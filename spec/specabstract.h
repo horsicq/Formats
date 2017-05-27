@@ -25,6 +25,7 @@
 #include <QSet>
 #include <QDataStream>
 #include <QElapsedTimer>
+#include <QUuid>
 #include "qpe.h"
 
 class SpecAbstract : public QObject
@@ -38,8 +39,13 @@ public:
         RECORD_FILETYPE_MSDOS,
         RECORD_FILETYPE_PE,
         RECORD_FILETYPE_PE32,
-        RECORD_FILETYPE_PE64,
-        RECORD_FILETYPE_PEOVERLAY // ???
+        RECORD_FILETYPE_PE64
+    };
+    enum RECORD_FILEPARTS
+    {
+        RECORD_FILEPART_UNKNOWN=0,
+        RECORD_FILEPART_HEADER,
+        RECORD_FILEPART_OVERLAY
     };
     enum RECORD_TYPES
     {
@@ -53,7 +59,11 @@ public:
         RECORD_TYPE_LINKER,
         RECORD_TYPE_PACKER,
         RECORD_TYPE_PROTECTOR,
-        RECORD_TYPE_TOOL
+        RECORD_TYPE_TOOL,
+        RECORD_TYPE_CERTIFICATE,
+        RECORD_TYPE_DEBUGDATA,
+        RECORD_TYPE_INSTALLERDATA,
+        RECORD_TYPE_SFX
     };
     enum RECORD_NAMES
     {
@@ -133,13 +143,20 @@ public:
         RECORD_NAME_WWPACK32,
         RECORD_NAME_ZIP,
         RECORD_NAME_CYGWIN,
-        RECORD_NAME_DYAMAR
+        RECORD_NAME_DYAMAR,
+        RECORD_NAME_CAB,
+        RECORD_NAME_WINAUTH,
+        RECORD_NAME_WIXTOOLSET,
+        RECORD_NAME_PDF,
+        RECORD_NAME_WINRAR,
+        RECORD_NAME_RAR
     };
 
     struct ID
     {
-        qint64 nOffset;
+        QUuid uuid;
         RECORD_FILETYPES filetype;
+        RECORD_FILEPARTS filepart;
     };
 
     // TODO flags(static scan/emul/heur)
@@ -204,9 +221,22 @@ public:
         qint64 nElapsedTime;
         ID parentId;
         ID id;
+        qint64 nOffset;
         qint64 nSize;
-        //        RECORD_FILETYPES filetype;
         QString sHeaderSignature;
+        QMap<RECORD_NAMES,SCANS_STRUCT> mapHeaderDetects;
+        QList<SpecAbstract::SCAN_STRUCT> listDetects;
+    };
+
+    struct BINARYINFO_STRUCT
+    {
+        BASIC_INFO basic_info;
+
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultArchives;
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultCertificates;
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultDebugData;
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultInstallerData;
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultFormats;
     };
 
 
@@ -215,6 +245,7 @@ public:
         BASIC_INFO basic_info;
         QString sEntryPointSignature;
         QString sOverlaySignature;
+        qint64 nOverlayOffset;
         qint64 nOverlaySize;
         S_IMAGE_FILE_HEADER fileHeader;
         union OPTIONAL_HEADER
@@ -233,7 +264,6 @@ public:
         QMap<RECORD_NAMES,SCANS_STRUCT> mapCodeSectionScanDetects; // Obsolete
         QMap<RECORD_NAMES,SCANS_STRUCT> mapDataSectionScanDetects; // Obsolete
         QMap<RECORD_NAMES,SCANS_STRUCT> mapHeaderScanDetects; // Obsolete
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapHeaderDetects;
         QMap<RECORD_NAMES,SCANS_STRUCT> mapOverlayDetects;
         QMap<RECORD_NAMES,SCANS_STRUCT> mapEntryPointDetects;
         QMap<RECORD_NAMES,SCANS_STRUCT> mapImportDetects;
@@ -281,13 +311,14 @@ public:
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultProtectors;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultPackers;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultInstallers;
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultSFX;
 
-        QList<SpecAbstract::SCAN_STRUCT> listDetects;
     };
 
     struct SCAN_OPTIONS
     {
-        bool bEmulate;
+        //        bool bEmulate;
+        bool bScanOverlay;
     };
 
     struct UNPACK_OPTIONS
@@ -394,35 +425,47 @@ public:
     explicit SpecAbstract(QObject *parent = 0);
     static QString append(QString sResult,QString sString);
     static QString recordFiletypeIdToString(RECORD_FILETYPES id);
+    static QString recordFilepartIdToString(RECORD_FILEPARTS id);
     static QString recordTypeIdToString(RECORD_TYPES id);
     static QString recordNameIdToString(RECORD_NAMES id);
 
-    static QList<SCAN_STRUCT> scanBinary(QBinary *pBinary,SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId);
-    static QList<SCAN_STRUCT> scanPE(QPE *pPE,SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId);
+    static QList<SCAN_STRUCT> scanBinary(QBinary *pBinary,SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId); // Obsolete
+    static QList<SCAN_STRUCT> scanPE(QPE *pPE,SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId); // Obsolete
     virtual bool unpack(UNPACK_OPTIONS *pUnpOptions,QIODevice *pDevice,QString sOutFileName);
 
     static SpecAbstract::UNPACK_OPTIONS getPossibleUnpackOptions(QIODevice *pDevice);
 
     static QString createResultString(const SCAN_STRUCT *pScanStruct);
     static QString createResultString2(const SCAN_STRUCT *pScanStruct);
+    static QString createTypeString(const SCAN_STRUCT *pScanStruct);
 
     static QString findEnigmaVersion(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
-    static PEINFO_STRUCT getPEInfo(QIODevice *pDevice); // TODO options
-    static void handle_Rich(PEINFO_STRUCT *pPEInfo);
+    static BINARYINFO_STRUCT getBinaryInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
+    static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
+
+
+    static void PE_handle_Rich(PEINFO_STRUCT *pPEInfo);
 
     static SCANS_STRUCT getScansStruct(quint32 nVariant,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo,qint64 nOffset);
 
-    static void handle_import(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static void handle_protection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static void handle_libraries(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static void handle_Microsoft(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static void handle_Borland(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static void handle_Tools(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static void handle_Installers(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_import(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_protection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_libraries(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_Microsoft(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_Borland(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_Tools(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_Installers(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_SFX(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
-    static void handle_ENIGMA(QIODevice *pDevice,SpecAbstract::PEINFO_STRUCT *pPEInfo);
-    static void handle_DotNet(PEINFO_STRUCT *pPEInfo);
+    static void Binary_handle_Archives(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
+    static void Binary_handle_Certificates(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
+    static void Binary_handle_DebugData(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
+    static void Binary_handle_Formats(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
+    static void Binary_handle_InstallerData(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
+
+
+    //    static void PE_handle_ENIGMA(QIODevice *pDevice,SpecAbstract::PEINFO_STRUCT *pPEInfo);
     static void handle(PEINFO_STRUCT *pPEInfo,RECORD_NAMES name,RESULT_PRIOS prio0,RESULT_PRIOS prio1=RESULT_PRIO_UNKNOWN,RESULT_PRIOS prio2=RESULT_PRIO_UNKNOWN);
     static QMap<RECORD_NAMES,SCANS_STRUCT> *getDetectsMap(PEINFO_STRUCT *pPEInfo,RESULT_PRIOS prio);
     //    static handle_ObjectPascal(PEINFO_STRUCT *pPEInfo);
@@ -432,32 +475,36 @@ public:
     //    static handle_MinGW(PEINFO_STRUCT *pPEInfo);
     //    static handle_MFC(PEINFO_STRUCT *pPEInfo);
     //    static handle_VisualBasic(PEINFO_STRUCT *pPEInfo);
-    static void fixDetects(PEINFO_STRUCT *pPEInfo);
-    static void fixResult(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    //    static void fixDetects(PEINFO_STRUCT *pPEInfo);
+    //    static void fixResult(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
     static void updateVersion(QMap<RECORD_NAMES,SCAN_STRUCT> *map,RECORD_NAMES name,QString sVersion);
     static void updateInfo(QMap<RECORD_NAMES,SCAN_STRUCT> *map,RECORD_NAMES name,QString sInfo);
     static void updateVersionAndInfo(QMap<RECORD_NAMES,SCAN_STRUCT> *map,RECORD_NAMES name,QString sVersion,QString sInfo);
 
-
     static bool isScanStructPresent(QList<SpecAbstract::SCAN_STRUCT> *pList,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo);
 
     static bool checkVersionString(QString sVersion);
-    static VI_STRUCT get_TurboLinker_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_FASM_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_UPX_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_WWPack32_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_InnoSetup_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_mslink_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_MFC_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_vc_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_BorlandCpp_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_EmbarcaderoCpp_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_CodegearCpp_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_FlexLM_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT get_FlexNet_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_TurboLinker_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_FASM_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_UPX_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_WWPack32_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_InnoSetup_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_mslink_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_MFC_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_VC_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_BorlandCpp_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_EmbarcaderoCpp_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_CodegearCpp_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_FlexLM_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_FlexNet_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_GCC_vi(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
-    static bool isValid_UPX(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static bool PE_isValid_UPX(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+
+    static QList<VCL_STRUCT> PE_getVCLstruct(QIODevice *pDevice,qint64 nOffset,qint64 nSize,bool bIs64);
+    static VCL_PACKAGEINFO PE_getVCLPackageInfo(QIODevice *pDevice,QList<QPE::RESOURCE_HEADER> *pListResources);
+    static SpecAbstract::SCANS_STRUCT PE_getRichSignatureDescription(quint32 nRichID);
 
     static QList<SCAN_STRUCT> mapToList(QMap<RECORD_NAMES,SCAN_STRUCT> *pMapRecords);
     //    static SCAN_STRUCT getScanStruct(QMap<RECORD_NAMES,SCANS_STRUCT> *pMapDetects,BASIC_INFO *pBasicInfo,RECORD_NAMES recordName);
@@ -466,12 +513,12 @@ public:
 
     static QByteArray _BasicPEInfoToArray(BASIC_PE_INFO *pInfo);
     static BASIC_PE_INFO _ArrayToBasicPEInfo(const QByteArray *pbaArray);
+
+
     static void memoryScan(QMap<RECORD_NAMES,SCANS_STRUCT> *pMapRecords,QIODevice *pDevice,qint64 nOffset,qint64 nSize,SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2);
     static void signatureScan(QMap<RECORD_NAMES,SCANS_STRUCT> *pMapRecords,QString sSignature,SIGNATURE_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
     static void resourcesScan(QMap<RECORD_NAMES,SCANS_STRUCT> *pMapRecords,QList<QPE::RESOURCE_HEADER> *pListResources,RESOURCES_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
-    static QList<VCL_STRUCT> getVCLstruct(QIODevice *pDevice,qint64 nOffset,qint64 nSize,bool bIs64);
-    static VCL_PACKAGEINFO getVCLPackageInfo(QIODevice *pDevice,QList<QPE::RESOURCE_HEADER> *pListResources);
-    static SpecAbstract::SCANS_STRUCT getRichSignatureDescription(quint32 nRichID);
+
 protected:
     void _errorMessage(QString sMessage);
     void _infoMessage(QString sMessage);

@@ -1,5 +1,5 @@
 // Copyright (c) 2017 hors<horsicq@gmail.com>
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-// 
+//
 #include "qbinary.h"
 
 QBinary::QBinary(QIODevice *__pDevice,bool bIsImage) // TODO offset and Size for example for PE overlays
@@ -1880,18 +1880,83 @@ QString QBinary::hexToString(QString sHex)
     return sResult;
 }
 
+quint8 QBinary::hexToUint8(QString sHex)
+{
+    quint8 nResult=0;
+
+    if(sHex.length()>=sizeof(quint8))
+    {
+        sHex=sHex.mid(0,2*sizeof(quint8));
+        bool bStatus=false;
+        nResult=(quint8)(sHex.toInt(&bStatus,16));
+    }
+
+    return nResult;
+}
+
+qint8 QBinary::hexToInt8(QString sHex)
+{
+    quint8 nResult=0;
+
+    if(sHex.length()>=sizeof(qint8))
+    {
+        sHex=sHex.mid(0,2*sizeof(qint8));
+        bool bStatus=false;
+        nResult=(qint8)(sHex.toInt(&bStatus,16));
+    }
+
+    return nResult;
+}
+
+quint16 QBinary::hexToUint16(QString sHex, bool bIsBigEndian)
+{
+    quint16 nResult=0;
+
+    if(sHex.length()>=sizeof(quint16))
+    {
+        if(!bIsBigEndian)
+        {
+            sHex=invertHexByteString(sHex.mid(0,2*sizeof(quint16)));
+        }
+
+        bool bStatus=false;
+        nResult=sHex.toUShort(&bStatus,16);
+    }
+
+    return nResult;
+}
+
+qint16 QBinary::hexToInt16(QString sHex, bool bIsBigEndian)
+{
+    qint16 nResult=0;
+
+    if(sHex.length()>=sizeof(qint16))
+    {
+        if(!bIsBigEndian)
+        {
+            sHex=invertHexByteString(sHex.mid(0,2*sizeof(qint16)));
+        }
+
+        bool bStatus=false;
+        nResult=sHex.toShort(&bStatus,16);
+    }
+
+    return nResult;
+}
+
 quint32 QBinary::hexToUint32(QString sHex, bool bIsBigEndian)
 {
     quint32 nResult=0;
 
-    if(sHex.length()>=8)
+    if(sHex.length()>=sizeof(quint32))
     {
         if(!bIsBigEndian)
         {
-            sHex=QString("%1%2%3%4").arg(sHex.mid(6,2)).arg(sHex.mid(4,2)).arg(sHex.mid(2,2)).arg(sHex.mid(0,2));
-            bool bStatus=false;
-            nResult=sHex.toUInt(&bStatus,16);
+            sHex=invertHexByteString(sHex.mid(0,2*sizeof(quint32)));
         }
+
+        bool bStatus=false;
+        nResult=sHex.toUInt(&bStatus,16);
     }
 
     return nResult;
@@ -1901,17 +1966,66 @@ qint32 QBinary::hexToInt32(QString sHex, bool bIsBigEndian)
 {
     qint32 nResult=0;
 
-    if(sHex.length()>=8)
+    if(sHex.length()>=sizeof(qint32))
     {
         if(!bIsBigEndian)
         {
-            sHex=QString("%1%2%3%4").arg(sHex.mid(6,2)).arg(sHex.mid(4,2)).arg(sHex.mid(2,2)).arg(sHex.mid(0,2));
-            bool bStatus=false;
-            nResult=sHex.toInt(&bStatus,16);
+            sHex=invertHexByteString(sHex.mid(0,2*sizeof(qint32)));
         }
+
+        bool bStatus=false;
+        nResult=sHex.toInt(&bStatus,16);
     }
 
     return nResult;
+}
+
+quint64 QBinary::hexToUint64(QString sHex, bool bIsBigEndian)
+{
+    quint64 nResult=0;
+
+    if(sHex.length()>=sizeof(quint64))
+    {
+        if(!bIsBigEndian)
+        {
+            sHex=invertHexByteString(sHex.mid(0,2*sizeof(quint64)));
+        }
+
+        bool bStatus=false;
+        nResult=sHex.toULongLong(&bStatus,16);
+    }
+
+    return nResult;
+}
+
+qint64 QBinary::hexToInt64(QString sHex, bool bIsBigEndian)
+{
+    qint64 nResult=0;
+
+    if(sHex.length()>=sizeof(qint64))
+    {
+        if(!bIsBigEndian)
+        {
+            sHex=invertHexByteString(sHex.mid(0,2*sizeof(qint64)));
+        }
+
+        bool bStatus=false;
+        nResult=sHex.toLongLong(&bStatus,16);
+    }
+
+    return nResult;
+}
+
+QString QBinary::invertHexByteString(QString sHex)
+{
+    QString sResult;
+
+    for(int i=sHex.length()-2; i>=0; i-=2)
+    {
+        sResult+=sHex.mid(i,2);
+    }
+
+    return sResult;
 }
 
 QList<QBinary::SIGNATURE_RECORD> QBinary::getSignatureRecords(QString sSignature)

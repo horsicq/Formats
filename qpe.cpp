@@ -1,5 +1,5 @@
 // Copyright (c) 2017 hors<horsicq@gmail.com>
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-// 
+//
 #include "qpe.h"
 
 QPE::QPE(QIODevice *pData,bool bIsImage): QMSDOS(pData,bIsImage)
@@ -1166,6 +1166,46 @@ void QPE::setSection_Characteristics(quint32 nNumber, quint32 value)
     }
 }
 
+bool QPE::isSectionNamePresent(QString sSectionName, QList<S_IMAGE_SECTION_HEADER> *pListSections)
+{
+    int nNumberOfSections=pListSections->count();
+
+    for(int i=0; i<nNumberOfSections; i++)
+    {
+        QString _sSectionName=QString((char *)pListSections->at(i).Name);
+        _sSectionName.resize(qMin(_sSectionName.length(),S_IMAGE_SIZEOF_SHORT_NAME));
+
+        if(_sSectionName==sSectionName)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+S_IMAGE_SECTION_HEADER QPE::getSectionByName(QString sSectionName, QList<S_IMAGE_SECTION_HEADER> *pListSections)
+{
+    S_IMAGE_SECTION_HEADER result= {0};
+
+    int nNumberOfSections=pListSections->count();
+
+    for(int i=0; i<nNumberOfSections; i++)
+    {
+        QString _sSectionName=QString((char *)pListSections->at(i).Name);
+        _sSectionName.resize(qMin(_sSectionName.length(),S_IMAGE_SIZEOF_SHORT_NAME));
+
+        if(_sSectionName==sSectionName)
+        {
+            result=pListSections->at(i);
+
+            break;
+        }
+    }
+
+    return result;
+}
+
 bool QPE::isImportPresent()
 {
     return isOptionalHeader_DataDirectoryPresent(S_IMAGE_DIRECTORY_ENTRY_IMPORT);
@@ -1530,7 +1570,7 @@ QList<S_IMAGE_IMPORT_DESCRIPTOR_EX> QPE::getImportDescriptorsEx()
     {
         QList<MEMORY_MAP> listMemoryMap=getMemoryMapList();
         qint64 nBaseAddress=getBaseAddress();
-//        bool bIs64=is64();
+        //        bool bIs64=is64();
 
         while(true)
         {
@@ -3000,7 +3040,7 @@ bool QPE::addSection(QString sFileName, S_IMAGE_SECTION_HEADER *pSectionHeader, 
     }
     else
     {
-        qDebug("Cannot open file");
+        qDebug("Cannot open file"); // TODO emit
     }
 
     return bResult;
@@ -3679,7 +3719,8 @@ int QPE::getNormalCodeSection()
 
     for(int i=0; i<nNumberOfSections; i++)
     {
-        QString sSectionName=(char *)listSections.at(i).Name;
+        QString sSectionName=QString((char *)listSections.at(i).Name);
+        sSectionName.resize(qMin(sSectionName.length(),S_IMAGE_SIZEOF_SHORT_NAME));
         quint32 nSectionCharacteristics=listSections.at(i).Characteristics;
         nSectionCharacteristics&=0xFF0000FF;
 
@@ -3724,7 +3765,8 @@ int QPE::getNormalDataSection()
         // 0xc0700040 MinGW
         // 0xc0600040 MinGW
         // 0xc0300040 MinGW
-        QString sSectionName=(char *)listSections.at(i).Name;
+        QString sSectionName=QString((char *)listSections.at(i).Name);
+        sSectionName.resize(qMin(sSectionName.length(),S_IMAGE_SIZEOF_SHORT_NAME));
         quint32 nSectionCharacteristics=listSections.at(i).Characteristics;
         nSectionCharacteristics&=0xFF0000FF;
 
@@ -3770,7 +3812,8 @@ int QPE::getConstDataSection()
         // 0x40700040 MinGW
         // 0x40600040 MinGW
         // 0x40300040 MinGW
-        QString sSectionName=(char *)listSections.at(i).Name;
+        QString sSectionName=QString((char *)listSections.at(i).Name);
+        sSectionName.resize(qMin(sSectionName.length(),S_IMAGE_SIZEOF_SHORT_NAME));
         quint32 nSectionCharacteristics=listSections.at(i).Characteristics;
         nSectionCharacteristics&=0xFF0000FF;
 
@@ -4010,7 +4053,7 @@ bool QPE::addRelocsSection(QIODevice *pDevice, QList<qint64> *pList)
 
             ish.Characteristics=0x42000040;
             QString sSectionName=".reloc";
-            QBinary::_copyMemory((char *)&ish.Name,sSectionName.toLatin1().data(),qMin(8,sSectionName.length()));
+            QBinary::_copyMemory((char *)&ish.Name,sSectionName.toLatin1().data(),qMin(S_IMAGE_SIZEOF_SHORT_NAME,sSectionName.length()));
 
 
             bResult=addSection(pDevice,&ish,baRelocs.data(),baRelocs.size());

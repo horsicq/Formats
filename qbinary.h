@@ -1,5 +1,5 @@
 // Copyright (c) 2017 hors<horsicq@gmail.com>
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-// 
+//
 #ifndef QBINARY_H
 #define QBINARY_H
 
@@ -244,8 +244,16 @@ public:
     static QString stringToHex(QString sString);
     static QString hexToString(QString sHex);
 
+    static quint8 hexToUint8(QString sHex);
+    static qint8 hexToInt8(QString sHex);
+    static quint16 hexToUint16(QString sHex,bool bIsBigEndian=false);
+    static qint16 hexToInt16(QString sHex,bool bIsBigEndian=false);
     static quint32 hexToUint32(QString sHex,bool bIsBigEndian=false);
     static qint32 hexToInt32(QString sHex,bool bIsBigEndian=false);
+    static quint64 hexToUint64(QString sHex,bool bIsBigEndian=false);
+    static qint64 hexToInt64(QString sHex,bool bIsBigEndian=false);
+
+    static QString invertHexByteString(QString sHex);
     // TODO uint64,uint16,uint8
 private:
     static QString convertSignature(QString sSignature);
