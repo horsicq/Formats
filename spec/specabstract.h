@@ -64,7 +64,8 @@ public:
         RECORD_TYPE_CERTIFICATE,
         RECORD_TYPE_DEBUGDATA,
         RECORD_TYPE_INSTALLERDATA,
-        RECORD_TYPE_SFX
+        RECORD_TYPE_SFX,
+        RECORD_TYPE_NETOBFUSCATOR
     };
     enum RECORD_NAMES
     {
@@ -207,7 +208,7 @@ public:
         RECORD_NAME_SETUPFACTORY,
         RECORD_NAME_SIMBIOZ,
         RECORD_NAME_SIXXPACK,
-        RECORD_NAME_SKATERNETOBFUSCATOR,
+        RECORD_NAME_SKATERNET,
         RECORD_NAME_SMARTASSEMBLY,
         RECORD_NAME_SMARTINSTALLMAKER,
         RECORD_NAME_SPICESNET,
@@ -409,6 +410,7 @@ public:
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultPackers;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultInstallers;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultSFX;
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultNETObfuscators;
 
     };
 
@@ -538,7 +540,7 @@ public:
 
     static void PE_handle_import(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_protection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static void PE_handle_NETprotection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_NETProtection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_libraries(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Microsoft(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Borland(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);

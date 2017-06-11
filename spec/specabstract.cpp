@@ -109,8 +109,8 @@ SpecAbstract::SIGNATURE_RECORD _dot_ansistrings_records[]={
 //    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_TOOL,              SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,  "",             "",                     "'Embarcadero.'"},
     {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_YANO,                     "1.X",          "",                     "'YanoAttribute'"},
     {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_AGILENET,                 "",             "",                     "'ObfuscatedByAgileDotNetAttribute'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_SKATERNETOBFUSCATOR,      "",             "",                     "'Skater_NET_Obfuscator'"},
-    {1, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_SKATERNETOBFUSCATOR,      "",             "",                     "'RustemSoft.Skater'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_SKATERNET,                "",             "",                     "'Skater_NET_Obfuscator'"},
+    {1, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_SKATERNET,                "",             "",                     "'RustemSoft.Skater'"},
     {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_BABELNET,                 "3.X",          "",                     "'BabelAttribute'"},
     {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_BABELNET,                 "1.X-2.X",      "",                     "'BabelObfuscatorAttribute'"},
     {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_CLISECURE,                "4.X-5.X",      "",                     "'ObfuscatedByCliSecureAttribute'"},
@@ -194,6 +194,7 @@ QString SpecAbstract::recordTypeIdToString(RECORD_TYPES id)
         case RECORD_TYPE_DEBUGDATA:                         sResult=tr("Debug data"); break;
         case RECORD_TYPE_INSTALLERDATA:                     sResult=tr("Installer data"); break;
         case RECORD_TYPE_SFX:                               sResult=tr("SFX"); break;
+        case RECORD_TYPE_NETOBFUSCATOR:                     sResult=tr(".NET Obfuscator"); break;
     }
 
     return sResult;
@@ -342,7 +343,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_SETUPFACTORY:                      sResult=QString("Setup Factory"); break;
         case RECORD_NAME_SIMBIOZ:                           sResult=QString("SimbiOZ"); break;
         case RECORD_NAME_SIXXPACK:                          sResult=QString("Sixxpack"); break;
-        case RECORD_NAME_SKATERNETOBFUSCATOR:               sResult=QString("Skater .NET Obfuscator"); break;
+        case RECORD_NAME_SKATERNET:                         sResult=QString("Skater .NET"); break;
         case RECORD_NAME_SMARTASSEMBLY:                     sResult=QString("Smart Assembly"); break;
         case RECORD_NAME_SMARTINSTALLMAKER:                 sResult=QString("Smart Install Maker"); break;
         case RECORD_NAME_SPICESNET:                         sResult=QString("Spices.Net"); break;
@@ -718,10 +719,10 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
                 signatureScan(&result.mapDotAnsistringsDetects,QBinary::stringToHex(result.cliInfo.listAnsiStrings.at(i)),_dot_ansistrings_records,sizeof(_dot_ansistrings_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_PE);
             }
 
-            for(int i=0;i<result.cliInfo.listUnicodeStrings.count();i++)
-            {
-                signatureScan(&result.mapDotUnicodestringsDetects,QBinary::stringToHex(result.cliInfo.listUnicodeStrings.at(i)),_dot_unicodestrings_records,sizeof(_dot_unicodestrings_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_PE);
-            }
+//            for(int i=0;i<result.cliInfo.listUnicodeStrings.count();i++)
+//            {
+//                signatureScan(&result.mapDotUnicodestringsDetects,QBinary::stringToHex(result.cliInfo.listUnicodeStrings.at(i)),_dot_unicodestrings_records,sizeof(_dot_unicodestrings_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_PE);
+//            }
         }
 
 
@@ -745,7 +746,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
 
 
         PE_handle_protection(pDevice,&result);
-        PE_handle_NETprotection(pDevice,&result);
+        PE_handle_NETProtection(pDevice,&result);
         // TODO Free Pascal Compiler
 
         PE_handle_libraries(pDevice,&result);
@@ -781,6 +782,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         result.basic_info.listDetects.append(result.mapResultLibraries.values());
         result.basic_info.listDetects.append(result.mapResultTools.values());
         result.basic_info.listDetects.append(result.mapResultProtectors.values());
+        result.basic_info.listDetects.append(result.mapResultNETObfuscators.values());
         result.basic_info.listDetects.append(result.mapResultPackers.values());
         result.basic_info.listDetects.append(result.mapResultSFX.values());
         result.basic_info.listDetects.append(result.mapResultInstallers.values());
@@ -1752,7 +1754,7 @@ void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO
     //    }
 }
 
-void SpecAbstract::PE_handle_NETprotection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_NETProtection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     QPE pe(pDevice);
 
@@ -1781,25 +1783,25 @@ void SpecAbstract::PE_handle_NETprotection(QIODevice *pDevice, SpecAbstract::PEI
             if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_YANO))
             {
                 SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_YANO);
-                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
             if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_DOTFUSCATOR))
             {
                 SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_DOTFUSCATOR);
-                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
             if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_AGILENET))
             {
                 SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_AGILENET);
-                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
-            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_SKATERNETOBFUSCATOR))
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_SKATERNET))
             {
-                SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_SKATERNETOBFUSCATOR);
-                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_SKATERNET);
+                pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
             if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_BABELNET))
