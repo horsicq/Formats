@@ -64,9 +64,12 @@ QByteArray QBinary::read_array(qint64 nOffset, qint64 nSize)
 
 qint64 QBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 {
-    if(__pDevice->seek(nOffset))
+    if(nMaxSize<=(getSize()-nOffset))
     {
-        return __pDevice->write(pBuffer,nMaxSize);
+        if(__pDevice->seek(nOffset))
+        {
+            return __pDevice->write(pBuffer,nMaxSize);
+        }
     }
 
     return 0;
@@ -190,13 +193,20 @@ qint64 QBinary::read_int64(qint64 nOffset, bool bIsBigEndian)
     return (qint64)result;
 }
 
+qint64 QBinary::write_ansiString(qint64 nOffset, QString sString)
+{
+    return write_array(nOffset,sString.toLatin1().data(),sString.length()+1);
+}
+
 QString QBinary::read_ansiString(qint64 nOffset,qint64 nMaxSize)
 {
     if(nMaxSize)
     {
         if(__pDevice->seek(nOffset))
         {
-            return __pDevice->readLine(nMaxSize+1);
+            // TODO optimize
+            QByteArray baData=read_array(nOffset,nMaxSize);
+            return baData.data();
         }
     }
 
@@ -2026,6 +2036,29 @@ QString QBinary::invertHexByteString(QString sHex)
     }
 
     return sResult;
+}
+
+bool QBinary::isPlainText()
+{
+    QByteArray baData=read_array(0,qMin(getSize(),(qint64)0x1000));
+
+    unsigned char *pDataOffset=(unsigned char *)baData.data();
+    int nDataSize=baData.size();
+
+    if(nDataSize==0)
+    {
+        return false;
+    }
+
+    for(int i=0; i<nDataSize; i++)
+    {
+        if(pDataOffset[i]<0x9)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 QList<QBinary::SIGNATURE_RECORD> QBinary::getSignatureRecords(QString sSignature)

@@ -99,6 +99,12 @@ bool SubDevice::open(QIODevice::OpenMode mode)
     return true;
 }
 
+bool SubDevice::atEnd()
+{
+    qDebug("bool SubDevice::atEnd()");
+    return (bytesAvailable() == 0);
+}
+
 void SubDevice::close()
 {
     setOpenMode(NotOpen);
@@ -113,14 +119,18 @@ qint64 SubDevice::readData(char *data, qint64 maxSize)
 {
     maxSize=qMin(maxSize,nSize-pos());
 
-    return pDevice->read(data,maxSize);
+    qint64 nLen=pDevice->read(data,maxSize);
+
+    return nLen;
 }
 
 qint64 SubDevice::writeData(const char *data, qint64 maxSize)
 {
     maxSize=qMin(maxSize,nSize-pos());
 
-    return pDevice->write(data,maxSize);
+    qint64 nLen=pDevice->write(data,maxSize);
+
+    return nLen;
 }
 
 void SubDevice::setErrorString(const QString &str)

@@ -36,6 +36,7 @@ public:
     virtual bool seek(qint64 pos);
     virtual bool reset();
     virtual bool open(OpenMode mode);
+    virtual bool atEnd();
     virtual void close();
     virtual qint64 pos();
 

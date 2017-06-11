@@ -114,6 +114,12 @@ public:
         quint32 nCount;
     };
 
+    struct RESOURCE_VERSION
+    {
+        S__tagVS_FIXEDFILEINFO fileInfo;
+        QList<QString> listRecords; // TODO rename
+    };
+
     struct CLI_INFO
     {
         bool bInit;
@@ -351,6 +357,13 @@ public:
     static bool isResourcePresent(QString sName1,int nID2,QList<RESOURCE_HEADER> *pListHeaders);
     static bool isResourcePresent(QString sName1,QString sName2,QList<RESOURCE_HEADER> *pListHeaders);
 
+    QString getResourceManifest(QList<QPE::RESOURCE_HEADER> *pListHeaders);
+    S_VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
+
+
+    RESOURCE_VERSION getResourceVersion(QList<QPE::RESOURCE_HEADER> *pListHeaders);
+    static QString getResourceVersionValue(QString sKey,QPE::RESOURCE_VERSION *pResVersion);
+
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getBaseAddress();
     virtual qint64 getEntryPointOffset();
@@ -457,6 +470,7 @@ private:
     qint64 _fixHeadersSize();
     qint64 _getMinSectionOffset();
     void _fixFileOffsets(qint64 nDelta);
+    quint32 __getResourceVersion(RESOURCE_VERSION *pResult,qint64 nOffset,qint64 nSize,QString sPrefix,int nLevel);
 };
 
 #endif // QPE_H

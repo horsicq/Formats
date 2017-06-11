@@ -743,7 +743,7 @@ S_IMAGE_DATA_DIRECTORY QPE::getOptionalHeader_DataDirectory(quint32 nNumber)
 {
     S_IMAGE_DATA_DIRECTORY result= {0};
 
-    if(nNumber<getOptionalHeader_NumberOfRvaAndSizes())
+//    if(nNumber<getOptionalHeader_NumberOfRvaAndSizes()) // There are protectors with false NumberOfRvaAndSizes
     {
         if(is64())
         {
@@ -2409,6 +2409,157 @@ bool QPE::isResourcePresent(QString sName1, int nID2, QList<QPE::RESOURCE_HEADER
 bool QPE::isResourcePresent(QString sName1, QString sName2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
 {
     return (getResourceHeader(sName1,sName2,pListHeaders).nSize);
+}
+
+QString QPE::getResourceManifest(QList<QPE::RESOURCE_HEADER> *pListHeaders)
+{
+    QString sResult;
+
+    RESOURCE_HEADER rh=getResourceHeader(S_RT_MANIFEST,1,pListHeaders);
+
+    if(rh.nOffset!=-1)
+    {
+        sResult=read_ansiString(rh.nOffset,rh.nSize);
+    }
+
+    return sResult;
+}
+
+S_VS_VERSION_INFO QPE::readResourceVersionInfo(qint64 nOffset)
+{
+    S_VS_VERSION_INFO result={0};
+
+    read_array(nOffset,(char *)&result,sizeof(S_VS_VERSION_INFO));
+
+    return result;
+}
+
+quint32 QPE::__getResourceVersion(QPE::RESOURCE_VERSION *pResult, qint64 nOffset, qint64 nSize, QString sPrefix, int nLevel)
+{
+    quint32 nResult=0;
+
+    if(nSize>=sizeof(S_VS_VERSION_INFO))
+    {
+        S_VS_VERSION_INFO vi=readResourceVersionInfo(nOffset);
+
+        if(vi.wLength<=nSize)
+        {
+            if(vi.wValueLength<vi.wLength)
+            {
+                QString sTitle=read_unicodeString(nOffset+sizeof(S_VS_VERSION_INFO));
+
+                qint32 nDelta=sizeof(S_VS_VERSION_INFO);
+                nDelta+=(sTitle.length()+1)*sizeof(quint16);
+                nDelta=__ALIGN_UP(nDelta,4);
+
+                if(sPrefix!="")
+                {
+                    sPrefix+=".";
+                }
+                sPrefix+=sTitle;
+
+                if(sPrefix=="VS_VERSION_INFO")
+                {
+                    if(vi.wValueLength>=sizeof(S__tagVS_FIXEDFILEINFO))
+                    {
+                        // TODO Check Signature?
+                        pResult->fileInfo.dwSignature=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwSignature));
+                        pResult->fileInfo.dwStrucVersion=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwStrucVersion));
+                        pResult->fileInfo.dwFileVersionMS=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwFileVersionMS));
+                        pResult->fileInfo.dwFileVersionLS=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwFileVersionLS));
+                        pResult->fileInfo.dwProductVersionMS=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwProductVersionMS));
+                        pResult->fileInfo.dwProductVersionLS=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwProductVersionLS));
+                        pResult->fileInfo.dwFileFlagsMask=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwFileFlagsMask));
+                        pResult->fileInfo.dwFileFlags=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwFileFlags));
+                        pResult->fileInfo.dwFileOS=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwFileOS));
+                        pResult->fileInfo.dwFileType=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwFileType));
+                        pResult->fileInfo.dwFileSubtype=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwFileSubtype));
+                        pResult->fileInfo.dwFileDateMS=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwFileDateMS));
+                        pResult->fileInfo.dwFileDateLS=read_uint32(nOffset+nDelta+offsetof(S__tagVS_FIXEDFILEINFO,dwFileDateLS));
+                    }
+                }
+
+                if(nLevel==3)
+                {
+                    QString sValue=read_unicodeString(nOffset+nDelta);
+                    sPrefix+=QString(":%1").arg(sValue);
+
+                    pResult->listRecords.append(sPrefix);
+                }
+
+                if(sPrefix=="VS_VERSION_INFO.VarFileInfo.Translation")
+                {
+                    if(vi.wValueLength==4)
+                    {
+                        quint32 nValue=read_uint32(nOffset+nDelta);
+                        QString sValue=QBinary::valueToHex(nValue);
+                        sPrefix+=QString(":%1").arg(sValue);
+
+                        pResult->listRecords.append(sPrefix);
+                    }
+                }
+
+                nDelta+=vi.wValueLength;
+
+                qint32 _nSize=vi.wLength-nDelta;
+
+                if(nLevel<3)
+                {
+                    while(_nSize>0)
+                    {
+                        qint32 _nDelta=__getResourceVersion(pResult,nOffset+nDelta,vi.wLength-nDelta,sPrefix,nLevel+1);
+
+                        if(_nDelta==0)
+                        {
+                            break;
+                        }
+
+                        _nDelta=__ALIGN_UP(_nDelta,4);
+
+                        nDelta+=_nDelta;
+                        _nSize-=_nDelta;
+                    }
+                }
+
+
+                nResult=vi.wLength;
+            }
+        }
+    }
+
+    return nResult;
+}
+
+QPE::RESOURCE_VERSION QPE::getResourceVersion(QList<QPE::RESOURCE_HEADER> *pListHeaders)
+{
+    RESOURCE_VERSION result={0};
+
+    RESOURCE_HEADER rh=getResourceHeader(S_RT_VERSION,1,pListHeaders);
+
+    if(rh.nOffset!=-1)
+    {
+        __getResourceVersion(&result,rh.nOffset,rh.nSize,"",0);
+    }
+
+    return result;
+}
+
+QString QPE::getResourceVersionValue(QString sKey,QPE::RESOURCE_VERSION *pResVersion)
+{
+    QString sResult;
+
+    for(int i=0;i<pResVersion->listRecords.count();i++)
+    {
+        QString sRecord=pResVersion->listRecords.at(i).section(".",3,-1);
+        QString _sKey=sRecord.section(":",0,0);
+        if(_sKey==sKey)
+        {
+            sResult=sRecord.section(":",1,-1);
+            break;
+        }
+    }
+
+    return sResult;
 }
 
 S_IMAGE_IMPORT_DESCRIPTOR QPE::read_S_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset)

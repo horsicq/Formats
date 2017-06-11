@@ -115,6 +115,8 @@ public:
     quint64 read_uint64(qint64 nOffset,bool bIsBigEndian=false);
     qint64 read_int64(qint64 nOffset,bool bIsBigEndian=false);
 
+    qint64 write_ansiString(qint64 nOffset,QString sString);
+
     QString read_ansiString(qint64 nOffset,qint64 nMaxSize=256);
     QString read_unicodeString(qint64 nOffset,qint64 nMaxSize=256);
 
@@ -254,6 +256,8 @@ public:
     static qint64 hexToInt64(QString sHex,bool bIsBigEndian=false);
 
     static QString invertHexByteString(QString sHex);
+
+    bool isPlainText();
     // TODO uint64,uint16,uint8
 private:
     static QString convertSignature(QString sSignature);

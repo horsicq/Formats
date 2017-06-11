@@ -39,7 +39,8 @@ public:
         RECORD_FILETYPE_MSDOS,
         RECORD_FILETYPE_PE,
         RECORD_FILETYPE_PE32,
-        RECORD_FILETYPE_PE64
+        RECORD_FILETYPE_PE64,
+        RECORD_FILETYPE_TEXT
     };
     enum RECORD_FILEPARTS
     {
@@ -70,86 +71,175 @@ public:
         RECORD_NAME_UNKNOWN=0,
         RECORD_NAME_32LITE,
         RECORD_NAME_7Z,
+        RECORD_NAME_ACPROTECT,
+        RECORD_NAME_ADVANCEDINSTALLER,
+        RECORD_NAME_AGILENET,
+        RECORD_NAME_AHTEAMEPPROTECTOR,
+        RECORD_NAME_ALEXPROTECTOR,
+        RECORD_NAME_ALLOY,
         RECORD_NAME_ANDPAKK2,
+        RECORD_NAME_ANTIDOTE,
+        RECORD_NAME_ARMADILLO,
+        RECORD_NAME_ARMPROTECTOR,
         RECORD_NAME_ASDPACK,
         RECORD_NAME_ASM,
         RECORD_NAME_ASPACK,
+        RECORD_NAME_ASPROTECT,
+        RECORD_NAME_ASSEMBLYINVOKE,
+        RECORD_NAME_AVERCRYPTOR,
+        RECORD_NAME_BABELNET,
+        RECORD_NAME_BITSHAPEPECRYPT,
         RECORD_NAME_BORLANDCPP,
         RECORD_NAME_BORLANDCPPBUILDER,
         RECORD_NAME_BORLANDDELPHI,
         RECORD_NAME_BORLANDDELPHIDOTNET,
+        RECORD_NAME_BORLANDOBJECTPASCAL,
+        RECORD_NAME_BREAKINTOPATTERN,
         RECORD_NAME_C,
+        RECORD_NAME_CAB,
         RECORD_NAME_CIL,
+        RECORD_NAME_CLICKTEAM,
+        RECORD_NAME_CLISECURE,
         RECORD_NAME_CODEGEARCPP,
         RECORD_NAME_CODEGEARCPPBUILDER,
         RECORD_NAME_CODEGEARDELPHI,
+        RECORD_NAME_CODEGEAROBJECTPASCAL,
+        RECORD_NAME_CODEVEIL,
+        RECORD_NAME_CODEWALL,
+        RECORD_NAME_CONFUSER,
         RECORD_NAME_CPP,
+        RECORD_NAME_CREATEINSTALL,
+        RECORD_NAME_CRINKLER,
+        RECORD_NAME_CRUNCH,
+        RECORD_NAME_CRYPTER,
+        RECORD_NAME_CRYPTOCRACKSPEPROTECTOR,
+        RECORD_NAME_CRYPTOOBFUSCATORFORNET,
+        RECORD_NAME_CYGWIN,
         RECORD_NAME_DEB,
+        RECORD_NAME_DEEPSEA,
+        RECORD_NAME_DNGUARD,
+        RECORD_NAME_DOTFIXNICEPROTECT,
         RECORD_NAME_DOTFUSCATOR,
         RECORD_NAME_DOTNET,
         RECORD_NAME_DVCLAL,
+        RECORD_NAME_DYAMAR,
+        RECORD_NAME_EAZFUSCATOR,
         RECORD_NAME_EMBARCADEROCPP,
         RECORD_NAME_EMBARCADEROCPPBUILDER,
         RECORD_NAME_EMBARCADERODELPHI,
         RECORD_NAME_EMBARCADERODELPHIDOTNET,
+        RECORD_NAME_EMBARCADEROOBJECTPASCAL,
+        RECORD_NAME_EMPTYFILE,
         RECORD_NAME_ENIGMA,
-        RECORD_NAME_ACPROTECT,
-        RECORD_NAME_ALLOY,
-        RECORD_NAME_ALEXPROTECTOR,
+        RECORD_NAME_EXECRYPT,
+        RECORD_NAME_EXECRYPTOR,
+        RECORD_NAME_EXEMPLARINSTALLER,
+        RECORD_NAME_EXESHIELD,
         RECORD_NAME_EXPORT,
         RECORD_NAME_FASM,
-        RECORD_NAME_GCC,
-        RECORD_NAME_FPC,
+        RECORD_NAME_FISHNET,
         RECORD_NAME_FLEXLM,
         RECORD_NAME_FLEXNET,
+        RECORD_NAME_FPC,
+        RECORD_NAME_FREECRYPTOR,
         RECORD_NAME_FSG,
+        RECORD_NAME_GCC,
         RECORD_NAME_GENERIC,
         RECORD_NAME_GENERICLINKER,
+        RECORD_NAME_GENTEEINSTALLER,
+        RECORD_NAME_GHOSTINSTALLER,
         RECORD_NAME_GNULINKER,
+        RECORD_NAME_GOLIATH,
         RECORD_NAME_GZIP,
+        RECORD_NAME_HIDEPE,
         RECORD_NAME_HXS,
         RECORD_NAME_IMPORT,
         RECORD_NAME_INNOSETUP,
+        RECORD_NAME_INSTALLANYWHERE,
+        RECORD_NAME_INSTALLSHIELD,
+        RECORD_NAME_IPBPROTECT,
+        RECORD_NAME_KKRUNCHY,
+        RECORD_NAME_MASKPE,
         RECORD_NAME_MASM,
         RECORD_NAME_MASM32,
+        RECORD_NAME_MAXTOCODE,
         RECORD_NAME_MFC,
         RECORD_NAME_MICROSOFTC,
         RECORD_NAME_MICROSOFTCPP,
         RECORD_NAME_MICROSOFTLINKER,
         RECORD_NAME_MICROSOFTVISUALSTUDIO,
         RECORD_NAME_MINGW,
+        RECORD_NAME_MOLEBOX,
+        RECORD_NAME_MORPHNAH,
+        RECORD_NAME_MPRESS,
         RECORD_NAME_MSYS,
         RECORD_NAME_MSYS2,
-        RECORD_NAME_MPRESS,
+        RECORD_NAME_MZ0OPE,
+        RECORD_NAME_NOOBYPROTECT,
+        RECORD_NAME_NORTHSTARPESHRINKER,
+        RECORD_NAME_NSIS,
         RECORD_NAME_NSPACK,
+        RECORD_NAME_OBFUSCAR,
+        RECORD_NAME_OBFUSCATORNET2009,
         RECORD_NAME_OBJECTPASCAL,
-        RECORD_NAME_BORLANDOBJECTPASCAL,
-        RECORD_NAME_CODEGEAROBJECTPASCAL,
-        RECORD_NAME_EMBARCADEROOBJECTPASCAL,
+        RECORD_NAME_OBSIDIUM,
+        RECORD_NAME_PCGUARD,
+        RECORD_NAME_PDF,
+        RECORD_NAME_PEARMOR,
+        RECORD_NAME_PEBUNDLE,
+        RECORD_NAME_PEENCRYPT,
+        RECORD_NAME_PELOCK,
+        RECORD_NAME_PEQUAKE,
+        RECORD_NAME_PESPIN,
+        RECORD_NAME_PETITE,
         RECORD_NAME_PEX,
+        RECORD_NAME_PHOENIX,
         RECORD_NAME_PKLITE32,
+        RECORD_NAME_PLAIN,
+        RECORD_NAME_POLYCRYPTPE,
+        RECORD_NAME_PRIVATEEXEPROTECTOR,
         RECORD_NAME_PYTHON,
         RECORD_NAME_QT,
+        RECORD_NAME_RAR,
+        RECORD_NAME_RCRYPTOR,
+        RECORD_NAME_RENETPACK,
         RECORD_NAME_RESOURCE,
+        RECORD_NAME_SETUPFACTORY,
+        RECORD_NAME_SIMBIOZ,
+        RECORD_NAME_SIXXPACK,
+        RECORD_NAME_SKATERNETOBFUSCATOR,
+        RECORD_NAME_SMARTASSEMBLY,
+        RECORD_NAME_SMARTINSTALLMAKER,
+        RECORD_NAME_SPICESNET,
+        RECORD_NAME_STARFORCE,
+        RECORD_NAME_SVKPROTECTOR,
+        RECORD_NAME_TARMAINSTALLER,
+        RECORD_NAME_TELOCK,
+        RECORD_NAME_THEMIDAWINLICENSE,
         RECORD_NAME_TURBOLINKER,
+        RECORD_NAME_UNOPIX,
         RECORD_NAME_UPX,
-        RECORD_NAME_YANO,
+        RECORD_NAME_UTF8,
+        RECORD_NAME_VBNET,
         RECORD_NAME_VCL,
         RECORD_NAME_VCLPACKAGEINFO,
+        RECORD_NAME_VIRTUALPASCAL,
+        RECORD_NAME_VISE,
         RECORD_NAME_VISUALBASIC,
-        RECORD_NAME_VBNET,
-        RECORD_NAME_VISUALCPP,
-        RECORD_NAME_WINUPACK,
-        RECORD_NAME_WWPACK32,
-        RECORD_NAME_ZIP,
-        RECORD_NAME_CYGWIN,
-        RECORD_NAME_DYAMAR,
-        RECORD_NAME_CAB,
+        RECORD_NAME_VISUALCCPP,
+        RECORD_NAME_VMPROTECT,
+        RECORD_NAME_WATCOMC,
+        RECORD_NAME_WATCOMCCPP,
         RECORD_NAME_WINAUTH,
-        RECORD_NAME_WIXTOOLSET,
-        RECORD_NAME_PDF,
+        RECORD_NAME_WINDOWSINSTALLER,
         RECORD_NAME_WINRAR,
-        RECORD_NAME_RAR
+        RECORD_NAME_WINUPACK,
+        RECORD_NAME_WIXTOOLSET,
+        RECORD_NAME_WWPACK32,
+        RECORD_NAME_XENOCODEPOSTBUILD,
+        RECORD_NAME_YANO,
+        RECORD_NAME_YODASCRYPTER,
+        RECORD_NAME_ZIP,
     };
 
     struct ID
@@ -232,11 +322,16 @@ public:
     {
         BASIC_INFO basic_info;
 
+        bool bIsPlainText;
+        QString sHeaderText;
+
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultTexts;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultArchives;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultCertificates;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultDebugData;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultInstallerData;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultFormats;
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultProtectorData;
     };
 
 
@@ -258,6 +353,8 @@ public:
         QPE::EXPORT_HEADER export_header;
         QList<QPE::RESOURCE_HEADER> listResources;
         QList<QPE::RICH_RECORD> listRichSignatures;
+        QString sResourceManifest;
+        QPE::RESOURCE_VERSION resVersion;
 
         QPE::CLI_INFO cliInfo;
 
@@ -412,16 +509,6 @@ public:
         QString sInfo;
     };
 
-    //    enum RESULT_TYPES
-    //    {
-    //        RESULT_TYPE_UNKNOWN=0,
-    //        RESULT_TYPE_LINKERS,
-    //        RESULT_TYPE_COMPILERS,
-    //        RESULT_TYPE_LIBRARIES,
-    //        RESULT_TYPE_TOOLS,
-    //        RESULT_TYPE_PROTECTORS
-    //    };
-
     explicit SpecAbstract(QObject *parent = 0);
     static QString append(QString sResult,QString sString);
     static QString recordFiletypeIdToString(RECORD_FILETYPES id);
@@ -445,12 +532,13 @@ public:
     static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
 
 
-    static void PE_handle_Rich(PEINFO_STRUCT *pPEInfo);
+//    static void PE_handle_Rich(PEINFO_STRUCT *pPEInfo);
 
     static SCANS_STRUCT getScansStruct(quint32 nVariant,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo,qint64 nOffset);
 
     static void PE_handle_import(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_protection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_NETprotection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_libraries(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Microsoft(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Borland(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
@@ -458,25 +546,16 @@ public:
     static void PE_handle_Installers(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_SFX(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
+    static void Binary_handle_Texts(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_Archives(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_Certificates(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_DebugData(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_Formats(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_InstallerData(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
+    static void Binary_handle_ProtectorData(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
 
-
-    //    static void PE_handle_ENIGMA(QIODevice *pDevice,SpecAbstract::PEINFO_STRUCT *pPEInfo);
     static void handle(PEINFO_STRUCT *pPEInfo,RECORD_NAMES name,RESULT_PRIOS prio0,RESULT_PRIOS prio1=RESULT_PRIO_UNKNOWN,RESULT_PRIOS prio2=RESULT_PRIO_UNKNOWN);
     static QMap<RECORD_NAMES,SCANS_STRUCT> *getDetectsMap(PEINFO_STRUCT *pPEInfo,RESULT_PRIOS prio);
-    //    static handle_ObjectPascal(PEINFO_STRUCT *pPEInfo);
-    //    static handle_BorlandCPP(PEINFO_STRUCT *pPEInfo);
-    //    static handle_Qt(PEINFO_STRUCT *pPEInfo);
-    //    static handle_FASM(PEINFO_STRUCT *pPEInfo);
-    //    static handle_MinGW(PEINFO_STRUCT *pPEInfo);
-    //    static handle_MFC(PEINFO_STRUCT *pPEInfo);
-    //    static handle_VisualBasic(PEINFO_STRUCT *pPEInfo);
-    //    static void fixDetects(PEINFO_STRUCT *pPEInfo);
-    //    static void fixResult(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
     static void updateVersion(QMap<RECORD_NAMES,SCAN_STRUCT> *map,RECORD_NAMES name,QString sVersion);
     static void updateInfo(QMap<RECORD_NAMES,SCAN_STRUCT> *map,RECORD_NAMES name,QString sInfo);
@@ -485,19 +564,7 @@ public:
     static bool isScanStructPresent(QList<SpecAbstract::SCAN_STRUCT> *pList,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo);
 
     static bool checkVersionString(QString sVersion);
-    static VI_STRUCT PE_get_TurboLinker_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT PE_get_FASM_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static VI_STRUCT PE_get_UPX_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT PE_get_WWPack32_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT PE_get_InnoSetup_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT PE_get_mslink_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT PE_get_MFC_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT PE_get_VC_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT PE_get_BorlandCpp_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT PE_get_EmbarcaderoCpp_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT PE_get_CodegearCpp_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT PE_get_FlexLM_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static VI_STRUCT PE_get_FlexNet_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static VI_STRUCT PE_get_GCC_vi(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
     static bool PE_isValid_UPX(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);

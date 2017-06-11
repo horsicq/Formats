@@ -34,7 +34,17 @@ SpecAbstract::SIGNATURE_RECORD _binary_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_ARCHIVE,          SpecAbstract::RECORD_NAME_ZIP,                          "",             "",                     "'PK'0304"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_PDF,                          "",             "",                     "'%PDF'"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_ARCHIVE,          SpecAbstract::RECORD_NAME_GZIP,                         "",             "",                     "1F8B08"},
-    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_ARCHIVE,          SpecAbstract::RECORD_NAME_RAR,                          "",             "",                     "'Rar!'1A07"}
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_ARCHIVE,          SpecAbstract::RECORD_NAME_RAR,                          "",             "",                     "'Rar!'1A07"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_INSTALLANYWHERE,              "",             "",                     "5B3E"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_GHOSTINSTALLER,               "1.0",          "xored MSCF, mask: 8D", "C0DECECB8D8D8D8D"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_NSIS,                         "",             "",                     "EFBEADDE'Null'..'oftInst'"},
+    {1, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_NSIS,                         "",             "",                     "EFBEADDE'nsisinstall'"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_NSIS,                         "",             "Install",              "00000000EFBEADDE'NullsoftInst'"},
+    {1, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_NSIS,                         "",             "Uninstall",            "01000000EFBEADDE'NullsoftInst'"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_UTF8,                         "",             "",                     "EFBBBF"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_FISHNET,                      "1.X",          "",                     "0800'FISH_NET'0100"},
+    {1, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_FISHNET,                      "1.X",          "",                     "000800'FISH_NET'0100"},
+    {2, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_FISHNET,                      "1.X",          "",                     "00000800'FISH_NET'0100"}
 };
 
 SpecAbstract::SIGNATURE_RECORD _header_records[]=
@@ -78,8 +88,6 @@ SpecAbstract::SIGNATURE_RECORD _entrypoint_records[]=
 
 };
 
-
-
 //SpecAbstract::SIGNATURE_RECORD _import_records[]={
 //    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_LIBRARY,      SpecAbstract::RECORD_NAME_QT,                           "4.X",          "Dynamic",              "'QTCORE4.DLL'"},
 //    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_LIBRARY,      SpecAbstract::RECORD_NAME_QT,                           "4.X",          "Dynamic/Debug",        "'QTCORED4.DLL'"},
@@ -93,48 +101,24 @@ SpecAbstract::SIGNATURE_RECORD _entrypoint_records[]=
 //    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_LIBRARY,      SpecAbstract::RECORD_NAME_DOTNET,                       "",             ""                      "'MSCOREE.DLL'"}
 //};
 
-//SpecAbstract::SIGNATURE_RECORD _export_records[]={
-//    {0, SpecAbstract::RECORD_FILETYPE_PE64,    SpecAbstract::RECORD_TYPE_COMPILER,     SpecAbstract::RECORD_NAME_EMBARCADEROCPP,               "",             "",                     "'__CPPdebugHook'"}
-//};
+// TODO Obfuscator
+SpecAbstract::SIGNATURE_RECORD _dot_ansistrings_records[]={
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_DOTFUSCATOR,              "",             "",                     "'DotfuscatorAttribute'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_LIBRARY,           SpecAbstract::RECORD_NAME_VCL,                      "",             ".NET",                 "'Borland.Vcl.'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_COMPILER,          SpecAbstract::RECORD_NAME_VBNET,                    "",             "",                     "'Microsoft.VisualBasic'"},
+//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_TOOL,              SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,  "",             "",                     "'Embarcadero.'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_YANO,                     "1.X",          "",                     "'YanoAttribute'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_AGILENET,                 "",             "",                     "'ObfuscatedByAgileDotNetAttribute'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_SKATERNETOBFUSCATOR,      "",             "",                     "'Skater_NET_Obfuscator'"},
+    {1, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_SKATERNETOBFUSCATOR,      "",             "",                     "'RustemSoft.Skater'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_BABELNET,                 "3.X",          "",                     "'BabelAttribute'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_BABELNET,                 "1.X-2.X",      "",                     "'BabelObfuscatorAttribute'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,         SpecAbstract::RECORD_NAME_CLISECURE,                "4.X-5.X",      "",                     "'ObfuscatedByCliSecureAttribute'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_TOOL,              SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,  "XE*",          "",                     "'Borland.Studio.Delphi'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_TOOL,              SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,  "8",            "",                     "'Borland.Vcl.Types'"},
+};
 
-//// mb TODO Borland DElphi
-//SpecAbstract::SCANMEMORY_RECORD _codesectionscan_records[]={
-//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_COMPILER,     SpecAbstract::RECORD_NAME_OBJECTPASCAL,                 "",             "",                     "\x06\x73\x74\x72\x69\x6e\x67"                         ,7}, // string
-//    {1, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_COMPILER,     SpecAbstract::RECORD_NAME_OBJECTPASCAL,                 "",             "",                     "\x07\x42\x6f\x6f\x6c\x65\x61\x6e"                     ,8}, // Boolean
-//    {2, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_COMPILER,     SpecAbstract::RECORD_NAME_OBJECTPASCAL,                 "",             "",                     "\x06\x53\x74\x72\x69\x6e\x67"                         ,7}  // String
-//};
-
-//SpecAbstract::SCANMEMORY_RECORD _datasectionscan_records[]={
-//    // TODO XXX
-//    {0, SpecAbstract::RECORD_FILETYPE_PE32,    SpecAbstract::RECORD_TYPE_COMPILER,     SpecAbstract::RECORD_NAME_BORLANDCPP,                   "XXXX",         "",                     "\x42\x6f\x72\x6c\x61\x6e\x64\x20\x43\x2b\x2b\x20\x2d\x20\x43\x6f\x70\x79\x72\x69\x67\x68\x74\x20"                             ,24},                    // Borland C++ - Copyright 1994 Borland Intl.
-//    {0, SpecAbstract::RECORD_FILETYPE_PE32,    SpecAbstract::RECORD_TYPE_COMPILER,     SpecAbstract::RECORD_NAME_EMBARCADEROCPP,               "XXXX",         "",                     "\x45\x6d\x62\x61\x72\x63\x61\x64\x65\x72\x6f\x20\x52\x41\x44\x20\x53\x74\x75\x64\x69\x6f\x20\x2d\x20\x43\x6f\x70\x79\x72\x69\x67\x68\x74\x20" ,35},    // Embarcadero RAD Studio - Copyright 2009 Embarcadero Technologies, Inc.
-//    {0, SpecAbstract::RECORD_FILETYPE_PE32,    SpecAbstract::RECORD_TYPE_COMPILER,     SpecAbstract::RECORD_NAME_CODEGEARCPP,                  "XXXX",         "",                     "\x43\x6f\x64\x65\x47\x65\x61\x72\x20\x43\x2b\x2b\x20\x2d\x20\x43\x6f\x70\x79\x72\x69\x67\x68\x74\x20" ,25},                                             // CodeGear C++ - Copyright 2008 Embarcadero Technologies
-//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_LIBRARY,      SpecAbstract::RECORD_NAME_MFC,                          "",             "Static",               "\x43\x4d\x46\x43\x43\x6f\x6d\x4f\x62\x6a\x65\x63\x74" ,13},                                                     // CMFCComObject
-//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_LIBRARY,      SpecAbstract::RECORD_NAME_FLEXLM,                       "",             "",                     "\x40\x28\x23\x29\x20\x46\x4c\x45\x58\x6c\x6d\x20\x76\x20" ,12},                                                 // "@(#) FLEXlm "
-//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_LIBRARY,      SpecAbstract::RECORD_NAME_FLEXNET,                      "",             "",                     "\x40\x28\x23\x29\x20\x46\x4c\x45\x58\x6e\x65\x74\x20\x4c\x69\x63\x65\x6e\x73\x69\x6e\x67\x20\x76" ,24},         // "@(#) FLEXnet Licensing v"
-//    {1, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_LIBRARY,      SpecAbstract::RECORD_NAME_FLEXNET,                      "",             "",                     "\x40\x28\x23\x29\x20\x46\x6c\x65\x78\x4e\x65\x74\x20\x4c\x69\x63\x65\x6e\x73\x69\x6e\x67\x20\x76" ,24}          // "@(#) FlexNet Licensing v"
-//};
-
-//SpecAbstract::SCANMEMORY_RECORD _headerscan_records[]={
-//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PACKER,       SpecAbstract::RECORD_NAME_UPX,                          "",             "",                     "\x24\x49\x64\x3a\x20\x55\x50\x58\x20"                 ,9}, // "$Id: UPX "
-//    {1, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PACKER,       SpecAbstract::RECORD_NAME_UPX,                          "",             "",                     "\x55\x50\x58\x21"                                     ,4} // UPX!
-
-//};
-
-
-//SpecAbstract::RESOURCES_RECORD _resources_records[]={
-//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_LIBRARY,      SpecAbstract::RECORD_NAME_VCL,                          "",             "",                     false,          "",         10,     true,       "PACKAGEINFO",      0},
-//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_UNKNOWN,      SpecAbstract::RECORD_NAME_DVCLAL,                       "",             "",                     false,          "",         10,     true,       "DVCLAL",           0},
-//    {0, SpecAbstract::RECORD_FILETYPE_PE32,    SpecAbstract::RECORD_TYPE_INSTALLER,    SpecAbstract::RECORD_NAME_INNOSETUP,                    "5.1.X-X.X.X",  "Install",              false,          "",         10,     false,       0,                 11111}
-//};
-
-
-//SpecAbstract::SIGNATURE_RECORD _dot_ansistrings_records[]={
-//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,    SpecAbstract::RECORD_NAME_DOTFUSCATOR,                   "",             "",                     "'DotfuscatorAttribute'"},
-//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_LIBRARY,      SpecAbstract::RECORD_NAME_VCL,                           "",             ".NET",                 "'Borland.Vcl.'"},
-//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_TOOL,         SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,       "",             "",                     "'Embarcadero.'"}
-//};
-
+//// TODO
 //SpecAbstract::SIGNATURE_RECORD _dot_unicodestrings_records[]={
 //    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_PROTECTOR,    SpecAbstract::RECORD_NAME_DOTFUSCATOR,                  "",             "",                     "'DotfuscatorAttribute'"}
 //};
@@ -166,25 +150,12 @@ QString SpecAbstract::recordFiletypeIdToString(RECORD_FILETYPES id)
 
     switch(id)
     {
-        case RECORD_FILETYPE_BINARY:
-            sResult=QString("Binary");
-            break;
-
-        case RECORD_FILETYPE_MSDOS:
-            sResult=QString("MSDOS");
-            break;
-
-        case RECORD_FILETYPE_PE:
-            sResult=QString("PE");
-            break;
-
-        case RECORD_FILETYPE_PE32:
-            sResult=QString("PE32");
-            break;
-
-        case RECORD_FILETYPE_PE64:
-            sResult=QString("PE64");
-            break;
+        case RECORD_FILETYPE_BINARY:                        sResult=QString("Binary"); break;
+        case RECORD_FILETYPE_MSDOS:                         sResult=QString("MSDOS"); break;
+        case RECORD_FILETYPE_PE:                            sResult=QString("PE"); break;
+        case RECORD_FILETYPE_PE32:                          sResult=QString("PE32"); break;
+        case RECORD_FILETYPE_PE64:                          sResult=QString("PE64"); break;
+        case RECORD_FILETYPE_TEXT:                          sResult=QString("Text"); break;
     }
 
     return sResult;
@@ -196,13 +167,8 @@ QString SpecAbstract::recordFilepartIdToString(SpecAbstract::RECORD_FILEPARTS id
 
     switch(id)
     {
-        case RECORD_FILEPART_HEADER:
-            sResult=QString("Header");
-            break;
-
-        case RECORD_FILEPART_OVERLAY:
-            sResult=QString("Overlay");
-            break;
+        case RECORD_FILEPART_HEADER:                        sResult=QString("Header"); break;
+        case RECORD_FILEPART_OVERLAY:                       sResult=QString("Overlay"); break;
     }
 
     return sResult;
@@ -214,61 +180,20 @@ QString SpecAbstract::recordTypeIdToString(RECORD_TYPES id)
 
     switch(id)
     {
-        case RECORD_TYPE_PACKER:
-            sResult=tr("Packer");
-            break;
-
-        case RECORD_TYPE_ARCHIVE:
-            sResult=tr("Archive");
-            break;
-
-        case RECORD_TYPE_FORMAT:
-            sResult=tr("Format");
-            break;
-
-        case RECORD_TYPE_PROTECTOR:
-            sResult=tr("Protector");
-            break;
-
-        case RECORD_TYPE_LINKER:
-            sResult=tr("Linker");
-            break;
-
-        case RECORD_TYPE_COMPILER:
-            sResult=tr("Compiler");
-            break;
-
-        case RECORD_TYPE_INSTALLER:
-            sResult=tr("Installer");
-            break;
-
-        case RECORD_TYPE_CONVERTER:
-            sResult=tr("Converter");
-            break;
-
-        case RECORD_TYPE_LIBRARY:
-            sResult=tr("Library");
-            break;
-
-        case RECORD_TYPE_TOOL:
-            sResult=tr("Tool");
-            break;
-
-        case RECORD_TYPE_CERTIFICATE:
-            sResult=tr("Certificate");
-            break;
-
-        case RECORD_TYPE_DEBUGDATA:
-            sResult=tr("Debug data");
-            break;
-
-        case RECORD_TYPE_INSTALLERDATA:
-            sResult=tr("Installer data");
-            break;
-
-        case RECORD_TYPE_SFX:
-            sResult=tr("SFX");
-            break;
+        case RECORD_TYPE_PACKER:                            sResult=tr("Packer"); break;
+        case RECORD_TYPE_ARCHIVE:                           sResult=tr("Archive"); break;
+        case RECORD_TYPE_FORMAT:                            sResult=tr("Format"); break;
+        case RECORD_TYPE_PROTECTOR:                         sResult=tr("Protector"); break;
+        case RECORD_TYPE_LINKER:                            sResult=tr("Linker"); break;
+        case RECORD_TYPE_COMPILER:                          sResult=tr("Compiler"); break;
+        case RECORD_TYPE_INSTALLER:                         sResult=tr("Installer"); break;
+        case RECORD_TYPE_CONVERTER:                         sResult=tr("Converter"); break;
+        case RECORD_TYPE_LIBRARY:                           sResult=tr("Library"); break;
+        case RECORD_TYPE_TOOL:                              sResult=tr("Tool"); break;
+        case RECORD_TYPE_CERTIFICATE:                       sResult=tr("Certificate"); break;
+        case RECORD_TYPE_DEBUGDATA:                         sResult=tr("Debug data"); break;
+        case RECORD_TYPE_INSTALLERDATA:                     sResult=tr("Installer data"); break;
+        case RECORD_TYPE_SFX:                               sResult=tr("SFX"); break;
     }
 
     return sResult;
@@ -280,329 +205,176 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
 
     switch(id)
     {
-        case RECORD_NAME_C:
-            sResult=QString("C");
-            break;
-
-        case RECORD_NAME_CPP:
-            sResult=QString("C++");
-            break;
-
-        case RECORD_NAME_MICROSOFTC:
-            sResult=QString("Microsoft C");
-            break;
-
-        case RECORD_NAME_MICROSOFTCPP:
-            sResult=QString("Microsoft C++");
-            break;
-
-        case RECORD_NAME_VISUALCPP:
-            sResult=QString("Visual C/C++");
-            break;
-
-        case RECORD_NAME_VISUALBASIC:
-            sResult=QString("Visual Basic");
-            break;
-
-        case RECORD_NAME_VBNET:
-            sResult=QString("VB .NET");
-            break;
-
-        case RECORD_NAME_DOTNET:
-            sResult=QString(".NET");
-            break;
-
-        case RECORD_NAME_MFC:
-            sResult=QString("MFC");
-            break;
-
-        case RECORD_NAME_ASM:
-            sResult=QString("Asm");
-            break;
-
-        case RECORD_NAME_RESOURCE:
-            sResult=QString("Resource");
-            break;
-
-        case RECORD_NAME_EXPORT:
-            sResult=QString("Export");
-            break;
-
-        case RECORD_NAME_IMPORT:
-            sResult=QString("Import");
-            break;
-
-        case RECORD_NAME_UPX:
-            sResult=QString("UPX");
-            break;
-
-        case RECORD_NAME_YANO:
-            sResult=QString("Yano");
-            break;
-
-        case RECORD_NAME_ANDPAKK2:
-            sResult=QString("ANDpakk2");
-            break;
-
-        case RECORD_NAME_ASDPACK:
-            sResult=QString("ASDPack");
-            break;
-
-        case RECORD_NAME_32LITE:
-            sResult=QString("32Lite");
-            break;
-
-        case RECORD_NAME_DOTFUSCATOR:
-            sResult=QString("Dotfuscator");
-            break;
-
-        case RECORD_NAME_CIL:
-            //        sResult=QString("Common Intermediate Language");
-            sResult=QString("cil");
-            break;
-
-        case RECORD_NAME_BORLANDDELPHIDOTNET:
-            sResult=QString("Borland Delphi .NET");
-            break;
-
-        case RECORD_NAME_EMBARCADERODELPHIDOTNET:
-            sResult=QString("Embarcadero Delphi .NET");
-            break;
-
-        case RECORD_NAME_DEB:
-            sResult=QString("DEB");
-            break;
-
-        case RECORD_NAME_ZIP:
-            sResult=QString("ZIP");
-            break;
-
-        case RECORD_NAME_PDF:
-            sResult=QString("PDF");
-            break;
-
-        case RECORD_NAME_GZIP:
-            sResult=QString("GZIP");
-            break;
-
-        case RECORD_NAME_7Z:
-            sResult=QString("7-Zip");
-            break;
-
-        case RECORD_NAME_PKLITE32:
-            sResult=QString("PKLITE32");
-            break;
-
-        case RECORD_NAME_MICROSOFTLINKER:
-            sResult=QString("Microsoft linker");
-            break;
-
-        //    case RECORD_NAME_MICROSOFTCPPCOMPILER:
-        //        sResult=QString("Microsoft C/C++ compiler"); // TODO
-        //        break;
-        case RECORD_NAME_MICROSOFTVISUALSTUDIO:
-            sResult=QString("Microsoft Visual Studio");
-            break;
-
-        case RECORD_NAME_GENERIC:
-            sResult=QString("Generic");
-            break;
-
-        case RECORD_NAME_TURBOLINKER:
-            sResult=QString("Turbo linker");
-            break;
-
-        case RECORD_NAME_BORLANDCPP:
-            sResult=QString("Borland C++");
-            break;
-
-        case RECORD_NAME_BORLANDCPPBUILDER:
-            sResult=QString("Borland C++ Builder");
-            break;
-
-        case RECORD_NAME_CODEGEARCPP:
-            sResult=QString("CodeGear C++");
-            break;
-
-        case RECORD_NAME_CODEGEARCPPBUILDER:
-            sResult=QString("CodeGear C++ Builder");
-            break;
-
-        case RECORD_NAME_EMBARCADEROCPP:
-            sResult=QString("Embarcadero C++");
-            break;
-
-        case RECORD_NAME_EMBARCADEROCPPBUILDER:
-            sResult=QString("Embarcadero C++ Builder");
-            break;
-
-        case RECORD_NAME_BORLANDDELPHI:
-            sResult=QString("Borland Delphi");
-            break;
-
-        case RECORD_NAME_CODEGEARDELPHI:
-            sResult=QString("CodeGear Delphi");
-            break;
-
-        case RECORD_NAME_EMBARCADERODELPHI:
-            sResult=QString("Embarcadero Delphi");
-            break;
-
-        case RECORD_NAME_GNULINKER:
-            sResult=QString("GNU ld");
-            break;
-
-        case RECORD_NAME_ASPACK:
-            sResult=QString("ASPack");
-            break;
-
-        case RECORD_NAME_FSG:
-            sResult=QString("FSG");
-            break;
-
-        case RECORD_NAME_NSPACK:
-            sResult=QString("NsPack");
-            break;
-
-        case RECORD_NAME_PEX:
-            sResult=QString("PeX");
-            break;
-
-        case RECORD_NAME_INNOSETUP:
-            sResult=QString("Inno Setup");
-            break;
-
-        case RECORD_NAME_FASM:
-            sResult=QString("FASM");
-            break;
-
-        case RECORD_NAME_GCC:
-            sResult=QString("GCC");
-            break;
-
-        case RECORD_NAME_FPC:
-            sResult=QString("Free Pascal");
-            break;
-
-        case RECORD_NAME_MASM:
-            sResult=QString("MASM");
-            break;
-
-        case RECORD_NAME_MASM32:
-            sResult=QString("MASM32");
-            break;
-
-        case RECORD_NAME_HXS:
-            sResult=QString("HXS");
-            break;
-
-        case RECORD_NAME_WINUPACK:
-            sResult=QString("(Win)Upack");
-            break;
-
-        case RECORD_NAME_MPRESS:
-            sResult=QString("MPRESS");
-            break;
-
-        case RECORD_NAME_VCL:
-            sResult=QString("Visual Component Library");
-            break;
-
-        case RECORD_NAME_VCLPACKAGEINFO:
-            sResult=QString("VCL PackageInfo");
-            break;
-
-        case RECORD_NAME_DVCLAL:
-            sResult=QString("DVCLAL");
-            break;
-
-        case RECORD_NAME_OBJECTPASCAL:
-            sResult=QString("Object Pascal");
-            break;
-
-        case RECORD_NAME_BORLANDOBJECTPASCAL:
-            sResult=QString("Borland Object Pascal");
-            break;
-
-        case RECORD_NAME_CODEGEAROBJECTPASCAL:
-            sResult=QString("Codegear Object Pascal");
-            break;
-
-        case RECORD_NAME_EMBARCADEROOBJECTPASCAL:
-            sResult=QString("Embarcadero Object Pascal");
-            break;
-
-        case RECORD_NAME_QT:
-            sResult=QString("Qt");
-            break;
-
-        case RECORD_NAME_PYTHON:
-            sResult=QString("Python");
-            break;
-
-        case RECORD_NAME_MINGW:
-            sResult=QString("MinGW");
-            break;
-
-        case RECORD_NAME_CYGWIN:
-            sResult=QString("Cygwin");
-            break;
-
-        case RECORD_NAME_DYAMAR:
-            sResult=QString("DYAMAR");
-            break;
-
-        case RECORD_NAME_MSYS:
-            sResult=QString("Msys");
-            break;
-
-        case RECORD_NAME_MSYS2:
-            sResult=QString("MSYS2");
-            break;
-
-        case RECORD_NAME_WWPACK32:
-            sResult=QString("WWPack32");
-            break;
-
-        case RECORD_NAME_FLEXLM:
-            sResult=QString("Flex License Manager");
-            break;
-
-        case RECORD_NAME_FLEXNET:
-            sResult=QString("FlexNet Licensing");
-            break;
-
-        case RECORD_NAME_ACPROTECT:
-            sResult=QString("ACProtect");
-            break;
-
-        case RECORD_NAME_ALEXPROTECTOR:
-            sResult=QString("Alex Protector");
-            break;
-
-        case RECORD_NAME_ALLOY:
-            sResult=QString("Alloy");
-            break;
-
-        case RECORD_NAME_ENIGMA:
-            sResult=QString("ENIGMA");
-            break;
-
-        case RECORD_NAME_CAB:
-            sResult=QString("CAB");
-            break;
-
-        case RECORD_NAME_RAR:
-            sResult=QString("RAR");
-            break;
-
-        case RECORD_NAME_WINRAR:
-            sResult=QString("WinRAR");
-            break;
-
-        case RECORD_NAME_WINAUTH:
-            sResult=QString("Windows Authenticode");
-            break;
+        case RECORD_NAME_32LITE:                            sResult=QString("32Lite"); break;
+        case RECORD_NAME_7Z:                                sResult=QString("7-Zip"); break;
+        case RECORD_NAME_ACPROTECT:                         sResult=QString("ACProtect"); break;
+        case RECORD_NAME_ADVANCEDINSTALLER:                 sResult=QString("Advanced Installer"); break;
+        case RECORD_NAME_AGILENET:                          sResult=QString("Agile .NET"); break;
+        case RECORD_NAME_AHTEAMEPPROTECTOR:                 sResult=QString("AHTeam EP Protector"); break;
+        case RECORD_NAME_ALEXPROTECTOR:                     sResult=QString("Alex Protector"); break;
+        case RECORD_NAME_ALLOY:                             sResult=QString("Alloy"); break;
+        case RECORD_NAME_ANDPAKK2:                          sResult=QString("ANDpakk2"); break;
+        case RECORD_NAME_ANTIDOTE:                          sResult=QString("AntiDote"); break;
+        case RECORD_NAME_ARMADILLO:                         sResult=QString("Armadillo"); break;
+        case RECORD_NAME_ARMPROTECTOR:                      sResult=QString("ARM Protector"); break;
+        case RECORD_NAME_ASDPACK:                           sResult=QString("ASDPack"); break;
+        case RECORD_NAME_ASM:                               sResult=QString("Asm"); break;
+        case RECORD_NAME_ASPACK:                            sResult=QString("ASPack"); break;
+        case RECORD_NAME_ASPROTECT:                         sResult=QString("ASProtect"); break;
+        case RECORD_NAME_ASSEMBLYINVOKE:                    sResult=QString("AssemblyInvoke"); break;
+        case RECORD_NAME_AVERCRYPTOR:                       sResult=QString("AverCryptor"); break;
+        case RECORD_NAME_BABELNET:                          sResult=QString("Babel .NET"); break;
+        case RECORD_NAME_BITSHAPEPECRYPT:                   sResult=QString("BitShape PE Crypt"); break;
+        case RECORD_NAME_BORLANDCPP:                        sResult=QString("Borland C++"); break;
+        case RECORD_NAME_BORLANDCPPBUILDER:                 sResult=QString("Borland C++ Builder"); break;
+        case RECORD_NAME_BORLANDDELPHI:                     sResult=QString("Borland Delphi"); break;
+        case RECORD_NAME_BORLANDDELPHIDOTNET:               sResult=QString("Borland Delphi .NET"); break;
+        case RECORD_NAME_BORLANDOBJECTPASCAL:               sResult=QString("Borland Object Pascal"); break;
+        case RECORD_NAME_BREAKINTOPATTERN:                  sResult=QString("Break Into Pattern"); break;
+        case RECORD_NAME_C:                                 sResult=QString("C"); break;
+        case RECORD_NAME_CAB:                               sResult=QString("CAB"); break;
+        case RECORD_NAME_CIL:                               sResult=QString("cil"); break;
+        case RECORD_NAME_CLICKTEAM:                         sResult=QString("ClickTeam"); break;
+        case RECORD_NAME_CLISECURE:                         sResult=QString("CliSecure"); break;
+        case RECORD_NAME_CODEGEARCPP:                       sResult=QString("CodeGear C++"); break;
+        case RECORD_NAME_CODEGEARCPPBUILDER:                sResult=QString("CodeGear C++ Builder"); break;
+        case RECORD_NAME_CODEGEARDELPHI:                    sResult=QString("CodeGear Delphi"); break;
+        case RECORD_NAME_CODEGEAROBJECTPASCAL:              sResult=QString("Codegear Object Pascal"); break;
+        case RECORD_NAME_CODEVEIL:                          sResult=QString("CodeVeil"); break;
+        case RECORD_NAME_CODEWALL:                          sResult=QString("CodeWall"); break;
+        case RECORD_NAME_CONFUSER:                          sResult=QString("Confuser"); break;
+        case RECORD_NAME_CPP:                               sResult=QString("C++"); break;
+        case RECORD_NAME_CREATEINSTALL:                     sResult=QString("CreateInstall"); break;
+        case RECORD_NAME_CRINKLER:                          sResult=QString("Crinkler"); break;
+        case RECORD_NAME_CRUNCH:                            sResult=QString("Crunch"); break;
+        case RECORD_NAME_CRYPTER:                           sResult=QString("Crypter"); break;
+        case RECORD_NAME_CRYPTOCRACKSPEPROTECTOR:           sResult=QString("CRYPToCRACks PE Protector"); break;
+        case RECORD_NAME_CRYPTOOBFUSCATORFORNET:            sResult=QString("Crypto Obfuscator For .Net"); break;
+        case RECORD_NAME_CYGWIN:                            sResult=QString("Cygwin"); break;
+        case RECORD_NAME_DEB:                               sResult=QString("DEB"); break;
+        case RECORD_NAME_DEEPSEA:                           sResult=QString("DeepSea"); break;
+        case RECORD_NAME_DNGUARD:                           sResult=QString("DNGuard"); break;
+        case RECORD_NAME_DOTFIXNICEPROTECT:                 sResult=QString("DotFix Nice Protect"); break;
+        case RECORD_NAME_DOTFUSCATOR:                       sResult=QString("Dotfuscator"); break;
+        case RECORD_NAME_DOTNET:                            sResult=QString(".NET"); break;
+        case RECORD_NAME_DVCLAL:                            sResult=QString("DVCLAL"); break;
+        case RECORD_NAME_DYAMAR:                            sResult=QString("DYAMAR"); break;
+        case RECORD_NAME_EAZFUSCATOR:                       sResult=QString("Eazfuscator"); break;
+        case RECORD_NAME_EMBARCADEROCPP:                    sResult=QString("Embarcadero C++"); break;
+        case RECORD_NAME_EMBARCADEROCPPBUILDER:             sResult=QString("Embarcadero C++ Builder"); break;
+        case RECORD_NAME_EMBARCADERODELPHI:                 sResult=QString("Embarcadero Delphi"); break;
+        case RECORD_NAME_EMBARCADERODELPHIDOTNET:           sResult=QString("Embarcadero Delphi .NET"); break;
+        case RECORD_NAME_EMBARCADEROOBJECTPASCAL:           sResult=QString("Embarcadero Object Pascal"); break;
+        case RECORD_NAME_EMPTYFILE:                         sResult=QString("Empty File"); break;
+        case RECORD_NAME_ENIGMA:                            sResult=QString("ENIGMA"); break;
+        case RECORD_NAME_EXECRYPT:                          sResult=QString("EXECrypt"); break;
+        case RECORD_NAME_EXECRYPTOR:                        sResult=QString("EXECryptor"); break;
+        case RECORD_NAME_EXEMPLARINSTALLER:                 sResult=QString("Exemplar Installer"); break;
+        case RECORD_NAME_EXESHIELD:                         sResult=QString("Exe Shield"); break;
+        case RECORD_NAME_EXPORT:                            sResult=QString("Export"); break;
+        case RECORD_NAME_FASM:                              sResult=QString("FASM"); break;
+        case RECORD_NAME_FISHNET:                           sResult=QString("FISH .NET"); break;
+        case RECORD_NAME_FLEXLM:                            sResult=QString("Flex License Manager"); break;
+        case RECORD_NAME_FLEXNET:                           sResult=QString("FlexNet Licensing"); break;
+        case RECORD_NAME_FPC:                               sResult=QString("Free Pascal"); break;
+        case RECORD_NAME_FREECRYPTOR:                       sResult=QString("FreeCryptor"); break;
+        case RECORD_NAME_FSG:                               sResult=QString("FSG"); break;
+        case RECORD_NAME_GCC:                               sResult=QString("GCC"); break;
+        case RECORD_NAME_GENERIC:                           sResult=QString("Generic"); break;
+        case RECORD_NAME_GENTEEINSTALLER:                   sResult=QString("Gentee Installer"); break;
+        case RECORD_NAME_GHOSTINSTALLER:                    sResult=QString("Ghost Installer"); break;
+        case RECORD_NAME_GNULINKER:                         sResult=QString("GNU ld"); break;
+        case RECORD_NAME_GOLIATH:                           sResult=QString("Goliath"); break;
+        case RECORD_NAME_GZIP:                              sResult=QString("GZIP"); break;
+        case RECORD_NAME_HIDEPE:                            sResult=QString("HidePE"); break;
+        case RECORD_NAME_HXS:                               sResult=QString("HXS"); break;
+        case RECORD_NAME_IMPORT:                            sResult=QString("Import"); break;
+        case RECORD_NAME_INNOSETUP:                         sResult=QString("Inno Setup"); break;
+        case RECORD_NAME_INSTALLANYWHERE:                   sResult=QString("InstallAnywhere"); break;
+        case RECORD_NAME_INSTALLSHIELD:                     sResult=QString("InstallShield"); break;
+        case RECORD_NAME_IPBPROTECT:                        sResult=QString("iPB Protect"); break;
+        case RECORD_NAME_KKRUNCHY:                          sResult=QString("kkrunchy"); break;
+        case RECORD_NAME_MASKPE:                            sResult=QString("MaskPE"); break;
+        case RECORD_NAME_MASM:                              sResult=QString("MASM"); break;
+        case RECORD_NAME_MASM32:                            sResult=QString("MASM32"); break;
+        case RECORD_NAME_MAXTOCODE:                         sResult=QString("Maxtocode"); break;
+        case RECORD_NAME_MFC:                               sResult=QString("MFC"); break;
+        case RECORD_NAME_MICROSOFTC:                        sResult=QString("Microsoft C"); break;
+        case RECORD_NAME_MICROSOFTCPP:                      sResult=QString("Microsoft C++"); break;
+        case RECORD_NAME_MICROSOFTLINKER:                   sResult=QString("Microsoft linker"); break;
+        case RECORD_NAME_MICROSOFTVISUALSTUDIO:             sResult=QString("Microsoft Visual Studio"); break;
+        case RECORD_NAME_MINGW:                             sResult=QString("MinGW"); break;
+        case RECORD_NAME_MOLEBOX:                           sResult=QString("MoleBox"); break;
+        case RECORD_NAME_MORPHNAH:                          sResult=QString("Morphnah"); break;
+        case RECORD_NAME_MPRESS:                            sResult=QString("MPRESS"); break;
+        case RECORD_NAME_MSYS:                              sResult=QString("Msys"); break;
+        case RECORD_NAME_MSYS2:                             sResult=QString("MSYS2"); break;
+        case RECORD_NAME_MZ0OPE:                            sResult=QString("MZ0oPE"); break;
+        case RECORD_NAME_NOOBYPROTECT:                      sResult=QString("NoobyProtect"); break;
+        case RECORD_NAME_NORTHSTARPESHRINKER:               sResult=QString("North Star PE Shrinker"); break;
+        case RECORD_NAME_NSIS:                              sResult=QString("Nullsoft Scriptable Install System"); break;
+        case RECORD_NAME_NSPACK:                            sResult=QString("NsPack"); break;
+        case RECORD_NAME_OBFUSCAR:                          sResult=QString("Obfuscar"); break;
+        case RECORD_NAME_OBFUSCATORNET2009:                 sResult=QString("Obfuscator.NET 2009"); break;
+        case RECORD_NAME_OBJECTPASCAL:                      sResult=QString("Object Pascal"); break;
+        case RECORD_NAME_OBSIDIUM:                          sResult=QString("Obsidium"); break;
+        case RECORD_NAME_PCGUARD:                           sResult=QString("PC Guard"); break;
+        case RECORD_NAME_PDF:                               sResult=QString("PDF"); break;
+        case RECORD_NAME_PEARMOR:                           sResult=QString("PE-Armor"); break;
+        case RECORD_NAME_PEBUNDLE:                          sResult=QString("PEBundle"); break;
+        case RECORD_NAME_PEENCRYPT:                         sResult=QString("PE Encrypt"); break;
+        case RECORD_NAME_PELOCK:                            sResult=QString("PELock"); break;
+        case RECORD_NAME_PEQUAKE:                           sResult=QString("PE Quake"); break;
+        case RECORD_NAME_PESPIN:                            sResult=QString("PESpin"); break;
+        case RECORD_NAME_PETITE:                            sResult=QString("Petite"); break;
+        case RECORD_NAME_PEX:                               sResult=QString("PeX"); break;
+        case RECORD_NAME_PHOENIX:                           sResult=QString("Phoenix"); break;
+        case RECORD_NAME_PKLITE32:                          sResult=QString("PKLITE32"); break;
+        case RECORD_NAME_PLAIN:                             sResult=QString("Plain"); break;
+        case RECORD_NAME_POLYCRYPTPE:                       sResult=QString("PolyCrypt PE"); break;
+        case RECORD_NAME_PRIVATEEXEPROTECTOR:               sResult=QString("Private EXE Protector"); break;
+        case RECORD_NAME_PYTHON:                            sResult=QString("Python"); break;
+        case RECORD_NAME_QT:                                sResult=QString("Qt"); break;
+        case RECORD_NAME_RAR:                               sResult=QString("RAR"); break;
+        case RECORD_NAME_RCRYPTOR:                          sResult=QString("RCryptor"); break;
+        case RECORD_NAME_RENETPACK:                         sResult=QString("ReNET-pack"); break;
+        case RECORD_NAME_RESOURCE:                          sResult=QString("Resource"); break;
+        case RECORD_NAME_SETUPFACTORY:                      sResult=QString("Setup Factory"); break;
+        case RECORD_NAME_SIMBIOZ:                           sResult=QString("SimbiOZ"); break;
+        case RECORD_NAME_SIXXPACK:                          sResult=QString("Sixxpack"); break;
+        case RECORD_NAME_SKATERNETOBFUSCATOR:               sResult=QString("Skater .NET Obfuscator"); break;
+        case RECORD_NAME_SMARTASSEMBLY:                     sResult=QString("Smart Assembly"); break;
+        case RECORD_NAME_SMARTINSTALLMAKER:                 sResult=QString("Smart Install Maker"); break;
+        case RECORD_NAME_SPICESNET:                         sResult=QString("Spices.Net"); break;
+        case RECORD_NAME_STARFORCE:                         sResult=QString("StarForce"); break;
+        case RECORD_NAME_SVKPROTECTOR:                      sResult=QString("SVK Protector"); break;
+        case RECORD_NAME_TARMAINSTALLER:                    sResult=QString("Tarma Installer"); break;
+        case RECORD_NAME_TELOCK:                            sResult=QString("tElock"); break;
+        case RECORD_NAME_THEMIDAWINLICENSE:                 sResult=QString("Themida/Winlicense"); break;
+        case RECORD_NAME_TURBOLINKER:                       sResult=QString("Turbo linker"); break;
+        case RECORD_NAME_UNOPIX:                            sResult=QString("Unopix"); break;
+        case RECORD_NAME_UPX:                               sResult=QString("UPX"); break;
+        case RECORD_NAME_UTF8:                              sResult=QString("UTF-8"); break;
+        case RECORD_NAME_VBNET:                             sResult=QString("VB .NET"); break;
+        case RECORD_NAME_VCL:                               sResult=QString("Visual Component Library"); break;
+        case RECORD_NAME_VCLPACKAGEINFO:                    sResult=QString("VCL PackageInfo"); break;
+        case RECORD_NAME_VIRTUALPASCAL:                     sResult=QString("Virtual Pascal"); break;
+        case RECORD_NAME_VISE:                              sResult=QString("Vise"); break;
+        case RECORD_NAME_VISUALBASIC:                       sResult=QString("Visual Basic");  break;
+        case RECORD_NAME_VISUALCCPP:                        sResult=QString("Visual C/C++"); break;
+        case RECORD_NAME_VMPROTECT:                         sResult=QString("VMProtect"); break;
+        case RECORD_NAME_WATCOMC:                           sResult=QString("Watcom C"); break;
+        case RECORD_NAME_WATCOMCCPP:                        sResult=QString("Watcom C/C++"); break;
+        case RECORD_NAME_WINAUTH:                           sResult=QString("Windows Authenticode"); break;
+        case RECORD_NAME_WINDOWSINSTALLER:                  sResult=QString("Windows Installer"); break;
+        case RECORD_NAME_WINRAR:                            sResult=QString("WinRAR"); break;
+        case RECORD_NAME_WINUPACK:                          sResult=QString("(Win)Upack"); break;
+        case RECORD_NAME_WIXTOOLSET:                        sResult=QString("WiX Toolset"); break;
+        case RECORD_NAME_WWPACK32:                          sResult=QString("WWPack32"); break;
+        case RECORD_NAME_XENOCODEPOSTBUILD:                 sResult=QString("Xenocode Postbuild"); break;
+        case RECORD_NAME_YANO:                              sResult=QString("Yano"); break;
+        case RECORD_NAME_YODASCRYPTER:                      sResult=QString("Yoda's Crypter"); break;
+        case RECORD_NAME_ZIP:                               sResult=QString("ZIP"); break;
     }
 
     return sResult;
@@ -750,17 +522,30 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
     // Scan Header
     signatureScan(&result.basic_info.mapHeaderDetects,result.basic_info.sHeaderSignature,_binary_records,sizeof(_binary_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_BINARY);
 
+    result.bIsPlainText=binary.isPlainText();
+
+    if(result.bIsPlainText)
+    {
+        result.sHeaderText=binary.read_ansiString(0,qMin(result.basic_info.nSize,(qint64)0x1000));
+        result.basic_info.id.filetype=RECORD_FILETYPE_TEXT;
+    }
+
+    Binary_handle_Texts(pDevice,&result);
+    Binary_handle_Formats(pDevice,&result);
     Binary_handle_Archives(pDevice,&result);
     Binary_handle_Certificates(pDevice,&result);
     Binary_handle_DebugData(pDevice,&result);
-    Binary_handle_Formats(pDevice,&result);
     Binary_handle_InstallerData(pDevice,&result);
+    Binary_handle_ProtectorData(pDevice,&result);
 
+
+    result.basic_info.listDetects.append(result.mapResultTexts.values());
     result.basic_info.listDetects.append(result.mapResultArchives.values());
     result.basic_info.listDetects.append(result.mapResultCertificates.values());
     result.basic_info.listDetects.append(result.mapResultDebugData.values());
     result.basic_info.listDetects.append(result.mapResultFormats.values());
     result.basic_info.listDetects.append(result.mapResultInstallerData.values());
+    result.basic_info.listDetects.append(result.mapResultProtectorData.values());
 
     if(!result.basic_info.listDetects.count())
     {
@@ -824,6 +609,8 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         result.listResources=pe.getResources();
         result.listRichSignatures=pe.getRichSignatureRecords();
         result.cliInfo=pe.getCliInfo();
+        result.sResourceManifest=pe.getResourceManifest(&result.listResources);
+        result.resVersion=pe.getResourceVersion(&result.listResources);
 
         //        if(result.listSections.count()>=1)
         //        {
@@ -924,15 +711,19 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         //        resourcesScan(&result.mapResourcesDetects,&result.listResources,_resources_records,sizeof(_resources_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_PE);
 
 
-        //        for(int i=0;i<result.cliInfo.listAnsiStrings.count();i++)
-        //        {
-        //            signatureScan(&result.mapDotAnsistringsDetects,QBinary::stringToHex(result.cliInfo.listAnsiStrings.at(i)),_dot_ansistrings_records,sizeof(_dot_ansistrings_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_PE);
-        //        }
+        if(result.cliInfo.bInit)
+        {
+            for(int i=0;i<result.cliInfo.listAnsiStrings.count();i++)
+            {
+                signatureScan(&result.mapDotAnsistringsDetects,QBinary::stringToHex(result.cliInfo.listAnsiStrings.at(i)),_dot_ansistrings_records,sizeof(_dot_ansistrings_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_PE);
+            }
 
-        //        for(int i=0;i<result.cliInfo.listUnicodeStrings.count();i++)
-        //        {
-        //            signatureScan(&result.mapDotUnicodestringsDetects,QBinary::stringToHex(result.cliInfo.listUnicodeStrings.at(i)),_dot_unicodestrings_records,sizeof(_dot_unicodestrings_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_PE);
-        //        }
+            for(int i=0;i<result.cliInfo.listUnicodeStrings.count();i++)
+            {
+                signatureScan(&result.mapDotUnicodestringsDetects,QBinary::stringToHex(result.cliInfo.listUnicodeStrings.at(i)),_dot_unicodestrings_records,sizeof(_dot_unicodestrings_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_PE);
+            }
+        }
+
 
         //        SpecAbstract::SCAN_STRUCT _record={0};
 
@@ -954,6 +745,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
 
 
         PE_handle_protection(pDevice,&result);
+        PE_handle_NETprotection(pDevice,&result);
         // TODO Free Pascal Compiler
 
         PE_handle_libraries(pDevice,&result);
@@ -981,62 +773,6 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         //        // http://stackoverflow.com/questions/18720045/what-are-the-list-of-all-possible-values-for-dvclal
         //        // https://synopse.info/forum/viewtopic.php?id=83
         //        // sysutils.pas TPackageInfoHeader
-        //        handle(&result,SpecAbstract::RECORD_NAME_MICROSOFTLINKER,RESULT_PRIO_RICH,RESULT_PRIO_HEADER);
-        //        handle(&result,SpecAbstract::RECORD_NAME_VISUALCPP,RESULT_PRIO_RICH,RESULT_PRIO_IMPORT);
-        //        handle(&result,SpecAbstract::RECORD_NAME_MASM,RESULT_PRIO_RICH);
-        //        handle(&result,SpecAbstract::RECORD_NAME_VISUALBASIC,RESULT_PRIO_RICH,RESULT_PRIO_IMPORT);
-        //        handle(&result,SpecAbstract::RECORD_NAME_MFC,RESULT_PRIO_IMPORT,RESULT_PRIO_DATASECTIONSCAN);
-        //        handle(&result,SpecAbstract::RECORD_NAME_OBJECTPASCAL,RESULT_PRIO_CODESECTIONSCAN);
-
-        //        handle(&result,SpecAbstract::RECORD_NAME_QT,RESULT_PRIO_IMPORT);
-        //        handle(&result,SpecAbstract::RECORD_NAME_FASM,RESULT_PRIO_HEADER);
-
-        //        handle(&result,SpecAbstract::RECORD_NAME_MINGW,RESULT_PRIO_IMPORT);
-        //        handle(&result,SpecAbstract::RECORD_NAME_UPX,RESULT_PRIO_ENTRYPOINT,RESULT_PRIO_HEADERSCAN);
-        //        handle(&result,SpecAbstract::RECORD_NAME_WWPACK32,RESULT_PRIO_ENTRYPOINT);
-
-        //        // mb TODO 1 function for Borland
-        //        handle(&result,SpecAbstract::RECORD_NAME_TURBOLINKER,RESULT_PRIO_HEADER);
-        //        handle(&result,SpecAbstract::RECORD_NAME_BORLANDCPP,RESULT_PRIO_DATASECTIONSCAN,RESULT_PRIO_ENTRYPOINT);
-        //        handle(&result,SpecAbstract::RECORD_NAME_CODEGEARCPP,RESULT_PRIO_DATASECTIONSCAN);
-        //        handle(&result,SpecAbstract::RECORD_NAME_EMBARCADEROCPP,RESULT_PRIO_DATASECTIONSCAN,RESULT_PRIO_EXPORT);
-        //        handle(&result,SpecAbstract::RECORD_NAME_VCL,RESULT_PRIO_RESOURCES,RESULT_PRIO_DOTANSISTRINGS);
-        //        handle(&result,SpecAbstract::RECORD_NAME_BORLANDDELPHIDOTNET,RESULT_PRIO_DOTANSISTRINGS,RESULT_PRIO_DOTUNICODESTRINGS);
-        //        handle(&result,SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,RESULT_PRIO_DOTANSISTRINGS,RESULT_PRIO_DOTUNICODESTRINGS);
-
-
-        //        handle(&result,SpecAbstract::RECORD_NAME_INNOSETUP,RESULT_PRIO_HEADER,RESULT_PRIO_RESOURCES,RESULT_PRIO_OVERLAY);
-
-        //        handle(&result,SpecAbstract::RECORD_NAME_DOTFUSCATOR,RESULT_PRIO_DOTANSISTRINGS);
-
-
-        //        handle(&result,SpecAbstract::RECORD_NAME_FLEXLM,RESULT_PRIO_DATASECTIONSCAN);
-        //        handle(&result,SpecAbstract::RECORD_NAME_FLEXNET,RESULT_PRIO_DATASECTIONSCAN);
-
-
-        ////        handle(&result,SpecAbstract::RECORD_NAME_ENIGMA,RESULT_PRIO_SPECIAL);
-
-
-
-
-
-        //        fixResult(pDevice,&result);
-
-        //        if(QPE::isResourcePresent(10,"DVCLAL",&result.listResources)||QPE::isResourcePresent(10,"PACKAGEINFO",&result.listResources))
-        //        {
-        //            SpecAbstract::SCAN_STRUCT record={0};
-
-        //            record.id.filetype=_record.id.filetype;
-        //            record.id.nOffset=_record.id.nOffset;
-        //            record.nSize=_record.nSize;
-        //            record.parentId=_record.parentId;
-        //            record.type=SpecAbstract::RECORD_TYPE_LIBRARY;
-        //            record.name=SpecAbstract::RECORD_NAME_VCL;
-
-        //            result.listResultLibraries.append(record);
-
-        //            qDebug("DVCLAL|PACKAGEINFO");
-        //        }
 
 
 
@@ -1064,85 +800,6 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
     result.basic_info.nElapsedTime=timer.elapsed();
 
     return result;
-}
-
-void SpecAbstract::PE_handle_Rich(SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    int nRichSignaturesCount=pPEInfo->listRichSignatures.count();
-
-    if(nRichSignaturesCount>=1)
-    {
-        SpecAbstract::SCANS_STRUCT ssLinker= {0};
-        SpecAbstract::SCANS_STRUCT ssCompiler= {0};
-
-        for(int i=1; i<=5; i++)
-        {
-            if(nRichSignaturesCount>=i)
-            {
-                quint32 _nRich=(pPEInfo->listRichSignatures.at(nRichSignaturesCount-i).nId<<16)+pPEInfo->listRichSignatures.at(nRichSignaturesCount-i).nVersion;
-                SpecAbstract::SCANS_STRUCT ssRich=SpecAbstract::PE_getRichSignatureDescription(_nRich);
-
-                if((ssLinker.type!=SpecAbstract::RECORD_TYPE_LINKER)&&(ssRich.type==SpecAbstract::RECORD_TYPE_LINKER))
-                {
-                    ssLinker=ssRich;
-                }
-
-                if((ssCompiler.type!=SpecAbstract::RECORD_TYPE_COMPILER)&&(ssRich.type==SpecAbstract::RECORD_TYPE_COMPILER))
-                {
-                    ssCompiler=ssRich;
-                }
-            }
-        }
-
-
-        SpecAbstract::SCANS_STRUCT recordLinker= {0};
-
-        //        recordLinker.id=pPEInfo->basic_info.id;
-        //        recordLinker.nSize=pPEInfo->basic_info.nSize;
-        //        recordLinker.parentId=pPEInfo->basic_info.parentId;
-        recordLinker.type=SpecAbstract::RECORD_TYPE_LINKER;
-        recordLinker.name=SpecAbstract::RECORD_NAME_MICROSOFTLINKER;
-
-        if(ssLinker.type==SpecAbstract::RECORD_TYPE_LINKER)
-        {
-            recordLinker.sVersion=ssLinker.sVersion;
-            recordLinker.sInfo=ssLinker.sInfo;
-        }
-        else
-        {
-            //            recordLinker.sVersion=QString("%1.%2").arg(pPEInfo->nMajorLinkerVersion).arg(pPEInfo->nMinorLinkerVersion);
-        }
-
-        pPEInfo->mapRichDetects.insert(recordLinker.name,recordLinker);
-
-        if(ssCompiler.type==SpecAbstract::RECORD_TYPE_COMPILER)
-        {
-            SpecAbstract::SCANS_STRUCT recordCompiler= {0};
-
-            //            recordCompiler.id=pPEInfo->basic_info.id;
-            //            recordCompiler.nSize=pPEInfo->basic_info.nSize;
-            //            recordCompiler.parentId=pPEInfo->basic_info.parentId;
-            recordCompiler.type=ssLinker.type;
-            recordCompiler.name=ssLinker.name;
-            recordCompiler.sVersion=ssLinker.sVersion;
-            recordCompiler.sInfo=ssLinker.sInfo;
-
-            // VB 6.0
-            if(recordCompiler.name==SpecAbstract::RECORD_NAME_VISUALBASIC)
-            {
-                if(nRichSignaturesCount>1)
-                {
-                    recordCompiler.sInfo="Native";
-                }
-                else
-                {
-                    recordCompiler.sInfo="P-Code";
-                }
-            }
-
-            pPEInfo->mapRichDetects.insert(recordCompiler.name,recordCompiler);
-        }
-    }
 }
 
 SpecAbstract::SCANS_STRUCT SpecAbstract::getScansStruct(quint32 nVariant, SpecAbstract::RECORD_FILETYPES filetype, SpecAbstract::RECORD_TYPES type, SpecAbstract::RECORD_NAMES name, QString sVersion, QString sInfo, qint64 nOffset)
@@ -1543,6 +1200,8 @@ void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO
     {
         if(!pPEInfo->cliInfo.bInit)
         {
+            // TODO MPRESS import
+
             VI_STRUCT viUPX=PE_get_UPX_vi(pDevice,pPEInfo);
 
             // UPX
@@ -1592,7 +1251,8 @@ void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO
                         }
                     }
 
-                    if((!bDetect)&&(nVariant==1))
+//                    if((!bDetect)&&(nVariant==1))
+                    if(!bDetect)
                     {
                         QString sEnigmaVersion=findEnigmaVersion(pDevice,nSectionOffset,nSectionSize);
 
@@ -1604,6 +1264,7 @@ void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     }
 
                     // TODO unknown
+                    // 60e8000000005d83....81ed
 
                     if(bDetect)
                     {
@@ -1895,21 +1556,7 @@ void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO
                 }
             }
         }
-        else
-        {
-            // .NET
-            if(QPE::isNETAnsiStringPresent("YanoAttribute",&(pPEInfo->cliInfo)))
-            {
-                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_YANO,"1.X","",0);
-                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
-            }
 
-            if(QPE::isNETAnsiStringPresent("DotfuscatorAttribute",&(pPEInfo->cliInfo)))
-            {
-                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_DOTFUSCATOR,"","",0);
-                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
-            }
-        }
     }
 
 
@@ -2105,6 +1752,77 @@ void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO
     //    }
 }
 
+void SpecAbstract::PE_handle_NETprotection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+{
+    QPE pe(pDevice);
+
+    if(pe.isValid())
+    {
+        if(pPEInfo->cliInfo.bInit)
+        {
+            // .NET
+            // Enigma
+            if((pPEInfo->nCodeSectionOffset)&&(pPEInfo->nCodeSectionSize))
+            {
+                qint64 nSectionOffset=pPEInfo->nCodeSectionOffset;
+                qint64 nSectionSize=pPEInfo->nCodeSectionSize;
+
+                QString sEnigmaVersion=findEnigmaVersion(pDevice,nSectionOffset,nSectionSize);
+
+                if(sEnigmaVersion!="")
+                {
+                    SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_ENIGMA,sEnigmaVersion,".NET",0);
+                    pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                }
+            }
+
+
+            // TODO
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_YANO))
+            {
+                SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_YANO);
+                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_DOTFUSCATOR))
+            {
+                SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_DOTFUSCATOR);
+                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_AGILENET))
+            {
+                SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_AGILENET);
+                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_SKATERNETOBFUSCATOR))
+            {
+                SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_SKATERNETOBFUSCATOR);
+                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_BABELNET))
+            {
+                SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_BABELNET);
+                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_CLISECURE))
+            {
+                SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_CLISECURE);
+                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
+            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_FISHNET))
+            {
+                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_FISHNET,"1.X","",0); // TODO
+                pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+        }
+    }
+}
+
 void SpecAbstract::PE_handle_libraries(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
@@ -2177,6 +1895,8 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
 
             for(int i=0; i<pPEInfo->listImports.count(); i++)
             {
+                // https://en.wikipedia.org/wiki/Microsoft_Foundation_Class_Library
+                // TODO eMbedded Visual C++ 4.0 		mfcce400.dll 	MFC 6.0
                 if(pPEInfo->listImports.at(i).sName.toUpper().contains(QRegExp("^MFC")))
                 {
                     QRegularExpression rxVersion("(\\d+)");
@@ -2259,7 +1979,7 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
             recordNET.name=SpecAbstract::RECORD_NAME_DOTNET;
             recordNET.sVersion=pPEInfo->cliInfo.sCLI_MetaData_Version;
 
-            if(QPE::isNETAnsiStringPresent("Microsoft.VisualBasic",&(pPEInfo->cliInfo)))
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_VBNET))
             {
                 recordCompiler.type=RECORD_TYPE_COMPILER;
                 recordCompiler.name=RECORD_NAME_VBNET;
@@ -2325,10 +2045,10 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
             }
         }
 
-        if((recordMFC.name==RECORD_NAME_MFC)&&(recordCompiler.name!=RECORD_NAME_VISUALCPP))
+        if((recordMFC.name==RECORD_NAME_MFC)&&(recordCompiler.name!=RECORD_NAME_VISUALCCPP))
         {
             recordCompiler.type=SpecAbstract::RECORD_TYPE_COMPILER;
-            recordCompiler.name=SpecAbstract::RECORD_NAME_VISUALCPP;
+            recordCompiler.name=SpecAbstract::RECORD_NAME_VISUALCCPP;
 
             if(recordMFC.sVersion=="6.00")
             {
@@ -2374,9 +2094,9 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
 
         if((recordMFC.name==RECORD_NAME_MFC)&&(recordMFC.sVersion==""))
         {
-            if((recordCompiler.name==RECORD_NAME_VISUALCPP)&&(recordCompiler.sVersion!=""))
+            if((recordCompiler.name==RECORD_NAME_VISUALCCPP)&&(recordLinker.sVersion!=""))
             {
-                recordMFC.sVersion=recordCompiler.sVersion.section(".",0,1);
+                recordMFC.sVersion=recordLinker.sVersion.section(".",0,1);
             }
         }
 
@@ -2386,14 +2106,14 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
             recordLinker.name=SpecAbstract::RECORD_NAME_MICROSOFTLINKER;
         }
 
-        if((recordMFC.name==RECORD_NAME_MFC)&&(recordLinker.sVersion==""))
+        if((recordMFC.name==RECORD_NAME_MFC)&&(recordLinker.sVersion=="")&&(pPEInfo->nMinorLinkerVersion!=10))
         {
             recordLinker.sVersion=recordMFC.sVersion;
             //            recordLinker.sVersion=QString("%1.%2").arg(pPEInfo->nMajorLinkerVersion).arg(pPEInfo->nMinorLinkerVersion);;
         }
 
 
-        if(recordCompiler.name==SpecAbstract::RECORD_NAME_VISUALCPP)
+        if(recordCompiler.name==SpecAbstract::RECORD_NAME_VISUALCCPP)
         {
             QString sLinkerVersion=recordLinker.sVersion;
             QString sCompilerVersion=recordCompiler.sVersion;
@@ -3014,23 +2734,23 @@ void SpecAbstract::PE_handle_Borland(QIODevice *pDevice, SpecAbstract::PEINFO_ST
 
                     pPEInfo->mapResultTools.insert(recordVCL.name,scansToScan(&(pPEInfo->basic_info),&recordVCL));
                 }
+
+                if(!pPEInfo->mapResultLinkers.contains(RECORD_NAME_TURBOLINKER))
+                {
+                    SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_LINKER,RECORD_NAME_TURBOLINKER,"","",0);
+                    pPEInfo->mapResultLinkers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                }
             }
         }
         else
         {
-            // .NET
-            if(QPE::isNETAnsiStringPresent("Borland.Studio.Delphi",&(pPEInfo->cliInfo)))
+            // .NET TODO: Check!!!!
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_EMBARCADERODELPHIDOTNET))
             {
-                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_TOOL,RECORD_NAME_EMBARCADERODELPHIDOTNET,"XE*","",0);
-                pPEInfo->mapResultTools.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
-            }
-            else if(QPE::isNETAnsiStringPresent("Borland.Vcl.Types",&(pPEInfo->cliInfo)))
-            {
-                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_TOOL,RECORD_NAME_BORLANDDELPHIDOTNET,"8","",0);
+                SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_EMBARCADERODELPHIDOTNET);
                 pPEInfo->mapResultTools.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
         }
-
     }
 
 }
@@ -3128,6 +2848,7 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
 
             if((sDllLib=="libgcc_s_dw2-1.dll")||
                     (sDllLib=="msys-gcc_s-1.dll")||
+                    (sDllLib=="_set_invalid_parameter_handler")||
                     QPE::isImportLibraryPresentI("libgcc_s_dw2-1.dll",&(pPEInfo->listImports)))
             {
                 // Mingw
@@ -3299,9 +3020,6 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                         }
                     }
 
-
-
-
                     pPEInfo->mapResultCompilers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
 
                     if(_dss.sInfo=="MinGW") // mb TODO variant
@@ -3362,8 +3080,6 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                 }
             }
 
-
-
             for(int i=0; i<pPEInfo->listImports.count(); i++)
             {
                 if(pPEInfo->listImports.at(i).sName.toUpper().contains(QRegExp("^PYTHON")))
@@ -3387,9 +3103,26 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                     break;
                 }
             }
+
+            // Virtual Pascal
+            if((pPEInfo->nDataSectionOffset)&&(pPEInfo->nDataSectionSize))
+            {
+                qint64 _nOffset=pPEInfo->nDataSectionOffset;
+                qint64 _nSize=pPEInfo->nDataSectionSize;
+                // TODO VP Version in Major and Minor linker
+
+                qint64 nOffset_VP=pe.find_ansiString(_nOffset,_nSize,"Virtual Pascal - Copyright (C) "); // "Virtual Pascal - Copyright (C) 1996-2000 vpascal.com"
+
+                if(nOffset_VP!=-1)
+                {
+                    SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_COMPILER,RECORD_NAME_VIRTUALPASCAL,"","",0);
+
+                    // TODO Version???
+                    ss.sVersion=QString("%1.%2").arg(pPEInfo->nMajorLinkerVersion).arg(pPEInfo->nMinorLinkerVersion);
+                    pPEInfo->mapResultCompilers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                }
+            }
         }
-
-
 
         if(pPEInfo->mapResultCompilers.contains(RECORD_NAME_GCC))
         {
@@ -3532,19 +3265,19 @@ void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO
                                 ss.sInfo=append(ss.sInfo,"OLD.TODO");
                             }
 
-                            QRegularExpression rxVersion("\\(\\S+\\)");
-                            QRegularExpression rxOptions("\\) \\(\\S+\\)");
+                            QRegularExpression rxVersion("\\((.*?)\\)");
+                            QRegularExpression rxOptions("\\) \\((.*?)\\)");
                             QRegularExpressionMatch matchVersion=rxVersion.match(sSetupDataString);
                             QRegularExpressionMatch matchOptions=rxOptions.match(sSetupDataString);
 
                             if(matchVersion.hasMatch())
                             {
-                                ss.sVersion=matchVersion.captured(0).remove("(").remove(")");
+                                ss.sVersion=matchVersion.captured(1);
                             }
 
                             if(matchOptions.hasMatch())
                             {
-                                QString sEncode=matchOptions.captured(0).remove("(").remove(")").remove(" ");
+                                QString sEncode=matchOptions.captured(1);
 
                                 if(sEncode=="a")
                                 {
@@ -3561,7 +3294,7 @@ void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO
 
                 pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
-            else if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_CAB))
+            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_CAB))
             {
                 // Wix Tools
                 if(QPE::isSectionNamePresent(".wixburn",&(pPEInfo->listSections)))
@@ -3569,6 +3302,87 @@ void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO
                     SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_WIXTOOLSET,"","",0);
                     ss.sVersion="3.X"; // TODO check "E:\delivery\Dev\wix37\build\ship\x86\burn.pdb"
                     pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                }
+            }
+            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_INSTALLANYWHERE))
+            {
+                if(QPE::getResourceVersionValue("ProductName",&(pPEInfo->resVersion))=="InstallAnywhere")
+                {
+                    SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_INSTALLANYWHERE,"","",0);
+                    ss.sVersion=QPE::getResourceVersionValue("ProductVersion",&(pPEInfo->resVersion));
+                    pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                }
+            }
+            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_GHOSTINSTALLER))
+            {
+                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_GHOSTINSTALLER,"","",0);
+                ss.sVersion="1.0";
+                pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_NSIS))
+            {
+                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_NSIS,"","",0);
+
+                QString _sInfo=pPEInfo->mapOverlayDetects.value(RECORD_NAME_NSIS).sInfo;
+                if(_sInfo!="")
+                {
+                    ss.sInfo=_sInfo;
+                }
+
+                QRegularExpression rxVersion("Null[sS]oft Install System v?(.*?)<");
+                QRegularExpressionMatch matchVersion=rxVersion.match(pPEInfo->sResourceManifest);
+
+                if(matchVersion.hasMatch())
+                {
+                    ss.sVersion=matchVersion.captured(1);
+                }
+                // TODO options
+
+                pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+            if(QPE::getResourceVersionValue("ProductName",&(pPEInfo->resVersion)).contains("InstallShield"))
+            {
+                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_INSTALLSHIELD,"","",0);
+                ss.sVersion=QPE::getResourceVersionValue("FileVersion",&(pPEInfo->resVersion)).trimmed();
+                pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+            // Windows Installer
+            for(int i=0;i<pPEInfo->listResources.count();i++)
+            {
+                qint64 _nOffset=pPEInfo->listResources.at(i).nOffset;
+                qint64 _nSize=pPEInfo->listResources.at(i).nSize;
+                qint64 _nSignatureSize=qMin(_nSize,(qint64)8);
+
+                if(_nSignatureSize)
+                {
+                    QString sSignature=pe.getSignature(_nOffset,_nSignatureSize);
+                    if(sSignature=="D0CF11E0A1B11AE1")
+                    {
+                        qint64 nStringOffset=pe.find_ansiString(_nOffset,_nSize,"Windows Installer");
+                        if(nStringOffset!=-1)
+                        {
+                            SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_WINDOWSINSTALLER,"","",0);
+
+                            QString _sString=pe.read_ansiString(nStringOffset);
+
+                            if(_sString.contains("xml",Qt::CaseInsensitive))
+                            {
+                                ss.sInfo="XML";
+                            }
+
+                            QRegularExpression rxVersion("\\((.*?)\\)");
+                            QRegularExpressionMatch matchVersion=rxVersion.match(_sString);
+
+                            if(matchVersion.hasMatch())
+                            {
+                                ss.sVersion=matchVersion.captured(1);
+                            }
+
+                            pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -3595,6 +3409,23 @@ void SpecAbstract::PE_handle_SFX(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT
                 }
             }
         }
+    }
+}
+
+void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+{
+    QBinary binary(pDevice);
+
+    if(pBinaryInfo->bIsPlainText)
+    {
+        SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_TEXT,RECORD_TYPE_FORMAT,RECORD_NAME_PLAIN,"","",0);
+
+        if(pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_UTF8))
+        {
+            ss.name=RECORD_NAME_UTF8;
+        }
+
+        pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
     }
 }
 
@@ -3688,9 +3519,14 @@ void SpecAbstract::Binary_handle_Formats(QIODevice *pDevice, SpecAbstract::BINAR
 {
     QBinary binary(pDevice);
 
-    // MinGW debug data
-    if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_PDF))&&(pBinaryInfo->basic_info.nSize>=8))
+    if(pBinaryInfo->basic_info.nSize==0)
     {
+        SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_BINARY,RECORD_TYPE_FORMAT,RECORD_NAME_EMPTYFILE,"","",0);
+        pBinaryInfo->mapResultFormats.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_PDF))&&(pBinaryInfo->basic_info.nSize>=8))
+    {
+        // PDF
         SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_PDF);
         ss.sVersion=QBinary::hexToString(pBinaryInfo->basic_info.sHeaderSignature.mid(5*2,6));
         pBinaryInfo->mapResultFormats.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
@@ -3706,6 +3542,33 @@ void SpecAbstract::Binary_handle_InstallerData(QIODevice *pDevice, SpecAbstract:
     {
         SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_INNOSETUP);
         pBinaryInfo->mapResultInstallerData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_INSTALLANYWHERE))&&(pBinaryInfo->basic_info.nSize>=8))
+    {
+        SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_INSTALLANYWHERE);
+        pBinaryInfo->mapResultInstallerData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_GHOSTINSTALLER))&&(pBinaryInfo->basic_info.nSize>=8))
+    {
+        SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_GHOSTINSTALLER);
+        pBinaryInfo->mapResultInstallerData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_NSIS))&&(pBinaryInfo->basic_info.nSize>=8))
+    {
+        SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_NSIS);
+        pBinaryInfo->mapResultInstallerData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+}
+
+void SpecAbstract::Binary_handle_ProtectorData(QIODevice *pDevice, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+{
+    QBinary binary(pDevice);
+
+    // Inno Setup
+    if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_FISHNET))&&(pBinaryInfo->basic_info.nSize>=8))
+    {
+        SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_FISHNET);
+        pBinaryInfo->mapResultProtectorData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
     }
 }
 
@@ -3982,62 +3845,6 @@ QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::SCANS_STRUCT> *SpecAbstract::getD
 //    }
 //}
 
-//SpecAbstract::handle_ObjectPascal(SpecAbstract::PEINFO_STRUCT *pPEInfo)
-//{
-//    if(pPEInfo->mapCodeSectionDetects.contains(SpecAbstract::RECORD_NAME_OBJECTPASCAL))
-//    {
-////        pPEInfo->mapResultCompilers.insert(SpecAbstract::RECORD_NAME_OBJECTPASCAL,getScanStruct(&(pPEInfo->mapCodeSectionDetects),&(pPEInfo->basic_info),SpecAbstract::RECORD_NAME_OBJECTPASCAL));
-//        pPEInfo->mapResultCompilers.insert(SpecAbstract::RECORD_NAME_OBJECTPASCAL,scansToScan(&(pPEInfo->basic_info),pPEInfo->mapCodeSectionDetects.value(RECORD_NAME_OBJECTPASCAL)));
-//    }
-//}
-
-//SpecAbstract::handle_BorlandCPP(SpecAbstract::PEINFO_STRUCT *pPEInfo)
-//{
-//    if(pPEInfo->mapCodeSectionDetects.contains(SpecAbstract::RECORD_NAME_BORLANDCPP))
-//    {
-//        pPEInfo->mapResultCompilers.insert(SpecAbstract::RECORD_NAME_BORLANDCPP,getScanStruct(&(pPEInfo->mapCodeSectionDetects),&(pPEInfo->basic_info),SpecAbstract::RECORD_NAME_BORLANDCPP));
-//    }
-//}
-
-//SpecAbstract::handle_Qt(SpecAbstract::PEINFO_STRUCT *pPEInfo)
-//{
-//    if(pPEInfo->mapImportDetects.contains(SpecAbstract::RECORD_NAME_QT))
-//    {
-//        pPEInfo->mapResultLibraries.insert(SpecAbstract::RECORD_NAME_QT,getScanStruct(&(pPEInfo->mapImportDetects),&(pPEInfo->basic_info),SpecAbstract::RECORD_NAME_QT));
-//    }
-//}
-
-//SpecAbstract::handle_FASM(SpecAbstract::PEINFO_STRUCT *pPEInfo)
-//{
-//    if(pPEInfo->mapHeaderDetects.contains(SpecAbstract::RECORD_NAME_FASM))
-//    {
-//        SCAN_STRUCT record=getScanStruct(&(pPEInfo->mapHeaderDetects),&(pPEInfo->basic_info),SpecAbstract::RECORD_NAME_FASM);
-//        record.sVersion=QString("%1.%2").arg(pPEInfo->nMajorLinkerVersion).arg(pPEInfo->nMinorLinkerVersion);
-//        pPEInfo->mapResultCompilers.insert(SpecAbstract::RECORD_NAME_FASM,record);
-//    }
-//}
-
-//SpecAbstract::handle_MinGW(SpecAbstract::PEINFO_STRUCT *pPEInfo)
-//{
-//    if(pPEInfo->mapImportDetects.contains(SpecAbstract::RECORD_NAME_MINGW))
-//    {
-//        pPEInfo->mapResultTools.insert(SpecAbstract::RECORD_NAME_MINGW,getScanStruct(&(pPEInfo->mapImportDetects),&(pPEInfo->basic_info),SpecAbstract::RECORD_NAME_MINGW));
-//    }
-//}
-
-//SpecAbstract::handle_MFC(SpecAbstract::PEINFO_STRUCT *pPEInfo)
-//{
-//    if(pPEInfo->mapImportDetects.contains(SpecAbstract::RECORD_NAME_MFC))
-//    {
-//        pPEInfo->mapResultLibraries.insert(SpecAbstract::RECORD_NAME_MFC,getScanStruct(&(pPEInfo->mapImportDetects),&(pPEInfo->basic_info),SpecAbstract::RECORD_NAME_MFC));
-//    }
-//}
-
-//SpecAbstract::handle_VisualBasic(SpecAbstract::PEINFO_STRUCT *pPEInfo)
-//{
-//    // TODO
-//}
-
 //void SpecAbstract::fixResult(QIODevice *pDevice,SpecAbstract::PEINFO_STRUCT *pPEInfo)
 //{
 //    // .NET
@@ -4050,89 +3857,6 @@ QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::SCANS_STRUCT> *SpecAbstract::getD
 
 //        pPEInfo->mapResultLibraries.insert(SpecAbstract::RECORD_NAME_DOTNET,scansToScan(&(pPEInfo->basic_info),&recordLibrary));
 //    }
-
-//    // FASM
-//    if(pPEInfo->mapResultCompilers.contains(SpecAbstract::RECORD_NAME_FASM))
-//    {
-//        // FASM does not have linker
-//        pPEInfo->mapResultLinkers.clear();
-//        QString sVersion=PE_get_FASM_vi(pDevice,pPEInfo).sVersion;
-
-//        if(sVersion!="")
-//        {
-//            updateVersion(&(pPEInfo->mapResultCompilers),SpecAbstract::RECORD_NAME_FASM,sVersion);
-//        }
-//    }
-
-//    // Turbo Linker
-//    if(pPEInfo->mapResultLinkers.contains(SpecAbstract::RECORD_NAME_TURBOLINKER))
-//    {
-//        QString sVersion=PE_get_TurboLinker_vi(pDevice,pPEInfo).sVersion;
-
-//        if(sVersion!="")
-//        {
-//            updateVersion(&(pPEInfo->mapResultLinkers),SpecAbstract::RECORD_NAME_TURBOLINKER,sVersion);
-//        }
-//    }
-
-//    // UPX
-//    if(pPEInfo->mapResultPackers.contains(SpecAbstract::RECORD_NAME_UPX))
-//    {
-//        if(PE_isValid_UPX(pDevice,pPEInfo))
-//        {
-//            VI_STRUCT vi=PE_get_UPX_vi(pDevice,pPEInfo);
-
-//            if(vi.sVersion!="")
-//            {
-//                updateVersionAndInfo(&(pPEInfo->mapResultPackers),SpecAbstract::RECORD_NAME_UPX,vi.sVersion,vi.sInfo);
-//            }
-//        }
-//    }
-
-//    // WWPack32
-//    if(pPEInfo->mapResultPackers.contains(SpecAbstract::RECORD_NAME_WWPACK32))
-//    {
-//        QString sVersion=PE_get_WWPack32_vi(pDevice,pPEInfo).sVersion;
-
-//        if(sVersion!="")
-//        {
-//            updateVersion(&(pPEInfo->mapResultPackers),SpecAbstract::RECORD_NAME_WWPACK32,sVersion);
-//        }
-//    }
-
-//    // Inno Setup
-//    if(pPEInfo->mapResultInstallers.contains(SpecAbstract::RECORD_NAME_INNOSETUP))
-//    {
-//        VI_STRUCT vi=PE_get_InnoSetup_vi(pDevice,pPEInfo);
-
-//        if(vi.sVersion!="")
-//        {
-//            updateVersionAndInfo(&(pPEInfo->mapResultInstallers),SpecAbstract::RECORD_NAME_INNOSETUP,vi.sVersion,vi.sInfo);
-//        }
-//    }
-
-//    // FlexLM
-//    if(pPEInfo->mapResultLibraries.contains(SpecAbstract::RECORD_NAME_FLEXLM))
-//    {
-//        VI_STRUCT vi=PE_get_FlexLM_vi(pDevice,pPEInfo);
-
-//        if(vi.sVersion!="")
-//        {
-//            updateVersionAndInfo(&(pPEInfo->mapResultLibraries),SpecAbstract::RECORD_NAME_FLEXLM,vi.sVersion,vi.sInfo);
-//        }
-//    }
-
-//    // FlexNet
-//    if(pPEInfo->mapResultLibraries.contains(SpecAbstract::RECORD_NAME_FLEXNET))
-//    {
-//        VI_STRUCT vi=PE_get_FlexNet_vi(pDevice,pPEInfo);
-
-//        if(vi.sVersion!="")
-//        {
-//            updateVersionAndInfo(&(pPEInfo->mapResultLibraries),SpecAbstract::RECORD_NAME_FLEXNET,vi.sVersion,vi.sInfo);
-//        }
-//    }
-
 
 
 //    // Borland
@@ -4827,28 +4551,7 @@ bool SpecAbstract::checkVersionString(QString sVersion)
         }
     }
 
-
     return bResult;
-}
-
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_TurboLinker_vi(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    Q_UNUSED(pDevice);
-    VI_STRUCT result;
-    // TODO
-    result.sVersion=QString("%1.%2").arg(pPEInfo->nMajorLinkerVersion).arg(pPEInfo->nMinorLinkerVersion,2,10,QChar('0'));
-
-    return result;
-}
-
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_FASM_vi(QIODevice *pDevice,SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    Q_UNUSED(pDevice);
-    VI_STRUCT result;
-    // TODO
-    result.sVersion=QString("%1.%2").arg(pPEInfo->nMajorLinkerVersion).arg(pPEInfo->nMinorLinkerVersion,2,10,QChar('0'));
-
-    return result;
 }
 
 SpecAbstract::VI_STRUCT SpecAbstract::PE_get_UPX_vi(QIODevice *pDevice,SpecAbstract::PEINFO_STRUCT *pPEInfo)
@@ -4948,329 +4651,6 @@ SpecAbstract::VI_STRUCT SpecAbstract::PE_get_UPX_vi(QIODevice *pDevice,SpecAbstr
     return result;
 }
 
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_WWPack32_vi(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    Q_UNUSED(pDevice);
-    VI_STRUCT result;
-    // TODO
-    result.sVersion=QBinary::hexToString(pPEInfo->sEntryPointSignature.mid(102,8));
-
-    return result;
-}
-
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_InnoSetup_vi(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    VI_STRUCT result;
-
-    QPE pe(pDevice);
-
-    if(pe.isValid())
-    {
-        if(pe.read_uint32(0x30)==0x6E556E49) // Uninstall
-        {
-            result.sInfo="Uninstall";
-            // TODO Version
-        }
-        else
-        {
-            qint64 nLdrTableOffset=-1;
-
-            if(pe.read_uint32(0x30)==0x6F6E6E49)
-            {
-                result.sVersion="1.XX-5.1.X";
-                result.sInfo="Install";
-                nLdrTableOffset=pe.read_uint32(0x30+4);
-            }
-            else // New versions
-            {
-                QPE::RESOURCE_HEADER resHeader=QPE::getResourceHeader(S_RT_RCDATA,11111,&(pPEInfo->listResources));
-
-                nLdrTableOffset=resHeader.nOffset;
-
-                if(nLdrTableOffset!=-1)
-                {
-                    result.sVersion="5.1.X-X.X.X";
-                    result.sInfo="Install";
-                }
-            }
-
-            if(nLdrTableOffset!=-1)
-            {
-                // TODO 1 function
-                QString sSignature=pe.getSignature(nLdrTableOffset+0,12);
-
-                if(sSignature.left(12)=="72446C507453") // rDlPtS
-                {
-                    //                    result.nLdrTableVersion=read_uint32(nLdrTableOffset+12+0);
-                    //                    result.nTotalSize=read_uint32(nLdrTableOffset+12+4);
-                    //                    result.nSetupE32Offset=read_uint32(nLdrTableOffset+12+8);
-                    //                    result.nSetupE32UncompressedSize=read_uint32(nLdrTableOffset+12+12);
-                    //                    result.nSetupE32CRC=read_uint32(nLdrTableOffset+12+16);
-                    //                    result.nSetupBin0Offset=read_uint32(nLdrTableOffset+12+20);
-                    //                    result.nSetupBin1Offset=read_uint32(nLdrTableOffset+12+24);
-                    //                    result.nTableCRC=read_uint32(nLdrTableOffset+12+28);
-
-                    QString sSetupDataString=pe.read_ansiString(pe.read_uint32(nLdrTableOffset+12+20));
-
-                    if(!sSetupDataString.contains("("))
-                    {
-                        sSetupDataString=pe.read_ansiString(pe.read_uint32(nLdrTableOffset+12+24));
-                        result.sInfo=append(result.sInfo,"OLD.TODO");
-                    }
-
-                    QRegularExpression rxVersion("\\(\\S+\\)");
-                    QRegularExpression rxOptions("\\) \\(\\S+\\)");
-                    QRegularExpressionMatch matchVersion=rxVersion.match(sSetupDataString);
-                    QRegularExpressionMatch matchOptions=rxOptions.match(sSetupDataString);
-
-                    if(matchVersion.hasMatch())
-                    {
-                        result.sVersion=matchVersion.captured(0).remove("(").remove(")");
-                    }
-
-                    if(matchOptions.hasMatch())
-                    {
-                        QString sEncode=matchOptions.captured(0).remove("(").remove(")").remove(" ");
-
-                        if(sEncode=="a")
-                        {
-                            result.sInfo=append(result.sInfo,"Ansi");
-                        }
-                        else if(sEncode=="u")
-                        {
-                            result.sInfo=append(result.sInfo,"Unicode");
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return result;
-}
-
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_mslink_vi(QIODevice *pDevice,SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    Q_UNUSED(pDevice);
-    VI_STRUCT result;
-    // TODO
-    result.sVersion=QString("%1.%2").arg(pPEInfo->nMajorLinkerVersion).arg(pPEInfo->nMinorLinkerVersion,2,10,QChar('0'));
-
-    return result;
-}
-
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_MFC_vi(QIODevice *pDevice,SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    Q_UNUSED(pDevice);
-    // https://en.wikipedia.org/wiki/Microsoft_Foundation_Class_Library
-    // TODO eMbedded Visual C++ 4.0 		mfcce400.dll 	MFC 6.0
-    VI_STRUCT result;
-
-    for(int i=0; i<pPEInfo->listImports.count(); i++)
-    {
-        if(pPEInfo->listImports.at(i).sName.toUpper().contains(QRegExp("^MFC")))
-        {
-            QRegularExpression rxVersion("(\\d+)");
-            QRegularExpressionMatch matchVersion=rxVersion.match(pPEInfo->listImports.at(i).sName.toUpper());
-
-            if(matchVersion.hasMatch())
-            {
-                double dVersion=matchVersion.captured(0).toDouble()/10;
-
-                if(dVersion)
-                {
-                    result.sVersion=QString::number(dVersion,'f',2);
-                }
-            }
-        }
-    }
-
-    return result;
-}
-
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_VC_vi(QIODevice *pDevice,SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    Q_UNUSED(pDevice);
-    VI_STRUCT result;
-
-    for(int i=0; i<pPEInfo->listImports.count(); i++)
-    {
-        if(pPEInfo->listImports.at(i).sName.toUpper().contains(QRegExp("^MSVC")))
-        {
-            if(pPEInfo->listImports.at(i).sName.toUpper()=="MSVCRT.DLL")
-            {
-                result.sVersion="12.00";
-            }
-            else
-            {
-                QRegularExpression rxVersion("(\\d+)");
-                QRegularExpressionMatch matchVersion=rxVersion.match(pPEInfo->listImports.at(i).sName.toUpper());
-
-                if(matchVersion.hasMatch())
-                {
-                    double dVersion=matchVersion.captured(0).toDouble()/10;
-
-                    if(dVersion)
-                    {
-                        if(dVersion==7.00)
-                        {
-                            result.sVersion="13.00";
-                        }
-                        else if(dVersion==7.10)
-                        {
-                            result.sVersion="13.10";
-                        }
-                        else if(dVersion==8.00)
-                        {
-                            result.sVersion="14.00";
-                        }
-                        else if(dVersion==9.00)
-                        {
-                            result.sVersion="15.00";
-                        }
-                        else if(dVersion==10.00)
-                        {
-                            result.sVersion="16.00";
-                        }
-                        else if(dVersion==11.00)
-                        {
-                            result.sVersion="17.00";
-                        }
-                        else if(dVersion==12.00)
-                        {
-                            result.sVersion="18.00";
-                        }
-                        else if(dVersion==14.00)
-                        {
-                            result.sVersion="19.00";
-                        }
-                        else
-                        {
-                            result.sVersion=QString::number(dVersion,'f',2);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return result;
-}
-
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_BorlandCpp_vi(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    VI_STRUCT result;
-
-    QBinary binary(pDevice);
-
-    // TODO Offset
-    if(pPEInfo->nDataSectionSize)
-    {
-        qint64 nStringOffset=binary.find_ansiString(pPEInfo->nDataSectionOffset,pPEInfo->nDataSectionSize,"Borland C++ - Copyright ");
-
-        if(nStringOffset!=-1)
-        {
-            result.sVersion=binary.read_ansiString(nStringOffset+24,4);
-        }
-    }
-
-    return result;
-}
-
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_EmbarcaderoCpp_vi(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    VI_STRUCT result;
-
-    QBinary binary(pDevice);
-
-    // TODO Offset
-    if(pPEInfo->nDataSectionSize)
-    {
-        qint64 nStringOffset=binary.find_ansiString(pPEInfo->nDataSectionOffset,pPEInfo->nDataSectionSize,"Embarcadero RAD Studio - Copyright ");
-
-        if(nStringOffset!=-1)
-        {
-            result.sVersion=binary.read_ansiString(nStringOffset+35,4);
-        }
-    }
-
-    return result;
-}
-
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_CodegearCpp_vi(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    VI_STRUCT result;
-
-    QBinary binary(pDevice);
-
-    // TODO Offset
-    if(pPEInfo->nDataSectionSize)
-    {
-        qint64 nStringOffset=binary.find_ansiString(pPEInfo->nDataSectionOffset,pPEInfo->nDataSectionSize,"CodeGear C++ - Copyright ");
-
-        if(nStringOffset!=-1)
-        {
-            result.sVersion=binary.read_ansiString(nStringOffset+25,4);
-        }
-    }
-
-    return result;
-}
-
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_FlexLM_vi(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    VI_STRUCT result;
-
-    QBinary binary(pDevice);
-
-    // TODO Offset
-    qint64 nOffset=pPEInfo->mapDataSectionScanDetects.value(SpecAbstract::RECORD_NAME_FLEXLM).nOffset;
-
-    if(nOffset)
-    {
-        result.sVersion=binary.read_ansiString(nOffset+12,50);
-        result.sVersion=result.sVersion.section(" ",0,0);
-
-        if(result.sVersion.left(1)=="v")
-        {
-            result.sVersion.remove(0,1);
-        }
-    }
-
-    return result;
-}
-
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_FlexNet_vi(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
-{
-    VI_STRUCT result;
-
-    QBinary binary(pDevice);
-
-    // TODO Offset
-    qint64 nOffset=pPEInfo->mapDataSectionScanDetects.value(SpecAbstract::RECORD_NAME_FLEXNET).nOffset;
-
-    if(nOffset)
-    {
-        result.sVersion=binary.read_ansiString(nOffset+24,50);
-
-        if(result.sVersion.contains("build"))
-        {
-            result.sVersion=result.sVersion.section(" ",0,2);
-        }
-        else
-        {
-            result.sVersion=result.sVersion.section(" ",0,0);
-        }
-
-        //        if(result.sVersion.left(1)=="v")
-        //        {
-        //            result.sVersion.remove(0,1);
-        //        }
-    }
-
-    return result;
-}
-
 SpecAbstract::VI_STRUCT SpecAbstract::PE_get_GCC_vi(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
 {
     VI_STRUCT result;
@@ -5305,21 +4685,6 @@ bool SpecAbstract::PE_isValid_UPX(QIODevice *pDevice, SpecAbstract::PEINFO_STRUC
 
     return false;
 }
-
-//SpecAbstract::SCAN_STRUCT SpecAbstract::getScanStruct(QMap<RECORD_NAMES, SCANS_STRUCT> *pMapDetects, BASIC_INFO *pBasicInfo, SpecAbstract::RECORD_NAMES recordName)
-//{
-//    SpecAbstract::SCAN_STRUCT record={0};
-
-//    record.id=pBasicInfo->id;
-//    record.nSize=pBasicInfo->nSize;
-//    record.parentId=pBasicInfo->parentId;
-//    record.type=pMapDetects->value(recordName).type;
-//    record.name=pMapDetects->value(recordName).name;
-//    record.sVersion=pMapDetects->value(recordName).sVersion;
-//    record.sInfo=pMapDetects->value(recordName).sInfo;
-
-//    return record;
-//}
 
 SpecAbstract::SCAN_STRUCT SpecAbstract::scansToScan(SpecAbstract::BASIC_INFO *pBasicInfo, SpecAbstract::SCANS_STRUCT *pScansStruct)
 {
@@ -5680,7 +5045,7 @@ SpecAbstract::SCANS_STRUCT SpecAbstract::PE_getRichSignatureDescription(quint32 
             case 0x104:
                 result.type=SpecAbstract::RECORD_TYPE_COMPILER;
                 //            result.name=SpecAbstract::RECORD_NAME_MICROSOFTC;
-                result.name=SpecAbstract::RECORD_NAME_VISUALCPP; // TODO Visual C++
+                result.name=SpecAbstract::RECORD_NAME_VISUALCCPP; // TODO Visual C++
                 result.sInfo="C";
                 break;
 
@@ -5695,19 +5060,19 @@ SpecAbstract::SCANS_STRUCT SpecAbstract::PE_getRichSignatureDescription(quint32 
             case 0x0e1:
             case 0x105:
                 result.type=SpecAbstract::RECORD_TYPE_COMPILER;
-                result.name=SpecAbstract::RECORD_NAME_VISUALCPP;
+                result.name=SpecAbstract::RECORD_NAME_VISUALCCPP;
                 result.sInfo="C++";
                 break;
 
             case 0x089:
                 result.type=SpecAbstract::RECORD_TYPE_COMPILER;
-                result.name=SpecAbstract::RECORD_NAME_VISUALCPP;
+                result.name=SpecAbstract::RECORD_NAME_VISUALCCPP;
                 result.sInfo="C/LTCG";
                 break;
 
             case 0x08a:
                 result.type=SpecAbstract::RECORD_TYPE_COMPILER;
-                result.name=SpecAbstract::RECORD_NAME_VISUALCPP;
+                result.name=SpecAbstract::RECORD_NAME_VISUALCCPP;
                 result.sInfo="C++/LTCG";
                 break;
 
@@ -5753,7 +5118,7 @@ SpecAbstract::SCANS_STRUCT SpecAbstract::PE_getRichSignatureDescription(quint32 
             case 0x10b:
             case 0x10c:
                 result.type=SpecAbstract::RECORD_TYPE_COMPILER;
-                result.name=SpecAbstract::RECORD_NAME_VISUALCPP;
+                result.name=SpecAbstract::RECORD_NAME_VISUALCCPP;
                 break;
         }
 

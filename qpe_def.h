@@ -387,6 +387,7 @@ struct S_IMAGE_RESOURCE_DATA_ENTRY
 #define    S_RT_NEWBITMAP        (S_RT_BITMAP|S_RT_NEWRESOURCE)
 #define    S_RT_NEWMENU          (S_RT_MENU|S_RT_NEWRESOURCE)
 #define    S_RT_NEWDIALOG        (S_RT_DIALOG|S_RT_NEWRESOURCE)
+#define    S_RT_MANIFEST         24
 
 struct S_IMAGE_IMPORT_DESCRIPTOR
 {
@@ -630,6 +631,31 @@ enum S_ReplacesCorHdrNumericDefines
     //@todo: Change to unlimited name lengths.
     S_MAX_CLASS_NAME                      =1024,
     S_MAX_PACKAGE_NAME                    =1024,
+};
+
+
+struct S_VS_VERSION_INFO
+{
+    quint16 wLength;             /* Length of the version resource */
+    quint16 wValueLength;        /* Length of the value field for this block */
+    quint16 wType;
+};
+
+struct S__tagVS_FIXEDFILEINFO
+{
+    quint32 dwSignature;        // e.g.  0xfeef04bd
+    quint32 dwStrucVersion;     // e.g.  0x00000042 = "0.42"
+    quint32 dwFileVersionMS;    // e.g.  0x00030075 = "3.75"
+    quint32 dwFileVersionLS;    // e.g.  0x00000031 = "0.31"
+    quint32 dwProductVersionMS; // e.g.  0x00030010 = "3.10"
+    quint32 dwProductVersionLS; // e.g.  0x00000031 = "0.31"
+    quint32 dwFileFlagsMask;    // = 0x3F for version "0.42"
+    quint32 dwFileFlags;        // e.g.  VFF_DEBUG | VFF_PRERELEASE
+    quint32 dwFileOS;           // e.g.  VOS_DOS_WINDOWS16
+    quint32 dwFileType;         // e.g.  VFT_DRIVER
+    quint32 dwFileSubtype;      // e.g.  VFT2_DRV_KEYBOARD
+    quint32 dwFileDateMS;       // e.g.  0
+    quint32 dwFileDateLS;       // e.g.  0
 };
 
 #endif // QPE_DEF_H
