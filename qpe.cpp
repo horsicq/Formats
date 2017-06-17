@@ -20,7 +20,7 @@
 //
 #include "qpe.h"
 
-QPE::QPE(QIODevice *pData,bool bIsImage): QMSDOS(pData,bIsImage)
+QPE::QPE(QIODevice *__pDevice,bool bIsImage): QMSDOS(__pDevice,bIsImage)
 {
 }
 
@@ -3628,7 +3628,7 @@ QPE::CLI_INFO QPE::getCliInfo()
                         {
                             nBLOBIndexSize=4;
                         }
-
+                        // TODO !!!
                         if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[0]>0x3FFF)
                         {
                             nResolutionScope=4;

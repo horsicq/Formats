@@ -27,6 +27,7 @@
 #include <QElapsedTimer>
 #include <QUuid>
 #include "qpe.h"
+#include "qelf.h"
 
 class SpecAbstract : public QObject
 {
@@ -40,6 +41,9 @@ public:
         RECORD_FILETYPE_PE,
         RECORD_FILETYPE_PE32,
         RECORD_FILETYPE_PE64,
+        RECORD_FILETYPE_ELF,
+        RECORD_FILETYPE_ELF32,
+        RECORD_FILETYPE_ELF64,
         RECORD_FILETYPE_TEXT
     };
     enum RECORD_FILEPARTS
@@ -241,6 +245,11 @@ public:
         RECORD_NAME_YANO,
         RECORD_NAME_YODASCRYPTER,
         RECORD_NAME_ZIP,
+        RECORD_NAME_MACROBJECT,
+        RECORD_NAME_SOFTWAREZATOR,
+        RECORD_NAME_LAZARUS,
+        RECORD_NAME_GOLINK,
+        RECORD_NAME_GOASM
     };
 
     struct ID
@@ -335,6 +344,14 @@ public:
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultProtectorData;
     };
 
+    struct ELFINFO_STRUCT
+    {
+        BASIC_INFO basic_info;
+        QString sEntryPointSignature;
+        // TODO
+        bool bIs64;
+    };
+
 
     struct PEINFO_STRUCT
     {
@@ -361,7 +378,7 @@ public:
 
         QMap<RECORD_NAMES,SCANS_STRUCT> mapCodeSectionScanDetects; // Obsolete
         QMap<RECORD_NAMES,SCANS_STRUCT> mapDataSectionScanDetects; // Obsolete
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapHeaderScanDetects; // Obsolete
+//        QMap<RECORD_NAMES,SCANS_STRUCT> mapHeaderScanDetects; // Obsolete
         QMap<RECORD_NAMES,SCANS_STRUCT> mapOverlayDetects;
         QMap<RECORD_NAMES,SCANS_STRUCT> mapEntryPointDetects;
         QMap<RECORD_NAMES,SCANS_STRUCT> mapImportDetects;
@@ -379,6 +396,8 @@ public:
         qint32 nCodeSection;
         qint32 nDataSection;
         qint32 nConstDataSection;
+        qint32 nRelocsSection;
+        qint32 nTLSSection;
 
         QString sEntryPointSectionName;
 
@@ -518,19 +537,22 @@ public:
     static QString recordTypeIdToString(RECORD_TYPES id);
     static QString recordNameIdToString(RECORD_NAMES id);
 
-    static QList<SCAN_STRUCT> scanBinary(QBinary *pBinary,SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId); // Obsolete
-    static QList<SCAN_STRUCT> scanPE(QPE *pPE,SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId); // Obsolete
+//    static QList<SCAN_STRUCT> scanBinary(QBinary *pBinary,SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId); // Obsolete
+//    static QList<SCAN_STRUCT> scanPE(QPE *pPE,SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId); // Obsolete
     virtual bool unpack(UNPACK_OPTIONS *pUnpOptions,QIODevice *pDevice,QString sOutFileName);
 
     static SpecAbstract::UNPACK_OPTIONS getPossibleUnpackOptions(QIODevice *pDevice);
 
     static QString createResultString(const SCAN_STRUCT *pScanStruct);
     static QString createResultString2(const SCAN_STRUCT *pScanStruct);
+    static QString createFullResultString(const SCAN_STRUCT *pScanStruct);
+    static QString createFullResultString2(const SCAN_STRUCT *pScanStruct);
     static QString createTypeString(const SCAN_STRUCT *pScanStruct);
 
     static QString findEnigmaVersion(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
     static BINARYINFO_STRUCT getBinaryInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
+    static ELFINFO_STRUCT getELFInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
     static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
 
 
@@ -540,6 +562,7 @@ public:
 
     static void PE_handle_import(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_protection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_VMProtect(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_NETProtection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_libraries(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Microsoft(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
@@ -555,9 +578,6 @@ public:
     static void Binary_handle_Formats(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_InstallerData(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_ProtectorData(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
-
-    static void handle(PEINFO_STRUCT *pPEInfo,RECORD_NAMES name,RESULT_PRIOS prio0,RESULT_PRIOS prio1=RESULT_PRIO_UNKNOWN,RESULT_PRIOS prio2=RESULT_PRIO_UNKNOWN);
-    static QMap<RECORD_NAMES,SCANS_STRUCT> *getDetectsMap(PEINFO_STRUCT *pPEInfo,RESULT_PRIOS prio);
 
     static void updateVersion(QMap<RECORD_NAMES,SCAN_STRUCT> *map,RECORD_NAMES name,QString sVersion);
     static void updateInfo(QMap<RECORD_NAMES,SCAN_STRUCT> *map,RECORD_NAMES name,QString sInfo);

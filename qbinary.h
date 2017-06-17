@@ -39,6 +39,7 @@
 
 #include "qmsdos_def.h"
 #include "qpe_def.h"
+#include "qelf_def.h"
 
 #include "subdevice.h"
 
@@ -75,7 +76,9 @@ public:
         FILE_TYPE_BINARY,
         FILE_TYPE_MSDOS,
         FILE_TYPE_PE32,
-        FILE_TYPE_PE64
+        FILE_TYPE_PE64,
+        FILE_TYPE_ELF32,
+        FILE_TYPE_ELF64
     };
     struct UNPACK_OPTIONS
     {

@@ -1374,23 +1374,23 @@ QSet<QBinary::FILE_TYPES> QBinary::getFileTypes()
         }
     }
 
-    //    if(nSize>=(int)sizeof(Elf32_Ehdr))
-    //    {
-    //        if((((Elf32_Ehdr *)pOffset)->e_ident[0] == 0x7f) &&
-    //                (((Elf32_Ehdr *)pOffset)->e_ident[1] == 'E') &&
-    //                (((Elf32_Ehdr *)pOffset)->e_ident[2] == 'L') &&
-    //                (((Elf32_Ehdr *)pOffset)->e_ident[3] == 'F'))
-    //        {
-    //            if(((Elf32_Ehdr *)pOffset)->e_ident[4] == 1)
-    //            {
-    //                listResult.append(QString("ELF"));
-    //            }
-    //            else if(((Elf32_Ehdr *)pOffset)->e_ident[4] == 2)
-    //            {
-    //                listResult.append(QString("ELF64"));
-    //            }
-    //        }
-    //    }
+    if(nSize>=(int)sizeof(Elf32_Ehdr))
+    {
+        if((((Elf32_Ehdr *)pOffset)->e_ident[0] == 0x7f) &&
+                (((Elf32_Ehdr *)pOffset)->e_ident[1] == 'E') &&
+                (((Elf32_Ehdr *)pOffset)->e_ident[2] == 'L') &&
+                (((Elf32_Ehdr *)pOffset)->e_ident[3] == 'F'))
+        {
+            if(((Elf32_Ehdr *)pOffset)->e_ident[4] == 1)
+            {
+                setResult.insert(FILE_TYPE_ELF32);
+            }
+            else if(((Elf32_Ehdr *)pOffset)->e_ident[4] == 2)
+            {
+                setResult.insert(FILE_TYPE_ELF64);
+            }
+        }
+    }
 
     //    if(nSize>=(int)sizeof(mach_header))
     //    {
