@@ -68,6 +68,7 @@ public:
         RECORD_TYPE_CERTIFICATE,
         RECORD_TYPE_DEBUGDATA,
         RECORD_TYPE_INSTALLERDATA,
+        RECORD_TYPE_SFXDATA,
         RECORD_TYPE_SFX,
         RECORD_TYPE_NETOBFUSCATOR
     };
@@ -249,7 +250,11 @@ public:
         RECORD_NAME_SOFTWAREZATOR,
         RECORD_NAME_LAZARUS,
         RECORD_NAME_GOLINK,
-        RECORD_NAME_GOASM
+        RECORD_NAME_GOASM,
+        RECORD_NAME_WXWIDGETS,
+        RECORD_NAME_SQUEEZSFX,
+        RECORD_NAME_PECOMPACT,
+        RECORD_NAME_QTINSTALLER
     };
 
     struct ID
@@ -340,8 +345,15 @@ public:
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultCertificates;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultDebugData;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultInstallerData;
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultSFXData;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultFormats;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultProtectorData;
+    };
+
+    struct MSDOSINFO_STRUCT
+    {
+        BASIC_INFO basic_info;
+        QString sEntryPointSignature;
     };
 
     struct ELFINFO_STRUCT
@@ -437,6 +449,7 @@ public:
     {
         //        bool bEmulate;
         bool bScanOverlay;
+        bool bResultAsXML;
     };
 
     struct UNPACK_OPTIONS
@@ -506,24 +519,6 @@ public:
         QList<VCL_PACKAGEINFO_MODULE> listModules;
     };
 
-    enum RESULT_PRIOS
-    {
-        RESULT_PRIO_UNKNOWN=0,
-        RESULT_PRIO_CODESECTIONSCAN,
-        RESULT_PRIO_DATASECTIONSCAN,
-        RESULT_PRIO_HEADERSCAN,
-        RESULT_PRIO_HEADER,
-        RESULT_PRIO_OVERLAY,
-        RESULT_PRIO_ENTRYPOINT,
-        RESULT_PRIO_IMPORT,
-        RESULT_PRIO_EXPORT,
-        RESULT_PRIO_RICH,
-        RESULT_PRIO_RESOURCES,
-        RESULT_PRIO_DOTANSISTRINGS,
-        RESULT_PRIO_DOTUNICODESTRINGS,
-        RESULT_PRIO_SPECIAL
-    };
-
     struct VI_STRUCT
     {
         QString sVersion;
@@ -552,9 +547,9 @@ public:
     static QString findEnigmaVersion(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
     static BINARYINFO_STRUCT getBinaryInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
+    static MSDOSINFO_STRUCT getMSDOSInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
     static ELFINFO_STRUCT getELFInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
     static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
-
 
 //    static void PE_handle_Rich(PEINFO_STRUCT *pPEInfo);
 
@@ -577,6 +572,7 @@ public:
     static void Binary_handle_DebugData(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_Formats(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_InstallerData(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
+    static void Binary_handle_SFXData(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_ProtectorData(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
 
     static void updateVersion(QMap<RECORD_NAMES,SCAN_STRUCT> *map,RECORD_NAMES name,QString sVersion);

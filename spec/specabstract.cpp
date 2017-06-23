@@ -50,6 +50,13 @@ SpecAbstract::SIGNATURE_RECORD _binary_records[]=
     {1, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_FISHNET,                      "1.X",          "",                     "000800'FISH_NET'0100"},
     {2, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_FISHNET,                      "1.X",          "",                     "00000800'FISH_NET'0100"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_SMARTINSTALLMAKER,            "",             "",                     "'Smart Install Maker v'"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_TARMAINSTALLER,               "",             "zlib",                 "'tiz1'........78da'"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_CLICKTEAM,                    "",             "",                     "'wwgT)'"},
+    {1, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_CLICKTEAM,                    "",             "",                     "..120100....0000"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_SFXDATA,          SpecAbstract::RECORD_NAME_WINRAR,                       "",             "",                     "'***messages***'"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_SFXDATA,          SpecAbstract::RECORD_NAME_SQUEEZSFX,                    "",             "",                     "'SQ5SFX'"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_SFXDATA,          SpecAbstract::RECORD_NAME_7Z,                           "",             "",                     "';!@Install@!UTF-8!'"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_QTINSTALLER,                  "",             "",                     "'qres'"},
 };
 
 SpecAbstract::SIGNATURE_RECORD _PE_header_records[]=
@@ -96,6 +103,7 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_ALEXPROTECTOR,                "1.0",          "",                     "60E8000000005D81ED........E8"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_ALLOY,                        "4.X",          "",                     "9C60E8........33C08BC483C0..938BE3"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_COMPILER,         SpecAbstract::RECORD_NAME_GCC,                          "3.X-4.X",      "MinGW",                "5589E583EC08C70424..000000FF15........E8....FFFF................55"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_PECOMPACT,                    "0.X-1.X",      "",                     "EB0668........C39C60"},
 
 };
 
@@ -198,6 +206,7 @@ QString SpecAbstract::recordTypeIdToString(RECORD_TYPES id)
         case RECORD_TYPE_CERTIFICATE:                       sResult=tr("Certificate"); break;
         case RECORD_TYPE_DEBUGDATA:                         sResult=tr("Debug data"); break;
         case RECORD_TYPE_INSTALLERDATA:                     sResult=tr("Installer data"); break;
+        case RECORD_TYPE_SFXDATA:                           sResult=tr("SFX data"); break;
         case RECORD_TYPE_SFX:                               sResult=tr("SFX"); break;
         case RECORD_TYPE_NETOBFUSCATOR:                     sResult=tr(".NET Obfuscator"); break;
     }
@@ -386,6 +395,10 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_LAZARUS:                           sResult=QString("Lazarus"); break;
         case RECORD_NAME_GOASM:                             sResult=QString("GoAsm"); break;
         case RECORD_NAME_GOLINK:                            sResult=QString("GoLink"); break;
+        case RECORD_NAME_WXWIDGETS:                         sResult=QString("wxWidgets"); break;
+        case RECORD_NAME_SQUEEZSFX:                         sResult=QString("Squeez Self Extractor"); break;
+        case RECORD_NAME_PECOMPACT:                         sResult=QString("PECompact"); break;
+        case RECORD_NAME_QTINSTALLER:                       sResult=QString("Qt Installer"); break;
     }
 
     return sResult;
@@ -557,6 +570,7 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
     Binary_handle_Certificates(pDevice,&result);
     Binary_handle_DebugData(pDevice,&result);
     Binary_handle_InstallerData(pDevice,&result);
+    Binary_handle_SFXData(pDevice,&result);
     Binary_handle_ProtectorData(pDevice,&result);
 
 
@@ -566,7 +580,43 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
     result.basic_info.listDetects.append(result.mapResultDebugData.values());
     result.basic_info.listDetects.append(result.mapResultFormats.values());
     result.basic_info.listDetects.append(result.mapResultInstallerData.values());
+    result.basic_info.listDetects.append(result.mapResultSFXData.values());
     result.basic_info.listDetects.append(result.mapResultProtectorData.values());
+
+    if(!result.basic_info.listDetects.count())
+    {
+        SCANS_STRUCT ssUnknown= {0};
+
+        ssUnknown.type=SpecAbstract::RECORD_TYPE_UNKNOWN;
+        ssUnknown.name=SpecAbstract::RECORD_NAME_UNKNOWN;
+
+        result.basic_info.listDetects.append(scansToScan(&(result.basic_info),&ssUnknown));
+    }
+
+    result.basic_info.nElapsedTime=timer.elapsed();
+
+    return result;
+}
+
+SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, SpecAbstract::ID parentId)
+{
+    QElapsedTimer timer;
+    timer.start();
+
+    MSDOSINFO_STRUCT result= {0};
+
+    QMSDOS msdos(pDevice);
+
+    result.basic_info.parentId=parentId;
+    result.basic_info.id.filetype=RECORD_FILETYPE_MSDOS;
+    result.basic_info.id.filepart=RECORD_FILEPART_HEADER;
+    result.basic_info.id.uuid=QUuid::createUuid();
+    result.basic_info.nOffset=0;
+    result.basic_info.nSize=pDevice->size();
+    result.basic_info.sHeaderSignature=msdos.getSignature(0,150);
+
+    // TODO
+    // TODO EntryPoint Signature
 
     if(!result.basic_info.listDetects.count())
     {
@@ -903,6 +953,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                 {
                     stDetects.insert("kernel32_upx0exe");   // 0.59-0.93
                     stDetects.insert("kernel32_upx1dll");
+                    stDetects.insert("kernel32_pecompact3");
 
                     if(pPEInfo->listImports.count()==1)
                     {
@@ -915,11 +966,12 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
             }
             else if(pPEInfo->listImports.at(0).listPositions.count()==3)
             {
-                if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                if(     (pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="ExitProcess"))
                 {
                     stDetects.insert("kernel32_upx1exe");   // 0.94-1.93
+                    stDetects.insert("kernel32_pecompact2");
                 }
                 else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
@@ -938,7 +990,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
             }
             else if(pPEInfo->listImports.at(0).listPositions.count()==4)
             {
-                if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                if(     (pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualProtect")&&
                         (pPEInfo->listImports.at(0).listPositions.at(3).sName=="ExitProcess"))
@@ -961,6 +1013,13 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                 }
                 else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(2).sName=="GlobalAlloc")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(3).sName=="ExitProcess"))
+                {
+                    stDetects.insert("kernel32_pecompact0");
+                }
+                else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualAlloc")&&
                         (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualFree"))
                 {
@@ -968,11 +1027,12 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                     {
                         stDetects.insert("kernel32_32lite");
                     }
+                    stDetects.insert("kernel32_pecompactx");
                 }
             }
             else if(pPEInfo->listImports.at(0).listPositions.count()==5)
             {
-                if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                if(     (pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualProtect")&&
                         (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualAlloc")&&
@@ -991,10 +1051,26 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         stDetects.insert("kernel32_pex");
                     }
                 }
+                else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(2).sName=="GlobalAlloc")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(3).sName=="ExitProcess")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(4).sName=="GlobalFree"))
+                {
+                    stDetects.insert("kernel32_pecompact1");
+                }
+                else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualAlloc")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualFree")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(4).sName=="ExitProcess"))
+                {
+                    stDetects.insert("kernel32_pecompact4");
+                }
             }
             else if(pPEInfo->listImports.at(0).listPositions.count()==6)
             {
-                if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                if(     (pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualProtect")&&
                         (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualAlloc")&&
@@ -1013,10 +1089,33 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                 {
                     stDetects.insert("kernel32_enigma1");
                 }
+                else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualAlloc")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualFree")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(4).sName=="ExitProcess")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(5).sName=="GetModuleHandleA"))
+                {
+                    stDetects.insert("kernel32_pecompact6");
+                }
+            }
+            else if(pPEInfo->listImports.at(0).listPositions.count()==8)
+            {
+                if( (pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                    (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
+                    (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualAlloc")&&
+                    (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualFree")&&
+                    (pPEInfo->listImports.at(0).listPositions.at(4).sName=="ExitProcess")&&
+                    (pPEInfo->listImports.at(0).listPositions.at(5).sName=="FreeLibrary")&&
+                    (pPEInfo->listImports.at(0).listPositions.at(6).sName=="GetModuleHandleA")&&
+                    (pPEInfo->listImports.at(0).listPositions.at(7).sName=="GetModuleFileNameA"))
+                    {
+                        stDetects.insert("kernel32_pecompact5");
+                    }
             }
             else if(pPEInfo->listImports.at(0).listPositions.count()==13)
             {
-                if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                if(     (pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualAlloc")&&
                         (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualFree")&&
@@ -1038,7 +1137,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
             }
             else if(pPEInfo->listImports.at(0).listPositions.count()==14)
             {
-                if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                if(     (pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualAlloc")&&
                         (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualFree")&&
@@ -1081,7 +1180,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
             }
             else if(pPEInfo->listImports.at(0).listPositions.count()==15)
             {
-                if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                if(     (pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualAlloc")&&
                         (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualFree")&&
@@ -1220,6 +1319,52 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
         pPEInfo->mapImportDetects.insert(RECORD_NAME_DYAMAR,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_DYAMAR,"1.3.5","",0));
     }
 
+    if(stDetects.contains("kernel32_pecompact0"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"0.90","",0));
+    }
+
+    if(stDetects.contains("kernel32_pecompact1"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"0.92-0.94","",0));
+    }
+
+    if(stDetects.contains("kernel32_pecompact2"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"0.97-0.971b","",0));
+    }
+
+    if(stDetects.contains("kernel32_pecompact3"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"0.975-1.10b3","",0));
+    }
+
+    if(stDetects.contains("kernel32_pecompact4"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"1.10b7-1.25","",0));
+    }
+
+    if(stDetects.contains("kernel32_pecompact5"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"1.30-1.40","",0));
+    }
+
+    if(stDetects.contains("kernel32_pecompact6"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"1.41-1.84","",0));
+    }
+
+
+    if(stDetects.contains("kernel32_pecompactx"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(1,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"2.40-3.X","",0));
+    }
+
+//    if(stDetects.contains("kernel32_pecompact2"))
+//    {
+//        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"2.X","",0));
+//    }
+
 
     if(stDetects.contains("kernel32_upx0exe")||
             stDetects.contains("kernel32_upx1dll"))
@@ -1303,6 +1448,100 @@ void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO
 
                     pPEInfo->mapResultPackers.insert(recordUPX.name,scansToScan(&(pPEInfo->basic_info),&recordUPX));
                 }
+            }
+
+            // PECompact
+
+            if(pPEInfo->mapImportDetects.contains(RECORD_NAME_PECOMPACT))
+            {
+                SpecAbstract::SCANS_STRUCT recordPC=pPEInfo->mapImportDetects.value(RECORD_NAME_PECOMPACT);
+
+                if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_PECOMPACT))
+                {
+                    if(recordPC.nVariant==1)
+                    {
+                        recordPC.sVersion="1.10b4-1.10b5";
+                    }
+
+                    pPEInfo->mapResultPackers.insert(recordPC.name,scansToScan(&(pPEInfo->basic_info),&recordPC));
+                }
+                else
+                {
+                    if(pPEInfo->listSections.count()>=2)
+                    {
+                        if(pPEInfo->listSections.at(0).PointerToRelocations==0x32434550)
+                        {
+                            quint32 nVersion=pPEInfo->listSections.at(0).PointerToLinenumbers;
+
+                            // TODO !!! more buil versions
+                            switch(nVersion)
+                            {
+                            case 20206:
+                                recordPC.sVersion="2.70";
+                                break;
+                            case 20240:
+                                recordPC.sVersion="2.78a";
+                                break;
+                            case 20243:
+                                recordPC.sVersion="2.79b1";
+                                break;
+                            case 20245:
+                                recordPC.sVersion="2.79bB";
+                                break;
+                            case 20247:
+                                recordPC.sVersion="2.79bD";
+                                break;
+                            case 20256:
+                                recordPC.sVersion="2.80b5";
+                                break;
+                            case 20288:
+                                recordPC.sVersion="2.93b3";
+                                break;
+                            case 20294:
+                                recordPC.sVersion="2.96.2";
+                                break;
+                            case 20295:
+                                recordPC.sVersion="2.97b1";
+                                break;
+                            case 20300:
+                                recordPC.sVersion="2.98.04";
+                                break;
+                            case 20302:
+                                recordPC.sVersion="2.98.06";
+                                break;
+                            case 20308:
+                                recordPC.sVersion="3.00.2";
+                                break;
+                            case 20318:
+                                recordPC.sVersion="3.02.2";
+                                break;
+//                            case 20343:
+//                                recordPC.sVersion="TODO";
+//                                break;
+                            default:
+                                {
+                                    if(nVersion>20308)
+                                    {
+                                        recordPC.sVersion=QString("3.X(build %1)").arg(nVersion);
+                                    }
+                                    else if(nVersion==0)
+                                    {
+                                        recordPC.sVersion="2.20-2.68";
+                                    }
+                                    else
+                                    {
+                                        recordPC.sVersion=QString("2.X(build %1)").arg(nVersion);
+                                    }
+                                }
+                            }
+//                            qDebug("nVersion: %d",nVersion);
+
+                            // TODO more versions
+                            pPEInfo->mapResultPackers.insert(recordPC.name,scansToScan(&(pPEInfo->basic_info),&recordPC));
+                        }
+                    }
+                }
+
             }
 
             // ENIGMA
@@ -1843,9 +2082,10 @@ void SpecAbstract::PE_handle_VMProtect(QIODevice *pDevice, SpecAbstract::PEINFO_
     {
         if(!pPEInfo->cliInfo.bInit)
         {
+            bool bSuccess=true;
+
             if(pPEInfo->nEntryPointSection>=3)
             {
-                bool bSuccess=true;
                 for(int i=0;i<pPEInfo->listSections.count();i++)
                 {
                     if(     (i==pPEInfo->nEntryPointSection)||
@@ -1873,6 +2113,11 @@ void SpecAbstract::PE_handle_VMProtect(QIODevice *pDevice, SpecAbstract::PEINFO_
                         pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
                     }
                 }
+            }
+
+            if(!bSuccess)
+            {
+                // TODO
             }
         }
     }
@@ -3277,6 +3522,15 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                     pPEInfo->mapResultCompilers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
                 }
             }
+
+            // wxWidgets
+            if(QPE::isResourcePresent(S_RT_MENU,"WXWINDOWMENU",&(pPEInfo->listResources)))
+            {
+                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_LIBRARY,RECORD_NAME_WXWIDGETS,"","",0);
+                // TODO Version???
+                ss.sInfo="Static";
+                pPEInfo->mapResultLibraries.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
         }
 
         if(pPEInfo->mapResultCompilers.contains(RECORD_NAME_GCC))
@@ -3471,6 +3725,8 @@ void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO
                 }
             }
 
+
+
             if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_GHOSTINSTALLER))
             {
                 SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_GHOSTINSTALLER,"","",0);
@@ -3478,15 +3734,35 @@ void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO
                 pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
+            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_QTINSTALLER))
+            {
+                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_QTINSTALLER,"","",0);
+                pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
             if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_SMARTINSTALLMAKER))
             {
-                SCANS_STRUCT ss=pPEInfo->mapOverlayDetects.value(RECORD_NAME_SMARTINSTALLMAKER);
+                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_SMARTINSTALLMAKER,"","",0);
                 ss.sVersion=QBinary::hexToString(pPEInfo->sOverlaySignature.mid(46,14)); // TODO make 1 function
                 pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
+            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_TARMAINSTALLER))
+            {
+                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_TARMAINSTALLER,"","",0);
+                // TODO version
+                pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
+            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_CLICKTEAM))
+            {
+                SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_CLICKTEAM,"","",0);
+                // TODO version
+                pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
             // NSIS
-            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_NSIS))
+            if((pPEInfo->mapOverlayDetects.contains(RECORD_NAME_NSIS))||(pPEInfo->sResourceManifest.contains("Nullsoft.NSIS")))
             {
                 SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_NSIS,"","",0);
 
@@ -3601,12 +3877,33 @@ void SpecAbstract::PE_handle_SFX(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT
                 }
             }
 
+            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_WINRAR))
+            {
+                if(pPEInfo->sResourceManifest.contains("WinRAR"))
+                {
+                    SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_SFX,RECORD_NAME_WINRAR,"","",0);
+                    // TODO Version
+                    pPEInfo->mapResultSFX.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                }
+            }
+
             // 7z SFX
             if(QPE::getResourceVersionValue("ProductName",&(pPEInfo->resVersion)).contains("7-Zip"))
             {
                 SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_SFX,RECORD_NAME_7Z,"","",0);
                 ss.sVersion=QPE::getResourceVersionValue("ProductVersion",&(pPEInfo->resVersion));
                 pPEInfo->mapResultSFX.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
+            // SQUEEZ SFX
+            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_SQUEEZSFX))
+            {
+                if(QPE::getResourceVersionValue("ProductName",&(pPEInfo->resVersion)).contains("Squeez"))
+                {
+                    SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_SQUEEZSFX,"","",0);
+                    ss.sVersion=QPE::getResourceVersionValue("FileVersion",&(pPEInfo->resVersion)).trimmed();
+                    pPEInfo->mapResultSFX.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                }
             }
         }
     }
@@ -3638,8 +3935,11 @@ void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice, SpecAbstract::BINA
     {
         // TODO more options
         SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_7Z);
-        ss.sVersion=QString("%1.%2").arg(QBinary::hexToUint8(pBinaryInfo->basic_info.sHeaderSignature.mid(6*2,2))).arg(QBinary::hexToUint8(pBinaryInfo->basic_info.sHeaderSignature.mid(7*2,2)));
-        pBinaryInfo->mapResultArchives.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+        if(ss.type==RECORD_TYPE_ARCHIVE)
+        {
+            ss.sVersion=QString("%1.%2").arg(QBinary::hexToUint8(pBinaryInfo->basic_info.sHeaderSignature.mid(6*2,2))).arg(QBinary::hexToUint8(pBinaryInfo->basic_info.sHeaderSignature.mid(7*2,2)));
+            pBinaryInfo->mapResultArchives.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+        }
     }
     // ZIP
     else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_ZIP))&&(pBinaryInfo->basic_info.nSize>=64)) // TODO min size
@@ -3763,6 +4063,45 @@ void SpecAbstract::Binary_handle_InstallerData(QIODevice *pDevice, SpecAbstract:
         SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_SMARTINSTALLMAKER);
         ss.sVersion=QBinary::hexToString(pBinaryInfo->basic_info.sHeaderSignature.mid(46,14));
         pBinaryInfo->mapResultInstallerData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_TARMAINSTALLER))&&(pBinaryInfo->basic_info.nSize>=20))
+    {
+        SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_TARMAINSTALLER);
+        pBinaryInfo->mapResultInstallerData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_CLICKTEAM))&&(pBinaryInfo->basic_info.nSize>=20))
+    {
+        SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_CLICKTEAM);
+        pBinaryInfo->mapResultInstallerData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_QTINSTALLER))&&(pBinaryInfo->basic_info.nSize>=20))
+    {
+        SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_QTINSTALLER);
+        pBinaryInfo->mapResultInstallerData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+}
+
+void SpecAbstract::Binary_handle_SFXData(QIODevice *pDevice, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+{
+    QBinary binary(pDevice);
+
+    if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_WINRAR))&&(pBinaryInfo->basic_info.nSize>=20))
+    {
+        SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_WINRAR);
+        pBinaryInfo->mapResultSFXData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_SQUEEZSFX))&&(pBinaryInfo->basic_info.nSize>=20))
+    {
+        SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_SQUEEZSFX);
+        pBinaryInfo->mapResultSFXData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_7Z))&&(pBinaryInfo->basic_info.nSize>=20))
+    {
+        SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_7Z);
+        if(ss.type==RECORD_TYPE_SFXDATA)
+        {
+            pBinaryInfo->mapResultSFXData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+        }
     }
 }
 
