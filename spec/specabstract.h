@@ -199,7 +199,7 @@ public:
         RECORD_NAME_PESPIN,
         RECORD_NAME_PETITE,
         RECORD_NAME_PEX,
-        RECORD_NAME_PHOENIX,
+        RECORD_NAME_PHOENIXPROTECTOR,
         RECORD_NAME_PKLITE32,
         RECORD_NAME_PLAIN,
         RECORD_NAME_POLYCRYPTPE,
@@ -254,7 +254,10 @@ public:
         RECORD_NAME_WXWIDGETS,
         RECORD_NAME_SQUEEZSFX,
         RECORD_NAME_PECOMPACT,
-        RECORD_NAME_QTINSTALLER
+        RECORD_NAME_QTINSTALLER,
+        RECORD_NAME_DOTNETZ,
+        RECORD_NAME_CEXE,
+        RECORD_NAME_LAYHEYFORTRAN90
     };
 
     struct ID
@@ -378,7 +381,8 @@ public:
             S_IMAGE_OPTIONAL_HEADER32 optionalHeader32;
             S_IMAGE_OPTIONAL_HEADER64 optionalHeader64;
         } optional_header;
-        QList<S_IMAGE_SECTION_HEADER> listSections;
+        QList<S_IMAGE_SECTION_HEADER> listSectionHeaders;
+        QList<QPE::SECTION_RECORD> listSectionRecords;
         QList<QPE::IMPORT_HEADER> listImports;
         QPE::EXPORT_HEADER export_header;
         QList<QPE::RESOURCE_HEADER> listResources;
@@ -558,6 +562,7 @@ public:
     static void PE_handle_import(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_protection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_VMProtect(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_Armadillo(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_NETProtection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_libraries(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Microsoft(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
@@ -583,6 +588,7 @@ public:
 
     static bool checkVersionString(QString sVersion);
     static VI_STRUCT PE_get_UPX_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static VI_STRUCT PE_get_Armadillo_vi(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static VI_STRUCT PE_get_GCC_vi(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
     static bool PE_isValid_UPX(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);

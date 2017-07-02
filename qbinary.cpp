@@ -720,6 +720,11 @@ qint64 QBinary::find_ansiString(qint64 nOffset, qint64 nSize, QString sString)
     return find_array(nOffset,nSize,sString.toLatin1().data(),sString.size());
 }
 
+qint64 QBinary::find_unicodeString(qint64 nOffset, qint64 nSize, QString sString)
+{
+    return find_array(nOffset,nSize,(char *)sString.utf16(),sString.size()*2);
+}
+
 qint64 QBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
 {
     // TODO too slow

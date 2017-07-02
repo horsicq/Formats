@@ -162,6 +162,7 @@ public:
     qint64 find_uint64(qint64 nOffset,qint64 nSize,qint64 value,bool bIsBigEndian=false);
     qint64 find_int64(qint64 nOffset,qint64 nSize,qint64 value,bool bIsBigEndian=false);
     qint64 find_ansiString(qint64 nOffset,qint64 nSize,QString sString);
+    qint64 find_unicodeString(qint64 nOffset,qint64 nSize,QString sString); // mb TODO endian
     qint64 find_signature(qint64 nOffset,qint64 nSize,QString sSignature);
 
     static bool createFile(QString sFileName,qint64 nFileSize=0);

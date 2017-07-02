@@ -28,6 +28,15 @@
 class QPE : public QMSDOS
 {
 public:
+
+    struct SECTION_RECORD
+    {
+        QString sName;
+        qint64 nOffset;
+        qint64 nSize;
+        qint64 nCharacteristics;
+    };
+
     struct IMPORT_RECORD
     {
         qint64 nOffset;
@@ -123,6 +132,7 @@ public:
     struct CLI_INFO
     {
         bool bInit;
+        bool bHidden;
         qint64 nCLIHeaderOffset;
         S_IMAGE_COR20_HEADER header;
 
@@ -299,6 +309,7 @@ public:
     void setSectionHeader(quint32 nNumber,S_IMAGE_SECTION_HEADER *pSectionHeader);
 
     QList<S_IMAGE_SECTION_HEADER> getSectionHeaders();
+    static QList<SECTION_RECORD> getSectionRecords(QList<S_IMAGE_SECTION_HEADER> *pList,bool bIsImage);
 
     QString getSection_NameAsString(quint32 nNumber);
     quint32 getSection_VirtualSize(quint32 nNumber);
@@ -449,7 +460,7 @@ public:
     bool isDll();
 
     bool isNETPresent();
-    CLI_INFO getCliInfo();
+    CLI_INFO getCliInfo(bool bFindHidden);
 
     static bool isNETAnsiStringPresent(QString sString,CLI_INFO *pCliInfo);
 

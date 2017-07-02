@@ -926,6 +926,37 @@ QList<S_IMAGE_SECTION_HEADER> QPE::getSectionHeaders()
     return listResult;
 }
 
+QList<QPE::SECTION_RECORD> QPE::getSectionRecords(QList<S_IMAGE_SECTION_HEADER> *pList, bool bIsImage)
+{
+     QList<QPE::SECTION_RECORD> listResult;
+
+     quint32 nNumberOfSections=pList->count();
+
+     for(int i=0; i<nNumberOfSections; i++)
+     {
+         QPE::SECTION_RECORD record= {0};
+
+         record.sName=QString((char *)pList->at(i).Name);
+         record.sName.resize(qMin(record.sName.length(),S_IMAGE_SIZEOF_SHORT_NAME));
+
+         if(bIsImage)
+         {
+             record.nOffset=pList->at(i).VirtualAddress;
+         }
+         else
+         {
+             record.nOffset=pList->at(i).PointerToRawData;
+         }
+
+         record.nSize=pList->at(i).SizeOfRawData;
+         record.nCharacteristics=pList->at(i).Characteristics;
+
+         listResult.append(record);
+     }
+
+     return listResult;
+}
+
 QString QPE::getSection_NameAsString(quint32 nNumber)
 {
     QString sResult;
@@ -3436,327 +3467,338 @@ bool QPE::isNETPresent()
     return isOptionalHeader_DataDirectoryPresent(S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 }
 
-QPE::CLI_INFO QPE::getCliInfo()
+
+QPE::CLI_INFO QPE::getCliInfo(bool bFindHidden)
 {
     CLI_INFO result= {0};
 
-    if(isNETPresent())
+    if(isNETPresent()||bFindHidden)
     {
         QList<MEMORY_MAP> listMM=getMemoryMapList();
         qint64 nBaseAddress=getBaseAddress();
 
-        result.nEntryPointSize=0;
-
-
-        S_IMAGE_DATA_DIRECTORY _idd=getOptionalHeader_DataDirectory(S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
-        result.nCLIHeaderOffset=addressToOffset(&listMM,nBaseAddress+_idd.VirtualAddress);
-
-        read_array(result.nCLIHeaderOffset,(char *)&(result.header),sizeof(S_IMAGE_COR20_HEADER));
-
-
-        result.nEntryPoint=result.header.EntryPointRVA;
-
-        if(result.header.MetaData.VirtualAddress&&result.header.MetaData.Size)
+        qint64 nCLIHeaderOffset=-1;
+        if(isNETPresent())
         {
-            result.nCLI_MetaDataOffset=addressToOffset(&listMM,nBaseAddress+result.header.MetaData.VirtualAddress);
+            S_IMAGE_DATA_DIRECTORY _idd=getOptionalHeader_DataDirectory(S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
-            if(result.nCLI_MetaDataOffset!=-1)
+            nCLIHeaderOffset=addressToOffset(&listMM,nBaseAddress+_idd.VirtualAddress);
+        }
+        else
+        {
+            // mb TODO
+            nCLIHeaderOffset=addressToOffset(&listMM,nBaseAddress+0x2008);
+            result.bHidden=true;
+        }
+
+        if(nCLIHeaderOffset!=-1)
+        {
+            result.nCLIHeaderOffset=nCLIHeaderOffset;
+
+            read_array(result.nCLIHeaderOffset,(char *)&(result.header),sizeof(S_IMAGE_COR20_HEADER));
+
+            if((result.header.cb==0x48)&&result.header.MetaData.VirtualAddress&&result.header.MetaData.Size)
             {
-                result.bInit=true;
+                result.nEntryPointSize=0;
+                result.nEntryPoint=result.header.EntryPointRVA;
 
-                result.nCLI_MetaData_Signature=read_uint32(result.nCLI_MetaDataOffset);
+                result.nCLI_MetaDataOffset=addressToOffset(&listMM,nBaseAddress+result.header.MetaData.VirtualAddress);
 
-                if(result.nCLI_MetaData_Signature==0x424a5342)
+                if(result.nCLI_MetaDataOffset!=-1)
                 {
-                    result.sCLI_MetaData_MajorVersion=read_uint16(result.nCLI_MetaDataOffset+4);
-                    result.sCLI_MetaData_MinorVersion=read_uint16(result.nCLI_MetaDataOffset+6);
-                    result.nCLI_MetaData_Reserved=read_uint32(result.nCLI_MetaDataOffset+8);
-                    result.nCLI_MetaData_VersionStringLength=read_uint32(result.nCLI_MetaDataOffset+12);
+                    result.nCLI_MetaData_Signature=read_uint32(result.nCLI_MetaDataOffset);
 
-                    result.sCLI_MetaData_Version=read_ansiString(result.nCLI_MetaDataOffset+16,result.nCLI_MetaData_VersionStringLength);
-                    result.sCLI_MetaData_Flags=read_uint16(result.nCLI_MetaDataOffset+16+result.nCLI_MetaData_VersionStringLength);
-                    result.sCLI_MetaData_Streams=read_uint16(result.nCLI_MetaDataOffset+16+result.nCLI_MetaData_VersionStringLength+2);
-
-
-                    qint64 nOffset=result.nCLI_MetaDataOffset+20+result.nCLI_MetaData_VersionStringLength;
-
-                    for(int i=0; i<result.sCLI_MetaData_Streams; i++)
+                    if(result.nCLI_MetaData_Signature==0x424a5342)
                     {
-                        result.listCLI_MetaData_Stream_Offsets.append(read_uint32(nOffset));
-                        result.listCLI_MetaData_Stream_Sizes.append(read_uint32(nOffset+4));
-                        result.listCLI_MetaData_Stream_Names.append(read_ansiString(nOffset+8));
+                        result.bInit=true;
 
-                        if(result.listCLI_MetaData_Stream_Names.at(i)=="#~")
+                        result.sCLI_MetaData_MajorVersion=read_uint16(result.nCLI_MetaDataOffset+4);
+                        result.sCLI_MetaData_MinorVersion=read_uint16(result.nCLI_MetaDataOffset+6);
+                        result.nCLI_MetaData_Reserved=read_uint32(result.nCLI_MetaDataOffset+8);
+                        result.nCLI_MetaData_VersionStringLength=read_uint32(result.nCLI_MetaDataOffset+12);
+
+                        result.sCLI_MetaData_Version=read_ansiString(result.nCLI_MetaDataOffset+16,result.nCLI_MetaData_VersionStringLength);
+                        result.sCLI_MetaData_Flags=read_uint16(result.nCLI_MetaDataOffset+16+result.nCLI_MetaData_VersionStringLength);
+                        result.sCLI_MetaData_Streams=read_uint16(result.nCLI_MetaDataOffset+16+result.nCLI_MetaData_VersionStringLength+2);
+
+
+                        qint64 nOffset=result.nCLI_MetaDataOffset+20+result.nCLI_MetaData_VersionStringLength;
+
+                        for(int i=0; i<result.sCLI_MetaData_Streams; i++)
                         {
-                            result.nCLI_MetaData_TablesHeaderOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
-                            result.nCLI_MetaData_TablesSize=result.listCLI_MetaData_Stream_Sizes.at(i);
-                        }
-                        else if(result.listCLI_MetaData_Stream_Names.at(i)=="#Strings")
-                        {
-                            result.nCLI_MetaData_StringsOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
-                            result.nCLI_MetaData_StringsSize=result.listCLI_MetaData_Stream_Sizes.at(i);
+                            result.listCLI_MetaData_Stream_Offsets.append(read_uint32(nOffset));
+                            result.listCLI_MetaData_Stream_Sizes.append(read_uint32(nOffset+4));
+                            result.listCLI_MetaData_Stream_Names.append(read_ansiString(nOffset+8));
 
-                            QByteArray baStrings=read_array(result.nCLI_MetaData_StringsOffset,result.nCLI_MetaData_StringsSize);
-
-                            char *_pOffset=baStrings.data();
-                            int _nSize=baStrings.size();
-
-                            for(int i=1; i<_nSize; i++)
+                            if(result.listCLI_MetaData_Stream_Names.at(i)=="#~")
                             {
-                                _pOffset++;
-                                QString sTemp=_pOffset;
-                                result.listAnsiStrings.append(sTemp);
-
-                                _pOffset+=sTemp.size();
-                                i+=sTemp.size();
+                                result.nCLI_MetaData_TablesHeaderOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.nCLI_MetaData_TablesSize=result.listCLI_MetaData_Stream_Sizes.at(i);
                             }
-                        }
-                        else if(result.listCLI_MetaData_Stream_Names.at(i)=="#US")
-                        {
-                            result.nCLI_MetaData_USOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
-                            result.nCLI_MetaData_USSize=result.listCLI_MetaData_Stream_Sizes.at(i);
-
-                            QByteArray baStrings=read_array(result.nCLI_MetaData_USOffset,result.nCLI_MetaData_USSize);
-
-                            char *_pOffset=baStrings.data();
-                            char *__pOffset=_pOffset;
-                            int _nSize=baStrings.size();
-
-                            __pOffset++;
-
-                            for(int i=1; i<_nSize; i++)
+                            else if(result.listCLI_MetaData_Stream_Names.at(i)=="#Strings")
                             {
-                                int nStringSize=(*((unsigned char *)__pOffset));
+                                result.nCLI_MetaData_StringsOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.nCLI_MetaData_StringsSize=result.listCLI_MetaData_Stream_Sizes.at(i);
 
-                                if(nStringSize==0x80)
-                                {
-                                    nStringSize=0;
-                                }
+                                QByteArray baStrings=read_array(result.nCLI_MetaData_StringsOffset,result.nCLI_MetaData_StringsSize);
 
-                                if(nStringSize>_nSize-i)
+                                char *_pOffset=baStrings.data();
+                                int _nSize=baStrings.size();
+
+                                for(int i=1; i<_nSize; i++)
                                 {
-                                    break;
+                                    _pOffset++;
+                                    QString sTemp=_pOffset;
+                                    result.listAnsiStrings.append(sTemp);
+
+                                    _pOffset+=sTemp.size();
+                                    i+=sTemp.size();
                                 }
+                            }
+                            else if(result.listCLI_MetaData_Stream_Names.at(i)=="#US")
+                            {
+                                result.nCLI_MetaData_USOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.nCLI_MetaData_USSize=result.listCLI_MetaData_Stream_Sizes.at(i);
+
+                                QByteArray baStrings=read_array(result.nCLI_MetaData_USOffset,result.nCLI_MetaData_USSize);
+
+                                char *_pOffset=baStrings.data();
+                                char *__pOffset=_pOffset;
+                                int _nSize=baStrings.size();
 
                                 __pOffset++;
 
-                                if(__pOffset>_pOffset+_nSize)
+                                for(int i=1; i<_nSize; i++)
                                 {
-                                    break;
+                                    int nStringSize=(*((unsigned char *)__pOffset));
+
+                                    if(nStringSize==0x80)
+                                    {
+                                        nStringSize=0;
+                                    }
+
+                                    if(nStringSize>_nSize-i)
+                                    {
+                                        break;
+                                    }
+
+                                    __pOffset++;
+
+                                    if(__pOffset>_pOffset+_nSize)
+                                    {
+                                        break;
+                                    }
+
+                                    QString sTemp=QString::fromUtf16((ushort *)__pOffset,nStringSize/2);
+
+                                    result.listUnicodeStrings.append(sTemp);
+
+                                    __pOffset+=nStringSize;
+                                    i+=nStringSize;
                                 }
-
-                                QString sTemp=QString::fromUtf16((ushort *)__pOffset,nStringSize/2);
-
-                                result.listUnicodeStrings.append(sTemp);
-
-                                __pOffset+=nStringSize;
-                                i+=nStringSize;
                             }
-                        }
-                        else if(result.listCLI_MetaData_Stream_Names.at(i)=="#Blob")
-                        {
-                            result.nCLI_MetaData_BlobOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
-                            result.nCLI_MetaData_BlobSize=result.listCLI_MetaData_Stream_Sizes.at(i);
-                        }
-                        else if(result.listCLI_MetaData_Stream_Names.at(i)=="#GUID")
-                        {
-                            result.nCLI_MetaData_GUIDOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
-                            result.nCLI_MetaData_GUIDSize=result.listCLI_MetaData_Stream_Sizes.at(i);
-                        }
-
-                        nOffset+=8;
-                        nOffset+=__ALIGN_UP(result.listCLI_MetaData_Stream_Names.at(i).length()+1,4);
-                    }
-
-                    if(result.nCLI_MetaData_TablesHeaderOffset)
-                    {
-                        result.nCLI_MetaData_Tables_Reserved1=read_uint32(result.nCLI_MetaData_TablesHeaderOffset);
-                        result.cCLI_MetaData_Tables_MajorVersion=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+4);
-                        result.cCLI_MetaData_Tables_MinorVersion=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+5);
-                        result.cCLI_MetaData_Tables_HeapOffsetSizes=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+6);
-                        result.cCLI_MetaData_Tables_Reserved2=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+7);
-                        result.nCLI_MetaData_Tables_Valid=read_uint64(result.nCLI_MetaData_TablesHeaderOffset+8);
-                        result.nCLI_MetaData_Tables_Sorted=read_uint64(result.nCLI_MetaData_TablesHeaderOffset+16);
-
-                        unsigned long long nValid=result.nCLI_MetaData_Tables_Valid;
-
-                        unsigned int nTemp=0;
-
-                        for(nTemp = 0; nValid; nTemp++)
-                        {
-                            nValid &= nValid - 1;
-                        }
-
-                        result.nCLI_MetaData_Tables_Valid_NumberOfRows=nTemp;
-
-                        nOffset=result.nCLI_MetaData_TablesHeaderOffset+24;
-
-                        for(int i=0; i<64; i++)
-                        {
-                            if(result.nCLI_MetaData_Tables_Valid&((unsigned long long)1<<i))
+                            else if(result.listCLI_MetaData_Stream_Names.at(i)=="#Blob")
                             {
-                                result.CLI_MetaData_Tables_TablesNumberOfIndexes[i]=read_uint32(nOffset);
-                                nOffset+=4;
+                                result.nCLI_MetaData_BlobOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.nCLI_MetaData_BlobSize=result.listCLI_MetaData_Stream_Sizes.at(i);
                             }
-                        }
-
-                        unsigned int nSize=0;
-                        int nStringIndexSize=2;
-                        int nGUIDIndexSize=2;
-                        int nBLOBIndexSize=2;
-                        int nResolutionScope=2;
-                        int nTypeDefOrRef=2;
-                        int nField=2;
-                        int nMethodDef=2;
-                        int nParamList=2;
-
-                        unsigned char cHeapOffsetSizes=0;
-
-                        cHeapOffsetSizes=result.cCLI_MetaData_Tables_HeapOffsetSizes;
-
-                        if(cHeapOffsetSizes&0x01)
-                        {
-                            nStringIndexSize=4;
-                        }
-
-                        if(cHeapOffsetSizes&0x02)
-                        {
-                            nGUIDIndexSize=4;
-                        }
-
-                        if(cHeapOffsetSizes&0x04)
-                        {
-                            nBLOBIndexSize=4;
-                        }
-                        // TODO !!!
-                        if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[0]>0x3FFF)
-                        {
-                            nResolutionScope=4;
-                        }
-
-                        if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[26]>0x3FFF)
-                        {
-                            nResolutionScope=4;
-                        }
-
-                        if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[35]>0x3FFF)
-                        {
-                            nResolutionScope=4;
-                        }
-
-                        if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[1]>0x3FFF)
-                        {
-                            nResolutionScope=4;
-                        }
-
-                        if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[1]>0x3FFF)
-                        {
-                            nTypeDefOrRef=4;
-                        }
-
-                        if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[2]>0x3FFF)
-                        {
-                            nTypeDefOrRef=4;
-                        }
-
-                        if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[27]>0x3FFF)
-                        {
-                            nTypeDefOrRef=4;
-                        }
-
-
-                        if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[4]>0xFFFF)
-                        {
-                            nField=4;
-                        }
-
-                        if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[6]>0xFFFF)
-                        {
-                            nMethodDef=4;
-                        }
-
-                        if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[8]>0xFFFF)
-                        {
-                            nParamList=4;
-                        }
-
-                        nSize=0;
-                        nSize+=2;
-                        nSize+=nStringIndexSize;
-                        nSize+=nGUIDIndexSize;
-                        nSize+=nGUIDIndexSize;
-                        nSize+=nGUIDIndexSize;
-                        result.CLI_MetaData_Tables_TablesSizes[0]=nSize;
-                        nSize=0;
-                        nSize+=nResolutionScope;
-                        nSize+=nStringIndexSize;
-                        nSize+=nStringIndexSize;
-                        result.CLI_MetaData_Tables_TablesSizes[1]=nSize;
-                        nSize=0;
-                        nSize+=4;
-                        nSize+=nStringIndexSize;
-                        nSize+=nStringIndexSize;
-                        nSize+=nTypeDefOrRef;
-                        nSize+=nField;
-                        nSize+=nMethodDef;
-                        result.CLI_MetaData_Tables_TablesSizes[2]=nSize;
-                        nSize=0;
-                        result.CLI_MetaData_Tables_TablesSizes[3]=nSize;
-                        nSize=0;
-                        nSize+=2;
-                        nSize+=nStringIndexSize;
-                        nSize+=nBLOBIndexSize;
-                        result.CLI_MetaData_Tables_TablesSizes[4]=nSize;
-                        nSize=0;
-                        result.CLI_MetaData_Tables_TablesSizes[5]=nSize;
-                        nSize=0;
-                        nSize+=4;
-                        nSize+=2;
-                        nSize+=2;
-                        nSize+=nStringIndexSize;
-                        nSize+=nBLOBIndexSize;
-                        nSize+=nParamList;
-                        result.CLI_MetaData_Tables_TablesSizes[6]=nSize;
-
-
-                        for(int i=0; i<64; i++)
-                        {
-                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[i])
+                            else if(result.listCLI_MetaData_Stream_Names.at(i)=="#GUID")
                             {
-                                result.CLI_MetaData_Tables_TablesOffsets[i]=nOffset;
-                                nOffset+=result.CLI_MetaData_Tables_TablesSizes[i]*result.CLI_MetaData_Tables_TablesNumberOfIndexes[i];
+                                result.nCLI_MetaData_GUIDOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.nCLI_MetaData_GUIDSize=result.listCLI_MetaData_Stream_Sizes.at(i);
                             }
+
+                            nOffset+=8;
+                            nOffset+=__ALIGN_UP(result.listCLI_MetaData_Stream_Names.at(i).length()+1,4);
                         }
 
-                        if(!(result.header.Flags&S_COMIMAGE_FLAGS_NATIVE_ENTRYPOINT))
+                        if(result.nCLI_MetaData_TablesHeaderOffset)
                         {
-                            if(((result.nEntryPoint&0xFF000000)>>24)==6)
-                            {
-                                unsigned int nIndex=result.nEntryPoint&0xFFFFFF;
+                            result.nCLI_MetaData_Tables_Reserved1=read_uint32(result.nCLI_MetaData_TablesHeaderOffset);
+                            result.cCLI_MetaData_Tables_MajorVersion=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+4);
+                            result.cCLI_MetaData_Tables_MinorVersion=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+5);
+                            result.cCLI_MetaData_Tables_HeapOffsetSizes=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+6);
+                            result.cCLI_MetaData_Tables_Reserved2=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+7);
+                            result.nCLI_MetaData_Tables_Valid=read_uint64(result.nCLI_MetaData_TablesHeaderOffset+8);
+                            result.nCLI_MetaData_Tables_Sorted=read_uint64(result.nCLI_MetaData_TablesHeaderOffset+16);
 
-                                if(nIndex<=result.CLI_MetaData_Tables_TablesNumberOfIndexes[6])
+                            unsigned long long nValid=result.nCLI_MetaData_Tables_Valid;
+
+                            unsigned int nTemp=0;
+
+                            for(nTemp = 0; nValid; nTemp++)
+                            {
+                                nValid &= nValid - 1;
+                            }
+
+                            result.nCLI_MetaData_Tables_Valid_NumberOfRows=nTemp;
+
+                            nOffset=result.nCLI_MetaData_TablesHeaderOffset+24;
+
+                            for(int i=0; i<64; i++)
+                            {
+                                if(result.nCLI_MetaData_Tables_Valid&((unsigned long long)1<<i))
                                 {
-                                    nOffset=result.CLI_MetaData_Tables_TablesOffsets[6];
-                                    nOffset+=result.CLI_MetaData_Tables_TablesSizes[6]*(nIndex-1);
+                                    result.CLI_MetaData_Tables_TablesNumberOfIndexes[i]=read_uint32(nOffset);
+                                    nOffset+=4;
+                                }
+                            }
 
-                                    result.nEntryPoint=read_uint32(nOffset);
+                            unsigned int nSize=0;
+                            int nStringIndexSize=2;
+                            int nGUIDIndexSize=2;
+                            int nBLOBIndexSize=2;
+                            int nResolutionScope=2;
+                            int nTypeDefOrRef=2;
+                            int nField=2;
+                            int nMethodDef=2;
+                            int nParamList=2;
+
+                            unsigned char cHeapOffsetSizes=0;
+
+                            cHeapOffsetSizes=result.cCLI_MetaData_Tables_HeapOffsetSizes;
+
+                            if(cHeapOffsetSizes&0x01)
+                            {
+                                nStringIndexSize=4;
+                            }
+
+                            if(cHeapOffsetSizes&0x02)
+                            {
+                                nGUIDIndexSize=4;
+                            }
+
+                            if(cHeapOffsetSizes&0x04)
+                            {
+                                nBLOBIndexSize=4;
+                            }
+                            // TODO !!!
+                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[0]>0x3FFF)
+                            {
+                                nResolutionScope=4;
+                            }
+
+                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[26]>0x3FFF)
+                            {
+                                nResolutionScope=4;
+                            }
+
+                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[35]>0x3FFF)
+                            {
+                                nResolutionScope=4;
+                            }
+
+                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[1]>0x3FFF)
+                            {
+                                nResolutionScope=4;
+                            }
+
+                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[1]>0x3FFF)
+                            {
+                                nTypeDefOrRef=4;
+                            }
+
+                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[2]>0x3FFF)
+                            {
+                                nTypeDefOrRef=4;
+                            }
+
+                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[27]>0x3FFF)
+                            {
+                                nTypeDefOrRef=4;
+                            }
+
+
+                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[4]>0xFFFF)
+                            {
+                                nField=4;
+                            }
+
+                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[6]>0xFFFF)
+                            {
+                                nMethodDef=4;
+                            }
+
+                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[8]>0xFFFF)
+                            {
+                                nParamList=4;
+                            }
+
+                            nSize=0;
+                            nSize+=2;
+                            nSize+=nStringIndexSize;
+                            nSize+=nGUIDIndexSize;
+                            nSize+=nGUIDIndexSize;
+                            nSize+=nGUIDIndexSize;
+                            result.CLI_MetaData_Tables_TablesSizes[0]=nSize;
+                            nSize=0;
+                            nSize+=nResolutionScope;
+                            nSize+=nStringIndexSize;
+                            nSize+=nStringIndexSize;
+                            result.CLI_MetaData_Tables_TablesSizes[1]=nSize;
+                            nSize=0;
+                            nSize+=4;
+                            nSize+=nStringIndexSize;
+                            nSize+=nStringIndexSize;
+                            nSize+=nTypeDefOrRef;
+                            nSize+=nField;
+                            nSize+=nMethodDef;
+                            result.CLI_MetaData_Tables_TablesSizes[2]=nSize;
+                            nSize=0;
+                            result.CLI_MetaData_Tables_TablesSizes[3]=nSize;
+                            nSize=0;
+                            nSize+=2;
+                            nSize+=nStringIndexSize;
+                            nSize+=nBLOBIndexSize;
+                            result.CLI_MetaData_Tables_TablesSizes[4]=nSize;
+                            nSize=0;
+                            result.CLI_MetaData_Tables_TablesSizes[5]=nSize;
+                            nSize=0;
+                            nSize+=4;
+                            nSize+=2;
+                            nSize+=2;
+                            nSize+=nStringIndexSize;
+                            nSize+=nBLOBIndexSize;
+                            nSize+=nParamList;
+                            result.CLI_MetaData_Tables_TablesSizes[6]=nSize;
+
+
+                            for(int i=0; i<64; i++)
+                            {
+                                if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[i])
+                                {
+                                    result.CLI_MetaData_Tables_TablesOffsets[i]=nOffset;
+                                    nOffset+=result.CLI_MetaData_Tables_TablesSizes[i]*result.CLI_MetaData_Tables_TablesNumberOfIndexes[i];
+                                }
+                            }
+
+                            if(!(result.header.Flags&S_COMIMAGE_FLAGS_NATIVE_ENTRYPOINT))
+                            {
+                                if(((result.nEntryPoint&0xFF000000)>>24)==6)
+                                {
+                                    unsigned int nIndex=result.nEntryPoint&0xFFFFFF;
+
+                                    if(nIndex<=result.CLI_MetaData_Tables_TablesNumberOfIndexes[6])
+                                    {
+                                        nOffset=result.CLI_MetaData_Tables_TablesOffsets[6];
+                                        nOffset+=result.CLI_MetaData_Tables_TablesSizes[6]*(nIndex-1);
+
+                                        result.nEntryPoint=read_uint32(nOffset);
+                                    }
+                                    else
+                                    {
+                                        result.nEntryPoint=0;
+                                    }
                                 }
                                 else
                                 {
                                     result.nEntryPoint=0;
                                 }
                             }
-                            else
-                            {
-                                result.nEntryPoint=0;
-                            }
                         }
                     }
                 }
-
             }
-
-
         }
     }
 
