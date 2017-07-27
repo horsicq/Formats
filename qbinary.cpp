@@ -24,6 +24,8 @@ QBinary::QBinary(QIODevice *__pDevice,bool bIsImage) // TODO offset and Size for
 {
     setData(__pDevice);
     setIsImage(bIsImage);
+    setBaseAddress(0);
+    setEntryPointOffset(0);
 }
 
 void QBinary::setData(QIODevice *__pDevice)
@@ -1116,7 +1118,12 @@ QList<QBinary::MEMORY_MAP> QBinary::getMemoryMapList()
 }
 qint64 QBinary::getBaseAddress()
 {
-    return 0;
+    return this->__nBaseAddress;
+}
+
+void QBinary::setBaseAddress(qint64 nBaseAddress)
+{
+    this->__nBaseAddress=nBaseAddress;
 }
 
 bool QBinary::isImage()
@@ -1211,7 +1218,17 @@ bool QBinary::compareSignatureOnAddress(QString sSignature, qint64 nAddress)
 
 qint64 QBinary::getEntryPointOffset()
 {
-    return 0;
+    return this->__nEntryPointOffset;
+}
+
+void QBinary::setEntryPointOffset(qint64 nEntryPointOffset)
+{
+    this->__nEntryPointOffset=nEntryPointOffset;
+}
+
+qint64 QBinary::getEntryPointAddress()
+{
+    return offsetToAddress(getEntryPointOffset());
 }
 
 bool QBinary::compareEntryPoint(QString sSignature, qint64 nOffset)

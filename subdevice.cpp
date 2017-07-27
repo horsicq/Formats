@@ -101,8 +101,8 @@ bool SubDevice::open(QIODevice::OpenMode mode)
 
 bool SubDevice::atEnd()
 {
-    qDebug("bool SubDevice::atEnd()");
-    return (bytesAvailable() == 0);
+    //qDebug("bool SubDevice::atEnd()");
+    return (bytesAvailable()==0);
 }
 
 void SubDevice::close()

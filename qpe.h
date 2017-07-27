@@ -37,6 +37,13 @@ public:
         qint64 nCharacteristics;
     };
 
+    struct SECTIONRVA_RECORD
+    {
+        qint64 nRVA;
+        qint64 nSize;
+        qint64 nCharacteristics;
+    };
+
     struct IMPORT_RECORD
     {
         qint64 nOffset;
@@ -309,7 +316,10 @@ public:
     void setSectionHeader(quint32 nNumber,S_IMAGE_SECTION_HEADER *pSectionHeader);
 
     QList<S_IMAGE_SECTION_HEADER> getSectionHeaders();
+    // TODO with __getSectionOffsetAndSize
     static QList<SECTION_RECORD> getSectionRecords(QList<S_IMAGE_SECTION_HEADER> *pList,bool bIsImage);
+
+    QList<SECTIONRVA_RECORD> getSectionRVARecords();
 
     QString getSection_NameAsString(quint32 nNumber);
     quint32 getSection_VirtualSize(quint32 nNumber);
@@ -377,7 +387,9 @@ public:
 
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getBaseAddress();
+    virtual void setBaseAddress(qint64 nBaseAddress);
     virtual qint64 getEntryPointOffset();
+    virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     S_IMAGE_IMPORT_DESCRIPTOR read_S_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset);
     void write_S_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset,S_IMAGE_IMPORT_DESCRIPTOR value);
 

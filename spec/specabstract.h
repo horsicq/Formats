@@ -68,6 +68,7 @@ public:
         RECORD_TYPE_CERTIFICATE,
         RECORD_TYPE_DEBUGDATA,
         RECORD_TYPE_INSTALLERDATA,
+        RECORD_TYPE_PROTECTORDATA,
         RECORD_TYPE_SFXDATA,
         RECORD_TYPE_SFX,
         RECORD_TYPE_NETOBFUSCATOR
@@ -113,6 +114,7 @@ public:
         RECORD_NAME_CODEVEIL,
         RECORD_NAME_CODEWALL,
         RECORD_NAME_CONFUSER,
+        RECORD_NAME_CONFUSEREX,
         RECORD_NAME_CPP,
         RECORD_NAME_CREATEINSTALL,
         RECORD_NAME_CRINKLER,
@@ -257,7 +259,11 @@ public:
         RECORD_NAME_QTINSTALLER,
         RECORD_NAME_DOTNETZ,
         RECORD_NAME_CEXE,
-        RECORD_NAME_LAYHEYFORTRAN90
+        RECORD_NAME_LAYHEYFORTRAN90,
+        RECORD_NAME_ZPROTECT,
+        RECORD_NAME_NOSTUBLINKER,
+        RECORD_NAME_WINACE,
+        RECORD_NAME_GPINSTALL
     };
 
     struct ID
@@ -422,6 +428,8 @@ public:
         qint64 nImageBaseAddress;
         quint8 nMinorLinkerVersion;
         quint8 nMajorLinkerVersion;
+        quint8 nMinorImageVersion;
+        quint8 nMajorImageVersion;
         bool bIs64;
 
         qint64 nHeaderOffset;
@@ -554,8 +562,6 @@ public:
     static MSDOSINFO_STRUCT getMSDOSInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
     static ELFINFO_STRUCT getELFInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
     static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
-
-//    static void PE_handle_Rich(PEINFO_STRUCT *pPEInfo);
 
     static SCANS_STRUCT getScansStruct(quint32 nVariant,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo,qint64 nOffset);
 

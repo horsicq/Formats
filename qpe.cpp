@@ -957,6 +957,27 @@ QList<QPE::SECTION_RECORD> QPE::getSectionRecords(QList<S_IMAGE_SECTION_HEADER> 
      return listResult;
 }
 
+QList<QPE::SECTIONRVA_RECORD> QPE::getSectionRVARecords()
+{
+    QList<SECTIONRVA_RECORD> listResult;
+
+    QList<S_IMAGE_SECTION_HEADER> listSH=getSectionHeaders();
+    qint32 nSectionAlignment=getOptionalHeader_SectionAlignment();
+
+    for(int i=0;i<listSH.count();i++)
+    {
+        SECTIONRVA_RECORD record={0};
+
+        record.nRVA=listSH.at(i).VirtualAddress;
+        record.nSize=__ALIGN_UP(listSH.at(i).Misc.VirtualSize,nSectionAlignment);
+        record.nCharacteristics=listSH.at(i).Characteristics;
+
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
 QString QPE::getSection_NameAsString(quint32 nNumber)
 {
     QString sResult;
@@ -1246,7 +1267,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
 {
     QList<MEMORY_MAP> list;
 
-    quint32 nNumberOfSections=getFileHeader_NumberOfSections();
+    quint32 nNumberOfSections=qMin((int)getFileHeader_NumberOfSections(),100);
     quint32 nFileAlignment=getOptionalHeader_FileAlignment();
     quint32 nSectionAlignment=getOptionalHeader_SectionAlignment();
     qint64 nBaseAddress=getOptionalHeader_ImageBase();
@@ -1303,7 +1324,8 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
         qint64 nFileOffset=section.PointerToRawData;
         //
         nFileOffset=__ALIGN_DOWN(nFileOffset,nFileAlignment);
-        qint64 nFileSize=__ALIGN_UP(section.SizeOfRawData,nFileAlignment);
+//        qint64 nFileSize=__ALIGN_UP(section.SizeOfRawData,nFileAlignment);
+        qint64 nFileSize=section.SizeOfRawData;
         qint64 nVirtualAddress=nBaseAddress+section.VirtualAddress;
         qint64 nVirtualSize=__ALIGN_UP(section.Misc.VirtualSize,nSectionAlignment);
 
@@ -1381,9 +1403,19 @@ qint64 QPE::getBaseAddress()
     return getOptionalHeader_ImageBase();
 }
 
+void QPE::setBaseAddress(qint64 nBaseAddress)
+{
+    setOptionalHeader_ImageBase(nBaseAddress);
+}
+
 qint64 QPE::getEntryPointOffset()
 {
     return addressToOffset(getBaseAddress()+getOptionalHeader_AddressOfEntryPoint());
+}
+
+void QPE::setEntryPointOffset(qint64 nEntryPointOffset)
+{
+    setOptionalHeader_AddressOfEntryPoint(offsetToAddress(nEntryPointOffset)-getBaseAddress());
 }
 
 QList<QPE::IMPORT_RECORD> QPE::getImportRecords()

@@ -75,8 +75,10 @@ public:
         FILE_TYPE_UNKNOWN=0,
         FILE_TYPE_BINARY,
         FILE_TYPE_MSDOS,
+        FILE_TYPE_PE,
         FILE_TYPE_PE32,
         FILE_TYPE_PE64,
+        FILE_TYPE_ELF,
         FILE_TYPE_ELF32,
         FILE_TYPE_ELF64
     };
@@ -184,17 +186,21 @@ public:
     qint64 offsetToAddress(qint64 nOffset);
     qint64 addressToOffset(qint64 nAddress);
 
-    bool isOffsetValid(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
-    bool isAddressValid(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
+    static bool isOffsetValid(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
+    static bool isAddressValid(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
 
-    qint64 offsetToAddress(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
-    qint64 addressToOffset(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
+    static qint64 offsetToAddress(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
+    static qint64 addressToOffset(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
 
-    MEMORY_MAP getOffsetMemoryMap(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
-    MEMORY_MAP getAddressMemoryMap(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
+    static MEMORY_MAP getOffsetMemoryMap(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
+    static MEMORY_MAP getAddressMemoryMap(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
 
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getBaseAddress();
+    virtual void setBaseAddress(qint64 nBaseAddress);
+    virtual qint64 getEntryPointOffset();
+    virtual void setEntryPointOffset(qint64 nEntryPointOffset);
+    qint64 getEntryPointAddress();
 
     bool isImage();
     void setIsImage(bool value);
@@ -204,7 +210,6 @@ public:
     static bool _compareByteArrayWithSignature(QByteArray baData,QString sSignature);
     static QString _createSignature(QString sSignature1,QString sSignature2);
     bool compareSignatureOnAddress(QString sSignature,qint64 nAddress);
-    virtual qint64 getEntryPointOffset();
     bool compareEntryPoint(QString sSignature,qint64 nOffset=0);
     bool moveMemory(qint64 nSourceOffset,qint64 nDestOffset,qint64 nSize);
 
@@ -287,6 +292,8 @@ signals:
 private:
     QIODevice *__pDevice;
     bool bIsImage;
+    qint64 __nBaseAddress;
+    qint64 __nEntryPointOffset;
 };
 
 #endif // QBINARY_H
