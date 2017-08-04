@@ -263,7 +263,8 @@ public:
         RECORD_NAME_ZPROTECT,
         RECORD_NAME_NOSTUBLINKER,
         RECORD_NAME_WINACE,
-        RECORD_NAME_GPINSTALL
+        RECORD_NAME_GPINSTALL,
+	RECORD_NAME_POWERBASIC
     };
 
     struct ID
@@ -340,6 +341,7 @@ public:
         QString sHeaderSignature;
         QMap<RECORD_NAMES,SCANS_STRUCT> mapHeaderDetects;
         QList<SpecAbstract::SCAN_STRUCT> listDetects;
+        bool bDeepScan;
     };
 
     struct BINARYINFO_STRUCT
@@ -461,6 +463,7 @@ public:
     {
         //        bool bEmulate;
         bool bScanOverlay;
+        bool bDeepScan;
         bool bResultAsXML;
     };
 
@@ -558,10 +561,10 @@ public:
 
     static QString findEnigmaVersion(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
-    static BINARYINFO_STRUCT getBinaryInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
-    static MSDOSINFO_STRUCT getMSDOSInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
-    static ELFINFO_STRUCT getELFInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
-    static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId); // TODO options
+    static BINARYINFO_STRUCT getBinaryInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions); // TODO options
+    static MSDOSINFO_STRUCT getMSDOSInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions); // TODO options
+    static ELFINFO_STRUCT getELFInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions); // TODO options
+    static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions); // TODO options
 
     static SCANS_STRUCT getScansStruct(quint32 nVariant,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo,qint64 nOffset);
 
