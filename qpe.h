@@ -413,8 +413,8 @@ public:
     double getSectionEntropy(quint32 nSection);
 
     qint32 addressToSection(qint64 nAddress);
-    qint32 addressToSection(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
-    static bool fixDumpFile(QString sFileName,DUMP_OPTIONS *pDumpOptions);
+    static qint32 addressToSection(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
+    static bool fixDumpFile(QString sFileName,DUMP_OPTIONS *pDumpOptions); // Obsolete
 
     bool addImportSection(QMap<qint64,QString> *pMapIAT);
     static bool addImportSection(QIODevice *pDevice,QMap<qint64,QString> *pMapIAT);

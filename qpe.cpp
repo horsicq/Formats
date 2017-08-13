@@ -2898,7 +2898,6 @@ bool QPE::fixDumpFile(QString sFileName,DUMP_OPTIONS *pDumpOptions)
 
             if(buffer.open(QIODevice::ReadWrite))
             {
-
                 QPE bufPE(&buffer);
 
                 QByteArray baHeader=pe.getHeaders();
