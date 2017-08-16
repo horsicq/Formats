@@ -38,6 +38,30 @@ qint64 QBinary::getSize()
     return __pDevice->size();
 }
 
+void QBinary::findFiles(QString sFileName, QList<QString> *pListFileNames)
+{
+    if((sFileName!=".")&&(sFileName!=".."))
+    {
+        QFileInfo fi(sFileName);
+
+        if(fi.isFile())
+        {
+            pListFileNames->append(fi.absoluteFilePath());
+        }
+        else if(fi.isDir())
+        {
+            QDir dir(sFileName);
+
+            QFileInfoList eil=dir.entryInfoList();
+
+            for(int i=0;i<eil.count();i++)
+            {
+                findFiles(eil.at(i).absoluteFilePath(),pListFileNames);
+            }
+        }
+    }
+}
+
 qint64 QBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 {
     qint64 nResult=0;
@@ -1746,21 +1770,6 @@ quint32 QBinary::getCRC32(QString sString)
 QIODevice *QBinary::getDevice()
 {
     return __pDevice;
-}
-
-QBinary::UNPACK_OPTIONS QBinary::getPossibleUnpackOptions()
-{
-    UNPACK_OPTIONS result= {0};
-
-    return result;
-}
-
-bool QBinary::unpack(QBinary::UNPACK_OPTIONS *pUnpOptions, QString sOutFileName)
-{
-    Q_UNUSED(pUnpOptions);
-    Q_UNUSED(sOutFileName);
-
-    return false;
 }
 
 bool QBinary::isValid()

@@ -107,6 +107,9 @@ public:
     explicit QBinary(QIODevice *__pDevice=0,bool bIsImage=false);
     void setData(QIODevice *__pDevice);
     qint64 getSize();
+
+    static void findFiles(QString sFileName,QList<QString> *pListFileNames);
+
     qint64 read_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
     QByteArray read_array(qint64 nOffset,qint64 nSize);
     qint64 write_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
@@ -243,8 +246,6 @@ public:
 
     QIODevice *getDevice();
 
-    virtual UNPACK_OPTIONS getPossibleUnpackOptions(); // TODO !!!
-    virtual bool unpack(UNPACK_OPTIONS *pUnpOptions,QString sOutFileName);
     virtual bool isValid();
 
     QString getSignature(qint64 nOffset,qint64 nSize);

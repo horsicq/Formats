@@ -443,6 +443,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_HMIMYSPACKER:                      sResult=QString("Hmimys Packer"); break;
         case RECORD_NAME_HMIMYSPROTECTOR:                   sResult=QString("Hmimys's Protector"); break;
         case RECORD_NAME_VPACKER:                           sResult=QString("VPacker"); break;
+        case RECORD_NAME_MKFPACK:                           sResult=QString("MKFPack"); break;
     }
 
     return sResult;
@@ -743,6 +744,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
 
         result.sEntryPointSignature=pe.getSignature(pe.getEntryPointOffset(),150);
 
+        result.dosHeader=pe.getDosHeaderEx();
         result.fileHeader=pe.getFileHeader();
         result.nOverlayOffset=pe.getOverlayOffset();
         result.nOverlaySize=pe.getOverlaySize();
@@ -1166,6 +1168,17 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         stDetects.insert("kernel32_hmimyspacker");
                     }
                 }
+                else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="GetProcAddress")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(1).sName=="LoadLibraryA")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(2).sName=="GetModuleHandleA")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualAlloc")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(4).sName=="VirtualFree"))
+                {
+                    if(pPEInfo->listImports.at(0).sName=="Kernel32.dll")
+                    {
+                        stDetects.insert("kernel32_mkfpack");
+                    }
+                }
             }
             else if(pPEInfo->listImports.at(0).listPositions.count()==6)
             {
@@ -1500,6 +1513,11 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     if(stDetects.contains("kernel32_aspack"))
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_ASPACK,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_ASPACK,"","",0));
+    }
+
+    if(stDetects.contains("kernel32_mkfpack"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_MKFPACK,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_MKFPACK,"","",0));
     }
 
     if(stDetects.contains("kernel32_nspack"))
@@ -1982,6 +2000,22 @@ void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     {
                         SpecAbstract::SCANS_STRUCT ss=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_VPACKER);
                         pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                    }
+                }
+
+                // MKFPack
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_MKFPACK))
+                {
+                    qint64 mLfanew=pPEInfo->dosHeader.e_lfanew-5;
+
+                    if(mLfanew>0)
+                    {
+                        QString sSignature=pe.read_ansiString(mLfanew,5);
+                        if(sSignature=="llydd")
+                        {
+                            SpecAbstract::SCANS_STRUCT ss=pPEInfo->mapImportDetects.value(RECORD_NAME_MKFPACK);
+                            pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                        }
                     }
                 }
 

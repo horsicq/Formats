@@ -270,7 +270,8 @@ public:
         RECORD_NAME_ORIEN,
         RECORD_NAME_HMIMYSPACKER,
         RECORD_NAME_HMIMYSPROTECTOR,
-        RECORD_NAME_VPACKER
+        RECORD_NAME_VPACKER,
+        RECORD_NAME_MKFPACK
     };
 
     struct ID
@@ -389,6 +390,7 @@ public:
         QString sOverlaySignature;
         qint64 nOverlayOffset;
         qint64 nOverlaySize;
+        S_IMAGE_DOS_HEADEREX dosHeader;
         S_IMAGE_FILE_HEADER fileHeader;
         union OPTIONAL_HEADER
         {
