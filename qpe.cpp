@@ -4198,7 +4198,7 @@ QPE::RESOURCES_ID_NAME QPE::getResourcesIDName(qint64 nResourceOffset,quint32 va
 
 QList<qint64> QPE::getRelocsAsRVAList()
 {
-    QList<qint64> listResult;
+    QSet<qint64> stResult;
 
     // TODO 64
     qint64 nRelocsOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
@@ -4230,7 +4230,7 @@ QList<qint64> QPE::getRelocsAsRVAList()
                 if(nRecord)
                 {
                     nRecord=nRecord&0x0FFF;
-                    listResult.append(ibr.VirtualAddress+nRecord);
+                    stResult.insert(ibr.VirtualAddress+nRecord);
                 }
 
                 nRelocsOffset+=sizeof(quint16);
@@ -4238,7 +4238,7 @@ QList<qint64> QPE::getRelocsAsRVAList()
         }
     }
 
-    return listResult;
+    return stResult.toList();
 }
 
 bool QPE::addRelocsSection(QList<qint64> *pList)
@@ -4252,7 +4252,7 @@ bool QPE::addRelocsSection(QIODevice *pDevice, QList<qint64> *pList)
 
     QString sClassName=pDevice->metaObject()->className();
 
-    if(sClassName=="QFile")
+    if((sClassName=="QFile")&&(pList->count()))
     {
         QPE pe(pDevice);
 
