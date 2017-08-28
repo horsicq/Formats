@@ -2874,80 +2874,6 @@ qint32 QPE::addressToSection(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nAdd
     }
 }
 
-bool QPE::fixDumpFile(QString sFileName,DUMP_OPTIONS *pDumpOptions)
-{
-    bool bResult=false;
-    QFile file;
-    file.setFileName(sFileName);
-
-    if(file.open(QIODevice::ReadWrite))
-    {
-        QPE pe(&file,true);
-
-        if(pe.isValid())
-        {
-            pe.setOptionalHeader_AddressOfEntryPoint(pDumpOptions->nAddressOfEntryPoint-pDumpOptions->nImageBase);
-
-            qint64 nCurrentOffset=0;
-            quint32 nFileAlignment=pe.getOptionalHeader_FileAlignment();
-            QByteArray baBuffer;
-            baBuffer.resize(file.size());
-            baBuffer.fill(0);
-            QBuffer buffer;
-            buffer.setBuffer(&baBuffer);
-
-            if(buffer.open(QIODevice::ReadWrite))
-            {
-                QPE bufPE(&buffer);
-
-                QByteArray baHeader=pe.getHeaders();
-                quint32 nSizeOfHeaders=0;
-
-                nSizeOfHeaders=QBinary::getPhysSize(baHeader.data(),baHeader.size());
-
-                bufPE.write_array(nCurrentOffset,baHeader.data(),nSizeOfHeaders);
-
-                nSizeOfHeaders=__ALIGN_UP(nSizeOfHeaders,nFileAlignment);
-                nCurrentOffset+=nSizeOfHeaders;
-
-                bufPE.setOptionalHeader_SizeOfHeaders(nSizeOfHeaders);
-
-                int nNumberOfSections=pe.getFileHeader_NumberOfSections();
-
-                for(int i=0; i<nNumberOfSections; i++)
-                {
-                    QByteArray baSection=pe.getSection(i);
-                    quint32 nNewSectionSize=QBinary::getPhysSize(baSection.data(),baSection.size());
-
-                    bufPE.write_array(nCurrentOffset,baSection.data(),nNewSectionSize);
-
-                    nNewSectionSize=__ALIGN_UP(nNewSectionSize,nFileAlignment);
-
-                    bufPE.setSection_PointerToRawData(i,nCurrentOffset);
-                    bufPE.setSection_SizeOfRawData(i,nNewSectionSize);
-                    bufPE.setSection_Characteristics(i,0xe0000020); // !!!
-                    nCurrentOffset+=nNewSectionSize;
-                }
-
-                //                bufPE._fixCheckSum();
-
-                // TODO init import
-
-                buffer.close();
-
-                bResult=true;
-            }
-
-            file.resize(0);
-            file.write(baBuffer.data(),nCurrentOffset);
-        }
-
-        file.close();
-    }
-
-    return bResult;
-}
-
 bool QPE::addImportSection(QMap<qint64, QString> *pMapIAT)
 {
     return addImportSection(getDevice(),pMapIAT);
@@ -4051,6 +3977,121 @@ int QPE::getConstDataSection()
     }
 
     return nResult;
+}
+
+bool QPE::rebuildDump(QString sResultFile)
+{
+    bool bResult=false;
+
+    QFile file;
+    file.setFileName(sResultFile);
+
+    if(file.open(QIODevice::ReadWrite))
+    {
+        file.resize(0);
+        quint32 nTotalSize=0;
+        quint32 nHeaderSize=0;
+        QList<quint32> listSectionsSize;
+        QList<quint32> listSectionsOffsets;
+
+        quint32 nFileAlignment=getOptionalHeader_FileAlignment();
+
+        QByteArray baHeader=getHeaders();
+
+        nHeaderSize=QBinary::getPhysSize(baHeader.data(),baHeader.size());
+        int nNumberOfSections=getFileHeader_NumberOfSections();
+        for(int i=0;i<nNumberOfSections;i++)
+        {
+            QByteArray baSection=read_array(getSection_VirtualAddress(i),getSection_VirtualSize(i));
+            quint32 nSectionSize=QBinary::getPhysSize(baSection.data(),baSection.size());
+            listSectionsSize.append(nSectionSize);
+        }
+
+        nTotalSize+=__ALIGN_UP(nHeaderSize,nFileAlignment);
+
+        for(int i=0;i<listSectionsSize.size();i++)
+        {
+            listSectionsOffsets.append(nTotalSize);
+            if(listSectionsSize.at(i))
+            {
+                nTotalSize+=__ALIGN_UP(listSectionsSize.at(i),nFileAlignment);
+            }
+        }
+
+        QByteArray baBuffer;
+        baBuffer.resize(nTotalSize);
+        baBuffer.fill(0);
+        QBuffer buffer;
+        buffer.setBuffer(&baBuffer);
+
+        if(buffer.open(QIODevice::ReadWrite))
+        {
+            QPE bufPE(&buffer);
+
+            QBinary::copyDeviceMemory(getDevice(),0,&buffer,0,nHeaderSize);
+
+            bufPE.setOptionalHeader_SizeOfHeaders(__ALIGN_UP(nHeaderSize,nFileAlignment));
+
+            for(int i=0;i<nNumberOfSections;i++)
+            {
+                QBinary::copyDeviceMemory(getDevice(),getSection_VirtualAddress(i),&buffer,listSectionsOffsets.at(i),listSectionsSize.at(i));
+                bufPE.setSection_PointerToRawData(i,listSectionsOffsets.at(i));
+                bufPE.setSection_SizeOfRawData(i,__ALIGN_UP(listSectionsSize.at(i),nFileAlignment));
+
+                bufPE.setSection_Characteristics(i,0xe0000020); // !!!
+            }
+
+            bResult=true;
+
+            buffer.close();
+        }
+
+        file.write(baBuffer.data(),baBuffer.size());
+
+
+        file.close();
+    }
+
+    return bResult;
+}
+
+bool QPE::rebuildDump(QString sInputFile, QString sResultFile)
+{
+    bool bResult=false;
+    QFile file;
+    file.setFileName(sInputFile);
+    if(file.open(QIODevice::ReadOnly))
+    {
+        QPE pe(&file);
+        if(pe.isValid())
+        {
+            bResult=pe.rebuildDump(sResultFile);
+        }
+
+        file.close();
+    }
+
+    return bResult;
+}
+
+bool QPE::fixCheckSum(QString sFileName)
+{
+    bool bResult=false;
+    QFile file;
+    file.setFileName(sFileName);
+    if(file.open(QIODevice::ReadWrite))
+    {
+        QPE pe(&file);
+        if(pe.isValid())
+        {
+            pe._fixCheckSum();
+            bResult=true;
+        }
+
+        file.close();
+    }
+
+    return bResult;
 }
 
 qint64 QPE::_fixHeadersSize()

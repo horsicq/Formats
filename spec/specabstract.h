@@ -555,10 +555,6 @@ public:
     static QString recordTypeIdToString(RECORD_TYPES id);
     static QString recordNameIdToString(RECORD_NAMES id);
 
-//    static QList<SCAN_STRUCT> scanBinary(QBinary *pBinary,SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId); // Obsolete
-//    static QList<SCAN_STRUCT> scanPE(QPE *pPE,SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId); // Obsolete
-    virtual bool unpack(UNPACK_OPTIONS *pUnpOptions,QIODevice *pDevice,QString sOutFileName);
-
     static SpecAbstract::UNPACK_OPTIONS getPossibleUnpackOptions(QIODevice *pDevice);
 
     static QString createResultString(const SCAN_STRUCT *pScanStruct);
@@ -621,7 +617,6 @@ public:
 
     static QByteArray _BasicPEInfoToArray(BASIC_PE_INFO *pInfo);
     static BASIC_PE_INFO _ArrayToBasicPEInfo(const QByteArray *pbaArray);
-
 
     static void memoryScan(QMap<RECORD_NAMES,SCANS_STRUCT> *pMapRecords,QIODevice *pDevice,qint64 nOffset,qint64 nSize,SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2);
     static void signatureScan(QMap<RECORD_NAMES,SCANS_STRUCT> *pMapRecords,QString sSignature,SIGNATURE_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);

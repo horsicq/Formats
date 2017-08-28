@@ -414,7 +414,6 @@ public:
 
     qint32 addressToSection(qint64 nAddress);
     static qint32 addressToSection(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
-    static bool fixDumpFile(QString sFileName,DUMP_OPTIONS *pDumpOptions); // Obsolete
 
     bool addImportSection(QMap<qint64,QString> *pMapIAT);
     static bool addImportSection(QIODevice *pDevice,QMap<qint64,QString> *pMapIAT);
@@ -485,6 +484,10 @@ public:
     int getNormalCodeSection();
     int getNormalDataSection();
     int getConstDataSection();
+
+    bool rebuildDump(QString sResultFile);
+    static bool rebuildDump(QString sInputFile,QString sResultFile);
+    static bool fixCheckSum(QString sFileName);
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     qint64 _calculateRawSize();

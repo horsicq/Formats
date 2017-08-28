@@ -449,51 +449,13 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
     return sResult;
 }
 
-//QList<SpecAbstract::SCAN_STRUCT> SpecAbstract::scanBinary(QBinary *pBinary, SpecAbstract::SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId)
-//{
-//    Q_UNUSED(pBinary);
-//    Q_UNUSED(pOptions);
-//    Q_UNUSED(nStartOffset);
-//    Q_UNUSED(parentId);
-
-//    QList<SpecAbstract::SCAN_STRUCT> list;
-
-//    return list;
-//}
-
-//QList<SpecAbstract::SCAN_STRUCT> SpecAbstract::scanPE(QPE *pPE, SpecAbstract::SCAN_OPTIONS *pOptions,qint64 nStartOffset,SpecAbstract::ID parentId)
-//{
-//    Q_UNUSED(pOptions);
-//    Q_UNUSED(nStartOffset);
-//    Q_UNUSED(parentId);
-
-//    QList<SpecAbstract::SCAN_STRUCT> list;
-
-//    SpecAbstract::SCAN_STRUCT record= {0};
-
-//    record.id.filetype=pPE->is64()?RECORD_FILETYPE_PE64:RECORD_FILETYPE_PE32;
-//    record.name=RECORD_NAME_UNKNOWN;
-
-//    list.append(record);
-
-//    return list;
-//}
-
-bool SpecAbstract::unpack(SpecAbstract::UNPACK_OPTIONS *pUnpOptions, QIODevice *pDevice, QString sOutFileName)
-{
-    Q_UNUSED(pUnpOptions);
-    Q_UNUSED(pDevice);
-    Q_UNUSED(sOutFileName);
-    return false;
-}
-
 SpecAbstract::UNPACK_OPTIONS SpecAbstract::getPossibleUnpackOptions(QIODevice *pDevice)
 {
     UNPACK_OPTIONS result= {0};
 
-    QSet<QBinary::FILE_TYPES> setFileTypes=QBinary::getFileTypes(pDevice);
+    QSet<QBinary::FILE_TYPES> stFileTypes=QBinary::getFileTypes(pDevice);
 
-    if(setFileTypes.contains(QBinary::FILE_TYPE_PE32)||setFileTypes.contains(QBinary::FILE_TYPE_PE64))
+    if(stFileTypes.contains(QBinary::FILE_TYPE_PE32)||stFileTypes.contains(QBinary::FILE_TYPE_PE64))
     {
         QPE pe(pDevice);
 
