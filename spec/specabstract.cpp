@@ -91,6 +91,8 @@ SpecAbstract::SIGNATURE_RECORD _PE_header_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_NSPACK,                       "2.2-2.4",      "",                     "'MZ'40000100000002000000FFFF00000002000000000000400000E9A4240100B409BA0B01CD21B44CCD21'packed by nspack$'40000000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_COMPILER,         SpecAbstract::RECORD_NAME_LAYHEYFORTRAN90,              "",             "",                     "'MZ'....................................................................................................................6C030000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_HMIMYSPROTECTOR,              "0.1",          "",                     "'MZ'............................................................'hmimys'27's ProtectV0.1'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "",             "",                     "'MZ'00000000000000000000'PE'00004C01....'FSG!'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MEW,                          "",             "",                     "'MZ'00000000000000000000'PE'00004C010200000000000000000000000000"},
 };
 
 SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
@@ -444,6 +446,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_HMIMYSPROTECTOR:                   sResult=QString("Hmimys's Protector"); break;
         case RECORD_NAME_VPACKER:                           sResult=QString("VPacker"); break;
         case RECORD_NAME_MKFPACK:                           sResult=QString("MKFPack"); break;
+        case RECORD_NAME_MEW:                               sResult=QString("MEW"); break;
     }
 
     return sResult;
@@ -989,6 +992,11 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         stDetects.insert("kernel32_winupack");
                         stDetects.insert("kernel32_andpakk");
                         stDetects.insert("kernel32_bero");
+
+                        if(pPEInfo->listImports.at(0).sName=="kernel32.dll")
+                        {
+                            stDetects.insert("kernel32_mew");
+                        }
                     }
                 }
                 else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="GetProcAddress")&&
@@ -1482,6 +1490,11 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
         pPEInfo->mapImportDetects.insert(RECORD_NAME_MKFPACK,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_MKFPACK,"","",0));
     }
 
+    if(stDetects.contains("kernel32_mew"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_MEW,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_MEW,"","",0));
+    }
+
     if(stDetects.contains("kernel32_nspack"))
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_NSPACK,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_NSPACK,"","",0));
@@ -1544,7 +1557,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
 
     if(stDetects.contains("kernel32_fsg"))
     {
-        pPEInfo->mapImportDetects.insert(RECORD_NAME_HMIMYSPROTECTOR,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PROTECTOR,RECORD_NAME_FSG,"","",0));
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_FSG,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_FSG,"","",0));
     }
 
     if(stDetects.contains("kernel32_hmimysprotector"))
@@ -2035,9 +2048,21 @@ void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO
                 // FSG
                 if(pPEInfo->mapImportDetects.contains(RECORD_NAME_FSG))
                 {
-                    // TODO
-                    //                    SpecAbstract::SCANS_STRUCT recordACProtect=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_ACPROTECT);
-                    //                    pPEInfo->mapResultProtectors.insert(recordACProtect.name,scansToScan(&(pPEInfo->basic_info),&recordACProtect));
+                    if(pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_FSG))
+                    {
+                        SpecAbstract::SCANS_STRUCT ss=pPEInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_FSG);
+                        pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                    }
+                }
+
+                // MEW
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_MEW))
+                {
+                    if(pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_MEW))
+                    {
+                        SpecAbstract::SCANS_STRUCT ss=pPEInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_MEW);
+                        pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                    }
                 }
 
 

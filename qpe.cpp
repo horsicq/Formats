@@ -930,7 +930,7 @@ QList<QPE::SECTION_RECORD> QPE::getSectionRecords(QList<S_IMAGE_SECTION_HEADER> 
 {
      QList<QPE::SECTION_RECORD> listResult;
 
-     quint32 nNumberOfSections=pList->count();
+     int nNumberOfSections=pList->count();
 
      for(int i=0; i<nNumberOfSections; i++)
      {
