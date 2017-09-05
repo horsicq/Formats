@@ -485,8 +485,24 @@ public:
     int getNormalDataSection();
     int getConstDataSection();
 
-    bool rebuildDump(QString sResultFile);
-    static bool rebuildDump(QString sInputFile,QString sResultFile);
+    struct REBUILD_OPTIONS
+    {
+        bool bOptimize;
+        bool bClearHeader;
+        bool bRemoveLastSection;
+        bool bSetEntryPoint;
+        quint32 nEntryPoint;
+        bool bAddImportSection;
+        QMap<qint64,QString> mapIAT;
+        bool bAddRelocsSection;
+        QList<qint64> listRelocsRVAs;
+        bool bRenameSections;
+        QString sSectionName;
+        bool bFixChecksum;
+    };
+
+    bool rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions);
+    static bool rebuildDump(QString sInputFile,QString sResultFile,REBUILD_OPTIONS *pRebuildOptions);
     static bool fixCheckSum(QString sFileName);
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

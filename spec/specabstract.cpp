@@ -91,8 +91,10 @@ SpecAbstract::SIGNATURE_RECORD _PE_header_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_NSPACK,                       "2.2-2.4",      "",                     "'MZ'40000100000002000000FFFF00000002000000000000400000E9A4240100B409BA0B01CD21B44CCD21'packed by nspack$'40000000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_COMPILER,         SpecAbstract::RECORD_NAME_LAYHEYFORTRAN90,              "",             "",                     "'MZ'....................................................................................................................6C030000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_HMIMYSPROTECTOR,              "0.1",          "",                     "'MZ'............................................................'hmimys'27's ProtectV0.1'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "",             "",                     "'MZ'00000000000000000000'PE'00004C01....'FSG!'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MEW,                          "",             "",                     "'MZ'00000000000000000000'PE'00004C010200000000000000000000000000"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.00",         "",                     "4D5A90000300000004000000FFFF0000B800000000000000400000000000000000000000000000000000000000000000000000000000000000000000600000000E1FBA0E00B409CD21B8014CCD21'Windows Program'0D0A24"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.31",         "",                     "'MZ'....................................................................................................................40000000'PE'00004C01....'FSG!'"},
+    {1, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.33-2.00",    "",                     "'MZ'....................'PE'00004C01....'FSG!'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MEW,                          "1.1-1.2",      "",                     "'MZ'00000000000000000000'PE'00004C010200000000000000000000000000"},
 };
 
 SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
@@ -447,6 +449,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_VPACKER:                           sResult=QString("VPacker"); break;
         case RECORD_NAME_MKFPACK:                           sResult=QString("MKFPack"); break;
         case RECORD_NAME_MEW:                               sResult=QString("MEW"); break;
+        case RECORD_NAME_UNKNOWNUPXLIKE:                    sResult=QString("Unknown UPX-like"); break;
     }
 
     return sResult;
@@ -885,7 +888,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         PE_handle_import(pDevice,&result);
 
 
-        PE_handle_protection(pDevice,&result);
+        PE_handle_Protection(pDevice,&result);
         PE_handle_VMProtect(pDevice,&result);
         PE_handle_Armadillo(pDevice,&result);
         PE_handle_NETProtection(pDevice,&result);
@@ -896,6 +899,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         PE_handle_Tools(pDevice,&result);
         PE_handle_SFX(pDevice,&result);
         PE_handle_Installers(pDevice,&result);
+        PE_handle_UnknownProtection(pDevice,&result);
 
         // TODO
         // Filter
@@ -914,8 +918,6 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         //        // http://stackoverflow.com/questions/18720045/what-are-the-list-of-all-possible-values-for-dvclal
         //        // https://synopse.info/forum/viewtopic.php?id=83
         //        // sysutils.pas TPackageInfoHeader
-
-
 
         result.basic_info.listDetects.append(result.mapResultLinkers.values());
         result.basic_info.listDetects.append(result.mapResultCompilers.values());
@@ -1657,7 +1659,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     }
 }
 
-void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     QPE pe(pDevice);
 
@@ -1685,27 +1687,29 @@ void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO
 
             // UPX
             // TODO 32-64
-            if(pPEInfo->mapImportDetects.contains(RECORD_NAME_UPX)||
-                    pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_UPX))
+            if(pPEInfo->mapImportDetects.contains(RECORD_NAME_UPX))
             {
-                if(viUPX.sVersion!="")
+                if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_UPX))
                 {
-                    SpecAbstract::SCANS_STRUCT recordUPX= {0};
+                    if((viUPX.sVersion!=""))
+                    {
+                        SpecAbstract::SCANS_STRUCT recordUPX= {0};
 
-                    recordUPX.type=RECORD_TYPE_PACKER;
-                    recordUPX.name=RECORD_NAME_UPX;
-                    recordUPX.sVersion=viUPX.sVersion;
-                    recordUPX.sInfo=viUPX.sInfo;
+                        recordUPX.type=RECORD_TYPE_PACKER;
+                        recordUPX.name=RECORD_NAME_UPX;
+                        recordUPX.sVersion=viUPX.sVersion;
+                        recordUPX.sInfo=viUPX.sInfo;
 
-                    pPEInfo->mapResultPackers.insert(recordUPX.name,scansToScan(&(pPEInfo->basic_info),&recordUPX));
-                }
-                else if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_UPX))
-                {
-                    SpecAbstract::SCANS_STRUCT recordUPX=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_UPX);
+                        pPEInfo->mapResultPackers.insert(recordUPX.name,scansToScan(&(pPEInfo->basic_info),&recordUPX));
+                    }
+                    else
+                    {
+                        SpecAbstract::SCANS_STRUCT recordUPX=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_UPX);
 
-                    recordUPX.sInfo=append(recordUPX.sInfo,"modified");
+                        recordUPX.sInfo=append(recordUPX.sInfo,"modified");
 
-                    pPEInfo->mapResultPackers.insert(recordUPX.name,scansToScan(&(pPEInfo->basic_info),&recordUPX));
+                        pPEInfo->mapResultPackers.insert(recordUPX.name,scansToScan(&(pPEInfo->basic_info),&recordUPX));
+                    }
                 }
             }
 
@@ -2051,7 +2055,23 @@ void SpecAbstract::PE_handle_protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     if(pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_FSG))
                     {
                         SpecAbstract::SCANS_STRUCT ss=pPEInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_FSG);
-                        pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                        if(ss.nVariant==0)
+                        {
+                            pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                        }
+                        else if(ss.nVariant==1)
+                        {
+                            if(pe.read_ansiString(0x154)=="KERNEL32.dll")
+                            {
+                                ss.sVersion="1.33";
+                            }
+                            else
+                            {
+                                ss.sVersion="2.00";
+                            }
+                            pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                        }
+
                     }
                 }
 
@@ -4409,6 +4429,28 @@ void SpecAbstract::PE_handle_SFX(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT
                 SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_SFX,RECORD_NAME_WINACE,"","",0);
                 ss.sVersion=QPE::getResourceVersionValue("ProductVersion",&(pPEInfo->resVersion));
                 pPEInfo->mapResultSFX.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+        }
+    }
+}
+
+void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+{
+    if((pPEInfo->mapResultPackers.count()==0)&&(pPEInfo->mapResultProtectors.count()==0))
+    {
+        if(pPEInfo->listSectionRecords.count())
+        {
+            if(pPEInfo->listSectionRecords.at(0).nSize==0)
+            {
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_UPX))
+                {
+                    SpecAbstract::SCANS_STRUCT recordSS={0};
+
+                    recordSS.type=RECORD_TYPE_PACKER;
+                    recordSS.name=RECORD_NAME_UNKNOWNUPXLIKE;
+
+                    pPEInfo->mapResultPackers.insert(recordSS.name,scansToScan(&(pPEInfo->basic_info),&recordSS));
+                }
             }
         }
     }

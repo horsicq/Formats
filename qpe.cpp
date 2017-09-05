@@ -3979,7 +3979,7 @@ int QPE::getConstDataSection()
     return nResult;
 }
 
-bool QPE::rebuildDump(QString sResultFile)
+bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 {
     bool bResult=false;
 
@@ -3996,27 +3996,39 @@ bool QPE::rebuildDump(QString sResultFile)
 
         quint32 nFileAlignment=getOptionalHeader_FileAlignment();
 
-        QByteArray baHeader=getHeaders();
+        quint32 nSectionAlignment=getOptionalHeader_SectionAlignment();
 
-        nHeaderSize=QBinary::getPhysSize(baHeader.data(),baHeader.size());
-        int nNumberOfSections=getFileHeader_NumberOfSections();
-        for(int i=0;i<nNumberOfSections;i++)
+        if(pRebuildOptions->bOptimize)
         {
-            QByteArray baSection=read_array(getSection_VirtualAddress(i),getSection_VirtualSize(i));
-            quint32 nSectionSize=QBinary::getPhysSize(baSection.data(),baSection.size());
-            listSectionsSize.append(nSectionSize);
-        }
+            QByteArray baHeader=getHeaders();
+            int nNumberOfSections=getFileHeader_NumberOfSections();
 
-        nTotalSize+=__ALIGN_UP(nHeaderSize,nFileAlignment);
+            nHeaderSize=QBinary::getPhysSize(baHeader.data(),baHeader.size());
 
-        for(int i=0;i<listSectionsSize.size();i++)
-        {
-            listSectionsOffsets.append(nTotalSize);
-            if(listSectionsSize.at(i))
+            for(int i=0;i<nNumberOfSections;i++)
             {
-                nTotalSize+=__ALIGN_UP(listSectionsSize.at(i),nFileAlignment);
+                QByteArray baSection=read_array(getSection_VirtualAddress(i),getSection_VirtualSize(i));
+                quint32 nSectionSize=QBinary::getPhysSize(baSection.data(),baSection.size());
+                listSectionsSize.append(nSectionSize);
+            }
+
+            nTotalSize+=__ALIGN_UP(nHeaderSize,nFileAlignment);
+
+            for(int i=0;i<listSectionsSize.size();i++)
+            {
+                listSectionsOffsets.append(nTotalSize);
+                if(listSectionsSize.at(i))
+                {
+                    nTotalSize+=__ALIGN_UP(listSectionsSize.at(i),nFileAlignment);
+                }
             }
         }
+        else
+        {
+            nTotalSize=getSize();
+        }
+
+        // TODO clearHeader
 
         QByteArray baBuffer;
         baBuffer.resize(nTotalSize);
@@ -4028,15 +4040,32 @@ bool QPE::rebuildDump(QString sResultFile)
         {
             QPE bufPE(&buffer);
 
-            QBinary::copyDeviceMemory(getDevice(),0,&buffer,0,nHeaderSize);
+            if(pRebuildOptions->bOptimize)
+            {
+                QBinary::copyDeviceMemory(getDevice(),0,&buffer,0,nHeaderSize);
+                bufPE.setOptionalHeader_SizeOfHeaders(__ALIGN_UP(nHeaderSize,nFileAlignment));
+            }
+            else
+            {
+                QBinary::copyDeviceMemory(getDevice(),0,&buffer,0,nTotalSize);
+            }
 
-            bufPE.setOptionalHeader_SizeOfHeaders(__ALIGN_UP(nHeaderSize,nFileAlignment));
-
+            int nNumberOfSections=getFileHeader_NumberOfSections();
             for(int i=0;i<nNumberOfSections;i++)
             {
-                QBinary::copyDeviceMemory(getDevice(),getSection_VirtualAddress(i),&buffer,listSectionsOffsets.at(i),listSectionsSize.at(i));
-                bufPE.setSection_PointerToRawData(i,listSectionsOffsets.at(i));
-                bufPE.setSection_SizeOfRawData(i,__ALIGN_UP(listSectionsSize.at(i),nFileAlignment));
+                if(pRebuildOptions->bOptimize)
+                {
+                    QBinary::copyDeviceMemory(getDevice(),getSection_VirtualAddress(i),&buffer,listSectionsOffsets.at(i),listSectionsSize.at(i));
+                    bufPE.setSection_PointerToRawData(i,listSectionsOffsets.at(i));
+                    bufPE.setSection_SizeOfRawData(i,__ALIGN_UP(listSectionsSize.at(i),nFileAlignment));
+                }
+                else
+                {
+                    quint32 nSectionAddress=getSection_VirtualAddress(i);
+                    quint32 nSectionSize=getSection_VirtualSize(i);
+                    bufPE.setSection_SizeOfRawData(i,__ALIGN_UP(nSectionSize,nSectionAlignment));
+                    bufPE.setSection_PointerToRawData(i,nSectionAddress);
+                }
 
                 bufPE.setSection_Characteristics(i,0xe0000020); // !!!
             }
@@ -4048,6 +4077,56 @@ bool QPE::rebuildDump(QString sResultFile)
 
         file.write(baBuffer.data(),baBuffer.size());
 
+        QPE _pe(&file);
+
+        if(_pe.isValid())
+        {
+            if(pRebuildOptions->bRemoveLastSection)
+            {
+                _pe.removeLastSection();
+            }
+
+            if(pRebuildOptions->bSetEntryPoint)
+            {
+                _pe.setOptionalHeader_AddressOfEntryPoint(pRebuildOptions->nEntryPoint);
+            }
+
+            if(pRebuildOptions->bAddImportSection)
+            {
+                if(!pRebuildOptions->mapIAT.isEmpty())
+                {
+                    if(!_pe.addImportSection(&(pRebuildOptions->mapIAT)))
+                    {
+                        _errorMessage(tr("Cannot add import section"));
+                    }
+                }
+            }
+
+            if(pRebuildOptions->bRenameSections)
+            {
+                int nNumberOfSections=_pe.getFileHeader_NumberOfSections();
+
+                for(int i=0;i<nNumberOfSections;i++)
+                {
+                    QString sSection=_pe.getSection_NameAsString(i);
+                    if(sSection!=".rsrc")
+                    {
+                        _pe.setSection_NameAsString(i,pRebuildOptions->sSectionName);
+                    }
+                }
+            }
+
+            if(pRebuildOptions->bAddRelocsSection)
+            {
+                _pe.addRelocsSection(&(pRebuildOptions->listRelocsRVAs));
+            }
+
+            if(pRebuildOptions->bFixChecksum)
+            {
+                _pe._fixCheckSum();
+            }
+        }
+
 
         file.close();
     }
@@ -4055,7 +4134,7 @@ bool QPE::rebuildDump(QString sResultFile)
     return bResult;
 }
 
-bool QPE::rebuildDump(QString sInputFile, QString sResultFile)
+bool QPE::rebuildDump(QString sInputFile, QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 {
     bool bResult=false;
     QFile file;
@@ -4065,7 +4144,7 @@ bool QPE::rebuildDump(QString sInputFile, QString sResultFile)
         QPE pe(&file);
         if(pe.isValid())
         {
-            bResult=pe.rebuildDump(sResultFile);
+            bResult=pe.rebuildDump(sResultFile,pRebuildOptions);
         }
 
         file.close();

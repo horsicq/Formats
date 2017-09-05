@@ -272,7 +272,8 @@ public:
         RECORD_NAME_HMIMYSPROTECTOR,
         RECORD_NAME_VPACKER,
         RECORD_NAME_MKFPACK,
-        RECORD_NAME_MEW
+        RECORD_NAME_MEW,
+        RECORD_NAME_UNKNOWNUPXLIKE
     };
 
     struct ID
@@ -574,7 +575,7 @@ public:
     static SCANS_STRUCT getScansStruct(quint32 nVariant,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo,qint64 nOffset);
 
     static void PE_handle_import(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
-    static void PE_handle_protection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_Protection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_VMProtect(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Armadillo(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_NETProtection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
@@ -584,6 +585,8 @@ public:
     static void PE_handle_Tools(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Installers(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_SFX(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+
+    static void PE_handle_UnknownProtection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
     static void Binary_handle_Texts(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_Archives(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
