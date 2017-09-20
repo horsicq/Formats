@@ -945,11 +945,13 @@ bool QBinary::zeroFill(qint64 nOffset, qint64 nSize)
     quint8 cZero=0;
 
     // TODO optimize
-    while(nSize>0)
+    if(__pDevice->seek(nOffset))
     {
-        write_array(nOffset,(char *)&cZero,1);
-        nOffset++;
-        nSize--;
+        while(nSize>0)
+        {
+            __pDevice->write((char *)&cZero,1);
+            nSize--;
+        }
     }
 
     return true;

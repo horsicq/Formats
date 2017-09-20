@@ -868,25 +868,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
 //            }
         }
 
-
-        //        SpecAbstract::SCAN_STRUCT _record={0};
-
-        //        _record.id=result.basic_info.id;
-        //        _record.nSize=result.basic_info.nSize;
-        ////        _record.parentId=parentId; // TODO
-        //        _record.parentId=result.basic_info.parentId;
-        //        _record.type=SpecAbstract::RECORD_TYPE_UNKNOWN;
-        //        _record.name=SpecAbstract::RECORD_NAME_UNKNOWN;
-        //        result.listDetects.append(_record);
-
-        //        SpecAbstract::BASIC_PE_INFO bpi={0};
-
-        //        bpi.nEntryPoint=result.nEntryPointAddress;
-
-        //        _record.baExtra=SpecAbstract::_BasicPEInfoToArray(&bpi);
-
         PE_handle_import(pDevice,&result);
-
 
         PE_handle_Protection(pDevice,&result);
         PE_handle_VMProtect(pDevice,&result);
@@ -909,8 +891,6 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         //        handle_ENIGMA(pDevice,&result);
 
         //        fixDetects(&result);
-
-
 
         //        // https://github.com/tmcdos/VCL-explorer
         //        // https://en.wikipedia.org/wiki/C%2B%2BBuilder
@@ -1454,6 +1434,32 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
         }
     }
 
+    for(int i=0;i<pPEInfo->listImports.count();i++)
+    {
+        if(pPEInfo->listImports.at(i).sName.toUpper()=="KERNEL32.DLL")
+        {
+            if(pPEInfo->listImports.at(i).listPositions.count()==4)
+            {
+                if( (pPEInfo->listImports.at(i).listPositions.at(0).sName=="LoadLibraryA")&&
+                    (pPEInfo->listImports.at(i).listPositions.at(1).sName=="ExitProcess")&&
+                    (pPEInfo->listImports.at(i).listPositions.at(2).sName=="GetProcAddress")&&
+                    (pPEInfo->listImports.at(i).listPositions.at(3).sName=="VirtualProtect"))
+                {
+                    stDetects.insert("kernel32_upx3exe_new");   // 3.91+
+                }
+            }
+            else if(pPEInfo->listImports.at(i).listPositions.count()==3)
+            {
+                if( (pPEInfo->listImports.at(i).listPositions.at(0).sName=="LoadLibraryA")&&
+                    (pPEInfo->listImports.at(i).listPositions.at(1).sName=="GetProcAddress")&&
+                    (pPEInfo->listImports.at(i).listPositions.at(2).sName=="VirtualProtect"))
+                {
+                    stDetects.insert("kernel32_upx3dll_new");   // 3.91+
+                }
+            }
+        }
+    }
+
 //    qDebug()<<stDetects;
 
     // TODO 32/64
@@ -1656,6 +1662,14 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     else if(stDetects.contains("kernel32_upx3dll"))
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_UPX,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_UPX,"2.90-3.XX","dll",0));
+    }
+    else if(stDetects.contains("kernel32_upx3exe_new"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_UPX,getScansStruct(1,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_UPX,"3.91+","exe",0));
+    }
+    else if(stDetects.contains("kernel32_upx3dll_new"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_UPX,getScansStruct(1,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_UPX,"3.91+","dll",0));
     }
 }
 
@@ -2085,7 +2099,6 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     }
                 }
 
-
                 // Alex Protector
                 // 2.0.X
                 if(pPEInfo->mapImportDetects.contains(RECORD_NAME_ALEXPROTECTOR))
@@ -2116,7 +2129,6 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                         pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
                     }
                 }
-
 
                 if(pPEInfo->mapImportDetects.contains(RECORD_NAME_ORIEN))
                 {
@@ -4442,7 +4454,8 @@ void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice, SpecAbstract:
         {
             if(pPEInfo->listSectionRecords.at(0).nSize==0)
             {
-                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_UPX))
+                if(     pPEInfo->mapImportDetects.contains(RECORD_NAME_UPX)&&
+                        (pPEInfo->mapImportDetects.value(RECORD_NAME_UPX).nVariant==0))
                 {
                     SpecAbstract::SCANS_STRUCT recordSS={0};
 

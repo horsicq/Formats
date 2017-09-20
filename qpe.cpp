@@ -1325,7 +1325,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
         //
         nFileOffset=__ALIGN_DOWN(nFileOffset,nFileAlignment);
 //        qint64 nFileSize=__ALIGN_UP(section.SizeOfRawData,nFileAlignment);
-        qint64 nFileSize=section.SizeOfRawData;
+        qint64 nFileSize=section.SizeOfRawData+(section.PointerToRawData-nFileOffset);
         qint64 nVirtualAddress=nBaseAddress+section.VirtualAddress;
         qint64 nVirtualSize=__ALIGN_UP(section.Misc.VirtualSize,nSectionAlignment);
 
@@ -1705,17 +1705,26 @@ void QPE::setImportDescriptor(quint32 nNumber, S_IMAGE_IMPORT_DESCRIPTOR *pImpor
         write_S_IMAGE_IMPORT_DESCRIPTOR(nImportOffset,*pImportDescriptor);
     }
 }
-
+// TODO: function with QList<MEMORY_MAP>
 QList<QPE::IMPORT_HEADER> QPE::getImports()
 {
     QList<IMPORT_HEADER> listResult;
 
-    qint64 nImportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_IMPORT);
+    S_IMAGE_DATA_DIRECTORY dataResources=getOptionalHeader_DataDirectory(S_IMAGE_DIRECTORY_ENTRY_IMPORT);
+    QList<MEMORY_MAP> listMemoryMap=getMemoryMapList();
+    qint64 nBaseAddress=getBaseAddress();
+    qint64 nImportOffset=-1;
+    qint64 nImportOffsetTest=-1;
+
+    if(dataResources.VirtualAddress)
+    {
+        nImportOffset=addressToOffset(&listMemoryMap,dataResources.VirtualAddress+nBaseAddress);
+        nImportOffsetTest=addressToOffset(&listMemoryMap,dataResources.VirtualAddress+nBaseAddress+sizeof(S_IMAGE_IMPORT_DESCRIPTOR)-2); // Test for some (Win)Upack stubs
+    }
+
 
     if(nImportOffset!=-1)
     {
-        QList<MEMORY_MAP> listMemoryMap=getMemoryMapList();
-        qint64 nBaseAddress=getBaseAddress();
         bool bIs64=is64();
 
         while(true)
@@ -1723,6 +1732,10 @@ QList<QPE::IMPORT_HEADER> QPE::getImports()
             IMPORT_HEADER importHeader= {0};
             S_IMAGE_IMPORT_DESCRIPTOR iid=read_S_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
 
+            if(nImportOffsetTest==-1)
+            {
+                iid.FirstThunk&=0x0000FFFF;
+            }
 
             if((iid.Characteristics==0)&&(iid.Name==0))
             {
@@ -2791,7 +2804,7 @@ QBinary::OFFSETSIZE QPE::__getSectionOffsetAndSize(quint32 nSection)
         {
             nSectionOffset=sectionHeader.PointerToRawData;
             nSectionOffset=__ALIGN_DOWN(nSectionOffset,nFileAlignment);
-            nSectionSize=sectionHeader.SizeOfRawData;
+            nSectionSize=sectionHeader.SizeOfRawData+(sectionHeader.PointerToRawData-nSectionOffset);
         }
         else
         {
@@ -2892,7 +2905,6 @@ bool QPE::addImportSection(QIODevice *pDevice, QMap<qint64, QString> *pMapIAT)
         if(pe.isValid())
         {
             QList<QPE::IMPORT_HEADER> list=mapIATToList(pMapIAT,pe.is64());
-
             bResult=setImports(pDevice,&list);
         }
     }
@@ -3255,14 +3267,14 @@ bool QPE::addSection(QIODevice *pDevice, S_IMAGE_SECTION_HEADER *pSectionHeader,
                 pe.moveMemory(nOverlayOffset-pSectionHeader->SizeOfRawData,nOverlayOffset,nOverlaySize);
             }
 
-            pe.zeroFill(pSectionHeader->PointerToRawData,pSectionHeader->SizeOfRawData);
-
             pe.write_array(pSectionHeader->PointerToRawData,pData,nDataSize);
+
+            pe.zeroFill(pSectionHeader->PointerToRawData+nDataSize,(pSectionHeader->SizeOfRawData)-nDataSize);
 
             qint64 nNewImageSize=__ALIGN_UP(pSectionHeader->VirtualAddress+pSectionHeader->Misc.VirtualSize,nSectionAlignment);
             pe.setOptionalHeader_SizeOfImage(nNewImageSize);
 
-
+            // TODO flag
             pe._fixCheckSum();
 
             bResult=true;
@@ -4003,7 +4015,14 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             QByteArray baHeader=getHeaders();
             int nNumberOfSections=getFileHeader_NumberOfSections();
 
-            nHeaderSize=QBinary::getPhysSize(baHeader.data(),baHeader.size());
+            if(pRebuildOptions->bClearHeader)
+            {
+                nHeaderSize=getSectionsTableOffset()+nNumberOfSections*sizeof(S_IMAGE_SECTION_HEADER);
+            }
+            else
+            {
+                nHeaderSize=QBinary::getPhysSize(baHeader.data(),baHeader.size());
+            }
 
             for(int i=0;i<nNumberOfSections;i++)
             {
@@ -4027,8 +4046,6 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
         {
             nTotalSize=getSize();
         }
-
-        // TODO clearHeader
 
         QByteArray baBuffer;
         baBuffer.resize(nTotalSize);
@@ -4120,6 +4137,8 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             {
                 _pe.addRelocsSection(&(pRebuildOptions->listRelocsRVAs));
             }
+
+
 
             if(pRebuildOptions->bFixChecksum)
             {

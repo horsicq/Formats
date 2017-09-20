@@ -36,6 +36,7 @@
 #include <QRegularExpressionMatch>
 #include <math.h>
 #include <QDebug>
+#include <QElapsedTimer>
 
 #include "qmsdos_def.h"
 #include "qpe_def.h"
