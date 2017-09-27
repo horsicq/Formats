@@ -124,6 +124,7 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_COMPILER,         SpecAbstract::RECORD_NAME_WATCOMCCPP,                   "1995",         "",                     "..................'WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1995. '"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_ORIEN,                        "",             "",                     "E95D010000CED1CE..'\r\n--------------------------------------------\r\n- ORiEN executable files protection system'"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_VPACKER,                      "0.02.10",      "",                     "60E8........C3"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_ASPROTECT,                    "1.23-2.77",    "",                     "6801......E801000000C3C3"},
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1995.
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1994. All rights re..
 };
@@ -1727,6 +1728,16 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                 }
             }
 
+            // ASProtect
+
+            if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_ASPROTECT))
+            {
+                SpecAbstract::SCANS_STRUCT recordSS=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_ASPROTECT);
+
+                pPEInfo->mapResultProtectors.insert(recordSS.name,scansToScan(&(pPEInfo->basic_info),&recordSS));
+            }
+
+
             // PECompact
 
             if(pPEInfo->mapImportDetects.contains(RECORD_NAME_PECOMPACT))
@@ -1941,7 +1952,10 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                         nBuildNumber=pPEInfo->nMinorImageVersion;
                     }
 
-                    qDebug("nBuildNumber: %x",nBuildNumber);
+                    #ifdef QT_DEBUG
+                        qDebug("nBuildNumber: %x",nBuildNumber);
+                    #endif
+
 
                     switch(nBuildNumber)
                     {
@@ -2342,7 +2356,7 @@ void SpecAbstract::PE_handle_VMProtect(QIODevice *pDevice, SpecAbstract::PEINFO_
     {
         if(!pPEInfo->cliInfo.bInit)
         {
-            bool bSuccess=true;
+            bool bSuccess=false;
 
             QSet<QString> stDetects;
 
@@ -2397,7 +2411,7 @@ void SpecAbstract::PE_handle_VMProtect(QIODevice *pDevice, SpecAbstract::PEINFO_
             // Import
             if(!bSuccess)
             {
-                bSuccess=QPE::isSectionNamePresent("vmp0",&(pPEInfo->listSectionHeaders));
+                bSuccess=QPE::isSectionNamePresent(".vmp0",&(pPEInfo->listSectionHeaders));
             }
 
             if(!bSuccess)
@@ -2431,6 +2445,7 @@ void SpecAbstract::PE_handle_VMProtect(QIODevice *pDevice, SpecAbstract::PEINFO_
                         pe.compareEntryPoint("68........E9")||
                         pe.compareEntryPoint("EB$$E9$$$$$$$$68........E8"))
                 {
+                    // TODO more checks
                     SpecAbstract::SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_VMPROTECT,"","",0);
                     pPEInfo->mapResultProtectors.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
                 }
@@ -3695,7 +3710,8 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
             if(     (sDllLib.contains("gcc"))||
                     (sDllLib.contains("libgcj"))||
                     (sDllLib=="_set_invalid_parameter_handler")||
-                    QPE::isImportLibraryPresentI("libgcc_s_dw2-1.dll",&(pPEInfo->listImports)))
+                    QPE::isImportLibraryPresentI("libgcc_s_dw2-1.dll",&(pPEInfo->listImports))||
+                    pPEInfo->mapOverlayDetects.contains(RECORD_NAME_MINGW))
             {
                 // Mingw
                 // Msys
@@ -3862,15 +3878,6 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                         SCANS_STRUCT ssTool=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_TOOL,RECORD_NAME_MINGW,"","",0);
                         pPEInfo->mapResultTools.insert(ssTool.name,scansToScan(&(pPEInfo->basic_info),&ssTool));
                     }
-                }
-            }
-
-            if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_MINGW))
-            {
-                if(!pPEInfo->mapResultCompilers.contains(RECORD_NAME_GCC))
-                {
-                    SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_COMPILER,RECORD_NAME_GCC,"","",0);
-                    pPEInfo->mapResultCompilers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
                 }
             }
 
@@ -7309,8 +7316,9 @@ SpecAbstract::VI_STRUCT SpecAbstract::PE_get_Armadillo_vi(QIODevice *pDevice, Sp
         {
             result.sVersion="6.60-7.00";
         }
-
+        #ifdef QT_DEBUG
         qDebug() << stDetects;
+        #endif
     }
 
     return result;
