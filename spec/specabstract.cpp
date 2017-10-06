@@ -1764,45 +1764,23 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                             // TODO !!! more buil versions
                             switch(nBuildNumber)
                             {
-                            case 20206:
-                                recordPC.sVersion="2.70";
-                                break;
-                            case 20240:
-                                recordPC.sVersion="2.78a";
-                                break;
-                            case 20243:
-                                recordPC.sVersion="2.79b1";
-                                break;
-                            case 20245:
-                                recordPC.sVersion="2.79bB";
-                                break;
-                            case 20247:
-                                recordPC.sVersion="2.79bD";
-                                break;
-                            case 20256:
-                                recordPC.sVersion="2.80b5";
-                                break;
-                            case 20288:
-                                recordPC.sVersion="2.93b3";
-                                break;
-                            case 20294:
-                                recordPC.sVersion="2.96.2";
-                                break;
-                            case 20295:
-                                recordPC.sVersion="2.97b1";
-                                break;
-                            case 20300:
-                                recordPC.sVersion="2.98.04";
-                                break;
-                            case 20302:
-                                recordPC.sVersion="2.98.06";
-                                break;
-                            case 20308:
-                                recordPC.sVersion="3.00.2";
-                                break;
-                            case 20318:
-                                recordPC.sVersion="3.02.2";
-                                break;
+                            case 20206:     recordPC.sVersion="2.70";       break;
+                            case 20240:     recordPC.sVersion="2.78a";      break;
+                            case 20243:     recordPC.sVersion="2.79b1";     break;
+                            case 20245:     recordPC.sVersion="2.79bB";     break;
+                            case 20247:     recordPC.sVersion="2.79bD";     break;
+                            case 20252:     recordPC.sVersion="2.80b1";     break;
+                            case 20256:     recordPC.sVersion="2.80b5";     break;
+                            case 20261:     recordPC.sVersion="2.82";       break;
+                            case 20288:     recordPC.sVersion="2.93b3";     break;
+                            case 20294:     recordPC.sVersion="2.96.2";     break;
+                            case 20295:     recordPC.sVersion="2.97b1";     break;
+                            case 20296:     recordPC.sVersion="2.98";       break;
+                            case 20300:     recordPC.sVersion="2.98.04";    break;
+                            case 20302:     recordPC.sVersion="2.98.06";    break;
+                            case 20303:     recordPC.sVersion="2.99b";      break;
+                            case 20308:     recordPC.sVersion="3.00.2";     break;
+                            case 20318:     recordPC.sVersion="3.02.2";     break;
 //                            case 20343:
 //                                recordPC.sVersion="TODO";
 //                                break;
@@ -3730,7 +3708,7 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                         QString sVersionString=pe.read_ansiString(nOffset_Version);
 
                         // TODO MinGW-w64
-                        if(sVersionString.contains("MinGW"))
+                        if(sVersionString.contains("MinGW")||sVersionString.contains("GNU"))
                         {
                             SCANS_STRUCT ssTool=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_TOOL,RECORD_NAME_MINGW,"","",0);
                             pPEInfo->mapResultTools.insert(ssTool.name,scansToScan(&(pPEInfo->basic_info),&ssTool));
@@ -3741,7 +3719,14 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                             pPEInfo->mapResultTools.insert(ssTool.name,scansToScan(&(pPEInfo->basic_info),&ssTool));
                         }
 
-                        ss.sVersion=sVersionString.section(" ",-1,-1);
+                        if(sVersionString.contains("GNU"))
+                        {
+                            ss.sVersion=sVersionString.section(" ",-2,-1);
+                        }
+                        else
+                        {
+                            ss.sVersion=sVersionString.section(" ",-1,-1);
+                        }
                     }
                     else
                     {

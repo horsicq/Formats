@@ -1565,8 +1565,7 @@ QString QBinary::getDeviceFilePath(QIODevice *pDevice)
         {
             QFileInfo fi(sFileName);
 
-            sResult=fi.absolutePath();
-
+            sResult=fi.absoluteFilePath();
         }
     }
 
