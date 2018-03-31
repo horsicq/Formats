@@ -1,4 +1,4 @@
-// Copyright (c) 2017 hors<horsicq@gmail.com>
+// copyright (c) 2017-2018 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -656,6 +656,28 @@ struct S__tagVS_FIXEDFILEINFO
     quint32 dwFileSubtype;      // e.g.  VFT2_DRV_KEYBOARD
     quint32 dwFileDateMS;       // e.g.  0
     quint32 dwFileDateLS;       // e.g.  0
+};
+
+//typedef VOID (NTAPI *PIMAGE_TLS_CALLBACK)(PVOID DllHandle,DWORD Reason,PVOID Reserved);
+
+struct S_IMAGE_TLS_DIRECTORY64
+{
+    quint64 StartAddressOfRawData;
+    quint64 EndAddressOfRawData;
+    quint64 AddressOfIndex;
+    quint64 AddressOfCallBacks;
+    quint32 SizeOfZeroFill;
+    quint32 Characteristics;
+};
+
+struct S_IMAGE_TLS_DIRECTORY32
+{
+    quint32 StartAddressOfRawData;
+    quint32 EndAddressOfRawData;
+    quint32 AddressOfIndex;
+    quint32 AddressOfCallBacks;
+    quint32 SizeOfZeroFill;
+    quint32 Characteristics;
 };
 
 #endif // QPE_DEF_H

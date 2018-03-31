@@ -1,4 +1,4 @@
-// Copyright (c) 2017 hors<horsicq@gmail.com>
+// copyright (c) 2017-2018 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -91,6 +91,16 @@ public:
         S_IMAGE_EXPORT_DIRECTORY directory;
         QString sName;
         QList<EXPORT_POSITION> listPositions;
+    };
+
+    struct TLS_HEADER
+    {
+        quint64 StartAddressOfRawData;
+        quint64 EndAddressOfRawData;
+        quint64 AddressOfIndex;
+        quint64 AddressOfCallBacks;
+        quint32 SizeOfZeroFill;
+        quint32 Characteristics;
     };
 
     struct RESOURCES_ID_NAME
@@ -368,14 +378,14 @@ public:
 
     QList<RESOURCE_HEADER> getResources();
 
-    static RESOURCE_HEADER getResourceHeader(int nID1,int nID2,QList<RESOURCE_HEADER> *pListHeaders);
-    static RESOURCE_HEADER getResourceHeader(int nID1,QString sName2,QList<RESOURCE_HEADER> *pListHeaders);
-    static RESOURCE_HEADER getResourceHeader(QString sName1,int nID2,QList<RESOURCE_HEADER> *pListHeaders);
+    static RESOURCE_HEADER getResourceHeader(quint32 nID1,quint32 nID2,QList<RESOURCE_HEADER> *pListHeaders);
+    static RESOURCE_HEADER getResourceHeader(quint32 nID1,QString sName2,QList<RESOURCE_HEADER> *pListHeaders);
+    static RESOURCE_HEADER getResourceHeader(QString sName1,quint32 nID2,QList<RESOURCE_HEADER> *pListHeaders);
     static RESOURCE_HEADER getResourceHeader(QString sName1,QString sName2,QList<RESOURCE_HEADER> *pListHeaders);
 
-    static bool isResourcePresent(int nID1,int nID2,QList<RESOURCE_HEADER> *pListHeaders);
-    static bool isResourcePresent(int nID1,QString sName2,QList<RESOURCE_HEADER> *pListHeaders);
-    static bool isResourcePresent(QString sName1,int nID2,QList<RESOURCE_HEADER> *pListHeaders);
+    static bool isResourcePresent(quint32 nID1,quint32 nID2,QList<RESOURCE_HEADER> *pListHeaders);
+    static bool isResourcePresent(quint32 nID1,QString sName2,QList<RESOURCE_HEADER> *pListHeaders);
+    static bool isResourcePresent(QString sName1,quint32 nID2,QList<RESOURCE_HEADER> *pListHeaders);
     static bool isResourcePresent(QString sName1,QString sName2,QList<RESOURCE_HEADER> *pListHeaders);
 
     QString getResourceManifest(QList<QPE::RESOURCE_HEADER> *pListHeaders);
@@ -458,13 +468,22 @@ public:
     bool isRelocsPresent();
     bool isTLSPresent();
 
+    TLS_HEADER getTLSHeader();
+
     static QMap<quint64,QString> getImageFileMachines();
+    static QMap<quint64,QString> getImageFileMachinesS();
     static QMap<quint64,QString> getImageFileCharacteristics();
+    static QMap<quint64,QString> getImageFileCharacteristicsS();
     static QMap<quint64,QString> getImageNtOptionalMagic();
+    static QMap<quint64,QString> getImageNtOptionalMagicS();
     static QMap<quint64,QString> getImageNtOptionalSubsystem();
+    static QMap<quint64,QString> getImageNtOptionalSubsystemS();
     static QMap<quint64,QString> getImageNtOptionalDllCharacteristics();
+    static QMap<quint64,QString> getImageNtOptionalDllCharacteristicsS();
     static QMap<quint64,QString> getImageSectionFlags();
+    static QMap<quint64,QString> getImageSectionFlagsS();
     static QMap<quint64,QString> getImageSectionAligns();
+    static QMap<quint64,QString> getImageSectionAlignsS();
 
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);
 
@@ -488,13 +507,13 @@ public:
     struct REBUILD_OPTIONS
     {
         bool bOptimize;
-        bool bClearHeader;
-        bool bRemoveLastSection;
+//        bool bClearHeader;
+//        bool bRemoveLastSection;
         bool bSetEntryPoint;
         quint32 nEntryPoint;
-        bool bAddImportSection;
+//        bool bAddImportSection;
         QMap<qint64,QString> mapIAT;
-        bool bAddRelocsSection;
+//        bool bAddRelocsSection;
         QList<qint64> listRelocsRVAs;
         bool bRenameSections;
         QString sSectionName;

@@ -1,4 +1,4 @@
-// Copyright (c) 2017 hors<horsicq@gmail.com>
+// copyright (c) 2017-2018 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ qint32 QMSDOS::get_lfanew()
 
 S_IMAGE_DOS_HEADER QMSDOS::getDosHeader()
 {
-    S_IMAGE_DOS_HEADER result= {0};
+    S_IMAGE_DOS_HEADER result=S_IMAGE_DOS_HEADER();
 
     read_array((qint64)offsetof(S_IMAGE_DOS_HEADER,e_magic),(char *)&result,sizeof(S_IMAGE_DOS_HEADER));
 
@@ -57,7 +57,7 @@ S_IMAGE_DOS_HEADER QMSDOS::getDosHeader()
 
 S_IMAGE_DOS_HEADEREX QMSDOS::getDosHeaderEx()
 {
-    S_IMAGE_DOS_HEADEREX result= {0};
+    S_IMAGE_DOS_HEADEREX result=S_IMAGE_DOS_HEADEREX();
 
     read_array((qint64)offsetof(S_IMAGE_DOS_HEADEREX,e_magic),(char *)&result,sizeof(S_IMAGE_DOS_HEADEREX));
 

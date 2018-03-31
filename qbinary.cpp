@@ -1,4 +1,4 @@
-// Copyright (c) 2017 hors<horsicq@gmail.com>
+// copyright (c) 2017-2018 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -1093,7 +1093,7 @@ qint64 QBinary::addressToOffset(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 n
 
 QBinary::MEMORY_MAP QBinary::getOffsetMemoryMap(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nOffset)
 {
-    MEMORY_MAP result= {0};
+    MEMORY_MAP result={};
 
     for(int i=0; i<pMemoryMap->count(); i++)
     {
@@ -1112,7 +1112,7 @@ QBinary::MEMORY_MAP QBinary::getOffsetMemoryMap(QList<QBinary::MEMORY_MAP> *pMem
 
 QBinary::MEMORY_MAP QBinary::getAddressMemoryMap(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress)
 {
-    MEMORY_MAP result= {0};
+    MEMORY_MAP result={};
 
     for(int i=0; i<pMemoryMap->count(); i++)
     {
@@ -1133,7 +1133,7 @@ QList<QBinary::MEMORY_MAP> QBinary::getMemoryMapList()
 {
     QList<MEMORY_MAP> listMemoryMap;
 
-    MEMORY_MAP record= {0};
+    MEMORY_MAP record={};
     record.nAddress=getBaseAddress();
     record.nOffset=0;
     record.nSize=getSize();
@@ -1383,7 +1383,7 @@ QSet<QBinary::FILE_TYPES> QBinary::getFileTypes()
 
             bool isHeaderValid=false;
 
-            if(((int)nLfanew<nHeaderSize)&&(baHeader.size()>sizeof(S_IMAGE_NT_HEADERS32)))
+            if((nLfanew<nHeaderSize)&&((quint32)baHeader.size()>sizeof(S_IMAGE_NT_HEADERS32)))
             {
                 pOffset+=nLfanew;
                 isHeaderValid=true;
@@ -1700,7 +1700,7 @@ double QBinary::getEntropy(qint64 nOffset, qint64 nSize)
                 return 0;
             }
 
-            for(int i=0; i<nTemp; i++)
+            for(quint64 i=0; i<nTemp; i++)
             {
                 bytes[(unsigned char)pBuffer[i]]+=1;
             }
@@ -1785,7 +1785,7 @@ QString QBinary::getSignature(qint64 nOffset, qint64 nSize)
 
 QBinary::OFFSETSIZE QBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
 {
-    OFFSETSIZE result;
+    OFFSETSIZE result={};
 
     result.nOffset=-1;
     result.nSize=0;
@@ -1926,7 +1926,7 @@ quint8 QBinary::hexToUint8(QString sHex)
 {
     quint8 nResult=0;
 
-    if(sHex.length()>=sizeof(quint8))
+    if((quint32)sHex.length()>=sizeof(quint8))
     {
         sHex=sHex.mid(0,2*sizeof(quint8));
         bool bStatus=false;
@@ -1940,7 +1940,7 @@ qint8 QBinary::hexToInt8(QString sHex)
 {
     quint8 nResult=0;
 
-    if(sHex.length()>=sizeof(qint8))
+    if((quint32)sHex.length()>=sizeof(qint8))
     {
         sHex=sHex.mid(0,2*sizeof(qint8));
         bool bStatus=false;
@@ -1954,7 +1954,7 @@ quint16 QBinary::hexToUint16(QString sHex, bool bIsBigEndian)
 {
     quint16 nResult=0;
 
-    if(sHex.length()>=sizeof(quint16))
+    if((quint32)sHex.length()>=sizeof(quint16))
     {
         if(!bIsBigEndian)
         {
@@ -1972,7 +1972,7 @@ qint16 QBinary::hexToInt16(QString sHex, bool bIsBigEndian)
 {
     qint16 nResult=0;
 
-    if(sHex.length()>=sizeof(qint16))
+    if((quint32)sHex.length()>=sizeof(qint16))
     {
         if(!bIsBigEndian)
         {
@@ -1990,7 +1990,7 @@ quint32 QBinary::hexToUint32(QString sHex, bool bIsBigEndian)
 {
     quint32 nResult=0;
 
-    if(sHex.length()>=sizeof(quint32))
+    if((quint32)sHex.length()>=sizeof(quint32))
     {
         if(!bIsBigEndian)
         {
@@ -2008,7 +2008,7 @@ qint32 QBinary::hexToInt32(QString sHex, bool bIsBigEndian)
 {
     qint32 nResult=0;
 
-    if(sHex.length()>=sizeof(qint32))
+    if((quint32)sHex.length()>=sizeof(qint32))
     {
         if(!bIsBigEndian)
         {
@@ -2026,7 +2026,7 @@ quint64 QBinary::hexToUint64(QString sHex, bool bIsBigEndian)
 {
     quint64 nResult=0;
 
-    if(sHex.length()>=sizeof(quint64))
+    if((quint32)sHex.length()>=sizeof(quint64))
     {
         if(!bIsBigEndian)
         {
@@ -2044,7 +2044,7 @@ qint64 QBinary::hexToInt64(QString sHex, bool bIsBigEndian)
 {
     qint64 nResult=0;
 
-    if(sHex.length()>=sizeof(qint64))
+    if((quint32)sHex.length()>=sizeof(qint64))
     {
         if(!bIsBigEndian)
         {

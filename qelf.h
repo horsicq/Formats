@@ -1,4 +1,4 @@
-// Copyright (c) 2017 hors<horsicq@gmail.com>
+// copyright (c) 2017-2018 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -130,103 +130,103 @@ public:
     static QMultiMap<quint32,QString> getProgramFlagList();
 
 
-    QMultiMap<quint32,QString> getStringList(int nSection=0);
-    QString getStringFromList(int nIndex,int nSection=0);
-    QByteArray getSection(int nIndex);
-    bool isSectionValid(int nIndex);
+    QMultiMap<quint32,QString> getStringList(quint32 nSection=0);
+    QString getStringFromList(quint32 nIndex,quint32 nSection=0);
+    QByteArray getSection(quint32 nIndex);
+    bool isSectionValid(quint32 nIndex);
 
     QList<Elf32_Shdr> getElf32_ShdrList();
     QList<Elf64_Shdr> getElf64_ShdrList();
 
-    Elf32_Shdr getElf32_Shdr(int nIndex);
-    Elf64_Shdr getElf64_Shdr(int nIndex);
+    Elf32_Shdr getElf32_Shdr(quint32 nIndex);
+    Elf64_Shdr getElf64_Shdr(quint32 nIndex);
     // TODO Set
 
-    quint32 getElf32_Shdr_name(int nIndex);
-    quint32 getElf32_Shdr_type(int nIndex);
-    quint32 getElf32_Shdr_flags(int nIndex);
-    quint32 getElf32_Shdr_addr(int nIndex);
-    quint32 getElf32_Shdr_offset(int nIndex);
-    quint32 getElf32_Shdr_size(int nIndex);
-    quint32 getElf32_Shdr_link(int nIndex);
-    quint32 getElf32_Shdr_info(int nIndex);
-    quint32 getElf32_Shdr_addralign(int nIndex);
-    quint32 getElf32_Shdr_entsize(int nIndex);
+    quint32 getElf32_Shdr_name(quint32 nIndex);
+    quint32 getElf32_Shdr_type(quint32 nIndex);
+    quint32 getElf32_Shdr_flags(quint32 nIndex);
+    quint32 getElf32_Shdr_addr(quint32 nIndex);
+    quint32 getElf32_Shdr_offset(quint32 nIndex);
+    quint32 getElf32_Shdr_size(quint32 nIndex);
+    quint32 getElf32_Shdr_link(quint32 nIndex);
+    quint32 getElf32_Shdr_info(quint32 nIndex);
+    quint32 getElf32_Shdr_addralign(quint32 nIndex);
+    quint32 getElf32_Shdr_entsize(quint32 nIndex);
 
-    void setElf32_Shdr_name(int nIndex,quint32 value);
-    void setElf32_Shdr_type(int nIndex,quint32 value);
-    void setElf32_Shdr_flags(int nIndex,quint32 value);
-    void setElf32_Shdr_addr(int nIndex,quint32 value);
-    void setElf32_Shdr_offset(int nIndex,quint32 value);
-    void setElf32_Shdr_size(int nIndex,quint32 value);
-    void setElf32_Shdr_link(int nIndex,quint32 value);
-    void setElf32_Shdr_info(int nIndex,quint32 value);
-    void setElf32_Shdr_addralign(int nIndex,quint32 value);
-    void setElf32_Shdr_entsize(int nIndex,quint32 value);
+    void setElf32_Shdr_name(quint32 nIndex,quint32 value);
+    void setElf32_Shdr_type(quint32 nIndex,quint32 value);
+    void setElf32_Shdr_flags(quint32 nIndex,quint32 value);
+    void setElf32_Shdr_addr(quint32 nIndex,quint32 value);
+    void setElf32_Shdr_offset(quint32 nIndex,quint32 value);
+    void setElf32_Shdr_size(quint32 nIndex,quint32 value);
+    void setElf32_Shdr_link(quint32 nIndex,quint32 value);
+    void setElf32_Shdr_info(quint32 nIndex,quint32 value);
+    void setElf32_Shdr_addralign(quint32 nIndex,quint32 value);
+    void setElf32_Shdr_entsize(quint32 nIndex,quint32 value);
 
-    quint32 getElf64_Shdr_name(int nIndex);
-    quint32 getElf64_Shdr_type(int nIndex);
-    quint64 getElf64_Shdr_flags(int nIndex);
-    quint64 getElf64_Shdr_addr(int nIndex);
-    quint64 getElf64_Shdr_offset(int nIndex);
-    quint64 getElf64_Shdr_size(int nIndex);
-    quint32 getElf64_Shdr_link(int nIndex);
-    quint32 getElf64_Shdr_info(int nIndex);
-    quint64 getElf64_Shdr_addralign(int nIndex);
-    quint64 getElf64_Shdr_entsize(int nIndex);
+    quint32 getElf64_Shdr_name(quint32 nIndex);
+    quint32 getElf64_Shdr_type(quint32 nIndex);
+    quint64 getElf64_Shdr_flags(quint32 nIndex);
+    quint64 getElf64_Shdr_addr(quint32 nIndex);
+    quint64 getElf64_Shdr_offset(quint32 nIndex);
+    quint64 getElf64_Shdr_size(quint32 nIndex);
+    quint32 getElf64_Shdr_link(quint32 nIndex);
+    quint32 getElf64_Shdr_info(quint32 nIndex);
+    quint64 getElf64_Shdr_addralign(quint32 nIndex);
+    quint64 getElf64_Shdr_entsize(quint32 nIndex);
 
-    void setElf64_Shdr_name(int nIndex,quint32 value);
-    void setElf64_Shdr_type(int nIndex,quint32 value);
-    void setElf64_Shdr_flags(int nIndex,quint64 value);
-    void setElf64_Shdr_addr(int nIndex,quint64 value);
-    void setElf64_Shdr_offset(int nIndex,quint64 value);
-    void setElf64_Shdr_size(int nIndex,quint64 value);
-    void setElf64_Shdr_link(int nIndex,quint32 value);
-    void setElf64_Shdr_info(int nIndex,quint32 value);
-    void setElf64_Shdr_addralign(int nIndex,quint64 value);
-    void setElf64_Shdr_entsize(int nIndex,quint64 value);
+    void setElf64_Shdr_name(quint32 nIndex,quint32 value);
+    void setElf64_Shdr_type(quint32 nIndex,quint32 value);
+    void setElf64_Shdr_flags(quint32 nIndex,quint64 value);
+    void setElf64_Shdr_addr(quint32 nIndex,quint64 value);
+    void setElf64_Shdr_offset(quint32 nIndex,quint64 value);
+    void setElf64_Shdr_size(quint32 nIndex,quint64 value);
+    void setElf64_Shdr_link(quint32 nIndex,quint32 value);
+    void setElf64_Shdr_info(quint32 nIndex,quint32 value);
+    void setElf64_Shdr_addralign(quint32 nIndex,quint64 value);
+    void setElf64_Shdr_entsize(quint32 nIndex,quint64 value);
 
     QList<Elf32_Phdr> getElf32_PhdrList();
     QList<Elf64_Phdr> getElf64_PhdrList();
 
-    Elf32_Phdr getElf32_Phdr(int nIndex);
-    Elf64_Phdr getElf64_Phdr(int nIndex);
+    Elf32_Phdr getElf32_Phdr(quint32 nIndex);
+    Elf64_Phdr getElf64_Phdr(quint32 nIndex);
 
-    quint32 getElf32_Phdr_type(int nIndex);
-    quint32 getElf32_Phdr_offset(int nIndex);
-    quint32 getElf32_Phdr_vaddr(int nIndex);
-    quint32 getElf32_Phdr_paddr(int nIndex);
-    quint32 getElf32_Phdr_filesz(int nIndex);
-    quint32 getElf32_Phdr_memsz(int nIndex);
-    quint32 getElf32_Phdr_flags(int nIndex);
-    quint32 getElf32_Phdr_align(int nIndex);
+    quint32 getElf32_Phdr_type(quint32 nIndex);
+    quint32 getElf32_Phdr_offset(quint32 nIndex);
+    quint32 getElf32_Phdr_vaddr(quint32 nIndex);
+    quint32 getElf32_Phdr_paddr(quint32 nIndex);
+    quint32 getElf32_Phdr_filesz(quint32 nIndex);
+    quint32 getElf32_Phdr_memsz(quint32 nIndex);
+    quint32 getElf32_Phdr_flags(quint32 nIndex);
+    quint32 getElf32_Phdr_align(quint32 nIndex);
 
-    void setElf32_Phdr_type(int nIndex,quint32 value);
-    void setElf32_Phdr_offset(int nIndex,quint32 value);
-    void setElf32_Phdr_vaddr(int nIndex,quint32 value);
-    void setElf32_Phdr_paddr(int nIndex,quint32 value);
-    void setElf32_Phdr_filesz(int nIndex,quint32 value);
-    void setElf32_Phdr_memsz(int nIndex,quint32 value);
-    void setElf32_Phdr_flags(int nIndex,quint32 value);
-    void setElf32_Phdr_align(int nIndex,quint32 value);
+    void setElf32_Phdr_type(quint32 nIndex,quint32 value);
+    void setElf32_Phdr_offset(quint32 nIndex,quint32 value);
+    void setElf32_Phdr_vaddr(quint32 nIndex,quint32 value);
+    void setElf32_Phdr_paddr(quint32 nIndex,quint32 value);
+    void setElf32_Phdr_filesz(quint32 nIndex,quint32 value);
+    void setElf32_Phdr_memsz(quint32 nIndex,quint32 value);
+    void setElf32_Phdr_flags(quint32 nIndex,quint32 value);
+    void setElf32_Phdr_align(quint32 nIndex,quint32 value);
 
-    quint32 getElf64_Phdr_type(int nIndex);
-    quint64 getElf64_Phdr_offset(int nIndex);
-    quint64 getElf64_Phdr_vaddr(int nIndex);
-    quint64 getElf64_Phdr_paddr(int nIndex);
-    quint64 getElf64_Phdr_filesz(int nIndex);
-    quint64 getElf64_Phdr_memsz(int nIndex);
-    quint32 getElf64_Phdr_flags(int nIndex);
-    quint64 getElf64_Phdr_align(int nIndex);
+    quint32 getElf64_Phdr_type(quint32 nIndex);
+    quint64 getElf64_Phdr_offset(quint32 nIndex);
+    quint64 getElf64_Phdr_vaddr(quint32 nIndex);
+    quint64 getElf64_Phdr_paddr(quint32 nIndex);
+    quint64 getElf64_Phdr_filesz(quint32 nIndex);
+    quint64 getElf64_Phdr_memsz(quint32 nIndex);
+    quint32 getElf64_Phdr_flags(quint32 nIndex);
+    quint64 getElf64_Phdr_align(quint32 nIndex);
 
-    void setElf64_Phdr_type(int nIndex,quint32 value);
-    void setElf64_Phdr_offset(int nIndex,quint64 value);
-    void setElf64_Phdr_vaddr(int nIndex,quint64 value);
-    void setElf64_Phdr_paddr(int nIndex,quint64 value);
-    void setElf64_Phdr_filesz(int nIndex,quint64 value);
-    void setElf64_Phdr_memsz(int nIndex,quint64 value);
-    void setElf64_Phdr_flags(int nIndex,quint32 value);
-    void setElf64_Phdr_align(int nIndex,quint64 value);
+    void setElf64_Phdr_type(quint32 nIndex,quint32 value);
+    void setElf64_Phdr_offset(quint32 nIndex,quint64 value);
+    void setElf64_Phdr_vaddr(quint32 nIndex,quint64 value);
+    void setElf64_Phdr_paddr(quint32 nIndex,quint64 value);
+    void setElf64_Phdr_filesz(quint32 nIndex,quint64 value);
+    void setElf64_Phdr_memsz(quint32 nIndex,quint64 value);
+    void setElf64_Phdr_flags(quint32 nIndex,quint32 value);
+    void setElf64_Phdr_align(quint32 nIndex,quint64 value);
 
     int getSectionIndexByName(QString sName);
     QByteArray getSectionByName(QString sName);

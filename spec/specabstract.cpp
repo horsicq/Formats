@@ -1,4 +1,4 @@
-// Copyright (c) 2017 hors<horsicq@gmail.com>
+// copyright (c) 2017-2018 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -78,17 +78,21 @@ SpecAbstract::SIGNATURE_RECORD _PE_header_records[]=
     {2, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_WINUPACK,                     "0.33",         "",                     "'MZLoadLibraryA'0000'PE'0000........'KERNEL32'"},
     {3, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_WINUPACK,                     "0.36",         "",                     "'MZLoadLibraryA'0000'PE'0000............................................'KERNEL32.DLL'"},
     {4, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_WINUPACK,                     "0.37-0.399",   "",                     "'MZKERNEL32.DLL'0000'PE'0000............................................'LoadLibraryA'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "",             "Win32/exe",            "'MZ'........................................................................................'Win32 .EXE.\r\n'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE64,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "",             "Win64/exe",            "'MZ'........................................................................................'Win64 .EXE.\r\n'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "",             "Win32/dll",            "'MZ'........................................................................................'Win32 .DLL.\r\n'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE64,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "",             "Win64/dll",            "'MZ'........................................................................................'Win64 .DLL.\r\n'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "",             ".NET",                 "'MZ'........................................................................................'It'27's .NET EXE"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "0.71-0.97",    "Win32/exe",            "'MZ'........................................................................................'Is Win32 EXE.'24"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE64,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "0.71-0.97",    "Win64/exe",            "'MZ'........................................................................................'Is Win64 EXE.'24"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "0.71-0.97",    "Win32/dll",            "'MZ'........................................................................................'Is Win32 DLL.'24"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE64,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "0.71-0.97",    "Win64/dll",            "'MZ'........................................................................................'Is Win64 DLL.'24"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "1.27-2.12",    "Win32/exe",            "'MZ'........................................................................................'Win32 .EXE.\r\n'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE64,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "1.27-2.12",    "Win64/exe",            "'MZ'........................................................................................'Win64 .EXE.\r\n'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "1.27-2.12",    "Win32/dll",            "'MZ'........................................................................................'Win32 .DLL.\r\n'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE64,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "1.27-2.12",    "Win64/dll",            "'MZ'........................................................................................'Win64 .DLL.\r\n'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MPRESS,                       "1.27-2.12",    ".NET",                 "'MZ'........................................................................................'It'27's .NET EXE"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_INSTALLER,        SpecAbstract::RECORD_NAME_INNOSETUP,                    "1.XX-5.1.X",   "Install",              "'MZ'............................................................................................496E6E6F"}, // TODO Versions
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_INSTALLER,        SpecAbstract::RECORD_NAME_INNOSETUP,                    "",             "Uninstall",            "'MZ'............................................................................................496E556E"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_ANDPAKK2,                     "0.18",         "",                     "'MZ'00'ANDpakk2'00'PE'0000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_LINKER,           SpecAbstract::RECORD_NAME_GOLINK,                       "",             "",                     "'MZ'6c000100000002000000ffff000000000000110000004000000000000000'Win32 Program!\r\n$'b409ba0001cd21b44ccd2160000000'GoLink, GoAsm www.GoDevTool.com'00"},
     {0, SpecAbstract::RECORD_FILETYPE_PE64,     SpecAbstract::RECORD_TYPE_LINKER,           SpecAbstract::RECORD_NAME_GOLINK,                       "",             "",                     "'MZ'6c000100000002000000ffff000000000000110000004000000000000000'Win64 Program!\r\n$'b409ba0001cd21b44ccd2160000000'GoLink, GoAsm www.GoDevTool.com'00"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_NSPACK,                       "2.2-2.4",      "",                     "'MZ'40000100000002000000FFFF00000002000000000000400000E9A4240100B409BA0B01CD21B44CCD21'packed by nspack$'40000000"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_NSPACK,                       "2.0-2.4",      "",                     "'MZ'40000100000002000000FFFF00000002000000000000400000....................CD21B44CCD21'packed by nspack$'40000000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_COMPILER,         SpecAbstract::RECORD_NAME_LAYHEYFORTRAN90,              "",             "",                     "'MZ'....................................................................................................................6C030000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_HMIMYSPROTECTOR,              "0.1",          "",                     "'MZ'............................................................'hmimys'27's ProtectV0.1'"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.00",         "",                     "4D5A90000300000004000000FFFF0000B800000000000000400000000000000000000000000000000000000000000000000000000000000000000000600000000E1FBA0E00B409CD21B8014CCD21'Windows Program'0D0A24"},
@@ -193,6 +197,7 @@ QString SpecAbstract::recordFiletypeIdToString(RECORD_FILETYPES id)
 
     switch(id)
     {
+        case RECORD_FILETYPE_UNKNOWN:                       sResult=QString("Unknown"); break;
         case RECORD_FILETYPE_BINARY:                        sResult=QString("Binary"); break;
         case RECORD_FILETYPE_MSDOS:                         sResult=QString("MSDOS"); break;
         case RECORD_FILETYPE_PE:                            sResult=QString("PE"); break;
@@ -213,6 +218,7 @@ QString SpecAbstract::recordFilepartIdToString(SpecAbstract::RECORD_FILEPARTS id
 
     switch(id)
     {
+        case RECORD_FILEPART_UNKNOWN:                       sResult=QString("Unknown"); break;
         case RECORD_FILEPART_HEADER:                        sResult=QString("Header"); break;
         case RECORD_FILEPART_OVERLAY:                       sResult=QString("Overlay"); break;
     }
@@ -226,6 +232,7 @@ QString SpecAbstract::recordTypeIdToString(RECORD_TYPES id)
 
     switch(id)
     {
+        case RECORD_TYPE_UNKNOWN:                           sResult=tr("Unknown"); break;
         case RECORD_TYPE_PACKER:                            sResult=tr("Packer"); break;
         case RECORD_TYPE_ARCHIVE:                           sResult=tr("Archive"); break;
         case RECORD_TYPE_FORMAT:                            sResult=tr("Format"); break;
@@ -254,6 +261,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
 
     switch(id)
     {
+        case RECORD_NAME_UNKNOWN:                           sResult=QString("Unknown"); break;
         case RECORD_NAME_32LITE:                            sResult=QString("32Lite"); break;
         case RECORD_NAME_7Z:                                sResult=QString("7-Zip"); break;
         case RECORD_NAME_ACPROTECT:                         sResult=QString("ACProtect"); break;
@@ -331,6 +339,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_FSG:                               sResult=QString("FSG"); break;
         case RECORD_NAME_GCC:                               sResult=QString("GCC"); break;
         case RECORD_NAME_GENERIC:                           sResult=QString("Generic"); break;
+        case RECORD_NAME_GENERICLINKER:                     sResult=QString("Generic Linker"); break;
         case RECORD_NAME_GENTEEINSTALLER:                   sResult=QString("Gentee Installer"); break;
         case RECORD_NAME_GHOSTINSTALLER:                    sResult=QString("Ghost Installer"); break;
         case RECORD_NAME_GNULINKER:                         sResult=QString("GNU ld"); break;
@@ -555,7 +564,7 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
     QElapsedTimer timer;
     timer.start();
 
-    BINARYINFO_STRUCT result= {0};
+    BINARYINFO_STRUCT result=BINARYINFO_STRUCT();
 
     QPE binary(pDevice);
 
@@ -600,7 +609,7 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
 
     if(!result.basic_info.listDetects.count())
     {
-        SCANS_STRUCT ssUnknown= {0};
+        SCANS_STRUCT ssUnknown={};
 
         ssUnknown.type=SpecAbstract::RECORD_TYPE_UNKNOWN;
         ssUnknown.name=SpecAbstract::RECORD_NAME_UNKNOWN;
@@ -618,7 +627,7 @@ SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, Sp
     QElapsedTimer timer;
     timer.start();
 
-    MSDOSINFO_STRUCT result= {0};
+    MSDOSINFO_STRUCT result={};
 
     QMSDOS msdos(pDevice);
 
@@ -636,7 +645,7 @@ SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, Sp
 
     if(!result.basic_info.listDetects.count())
     {
-        SCANS_STRUCT ssUnknown= {0};
+        SCANS_STRUCT ssUnknown={};
 
         ssUnknown.type=SpecAbstract::RECORD_TYPE_UNKNOWN;
         ssUnknown.name=SpecAbstract::RECORD_NAME_UNKNOWN;
@@ -654,7 +663,7 @@ SpecAbstract::ELFINFO_STRUCT SpecAbstract::getELFInfo(QIODevice *pDevice, SpecAb
     QElapsedTimer timer;
     timer.start();
 
-    ELFINFO_STRUCT result= {0};
+    ELFINFO_STRUCT result={};
 
     QELF elf(pDevice);
 
@@ -674,7 +683,7 @@ SpecAbstract::ELFINFO_STRUCT SpecAbstract::getELFInfo(QIODevice *pDevice, SpecAb
 
     if(!result.basic_info.listDetects.count())
     {
-        SCANS_STRUCT ssUnknown= {0};
+        SCANS_STRUCT ssUnknown={};
 
         ssUnknown.type=SpecAbstract::RECORD_TYPE_UNKNOWN;
         ssUnknown.name=SpecAbstract::RECORD_NAME_UNKNOWN;
@@ -692,7 +701,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
     QElapsedTimer timer;
     timer.start();
 
-    PEINFO_STRUCT result= {0};
+    PEINFO_STRUCT result={};
 
     QPE pe(pDevice);
 
@@ -913,7 +922,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         // TODO unknown cryptors
         if(!result.basic_info.listDetects.count())
         {
-            SCANS_STRUCT ssUnknown= {0};
+            SCANS_STRUCT ssUnknown={};
 
             ssUnknown.type=SpecAbstract::RECORD_TYPE_UNKNOWN;
             ssUnknown.name=SpecAbstract::RECORD_NAME_UNKNOWN;
@@ -929,7 +938,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
 
 SpecAbstract::SCANS_STRUCT SpecAbstract::getScansStruct(quint32 nVariant, SpecAbstract::RECORD_FILETYPES filetype, SpecAbstract::RECORD_TYPES type, SpecAbstract::RECORD_NAMES name, QString sVersion, QString sInfo, qint64 nOffset)
 {
-    SCANS_STRUCT result= {0};
+    SCANS_STRUCT result={};
 
     result.nVariant=nVariant;
     result.filetype=filetype;
@@ -1708,7 +1717,7 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                 {
                     if((viUPX.sVersion!=""))
                     {
-                        SpecAbstract::SCANS_STRUCT recordUPX= {0};
+                        SpecAbstract::SCANS_STRUCT recordUPX={};
 
                         recordUPX.type=RECORD_TYPE_PACKER;
                         recordUPX.name=RECORD_NAME_UPX;
@@ -1836,7 +1845,7 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
 
                     bool bDetect=false;
 
-                    SpecAbstract::SCANS_STRUCT recordEnigma= {0};
+                    SpecAbstract::SCANS_STRUCT recordEnigma={};
 
                     recordEnigma.type=SpecAbstract::RECORD_TYPE_PROTECTOR;
                     recordEnigma.name=SpecAbstract::RECORD_NAME_ENIGMA;
@@ -2028,7 +2037,7 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
 
                         if(nOffset1!=-1)
                         {
-                            SpecAbstract::SCANS_STRUCT recordACProtect= {0};
+                            SpecAbstract::SCANS_STRUCT recordACProtect={};
                             recordACProtect.type=RECORD_TYPE_PROTECTOR;
                             recordACProtect.name=RECORD_NAME_ACPROTECT;
 
@@ -2297,7 +2306,7 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
 
                     if(_sVersion!="")
                     {
-                        SpecAbstract::SCANS_STRUCT recordASPack= {0};
+                        SpecAbstract::SCANS_STRUCT recordASPack={};
 
                         recordASPack.type=RECORD_TYPE_PACKER;
                         recordASPack.name=RECORD_NAME_ASPACK;
@@ -2312,7 +2321,7 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                 // TODO false
                 if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_WWPACK32))
                 {
-                    SpecAbstract::SCANS_STRUCT ss= {0};
+                    SpecAbstract::SCANS_STRUCT ss={};
 
                     ss.type=RECORD_TYPE_PACKER;
                     ss.name=RECORD_NAME_WWPACK32;
@@ -2653,11 +2662,11 @@ void SpecAbstract::PE_handle_libraries(QIODevice *pDevice, SpecAbstract::PEINFO_
 
 void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
-    SpecAbstract::SCANS_STRUCT recordLinker= {0};
-    SpecAbstract::SCANS_STRUCT recordCompiler= {0};
-    SpecAbstract::SCANS_STRUCT recordTool= {0};
-    SpecAbstract::SCANS_STRUCT recordMFC= {0};
-    SpecAbstract::SCANS_STRUCT recordNET= {0};
+    SpecAbstract::SCANS_STRUCT recordLinker={};
+    SpecAbstract::SCANS_STRUCT recordCompiler={};
+    SpecAbstract::SCANS_STRUCT recordTool={};
+    SpecAbstract::SCANS_STRUCT recordMFC={};
+    SpecAbstract::SCANS_STRUCT recordNET={};
 
     QPE pe(pDevice);
 
@@ -2795,11 +2804,11 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
             recordLinker.type=SpecAbstract::RECORD_TYPE_LINKER;
             recordLinker.name=SpecAbstract::RECORD_NAME_MICROSOFTLINKER;
 
-            SpecAbstract::SCANS_STRUCT ssLinker= {0};
+            SpecAbstract::SCANS_STRUCT ssLinker={};
 
-            SpecAbstract::SCANS_STRUCT ssCompiler= {0};
-            SpecAbstract::SCANS_STRUCT _ssCompiler1= {0};
-            SpecAbstract::SCANS_STRUCT _ssCompiler2= {0};
+            SpecAbstract::SCANS_STRUCT ssCompiler={};
+            SpecAbstract::SCANS_STRUCT _ssCompiler1={};
+            SpecAbstract::SCANS_STRUCT _ssCompiler2={};
 
             for(int i=1; i<=5; i++)
             {
@@ -4440,6 +4449,7 @@ void SpecAbstract::PE_handle_SFX(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT
 
 void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
+    Q_UNUSED(pDevice);
     if((pPEInfo->mapResultPackers.count()==0)&&(pPEInfo->mapResultProtectors.count()==0))
     {
         if(pPEInfo->listSectionRecords.count())
@@ -4449,7 +4459,7 @@ void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice, SpecAbstract:
                 if(     pPEInfo->mapImportDetects.contains(RECORD_NAME_UPX)&&
                         (pPEInfo->mapImportDetects.value(RECORD_NAME_UPX).nVariant==0))
                 {
-                    SpecAbstract::SCANS_STRUCT recordSS={0};
+                    SpecAbstract::SCANS_STRUCT recordSS={};
 
                     recordSS.type=RECORD_TYPE_PACKER;
                     recordSS.name=RECORD_NAME_UNKNOWNUPXLIKE;
@@ -7346,7 +7356,7 @@ bool SpecAbstract::PE_isValid_UPX(QIODevice *pDevice, SpecAbstract::PEINFO_STRUC
 
 SpecAbstract::SCAN_STRUCT SpecAbstract::scansToScan(SpecAbstract::BASIC_INFO *pBasicInfo, SpecAbstract::SCANS_STRUCT *pScansStruct)
 {
-    SCAN_STRUCT result= {0};
+    SCAN_STRUCT result={};
 
     result.id=pBasicInfo->id;
     result.nSize=pBasicInfo->nSize;
@@ -7398,7 +7408,7 @@ void SpecAbstract::memoryScan(QMap<RECORD_NAMES, SCANS_STRUCT> *pMmREcords, QIOD
 
                     if(_nOffset!=-1)
                     {
-                        SpecAbstract::SCANS_STRUCT record= {0};
+                        SpecAbstract::SCANS_STRUCT record={};
                         record.nVariant=pRecords[i].nVariant;
                         record.filetype=pRecords[i].filetype;
                         record.type=pRecords[i].type;
@@ -7427,7 +7437,7 @@ void SpecAbstract::signatureScan(QMap<RECORD_NAMES, SCANS_STRUCT> *pMapRecords, 
             {
                 if(QBinary::compareSignatureStrings(sSignature,pRecords[i].pszSignature))
                 {
-                    SpecAbstract::SCANS_STRUCT record= {0};
+                    SpecAbstract::SCANS_STRUCT record={};
                     record.nVariant=pRecords[i].nVariant;
                     record.filetype=pRecords[i].filetype;
                     record.type=pRecords[i].type;
@@ -7481,7 +7491,7 @@ void SpecAbstract::resourcesScan(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::
 
                 if(bSuccess)
                 {
-                    SpecAbstract::SCANS_STRUCT record= {0};
+                    SpecAbstract::SCANS_STRUCT record={};
                     record.nVariant=pRecords[i].nVariant;
                     record.filetype=pRecords[i].filetype;
                     record.type=pRecords[i].type;
@@ -7528,7 +7538,7 @@ QList<SpecAbstract::VCL_STRUCT> SpecAbstract::PE_getVCLstruct(QIODevice *pDevice
 
                 if(nValue<=0xFFFF)
                 {
-                    VCL_STRUCT record= {0};
+                    VCL_STRUCT record={};
 
                     record.nValue=nValue;
                     record.nOffset=nAddressSize*(i+1);
@@ -7552,7 +7562,7 @@ QList<SpecAbstract::VCL_STRUCT> SpecAbstract::PE_getVCLstruct(QIODevice *pDevice
 
 SpecAbstract::VCL_PACKAGEINFO SpecAbstract::PE_getVCLPackageInfo(QIODevice *pDevice,QList<QPE::RESOURCE_HEADER> *pListResources)
 {
-    VCL_PACKAGEINFO result= {0};
+    VCL_PACKAGEINFO result={};
 
     QPE pe(pDevice);
 
@@ -7593,7 +7603,7 @@ SpecAbstract::VCL_PACKAGEINFO SpecAbstract::PE_getVCLPackageInfo(QIODevice *pDev
                         break;
                     }
 
-                    VCL_PACKAGEINFO_MODULE vpm= {0};
+                    VCL_PACKAGEINFO_MODULE vpm=VCL_PACKAGEINFO_MODULE();
                     vpm.nFlags=pe.read_uint8(nOffset);
                     nOffset++;
                     vpm.nHashCode=pe.read_uint8(nOffset);
@@ -7612,7 +7622,7 @@ SpecAbstract::VCL_PACKAGEINFO SpecAbstract::PE_getVCLPackageInfo(QIODevice *pDev
 
 SpecAbstract::SCANS_STRUCT SpecAbstract::PE_getRichSignatureDescription(quint32 nRichID)
 {
-    SpecAbstract::SCANS_STRUCT result= {0};
+    SpecAbstract::SCANS_STRUCT result={};
 
     if(nRichID)
     {

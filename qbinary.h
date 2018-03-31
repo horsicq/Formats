@@ -1,4 +1,4 @@
-// Copyright (c) 2017 hors<horsicq@gmail.com>
+// copyright (c) 2017-2018 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -44,8 +44,8 @@
 
 #include "subdevice.h"
 
-#define __ALIGN_DOWN(x,align)     (x&~(align-1))
-#define __ALIGN_UP(x,align)       ((x&(align-1))?__ALIGN_DOWN(x,align)+align:x)
+#define __ALIGN_DOWN(x,align)     ((x)&~(align-1))
+#define __ALIGN_UP(x,align)       (((x)&(align-1))?__ALIGN_DOWN(x,align)+align:x)
 
 #define __LOWORD(l)               ((quint16)((quint32)(l)&0xffff))
 #define __HIWORD(l)               ((quint16)((quint32)(l)>>16))
@@ -105,7 +105,7 @@ private:
     };
 
 public:
-    explicit QBinary(QIODevice *__pDevice=0,bool bIsImage=false);
+    explicit QBinary(QIODevice *__pDevice=0,bool bIsImage=false); // mb TODO parent for signals/slot
     void setData(QIODevice *__pDevice);
     qint64 getSize();
 
@@ -269,6 +269,7 @@ public:
     static QString invertHexByteString(QString sHex);
 
     bool isPlainText();
+
     // TODO uint64,uint16,uint8
 private:
     static QString convertSignature(QString sSignature);

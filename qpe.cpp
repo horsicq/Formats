@@ -1,4 +1,4 @@
-// Copyright (c) 2017 hors<horsicq@gmail.com>
+// copyright (c) 2017-2018 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -181,7 +181,7 @@ qint64 QPE::getFileHeaderOffset()
 
 S_IMAGE_FILE_HEADER QPE::getFileHeader()
 {
-    S_IMAGE_FILE_HEADER result= {0};
+    S_IMAGE_FILE_HEADER result={};
 
     read_array(getFileHeaderOffset(),(char *)&result,sizeof(S_IMAGE_FILE_HEADER));
 
@@ -277,7 +277,7 @@ qint64 QPE::getOptionalHeaderOffset()
 
 S_IMAGE_OPTIONAL_HEADER32 QPE::getOptionalHeader32()
 {
-    S_IMAGE_OPTIONAL_HEADER32 result= {0};
+    S_IMAGE_OPTIONAL_HEADER32 result={};
 
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(S_IMAGE_OPTIONAL_HEADER32));
 
@@ -286,7 +286,7 @@ S_IMAGE_OPTIONAL_HEADER32 QPE::getOptionalHeader32()
 
 S_IMAGE_OPTIONAL_HEADER64 QPE::getOptionalHeader64()
 {
-    S_IMAGE_OPTIONAL_HEADER64 result= {0};
+    S_IMAGE_OPTIONAL_HEADER64 result={};
 
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(S_IMAGE_OPTIONAL_HEADER64));
 
@@ -305,7 +305,7 @@ void QPE::setOptionalHeader64(S_IMAGE_OPTIONAL_HEADER64 *pOptionalHeader64)
 
 S_IMAGE_OPTIONAL_HEADER32S QPE::getOptionalHeader32S()
 {
-    S_IMAGE_OPTIONAL_HEADER32S result= {0};
+    S_IMAGE_OPTIONAL_HEADER32S result={};
 
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(S_IMAGE_OPTIONAL_HEADER32S));
 
@@ -314,7 +314,7 @@ S_IMAGE_OPTIONAL_HEADER32S QPE::getOptionalHeader32S()
 
 S_IMAGE_OPTIONAL_HEADER64S QPE::getOptionalHeader64S()
 {
-    S_IMAGE_OPTIONAL_HEADER64S result= {0};
+    S_IMAGE_OPTIONAL_HEADER64S result={};
 
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(S_IMAGE_OPTIONAL_HEADER64S));
 
@@ -741,7 +741,7 @@ void QPE::setOptionalHeader_NumberOfRvaAndSizes(quint32 value)
 
 S_IMAGE_DATA_DIRECTORY QPE::getOptionalHeader_DataDirectory(quint32 nNumber)
 {
-    S_IMAGE_DATA_DIRECTORY result= {0};
+    S_IMAGE_DATA_DIRECTORY result={};
 
 //    if(nNumber<getOptionalHeader_NumberOfRvaAndSizes()) // There are protectors with false NumberOfRvaAndSizes
     {
@@ -801,7 +801,7 @@ QList<S_IMAGE_DATA_DIRECTORY> QPE::getDirectories()
 
     for(int i=0; i<nCount; i++)
     {
-        S_IMAGE_DATA_DIRECTORY record= {0};
+        S_IMAGE_DATA_DIRECTORY record={};
 
         read_array(nDirectoriesOffset+i*sizeof(S_IMAGE_DATA_DIRECTORY),(char *)&record,sizeof(S_IMAGE_DATA_DIRECTORY));
 
@@ -880,7 +880,7 @@ qint64 QPE::getSectionsTableOffset()
 
 S_IMAGE_SECTION_HEADER QPE::getSectionHeader(quint32 nNumber)
 {
-    S_IMAGE_SECTION_HEADER result= {0};
+    S_IMAGE_SECTION_HEADER result={};
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
@@ -916,7 +916,7 @@ QList<S_IMAGE_SECTION_HEADER> QPE::getSectionHeaders()
 
     for(int i=0; i<(int)nNumberOfSections; i++)
     {
-        S_IMAGE_SECTION_HEADER record= {0};
+        S_IMAGE_SECTION_HEADER record={};
 
         read_array(nSectionOffset+i*sizeof(S_IMAGE_SECTION_HEADER),(char *)&record,sizeof(S_IMAGE_SECTION_HEADER));
 
@@ -934,7 +934,7 @@ QList<QPE::SECTION_RECORD> QPE::getSectionRecords(QList<S_IMAGE_SECTION_HEADER> 
 
      for(int i=0; i<nNumberOfSections; i++)
      {
-         QPE::SECTION_RECORD record= {0};
+         QPE::SECTION_RECORD record={};
 
          record.sName=QString((char *)pList->at(i).Name);
          record.sName.resize(qMin(record.sName.length(),S_IMAGE_SIZEOF_SHORT_NAME));
@@ -966,7 +966,7 @@ QList<QPE::SECTIONRVA_RECORD> QPE::getSectionRVARecords()
 
     for(int i=0;i<listSH.count();i++)
     {
-        SECTIONRVA_RECORD record={0};
+        SECTIONRVA_RECORD record={};
 
         record.nRVA=listSH.at(i).VirtualAddress;
         record.nSize=__ALIGN_UP(listSH.at(i).Misc.VirtualSize,nSectionAlignment);
@@ -1238,7 +1238,7 @@ bool QPE::isSectionNamePresent(QString sSectionName, QList<S_IMAGE_SECTION_HEADE
 
 S_IMAGE_SECTION_HEADER QPE::getSectionByName(QString sSectionName, QList<S_IMAGE_SECTION_HEADER> *pListSections)
 {
-    S_IMAGE_SECTION_HEADER result= {0};
+    S_IMAGE_SECTION_HEADER result={};
 
     int nNumberOfSections=pListSections->count();
 
@@ -1281,7 +1281,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
     quint32 nVirtualSizeofHeaders=__ALIGN_UP(nHeadersSize,nSectionAlignment);
     qint64 nMaxOffset=0;
 
-    MEMORY_MAP recordHeaderRaw= {0};
+    MEMORY_MAP recordHeaderRaw={};
 
     if(!isImage())
     {
@@ -1294,7 +1294,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
 
         if(nVirtualSizeofHeaders-nHeadersSize)
         {
-            MEMORY_MAP record= {0};
+            MEMORY_MAP record={};
             record.bIsHeader=true;
 
             record.nAddress=nBaseAddress+nHeadersSize;
@@ -1335,7 +1335,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
         {
             if(nFileSize)
             {
-                MEMORY_MAP record= {0};
+                MEMORY_MAP record={};
 
                 record.bIsSection=true;
                 record.nSection=i;
@@ -1349,7 +1349,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
 
             if(nVirtualSize-nFileSize)
             {
-                MEMORY_MAP record= {0};
+                MEMORY_MAP record={};
 
                 record.bIsSection=true;
                 record.nSection=i;
@@ -1363,13 +1363,13 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
         }
         else
         {
-            MEMORY_MAP record= {0};
+            MEMORY_MAP record={};
 
             record.bIsSection=true;
             record.nSection=i;
 
             record.nAddress=nVirtualAddress;
-            record.nOffset=nVirtualAddress;
+            record.nOffset=nVirtualAddress-nBaseAddress;
             record.nSize=nVirtualSize;
 
             list.append(record);
@@ -1377,7 +1377,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
     }
 
     // Overlay;
-    MEMORY_MAP record= {0};
+    MEMORY_MAP record={};
 
     record.bIsOvelay=true;
 
@@ -1513,7 +1513,6 @@ QList<QPE::IMPORT_RECORD> QPE::getImportRecords()
                     {
                         sFunction=QString("%1").arg(nThunk64&0x7FFFFFFFFFFFFFFF);
                     }
-
                 }
                 else
                 {
@@ -1637,7 +1636,7 @@ QList<S_IMAGE_IMPORT_DESCRIPTOR_EX> QPE::getImportDescriptorsEx()
 
         while(true)
         {
-            S_IMAGE_IMPORT_DESCRIPTOR_EX record= {0};
+            S_IMAGE_IMPORT_DESCRIPTOR_EX record={};
             S_IMAGE_IMPORT_DESCRIPTOR iid=read_S_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
 
 
@@ -1680,7 +1679,7 @@ QList<S_IMAGE_IMPORT_DESCRIPTOR_EX> QPE::getImportDescriptorsEx()
 
 S_IMAGE_IMPORT_DESCRIPTOR QPE::getImportDescriptor(quint32 nNumber)
 {
-    S_IMAGE_IMPORT_DESCRIPTOR result= {0};
+    S_IMAGE_IMPORT_DESCRIPTOR result={};
 
     qint64 nImportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 
@@ -1729,7 +1728,7 @@ QList<QPE::IMPORT_HEADER> QPE::getImports()
 
         while(true)
         {
-            IMPORT_HEADER importHeader= {0};
+            IMPORT_HEADER importHeader={};
             S_IMAGE_IMPORT_DESCRIPTOR iid=read_S_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
 
             if(nImportOffsetTest==-1)
@@ -1786,7 +1785,7 @@ QList<QPE::IMPORT_HEADER> QPE::getImports()
 
             while(true)
             {
-                IMPORT_POSITION importPosition= {0};
+                IMPORT_POSITION importPosition={};
                 importPosition.nThunkRVA=nThunksOriginalRVA;
                 importPosition.nThunkOffset=nThunksOriginalOffset;
 
@@ -1910,7 +1909,7 @@ QList<QPE::IMPORT_POSITION> QPE::getImportPositions(int nIndex)
 
         while(true)
         {
-            IMPORT_HEADER importHeader= {0};
+            IMPORT_HEADER importHeader={};
             S_IMAGE_IMPORT_DESCRIPTOR iid=read_S_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
 
             if((iid.Characteristics==0)&&(iid.Name==0))
@@ -1962,7 +1961,7 @@ QList<QPE::IMPORT_POSITION> QPE::getImportPositions(int nIndex)
             {
                 while(true)
                 {
-                    IMPORT_POSITION importPosition= {0};
+                    IMPORT_POSITION importPosition={};
                     importPosition.nThunkOffset=nThunksOffset;
                     importPosition.nThunkRVA=nThunksRVA;
 
@@ -2207,7 +2206,7 @@ bool QPE::setImports(QIODevice *pDevice, QList<QPE::IMPORT_HEADER> *pListHeaders
                 pIID++;
             }
 
-            S_IMAGE_SECTION_HEADER ish= {0};
+            S_IMAGE_SECTION_HEADER ish={};
 
             ish.Characteristics=0xc0000040;
 
@@ -2222,10 +2221,10 @@ bool QPE::setImports(QIODevice *pDevice, QList<QPE::IMPORT_HEADER> *pListHeaders
                 QList<MEMORY_MAP> listMP=pe.getMemoryMapList();
                 qint64 nBaseAddress=pe.getBaseAddress();
 
-                S_IMAGE_DATA_DIRECTORY iddIAT= {0};
+                S_IMAGE_DATA_DIRECTORY iddIAT={};
                 iddIAT.VirtualAddress=ish.VirtualAddress;
                 iddIAT.Size=nIATSize;
-                S_IMAGE_DATA_DIRECTORY iddImportTable= {0};
+                S_IMAGE_DATA_DIRECTORY iddImportTable={};
                 iddImportTable.VirtualAddress=nIATSize+ish.VirtualAddress;
                 iddImportTable.Size=nImportTableSize;
 
@@ -2317,13 +2316,13 @@ QList<QPE::RESOURCE_HEADER> QPE::getResources()
     {
         QList<MEMORY_MAP> memoryMap=getMemoryMapList();
         qint64 nBaseAddress=getBaseAddress();
-        RESOURCE_HEADER record= {0};
+        RESOURCE_HEADER record={};
 
 
-        qint64 nOffsetLevel[3]= {0};
-        S_IMAGE_RESOURCE_DIRECTORY rd[3]= {0};
-        S_IMAGE_RESOURCE_DIRECTORY_ENTRY rde[3]= {0};
-        RESOURCES_ID_NAME irin[3]= {0};
+        qint64 nOffsetLevel[3]={};
+        S_IMAGE_RESOURCE_DIRECTORY rd[3]={};
+        S_IMAGE_RESOURCE_DIRECTORY_ENTRY rde[3]={};
+        RESOURCES_ID_NAME irin[3]={};
 
         nOffsetLevel[0]=nResourceOffset;
         rd[0]=read_S_IMAGE_RESOURCE_DIRECTORY(nOffsetLevel[0]);
@@ -2403,9 +2402,9 @@ QList<QPE::RESOURCE_HEADER> QPE::getResources()
     return listResources;
 }
 
-QPE::RESOURCE_HEADER QPE::getResourceHeader(int nID1, int nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+QPE::RESOURCE_HEADER QPE::getResourceHeader(quint32 nID1, quint32 nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
 {
-    RESOURCE_HEADER result= {0};
+    RESOURCE_HEADER result={};
     result.nOffset=-1;
 
     for(int i=0; i<pListHeaders->count(); i++)
@@ -2419,9 +2418,9 @@ QPE::RESOURCE_HEADER QPE::getResourceHeader(int nID1, int nID2, QList<QPE::RESOU
     return result;
 }
 
-QPE::RESOURCE_HEADER QPE::getResourceHeader(int nID1, QString sName2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+QPE::RESOURCE_HEADER QPE::getResourceHeader(quint32 nID1, QString sName2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
 {
-    RESOURCE_HEADER result= {0};
+    RESOURCE_HEADER result={};
     result.nOffset=-1;
 
     for(int i=0; i<pListHeaders->count(); i++)
@@ -2435,9 +2434,9 @@ QPE::RESOURCE_HEADER QPE::getResourceHeader(int nID1, QString sName2, QList<QPE:
     return result;
 }
 
-QPE::RESOURCE_HEADER QPE::getResourceHeader(QString sName1, int nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+QPE::RESOURCE_HEADER QPE::getResourceHeader(QString sName1, quint32 nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
 {
-    RESOURCE_HEADER result= {0};
+    RESOURCE_HEADER result={};
     result.nOffset=-1;
 
     for(int i=0; i<pListHeaders->count(); i++)
@@ -2453,7 +2452,7 @@ QPE::RESOURCE_HEADER QPE::getResourceHeader(QString sName1, int nID2, QList<QPE:
 
 QPE::RESOURCE_HEADER QPE::getResourceHeader(QString sName1, QString sName2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
 {
-    RESOURCE_HEADER result= {0};
+    RESOURCE_HEADER result={};
     result.nOffset=-1;
 
     for(int i=0; i<pListHeaders->count(); i++)
@@ -2467,17 +2466,17 @@ QPE::RESOURCE_HEADER QPE::getResourceHeader(QString sName1, QString sName2, QLis
     return result;
 }
 
-bool QPE::isResourcePresent(int nID1, int nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+bool QPE::isResourcePresent(quint32 nID1, quint32 nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
 {
     return (getResourceHeader(nID1,nID2,pListHeaders).nSize);
 }
 
-bool QPE::isResourcePresent(int nID1, QString sName2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+bool QPE::isResourcePresent(quint32 nID1, QString sName2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
 {
     return (getResourceHeader(nID1,sName2,pListHeaders).nSize);
 }
 
-bool QPE::isResourcePresent(QString sName1, int nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+bool QPE::isResourcePresent(QString sName1, quint32 nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
 {
     return (getResourceHeader(sName1,nID2,pListHeaders).nSize);
 }
@@ -2503,7 +2502,7 @@ QString QPE::getResourceManifest(QList<QPE::RESOURCE_HEADER> *pListHeaders)
 
 S_VS_VERSION_INFO QPE::readResourceVersionInfo(qint64 nOffset)
 {
-    S_VS_VERSION_INFO result={0};
+    S_VS_VERSION_INFO result={};
 
     read_array(nOffset,(char *)&result,sizeof(S_VS_VERSION_INFO));
 
@@ -2514,7 +2513,7 @@ quint32 QPE::__getResourceVersion(QPE::RESOURCE_VERSION *pResult, qint64 nOffset
 {
     quint32 nResult=0;
 
-    if(nSize>=sizeof(S_VS_VERSION_INFO))
+    if((quint32)nSize>=sizeof(S_VS_VERSION_INFO))
     {
         S_VS_VERSION_INFO vi=readResourceVersionInfo(nOffset);
 
@@ -2608,7 +2607,7 @@ quint32 QPE::__getResourceVersion(QPE::RESOURCE_VERSION *pResult, qint64 nOffset
 
 QPE::RESOURCE_VERSION QPE::getResourceVersion(QList<QPE::RESOURCE_HEADER> *pListHeaders)
 {
-    RESOURCE_VERSION result={0};
+    RESOURCE_VERSION result={};
 
     RESOURCE_HEADER rh=getResourceHeader(S_RT_VERSION,1,pListHeaders);
 
@@ -2640,7 +2639,7 @@ QString QPE::getResourceVersionValue(QString sKey,QPE::RESOURCE_VERSION *pResVer
 
 S_IMAGE_IMPORT_DESCRIPTOR QPE::read_S_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset)
 {
-    S_IMAGE_IMPORT_DESCRIPTOR result= {0};
+    S_IMAGE_IMPORT_DESCRIPTOR result={};
 
     read_array(nOffset,(char *)&result,sizeof(S_IMAGE_IMPORT_DESCRIPTOR));
 
@@ -2659,7 +2658,7 @@ bool QPE::isExportPresent()
 
 QPE::EXPORT_HEADER QPE::getExport()
 {
-    EXPORT_HEADER result= {0};
+    EXPORT_HEADER result={};
 
     qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
@@ -2687,7 +2686,7 @@ QPE::EXPORT_HEADER QPE::getExport()
             {
                 for(int i=0; i<(int)result.directory.NumberOfFunctions; i++)
                 {
-                    EXPORT_POSITION position= {0};
+                    EXPORT_POSITION position={};
 
                     int nIndex=read_uint16(nAddressOfNameOrdinalsOffset+2*i);
                     position.nOrdinal=nIndex+result.directory.Base;
@@ -2727,7 +2726,7 @@ bool QPE::isExportFunctionPresent(QString sFunction,QPE::EXPORT_HEADER *pExportH
 
 S_IMAGE_EXPORT_DIRECTORY QPE::getExportDirectory()
 {
-    S_IMAGE_EXPORT_DIRECTORY result= {0};
+    S_IMAGE_EXPORT_DIRECTORY result={};
 
     qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
@@ -2773,7 +2772,7 @@ QByteArray QPE::getHeaders()
 
 QBinary::OFFSETSIZE QPE::__getSectionOffsetAndSize(quint32 nSection)
 {
-    OFFSETSIZE result= {0};
+    OFFSETSIZE result={};
 
     S_IMAGE_SECTION_HEADER sectionHeader=getSectionHeader(nSection);
     quint32 nSectionAlignment=getOptionalHeader_SectionAlignment();
@@ -2894,6 +2893,12 @@ bool QPE::addImportSection(QMap<qint64, QString> *pMapIAT)
 
 bool QPE::addImportSection(QIODevice *pDevice, QMap<qint64, QString> *pMapIAT)
 {
+#ifdef QT_DEBUG
+    QElapsedTimer timer;
+    timer.start();
+    qDebug("QPE::addImportSection");
+#endif
+
     bool bResult=false;
 
     QString sClassName=pDevice->metaObject()->className();
@@ -2905,9 +2910,19 @@ bool QPE::addImportSection(QIODevice *pDevice, QMap<qint64, QString> *pMapIAT)
         if(pe.isValid())
         {
             QList<QPE::IMPORT_HEADER> list=mapIATToList(pMapIAT,pe.is64());
+        #ifdef QT_DEBUG
+            qDebug("QPE::addImportSection:mapIATToList: %lld msec",timer.elapsed());
+        #endif
             bResult=setImports(pDevice,&list);
+        #ifdef QT_DEBUG
+            qDebug("QPE::addImportSection:setImports: %lld msec",timer.elapsed());
+        #endif
         }
     }
+
+#ifdef QT_DEBUG
+    qDebug("QPE::addImportSection: %lld msec",timer.elapsed());
+#endif
 
     return bResult;
 }
@@ -2933,7 +2948,7 @@ QList<QPE::IMPORT_HEADER> QPE::mapIATToList(QMap<qint64, QString> *pMapIAT,bool 
 
     QMapIterator<qint64, QString> i(*pMapIAT);
 
-    IMPORT_HEADER record= {0};
+    IMPORT_HEADER record={};
 
     quint64 nCurrentRVA=0;
 
@@ -2955,7 +2970,7 @@ QList<QPE::IMPORT_HEADER> QPE::mapIATToList(QMap<qint64, QString> *pMapIAT,bool 
         QString sLibrary=i.value().section("#",0,0);
         QString sFunction=i.value().section("#",1,1);
 
-        if(nCurrentRVA+nStep!=i.key())
+        if(((qint64)(nCurrentRVA+nStep)!=i.key())||((record.sName!="")&&(record.sName!=sLibrary)))
         {
             if(record.sName!="")
             {
@@ -2969,7 +2984,7 @@ QList<QPE::IMPORT_HEADER> QPE::mapIATToList(QMap<qint64, QString> *pMapIAT,bool 
 
         nCurrentRVA=i.key();
 
-        IMPORT_POSITION position= {0};
+        IMPORT_POSITION position={};
 
         position.nHint=0;
 
@@ -3314,7 +3329,7 @@ bool QPE::removeLastSection(QIODevice *pDevice)
                 qint64 nOverlaySize=pe.getOverlaySize();
 
                 S_IMAGE_SECTION_HEADER ish=pe.getSectionHeader(nNumberOfSections-1);
-                S_IMAGE_SECTION_HEADER ish0= {0};
+                S_IMAGE_SECTION_HEADER ish0={};
                 pe.setSectionHeader(nNumberOfSections-1,&ish0);
                 pe.setFileHeader_NumberOfSections(nNumberOfSections-1);
 
@@ -3439,7 +3454,7 @@ bool QPE::isNETPresent()
 
 QPE::CLI_INFO QPE::getCliInfo(bool bFindHidden)
 {
-    CLI_INFO result= {0};
+    CLI_INFO result={};
 
     if(isNETPresent()||bFindHidden)
     {
@@ -3578,7 +3593,7 @@ QPE::CLI_INFO QPE::getCliInfo(bool bFindHidden)
                             }
 
                             nOffset+=8;
-                            nOffset+=__ALIGN_UP(result.listCLI_MetaData_Stream_Names.at(i).length()+1,4);
+                            nOffset+=__ALIGN_UP((result.listCLI_MetaData_Stream_Names.at(i).length()+1),4);
                         }
 
                         if(result.nCLI_MetaData_TablesHeaderOffset)
@@ -3993,14 +4008,16 @@ int QPE::getConstDataSection()
 
 bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 {
+#ifdef QT_DEBUG
+    QElapsedTimer timer;
+    timer.start();
+    qDebug("QPE::rebuildDump");
+#endif
+
     bool bResult=false;
 
-    QFile file;
-    file.setFileName(sResultFile);
-
-    if(file.open(QIODevice::ReadWrite))
+    if(sResultFile!="")
     {
-        file.resize(0);
         quint32 nTotalSize=0;
         quint32 nHeaderSize=0;
         QList<quint32> listSectionsSize;
@@ -4015,14 +4032,16 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             QByteArray baHeader=getHeaders();
             int nNumberOfSections=getFileHeader_NumberOfSections();
 
-            if(pRebuildOptions->bClearHeader)
-            {
-                nHeaderSize=getSectionsTableOffset()+nNumberOfSections*sizeof(S_IMAGE_SECTION_HEADER);
-            }
-            else
-            {
-                nHeaderSize=QBinary::getPhysSize(baHeader.data(),baHeader.size());
-            }
+//            if(pRebuildOptions->bClearHeader)
+//            {
+//                nHeaderSize=getSectionsTableOffset()+nNumberOfSections*sizeof(S_IMAGE_SECTION_HEADER);
+//            }
+//            else
+//            {
+//                nHeaderSize=QBinary::getPhysSize(baHeader.data(),baHeader.size());
+//            }
+
+            nHeaderSize=QBinary::getPhysSize(baHeader.data(),baHeader.size());
 
             for(int i=0;i<nNumberOfSections;i++)
             {
@@ -4047,6 +4066,10 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             nTotalSize=getSize();
         }
 
+    #ifdef QT_DEBUG
+        qDebug("QPE::rebuildDump:totalsize: %lld msec",timer.elapsed());
+    #endif
+
         QByteArray baBuffer;
         baBuffer.resize(nTotalSize);
         baBuffer.fill(0);
@@ -4066,6 +4089,9 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             {
                 QBinary::copyDeviceMemory(getDevice(),0,&buffer,0,nTotalSize);
             }
+            #ifdef QT_DEBUG
+                qDebug("QPE::rebuildDump:copy: %lld msec",timer.elapsed());
+            #endif
 
             int nNumberOfSections=getFileHeader_NumberOfSections();
             for(int i=0;i<nNumberOfSections;i++)
@@ -4087,29 +4113,65 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 bufPE.setSection_Characteristics(i,0xe0000020); // !!!
             }
 
+        #ifdef QT_DEBUG
+            qDebug("QPE::rebuildDump:copysections: %lld msec",timer.elapsed());
+        #endif
+
             bResult=true;
 
             buffer.close();
         }
 
-        file.write(baBuffer.data(),baBuffer.size());
+        QFile file;
+        file.setFileName(sResultFile);
 
-        QPE _pe(&file);
-
-        if(_pe.isValid())
+        if(file.open(QIODevice::ReadWrite))
         {
-            if(pRebuildOptions->bRemoveLastSection)
-            {
-                _pe.removeLastSection();
-            }
+        #ifdef QT_DEBUG
+            qDebug("QPE::rebuildDump:write:start: %lld msec",timer.elapsed());
+        #endif
+            file.resize(baBuffer.size());
+            file.write(baBuffer.data(),baBuffer.size());
+            file.close();
+        #ifdef QT_DEBUG
+            qDebug("QPE::rebuildDump:write: %lld msec",timer.elapsed());
+        #endif
 
-            if(pRebuildOptions->bSetEntryPoint)
-            {
-                _pe.setOptionalHeader_AddressOfEntryPoint(pRebuildOptions->nEntryPoint);
-            }
+            bResult=true;
+        }
+    }
 
-            if(pRebuildOptions->bAddImportSection)
+    if(bResult)
+    {
+        bResult=false;
+
+        QFile file;
+        file.setFileName(sResultFile);
+
+        if(file.open(QIODevice::ReadWrite))
+        {
+            QPE _pe(&file);
+
+            if(_pe.isValid())
             {
+//                if(pRebuildOptions->bRemoveLastSection)
+//                {
+//                    _pe.removeLastSection();
+//                }
+
+            #ifdef QT_DEBUG
+                qDebug("QPE::rebuildDump:removelastsection: %lld msec",timer.elapsed());
+            #endif
+
+                if(pRebuildOptions->bSetEntryPoint)
+                {
+                    _pe.setOptionalHeader_AddressOfEntryPoint(pRebuildOptions->nEntryPoint);
+                }
+
+            #ifdef QT_DEBUG
+                qDebug("QPE::rebuildDump:setentrypoint: %lld msec",timer.elapsed());
+            #endif
+
                 if(!pRebuildOptions->mapIAT.isEmpty())
                 {
                     if(!_pe.addImportSection(&(pRebuildOptions->mapIAT)))
@@ -4117,38 +4179,57 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                         _errorMessage(tr("Cannot add import section"));
                     }
                 }
-            }
 
-            if(pRebuildOptions->bRenameSections)
-            {
-                int nNumberOfSections=_pe.getFileHeader_NumberOfSections();
+            #ifdef QT_DEBUG
+                qDebug("QPE::rebuildDump:addimportsection: %lld msec",timer.elapsed());
+            #endif
 
-                for(int i=0;i<nNumberOfSections;i++)
+                if(pRebuildOptions->bRenameSections)
                 {
-                    QString sSection=_pe.getSection_NameAsString(i);
-                    if(sSection!=".rsrc")
+                    int nNumberOfSections=_pe.getFileHeader_NumberOfSections();
+
+                    for(int i=0;i<nNumberOfSections;i++)
                     {
-                        _pe.setSection_NameAsString(i,pRebuildOptions->sSectionName);
+                        QString sSection=_pe.getSection_NameAsString(i);
+                        if(sSection!=".rsrc")
+                        {
+                            _pe.setSection_NameAsString(i,pRebuildOptions->sSectionName);
+                        }
                     }
                 }
+
+            #ifdef QT_DEBUG
+                qDebug("QPE::rebuildDump:renamesections: %lld msec",timer.elapsed());
+            #endif
+
+                if(pRebuildOptions->listRelocsRVAs.count())
+                {
+                    _pe.addRelocsSection(&(pRebuildOptions->listRelocsRVAs));
+                }
+
+            #ifdef QT_DEBUG
+                qDebug("QPE::rebuildDump:addrelocssection: %lld msec",timer.elapsed());
+            #endif
+
+                if(pRebuildOptions->bFixChecksum)
+                {
+                    _pe._fixCheckSum();
+                }
+
+            #ifdef QT_DEBUG
+                qDebug("QPE::rebuildDump:fixchecksum: %lld msec",timer.elapsed());
+            #endif
             }
 
-            if(pRebuildOptions->bAddRelocsSection)
-            {
-                _pe.addRelocsSection(&(pRebuildOptions->listRelocsRVAs));
-            }
+            bResult=true;
 
-
-
-            if(pRebuildOptions->bFixChecksum)
-            {
-                _pe._fixCheckSum();
-            }
+            file.close();
         }
-
-
-        file.close();
     }
+
+#ifdef QT_DEBUG
+    qDebug("QPE::rebuildDump: %lld msec",timer.elapsed());
+#endif
 
     return bResult;
 }
@@ -4287,7 +4368,7 @@ quint16 QPE::_checkSum(qint64 nStartValue,qint64 nDataSize)
 
 S_IMAGE_RESOURCE_DIRECTORY_ENTRY QPE::read_S_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset)
 {
-    S_IMAGE_RESOURCE_DIRECTORY_ENTRY result= {0};
+    S_IMAGE_RESOURCE_DIRECTORY_ENTRY result={};
 
     read_array(nOffset,(char *)&result,sizeof(S_IMAGE_RESOURCE_DIRECTORY_ENTRY));
 
@@ -4296,7 +4377,7 @@ S_IMAGE_RESOURCE_DIRECTORY_ENTRY QPE::read_S_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint
 
 S_IMAGE_RESOURCE_DIRECTORY QPE::read_S_IMAGE_RESOURCE_DIRECTORY(qint64 nOffset)
 {
-    S_IMAGE_RESOURCE_DIRECTORY result= {0};
+    S_IMAGE_RESOURCE_DIRECTORY result={};
 
     read_array(nOffset,(char *)&result,sizeof(S_IMAGE_RESOURCE_DIRECTORY));
 
@@ -4305,7 +4386,7 @@ S_IMAGE_RESOURCE_DIRECTORY QPE::read_S_IMAGE_RESOURCE_DIRECTORY(qint64 nOffset)
 
 S_IMAGE_RESOURCE_DATA_ENTRY QPE::read_S_IMAGE_RESOURCE_DATA_ENTRY(qint64 nOffset)
 {
-    S_IMAGE_RESOURCE_DATA_ENTRY result= {0};
+    S_IMAGE_RESOURCE_DATA_ENTRY result={};
 
     read_array(nOffset,(char *)&result,sizeof(S_IMAGE_RESOURCE_DATA_ENTRY));
 
@@ -4314,7 +4395,7 @@ S_IMAGE_RESOURCE_DATA_ENTRY QPE::read_S_IMAGE_RESOURCE_DATA_ENTRY(qint64 nOffset
 
 QPE::RESOURCES_ID_NAME QPE::getResourcesIDName(qint64 nResourceOffset,quint32 value)
 {
-    RESOURCES_ID_NAME result= {0};
+    RESOURCES_ID_NAME result={};
 
     if(value&0x80000000)
     {
@@ -4346,14 +4427,14 @@ QList<qint64> QPE::getRelocsAsRVAList()
     {
         while(true)
         {
-            _S_IMAGE_BASE_RELOCATION ibr= {0};
+            _S_IMAGE_BASE_RELOCATION ibr={};
 
             if(!read_array(nRelocsOffset,(char *)&ibr,sizeof(_S_IMAGE_BASE_RELOCATION)))
             {
                 break;
             }
 
-            if(ibr.VirtualAddress==0)
+            if((ibr.VirtualAddress==0)||(ibr.SizeOfBlock==0))
             {
                 break;
             }
@@ -4412,7 +4493,7 @@ bool QPE::addRelocsSection(QIODevice *pDevice, QList<qint64> *pList)
 
             QByteArray baRelocs=QPE::relocsAsRVAListToByteArray(&listRVAs,pe.is64());
 
-            S_IMAGE_SECTION_HEADER ish= {0};
+            S_IMAGE_SECTION_HEADER ish={};
 
             ish.Characteristics=0x42000040;
             QString sSectionName=".reloc";
@@ -4423,7 +4504,7 @@ bool QPE::addRelocsSection(QIODevice *pDevice, QList<qint64> *pList)
 
             if(bResult)
             {
-                S_IMAGE_DATA_DIRECTORY dd= {0};
+                S_IMAGE_DATA_DIRECTORY dd={};
 
                 dd.VirtualAddress=ish.VirtualAddress;
                 dd.Size=ish.Misc.VirtualSize;
@@ -4484,8 +4565,8 @@ QByteArray QPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
     nBaseAddress=-1;
     quint32 nOffset=0;
     char *pData=baResult.data();
-    char *pVirtualAddress;
-    char *pSizeOfBlock;
+    char *pVirtualAddress=0;
+    char *pSizeOfBlock=0;
     quint32 nCurrentBlockSize=0;
 
     for(int i=0; i<pList->count(); i++)
@@ -4556,6 +4637,43 @@ bool QPE::isTLSPresent()
     return isOptionalHeader_DataDirectoryPresent(S_IMAGE_DIRECTORY_ENTRY_TLS);
 }
 
+QPE::TLS_HEADER QPE::getTLSHeader()
+{
+    TLS_HEADER result={};
+
+    qint64 nTLSOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            S_IMAGE_TLS_DIRECTORY64 tls64;
+            read_array(nTLSOffset,(char *)&tls64,sizeof(S_IMAGE_TLS_DIRECTORY64));
+
+            result.AddressOfCallBacks=tls64.AddressOfCallBacks;
+            result.AddressOfIndex=tls64.AddressOfIndex;
+            result.Characteristics=tls64.Characteristics;
+            result.EndAddressOfRawData=tls64.EndAddressOfRawData;
+            result.SizeOfZeroFill=tls64.SizeOfZeroFill;
+            result.StartAddressOfRawData=tls64.StartAddressOfRawData;
+        }
+        else
+        {
+            S_IMAGE_TLS_DIRECTORY32 tls32;
+            read_array(nTLSOffset,(char *)&tls32,sizeof(S_IMAGE_TLS_DIRECTORY32));
+
+            result.AddressOfCallBacks=tls32.AddressOfCallBacks;
+            result.AddressOfIndex=tls32.AddressOfIndex;
+            result.Characteristics=tls32.Characteristics;
+            result.EndAddressOfRawData=tls32.EndAddressOfRawData;
+            result.SizeOfZeroFill=tls32.SizeOfZeroFill;
+            result.StartAddressOfRawData=tls32.StartAddressOfRawData;
+        }
+    }
+
+    return result;
+}
+
 QMap<quint64, QString> QPE::getImageFileMachines()
 {
     QMap<quint64, QString> mapResult;
@@ -4593,6 +4711,43 @@ QMap<quint64, QString> QPE::getImageFileMachines()
     return mapResult;
 }
 
+QMap<quint64, QString> QPE::getImageFileMachinesS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"UNKNOWN");
+    mapResult.insert(0x014c,"I386");
+    mapResult.insert(0x0162,"R3000");
+    mapResult.insert(0x0166,"R4000");
+    mapResult.insert(0x0168,"R10000");
+    mapResult.insert(0x0169,"WCEMIPSV2");
+    mapResult.insert(0x0184,"ALPHA");
+    mapResult.insert(0x01a2,"SH3");
+    mapResult.insert(0x01a3,"SH3DSP");
+    mapResult.insert(0x01a4,"SH3E");
+    mapResult.insert(0x01a6,"SH4");
+    mapResult.insert(0x01a8,"SH5");
+    mapResult.insert(0x01c0,"ARM");
+    mapResult.insert(0x01c2,"THUMB");
+    mapResult.insert(0x01c4,"ARMNT");
+    mapResult.insert(0x01d3,"AM33");
+    mapResult.insert(0x01F0,"POWERPC");
+    mapResult.insert(0x01f1,"POWERPCFP");
+    mapResult.insert(0x0200,"IA64");
+    mapResult.insert(0x0266,"MIPS16");
+    mapResult.insert(0x0284,"ALPHA64");
+    mapResult.insert(0x0366,"MIPSFPU");
+    mapResult.insert(0x0466,"MIPSFPU16");
+    mapResult.insert(0x0520,"TRICORE");
+    mapResult.insert(0x0CEF,"CEF");
+    mapResult.insert(0x0EBC,"EBC");
+    mapResult.insert(0x8664,"AMD64");
+    mapResult.insert(0x9041,"M32R");
+    mapResult.insert(0xC0EE,"CEE");
+
+    return mapResult;
+}
+
 QMap<quint64, QString> QPE::getImageFileCharacteristics()
 {
     QMap<quint64, QString> mapResult;
@@ -4616,6 +4771,29 @@ QMap<quint64, QString> QPE::getImageFileCharacteristics()
     return mapResult;
 }
 
+QMap<quint64, QString> QPE::getImageFileCharacteristicsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x0001,"RELOCS_STRIPPED");
+    mapResult.insert(0x0002,"EXECUTABLE_IMAGE");
+    mapResult.insert(0x0004,"LINE_NUMS_STRIPPED");
+    mapResult.insert(0x0008,"LOCAL_SYMS_STRIPPED");
+    mapResult.insert(0x0010,"AGGRESIVE_WS_TRIM");
+    mapResult.insert(0x0020,"LARGE_ADDRESS_AWARE");
+    mapResult.insert(0x0080,"BYTES_REVERSED_LO");
+    mapResult.insert(0x0100,"32BIT_MACHINE");
+    mapResult.insert(0x0200,"DEBUG_STRIPPED");
+    mapResult.insert(0x0400,"REMOVABLE_RUN_FROM_SWAP");
+    mapResult.insert(0x0800,"NET_RUN_FROM_SWAP");
+    mapResult.insert(0x1000,"SYSTEM");
+    mapResult.insert(0x2000,"DLL");
+    mapResult.insert(0x4000,"UP_SYSTEM_ONLY");
+    mapResult.insert(0x8000,"BYTES_REVERSED_HI");
+
+    return mapResult;
+}
+
 QMap<quint64, QString> QPE::getImageNtOptionalMagic()
 {
     QMap<quint64, QString> mapResult;
@@ -4623,6 +4801,17 @@ QMap<quint64, QString> QPE::getImageNtOptionalMagic()
     mapResult.insert(0x10b,"IMAGE_NT_OPTIONAL_HDR32_MAGIC");
     mapResult.insert(0x20b,"IMAGE_NT_OPTIONAL_HDR64_MAGIC");
     mapResult.insert(0x107,"IMAGE_ROM_OPTIONAL_HDR_MAGIC");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QPE::getImageNtOptionalMagicS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x10b,"NT_HDR32_MAGIC");
+    mapResult.insert(0x20b,"NT_HDR64_MAGIC");
+    mapResult.insert(0x107,"ROM_HDR_MAGIC");
 
     return mapResult;
 }
@@ -4649,6 +4838,28 @@ QMap<quint64, QString> QPE::getImageNtOptionalSubsystem()
     return mapResult;
 }
 
+QMap<quint64, QString> QPE::getImageNtOptionalSubsystemS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"UNKNOWN");
+    mapResult.insert(1,"NATIVE");
+    mapResult.insert(2,"WINDOWS_GUI");
+    mapResult.insert(3,"WINDOWS_CUI");
+    mapResult.insert(5,"OS2_CUI");
+    mapResult.insert(7,"POSIX_CUI");
+    mapResult.insert(8,"NATIVE_WINDOWS");
+    mapResult.insert(9,"WINDOWS_CE_GUI");
+    mapResult.insert(10,"EFI_APPLICATION");
+    mapResult.insert(11,"EFI_BOOT_SERVICE_DRIVER");
+    mapResult.insert(12,"EFI_RUNTIME_DRIVER");
+    mapResult.insert(13,"EFI_ROM");
+    mapResult.insert(14,"XBOX");
+    mapResult.insert(16,"WINDOWS_BOOT_APPLICATION");
+
+    return mapResult;
+}
+
 QMap<quint64, QString> QPE::getImageNtOptionalDllCharacteristics()
 {
     QMap<quint64, QString> mapResult;
@@ -4664,6 +4875,25 @@ QMap<quint64, QString> QPE::getImageNtOptionalDllCharacteristics()
     mapResult.insert(0x2000,"IMAGE_DLLCHARACTERISTICS_WDM_DRIVER");
     mapResult.insert(0x4000,"IMAGE_DLLCHARACTERISTICS_GUARD_CF");
     mapResult.insert(0x8000,"IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QPE::getImageNtOptionalDllCharacteristicsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x0020,"HIGH_ENTROPY_VA");
+    mapResult.insert(0x0040,"DYNAMIC_BASE");
+    mapResult.insert(0x0080,"FORCE_INTEGRITY");
+    mapResult.insert(0x0100,"NX_COMPAT");
+    mapResult.insert(0x0200,"NO_ISOLATION");
+    mapResult.insert(0x0400,"NO_SEH");
+    mapResult.insert(0x0800,"NO_BIND");
+    mapResult.insert(0x1000,"APPCONTAINER");
+    mapResult.insert(0x2000,"WDM_DRIVER");
+    mapResult.insert(0x4000,"GUARD_CF");
+    mapResult.insert(0x8000,"TERMINAL_SERVER_AWARE");
 
     return mapResult;
 }
@@ -4698,6 +4928,36 @@ QMap<quint64, QString> QPE::getImageSectionFlags()
     return mapResult;
 }
 
+QMap<quint64, QString> QPE::getImageSectionFlagsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000008,"TYPE_NO_PAD");
+    mapResult.insert(0x00000020,"CNT_CODE");
+    mapResult.insert(0x00000040,"CNT_INITIALIZED_DATA");
+    mapResult.insert(0x00000080,"CNT_UNINITIALIZED_DATA");
+    mapResult.insert(0x00000100,"LNK_OTHER");
+    mapResult.insert(0x00000200,"LNK_INFO");
+    mapResult.insert(0x00000800,"LNK_REMOVE");
+    mapResult.insert(0x00001000,"LNK_COMDAT");
+    mapResult.insert(0x00004000,"NO_DEFER_SPEC_EXC");
+    mapResult.insert(0x00008000,"GPREL");
+    mapResult.insert(0x00020000,"MEM_PURGEABLE");
+    mapResult.insert(0x00020000,"MEM_16BIT");
+    mapResult.insert(0x00040000,"MEM_LOCKED");
+    mapResult.insert(0x00080000,"MEM_PRELOAD");
+    mapResult.insert(0x01000000,"LNK_NRELOC_OVFL");
+    mapResult.insert(0x02000000,"MEM_DISCARDABLE");
+    mapResult.insert(0x04000000,"MEM_NOT_CACHED");
+    mapResult.insert(0x08000000,"MEM_NOT_PAGED");
+    mapResult.insert(0x10000000,"MEM_SHARED");
+    mapResult.insert(0x20000000,"MEM_EXECUTE");
+    mapResult.insert(0x40000000,"MEM_READ");
+    mapResult.insert(0x80000000,"MEM_WRITE");
+
+    return mapResult;
+}
+
 QMap<quint64, QString> QPE::getImageSectionAligns()
 {
     QMap<quint64, QString> mapResult;
@@ -4716,6 +4976,28 @@ QMap<quint64, QString> QPE::getImageSectionAligns()
     mapResult.insert(0x00C00000,"IMAGE_SCN_ALIGN_2048BYTES");
     mapResult.insert(0x00D00000,"IMAGE_SCN_ALIGN_4096BYTES");
     mapResult.insert(0x00E00000,"IMAGE_SCN_ALIGN_8192BYTES");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QPE::getImageSectionAlignsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00100000,"1BYTES");
+    mapResult.insert(0x00200000,"2BYTES");
+    mapResult.insert(0x00300000,"4BYTES");
+    mapResult.insert(0x00400000,"8BYTES");
+    mapResult.insert(0x00500000,"16BYTES");
+    mapResult.insert(0x00600000,"32BYTES");
+    mapResult.insert(0x00700000,"64BYTES");
+    mapResult.insert(0x00800000,"128BYTES");
+    mapResult.insert(0x00900000,"256BYTES");
+    mapResult.insert(0x00A00000,"512BYTES");
+    mapResult.insert(0x00B00000,"1024BYTES");
+    mapResult.insert(0x00C00000,"2048BYTES");
+    mapResult.insert(0x00D00000,"4096BYTES");
+    mapResult.insert(0x00E00000,"8192BYTES");
 
     return mapResult;
 }
