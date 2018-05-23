@@ -38,6 +38,24 @@ qint64 QBinary::getSize()
     return __pDevice->size();
 }
 
+quint32 QBinary::random32()
+{
+#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
+    return QRandomGenerator::global()->generate();
+#else
+    qsrand(QDateTime::currentMSecsSinceEpoch() / 1000);
+    return qrand();
+#endif
+}
+
+quint32 QBinary::random64()
+{
+    quint64 nVal1=random32();
+    quint64 nVal2=random32();
+    nVal1=nVal1<<32;
+    return nVal1+nVal2;
+}
+
 void QBinary::findFiles(QString sFileName, QList<QString> *pListFileNames)
 {
     if((sFileName!=".")&&(sFileName!=".."))
@@ -1523,12 +1541,18 @@ QString QBinary::getUnpackedName(QIODevice *pDevice)
 
         if(sFileName!="")
         {
-            QFileInfo fi(sFileName);
-
-            sResult=fi.absolutePath()+QDir::separator()+fi.baseName()+".unp."+fi.completeSuffix();
-
+            sResult=getUnpackedName(sFileName);
         }
     }
+
+    return sResult;
+}
+
+QString QBinary::getUnpackedName(QString sFileName)
+{
+    QFileInfo fi(sFileName);
+    QString sResult=fi.absolutePath()+QDir::separator()+fi.completeBaseName()+".unp."+fi.suffix();
+    //            sResult=fi.absolutePath()+QDir::separator()+fi.baseName()+".unp."+fi.completeSuffix();
 
     return sResult;
 }
@@ -2389,6 +2413,22 @@ quint32 QBinary::getPhysSize(char *pBuffer, qint64 nSize)
     }
 
     return nSize;
+}
+
+bool QBinary::isEmptyData(char *pBuffer, qint64 nSize) // TODO dwords
+{
+    bool bResult=true;
+    for(qint64 i=0;i<nSize;i++)
+    {
+        char *pOffset=(pBuffer+i);
+        if(*pOffset)
+        {
+            bResult=false;
+            break;
+        }
+    }
+
+    return bResult;
 }
 
 bool QBinary::_isOffsetValid(qint64 nOffset)

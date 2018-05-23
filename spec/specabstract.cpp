@@ -95,10 +95,11 @@ SpecAbstract::SIGNATURE_RECORD _PE_header_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_NSPACK,                       "2.0-2.4",      "",                     "'MZ'40000100000002000000FFFF00000002000000000000400000....................CD21B44CCD21'packed by nspack$'40000000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_COMPILER,         SpecAbstract::RECORD_NAME_LAYHEYFORTRAN90,              "",             "",                     "'MZ'....................................................................................................................6C030000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_HMIMYSPROTECTOR,              "0.1",          "",                     "'MZ'............................................................'hmimys'27's ProtectV0.1'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.00",         "",                     "4D5A90000300000004000000FFFF0000B800000000000000400000000000000000000000000000000000000000000000000000000000000000000000600000000E1FBA0E00B409CD21B8014CCD21'Windows Program'0D0A24"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.31",         "",                     "'MZ'....................................................................................................................40000000'PE'00004C01....'FSG!'"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.00-1.20",    "",                     "'MZ'....................................................................................................................600000000E1FBA0E00B409CD21B8014CCD21'Windows Program'0D0A24"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.30-1.32",    "",                     "'MZ'....................................................................................................................40000000'PE'00004C01....'FSG!'"},
     {1, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.33-2.00",    "",                     "'MZ'....................'PE'00004C01....'FSG!'"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MEW,                          "1.1-1.2",      "",                     "'MZ'00000000000000000000'PE'00004C010200000000000000000000000000"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_BEROEXEPACKER,                "1.00",         "",                     "'MZ'52C3'(C)BeRo!PE'0000"},
 };
 
 SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
@@ -129,6 +130,16 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_ORIEN,                        "",             "",                     "E95D010000CED1CE..'\r\n--------------------------------------------\r\n- ORiEN executable files protection system'"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_VPACKER,                      "0.02.10",      "",                     "60E8........C3"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_ASPROTECT,                    "1.23-2.77",    "",                     "6801......E801000000C3C3"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_EXEPACK,                      "1.4",          "",                     "33C08BC068........68........E8"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_EXEPACK,                      "1.4",          "",                     "EB01909068........68........E8"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_PESPIN,                       "",             "",                     "EB016860E8000000008B1C2483C312812BE8B10600FE4BFD822C24"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_WINUPACK,                     "",             "Alt stub",             "60E809000000..................33C95E870E"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_AHPACKER,                     "0.1",          "",                     "6068........B8........FF10"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_BEROEXEPACKER,                "1.00",         "LZBRR",                "60BE........BF........FCB28033DBA4B302E8"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_BEROEXEPACKER,                "1.00",         "LZBRS",                "60BE........BF........FCAD8D1C07B0803BFB733BE8"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_BEROEXEPACKER,                "1.00",         "LZMA",                 "6068........68........68........E8........BE........B9"},
+
+
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1995.
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1994. All rights re..
 };
@@ -460,6 +471,9 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_MKFPACK:                           sResult=QString("MKFPack"); break;
         case RECORD_NAME_MEW:                               sResult=QString("MEW"); break;
         case RECORD_NAME_UNKNOWNUPXLIKE:                    sResult=QString("Unknown UPX-like"); break;
+        case RECORD_NAME_EXEPACK:                           sResult=QString("!EP(EXE Pack)"); break;
+        case RECORD_NAME_AHPACKER:                          sResult=QString("AHPacker"); break;
+        case RECORD_NAME_BEROEXEPACKER:                     sResult=QString("BeRoEXEPacker"); break;
     }
 
     return sResult;
@@ -467,7 +481,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
 
 SpecAbstract::UNPACK_OPTIONS SpecAbstract::getPossibleUnpackOptions(QIODevice *pDevice)
 {
-    UNPACK_OPTIONS result= {0};
+    UNPACK_OPTIONS result= {};
 
     QSet<QBinary::FILE_TYPES> stFileTypes=QBinary::getFileTypes(pDevice);
 
@@ -988,6 +1002,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         if(pPEInfo->listImports.at(0).sName=="kernel32.dll")
                         {
                             stDetects.insert("kernel32_mew");
+                            stDetects.insert("kernel32_beroexepacker");
                         }
                     }
                 }
@@ -1019,6 +1034,11 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                     stDetects.insert("kernel32_aspack");
                     stDetects.insert("kernel32_asprotect");
                     stDetects.insert("kernel32_alexprotector");
+                    stDetects.insert("kernel32_exe_pack");
+                    if(pPEInfo->listImports.count()==2)
+                    {
+                        stDetects.insert("kernel32_ahpacker");
+                    }
                 }
                 else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="GetModuleHandleA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="LoadLibraryA")&&
@@ -1356,6 +1376,8 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         stDetects.insert("user32_acprotect");
                         stDetects.insert("user32_alexprotector");
                         stDetects.insert("user32_pex");
+                        stDetects.insert("user32_exe_pack");
+                        stDetects.insert("user32_ahpacker");
                     }
                 }
             }
@@ -1418,7 +1440,18 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     {
         if(pPEInfo->listImports.at(2).sName.toUpper()=="KERNEL32.DLL")
         {
-            if(pPEInfo->listImports.at(2).listPositions.count()==4)
+            if(pPEInfo->listImports.at(2).listPositions.count()==2)
+            {
+                if( (pPEInfo->listImports.at(2).listPositions.at(0).sName=="LoadLibraryA")&&
+                    (pPEInfo->listImports.at(2).listPositions.at(1).sName=="GetProcAddress"))
+                {
+                    if(pPEInfo->listImports.count()==3)
+                    {
+                        stDetects.insert("kernel32_pespinx");
+                    }
+                }
+            }
+            else if(pPEInfo->listImports.at(2).listPositions.count()==4)
             {
                 if( (pPEInfo->listImports.at(2).listPositions.at(0).sName=="LoadLibraryA")&&
                     (pPEInfo->listImports.at(2).listPositions.at(1).sName=="GetProcAddress")&&
@@ -1523,14 +1556,29 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
         pPEInfo->mapImportDetects.insert(RECORD_NAME_PEX,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_PEX,"0.99","",0));
     }
 
+    if(stDetects.contains("kernel32_ahpacker")&&stDetects.contains("user32_ahpacker"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_AHPACKER,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_AHPACKER,"0.1","",0));
+    }
+
+    if(stDetects.contains("kernel32_beroexepacker"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_BEROEXEPACKER,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_BEROEXEPACKER,"1.00","",0));
+    }
+
     if(stDetects.contains("user32_pespina")&&stDetects.contains("comctl32_pespina"))
     {
-        pPEInfo->mapImportDetects.insert(RECORD_NAME_PESPIN,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PESPIN,"1.0-1.2","",0));
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PESPIN,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_PESPIN,"1.0-1.2","",0));
     }
 
     if(stDetects.contains("user32_pespin")&&stDetects.contains("comctl32_pespin")&&stDetects.contains("kernel32_pespin"))
     {
-        pPEInfo->mapImportDetects.insert(RECORD_NAME_PESPIN,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PESPIN,"","",0));
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PESPIN,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_PESPIN,"","",0));
+    }
+
+    if(stDetects.contains("user32_pespin")&&stDetects.contains("comctl32_pespin")&&stDetects.contains("kernel32_pespinx"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PESPIN,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_PESPIN,"1.3X","",0));
     }
 
     if(stDetects.contains("kernel32_orien")&&stDetects.contains("comctl32_orien"))
@@ -1556,6 +1604,11 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     if(stDetects.contains("kernel32_alexprotector")&&stDetects.contains("user32_alexprotector"))
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_ALEXPROTECTOR,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_ALEXPROTECTOR,"1.0","",0));
+    }
+
+    if(stDetects.contains("kernel32_exe_pack")&&stDetects.contains("user32_exe_pack"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_EXEPACK,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_EXEPACK,"","",0));
     }
 
     if(stDetects.contains("kernel32_alloy0"))
@@ -1627,7 +1680,6 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"1.41-1.84","",0));
     }
-
 
     if(stDetects.contains("kernel32_pecompactx"))
     {
@@ -1894,6 +1946,25 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
             if(pPEInfo->mapImportDetects.contains(RECORD_NAME_PESPIN))
             {
                 SpecAbstract::SCANS_STRUCT ss=pPEInfo->mapImportDetects.value(RECORD_NAME_PESPIN);
+                // Get version
+                if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_PESPIN))
+                {
+                    quint8 nByte=pPEInfo->sEntryPointSignature.mid(54,2).toInt(0,16);
+                    switch(nByte)
+                    {
+                    case 0x5C: ss.sVersion="0.1";     break;
+                    case 0xB7: ss.sVersion="0.3";     break;
+                    case 0x73: ss.sVersion="0.4";     break;
+                    case 0x83: ss.sVersion="0.7";     break;
+                    case 0xC8: ss.sVersion="1.0";     break;
+                    case 0x7D: ss.sVersion="1.1";     break;
+                    case 0x71: ss.sVersion="1.3beta"; break;
+                    case 0xAC: ss.sVersion="1.3";     break;
+                    case 0x88: ss.sVersion="1.3x";    break;
+                    case 0x17: ss.sVersion="1.32";    break;
+                    case 0x77: ss.sVersion="1.33";    break;
+                    }
+                }
                 pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
@@ -1923,10 +1994,42 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     }
                 }
 
+                // AHPacker
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_AHPACKER))
+                {
+                    if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_AHPACKER))
+                    {
+                        SpecAbstract::SCANS_STRUCT ss=pPEInfo->mapImportDetects.value(RECORD_NAME_AHPACKER);
+                        pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                    }
+                }
+
+                // BeRoEXEPacker
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_BEROEXEPACKER))
+                {
+                    if(pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_BEROEXEPACKER))
+                    {
+                        SpecAbstract::SCANS_STRUCT ss=pPEInfo->mapImportDetects.value(RECORD_NAME_BEROEXEPACKER);
+
+                        if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_BEROEXEPACKER))
+                        {
+                            ss=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_BEROEXEPACKER);
+                        }
+
+                        pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                    }
+                }
+
                 // Winupack
                 if(pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_WINUPACK))
                 {
                     SpecAbstract::SCANS_STRUCT ss=pPEInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_WINUPACK);
+
+                    if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_WINUPACK))
+                    {
+                        ss=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_WINUPACK);
+                    }
+
 //                    recordWinupack.sVersion=QString("%1.%2").arg(pPEInfo->nMajorLinkerVersion).arg(((pPEInfo->nMinorLinkerVersion)/16)*10+(pPEInfo->nMinorLinkerVersion)%16);
 
                     int nBuildNumber=0;
@@ -1950,6 +2053,7 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     case 0x25:  ss.sVersion="0.25";         break;
                     case 0x27:  ss.sVersion="0.27";         break;
                     case 0x28:  ss.sVersion="0.28";         break;
+                    case 0x29:  ss.sVersion="0.29";         break;
                     case 0x30:  ss.sVersion="0.30";         break;
                     case 0x32:  ss.sVersion="0.32";         break;
                     case 0x33:  ss.sVersion="0.33";         break;
@@ -1959,6 +2063,7 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     case 0x38:  ss.sVersion="0.38 beta";    break;
                     case 0x39:  ss.sVersion="0.39 final";   break;
                     case 0x3A:  ss.sVersion="0.399";        break;
+                    default:    ss.sVersion="";
                     }
 
                     pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
@@ -2086,7 +2191,6 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                             }
                             pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
                         }
-
                     }
                 }
 
@@ -2329,6 +2433,14 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     //recordAndpakk.sInfo;
 
                     pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                }
+
+                // EXE Pack
+                if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_EXEPACK))
+                {
+                    SpecAbstract::SCANS_STRUCT recordEP=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_EXEPACK);
+
+                    pPEInfo->mapResultPackers.insert(recordEP.name,scansToScan(&(pPEInfo->basic_info),&recordEP));
                 }
             }
         }
@@ -7381,7 +7493,7 @@ QByteArray SpecAbstract::_BasicPEInfoToArray(SpecAbstract::BASIC_PE_INFO *pInfo)
 
 SpecAbstract::BASIC_PE_INFO SpecAbstract::_ArrayToBasicPEInfo(const QByteArray *pbaArray)
 {
-    BASIC_PE_INFO result= {0};
+    BASIC_PE_INFO result= {};
 
     QDataStream ds((QByteArray *)pbaArray,QIODevice::ReadOnly);
 

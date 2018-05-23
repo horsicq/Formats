@@ -37,6 +37,10 @@
 #include <math.h>
 #include <QDebug>
 #include <QElapsedTimer>
+#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
+#include <QRandomGenerator>
+#endif
+#include <QDateTime>
 
 #include "qmsdos_def.h"
 #include "qpe_def.h"
@@ -108,6 +112,9 @@ public:
     explicit QBinary(QIODevice *__pDevice=0,bool bIsImage=false); // mb TODO parent for signals/slot
     void setData(QIODevice *__pDevice);
     qint64 getSize();
+
+    static quint32 random32();
+    static quint32 random64();
 
     static void findFiles(QString sFileName,QList<QString> *pListFileNames);
 
@@ -209,7 +216,8 @@ public:
     bool isImage();
     void setIsImage(bool value);
 
-    static quint32 getPhysSize(char *pBuffer,qint64 nSize);
+    static quint32 getPhysSize(char *pBuffer,qint64 nSize); // TODO
+    static bool isEmptyData(char *pBuffer,qint64 nSize);
     bool compareSignature(QString sSignature,qint64 nOffset=0);
     static bool _compareByteArrayWithSignature(QByteArray baData,QString sSignature);
     static QString _createSignature(QString sSignature1,QString sSignature2);
@@ -233,6 +241,7 @@ public:
     static QString valueToHex(qint64 value);
 
     static QString getUnpackedName(QIODevice *pDevice);
+    static QString getUnpackedName(QString sFileName);
     static QString getDeviceFileName(QIODevice *pDevice);
     static QString getDeviceFilePath(QIODevice *pDevice);
     static QList<qint64> getFixupList(QIODevice *pDevice1,QIODevice *pDevice2,qint64 nDelta);

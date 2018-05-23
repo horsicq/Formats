@@ -2322,7 +2322,12 @@ QList<QPE::RESOURCE_HEADER> QPE::getResources()
         qint64 nOffsetLevel[3]={};
         S_IMAGE_RESOURCE_DIRECTORY rd[3]={};
         S_IMAGE_RESOURCE_DIRECTORY_ENTRY rde[3]={};
+
+#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
         RESOURCES_ID_NAME irin[3]={};
+#else
+        RESOURCES_ID_NAME irin[3]={0}; // MinGW 4.9 bug?
+#endif
 
         nOffsetLevel[0]=nResourceOffset;
         rd[0]=read_S_IMAGE_RESOURCE_DIRECTORY(nOffsetLevel[0]);
@@ -2946,8 +2951,6 @@ QList<QPE::IMPORT_HEADER> QPE::mapIATToList(QMap<qint64, QString> *pMapIAT,bool 
 {
     QList<QPE::IMPORT_HEADER> listResult;
 
-    QMapIterator<qint64, QString> i(*pMapIAT);
-
     IMPORT_HEADER record={};
 
     quint64 nCurrentRVA=0;
@@ -2963,6 +2966,7 @@ QList<QPE::IMPORT_HEADER> QPE::mapIATToList(QMap<qint64, QString> *pMapIAT,bool 
         nStep=4;
     }
 
+    QMapIterator<qint64, QString> i(*pMapIAT);
     while(i.hasNext())
     {
         i.next();
@@ -3427,6 +3431,90 @@ void QPE::_fixCheckSum()
     setOptionalHeader_CheckSum(calculateCheckSum());
 }
 
+QList<S_IMAGE_SECTION_HEADER> QPE::splitSection(QByteArray *pbaData, S_IMAGE_SECTION_HEADER shOriginal)
+{
+    QList<S_IMAGE_SECTION_HEADER> listResult;
+    int nBlockSize=0x1000;
+    int nSize=pbaData->size();
+    char *pOffset=pbaData->data();
+    char *pOffsetStart=pOffset;
+    int nCount=nSize/nBlockSize;
+    quint64 nVirtualAddress=shOriginal.VirtualAddress;
+
+    if(nCount>1)
+    {
+        // Check the first block
+
+
+        while(isEmptyData(pOffset,nBlockSize))
+        {
+            pOffset+=nBlockSize;
+            nCount--;
+            if(pOffset>=pOffsetStart+nSize)
+            {
+                break;
+            }
+        }
+
+        if(pOffset!=pOffsetStart)
+        {
+            S_IMAGE_SECTION_HEADER sh=shOriginal;
+            sh.VirtualAddress=nVirtualAddress;
+            sh.Misc.VirtualSize=pOffset-pOffsetStart;
+            sh.SizeOfRawData=QBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
+            listResult.append(sh);
+
+            nVirtualAddress+=sh.Misc.VirtualSize;
+        }
+
+        bool bNew=false;
+        pOffsetStart=pOffset;
+        while(nCount>0)
+        {
+            if(isEmptyData(pOffset,nBlockSize))
+            {
+                bNew=true;
+            }
+            else
+            {
+                if(bNew)
+                {
+                    S_IMAGE_SECTION_HEADER sh=shOriginal;
+                    sh.VirtualAddress=nVirtualAddress;
+                    sh.Misc.VirtualSize=pOffset-pOffsetStart;
+                    sh.SizeOfRawData=QBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
+                    listResult.append(sh);
+
+                    nVirtualAddress+=sh.Misc.VirtualSize;
+
+                    pOffsetStart=pOffset;
+                    bNew=false;
+                }
+            }
+            pOffset+=nBlockSize;
+            nCount--;
+        }
+
+        if(pOffset!=pOffsetStart)
+        {
+            S_IMAGE_SECTION_HEADER sh=shOriginal;
+            sh.VirtualAddress=nVirtualAddress;
+            sh.Misc.VirtualSize=pOffset-pOffsetStart;
+            sh.SizeOfRawData=QBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
+            listResult.append(sh);
+
+            nVirtualAddress+=sh.Misc.VirtualSize;
+        }
+    }
+    else
+    {
+        listResult.append(shOriginal);
+    }
+
+
+    return listResult;
+}
+
 qint64 QPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)
 {
     qint64 nHeadersSize=nSectionsTableOffset+sizeof(S_IMAGE_SECTION_HEADER)*nNumberOfSections;
@@ -3444,6 +3532,11 @@ bool QPE::isDll()
     }
 
     return false;
+}
+
+bool QPE::isConsole()
+{
+    return getOptionalHeader_Subsystem()==S_IMAGE_SUBSYSTEM_WINDOWS_CUI;
 }
 
 bool QPE::isNETPresent()
@@ -4032,14 +4125,14 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             QByteArray baHeader=getHeaders();
             int nNumberOfSections=getFileHeader_NumberOfSections();
 
-//            if(pRebuildOptions->bClearHeader)
-//            {
-//                nHeaderSize=getSectionsTableOffset()+nNumberOfSections*sizeof(S_IMAGE_SECTION_HEADER);
-//            }
-//            else
-//            {
-//                nHeaderSize=QBinary::getPhysSize(baHeader.data(),baHeader.size());
-//            }
+            if(pRebuildOptions->bClearHeader)
+            {
+                nHeaderSize=getSectionsTableOffset()+nNumberOfSections*sizeof(S_IMAGE_SECTION_HEADER);
+            }
+            else
+            {
+                nHeaderSize=QBinary::getPhysSize(baHeader.data(),baHeader.size());
+            }
 
             nHeaderSize=QBinary::getPhysSize(baHeader.data(),baHeader.size());
 
@@ -4158,10 +4251,38 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 //                {
 //                    _pe.removeLastSection();
 //                }
+//            #ifdef QT_DEBUG
+//                qDebug("QPE::rebuildDump:removelastsection: %lld msec",timer.elapsed());
+//            #endif
+                if(!pRebuildOptions->mapPatches.empty())
+                {
+                    QList<MEMORY_MAP> listMemoryMap=_pe.getMemoryMapList();
+
+                    QMapIterator<qint64, quint64> i(pRebuildOptions->mapPatches);
+                    while(i.hasNext())
+                    {
+                        i.next();
+
+                        qint64 nAddress=i.key();
+                        quint64 nValue=i.value();
+
+                        quint64 nOffset=_pe.addressToOffset(&listMemoryMap,nAddress);
+
+                        if(_pe.is64())
+                        {
+                            _pe.write_uint64(nOffset,nValue);
+                        }
+                        else
+                        {
+                            _pe.write_uint32(nOffset,(quint32)nValue);
+                        }
+                    }
+                }
 
             #ifdef QT_DEBUG
-                qDebug("QPE::rebuildDump:removelastsection: %lld msec",timer.elapsed());
+                qDebug("QPE::rebuildDump:mapPatches: %lld msec",timer.elapsed());
             #endif
+
 
                 if(pRebuildOptions->bSetEntryPoint)
                 {
@@ -4442,6 +4563,8 @@ QList<qint64> QPE::getRelocsAsRVAList()
             nRelocsOffset+=sizeof(_S_IMAGE_BASE_RELOCATION);
 
             int nCount=(ibr.SizeOfBlock-sizeof(_S_IMAGE_BASE_RELOCATION))/sizeof(quint16);
+
+            nCount=qMin(nCount,(int)0xFFFF);
 
             for(int i=0; i<nCount; i++)
             {

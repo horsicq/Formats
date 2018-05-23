@@ -105,9 +105,9 @@ public:
 
     struct RESOURCES_ID_NAME
     {
+        quint32 nID;
         QString sName;
         quint32 nNameOffset;
-        quint32 nID;
     };
 
     struct RESOURCE_HEADER
@@ -488,6 +488,7 @@ public:
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);
 
     bool isDll();
+    bool isConsole();
 
     bool isNETPresent();
     CLI_INFO getCliInfo(bool bFindHidden);
@@ -507,12 +508,13 @@ public:
     struct REBUILD_OPTIONS
     {
         bool bOptimize;
-//        bool bClearHeader;
+        bool bClearHeader;
 //        bool bRemoveLastSection;
         bool bSetEntryPoint;
         quint32 nEntryPoint;
 //        bool bAddImportSection;
         QMap<qint64,QString> mapIAT;
+        QMap<qint64,quint64> mapPatches;
 //        bool bAddRelocsSection;
         QList<qint64> listRelocsRVAs;
         bool bRenameSections;
@@ -523,10 +525,13 @@ public:
     bool rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions);
     static bool rebuildDump(QString sInputFile,QString sResultFile,REBUILD_OPTIONS *pRebuildOptions);
     static bool fixCheckSum(QString sFileName);
+    void _fixCheckSum();
+
+    static QList<S_IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData,S_IMAGE_SECTION_HEADER shOriginal);
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     qint64 _calculateRawSize();
-    void _fixCheckSum();
+
 
     qint64 _fixHeadersSize();
     qint64 _getMinSectionOffset();
