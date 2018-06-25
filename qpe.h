@@ -117,6 +117,7 @@ public:
         quint32 nID[3];
         qint64 nIRDEOffset;
         qint64 nAddress;
+        qint64 nRVA;
         qint64 nOffset;
         qint64 nSize;
     };
@@ -527,7 +528,7 @@ public:
     static bool fixCheckSum(QString sFileName);
     void _fixCheckSum();
 
-    static QList<S_IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData,S_IMAGE_SECTION_HEADER shOriginal);
+    static QList<S_IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData,S_IMAGE_SECTION_HEADER shOriginal,quint32 nBlockSize);
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     qint64 _calculateRawSize();

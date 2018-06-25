@@ -743,7 +743,8 @@ S_IMAGE_DATA_DIRECTORY QPE::getOptionalHeader_DataDirectory(quint32 nNumber)
 {
     S_IMAGE_DATA_DIRECTORY result={};
 
-//    if(nNumber<getOptionalHeader_NumberOfRvaAndSizes()) // There are protectors with false NumberOfRvaAndSizes
+//    if(nNumber<getOptionalHeader_NumberOfRvaAndSizes()) // There are some protectors with false NumberOfRvaAndSizes
+    if(nNumber<16)
     {
         if(is64())
         {
@@ -760,7 +761,8 @@ S_IMAGE_DATA_DIRECTORY QPE::getOptionalHeader_DataDirectory(quint32 nNumber)
 
 void QPE::setOptionalHeader_DataDirectory(quint32 nNumber,S_IMAGE_DATA_DIRECTORY *pDataDirectory)
 {
-    if(nNumber<16)
+//    if(nNumber<16)
+    if(nNumber<getOptionalHeader_NumberOfRvaAndSizes())
     {
         if(is64())
         {
@@ -2387,6 +2389,7 @@ QList<QPE::RESOURCE_HEADER> QPE::getResources()
 
                         record.nIRDEOffset=rde[2].OffsetToData;
                         S_IMAGE_RESOURCE_DATA_ENTRY irde=read_S_IMAGE_RESOURCE_DATA_ENTRY(nResourceOffset+record.nIRDEOffset);
+                        record.nRVA=irde.OffsetToData;
                         record.nAddress=irde.OffsetToData+nBaseAddress;
                         record.nOffset=addressToOffset(&memoryMap,record.nAddress);
                         record.nSize=irde.Size;
@@ -3431,15 +3434,18 @@ void QPE::_fixCheckSum()
     setOptionalHeader_CheckSum(calculateCheckSum());
 }
 
-QList<S_IMAGE_SECTION_HEADER> QPE::splitSection(QByteArray *pbaData, S_IMAGE_SECTION_HEADER shOriginal)
+QList<S_IMAGE_SECTION_HEADER> QPE::splitSection(QByteArray *pbaData, S_IMAGE_SECTION_HEADER shOriginal, quint32 nBlockSize)
 {
     QList<S_IMAGE_SECTION_HEADER> listResult;
-    int nBlockSize=0x1000;
+//    int nBlockSize=0x1000;
     int nSize=pbaData->size();
     char *pOffset=pbaData->data();
     char *pOffsetStart=pOffset;
     int nCount=nSize/nBlockSize;
     quint64 nVirtualAddress=shOriginal.VirtualAddress;
+    qint64 nRelVirtualStart=0;
+    qint64 nRelVirtualEnd=__ALIGN_UP(shOriginal.Misc.VirtualSize,nBlockSize);
+    qint64 nRelCurrent=nRelVirtualStart;
 
     if(nCount>1)
     {
@@ -3449,6 +3455,7 @@ QList<S_IMAGE_SECTION_HEADER> QPE::splitSection(QByteArray *pbaData, S_IMAGE_SEC
         while(isEmptyData(pOffset,nBlockSize))
         {
             pOffset+=nBlockSize;
+            nRelCurrent+=nBlockSize;
             nCount--;
             if(pOffset>=pOffsetStart+nSize)
             {
@@ -3460,7 +3467,8 @@ QList<S_IMAGE_SECTION_HEADER> QPE::splitSection(QByteArray *pbaData, S_IMAGE_SEC
         {
             S_IMAGE_SECTION_HEADER sh=shOriginal;
             sh.VirtualAddress=nVirtualAddress;
-            sh.Misc.VirtualSize=pOffset-pOffsetStart;
+//            sh.Misc.VirtualSize=pOffset-pOffsetStart;
+            sh.Misc.VirtualSize=nRelCurrent-nRelVirtualStart;
             sh.SizeOfRawData=QBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
             listResult.append(sh);
 
@@ -3469,6 +3477,7 @@ QList<S_IMAGE_SECTION_HEADER> QPE::splitSection(QByteArray *pbaData, S_IMAGE_SEC
 
         bool bNew=false;
         pOffsetStart=pOffset;
+        nRelVirtualStart=nRelCurrent;
         while(nCount>0)
         {
             if(isEmptyData(pOffset,nBlockSize))
@@ -3481,17 +3490,20 @@ QList<S_IMAGE_SECTION_HEADER> QPE::splitSection(QByteArray *pbaData, S_IMAGE_SEC
                 {
                     S_IMAGE_SECTION_HEADER sh=shOriginal;
                     sh.VirtualAddress=nVirtualAddress;
-                    sh.Misc.VirtualSize=pOffset-pOffsetStart;
+//                    sh.Misc.VirtualSize=pOffset-pOffsetStart;
+                    sh.Misc.VirtualSize=nRelCurrent-nRelVirtualStart;
                     sh.SizeOfRawData=QBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
                     listResult.append(sh);
 
                     nVirtualAddress+=sh.Misc.VirtualSize;
 
                     pOffsetStart=pOffset;
+                    nRelVirtualStart=nRelCurrent;
                     bNew=false;
                 }
             }
             pOffset+=nBlockSize;
+            nRelCurrent+=nBlockSize;
             nCount--;
         }
 
@@ -3499,9 +3511,14 @@ QList<S_IMAGE_SECTION_HEADER> QPE::splitSection(QByteArray *pbaData, S_IMAGE_SEC
         {
             S_IMAGE_SECTION_HEADER sh=shOriginal;
             sh.VirtualAddress=nVirtualAddress;
-            sh.Misc.VirtualSize=pOffset-pOffsetStart;
-            sh.SizeOfRawData=QBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
-            listResult.append(sh);
+//            sh.Misc.VirtualSize=pOffset-pOffsetStart;
+            sh.Misc.VirtualSize=nRelVirtualEnd-nRelVirtualStart;
+            sh.SizeOfRawData=QBinary::getPhysSize(pOffsetStart,nSize-(pOffsetStart-pbaData->data()));
+            if(sh.Misc.VirtualSize)
+            {
+                listResult.append(sh);
+            }
+
 
             nVirtualAddress+=sh.Misc.VirtualSize;
         }
@@ -3510,7 +3527,6 @@ QList<S_IMAGE_SECTION_HEADER> QPE::splitSection(QByteArray *pbaData, S_IMAGE_SEC
     {
         listResult.append(shOriginal);
     }
-
 
     return listResult;
 }

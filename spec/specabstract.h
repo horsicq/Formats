@@ -276,7 +276,11 @@ public:
         RECORD_NAME_UNKNOWNUPXLIKE,
         RECORD_NAME_EXEPACK,
         RECORD_NAME_AHPACKER,
-        RECORD_NAME_BEROEXEPACKER
+        RECORD_NAME_BEROEXEPACKER,
+        RECORD_NAME_EXEFOG,
+        RECORD_NAME_NPACK,
+        RECORD_NAME_EXESAX,
+        RECORD_NAME_FISHPEPACKER
     };
 
     struct ID
@@ -588,6 +592,7 @@ public:
     static void PE_handle_Tools(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Installers(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_SFX(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_PolyMorph(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
     static void PE_handle_UnknownProtection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
