@@ -27,6 +27,7 @@
 // TODO buffer big Endian();
 class QELF : public QBinary
 {
+    Q_OBJECT
     struct NOTE
     {
         quint16 type;
@@ -135,11 +136,11 @@ public:
     QByteArray getSection(quint32 nIndex);
     bool isSectionValid(quint32 nIndex);
 
-    QList<Elf32_Shdr> getElf32_ShdrList();
-    QList<Elf64_Shdr> getElf64_ShdrList();
+    QList<S_Elf32_Shdr> getElf32_ShdrList();
+    QList<S_Elf64_Shdr> getElf64_ShdrList();
 
-    Elf32_Shdr getElf32_Shdr(quint32 nIndex);
-    Elf64_Shdr getElf64_Shdr(quint32 nIndex);
+    S_Elf32_Shdr getElf32_Shdr(quint32 nIndex);
+    S_Elf64_Shdr getElf64_Shdr(quint32 nIndex);
     // TODO Set
 
     quint32 getElf32_Shdr_name(quint32 nIndex);
@@ -186,11 +187,11 @@ public:
     void setElf64_Shdr_addralign(quint32 nIndex,quint64 value);
     void setElf64_Shdr_entsize(quint32 nIndex,quint64 value);
 
-    QList<Elf32_Phdr> getElf32_PhdrList();
-    QList<Elf64_Phdr> getElf64_PhdrList();
+    QList<S_Elf32_Phdr> getElf32_PhdrList();
+    QList<S_Elf64_Phdr> getElf64_PhdrList();
 
-    Elf32_Phdr getElf32_Phdr(quint32 nIndex);
-    Elf64_Phdr getElf64_Phdr(quint32 nIndex);
+    S_Elf32_Phdr getElf32_Phdr(quint32 nIndex);
+    S_Elf64_Phdr getElf64_Phdr(quint32 nIndex);
 
     quint32 getElf32_Phdr_type(quint32 nIndex);
     quint32 getElf32_Phdr_offset(quint32 nIndex);

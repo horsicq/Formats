@@ -191,6 +191,7 @@ public:
         RECORD_NAME_OBFUSCATORNET2009,
         RECORD_NAME_OBJECTPASCAL,
         RECORD_NAME_OBSIDIUM,
+        RECORD_NAME_PACKMAN,
         RECORD_NAME_PCGUARD,
         RECORD_NAME_PDF,
         RECORD_NAME_PEARMOR,
@@ -280,7 +281,9 @@ public:
         RECORD_NAME_EXEFOG,
         RECORD_NAME_NPACK,
         RECORD_NAME_EXESAX,
-        RECORD_NAME_FISHPEPACKER
+        RECORD_NAME_FISHPEPACKER,
+        RECORD_NAME_QUICKPACKNT,
+        RECORD_NAME_REVPROT
     };
 
     struct ID
@@ -319,6 +322,12 @@ public:
         //                //TODO
         //            } archive_info;
         //        } extra_info;
+    };
+
+    struct SCAN_RESULT
+    {
+        qint32 nScanTime;
+        QList<SCAN_STRUCT> listRecords;
     };
 
     struct SCANS_STRUCT
@@ -417,19 +426,19 @@ public:
 
         QPE::CLI_INFO cliInfo;
 
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapCodeSectionScanDetects; // Obsolete
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapDataSectionScanDetects; // Obsolete
-//        QMap<RECORD_NAMES,SCANS_STRUCT> mapHeaderScanDetects; // Obsolete
+//        QMap<RECORD_NAMES,SCANS_STRUCT> mapCodeSectionScanDetects; // Obsolete
+//        QMap<RECORD_NAMES,SCANS_STRUCT> mapDataSectionScanDetects; // Obsolete
+////        QMap<RECORD_NAMES,SCANS_STRUCT> mapHeaderScanDetects; // Obsolete
         QMap<RECORD_NAMES,SCANS_STRUCT> mapOverlayDetects;
         QMap<RECORD_NAMES,SCANS_STRUCT> mapEntryPointDetects;
         QMap<RECORD_NAMES,SCANS_STRUCT> mapImportDetects;
-        QMap<RECORD_NAMES,SCANS_STRUCT> _mapImportDetects; // Obsolete
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapExportDetects; // Obsolete
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapRichDetects; // Obsolete
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapResourcesDetects; // Obsolete
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapDotAnsistringsDetects; // Obsolete
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapDotUnicodestringsDetects; // Obsolete
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapSpecialDetects; // Obsolete
+//        QMap<RECORD_NAMES,SCANS_STRUCT> _mapImportDetects; // Obsolete
+//        QMap<RECORD_NAMES,SCANS_STRUCT> mapExportDetects; // Obsolete
+//        QMap<RECORD_NAMES,SCANS_STRUCT> mapRichDetects; // Obsolete
+//        QMap<RECORD_NAMES,SCANS_STRUCT> mapResourcesDetects; // Obsolete
+        QMap<RECORD_NAMES,SCANS_STRUCT> mapDotAnsistringsDetects;
+        QMap<RECORD_NAMES,SCANS_STRUCT> mapDotUnicodestringsDetects;
+//        QMap<RECORD_NAMES,SCANS_STRUCT> mapSpecialDetects; // Obsolete
 
         qint32 nEntryPointSection;
         qint32 nResourceSection;
@@ -585,6 +594,7 @@ public:
     static void PE_handle_Protection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_VMProtect(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Armadillo(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_Petite(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_NETProtection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_libraries(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Microsoft(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);

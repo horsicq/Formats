@@ -780,7 +780,8 @@ bool QPE::isOptionalHeader_DataDirectoryPresent(quint32 nNumber)
     S_IMAGE_DATA_DIRECTORY dd=getOptionalHeader_DataDirectory(nNumber);
 
     //    return (dd.Size)&&(dd.VirtualAddress)&&(isAddressValid(dd.VirtualAddress+getBaseAddress())); // TODO Check
-    return (dd.Size)&&(dd.VirtualAddress);
+//    return (dd.Size)&&(dd.VirtualAddress);
+    return (dd.VirtualAddress);
 }
 
 QList<S_IMAGE_DATA_DIRECTORY> QPE::getDirectories()
@@ -2417,9 +2418,12 @@ QPE::RESOURCE_HEADER QPE::getResourceHeader(quint32 nID1, quint32 nID2, QList<QP
 
     for(int i=0; i<pListHeaders->count(); i++)
     {
-        if((pListHeaders->at(i).nID[0]==nID1)&&(pListHeaders->at(i).nID[1]==nID2))
+        if(pListHeaders->at(i).nID[0]==nID1)
         {
-            result=pListHeaders->at(i);
+            if((pListHeaders->at(i).nID[1]==nID2)||(nID2==-1))
+            {
+                result=pListHeaders->at(i);
+            }
         }
     }
 
@@ -2449,9 +2453,12 @@ QPE::RESOURCE_HEADER QPE::getResourceHeader(QString sName1, quint32 nID2, QList<
 
     for(int i=0; i<pListHeaders->count(); i++)
     {
-        if((pListHeaders->at(i).sName[0]==sName1)&&(pListHeaders->at(i).nID[1]==nID2))
+        if(pListHeaders->at(i).sName[0]==sName1)
         {
-            result=pListHeaders->at(i);
+            if((pListHeaders->at(i).nID[1]==nID2)||(nID2==-1))
+            {
+                result=pListHeaders->at(i);
+            }
         }
     }
 
@@ -4564,9 +4571,9 @@ QList<qint64> QPE::getRelocsAsRVAList()
     {
         while(true)
         {
-            _S_IMAGE_BASE_RELOCATION ibr={};
+            S_IMAGE_BASE_RELOCATION ibr={};
 
-            if(!read_array(nRelocsOffset,(char *)&ibr,sizeof(_S_IMAGE_BASE_RELOCATION)))
+            if(!read_array(nRelocsOffset,(char *)&ibr,sizeof(S_IMAGE_BASE_RELOCATION)))
             {
                 break;
             }
@@ -4576,9 +4583,9 @@ QList<qint64> QPE::getRelocsAsRVAList()
                 break;
             }
 
-            nRelocsOffset+=sizeof(_S_IMAGE_BASE_RELOCATION);
+            nRelocsOffset+=sizeof(S_IMAGE_BASE_RELOCATION);
 
-            int nCount=(ibr.SizeOfBlock-sizeof(_S_IMAGE_BASE_RELOCATION))/sizeof(quint16);
+            int nCount=(ibr.SizeOfBlock-sizeof(S_IMAGE_BASE_RELOCATION))/sizeof(quint16);
 
             nCount=qMin(nCount,(int)0xFFFF);
 
@@ -4691,7 +4698,7 @@ QByteArray QPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
         {
             nBaseAddress=_nBaseAddress;
             nSize=__ALIGN_UP(nSize,4);
-            nSize+=sizeof(_S_IMAGE_BASE_RELOCATION);
+            nSize+=sizeof(S_IMAGE_BASE_RELOCATION);
         }
 
         nSize+=2;
@@ -4725,13 +4732,13 @@ QByteArray QPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
                 nOffset=_nOffset;
             }
 
-            pVirtualAddress=pData+nOffset+offsetof(_S_IMAGE_BASE_RELOCATION,VirtualAddress);
-            pSizeOfBlock=pData+nOffset+offsetof(_S_IMAGE_BASE_RELOCATION,SizeOfBlock);
+            pVirtualAddress=pData+nOffset+offsetof(S_IMAGE_BASE_RELOCATION,VirtualAddress);
+            pSizeOfBlock=pData+nOffset+offsetof(S_IMAGE_BASE_RELOCATION,SizeOfBlock);
             QBinary::_write_uint32(pVirtualAddress,nBaseAddress);
-            nCurrentBlockSize=sizeof(_S_IMAGE_BASE_RELOCATION);
+            nCurrentBlockSize=sizeof(S_IMAGE_BASE_RELOCATION);
             QBinary::_write_uint32(pSizeOfBlock,nCurrentBlockSize);
 
-            nOffset+=sizeof(_S_IMAGE_BASE_RELOCATION);
+            nOffset+=sizeof(S_IMAGE_BASE_RELOCATION);
         }
 
         nCurrentBlockSize+=2;

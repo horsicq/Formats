@@ -26,6 +26,7 @@
 
 class QMSDOS : public QBinary
 {
+    Q_OBJECT
 public:
     explicit QMSDOS(QIODevice *__pDevice=0,bool bIsImage=false);
     virtual bool isValid();

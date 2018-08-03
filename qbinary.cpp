@@ -56,6 +56,61 @@ quint32 QBinary::random64()
     return nVal1+nVal2;
 }
 
+QString QBinary::convertFileName(QString sFileName)
+{
+#ifdef Q_OS_MAC
+//    if(sFileName.startsWith("/.file/id="))
+//    {
+//        CFStringRef relCFStringRef =
+//            CFStringCreateWithCString(
+//                kCFAllocatorDefault,
+//                sFileName.toUtf8().constData(),
+//                kCFStringEncodingUTF8
+//            );
+//    CFURLRef relCFURL =
+//        CFURLCreateWithFileSystemPath(
+//            kCFAllocatorDefault,
+//            relCFStringRef,
+//            kCFURLPOSIXPathStyle,
+//            false // isDirectory
+//        );
+//    CFErrorRef error=0;
+//    CFURLRef absCFURL =
+//    CFURLCreateFilePathURL(
+//            kCFAllocatorDefault,
+//            relCFURL,
+//            &error
+//        );
+//    if(!error)
+//    {
+//        static const CFIndex maxAbsPathCStrBufLen=4096;
+//        char absPathCStr[maxAbsPathCStrBufLen];
+//        if(CFURLGetFileSystemRepresentation(
+//                absCFURL,
+//                true, // resolveAgainstBase
+//                reinterpret_cast<UInt8 *>(&absPathCStr[0] ),
+//                maxAbsPathCStrBufLen
+//            ))
+//            {
+//            sFileName=QString(absPathCStr);
+//            }
+//        }
+//        CFRelease(absCFURL);
+//        CFRelease(relCFURL);
+//        CFRelease(relCFStringRef);
+//    }
+#endif
+
+    QFileInfo fiLink(sFileName);
+
+    if(fiLink.isSymLink())
+    {
+        sFileName=fiLink.symLinkTarget();
+    }
+
+    return sFileName;
+}
+
 void QBinary::findFiles(QString sFileName, QList<QString> *pListFileNames)
 {
     if((sFileName!=".")&&(sFileName!=".."))
@@ -78,6 +133,32 @@ void QBinary::findFiles(QString sFileName, QList<QString> *pListFileNames)
             }
         }
     }
+}
+
+QString QBinary::regExp(QString sRegExp, QString sString, int nIndex)
+{
+    QString sResult;
+
+#if (QT_VERSION_MAJOR<5)
+    QRegExp rxString(sRegExp);
+    rxString.indexIn(sString);
+
+    QStringList list=rxString.capturedTexts();
+    if(list.count()>nIndex)
+    {
+        sResult=list.at(nIndex);
+    }
+#else
+    QRegularExpression rxString(sRegExp);
+    QRegularExpressionMatch matchString=rxString.match(sString);
+
+    if(matchString.hasMatch())
+    {
+        sResult=matchString.captured(nIndex);
+    }
+#endif
+
+    return sResult;
 }
 
 qint64 QBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
@@ -771,17 +852,25 @@ qint64 QBinary::find_unicodeString(qint64 nOffset, qint64 nSize, QString sString
 
 qint64 QBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
 {
-    // TODO too slow
+    sSignature=convertSignature(sSignature);
+
     qint64 nResult=-1;
 
-
-    for(qint64 i=0; i<nSize; i++)
+    if(sSignature.contains(".")||sSignature.contains("$")||sSignature.contains("#"))
     {
-        if(compareSignature(sSignature,nOffset+i))
+        for(qint64 i=0; i<nSize; i++)
         {
-            nResult=nOffset+i;
-            break;
+            if(compareSignature(sSignature,nOffset+i))
+            {
+                nResult=nOffset+i;
+                break;
+            }
         }
+    }
+    else
+    {
+        QByteArray baData=QByteArray::fromHex(QByteArray(sSignature.toLatin1().data()));
+        nResult=find_array(nOffset,nSize,baData.data(),baData.size());
     }
 
     return nResult;
@@ -1440,18 +1529,18 @@ QSet<QBinary::FILE_TYPES> QBinary::getFileTypes()
         }
     }
 
-    if(nSize>=(int)sizeof(Elf32_Ehdr))
+    if(nSize>=(int)sizeof(S_Elf32_Ehdr))
     {
-        if((((Elf32_Ehdr *)pOffset)->e_ident[0] == 0x7f) &&
-                (((Elf32_Ehdr *)pOffset)->e_ident[1] == 'E') &&
-                (((Elf32_Ehdr *)pOffset)->e_ident[2] == 'L') &&
-                (((Elf32_Ehdr *)pOffset)->e_ident[3] == 'F'))
+        if((((S_Elf32_Ehdr *)pOffset)->e_ident[0] == 0x7f) &&
+                (((S_Elf32_Ehdr *)pOffset)->e_ident[1] == 'E') &&
+                (((S_Elf32_Ehdr *)pOffset)->e_ident[2] == 'L') &&
+                (((S_Elf32_Ehdr *)pOffset)->e_ident[3] == 'F'))
         {
-            if(((Elf32_Ehdr *)pOffset)->e_ident[4] == 1)
+            if(((S_Elf32_Ehdr *)pOffset)->e_ident[4] == 1)
             {
                 setResult.insert(FILE_TYPE_ELF32);
             }
-            else if(((Elf32_Ehdr *)pOffset)->e_ident[4] == 2)
+            else if(((S_Elf32_Ehdr *)pOffset)->e_ident[4] == 2)
             {
                 setResult.insert(FILE_TYPE_ELF64);
             }

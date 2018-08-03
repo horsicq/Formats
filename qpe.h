@@ -27,6 +27,7 @@
 // TODO info
 class QPE : public QMSDOS
 {
+    Q_OBJECT
 public:
 
     struct SECTION_RECORD

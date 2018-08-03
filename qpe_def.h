@@ -417,65 +417,65 @@ struct S_IMAGE_IMPORT_DESCRIPTOR_EX
     QString sLibrary;
 };
 
-struct _VS_VERSION_INFO
-{
-    quint16 wLength;             /* Length of the version resource */
-    quint16 wValueLength;        /* Length of the value field for this block */
-    quint16 wType;
-};
+//struct _VS_VERSION_INFO
+//{
+//    quint16 wLength;             /* Length of the version resource */
+//    quint16 wValueLength;        /* Length of the value field for this block */
+//    quint16 wType;
+//};
 
-struct _VS_FIXEDFILEINFO
-{
-    quint32 dwSignature;        // e.g.  0xfeef04bd
-    quint32 dwStrucVersion;     // e.g.  0x00000042 = "0.42"
-    quint32 dwFileVersionMS;    // e.g.  0x00030075 = "3.75"
-    quint32 dwFileVersionLS;    // e.g.  0x00000031 = "0.31"
-    quint32 dwProductVersionMS; // e.g.  0x00030010 = "3.10"
-    quint32 dwProductVersionLS; // e.g.  0x00000031 = "0.31"
-    quint32 dwFileFlagsMask;    // = 0x3F for version "0.42"
-    quint32 dwFileFlags;        // e.g.  VFF_DEBUG | VFF_PRERELEASE
-    quint32 dwFileOS;           // e.g.  VOS_DOS_WINDOWS16
-    quint32 dwFileType;         // e.g.  VFT_DRIVER
-    quint32 dwFileSubtype;      // e.g.  VFT2_DRV_KEYBOARD
-    quint32 dwFileDateMS;       // e.g.  0
-    quint32 dwFileDateLS;       // e.g.  0
-};
+//struct _VS_FIXEDFILEINFO
+//{
+//    quint32 dwSignature;        // e.g.  0xfeef04bd
+//    quint32 dwStrucVersion;     // e.g.  0x00000042 = "0.42"
+//    quint32 dwFileVersionMS;    // e.g.  0x00030075 = "3.75"
+//    quint32 dwFileVersionLS;    // e.g.  0x00000031 = "0.31"
+//    quint32 dwProductVersionMS; // e.g.  0x00030010 = "3.10"
+//    quint32 dwProductVersionLS; // e.g.  0x00000031 = "0.31"
+//    quint32 dwFileFlagsMask;    // = 0x3F for version "0.42"
+//    quint32 dwFileFlags;        // e.g.  VFF_DEBUG | VFF_PRERELEASE
+//    quint32 dwFileOS;           // e.g.  VOS_DOS_WINDOWS16
+//    quint32 dwFileType;         // e.g.  VFT_DRIVER
+//    quint32 dwFileSubtype;      // e.g.  VFT2_DRV_KEYBOARD
+//    quint32 dwFileDateMS;       // e.g.  0
+//    quint32 dwFileDateLS;       // e.g.  0
+//};
 
-struct _S_IMAGE_COR20_HEADER
-{
-    // Header versioning
-    quint32                   cb;
-    quint16                    MajorRuntimeVersion;
-    quint16                    MinorRuntimeVersion;
-    // Symbol table and startup information
-    S_IMAGE_DATA_DIRECTORY    MetaData;
-    quint32                   Flags;
-    // DDBLD - Added next section to replace following lin
-    // DDBLD - Still verifying, since not in NT SDK
-    // DWORD                   EntryPointToken;
-    // If COMS_IMAGE_FLAGS_NATIVE_ENTRYPOINT is not set,
-    // EntryPointToken represents a managed entrypoint.
-    // If COMS_IMAGE_FLAGS_NATIVE_ENTRYPOINT is set,
-    // EntryPointRVA represents an RVA to a native entrypoint.
-    union
-    {
-        quint32               EntryPointToken;
-        quint32               EntryPointRVA;
-    };
-    // DDBLD - End of Added Area
-    // Binding information
-    S_IMAGE_DATA_DIRECTORY    Resources;
-    S_IMAGE_DATA_DIRECTORY    StrongNameSignature;
-    // Regular fixup and binding information
-    S_IMAGE_DATA_DIRECTORY    CodeManagerTable;
-    S_IMAGE_DATA_DIRECTORY    VTableFixups;
-    S_IMAGE_DATA_DIRECTORY    ExportAddressTableJumps;
-    // Precompiled image info (internal use only - set to zero)
-    S_IMAGE_DATA_DIRECTORY    ManagedNativeHeader;
+//struct _S_IMAGE_COR20_HEADER
+//{
+//    // Header versioning
+//    quint32                   cb;
+//    quint16                    MajorRuntimeVersion;
+//    quint16                    MinorRuntimeVersion;
+//    // Symbol table and startup information
+//    S_IMAGE_DATA_DIRECTORY    MetaData;
+//    quint32                   Flags;
+//    // DDBLD - Added next section to replace following lin
+//    // DDBLD - Still verifying, since not in NT SDK
+//    // DWORD                   EntryPointToken;
+//    // If COMS_IMAGE_FLAGS_NATIVE_ENTRYPOINT is not set,
+//    // EntryPointToken represents a managed entrypoint.
+//    // If COMS_IMAGE_FLAGS_NATIVE_ENTRYPOINT is set,
+//    // EntryPointRVA represents an RVA to a native entrypoint.
+//    union
+//    {
+//        quint32               EntryPointToken;
+//        quint32               EntryPointRVA;
+//    };
+//    // DDBLD - End of Added Area
+//    // Binding information
+//    S_IMAGE_DATA_DIRECTORY    Resources;
+//    S_IMAGE_DATA_DIRECTORY    StrongNameSignature;
+//    // Regular fixup and binding information
+//    S_IMAGE_DATA_DIRECTORY    CodeManagerTable;
+//    S_IMAGE_DATA_DIRECTORY    VTableFixups;
+//    S_IMAGE_DATA_DIRECTORY    ExportAddressTableJumps;
+//    // Precompiled image info (internal use only - set to zero)
+//    S_IMAGE_DATA_DIRECTORY    ManagedNativeHeader;
 
-};
+//};
 
-struct _S_IMAGE_BASE_RELOCATION
+struct S_IMAGE_BASE_RELOCATION
 {
     quint32   VirtualAddress;
     quint32   SizeOfBlock;

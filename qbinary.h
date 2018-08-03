@@ -32,8 +32,11 @@
 #include <QSet>
 #include <QTemporaryFile>
 #include <QCryptographicHash>
+#if (QT_VERSION_MAJOR<5)
+#else
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#endif
 #include <math.h>
 #include <QDebug>
 #include <QElapsedTimer>
@@ -53,6 +56,10 @@
 
 #define __LOWORD(l)               ((quint16)((quint32)(l)&0xffff))
 #define __HIWORD(l)               ((quint16)((quint32)(l)>>16))
+
+#ifdef Q_OS_MAC
+#include <CoreFoundation/CoreFoundation.h>
+#endif
 
 class QBinary : public QObject
 {
@@ -116,7 +123,11 @@ public:
     static quint32 random32();
     static quint32 random64();
 
+    static QString convertFileName(QString sFileName);
+
     static void findFiles(QString sFileName,QList<QString> *pListFileNames);
+
+    static QString regExp(QString sRegExp,QString sString,int nIndex);
 
     qint64 read_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
     QByteArray read_array(qint64 nOffset,qint64 nSize);
