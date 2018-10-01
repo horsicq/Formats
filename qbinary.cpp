@@ -858,9 +858,13 @@ qint64 QBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
 
     if(sSignature.contains(".")||sSignature.contains("$")||sSignature.contains("#"))
     {
+        sSignature=convertSignature(sSignature);
+
+        QList<SIGNATURE_RECORD> records=getSignatureRecords(sSignature);
+
         for(qint64 i=0; i<nSize; i++)
         {
-            if(compareSignature(sSignature,nOffset+i))
+            if(_compareSignature(&records,nOffset+i))
             {
                 nResult=nOffset+i;
                 break;
@@ -1472,7 +1476,7 @@ QSet<QBinary::FILE_TYPES> QBinary::getFileTypes()
 {
     QSet<QBinary::FILE_TYPES> setResult;
 
-    setResult.insert(FILE_TYPE_BINARY);
+    setResult.insert(FT_BINARY);
 
     QByteArray baHeader;
     baHeader=read_array(0,0x200);
@@ -1512,20 +1516,20 @@ QSet<QBinary::FILE_TYPES> QBinary::getFileTypes()
                 {
                     if((((S_IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==S_IMAGE_FILE_MACHINE_AMD64)
                     {
-                        setResult.insert(FILE_TYPE_PE64);
+                        setResult.insert(FT_PE64);
                     }
                     else if((((S_IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==S_IMAGE_FILE_MACHINE_IA64)
                     {
-                        setResult.insert(FILE_TYPE_PE64);
+                        setResult.insert(FT_PE64);
                     }
                     else
                     {
-                        setResult.insert(FILE_TYPE_PE32);
+                        setResult.insert(FT_PE32);
                     }
                 }
             }
 
-            setResult.insert(FILE_TYPE_MSDOS);
+            setResult.insert(FT_MSDOS);
         }
     }
 
@@ -1538,11 +1542,11 @@ QSet<QBinary::FILE_TYPES> QBinary::getFileTypes()
         {
             if(((S_Elf32_Ehdr *)pOffset)->e_ident[4] == 1)
             {
-                setResult.insert(FILE_TYPE_ELF32);
+                setResult.insert(FT_ELF32);
             }
             else if(((S_Elf32_Ehdr *)pOffset)->e_ident[4] == 2)
             {
-                setResult.insert(FILE_TYPE_ELF64);
+                setResult.insert(FT_ELF64);
             }
         }
     }

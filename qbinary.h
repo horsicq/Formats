@@ -84,15 +84,24 @@ public:
     };
     enum FILE_TYPES
     {
-        FILE_TYPE_UNKNOWN=0,
-        FILE_TYPE_BINARY,
-        FILE_TYPE_MSDOS,
-        FILE_TYPE_PE,
-        FILE_TYPE_PE32,
-        FILE_TYPE_PE64,
-        FILE_TYPE_ELF,
-        FILE_TYPE_ELF32,
-        FILE_TYPE_ELF64
+//        FILE_TYPE_UNKNOWN=0,
+//        FILE_TYPE_BINARY,
+//        FILE_TYPE_MSDOS,
+//        FILE_TYPE_PE,
+//        FILE_TYPE_PE32,
+//        FILE_TYPE_PE64,
+//        FILE_TYPE_ELF,
+//        FILE_TYPE_ELF32,
+//        FILE_TYPE_ELF64
+        FT_UNKNOWN=0,
+        FT_BINARY,
+        FT_MSDOS,
+        FT_PE,
+        FT_PE32,
+        FT_PE64,
+        FT_ELF,
+        FT_ELF32,
+        FT_ELF64
     };
     struct UNPACK_OPTIONS
     {

@@ -775,6 +775,12 @@ void QPE::setOptionalHeader_DataDirectory(quint32 nNumber,S_IMAGE_DATA_DIRECTORY
     }
 }
 
+void QPE::clearOptionalHeader_DataDirectory(quint32 nNumber)
+{
+    S_IMAGE_DATA_DIRECTORY dd={};
+    setOptionalHeader_DataDirectory(nNumber,&dd);
+}
+
 bool QPE::isOptionalHeader_DataDirectoryPresent(quint32 nNumber)
 {
     S_IMAGE_DATA_DIRECTORY dd=getOptionalHeader_DataDirectory(nNumber);
@@ -2706,7 +2712,7 @@ QPE::EXPORT_HEADER QPE::getExport()
                     int nIndex=read_uint16(nAddressOfNameOrdinalsOffset+2*i);
                     position.nOrdinal=nIndex+result.directory.Base;
                     position.nRVA=read_uint32(nAddressOfFunctionsOffset+4*nIndex);
-                    quint32 nFunctionNameRVA=read_uint32(nAddressOfNamesOffset+4*nIndex);
+                    quint32 nFunctionNameRVA=read_uint32(nAddressOfNamesOffset+4*i);
                     qint64 nFunctionNameOffset=addressToOffset(&listMemoryMap,nFunctionNameRVA+nBaseAddress);
 
                     if(nFunctionNameOffset!=-1)

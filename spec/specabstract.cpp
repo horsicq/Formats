@@ -510,7 +510,7 @@ SpecAbstract::UNPACK_OPTIONS SpecAbstract::getPossibleUnpackOptions(QIODevice *p
 
     QSet<QBinary::FILE_TYPES> stFileTypes=QBinary::getFileTypes(pDevice);
 
-    if(stFileTypes.contains(QBinary::FILE_TYPE_PE32)||stFileTypes.contains(QBinary::FILE_TYPE_PE64))
+    if(stFileTypes.contains(QBinary::FT_PE32)||stFileTypes.contains(QBinary::FT_PE64))
     {
         QPE pe(pDevice);
 

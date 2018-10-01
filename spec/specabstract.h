@@ -501,7 +501,7 @@ public:
 
     struct SIGNATURE_RECORD
     {
-        int nVariant;
+        quint32 nVariant;
         const RECORD_FILETYPES filetype;
         const RECORD_TYPES type;
         const RECORD_NAMES name;
@@ -512,7 +512,7 @@ public:
 
     struct SCANMEMORY_RECORD
     {
-        int nVariant;
+        quint32 nVariant;
         const RECORD_FILETYPES filetype;
         const RECORD_TYPES type;
         const RECORD_NAMES name;
@@ -524,7 +524,7 @@ public:
 
     struct RESOURCES_RECORD
     {
-        int nVariant;
+        quint32 nVariant;
         const RECORD_FILETYPES filetype;
         const RECORD_TYPES type;
         const RECORD_NAMES name;

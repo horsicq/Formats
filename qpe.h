@@ -314,6 +314,7 @@ public:
 
     S_IMAGE_DATA_DIRECTORY getOptionalHeader_DataDirectory(quint32 nNumber);
     void setOptionalHeader_DataDirectory(quint32 nNumber,S_IMAGE_DATA_DIRECTORY *pDataDirectory);
+    void clearOptionalHeader_DataDirectory(quint32 nNumber);
 
     bool isOptionalHeader_DataDirectoryPresent(quint32 nNumber);
 
