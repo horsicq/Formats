@@ -98,7 +98,7 @@ SpecAbstract::SIGNATURE_RECORD _PE_header_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.00-1.20",    "",                     "'MZ'....................................................................................................................600000000E1FBA0E00B409CD21B8014CCD21'Windows Program'0D0A24"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.30-1.32",    "",                     "'MZ'....................................................................................................................40000000'PE'00004C01....'FSG!'"},
     {1, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FSG,                          "1.33-2.00",    "",                     "'MZ'....................'PE'00004C01....'FSG!'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MEW,                          "1.1-1.2",      "",                     "'MZ'00000000000000000000'PE'00004C010200000000000000000000000000"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_MEW11SE,                      "1.1-1.2",      "",                     "'MZ'00000000000000000000'PE'00004C010200000000000000000000000000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_BEROEXEPACKER,                "1.00",         "",                     "'MZ'52C3'(C)BeRo!PE'0000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_KKRUNCHY,                     "0.23",         "farbraush",            "'MZfarbrauschPE'"},
     {1, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_KKRUNCHY,                     "",             "conspiracy",           "'MZconspiracyPE'"},
@@ -117,6 +117,7 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE64,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_UPX,                          "3.81+",            "dll",                  "48894C240848895424104C8944241880FA010F85........53565755488D35........488DBE"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_WWPACK32,                     "1.01-1.12",        "",                     "53558be833dbeb60'\r\n\r\nWWPack32 decompression routine version '........'\r\n(c) 1998 Piotr Warezak and Rafal Wierzbicki\r\n\r\n'"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_COMPILER,         SpecAbstract::RECORD_NAME_BORLANDCPP,                   "",                 "",                     "EB10'fb:C++HOOK'90"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_ANDPAKK2,                     "0.06",             "",                     "60FCBE........BF........5783CDFF33C9F9EB05A402DB7505"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_ANDPAKK2,                     "0.18",             "",                     "FCBE........BF........5783CDFF33C9F9EB05A402DB7505"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_ASDPACK,                      "2.0",              "",                     "8B442404565753E8CD010000C3"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_PEX,                          "0.99",             "",                     "E9"},
@@ -488,7 +489,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_HMIMYSPROTECTOR:                   sResult=QString("Hmimys's Protector"); break;
         case RECORD_NAME_VPACKER:                           sResult=QString("VPacker"); break;
         case RECORD_NAME_MKFPACK:                           sResult=QString("MKFPack"); break;
-        case RECORD_NAME_MEW:                               sResult=QString("MEW"); break;
+        case RECORD_NAME_MEW11SE:                           sResult=QString("MEW11 SE"); break;
         case RECORD_NAME_UNKNOWNUPXLIKE:                    sResult=QString("Unknown UPX-like"); break;
         case RECORD_NAME_EXEPACK:                           sResult=QString("!EP(EXE Pack)"); break;
         case RECORD_NAME_AHPACKER:                          sResult=QString("AHPacker"); break;
@@ -1649,7 +1650,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
 
     if(stDetects.contains("kernel32_mew"))
     {
-        pPEInfo->mapImportDetects.insert(RECORD_NAME_MEW,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_MEW,"","",0));
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_MEW11SE,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_MEW11SE,"","",0));
     }
 
     if(stDetects.contains("kernel32_nspack"))
@@ -1764,7 +1765,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
 
     if(stDetects.contains("kernel32_pecompact0"))
     {
-        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"0.90","",0));
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"0.90-0.91","",0));
     }
 
     if(stDetects.contains("kernel32_pecompact1"))
@@ -1784,17 +1785,17 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
 
     if(stDetects.contains("kernel32_pecompact4"))
     {
-        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"1.10b7-1.25","",0));
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"1.10b7-1.34","",0));
     }
 
-    if(stDetects.contains("kernel32_pecompact5"))
+    if(stDetects.contains("kernel32_pecompact5")) // TODO Cjeck
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"1.30-1.40","",0));
     }
 
     if(stDetects.contains("kernel32_pecompact6"))
     {
-        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"1.41-1.84","",0));
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_PECOMPACT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_PECOMPACT,"1.40-1.84","",0));
     }
 
     if(stDetects.contains("kernel32_pecompactx"))
@@ -2389,11 +2390,11 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                 }
 
                 // MEW
-                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_MEW))
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_MEW11SE))
                 {
-                    if(pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_MEW))
+                    if(pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_MEW11SE))
                     {
-                        SpecAbstract::SCANS_STRUCT ss=pPEInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_MEW);
+                        SpecAbstract::SCANS_STRUCT ss=pPEInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_MEW11SE);
                         pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
                     }
                 }
@@ -2622,7 +2623,7 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                         }
                         else if(QBinary::compareSignatureStrings(_sSignature,"60E803000000E9EB045D4555C3E801"))
                         {
-                            _sVersion="2.12";
+                            _sVersion="2.12-2.42";
                         }
 
                         if(_nOffset>20)

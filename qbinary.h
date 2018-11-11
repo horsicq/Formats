@@ -250,6 +250,7 @@ public:
 
     QSet<FILE_TYPES> getFileTypes();
     static QSet<FILE_TYPES> getFileTypes(QIODevice *pDevice);
+    static QSet<FILE_TYPES> getFileTypes(QString sFileName);
 
     static QString valueToHex(quint8 value);
     static QString valueToHex(qint8 value);

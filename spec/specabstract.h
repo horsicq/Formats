@@ -273,7 +273,7 @@ public:
         RECORD_NAME_HMIMYSPROTECTOR,
         RECORD_NAME_VPACKER,
         RECORD_NAME_MKFPACK,
-        RECORD_NAME_MEW,
+        RECORD_NAME_MEW11SE,
         RECORD_NAME_UNKNOWNUPXLIKE,
         RECORD_NAME_EXEPACK,
         RECORD_NAME_AHPACKER,
@@ -284,6 +284,12 @@ public:
         RECORD_NAME_FISHPEPACKER,
         RECORD_NAME_QUICKPACKNT,
         RECORD_NAME_REVPROT
+    };
+
+    enum RECORD_VERSIONS
+    {
+        RECORD_VERSION_UNKNOWN=0,
+        RECORD_VERSION_32LITE
     };
 
     struct ID
@@ -301,6 +307,7 @@ public:
         ID parentId;
         RECORD_TYPES type;
         RECORD_NAMES name;
+        RECORD_VERSIONS version;
         QString sVersion;
         QString sInfo;
         QByteArray baExtra;

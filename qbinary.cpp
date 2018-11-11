@@ -43,8 +43,23 @@ quint32 QBinary::random32()
 #if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
     return QRandomGenerator::global()->generate();
 #else
-    qsrand(QDateTime::currentMSecsSinceEpoch() / 1000);
-    return qrand();
+
+    static quint32 nSeed=0;
+
+    if(!nSeed)
+    {
+        quint32 nRValue=QDateTime::currentMSecsSinceEpoch()&0xFFFFFFFF;
+
+        nSeed^=nRValue;
+        qsrand(nSeed);
+    }
+
+    quint16 nValue1=(quint32)qrand();
+    quint16 nValue2=(quint32)qrand();
+
+    nSeed^=(nValue1<<16)+nValue2;
+
+    return nSeed;
 #endif
 }
 
@@ -325,17 +340,20 @@ qint64 QBinary::write_ansiString(qint64 nOffset, QString sString)
 
 QString QBinary::read_ansiString(qint64 nOffset,qint64 nMaxSize)
 {
+    QString sResult;
+
     if(nMaxSize)
     {
         if(__pDevice->seek(nOffset))
         {
             // TODO optimize
             QByteArray baData=read_array(nOffset,nMaxSize);
-            return baData.data();
+
+            sResult=baData.data();
         }
     }
 
-    return "";
+    return sResult;
 }
 
 QString QBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize)
@@ -1578,6 +1596,25 @@ QSet<QBinary::FILE_TYPES> QBinary::getFileTypes(QIODevice *pDevice)
     QBinary _binary(pDevice);
 
     return _binary.getFileTypes();
+}
+
+QSet<QBinary::FILE_TYPES> QBinary::getFileTypes(QString sFileName)
+{
+    QSet<QBinary::FILE_TYPES> result;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        QBinary _binary(&file);
+
+        result=_binary.getFileTypes();
+
+        file.close();
+    }
+
+    return result;
 }
 
 QString QBinary::valueToHex(quint8 value)
