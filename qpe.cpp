@@ -378,7 +378,7 @@ quint32 QPE::getOptionalHeader_BaseOfData()
     return read_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,BaseOfData));
 }
 
-qint64 QPE::getOptionalHeader_ImageBase()
+quint64 QPE::getOptionalHeader_ImageBase()
 {
     if(is64())
     {
@@ -579,7 +579,7 @@ void QPE::setOptionalHeader_BaseOfData(quint32 value)
     write_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,BaseOfData),value);
 }
 
-void QPE::setOptionalHeader_ImageBase(qint64 value)
+void QPE::setOptionalHeader_ImageBase(quint64 value)
 {
     if(is64())
     {
@@ -661,7 +661,7 @@ void QPE::setOptionalHeader_DllCharacteristics(quint16 value)
     write_uint16(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,DllCharacteristics),value);
 }
 
-void QPE::setOptionalHeader_SizeOfStackReserve(qint64 value)
+void QPE::setOptionalHeader_SizeOfStackReserve(quint64 value)
 {
     if(is64())
     {
@@ -674,7 +674,7 @@ void QPE::setOptionalHeader_SizeOfStackReserve(qint64 value)
 
 }
 
-void QPE::setOptionalHeader_SizeOfStackCommit(qint64 value)
+void QPE::setOptionalHeader_SizeOfStackCommit(quint64 value)
 {
     if(is64())
     {
@@ -687,7 +687,7 @@ void QPE::setOptionalHeader_SizeOfStackCommit(qint64 value)
 
 }
 
-void QPE::setOptionalHeader_SizeOfHeapReserve(qint64 value)
+void QPE::setOptionalHeader_SizeOfHeapReserve(quint64 value)
 {
     if(is64())
     {
@@ -700,7 +700,7 @@ void QPE::setOptionalHeader_SizeOfHeapReserve(qint64 value)
 
 }
 
-void QPE::setOptionalHeader_SizeOfHeapCommit(qint64 value)
+void QPE::setOptionalHeader_SizeOfHeapCommit(quint64 value)
 {
     if(is64())
     {
@@ -771,6 +771,36 @@ void QPE::setOptionalHeader_DataDirectory(quint32 nNumber,S_IMAGE_DATA_DIRECTORY
         else
         {
             write_array(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(S_IMAGE_DATA_DIRECTORY),(char *)pDataDirectory,sizeof(S_IMAGE_DATA_DIRECTORY));
+        }
+    }
+}
+
+void QPE::setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber, quint32 value)
+{
+    if(nNumber<getOptionalHeader_NumberOfRvaAndSizes())
+    {
+        if(is64())
+        {
+            write_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER64,DataDirectory)+nNumber*sizeof(S_IMAGE_DATA_DIRECTORY)+offsetof(S_IMAGE_DATA_DIRECTORY,VirtualAddress),value);
+        }
+        else
+        {
+            write_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(S_IMAGE_DATA_DIRECTORY)+offsetof(S_IMAGE_DATA_DIRECTORY,VirtualAddress),value);
+        }
+    }
+}
+
+void QPE::setOptionalHeader_DataDirectory_Size(quint32 nNumber, quint32 value)
+{
+    if(nNumber<getOptionalHeader_NumberOfRvaAndSizes())
+    {
+        if(is64())
+        {
+            write_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER64,DataDirectory)+nNumber*sizeof(S_IMAGE_DATA_DIRECTORY)+offsetof(S_IMAGE_DATA_DIRECTORY,Size),value);
+        }
+        else
+        {
+            write_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(S_IMAGE_DATA_DIRECTORY)+offsetof(S_IMAGE_DATA_DIRECTORY,Size),value);
         }
     }
 }
@@ -4826,7 +4856,43 @@ QPE::TLS_HEADER QPE::getTLSHeader()
     return result;
 }
 
-QMap<quint64, QString> QPE::getImageFileMachines()
+QMap<quint64, QString> QPE::getImageNtHeadersSignatures()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00004550,"IMAGE_NT_SIGNATURE");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QPE::getImageNtHeadersSignaturesS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00004550,"NT_SIGNATURE");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QPE::getImageMagics()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x5A4D,"IMAGE_DOS_SIGNATURE");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QPE::getImageMagicsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x5A4D,"DOS_SIGNATURE");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QPE::getImageFileHeaderMachines()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4863,7 +4929,7 @@ QMap<quint64, QString> QPE::getImageFileMachines()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageFileMachinesS()
+QMap<quint64, QString> QPE::getImageFileHeaderMachinesS()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4900,7 +4966,7 @@ QMap<quint64, QString> QPE::getImageFileMachinesS()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageFileCharacteristics()
+QMap<quint64, QString> QPE::getImageFileHeaderCharacteristics()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4923,7 +4989,7 @@ QMap<quint64, QString> QPE::getImageFileCharacteristics()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageFileCharacteristicsS()
+QMap<quint64, QString> QPE::getImageFileHeaderCharacteristicsS()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4946,7 +5012,7 @@ QMap<quint64, QString> QPE::getImageFileCharacteristicsS()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageNtOptionalMagic()
+QMap<quint64, QString> QPE::getImageOptionalHeaderMagic()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4957,7 +5023,7 @@ QMap<quint64, QString> QPE::getImageNtOptionalMagic()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageNtOptionalMagicS()
+QMap<quint64, QString> QPE::getImageOptionalHeaderMagicS()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4968,7 +5034,7 @@ QMap<quint64, QString> QPE::getImageNtOptionalMagicS()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageNtOptionalSubsystem()
+QMap<quint64, QString> QPE::getImageOptionalHeaderSubsystem()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4990,7 +5056,7 @@ QMap<quint64, QString> QPE::getImageNtOptionalSubsystem()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageNtOptionalSubsystemS()
+QMap<quint64, QString> QPE::getImageOptionalHeaderSubsystemS()
 {
     QMap<quint64, QString> mapResult;
 
@@ -5012,7 +5078,7 @@ QMap<quint64, QString> QPE::getImageNtOptionalSubsystemS()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageNtOptionalDllCharacteristics()
+QMap<quint64, QString> QPE::getImageOptionalHeaderDllCharacteristics()
 {
     QMap<quint64, QString> mapResult;
 
@@ -5031,7 +5097,7 @@ QMap<quint64, QString> QPE::getImageNtOptionalDllCharacteristics()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageNtOptionalDllCharacteristicsS()
+QMap<quint64, QString> QPE::getImageOptionalHeaderDllCharacteristicsS()
 {
     QMap<quint64, QString> mapResult;
 
@@ -5050,7 +5116,7 @@ QMap<quint64, QString> QPE::getImageNtOptionalDllCharacteristicsS()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageSectionFlags()
+QMap<quint64, QString> QPE::getImageSectionHeaderFlags()
 {
     QMap<quint64, QString> mapResult;
 
@@ -5080,7 +5146,7 @@ QMap<quint64, QString> QPE::getImageSectionFlags()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageSectionFlagsS()
+QMap<quint64, QString> QPE::getImageSectionHeaderFlagsS()
 {
     QMap<quint64, QString> mapResult;
 
@@ -5110,7 +5176,7 @@ QMap<quint64, QString> QPE::getImageSectionFlagsS()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageSectionAligns()
+QMap<quint64, QString> QPE::getImageSectionHeaderAligns()
 {
     QMap<quint64, QString> mapResult;
 
@@ -5132,7 +5198,7 @@ QMap<quint64, QString> QPE::getImageSectionAligns()
     return mapResult;
 }
 
-QMap<quint64, QString> QPE::getImageSectionAlignsS()
+QMap<quint64, QString> QPE::getImageSectionHeaderAlignsS()
 {
     QMap<quint64, QString> mapResult;
 
