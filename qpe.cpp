@@ -2799,6 +2799,116 @@ void QPE::setExportDirectory(S_IMAGE_EXPORT_DIRECTORY *pExportDirectory)
     }
 }
 
+void QPE::setExportDirectory_Characteristics(quint32 value)
+{
+    qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+    if(nExportOffset!=-1)
+    {
+        write_uint32(nExportOffset+offsetof(S_IMAGE_EXPORT_DIRECTORY,Characteristics),value);
+    }
+}
+
+void QPE::setExportDirectory_TimeDateStamp(quint32 value)
+{
+    qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+    if(nExportOffset!=-1)
+    {
+        write_uint32(nExportOffset+offsetof(S_IMAGE_EXPORT_DIRECTORY,TimeDateStamp),value);
+    }
+}
+
+void QPE::setExportDirectory_MajorVersion(quint16 value)
+{
+    qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+    if(nExportOffset!=-1)
+    {
+        write_uint16(nExportOffset+offsetof(S_IMAGE_EXPORT_DIRECTORY,MajorVersion),value);
+    }
+}
+
+void QPE::setExportDirectory_MinorVersion(quint16 value)
+{
+    qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+    if(nExportOffset!=-1)
+    {
+        write_uint16(nExportOffset+offsetof(S_IMAGE_EXPORT_DIRECTORY,MinorVersion),value);
+    }
+}
+
+void QPE::setExportDirectory_Name(quint32 value)
+{
+    qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+    if(nExportOffset!=-1)
+    {
+        write_uint32(nExportOffset+offsetof(S_IMAGE_EXPORT_DIRECTORY,Name),value);
+    }
+}
+
+void QPE::setExportDirectory_Base(quint32 value)
+{
+    qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+    if(nExportOffset!=-1)
+    {
+        write_uint32(nExportOffset+offsetof(S_IMAGE_EXPORT_DIRECTORY,Base),value);
+    }
+}
+
+void QPE::setExportDirectory_NumberOfFunctions(quint32 value)
+{
+    qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+    if(nExportOffset!=-1)
+    {
+        write_uint32(nExportOffset+offsetof(S_IMAGE_EXPORT_DIRECTORY,NumberOfFunctions),value);
+    }
+}
+
+void QPE::setExportDirectory_NumberOfNames(quint32 value)
+{
+    qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+    if(nExportOffset!=-1)
+    {
+        write_uint32(nExportOffset+offsetof(S_IMAGE_EXPORT_DIRECTORY,NumberOfNames),value);
+    }
+}
+
+void QPE::setExportDirectory_AddressOfFunctions(quint32 value)
+{
+    qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+    if(nExportOffset!=-1)
+    {
+        write_uint32(nExportOffset+offsetof(S_IMAGE_EXPORT_DIRECTORY,AddressOfFunctions),value);
+    }
+}
+
+void QPE::setExportDirectory_AddressOfNames(quint32 value)
+{
+    qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+    if(nExportOffset!=-1)
+    {
+        write_uint32(nExportOffset+offsetof(S_IMAGE_EXPORT_DIRECTORY,AddressOfNames),value);
+    }
+}
+
+void QPE::setExportDirectory_AddressOfNameOrdinals(quint32 value)
+{
+    qint64 nExportOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+    if(nExportOffset!=-1)
+    {
+        write_uint32(nExportOffset+offsetof(S_IMAGE_EXPORT_DIRECTORY,AddressOfNameOrdinals),value);
+    }
+}
+
 QByteArray QPE::getHeaders()
 {
     QByteArray baResult;

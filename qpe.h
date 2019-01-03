@@ -420,6 +420,18 @@ public:
     S_IMAGE_EXPORT_DIRECTORY getExportDirectory();
     void setExportDirectory(S_IMAGE_EXPORT_DIRECTORY *pExportDirectory);
 
+    void setExportDirectory_Characteristics(quint32 value);
+    void setExportDirectory_TimeDateStamp(quint32 value);
+    void setExportDirectory_MajorVersion(quint16 value);
+    void setExportDirectory_MinorVersion(quint16 value);
+    void setExportDirectory_Name(quint32 value);
+    void setExportDirectory_Base(quint32 value);
+    void setExportDirectory_NumberOfFunctions(quint32 value);
+    void setExportDirectory_NumberOfNames(quint32 value);
+    void setExportDirectory_AddressOfFunctions(quint32 value);
+    void setExportDirectory_AddressOfNames(quint32 value);
+    void setExportDirectory_AddressOfNameOrdinals(quint32 value);
+
     QByteArray getHeaders();
 
     OFFSETSIZE __getSectionOffsetAndSize(quint32 nSection);
