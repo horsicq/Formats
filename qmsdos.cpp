@@ -1,4 +1,4 @@
-// copyright (c) 2017-2018 hors<horsicq@gmail.com>
+// copyright (c) 2017-2019 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -72,4 +72,105 @@ void QMSDOS::setDosHeader(S_IMAGE_DOS_HEADER *pDosHeader)
 void QMSDOS::setDosHeaderEx(S_IMAGE_DOS_HEADEREX *pDosHeaderEx)
 {
     write_array((qint64)offsetof(S_IMAGE_DOS_HEADEREX,e_magic),(char *)pDosHeaderEx,sizeof(S_IMAGE_DOS_HEADEREX));
+}
+
+void QMSDOS::set_e_magic(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_magic),value);
+}
+
+void QMSDOS::set_e_cblp(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cblp),value);
+}
+
+void QMSDOS::set_e_cp(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cp),value);
+}
+
+void QMSDOS::set_e_crlc(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_crlc),value);
+}
+
+void QMSDOS::set_e_cparhdr(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cparhdr),value);
+}
+
+void QMSDOS::set_e_minalloc(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_minalloc),value);
+}
+
+void QMSDOS::set_e_maxalloc(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_maxalloc),value);
+}
+
+void QMSDOS::set_e_ss(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ss),value);
+}
+
+void QMSDOS::set_e_sp(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_sp),value);
+}
+
+void QMSDOS::set_e_csum(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_csum),value);
+}
+
+void QMSDOS::set_e_ip(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ip),value);
+}
+
+void QMSDOS::set_e_cs(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cs),value);
+}
+
+void QMSDOS::set_e_lfarlc(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_lfarlc),value);
+}
+
+void QMSDOS::set_e_ovno(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ovno),value);
+}
+
+void QMSDOS::set_e_res(int nPosition, quint16 value)
+{
+    if(nPosition<4)
+    {
+        write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_res)+sizeof(quint16)*nPosition,value);
+    }
+}
+
+void QMSDOS::set_e_oemid(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_oemid),value);
+}
+
+void QMSDOS::set_e_oeminfo(quint16 value)
+{
+    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_oeminfo),value);
+}
+
+void QMSDOS::set_e_res2(int nPosition, quint16 value)
+{
+    if(nPosition<10)
+    {
+        write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_res2)+sizeof(quint16)*nPosition,value);
+    }
+}
+
+void QMSDOS::set_e_lfanew(quint32 value)
+{
+    write_uint32(offsetof(S_IMAGE_DOS_HEADEREX,e_lfanew),value);
 }

@@ -1,4 +1,4 @@
-// copyright (c) 2017-2018 hors<horsicq@gmail.com>
+// copyright (c) 2017-2019 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -301,9 +301,10 @@ struct S_IMAGE_NT_HEADERS32
 
 #define S_IMAGE_SIZEOF_SHORT_NAME 8
 
-#define S_IMAGE_SCN_MEM_EXECUTE 0x20000000
-#define S_IMAGE_SCN_MEM_READ 0x40000000
-#define S_IMAGE_SCN_MEM_WRITE 0x80000000
+#define S_IMAGE_SCN_MEM_EXECUTE         0x20000000
+#define S_IMAGE_SCN_MEM_READ            0x40000000
+#define S_IMAGE_SCN_MEM_WRITE           0x80000000
+#define S_IMAGE_SCN_ALIGN_MASK          0x00F00000
 
 struct S_IMAGE_SECTION_HEADER
 {

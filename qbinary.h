@@ -1,4 +1,4 @@
-// copyright (c) 2017-2018 hors<horsicq@gmail.com>
+// copyright (c) 2017-2019 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -84,15 +84,6 @@ public:
     };
     enum FILE_TYPES
     {
-//        FILE_TYPE_UNKNOWN=0,
-//        FILE_TYPE_BINARY,
-//        FILE_TYPE_MSDOS,
-//        FILE_TYPE_PE,
-//        FILE_TYPE_PE32,
-//        FILE_TYPE_PE64,
-//        FILE_TYPE_ELF,
-//        FILE_TYPE_ELF32,
-//        FILE_TYPE_ELF64
         FT_UNKNOWN=0,
         FT_BINARY,
         FT_MSDOS,

@@ -1,4 +1,4 @@
-// copyright (c) 2017-2018 hors<horsicq@gmail.com>
+// copyright (c) 2017-2019 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -258,7 +258,7 @@ public:
     quint32 getOptionalHeader_AddressOfEntryPoint();
     quint32 getOptionalHeader_BaseOfCode();
     quint32 getOptionalHeader_BaseOfData();
-    qint64 getOptionalHeader_ImageBase();
+    quint64 getOptionalHeader_ImageBase();
     quint32 getOptionalHeader_SectionAlignment();
     quint32 getOptionalHeader_FileAlignment();
     quint16 getOptionalHeader_MajorOperatingSystemVersion();
@@ -290,7 +290,7 @@ public:
     void setOptionalHeader_AddressOfEntryPoint(quint32 value);
     void setOptionalHeader_BaseOfCode(quint32 value);
     void setOptionalHeader_BaseOfData(quint32 value);
-    void setOptionalHeader_ImageBase(qint64 value);
+    void setOptionalHeader_ImageBase(quint64 value);
     void setOptionalHeader_SectionAlignment(quint32 value);
     void setOptionalHeader_FileAlignment(quint32 value);
     void setOptionalHeader_MajorOperatingSystemVersion(quint16 value);
@@ -305,15 +305,19 @@ public:
     void setOptionalHeader_CheckSum(quint32 value);
     void setOptionalHeader_Subsystem(quint16 value);
     void setOptionalHeader_DllCharacteristics(quint16 value);
-    void setOptionalHeader_SizeOfStackReserve(qint64 value);
-    void setOptionalHeader_SizeOfStackCommit(qint64 value);
-    void setOptionalHeader_SizeOfHeapReserve(qint64 value);
-    void setOptionalHeader_SizeOfHeapCommit(qint64 value);
+    void setOptionalHeader_SizeOfStackReserve(quint64 value);
+    void setOptionalHeader_SizeOfStackCommit(quint64 value);
+    void setOptionalHeader_SizeOfHeapReserve(quint64 value);
+    void setOptionalHeader_SizeOfHeapCommit(quint64 value);
     void setOptionalHeader_LoaderFlags(quint32 value);
     void setOptionalHeader_NumberOfRvaAndSizes(quint32 value);
 
     S_IMAGE_DATA_DIRECTORY getOptionalHeader_DataDirectory(quint32 nNumber);
     void setOptionalHeader_DataDirectory(quint32 nNumber,S_IMAGE_DATA_DIRECTORY *pDataDirectory);
+
+    void setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber,quint32 value);
+    void setOptionalHeader_DataDirectory_Size(quint32 nNumber,quint32 value);
+
     void clearOptionalHeader_DataDirectory(quint32 nNumber);
 
     bool isOptionalHeader_DataDirectoryPresent(quint32 nNumber);
@@ -416,6 +420,18 @@ public:
     S_IMAGE_EXPORT_DIRECTORY getExportDirectory();
     void setExportDirectory(S_IMAGE_EXPORT_DIRECTORY *pExportDirectory);
 
+    void setExportDirectory_Characteristics(quint32 value);
+    void setExportDirectory_TimeDateStamp(quint32 value);
+    void setExportDirectory_MajorVersion(quint16 value);
+    void setExportDirectory_MinorVersion(quint16 value);
+    void setExportDirectory_Name(quint32 value);
+    void setExportDirectory_Base(quint32 value);
+    void setExportDirectory_NumberOfFunctions(quint32 value);
+    void setExportDirectory_NumberOfNames(quint32 value);
+    void setExportDirectory_AddressOfFunctions(quint32 value);
+    void setExportDirectory_AddressOfNames(quint32 value);
+    void setExportDirectory_AddressOfNameOrdinals(quint32 value);
+
     QByteArray getHeaders();
 
     OFFSETSIZE __getSectionOffsetAndSize(quint32 nSection);
@@ -473,20 +489,24 @@ public:
 
     TLS_HEADER getTLSHeader();
 
-    static QMap<quint64,QString> getImageFileMachines();
-    static QMap<quint64,QString> getImageFileMachinesS();
-    static QMap<quint64,QString> getImageFileCharacteristics();
-    static QMap<quint64,QString> getImageFileCharacteristicsS();
-    static QMap<quint64,QString> getImageNtOptionalMagic();
-    static QMap<quint64,QString> getImageNtOptionalMagicS();
-    static QMap<quint64,QString> getImageNtOptionalSubsystem();
-    static QMap<quint64,QString> getImageNtOptionalSubsystemS();
-    static QMap<quint64,QString> getImageNtOptionalDllCharacteristics();
-    static QMap<quint64,QString> getImageNtOptionalDllCharacteristicsS();
-    static QMap<quint64,QString> getImageSectionFlags();
-    static QMap<quint64,QString> getImageSectionFlagsS();
-    static QMap<quint64,QString> getImageSectionAligns();
-    static QMap<quint64,QString> getImageSectionAlignsS();
+    static QMap<quint64,QString> getImageNtHeadersSignatures();
+    static QMap<quint64,QString> getImageNtHeadersSignaturesS();
+    static QMap<quint64,QString> getImageMagics();
+    static QMap<quint64,QString> getImageMagicsS();
+    static QMap<quint64,QString> getImageFileHeaderMachines();
+    static QMap<quint64,QString> getImageFileHeaderMachinesS();
+    static QMap<quint64,QString> getImageFileHeaderCharacteristics();
+    static QMap<quint64,QString> getImageFileHeaderCharacteristicsS();
+    static QMap<quint64,QString> getImageOptionalHeaderMagic();
+    static QMap<quint64,QString> getImageOptionalHeaderMagicS();
+    static QMap<quint64,QString> getImageOptionalHeaderSubsystem();
+    static QMap<quint64,QString> getImageOptionalHeaderSubsystemS();
+    static QMap<quint64,QString> getImageOptionalHeaderDllCharacteristics();
+    static QMap<quint64,QString> getImageOptionalHeaderDllCharacteristicsS();
+    static QMap<quint64,QString> getImageSectionHeaderFlags();
+    static QMap<quint64,QString> getImageSectionHeaderFlagsS();
+    static QMap<quint64,QString> getImageSectionHeaderAligns();
+    static QMap<quint64,QString> getImageSectionHeaderAlignsS();
 
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);
 
