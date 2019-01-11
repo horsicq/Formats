@@ -147,6 +147,7 @@ public:
         RECORD_NAME_EMBARCADEROOBJECTPASCAL,
         RECORD_NAME_EMPTYFILE,
         RECORD_NAME_ENIGMA,
+        RECORD_NAME_EXE32PACK,
         RECORD_NAME_EXECRYPT,
         RECORD_NAME_EXECRYPTOR,
         RECORD_NAME_EXEFOG,
@@ -441,19 +442,11 @@ public:
 
         QPE::CLI_INFO cliInfo;
 
-//        QMap<RECORD_NAMES,SCANS_STRUCT> mapCodeSectionScanDetects; // Obsolete
-//        QMap<RECORD_NAMES,SCANS_STRUCT> mapDataSectionScanDetects; // Obsolete
-////        QMap<RECORD_NAMES,SCANS_STRUCT> mapHeaderScanDetects; // Obsolete
         QMap<RECORD_NAMES,SCANS_STRUCT> mapOverlayDetects;
         QMap<RECORD_NAMES,SCANS_STRUCT> mapEntryPointDetects;
         QMap<RECORD_NAMES,SCANS_STRUCT> mapImportDetects;
-//        QMap<RECORD_NAMES,SCANS_STRUCT> _mapImportDetects; // Obsolete
-//        QMap<RECORD_NAMES,SCANS_STRUCT> mapExportDetects; // Obsolete
-//        QMap<RECORD_NAMES,SCANS_STRUCT> mapRichDetects; // Obsolete
-//        QMap<RECORD_NAMES,SCANS_STRUCT> mapResourcesDetects; // Obsolete
         QMap<RECORD_NAMES,SCANS_STRUCT> mapDotAnsistringsDetects;
         QMap<RECORD_NAMES,SCANS_STRUCT> mapDotUnicodestringsDetects;
-//        QMap<RECORD_NAMES,SCANS_STRUCT> mapSpecialDetects; // Obsolete
 
         qint32 nEntryPointSection;
         qint32 nResourceSection;

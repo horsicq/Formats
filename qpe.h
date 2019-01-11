@@ -83,6 +83,7 @@ public:
     {
         quint16 nOrdinal;
         quint32 nRVA;
+        quint32 nNameRVA;
         QString sFunctionName;
         qint64 nFunctionOffset;
     };
@@ -375,7 +376,6 @@ public:
 
     QList<IMPORT_HEADER> getImports();
     QList<IMPORT_POSITION> getImportPositions(int nIndex);
-
 
     static bool isImportLibraryPresentI(QString sLibrary,QList<IMPORT_HEADER> *pListImport);
 

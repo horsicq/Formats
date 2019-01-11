@@ -163,7 +163,7 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_XCOMP,                        "0.97-0.98",        "",                     "68........9C60E8"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_XPACK,                        "0.97-0.98",        "",                     "68........9C60E8"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_ABCCRYPTOR,                   "1.0",              "",                     "68FF6424F0685858585890FFD4"},
-
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_EXE32PACK,                    "1.4X",             "",                     "3BC07402"},
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1995.
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1994. All rights re..
 };
@@ -368,6 +368,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_EMBARCADEROOBJECTPASCAL:           sResult=QString("Embarcadero Object Pascal");                   break;
         case RECORD_NAME_EMPTYFILE:                         sResult=QString("Empty File");                                  break;
         case RECORD_NAME_ENIGMA:                            sResult=QString("ENIGMA");                                      break;
+        case RECORD_NAME_EXE32PACK:                         sResult=QString("exe32pack");                                   break;
         case RECORD_NAME_EXECRYPT:                          sResult=QString("EXECrypt");                                    break;
         case RECORD_NAME_EXECRYPTOR:                        sResult=QString("EXECryptor");                                  break;
         case RECORD_NAME_EXEFOG:                            sResult=QString("ExeFog");                                      break;
@@ -1057,6 +1058,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress"))
                 {
                     stDetects.insert("kernel32_packmana");
+                    stDetects.insert("kernel32_exe32pack");
                 }
             }
             else if(pPEInfo->listImports.at(0).listPositions.count()==3)
@@ -1823,6 +1825,11 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     if(stDetects.contains("kernel32_xpack"))
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_XPACK,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_XPACK,"0.97-0.98","",0));
+    }
+
+    if(stDetects.contains("kernel32_exe32pack"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_EXE32PACK,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_EXE32PACK,"1.4X","",0));
     }
 
     if(stDetects.contains("kernel32_pecompact0"))
@@ -2805,6 +2812,28 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     if((pPEInfo->nEntryPointAddress-pPEInfo->listSectionHeaders.at(pPEInfo->nEntryPointSection).VirtualAddress)==1)
                     {
                         pPEInfo->mapResultPackers.insert(recordEP.name,scansToScan(&(pPEInfo->basic_info),&recordEP));
+                    }
+                }
+
+                // exe 32 pack
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_EXE32PACK))
+                {
+                    if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_EXE32PACK))
+                    {
+                        SCANS_STRUCT ss=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_EXE32PACK);
+
+                        qint64 _nOffset=pPEInfo->nHeaderOffset;
+                        qint64 _nSize=qMin(pPEInfo->basic_info.nSize,(qint64)0x2000);
+
+                        qint64 nOffset_version=pe.find_ansiString(_nOffset,_nSize,"Packed by exe32pack");
+
+                        if(nOffset_version!=-1)
+                        {
+                            ss.sVersion=pe.read_ansiString(nOffset_version+20,50);
+                            ss.sVersion=ss.sVersion.section(" ",0,0);
+                        }
+
+                        pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
                     }
                 }
             }
@@ -4284,6 +4313,26 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
 
         if(!pPEInfo->cliInfo.bInit)
         {
+            bool bDetectGCC=false;
+            bool bHeurGCC=false;
+
+            if(pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_GENERICLINKER))
+            {
+                switch(pPEInfo->nMajorLinkerVersion)
+                {
+                case 2:
+                    switch(pPEInfo->nMinorLinkerVersion)
+                    {
+                    case 24:
+                    case 25:
+                    case 56:
+                        bHeurGCC=true;
+                        break;
+                    }
+                    break;
+                }
+            }
+
             QString sDllLib;
 
             if((pPEInfo->nConstDataSectionOffset)&&(pPEInfo->nConstDataSectionSize)&&(pPEInfo->basic_info.bDeepScan))
@@ -4300,11 +4349,18 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                 pPEInfo->mapResultTools.insert(ssMsys.name,scansToScan(&(pPEInfo->basic_info),&ssMsys));
             }
 
+
             if(     (sDllLib.contains("gcc"))||
                     (sDllLib.contains("libgcj"))||
                     (sDllLib=="_set_invalid_parameter_handler")||
                     QPE::isImportLibraryPresentI("libgcc_s_dw2-1.dll",&(pPEInfo->listImports))||
                     pPEInfo->mapOverlayDetects.contains(RECORD_NAME_MINGW))
+            {
+                bDetectGCC=true;
+            }
+
+
+            if(bDetectGCC||bHeurGCC)
             {
                 // Mingw
                 // Msys
@@ -4320,6 +4376,8 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
 
                     if(nOffset_Version!=-1)
                     {
+                        bDetectGCC=true;
+
                         QString sVersionString=pe.read_ansiString(nOffset_Version);
 
                         // TODO MinGW-w64
@@ -4351,7 +4409,10 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                     }
                 }
 
-                pPEInfo->mapResultCompilers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                if(bDetectGCC)
+                {
+                    pPEInfo->mapResultCompilers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                }
             }
 
             for(int i=0; i<pPEInfo->listImports.count(); i++)

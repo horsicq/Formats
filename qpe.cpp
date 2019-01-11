@@ -1767,8 +1767,10 @@ QList<QPE::IMPORT_HEADER> QPE::getImports()
 
         while(true)
         {
-            IMPORT_HEADER importHeader={};
             S_IMAGE_IMPORT_DESCRIPTOR iid=read_S_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
+
+            IMPORT_HEADER importHeader={};
+
 
             if(nImportOffsetTest==-1)
             {
@@ -2742,8 +2744,8 @@ QPE::EXPORT_HEADER QPE::getExport()
                     int nIndex=read_uint16(nAddressOfNameOrdinalsOffset+2*i);
                     position.nOrdinal=nIndex+result.directory.Base;
                     position.nRVA=read_uint32(nAddressOfFunctionsOffset+4*nIndex);
-                    quint32 nFunctionNameRVA=read_uint32(nAddressOfNamesOffset+4*i);
-                    qint64 nFunctionNameOffset=addressToOffset(&listMemoryMap,nFunctionNameRVA+nBaseAddress);
+                    position.nNameRVA=read_uint32(nAddressOfNamesOffset+4*i);
+                    qint64 nFunctionNameOffset=addressToOffset(&listMemoryMap,position.nNameRVA+nBaseAddress);
 
                     if(nFunctionNameOffset!=-1)
                     {
