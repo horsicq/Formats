@@ -2346,10 +2346,9 @@ bool QPE::setImports(QString sFileName,QList<QPE::IMPORT_HEADER> *pListHeaders)
     return bResult;
 }
 
-QList<QPE::RESOURCE_HEADER> QPE::getResources()
+QPE::RESOURCE_HEADER QPE::getResourceHeader()
 {
-    // TODO BE LE
-    QList<RESOURCE_HEADER> listResources;
+    RESOURCE_HEADER result={};
 
     qint64 nResourceOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 
@@ -2357,8 +2356,44 @@ QList<QPE::RESOURCE_HEADER> QPE::getResources()
     {
         QList<MEMORY_MAP> memoryMap=getMemoryMapList();
         qint64 nBaseAddress=getBaseAddress();
-        RESOURCE_HEADER record={};
 
+        qint64 nOffset=nResourceOffset;
+
+        result.nOffset=nOffset;
+        result.directory=read_S_IMAGE_RESOURCE_DIRECTORY(nOffset);
+
+        if((result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries<=100)&&(result.directory.Characteristics==0)) // check corrupted
+        {
+            nOffset+=sizeof(S_IMAGE_RESOURCE_DIRECTORY);
+
+            for(int i=0;i<result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries;i++)
+            {
+                RESOURCE_POSITION rp=_getResourcePosition(&memoryMap,nBaseAddress,nResourceOffset,nOffset,0);
+                if(!rp.bIsValid)
+                {
+                    break;
+                }
+                result.listPositions.append(rp);
+                nOffset+=sizeof(S_IMAGE_RESOURCE_DIRECTORY_ENTRY);
+            }
+        }
+    }
+
+    return result;
+}
+
+QList<QPE::RESOURCE_RECORD> QPE::getResources()
+{
+    // TODO BE LE
+    QList<RESOURCE_RECORD> listResources;
+
+    qint64 nResourceOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
+
+    if(nResourceOffset!=-1)
+    {
+        QList<MEMORY_MAP> memoryMap=getMemoryMapList();
+        qint64 nBaseAddress=getBaseAddress();
+        RESOURCE_RECORD record={};
 
         qint64 nOffsetLevel[3]={};
         S_IMAGE_RESOURCE_DIRECTORY rd[3]={};
@@ -2449,18 +2484,18 @@ QList<QPE::RESOURCE_HEADER> QPE::getResources()
     return listResources;
 }
 
-QPE::RESOURCE_HEADER QPE::getResourceHeader(quint32 nID1, quint32 nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+QPE::RESOURCE_RECORD QPE::getResourceRecord(quint32 nID1, quint32 nID2, QList<QPE::RESOURCE_RECORD> *pListRecords)
 {
-    RESOURCE_HEADER result={};
+    RESOURCE_RECORD result={};
     result.nOffset=-1;
 
-    for(int i=0; i<pListHeaders->count(); i++)
+    for(int i=0; i<pListRecords->count(); i++)
     {
-        if(pListHeaders->at(i).nID[0]==nID1)
+        if(pListRecords->at(i).nID[0]==nID1)
         {
-            if((pListHeaders->at(i).nID[1]==nID2)||(nID2==-1))
+            if((pListRecords->at(i).nID[1]==nID2)||(nID2==-1))
             {
-                result=pListHeaders->at(i);
+                result=pListRecords->at(i);
             }
         }
     }
@@ -2468,34 +2503,34 @@ QPE::RESOURCE_HEADER QPE::getResourceHeader(quint32 nID1, quint32 nID2, QList<QP
     return result;
 }
 
-QPE::RESOURCE_HEADER QPE::getResourceHeader(quint32 nID1, QString sName2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+QPE::RESOURCE_RECORD QPE::getResourceRecord(quint32 nID1, QString sName2, QList<QPE::RESOURCE_RECORD> *pListRecords)
 {
-    RESOURCE_HEADER result={};
+    RESOURCE_RECORD result={};
     result.nOffset=-1;
 
-    for(int i=0; i<pListHeaders->count(); i++)
+    for(int i=0; i<pListRecords->count(); i++)
     {
-        if((pListHeaders->at(i).nID[0]==nID1)&&(pListHeaders->at(i).sName[1]==sName2))
+        if((pListRecords->at(i).nID[0]==nID1)&&(pListRecords->at(i).sName[1]==sName2))
         {
-            result=pListHeaders->at(i);
+            result=pListRecords->at(i);
         }
     }
 
     return result;
 }
 
-QPE::RESOURCE_HEADER QPE::getResourceHeader(QString sName1, quint32 nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+QPE::RESOURCE_RECORD QPE::getResourceRecord(QString sName1, quint32 nID2, QList<QPE::RESOURCE_RECORD> *pListRecords)
 {
-    RESOURCE_HEADER result={};
+    RESOURCE_RECORD result={};
     result.nOffset=-1;
 
-    for(int i=0; i<pListHeaders->count(); i++)
+    for(int i=0; i<pListRecords->count(); i++)
     {
-        if(pListHeaders->at(i).sName[0]==sName1)
+        if(pListRecords->at(i).sName[0]==sName1)
         {
-            if((pListHeaders->at(i).nID[1]==nID2)||(nID2==-1))
+            if((pListRecords->at(i).nID[1]==nID2)||(nID2==-1))
             {
-                result=pListHeaders->at(i);
+                result=pListRecords->at(i);
             }
         }
     }
@@ -2503,50 +2538,51 @@ QPE::RESOURCE_HEADER QPE::getResourceHeader(QString sName1, quint32 nID2, QList<
     return result;
 }
 
-QPE::RESOURCE_HEADER QPE::getResourceHeader(QString sName1, QString sName2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+QPE::RESOURCE_RECORD QPE::getResourceRecord(QString sName1, QString sName2, QList<QPE::RESOURCE_RECORD> *pListRecords)
 {
-    RESOURCE_HEADER result={};
+    RESOURCE_RECORD result={};
     result.nOffset=-1;
 
-    for(int i=0; i<pListHeaders->count(); i++)
+    for(int i=0; i<pListRecords->count(); i++)
     {
-        if((pListHeaders->at(i).sName[0]==sName1)&&(pListHeaders->at(i).sName[1]==sName2))
+        if((pListRecords->at(i).sName[0]==sName1)&&(pListRecords->at(i).sName[1]==sName2))
         {
-            result=pListHeaders->at(i);
+            result=pListRecords->at(i);
         }
     }
 
     return result;
 }
 
-bool QPE::isResourcePresent(quint32 nID1, quint32 nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+bool QPE::isResourcePresent(quint32 nID1, quint32 nID2, QList<QPE::RESOURCE_RECORD> *pListRecords)
 {
-    return (getResourceHeader(nID1,nID2,pListHeaders).nSize);
+    return (getResourceRecord(nID1,nID2,pListRecords).nSize);
 }
 
-bool QPE::isResourcePresent(quint32 nID1, QString sName2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+bool QPE::isResourcePresent(quint32 nID1, QString sName2, QList<QPE::RESOURCE_RECORD> *pListRecords)
 {
-    return (getResourceHeader(nID1,sName2,pListHeaders).nSize);
+    return (getResourceRecord(nID1,sName2,pListRecords).nSize);
 }
 
-bool QPE::isResourcePresent(QString sName1, quint32 nID2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+bool QPE::isResourcePresent(QString sName1, quint32 nID2, QList<QPE::RESOURCE_RECORD> *pListRecords)
 {
-    return (getResourceHeader(sName1,nID2,pListHeaders).nSize);
+    return (getResourceRecord(sName1,nID2,pListRecords).nSize);
 }
 
-bool QPE::isResourcePresent(QString sName1, QString sName2, QList<QPE::RESOURCE_HEADER> *pListHeaders)
+bool QPE::isResourcePresent(QString sName1, QString sName2, QList<QPE::RESOURCE_RECORD> *pListRecords)
 {
-    return (getResourceHeader(sName1,sName2,pListHeaders).nSize);
+    return (getResourceRecord(sName1,sName2,pListRecords).nSize);
 }
 
-QString QPE::getResourceManifest(QList<QPE::RESOURCE_HEADER> *pListHeaders)
+QString QPE::getResourceManifest(QList<QPE::RESOURCE_RECORD> *pListRecords)
 {
     QString sResult;
 
-    RESOURCE_HEADER rh=getResourceHeader(S_RT_MANIFEST,1,pListHeaders);
+    RESOURCE_RECORD rh=getResourceRecord(S_RT_MANIFEST,1,pListRecords);
 
     if(rh.nOffset!=-1)
     {
+        rh.nSize=qMin(rh.nSize,qint64(4000));
         sResult=read_ansiString(rh.nOffset,rh.nSize);
     }
 
@@ -2658,11 +2694,11 @@ quint32 QPE::__getResourceVersion(QPE::RESOURCE_VERSION *pResult, qint64 nOffset
     return nResult;
 }
 
-QPE::RESOURCE_VERSION QPE::getResourceVersion(QList<QPE::RESOURCE_HEADER> *pListHeaders)
+QPE::RESOURCE_VERSION QPE::getResourceVersion(QList<QPE::RESOURCE_RECORD> *pListHeaders)
 {
     RESOURCE_VERSION result={};
 
-    RESOURCE_HEADER rh=getResourceHeader(S_RT_VERSION,1,pListHeaders);
+    RESOURCE_RECORD rh=getResourceRecord(S_RT_VERSION,1,pListHeaders);
 
     if(rh.nOffset!=-1)
     {
@@ -3582,6 +3618,123 @@ qint64 QPE::_calculateRawSize()
     }
 
     return nResult;
+}
+
+QPE::RESOURCE_POSITION QPE::_getResourcePosition(QList<QBinary::MEMORY_MAP> *pMemoryMap,qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel)
+{
+    RESOURCE_POSITION result={};
+
+    result.nOffset=nOffset;
+    result.nLevel=nLevel;
+    result.dir_entry=read_S_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffset);
+    result.rin=getResourcesIDName(nResourceOffset,result.dir_entry.Name);
+    result.bIsDataDirectory=result.dir_entry.DataIsDirectory;
+
+    if(result.bIsDataDirectory)
+    {
+        qint64 nDirectoryOffset=nResourceOffset+result.dir_entry.OffsetToDirectory;
+        result.directory=read_S_IMAGE_RESOURCE_DIRECTORY(nDirectoryOffset);
+        nDirectoryOffset+=sizeof(S_IMAGE_RESOURCE_DIRECTORY);
+
+        if((result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries<=100)&&(result.directory.Characteristics==0)) // check corrupted
+        {
+            result.bIsValid=true;
+
+            for(int i=0;i<result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries;i++)
+            {
+                RESOURCE_POSITION rp=_getResourcePosition(pMemoryMap,nBaseAddress,nResourceOffset,nDirectoryOffset,nLevel+1);
+                if(!rp.bIsValid)
+                {
+                    break;
+                }
+                result.listPositions.append(rp);
+                nDirectoryOffset+=sizeof(S_IMAGE_RESOURCE_DIRECTORY_ENTRY);
+            }
+        }
+    }
+    else
+    {
+        result.bIsValid=true;
+        result.data_entry=read_S_IMAGE_RESOURCE_DATA_ENTRY(nResourceOffset+result.dir_entry.OffsetToData);
+        result.nDataOffset=addressToOffset(pMemoryMap,nBaseAddress+result.data_entry.OffsetToData);
+    }
+
+    return result;
+
+    //        nOffsetLevel[0]=nResourceOffset;
+    //        rd[0]=read_S_IMAGE_RESOURCE_DIRECTORY(nOffsetLevel[0]);
+
+    //        if((rd[0].NumberOfIdEntries+rd[0].NumberOfNamedEntries<=100)&&(rd[0].Characteristics==0)) // check corrupted
+    //        {
+    //            nOffsetLevel[0]+=sizeof(S_IMAGE_RESOURCE_DIRECTORY);
+
+    //            for(int i=0; i<rd[0].NumberOfIdEntries+rd[0].NumberOfNamedEntries; i++)
+    //            {
+    //                rde[0]=read_S_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffsetLevel[0]);
+
+    //                irin[0]=getResourcesIDName(nResourceOffset,rde[0].Name);
+    //                record.nID[0]=irin[0].nID;
+    //                record.sName[0]=irin[0].sName;
+    //                record.nNameOffset[0]=irin[0].nNameOffset;
+
+    //                nOffsetLevel[1]=nResourceOffset+rde[0].OffsetToDirectory;
+
+    //                rd[1]=read_S_IMAGE_RESOURCE_DIRECTORY(nOffsetLevel[1]);
+
+    //                if(rd[1].Characteristics!=0)
+    //                {
+    //                    break;
+    //                }
+
+    //                nOffsetLevel[1]+=sizeof(S_IMAGE_RESOURCE_DIRECTORY);
+
+    //                for(int j=0; j<rd[1].NumberOfIdEntries+rd[1].NumberOfNamedEntries; j++)
+    //                {
+    //                    rde[1]=read_S_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffsetLevel[1]);
+
+    //                    irin[1]=getResourcesIDName(nResourceOffset,rde[1].Name);
+    //                    record.nID[1]=irin[1].nID;
+    //                    record.sName[1]=irin[1].sName;
+    //                    record.nNameOffset[1]=irin[1].nNameOffset;
+
+    //                    nOffsetLevel[2]=nResourceOffset+rde[1].OffsetToDirectory;
+
+    //                    rd[2]=read_S_IMAGE_RESOURCE_DIRECTORY(nOffsetLevel[2]);
+
+    //                    if(rd[2].Characteristics!=0)
+    //                    {
+    //                        break;
+    //                    }
+
+    //                    nOffsetLevel[2]+=sizeof(S_IMAGE_RESOURCE_DIRECTORY);
+
+    //                    for(int k=0; k<rd[2].NumberOfIdEntries+rd[2].NumberOfNamedEntries; k++)
+    //                    {
+    //                        rde[2]=read_S_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffsetLevel[2]);
+
+    //                        irin[2]=getResourcesIDName(nResourceOffset,rde[2].Name);
+    //                        record.nID[2]=irin[2].nID;
+    //                        record.sName[2]=irin[2].sName;
+    //                        record.nNameOffset[2]=irin[2].nNameOffset;
+
+    //                        record.nIRDEOffset=rde[2].OffsetToData;
+    //                        S_IMAGE_RESOURCE_DATA_ENTRY irde=read_S_IMAGE_RESOURCE_DATA_ENTRY(nResourceOffset+record.nIRDEOffset);
+    //                        record.nRVA=irde.OffsetToData;
+    //                        record.nAddress=irde.OffsetToData+nBaseAddress;
+    //                        record.nOffset=addressToOffset(&memoryMap,record.nAddress);
+    //                        record.nSize=irde.Size;
+
+    //                        listResources.append(record);
+
+    //                        nOffsetLevel[2]+=sizeof(S_IMAGE_RESOURCE_DIRECTORY_ENTRY);
+    //                    }
+
+    //                    nOffsetLevel[1]+=sizeof(S_IMAGE_RESOURCE_DIRECTORY_ENTRY);
+    //                }
+
+    //                nOffsetLevel[0]+=sizeof(S_IMAGE_RESOURCE_DIRECTORY_ENTRY);
+    //            }
+    //        }
 }
 
 void QPE::_fixCheckSum()
@@ -4691,6 +4844,7 @@ QPE::RESOURCES_ID_NAME QPE::getResourcesIDName(qint64 nResourceOffset,quint32 va
 
     if(value&0x80000000)
     {
+        result.bIsName=true;
         value&=0x7FFFFFFF;
         result.nNameOffset=value;
         result.nID=0;
@@ -4753,6 +4907,78 @@ QList<qint64> QPE::getRelocsAsRVAList()
     }
 
     return stResult.toList();
+}
+
+QList<QPE::RELOCS_HEADER> QPE::getRelocsHeaders()
+{
+    QList<QPE::RELOCS_HEADER> listResult;
+
+    qint64 nRelocsOffset=getDataDirectoryOffset(S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
+
+    if(nRelocsOffset!=-1)
+    {
+        while(true)
+        {
+            RELOCS_HEADER record={0};
+
+            record.nOffset=nRelocsOffset;
+            if(!read_array(nRelocsOffset,(char *)&record.ibr,sizeof(S_IMAGE_BASE_RELOCATION)))
+            {
+                break;
+            }
+
+            if((record.ibr.VirtualAddress==0)||(record.ibr.SizeOfBlock==0))
+            {
+                break;
+            }
+
+            nRelocsOffset+=sizeof(S_IMAGE_BASE_RELOCATION);
+
+            record.nCount=(record.ibr.SizeOfBlock-sizeof(S_IMAGE_BASE_RELOCATION))/sizeof(quint16);
+
+            nRelocsOffset+=sizeof(quint16)*record.nCount;
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+QList<QPE::RELOCS_POSITION> QPE::getRelocsPositions(qint64 nOffset)
+{
+    QList<QPE::RELOCS_POSITION> listResult;
+
+    S_IMAGE_BASE_RELOCATION ibr={0};
+
+    if(read_array(nOffset,(char *)&ibr,sizeof(S_IMAGE_BASE_RELOCATION)))
+    {
+        if((ibr.VirtualAddress)&&(ibr.SizeOfBlock))
+        {
+            nOffset+=sizeof(S_IMAGE_BASE_RELOCATION);
+
+            int nCount=(ibr.SizeOfBlock-sizeof(S_IMAGE_BASE_RELOCATION))/sizeof(quint16);
+
+            nCount&=0xFFFF;
+
+            for(int i=0; i<nCount; i++)
+            {
+                RELOCS_POSITION record={0};
+
+                quint16 nRecord=read_uint16(nOffset);
+
+                record.nTypeOffset=nRecord;
+                record.nAddress=ibr.VirtualAddress+(nRecord&0x0FFF);
+                record.nType=nRecord>>12;
+
+                listResult.append(record);
+
+                nOffset+=sizeof(quint16);
+            }
+        }
+    }
+
+    return listResult;
 }
 
 bool QPE::addRelocsSection(QList<qint64> *pList)
@@ -5328,6 +5554,96 @@ QMap<quint64, QString> QPE::getImageSectionHeaderAlignsS()
     mapResult.insert(0x00C00000,"2048BYTES");
     mapResult.insert(0x00D00000,"4096BYTES");
     mapResult.insert(0x00E00000,"8192BYTES");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QPE::getResourceTypes()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(1,"RT_CURSOR");
+    mapResult.insert(2,"RT_BITMAP");
+    mapResult.insert(3,"RT_ICON");
+    mapResult.insert(4,"RT_MENU");
+    mapResult.insert(5,"RT_DIALOG");
+    mapResult.insert(6,"RT_STRING");
+    mapResult.insert(7,"RT_FONTDIR");
+    mapResult.insert(8,"RT_FONT");
+    mapResult.insert(9,"RT_ACCELERATORS");
+    mapResult.insert(10,"RT_RCDATA");
+    mapResult.insert(11,"RT_MESSAGETABLE");
+    mapResult.insert(12,"RT_GROUP_CURSOR");
+    mapResult.insert(14,"RT_GROUP_ICON");
+    mapResult.insert(16,"RT_VERSION");
+    mapResult.insert(24,"RT_MANIFEST");
+    mapResult.insert(0x2000+2,"RT_NEWBITMAP");
+    mapResult.insert(0x2000+4,"RT_NEWMENU");
+    mapResult.insert(0x2000+5,"RT_NEWDIALOG");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QPE::getResourceTypesS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(1,"CURSOR");
+    mapResult.insert(2,"BITMAP");
+    mapResult.insert(3,"ICON");
+    mapResult.insert(4,"MENU");
+    mapResult.insert(5,"DIALOG");
+    mapResult.insert(6,"STRING");
+    mapResult.insert(7,"FONTDIR");
+    mapResult.insert(8,"FONT");
+    mapResult.insert(9,"ACCELERATORS");
+    mapResult.insert(10,"RCDATA");
+    mapResult.insert(11,"MESSAGETABLE");
+    mapResult.insert(12,"GROUP_CURSOR");
+    mapResult.insert(14,"GROUP_ICON");
+    mapResult.insert(16,"VERSION");
+    mapResult.insert(24,"MANIFEST");
+    mapResult.insert(0x2000+2,"NEWBITMAP");
+    mapResult.insert(0x2000+4,"NEWMENU");
+    mapResult.insert(0x2000+5,"NEWDIALOG");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QPE::getImageRelBased()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"IMAGE_REL_BASED_ABSOLUTE");
+    mapResult.insert(1,"IMAGE_REL_BASED_HIGH");
+    mapResult.insert(2,"IMAGE_REL_BASED_LOW");
+    mapResult.insert(3,"IMAGE_REL_BASED_HIGHLOW");
+    mapResult.insert(4,"IMAGE_REL_BASED_HIGHADJ");
+    mapResult.insert(5,"IMAGE_REL_BASED_MACHINE_SPECIFIC_5");
+    mapResult.insert(6,"IMAGE_REL_BASED_RESERVED");
+    mapResult.insert(7,"IMAGE_REL_BASED_MACHINE_SPECIFIC_7");
+    mapResult.insert(8,"IMAGE_REL_BASED_MACHINE_SPECIFIC_8");
+    mapResult.insert(9,"IMAGE_REL_BASED_MACHINE_SPECIFIC_9");
+    mapResult.insert(10,"IMAGE_REL_BASED_DIR64");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QPE::getImageRelBasedS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"ABSOLUTE");
+    mapResult.insert(1,"HIGH");
+    mapResult.insert(2,"LOW");
+    mapResult.insert(3,"HIGHLOW");
+    mapResult.insert(4,"HIGHADJ");
+    mapResult.insert(5,"MACHINE_SPECIFIC_5");
+    mapResult.insert(6,"RESERVED");
+    mapResult.insert(7,"MACHINE_SPECIFIC_7");
+    mapResult.insert(8,"MACHINE_SPECIFIC_8");
+    mapResult.insert(9,"MACHINE_SPECIFIC_9");
+    mapResult.insert(10,"DIR64");
 
     return mapResult;
 }

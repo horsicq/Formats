@@ -107,12 +107,13 @@ public:
 
     struct RESOURCES_ID_NAME
     {
+        bool bIsName;
         quint32 nID;
         QString sName;
         quint32 nNameOffset;
     };
 
-    struct RESOURCE_HEADER
+    struct RESOURCE_RECORD
     {
         QString sName[3];
         quint32 nNameOffset[3];
@@ -122,6 +123,41 @@ public:
         qint64 nRVA;
         qint64 nOffset;
         qint64 nSize;
+    };
+
+    struct RESOURCE_POSITION
+    {
+        qint64 nOffset;
+        bool bIsValid;
+        quint32 nLevel;
+        bool bIsDataDirectory;
+        RESOURCES_ID_NAME rin;
+        S_IMAGE_RESOURCE_DIRECTORY directory;
+        S_IMAGE_RESOURCE_DIRECTORY_ENTRY dir_entry;
+        S_IMAGE_RESOURCE_DATA_ENTRY data_entry;
+        qint64 nDataOffset;
+        QList<RESOURCE_POSITION> listPositions;
+    };
+
+    struct RESOURCE_HEADER
+    {
+        qint64 nOffset;
+        S_IMAGE_RESOURCE_DIRECTORY directory;
+        QList<RESOURCE_POSITION> listPositions;
+    };
+
+    struct RELOCS_POSITION
+    {
+        qint16 nTypeOffset;
+        quint32 nType;
+        qint64 nAddress;
+    };
+
+    struct RELOCS_HEADER
+    {
+        qint64 nOffset;
+        S_IMAGE_BASE_RELOCATION ibr;
+        qint32 nCount;
     };
 
     struct DUMP_OPTIONS
@@ -383,23 +419,24 @@ public:
     static bool setImports(QIODevice *pDevice,QList<IMPORT_HEADER> *pListHeaders);
     static bool setImports(QString sFileName,QList<IMPORT_HEADER> *pListHeaders);
 
-    QList<RESOURCE_HEADER> getResources();
+    RESOURCE_HEADER getResourceHeader();
+    QList<RESOURCE_RECORD> getResources();
 
-    static RESOURCE_HEADER getResourceHeader(quint32 nID1,quint32 nID2,QList<RESOURCE_HEADER> *pListHeaders);
-    static RESOURCE_HEADER getResourceHeader(quint32 nID1,QString sName2,QList<RESOURCE_HEADER> *pListHeaders);
-    static RESOURCE_HEADER getResourceHeader(QString sName1,quint32 nID2,QList<RESOURCE_HEADER> *pListHeaders);
-    static RESOURCE_HEADER getResourceHeader(QString sName1,QString sName2,QList<RESOURCE_HEADER> *pListHeaders);
+    static RESOURCE_RECORD getResourceRecord(quint32 nID1,quint32 nID2,QList<RESOURCE_RECORD> *pListRecords);
+    static RESOURCE_RECORD getResourceRecord(quint32 nID1,QString sName2,QList<RESOURCE_RECORD> *pListRecords);
+    static RESOURCE_RECORD getResourceRecord(QString sName1,quint32 nID2,QList<RESOURCE_RECORD> *pListRecords);
+    static RESOURCE_RECORD getResourceRecord(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListRecords);
 
-    static bool isResourcePresent(quint32 nID1,quint32 nID2,QList<RESOURCE_HEADER> *pListHeaders);
-    static bool isResourcePresent(quint32 nID1,QString sName2,QList<RESOURCE_HEADER> *pListHeaders);
-    static bool isResourcePresent(QString sName1,quint32 nID2,QList<RESOURCE_HEADER> *pListHeaders);
-    static bool isResourcePresent(QString sName1,QString sName2,QList<RESOURCE_HEADER> *pListHeaders);
+    static bool isResourcePresent(quint32 nID1,quint32 nID2,QList<RESOURCE_RECORD> *pListHeaders);
+    static bool isResourcePresent(quint32 nID1,QString sName2,QList<RESOURCE_RECORD> *pListHeaders);
+    static bool isResourcePresent(QString sName1,quint32 nID2,QList<RESOURCE_RECORD> *pListHeaders);
+    static bool isResourcePresent(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListHeaders);
 
-    QString getResourceManifest(QList<QPE::RESOURCE_HEADER> *pListHeaders);
+    QString getResourceManifest(QList<QPE::RESOURCE_RECORD> *pListHeaders);
     S_VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
 
 
-    RESOURCE_VERSION getResourceVersion(QList<QPE::RESOURCE_HEADER> *pListHeaders);
+    RESOURCE_VERSION getResourceVersion(QList<QPE::RESOURCE_RECORD> *pListHeaders);
     static QString getResourceVersionValue(QString sKey,QPE::RESOURCE_VERSION *pResVersion);
 
     virtual QList<MEMORY_MAP> getMemoryMapList();
@@ -478,6 +515,10 @@ public:
     QPE::RESOURCES_ID_NAME getResourcesIDName(qint64 nResourceOffset, quint32 value);
 
     QList<qint64> getRelocsAsRVAList();
+
+    QList<RELOCS_HEADER> getRelocsHeaders();
+    QList<RELOCS_POSITION> getRelocsPositions(qint64 nOffset);
+
     bool addRelocsSection(QList<qint64> *pList);
     static bool addRelocsSection(QIODevice *pDevice,QList<qint64> *pList);
     static bool addRelocsSection(QString sFileName,QList<qint64> *pList);
@@ -507,6 +548,10 @@ public:
     static QMap<quint64,QString> getImageSectionHeaderFlagsS();
     static QMap<quint64,QString> getImageSectionHeaderAligns();
     static QMap<quint64,QString> getImageSectionHeaderAlignsS();
+    static QMap<quint64,QString> getResourceTypes();
+    static QMap<quint64,QString> getResourceTypesS();
+    static QMap<quint64,QString> getImageRelBased();
+    static QMap<quint64,QString> getImageRelBasedS();
 
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);
 
@@ -554,6 +599,7 @@ public:
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     qint64 _calculateRawSize();
+    RESOURCE_POSITION _getResourcePosition(QList<MEMORY_MAP> *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);
 
 
     qint64 _fixHeadersSize();

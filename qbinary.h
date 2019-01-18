@@ -82,7 +82,7 @@ public:
         bool bIsOvelay;
         qint64 nSection;
     };
-    enum FILE_TYPES
+    enum FT
     {
         FT_UNKNOWN=0,
         FT_BINARY,
@@ -239,9 +239,9 @@ public:
     static bool dumpToFile(QString sFileName,const char *pData,qint64 nDataSize);
     bool dumpToFile(QString sFileName,qint64 nDataOffset,qint64 nDataSize);
 
-    QSet<FILE_TYPES> getFileTypes();
-    static QSet<FILE_TYPES> getFileTypes(QIODevice *pDevice);
-    static QSet<FILE_TYPES> getFileTypes(QString sFileName);
+    QSet<FT> getFileTypes();
+    static QSet<FT> getFileTypes(QIODevice *pDevice);
+    static QSet<FT> getFileTypes(QString sFileName);
 
     static QString valueToHex(quint8 value);
     static QString valueToHex(qint8 value);

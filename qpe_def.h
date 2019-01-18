@@ -403,7 +403,7 @@ struct S_IMAGE_IMPORT_DESCRIPTOR
     quint32   FirstThunk;
 };
 
-struct S_IMAGE_IMPORT_DESCRIPTOR_EX
+struct S_IMAGE_IMPORT_DESCRIPTOR_EX // TODO move to QPE
 {
     union
     {

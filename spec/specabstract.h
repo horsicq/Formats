@@ -320,33 +320,16 @@ public:
         QString sVersion;
         QString sInfo;
         QByteArray baExtra;
-        //        union EXTRA_INFO
-        //        {
-        //            struct PE_INFO
-        //            {
-        //                quint32 nEntryPoint;
-        //            } pe_info;
-        //            struct PE_PROTECTOR_INFO
-        //            {
-        //                qint64 nImageBase; // TODO!!!!!
-        //                qint64 nOriginalEntryPoint;
-        //                qint64 nWriteImport;
-        //            } pe_protector_info;
-        //            struct ARCHIVE_INFO
-        //            {
-        //                qint64 nNumberOfFiles;
-        //                //TODO
-        //            } archive_info;
-        //        } extra_info;
     };
 
     struct SCAN_RESULT
     {
-        qint32 nScanTime;
+        qint64 nScanTime;
+        QString sFileName;
         QList<SCAN_STRUCT> listRecords;
     };
 
-    struct SCANS_STRUCT
+    struct _SCANS_STRUCT
     {
         quint32 nVariant;
         RECORD_FILETYPES filetype;
@@ -380,7 +363,7 @@ public:
         qint64 nOffset;
         qint64 nSize;
         QString sHeaderSignature;
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapHeaderDetects;
+        QMap<RECORD_NAMES,_SCANS_STRUCT> mapHeaderDetects;
         QList<SpecAbstract::SCAN_STRUCT> listDetects;
         bool bDeepScan;
     };
@@ -435,18 +418,18 @@ public:
         QList<QPE::SECTION_RECORD> listSectionRecords;
         QList<QPE::IMPORT_HEADER> listImports;
         QPE::EXPORT_HEADER export_header;
-        QList<QPE::RESOURCE_HEADER> listResources;
+        QList<QPE::RESOURCE_RECORD> listResources;
         QList<QPE::RICH_RECORD> listRichSignatures;
         QString sResourceManifest;
         QPE::RESOURCE_VERSION resVersion;
 
         QPE::CLI_INFO cliInfo;
 
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapOverlayDetects;
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapEntryPointDetects;
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapImportDetects;
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapDotAnsistringsDetects;
-        QMap<RECORD_NAMES,SCANS_STRUCT> mapDotUnicodestringsDetects;
+        QMap<RECORD_NAMES,_SCANS_STRUCT> mapOverlayDetects;
+        QMap<RECORD_NAMES,_SCANS_STRUCT> mapEntryPointDetects;
+        QMap<RECORD_NAMES,_SCANS_STRUCT> mapImportDetects;
+        QMap<RECORD_NAMES,_SCANS_STRUCT> mapDotAnsistringsDetects;
+        QMap<RECORD_NAMES,_SCANS_STRUCT> mapDotUnicodestringsDetects;
 
         qint32 nEntryPointSection;
         qint32 nResourceSection;
@@ -499,6 +482,7 @@ public:
         bool bScanOverlay;
         bool bDeepScan;
         bool bResultAsXML;
+        bool bSubdirectories;
     };
 
     struct UNPACK_OPTIONS
@@ -596,7 +580,7 @@ public:
     static ELFINFO_STRUCT getELFInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions); // TODO options
     static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions); // TODO options
 
-    static SCANS_STRUCT getScansStruct(quint32 nVariant,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo,qint64 nOffset);
+    static _SCANS_STRUCT getScansStruct(quint32 nVariant,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo,qint64 nOffset);
 
     static void PE_handle_import(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Protection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
@@ -637,20 +621,20 @@ public:
     static bool PE_isValid_UPX(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
     static QList<VCL_STRUCT> PE_getVCLstruct(QIODevice *pDevice,qint64 nOffset,qint64 nSize,bool bIs64);
-    static VCL_PACKAGEINFO PE_getVCLPackageInfo(QIODevice *pDevice,QList<QPE::RESOURCE_HEADER> *pListResources);
-    static SpecAbstract::SCANS_STRUCT PE_getRichSignatureDescription(quint32 nRichID);
+    static VCL_PACKAGEINFO PE_getVCLPackageInfo(QIODevice *pDevice,QList<QPE::RESOURCE_RECORD> *pListResources);
+    static SpecAbstract::_SCANS_STRUCT PE_getRichSignatureDescription(quint32 nRichID);
 
     static QList<SCAN_STRUCT> mapToList(QMap<RECORD_NAMES,SCAN_STRUCT> *pMapRecords);
     //    static SCAN_STRUCT getScanStruct(QMap<RECORD_NAMES,SCANS_STRUCT> *pMapDetects,BASIC_INFO *pBasicInfo,RECORD_NAMES recordName);
 
-    static SCAN_STRUCT scansToScan(BASIC_INFO *pBasicInfo,SCANS_STRUCT *pScansStruct);
+    static SCAN_STRUCT scansToScan(BASIC_INFO *pBasicInfo,_SCANS_STRUCT *pScansStruct);
 
     static QByteArray _BasicPEInfoToArray(BASIC_PE_INFO *pInfo);
     static BASIC_PE_INFO _ArrayToBasicPEInfo(const QByteArray *pbaArray);
 
-    static void memoryScan(QMap<RECORD_NAMES,SCANS_STRUCT> *pMapRecords,QIODevice *pDevice,qint64 nOffset,qint64 nSize,SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2);
-    static void signatureScan(QMap<RECORD_NAMES,SCANS_STRUCT> *pMapRecords,QString sSignature,SIGNATURE_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
-    static void resourcesScan(QMap<RECORD_NAMES,SCANS_STRUCT> *pMapRecords,QList<QPE::RESOURCE_HEADER> *pListResources,RESOURCES_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
+    static void memoryScan(QMap<RECORD_NAMES,_SCANS_STRUCT> *pMapRecords,QIODevice *pDevice,qint64 nOffset,qint64 nSize,SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2);
+    static void signatureScan(QMap<RECORD_NAMES,_SCANS_STRUCT> *pMapRecords,QString sSignature,SIGNATURE_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
+    static void resourcesScan(QMap<RECORD_NAMES,_SCANS_STRUCT> *pMapRecords,QList<QPE::RESOURCE_RECORD> *pListResources,RESOURCES_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
 
 protected:
     void _errorMessage(QString sMessage);

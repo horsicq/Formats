@@ -1490,9 +1490,9 @@ bool QBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
     return bResult;
 }
 
-QSet<QBinary::FILE_TYPES> QBinary::getFileTypes()
+QSet<QBinary::FT> QBinary::getFileTypes()
 {
-    QSet<QBinary::FILE_TYPES> setResult;
+    QSet<QBinary::FT> setResult;
 
     setResult.insert(FT_BINARY);
 
@@ -1591,16 +1591,16 @@ QSet<QBinary::FILE_TYPES> QBinary::getFileTypes()
     return setResult;
 }
 
-QSet<QBinary::FILE_TYPES> QBinary::getFileTypes(QIODevice *pDevice)
+QSet<QBinary::FT> QBinary::getFileTypes(QIODevice *pDevice)
 {
     QBinary _binary(pDevice);
 
     return _binary.getFileTypes();
 }
 
-QSet<QBinary::FILE_TYPES> QBinary::getFileTypes(QString sFileName)
+QSet<QBinary::FT> QBinary::getFileTypes(QString sFileName)
 {
-    QSet<QBinary::FILE_TYPES> result;
+    QSet<QBinary::FT> result;
 
     QFile file;
     file.setFileName(sFileName);
