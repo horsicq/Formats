@@ -171,7 +171,7 @@ public:
         RECORD_NAME_GHOSTINSTALLER,
         RECORD_NAME_GNULINKER,
         RECORD_NAME_GOASM,
-        RECORD_NAME_GOLIATH,
+        RECORD_NAME_GOLIATHNET,
         RECORD_NAME_GOLINK,
         RECORD_NAME_GPINSTALL,
         RECORD_NAME_GZIP,
@@ -251,7 +251,7 @@ public:
         RECORD_NAME_SETUPFACTORY,
         RECORD_NAME_SIMBIOZ,
         RECORD_NAME_SIXXPACK,
-        RECORD_NAME_SKATERNET,
+        RECORD_NAME_SKATER,
         RECORD_NAME_SMARTASSEMBLY,
         RECORD_NAME_SMARTINSTALLMAKER,
         RECORD_NAME_SOFTWAREZATOR,
@@ -291,6 +291,7 @@ public:
         RECORD_NAME_XPACK,
         RECORD_NAME_YANO,
         RECORD_NAME_YODASCRYPTER,
+        RECORD_NAME_YZPACK,
         RECORD_NAME_ZIP,
         RECORD_NAME_ZPROTECT
     };
@@ -502,6 +503,17 @@ public:
         const char *pszSignature;
     };
 
+    struct STRING_RECORD
+    {
+        quint32 nVariant;
+        const RECORD_FILETYPES filetype;
+        const RECORD_TYPES type;
+        const RECORD_NAMES name;
+        const char *pszVersion;
+        const char *pszInfo;
+        const char *pszString;
+    };
+
     struct SCANMEMORY_RECORD
     {
         quint32 nVariant;
@@ -635,6 +647,7 @@ public:
     static void memoryScan(QMap<RECORD_NAMES,_SCANS_STRUCT> *pMapRecords,QIODevice *pDevice,qint64 nOffset,qint64 nSize,SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2);
     static void signatureScan(QMap<RECORD_NAMES,_SCANS_STRUCT> *pMapRecords,QString sSignature,SIGNATURE_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
     static void resourcesScan(QMap<RECORD_NAMES,_SCANS_STRUCT> *pMapRecords,QList<QPE::RESOURCE_RECORD> *pListResources,RESOURCES_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
+    static void stringScan(QMap<RECORD_NAMES,_SCANS_STRUCT> *pMapRecords,QList<QString> *pListStrings,STRING_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
 
 protected:
     void _errorMessage(QString sMessage);

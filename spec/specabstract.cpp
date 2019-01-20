@@ -104,6 +104,10 @@ SpecAbstract::SIGNATURE_RECORD _PE_header_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_KKRUNCHY,                     "0.23",         "farbraush",            "'MZfarbrauschPE'"},
     {1, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_KKRUNCHY,                     "",             "conspiracy",           "'MZconspiracyPE'"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_QUICKPACKNT,                  "0.1",          "",                     "'MZ'90EB010052E9........'PE'0000"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_GENERIC,                      "",             "",                     "'MZ'....................'PE'0000"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_YZPACK,                       "1.1",          "",                     "'MZ'40000100000002000400FFFF0200400000000E0000001C00000000000000'(c) UsAr 2oo6$'0EB409BA00001FCD21B8014CCD2140000000'PE'0000"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_YZPACK,                       "1.2",          "",                     "'MZ'52456083EC188BEC8BFC33C0648B4030780C8B400C8B701CAD8B4008EB098B403483C07C8B403CABE9........B409BA00001FCD21B8014CCD2140000000'PE'0000"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_YZPACK,                       "2.0",          "",                     "'MZKERNEL32'0000'PE'0000"},
 };
 
 SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
@@ -144,6 +148,9 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_BEROEXEPACKER,                "1.00",             "LZBRR",                "60BE........BF........FCB28033DBA4B302E8"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_BEROEXEPACKER,                "1.00",             "LZBRS",                "60BE........BF........FCAD8D1C07B0803BFB733BE8"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_BEROEXEPACKER,                "1.00",             "LZMA",                 "6068........68........68........E8........BE........B9"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_BEROEXEPACKER,                "1.00",             "LZBRR/dll",            "837C2408010F85........60BE........BF........FCB28033DBA4B302E8"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_BEROEXEPACKER,                "1.00",             "LZBRS/dll",            "837C2408010F85........60BE........BF........FCAD8D1C07B0803BFB733BE8"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_BEROEXEPACKER,                "1.00",             "LZMA/dll",             "837C2408010F85........6068........68........68........E8........BE........B9"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_NPACK,                        "",                 "",                     "833D........007505E9........C3"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FISHPEPACKER,                 "1.02",             "",                     "60E8........6168........C3"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FISHPEPACKER,                 "1.03",             "",                     "60E8........EB"},
@@ -164,40 +171,42 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_XPACK,                        "0.97-0.98",        "",                     "68........9C60E8"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_ABCCRYPTOR,                   "1.0",              "",                     "68FF6424F0685858585890FFD4"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_EXE32PACK,                    "1.4X",             "",                     "3BC07402"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_GENERIC,                      "",                 "",                     "60"},
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1995.
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1994. All rights re..
 };
 
-SpecAbstract::SIGNATURE_RECORD _PE_dot_ansistrings_records[]={
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_DOTFUSCATOR,                  "",             "",                     "'DotfuscatorAttribute'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_LIBRARY,          SpecAbstract::RECORD_NAME_VCL,                          "",             ".NET",                 "'Borland.Vcl.'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_COMPILER,         SpecAbstract::RECORD_NAME_VBNET,                        "",             "",                     "'Microsoft.VisualBasic'"},
-//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_TOOL,              SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,  "",             "",                     "'Embarcadero.'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_YANO,                         "1.X",          "",                     "'YanoAttribute'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_AGILENET,                     "",             "",                     "'ObfuscatedByAgileDotNetAttribute'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_SKATERNET,                    "",             "",                     "'Skater_NET_Obfuscator'"},
-    {1, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_SKATERNET,                    "",             "",                     "'RustemSoft.Skater'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_BABELNET,                     "3.X",          "",                     "'BabelAttribute'"}, // TODO Version
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_BABELNET,                     "1.X-2.X",      "",                     "'BabelObfuscatorAttribute'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_CLISECURE,                    "4.X-5.X",      "",                     "'ObfuscatedByCliSecureAttribute'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_CLISECURE,                    "3.X",          "",                     "'CliSecureRd.dll'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_CLISECURE,                    "3.X",          "",                     "'CliSecureRd64.dll'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_TOOL,             SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,      "XE*",          "",                     "'Borland.Studio.Delphi'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_TOOL,             SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,      "8",            "",                     "'Borland.Vcl.Types'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_CRYPTOOBFUSCATORFORNET,       "",             "",                     "'CryptoObfuscator'"}, // TODO Version, die
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_DEEPSEA,                      "4.X",          "",                     "'DeepSeaObfuscator'"}, // TODO Version, die
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_GOLIATH,                      "",             "",                     "'ObfuscatedByGoliath'"}, // TODO Version, die
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_MACROBJECT,                   "",             "",                     "'Obfuscated by Macrobject Obfuscator.NET'"}, // TODO Version
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_SOFTWAREZATOR,                "",             "",                     "'ObfuscatedBySoftwareZatorAttribute'"}, // TODO Version
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_NSPACK,                       "2.X-3.X",      ".NET",                 "'nsnet'"}, // TODO Version
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_DNGUARD,                      "",             "",                     "'ZYXDNGuarder'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_DNGUARD,                      "",             "",                     "'HVMRuntm.dll'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_DOTNETZ,                      "",             "",                     "'NetzStarter'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_MAXTOCODE,                    "",             "",                     "'InfaceMaxtoCode'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_PHOENIXPROTECTOR,             "",             "",                     "'?1?.?9?.resources'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_SIXXPACK,                     "",             "",                     "'Sixxpack'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_SMARTASSEMBLY,                "",             "",                     "'SmartAssembly.Attributes'"},
-    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_CONFUSER,                     "1.X",          "",                     "'ConfusedByAttribute'"},
+SpecAbstract::STRING_RECORD _PE_dot_ansistrings_records[]={
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_DOTFUSCATOR,                  "",             "",                     "DotfuscatorAttribute"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_LIBRARY,          SpecAbstract::RECORD_NAME_VCL,                          "",             ".NET",                 "Borland.Vcl.Types"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_COMPILER,         SpecAbstract::RECORD_NAME_VBNET,                        "",             "",                     "Microsoft.VisualBasic"},
+//    {0, SpecAbstract::RECORD_FILETYPE_PE,      SpecAbstract::RECORD_TYPE_TOOL,              SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,  "",             "",                     "Embarcadero."},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_YANO,                         "1.X",          "",                     "YanoAttribute"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_AGILENET,                     "",             "",                     "ObfuscatedByAgileDotNetAttribute"},
+//    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_SKATERNET,                    "",             "",                     "Skater_NET_Obfuscator"},
+//    {1, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_SKATERNET,                    "",             "",                     "RustemSoft.Skater"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_BABELNET,                     "3.X",          "",                     "BabelAttribute"}, // TODO Version
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_BABELNET,                     "1.X-2.X",      "",                     "BabelObfuscatorAttribute"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_CLISECURE,                    "4.X-5.X",      "",                     "ObfuscatedByCliSecureAttribute"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_CLISECURE,                    "3.X",          "",                     "CliSecureRd.dll"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_CLISECURE,                    "3.X",          "",                     "CliSecureRd64.dll"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_TOOL,             SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,      "XE*",          "",                     "Borland.Studio.Delphi"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_TOOL,             SpecAbstract::RECORD_NAME_EMBARCADERODELPHIDOTNET,      "8",            "",                     "Borland.Vcl.Types"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_CRYPTOOBFUSCATORFORNET,       "",             "",                     "CryptoObfuscator"}, // TODO Version, die
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_DEEPSEA,                      "4.X",          "",                     "DeepSeaObfuscator"}, // TODO Version, die
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_GOLIATHNET,                   "",             "",                     "ObfuscatedByGoliath"}, // TODO Version, die
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_MACROBJECT,                   "",             "",                     "Obfuscated by Macrobject Obfuscator.NET"}, // TODO Version
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_SOFTWAREZATOR,                "",             "",                     "ObfuscatedBySoftwareZatorAttribute"}, // TODO Version
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_NSPACK,                       "2.X-3.X",      ".NET",                 "nsnet"}, // TODO Version
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_DNGUARD,                      "",             "",                     "ZYXDNGuarder"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_DNGUARD,                      "",             "",                     "HVMRuntm.dll"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_DOTNETZ,                      "",             "",                     "NetzStarter"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_MAXTOCODE,                    "",             "",                     "InfaceMaxtoCode"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_PHOENIXPROTECTOR,             "",             "",                     "?1?.?9?.resources"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_SIXXPACK,                     "",             "",                     "Sixxpack"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_SMARTASSEMBLY,                "",             "",                     "SmartAssembly.Attributes"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_CONFUSER,                     "1.X",          "",                     "ConfusedByAttribute"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_SPICESNET,                    "",             "",                     "NineRays.Obfuscator"},
 };
 
 //// TODO
@@ -392,7 +401,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_GHOSTINSTALLER:                    sResult=QString("Ghost Installer");                             break;
         case RECORD_NAME_GNULINKER:                         sResult=QString("GNU ld");                                      break;
         case RECORD_NAME_GOASM:                             sResult=QString("GoAsm");                                       break;
-        case RECORD_NAME_GOLIATH:                           sResult=QString("Goliath");                                     break;
+        case RECORD_NAME_GOLIATHNET:                        sResult=QString("Goliath .NET");                                break;
         case RECORD_NAME_GOLINK:                            sResult=QString("GoLink");                                      break;
         case RECORD_NAME_GPINSTALL:                         sResult=QString("GP-Install");                                  break;
         case RECORD_NAME_GZIP:                              sResult=QString("GZIP");                                        break;
@@ -472,7 +481,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_SETUPFACTORY:                      sResult=QString("Setup Factory");                               break;
         case RECORD_NAME_SIMBIOZ:                           sResult=QString("SimbiOZ");                                     break;
         case RECORD_NAME_SIXXPACK:                          sResult=QString("Sixxpack");                                    break;
-        case RECORD_NAME_SKATERNET:                         sResult=QString("Skater .NET");                                 break;
+        case RECORD_NAME_SKATER:                            sResult=QString("Skater");                                      break;
         case RECORD_NAME_SMARTASSEMBLY:                     sResult=QString("Smart Assembly");                              break;
         case RECORD_NAME_SMARTINSTALLMAKER:                 sResult=QString("Smart Install Maker");                         break;
         case RECORD_NAME_SOFTWAREZATOR:                     sResult=QString("SoftwareZator");                               break;
@@ -512,6 +521,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_XPACK:                             sResult=QString("XPack");                                       break;
         case RECORD_NAME_YANO:                              sResult=QString("Yano");                                        break;
         case RECORD_NAME_YODASCRYPTER:                      sResult=QString("Yoda's Crypter");                              break;
+        case RECORD_NAME_YZPACK:                            sResult=QString("YZPack");                                      break;
         case RECORD_NAME_ZIP:                               sResult=QString("ZIP");                                         break;
         case RECORD_NAME_ZPROTECT:                          sResult=QString("ZProtect");                                    break;
     }
@@ -920,10 +930,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
 
         if(result.cliInfo.bInit)
         {
-            for(int i=0;i<result.cliInfo.listAnsiStrings.count();i++)
-            {
-                signatureScan(&result.mapDotAnsistringsDetects,QBinary::stringToHex(result.cliInfo.listAnsiStrings.at(i)),_PE_dot_ansistrings_records,sizeof(_PE_dot_ansistrings_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_PE); // TODO optimize
-            }
+            stringScan(&result.mapDotAnsistringsDetects,&result.cliInfo.listAnsiStrings,_PE_dot_ansistrings_records,sizeof(_PE_dot_ansistrings_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_PE);
 
 //            for(int i=0;i<result.cliInfo.listUnicodeStrings.count();i++)
 //            {
@@ -1016,6 +1023,13 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                 if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="GetModuleHandleA"))
                 {
                     stDetects.insert("kernel32_asdpack"); // Kernel32.dll
+                }
+                else if((pPEInfo->listImports.at(0).listPositions.at(0).nOrdinal==1))
+                {
+                    if(pPEInfo->listImports.count()==1)
+                    {
+                        stDetects.insert("kernel32_yzpack_a");
+                    }
                 }
             }
             else if(pPEInfo->listImports.at(0).listPositions.count()==2)
@@ -1466,6 +1480,30 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
             }
 
         }
+        else if(pPEInfo->listImports.at(0).sName.toUpper()=="KERNEL32")
+        {
+            if(pPEInfo->listImports.at(0).listPositions.count()==1)
+            {
+                if((pPEInfo->listImports.at(0).listPositions.at(0).nOrdinal==1))
+                {
+                    if(pPEInfo->listImports.count()==1)
+                    {
+                        stDetects.insert("kernel32_yzpack_b");
+                    }
+                }
+            }
+            else if(pPEInfo->listImports.at(0).listPositions.count()==2)
+            {
+                if(     (pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress"))
+                {
+                    if(pPEInfo->listImports.count()==1)
+                    {
+                        stDetects.insert("kernel32_yzpack_c");
+                    }
+                }
+            }
+        }
     }
 
     if(pPEInfo->listImports.count()>=2)
@@ -1661,6 +1699,19 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     if(stDetects.contains("kernel32_zprotect"))
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_ZPROTECT,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PROTECTOR,RECORD_NAME_ZPROTECT,"","",0));
+    }
+
+    if(stDetects.contains("kernel32_yzpack_a"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_YZPACK,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_YZPACK,"1.1","",0));
+    }
+    else if(stDetects.contains("kernel32_yzpack_b"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_YZPACK,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_YZPACK,"1.2","",0));
+    }
+    else if(stDetects.contains("kernel32_yzpack_c"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_YZPACK,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_YZPACK,"2.0","",0));
     }
 
     if(stDetects.contains("kernel32_32lite"))
@@ -2079,6 +2130,16 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                 }
             }
 
+            // YZPack
+            if(pPEInfo->mapImportDetects.contains(RECORD_NAME_YZPACK))
+            {
+                if(pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_YZPACK))
+                {
+                    SpecAbstract::_SCANS_STRUCT ss=pPEInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_YZPACK);
+                    pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                }
+            }
+
             // ENIGMA
             if(pPEInfo->mapImportDetects.contains(RECORD_NAME_ENIGMA))
             {
@@ -2230,6 +2291,14 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                         }
 
                         pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                    }
+                    else if(pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_GENERIC))
+                    {
+                        if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_BEROEXEPACKER))
+                        {
+                            SpecAbstract::_SCANS_STRUCT ss=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_BEROEXEPACKER);
+                            pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                        }
                     }
                 }
 
@@ -3123,15 +3192,47 @@ void SpecAbstract::PE_handle_NETProtection(QIODevice *pDevice, SpecAbstract::PEI
                 pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
-            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_SKATERNET))
+//            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_SKATERNET))
+//            {
+//                _SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_SKATERNET);
+//                pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+//            }
+
+            if((pPEInfo->nCodeSectionOffset)&&(pPEInfo->nCodeSectionSize)&&(pPEInfo->basic_info.bDeepScan))
             {
-                _SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_SKATERNET);
-                pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                qint64 _nOffset=pPEInfo->nCodeSectionOffset;
+                qint64 _nSize=pPEInfo->nCodeSectionSize;
+
+                qint64 nOffset_String=pe.find_ansiString(_nOffset,_nSize,"RustemSoft.Skater");
+
+                if(nOffset_String!=-1)
+                {
+                    _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_NETOBFUSCATOR,RECORD_NAME_SKATER,"","",0);
+                    pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                }
             }
 
             if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_BABELNET))
             {
                 _SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_BABELNET);
+                pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_GOLIATHNET))
+            {
+                _SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_GOLIATHNET);
+                pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_SPICESNET))
+            {
+                _SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_SPICESNET);
+                pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_DEEPSEA))
+            {
+                _SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_DEEPSEA);
                 pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
@@ -3208,8 +3309,18 @@ void SpecAbstract::PE_handle_NETProtection(QIODevice *pDevice, SpecAbstract::PEI
 
             if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_SMARTASSEMBLY))
             {
-                // TODO Version
                 _SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_SMARTASSEMBLY);
+
+                qint64 _nOffset=pPEInfo->nCodeSectionOffset;
+                qint64 _nSize=pPEInfo->nCodeSectionSize;
+
+                qint64 nOffset_Confuser=pe.find_ansiString(_nOffset,_nSize,"Powered by SmartAssembly ");
+
+                if(nOffset_Confuser!=-1)
+                {
+                    ss.sVersion=pe.read_ansiString(nOffset_Confuser+25);
+                }
+
                 pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
@@ -3290,6 +3401,11 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
     {
         // Linker
         if((pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_MICROSOFTLINKER))&&(!pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_GENERICLINKER)))
+        {
+            recordLinker.type=RECORD_TYPE_LINKER;
+            recordLinker.name=RECORD_NAME_MICROSOFTLINKER;
+        }
+        else if((pPEInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_MICROSOFTLINKER))&&(pPEInfo->cliInfo.bInit))
         {
             recordLinker.type=RECORD_TYPE_LINKER;
             recordLinker.name=RECORD_NAME_MICROSOFTLINKER;
@@ -7347,7 +7463,6 @@ SpecAbstract::VI_STRUCT SpecAbstract::PE_get_Armadillo_vi(QIODevice *pDevice, Sp
                 }
             }
 
-
             if(pPEInfo->listImports.at(1).sName.toUpper()=="USER32.DLL")
             {
                 if(pPEInfo->listImports.at(1).listPositions.count()==24)
@@ -8243,6 +8358,59 @@ void SpecAbstract::resourcesScan(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::
                     record.nOffset=0;
 
                     pMapRecords->insert(record.name,record);
+                }
+            }
+        }
+    }
+}
+
+void SpecAbstract::stringScan(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::_SCANS_STRUCT> *pMapRecords, QList<QString> *pListStrings, SpecAbstract::STRING_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2)
+{
+    QList<quint32> listStringCRC;
+    QList<quint32> listSignatureCRC;
+
+    int nCount=pListStrings->count();
+    int nSignaturesCount=nRecordsSize/sizeof(STRING_RECORD);
+
+    for(int i=0;i<nCount;i++)
+    {
+        quint32 nCRC=QBinary::getCRC32(pListStrings->at(i));
+        listStringCRC.append(nCRC);
+    }
+
+    for(int i=0;i<nSignaturesCount;i++)
+    {
+        quint32 nCRC=QBinary::getCRC32(pRecords[i].pszString);
+        listSignatureCRC.append(nCRC);
+    }
+
+    for(int i=0;i<nCount;i++)
+    {
+        for(int j=0;j<nSignaturesCount;j++)
+        {
+            if((pRecords[j].filetype==fileType1)||(pRecords[j].filetype==fileType2))
+            {
+                if(!pMapRecords->contains(pRecords[j].name))
+                {
+                    quint32 nCRC1=listStringCRC[i];
+                    quint32 nCRC2=listSignatureCRC[j];
+                    if(nCRC1==nCRC2)
+                    {
+                        QString sTest1=pListStrings->at(i);
+                        QString sTest2=pRecords[j].pszString;
+
+                        SpecAbstract::_SCANS_STRUCT record={};
+                        record.nVariant=pRecords[j].nVariant;
+                        record.filetype=pRecords[j].filetype;
+                        record.type=pRecords[j].type;
+                        record.name=pRecords[j].name;
+                        record.sVersion=pRecords[j].pszVersion;
+                        record.sInfo=pRecords[j].pszInfo;
+
+                        record.nOffset=0;
+
+                        pMapRecords->insert(record.name,record);
+                    }
                 }
             }
         }

@@ -1906,9 +1906,13 @@ quint32 QBinary::getCRC32(QString sString)
     //        nResult+=_char;
     //    }
 
-    for(int i=0; i<sString.size(); i++)
+//    char *pData=sString.toLatin1().data();
+    int nSize=sString.size();
+
+    for(int i=0; i<nSize; i++)
     {
         unsigned char _char=(unsigned char)sString.at(i).toLatin1();
+//        unsigned char _char=(unsigned char)pData[i];
         nResult^=_char;
 
         for(int k=0; k<8; k++)
