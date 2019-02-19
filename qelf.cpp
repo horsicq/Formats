@@ -382,9 +382,9 @@ void QELF::setHdr64_shstrndx(quint16 value)
     write_uint16(offsetof(S_Elf64_Ehdr,e_shstrndx),value,isBigEndian());
 }
 
-QMultiMap<quint32, QString> QELF::getHeaderTypeList()
+QMap<quint32, QString> QELF::getHeaderTypeList()
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
     mapResult.insert(0,"ET_NONE");
     mapResult.insert(1,"ET_REL");
     mapResult.insert(2,"ET_EXEC");
@@ -396,9 +396,9 @@ QMultiMap<quint32, QString> QELF::getHeaderTypeList()
     return mapResult;
 }
 
-QMultiMap<quint32, QString> QELF::getHeaderMachineList()
+QMap<quint32, QString> QELF::getHeaderMachineList()
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
     mapResult.insert(0,"EM_NONE"); // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_S_Elf.h
     mapResult.insert(1,"EM_M32");
     mapResult.insert(2,"EM_SPARC");
@@ -440,41 +440,41 @@ QMultiMap<quint32, QString> QELF::getHeaderMachineList()
     return mapResult;
 }
 
-QMultiMap<quint32, QString> QELF::getHeaderVersionList()
+QMap<quint32, QString> QELF::getHeaderVersionList()
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
     mapResult.insert(1,"EV_CURRENT");
     return mapResult;
 }
 
-QMultiMap<quint32, QString> QELF::getIndentClassList()
+QMap<quint32, QString> QELF::getIndentClassList()
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
     mapResult.insert(0,"S_ElfCLASSNONE");
     mapResult.insert(1,"S_ElfCLASS32");
     mapResult.insert(2,"S_ElfCLASS64");
     return mapResult;
 }
 
-QMultiMap<quint32, QString> QELF::getIndentDataList()
+QMap<quint32, QString> QELF::getIndentDataList()
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
     mapResult.insert(0,"S_ElfDATANONE");
     mapResult.insert(1,"S_ElfDATA2LSB");
     mapResult.insert(2,"S_ElfDATA2MSB");
     return mapResult;
 }
 
-QMultiMap<quint32, QString> QELF::getIndentVersionList()
+QMap<quint32, QString> QELF::getIndentVersionList()
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
     mapResult.insert(1,"EV_CURRENT");
     return mapResult;
 }
 
-QMultiMap<quint32, QString> QELF::getIndentOsabiList()
+QMap<quint32, QString> QELF::getIndentOsabiList()
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
     mapResult.insert(0,"S_ElfOSABI_SYSV");
     mapResult.insert(1,"S_ElfOSABI_HPUX");
     mapResult.insert(2,"S_ElfOSABI_NETBSD");
@@ -496,9 +496,9 @@ QMultiMap<quint32, QString> QELF::getIndentOsabiList()
     return mapResult;
 }
 
-QMultiMap<quint32, QString> QELF::getSectionTypeList()
+QMap<quint32, QString> QELF::getSectionTypeList()
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
     mapResult.insert(0,"SHT_NULL");
     mapResult.insert(1,"SHT_PROGBITS");
     mapResult.insert(2,"SHT_SYMTAB");
@@ -536,9 +536,9 @@ QMultiMap<quint32, QString> QELF::getSectionTypeList()
     return mapResult;
 }
 
-QMultiMap<quint32, QString> QELF::getSectionFlagList()
+QMap<quint32, QString> QELF::getSectionFlagList()
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
     mapResult.insert(0x00000001,"SHF_WRITE");
     mapResult.insert(0x00000002,"SHF_ALLOC");
     mapResult.insert(0x00000004,"SHF_EXECINSTR");
@@ -556,9 +556,9 @@ QMultiMap<quint32, QString> QELF::getSectionFlagList()
     return mapResult;
 }
 
-QMultiMap<quint32, QString> QELF::getProgramTypeList()
+QMap<quint32, QString> QELF::getProgramTypeList()
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
     mapResult.insert(0,"PT_NULL");
     mapResult.insert(1,"PT_LOAD");
     mapResult.insert(2,"PT_DYNAMIC");
@@ -579,9 +579,9 @@ QMultiMap<quint32, QString> QELF::getProgramTypeList()
     return mapResult;
 }
 
-QMultiMap<quint32, QString> QELF::getProgramFlagList()
+QMap<quint32, QString> QELF::getProgramFlagList()
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
     mapResult.insert(0x00000001,"PF_X");
     mapResult.insert(0x00000002,"PF_W");
     mapResult.insert(0x00000004,"PF_R");
@@ -590,26 +590,26 @@ QMultiMap<quint32, QString> QELF::getProgramFlagList()
     return mapResult;
 }
 
-QMultiMap<quint32, QString> QELF::getStringList(quint32 nSection)
+QMap<quint32, QString> QELF::getStringList(quint32 nSection)
 {
-    QMultiMap<quint32, QString> mapResult;
+    QMap<quint32, QString> mapResult;
 
-    if(nSection==0)
-    {
-        if(is64())
-        {
-            nSection=getHdr64_shstrndx();
-        }
-        else
-        {
-            nSection=getHdr32_shstrndx();
-        }
-    }
+//    if(nSection==0)
+//    {
+//        if(is64())
+//        {
+//            nSection=getHdr64_shstrndx();
+//        }
+//        else
+//        {
+//            nSection=getHdr32_shstrndx();
+//        }
+//    }
 
     QByteArray section=getSection(nSection);
     int nSize=section.size();
     char *pOffset=section.data();
-    int nCount=0;
+    quint32 nCount=0;
 
     while(nSize>0)
     {
@@ -620,7 +620,7 @@ QMultiMap<quint32, QString> QELF::getStringList(quint32 nSection)
             mapResult.insert(nCount,sString);
         }
 
-        nCount+=sString.length()+1;
+        nCount+=(quint32)sString.length()+1;
         nSize-=sString.length()+1;
     }
 
@@ -631,17 +631,17 @@ QString QELF::getStringFromList(quint32 nIndex, quint32 nSection)
 {
     QString sResult;
 
-    if(nSection==0)
-    {
-        if(is64())
-        {
-            nSection=getHdr64_shstrndx();
-        }
-        else
-        {
-            nSection=getHdr32_shstrndx();
-        }
-    }
+//    if(nSection==0)
+//    {
+//        if(is64())
+//        {
+//            nSection=getHdr64_shstrndx();
+//        }
+//        else
+//        {
+//            nSection=getHdr32_shstrndx();
+//        }
+//    }
 
     quint64 offset=0;
     quint64 size=0;
@@ -665,6 +665,38 @@ QString QELF::getStringFromList(quint32 nIndex, quint32 nSection)
     }
 
     return sResult;
+}
+
+QMap<quint32, QString> QELF::getStringListMain()
+{
+    quint32 nSection=0;
+
+    if(is64())
+    {
+        nSection=getHdr64_shstrndx();
+    }
+    else
+    {
+        nSection=getHdr32_shstrndx();
+    }
+
+    return getStringList(nSection);
+}
+
+QString QELF::getStringFromListMain(quint32 nIndex)
+{
+    quint32 nSection=0;
+
+    if(is64())
+    {
+        nSection=getHdr64_shstrndx();
+    }
+    else
+    {
+        nSection=getHdr32_shstrndx();
+    }
+
+    return getStringFromList(nIndex,nSection);
 }
 
 QByteArray QELF::getSection(quint32 nIndex)
@@ -1937,11 +1969,11 @@ int QELF::getSectionIndexByName(QString sName)
 
     if(is64())
     {
-        for(int i=0; i<getHdr64_shnum(); i++)
+        for(quint32 i=0; i<getHdr64_shnum(); i++)
         {
-            int nCurrentNameIndex=getElf64_Shdr_name(i);
+            quint32 nCurrentNameIndex=getElf64_Shdr_name(i);
 
-            if(getStringFromList(nCurrentNameIndex)==sName)
+            if(getStringFromListMain(nCurrentNameIndex)==sName)
             {
                 nResult=i;
                 break;
@@ -1950,11 +1982,11 @@ int QELF::getSectionIndexByName(QString sName)
     }
     else
     {
-        for(int i=0; i<getHdr32_shnum(); i++)
+        for(quint32 i=0; i<getHdr32_shnum(); i++)
         {
-            int nCurrentNameIndex=getElf32_Shdr_name(i);
+            quint32 nCurrentNameIndex=getElf32_Shdr_name(i);
 
-            if(getStringFromList(nCurrentNameIndex)==sName)
+            if(getStringFromListMain(nCurrentNameIndex)==sName)
             {
                 nResult=i;
                 break;

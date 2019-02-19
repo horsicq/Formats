@@ -62,6 +62,7 @@ SpecAbstract::SIGNATURE_RECORD _binary_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_ACTUALINSTALLER,              "",             "",                     "....................'MSCF'00"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_MICROSOFTLINKERDATABASE,      "",             "",                     "'Microsoft Linker Database\n\n'071A"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_IMAGE,            SpecAbstract::RECORD_NAME_JPEG,                         "",             "",                     "FFD8FFE0....'JFIF'00"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_IMAGE,            SpecAbstract::RECORD_NAME_WINDOWSICON,                  "",             "",                     "00000100"},
 };
 
 SpecAbstract::SIGNATURE_RECORD _PE_header_records[]=
@@ -207,6 +208,7 @@ SpecAbstract::STRING_RECORD _PE_dot_ansistrings_records[]={
     {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_SMARTASSEMBLY,                "",             "",                     "SmartAssembly.Attributes"},
     {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_CONFUSER,                     "1.X",          "",                     "ConfusedByAttribute"},
     {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_SPICESNET,                    "",             "",                     "NineRays.Obfuscator"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_NETOBFUSCATOR,    SpecAbstract::RECORD_NAME_OBFUSCATORNET2009,            "",             "",                     "Macrobject.Obfuscator"},
 };
 
 //// TODO
@@ -510,6 +512,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_WATCOMCCPP:                        sResult=QString("Watcom C/C++");                                break;
         case RECORD_NAME_WINACE:                            sResult=QString("WinACE");                                      break;
         case RECORD_NAME_WINAUTH:                           sResult=QString("Windows Authenticode");                        break;
+        case RECORD_NAME_WINDOWSICON:                       sResult=QString("Windows Icon");                                break;
         case RECORD_NAME_WINDOWSINSTALLER:                  sResult=QString("Windows Installer");                           break;
         case RECORD_NAME_WINRAR:                            sResult=QString("WinRAR");                                      break;
         case RECORD_NAME_WINUPACK:                          sResult=QString("(Win)Upack");                                  break;
@@ -731,29 +734,33 @@ SpecAbstract::ELFINFO_STRUCT SpecAbstract::getELFInfo(QIODevice *pDevice, SpecAb
 
     QELF elf(pDevice);
 
-    result.bIs64=elf.is64();
-
-    result.basic_info.parentId=parentId;
-    result.basic_info.id.filetype=result.bIs64?RECORD_FILETYPE_ELF64:RECORD_FILETYPE_ELF32;
-    result.basic_info.id.filepart=RECORD_FILEPART_HEADER;
-    result.basic_info.id.uuid=QUuid::createUuid();
-    result.basic_info.nOffset=0;
-    result.basic_info.nSize=pDevice->size();
-    result.basic_info.sHeaderSignature=elf.getSignature(0,150);
-    result.basic_info.bDeepScan=pOptions->bDeepScan;
-
-    // TODO
-    // TODO EntryPoint Signature
-
-    if(!result.basic_info.listDetects.count())
+    if(elf.isValid())
     {
-        _SCANS_STRUCT ssUnknown={};
+        result.bIs64=elf.is64();
 
-        ssUnknown.type=SpecAbstract::RECORD_TYPE_UNKNOWN;
-        ssUnknown.name=SpecAbstract::RECORD_NAME_UNKNOWN;
+        result.basic_info.parentId=parentId;
+        result.basic_info.id.filetype=result.bIs64?RECORD_FILETYPE_ELF64:RECORD_FILETYPE_ELF32;
+        result.basic_info.id.filepart=RECORD_FILEPART_HEADER;
+        result.basic_info.id.uuid=QUuid::createUuid();
+        result.basic_info.nOffset=0;
+        result.basic_info.nSize=pDevice->size();
+        result.basic_info.sHeaderSignature=elf.getSignature(0,150);
+        result.basic_info.bDeepScan=pOptions->bDeepScan;
 
-        result.basic_info.listDetects.append(scansToScan(&(result.basic_info),&ssUnknown));
+        result.sEntryPointSignature=elf.getSignature(elf.getEntryPointOffset(),150);
+
+        if(!result.basic_info.listDetects.count())
+        {
+            _SCANS_STRUCT ssUnknown={};
+
+            ssUnknown.type=SpecAbstract::RECORD_TYPE_UNKNOWN;
+            ssUnknown.name=SpecAbstract::RECORD_NAME_UNKNOWN;
+
+            result.basic_info.listDetects.append(scansToScan(&(result.basic_info),&ssUnknown));
+        }
     }
+
+
 
     result.basic_info.nElapsedTime=timer.elapsed();
 
@@ -806,7 +813,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         }
 
         result.listSectionHeaders=pe.getSectionHeaders();
-        result.listSectionRecords=QPE::getSectionRecords(&result.listSectionHeaders,false); // TODO image
+        result.listSectionRecords=QPE::getSectionRecords(&result.listSectionHeaders,pe.isImage());
         result.listImports=pe.getImports();
         result.export_header=pe.getExport();
         result.listResources=pe.getResources();
@@ -841,7 +848,6 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         result.nMajorLinkerVersion=result.bIs64?result.optional_header.optionalHeader64.MajorLinkerVersion:result.optional_header.optionalHeader32.MajorLinkerVersion;
         result.nMinorImageVersion=result.bIs64?result.optional_header.optionalHeader64.MinorImageVersion:result.optional_header.optionalHeader32.MinorImageVersion;
         result.nMajorImageVersion=result.bIs64?result.optional_header.optionalHeader64.MajorImageVersion:result.optional_header.optionalHeader32.MajorImageVersion;
-
 
         result.nEntryPointSection=pe.getEntryPointSection();
         result.nResourceSection=pe.getResourcesSection();
@@ -946,7 +952,6 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         PE_handle_Petite(pDevice,&result);
         PE_handle_NETProtection(pDevice,&result);
         PE_handle_PolyMorph(pDevice,&result);
-        // TODO Free Pascal Compiler
         PE_handle_libraries(pDevice,&result);
         PE_handle_Microsoft(pDevice,&result);
         PE_handle_Borland(pDevice,&result);
@@ -3230,6 +3235,12 @@ void SpecAbstract::PE_handle_NETProtection(QIODevice *pDevice, SpecAbstract::PEI
                 pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
+            if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_OBFUSCATORNET2009))
+            {
+                _SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_OBFUSCATORNET2009);
+                pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+            }
+
             if(pPEInfo->mapDotAnsistringsDetects.contains(RECORD_NAME_DEEPSEA))
             {
                 _SCANS_STRUCT ss=pPEInfo->mapDotAnsistringsDetects.value(RECORD_NAME_DEEPSEA);
@@ -4507,7 +4518,11 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                             pPEInfo->mapResultTools.insert(ssTool.name,scansToScan(&(pPEInfo->basic_info),&ssTool));
                         }
 
-                        if(sVersionString.contains("GNU"))
+                        if(sVersionString.contains("(experimental)"))
+                        {
+                            ss.sVersion=sVersionString.section(" ",-3,-1);
+                        }
+                        else if(sVersionString.contains("GNU"))
                         {
                             ss.sVersion=sVersionString.section(" ",-2,-1);
                         }
@@ -5449,6 +5464,13 @@ void SpecAbstract::Binary_handle_Formats(QIODevice *pDevice, SpecAbstract::BINAR
         quint32 nMajor=pBinaryInfo->basic_info.sHeaderSignature.mid(11*2,2).toUInt(nullptr,16);
         quint32 nMinor=pBinaryInfo->basic_info.sHeaderSignature.mid(12*2,2).toUInt(nullptr,16);
         ss.sVersion=QString("%1.%2").arg(nMajor).arg(nMinor,2,10,QChar('0'));
+        pBinaryInfo->mapResultFormats.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_WINDOWSICON))&&(pBinaryInfo->basic_info.nSize>=40))
+    {
+        // Windows Icon
+        // TODO more information
+        _SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_WINDOWSICON);
         pBinaryInfo->mapResultFormats.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
     }
 }
