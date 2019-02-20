@@ -28,6 +28,7 @@
 #include <QUuid>
 #include "qpe.h"
 #include "qelf.h"
+#include "qmach.h"
 
 class SpecAbstract : public QObject
 {
@@ -44,6 +45,9 @@ public:
         RECORD_FILETYPE_ELF,
         RECORD_FILETYPE_ELF32,
         RECORD_FILETYPE_ELF64,
+        RECORD_FILETYPE_MACH,
+        RECORD_FILETYPE_MACH32,
+        RECORD_FILETYPE_MACH64,
         RECORD_FILETYPE_TEXT
     };
     enum RECORD_FILEPARTS
@@ -401,6 +405,13 @@ public:
         bool bIs64;
     };
 
+    struct MACHINFO_STRUCT
+    {
+        BASIC_INFO basic_info;
+        QString sEntryPointSignature;
+        // TODO
+        bool bIs64;
+    };
 
     struct PEINFO_STRUCT
     {
@@ -588,10 +599,11 @@ public:
 
     static QString findEnigmaVersion(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
-    static BINARYINFO_STRUCT getBinaryInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions); // TODO options
-    static MSDOSINFO_STRUCT getMSDOSInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions); // TODO options
-    static ELFINFO_STRUCT getELFInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions); // TODO options
-    static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions); // TODO options
+    static BINARYINFO_STRUCT getBinaryInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions);
+    static MSDOSINFO_STRUCT getMSDOSInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions);
+    static ELFINFO_STRUCT getELFInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions);
+    static MACHINFO_STRUCT getMACHInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions);
+    static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions);
 
     static _SCANS_STRUCT getScansStruct(quint32 nVariant,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo,qint64 nOffset);
 

@@ -606,23 +606,28 @@ QMap<quint32, QString> QELF::getStringList(quint32 nSection)
 //        }
 //    }
 
-    QByteArray section=getSection(nSection);
-    int nSize=section.size();
-    char *pOffset=section.data();
-    quint32 nCount=0;
-
-    while(nSize>0)
+    if(nSection!=SHN_UNDEF)
     {
-        QString sString(pOffset+nCount);
+        QByteArray section=getSection(nSection);
+        int nSize=section.size();
+        char *pOffset=section.data();
+        quint32 nCount=0;
 
-        if(sString.length())
+        while(nSize>0)
         {
-            mapResult.insert(nCount,sString);
-        }
+            QString sString(pOffset+nCount);
 
-        nCount+=(quint32)sString.length()+1;
-        nSize-=sString.length()+1;
+            if(sString.length())
+            {
+                mapResult.insert(nCount,sString);
+            }
+
+            nCount+=(quint32)sString.length()+1;
+            nSize-=sString.length()+1;
+        }
     }
+
+
 
     return mapResult;
 }

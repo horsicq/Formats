@@ -252,6 +252,9 @@ QString SpecAbstract::recordFiletypeIdToString(RECORD_FILETYPES id)
         case RECORD_FILETYPE_ELF:                           sResult=QString("ELF");                         break;
         case RECORD_FILETYPE_ELF32:                         sResult=QString("ELF32");                       break;
         case RECORD_FILETYPE_ELF64:                         sResult=QString("ELF64");                       break;
+        case RECORD_FILETYPE_MACH:                          sResult=QString("MACH");                        break;
+        case RECORD_FILETYPE_MACH32:                        sResult=QString("MACH32");                      break;
+        case RECORD_FILETYPE_MACH64:                        sResult=QString("MACH64");                      break;
         case RECORD_FILETYPE_TEXT:                          sResult=QString("Text");                        break;
     }
 
@@ -760,7 +763,45 @@ SpecAbstract::ELFINFO_STRUCT SpecAbstract::getELFInfo(QIODevice *pDevice, SpecAb
         }
     }
 
+    result.basic_info.nElapsedTime=timer.elapsed();
 
+    return result;
+}
+
+SpecAbstract::MACHINFO_STRUCT SpecAbstract::getMACHInfo(QIODevice *pDevice, SpecAbstract::ID parentId, SpecAbstract::SCAN_OPTIONS *pOptions)
+{
+    QElapsedTimer timer;
+    timer.start();
+
+    MACHINFO_STRUCT result={};
+
+    QMACH mach(pDevice);
+
+    if(mach.isValid())
+    {
+        result.bIs64=mach.is64();
+
+        result.basic_info.parentId=parentId;
+        result.basic_info.id.filetype=result.bIs64?RECORD_FILETYPE_MACH64:RECORD_FILETYPE_MACH32;
+        result.basic_info.id.filepart=RECORD_FILEPART_HEADER;
+        result.basic_info.id.uuid=QUuid::createUuid();
+        result.basic_info.nOffset=0;
+        result.basic_info.nSize=pDevice->size();
+        result.basic_info.sHeaderSignature=mach.getSignature(0,150);
+        result.basic_info.bDeepScan=pOptions->bDeepScan;
+
+        result.sEntryPointSignature=mach.getSignature(mach.getEntryPointOffset(),150);
+
+        if(!result.basic_info.listDetects.count())
+        {
+            _SCANS_STRUCT ssUnknown={};
+
+            ssUnknown.type=SpecAbstract::RECORD_TYPE_UNKNOWN;
+            ssUnknown.name=SpecAbstract::RECORD_NAME_UNKNOWN;
+
+            result.basic_info.listDetects.append(scansToScan(&(result.basic_info),&ssUnknown));
+        }
+    }
 
     result.basic_info.nElapsedTime=timer.elapsed();
 
@@ -4518,7 +4559,9 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                             pPEInfo->mapResultTools.insert(ssTool.name,scansToScan(&(pPEInfo->basic_info),&ssTool));
                         }
 
-                        if(sVersionString.contains("(experimental)"))
+                        // TODO function
+                        if( (sVersionString.contains("(experimental)"))||
+                            (sVersionString.contains("(prerelease)")))
                         {
                             ss.sVersion=sVersionString.section(" ",-3,-1);
                         }

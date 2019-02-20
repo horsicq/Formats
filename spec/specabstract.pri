@@ -16,3 +16,8 @@ SOURCES += \
     XCONFIG += qelf
     include(../qelf.pri)
 }
+
+!contains(XCONFIG, qmach) {
+    XCONFIG += qmach
+    include(../qmach.pri)
+}

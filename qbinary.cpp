@@ -1492,9 +1492,9 @@ bool QBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
 
 QSet<QBinary::FT> QBinary::getFileTypes()
 {
-    QSet<QBinary::FT> setResult;
+    QSet<QBinary::FT> stResult;
 
-    setResult.insert(FT_BINARY);
+    stResult.insert(FT_BINARY);
 
     QByteArray baHeader;
     baHeader=read_array(0,0x200);
@@ -1534,20 +1534,20 @@ QSet<QBinary::FT> QBinary::getFileTypes()
                 {
                     if((((S_IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==S_IMAGE_FILE_MACHINE_AMD64)
                     {
-                        setResult.insert(FT_PE64);
+                        stResult.insert(FT_PE64);
                     }
                     else if((((S_IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==S_IMAGE_FILE_MACHINE_IA64)
                     {
-                        setResult.insert(FT_PE64);
+                        stResult.insert(FT_PE64);
                     }
                     else
                     {
-                        setResult.insert(FT_PE32);
+                        stResult.insert(FT_PE32);
                     }
                 }
             }
 
-            setResult.insert(FT_MSDOS);
+            stResult.insert(FT_MSDOS);
         }
     }
 
@@ -1560,35 +1560,39 @@ QSet<QBinary::FT> QBinary::getFileTypes()
         {
             if(((S_Elf32_Ehdr *)pOffset)->e_ident[4] == 1)
             {
-                setResult.insert(FT_ELF32);
+                stResult.insert(FT_ELF32);
             }
             else if(((S_Elf32_Ehdr *)pOffset)->e_ident[4] == 2)
             {
-                setResult.insert(FT_ELF64);
+                stResult.insert(FT_ELF64);
             }
         }
     }
 
-    //    if(nSize>=(int)sizeof(mach_header))
-    //    {
-    //        if(((((mach_header *)pOffset)->magic == MH_MAGIC)||(((mach_header *)pOffset)->magic == MH_CIGAM))&&(((mach_header *)pOffset)->filetype<0xFFFF))
-    //        {
-    //            listResult.append(QString("MACH"));
-    //        }
-    //        else if(((((mach_header *)pOffset)->magic == MH_MAGIC_64)||(((mach_header *)pOffset)->magic == MH_CIGAM_64))&&(((mach_header *)pOffset)->filetype<0xFFFF))
-    //        {
-    //            listResult.append(QString("MACH64"));
-    //        }
-    //    }
+    if(nSize>=(int)sizeof(S_mach_header))
+    {
+        if(((S_mach_header *)pOffset)->filetype<0xFFFF)
+        {
+            if((((S_mach_header *)pOffset)->magic == S_MH_MAGIC)||(((S_mach_header *)pOffset)->magic == S_MH_CIGAM))
+            {
+                stResult.insert(FT_MACH32);
+            }
+            else if((((S_mach_header *)pOffset)->magic == S_MH_MAGIC_64)||(((S_mach_header *)pOffset)->magic == S_MH_CIGAM_64))
+            {
+                stResult.insert(FT_MACH32);
+            }
+        }
 
-    //    if(isPlainText())
-    //    {
-    //        listResult.append(QString("Text"));
-    //    }
+    }
+
+//    if(isPlainText())
+//    {
+//        listResult.append(QString("Text"));
+//    }
 
 
 
-    return setResult;
+    return stResult;
 }
 
 QSet<QBinary::FT> QBinary::getFileTypes(QIODevice *pDevice)

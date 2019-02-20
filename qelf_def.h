@@ -161,5 +161,7 @@ typedef struct
     quint64      p_align;        /* memory & file alignment */
 } S_Elf64_Phdr;
 
+#define SHN_UNDEF 0
+
 #endif // QELF_DEF
 
