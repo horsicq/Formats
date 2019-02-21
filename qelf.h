@@ -45,20 +45,24 @@ public:
 
     quint32 getIdent_Magic();
     void setIdent_Magic(quint32 value);
-    quint8 getIdent_FileClass();
-    void setIdent_FileClass(quint8 value);
-    quint8 getIdent_DataEncoding();
-    void setIdent_DataEncoding(quint8 value);
-    quint8 getIdent_FileVersion();
-    void setIdent_FileVersion(quint8 value);
+
+    quint8 getIdent_mag(int nMag);
+    void setIdent_mag(quint8 value,int nMag);
+
+    quint8 getIdent_class();
+    void setIdent_class(quint8 value);
+    quint8 getIdent_data();
+    void setIdent_data(quint8 value);
+    quint8 getIdent_version();
+    void setIdent_version(quint8 value);
 
     quint8 getIdent_osabi();
     void setIdent_osabi(quint8 value);
     quint8 getIdent_abiversion();
     void setIdent_abiversion(quint8 value);
 
-    quint8 getIdent_Pad(int nPad);
-    void setIdent_Pad(quint8 value,int nPad);
+    quint8 getIdent_pad(int nPad);
+    void setIdent_pad(quint8 value,int nPad);
 
     // TODO Hdr32 getHdr32();
     quint16 getHdr32_type();

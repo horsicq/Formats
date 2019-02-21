@@ -35,11 +35,11 @@ bool QELF::bIsValid()
 
 bool QELF::isBigEndian()
 {
-    return getIdent_DataEncoding()==S_ELFDATA2MSB;
+    return getIdent_data()==S_ELFDATA2MSB;
 }
 bool QELF::is64()
 {
-    return getIdent_FileClass()==S_ELFCLASS64;
+    return getIdent_class()==S_ELFCLASS64;
 }
 
 quint32 QELF::getIdent_Magic()
@@ -52,32 +52,52 @@ void QELF::setIdent_Magic(quint32 value)
     write_uint32((quint64)S_EI_MAG0,value);
 }
 
-quint8 QELF::getIdent_FileClass()
+quint8 QELF::getIdent_mag(int nMag)
+{
+    quint8 value=0;
+
+    if(nMag<4)
+    {
+        value=read_uint8(nMag);
+    }
+
+    return value;
+}
+
+void QELF::setIdent_mag(quint8 value, int nMag)
+{
+    if(nMag<4)
+    {
+        write_uint8(nMag,value);
+    }
+}
+
+quint8 QELF::getIdent_class()
 {
     return read_uint8(S_EI_CLASS);
 }
 
-void QELF::setIdent_FileClass(quint8 value)
+void QELF::setIdent_class(quint8 value)
 {
     write_uint8(S_EI_CLASS,value);
 }
 
-quint8 QELF::getIdent_DataEncoding()
+quint8 QELF::getIdent_data()
 {
     return read_uint8(S_EI_DATA);
 }
 
-void QELF::setIdent_DataEncoding(quint8 value)
+void QELF::setIdent_data(quint8 value)
 {
     write_uint8(S_EI_DATA,value);
 }
 
-quint8 QELF::getIdent_FileVersion()
+quint8 QELF::getIdent_version()
 {
     return read_uint8(S_EI_VERSION);
 }
 
-void QELF::setIdent_FileVersion(quint8 value)
+void QELF::setIdent_version(quint8 value)
 {
     write_uint8(S_EI_VERSION,value);
 }
@@ -102,7 +122,7 @@ void QELF::setIdent_abiversion(quint8 value)
     write_uint8(S_EI_ABIVERSION,value);
 }
 
-quint8 QELF::getIdent_Pad(int nPad)
+quint8 QELF::getIdent_pad(int nPad)
 {
     quint8 value=0;
 
@@ -114,7 +134,7 @@ quint8 QELF::getIdent_Pad(int nPad)
     return value;
 }
 
-void QELF::setIdent_Pad(quint8 value, int nPad)
+void QELF::setIdent_pad(quint8 value, int nPad)
 {
     if(nPad<7)
     {
