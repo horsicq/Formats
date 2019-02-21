@@ -1714,7 +1714,9 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
         }
     }
 
-//    qDebug()<<stDetects;
+#ifdef QT_DEBUG
+    qDebug()<<stDetects;
+#endif
 
     // TODO 32/64
     if(stDetects.contains("kernel32_andpakk"))
@@ -2370,9 +2372,9 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                         nBuildNumber=pPEInfo->nMinorImageVersion;
                     }
 
-                    #ifdef QT_DEBUG
-                        qDebug("nBuildNumber: %x",nBuildNumber);
-                    #endif
+                #ifdef QT_DEBUG
+                    qDebug("nBuildNumber: %x",nBuildNumber);
+                #endif
 
 
                     switch(nBuildNumber)
