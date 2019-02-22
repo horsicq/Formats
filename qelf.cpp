@@ -402,9 +402,9 @@ void QELF::setHdr64_shstrndx(quint16 value)
     write_uint16(offsetof(S_Elf64_Ehdr,e_shstrndx),value,isBigEndian());
 }
 
-QMap<quint32, QString> QELF::getHeaderTypeList()
+QMap<quint64, QString> QELF::getHeaderTypeList()
 {
-    QMap<quint32, QString> mapResult;
+    QMap<quint64, QString> mapResult;
     mapResult.insert(0,"ET_NONE");
     mapResult.insert(1,"ET_REL");
     mapResult.insert(2,"ET_EXEC");
@@ -416,9 +416,9 @@ QMap<quint32, QString> QELF::getHeaderTypeList()
     return mapResult;
 }
 
-QMap<quint32, QString> QELF::getHeaderMachineList()
+QMap<quint64, QString> QELF::getHeaderMachineList()
 {
-    QMap<quint32, QString> mapResult;
+    QMap<quint64, QString> mapResult;
     mapResult.insert(0,"EM_NONE"); // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_S_Elf.h
     mapResult.insert(1,"EM_M32");
     mapResult.insert(2,"EM_SPARC");
@@ -460,65 +460,90 @@ QMap<quint32, QString> QELF::getHeaderMachineList()
     return mapResult;
 }
 
-QMap<quint32, QString> QELF::getHeaderVersionList()
+QMap<quint64, QString> QELF::getHeaderVersionList()
 {
-    QMap<quint32, QString> mapResult;
+    QMap<quint64, QString> mapResult;
     mapResult.insert(1,"EV_CURRENT");
     return mapResult;
 }
 
-QMap<quint32, QString> QELF::getIndentClassList()
+QMap<quint64, QString> QELF::getIndentClasses()
 {
-    QMap<quint32, QString> mapResult;
-    mapResult.insert(0,"S_ElfCLASSNONE");
-    mapResult.insert(1,"S_ElfCLASS32");
-    mapResult.insert(2,"S_ElfCLASS64");
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"ELFCLASSNONE");
+    mapResult.insert(1,"ELFCLASS32");
+    mapResult.insert(2,"ELFCLASS64");
     return mapResult;
 }
 
-QMap<quint32, QString> QELF::getIndentDataList()
+QMap<quint64, QString> QELF::getIndentClassesS()
 {
-    QMap<quint32, QString> mapResult;
-    mapResult.insert(0,"S_ElfDATANONE");
-    mapResult.insert(1,"S_ElfDATA2LSB");
-    mapResult.insert(2,"S_ElfDATA2MSB");
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"NONE");
+    mapResult.insert(1,"32");
+    mapResult.insert(2,"64");
     return mapResult;
 }
 
-QMap<quint32, QString> QELF::getIndentVersionList()
+QMap<quint64, QString> QELF::getIndentDatas()
 {
-    QMap<quint32, QString> mapResult;
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"ELFDATANONE");
+    mapResult.insert(1,"ELFDATA2LSB");
+    mapResult.insert(2,"ELFDATA2MSB");
+    return mapResult;
+}
+
+QMap<quint64, QString> QELF::getIndentDatasS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"NONE");
+    mapResult.insert(1,"2LSB");
+    mapResult.insert(2,"2MSB");
+    return mapResult;
+}
+
+QMap<quint64, QString> QELF::getIndentVersions()
+{
+    QMap<quint64, QString> mapResult;
     mapResult.insert(1,"EV_CURRENT");
     return mapResult;
 }
 
-QMap<quint32, QString> QELF::getIndentOsabiList()
+QMap<quint64, QString> QELF::getIndentVersionsS()
 {
-    QMap<quint32, QString> mapResult;
-    mapResult.insert(0,"S_ElfOSABI_SYSV");
-    mapResult.insert(1,"S_ElfOSABI_HPUX");
-    mapResult.insert(2,"S_ElfOSABI_NETBSD");
-    mapResult.insert(3,"S_ElfOSABI_LINUX");
-    mapResult.insert(4,"S_ElfOSABI_HURD");
-    mapResult.insert(5,"S_ElfOSABI_86OPEN");
-    mapResult.insert(6,"S_ElfOSABI_SOLARIS");
-    mapResult.insert(7,"S_ElfOSABI_MONTEREY");
-    mapResult.insert(8,"S_ElfOSABI_IRIX");
-    mapResult.insert(9,"S_ElfOSABI_FREEBSD");
-    mapResult.insert(10,"S_ElfOSABI_TRU64");
-    mapResult.insert(11,"S_ElfOSABI_MODESTO");
-    mapResult.insert(12,"S_ElfOSABI_OPENBSD");
-    mapResult.insert(13,"S_ElfOSABI_OPENVMS");
-    mapResult.insert(14,"S_ElfOSABI_NSK");
-    mapResult.insert(15,"S_ElfOSABI_AROS");
-    mapResult.insert(97,"S_ElfOSABI_ARM");
-    mapResult.insert(255,"S_ElfOSABI_STANDALONE");
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(1,"CURRENT");
     return mapResult;
 }
 
-QMap<quint32, QString> QELF::getSectionTypeList()
+QMap<quint64, QString> QELF::getIndentOsabiList()
 {
-    QMap<quint32, QString> mapResult;
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"ELFOSABI_SYSV");
+    mapResult.insert(1,"ELFOSABI_HPUX");
+    mapResult.insert(2,"ELFOSABI_NETBSD");
+    mapResult.insert(3,"ELFOSABI_LINUX");
+    mapResult.insert(4,"ELFOSABI_HURD");
+    mapResult.insert(5,"ELFOSABI_86OPEN");
+    mapResult.insert(6,"ELFOSABI_SOLARIS");
+    mapResult.insert(7,"ELFOSABI_MONTEREY");
+    mapResult.insert(8,"ELFOSABI_IRIX");
+    mapResult.insert(9,"ELFOSABI_FREEBSD");
+    mapResult.insert(10,"ELFOSABI_TRU64");
+    mapResult.insert(11,"ELFOSABI_MODESTO");
+    mapResult.insert(12,"ELFOSABI_OPENBSD");
+    mapResult.insert(13,"ELFOSABI_OPENVMS");
+    mapResult.insert(14,"ELFOSABI_NSK");
+    mapResult.insert(15,"ELFOSABI_AROS");
+    mapResult.insert(97,"ELFOSABI_ARM");
+    mapResult.insert(255,"ELFOSABI_STANDALONE");
+    return mapResult;
+}
+
+QMap<quint64, QString> QELF::getSectionTypeList()
+{
+    QMap<quint64, QString> mapResult;
     mapResult.insert(0,"SHT_NULL");
     mapResult.insert(1,"SHT_PROGBITS");
     mapResult.insert(2,"SHT_SYMTAB");
@@ -556,9 +581,9 @@ QMap<quint32, QString> QELF::getSectionTypeList()
     return mapResult;
 }
 
-QMap<quint32, QString> QELF::getSectionFlagList()
+QMap<quint64, QString> QELF::getSectionFlagList()
 {
-    QMap<quint32, QString> mapResult;
+    QMap<quint64, QString> mapResult;
     mapResult.insert(0x00000001,"SHF_WRITE");
     mapResult.insert(0x00000002,"SHF_ALLOC");
     mapResult.insert(0x00000004,"SHF_EXECINSTR");
@@ -576,9 +601,9 @@ QMap<quint32, QString> QELF::getSectionFlagList()
     return mapResult;
 }
 
-QMap<quint32, QString> QELF::getProgramTypeList()
+QMap<quint64, QString> QELF::getProgramTypeList()
 {
-    QMap<quint32, QString> mapResult;
+    QMap<quint64, QString> mapResult;
     mapResult.insert(0,"PT_NULL");
     mapResult.insert(1,"PT_LOAD");
     mapResult.insert(2,"PT_DYNAMIC");
@@ -599,9 +624,9 @@ QMap<quint32, QString> QELF::getProgramTypeList()
     return mapResult;
 }
 
-QMap<quint32, QString> QELF::getProgramFlagList()
+QMap<quint64, QString> QELF::getProgramFlagList()
 {
-    QMap<quint32, QString> mapResult;
+    QMap<quint64, QString> mapResult;
     mapResult.insert(0x00000001,"PF_X");
     mapResult.insert(0x00000002,"PF_W");
     mapResult.insert(0x00000004,"PF_R");

@@ -119,20 +119,23 @@ public:
     quint16 getHdr64_shstrndx();
     void setHdr64_shstrndx(quint16 value);
 
-    static QMap<quint32,QString> getHeaderTypeList();
-    static QMap<quint32,QString> getHeaderMachineList();
-    static QMap<quint32,QString> getHeaderVersionList();
+    static QMap<quint64,QString> getHeaderTypeList();
+    static QMap<quint64,QString> getHeaderMachineList();
+    static QMap<quint64,QString> getHeaderVersionList();
 
-    static QMap<quint32,QString> getIndentClassList();
-    static QMap<quint32,QString> getIndentDataList();
-    static QMap<quint32,QString> getIndentVersionList();
-    static QMap<quint32,QString> getIndentOsabiList();
+    static QMap<quint64,QString> getIndentClasses();
+    static QMap<quint64,QString> getIndentClassesS();
+    static QMap<quint64,QString> getIndentDatas();
+    static QMap<quint64,QString> getIndentDatasS();
+    static QMap<quint64,QString> getIndentVersions();
+    static QMap<quint64,QString> getIndentVersionsS();
+    static QMap<quint64,QString> getIndentOsabiList();
 
-    static QMap<quint32,QString> getSectionTypeList();
-    static QMap<quint32,QString> getSectionFlagList();
+    static QMap<quint64,QString> getSectionTypeList();
+    static QMap<quint64,QString> getSectionFlagList();
 
-    static QMap<quint32,QString> getProgramTypeList();
-    static QMap<quint32,QString> getProgramFlagList();
+    static QMap<quint64,QString> getProgramTypeList();
+    static QMap<quint64,QString> getProgramFlagList();
 
     QMap<quint32,QString> getStringList(quint32 nSection);
     QString getStringFromList(quint32 nIndex,quint32 nSection);
