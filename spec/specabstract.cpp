@@ -667,7 +667,6 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
     Binary_handle_SFXData(pDevice,&result);
     Binary_handle_ProtectorData(pDevice,&result);
 
-
     result.basic_info.listDetects.append(result.mapResultTexts.values());
     result.basic_info.listDetects.append(result.mapResultArchives.values());
     result.basic_info.listDetects.append(result.mapResultCertificates.values());
@@ -1524,7 +1523,6 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                     }
                 }
             }
-
         }
         else if(pPEInfo->listImports.at(0).sName.toUpper()=="KERNEL32")
         {
@@ -2083,7 +2081,6 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
             }
 
             // ASProtect
-
             if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_ASPROTECT))
             {
                 SpecAbstract::_SCANS_STRUCT recordSS=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_ASPROTECT);
@@ -2091,9 +2088,7 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                 pPEInfo->mapResultProtectors.insert(recordSS.name,scansToScan(&(pPEInfo->basic_info),&recordSS));
             }
 
-
             // PECompact
-
             if(pPEInfo->mapImportDetects.contains(RECORD_NAME_PECOMPACT))
             {
                 SpecAbstract::_SCANS_STRUCT recordPC=pPEInfo->mapImportDetects.value(RECORD_NAME_PECOMPACT);
@@ -3047,7 +3042,6 @@ void SpecAbstract::PE_handle_VMProtect(QIODevice *pDevice, SpecAbstract::PEINFO_
                 }
             }
 
-
             if(bSuccess)
             {
                 if(     pe.compareEntryPoint("68........E8")||
@@ -3101,7 +3095,6 @@ void SpecAbstract::PE_handle_Petite(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                 QString sVersion;
                 for(int i=0;i<pPEInfo->listImports.count();i++)
                 {
-
                     if(pPEInfo->listImports.at(i).sName.toUpper()=="USER32.DLL")
                     {
                         if(pPEInfo->listImports.at(i).listPositions.count()==2)
@@ -3111,7 +3104,6 @@ void SpecAbstract::PE_handle_Petite(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                             {
                                 bUser32=true;
                             }
-
                         }
                         else if(pPEInfo->listImports.at(i).listPositions.count()==1)
                         {
@@ -3119,7 +3111,6 @@ void SpecAbstract::PE_handle_Petite(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                             {
                                 bUser32=true;
                             }
-
                         }
                     }
                     else if(pPEInfo->listImports.at(i).sName.toUpper()=="KERNEL32.DLL")
@@ -3315,7 +3306,6 @@ void SpecAbstract::PE_handle_NETProtection(QIODevice *pDevice, SpecAbstract::PEI
                             pPEInfo->mapResultNETObfuscators.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
                         }
                     }
-
                 }
             }
 
@@ -3438,7 +3428,6 @@ void SpecAbstract::PE_handle_libraries(QIODevice *pDevice, SpecAbstract::PEINFO_
             pPEInfo->mapResultLibraries.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
         }
     }
-
 }
 
 void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
@@ -3646,7 +3635,6 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
                     ssCompiler=_ssCompiler2;
                 }
             }
-
 
             if(ssLinker.type==SpecAbstract::RECORD_TYPE_LINKER)
             {
@@ -4447,7 +4435,6 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                 pPEInfo->mapResultLibraries.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
-
             qint64 nOffset_FlexNet=-1;
 
             if(nOffset_FlexLM==-1)
@@ -4518,7 +4505,6 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                 pPEInfo->mapResultTools.insert(ssMsys.name,scansToScan(&(pPEInfo->basic_info),&ssMsys));
             }
 
-
             if(     (sDllLib.contains("gcc"))||
                     (sDllLib.contains("libgcj"))||
                     (sDllLib=="_set_invalid_parameter_handler")||
@@ -4527,7 +4513,6 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
             {
                 bDetectGCC=true;
             }
-
 
             if(bDetectGCC||bHeurGCC)
             {
@@ -4619,7 +4604,6 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                             // TODO
                         }
                     }
-
 
                     _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_LIBRARY,RECORD_NAME_CYGWIN,"","",0);
 
@@ -4842,6 +4826,7 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                 }
             }
 
+            // Watcom CPP
             if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_WATCOMCCPP))
             {
                 _SCANS_STRUCT ss=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_WATCOMCCPP);
@@ -5074,8 +5059,6 @@ void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO
                 }
             }
 
-
-
             if(pPEInfo->mapOverlayDetects.contains(RECORD_NAME_GHOSTINSTALLER))
             {
                 _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_INSTALLER,RECORD_NAME_GHOSTINSTALLER,"","",0);
@@ -5129,7 +5112,6 @@ void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO
 //                    ss.sVersion=matchVersion.captured(1);
 //                }
 
-
                 QString sVersion=QBinary::regExp("Null[sS]oft Install System v?(.*?)<",pPEInfo->sResourceManifest,1);
 
                 if(sVersion!="")
@@ -5166,7 +5148,6 @@ void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO
                     }
                 }
 
-
                 pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
 
@@ -5188,10 +5169,8 @@ void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO
                     }
                 }
 
-
                 pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
-
 
             if(pPEInfo->sResourceManifest.contains("Gentee.Installer.Install"))
             {
@@ -5223,7 +5202,6 @@ void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO
 
                 pPEInfo->mapResultInstallers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
             }
-
 
             // Windows Installer
             for(int i=0;i<pPEInfo->listResources.count();i++)

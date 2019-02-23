@@ -20,7 +20,7 @@
 //
 #include "qbinary.h"
 
-QBinary::QBinary(QIODevice *__pDevice,bool bIsImage) // TODO offset and Size for example for PE overlays
+QBinary::QBinary(QIODevice *__pDevice,bool bIsImage)
 {
     setData(__pDevice);
     setIsImage(bIsImage);
