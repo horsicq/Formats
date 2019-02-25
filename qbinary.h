@@ -128,7 +128,17 @@ public:
     static quint32 random64();
 
     static QString convertFileName(QString sFileName);
-    static void findFiles(QString sFileName,QList<QString> *pListFileNames);
+    static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames);
+
+    struct FFOPTIONS
+    {
+        QList<QString> *pListFiles;
+        bool bSubdirectories;
+        bool *pbIsStop;
+        qint32 *pnNumberOfFiles;
+    };
+    static void findFiles(QString sDirectoryName,FFOPTIONS *pFFOption,qint32 nLevel=0);
+
     static QString regExp(QString sRegExp,QString sString,int nIndex);
     qint64 read_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
     QByteArray read_array(qint64 nOffset,qint64 nSize);

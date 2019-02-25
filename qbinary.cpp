@@ -126,11 +126,11 @@ QString QBinary::convertFileName(QString sFileName)
     return sFileName;
 }
 
-void QBinary::findFiles(QString sFileName, QList<QString> *pListFileNames)
+void QBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
 {
-    if((sFileName!=".")&&(sFileName!=".."))
+    if((sDirectoryName!=".")&&(sDirectoryName!=".."))
     {
-        QFileInfo fi(sFileName);
+        QFileInfo fi(sDirectoryName);
 
         if(fi.isFile())
         {
@@ -138,13 +138,43 @@ void QBinary::findFiles(QString sFileName, QList<QString> *pListFileNames)
         }
         else if(fi.isDir())
         {
-            QDir dir(sFileName);
+            QDir dir(sDirectoryName);
 
             QFileInfoList eil=dir.entryInfoList();
 
             for(int i=0;i<eil.count();i++)
             {
                 findFiles(eil.at(i).absoluteFilePath(),pListFileNames);
+            }
+        }
+    }
+}
+
+void QBinary::findFiles(QString sDirectoryName, QBinary::FFOPTIONS *pFFOption, qint32 nLevel)
+{
+    *(pFFOption->pnNumberOfFiles)=pFFOption->pListFiles->count();
+
+    if(!(*pFFOption->pbIsStop))
+    {
+        QFileInfo fi(sDirectoryName);
+
+        if(fi.isFile())
+        {
+            pFFOption->pListFiles->append(fi.absoluteFilePath());
+        }
+        else if(fi.isDir()&&((pFFOption->bSubdirectories)||(nLevel==0)))
+        {
+            QDir dir(sDirectoryName);
+
+            QFileInfoList eil=dir.entryInfoList();
+
+            for(int i=0;(i<eil.count())&&(!(*(pFFOption->pbIsStop)));i++)
+            {
+                QString sFN=eil.at(i).fileName();
+                if((sFN!=".")&&(sFN!=".."))
+                {
+                    findFiles(eil.at(i).absoluteFilePath(),pFFOption,nLevel+1);
+                }
             }
         }
     }
