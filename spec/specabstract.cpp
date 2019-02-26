@@ -62,6 +62,7 @@ SpecAbstract::SIGNATURE_RECORD _binary_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_ACTUALINSTALLER,              "",             "",                     "....................'MSCF'00"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_MICROSOFTLINKERDATABASE,      "",             "",                     "'Microsoft Linker Database\n\n'071A"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_IMAGE,            SpecAbstract::RECORD_NAME_JPEG,                         "",             "",                     "FFD8FFE0....'JFIF'00"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_IMAGE,            SpecAbstract::RECORD_NAME_PNG,                          "",             "",                     "89'PNG\r\n'1A0A........'IHDR'"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_IMAGE,            SpecAbstract::RECORD_NAME_WINDOWSICON,                  "",             "",                     "00000100"},
 };
 
@@ -475,6 +476,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_PHOENIXPROTECTOR:                  sResult=QString("Phoenix Protector");                           break;
         case RECORD_NAME_PKLITE32:                          sResult=QString("PKLITE32");                                    break;
         case RECORD_NAME_PLAIN:                             sResult=QString("Plain");                                       break;
+        case RECORD_NAME_PNG:                               sResult=QString("PNG");                                         break;
         case RECORD_NAME_POLYCRYPTPE:                       sResult=QString("PolyCrypt PE");                                break;
         case RECORD_NAME_POWERBASIC:                        sResult=QString("PowerBASIC");                                  break;
         case RECORD_NAME_PRIVATEEXEPROTECTOR:               sResult=QString("Private EXE Protector");                       break;
@@ -3902,6 +3904,10 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
             {
                 recordTool.sVersion="2017";
             }
+            else if((sLinkerVersion=="14.10.25834")&&(sCompilerVersion=="19.10.25834"))
+            {
+                recordTool.sVersion="2017";
+            }
             else if(sCompilerMajorVersion=="12.00")
             {
                 recordTool.sVersion="6.0";
@@ -5507,6 +5513,13 @@ void SpecAbstract::Binary_handle_Formats(QIODevice *pDevice, SpecAbstract::BINAR
         // Windows Icon
         // TODO more information
         _SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_WINDOWSICON);
+        pBinaryInfo->mapResultFormats.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_PNG))&&(pBinaryInfo->basic_info.nSize>=8))
+    {
+        // PNG
+        // TODO resolution
+        _SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_PNG);
         pBinaryInfo->mapResultFormats.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
     }
 }
