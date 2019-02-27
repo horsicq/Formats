@@ -381,6 +381,8 @@ public:
         BASIC_INFO basic_info;
 
         bool bIsPlainText;
+        bool bIsUTF8;
+        QBinary::UNICODE_TYPE unicodeType;
         QString sHeaderText;
 
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultTexts;

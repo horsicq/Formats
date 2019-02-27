@@ -43,7 +43,6 @@ SpecAbstract::SIGNATURE_RECORD _binary_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_NSIS,                         "",             "Install",              "00000000EFBEADDE'NullsoftInst'"},
     {1, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_NSIS,                         "",             "Uninstall",            "01000000EFBEADDE'NullsoftInst'"},
     {3, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_NSIS,                         "",             "Install",              "02000000EFBEADDE'NullsoftInst'"},
-    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_UTF8,                         "",             "",                     "EFBBBF"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_PROTECTORDATA,    SpecAbstract::RECORD_NAME_FISHNET,                      "1.X",          "",                     "0800'FISH_NET'0100"},
     {1, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_PROTECTORDATA,    SpecAbstract::RECORD_NAME_FISHNET,                      "1.X",          "",                     "000800'FISH_NET'0100"},
     {2, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_PROTECTORDATA,    SpecAbstract::RECORD_NAME_FISHNET,                      "1.X",          "",                     "00000800'FISH_NET'0100"},
@@ -657,9 +656,21 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
     // Scan Header
     signatureScan(&result.basic_info.mapHeaderDetects,result.basic_info.sHeaderSignature,_binary_records,sizeof(_binary_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_BINARY);
 
-    result.bIsPlainText=binary.isPlainText();
+    result.bIsPlainText=binary.isPlainTextType();
+    result.bIsUTF8=binary.isUTF8TextType();
+    result.unicodeType=binary.getUnicodeType();
 
-    if(result.bIsPlainText)
+    if(result.unicodeType!=QBinary::UNICODE_TYPE_NONE)
+    {
+        result.sHeaderText=binary.read_unicodeString(2,qMin(result.basic_info.nSize,(qint64)0x1000),(result.unicodeType==QBinary::UNICODE_TYPE_BE));
+        result.basic_info.id.filetype=RECORD_FILETYPE_TEXT;
+    }
+    else if(result.bIsUTF8)
+    {
+        result.sHeaderText=binary.read_utf8String(3,qMin(result.basic_info.nSize,(qint64)0x1000));
+        result.basic_info.id.filetype=RECORD_FILETYPE_TEXT;
+    }
+    else if(result.bIsPlainText)
     {
         result.sHeaderText=binary.read_ansiString(0,qMin(result.basic_info.nSize,(qint64)0x1000));
         result.basic_info.id.filetype=RECORD_FILETYPE_TEXT;
@@ -5368,7 +5379,7 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice, SpecAbstract::BINARYI
 {
     QBinary binary(pDevice);
 
-    if(pBinaryInfo->bIsPlainText)
+    if((pBinaryInfo->bIsPlainText)||(pBinaryInfo->unicodeType!=QBinary::UNICODE_TYPE_NONE))
     {
         _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_TEXT,RECORD_TYPE_FORMAT,RECORD_NAME_PLAIN,"","",0);
 

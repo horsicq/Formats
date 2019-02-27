@@ -156,7 +156,8 @@ public:
     qint64 write_ansiString(qint64 nOffset,QString sString);
 
     QString read_ansiString(qint64 nOffset,qint64 nMaxSize=256);
-    QString read_unicodeString(qint64 nOffset,qint64 nMaxSize=256);
+    QString read_unicodeString(qint64 nOffset,qint64 nMaxSize=256,bool bIsBigEndian=false);
+    QString read_utf8String(qint64 nOffset,qint64 nMaxSize=256);
 
     void write_uint8(qint64 nOffset,quint8 value);
     void write_int8(qint64 nOffset,qint8 value);
@@ -300,7 +301,16 @@ public:
 
     static QString invertHexByteString(QString sHex);
 
-    bool isPlainText();
+    bool isPlainTextType();
+    bool isUTF8TextType();
+    enum UNICODE_TYPE
+    {
+        UNICODE_TYPE_NONE=0,
+        UNICODE_TYPE_LE,
+        UNICODE_TYPE_BE
+    };
+
+    UNICODE_TYPE getUnicodeType();
 
     // TODO uint64,uint16,uint8
 private:

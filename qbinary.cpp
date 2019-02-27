@@ -386,7 +386,7 @@ QString QBinary::read_ansiString(qint64 nOffset,qint64 nMaxSize)
     return sResult;
 }
 
-QString QBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize)
+QString QBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize,bool bIsBigEndian)
 {
     QString sResult;
 
@@ -396,7 +396,7 @@ QString QBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize)
 
         for(int i=0; i<nMaxSize; i++)
         {
-            pBuffer[i]=read_uint16(nOffset+2*i); // TODO EndEndian
+            pBuffer[i]=read_uint16(nOffset+2*i,bIsBigEndian);
 
             if(pBuffer[i]==0)
             {
@@ -413,6 +413,50 @@ QString QBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize)
 
 
         delete [] pBuffer;
+    }
+
+    return sResult;
+}
+
+QString QBinary::read_utf8String(qint64 nOffset, qint64 nMaxSize)
+{
+    QString sResult;
+
+    if(nMaxSize)
+    {
+        qint32 nRealSize=0;
+        for(int i=0; i<nMaxSize; i++)
+        {
+            quint8 nByte=read_uint8(nOffset+nRealSize);
+
+            if(nByte==0)
+            {
+                break;
+            }
+
+            if((nByte>>7)&0x1)
+            {
+                nRealSize++;
+            }
+            else if((nByte>>5)&0x1)
+            {
+                nRealSize+=2;
+            }
+            else if((nByte>>4)&0x1)
+            {
+                nRealSize+=3;
+            }
+            else if((nByte>>3)&0x1)
+            {
+                nRealSize+=4;
+            }
+        }
+
+        if(nRealSize)
+        {
+            QByteArray baString=read_array(nOffset,nRealSize);
+            sResult=QString::fromUtf8(baString.data());
+        }
     }
 
     return sResult;
@@ -2262,27 +2306,81 @@ QString QBinary::invertHexByteString(QString sHex)
     return sResult;
 }
 
-bool QBinary::isPlainText()
+bool QBinary::isPlainTextType()
 {
+    bool bResult=false;
+
     QByteArray baData=read_array(0,qMin(getSize(),(qint64)0x1000));
 
     unsigned char *pDataOffset=(unsigned char *)baData.data();
     int nDataSize=baData.size();
 
-    if(nDataSize==0)
+    if(nDataSize)
     {
-        return false;
+        for(int i=0; i<nDataSize; i++)
+        {
+            if(pDataOffset[i]<0x9)
+            {
+                bResult=false;
+                break;
+            }
+        }
+        bResult=true;
     }
 
-    for(int i=0; i<nDataSize; i++)
+    return bResult;
+}
+
+bool QBinary::isUTF8TextType()
+{
+    // EFBBBF
+    bool bResult=false;
+
+    QByteArray baData=read_array(0,qMin(getSize(),(qint64)3));
+
+    unsigned char *pDataOffset=(unsigned char *)baData.data();
+    int nDataSize=baData.size();
+
+    if(nDataSize==3)
     {
-        if(pDataOffset[i]<0x9)
+        if((pDataOffset[0]==0xEF)&&(pDataOffset[1]==0xBB)&&(pDataOffset[2]==0xBF))
         {
-            return false;
+            bResult=true;
         }
     }
 
-    return true;
+    return bResult;
+}
+
+QBinary::UNICODE_TYPE QBinary::getUnicodeType()
+{
+    QBinary::UNICODE_TYPE result=QBinary::UNICODE_TYPE_NONE;
+
+    QByteArray baData=read_array(0,qMin(getSize(),(qint64)0x2));
+
+    unsigned char *pDataOffset=(unsigned char *)baData.data();
+    int nDataSize=baData.size();
+
+    if(nDataSize)
+    {
+        quint16 nSymbol=*((quint16 *)(pDataOffset));
+
+        nSymbol=qFromLittleEndian(nSymbol);
+        if(nSymbol==0xFFFE)
+        {
+            result=UNICODE_TYPE_BE;
+        }
+        else if(nSymbol==0xFEFF)
+        {
+            result=UNICODE_TYPE_LE;
+        }
+        else
+        {
+            result=UNICODE_TYPE_NONE;
+        }
+    }
+
+    return result;
 }
 
 QList<QBinary::SIGNATURE_RECORD> QBinary::getSignatureRecords(QString sSignature)
