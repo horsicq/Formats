@@ -503,6 +503,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_TELOCK:                            sResult=QString("tElock");                                      break;
         case RECORD_NAME_THEMIDAWINLICENSE:                 sResult=QString("Themida/Winlicense");                          break;
         case RECORD_NAME_TURBOLINKER:                       sResult=QString("Turbo linker");                                break;
+        case RECORD_NAME_UNICODE:                           sResult=QString("Unicode");                                     break;
         case RECORD_NAME_UNKNOWNUPXLIKE:                    sResult=QString("Unknown UPX-like");                            break;
         case RECORD_NAME_UNOPIX:                            sResult=QString("Unopix");                                      break;
         case RECORD_NAME_UPX:                               sResult=QString("UPX");                                         break;
@@ -5379,16 +5380,36 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice, SpecAbstract::BINARYI
 {
     QBinary binary(pDevice);
 
-    if((pBinaryInfo->bIsPlainText)||(pBinaryInfo->unicodeType!=QBinary::UNICODE_TYPE_NONE))
+    if((pBinaryInfo->bIsPlainText)||(pBinaryInfo->unicodeType!=QBinary::UNICODE_TYPE_NONE)||(pBinaryInfo->bIsUTF8))
     {
-        _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_TEXT,RECORD_TYPE_FORMAT,RECORD_NAME_PLAIN,"","",0);
-
-        if(pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_UTF8))
+        if(pBinaryInfo->mapResultTexts.count()==0)
         {
-            ss.name=RECORD_NAME_UTF8;
-        }
+            _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_TEXT,RECORD_TYPE_FORMAT,RECORD_NAME_PLAIN,"","",0);
 
-        pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+            if(pBinaryInfo->unicodeType!=QBinary::UNICODE_TYPE_NONE)
+            {
+                ss.name=RECORD_NAME_UNICODE;
+
+                if(pBinaryInfo->unicodeType==QBinary::UNICODE_TYPE_BE)
+                {
+                    ss.sVersion="Big Endian";
+                }
+                else if(pBinaryInfo->unicodeType==QBinary::UNICODE_TYPE_LE)
+                {
+                    ss.sVersion="Little Endian";
+                }
+            }
+            else if(pBinaryInfo->bIsUTF8)
+            {
+                ss.name=RECORD_NAME_UTF8;
+            }
+            else if(pBinaryInfo->bIsPlainText)
+            {
+                ss.name=RECORD_NAME_PLAIN;
+            }
+
+            pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+        }
     }
 }
 
