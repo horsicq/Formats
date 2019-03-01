@@ -2317,6 +2317,7 @@ bool QBinary::isPlainTextType()
 
     if(nDataSize)
     {
+        bResult=true;
         for(int i=0; i<nDataSize; i++)
         {
             if(pDataOffset[i]<0x9)
@@ -2325,7 +2326,6 @@ bool QBinary::isPlainTextType()
                 break;
             }
         }
-        bResult=true;
     }
 
     return bResult;
