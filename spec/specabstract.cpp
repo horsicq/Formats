@@ -728,7 +728,6 @@ SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, Sp
     result.basic_info.sHeaderSignature=msdos.getSignature(0,150);
     result.basic_info.bDeepScan=pOptions->bDeepScan;
 
-    // TODO
     // TODO EntryPoint Signature
 
     if(!result.basic_info.listDetects.count())
@@ -847,8 +846,6 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         result.basic_info.nSize=pDevice->size();
         result.basic_info.sHeaderSignature=pe.getSignature(0,150);
         result.basic_info.bDeepScan=pOptions->bDeepScan;
-
-//        qDebug(result.basic_info.sHeaderSignature.toLatin1().data());
 
         result.sEntryPointSignature=pe.getSignature(pe.getEntryPointOffset(),150);
 
