@@ -177,6 +177,8 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_ABCCRYPTOR,                   "1.0",              "",                     "68FF6424F0685858585890FFD4"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_EXE32PACK,                    "1.4X",             "",                     "3BC07402"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_GENERIC,                      "",                 "",                     "60"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_SOFTWARECOMPRESS,             "1.2",              "",                     "E9........608B7424248B7C2428FC"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_SOFTWARECOMPRESS,             "1.4 LITE",         "",                     "E800000000812C24........5DE800000000"},
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1995.
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1994. All rights re..
 };
@@ -494,6 +496,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_SKATER:                            sResult=QString("Skater");                                      break;
         case RECORD_NAME_SMARTASSEMBLY:                     sResult=QString("Smart Assembly");                              break;
         case RECORD_NAME_SMARTINSTALLMAKER:                 sResult=QString("Smart Install Maker");                         break;
+        case RECORD_NAME_SOFTWARECOMPRESS:                  sResult=QString("Software Compress");                           break;
         case RECORD_NAME_SOFTWAREZATOR:                     sResult=QString("SoftwareZator");                               break;
         case RECORD_NAME_SPICESNET:                         sResult=QString("Spices.Net");                                  break;
         case RECORD_NAME_SQUEEZSFX:                         sResult=QString("Squeez Self Extractor");                       break;
@@ -1330,6 +1333,17 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         stDetects.insert("kernel32_xcomp");
                     }
                 }
+                else if( (pPEInfo->listImports.at(0).listPositions.at(0).sName=="GetModuleHandleA")&&
+                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
+                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="GlobalAlloc")&&
+                         (pPEInfo->listImports.at(0).listPositions.at(3).sName=="GlobalFree")&&
+                         (pPEInfo->listImports.at(0).listPositions.at(4).sName=="LoadLibraryA"))
+                 {
+                     if(pPEInfo->listImports.count()==2)
+                     {
+                         stDetects.insert("kernel32_softwarecompress");
+                     }
+                 }
             }
             else if(pPEInfo->listImports.at(0).listPositions.count()==6)
             {
@@ -1584,6 +1598,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         stDetects.insert("user32_revprot");
                         stDetects.insert("user32_exe_pack");
                         stDetects.insert("user32_ahpacker");
+                        stDetects.insert("user32_softwarecompress");
                     }
                 }
             }
@@ -1827,6 +1842,11 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     if(stDetects.contains("kernel32_revprot")&&stDetects.contains("user32_revprot"))
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_REVPROT,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PROTECTOR,RECORD_NAME_REVPROT,"0.1a","",0));
+    }
+
+    if(stDetects.contains("kernel32_softwarecompress")&&stDetects.contains("user32_softwarecompress"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_SOFTWARECOMPRESS,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PROTECTOR,RECORD_NAME_SOFTWARECOMPRESS,"1.2-1.4","",0));
     }
 
     if(stDetects.contains("kernel32_npack")&&stDetects.contains("user32_npack"))
@@ -2680,6 +2700,16 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     {
                         SpecAbstract::_SCANS_STRUCT recordREVPROT=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_REVPROT);
                         pPEInfo->mapResultProtectors.insert(recordREVPROT.name,scansToScan(&(pPEInfo->basic_info),&recordREVPROT));
+                    }
+                }
+
+                // Software Compress
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_SOFTWARECOMPRESS))
+                {
+                    if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_SOFTWARECOMPRESS))
+                    {
+                        SpecAbstract::_SCANS_STRUCT recordSS=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_SOFTWARECOMPRESS);
+                        pPEInfo->mapResultProtectors.insert(recordSS.name,scansToScan(&(pPEInfo->basic_info),&recordSS));
                     }
                 }
 
@@ -5345,6 +5375,8 @@ void SpecAbstract::PE_handle_SFX(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT
 
 void SpecAbstract::PE_handle_PolyMorph(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
+    Q_UNUSED(pDevice);
+    Q_UNUSED(pPEInfo);
     // ExeSax
 
 }
