@@ -180,6 +180,7 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_SOFTWARECOMPRESS,             "1.2",              "",                     "E9........608B7424248B7C2428FC"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_SOFTWARECOMPRESS,             "1.4 LITE",         "",                     "E800000000812C24........5DE800000000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_SIMPLEPACK,                   "1.0",              "",                     "60E8000000005B8D5BFA"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_NAKEDPACKER,                  "1.0",              "",                     "60FC0FB605........85C075"},
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1995.
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1994. All rights re..
 };
@@ -450,6 +451,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_MSYS:                              sResult=QString("Msys");                                        break;
         case RECORD_NAME_MSYS2:                             sResult=QString("MSYS2");                                       break;
         case RECORD_NAME_MZ0OPE:                            sResult=QString("MZ0oPE");                                      break;
+        case RECORD_NAME_NAKEDPACKER:                       sResult=QString("NakedPacker");                                 break;
         case RECORD_NAME_NOOBYPROTECT:                      sResult=QString("NoobyProtect");                                break;
         case RECORD_NAME_NORTHSTARPESHRINKER:               sResult=QString("North Star PE Shrinker");                      break;
         case RECORD_NAME_NOSTUBLINKER:                      sResult=QString("NOSTUBLINKER");                                break;
@@ -1348,10 +1350,21 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                          (pPEInfo->listImports.at(0).listPositions.at(2).sName=="GlobalAlloc")&&
                          (pPEInfo->listImports.at(0).listPositions.at(3).sName=="GlobalFree")&&
                          (pPEInfo->listImports.at(0).listPositions.at(4).sName=="LoadLibraryA"))
+                {
+                    if(pPEInfo->listImports.count()==2)
+                    {
+                     stDetects.insert("kernel32_softwarecompress");
+                    }
+                }
+                else if( (pPEInfo->listImports.at(0).listPositions.at(0).sName=="HeapAlloc")&&
+                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcessHeap")&&
+                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="HeapFree")&&
+                         (pPEInfo->listImports.at(0).listPositions.at(3).sName=="GetProcAddress")&&
+                         (pPEInfo->listImports.at(0).listPositions.at(4).sName=="LoadLibraryA"))
                  {
-                     if(pPEInfo->listImports.count()==2)
+                     if(pPEInfo->listImports.count()==1)
                      {
-                         stDetects.insert("kernel32_softwarecompress");
+                         stDetects.insert("kernel32_nakedpacker");
                      }
                  }
             }
@@ -1926,6 +1939,11 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     if(stDetects.contains("kernel32_acprotect")&&stDetects.contains("user32_acprotect"))
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_ACPROTECT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_ACPROTECT,"1.X-2.X","",0));
+    }
+
+    if(stDetects.contains("kernel32_nakedpacker"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_NAKEDPACKER,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_NAKEDPACKER,"1.0","",0));
     }
 
     if(stDetects.contains("kernel32_simplepack_a")&&stDetects.contains("user32_simplepack_a"))
@@ -2761,7 +2779,17 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_SIMPLEPACK))
                     {
                         SpecAbstract::_SCANS_STRUCT recordSS=pPEInfo->mapImportDetects.value(RECORD_NAME_SIMPLEPACK);
-                        pPEInfo->mapResultProtectors.insert(recordSS.name,scansToScan(&(pPEInfo->basic_info),&recordSS));
+                        pPEInfo->mapResultPackers.insert(recordSS.name,scansToScan(&(pPEInfo->basic_info),&recordSS));
+                    }
+                }
+
+                // NakedPacker
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_NAKEDPACKER))
+                {
+                    if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_NAKEDPACKER))
+                    {
+                        SpecAbstract::_SCANS_STRUCT recordSS=pPEInfo->mapImportDetects.value(RECORD_NAME_NAKEDPACKER);
+                        pPEInfo->mapResultPackers.insert(recordSS.name,scansToScan(&(pPEInfo->basic_info),&recordSS));
                     }
                 }
 
