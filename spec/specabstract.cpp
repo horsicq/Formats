@@ -179,6 +179,7 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_GENERIC,                      "",                 "",                     "60"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_SOFTWARECOMPRESS,             "1.2",              "",                     "E9........608B7424248B7C2428FC"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_SOFTWARECOMPRESS,             "1.4 LITE",         "",                     "E800000000812C24........5DE800000000"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_SIMPLEPACK,                   "1.0",              "",                     "60E8000000005B8D5BFA"},
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1995.
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1994. All rights re..
 };
@@ -492,6 +493,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_REVPROT:                           sResult=QString("REVProt");                                     break;
         case RECORD_NAME_SETUPFACTORY:                      sResult=QString("Setup Factory");                               break;
         case RECORD_NAME_SIMBIOZ:                           sResult=QString("SimbiOZ");                                     break;
+        case RECORD_NAME_SIMPLEPACK:                        sResult=QString("Simple Pack");                                 break;
         case RECORD_NAME_SIXXPACK:                          sResult=QString("Sixxpack");                                    break;
         case RECORD_NAME_SKATER:                            sResult=QString("Skater");                                      break;
         case RECORD_NAME_SMARTASSEMBLY:                     sResult=QString("Smart Assembly");                              break;
@@ -1241,6 +1243,10 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         stDetects.insert("kernel32_32lite");
                         stDetects.insert("kernel32_fishpepacker_a");
                     }
+                    else if(pPEInfo->listImports.count()==2)
+                    {
+                        stDetects.insert("kernel32_simplepack_c");
+                    }
                     stDetects.insert("kernel32_pecompactx");
                 }
                 else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
@@ -1263,6 +1269,10 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         (pPEInfo->listImports.at(0).listPositions.at(4).sName=="VirtualFree"))
                 {
                     stDetects.insert("kernel32_upx3dll");
+                    if(pPEInfo->listImports.count()==2)
+                    {
+                        stDetects.insert("kernel32_simplepack_b");
+                    }
                 }
                 else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="LoadLibraryA")&&
@@ -1388,6 +1398,22 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                     }
                 }
             }
+            else if(pPEInfo->listImports.at(0).listPositions.count()==7)
+            {
+                if(     (pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetModuleHandleA")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(2).sName=="GetProcAddress")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualAlloc")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(4).sName=="VirtualProtect")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(5).sName=="VirtualFree")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(6).sName=="ExitProcess"))
+                {
+                    if(pPEInfo->listImports.count()==2)
+                    {
+                        stDetects.insert("kernel32_simplepack_a");
+                    }
+                }
+            }
             else if(pPEInfo->listImports.at(0).listPositions.count()==8)
             {
                 if(     (pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
@@ -1401,7 +1427,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                 {
                     stDetects.insert("kernel32_pecompact5");
                 }
-                else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="GetModuleHandleA")&&
+                else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="LoadLibraryA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualAlloc")&&
@@ -1599,6 +1625,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         stDetects.insert("user32_exe_pack");
                         stDetects.insert("user32_ahpacker");
                         stDetects.insert("user32_softwarecompress");
+                        stDetects.insert("user32_simplepack_a");
                     }
                 }
             }
@@ -1610,6 +1637,8 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                     if(pPEInfo->listImports.count()==2)
                     {
                         stDetects.insert("user32_npack");
+                        stDetects.insert("user32_simplepack_b");
+                        stDetects.insert("user32_simplepack_c");
                     }
                 }
                 else if( (pPEInfo->listImports.at(1).listPositions.at(0).sName=="MessageBoxA")&&
@@ -1897,6 +1926,19 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     if(stDetects.contains("kernel32_acprotect")&&stDetects.contains("user32_acprotect"))
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_ACPROTECT,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_ACPROTECT,"1.X-2.X","",0));
+    }
+
+    if(stDetects.contains("kernel32_simplepack_a")&&stDetects.contains("user32_simplepack_a"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_SIMPLEPACK,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_SIMPLEPACK,"1.0","",0));
+    }
+    else if(stDetects.contains("kernel32_simplepack_b")&&stDetects.contains("user32_simplepack_b"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_SIMPLEPACK,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_SIMPLEPACK,"1.2-1.3","",0));
+    }
+    else if(stDetects.contains("kernel32_simplepack_c")&&stDetects.contains("user32_simplepack_c"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_SIMPLEPACK,getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PACKER,RECORD_NAME_SIMPLEPACK,"1.11","",0));
     }
 
     if(stDetects.contains("kernel32_alexprotector")&&stDetects.contains("user32_alexprotector"))
@@ -2709,6 +2751,16 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_SOFTWARECOMPRESS))
                     {
                         SpecAbstract::_SCANS_STRUCT recordSS=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_SOFTWARECOMPRESS);
+                        pPEInfo->mapResultProtectors.insert(recordSS.name,scansToScan(&(pPEInfo->basic_info),&recordSS));
+                    }
+                }
+
+                // Simple Pack
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_SIMPLEPACK))
+                {
+                    if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_SIMPLEPACK))
+                    {
+                        SpecAbstract::_SCANS_STRUCT recordSS=pPEInfo->mapImportDetects.value(RECORD_NAME_SIMPLEPACK);
                         pPEInfo->mapResultProtectors.insert(recordSS.name,scansToScan(&(pPEInfo->basic_info),&recordSS));
                     }
                 }
