@@ -3875,9 +3875,17 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
             {
                 recordTool.sVersion="6.0 SP5-SP6";
             }
+            else if(sCompilerVersion=="12.00.8447")
+            {
+                recordTool.sVersion="6.0 SP5";
+            }
             else if((sLinkerVersion=="7.00.9466")&&(sCompilerVersion=="13.00.9466"))
             {
                 recordTool.sVersion="2002";
+            }
+            else if((sLinkerVersion=="7.10.3052")&&(sCompilerVersion=="13.10.3052"))
+            {
+                recordTool.sVersion="2003";
             }
             else if((sLinkerVersion=="7.10.3077")&&(sCompilerVersion=="13.10.3077"))
             {
@@ -3995,6 +4003,10 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
             {
                 recordTool.sVersion="2015 SP1"; // ???
             }
+            else if((sLinkerVersion=="14.00.24123")&&(sCompilerVersion=="19.00.24123"))
+            {
+                recordTool.sVersion="2015 update 3";
+            }
             else if((sLinkerVersion=="14.00.24210")&&(sCompilerVersion=="19.00.24210"))
             {
                 recordTool.sVersion="2015 update 3";
@@ -4009,17 +4021,25 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
             }
             else if((sLinkerVersion=="14.00.24215")&&(sCompilerVersion=="19.00.24215"))
             {
-                recordTool.sVersion="2015 update 3";
+                recordTool.sVersion="2015 update 3.1";
             }
             else if((sLinkerVersion=="14.00.24218")&&(sCompilerVersion=="19.00.24218"))
             {
-                recordTool.sVersion="2015 update 3";
+                recordTool.sVersion="2015 update 3.1";
             }
             else if((sLinkerVersion=="14.00.24723")&&(sCompilerVersion=="19.00.24723"))
             {
                 recordTool.sVersion="2015"; // Update 4? 2017?
             }
             else if((sLinkerVersion=="14.10.25017")&&(sCompilerVersion=="19.10.25017"))
+            {
+                recordTool.sVersion="2017";
+            }
+            else if((sLinkerVersion=="14.10.25019")&&(sCompilerVersion=="19.10.25019"))
+            {
+                recordTool.sVersion="2017"; // 15.2?
+            }
+            else if((sLinkerVersion=="14.10.25203")&&(sCompilerVersion=="19.10.25203"))
             {
                 recordTool.sVersion="2017";
             }
@@ -8783,6 +8803,8 @@ SpecAbstract::_SCANS_STRUCT SpecAbstract::PE_getRichSignatureDescription(quint32
                 result.name=SpecAbstract::RECORD_NAME_EXPORT;
                 break;
 
+//            case 0x001: Total Import
+            case 0x002:
             case 0x019:
             case 0x09c:
             case 0x05d:
@@ -8795,7 +8817,6 @@ SpecAbstract::_SCANS_STRUCT SpecAbstract::PE_getRichSignatureDescription(quint32
                 result.name=SpecAbstract::RECORD_NAME_IMPORT;
                 break;
 
-            case 0x002:
             case 0x004:
             case 0x013:
             case 0x03d:
