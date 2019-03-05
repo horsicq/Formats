@@ -295,13 +295,14 @@ QString SpecAbstract::recordTypeIdToString(RECORD_TYPES id)
         case RECORD_TYPE_COMPILER:                          sResult=tr("Compiler");                         break;
         case RECORD_TYPE_CONVERTER:                         sResult=tr("Converter");                        break;
         case RECORD_TYPE_DEBUGDATA:                         sResult=tr("Debug data");                       break;
+        case RECORD_TYPE_DONGLEPROTECTION:                  sResult=tr("Dongle protection");                break;
         case RECORD_TYPE_FORMAT:                            sResult=tr("Format");                           break;
         case RECORD_TYPE_IMAGE:                             sResult=tr("Image");                            break;
         case RECORD_TYPE_INSTALLER:                         sResult=tr("Installer");                        break;
         case RECORD_TYPE_INSTALLERDATA:                     sResult=tr("Installer data");                   break;
         case RECORD_TYPE_LIBRARY:                           sResult=tr("Library");                          break;
         case RECORD_TYPE_LINKER:                            sResult=tr("Linker");                           break;
-        case RECORD_TYPE_NETOBFUSCATOR:                     sResult=tr(".NET Obfuscator");                  break;
+        case RECORD_TYPE_NETOBFUSCATOR:                     sResult=tr(".NET obfuscator");                  break;
         case RECORD_TYPE_PACKER:                            sResult=tr("Packer");                           break;
         case RECORD_TYPE_PROTECTOR:                         sResult=tr("Protector");                        break;
         case RECORD_TYPE_PROTECTORDATA:                     sResult=tr("Protector data");                   break;
@@ -417,6 +418,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_GOLIATHNET:                        sResult=QString("Goliath .NET");                                break;
         case RECORD_NAME_GOLINK:                            sResult=QString("GoLink");                                      break;
         case RECORD_NAME_GPINSTALL:                         sResult=QString("GP-Install");                                  break;
+        case RECORD_NAME_GUARDIANSTEALTH:                   sResult=QString("Guardian Stealth");                            break;
         case RECORD_NAME_GZIP:                              sResult=QString("GZIP");                                        break;
         case RECORD_NAME_HIDEPE:                            sResult=QString("HidePE");                                      break;
         case RECORD_NAME_HMIMYSPACKER:                      sResult=QString("Hmimys Packer");                               break;
@@ -1021,6 +1023,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         PE_handle_Tools(pDevice,&result);
         PE_handle_SFX(pDevice,&result);
         PE_handle_Installers(pDevice,&result);
+        PE_handle_DongleProtection(pDevice,&result);
         PE_handle_UnknownProtection(pDevice,&result);
 
         // TODO
@@ -1039,6 +1042,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         result.basic_info.listDetects.append(result.mapResultTools.values());
         result.basic_info.listDetects.append(result.mapResultProtectors.values());
         result.basic_info.listDetects.append(result.mapResultNETObfuscators.values());
+        result.basic_info.listDetects.append(result.mapResultDongleProtection.values());
         result.basic_info.listDetects.append(result.mapResultPackers.values());
         result.basic_info.listDetects.append(result.mapResultSFX.values());
         result.basic_info.listDetects.append(result.mapResultInstallers.values());
@@ -3862,7 +3866,7 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
         {
             QString sLinkerVersion=recordLinker.sVersion;
             QString sCompilerVersion=recordCompiler.sVersion;
-            QString sCompilerMajorVersion=sCompilerVersion.left(5);
+            QString sCompilerMajorVersion=sCompilerVersion.section(".",0,1);
 
             recordTool.type=SpecAbstract::RECORD_TYPE_TOOL;
             recordTool.name=SpecAbstract::RECORD_NAME_MICROSOFTVISUALSTUDIO;
@@ -4083,7 +4087,11 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
             {
                 recordTool.sVersion="2015";
             }
-            else if(sCompilerMajorVersion=="19.10") // TODO
+            else if(sCompilerMajorVersion=="19.10") // TODO ???
+            {
+                recordTool.sVersion="2017";
+            }
+            else if(sCompilerMajorVersion=="19.15") // TODO
             {
                 recordTool.sVersion="2017";
             }
@@ -5479,6 +5487,20 @@ void SpecAbstract::PE_handle_PolyMorph(QIODevice *pDevice, SpecAbstract::PEINFO_
     Q_UNUSED(pPEInfo);
     // ExeSax
 
+}
+
+void SpecAbstract::PE_handle_DongleProtection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+{
+    Q_UNUSED(pDevice);
+
+    if(pPEInfo->listImports.count()==1)
+    {
+        if(pPEInfo->listImports.at(0).sName.toUpper().contains(QRegExp("^NOVEX")))
+        {
+            _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_DONGLEPROTECTION,RECORD_NAME_GUARDIANSTEALTH,"","",0);
+            pPEInfo->mapResultSFX.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+        }
+    }
 }
 
 void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
@@ -9100,6 +9122,18 @@ SpecAbstract::_SCANS_STRUCT SpecAbstract::PE_getRichSignatureDescription(quint32
             case 0x10c:
                 result.sVersion="19.00";
                 break;
+        }
+
+        if(nMinor>=25008)
+        {
+            if(result.sVersion=="14.00")
+            {
+                result.sVersion="14.15";
+            }
+            else if(result.sVersion=="19.00")
+            {
+                result.sVersion="19.15";
+            }
         }
 
         if(result.type!=SpecAbstract::RECORD_TYPE_UNKNOWN)

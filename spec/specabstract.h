@@ -64,6 +64,7 @@ public:
         RECORD_TYPE_COMPILER,
         RECORD_TYPE_CONVERTER,
         RECORD_TYPE_DEBUGDATA,
+        RECORD_TYPE_DONGLEPROTECTION,
         RECORD_TYPE_FORMAT,
         RECORD_TYPE_IMAGE,
         RECORD_TYPE_INSTALLER,
@@ -178,6 +179,7 @@ public:
         RECORD_NAME_GOLIATHNET,
         RECORD_NAME_GOLINK,
         RECORD_NAME_GPINSTALL,
+        RECORD_NAME_GUARDIANSTEALTH,
         RECORD_NAME_GZIP,
         RECORD_NAME_HIDEPE,
         RECORD_NAME_HMIMYSPACKER,
@@ -494,6 +496,7 @@ public:
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultInstallers;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultSFX;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultNETObfuscators;
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultDongleProtection;
 
     };
 
@@ -628,6 +631,7 @@ public:
     static void PE_handle_Installers(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_SFX(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_PolyMorph(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+    static void PE_handle_DongleProtection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
     static void PE_handle_UnknownProtection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
