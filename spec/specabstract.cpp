@@ -225,6 +225,10 @@ SpecAbstract::STRING_RECORD _PE_dot_ansistrings_records[]={
 //};
 
 
+SpecAbstract::STRING_RECORD _TEXT_records[]={
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                          "",             "",                    "#include [\"<].*?[>\"]"},
+};
+
 SpecAbstract::SpecAbstract(QObject *parent)
 {
     Q_UNUSED(parent);
@@ -308,6 +312,7 @@ QString SpecAbstract::recordTypeIdToString(RECORD_TYPES id)
         case RECORD_TYPE_PROTECTORDATA:                     sResult=tr("Protector data");                   break;
         case RECORD_TYPE_SFX:                               sResult=tr("SFX");                              break;
         case RECORD_TYPE_SFXDATA:                           sResult=tr("SFX data");                         break;
+        case RECORD_TYPE_SOURCECODE:                        sResult=tr("Source code");                      break;
         case RECORD_TYPE_TOOL:                              sResult=tr("Tool");                             break;
     }
 
@@ -354,6 +359,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_BREAKINTOPATTERN:                  sResult=QString("Break Into Pattern");                          break;
         case RECORD_NAME_C:                                 sResult=QString("C");                                           break;
         case RECORD_NAME_CAB:                               sResult=QString("CAB");                                         break;
+        case RECORD_NAME_CCPP:                              sResult=QString("C/C++");                                       break;
         case RECORD_NAME_CEXE:                              sResult=QString("CExe");                                        break;
         case RECORD_NAME_CIL:                               sResult=QString("cil");                                         break;
         case RECORD_NAME_CLICKTEAM:                         sResult=QString("ClickTeam");                                   break;
@@ -5533,6 +5539,31 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice, SpecAbstract::BINARYI
 
     if((pBinaryInfo->bIsPlainText)||(pBinaryInfo->unicodeType!=QBinary::UNICODE_TYPE_NONE)||(pBinaryInfo->bIsUTF8))
     {
+        int nSignaturesCount=sizeof(_TEXT_records)/sizeof(STRING_RECORD);
+
+        for(int i=0;i<nSignaturesCount;i++)
+        {
+            if(QBinary::isRegExpPresent(_TEXT_records[i].pszString,pBinaryInfo->sHeaderText))
+            {
+                SpecAbstract::_SCANS_STRUCT record={};
+                record.nVariant=_TEXT_records[i].nVariant;
+                record.filetype=_TEXT_records[i].filetype;
+                record.type=_TEXT_records[i].type;
+                record.name=_TEXT_records[i].name;
+                record.sVersion=_TEXT_records[i].pszVersion;
+                record.sInfo=_TEXT_records[i].pszInfo;
+                record.nOffset=0;
+
+                pBinaryInfo->mapTextHeaderDetects.insert(record.name,record);
+            }
+        }
+
+        if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_CCPP))
+        {
+            _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_CCPP);
+            pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+        }
+
         if(pBinaryInfo->mapResultTexts.count()==0)
         {
             _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_TEXT,RECORD_TYPE_FORMAT,RECORD_NAME_PLAIN,"","",0);

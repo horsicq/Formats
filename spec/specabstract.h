@@ -77,6 +77,7 @@ public:
         RECORD_TYPE_PROTECTORDATA,
         RECORD_TYPE_SFX,
         RECORD_TYPE_SFXDATA,
+        RECORD_TYPE_SOURCECODE,
         RECORD_TYPE_TOOL
     };
     enum RECORD_NAMES
@@ -115,6 +116,7 @@ public:
         RECORD_NAME_BREAKINTOPATTERN,
         RECORD_NAME_C,
         RECORD_NAME_CAB,
+        RECORD_NAME_CCPP,
         RECORD_NAME_CEXE,
         RECORD_NAME_CIL,
         RECORD_NAME_CLICKTEAM,
@@ -390,6 +392,8 @@ public:
         bool bIsUTF8;
         QBinary::UNICODE_TYPE unicodeType;
         QString sHeaderText;
+
+        QMap<RECORD_NAMES,_SCANS_STRUCT> mapTextHeaderDetects;
 
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultTexts;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultArchives;

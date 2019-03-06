@@ -33,6 +33,7 @@
 #include <QTemporaryFile>
 #include <QCryptographicHash>
 #if (QT_VERSION_MAJOR<5)
+#include <QRegExp>
 #else
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
@@ -140,6 +141,7 @@ public:
     static void findFiles(QString sDirectoryName,FFOPTIONS *pFFOption,qint32 nLevel=0);
 
     static QString regExp(QString sRegExp,QString sString,int nIndex);
+    static bool isRegExpPresent(QString sRegExp,QString sString);
     qint64 read_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
     QByteArray read_array(qint64 nOffset,qint64 nSize);
     qint64 write_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
