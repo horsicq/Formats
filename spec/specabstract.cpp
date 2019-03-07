@@ -227,6 +227,8 @@ SpecAbstract::STRING_RECORD _PE_dot_ansistrings_records[]={
 
 SpecAbstract::STRING_RECORD _TEXT_records[]={
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                          "",             "",                    "#include [\"<].*?[>\"]"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                          "",             "header",              "#ifndef (\\w+).*\\s+#define \\1"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_PYTHON,                        "",             "",                    "import"},
 };
 
 SpecAbstract::SpecAbstract(QObject *parent)
@@ -5562,6 +5564,14 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice, SpecAbstract::BINARYI
         {
             _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_CCPP);
             pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+        }
+        else if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_PYTHON))
+        {
+            if((pBinaryInfo->sHeaderText.contains("class"))&&(pBinaryInfo->sHeaderText.contains("self")))
+            {
+                _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_PYTHON);
+                pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+            }
         }
 
         if(pBinaryInfo->mapResultTexts.count()==0)
