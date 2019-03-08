@@ -226,9 +226,10 @@ SpecAbstract::STRING_RECORD _PE_dot_ansistrings_records[]={
 
 
 SpecAbstract::STRING_RECORD _TEXT_records[]={
-    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                          "",             "",                    "#include [\"<].*?[>\"]"},
-    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                          "",             "header",              "#ifndef (\\w+).*\\s+#define \\1"},
-    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_PYTHON,                        "",             "",                    "import"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                         "",             "",                    "#include [\"<].*?[>\"]"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                         "",             "header",              "#ifndef (\\w+).*\\s+#define \\1"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_PYTHON,                       "",             "",                    "import"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_HTML,                         "",             "",                    "^<(!DOCTYPE )?html"},
 };
 
 SpecAbstract::SpecAbstract(QObject *parent)
@@ -431,6 +432,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_HIDEPE:                            sResult=QString("HidePE");                                      break;
         case RECORD_NAME_HMIMYSPACKER:                      sResult=QString("Hmimys Packer");                               break;
         case RECORD_NAME_HMIMYSPROTECTOR:                   sResult=QString("Hmimys's Protector");                          break;
+        case RECORD_NAME_HTML:                              sResult=QString("HTML");                                        break;
         case RECORD_NAME_HXS:                               sResult=QString("HXS");                                         break;
         case RECORD_NAME_IMPORT:                            sResult=QString("Import");                                      break;
         case RECORD_NAME_INNOSETUP:                         sResult=QString("Inno Setup");                                  break;
@@ -660,7 +662,7 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
 
     BINARYINFO_STRUCT result=BINARYINFO_STRUCT();
 
-    QPE binary(pDevice);
+    QPE binary(pDevice,pOptions->bIsImage);
 
     result.basic_info.parentId=parentId;
     result.basic_info.id.filetype=RECORD_FILETYPE_BINARY;
@@ -734,7 +736,7 @@ SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, Sp
 
     MSDOSINFO_STRUCT result={};
 
-    QMSDOS msdos(pDevice);
+    QMSDOS msdos(pDevice,pOptions->bIsImage);
 
     result.basic_info.parentId=parentId;
     result.basic_info.id.filetype=RECORD_FILETYPE_MSDOS;
@@ -769,7 +771,7 @@ SpecAbstract::ELFINFO_STRUCT SpecAbstract::getELFInfo(QIODevice *pDevice, SpecAb
 
     ELFINFO_STRUCT result={};
 
-    QELF elf(pDevice);
+    QELF elf(pDevice,pOptions->bIsImage);
 
     if(elf.isValid())
     {
@@ -809,7 +811,7 @@ SpecAbstract::MACHINFO_STRUCT SpecAbstract::getMACHInfo(QIODevice *pDevice, Spec
 
     MACHINFO_STRUCT result={};
 
-    QMACH mach(pDevice);
+    QMACH mach(pDevice,pOptions->bIsImage);
 
     if(mach.isValid())
     {
@@ -849,7 +851,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
 
     PEINFO_STRUCT result={};
 
-    QPE pe(pDevice);
+    QPE pe(pDevice,pOptions->bIsImage);
 
     if(pe.isValid())
     {
@@ -5572,6 +5574,11 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice, SpecAbstract::BINARYI
                 _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_PYTHON);
                 pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
             }
+        }
+        else if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_HTML))
+        {
+            _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_HTML);
+            pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
         }
 
         if(pBinaryInfo->mapResultTexts.count()==0)

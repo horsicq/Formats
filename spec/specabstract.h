@@ -186,6 +186,7 @@ public:
         RECORD_NAME_HIDEPE,
         RECORD_NAME_HMIMYSPACKER,
         RECORD_NAME_HMIMYSPROTECTOR,
+        RECORD_NAME_HTML,
         RECORD_NAME_HXS,
         RECORD_NAME_IMPORT,
         RECORD_NAME_INNOSETUP,
@@ -511,6 +512,7 @@ public:
         bool bDeepScan;
         bool bResultAsXML;
         bool bSubdirectories;
+        bool bIsImage;
     };
 
     struct UNPACK_OPTIONS

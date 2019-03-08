@@ -874,6 +874,8 @@ void QPE::setDirectories(QList<S_IMAGE_DATA_DIRECTORY> *pListDirectories)
 
 qint64 QPE::getDataDirectoryOffset(quint32 nNumber)
 {
+    qint64 nResult=-1;
+
     S_IMAGE_DATA_DIRECTORY dataResources=getOptionalHeader_DataDirectory(nNumber);
 
     if(dataResources.VirtualAddress)
@@ -881,10 +883,10 @@ qint64 QPE::getDataDirectoryOffset(quint32 nNumber)
         QList<MEMORY_MAP> list=getMemoryMapList();
         qint64 nBaseAddress=getBaseAddress();
 
-        return addressToOffset(&list,dataResources.VirtualAddress+nBaseAddress);
+        nResult=addressToOffset(&list,dataResources.VirtualAddress+nBaseAddress);
     }
 
-    return -1;
+    return nResult;
 }
 
 QByteArray QPE::getDataDirectory(quint32 nNumber)
@@ -1368,7 +1370,15 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
         qint64 nVirtualAddress=nBaseAddress+section.VirtualAddress;
         qint64 nVirtualSize=__ALIGN_UP(section.Misc.VirtualSize,nSectionAlignment);
 
-        nMaxOffset=qMax(nMaxOffset,(qint64)(nFileOffset+nFileSize));
+        if(!isImage())
+        {
+            nMaxOffset=qMax(nMaxOffset,(qint64)(nFileOffset+nFileSize));
+        }
+        else
+        {
+            nMaxOffset=qMax(nMaxOffset,(qint64)(nVirtualAddress+nVirtualSize));
+        }
+
 
         if(!isImage())
         {
