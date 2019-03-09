@@ -182,6 +182,10 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PROTECTOR,        SpecAbstract::RECORD_NAME_SDPROTECTORPRO,               "1.1X",             "",                     "558BEC6AFF68........688888880864A1"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_SIMPLEPACK,                   "1.0",              "",                     "60E8000000005B8D5BFA"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_NAKEDPACKER,                  "1.0",              "",                     "60FC0FB605........85C075"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_RLPACK,                       "",                 "",                     "60E8000000008B2C2483C404"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_RLPACK,                       "",                 "dll",                  "807C2408010F85........60E8000000008B2C2483C404"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_RLP,                          "0.7.4b",           "",                     "68........E8........C3C3"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FAKESIGNATURE,                "",                 "ASPacker 2.12",        "60E803000000E9EB045D4555C3E801"},
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1995.
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1994. All rights re..
 };
@@ -410,6 +414,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_EXESAX:                            sResult=QString("ExeSax");                                      break;
         case RECORD_NAME_EXESHIELD:                         sResult=QString("Exe Shield");                                  break;
         case RECORD_NAME_EXPORT:                            sResult=QString("Export");                                      break;
+        case RECORD_NAME_FAKESIGNATURE:                     sResult=QString("Fake signature");                              break;
         case RECORD_NAME_FASM:                              sResult=QString("FASM");                                        break;
         case RECORD_NAME_FISHNET:                           sResult=QString("FISH .NET");                                   break;
         case RECORD_NAME_FISHPEPACKER:                      sResult=QString("Fish PE Packer");                              break;
@@ -506,6 +511,8 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_RENETPACK:                         sResult=QString("ReNET-pack");                                  break;
         case RECORD_NAME_RESOURCE:                          sResult=QString("Resource");                                    break;
         case RECORD_NAME_REVPROT:                           sResult=QString("REVProt");                                     break;
+        case RECORD_NAME_RLP:                               sResult=QString("RLP");                                         break;
+        case RECORD_NAME_RLPACK:                            sResult=QString("RLPack");                                      break;
         case RECORD_NAME_SDPROTECTORPRO:                    sResult=QString("SDProtector Pro");                             break;
         case RECORD_NAME_SETUPFACTORY:                      sResult=QString("Setup Factory");                               break;
         case RECORD_NAME_SIMBIOZ:                           sResult=QString("SimbiOZ");                                     break;
@@ -1038,15 +1045,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         PE_handle_DongleProtection(pDevice,&result);
         PE_handle_UnknownProtection(pDevice,&result);
 
-        // TODO
-        // Filter
-
-        //
-        //        handle_Rich(&result);
-        //        handle_ENIGMA(pDevice,&result);
-
-        //        fixDetects(&result);
-
+        PE_handle_FixDetects(pDevice,&result);
 
         result.basic_info.listDetects.append(result.mapResultLinkers.values());
         result.basic_info.listDetects.append(result.mapResultCompilers.values());
@@ -1172,12 +1171,18 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualProtect"))
                 {
                     stDetects.insert("kernel32_upx2dll");
-                    if(pPEInfo->listImports.at(0).sName=="KERNEL32.DLL")
+                    if((pPEInfo->listImports.at(0).sName=="KERNEL32.DLL")&&(pPEInfo->listImports.count()==1))
                     {
-                        if(pPEInfo->listImports.count()==1)
-                        {
-                            stDetects.insert("kernel32_quickpacknt");
-                        }
+                        stDetects.insert("kernel32_quickpacknt");
+                    }
+                }
+                else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(2).sName=="GetModuleHandleA"))
+                {
+                    if((pPEInfo->listImports.at(0).sName=="kernel32.dll")&&(pPEInfo->listImports.count()==1))
+                    {
+                        stDetects.insert("kernel32_rlp");
                     }
                 }
                 else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="GetProcAddress")&&
@@ -1224,12 +1229,9 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="LoadLibraryA"))
                 {
-                    if(pPEInfo->listImports.at(0).sName=="kernel32.dll")
+                    if((pPEInfo->listImports.at(0).sName=="kernel32.dll")&&(pPEInfo->listImports.count()==1))
                     {
-                        if(pPEInfo->listImports.count()==1)
-                        {
-                            stDetects.insert("kernel32_sdprotector");
-                        }
+                        stDetects.insert("kernel32_sdprotector");
                     }
                 }
             }
@@ -1436,6 +1438,18 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                     if(pPEInfo->listImports.count()==2)
                     {
                         stDetects.insert("kernel32_pepack");
+                    }
+                }
+                else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="LoadLibraryA")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(1).sName=="GetProcAddress")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(2).sName=="VirtualAlloc")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualFree")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(4).sName=="VirtualProtect")&&
+                        (pPEInfo->listImports.at(0).listPositions.at(5).sName=="GetModuleHandleA"))
+                {
+                    if((pPEInfo->listImports.count()==1)&&(pPEInfo->listImports.at(0).sName=="kernel32.dll"))
+                    {
+                        stDetects.insert("kernel32_rlpack");
                     }
                 }
             }
@@ -1833,6 +1847,11 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
         pPEInfo->mapImportDetects.insert(RECORD_NAME_VPACKER,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_VPACKER,"0.02.10","",0));
     }
 
+    if(stDetects.contains("kernel32_rlp"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_RLP,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_RLP,"0.7.4b","",0));
+    }
+
     if(stDetects.contains("kernel32_kkrunchy"))
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_KKRUNCHY,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_KKRUNCHY,"","",0));
@@ -1869,6 +1888,11 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     if(stDetects.contains("kernel32_32lite"))
     {
         pPEInfo->mapImportDetects.insert(RECORD_NAME_32LITE,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_32LITE,"0.03a","",0));
+    }
+
+    if(stDetects.contains("kernel32_rlpack"))
+    {
+        pPEInfo->mapImportDetects.insert(RECORD_NAME_RLPACK,getScansStruct(0,RECORD_FILETYPE_PE32,RECORD_TYPE_PACKER,RECORD_NAME_RLPACK,"1.16","",0));
     }
 
     if(stDetects.contains("kernel32_fishpepacker_a"))
@@ -2556,6 +2580,16 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     }
                 }
 
+                // RLP
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_RLP))
+                {
+                    if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_RLP))
+                    {
+                        SpecAbstract::_SCANS_STRUCT ss=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_RLP);
+                        pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                    }
+                }
+
                 // KKrunchy
                 if(pPEInfo->mapImportDetects.contains(RECORD_NAME_KKRUNCHY))
                 {
@@ -2610,6 +2644,28 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                         // TODO compare entryPoint and import sections
                         SpecAbstract::_SCANS_STRUCT ss=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_32LITE);
                         pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                    }
+                }
+
+                // RLPack
+                if(pPEInfo->mapImportDetects.contains(RECORD_NAME_RLPACK))
+                {
+                    if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_RLPACK))
+                    {
+                        SpecAbstract::_SCANS_STRUCT ss=pPEInfo->mapImportDetects.value(RECORD_NAME_RLPACK);
+                        pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                    }
+                    else if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_FAKESIGNATURE))
+                    {
+                        if(pPEInfo->listSectionHeaders.count()>=2)
+                        {
+                            if(pPEInfo->listSectionHeaders.at(0).SizeOfRawData==0)
+                            {
+                                SpecAbstract::_SCANS_STRUCT ss=pPEInfo->mapImportDetects.value(RECORD_NAME_RLPACK);
+                                ss.sInfo=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_FAKESIGNATURE).sInfo;
+                                pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                            }
+                        }
                     }
                 }
 
@@ -5563,6 +5619,16 @@ void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice, SpecAbstract:
                 }
             }
         }
+    }
+}
+
+void SpecAbstract::PE_handle_FixDetects(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+{
+    if(pPEInfo->mapResultPackers.contains(RECORD_NAME_RLPACK))
+    {
+        pPEInfo->mapResultLinkers.remove(RECORD_NAME_MICROSOFTLINKER);
+        pPEInfo->mapResultCompilers.remove(RECORD_NAME_MASM);
+        pPEInfo->mapResultTools.remove(RECORD_NAME_MASM32);
     }
 }
 

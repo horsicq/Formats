@@ -163,6 +163,7 @@ public:
         RECORD_NAME_EXESAX,
         RECORD_NAME_EXESHIELD,
         RECORD_NAME_EXPORT,
+        RECORD_NAME_FAKESIGNATURE,
         RECORD_NAME_FASM,
         RECORD_NAME_FISHNET,
         RECORD_NAME_FISHPEPACKER,
@@ -259,6 +260,8 @@ public:
         RECORD_NAME_RENETPACK,
         RECORD_NAME_RESOURCE,
         RECORD_NAME_REVPROT,
+        RECORD_NAME_RLP,
+        RECORD_NAME_RLPACK,
         RECORD_NAME_SDPROTECTORPRO,
         RECORD_NAME_SETUPFACTORY,
         RECORD_NAME_SIMBIOZ,
@@ -641,6 +644,9 @@ public:
     static void PE_handle_DongleProtection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
     static void PE_handle_UnknownProtection(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+
+    static void PE_handle_FixDetects(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
+
 
     static void Binary_handle_Texts(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_Archives(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
