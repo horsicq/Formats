@@ -20,7 +20,7 @@
 //
 #include "qmsdos.h"
 
-QMSDOS::QMSDOS(QIODevice *__pDevice,bool bIsImage): QBinary(__pDevice,bIsImage)
+QMSDOS::QMSDOS(QIODevice *__pDevice, bool bIsImage, qint64 nImageAddress): QBinary(__pDevice,bIsImage,nImageAddress)
 {
 }
 

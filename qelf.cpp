@@ -20,7 +20,7 @@
 //
 #include "qelf.h"
 
-QELF::QELF(QIODevice *__pDevice,bool bIsImage): QBinary(__pDevice,bIsImage)
+QELF::QELF(QIODevice *__pDevice,bool bIsImage,qint64 nImageAddress): QBinary(__pDevice,bIsImage,nImageAddress)
 {
 }
 

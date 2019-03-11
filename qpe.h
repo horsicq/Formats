@@ -237,7 +237,7 @@ public:
         QList<QString> listUnicodeStrings;
     };
 
-    explicit QPE(QIODevice *__pDevice=0,bool bIsImage=false);
+    explicit QPE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
     virtual bool isValid();
     bool is64();
 

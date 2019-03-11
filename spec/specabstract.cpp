@@ -250,6 +250,7 @@ SpecAbstract::STRING_RECORD _TEXT_records[]={
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                         "",             "header",              "#ifndef (\\w+).*\\s+#define \\1"},
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_PYTHON,                       "",             "",                    "import"},
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_HTML,                         "",             "",                    "^<(!DOCTYPE )?html"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_XML,                          "",             "",                    "^<\\?xml"},
 };
 
 SpecAbstract::SpecAbstract(QObject *parent)
@@ -574,6 +575,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_WXWIDGETS:                         sResult=QString("wxWidgets");                                   break;
         case RECORD_NAME_XENOCODEPOSTBUILD:                 sResult=QString("Xenocode Postbuild");                          break;
         case RECORD_NAME_XCOMP:                             sResult=QString("XComp");                                       break;
+        case RECORD_NAME_XML:                               sResult=QString("XML");                                         break;
         case RECORD_NAME_XPACK:                             sResult=QString("XPack");                                       break;
         case RECORD_NAME_YANO:                              sResult=QString("Yano");                                        break;
         case RECORD_NAME_YODASCRYPTER:                      sResult=QString("Yoda's Crypter");                              break;
@@ -5729,6 +5731,13 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice, SpecAbstract::BINARYI
         else if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_HTML))
         {
             _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_HTML);
+            pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+        }
+        else if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_XML))
+        {
+            _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_XML);
+            ss.sVersion=QBinary::regExp("version=\"(.*?)\"",pBinaryInfo->sHeaderText,1);
+
             pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
         }
 

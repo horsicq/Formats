@@ -20,7 +20,7 @@
 //
 #include "qpe.h"
 
-QPE::QPE(QIODevice *__pDevice,bool bIsImage): QMSDOS(__pDevice,bIsImage)
+QPE::QPE(QIODevice *__pDevice, bool bIsImage, qint64 nImageAddress): QMSDOS(__pDevice,bIsImage,nImageAddress)
 {
 }
 
@@ -881,7 +881,7 @@ qint64 QPE::getDataDirectoryOffset(quint32 nNumber)
     if(dataResources.VirtualAddress)
     {
         QList<MEMORY_MAP> list=getMemoryMapList();
-        qint64 nBaseAddress=getBaseAddress();
+        qint64 nBaseAddress=_getBaseAddress();
 
         nResult=addressToOffset(&list,dataResources.VirtualAddress+nBaseAddress);
     }
@@ -897,7 +897,7 @@ QByteArray QPE::getDataDirectory(quint32 nNumber)
     if(dataDirectory.VirtualAddress)
     {
         QList<MEMORY_MAP> list=getMemoryMapList();
-        qint64 nBaseAddress=getBaseAddress();
+        qint64 nBaseAddress=_getBaseAddress();
 
         qint64 nOffset=addressToOffset(&list,dataDirectory.VirtualAddress+nBaseAddress);
 
@@ -1459,12 +1459,12 @@ void QPE::setBaseAddress(qint64 nBaseAddress)
 
 qint64 QPE::getEntryPointOffset()
 {
-    return addressToOffset(getBaseAddress()+getOptionalHeader_AddressOfEntryPoint());
+    return addressToOffset(_getBaseAddress()+getOptionalHeader_AddressOfEntryPoint());
 }
 
 void QPE::setEntryPointOffset(qint64 nEntryPointOffset)
 {
-    setOptionalHeader_AddressOfEntryPoint(offsetToAddress(nEntryPointOffset)-getBaseAddress());
+    setOptionalHeader_AddressOfEntryPoint(offsetToAddress(nEntryPointOffset)-_getBaseAddress());
 }
 
 QList<QPE::IMPORT_RECORD> QPE::getImportRecords()
@@ -1476,7 +1476,7 @@ QList<QPE::IMPORT_RECORD> QPE::getImportRecords()
     if(nImportOffset!=-1)
     {
         QList<MEMORY_MAP> listMemoryMap=getMemoryMapList();
-        qint64 nBaseAddress=getBaseAddress();
+        qint64 nBaseAddress=_getBaseAddress();
         bool bIs64=is64();
 
         while(true)
@@ -1633,7 +1633,7 @@ QList<S_IMAGE_IMPORT_DESCRIPTOR> QPE::getImportDescriptors()
     if(nImportOffset!=-1)
     {
         QList<MEMORY_MAP> listMemoryMap=getMemoryMapList();
-        qint64 nBaseAddress=getBaseAddress();
+        qint64 nBaseAddress=_getBaseAddress();
 
         while(true)
         {
@@ -1680,7 +1680,7 @@ QList<S_IMAGE_IMPORT_DESCRIPTOR_EX> QPE::getImportDescriptorsEx()
     if(nImportOffset!=-1)
     {
         QList<MEMORY_MAP> listMemoryMap=getMemoryMapList();
-        qint64 nBaseAddress=getBaseAddress();
+        qint64 nBaseAddress=_getBaseAddress();
         //        bool bIs64=is64();
 
         while(true)
@@ -1760,7 +1760,7 @@ QList<QPE::IMPORT_HEADER> QPE::getImports()
 
     S_IMAGE_DATA_DIRECTORY dataResources=getOptionalHeader_DataDirectory(S_IMAGE_DIRECTORY_ENTRY_IMPORT);
     QList<MEMORY_MAP> listMemoryMap=getMemoryMapList();
-    qint64 nBaseAddress=getBaseAddress();
+    qint64 nBaseAddress=_getBaseAddress();
     qint64 nImportOffset=-1;
     qint64 nImportOffsetTest=-1;
 
@@ -1953,7 +1953,7 @@ QList<QPE::IMPORT_POSITION> QPE::getImportPositions(int nIndex)
     if(nImportOffset!=-1)
     {
         QList<MEMORY_MAP> listMemoryMap=getMemoryMapList();
-        qint64 nBaseAddress=getBaseAddress();
+        qint64 nBaseAddress=_getBaseAddress();
         bool bIs64=is64();
 
         int _nIndex=0;
@@ -2270,7 +2270,7 @@ bool QPE::setImports(QIODevice *pDevice, QList<QPE::IMPORT_HEADER> *pListHeaders
             if(addSection(pDevice,&ish,baImport.data(),baImport.size()))
             {
                 QList<MEMORY_MAP> listMP=pe.getMemoryMapList();
-                qint64 nBaseAddress=pe.getBaseAddress();
+                qint64 nBaseAddress=pe._getBaseAddress();
 
                 S_IMAGE_DATA_DIRECTORY iddIAT={};
                 iddIAT.VirtualAddress=ish.VirtualAddress;
@@ -2365,7 +2365,7 @@ QPE::RESOURCE_HEADER QPE::getResourceHeader()
     if(nResourceOffset!=-1)
     {
         QList<MEMORY_MAP> memoryMap=getMemoryMapList();
-        qint64 nBaseAddress=getBaseAddress();
+        qint64 nBaseAddress=_getBaseAddress();
 
         qint64 nOffset=nResourceOffset;
 
@@ -2402,7 +2402,7 @@ QList<QPE::RESOURCE_RECORD> QPE::getResources()
     if(nResourceOffset!=-1)
     {
         QList<MEMORY_MAP> memoryMap=getMemoryMapList();
-        qint64 nBaseAddress=getBaseAddress();
+        qint64 nBaseAddress=_getBaseAddress();
         RESOURCE_RECORD record={};
 
         qint64 nOffsetLevel[3]={};
@@ -2766,7 +2766,7 @@ QPE::EXPORT_HEADER QPE::getExport()
         read_array(nExportOffset,(char *)&result.directory,sizeof(S_IMAGE_EXPORT_DIRECTORY));
 
         QList<MEMORY_MAP> listMemoryMap=getMemoryMapList();
-        qint64 nBaseAddress=getBaseAddress();
+        qint64 nBaseAddress=_getBaseAddress();
 
         qint64 nNameOffset=addressToOffset(&listMemoryMap,result.directory.Name+nBaseAddress);
 
@@ -3886,7 +3886,7 @@ QPE::CLI_INFO QPE::getCliInfo(bool bFindHidden)
     if(isNETPresent()||bFindHidden)
     {
         QList<MEMORY_MAP> listMM=getMemoryMapList();
-        qint64 nBaseAddress=getBaseAddress();
+        qint64 nBaseAddress=_getBaseAddress();
 
         qint64 nCLIHeaderOffset=-1;
         if(isNETPresent())
@@ -4245,7 +4245,7 @@ int QPE::getEntryPointSection()
 
     if(nAddressOfEntryPoint)
     {
-        return addressToSection(getBaseAddress()+nAddressOfEntryPoint);
+        return addressToSection(_getBaseAddress()+nAddressOfEntryPoint);
     }
 
     return -1;
@@ -4257,7 +4257,7 @@ int QPE::getImportSection()
 
     if(nAddressOfImport)
     {
-        return addressToSection(getBaseAddress()+nAddressOfImport);
+        return addressToSection(_getBaseAddress()+nAddressOfImport);
     }
 
     return -1;
@@ -4269,7 +4269,7 @@ int QPE::getExportSection()
 
     if(nAddressOfExport)
     {
-        return addressToSection(getBaseAddress()+nAddressOfExport);
+        return addressToSection(_getBaseAddress()+nAddressOfExport);
     }
 
     return -1;
@@ -4281,7 +4281,7 @@ int QPE::getTLSSection()
 
     if(nAddressOfTLS)
     {
-        return addressToSection(getBaseAddress()+nAddressOfTLS);
+        return addressToSection(_getBaseAddress()+nAddressOfTLS);
     }
 
     return -1;
@@ -4293,7 +4293,7 @@ int QPE::getResourcesSection()
 
     if(nAddressOfResources)
     {
-        return addressToSection(getBaseAddress()+nAddressOfResources);
+        return addressToSection(_getBaseAddress()+nAddressOfResources);
     }
 
     return -1;
@@ -4305,7 +4305,7 @@ int QPE::getRelocsSection()
 
     if(nAddressOfRelocs)
     {
-        return addressToSection(getBaseAddress()+nAddressOfRelocs);
+        return addressToSection(_getBaseAddress()+nAddressOfRelocs);
     }
 
     return -1;
@@ -4334,7 +4334,7 @@ int QPE::getNormalCodeSection()
                 (nSectionCharacteristics==0x60000020)&&
                 (listSections.at(i).SizeOfRawData))
         {
-            nResult=addressToSection(getBaseAddress()+listSections.at(i).VirtualAddress);
+            nResult=addressToSection(_getBaseAddress()+listSections.at(i).VirtualAddress);
             break;
         }
     }
@@ -4345,7 +4345,7 @@ int QPE::getNormalCodeSection()
         {
             if(listSections.at(0).SizeOfRawData)
             {
-                nResult=addressToSection(getBaseAddress()+listSections.at(0).VirtualAddress);
+                nResult=addressToSection(_getBaseAddress()+listSections.at(0).VirtualAddress);
             }
         }
     }
@@ -4379,7 +4379,7 @@ int QPE::getNormalDataSection()
                 (listSections.at(i).SizeOfRawData)&&
                 (nImportSection!=i))
         {
-            nResult=addressToSection(getBaseAddress()+listSections.at(i).VirtualAddress);
+            nResult=addressToSection(_getBaseAddress()+listSections.at(i).VirtualAddress);
             break;
         }
     }
@@ -4393,7 +4393,7 @@ int QPE::getNormalDataSection()
                     (listSections.at(i).Characteristics!=0x60000020)&&
                     (listSections.at(i).Characteristics!=0x40000040))
             {
-                nResult=addressToSection(getBaseAddress()+listSections.at(i).VirtualAddress);
+                nResult=addressToSection(_getBaseAddress()+listSections.at(i).VirtualAddress);
                 break;
             }
         }
@@ -4425,7 +4425,7 @@ int QPE::getConstDataSection()
                 (nSectionCharacteristics==0x40000040)&&
                 (listSections.at(i).SizeOfRawData))
         {
-            nResult=addressToSection(getBaseAddress()+listSections.at(i).VirtualAddress);
+            nResult=addressToSection(_getBaseAddress()+listSections.at(i).VirtualAddress);
             break;
         }
     }
@@ -5010,7 +5010,7 @@ bool QPE::addRelocsSection(QIODevice *pDevice, QList<qint64> *pList)
         {
             // Check valid
             QList<MEMORY_MAP> listMM=pe.getMemoryMapList();
-            qint64 nBaseAddress=pe.getBaseAddress();
+            qint64 nBaseAddress=pe._getBaseAddress();
             QList<qint64> listRVAs;
 
             for(int i=0; i<pList->count(); i++)

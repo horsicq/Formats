@@ -121,7 +121,7 @@ private:
     };
 
 public:
-    explicit QBinary(QIODevice *__pDevice=0,bool bIsImage=false); // mb TODO parent for signals/slot
+    explicit QBinary(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1); // mb TODO parent for signals/slot
     void setData(QIODevice *__pDevice);
     qint64 getSize();
 
@@ -238,6 +238,11 @@ public:
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     qint64 getEntryPointAddress();
 
+    qint64 getImageAddress();
+    void setImageAddress(qint64 nValue);
+
+    qint64 _getBaseAddress();
+
     bool isImage();
     void setIsImage(bool value);
 
@@ -341,6 +346,7 @@ private:
     bool bIsImage;
     qint64 __nBaseAddress;
     qint64 __nEntryPointOffset;
+    qint64 __nImageAddress;
 };
 
 #endif // QBINARY_H

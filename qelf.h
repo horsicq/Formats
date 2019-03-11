@@ -36,7 +36,7 @@ class QELF : public QBinary
     };
 
 public:
-    QELF(QIODevice *__pDevice=0,bool bIsImage=false);
+    QELF(QIODevice *__pDevice=0,bool bIsImage=false,qint64 nImageAddress=-1);
     ~QELF();
 
     virtual bool bIsValid();

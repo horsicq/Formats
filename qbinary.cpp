@@ -20,11 +20,12 @@
 //
 #include "qbinary.h"
 
-QBinary::QBinary(QIODevice *__pDevice,bool bIsImage)
+QBinary::QBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageAddress)
 {
     setData(__pDevice);
     setIsImage(bIsImage);
     setBaseAddress(0);
+    setImageAddress(nImageAddress);
     setEntryPointOffset(0);
 }
 
@@ -1342,7 +1343,7 @@ QList<QBinary::MEMORY_MAP> QBinary::getMemoryMapList()
     QList<MEMORY_MAP> listMemoryMap;
 
     MEMORY_MAP record={};
-    record.nAddress=getBaseAddress();
+    record.nAddress=_getBaseAddress();
     record.nOffset=0;
     record.nSize=getSize();
 
@@ -1463,6 +1464,33 @@ void QBinary::setEntryPointOffset(qint64 nEntryPointOffset)
 qint64 QBinary::getEntryPointAddress()
 {
     return offsetToAddress(getEntryPointOffset());
+}
+
+qint64 QBinary::getImageAddress()
+{
+    return this->__nImageAddress;
+}
+
+void QBinary::setImageAddress(qint64 nValue)
+{
+    this->__nImageAddress=nValue;
+}
+
+qint64 QBinary::_getBaseAddress()
+{
+    qint64 nResult=0;
+
+    qint64 nImageAddress=getImageAddress();
+    if(isImage()&&(nImageAddress!=-1))
+    {
+        nResult=nImageAddress;
+    }
+    else
+    {
+        nResult=getBaseAddress();
+    }
+
+    return nResult;
 }
 
 bool QBinary::compareEntryPoint(QString sSignature, qint64 nOffset)
