@@ -74,7 +74,7 @@ SpecAbstract::SIGNATURE_RECORD _PE_header_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_LINKER,           SpecAbstract::RECORD_NAME_MICROSOFTLINKER,              "",             "patched",              "'MZ'90000300000004000000FFFF0000B800000000000000400000000000000000000000000000000000000000000000000000000000000000000000....000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_COMPILER,         SpecAbstract::RECORD_NAME_FASM,                         "",             "",                     "'MZ'80000100000004001000FFFF00004001000000000000400000000000000000000000000000000000000000000000000000000000000000000000800000000E1FBA0E00B409CD21B8014CCD21'This program cannot be run in DOS mode.\r\n$'0000000000000000'PE'0000"}, // TODO patched
     {0, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_HXS,                          "",             "",                     "'MZ'0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000504500004C010200000000000000000000000000E00001200B010000000000000000000000000000000000000000000000000000000040000000000000"},
-    {1, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_LINKER,           SpecAbstract::RECORD_NAME_NOSTUBLINKER,                 "",             "",                     "'MZ'90000300000004000000FFFF0000B8000000000000004000000000000000000000000000000000000000000000000000000000000000000000004000000050450000"},
+    {1, SpecAbstract::RECORD_FILETYPE_PE,       SpecAbstract::RECORD_TYPE_LINKER,           SpecAbstract::RECORD_NAME_NOSTUBLINKER,                 "",             "",                     "'MZ'....................................................................................................................4000000050450000"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_WINUPACK,                     "0.1X-0.24",    "",                     "'MZKERNEL32.DLL'0000'PE'0000........'UpackByDwing'"},
     {1, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_WINUPACK,                     "0.24-0.32",    "",                     "'MZKERNEL32.DLL'0000'LoadLibraryA'00000000'GetProcAddress'............................40000000"},
     {2, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_WINUPACK,                     "0.33",         "",                     "'MZLoadLibraryA'0000'PE'0000........'KERNEL32'"},
@@ -1527,7 +1527,7 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                 {
                     stDetects.insert("kernel32_pecompact5");
                 }
-                else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="")&&
+                else if((pPEInfo->listImports.at(0).listPositions.at(0).sName=="GetModuleHandleA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(1).sName=="LoadLibraryA")&&
                         (pPEInfo->listImports.at(0).listPositions.at(2).sName=="GetProcAddress")&&
                         (pPEInfo->listImports.at(0).listPositions.at(3).sName=="VirtualAlloc")&&
