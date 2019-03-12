@@ -249,7 +249,7 @@ SpecAbstract::STRING_RECORD _TEXT_records[]={
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                         "",             "",                    "#include [\"<].*?[>\"]"},
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                         "",             "header",              "#ifndef (\\w+).*\\s+#define \\1"},
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_PYTHON,                       "",             "",                    "import"},
-    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_HTML,                         "",             "",                    "^<(!DOCTYPE )?html"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_HTML,                         "",             "",                    "^<(!DOCTYPE )?[Hh][Tt][Mm][Ll]"},
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_XML,                          "",             "",                    "^<\\?xml"},
 };
 
@@ -5682,6 +5682,8 @@ void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice, SpecAbstract:
 
 void SpecAbstract::PE_handle_FixDetects(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
+    Q_UNUSED(pDevice);
+
     if(pPEInfo->mapResultPackers.contains(RECORD_NAME_RLPACK))
     {
         pPEInfo->mapResultLinkers.remove(RECORD_NAME_MICROSOFTLINKER);
@@ -5736,7 +5738,7 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice, SpecAbstract::BINARYI
         else if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_XML))
         {
             _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_XML);
-            ss.sVersion=QBinary::regExp("version=\"(.*?)\"",pBinaryInfo->sHeaderText,1);
+            ss.sVersion=QBinary::regExp("version=['\"](.*?)['\"]",pBinaryInfo->sHeaderText,1);
 
             pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
         }
