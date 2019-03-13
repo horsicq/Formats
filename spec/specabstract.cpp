@@ -3423,6 +3423,19 @@ void SpecAbstract::PE_handle_Petite(QIODevice *pDevice, SpecAbstract::PEINFO_STR
                                 bKernel32=true;
                             }
                         }
+                        if(pPEInfo->listImports.at(i).listPositions.count()==6)
+                        {
+                            if(     (pPEInfo->listImports.at(i).listPositions.at(0).sName=="ExitProcess")&&
+                                    (pPEInfo->listImports.at(i).listPositions.at(1).sName=="GetModuleHandleA")&&
+                                    (pPEInfo->listImports.at(i).listPositions.at(2).sName=="GetProcAddress")&&
+                                    (pPEInfo->listImports.at(i).listPositions.at(3).sName=="VirtualProtect")&&
+                                    (pPEInfo->listImports.at(i).listPositions.at(4).sName=="GlobalAlloc")&&
+                                    (pPEInfo->listImports.at(i).listPositions.at(5).sName=="GlobalFree"))
+                            {
+                                sVersion="2.3";// DLL only?? // TODO Check
+                                bKernel32=true;
+                            }
+                        }
                         else if(pPEInfo->listImports.at(i).listPositions.count()==5)
                         {
                             if(     (pPEInfo->listImports.at(i).listPositions.at(0).sName=="ExitProcess")&&
