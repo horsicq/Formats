@@ -1311,7 +1311,8 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
     quint32 nNumberOfSections=qMin((int)getFileHeader_NumberOfSections(),100);
     quint32 nFileAlignment=getOptionalHeader_FileAlignment();
     quint32 nSectionAlignment=getOptionalHeader_SectionAlignment();
-    qint64 nBaseAddress=getOptionalHeader_ImageBase();
+    //qint64 nBaseAddress=getOptionalHeader_ImageBase();
+    qint64 nBaseAddress=_getBaseAddress();
     quint32 nHeadersSize=getOptionalHeader_SizeOfHeaders(); // mb TODO calc for UPX
 
     if(nFileAlignment==nSectionAlignment)
@@ -1328,8 +1329,10 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
     {
         recordHeaderRaw.bIsHeader=true;
         recordHeaderRaw.nAddress=nBaseAddress;
+        recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
         recordHeaderRaw.nOffset=0;
         recordHeaderRaw.nSize=nHeadersSize;
+        recordHeaderRaw.nSection=-1;
 
         list.append(recordHeaderRaw);
 
@@ -1339,8 +1342,10 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
             record.bIsHeader=true;
 
             record.nAddress=nBaseAddress+nHeadersSize;
+            recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
             record.nOffset=-1;
             record.nSize=nVirtualSizeofHeaders-nHeadersSize;
+            recordHeaderRaw.nSection=-1;
 
             list.append(record);
         }
@@ -1349,8 +1354,10 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
     {
         recordHeaderRaw.bIsHeader=true;
         recordHeaderRaw.nAddress=nBaseAddress;
+        recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
         recordHeaderRaw.nOffset=0;
         recordHeaderRaw.nSize=nVirtualSizeofHeaders;
+        recordHeaderRaw.nSection=-1;
 
         list.append(recordHeaderRaw);
     }
@@ -1388,7 +1395,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
 
                 record.bIsSection=true;
                 record.nSection=i;
-
+                record.segment=ADDRESS_SEGMENT_FLAT;
                 record.nAddress=nVirtualAddress;
                 record.nOffset=nFileOffset;
                 record.nSize=nFileSize;
@@ -1402,7 +1409,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
 
                 record.bIsSection=true;
                 record.nSection=i;
-
+                record.segment=ADDRESS_SEGMENT_FLAT;
                 record.nAddress=nVirtualAddress+nFileSize;
                 record.nOffset=-1;
                 record.nSize=nVirtualSize-nFileSize;
@@ -1416,7 +1423,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
 
             record.bIsSection=true;
             record.nSection=i;
-
+            record.segment=ADDRESS_SEGMENT_FLAT;
             record.nAddress=nVirtualAddress;
             record.nOffset=nVirtualAddress-nBaseAddress;
             record.nSize=nVirtualSize;
@@ -1431,8 +1438,10 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
     record.bIsOvelay=true;
 
     record.nAddress=-1;
+    record.segment=ADDRESS_SEGMENT_FLAT;
     record.nOffset=nMaxOffset;
     record.nSize=0;
+    record.nSection=-1;
 
     if(!isImage())
     {
@@ -1449,7 +1458,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
 
 qint64 QPE::getBaseAddress()
 {
-    return getOptionalHeader_ImageBase();
+    return (qint64)getOptionalHeader_ImageBase();
 }
 
 void QPE::setBaseAddress(qint64 nBaseAddress)

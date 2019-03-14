@@ -174,3 +174,94 @@ void QMSDOS::set_e_lfanew(quint32 value)
 {
     write_uint32(offsetof(S_IMAGE_DOS_HEADEREX,e_lfanew),value);
 }
+
+quint16 QMSDOS::get_e_magic()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_magic));
+}
+
+quint16 QMSDOS::get_e_cblp()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cblp));
+}
+
+quint16 QMSDOS::get_e_cp()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cp));
+}
+
+quint16 QMSDOS::get_e_crlc()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_crlc));
+}
+
+quint16 QMSDOS::get_e_cparhdr()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cparhdr));
+}
+
+quint16 QMSDOS::get_e_minalloc()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_minalloc));
+}
+
+quint16 QMSDOS::get_e_maxalloc()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_maxalloc));
+}
+
+quint16 QMSDOS::get_e_ss()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ss));
+}
+
+quint16 QMSDOS::get_e_sp()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_sp));
+}
+
+quint16 QMSDOS::get_e_csum()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_csum));
+}
+
+quint16 QMSDOS::get_e_ip()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ip));
+}
+
+quint16 QMSDOS::get_e_cs()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cs));
+}
+
+quint16 QMSDOS::get_e_lfarlc()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_lfarlc));
+}
+
+quint16 QMSDOS::get_e_ovno()
+{
+    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ovno));
+}
+
+QList<QBinary::MEMORY_MAP> QMSDOS::getMemoryMapList()
+{
+    QList<MEMORY_MAP> listResult;
+
+    qint64 nHeaderSize=get_e_cparhdr()*16;
+    qint64 nBaseAddress=_getBaseAddress();
+
+    MEMORY_MAP recordHeader={};
+    recordHeader.nSize=nHeaderSize;
+    recordHeader.nOffset=0;
+//    recordHeader.nAddress=-1;
+//    recordHeader.nSection=-1;
+
+
+    MEMORY_MAP recordData={};
+    MEMORY_MAP recordCode={};
+    MEMORY_MAP recordOverlay={};
+
+    return listResult;
+}

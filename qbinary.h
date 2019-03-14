@@ -74,10 +74,19 @@ public:
         qint64 nSize;
     };
 
+    enum ADDRESS_SEGMENT
+    {
+        ADDRESS_SEGMENT_UNKNOWN=-1,
+        ADDRESS_SEGMENT_FLAT=0,
+        ADDRESS_SEGMENT_CODE,
+        ADDRESS_SEGMENT_DATA
+    };
+
     struct MEMORY_MAP
     {
         qint64 nOffset;
         qint64 nAddress;
+        ADDRESS_SEGMENT segment;
         qint64 nSize;
         bool bIsHeader;
         bool bIsSection;
@@ -217,19 +226,19 @@ public:
     static bool compareMemory(char *pMemory1,const char *pMemory2,qint64 nSize);
 
     bool isOffsetValid(qint64 nOffset);
-    bool isAddressValid(qint64 nAddress);
+    bool isAddressValid(qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
 
-    qint64 offsetToAddress(qint64 nOffset);
-    qint64 addressToOffset(qint64 nAddress);
+    qint64 offsetToAddress(qint64 nOffset,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
+    qint64 addressToOffset(qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
 
     static bool isOffsetValid(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
-    static bool isAddressValid(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
+    static bool isAddressValid(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
 
-    static qint64 offsetToAddress(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
-    static qint64 addressToOffset(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
+    static qint64 offsetToAddress(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
+    static qint64 addressToOffset(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
 
     static MEMORY_MAP getOffsetMemoryMap(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
-    static MEMORY_MAP getAddressMemoryMap(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
+    static MEMORY_MAP getAddressMemoryMap(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
 
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getBaseAddress();
@@ -251,7 +260,7 @@ public:
     bool compareSignature(QString sSignature,qint64 nOffset=0);
     static bool _compareByteArrayWithSignature(QByteArray baData,QString sSignature);
     static QString _createSignature(QString sSignature1,QString sSignature2);
-    bool compareSignatureOnAddress(QString sSignature,qint64 nAddress);
+    bool compareSignatureOnAddress(QString sSignature,qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
     bool compareEntryPoint(QString sSignature,qint64 nOffset=0);
     bool moveMemory(qint64 nSourceOffset,qint64 nDestOffset,qint64 nSize);
 
@@ -283,7 +292,6 @@ public:
     static quint32 _ror32(quint32 nValue,quint32 nShift);
     static quint32 _rol32(quint32 nValue,quint32 nShift);
     static quint32 getCRC32(QString sString);
-
 
     QIODevice *getDevice();
 

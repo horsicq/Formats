@@ -1215,25 +1215,25 @@ bool QBinary::isOffsetValid(qint64 nOffset)
     return isOffsetValid(&list,nOffset);
 }
 
-bool QBinary::isAddressValid(qint64 nAddress)
+bool QBinary::isAddressValid(qint64 nAddress,ADDRESS_SEGMENT segment)
 {
     QList<MEMORY_MAP> list=getMemoryMapList();
 
-    return isAddressValid(&list,nAddress);
+    return isAddressValid(&list,nAddress,segment);
 }
 
-qint64 QBinary::offsetToAddress(qint64 nOffset)
+qint64 QBinary::offsetToAddress(qint64 nOffset,ADDRESS_SEGMENT segment)
 {
     QList<MEMORY_MAP> list=getMemoryMapList();
 
-    return offsetToAddress(&list,nOffset);
+    return offsetToAddress(&list,nOffset,segment);
 }
 
-qint64 QBinary::addressToOffset(qint64 nAddress)
+qint64 QBinary::addressToOffset(qint64 nAddress,ADDRESS_SEGMENT segment)
 {
     QList<MEMORY_MAP> list=getMemoryMapList();
 
-    return addressToOffset(&list,nAddress);
+    return addressToOffset(&list,nAddress,segment);
 }
 
 bool QBinary::isOffsetValid(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nOffset)
@@ -1252,11 +1252,11 @@ bool QBinary::isOffsetValid(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nOffs
     return false;
 }
 
-bool QBinary::isAddressValid(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress)
+bool QBinary::isAddressValid(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress, ADDRESS_SEGMENT segment)
 {
     for(int i=0; i<pMemoryMap->count(); i++)
     {
-        if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nAddress!=-1))
+        if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nAddress!=-1)&&(pMemoryMap->at(i).segment==segment))
         {
             if((pMemoryMap->at(i).nAddress<=nAddress)&&(nAddress<pMemoryMap->at(i).nAddress+pMemoryMap->at(i).nSize))
             {
@@ -1268,11 +1268,11 @@ bool QBinary::isAddressValid(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nAdd
     return false;
 }
 
-qint64 QBinary::offsetToAddress(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nOffset)
+qint64 QBinary::offsetToAddress(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nOffset, ADDRESS_SEGMENT segment)
 {
     for(int i=0; i<pMemoryMap->count(); i++)
     {
-        if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nOffset!=-1)&&(pMemoryMap->at(i).nAddress!=-1))
+        if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nOffset!=-1)&&(pMemoryMap->at(i).nAddress!=-1)&&(pMemoryMap->at(i).segment==segment))
         {
             if((pMemoryMap->at(i).nOffset<=nOffset)&&(nOffset<pMemoryMap->at(i).nOffset+pMemoryMap->at(i).nSize))
             {
@@ -1284,11 +1284,11 @@ qint64 QBinary::offsetToAddress(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 n
     return -1;
 }
 
-qint64 QBinary::addressToOffset(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress)
+qint64 QBinary::addressToOffset(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress, ADDRESS_SEGMENT segment)
 {
     for(int i=0; i<pMemoryMap->count(); i++)
     {
-        if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nAddress!=-1)&&(pMemoryMap->at(i).nOffset!=-1))
+        if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nAddress!=-1)&&(pMemoryMap->at(i).nOffset!=-1)&&(pMemoryMap->at(i).segment==segment))
         {
             if((pMemoryMap->at(i).nAddress<=nAddress)&&(nAddress<pMemoryMap->at(i).nAddress+pMemoryMap->at(i).nSize))
             {
@@ -1319,13 +1319,13 @@ QBinary::MEMORY_MAP QBinary::getOffsetMemoryMap(QList<QBinary::MEMORY_MAP> *pMem
     return result;
 }
 
-QBinary::MEMORY_MAP QBinary::getAddressMemoryMap(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress)
+QBinary::MEMORY_MAP QBinary::getAddressMemoryMap(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress, ADDRESS_SEGMENT segment)
 {
     MEMORY_MAP result={};
 
     for(int i=0; i<pMemoryMap->count(); i++)
     {
-        if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nAddress!=-1))
+        if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nAddress!=-1)&&(pMemoryMap->at(i).segment==segment))
         {
             if((pMemoryMap->at(i).nAddress<=nAddress)&&(nAddress<pMemoryMap->at(i).nAddress+pMemoryMap->at(i).nSize))
             {
@@ -1344,6 +1344,7 @@ QList<QBinary::MEMORY_MAP> QBinary::getMemoryMapList()
 
     MEMORY_MAP record={};
     record.nAddress=_getBaseAddress();
+    record.segment=ADDRESS_SEGMENT_FLAT;
     record.nOffset=0;
     record.nSize=getSize();
 
@@ -1439,9 +1440,9 @@ QString QBinary::_createSignature(QString sSignature1, QString sSignature2)
     return sResult;
 }
 
-bool QBinary::compareSignatureOnAddress(QString sSignature, qint64 nAddress)
+bool QBinary::compareSignatureOnAddress(QString sSignature, qint64 nAddress,ADDRESS_SEGMENT segment)
 {
-    qint64 nOffset=addressToOffset(nAddress);
+    qint64 nOffset=addressToOffset(nAddress,segment);
 
     if(nOffset!=-1)
     {

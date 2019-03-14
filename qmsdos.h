@@ -59,6 +59,26 @@ public:
     void set_e_res2(int nPosition,quint16 value);
     void set_e_lfanew(quint32 value);
 
+    quint16 get_e_magic();
+    quint16 get_e_cblp();
+    quint16 get_e_cp();
+    quint16 get_e_crlc();
+    quint16 get_e_cparhdr();
+    quint16 get_e_minalloc();
+    quint16 get_e_maxalloc();
+    quint16 get_e_ss();
+    quint16 get_e_sp();
+    quint16 get_e_csum();
+    quint16 get_e_ip();
+    quint16 get_e_cs();
+    quint16 get_e_lfarlc();
+    quint16 get_e_ovno();
+
+    virtual QList<MEMORY_MAP> getMemoryMapList();
+
+private:
+    const qint64 N_DATABASEADDRESS=0x10000;
+    const qint64 N_CODEBASEADDRESS=0x00000;
 };
 
 #endif // QMSDOS_H
