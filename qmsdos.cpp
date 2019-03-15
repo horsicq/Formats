@@ -255,8 +255,9 @@ QList<QBinary::MEMORY_MAP> QMSDOS::getMemoryMapList()
     MEMORY_MAP recordHeader={};
     recordHeader.nSize=nHeaderSize;
     recordHeader.nOffset=0;
-//    recordHeader.nAddress=-1;
-//    recordHeader.nSection=-1;
+    recordHeader.nAddress=-1;
+    recordHeader.nSection=-1;
+    recordHeader.segment=ADDRESS_SEGMENT_UNKNOWN;
 
 
     MEMORY_MAP recordData={};

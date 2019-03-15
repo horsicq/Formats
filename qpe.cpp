@@ -1438,7 +1438,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
     record.bIsOvelay=true;
 
     record.nAddress=-1;
-    record.segment=ADDRESS_SEGMENT_FLAT;
+    record.segment=ADDRESS_SEGMENT_UNKNOWN;
     record.nOffset=nMaxOffset;
     record.nSize=0;
     record.nSection=-1;
