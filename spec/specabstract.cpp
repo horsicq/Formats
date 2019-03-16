@@ -202,6 +202,7 @@ SpecAbstract::SIGNATURE_RECORD _PE_entrypoint_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FAKESIGNATURE,                "",                 "Obsidium 1.3.0.4",     "EB02....E825000000EB04........EB01..8B54240CEB01"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FAKESIGNATURE,                "",                 "Themida 1.8.0.0",      "B8........600BC074..E8000000005805..0000008038E975"},
     {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_FAKESIGNATURE,                "",                 "Visual Basic 5.0-6.0", "6800000000E8........C0EB0F000000300000004000000000000000485858E9"},
+    {0, SpecAbstract::RECORD_FILETYPE_PE32,     SpecAbstract::RECORD_TYPE_PACKER,           SpecAbstract::RECORD_NAME_EZIP,                         "1.0",              "",                     "E9........E9........E9........E9........E9........E9........E9........E9........E9........E9........E9........CC"},
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1995.
     // WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1994. All rights re..
 };
@@ -2646,6 +2647,16 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
                     if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_RLP))
                     {
                         SpecAbstract::_SCANS_STRUCT ss=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_RLP);
+                        pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
+                    }
+                }
+
+                // EZIP
+                if(pPEInfo->mapEntryPointDetects.contains(RECORD_NAME_EZIP))
+                {
+                    if(pPEInfo->nOverlaySize)
+                    {
+                        SpecAbstract::_SCANS_STRUCT ss=pPEInfo->mapEntryPointDetects.value(RECORD_NAME_EZIP);
                         pPEInfo->mapResultPackers.insert(ss.name,scansToScan(&(pPEInfo->basic_info),&ss));
                     }
                 }
