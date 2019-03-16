@@ -27,6 +27,7 @@ SpecAbstract::SIGNATURE_RECORD _binary_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_INNOSETUP,                    "",             "Install",              "'zlb'1A"}, // TODO none
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_INSTALLERDATA,    SpecAbstract::RECORD_NAME_INNOSETUP,                    "",             "Uninstall",            "'Inno Setup Messages'"},  // TODO check
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_ARCHIVE,          SpecAbstract::RECORD_NAME_CAB,                          "",             "",                     "'MSCF'"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_ARCHIVE,          SpecAbstract::RECORD_NAME_ZLIB,                         "",             "",                     "78"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_ARCHIVE,          SpecAbstract::RECORD_NAME_7Z,                           "",             "",                     "'7z'BCAF271C"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_CERTIFICATE,      SpecAbstract::RECORD_NAME_WINAUTH,                      "2.0",          "PKCS #7",              "........00020200"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_DEBUGDATA,        SpecAbstract::RECORD_NAME_MINGW,                        "",             "",                     "'.file'000000"},
@@ -430,6 +431,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_EXESAX:                            sResult=QString("ExeSax");                                      break;
         case RECORD_NAME_EXESHIELD:                         sResult=QString("Exe Shield");                                  break;
         case RECORD_NAME_EXPORT:                            sResult=QString("Export");                                      break;
+        case RECORD_NAME_EZIP:                              sResult=QString("EZIP");                                        break;
         case RECORD_NAME_FAKESIGNATURE:                     sResult=QString("Fake signature");                              break;
         case RECORD_NAME_FASM:                              sResult=QString("FASM");                                        break;
         case RECORD_NAME_FISHNET:                           sResult=QString("FISH .NET");                                   break;
@@ -581,6 +583,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_YODASCRYPTER:                      sResult=QString("Yoda's Crypter");                              break;
         case RECORD_NAME_YZPACK:                            sResult=QString("YZPack");                                      break;
         case RECORD_NAME_ZIP:                               sResult=QString("ZIP");                                         break;
+        case RECORD_NAME_ZLIB:                              sResult=QString("zlib");                                        break;
         case RECORD_NAME_ZPROTECT:                          sResult=QString("ZProtect");                                    break;
     }
 
@@ -5840,6 +5843,15 @@ void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice, SpecAbstract::BINA
     else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_RAR))&&(pBinaryInfo->basic_info.nSize>=64))
     {
         _SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_RAR);
+
+        // TODO options
+        // TODO files
+        pBinaryInfo->mapResultArchives.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+    // zlib
+    else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_ZLIB))&&(pBinaryInfo->basic_info.nSize>=32))
+    {
+        _SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_ZLIB);
 
         // TODO options
         // TODO files
