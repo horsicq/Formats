@@ -249,16 +249,23 @@ QList<QBinary::MEMORY_MAP> QMSDOS::getMemoryMapList()
 {
     QList<MEMORY_MAP> listResult;
 
+    qint64 nHeaderOffset=0;
     qint64 nHeaderSize=get_e_cparhdr()*16;
+    qint64 nDataOffset=nHeaderOffset+nHeaderSize;
+    qint64 nDataSize=get_e_cs()*16;
+    qint64 nCodeOffset=nDataOffset+nDataSize;
+    qint64 nCodeSize=0;
+    qint64 nOverlayOffset=0;
+    qint64 nOverlaySize=0;
+
     qint64 nBaseAddress=_getBaseAddress();
 
     MEMORY_MAP recordHeader={};
     recordHeader.nSize=nHeaderSize;
-    recordHeader.nOffset=0;
+    recordHeader.nOffset=nHeaderOffset;
     recordHeader.nAddress=-1;
     recordHeader.nSection=-1;
     recordHeader.segment=ADDRESS_SEGMENT_UNKNOWN;
-
 
     MEMORY_MAP recordData={};
     MEMORY_MAP recordCode={};
