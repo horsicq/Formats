@@ -83,9 +83,10 @@ public:
     {
         quint16 nOrdinal;
         quint32 nRVA;
+        quint32 nAddress;
         quint32 nNameRVA;
         QString sFunctionName;
-        qint64 nFunctionOffset;
+        //qint64 nFunctionOffset;
     };
 
     struct EXPORT_HEADER

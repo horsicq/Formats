@@ -1445,10 +1445,7 @@ QList<QBinary::MEMORY_MAP> QPE::getMemoryMapList()
 
     if(!isImage())
     {
-        if(getSize()-nMaxOffset>0)
-        {
-            record.nSize=getSize()-nMaxOffset;
-        }
+        record.nSize=qMax(getSize()-nMaxOffset,(qint64)0);
     }
 
     list.append(record);
@@ -2799,7 +2796,9 @@ QPE::EXPORT_HEADER QPE::getExport()
                     int nIndex=read_uint16(nAddressOfNameOrdinalsOffset+2*i);
                     position.nOrdinal=nIndex+result.directory.Base;
                     position.nRVA=read_uint32(nAddressOfFunctionsOffset+4*nIndex);
+                    position.nAddress=position.nRVA+nBaseAddress;
                     position.nNameRVA=read_uint32(nAddressOfNamesOffset+4*i);
+
                     qint64 nFunctionNameOffset=addressToOffset(&listMemoryMap,position.nNameRVA+nBaseAddress);
 
                     if(nFunctionNameOffset!=-1)
