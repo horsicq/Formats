@@ -253,10 +253,10 @@ QList<QBinary::MEMORY_MAP> QMSDOS::getMemoryMapList()
 
     qint64 nHeaderOffset=0;
     qint64 nHeaderSize=get_e_cparhdr()*16;
-    qint64 nDataOffset=nHeaderOffset+nHeaderSize;
-    qint64 nDataSize=get_e_cs()*16;
-    qint64 nCodeOffset=nDataOffset+nDataSize;
-    qint64 nCodeSize=0;
+//    qint64 nDataOffset=nHeaderOffset+nHeaderSize;
+//    qint64 nDataSize=get_e_cs()*16;
+    qint64 nCodeOffset=get_e_cs()*16;
+    qint64 nCodeSize=nMaxOffset-nCodeOffset;
     qint64 nOverlayOffset=nMaxOffset;
     qint64 nOverlaySize=qMax(getSize()-nMaxOffset,(qint64)0);
 
@@ -272,9 +272,16 @@ QList<QBinary::MEMORY_MAP> QMSDOS::getMemoryMapList()
 
     listResult.append(recordHeader);
 
-    MEMORY_MAP recordData={};
+//    MEMORY_MAP recordData={};
     MEMORY_MAP recordCode={};
 
+    recordCode.nSize=nCodeSize;
+    recordCode.nOffset=nCodeOffset;
+    recordCode.nAddress=0;
+    recordCode.nSection=-1;
+    recordCode.segment=ADDRESS_SEGMENT_CODE;
+    recordCode.bIsHeader=false;
+    // TODO
 
     MEMORY_MAP recordOverlay={};
     recordOverlay.nSize=nOverlayOffset;
