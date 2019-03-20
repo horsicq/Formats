@@ -650,7 +650,6 @@ public:
 
     static void PE_handle_FixDetects(QIODevice *pDevice,PEINFO_STRUCT *pPEInfo);
 
-
     static void Binary_handle_Texts(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_Archives(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_Certificates(QIODevice *pDevice,BINARYINFO_STRUCT *pBinaryInfo);

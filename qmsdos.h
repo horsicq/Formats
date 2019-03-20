@@ -75,6 +75,7 @@ public:
     quint16 get_e_ovno();
 
     virtual QList<MEMORY_MAP> getMemoryMapList();
+    virtual qint64 getEntryPointOffset();
 
 private:
     const qint64 N_DATABASEADDRESS=0x10000;

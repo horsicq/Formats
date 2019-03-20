@@ -136,6 +136,7 @@ public:
         S_IMAGE_RESOURCE_DIRECTORY directory;
         S_IMAGE_RESOURCE_DIRECTORY_ENTRY dir_entry;
         S_IMAGE_RESOURCE_DATA_ENTRY data_entry;
+        qint64 nDataAddress;
         qint64 nDataOffset;
         QList<RESOURCE_POSITION> listPositions;
     };

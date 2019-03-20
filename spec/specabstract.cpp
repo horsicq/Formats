@@ -777,7 +777,7 @@ SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, Sp
     result.basic_info.sHeaderSignature=msdos.getSignature(0,150);
     result.basic_info.bDeepScan=pOptions->bDeepScan;
 
-    // TODO EntryPoint Signature
+    result.sEntryPointSignature=msdos.getSignature(msdos.getEntryPointOffset(),150);
 
     if(!result.basic_info.listDetects.count())
     {

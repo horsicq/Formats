@@ -3674,7 +3674,8 @@ QPE::RESOURCE_POSITION QPE::_getResourcePosition(QList<QBinary::MEMORY_MAP> *pMe
     {
         result.bIsValid=true;
         result.data_entry=read_S_IMAGE_RESOURCE_DATA_ENTRY(nResourceOffset+result.dir_entry.OffsetToData);
-        result.nDataOffset=addressToOffset(pMemoryMap,nBaseAddress+result.data_entry.OffsetToData);
+        result.nDataAddress=nBaseAddress+result.data_entry.OffsetToData;
+        result.nDataOffset=addressToOffset(pMemoryMap,result.nDataAddress);
     }
 
     return result;
