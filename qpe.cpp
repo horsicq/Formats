@@ -2135,10 +2135,10 @@ bool QPE::isImportLibraryPresentI(QString sLibrary, QList<QPE::IMPORT_HEADER> *p
 
 bool QPE::setImports(QList<QPE::IMPORT_HEADER> *pListHeaders)
 {
-    return setImports(getDevice(),pListHeaders);
+    return setImports(getDevice(),isImage(),pListHeaders);
 }
 
-bool QPE::setImports(QIODevice *pDevice, QList<QPE::IMPORT_HEADER> *pListHeaders)
+bool QPE::setImports(QIODevice *pDevice,bool bIsImage, QList<QPE::IMPORT_HEADER> *pListHeaders)
 {
     bool bResult=false;
 
@@ -2146,7 +2146,7 @@ bool QPE::setImports(QIODevice *pDevice, QList<QPE::IMPORT_HEADER> *pListHeaders
 
     if(sClassName=="QFile")
     {
-        QPE pe(pDevice);
+        QPE pe(pDevice,bIsImage);
 
         if(pe.isValid())
         {
@@ -2273,7 +2273,7 @@ bool QPE::setImports(QIODevice *pDevice, QList<QPE::IMPORT_HEADER> *pListHeaders
 
             //    addSection(sFileName,&ish,pszTest,5);
 
-            if(addSection(pDevice,&ish,baImport.data(),baImport.size()))
+            if(addSection(pDevice,bIsImage,&ish,baImport.data(),baImport.size()))
             {
                 QList<MEMORY_MAP> listMP=pe.getMemoryMapList();
                 qint64 nBaseAddress=pe._getBaseAddress();
@@ -2346,7 +2346,7 @@ bool QPE::setImports(QIODevice *pDevice, QList<QPE::IMPORT_HEADER> *pListHeaders
     return bResult;
 }
 
-bool QPE::setImports(QString sFileName,QList<QPE::IMPORT_HEADER> *pListHeaders)
+bool QPE::setImports(QString sFileName,bool bIsImage,QList<QPE::IMPORT_HEADER> *pListHeaders)
 {
     bool bResult=false;
 
@@ -2354,7 +2354,7 @@ bool QPE::setImports(QString sFileName,QList<QPE::IMPORT_HEADER> *pListHeaders)
 
     if(file.open(QIODevice::ReadWrite))
     {
-        bResult=setImports(&file,pListHeaders);
+        bResult=setImports(&file,bIsImage,pListHeaders);
 
         file.close();
     }
@@ -3105,10 +3105,10 @@ qint32 QPE::addressToSection(QList<QBinary::MEMORY_MAP> *pMemoryMap, qint64 nAdd
 
 bool QPE::addImportSection(QMap<qint64, QString> *pMapIAT)
 {
-    return addImportSection(getDevice(),pMapIAT);
+    return addImportSection(getDevice(),isImage(),pMapIAT);
 }
 
-bool QPE::addImportSection(QIODevice *pDevice, QMap<qint64, QString> *pMapIAT)
+bool QPE::addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QString> *pMapIAT)
 {
 #ifdef QT_DEBUG
     QElapsedTimer timer;
@@ -3122,7 +3122,7 @@ bool QPE::addImportSection(QIODevice *pDevice, QMap<qint64, QString> *pMapIAT)
 
     if(sClassName=="QFile")
     {
-        QPE pe(pDevice);
+        QPE pe(pDevice,bIsImage);
 
         if(pe.isValid())
         {
@@ -3130,7 +3130,7 @@ bool QPE::addImportSection(QIODevice *pDevice, QMap<qint64, QString> *pMapIAT)
         #ifdef QT_DEBUG
             qDebug("QPE::addImportSection:mapIATToList: %lld msec",timer.elapsed());
         #endif
-            bResult=setImports(pDevice,&list);
+            bResult=setImports(pDevice,bIsImage,&list);
         #ifdef QT_DEBUG
             qDebug("QPE::addImportSection:setImports: %lld msec",timer.elapsed());
         #endif
@@ -3144,14 +3144,14 @@ bool QPE::addImportSection(QIODevice *pDevice, QMap<qint64, QString> *pMapIAT)
     return bResult;
 }
 
-bool QPE::addImportSection(QString sFileName, QMap<qint64, QString> *pMapIAT)
+bool QPE::addImportSection(QString sFileName,bool bIsImage, QMap<qint64, QString> *pMapIAT)
 {
     bool bResult=false;
     QFile file(sFileName);
 
     if(file.open(QIODevice::ReadWrite))
     {
-        bResult=addImportSection(&file,pMapIAT);
+        bResult=addImportSection(&file,bIsImage,pMapIAT);
 
         file.close();
     }
@@ -3278,10 +3278,10 @@ bool QPE::isOverlayPresent()
 
 bool QPE::addOverlay(char *pData, qint64 nDataSize)
 {
-    return addOverlay(getDevice(),pData,nDataSize);
+    return addOverlay(getDevice(),isImage(),pData,nDataSize);
 }
 
-bool QPE::addOverlay(QString sFileName, char *pData, qint64 nDataSize)
+bool QPE::addOverlay(QString sFileName,bool bIsImage, char *pData, qint64 nDataSize)
 {
     bool bResult=false;
     QFile file;
@@ -3289,7 +3289,7 @@ bool QPE::addOverlay(QString sFileName, char *pData, qint64 nDataSize)
 
     if(file.open(QIODevice::ReadWrite))
     {
-        bResult=addOverlay(&file,pData,nDataSize);
+        bResult=addOverlay(&file,bIsImage,pData,nDataSize);
 
         file.close();
     }
@@ -3297,7 +3297,7 @@ bool QPE::addOverlay(QString sFileName, char *pData, qint64 nDataSize)
     return bResult;
 }
 
-bool QPE::addOverlay(QIODevice *pDevice, char *pData, qint64 nDataSize)
+bool QPE::addOverlay(QIODevice *pDevice,bool bIsImage, char *pData, qint64 nDataSize)
 {
     bool bResult=false;
 
@@ -3305,7 +3305,7 @@ bool QPE::addOverlay(QIODevice *pDevice, char *pData, qint64 nDataSize)
 
     if(sClassName=="QFile")
     {
-        QPE pe(pDevice);
+        QPE pe(pDevice,bIsImage);
 
         if(pe.isValid())
         {
@@ -3327,10 +3327,10 @@ bool QPE::addOverlay(QIODevice *pDevice, char *pData, qint64 nDataSize)
 
 bool QPE::addOverlayFromDevice(QIODevice *pSourceDevice, qint64 nOffset, qint64 nSize)
 {
-    return addOverlayFromDevice(getDevice(),pSourceDevice,nOffset,nSize);
+    return addOverlayFromDevice(getDevice(),isImage(),pSourceDevice,nOffset,nSize);
 }
 
-bool QPE::addOverlayFromDevice(QIODevice *pDevice, QIODevice *pSourceDevice, qint64 nOffset, qint64 nSize)
+bool QPE::addOverlayFromDevice(QIODevice *pDevice, bool bIsImage, QIODevice *pSourceDevice, qint64 nOffset, qint64 nSize)
 {
     bool bResult=false;
     const int BUFFER_SIZE=0x1000;
@@ -3339,7 +3339,7 @@ bool QPE::addOverlayFromDevice(QIODevice *pDevice, QIODevice *pSourceDevice, qin
 
     if(sClassName=="QFile")
     {
-        QPE pe(pDevice);
+        QPE pe(pDevice,bIsImage);
 
         if(pe.isValid())
         {
@@ -3387,10 +3387,10 @@ bool QPE::addOverlayFromDevice(QIODevice *pDevice, QIODevice *pSourceDevice, qin
 
 bool QPE::removeOverlay()
 {
-    return removeOverlay(getDevice());
+    return removeOverlay(getDevice(),isImage());
 }
 
-bool QPE::removeOverlay(QIODevice *pDevice)
+bool QPE::removeOverlay(QIODevice *pDevice,bool bIsImage)
 {
     bool bResult=false;
 
@@ -3398,25 +3398,25 @@ bool QPE::removeOverlay(QIODevice *pDevice)
 
     if(sClassName=="QFile")
     {
-        QPE pe(pDevice);
+        QPE pe(pDevice,bIsImage);
 
         if(pe.isValid())
         {
-            bResult=addOverlay(pDevice,0,0);
+            bResult=addOverlay(pDevice,bIsImage,0,0);
         }
     }
 
     return bResult;
 }
 
-bool QPE::addSection(QString sFileName, S_IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize)
+bool QPE::addSection(QString sFileName,bool bIsImage, S_IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize)
 {
     bool bResult=false;
     QFile file(sFileName);
 
     if(file.open(QIODevice::ReadWrite))
     {
-        bResult=addSection(&file,pSectionHeader,pData,nDataSize);
+        bResult=addSection(&file,bIsImage,pSectionHeader,pData,nDataSize);
 
         file.close();
     }
@@ -3428,7 +3428,7 @@ bool QPE::addSection(QString sFileName, S_IMAGE_SECTION_HEADER *pSectionHeader, 
     return bResult;
 }
 
-bool QPE::addSection(QIODevice *pDevice, S_IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize)
+bool QPE::addSection(QIODevice *pDevice, bool bIsImage, S_IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize)
 {
     bool bResult=false;
 
@@ -3436,7 +3436,7 @@ bool QPE::addSection(QIODevice *pDevice, S_IMAGE_SECTION_HEADER *pSectionHeader,
 
     if(sClassName=="QFile")
     {
-        QPE pe(pDevice);
+        QPE pe(pDevice,bIsImage);
 
         if(pe.isValid())
         {
@@ -3517,10 +3517,10 @@ bool QPE::addSection(QIODevice *pDevice, S_IMAGE_SECTION_HEADER *pSectionHeader,
 
 bool QPE::removeLastSection()
 {
-    return removeLastSection(getDevice());
+    return removeLastSection(getDevice(),isImage());
 }
 
-bool QPE::removeLastSection(QIODevice *pDevice)
+bool QPE::removeLastSection(QIODevice *pDevice,bool bIsImage)
 {
     bool bResult=false;
 
@@ -3528,7 +3528,7 @@ bool QPE::removeLastSection(QIODevice *pDevice)
 
     if(sClassName=="QFile")
     {
-        QPE pe(pDevice);
+        QPE pe(pDevice,bIsImage);
 
         if(pe.isValid())
         {
@@ -3596,14 +3596,14 @@ bool QPE::removeLastSection(QIODevice *pDevice)
     return bResult;
 }
 
-bool QPE::removeLastSection(QString sFileName)
+bool QPE::removeLastSection(QString sFileName, bool bIsImage)
 {
     bool bResult=false;
     QFile file(sFileName);
 
     if(file.open(QIODevice::ReadWrite))
     {
-        bResult=removeLastSection(&file);
+        bResult=removeLastSection(&file,bIsImage);
 
         file.close();
     }
@@ -3611,14 +3611,14 @@ bool QPE::removeLastSection(QString sFileName)
     return bResult;
 }
 
-bool QPE::removeOverlay(QString sFileName)
+bool QPE::removeOverlay(QString sFileName,bool bIsImage)
 {
-    return addOverlay(sFileName,0,0);
+    return addOverlay(sFileName,bIsImage,0,0);
 }
 
 bool QPE::addSection(S_IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize)
 {
-    return addSection(getDevice(),pSectionHeader,pData,nDataSize);
+    return addSection(getDevice(),isImage(),pSectionHeader,pData,nDataSize);
 }
 
 qint64 QPE::_calculateRawSize()
@@ -4444,6 +4444,7 @@ int QPE::getConstDataSection()
 
 bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 {
+    // TODO rework!
 #ifdef QT_DEBUG
     QElapsedTimer timer;
     timer.start();
@@ -4514,7 +4515,7 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 
         if(buffer.open(QIODevice::ReadWrite))
         {
-            QPE bufPE(&buffer);
+            QPE bufPE(&buffer,false);
 
             if(pRebuildOptions->bOptimize)
             {
@@ -4586,7 +4587,7 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 
         if(file.open(QIODevice::ReadWrite))
         {
-            QPE _pe(&file);
+            QPE _pe(&file,false);
 
             if(_pe.isValid())
             {
@@ -4700,12 +4701,13 @@ bool QPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 
 bool QPE::rebuildDump(QString sInputFile, QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 {
+    // TODO rework!
     bool bResult=false;
     QFile file;
     file.setFileName(sInputFile);
     if(file.open(QIODevice::ReadOnly))
     {
-        QPE pe(&file);
+        QPE pe(&file,false);
         if(pe.isValid())
         {
             bResult=pe.rebuildDump(sResultFile,pRebuildOptions);
@@ -4717,14 +4719,14 @@ bool QPE::rebuildDump(QString sInputFile, QString sResultFile,REBUILD_OPTIONS *p
     return bResult;
 }
 
-bool QPE::fixCheckSum(QString sFileName)
+bool QPE::fixCheckSum(QString sFileName, bool bIsImage)
 {
     bool bResult=false;
     QFile file;
     file.setFileName(sFileName);
     if(file.open(QIODevice::ReadWrite))
     {
-        QPE pe(&file);
+        QPE pe(&file,bIsImage);
         if(pe.isValid())
         {
             pe._fixCheckSum();
@@ -5002,10 +5004,10 @@ QList<QPE::RELOCS_POSITION> QPE::getRelocsPositions(qint64 nOffset)
 
 bool QPE::addRelocsSection(QList<qint64> *pList)
 {
-    return addRelocsSection(getDevice(),pList);
+    return addRelocsSection(getDevice(),isImage(),pList);
 }
 
-bool QPE::addRelocsSection(QIODevice *pDevice, QList<qint64> *pList)
+bool QPE::addRelocsSection(QIODevice *pDevice,bool bIsImage, QList<qint64> *pList)
 {
     bool bResult=false;
 
@@ -5013,7 +5015,7 @@ bool QPE::addRelocsSection(QIODevice *pDevice, QList<qint64> *pList)
 
     if((sClassName=="QFile")&&(pList->count()))
     {
-        QPE pe(pDevice);
+        QPE pe(pDevice,bIsImage);
 
         if(pe.isValid())
         {
@@ -5039,7 +5041,7 @@ bool QPE::addRelocsSection(QIODevice *pDevice, QList<qint64> *pList)
             QBinary::_copyMemory((char *)&ish.Name,sSectionName.toLatin1().data(),qMin(S_IMAGE_SIZEOF_SHORT_NAME,sSectionName.length()));
 
 
-            bResult=addSection(pDevice,&ish,baRelocs.data(),baRelocs.size());
+            bResult=addSection(pDevice,bIsImage,&ish,baRelocs.data(),baRelocs.size());
 
             if(bResult)
             {
@@ -5058,14 +5060,14 @@ bool QPE::addRelocsSection(QIODevice *pDevice, QList<qint64> *pList)
     return bResult;
 }
 
-bool QPE::addRelocsSection(QString sFileName, QList<qint64> *pList)
+bool QPE::addRelocsSection(QString sFileName,bool bIsImage, QList<qint64> *pList)
 {
     bool bResult=false;
     QFile file(sFileName);
 
     if(file.open(QIODevice::ReadWrite))
     {
-        bResult=addRelocsSection(&file,pList);
+        bResult=addRelocsSection(&file,bIsImage,pList);
 
         file.close();
     }

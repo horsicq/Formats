@@ -418,8 +418,8 @@ public:
     static bool isImportLibraryPresentI(QString sLibrary,QList<IMPORT_HEADER> *pListImport);
 
     bool setImports(QList<IMPORT_HEADER> *pListHeaders);
-    static bool setImports(QIODevice *pDevice,QList<IMPORT_HEADER> *pListHeaders);
-    static bool setImports(QString sFileName,QList<IMPORT_HEADER> *pListHeaders);
+    static bool setImports(QIODevice *pDevice,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
+    static bool setImports(QString sFileName,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
 
     RESOURCE_HEADER getResourceHeader();
     QList<RESOURCE_RECORD> getResources();
@@ -484,8 +484,8 @@ public:
     static qint32 addressToSection(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
 
     bool addImportSection(QMap<qint64,QString> *pMapIAT);
-    static bool addImportSection(QIODevice *pDevice,QMap<qint64,QString> *pMapIAT);
-    static bool addImportSection(QString sFileName,QMap<qint64,QString> *pMapIAT);
+    static bool addImportSection(QIODevice *pDevice,bool bIsImage,QMap<qint64,QString> *pMapIAT);
+    static bool addImportSection(QString sFileName,bool bIsImage,QMap<qint64,QString> *pMapIAT);
 
     static QList<QPE::IMPORT_HEADER> mapIATToList(QMap<qint64,QString> *pMapIAT,bool bIs64);
 
@@ -495,21 +495,21 @@ public:
     bool isOverlayPresent();
 
     bool addOverlay(char *pData,qint64 nDataSize);
-    static bool addOverlay(QString sFileName,char *pData,qint64 nDataSize);
-    static bool addOverlay(QIODevice *pDevice,char *pData,qint64 nDataSize);
+    static bool addOverlay(QString sFileName,bool bIsImage,char *pData,qint64 nDataSize);
+    static bool addOverlay(QIODevice *pDevice, bool bIsImage, char *pData, qint64 nDataSize);
     bool addOverlayFromDevice(QIODevice *pSourceDevice,qint64 nOffset,qint64 nSize);
-    bool addOverlayFromDevice(QIODevice *pDevice,QIODevice *pSourceDevice,qint64 nOffset,qint64 nSize);
+    bool addOverlayFromDevice(QIODevice *pDevice,bool bIsImage,QIODevice *pSourceDevice,qint64 nOffset,qint64 nSize);
 
     bool removeOverlay();
-    static bool removeOverlay(QIODevice *pDevice);
-    static bool removeOverlay(QString sFileName);
+    static bool removeOverlay(QIODevice *pDevice, bool bIsImage);
+    static bool removeOverlay(QString sFileName, bool bIsImage);
     bool addSection(S_IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
-    static bool addSection(QString sFileName,S_IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
-    static bool addSection(QIODevice *pDevice,S_IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
+    static bool addSection(QString sFileName,bool bIsImage,S_IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
+    static bool addSection(QIODevice *pDevice, bool bIsImage, S_IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
 
     bool removeLastSection();
-    static bool removeLastSection(QIODevice *pDevice);
-    static bool removeLastSection(QString sFileName);
+    static bool removeLastSection(QIODevice *pDevice, bool bIsImage);
+    static bool removeLastSection(QString sFileName,bool bIsImage);
     // TODO copy Overlay function
     S_IMAGE_RESOURCE_DIRECTORY_ENTRY read_S_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset);
     S_IMAGE_RESOURCE_DIRECTORY read_S_IMAGE_RESOURCE_DIRECTORY(qint64 nOffset);
@@ -522,8 +522,8 @@ public:
     QList<RELOCS_POSITION> getRelocsPositions(qint64 nOffset);
 
     bool addRelocsSection(QList<qint64> *pList);
-    static bool addRelocsSection(QIODevice *pDevice,QList<qint64> *pList);
-    static bool addRelocsSection(QString sFileName,QList<qint64> *pList);
+    static bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pList);
+    static bool addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pList);
     static QByteArray relocsAsRVAListToByteArray(QList<qint64> *pList,bool bIs64);
 
     bool isResourcesPresent();
@@ -594,7 +594,7 @@ public:
 
     bool rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions);
     static bool rebuildDump(QString sInputFile,QString sResultFile,REBUILD_OPTIONS *pRebuildOptions);
-    static bool fixCheckSum(QString sFileName);
+    static bool fixCheckSum(QString sFileName,bool bIsImage);
     void _fixCheckSum();
 
     static QList<S_IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData,S_IMAGE_SECTION_HEADER shOriginal,quint32 nBlockSize);

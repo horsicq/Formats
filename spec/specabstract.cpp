@@ -255,6 +255,11 @@ SpecAbstract::STRING_RECORD _TEXT_records[]={
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_XML,                          "",             "",                    "^<\\?xml"},
 };
 
+SpecAbstract::SIGNATURE_RECORD _MSDOS_entrypoint_records[]=
+{
+    {0, SpecAbstract::RECORD_FILETYPE_MSDOS,     SpecAbstract::RECORD_TYPE_LINKER,          SpecAbstract::RECORD_NAME_IBMPCPASCAL,                  "2.05(1987)",   "",                     "b8....8ed88bd08c06....268b1e....891e....2bd8f7c3....75..b1..d3e3"},
+};
+
 SpecAbstract::SpecAbstract(QObject *parent)
 {
     Q_UNUSED(parent);
@@ -459,6 +464,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_HMIMYSPROTECTOR:                   sResult=QString("Hmimys's Protector");                          break;
         case RECORD_NAME_HTML:                              sResult=QString("HTML");                                        break;
         case RECORD_NAME_HXS:                               sResult=QString("HXS");                                         break;
+        case RECORD_NAME_IBMPCPASCAL:                       sResult=QString("IBM PC Pascal");                               break;
         case RECORD_NAME_IMPORT:                            sResult=QString("Import");                                      break;
         case RECORD_NAME_INNOSETUP:                         sResult=QString("Inno Setup");                                  break;
         case RECORD_NAME_INSTALLANYWHERE:                   sResult=QString("InstallAnywhere");                             break;
@@ -591,7 +597,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
     return sResult;
 }
 
-SpecAbstract::UNPACK_OPTIONS SpecAbstract::getPossibleUnpackOptions(QIODevice *pDevice)
+SpecAbstract::UNPACK_OPTIONS SpecAbstract::getPossibleUnpackOptions(QIODevice *pDevice,bool bIsImage)
 {
     UNPACK_OPTIONS result= {};
 
@@ -599,7 +605,7 @@ SpecAbstract::UNPACK_OPTIONS SpecAbstract::getPossibleUnpackOptions(QIODevice *p
 
     if(stFileTypes.contains(QBinary::FT_PE32)||stFileTypes.contains(QBinary::FT_PE64))
     {
-        QPE pe(pDevice);
+        QPE pe(pDevice,bIsImage);
 
         if(pe.isValid())
         {
@@ -726,14 +732,14 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
         result.basic_info.id.filetype=RECORD_FILETYPE_TEXT;
     }
 
-    Binary_handle_Texts(pDevice,&result);
-    Binary_handle_Formats(pDevice,&result);
-    Binary_handle_Archives(pDevice,&result);
-    Binary_handle_Certificates(pDevice,&result);
-    Binary_handle_DebugData(pDevice,&result);
-    Binary_handle_InstallerData(pDevice,&result);
-    Binary_handle_SFXData(pDevice,&result);
-    Binary_handle_ProtectorData(pDevice,&result);
+    Binary_handle_Texts(pDevice,pOptions->bIsImage,&result);
+    Binary_handle_Formats(pDevice,pOptions->bIsImage,&result);
+    Binary_handle_Archives(pDevice,pOptions->bIsImage,&result);
+    Binary_handle_Certificates(pDevice,pOptions->bIsImage,&result);
+    Binary_handle_DebugData(pDevice,pOptions->bIsImage,&result);
+    Binary_handle_InstallerData(pDevice,pOptions->bIsImage,&result);
+    Binary_handle_SFXData(pDevice,pOptions->bIsImage,&result);
+    Binary_handle_ProtectorData(pDevice,pOptions->bIsImage,&result);
 
     result.basic_info.listDetects.append(result.mapResultTexts.values());
     result.basic_info.listDetects.append(result.mapResultArchives.values());
@@ -778,6 +784,12 @@ SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, Sp
     result.basic_info.bDeepScan=pOptions->bDeepScan;
 
     result.sEntryPointSignature=msdos.getSignature(msdos.getEntryPointOffset(),150);
+
+    signatureScan(&result.mapEntryPointDetects,result.sEntryPointSignature,_MSDOS_entrypoint_records,sizeof(_MSDOS_entrypoint_records),result.basic_info.id.filetype,SpecAbstract::RECORD_FILETYPE_PE);
+
+    MSDOS_handle_Tools(pDevice,pOptions->bIsImage,&result);
+
+    result.basic_info.listDetects.append(result.mapResultCompilers.values());
 
     if(!result.basic_info.listDetects.count())
     {
@@ -1049,24 +1061,24 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
 //            }
         }
 
-        PE_handle_import(pDevice,&result);
+        PE_handle_import(pDevice,pOptions->bIsImage,&result);
 
-        PE_handle_Protection(pDevice,&result);
-        PE_handle_VMProtect(pDevice,&result);
-        PE_handle_Armadillo(pDevice,&result);
-        PE_handle_Petite(pDevice,&result);
-        PE_handle_NETProtection(pDevice,&result);
-        PE_handle_PolyMorph(pDevice,&result);
-        PE_handle_libraries(pDevice,&result);
-        PE_handle_Microsoft(pDevice,&result);
-        PE_handle_Borland(pDevice,&result);
-        PE_handle_Tools(pDevice,&result);
-        PE_handle_SFX(pDevice,&result);
-        PE_handle_Installers(pDevice,&result);
-        PE_handle_DongleProtection(pDevice,&result);
-        PE_handle_UnknownProtection(pDevice,&result);
+        PE_handle_Protection(pDevice,pOptions->bIsImage,&result);
+        PE_handle_VMProtect(pDevice,pOptions->bIsImage,&result);
+        PE_handle_Armadillo(pDevice,pOptions->bIsImage,&result);
+        PE_handle_Petite(pDevice,pOptions->bIsImage,&result);
+        PE_handle_NETProtection(pDevice,pOptions->bIsImage,&result);
+        PE_handle_PolyMorph(pDevice,pOptions->bIsImage,&result);
+        PE_handle_libraries(pDevice,pOptions->bIsImage,&result);
+        PE_handle_Microsoft(pDevice,pOptions->bIsImage,&result);
+        PE_handle_Borland(pDevice,pOptions->bIsImage,&result);
+        PE_handle_Tools(pDevice,pOptions->bIsImage,&result);
+        PE_handle_SFX(pDevice,pOptions->bIsImage,&result);
+        PE_handle_Installers(pDevice,pOptions->bIsImage,&result);
+        PE_handle_DongleProtection(pDevice,pOptions->bIsImage,&result);
+        PE_handle_UnknownProtection(pDevice,pOptions->bIsImage,&result);
 
-        PE_handle_FixDetects(pDevice,&result);
+        PE_handle_FixDetects(pDevice,pOptions->bIsImage,&result);
 
         result.basic_info.listDetects.append(result.mapResultLinkers.values());
         result.basic_info.listDetects.append(result.mapResultCompilers.values());
@@ -1111,7 +1123,7 @@ SpecAbstract::_SCANS_STRUCT SpecAbstract::getScansStruct(quint32 nVariant, SpecA
     return result;
 }
 
-void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_import(QIODevice *pDevice, bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
     // Import Check
@@ -2240,9 +2252,9 @@ void SpecAbstract::PE_handle_import(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     }
 }
 
-void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
-    QPE pe(pDevice);
+    QPE pe(pDevice,bIsImage);
 
     if(pe.isValid())
     {
@@ -2264,7 +2276,7 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
         {
             // TODO MPRESS import
 
-            VI_STRUCT viUPX=PE_get_UPX_vi(pDevice,pPEInfo);
+            VI_STRUCT viUPX=PE_get_UPX_vi(pDevice,bIsImage,pPEInfo);
 
             // UPX
             // TODO 32-64
@@ -3249,9 +3261,9 @@ void SpecAbstract::PE_handle_Protection(QIODevice *pDevice, SpecAbstract::PEINFO
     }
 }
 
-void SpecAbstract::PE_handle_VMProtect(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_VMProtect(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
-    QPE pe(pDevice);
+    QPE pe(pDevice,bIsImage);
 
     if(pe.isValid())
     {
@@ -3354,9 +3366,9 @@ void SpecAbstract::PE_handle_VMProtect(QIODevice *pDevice, SpecAbstract::PEINFO_
     }
 }
 
-void SpecAbstract::PE_handle_Armadillo(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_Armadillo(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
-    QPE pe(pDevice);
+    QPE pe(pDevice,bIsImage);
 
     if(pe.isValid())
     {
@@ -3366,7 +3378,7 @@ void SpecAbstract::PE_handle_Armadillo(QIODevice *pDevice, SpecAbstract::PEINFO_
             {
                 SpecAbstract::_SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_PE,RECORD_TYPE_PROTECTOR,RECORD_NAME_ARMADILLO,"","",0);
 
-                VI_STRUCT vi=PE_get_Armadillo_vi(pDevice,pPEInfo);
+                VI_STRUCT vi=PE_get_Armadillo_vi(pDevice,bIsImage,pPEInfo);
 
                 ss.sVersion=vi.sVersion;
                 ss.sInfo=vi.sInfo;
@@ -3377,9 +3389,9 @@ void SpecAbstract::PE_handle_Armadillo(QIODevice *pDevice, SpecAbstract::PEINFO_
     }
 }
 
-void SpecAbstract::PE_handle_Petite(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_Petite(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
-    QPE pe(pDevice);
+    QPE pe(pDevice,bIsImage);
 
     if(pe.isValid())
     {
@@ -3498,9 +3510,9 @@ void SpecAbstract::PE_handle_Petite(QIODevice *pDevice, SpecAbstract::PEINFO_STR
     }
 }
 
-void SpecAbstract::PE_handle_NETProtection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_NETProtection(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
-    QPE pe(pDevice);
+    QPE pe(pDevice,bIsImage);
 
     if(pe.isValid())
     {
@@ -3709,7 +3721,7 @@ void SpecAbstract::PE_handle_NETProtection(QIODevice *pDevice, SpecAbstract::PEI
     }
 }
 
-void SpecAbstract::PE_handle_libraries(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_libraries(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
 
@@ -3740,7 +3752,7 @@ void SpecAbstract::PE_handle_libraries(QIODevice *pDevice, SpecAbstract::PEINFO_
     }
 }
 
-void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     SpecAbstract::_SCANS_STRUCT recordLinker={};
     SpecAbstract::_SCANS_STRUCT recordCompiler={};
@@ -3748,7 +3760,7 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
     SpecAbstract::_SCANS_STRUCT recordMFC={};
     SpecAbstract::_SCANS_STRUCT recordNET={};
 
-    QPE pe(pDevice);
+    QPE pe(pDevice,bIsImage);
 
     if(pe.isValid())
     {
@@ -4321,11 +4333,10 @@ void SpecAbstract::PE_handle_Microsoft(QIODevice *pDevice, SpecAbstract::PEINFO_
     }
 }
 
-void SpecAbstract::PE_handle_Borland(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_Borland(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     // TODO Turbo Linker
-    QPE pe(pDevice);
-    //
+    QPE pe(pDevice,bIsImage);
 
     if(pe.isValid())
     {
@@ -4375,7 +4386,7 @@ void SpecAbstract::PE_handle_Borland(QIODevice *pDevice, SpecAbstract::PEINFO_ST
                             nOffset_String=pe.find_array(_nOffset,_nSize,"\x06\x53\x74\x72\x69\x6e\x67",7); // String
                         }
 
-                        listVCL=PE_getVCLstruct(pDevice,_nOffset,_nSize,pPEInfo->bIs64);
+                        listVCL=PE_getVCLstruct(pDevice,bIsImage,_nOffset,_nSize,pPEInfo->bIs64);
                     }
                 }
 
@@ -4482,7 +4493,7 @@ void SpecAbstract::PE_handle_Borland(QIODevice *pDevice, SpecAbstract::PEINFO_ST
 
                 if(bPackageinfo)
                 {
-                    VCL_PACKAGEINFO pi=PE_getVCLPackageInfo(pDevice,&pPEInfo->listResources);
+                    VCL_PACKAGEINFO pi=PE_getVCLPackageInfo(pDevice,bIsImage,&pPEInfo->listResources);
 
                     if(pi.listModules.count())
                     {
@@ -4712,9 +4723,9 @@ void SpecAbstract::PE_handle_Borland(QIODevice *pDevice, SpecAbstract::PEINFO_ST
 
 }
 
-void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_Tools(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
-    QPE pe(pDevice);
+    QPE pe(pDevice,bIsImage);
 
     if(pe.isValid())
     {
@@ -4903,7 +4914,7 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                     {
                         // Cygwin
                         // MinGW ???
-                        ss.sVersion=PE_get_GCC_vi(pDevice,_nOffset,_nSize).sVersion;
+                        ss.sVersion=PE_get_GCC_vi(pDevice,bIsImage,_nOffset,_nSize).sVersion;
                     }
                 }
 
@@ -5021,7 +5032,7 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
 
                     if((pPEInfo->nConstDataSectionOffset)&&(pPEInfo->nConstDataSectionSize)&&(pPEInfo->basic_info.bDeepScan))
                     {
-                        _sGCCVersion=PE_get_GCC_vi(pDevice,pPEInfo->nConstDataSectionOffset,pPEInfo->nConstDataSectionSize).sVersion;
+                        _sGCCVersion=PE_get_GCC_vi(pDevice,bIsImage,pPEInfo->nConstDataSectionOffset,pPEInfo->nConstDataSectionSize).sVersion;
 
                         if(_sGCCVersion!="")
                         {
@@ -5033,7 +5044,7 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
                     {
                         if((pPEInfo->nDataSectionOffset)&&(pPEInfo->nDataSectionSize)&&(pPEInfo->basic_info.bDeepScan))
                         {
-                            _sGCCVersion=PE_get_GCC_vi(pDevice,pPEInfo->nDataSectionOffset,pPEInfo->nDataSectionSize).sVersion;
+                            _sGCCVersion=PE_get_GCC_vi(pDevice,bIsImage,pPEInfo->nDataSectionOffset,pPEInfo->nDataSectionSize).sVersion;
 
                             if(_sGCCVersion!="")
                             {
@@ -5218,9 +5229,9 @@ void SpecAbstract::PE_handle_Tools(QIODevice *pDevice, SpecAbstract::PEINFO_STRU
     }
 }
 
-void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_Installers(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
-    QPE pe(pDevice);
+    QPE pe(pDevice,bIsImage);
     //
 
     if(pe.isValid())
@@ -5599,10 +5610,9 @@ void SpecAbstract::PE_handle_Installers(QIODevice *pDevice, SpecAbstract::PEINFO
     }
 }
 
-void SpecAbstract::PE_handle_SFX(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_SFX(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
-    QPE pe(pDevice);
-    //
+    QPE pe(pDevice,bIsImage);
 
     if(pe.isValid())
     {
@@ -5661,7 +5671,7 @@ void SpecAbstract::PE_handle_SFX(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT
     }
 }
 
-void SpecAbstract::PE_handle_PolyMorph(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_PolyMorph(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
     Q_UNUSED(pPEInfo);
@@ -5669,7 +5679,7 @@ void SpecAbstract::PE_handle_PolyMorph(QIODevice *pDevice, SpecAbstract::PEINFO_
 
 }
 
-void SpecAbstract::PE_handle_DongleProtection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_DongleProtection(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
 
@@ -5683,7 +5693,7 @@ void SpecAbstract::PE_handle_DongleProtection(QIODevice *pDevice, SpecAbstract::
     }
 }
 
-void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
     if((pPEInfo->mapResultPackers.count()==0)&&(pPEInfo->mapResultProtectors.count()==0))
@@ -5707,7 +5717,7 @@ void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice, SpecAbstract:
     }
 }
 
-void SpecAbstract::PE_handle_FixDetects(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+void SpecAbstract::PE_handle_FixDetects(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
 
@@ -5719,7 +5729,7 @@ void SpecAbstract::PE_handle_FixDetects(QIODevice *pDevice, SpecAbstract::PEINFO
     }
 }
 
-void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
 
@@ -5801,7 +5811,7 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice, SpecAbstract::BINARYI
     }
 }
 
-void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
 
@@ -5870,7 +5880,7 @@ void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice, SpecAbstract::BINA
     }
 }
 
-void SpecAbstract::Binary_handle_Certificates(QIODevice *pDevice, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+void SpecAbstract::Binary_handle_Certificates(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
 
@@ -5887,7 +5897,7 @@ void SpecAbstract::Binary_handle_Certificates(QIODevice *pDevice, SpecAbstract::
     }
 }
 
-void SpecAbstract::Binary_handle_DebugData(QIODevice *pDevice, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+void SpecAbstract::Binary_handle_DebugData(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
 
@@ -5899,7 +5909,7 @@ void SpecAbstract::Binary_handle_DebugData(QIODevice *pDevice, SpecAbstract::BIN
     }
 }
 
-void SpecAbstract::Binary_handle_Formats(QIODevice *pDevice, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+void SpecAbstract::Binary_handle_Formats(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
 
@@ -5953,7 +5963,7 @@ void SpecAbstract::Binary_handle_Formats(QIODevice *pDevice, SpecAbstract::BINAR
     }
 }
 
-void SpecAbstract::Binary_handle_InstallerData(QIODevice *pDevice, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+void SpecAbstract::Binary_handle_InstallerData(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
 
@@ -6016,7 +6026,7 @@ void SpecAbstract::Binary_handle_InstallerData(QIODevice *pDevice, SpecAbstract:
     }
 }
 
-void SpecAbstract::Binary_handle_SFXData(QIODevice *pDevice, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+void SpecAbstract::Binary_handle_SFXData(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
 
@@ -6040,7 +6050,7 @@ void SpecAbstract::Binary_handle_SFXData(QIODevice *pDevice, SpecAbstract::BINAR
     }
 }
 
-void SpecAbstract::Binary_handle_ProtectorData(QIODevice *pDevice, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+void SpecAbstract::Binary_handle_ProtectorData(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
 
@@ -6049,6 +6059,21 @@ void SpecAbstract::Binary_handle_ProtectorData(QIODevice *pDevice, SpecAbstract:
     {
         _SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_FISHNET);
         pBinaryInfo->mapResultProtectorData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+}
+
+void SpecAbstract::MSDOS_handle_Tools(QIODevice *pDevice, bool bIsImage, SpecAbstract::MSDOSINFO_STRUCT *pMSDOSInfo)
+{
+    QMSDOS msdos(pDevice,bIsImage);
+
+    if(msdos.isValid())
+    {
+        // IBM PC Pascal
+        if(pMSDOSInfo->mapEntryPointDetects.contains(RECORD_NAME_IBMPCPASCAL))
+        {
+            _SCANS_STRUCT ss=pMSDOSInfo->mapEntryPointDetects.value(RECORD_NAME_IBMPCPASCAL);
+            pMSDOSInfo->mapResultCompilers.insert(ss.name,scansToScan(&(pMSDOSInfo->basic_info),&ss));
+        }
     }
 }
 
@@ -6148,7 +6173,7 @@ bool SpecAbstract::checkVersionString(QString sVersion)
     return bResult;
 }
 
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_UPX_vi(QIODevice *pDevice,SpecAbstract::PEINFO_STRUCT *pPEInfo)
+SpecAbstract::VI_STRUCT SpecAbstract::PE_get_UPX_vi(QIODevice *pDevice,bool bIsImage,SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     // TODO unknown vesrion
     VI_STRUCT result;
@@ -6245,11 +6270,11 @@ SpecAbstract::VI_STRUCT SpecAbstract::PE_get_UPX_vi(QIODevice *pDevice,SpecAbstr
     return result;
 }
 
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_Armadillo_vi(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+SpecAbstract::VI_STRUCT SpecAbstract::PE_get_Armadillo_vi(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     VI_STRUCT result;
 
-    QPE pe(pDevice);
+    QPE pe(pDevice,bIsImage);
 
     if(pe.isValid())
     {
@@ -8676,11 +8701,11 @@ SpecAbstract::VI_STRUCT SpecAbstract::PE_get_Armadillo_vi(QIODevice *pDevice, Sp
     return result;
 }
 
-SpecAbstract::VI_STRUCT SpecAbstract::PE_get_GCC_vi(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
+SpecAbstract::VI_STRUCT SpecAbstract::PE_get_GCC_vi(QIODevice *pDevice,bool bIsImage, qint64 nOffset, qint64 nSize)
 {
     VI_STRUCT result;
 
-    QBinary binary(pDevice);
+    QBinary binary(pDevice,bIsImage);
 
     // TODO get max version
     qint64 nOffset_Version=binary.find_ansiString(nOffset,nSize,"gcc-");
@@ -8695,7 +8720,7 @@ SpecAbstract::VI_STRUCT SpecAbstract::PE_get_GCC_vi(QIODevice *pDevice, qint64 n
     return result;
 }
 
-bool SpecAbstract::PE_isValid_UPX(QIODevice *pDevice, SpecAbstract::PEINFO_STRUCT *pPEInfo)
+bool SpecAbstract::PE_isValid_UPX(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
 
@@ -8747,11 +8772,11 @@ SpecAbstract::BASIC_PE_INFO SpecAbstract::_ArrayToBasicPEInfo(const QByteArray *
     return result;
 }
 
-void SpecAbstract::memoryScan(QMap<RECORD_NAMES, _SCANS_STRUCT> *pMmREcords, QIODevice *pDevice, qint64 nOffset, qint64 nSize, SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2)
+void SpecAbstract::memoryScan(QMap<RECORD_NAMES, _SCANS_STRUCT> *pMmREcords, QIODevice *pDevice, bool bIsImage, qint64 nOffset, qint64 nSize, SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2)
 {
     if(nSize)
     {
-        QBinary binary(pDevice);
+        QBinary binary(pDevice,bIsImage);
 
         int nSignaturesCount=nRecordsSize/sizeof(SIGNATURE_RECORD);
 
@@ -8917,11 +8942,11 @@ void SpecAbstract::stringScan(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::_SC
     }
 }
 
-QList<SpecAbstract::VCL_STRUCT> SpecAbstract::PE_getVCLstruct(QIODevice *pDevice,qint64 nOffset,qint64 nSize,bool bIs64)
+QList<SpecAbstract::VCL_STRUCT> SpecAbstract::PE_getVCLstruct(QIODevice *pDevice,bool bIsImage,qint64 nOffset,qint64 nSize,bool bIs64)
 {
     QList<VCL_STRUCT> listResult;
 
-    QPE pe(pDevice);
+    QPE pe(pDevice,bIsImage);
 
     qint64 _nOffset=nOffset;
     qint64 _nSize=nSize;
@@ -8970,11 +8995,11 @@ QList<SpecAbstract::VCL_STRUCT> SpecAbstract::PE_getVCLstruct(QIODevice *pDevice
     return listResult;
 }
 
-SpecAbstract::VCL_PACKAGEINFO SpecAbstract::PE_getVCLPackageInfo(QIODevice *pDevice, QList<QPE::RESOURCE_RECORD> *pListResources)
+SpecAbstract::VCL_PACKAGEINFO SpecAbstract::PE_getVCLPackageInfo(QIODevice *pDevice,bool bIsImage, QList<QPE::RESOURCE_RECORD> *pListResources)
 {
     VCL_PACKAGEINFO result={};
 
-    QPE pe(pDevice);
+    QPE pe(pDevice,bIsImage);
 
     if(pe.isValid())
     {
