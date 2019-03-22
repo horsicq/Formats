@@ -513,7 +513,6 @@ public:
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultSFX;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultNETObfuscators;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultDongleProtection;
-
     };
 
     struct SCAN_OPTIONS
@@ -698,6 +697,7 @@ public:
 protected:
     void _errorMessage(QString sMessage);
     void _infoMessage(QString sMessage);
+
 signals:
     void errorMessage(QString sMessage);
     void infoMessage(QString sMessage);

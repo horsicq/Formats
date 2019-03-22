@@ -248,16 +248,19 @@ SpecAbstract::STRING_RECORD _PE_dot_ansistrings_records[]={
 
 
 SpecAbstract::STRING_RECORD _TEXT_records[]={
-    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                         "",             "",                    "#include [\"<].*?[>\"]"},
-    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                         "",             "header",              "#ifndef (\\w+).*\\s+#define \\1"},
-    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_PYTHON,                       "",             "",                    "import"},
-    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_HTML,                         "",             "",                    "^<(!DOCTYPE )?[Hh][Tt][Mm][Ll]"},
-    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_XML,                          "",             "",                    "^<\\?xml"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                         "",             "",                     "#include [\"<].*?[>\"]"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_CCPP,                         "",             "header",               "#ifndef (\\w+).*\\s+#define \\1"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_PYTHON,                       "",             "",                     "import"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_HTML,                         "",             "",                     "^<(!DOCTYPE )?[Hh][Tt][Mm][Ll]"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_XML,                          "",             "",                     "^<\\?xml"},
 };
 
 SpecAbstract::SIGNATURE_RECORD _MSDOS_entrypoint_records[]=
 {
-    {0, SpecAbstract::RECORD_FILETYPE_MSDOS,     SpecAbstract::RECORD_TYPE_LINKER,          SpecAbstract::RECORD_NAME_IBMPCPASCAL,                  "2.05(1987)",   "",                     "b8....8ed88bd08c06....268b1e....891e....2bd8f7c3....75..b1..d3e3"},
+    {0, SpecAbstract::RECORD_FILETYPE_MSDOS,     SpecAbstract::RECORD_TYPE_COMPILER,        SpecAbstract::RECORD_NAME_IBMPCPASCAL,                  "1.00(1981)",   "",                     "B8....8ED88C06....BA....D1EAB9....2BCAD1EA"},
+    {0, SpecAbstract::RECORD_FILETYPE_MSDOS,     SpecAbstract::RECORD_TYPE_COMPILER,        SpecAbstract::RECORD_NAME_IBMPCPASCAL,                  "2.00(1984)",   "",                     "B8....8ED88C06....FA8ED0268B1E....2BD881FB....7E..BB....D1E3"},
+    {0, SpecAbstract::RECORD_FILETYPE_MSDOS,     SpecAbstract::RECORD_TYPE_COMPILER,        SpecAbstract::RECORD_NAME_IBMPCPASCAL,                  "2.02(1987)",   "",                     "2E8E1E....8CD08CDB2BC3D1E0"}, // TODO Check
+    {0, SpecAbstract::RECORD_FILETYPE_MSDOS,     SpecAbstract::RECORD_TYPE_COMPILER,        SpecAbstract::RECORD_NAME_IBMPCPASCAL,                  "2.05(1987)",   "",                     "B8....8ED88BD08C06....268B1E....891E....2BD8F7C3....75..B1..D3E3"},
 };
 
 SpecAbstract::SpecAbstract(QObject *parent)
