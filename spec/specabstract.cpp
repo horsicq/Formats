@@ -942,26 +942,6 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         result.sResourceManifest=pe.getResourceManifest(&result.listResources);
         result.resVersion=pe.getResourceVersion(&result.listResources);
 
-//        for(int i=0;i<result.cliInfo.listAnsiStrings.count();i++)
-//        {
-//            qDebug(result.cliInfo.listAnsiStrings.at(i).toLatin1().data());
-//        }
-
-//        for(int i=0;i<result.cliInfo.listUnicodeStrings.count();i++)
-//        {
-//            qDebug(result.cliInfo.listUnicodeStrings.at(i).toLatin1().data());
-//        }
-
-
-        //        if(result.listSections.count()>=1)
-        //        {
-        //            result.nCodeSectionOffset=result.listSections.at(0).PointerToRawData;
-        //            result.nCodeSectionSize=result.listSections.at(0).SizeOfRawData;
-        //        }
-
-        //        result.nHeaderOffset=0;
-        //        result.nHeaderSize=qMin(result.basic_info.nSize,(qint64)1024);
-
         result.nEntryPointAddress=result.bIs64?result.optional_header.optionalHeader64.AddressOfEntryPoint:result.optional_header.optionalHeader32.AddressOfEntryPoint;
         result.nImageBaseAddress=result.bIs64?result.optional_header.optionalHeader64.ImageBase:result.optional_header.optionalHeader32.ImageBase;
         result.nMinorLinkerVersion=result.bIs64?result.optional_header.optionalHeader64.MinorLinkerVersion:result.optional_header.optionalHeader32.MinorLinkerVersion;
