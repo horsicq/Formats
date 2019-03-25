@@ -1109,6 +1109,7 @@ SpecAbstract::_SCANS_STRUCT SpecAbstract::getScansStruct(quint32 nVariant, SpecA
 void SpecAbstract::PE_handle_import(QIODevice *pDevice, bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
+    Q_UNUSED(bIsImage);
     // Import Check
 
     QSet<QString> stDetects;
@@ -3707,6 +3708,7 @@ void SpecAbstract::PE_handle_NETProtection(QIODevice *pDevice,bool bIsImage, Spe
 void SpecAbstract::PE_handle_libraries(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
+    Q_UNUSED(bIsImage);
 
     if(!pPEInfo->cliInfo.bInit)
     {
@@ -5657,6 +5659,7 @@ void SpecAbstract::PE_handle_SFX(QIODevice *pDevice,bool bIsImage, SpecAbstract:
 void SpecAbstract::PE_handle_PolyMorph(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
+    Q_UNUSED(bIsImage);
     Q_UNUSED(pPEInfo);
     // ExeSax
 
@@ -5665,6 +5668,7 @@ void SpecAbstract::PE_handle_PolyMorph(QIODevice *pDevice,bool bIsImage, SpecAbs
 void SpecAbstract::PE_handle_DongleProtection(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
+    Q_UNUSED(bIsImage);
 
     if(pPEInfo->listImports.count()==1)
     {
@@ -5679,6 +5683,8 @@ void SpecAbstract::PE_handle_DongleProtection(QIODevice *pDevice,bool bIsImage, 
 void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
+    Q_UNUSED(bIsImage);
+
     if((pPEInfo->mapResultPackers.count()==0)&&(pPEInfo->mapResultProtectors.count()==0))
     {
         if(pPEInfo->listSectionRecords.count())
@@ -5703,6 +5709,7 @@ void SpecAbstract::PE_handle_UnknownProtection(QIODevice *pDevice,bool bIsImage,
 void SpecAbstract::PE_handle_FixDetects(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
+    Q_UNUSED(bIsImage);
 
     if(pPEInfo->mapResultPackers.contains(RECORD_NAME_RLPACK))
     {
@@ -5715,6 +5722,7 @@ void SpecAbstract::PE_handle_FixDetects(QIODevice *pDevice,bool bIsImage, SpecAb
 void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
+    Q_UNUSED(bIsImage);
 
     if((pBinaryInfo->bIsPlainText)||(pBinaryInfo->unicodeType!=QBinary::UNICODE_TYPE_NONE)||(pBinaryInfo->bIsUTF8))
     {
@@ -5797,6 +5805,7 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice,bool bIsImage, SpecAbs
 void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
+    Q_UNUSED(bIsImage);
 
     // 7-Zip
     if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_7Z))&&(pBinaryInfo->basic_info.nSize>=64))
@@ -5866,6 +5875,7 @@ void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice,bool bIsImage, Spec
 void SpecAbstract::Binary_handle_Certificates(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
+    Q_UNUSED(bIsImage);
 
     // Windows Authenticode Portable Executable Signature Format
     if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_WINAUTH))&&(pBinaryInfo->basic_info.nSize>=8))
@@ -5883,6 +5893,7 @@ void SpecAbstract::Binary_handle_Certificates(QIODevice *pDevice,bool bIsImage, 
 void SpecAbstract::Binary_handle_DebugData(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
+    Q_UNUSED(bIsImage);
 
     // MinGW debug data
     if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_MINGW))&&(pBinaryInfo->basic_info.nSize>=8))
@@ -5895,6 +5906,7 @@ void SpecAbstract::Binary_handle_DebugData(QIODevice *pDevice,bool bIsImage, Spe
 void SpecAbstract::Binary_handle_Formats(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
+    Q_UNUSED(bIsImage);
 
     if(pBinaryInfo->basic_info.nSize==0)
     {
@@ -5949,6 +5961,7 @@ void SpecAbstract::Binary_handle_Formats(QIODevice *pDevice,bool bIsImage, SpecA
 void SpecAbstract::Binary_handle_InstallerData(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
+    Q_UNUSED(bIsImage);
 
     // Inno Setup
     if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_INNOSETUP))&&(pBinaryInfo->basic_info.nSize>=8))
@@ -6012,6 +6025,7 @@ void SpecAbstract::Binary_handle_InstallerData(QIODevice *pDevice,bool bIsImage,
 void SpecAbstract::Binary_handle_SFXData(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
+    Q_UNUSED(bIsImage);
 
     if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_WINRAR))&&(pBinaryInfo->basic_info.nSize>=20))
     {
@@ -6036,6 +6050,7 @@ void SpecAbstract::Binary_handle_SFXData(QIODevice *pDevice,bool bIsImage, SpecA
 void SpecAbstract::Binary_handle_ProtectorData(QIODevice *pDevice,bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
 {
     QBinary binary(pDevice);
+    Q_UNUSED(bIsImage);
 
     // Inno Setup
     if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_FISHNET))&&(pBinaryInfo->basic_info.nSize>=8))
@@ -6158,6 +6173,7 @@ bool SpecAbstract::checkVersionString(QString sVersion)
 
 SpecAbstract::VI_STRUCT SpecAbstract::PE_get_UPX_vi(QIODevice *pDevice,bool bIsImage,SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
+    Q_UNUSED(bIsImage);
     // TODO unknown vesrion
     VI_STRUCT result;
 
@@ -8706,6 +8722,7 @@ SpecAbstract::VI_STRUCT SpecAbstract::PE_get_GCC_vi(QIODevice *pDevice,bool bIsI
 bool SpecAbstract::PE_isValid_UPX(QIODevice *pDevice,bool bIsImage, SpecAbstract::PEINFO_STRUCT *pPEInfo)
 {
     Q_UNUSED(pDevice);
+    Q_UNUSED(bIsImage);
 
     if(pPEInfo->listSectionHeaders.count()>=3)
     {
