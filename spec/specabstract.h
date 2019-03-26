@@ -29,6 +29,7 @@
 #include "qpe.h"
 #include "qelf.h"
 #include "qmach.h"
+#include "xzip.h"
 
 class SpecAbstract : public QObject
 {
@@ -196,6 +197,7 @@ public:
         RECORD_NAME_INSTALLANYWHERE,
         RECORD_NAME_INSTALLSHIELD,
         RECORD_NAME_IPBPROTECT,
+        RECORD_NAME_JAR,
         RECORD_NAME_JPEG,
         RECORD_NAME_KKRUNCHY,
         RECORD_NAME_LAYHEYFORTRAN90,
@@ -209,8 +211,12 @@ public:
         RECORD_NAME_MFC,
         RECORD_NAME_MICROSOFTC,
         RECORD_NAME_MICROSOFTCPP,
+        RECORD_NAME_MICROSOFTEXCEL,
         RECORD_NAME_MICROSOFTLINKER,
         RECORD_NAME_MICROSOFTLINKERDATABASE,
+        RECORD_NAME_MICROSOFTOFFICE,
+        RECORD_NAME_MICROSOFTOFFICEWORD,
+        RECORD_NAME_MICROSOFTVISIO,
         RECORD_NAME_MICROSOFTVISUALSTUDIO,
         RECORD_NAME_MINGW,
         RECORD_NAME_MKFPACK,
@@ -661,6 +667,8 @@ public:
     static void Binary_handle_InstallerData(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_SFXData(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_ProtectorData(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
+
+    static void Binary_handle_FixDetects(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
 
     static void MSDOS_handle_Tools(QIODevice *pDevice, bool bIsImage, MSDOSINFO_STRUCT *pMSDOSInfo);
 

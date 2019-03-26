@@ -21,3 +21,8 @@ SOURCES += \
     XCONFIG += qmach
     include(../qmach.pri)
 }
+
+!contains(XCONFIG, xarchive) {
+    XCONFIG += xarchive
+    include(../../XArchive/xarchive.pri)
+}

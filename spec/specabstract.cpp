@@ -32,6 +32,7 @@ SpecAbstract::SIGNATURE_RECORD _binary_records[]=
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_CERTIFICATE,      SpecAbstract::RECORD_NAME_WINAUTH,                      "2.0",          "PKCS #7",              "........00020200"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_DEBUGDATA,        SpecAbstract::RECORD_NAME_MINGW,                        "",             "",                     "'.file'000000"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_ARCHIVE,          SpecAbstract::RECORD_NAME_ZIP,                          "",             "",                     "'PK'0304"},
+    {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_ARCHIVE,          SpecAbstract::RECORD_NAME_ZIP,                          "",             "Empty",                "'PK'0506"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_PDF,                          "",             "",                     "'%PDF'"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_PDB,                          "2.00",         "",                     "'Microsoft C/C++ program database 2.00\r\n'1A'JG'0000"},
     {0, SpecAbstract::RECORD_FILETYPE_BINARY,   SpecAbstract::RECORD_TYPE_FORMAT,           SpecAbstract::RECORD_NAME_PDB,                          "7.00",         "",                     "'Microsoft C/C++ MSF 7.00\r\n'1A'DS'000000"},
@@ -473,6 +474,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_INSTALLANYWHERE:                   sResult=QString("InstallAnywhere");                             break;
         case RECORD_NAME_INSTALLSHIELD:                     sResult=QString("InstallShield");                               break;
         case RECORD_NAME_IPBPROTECT:                        sResult=QString("iPB Protect");                                 break;
+        case RECORD_NAME_JAR:                               sResult=QString("JAR");                                         break;
         case RECORD_NAME_JPEG:                              sResult=QString("JPEG");                                        break;
         case RECORD_NAME_KKRUNCHY:                          sResult=QString("kkrunchy");                                    break;
         case RECORD_NAME_LAYHEYFORTRAN90:                   sResult=QString("Lahey Fortran 90");                            break;
@@ -486,8 +488,12 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_MFC:                               sResult=QString("MFC");                                         break;
         case RECORD_NAME_MICROSOFTC:                        sResult=QString("Microsoft C");                                 break;
         case RECORD_NAME_MICROSOFTCPP:                      sResult=QString("Microsoft C++");                               break;
+        case RECORD_NAME_MICROSOFTEXCEL:                    sResult=QString("Microsoft Excel");                             break;
         case RECORD_NAME_MICROSOFTLINKER:                   sResult=QString("Microsoft linker");                            break;
         case RECORD_NAME_MICROSOFTLINKERDATABASE:           sResult=QString("Microsoft Linker Database");                   break;
+        case RECORD_NAME_MICROSOFTOFFICE:                   sResult=QString("Microsoft Office");                            break;
+        case RECORD_NAME_MICROSOFTOFFICEWORD:               sResult=QString("Microsoft Office Word");                       break;
+        case RECORD_NAME_MICROSOFTVISIO:                    sResult=QString("Microsoft Visio");                             break;
         case RECORD_NAME_MICROSOFTVISUALSTUDIO:             sResult=QString("Microsoft Visual Studio");                     break;
         case RECORD_NAME_MINGW:                             sResult=QString("MinGW");                                       break;
         case RECORD_NAME_MKFPACK:                           sResult=QString("MKFPack");                                     break;
@@ -743,6 +749,8 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
     Binary_handle_InstallerData(pDevice,pOptions->bIsImage,&result);
     Binary_handle_SFXData(pDevice,pOptions->bIsImage,&result);
     Binary_handle_ProtectorData(pDevice,pOptions->bIsImage,&result);
+
+    Binary_handle_FixDetects(pDevice,pOptions->bIsImage,&result);
 
     result.basic_info.listDetects.append(result.mapResultTexts.values());
     result.basic_info.listDetects.append(result.mapResultArchives.values());
@@ -5821,18 +5829,73 @@ void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice,bool bIsImage, Spec
     // ZIP
     else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_ZIP))&&(pBinaryInfo->basic_info.nSize>=64)) // TODO min size
     {
-        // TODO jar, docx ...
-        _SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_ZIP);
-        quint8 nVersion=QBinary::hexToUint8(pBinaryInfo->basic_info.sHeaderSignature.mid(4*2,2));
-        quint8 nFlags=QBinary::hexToUint8(pBinaryInfo->basic_info.sHeaderSignature.mid(6*2,2));
-
-        ss.sVersion=QString("%1").arg((double)nVersion/10,0,'f',1);
-        if(nFlags&0x1)
+        XZip xzip(pDevice);
+        if(xzip.isVaild())
         {
-            ss.sInfo="Encrypted";
+            QList<XArchive::RECORD> listRecords=xzip.getRecords();
+
+            int nCount=listRecords.count();
+            for(int i=0;i<nCount;i++)
+            {
+                XArchive::RECORD record=listRecords.at(i);
+
+                if(record.sFileName=="docProps/app.xml")
+                {
+                    if((record.nUncompressedSize)&&(record.nUncompressedSize<=0x4000))
+                    {
+                        QString sData=xzip.decompress(&record).data();
+                        QString sApplication=QBinary::regExp("<Application>(.*?)</Application>",sData,1);
+
+                        _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_BINARY,RECORD_TYPE_FORMAT,RECORD_NAME_MICROSOFTOFFICE,"","",0);
+
+                        if(sApplication=="Microsoft Office Word")
+                        {
+                            ss.name=RECORD_NAME_MICROSOFTOFFICEWORD;
+                        }
+                        else if(sApplication=="Microsoft Excel")
+                        {
+                            ss.name=RECORD_NAME_MICROSOFTEXCEL;
+                        }
+                        else if(sApplication=="Microsoft Visio")
+                        {
+                            ss.name=RECORD_NAME_MICROSOFTVISIO;
+                        }
+
+                        ss.sVersion=QBinary::regExp("<AppVersion>(.*?)</AppVersion>",sData,1);
+                        pBinaryInfo->mapResultFormats.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+                    }
+
+                    break;
+                }
+                else if(record.sFileName=="META-INF/MANIFEST.MF")
+                {
+                    if((record.nUncompressedSize)&&(record.nUncompressedSize<=0x4000))
+                    {
+                        QString sData=xzip.decompress(&record).data();
+                        // TODO
+                        _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_BINARY,RECORD_TYPE_ARCHIVE,RECORD_NAME_JAR,"","",0);
+
+                        pBinaryInfo->mapResultArchives.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+                    }
+
+                    break;
+                }
+            }
+            // TODO jar
+
+            _SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_ZIP);
+            quint8 nVersion=QBinary::hexToUint8(pBinaryInfo->basic_info.sHeaderSignature.mid(4*2,2));
+            quint8 nFlags=QBinary::hexToUint8(pBinaryInfo->basic_info.sHeaderSignature.mid(6*2,2));
+
+            ss.sVersion=QString("%1").arg((double)nVersion/10,0,'f',1);
+            ss.sInfo=QString("%1 records").arg(listRecords.count());
+            if(nFlags&0x1)
+            {
+                ss.sInfo=append(ss.sInfo,"Encrypted");
+            }
+            // TODO files
+            pBinaryInfo->mapResultArchives.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
         }
-        // TODO files
-        pBinaryInfo->mapResultArchives.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
     }
     // ZIP
     else if((pBinaryInfo->basic_info.mapHeaderDetects.contains(RECORD_NAME_GZIP))&&(pBinaryInfo->basic_info.nSize>=9))
@@ -6057,6 +6120,21 @@ void SpecAbstract::Binary_handle_ProtectorData(QIODevice *pDevice,bool bIsImage,
     {
         _SCANS_STRUCT ss=pBinaryInfo->basic_info.mapHeaderDetects.value(RECORD_NAME_FISHNET);
         pBinaryInfo->mapResultProtectorData.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+    }
+}
+
+void SpecAbstract::Binary_handle_FixDetects(QIODevice *pDevice, bool bIsImage, SpecAbstract::BINARYINFO_STRUCT *pBinaryInfo)
+{
+    Q_UNUSED(pDevice);
+    Q_UNUSED(bIsImage);
+
+    if( (pBinaryInfo->mapResultFormats.contains(RECORD_NAME_MICROSOFTOFFICE))||
+        (pBinaryInfo->mapResultFormats.contains(RECORD_NAME_MICROSOFTOFFICEWORD))||
+        (pBinaryInfo->mapResultFormats.contains(RECORD_NAME_MICROSOFTEXCEL))||
+        (pBinaryInfo->mapResultFormats.contains(RECORD_NAME_MICROSOFTVISIO))||
+        (pBinaryInfo->mapResultArchives.contains(RECORD_NAME_JAR)))
+    {
+        pBinaryInfo->mapResultArchives.remove(RECORD_NAME_ZIP);
     }
 }
 
