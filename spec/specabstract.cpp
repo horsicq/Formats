@@ -5832,6 +5832,7 @@ void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice,bool bIsImage, Spec
         XZip xzip(pDevice);
         if(xzip.isVaild())
         {
+            // TODO deep scan
             QList<XArchive::RECORD> listRecords=xzip.getRecords();
 
             int nCount=listRecords.count();
