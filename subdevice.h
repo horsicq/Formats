@@ -36,9 +36,9 @@ public:
     virtual bool seek(qint64 pos);
     virtual bool reset();
     virtual bool open(OpenMode mode);
-    virtual bool atEnd();
+    virtual bool atEnd() const;
     virtual void close();
-    virtual qint64 pos();
+    virtual qint64 pos() const;
 
 protected:
     virtual qint64 readData(char *data, qint64 maxSize);

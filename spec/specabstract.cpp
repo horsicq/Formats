@@ -5833,7 +5833,7 @@ void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice,bool bIsImage, Spec
         if(xzip.isVaild())
         {
             // TODO deep scan
-            QList<XArchive::RECORD> listRecords=xzip.getRecords();
+            QList<XArchive::RECORD> listRecords=xzip.getRecords(100);
 
             int nCount=listRecords.count();
             for(int i=0;i<nCount;i++)
@@ -5876,6 +5876,8 @@ void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice,bool bIsImage, Spec
                         // TODO
                         _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_BINARY,RECORD_TYPE_ARCHIVE,RECORD_NAME_JAR,"","",0);
 
+                        ss.sVersion=QBinary::regExp("Created-By: (.*?)\n",sData,1);
+
                         pBinaryInfo->mapResultArchives.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
                     }
 
@@ -5889,7 +5891,7 @@ void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice,bool bIsImage, Spec
             quint8 nFlags=QBinary::hexToUint8(pBinaryInfo->basic_info.sHeaderSignature.mid(6*2,2));
 
             ss.sVersion=QString("%1").arg((double)nVersion/10,0,'f',1);
-            ss.sInfo=QString("%1 records").arg(listRecords.count());
+            ss.sInfo=QString("%1 records").arg(xzip.getNumberOfRecords());
             if(nFlags&0x1)
             {
                 ss.sInfo=append(ss.sInfo,"Encrypted");

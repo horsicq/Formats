@@ -99,7 +99,7 @@ bool SubDevice::open(QIODevice::OpenMode mode)
     return true;
 }
 
-bool SubDevice::atEnd()
+bool SubDevice::atEnd() const
 {
     //qDebug("bool SubDevice::atEnd()");
     return (bytesAvailable()==0);
@@ -110,7 +110,7 @@ void SubDevice::close()
     setOpenMode(NotOpen);
 }
 
-qint64 SubDevice::pos()
+qint64 SubDevice::pos() const
 {
     return pDevice->pos()-nOffset;
 }
