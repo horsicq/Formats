@@ -514,6 +514,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
         case RECORD_NAME_OBFUSCATORNET2009:                 sResult=QString("Obfuscator.NET 2009");                         break;
         case RECORD_NAME_OBJECTPASCAL:                      sResult=QString("Object Pascal");                               break;
         case RECORD_NAME_OBSIDIUM:                          sResult=QString("Obsidium");                                    break;
+        case RECORD_NAME_OPENDOCUMENT:                      sResult=QString("Open Document");                               break;
         case RECORD_NAME_ORIEN:                             sResult=QString("ORiEN");                                       break;
         case RECORD_NAME_PACKMAN:                           sResult=QString("Packman");                                     break;
         case RECORD_NAME_PCGUARD:                           sResult=QString("PC Guard");                                    break;
@@ -5864,9 +5865,9 @@ void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice,bool bIsImage, Spec
 
                         ss.sVersion=QBinary::regExp("<AppVersion>(.*?)</AppVersion>",sData,1);
                         pBinaryInfo->mapResultFormats.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
-                    }
 
-                    break;
+                        break;
+                    }
                 }
                 else if(record.sFileName=="META-INF/MANIFEST.MF")
                 {
@@ -5878,10 +5879,26 @@ void SpecAbstract::Binary_handle_Archives(QIODevice *pDevice,bool bIsImage, Spec
 
                         ss.sVersion=QBinary::regExp("Created-By: (.*?)\n",sData,1);
 
-                        pBinaryInfo->mapResultArchives.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+                        if(ss.sVersion!="")
+                        {
+                            pBinaryInfo->mapResultArchives.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+                            break;
+                        }
                     }
+                }
+                else if(record.sFileName=="meta.xml")
+                {
+                    if((record.nUncompressedSize)&&(record.nUncompressedSize<=0x4000))
+                    {
+                        QString sData=xzip.decompress(&record).data();
+                        // TODO
+                        if(sData.contains(":opendocument:"))
+                        {
+                            _SCANS_STRUCT ss=getScansStruct(0,RECORD_FILETYPE_BINARY,RECORD_TYPE_FORMAT,RECORD_NAME_OPENDOCUMENT,"","",0);
 
-                    break;
+                            pBinaryInfo->mapResultFormats.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+                        }
+                    }
                 }
             }
             // TODO jar
@@ -6135,6 +6152,7 @@ void SpecAbstract::Binary_handle_FixDetects(QIODevice *pDevice, bool bIsImage, S
         (pBinaryInfo->mapResultFormats.contains(RECORD_NAME_MICROSOFTOFFICEWORD))||
         (pBinaryInfo->mapResultFormats.contains(RECORD_NAME_MICROSOFTEXCEL))||
         (pBinaryInfo->mapResultFormats.contains(RECORD_NAME_MICROSOFTVISIO))||
+        (pBinaryInfo->mapResultFormats.contains(RECORD_NAME_OPENDOCUMENT))||
         (pBinaryInfo->mapResultArchives.contains(RECORD_NAME_JAR)))
     {
         pBinaryInfo->mapResultArchives.remove(RECORD_NAME_ZIP);
