@@ -64,6 +64,7 @@ public:
         RECORD_TYPE_CERTIFICATE,
         RECORD_TYPE_COMPILER,
         RECORD_TYPE_CONVERTER,
+        RECORD_TYPE_DATABASE,
         RECORD_TYPE_DEBUGDATA,
         RECORD_TYPE_DONGLEPROTECTION,
         RECORD_TYPE_FORMAT,
@@ -209,6 +210,7 @@ public:
         RECORD_NAME_MAXTOCODE,
         RECORD_NAME_MEW11SE,
         RECORD_NAME_MFC,
+        RECORD_NAME_MICROSOFTACCESS,
         RECORD_NAME_MICROSOFTC,
         RECORD_NAME_MICROSOFTCPP,
         RECORD_NAME_MICROSOFTEXCEL,
@@ -418,6 +420,8 @@ public:
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultInstallerData;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultSFXData;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultFormats;
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultDatabases;
+        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultImages;
         QMap<RECORD_NAMES,SCAN_STRUCT> mapResultProtectorData;
     };
 
@@ -665,6 +669,8 @@ public:
     static void Binary_handle_Certificates(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_DebugData(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_Formats(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
+    static void Binary_handle_Databases(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
+    static void Binary_handle_Images(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_InstallerData(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_SFXData(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
     static void Binary_handle_ProtectorData(QIODevice *pDevice,bool bIsImage,BINARYINFO_STRUCT *pBinaryInfo);
