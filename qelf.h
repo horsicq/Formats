@@ -36,7 +36,7 @@ class QELF : public QBinary
     };
 
 public:
-    QELF(QIODevice *__pDevice=0,bool bIsImage=false,qint64 nImageAddress=-1);
+    QELF(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
     ~QELF();
 
     virtual bool bIsValid();
@@ -245,6 +245,9 @@ public:
     QString getCompatibleKernelVersion();
 
     static NOTE getNote(QByteArray &baData,bool bIsBigEndian);
+
+    virtual QList<MEMORY_MAP> getMemoryMapList();
+    virtual qint64 getEntryPointOffset();
 };
 
 #endif // QELF_H

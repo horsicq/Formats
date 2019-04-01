@@ -2126,4 +2126,19 @@ QELF::NOTE QELF::getNote(QByteArray &baData,bool bIsBigEndian)
     return result;
 }
 
+QList<QBinary::MEMORY_MAP> QELF::getMemoryMapList()
+{
+    QList<QBinary::MEMORY_MAP> listResult;
+
+    // TODO
+
+    return  listResult;
+}
+
+qint64 QELF::getEntryPointOffset()
+{
+    // TODO
+    return -1;
+}
+
 
