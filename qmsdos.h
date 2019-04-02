@@ -77,6 +77,9 @@ public:
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getEntryPointOffset();
 
+    static QMap<quint64, QString> getImageMagics();
+    static QMap<quint64, QString> getImageMagicsS();
+
 private:
     const qint64 N_DATABASEADDRESS=0x10000;
     const qint64 N_CODEBASEADDRESS=0x00000;

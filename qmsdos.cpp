@@ -302,3 +302,21 @@ qint64 QMSDOS::getEntryPointOffset()
 {
     return addressToOffset(get_e_ip(),ADDRESS_SEGMENT_CODE);
 }
+
+QMap<quint64, QString> QMSDOS::getImageMagics()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x5A4D,"IMAGE_DOS_SIGNATURE");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> QMSDOS::getImageMagicsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x5A4D,"DOS_SIGNATURE");
+
+    return mapResult;
+}
