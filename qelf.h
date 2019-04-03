@@ -129,7 +129,8 @@ public:
     static QMap<quint64,QString> getIndentDatasS();
     static QMap<quint64,QString> getIndentVersions();
     static QMap<quint64,QString> getIndentVersionsS();
-    static QMap<quint64,QString> getIndentOsabiList();
+    static QMap<quint64,QString> getIndentOsabis();
+    static QMap<quint64,QString> getIndentOsabisS();
 
     static QMap<quint64,QString> getSectionTypeList();
     static QMap<quint64,QString> getSectionFlagList();

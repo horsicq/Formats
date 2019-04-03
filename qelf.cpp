@@ -517,7 +517,7 @@ QMap<quint64, QString> QELF::getIndentVersionsS()
     return mapResult;
 }
 
-QMap<quint64, QString> QELF::getIndentOsabiList()
+QMap<quint64, QString> QELF::getIndentOsabis()
 {
     QMap<quint64, QString> mapResult;
     mapResult.insert(0,"ELFOSABI_SYSV");
@@ -538,6 +538,30 @@ QMap<quint64, QString> QELF::getIndentOsabiList()
     mapResult.insert(15,"ELFOSABI_AROS");
     mapResult.insert(97,"ELFOSABI_ARM");
     mapResult.insert(255,"ELFOSABI_STANDALONE");
+    return mapResult;
+}
+
+QMap<quint64, QString> QELF::getIndentOsabisS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"SYSV");
+    mapResult.insert(1,"HPUX");
+    mapResult.insert(2,"NETBSD");
+    mapResult.insert(3,"LINUX");
+    mapResult.insert(4,"HURD");
+    mapResult.insert(5,"86OPEN");
+    mapResult.insert(6,"SOLARIS");
+    mapResult.insert(7,"MONTEREY");
+    mapResult.insert(8,"IRIX");
+    mapResult.insert(9,"FREEBSD");
+    mapResult.insert(10,"TRU64");
+    mapResult.insert(11,"MODESTO");
+    mapResult.insert(12,"OPENBSD");
+    mapResult.insert(13,"OPENVMS");
+    mapResult.insert(14,"NSK");
+    mapResult.insert(15,"AROS");
+    mapResult.insert(97,"ARM");
+    mapResult.insert(255,"STANDALONE");
     return mapResult;
 }
 
