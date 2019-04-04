@@ -402,7 +402,7 @@ void QELF::setHdr64_shstrndx(quint16 value)
     write_uint16(offsetof(S_Elf64_Ehdr,e_shstrndx),value,isBigEndian());
 }
 
-QMap<quint64, QString> QELF::getHeaderTypeList()
+QMap<quint64, QString> QELF::getTypes()
 {
     QMap<quint64, QString> mapResult;
     mapResult.insert(0,"ET_NONE");
@@ -413,6 +413,20 @@ QMap<quint64, QString> QELF::getHeaderTypeList()
     mapResult.insert(5,"ET_NUM");
     mapResult.insert(0xff00,"ET_LOPROC");
     mapResult.insert(0xffff,"ET_HIPROC");
+    return mapResult;
+}
+
+QMap<quint64, QString> QELF::getTypesS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"NONE");
+    mapResult.insert(1,"REL");
+    mapResult.insert(2,"EXEC");
+    mapResult.insert(3,"DYN");
+    mapResult.insert(4,"CORE");
+    mapResult.insert(5,"NUM");
+    mapResult.insert(0xff00,"LOPROC");
+    mapResult.insert(0xffff,"HIPROC");
     return mapResult;
 }
 

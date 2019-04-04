@@ -119,7 +119,7 @@ public:
     quint16 getHdr64_shstrndx();
     void setHdr64_shstrndx(quint16 value);
 
-    static QMap<quint64,QString> getHeaderTypeList();
+
     static QMap<quint64,QString> getHeaderMachineList();
     static QMap<quint64,QString> getHeaderVersionList();
 
@@ -131,6 +131,9 @@ public:
     static QMap<quint64,QString> getIndentVersionsS();
     static QMap<quint64,QString> getIndentOsabis();
     static QMap<quint64,QString> getIndentOsabisS();
+
+    static QMap<quint64,QString> getTypes();
+    static QMap<quint64,QString> getTypesS();
 
     static QMap<quint64,QString> getSectionTypeList();
     static QMap<quint64,QString> getSectionFlagList();
