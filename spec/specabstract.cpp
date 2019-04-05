@@ -286,7 +286,7 @@ QString SpecAbstract::append(QString sResult, QString sString)
     return sResult;
 }
 
-QString SpecAbstract::recordFiletypeIdToString(RECORD_FILETYPES id)
+QString SpecAbstract::recordFiletypeIdToString(RECORD_FILETYPE id)
 {
     QString sResult=tr("Unknown");
 
@@ -310,7 +310,7 @@ QString SpecAbstract::recordFiletypeIdToString(RECORD_FILETYPES id)
     return sResult;
 }
 
-QString SpecAbstract::recordFilepartIdToString(SpecAbstract::RECORD_FILEPARTS id)
+QString SpecAbstract::recordFilepartIdToString(SpecAbstract::RECORD_FILEPART id)
 {
     QString sResult=tr("Unknown");
 
@@ -324,7 +324,7 @@ QString SpecAbstract::recordFilepartIdToString(SpecAbstract::RECORD_FILEPARTS id
     return sResult;
 }
 
-QString SpecAbstract::recordTypeIdToString(RECORD_TYPES id)
+QString SpecAbstract::recordTypeIdToString(RECORD_TYPE id)
 {
     QString sResult=tr("Unknown");
 
@@ -357,7 +357,7 @@ QString SpecAbstract::recordTypeIdToString(RECORD_TYPES id)
     return sResult;
 }
 
-QString SpecAbstract::recordNameIdToString(RECORD_NAMES id)
+QString SpecAbstract::recordNameIdToString(RECORD_NAME id)
 {
     QString sResult=tr("Unknown");
 
@@ -706,7 +706,7 @@ QString SpecAbstract::findEnigmaVersion(QIODevice *pDevice, qint64 nOffset, qint
     return sResult;
 }
 
-SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, SpecAbstract::ID parentId, SCAN_OPTIONS *pOptions)
+SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, SpecAbstract::ID parentId, SCAN_OPTIONS *pOptions, qint64 nOffset)
 {
     QElapsedTimer timer;
     timer.start();
@@ -719,7 +719,7 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
     result.basic_info.id.filetype=RECORD_FILETYPE_BINARY;
     result.basic_info.id.filepart=RECORD_FILEPART_HEADER;
     result.basic_info.id.uuid=QUuid::createUuid();
-    result.basic_info.nOffset=0;
+    result.basic_info.nOffset=nOffset;
     result.basic_info.nSize=pDevice->size();
     result.basic_info.sHeaderSignature=binary.getSignature(0,150);
     result.basic_info.bDeepScan=pOptions->bDeepScan;
@@ -786,7 +786,7 @@ SpecAbstract::BINARYINFO_STRUCT SpecAbstract::getBinaryInfo(QIODevice *pDevice, 
     return result;
 }
 
-SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, SpecAbstract::ID parentId, SpecAbstract::SCAN_OPTIONS *pOptions)
+SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, SpecAbstract::ID parentId, SpecAbstract::SCAN_OPTIONS *pOptions, qint64 nOffset)
 {
     QElapsedTimer timer;
     timer.start();
@@ -799,7 +799,7 @@ SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, Sp
     result.basic_info.id.filetype=RECORD_FILETYPE_MSDOS;
     result.basic_info.id.filepart=RECORD_FILEPART_HEADER;
     result.basic_info.id.uuid=QUuid::createUuid();
-    result.basic_info.nOffset=0;
+    result.basic_info.nOffset=nOffset;
     result.basic_info.nSize=pDevice->size();
     result.basic_info.sHeaderSignature=msdos.getSignature(0,150);
     result.basic_info.bDeepScan=pOptions->bDeepScan;
@@ -827,7 +827,7 @@ SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, Sp
     return result;
 }
 
-SpecAbstract::ELFINFO_STRUCT SpecAbstract::getELFInfo(QIODevice *pDevice, SpecAbstract::ID parentId, SpecAbstract::SCAN_OPTIONS *pOptions)
+SpecAbstract::ELFINFO_STRUCT SpecAbstract::getELFInfo(QIODevice *pDevice, SpecAbstract::ID parentId, SpecAbstract::SCAN_OPTIONS *pOptions, qint64 nOffset)
 {
     QElapsedTimer timer;
     timer.start();
@@ -844,7 +844,7 @@ SpecAbstract::ELFINFO_STRUCT SpecAbstract::getELFInfo(QIODevice *pDevice, SpecAb
         result.basic_info.id.filetype=result.bIs64?RECORD_FILETYPE_ELF64:RECORD_FILETYPE_ELF32;
         result.basic_info.id.filepart=RECORD_FILEPART_HEADER;
         result.basic_info.id.uuid=QUuid::createUuid();
-        result.basic_info.nOffset=0;
+        result.basic_info.nOffset=nOffset;
         result.basic_info.nSize=pDevice->size();
         result.basic_info.sHeaderSignature=elf.getSignature(0,150);
         result.basic_info.bDeepScan=pOptions->bDeepScan;
@@ -867,7 +867,7 @@ SpecAbstract::ELFINFO_STRUCT SpecAbstract::getELFInfo(QIODevice *pDevice, SpecAb
     return result;
 }
 
-SpecAbstract::MACHINFO_STRUCT SpecAbstract::getMACHInfo(QIODevice *pDevice, SpecAbstract::ID parentId, SpecAbstract::SCAN_OPTIONS *pOptions)
+SpecAbstract::MACHINFO_STRUCT SpecAbstract::getMACHInfo(QIODevice *pDevice, SpecAbstract::ID parentId, SpecAbstract::SCAN_OPTIONS *pOptions, qint64 nOffset)
 {
     QElapsedTimer timer;
     timer.start();
@@ -884,7 +884,7 @@ SpecAbstract::MACHINFO_STRUCT SpecAbstract::getMACHInfo(QIODevice *pDevice, Spec
         result.basic_info.id.filetype=result.bIs64?RECORD_FILETYPE_MACH64:RECORD_FILETYPE_MACH32;
         result.basic_info.id.filepart=RECORD_FILEPART_HEADER;
         result.basic_info.id.uuid=QUuid::createUuid();
-        result.basic_info.nOffset=0;
+        result.basic_info.nOffset=nOffset;
         result.basic_info.nSize=pDevice->size();
         result.basic_info.sHeaderSignature=mach.getSignature(0,150);
         result.basic_info.bDeepScan=pOptions->bDeepScan;
@@ -907,7 +907,7 @@ SpecAbstract::MACHINFO_STRUCT SpecAbstract::getMACHInfo(QIODevice *pDevice, Spec
     return result;
 }
 
-SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId, SpecAbstract::SCAN_OPTIONS *pOptions)
+SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice, SpecAbstract::ID parentId, SpecAbstract::SCAN_OPTIONS *pOptions, qint64 nOffset)
 {
     QElapsedTimer timer;
     timer.start();
@@ -924,7 +924,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
         result.basic_info.id.filetype=result.bIs64?RECORD_FILETYPE_PE64:RECORD_FILETYPE_PE32;
         result.basic_info.id.filepart=RECORD_FILEPART_HEADER;
         result.basic_info.id.uuid=QUuid::createUuid();
-        result.basic_info.nOffset=0;
+        result.basic_info.nOffset=nOffset;
         result.basic_info.nSize=pDevice->size();
         result.basic_info.sHeaderSignature=pe.getSignature(0,150);
         result.basic_info.bDeepScan=pOptions->bDeepScan;
@@ -1109,7 +1109,7 @@ SpecAbstract::PEINFO_STRUCT SpecAbstract::getPEInfo(QIODevice *pDevice,SpecAbstr
     return result;
 }
 
-SpecAbstract::_SCANS_STRUCT SpecAbstract::getScansStruct(quint32 nVariant, SpecAbstract::RECORD_FILETYPES filetype, SpecAbstract::RECORD_TYPES type, SpecAbstract::RECORD_NAMES name, QString sVersion, QString sInfo, qint64 nOffset)
+SpecAbstract::_SCANS_STRUCT SpecAbstract::getScansStruct(quint32 nVariant, SpecAbstract::RECORD_FILETYPE filetype, SpecAbstract::RECORD_TYPE type, SpecAbstract::RECORD_NAME name, QString sVersion, QString sInfo, qint64 nOffset)
 {
     _SCANS_STRUCT result={};
 
@@ -6236,7 +6236,7 @@ void SpecAbstract::MSDOS_handle_Tools(QIODevice *pDevice, bool bIsImage, SpecAbs
 //    }
 //}
 
-void SpecAbstract::updateVersion(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::SCAN_STRUCT> *map, SpecAbstract::RECORD_NAMES name, QString sVersion)
+void SpecAbstract::updateVersion(QMap<SpecAbstract::RECORD_NAME, SpecAbstract::SCAN_STRUCT> *map, SpecAbstract::RECORD_NAME name, QString sVersion)
 {
     if(map->contains(name))
     {
@@ -6246,7 +6246,7 @@ void SpecAbstract::updateVersion(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::
     }
 }
 
-void SpecAbstract::updateInfo(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::SCAN_STRUCT> *map, SpecAbstract::RECORD_NAMES name, QString sInfo)
+void SpecAbstract::updateInfo(QMap<SpecAbstract::RECORD_NAME, SpecAbstract::SCAN_STRUCT> *map, SpecAbstract::RECORD_NAME name, QString sInfo)
 {
     if(map->contains(name))
     {
@@ -6256,7 +6256,7 @@ void SpecAbstract::updateInfo(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::SCA
     }
 }
 
-void SpecAbstract::updateVersionAndInfo(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::SCAN_STRUCT> *map, SpecAbstract::RECORD_NAMES name, QString sVersion, QString sInfo)
+void SpecAbstract::updateVersionAndInfo(QMap<SpecAbstract::RECORD_NAME, SpecAbstract::SCAN_STRUCT> *map, SpecAbstract::RECORD_NAME name, QString sVersion, QString sInfo)
 {
     if(map->contains(name))
     {
@@ -6267,7 +6267,7 @@ void SpecAbstract::updateVersionAndInfo(QMap<SpecAbstract::RECORD_NAMES, SpecAbs
     }
 }
 
-bool SpecAbstract::isScanStructPresent(QList<SpecAbstract::SCAN_STRUCT> *pList, SpecAbstract::RECORD_FILETYPES filetype, SpecAbstract::RECORD_TYPES type, SpecAbstract::RECORD_NAMES name, QString sVersion, QString sInfo)
+bool SpecAbstract::isScanStructPresent(QList<SpecAbstract::SCAN_STRUCT> *pList, SpecAbstract::RECORD_FILETYPE filetype, SpecAbstract::RECORD_TYPE type, SpecAbstract::RECORD_NAME name, QString sVersion, QString sInfo)
 {
     bool bResult=false;
 
@@ -8885,6 +8885,7 @@ SpecAbstract::SCAN_STRUCT SpecAbstract::scansToScan(SpecAbstract::BASIC_INFO *pB
 
     result.id=pBasicInfo->id;
     result.nSize=pBasicInfo->nSize;
+    result.nOffset=pBasicInfo->nOffset;
     result.parentId=pBasicInfo->parentId;
     result.type=pScansStruct->type;
     result.name=pScansStruct->name;
@@ -8915,7 +8916,7 @@ SpecAbstract::BASIC_PE_INFO SpecAbstract::_ArrayToBasicPEInfo(const QByteArray *
     return result;
 }
 
-void SpecAbstract::memoryScan(QMap<RECORD_NAMES, _SCANS_STRUCT> *pMmREcords, QIODevice *pDevice, bool bIsImage, qint64 nOffset, qint64 nSize, SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2)
+void SpecAbstract::memoryScan(QMap<RECORD_NAME, _SCANS_STRUCT> *pMmREcords, QIODevice *pDevice, bool bIsImage, qint64 nOffset, qint64 nSize, SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPE fileType1, SpecAbstract::RECORD_FILETYPE fileType2)
 {
     if(nSize)
     {
@@ -8950,7 +8951,7 @@ void SpecAbstract::memoryScan(QMap<RECORD_NAMES, _SCANS_STRUCT> *pMmREcords, QIO
     }
 }
 
-void SpecAbstract::signatureScan(QMap<RECORD_NAMES, _SCANS_STRUCT> *pMapRecords, QString sSignature, SpecAbstract::SIGNATURE_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2)
+void SpecAbstract::signatureScan(QMap<RECORD_NAME, _SCANS_STRUCT> *pMapRecords, QString sSignature, SpecAbstract::SIGNATURE_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPE fileType1, SpecAbstract::RECORD_FILETYPE fileType2)
 {
     int nSignaturesCount=nRecordsSize/sizeof(SIGNATURE_RECORD);
 
@@ -8979,7 +8980,7 @@ void SpecAbstract::signatureScan(QMap<RECORD_NAMES, _SCANS_STRUCT> *pMapRecords,
     }
 }
 
-void SpecAbstract::resourcesScan(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::_SCANS_STRUCT> *pMapRecords, QList<QPE::RESOURCE_RECORD> *pListResources, SpecAbstract::RESOURCES_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2)
+void SpecAbstract::resourcesScan(QMap<SpecAbstract::RECORD_NAME, SpecAbstract::_SCANS_STRUCT> *pMapRecords, QList<QPE::RESOURCE_RECORD> *pListResources, SpecAbstract::RESOURCES_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPE fileType1, SpecAbstract::RECORD_FILETYPE fileType2)
 {
     int nSignaturesCount=nRecordsSize/sizeof(RESOURCES_RECORD);
 
@@ -9032,7 +9033,7 @@ void SpecAbstract::resourcesScan(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::
     }
 }
 
-void SpecAbstract::stringScan(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::_SCANS_STRUCT> *pMapRecords, QList<QString> *pListStrings, SpecAbstract::STRING_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2)
+void SpecAbstract::stringScan(QMap<SpecAbstract::RECORD_NAME, SpecAbstract::_SCANS_STRUCT> *pMapRecords, QList<QString> *pListStrings, SpecAbstract::STRING_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPE fileType1, SpecAbstract::RECORD_FILETYPE fileType2)
 {
     QList<quint32> listStringCRC;
     QList<quint32> listSignatureCRC;
@@ -9083,6 +9084,52 @@ void SpecAbstract::stringScan(QMap<SpecAbstract::RECORD_NAMES, SpecAbstract::_SC
             }
         }
     }
+}
+
+QByteArray SpecAbstract::serialize(SCAN_STRUCT ssRecord)
+{
+    QByteArray baResult;
+
+    QDataStream ds(baResult);
+
+    ds << ssRecord.nSize;
+    ds << ssRecord.nOffset;
+    ds << ssRecord.id.uuid;
+    ds << (quint32)ssRecord.id.filetype;
+    ds << (quint32)ssRecord.id.filepart;
+    ds << ssRecord.parentId.uuid;
+    ds << (quint32)ssRecord.parentId.filetype;
+    ds << (quint32)ssRecord.parentId.filepart;
+    ds << (quint32)ssRecord.type;
+    ds << (quint32)ssRecord.name;
+    ds << ssRecord.sVersion;
+    ds << ssRecord.sInfo;
+
+    return baResult;
+}
+
+SpecAbstract::SCAN_STRUCT SpecAbstract::deserialize(QByteArray baData)
+{
+    SCAN_STRUCT ssResult={};
+
+    QDataStream ds(baData);
+
+    quint32 nTemp=0;
+
+    ds >> ssResult.nSize;
+    ds >> ssResult.nOffset;
+    ds >> ssResult.id.uuid;
+    ds >> nTemp; ssResult.id.filetype=(RECORD_FILETYPE)nTemp;
+    ds >> nTemp; ssResult.id.filepart=(RECORD_FILEPART)nTemp;
+    ds >> ssResult.parentId.uuid;
+    ds >> nTemp; ssResult.parentId.filetype=(RECORD_FILETYPE)nTemp;
+    ds >> nTemp; ssResult.parentId.filepart=(RECORD_FILEPART)nTemp;
+    ds >> nTemp; ssResult.type=(RECORD_TYPE)nTemp;
+    ds >> nTemp; ssResult.name=(RECORD_NAME)nTemp;
+    ds >> ssResult.sVersion;
+    ds >> ssResult.sInfo;
+
+    return ssResult;
 }
 
 QList<SpecAbstract::VCL_STRUCT> SpecAbstract::PE_getVCLstruct(QIODevice *pDevice,bool bIsImage,qint64 nOffset,qint64 nSize,bool bIs64)

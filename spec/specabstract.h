@@ -35,7 +35,7 @@ class SpecAbstract : public QObject
 {
     Q_OBJECT
 public:
-    enum RECORD_FILETYPES
+    enum RECORD_FILETYPE
     {
         RECORD_FILETYPE_UNKNOWN=0,
         RECORD_FILETYPE_BINARY,
@@ -51,13 +51,13 @@ public:
         RECORD_FILETYPE_MACH64,
         RECORD_FILETYPE_TEXT
     };
-    enum RECORD_FILEPARTS
+    enum RECORD_FILEPART
     {
         RECORD_FILEPART_UNKNOWN=0,
         RECORD_FILEPART_HEADER,
         RECORD_FILEPART_OVERLAY
     };
-    enum RECORD_TYPES
+    enum RECORD_TYPE
     {
         RECORD_TYPE_UNKNOWN=0,
         RECORD_TYPE_ARCHIVE,
@@ -82,7 +82,7 @@ public:
         RECORD_TYPE_SOURCECODE,
         RECORD_TYPE_TOOL
     };
-    enum RECORD_NAMES
+    enum RECORD_NAME
     {
         RECORD_NAME_UNKNOWN=0,
         RECORD_NAME_32LITE,
@@ -330,31 +330,24 @@ public:
         RECORD_NAME_ZPROTECT
     };
 
-    enum RECORD_VERSIONS
-    {
-        RECORD_VERSION_UNKNOWN=0,
-        RECORD_VERSION_32LITE
-    };
-
     struct ID
     {
         QUuid uuid;
-        RECORD_FILETYPES filetype;
-        RECORD_FILEPARTS filepart;
+        RECORD_FILETYPE filetype;
+        RECORD_FILEPART filepart;
     };
 
     // TODO flags(static scan/emul/heur)
     struct SCAN_STRUCT
     {
         qint64 nSize;
+        qint64 nOffset;
         ID id;
         ID parentId;
-        RECORD_TYPES type;
-        RECORD_NAMES name;
-        RECORD_VERSIONS version;
+        RECORD_TYPE type;
+        RECORD_NAME name;
         QString sVersion;
         QString sInfo;
-        QByteArray baExtra;
     };
 
     struct SCAN_RESULT
@@ -367,20 +360,19 @@ public:
     struct _SCANS_STRUCT
     {
         quint32 nVariant;
-        RECORD_FILETYPES filetype;
-        RECORD_TYPES type;
-        RECORD_NAMES name;
+        RECORD_FILETYPE filetype;
+        RECORD_TYPE type;
+        RECORD_NAME name;
         QString sVersion;
         QString sInfo;
-
         qint64 nOffset;
     };
 
     struct SCAN_RECORD
     {
-        RECORD_FILETYPES filetype;
-        RECORD_TYPES type;
-        RECORD_NAMES name;
+        RECORD_FILETYPE filetype;
+        RECORD_TYPE type;
+        RECORD_NAME name;
         QString sVersion;
         QString sInfo;
     };
@@ -398,7 +390,7 @@ public:
         qint64 nOffset;
         qint64 nSize;
         QString sHeaderSignature;
-        QMap<RECORD_NAMES,_SCANS_STRUCT> mapHeaderDetects;
+        QMap<RECORD_NAME,_SCANS_STRUCT> mapHeaderDetects;
         QList<SpecAbstract::SCAN_STRUCT> listDetects;
         bool bDeepScan;
     };
@@ -412,18 +404,18 @@ public:
         QBinary::UNICODE_TYPE unicodeType;
         QString sHeaderText;
 
-        QMap<RECORD_NAMES,_SCANS_STRUCT> mapTextHeaderDetects;
+        QMap<RECORD_NAME,_SCANS_STRUCT> mapTextHeaderDetects;
 
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultTexts;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultArchives;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultCertificates;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultDebugData;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultInstallerData;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultSFXData;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultFormats;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultDatabases;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultImages;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultProtectorData;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultTexts;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultArchives;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultCertificates;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultDebugData;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultInstallerData;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultSFXData;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultFormats;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultDatabases;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultImages;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultProtectorData;
     };
 
     struct MSDOSINFO_STRUCT
@@ -431,8 +423,8 @@ public:
         BASIC_INFO basic_info;
         QString sEntryPointSignature;
 
-        QMap<RECORD_NAMES,_SCANS_STRUCT> mapEntryPointDetects;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultCompilers;
+        QMap<RECORD_NAME,_SCANS_STRUCT> mapEntryPointDetects;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultCompilers;
     };
 
     struct ELFINFO_STRUCT
@@ -476,11 +468,11 @@ public:
 
         QPE::CLI_INFO cliInfo;
 
-        QMap<RECORD_NAMES,_SCANS_STRUCT> mapOverlayDetects;
-        QMap<RECORD_NAMES,_SCANS_STRUCT> mapEntryPointDetects;
-        QMap<RECORD_NAMES,_SCANS_STRUCT> mapImportDetects;
-        QMap<RECORD_NAMES,_SCANS_STRUCT> mapDotAnsistringsDetects;
-        QMap<RECORD_NAMES,_SCANS_STRUCT> mapDotUnicodestringsDetects;
+        QMap<RECORD_NAME,_SCANS_STRUCT> mapOverlayDetects;
+        QMap<RECORD_NAME,_SCANS_STRUCT> mapEntryPointDetects;
+        QMap<RECORD_NAME,_SCANS_STRUCT> mapImportDetects;
+        QMap<RECORD_NAME,_SCANS_STRUCT> mapDotAnsistringsDetects;
+        QMap<RECORD_NAME,_SCANS_STRUCT> mapDotUnicodestringsDetects;
 
         qint32 nEntryPointSection;
         qint32 nResourceSection;
@@ -515,16 +507,16 @@ public:
         qint64 nImportSectionOffset;
         qint64 nImportSectionSize;
 
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultLinkers;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultCompilers;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultLibraries;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultTools;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultProtectors;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultPackers;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultInstallers;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultSFX;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultNETObfuscators;
-        QMap<RECORD_NAMES,SCAN_STRUCT> mapResultDongleProtection;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultLinkers;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultCompilers;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultLibraries;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultTools;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultProtectors;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultPackers;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultInstallers;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultSFX;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultNETObfuscators;
+        QMap<RECORD_NAME,SCAN_STRUCT> mapResultDongleProtection;
     };
 
     struct SCAN_OPTIONS
@@ -546,9 +538,9 @@ public:
     struct SIGNATURE_RECORD
     {
         quint32 nVariant;
-        const RECORD_FILETYPES filetype;
-        const RECORD_TYPES type;
-        const RECORD_NAMES name;
+        const RECORD_FILETYPE filetype;
+        const RECORD_TYPE type;
+        const RECORD_NAME name;
         const char *pszVersion;
         const char *pszInfo;
         const char *pszSignature;
@@ -557,9 +549,9 @@ public:
     struct STRING_RECORD
     {
         quint32 nVariant;
-        const RECORD_FILETYPES filetype;
-        const RECORD_TYPES type;
-        const RECORD_NAMES name;
+        const RECORD_FILETYPE filetype;
+        const RECORD_TYPE type;
+        const RECORD_NAME name;
         const char *pszVersion;
         const char *pszInfo;
         const char *pszString;
@@ -568,9 +560,9 @@ public:
     struct SCANMEMORY_RECORD
     {
         quint32 nVariant;
-        const RECORD_FILETYPES filetype;
-        const RECORD_TYPES type;
-        const RECORD_NAMES name;
+        const RECORD_FILETYPE filetype;
+        const RECORD_TYPE type;
+        const RECORD_NAME name;
         const char *pszVersion;
         const char *pszInfo;
         const char *pData;
@@ -580,9 +572,9 @@ public:
     struct RESOURCES_RECORD
     {
         quint32 nVariant;
-        const RECORD_FILETYPES filetype;
-        const RECORD_TYPES type;
-        const RECORD_NAMES name;
+        const RECORD_FILETYPE filetype;
+        const RECORD_TYPE type;
+        const RECORD_NAME name;
         const char *pszVersion;
         const char *pszInfo;
         bool bIsString1;
@@ -623,10 +615,10 @@ public:
 
     explicit SpecAbstract(QObject *parent = 0);
     static QString append(QString sResult,QString sString);
-    static QString recordFiletypeIdToString(RECORD_FILETYPES id);
-    static QString recordFilepartIdToString(RECORD_FILEPARTS id);
-    static QString recordTypeIdToString(RECORD_TYPES id);
-    static QString recordNameIdToString(RECORD_NAMES id);
+    static QString recordFiletypeIdToString(RECORD_FILETYPE id);
+    static QString recordFilepartIdToString(RECORD_FILEPART id);
+    static QString recordTypeIdToString(RECORD_TYPE id);
+    static QString recordNameIdToString(RECORD_NAME id);
 
     static SpecAbstract::UNPACK_OPTIONS getPossibleUnpackOptions(QIODevice *pDevice, bool bIsImage);
 
@@ -638,13 +630,13 @@ public:
 
     static QString findEnigmaVersion(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
-    static BINARYINFO_STRUCT getBinaryInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions);
-    static MSDOSINFO_STRUCT getMSDOSInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions);
-    static ELFINFO_STRUCT getELFInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions);
-    static MACHINFO_STRUCT getMACHInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions);
-    static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions);
+    static BINARYINFO_STRUCT getBinaryInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions,qint64 nOffset);
+    static MSDOSINFO_STRUCT getMSDOSInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions,qint64 nOffset);
+    static ELFINFO_STRUCT getELFInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions,qint64 nOffset);
+    static MACHINFO_STRUCT getMACHInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions,qint64 nOffset);
+    static PEINFO_STRUCT getPEInfo(QIODevice *pDevice,SpecAbstract::ID parentId,SpecAbstract::SCAN_OPTIONS *pOptions,qint64 nOffset);
 
-    static _SCANS_STRUCT getScansStruct(quint32 nVariant,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo,qint64 nOffset);
+    static _SCANS_STRUCT getScansStruct(quint32 nVariant,RECORD_FILETYPE filetype,RECORD_TYPE type,RECORD_NAME name,QString sVersion,QString sInfo,qint64 nOffset);
 
     static void PE_handle_import(QIODevice *pDevice,bool bIsImage,PEINFO_STRUCT *pPEInfo);
     static void PE_handle_Protection(QIODevice *pDevice,bool bIsImage,PEINFO_STRUCT *pPEInfo);
@@ -680,11 +672,11 @@ public:
 
     static void MSDOS_handle_Tools(QIODevice *pDevice, bool bIsImage, MSDOSINFO_STRUCT *pMSDOSInfo);
 
-    static void updateVersion(QMap<RECORD_NAMES,SCAN_STRUCT> *map,RECORD_NAMES name,QString sVersion);
-    static void updateInfo(QMap<RECORD_NAMES,SCAN_STRUCT> *map,RECORD_NAMES name,QString sInfo);
-    static void updateVersionAndInfo(QMap<RECORD_NAMES,SCAN_STRUCT> *map,RECORD_NAMES name,QString sVersion,QString sInfo);
+    static void updateVersion(QMap<RECORD_NAME,SCAN_STRUCT> *map,RECORD_NAME name,QString sVersion);
+    static void updateInfo(QMap<RECORD_NAME,SCAN_STRUCT> *map,RECORD_NAME name,QString sInfo);
+    static void updateVersionAndInfo(QMap<RECORD_NAME,SCAN_STRUCT> *map,RECORD_NAME name,QString sVersion,QString sInfo);
 
-    static bool isScanStructPresent(QList<SpecAbstract::SCAN_STRUCT> *pList,RECORD_FILETYPES filetype,RECORD_TYPES type,RECORD_NAMES name,QString sVersion,QString sInfo);
+    static bool isScanStructPresent(QList<SpecAbstract::SCAN_STRUCT> *pList,RECORD_FILETYPE filetype,RECORD_TYPE type,RECORD_NAME name,QString sVersion,QString sInfo);
 
     static bool checkVersionString(QString sVersion);
     static VI_STRUCT PE_get_UPX_vi(QIODevice *pDevice,bool bIsImage,PEINFO_STRUCT *pPEInfo);
@@ -697,7 +689,7 @@ public:
     static VCL_PACKAGEINFO PE_getVCLPackageInfo(QIODevice *pDevice,bool bIsImage,QList<QPE::RESOURCE_RECORD> *pListResources);
     static SpecAbstract::_SCANS_STRUCT PE_getRichSignatureDescription(quint32 nRichID);
 
-    static QList<SCAN_STRUCT> mapToList(QMap<RECORD_NAMES,SCAN_STRUCT> *pMapRecords);
+    static QList<SCAN_STRUCT> mapToList(QMap<RECORD_NAME,SCAN_STRUCT> *pMapRecords);
     //    static SCAN_STRUCT getScanStruct(QMap<RECORD_NAMES,SCANS_STRUCT> *pMapDetects,BASIC_INFO *pBasicInfo,RECORD_NAMES recordName);
 
     static SCAN_STRUCT scansToScan(BASIC_INFO *pBasicInfo,_SCANS_STRUCT *pScansStruct);
@@ -705,11 +697,13 @@ public:
     static QByteArray _BasicPEInfoToArray(BASIC_PE_INFO *pInfo);
     static BASIC_PE_INFO _ArrayToBasicPEInfo(const QByteArray *pbaArray);
 
-    static void memoryScan(QMap<RECORD_NAMES,_SCANS_STRUCT> *pMapRecords,QIODevice *pDevice,bool bIsImage,qint64 nOffset,qint64 nSize,SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPES fileType1, SpecAbstract::RECORD_FILETYPES fileType2);
-    static void signatureScan(QMap<RECORD_NAMES,_SCANS_STRUCT> *pMapRecords,QString sSignature,SIGNATURE_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
-    static void resourcesScan(QMap<RECORD_NAMES,_SCANS_STRUCT> *pMapRecords,QList<QPE::RESOURCE_RECORD> *pListResources,RESOURCES_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
-    static void stringScan(QMap<RECORD_NAMES,_SCANS_STRUCT> *pMapRecords,QList<QString> *pListStrings,STRING_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPES fileType1,RECORD_FILETYPES fileType2);
+    static void memoryScan(QMap<RECORD_NAME,_SCANS_STRUCT> *pMapRecords,QIODevice *pDevice,bool bIsImage,qint64 nOffset,qint64 nSize,SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPE fileType1, SpecAbstract::RECORD_FILETYPE fileType2);
+    static void signatureScan(QMap<RECORD_NAME,_SCANS_STRUCT> *pMapRecords,QString sSignature,SIGNATURE_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPE fileType1,RECORD_FILETYPE fileType2);
+    static void resourcesScan(QMap<RECORD_NAME,_SCANS_STRUCT> *pMapRecords,QList<QPE::RESOURCE_RECORD> *pListResources,RESOURCES_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPE fileType1,RECORD_FILETYPE fileType2);
+    static void stringScan(QMap<RECORD_NAME,_SCANS_STRUCT> *pMapRecords,QList<QString> *pListStrings,STRING_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPE fileType1,RECORD_FILETYPE fileType2);
 
+    static QByteArray serialize(SCAN_STRUCT ssRecord);
+    static SCAN_STRUCT deserialize(QByteArray baData);
 protected:
     void _errorMessage(QString sMessage);
     void _infoMessage(QString sMessage);

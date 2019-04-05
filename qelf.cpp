@@ -430,7 +430,7 @@ QMap<quint64, QString> QELF::getTypesS()
     return mapResult;
 }
 
-QMap<quint64, QString> QELF::getHeaderMachineList()
+QMap<quint64, QString> QELF::getMachines()
 {
     QMap<quint64, QString> mapResult;
     mapResult.insert(0,"EM_NONE"); // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_S_Elf.h
@@ -471,6 +471,50 @@ QMap<quint64, QString> QELF::getHeaderMachineList()
     mapResult.insert(0x9041,"EM_CYGNUS_M32R");
     mapResult.insert(0xA390,"EM_S390_OLD");
     mapResult.insert(0xbeef,"EM_CYGNUS_MN10300");
+    return mapResult;
+}
+
+QMap<quint64, QString> QELF::getMachinesS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"NONE"); // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_S_Elf.h
+    mapResult.insert(1,"M32");
+    mapResult.insert(2,"SPARC");
+    mapResult.insert(3,"386");
+    mapResult.insert(4,"68K");
+    mapResult.insert(5,"88K");
+    mapResult.insert(6,"486"); /* Perhaps disused */
+    mapResult.insert(7,"860");
+    mapResult.insert(8,"MIPS");
+    mapResult.insert(9,"S370");
+    mapResult.insert(10,"MIPS_RS3_LE");
+    mapResult.insert(15,"PARISC");
+    mapResult.insert(18,"SPARC32PLUS");
+    mapResult.insert(20,"PPC");
+    mapResult.insert(21,"PPC64");
+    mapResult.insert(22,"S390");
+    mapResult.insert(23,"SPU");
+    mapResult.insert(40,"ARM");
+    mapResult.insert(42,"SH");
+    mapResult.insert(43,"SPARCV9");
+    mapResult.insert(50,"IA_64");
+    mapResult.insert(62,"X86_64");
+    mapResult.insert(76,"CRIS");
+    mapResult.insert(87,"V850");
+    mapResult.insert(88,"M32R");
+    mapResult.insert(89,"MN10300");
+    mapResult.insert(92,"OPENRISC");
+    mapResult.insert(106,"BLACKFIN");
+    mapResult.insert(113,"ALTERA_NIOS2");
+    mapResult.insert(140,"TI_C6000");
+    mapResult.insert(183,"AARCH64");
+    mapResult.insert(0x5441,"FRV");
+    mapResult.insert(0x18ad,"AVR32");
+    mapResult.insert(0x9026,"ALPHA");
+    mapResult.insert(0x9080,"CYGNUS_V850");
+    mapResult.insert(0x9041,"CYGNUS_M32R");
+    mapResult.insert(0xA390,"S390_OLD");
+    mapResult.insert(0xbeef,"CYGNUS_MN10300");
     return mapResult;
 }
 
