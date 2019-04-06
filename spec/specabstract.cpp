@@ -6201,6 +6201,14 @@ void SpecAbstract::Binary_handle_FixDetects(QIODevice *pDevice, bool bIsImage, S
     {
         pBinaryInfo->mapResultArchives.remove(RECORD_NAME_ZIP);
     }
+
+    if(pBinaryInfo->mapResultFormats.contains(RECORD_NAME_PDF))
+    {
+        pBinaryInfo->mapResultTexts.clear();
+
+        pBinaryInfo->mapResultFormats[RECORD_NAME_PDF].id.filetype=RECORD_FILETYPE_BINARY;
+        pBinaryInfo->basic_info.id.filetype=RECORD_FILETYPE_BINARY;
+    }
 }
 
 void SpecAbstract::MSDOS_handle_Tools(QIODevice *pDevice, bool bIsImage, SpecAbstract::MSDOSINFO_STRUCT *pMSDOSInfo)
