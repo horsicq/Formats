@@ -490,8 +490,8 @@ public:
         qint64 nImageBaseAddress;
         quint8 nMinorLinkerVersion;
         quint8 nMajorLinkerVersion;
-        quint8 nMinorImageVersion;
-        quint8 nMajorImageVersion;
+        quint16 nMinorImageVersion;
+        quint16 nMajorImageVersion;
         bool bIs64;
 
         qint64 nHeaderOffset;
