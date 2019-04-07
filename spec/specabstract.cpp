@@ -795,7 +795,7 @@ SpecAbstract::MSDOSINFO_STRUCT SpecAbstract::getMSDOSInfo(QIODevice *pDevice, Sp
 
     MSDOSINFO_STRUCT result={};
 
-    QMSDOS msdos(pDevice,pOptions->bIsImage);
+    XMSDOS msdos(pDevice,pOptions->bIsImage);
 
     result.basic_info.parentId=parentId;
     result.basic_info.id.filetype=RECORD_FILETYPE_MSDOS;
@@ -6220,7 +6220,7 @@ void SpecAbstract::Binary_handle_FixDetects(QIODevice *pDevice, bool bIsImage, S
 
 void SpecAbstract::MSDOS_handle_Tools(QIODevice *pDevice, bool bIsImage, SpecAbstract::MSDOSINFO_STRUCT *pMSDOSInfo)
 {
-    QMSDOS msdos(pDevice,bIsImage);
+    XMSDOS msdos(pDevice,bIsImage);
 
     if(msdos.isValid())
     {
