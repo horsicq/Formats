@@ -7,19 +7,19 @@ HEADERS += \
 SOURCES += \
     $$PWD/specabstract.cpp
 
-!contains(XCONFIG, qpe) {
-    XCONFIG += qpe
-    include(../qpe.pri)
+!contains(XCONFIG, xpe) {
+    XCONFIG += xpe
+    include(../xpe.pri)
 }
 
-!contains(XCONFIG, qelf) {
-    XCONFIG += qelf
-    include(../qelf.pri)
+!contains(XCONFIG, xelf) {
+    XCONFIG += xelf
+    include(../xelf.pri)
 }
 
-!contains(XCONFIG, qmach) {
-    XCONFIG += qmach
-    include(../qmach.pri)
+!contains(XCONFIG, xmach) {
+    XCONFIG += xmach
+    include(../xmach.pri)
 }
 
 !contains(XCONFIG, xarchive) {

@@ -26,9 +26,9 @@
 #include <QDataStream>
 #include <QElapsedTimer>
 #include <QUuid>
-#include "qpe.h"
-#include "qelf.h"
-#include "qmach.h"
+#include "xpe.h"
+#include "xelf.h"
+#include "xmach.h"
 #include "xzip.h"
 
 class SpecAbstract : public QObject
@@ -402,7 +402,7 @@ public:
 
         bool bIsPlainText;
         bool bIsUTF8;
-        QBinary::UNICODE_TYPE unicodeType;
+        XBinary::UNICODE_TYPE unicodeType;
         QString sHeaderText;
 
         QMap<RECORD_NAME,_SCANS_STRUCT> mapTextHeaderDetects;
@@ -459,15 +459,15 @@ public:
             S_IMAGE_OPTIONAL_HEADER64 optionalHeader64;
         } optional_header;
         QList<S_IMAGE_SECTION_HEADER> listSectionHeaders;
-        QList<QPE::SECTION_RECORD> listSectionRecords;
-        QList<QPE::IMPORT_HEADER> listImports;
-        QPE::EXPORT_HEADER export_header;
-        QList<QPE::RESOURCE_RECORD> listResources;
-        QList<QPE::RICH_RECORD> listRichSignatures;
+        QList<XPE::SECTION_RECORD> listSectionRecords;
+        QList<XPE::IMPORT_HEADER> listImports;
+        XPE::EXPORT_HEADER export_header;
+        QList<XPE::RESOURCE_RECORD> listResources;
+        QList<XPE::RICH_RECORD> listRichSignatures;
         QString sResourceManifest;
-        QPE::RESOURCE_VERSION resVersion;
+        XPE::RESOURCE_VERSION resVersion;
 
-        QPE::CLI_INFO cliInfo;
+        XPE::CLI_INFO cliInfo;
 
         QMap<RECORD_NAME,_SCANS_STRUCT> mapOverlayDetects;
         QMap<RECORD_NAME,_SCANS_STRUCT> mapEntryPointDetects;
@@ -687,7 +687,7 @@ public:
     static bool PE_isValid_UPX(QIODevice *pDevice,bool bIsImage,PEINFO_STRUCT *pPEInfo);
 
     static QList<VCL_STRUCT> PE_getVCLstruct(QIODevice *pDevice,bool bIsImage,qint64 nOffset,qint64 nSize,bool bIs64);
-    static VCL_PACKAGEINFO PE_getVCLPackageInfo(QIODevice *pDevice,bool bIsImage,QList<QPE::RESOURCE_RECORD> *pListResources);
+    static VCL_PACKAGEINFO PE_getVCLPackageInfo(QIODevice *pDevice,bool bIsImage,QList<XPE::RESOURCE_RECORD> *pListResources);
     static SpecAbstract::_SCANS_STRUCT PE_getRichSignatureDescription(quint32 nRichID);
 
     static QList<SCAN_STRUCT> mapToList(QMap<RECORD_NAME,SCAN_STRUCT> *pMapRecords);
@@ -700,7 +700,7 @@ public:
 
     static void memoryScan(QMap<RECORD_NAME,_SCANS_STRUCT> *pMapRecords,QIODevice *pDevice,bool bIsImage,qint64 nOffset,qint64 nSize,SpecAbstract::SCANMEMORY_RECORD *pRecords, int nRecordsSize, SpecAbstract::RECORD_FILETYPE fileType1, SpecAbstract::RECORD_FILETYPE fileType2);
     static void signatureScan(QMap<RECORD_NAME,_SCANS_STRUCT> *pMapRecords,QString sSignature,SIGNATURE_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPE fileType1,RECORD_FILETYPE fileType2);
-    static void resourcesScan(QMap<RECORD_NAME,_SCANS_STRUCT> *pMapRecords,QList<QPE::RESOURCE_RECORD> *pListResources,RESOURCES_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPE fileType1,RECORD_FILETYPE fileType2);
+    static void resourcesScan(QMap<RECORD_NAME,_SCANS_STRUCT> *pMapRecords,QList<XPE::RESOURCE_RECORD> *pListResources,RESOURCES_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPE fileType1,RECORD_FILETYPE fileType2);
     static void stringScan(QMap<RECORD_NAME,_SCANS_STRUCT> *pMapRecords,QList<QString> *pListStrings,STRING_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPE fileType1,RECORD_FILETYPE fileType2);
 
     static QByteArray serialize(SCAN_STRUCT ssRecord);
