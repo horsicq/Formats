@@ -256,6 +256,7 @@ SpecAbstract::STRING_RECORD _TEXT_records[]={
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_PYTHON,                       "",             "",                     "import"},
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_HTML,                         "",             "",                     "^<(!DOCTYPE )?[Hh][Tt][Mm][Ll]"},
     {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_XML,                          "",             "",                     "^<\\?xml"},
+    {0, SpecAbstract::RECORD_FILETYPE_TEXT,     SpecAbstract::RECORD_TYPE_SOURCECODE,       SpecAbstract::RECORD_NAME_PHP,                          "",             "",                     "^<\\?php"},
 };
 
 SpecAbstract::SIGNATURE_RECORD _MSDOS_entrypoint_records[]=
@@ -536,6 +537,7 @@ QString SpecAbstract::recordNameIdToString(RECORD_NAME id)
         case RECORD_NAME_PETITE:                            sResult=QString("Petite");                                      break;
         case RECORD_NAME_PEX:                               sResult=QString("PeX");                                         break;
         case RECORD_NAME_PHOENIXPROTECTOR:                  sResult=QString("Phoenix Protector");                           break;
+        case RECORD_NAME_PHP:                               sResult=QString("PHP");                                         break;
         case RECORD_NAME_PKLITE32:                          sResult=QString("PKLITE32");                                    break;
         case RECORD_NAME_PLAIN:                             sResult=QString("Plain");                                       break;
         case RECORD_NAME_PNG:                               sResult=QString("PNG");                                         break;
@@ -5794,6 +5796,11 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice,bool bIsImage, SpecAbs
             _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_XML);
             ss.sVersion=QBinary::regExp("version=['\"](.*?)['\"]",pBinaryInfo->sHeaderText,1);
 
+            pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
+        }
+        else if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_PHP))
+        {
+            _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_PHP);
             pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
         }
 
