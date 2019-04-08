@@ -239,6 +239,21 @@ public:
         QList<QString> listUnicodeStrings;
     };
 
+    struct S_IMAGE_IMPORT_DESCRIPTOR_EX
+    {
+        union
+        {
+            quint32   Characteristics;
+            quint32   OriginalFirstThunk;
+        };
+        quint32   TimeDateStamp;
+        quint32   ForwarderChain;
+        quint32   Name;
+        quint32   FirstThunk;
+        //
+        QString sLibrary;
+    };
+
     explicit XPE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
     virtual bool isValid();
     bool is64();

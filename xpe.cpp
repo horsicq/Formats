@@ -28,7 +28,7 @@ bool XPE::isValid()
 {
     quint16 magic=get_magic();
 
-    if((magic==S_IMAGE_DOS_SIGNATURE))
+    if(magic==(quint16)S_IMAGE_DOS_SIGNATURE)
     {
         qint32 lfanew=get_lfanew();
 
@@ -1677,7 +1677,7 @@ QList<S_IMAGE_IMPORT_DESCRIPTOR> XPE::getImportDescriptors()
     return listResult;
 }
 
-QList<S_IMAGE_IMPORT_DESCRIPTOR_EX> XPE::getImportDescriptorsEx()
+QList<XPE::S_IMAGE_IMPORT_DESCRIPTOR_EX> XPE::getImportDescriptorsEx()
 {
     QList<S_IMAGE_IMPORT_DESCRIPTOR_EX> listResult;
 

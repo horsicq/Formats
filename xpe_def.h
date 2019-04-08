@@ -26,7 +26,6 @@
 #define S_IMAGE_NT_SIGNATURE 0x00004550  // PE00
 #define S_IMAGE_NUMBEROF_DIRECTORY_ENTRIES 16
 
-
 #define S_IMAGE_DIRECTORY_ENTRY_EXPORT          0   // Export Directory
 #define S_IMAGE_DIRECTORY_ENTRY_IMPORT          1   // Import Directory
 #define S_IMAGE_DIRECTORY_ENTRY_RESOURCE        2   // Resource Directory
@@ -401,21 +400,6 @@ struct S_IMAGE_IMPORT_DESCRIPTOR
     quint32   ForwarderChain;
     quint32   Name;
     quint32   FirstThunk;
-};
-
-struct S_IMAGE_IMPORT_DESCRIPTOR_EX // TODO move to QPE
-{
-    union
-    {
-        quint32   Characteristics;
-        quint32   OriginalFirstThunk;
-    };
-    quint32   TimeDateStamp;
-    quint32   ForwarderChain;
-    quint32   Name;
-    quint32   FirstThunk;
-    //
-    QString sLibrary;
 };
 
 //struct _VS_VERSION_INFO
