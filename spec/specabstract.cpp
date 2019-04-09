@@ -9101,7 +9101,7 @@ void SpecAbstract::stringScan(QMap<SpecAbstract::RECORD_NAME, SpecAbstract::_SCA
     }
 }
 
-QByteArray SpecAbstract::serialize(SCAN_STRUCT ssRecord)
+QByteArray SpecAbstract::serializeScanStruct(SCAN_STRUCT ssRecord, bool bIsHeader)
 {
     QByteArray baResult;
 
@@ -9119,11 +9119,12 @@ QByteArray SpecAbstract::serialize(SCAN_STRUCT ssRecord)
     ds << (quint32)ssRecord.name;
     ds << ssRecord.sVersion;
     ds << ssRecord.sInfo;
+    ds << bIsHeader;
 
     return baResult;
 }
 
-SpecAbstract::SCAN_STRUCT SpecAbstract::deserialize(QByteArray baData)
+SpecAbstract::SCAN_STRUCT SpecAbstract::deserializeScanStruct(QByteArray baData, bool *pbIsHeader)
 {
     SCAN_STRUCT ssResult={};
 
@@ -9143,6 +9144,7 @@ SpecAbstract::SCAN_STRUCT SpecAbstract::deserialize(QByteArray baData)
     ds >> nTemp; ssResult.name=(RECORD_NAME)nTemp;
     ds >> ssResult.sVersion;
     ds >> ssResult.sInfo;
+    ds >> *pbIsHeader;
 
     return ssResult;
 }

@@ -1442,14 +1442,15 @@ QString XBinary::_createSignature(QString sSignature1, QString sSignature2)
 
 bool XBinary::compareSignatureOnAddress(QString sSignature, qint64 nAddress,ADDRESS_SEGMENT segment)
 {
+    bool bResult=false;
     qint64 nOffset=addressToOffset(nAddress,segment);
 
     if(nOffset!=-1)
     {
-        return compareSignature(sSignature,nOffset);
+        bResult=compareSignature(sSignature,nOffset);
     }
 
-    return false;
+    return bResult;
 }
 
 qint64 XBinary::getEntryPointOffset()
@@ -1503,6 +1504,8 @@ bool XBinary::compareEntryPoint(QString sSignature, qint64 nOffset)
 
 bool XBinary::moveMemory(qint64 nSourceOffset,qint64 nDestOffset, qint64 nSize)
 {
+    bool bResult=false;
+
     if(nDestOffset==nSourceOffset)
     {
         return true;
@@ -1519,16 +1522,16 @@ bool XBinary::moveMemory(qint64 nSourceOffset,qint64 nDestOffset, qint64 nSize)
 
     if(nDelta>0)
     {
-        copyMemory(nSourceOffset,nDestOffset,nSize,nDelta,true);
+        bResult=copyMemory(nSourceOffset,nDestOffset,nSize,nDelta,true);
         zeroFill(nSourceOffset,nDelta);
     }
     else
     {
-        copyMemory(nSourceOffset,nDestOffset,nSize,-nDelta,false);
+        bResult=copyMemory(nSourceOffset,nDestOffset,nSize,-nDelta,false);
         zeroFill(nDestOffset+nSize,-nDelta);
     }
 
-    return false;
+    return bResult;
 }
 
 bool XBinary::dumpToFile(QString sFileName, const char *pData, qint64 nDataSize)

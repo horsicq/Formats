@@ -703,8 +703,8 @@ public:
     static void resourcesScan(QMap<RECORD_NAME,_SCANS_STRUCT> *pMapRecords,QList<XPE::RESOURCE_RECORD> *pListResources,RESOURCES_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPE fileType1,RECORD_FILETYPE fileType2);
     static void stringScan(QMap<RECORD_NAME,_SCANS_STRUCT> *pMapRecords,QList<QString> *pListStrings,STRING_RECORD *pRecords,int nRecordsSize,RECORD_FILETYPE fileType1,RECORD_FILETYPE fileType2);
 
-    static QByteArray serialize(SCAN_STRUCT ssRecord);
-    static SCAN_STRUCT deserialize(QByteArray baData);
+    static QByteArray serializeScanStruct(SCAN_STRUCT ssRecord,bool bIsHeader=false);
+    static SCAN_STRUCT deserializeScanStruct(QByteArray baData,bool *pbIsHeader=nullptr);
 protected:
     void _errorMessage(QString sMessage);
     void _infoMessage(QString sMessage);
