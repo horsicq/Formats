@@ -327,7 +327,6 @@ public:
 
     UNICODE_TYPE getUnicodeType();
 
-    // TODO uint64,uint16,uint8
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);
