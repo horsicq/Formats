@@ -20,7 +20,7 @@
 //
 #include "xmach.h"
 
-XMACH::XMACH(QIODevice *__pDevice, bool bIsImage): XBinary(__pDevice,bIsImage)
+XMACH::XMACH(QIODevice *__pDevice, bool bIsImage, qint64 nImageAddress): XBinary(__pDevice,bIsImage,nImageAddress)
 {
 
 }

@@ -28,7 +28,7 @@ class XMACH : public XBinary
 {
     Q_OBJECT
 public:
-    XMACH(QIODevice *__pDevice=nullptr,bool bIsImage=false);
+    XMACH(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
     ~XMACH();
 
     bool isValid();
