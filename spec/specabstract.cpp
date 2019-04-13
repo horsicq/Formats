@@ -5778,7 +5778,7 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice,bool bIsImage, SpecAbs
             _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_CCPP);
             pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
         }
-        else if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_PYTHON))
+        if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_PYTHON))
         {
             if((pBinaryInfo->sHeaderText.contains("class"))&&(pBinaryInfo->sHeaderText.contains("self")))
             {
@@ -5786,19 +5786,19 @@ void SpecAbstract::Binary_handle_Texts(QIODevice *pDevice,bool bIsImage, SpecAbs
                 pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
             }
         }
-        else if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_HTML))
+        if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_HTML))
         {
             _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_HTML);
             pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
         }
-        else if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_XML))
+        if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_XML))
         {
             _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_XML);
             ss.sVersion=XBinary::regExp("version=['\"](.*?)['\"]",pBinaryInfo->sHeaderText,1);
 
             pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
         }
-        else if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_PHP))
+        if(pBinaryInfo->mapTextHeaderDetects.contains(RECORD_NAME_PHP))
         {
             _SCANS_STRUCT ss=pBinaryInfo->mapTextHeaderDetects.value(RECORD_NAME_PHP);
             pBinaryInfo->mapResultTexts.insert(ss.name,scansToScan(&(pBinaryInfo->basic_info),&ss));
