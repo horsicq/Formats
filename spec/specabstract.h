@@ -213,6 +213,7 @@ public:
         RECORD_NAME_MFC,
         RECORD_NAME_MICROSOFTACCESS,
         RECORD_NAME_MICROSOFTC,
+        RECORD_NAME_MICROSOFTCOMPILEDHTMLHELP,
         RECORD_NAME_MICROSOFTCPP,
         RECORD_NAME_MICROSOFTEXCEL,
         RECORD_NAME_MICROSOFTLINKER,
@@ -614,7 +615,7 @@ public:
         QString sInfo;
     };
 
-    explicit SpecAbstract(QObject *parent = 0);
+    explicit SpecAbstract(QObject *parent = nullptr);
     static QString append(QString sResult,QString sString);
     static QString recordFiletypeIdToString(RECORD_FILETYPE id);
     static QString recordFilepartIdToString(RECORD_FILEPART id);
