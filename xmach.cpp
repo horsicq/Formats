@@ -140,3 +140,23 @@ void XMACH::setHeader_reserved(quint32 nValue)
 {
     write_uint32(offsetof(S_mach_header_64,reserved),nValue,isBigEndian());
 }
+
+QMap<quint64, QString> XMACH::getHeaderMagics()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0xfeedface,"MH_MAGIC");
+    mapResult.insert(0xcefaedfe,"MH_CIGAM");
+    mapResult.insert(0xfeedfacf,"MH_MAGIC_64");
+    mapResult.insert(0xcffaedfe,"MH_CIGAM_64");
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getHeaderMagicsS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0xfeedface,"MAGIC");
+    mapResult.insert(0xcefaedfe,"CIGAM");
+    mapResult.insert(0xfeedfacf,"MAGIC_64");
+    mapResult.insert(0xcffaedfe,"CIGAM_64");
+    return mapResult;
+}

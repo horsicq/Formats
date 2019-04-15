@@ -52,6 +52,9 @@ public:
     void setHeader_sizeofcmds(quint32 nValue);
     void setHeader_flags(quint32 nValue);
     void setHeader_reserved(quint32 nValue);
+
+    static QMap<quint64,QString> getHeaderMagics();
+    static QMap<quint64,QString> getHeaderMagicsS();
 };
 
 #endif // XMACH_H
