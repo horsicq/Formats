@@ -160,3 +160,61 @@ QMap<quint64, QString> XMACH::getHeaderMagicsS()
     mapResult.insert(0xcffaedfe,"CIGAM_64");
     return mapResult;
 }
+
+QMap<quint64, QString> XMACH::getHeaderCpuTypes()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(7,"CPU_TYPE_I386");
+    mapResult.insert(0x1000007,"CPU_TYPE_X86_64");
+    mapResult.insert(12,"CPU_TYPE_ARM");
+    mapResult.insert(14,"CPU_TYPE_SPARC");
+    mapResult.insert(18,"CPU_TYPE_POWERPC");
+    mapResult.insert(0x1000018,"CPU_TYPE_POWERPC64");
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getHeaderCpuTypesS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(7,"I386");
+    mapResult.insert(0x1000007,"X86_64");
+    mapResult.insert(12,"ARM");
+    mapResult.insert(14,"SPARC");
+    mapResult.insert(18,"POWERPC");
+    mapResult.insert(0x1000018,"POWERPC64");
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getHeaderFileTypes()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0x1,"MH_OBJECT");
+    mapResult.insert(0x2,"MH_EXECUTE");
+    mapResult.insert(0x3,"MH_FVMLIB");
+    mapResult.insert(0x4,"MH_CORE");
+    mapResult.insert(0x5,"MH_PRELOAD");
+    mapResult.insert(0x6,"MH_DYLIB");
+    mapResult.insert(0x7,"MH_DYLINKER");
+    mapResult.insert(0x8,"MH_BUNDLE");
+    mapResult.insert(0x9,"MH_DYLIB_STUB");
+    mapResult.insert(0xa,"MH_DSYM");
+    mapResult.insert(0xb,"MH_KEXT_BUNDLE");
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getHeaderFileTypesS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0x1,"OBJECT");
+    mapResult.insert(0x2,"EXECUTE");
+    mapResult.insert(0x3,"FVMLIB");
+    mapResult.insert(0x4,"CORE");
+    mapResult.insert(0x5,"PRELOAD");
+    mapResult.insert(0x6,"DYLIB");
+    mapResult.insert(0x7,"DYLINKER");
+    mapResult.insert(0x8,"BUNDLE");
+    mapResult.insert(0x9,"DYLIB_STUB");
+    mapResult.insert(0xa,"DSYM");
+    mapResult.insert(0xb,"KEXT_BUNDLE");
+    return mapResult;
+}
