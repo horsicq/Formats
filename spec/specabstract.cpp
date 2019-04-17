@@ -341,6 +341,7 @@ QString SpecAbstract::recordTypeIdToString(RECORD_TYPE id)
         case RECORD_TYPE_DEBUGDATA:                         sResult=tr("Debug data");                       break;
         case RECORD_TYPE_DONGLEPROTECTION:                  sResult=tr("Dongle protection");                break;
         case RECORD_TYPE_FORMAT:                            sResult=tr("Format");                           break;
+        case RECORD_TYPE_GENERIC:                           sResult=tr("Generic");                          break;
         case RECORD_TYPE_IMAGE:                             sResult=tr("Image");                            break;
         case RECORD_TYPE_INSTALLER:                         sResult=tr("Installer");                        break;
         case RECORD_TYPE_INSTALLERDATA:                     sResult=tr("Installer data");                   break;
@@ -682,6 +683,18 @@ QString SpecAbstract::createTypeString(const SpecAbstract::SCAN_STRUCT *pScanStr
     sResult+=SpecAbstract::recordFiletypeIdToString(pScanStruct->id.filetype);
 
     return sResult;
+}
+
+SpecAbstract::SCAN_STRUCT SpecAbstract::createHeaderScanStruct(const SpecAbstract::SCAN_STRUCT *pScanStruct)
+{
+    SCAN_STRUCT result=*pScanStruct;
+    result.id.uuid=QUuid::createUuid();
+    result.type=RECORD_TYPE_GENERIC;
+    result.name=RECORD_NAME_GENERIC;
+    result.sVersion="";
+    result.sInfo="";
+
+    return result;
 }
 
 // TODO VI

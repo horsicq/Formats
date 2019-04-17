@@ -68,6 +68,7 @@ public:
         RECORD_TYPE_DEBUGDATA,
         RECORD_TYPE_DONGLEPROTECTION,
         RECORD_TYPE_FORMAT,
+        RECORD_TYPE_GENERIC,
         RECORD_TYPE_IMAGE,
         RECORD_TYPE_INSTALLER,
         RECORD_TYPE_INSTALLERDATA,
@@ -629,6 +630,7 @@ public:
     static QString createFullResultString(const SCAN_STRUCT *pScanStruct);
     static QString createFullResultString2(const SCAN_STRUCT *pScanStruct);
     static QString createTypeString(const SCAN_STRUCT *pScanStruct);
+    static SCAN_STRUCT createHeaderScanStruct(const SCAN_STRUCT *pScanStruct);
 
     static QString findEnigmaVersion(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
