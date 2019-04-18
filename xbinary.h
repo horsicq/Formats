@@ -282,6 +282,8 @@ public:
 
     static QString getUnpackedName(QIODevice *pDevice);
     static QString getUnpackedName(QString sFileName);
+    static QString getBackupName(QIODevice *pDevice);
+    static QString getBackupName(QString sFileName);
     static QString getDeviceFileName(QIODevice *pDevice);
     static QString getDeviceFilePath(QIODevice *pDevice);
     static QList<qint64> getFixupList(QIODevice *pDevice1,QIODevice *pDevice2,qint64 nDelta);

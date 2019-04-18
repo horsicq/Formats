@@ -59,6 +59,8 @@ public:
     static QMap<quint64,QString> getHeaderCpuTypesS();
     static QMap<quint64,QString> getHeaderFileTypes();
     static QMap<quint64,QString> getHeaderFileTypesS();
+    static QMap<quint64,QString> getHeaderFlags();
+    static QMap<quint64,QString> getHeaderFlagsS();
 };
 
 #endif // XMACH_H

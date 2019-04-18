@@ -1802,6 +1802,35 @@ QString XBinary::getUnpackedName(QString sFileName)
     return sResult;
 }
 
+QString XBinary::getBackupName(QIODevice *pDevice)
+{
+    QString sResult="backup";
+
+    QString sClassName=pDevice->metaObject()->className();
+
+    if(sClassName=="QFile")
+    {
+        QFile *pFile=(QFile *)pDevice;
+
+        QString sFileName=pFile->fileName(); // TODO
+
+        if(sFileName!="")
+        {
+            sResult=getBackupName(sFileName);
+        }
+    }
+
+    return sResult;
+}
+
+QString XBinary::getBackupName(QString sFileName)
+{
+    QFileInfo fi(sFileName);
+    QString sResult=fi.absolutePath()+QDir::separator()+fi.completeBaseName()+fi.suffix()+".BAK";
+
+    return sResult;
+}
+
 QString XBinary::getDeviceFileName(QIODevice *pDevice)
 {
     QString sResult;

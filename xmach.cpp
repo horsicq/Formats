@@ -218,3 +218,71 @@ QMap<quint64, QString> XMACH::getHeaderFileTypesS()
     mapResult.insert(0xb,"KEXT_BUNDLE");
     return mapResult;
 }
+
+QMap<quint64, QString> XMACH::getHeaderFlags()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0x1,"MH_NOUNDEFS");
+    mapResult.insert(0x2,"MH_INCRLINK");
+    mapResult.insert(0x4,"MH_DYLDLINK");
+    mapResult.insert(0x8,"MH_BINDATLOAD");
+    mapResult.insert(0x10,"MH_PREBOUND");
+    mapResult.insert(0x20,"MH_SPLIT_SEGS");
+    mapResult.insert(0x40,"MH_LAZY_INIT");
+    mapResult.insert(0x80,"MH_TWOLEVEL");
+    mapResult.insert(0x100,"MH_FORCE_FLAT");
+    mapResult.insert(0x200,"MH_NOMULTIDEFS");
+    mapResult.insert(0x400,"MH_NOFIXPREBINDING");
+    mapResult.insert(0x800,"MH_PREBINDABLE");
+    mapResult.insert(0x1000,"MH_ALLMODSBOUND");
+    mapResult.insert(0x2000,"MH_SUBSECTIONS_VIA_SYMBOLS");
+    mapResult.insert(0x4000,"MH_CANONICAL");
+    mapResult.insert(0x8000,"MH_WEAK_DEFINES");
+    mapResult.insert(0x10000,"MH_BINDS_TO_WEAK");
+    mapResult.insert(0x20000,"MH_ALLOW_STACK_EXECUTION");
+    mapResult.insert(0x40000,"MH_ROOT_SAFE");
+    mapResult.insert(0x80000,"MH_SETUID_SAFE");
+    mapResult.insert(0x100000,"MH_NO_REEXPORTED_DYLIBS");
+    mapResult.insert(0x200000,"MH_PIE");
+    mapResult.insert(0x400000,"MH_DEAD_STRIPPABLE_DYLIB");
+    mapResult.insert(0x800000,"MH_HAS_TLV_DESCRIPTORS");
+    mapResult.insert(0x1000000,"MH_NO_HEAP_EXECUTION");
+    mapResult.insert(0x02000000,"MH_APP_EXTENSION_SAFE");
+    mapResult.insert(0x04000000,"MH_NLIST_OUTOFSYNC_WITH_DYLDINFO");
+    mapResult.insert(0x08000000,"MH_SIM_SUPPORT");
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getHeaderFlagsS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0x1,"NOUNDEFS");
+    mapResult.insert(0x2,"INCRLINK");
+    mapResult.insert(0x4,"DYLDLINK");
+    mapResult.insert(0x8,"BINDATLOAD");
+    mapResult.insert(0x10,"PREBOUND");
+    mapResult.insert(0x20,"SPLIT_SEGS");
+    mapResult.insert(0x40,"LAZY_INIT");
+    mapResult.insert(0x80,"TWOLEVEL");
+    mapResult.insert(0x100,"FORCE_FLAT");
+    mapResult.insert(0x200,"NOMULTIDEFS");
+    mapResult.insert(0x400,"NOFIXPREBINDING");
+    mapResult.insert(0x800,"PREBINDABLE");
+    mapResult.insert(0x1000,"ALLMODSBOUND");
+    mapResult.insert(0x2000,"SUBSECTIONS_VIA_SYMBOLS");
+    mapResult.insert(0x4000,"CANONICAL");
+    mapResult.insert(0x8000,"WEAK_DEFINES");
+    mapResult.insert(0x10000,"BINDS_TO_WEAK");
+    mapResult.insert(0x20000,"ALLOW_STACK_EXECUTION");
+    mapResult.insert(0x40000,"ROOT_SAFE");
+    mapResult.insert(0x80000,"SETUID_SAFE");
+    mapResult.insert(0x100000,"NO_REEXPORTED_DYLIBS");
+    mapResult.insert(0x200000,"PIE");
+    mapResult.insert(0x400000,"DEAD_STRIPPABLE_DYLIB");
+    mapResult.insert(0x800000,"HAS_TLV_DESCRIPTORS");
+    mapResult.insert(0x1000000,"NO_HEAP_EXECUTION");
+    mapResult.insert(0x02000000,"APP_EXTENSION_SAFE");
+    mapResult.insert(0x04000000,"NLIST_OUTOFSYNC_WITH_DYLDINFO");
+    mapResult.insert(0x08000000,"SIM_SUPPORT");
+    return mapResult;
+}
