@@ -2415,6 +2415,25 @@ bool XBinary::isUTF8TextType()
         }
     }
 
+    if(bResult)
+    {
+        baData=read_array(0,qMin(getSize(),(qint64)0x1000));
+        unsigned char *pDataOffset=(unsigned char *)baData.data();
+        pDataOffset+=3;
+
+        nDataSize=baData.size();
+        nDataSize=nDataSize-3;
+
+        for(int i=0; i<nDataSize; i++)
+        {
+            if(pDataOffset[i]==0)
+            {
+                bResult=false;
+                break;
+            }
+        }
+    }
+
     return bResult;
 }
 
@@ -2445,6 +2464,7 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType()
             result=UNICODE_TYPE_NONE;
         }
     }
+    // TODO 0 end
 
     return result;
 }
