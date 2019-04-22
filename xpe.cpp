@@ -100,7 +100,6 @@ QList<XPE::RICH_RECORD> XPE::getRichSignatureRecords()
                     //                    quint32 n1=nValue1>>24;
                     //                    quint32 n2=(nValue1>>16)&0xFF;
 
-
                     quint32 nValue2=read_uint32(nCurrentOffset+4)^nXORkey;
                     record.nCount=nValue2;
 
@@ -385,7 +384,6 @@ quint64 XPE::getOptionalHeader_ImageBase()
     {
         return read_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,ImageBase));
     }
-
 }
 
 quint32 XPE::getOptionalHeader_SectionAlignment()
@@ -681,7 +679,6 @@ void XPE::setOptionalHeader_SizeOfStackCommit(quint64 value)
     {
         write_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,SizeOfStackCommit),value);
     }
-
 }
 
 void XPE::setOptionalHeader_SizeOfHeapReserve(quint64 value)
@@ -694,7 +691,6 @@ void XPE::setOptionalHeader_SizeOfHeapReserve(quint64 value)
     {
         write_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,SizeOfHeapReserve),value);
     }
-
 }
 
 void XPE::setOptionalHeader_SizeOfHeapCommit(quint64 value)
@@ -707,7 +703,6 @@ void XPE::setOptionalHeader_SizeOfHeapCommit(quint64 value)
     {
         write_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,SizeOfHeapCommit),value);
     }
-
 }
 
 void XPE::setOptionalHeader_LoaderFlags(quint32 value)
@@ -720,7 +715,6 @@ void XPE::setOptionalHeader_LoaderFlags(quint32 value)
     {
         write_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,LoaderFlags),value);
     }
-
 }
 
 void XPE::setOptionalHeader_NumberOfRvaAndSizes(quint32 value)
@@ -733,7 +727,6 @@ void XPE::setOptionalHeader_NumberOfRvaAndSizes(quint32 value)
     {
         write_uint32(getOptionalHeaderOffset()+offsetof(S_IMAGE_OPTIONAL_HEADER32,NumberOfRvaAndSizes),value);
     }
-
 }
 
 S_IMAGE_DATA_DIRECTORY XPE::getOptionalHeader_DataDirectory(quint32 nNumber)
