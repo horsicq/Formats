@@ -62,4 +62,10 @@ struct S_mach_header_64
 #define S_MH_MAGIC_64 0xfeedfacf /* the 64-bit mach magic number */
 #define S_MH_CIGAM_64 0xcffaedfe /* NXSwapInt(MH_MAGIC_64) */
 
+struct S_load_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+};
+
 #endif // QMACH_DEF_H

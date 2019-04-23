@@ -28,6 +28,13 @@ class XMACH : public XBinary
 {
     Q_OBJECT
 public:
+    struct COMMAND_RECORD
+    {
+        quint32 nType;
+        qint64 nOffset;
+        qint64 nSize;
+    };
+
     XMACH(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
     ~XMACH();
 
@@ -53,6 +60,8 @@ public:
     void setHeader_flags(quint32 nValue);
     void setHeader_reserved(quint32 nValue);
 
+    qint64 getHeaderSize();
+
     static QMap<quint64,QString> getHeaderMagics();
     static QMap<quint64,QString> getHeaderMagicsS();
     static QMap<quint64,QString> getHeaderCpuTypes();
@@ -61,6 +70,8 @@ public:
     static QMap<quint64,QString> getHeaderFileTypesS();
     static QMap<quint64,QString> getHeaderFlags();
     static QMap<quint64,QString> getHeaderFlagsS();
+
+    QList<COMMAND_RECORD> getCommandRecords();
 };
 
 #endif // XMACH_H

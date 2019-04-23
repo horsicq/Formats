@@ -141,6 +141,22 @@ void XMACH::setHeader_reserved(quint32 nValue)
     write_uint32(offsetof(S_mach_header_64,reserved),nValue,isBigEndian());
 }
 
+qint64 XMACH::getHeaderSize()
+{
+    qint64 nResult=0;
+
+    if(is64())
+    {
+        nResult=sizeof(S_mach_header_64);
+    }
+    else
+    {
+        nResult=sizeof(S_mach_header);
+    }
+
+    return nResult;
+}
+
 QMap<quint64, QString> XMACH::getHeaderMagics()
 {
     QMap<quint64, QString> mapResult;
@@ -285,4 +301,49 @@ QMap<quint64, QString> XMACH::getHeaderFlagsS()
     mapResult.insert(0x04000000,"NLIST_OUTOFSYNC_WITH_DYLDINFO");
     mapResult.insert(0x08000000,"SIM_SUPPORT");
     return mapResult;
+}
+
+QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
+{
+    QList<COMMAND_RECORD> listResult;
+
+    quint32 nNumberOfCommands=getHeader_ncmds();
+    quint32 nSizeOfCommands=getHeader_sizeofcmds();
+
+    qint64 nOffset=getHeaderSize();
+    bool bIsBigEndian=isBigEndian();
+    bool bIs64=is64();
+
+    qint64 nSize=0;
+
+    for(quint32 i=0;i<nNumberOfCommands;i++)
+    {
+        COMMAND_RECORD record={};
+
+        record.nOffset=nOffset;
+        record.nType=read_uint32(nOffset+offsetof(S_load_command,cmd),bIsBigEndian);
+        record.nSize=read_uint32(nOffset+offsetof(S_load_command,cmdsize),bIsBigEndian);
+
+        listResult.append(record);
+
+        qint64 _nSize=record.nSize;
+
+        if(bIs64)
+        {
+            _nSize=__ALIGN_UP(_nSize,8);
+        }
+        else
+        {
+            _nSize=__ALIGN_UP(_nSize,4);
+        }
+        nSize+=_nSize;
+        nOffset+=_nSize;
+
+        if(nSize>nSizeOfCommands)
+        {
+            break;
+        }
+    }
+
+    return listResult;
 }
