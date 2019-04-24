@@ -303,6 +303,122 @@ QMap<quint64, QString> XMACH::getHeaderFlagsS()
     return mapResult;
 }
 
+QMap<quint64, QString> XMACH::getLoadCommandTypes()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0x1,"LC_SEGMENT");
+    mapResult.insert(0x2,"LC_SYMTAB");
+    mapResult.insert(0x3,"LC_SYMSEG");
+    mapResult.insert(0x4,"LC_THREAD");
+    mapResult.insert(0x5,"LC_UNIXTHREAD");
+    mapResult.insert(0x6,"LC_LOADFVMLIB");
+    mapResult.insert(0x7,"LC_IDFVMLIB");
+    mapResult.insert(0x8,"LC_IDENT");
+    mapResult.insert(0x9,"LC_FVMFILE");
+    mapResult.insert(0xa,"LC_PREPAGE");
+    mapResult.insert(0xb,"LC_DYSYMTAB");
+    mapResult.insert(0xc,"LC_LOAD_DYLIB");
+    mapResult.insert(0xd,"LC_ID_DYLIB");
+    mapResult.insert(0xe,"LC_LOAD_DYLINKER");
+    mapResult.insert(0xf,"LC_ID_DYLINKER");
+    mapResult.insert(0x10,"LC_PREBOUND_DYLIB");
+    mapResult.insert(0x11,"LC_ROUTINES");
+    mapResult.insert(0x12,"LC_SUB_FRAMEWORK");
+    mapResult.insert(0x13,"LC_SUB_UMBRELLA");
+    mapResult.insert(0x14,"LC_SUB_CLIENT");
+    mapResult.insert(0x15,"LC_SUB_LIBRARY");
+    mapResult.insert(0x16,"LC_TWOLEVEL_HINTS");
+    mapResult.insert(0x17,"LC_PREBIND_CKSUM");
+    mapResult.insert(0x18|0x80000000,"LC_LOAD_WEAK_DYLIB");
+    mapResult.insert(0x19,"LC_SEGMENT_64");
+    mapResult.insert(0x1a,"LC_ROUTINES_64");
+    mapResult.insert(0x1b,"LC_UUID");
+    mapResult.insert(0x1c|0x80000000,"LC_RPATH");
+    mapResult.insert(0x1d,"LC_CODE_SIGNATURE");
+    mapResult.insert(0x1e,"LC_SEGMENT_SPLIT_INFO");
+    mapResult.insert(0x1f|0x80000000,"LC_REEXPORT_DYLIB");
+    mapResult.insert(0x20,"LC_LAZY_LOAD_DYLIB");
+    mapResult.insert(0x21,"LC_ENCRYPTION_INFO");
+    mapResult.insert(0x22,"LC_DYLD_INFO");
+    mapResult.insert(0x22|0x80000000,"LC_DYLD_INFO_ONLY");
+    mapResult.insert(0x23|0x80000000,"LC_LOAD_UPWARD_DYLIB");
+    mapResult.insert(0x24,"LC_VERSION_MIN_MACOSX");
+    mapResult.insert(0x25,"LC_VERSION_MIN_IPHONEOS");
+    mapResult.insert(0x26,"LC_FUNCTION_STARTS");
+    mapResult.insert(0x24,"LC_VERSION_MIN_MACOSX");
+    mapResult.insert(0x25,"LC_VERSION_MIN_IPHONEOS");
+    mapResult.insert(0x26,"LC_FUNCTION_STARTS");
+    mapResult.insert(0x27,"LC_DYLD_ENVIRONMENT");
+    mapResult.insert(0x28|0x80000000,"LC_MAIN");
+    mapResult.insert(0x29,"LC_DATA_IN_CODE");
+    mapResult.insert(0x2A,"LC_SOURCE_VERSION");
+    mapResult.insert(0x2B,"LC_DYLIB_CODE_SIGN_DRS");
+    mapResult.insert(0x2C,"LC_ENCRYPTION_INFO_64");
+    mapResult.insert(0x2D,"LC_LINKER_OPTION");
+    mapResult.insert(0x2E,"LC_LINKER_OPTIMIZATION_HINT");
+    mapResult.insert(0x2F,"LC_VERSION_MIN_TVOS");
+    mapResult.insert(0x30,"LC_VERSION_MIN_WATCHOS");
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getLoadCommandTypesS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0x1,"SEGMENT");
+    mapResult.insert(0x2,"SYMTAB");
+    mapResult.insert(0x3,"SYMSEG");
+    mapResult.insert(0x4,"THREAD");
+    mapResult.insert(0x5,"UNIXTHREAD");
+    mapResult.insert(0x6,"LOADFVMLIB");
+    mapResult.insert(0x7,"IDFVMLIB");
+    mapResult.insert(0x8,"IDENT");
+    mapResult.insert(0x9,"FVMFILE");
+    mapResult.insert(0xa,"PREPAGE");
+    mapResult.insert(0xb,"DYSYMTAB");
+    mapResult.insert(0xc,"LOAD_DYLIB");
+    mapResult.insert(0xd,"ID_DYLIB");
+    mapResult.insert(0xe,"LOAD_DYLINKER");
+    mapResult.insert(0xf,"ID_DYLINKER");
+    mapResult.insert(0x10,"PREBOUND_DYLIB");
+    mapResult.insert(0x11,"ROUTINES");
+    mapResult.insert(0x12,"SUB_FRAMEWORK");
+    mapResult.insert(0x13,"SUB_UMBRELLA");
+    mapResult.insert(0x14,"SUB_CLIENT");
+    mapResult.insert(0x15,"SUB_LIBRARY");
+    mapResult.insert(0x16,"TWOLEVEL_HINTS");
+    mapResult.insert(0x17,"PREBIND_CKSUM");
+    mapResult.insert(0x18|0x80000000,"LOAD_WEAK_DYLIB");
+    mapResult.insert(0x19,"SEGMENT_64");
+    mapResult.insert(0x1a,"ROUTINES_64");
+    mapResult.insert(0x1b,"UUID");
+    mapResult.insert(0x1c|0x80000000,"RPATH");
+    mapResult.insert(0x1d,"CODE_SIGNATURE");
+    mapResult.insert(0x1e,"SEGMENT_SPLIT_INFO");
+    mapResult.insert(0x1f|0x80000000,"REEXPORT_DYLIB");
+    mapResult.insert(0x20,"LAZY_LOAD_DYLIB");
+    mapResult.insert(0x21,"ENCRYPTION_INFO");
+    mapResult.insert(0x22,"DYLD_INFO");
+    mapResult.insert(0x22|0x80000000,"DYLD_INFO_ONLY");
+    mapResult.insert(0x23|0x80000000,"LOAD_UPWARD_DYLIB");
+    mapResult.insert(0x24,"VERSION_MIN_MACOSX");
+    mapResult.insert(0x25,"VERSION_MIN_IPHONEOS");
+    mapResult.insert(0x26,"FUNCTION_STARTS");
+    mapResult.insert(0x24,"VERSION_MIN_MACOSX");
+    mapResult.insert(0x25,"VERSION_MIN_IPHONEOS");
+    mapResult.insert(0x26,"FUNCTION_STARTS");
+    mapResult.insert(0x27,"DYLD_ENVIRONMENT");
+    mapResult.insert(0x28|0x80000000,"MAIN");
+    mapResult.insert(0x29,"DATA_IN_CODE");
+    mapResult.insert(0x2A,"SOURCE_VERSION");
+    mapResult.insert(0x2B,"DYLIB_CODE_SIGN_DRS");
+    mapResult.insert(0x2C,"ENCRYPTION_INFO_64");
+    mapResult.insert(0x2D,"LINKER_OPTION");
+    mapResult.insert(0x2E,"LINKER_OPTIMIZATION_HINT");
+    mapResult.insert(0x2F,"VERSION_MIN_TVOS");
+    mapResult.insert(0x30,"VERSION_MIN_WATCHOS");
+    return mapResult;
+}
+
 QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
 {
     QList<COMMAND_RECORD> listResult;

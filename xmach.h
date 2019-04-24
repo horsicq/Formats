@@ -70,6 +70,8 @@ public:
     static QMap<quint64,QString> getHeaderFileTypesS();
     static QMap<quint64,QString> getHeaderFlags();
     static QMap<quint64,QString> getHeaderFlagsS();
+    static QMap<quint64,QString> getLoadCommandTypes();
+    static QMap<quint64,QString> getLoadCommandTypesS();
 
     QList<COMMAND_RECORD> getCommandRecords();
 };

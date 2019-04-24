@@ -119,8 +119,6 @@ public:
     quint16 getHdr64_shstrndx();
     void setHdr64_shstrndx(quint16 value);
 
-
-
     static QMap<quint64,QString> getHeaderVersionList();
 
     static QMap<quint64,QString> getIndentClasses();
