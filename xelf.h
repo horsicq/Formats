@@ -147,14 +147,12 @@ public:
     QString getStringFromListMain(quint32 nIndex);
     QByteArray getSection(quint32 nIndex);
     bool isSectionValid(quint32 nIndex);
-
+    // TODO Set
     QList<S_Elf32_Shdr> getElf32_ShdrList();
     QList<S_Elf64_Shdr> getElf64_ShdrList();
-
+    // TODO Set
     S_Elf32_Shdr getElf32_Shdr(quint32 nIndex);
     S_Elf64_Shdr getElf64_Shdr(quint32 nIndex);
-    // TODO Set
-
     quint32 getElf32_Shdr_name(quint32 nIndex);
     quint32 getElf32_Shdr_type(quint32 nIndex);
     quint32 getElf32_Shdr_flags(quint32 nIndex);
