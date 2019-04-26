@@ -2212,7 +2212,7 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
 {
     QList<XBinary::MEMORY_MAP> listResult;
 
-    // TODO
+    // TODO Sections and Programs
 
     return  listResult;
 }
