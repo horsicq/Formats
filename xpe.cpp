@@ -26,6 +26,8 @@ XPE::XPE(QIODevice *__pDevice, bool bIsImage, qint64 nImageAddress): XMSDOS(__pD
 
 bool XPE::isValid()
 {
+    bool bResult=false;
+
     quint16 magic=get_magic();
 
     if(magic==(quint16)S_IMAGE_DOS_SIGNATURE)
@@ -38,12 +40,12 @@ bool XPE::isValid()
 
             if(signature==S_IMAGE_NT_SIGNATURE)
             {
-                return true;
+                bResult=true;
             }
         }
     }
 
-    return false;
+    return bResult;
 }
 
 bool XPE::is64()
