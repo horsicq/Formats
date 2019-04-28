@@ -3841,21 +3841,24 @@ qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOf
 
 bool XPE::isDll()
 {
+    bool bResult=false;
+
     if(getOptionalHeader_Subsystem()!=S_IMAGE_SUBSYSTEM_NATIVE)
     {
-        return (getFileHeader_Characteristics()&S_IMAGE_FILE_DLL);
+        bResult=(getFileHeader_Characteristics()&S_IMAGE_FILE_DLL);
     }
 
-    return false;
+    return bResult;
 }
 
 bool XPE::isConsole()
 {
-    return getOptionalHeader_Subsystem()==S_IMAGE_SUBSYSTEM_WINDOWS_CUI;
+    return (getOptionalHeader_Subsystem()==S_IMAGE_SUBSYSTEM_WINDOWS_CUI);
 }
 
 bool XPE::isNETPresent()
 {
+    // TODO more checks
     return isOptionalHeader_DataDirectoryPresent(S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 }
 
