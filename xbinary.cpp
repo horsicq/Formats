@@ -20,12 +20,12 @@
 //
 #include "xbinary.h"
 
-XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageAddress)
+XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
 {
     setData(__pDevice);
     setIsImage(bIsImage);
     setBaseAddress(0);
-    setImageAddress(nImageAddress);
+    setImageBase(nImageBase);
     setEntryPointOffset(0);
 }
 
@@ -1470,12 +1470,12 @@ qint64 XBinary::getEntryPointAddress()
 
 qint64 XBinary::getImageAddress()
 {
-    return this->__nImageAddress;
+    return this->__nImageBase;
 }
 
-void XBinary::setImageAddress(qint64 nValue)
+void XBinary::setImageBase(qint64 nValue)
 {
-    this->__nImageAddress=nValue;
+    this->__nImageBase=nValue;
 }
 
 qint64 XBinary::_getBaseAddress()

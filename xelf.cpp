@@ -20,7 +20,7 @@
 //
 #include "xelf.h"
 
-XELF::XELF(QIODevice *__pDevice,bool bIsImage,qint64 nImageAddress): XBinary(__pDevice,bIsImage,nImageAddress)
+XELF::XELF(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase): XBinary(__pDevice,bIsImage,nImageBase)
 {
 }
 

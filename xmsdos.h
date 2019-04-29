@@ -28,7 +28,7 @@ class XMSDOS : public XBinary
 {
     Q_OBJECT
 public:
-    explicit XMSDOS(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
+    explicit XMSDOS(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
 
     quint16 get_magic();

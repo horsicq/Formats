@@ -130,7 +130,7 @@ private:
     };
 
 public:
-    explicit XBinary(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1); // mb TODO parent for signals/slot
+    explicit XBinary(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
     void setData(QIODevice *__pDevice);
     qint64 getSize();
 
@@ -248,7 +248,7 @@ public:
     qint64 getEntryPointAddress();
 
     qint64 getImageAddress();
-    void setImageAddress(qint64 nValue);
+    void setImageBase(qint64 nValue);
 
     qint64 _getBaseAddress();
 
@@ -355,7 +355,7 @@ private:
     bool bIsImage;
     qint64 __nBaseAddress;
     qint64 __nEntryPointOffset;
-    qint64 __nImageAddress;
+    qint64 __nImageBase;
 };
 
 #endif // XBINARY_H

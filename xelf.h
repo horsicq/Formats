@@ -36,7 +36,7 @@ class XELF : public XBinary
     };
 
 public:
-    XELF(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
+    XELF(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     ~XELF();
 
     virtual bool bIsValid();

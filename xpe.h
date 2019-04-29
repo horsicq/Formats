@@ -254,7 +254,7 @@ public:
         QString sLibrary;
     };
 
-    explicit XPE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
+    explicit XPE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
     bool is64();
 
