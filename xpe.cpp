@@ -4193,9 +4193,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
             }
         }
     }
-
     //    emit appendError(".NET is not present");
-
     return result;
 }
 

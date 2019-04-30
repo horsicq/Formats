@@ -113,6 +113,7 @@ public:
         // PE/PE+
         bool bCopyOverlay;     // In
     };
+
 private:
     struct SIGNATURE_RECORD
     {

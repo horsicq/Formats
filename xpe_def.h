@@ -618,7 +618,6 @@ enum S_ReplacesCorHdrNumericDefines
     S_MAX_PACKAGE_NAME                    =1024,
 };
 
-
 struct S_VS_VERSION_INFO
 {
     quint16 wLength;             /* Length of the version resource */
@@ -642,7 +641,6 @@ struct S__tagVS_FIXEDFILEINFO
     quint32 dwFileDateMS;       // e.g.  0
     quint32 dwFileDateLS;       // e.g.  0
 };
-
 //typedef VOID (NTAPI *PIMAGE_TLS_CALLBACK)(PVOID DllHandle,DWORD Reason,PVOID Reserved);
 
 struct S_IMAGE_TLS_DIRECTORY64

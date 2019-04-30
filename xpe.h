@@ -452,7 +452,6 @@ public:
     QString getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListHeaders);
     S_VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
 
-
     RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);
     static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion);
 
@@ -465,7 +464,6 @@ public:
     void write_S_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset,S_IMAGE_IMPORT_DESCRIPTOR value);
 
     bool isExportPresent();
-
 
     EXPORT_HEADER getExport();
 
@@ -613,12 +611,11 @@ public:
     void _fixCheckSum();
 
     static QList<S_IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData,S_IMAGE_SECTION_HEADER shOriginal,quint32 nBlockSize);
+
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     qint64 _calculateRawSize();
     RESOURCE_POSITION _getResourcePosition(QList<MEMORY_MAP> *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);
-
-
     qint64 _fixHeadersSize();
     qint64 _getMinSectionOffset();
     void _fixFileOffsets(qint64 nDelta);
