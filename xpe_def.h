@@ -204,7 +204,6 @@ struct S_IMAGE_OPTIONAL_HEADER32S
     quint32 NumberOfRvaAndSizes;
 };
 
-
 struct S_IMAGE_OPTIONAL_HEADER64
 {
     //
@@ -529,51 +528,34 @@ struct S_SYSTEM_INFO64
 struct S_IMAGE_COR20_HEADER
 {
     // Header versioning
-
     quint32                   cb;
     quint16                    MajorRuntimeVersion;
     quint16                    MinorRuntimeVersion;
     // Symbol table and startup information
-
     S_IMAGE_DATA_DIRECTORY    MetaData;
     quint32                   Flags;
     // DDBLD - Added next section to replace following lin
-
     // DDBLD - Still verifying, since not in NT SDK
-
     // unsigned int                   EntryPointToken;
-
     // If COMIMAGE_FLAGS_NATIVE_ENTRYPOINT is not set,
-
     // EntryPointToken represents a managed entrypoint.
-
     // If COMIMAGE_FLAGS_NATIVE_ENTRYPOINT is set,
-
     // EntryPointRVA represents an RVA to a native entrypoint.
-
     union
     {
         quint32               EntryPointToken;
         quint32               EntryPointRVA;
     };
     // DDBLD - End of Added Area
-
-
     // Binding information
-
     S_IMAGE_DATA_DIRECTORY    Resources;
     S_IMAGE_DATA_DIRECTORY    StrongNameSignature;
-
     // Regular fixup and binding information
-
     S_IMAGE_DATA_DIRECTORY    CodeManagerTable;
     S_IMAGE_DATA_DIRECTORY    VTableFixups;
     S_IMAGE_DATA_DIRECTORY    ExportAddressTableJumps;
-
     // Precompiled image info (internal use only - set to zero)
-
     S_IMAGE_DATA_DIRECTORY    ManagedNativeHeader;
-
 };
 
 enum S_ReplacesCorHdrNumericDefines
