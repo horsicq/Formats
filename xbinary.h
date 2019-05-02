@@ -89,9 +89,9 @@ public:
         ADDRESS_SEGMENT segment;
         qint64 nSize;
         bool bIsHeader;
-        bool bIsSection;
+        bool bIsLoadSection; // Section in PE; LoadProgram in ELF
         bool bIsOvelay;
-        qint64 nSection;
+        qint64 nLoadSection;
     };
     enum FT
     {

@@ -1324,7 +1324,6 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
         recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
         recordHeaderRaw.nOffset=0;
         recordHeaderRaw.nSize=nHeadersSize;
-        recordHeaderRaw.nSection=-1;
 
         list.append(recordHeaderRaw);
 
@@ -1337,7 +1336,6 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
             recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
             record.nOffset=-1;
             record.nSize=nVirtualSizeofHeaders-nHeadersSize;
-            recordHeaderRaw.nSection=-1;
 
             list.append(record);
         }
@@ -1349,7 +1347,6 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
         recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
         recordHeaderRaw.nOffset=0;
         recordHeaderRaw.nSize=nVirtualSizeofHeaders;
-        recordHeaderRaw.nSection=-1;
 
         list.append(recordHeaderRaw);
     }
@@ -1384,8 +1381,8 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
             {
                 MEMORY_MAP record={};
 
-                record.bIsSection=true;
-                record.nSection=i;
+                record.bIsLoadSection=true;
+                record.nLoadSection=i;
                 record.segment=ADDRESS_SEGMENT_FLAT;
                 record.nAddress=nVirtualAddress;
                 record.nOffset=nFileOffset;
@@ -1398,8 +1395,8 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
             {
                 MEMORY_MAP record={};
 
-                record.bIsSection=true;
-                record.nSection=i;
+                record.bIsLoadSection=true;
+                record.nLoadSection=i;
                 record.segment=ADDRESS_SEGMENT_FLAT;
                 record.nAddress=nVirtualAddress+nFileSize;
                 record.nOffset=-1;
@@ -1412,8 +1409,8 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
         {
             MEMORY_MAP record={};
 
-            record.bIsSection=true;
-            record.nSection=i;
+            record.bIsLoadSection=true;
+            record.nLoadSection=i;
             record.segment=ADDRESS_SEGMENT_FLAT;
             record.nAddress=nVirtualAddress;
             record.nOffset=nVirtualAddress-nBaseAddress;
@@ -1432,7 +1429,6 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
     record.segment=ADDRESS_SEGMENT_UNKNOWN;
     record.nOffset=nMaxOffset;
     record.nSize=0;
-    record.nSection=-1;
 
     if(!isImage())
     {
@@ -3074,9 +3070,9 @@ qint32 XPE::addressToSection(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nAdd
 {
     MEMORY_MAP mm=getAddressMemoryMap(pMemoryMap,nAddress);
 
-    if(mm.bIsSection)
+    if(mm.bIsLoadSection)
     {
-        return mm.nSection;
+        return mm.nLoadSection;
     }
     else
     {
@@ -4725,7 +4721,7 @@ qint64 XPE::_getMinSectionOffset()
 
     for(int i=0; i<listMM.count(); i++)
     {
-        if(listMM.at(i).bIsSection)
+        if(listMM.at(i).bIsLoadSection)
         {
             if(nResult==-1)
             {
