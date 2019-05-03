@@ -2212,7 +2212,31 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
 {
     QList<XBinary::MEMORY_MAP> listResult;
 
-    // TODO Sections and Programs
+    QList<S_Elf32_Phdr> listPhdr32=getElf32_PhdrList();
+    QList<S_Elf64_Phdr> listPhdr64=getElf64_PhdrList();
+
+    bool bIs64=is64();
+    int nCount=0;
+
+    if(bIs64)
+    {
+        listPhdr64=getElf64_PhdrList();
+        nCount=listPhdr64.count();
+    }
+    else
+    {
+        listPhdr32=getElf32_PhdrList();
+        nCount=listPhdr64.count();
+    }
+
+    for(int i=0;i<nCount;i++)
+    {
+        // TODO
+        if(!isImage())
+        {
+
+        }
+    }
 
     return  listResult;
 }
