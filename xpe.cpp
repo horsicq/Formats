@@ -2487,7 +2487,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, quint32 nID2, QList<XP
     {
         if(pListRecords->at(i).nID[0]==nID1)
         {
-            if((pListRecords->at(i).nID[1]==nID2)||(nID2==-1))
+            if((pListRecords->at(i).nID[1]==nID2)||(nID2==(quint32)-1))
             {
                 result=pListRecords->at(i);
             }
