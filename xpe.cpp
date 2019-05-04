@@ -3068,16 +3068,16 @@ qint32 XPE::addressToSection(qint64 nAddress)
 
 qint32 XPE::addressToSection(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress)
 {
+    qint32 nResult=-1;
+
     MEMORY_MAP mm=getAddressMemoryMap(pMemoryMap,nAddress);
 
     if(mm.bIsLoadSection)
     {
-        return mm.nLoadSection;
+        nResult=mm.nLoadSection;
     }
-    else
-    {
-        return -1;
-    }
+
+    return nResult;
 }
 
 bool XPE::addImportSection(QMap<qint64, QString> *pMapIAT)

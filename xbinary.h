@@ -91,7 +91,7 @@ public:
         bool bIsHeader;
         bool bIsLoadSection; // Section in PE; LoadProgram in ELF
         bool bIsOvelay;
-        qint64 nLoadSection;
+        qint32 nLoadSection;
     };
     enum FT
     {
