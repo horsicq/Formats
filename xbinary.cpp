@@ -232,23 +232,32 @@ qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize)
 {
     QByteArray baResult;
-    baResult.resize(nSize);
+
+    baResult.resize((qint32)nSize);
+
     qint64 nBytes=read_array(nOffset,baResult.data(),nSize);
-    baResult.resize(nBytes);
+
+    if(nSize!=nBytes)
+    {
+        baResult.resize((qint32)nBytes);
+    }
+
     return baResult;
 }
 
 qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 {
+    qint64 nResult=0;
+
     if(nMaxSize<=(getSize()-nOffset))
     {
         if(__pDevice->seek(nOffset))
         {
-            return __pDevice->write(pBuffer,nMaxSize);
+            nResult=__pDevice->write(pBuffer,nMaxSize);
         }
     }
 
-    return 0;
+    return nResult;
 }
 
 quint8 XBinary::read_uint8(qint64 nOffset)
