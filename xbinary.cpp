@@ -2478,6 +2478,20 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType()
     return result;
 }
 
+bool XBinary::tryToOpen(QIODevice *pDevice)
+{
+    bool bResult=false;
+
+    bResult=pDevice->open(QIODevice::ReadWrite);
+
+    if(!bResult)
+    {
+        bResult=pDevice->open(QIODevice::ReadOnly);
+    }
+
+    return bResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     QList<SIGNATURE_RECORD> result;

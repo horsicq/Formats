@@ -330,6 +330,8 @@ public:
 
     UNICODE_TYPE getUnicodeType();
 
+    static bool tryToOpen(QIODevice *pDevice);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);
