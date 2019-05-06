@@ -26,14 +26,16 @@ XMSDOS::XMSDOS(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase): XBinary(
 
 bool XMSDOS::isValid()
 {
+    bool bResult=false;
+
     quint16 magic=get_magic();
 
     if((magic==S_IMAGE_DOS_SIGNATURE)||(magic==S_IMAGE_DOS_SIGNATURE_ZM))
     {
-        return true;
+        bResult=true;
     }
 
-    return false;
+    return bResult;
 }
 
 quint16 XMSDOS::get_magic()
