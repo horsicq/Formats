@@ -5139,6 +5139,11 @@ bool XPE::isTLSPresent()
     return isOptionalHeader_DataDirectoryPresent(S_IMAGE_DIRECTORY_ENTRY_TLS);
 }
 
+bool XPE::isSignPresent()
+{
+    return isOptionalHeader_DataDirectoryPresent(S_IMAGE_DIRECTORY_ENTRY_SECURITY);
+}
+
 XPE::TLS_HEADER XPE::getTLSHeader()
 {
     TLS_HEADER result={};

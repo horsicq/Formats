@@ -542,6 +542,7 @@ public:
     bool isResourcesPresent();
     bool isRelocsPresent();
     bool isTLSPresent();
+    bool isSignPresent();
 
     TLS_HEADER getTLSHeader();
 
