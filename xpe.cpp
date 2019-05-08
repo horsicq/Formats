@@ -1353,7 +1353,6 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
 
     nMaxOffset=recordHeaderRaw.nSize;
 
-
     for(quint32 i=0; i<nNumberOfSections; i++)
     {
         S_IMAGE_SECTION_HEADER section=getSectionHeader(i);

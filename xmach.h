@@ -74,6 +74,15 @@ public:
     static QMap<quint64,QString> getLoadCommandTypesS();
 
     QList<COMMAND_RECORD> getCommandRecords();
+    QList<COMMAND_RECORD> getCommandRecords(QList<COMMAND_RECORD> *pList,quint32 nCommandID);
+
+    bool isCommandPresent(quint32 nCommandID,int nIndex=0);
+    bool isCommandPresent(QList<COMMAND_RECORD> *pList,quint32 nCommandID,int nIndex=0);
+
+    QByteArray getCommand(quint32 nCommandID,int nIndex=0);
+    bool setCommand(quint32 nCommandID,QByteArray baData,int nIndex=0);
+    QByteArray getCommand(QList<COMMAND_RECORD> *pList,quint32 nCommandID,int nIndex=0);
+    bool setCommand(QList<COMMAND_RECORD> *pList,quint32 nCommandID,QByteArray baData,int nIndex=0);
 };
 
 #endif // XMACH_H
