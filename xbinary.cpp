@@ -2146,7 +2146,6 @@ bool XBinary::compareSignatureStrings(QString sBaseSignature, QString sOptSignat
                 return false;
             }
         }
-
     }
 
     return true;
