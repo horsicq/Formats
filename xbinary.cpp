@@ -75,46 +75,46 @@ quint32 XBinary::random64()
 QString XBinary::convertFileName(QString sFileName)
 {
 #ifdef Q_OS_MAC
-//    if(sFileName.startsWith("/.file/id="))
-//    {
-//        CFStringRef relCFStringRef =
-//            CFStringCreateWithCString(
-//                kCFAllocatorDefault,
-//                sFileName.toUtf8().constData(),
-//                kCFStringEncodingUTF8
-//            );
-//    CFURLRef relCFURL =
-//        CFURLCreateWithFileSystemPath(
-//            kCFAllocatorDefault,
-//            relCFStringRef,
-//            kCFURLPOSIXPathStyle,
-//            false // isDirectory
-//        );
-//    CFErrorRef error=0;
-//    CFURLRef absCFURL =
-//    CFURLCreateFilePathURL(
-//            kCFAllocatorDefault,
-//            relCFURL,
-//            &error
-//        );
-//    if(!error)
-//    {
-//        static const CFIndex maxAbsPathCStrBufLen=4096;
-//        char absPathCStr[maxAbsPathCStrBufLen];
-//        if(CFURLGetFileSystemRepresentation(
-//                absCFURL,
-//                true, // resolveAgainstBase
-//                reinterpret_cast<UInt8 *>(&absPathCStr[0] ),
-//                maxAbsPathCStrBufLen
-//            ))
-//            {
-//            sFileName=QString(absPathCStr);
-//            }
-//        }
-//        CFRelease(absCFURL);
-//        CFRelease(relCFURL);
-//        CFRelease(relCFStringRef);
-//    }
+    //    if(sFileName.startsWith("/.file/id="))
+    //    {
+    //        CFStringRef relCFStringRef =
+    //            CFStringCreateWithCString(
+    //                kCFAllocatorDefault,
+    //                sFileName.toUtf8().constData(),
+    //                kCFStringEncodingUTF8
+    //            );
+    //    CFURLRef relCFURL =
+    //        CFURLCreateWithFileSystemPath(
+    //            kCFAllocatorDefault,
+    //            relCFStringRef,
+    //            kCFURLPOSIXPathStyle,
+    //            false // isDirectory
+    //        );
+    //    CFErrorRef error=0;
+    //    CFURLRef absCFURL =
+    //    CFURLCreateFilePathURL(
+    //            kCFAllocatorDefault,
+    //            relCFURL,
+    //            &error
+    //        );
+    //    if(!error)
+    //    {
+    //        static const CFIndex maxAbsPathCStrBufLen=4096;
+    //        char absPathCStr[maxAbsPathCStrBufLen];
+    //        if(CFURLGetFileSystemRepresentation(
+    //                absCFURL,
+    //                true, // resolveAgainstBase
+    //                reinterpret_cast<UInt8 *>(&absPathCStr[0] ),
+    //                maxAbsPathCStrBufLen
+    //            ))
+    //            {
+    //            sFileName=QString(absPathCStr);
+    //            }
+    //        }
+    //        CFRelease(absCFURL);
+    //        CFRelease(relCFURL);
+    //        CFRelease(relCFStringRef);
+    //    }
 #endif
 
     QFileInfo fiLink(sFileName);
@@ -143,7 +143,7 @@ void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
 
             QFileInfoList eil=dir.entryInfoList();
 
-            for(int i=0;i<eil.count();i++)
+            for(int i=0; i<eil.count(); i++)
             {
                 findFiles(eil.at(i).absoluteFilePath(),pListFileNames);
             }
@@ -169,9 +169,10 @@ void XBinary::findFiles(QString sDirectoryName, XBinary::FFOPTIONS *pFFOption, q
 
             QFileInfoList eil=dir.entryInfoList();
 
-            for(int i=0;(i<eil.count())&&(!(*(pFFOption->pbIsStop)));i++)
+            for(int i=0; (i<eil.count())&&(!(*(pFFOption->pbIsStop))); i++)
             {
                 QString sFN=eil.at(i).fileName();
+
                 if((sFN!=".")&&(sFN!=".."))
                 {
                     findFiles(eil.at(i).absoluteFilePath(),pFFOption,nLevel+1);
@@ -190,10 +191,12 @@ QString XBinary::regExp(QString sRegExp, QString sString, int nIndex)
     rxString.indexIn(sString);
 
     QStringList list=rxString.capturedTexts();
+
     if(list.count()>nIndex)
     {
         sResult=list.at(nIndex);
     }
+
 #else
     QRegularExpression rxString(sRegExp);
     QRegularExpressionMatch matchString=rxString.match(sString);
@@ -202,6 +205,7 @@ QString XBinary::regExp(QString sRegExp, QString sString, int nIndex)
     {
         sResult=matchString.captured(nIndex);
     }
+
 #endif
 
     return sResult;
@@ -440,6 +444,7 @@ QString XBinary::read_utf8String(qint64 nOffset, qint64 nMaxSize)
     if(nMaxSize)
     {
         qint32 nRealSize=0;
+
         for(int i=0; i<nMaxSize; i++)
         {
             quint8 nByte=read_uint8(nOffset+nRealSize);
@@ -1311,7 +1316,7 @@ qint64 XBinary::addressToOffset(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 n
 
 XBinary::MEMORY_MAP XBinary::getOffsetMemoryMap(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nOffset)
 {
-    MEMORY_MAP result={};
+    MEMORY_MAP result= {};
 
     for(int i=0; i<pMemoryMap->count(); i++)
     {
@@ -1330,7 +1335,7 @@ XBinary::MEMORY_MAP XBinary::getOffsetMemoryMap(QList<XBinary::MEMORY_MAP> *pMem
 
 XBinary::MEMORY_MAP XBinary::getAddressMemoryMap(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress, ADDRESS_SEGMENT segment)
 {
-    MEMORY_MAP result={};
+    MEMORY_MAP result= {};
 
     for(int i=0; i<pMemoryMap->count(); i++)
     {
@@ -1351,7 +1356,7 @@ QList<XBinary::MEMORY_MAP> XBinary::getMemoryMapList()
 {
     QList<MEMORY_MAP> listMemoryMap;
 
-    MEMORY_MAP record={};
+    MEMORY_MAP record= {};
     record.nAddress=_getBaseAddress();
     record.segment=ADDRESS_SEGMENT_FLAT;
     record.nOffset=0;
@@ -1492,6 +1497,7 @@ qint64 XBinary::_getBaseAddress()
     qint64 nResult=0;
 
     qint64 nImageAddress=getImageAddress();
+
     if(isImage()&&(nImageAddress!=-1))
     {
         nResult=nImageAddress;
@@ -1705,10 +1711,10 @@ QSet<XBinary::FT> XBinary::getFileTypes()
 
     }
 
-//    if(isPlainText())
-//    {
-//        listResult.append(QString("Text"));
-//    }
+    //    if(isPlainText())
+    //    {
+    //        listResult.append(QString("Text"));
+    //    }
 
 
 
@@ -2059,13 +2065,13 @@ quint32 XBinary::getCRC32(QString sString)
     //        nResult+=_char;
     //    }
 
-//    char *pData=sString.toLatin1().data();
+    //    char *pData=sString.toLatin1().data();
     int nSize=sString.size();
 
     for(int i=0; i<nSize; i++)
     {
         unsigned char _char=(unsigned char)sString.at(i).toLatin1();
-//        unsigned char _char=(unsigned char)pData[i];
+        //        unsigned char _char=(unsigned char)pData[i];
         nResult^=_char;
 
         for(int k=0; k<8; k++)
@@ -2096,7 +2102,7 @@ QString XBinary::getSignature(qint64 nOffset, qint64 nSize)
 
 XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
 {
-    OFFSETSIZE result={};
+    OFFSETSIZE result= {};
 
     result.nOffset=-1;
     result.nSize=0;
@@ -2392,6 +2398,7 @@ bool XBinary::isPlainTextType()
     if(nDataSize)
     {
         bResult=true;
+
         for(int i=0; i<nDataSize; i++)
         {
             if(pDataOffset[i]<0x9)
@@ -2459,6 +2466,7 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType()
         quint16 nSymbol=*((quint16 *)(pDataOffset));
 
         nSymbol=qFromLittleEndian(nSymbol);
+
         if(nSymbol==0xFFFE)
         {
             result=UNICODE_TYPE_BE;
@@ -2472,6 +2480,7 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType()
             result=UNICODE_TYPE_NONE;
         }
     }
+
     // TODO 0 end
 
     return result;
@@ -2792,9 +2801,11 @@ quint32 XBinary::getPhysSize(char *pBuffer, qint64 nSize)
 bool XBinary::isEmptyData(char *pBuffer, qint64 nSize) // TODO dwords
 {
     bool bResult=true;
-    for(qint64 i=0;i<nSize;i++)
+
+    for(qint64 i=0; i<nSize; i++)
     {
         char *pOffset=(pBuffer+i);
+
         if(*pOffset)
         {
             bResult=false;

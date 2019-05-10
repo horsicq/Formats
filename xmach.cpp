@@ -432,9 +432,9 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
 
     qint64 nSize=0;
 
-    for(quint32 i=0;i<nNumberOfCommands;i++)
+    for(quint32 i=0; i<nNumberOfCommands; i++)
     {
-        COMMAND_RECORD record={};
+        COMMAND_RECORD record= {};
 
         record.nOffset=nOffset;
         record.nType=read_uint32(nOffset+offsetof(S_load_command,cmd),bIsBigEndian);
@@ -452,6 +452,7 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
         {
             _nSize=__ALIGN_UP(_nSize,4);
         }
+
         nSize+=_nSize;
         nOffset+=_nSize;
 
@@ -470,7 +471,7 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(QList<XMACH::COMMAND_RECOR
 
     int nCount=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0; i<nCount; i++)
     {
         if(pList->at(i).nType==nCommandID)
         {
@@ -495,7 +496,8 @@ bool XMACH::isCommandPresent(QList<XMACH::COMMAND_RECORD> *pList, quint32 nComma
     int nCount=pList->count();
 
     int nCurrentIndex=0;
-    for(int i=0;i<nCount;i++)
+
+    for(int i=0; i<nCount; i++)
     {
         if(pList->at(i).nType==nCommandID)
         {
@@ -504,6 +506,7 @@ bool XMACH::isCommandPresent(QList<XMACH::COMMAND_RECORD> *pList, quint32 nComma
                 bResult=true;
                 break;
             }
+
             nCurrentIndex++;
         }
     }
@@ -532,7 +535,8 @@ QByteArray XMACH::getCommand(QList<XMACH::COMMAND_RECORD> *pList, quint32 nComma
     int nCount=pList->count();
 
     int nCurrentIndex=0;
-    for(int i=0;i<nCount;i++)
+
+    for(int i=0; i<nCount; i++)
     {
         if(pList->at(i).nType==nCommandID)
         {
@@ -541,6 +545,7 @@ QByteArray XMACH::getCommand(QList<XMACH::COMMAND_RECORD> *pList, quint32 nComma
                 baResult=read_array(pList->at(i).nOffset,pList->at(i).nSize);
                 break;
             }
+
             nCurrentIndex++;
         }
     }
@@ -555,7 +560,8 @@ bool XMACH::setCommand(QList<XMACH::COMMAND_RECORD> *pList, quint32 nCommandID, 
     int nCount=pList->count();
 
     int nCurrentIndex=0;
-    for(int i=0;i<nCount;i++)
+
+    for(int i=0; i<nCount; i++)
     {
         if(pList->at(i).nType==nCommandID)
         {
@@ -567,8 +573,10 @@ bool XMACH::setCommand(QList<XMACH::COMMAND_RECORD> *pList, quint32 nCommandID, 
                 {
                     bResult=(write_array(pList->at(i).nOffset,baData.data(),pList->at(i).nSize)==nSize);
                 }
+
                 break;
             }
+
             nCurrentIndex++;
         }
     }

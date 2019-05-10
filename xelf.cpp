@@ -721,17 +721,17 @@ QMap<quint32, QString> XELF::getStringList(quint32 nSection)
 {
     QMap<quint32, QString> mapResult;
 
-//    if(nSection==0)
-//    {
-//        if(is64())
-//        {
-//            nSection=getHdr64_shstrndx();
-//        }
-//        else
-//        {
-//            nSection=getHdr32_shstrndx();
-//        }
-//    }
+    //    if(nSection==0)
+    //    {
+    //        if(is64())
+    //        {
+    //            nSection=getHdr64_shstrndx();
+    //        }
+    //        else
+    //        {
+    //            nSection=getHdr32_shstrndx();
+    //        }
+    //    }
 
     if(nSection!=SHN_UNDEF)
     {
@@ -763,17 +763,17 @@ QString XELF::getStringFromList(quint32 nIndex, quint32 nSection)
 {
     QString sResult;
 
-//    if(nSection==0)
-//    {
-//        if(is64())
-//        {
-//            nSection=getHdr64_shstrndx();
-//        }
-//        else
-//        {
-//            nSection=getHdr32_shstrndx();
-//        }
-//    }
+    //    if(nSection==0)
+    //    {
+    //        if(is64())
+    //        {
+    //            nSection=getHdr64_shstrndx();
+    //        }
+    //        else
+    //        {
+    //            nSection=getHdr32_shstrndx();
+    //        }
+    //    }
 
     quint64 offset=0;
     quint64 size=0;
@@ -887,7 +887,7 @@ QList<S_Elf64_Shdr> XELF::getElf64_ShdrList()
 
     for(quint32 i=0; i<nNumberOfSections; i++)
     {
-        S_Elf64_Shdr record={};
+        S_Elf64_Shdr record= {};
         record.sh_name=read_uint32(offset+offsetof(S_Elf64_Shdr,sh_name),bIsBigEndian);
         record.sh_type=read_uint32(offset+offsetof(S_Elf64_Shdr,sh_type),bIsBigEndian);
         record.sh_flags=read_uint64(offset+offsetof(S_Elf64_Shdr,sh_flags),bIsBigEndian);
@@ -907,7 +907,7 @@ QList<S_Elf64_Shdr> XELF::getElf64_ShdrList()
 
 S_Elf32_Shdr XELF::getElf32_Shdr(quint32 nIndex)
 {
-    S_Elf32_Shdr result={};
+    S_Elf32_Shdr result= {};
     quint32 nNumberOfSections=getHdr32_shnum();
     quint32 offset=getHdr32_shoff();
     bool bIsBigEndian=isBigEndian();
@@ -932,7 +932,7 @@ S_Elf32_Shdr XELF::getElf32_Shdr(quint32 nIndex)
 
 S_Elf64_Shdr XELF::getElf64_Shdr(quint32 nIndex)
 {
-    S_Elf64_Shdr result={};
+    S_Elf64_Shdr result= {};
     quint32 nNumberOfSections=getHdr64_shnum();
     quint64 offset=getHdr64_shoff();
     bool bIsBigEndian=isBigEndian();
@@ -1544,7 +1544,7 @@ QList<S_Elf32_Phdr> XELF::getElf32_PhdrList()
 
     for(quint32 i=0; i<nNumberOfProgramms; i++)
     {
-        S_Elf32_Phdr record={};
+        S_Elf32_Phdr record= {};
         record.p_type=read_uint32(offset+offsetof(S_Elf32_Phdr,p_type),bIsBigEndian);
         record.p_offset=read_uint32(offset+offsetof(S_Elf32_Phdr,p_offset),bIsBigEndian);
         record.p_vaddr=read_uint32(offset+offsetof(S_Elf32_Phdr,p_vaddr),bIsBigEndian);
@@ -1569,7 +1569,7 @@ QList<S_Elf64_Phdr> XELF::getElf64_PhdrList()
 
     for(quint32 i=0; i<nNumberOfProgramms; i++)
     {
-        S_Elf64_Phdr record={};
+        S_Elf64_Phdr record= {};
         record.p_type=read_uint32(offset+offsetof(S_Elf64_Phdr,p_type),bIsBigEndian);
         record.p_offset=read_uint64(offset+offsetof(S_Elf64_Phdr,p_offset),bIsBigEndian);
         record.p_vaddr=read_uint64(offset+offsetof(S_Elf64_Phdr,p_vaddr),bIsBigEndian);
@@ -1587,7 +1587,7 @@ QList<S_Elf64_Phdr> XELF::getElf64_PhdrList()
 
 S_Elf32_Phdr XELF::getElf32_Phdr(quint32 nIndex)
 {
-    S_Elf32_Phdr result={};
+    S_Elf32_Phdr result= {};
     quint32 nNumberOfPrograms=getHdr32_phnum();
     quint32 offset=getHdr32_phoff();
     bool bIsBigEndian=isBigEndian();
@@ -1610,7 +1610,7 @@ S_Elf32_Phdr XELF::getElf32_Phdr(quint32 nIndex)
 
 S_Elf64_Phdr XELF::getElf64_Phdr(quint32 nIndex)
 {
-    S_Elf64_Phdr result={};
+    S_Elf64_Phdr result= {};
     quint32 nNumberOfPrograms=getHdr64_phnum();
     quint64 offset=getHdr64_phoff();
     bool bIsBigEndian=isBigEndian();
@@ -2182,7 +2182,7 @@ QString XELF::getCompatibleKernelVersion()
 
 XELF::NOTE XELF::getNote(QByteArray &baData,bool bIsBigEndian)
 {
-    NOTE result={};
+    NOTE result= {};
     char *pData=baData.data();
     int nDataSize=baData.size();
 
@@ -2229,7 +2229,7 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
         nCount=listPhdr64.count();
     }
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0; i<nCount; i++)
     {
         // TODO
         if(!isImage())

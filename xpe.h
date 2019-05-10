@@ -593,13 +593,13 @@ public:
     {
         bool bOptimize;
         bool bClearHeader;
-//        bool bRemoveLastSection;
+        //        bool bRemoveLastSection;
         bool bSetEntryPoint;
         quint32 nEntryPoint;
-//        bool bAddImportSection;
+        //        bool bAddImportSection;
         QMap<qint64,QString> mapIAT;
         QMap<qint64,quint64> mapPatches;
-//        bool bAddRelocsSection;
+        //        bool bAddRelocsSection;
         QList<qint64> listRelocsRVAs;
         bool bRenameSections;
         QString sSectionName;
