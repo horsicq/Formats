@@ -34,10 +34,10 @@ public:
     quint16 get_magic();
     qint32 get_lfanew();
 
-    S_IMAGE_DOS_HEADER getDosHeader();
-    S_IMAGE_DOS_HEADEREX getDosHeaderEx();
-    void setDosHeader(S_IMAGE_DOS_HEADER *pDosHeader);
-    void setDosHeaderEx(S_IMAGE_DOS_HEADEREX *pDosHeaderEx);
+    XMSDOS_DEF::IMAGE_DOS_HEADER getDosHeader();
+    XMSDOS_DEF::IMAGE_DOS_HEADEREX getDosHeaderEx();
+    void setDosHeader(XMSDOS_DEF::IMAGE_DOS_HEADER *pDosHeader);
+    void setDosHeaderEx(XMSDOS_DEF::IMAGE_DOS_HEADEREX *pDosHeaderEx);
 
     void set_e_magic(quint16 value);
     void set_e_cblp(quint16 value);

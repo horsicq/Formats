@@ -23,11 +23,21 @@
 
 #include <QtGlobal>
 
+namespace XMACH_DEF
+{
+
+/* Constant for the magic field of the mach_header (32-bit architectures) */
+const quint32 S_MH_MAGIC      =0xfeedface;	/* the mach magic number */
+const quint32 S_MH_CIGAM      =0xcefaedfe	;/* NXSwapInt(MH_MAGIC) */
+/* Constant for the magic field of the mach_header_64 (64-bit architectures) */
+const quint32 S_MH_MAGIC_64=0xfeedfacf; /* the 64-bit mach magic number */
+const quint32 S_MH_CIGAM_64=0xcffaedfe; /* NXSwapInt(MH_MAGIC_64) */
+
 /*
  * The 32-bit mach header appears at the very beginning of the object file for
  * 32-bit architectures.
  */
-struct S_mach_header
+struct mach_header
 {
     quint32	magic;		/* mach magic number identifier */
     qint32	cputype;	/* cpu specifier */
@@ -38,15 +48,11 @@ struct S_mach_header
     quint32	flags;		/* flags */
 };
 
-/* Constant for the magic field of the mach_header (32-bit architectures) */
-#define	S_MH_MAGIC	0xfeedface	/* the mach magic number */
-#define S_MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
-
 /*
  * The 64-bit mach header appears at the very beginning of object files for
  * 64-bit architectures.
  */
-struct S_mach_header_64
+struct mach_header_64
 {
     quint32	magic;		/* mach magic number identifier */
     qint32	cputype;	/* cpu specifier */
@@ -58,14 +64,43 @@ struct S_mach_header_64
     quint32	reserved;	/* reserved */
 };
 
-/* Constant for the magic field of the mach_header_64 (64-bit architectures) */
-#define S_MH_MAGIC_64 0xfeedfacf /* the 64-bit mach magic number */
-#define S_MH_CIGAM_64 0xcffaedfe /* NXSwapInt(MH_MAGIC_64) */
 
-struct S_load_command
+
+struct load_command
 {
     quint32 cmd;
     quint32 cmdsize;
 };
+
+struct segment_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    char segname[16];
+    quint32 vmaddr;
+    quint32 vmsize;
+    quint32 fileoff;
+    quint32 filesize;
+    qint32 maxprot;
+    qint32 initprot;
+    quint32 nsects;
+    quint32 flags;
+};
+
+struct segment_command_64
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    char segname[16];
+    quint64 vmaddr;
+    quint64 vmsize;
+    quint64 fileoff;
+    quint64 filesize;
+    qint32 maxprot;
+    qint32 initprot;
+    quint32 nsects;
+    quint32 flags;
+};
+}
 
 #endif // QMACH_DEF_H

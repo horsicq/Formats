@@ -30,7 +30,7 @@ bool XMSDOS::isValid()
 
     quint16 magic=get_magic();
 
-    if((magic==S_IMAGE_DOS_SIGNATURE)||(magic==S_IMAGE_DOS_SIGNATURE_ZM))
+    if((magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||(magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
     {
         bResult=true;
     }
@@ -40,211 +40,211 @@ bool XMSDOS::isValid()
 
 quint16 XMSDOS::get_magic()
 {
-    return read_uint16((qint64)offsetof(S_IMAGE_DOS_HEADEREX,e_magic));
+    return read_uint16((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_magic));
 }
 
 qint32 XMSDOS::get_lfanew()
 {
-    return read_int32(offsetof(S_IMAGE_DOS_HEADEREX,e_lfanew));
+    return read_int32(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_lfanew));
 }
 
-S_IMAGE_DOS_HEADER XMSDOS::getDosHeader()
+XMSDOS_DEF::IMAGE_DOS_HEADER XMSDOS::getDosHeader()
 {
-    S_IMAGE_DOS_HEADER result=S_IMAGE_DOS_HEADER();
+    XMSDOS_DEF::IMAGE_DOS_HEADER result=XMSDOS_DEF::IMAGE_DOS_HEADER();
 
-    read_array((qint64)offsetof(S_IMAGE_DOS_HEADER,e_magic),(char *)&result,sizeof(S_IMAGE_DOS_HEADER));
+    read_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER,e_magic),(char *)&result,sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));
 
     return result;
 }
 
-S_IMAGE_DOS_HEADEREX XMSDOS::getDosHeaderEx()
+XMSDOS_DEF::IMAGE_DOS_HEADEREX XMSDOS::getDosHeaderEx()
 {
-    S_IMAGE_DOS_HEADEREX result=S_IMAGE_DOS_HEADEREX();
+    XMSDOS_DEF::IMAGE_DOS_HEADEREX result=XMSDOS_DEF::IMAGE_DOS_HEADEREX();
 
-    read_array((qint64)offsetof(S_IMAGE_DOS_HEADEREX,e_magic),(char *)&result,sizeof(S_IMAGE_DOS_HEADEREX));
+    read_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_magic),(char *)&result,sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX));
 
     return result;
 }
 
-void XMSDOS::setDosHeader(S_IMAGE_DOS_HEADER *pDosHeader)
+void XMSDOS::setDosHeader(XMSDOS_DEF::IMAGE_DOS_HEADER *pDosHeader)
 {
-    write_array((qint64)offsetof(S_IMAGE_DOS_HEADER,e_magic),(char *)pDosHeader,sizeof(S_IMAGE_DOS_HEADER));
+    write_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER,e_magic),(char *)pDosHeader,sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));
 }
 
-void XMSDOS::setDosHeaderEx(S_IMAGE_DOS_HEADEREX *pDosHeaderEx)
+void XMSDOS::setDosHeaderEx(XMSDOS_DEF::IMAGE_DOS_HEADEREX *pDosHeaderEx)
 {
-    write_array((qint64)offsetof(S_IMAGE_DOS_HEADEREX,e_magic),(char *)pDosHeaderEx,sizeof(S_IMAGE_DOS_HEADEREX));
+    write_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_magic),(char *)pDosHeaderEx,sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX));
 }
 
 void XMSDOS::set_e_magic(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_magic),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_magic),value);
 }
 
 void XMSDOS::set_e_cblp(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cblp),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_cblp),value);
 }
 
 void XMSDOS::set_e_cp(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cp),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_cp),value);
 }
 
 void XMSDOS::set_e_crlc(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_crlc),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_crlc),value);
 }
 
 void XMSDOS::set_e_cparhdr(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cparhdr),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_cparhdr),value);
 }
 
 void XMSDOS::set_e_minalloc(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_minalloc),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_minalloc),value);
 }
 
 void XMSDOS::set_e_maxalloc(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_maxalloc),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_maxalloc),value);
 }
 
 void XMSDOS::set_e_ss(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ss),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_ss),value);
 }
 
 void XMSDOS::set_e_sp(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_sp),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_sp),value);
 }
 
 void XMSDOS::set_e_csum(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_csum),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_csum),value);
 }
 
 void XMSDOS::set_e_ip(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ip),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_ip),value);
 }
 
 void XMSDOS::set_e_cs(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cs),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_cs),value);
 }
 
 void XMSDOS::set_e_lfarlc(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_lfarlc),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_lfarlc),value);
 }
 
 void XMSDOS::set_e_ovno(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ovno),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_ovno),value);
 }
 
 void XMSDOS::set_e_res(int nPosition, quint16 value)
 {
     if(nPosition<4)
     {
-        write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_res)+sizeof(quint16)*nPosition,value);
+        write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_res)+sizeof(quint16)*nPosition,value);
     }
 }
 
 void XMSDOS::set_e_oemid(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_oemid),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_oemid),value);
 }
 
 void XMSDOS::set_e_oeminfo(quint16 value)
 {
-    write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_oeminfo),value);
+    write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_oeminfo),value);
 }
 
 void XMSDOS::set_e_res2(int nPosition, quint16 value)
 {
     if(nPosition<10)
     {
-        write_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_res2)+sizeof(quint16)*nPosition,value);
+        write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_res2)+sizeof(quint16)*nPosition,value);
     }
 }
 
 void XMSDOS::set_e_lfanew(quint32 value)
 {
-    write_uint32(offsetof(S_IMAGE_DOS_HEADEREX,e_lfanew),value);
+    write_uint32(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_lfanew),value);
 }
 
 quint16 XMSDOS::get_e_magic()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_magic));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_magic));
 }
 
 quint16 XMSDOS::get_e_cblp()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cblp));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_cblp));
 }
 
 quint16 XMSDOS::get_e_cp()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cp));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_cp));
 }
 
 quint16 XMSDOS::get_e_crlc()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_crlc));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_crlc));
 }
 
 quint16 XMSDOS::get_e_cparhdr()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cparhdr));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_cparhdr));
 }
 
 quint16 XMSDOS::get_e_minalloc()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_minalloc));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_minalloc));
 }
 
 quint16 XMSDOS::get_e_maxalloc()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_maxalloc));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_maxalloc));
 }
 
 quint16 XMSDOS::get_e_ss()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ss));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_ss));
 }
 
 quint16 XMSDOS::get_e_sp()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_sp));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_sp));
 }
 
 quint16 XMSDOS::get_e_csum()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_csum));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_csum));
 }
 
 quint16 XMSDOS::get_e_ip()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ip));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_ip));
 }
 
 quint16 XMSDOS::get_e_cs()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_cs));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_cs));
 }
 
 quint16 XMSDOS::get_e_lfarlc()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_lfarlc));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_lfarlc));
 }
 
 quint16 XMSDOS::get_e_ovno()
 {
-    return read_uint16(offsetof(S_IMAGE_DOS_HEADEREX,e_ovno));
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_ovno));
 }
 
 QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()

@@ -35,7 +35,7 @@ bool XMACH::isValid()
     bool bResult=false;
     unsigned int nMagic=read_uint32(0);
 
-    if((nMagic==S_MH_MAGIC)||(nMagic==S_MH_CIGAM)||(nMagic==S_MH_MAGIC_64)||(nMagic==S_MH_CIGAM_64))
+    if((nMagic==XMACH_DEF::S_MH_MAGIC)||(nMagic==XMACH_DEF::S_MH_CIGAM)||(nMagic==XMACH_DEF::S_MH_MAGIC_64)||(nMagic==XMACH_DEF::S_MH_CIGAM_64))
     {
         bResult=true;
     }
@@ -48,7 +48,7 @@ bool XMACH::isBigEndian()
     bool bResult=false;
     quint32 nMagic=read_uint32(0);
 
-    if((nMagic==S_MH_CIGAM)||(nMagic==S_MH_CIGAM_64))
+    if((nMagic==XMACH_DEF::S_MH_CIGAM)||(nMagic==XMACH_DEF::S_MH_CIGAM_64))
     {
         bResult=true;
     }
@@ -58,87 +58,87 @@ bool XMACH::isBigEndian()
 
 bool XMACH::is64()
 {
-    return (getHeader_magic()==S_MH_MAGIC_64);
+    return (getHeader_magic()==XMACH_DEF::S_MH_MAGIC_64);
 }
 
 quint32 XMACH::getHeader_magic()
 {
-    return read_uint32(offsetof(S_mach_header,magic),isBigEndian());
+    return read_uint32(offsetof(XMACH_DEF::mach_header,magic),isBigEndian());
 }
 
 qint32 XMACH::getHeader_cputype()
 {
-    return read_int32(offsetof(S_mach_header,cputype),isBigEndian());
+    return read_int32(offsetof(XMACH_DEF::mach_header,cputype),isBigEndian());
 }
 
 qint32 XMACH::getHeader_cpusubtype()
 {
-    return read_int32(offsetof(S_mach_header,cpusubtype),isBigEndian());
+    return read_int32(offsetof(XMACH_DEF::mach_header,cpusubtype),isBigEndian());
 }
 
 quint32 XMACH::getHeader_filetype()
 {
-    return read_uint32(offsetof(S_mach_header,filetype),isBigEndian());
+    return read_uint32(offsetof(XMACH_DEF::mach_header,filetype),isBigEndian());
 }
 
 quint32 XMACH::getHeader_ncmds()
 {
-    return read_uint32(offsetof(S_mach_header,ncmds),isBigEndian());
+    return read_uint32(offsetof(XMACH_DEF::mach_header,ncmds),isBigEndian());
 }
 
 quint32 XMACH::getHeader_sizeofcmds()
 {
-    return read_uint32(offsetof(S_mach_header,sizeofcmds),isBigEndian());
+    return read_uint32(offsetof(XMACH_DEF::mach_header,sizeofcmds),isBigEndian());
 }
 
 quint32 XMACH::getHeader_flags()
 {
-    return read_uint32(offsetof(S_mach_header,flags),isBigEndian());
+    return read_uint32(offsetof(XMACH_DEF::mach_header,flags),isBigEndian());
 }
 
 quint32 XMACH::getHeader_reserved()
 {
-    return read_uint32(offsetof(S_mach_header_64,reserved),isBigEndian());
+    return read_uint32(offsetof(XMACH_DEF::mach_header_64,reserved),isBigEndian());
 }
 
 void XMACH::setHeader_magic(quint32 nValue)
 {
-    write_uint32(offsetof(S_mach_header,magic),nValue,isBigEndian());
+    write_uint32(offsetof(XMACH_DEF::mach_header,magic),nValue,isBigEndian());
 }
 
 void XMACH::setHeader_cputype(qint32 nValue)
 {
-    write_int32(offsetof(S_mach_header,cputype),nValue,isBigEndian());
+    write_int32(offsetof(XMACH_DEF::mach_header,cputype),nValue,isBigEndian());
 }
 
 void XMACH::setHeader_cpusubtype(qint32 nValue)
 {
-    write_int32(offsetof(S_mach_header,cpusubtype),nValue,isBigEndian());
+    write_int32(offsetof(XMACH_DEF::mach_header,cpusubtype),nValue,isBigEndian());
 }
 
 void XMACH::setHeader_filetype(quint32 nValue)
 {
-    write_uint32(offsetof(S_mach_header,filetype),nValue,isBigEndian());
+    write_uint32(offsetof(XMACH_DEF::mach_header,filetype),nValue,isBigEndian());
 }
 
 void XMACH::setHeader_ncmds(quint32 nValue)
 {
-    write_uint32(offsetof(S_mach_header,ncmds),nValue,isBigEndian());
+    write_uint32(offsetof(XMACH_DEF::mach_header,ncmds),nValue,isBigEndian());
 }
 
 void XMACH::setHeader_sizeofcmds(quint32 nValue)
 {
-    write_uint32(offsetof(S_mach_header,sizeofcmds),nValue,isBigEndian());
+    write_uint32(offsetof(XMACH_DEF::mach_header,sizeofcmds),nValue,isBigEndian());
 }
 
 void XMACH::setHeader_flags(quint32 nValue)
 {
-    write_uint32(offsetof(S_mach_header,flags),nValue,isBigEndian());
+    write_uint32(offsetof(XMACH_DEF::mach_header,flags),nValue,isBigEndian());
 }
 
 void XMACH::setHeader_reserved(quint32 nValue)
 {
-    write_uint32(offsetof(S_mach_header_64,reserved),nValue,isBigEndian());
+    write_uint32(offsetof(XMACH_DEF::mach_header_64,reserved),nValue,isBigEndian());
 }
 
 qint64 XMACH::getHeaderSize()
@@ -147,11 +147,11 @@ qint64 XMACH::getHeaderSize()
 
     if(is64())
     {
-        nResult=sizeof(S_mach_header_64);
+        nResult=sizeof(XMACH_DEF::mach_header_64);
     }
     else
     {
-        nResult=sizeof(S_mach_header);
+        nResult=sizeof(XMACH_DEF::mach_header);
     }
 
     return nResult;
@@ -251,17 +251,17 @@ QMap<quint64, QString> XMACH::getHeaderFlags()
     mapResult.insert(0x400,"MH_NOFIXPREBINDING");
     mapResult.insert(0x800,"MH_PREBINDABLE");
     mapResult.insert(0x1000,"MH_ALLMODSBOUND");
-    mapResult.insert(0x2000,"MH_SUBSECTIONS_VIA_SYMBOLS");
+    mapResult.insert(0x2000,"MH_SUBSECTIONMACH::VIA_SYMBOLS");
     mapResult.insert(0x4000,"MH_CANONICAL");
     mapResult.insert(0x8000,"MH_WEAK_DEFINES");
-    mapResult.insert(0x10000,"MH_BINDS_TO_WEAK");
+    mapResult.insert(0x10000,"MH_BINDMACH::TO_WEAK");
     mapResult.insert(0x20000,"MH_ALLOW_STACK_EXECUTION");
     mapResult.insert(0x40000,"MH_ROOT_SAFE");
     mapResult.insert(0x80000,"MH_SETUID_SAFE");
     mapResult.insert(0x100000,"MH_NO_REEXPORTED_DYLIBS");
     mapResult.insert(0x200000,"MH_PIE");
     mapResult.insert(0x400000,"MH_DEAD_STRIPPABLE_DYLIB");
-    mapResult.insert(0x800000,"MH_HAS_TLV_DESCRIPTORS");
+    mapResult.insert(0x800000,"MH_HAMACH::TLV_DESCRIPTORS");
     mapResult.insert(0x1000000,"MH_NO_HEAP_EXECUTION");
     mapResult.insert(0x02000000,"MH_APP_EXTENSION_SAFE");
     mapResult.insert(0x04000000,"MH_NLIST_OUTOFSYNC_WITH_DYLDINFO");
@@ -285,17 +285,17 @@ QMap<quint64, QString> XMACH::getHeaderFlagsS()
     mapResult.insert(0x400,"NOFIXPREBINDING");
     mapResult.insert(0x800,"PREBINDABLE");
     mapResult.insert(0x1000,"ALLMODSBOUND");
-    mapResult.insert(0x2000,"SUBSECTIONS_VIA_SYMBOLS");
+    mapResult.insert(0x2000,"SUBSECTIONMACH::VIA_SYMBOLS");
     mapResult.insert(0x4000,"CANONICAL");
     mapResult.insert(0x8000,"WEAK_DEFINES");
-    mapResult.insert(0x10000,"BINDS_TO_WEAK");
+    mapResult.insert(0x10000,"BINDMACH::TO_WEAK");
     mapResult.insert(0x20000,"ALLOW_STACK_EXECUTION");
     mapResult.insert(0x40000,"ROOT_SAFE");
     mapResult.insert(0x80000,"SETUID_SAFE");
     mapResult.insert(0x100000,"NO_REEXPORTED_DYLIBS");
     mapResult.insert(0x200000,"PIE");
     mapResult.insert(0x400000,"DEAD_STRIPPABLE_DYLIB");
-    mapResult.insert(0x800000,"HAS_TLV_DESCRIPTORS");
+    mapResult.insert(0x800000,"HAMACH::TLV_DESCRIPTORS");
     mapResult.insert(0x1000000,"NO_HEAP_EXECUTION");
     mapResult.insert(0x02000000,"APP_EXTENSION_SAFE");
     mapResult.insert(0x04000000,"NLIST_OUTOFSYNC_WITH_DYLDINFO");
@@ -331,7 +331,7 @@ QMap<quint64, QString> XMACH::getLoadCommandTypes()
     mapResult.insert(0x17,"LC_PREBIND_CKSUM");
     mapResult.insert(0x18|0x80000000,"LC_LOAD_WEAK_DYLIB");
     mapResult.insert(0x19,"LC_SEGMENT_64");
-    mapResult.insert(0x1a,"LC_ROUTINES_64");
+    mapResult.insert(0x1a,"LC_ROUTINEMACH::64");
     mapResult.insert(0x1b,"LC_UUID");
     mapResult.insert(0x1c|0x80000000,"LC_RPATH");
     mapResult.insert(0x1d,"LC_CODE_SIGNATURE");
@@ -389,7 +389,7 @@ QMap<quint64, QString> XMACH::getLoadCommandTypesS()
     mapResult.insert(0x17,"PREBIND_CKSUM");
     mapResult.insert(0x18|0x80000000,"LOAD_WEAK_DYLIB");
     mapResult.insert(0x19,"SEGMENT_64");
-    mapResult.insert(0x1a,"ROUTINES_64");
+    mapResult.insert(0x1a,"ROUTINEMACH::64");
     mapResult.insert(0x1b,"UUID");
     mapResult.insert(0x1c|0x80000000,"RPATH");
     mapResult.insert(0x1d,"CODE_SIGNATURE");
@@ -437,8 +437,8 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
         COMMAND_RECORD record= {};
 
         record.nOffset=nOffset;
-        record.nType=read_uint32(nOffset+offsetof(S_load_command,cmd),bIsBigEndian);
-        record.nSize=read_uint32(nOffset+offsetof(S_load_command,cmdsize),bIsBigEndian);
+        record.nType=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmd),bIsBigEndian);
+        record.nSize=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmdsize),bIsBigEndian);
 
         listResult.append(record);
 

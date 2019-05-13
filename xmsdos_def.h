@@ -18,15 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-#ifndef XMSDOS_DEF
-#define XMSDOS_DEF
+#ifndef XMSDOS_DEF_H
+#define XMSDOS_DEF_H
 
 #include <QtGlobal>
 
-#define S_IMAGE_DOS_SIGNATURE                 0x5A4D      // MZ
-#define S_IMAGE_DOS_SIGNATURE_ZM              0x4D5A      // ZM
+namespace XMSDOS_DEF
+{
+const quint32 S_IMAGE_DOS_SIGNATURE=0x5A4D;      // MZ
+const quint32 S_IMAGE_DOS_SIGNATURE_ZM=0x4D5A;      // ZM
 
-struct S_IMAGE_DOS_HEADER
+struct IMAGE_DOS_HEADER
 {
     quint16 e_magic;      /* 00: MZ Header signature */
     quint16 e_cblp;       /* 02: Bytes on last page of file */
@@ -44,7 +46,7 @@ struct S_IMAGE_DOS_HEADER
     quint16 e_ovno;       /* 1a: Overlay number */
 };
 
-struct S_IMAGE_DOS_HEADEREX
+struct IMAGE_DOS_HEADEREX
 {
     quint16 e_magic;      /* 00: MZ Header signature */
     quint16 e_cblp;       /* 02: Bytes on last page of file */
@@ -67,6 +69,6 @@ struct S_IMAGE_DOS_HEADEREX
     quint16 e_res2[10];   /* 28: Reserved words */
     qint32 e_lfanew;     /* 3c: Offset to extended header */
 };
-
-#endif // XMSDOS_DEF
+}
+#endif // XMSDOS_DEF_H
 

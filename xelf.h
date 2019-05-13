@@ -148,11 +148,11 @@ public:
     QByteArray getSection(quint32 nIndex);
     bool isSectionValid(quint32 nIndex);
     // TODO Set
-    QList<S_Elf32_Shdr> getElf32_ShdrList();
-    QList<S_Elf64_Shdr> getElf64_ShdrList();
+    QList<XELF_DEF::Elf32_Shdr> getElf32_ShdrList();
+    QList<XELF_DEF::Elf64_Shdr> getElf64_ShdrList();
     // TODO Set
-    S_Elf32_Shdr getElf32_Shdr(quint32 nIndex);
-    S_Elf64_Shdr getElf64_Shdr(quint32 nIndex);
+    XELF_DEF::Elf32_Shdr getElf32_Shdr(quint32 nIndex);
+    XELF_DEF::Elf64_Shdr getElf64_Shdr(quint32 nIndex);
     quint32 getElf32_Shdr_name(quint32 nIndex);
     quint32 getElf32_Shdr_type(quint32 nIndex);
     quint32 getElf32_Shdr_flags(quint32 nIndex);
@@ -197,11 +197,11 @@ public:
     void setElf64_Shdr_addralign(quint32 nIndex,quint64 value);
     void setElf64_Shdr_entsize(quint32 nIndex,quint64 value);
 
-    QList<S_Elf32_Phdr> getElf32_PhdrList();
-    QList<S_Elf64_Phdr> getElf64_PhdrList();
+    QList<XELF_DEF::Elf32_Phdr> getElf32_PhdrList();
+    QList<XELF_DEF::Elf64_Phdr> getElf64_PhdrList();
 
-    S_Elf32_Phdr getElf32_Phdr(quint32 nIndex);
-    S_Elf64_Phdr getElf64_Phdr(quint32 nIndex);
+    XELF_DEF::Elf32_Phdr getElf32_Phdr(quint32 nIndex);
+    XELF_DEF::Elf64_Phdr getElf64_Phdr(quint32 nIndex);
 
     quint32 getElf32_Phdr_type(quint32 nIndex);
     quint32 getElf32_Phdr_offset(quint32 nIndex);

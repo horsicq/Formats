@@ -1627,27 +1627,27 @@ QSet<XBinary::FT> XBinary::getFileTypes()
     char *pOffset=baHeader.data();
     unsigned int nSize=getSize();
 
-    if(nSize>=(int)sizeof(S_IMAGE_DOS_HEADEREX))
+    if(nSize>=(int)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX))
     {
-        if((((S_IMAGE_DOS_HEADEREX *)pOffset)->e_magic==S_IMAGE_DOS_SIGNATURE)||(((S_IMAGE_DOS_HEADEREX *)pOffset)->e_magic==0x4D5A))
+        if((((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||(((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==0x4D5A))
         {
             unsigned int nLfanew=0;
-            nLfanew=((S_IMAGE_DOS_HEADEREX *)pOffset)->e_lfanew;
-            unsigned int nHeaderSize=baHeader.size()-sizeof(S_IMAGE_NT_HEADERS32);
+            nLfanew=((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_lfanew;
+            unsigned int nHeaderSize=baHeader.size()-sizeof(XPE_DEF::IMAGE_NT_HEADERS32);
             QByteArray baNTHeaders;
 
             bool isHeaderValid=false;
 
-            if((nLfanew<nHeaderSize)&&((quint32)baHeader.size()>sizeof(S_IMAGE_NT_HEADERS32)))
+            if((nLfanew<nHeaderSize)&&((quint32)baHeader.size()>sizeof(XPE_DEF::IMAGE_NT_HEADERS32)))
             {
                 pOffset+=nLfanew;
                 isHeaderValid=true;
             }
             else
             {
-                baNTHeaders=read_array(nLfanew,sizeof(S_IMAGE_NT_HEADERS32));
+                baNTHeaders=read_array(nLfanew,sizeof(XPE_DEF::IMAGE_NT_HEADERS32));
 
-                if(baNTHeaders.size()==sizeof(S_IMAGE_NT_HEADERS32))
+                if(baNTHeaders.size()==sizeof(XPE_DEF::IMAGE_NT_HEADERS32))
                 {
                     pOffset=baNTHeaders.data();
                     isHeaderValid=true;
@@ -1656,13 +1656,13 @@ QSet<XBinary::FT> XBinary::getFileTypes()
 
             if(isHeaderValid)
             {
-                if((((S_IMAGE_NT_HEADERS32 *)pOffset))->Signature==S_IMAGE_NT_SIGNATURE)
+                if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XPE_DEF::S_IMAGE_NT_SIGNATURE)
                 {
-                    if((((S_IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==S_IMAGE_FILE_MACHINE_AMD64)
+                    if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)
                     {
                         stResult.insert(FT_PE64);
                     }
-                    else if((((S_IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==S_IMAGE_FILE_MACHINE_IA64)
+                    else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==XPE_DEF::S_IMAGE_FILE_MACHINE_IA64)
                     {
                         stResult.insert(FT_PE64);
                     }
@@ -1677,33 +1677,33 @@ QSet<XBinary::FT> XBinary::getFileTypes()
         }
     }
 
-    if(nSize>=(int)sizeof(S_Elf32_Ehdr))
+    if(nSize>=(int)sizeof(XELF_DEF::Elf32_Ehdr))
     {
-        if((((S_Elf32_Ehdr *)pOffset)->e_ident[0] == 0x7f) &&
-                (((S_Elf32_Ehdr *)pOffset)->e_ident[1] == 'E') &&
-                (((S_Elf32_Ehdr *)pOffset)->e_ident[2] == 'L') &&
-                (((S_Elf32_Ehdr *)pOffset)->e_ident[3] == 'F'))
+        if((((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[0]==0x7f) &&
+                (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[1]=='E') &&
+                (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[2]=='L') &&
+                (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[3]=='F'))
         {
-            if(((S_Elf32_Ehdr *)pOffset)->e_ident[4] == 1)
+            if(((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[4]==1)
             {
                 stResult.insert(FT_ELF32);
             }
-            else if(((S_Elf32_Ehdr *)pOffset)->e_ident[4] == 2)
+            else if(((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[4]==2)
             {
                 stResult.insert(FT_ELF64);
             }
         }
     }
 
-    if(nSize>=(int)sizeof(S_mach_header))
+    if(nSize>=(int)sizeof(XMACH_DEF::mach_header))
     {
-        if(((S_mach_header *)pOffset)->filetype<0xFFFF)
+        if(((XMACH_DEF::mach_header *)pOffset)->filetype<0xFFFF)
         {
-            if((((S_mach_header *)pOffset)->magic == S_MH_MAGIC)||(((S_mach_header *)pOffset)->magic == S_MH_CIGAM))
+            if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_MAGIC)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_CIGAM))
             {
                 stResult.insert(FT_MACH32);
             }
-            else if((((S_mach_header *)pOffset)->magic == S_MH_MAGIC_64)||(((S_mach_header *)pOffset)->magic == S_MH_CIGAM_64))
+            else if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_MAGIC_64)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_CIGAM_64))
             {
                 stResult.insert(FT_MACH32);
             }

@@ -91,7 +91,7 @@ public:
 
     struct EXPORT_HEADER
     {
-        S_IMAGE_EXPORT_DIRECTORY directory;
+        XPE_DEF::IMAGE_EXPORT_DIRECTORY directory;
         QString sName;
         QList<EXPORT_POSITION> listPositions;
     };
@@ -133,9 +133,9 @@ public:
         quint32 nLevel;
         bool bIsDataDirectory;
         RESOURCES_ID_NAME rin;
-        S_IMAGE_RESOURCE_DIRECTORY directory;
-        S_IMAGE_RESOURCE_DIRECTORY_ENTRY dir_entry;
-        S_IMAGE_RESOURCE_DATA_ENTRY data_entry;
+        XPE_DEF::IMAGE_RESOURCE_DIRECTORY directory;
+        XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY dir_entry;
+        XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY data_entry;
         qint64 nDataAddress;
         qint64 nDataOffset;
         QList<RESOURCE_POSITION> listPositions;
@@ -144,7 +144,7 @@ public:
     struct RESOURCE_HEADER
     {
         qint64 nOffset;
-        S_IMAGE_RESOURCE_DIRECTORY directory;
+        XPE_DEF::IMAGE_RESOURCE_DIRECTORY directory;
         QList<RESOURCE_POSITION> listPositions;
     };
 
@@ -158,7 +158,7 @@ public:
     struct RELOCS_HEADER
     {
         qint64 nOffset;
-        S_IMAGE_BASE_RELOCATION ibr;
+        XPE_DEF::IMAGE_BASE_RELOCATION ibr;
         qint32 nCount;
     };
 
@@ -183,7 +183,7 @@ public:
 
     struct RESOURCE_VERSION
     {
-        S__tagVS_FIXEDFILEINFO fileInfo;
+        XPE_DEF::_tagVS_FIXEDFILEINFO fileInfo;
         QList<QString> listRecords; // TODO rename
     };
 
@@ -192,7 +192,7 @@ public:
         bool bInit;
         bool bHidden;
         qint64 nCLIHeaderOffset;
-        S_IMAGE_COR20_HEADER header;
+        XPE_DEF::IMAGE_COR20_HEADER header;
 
         qint64 nCLI_MetaDataOffset;
         quint32 nCLI_MetaData_Signature;
@@ -239,7 +239,7 @@ public:
         QList<QString> listUnicodeStrings;
     };
 
-    struct S_IMAGE_IMPORT_DESCRIPTOR_EX
+    struct IMAGE_IMPORT_DESCRIPTOR_EX
     {
         union
         {
@@ -271,8 +271,8 @@ public:
     void setNtHeaders_Signature(quint32 value);
     qint64 getFileHeaderOffset();
 
-    S_IMAGE_FILE_HEADER getFileHeader();
-    void setFileHeader(S_IMAGE_FILE_HEADER *pFileHeader);
+    XPE_DEF::IMAGE_FILE_HEADER getFileHeader();
+    void setFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pFileHeader);
     quint16 getFileHeader_Machine();
     quint16 getFileHeader_NumberOfSections();
     quint32 getFileHeader_TimeDateStamp();
@@ -291,17 +291,17 @@ public:
 
     qint64 getOptionalHeaderOffset();
 
-    S_IMAGE_OPTIONAL_HEADER32 getOptionalHeader32();
-    S_IMAGE_OPTIONAL_HEADER64 getOptionalHeader64();
+    XPE_DEF::IMAGE_OPTIONAL_HEADER32 getOptionalHeader32();
+    XPE_DEF::IMAGE_OPTIONAL_HEADER64 getOptionalHeader64();
 
-    void setOptionalHeader32(S_IMAGE_OPTIONAL_HEADER32 *pOptionalHeader32);
-    void setOptionalHeader64(S_IMAGE_OPTIONAL_HEADER64 *pOptionalHeader64);
+    void setOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pOptionalHeader32);
+    void setOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pOptionalHeader64);
 
-    S_IMAGE_OPTIONAL_HEADER32S getOptionalHeader32S();
-    S_IMAGE_OPTIONAL_HEADER64S getOptionalHeader64S();
+    XPE_DEF::IMAGE_OPTIONAL_HEADER32S getOptionalHeader32S();
+    XPE_DEF::IMAGE_OPTIONAL_HEADER64S getOptionalHeader64S();
 
-    void setOptionalHeader32S(S_IMAGE_OPTIONAL_HEADER32S *pOptionalHeader32S);
-    void setOptionalHeader64S(S_IMAGE_OPTIONAL_HEADER64S *pOptionalHeader64S);
+    void setOptionalHeader32S(XPE_DEF::IMAGE_OPTIONAL_HEADER32S *pOptionalHeader32S);
+    void setOptionalHeader64S(XPE_DEF::IMAGE_OPTIONAL_HEADER64S *pOptionalHeader64S);
 
     quint16 getOptionalHeader_Magic();
     quint8 getOptionalHeader_MajorLinkerVersion();
@@ -366,8 +366,8 @@ public:
     void setOptionalHeader_LoaderFlags(quint32 value);
     void setOptionalHeader_NumberOfRvaAndSizes(quint32 value);
 
-    S_IMAGE_DATA_DIRECTORY getOptionalHeader_DataDirectory(quint32 nNumber);
-    void setOptionalHeader_DataDirectory(quint32 nNumber,S_IMAGE_DATA_DIRECTORY *pDataDirectory);
+    XPE_DEF::IMAGE_DATA_DIRECTORY getOptionalHeader_DataDirectory(quint32 nNumber);
+    void setOptionalHeader_DataDirectory(quint32 nNumber,XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
 
     void setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber,quint32 value);
     void setOptionalHeader_DataDirectory_Size(quint32 nNumber,quint32 value);
@@ -376,19 +376,19 @@ public:
 
     bool isOptionalHeader_DataDirectoryPresent(quint32 nNumber);
 
-    QList<S_IMAGE_DATA_DIRECTORY> getDirectories();
-    void setDirectories(QList<S_IMAGE_DATA_DIRECTORY> *pListDirectories);
+    QList<XPE_DEF::IMAGE_DATA_DIRECTORY> getDirectories();
+    void setDirectories(QList<XPE_DEF::IMAGE_DATA_DIRECTORY> *pListDirectories);
 
     qint64 getDataDirectoryOffset(quint32 nNumber);
     QByteArray getDataDirectory(quint32 nNumber);
 
     qint64 getSectionsTableOffset();
-    S_IMAGE_SECTION_HEADER getSectionHeader(quint32 nNumber);
-    void setSectionHeader(quint32 nNumber,S_IMAGE_SECTION_HEADER *pSectionHeader);
+    XPE_DEF::IMAGE_SECTION_HEADER getSectionHeader(quint32 nNumber);
+    void setSectionHeader(quint32 nNumber,XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader);
 
-    QList<S_IMAGE_SECTION_HEADER> getSectionHeaders();
+    QList<XPE_DEF::IMAGE_SECTION_HEADER> getSectionHeaders();
     // TODO with __getSectionOffsetAndSize
-    static QList<SECTION_RECORD> getSectionRecords(QList<S_IMAGE_SECTION_HEADER> *pList,bool bIsImage);
+    static QList<SECTION_RECORD> getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pList,bool bIsImage);
 
     QList<SECTIONRVA_RECORD> getSectionRVARecords();
 
@@ -414,18 +414,18 @@ public:
     void setSection_NumberOfLinenumbers(quint32 nNumber,quint16 value);
     void setSection_Characteristics(quint32 nNumber,quint32 value);
 
-    static bool isSectionNamePresent(QString sSectionName,QList<S_IMAGE_SECTION_HEADER> *pListSections);
-    static S_IMAGE_SECTION_HEADER getSectionByName(QString sSectionName,QList<S_IMAGE_SECTION_HEADER> *pListSections);
+    static bool isSectionNamePresent(QString sSectionName,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections);
+    static XPE_DEF::IMAGE_SECTION_HEADER getSectionByName(QString sSectionName,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections);
 
     bool isImportPresent();
 
     QList<IMPORT_RECORD> getImportRecords();
 
-    QList<S_IMAGE_IMPORT_DESCRIPTOR> getImportDescriptors();
-    QList<S_IMAGE_IMPORT_DESCRIPTOR_EX> getImportDescriptorsEx();
+    QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> getImportDescriptors();
+    QList<IMAGE_IMPORT_DESCRIPTOR_EX> getImportDescriptorsEx();
 
-    S_IMAGE_IMPORT_DESCRIPTOR getImportDescriptor(quint32 nNumber);
-    void setImportDescriptor(quint32 nNumber,S_IMAGE_IMPORT_DESCRIPTOR *pImportDescriptor);
+    XPE_DEF::IMAGE_IMPORT_DESCRIPTOR getImportDescriptor(quint32 nNumber);
+    void setImportDescriptor(quint32 nNumber,XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *pImportDescriptor);
 
     QList<IMPORT_HEADER> getImports();
     QList<IMPORT_POSITION> getImportPositions(int nIndex);
@@ -450,7 +450,7 @@ public:
     static bool isResourcePresent(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListHeaders);
 
     QString getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListHeaders);
-    S_VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
+    XPE_DEF::VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
 
     RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);
     static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion);
@@ -460,8 +460,8 @@ public:
     virtual void setBaseAddress(qint64 nBaseAddress);
     virtual qint64 getEntryPointOffset();
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
-    S_IMAGE_IMPORT_DESCRIPTOR read_S_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset);
-    void write_S_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset,S_IMAGE_IMPORT_DESCRIPTOR value);
+    XPE_DEF::IMAGE_IMPORT_DESCRIPTOR read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset);
+    void write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset,XPE_DEF::IMAGE_IMPORT_DESCRIPTOR value);
 
     bool isExportPresent();
 
@@ -469,8 +469,8 @@ public:
 
     static bool isExportFunctionPresent(QString sFunction,EXPORT_HEADER *pExportHeader);
 
-    S_IMAGE_EXPORT_DIRECTORY getExportDirectory();
-    void setExportDirectory(S_IMAGE_EXPORT_DIRECTORY *pExportDirectory);
+    XPE_DEF::IMAGE_EXPORT_DIRECTORY getExportDirectory();
+    void setExportDirectory(XPE_DEF::IMAGE_EXPORT_DIRECTORY *pExportDirectory);
 
     void setExportDirectory_Characteristics(quint32 value);
     void setExportDirectory_TimeDateStamp(quint32 value);
@@ -516,17 +516,17 @@ public:
     bool removeOverlay();
     static bool removeOverlay(QIODevice *pDevice, bool bIsImage);
     static bool removeOverlay(QString sFileName, bool bIsImage);
-    bool addSection(S_IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
-    static bool addSection(QString sFileName,bool bIsImage,S_IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
-    static bool addSection(QIODevice *pDevice, bool bIsImage, S_IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
+    bool addSection(XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
+    static bool addSection(QString sFileName,bool bIsImage,XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
+    static bool addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
 
     bool removeLastSection();
     static bool removeLastSection(QIODevice *pDevice, bool bIsImage);
     static bool removeLastSection(QString sFileName,bool bIsImage);
     // TODO copy Overlay function
-    S_IMAGE_RESOURCE_DIRECTORY_ENTRY read_S_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset);
-    S_IMAGE_RESOURCE_DIRECTORY read_S_IMAGE_RESOURCE_DIRECTORY(qint64 nOffset);
-    S_IMAGE_RESOURCE_DATA_ENTRY read_S_IMAGE_RESOURCE_DATA_ENTRY(qint64 nOffset);
+    XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY read_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset);
+    XPE_DEF::IMAGE_RESOURCE_DIRECTORY read_IMAGE_RESOURCE_DIRECTORY(qint64 nOffset);
+    XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY read_IMAGE_RESOURCE_DATA_ENTRY(qint64 nOffset);
     XPE::RESOURCES_ID_NAME getResourcesIDName(qint64 nResourceOffset, quint32 value);
 
     QList<qint64> getRelocsAsRVAList();
@@ -611,7 +611,7 @@ public:
     static bool fixCheckSum(QString sFileName,bool bIsImage);
     void _fixCheckSum();
 
-    static QList<S_IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData,S_IMAGE_SECTION_HEADER shOriginal,quint32 nBlockSize);
+    static QList<XPE_DEF::IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData,XPE_DEF::IMAGE_SECTION_HEADER shOriginal,quint32 nBlockSize);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
