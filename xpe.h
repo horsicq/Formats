@@ -450,7 +450,7 @@ public:
     static bool isResourcePresent(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListHeaders);
 
     QString getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListHeaders);
-    XPE_DEF::VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
+    XPE_DEF::S_VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
 
     RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);
     static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion);

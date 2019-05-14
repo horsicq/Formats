@@ -2584,11 +2584,11 @@ QString XPE::getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListRecords)
     return sResult;
 }
 
-XPE_DEF::VS_VERSION_INFO XPE::readResourceVersionInfo(qint64 nOffset)
+XPE_DEF::S_VS_VERSION_INFO XPE::readResourceVersionInfo(qint64 nOffset)
 {
-    XPE_DEF::VS_VERSION_INFO result= {};
+    XPE_DEF::S_VS_VERSION_INFO result= {};
 
-    read_array(nOffset,(char *)&result,sizeof(XPE_DEF::VS_VERSION_INFO));
+    read_array(nOffset,(char *)&result,sizeof(XPE_DEF::S_VS_VERSION_INFO));
 
     return result;
 }
@@ -2597,17 +2597,17 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
 {
     quint32 nResult=0;
 
-    if((quint32)nSize>=sizeof(XPE_DEF::VS_VERSION_INFO))
+    if((quint32)nSize>=sizeof(XPE_DEF::S_VS_VERSION_INFO))
     {
-        XPE_DEF::VS_VERSION_INFO vi=readResourceVersionInfo(nOffset);
+        XPE_DEF::S_VS_VERSION_INFO vi=readResourceVersionInfo(nOffset);
 
         if(vi.wLength<=nSize)
         {
             if(vi.wValueLength<vi.wLength)
             {
-                QString sTitle=read_unicodeString(nOffset+sizeof(XPE_DEF::VS_VERSION_INFO));
+                QString sTitle=read_unicodeString(nOffset+sizeof(XPE_DEF::S_VS_VERSION_INFO));
 
-                qint32 nDelta=sizeof(XPE_DEF::VS_VERSION_INFO);
+                qint32 nDelta=sizeof(XPE_DEF::S_VS_VERSION_INFO);
                 nDelta+=(sTitle.length()+1)*sizeof(quint16);
                 nDelta=__ALIGN_UP(nDelta,4);
 
