@@ -346,9 +346,11 @@ private:
 
 protected:
     bool _isOffsetValid(qint64 nOffset);
+
 protected:
     void _errorMessage(QString sMessage);
     void _infoMessage(QString sMessage);
+
 signals:
     void errorMessage(QString sMessage);
     void infoMessage(QString sMessage);

@@ -51,7 +51,7 @@ const quint8 S_ELFMAG2='L';
 const quint8 S_EI_MAG3=3;
 const quint8 S_ELFMAG3='F';
 //const quint8 ELFMAG          "\177ELF"
-const quint8 S_ELFMAG=0x464C457F;
+const quint32 S_ELFMAG=0x464C457F;
 const quint8 S_SELFMAG=4;
 const quint8 S_EI_CLASS=4;       /* File class byte index */
 const quint8 S_ELFCLASSNONE=0;       /* Invalid class */
