@@ -2236,6 +2236,8 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
         }
     }
 
+    // TODO Overlays
+
     return  listResult;
 }
 
