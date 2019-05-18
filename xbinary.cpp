@@ -1322,7 +1322,7 @@ qint64 XBinary::addressToOffset(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 n
         }
     }
 
-    return -1;
+    return nResult;
 }
 
 XBinary::MEMORY_MAP XBinary::getOffsetMemoryMap(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nOffset)
