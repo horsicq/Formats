@@ -430,7 +430,6 @@ QString XBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize,bool bIsBigE
 
         sResult=QString::fromUtf16(pBuffer);
 
-
         delete [] pBuffer;
     }
 
@@ -1252,61 +1251,73 @@ qint64 XBinary::addressToOffset(qint64 nAddress,ADDRESS_SEGMENT segment)
 
 bool XBinary::isOffsetValid(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nOffset)
 {
+    bool bResult=false;
+
     for(int i=0; i<pMemoryMap->count(); i++)
     {
         if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nOffset!=-1))
         {
             if((pMemoryMap->at(i).nOffset<=nOffset)&&(nOffset<pMemoryMap->at(i).nOffset+pMemoryMap->at(i).nSize))
             {
-                return true;
+                bResult=true;
+                break;
             }
         }
     }
 
-    return false;
+    return bResult;
 }
 
 bool XBinary::isAddressValid(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress, ADDRESS_SEGMENT segment)
 {
+    bool bResult=false;
+
     for(int i=0; i<pMemoryMap->count(); i++)
     {
         if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nAddress!=-1)&&(pMemoryMap->at(i).segment==segment))
         {
             if((pMemoryMap->at(i).nAddress<=nAddress)&&(nAddress<pMemoryMap->at(i).nAddress+pMemoryMap->at(i).nSize))
             {
-                return true;
+                bResult=true;
+                break;
             }
         }
     }
 
-    return false;
+    return bResult;
 }
 
 qint64 XBinary::offsetToAddress(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nOffset, ADDRESS_SEGMENT segment)
 {
+    qint64 nResult=-1;
+
     for(int i=0; i<pMemoryMap->count(); i++)
     {
         if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nOffset!=-1)&&(pMemoryMap->at(i).nAddress!=-1)&&(pMemoryMap->at(i).segment==segment))
         {
             if((pMemoryMap->at(i).nOffset<=nOffset)&&(nOffset<pMemoryMap->at(i).nOffset+pMemoryMap->at(i).nSize))
             {
-                return (nOffset-pMemoryMap->at(i).nOffset)+pMemoryMap->at(i).nAddress;
+                nResult=(nOffset-pMemoryMap->at(i).nOffset)+pMemoryMap->at(i).nAddress;
+                break;
             }
         }
     }
 
-    return -1;
+    return nResult;
 }
 
 qint64 XBinary::addressToOffset(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress, ADDRESS_SEGMENT segment)
 {
+    qint64 nResult=-1;
+
     for(int i=0; i<pMemoryMap->count(); i++)
     {
         if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nAddress!=-1)&&(pMemoryMap->at(i).nOffset!=-1)&&(pMemoryMap->at(i).segment==segment))
         {
             if((pMemoryMap->at(i).nAddress<=nAddress)&&(nAddress<pMemoryMap->at(i).nAddress+pMemoryMap->at(i).nSize))
             {
-                return (nAddress-pMemoryMap->at(i).nAddress)+pMemoryMap->at(i).nOffset;
+                nResult=(nAddress-pMemoryMap->at(i).nAddress)+pMemoryMap->at(i).nOffset;
+                break;
             }
         }
     }
