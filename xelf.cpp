@@ -2210,8 +2210,8 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
 {
     QList<XBinary::MEMORY_MAP> listResult;
 
-    QList<XELF_DEF::Elf32_Phdr> listPhdr32=getElf32_PhdrList();
-    QList<XELF_DEF::Elf64_Phdr> listPhdr64=getElf64_PhdrList();
+    QList<XELF_DEF::Elf32_Phdr> listPhdr32;
+    QList<XELF_DEF::Elf64_Phdr> listPhdr64;
 
     bool bIs64=is64();
     int nCount=0;
@@ -2224,16 +2224,57 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
     else
     {
         listPhdr32=getElf32_PhdrList();
-        nCount=listPhdr64.count();
+        nCount=listPhdr32.count();
     }
 
+    // TODO
     for(int i=0; i<nCount; i++)
     {
-        // TODO
-        if(!isImage())
-        {
+        qint64 nVirtualAddress=0;
+        qint64 nVirtualSize=0;
+        qint64 nFileOffset=0;
+        qint64 nFileSize=0;
+        qint64 nAlignment=0;
+        qint32 nType=0;
 
+        if(bIs64)
+        {
+            nType=listPhdr64.at(i).p_type;
+            nVirtualAddress=listPhdr64.at(i).p_vaddr;
+            nVirtualSize=listPhdr64.at(i).p_memsz;
+            nFileOffset=listPhdr64.at(i).p_paddr;
+            nFileSize=listPhdr64.at(i).p_filesz;
+            nAlignment=listPhdr64.at(i).p_align;
         }
+        else
+        {
+            nType=listPhdr32.at(i).p_type;
+            nVirtualAddress=listPhdr32.at(i).p_vaddr;
+            nVirtualSize=listPhdr32.at(i).p_memsz;
+            nFileOffset=listPhdr32.at(i).p_paddr;
+            nFileSize=listPhdr32.at(i).p_filesz;
+            nAlignment=listPhdr32.at(i).p_align;
+        }
+
+        if(nType==1) // TODO const
+        {
+            XBinary::MEMORY_MAP record={};
+
+            record.bIsHeader=false;
+            record.bIsLoadSection=true;
+            record.bIsOvelay=false;
+            record.nAddress=nVirtualAddress;
+            record.nSize=nFileSize;
+            record.nOffset=nFileOffset;
+
+            listResult.append(record);
+        }
+
+//        // TODO
+//        if(!isImage())
+//        {
+
+//        }
     }
 
     // TODO Overlays
@@ -2243,8 +2284,20 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
 
 qint64 XELF::getEntryPointOffset()
 {
-    // TODO
-    return -1;
+    qint64 nAddress=-1;
+
+    bool bIs64=is64();
+
+    if(bIs64)
+    {
+        nAddress=getHdr64_entry();
+    }
+    else
+    {
+        nAddress=getHdr32_entry();
+    }
+
+    return addressToOffset(nAddress);
 }
 
 

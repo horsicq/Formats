@@ -2108,7 +2108,14 @@ bool XBinary::isValid()
 
 QString XBinary::getSignature(qint64 nOffset, qint64 nSize)
 {
-    return read_array(nOffset,nSize).toHex().toUpper();
+    QString sResult;
+
+    if(nOffset!=-1)
+    {
+        sResult=read_array(nOffset,nSize).toHex().toUpper();
+    }
+
+    return sResult;
 }
 
 XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
