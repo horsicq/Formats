@@ -92,6 +92,7 @@ const quint32 S_IMAGE_FILE_MACHINE_EBC               =0x0EBC;  // EFI Byte Code
 const quint32 S_IMAGE_FILE_MACHINE_AMD64             =0x8664;  // AMD64 (K8)
 const quint32 S_IMAGE_FILE_MACHINE_M32R              =0x9041;  // M32R little-endian
 const quint32 S_IMAGE_FILE_MACHINE_CEE               =0xC0EE;
+const quint32 S_IMAGE_FILE_MACHINE_ARM64             =0xAA64;
 
 const quint32 S_IMAGE_SUBSYSTEM_UNKNOWN               =0;
 const quint32 S_IMAGE_SUBSYSTEM_NATIVE                =1;

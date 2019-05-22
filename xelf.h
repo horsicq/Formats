@@ -28,6 +28,8 @@
 class XELF : public XBinary
 {
     Q_OBJECT
+public:
+
     struct NOTE
     {
         quint16 type;
@@ -35,7 +37,12 @@ class XELF : public XBinary
         QByteArray desc;
     };
 
-public:
+    struct TAG_STRUCT
+    {
+        qint64 nTag;
+        qint64 nValue;
+    };
+
     XELF(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     ~XELF();
 
@@ -135,21 +142,26 @@ public:
     static QMap<quint64,QString> getMachines();
     static QMap<quint64,QString> getMachinesS();
 
-    static QMap<quint64,QString> getSectionTypeList();
-    static QMap<quint64,QString> getSectionFlagList();
+    static QMap<quint64,QString> getSectionTypes();
+    static QMap<quint64,QString> getSectionTypesS();
+    static QMap<quint64,QString> getSectionFlags();
+    static QMap<quint64,QString> getSectionFlagsS();
 
-    static QMap<quint64,QString> getProgramTypeList();
-    static QMap<quint64,QString> getProgramFlagList();
+    static QMap<quint64,QString> getProgramTypes();
+    static QMap<quint64,QString> getProgramTypesS();
+    static QMap<quint64,QString> getProgramFlags();
+    static QMap<quint64,QString> getProgramFlagsS();
 
-    QMap<quint32,QString> getStringList(quint32 nSection);
-    QString getStringFromList(quint32 nIndex,quint32 nSection);
-    QMap<quint32,QString> getStringListMain();
-    QString getStringFromListMain(quint32 nIndex);
+    QMap<quint32,QString> getStringsFromSection(quint32 nSection);
+    QString getStringFromSection(quint32 nIndex,quint32 nSection);
+    QMap<quint32,QString> getStringsFromMainSection();
+    QString getStringFromMainSection(quint32 nIndex);
     QByteArray getSection(quint32 nIndex);
     bool isSectionValid(quint32 nIndex);
     // TODO Set
     QList<XELF_DEF::Elf32_Shdr> getElf32_ShdrList();
     QList<XELF_DEF::Elf64_Shdr> getElf64_ShdrList();
+    QList<XELF_DEF::Elf_Shdr> getElf_ShdrList();
     // TODO Set
     XELF_DEF::Elf32_Shdr getElf32_Shdr(quint32 nIndex);
     XELF_DEF::Elf64_Shdr getElf64_Shdr(quint32 nIndex);
@@ -199,6 +211,7 @@ public:
 
     QList<XELF_DEF::Elf32_Phdr> getElf32_PhdrList();
     QList<XELF_DEF::Elf64_Phdr> getElf64_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> getElf_PhdrList();
 
     XELF_DEF::Elf32_Phdr getElf32_Phdr(quint32 nIndex);
     XELF_DEF::Elf64_Phdr getElf64_Phdr(quint32 nIndex);
@@ -243,10 +256,12 @@ public:
     QByteArray getSectionByName(QString sName);
 
     QString getProgramInterpreterName();
-    QString getCommentString();
+//    QString getCommentString();
     QString getCompatibleKernelVersion();
 
     static NOTE getNote(QByteArray &baData,bool bIsBigEndian);
+
+    QList<TAG_STRUCT> getTagStructs();
 
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getEntryPointOffset();

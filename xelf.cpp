@@ -623,7 +623,7 @@ QMap<quint64, QString> XELF::getIndentOsabisS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionTypeList()
+QMap<quint64, QString> XELF::getSectionTypes()
 {
     QMap<quint64, QString> mapResult;
     mapResult.insert(0,"SHT_NULL");
@@ -663,7 +663,47 @@ QMap<quint64, QString> XELF::getSectionTypeList()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionFlagList()
+QMap<quint64, QString> XELF::getSectionTypesS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"NULL");
+    mapResult.insert(1,"PROGBITS");
+    mapResult.insert(2,"SYMTAB");
+    mapResult.insert(3,"STRTAB");
+    mapResult.insert(4,"RELA");
+    mapResult.insert(5,"HASH");
+    mapResult.insert(6,"DYNAMIC");
+    mapResult.insert(7,"NOTE");
+    mapResult.insert(8,"NOBITS");
+    mapResult.insert(9,"REL");
+    mapResult.insert(10,"SHLIB");
+    mapResult.insert(11,"DYNSYM");
+    mapResult.insert(14,"INIT_ARRAY");
+    mapResult.insert(15,"FINI_ARRAY");
+    mapResult.insert(16,"PREINIT_ARRAY");
+    mapResult.insert(17,"GROUP");
+    mapResult.insert(18,"SYMTAB_SHNDX");
+    mapResult.insert(19,"NUM");
+    mapResult.insert(0x60000000,"LOOS");
+    mapResult.insert(0x6ffffff6,"GNU_HASH");
+    mapResult.insert(0x6ffffffa,"SUNW_move");
+    mapResult.insert(0x6ffffffc,"SUNW_syminfo");
+    mapResult.insert(0x6ffffffd,"GNU_verdef");
+    mapResult.insert(0x6ffffffe,"GNU_verneed");
+    mapResult.insert(0x6fffffff,"GNU_versym");
+    mapResult.insert(0x70000000,"LOPROC");
+    mapResult.insert(0x70000001,"AMD64_UNWIND");
+    mapResult.insert(0x70000002,"ARM_PREEMPTMAP");
+    mapResult.insert(0x70000003,"ARM_ATTRIBUTES");
+    mapResult.insert(0x70000004,"ARM_DEBUGOVERLAY");
+    mapResult.insert(0x70000005,"ARM_OVERLAYSECTION");
+    mapResult.insert(0x7fffffff,"HIPROC");
+    mapResult.insert(0x80000000,"LOUSER");
+    mapResult.insert(0xffffffff,"HIUSER");
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getSectionFlags()
 {
     QMap<quint64, QString> mapResult;
     mapResult.insert(0x00000001,"SHF_WRITE");
@@ -683,7 +723,27 @@ QMap<quint64, QString> XELF::getSectionFlagList()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getProgramTypeList()
+QMap<quint64, QString> XELF::getSectionFlagsS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0x00000001,"WRITE");
+    mapResult.insert(0x00000002,"ALLOC");
+    mapResult.insert(0x00000004,"EXECINSTR");
+    mapResult.insert(0x00000010,"MERGE");
+    mapResult.insert(0x00000020,"STRINGS");
+    mapResult.insert(0x00000040,"INFO_LINK");
+    mapResult.insert(0x00000080,"LINK_ORDER");
+    mapResult.insert(0x00000100,"OXELF_DEF::NONCONFORMING");
+    mapResult.insert(0x00000200,"GROUP");
+    mapResult.insert(0x00000400,"TLS");
+    mapResult.insert(0x0ff00000,"MASKOS");
+    mapResult.insert(0xf0000000,"MASKPROC");
+    mapResult.insert(0x40000000,"ORDERED");
+    mapResult.insert(0x80000000,"EXCLUDE");
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getProgramTypes()
 {
     QMap<quint64, QString> mapResult;
     mapResult.insert(0,"PT_NULL");
@@ -706,7 +766,30 @@ QMap<quint64, QString> XELF::getProgramTypeList()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getProgramFlagList()
+QMap<quint64, QString> XELF::getProgramTypesS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"NULL");
+    mapResult.insert(1,"LOAD");
+    mapResult.insert(2,"DYNAMIC");
+    mapResult.insert(3,"INTERP");
+    mapResult.insert(4,"NOTE");
+    mapResult.insert(5,"SHLIB");
+    mapResult.insert(6,"PHDR");
+    mapResult.insert(7,"TLS");
+    mapResult.insert(8,"NUM");
+    mapResult.insert(0x60000000,"LOOS");
+    mapResult.insert(0x6474e550,"GNU_EH_FRAME");
+    mapResult.insert(0x6474e551,"GNU_STACK");
+    mapResult.insert(0x6474e552,"GNU_RELRO");
+    mapResult.insert(0x6fffffff,"HIOS");
+    mapResult.insert(0x70000000,"LOPROC");
+    mapResult.insert(0x7fffffff,"HIPROC");
+    mapResult.insert(0x70000000,"MIPXELF_DEF::REGINFO");
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getProgramFlags()
 {
     QMap<quint64, QString> mapResult;
     mapResult.insert(0x00000001,"PF_X");
@@ -717,21 +800,20 @@ QMap<quint64, QString> XELF::getProgramFlagList()
     return mapResult;
 }
 
-QMap<quint32, QString> XELF::getStringList(quint32 nSection)
+QMap<quint64, QString> XELF::getProgramFlagsS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0x00000001,"X");
+    mapResult.insert(0x00000002,"W");
+    mapResult.insert(0x00000004,"R");
+    mapResult.insert(0x0ff00000,"MASKOS");
+    mapResult.insert(0xf0000000,"MASKPROC");
+    return mapResult;
+}
+
+QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
 {
     QMap<quint32, QString> mapResult;
-
-    //    if(nSection==0)
-    //    {
-    //        if(is64())
-    //        {
-    //            nSection=getHdr64_shstrndx();
-    //        }
-    //        else
-    //        {
-    //            nSection=getHdr32_shstrndx();
-    //        }
-    //    }
 
     if(nSection!=XELF_DEF::S_SHN_UNDEF)
     {
@@ -757,21 +839,9 @@ QMap<quint32, QString> XELF::getStringList(quint32 nSection)
     return mapResult;
 }
 
-QString XELF::getStringFromList(quint32 nIndex, quint32 nSection)
+QString XELF::getStringFromSection(quint32 nIndex, quint32 nSection)
 {
     QString sResult;
-
-    //    if(nSection==0)
-    //    {
-    //        if(is64())
-    //        {
-    //            nSection=getHdr64_shstrndx();
-    //        }
-    //        else
-    //        {
-    //            nSection=getHdr32_shstrndx();
-    //        }
-    //    }
 
     quint64 offset=0;
     quint64 size=0;
@@ -797,7 +867,7 @@ QString XELF::getStringFromList(quint32 nIndex, quint32 nSection)
     return sResult;
 }
 
-QMap<quint32, QString> XELF::getStringListMain()
+QMap<quint32, QString> XELF::getStringsFromMainSection()
 {
     quint32 nSection=0;
 
@@ -810,10 +880,10 @@ QMap<quint32, QString> XELF::getStringListMain()
         nSection=getHdr32_shstrndx();
     }
 
-    return getStringList(nSection);
+    return getStringsFromSection(nSection);
 }
 
-QString XELF::getStringFromListMain(quint32 nIndex)
+QString XELF::getStringFromMainSection(quint32 nIndex)
 {
     quint32 nSection=0;
 
@@ -826,7 +896,7 @@ QString XELF::getStringFromListMain(quint32 nIndex)
         nSection=getHdr32_shstrndx();
     }
 
-    return getStringFromList(nIndex,nSection);
+    return getStringFromSection(nIndex,nSection);
 }
 
 QByteArray XELF::getSection(quint32 nIndex)
@@ -901,6 +971,62 @@ QList<XELF_DEF::Elf64_Shdr> XELF::getElf64_ShdrList()
     }
 
     return result;
+}
+
+QList<XELF_DEF::Elf_Shdr> XELF::getElf_ShdrList()
+{
+    QList<XELF_DEF::Elf_Shdr> listResult;
+
+    bool bIs64=is64();
+
+    if(bIs64)
+    {
+        QList<XELF_DEF::Elf64_Shdr> list=getElf64_ShdrList();
+        int nCount=list.count();
+
+        for(int i=0;i<nCount;i++)
+        {
+            XELF_DEF::Elf_Shdr record={};
+
+            record.sh_name=list.at(i).sh_name;
+            record.sh_type=list.at(i).sh_type;
+            record.sh_flags=list.at(i).sh_flags;
+            record.sh_addr=list.at(i).sh_addr;
+            record.sh_offset=list.at(i).sh_offset;
+            record.sh_size=list.at(i).sh_size;
+            record.sh_link=list.at(i).sh_link;
+            record.sh_info=list.at(i).sh_info;
+            record.sh_addralign=list.at(i).sh_addralign;
+            record.sh_entsize=list.at(i).sh_entsize;
+
+            listResult.append(record);
+        }
+    }
+    else
+    {
+        QList<XELF_DEF::Elf32_Shdr> list=getElf32_ShdrList();
+        int nCount=list.count();
+
+        for(int i=0;i<nCount;i++)
+        {
+            XELF_DEF::Elf_Shdr record={};
+
+            record.sh_name=list.at(i).sh_name;
+            record.sh_type=list.at(i).sh_type;
+            record.sh_flags=list.at(i).sh_flags;
+            record.sh_addr=list.at(i).sh_addr;
+            record.sh_offset=list.at(i).sh_offset;
+            record.sh_size=list.at(i).sh_size;
+            record.sh_link=list.at(i).sh_link;
+            record.sh_info=list.at(i).sh_info;
+            record.sh_addralign=list.at(i).sh_addralign;
+            record.sh_entsize=list.at(i).sh_entsize;
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
 }
 
 XELF_DEF::Elf32_Shdr XELF::getElf32_Shdr(quint32 nIndex)
@@ -1583,6 +1709,58 @@ QList<XELF_DEF::Elf64_Phdr> XELF::getElf64_PhdrList()
     return result;
 }
 
+QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList()
+{
+    QList<XELF_DEF::Elf_Phdr> listResult;
+
+    bool bIs64=is64();
+
+    if(bIs64)
+    {
+        QList<XELF_DEF::Elf64_Phdr> list=getElf64_PhdrList();
+        int nCount=list.count();
+
+        for(int i=0;i<nCount;i++)
+        {
+            XELF_DEF::Elf_Phdr record={};
+
+            record.p_type=list.at(i).p_type;
+            record.p_flags=list.at(i).p_flags;
+            record.p_offset=list.at(i).p_offset;
+            record.p_vaddr=list.at(i).p_vaddr;
+            record.p_paddr=list.at(i).p_paddr;
+            record.p_filesz=list.at(i).p_filesz;
+            record.p_memsz=list.at(i).p_memsz;
+            record.p_align=list.at(i).p_align;
+
+            listResult.append(record);
+        }
+    }
+    else
+    {
+        QList<XELF_DEF::Elf32_Phdr> list=getElf32_PhdrList();
+        int nCount=list.count();
+
+        for(int i=0;i<nCount;i++)
+        {
+            XELF_DEF::Elf_Phdr record={};
+
+            record.p_type=list.at(i).p_type;
+            record.p_flags=list.at(i).p_flags;
+            record.p_offset=list.at(i).p_offset;
+            record.p_vaddr=list.at(i).p_vaddr;
+            record.p_paddr=list.at(i).p_paddr;
+            record.p_filesz=list.at(i).p_filesz;
+            record.p_memsz=list.at(i).p_memsz;
+            record.p_align=list.at(i).p_align;
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
 XELF_DEF::Elf32_Phdr XELF::getElf32_Phdr(quint32 nIndex)
 {
     XELF_DEF::Elf32_Phdr result= {};
@@ -2103,7 +2281,7 @@ int XELF::getSectionIndexByName(QString sName)
         {
             quint32 nCurrentNameIndex=getElf64_Shdr_name(i);
 
-            if(getStringFromListMain(nCurrentNameIndex)==sName)
+            if(getStringFromMainSection(nCurrentNameIndex)==sName)
             {
                 nResult=i;
                 break;
@@ -2116,7 +2294,7 @@ int XELF::getSectionIndexByName(QString sName)
         {
             quint32 nCurrentNameIndex=getElf32_Shdr_name(i);
 
-            if(getStringFromListMain(nCurrentNameIndex)==sName)
+            if(getStringFromMainSection(nCurrentNameIndex)==sName)
             {
                 nResult=i;
                 break;
@@ -2147,12 +2325,12 @@ QString XELF::getProgramInterpreterName()
     return sResult;
 }
 
-QString XELF::getCommentString()
-{
-    QString sResult;
-    sResult.append(getSectionByName(".comment"));
-    return sResult;
-}
+//QString XELF::getCommentString()
+//{
+//    QString sResult;
+//    sResult.append(getSectionByName(".comment"));
+//    return sResult;
+//}
 
 QString XELF::getCompatibleKernelVersion()
 {
@@ -2206,66 +2384,86 @@ XELF::NOTE XELF::getNote(QByteArray &baData,bool bIsBigEndian)
     return result;
 }
 
+QList<XELF::TAG_STRUCT> XELF::getTagStructs()
+{
+    QList<TAG_STRUCT> listResult;
+
+    QList<MEMORY_MAP> listMM=getMemoryMapList();
+    bool bIs64=is64();
+    bool bIsBigEndian=isBigEndian();
+
+    QList<XELF_DEF::Elf_Phdr> listPrograms=getElf_PhdrList();
+    int nCount=listPrograms.count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(listPrograms.at(i).p_type==2)
+        {
+            qint64 nOffset=listPrograms.at(i).p_offset; //  Check image
+            qint64 nSize=listPrograms.at(i).p_filesz;
+
+            if(isOffsetValid(&listMM,nOffset))
+            {
+                while(nSize>0)
+                {
+                    TAG_STRUCT tagStruct={};
+
+                    if(bIs64)
+                    {
+                        tagStruct.nTag=read_int64(nOffset,bIsBigEndian);
+                        tagStruct.nValue=read_int64(nOffset+8,bIsBigEndian);
+                        nOffset+=16;
+                        nSize-=16;
+                    }
+                    else
+                    {
+                        tagStruct.nTag=read_int32(nOffset,bIsBigEndian);
+                        tagStruct.nValue=read_int32(nOffset+4,bIsBigEndian);
+                        nOffset+=8;
+                        nSize-=8;
+                    }
+
+                    if(tagStruct.nTag)
+                    {
+                        listResult.append(tagStruct);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            break;
+        }
+    }
+
+    return listResult;
+}
+
 QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
 {
     QList<XBinary::MEMORY_MAP> listResult;
 
-    QList<XELF_DEF::Elf32_Phdr> listPhdr32;
-    QList<XELF_DEF::Elf64_Phdr> listPhdr64;
+    QList<XELF_DEF::Elf_Phdr> listPhdr=getElf_PhdrList();
+
 
     bool bIs64=is64();
-    int nCount=0;
-
-    if(bIs64)
-    {
-        listPhdr64=getElf64_PhdrList();
-        nCount=listPhdr64.count();
-    }
-    else
-    {
-        listPhdr32=getElf32_PhdrList();
-        nCount=listPhdr32.count();
-    }
+    int nCount=listPhdr.count();
 
     // TODO
     for(int i=0; i<nCount; i++)
     {
-        qint64 nVirtualAddress=0;
-        qint64 nVirtualSize=0;
-        qint64 nFileOffset=0;
-        qint64 nFileSize=0;
-        qint64 nAlignment=0;
-        qint32 nType=0;
-
-        if(bIs64)
-        {
-            nType=listPhdr64.at(i).p_type;
-            nVirtualAddress=listPhdr64.at(i).p_vaddr;
-            nVirtualSize=listPhdr64.at(i).p_memsz;
-            nFileOffset=listPhdr64.at(i).p_paddr;
-            nFileSize=listPhdr64.at(i).p_filesz;
-            nAlignment=listPhdr64.at(i).p_align;
-        }
-        else
-        {
-            nType=listPhdr32.at(i).p_type;
-            nVirtualAddress=listPhdr32.at(i).p_vaddr;
-            nVirtualSize=listPhdr32.at(i).p_memsz;
-            nFileOffset=listPhdr32.at(i).p_paddr;
-            nFileSize=listPhdr32.at(i).p_filesz;
-            nAlignment=listPhdr32.at(i).p_align;
-        }
-
-        if(nType==1) // TODO const
+        if(listPhdr.at(i).p_type==1) // TODO const
         {
             XBinary::MEMORY_MAP record={};
 
             record.bIsHeader=false;
             record.bIsLoadSection=true;
             record.bIsOvelay=false;
-            record.nAddress=nVirtualAddress;
-            record.nSize=nFileSize;
-            record.nOffset=nFileOffset;
+            record.nAddress=listPhdr.at(i).p_vaddr;
+            record.nSize=listPhdr.at(i).p_filesz;
+            record.nOffset=listPhdr.at(i).p_offset;
 
             listResult.append(record);
         }

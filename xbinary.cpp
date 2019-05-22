@@ -1310,7 +1310,9 @@ qint64 XBinary::addressToOffset(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 n
 {
     qint64 nResult=-1;
 
-    for(int i=0; i<pMemoryMap->count(); i++)
+    int nCount=pMemoryMap->count();
+
+    for(int i=0; i<nCount; i++)
     {
         if(pMemoryMap->at(i).nSize&&(pMemoryMap->at(i).nAddress!=-1)&&(pMemoryMap->at(i).nOffset!=-1)&&(pMemoryMap->at(i).segment==segment))
         {

@@ -50,7 +50,11 @@ bool XPE::isValid()
 
 bool XPE::is64()
 {
-    return (getFileHeader_Machine()==XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)||(getFileHeader_Machine()==XPE_DEF::S_IMAGE_FILE_MACHINE_IA64);
+    quint16 nMachine=getFileHeader_Machine();
+
+    return  (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)||
+            (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_IA64)||
+            (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64);
 }
 
 bool XPE::isRichSignaturePresent()
@@ -5272,6 +5276,8 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachines()
     mapResult.insert(0x8664,"IMAGE_FILE_MACHINE_AMD64");
     mapResult.insert(0x9041,"IMAGE_FILE_MACHINE_M32R");
     mapResult.insert(0xC0EE,"IMAGE_FILE_MACHINE_CEE");
+    mapResult.insert(0xAA64,"IMAGE_FILE_MACHINE_ARM64");
+
     return mapResult;
 }
 
@@ -5307,6 +5313,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
     mapResult.insert(0x8664,"AMD64");
     mapResult.insert(0x9041,"M32R");
     mapResult.insert(0xC0EE,"CEE");
+    mapResult.insert(0xAA64,"ARM64");
     return mapResult;
 }
 
