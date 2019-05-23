@@ -43,6 +43,14 @@ public:
         qint64 nValue;
     };
 
+    struct SECTION_RECORD
+    {
+        QString sName;
+        qint64 nOffset;
+        qint64 nSize;
+        qint64 nFlags;
+    };
+
     XELF(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     ~XELF();
 
@@ -151,6 +159,9 @@ public:
     static QMap<quint64,QString> getProgramTypesS();
     static QMap<quint64,QString> getProgramFlags();
     static QMap<quint64,QString> getProgramFlagsS();
+
+    quint16 getSectionStringTable();
+    quint16 getSectionStringTable(bool bIs64);
 
     QMap<quint32,QString> getStringsFromSection(quint32 nSection);
     QString getStringFromSection(quint32 nIndex,quint32 nSection);
@@ -263,8 +274,14 @@ public:
 
     QList<TAG_STRUCT> getTagStructs();
 
+    static QMap<quint64,QString> getDynamicTags();
+    static QMap<quint64,QString> getDynamicTagsS();
+
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getEntryPointOffset();
+
+    static QList<SECTION_RECORD> getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pList,bool bIsImage,QByteArray *pbaSectionTable);
+    static bool isSectionNamePresent(QString sSectionName,QList<SECTION_RECORD> *pListSections);
 };
 
 #endif // XELF_H

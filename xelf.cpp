@@ -756,14 +756,20 @@ QMap<quint64, QString> XELF::getProgramTypes()
     mapResult.insert(7,"PT_TLS");
     mapResult.insert(8,"PT_NUM");
     mapResult.insert(0x60000000,"PT_LOOS");
-    mapResult.insert(0x6474e550,"PT_GNU_EH_FRAME");
+    mapResult.insert(0x6464e550,"PT_SUNW_UNWIND");
+    mapResult.insert(0x6474e550,"PT_GNU_EH_FRAME"); // PT_SUNW_EH_FRAME
     mapResult.insert(0x6474e551,"PT_GNU_STACK");
     mapResult.insert(0x6474e552,"PT_GNU_RELRO");
-    mapResult.insert(0x6fffffff,"PT_HIOS");
+    mapResult.insert(0x6ffffffa,"PT_LOSUNW");
+    mapResult.insert(0x6ffffffa,"PT_SUNWBSS");
+    mapResult.insert(0x6ffffffb,"PT_SUNWSTACK");
+    mapResult.insert(0x6ffffffc,"PT_SUNWDTRACE");
+    mapResult.insert(0x6ffffffd,"PT_SUNWCAP");
+    mapResult.insert(0x6fffffff,"PT_HIOS"); // PT_HISUNW
     mapResult.insert(0x70000000,"PT_LOPROC");
     mapResult.insert(0x7fffffff,"PT_HIPROC");
     mapResult.insert(0x70000000,"PT_MIPXELF_DEF::REGINFO");
-    return mapResult;
+    return mapResult;   
 }
 
 QMap<quint64, QString> XELF::getProgramTypesS()
@@ -779,10 +785,16 @@ QMap<quint64, QString> XELF::getProgramTypesS()
     mapResult.insert(7,"TLS");
     mapResult.insert(8,"NUM");
     mapResult.insert(0x60000000,"LOOS");
-    mapResult.insert(0x6474e550,"GNU_EH_FRAME");
+    mapResult.insert(0x6464e550,"SUNW_UNWIND");
+    mapResult.insert(0x6474e550,"GNU_EH_FRAME"); // SUNW_EH_FRAME
     mapResult.insert(0x6474e551,"GNU_STACK");
     mapResult.insert(0x6474e552,"GNU_RELRO");
-    mapResult.insert(0x6fffffff,"HIOS");
+    mapResult.insert(0x6ffffffa,"LOSUNW");
+    mapResult.insert(0x6ffffffa,"SUNWBSS");
+    mapResult.insert(0x6ffffffb,"SUNWSTACK");
+    mapResult.insert(0x6ffffffc,"SUNWDTRACE");
+    mapResult.insert(0x6ffffffd,"SUNWCAP");
+    mapResult.insert(0x6fffffff,"HIOS"); // HISUNW
     mapResult.insert(0x70000000,"LOPROC");
     mapResult.insert(0x7fffffff,"HIPROC");
     mapResult.insert(0x70000000,"MIPXELF_DEF::REGINFO");
@@ -809,6 +821,27 @@ QMap<quint64, QString> XELF::getProgramFlagsS()
     mapResult.insert(0x0ff00000,"MASKOS");
     mapResult.insert(0xf0000000,"MASKPROC");
     return mapResult;
+}
+
+quint16 XELF::getSectionStringTable()
+{
+    return getSectionStringTable(is64());
+}
+
+quint16 XELF::getSectionStringTable(bool bIs64)
+{
+    quint32 nResult=0;
+
+    if(bIs64)
+    {
+        nResult=getHdr64_shstrndx();
+    }
+    else
+    {
+        nResult=getHdr32_shstrndx();
+    }
+
+    return nResult;
 }
 
 QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
@@ -843,25 +876,25 @@ QString XELF::getStringFromSection(quint32 nIndex, quint32 nSection)
 {
     QString sResult;
 
-    quint64 offset=0;
-    quint64 size=0;
+    quint64 nOffset=0;
+    quint64 nSize=0;
 
     if(is64())
     {
         XELF_DEF::Elf64_Shdr section_header=getElf64_Shdr(nSection);
-        offset=section_header.sh_offset;
-        size=section_header.sh_size;
+        nOffset=(isImage())?(section_header.sh_addr):(section_header.sh_offset);
+        nSize=section_header.sh_size;
     }
     else
     {
         XELF_DEF::Elf32_Shdr section_header=getElf32_Shdr(nSection);
-        offset=section_header.sh_offset;
-        size=section_header.sh_size;
+        nOffset=(isImage())?(section_header.sh_addr):(section_header.sh_offset);
+        nSize=section_header.sh_size;
     }
 
-    if(nIndex<size)
+    if(nIndex<nSize)
     {
-        sResult=read_ansiString(offset+nIndex);
+        sResult=read_ansiString(nOffset+nIndex);
     }
 
     return sResult;
@@ -869,48 +902,37 @@ QString XELF::getStringFromSection(quint32 nIndex, quint32 nSection)
 
 QMap<quint32, QString> XELF::getStringsFromMainSection()
 {
-    quint32 nSection=0;
-
-    if(is64())
-    {
-        nSection=getHdr64_shstrndx();
-    }
-    else
-    {
-        nSection=getHdr32_shstrndx();
-    }
+    quint32 nSection=getSectionStringTable();
 
     return getStringsFromSection(nSection);
 }
 
 QString XELF::getStringFromMainSection(quint32 nIndex)
 {
-    quint32 nSection=0;
-
-    if(is64())
-    {
-        nSection=getHdr64_shstrndx();
-    }
-    else
-    {
-        nSection=getHdr32_shstrndx();
-    }
+    quint32 nSection=getSectionStringTable();
 
     return getStringFromSection(nIndex,nSection);
 }
 
 QByteArray XELF::getSection(quint32 nIndex)
 {
+    qint64 nOffset=0;
+    qint64 nSize=0;
+
     if(is64())
     {
         XELF_DEF::Elf64_Shdr section_header=getElf64_Shdr(nIndex);
-        return read_array(section_header.sh_offset,section_header.sh_size);
+        nSize=section_header.sh_size;
+        nOffset=(isImage())?(section_header.sh_addr):(section_header.sh_offset);
     }
     else
     {
         XELF_DEF::Elf32_Shdr section_header=getElf32_Shdr(nIndex);
-        return read_array(section_header.sh_offset,section_header.sh_size);
+        nSize=section_header.sh_size;
+        nOffset=(isImage())?(section_header.sh_addr):(section_header.sh_offset);
     }
+
+    return read_array(nOffset,nSize);
 }
 
 bool XELF::isSectionValid(quint32 nIndex)
@@ -2441,6 +2463,150 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs()
     return listResult;
 }
 
+QMap<quint64, QString> XELF::getDynamicTags()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"DT_NULL");
+    mapResult.insert(1,"DT_NEEDED");
+    mapResult.insert(2,"DT_PLTRELSZ");
+    mapResult.insert(3,"DT_PLTGOT");
+    mapResult.insert(4,"DT_HASH");
+    mapResult.insert(5,"DT_STRTAB");
+    mapResult.insert(6,"DT_SYMTAB");
+    mapResult.insert(7,"DT_RELA");
+    mapResult.insert(8,"DT_RELASZ");
+    mapResult.insert(9,"DT_RELAENT");
+    mapResult.insert(10,"DT_STRSZ");
+    mapResult.insert(11,"DT_SYMENT");
+    mapResult.insert(12,"DT_INIT");
+    mapResult.insert(13,"DT_FINI");
+    mapResult.insert(14,"DT_SONAME");
+    mapResult.insert(15,"DT_RPATH");
+    mapResult.insert(16,"DT_SYMBOLIC");
+    mapResult.insert(17,"DT_REL");
+    mapResult.insert(18,"DT_RELSZ");
+    mapResult.insert(19,"DT_RELENT");
+    mapResult.insert(20,"DT_PLTREL");
+    mapResult.insert(21,"DT_DEBUG");
+    mapResult.insert(22,"DT_TEXTREL");
+    mapResult.insert(23,"DT_JMPREL");
+    mapResult.insert(24,"DT_BIND_NOW");
+    mapResult.insert(25,"DT_INIT_ARRAY");
+    mapResult.insert(26,"DT_FINI_ARRAY");
+    mapResult.insert(27,"DT_INIT_ARRAYSZ");
+    mapResult.insert(28,"DT_FINI_ARRAYSZ");
+    mapResult.insert(29,"DT_RUNPATH");
+    mapResult.insert(30,"DT_FLAGS");
+    mapResult.insert(32,"DT_PREINIT_ARRAY"); // DT_ENCODING
+    mapResult.insert(33,"DT_PREINIT_ARRAYSZ");
+    mapResult.insert(0x6000000d,"DT_LOOS");
+    mapResult.insert(0x6000000e,"DT_SUNW_RTLDINF");
+    mapResult.insert(0x6ffff000,"DT_HIOS");
+    mapResult.insert(0x6ffffd00,"DT_VALRNGLO");
+    mapResult.insert(0x6ffffdf8,"DT_CHECKSUM");
+    mapResult.insert(0x6ffffdf9,"DT_PLTPADSZ");
+    mapResult.insert(0x6ffffdfa,"DT_MOVEENT");
+    mapResult.insert(0x6ffffdfb,"DT_MOVESZ");
+    mapResult.insert(0x6ffffdfc,"DT_FEATURE_1");
+    mapResult.insert(0x6ffffdfd,"DT_POSFLAG_1");
+    mapResult.insert(0x6ffffdfe,"DT_SYMINSZ");
+    mapResult.insert(0x6ffffdff,"DT_SYMINENT");
+    mapResult.insert(0x6ffffdff,"DT_VALRNGHI");
+    mapResult.insert(0x6ffffe00,"DT_ADDRRNGLO");
+    mapResult.insert(0x6ffffefa,"DT_CONFIG");
+    mapResult.insert(0x6ffffefb,"DT_DEPAUDIT");
+    mapResult.insert(0x6ffffefc,"DT_AUDIT");
+    mapResult.insert(0x6ffffefd,"DT_PLTPAD");
+    mapResult.insert(0x6ffffefe,"DT_MOVETAB");
+    mapResult.insert(0x6ffffeff,"DT_SYMINFO");
+    mapResult.insert(0x6ffffeff,"DT_ADDRRNGHI");
+    mapResult.insert(0x6ffffff9,"DT_RELACOUNT");
+    mapResult.insert(0x6ffffffa,"DT_RELCOUNT");
+    mapResult.insert(0x6ffffffb,"DT_FLAGS_1");
+    mapResult.insert(0x6ffffffc,"DT_VERDEF");
+    mapResult.insert(0x6ffffffd,"DT_VERDEFNUM");
+    mapResult.insert(0x6ffffffe,"DT_VERNEED");
+    mapResult.insert(0x6fffffff,"DT_VERNEEDNUM");
+    mapResult.insert(0x70000000,"DT_LOPROC");
+    mapResult.insert(0x70000001,"DT_SPARC_REGISTER");
+    mapResult.insert(0x7ffffffd,"DT_AUXILIARY");
+    mapResult.insert(0x7ffffffe,"DT_USED");
+    mapResult.insert(0x7fffffff,"DT_HIPROC"); // DT_FILTER
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getDynamicTagsS()
+{
+    QMap<quint64, QString> mapResult;
+    mapResult.insert(0,"NULL");
+    mapResult.insert(1,"NEEDED");
+    mapResult.insert(2,"PLTRELSZ");
+    mapResult.insert(3,"PLTGOT");
+    mapResult.insert(4,"HASH");
+    mapResult.insert(5,"STRTAB");
+    mapResult.insert(6,"SYMTAB");
+    mapResult.insert(7,"RELA");
+    mapResult.insert(8,"RELASZ");
+    mapResult.insert(9,"RELAENT");
+    mapResult.insert(10,"STRSZ");
+    mapResult.insert(11,"SYMENT");
+    mapResult.insert(12,"INIT");
+    mapResult.insert(13,"FINI");
+    mapResult.insert(14,"SONAME");
+    mapResult.insert(15,"RPATH");
+    mapResult.insert(16,"SYMBOLIC");
+    mapResult.insert(17,"REL");
+    mapResult.insert(18,"RELSZ");
+    mapResult.insert(19,"RELENT");
+    mapResult.insert(20,"PLTREL");
+    mapResult.insert(21,"DEBUG");
+    mapResult.insert(22,"TEXTREL");
+    mapResult.insert(23,"JMPREL");
+    mapResult.insert(24,"BIND_NOW");
+    mapResult.insert(25,"INIT_ARRAY");
+    mapResult.insert(26,"FINI_ARRAY");
+    mapResult.insert(27,"INIT_ARRAYSZ");
+    mapResult.insert(28,"FINI_ARRAYSZ");
+    mapResult.insert(29,"RUNPATH");
+    mapResult.insert(30,"FLAGS");
+    mapResult.insert(32,"PREINIT_ARRAY"); // ENCODING
+    mapResult.insert(33,"PREINIT_ARRAYSZ");
+    mapResult.insert(0x6000000d,"LOOS");
+    mapResult.insert(0x6000000e,"SUNW_RTLDINF");
+    mapResult.insert(0x6ffff000,"HIOS");
+    mapResult.insert(0x6ffffd00,"VALRNGLO");
+    mapResult.insert(0x6ffffdf8,"CHECKSUM");
+    mapResult.insert(0x6ffffdf9,"PLTPADSZ");
+    mapResult.insert(0x6ffffdfa,"MOVEENT");
+    mapResult.insert(0x6ffffdfb,"MOVESZ");
+    mapResult.insert(0x6ffffdfc,"FEATURE_1");
+    mapResult.insert(0x6ffffdfd,"POSFLAG_1");
+    mapResult.insert(0x6ffffdfe,"SYMINSZ");
+    mapResult.insert(0x6ffffdff,"SYMINENT");
+    mapResult.insert(0x6ffffdff,"VALRNGHI");
+    mapResult.insert(0x6ffffe00,"ADDRRNGLO");
+    mapResult.insert(0x6ffffefa,"CONFIG");
+    mapResult.insert(0x6ffffefb,"DEPAUDIT");
+    mapResult.insert(0x6ffffefc,"AUDIT");
+    mapResult.insert(0x6ffffefd,"PLTPAD");
+    mapResult.insert(0x6ffffefe,"MOVETAB");
+    mapResult.insert(0x6ffffeff,"SYMINFO");
+    mapResult.insert(0x6ffffeff,"ADDRRNGHI");
+    mapResult.insert(0x6ffffff9,"RELACOUNT");
+    mapResult.insert(0x6ffffffa,"RELCOUNT");
+    mapResult.insert(0x6ffffffb,"FLAGS_1");
+    mapResult.insert(0x6ffffffc,"VERDEF");
+    mapResult.insert(0x6ffffffd,"VERDEFNUM");
+    mapResult.insert(0x6ffffffe,"VERNEED");
+    mapResult.insert(0x6fffffff,"VERNEEDNUM");
+    mapResult.insert(0x70000000,"LOPROC");
+    mapResult.insert(0x70000001,"SPARC_REGISTER");
+    mapResult.insert(0x7ffffffd,"AUXILIARY");
+    mapResult.insert(0x7ffffffe,"USED");
+    mapResult.insert(0x7fffffff,"HIPROC"); // FILTER
+    return mapResult;
+}
+
 QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
 {
     QList<XBinary::MEMORY_MAP> listResult;
@@ -2496,6 +2662,58 @@ qint64 XELF::getEntryPointOffset()
     }
 
     return addressToOffset(nAddress);
+}
+
+QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pList, bool bIsImage, QByteArray *pbaSectionTable)
+{
+    QList<SECTION_RECORD> listRecords;
+
+    int nCount=pList->count();
+    quint32 nSectionTableSize=pbaSectionTable->size();
+
+    for(int i=0;i<nCount;i++)
+    {
+        SECTION_RECORD record={};
+
+        record.nSize=pList->at(i).sh_size;
+        record.nFlags=pList->at(i).sh_flags;
+
+        if(bIsImage)
+        {
+            record.nOffset=pList->at(i).sh_addr;
+        }
+        else
+        {
+            record.nOffset=pList->at(i).sh_offset;
+        }
+
+        if(pList->at(i).sh_name<nSectionTableSize)
+        {
+            record.sName=pbaSectionTable->data()+pList->at(i).sh_name;
+        }
+
+        listRecords.append(record);
+    }
+
+    return listRecords;
+}
+
+bool XELF::isSectionNamePresent(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSections)
+{
+    bool bResult=false;
+
+    int nNumberOfSections=pListSections->count();
+
+    for(int i=0; i<nNumberOfSections; i++)
+    {
+        if(pListSections->at(i).sName==sSectionName)
+        {
+            bResult=true;
+            break;
+        }
+    }
+
+    return bResult;
 }
 
 

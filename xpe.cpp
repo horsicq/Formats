@@ -1257,6 +1257,8 @@ void XPE::setSection_Characteristics(quint32 nNumber, quint32 value)
 
 bool XPE::isSectionNamePresent(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections)
 {
+    bool bResult=false;
+
     int nNumberOfSections=pListSections->count();
 
     for(int i=0; i<nNumberOfSections; i++)
@@ -1266,11 +1268,12 @@ bool XPE::isSectionNamePresent(QString sSectionName, QList<XPE_DEF::IMAGE_SECTIO
 
         if(_sSectionName==sSectionName)
         {
-            return true;
+            bResult=true;
+            break;
         }
     }
 
-    return false;
+    return bResult;
 }
 
 XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionByName(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections)
