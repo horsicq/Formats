@@ -1166,7 +1166,7 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
 
     quint8 cZero=0;
 
-    // TODO optimize
+    // TODO optimize with dwords
     if(__pDevice->seek(nOffset))
     {
         while(nSize>0)

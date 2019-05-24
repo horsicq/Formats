@@ -543,6 +543,7 @@ public:
     bool isRelocsPresent();
     bool isTLSPresent();
     bool isSignPresent();
+    bool isExceptionPresent();
 
     TLS_HEADER getTLSHeader();
 
