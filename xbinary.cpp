@@ -44,7 +44,6 @@ quint32 XBinary::random32()
 #if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
     return QRandomGenerator::global()->generate();
 #else
-
     static quint32 nSeed=0;
 
     if(!nSeed)
@@ -185,7 +184,6 @@ void XBinary::findFiles(QString sDirectoryName, XBinary::FFOPTIONS *pFFOption, q
 QString XBinary::regExp(QString sRegExp, QString sString, int nIndex)
 {
     QString sResult;
-
 #if (QT_VERSION_MAJOR<5)
     QRegExp rxString(sRegExp);
     rxString.indexIn(sString);
@@ -196,7 +194,6 @@ QString XBinary::regExp(QString sRegExp, QString sString, int nIndex)
     {
         sResult=list.at(nIndex);
     }
-
 #else
     QRegularExpression rxString(sRegExp);
     QRegularExpressionMatch matchString=rxString.match(sString);
@@ -205,7 +202,6 @@ QString XBinary::regExp(QString sRegExp, QString sString, int nIndex)
     {
         sResult=matchString.captured(nIndex);
     }
-
 #endif
 
     return sResult;
@@ -2500,7 +2496,6 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType()
             result=UNICODE_TYPE_NONE;
         }
     }
-
     // TODO 0 end
 
     return result;
@@ -2643,7 +2638,6 @@ bool XBinary::_compareSignature(QList<XBinary::SIGNATURE_RECORD> *pListSignature
             return false;
         }
     }
-
     //    CompareBytes,
     //    RelOffsetFix,
     //    RelOffset,
@@ -2839,5 +2833,6 @@ bool XBinary::isEmptyData(char *pBuffer, qint64 nSize) // TODO dwords
 bool XBinary::_isOffsetValid(qint64 nOffset)
 {
     qint64 nFileSize=getSize();
+    
     return (nOffset<nFileSize);
 }
