@@ -2513,6 +2513,7 @@ QMap<quint64, QString> XELF::getDynamicTags()
     mapResult.insert(0x6ffffdff,"DT_SYMINENT");
     mapResult.insert(0x6ffffdff,"DT_VALRNGHI");
     mapResult.insert(0x6ffffe00,"DT_ADDRRNGLO");
+    mapResult.insert(0x6ffffef5,"DT_GNU_HASH");
     mapResult.insert(0x6ffffefa,"DT_CONFIG");
     mapResult.insert(0x6ffffefb,"DT_DEPAUDIT");
     mapResult.insert(0x6ffffefc,"DT_AUDIT");
@@ -2520,6 +2521,7 @@ QMap<quint64, QString> XELF::getDynamicTags()
     mapResult.insert(0x6ffffefe,"DT_MOVETAB");
     mapResult.insert(0x6ffffeff,"DT_SYMINFO");
     mapResult.insert(0x6ffffeff,"DT_ADDRRNGHI");
+    mapResult.insert(0x6ffffff0,"DT_VERSYM");
     mapResult.insert(0x6ffffff9,"DT_RELACOUNT");
     mapResult.insert(0x6ffffffa,"DT_RELCOUNT");
     mapResult.insert(0x6ffffffb,"DT_FLAGS_1");
@@ -2585,6 +2587,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     mapResult.insert(0x6ffffdff,"SYMINENT");
     mapResult.insert(0x6ffffdff,"VALRNGHI");
     mapResult.insert(0x6ffffe00,"ADDRRNGLO");
+    mapResult.insert(0x6ffffef5,"GNU_HASH");
     mapResult.insert(0x6ffffefa,"CONFIG");
     mapResult.insert(0x6ffffefb,"DEPAUDIT");
     mapResult.insert(0x6ffffefc,"AUDIT");
@@ -2592,6 +2595,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     mapResult.insert(0x6ffffefe,"MOVETAB");
     mapResult.insert(0x6ffffeff,"SYMINFO");
     mapResult.insert(0x6ffffeff,"ADDRRNGHI");
+    mapResult.insert(0x6ffffff0,"VERSYM");
     mapResult.insert(0x6ffffff9,"RELACOUNT");
     mapResult.insert(0x6ffffffa,"RELCOUNT");
     mapResult.insert(0x6ffffffb,"FLAGS_1");
