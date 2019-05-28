@@ -2463,6 +2463,59 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs()
     return listResult;
 }
 
+QList<XELF::TAG_STRUCT> XELF::getStructsByTag(QList<XELF::TAG_STRUCT> *pList,qint64 nTag)
+{
+    QList<XELF::TAG_STRUCT> listResult;
+
+    int nCount=pList->count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(pList->at(i).nTag==nTag)
+        {
+            listResult.append(pList->at(i));
+        }
+    }
+
+    return listResult;
+}
+
+QList<QString> XELF::getLibraries(QList<XELF::TAG_STRUCT> *pList)
+{
+    QList<QString> listResult;
+
+    QList<XELF::TAG_STRUCT> listNeeded=XELF::getStructsByTag(pList,1); // TODO const
+    QList<XELF::TAG_STRUCT> listStrTab=XELF::getStructsByTag(pList,5); // TODO const
+    QList<XELF::TAG_STRUCT> listStrSize=XELF::getStructsByTag(pList,10); // TODO const
+
+    QList<MEMORY_MAP> listMM=getMemoryMapList();
+
+    if(listStrTab.count()&&listStrSize.count())
+    {
+        qint64 nOffset=addressToOffset(&listMM,listStrTab.at(0).nValue);
+
+        QByteArray baSection=read_array(nOffset,listStrSize.at(0).nValue);
+
+        qint64 nSectionTableSize=baSection.size();
+
+        int nCount=listNeeded.count();
+
+        for(int i=0;i<nCount;i++)
+        {
+            quint64 nValue=listNeeded.at(i).nValue;
+
+            if(nValue<nSectionTableSize)
+            {
+                QString sLibrary=baSection.data()+nValue;
+
+                listResult.append(sLibrary);
+            }
+        }
+    }
+
+    return listResult;
+}
+
 QMap<quint64, QString> XELF::getDynamicTags()
 {
     QMap<quint64, QString> mapResult;

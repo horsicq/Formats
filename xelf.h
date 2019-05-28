@@ -274,6 +274,9 @@ public:
 
     QList<TAG_STRUCT> getTagStructs();
 
+    static QList<TAG_STRUCT> getStructsByTag(QList<TAG_STRUCT> *pList, qint64 nTag);
+    QList<QString> getLibraries(QList<TAG_STRUCT> *pList);
+
     static QMap<quint64,QString> getDynamicTags();
     static QMap<quint64,QString> getDynamicTagsS();
 
