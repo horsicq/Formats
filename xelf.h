@@ -267,14 +267,14 @@ public:
     QByteArray getSectionByName(QString sName);
 
     QString getProgramInterpreterName();
-//    QString getCommentString();
+    QString getCommentString();
     QString getCompatibleKernelVersion();
 
     static NOTE getNote(QByteArray &baData,bool bIsBigEndian);
 
     QList<TAG_STRUCT> getTagStructs();
+    static QList<TAG_STRUCT> getTagStructs(QList<TAG_STRUCT> *pList, qint64 nTag);
 
-    static QList<TAG_STRUCT> getStructsByTag(QList<TAG_STRUCT> *pList, qint64 nTag);
     QList<QString> getLibraries(QList<TAG_STRUCT> *pList);
 
     static QMap<quint64,QString> getDynamicTags();
@@ -285,6 +285,7 @@ public:
 
     static QList<SECTION_RECORD> getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pList,bool bIsImage,QByteArray *pbaSectionTable);
     static bool isSectionNamePresent(QString sSectionName,QList<SECTION_RECORD> *pListSections);
+    static qint32 getSectionNumber(QString sSectionName,QList<SECTION_RECORD> *pListSections);
 };
 
 #endif // XELF_H

@@ -2515,6 +2515,11 @@ bool XBinary::tryToOpen(QIODevice *pDevice)
     return bResult;
 }
 
+bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE os)
+{
+    return (os.nOffset)&&(os.nSize);
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     QList<SIGNATURE_RECORD> result;

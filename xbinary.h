@@ -332,6 +332,8 @@ public:
 
     static bool tryToOpen(QIODevice *pDevice);
 
+    static bool checkOffsetSize(OFFSETSIZE os);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);

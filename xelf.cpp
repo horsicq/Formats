@@ -2347,12 +2347,12 @@ QString XELF::getProgramInterpreterName()
     return sResult;
 }
 
-//QString XELF::getCommentString()
-//{
-//    QString sResult;
-//    sResult.append(getSectionByName(".comment"));
-//    return sResult;
-//}
+QString XELF::getCommentString()
+{
+    QString sResult;
+    sResult.append(getSectionByName(".comment"));
+    return sResult;
+}
 
 QString XELF::getCompatibleKernelVersion()
 {
@@ -2463,7 +2463,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs()
     return listResult;
 }
 
-QList<XELF::TAG_STRUCT> XELF::getStructsByTag(QList<XELF::TAG_STRUCT> *pList,qint64 nTag)
+QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF::TAG_STRUCT> *pList,qint64 nTag)
 {
     QList<XELF::TAG_STRUCT> listResult;
 
@@ -2484,9 +2484,9 @@ QList<QString> XELF::getLibraries(QList<XELF::TAG_STRUCT> *pList)
 {
     QList<QString> listResult;
 
-    QList<XELF::TAG_STRUCT> listNeeded=XELF::getStructsByTag(pList,1); // TODO const
-    QList<XELF::TAG_STRUCT> listStrTab=XELF::getStructsByTag(pList,5); // TODO const
-    QList<XELF::TAG_STRUCT> listStrSize=XELF::getStructsByTag(pList,10); // TODO const
+    QList<XELF::TAG_STRUCT> listNeeded=XELF::getTagStructs(pList,1); // TODO const
+    QList<XELF::TAG_STRUCT> listStrTab=XELF::getTagStructs(pList,5); // TODO const
+    QList<XELF::TAG_STRUCT> listStrSize=XELF::getTagStructs(pList,10); // TODO const
 
     QList<MEMORY_MAP> listMM=getMemoryMapList();
 
@@ -2773,4 +2773,21 @@ bool XELF::isSectionNamePresent(QString sSectionName, QList<XELF::SECTION_RECORD
     return bResult;
 }
 
+qint32 XELF::getSectionNumber(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSections)
+{
+    qint32 nResult=-1;
+
+    int nNumberOfSections=pListSections->count();
+
+    for(int i=0; i<nNumberOfSections; i++)
+    {
+        if(pListSections->at(i).sName==sSectionName)
+        {
+            nResult=i;
+            break;
+        }
+    }
+
+    return nResult;
+}
 
