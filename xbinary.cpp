@@ -989,21 +989,25 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
 
 bool XBinary::createFile(QString sFileName, qint64 nFileSize)
 {
+    bool bResult=false;
+
     QFile file;
 
     file.setFileName(sFileName);
 
     if(file.open(QIODevice::ReadWrite))
     {
+        bResult=true;
+
         if(nFileSize)
         {
-            return file.resize(nFileSize);
+            bResult=file.resize(nFileSize);
         }
 
-        return true;
+        file.close();
     }
 
-    return false;
+    return bResult;
 }
 
 bool XBinary::isFileExists(QString sFileName)
