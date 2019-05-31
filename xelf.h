@@ -263,8 +263,8 @@ public:
     void setElf64_Phdr_flags(quint32 nIndex,quint32 value);
     void setElf64_Phdr_align(quint32 nIndex,quint64 value);
 
-    int getSectionIndexByName(QString sName);
-    QByteArray getSectionByName(QString sName);
+    int getSectionIndexByName(QString sSectionName);
+    QByteArray getSectionByName(QString sSectionName);
 
     QString getProgramInterpreterName();
     QString getCommentString();
@@ -286,6 +286,7 @@ public:
     static QList<SECTION_RECORD> getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pList,bool bIsImage,QByteArray *pbaSectionTable);
     static bool isSectionNamePresent(QString sSectionName,QList<SECTION_RECORD> *pListSections);
     static qint32 getSectionNumber(QString sSectionName,QList<SECTION_RECORD> *pListSections);
+    static SECTION_RECORD getSectionRecord(QString sSectionName,QList<SECTION_RECORD> *pListSections);
 };
 
 #endif // XELF_H

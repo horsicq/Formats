@@ -2293,7 +2293,7 @@ void XELF::setElf64_Phdr_align(quint32 nIndex, quint64 value)
     }
 }
 
-int XELF::getSectionIndexByName(QString sName)
+int XELF::getSectionIndexByName(QString sSectionName)
 {
     int nResult=-1;
 
@@ -2303,7 +2303,7 @@ int XELF::getSectionIndexByName(QString sName)
         {
             quint32 nCurrentNameIndex=getElf64_Shdr_name(i);
 
-            if(getStringFromMainSection(nCurrentNameIndex)==sName)
+            if(getStringFromMainSection(nCurrentNameIndex)==sSectionName)
             {
                 nResult=i;
                 break;
@@ -2316,7 +2316,7 @@ int XELF::getSectionIndexByName(QString sName)
         {
             quint32 nCurrentNameIndex=getElf32_Shdr_name(i);
 
-            if(getStringFromMainSection(nCurrentNameIndex)==sName)
+            if(getStringFromMainSection(nCurrentNameIndex)==sSectionName)
             {
                 nResult=i;
                 break;
@@ -2327,10 +2327,10 @@ int XELF::getSectionIndexByName(QString sName)
     return nResult;
 }
 
-QByteArray XELF::getSectionByName(QString sName)
+QByteArray XELF::getSectionByName(QString sSectionName)
 {
     QByteArray baResult;
-    quint32 nIndex=getSectionIndexByName(sName);
+    quint32 nIndex=getSectionIndexByName(sSectionName);
 
     if(nIndex!=(quint32)-1)
     {
@@ -2789,5 +2789,23 @@ qint32 XELF::getSectionNumber(QString sSectionName, QList<XELF::SECTION_RECORD> 
     }
 
     return nResult;
+}
+
+XELF::SECTION_RECORD XELF::getSectionRecord(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSections)
+{
+    SECTION_RECORD result={};
+
+    int nNumberOfSections=pListSections->count();
+
+    for(int i=0; i<nNumberOfSections; i++)
+    {
+        if(pListSections->at(i).sName==sSectionName)
+        {
+            result=pListSections->at(i);
+            break;
+        }
+    }
+
+    return result;
 }
 
