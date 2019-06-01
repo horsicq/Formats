@@ -63,14 +63,12 @@ bool XPE::isRichSignaturePresent()
     int nOffset=sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
     int nSize=get_lfanew()-sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
 
-    if((nSize>0x200)||(nSize<=0))
+    if((nSize>0)&&(nSize<=0x200))
     {
-        return false;
+        QByteArray baStub=read_array(nOffset,nSize);
+
+        bResult=baStub.contains("Rich");
     }
-
-    QByteArray baStub=read_array(nOffset,nSize);
-
-    bResult=baStub.contains("Rich");
 
     return bResult;
 }
