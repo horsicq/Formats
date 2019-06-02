@@ -41,11 +41,10 @@ qint64 XBinary::getSize()
 
 quint32 XBinary::random32()
 {
-#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
-    return QRandomGenerator::global()->generate();
-#else
     static quint32 nSeed=0;
-
+#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
+    nSeed=QRandomGenerator::global()->generate();
+#else
     if(!nSeed)
     {
         quint32 nRValue=QDateTime::currentMSecsSinceEpoch()&0xFFFFFFFF;
@@ -58,9 +57,8 @@ quint32 XBinary::random32()
     quint16 nValue2=(quint32)qrand();
 
     nSeed^=(nValue1<<16)+nValue2;
-
-    return nSeed;
 #endif
+    return nSeed;
 }
 
 quint32 XBinary::random64()
@@ -73,7 +71,7 @@ quint32 XBinary::random64()
 
 QString XBinary::convertFileName(QString sFileName)
 {
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MAC // TODO Check
     //    if(sFileName.startsWith("/.file/id="))
     //    {
     //        CFStringRef relCFStringRef =

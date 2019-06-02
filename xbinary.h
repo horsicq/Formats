@@ -297,7 +297,6 @@ public:
     static quint32 getCRC32(QString sString);
 
     QIODevice *getDevice();
-
     virtual bool isValid();
 
     QString getSignature(qint64 nOffset,qint64 nSize);
