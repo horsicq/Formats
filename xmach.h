@@ -83,6 +83,11 @@ public:
     bool setCommand(quint32 nCommandID,QByteArray baData,int nIndex=0);
     QByteArray getCommand(QList<COMMAND_RECORD> *pList,quint32 nCommandID,int nIndex=0);
     bool setCommand(QList<COMMAND_RECORD> *pList,quint32 nCommandID,QByteArray baData,int nIndex=0);
+
+    qint64 getAddressOfEntryPoint();
+
+    virtual QList<MEMORY_MAP> getMemoryMapList();
+    virtual qint64 getEntryPointOffset();
 };
 
 #endif // XMACH_H
