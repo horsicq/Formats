@@ -27,11 +27,11 @@ namespace XMACH_DEF
 {
 
 /* Constant for the magic field of the mach_header (32-bit architectures) */
-const quint32 S_MH_MAGIC      =0xfeedface;	/* the mach magic number */
-const quint32 S_MH_CIGAM      =0xcefaedfe	;/* NXSwapInt(MH_MAGIC) */
+const quint32 S_MH_MAGIC        =0xfeedface;	/* the mach magic number */
+const quint32 S_MH_CIGAM        =0xcefaedfe	;/* NXSwapInt(MH_MAGIC) */
 /* Constant for the magic field of the mach_header_64 (64-bit architectures) */
-const quint32 S_MH_MAGIC_64=0xfeedfacf; /* the 64-bit mach magic number */
-const quint32 S_MH_CIGAM_64=0xcffaedfe; /* NXSwapInt(MH_MAGIC_64) */
+const quint32 S_MH_MAGIC_64     =0xfeedfacf; /* the 64-bit mach magic number */
+const quint32 S_MH_CIGAM_64     =0xcffaedfe; /* NXSwapInt(MH_MAGIC_64) */
 
 /*
  * The 32-bit mach header appears at the very beginning of the object file for

@@ -586,7 +586,7 @@ bool XMACH::setCommand(QList<XMACH::COMMAND_RECORD> *pList, quint32 nCommandID, 
 
 qint64 XMACH::getAddressOfEntryPoint()
 {
-    qint64 nResult=0;
+    qint64 nResult=-1;
 
     // TODO
 
@@ -604,6 +604,14 @@ QList<XBinary::MEMORY_MAP> XMACH::getMemoryMapList()
 
 qint64 XMACH::getEntryPointOffset()
 {
-    // TODO
-    return 0;
+    qint64 nResult=-1;
+
+    qint64 nAddress=getAddressOfEntryPoint();
+
+    if(nAddress!=-1)
+    {
+        nResult=addressToOffset(nAddress);
+    }
+
+    return nResult;
 }
