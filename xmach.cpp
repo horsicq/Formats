@@ -588,7 +588,35 @@ qint64 XMACH::getAddressOfEntryPoint()
 {
     qint64 nResult=-1;
 
-    // TODO
+    QList<COMMAND_RECORD> listLC=getCommandRecords();
+
+    int nCount=listLC.count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        quint32 nType=listLC.at(i).nType;
+        qint64 nOffset=listLC.at(i).nOffset;
+
+        if((nType==0x4)||(nType==0x5)) // TODO consts
+        {
+            quint32 nFlavor=read_uint32(nOffset+8,isBigEndian());
+
+            if(nFlavor==XMACH_DEF::S_x86_THREAD_STATE32)
+            {
+                nResult=read_uint32(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE32,eip),isBigEndian());
+            }
+            else if(nFlavor==XMACH_DEF::S_x86_THREAD_STATE64)
+            {
+                nResult=read_uint64(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE64,rip),isBigEndian());
+            }
+        }
+        else if(nType==0x80000028) // TODO const
+        {
+            qint64 nEntryPointOffset=read_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),isBigEndian());
+
+            nResult=offsetToAddress(nEntryPointOffset);
+        }
+    }
 
     return nResult;
 }
