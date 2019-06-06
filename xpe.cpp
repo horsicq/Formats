@@ -3417,9 +3417,9 @@ bool XPE::addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_H
 {
     bool bResult=false;
 
-    QString sClassName=pDevice->metaObject()->className();
+    QString sClassName=pDevice->metaObject()->className(); // TODO Create a function!
 
-    if(sClassName=="QFile")
+    if((sClassName=="QFile")||(sClassName=="QBuffer"))
     {
         XPE pe(pDevice,bIsImage);
 
@@ -3469,6 +3469,7 @@ bool XPE::addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_H
             pSectionHeader->PointerToRawData+=nDelta;
             nFileSize+=nDelta;
 
+            // TODO!!!
             ((QFile *)pDevice)->resize(nFileSize+pSectionHeader->SizeOfRawData);
 
             quint32 nNumberOfSections=pe.getFileHeader_NumberOfSections();
@@ -3511,7 +3512,7 @@ bool XPE::removeLastSection(QIODevice *pDevice,bool bIsImage)
 
     QString sClassName=pDevice->metaObject()->className();
 
-    if(sClassName=="QFile")
+    if((sClassName=="QFile")||(sClassName=="QBuffer"))
     {
         XPE pe(pDevice,bIsImage);
 
@@ -3839,6 +3840,29 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
     }
 
     return listResult;
+}
+
+QByteArray XPE::createHeaderStub(quint32 nMachine) // TODO options
+{
+    QByteArray baResult;
+
+    baResult.resize(0x200);
+    baResult.fill(0);
+
+    QBuffer buffer(&baResult);
+
+    if(buffer.open(QIODevice::ReadWrite))
+    {
+        XPE pe(&buffer);
+
+        pe.set_e_magic(XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE);
+        pe.set_e_lfanew(0x40);
+        pe.setNtHeaders_Signature(XPE_DEF::S_IMAGE_NT_SIGNATURE);
+
+        buffer.close();
+    }
+
+    return baResult;
 }
 
 qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)

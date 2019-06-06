@@ -35,6 +35,15 @@ public:
         qint64 nSize;
     };
 
+    struct LIBRARY_RECORD
+    {
+        QString sName;
+        QString sFullName;
+        quint32 timestamp;
+        quint32 current_version;
+        quint32 compatibility_version;
+    };
+
     XMACH(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
     ~XMACH();
 
@@ -88,6 +97,8 @@ public:
 
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getEntryPointOffset();
+
+    QList<LIBRARY_RECORD> getLibraryRecords();
 };
 
 #endif // XMACH_H

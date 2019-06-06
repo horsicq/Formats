@@ -614,6 +614,8 @@ public:
 
     static QList<XPE_DEF::IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData,XPE_DEF::IMAGE_SECTION_HEADER shOriginal,quint32 nBlockSize);
 
+    static QByteArray createHeaderStub(quint32 nMachine);
+
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     qint64 _calculateRawSize();

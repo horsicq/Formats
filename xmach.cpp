@@ -627,6 +627,20 @@ QList<XBinary::MEMORY_MAP> XMACH::getMemoryMapList()
 
     // TODO
 
+    QList<COMMAND_RECORD> listLC=getCommandRecords();
+
+    bool bIs64=is64();
+    bool bIsBigEndian=isBigEndian();
+
+    if(bIs64)
+    {
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(&listLC,0x19); // TODO consts
+    }
+    else
+    {
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(&listLC,0x01); // TODO consts
+    }
+
     return listResult;
 }
 
@@ -642,4 +656,25 @@ qint64 XMACH::getEntryPointOffset()
     }
 
     return nResult;
+}
+
+QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords()
+{
+    QList<LIBRARY_RECORD> listResult;
+
+    QList<COMMAND_RECORD> listLC=getCommandRecords();
+    QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(&listLC,0x0C); // TODO consts
+
+    int nCount=listLCLibraries.count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        LIBRARY_RECORD record={};
+
+        record.sFullName="";
+
+        listResult.append(record);
+    }
+
+    return listResult;
 }

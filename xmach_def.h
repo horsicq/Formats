@@ -167,6 +167,21 @@ struct entry_point_command
     quint64  entryoff;    /* file (__TEXT) offset of main() */
     quint64  stacksize;/* if not zero, initial stack size */
 };
+
+struct dylib
+{
+    quint32 name; // rel offset
+    quint32 timestamp;
+    quint32 current_version;
+    quint32 compatibility_version;
+};
+
+struct dylib_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    dylib _dylib;
+};
 }
 
 #endif // QMACH_DEF_H

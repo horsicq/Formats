@@ -2522,6 +2522,13 @@ bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE os)
     return (os.nOffset)&&(os.nSize);
 }
 
+QString XBinary::get_uint32_version(quint32 nValue)
+{
+    return QString("%1.%2.%3")  .arg((nValue >> 16) & 0xff)
+                                .arg((nValue >> 8) & 0xff)
+                                .arg((nValue) & 0xff);
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     QList<SIGNATURE_RECORD> result;

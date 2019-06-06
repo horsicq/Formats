@@ -333,6 +333,8 @@ public:
 
     static bool checkOffsetSize(OFFSETSIZE os);
 
+    static QString get_uint32_version(quint32 nValue);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);
