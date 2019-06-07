@@ -99,6 +99,8 @@ public:
     virtual qint64 getEntryPointOffset();
 
     QList<LIBRARY_RECORD> getLibraryRecords();
+    static LIBRARY_RECORD getLibraryRecordByName(QList<LIBRARY_RECORD> *pList,QString sName);
+    static bool isLibraryRecordNamePresent(QList<LIBRARY_RECORD> *pList,QString sName);
 };
 
 #endif // XMACH_H

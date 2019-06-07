@@ -2129,9 +2129,7 @@ bool XPE::setImports(QIODevice *pDevice,bool bIsImage, QList<XPE::IMPORT_HEADER>
 {
     bool bResult=false;
 
-    QString sClassName=pDevice->metaObject()->className();
-
-    if(sClassName=="QFile")
+    if(isResizeEnable(pDevice))
     {
         XPE pe(pDevice,bIsImage);
 
@@ -3103,9 +3101,7 @@ bool XPE::addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QStri
 
     bool bResult=false;
 
-    QString sClassName=pDevice->metaObject()->className();
-
-    if(sClassName=="QFile")
+    if(isResizeEnable(pDevice))
     {
         XPE pe(pDevice,bIsImage);
 
@@ -3287,16 +3283,15 @@ bool XPE::addOverlay(QIODevice *pDevice,bool bIsImage, char *pData, qint64 nData
 {
     bool bResult=false;
 
-    QString sClassName=pDevice->metaObject()->className();
-
-    if(sClassName=="QFile")
+    if(isResizeEnable(pDevice))
     {
         XPE pe(pDevice,bIsImage);
 
         if(pe.isValid())
         {
             qint64 nRawSize=pe.getOverlayOffset();
-            ((QFile *)pDevice)->resize(nRawSize+nDataSize);
+
+            resize(pDevice,nRawSize+nDataSize);
 
             if(nDataSize)
             {
@@ -3321,16 +3316,14 @@ bool XPE::addOverlayFromDevice(QIODevice *pDevice, bool bIsImage, QIODevice *pSo
     bool bResult=false;
     const int BUFFER_SIZE=0x1000;
 
-    QString sClassName=pDevice->metaObject()->className();
-
-    if(sClassName=="QFile")
+    if(isResizeEnable(pDevice))
     {
         XPE pe(pDevice,bIsImage);
 
         if(pe.isValid())
         {
             qint64 nRawSize=pe.getOverlayOffset();
-            ((QFile *)pDevice)->resize(nRawSize+nSize);
+            resize(pDevice,nRawSize+nSize);
 
             if(nSize)
             {
@@ -3379,9 +3372,7 @@ bool XPE::removeOverlay(QIODevice *pDevice,bool bIsImage)
 {
     bool bResult=false;
 
-    QString sClassName=pDevice->metaObject()->className();
-
-    if(sClassName=="QFile")
+    if(isResizeEnable(pDevice))
     {
         XPE pe(pDevice,bIsImage);
 
@@ -3417,9 +3408,7 @@ bool XPE::addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_H
 {
     bool bResult=false;
 
-    QString sClassName=pDevice->metaObject()->className(); // TODO Create a function!
-
-    if((sClassName=="QFile")||(sClassName=="QBuffer"))
+    if(isResizeEnable(pDevice))
     {
         XPE pe(pDevice,bIsImage);
 
@@ -3455,13 +3444,13 @@ bool XPE::addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_H
 
             if(nDelta>0)
             {
-                ((QFile *)pDevice)->resize(nFileSize+nDelta);
+                resize(pDevice,nFileSize+nDelta);
                 pe.moveMemory(nHeadersSize,nNewHeadersSize,nFileSize-nHeadersSize);
             }
             else if(nDelta<0)
             {
                 pe.moveMemory(nHeadersSize,nNewHeadersSize,nFileSize-nHeadersSize);
-                ((QFile *)pDevice)->resize(nFileSize+nDelta);
+                resize(pDevice,nFileSize+nDelta);
             }
 
             pe._fixFileOffsets(nDelta);
@@ -3470,7 +3459,7 @@ bool XPE::addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_H
             nFileSize+=nDelta;
 
             // TODO!!!
-            ((QFile *)pDevice)->resize(nFileSize+pSectionHeader->SizeOfRawData);
+            resize(pDevice,nFileSize+pSectionHeader->SizeOfRawData);
 
             quint32 nNumberOfSections=pe.getFileHeader_NumberOfSections();
             pe.setFileHeader_NumberOfSections(nNumberOfSections+1);
@@ -3510,9 +3499,7 @@ bool XPE::removeLastSection(QIODevice *pDevice,bool bIsImage)
 {
     bool bResult=false;
 
-    QString sClassName=pDevice->metaObject()->className();
-
-    if((sClassName=="QFile")||(sClassName=="QBuffer"))
+    if(isResizeEnable(pDevice))
     {
         XPE pe(pDevice,bIsImage);
 
@@ -3543,13 +3530,13 @@ bool XPE::removeLastSection(QIODevice *pDevice,bool bIsImage)
 
                 if(nDelta>0)
                 {
-                    ((QFile *)pDevice)->resize(nFileSize+nDelta);
+                    resize(pDevice,nFileSize+nDelta);
                     pe.moveMemory(nHeadersSize,nNewHeadersSize,nFileSize-nHeadersSize);
                 }
                 else if(nDelta<0)
                 {
                     pe.moveMemory(nHeadersSize,nNewHeadersSize,nFileSize-nHeadersSize);
-                    ((QFile *)pDevice)->resize(nFileSize+nDelta);
+                    resize(pDevice,nFileSize+nDelta);
                 }
 
                 pe._fixFileOffsets(nDelta);
@@ -3562,7 +3549,7 @@ bool XPE::removeLastSection(QIODevice *pDevice,bool bIsImage)
                     pe.moveMemory(nOverlayOffset,nOverlayOffset-ish.SizeOfRawData,nOverlaySize);
                 }
 
-                ((QFile *)pDevice)->resize(nFileSize-ish.SizeOfRawData);
+                resize(pDevice,nFileSize-ish.SizeOfRawData);
 
                 qint64 nNewImageSize=__ALIGN_UP(ish.VirtualAddress,nSectionAlignment);
                 pe.setOptionalHeader_SizeOfImage(nNewImageSize);
@@ -3842,7 +3829,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
     return listResult;
 }
 
-QByteArray XPE::createHeaderStub(quint32 nMachine) // TODO options
+QByteArray XPE::createHeaderStub(HEADER_OPTIONS *pHeaderOptions) // TODO options
 {
     QByteArray baResult;
 
@@ -3858,6 +3845,10 @@ QByteArray XPE::createHeaderStub(quint32 nMachine) // TODO options
         pe.set_e_magic(XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE);
         pe.set_e_lfanew(0x40);
         pe.setNtHeaders_Signature(XPE_DEF::S_IMAGE_NT_SIGNATURE);
+        pe.setFileHeader_SizeOfOptionalHeader(0xE0);
+        pe.setOptionalHeader_FileAlignment(pHeaderOptions->nFileAlignment);
+        pe.setOptionalHeader_SectionAlignment(pHeaderOptions->nSectionAlignment);
+        pe.setOptionalHeader_NumberOfRvaAndSizes(0x10);
 
         buffer.close();
     }
@@ -5025,9 +5016,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice,bool bIsImage, QList<qint64> *pLis
 {
     bool bResult=false;
 
-    QString sClassName=pDevice->metaObject()->className();
-
-    if((sClassName=="QFile")&&(pList->count()))
+    if((isResizeEnable(pDevice))&&(pList->count()))
     {
         XPE pe(pDevice,bIsImage);
 

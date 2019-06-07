@@ -334,6 +334,8 @@ public:
     static bool checkOffsetSize(OFFSETSIZE os);
 
     static QString get_uint32_version(quint32 nValue);
+    static bool isResizeEnable(QIODevice *pDevice);
+    static bool resize(QIODevice *pDevice,qint64 nSize);
 
 private:
     static QString convertSignature(QString sSignature);

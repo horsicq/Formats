@@ -2526,7 +2526,35 @@ QString XBinary::get_uint32_version(quint32 nValue)
 {
     return QString("%1.%2.%3")  .arg((nValue >> 16) & 0xff)
                                 .arg((nValue >> 8) & 0xff)
-                                .arg((nValue) & 0xff);
+            .arg((nValue) & 0xff);
+}
+
+bool XBinary::isResizeEnable(QIODevice *pDevice)
+{
+    bool bResult=false;
+
+    QString sClassName=pDevice->metaObject()->className();
+
+    if(sClassName=="QFile")
+    {
+        bResult=true;
+    }
+
+    return bResult;
+}
+
+bool XBinary::resize(QIODevice *pDevice, qint64 nSize)
+{
+    bool bResult=false;
+
+    QString sClassName=pDevice->metaObject()->className();
+
+    if(sClassName=="QFile")
+    {
+        bResult=((QFile *)pDevice)->resize(nSize);
+    }
+
+    return bResult;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)

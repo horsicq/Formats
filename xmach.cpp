@@ -662,6 +662,8 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords()
 {
     QList<LIBRARY_RECORD> listResult;
 
+    bool bIsBigEndian=isBigEndian();
+
     QList<COMMAND_RECORD> listLC=getCommandRecords();
     QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(&listLC,0x0C); // TODO consts
 
@@ -671,10 +673,53 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords()
     {
         LIBRARY_RECORD record={};
 
-        record.sFullName="";
+        qint64 nOffset=listLCLibraries.at(i).nOffset;
+
+        qint64 nNameOffset=read_uint32(nOffset+8+offsetof(XMACH_DEF::dylib,name),bIsBigEndian);
+        record.sFullName=read_ansiString(nOffset+nNameOffset);
+        record.sName=record.sFullName.section("/",-1,-1);
+        record.timestamp=read_uint32(nOffset+8+offsetof(XMACH_DEF::dylib,timestamp),bIsBigEndian);
+        record.current_version=read_uint32(nOffset+8+offsetof(XMACH_DEF::dylib,current_version),bIsBigEndian);
+        record.compatibility_version=read_uint32(nOffset+8+offsetof(XMACH_DEF::dylib,compatibility_version),bIsBigEndian);
 
         listResult.append(record);
     }
 
     return listResult;
+}
+
+XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QList<XMACH::LIBRARY_RECORD> *pList, QString sName)
+{
+    LIBRARY_RECORD result={};
+
+    int nCount=pList->count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(pList->at(i).sName==sName)
+        {
+            result=pList->at(i);
+            break;
+        }
+    }
+
+    return result;
+}
+
+bool XMACH::isLibraryRecordNamePresent(QList<XMACH::LIBRARY_RECORD> *pList, QString sName)
+{
+    bool bResult=false;
+
+    int nCount=pList->count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(pList->at(i).sName==sName)
+        {
+            bResult=true;
+            break;
+        }
+    }
+
+    return bResult;
 }
