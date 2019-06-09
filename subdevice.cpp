@@ -75,16 +75,18 @@ bool SubDevice::isSequential() const
 
 bool SubDevice::seek(qint64 pos)
 {
+    bool bResult=false;
+
     if((pos<nSize)&&(pos>=0))
     {
         if(pDevice->seek(nOffset+pos))
         {
             QIODevice::seek(pos);
-            return true;
+            bResult=true;
         }
     }
 
-    return false;
+    return bResult;
 }
 
 bool SubDevice::reset()
