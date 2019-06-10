@@ -25,8 +25,6 @@
 
 namespace XELF_DEF
 {
-
-
 //typedef quint32        Elf32_Addr;
 //typedef quint16        Elf32_Half;
 //typedef quint32        Elf32_Off;

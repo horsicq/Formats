@@ -25,7 +25,6 @@
 
 namespace XMACH_DEF
 {
-
 /* Constant for the magic field of the mach_header (32-bit architectures) */
 const quint32 S_MH_MAGIC        =0xfeedface;	/* the mach magic number */
 const quint32 S_MH_CIGAM        =0xcefaedfe	;/* NXSwapInt(MH_MAGIC) */

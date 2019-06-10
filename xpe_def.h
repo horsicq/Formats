@@ -115,9 +115,7 @@ const quint32 S_IMAGE_SCN_MEM_EXECUTE                 =0x20000000;
 const quint32 S_IMAGE_SCN_MEM_READ                    =0x40000000;
 const quint32 S_IMAGE_SCN_MEM_WRITE                   =0x80000000;
 const quint32 S_IMAGE_SCN_ALIGN_MASK                  =0x00F00000;
-//
-// Resource Format.
-//
+
 /* Predefined resource types */
 const quint32    S_RT_NEWRESOURCE      =0x2000;
 const quint32    S_RT_ERROR            =0x7fff;
