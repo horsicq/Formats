@@ -2494,6 +2494,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, quint32 nID2, QList<XP
             if((pListRecords->at(i).nID[1]==nID2)||(nID2==(quint32)-1))
             {
                 result=pListRecords->at(i);
+                break;
             }
         }
     }
@@ -2511,6 +2512,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, QString sName2, QList<
         if((pListRecords->at(i).nID[0]==nID1)&&(pListRecords->at(i).sName[1]==sName2))
         {
             result=pListRecords->at(i);
+            break;
         }
     }
 
@@ -2529,6 +2531,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<
             if((pListRecords->at(i).nID[1]==nID2)||(nID2==-1))
             {
                 result=pListRecords->at(i);
+                break;
             }
         }
     }
@@ -2546,6 +2549,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, QString sName2, QLis
         if((pListRecords->at(i).sName[0]==sName1)&&(pListRecords->at(i).sName[1]==sName2))
         {
             result=pListRecords->at(i);
+            break;
         }
     }
 
