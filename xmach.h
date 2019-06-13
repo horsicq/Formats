@@ -44,6 +44,20 @@ public:
         quint32 compatibility_version;
     };
 
+    struct SEGMENT_RECORD
+    {
+        qint64 nLCOffset;
+        char segname[16];
+        quint64 vmaddr;
+        quint64 vmsize;
+        quint64 fileoff;
+        quint64 filesize;
+        qint32 maxprot;
+        qint32 initprot;
+        quint32 nsects;
+        quint32 flags;
+    };
+
     XMACH(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
     ~XMACH();
 
@@ -101,6 +115,8 @@ public:
     QList<LIBRARY_RECORD> getLibraryRecords();
     static LIBRARY_RECORD getLibraryRecordByName(QList<LIBRARY_RECORD> *pList,QString sName);
     static bool isLibraryRecordNamePresent(QList<LIBRARY_RECORD> *pList,QString sName);
+
+    QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pList);
 };
 
 #endif // XMACH_H

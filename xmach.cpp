@@ -629,17 +629,9 @@ QList<XBinary::MEMORY_MAP> XMACH::getMemoryMapList()
 
     QList<COMMAND_RECORD> listLC=getCommandRecords();
 
-    bool bIs64=is64();
-    bool bIsBigEndian=isBigEndian();
+    QList<SEGMENT_RECORD> listSegmentRecords=getSegmentRecords(&listLC);
 
-    if(bIs64)
-    {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(&listLC,0x19); // TODO consts
-    }
-    else
-    {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(&listLC,0x01); // TODO consts
-    }
+    // TODO
 
     return listResult;
 }
@@ -722,4 +714,67 @@ bool XMACH::isLibraryRecordNamePresent(QList<XMACH::LIBRARY_RECORD> *pList, QStr
     }
 
     return bResult;
+}
+
+QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECORD> *pList)
+{
+    QList<SEGMENT_RECORD> listResult;
+
+    bool bIs64=is64();
+    bool bIsBigEndian=isBigEndian();
+
+    if(bIs64)
+    {
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,0x19); // TODO consts
+
+        int nCount=listLCSegments.count();
+
+        for(int i=0;i<nCount;i++)
+        {
+            qint64 nOffset=listLCSegments.at(i).nOffset;
+
+            SEGMENT_RECORD record={};
+
+            record.nLCOffset=nOffset;
+            read_array(nOffset+offsetof(XMACH_DEF::segment_command_64,segname),record.segname,sizeof(record.segname));
+            record.vmaddr=read_uint64(nOffset+offsetof(XMACH_DEF::segment_command_64,vmaddr),bIsBigEndian);
+            record.vmsize=read_uint64(nOffset+offsetof(XMACH_DEF::segment_command_64,vmsize),bIsBigEndian);
+            record.fileoff=read_uint64(nOffset+offsetof(XMACH_DEF::segment_command_64,fileoff),bIsBigEndian);
+            record.filesize=read_uint64(nOffset+offsetof(XMACH_DEF::segment_command_64,filesize),bIsBigEndian);
+            record.maxprot=read_int32(nOffset+offsetof(XMACH_DEF::segment_command_64,maxprot),bIsBigEndian);
+            record.initprot=read_int32(nOffset+offsetof(XMACH_DEF::segment_command_64,initprot),bIsBigEndian);
+            record.nsects=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,nsects),bIsBigEndian);
+            record.flags=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,flags),bIsBigEndian);
+
+            listResult.append(record);
+        }
+    }
+    else
+    {
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,0x01); // TODO consts
+
+        int nCount=listLCSegments.count();
+
+        for(int i=0;i<nCount;i++)
+        {
+            qint64 nOffset=listLCSegments.at(i).nOffset;
+
+            SEGMENT_RECORD record={};
+
+            record.nLCOffset=nOffset;
+            read_array(nOffset+offsetof(XMACH_DEF::segment_command,segname),record.segname,sizeof(record.segname));
+            record.vmaddr=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,vmaddr),bIsBigEndian);
+            record.vmsize=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,vmsize),bIsBigEndian);
+            record.fileoff=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,fileoff),bIsBigEndian);
+            record.filesize=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,filesize),bIsBigEndian);
+            record.maxprot=read_int32(nOffset+offsetof(XMACH_DEF::segment_command,maxprot),bIsBigEndian);
+            record.initprot=read_int32(nOffset+offsetof(XMACH_DEF::segment_command,initprot),bIsBigEndian);
+            record.nsects=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),bIsBigEndian);
+            record.flags=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,flags),bIsBigEndian);
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
 }
