@@ -2604,22 +2604,22 @@ bool XBinary::_compareSignature(QList<XBinary::SIGNATURE_RECORD> *pListSignature
         switch(pListSignatures->at(i).nType)
         {
             case XBinary::CompareBytes:
-            {
-                QByteArray baData=read_array(nOffset,pListSignatures->at(i).baData.size());
-
-                if(baData.size()!=pListSignatures->at(i).baData.size())
                 {
-                    return false;
-                }
+                    QByteArray baData=read_array(nOffset,pListSignatures->at(i).baData.size());
 
-                if(!compareMemory(baData.data(),(char *)(pListSignatures->at(i).baData.data()),baData.size()))
-                {
-                    return false;
-                }
+                    if(baData.size()!=pListSignatures->at(i).baData.size())
+                    {
+                        return false;
+                    }
 
-                nOffset+=baData.size();
-            }
-            break;
+                    if(!compareMemory(baData.data(),(char *)(pListSignatures->at(i).baData.data()),baData.size()))
+                    {
+                        return false;
+                    }
+
+                    nOffset+=baData.size();
+                }
+                break;
 
             case XBinary::RelOffsetFix:
                 nOffset+=pListSignatures->at(i).nBaseAddress;
