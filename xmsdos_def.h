@@ -25,8 +25,8 @@
 
 namespace XMSDOS_DEF
 {
-const quint32 S_IMAGE_DOS_SIGNATURE=0x5A4D;      // MZ
-const quint32 S_IMAGE_DOS_SIGNATURE_ZM=0x4D5A;      // ZM
+const quint32 S_IMAGE_DOS_SIGNATURE         =0x5A4D;      // MZ
+const quint32 S_IMAGE_DOS_SIGNATURE_ZM      =0x4D5A;      // ZM
 
 struct IMAGE_DOS_HEADER
 {
