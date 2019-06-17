@@ -319,6 +319,7 @@ public:
 
     bool isPlainTextType();
     bool isUTF8TextType();
+
     enum UNICODE_TYPE
     {
         UNICODE_TYPE_NONE=0,

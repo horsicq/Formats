@@ -94,20 +94,20 @@ const quint32 S_IMAGE_FILE_MACHINE_M32R              =0x9041;  // M32R little-en
 const quint32 S_IMAGE_FILE_MACHINE_CEE               =0xC0EE;
 const quint32 S_IMAGE_FILE_MACHINE_ARM64             =0xAA64;
 
-const quint32 S_IMAGE_SUBSYSTEM_UNKNOWN               =0;
-const quint32 S_IMAGE_SUBSYSTEM_NATIVE                =1;
-const quint32 S_IMAGE_SUBSYSTEM_WINDOWS_GUI           =2;
-const quint32 S_IMAGE_SUBSYSTEM_WINDOWS_CUI           =3;
-const quint32 S_IMAGE_SUBSYSTEM_OS2_CUI               =5;
-const quint32 S_IMAGE_SUBSYSTEM_POSIX_CUI             =7;
-const quint32 S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS        =8;
-const quint32 S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI        =9;
-const quint32 S_IMAGE_SUBSYSTEM_EFI_APPLICATION       =10;
-const quint32 S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER =11;
-const quint32 S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER    =12;
-const quint32 S_IMAGE_SUBSYSTEM_EFI_ROM               =13;
-const quint32 S_IMAGE_SUBSYSTEM_XBOX                  =14;
-const quint32 S_IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION =16;
+const quint32 S_IMAGE_SUBSYSTEM_UNKNOWN                     =0;
+const quint32 S_IMAGE_SUBSYSTEM_NATIVE                      =1;
+const quint32 S_IMAGE_SUBSYSTEM_WINDOWS_GUI                 =2;
+const quint32 S_IMAGE_SUBSYSTEM_WINDOWS_CUI                 =3;
+const quint32 S_IMAGE_SUBSYSTEM_OS2_CUI                     =5;
+const quint32 S_IMAGE_SUBSYSTEM_POSIX_CUI                   =7;
+const quint32 S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS              =8;
+const quint32 S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI              =9;
+const quint32 S_IMAGE_SUBSYSTEM_EFI_APPLICATION             =10;
+const quint32 S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER     =11;
+const quint32 S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER          =12;
+const quint32 S_IMAGE_SUBSYSTEM_EFI_ROM                     =13;
+const quint32 S_IMAGE_SUBSYSTEM_XBOX                        =14;
+const quint32 S_IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION    =16;
 
 const qint32 S_IMAGE_SIZEOF_SHORT_NAME =8;
 

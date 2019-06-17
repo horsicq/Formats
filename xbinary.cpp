@@ -1721,13 +1721,10 @@ QSet<XBinary::FT> XBinary::getFileTypes()
         }
 
     }
-
     //    if(isPlainText())
     //    {
     //        listResult.append(QString("Text"));
     //    }
-
-
 
     return stResult;
 }
@@ -1949,9 +1946,6 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
         delete[] pBuffer2;
     }
 
-
-
-
     return listResult;
 }
 QString XBinary::getMD5(qint64 nOffset,qint64 nSize)
@@ -2143,6 +2137,7 @@ XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
 
 bool XBinary::compareSignatureStrings(QString sBaseSignature, QString sOptSignature)
 {
+    // TODO optimize
     sBaseSignature=convertSignature(sBaseSignature);
     sOptSignature=convertSignature(sOptSignature);
 
