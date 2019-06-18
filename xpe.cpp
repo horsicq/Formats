@@ -3849,7 +3849,9 @@ QByteArray XPE::createHeaderStub(HEADER_OPTIONS *pHeaderOptions) // TODO options
         pe.set_e_magic(XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE);
         pe.set_e_lfanew(0x40);
         pe.setNtHeaders_Signature(XPE_DEF::S_IMAGE_NT_SIGNATURE);
-        pe.setFileHeader_SizeOfOptionalHeader(0xE0);
+        pe.setFileHeader_SizeOfOptionalHeader(0xE0); // TODO
+        pe.setFileHeader_Machine(pHeaderOptions->nMachine);
+        pe.setFileHeader_Characteristics(pHeaderOptions->nCharacteristics);
         pe.setOptionalHeader_FileAlignment(pHeaderOptions->nFileAlignment);
         pe.setOptionalHeader_SectionAlignment(pHeaderOptions->nSectionAlignment);
         pe.setOptionalHeader_NumberOfRvaAndSizes(0x10);

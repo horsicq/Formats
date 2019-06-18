@@ -631,7 +631,27 @@ QList<XBinary::MEMORY_MAP> XMACH::getMemoryMapList()
 
     QList<SEGMENT_RECORD> listSegmentRecords=getSegmentRecords(&listLC);
 
-    // TODO
+    int nCount=listSegmentRecords.count();
+
+    for(int i=0; i<nCount; i++)
+    {
+        XBinary::MEMORY_MAP record={};
+
+        record.bIsHeader=false;
+        record.bIsLoadSection=true;
+        record.bIsOvelay=false;
+        record.nAddress=listSegmentRecords.at(i).vmaddr;
+        record.nSize=listSegmentRecords.at(i).filesize;
+        record.nOffset=listSegmentRecords.at(i).fileoff;
+
+        listResult.append(record);
+
+//        // TODO
+//        if(!isImage())
+//        {
+
+//        }
+    }
 
     return listResult;
 }

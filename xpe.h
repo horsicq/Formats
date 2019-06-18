@@ -616,7 +616,8 @@ public:
 
     struct HEADER_OPTIONS
     {
-        quint32 nMachine;
+        quint16 nMachine;
+        quint16 nCharacteristics;
         quint32 nFileAlignment;
         quint64 nSectionAlignment;
     };
