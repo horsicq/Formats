@@ -116,6 +116,7 @@ public:
     static LIBRARY_RECORD getLibraryRecordByName(QList<LIBRARY_RECORD> *pList,QString sName);
     static bool isLibraryRecordNamePresent(QList<LIBRARY_RECORD> *pList,QString sName);
 
+    QList<SEGMENT_RECORD> getSegmentRecords();
     QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pList);
 };
 

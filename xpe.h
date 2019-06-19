@@ -618,6 +618,7 @@ public:
     {
         quint16 nMachine;
         quint16 nCharacteristics;
+        quint16 nMagic;
         quint32 nFileAlignment;
         quint64 nSectionAlignment;
     };
