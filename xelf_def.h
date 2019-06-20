@@ -51,19 +51,19 @@ const quint8 S_ELFMAG3='F';
 //const quint8 ELFMAG          "\177ELF"
 const quint32 S_ELFMAG=0x464C457F;
 const quint8 S_SELFMAG=4;
-const quint8 S_EI_CLASS=4;       /* File class byte index */
-const quint8 S_ELFCLASSNONE=0;       /* Invalid class */
-const quint8 S_ELFCLASS32=1;       /* 32-bit objects */
-const quint8 S_ELFCLASS64=2;       /* 64-bit objects */
-const quint8 S_EI_DATA=5;       /* Data encodeing byte index */
-const quint8 S_ELFDATANONE=0;       /* Invalid data encoding */
-const quint8 S_ELFDATA2LSB=1;       /* 2's complement little endian */
-const quint8 S_ELFDATA2MSB=2;       /* 2's complement big endian */
-const quint8 S_EI_VERSION=6;       /* File version byte index */
-const quint8 S_EV_NONE=0;       /* Invalid ELF Version */
-const quint8 S_EV_CURRENT=1;       /* Current version */
-const quint8 S_EI_OSABI=7;       /* Operating system/ABI identification */
-const quint8 S_EI_ABIVERSION=8;       /* ABI version */
+const quint8 S_EI_CLASS=4;                  /* File class byte index */
+const quint8 S_ELFCLASSNONE=0;              /* Invalid class */
+const quint8 S_ELFCLASS32=1;                /* 32-bit objects */
+const quint8 S_ELFCLASS64=2;                /* 64-bit objects */
+const quint8 S_EI_DATA=5;                   /* Data encodeing byte index */
+const quint8 S_ELFDATANONE=0;               /* Invalid data encoding */
+const quint8 S_ELFDATA2LSB=1;               /* 2's complement little endian */
+const quint8 S_ELFDATA2MSB=2;               /* 2's complement big endian */
+const quint8 S_EI_VERSION=6;                /* File version byte index */
+const quint8 S_EV_NONE=0;                   /* Invalid ELF Version */
+const quint8 S_EV_CURRENT=1;                /* Current version */
+const quint8 S_EI_OSABI=7;                  /* Operating system/ABI identification */
+const quint8 S_EI_ABIVERSION=8;             /* ABI version */
 const quint8 S_SHN_UNDEF=0;
 
 struct Elf32_Ehdr
@@ -104,44 +104,44 @@ struct Elf64_Ehdr
 
 struct Elf32_Shdr
 {
-    quint32	sh_name;	/* Section name (index into the section header string table). */
-    quint32	sh_type;	/* Section type. */
-    quint32	sh_flags;	/* Section flags. */
-    quint32	sh_addr;	/* Address in memory image. */
-    quint32	sh_offset;	/* Offset in file. */
-    quint32	sh_size;	/* Size in bytes. */
-    quint32	sh_link;	/* Index of a related section. */
-    quint32	sh_info;	/* Depends on section type. */
-    quint32	sh_addralign;	/* Alignment in bytes. */
-    quint32	sh_entsize;	/* Size of each entry in section. */
+    quint32	sh_name;            /* Section name (index into the section header string table). */
+    quint32	sh_type;            /* Section type. */
+    quint32	sh_flags;           /* Section flags. */
+    quint32	sh_addr;            /* Address in memory image. */
+    quint32	sh_offset;          /* Offset in file. */
+    quint32	sh_size;            /* Size in bytes. */
+    quint32	sh_link;            /* Index of a related section. */
+    quint32	sh_info;            /* Depends on section type. */
+    quint32	sh_addralign;       /* Alignment in bytes. */
+    quint32	sh_entsize;         /* Size of each entry in section. */
 };
 
 struct Elf64_Shdr
 {
-    quint32	sh_name;	/* Section name (index into the section header string table). */
-    quint32	sh_type;	/* Section type. */
-    quint64	sh_flags;	/* Section flags. */
-    quint64	sh_addr;	/* Address in memory image. */
-    quint64	sh_offset;	/* Offset in file. */
-    quint64	sh_size;	/* Size in bytes. */
-    quint32	sh_link;	/* Index of a related section. */
-    quint32	sh_info;	/* Depends on section type. */
-    quint64	sh_addralign;	/* Alignment in bytes. */
-    quint64	sh_entsize;	/* Size of each entry in section. */
+    quint32	sh_name;            /* Section name (index into the section header string table). */
+    quint32	sh_type;            /* Section type. */
+    quint64	sh_flags;           /* Section flags. */
+    quint64	sh_addr;            /* Address in memory image. */
+    quint64	sh_offset;          /* Offset in file. */
+    quint64	sh_size;            /* Size in bytes. */
+    quint32	sh_link;            /* Index of a related section. */
+    quint32	sh_info;            /* Depends on section type. */
+    quint64	sh_addralign;       /* Alignment in bytes. */
+    quint64	sh_entsize;         /* Size of each entry in section. */
 };
 
 struct Elf_Shdr
 {
-    quint32	sh_name;	/* Section name (index into the section header string table). */
-    quint32	sh_type;	/* Section type. */
-    quint64	sh_flags;	/* Section flags. */
-    quint64	sh_addr;	/* Address in memory image. */
-    quint64	sh_offset;	/* Offset in file. */
-    quint64	sh_size;	/* Size in bytes. */
-    quint32	sh_link;	/* Index of a related section. */
-    quint32	sh_info;	/* Depends on section type. */
-    quint64	sh_addralign;	/* Alignment in bytes. */
-    quint64	sh_entsize;	/* Size of each entry in section. */
+    quint32	sh_name;            /* Section name (index into the section header string table). */
+    quint32	sh_type;            /* Section type. */
+    quint64	sh_flags;           /* Section flags. */
+    quint64	sh_addr;            /* Address in memory image. */
+    quint64	sh_offset;          /* Offset in file. */
+    quint64	sh_size;            /* Size in bytes. */
+    quint32	sh_link;            /* Index of a related section. */
+    quint32	sh_info;            /* Depends on section type. */
+    quint64	sh_addralign;       /* Alignment in bytes. */
+    quint64	sh_entsize;         /* Size of each entry in section. */
 };
 
 struct Elf32_Phdr

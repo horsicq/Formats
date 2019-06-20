@@ -157,9 +157,7 @@ struct IMAGE_DATA_DIRECTORY
 
 struct IMAGE_OPTIONAL_HEADER32
 {
-    //
     // Standard fields.
-    //
     quint16 Magic;
     quint8  MajorLinkerVersion;
     quint8  MinorLinkerVersion;
@@ -169,9 +167,7 @@ struct IMAGE_OPTIONAL_HEADER32
     quint32 AddressOfEntryPoint;
     quint32 BaseOfCode;
     quint32 BaseOfData;
-    //
     // NT additional fields.
-    //
     quint32 ImageBase;
     quint32 SectionAlignment;
     quint32 FileAlignment;
@@ -198,9 +194,7 @@ struct IMAGE_OPTIONAL_HEADER32
 
 struct IMAGE_OPTIONAL_HEADER32S
 {
-    //
     // Standard fields.
-    //
     quint16 Magic;
     quint8  MajorLinkerVersion;
     quint8  MinorLinkerVersion;
@@ -210,9 +204,7 @@ struct IMAGE_OPTIONAL_HEADER32S
     quint32 AddressOfEntryPoint;
     quint32 BaseOfCode;
     quint32 BaseOfData;
-    //
     // NT additional fields.
-    //
     quint32 ImageBase;
     quint32 SectionAlignment;
     quint32 FileAlignment;
@@ -238,9 +230,7 @@ struct IMAGE_OPTIONAL_HEADER32S
 
 struct IMAGE_OPTIONAL_HEADER64
 {
-    //
     // Standard fields.
-    //
     quint16 Magic;
     quint8  MajorLinkerVersion;
     quint8  MinorLinkerVersion;
@@ -249,9 +239,7 @@ struct IMAGE_OPTIONAL_HEADER64
     quint32 SizeOfUninitializedData;
     quint32 AddressOfEntryPoint;
     quint32 BaseOfCode;
-    //
     // NT additional fields.
-    //
     qint64 ImageBase;
     quint32 SectionAlignment;
     quint32 FileAlignment;
@@ -278,9 +266,7 @@ struct IMAGE_OPTIONAL_HEADER64
 
 struct IMAGE_OPTIONAL_HEADER64S
 {
-    //
     // Standard fields.
-    //
     quint16 Magic;
     quint8  MajorLinkerVersion;
     quint8  MinorLinkerVersion;
@@ -289,9 +275,7 @@ struct IMAGE_OPTIONAL_HEADER64S
     quint32 SizeOfUninitializedData;
     quint32 AddressOfEntryPoint;
     quint32 BaseOfCode;
-    //
     // NT additional fields.
-    //
     qint64 ImageBase;
     quint32 SectionAlignment;
     quint32 FileAlignment;
