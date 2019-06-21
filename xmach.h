@@ -46,7 +46,7 @@ public:
 
     struct SEGMENT_RECORD
     {
-        qint64 nLCOffset;
+        qint64 nStructOffset;
         char segname[16];
         quint64 vmaddr;
         quint64 vmsize;
@@ -56,6 +56,20 @@ public:
         qint32 initprot;
         quint32 nsects;
         quint32 flags;
+    };
+
+    struct SECTION_RECORD
+    {
+        qint64 nStructOffset;
+        char sectname[16];
+        char segname[16];
+        quint64	addr;
+        quint64	size;
+        quint32	offset;
+        quint32	align;
+        quint32	reloff;
+        quint32	nreloc;
+        quint32	flags;
     };
 
     XMACH(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);

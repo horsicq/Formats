@@ -99,6 +99,35 @@ struct segment_command_64
     quint32 flags;
 };
 
+struct section { /* for 32-bit architectures */
+    char sectname[16];	/* name of this section */
+    char segname[16];	/* segment this section goes in */
+    quint32	addr;		/* memory address of this section */
+    quint32	size;		/* size in bytes of this section */
+    quint32	offset;		/* file offset of this section */
+    quint32	align;		/* section alignment (power of 2) */
+    quint32	reloff;		/* file offset of relocation entries */
+    quint32	nreloc;		/* number of relocation entries */
+    quint32	flags;		/* flags (section type and attributes)*/
+    quint32	reserved1;	/* reserved (for offset or index) */
+    quint32	reserved2;	/* reserved (for count or sizeof) */
+};
+
+struct section_64 { /* for 64-bit architectures */
+    char sectname[16];	/* name of this section */
+    char segname[16];	/* segment this section goes in */
+    quint64	addr;		/* memory address of this section */
+    quint64	size;		/* size in bytes of this section */
+    quint32	offset;		/* file offset of this section */
+    quint32	align;		/* section alignment (power of 2) */
+    quint32	reloff;		/* file offset of relocation entries */
+    quint32	nreloc;		/* number of relocation entries */
+    quint32	flags;		/* flags (section type and attributes)*/
+    quint32	reserved1;	/* reserved (for offset or index) */
+    quint32	reserved2;	/* reserved (for count or sizeof) */
+    quint32	reserved3;	/* reserved */
+};
+
 const quint32 S_x86_THREAD_STATE32=1;
 const quint32 S_x86_FLOAT_STATE32=2;
 const quint32 S_x86_EXCEPTION_STATE32=3;

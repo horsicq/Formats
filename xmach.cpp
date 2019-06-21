@@ -762,7 +762,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
             SEGMENT_RECORD record={};
 
-            record.nLCOffset=nOffset;
+            record.nStructOffset=nOffset+sizeof(XMACH_DEF::load_command);
             read_array(nOffset+offsetof(XMACH_DEF::segment_command_64,segname),record.segname,sizeof(record.segname));
             record.vmaddr=read_uint64(nOffset+offsetof(XMACH_DEF::segment_command_64,vmaddr),bIsBigEndian);
             record.vmsize=read_uint64(nOffset+offsetof(XMACH_DEF::segment_command_64,vmsize),bIsBigEndian);
@@ -788,7 +788,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
             SEGMENT_RECORD record={};
 
-            record.nLCOffset=nOffset;
+            record.nStructOffset=nOffset+sizeof(XMACH_DEF::load_command);
             read_array(nOffset+offsetof(XMACH_DEF::segment_command,segname),record.segname,sizeof(record.segname));
             record.vmaddr=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,vmaddr),bIsBigEndian);
             record.vmsize=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,vmsize),bIsBigEndian);
