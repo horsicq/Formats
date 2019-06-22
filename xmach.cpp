@@ -805,3 +805,22 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
     return listResult;
 }
+
+QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECORD> *pList)
+{
+    QList<SECTION_RECORD> listResult;
+
+    bool bIs64=is64();
+    bool bIsBigEndian=isBigEndian();
+
+    if(bIs64)
+    {
+
+    }
+    else
+    {
+
+    }
+
+    return listResult;
+}

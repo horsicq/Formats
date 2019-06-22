@@ -132,6 +132,8 @@ public:
 
     QList<SEGMENT_RECORD> getSegmentRecords();
     QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pList);
+
+    QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pList);
 };
 
 #endif // XMACH_H
