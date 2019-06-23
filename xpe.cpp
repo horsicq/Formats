@@ -159,6 +159,7 @@ qint64 XPE::getNtHeadersOffset()
 quint32 XPE::getNtHeaders_Signature()
 {
     qint64 nOffset=getNtHeadersOffset();
+
     return read_uint32(nOffset);
 }
 
@@ -380,14 +381,18 @@ quint32 XPE::getOptionalHeader_BaseOfData()
 
 quint64 XPE::getOptionalHeader_ImageBase()
 {
+    quint64 nResult=0;
+
     if(is64())
     {
-        return read_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,ImageBase));
+        nResult=read_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,ImageBase));
     }
     else
     {
-        return read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,ImageBase));
+        nResult=read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,ImageBase));
     }
+
+    return nResult;
 }
 
 quint32 XPE::getOptionalHeader_SectionAlignment()
@@ -462,74 +467,98 @@ quint16 XPE::getOptionalHeader_DllCharacteristics()
 
 qint64 XPE::getOptionalHeader_SizeOfStackReserve()
 {
+    qint64 nResult=0;
+
     if(is64())
     {
-        return read_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfStackReserve));
+        nResult=read_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfStackReserve));
     }
     else
     {
-        return read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfStackReserve));
+        nResult=read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfStackReserve));
     }
+
+    return nResult;
 }
 
 qint64 XPE::getOptionalHeader_SizeOfStackCommit()
 {
+    qint64 nResult=0;
+
     if(is64())
     {
-        return read_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfStackCommit));
+        nResult=read_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfStackCommit));
     }
     else
     {
-        return read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfStackCommit));
+        nResult=read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfStackCommit));
     }
+
+    return nResult;
 }
 
 qint64 XPE::getOptionalHeader_SizeOfHeapReserve()
 {
+    qint64 nResult=0;
+
     if(is64())
     {
-        return read_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfHeapReserve));
+        nResult=read_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfHeapReserve));
     }
     else
     {
-        return read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfHeapReserve));
+        nResult=read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfHeapReserve));
     }
+
+    return nResult;
 }
 
 qint64 XPE::getOptionalHeader_SizeOfHeapCommit()
 {
+    qint64 nResult=0;
+
     if(is64())
     {
-        return read_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfHeapCommit));
+        nResult=read_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfHeapCommit));
     }
     else
     {
-        return read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfHeapCommit));
+        nResult=read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfHeapCommit));
     }
+
+    return nResult;
 }
 
 quint32 XPE::getOptionalHeader_LoaderFlags()
 {
+    quint32 nResult=0;
+
     if(is64())
     {
-        return read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,LoaderFlags));
+        nResult=read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,LoaderFlags));
     }
     else
     {
-        return read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,LoaderFlags));
+        nResult=read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,LoaderFlags));
     }
+
+    return nResult;
 }
 
 quint32 XPE::getOptionalHeader_NumberOfRvaAndSizes()
 {
+    quint32 nResult=0;
+
     if(is64())
     {
-        return read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,NumberOfRvaAndSizes));
+        nResult=read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,NumberOfRvaAndSizes));
     }
     else
     {
-        return read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,NumberOfRvaAndSizes));
+        nResult=read_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,NumberOfRvaAndSizes));
     }
+
+    return nResult;
 }
 
 void XPE::setOptionalHeader_Magic(quint16 value)
