@@ -672,12 +672,18 @@ qint64 XMACH::getEntryPointOffset()
 
 QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords()
 {
+    QList<COMMAND_RECORD> listLC=getCommandRecords();
+
+    return getLibraryRecords(&listLC);
+}
+
+QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECORD> *pList)
+{
     QList<LIBRARY_RECORD> listResult;
 
     bool bIsBigEndian=isBigEndian();
 
-    QList<COMMAND_RECORD> listLC=getCommandRecords();
-    QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(&listLC,0x0C); // TODO consts
+    QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(pList,0x0C); // TODO consts
 
     int nCount=listLCLibraries.count();
 
@@ -804,6 +810,13 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
     }
 
     return listResult;
+}
+
+QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords()
+{
+    QList<XMACH::COMMAND_RECORD> listCR=getCommandRecords();
+
+    return getSectionRecords(&listCR);
 }
 
 QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECORD> *pList)

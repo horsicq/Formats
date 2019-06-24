@@ -127,12 +127,14 @@ public:
     virtual qint64 getEntryPointOffset();
 
     QList<LIBRARY_RECORD> getLibraryRecords();
+    QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pList);
     static LIBRARY_RECORD getLibraryRecordByName(QList<LIBRARY_RECORD> *pList,QString sName);
     static bool isLibraryRecordNamePresent(QList<LIBRARY_RECORD> *pList,QString sName);
 
     QList<SEGMENT_RECORD> getSegmentRecords();
     QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pList);
 
+    QList<SECTION_RECORD> getSectionRecords();
     QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pList);
 };
 
