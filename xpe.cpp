@@ -3885,6 +3885,7 @@ QByteArray XPE::createHeaderStub(HEADER_OPTIONS *pHeaderOptions) // TODO options
         pe.setOptionalHeader_ImageBase(pHeaderOptions->nImagebase);
         pe.setOptionalHeader_FileAlignment(pHeaderOptions->nFileAlignment);
         pe.setOptionalHeader_SectionAlignment(pHeaderOptions->nSectionAlignment);
+        pe.setOptionalHeader_AddressOfEntryPoint(pHeaderOptions->nAddressOfEntryPoint);
         pe.setOptionalHeader_NumberOfRvaAndSizes(0x10);
 
         buffer.close();

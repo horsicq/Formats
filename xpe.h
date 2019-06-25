@@ -621,7 +621,8 @@ public:
         quint16 nMagic;
         quint64 nImagebase;
         quint32 nFileAlignment;
-        quint64 nSectionAlignment;
+        quint32 nSectionAlignment;
+        quint32 nAddressOfEntryPoint;
     };
 
     static QByteArray createHeaderStub(HEADER_OPTIONS *pHeaderOptions);
