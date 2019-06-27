@@ -262,7 +262,7 @@ QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()
     qint64 nOverlayOffset=nMaxOffset;
     qint64 nOverlaySize=qMax(getSize()-nMaxOffset,(qint64)0);
 
-    qint64 nBaseAddress=_getBaseAddress();
+//    qint64 nBaseAddress=_getBaseAddress();
 
     MEMORY_MAP recordHeader= {};
     recordHeader.nSize=nHeaderSize;

@@ -2502,7 +2502,7 @@ QList<QString> XELF::getLibraries(QList<XELF::TAG_STRUCT> *pList)
 
         for(int i=0;i<nCount;i++)
         {
-            quint64 nValue=listNeeded.at(i).nValue;
+            qint64 nValue=listNeeded.at(i).nValue;
 
             if(nValue<nSectionTableSize)
             {
