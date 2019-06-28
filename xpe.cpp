@@ -3888,6 +3888,9 @@ QByteArray XPE::createHeaderStub(HEADER_OPTIONS *pHeaderOptions) // TODO options
         pe.setOptionalHeader_AddressOfEntryPoint(pHeaderOptions->nAddressOfEntryPoint);
         pe.setOptionalHeader_NumberOfRvaAndSizes(0x10);
 
+        pe.setOptionalHeader_DataDirectory_VirtualAddress(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE,pHeaderOptions->nResourceRVA);
+        pe.setOptionalHeader_DataDirectory_Size(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE,pHeaderOptions->nResourceSize);
+
         buffer.close();
     }
 

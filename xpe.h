@@ -623,6 +623,8 @@ public:
         quint32 nFileAlignment;
         quint32 nSectionAlignment;
         quint32 nAddressOfEntryPoint;
+        quint32 nResourceRVA;
+        quint32 nResourceSize;
     };
 
     static QByteArray createHeaderStub(HEADER_OPTIONS *pHeaderOptions);
