@@ -446,11 +446,11 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
 
         if(bIs64)
         {
-            _nSize=__ALIGN_UP(_nSize,8);
+  S_ALIGN_UP_nSize=__ALIGN_UP(_nSize,8);
         }
         else
         {
-            _nSize=__ALIGN_UP(_nSize,4);
+S_ALIGN_UP  _nSize=__ALIGN_UP(_nSize,4);
         }
 
         nSize+=_nSize;

@@ -1033,7 +1033,7 @@ QList<XPE::SECTIONRVA_RECORD> XPE::getSectionRVARecords()
         SECTIONRVA_RECORD record= {};
 
         record.nRVA=listSH.at(i).VirtualAddress;
-        record.nSize=__ALIGN_UP(listSH.at(i).Misc.VirtualSize,nSectionAlignment);
+        record.nSize=S_ALIGN_UP(listSH.at(i).Misc.VirtualSize,nSectionAlignment);
         record.nCharacteristics=listSH.at(i).Characteristics;
 
         listResult.append(record);
@@ -1346,7 +1346,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
         nFileAlignment=1;
     }
 
-    quint32 nVirtualSizeofHeaders=__ALIGN_UP(nHeadersSize,nSectionAlignment);
+    quint32 nVirtualSizeofHeaders=S_ALIGN_UP(nHeadersSize,nSectionAlignment);
     qint64 nMaxOffset=0;
 
     MEMORY_MAP recordHeaderRaw= {};
@@ -1393,11 +1393,11 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
         // TODO for corrupted files
         qint64 nFileOffset=section.PointerToRawData;
         //
-        nFileOffset=__ALIGN_DOWN(nFileOffset,nFileAlignment);
+        nFileOffset=S_ALIGN_DOWN(nFileOffset,nFileAlignment);
         //        qint64 nFileSize=__ALIGN_UP(section.SizeOfRawData,nFileAlignment);
         qint64 nFileSize=section.SizeOfRawData+(section.PointerToRawData-nFileOffset);
         qint64 nVirtualAddress=nBaseAddress+section.VirtualAddress;
-        qint64 nVirtualSize=__ALIGN_UP(section.Misc.VirtualSize,nSectionAlignment);
+        qint64 nVirtualSize=S_ALIGN_UP(section.Misc.VirtualSize,nSectionAlignment);
 
         if(!isImage())
         {
@@ -2199,9 +2199,9 @@ bool XPE::setImports(QIODevice *pDevice,bool bIsImage, QList<XPE::IMPORT_HEADER>
                 }
             }
 
-            nImportTableSize=__ALIGN_UP(nImportTableSize,16);
-            nIATSize=__ALIGN_UP(nIATSize,16);
-            nAnsiDataSize=__ALIGN_UP(nAnsiDataSize,16);
+            nImportTableSize=S_ALIGN_UP(nImportTableSize,16);
+            nIATSize=S_ALIGN_UP(nIATSize,16);
+            nAnsiDataSize=S_ALIGN_UP(nAnsiDataSize,16);
 
             baImport.resize(nIATSize+nImportTableSize+nIATSize+nAnsiDataSize);
             baImport.fill(0);
@@ -2645,7 +2645,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
 
                 qint32 nDelta=sizeof(XPE_DEF::S_VS_VERSION_INFO);
                 nDelta+=(sTitle.length()+1)*sizeof(quint16);
-                nDelta=__ALIGN_UP(nDelta,4);
+                nDelta=S_ALIGN_UP(nDelta,4);
 
                 if(sPrefix!="")
                 {
@@ -2710,7 +2710,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
                             break;
                         }
 
-                        _nDelta=__ALIGN_UP(_nDelta,4);
+                        _nDelta=S_ALIGN_UP(_nDelta,4);
 
                         nDelta+=_nDelta;
                         _nSize-=_nDelta;
@@ -2990,7 +2990,7 @@ QByteArray XPE::getHeaders()
     if(isImage())
     {
         quint32 nSectionAlignment=getOptionalHeader_SectionAlignment();
-        nSizeOfHeaders=__ALIGN_UP(nSizeOfHeaders,nSectionAlignment);
+        nSizeOfHeaders=S_ALIGN_UP(nSizeOfHeaders,nSectionAlignment);
     }
 
     baResult=read_array(0,nSizeOfHeaders);
@@ -3035,7 +3035,7 @@ XBinary::OFFSETSIZE XPE::__getSectionOffsetAndSize(quint32 nSection)
         if(!isImage())
         {
             nSectionOffset=sectionHeader.PointerToRawData;
-            nSectionOffset=__ALIGN_DOWN(nSectionOffset,nFileAlignment);
+            nSectionOffset=S_ALIGN_DOWN(nSectionOffset,nFileAlignment);
             nSectionSize=sectionHeader.SizeOfRawData+(sectionHeader.PointerToRawData-nSectionOffset);
         }
         else
@@ -3249,22 +3249,22 @@ quint32 XPE::calculateCheckSum()
     quint32 nCalcSum=_checkSum(0,getSize());
     quint32 nHdrSum=getOptionalHeader_CheckSum();
 
-    if(__LOWORD(nCalcSum)>=__LOWORD(nHdrSum))
+    if(S_LOWORD(nCalcSum)>=S_LOWORD(nHdrSum))
     {
-        nCalcSum-=__LOWORD(nHdrSum);
+        nCalcSum-=S_LOWORD(nHdrSum);
     }
     else
     {
-        nCalcSum=((__LOWORD(nCalcSum)-__LOWORD(nHdrSum))&0xFFFF)-1;
+        nCalcSum=((S_LOWORD(nCalcSum)-S_LOWORD(nHdrSum))&0xFFFF)-1;
     }
 
-    if(__LOWORD(nCalcSum)>=__HIWORD(nHdrSum)) //!!!!!
+    if(S_LOWORD(nCalcSum)>=S_HIWORD(nHdrSum)) //!!!!!
     {
-        nCalcSum-=__HIWORD(nHdrSum);
+        nCalcSum-=S_HIWORD(nHdrSum);
     }
     else
     {
-        nCalcSum=((__LOWORD(nCalcSum)-__HIWORD(nHdrSum))&0xFFFF)-1;
+        nCalcSum=((S_LOWORD(nCalcSum)-S_HIWORD(nHdrSum))&0xFFFF)-1;
     }
 
     nCalcSum+=getSize();
@@ -3459,17 +3459,17 @@ bool XPE::addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_H
 
             if(pSectionHeader->SizeOfRawData==0)
             {
-                pSectionHeader->SizeOfRawData=__ALIGN_UP(nDataSize,nFileAlignment);
+                pSectionHeader->SizeOfRawData=S_ALIGN_UP(nDataSize,nFileAlignment);
             }
 
             if(pSectionHeader->VirtualAddress==0)
             {
-                pSectionHeader->VirtualAddress=__ALIGN_UP(pe.getOptionalHeader_SizeOfImage(),nSectionAlignment);
+                pSectionHeader->VirtualAddress=S_ALIGN_UP(pe.getOptionalHeader_SizeOfImage(),nSectionAlignment);
             }
 
             if(pSectionHeader->Misc.VirtualSize==0)
             {
-                pSectionHeader->Misc.VirtualSize=__ALIGN_UP(nDataSize,nSectionAlignment);
+                pSectionHeader->Misc.VirtualSize=S_ALIGN_UP(nDataSize,nSectionAlignment);
             }
 
             qint64 nDelta=nNewHeadersSize-nHeadersSize;
@@ -3510,7 +3510,7 @@ bool XPE::addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_H
 
             pe.zeroFill(pSectionHeader->PointerToRawData+nDataSize,(pSectionHeader->SizeOfRawData)-nDataSize);
 
-            qint64 nNewImageSize=__ALIGN_UP(pSectionHeader->VirtualAddress+pSectionHeader->Misc.VirtualSize,nSectionAlignment);
+            qint64 nNewImageSize=S_ALIGN_UP(pSectionHeader->VirtualAddress+pSectionHeader->Misc.VirtualSize,nSectionAlignment);
             pe.setOptionalHeader_SizeOfImage(nNewImageSize);
 
             // TODO flag
@@ -3555,8 +3555,8 @@ bool XPE::removeLastSection(QIODevice *pDevice,bool bIsImage)
                 pe.setSectionHeader(nNumberOfSections-1,&ish0);
                 pe.setFileHeader_NumberOfSections(nNumberOfSections-1);
 
-                ish.SizeOfRawData=__ALIGN_UP(ish.SizeOfRawData,nFileAlignment);
-                ish.Misc.VirtualSize=__ALIGN_UP(ish.Misc.VirtualSize,nSectionAlignment);
+                ish.SizeOfRawData=S_ALIGN_UP(ish.SizeOfRawData,nFileAlignment);
+                ish.Misc.VirtualSize=S_ALIGN_UP(ish.Misc.VirtualSize,nSectionAlignment);
 
                 qint64 nDelta=nNewHeadersSize-nHeadersSize;
                 qint64 nFileSize=pDevice->size();
@@ -3584,7 +3584,7 @@ bool XPE::removeLastSection(QIODevice *pDevice,bool bIsImage)
 
                 resize(pDevice,nFileSize-ish.SizeOfRawData);
 
-                qint64 nNewImageSize=__ALIGN_UP(ish.VirtualAddress,nSectionAlignment);
+                qint64 nNewImageSize=S_ALIGN_UP(ish.VirtualAddress,nSectionAlignment);
                 pe.setOptionalHeader_SizeOfImage(nNewImageSize);
 
                 pe._fixCheckSum();
@@ -3774,7 +3774,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
     int nCount=nSize/nBlockSize;
     quint64 nVirtualAddress=shOriginal.VirtualAddress;
     qint64 nRelVirtualStart=0;
-    qint64 nRelVirtualEnd=__ALIGN_UP(shOriginal.Misc.VirtualSize,nBlockSize);
+    qint64 nRelVirtualEnd=S_ALIGN_UP(shOriginal.Misc.VirtualSize,nBlockSize);
     qint64 nRelCurrent=nRelVirtualStart;
 
     if(nCount>1)
@@ -3901,7 +3901,7 @@ qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOf
 {
     qint64 nHeadersSize=nSectionsTableOffset+sizeof(XPE_DEF::IMAGE_SECTION_HEADER)*nNumberOfSections;
     quint32 nFileAlignment=getOptionalHeader_FileAlignment();
-    nHeadersSize=__ALIGN_UP(nHeadersSize,nFileAlignment);
+    nHeadersSize=S_ALIGN_UP(nHeadersSize,nFileAlignment);
 
     return nHeadersSize;
 }
@@ -4071,7 +4071,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
                             }
 
                             nOffset+=8;
-                            nOffset+=__ALIGN_UP((result.listCLI_MetaData_Stream_Names.at(i).length()+1),4);
+                            nOffset+=S_ALIGN_UP((result.listCLI_MetaData_Stream_Names.at(i).length()+1),4);
                         }
 
                         if(result.nCLI_MetaData_TablesHeaderOffset)
@@ -4524,7 +4524,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 listSectionsSize.append(nSectionSize);
             }
 
-            nTotalSize+=__ALIGN_UP(nHeaderSize,nFileAlignment);
+            nTotalSize+=S_ALIGN_UP(nHeaderSize,nFileAlignment);
 
             for(int i=0; i<listSectionsSize.size(); i++)
             {
@@ -4532,7 +4532,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 
                 if(listSectionsSize.at(i))
                 {
-                    nTotalSize+=__ALIGN_UP(listSectionsSize.at(i),nFileAlignment);
+                    nTotalSize+=S_ALIGN_UP(listSectionsSize.at(i),nFileAlignment);
                 }
             }
         }
@@ -4558,7 +4558,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             if(pRebuildOptions->bOptimize)
             {
                 XBinary::copyDeviceMemory(getDevice(),0,&buffer,0,nHeaderSize);
-                bufPE.setOptionalHeader_SizeOfHeaders(__ALIGN_UP(nHeaderSize,nFileAlignment));
+                bufPE.setOptionalHeader_SizeOfHeaders(S_ALIGN_UP(nHeaderSize,nFileAlignment));
             }
             else
             {
@@ -4577,13 +4577,13 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 {
                     XBinary::copyDeviceMemory(getDevice(),getSection_VirtualAddress(i),&buffer,listSectionsOffsets.at(i),listSectionsSize.at(i));
                     bufPE.setSection_PointerToRawData(i,listSectionsOffsets.at(i));
-                    bufPE.setSection_SizeOfRawData(i,__ALIGN_UP(listSectionsSize.at(i),nFileAlignment));
+                    bufPE.setSection_SizeOfRawData(i,S_ALIGN_UP(listSectionsSize.at(i),nFileAlignment));
                 }
                 else
                 {
                     quint32 nSectionAddress=getSection_VirtualAddress(i);
                     quint32 nSectionSize=getSection_VirtualSize(i);
-                    bufPE.setSection_SizeOfRawData(i,__ALIGN_UP(nSectionSize,nSectionAlignment));
+                    bufPE.setSection_SizeOfRawData(i,S_ALIGN_UP(nSectionSize,nSectionAlignment));
                     bufPE.setSection_PointerToRawData(i,nSectionAddress);
                 }
 
@@ -4860,9 +4860,9 @@ quint16 XPE::_checkSum(qint64 nStartValue,qint64 nDataSize)
         {
             nSum+=*((unsigned short *)pOffset);
 
-            if(__HIWORD(nSum)!=0)
+            if(S_HIWORD(nSum)!=0)
             {
-                nSum=__LOWORD(nSum)+__HIWORD(nSum);
+                nSum=S_LOWORD(nSum)+S_HIWORD(nSum);
             }
 
             pOffset+=2;
@@ -4874,7 +4874,7 @@ quint16 XPE::_checkSum(qint64 nStartValue,qint64 nDataSize)
 
     delete[] pBuffer;
 
-    return (unsigned short)(__LOWORD(nSum)+__HIWORD(nSum));
+    return (unsigned short)(S_LOWORD(nSum)+S_HIWORD(nSum));
 }
 
 XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY XPE::read_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset)
@@ -5130,19 +5130,19 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
 
     for(int i=0; i<pList->count(); i++)
     {
-        qint32 _nBaseAddress=__ALIGN_DOWN(pList->at(i),0x1000);
+        qint32 _nBaseAddress=S_ALIGN_DOWN(pList->at(i),0x1000);
 
         if(nBaseAddress!=_nBaseAddress)
         {
             nBaseAddress=_nBaseAddress;
-            nSize=__ALIGN_UP(nSize,4);
+            nSize=S_ALIGN_UP(nSize,4);
             nSize+=sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
         }
 
         nSize+=2;
     }
 
-    nSize=__ALIGN_UP(nSize,4);
+    nSize=S_ALIGN_UP(nSize,4);
 
     baResult.resize(nSize);
 
@@ -5155,12 +5155,12 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
 
     for(int i=0; i<pList->count(); i++)
     {
-        qint32 _nBaseAddress=__ALIGN_DOWN(pList->at(i),0x1000);
+        qint32 _nBaseAddress=S_ALIGN_DOWN(pList->at(i),0x1000);
 
         if(nBaseAddress!=_nBaseAddress)
         {
             nBaseAddress=_nBaseAddress;
-            quint32 _nOffset=__ALIGN_UP(nOffset,4);
+            quint32 _nOffset=S_ALIGN_UP(nOffset,4);
 
             if(nOffset!=_nOffset)
             {
@@ -5194,7 +5194,7 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
         nOffset+=2;
     }
 
-    quint32 _nOffset=__ALIGN_UP(nOffset,4);
+    quint32 _nOffset=S_ALIGN_UP(nOffset,4);
 
     if(nOffset!=_nOffset)
     {
