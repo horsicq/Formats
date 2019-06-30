@@ -261,6 +261,7 @@ qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 quint8 XBinary::read_uint8(qint64 nOffset)
 {
     quint8 result=0;
+
     read_array(nOffset,(char *)(&result),1);
 
     return result;
@@ -269,6 +270,7 @@ quint8 XBinary::read_uint8(qint64 nOffset)
 qint8 XBinary::read_int8(qint64 nOffset)
 {
     quint8 result=0;
+
     read_array(nOffset,(char *)(&result),1);
 
     return (qint8)result;
@@ -277,6 +279,7 @@ qint8 XBinary::read_int8(qint64 nOffset)
 quint16 XBinary::read_uint16(qint64 nOffset, bool bIsBigEndian)
 {
     quint16 result=0;
+
     read_array(nOffset,(char *)(&result),2);
 
     if(bIsBigEndian)
@@ -294,6 +297,7 @@ quint16 XBinary::read_uint16(qint64 nOffset, bool bIsBigEndian)
 qint16 XBinary::read_int16(qint64 nOffset, bool bIsBigEndian)
 {
     quint16 result=0;
+
     read_array(nOffset,(char *)(&result),2);
 
     if(bIsBigEndian)
@@ -311,6 +315,7 @@ qint16 XBinary::read_int16(qint64 nOffset, bool bIsBigEndian)
 quint32 XBinary::read_uint32(qint64 nOffset, bool bIsBigEndian)
 {
     quint32 result=0;
+
     read_array(nOffset,(char *)(&result),4);
 
     if(bIsBigEndian)
@@ -328,6 +333,7 @@ quint32 XBinary::read_uint32(qint64 nOffset, bool bIsBigEndian)
 qint32 XBinary::read_int32(qint64 nOffset, bool bIsBigEndian)
 {
     quint32 result=0;
+
     read_array(nOffset,(char *)(&result),4);
 
     if(bIsBigEndian)
@@ -345,6 +351,7 @@ qint32 XBinary::read_int32(qint64 nOffset, bool bIsBigEndian)
 quint64 XBinary::read_uint64(qint64 nOffset, bool bIsBigEndian)
 {
     qint64 result=0;
+
     read_array(nOffset,(char *)(&result),8);
 
     if(bIsBigEndian)
@@ -362,6 +369,7 @@ quint64 XBinary::read_uint64(qint64 nOffset, bool bIsBigEndian)
 qint64 XBinary::read_int64(qint64 nOffset, bool bIsBigEndian)
 {
     qint64 result=0;
+
     read_array(nOffset,(char *)(&result),8);
 
     if(bIsBigEndian)
