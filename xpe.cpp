@@ -3883,6 +3883,10 @@ QByteArray XPE::createHeaderStub(HEADER_OPTIONS *pHeaderOptions) // TODO options
         pe.setFileHeader_Characteristics(pHeaderOptions->nCharacteristics);
         pe.setOptionalHeader_Magic(pHeaderOptions->nMagic);
         pe.setOptionalHeader_ImageBase(pHeaderOptions->nImagebase);
+        pe.setOptionalHeader_DllCharacteristics(pHeaderOptions->nDllcharacteristics);
+        pe.setOptionalHeader_Subsystem(pHeaderOptions->nSubsystem);
+        pe.setOptionalHeader_MajorOperatingSystemVersion(pHeaderOptions->nMajorOperationSystemVersion);
+        pe.setOptionalHeader_MinorOperatingSystemVersion(pHeaderOptions->nMinorOperationSystemVersion);
         pe.setOptionalHeader_FileAlignment(pHeaderOptions->nFileAlignment);
         pe.setOptionalHeader_SectionAlignment(pHeaderOptions->nSectionAlignment);
         pe.setOptionalHeader_AddressOfEntryPoint(pHeaderOptions->nAddressOfEntryPoint);

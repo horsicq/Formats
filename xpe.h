@@ -620,6 +620,10 @@ public:
         quint16 nCharacteristics;
         quint16 nMagic;
         quint64 nImagebase;
+        quint16 nSubsystem;
+        quint16 nDllcharacteristics;
+        quint8 nMajorOperationSystemVersion;
+        quint8 nMinorOperationSystemVersion;
         quint32 nFileAlignment;
         quint32 nSectionAlignment;
         quint32 nAddressOfEntryPoint;
