@@ -80,6 +80,9 @@ public:
     static QMap<quint64, QString> getImageMagics();
     static QMap<quint64, QString> getImageMagicsS();
 
+    qint64 getOverlayOffset(); // mb TODO move to XBinary
+    qint64 getOverlaySize();
+    bool isOverlayPresent();
 private:
     const qint64 N_DATABASEADDRESS=0x10000;
     const qint64 N_CODEBASEADDRESS=0x00000;

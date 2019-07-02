@@ -286,15 +286,18 @@ QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()
     listResult.append(recordCode);
     // TODO
 
-    MEMORY_MAP recordOverlay= {};
-    recordOverlay.nSize=nOverlayOffset;
-    recordOverlay.nOffset=nOverlaySize;
-    recordOverlay.nAddress=-1;
+    if(nOverlaySize)
+    {
+        MEMORY_MAP recordOverlay= {};
+        recordOverlay.nSize=nOverlayOffset;
+        recordOverlay.nOffset=nOverlaySize;
+        recordOverlay.nAddress=-1;
 
-    recordOverlay.segment=ADDRESS_SEGMENT_UNKNOWN;
-    recordOverlay.bIsOvelay=true;
+        recordOverlay.segment=ADDRESS_SEGMENT_UNKNOWN;
+        recordOverlay.bIsOvelay=true;
 
-    listResult.append(recordOverlay);
+        listResult.append(recordOverlay);
+    }
 
     return listResult;
 }
@@ -320,4 +323,27 @@ QMap<quint64, QString> XMSDOS::getImageMagicsS()
     mapResult.insert(0x5A4D,"DOS_SIGNATURE");
 
     return mapResult;
+}
+
+qint64 XMSDOS::getOverlayOffset()
+{
+    qint64 nResult=0;
+
+    nResult=(get_e_cp()-1)*512+get_e_cblp();
+
+    return nResult;
+}
+
+qint64 XMSDOS::getOverlaySize()
+{
+    qint64 nSize=getSize();
+    qint64 nOverlayOffset=getOverlayOffset();
+    qint64 nDelta=nSize-nOverlayOffset;
+
+    return qMax(nDelta,(qint64)0);
+}
+
+bool XMSDOS::isOverlayPresent()
+{
+    return getOverlaySize()!=0;
 }
