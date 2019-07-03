@@ -2149,6 +2149,28 @@ bool XPE::isImportLibraryPresentI(QString sLibrary, QList<XPE::IMPORT_HEADER> *p
     return bResult;
 }
 
+bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction, QList<XPE::IMPORT_HEADER> *pListImport)
+{
+    bool bResult=false;
+
+    for(int i=0; i<pListImport->count(); i++)
+    {
+        if(pListImport->at(i).sName.toUpper()==sLibrary.toUpper())
+        {
+            for(int j=0;j<pListImport->at(i).listPositions.count();j++)
+            {
+                if(pListImport->at(i).listPositions.at(j).sFunction==sFunction)
+                {
+                    bResult=true;
+                    break;
+                }
+            }
+        }
+    }
+
+    return bResult;
+}
+
 bool XPE::setImports(QList<XPE::IMPORT_HEADER> *pListHeaders)
 {
     return setImports(getDevice(),isImage(),pListHeaders);

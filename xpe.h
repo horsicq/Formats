@@ -431,6 +431,7 @@ public:
     QList<IMPORT_POSITION> getImportPositions(int nIndex);
 
     static bool isImportLibraryPresentI(QString sLibrary,QList<IMPORT_HEADER> *pListImport);
+    static bool isImportFunctionPresentI(QString sLibrary,QString sFunction,QList<IMPORT_HEADER> *pListImport);
 
     bool setImports(QList<IMPORT_HEADER> *pListHeaders);
     static bool setImports(QIODevice *pDevice,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
