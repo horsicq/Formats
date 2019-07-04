@@ -828,11 +828,11 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
     if(bIs64)
     {
-
+        // TODO
     }
     else
     {
-
+        // TODO
     }
 
     return listResult;
