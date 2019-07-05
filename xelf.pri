@@ -2,8 +2,8 @@ INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
 HEADERS += \
-    $$PWD/xelf_def.h \
-    $$PWD/xelf.h
+    $$PWD/xelf.h \
+    $$PWD/xelf_def.h
 
 SOURCES += \
     $$PWD/xelf.cpp
