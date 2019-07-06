@@ -142,7 +142,6 @@ const quint32 S_x86_DEBUG_STATE64=11;
 const quint32 S_x86_DEBUG_STATE=12;
 const quint32 S_THREAD_STATE_NONE=13;
 
-
 struct STRUCT_X86_THREAD_STATE32
 {
     quint32 eax;

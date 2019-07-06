@@ -4316,74 +4316,86 @@ bool XPE::isNETAnsiStringPresent(QString sString, XPE::CLI_INFO *pCliInfo)
 
 int XPE::getEntryPointSection()
 {
+    int nResult=-1;
+
     qint64 nAddressOfEntryPoint=getOptionalHeader_AddressOfEntryPoint();
 
     if(nAddressOfEntryPoint)
     {
-        return addressToSection(_getBaseAddress()+nAddressOfEntryPoint);
+        nResult=addressToSection(_getBaseAddress()+nAddressOfEntryPoint);
     }
 
-    return -1;
+    return nResult;
 }
 
 int XPE::getImportSection()
 {
+    int nResult=-1;
+
     qint64 nAddressOfImport=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT).VirtualAddress;
 
     if(nAddressOfImport)
     {
-        return addressToSection(_getBaseAddress()+nAddressOfImport);
+        nResult=addressToSection(_getBaseAddress()+nAddressOfImport);
     }
 
-    return -1;
+    return nResult;
 }
 
 int XPE::getExportSection()
 {
+    int nResult=-1;
+
     qint64 nAddressOfExport=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT).VirtualAddress;
 
     if(nAddressOfExport)
     {
-        return addressToSection(_getBaseAddress()+nAddressOfExport);
+        nResult=addressToSection(_getBaseAddress()+nAddressOfExport);
     }
 
-    return -1;
+    return nResult;
 }
 
 int XPE::getTLSSection()
 {
+    int nResult=-1;
+
     qint64 nAddressOfTLS=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS).VirtualAddress;
 
     if(nAddressOfTLS)
     {
-        return addressToSection(_getBaseAddress()+nAddressOfTLS);
+        nResult=addressToSection(_getBaseAddress()+nAddressOfTLS);
     }
 
-    return -1;
+    return nResult;
 }
 
 int XPE::getResourcesSection()
 {
+    int nResult=-1;
+
     qint64 nAddressOfResources=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE).VirtualAddress;
 
     if(nAddressOfResources)
     {
-        return addressToSection(_getBaseAddress()+nAddressOfResources);
+        nResult=addressToSection(_getBaseAddress()+nAddressOfResources);
     }
 
-    return -1;
+    return nResult;
 }
 
 int XPE::getRelocsSection()
 {
+    int nResult=-1;
+
     qint64 nAddressOfRelocs=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC).VirtualAddress;
 
     if(nAddressOfRelocs)
     {
-        return addressToSection(_getBaseAddress()+nAddressOfRelocs);
+        nResult=addressToSection(_getBaseAddress()+nAddressOfRelocs);
     }
 
-    return -1;
+    return nResult;
 }
 
 int XPE::getNormalCodeSection()
@@ -4394,7 +4406,6 @@ int XPE::getNormalCodeSection()
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSections=getSectionHeaders();
     int nNumberOfSections=listSections.count();
     nNumberOfSections=qMin(nNumberOfSections,2);
-
 
     for(int i=0; i<nNumberOfSections; i++)
     {
