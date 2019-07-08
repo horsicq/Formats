@@ -824,7 +824,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
     QList<SECTION_RECORD> listResult;
 
     bool bIs64=is64();
-    bool bIsBigEndian=isBigEndian();
+//    bool bIsBigEndian=isBigEndian();
 
     if(bIs64)
     {
