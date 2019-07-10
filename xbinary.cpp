@@ -2822,6 +2822,7 @@ int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignature
         else
         {
             // TODO: invalid symbols
+            // Check
             break;
         }
     }
