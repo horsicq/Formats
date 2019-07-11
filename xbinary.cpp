@@ -1998,6 +1998,78 @@ QString XBinary::getMD5(qint64 nOffset,qint64 nSize)
     return sResult;
 }
 
+QString XBinary::getSHA1(qint64 nOffset, qint64 nSize)
+{
+    QString sResult;
+
+    OFFSETSIZE offsize=convertOffsetAndSize(nOffset,nSize);
+
+    nOffset=offsize.nOffset;
+    nSize=offsize.nSize;
+
+    if(nOffset!=-1)
+    {
+        const int BUFFER_SIZE=0x1000;
+
+        quint64 nTemp=0;
+        char *pBuffer=new char[BUFFER_SIZE];
+
+        QCryptographicHash crypto(QCryptographicHash::Sha1);
+
+        while(nSize>0)
+        {
+            nTemp=qMin((qint64)BUFFER_SIZE,nSize);
+
+            if(!read_array(nOffset,pBuffer,nTemp))
+            {
+                delete[] pBuffer;
+                return "";
+            }
+
+            crypto.addData(pBuffer,nTemp);
+
+            nSize-=nTemp;
+            nOffset+=nTemp;
+        }
+
+        delete[] pBuffer;
+
+        sResult=crypto.result().toHex();
+    }
+
+    return sResult;
+}
+
+quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize)
+{
+    // TODO optimize!!!
+    quint32 nResult=0;
+
+    OFFSETSIZE offsize=convertOffsetAndSize(nOffset,nSize);
+
+    nOffset=offsize.nOffset;
+    nSize=offsize.nSize;
+
+    const quint32 MOD_ADLER=65521;
+
+    if(nOffset!=-1)
+    {
+        quint32 a=1;
+        quint32 b=0;
+
+        // Process each byte of the data in order
+        for(qint64 index=0;index<nSize;++index)
+        {
+            a=(a+read_uint8(nOffset+index))%MOD_ADLER;
+            b=(b+a)%MOD_ADLER;
+        }
+
+        nResult=(b<<16)|a;
+    }
+
+    return nResult;
+}
+
 double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
 {
     double dResult=1.4426950408889634073599246810023;

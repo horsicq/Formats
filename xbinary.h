@@ -289,6 +289,9 @@ public:
     static QList<qint64> getFixupList(QIODevice *pDevice1,QIODevice *pDevice2,qint64 nDelta);
 
     QString getMD5(qint64 nOffset=0,qint64 nSize=-1);
+    QString getSHA1(qint64 nOffset=0,qint64 nSize=-1);
+    quint32 getAdler32(qint64 nOffset=0,qint64 nSize=-1);
+
     double getEntropy(qint64 nOffset=0,qint64 nSize=-1);
 
     static quint32 _ror32(quint32 nValue,quint32 nShift);

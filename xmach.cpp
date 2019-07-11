@@ -828,10 +828,26 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
     if(bIs64)
     {
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,0x19); // TODO consts
+
+        int nCount=listLCSegments.count();
+
+        for(int i=0;i<nCount;i++)
+        {
+
+        }
         // TODO
     }
     else
     {
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,0x01); // TODO consts
+
+        int nCount=listLCSegments.count();
+
+        for(int i=0;i<nCount;i++)
+        {
+
+        }
         // TODO
     }
 
