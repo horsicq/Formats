@@ -2220,6 +2220,7 @@ XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
 bool XBinary::compareSignatureStrings(QString sBaseSignature, QString sOptSignature)
 {
     // TODO optimize
+    // TODO check
     sBaseSignature=convertSignature(sBaseSignature);
     sOptSignature=convertSignature(sOptSignature);
 
@@ -2885,8 +2886,8 @@ int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignature
 
     for(int i=nStartIndex; i<nSignatureSize; i++)
     {
-        if(((sSignature.at(i)>=QChar('a'))&&(sSignature.at(i)<=QChar('f')))
-                ||(((sSignature.at(i)>=QChar('0'))&&(sSignature.at(i)<=QChar('9')))))
+        if( ((sSignature.at(i)>=QChar('a'))&&(sSignature.at(i)<=QChar('f'))) ||
+            (((sSignature.at(i)>=QChar('0'))&&(sSignature.at(i)<=QChar('9')))))
         {
             nResult++;
             sBytes.append(sSignature.at(i));
