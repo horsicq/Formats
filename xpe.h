@@ -29,7 +29,6 @@ class XPE : public XMSDOS
 {
     Q_OBJECT
 public:
-
     struct SECTIONFILE_RECORD
     {
         QString sName;

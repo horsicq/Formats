@@ -570,5 +570,4 @@ struct IMAGE_TLS_DIRECTORY32
     quint32 Characteristics;
 };
 }
-
 #endif // XPE_DEF_H

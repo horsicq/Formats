@@ -1077,7 +1077,6 @@ bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice,qint64 nSourceOffset,QIO
 
     char *pBuffer=new char[nBufferSize];
 
-
     while(nSize>0)
     {
         qint64 nCurrentBufferSize=qMin(nSize,(qint64)nBufferSize);
@@ -1146,7 +1145,6 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
             nSourceOffset+=nTempSize;
             nDestOffset+=nTempSize;
         }
-
 
         nSize-=nTempSize;
     }
@@ -1604,7 +1602,6 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
         qint64 nSourceOffset=nDataOffset;
         qint64 nDestOffset=0;
 
-
         bResult=true;
 
         while(nDataSize>0)
@@ -1727,7 +1724,6 @@ QSet<XBinary::FT> XBinary::getFileTypes()
                 stResult.insert(FT_MACH32);
             }
         }
-
     }
     //    if(isPlainText())
     //    {
