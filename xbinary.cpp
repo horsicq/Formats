@@ -1059,6 +1059,7 @@ bool XBinary::moveFileToDirectory(QString sSrcFileName, QString sDestDirectory)
 
 void XBinary::_copyMemory(char *pDest,char *pSource, qint64 nSize)
 {
+    // TODO optimize
     while(nSize)
     {
         *pDest=*pSource;
@@ -1070,6 +1071,7 @@ void XBinary::_copyMemory(char *pDest,char *pSource, qint64 nSize)
 
 bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice,qint64 nSourceOffset,QIODevice *pDestDevice,qint64 nDestOffset,qint64 nSize,quint32 nBufferSize)
 {
+    // TODO optimize
     if((!pSourceDevice->seek(nSourceOffset))||(!pDestDevice->seek(nDestOffset)))
     {
         return false;
@@ -1101,6 +1103,7 @@ bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice,qint64 nSourceOffset,QIO
 
 bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize, bool bReverse)
 {
+    // TODO optimize
     if(nBufferSize==0)
     {
         return false;
@@ -1156,6 +1159,7 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
 
 bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
 {
+    // TODO optimize
     if(nSize==0)
     {
         return false;
@@ -1185,6 +1189,7 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
 
 bool XBinary::compareMemory(char *pMemory1,const char *pMemory2, qint64 nSize)
 {
+    // TODO optimize
     while(nSize>0)
     {
         if(nSize>=4)
