@@ -4874,6 +4874,8 @@ void XPE::_fixFileOffsets(qint64 nDelta)
 
 quint16 XPE::_checkSum(qint64 nStartValue,qint64 nDataSize)
 {
+    // TODO Check
+    // TODO Optimize
     const int BUFFER_SIZE=0x1000;
     int nSum=(int)nStartValue;
     unsigned int nTemp=0;
