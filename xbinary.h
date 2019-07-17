@@ -340,6 +340,14 @@ public:
     static bool isResizeEnable(QIODevice *pDevice);
     static bool resize(QIODevice *pDevice,qint64 nSize);
 
+    struct ULEB128
+    {
+        quint64 nValue;
+        quint32 nByteSize;
+    };
+
+    ULEB128 get_uleb128(qint64 nOffset);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);

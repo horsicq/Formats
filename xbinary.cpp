@@ -2618,6 +2618,10 @@ bool XBinary::isResizeEnable(QIODevice *pDevice)
     {
         bResult=true;
     }
+    else if(sClassName=="QBuffer")
+    {
+        bResult=true;
+    }
 
     return bResult;
 }
@@ -2632,8 +2636,37 @@ bool XBinary::resize(QIODevice *pDevice, qint64 nSize)
     {
         bResult=((QFile *)pDevice)->resize(nSize);
     }
+    else if(sClassName=="QBuffer")
+    {
+        ((QBuffer *)pDevice)->buffer().resize(nSize);
+        bResult=true;
+    }
 
     return bResult;
+}
+
+XBinary::ULEB128 XBinary::get_uleb128(qint64 nOffset)
+{
+    ULEB128 result={};
+
+    quint32 nShift=0;
+
+    while(true)
+    {
+        quint8 nByte=read_uint8(nOffset);
+        result.nValue|=((nByte&0x7F)<<nShift);
+        result.nByteSize++;
+        nShift+=7;
+        nOffset++;
+
+        if((nByte&0x80)==0)
+        {
+            break;
+        }
+        // TODO more checks!
+    }
+
+    return result;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
