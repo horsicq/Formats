@@ -60,7 +60,7 @@
 #define S_HIWORD(l)               ((quint16)((quint32)(l)>>16))
 
 #ifdef Q_OS_MAC
-#include <CoreFoundation/CoreFoundation.h>
+#include <CoreFoundation/CoreFoundation.h> // Check
 #endif
 
 class XBinary : public QObject
