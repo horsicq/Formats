@@ -2721,7 +2721,7 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
 
     QList<XELF_DEF::Elf_Phdr> listPhdr=getElf_PhdrList();
 
-    bool bIs64=is64();
+//    bool bIs64=is64();
     int nCount=listPhdr.count();
 
     // TODO

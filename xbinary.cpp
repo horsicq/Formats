@@ -2128,19 +2128,19 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
     return dResult;
 }
 
-quint32 XBinary::_ror32(quint32 nValue, quint32 nShift)
-{
-    // TODO Check
-    nShift&=(31);
-    return (nValue>>nShift)|(nValue<<((-nShift)&31));
-}
+//quint32 XBinary::_ror32(quint32 nValue, quint32 nShift)
+//{
+//    // TODO Check
+//    nShift&=(31);
+//    return (nValue>>nShift)|(nValue<<((-nShift)&31));
+//}
 
-quint32 XBinary::_rol32(quint32 nValue, quint32 nShift)
-{
-    // TODO Check
-    nShift&=(31);
-    return (nValue<<nShift)|(nValue>>((-nShift)&31));
-}
+//quint32 XBinary::_rol32(quint32 nValue, quint32 nShift)
+//{
+//    // TODO Check
+//    nShift&=(31);
+//    return (nValue<<nShift)|(nValue>>((-nShift)&31));
+//}
 
 quint32 XBinary::getCRC32(QString sString)
 {

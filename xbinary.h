@@ -294,8 +294,8 @@ public:
 
     double getEntropy(qint64 nOffset=0,qint64 nSize=-1);
 
-    static quint32 _ror32(quint32 nValue,quint32 nShift);
-    static quint32 _rol32(quint32 nValue,quint32 nShift);
+//    static quint32 _ror32(quint32 nValue,quint32 nShift);
+//    static quint32 _rol32(quint32 nValue,quint32 nShift);
     static quint32 getCRC32(QString sString);
 
     QIODevice *getDevice();
