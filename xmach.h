@@ -136,6 +136,8 @@ public:
 
     QList<SECTION_RECORD> getSectionRecords();
     QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pList);
+
+    static bool isSectionNamePresent(QList<SECTION_RECORD> *pList,QString sName);
 };
 
 #endif // XMACH_H

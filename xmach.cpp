@@ -899,3 +899,26 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
     return listResult;
 }
+
+bool XMACH::isSectionNamePresent(QList<XMACH::SECTION_RECORD> *pList, QString sName)
+{
+    bool bResult=false;
+
+    int nCount=pList->count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        QString _sName=QString(pList->at(i).sectname);
+        if(_sName.size()>16)
+        {
+            _sName.resize(16);
+        }
+        if(_sName==sName)
+        {
+            bResult=true;
+            break;
+        }
+    }
+
+    return bResult;
+}
