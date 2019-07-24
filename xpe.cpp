@@ -699,7 +699,6 @@ void XPE::setOptionalHeader_SizeOfStackReserve(quint64 value)
     {
         write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfStackReserve),value);
     }
-
 }
 
 void XPE::setOptionalHeader_SizeOfStackCommit(quint64 value)
@@ -785,7 +784,7 @@ XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getOptionalHeader_DataDirectory(quint32 nNumb
 void XPE::setOptionalHeader_DataDirectory(quint32 nNumber,XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory)
 {
     //    if(nNumber<16)
-    if(nNumber<getOptionalHeader_NumberOfRvaAndSizes())
+    if(nNumber<getOptionalHeader_NumberOfRvaAndSizes()) // TODO Check!!!
     {
         if(is64())
         {
@@ -1686,7 +1685,6 @@ QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> XPE::getImportDescriptors()
                 break; // corrupted
             }
 
-
             listResult.append(iid);
 
             nImportOffset+=sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
@@ -2545,6 +2543,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, quint32 nID2, QList<XP
             if((pListRecords->at(i).nID[1]==nID2)||(nID2==(quint32)-1))
             {
                 result=pListRecords->at(i);
+
                 break;
             }
         }
@@ -2563,6 +2562,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, QString sName2, QList<
         if((pListRecords->at(i).nID[0]==nID1)&&(pListRecords->at(i).sName[1]==sName2))
         {
             result=pListRecords->at(i);
+
             break;
         }
     }
@@ -2582,6 +2582,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<
             if((pListRecords->at(i).nID[1]==nID2)||(nID2==-1))
             {
                 result=pListRecords->at(i);
+
                 break;
             }
         }
@@ -2600,6 +2601,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, QString sName2, QLis
         if((pListRecords->at(i).sName[0]==sName1)&&(pListRecords->at(i).sName[1]==sName2))
         {
             result=pListRecords->at(i);
+
             break;
         }
     }
@@ -2773,6 +2775,7 @@ QString XPE::getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVer
         if(_sKey==sKey)
         {
             sResult=sRecord.section(":",1,-1);
+
             break;
         }
     }
@@ -2862,6 +2865,7 @@ bool XPE::isExportFunctionPresent(QString sFunction,XPE::EXPORT_HEADER *pExportH
         if(pExportHeader->listPositions.at(i).sFunctionName==sFunction)
         {
             bResult=true;
+
             break;
         }
     }
@@ -3398,6 +3402,7 @@ bool XPE::addOverlayFromDevice(QIODevice *pDevice, bool bIsImage, QIODevice *pSo
                     if(pSourceDevice->read(pBuffer,nTemp)<=0)
                     {
                         bResult=false;
+
                         break;
                     }
 
@@ -3654,6 +3659,7 @@ qint64 XPE::_calculateRawSize()
         if(list.at(i).bIsOvelay)
         {
             nResult=list.at(i).nOffset;
+
             break;
         }
     }
