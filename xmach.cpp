@@ -504,6 +504,7 @@ bool XMACH::isCommandPresent(QList<XMACH::COMMAND_RECORD> *pList, quint32 nComma
             if(nCurrentIndex==nIndex)
             {
                 bResult=true;
+
                 break;
             }
 
@@ -543,6 +544,7 @@ QByteArray XMACH::getCommand(QList<XMACH::COMMAND_RECORD> *pList, quint32 nComma
             if(nCurrentIndex==nIndex)
             {
                 baResult=read_array(pList->at(i).nOffset,pList->at(i).nSize);
+
                 break;
             }
 
@@ -717,6 +719,7 @@ XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QList<XMACH::LIBRARY_RECORD>
         if(pList->at(i).sName==sName)
         {
             result=pList->at(i);
+
             break;
         }
     }
@@ -735,6 +738,7 @@ bool XMACH::isLibraryRecordNamePresent(QList<XMACH::LIBRARY_RECORD> *pList, QStr
         if(pList->at(i).sName==sName)
         {
             bResult=true;
+
             break;
         }
     }
@@ -916,6 +920,7 @@ bool XMACH::isSectionNamePresent(QList<XMACH::SECTION_RECORD> *pList, QString sN
         if(_sName==sName)
         {
             bResult=true;
+
             break;
         }
     }
