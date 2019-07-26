@@ -532,7 +532,7 @@ struct S_VS_VERSION_INFO
     quint16 wType;
 };
 
-struct _tagVS_FIXEDFILEINFO
+struct S_tagVS_FIXEDFILEINFO
 {
     quint32 dwSignature;        // e.g.  0xfeef04bd
     quint32 dwStrucVersion;     // e.g.  0x00000042 = "0.42"
@@ -550,7 +550,7 @@ struct _tagVS_FIXEDFILEINFO
 };
 //typedef VOID (NTAPI *PIMAGE_TLS_CALLBACK)(PVOID DllHandle,DWORD Reason,PVOID Reserved);
 
-struct IMAGE_TLS_DIRECTORY64
+struct S_IMAGE_TLS_DIRECTORY64
 {
     quint64 StartAddressOfRawData;
     quint64 EndAddressOfRawData;
@@ -560,7 +560,7 @@ struct IMAGE_TLS_DIRECTORY64
     quint32 Characteristics;
 };
 
-struct IMAGE_TLS_DIRECTORY32
+struct S_IMAGE_TLS_DIRECTORY32
 {
     quint32 StartAddressOfRawData;
     quint32 EndAddressOfRawData;
@@ -568,6 +568,24 @@ struct IMAGE_TLS_DIRECTORY32
     quint32 AddressOfCallBacks;
     quint32 SizeOfZeroFill;
     quint32 Characteristics;
+};
+
+struct S_IMAGE_ALPHA64_RUNTIME_FUNCTION_ENTRY
+{
+    quint64 BeginAddress;
+    quint64 EndAddress;
+    quint64 ExceptionHandler;
+    quint64 HandlerData;
+    quint64 PrologEndAddress;
+};
+
+struct S_IMAGE_ALPHA_RUNTIME_FUNCTION_ENTRY
+{
+    quint32 BeginAddress;
+    quint32 EndAddress;
+    quint32 ExceptionHandler;
+    quint32 HandlerData;
+    quint32 PrologEndAddress;
 };
 }
 #endif // XPE_DEF_H

@@ -182,7 +182,7 @@ public:
 
     struct RESOURCE_VERSION
     {
-        XPE_DEF::_tagVS_FIXEDFILEINFO fileInfo;
+        XPE_DEF::S_tagVS_FIXEDFILEINFO fileInfo;
         QList<QString> listRecords; // TODO rename
     };
 

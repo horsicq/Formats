@@ -2680,22 +2680,22 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
 
                 if(sPrefix=="VS_VERSION_INFO")
                 {
-                    if(vi.wValueLength>=sizeof(XPE_DEF::_tagVS_FIXEDFILEINFO))
+                    if(vi.wValueLength>=sizeof(XPE_DEF::S_tagVS_FIXEDFILEINFO))
                     {
                         // TODO Check Signature?
-                        pResult->fileInfo.dwSignature=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwSignature));
-                        pResult->fileInfo.dwStrucVersion=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwStrucVersion));
-                        pResult->fileInfo.dwFileVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwFileVersionMS));
-                        pResult->fileInfo.dwFileVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwFileVersionLS));
-                        pResult->fileInfo.dwProductVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwProductVersionMS));
-                        pResult->fileInfo.dwProductVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwProductVersionLS));
-                        pResult->fileInfo.dwFileFlagsMask=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwFileFlagsMask));
-                        pResult->fileInfo.dwFileFlags=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwFileFlags));
-                        pResult->fileInfo.dwFileOS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwFileOS));
-                        pResult->fileInfo.dwFileType=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwFileType));
-                        pResult->fileInfo.dwFileSubtype=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwFileSubtype));
-                        pResult->fileInfo.dwFileDateMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwFileDateMS));
-                        pResult->fileInfo.dwFileDateLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::_tagVS_FIXEDFILEINFO,dwFileDateLS));
+                        pResult->fileInfo.dwSignature=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwSignature));
+                        pResult->fileInfo.dwStrucVersion=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwStrucVersion));
+                        pResult->fileInfo.dwFileVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionMS));
+                        pResult->fileInfo.dwFileVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionLS));
+                        pResult->fileInfo.dwProductVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionMS));
+                        pResult->fileInfo.dwProductVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionLS));
+                        pResult->fileInfo.dwFileFlagsMask=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlagsMask));
+                        pResult->fileInfo.dwFileFlags=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlags));
+                        pResult->fileInfo.dwFileOS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileOS));
+                        pResult->fileInfo.dwFileType=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileType));
+                        pResult->fileInfo.dwFileSubtype=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileSubtype));
+                        pResult->fileInfo.dwFileDateMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateMS));
+                        pResult->fileInfo.dwFileDateLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateLS));
                     }
                 }
 
@@ -5286,8 +5286,8 @@ XPE::TLS_HEADER XPE::getTLSHeader()
     {
         if(is64())
         {
-            XPE_DEF::IMAGE_TLS_DIRECTORY64 tls64;
-            read_array(nTLSOffset,(char *)&tls64,sizeof(XPE_DEF::IMAGE_TLS_DIRECTORY64));
+            XPE_DEF::S_IMAGE_TLS_DIRECTORY64 tls64;
+            read_array(nTLSOffset,(char *)&tls64,sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64));
 
             result.AddressOfCallBacks=tls64.AddressOfCallBacks;
             result.AddressOfIndex=tls64.AddressOfIndex;
@@ -5298,8 +5298,8 @@ XPE::TLS_HEADER XPE::getTLSHeader()
         }
         else
         {
-            XPE_DEF::IMAGE_TLS_DIRECTORY32 tls32;
-            read_array(nTLSOffset,(char *)&tls32,sizeof(XPE_DEF::IMAGE_TLS_DIRECTORY32));
+            XPE_DEF::S_IMAGE_TLS_DIRECTORY32 tls32;
+            read_array(nTLSOffset,(char *)&tls32,sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32));
 
             result.AddressOfCallBacks=tls32.AddressOfCallBacks;
             result.AddressOfIndex=tls32.AddressOfIndex;
