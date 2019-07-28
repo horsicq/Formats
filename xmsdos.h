@@ -84,9 +84,9 @@ public:
     qint64 getOverlaySize();
     bool isOverlayPresent();
 
-private:
-    const qint64 N_DATABASEADDRESS=0x10000;
-    const qint64 N_CODEBASEADDRESS=0x00000;
+//private:
+//    const qint64 N_DATABASEADDRESS=0x10000;
+//    const qint64 N_CODEBASEADDRESS=0x00000;
 };
 
 #endif // XMSDOS_H
