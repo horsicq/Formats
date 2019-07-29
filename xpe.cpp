@@ -5113,7 +5113,9 @@ bool XPE::addRelocsSection(QIODevice *pDevice,bool bIsImage, QList<qint64> *pLis
             qint64 nBaseAddress=pe._getBaseAddress();
             QList<qint64> listRVAs;
 
-            for(int i=0; i<pList->count(); i++)
+            int _nCount=pList->count();
+
+            for(int i=0; i<_nCount; i++)
             {
                 if(pe.isAddressValid(&listMM,pList->at(i)+nBaseAddress))
                 {
