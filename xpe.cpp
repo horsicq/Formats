@@ -5278,18 +5278,43 @@ bool XPE::isExceptionPresent()
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 }
 
-XPE::TLS_HEADER XPE::getTLSHeader()
+XPE_DEF::S_IMAGE_TLS_DIRECTORY32 XPE::getTLSDirectory32()
 {
-    TLS_HEADER result= {};
+    XPE_DEF::S_IMAGE_TLS_DIRECTORY32 result={};
 
     qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
 
     if(nTLSOffset!=-1)
     {
+        read_array(nTLSOffset,(char *)&result,sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32));
+    }
+
+    return result;
+}
+
+XPE_DEF::S_IMAGE_TLS_DIRECTORY64 XPE::getTLSDirectory64()
+{
+    XPE_DEF::S_IMAGE_TLS_DIRECTORY64 result={};
+
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        read_array(nTLSOffset,(char *)&result,sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64));
+    }
+
+    return result;
+}
+
+XPE::TLS_HEADER XPE::getTLSHeader()
+{
+    TLS_HEADER result= {};
+
+    if(isTLSPresent())
+    {
         if(is64())
         {
-            XPE_DEF::S_IMAGE_TLS_DIRECTORY64 tls64;
-            read_array(nTLSOffset,(char *)&tls64,sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64));
+            XPE_DEF::S_IMAGE_TLS_DIRECTORY64 tls64=getTLSDirectory64();
 
             result.AddressOfCallBacks=tls64.AddressOfCallBacks;
             result.AddressOfIndex=tls64.AddressOfIndex;
@@ -5300,8 +5325,7 @@ XPE::TLS_HEADER XPE::getTLSHeader()
         }
         else
         {
-            XPE_DEF::S_IMAGE_TLS_DIRECTORY32 tls32;
-            read_array(nTLSOffset,(char *)&tls32,sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32));
+            XPE_DEF::S_IMAGE_TLS_DIRECTORY32 tls32=getTLSDirectory32();
 
             result.AddressOfCallBacks=tls32.AddressOfCallBacks;
             result.AddressOfIndex=tls32.AddressOfIndex;

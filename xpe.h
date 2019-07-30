@@ -545,6 +545,9 @@ public:
     bool isSignPresent();
     bool isExceptionPresent();
 
+    XPE_DEF::S_IMAGE_TLS_DIRECTORY32 getTLSDirectory32();
+    XPE_DEF::S_IMAGE_TLS_DIRECTORY64 getTLSDirectory64();
+
     TLS_HEADER getTLSHeader();
 
     static QMap<quint64,QString> getImageNtHeadersSignatures();
