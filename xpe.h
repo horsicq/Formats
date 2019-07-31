@@ -548,6 +548,13 @@ public:
     XPE_DEF::S_IMAGE_TLS_DIRECTORY32 getTLSDirectory32();
     XPE_DEF::S_IMAGE_TLS_DIRECTORY64 getTLSDirectory64();
 
+    void setTLS_StartAddressOfRawData(quint64 value);
+    void setTLS_EndAddressOfRawData(quint64 value);
+    void setTLS_AddressOfIndex(quint64 value);
+    void setTLS_AddressOfCallBacks(quint64 value);
+    void setTLS_SizeOfZeroFill(quint32 value);
+    void setTLS_Characteristics(quint32 value);
+
     TLS_HEADER getTLSHeader();
 
     static QMap<quint64,QString> getImageNtHeadersSignatures();

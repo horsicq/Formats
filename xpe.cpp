@@ -5306,6 +5306,108 @@ XPE_DEF::S_IMAGE_TLS_DIRECTORY64 XPE::getTLSDirectory64()
     return result;
 }
 
+void XPE::setTLS_StartAddressOfRawData(quint64 value)
+{
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,StartAddressOfRawData),value);
+        }
+        else
+        {
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,StartAddressOfRawData),value);
+        }
+    }
+}
+
+void XPE::setTLS_EndAddressOfRawData(quint64 value)
+{
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,EndAddressOfRawData),value);
+        }
+        else
+        {
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,EndAddressOfRawData),value);
+        }
+    }
+}
+
+void XPE::setTLS_AddressOfIndex(quint64 value)
+{
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,AddressOfIndex),value);
+        }
+        else
+        {
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,AddressOfIndex),value);
+        }
+    }
+}
+
+void XPE::setTLS_AddressOfCallBacks(quint64 value)
+{
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,AddressOfCallBacks),value);
+        }
+        else
+        {
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,AddressOfCallBacks),value);
+        }
+    }
+}
+
+void XPE::setTLS_SizeOfZeroFill(quint32 value)
+{
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,SizeOfZeroFill),value);
+        }
+        else
+        {
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,SizeOfZeroFill),value);
+        }
+    }
+}
+
+void XPE::setTLS_Characteristics(quint32 value)
+{
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,Characteristics),value);
+        }
+        else
+        {
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,Characteristics),value);
+        }
+    }
+}
+
 XPE::TLS_HEADER XPE::getTLSHeader()
 {
     TLS_HEADER result= {};
