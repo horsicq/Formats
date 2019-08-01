@@ -525,6 +525,7 @@ enum ReplacesCorHdrNumericDefines
     MAX_CLASS_NAME                      =1024,
     MAX_PACKAGE_NAME                    =1024
 };
+
 struct S_VS_VERSION_INFO
 {
     quint16 wLength;             /* Length of the version resource */
@@ -595,6 +596,18 @@ struct S_IMAGE_ALPHA_RUNTIME_FUNCTION_ENTRY
     quint32 ExceptionHandler;
     quint32 HandlerData;
     quint32 PrologEndAddress;
+};
+
+struct S_IMAGE_DEBUG_DIRECTORY
+{
+    quint32 Characteristics;
+    quint32 TimeDateStamp;
+    quint16 MajorVersion;
+    quint16 MinorVersion;
+    quint32 Type;
+    quint32 SizeOfData;
+    quint32 AddressOfRawData;
+    quint32 PointerToRawData;
 };
 }
 #endif // XPE_DEF_H
