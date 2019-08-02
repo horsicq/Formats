@@ -376,35 +376,35 @@ struct IMAGE_IMPORT_DESCRIPTOR
 {
     union
     {
-        quint32   Characteristics;
-        quint32   OriginalFirstThunk;
+        quint32 Characteristics;
+        quint32 OriginalFirstThunk;
     };
-    quint32   TimeDateStamp;
-    quint32   ForwarderChain;
-    quint32   Name;
-    quint32   FirstThunk;
+    quint32 TimeDateStamp;
+    quint32 ForwarderChain;
+    quint32 Name;
+    quint32 FirstThunk;
 };
 
 struct IMAGE_BASE_RELOCATION
 {
-    quint32   VirtualAddress;
-    quint32   SizeOfBlock;
+    quint32 VirtualAddress;
+    quint32 SizeOfBlock;
     // WORD    TypeOffset[1];
 };
 
 struct IMAGE_EXPORT_DIRECTORY
 {
-    quint32   Characteristics;
-    quint32   TimeDateStamp;
-    quint16   MajorVersion;
-    quint16   MinorVersion;
-    quint32   Name;
-    quint32   Base;
-    quint32   NumberOfFunctions;
-    quint32   NumberOfNames;
-    quint32   AddressOfFunctions;     // RVA from base of image
-    quint32   AddressOfNames;         // RVA from base of image
-    quint32   AddressOfNameOrdinals;  // RVA from base of image
+    quint32 Characteristics;
+    quint32 TimeDateStamp;
+    quint16 MajorVersion;
+    quint16 MinorVersion;
+    quint32 Name;
+    quint32 Base;
+    quint32 NumberOfFunctions;
+    quint32 NumberOfNames;
+    quint32 AddressOfFunctions;     // RVA from base of image
+    quint32 AddressOfNames;         // RVA from base of image
+    quint32 AddressOfNameOrdinals;  // RVA from base of image
 };
 
 struct SYSTEM_INFO32
@@ -454,12 +454,12 @@ struct SYSTEM_INFO64
 struct IMAGE_COR20_HEADER
 {
     // Header versioning
-    quint32                   cb;
-    quint16                    MajorRuntimeVersion;
-    quint16                    MinorRuntimeVersion;
+    quint32 cb;
+    quint16 MajorRuntimeVersion;
+    quint16 MinorRuntimeVersion;
     // Symbol table and startup information
-    IMAGE_DATA_DIRECTORY    MetaData;
-    quint32                   Flags;
+    IMAGE_DATA_DIRECTORY MetaData;
+    quint32 Flags;
     // DDBLD - Added next section to replace following lin
     // DDBLD - Still verifying, since not in NT SDK
     // unsigned int                   EntryPointToken;
@@ -469,19 +469,19 @@ struct IMAGE_COR20_HEADER
     // EntryPointRVA represents an RVA to a native entrypoint.
     union
     {
-        quint32               EntryPointToken;
-        quint32               EntryPointRVA;
+        quint32 EntryPointToken;
+        quint32 EntryPointRVA;
     };
     // DDBLD - End of Added Area
     // Binding information
-    IMAGE_DATA_DIRECTORY    Resources;
-    IMAGE_DATA_DIRECTORY    StrongNameSignature;
+    IMAGE_DATA_DIRECTORY Resources;
+    IMAGE_DATA_DIRECTORY StrongNameSignature;
     // Regular fixup and binding information
-    IMAGE_DATA_DIRECTORY    CodeManagerTable;
-    IMAGE_DATA_DIRECTORY    VTableFixups;
-    IMAGE_DATA_DIRECTORY    ExportAddressTableJumps;
+    IMAGE_DATA_DIRECTORY CodeManagerTable;
+    IMAGE_DATA_DIRECTORY VTableFixups;
+    IMAGE_DATA_DIRECTORY ExportAddressTableJumps;
     // Precompiled image info (internal use only - set to zero)
-    IMAGE_DATA_DIRECTORY    ManagedNativeHeader;
+    IMAGE_DATA_DIRECTORY ManagedNativeHeader;
 };
 
 enum ReplacesCorHdrNumericDefines
