@@ -270,8 +270,8 @@ public:
     void setNtHeaders_Signature(quint32 value);
     qint64 getFileHeaderOffset();
 
-    XPE_DEF::IMAGE_FILE_HEADER getFileHeader();
-    void setFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pFileHeader);
+    XPE_DEF::S_IMAGE_FILE_HEADER getFileHeader();
+    void setFileHeader(XPE_DEF::S_IMAGE_FILE_HEADER *pFileHeader);
     quint16 getFileHeader_Machine();
     quint16 getFileHeader_NumberOfSections();
     quint32 getFileHeader_TimeDateStamp();

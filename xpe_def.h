@@ -138,7 +138,7 @@ const quint32    S_RT_NEWMENU                               =(S_RT_MENU|S_RT_NEW
 const quint32    S_RT_NEWDIALOG                             =(S_RT_DIALOG|S_RT_NEWRESOURCE);
 const quint32    S_RT_MANIFEST                              =24;
 
-struct IMAGE_FILE_HEADER
+struct S_IMAGE_FILE_HEADER
 {
     quint16 Machine;
     quint16 NumberOfSections;
@@ -302,14 +302,14 @@ struct IMAGE_OPTIONAL_HEADER64S
 struct IMAGE_NT_HEADERS64
 {
     quint32 Signature;
-    IMAGE_FILE_HEADER FileHeader;
+    S_IMAGE_FILE_HEADER FileHeader;
     IMAGE_OPTIONAL_HEADER64 OptionalHeader;
 };
 
 struct IMAGE_NT_HEADERS32
 {
     quint32 Signature;
-    IMAGE_FILE_HEADER FileHeader;
+    S_IMAGE_FILE_HEADER FileHeader;
     IMAGE_OPTIONAL_HEADER32 OptionalHeader;
 };
 

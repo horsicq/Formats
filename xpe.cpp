@@ -180,93 +180,93 @@ qint64 XPE::getFileHeaderOffset()
     return result;
 }
 
-XPE_DEF::IMAGE_FILE_HEADER XPE::getFileHeader()
+XPE_DEF::S_IMAGE_FILE_HEADER XPE::getFileHeader()
 {
-    XPE_DEF::IMAGE_FILE_HEADER result= {};
+    XPE_DEF::S_IMAGE_FILE_HEADER result= {};
 
-    read_array(getFileHeaderOffset(),(char *)&result,sizeof(XPE_DEF::IMAGE_FILE_HEADER));
+    read_array(getFileHeaderOffset(),(char *)&result,sizeof(XPE_DEF::S_IMAGE_FILE_HEADER));
 
     return result;
 }
 
-void XPE::setFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pFileHeader)
+void XPE::setFileHeader(XPE_DEF::S_IMAGE_FILE_HEADER *pFileHeader)
 {
-    write_array(getFileHeaderOffset(),(char *)pFileHeader,sizeof(XPE_DEF::IMAGE_FILE_HEADER));
+    write_array(getFileHeaderOffset(),(char *)pFileHeader,sizeof(XPE_DEF::S_IMAGE_FILE_HEADER));
 }
 
 quint16 XPE::getFileHeader_Machine()
 {
-    return read_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,Machine));
+    return read_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,Machine));
 }
 
 quint16 XPE::getFileHeader_NumberOfSections()
 {
-    return read_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,NumberOfSections));
+    return read_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,NumberOfSections));
 }
 
 quint32 XPE::getFileHeader_TimeDateStamp()
 {
-    return read_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,TimeDateStamp));
+    return read_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,TimeDateStamp));
 }
 
 quint32 XPE::getFileHeader_PointerToSymbolTable()
 {
-    return read_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,PointerToSymbolTable));
+    return read_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,PointerToSymbolTable));
 }
 
 quint32 XPE::getFileHeader_NumberOfSymbols()
 {
-    return read_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,NumberOfSymbols));
+    return read_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,NumberOfSymbols));
 }
 
 quint16 XPE::getFileHeader_SizeOfOptionalHeader()
 {
-    return read_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,SizeOfOptionalHeader));
+    return read_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,SizeOfOptionalHeader));
 }
 
 quint16 XPE::getFileHeader_Characteristics()
 {
-    return read_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,Characteristics));
+    return read_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,Characteristics));
 }
 
 void XPE::setFileHeader_Machine(quint16 value)
 {
-    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,Machine),value);
+    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,Machine),value);
 }
 
 void XPE::setFileHeader_NumberOfSections(quint16 value)
 {
-    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,NumberOfSections),value);
+    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,NumberOfSections),value);
 }
 
 void XPE::setFileHeader_TimeDateStamp(quint32 value)
 {
-    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,TimeDateStamp),value);
+    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,TimeDateStamp),value);
 }
 
 void XPE::setFileHeader_PointerToSymbolTable(quint32 value)
 {
-    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,PointerToSymbolTable),value);
+    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,PointerToSymbolTable),value);
 }
 
 void XPE::setFileHeader_NumberOfSymbols(quint32 value)
 {
-    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,NumberOfSymbols),value);
+    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,NumberOfSymbols),value);
 }
 
 void XPE::setFileHeader_SizeOfOptionalHeader(quint16 value)
 {
-    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,SizeOfOptionalHeader),value);
+    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,SizeOfOptionalHeader),value);
 }
 
 void XPE::setFileHeader_Characteristics(quint16 value)
 {
-    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::IMAGE_FILE_HEADER,Characteristics),value);
+    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,Characteristics),value);
 }
 
 qint64 XPE::getOptionalHeaderOffset()
 {
-    qint64 result=get_lfanew()+4+sizeof(XPE_DEF::IMAGE_FILE_HEADER);
+    qint64 result=get_lfanew()+4+sizeof(XPE_DEF::S_IMAGE_FILE_HEADER);
 
     if(!_isOffsetValid(result))
     {
