@@ -548,6 +548,13 @@ public:
     XPE_DEF::S_IMAGE_TLS_DIRECTORY32 getTLSDirectory32();
     XPE_DEF::S_IMAGE_TLS_DIRECTORY64 getTLSDirectory64();
 
+    quint64 getTLS_StartAddressOfRawData();
+    quint64 getTLS_EndAddressOfRawData();
+    quint64 getTLS_AddressOfIndex();
+    quint64 getTLS_AddressOfCallBacks();
+    quint32 getTLS_SizeOfZeroFill();
+    quint32 getTLS_Characteristics();
+
     void setTLS_StartAddressOfRawData(quint64 value);
     void setTLS_EndAddressOfRawData(quint64 value);
     void setTLS_AddressOfIndex(quint64 value);

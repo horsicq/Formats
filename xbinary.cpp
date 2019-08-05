@@ -2669,6 +2669,31 @@ XBinary::ULEB128 XBinary::get_uleb128(qint64 nOffset)
     return result;
 }
 
+QList<QString> XBinary::getListFromFile(QString sFileName)
+{
+    QList<QString> listResult;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        QTextStream in(&file);
+        while(!in.atEnd())
+        {
+            QString sLine=in.readLine().trimmed();
+            if(sLine!="")
+            {
+                listResult.append(sLine);
+            }
+        }
+
+        file.close();
+    }
+
+    return listResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     QList<SIGNATURE_RECORD> result;

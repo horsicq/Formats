@@ -5306,6 +5306,132 @@ XPE_DEF::S_IMAGE_TLS_DIRECTORY64 XPE::getTLSDirectory64()
     return result;
 }
 
+quint64 XPE::getTLS_StartAddressOfRawData()
+{
+    quint64 nResult=0;
+
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            nResult=read_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,StartAddressOfRawData));
+        }
+        else
+        {
+            nResult=read_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,StartAddressOfRawData));
+        }
+    }
+
+    return nResult;
+}
+
+quint64 XPE::getTLS_EndAddressOfRawData()
+{
+    quint64 nResult=0;
+
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            nResult=read_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,EndAddressOfRawData));
+        }
+        else
+        {
+            nResult=read_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,EndAddressOfRawData));
+        }
+    }
+
+    return nResult;
+}
+
+quint64 XPE::getTLS_AddressOfIndex()
+{
+    quint64 nResult=0;
+
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            nResult=read_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,AddressOfIndex));
+        }
+        else
+        {
+            nResult=read_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,AddressOfIndex));
+        }
+    }
+
+    return nResult;
+}
+
+quint64 XPE::getTLS_AddressOfCallBacks()
+{
+    quint64 nResult=0;
+
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            nResult=read_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,AddressOfCallBacks));
+        }
+        else
+        {
+            nResult=read_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,AddressOfCallBacks));
+        }
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getTLS_SizeOfZeroFill()
+{
+    quint32 nResult=0;
+
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            nResult=read_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,SizeOfZeroFill));
+        }
+        else
+        {
+            nResult=read_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,SizeOfZeroFill));
+        }
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getTLS_Characteristics()
+{
+    quint32 nResult=0;
+
+    qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+
+    if(nTLSOffset!=-1)
+    {
+        if(is64())
+        {
+            nResult=read_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,Characteristics));
+        }
+        else
+        {
+            nResult=read_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,Characteristics));
+        }
+    }
+
+    return nResult;
+}
+
 void XPE::setTLS_StartAddressOfRawData(quint64 value)
 {
     qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);

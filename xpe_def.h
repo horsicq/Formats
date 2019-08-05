@@ -609,5 +609,16 @@ struct S_IMAGE_DEBUG_DIRECTORY
     quint32 AddressOfRawData;
     quint32 PointerToRawData;
 };
+
+struct S_IMAGE_RUNTIME_FUNCTION_ENTRY
+{
+    quint32 BeginAddress;
+    quint32 EndAddress;
+    union
+    {
+        quint32 UnwindInfoAddress;
+        quint32 UnwindData;
+    } DUMMYUNIONNAME;
+};
 }
 #endif // XPE_DEF_H

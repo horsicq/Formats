@@ -348,6 +348,8 @@ public:
 
     ULEB128 get_uleb128(qint64 nOffset);
 
+    static QList<QString> getListFromFile(QString sFileName);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);
