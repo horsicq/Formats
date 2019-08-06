@@ -1999,6 +1999,25 @@ QString XBinary::getMD5(qint64 nOffset,qint64 nSize)
     return sResult;
 }
 
+QString XBinary::getMD5(QString sFileName)
+{
+    QString sResult;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        XBinary binary(&file);
+
+        sResult=binary.getMD5(0,-1);
+
+        file.close();
+    }
+
+    return sResult;
+}
+
 QString XBinary::getSHA1(qint64 nOffset, qint64 nSize)
 {
     QString sResult;

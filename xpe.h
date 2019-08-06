@@ -562,6 +562,8 @@ public:
     void setTLS_SizeOfZeroFill(quint32 value);
     void setTLS_Characteristics(quint32 value);
 
+    QList<qint64> getTLS_CallbacksList();
+
     TLS_HEADER getTLSHeader();
 
     static QMap<quint64,QString> getImageNtHeadersSignatures();
@@ -590,6 +592,7 @@ public:
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);
 
     bool isDll();
+    static bool isDll(QString sFileName);
     bool isConsole();
 
     bool isNETPresent();

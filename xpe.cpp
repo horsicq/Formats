@@ -3950,6 +3950,27 @@ bool XPE::isDll()
     return bResult;
 }
 
+bool XPE::isDll(QString sFileName)
+{
+    bool bResult=false;
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        XPE pe(&file);
+
+        if(pe.isValid())
+        {
+            bResult=pe.isDll();
+        }
+
+        file.close();
+    }
+
+    return bResult;
+}
+
 bool XPE::isConsole()
 {
     return (getOptionalHeader_Subsystem()==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI);
@@ -5532,6 +5553,45 @@ void XPE::setTLS_Characteristics(quint32 value)
             write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,Characteristics),value);
         }
     }
+}
+
+QList<qint64> XPE::getTLS_CallbacksList()
+{
+    QList<qint64> listResult;
+
+    qint64 nOffset=addressToOffset(getTLS_AddressOfCallBacks());
+
+    if(nOffset!=-1)
+    {
+        for(int i=0;i<100;i++)
+        {
+            qint64 nAddress=0;
+
+            if(is64())
+            {
+                nAddress=read_uint64(nOffset);
+
+                nOffset+=8;
+            }
+            else
+            {
+                nAddress=read_uint32(nOffset);
+
+                nOffset+=4;
+            }
+
+            if(nAddress&&isAddressValid(nAddress))
+            {
+                listResult.append(nAddress);
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    return listResult;
 }
 
 XPE::TLS_HEADER XPE::getTLSHeader()
