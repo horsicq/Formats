@@ -92,6 +92,7 @@ public:
         bool bIsOvelay;
         qint32 nLoadSection;
     };
+
     enum FT
     {
         FT_UNKNOWN=0,
@@ -107,6 +108,7 @@ public:
         FT_MACH32,
         FT_MACH64
     };
+
     struct UNPACK_OPTIONS
     {
         // PE/PE+
@@ -121,6 +123,7 @@ private:
         quint8 nSizeOfAddr;
         qint64 nBaseAddress;
     };
+
     enum SIGNATURE_TYPES
     {
         CompareBytes,
@@ -365,8 +368,6 @@ private:
 
 protected:
     bool _isOffsetValid(qint64 nOffset);
-
-protected:
     void _errorMessage(QString sMessage);
     void _infoMessage(QString sMessage);
 
