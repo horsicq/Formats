@@ -82,7 +82,7 @@ public:
     {
         quint16 nOrdinal;
         quint32 nRVA;
-        quint32 nAddress;
+        qint64 nAddress;
         quint32 nNameRVA;
         QString sFunctionName;
         //qint64 nFunctionOffset;
