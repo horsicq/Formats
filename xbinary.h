@@ -258,7 +258,7 @@ public:
     bool isImage();
     void setIsImage(bool value);
 
-    static quint32 getPhysSize(char *pBuffer,qint64 nSize); // TODO
+    static qint64 getPhysSize(char *pBuffer,qint64 nSize); // TODO
     static bool isEmptyData(char *pBuffer,qint64 nSize);
     bool compareSignature(QString sSignature,qint64 nOffset=0);
     static bool _compareByteArrayWithSignature(QByteArray baData,QString sSignature);

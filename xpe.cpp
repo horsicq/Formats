@@ -3823,7 +3823,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
             sh.VirtualAddress=nVirtualAddress;
             //            sh.Misc.VirtualSize=pOffset-pOffsetStart;
             sh.Misc.VirtualSize=nRelCurrent-nRelVirtualStart;
-            sh.SizeOfRawData=XBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
+            sh.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
             listResult.append(sh);
 
             nVirtualAddress+=sh.Misc.VirtualSize;
@@ -3847,7 +3847,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
                     sh.VirtualAddress=nVirtualAddress;
                     //                    sh.Misc.VirtualSize=pOffset-pOffsetStart;
                     sh.Misc.VirtualSize=nRelCurrent-nRelVirtualStart;
-                    sh.SizeOfRawData=XBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
+                    sh.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
                     listResult.append(sh);
 
                     nVirtualAddress+=sh.Misc.VirtualSize;
@@ -3869,7 +3869,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
             sh.VirtualAddress=nVirtualAddress;
             //            sh.Misc.VirtualSize=pOffset-pOffsetStart;
             sh.Misc.VirtualSize=nRelVirtualEnd-nRelVirtualStart;
-            sh.SizeOfRawData=XBinary::getPhysSize(pOffsetStart,nSize-(pOffsetStart-pbaData->data()));
+            sh.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,nSize-(pOffsetStart-pbaData->data()));
 
             if(sh.Misc.VirtualSize)
             {
@@ -4572,15 +4572,15 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             }
             else
             {
-                nHeaderSize=XBinary::getPhysSize(baHeader.data(),baHeader.size());
+                nHeaderSize=(quint32)XBinary::getPhysSize(baHeader.data(),baHeader.size());
             }
 
-            nHeaderSize=XBinary::getPhysSize(baHeader.data(),baHeader.size());
+            nHeaderSize=(quint32)XBinary::getPhysSize(baHeader.data(),baHeader.size());
 
             for(int i=0; i<nNumberOfSections; i++)
             {
                 QByteArray baSection=read_array(getSection_VirtualAddress(i),getSection_VirtualSize(i));
-                quint32 nSectionSize=XBinary::getPhysSize(baSection.data(),baSection.size());
+                quint32 nSectionSize=(quint32)XBinary::getPhysSize(baSection.data(),baSection.size());
                 listSectionsSize.append(nSectionSize);
             }
 
