@@ -4033,7 +4033,6 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
                         result.sCLI_MetaData_Flags=read_uint16(result.nCLI_MetaDataOffset+16+result.nCLI_MetaData_VersionStringLength);
                         result.sCLI_MetaData_Streams=read_uint16(result.nCLI_MetaDataOffset+16+result.nCLI_MetaData_VersionStringLength+2);
 
-
                         qint64 nOffset=result.nCLI_MetaDataOffset+20+result.nCLI_MetaData_VersionStringLength;
 
                         for(int i=0; i<result.sCLI_MetaData_Streams; i++)
@@ -4138,9 +4137,9 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
 
                             unsigned int nTemp=0;
 
-                            for(nTemp = 0; nValid; nTemp++)
+                            for(nTemp=0; nValid; nTemp++)
                             {
-                                nValid &= nValid - 1;
+                                nValid&=(nValid-1);
                             }
 
                             result.nCLI_MetaData_Tables_Valid_NumberOfRows=nTemp;
@@ -4601,11 +4600,9 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
         {
             nTotalSize=getSize();
         }
-
 #ifdef QT_DEBUG
         qDebug("QPE::rebuildDump:totalsize: %lld msec",timer.elapsed());
 #endif
-
         QByteArray baBuffer;
         baBuffer.resize(nTotalSize);
         baBuffer.fill(0);
@@ -4625,11 +4622,9 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             {
                 XBinary::copyDeviceMemory(getDevice(),0,&buffer,0,nTotalSize);
             }
-
 #ifdef QT_DEBUG
             qDebug("QPE::rebuildDump:copy: %lld msec",timer.elapsed());
 #endif
-
             int nNumberOfSections=getFileHeader_NumberOfSections();
 
             for(int i=0; i<nNumberOfSections; i++)
@@ -4650,11 +4645,9 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 
                 bufPE.setSection_Characteristics(i,0xe0000020); // !!!
             }
-
 #ifdef QT_DEBUG
             qDebug("QPE::rebuildDump:copysections: %lld msec",timer.elapsed());
 #endif
-
             bResult=true;
 
             buffer.close();
@@ -4674,7 +4667,6 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 #ifdef QT_DEBUG
             qDebug("QPE::rebuildDump:write: %lld msec",timer.elapsed());
 #endif
-
             bResult=true;
         }
     }
@@ -4728,7 +4720,6 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 #ifdef QT_DEBUG
                 qDebug("QPE::rebuildDump:mapPatches: %lld msec",timer.elapsed());
 #endif
-
                 if(pRebuildOptions->bSetEntryPoint)
                 {
                     _pe.setOptionalHeader_AddressOfEntryPoint(pRebuildOptions->nEntryPoint);
@@ -4737,7 +4728,6 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 #ifdef QT_DEBUG
                 qDebug("QPE::rebuildDump:setentrypoint: %lld msec",timer.elapsed());
 #endif
-
                 if(!pRebuildOptions->mapIAT.isEmpty())
                 {
                     if(!_pe.addImportSection(&(pRebuildOptions->mapIAT)))
@@ -4749,7 +4739,6 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 #ifdef QT_DEBUG
                 qDebug("QPE::rebuildDump:addimportsection: %lld msec",timer.elapsed());
 #endif
-
                 if(pRebuildOptions->bRenameSections)
                 {
                     int nNumberOfSections=_pe.getFileHeader_NumberOfSections();
@@ -4768,21 +4757,17 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 #ifdef QT_DEBUG
                 qDebug("QPE::rebuildDump:renamesections: %lld msec",timer.elapsed());
 #endif
-
                 if(pRebuildOptions->listRelocsRVAs.count())
                 {
                     _pe.addRelocsSection(&(pRebuildOptions->listRelocsRVAs));
                 }
-
 #ifdef QT_DEBUG
                 qDebug("QPE::rebuildDump:addrelocssection: %lld msec",timer.elapsed());
 #endif
-
                 if(pRebuildOptions->bFixChecksum)
                 {
                     _pe._fixCheckSum();
                 }
-
 #ifdef QT_DEBUG
                 qDebug("QPE::rebuildDump:fixchecksum: %lld msec",timer.elapsed());
 #endif
@@ -4793,7 +4778,6 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             file.close();
         }
     }
-
 #ifdef QT_DEBUG
     qDebug("QPE::rebuildDump: %lld msec",timer.elapsed());
 #endif
@@ -4935,7 +4919,7 @@ quint16 XPE::_checkSum(qint64 nStartValue,qint64 nDataSize)
         nStartValue+=nTemp;
     }
 
-    delete[] pBuffer;
+    delete [] pBuffer;
 
     return (unsigned short)(S_LOWORD(nSum)+S_HIWORD(nSum));
 }
@@ -5187,7 +5171,6 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
 {
     QByteArray baResult;
     // GetHeaders
-
     // pList must be sorted!
 
     qint32 nBaseAddress=-1;

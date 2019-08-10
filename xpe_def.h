@@ -117,26 +117,26 @@ const quint32 S_IMAGE_SCN_MEM_WRITE                         =0x80000000;
 const quint32 S_IMAGE_SCN_ALIGN_MASK                        =0x00F00000;
 
 /* Predefined resource types */
-const quint32    S_RT_NEWRESOURCE                           =0x2000;
-const quint32    S_RT_ERROR                                 =0x7fff;
-const quint32    S_RT_CURSOR                                =1;
-const quint32    S_RT_BITMAP                                =2;
-const quint32    S_RT_ICON                                  =3;
-const quint32    S_RT_MENU                                  =4;
-const quint32    S_RT_DIALOG                                =5;
-const quint32    S_RT_STRING                                =6;
-const quint32    S_RT_FONTDIR                               =7;
-const quint32    S_RT_FONT                                  =8;
-const quint32    S_RT_ACCELERATORS                          =9;
-const quint32    S_RT_RCDATA                                =10;
-const quint32    S_RT_MESSAGETABLE                          =11;
-const quint32    S_RT_GROUP_CURSOR                          =12;
-const quint32    S_RT_GROUP_ICON                            =14;
-const quint32    S_RT_VERSION                               =16;
-const quint32    S_RT_NEWBITMAP                             =(S_RT_BITMAP|S_RT_NEWRESOURCE);
-const quint32    S_RT_NEWMENU                               =(S_RT_MENU|S_RT_NEWRESOURCE);
-const quint32    S_RT_NEWDIALOG                             =(S_RT_DIALOG|S_RT_NEWRESOURCE);
-const quint32    S_RT_MANIFEST                              =24;
+const quint32 S_RT_NEWRESOURCE                              =0x2000;
+const quint32 S_RT_ERROR                                    =0x7fff;
+const quint32 S_RT_CURSOR                                   =1;
+const quint32 S_RT_BITMAP                                   =2;
+const quint32 S_RT_ICON                                     =3;
+const quint32 S_RT_MENU                                     =4;
+const quint32 S_RT_DIALOG                                   =5;
+const quint32 S_RT_STRING                                   =6;
+const quint32 S_RT_FONTDIR                                  =7;
+const quint32 S_RT_FONT                                     =8;
+const quint32 S_RT_ACCELERATORS                             =9;
+const quint32 S_RT_RCDATA                                   =10;
+const quint32 S_RT_MESSAGETABLE                             =11;
+const quint32 S_RT_GROUP_CURSOR                             =12;
+const quint32 S_RT_GROUP_ICON                               =14;
+const quint32 S_RT_VERSION                                  =16;
+const quint32 S_RT_NEWBITMAP                                =(S_RT_BITMAP|S_RT_NEWRESOURCE);
+const quint32 S_RT_NEWMENU                                  =(S_RT_MENU|S_RT_NEWRESOURCE);
+const quint32 S_RT_NEWDIALOG                                =(S_RT_DIALOG|S_RT_NEWRESOURCE);
+const quint32 S_RT_MANIFEST                                 =24;
 
 struct S_IMAGE_FILE_HEADER
 {
