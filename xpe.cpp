@@ -3354,7 +3354,7 @@ bool XPE::addOverlay(QIODevice *pDevice,bool bIsImage, char *pData, qint64 nData
                 pe.write_array(nRawSize,pData,nDataSize);
             }
 
-            pe._fixCheckSum();
+            pe.fixCheckSum();
             bResult=true;
         }
     }
@@ -3413,7 +3413,7 @@ bool XPE::addOverlayFromDevice(QIODevice *pDevice, bool bIsImage, QIODevice *pSo
                 delete [] pBuffer;
             }
 
-            pe._fixCheckSum();
+            pe.fixCheckSum();
         }
     }
 
@@ -3515,6 +3515,11 @@ bool XPE::addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_H
             pSectionHeader->PointerToRawData+=nDelta;
             nFileSize+=nDelta;
 
+            if(nFileSize<nHeadersSize)
+            {
+                nFileSize=nHeadersSize;
+            }
+
             // TODO!!!
             resize(pDevice,nFileSize+pSectionHeader->SizeOfRawData);
 
@@ -3538,7 +3543,7 @@ bool XPE::addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_H
             pe.setOptionalHeader_SizeOfImage(nNewImageSize);
 
             // TODO flag
-            pe._fixCheckSum();
+            pe.fixCheckSum();
 
             bResult=true;
         }
@@ -3611,7 +3616,7 @@ bool XPE::removeLastSection(QIODevice *pDevice,bool bIsImage)
                 qint64 nNewImageSize=S_ALIGN_UP(ish.VirtualAddress,nSectionAlignment);
                 pe.setOptionalHeader_SizeOfImage(nNewImageSize);
 
-                pe._fixCheckSum();
+                pe.fixCheckSum();
 
                 bResult=true;
             }
@@ -3784,7 +3789,7 @@ XPE::RESOURCE_POSITION XPE::_getResourcePosition(QList<XBinary::MEMORY_MAP> *pMe
     //        }
 }
 
-void XPE::_fixCheckSum()
+void XPE::fixCheckSum()
 {
     setOptionalHeader_CheckSum(calculateCheckSum());
 }
@@ -4766,7 +4771,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 #endif
                 if(pRebuildOptions->bFixChecksum)
                 {
-                    _pe._fixCheckSum();
+                    _pe.fixCheckSum();
                 }
 #ifdef QT_DEBUG
                 qDebug("QPE::rebuildDump:fixchecksum: %lld msec",timer.elapsed());
@@ -4819,7 +4824,7 @@ bool XPE::fixCheckSum(QString sFileName, bool bIsImage)
 
         if(pe.isValid())
         {
-            pe._fixCheckSum();
+            pe.fixCheckSum();
             bResult=true;
         }
 
