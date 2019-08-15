@@ -938,6 +938,7 @@ QByteArray XELF::getSection(quint32 nIndex)
 bool XELF::isSectionValid(quint32 nIndex)
 {
     quint32 nNumberOfSections=getHdr32_shnum();
+
     return (nIndex<nNumberOfSections)&&(nIndex!=(quint32)-1);
 }
 

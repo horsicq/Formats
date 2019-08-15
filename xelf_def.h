@@ -146,40 +146,39 @@ struct Elf_Shdr
 
 struct Elf32_Phdr
 {
-    quint32      p_type;         /* entry type */
-    quint32      p_offset;       /* offset */
-    quint32      p_vaddr;        /* virtual address */
-    quint32      p_paddr;        /* physical address */
-    quint32      p_filesz;       /* file size */
-    quint32      p_memsz;        /* memory size */
-    quint32      p_flags;        /* flags */
-    quint32      p_align;        /* memory & file alignment */
+    quint32 p_type;             /* entry type */
+    quint32 p_offset;           /* offset */
+    quint32 p_vaddr;            /* virtual address */
+    quint32 p_paddr;            /* physical address */
+    quint32 p_filesz;           /* file size */
+    quint32 p_memsz;            /* memory size */
+    quint32 p_flags;            /* flags */
+    quint32 p_align;            /* memory & file alignment */
 };
 
 struct Elf64_Phdr
 {
-    quint32      p_type;         /* entry type */
-    quint32      p_flags;        /* flags */
-    quint64      p_offset;       /* offset */
-    quint64      p_vaddr;        /* virtual address */
-    quint64      p_paddr;        /* physical address */
-    quint64      p_filesz;       /* file size */
-    quint64      p_memsz;        /* memory size */
-    quint64      p_align;        /* memory & file alignment */
+    quint32 p_type;             /* entry type */
+    quint32 p_flags;            /* flags */
+    quint64 p_offset;           /* offset */
+    quint64 p_vaddr;            /* virtual address */
+    quint64 p_paddr;            /* physical address */
+    quint64 p_filesz;           /* file size */
+    quint64 p_memsz;            /* memory size */
+    quint64 p_align;            /* memory & file alignment */
 };
 
 struct Elf_Phdr
 {
-    quint32      p_type;         /* entry type */
-    quint32      p_flags;        /* flags */
-    quint64      p_offset;       /* offset */
-    quint64      p_vaddr;        /* virtual address */
-    quint64      p_paddr;        /* physical address */
-    quint64      p_filesz;       /* file size */
-    quint64      p_memsz;        /* memory size */
-    quint64      p_align;        /* memory & file alignment */
+    quint32 p_type;             /* entry type */
+    quint32 p_flags;            /* flags */
+    quint64 p_offset;           /* offset */
+    quint64 p_vaddr;            /* virtual address */
+    quint64 p_paddr;            /* physical address */
+    quint64 p_filesz;           /* file size */
+    quint64 p_memsz;            /* memory size */
+    quint64 p_align;            /* memory & file alignment */
 };
-
 }
 #endif // XELF_DEF_H
 
