@@ -4138,9 +4138,9 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
                             result.nCLI_MetaData_Tables_Valid=read_uint64(result.nCLI_MetaData_TablesHeaderOffset+8);
                             result.nCLI_MetaData_Tables_Sorted=read_uint64(result.nCLI_MetaData_TablesHeaderOffset+16);
 
-                            unsigned long long nValid=result.nCLI_MetaData_Tables_Valid;
+                            quint64 nValid=result.nCLI_MetaData_Tables_Valid;
 
-                            unsigned int nTemp=0;
+                            quint32 nTemp=0;
 
                             for(nTemp=0; nValid; nTemp++)
                             {
@@ -4160,7 +4160,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
                                 }
                             }
 
-                            unsigned int nSize=0;
+                            quint32 nSize=0;
                             int nStringIndexSize=2;
                             int nGUIDIndexSize=2;
                             int nBLOBIndexSize=2;
@@ -4170,9 +4170,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
                             int nMethodDef=2;
                             int nParamList=2;
 
-                            unsigned char cHeapOffsetSizes=0;
-
-                            cHeapOffsetSizes=result.cCLI_MetaData_Tables_HeapOffsetSizes;
+                            quint8 cHeapOffsetSizes=cHeapOffsetSizes=result.cCLI_MetaData_Tables_HeapOffsetSizes;
 
                             if(cHeapOffsetSizes&0x01)
                             {
