@@ -28,8 +28,8 @@
 class XELF : public XBinary
 {
     Q_OBJECT
-public:
 
+public:
     struct NOTE
     {
         quint16 type;

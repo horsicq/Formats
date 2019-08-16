@@ -27,6 +27,7 @@
 class XMACH : public XBinary
 {
     Q_OBJECT
+
 public:
     struct COMMAND_RECORD
     {

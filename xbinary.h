@@ -66,6 +66,7 @@
 class XBinary : public QObject
 {
     Q_OBJECT
+
 public:
     struct OFFSETSIZE
     {
