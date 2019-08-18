@@ -2065,7 +2065,6 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
                         {
                             importPosition.nOrdinal=importPosition.nThunkValue&0x7FFFFFFFFFFFFFFF;
                         }
-
                     }
                     else
                     {

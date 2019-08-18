@@ -24,7 +24,6 @@
 #include "xmsdos.h"
 #include "xpe_def.h"
 
-// TODO info
 class XPE : public XMSDOS
 {
     Q_OBJECT
@@ -334,7 +333,6 @@ public:
     quint32 getOptionalHeader_LoaderFlags();
     quint32 getOptionalHeader_NumberOfRvaAndSizes();
 
-    // TODO set functions
     void setOptionalHeader_Magic(quint16 value);
     void setOptionalHeader_MajorLinkerVersion(quint8 value);
     void setOptionalHeader_MinorLinkerVersion(quint8 value);

@@ -68,7 +68,7 @@ const quint8 S_SHN_UNDEF=0;
 
 struct Elf32_Ehdr
 {
-    unsigned char   e_ident[S_EI_NIDENT];   /* ident bytes */
+    quint8          e_ident[S_EI_NIDENT];   /* ident bytes */
     quint16         e_type;                 /* file type */
     quint16         e_machine;              /* target machine */
     quint32         e_version;              /* file version */
@@ -86,7 +86,7 @@ struct Elf32_Ehdr
 
 struct Elf64_Ehdr
 {
-    unsigned char   e_ident[S_EI_NIDENT];   /* ident bytes */
+    quint8          e_ident[S_EI_NIDENT];   /* ident bytes */
     quint16         e_type;                 /* file type */
     quint16         e_machine;              /* target machine */
     quint32         e_version;              /* file version */

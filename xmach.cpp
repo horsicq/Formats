@@ -33,9 +33,13 @@ XMACH::~XMACH()
 bool XMACH::isValid()
 {
     bool bResult=false;
-    unsigned int nMagic=read_uint32(0);
 
-    if((nMagic==XMACH_DEF::S_MH_MAGIC)||(nMagic==XMACH_DEF::S_MH_CIGAM)||(nMagic==XMACH_DEF::S_MH_MAGIC_64)||(nMagic==XMACH_DEF::S_MH_CIGAM_64))
+    quint32 nMagic=read_uint32(0);
+
+    if( (nMagic==XMACH_DEF::S_MH_MAGIC)||
+        (nMagic==XMACH_DEF::S_MH_CIGAM)||
+        (nMagic==XMACH_DEF::S_MH_MAGIC_64)||
+        (nMagic==XMACH_DEF::S_MH_CIGAM_64))
     {
         bResult=true;
     }
@@ -46,9 +50,11 @@ bool XMACH::isValid()
 bool XMACH::isBigEndian()
 {
     bool bResult=false;
+
     quint32 nMagic=read_uint32(0);
 
-    if((nMagic==XMACH_DEF::S_MH_CIGAM)||(nMagic==XMACH_DEF::S_MH_CIGAM_64))
+    if( (nMagic==XMACH_DEF::S_MH_CIGAM)||
+        (nMagic==XMACH_DEF::S_MH_CIGAM_64))
     {
         bResult=true;
     }
@@ -628,7 +634,6 @@ QList<XBinary::MEMORY_MAP> XMACH::getMemoryMapList()
     QList<MEMORY_MAP> listResult;
 
     // TODO
-
     QList<COMMAND_RECORD> listLC=getCommandRecords();
 
     QList<SEGMENT_RECORD> listSegmentRecords=getSegmentRecords(&listLC);

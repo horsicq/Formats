@@ -128,19 +128,19 @@ struct section_64 { /* for 64-bit architectures */
     quint32	reserved3;	/* reserved */
 };
 
-const quint32 S_x86_THREAD_STATE32=1;
-const quint32 S_x86_FLOAT_STATE32=2;
-const quint32 S_x86_EXCEPTION_STATE32=3;
-const quint32 S_x86_THREAD_STATE64=4;
-const quint32 S_x86_FLOAT_STATE64=5;
-const quint32 S_x86_EXCEPTION_STATE64=6;
-const quint32 S_x86_THREAD_STATE=7;
-const quint32 S_x86_FLOAT_STATE=8;
-const quint32 S_x86_EXCEPTION_STATE=9;
-const quint32 S_x86_DEBUG_STATE32=10;
-const quint32 S_x86_DEBUG_STATE64=11;
-const quint32 S_x86_DEBUG_STATE=12;
-const quint32 S_THREAD_STATE_NONE=13;
+const quint32 S_x86_THREAD_STATE32                  =1;
+const quint32 S_x86_FLOAT_STATE32                   =2;
+const quint32 S_x86_EXCEPTION_STATE32               =3;
+const quint32 S_x86_THREAD_STATE64                  =4;
+const quint32 S_x86_FLOAT_STATE64                   =5;
+const quint32 S_x86_EXCEPTION_STATE64               =6;
+const quint32 S_x86_THREAD_STATE                    =7;
+const quint32 S_x86_FLOAT_STATE                     =8;
+const quint32 S_x86_EXCEPTION_STATE                 =9;
+const quint32 S_x86_DEBUG_STATE32                   =10;
+const quint32 S_x86_DEBUG_STATE64                   =11;
+const quint32 S_x86_DEBUG_STATE                     =12;
+const quint32 S_THREAD_STATE_NONE                   =13;
 
 struct STRUCT_X86_THREAD_STATE32
 {
