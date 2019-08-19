@@ -2149,6 +2149,50 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
     return dResult;
 }
 
+void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
+{
+    OFFSETSIZE offsize=convertOffsetAndSize(nOffset,nSize);
+
+    nOffset=offsize.nOffset;
+    nSize=offsize.nSize;
+
+    if(nOffset!=-1)
+    {
+        if(nOffset!=-1)
+        {
+            const int BUFFER_SIZE=0x1000;
+
+            quint64 nTemp=0;
+            char *pBuffer=new char[BUFFER_SIZE];
+
+            while(nSize>0)
+            {
+                nTemp=qMin((qint64)BUFFER_SIZE,nSize);
+
+                if(!read_array(nOffset,pBuffer,nTemp))
+                {
+                    break;
+                }
+
+                for(int i=0;i<nTemp;i++)
+                {
+                    *(pBuffer+i)^=nXorValue;
+                }
+
+                if(!write_array(nOffset,pBuffer,nTemp))
+                {
+                    break;
+                }
+
+                nSize-=nTemp;
+                nOffset+=nTemp;
+            }
+
+            delete[] pBuffer;
+        }
+    }
+}
+
 //quint32 XBinary::_ror32(quint32 nValue, quint32 nShift)
 //{
 //    // TODO Check
