@@ -179,7 +179,7 @@ qint64 XPE::getFileHeaderOffset()
 
 XPE_DEF::S_IMAGE_FILE_HEADER XPE::getFileHeader()
 {
-    XPE_DEF::S_IMAGE_FILE_HEADER result= {};
+    XPE_DEF::S_IMAGE_FILE_HEADER result={};
 
     read_array(getFileHeaderOffset(),(char *)&result,sizeof(XPE_DEF::S_IMAGE_FILE_HEADER));
 
@@ -275,7 +275,7 @@ qint64 XPE::getOptionalHeaderOffset()
 
 XPE_DEF::IMAGE_OPTIONAL_HEADER32 XPE::getOptionalHeader32()
 {
-    XPE_DEF::IMAGE_OPTIONAL_HEADER32 result= {};
+    XPE_DEF::IMAGE_OPTIONAL_HEADER32 result={};
 
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER32));
 
@@ -284,7 +284,7 @@ XPE_DEF::IMAGE_OPTIONAL_HEADER32 XPE::getOptionalHeader32()
 
 XPE_DEF::IMAGE_OPTIONAL_HEADER64 XPE::getOptionalHeader64()
 {
-    XPE_DEF::IMAGE_OPTIONAL_HEADER64 result= {};
+    XPE_DEF::IMAGE_OPTIONAL_HEADER64 result={};
 
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER64));
 
@@ -303,7 +303,7 @@ void XPE::setOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pOptionalHeader6
 
 XPE_DEF::IMAGE_OPTIONAL_HEADER32S XPE::getOptionalHeader32S()
 {
-    XPE_DEF::IMAGE_OPTIONAL_HEADER32S result= {};
+    XPE_DEF::IMAGE_OPTIONAL_HEADER32S result={};
 
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S));
 
@@ -312,7 +312,7 @@ XPE_DEF::IMAGE_OPTIONAL_HEADER32S XPE::getOptionalHeader32S()
 
 XPE_DEF::IMAGE_OPTIONAL_HEADER64S XPE::getOptionalHeader64S()
 {
-    XPE_DEF::IMAGE_OPTIONAL_HEADER64S result= {};
+    XPE_DEF::IMAGE_OPTIONAL_HEADER64S result={};
 
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S));
 
@@ -760,7 +760,7 @@ void XPE::setOptionalHeader_NumberOfRvaAndSizes(quint32 value)
 
 XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getOptionalHeader_DataDirectory(quint32 nNumber)
 {
-    XPE_DEF::IMAGE_DATA_DIRECTORY result= {};
+    XPE_DEF::IMAGE_DATA_DIRECTORY result={};
 
     //    if(nNumber<getOptionalHeader_NumberOfRvaAndSizes()) // There are some protectors with false NumberOfRvaAndSizes
     if(nNumber<16)
@@ -826,7 +826,7 @@ void XPE::setOptionalHeader_DataDirectory_Size(quint32 nNumber, quint32 value)
 
 void XPE::clearOptionalHeader_DataDirectory(quint32 nNumber)
 {
-    XPE_DEF::IMAGE_DATA_DIRECTORY dd= {};
+    XPE_DEF::IMAGE_DATA_DIRECTORY dd={};
     setOptionalHeader_DataDirectory(nNumber,&dd);
 }
 
@@ -859,7 +859,7 @@ QList<XPE_DEF::IMAGE_DATA_DIRECTORY> XPE::getDirectories()
 
     for(int i=0; i<nCount; i++)
     {
-        XPE_DEF::IMAGE_DATA_DIRECTORY record= {};
+        XPE_DEF::IMAGE_DATA_DIRECTORY record={};
 
         read_array(nDirectoriesOffset+i*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),(char *)&record,sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
 
@@ -940,7 +940,7 @@ qint64 XPE::getSectionsTableOffset()
 
 XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionHeader(quint32 nNumber)
 {
-    XPE_DEF::IMAGE_SECTION_HEADER result= {};
+    XPE_DEF::IMAGE_SECTION_HEADER result={};
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
@@ -976,7 +976,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders()
 
     for(int i=0; i<(int)nNumberOfSections; i++)
     {
-        XPE_DEF::IMAGE_SECTION_HEADER record= {};
+        XPE_DEF::IMAGE_SECTION_HEADER record={};
 
         read_array(nSectionOffset+i*sizeof(XPE_DEF::IMAGE_SECTION_HEADER),(char *)&record,sizeof(XPE_DEF::IMAGE_SECTION_HEADER));
 
@@ -994,7 +994,7 @@ QList<XPE::SECTIONFILE_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTI
 
     for(int i=0; i<nNumberOfSections; i++)
     {
-        XPE::SECTIONFILE_RECORD record= {};
+        XPE::SECTIONFILE_RECORD record={};
 
         record.sName=QString((char *)pList->at(i).Name);
         record.sName.resize(qMin(record.sName.length(),XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
@@ -1026,7 +1026,7 @@ QList<XPE::SECTIONRVA_RECORD> XPE::getSectionRVARecords()
 
     for(int i=0; i<listSH.count(); i++)
     {
-        SECTIONRVA_RECORD record= {};
+        SECTIONRVA_RECORD record={};
 
         record.nRVA=listSH.at(i).VirtualAddress;
         record.nSize=S_ALIGN_UP(listSH.at(i).Misc.VirtualSize,nSectionAlignment);
@@ -1301,7 +1301,7 @@ bool XPE::isSectionNamePresent(QString sSectionName, QList<XPE_DEF::IMAGE_SECTIO
 
 XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionByName(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections)
 {
-    XPE_DEF::IMAGE_SECTION_HEADER result= {};
+    XPE_DEF::IMAGE_SECTION_HEADER result={};
 
     int nNumberOfSections=pListSections->count();
 
@@ -1345,7 +1345,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
     quint32 nVirtualSizeofHeaders=S_ALIGN_UP(nHeadersSize,nSectionAlignment);
     qint64 nMaxOffset=0;
 
-    MEMORY_MAP recordHeaderRaw= {};
+    MEMORY_MAP recordHeaderRaw={};
 
     if(!isImage())
     {
@@ -1359,7 +1359,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
 
         if(nVirtualSizeofHeaders-nHeadersSize)
         {
-            MEMORY_MAP record= {};
+            MEMORY_MAP record={};
             record.bIsHeader=true;
 
             record.nAddress=nBaseAddress+nHeadersSize;
@@ -1408,7 +1408,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
         {
             if(nFileSize)
             {
-                MEMORY_MAP record= {};
+                MEMORY_MAP record={};
 
                 record.bIsLoadSection=true;
                 record.nLoadSection=i;
@@ -1422,7 +1422,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
 
             if(nVirtualSize-nFileSize)
             {
-                MEMORY_MAP record= {};
+                MEMORY_MAP record={};
 
                 record.bIsLoadSection=true;
                 record.nLoadSection=i;
@@ -1436,7 +1436,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
         }
         else
         {
-            MEMORY_MAP record= {};
+            MEMORY_MAP record={};
 
             record.bIsLoadSection=true;
             record.nLoadSection=i;
@@ -1450,7 +1450,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
     }
 
     // Overlay;
-    MEMORY_MAP record= {};
+    MEMORY_MAP record={};
 
     record.bIsOvelay=true;
 
@@ -1705,7 +1705,7 @@ QList<XPE::IMAGE_IMPORT_DESCRIPTOR_EX> XPE::getImportDescriptorsEx()
 
         while(true)
         {
-            IMAGE_IMPORT_DESCRIPTOR_EX record= {};
+            IMAGE_IMPORT_DESCRIPTOR_EX record={};
             XPE_DEF::IMAGE_IMPORT_DESCRIPTOR iid=read_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
 
             if((iid.Characteristics==0)&&(iid.Name==0))
@@ -1747,7 +1747,7 @@ QList<XPE::IMAGE_IMPORT_DESCRIPTOR_EX> XPE::getImportDescriptorsEx()
 
 XPE_DEF::IMAGE_IMPORT_DESCRIPTOR XPE::getImportDescriptor(quint32 nNumber)
 {
-    XPE_DEF::IMAGE_IMPORT_DESCRIPTOR result= {};
+    XPE_DEF::IMAGE_IMPORT_DESCRIPTOR result={};
 
     qint64 nImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 
@@ -1797,7 +1797,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports()
         {
             XPE_DEF::IMAGE_IMPORT_DESCRIPTOR iid=read_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
 
-            IMPORT_HEADER importHeader= {};
+            IMPORT_HEADER importHeader={};
 
             if(nImportOffsetTest==-1)
             {
@@ -1853,7 +1853,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports()
 
             while(true)
             {
-                IMPORT_POSITION importPosition= {};
+                IMPORT_POSITION importPosition={};
                 importPosition.nThunkRVA=nThunksOriginalRVA;
                 importPosition.nThunkOffset=nThunksOriginalOffset;
 
@@ -1977,7 +1977,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
 
         while(true)
         {
-            IMPORT_HEADER importHeader= {};
+            IMPORT_HEADER importHeader={};
             XPE_DEF::IMAGE_IMPORT_DESCRIPTOR iid=read_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
 
             if((iid.Characteristics==0)&&(iid.Name==0))
@@ -2029,7 +2029,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
             {
                 while(true)
                 {
-                    IMPORT_POSITION importPosition= {};
+                    IMPORT_POSITION importPosition={};
                     importPosition.nThunkOffset=nThunksOffset;
                     importPosition.nThunkRVA=nThunksRVA;
 
@@ -2288,7 +2288,7 @@ bool XPE::setImports(QIODevice *pDevice,bool bIsImage, QList<XPE::IMPORT_HEADER>
                 pIID++;
             }
 
-            XPE_DEF::IMAGE_SECTION_HEADER ish= {};
+            XPE_DEF::IMAGE_SECTION_HEADER ish={};
 
             ish.Characteristics=0xc0000040;
 
@@ -2303,10 +2303,10 @@ bool XPE::setImports(QIODevice *pDevice,bool bIsImage, QList<XPE::IMPORT_HEADER>
                 QList<MEMORY_MAP> listMP=pe.getMemoryMapList();
                 qint64 nBaseAddress=pe._getBaseAddress();
 
-                XPE_DEF::IMAGE_DATA_DIRECTORY iddIAT= {};
+                XPE_DEF::IMAGE_DATA_DIRECTORY iddIAT={};
                 iddIAT.VirtualAddress=ish.VirtualAddress;
                 iddIAT.Size=nIATSize;
-                XPE_DEF::IMAGE_DATA_DIRECTORY iddImportTable= {};
+                XPE_DEF::IMAGE_DATA_DIRECTORY iddImportTable={};
                 iddImportTable.VirtualAddress=nIATSize+ish.VirtualAddress;
                 iddImportTable.Size=nImportTableSize;
 
@@ -2389,7 +2389,7 @@ bool XPE::setImports(QString sFileName,bool bIsImage,QList<XPE::IMPORT_HEADER> *
 
 XPE::RESOURCE_HEADER XPE::getResourceHeader()
 {
-    RESOURCE_HEADER result= {};
+    RESOURCE_HEADER result={};
 
     qint64 nResourceOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 
@@ -2436,14 +2436,14 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources()
     {
         QList<MEMORY_MAP> memoryMap=getMemoryMapList();
         qint64 nBaseAddress=_getBaseAddress();
-        RESOURCE_RECORD record= {};
+        RESOURCE_RECORD record={};
 
-        qint64 nOffsetLevel[3]= {};
-        XPE_DEF::IMAGE_RESOURCE_DIRECTORY rd[3]= {};
-        XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY rde[3]= {};
+        qint64 nOffsetLevel[3]={};
+        XPE_DEF::IMAGE_RESOURCE_DIRECTORY rd[3]={};
+        XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY rde[3]={};
 
 #if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
-        RESOURCES_ID_NAME irin[3]= {};
+        RESOURCES_ID_NAME irin[3]={};
 #else
         RESOURCES_ID_NAME irin[3]= {0}; // MinGW 4.9 bug?
 #endif
@@ -2529,7 +2529,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources()
 
 XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListRecords)
 {
-    RESOURCE_RECORD result= {};
+    RESOURCE_RECORD result={};
     result.nOffset=-1;
 
     for(int i=0; i<pListRecords->count(); i++)
@@ -2550,7 +2550,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, quint32 nID2, QList<XP
 
 XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListRecords)
 {
-    RESOURCE_RECORD result= {};
+    RESOURCE_RECORD result={};
     result.nOffset=-1;
 
     for(int i=0; i<pListRecords->count(); i++)
@@ -2568,7 +2568,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, QString sName2, QList<
 
 XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListRecords)
 {
-    RESOURCE_RECORD result= {};
+    RESOURCE_RECORD result={};
     result.nOffset=-1;
 
     for(int i=0; i<pListRecords->count(); i++)
@@ -2589,7 +2589,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<
 
 XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListRecords)
 {
-    RESOURCE_RECORD result= {};
+    RESOURCE_RECORD result={};
     result.nOffset=-1;
 
     for(int i=0; i<pListRecords->count(); i++)
@@ -2642,7 +2642,7 @@ QString XPE::getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListRecords)
 
 XPE_DEF::S_VS_VERSION_INFO XPE::readResourceVersionInfo(qint64 nOffset)
 {
-    XPE_DEF::S_VS_VERSION_INFO result= {};
+    XPE_DEF::S_VS_VERSION_INFO result={};
 
     read_array(nOffset,(char *)&result,sizeof(XPE_DEF::S_VS_VERSION_INFO));
 
@@ -2747,7 +2747,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
 
 XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders)
 {
-    RESOURCE_VERSION result= {};
+    RESOURCE_VERSION result={};
 
     RESOURCE_RECORD rh=getResourceRecord(XPE_DEF::S_RT_VERSION,1,pListHeaders);
 
@@ -2781,7 +2781,7 @@ QString XPE::getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVer
 
 XPE_DEF::IMAGE_IMPORT_DESCRIPTOR XPE::read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset)
 {
-    XPE_DEF::IMAGE_IMPORT_DESCRIPTOR result= {};
+    XPE_DEF::IMAGE_IMPORT_DESCRIPTOR result={};
 
     read_array(nOffset,(char *)&result,sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR));
 
@@ -2800,7 +2800,7 @@ bool XPE::isExportPresent()
 
 XPE::EXPORT_HEADER XPE::getExport()
 {
-    EXPORT_HEADER result= {};
+    EXPORT_HEADER result={};
 
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
@@ -2828,7 +2828,7 @@ XPE::EXPORT_HEADER XPE::getExport()
             {
                 for(int i=0; i<(int)result.directory.NumberOfFunctions; i++)
                 {
-                    EXPORT_POSITION position= {};
+                    EXPORT_POSITION position={};
 
                     int nIndex=read_uint16(nAddressOfNameOrdinalsOffset+2*i);
                     position.nOrdinal=nIndex+result.directory.Base;
@@ -2871,7 +2871,7 @@ bool XPE::isExportFunctionPresent(QString sFunction,XPE::EXPORT_HEADER *pExportH
 
 XPE_DEF::IMAGE_EXPORT_DIRECTORY XPE::getExportDirectory()
 {
-    XPE_DEF::IMAGE_EXPORT_DIRECTORY result= {};
+    XPE_DEF::IMAGE_EXPORT_DIRECTORY result={};
 
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
@@ -3027,7 +3027,7 @@ QByteArray XPE::getHeaders()
 
 XBinary::OFFSETSIZE XPE::__getSectionOffsetAndSize(quint32 nSection)
 {
-    OFFSETSIZE result= {};
+    OFFSETSIZE result={};
 
     XPE_DEF::IMAGE_SECTION_HEADER sectionHeader=getSectionHeader(nSection);
     quint32 nSectionAlignment=getOptionalHeader_SectionAlignment();
@@ -3199,7 +3199,7 @@ QList<XPE::IMPORT_HEADER> XPE::mapIATToList(QMap<qint64, QString> *pMapIAT,bool 
 {
     QList<XPE::IMPORT_HEADER> listResult;
 
-    IMPORT_HEADER record= {};
+    IMPORT_HEADER record={};
 
     quint64 nCurrentRVA=0;
 
@@ -3237,7 +3237,7 @@ QList<XPE::IMPORT_HEADER> XPE::mapIATToList(QMap<qint64, QString> *pMapIAT,bool 
 
         nCurrentRVA=i.key();
 
-        IMPORT_POSITION position= {};
+        IMPORT_POSITION position={};
 
         position.nHint=0;
 
@@ -3579,7 +3579,7 @@ bool XPE::removeLastSection(QIODevice *pDevice,bool bIsImage)
                 qint64 nOverlaySize=pe.getOverlaySize();
 
                 XPE_DEF::IMAGE_SECTION_HEADER ish=pe.getSectionHeader(nNumberOfSections-1);
-                XPE_DEF::IMAGE_SECTION_HEADER ish0= {};
+                XPE_DEF::IMAGE_SECTION_HEADER ish0={};
                 pe.setSectionHeader(nNumberOfSections-1,&ish0);
                 pe.setFileHeader_NumberOfSections(nNumberOfSections-1);
 
@@ -3670,7 +3670,7 @@ qint64 XPE::_calculateRawSize()
 
 XPE::RESOURCE_POSITION XPE::_getResourcePosition(QList<XBinary::MEMORY_MAP> *pMemoryMap,qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel)
 {
-    RESOURCE_POSITION result= {};
+    RESOURCE_POSITION result={};
 
     result.nOffset=nOffset;
     result.nLevel=nLevel;
@@ -3985,7 +3985,7 @@ bool XPE::isNETPresent()
 
 XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
 {
-    CLI_INFO result= {};
+    CLI_INFO result={};
 
     if(isNETPresent()||bFindHidden)
     {
@@ -4928,7 +4928,7 @@ quint16 XPE::_checkSum(qint64 nStartValue,qint64 nDataSize)
 
 XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY XPE::read_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset)
 {
-    XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY result= {};
+    XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY result={};
 
     read_array(nOffset,(char *)&result,sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY));
 
@@ -4937,7 +4937,7 @@ XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY XPE::read_IMAGE_RESOURCE_DIRECTORY_ENTRY
 
 XPE_DEF::IMAGE_RESOURCE_DIRECTORY XPE::read_IMAGE_RESOURCE_DIRECTORY(qint64 nOffset)
 {
-    XPE_DEF::IMAGE_RESOURCE_DIRECTORY result= {};
+    XPE_DEF::IMAGE_RESOURCE_DIRECTORY result={};
 
     read_array(nOffset,(char *)&result,sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY));
 
@@ -4946,7 +4946,7 @@ XPE_DEF::IMAGE_RESOURCE_DIRECTORY XPE::read_IMAGE_RESOURCE_DIRECTORY(qint64 nOff
 
 XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY XPE::read_IMAGE_RESOURCE_DATA_ENTRY(qint64 nOffset)
 {
-    XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY result= {};
+    XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY result={};
 
     read_array(nOffset,(char *)&result,sizeof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY));
 
@@ -4955,7 +4955,7 @@ XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY XPE::read_IMAGE_RESOURCE_DATA_ENTRY(qint64 nO
 
 XPE::RESOURCES_ID_NAME XPE::getResourcesIDName(qint64 nResourceOffset,quint32 value)
 {
-    RESOURCES_ID_NAME result= {};
+    RESOURCES_ID_NAME result={};
 
     if(value&0x80000000)
     {
@@ -4988,7 +4988,7 @@ QList<qint64> XPE::getRelocsAsRVAList()
     {
         while(true)
         {
-            XPE_DEF::IMAGE_BASE_RELOCATION ibr= {};
+            XPE_DEF::IMAGE_BASE_RELOCATION ibr={};
 
             if(!read_array(nRelocsOffset,(char *)&ibr,sizeof(XPE_DEF::IMAGE_BASE_RELOCATION)))
             {
@@ -5129,7 +5129,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice,bool bIsImage, QList<qint64> *pLis
 
             QByteArray baRelocs=XPE::relocsAsRVAListToByteArray(&listRVAs,pe.is64());
 
-            XPE_DEF::IMAGE_SECTION_HEADER ish= {};
+            XPE_DEF::IMAGE_SECTION_HEADER ish={};
 
             ish.Characteristics=0x42000040;
             QString sSectionName=".reloc";
@@ -5139,7 +5139,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice,bool bIsImage, QList<qint64> *pLis
 
             if(bResult)
             {
-                XPE_DEF::IMAGE_DATA_DIRECTORY dd= {};
+                XPE_DEF::IMAGE_DATA_DIRECTORY dd={};
 
                 dd.VirtualAddress=ish.VirtualAddress;
                 dd.Size=ish.Misc.VirtualSize;
@@ -5578,7 +5578,7 @@ QList<qint64> XPE::getTLS_CallbacksList()
 
 XPE::TLS_HEADER XPE::getTLSHeader()
 {
-    TLS_HEADER result= {};
+    TLS_HEADER result={};
 
     if(isTLSPresent())
     {

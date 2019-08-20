@@ -1340,7 +1340,7 @@ qint64 XBinary::addressToOffset(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 n
 
 XBinary::MEMORY_MAP XBinary::getOffsetMemoryMap(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nOffset)
 {
-    MEMORY_MAP result= {};
+    MEMORY_MAP result={};
 
     for(int i=0; i<pMemoryMap->count(); i++)
     {
@@ -1359,7 +1359,7 @@ XBinary::MEMORY_MAP XBinary::getOffsetMemoryMap(QList<XBinary::MEMORY_MAP> *pMem
 
 XBinary::MEMORY_MAP XBinary::getAddressMemoryMap(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress, ADDRESS_SEGMENT segment)
 {
-    MEMORY_MAP result= {};
+    MEMORY_MAP result={};
 
     for(int i=0; i<pMemoryMap->count(); i++)
     {
@@ -1380,7 +1380,7 @@ QList<XBinary::MEMORY_MAP> XBinary::getMemoryMapList()
 {
     QList<MEMORY_MAP> listMemoryMap;
 
-    MEMORY_MAP record= {};
+    MEMORY_MAP record={};
     record.nAddress=_getBaseAddress();
     record.segment=ADDRESS_SEGMENT_FLAT;
     record.nOffset=0;
@@ -2262,7 +2262,7 @@ QString XBinary::getSignature(qint64 nOffset, qint64 nSize)
 
 XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
 {
-    OFFSETSIZE result= {};
+    OFFSETSIZE result={};
 
     result.nOffset=-1;
     result.nSize=0;

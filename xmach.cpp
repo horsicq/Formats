@@ -440,7 +440,7 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
 
     for(quint32 i=0; i<nNumberOfCommands; i++)
     {
-        COMMAND_RECORD record= {};
+        COMMAND_RECORD record={};
 
         record.nOffset=nOffset;
         record.nType=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmd),bIsBigEndian);

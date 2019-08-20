@@ -264,7 +264,7 @@ QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()
 
 //    qint64 nBaseAddress=_getBaseAddress();
 
-    MEMORY_MAP recordHeader= {};
+    MEMORY_MAP recordHeader={};
     recordHeader.nSize=nHeaderSize;
     recordHeader.nOffset=nHeaderOffset;
     recordHeader.nAddress=-1;
@@ -274,7 +274,7 @@ QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()
     listResult.append(recordHeader);
 
     //    MEMORY_MAP recordData={};
-    MEMORY_MAP recordCode= {};
+    MEMORY_MAP recordCode={};
 
     recordCode.nSize=nCodeSize;
     recordCode.nOffset=nCodeOffset;
@@ -288,7 +288,7 @@ QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()
 
     if(nOverlaySize)
     {
-        MEMORY_MAP recordOverlay= {};
+        MEMORY_MAP recordOverlay={};
         recordOverlay.nSize=nOverlayOffset;
         recordOverlay.nOffset=nOverlaySize;
         recordOverlay.nAddress=-1;
