@@ -53,15 +53,15 @@ const quint32 S_IMAGE_FILE_LINE_NUMS_STRIPPED               =0x0004;  // Line nu
 const quint32 S_IMAGE_FILE_LOCAL_SYMS_STRIPPED              =0x0008;  // Local symbols stripped from file.
 const quint32 S_IMAGE_FILE_AGGRESIVE_WS_TRIM                =0x0010;  // Agressively trim working set
 const quint32 S_IMAGE_FILE_LARGE_ADDRESS_AWARE              =0x0020;  // App can handle >2gb addresses
-const quint32 S_IMAGE_FILE_BYTES_REVERSED_LO                =0x0080;  // Bytes of machine word are reversed.
-const quint32 S_IMAGE_FILE_32BIT_MACHINE                    =0x0100;  // 32 bit word machine.
+const quint32 S_IMAGE_FILE_BYTES_REVERSED_LO                =0x0080;  // Bytes of machine quint16 are reversed.
+const quint32 S_IMAGE_FILE_32BIT_MACHINE                    =0x0100;  // 32 bit quint16 machine.
 const quint32 S_IMAGE_FILE_DEBUG_STRIPPED                   =0x0200;  // Debugging info stripped from file in .DBG file
 const quint32 S_IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP          =0x0400;  // If Image is on removable media, copy and run from the swap file.
 const quint32 S_IMAGE_FILE_NET_RUN_FROM_SWAP                =0x0800;  // If Image is on Net, copy and run from the swap file.
 const quint32 S_IMAGE_FILE_SYSTEM                           =0x1000;  // System File.
 const quint32 S_IMAGE_FILE_DLL                              =0x2000;  // File is a DLL.
 const quint32 S_IMAGE_FILE_UP_SYSTEM_ONLY                   =0x4000;  // File should only be run on a UP machine
-const quint32 S_IMAGE_FILE_BYTES_REVERSED_HI                =0x8000;  // Bytes of machine word are reversed.
+const quint32 S_IMAGE_FILE_BYTES_REVERSED_HI                =0x8000;  // Bytes of machine quint16 are reversed.
 
 const quint32 S_IMAGE_FILE_MACHINE_UNKNOWN                  =0;
 const quint32 S_IMAGE_FILE_MACHINE_I386                     =0x014c;  // Intel 386.
@@ -389,7 +389,7 @@ struct IMAGE_BASE_RELOCATION
 {
     quint32 VirtualAddress;
     quint32 SizeOfBlock;
-    // WORD    TypeOffset[1];
+    // quint16    TypeOffset[1];
 };
 
 struct IMAGE_EXPORT_DIRECTORY
@@ -549,7 +549,7 @@ struct S_tagVS_FIXEDFILEINFO
     quint32 dwFileDateMS;       // e.g.  0
     quint32 dwFileDateLS;       // e.g.  0
 };
-//typedef VOID (NTAPI *PIMAGE_TLS_CALLBACK)(PVOID DllHandle,DWORD Reason,PVOID Reserved);
+//typedef VOID (NTAPI *PIMAGE_TLS_CALLBACK)(PVOID DllHandle,quint32 Reason,PVOID Reserved);
 
 struct S_IMAGE_TLS_DIRECTORY64
 {
@@ -572,11 +572,11 @@ struct S_IMAGE_TLS_DIRECTORY32
 };
 
 //union {
-//        DWORD Characteristics;
+//        quint32 Characteristics;
 //        struct {
-//            DWORD Reserved0 : 20;
-//            DWORD Alignment : 4;
-//            DWORD Reserved1 : 8;
+//            quint32 Reserved0 : 20;
+//            quint32 Alignment : 4;
+//            quint32 Reserved1 : 8;
 //        } DUMMYSTRUCTNAME;
 //    } DUMMYUNIONNAME;
 
@@ -620,5 +620,106 @@ struct S_IMAGE_RUNTIME_FUNCTION_ENTRY
         quint32 UnwindData;
     } DUMMYUNIONNAME;
 };
+
+struct S_IMAGE_LOAD_CONFIG_CODE_INTEGRITY
+{
+    quint16 Flags;          // Flags to indicate if CI information is available, etc.
+    quint16 Catalog;        // 0xFFFF means not available
+    quint32 CatalogOffset;
+    quint32 Reserved;       // Additional bitmask to be defined later
+};
+
+struct S_IMAGE_LOAD_CONFIG_DIRECTORY32
+{
+    quint32 Size;
+    quint32 TimeDateStamp;
+    quint16 MajorVersion;
+    quint16 MinorVersion;
+    quint32 GlobalFlagsClear;
+    quint32 GlobalFlagsSet;
+    quint32 CriticalSectionDefaultTimeout;
+    quint32 DeCommitFreeBlockThreshold;
+    quint32 DeCommitTotalFreeThreshold;
+    quint32 LockPrefixTable;                // VA
+    quint32 MaximumAllocationSize;
+    quint32 VirtualMemoryThreshold;
+    quint32 ProcessHeapFlags;
+    quint32 ProcessAffinityMask;
+    quint16 CSDVersion;
+    quint16 DependentLoadFlags;
+    quint32 EditList;                       // VA
+    quint32 SecurityCookie;                 // VA
+    quint32 SEHandlerTable;                 // VA
+    quint32 SEHandlerCount;
+    quint32 GuardCFCheckFunctionPointer;    // VA
+    quint32 GuardCFDispatchFunctionPointer; // VA
+    quint32 GuardCFFunctionTable;           // VA
+    quint32 GuardCFFunctionCount;
+    quint32 GuardFlags;
+    S_IMAGE_LOAD_CONFIG_CODE_INTEGRITY CodeIntegrity;
+    quint32 GuardAddressTakenIatEntryTable; // VA
+    quint32 GuardAddressTakenIatEntryCount;
+    quint32 GuardLongJumpTargetTable;       // VA
+    quint32 GuardLongJumpTargetCount;
+    quint32 DynamicValueRelocTable;         // VA
+    quint32 CHPEMetadataPointer;
+    quint32 GuardRFFailureRoutine;          // VA
+    quint32 GuardRFFailureRoutineFunctionPointer; // VA
+    quint32 DynamicValueRelocTableOffset;
+    quint16 DynamicValueRelocTableSection;
+    quint16 Reserved2;
+    quint32 GuardRFVerifyStackPointerFunctionPointer; // VA
+    quint32 HotPatchTableOffset;
+    quint32 Reserved3;
+    quint32 EnclaveConfigurationPointer;    // VA
+    quint32 VolatileMetadataPointer;        // VA
+};
+
+struct S_IMAGE_LOAD_CONFIG_DIRECTORY64
+{
+    quint32 Size;
+    quint32 TimeDateStamp;
+    quint16 MajorVersion;
+    quint16 MinorVersion;
+    quint32 GlobalFlagsClear;
+    quint32 GlobalFlagsSet;
+    quint32 CriticalSectionDefaultTimeout;
+    quint64 DeCommitFreeBlockThreshold;
+    quint64 DeCommitTotalFreeThreshold;
+    quint64 LockPrefixTable;                // VA
+    quint64 MaximumAllocationSize;
+    quint64 VirtualMemoryThreshold;
+    quint64 ProcessAffinityMask;
+    quint32 ProcessHeapFlags;
+    quint16 CSDVersion;
+    quint16 DependentLoadFlags;
+    quint64 EditList;                       // VA
+    quint64 SecurityCookie;                 // VA
+    quint64 SEHandlerTable;                 // VA
+    quint64 SEHandlerCount;
+    quint64 GuardCFCheckFunctionPointer;    // VA
+    quint64 GuardCFDispatchFunctionPointer; // VA
+    quint64 GuardCFFunctionTable;           // VA
+    quint64 GuardCFFunctionCount;
+    quint32 GuardFlags;
+    S_IMAGE_LOAD_CONFIG_CODE_INTEGRITY CodeIntegrity;
+    quint64 GuardAddressTakenIatEntryTable; // VA
+    quint64 GuardAddressTakenIatEntryCount;
+    quint64 GuardLongJumpTargetTable;       // VA
+    quint64 GuardLongJumpTargetCount;
+    quint64 DynamicValueRelocTable;         // VA
+    quint64 CHPEMetadataPointer;            // VA
+    quint64 GuardRFFailureRoutine;          // VA
+    quint64 GuardRFFailureRoutineFunctionPointer; // VA
+    quint32 DynamicValueRelocTableOffset;
+    quint16 DynamicValueRelocTableSection;
+    quint16 Reserved2;
+    quint64 GuardRFVerifyStackPointerFunctionPointer; // VA
+    quint32 HotPatchTableOffset;
+    quint32 Reserved3;
+    quint64 EnclaveConfigurationPointer;     // VA
+    quint64 VolatileMetadataPointer;         // VA
+};
+
 }
 #endif // XPE_DEF_H
