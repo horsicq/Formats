@@ -543,6 +543,7 @@ public:
     bool isTLSPresent();
     bool isSignPresent();
     bool isExceptionPresent();
+    bool isLoadConfigPresent();
 
     XPE_DEF::S_IMAGE_TLS_DIRECTORY32 getTLSDirectory32();
     XPE_DEF::S_IMAGE_TLS_DIRECTORY64 getTLSDirectory64();

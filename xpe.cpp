@@ -5281,6 +5281,11 @@ bool XPE::isExceptionPresent()
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 }
 
+bool XPE::isLoadConfigPresent()
+{
+    return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+}
+
 XPE_DEF::S_IMAGE_TLS_DIRECTORY32 XPE::getTLSDirectory32()
 {
     XPE_DEF::S_IMAGE_TLS_DIRECTORY32 result={};
