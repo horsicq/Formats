@@ -2292,12 +2292,7 @@ bool XPE::setImports(QIODevice *pDevice,bool bIsImage, QList<XPE::IMPORT_HEADER>
 
             ish.Characteristics=0xc0000040;
 
-            // TODO section name!
-
-            //    char *pszTest="ABCDE";
-
-            //    addSection(sFileName,&ish,pszTest,5);
-
+            // TODO section name!!!
             if(addSection(pDevice,bIsImage,&ish,baImport.data(),baImport.size()))
             {
                 QList<MEMORY_MAP> listMP=pe.getMemoryMapList();
