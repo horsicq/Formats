@@ -65,7 +65,9 @@ quint32 XBinary::random64()
 {
     quint64 nVal1=random32();
     quint64 nVal2=random32();
+
     nVal1=nVal1<<32;
+
     return nVal1+nVal2;
 }
 
@@ -694,9 +696,11 @@ qint64 XBinary::_read_int64(char *pData, bool bIsBigEndian)
 
 QString XBinary::_read_ansiString(char *pData, int nMaxSize)
 {
-    QByteArray baData(pData,nMaxSize);
     QString sResult;
+
+    QByteArray baData(pData,nMaxSize);
     sResult.append(baData.data());
+
     return sResult;
 }
 
@@ -1390,6 +1394,7 @@ QList<XBinary::MEMORY_MAP> XBinary::getMemoryMapList()
 
     return listMemoryMap;
 }
+
 qint64 XBinary::getBaseAddress()
 {
     return this->__nBaseAddress;
@@ -1481,6 +1486,7 @@ QString XBinary::_createSignature(QString sSignature1, QString sSignature2)
 bool XBinary::compareSignatureOnAddress(QString sSignature, qint64 nAddress,ADDRESS_SEGMENT segment)
 {
     bool bResult=false;
+
     qint64 nOffset=addressToOffset(nAddress,segment);
 
     if(nOffset!=-1)
@@ -1576,8 +1582,8 @@ bool XBinary::moveMemory(qint64 nSourceOffset,qint64 nDestOffset, qint64 nSize)
 bool XBinary::dumpToFile(QString sFileName, const char *pData, qint64 nDataSize)
 {
     bool bResult=false;
-    QFile file;
 
+    QFile file;
     file.setFileName(sFileName);
     file.resize(0);
 
@@ -1596,8 +1602,8 @@ bool XBinary::dumpToFile(QString sFileName, const char *pData, qint64 nDataSize)
 bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize)
 {
     bool bResult=false;
-    QFile file;
 
+    QFile file;
     file.setFileName(sFileName);
     file.resize(0);
 
@@ -2924,6 +2930,7 @@ int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSi
 int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSignatures, QString sSignature, int nStartIndex)
 {
     int nResult=0;
+
     int nSignatureSize=sSignature.size();
 
     for(int i=nStartIndex; i<nSignatureSize; i++)
@@ -2955,6 +2962,7 @@ int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSigna
 int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatures, QString sSignature, int nStartIndex)
 {
     int nResult=0;
+
     int nSignatureSize=sSignature.size();
     QString sBaseAddress;
     bool bIsBaseAddress=false;
@@ -3005,6 +3013,7 @@ int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
 int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignatures, QString sSignature, int nStartIndex)
 {
     int nResult=0;
+
     int nSignatureSize=sSignature.size();
     QString sBytes;
 
