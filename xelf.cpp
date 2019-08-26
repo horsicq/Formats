@@ -405,6 +405,7 @@ void XELF::setHdr64_shstrndx(quint16 value)
 QMap<quint64, QString> XELF::getTypes()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"ET_NONE");
     mapResult.insert(1,"ET_REL");
     mapResult.insert(2,"ET_EXEC");
@@ -413,12 +414,14 @@ QMap<quint64, QString> XELF::getTypes()
     mapResult.insert(5,"ET_NUM");
     mapResult.insert(0xff00,"ET_LOPROC");
     mapResult.insert(0xffff,"ET_HIPROC");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getTypesS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"NONE");
     mapResult.insert(1,"REL");
     mapResult.insert(2,"EXEC");
@@ -427,12 +430,14 @@ QMap<quint64, QString> XELF::getTypesS()
     mapResult.insert(5,"NUM");
     mapResult.insert(0xff00,"LOPROC");
     mapResult.insert(0xffff,"HIPROC");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getMachines()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"EM_NONE"); // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_XELF_DEF::Elf.h
     mapResult.insert(1,"EM_M32");
     mapResult.insert(2,"EM_SPARC");
@@ -471,12 +476,14 @@ QMap<quint64, QString> XELF::getMachines()
     mapResult.insert(0x9041,"EM_CYGNUXELF_DEF::M32R");
     mapResult.insert(0xA390,"EM_S390_OLD");
     mapResult.insert(0xbeef,"EM_CYGNUXELF_DEF::MN10300");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getMachinesS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"NONE"); // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_XELF_DEF::Elf.h
     mapResult.insert(1,"M32");
     mapResult.insert(2,"SPARC");
@@ -515,69 +522,85 @@ QMap<quint64, QString> XELF::getMachinesS()
     mapResult.insert(0x9041,"CYGNUXELF_DEF::M32R");
     mapResult.insert(0xA390,"S390_OLD");
     mapResult.insert(0xbeef,"CYGNUXELF_DEF::MN10300");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getHeaderVersionList()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(1,"EV_CURRENT");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getIndentClasses()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"ELFCLASSNONE");
     mapResult.insert(1,"ELFCLASS32");
     mapResult.insert(2,"ELFCLASS64");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getIndentClassesS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"NONE");
     mapResult.insert(1,"32");
     mapResult.insert(2,"64");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getIndentDatas()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"ELFDATANONE");
     mapResult.insert(1,"ELFDATA2LSB");
     mapResult.insert(2,"ELFDATA2MSB");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getIndentDatasS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"NONE");
     mapResult.insert(1,"2LSB");
     mapResult.insert(2,"2MSB");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getIndentVersions()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(1,"EV_CURRENT");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getIndentVersionsS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(1,"CURRENT");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getIndentOsabis()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"ELFOSABI_SYSV");
     mapResult.insert(1,"ELFOSABI_HPUX");
     mapResult.insert(2,"ELFOSABI_NETBSD");
@@ -596,12 +619,14 @@ QMap<quint64, QString> XELF::getIndentOsabis()
     mapResult.insert(15,"ELFOSABI_AROS");
     mapResult.insert(97,"ELFOSABI_ARM");
     mapResult.insert(255,"ELFOSABI_STANDALONE");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getIndentOsabisS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"SYSV");
     mapResult.insert(1,"HPUX");
     mapResult.insert(2,"NETBSD");
@@ -620,12 +645,14 @@ QMap<quint64, QString> XELF::getIndentOsabisS()
     mapResult.insert(15,"AROS");
     mapResult.insert(97,"ARM");
     mapResult.insert(255,"STANDALONE");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getSectionTypes()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"SHT_NULL");
     mapResult.insert(1,"SHT_PROGBITS");
     mapResult.insert(2,"SHT_SYMTAB");
@@ -660,12 +687,14 @@ QMap<quint64, QString> XELF::getSectionTypes()
     mapResult.insert(0x7fffffff,"SHT_HIPROC");
     mapResult.insert(0x80000000,"SHT_LOUSER");
     mapResult.insert(0xffffffff,"SHT_HIUSER");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getSectionTypesS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"NULL");
     mapResult.insert(1,"PROGBITS");
     mapResult.insert(2,"SYMTAB");
@@ -700,12 +729,14 @@ QMap<quint64, QString> XELF::getSectionTypesS()
     mapResult.insert(0x7fffffff,"HIPROC");
     mapResult.insert(0x80000000,"LOUSER");
     mapResult.insert(0xffffffff,"HIUSER");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getSectionFlags()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0x00000001,"SHF_WRITE");
     mapResult.insert(0x00000002,"SHF_ALLOC");
     mapResult.insert(0x00000004,"SHF_EXECINSTR");
@@ -720,12 +751,14 @@ QMap<quint64, QString> XELF::getSectionFlags()
     mapResult.insert(0xf0000000,"SHF_MASKPROC");
     mapResult.insert(0x40000000,"SHF_ORDERED");
     mapResult.insert(0x80000000,"SHF_EXCLUDE");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getSectionFlagsS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0x00000001,"WRITE");
     mapResult.insert(0x00000002,"ALLOC");
     mapResult.insert(0x00000004,"EXECINSTR");
@@ -740,12 +773,14 @@ QMap<quint64, QString> XELF::getSectionFlagsS()
     mapResult.insert(0xf0000000,"MASKPROC");
     mapResult.insert(0x40000000,"ORDERED");
     mapResult.insert(0x80000000,"EXCLUDE");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getProgramTypes()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"PT_NULL");
     mapResult.insert(1,"PT_LOAD");
     mapResult.insert(2,"PT_DYNAMIC");
@@ -769,12 +804,14 @@ QMap<quint64, QString> XELF::getProgramTypes()
     mapResult.insert(0x70000000,"PT_LOPROC");
     mapResult.insert(0x7fffffff,"PT_HIPROC");
     mapResult.insert(0x70000000,"PT_MIPXELF_DEF::REGINFO");
+
     return mapResult;   
 }
 
 QMap<quint64, QString> XELF::getProgramTypesS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"NULL");
     mapResult.insert(1,"LOAD");
     mapResult.insert(2,"DYNAMIC");
@@ -798,28 +835,33 @@ QMap<quint64, QString> XELF::getProgramTypesS()
     mapResult.insert(0x70000000,"LOPROC");
     mapResult.insert(0x7fffffff,"HIPROC");
     mapResult.insert(0x70000000,"MIPXELF_DEF::REGINFO");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getProgramFlags()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0x00000001,"PF_X");
     mapResult.insert(0x00000002,"PF_W");
     mapResult.insert(0x00000004,"PF_R");
     mapResult.insert(0x0ff00000,"PF_MASKOS");
     mapResult.insert(0xf0000000,"PF_MASKPROC");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getProgramFlagsS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0x00000001,"X");
     mapResult.insert(0x00000002,"W");
     mapResult.insert(0x00000004,"R");
     mapResult.insert(0x0ff00000,"MASKOS");
     mapResult.insert(0xf0000000,"MASKPROC");
+
     return mapResult;
 }
 
@@ -2583,6 +2625,7 @@ QList<QString> XELF::getLibraries(QList<XELF::TAG_STRUCT> *pList)
 QMap<quint64, QString> XELF::getDynamicTags()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"DT_NULL");
     mapResult.insert(1,"DT_NEEDED");
     mapResult.insert(2,"DT_PLTRELSZ");
@@ -2651,12 +2694,14 @@ QMap<quint64, QString> XELF::getDynamicTags()
     mapResult.insert(0x7ffffffd,"DT_AUXILIARY");
     mapResult.insert(0x7ffffffe,"DT_USED");
     mapResult.insert(0x7fffffff,"DT_HIPROC"); // DT_FILTER
+
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getDynamicTagsS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0,"NULL");
     mapResult.insert(1,"NEEDED");
     mapResult.insert(2,"PLTRELSZ");
@@ -2725,6 +2770,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     mapResult.insert(0x7ffffffd,"AUXILIARY");
     mapResult.insert(0x7ffffffe,"USED");
     mapResult.insert(0x7fffffff,"HIPROC"); // FILTER
+
     return mapResult;
 }
 

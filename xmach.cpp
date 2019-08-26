@@ -166,50 +166,59 @@ qint64 XMACH::getHeaderSize()
 QMap<quint64, QString> XMACH::getHeaderMagics()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0xfeedface,"MH_MAGIC");
     mapResult.insert(0xcefaedfe,"MH_CIGAM");
     mapResult.insert(0xfeedfacf,"MH_MAGIC_64");
     mapResult.insert(0xcffaedfe,"MH_CIGAM_64");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XMACH::getHeaderMagicsS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0xfeedface,"MAGIC");
     mapResult.insert(0xcefaedfe,"CIGAM");
     mapResult.insert(0xfeedfacf,"MAGIC_64");
     mapResult.insert(0xcffaedfe,"CIGAM_64");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XMACH::getHeaderCpuTypes()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(7,"CPU_TYPE_I386");
     mapResult.insert(0x1000007,"CPU_TYPE_X86_64");
     mapResult.insert(12,"CPU_TYPE_ARM");
     mapResult.insert(14,"CPU_TYPE_SPARC");
     mapResult.insert(18,"CPU_TYPE_POWERPC");
     mapResult.insert(0x1000018,"CPU_TYPE_POWERPC64");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XMACH::getHeaderCpuTypesS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(7,"I386");
     mapResult.insert(0x1000007,"X86_64");
     mapResult.insert(12,"ARM");
     mapResult.insert(14,"SPARC");
     mapResult.insert(18,"POWERPC");
     mapResult.insert(0x1000018,"POWERPC64");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XMACH::getHeaderFileTypes()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0x1,"MH_OBJECT");
     mapResult.insert(0x2,"MH_EXECUTE");
     mapResult.insert(0x3,"MH_FVMLIB");
@@ -221,12 +230,14 @@ QMap<quint64, QString> XMACH::getHeaderFileTypes()
     mapResult.insert(0x9,"MH_DYLIB_STUB");
     mapResult.insert(0xa,"MH_DSYM");
     mapResult.insert(0xb,"MH_KEXT_BUNDLE");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XMACH::getHeaderFileTypesS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0x1,"OBJECT");
     mapResult.insert(0x2,"EXECUTE");
     mapResult.insert(0x3,"FVMLIB");
@@ -238,12 +249,14 @@ QMap<quint64, QString> XMACH::getHeaderFileTypesS()
     mapResult.insert(0x9,"DYLIB_STUB");
     mapResult.insert(0xa,"DSYM");
     mapResult.insert(0xb,"KEXT_BUNDLE");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XMACH::getHeaderFlags()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0x1,"MH_NOUNDEFS");
     mapResult.insert(0x2,"MH_INCRLINK");
     mapResult.insert(0x4,"MH_DYLDLINK");
@@ -272,12 +285,14 @@ QMap<quint64, QString> XMACH::getHeaderFlags()
     mapResult.insert(0x02000000,"MH_APP_EXTENSION_SAFE");
     mapResult.insert(0x04000000,"MH_NLIST_OUTOFSYNC_WITH_DYLDINFO");
     mapResult.insert(0x08000000,"MH_SIM_SUPPORT");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XMACH::getHeaderFlagsS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0x1,"NOUNDEFS");
     mapResult.insert(0x2,"INCRLINK");
     mapResult.insert(0x4,"DYLDLINK");
@@ -306,12 +321,14 @@ QMap<quint64, QString> XMACH::getHeaderFlagsS()
     mapResult.insert(0x02000000,"APP_EXTENSION_SAFE");
     mapResult.insert(0x04000000,"NLIST_OUTOFSYNC_WITH_DYLDINFO");
     mapResult.insert(0x08000000,"SIM_SUPPORT");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XMACH::getLoadCommandTypes()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0x1,"LC_SEGMENT");
     mapResult.insert(0x2,"LC_SYMTAB");
     mapResult.insert(0x3,"LC_SYMSEG");
@@ -364,12 +381,14 @@ QMap<quint64, QString> XMACH::getLoadCommandTypes()
     mapResult.insert(0x2E,"LC_LINKER_OPTIMIZATION_HINT");
     mapResult.insert(0x2F,"LC_VERSION_MIN_TVOS");
     mapResult.insert(0x30,"LC_VERSION_MIN_WATCHOS");
+
     return mapResult;
 }
 
 QMap<quint64, QString> XMACH::getLoadCommandTypesS()
 {
     QMap<quint64, QString> mapResult;
+
     mapResult.insert(0x1,"SEGMENT");
     mapResult.insert(0x2,"SYMTAB");
     mapResult.insert(0x3,"SYMSEG");
@@ -422,6 +441,7 @@ QMap<quint64, QString> XMACH::getLoadCommandTypesS()
     mapResult.insert(0x2E,"LINKER_OPTIMIZATION_HINT");
     mapResult.insert(0x2F,"VERSION_MIN_TVOS");
     mapResult.insert(0x30,"VERSION_MIN_WATCHOS");
+
     return mapResult;
 }
 
