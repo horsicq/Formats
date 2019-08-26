@@ -3925,6 +3925,20 @@ QByteArray XPE::createHeaderStub(HEADER_OPTIONS *pHeaderOptions) // TODO options
     return baResult;
 }
 
+XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32()
+{
+    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 result={};
+
+    return result;
+}
+
+XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64()
+{
+    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 result={};
+
+    return result;
+}
+
 qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)
 {
     qint64 nHeadersSize=nSectionsTableOffset+sizeof(XPE_DEF::IMAGE_SECTION_HEADER)*nNumberOfSections;

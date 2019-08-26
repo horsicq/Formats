@@ -653,6 +653,9 @@ public:
 
     static QByteArray createHeaderStub(HEADER_OPTIONS *pHeaderOptions);
 
+    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 getLoadConfigDirectory32();
+    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 getLoadConfigDirectory64();
+
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     qint64 _calculateRawSize();
