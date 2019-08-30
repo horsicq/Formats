@@ -720,6 +720,5 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY64
     quint64 EnclaveConfigurationPointer;     // VA
     quint64 VolatileMetadataPointer;         // VA
 };
-
 }
 #endif // XPE_DEF_H

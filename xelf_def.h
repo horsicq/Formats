@@ -39,67 +39,67 @@ namespace XELF_DEF
 //typedef quint32        Elf64_Word;
 //typedef quint64        Elf64_Size;
 
-const quint8 S_EI_NIDENT=16;
-const quint8 S_EI_MAG0=0;
-const quint8 S_ELFMAG0=0x7f;
-const quint8 S_EI_MAG1=1;
-const quint8 S_ELFMAG1='E';
-const quint8 S_EI_MAG2=2;
-const quint8 S_ELFMAG2='L';
-const quint8 S_EI_MAG3=3;
-const quint8 S_ELFMAG3='F';
+const quint8 S_EI_NIDENT                    =16;
+const quint8 S_EI_MAG0                      =0;
+const quint8 S_ELFMAG0                      =0x7f;
+const quint8 S_EI_MAG1                      =1;
+const quint8 S_ELFMAG1                      ='E';
+const quint8 S_EI_MAG2                      =2;
+const quint8 S_ELFMAG2                      ='L';
+const quint8 S_EI_MAG3                      =3;
+const quint8 S_ELFMAG3                      ='F';
 //const quint8 ELFMAG          "\177ELF"
-const quint32 S_ELFMAG=0x464C457F;
-const quint8 S_SELFMAG=4;
-const quint8 S_EI_CLASS=4;                  /* File class byte index */
-const quint8 S_ELFCLASSNONE=0;              /* Invalid class */
-const quint8 S_ELFCLASS32=1;                /* 32-bit objects */
-const quint8 S_ELFCLASS64=2;                /* 64-bit objects */
-const quint8 S_EI_DATA=5;                   /* Data encodeing byte index */
-const quint8 S_ELFDATANONE=0;               /* Invalid data encoding */
-const quint8 S_ELFDATA2LSB=1;               /* 2's complement little endian */
-const quint8 S_ELFDATA2MSB=2;               /* 2's complement big endian */
-const quint8 S_EI_VERSION=6;                /* File version byte index */
-const quint8 S_EV_NONE=0;                   /* Invalid ELF Version */
-const quint8 S_EV_CURRENT=1;                /* Current version */
-const quint8 S_EI_OSABI=7;                  /* Operating system/ABI identification */
-const quint8 S_EI_ABIVERSION=8;             /* ABI version */
-const quint8 S_SHN_UNDEF=0;
+const quint32 S_ELFMAG                      =0x464C457F;
+const quint8 S_SELFMAG                      =4;
+const quint8 S_EI_CLASS                     =4;                     /* File class byte index */
+const quint8 S_ELFCLASSNONE                 =0;                     /* Invalid class */
+const quint8 S_ELFCLASS32                   =1;                     /* 32-bit objects */
+const quint8 S_ELFCLASS64                   =2;                     /* 64-bit objects */
+const quint8 S_EI_DATA                      =5;                     /* Data encodeing byte index */
+const quint8 S_ELFDATANONE                  =0;                     /* Invalid data encoding */
+const quint8 S_ELFDATA2LSB                  =1;                     /* 2's complement little endian */
+const quint8 S_ELFDATA2MSB                  =2;                     /* 2's complement big endian */
+const quint8 S_EI_VERSION                   =6;                     /* File version byte index */
+const quint8 S_EV_NONE                      =0;                     /* Invalid ELF Version */
+const quint8 S_EV_CURRENT                   =1;                     /* Current version */
+const quint8 S_EI_OSABI                     =7;                     /* Operating system/ABI identification */
+const quint8 S_EI_ABIVERSION                =8;                     /* ABI version */
+const quint8 S_SHN_UNDEF                    =0;
 
 struct Elf32_Ehdr
 {
-    quint8          e_ident[S_EI_NIDENT];   /* ident bytes */
-    quint16         e_type;                 /* file type */
-    quint16         e_machine;              /* target machine */
-    quint32         e_version;              /* file version */
-    quint32         e_entry;                /* start address */
-    quint32         e_phoff;                /* phdr file offset */
-    quint32         e_shoff;                /* shdr file offset */
-    quint32         e_flags;                /* file flags */
-    quint16         e_ehsize;               /* sizeof ehdr */
-    quint16         e_phentsize;            /* sizeof phdr */
-    quint16         e_phnum;                /* number phdrs */
-    quint16         e_shentsize;            /* sizeof shdr */
-    quint16         e_shnum;                /* number shdrs */
-    quint16         e_shstrndx;             /* shdr string index */
+    quint8 e_ident[S_EI_NIDENT];    /* ident bytes */
+    quint16 e_type;                 /* file type */
+    quint16 e_machine;              /* target machine */
+    quint32 e_version;              /* file version */
+    quint32 e_entry;                /* start address */
+    quint32 e_phoff;                /* phdr file offset */
+    quint32 e_shoff;                /* shdr file offset */
+    quint32 e_flags;                /* file flags */
+    quint16 e_ehsize;               /* sizeof ehdr */
+    quint16 e_phentsize;            /* sizeof phdr */
+    quint16 e_phnum;                /* number phdrs */
+    quint16 e_shentsize;            /* sizeof shdr */
+    quint16 e_shnum;                /* number shdrs */
+    quint16 e_shstrndx;             /* shdr string index */
 };
 
 struct Elf64_Ehdr
 {
-    quint8          e_ident[S_EI_NIDENT];   /* ident bytes */
-    quint16         e_type;                 /* file type */
-    quint16         e_machine;              /* target machine */
-    quint32         e_version;              /* file version */
-    quint64         e_entry;                /* start address */
-    quint64         e_phoff;                /* phdr file offset */
-    quint64         e_shoff;                /* shdr file offset */
-    quint32         e_flags;                /* file flags */
-    quint16         e_ehsize;               /* sizeof ehdr */
-    quint16         e_phentsize;            /* sizeof phdr */
-    quint16         e_phnum;                /* number phdrs */
-    quint16         e_shentsize;            /* sizeof shdr */
-    quint16         e_shnum;                /* number shdrs */
-    quint16         e_shstrndx;             /* shdr string index */
+    quint8 e_ident[S_EI_NIDENT];    /* ident bytes */
+    quint16 e_type;                 /* file type */
+    quint16 e_machine;              /* target machine */
+    quint32 e_version;              /* file version */
+    quint64 e_entry;                /* start address */
+    quint64 e_phoff;                /* phdr file offset */
+    quint64 e_shoff;                /* shdr file offset */
+    quint32 e_flags;                /* file flags */
+    quint16 e_ehsize;               /* sizeof ehdr */
+    quint16 e_phentsize;            /* sizeof phdr */
+    quint16 e_phnum;                /* number phdrs */
+    quint16 e_shentsize;            /* sizeof shdr */
+    quint16 e_shnum;                /* number shdrs */
+    quint16 e_shstrndx;             /* shdr string index */
 };
 
 struct Elf32_Shdr
@@ -181,4 +181,3 @@ struct Elf_Phdr
 };
 }
 #endif // XELF_DEF_H
-

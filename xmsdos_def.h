@@ -71,4 +71,3 @@ struct IMAGE_DOS_HEADEREX
 };
 }
 #endif // XMSDOS_DEF_H
-
