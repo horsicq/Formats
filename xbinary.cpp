@@ -3043,6 +3043,7 @@ int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignature
         QByteArray baData;
         baData.append(sBytes);
         record.baData=QByteArray::fromHex(baData);
+
         pListSignatures->append(record);
     }
 

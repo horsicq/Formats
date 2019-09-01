@@ -986,7 +986,7 @@ bool XELF::isSectionValid(quint32 nIndex)
 
 QList<XELF_DEF::Elf32_Shdr> XELF::getElf32_ShdrList()
 {
-    QList<XELF_DEF::Elf32_Shdr> result;
+    QList<XELF_DEF::Elf32_Shdr> listResult;
 
     quint32 nNumberOfSections=getHdr32_shnum();
     quint32 offset=getHdr32_shoff();
@@ -1007,17 +1007,17 @@ QList<XELF_DEF::Elf32_Shdr> XELF::getElf32_ShdrList()
         record.sh_addralign=read_uint32(offset+offsetof(XELF_DEF::Elf32_Shdr,sh_addralign),bIsBigEndian);
         record.sh_entsize=read_uint32(offset+offsetof(XELF_DEF::Elf32_Shdr,sh_entsize),bIsBigEndian);
 
-        result.append(record);
+        listResult.append(record);
 
         offset+=sizeof(XELF_DEF::Elf32_Shdr);
     }
 
-    return result;
+    return listResult;
 }
 
 QList<XELF_DEF::Elf64_Shdr> XELF::getElf64_ShdrList()
 {
-    QList<XELF_DEF::Elf64_Shdr> result;
+    QList<XELF_DEF::Elf64_Shdr> listResult;
 
     quint32 nNumberOfSections=getHdr64_shnum();
     quint64 offset=getHdr64_shoff();
@@ -1038,12 +1038,12 @@ QList<XELF_DEF::Elf64_Shdr> XELF::getElf64_ShdrList()
         record.sh_addralign=read_uint64(offset+offsetof(XELF_DEF::Elf64_Shdr,sh_addralign),bIsBigEndian);
         record.sh_entsize=read_uint64(offset+offsetof(XELF_DEF::Elf64_Shdr,sh_entsize),bIsBigEndian);
 
-        result.append(record);
+        listResult.append(record);
 
         offset+=sizeof(XELF_DEF::Elf64_Shdr);
     }
 
-    return result;
+    return listResult;
 }
 
 QList<XELF_DEF::Elf_Shdr> XELF::getElf_ShdrList()
