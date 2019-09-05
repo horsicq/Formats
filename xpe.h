@@ -656,6 +656,16 @@ public:
     XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 getLoadConfigDirectory32();
     XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 getLoadConfigDirectory64();
 
+    quint32 getLoadConfig_Size();
+    quint32 getLoadConfig_TimeDateStamp();
+    quint16 getLoadConfig_MajorVersion();
+    quint16 getLoadConfig_MinorVersion();
+
+    void setLoadConfig_Size(quint32 value);
+    void setLoadConfig_TimeDateStamp(quint32 value);
+    void setLoadConfig_MajorVersion(quint16 value);
+    void setLoadConfig_MinorVersion(quint16 value);
+
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     qint64 _calculateRawSize();
