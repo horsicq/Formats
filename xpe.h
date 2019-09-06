@@ -660,11 +660,17 @@ public:
     quint32 getLoadConfig_TimeDateStamp();
     quint16 getLoadConfig_MajorVersion();
     quint16 getLoadConfig_MinorVersion();
+    quint32 getLoadConfig_GlobalFlagsClear();
+    quint32 getLoadConfig_GlobalFlagsSet();
+    quint32 getLoadConfig_CriticalSectionDefaultTimeout();
 
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
     void setLoadConfig_MajorVersion(quint16 value);
     void setLoadConfig_MinorVersion(quint16 value);
+    void setLoadConfig_GlobalFlagsClear(quint32 value);
+    void setLoadConfig_GlobalFlagsSet(quint32 value);
+    void setLoadConfig_CriticalSectionDefaultTimeout(quint32 value);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

@@ -651,6 +651,7 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY32
     quint32 SecurityCookie;                 // VA
     quint32 SEHandlerTable;                 // VA
     quint32 SEHandlerCount;
+    // Standard
     quint32 GuardCFCheckFunctionPointer;    // VA
     quint32 GuardCFDispatchFunctionPointer; // VA
     quint32 GuardCFFunctionTable;           // VA
@@ -697,6 +698,7 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY64
     quint64 SecurityCookie;                 // VA
     quint64 SEHandlerTable;                 // VA
     quint64 SEHandlerCount;
+    // Standard
     quint64 GuardCFCheckFunctionPointer;    // VA
     quint64 GuardCFDispatchFunctionPointer; // VA
     quint64 GuardCFFunctionTable;           // VA
