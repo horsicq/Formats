@@ -664,6 +664,13 @@ public:
     quint32 getLoadConfig_GlobalFlagsSet();
     quint32 getLoadConfig_CriticalSectionDefaultTimeout();
 
+    quint64 getLoadConfig_DeCommitFreeBlockThreshold();
+    quint64 getLoadConfig_DeCommitTotalFreeThreshold();
+    quint64 getLoadConfig_LockPrefixTable();
+    quint64 getLoadConfig_MaximumAllocationSize();
+    quint64 getLoadConfig_VirtualMemoryThreshold();
+    quint64 getLoadConfig_ProcessAffinityMask();
+
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
     void setLoadConfig_MajorVersion(quint16 value);
