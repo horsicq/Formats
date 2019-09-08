@@ -679,6 +679,13 @@ public:
     void setLoadConfig_GlobalFlagsSet(quint32 value);
     void setLoadConfig_CriticalSectionDefaultTimeout(quint32 value);
 
+    void setLoadConfig_DeCommitFreeBlockThreshold(quint64 value);
+    void setLoadConfig_DeCommitTotalFreeThreshold(quint64 value);
+    void setLoadConfig_LockPrefixTable(quint64 value);
+    void setLoadConfig_MaximumAllocationSize(quint64 value);
+    void setLoadConfig_VirtualMemoryThreshold(quint64 value);
+    void setLoadConfig_ProcessAffinityMask(quint64 value);
+
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     qint64 _calculateRawSize();
