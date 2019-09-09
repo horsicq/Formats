@@ -671,6 +671,9 @@ public:
     quint64 getLoadConfig_VirtualMemoryThreshold();
     quint64 getLoadConfig_ProcessAffinityMask();
 
+    quint16 getLoadConfig_CSDVersion();
+    quint16 getLoadConfig_DependentLoadFlags();
+
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
     void setLoadConfig_MajorVersion(quint16 value);
@@ -685,6 +688,9 @@ public:
     void setLoadConfig_MaximumAllocationSize(quint64 value);
     void setLoadConfig_VirtualMemoryThreshold(quint64 value);
     void setLoadConfig_ProcessAffinityMask(quint64 value);
+
+    void setLoadConfig_CSDVersion(quint16 value);
+    void setLoadConfig_DependentLoadFlags(quint16 value);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
