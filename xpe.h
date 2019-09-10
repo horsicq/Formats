@@ -256,6 +256,7 @@ public:
     explicit XPE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
     bool is64();
+    static bool is64(QString sFileName);
 
     bool isRichSignaturePresent();
     QList<XPE::RICH_RECORD> getRichSignatureRecords();
@@ -674,6 +675,11 @@ public:
     quint16 getLoadConfig_CSDVersion();
     quint16 getLoadConfig_DependentLoadFlags();
 
+    quint64 getLoadConfig_EditList();
+    quint64 getLoadConfig_SecurityCookie();
+    quint64 getLoadConfig_SEHandlerTable();
+    quint64 getLoadConfig_SEHandlerCount();
+
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
     void setLoadConfig_MajorVersion(quint16 value);
@@ -691,6 +697,11 @@ public:
 
     void setLoadConfig_CSDVersion(quint16 value);
     void setLoadConfig_DependentLoadFlags(quint16 value);
+
+    void setLoadConfig_EditList(quint64 value);
+    void setLoadConfig_SecurityCookie(quint64 value);
+    void setLoadConfig_SEHandlerTable(quint64 value);
+    void setLoadConfig_SEHandlerCount(quint64 value);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
