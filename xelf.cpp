@@ -448,9 +448,13 @@ QMap<quint64, QString> XELF::getMachines()
     mapResult.insert(7,"EM_860");
     mapResult.insert(8,"EM_MIPS");
     mapResult.insert(9,"EM_S370");
-    mapResult.insert(10,"EM_MIPXELF_DEF::RS3_LE");
+    mapResult.insert(10,"EM_MIPS_RS3_LE");
+    mapResult.insert(11,"EM_RS6000");
     mapResult.insert(15,"EM_PARISC");
+    mapResult.insert(16,"EM_nCUBE");
+    mapResult.insert(17,"EM_VPP500");
     mapResult.insert(18,"EM_SPARC32PLUS");
+    mapResult.insert(19,"EM_960");
     mapResult.insert(20,"EM_PPC");
     mapResult.insert(21,"EM_PPC64");
     mapResult.insert(22,"EM_S390");
@@ -484,7 +488,9 @@ QMap<quint64, QString> XELF::getMachinesS()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0,"NONE"); // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_XELF_DEF::Elf.h
+    // TODO ftp://ftp.eso.org/pub/solaris/rec_patches/8/8_Recommended/109147-39/SUNWhea/reloc/usr/include/sys/elf.h
+    // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_XELF_DEF::Elf.h
+    mapResult.insert(0,"NONE");
     mapResult.insert(1,"M32");
     mapResult.insert(2,"SPARC");
     mapResult.insert(3,"386");
@@ -494,9 +500,13 @@ QMap<quint64, QString> XELF::getMachinesS()
     mapResult.insert(7,"860");
     mapResult.insert(8,"MIPS");
     mapResult.insert(9,"S370");
-    mapResult.insert(10,"MIPXELF_DEF::RS3_LE");
+    mapResult.insert(10,"MIPS_RS3_LE");
+    mapResult.insert(11,"RS6000");
     mapResult.insert(15,"PARISC");
+    mapResult.insert(16,"nCUBE");
+    mapResult.insert(17,"VPP500");
     mapResult.insert(18,"SPARC32PLUS");
+    mapResult.insert(19,"960");
     mapResult.insert(20,"PPC");
     mapResult.insert(21,"PPC64");
     mapResult.insert(22,"S390");
