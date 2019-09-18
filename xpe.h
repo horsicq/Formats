@@ -420,6 +420,8 @@ public:
 
     QList<IMPORT_RECORD> getImportRecords();
 
+    quint64 getImportHash();
+
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> getImportDescriptors();
     QList<IMAGE_IMPORT_DESCRIPTOR_EX> getImportDescriptorsEx();
 

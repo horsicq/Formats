@@ -482,8 +482,10 @@ QMap<quint64, QString> XELF::getMachines()
     mapResult.insert(56,"EM_NCPU");
     mapResult.insert(57,"EM_NDR1");
     mapResult.insert(58,"EM_STARCORE");
-    mapResult.insert(59,"EM_ME16");   // TODO
-    mapResult.insert(62,"EM_X86_64");
+    mapResult.insert(59,"EM_ME16");
+    mapResult.insert(60,"EM_ST100");
+    mapResult.insert(61,"EM_TINYJ");
+    mapResult.insert(62,"EM_AMD64"); // EM_X86_64 TODO
     mapResult.insert(76,"EM_CRIS");
     mapResult.insert(87,"EM_V850");
     mapResult.insert(88,"EM_M32R");
@@ -555,7 +557,9 @@ QMap<quint64, QString> XELF::getMachinesS()
     mapResult.insert(57,"NDR1");
     mapResult.insert(58,"STARCORE");
     mapResult.insert(59,"ME16");
-    mapResult.insert(62,"X86_64");
+    mapResult.insert(60,"ST100");
+    mapResult.insert(61,"TINYJ");
+    mapResult.insert(62,"AMD64"); // X86_64
     mapResult.insert(76,"CRIS");
     mapResult.insert(87,"V850");
     mapResult.insert(88,"M32R");

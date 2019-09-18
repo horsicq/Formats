@@ -1682,6 +1682,24 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords()
     return listResult;
 }
 
+quint64 XPE::getImportHash()
+{
+    quint64 nResult=0;
+
+    QList<XPE::IMPORT_RECORD> listImports=getImportRecords();
+
+    int nCount=listImports.count();
+
+    for(int i=0;i<nCount; i++)
+    {
+        QString sRecord=listImports.at(i).sLibrary+" "+listImports.at(i).sFunction;
+
+        nResult+=getCRC32(sRecord);
+    }
+
+    return nResult;
+}
+
 QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> XPE::getImportDescriptors()
 {
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> listResult;
