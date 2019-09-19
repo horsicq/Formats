@@ -1682,7 +1682,7 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords()
     return listResult;
 }
 
-quint64 XPE::getImportHash()
+quint64 XPE::getImportHash64()
 {
     quint64 nResult=0;
 
@@ -1696,6 +1696,26 @@ quint64 XPE::getImportHash()
 
         nResult+=getCRC32(sRecord);
     }
+
+    return nResult;
+}
+
+quint32 XPE::getImportHash32()
+{
+    quint64 nResult=0;
+
+    QList<XPE::IMPORT_RECORD> listImports=getImportRecords();
+
+    int nCount=listImports.count();
+
+    QString sRecord;
+
+    for(int i=0;i<nCount; i++)
+    {
+        sRecord+=listImports.at(i).sLibrary+listImports.at(i).sFunction;
+    }
+
+    nResult=getCRC32(sRecord);
 
     return nResult;
 }
