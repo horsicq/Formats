@@ -53,15 +53,15 @@ quint32 XBinary::random32()
         qsrand(nSeed);
     }
 
-    quint16 nValue1=(quint32)qrand();
-    quint16 nValue2=(quint32)qrand();
+    quint16 nValue1=(quint16)qrand();
+    quint16 nValue2=(quint16)qrand();
 
     nSeed^=(nValue1<<16)+nValue2;
 #endif
     return nSeed;
 }
 
-quint32 XBinary::random64()
+quint64 XBinary::random64()
 {
     quint64 nVal1=random32();
     quint64 nVal2=random32();
@@ -354,7 +354,7 @@ qint32 XBinary::read_int32(qint64 nOffset, bool bIsBigEndian)
 
 quint64 XBinary::read_uint64(qint64 nOffset, bool bIsBigEndian)
 {
-    qint64 result=0;
+    quint64 result=0;
 
     read_array(nOffset,(char *)(&result),8);
 
@@ -2113,7 +2113,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
 
         const int BUFFER_SIZE=0x1000;
 
-        quint64 nTemp=0;
+        qint64 nTemp=0;
         char *pBuffer=new char[BUFFER_SIZE];
 
         while(nSize>0)
@@ -2168,7 +2168,7 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
         {
             const int BUFFER_SIZE=0x1000;
 
-            quint64 nTemp=0;
+            qint64 nTemp=0;
             char *pBuffer=new char[BUFFER_SIZE];
 
             while(nSize>0)
@@ -2709,7 +2709,7 @@ bool XBinary::resize(QIODevice *pDevice, qint64 nSize)
     }
     else if(sClassName=="QBuffer")
     {
-        ((QBuffer *)pDevice)->buffer().resize(nSize);
+        ((QBuffer *)pDevice)->buffer().resize((qint32)nSize);
         bResult=true;
     }
 

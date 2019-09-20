@@ -2647,7 +2647,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<
     {
         if(pListRecords->at(i).sName[0]==sName1)
         {
-            if((pListRecords->at(i).nID[1]==nID2)||(nID2==-1))
+            if((pListRecords->at(i).nID[1]==nID2)||(nID2==(quint32)-1))
             {
                 result=pListRecords->at(i);
 
@@ -5038,7 +5038,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
                             int nMethodDef=2;
                             int nParamList=2;
 
-                            quint8 cHeapOffsetSizes=cHeapOffsetSizes=result.cCLI_MetaData_Tables_HeapOffsetSizes;
+                            quint8 cHeapOffsetSizes=result.cCLI_MetaData_Tables_HeapOffsetSizes;
 
                             if(cHeapOffsetSizes&0x01)
                             {
@@ -6418,7 +6418,7 @@ QList<qint64> XPE::getTLS_CallbacksList()
 {
     QList<qint64> listResult;
 
-    qint64 nOffset=addressToOffset(getTLS_AddressOfCallBacks());
+    qint64 nOffset=addressToOffset((qint64)getTLS_AddressOfCallBacks());
 
     if(nOffset!=-1)
     {

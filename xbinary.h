@@ -139,7 +139,7 @@ public:
     qint64 getSize();
 
     static quint32 random32();
-    static quint32 random64();
+    static quint64 random64();
 
     static QString convertFileName(QString sFileName);
     static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames);
