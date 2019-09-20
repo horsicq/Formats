@@ -1070,7 +1070,7 @@ QString XPE::getSection_NameAsString(quint32 nNumber)
 
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
-    char cBuffer[9]= {0};
+    char cBuffer[9]={0};
 
     if(nNumber<nNumberOfSections)
     {
@@ -1212,7 +1212,7 @@ void XPE::setSection_NameAsString(quint32 nNumber, QString sName)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
-    char cBuffer[9]= {0};
+    char cBuffer[9]={0};
 
     sName.resize(8);
 
@@ -5905,7 +5905,7 @@ QList<XPE::RELOCS_HEADER> XPE::getRelocsHeaders()
     {
         while(true)
         {
-            RELOCS_HEADER record= {0};
+            RELOCS_HEADER record={0};
 
             record.nOffset=nRelocsOffset;
 
@@ -5936,7 +5936,7 @@ QList<XPE::RELOCS_POSITION> XPE::getRelocsPositions(qint64 nOffset)
 {
     QList<XPE::RELOCS_POSITION> listResult;
 
-    XPE_DEF::IMAGE_BASE_RELOCATION ibr= {0};
+    XPE_DEF::IMAGE_BASE_RELOCATION ibr={0};
 
     if(read_array(nOffset,(char *)&ibr,sizeof(XPE_DEF::IMAGE_BASE_RELOCATION)))
     {
@@ -5950,7 +5950,7 @@ QList<XPE::RELOCS_POSITION> XPE::getRelocsPositions(qint64 nOffset)
 
             for(int i=0; i<nCount; i++)
             {
-                RELOCS_POSITION record= {0};
+                RELOCS_POSITION record={0};
 
                 quint16 nRecord=read_uint16(nOffset);
 

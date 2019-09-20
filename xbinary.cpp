@@ -2109,7 +2109,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
 
     if(nOffset!=-1)
     {
-        double bytes[256]= {0.0};
+        double bytes[256]={0.0};
 
         const int BUFFER_SIZE=0x1000;
 
@@ -2126,7 +2126,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
                 return 0;
             }
 
-            for(quint64 i=0; i<nTemp; i++)
+            for(qint64 i=0; i<nTemp; i++)
             {
                 bytes[(unsigned char)pBuffer[i]]+=1;
             }
