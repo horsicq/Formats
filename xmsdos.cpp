@@ -30,7 +30,8 @@ bool XMSDOS::isValid()
 
     quint16 magic=get_magic();
 
-    if((magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||(magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
+    if( (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||
+        (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
     {
         bResult=true;
     }
@@ -312,6 +313,7 @@ QMap<quint64, QString> XMSDOS::getImageMagics()
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x5A4D,"IMAGE_DOS_SIGNATURE");
+    mapResult.insert(0x4D5A,"IMAGE_DOS_SIGNATURE_ZM");
 
     return mapResult;
 }
@@ -321,6 +323,7 @@ QMap<quint64, QString> XMSDOS::getImageMagicsS()
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x5A4D,"DOS_SIGNATURE");
+    mapResult.insert(0x4D5A,"DOS_SIGNATURE_ZM");
 
     return mapResult;
 }
