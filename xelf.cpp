@@ -497,10 +497,20 @@ QMap<quint64, QString> XELF::getMachines()
     mapResult.insert(73,"EM_SVX");
     mapResult.insert(74,"EM_ST19");
     mapResult.insert(75,"EM_VAX");
-    mapResult.insert(76,"EM_CRIS"); // TODO
+    mapResult.insert(76,"EM_CRIS");
+    mapResult.insert(77,"EM_JAVELIN");
+    mapResult.insert(78,"EM_FIREPATH");
+    mapResult.insert(79,"EM_ZSP");
+    mapResult.insert(80,"EM_MMIX");
+    mapResult.insert(81,"EM_HUANY");
+    mapResult.insert(82,"EM_PRISM");
+    mapResult.insert(83,"EM_AVR");
+    mapResult.insert(84,"EM_FR30");
+    mapResult.insert(85,"EM_D10V");
+    mapResult.insert(86,"EM_D30V");
     mapResult.insert(87,"EM_V850");
     mapResult.insert(88,"EM_M32R");
-    mapResult.insert(89,"EM_MN10300");
+    mapResult.insert(89,"EM_MN10300"); // TODO
     mapResult.insert(92,"EM_OPENRISC");
     mapResult.insert(106,"EM_BLACKFIN");
     mapResult.insert(113,"EM_ALTERA_NIOS2");
@@ -583,6 +593,16 @@ QMap<quint64, QString> XELF::getMachinesS()
     mapResult.insert(74,"ST19");
     mapResult.insert(75,"VAX");
     mapResult.insert(76,"CRIS");
+    mapResult.insert(77,"JAVELIN");
+    mapResult.insert(78,"FIREPATH");
+    mapResult.insert(79,"ZSP");
+    mapResult.insert(80,"MMIX");
+    mapResult.insert(81,"HUANY");
+    mapResult.insert(82,"PRISM");
+    mapResult.insert(83,"AVR");
+    mapResult.insert(84,"FR30");
+    mapResult.insert(85,"D10V");
+    mapResult.insert(86,"D30V");
     mapResult.insert(87,"V850");
     mapResult.insert(88,"M32R");
     mapResult.insert(89,"MN10300");
