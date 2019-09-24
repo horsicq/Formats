@@ -251,6 +251,9 @@ public:
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     qint64 getEntryPointAddress();
 
+    static qint64 getTotalVirtualSize(QList<MEMORY_MAP> *pMemoryMap);
+    static qint64 positionToVirtualAddress(QList<MEMORY_MAP> *pMemoryMap,qint64 nPosition);
+
     qint64 getImageAddress();
     void setImageBase(qint64 nValue);
 

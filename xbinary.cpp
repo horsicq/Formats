@@ -1512,6 +1512,41 @@ qint64 XBinary::getEntryPointAddress()
     return offsetToAddress(getEntryPointOffset());
 }
 
+qint64 XBinary::getTotalVirtualSize(QList<XBinary::MEMORY_MAP> *pMemoryMap)
+{
+    qint64 nResult=0;
+
+    int nCount=pMemoryMap->count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        nResult+=pMemoryMap->at(i).nSize;
+    }
+
+    return nResult;
+}
+
+qint64 XBinary::positionToVirtualAddress(QList<MEMORY_MAP> *pMemoryMap,qint64 nPosition)
+{
+    qint64 nResult=-1;
+
+    int nCount=pMemoryMap->count();
+
+    qint64 _nSize=0;
+
+    for(int i=0;i<nCount;i++)
+    {
+        if((_nSize<=nPosition)&&(nPosition<_nSize+pMemoryMap->at(i).nSize))
+        {
+            nResult=pMemoryMap->at(i).nAddress+(nPosition-_nSize);
+        }
+
+       _nSize+=pMemoryMap->at(i).nSize;
+    }
+
+    return nResult;
+}
+
 qint64 XBinary::getImageAddress()
 {
     return this->__nImageBase;
