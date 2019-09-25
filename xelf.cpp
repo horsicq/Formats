@@ -512,8 +512,11 @@ QMap<quint64, QString> XELF::getMachines()
     mapResult.insert(88,"EM_M32R");
     mapResult.insert(89,"EM_MN10300");
     mapResult.insert(90,"EM_MN10200");
-    mapResult.insert(91,"EM_PJ"); // TODO
+    mapResult.insert(91,"EM_PJ");
     mapResult.insert(92,"EM_OPENRISC");
+    mapResult.insert(93,"EM_ARC_A5");
+    mapResult.insert(94,"EM_XTENSA");
+    mapResult.insert(95,"EM_NUM"); // TODO
     mapResult.insert(106,"EM_BLACKFIN");
     mapResult.insert(113,"EM_ALTERA_NIOS2");
     mapResult.insert(140,"EM_TI_C6000");
@@ -612,6 +615,9 @@ QMap<quint64, QString> XELF::getMachinesS()
     mapResult.insert(90,"MN10200");
     mapResult.insert(91,"PJ"); // TODO
     mapResult.insert(92,"OPENRISC");
+    mapResult.insert(93,"ARC_A5");
+    mapResult.insert(94,"XTENSA");
+    mapResult.insert(95,"NUM");
     mapResult.insert(106,"BLACKFIN");
     mapResult.insert(113,"ALTERA_NIOS2");
     mapResult.insert(140,"TI_C6000");
