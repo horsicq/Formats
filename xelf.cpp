@@ -724,6 +724,7 @@ QMap<quint64, QString> XELF::getIndentOsabis()
     mapResult.insert(13,"ELFOSABI_OPENVMS");
     mapResult.insert(14,"ELFOSABI_NSK");
     mapResult.insert(15,"ELFOSABI_AROS");
+    mapResult.insert(64,"ELFOSABI_ARM_AEABI");
     mapResult.insert(97,"ELFOSABI_ARM");
     mapResult.insert(255,"ELFOSABI_STANDALONE");
 
@@ -750,6 +751,7 @@ QMap<quint64, QString> XELF::getIndentOsabisS()
     mapResult.insert(13,"OPENVMS");
     mapResult.insert(14,"NSK");
     mapResult.insert(15,"AROS");
+    mapResult.insert(64,"ARM_AEABI");
     mapResult.insert(97,"ARM");
     mapResult.insert(255,"STANDALONE");
 
