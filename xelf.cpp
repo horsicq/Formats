@@ -3026,4 +3026,3 @@ XELF::SECTION_RECORD XELF::getSectionRecord(QString sSectionName, QList<XELF::SE
 
     return result;
 }
-

@@ -191,6 +191,13 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypes()
 {
     QMap<quint64, QString> mapResult;
 
+    // https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h
+
+    mapResult.insert(1,"CPU_TYPE_VAX");
+    mapResult.insert(2,"CPU_TYPE_ROMP");
+    mapResult.insert(4,"CPU_TYPE_NS32032");
+    mapResult.insert(5,"CPU_TYPE_NS32332");
+    mapResult.insert(6,"CPU_TYPE_MC680x0");
     mapResult.insert(7,"CPU_TYPE_I386");
     mapResult.insert(0x1000007,"CPU_TYPE_X86_64");
     mapResult.insert(12,"CPU_TYPE_ARM");
@@ -205,6 +212,11 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypesS()
 {
     QMap<quint64, QString> mapResult;
 
+    mapResult.insert(1,"VAX");
+    mapResult.insert(2,"ROMP");
+    mapResult.insert(4,"NS32032");
+    mapResult.insert(5,"NS32332");
+    mapResult.insert(6,"MC680x0");
     mapResult.insert(7,"I386");
     mapResult.insert(0x1000007,"X86_64");
     mapResult.insert(12,"ARM");
