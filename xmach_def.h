@@ -142,6 +142,23 @@ const quint32 S_x86_DEBUG_STATE64                   =11;
 const quint32 S_x86_DEBUG_STATE                     =12;
 const quint32 S_THREAD_STATE_NONE                   =13;
 
+const quint32 S_LC_SEGMENT                          =0x1;	/* segment of this file to be mapped */
+const quint32 S_LC_SYMTAB                           =0x2;	/* link-edit stab symbol table info */
+const quint32 S_LC_SYMSEG                           =0x3;	/* link-edit gdb symbol table info (obsolete) */
+const quint32 S_LC_THREAD                           =0x4;	/* thread */
+const quint32 S_LC_UNIXTHREAD                       =0x5;	/* unix thread (includes a stack) */
+const quint32 S_LC_LOADFVMLIB                       =0x6;	/* load a specified fixed VM shared library */
+const quint32 S_LC_IDFVMLIB                         =0x7;	/* fixed VM shared library identification */
+const quint32 S_LC_IDENT                            =0x8;	/* object identification info (obsolete) */
+const quint32 S_LC_FVMFILE                          =0x9;	/* fixed VM file inclusion (internal use) */
+const quint32 S_LC_PREPAGE                          =0xa;   /* prepage command (internal use) */
+const quint32 S_LC_DYSYMTAB                         =0xb;	/* dynamic link-edit symbol table info */
+const quint32 S_LC_LOAD_DYLIB                       =0xc;	/* load a dynamicly linked shared library */
+const quint32 S_LC_ID_DYLIB                         =0xd;	/* dynamicly linked shared lib identification */
+const quint32 S_LC_LOAD_DYLINKER                    =0xe;	/* load a dynamic linker */
+const quint32 S_LC_ID_DYLINKER                      =0xf;	/* dynamic linker identification */
+const quint32 S_LC_PREBOUND_DYLIB                   =0x10;	/* modules prebound for a dynamicly */
+
 struct STRUCT_X86_THREAD_STATE32
 {
     quint32 eax;

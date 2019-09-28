@@ -637,7 +637,7 @@ qint64 XMACH::getAddressOfEntryPoint()
         quint32 nType=listLC.at(i).nType;
         qint64 nOffset=listLC.at(i).nOffset;
 
-        if((nType==0x4)||(nType==0x5)) // TODO consts
+        if((nType==XMACH_DEF::S_LC_THREAD)||(nType==XMACH_DEF::S_LC_UNIXTHREAD)) // TODO consts
         {
             quint32 nFlavor=read_uint32(nOffset+8,isBigEndian());
 
