@@ -26,11 +26,11 @@
 namespace XMACH_DEF
 {
 /* Constant for the magic field of the mach_header (32-bit architectures) */
-const quint32 S_MH_MAGIC        =0xfeedface;	/* the mach magic number */
-const quint32 S_MH_CIGAM        =0xcefaedfe	;/* NXSwapInt(MH_MAGIC) */
+const quint32 S_MH_MAGIC        =0xfeedface;        /* the mach magic number */
+const quint32 S_MH_CIGAM        =0xcefaedfe	;       /* NXSwapInt(MH_MAGIC) */
 /* Constant for the magic field of the mach_header_64 (64-bit architectures) */
-const quint32 S_MH_MAGIC_64     =0xfeedfacf; /* the 64-bit mach magic number */
-const quint32 S_MH_CIGAM_64     =0xcffaedfe; /* NXSwapInt(MH_MAGIC_64) */
+const quint32 S_MH_MAGIC_64     =0xfeedfacf;        /* the 64-bit mach magic number */
+const quint32 S_MH_CIGAM_64     =0xcffaedfe;        /* NXSwapInt(MH_MAGIC_64) */
 
 /*
  * The 32-bit mach header appears at the very beginning of the object file for
@@ -38,13 +38,13 @@ const quint32 S_MH_CIGAM_64     =0xcffaedfe; /* NXSwapInt(MH_MAGIC_64) */
  */
 struct mach_header
 {
-    quint32	magic;		/* mach magic number identifier */
-    qint32	cputype;	/* cpu specifier */
-    qint32	cpusubtype;	/* machine specifier */
-    quint32	filetype;	/* type of file */
-    quint32	ncmds;		/* number of load commands */
-    quint32	sizeofcmds;	/* the size of all the load commands */
-    quint32	flags;		/* flags */
+    quint32	magic;          /* mach magic number identifier */
+    qint32	cputype;        /* cpu specifier */
+    qint32	cpusubtype;     /* machine specifier */
+    quint32	filetype;       /* type of file */
+    quint32	ncmds;          /* number of load commands */
+    quint32	sizeofcmds;     /* the size of all the load commands */
+    quint32	flags;          /* flags */
 };
 
 /*
@@ -53,14 +53,14 @@ struct mach_header
  */
 struct mach_header_64
 {
-    quint32	magic;		/* mach magic number identifier */
-    qint32	cputype;	/* cpu specifier */
-    qint32	cpusubtype;	/* machine specifier */
-    quint32	filetype;	/* type of file */
-    quint32	ncmds;		/* number of load commands */
-    quint32	sizeofcmds;	/* the size of all the load commands */
-    quint32	flags;		/* flags */
-    quint32	reserved;	/* reserved */
+    quint32	magic;          /* mach magic number identifier */
+    qint32	cputype;        /* cpu specifier */
+    qint32	cpusubtype;     /* machine specifier */
+    quint32	filetype;       /* type of file */
+    quint32	ncmds;          /* number of load commands */
+    quint32	sizeofcmds;     /* the size of all the load commands */
+    quint32	flags;          /* flags */
+    quint32	reserved;       /* reserved */
 };
 
 struct load_command
@@ -99,33 +99,33 @@ struct segment_command_64
     quint32 flags;
 };
 
-struct section { /* for 32-bit architectures */
-    char sectname[16];	/* name of this section */
-    char segname[16];	/* segment this section goes in */
-    quint32	addr;		/* memory address of this section */
-    quint32	size;		/* size in bytes of this section */
-    quint32	offset;		/* file offset of this section */
-    quint32	align;		/* section alignment (power of 2) */
-    quint32	reloff;		/* file offset of relocation entries */
-    quint32	nreloc;		/* number of relocation entries */
-    quint32	flags;		/* flags (section type and attributes)*/
-    quint32	reserved1;	/* reserved (for offset or index) */
-    quint32	reserved2;	/* reserved (for count or sizeof) */
+struct section {            /* for 32-bit architectures */
+    char sectname[16];      /* name of this section */
+    char segname[16];       /* segment this section goes in */
+    quint32	addr;           /* memory address of this section */
+    quint32	size;           /* size in bytes of this section */
+    quint32	offset;         /* file offset of this section */
+    quint32	align;          /* section alignment (power of 2) */
+    quint32	reloff;         /* file offset of relocation entries */
+    quint32	nreloc;         /* number of relocation entries */
+    quint32	flags;          /* flags (section type and attributes)*/
+    quint32	reserved1;      /* reserved (for offset or index) */
+    quint32	reserved2;      /* reserved (for count or sizeof) */
 };
 
-struct section_64 { /* for 64-bit architectures */
-    char sectname[16];	/* name of this section */
-    char segname[16];	/* segment this section goes in */
-    quint64	addr;		/* memory address of this section */
-    quint64	size;		/* size in bytes of this section */
-    quint32	offset;		/* file offset of this section */
-    quint32	align;		/* section alignment (power of 2) */
-    quint32	reloff;		/* file offset of relocation entries */
-    quint32	nreloc;		/* number of relocation entries */
-    quint32	flags;		/* flags (section type and attributes)*/
-    quint32	reserved1;	/* reserved (for offset or index) */
-    quint32	reserved2;	/* reserved (for count or sizeof) */
-    quint32	reserved3;	/* reserved */
+struct section_64 {         /* for 64-bit architectures */
+    char sectname[16];      /* name of this section */
+    char segname[16];       /* segment this section goes in */
+    quint64	addr;           /* memory address of this section */
+    quint64	size;           /* size in bytes of this section */
+    quint32	offset;         /* file offset of this section */
+    quint32	align;          /* section alignment (power of 2) */
+    quint32	reloff;         /* file offset of relocation entries */
+    quint32	nreloc;         /* number of relocation entries */
+    quint32	flags;          /* flags (section type and attributes)*/
+    quint32	reserved1;      /* reserved (for offset or index) */
+    quint32	reserved2;      /* reserved (for count or sizeof) */
+    quint32	reserved3;      /* reserved */
 };
 
 const quint32 S_x86_THREAD_STATE32                  =1;
@@ -142,22 +142,34 @@ const quint32 S_x86_DEBUG_STATE64                   =11;
 const quint32 S_x86_DEBUG_STATE                     =12;
 const quint32 S_THREAD_STATE_NONE                   =13;
 
-const quint32 S_LC_SEGMENT                          =0x1;	/* segment of this file to be mapped */
-const quint32 S_LC_SYMTAB                           =0x2;	/* link-edit stab symbol table info */
-const quint32 S_LC_SYMSEG                           =0x3;	/* link-edit gdb symbol table info (obsolete) */
-const quint32 S_LC_THREAD                           =0x4;	/* thread */
-const quint32 S_LC_UNIXTHREAD                       =0x5;	/* unix thread (includes a stack) */
-const quint32 S_LC_LOADFVMLIB                       =0x6;	/* load a specified fixed VM shared library */
-const quint32 S_LC_IDFVMLIB                         =0x7;	/* fixed VM shared library identification */
-const quint32 S_LC_IDENT                            =0x8;	/* object identification info (obsolete) */
-const quint32 S_LC_FVMFILE                          =0x9;	/* fixed VM file inclusion (internal use) */
-const quint32 S_LC_PREPAGE                          =0xa;   /* prepage command (internal use) */
-const quint32 S_LC_DYSYMTAB                         =0xb;	/* dynamic link-edit symbol table info */
-const quint32 S_LC_LOAD_DYLIB                       =0xc;	/* load a dynamicly linked shared library */
-const quint32 S_LC_ID_DYLIB                         =0xd;	/* dynamicly linked shared lib identification */
-const quint32 S_LC_LOAD_DYLINKER                    =0xe;	/* load a dynamic linker */
-const quint32 S_LC_ID_DYLINKER                      =0xf;	/* dynamic linker identification */
-const quint32 S_LC_PREBOUND_DYLIB                   =0x10;	/* modules prebound for a dynamicly */
+const quint32 S_LC_REQ_DYLD                         =0x80000000;
+const quint32 S_LC_SEGMENT                          =0x1;           /* segment of this file to be mapped */
+const quint32 S_LC_SYMTAB                           =0x2;           /* link-edit stab symbol table info */
+const quint32 S_LC_SYMSEG                           =0x3;        	/* link-edit gdb symbol table info (obsolete) */
+const quint32 S_LC_THREAD                           =0x4;	        /* thread */
+const quint32 S_LC_UNIXTHREAD                       =0x5;	        /* unix thread (includes a stack) */
+const quint32 S_LC_LOADFVMLIB                       =0x6;	        /* load a specified fixed VM shared library */
+const quint32 S_LC_IDFVMLIB                         =0x7;	        /* fixed VM shared library identification */
+const quint32 S_LC_IDENT                            =0x8;	        /* object identification info (obsolete) */
+const quint32 S_LC_FVMFILE                          =0x9;	        /* fixed VM file inclusion (internal use) */
+const quint32 S_LC_PREPAGE                          =0xa;           /* prepage command (internal use) */
+const quint32 S_LC_DYSYMTAB                         =0xb;	        /* dynamic link-edit symbol table info */
+const quint32 S_LC_LOAD_DYLIB                       =0xc;	        /* load a dynamicly linked shared library */
+const quint32 S_LC_ID_DYLIB                         =0xd;	        /* dynamicly linked shared lib identification */
+const quint32 S_LC_LOAD_DYLINKER                    =0xe;	        /* load a dynamic linker */
+const quint32 S_LC_ID_DYLINKER                      =0xf;	        /* dynamic linker identification */
+const quint32 S_LC_PREBOUND_DYLIB                   =0x10;	        /* modules prebound for a dynamicly */
+const quint32 S_LC_ROUTINES                         =0x11;	        /* image routines */
+const quint32 S_LC_SUB_FRAMEWORK                    =0x12;	        /* sub framework */
+const quint32 S_LC_SUB_UMBRELLA                     =0x13;	        /* sub umbrella */
+const quint32 S_LC_SUB_CLIENT                       =0x14;	        /* sub client */
+const quint32 S_LC_SUB_LIBRARY                      =0x15;	        /* sub library */
+const quint32 S_LC_TWOLEVEL_HINTS                   =0x16;	        /* two-level namespace lookup hints */
+const quint32 S_LC_PREBIND_CKSUM                    =0x17;	        /* prebind checksum */
+const quint32 S_LC_LOAD_WEAK_DYLIB                  =(0x18 | S_LC_REQ_DYLD);
+const quint32 S_LC_SEGMENT_64                       =0x19;	        /* 64-bit segment of this file to bemapped */
+const quint32 S_LC_ROUTINES_64                      =0x1a;	        /* 64-bit image routines */
+const quint32 S_LC_UUID                             =0x1b;	        /* the uuid */
 
 struct STRUCT_X86_THREAD_STATE32
 {
@@ -206,10 +218,10 @@ struct STRUCT_X86_THREAD_STATE64
 
 struct entry_point_command
 {
-    quint32  cmd;    /* LC_MAIN only used in MH_EXECUTE filetypes */
-    quint32  cmdsize;    /* 24 */
-    quint64  entryoff;    /* file (__TEXT) offset of main() */
-    quint64  stacksize;/* if not zero, initial stack size */
+    quint32  cmd;               /* LC_MAIN only used in MH_EXECUTE filetypes */
+    quint32  cmdsize;           /* 24 */
+    quint64  entryoff;          /* file (__TEXT) offset of main() */
+    quint64  stacksize;         /* if not zero, initial stack size */
 };
 
 struct dylib

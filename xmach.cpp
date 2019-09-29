@@ -637,7 +637,7 @@ qint64 XMACH::getAddressOfEntryPoint()
         quint32 nType=listLC.at(i).nType;
         qint64 nOffset=listLC.at(i).nOffset;
 
-        if((nType==XMACH_DEF::S_LC_THREAD)||(nType==XMACH_DEF::S_LC_UNIXTHREAD)) // TODO consts
+        if((nType==XMACH_DEF::S_LC_THREAD)||(nType==XMACH_DEF::S_LC_UNIXTHREAD))
         {
             quint32 nFlavor=read_uint32(nOffset+8,isBigEndian());
 
@@ -722,7 +722,7 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECOR
 
     bool bIsBigEndian=isBigEndian();
 
-    QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(pList,0x0C); // TODO consts
+    QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(pList,XMACH_DEF::S_LC_LOAD_DYLIB);
 
     int nCount=listLCLibraries.count();
 
@@ -799,7 +799,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,0x19); // TODO consts
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT_64);
 
         int nCount=listLCSegments.count();
 
@@ -825,7 +825,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,0x01); // TODO consts
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT);
 
         int nCount=listLCSegments.count();
 
@@ -869,7 +869,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,0x19); // TODO consts
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT_64);
 
         int nCount=listLCSegments.count();
 
@@ -904,7 +904,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,0x01); // TODO consts
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT);
 
         int nCount=listLCSegments.count();
 
