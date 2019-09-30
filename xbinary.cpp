@@ -1063,6 +1063,32 @@ bool XBinary::moveFileToDirectory(QString sSrcFileName, QString sDestDirectory)
     return moveFile(sSrcFileName,sDestDirectory+QDir::separator()+fi.fileName());
 }
 
+QString XBinary::convertFileNameSymbols(QString sFileName)
+{
+    sFileName=sFileName.replace("/","_");
+    sFileName=sFileName.replace("\\","_");
+    sFileName=sFileName.replace("?","_");
+    sFileName=sFileName.replace("*","_");
+    sFileName=sFileName.replace("\"","_");
+    sFileName=sFileName.replace("<","_");
+    sFileName=sFileName.replace(">","_");
+    sFileName=sFileName.replace("|","_");
+
+    return sFileName;
+}
+
+QString XBinary::getBaseFileName(QString sFileName)
+{
+    QFileInfo fi(sFileName);
+
+    return fi.fileName();
+}
+
+bool XBinary::createDirectory(QString sDirectoryName)
+{
+    return QDir().mkdir(sDirectoryName);
+}
+
 void XBinary::_copyMemory(char *pDest,char *pSource, qint64 nSize)
 {
     // TODO optimize

@@ -81,8 +81,7 @@ bool SubDevice::seek(qint64 pos)
     {
         if(pDevice->seek(nOffset+pos))
         {
-            QIODevice::seek(pos);
-            bResult=true;
+            bResult=QIODevice::seek(pos);
         }
     }
 
@@ -113,7 +112,8 @@ void SubDevice::close()
 
 qint64 SubDevice::pos() const
 {
-    return pDevice->pos()-nOffset;
+//    return pDevice->pos()-nOffset;
+    return QIODevice::pos();
 }
 
 qint64 SubDevice::readData(char *data, qint64 maxSize)

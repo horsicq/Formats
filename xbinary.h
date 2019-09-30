@@ -222,6 +222,9 @@ public:
     static bool copyFile(QString sSrcFileName,QString sDestFileName);
     static bool moveFile(QString sSrcFileName,QString sDestFileName);
     static bool moveFileToDirectory(QString sSrcFileName,QString sDestDirectory);
+    static QString convertFileNameSymbols(QString sFileName);
+    static QString getBaseFileName(QString sFileName);
+    static bool createDirectory(QString sDirectoryName);
 
     static void _copyMemory(char *pDest,char *pSource, qint64 nSize);
     static bool copyDeviceMemory(QIODevice *pSourceDevice,qint64 nSourceOffset,QIODevice *pDestDevice,qint64 nDestOffset,qint64 nSize,quint32 nBufferSize=0x1000);
