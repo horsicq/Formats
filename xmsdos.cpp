@@ -341,7 +341,12 @@ qint64 XMSDOS::getOverlaySize()
 {
     qint64 nSize=getSize();
     qint64 nOverlayOffset=getOverlayOffset();
-    qint64 nDelta=nSize-nOverlayOffset;
+    qint64 nDelta=0;
+
+    if(nOverlayOffset>0)
+    {
+        nDelta=nSize-nOverlayOffset;
+    }
 
     return qMax(nDelta,(qint64)0);
 }
