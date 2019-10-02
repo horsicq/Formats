@@ -5887,6 +5887,11 @@ QList<qint64> XPE::getRelocsAsRVAList()
                 break;
             }
 
+            if(ibr.VirtualAddress&0xFFF)
+            {
+                break;
+            }
+
             nRelocsOffset+=sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
 
             int nCount=(ibr.SizeOfBlock-sizeof(XPE_DEF::IMAGE_BASE_RELOCATION))/sizeof(quint16);
@@ -5931,6 +5936,11 @@ QList<XPE::RELOCS_HEADER> XPE::getRelocsHeaders()
             }
 
             if((record.ibr.VirtualAddress==0)||(record.ibr.SizeOfBlock==0))
+            {
+                break;
+            }
+
+            if(record.ibr.VirtualAddress&0xFFF)
             {
                 break;
             }

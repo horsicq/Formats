@@ -30,7 +30,19 @@ XELF::~XELF()
 
 bool XELF::bIsValid()
 {
-    return getIdent_Magic()==XELF_DEF::S_ELFMAG;
+    bool bResult=false;
+
+    if(getIdent_Magic()==XELF_DEF::S_ELFMAG)
+    {
+        quint8 nClass=getIdent_class();
+
+        if((nClass==XELF_DEF::S_ELFCLASS32)||(nClass==XELF_DEF::S_ELFCLASS64))
+        {
+            bResult=true;
+        }
+    }
+
+    return bResult;
 }
 
 bool XELF::isBigEndian()
