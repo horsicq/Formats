@@ -2711,9 +2711,9 @@ QList<QString> XELF::getLibraries(QList<XELF::TAG_STRUCT> *pList)
 {
     QList<QString> listResult;
 
-    QList<XELF::TAG_STRUCT> listNeeded=XELF::getTagStructs(pList,1); // TODO const
-    QList<XELF::TAG_STRUCT> listStrTab=XELF::getTagStructs(pList,5); // TODO const
-    QList<XELF::TAG_STRUCT> listStrSize=XELF::getTagStructs(pList,10); // TODO const
+    QList<XELF::TAG_STRUCT> listNeeded=XELF::getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
+    QList<XELF::TAG_STRUCT> listStrTab=XELF::getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
+    QList<XELF::TAG_STRUCT> listStrSize=XELF::getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
 
     QList<MEMORY_MAP> listMM=getMemoryMapList();
 

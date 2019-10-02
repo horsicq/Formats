@@ -66,6 +66,18 @@ const quint8 S_EI_OSABI                     =7;                     /* Operating
 const quint8 S_EI_ABIVERSION                =8;                     /* ABI version */
 const quint8 S_SHN_UNDEF                    =0;
 
+const quint32 S_DT_NULL                     =0;                     /* Marks end of dynamic section */
+const quint32 S_DT_NEEDED                   =1;                     /* Name of needed library */
+const quint32 S_DT_PLTRELSZ                 =2;                     /* Size in bytes of PLT relocs */
+const quint32 S_DT_PLTGOT                   =3;                     /* Processor defined value */
+const quint32 S_DT_HASH                     =4;                     /* Address of symbol hash table */
+const quint32 S_DT_STRTAB                   =5;                     /* Address of string table */
+const quint32 S_DT_SYMTAB                   =6;                     /* Address of symbol table */
+const quint32 S_DT_RELA                     =7;                     /* Address of Rela relocs */
+const quint32 S_DT_RELASZ                   =8;                     /* Total size of Rela relocs */
+const quint32 S_DT_RELAENT                  =9;                     /* Size of one Rela reloc */
+const quint32 S_DT_STRSZ                    =10;                    /* Size of string table */
+
 struct Elf32_Ehdr
 {
     quint8 e_ident[S_EI_NIDENT];    /* ident bytes */
