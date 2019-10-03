@@ -126,29 +126,29 @@ QString XBinary::convertFileName(QString sFileName)
     return sFileName;
 }
 
-void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
-{
-    if((sDirectoryName!=".")&&(sDirectoryName!=".."))
-    {
-        QFileInfo fi(sDirectoryName);
+//void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
+//{
+//    if((sDirectoryName!=".")&&(sDirectoryName!=".."))
+//    {
+//        QFileInfo fi(sDirectoryName);
 
-        if(fi.isFile())
-        {
-            pListFileNames->append(fi.absoluteFilePath());
-        }
-        else if(fi.isDir())
-        {
-            QDir dir(sDirectoryName);
+//        if(fi.isFile())
+//        {
+//            pListFileNames->append(fi.absoluteFilePath());
+//        }
+//        else if(fi.isDir())
+//        {
+//            QDir dir(sDirectoryName);
 
-            QFileInfoList eil=dir.entryInfoList();
+//            QFileInfoList eil=dir.entryInfoList();
 
-            for(int i=0; i<eil.count(); i++)
-            {
-                findFiles(eil.at(i).absoluteFilePath(),pListFileNames);
-            }
-        }
-    }
-}
+//            for(int i=0; i<eil.count(); i++)
+//            {
+//                findFiles(eil.at(i).absoluteFilePath(),pListFileNames);
+//            }
+//        }
+//    }
+//}
 
 void XBinary::findFiles(QString sDirectoryName, XBinary::FFOPTIONS *pFFOption, qint32 nLevel)
 {

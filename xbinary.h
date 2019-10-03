@@ -142,7 +142,7 @@ public:
     static quint64 random64();
 
     static QString convertFileName(QString sFileName);
-    static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames);
+//    static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames); // TODO Check
 
     struct FFOPTIONS
     {
