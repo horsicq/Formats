@@ -432,6 +432,8 @@ public:
     QList<IMPORT_HEADER> getImports();
     QList<IMPORT_POSITION> getImportPositions(int nIndex);
 
+    QList<quint32> getImportPositionHashes();
+
     static bool isImportLibraryPresentI(QString sLibrary,QList<IMPORT_HEADER> *pListImport);
     static bool isImportFunctionPresentI(QString sLibrary,QString sFunction,QList<IMPORT_HEADER> *pListImport);
 

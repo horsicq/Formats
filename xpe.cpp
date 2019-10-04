@@ -2212,6 +2212,34 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
     return listResult;
 }
 
+QList<quint32> XPE::getImportPositionHashes()
+{
+    QList<quint32> listResult;
+
+    QList<IMPORT_HEADER> listImports=getImports();
+
+    int nCount=listImports.count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        IMPORT_HEADER record=listImports.at(i);
+
+        int _nCount=record.listPositions.count();
+
+        QString sString;
+
+        for(int j=0;j<_nCount;j++)
+        {
+            sString+=record.sName;
+            sString+=record.listPositions.at(j).sFunction;
+        }
+
+        listResult.append(getCRC32(sString));
+    }
+
+    return listResult;
+}
+
 bool XPE::isImportLibraryPresentI(QString sLibrary, QList<XPE::IMPORT_HEADER> *pListImport)
 {
     bool bResult=false;
