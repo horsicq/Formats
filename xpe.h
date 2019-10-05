@@ -388,6 +388,7 @@ public:
     QList<XPE_DEF::IMAGE_SECTION_HEADER> getSectionHeaders();
     // TODO with __getSectionOffsetAndSize
     static QList<SECTIONFILE_RECORD> getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pList,bool bIsImage);
+    static QList<QString> getSectionNames(QList<XPE::SECTIONFILE_RECORD> *pList);
 
     QList<SECTIONRVA_RECORD> getSectionRVARecords();
 

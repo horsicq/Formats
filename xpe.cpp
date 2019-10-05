@@ -1043,6 +1043,20 @@ QList<XPE::SECTIONFILE_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTI
     return listResult;
 }
 
+QList<QString> XPE::getSectionNames(QList<XPE::SECTIONFILE_RECORD> *pList)
+{
+    QList<QString> listResult;
+
+    int nNumberOfSections=pList->count();
+
+    for(int i=0; i<nNumberOfSections; i++)
+    {
+        listResult.append(pList->at(i).sName);
+    }
+
+    return listResult;
+}
+
 QList<XPE::SECTIONRVA_RECORD> XPE::getSectionRVARecords()
 {
     QList<SECTIONRVA_RECORD> listResult;
@@ -5397,10 +5411,10 @@ int XPE::getNormalDataSection()
         quint32 nSectionCharacteristics=listSections.at(i).Characteristics;
         nSectionCharacteristics&=0xFF0000FF;
 
-        if((((sSectionName=="DATA")||sSectionName==".data"))&&
-                (nSectionCharacteristics==0xC0000040)&&
-                (listSections.at(i).SizeOfRawData)&&
-                (nImportSection!=i))
+        if( (((sSectionName=="DATA")||sSectionName==".data"))&&
+            (nSectionCharacteristics==0xC0000040)&&
+            (listSections.at(i).SizeOfRawData)&&
+            (nImportSection!=i))
         {
             nResult=addressToSection(_getBaseAddress()+listSections.at(i).VirtualAddress);
             break;
@@ -5411,9 +5425,9 @@ int XPE::getNormalDataSection()
     {
         for(int i=1; i<nNumberOfSections; i++)
         {
-            if(listSections.at(i).SizeOfRawData&&(nImportSection!=i)&&
-                    (listSections.at(i).Characteristics!=0x60000020)&&
-                    (listSections.at(i).Characteristics!=0x40000040))
+            if( listSections.at(i).SizeOfRawData&&(nImportSection!=i)&&
+                (listSections.at(i).Characteristics!=0x60000020)&&
+                (listSections.at(i).Characteristics!=0x40000040))
             {
                 nResult=addressToSection(_getBaseAddress()+listSections.at(i).VirtualAddress);
                 break;
@@ -5462,7 +5476,6 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
     timer.start();
     qDebug("QPE::rebuildDump");
 #endif
-
     bool bResult=false;
 
     if(sResultFile!="")

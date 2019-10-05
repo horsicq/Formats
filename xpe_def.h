@@ -109,7 +109,7 @@ const quint32 S_IMAGE_SUBSYSTEM_EFI_ROM                     =13;
 const quint32 S_IMAGE_SUBSYSTEM_XBOX                        =14;
 const quint32 S_IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION    =16;
 
-const qint32 S_IMAGE_SIZEOF_SHORT_NAME =8;
+const qint32 S_IMAGE_SIZEOF_SHORT_NAME                      =8;
 
 const quint32 S_IMAGE_SCN_MEM_EXECUTE                       =0x20000000;
 const quint32 S_IMAGE_SCN_MEM_READ                          =0x40000000;
