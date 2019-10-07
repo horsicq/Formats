@@ -204,6 +204,7 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypes()
     mapResult.insert(9,"CPU_TYPE_NS32532");
     mapResult.insert(11,"CPU_TYPE_HPPA");
     mapResult.insert(12,"CPU_TYPE_ARM");
+    mapResult.insert(13,"CPU_TYPE_MC88000");
     mapResult.insert(14,"CPU_TYPE_SPARC");
     mapResult.insert(18,"CPU_TYPE_POWERPC");
     mapResult.insert(0x1000018,"CPU_TYPE_POWERPC64");
@@ -226,6 +227,7 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypesS()
     mapResult.insert(9,"NS32532");
     mapResult.insert(11,"HPPA");
     mapResult.insert(12,"ARM");
+    mapResult.insert(13,"MC88000");
     mapResult.insert(14,"SPARC");
     mapResult.insert(18,"POWERPC");
     mapResult.insert(0x1000018,"POWERPC64");
