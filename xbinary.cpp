@@ -39,6 +39,16 @@ qint64 XBinary::getSize()
     return __pDevice->size();
 }
 
+XBinary::MODE XBinary::getMode()
+{
+    return MODE_UNKNOWN;
+}
+
+XBinary::ARCH XBinary::getArch()
+{
+    return ARCH_UNKNOWN;
+}
+
 quint32 XBinary::random32()
 {
     static quint32 nSeed=0;
@@ -1536,6 +1546,28 @@ void XBinary::setEntryPointOffset(qint64 nEntryPointOffset)
 qint64 XBinary::getEntryPointAddress()
 {
     return offsetToAddress(getEntryPointOffset());
+}
+
+qint64 XBinary::getLowestAddress(QList<XBinary::MEMORY_MAP> *pMemoryMap)
+{
+    qint64 nResult=-1;
+
+    int nCount=pMemoryMap->count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(pMemoryMap->at(i).nAddress!=-1)
+        {
+            if(nResult==-1)
+            {
+                nResult=pMemoryMap->at(i).nAddress;
+            }
+
+            nResult=qMin(pMemoryMap->at(i).nAddress,nResult);
+        }
+    }
+
+    return nResult;
 }
 
 qint64 XBinary::getTotalVirtualSize(QList<XBinary::MEMORY_MAP> *pMemoryMap)

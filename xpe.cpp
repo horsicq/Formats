@@ -79,6 +79,23 @@ bool XPE::is64(QString sFileName)
     return bResult;
 }
 
+XBinary::MODE XPE::getMode()
+{
+    MODE result=MODE_32;
+
+    if(is64())
+    {
+        result=MODE_64;
+    }
+
+    return result;
+}
+
+XBinary::ARCH XPE::getArch()
+{
+    return ARCH_X86;
+}
+
 bool XPE::isRichSignaturePresent()
 {
     bool bResult=false;

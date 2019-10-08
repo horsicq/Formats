@@ -110,6 +110,20 @@ public:
         FT_MACH64
     };
 
+    enum MODE
+    {
+        MODE_UNKNOWN=0,
+        MODE_16,
+        MODE_32,
+        MODE_64
+    };
+
+    enum ARCH
+    {
+        ARCH_UNKNOWN=0,
+        ARCH_X86
+    };
+
     struct UNPACK_OPTIONS
     {
         // PE/PE+
@@ -137,6 +151,9 @@ public:
     explicit XBinary(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
     void setData(QIODevice *__pDevice);
     qint64 getSize();
+
+    virtual MODE getMode();
+    virtual ARCH getArch();
 
     static quint32 random32();
     static quint64 random64();
@@ -254,6 +271,7 @@ public:
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     qint64 getEntryPointAddress();
 
+    static qint64 getLowestAddress(QList<MEMORY_MAP> *pMemoryMap);
     static qint64 getTotalVirtualSize(QList<MEMORY_MAP> *pMemoryMap);
     static qint64 positionToVirtualAddress(QList<MEMORY_MAP> *pMemoryMap,qint64 nPosition);
 

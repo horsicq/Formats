@@ -258,6 +258,9 @@ public:
     bool is64();
     static bool is64(QString sFileName);
 
+    virtual MODE getMode();
+    virtual ARCH getArch();
+
     bool isRichSignaturePresent();
     QList<XPE::RICH_RECORD> getRichSignatureRecords();
 
