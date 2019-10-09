@@ -865,7 +865,7 @@ QMap<quint64, QString> XELF::getSectionFlags()
     mapResult.insert(0x00000020,"SHF_STRINGS");
     mapResult.insert(0x00000040,"SHF_INFO_LINK");
     mapResult.insert(0x00000080,"SHF_LINK_ORDER");
-    mapResult.insert(0x00000100,"SHF_OXELF_DEF::NONCONFORMING");
+    mapResult.insert(0x00000100,"SHF_OS_NONCONFORMING");
     mapResult.insert(0x00000200,"SHF_GROUP");
     mapResult.insert(0x00000400,"SHF_TLS");
     mapResult.insert(0x0ff00000,"SHF_MASKOS");
@@ -887,7 +887,7 @@ QMap<quint64, QString> XELF::getSectionFlagsS()
     mapResult.insert(0x00000020,"STRINGS");
     mapResult.insert(0x00000040,"INFO_LINK");
     mapResult.insert(0x00000080,"LINK_ORDER");
-    mapResult.insert(0x00000100,"OXELF_DEF::NONCONFORMING");
+    mapResult.insert(0x00000100,"OS_NONCONFORMING");
     mapResult.insert(0x00000200,"GROUP");
     mapResult.insert(0x00000400,"TLS");
     mapResult.insert(0x0ff00000,"MASKOS");
@@ -924,7 +924,7 @@ QMap<quint64, QString> XELF::getProgramTypes()
     mapResult.insert(0x6fffffff,"PT_HIOS"); // PT_HISUNW
     mapResult.insert(0x70000000,"PT_LOPROC");
     mapResult.insert(0x7fffffff,"PT_HIPROC");
-    mapResult.insert(0x70000000,"PT_MIPXELF_DEF::REGINFO");
+//    mapResult.insert(0x70000000,"PT_MIPXELF_DEF::REGINFO");
 
     return mapResult;   
 }
@@ -955,7 +955,7 @@ QMap<quint64, QString> XELF::getProgramTypesS()
     mapResult.insert(0x6fffffff,"HIOS"); // HISUNW
     mapResult.insert(0x70000000,"LOPROC");
     mapResult.insert(0x7fffffff,"HIPROC");
-    mapResult.insert(0x70000000,"MIPXELF_DEF::REGINFO");
+//    mapResult.insert(0x70000000,"MIPXELF_DEF::REGINFO");
 
     return mapResult;
 }
