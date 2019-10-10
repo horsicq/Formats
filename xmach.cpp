@@ -666,7 +666,7 @@ qint64 XMACH::getAddressOfEntryPoint()
                 nResult=read_uint64(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE64,rip),isBigEndian());
             }
         }
-        else if(nType==0x80000028) // TODO const
+        else if(nType==XMACH_DEF::S_LC_MAIN) // TODO const
         {
             qint64 nEntryPointOffset=read_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),isBigEndian());
 

@@ -170,6 +170,7 @@ const quint32 S_LC_LOAD_WEAK_DYLIB                  =(0x18 | S_LC_REQ_DYLD);
 const quint32 S_LC_SEGMENT_64                       =0x19;	        /* 64-bit segment of this file to bemapped */
 const quint32 S_LC_ROUTINES_64                      =0x1a;	        /* 64-bit image routines */
 const quint32 S_LC_UUID                             =0x1b;	        /* the uuid */
+const quint32 S_LC_MAIN                             =(0x28 | S_LC_REQ_DYLD);       /* main */
 
 struct STRUCT_X86_THREAD_STATE32
 {
