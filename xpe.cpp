@@ -3297,7 +3297,7 @@ bool XPE::addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QStri
 #ifdef QT_DEBUG
     QElapsedTimer timer;
     timer.start();
-    qDebug("QPE::addImportSection");
+    qDebug("XPE::addImportSection");
 #endif
 
     bool bResult=false;
@@ -3310,17 +3310,17 @@ bool XPE::addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QStri
         {
             QList<XPE::IMPORT_HEADER> list=mapIATToList(pMapIAT,pe.is64());
 #ifdef QT_DEBUG
-            qDebug("QPE::addImportSection:mapIATToList: %lld msec",timer.elapsed());
+            qDebug("XPE::addImportSection:mapIATToList: %lld msec",timer.elapsed());
 #endif
             bResult=setImports(pDevice,bIsImage,&list);
 #ifdef QT_DEBUG
-            qDebug("QPE::addImportSection:setImports: %lld msec",timer.elapsed());
+            qDebug("XPE::addImportSection:setImports: %lld msec",timer.elapsed());
 #endif
         }
     }
 
 #ifdef QT_DEBUG
-    qDebug("QPE::addImportSection: %lld msec",timer.elapsed());
+    qDebug("XPE::addImportSection: %lld msec",timer.elapsed());
 #endif
 
     return bResult;
@@ -5491,7 +5491,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 #ifdef QT_DEBUG
     QElapsedTimer timer;
     timer.start();
-    qDebug("QPE::rebuildDump");
+    qDebug("XPE::rebuildDump");
 #endif
     bool bResult=false;
 
@@ -5546,7 +5546,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             nTotalSize=getSize();
         }
 #ifdef QT_DEBUG
-        qDebug("QPE::rebuildDump:totalsize: %lld msec",timer.elapsed());
+        qDebug("XPE::rebuildDump:totalsize: %lld msec",timer.elapsed());
 #endif
         QByteArray baBuffer;
         baBuffer.resize(nTotalSize);
@@ -5568,7 +5568,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 XBinary::copyDeviceMemory(getDevice(),0,&buffer,0,nTotalSize);
             }
 #ifdef QT_DEBUG
-            qDebug("QPE::rebuildDump:copy: %lld msec",timer.elapsed());
+            qDebug("XPE::rebuildDump:copy: %lld msec",timer.elapsed());
 #endif
             int nNumberOfSections=getFileHeader_NumberOfSections();
 
@@ -5591,7 +5591,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 bufPE.setSection_Characteristics(i,0xe0000020); // !!!
             }
 #ifdef QT_DEBUG
-            qDebug("QPE::rebuildDump:copysections: %lld msec",timer.elapsed());
+            qDebug("XPE::rebuildDump:copysections: %lld msec",timer.elapsed());
 #endif
             bResult=true;
 
@@ -5604,13 +5604,13 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
         if(file.open(QIODevice::ReadWrite))
         {
 #ifdef QT_DEBUG
-            qDebug("QPE::rebuildDump:write:start: %lld msec",timer.elapsed());
+            qDebug("XPE::rebuildDump:write:start: %lld msec",timer.elapsed());
 #endif
             file.resize(baBuffer.size());
             file.write(baBuffer.data(),baBuffer.size());
             file.close();
 #ifdef QT_DEBUG
-            qDebug("QPE::rebuildDump:write: %lld msec",timer.elapsed());
+            qDebug("XPE::rebuildDump:write: %lld msec",timer.elapsed());
 #endif
             bResult=true;
         }
@@ -5634,7 +5634,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 //                    _pe.removeLastSection();
                 //                }
                 //            #ifdef QT_DEBUG
-                //                qDebug("QPE::rebuildDump:removelastsection: %lld msec",timer.elapsed());
+                //                qDebug("XPE::rebuildDump:removelastsection: %lld msec",timer.elapsed());
                 //            #endif
                 if(!pRebuildOptions->mapPatches.empty())
                 {
@@ -5663,7 +5663,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 }
 
 #ifdef QT_DEBUG
-                qDebug("QPE::rebuildDump:mapPatches: %lld msec",timer.elapsed());
+                qDebug("XPE::rebuildDump:mapPatches: %lld msec",timer.elapsed());
 #endif
                 if(pRebuildOptions->bSetEntryPoint)
                 {
@@ -5671,7 +5671,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 }
 
 #ifdef QT_DEBUG
-                qDebug("QPE::rebuildDump:setentrypoint: %lld msec",timer.elapsed());
+                qDebug("XPE::rebuildDump:setentrypoint: %lld msec",timer.elapsed());
 #endif
                 if(!pRebuildOptions->mapIAT.isEmpty())
                 {
@@ -5682,7 +5682,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 }
 
 #ifdef QT_DEBUG
-                qDebug("QPE::rebuildDump:addimportsection: %lld msec",timer.elapsed());
+                qDebug("XPE::rebuildDump:addimportsection: %lld msec",timer.elapsed());
 #endif
                 if(pRebuildOptions->bRenameSections)
                 {
@@ -5700,21 +5700,21 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 }
 
 #ifdef QT_DEBUG
-                qDebug("QPE::rebuildDump:renamesections: %lld msec",timer.elapsed());
+                qDebug("XPE::rebuildDump:renamesections: %lld msec",timer.elapsed());
 #endif
                 if(pRebuildOptions->listRelocsRVAs.count())
                 {
                     _pe.addRelocsSection(&(pRebuildOptions->listRelocsRVAs));
                 }
 #ifdef QT_DEBUG
-                qDebug("QPE::rebuildDump:addrelocssection: %lld msec",timer.elapsed());
+                qDebug("XPE::rebuildDump:addrelocssection: %lld msec",timer.elapsed());
 #endif
                 if(pRebuildOptions->bFixChecksum)
                 {
                     _pe.fixCheckSum();
                 }
 #ifdef QT_DEBUG
-                qDebug("QPE::rebuildDump:fixchecksum: %lld msec",timer.elapsed());
+                qDebug("XPE::rebuildDump:fixchecksum: %lld msec",timer.elapsed());
 #endif
             }
 
@@ -5724,7 +5724,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
         }
     }
 #ifdef QT_DEBUG
-    qDebug("QPE::rebuildDump: %lld msec",timer.elapsed());
+    qDebug("XPE::rebuildDump: %lld msec",timer.elapsed());
 #endif
 
     return bResult;
