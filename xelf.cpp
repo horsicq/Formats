@@ -2646,7 +2646,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs()
 
     for(int i=0;i<nCount;i++)
     {
-        if(listPrograms.at(i).p_type==2)
+        if(listPrograms.at(i).p_type==2) // TODO const!!!
         {
             qint64 nOffset=listPrograms.at(i).p_offset; //  Check image
             qint64 nSize=listPrograms.at(i).p_filesz;

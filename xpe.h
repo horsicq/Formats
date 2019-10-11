@@ -66,7 +66,7 @@ public:
     struct IMPORT_HEADER
     {
         QString sName;
-        quint32 nFirstThunk; // For path only!
+        quint32 nFirstThunk; // For patch only!
         QList<IMPORT_POSITION> listPositions;
     };
 

@@ -334,6 +334,8 @@ qint64 XMSDOS::getOverlayOffset()
 
     nResult=(get_e_cp()-1)*512+get_e_cblp();
 
+    nResult=qMax(nResult,(qint64)0);
+
     return nResult;
 }
 
