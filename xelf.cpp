@@ -28,7 +28,7 @@ XELF::~XELF()
 {
 }
 
-bool XELF::bIsValid()
+bool XELF::isValid()
 {
     bool bResult=false;
 

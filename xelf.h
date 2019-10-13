@@ -54,7 +54,7 @@ public:
     XELF(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     ~XELF();
 
-    virtual bool bIsValid();
+    virtual bool isValid();
     bool isBigEndian();
     bool is64();
 
