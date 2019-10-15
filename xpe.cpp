@@ -1474,11 +1474,17 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
 
             if(!isImage())
             {
-                nMaxOffset=qMax(nMaxOffset,(qint64)(nFileOffset+nFileSize));
+                if(nFileSize)
+                {
+                    nMaxOffset=qMax(nMaxOffset,(qint64)(nFileOffset+nFileSize));
+                }
             }
             else
             {
-                nMaxOffset=qMax(nMaxOffset,(qint64)(nVirtualAddress+nVirtualSize));
+                if(nVirtualSize)
+                {
+                    nMaxOffset=qMax(nMaxOffset,(qint64)(nVirtualAddress+nVirtualSize));
+                }
             }
 
             if(!isImage())
@@ -1526,22 +1532,25 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
             }
         }
 
-        // Overlay;
-        MEMORY_MAP record={};
-
-        record.bIsOvelay=true;
-
-        record.nAddress=-1;
-        record.segment=ADDRESS_SEGMENT_UNKNOWN;
-        record.nOffset=nMaxOffset;
-        record.nSize=0;
-
         if(!isImage())
         {
-            record.nSize=qMax(getSize()-nMaxOffset,(qint64)0);
-        }
+            // Overlay;
+            MEMORY_MAP record={};
 
-        listResult.append(record);
+            record.bIsOvelay=true;
+
+            record.nAddress=-1;
+            record.segment=ADDRESS_SEGMENT_UNKNOWN;
+            record.nOffset=nMaxOffset;
+            record.nSize=0;
+
+            record.nSize=qMax(getSize()-nMaxOffset,(qint64)0);
+
+            if(record.nSize)
+            {
+                listResult.append(record);
+            }
+        }
     }
 
     return listResult;
