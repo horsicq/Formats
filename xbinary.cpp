@@ -1083,6 +1083,7 @@ QString XBinary::convertFileNameSymbols(QString sFileName)
     sFileName=sFileName.replace("<","_");
     sFileName=sFileName.replace(">","_");
     sFileName=sFileName.replace("|","_");
+    sFileName=sFileName.replace(":","_");
 
     return sFileName;
 }
