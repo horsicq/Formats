@@ -1826,7 +1826,6 @@ QList<XPE::IMAGE_IMPORT_DESCRIPTOR_EX> XPE::getImportDescriptorsEx()
     {
         QList<MEMORY_MAP> listMemoryMap=getMemoryMapList();
         qint64 nBaseAddress=_getBaseAddress();
-        //        bool bIs64=is64();
 
         while(true)
         {
