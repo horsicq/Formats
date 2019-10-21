@@ -243,6 +243,8 @@ public:
     static QString getBaseFileName(QString sFileName);
     static bool createDirectory(QString sDirectoryName);
 
+    static QByteArray readFile(QString sFileName);
+
     static void _copyMemory(char *pDest,char *pSource, qint64 nSize);
     static bool copyDeviceMemory(QIODevice *pSourceDevice,qint64 nSourceOffset,QIODevice *pDestDevice,qint64 nDestOffset,qint64 nSize,quint32 nBufferSize=0x1000);
     bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset,qint64 nSize,quint32 nBufferSize=1,bool bReverse=false);

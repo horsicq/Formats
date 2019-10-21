@@ -1100,6 +1100,23 @@ bool XBinary::createDirectory(QString sDirectoryName)
     return QDir().mkdir(sDirectoryName);
 }
 
+QByteArray XBinary::readFile(QString sFileName)
+{
+    QByteArray baResult;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        baResult=file.readAll();
+
+        file.close();
+    }
+
+    return baResult;
+}
+
 void XBinary::_copyMemory(char *pDest,char *pSource, qint64 nSize)
 {
     // TODO optimize

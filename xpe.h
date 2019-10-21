@@ -712,6 +712,8 @@ public:
     void setLoadConfig_SEHandlerTable(quint64 value);
     void setLoadConfig_SEHandlerCount(quint64 value);
 
+    QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
+
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     qint64 _calculateRawSize();

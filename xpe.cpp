@@ -4320,7 +4320,7 @@ quint64 XPE::getLoadConfig_DeCommitFreeBlockThreshold()
         }
         else
         {
-            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DeCommitFreeBlockThreshold));
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DeCommitFreeBlockThreshold));
         }
     }
 
@@ -4341,7 +4341,7 @@ quint64 XPE::getLoadConfig_DeCommitTotalFreeThreshold()
         }
         else
         {
-            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DeCommitTotalFreeThreshold));
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DeCommitTotalFreeThreshold));
         }
     }
 
@@ -4362,7 +4362,7 @@ quint64 XPE::getLoadConfig_LockPrefixTable()
         }
         else
         {
-            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,LockPrefixTable));
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,LockPrefixTable));
         }
     }
 
@@ -4383,7 +4383,7 @@ quint64 XPE::getLoadConfig_MaximumAllocationSize()
         }
         else
         {
-            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,MaximumAllocationSize));
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,MaximumAllocationSize));
         }
     }
 
@@ -4404,7 +4404,7 @@ quint64 XPE::getLoadConfig_VirtualMemoryThreshold()
         }
         else
         {
-            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,VirtualMemoryThreshold));
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,VirtualMemoryThreshold));
         }
     }
 
@@ -4425,7 +4425,7 @@ quint64 XPE::getLoadConfig_ProcessAffinityMask()
         }
         else
         {
-            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,ProcessAffinityMask));
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,ProcessAffinityMask));
         }
     }
 
@@ -4488,7 +4488,7 @@ quint64 XPE::getLoadConfig_EditList()
         }
         else
         {
-            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,EditList));
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,EditList));
         }
     }
 
@@ -4509,7 +4509,7 @@ quint64 XPE::getLoadConfig_SecurityCookie()
         }
         else
         {
-            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SecurityCookie));
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SecurityCookie));
         }
     }
 
@@ -4530,7 +4530,7 @@ quint64 XPE::getLoadConfig_SEHandlerTable()
         }
         else
         {
-            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SEHandlerTable));
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SEHandlerTable));
         }
     }
 
@@ -4551,7 +4551,7 @@ quint64 XPE::getLoadConfig_SEHandlerCount()
         }
         else
         {
-            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SEHandlerCount));
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SEHandlerCount));
         }
     }
 
@@ -4689,7 +4689,7 @@ void XPE::setLoadConfig_DeCommitFreeBlockThreshold(quint64 value)
         }
         else
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DeCommitFreeBlockThreshold),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DeCommitFreeBlockThreshold),value);
         }
     }
 }
@@ -4706,7 +4706,7 @@ void XPE::setLoadConfig_DeCommitTotalFreeThreshold(quint64 value)
         }
         else
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DeCommitTotalFreeThreshold),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DeCommitTotalFreeThreshold),value);
         }
     }
 }
@@ -4723,7 +4723,7 @@ void XPE::setLoadConfig_LockPrefixTable(quint64 value)
         }
         else
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,LockPrefixTable),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,LockPrefixTable),value);
         }
     }
 }
@@ -4740,7 +4740,7 @@ void XPE::setLoadConfig_MaximumAllocationSize(quint64 value)
         }
         else
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,MaximumAllocationSize),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,MaximumAllocationSize),value);
         }
     }
 }
@@ -4757,7 +4757,7 @@ void XPE::setLoadConfig_VirtualMemoryThreshold(quint64 value)
         }
         else
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,VirtualMemoryThreshold),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,VirtualMemoryThreshold),value);
         }
     }
 }
@@ -4774,7 +4774,7 @@ void XPE::setLoadConfig_ProcessAffinityMask(quint64 value)
         }
         else
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,ProcessAffinityMask),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,ProcessAffinityMask),value);
         }
     }
 }
@@ -4825,7 +4825,7 @@ void XPE::setLoadConfig_EditList(quint64 value)
         }
         else
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,EditList),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,EditList),value);
         }
     }
 }
@@ -4842,7 +4842,7 @@ void XPE::setLoadConfig_SecurityCookie(quint64 value)
         }
         else
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SecurityCookie),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SecurityCookie),value);
         }
     }
 }
@@ -4859,7 +4859,7 @@ void XPE::setLoadConfig_SEHandlerTable(quint64 value)
         }
         else
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SEHandlerTable),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SEHandlerTable),value);
         }
     }
 }
@@ -4876,9 +4876,47 @@ void XPE::setLoadConfig_SEHandlerCount(quint64 value)
         }
         else
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SEHandlerCount),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,SEHandlerCount),value);
         }
     }
+}
+
+QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList()
+{
+    QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> listResult;
+
+    QList<MEMORY_MAP> listMM=getMemoryMapList();
+    qint64 nBaseAddress=getBaseAddress();
+
+    qint64 nExceptionOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION);
+
+    if(nExceptionOffset!=-1)
+    {
+        while(true)
+        {
+            XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY record={};
+
+            record.BeginAddress=read_uint32(nExceptionOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,BeginAddress));
+            record.EndAddress=read_uint32(nExceptionOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,EndAddress));
+            record.DUMMYUNIONNAME.UnwindInfoAddress=read_uint32(nExceptionOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,DUMMYUNIONNAME.UnwindInfoAddress));
+
+            if( record.BeginAddress&&
+                record.EndAddress&&
+                isAddressValid(&listMM,nBaseAddress+record.BeginAddress)&&
+                isAddressValid(&listMM,nBaseAddress+record.EndAddress))
+            {
+                listResult.append(record);
+            }
+            else
+            {
+                break;
+            }
+
+            nExceptionOffset+=sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY);
+        }
+    }
+
+    return listResult;
 }
 
 qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)
