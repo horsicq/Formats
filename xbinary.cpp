@@ -936,7 +936,7 @@ qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 value, bool bIsB
         _value=qFromLittleEndian(_value);
     }
 
-    return find_array(nOffset,nSize,(char *)&value,4);
+    return find_array(nOffset,nSize,(char *)&_value,4);
 }
 
 qint64 XBinary::find_uint64(qint64 nOffset, qint64 nSize, qint64 value, bool bIsBigEndian)
@@ -2729,6 +2729,13 @@ bool XBinary::isUTF8TextType()
     }
 
     return bResult;
+}
+
+bool XBinary::isPlainTextType(QIODevice *pDevice)
+{
+    XBinary binary(pDevice);
+
+    return binary.isPlainTextType();
 }
 
 XBinary::UNICODE_TYPE XBinary::getUnicodeType()

@@ -356,6 +356,8 @@ public:
     bool isPlainTextType();
     bool isUTF8TextType();
 
+    static bool isPlainTextType(QIODevice *pDevice);
+
     enum UNICODE_TYPE
     {
         UNICODE_TYPE_NONE=0,

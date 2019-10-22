@@ -2622,48 +2622,54 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources()
 
                 nOffsetLevel[1]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
 
-                for(int j=0; j<rd[1].NumberOfIdEntries+rd[1].NumberOfNamedEntries; j++)
+                if(rd[1].NumberOfIdEntries+rd[1].NumberOfNamedEntries<=100)
                 {
-                    rde[1]=read_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffsetLevel[1]);
-
-                    irin[1]=getResourcesIDName(nResourceOffset,rde[1].Name);
-                    record.nID[1]=irin[1].nID;
-                    record.sName[1]=irin[1].sName;
-                    record.nNameOffset[1]=irin[1].nNameOffset;
-
-                    nOffsetLevel[2]=nResourceOffset+rde[1].OffsetToDirectory;
-
-                    rd[2]=read_IMAGE_RESOURCE_DIRECTORY(nOffsetLevel[2]);
-
-                    if(rd[2].Characteristics!=0)
+                    for(int j=0; j<rd[1].NumberOfIdEntries+rd[1].NumberOfNamedEntries; j++)
                     {
-                        break;
+                        rde[1]=read_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffsetLevel[1]);
+
+                        irin[1]=getResourcesIDName(nResourceOffset,rde[1].Name);
+                        record.nID[1]=irin[1].nID;
+                        record.sName[1]=irin[1].sName;
+                        record.nNameOffset[1]=irin[1].nNameOffset;
+
+                        nOffsetLevel[2]=nResourceOffset+rde[1].OffsetToDirectory;
+
+                        rd[2]=read_IMAGE_RESOURCE_DIRECTORY(nOffsetLevel[2]);
+
+                        if(rd[2].Characteristics!=0)
+                        {
+                            break;
+                        }
+
+                        nOffsetLevel[2]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
+
+                        if(rd[2].NumberOfIdEntries+rd[2].NumberOfNamedEntries<=100)
+                        {
+                            for(int k=0; k<rd[2].NumberOfIdEntries+rd[2].NumberOfNamedEntries; k++)
+                            {
+                                rde[2]=read_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffsetLevel[2]);
+
+                                irin[2]=getResourcesIDName(nResourceOffset,rde[2].Name);
+                                record.nID[2]=irin[2].nID;
+                                record.sName[2]=irin[2].sName;
+                                record.nNameOffset[2]=irin[2].nNameOffset;
+
+                                record.nIRDEOffset=rde[2].OffsetToData;
+                                XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY irde=read_IMAGE_RESOURCE_DATA_ENTRY(nResourceOffset+record.nIRDEOffset);
+                                record.nRVA=irde.OffsetToData;
+                                record.nAddress=irde.OffsetToData+nBaseAddress;
+                                record.nOffset=addressToOffset(&memoryMap,record.nAddress);
+                                record.nSize=irde.Size;
+
+                                listResources.append(record);
+
+                                nOffsetLevel[2]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
+                            }
+                        }
+
+                        nOffsetLevel[1]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
                     }
-
-                    nOffsetLevel[2]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
-
-                    for(int k=0; k<rd[2].NumberOfIdEntries+rd[2].NumberOfNamedEntries; k++)
-                    {
-                        rde[2]=read_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffsetLevel[2]);
-
-                        irin[2]=getResourcesIDName(nResourceOffset,rde[2].Name);
-                        record.nID[2]=irin[2].nID;
-                        record.sName[2]=irin[2].sName;
-                        record.nNameOffset[2]=irin[2].nNameOffset;
-
-                        record.nIRDEOffset=rde[2].OffsetToData;
-                        XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY irde=read_IMAGE_RESOURCE_DATA_ENTRY(nResourceOffset+record.nIRDEOffset);
-                        record.nRVA=irde.OffsetToData;
-                        record.nAddress=irde.OffsetToData+nBaseAddress;
-                        record.nOffset=addressToOffset(&memoryMap,record.nAddress);
-                        record.nSize=irde.Size;
-
-                        listResources.append(record);
-
-                        nOffsetLevel[2]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
-                    }
-
-                    nOffsetLevel[1]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
                 }
 
                 nOffsetLevel[0]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
@@ -3966,7 +3972,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
     char *pOffset=pbaData->data();
     char *pOffsetStart=pOffset;
     int nCount=nSize/nBlockSize;
-    quint64 nVirtualAddress=shOriginal.VirtualAddress;
+//    quint64 nVirtualAddress=shOriginal.VirtualAddress;
     qint64 nRelVirtualStart=0;
     qint64 nRelVirtualEnd=S_ALIGN_UP(shOriginal.Misc.VirtualSize,nBlockSize);
     qint64 nRelCurrent=nRelVirtualStart;
@@ -3989,13 +3995,13 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
         if(pOffset!=pOffsetStart)
         {
             XPE_DEF::IMAGE_SECTION_HEADER sh=shOriginal;
-            sh.VirtualAddress=nVirtualAddress;
+//            sh.VirtualAddress=nVirtualAddress;
             //            sh.Misc.VirtualSize=pOffset-pOffsetStart;
             sh.Misc.VirtualSize=nRelCurrent-nRelVirtualStart;
             sh.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
             listResult.append(sh);
 
-            nVirtualAddress+=sh.Misc.VirtualSize;
+//            nVirtualAddress+=sh.Misc.VirtualSize;
         }
 
         bool bNew=false;
@@ -4013,13 +4019,13 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
                 if(bNew)
                 {
                     XPE_DEF::IMAGE_SECTION_HEADER sh=shOriginal;
-                    sh.VirtualAddress=nVirtualAddress;
+//                    sh.VirtualAddress=nVirtualAddress;
                     //                    sh.Misc.VirtualSize=pOffset-pOffsetStart;
                     sh.Misc.VirtualSize=nRelCurrent-nRelVirtualStart;
                     sh.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
                     listResult.append(sh);
 
-                    nVirtualAddress+=sh.Misc.VirtualSize;
+//                    nVirtualAddress+=sh.Misc.VirtualSize;
 
                     pOffsetStart=pOffset;
                     nRelVirtualStart=nRelCurrent;
@@ -4035,7 +4041,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
         if(pOffset!=pOffsetStart)
         {
             XPE_DEF::IMAGE_SECTION_HEADER sh=shOriginal;
-            sh.VirtualAddress=nVirtualAddress;
+//            sh.VirtualAddress=nVirtualAddress;
             //            sh.Misc.VirtualSize=pOffset-pOffsetStart;
             sh.Misc.VirtualSize=nRelVirtualEnd-nRelVirtualStart;
             sh.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,nSize-(pOffsetStart-pbaData->data()));
@@ -4045,7 +4051,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
                 listResult.append(sh);
             }
 
-            nVirtualAddress+=sh.Misc.VirtualSize;
+//            nVirtualAddress+=sh.Misc.VirtualSize;
         }
     }
     else
@@ -5557,14 +5563,14 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
             QByteArray baHeader=getHeaders();
             int nNumberOfSections=getFileHeader_NumberOfSections();
 
-            if(pRebuildOptions->bClearHeader)
-            {
-                nHeaderSize=(qint32)getSectionsTableOffset()+nNumberOfSections*sizeof(XPE_DEF::IMAGE_SECTION_HEADER);
-            }
-            else
-            {
-                nHeaderSize=(quint32)XBinary::getPhysSize(baHeader.data(),baHeader.size());
-            }
+//            if(pRebuildOptions->bClearHeader)
+//            {
+//                nHeaderSize=(qint32)getSectionsTableOffset()+nNumberOfSections*sizeof(XPE_DEF::IMAGE_SECTION_HEADER);
+//            }
+//            else
+//            {
+//                nHeaderSize=(quint32)XBinary::getPhysSize(baHeader.data(),baHeader.size());
+//            }
 
             nHeaderSize=(quint32)XBinary::getPhysSize(baHeader.data(),baHeader.size());
 
