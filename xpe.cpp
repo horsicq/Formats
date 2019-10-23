@@ -1345,6 +1345,13 @@ void XPE::setSection_Characteristics(quint32 nNumber, quint32 value)
     }
 }
 
+bool XPE::isSectionNamePresent(QString sSectionName)
+{
+    QList<XPE_DEF::IMAGE_SECTION_HEADER> listSectionHeaders=getSectionHeaders();
+
+    return isSectionNamePresent(sSectionName,&listSectionHeaders);
+}
+
 bool XPE::isSectionNamePresent(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections)
 {
     bool bResult=false;

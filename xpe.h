@@ -417,6 +417,7 @@ public:
     void setSection_NumberOfLinenumbers(quint32 nNumber,quint16 value);
     void setSection_Characteristics(quint32 nNumber,quint32 value);
 
+    bool isSectionNamePresent(QString sSectionName);
     static bool isSectionNamePresent(QString sSectionName,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections);
     static XPE_DEF::IMAGE_SECTION_HEADER getSectionByName(QString sSectionName,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections);
 
