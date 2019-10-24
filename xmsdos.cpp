@@ -248,6 +248,11 @@ quint16 XMSDOS::get_e_ovno()
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_ovno));
 }
 
+quint32 XMSDOS::get_e_lfanew()
+{
+    return read_uint32(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_lfanew));
+}
+
 QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()
 {
     QList<MEMORY_MAP> listResult;
@@ -328,32 +333,26 @@ QMap<quint64, QString> XMSDOS::getImageMagicsS()
     return mapResult;
 }
 
-qint64 XMSDOS::getOverlayOffset()
+bool XMSDOS::isLE()
 {
-    qint64 nResult=0;
+    quint32 nOffset=get_e_lfanew();
+    quint16 nNew=read_uint16(nOffset);
 
-    nResult=(get_e_cp()-1)*512+get_e_cblp();
-
-    nResult=qMax(nResult,(qint64)0);
-
-    return nResult;
+    return (nNew==0x454C); // TODO const
 }
 
-qint64 XMSDOS::getOverlaySize()
+bool XMSDOS::isLX()
 {
-    qint64 nSize=getSize();
-    qint64 nOverlayOffset=getOverlayOffset();
-    qint64 nDelta=0;
+    quint32 nOffset=get_e_lfanew();
+    quint16 nNew=read_uint16(nOffset);
 
-    if(nOverlayOffset>0)
-    {
-        nDelta=nSize-nOverlayOffset;
-    }
-
-    return qMax(nDelta,(qint64)0);
+    return (nNew==0x584C); // TODO const
 }
 
-bool XMSDOS::isOverlayPresent()
+bool XMSDOS::isNE()
 {
-    return getOverlaySize()!=0;
+    quint32 nOffset=get_e_lfanew();
+    quint16 nNew=read_uint16(nOffset);
+
+    return (nNew==0x454E); // TODO const
 }

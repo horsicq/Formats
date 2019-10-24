@@ -233,6 +233,8 @@ public:
     qint64 find_unicodeString(qint64 nOffset,qint64 nSize,QString sString); // mb TODO endian
     qint64 find_signature(qint64 nOffset,qint64 nSize,QString sSignature);
 
+    bool isSignaturePresent(qint64 nOffset,qint64 nSize,QString sSignature);
+
     static bool createFile(QString sFileName,qint64 nFileSize=0);
     static bool isFileExists(QString sFileName);
     static bool removeFile(QString sFileName);
@@ -385,6 +387,16 @@ public:
 
     static QList<QString> getListFromFile(QString sFileName);
 
+    qint64 getOverlaySize();
+    qint64 getOverlayOffset();
+    bool isOverlayPresent();
+
+    bool compareOverlay(QString sSignature, qint64 nOffset);
+
+    bool addOverlay(char *pData,qint64 nDataSize);
+
+    bool removeOverlay();
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);
@@ -401,6 +413,7 @@ protected:
     bool _isOffsetValid(qint64 nOffset);
     void _errorMessage(QString sMessage);
     void _infoMessage(QString sMessage);
+    qint64 _calculateRawSize();
 
 signals:
     void errorMessage(QString sMessage);

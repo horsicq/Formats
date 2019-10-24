@@ -3462,160 +3462,6 @@ quint32 XPE::calculateCheckSum()
     return nCalcSum;
 }
 
-qint64 XPE::getOverlaySize()
-{
-    qint64 nSize=getSize();
-    qint64 nRawSize=_calculateRawSize();
-    qint64 nDelta=0;
-
-    if(nRawSize)
-    {
-        nDelta=nSize-nRawSize;
-    }
-
-    return qMax(nDelta,(qint64)0);
-}
-
-qint64 XPE::getOverlayOffset()
-{
-    return _calculateRawSize();
-}
-
-bool XPE::isOverlayPresent()
-{
-    return getOverlaySize()!=0;
-}
-
-bool XPE::addOverlay(char *pData, qint64 nDataSize)
-{
-    return addOverlay(getDevice(),isImage(),pData,nDataSize);
-}
-
-bool XPE::addOverlay(QString sFileName,bool bIsImage, char *pData, qint64 nDataSize)
-{
-    bool bResult=false;
-
-    QFile file;
-    file.setFileName(sFileName);
-
-    if(file.open(QIODevice::ReadWrite))
-    {
-        bResult=addOverlay(&file,bIsImage,pData,nDataSize);
-
-        file.close();
-    }
-
-    return bResult;
-}
-
-bool XPE::addOverlay(QIODevice *pDevice,bool bIsImage, char *pData, qint64 nDataSize)
-{
-    bool bResult=false;
-
-    if(isResizeEnable(pDevice))
-    {
-        XPE pe(pDevice,bIsImage);
-
-        if(pe.isValid())
-        {
-            qint64 nRawSize=pe.getOverlayOffset();
-
-            resize(pDevice,nRawSize+nDataSize);
-
-            if(nDataSize)
-            {
-                pe.write_array(nRawSize,pData,nDataSize);
-            }
-
-            pe.fixCheckSum();
-            bResult=true;
-        }
-    }
-
-    return bResult;
-}
-
-bool XPE::addOverlayFromDevice(QIODevice *pSourceDevice, qint64 nOffset, qint64 nSize)
-{
-    return addOverlayFromDevice(getDevice(),isImage(),pSourceDevice,nOffset,nSize);
-}
-
-bool XPE::addOverlayFromDevice(QIODevice *pDevice, bool bIsImage, QIODevice *pSourceDevice, qint64 nOffset, qint64 nSize)
-{
-    bool bResult=false;
-
-    const int BUFFER_SIZE=0x1000;
-
-    if(isResizeEnable(pDevice))
-    {
-        XPE pe(pDevice,bIsImage);
-
-        if(pe.isValid())
-        {
-            qint64 nRawSize=pe.getOverlayOffset();
-            resize(pDevice,nRawSize+nSize);
-
-            if(nSize)
-            {
-                char *pBuffer=new char[BUFFER_SIZE];
-
-                qint64 nSourceOffset=nOffset;
-                qint64 nDestOffset=pe.getOverlayOffset();
-
-                bResult=true;
-
-                while(nSize>0)
-                {
-                    qint64 nTemp=qMin((qint64)(BUFFER_SIZE),nSize);
-
-                    pSourceDevice->seek(nOffset);
-
-                    if(pSourceDevice->read(pBuffer,nTemp)<=0)
-                    {
-                        bResult=false;
-
-                        break;
-                    }
-
-                    write_array(nDestOffset,pBuffer,nTemp);
-
-                    nSourceOffset+=nTemp;
-                    nDestOffset+=nTemp;
-                    nSize-=nTemp;
-                }
-
-                delete [] pBuffer;
-            }
-
-            pe.fixCheckSum();
-        }
-    }
-
-    return bResult;
-}
-
-bool XPE::removeOverlay()
-{
-    return removeOverlay(getDevice(),isImage());
-}
-
-bool XPE::removeOverlay(QIODevice *pDevice,bool bIsImage)
-{
-    bool bResult=false;
-
-    if(isResizeEnable(pDevice))
-    {
-        XPE pe(pDevice,bIsImage);
-
-        if(pe.isValid())
-        {
-            bResult=addOverlay(pDevice,bIsImage,0,0);
-        }
-    }
-
-    return bResult;
-}
-
 bool XPE::addSection(QString sFileName,bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize)
 {
     bool bResult=false;
@@ -3817,33 +3663,9 @@ bool XPE::removeLastSection(QString sFileName, bool bIsImage)
     return bResult;
 }
 
-bool XPE::removeOverlay(QString sFileName,bool bIsImage)
-{
-    return addOverlay(sFileName,bIsImage,0,0);
-}
-
 bool XPE::addSection(XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize)
 {
     return addSection(getDevice(),isImage(),pSectionHeader,pData,nDataSize);
-}
-
-qint64 XPE::_calculateRawSize()
-{
-    qint64 nResult=0;
-
-    QList<MEMORY_MAP> list=getMemoryMapList();
-
-    for(int i=0; i<list.count(); i++)
-    {
-        if(list.at(i).bIsOvelay)
-        {
-            nResult=list.at(i).nOffset;
-
-            break;
-        }
-    }
-
-    return nResult;
 }
 
 XPE::RESOURCE_POSITION XPE::_getResourcePosition(QList<XBinary::MEMORY_MAP> *pMemoryMap,qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel)
@@ -6887,6 +6709,54 @@ QMap<quint64, QString> XPE::getImageOptionalHeaderDllCharacteristicsS()
     mapResult.insert(0x2000,"WDM_DRIVER");
     mapResult.insert(0x4000,"GUARD_CF");
     mapResult.insert(0x8000,"TERMINAL_SERVER_AWARE");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getImageOptionalHeaderDataDirectory()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"IMAGE_DIRECTORY_ENTRY_EXPORT");
+    mapResult.insert(1,"IMAGE_DIRECTORY_ENTRY_IMPORT");
+    mapResult.insert(2,"IMAGE_DIRECTORY_ENTRY_RESOURCE");
+    mapResult.insert(3,"IMAGE_DIRECTORY_ENTRY_EXCEPTION");
+    mapResult.insert(4,"IMAGE_DIRECTORY_ENTRY_SECURITY");
+    mapResult.insert(5,"IMAGE_DIRECTORY_ENTRY_BASERELOC");
+    mapResult.insert(6,"IMAGE_DIRECTORY_ENTRY_DEBUG");
+    mapResult.insert(7,"IMAGE_DIRECTORY_ENTRY_ARCHITECTURE");
+    mapResult.insert(8,"IMAGE_DIRECTORY_ENTRY_GLOBALPTR");
+    mapResult.insert(9,"IMAGE_DIRECTORY_ENTRY_TLS");
+    mapResult.insert(10,"IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG");
+    mapResult.insert(11,"IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT");
+    mapResult.insert(12,"IMAGE_DIRECTORY_ENTRY_IAT");
+    mapResult.insert(13,"IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT");
+    mapResult.insert(14,"IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR");
+    mapResult.insert(15,"RESERVED");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getImageOptionalHeaderDataDirectoryS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"EXPORT");
+    mapResult.insert(1,"IMPORT");
+    mapResult.insert(2,"RESOURCE");
+    mapResult.insert(3,"EXCEPTION");
+    mapResult.insert(4,"SECURITY");
+    mapResult.insert(5,"BASERELOC");
+    mapResult.insert(6,"DEBUG");
+    mapResult.insert(7,"ARCHITECTURE");
+    mapResult.insert(8,"GLOBALPTR");
+    mapResult.insert(9,"TLS");
+    mapResult.insert(10,"LOAD_CONFIG");
+    mapResult.insert(11,"BOUND_IMPORT");
+    mapResult.insert(12,"IAT");
+    mapResult.insert(13,"DELAY_IMPORT");
+    mapResult.insert(14,"COM_DESCRIPTOR");
+    mapResult.insert(15,"RESERVED");
 
     return mapResult;
 }

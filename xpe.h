@@ -513,19 +513,7 @@ public:
     static QList<XPE::IMPORT_HEADER> mapIATToList(QMap<qint64,QString> *pMapIAT,bool bIs64);
 
     quint32 calculateCheckSum();
-    qint64 getOverlaySize();
-    qint64 getOverlayOffset();
-    bool isOverlayPresent();
 
-    bool addOverlay(char *pData,qint64 nDataSize);
-    static bool addOverlay(QString sFileName,bool bIsImage,char *pData,qint64 nDataSize);
-    static bool addOverlay(QIODevice *pDevice, bool bIsImage, char *pData, qint64 nDataSize);
-    bool addOverlayFromDevice(QIODevice *pSourceDevice,qint64 nOffset,qint64 nSize);
-    bool addOverlayFromDevice(QIODevice *pDevice,bool bIsImage,QIODevice *pSourceDevice,qint64 nOffset,qint64 nSize);
-
-    bool removeOverlay();
-    static bool removeOverlay(QIODevice *pDevice, bool bIsImage);
-    static bool removeOverlay(QString sFileName, bool bIsImage);
     bool addSection(XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
     static bool addSection(QString sFileName,bool bIsImage,XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
     static bool addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
@@ -591,6 +579,8 @@ public:
     static QMap<quint64,QString> getImageOptionalHeaderSubsystemS();
     static QMap<quint64,QString> getImageOptionalHeaderDllCharacteristics();
     static QMap<quint64,QString> getImageOptionalHeaderDllCharacteristicsS();
+    static QMap<quint64,QString> getImageOptionalHeaderDataDirectory();
+    static QMap<quint64,QString> getImageOptionalHeaderDataDirectoryS();
     static QMap<quint64,QString> getImageSectionHeaderFlags();
     static QMap<quint64,QString> getImageSectionHeaderFlagsS();
     static QMap<quint64,QString> getImageSectionHeaderAligns();
@@ -717,7 +707,7 @@ public:
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
-    qint64 _calculateRawSize();
+
     RESOURCE_POSITION _getResourcePosition(QList<MEMORY_MAP> *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);
     qint64 _fixHeadersSize();
     qint64 _getMinSectionOffset();

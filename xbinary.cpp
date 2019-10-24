@@ -1009,6 +1009,11 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
     return nResult;
 }
 
+bool XBinary::isSignaturePresent(qint64 nOffset, qint64 nSize, QString sSignature)
+{
+    return (find_signature(nOffset,nSize,sSignature)!=-1);
+}
+
 bool XBinary::createFile(QString sFileName, qint64 nFileSize)
 {
     bool bResult=false;
@@ -2452,6 +2457,23 @@ void XBinary::_infoMessage(QString sMessage)
     emit infoMessage(sMessage);
 }
 
+qint64 XBinary::_calculateRawSize()
+{
+    qint64 nResult=0;
+
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    for(int i=0; i<list.count(); i++)
+    {
+        if((list.at(i).nOffset!=-1)&&(!list.at(i).bIsOvelay))
+        {
+            nResult=qMax(nResult,(qint64)(list.at(i).nOffset+list.at(i).nSize));
+        }
+    }
+
+    return nResult;
+}
+
 QString XBinary::convertSignature(QString sSignature)
 {
     // 'AnsiString'
@@ -2881,6 +2903,61 @@ QList<QString> XBinary::getListFromFile(QString sFileName)
     }
 
     return listResult;
+}
+
+qint64 XBinary::getOverlaySize()
+{
+    qint64 nSize=getSize();
+    qint64 nRawSize=getOverlayOffset();
+    qint64 nDelta=0;
+
+    if(nRawSize)
+    {
+        nDelta=nSize-nRawSize;
+    }
+
+    return qMax(nDelta,(qint64)0);
+}
+
+qint64 XBinary::getOverlayOffset()
+{
+    return _calculateRawSize();
+}
+
+bool XBinary::isOverlayPresent()
+{
+    return getOverlaySize()!=0;
+}
+
+bool XBinary::compareOverlay(QString sSignature, qint64 nOffset)
+{
+    qint64 nOverlayOffset=getOverlayOffset()+nOffset;
+
+    return compareSignature(sSignature,nOverlayOffset);
+}
+
+bool XBinary::addOverlay(char *pData, qint64 nDataSize)
+{
+    bool bResult=false;
+
+    qint64 nRawSize=getOverlayOffset();
+
+    if(resize(getDevice(),nRawSize+nDataSize))
+    {
+        if(nDataSize)
+        {
+            write_array(nRawSize,pData,nDataSize);
+
+            bResult=true;
+        }
+    }
+
+    return bResult;
+}
+
+bool XBinary::removeOverlay()
+{
+    return addOverlay(0,0);
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)

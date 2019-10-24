@@ -74,6 +74,8 @@ public:
     quint16 get_e_cs();
     quint16 get_e_lfarlc();
     quint16 get_e_ovno();
+    // TODO more
+    quint32 get_e_lfanew();
 
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getEntryPointOffset();
@@ -81,9 +83,9 @@ public:
     static QMap<quint64, QString> getImageMagics();
     static QMap<quint64, QString> getImageMagicsS();
 
-    qint64 getOverlayOffset(); // mb TODO move to XBinary
-    qint64 getOverlaySize();
-    bool isOverlayPresent();
+    bool isLE();
+    bool isLX();
+    bool isNE();
 
 //private:
 //    const qint64 N_DATABASEADDRESS=0x10000;
