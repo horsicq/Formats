@@ -2697,9 +2697,23 @@ void XBinary::_swapBytes(char *pSource, int nSize)
     }
 }
 
+quint16 XBinary::swapBytes(quint16 nValue)
+{
+    _swapBytes((char *)&nValue,2);
+
+    return nValue;
+}
+
 quint32 XBinary::swapBytes(quint32 nValue)
 {
     _swapBytes((char *)&nValue,4);
+
+    return nValue;
+}
+
+quint64 XBinary::swapBytes(quint64 nValue)
+{
+    _swapBytes((char *)&nValue,8);
 
     return nValue;
 }
