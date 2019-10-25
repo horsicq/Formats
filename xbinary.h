@@ -355,6 +355,9 @@ public:
 
     static QString invertHexByteString(QString sHex);
 
+    static void _swapBytes(char *pSource, int nSize);
+    static quint32 swapBytes(quint32 nValue);
+
     bool isPlainTextType();
     bool isUTF8TextType();
 
