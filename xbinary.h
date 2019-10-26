@@ -53,11 +53,11 @@
 
 #include "subdevice.h"
 
-#define S_ALIGN_DOWN(x,align)     ((x)&~(align-1))
-#define S_ALIGN_UP(x,align)       (((x)&(align-1))?S_ALIGN_DOWN(x,align)+align:x)
+#define S_ALIGN_DOWN(value,align)   ((value)&~(align-1))
+#define S_ALIGN_UP(value,align)     (((value)&(align-1))?S_ALIGN_DOWN(value,align)+align:value)
 
-#define S_LOWORD(l)               ((quint16)((quint32)(l)&0xffff))
-#define S_HIWORD(l)               ((quint16)((quint32)(l)>>16))
+#define S_LOWORD(value)             ((quint16)((quint32)(value)&0xffff))
+#define S_HIWORD(value)             ((quint16)((quint32)(value)>>16))
 
 #ifdef Q_OS_MAC
 #include <CoreFoundation/CoreFoundation.h> // Check
