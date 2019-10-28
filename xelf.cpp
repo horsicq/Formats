@@ -2985,6 +2985,18 @@ QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *p
     return listRecords;
 }
 
+bool XELF::isSectionNamePresent(QString sSectionName)
+{
+    bool bIs64=is64();
+    quint16 nStringTableSection=getSectionStringTable(bIs64);
+    QByteArray baStringTable=getSection(nStringTableSection);
+    QList<XELF_DEF::Elf_Shdr> listSH=getElf_ShdrList();
+
+    QList<XELF::SECTION_RECORD> listSR=getSectionRecords(&listSH,bIs64,&baStringTable);
+
+    return isSectionNamePresent(sSectionName,&listSR);
+}
+
 bool XELF::isSectionNamePresent(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSections)
 {
     bool bResult=false;
