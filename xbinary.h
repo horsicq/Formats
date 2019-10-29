@@ -397,9 +397,7 @@ public:
     bool isOverlayPresent();
 
     bool compareOverlay(QString sSignature, qint64 nOffset);
-
     bool addOverlay(char *pData,qint64 nDataSize);
-
     bool removeOverlay();
 
 private:

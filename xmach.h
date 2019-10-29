@@ -130,6 +130,7 @@ public:
     QList<LIBRARY_RECORD> getLibraryRecords();
     QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pList);
     static LIBRARY_RECORD getLibraryRecordByName(QList<LIBRARY_RECORD> *pList,QString sName);
+    bool isLibraryRecordNamePresent(QString sName);
     static bool isLibraryRecordNamePresent(QList<LIBRARY_RECORD> *pList,QString sName);
 
     QList<SEGMENT_RECORD> getSegmentRecords();

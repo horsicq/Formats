@@ -780,6 +780,13 @@ XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QList<XMACH::LIBRARY_RECORD>
     return result;
 }
 
+bool XMACH::isLibraryRecordNamePresent(QString sName)
+{
+    QList<XMACH::LIBRARY_RECORD> listLibraries=getLibraryRecords();
+
+    return isLibraryRecordNamePresent(&listLibraries,sName);
+}
+
 bool XMACH::isLibraryRecordNamePresent(QList<XMACH::LIBRARY_RECORD> *pList, QString sName)
 {
     bool bResult=false;
