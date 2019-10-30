@@ -139,6 +139,9 @@ public:
     QList<SECTION_RECORD> getSectionRecords();
     QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pList);
 
+    quint32 getNumberOfSections();
+    quint32 getNumberOfSections(QList<COMMAND_RECORD> *pList);
+
     static bool isSectionNamePresent(QList<SECTION_RECORD> *pList,QString sName);
 };
 

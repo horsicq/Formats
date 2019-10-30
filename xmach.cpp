@@ -964,6 +964,52 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
     return listResult;
 }
 
+quint32 XMACH::getNumberOfSections()
+{
+    QList<XMACH::COMMAND_RECORD> listCR=getCommandRecords();
+
+    return getNumberOfSections(&listCR);
+}
+
+quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pList)
+{
+    quint32 nResult=0;
+
+    bool bIs64=is64();
+    bool bIsBigEndian=isBigEndian();
+
+    if(bIs64)
+    {
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT_64);
+
+        int nCount=listLCSegments.count();
+
+        for(int i=0;i<nCount;i++)
+        {
+            qint64 nOffset=listLCSegments.at(i).nOffset;
+            int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,nsects),bIsBigEndian);
+
+            nResult+=nNumberOfSections;
+        }
+    }
+    else
+    {
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT);
+
+        int nCount=listLCSegments.count();
+
+        for(int i=0;i<nCount;i++)
+        {
+            qint64 nOffset=listLCSegments.at(i).nOffset;
+            int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),bIsBigEndian);
+
+            nResult+=nNumberOfSections;
+        }
+    }
+
+    return nResult;
+}
+
 bool XMACH::isSectionNamePresent(QList<XMACH::SECTION_RECORD> *pList, QString sName)
 {
     bool bResult=false;
