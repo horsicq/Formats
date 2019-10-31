@@ -539,6 +539,7 @@ public:
 
     bool isResourcesPresent();
     bool isRelocsPresent();
+    bool isDebugPresent();
     bool isTLSPresent();
     bool isSignPresent();
     bool isExceptionPresent();
