@@ -4754,6 +4754,49 @@ QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList()
     return listResult;
 }
 
+QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList()
+{
+    QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY>  listResult;
+
+    QList<MEMORY_MAP> listMM=getMemoryMapList();
+    qint64 nBaseAddress=getBaseAddress();
+
+    qint64 nDebugOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DEBUG);
+
+    if(nDebugOffset!=-1)
+    {
+        while(true)
+        {
+            XPE_DEF::S_IMAGE_DEBUG_DIRECTORY record={};
+
+            record.Characteristics=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Characteristics));
+            record.TimeDateStamp=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,TimeDateStamp));
+            record.MajorVersion=read_uint16(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MajorVersion));
+            record.MinorVersion=read_uint16(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MinorVersion));
+            record.Type=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Type));
+            record.SizeOfData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,SizeOfData));
+            record.AddressOfRawData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,AddressOfRawData));
+            record.PointerToRawData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,PointerToRawData));
+
+            if( record.AddressOfRawData&&
+                record.PointerToRawData&&
+                isAddressValid(&listMM,nBaseAddress+record.AddressOfRawData)&&
+                isOffsetValid(&listMM,record.PointerToRawData))
+            {
+                listResult.append(record);
+            }
+            else
+            {
+                break;
+            }
+
+            nDebugOffset+=sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY);
+        }
+    }
+
+    return listResult;
+}
+
 qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)
 {
     qint64 nHeadersSize=nSectionsTableOffset+sizeof(XPE_DEF::IMAGE_SECTION_HEADER)*nNumberOfSections;

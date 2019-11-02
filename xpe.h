@@ -706,6 +706,8 @@ public:
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 
+    QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList();
+
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
 
