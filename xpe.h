@@ -435,6 +435,8 @@ public:
     void setImportDescriptor(quint32 nNumber,XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *pImportDescriptor);
 
     QList<IMPORT_HEADER> getImports();
+    QList<IMPORT_HEADER> getImports(QList<MEMORY_MAP> *pMemoryMap);
+
     QList<IMPORT_POSITION> getImportPositions(int nIndex);
 
     QList<quint32> getImportPositionHashes();

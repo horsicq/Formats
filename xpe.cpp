@@ -1903,21 +1903,28 @@ void XPE::setImportDescriptor(quint32 nNumber, XPE_DEF::IMAGE_IMPORT_DESCRIPTOR 
         write_IMAGE_IMPORT_DESCRIPTOR(nImportOffset,*pImportDescriptor);
     }
 }
-// TODO: function with QList<MEMORY_MAP>
+
 QList<XPE::IMPORT_HEADER> XPE::getImports()
+{
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return getImports(&list);
+}
+
+QList<XPE::IMPORT_HEADER> XPE::getImports(QList<XBinary::MEMORY_MAP> *pMemoryMap)
 {
     QList<IMPORT_HEADER> listResult;
 
     XPE_DEF::IMAGE_DATA_DIRECTORY dataResources=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
-    QList<MEMORY_MAP> listMemoryMap=getMemoryMapList();
+
     qint64 nBaseAddress=_getBaseAddress();
     qint64 nImportOffset=-1;
     qint64 nImportOffsetTest=-1;
 
     if(dataResources.VirtualAddress)
     {
-        nImportOffset=addressToOffset(&listMemoryMap,dataResources.VirtualAddress+nBaseAddress);
-        nImportOffsetTest=addressToOffset(&listMemoryMap,dataResources.VirtualAddress+nBaseAddress+sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR)-2); // Test for some (Win)Upack stubs
+        nImportOffset=addressToOffset(pMemoryMap,dataResources.VirtualAddress+nBaseAddress);
+        nImportOffsetTest=addressToOffset(pMemoryMap,dataResources.VirtualAddress+nBaseAddress+sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR)-2); // Test for some (Win)Upack stubs
     }
 
     if(nImportOffset!=-1)
@@ -1940,7 +1947,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports()
                 break;
             }
 
-            qint64 nOffset=addressToOffset(&listMemoryMap,iid.Name+nBaseAddress);
+            qint64 nOffset=addressToOffset(pMemoryMap,iid.Name+nBaseAddress);
 
             if(nOffset!=-1)
             {
@@ -1974,8 +1981,8 @@ QList<XPE::IMPORT_HEADER> XPE::getImports()
 
             nThunksOriginalRVA=iid.FirstThunk;
 
-            nThunksOffset=addressToOffset(&listMemoryMap,nThunksRVA+nBaseAddress);
-            nThunksOriginalOffset=addressToOffset(&listMemoryMap,nThunksOriginalRVA+nBaseAddress);
+            nThunksOffset=addressToOffset(pMemoryMap,nThunksRVA+nBaseAddress);
+            nThunksOriginalOffset=addressToOffset(pMemoryMap,nThunksOriginalRVA+nBaseAddress);
 
             if(nThunksOffset==-1)
             {
@@ -1999,7 +2006,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports()
 
                     if(!(importPosition.nThunkValue&0x8000000000000000))
                     {
-                        qint64 nOffset=addressToOffset(&listMemoryMap,importPosition.nThunkValue+nBaseAddress);
+                        qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nThunkValue+nBaseAddress);
 
                         if(nOffset!=-1)
                         {
@@ -2033,7 +2040,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports()
 
                     if(!(importPosition.nThunkValue&0x80000000))
                     {
-                        qint64 nOffset=addressToOffset(&listMemoryMap,importPosition.nThunkValue+nBaseAddress);
+                        qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nThunkValue+nBaseAddress);
 
                         if(nOffset!=-1)
                         {
