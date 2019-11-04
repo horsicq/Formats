@@ -2950,6 +2950,76 @@ QString XPE::getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVer
     return sResult;
 }
 
+quint32 XPE::getResourceIdByNumber(quint32 nNumber)
+{
+    quint32 nResult=0;
+
+    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+
+    if((qint32)nNumber<listResources.count())
+    {
+        nResult=listResources.at(nNumber).nID[1];
+    }
+
+    return nResult;
+}
+
+QString XPE::getResourceNameByNumber(quint32 nNumber)
+{
+    QString sResult;
+
+    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+
+    if((qint32)nNumber<listResources.count())
+    {
+        sResult=listResources.at(nNumber).sName[1];
+    }
+
+    return sResult;
+}
+
+qint64 XPE::getResourceOffsetByNumber(quint32 nNumber)
+{
+    qint64 nResult=-1;
+
+    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+
+    if((qint32)nNumber<listResources.count())
+    {
+        nResult=listResources.at(nNumber).nOffset;
+    }
+
+    return nResult;
+}
+
+qint64 XPE::getResourceSizeByNumber(quint32 nNumber)
+{
+    qint64 nResult=0;
+
+    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+
+    if((qint32)nNumber<listResources.count())
+    {
+        nResult=listResources.at(nNumber).nSize;
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getResourceTypeByNumber(quint32 nNumber)
+{
+    qint64 nResult=0;
+
+    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+
+    if((qint32)nNumber<listResources.count())
+    {
+        nResult=listResources.at(nNumber).nID[0];
+    }
+
+    return nResult;
+}
+
 XPE_DEF::IMAGE_IMPORT_DESCRIPTOR XPE::read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset)
 {
     XPE_DEF::IMAGE_IMPORT_DESCRIPTOR result={};

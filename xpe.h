@@ -467,6 +467,12 @@ public:
     RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);
     static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion);
 
+    quint32 getResourceIdByNumber(quint32 nNumber);
+    QString getResourceNameByNumber(quint32 nNumber);
+    qint64 getResourceOffsetByNumber(quint32 nNumber);
+    qint64 getResourceSizeByNumber(quint32 nNumber);
+    quint32 getResourceTypeByNumber(quint32 nNumber);
+
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nBaseAddress);
