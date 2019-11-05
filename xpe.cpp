@@ -5263,6 +5263,13 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
     return result;
 }
 
+bool XPE::isNETAnsiStringPresent(QString sString)
+{
+    XPE::CLI_INFO cliInfo=getCliInfo(true);
+
+    return isNETAnsiStringPresent(sString,&cliInfo);
+}
+
 bool XPE::isNETAnsiStringPresent(QString sString, XPE::CLI_INFO *pCliInfo)
 {
     bool bResult=false;

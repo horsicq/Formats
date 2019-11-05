@@ -608,6 +608,7 @@ public:
     bool isNETPresent();
     CLI_INFO getCliInfo(bool bFindHidden);
 
+    bool isNETAnsiStringPresent(QString sString);
     static bool isNETAnsiStringPresent(QString sString,CLI_INFO *pCliInfo);
 
     int getEntryPointSection();
