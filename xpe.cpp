@@ -4874,6 +4874,27 @@ QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList()
     return listResult;
 }
 
+qint32 XPE::getNumberOfImports()
+{
+    QList<XPE::IMPORT_RECORD> listImports=getImportRecords(); // TODO Check
+
+    return listImports.count();
+}
+
+QString XPE::getImportLibraryName(quint32 nNumber)
+{
+    QString sResult;
+
+    QList<XPE::IMAGE_IMPORT_DESCRIPTOR_EX> listImports=getImportDescriptorsEx(); // TODO Check
+
+    if(nNumber<listImports.count())
+    {
+        sResult=listImports.at(nNumber).sLibrary;
+    }
+
+    return sResult;
+}
+
 qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)
 {
     qint64 nHeadersSize=nSectionsTableOffset+sizeof(XPE_DEF::IMAGE_SECTION_HEADER)*nNumberOfSections;
