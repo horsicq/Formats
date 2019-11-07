@@ -2293,6 +2293,13 @@ QList<quint32> XPE::getImportPositionHashes()
     return listResult;
 }
 
+bool XPE::isImportLibraryPresentI(QString sLibrary)
+{
+    QList<XPE::IMPORT_HEADER> listImports=getImports();
+
+    return isImportLibraryPresentI(sLibrary,&listImports);
+}
+
 bool XPE::isImportLibraryPresentI(QString sLibrary, QList<XPE::IMPORT_HEADER> *pListImport)
 {
     bool bResult=false;
