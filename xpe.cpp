@@ -2803,6 +2803,13 @@ bool XPE::isResourcePresent(QString sName1, QString sName2, QList<XPE::RESOURCE_
     return (getResourceRecord(sName1,sName2,pListRecords).nSize);
 }
 
+QString XPE::getResourceManifest()
+{
+    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+
+    return getResourceManifest(&listResources);
+}
+
 QString XPE::getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListRecords)
 {
     QString sResult;
@@ -4894,7 +4901,7 @@ QString XPE::getImportLibraryName(quint32 nNumber)
 
     QList<XPE::IMAGE_IMPORT_DESCRIPTOR_EX> listImports=getImportDescriptorsEx(); // TODO Check
 
-    if(nNumber<listImports.count())
+    if((qint32)nNumber<listImports.count())
     {
         sResult=listImports.at(nNumber).sLibrary;
     }
