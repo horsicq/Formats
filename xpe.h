@@ -468,6 +468,8 @@ public:
     XPE_DEF::S_VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
 
     RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);
+
+    QString getResourceVersionValue(QString sKey);
     static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion);
 
     quint32 getResourceIdByNumber(quint32 nNumber);
@@ -555,6 +557,7 @@ public:
     bool isSignPresent();
     bool isExceptionPresent();
     bool isLoadConfigPresent();
+    bool isDelayImportPresent();
 
     XPE_DEF::S_IMAGE_TLS_DIRECTORY32 getTLSDirectory32();
     XPE_DEF::S_IMAGE_TLS_DIRECTORY64 getTLSDirectory64();

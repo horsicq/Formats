@@ -2944,6 +2944,14 @@ XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pList
     return result;
 }
 
+QString XPE::getResourceVersionValue(QString sKey)
+{
+    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+    XPE::RESOURCE_VERSION resVersion=getResourceVersion(&listResources);
+
+    return getResourceVersionValue(sKey,&resVersion);
+}
+
 QString XPE::getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion)
 {
     QString sResult;
@@ -6288,6 +6296,11 @@ bool XPE::isExceptionPresent()
 bool XPE::isLoadConfigPresent()
 {
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+}
+
+bool XPE::isDelayImportPresent()
+{
+    return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
 }
 
 XPE_DEF::S_IMAGE_TLS_DIRECTORY32 XPE::getTLSDirectory32()
