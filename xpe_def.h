@@ -722,5 +722,23 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY64
     quint64 EnclaveConfigurationPointer;     // VA
     quint64 VolatileMetadataPointer;         // VA
 };
+
+struct S_IMAGE_DELAYLOAD_DESCRIPTOR {
+    union {
+        quint32 AllAttributes;
+        struct {
+            quint32 RvaBased : 1;             // Delay load version 2
+            quint32 ReservedAttributes : 31;
+        } DUMMYSTRUCTNAME;
+    } Attributes;
+    quint32 DllNameRVA;                       // RVA to the name of the target library (NULL-terminate ASCII string)
+    quint32 ModuleHandleRVA;                  // RVA to the HMODULE caching location (PHMODULE)
+    quint32 ImportAddressTableRVA;            // RVA to the start of the IAT (PIMAGE_THUNK_DATA)
+    quint32 ImportNameTableRVA;               // RVA to the start of the name table (PIMAGE_THUNK_DATA::AddressOfData)
+    quint32 BoundImportAddressTableRVA;       // RVA to an optional bound IAT
+    quint32 UnloadInformationTableRVA;        // RVA to an optional unload info table
+    quint32 TimeDateStamp;                    // 0 if not bound,
+                                              // Otherwise, date/time of the target DLL
+};
 }
 #endif // XPE_DEF_H

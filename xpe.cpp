@@ -4917,6 +4917,20 @@ QString XPE::getImportLibraryName(quint32 nNumber)
     return sResult;
 }
 
+qint32 XPE::getNumberOfImportThunks(quint32 nNumber)
+{
+    qint32 nResult;
+
+    QList<IMPORT_HEADER> listImports=getImports();
+
+    if((qint32)nNumber<listImports.count())
+    {
+        nResult=listImports.at(nNumber).listPositions.count();
+    }
+
+    return nResult;
+}
+
 qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)
 {
     qint64 nHeadersSize=nSectionsTableOffset+sizeof(XPE_DEF::IMAGE_SECTION_HEADER)*nNumberOfSections;
