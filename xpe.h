@@ -727,6 +727,7 @@ public:
     QString getImportLibraryName(quint32 nNumber);
 
     qint32 getNumberOfImportThunks(quint32 nNumber);
+    qint32 getNumberOfRichIDs();
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

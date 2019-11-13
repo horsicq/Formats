@@ -4832,7 +4832,7 @@ QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList()
 
             record.BeginAddress=read_uint32(nExceptionOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,BeginAddress));
             record.EndAddress=read_uint32(nExceptionOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,EndAddress));
-            record.DUMMYUNIONNAME.UnwindInfoAddress=read_uint32(nExceptionOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,DUMMYUNIONNAME.UnwindInfoAddress));
+            record.UnwindInfoAddress=read_uint32(nExceptionOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,UnwindInfoAddress));
 
             if( record.BeginAddress&&
                 record.EndAddress&&
@@ -4929,6 +4929,13 @@ qint32 XPE::getNumberOfImportThunks(quint32 nNumber)
     }
 
     return nResult;
+}
+
+qint32 XPE::getNumberOfRichIDs()
+{
+    QList<RICH_RECORD> listRecords=getRichSignatureRecords();
+
+    return listRecords.count();
 }
 
 qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)

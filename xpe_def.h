@@ -618,7 +618,7 @@ struct S_IMAGE_RUNTIME_FUNCTION_ENTRY
     {
         quint32 UnwindInfoAddress;
         quint32 UnwindData;
-    } DUMMYUNIONNAME;
+    };
 };
 
 struct S_IMAGE_LOAD_CONFIG_CODE_INTEGRITY
