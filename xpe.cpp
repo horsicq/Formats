@@ -3042,6 +3042,31 @@ quint32 XPE::getResourceTypeByNumber(quint32 nNumber)
     return nResult;
 }
 
+qint64 XPE::getResourceNameOffset(QString sName)
+{
+    qint64 nResult=-1;
+
+    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+
+    int nCount=listResources.count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(listResources.at(i).sName[1]==sName)
+        {
+            nResult=listResources.at(i).nOffset;
+            break;
+        }
+    }
+
+    return nResult;
+}
+
+bool XPE::isResourceNamePresent(QString sName)
+{
+    return (getResourceNameOffset(sName)!=-1);
+}
+
 XPE_DEF::IMAGE_IMPORT_DESCRIPTOR XPE::read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset)
 {
     XPE_DEF::IMAGE_IMPORT_DESCRIPTOR result={};
@@ -6317,6 +6342,11 @@ bool XPE::isExceptionPresent()
 bool XPE::isLoadConfigPresent()
 {
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+}
+
+bool XPE::isBoundImportPresent()
+{
+    return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
 }
 
 bool XPE::isDelayImportPresent()

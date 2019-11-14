@@ -478,6 +478,9 @@ public:
     qint64 getResourceSizeByNumber(quint32 nNumber);
     quint32 getResourceTypeByNumber(quint32 nNumber);
 
+    qint64 getResourceNameOffset(QString sName);
+    bool isResourceNamePresent(QString sName);
+
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nBaseAddress);
@@ -557,6 +560,7 @@ public:
     bool isSignPresent();
     bool isExceptionPresent();
     bool isLoadConfigPresent();
+    bool isBoundImportPresent();
     bool isDelayImportPresent();
 
     XPE_DEF::S_IMAGE_TLS_DIRECTORY32 getTLSDirectory32();
