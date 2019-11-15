@@ -724,13 +724,15 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY64
 };
 
 struct S_IMAGE_DELAYLOAD_DESCRIPTOR {
-    union {
+    union
+    {
         quint32 AllAttributes;
-        struct {
+        struct
+        {
             quint32 RvaBased : 1;             // Delay load version 2
             quint32 ReservedAttributes : 31;
         } DUMMYSTRUCTNAME;
-    } Attributes;
+    };
     quint32 DllNameRVA;                       // RVA to the name of the target library (NULL-terminate ASCII string)
     quint32 ModuleHandleRVA;                  // RVA to the HMODULE caching location (PHMODULE)
     quint32 ImportAddressTableRVA;            // RVA to the start of the IAT (PIMAGE_THUNK_DATA)

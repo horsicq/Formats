@@ -727,6 +727,8 @@ public:
 
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList();
 
+    QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> getDelayImportsList();
+
     qint32 getNumberOfImports();
     QString getImportLibraryName(quint32 nNumber);
 

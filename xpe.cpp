@@ -4921,6 +4921,47 @@ QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList()
     return listResult;
 }
 
+QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
+{
+    QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR>  listResult;
+
+    QList<MEMORY_MAP> listMM=getMemoryMapList();
+    qint64 nBaseAddress=getBaseAddress();
+
+    qint64 nDebugOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
+
+    if(nDebugOffset!=-1)
+    {
+        while(true)
+        {
+            XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR record={};
+
+            record.AllAttributes=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,AllAttributes));
+            record.DllNameRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,DllNameRVA));
+            record.ModuleHandleRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ModuleHandleRVA));
+            record.ImportAddressTableRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportAddressTableRVA));
+            record.ImportNameTableRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportNameTableRVA));
+            record.BoundImportAddressTableRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,BoundImportAddressTableRVA));
+            record.UnloadInformationTableRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,UnloadInformationTableRVA));
+            record.TimeDateStamp=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,TimeDateStamp));
+
+            if( record.DllNameRVA&&
+                isAddressValid(&listMM,nBaseAddress+record.DllNameRVA))
+            {
+                listResult.append(record);
+            }
+            else
+            {
+                break;
+            }
+
+            nDebugOffset+=sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
+        }
+    }
+
+    return listResult;
+}
+
 qint32 XPE::getNumberOfImports()
 {
     QList<XPE::IMPORT_RECORD> listImports=getImportRecords(); // TODO Check
