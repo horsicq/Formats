@@ -2316,6 +2316,13 @@ bool XPE::isImportLibraryPresentI(QString sLibrary, QList<XPE::IMPORT_HEADER> *p
     return bResult;
 }
 
+bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction)
+{
+    QList<XPE::IMPORT_HEADER> listImports=getImports();
+
+    return isImportFunctionPresentI(sLibrary,sFunction,&listImports);
+}
+
 bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction, QList<XPE::IMPORT_HEADER> *pListImport)
 {
     bool bResult=false;
@@ -4975,6 +4982,11 @@ bool XPE::isDll(QString sFileName)
 bool XPE::isConsole()
 {
     return (getOptionalHeader_Subsystem()==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI);
+}
+
+bool XPE::isDriver()
+{
+    return (getOptionalHeader_Subsystem()==XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE);
 }
 
 bool XPE::isNETPresent()

@@ -443,6 +443,8 @@ public:
 
     bool isImportLibraryPresentI(QString sLibrary);
     static bool isImportLibraryPresentI(QString sLibrary,QList<IMPORT_HEADER> *pListImport);
+
+    bool isImportFunctionPresentI(QString sLibrary,QString sFunction);
     static bool isImportFunctionPresentI(QString sLibrary,QString sFunction,QList<IMPORT_HEADER> *pListImport);
 
     bool setImports(QList<IMPORT_HEADER> *pListHeaders);
@@ -614,6 +616,8 @@ public:
     bool isDll();
     static bool isDll(QString sFileName);
     bool isConsole();
+
+    bool isDriver();
 
     bool isNETPresent();
     CLI_INFO getCliInfo(bool bFindHidden);

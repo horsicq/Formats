@@ -400,6 +400,11 @@ public:
     bool addOverlay(char *pData,qint64 nDataSize);
     bool removeOverlay();
 
+    bool isSignatureInLoadSectionPresent(qint32 nLoadSection,QString sSignature);
+    bool isSignatureInLoadSectionPresent(QList<MEMORY_MAP> *pMemoryMap,qint32 nLoadSection,QString sSignature);
+
+    static QString getStringCollision(QList<QString> *pListStrings,QString sString1,QString sString2);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);

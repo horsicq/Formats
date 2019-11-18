@@ -2993,6 +2993,69 @@ bool XBinary::removeOverlay()
     return addOverlay(0,0);
 }
 
+bool XBinary::isSignatureInLoadSectionPresent(qint32 nLoadSection, QString sSignature)
+{
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return isSignatureInLoadSectionPresent(&list,nLoadSection,sSignature);
+}
+
+bool XBinary::isSignatureInLoadSectionPresent(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint32 nLoadSection, QString sSignature)
+{
+    bool bResult=false;
+
+    int nCount=pMemoryMap->count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(pMemoryMap->at(i).nLoadSection==nLoadSection)
+        {
+            if(pMemoryMap->at(i).nOffset!=-1)
+            {
+                bResult=isSignaturePresent(pMemoryMap->at(i).nOffset,pMemoryMap->at(i).nSize,sSignature);
+
+                break;
+            }
+        }
+    }
+
+    return bResult;
+}
+
+QString XBinary::getStringCollision(QList<QString> *pListStrings, QString sString1, QString sString2)
+{
+    QString sResult;
+
+    int nCount=pListStrings->count();
+
+    QString sRoot1;
+    QString sRoot2;
+
+    for(int i=0;i<nCount;i++)
+    {
+        QString sCurrentString=pListStrings->at(i);
+
+        if(sCurrentString.contains(sString1))
+        {
+            sRoot1=sCurrentString.section(sString1,0,0);
+        }
+
+        if((sRoot1!="")&&sCurrentString.contains(sString2))
+        {
+            sRoot2=sCurrentString.section(sString2,0,0);
+
+            break;
+        }
+    }
+
+    if((sRoot1!="")&&(sRoot1==sRoot2))
+    {
+        sResult=sRoot1;
+    }
+
+    return sResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     QList<SIGNATURE_RECORD> result;
