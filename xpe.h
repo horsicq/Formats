@@ -421,6 +421,9 @@ public:
     static bool isSectionNamePresent(QString sSectionName,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections);
     static XPE_DEF::IMAGE_SECTION_HEADER getSectionByName(QString sSectionName,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections);
 
+    qint32 getSectionNumber(QString sSectionName);
+    static qint32 getSectionNumber(QString sSectionName,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections);
+
     bool isImportPresent();
 
     QList<IMPORT_RECORD> getImportRecords();
@@ -463,6 +466,9 @@ public:
     static bool isResourcePresent(quint32 nID1,QString sName2,QList<RESOURCE_RECORD> *pListHeaders);
     static bool isResourcePresent(QString sName1,quint32 nID2,QList<RESOURCE_RECORD> *pListHeaders);
     static bool isResourcePresent(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListHeaders);
+
+    bool isResourceManifestPresent();
+    bool isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders);
 
     QString getResourceManifest();
     QString getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListHeaders);
@@ -520,9 +526,6 @@ public:
 
     QString getSectionMD5(quint32 nSection);
     double getSectionEntropy(quint32 nSection);
-
-    qint32 addressToSection(qint64 nAddress);
-    static qint32 addressToSection(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress);
 
     bool addImportSection(QMap<qint64,QString> *pMapIAT);
     static bool addImportSection(QIODevice *pDevice,bool bIsImage,QMap<qint64,QString> *pMapIAT);
@@ -626,14 +629,23 @@ public:
     static bool isNETAnsiStringPresent(QString sString,CLI_INFO *pCliInfo);
 
     int getEntryPointSection();
+    int getEntryPointSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
     int getImportSection();
+    int getImportSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
     int getExportSection();
+    int getExportSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
     int getTLSSection();
+    int getTLSSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
     int getResourcesSection();
+    int getResourcesSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
     int getRelocsSection();
+    int getRelocsSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
     int getNormalCodeSection();
+    int getNormalCodeSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
     int getNormalDataSection();
+    int getNormalDataSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
     int getConstDataSection();
+    int getConstDataSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
 
     struct REBUILD_OPTIONS
     {

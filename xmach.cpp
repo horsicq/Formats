@@ -519,7 +519,7 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
     return listResult;
 }
 
-QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(QList<XMACH::COMMAND_RECORD> *pList, quint32 nCommandID)
+QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *pList)
 {
     QList<COMMAND_RECORD> listResult;
 
@@ -540,10 +540,10 @@ bool XMACH::isCommandPresent(quint32 nCommandID, int nIndex)
 {
     QList<COMMAND_RECORD> list=getCommandRecords();
 
-    return isCommandPresent(&list,nCommandID,nIndex);
+    return isCommandPresent(nCommandID,nIndex,&list);
 }
 
-bool XMACH::isCommandPresent(QList<XMACH::COMMAND_RECORD> *pList, quint32 nCommandID, int nIndex)
+bool XMACH::isCommandPresent(quint32 nCommandID, int nIndex, QList<XMACH::COMMAND_RECORD> *pList)
 {
     bool bResult=false;
 
@@ -573,17 +573,17 @@ QByteArray XMACH::getCommand(quint32 nCommandID, int nIndex)
 {
     QList<COMMAND_RECORD> list=getCommandRecords();
 
-    return getCommand(&list,nCommandID,nIndex);
+    return getCommand(nCommandID,nIndex,&list);
 }
 
 bool XMACH::setCommand(quint32 nCommandID, QByteArray baData, int nIndex)
 {
     QList<COMMAND_RECORD> list=getCommandRecords();
 
-    return setCommand(&list,nCommandID,baData,nIndex);
+    return setCommand(nCommandID,baData,nIndex,&list);
 }
 
-QByteArray XMACH::getCommand(QList<XMACH::COMMAND_RECORD> *pList, quint32 nCommandID, int nIndex)
+QByteArray XMACH::getCommand(quint32 nCommandID, int nIndex, QList<XMACH::COMMAND_RECORD> *pList)
 {
     QByteArray baResult;
 
@@ -609,7 +609,7 @@ QByteArray XMACH::getCommand(QList<XMACH::COMMAND_RECORD> *pList, quint32 nComma
     return baResult;
 }
 
-bool XMACH::setCommand(QList<XMACH::COMMAND_RECORD> *pList, quint32 nCommandID, QByteArray baData, int nIndex)
+bool XMACH::setCommand(quint32 nCommandID, QByteArray baData, int nIndex, QList<XMACH::COMMAND_RECORD> *pList)
 {
     bool bResult=false;
 
@@ -738,7 +738,7 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECOR
 
     bool bIsBigEndian=isBigEndian();
 
-    QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(pList,XMACH_DEF::S_LC_LOAD_DYLIB);
+    QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(XMACH_DEF::S_LC_LOAD_DYLIB,pList);
 
     int nCount=listLCLibraries.count();
 
@@ -761,7 +761,7 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECOR
     return listResult;
 }
 
-XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QList<XMACH::LIBRARY_RECORD> *pList, QString sName)
+XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QString sName, QList<XMACH::LIBRARY_RECORD> *pList)
 {
     LIBRARY_RECORD result={};
 
@@ -784,10 +784,10 @@ bool XMACH::isLibraryRecordNamePresent(QString sName)
 {
     QList<XMACH::LIBRARY_RECORD> listLibraries=getLibraryRecords();
 
-    return isLibraryRecordNamePresent(&listLibraries,sName);
+    return isLibraryRecordNamePresent(sName,&listLibraries);
 }
 
-bool XMACH::isLibraryRecordNamePresent(QList<XMACH::LIBRARY_RECORD> *pList, QString sName)
+bool XMACH::isLibraryRecordNamePresent(QString sName, QList<XMACH::LIBRARY_RECORD> *pList)
 {
     bool bResult=false;
 
@@ -822,7 +822,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT_64);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pList);
 
         int nCount=listLCSegments.count();
 
@@ -848,7 +848,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pList);
 
         int nCount=listLCSegments.count();
 
@@ -892,7 +892,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT_64);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pList);
 
         int nCount=listLCSegments.count();
 
@@ -927,7 +927,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pList);
 
         int nCount=listLCSegments.count();
 
@@ -980,7 +980,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pList)
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT_64);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pList);
 
         int nCount=listLCSegments.count();
 
@@ -994,7 +994,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pList)
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(pList,XMACH_DEF::S_LC_SEGMENT);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pList);
 
         int nCount=listLCSegments.count();
 
@@ -1014,15 +1014,15 @@ bool XMACH::isSectionNamePresent(QString sName)
 {
     QList<SECTION_RECORD> listSections=getSectionRecords();
 
-    return isSectionNamePresent(&listSections,sName);
+    return isSectionNamePresent(sName,&listSections);
 }
 
-bool XMACH::isSectionNamePresent(QList<XMACH::SECTION_RECORD> *pList, QString sName)
+bool XMACH::isSectionNamePresent(QString sName, QList<XMACH::SECTION_RECORD> *pList)
 {
-    return (getSectionNumber(pList,sName)!=-1);
+    return (getSectionNumber(sName,pList)!=-1);
 }
 
-qint32 XMACH::getSectionNumber(QList<XMACH::SECTION_RECORD> *pList, QString sName)
+qint32 XMACH::getSectionNumber(QString sName, QList<XMACH::SECTION_RECORD> *pList)
 {
     qint32 nResult=-1;
 
@@ -1050,5 +1050,5 @@ qint32 XMACH::getSectionNumber(QString sName)
 {
     QList<SECTION_RECORD> listSections=getSectionRecords();
 
-    return getSectionNumber(&listSections,sName);
+    return getSectionNumber(sName,&listSections);
 }

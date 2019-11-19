@@ -1395,6 +1395,34 @@ XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionByName(QString sSectionName, QList<
     return result;
 }
 
+qint32 XPE::getSectionNumber(QString sSectionName)
+{
+    QList<XPE_DEF::IMAGE_SECTION_HEADER> listSectionHeaders=getSectionHeaders();
+
+    return getSectionNumber(sSectionName,&listSectionHeaders);
+}
+
+qint32 XPE::getSectionNumber(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections)
+{
+    qint32 nResult=-1;
+
+    int nNumberOfSections=pListSections->count();
+
+    for(int i=0; i<nNumberOfSections; i++)
+    {
+        QString _sSectionName=QString((char *)pListSections->at(i).Name);
+        _sSectionName.resize(qMin(_sSectionName.length(),XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
+
+        if(_sSectionName==sSectionName)
+        {
+            nResult=i;
+            break;
+        }
+    }
+
+    return nResult;
+}
+
 bool XPE::isImportPresent()
 {
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
@@ -2810,6 +2838,18 @@ bool XPE::isResourcePresent(QString sName1, QString sName2, QList<XPE::RESOURCE_
     return (getResourceRecord(sName1,sName2,pListRecords).nSize);
 }
 
+bool XPE::isResourceManifestPresent()
+{
+    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+
+    return isResourceManifestPresent(&listResources);
+}
+
+bool XPE::isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders)
+{
+    return isResourcePresent(XPE_DEF::S_RT_MANIFEST,1,pListHeaders);
+}
+
 QString XPE::getResourceManifest()
 {
     QList<XPE::RESOURCE_RECORD> listResources=getResources();
@@ -3416,27 +3456,6 @@ double XPE::getSectionEntropy(quint32 nSection)
     }
 
     return dResult;
-}
-
-qint32 XPE::addressToSection(qint64 nAddress)
-{
-    QList<MEMORY_MAP> list=getMemoryMapList();
-
-    return addressToSection(&list,nAddress);
-}
-
-qint32 XPE::addressToSection(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress)
-{
-    qint32 nResult=-1;
-
-    MEMORY_MAP mm=getAddressMemoryMap(pMemoryMap,nAddress);
-
-    if(mm.bIsLoadSection)
-    {
-        nResult=mm.nLoadSection;
-    }
-
-    return nResult;
 }
 
 bool XPE::addImportSection(QMap<qint64, QString> *pMapIAT)
@@ -5360,13 +5379,20 @@ bool XPE::isNETAnsiStringPresent(QString sString, XPE::CLI_INFO *pCliInfo)
 
 int XPE::getEntryPointSection()
 {
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return getEntryPointSection(&list);
+}
+
+int XPE::getEntryPointSection(QList<MEMORY_MAP> *pMemoryMap)
+{
     int nResult=-1;
 
     qint64 nAddressOfEntryPoint=getOptionalHeader_AddressOfEntryPoint();
 
     if(nAddressOfEntryPoint)
     {
-        nResult=addressToSection(_getBaseAddress()+nAddressOfEntryPoint);
+        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfEntryPoint);
     }
 
     return nResult;
@@ -5374,13 +5400,20 @@ int XPE::getEntryPointSection()
 
 int XPE::getImportSection()
 {
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return getImportSection(&list);
+}
+
+int XPE::getImportSection(QList<MEMORY_MAP> *pMemoryMap)
+{
     int nResult=-1;
 
     qint64 nAddressOfImport=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT).VirtualAddress;
 
     if(nAddressOfImport)
     {
-        nResult=addressToSection(_getBaseAddress()+nAddressOfImport);
+        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfImport);
     }
 
     return nResult;
@@ -5388,13 +5421,20 @@ int XPE::getImportSection()
 
 int XPE::getExportSection()
 {
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return getExportSection(&list);
+}
+
+int XPE::getExportSection(QList<MEMORY_MAP> *pMemoryMap)
+{
     int nResult=-1;
 
     qint64 nAddressOfExport=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT).VirtualAddress;
 
     if(nAddressOfExport)
     {
-        nResult=addressToSection(_getBaseAddress()+nAddressOfExport);
+        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfExport);
     }
 
     return nResult;
@@ -5402,13 +5442,20 @@ int XPE::getExportSection()
 
 int XPE::getTLSSection()
 {
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return getTLSSection(&list);
+}
+
+int XPE::getTLSSection(QList<MEMORY_MAP> *pMemoryMap)
+{
     int nResult=-1;
 
     qint64 nAddressOfTLS=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS).VirtualAddress;
 
     if(nAddressOfTLS)
     {
-        nResult=addressToSection(_getBaseAddress()+nAddressOfTLS);
+        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfTLS);
     }
 
     return nResult;
@@ -5416,13 +5463,20 @@ int XPE::getTLSSection()
 
 int XPE::getResourcesSection()
 {
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return getResourcesSection(&list);
+}
+
+int XPE::getResourcesSection(QList<MEMORY_MAP> *pMemoryMap)
+{
     int nResult=-1;
 
     qint64 nAddressOfResources=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE).VirtualAddress;
 
     if(nAddressOfResources)
     {
-        nResult=addressToSection(_getBaseAddress()+nAddressOfResources);
+        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfResources);
     }
 
     return nResult;
@@ -5430,19 +5484,33 @@ int XPE::getResourcesSection()
 
 int XPE::getRelocsSection()
 {
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return getRelocsSection(&list);
+}
+
+int XPE::getRelocsSection(QList<MEMORY_MAP> *pMemoryMap)
+{
     int nResult=-1;
 
     qint64 nAddressOfRelocs=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC).VirtualAddress;
 
     if(nAddressOfRelocs)
     {
-        nResult=addressToSection(_getBaseAddress()+nAddressOfRelocs);
+        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfRelocs);
     }
 
     return nResult;
 }
 
 int XPE::getNormalCodeSection()
+{
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return getNormalCodeSection(&list);
+}
+
+int XPE::getNormalCodeSection(QList<MEMORY_MAP> *pMemoryMap)
 {
     int nResult=-1;
     // TODO opimize
@@ -5464,7 +5532,7 @@ int XPE::getNormalCodeSection()
                 (nSectionCharacteristics==0x60000020)&&
                 (listSections.at(i).SizeOfRawData))
         {
-            nResult=addressToSection(_getBaseAddress()+listSections.at(i).VirtualAddress);
+            nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+listSections.at(i).VirtualAddress);
             break;
         }
     }
@@ -5475,7 +5543,7 @@ int XPE::getNormalCodeSection()
         {
             if(listSections.at(0).SizeOfRawData)
             {
-                nResult=addressToSection(_getBaseAddress()+listSections.at(0).VirtualAddress);
+                nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+listSections.at(0).VirtualAddress);
             }
         }
     }
@@ -5485,13 +5553,20 @@ int XPE::getNormalCodeSection()
 
 int XPE::getNormalDataSection()
 {
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return getNormalDataSection(&list);
+}
+
+int XPE::getNormalDataSection(QList<MEMORY_MAP> *pMemoryMap)
+{
     int nResult=-1;
     // TODO opimize
 
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSections=getSectionHeaders();
     int nNumberOfSections=listSections.count();
 
-    int nImportSection=getImportSection();
+    int nImportSection=getImportSection(pMemoryMap);
 
     for(int i=1; i<nNumberOfSections; i++)
     {
@@ -5508,7 +5583,7 @@ int XPE::getNormalDataSection()
             (listSections.at(i).SizeOfRawData)&&
             (nImportSection!=i))
         {
-            nResult=addressToSection(_getBaseAddress()+listSections.at(i).VirtualAddress);
+            nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+listSections.at(i).VirtualAddress);
             break;
         }
     }
@@ -5521,7 +5596,7 @@ int XPE::getNormalDataSection()
                 (listSections.at(i).Characteristics!=0x60000020)&&
                 (listSections.at(i).Characteristics!=0x40000040))
             {
-                nResult=addressToSection(_getBaseAddress()+listSections.at(i).VirtualAddress);
+                nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+listSections.at(i).VirtualAddress);
                 break;
             }
         }
@@ -5531,6 +5606,13 @@ int XPE::getNormalDataSection()
 }
 
 int XPE::getConstDataSection()
+{
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return getConstDataSection(&list);
+}
+
+int XPE::getConstDataSection(QList<MEMORY_MAP> *pMemoryMap)
 {
     int nResult=-1;
     // TODO opimize
@@ -5552,7 +5634,7 @@ int XPE::getConstDataSection()
                 (nSectionCharacteristics==0x40000040)&&
                 (listSections.at(i).SizeOfRawData))
         {
-            nResult=addressToSection(_getBaseAddress()+listSections.at(i).VirtualAddress);
+            nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+listSections.at(i).VirtualAddress);
             break;
         }
     }

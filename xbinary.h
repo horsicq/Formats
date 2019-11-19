@@ -268,6 +268,8 @@ public:
     static MEMORY_MAP getOffsetMemoryMap(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
     static MEMORY_MAP getAddressMemoryMap(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
 
+    static qint32 addressToLoadSection(QList<XBinary::MEMORY_MAP> *pMemoryMap,qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
+
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nBaseAddress);

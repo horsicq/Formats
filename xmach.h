@@ -112,15 +112,15 @@ public:
     static QMap<quint64,QString> getLoadCommandTypesS();
 
     QList<COMMAND_RECORD> getCommandRecords();
-    static QList<COMMAND_RECORD> getCommandRecords(QList<COMMAND_RECORD> *pList,quint32 nCommandID);
+    static QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID,QList<COMMAND_RECORD> *pList);
 
-    bool isCommandPresent(quint32 nCommandID,int nIndex=0);
-    bool isCommandPresent(QList<COMMAND_RECORD> *pList,quint32 nCommandID,int nIndex=0);
+    bool isCommandPresent(quint32 nCommandID,int nIndex);
+    bool isCommandPresent(quint32 nCommandID,int nIndex,QList<COMMAND_RECORD> *pList);
 
     QByteArray getCommand(quint32 nCommandID,int nIndex=0);
     bool setCommand(quint32 nCommandID,QByteArray baData,int nIndex=0);
-    QByteArray getCommand(QList<COMMAND_RECORD> *pList,quint32 nCommandID,int nIndex=0);
-    bool setCommand(QList<COMMAND_RECORD> *pList,quint32 nCommandID,QByteArray baData,int nIndex=0);
+    QByteArray getCommand(quint32 nCommandID,int nIndex,QList<COMMAND_RECORD> *pList);
+    bool setCommand(quint32 nCommandID,QByteArray baData,int nIndex,QList<COMMAND_RECORD> *pList);
 
     qint64 getAddressOfEntryPoint();
 
@@ -129,9 +129,9 @@ public:
 
     QList<LIBRARY_RECORD> getLibraryRecords();
     QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pList);
-    static LIBRARY_RECORD getLibraryRecordByName(QList<LIBRARY_RECORD> *pList,QString sName);
+    static LIBRARY_RECORD getLibraryRecordByName(QString sName,QList<LIBRARY_RECORD> *pList);
     bool isLibraryRecordNamePresent(QString sName);
-    static bool isLibraryRecordNamePresent(QList<LIBRARY_RECORD> *pList,QString sName);
+    static bool isLibraryRecordNamePresent(QString sName,QList<LIBRARY_RECORD> *pList);
 
     QList<SEGMENT_RECORD> getSegmentRecords();
     QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pList);
@@ -143,9 +143,9 @@ public:
     quint32 getNumberOfSections(QList<COMMAND_RECORD> *pList);
 
     bool isSectionNamePresent(QString sName);
-    static bool isSectionNamePresent(QList<SECTION_RECORD> *pList,QString sName);
+    static bool isSectionNamePresent(QString sName,QList<SECTION_RECORD> *pList);
 
-    static qint32 getSectionNumber(QList<SECTION_RECORD> *pList,QString sName);
+    static qint32 getSectionNumber(QString sName,QList<SECTION_RECORD> *pList);
     qint32 getSectionNumber(QString sName);
 };
 

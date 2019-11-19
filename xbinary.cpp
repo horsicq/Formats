@@ -1441,6 +1441,20 @@ XBinary::MEMORY_MAP XBinary::getAddressMemoryMap(QList<XBinary::MEMORY_MAP> *pMe
     return result;
 }
 
+qint32 XBinary::addressToLoadSection(QList<XBinary::MEMORY_MAP> *pMemoryMap, qint64 nAddress, XBinary::ADDRESS_SEGMENT segment)
+{
+    qint32 nResult=-1;
+
+    MEMORY_MAP mm=getAddressMemoryMap(pMemoryMap,nAddress,segment);
+
+    if(mm.bIsLoadSection)
+    {
+        nResult=mm.nLoadSection;
+    }
+
+    return nResult;
+}
+
 QList<XBinary::MEMORY_MAP> XBinary::getMemoryMapList()
 {
     QList<MEMORY_MAP> listMemoryMap;
