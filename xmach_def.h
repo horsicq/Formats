@@ -172,6 +172,15 @@ const quint32 S_LC_ROUTINES_64                      =0x1a;	        /* 64-bit ima
 const quint32 S_LC_UUID                             =0x1b;	        /* the uuid */
 const quint32 S_LC_MAIN                             =(0x28|S_LC_REQ_DYLD);       /* main */
 
+const quint32 S_MH_OBJECT                           =0x1;		/* relocatable object file */
+const quint32 S_MH_EXECUTE	                        =0x2;		/* demand paged executable file */
+const quint32 S_MH_FVMLIB	                        =0x3;		/* fixed VM shared library file */
+const quint32 S_MH_CORE		                        =0x4;		/* core file */
+const quint32 S_MH_PRELOAD	                        =0x5;		/* preloaded executable file */
+const quint32 S_MH_DYLIB	                        =0x6;		/* dynamicly bound shared library file*/
+const quint32 S_MH_DYLINKER	                        =0x7;		/* dynamic link editor */
+const quint32 S_MH_BUNDLE	                        =0x8;		/* dynamicly bound bundle file */
+
 struct STRUCT_X86_THREAD_STATE32
 {
     quint32 eax;
