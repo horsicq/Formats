@@ -1029,15 +1029,15 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders()
     return listResult;
 }
 
-QList<XPE::SECTIONFILE_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pList, bool bIsImage)
+QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pList, bool bIsImage)
 {
-    QList<XPE::SECTIONFILE_RECORD> listResult;
+    QList<XPE::SECTION_RECORD> listResult;
 
     int nNumberOfSections=pList->count();
 
     for(int i=0; i<nNumberOfSections; i++)
     {
-        XPE::SECTIONFILE_RECORD record={};
+        XPE::SECTION_RECORD record={};
 
         record.sName=QString((char *)pList->at(i).Name);
         record.sName.resize(qMin(record.sName.length(),XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
@@ -1050,6 +1050,7 @@ QList<XPE::SECTIONFILE_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTI
         {
             record.nOffset=pList->at(i).PointerToRawData;
         }
+        record.nRVA=pList->at(i).VirtualAddress;
 
         record.nSize=pList->at(i).SizeOfRawData;
         record.nCharacteristics=pList->at(i).Characteristics;
@@ -1060,7 +1061,7 @@ QList<XPE::SECTIONFILE_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTI
     return listResult;
 }
 
-QList<QString> XPE::getSectionNames(QList<XPE::SECTIONFILE_RECORD> *pList)
+QList<QString> XPE::getSectionNames(QList<XPE::SECTION_RECORD> *pList)
 {
     QList<QString> listResult;
 
@@ -4955,6 +4956,24 @@ qint32 XPE::getNumberOfRichIDs()
     return listRecords.count();
 }
 
+XPE::NET_HEADER XPE::getNetHeader()
+{
+    XPE::NET_HEADER result={};
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        result.cb=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,cb));
+        result.MajorRuntimeVersion=read_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MajorRuntimeVersion));
+        result.MinorRuntimeVersion=read_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MinorRuntimeVersion));
+        result.Flags=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Flags));
+        result.EntryPoint=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,EntryPointRVA));
+    }
+
+    return result;
+}
+
 qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)
 {
     qint64 nHeadersSize=nSectionsTableOffset+sizeof(XPE_DEF::IMAGE_SECTION_HEADER)*nNumberOfSections;
@@ -5358,23 +5377,19 @@ bool XPE::isNETAnsiStringPresent(QString sString)
 
 bool XPE::isNETAnsiStringPresent(QString sString, XPE::CLI_INFO *pCliInfo)
 {
-    bool bResult=false;
+    return pCliInfo->listAnsiStrings.contains(sString);
+}
 
-    for(int i=0; i<pCliInfo->listAnsiStrings.count(); i++)
-    {
-        QString sRecord=pCliInfo->listAnsiStrings.at(i);
+bool XPE::isNETUnicodeStringPresent(QString sString)
+{
+    XPE::CLI_INFO cliInfo=getCliInfo(true);
 
-        if(sRecord!="")
-        {
-            if(sString==sRecord)
-            {
-                bResult=true;
-                break;
-            }
-        }
-    }
+    return isNETUnicodeStringPresent(sString,&cliInfo);
+}
 
-    return bResult;
+bool XPE::isNETUnicodeStringPresent(QString sString, XPE::CLI_INFO *pCliInfo)
+{
+    return pCliInfo->listUnicodeStrings.contains(sString);
 }
 
 int XPE::getEntryPointSection()

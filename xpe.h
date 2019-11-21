@@ -29,10 +29,11 @@ class XPE : public XMSDOS
     Q_OBJECT
 
 public:
-    struct SECTIONFILE_RECORD
+    struct SECTION_RECORD
     {
         QString sName;
         qint64 nOffset;
+        qint64 nRVA;
         qint64 nSize;
         qint64 nCharacteristics;
     };
@@ -238,6 +239,15 @@ public:
         QList<QString> listUnicodeStrings;
     };
 
+    struct NET_HEADER
+    {
+        quint32 cb;
+        quint16 MajorRuntimeVersion;
+        quint16 MinorRuntimeVersion;
+        quint32 Flags;
+        quint32 EntryPoint;
+    };
+
     struct IMAGE_IMPORT_DESCRIPTOR_EX
     {
         union
@@ -390,8 +400,8 @@ public:
 
     QList<XPE_DEF::IMAGE_SECTION_HEADER> getSectionHeaders();
     // TODO with __getSectionOffsetAndSize
-    static QList<SECTIONFILE_RECORD> getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pList,bool bIsImage);
-    static QList<QString> getSectionNames(QList<XPE::SECTIONFILE_RECORD> *pList);
+    static QList<SECTION_RECORD> getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pList,bool bIsImage);
+    static QList<QString> getSectionNames(QList<XPE::SECTION_RECORD> *pList);
 
     QList<SECTIONRVA_RECORD> getSectionRVARecords();
 
@@ -628,6 +638,9 @@ public:
     bool isNETAnsiStringPresent(QString sString);
     static bool isNETAnsiStringPresent(QString sString,CLI_INFO *pCliInfo);
 
+    bool isNETUnicodeStringPresent(QString sString);
+    static bool isNETUnicodeStringPresent(QString sString,CLI_INFO *pCliInfo);
+
     int getEntryPointSection();
     int getEntryPointSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
     int getImportSection();
@@ -750,6 +763,8 @@ public:
 
     qint32 getNumberOfImportThunks(quint32 nNumber);
     qint32 getNumberOfRichIDs();
+
+    XPE::NET_HEADER getNetHeader();
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

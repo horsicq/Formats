@@ -134,6 +134,8 @@ public:
     quint16 getHdr64_shstrndx();
     void setHdr64_shstrndx(quint16 value);
 
+    XELF_DEF::Elf_Ehdr getHdr();
+
     static QMap<quint64,QString> getHeaderVersionList();
 
     static QMap<quint64,QString> getIndentClasses();
@@ -221,6 +223,17 @@ public:
     void setElf64_Shdr_addralign(quint32 nIndex,quint64 value);
     void setElf64_Shdr_entsize(quint32 nIndex,quint64 value);
 
+    quint32 getElf_Shdr_name(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+    quint32 getElf_Shdr_type(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+    quint64 getElf_Shdr_flags(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+    quint64 getElf_Shdr_addr(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+    quint64 getElf_Shdr_offset(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+    quint64 getElf_Shdr_size(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+    quint32 getElf_Shdr_link(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+    quint32 getElf_Shdr_info(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+    quint64 getElf_Shdr_addralign(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+    quint64 getElf_Shdr_entsize(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+
     QList<XELF_DEF::Elf32_Phdr> getElf32_PhdrList();
     QList<XELF_DEF::Elf64_Phdr> getElf64_PhdrList();
     QList<XELF_DEF::Elf_Phdr> getElf_PhdrList();
@@ -263,6 +276,15 @@ public:
     void setElf64_Phdr_memsz(quint32 nIndex,quint64 value);
     void setElf64_Phdr_flags(quint32 nIndex,quint32 value);
     void setElf64_Phdr_align(quint32 nIndex,quint64 value);
+
+    quint32 getElf_Phdr_type(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pList);
+    quint64 getElf_Phdr_offset(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pList);
+    quint64 getElf_Phdr_vaddr(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pList);
+    quint64 getElf_Phdr_paddr(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pList);
+    quint64 getElf_Phdr_filesz(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pList);
+    quint64 getElf_Phdr_memsz(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pList);
+    quint32 getElf_Phdr_flags(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pList);
+    quint64 getElf_Phdr_align(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pList);
 
     int getSectionIndexByName(QString sSectionName);
     QByteArray getSectionByName(QString sSectionName);

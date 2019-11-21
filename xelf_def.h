@@ -114,6 +114,24 @@ struct Elf64_Ehdr
     quint16 e_shstrndx;             /* shdr string index */
 };
 
+struct Elf_Ehdr
+{
+    quint8 e_ident[S_EI_NIDENT];    /* ident bytes */
+    quint16 e_type;                 /* file type */
+    quint16 e_machine;              /* target machine */
+    quint32 e_version;              /* file version */
+    quint64 e_entry;                /* start address */
+    quint64 e_phoff;                /* phdr file offset */
+    quint64 e_shoff;                /* shdr file offset */
+    quint32 e_flags;                /* file flags */
+    quint16 e_ehsize;               /* sizeof ehdr */
+    quint16 e_phentsize;            /* sizeof phdr */
+    quint16 e_phnum;                /* number phdrs */
+    quint16 e_shentsize;            /* sizeof shdr */
+    quint16 e_shnum;                /* number shdrs */
+    quint16 e_shstrndx;             /* shdr string index */
+};
+
 struct Elf32_Shdr
 {
     quint32	sh_name;            /* Section name (index into the section header string table). */
