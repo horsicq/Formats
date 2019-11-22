@@ -2631,6 +2631,13 @@ XPE::RESOURCE_HEADER XPE::getResourceHeader()
 
 QList<XPE::RESOURCE_RECORD> XPE::getResources()
 {
+    QList<MEMORY_MAP> memoryMap=getMemoryMapList();
+
+    return getResources(&memoryMap);
+}
+
+QList<XPE::RESOURCE_RECORD> XPE::getResources(QList<XBinary::MEMORY_MAP> *pMemoryMap)
+{
     // TODO BE LE
     QList<RESOURCE_RECORD> listResources;
 
@@ -2638,7 +2645,6 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources()
 
     if(nResourceOffset!=-1)
     {
-        QList<MEMORY_MAP> memoryMap=getMemoryMapList();
         qint64 nBaseAddress=_getBaseAddress();
         RESOURCE_RECORD record={};
 
@@ -2716,7 +2722,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources()
                                 XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY irde=read_IMAGE_RESOURCE_DATA_ENTRY(nResourceOffset+record.nIRDEOffset);
                                 record.nRVA=irde.OffsetToData;
                                 record.nAddress=irde.OffsetToData+nBaseAddress;
-                                record.nOffset=addressToOffset(&memoryMap,record.nAddress);
+                                record.nOffset=addressToOffset(pMemoryMap,record.nAddress);
                                 record.nSize=irde.Size;
 
                                 listResources.append(record);
@@ -3022,13 +3028,18 @@ QString XPE::getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVer
 
 quint32 XPE::getResourceIdByNumber(quint32 nNumber)
 {
-    quint32 nResult=0;
-
     QList<XPE::RESOURCE_RECORD> listResources=getResources();
 
-    if((qint32)nNumber<listResources.count())
+    return getResourceIdByNumber(nNumber,&listResources);
+}
+
+quint32 XPE::getResourceIdByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pList)
+{
+    quint32 nResult=0;
+
+    if((qint32)nNumber<pList->count())
     {
-        nResult=listResources.at(nNumber).nID[1];
+        nResult=pList->at(nNumber).nID[1];
     }
 
     return nResult;
@@ -3036,13 +3047,18 @@ quint32 XPE::getResourceIdByNumber(quint32 nNumber)
 
 QString XPE::getResourceNameByNumber(quint32 nNumber)
 {
-    QString sResult;
-
     QList<XPE::RESOURCE_RECORD> listResources=getResources();
 
-    if((qint32)nNumber<listResources.count())
+    return getResourceNameByNumber(nNumber,&listResources);
+}
+
+QString XPE::getResourceNameByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pList)
+{
+    QString sResult;
+
+    if((qint32)nNumber<pList->count())
     {
-        sResult=listResources.at(nNumber).sName[1];
+        sResult=pList->at(nNumber).sName[1];
     }
 
     return sResult;
@@ -3050,13 +3066,18 @@ QString XPE::getResourceNameByNumber(quint32 nNumber)
 
 qint64 XPE::getResourceOffsetByNumber(quint32 nNumber)
 {
-    qint64 nResult=-1;
-
     QList<XPE::RESOURCE_RECORD> listResources=getResources();
 
-    if((qint32)nNumber<listResources.count())
+    return getResourceOffsetByNumber(nNumber,&listResources);
+}
+
+qint64 XPE::getResourceOffsetByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pList)
+{
+    qint64 nResult=-1;
+
+    if((qint32)nNumber<pList->count())
     {
-        nResult=listResources.at(nNumber).nOffset;
+        nResult=pList->at(nNumber).nOffset;
     }
 
     return nResult;
@@ -3064,13 +3085,18 @@ qint64 XPE::getResourceOffsetByNumber(quint32 nNumber)
 
 qint64 XPE::getResourceSizeByNumber(quint32 nNumber)
 {
-    qint64 nResult=0;
-
     QList<XPE::RESOURCE_RECORD> listResources=getResources();
 
-    if((qint32)nNumber<listResources.count())
+    return getResourceSizeByNumber(nNumber,&listResources);
+}
+
+qint64 XPE::getResourceSizeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pList)
+{
+    qint64 nResult=0;
+
+    if((qint32)nNumber<pList->count())
     {
-        nResult=listResources.at(nNumber).nSize;
+        nResult=pList->at(nNumber).nSize;
     }
 
     return nResult;
@@ -3078,13 +3104,18 @@ qint64 XPE::getResourceSizeByNumber(quint32 nNumber)
 
 quint32 XPE::getResourceTypeByNumber(quint32 nNumber)
 {
-    qint64 nResult=0;
-
     QList<XPE::RESOURCE_RECORD> listResources=getResources();
 
-    if((qint32)nNumber<listResources.count())
+    return getResourceTypeByNumber(nNumber,&listResources);
+}
+
+quint32 XPE::getResourceTypeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pList)
+{
+    qint64 nResult=0;
+
+    if((qint32)nNumber<pList->count())
     {
-        nResult=listResources.at(nNumber).nID[0];
+        nResult=pList->at(nNumber).nID[0];
     }
 
     return nResult;
@@ -3092,17 +3123,22 @@ quint32 XPE::getResourceTypeByNumber(quint32 nNumber)
 
 qint64 XPE::getResourceNameOffset(QString sName)
 {
-    qint64 nResult=-1;
-
     QList<XPE::RESOURCE_RECORD> listResources=getResources();
 
-    int nCount=listResources.count();
+    return getResourceNameOffset(sName,&listResources);
+}
+
+qint64 XPE::getResourceNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pList)
+{
+    qint64 nResult=-1;
+
+    int nCount=pList->count();
 
     for(int i=0;i<nCount;i++)
     {
-        if(listResources.at(i).sName[1]==sName)
+        if(pList->at(i).sName[1]==sName)
         {
-            nResult=listResources.at(i).nOffset;
+            nResult=pList->at(i).nOffset;
             break;
         }
     }
@@ -3112,7 +3148,14 @@ qint64 XPE::getResourceNameOffset(QString sName)
 
 bool XPE::isResourceNamePresent(QString sName)
 {
-    return (getResourceNameOffset(sName)!=-1);
+    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+
+    return isResourceNamePresent(sName,&listResources);
+}
+
+bool XPE::isResourceNamePresent(QString sName, QList<XPE::RESOURCE_RECORD> *pList)
+{
+    return (getResourceNameOffset(sName,pList)!=-1);
 }
 
 XPE_DEF::IMAGE_IMPORT_DESCRIPTOR XPE::read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset)
@@ -4974,6 +5017,126 @@ XPE::NET_HEADER XPE::getNetHeader()
     return result;
 }
 
+quint32 XPE::getNetHeader_cb()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,cb));
+    }
+
+    return nResult;
+}
+
+quint16 XPE::getNetHeader_MajorRuntimeVersion()
+{
+    quint16 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MajorRuntimeVersion));
+    }
+
+    return nResult;
+}
+
+quint16 XPE::getNetHeader_MinorRuntimeVersion()
+{
+    quint16 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MinorRuntimeVersion));
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getNetHeader_Flags()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Flags));
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getNetHeader_EntryPoint()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,EntryPointRVA));
+    }
+
+    return nResult;
+}
+
+void XPE::setNetHeader_cb(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,cb),value);
+    }
+}
+
+void XPE::setNetHeader_MajorRuntimeVersion(quint16 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MajorRuntimeVersion),value);
+    }
+}
+
+void XPE::setNetHeader_MinorRuntimeVersion(quint16 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MinorRuntimeVersion),value);
+    }
+}
+
+void XPE::setNetHeader_Flags(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Flags),value);
+    }
+}
+
+void XPE::setNetHeader_EntryPoint(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,EntryPointRVA),value);
+    }
+}
+
 qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)
 {
     qint64 nHeadersSize=nSectionsTableOffset+sizeof(XPE_DEF::IMAGE_SECTION_HEADER)*nNumberOfSections;
@@ -5035,11 +5198,17 @@ bool XPE::isNETPresent()
 
 XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
 {
+    QList<MEMORY_MAP> listMM=getMemoryMapList();
+
+    return getCliInfo(bFindHidden,&listMM);
+}
+
+XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, QList<XBinary::MEMORY_MAP> *pMemoryMap)
+{
     CLI_INFO result={};
 
     if(isNETPresent()||bFindHidden)
     {
-        QList<MEMORY_MAP> listMM=getMemoryMapList();
         qint64 nBaseAddress=_getBaseAddress();
 
         qint64 nCLIHeaderOffset=-1;
@@ -5048,12 +5217,12 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
         {
             XPE_DEF::IMAGE_DATA_DIRECTORY _idd=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
-            nCLIHeaderOffset=addressToOffset(&listMM,nBaseAddress+_idd.VirtualAddress);
+            nCLIHeaderOffset=addressToOffset(pMemoryMap,nBaseAddress+_idd.VirtualAddress);
         }
         else
         {
             // mb TODO
-            nCLIHeaderOffset=addressToOffset(&listMM,nBaseAddress+0x2008);
+            nCLIHeaderOffset=addressToOffset(pMemoryMap,nBaseAddress+0x2008);
             result.bHidden=true;
         }
 
@@ -5068,7 +5237,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
                 result.nEntryPointSize=0;
                 result.nEntryPoint=result.header.EntryPointRVA;
 
-                result.nCLI_MetaDataOffset=addressToOffset(&listMM,nBaseAddress+result.header.MetaData.VirtualAddress);
+                result.nCLI_MetaDataOffset=addressToOffset(pMemoryMap,nBaseAddress+result.header.MetaData.VirtualAddress);
 
                 if(result.nCLI_MetaDataOffset!=-1)
                 {

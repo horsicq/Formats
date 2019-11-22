@@ -2955,12 +2955,12 @@ QList<QString> XBinary::getListFromFile(QString sFileName)
 qint64 XBinary::getOverlaySize()
 {
     qint64 nSize=getSize();
-    qint64 nRawSize=getOverlayOffset();
+    qint64 nOverlayOffset=getOverlayOffset();
     qint64 nDelta=0;
 
-    if(nRawSize)
+    if(nOverlayOffset>0)
     {
-        nDelta=nSize-nRawSize;
+        nDelta=nSize-nOverlayOffset;
     }
 
     return qMax(nDelta,(qint64)0);
@@ -2968,19 +2968,34 @@ qint64 XBinary::getOverlaySize()
 
 qint64 XBinary::getOverlayOffset()
 {
-    return _calculateRawSize();
+    qint64 nResult=-1;
+    qint64 nRawSize=_calculateRawSize();
+
+    if(nRawSize)
+    {
+        nResult=nRawSize;
+    }
+
+    return nResult;
 }
 
 bool XBinary::isOverlayPresent()
 {
-    return getOverlaySize()!=0;
+    return (getOverlaySize()!=0);
 }
 
 bool XBinary::compareOverlay(QString sSignature, qint64 nOffset)
 {
-    qint64 nOverlayOffset=getOverlayOffset()+nOffset;
+    bool bResult=false;
 
-    return compareSignature(sSignature,nOverlayOffset);
+    if(isOverlayPresent())
+    {
+        qint64 nOverlayOffset=getOverlayOffset()+nOffset;
+
+        bResult=compareSignature(sSignature,nOverlayOffset);
+    }
+
+    return bResult;
 }
 
 bool XBinary::addOverlay(char *pData, qint64 nDataSize)

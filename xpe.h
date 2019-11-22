@@ -466,6 +466,7 @@ public:
 
     RESOURCE_HEADER getResourceHeader();
     QList<RESOURCE_RECORD> getResources();
+    QList<RESOURCE_RECORD> getResources(QList<MEMORY_MAP> *pMemoryMap);
 
     static RESOURCE_RECORD getResourceRecord(quint32 nID1,quint32 nID2,QList<RESOURCE_RECORD> *pListRecords);
     static RESOURCE_RECORD getResourceRecord(quint32 nID1,QString sName2,QList<RESOURCE_RECORD> *pListRecords);
@@ -491,13 +492,20 @@ public:
     static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion);
 
     quint32 getResourceIdByNumber(quint32 nNumber);
+    quint32 getResourceIdByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pList);
     QString getResourceNameByNumber(quint32 nNumber);
+    QString getResourceNameByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pList);
     qint64 getResourceOffsetByNumber(quint32 nNumber);
+    qint64 getResourceOffsetByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pList);
     qint64 getResourceSizeByNumber(quint32 nNumber);
+    qint64 getResourceSizeByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pList);
     quint32 getResourceTypeByNumber(quint32 nNumber);
+    quint32 getResourceTypeByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pList);
 
     qint64 getResourceNameOffset(QString sName);
+    qint64 getResourceNameOffset(QString sName,QList<XPE::RESOURCE_RECORD> *pList);
     bool isResourceNamePresent(QString sName);
+    bool isResourceNamePresent(QString sName,QList<XPE::RESOURCE_RECORD> *pList);
 
     virtual QList<MEMORY_MAP> getMemoryMapList();
     virtual qint64 getBaseAddress();
@@ -634,6 +642,7 @@ public:
 
     bool isNETPresent();
     CLI_INFO getCliInfo(bool bFindHidden);
+    CLI_INFO getCliInfo(bool bFindHidden,QList<XBinary::MEMORY_MAP> *pMemoryMap);
 
     bool isNETAnsiStringPresent(QString sString);
     static bool isNETAnsiStringPresent(QString sString,CLI_INFO *pCliInfo);
@@ -765,6 +774,18 @@ public:
     qint32 getNumberOfRichIDs();
 
     XPE::NET_HEADER getNetHeader();
+
+    quint32 getNetHeader_cb();
+    quint16 getNetHeader_MajorRuntimeVersion();
+    quint16 getNetHeader_MinorRuntimeVersion();
+    quint32 getNetHeader_Flags();
+    quint32 getNetHeader_EntryPoint();
+
+    void setNetHeader_cb(quint32 value);
+    void setNetHeader_MajorRuntimeVersion(quint16 value);
+    void setNetHeader_MinorRuntimeVersion(quint16 value);
+    void setNetHeader_Flags(quint32 value);
+    void setNetHeader_EntryPoint(quint32 value);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
