@@ -484,6 +484,9 @@ public:
     QString getResourceManifest();
     QString getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListHeaders);
 
+    bool isResourceVersionPresent();
+    bool isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders);
+
     XPE_DEF::S_VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
 
     RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);

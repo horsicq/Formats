@@ -2854,7 +2854,7 @@ bool XPE::isResourceManifestPresent()
 
 bool XPE::isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders)
 {
-    return isResourcePresent(XPE_DEF::S_RT_MANIFEST,1,pListHeaders);
+    return isResourcePresent(XPE_DEF::S_RT_MANIFEST,-1,pListHeaders);
 }
 
 QString XPE::getResourceManifest()
@@ -2868,7 +2868,7 @@ QString XPE::getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListRecords)
 {
     QString sResult;
 
-    RESOURCE_RECORD rh=getResourceRecord(XPE_DEF::S_RT_MANIFEST,1,pListRecords);
+    RESOURCE_RECORD rh=getResourceRecord(XPE_DEF::S_RT_MANIFEST,-1,pListRecords);
 
     if(rh.nOffset!=-1)
     {
@@ -2877,6 +2877,18 @@ QString XPE::getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListRecords)
     }
 
     return sResult;
+}
+
+bool XPE::isResourceVersionPresent()
+{
+    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+
+    return isResourceVersionPresent(&listResources);
+}
+
+bool XPE::isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders)
+{
+    return isResourcePresent(XPE_DEF::S_RT_VERSION,-1,pListHeaders);
 }
 
 XPE_DEF::S_VS_VERSION_INFO XPE::readResourceVersionInfo(qint64 nOffset)
@@ -2988,7 +3000,7 @@ XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pList
 {
     RESOURCE_VERSION result={};
 
-    RESOURCE_RECORD rh=getResourceRecord(XPE_DEF::S_RT_VERSION,1,pListHeaders);
+    RESOURCE_RECORD rh=getResourceRecord(XPE_DEF::S_RT_VERSION,-1,pListHeaders);
 
     if(rh.nOffset!=-1)
     {
