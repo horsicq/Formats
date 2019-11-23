@@ -7429,3 +7429,31 @@ QMap<quint64, QString> XPE::getImageRelBasedS()
 
     return mapResult;
 }
+
+QMap<quint64, QString> XPE::getComImageFlags()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000001,"COMIMAGE_FLAGS_ILONLY");
+    mapResult.insert(0x00000002,"COMIMAGE_FLAGS_32BITREQUIRED");
+    mapResult.insert(0x00000004,"COMIMAGE_FLAGS_IL_LIBRARY");
+    mapResult.insert(0x00000008,"COMIMAGE_FLAGS_STRONGNAMESIGNED");
+    mapResult.insert(0x00000010,"COMIMAGE_FLAGS_NATIVE_ENTRYPOINT");
+    mapResult.insert(0x00010000,"COMIMAGE_FLAGS_TRACKDEBUGDATA");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getComImageFlagsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000001,"ILONLY");
+    mapResult.insert(0x00000002,"32BITREQUIRED");
+    mapResult.insert(0x00000004,"IL_LIBRARY");
+    mapResult.insert(0x00000008,"STRONGNAMESIGNED");
+    mapResult.insert(0x00000010,"NATIVE_ENTRYPOINT");
+    mapResult.insert(0x00010000,"TRACKDEBUGDATA");
+
+    return mapResult;
+}

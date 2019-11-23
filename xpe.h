@@ -632,6 +632,9 @@ public:
     static QMap<quint64,QString> getImageRelBased();
     static QMap<quint64,QString> getImageRelBasedS();
 
+    static QMap<quint64,QString> getComImageFlags();
+    static QMap<quint64,QString> getComImageFlagsS();
+
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);
 
     bool isDll();
