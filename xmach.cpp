@@ -67,6 +67,20 @@ bool XMACH::is64()
     return (getHeader_magic()==XMACH_DEF::S_MH_MAGIC_64);
 }
 
+bool XMACH::is64(QIODevice *pDevice)
+{
+    bool bResult=false;
+
+    XMACH xmach(pDevice);
+
+    if(xmach.isValid())
+    {
+        bResult=xmach.is64();
+    }
+
+    return bResult;
+}
+
 quint32 XMACH::getHeader_magic()
 {
     return read_uint32(offsetof(XMACH_DEF::mach_header,magic),isBigEndian());

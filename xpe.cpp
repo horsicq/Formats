@@ -57,6 +57,20 @@ bool XPE::is64()
             (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64);
 }
 
+bool XPE::is64(QIODevice *pDevice)
+{
+    bool bResult=false;
+
+    XPE pe(pDevice);
+
+    if(pe.isValid())
+    {
+        bResult=pe.is64();
+    }
+
+    return bResult;
+}
+
 bool XPE::is64(QString sFileName)
 {
     bool bResult=false;
@@ -66,12 +80,7 @@ bool XPE::is64(QString sFileName)
 
     if(file.open(QIODevice::ReadOnly))
     {
-        XPE pe(&file);
-
-        if(pe.isValid())
-        {
-            bResult=pe.is64();
-        }
+        bResult=XPE::is64(&file);
 
         file.close();
     }
@@ -3486,7 +3495,7 @@ QByteArray XPE::getSection(quint32 nSection)
     return baResult;
 }
 
-QString XPE::getSectionMD5(quint32 nSection)
+QString XPE::getSectionHash(HASH hash,quint32 nSection)
 {
     QString sResult;
 
@@ -3494,7 +3503,7 @@ QString XPE::getSectionMD5(quint32 nSection)
 
     if(offsize.nOffset!=-1)
     {
-        sResult=getMD5(offsize.nOffset,offsize.nSize);
+        sResult=getHash(hash,offsize.nOffset,offsize.nSize);
     }
 
     return sResult;

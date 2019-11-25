@@ -185,6 +185,7 @@ public:
     {
         XPE_DEF::S_tagVS_FIXEDFILEINFO fileInfo;
         QList<QString> listRecords; // TODO rename
+        // TODO VarFileInfo
     };
 
     struct CLI_INFO
@@ -266,6 +267,7 @@ public:
     explicit XPE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
     bool is64();
+    static bool is64(QIODevice *pDevice);
     static bool is64(QString sFileName);
 
     virtual MODE getMode();
@@ -545,7 +547,7 @@ public:
 
     QByteArray getSection(quint32 nSection);
 
-    QString getSectionMD5(quint32 nSection);
+    QString getSectionHash(HASH hash,quint32 nSection);
     double getSectionEntropy(quint32 nSection);
 
     bool addImportSection(QMap<qint64,QString> *pMapIAT);

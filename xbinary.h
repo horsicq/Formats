@@ -130,6 +130,12 @@ public:
         bool bCopyOverlay;     // In
     };
 
+    enum HASH
+    {
+        HASH_MD5=0,
+        HASH_SHA1
+    };
+
 private:
     struct SIGNATURE_RECORD
     {
@@ -322,9 +328,10 @@ public:
     static QString getDeviceFilePath(QIODevice *pDevice);
     static QList<qint64> getFixupList(QIODevice *pDevice1,QIODevice *pDevice2,qint64 nDelta);
 
-    QString getMD5(qint64 nOffset=0,qint64 nSize=-1);
-    static QString getMD5(QString sFileName); // TODO one function
-    QString getSHA1(qint64 nOffset=0,qint64 nSize=-1);
+    static QString getHash(HASH hash,QString sFileName);
+    static QString getHash(HASH hash,QIODevice *pDevice);
+    QString getHash(HASH hash,qint64 nOffset=0,qint64 nSize=-1);
+
     quint32 getAdler32(qint64 nOffset=0,qint64 nSize=-1);
 
     double getEntropy(qint64 nOffset=0,qint64 nSize=-1);

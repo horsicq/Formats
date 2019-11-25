@@ -79,6 +79,7 @@ public:
     bool isValid();
     bool isBigEndian();
     bool is64();
+    static bool is64(QIODevice *pDevice);
 
     quint32 getHeader_magic();
     qint32 getHeader_cputype();

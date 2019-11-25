@@ -2097,49 +2097,8 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
 
     return listResult;
 }
-QString XBinary::getMD5(qint64 nOffset,qint64 nSize)
-{
-    QString sResult;
 
-    OFFSETSIZE offsize=convertOffsetAndSize(nOffset,nSize);
-
-    nOffset=offsize.nOffset;
-    nSize=offsize.nSize;
-
-    if(nOffset!=-1)
-    {
-        const int BUFFER_SIZE=0x1000;
-
-        quint64 nTemp=0;
-        char *pBuffer=new char[BUFFER_SIZE];
-
-        QCryptographicHash crypto(QCryptographicHash::Md5);
-
-        while(nSize>0)
-        {
-            nTemp=qMin((qint64)BUFFER_SIZE,nSize);
-
-            if(!read_array(nOffset,pBuffer,nTemp))
-            {
-                delete[] pBuffer;
-                return "";
-            }
-
-            crypto.addData(pBuffer,nTemp);
-
-            nSize-=nTemp;
-            nOffset+=nTemp;
-        }
-
-        delete[] pBuffer;
-
-        sResult=crypto.result().toHex();
-    }
-
-    return sResult;
-}
-
-QString XBinary::getMD5(QString sFileName)
+QString XBinary::getHash(XBinary::HASH hash, QString sFileName)
 {
     QString sResult;
 
@@ -2148,9 +2107,7 @@ QString XBinary::getMD5(QString sFileName)
 
     if(file.open(QIODevice::ReadOnly))
     {
-        XBinary binary(&file);
-
-        sResult=binary.getMD5(0,-1);
+        sResult=XBinary::getHash(hash,&file);
 
         file.close();
     }
@@ -2158,7 +2115,14 @@ QString XBinary::getMD5(QString sFileName)
     return sResult;
 }
 
-QString XBinary::getSHA1(qint64 nOffset, qint64 nSize)
+QString XBinary::getHash(XBinary::HASH hash, QIODevice *pDevice)
+{
+    XBinary binary(pDevice);
+
+    return binary.getHash(hash,0,-1);
+}
+
+QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 {
     QString sResult;
 
@@ -2174,7 +2138,15 @@ QString XBinary::getSHA1(qint64 nOffset, qint64 nSize)
         quint64 nTemp=0;
         char *pBuffer=new char[BUFFER_SIZE];
 
-        QCryptographicHash crypto(QCryptographicHash::Sha1);
+        QCryptographicHash::Algorithm algorithm=QCryptographicHash::Md4;
+
+        switch(hash)
+        {
+            case HASH_MD5:      algorithm=QCryptographicHash::Md5;      break;
+            case HASH_SHA1:     algorithm=QCryptographicHash::Sha1;     break;
+        }
+
+        QCryptographicHash crypto(algorithm);
 
         while(nSize>0)
         {

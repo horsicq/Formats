@@ -58,6 +58,8 @@ public:
     bool isBigEndian();
     bool is64();
 
+    static bool is64(QIODevice *pDevice);
+
     quint32 getIdent_Magic();
     void setIdent_Magic(quint32 value);
 

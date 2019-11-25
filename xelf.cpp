@@ -54,6 +54,20 @@ bool XELF::is64()
     return getIdent_class()==XELF_DEF::S_ELFCLASS64;
 }
 
+bool XELF::is64(QIODevice *pDevice)
+{
+    bool bResult=false;
+
+    XELF xelf(pDevice);
+
+    if(xelf.isValid())
+    {
+        bResult=xelf.is64();
+    }
+
+    return bResult;
+}
+
 quint32 XELF::getIdent_Magic()
 {
     return read_uint32((quint64)XELF_DEF::S_EI_MAG0);
