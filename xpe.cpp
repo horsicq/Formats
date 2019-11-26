@@ -2938,6 +2938,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
                 {
                     if(vi.wValueLength>=sizeof(XPE_DEF::S_tagVS_FIXEDFILEINFO))
                     {
+                        pResult->nFixedFileInfoOffset=nOffset;
                         // TODO Check Signature?
                         pResult->fileInfo.dwSignature=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwSignature));
                         pResult->fileInfo.dwStrucVersion=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwStrucVersion));
@@ -3003,6 +3004,13 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
     }
 
     return nResult;
+}
+
+XPE::RESOURCE_VERSION XPE::getResourceVersion()
+{
+    QList<XPE::RESOURCE_RECORD> listRH=getResources();
+
+    return getResourceVersion(&listRH);
 }
 
 XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders)

@@ -1998,7 +1998,7 @@ QString XBinary::getBackupName(QIODevice *pDevice)
 QString XBinary::getBackupName(QString sFileName)
 {
     QFileInfo fi(sFileName);
-    QString sResult=fi.absolutePath()+QDir::separator()+fi.completeBaseName()+fi.suffix()+".BAK";
+    QString sResult=fi.absolutePath()+QDir::separator()+fi.completeBaseName()+"."+fi.suffix()+".BAK";
 
     return sResult;
 }
@@ -2117,9 +2117,15 @@ QString XBinary::getHash(XBinary::HASH hash, QString sFileName)
 
 QString XBinary::getHash(XBinary::HASH hash, QIODevice *pDevice)
 {
+    QString sResult;
+
     XBinary binary(pDevice);
 
-    return binary.getHash(hash,0,-1);
+    sResult=binary.getHash(hash,0,-1);
+
+    pDevice->reset();
+
+    return sResult;
 }
 
 QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)

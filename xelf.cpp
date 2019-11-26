@@ -1935,7 +1935,7 @@ quint32 XELF::getElf_Shdr_name(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList)
 {
     quint32 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).sh_name;
     }
@@ -1947,7 +1947,7 @@ quint32 XELF::getElf_Shdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList)
 {
     quint32 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).sh_type;
     }
@@ -1959,7 +1959,7 @@ quint64 XELF::getElf_Shdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList
 {
     quint64 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).sh_flags;
     }
@@ -1971,7 +1971,7 @@ quint64 XELF::getElf_Shdr_addr(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList)
 {
     quint64 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).sh_addr;
     }
@@ -1983,7 +1983,7 @@ quint64 XELF::getElf_Shdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pLis
 {
     quint64 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).sh_offset;
     }
@@ -1995,7 +1995,7 @@ quint64 XELF::getElf_Shdr_size(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList)
 {
     quint64 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).sh_size;
     }
@@ -2007,7 +2007,7 @@ quint32 XELF::getElf_Shdr_link(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList)
 {
     quint32 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).sh_link;
     }
@@ -2019,7 +2019,7 @@ quint32 XELF::getElf_Shdr_info(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList)
 {
     quint32 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).sh_info;
     }
@@ -2031,7 +2031,7 @@ quint64 XELF::getElf_Shdr_addralign(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *p
 {
     quint64 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).sh_addralign;
     }
@@ -2043,7 +2043,7 @@ quint64 XELF::getElf_Shdr_entsize(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pLi
 {
     quint32 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).sh_entsize;
     }
@@ -2693,7 +2693,7 @@ quint32 XELF::getElf_Phdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList)
 {
     quint32 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).p_type;
     }
@@ -2705,7 +2705,7 @@ quint64 XELF::getElf_Phdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pLis
 {
     quint64 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).p_offset;
     }
@@ -2717,7 +2717,7 @@ quint64 XELF::getElf_Phdr_vaddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
 {
     quint64 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).p_vaddr;
     }
@@ -2729,7 +2729,7 @@ quint64 XELF::getElf_Phdr_paddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
 {
     quint64 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).p_paddr;
     }
@@ -2741,7 +2741,7 @@ quint64 XELF::getElf_Phdr_filesz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pLis
 {
     quint64 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).p_filesz;
     }
@@ -2753,7 +2753,7 @@ quint64 XELF::getElf_Phdr_memsz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
 {
     quint64 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).p_memsz;
     }
@@ -2765,7 +2765,7 @@ quint32 XELF::getElf_Phdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
 {
     quint32 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).p_flags;
     }
@@ -2777,7 +2777,7 @@ quint64 XELF::getElf_Phdr_align(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
 {
     quint64 nResult=0;
 
-    if((qint32)nIndex<pList->count())
+    if(nIndex<(quint32)pList->count())
     {
         nResult=pList->at(nIndex).p_align;
     }

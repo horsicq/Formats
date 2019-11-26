@@ -183,6 +183,7 @@ public:
 
     struct RESOURCE_VERSION
     {
+        qint64 nFixedFileInfoOffset;
         XPE_DEF::S_tagVS_FIXEDFILEINFO fileInfo;
         QList<QString> listRecords; // TODO rename
         // TODO VarFileInfo
@@ -489,6 +490,7 @@ public:
     bool isResourceVersionPresent();
     bool isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders);
 
+    RESOURCE_VERSION getResourceVersion();
     XPE_DEF::S_VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
 
     RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);
