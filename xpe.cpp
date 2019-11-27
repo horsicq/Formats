@@ -4988,7 +4988,7 @@ QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
 
 qint32 XPE::getNumberOfImports()
 {
-    QList<XPE::IMPORT_RECORD> listImports=getImportRecords(); // TODO Check
+    QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> listImports=getImportDescriptors();
 
     return listImports.count();
 }
