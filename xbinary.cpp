@@ -2178,6 +2178,36 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
     return sResult;
 }
 
+quint32 XBinary::getAdler32(QString sFileName)
+{
+    quint32 nResult=0;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        nResult=XBinary::getAdler32(&file);
+
+        file.close();
+    }
+
+    return nResult;
+}
+
+quint32 XBinary::getAdler32(QIODevice *pDevice)
+{
+    quint32 nResult=0;
+
+    XBinary binary(pDevice);
+
+    nResult=binary.getAdler32(0,-1);
+
+    pDevice->reset();
+
+    return nResult;
+}
+
 quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize)
 {
     // TODO optimize!!!
@@ -2192,18 +2222,124 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize)
 
     if(nOffset!=-1)
     {
+        const int BUFFER_SIZE=0x1000;
+
+        qint64 nTemp=0;
+        char *pBuffer=new char[BUFFER_SIZE];
+
         quint32 a=1;
         quint32 b=0;
 
-        // Process each byte of the data in order
-        for(qint64 index=0;index<nSize;++index)
+        while(nSize>0)
         {
-            a=(a+read_uint8(nOffset+index))%MOD_ADLER;
-            b=(b+a)%MOD_ADLER;
+            nTemp=qMin((qint64)BUFFER_SIZE,nSize);
+
+            if(!read_array(nOffset,pBuffer,nTemp))
+            {
+                delete[] pBuffer;
+                return 0;
+            }
+
+            for(qint64 i=0; i<nTemp; i++)
+            {
+                a=(a+(quint8)(pBuffer[nOffset+i]))%MOD_ADLER;
+                b=(b+a)%MOD_ADLER;
+            }
+
+            nSize-=nTemp;
+            nOffset+=nTemp;
         }
+
+        delete[] pBuffer;
 
         nResult=(b<<16)|a;
     }
+
+    return nResult;
+}
+
+quint32 XBinary::_getCRC32(QString sFileName)
+{
+    quint32 nResult=0;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        nResult=XBinary::_getCRC32(&file);
+
+        file.close();
+    }
+
+    return nResult;
+}
+
+quint32 XBinary::_getCRC32(QIODevice *pDevice)
+{
+    quint32 nResult=0;
+
+    XBinary binary(pDevice);
+
+    nResult=binary._getCRC32(0,-1);
+
+    pDevice->reset();
+
+    return nResult;
+}
+
+quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
+{
+    // TODO optimize!!!
+    quint32 nResult=0xFFFFFFFF; // ~0
+
+    OFFSETSIZE offsize=convertOffsetAndSize(nOffset,nSize);
+
+    nOffset=offsize.nOffset;
+    nSize=offsize.nSize;
+
+    if(nOffset!=-1)
+    {
+        const int BUFFER_SIZE=0x1000;
+
+        quint32 crc_table[256];
+
+        for(int i=0;i<256;i++)
+        {
+            quint32 crc = i;
+            for (int j=0;j<8;j++)
+            {
+                crc=(crc&1)?((crc>>1)^0xEDB88320):(crc>>1);
+            }
+            crc_table[i]=crc;
+        }
+
+        qint64 nTemp=0;
+        char *pBuffer=new char[BUFFER_SIZE];
+
+        while(nSize>0)
+        {
+            nTemp=qMin((qint64)BUFFER_SIZE,nSize);
+
+            if(!read_array(nOffset,pBuffer,nTemp))
+            {
+                delete[] pBuffer;
+                return 0;
+            }
+
+            for(int i=0;i<nTemp;i++)
+            {
+                nResult=crc_table[(nResult^((quint8)pBuffer[i]))&0xFF]^(nResult>>8);
+            }
+
+            nSize-=nTemp;
+            nOffset+=nTemp;
+        }
+
+        delete[] pBuffer;
+    }
+
+    nResult^=0xFFFFFFFF;
 
     return nResult;
 }
@@ -2323,29 +2459,21 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
 //    return (nValue<<nShift)|(nValue>>((-nShift)&31));
 //}
 
-quint32 XBinary::getCRC32(QString sString)
+quint32 XBinary::getStringCustomCRC32(QString sString)
 {
-    quint32 nResult=0;
+    quint32 nResult=0; // not ~0 !!! if ~0 (0xFFFFFFFF) it will be a CRC32C
 
-    //    for(int i=0;i<sString.size();i++)
-    //    {
-    //        unsigned char _char=(unsigned char)sString.at(i).toLatin1();
-    //        nResult=_rol32(nResult,_char);
-    //        nResult+=_char;
-    //    }
-
-    //    char *pData=sString.toLatin1().data();
     int nSize=sString.size();
 
     for(int i=0; i<nSize; i++)
     {
         unsigned char _char=(unsigned char)sString.at(i).toLatin1();
-        //        unsigned char _char=(unsigned char)pData[i];
+
         nResult^=_char;
 
         for(int k=0; k<8; k++)
         {
-            nResult=nResult&1?(nResult>>1)^0x82f63b78:nResult>>1;
+            nResult=(nResult&1)?((nResult>>1)^0x82f63b78):(nResult>>1);
         }
     }
 

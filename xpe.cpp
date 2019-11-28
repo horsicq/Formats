@@ -1790,7 +1790,7 @@ quint64 XPE::getImportHash64()
     {
         QString sRecord=listImports.at(i).sLibrary+" "+listImports.at(i).sFunction;
 
-        nResult+=getCRC32(sRecord);
+        nResult+=getStringCustomCRC32(sRecord);
     }
 
     return nResult;
@@ -1811,7 +1811,7 @@ quint32 XPE::getImportHash32()
         sRecord+=listImports.at(i).sLibrary+listImports.at(i).sFunction;
     }
 
-    nResult=getCRC32(sRecord);
+    nResult=getStringCustomCRC32(sRecord);
 
     return nResult;
 }
@@ -2325,7 +2325,7 @@ QList<quint32> XPE::getImportPositionHashes()
             sString+=record.listPositions.at(j).sFunction;
         }
 
-        listResult.append(getCRC32(sString));
+        listResult.append(getStringCustomCRC32(sString));
     }
 
     return listResult;
@@ -2598,6 +2598,21 @@ bool XPE::setImports(QString sFileName,bool bIsImage,QList<XPE::IMPORT_HEADER> *
     }
 
     return bResult;
+}
+
+QString XPE::getImportFunctionName(quint32 nImport, quint32 nFunctionNumber, QList<XPE::IMPORT_HEADER> *pListHeaders)
+{
+    QString sResult;
+
+    if(nImport<pListHeaders->count())
+    {
+        if(nFunctionNumber<pListHeaders->at(nImport).listPositions.count())
+        {
+            sResult=pListHeaders->at(nImport).listPositions.at(nFunctionNumber).sFunction;
+        }
+    }
+
+    return sResult;
 }
 
 XPE::RESOURCE_HEADER XPE::getResourceHeader()
@@ -2938,7 +2953,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
                 {
                     if(vi.wValueLength>=sizeof(XPE_DEF::S_tagVS_FIXEDFILEINFO))
                     {
-                        pResult->nFixedFileInfoOffset=nOffset;
+                        pResult->nFixedFileInfoOffset=nOffset+nDelta;
                         // TODO Check Signature?
                         pResult->fileInfo.dwSignature=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwSignature));
                         pResult->fileInfo.dwStrucVersion=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwStrucVersion));
@@ -3016,6 +3031,7 @@ XPE::RESOURCE_VERSION XPE::getResourceVersion()
 XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders)
 {
     RESOURCE_VERSION result={};
+    result.nFixedFileInfoOffset=-1;
 
     RESOURCE_RECORD rh=getResourceRecord(XPE_DEF::S_RT_VERSION,-1,pListHeaders);
 
@@ -3025,6 +3041,136 @@ XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pList
     }
 
     return result;
+}
+
+void XPE::setFixedFileInfo_dwSignature(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwSignature),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwStrucVersion(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwStrucVersion),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwFileVersionMS(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionMS),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwFileVersionLS(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionLS),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwProductVersionMS(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionMS),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwProductVersionLS(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionLS),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwFileFlagsMask(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlagsMask),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwFileFlags(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlags),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwFileOS(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileOS),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwFileType(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileType),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwFileSubtype(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileSubtype),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwFileDateMS(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateMS),value);
+    }
+}
+
+void XPE::setFixedFileInfo_dwFileDateLS(quint32 value)
+{
+    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateLS),value);
+    }
 }
 
 QString XPE::getResourceVersionValue(QString sKey)
@@ -5026,6 +5172,27 @@ qint32 XPE::getNumberOfRichIDs()
     QList<RICH_RECORD> listRecords=getRichSignatureRecords();
 
     return listRecords.count();
+}
+
+bool XPE::isRichVersionPresent(quint32 nVersion)
+{
+    bool bResult=false;
+
+    QList<RICH_RECORD> listRecords=getRichSignatureRecords();
+
+    int nCount=listRecords.count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(listRecords.at(i).nVersion==nVersion)
+        {
+            bResult=true;
+
+            break;
+        }
+    }
+
+    return bResult;
 }
 
 XPE::NET_HEADER XPE::getNetHeader()

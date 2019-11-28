@@ -332,7 +332,13 @@ public:
     static QString getHash(HASH hash,QIODevice *pDevice);
     QString getHash(HASH hash,qint64 nOffset=0,qint64 nSize=-1);
 
+    static quint32 getAdler32(QString sFileName);
+    static quint32 getAdler32(QIODevice *pDevice);
     quint32 getAdler32(qint64 nOffset=0,qint64 nSize=-1);
+
+    static quint32 _getCRC32(QString sFileName);
+    static quint32 _getCRC32(QIODevice *pDevice);
+    quint32 _getCRC32(qint64 nOffset=0,qint64 nSize=-1);
 
     double getEntropy(qint64 nOffset=0,qint64 nSize=-1);
 
@@ -340,7 +346,7 @@ public:
 
 //    static quint32 _ror32(quint32 nValue,quint32 nShift);
 //    static quint32 _rol32(quint32 nValue,quint32 nShift);
-    static quint32 getCRC32(QString sString);
+    static quint32 getStringCustomCRC32(QString sString);
 
     QIODevice *getDevice();
     virtual bool isValid();

@@ -467,6 +467,8 @@ public:
     static bool setImports(QIODevice *pDevice,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
     static bool setImports(QString sFileName,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
 
+    QString getImportFunctionName(quint32 nImport,quint32 nFunctionNumber,QList<IMPORT_HEADER> *pListHeaders);
+
     RESOURCE_HEADER getResourceHeader();
     QList<RESOURCE_RECORD> getResources();
     QList<RESOURCE_RECORD> getResources(QList<MEMORY_MAP> *pMemoryMap);
@@ -494,6 +496,20 @@ public:
     XPE_DEF::S_VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
 
     RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);
+
+    void setFixedFileInfo_dwSignature(quint32 value);
+    void setFixedFileInfo_dwStrucVersion(quint32 value);
+    void setFixedFileInfo_dwFileVersionMS(quint32 value);
+    void setFixedFileInfo_dwFileVersionLS(quint32 value);
+    void setFixedFileInfo_dwProductVersionMS(quint32 value);
+    void setFixedFileInfo_dwProductVersionLS(quint32 value);
+    void setFixedFileInfo_dwFileFlagsMask(quint32 value);
+    void setFixedFileInfo_dwFileFlags(quint32 value);
+    void setFixedFileInfo_dwFileOS(quint32 value);
+    void setFixedFileInfo_dwFileType(quint32 value);
+    void setFixedFileInfo_dwFileSubtype(quint32 value);
+    void setFixedFileInfo_dwFileDateMS(quint32 value);
+    void setFixedFileInfo_dwFileDateLS(quint32 value);
 
     QString getResourceVersionValue(QString sKey);
     static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion);
@@ -782,6 +798,8 @@ public:
 
     qint32 getNumberOfImportThunks(quint32 nNumber);
     qint32 getNumberOfRichIDs();
+
+    bool isRichVersionPresent(quint32 nVersion);
 
     XPE::NET_HEADER getNetHeader();
 
