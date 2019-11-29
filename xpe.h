@@ -498,6 +498,7 @@ public:
     RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);
 
     QString getFileVersion();
+    QString getFileVersion(RESOURCE_VERSION *pResourceVersion);
 
     void setFixedFileInfo_dwSignature(quint32 value);
     void setFixedFileInfo_dwStrucVersion(quint32 value);
@@ -797,6 +798,7 @@ public:
 
     qint32 getNumberOfImports();
     QString getImportLibraryName(quint32 nNumber);
+    QString getImportLibraryName(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
 
     qint32 getNumberOfImportThunks(quint32 nNumber);
     qint32 getNumberOfRichIDs();

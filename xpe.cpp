@@ -3047,7 +3047,12 @@ QString XPE::getFileVersion()
 {
     RESOURCE_VERSION resourveVersion=getResourceVersion();
 
-    return QString("%1.%2").arg(get_uint32_version(resourveVersion.fileInfo.dwFileVersionMS)).arg(get_uint32_version(resourveVersion.fileInfo.dwFileVersionLS));
+    return getFileVersion(&resourveVersion);
+}
+
+QString XPE::getFileVersion(RESOURCE_VERSION *pResourceVersion)
+{
+    return QString("%1.%2").arg(get_uint32_version(pResourceVersion->fileInfo.dwFileVersionMS)).arg(get_uint32_version(pResourceVersion->fileInfo.dwFileVersionLS));
 }
 
 void XPE::setFixedFileInfo_dwSignature(quint32 value)
@@ -5152,9 +5157,21 @@ QString XPE::getImportLibraryName(quint32 nNumber)
 
     QList<XPE::IMAGE_IMPORT_DESCRIPTOR_EX> listImports=getImportDescriptorsEx(); // TODO Check
 
-    if((qint32)nNumber<listImports.count())
+    if(nNumber<(quint32)listImports.count())
     {
         sResult=listImports.at(nNumber).sLibrary;
+    }
+
+    return sResult;
+}
+
+QString XPE::getImportLibraryName(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport)
+{
+    QString sResult;
+
+    if((qint32)nNumber<pListImport->count())
+    {
+        sResult=pListImport->at(nNumber).sName;
     }
 
     return sResult;
@@ -5166,7 +5183,7 @@ qint32 XPE::getNumberOfImportThunks(quint32 nNumber)
 
     QList<IMPORT_HEADER> listImports=getImports();
 
-    if((qint32)nNumber<listImports.count())
+    if(nNumber<(quint32)listImports.count())
     {
         nResult=listImports.at(nNumber).listPositions.count();
     }
