@@ -2604,9 +2604,9 @@ QString XPE::getImportFunctionName(quint32 nImport, quint32 nFunctionNumber, QLi
 {
     QString sResult;
 
-    if(nImport<pListHeaders->count())
+    if(nImport<(quint32)pListHeaders->count())
     {
-        if(nFunctionNumber<pListHeaders->at(nImport).listPositions.count())
+        if(nFunctionNumber<(quint32)pListHeaders->at(nImport).listPositions.count())
         {
             sResult=pListHeaders->at(nImport).listPositions.at(nFunctionNumber).sFunction;
         }
@@ -3041,6 +3041,13 @@ XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pList
     }
 
     return result;
+}
+
+QString XPE::getFileVersion()
+{
+    RESOURCE_VERSION resourveVersion=getResourceVersion();
+
+    return QString("%1.%2").arg(get_uint32_version(resourveVersion.fileInfo.dwFileVersionMS)).arg(get_uint32_version(resourveVersion.fileInfo.dwFileVersionLS));
 }
 
 void XPE::setFixedFileInfo_dwSignature(quint32 value)

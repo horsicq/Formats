@@ -497,6 +497,8 @@ public:
 
     RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);
 
+    QString getFileVersion();
+
     void setFixedFileInfo_dwSignature(quint32 value);
     void setFixedFileInfo_dwStrucVersion(quint32 value);
     void setFixedFileInfo_dwFileVersionMS(quint32 value);

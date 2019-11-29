@@ -2042,6 +2042,29 @@ QString XBinary::getDeviceFilePath(QIODevice *pDevice)
     return sResult;
 }
 
+QString XBinary::getDeviceDirectory(QIODevice *pDevice)
+{
+    QString sResult;
+
+    QString sClassName=pDevice->metaObject()->className();
+
+    if(sClassName=="QFile")
+    {
+        QFile *pFile=(QFile *)pDevice;
+
+        QString sFileName=pFile->fileName(); // TODO
+
+        if(sFileName!="")
+        {
+            QFileInfo fi(sFileName);
+
+            sResult=fi.absolutePath();
+        }
+    }
+
+    return sResult;
+}
+
 QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta)
 {
     QList<qint64> listResult;
