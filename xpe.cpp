@@ -1449,6 +1449,21 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
     qint64 nBaseAddress=_getBaseAddress();
     quint32 nHeadersSize=getOptionalHeader_SizeOfHeaders(); // mb TODO calc for UPX
 
+    if(nFileAlignment>0x10000) // Invalid file
+    {
+        nFileAlignment=0x200;
+    }
+
+    if(nSectionAlignment>0x10000) // Invalid file
+    {
+        nSectionAlignment=0x1000;
+    }
+
+    if(nHeadersSize>(quint64)getSize())
+    {
+        nHeadersSize=(quint32)getSize();
+    }
+
     if(nFileAlignment==nSectionAlignment)
     {
         nFileAlignment=1;

@@ -983,6 +983,23 @@ qint64 XBinary::find_unicodeString(qint64 nOffset, qint64 nSize, QString sString
 
 qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
 {
+    qint64 _nSize=getSize();
+
+    if(nSize==-1)
+    {
+        nSize=_nSize-nOffset;
+    }
+
+    if(nSize<=0)
+    {
+        return -1;
+    }
+
+    if(nOffset+nSize>_nSize)
+    {
+        return -1;
+    }
+
     sSignature=convertSignature(sSignature);
 
     qint64 nResult=-1;
@@ -3166,7 +3183,7 @@ bool XBinary::isSignatureInLoadSectionPresent(QList<XBinary::MEMORY_MAP> *pMemor
 
     for(int i=0;i<nCount;i++)
     {
-        if(pMemoryMap->at(i).nLoadSection==nLoadSection)
+        if((pMemoryMap->at(i).bIsLoadSection)&&(pMemoryMap->at(i).nLoadSection==nLoadSection))
         {
             if(pMemoryMap->at(i).nOffset!=-1)
             {
