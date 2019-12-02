@@ -1601,7 +1601,14 @@ void XBinary::setEntryPointOffset(qint64 nEntryPointOffset)
 
 qint64 XBinary::getEntryPointAddress()
 {
-    return offsetToAddress(getEntryPointOffset());
+    QList<MEMORY_MAP> list=getMemoryMapList();
+
+    return getEntryPointAddress(&list);
+}
+
+qint64 XBinary::getEntryPointAddress(QList<XBinary::MEMORY_MAP> *pMemoryMap)
+{
+    return offsetToAddress(pMemoryMap,getEntryPointOffset());
 }
 
 qint64 XBinary::getLowestAddress(QList<XBinary::MEMORY_MAP> *pMemoryMap)
@@ -1857,10 +1864,10 @@ QSet<XBinary::FT> XBinary::getFileTypes()
 
     if(nSize>=(int)sizeof(XELF_DEF::Elf32_Ehdr))
     {
-        if((((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[0]==0x7f) &&
-                (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[1]=='E') &&
-                (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[2]=='L') &&
-                (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[3]=='F'))
+        if( (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[0]==0x7f) &&
+            (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[1]=='E') &&
+            (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[2]=='L') &&
+            (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[3]=='F'))
         {
             if(((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[4]==1)
             {

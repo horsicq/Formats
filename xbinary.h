@@ -282,6 +282,7 @@ public:
     virtual qint64 getEntryPointOffset();
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     qint64 getEntryPointAddress();
+    qint64 getEntryPointAddress(QList<MEMORY_MAP> *pMemoryMap);
 
     static qint64 getLowestAddress(QList<MEMORY_MAP> *pMemoryMap);
     static qint64 getTotalVirtualSize(QList<MEMORY_MAP> *pMemoryMap);
