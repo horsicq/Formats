@@ -47,6 +47,9 @@
 #include <QDateTime>
 
 #include "xmsdos_def.h"
+#include "xne_def.h"
+#include "xle_def.h"
+#include "xlx_def.h"
 #include "xpe_def.h"
 #include "xelf_def.h"
 #include "xmach_def.h"
@@ -99,6 +102,9 @@ public:
         FT_UNKNOWN=0,
         FT_BINARY,
         FT_MSDOS,
+        FT_NE,
+        FT_LE,
+        FT_LX,
         FT_PE,
         FT_PE32,
         FT_PE64,

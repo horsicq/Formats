@@ -1856,6 +1856,18 @@ QSet<XBinary::FT> XBinary::getFileTypes()
                         stResult.insert(FT_PE32);
                     }
                 }
+                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XNE_DEF::S_IMAGE_OS2_SIGNATURE)
+                {
+                    stResult.insert(FT_NE);
+                }
+                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_OS2_SIGNATURE_LE)
+                {
+                    stResult.insert(FT_LE);
+                }
+                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLX_DEF::S_LX_SIGNATURE)
+                {
+                    stResult.insert(FT_LX);
+                }
             }
 
             stResult.insert(FT_MSDOS);
