@@ -274,6 +274,13 @@ qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
     return nResult;
 }
 
+QByteArray XBinary::read_array(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
+{
+    XBinary binary(pDevice);
+
+    return binary.read_array(nOffset,nSize);
+}
+
 quint8 XBinary::read_uint8(qint64 nOffset)
 {
     quint8 result=0;
@@ -1843,6 +1850,8 @@ QSet<XBinary::FT> XBinary::getFileTypes()
             {
                 if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XPE_DEF::S_IMAGE_NT_SIGNATURE)
                 {
+                    stResult.insert(FT_PE);
+
                     if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)
                     {
                         stResult.insert(FT_PE64);
@@ -1856,15 +1865,15 @@ QSet<XBinary::FT> XBinary::getFileTypes()
                         stResult.insert(FT_PE32);
                     }
                 }
-                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XNE_DEF::S_IMAGE_OS2_SIGNATURE)
+                else if((((XNE_DEF::IMAGE_OS2_HEADER *)pOffset))->ne_magic==XNE_DEF::S_IMAGE_OS2_SIGNATURE)
                 {
                     stResult.insert(FT_NE);
                 }
-                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_OS2_SIGNATURE_LE)
+                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_OS2_SIGNATURE_LE) // TODO
                 {
                     stResult.insert(FT_LE);
                 }
-                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLX_DEF::S_LX_SIGNATURE)
+                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLX_DEF::S_LX_SIGNATURE) // TODO
                 {
                     stResult.insert(FT_LX);
                 }
@@ -1881,6 +1890,8 @@ QSet<XBinary::FT> XBinary::getFileTypes()
             (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[2]=='L') &&
             (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[3]=='F'))
         {
+            stResult.insert(FT_ELF);
+
             if(((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[4]==1)
             {
                 stResult.insert(FT_ELF32);
@@ -1896,6 +1907,8 @@ QSet<XBinary::FT> XBinary::getFileTypes()
     {
         if(((XMACH_DEF::mach_header *)pOffset)->filetype<0xFFFF)
         {
+            stResult.insert(FT_MACH);
+
             if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_MAGIC)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_CIGAM))
             {
                 stResult.insert(FT_MACH32);

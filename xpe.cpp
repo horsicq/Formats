@@ -5194,13 +5194,18 @@ QString XPE::getImportLibraryName(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pL
 
 qint32 XPE::getNumberOfImportThunks(quint32 nNumber)
 {
-    qint32 nResult;
-
     QList<IMPORT_HEADER> listImports=getImports();
 
-    if(nNumber<(quint32)listImports.count())
+    return getNumberOfImportThunks(nNumber,&listImports);
+}
+
+qint32 XPE::getNumberOfImportThunks(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport)
+{
+    qint32 nResult;
+
+    if(nNumber<(quint32)pListImport->count())
     {
-        nResult=listImports.at(nNumber).listPositions.count();
+        nResult=pListImport->at(nNumber).listPositions.count();
     }
 
     return nResult;

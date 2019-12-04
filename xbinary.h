@@ -188,6 +188,8 @@ public:
     QByteArray read_array(qint64 nOffset,qint64 nSize);
     qint64 write_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
 
+    static QByteArray read_array(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
+
     quint8 read_uint8(qint64 nOffset);
     qint8 read_int8(qint64 nOffset);
     quint16 read_uint16(qint64 nOffset,bool bIsBigEndian=false);

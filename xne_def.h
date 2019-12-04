@@ -25,7 +25,41 @@
 
 namespace XNE_DEF
 {
-const quint32 S_IMAGE_OS2_SIGNATURE     =0x454E;      // NE
+const quint16 S_IMAGE_OS2_SIGNATURE     =0x454E;      // NE
+
+struct IMAGE_OS2_HEADER  // OS/2 .EXE header
+{
+    quint16   ne_magic;                    // Magic number
+//    CHAR   ne_ver;                      // Version number
+//    CHAR   ne_rev;                      // Revision number
+//    WORD   ne_enttab;                   // Offset of Entry Table
+//    WORD   ne_cbenttab;                 // Number of bytes in Entry Table
+//    LONG   ne_crc;                      // Checksum of whole file
+//    WORD   ne_flags;                    // Flag word
+//    WORD   ne_autodata;                 // Automatic data segment number
+//    WORD   ne_heap;                     // Initial heap allocation
+//    WORD   ne_stack;                    // Initial stack allocation
+//    LONG   ne_csip;                     // Initial CS:IP setting
+//    LONG   ne_sssp;                     // Initial SS:SP setting
+//    WORD   ne_cseg;                     // Count of file segments
+//    WORD   ne_cmod;                     // Entries in Module Reference Table
+//    WORD   ne_cbnrestab;                // Size of non-resident name table
+//    WORD   ne_segtab;                   // Offset of Segment Table
+//    WORD   ne_rsrctab;                  // Offset of Resource Table
+//    WORD   ne_restab;                   // Offset of resident name table
+//    WORD   ne_modtab;                   // Offset of Module Reference Table
+//    WORD   ne_imptab;                   // Offset of Imported Names Table
+//    LONG   ne_nrestab;                  // Offset of Non-resident Names Table
+//    WORD   ne_cmovent;                  // Count of movable entries
+//    WORD   ne_align;                    // Segment alignment shift count
+//    WORD   ne_cres;                     // Count of resource segments
+//    BYTE   ne_exetyp;                   // Target Operating system
+//    BYTE   ne_flagsothers;              // Other .EXE flags
+//    WORD   ne_pretthunks;               // offset to return thunks
+//    WORD   ne_psegrefbytes;             // offset to segment ref. bytes
+//    WORD   ne_swaparea;                 // Minimum code swap area size
+//    WORD   ne_expver;                   // Expected Windows version number
+  };
 }
 
 #endif // XNE_DEF_H

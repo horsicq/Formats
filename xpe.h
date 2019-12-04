@@ -801,6 +801,8 @@ public:
     QString getImportLibraryName(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
 
     qint32 getNumberOfImportThunks(quint32 nNumber);
+    qint32 getNumberOfImportThunks(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
+
     qint32 getNumberOfRichIDs();
 
     bool isRichVersionPresent(quint32 nVersion);
