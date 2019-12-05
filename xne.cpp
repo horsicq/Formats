@@ -48,3 +48,71 @@ bool XNE::isValid()
 
     return bResult;
 }
+
+qint64 XNE::getImageOS2HeaderOffset()
+{
+    qint64 nResult=get_lfanew();
+
+    if(!isOffsetValid(nResult))
+    {
+        nResult=-1;
+    }
+
+    return nResult;
+}
+
+XNE_DEF::IMAGE_OS2_HEADER XNE::getImageOS2Header()
+{
+    XNE_DEF::IMAGE_OS2_HEADER result={};
+
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        result.ne_magic=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_magic));
+    }
+
+    return result;
+}
+
+quint16 XNE::getImageOS2Header_magic()
+{
+    quint16 nResult=0;
+
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_magic));
+    }
+
+    return nResult;
+}
+
+void XNE::setImageOS2Header_magic(quint16 value)
+{
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_magic),value);
+    }
+}
+
+QMap<quint64, QString> XNE::getImageNEMagics()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x454E,"IMAGE_OS2_SIGNATURE");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XNE::getImageNEMagicsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x454E,"OS2_SIGNATURE");
+
+    return mapResult;
+}

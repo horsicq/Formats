@@ -31,6 +31,15 @@ class XNE : public XMSDOS
 public:
     explicit XNE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
+
+    qint64 getImageOS2HeaderOffset();
+    XNE_DEF::IMAGE_OS2_HEADER getImageOS2Header();
+
+    quint16 getImageOS2Header_magic();
+    void setImageOS2Header_magic(quint16 value);
+
+    static QMap<quint64, QString> getImageNEMagics();
+    static QMap<quint64, QString> getImageNEMagicsS();
 };
 
 #endif // XNE_H

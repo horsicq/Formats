@@ -5215,20 +5215,30 @@ qint32 XPE::getNumberOfRichIDs()
 {
     QList<RICH_RECORD> listRecords=getRichSignatureRecords();
 
-    return listRecords.count();
+    return getNumberOfRichIDs(&listRecords);
+}
+
+qint32 XPE::getNumberOfRichIDs(QList<XPE::RICH_RECORD> *pListRich)
+{
+    return pListRich->count();
 }
 
 bool XPE::isRichVersionPresent(quint32 nVersion)
 {
-    bool bResult=false;
-
     QList<RICH_RECORD> listRecords=getRichSignatureRecords();
 
-    int nCount=listRecords.count();
+    return isRichVersionPresent(nVersion,&listRecords);
+}
+
+bool XPE::isRichVersionPresent(quint32 nVersion, QList<XPE::RICH_RECORD> *pListRich)
+{
+    bool bResult=false;
+
+    int nCount=pListRich->count();
 
     for(int i=0;i<nCount;i++)
     {
-        if(listRecords.at(i).nVersion==nVersion)
+        if(pListRich->at(i).nVersion==nVersion)
         {
             bResult=true;
 

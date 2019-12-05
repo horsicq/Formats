@@ -804,8 +804,10 @@ public:
     qint32 getNumberOfImportThunks(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
 
     qint32 getNumberOfRichIDs();
+    qint32 getNumberOfRichIDs(QList<RICH_RECORD> *pListRich);
 
     bool isRichVersionPresent(quint32 nVersion);
+    bool isRichVersionPresent(quint32 nVersion,QList<RICH_RECORD> *pListRich);
 
     XPE::NET_HEADER getNetHeader();
 

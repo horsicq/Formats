@@ -51,7 +51,7 @@ qint32 XMSDOS::get_lfanew()
 
 XMSDOS_DEF::IMAGE_DOS_HEADER XMSDOS::getDosHeader()
 {
-    XMSDOS_DEF::IMAGE_DOS_HEADER result=XMSDOS_DEF::IMAGE_DOS_HEADER();
+    XMSDOS_DEF::IMAGE_DOS_HEADER result={};
 
     read_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER,e_magic),(char *)&result,sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));
 
@@ -60,7 +60,7 @@ XMSDOS_DEF::IMAGE_DOS_HEADER XMSDOS::getDosHeader()
 
 XMSDOS_DEF::IMAGE_DOS_HEADEREX XMSDOS::getDosHeaderEx()
 {
-    XMSDOS_DEF::IMAGE_DOS_HEADEREX result=XMSDOS_DEF::IMAGE_DOS_HEADEREX();
+    XMSDOS_DEF::IMAGE_DOS_HEADEREX result={};
 
     read_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_magic),(char *)&result,sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX));
 
