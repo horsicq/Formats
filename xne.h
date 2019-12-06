@@ -38,10 +38,14 @@ public:
     quint16 getImageOS2Header_magic();
     quint8 getImageOS2Header_ver();
     quint8 getImageOS2Header_rev();
+    quint16 getImageOS2Header_enttab();
+    quint16 getImageOS2Header_cbenttab();
 
     void setImageOS2Header_magic(quint16 value);
     void setImageOS2Header_ver(quint8 value);
     void setImageOS2Header_rev(quint8 value);
+    void setImageOS2Header_enttab(quint16 value);
+    void setImageOS2Header_cbenttab(quint16 value);
 
     static QMap<quint64, QString> getImageNEMagics();
     static QMap<quint64, QString> getImageNEMagicsS();
