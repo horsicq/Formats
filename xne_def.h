@@ -29,9 +29,9 @@ const quint16 S_IMAGE_OS2_SIGNATURE     =0x454E;      // NE
 
 struct IMAGE_OS2_HEADER  // OS/2 .EXE header
 {
-    quint16   ne_magic;                    // Magic number
-//    CHAR   ne_ver;                      // Version number
-//    CHAR   ne_rev;                      // Revision number
+    quint16 ne_magic;                    // Magic number
+    quint8  ne_ver;                      // Version number
+    quint8  ne_rev;                      // Revision number
 //    WORD   ne_enttab;                   // Offset of Entry Table
 //    WORD   ne_cbenttab;                 // Number of bytes in Entry Table
 //    LONG   ne_crc;                      // Checksum of whole file

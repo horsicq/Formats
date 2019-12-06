@@ -101,6 +101,7 @@ public:
     {
         FT_UNKNOWN=0,
         FT_BINARY,
+        FT_TEXT,
         FT_MSDOS,
         FT_NE,
         FT_LE,
@@ -169,6 +170,8 @@ public:
 
     static quint32 random32();
     static quint64 random64();
+
+    static QString fileTypeIdToString(FT fileType);
 
     static QString convertFileName(QString sFileName);
 //    static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames); // TODO Check

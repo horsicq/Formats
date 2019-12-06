@@ -81,6 +81,29 @@ quint64 XBinary::random64()
     return nVal1+nVal2;
 }
 
+QString XBinary::fileTypeIdToString(XBinary::FT fileType)
+{
+    QString sResult="Unknown";
+
+    switch(fileType)
+    {
+        case FT_BINARY:             sResult=QString("Binary");      break;
+        case FT_TEXT:               sResult=QString("Text");        break;
+        case FT_MSDOS:              sResult=QString("MSDOS");       break;
+        case FT_PE:                 sResult=QString("PE");          break;
+        case FT_PE32:               sResult=QString("PE32");        break;
+        case FT_PE64:               sResult=QString("PE64");        break;
+        case FT_ELF:                sResult=QString("ELF");         break;
+        case FT_ELF32:              sResult=QString("ELF32");       break;
+        case FT_ELF64:              sResult=QString("ELF64");       break;
+        case FT_MACH:               sResult=QString("MACH");        break;
+        case FT_MACH32:             sResult=QString("MACH32");      break;
+        case FT_MACH64:             sResult=QString("MACH64");      break;
+    }
+
+    return sResult;
+}
+
 QString XBinary::convertFileName(QString sFileName)
 {
 #ifdef Q_OS_MAC // TODO Check
@@ -1919,10 +1942,11 @@ QSet<XBinary::FT> XBinary::getFileTypes()
             }
         }
     }
-    //    if(isPlainText())
-    //    {
-    //        listResult.append(QString("Text"));
-    //    }
+
+    if(isPlainTextType())
+    {
+        stResult.insert(FT_TEXT);
+    }
 
     return stResult;
 }
