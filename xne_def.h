@@ -34,7 +34,7 @@ struct IMAGE_OS2_HEADER  // OS/2 .EXE header
     quint8  ne_rev;                      // Revision number
     quint16 ne_enttab;                   // Offset of Entry Table
     quint16 ne_cbenttab;                 // Number of bytes in Entry Table
-//    LONG   ne_crc;                      // Checksum of whole file
+    quint32 ne_crc;                      // Checksum of whole file
 //    WORD   ne_flags;                    // Flag word
 //    WORD   ne_autodata;                 // Automatic data segment number
 //    WORD   ne_heap;                     // Initial heap allocation
