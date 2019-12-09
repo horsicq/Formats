@@ -261,6 +261,7 @@ public:
     static QString convertFileNameSymbols(QString sFileName);
     static QString getBaseFileName(QString sFileName);
     static bool createDirectory(QString sDirectoryName);
+    static bool isDirectoryExists(QString sDirectoryName);
 
     static QByteArray readFile(QString sFileName);
 

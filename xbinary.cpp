@@ -1154,6 +1154,11 @@ bool XBinary::createDirectory(QString sDirectoryName)
     return QDir().mkdir(sDirectoryName);
 }
 
+bool XBinary::isDirectoryExists(QString sDirectoryName)
+{
+    return QDir().exists(sDirectoryName);
+}
+
 QByteArray XBinary::readFile(QString sFileName)
 {
     QByteArray baResult;

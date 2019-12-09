@@ -41,6 +41,10 @@ public:
     quint16 getImageOS2Header_enttab();
     quint16 getImageOS2Header_cbenttab();
     quint32 getImageOS2Header_crc();
+    quint16 getImageOS2Header_flags();
+    quint16 getImageOS2Header_autodata();
+    quint16 getImageOS2Header_heap();
+    quint16 getImageOS2Header_stack();
 
     void setImageOS2Header_magic(quint16 value);
     void setImageOS2Header_ver(quint8 value);
@@ -48,6 +52,10 @@ public:
     void setImageOS2Header_enttab(quint16 value);
     void setImageOS2Header_cbenttab(quint16 value);
     void setImageOS2Header_crc(quint32 value);
+    void setImageOS2Header_flags(quint16 value);
+    void setImageOS2Header_autodata(quint16 value);
+    void setImageOS2Header_heap(quint16 value);
+    void setImageOS2Header_stack(quint16 value);
 
     static QMap<quint64, QString> getImageNEMagics();
     static QMap<quint64, QString> getImageNEMagicsS();

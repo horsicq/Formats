@@ -35,10 +35,10 @@ struct IMAGE_OS2_HEADER  // OS/2 .EXE header
     quint16 ne_enttab;                   // Offset of Entry Table
     quint16 ne_cbenttab;                 // Number of bytes in Entry Table
     quint32 ne_crc;                      // Checksum of whole file
-//    WORD   ne_flags;                    // Flag word
-//    WORD   ne_autodata;                 // Automatic data segment number
-//    WORD   ne_heap;                     // Initial heap allocation
-//    WORD   ne_stack;                    // Initial stack allocation
+    quint16 ne_flags;                    // Flag word
+    quint16 ne_autodata;                 // Automatic data segment number
+    quint16 ne_heap;                     // Initial heap allocation
+    quint16 ne_stack;                    // Initial stack allocation
 //    LONG   ne_csip;                     // Initial CS:IP setting
 //    LONG   ne_sssp;                     // Initial SS:SP setting
 //    WORD   ne_cseg;                     // Count of file segments
