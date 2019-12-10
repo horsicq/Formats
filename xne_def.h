@@ -39,8 +39,8 @@ struct IMAGE_OS2_HEADER  // OS/2 .EXE header
     quint16 ne_autodata;                 // Automatic data segment number
     quint16 ne_heap;                     // Initial heap allocation
     quint16 ne_stack;                    // Initial stack allocation
-//    LONG   ne_csip;                     // Initial CS:IP setting
-//    LONG   ne_sssp;                     // Initial SS:SP setting
+    quint32 ne_csip;                     // Initial CS:IP setting
+    quint32 ne_sssp;                     // Initial SS:SP setting
 //    WORD   ne_cseg;                     // Count of file segments
 //    WORD   ne_cmod;                     // Entries in Module Reference Table
 //    WORD   ne_cbnrestab;                // Size of non-resident name table

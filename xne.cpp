@@ -74,11 +74,13 @@ XNE_DEF::IMAGE_OS2_HEADER XNE::getImageOS2Header()
         result.ne_rev=read_uint8(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_rev));
         result.ne_enttab=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_enttab));
         result.ne_cbenttab=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_cbenttab));
-        result.ne_crc=read_uint32(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_crc));        
+        result.ne_crc=read_uint32(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_crc));
         result.ne_flags=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_flags));
         result.ne_autodata=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_autodata));
         result.ne_heap=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_heap));
         result.ne_stack=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_stack));
+        result.ne_csip=read_uint32(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_csip));
+        result.ne_sssp=read_uint32(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_sssp));
     }
 
     return result;
@@ -224,6 +226,34 @@ quint16 XNE::getImageOS2Header_stack()
     return nResult;
 }
 
+quint32 XNE::getImageOS2Header_csip()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_csip));
+    }
+
+    return nResult;
+}
+
+quint32 XNE::getImageOS2Header_sssp()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_sssp));
+    }
+
+    return nResult;
+}
+
 void XNE::setImageOS2Header_magic(quint16 value)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
@@ -321,6 +351,26 @@ void XNE::setImageOS2Header_stack(quint16 value)
     if(nOffset!=-1)
     {
         write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_stack),value);
+    }
+}
+
+void XNE::setImageOS2Header_csip(quint32 value)
+{
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_csip),value);
+    }
+}
+
+void XNE::setImageOS2Header_sssp(quint32 value)
+{
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_sssp),value);
     }
 }
 
