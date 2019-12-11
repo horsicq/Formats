@@ -41,14 +41,14 @@ struct IMAGE_OS2_HEADER  // OS/2 .EXE header
     quint16 ne_stack;                    // Initial stack allocation
     quint32 ne_csip;                     // Initial CS:IP setting
     quint32 ne_sssp;                     // Initial SS:SP setting
-//    WORD   ne_cseg;                     // Count of file segments
-//    WORD   ne_cmod;                     // Entries in Module Reference Table
-//    WORD   ne_cbnrestab;                // Size of non-resident name table
-//    WORD   ne_segtab;                   // Offset of Segment Table
-//    WORD   ne_rsrctab;                  // Offset of Resource Table
-//    WORD   ne_restab;                   // Offset of resident name table
-//    WORD   ne_modtab;                   // Offset of Module Reference Table
-//    WORD   ne_imptab;                   // Offset of Imported Names Table
+    quint16 ne_cseg;                     // Count of file segments
+    quint16 ne_cmod;                     // Entries in Module Reference Table
+    quint16 ne_cbnrestab;                // Size of non-resident name table
+    quint16 ne_segtab;                   // Offset of Segment Table
+    quint16 ne_rsrctab;                  // Offset of Resource Table
+    quint16 ne_restab;                   // Offset of resident name table
+    quint16 ne_modtab;                   // Offset of Module Reference Table
+    quint16 ne_imptab;                   // Offset of Imported Names Table
 //    LONG   ne_nrestab;                  // Offset of Non-resident Names Table
 //    WORD   ne_cmovent;                  // Count of movable entries
 //    WORD   ne_align;                    // Segment alignment shift count

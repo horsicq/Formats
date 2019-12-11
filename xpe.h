@@ -265,6 +265,14 @@ public:
         QString sLibrary;
     };
 
+    enum TYPE
+    {
+        TYPE_UNKNOWN=0,
+        TYPE_EXE,
+        TYPE_DLL,
+        TYPE_DRIVER
+    };
+
     explicit XPE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
     bool is64();
@@ -273,6 +281,8 @@ public:
 
     virtual MODE getMode();
     virtual ARCH getArch();
+
+    TYPE getType();
 
     bool isRichSignaturePresent();
     QList<XPE::RICH_RECORD> getRichSignatureRecords();
@@ -660,6 +670,9 @@ public:
 
     static QMap<quint64,QString> getComImageFlags();
     static QMap<quint64,QString> getComImageFlagsS();
+
+    static QMap<quint64,QString> getTypes();
+    static QMap<quint64,QString> getTypesS();
 
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);
 

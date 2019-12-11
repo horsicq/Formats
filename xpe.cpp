@@ -105,6 +105,22 @@ XBinary::ARCH XPE::getArch()
     return ARCH_X86;
 }
 
+XPE::TYPE XPE::getType()
+{
+    TYPE result=TYPE_EXE;
+
+    if(isDll())
+    {
+        result=TYPE_DLL;
+    }
+    else if(isDriver())
+    {
+        result=TYPE_DRIVER;
+    }
+
+    return result;
+}
+
 bool XPE::isRichSignaturePresent()
 {
     bool bResult=false;
@@ -7704,6 +7720,30 @@ QMap<quint64, QString> XPE::getComImageFlagsS()
     mapResult.insert(0x00000008,"STRONGNAMESIGNED");
     mapResult.insert(0x00000010,"NATIVE_ENTRYPOINT");
     mapResult.insert(0x00010000,"TRACKDEBUGDATA");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getTypes()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000000,"TYPE_UNKNOWN");
+    mapResult.insert(0x00000001,"TYPE_EXE");
+    mapResult.insert(0x00000002,"TYPE_DLL");
+    mapResult.insert(0x00000003,"TYPE_DRIVER");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getTypesS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000000,"UNKNOWN");
+    mapResult.insert(0x00000001,"EXE");
+    mapResult.insert(0x00000002,"DLL");
+    mapResult.insert(0x00000003,"DRIVER");
 
     return mapResult;
 }

@@ -32,6 +32,7 @@
 #include <QSet>
 #include <QTemporaryFile>
 #include <QCryptographicHash>
+#include <QCoreApplication>
 #if (QT_VERSION_MAJOR<5)
 #include <QRegExp>
 #else
@@ -174,6 +175,7 @@ public:
     static QString fileTypeIdToString(FT fileType);
 
     static QString convertFileName(QString sFileName);
+    static QString convertPathName(QString sPathName);
 //    static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames); // TODO Check
 
     struct FFOPTIONS
@@ -433,6 +435,8 @@ public:
     bool isSignatureInLoadSectionPresent(QList<MEMORY_MAP> *pMemoryMap,qint32 nLoadSection,QString sSignature);
 
     static QString getStringCollision(QList<QString> *pListStrings,QString sString1,QString sString2);
+
+    static bool writeToFile(QString sFileName,QByteArray baData);
 
 private:
     static QString convertSignature(QString sSignature);

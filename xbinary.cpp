@@ -159,6 +159,19 @@ QString XBinary::convertFileName(QString sFileName)
     return sFileName;
 }
 
+QString XBinary::convertPathName(QString sPathName)
+{
+    QString sResult=sPathName;
+
+    if(sPathName.contains("$app"))
+    {
+        sResult.replace("$app",QCoreApplication::applicationDirPath());
+        sResult.replace("/",QDir::separator());
+    }
+
+    return sResult;
+}
+
 //void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
 //{
 //    if((sDirectoryName!=".")&&(sDirectoryName!=".."))
@@ -1935,15 +1948,15 @@ QSet<XBinary::FT> XBinary::getFileTypes()
     {
         if(((XMACH_DEF::mach_header *)pOffset)->filetype<0xFFFF)
         {
-            stResult.insert(FT_MACH);
-
             if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_MAGIC)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_CIGAM))
             {
+                stResult.insert(FT_MACH);
                 stResult.insert(FT_MACH32);
             }
             else if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_MAGIC_64)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_CIGAM_64))
             {
-                stResult.insert(FT_MACH32);
+                stResult.insert(FT_MACH);
+                stResult.insert(FT_MACH64);
             }
         }
     }
@@ -3290,6 +3303,24 @@ QString XBinary::getStringCollision(QList<QString> *pListStrings, QString sStrin
     }
 
     return sResult;
+}
+
+bool XBinary::writeToFile(QString sFileName, QByteArray baData)
+{
+    bool bResult=false;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadWrite))
+    {
+        file.write(baData.data(),baData.size());
+
+        file.close();
+        bResult=true;
+    }
+
+    return bResult;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)

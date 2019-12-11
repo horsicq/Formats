@@ -47,6 +47,14 @@ public:
     quint16 getImageOS2Header_stack();
     quint32 getImageOS2Header_csip();
     quint32 getImageOS2Header_sssp();
+    quint16 getImageOS2Header_cseg();
+    quint16 getImageOS2Header_cmod();
+    quint16 getImageOS2Header_cbnrestab();
+    quint16 getImageOS2Header_segtab();
+    quint16 getImageOS2Header_rsrctab();
+    quint16 getImageOS2Header_restab();
+    quint16 getImageOS2Header_modtab();
+    quint16 getImageOS2Header_imptab();
 
     void setImageOS2Header_magic(quint16 value);
     void setImageOS2Header_ver(quint8 value);
@@ -60,6 +68,23 @@ public:
     void setImageOS2Header_stack(quint16 value);
     void setImageOS2Header_csip(quint32 value);
     void setImageOS2Header_sssp(quint32 value);
+    void setImageOS2Header_cseg(quint16 value);
+    void setImageOS2Header_cmod(quint16 value);
+    void setImageOS2Header_cbnrestab(quint16 value);
+    void setImageOS2Header_segtab(quint16 value);
+    void setImageOS2Header_rsrctab(quint16 value);
+    void setImageOS2Header_restab(quint16 value);
+    void setImageOS2Header_modtab(quint16 value);
+    void setImageOS2Header_imptab(quint16 value);
+
+//    quint16 ne_;                     // Count of file segments
+//    quint16 ne_;                     // Entries in Module Reference Table
+//    quint16 ne_;                // Size of non-resident name table
+//    quint16 ne_;                   // Offset of Segment Table
+//    quint16 ne_;                  // Offset of Resource Table
+//    quint16 ne_;                   // Offset of resident name table
+//    quint16 ne_;                   // Offset of Module Reference Table
+//    quint16 ne_;                   // Offset of Imported Names Table
 
     static QMap<quint64, QString> getImageNEMagics();
     static QMap<quint64, QString> getImageNEMagicsS();
