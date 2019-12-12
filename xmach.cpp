@@ -706,9 +706,8 @@ QList<XBinary::MEMORY_MAP> XMACH::getMemoryMapList()
     {
         XBinary::MEMORY_MAP record={};
 
-        record.bIsHeader=false;
-        record.bIsLoadSection=true;
-        record.bIsOvelay=false;
+        record.type=MMT_LOADSECTION;
+        // TODO number
         record.nAddress=listSegmentRecords.at(i).vmaddr;
         record.nSize=listSegmentRecords.at(i).filesize;
         record.nOffset=listSegmentRecords.at(i).fileoff;

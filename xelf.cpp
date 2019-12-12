@@ -3183,9 +3183,8 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
         {
             XBinary::MEMORY_MAP record={};
 
-            record.bIsHeader=false;
-            record.bIsLoadSection=true;
-            record.bIsOvelay=false;
+            record.type=MMT_LOADSECTION;
+            // TODO Section number!
             record.nAddress=listPhdr.at(i).p_vaddr;
             record.nSize=listPhdr.at(i).p_filesz;
             record.nOffset=listPhdr.at(i).p_offset;
