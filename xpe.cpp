@@ -1502,7 +1502,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
 
         if(!isImage())
         {
-            recordHeaderRaw.bIsHeader=true;
+            recordHeaderRaw.type=MMT_HEADER;
             recordHeaderRaw.nAddress=nBaseAddress;
             recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
             recordHeaderRaw.nOffset=0;
@@ -1513,7 +1513,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
             if(nVirtualSizeofHeaders-nHeadersSize)
             {
                 MEMORY_MAP record={};
-                record.bIsHeader=true;
+                record.type=MMT_HEADER;
 
                 record.nAddress=nBaseAddress+nHeadersSize;
                 recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
@@ -1525,7 +1525,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
         }
         else
         {
-            recordHeaderRaw.bIsHeader=true;
+            recordHeaderRaw.type=MMT_HEADER;
             recordHeaderRaw.nAddress=nBaseAddress;
             recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
             recordHeaderRaw.nOffset=0;
@@ -1569,7 +1569,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
                 {
                     MEMORY_MAP record={};
 
-                    record.bIsLoadSection=true;
+                    record.type=MMT_LOADSECTION;
                     record.nLoadSection=i;
                     record.segment=ADDRESS_SEGMENT_FLAT;
                     record.nAddress=nVirtualAddress;
@@ -1583,7 +1583,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
                 {
                     MEMORY_MAP record={};
 
-                    record.bIsLoadSection=true;
+                    record.type=MMT_LOADSECTION;
                     record.nLoadSection=i;
                     record.segment=ADDRESS_SEGMENT_FLAT;
                     record.nAddress=nVirtualAddress+nFileSize;
@@ -1597,7 +1597,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
             {
                 MEMORY_MAP record={};
 
-                record.bIsLoadSection=true;
+                record.type=MMT_LOADSECTION;
                 record.nLoadSection=i;
                 record.segment=ADDRESS_SEGMENT_FLAT;
                 record.nAddress=nVirtualAddress;
@@ -1613,7 +1613,7 @@ QList<XBinary::MEMORY_MAP> XPE::getMemoryMapList()
             // Overlay;
             MEMORY_MAP record={};
 
-            record.bIsOvelay=true;
+            record.type=MMT_OVERLAY;
 
             record.nAddress=-1;
             record.segment=ADDRESS_SEGMENT_UNKNOWN;
@@ -5058,7 +5058,7 @@ QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList()
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> listResult;
 
     QList<MEMORY_MAP> listMM=getMemoryMapList();
-    qint64 nBaseAddress=getBaseAddress();
+    qint64 nBaseAddress=_getBaseAddress();
 
     qint64 nExceptionOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 
@@ -5096,7 +5096,7 @@ QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList()
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY>  listResult;
 
     QList<MEMORY_MAP> listMM=getMemoryMapList();
-    qint64 nBaseAddress=getBaseAddress();
+    qint64 nBaseAddress=_getBaseAddress();
 
     qint64 nDebugOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DEBUG);
 
@@ -5139,7 +5139,7 @@ QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
     QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR>  listResult;
 
     QList<MEMORY_MAP> listMM=getMemoryMapList();
-    qint64 nBaseAddress=getBaseAddress();
+    qint64 nBaseAddress=_getBaseAddress();
 
     qint64 nDebugOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
 
@@ -6403,7 +6403,7 @@ qint64 XPE::_getMinSectionOffset()
 
     for(int i=0; i<listMM.count(); i++)
     {
-        if(listMM.at(i).bIsLoadSection)
+        if(listMM.at(i).type==MMT_LOADSECTION)
         {
             if(nResult==-1)
             {

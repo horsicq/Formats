@@ -1053,12 +1053,43 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
 
         QList<SIGNATURE_RECORD> records=getSignatureRecords(sSignature);
 
-        for(qint64 i=0; i<nSize; i++)
+        if(records.count()&&(records.at(0).st==ST_COMPAREBYTES))
         {
-            if(_compareSignature(&records,nOffset+i))
+            QByteArray baFirst=records.at(0).baData;
+
+            char *pData=baFirst.data();
+            qint32 nDataSize=baFirst.size();
+
+            for(qint64 i=0; i<nSize;)
             {
-                nResult=nOffset+i;
-                break;
+                qint64 nTempOffset=find_array(nOffset+i,nSize-1,pData,nDataSize);
+
+                if(nTempOffset!=-1)
+                {
+                    if(_compareSignature(&records,nTempOffset))
+                    {
+                        nResult=nTempOffset;
+
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+
+                i=nTempOffset+nDataSize-nOffset;
+            }
+        }
+        else
+        {
+            for(qint64 i=0; i<nSize; i++)
+            {
+                if(_compareSignature(&records,nOffset+i))
+                {
+                    nResult=nOffset+i;
+                    break;
+                }
             }
         }
     }
@@ -1512,7 +1543,7 @@ qint32 XBinary::addressToLoadSection(QList<XBinary::MEMORY_MAP> *pMemoryMap, qin
 
     MEMORY_MAP mm=getAddressMemoryMap(pMemoryMap,nAddress,segment);
 
-    if(mm.bIsLoadSection)
+    if(mm.type==MMT_LOADSECTION)
     {
         nResult=mm.nLoadSection;
     }
@@ -2701,7 +2732,7 @@ qint64 XBinary::_calculateRawSize()
 
     for(int i=0; i<list.count(); i++)
     {
-        if((list.at(i).nOffset!=-1)&&(!list.at(i).bIsOvelay))
+        if((list.at(i).nOffset!=-1)&&(list.at(i).type!=MMT_OVERLAY))
         {
             nResult=qMax(nResult,(qint64)(list.at(i).nOffset+list.at(i).nSize));
         }
@@ -3257,7 +3288,7 @@ bool XBinary::isSignatureInLoadSectionPresent(QList<XBinary::MEMORY_MAP> *pMemor
 
     for(int i=0;i<nCount;i++)
     {
-        if((pMemoryMap->at(i).bIsLoadSection)&&(pMemoryMap->at(i).nLoadSection==nLoadSection))
+        if((pMemoryMap->at(i).type==MMT_LOADSECTION)&&(pMemoryMap->at(i).nLoadSection==nLoadSection))
         {
             if(pMemoryMap->at(i).nOffset!=-1)
             {
@@ -3367,9 +3398,9 @@ bool XBinary::_compareSignature(QList<XBinary::SIGNATURE_RECORD> *pListSignature
     {
         qint64 _nAddress=0;
 
-        switch(pListSignatures->at(i).nType)
+        switch(pListSignatures->at(i).st)
         {
-            case XBinary::CompareBytes:
+            case XBinary::ST_COMPAREBYTES:
                 {
                     QByteArray baData=read_array(nOffset,pListSignatures->at(i).baData.size());
 
@@ -3387,11 +3418,11 @@ bool XBinary::_compareSignature(QList<XBinary::SIGNATURE_RECORD> *pListSignature
                 }
                 break;
 
-            case XBinary::RelOffsetFix:
+            case XBinary::ST_RELOFFSETFIX:
                 nOffset+=pListSignatures->at(i).nBaseAddress;
                 break;
 
-            case XBinary::RelOffset:
+            case XBinary::ST_RELOFFSET:
                 _nAddress=offsetToAddress(nOffset);
 
                 switch(pListSignatures->at(i).nSizeOfAddr)
@@ -3417,7 +3448,7 @@ bool XBinary::_compareSignature(QList<XBinary::SIGNATURE_RECORD> *pListSignature
 
                 break;
 
-            case XBinary::Address:
+            case XBinary::ST_ADDRESS:
                 switch(pListSignatures->at(i).nSizeOfAddr)
                 {
                     case 1:
@@ -3475,7 +3506,7 @@ int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSi
     {
         SIGNATURE_RECORD record;
 
-        record.nType=XBinary::RelOffsetFix;
+        record.st=XBinary::ST_RELOFFSETFIX;
         record.nSizeOfAddr=0;
         record.nBaseAddress=nResult/2;
 
@@ -3507,7 +3538,7 @@ int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSigna
     {
         SIGNATURE_RECORD record;
 
-        record.nType=XBinary::RelOffset;
+        record.st=XBinary::ST_RELOFFSET;
         record.nSizeOfAddr=nResult/2;
         record.nBaseAddress=0;
 
@@ -3558,7 +3589,7 @@ int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
     {
         SIGNATURE_RECORD record;
 
-        record.nType=XBinary::Address;
+        record.st=XBinary::ST_ADDRESS;
         record.nSizeOfAddr=nSizeOfAddress/2;
         record.nBaseAddress=sBaseAddress.toInt(0,16);
 
@@ -3595,7 +3626,7 @@ int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignature
     {
         SIGNATURE_RECORD record;
 
-        record.nType=XBinary::CompareBytes;
+        record.st=XBinary::ST_COMPAREBYTES;
         record.nSizeOfAddr=0;
         record.nBaseAddress=0;
         QByteArray baData;

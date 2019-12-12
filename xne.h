@@ -55,6 +55,7 @@ public:
     quint16 getImageOS2Header_restab();
     quint16 getImageOS2Header_modtab();
     quint16 getImageOS2Header_imptab();
+    quint32 getImageOS2Header_nrestab();
 
     void setImageOS2Header_magic(quint16 value);
     void setImageOS2Header_ver(quint8 value);
@@ -76,6 +77,7 @@ public:
     void setImageOS2Header_restab(quint16 value);
     void setImageOS2Header_modtab(quint16 value);
     void setImageOS2Header_imptab(quint16 value);
+    void setImageOS2Header_nrestab(quint32 value);
 
 //    quint16 ne_;                     // Count of file segments
 //    quint16 ne_;                     // Entries in Module Reference Table

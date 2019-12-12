@@ -86,16 +86,23 @@ public:
         ADDRESS_SEGMENT_DATA
     };
 
+    enum MMT
+    {
+        MMT_UNKNOWN=0,
+        MMT_HEADER,
+        MMT_LOADSECTION, // Section in PE; LoadProgram in ELF
+        MMT_OVERLAY
+    };
+
     struct MEMORY_MAP
     {
         qint64 nOffset;
         qint64 nAddress;
         ADDRESS_SEGMENT segment;
         qint64 nSize;
-        bool bIsHeader;
-        bool bIsLoadSection; // Section in PE; LoadProgram in ELF
-        bool bIsOvelay;
+        MMT type;
         qint32 nLoadSection;
+        QString sName;
     };
 
     enum FT
@@ -145,20 +152,20 @@ public:
     };
 
 private:
-    struct SIGNATURE_RECORD
+    enum ST
     {
-        quint8 nType;
-        QByteArray baData;
-        quint8 nSizeOfAddr;
-        qint64 nBaseAddress;
+        ST_COMPAREBYTES=0,
+        ST_RELOFFSETFIX,
+        ST_RELOFFSET,
+        ST_ADDRESS
     };
 
-    enum SIGNATURE_TYPES
+    struct SIGNATURE_RECORD
     {
-        CompareBytes,
-        RelOffsetFix,
-        RelOffset,
-        Address
+        qint64 nBaseAddress;
+        ST st;
+        QByteArray baData;
+        quint32 nSizeOfAddr;
     };
 
 public:

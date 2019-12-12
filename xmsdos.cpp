@@ -275,7 +275,7 @@ QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()
     recordHeader.nOffset=nHeaderOffset;
     recordHeader.nAddress=-1;
     recordHeader.segment=ADDRESS_SEGMENT_UNKNOWN;
-    recordHeader.bIsHeader=true;
+    recordHeader.type=MMT_HEADER;
 
     listResult.append(recordHeader);
 
@@ -287,7 +287,7 @@ QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()
     recordCode.nAddress=0;
 
     recordCode.segment=ADDRESS_SEGMENT_CODE;
-    recordCode.bIsHeader=false;
+    recordCode.type=MMT_LOADSECTION;
 
     listResult.append(recordCode);
     // TODO
@@ -300,7 +300,7 @@ QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()
         recordOverlay.nAddress=-1;
 
         recordOverlay.segment=ADDRESS_SEGMENT_UNKNOWN;
-        recordOverlay.bIsOvelay=true;
+        recordOverlay.type=MMT_OVERLAY;
 
         listResult.append(recordOverlay);
     }

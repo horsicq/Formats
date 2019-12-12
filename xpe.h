@@ -841,7 +841,7 @@ private:
 
     RESOURCE_POSITION _getResourcePosition(QList<MEMORY_MAP> *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);
     qint64 _fixHeadersSize();
-    qint64 _getMinSectionOffset();
+    qint64 _getMinSectionOffset(); // TODO move to XBinary
     void _fixFileOffsets(qint64 nDelta);
     quint32 __getResourceVersion(RESOURCE_VERSION *pResult,qint64 nOffset,qint64 nSize,QString sPrefix,int nLevel);
 };
