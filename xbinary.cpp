@@ -89,7 +89,11 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
     {
         case FT_BINARY:             sResult=QString("Binary");      break;
         case FT_TEXT:               sResult=QString("Text");        break;
+        case FT_COM:                sResult=QString("COM");         break;
         case FT_MSDOS:              sResult=QString("MSDOS");       break;
+        case FT_NE:                 sResult=QString("NE");          break;
+        case FT_LE:                 sResult=QString("LE");          break;
+        case FT_LX:                 sResult=QString("LX");          break;
         case FT_PE:                 sResult=QString("PE");          break;
         case FT_PE32:               sResult=QString("PE32");        break;
         case FT_PE64:               sResult=QString("PE64");        break;
@@ -1992,10 +1996,10 @@ QSet<XBinary::FT> XBinary::getFileTypes()
         }
     }
 
-    if(isPlainTextType())
-    {
-        stResult.insert(FT_TEXT);
-    }
+//    if(isPlainTextType())
+//    {
+//        stResult.insert(FT_TEXT);
+//    }
 
     return stResult;
 }

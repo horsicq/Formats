@@ -110,6 +110,7 @@ public:
         FT_UNKNOWN=0,
         FT_BINARY,
         FT_TEXT,
+        FT_COM,
         FT_MSDOS,
         FT_NE,
         FT_LE,

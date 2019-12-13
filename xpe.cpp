@@ -1371,6 +1371,126 @@ void XPE::setSection_Characteristics(quint32 nNumber, quint32 value)
     }
 }
 
+QString XPE::getSection_NameAsString(quint32 nNumber, QList<QString> *pListSectionNames)
+{
+    QString sResult;
+
+    if(nNumber<(quint32)pListSectionNames->count())
+    {
+        sResult=pListSectionNames->at(nNumber);
+    }
+
+    return sResult;
+}
+
+quint32 XPE::getSection_VirtualSize(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+{
+    quint32 nResult=0;
+
+    if(nNumber<(quint32)pListSectionHeaders->count())
+    {
+        nResult=pListSectionHeaders->at(nNumber).Misc.VirtualSize;
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getSection_VirtualAddress(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+{
+    quint32 nResult=0;
+
+    if(nNumber<(quint32)pListSectionHeaders->count())
+    {
+        nResult=pListSectionHeaders->at(nNumber).VirtualAddress;
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getSection_SizeOfRawData(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+{
+    quint32 nResult=0;
+
+    if(nNumber<(quint32)pListSectionHeaders->count())
+    {
+        nResult=pListSectionHeaders->at(nNumber).SizeOfRawData;
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getSection_PointerToRawData(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+{
+    quint32 nResult=0;
+
+    if(nNumber<(quint32)pListSectionHeaders->count())
+    {
+        nResult=pListSectionHeaders->at(nNumber).PointerToRawData;
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getSection_PointerToRelocations(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+{
+    quint32 nResult=0;
+
+    if(nNumber<(quint32)pListSectionHeaders->count())
+    {
+        nResult=pListSectionHeaders->at(nNumber).PointerToRelocations;
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getSection_PointerToLinenumbers(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+{
+    quint32 nResult=0;
+
+    if(nNumber<(quint32)pListSectionHeaders->count())
+    {
+        nResult=pListSectionHeaders->at(nNumber).PointerToLinenumbers;
+    }
+
+    return nResult;
+}
+
+quint16 XPE::getSection_NumberOfRelocations(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+{
+    quint16 nResult=0;
+
+    if(nNumber<(quint32)pListSectionHeaders->count())
+    {
+        nResult=pListSectionHeaders->at(nNumber).NumberOfRelocations;
+    }
+
+    return nResult;
+}
+
+quint16 XPE::getSection_NumberOfLinenumbers(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+{
+    quint16 nResult=0;
+
+    if(nNumber<(quint32)pListSectionHeaders->count())
+    {
+        nResult=pListSectionHeaders->at(nNumber).NumberOfLinenumbers;
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getSection_Characteristics(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+{
+    quint32 nResult=0;
+
+    if(nNumber<(quint32)pListSectionHeaders->count())
+    {
+        nResult=pListSectionHeaders->at(nNumber).Characteristics;
+    }
+
+    return nResult;
+}
+
 bool XPE::isSectionNamePresent(QString sSectionName)
 {
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSectionHeaders=getSectionHeaders();

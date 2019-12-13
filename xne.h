@@ -56,6 +56,9 @@ public:
     quint16 getImageOS2Header_modtab();
     quint16 getImageOS2Header_imptab();
     quint32 getImageOS2Header_nrestab();
+    quint16 getImageOS2Header_cmovent();
+    quint16 getImageOS2Header_align();
+    quint16 getImageOS2Header_cres();
 
     void setImageOS2Header_magic(quint16 value);
     void setImageOS2Header_ver(quint8 value);
@@ -78,15 +81,9 @@ public:
     void setImageOS2Header_modtab(quint16 value);
     void setImageOS2Header_imptab(quint16 value);
     void setImageOS2Header_nrestab(quint32 value);
-
-//    quint16 ne_;                     // Count of file segments
-//    quint16 ne_;                     // Entries in Module Reference Table
-//    quint16 ne_;                // Size of non-resident name table
-//    quint16 ne_;                   // Offset of Segment Table
-//    quint16 ne_;                  // Offset of Resource Table
-//    quint16 ne_;                   // Offset of resident name table
-//    quint16 ne_;                   // Offset of Module Reference Table
-//    quint16 ne_;                   // Offset of Imported Names Table
+    void setImageOS2Header_cmovent(quint16 value);
+    void setImageOS2Header_align(quint16 value);
+    void setImageOS2Header_cres(quint16 value);
 
     static QMap<quint64, QString> getImageNEMagics();
     static QMap<quint64, QString> getImageNEMagicsS();
