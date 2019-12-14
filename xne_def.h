@@ -53,8 +53,8 @@ struct IMAGE_OS2_HEADER  // OS/2 .EXE header
     quint16 ne_cmovent;                  // Count of movable entries
     quint16 ne_align;                    // Segment alignment shift count
     quint16 ne_cres;                     // Count of resource segments
-//    BYTE   ne_exetyp;                   // Target Operating system
-//    BYTE   ne_flagsothers;              // Other .EXE flags
+    quint8  ne_exetyp;                   // Target Operating system
+    quint8  ne_flagsothers;              // Other .EXE flags
 //    WORD   ne_pretthunks;               // offset to return thunks
 //    WORD   ne_psegrefbytes;             // offset to segment ref. bytes
 //    WORD   ne_swaparea;                 // Minimum code swap area size
