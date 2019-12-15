@@ -95,6 +95,10 @@ XNE_DEF::IMAGE_OS2_HEADER XNE::getImageOS2Header()
         result.ne_cres=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_cres));
         result.ne_exetyp=read_uint8(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_exetyp));
         result.ne_flagsothers=read_uint8(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_flagsothers));
+        result.ne_pretthunks=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_pretthunks));
+        result.ne_psegrefbytes=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_psegrefbytes));
+        result.ne_swaparea=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_swaparea));
+        result.ne_expver=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_expver));
     }
 
     return result;
@@ -464,6 +468,62 @@ quint8 XNE::getImageOS2Header_flagsothers()
     return nResult;
 }
 
+quint16 XNE::getImageOS2Header_pretthunks()
+{
+    quint16 nResult=0;
+
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_pretthunks));
+    }
+
+    return nResult;
+}
+
+quint16 XNE::getImageOS2Header_psegrefbytes()
+{
+    quint16 nResult=0;
+
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_psegrefbytes));
+    }
+
+    return nResult;
+}
+
+quint16 XNE::getImageOS2Header_swaparea()
+{
+    quint16 nResult=0;
+
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_swaparea));
+    }
+
+    return nResult;
+}
+
+quint16 XNE::getImageOS2Header_expver()
+{
+    quint16 nResult=0;
+
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_expver));
+    }
+
+    return nResult;
+}
+
 void XNE::setImageOS2Header_magic(quint16 value)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
@@ -721,6 +781,46 @@ void XNE::setImageOS2Header_flagsothers(quint8 value)
     if(nOffset!=-1)
     {
         write_uint8(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_flagsothers),value);
+    }
+}
+
+void XNE::setImageOS2Header_pretthunks(quint16 value)
+{
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_pretthunks),value);
+    }
+}
+
+void XNE::setImageOS2Header_psegrefbytes(quint16 value)
+{
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_psegrefbytes),value);
+    }
+}
+
+void XNE::setImageOS2Header_swaparea(quint16 value)
+{
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_swaparea),value);
+    }
+}
+
+void XNE::setImageOS2Header_expver(quint16 value)
+{
+    qint64 nOffset=getImageOS2HeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_expver),value);
     }
 }
 

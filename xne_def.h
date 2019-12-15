@@ -55,10 +55,10 @@ struct IMAGE_OS2_HEADER  // OS/2 .EXE header
     quint16 ne_cres;                     // Count of resource segments
     quint8  ne_exetyp;                   // Target Operating system
     quint8  ne_flagsothers;              // Other .EXE flags
-//    WORD   ne_pretthunks;               // offset to return thunks
-//    WORD   ne_psegrefbytes;             // offset to segment ref. bytes
-//    WORD   ne_swaparea;                 // Minimum code swap area size
-//    WORD   ne_expver;                   // Expected Windows version number
+    quint16 ne_pretthunks;               // offset to return thunks
+    quint16 ne_psegrefbytes;             // offset to segment ref. bytes
+    quint16 ne_swaparea;                 // Minimum code swap area size
+    quint16 ne_expver;                   // Expected Windows version number
   };
 }
 
