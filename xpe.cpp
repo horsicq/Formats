@@ -121,91 +121,6 @@ XPE::TYPE XPE::getType()
     return result;
 }
 
-bool XPE::isRichSignaturePresent()
-{
-    bool bResult=false;
-
-    int nOffset=sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
-    int nSize=get_lfanew()-sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
-
-    if((nSize>0)&&(nSize<=0x200))
-    {
-        QByteArray baStub=read_array(nOffset,nSize);
-
-        bResult=baStub.contains("Rich");
-    }
-
-    return bResult;
-}
-
-QList<XPE::RICH_RECORD> XPE::getRichSignatureRecords()
-{
-    QList<RICH_RECORD> listResult;
-
-    qint64 nOffset=find_ansiString(getDosStubOffset(),getDosStubSize(),"Rich");
-
-    if(nOffset!=-1)
-    {
-        quint32 nXORkey=read_uint32(nOffset+4);
-
-        qint64 nCurrentOffset=nOffset-4;
-
-        while(nCurrentOffset>getDosStubOffset()) // TODO optimize
-        {
-            quint32 nTemp=read_uint32(nCurrentOffset)^nXORkey;
-
-            if(nTemp==0x536e6144) // DanS
-            {
-                nCurrentOffset+=16;
-
-                for(; nCurrentOffset<nOffset; nCurrentOffset+=8)
-                {
-                    RICH_RECORD record;
-
-                    quint32 nValue1=read_uint32(nCurrentOffset)^nXORkey;
-                    record.nId=nValue1>>16;
-                    record.nVersion=nValue1&0xFFFF;
-
-                    quint32 nValue2=read_uint32(nCurrentOffset+4)^nXORkey;
-                    record.nCount=nValue2;
-
-                    listResult.append(record);
-                }
-
-                break;
-            }
-
-            nCurrentOffset-=4;
-        }
-    }
-
-    return listResult;
-}
-
-qint64 XPE::getDosStubSize()
-{
-    qint64 nSize=(qint64)get_lfanew()-sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);
-
-    nSize=qMax(nSize,(qint64)0);
-
-    return nSize;
-}
-
-qint64 XPE::getDosStubOffset()
-{
-    return sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);
-}
-
-QByteArray XPE::getDosStub()
-{
-    return read_array(getDosStubOffset(),getDosStubSize());
-}
-
-bool XPE::isDosStubPresent()
-{
-    return getDosStubSize()!=0;
-}
-
 qint64 XPE::getNtHeadersOffset()
 {
     qint64 result=get_lfanew();
@@ -5345,44 +5260,6 @@ qint32 XPE::getNumberOfImportThunks(quint32 nNumber, QList<XPE::IMPORT_HEADER> *
     }
 
     return nResult;
-}
-
-qint32 XPE::getNumberOfRichIDs()
-{
-    QList<RICH_RECORD> listRecords=getRichSignatureRecords();
-
-    return getNumberOfRichIDs(&listRecords);
-}
-
-qint32 XPE::getNumberOfRichIDs(QList<XPE::RICH_RECORD> *pListRich)
-{
-    return pListRich->count();
-}
-
-bool XPE::isRichVersionPresent(quint32 nVersion)
-{
-    QList<RICH_RECORD> listRecords=getRichSignatureRecords();
-
-    return isRichVersionPresent(nVersion,&listRecords);
-}
-
-bool XPE::isRichVersionPresent(quint32 nVersion, QList<XPE::RICH_RECORD> *pListRich)
-{
-    bool bResult=false;
-
-    int nCount=pListRich->count();
-
-    for(int i=0;i<nCount;i++)
-    {
-        if(pListRich->at(i).nVersion==nVersion)
-        {
-            bResult=true;
-
-            break;
-        }
-    }
-
-    return bResult;
 }
 
 XPE::NET_HEADER XPE::getNetHeader()

@@ -174,13 +174,6 @@ public:
         //        bool bSaveIAT;
     };
 
-    struct RICH_RECORD
-    {
-        quint32 nId;
-        quint32 nVersion;
-        quint32 nCount;
-    };
-
     struct RESOURCE_VERSION
     {
         qint64 nFixedFileInfoOffset;
@@ -283,14 +276,6 @@ public:
     virtual ARCH getArch();
 
     TYPE getType();
-
-    bool isRichSignaturePresent();
-    QList<XPE::RICH_RECORD> getRichSignatureRecords();
-
-    qint64 getDosStubSize();
-    qint64 getDosStubOffset();
-    QByteArray getDosStub();
-    bool isDosStubPresent();
 
     qint64 getNtHeadersOffset();
     quint32 getNtHeaders_Signature();
@@ -826,12 +811,6 @@ public:
 
     qint32 getNumberOfImportThunks(quint32 nNumber);
     qint32 getNumberOfImportThunks(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
-
-    qint32 getNumberOfRichIDs();
-    qint32 getNumberOfRichIDs(QList<RICH_RECORD> *pListRich);
-
-    bool isRichVersionPresent(quint32 nVersion);
-    bool isRichVersionPresent(quint32 nVersion,QList<RICH_RECORD> *pListRich);
 
     XPE::NET_HEADER getNetHeader();
 

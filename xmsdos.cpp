@@ -356,3 +356,134 @@ bool XMSDOS::isNE()
 
     return (nNew==0x454E); // TODO const
 }
+
+bool XMSDOS::isPE()
+{
+    quint32 nOffset=get_e_lfanew();
+    quint16 nNew=read_uint16(nOffset);
+
+    return (nNew==0x4550); // TODO const
+}
+
+bool XMSDOS::isRichSignaturePresent()
+{
+    bool bResult=false;
+
+    int nOffset=sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
+    int nSize=get_lfanew()-sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
+
+    if((nSize>0)&&(nSize<=0x200))
+    {
+        QByteArray baStub=read_array(nOffset,nSize);
+
+        bResult=baStub.contains("Rich");
+    }
+
+    return bResult;
+}
+
+QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords()
+{
+    QList<MS_RICH_RECORD> listResult;
+
+    qint64 nOffset=find_ansiString(getDosStubOffset(),getDosStubSize(),"Rich");
+
+    if(nOffset!=-1)
+    {
+        quint32 nXORkey=read_uint32(nOffset+4);
+
+        qint64 nCurrentOffset=nOffset-4;
+
+        while(nCurrentOffset>getDosStubOffset()) // TODO optimize
+        {
+            quint32 nTemp=read_uint32(nCurrentOffset)^nXORkey;
+
+            if(nTemp==0x536e6144) // DanS
+            {
+                nCurrentOffset+=16;
+
+                for(; nCurrentOffset<nOffset; nCurrentOffset+=8)
+                {
+                    MS_RICH_RECORD record={};
+
+                    quint32 nValue1=read_uint32(nCurrentOffset)^nXORkey;
+                    record.nId=nValue1>>16;
+                    record.nVersion=nValue1&0xFFFF;
+
+                    quint32 nValue2=read_uint32(nCurrentOffset+4)^nXORkey;
+                    record.nCount=nValue2;
+
+                    listResult.append(record);
+                }
+
+                break;
+            }
+
+            nCurrentOffset-=4;
+        }
+    }
+
+    return listResult;
+}
+
+qint32 XMSDOS::getNumberOfRichIDs()
+{
+    QList<MS_RICH_RECORD> listRecords=getRichSignatureRecords();
+
+    return getNumberOfRichIDs(&listRecords);
+}
+
+qint32 XMSDOS::getNumberOfRichIDs(QList<XMSDOS::MS_RICH_RECORD> *pListRich)
+{
+    return pListRich->count();
+}
+
+bool XMSDOS::isRichVersionPresent(quint32 nVersion)
+{
+    QList<MS_RICH_RECORD> listRecords=getRichSignatureRecords();
+
+    return isRichVersionPresent(nVersion,&listRecords);
+}
+
+bool XMSDOS::isRichVersionPresent(quint32 nVersion, QList<XMSDOS::MS_RICH_RECORD> *pListRich)
+{
+    bool bResult=false;
+
+    int nCount=pListRich->count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(pListRich->at(i).nVersion==nVersion)
+        {
+            bResult=true;
+
+            break;
+        }
+    }
+
+    return bResult;
+}
+
+qint64 XMSDOS::getDosStubSize()
+{
+    qint64 nSize=(qint64)get_lfanew()-sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);
+
+    nSize=qMax(nSize,(qint64)0);
+
+    return nSize;
+}
+
+qint64 XMSDOS::getDosStubOffset()
+{
+    return sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);
+}
+
+QByteArray XMSDOS::getDosStub()
+{
+    return read_array(getDosStubOffset(),getDosStubSize());
+}
+
+bool XMSDOS::isDosStubPresent()
+{
+    return getDosStubSize()!=0;
+}

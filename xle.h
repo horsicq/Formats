@@ -31,6 +31,16 @@ class XLE : public XMSDOS
 public:
     explicit XLE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
+
+    qint64 getImageVxdHeaderOffset();
+    XLE_DEF::IMAGE_VXD_HEADER getImageVxdHeader();
+
+    quint16 getImageVxdHeader_magic();
+
+    void setImageVxdHeader_magic(quint16 value);
+
+    static QMap<quint64, QString> getImageLEMagics();
+    static QMap<quint64, QString> getImageLEMagicsS();
 };
 
 #endif // XLE_H

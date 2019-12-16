@@ -39,7 +39,7 @@ bool XLE::isValid()
         {
             quint32 signature=read_uint32(lfanew);
 
-            if(signature==XLE_DEF::S_IMAGE_OS2_SIGNATURE_LE)
+            if(signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE)
             {
                 bResult=true;
             }
@@ -47,4 +47,72 @@ bool XLE::isValid()
     }
 
     return bResult;
+}
+
+qint64 XLE::getImageVxdHeaderOffset()
+{
+    qint64 nResult=get_lfanew();
+
+    if(!isOffsetValid(nResult))
+    {
+        nResult=-1;
+    }
+
+    return nResult;
+}
+
+XLE_DEF::IMAGE_VXD_HEADER XLE::getImageVxdHeader()
+{
+    XLE_DEF::IMAGE_VXD_HEADER result={};
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        result.e32_magic=read_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_magic));
+    }
+
+    return result;
+}
+
+quint16 XLE::getImageVxdHeader_magic()
+{
+    quint16 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_magic));
+    }
+
+    return nResult;
+}
+
+void XLE::setImageVxdHeader_magic(quint16 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_magic),value);
+    }
+}
+
+QMap<quint64, QString> XLE::getImageLEMagics()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x454C,"IMAGE_OS2_SIGNATURE_LE");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XLE::getImageLEMagicsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x454C,"OS2_SIGNATURE_LE");
+
+    return mapResult;
 }

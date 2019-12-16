@@ -1945,7 +1945,7 @@ QSet<XBinary::FT> XBinary::getFileTypes()
                 {
                     stResult.insert(FT_NE);
                 }
-                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_OS2_SIGNATURE_LE) // TODO
+                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE) // TODO
                 {
                     stResult.insert(FT_LE);
                 }

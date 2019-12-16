@@ -86,6 +86,28 @@ public:
     bool isLE();
     bool isLX();
     bool isNE();
+    bool isPE();
+
+    struct MS_RICH_RECORD
+    {
+        quint32 nId;
+        quint32 nVersion;
+        quint32 nCount;
+    };
+
+    bool isRichSignaturePresent(); // PE and LE
+    QList<XMSDOS::MS_RICH_RECORD> getRichSignatureRecords();
+
+    qint32 getNumberOfRichIDs();
+    qint32 getNumberOfRichIDs(QList<MS_RICH_RECORD> *pListRich);
+
+    bool isRichVersionPresent(quint32 nVersion);
+    bool isRichVersionPresent(quint32 nVersion,QList<MS_RICH_RECORD> *pListRich);
+
+    qint64 getDosStubSize();
+    qint64 getDosStubOffset();
+    QByteArray getDosStub();
+    bool isDosStubPresent();
 
 //private:
 //    const qint64 N_DATABASEADDRESS=0x10000;
