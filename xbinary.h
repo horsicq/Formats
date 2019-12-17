@@ -260,6 +260,8 @@ public:
     qint64 find_unicodeString(qint64 nOffset,qint64 nSize,QString sString); // mb TODO endian
     qint64 find_signature(qint64 nOffset,qint64 nSize,QString sSignature);
 
+    void stop_findprocess();
+
     bool isSignaturePresent(qint64 nOffset,qint64 nSize,QString sSignature);
 
     static bool createFile(QString sFileName,qint64 nFileSize=0);
@@ -467,6 +469,8 @@ protected:
 signals:
     void errorMessage(QString sMessage);
     void infoMessage(QString sMessage);
+    void findProgressMaximumChanged(qint32 nMaximum);
+    void findProgressValueChanged(qint32 nValue);
 
 private:
     QIODevice *__pDevice;
@@ -474,6 +478,8 @@ private:
     qint64 __nBaseAddress;
     qint64 __nEntryPointOffset;
     qint64 __nImageBase;
+
+    bool __bIsFindStop;
 };
 
 #endif // XBINARY_H

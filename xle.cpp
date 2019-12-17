@@ -70,6 +70,8 @@ XLE_DEF::IMAGE_VXD_HEADER XLE::getImageVxdHeader()
     if(nOffset!=-1)
     {
         result.e32_magic=read_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_magic));
+        result.e32_border=read_uint8(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_border));
+        result.e32_worder=read_uint8(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_worder));
     }
 
     return result;
@@ -89,6 +91,34 @@ quint16 XLE::getImageVxdHeader_magic()
     return nResult;
 }
 
+quint8 XLE::getImageVxdHeader_border()
+{
+    quint8 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint8(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_border));
+    }
+
+    return nResult;
+}
+
+quint8 XLE::getImageVxdHeader_worder()
+{
+    quint8 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint8(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_worder));
+    }
+
+    return nResult;
+}
+
 void XLE::setImageVxdHeader_magic(quint16 value)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
@@ -96,6 +126,26 @@ void XLE::setImageVxdHeader_magic(quint16 value)
     if(nOffset!=-1)
     {
         write_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_magic),value);
+    }
+}
+
+void XLE::setImageVxdHeader_border(quint8 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint8(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_border),value);
+    }
+}
+
+void XLE::setImageVxdHeader_worder(quint8 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint8(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_worder),value);
     }
 }
 

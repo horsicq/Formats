@@ -29,9 +29,9 @@ const quint32 S_IMAGE_VXD_SIGNATURE         =0x454C;      // LE
 
 struct IMAGE_VXD_HEADER
 {      // Windows VXD header
-    quint32 e32_magic;                   // Magic number
-//    BYTE   e32_border;                  // The byte ordering for the VXD
-//    BYTE   e32_worder;                  // The word ordering for the VXD
+    quint16 e32_magic;                   // Magic number
+    quint8 e32_border;                  // The byte ordering for the VXD
+    quint8 e32_worder;                  // The word ordering for the VXD
 //    DWORD  e32_level;                   // The EXE format level for now = 0
 //    WORD   e32_cpu;                     // The CPU type
 //    WORD   e32_os;                      // The OS type

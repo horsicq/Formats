@@ -36,8 +36,12 @@ public:
     XLE_DEF::IMAGE_VXD_HEADER getImageVxdHeader();
 
     quint16 getImageVxdHeader_magic();
+    quint8 getImageVxdHeader_border();
+    quint8 getImageVxdHeader_worder();
 
     void setImageVxdHeader_magic(quint16 value);
+    void setImageVxdHeader_border(quint8 value);
+    void setImageVxdHeader_worder(quint8 value);
 
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();

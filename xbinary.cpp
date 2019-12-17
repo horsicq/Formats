@@ -27,6 +27,7 @@ XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
     setBaseAddress(0);
     setImageBase(nImageBase);
     setEntryPointOffset(0);
+    __bIsFindStop=false;
 }
 
 void XBinary::setData(QIODevice *__pDevice)
@@ -864,6 +865,10 @@ void XBinary::_write_int64(char *pData, qint64 value, bool bIsBigEndian)
 
 qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint64 nArraySize)
 {
+    __bIsFindStop=false;
+    emit findProgressMaximumChanged(100);
+    emit findProgressValueChanged(0);
+
     qint64 _nSize=getSize();
 
     if(nSize==-1)
@@ -890,7 +895,10 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
     const int BUFFER_SIZE=0x1000;
     char *pBuffer=new char[BUFFER_SIZE+(nArraySize-1)];
 
-    while(nSize>nArraySize-1)
+    qint64 nTotalSize=nSize;
+    qint32 nCurrentProgress=0;
+
+    while((nSize>nArraySize-1)&&(!__bIsFindStop))
     {
         nTemp=qMin((qint64)(BUFFER_SIZE+(nArraySize-1)),nSize);
 
@@ -911,6 +919,12 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
 
         nSize-=nTemp-(nArraySize-1);
         nOffset+=nTemp-(nArraySize-1);
+
+        if((((nTotalSize-nSize)*100)/nTotalSize)>nCurrentProgress)
+        {
+            nCurrentProgress++;
+            emit findProgressValueChanged(nCurrentProgress);
+        }
     }
 
     delete[] pBuffer;
@@ -1053,6 +1067,11 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
 
     if(sSignature.contains(".")||sSignature.contains("$")||sSignature.contains("#"))
     {
+        __bIsFindStop=false;
+        emit findProgressMaximumChanged(100);
+        emit findProgressValueChanged(0);
+         qint64 nCurrentProgress=0;
+
         sSignature=convertSignature(sSignature);
 
         QList<SIGNATURE_RECORD> records=getSignatureRecords(sSignature);
@@ -1064,7 +1083,7 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
             char *pData=baFirst.data();
             qint32 nDataSize=baFirst.size();
 
-            for(qint64 i=0; i<nSize;)
+            for(qint64 i=0;(i<nSize)&&(!__bIsFindStop);)
             {
                 qint64 nTempOffset=find_array(nOffset+i,nSize-1,pData,nDataSize);
 
@@ -1083,16 +1102,28 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
                 }
 
                 i=nTempOffset+nDataSize-nOffset;
+
+                if((i*100)/nSize>nCurrentProgress)
+                {
+                    nCurrentProgress++;
+                    emit findProgressValueChanged(nCurrentProgress);
+                }
             }
         }
         else
         {
-            for(qint64 i=0; i<nSize; i++)
+            for(qint64 i=0;(i<nSize)&&(!__bIsFindStop); i++)
             {
                 if(_compareSignature(&records,nOffset+i))
                 {
                     nResult=nOffset+i;
                     break;
+                }
+
+                if((i*100)/nSize>nCurrentProgress)
+                {
+                    nCurrentProgress++;
+                    emit findProgressValueChanged(nCurrentProgress);
                 }
             }
         }
@@ -1104,6 +1135,11 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
     }
 
     return nResult;
+}
+
+void XBinary::stop_findprocess()
+{
+    __bIsFindStop=true;
 }
 
 bool XBinary::isSignaturePresent(qint64 nOffset, qint64 nSize, QString sSignature)
