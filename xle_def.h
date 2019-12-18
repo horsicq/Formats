@@ -26,6 +26,7 @@
 namespace XLE_DEF
 {
 const quint32 S_IMAGE_VXD_SIGNATURE         =0x454C;      // LE
+const quint32 S_LX_SIGNATURE                =0x584C;      // LX
 
 struct IMAGE_VXD_HEADER
 {      // Windows VXD header

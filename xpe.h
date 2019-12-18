@@ -457,7 +457,7 @@ public:
     void setImportDescriptor(quint32 nNumber,XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *pImportDescriptor);
 
     QList<IMPORT_HEADER> getImports();
-    QList<IMPORT_HEADER> getImports(QList<MEMORY_MAP> *pMemoryMap);
+    QList<IMPORT_HEADER> getImports(_MEMORY_MAP *pMemoryMap);
 
     QList<IMPORT_POSITION> getImportPositions(int nIndex);
 
@@ -477,7 +477,7 @@ public:
 
     RESOURCE_HEADER getResourceHeader();
     QList<RESOURCE_RECORD> getResources();
-    QList<RESOURCE_RECORD> getResources(QList<MEMORY_MAP> *pMemoryMap);
+    QList<RESOURCE_RECORD> getResources(_MEMORY_MAP *pMemoryMap);
 
     static RESOURCE_RECORD getResourceRecord(quint32 nID1,quint32 nID2,QList<RESOURCE_RECORD> *pListRecords);
     static RESOURCE_RECORD getResourceRecord(quint32 nID1,QString sName2,QList<RESOURCE_RECORD> *pListRecords);
@@ -539,7 +539,7 @@ public:
     bool isResourceNamePresent(QString sName);
     bool isResourceNamePresent(QString sName,QList<XPE::RESOURCE_RECORD> *pList);
 
-    virtual QList<MEMORY_MAP> getMemoryMapList();
+    virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nBaseAddress);
     virtual qint64 getEntryPointOffset();
@@ -680,7 +680,7 @@ public:
 
     bool isNETPresent();
     CLI_INFO getCliInfo(bool bFindHidden);
-    CLI_INFO getCliInfo(bool bFindHidden,QList<XBinary::MEMORY_MAP> *pMemoryMap);
+    CLI_INFO getCliInfo(bool bFindHidden,XBinary::_MEMORY_MAP *pMemoryMap);
 
     bool isNETAnsiStringPresent(QString sString);
     static bool isNETAnsiStringPresent(QString sString,CLI_INFO *pCliInfo);
@@ -689,23 +689,23 @@ public:
     static bool isNETUnicodeStringPresent(QString sString,CLI_INFO *pCliInfo);
 
     int getEntryPointSection();
-    int getEntryPointSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
+    int getEntryPointSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getImportSection();
-    int getImportSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
+    int getImportSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getExportSection();
-    int getExportSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
+    int getExportSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getTLSSection();
-    int getTLSSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
+    int getTLSSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getResourcesSection();
-    int getResourcesSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
+    int getResourcesSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getRelocsSection();
-    int getRelocsSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
+    int getRelocsSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getNormalCodeSection();
-    int getNormalCodeSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
+    int getNormalCodeSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getNormalDataSection();
-    int getNormalDataSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
+    int getNormalDataSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getConstDataSection();
-    int getConstDataSection(QList<XBinary::MEMORY_MAP> *pMemoryMap);
+    int getConstDataSection(XBinary::_MEMORY_MAP *pMemoryMap);
 
     struct REBUILD_OPTIONS
     {
@@ -829,7 +829,7 @@ public:
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
 
-    RESOURCE_POSITION _getResourcePosition(QList<MEMORY_MAP> *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);
+    RESOURCE_POSITION _getResourcePosition(_MEMORY_MAP *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);
     qint64 _fixHeadersSize();
     qint64 _getMinSectionOffset(); // TODO move to XBinary
     void _fixFileOffsets(qint64 nDelta);

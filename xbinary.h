@@ -50,7 +50,6 @@
 #include "xmsdos_def.h"
 #include "xne_def.h"
 #include "xle_def.h"
-#include "xlx_def.h"
 #include "xpe_def.h"
 #include "xelf_def.h"
 #include "xmach_def.h"
@@ -83,7 +82,7 @@ public:
         ADDRESS_SEGMENT_UNKNOWN=-1,
         ADDRESS_SEGMENT_FLAT=0,
         ADDRESS_SEGMENT_CODE,
-        ADDRESS_SEGMENT_DATA
+//        ADDRESS_SEGMENT_DATA
     };
 
     enum MMT
@@ -94,7 +93,7 @@ public:
         MMT_OVERLAY
     };
 
-    struct MEMORY_MAP
+    struct _MEMORY_RECORD
     {
         qint64 nOffset;
         qint64 nAddress;
@@ -138,6 +137,15 @@ public:
     {
         ARCH_UNKNOWN=0,
         ARCH_X86
+    };
+
+    struct _MEMORY_MAP
+    {
+        qint64 nBaseAddress;
+        // TODO Image Size
+        FT fileType;
+        MODE mode;
+        QList<_MEMORY_RECORD> listRecords;
     };
 
     struct UNPACK_OPTIONS
@@ -258,11 +266,12 @@ public:
     qint64 find_int64(qint64 nOffset,qint64 nSize,qint64 value,bool bIsBigEndian=false);
     qint64 find_ansiString(qint64 nOffset,qint64 nSize,QString sString);
     qint64 find_unicodeString(qint64 nOffset,qint64 nSize,QString sString); // mb TODO endian
-    qint64 find_signature(qint64 nOffset,qint64 nSize,QString sSignature);
+    qint64 find_signature(qint64 nOffset, qint64 nSize, QString sSignature);
+    qint64 find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nSize, QString sSignature);
 
     void stop_findprocess();
 
-    bool isSignaturePresent(qint64 nOffset,qint64 nSize,QString sSignature);
+    bool isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature);
 
     static bool createFile(QString sFileName,qint64 nFileSize=0);
     static bool isFileExists(QString sFileName);
@@ -284,33 +293,33 @@ public:
     static bool compareMemory(char *pMemory1,const char *pMemory2,qint64 nSize);
 
     bool isOffsetValid(qint64 nOffset);
-    bool isAddressValid(qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
+    bool isAddressValid(qint64 nAddress);
 
-    qint64 offsetToAddress(qint64 nOffset,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
-    qint64 addressToOffset(qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
+    qint64 offsetToAddress(qint64 nOffset);
+    qint64 addressToOffset(qint64 nAddress);
 
-    static bool isOffsetValid(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
-    static bool isAddressValid(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
+    static bool isOffsetValid(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
+    static bool isAddressValid(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
 
-    static qint64 offsetToAddress(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
-    static qint64 addressToOffset(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
+    static qint64 offsetToAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
+    static qint64 addressToOffset(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
 
-    static MEMORY_MAP getOffsetMemoryMap(QList<MEMORY_MAP> *pMemoryMap,qint64 nOffset);
-    static MEMORY_MAP getAddressMemoryMap(QList<MEMORY_MAP> *pMemoryMap,qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
+    static _MEMORY_RECORD getOffsetMemoryRecord(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
+    static _MEMORY_RECORD getAddressMemoryRecord(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
 
-    static qint32 addressToLoadSection(QList<XBinary::MEMORY_MAP> *pMemoryMap,qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
+    static qint32 addressToLoadSection(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
 
-    virtual QList<MEMORY_MAP> getMemoryMapList();
+    virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nBaseAddress);
     virtual qint64 getEntryPointOffset();
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     qint64 getEntryPointAddress();
-    qint64 getEntryPointAddress(QList<MEMORY_MAP> *pMemoryMap);
+    qint64 getEntryPointAddress(_MEMORY_MAP *pMemoryMap);
 
-    static qint64 getLowestAddress(QList<MEMORY_MAP> *pMemoryMap);
-    static qint64 getTotalVirtualSize(QList<MEMORY_MAP> *pMemoryMap);
-    static qint64 positionToVirtualAddress(QList<MEMORY_MAP> *pMemoryMap,qint64 nPosition);
+    static qint64 getLowestAddress(_MEMORY_MAP *pMemoryMap);
+    static qint64 getTotalVirtualSize(_MEMORY_MAP *pMemoryMap);
+    static qint64 positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPosition);
 
     qint64 getImageAddress();
     void setImageBase(qint64 nValue);
@@ -322,11 +331,16 @@ public:
 
     static qint64 getPhysSize(char *pBuffer,qint64 nSize); // TODO
     static bool isEmptyData(char *pBuffer,qint64 nSize);
-    bool compareSignature(QString sSignature,qint64 nOffset=0);
+    bool compareSignature(_MEMORY_MAP *pMemoryMap,QString sSignature,qint64 nOffset=0);
     static bool _compareByteArrayWithSignature(QByteArray baData,QString sSignature);
     static QString _createSignature(QString sSignature1,QString sSignature2);
-    bool compareSignatureOnAddress(QString sSignature,qint64 nAddress,ADDRESS_SEGMENT segment=ADDRESS_SEGMENT_FLAT);
+
+    bool compareSignatureOnAddress(QString sSignature,qint64 nAddress);
+    bool compareSignatureOnAddress(_MEMORY_MAP *pMemoryMap,QString sSignature,qint64 nAddress);
+
     bool compareEntryPoint(QString sSignature,qint64 nOffset=0);
+    bool compareEntryPoint(_MEMORY_MAP *pMemoryMap,QString sSignature,qint64 nOffset=0);
+
     bool moveMemory(qint64 nSourceOffset,qint64 nDestOffset,qint64 nSize);
 
     static bool dumpToFile(QString sFileName,const char *pData,qint64 nDataSize);
@@ -438,11 +452,13 @@ public:
     bool isOverlayPresent();
 
     bool compareOverlay(QString sSignature, qint64 nOffset);
+    bool compareOverlay(_MEMORY_MAP *pMemoryMap,QString sSignature, qint64 nOffset);
+
     bool addOverlay(char *pData,qint64 nDataSize);
     bool removeOverlay();
 
     bool isSignatureInLoadSectionPresent(qint32 nLoadSection,QString sSignature);
-    bool isSignatureInLoadSectionPresent(QList<MEMORY_MAP> *pMemoryMap,qint32 nLoadSection,QString sSignature);
+    bool isSignatureInLoadSectionPresent(_MEMORY_MAP *pMemoryMap,qint32 nLoadSection,QString sSignature);
 
     static QString getStringCollision(QList<QString> *pListStrings,QString sString1,QString sString2);
 
@@ -453,7 +469,7 @@ private:
     static QString qcharToHex(QChar c);
 
     QList<SIGNATURE_RECORD> getSignatureRecords(QString sSignature);
-    bool _compareSignature(QList<SIGNATURE_RECORD> *pListSignatures,qint64 nOffset);
+    bool _compareSignature(_MEMORY_MAP *pMemoryMap,QList<SIGNATURE_RECORD> *pListSignatures,qint64 nOffset);
 
     int _getSignatureRelOffsetFix(QList<SIGNATURE_RECORD> *pListSignatures,QString sSignature,int nStartIndex);
     int _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatures,QString sSignature,int nStartIndex);

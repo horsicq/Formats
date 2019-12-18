@@ -2909,7 +2909,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs()
 {
     QList<TAG_STRUCT> listResult;
 
-    QList<MEMORY_MAP> listMM=getMemoryMapList();
+    _MEMORY_MAP memoryMap=getMemoryMap();
     bool bIs64=is64();
     bool bIsBigEndian=isBigEndian();
 
@@ -2923,7 +2923,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs()
             qint64 nOffset=listPrograms.at(i).p_offset; //  Check image
             qint64 nSize=listPrograms.at(i).p_filesz;
 
-            if(isOffsetValid(&listMM,nOffset))
+            if(isOffsetValid(&memoryMap,nOffset))
             {
                 while(nSize>0)
                 {
@@ -2987,11 +2987,11 @@ QList<QString> XELF::getLibraries(QList<XELF::TAG_STRUCT> *pList)
     QList<XELF::TAG_STRUCT> listStrTab=XELF::getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
     QList<XELF::TAG_STRUCT> listStrSize=XELF::getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
 
-    QList<MEMORY_MAP> listMM=getMemoryMapList();
+    _MEMORY_MAP memoryMap=getMemoryMap();
 
     if(listStrTab.count()&&listStrSize.count())
     {
-        qint64 nOffset=addressToOffset(&listMM,listStrTab.at(0).nValue);
+        qint64 nOffset=addressToOffset(&memoryMap,listStrTab.at(0).nValue);
 
         QByteArray baSection=read_array(nOffset,listStrSize.at(0).nValue);
 
@@ -3167,9 +3167,20 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     return mapResult;
 }
 
-QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
+ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 {
-    QList<XBinary::MEMORY_MAP> listResult;
+    XBinary::_MEMORY_MAP result={};
+
+    if(is64())
+    {
+        result.fileType=FT_ELF64;
+        result.mode=MODE_64;
+    }
+    else
+    {
+        result.fileType=FT_ELF32;
+        result.mode=MODE_32;
+    }
 
     QList<XELF_DEF::Elf_Phdr> listPhdr=getElf_PhdrList();
 
@@ -3181,7 +3192,7 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
     {
         if(listPhdr.at(i).p_type==1) // TODO const
         {
-            XBinary::MEMORY_MAP record={};
+            XBinary::_MEMORY_RECORD record={};
 
             record.type=MMT_LOADSECTION;
             // TODO Section number!
@@ -3189,7 +3200,7 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
             record.nSize=listPhdr.at(i).p_filesz;
             record.nOffset=listPhdr.at(i).p_offset;
 
-            listResult.append(record);
+            result.listRecords.append(record);
         }
 
 //        // TODO
@@ -3201,7 +3212,7 @@ QList<XBinary::MEMORY_MAP> XELF::getMemoryMapList()
 
     // TODO Overlays
 
-    return  listResult;
+    return  result;
 }
 
 qint64 XELF::getEntryPointOffset()

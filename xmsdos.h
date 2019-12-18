@@ -77,7 +77,7 @@ public:
     // TODO more
     quint32 get_e_lfanew();
 
-    virtual QList<MEMORY_MAP> getMemoryMapList();
+    virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getEntryPointOffset();
 
     static QMap<quint64, QString> getImageMagics();

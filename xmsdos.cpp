@@ -253,48 +253,72 @@ quint32 XMSDOS::get_e_lfanew()
     return read_uint32(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_lfanew));
 }
 
-QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()
+XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 {
-    QList<MEMORY_MAP> listResult;
+    _MEMORY_MAP result={};
+    result.fileType=FT_MSDOS;
+    result.mode=MODE_16;
 
     qint64 nMaxOffset=(get_e_cp()-1)*512+get_e_cblp();
 
     qint64 nHeaderOffset=0;
-    qint64 nHeaderSize=get_e_cparhdr()*16;
+    qint64 nHeaderSize=(quint16)(get_e_cparhdr()*16);
     //    qint64 nDataOffset=nHeaderOffset+nHeaderSize;
     //    qint64 nDataSize=get_e_cs()*16;
-    qint64 nCodeOffset=nHeaderSize+get_e_cs()*16;
+    qint64 nCodeOffset=(qint16)((qint16)(get_e_cparhdr()*16)+(qint16)(get_e_cs()*16));
+    qint64 nCodeAddress=0;
+
     qint64 nCodeSize=nMaxOffset-nCodeOffset;
     qint64 nOverlayOffset=nMaxOffset;
     qint64 nOverlaySize=qMax(getSize()-nMaxOffset,(qint64)0);
 
 //    qint64 nBaseAddress=_getBaseAddress();
 
-    MEMORY_MAP recordHeader={};
+    _MEMORY_RECORD recordHeader={};
     recordHeader.nSize=nHeaderSize;
     recordHeader.nOffset=nHeaderOffset;
     recordHeader.nAddress=-1;
     recordHeader.segment=ADDRESS_SEGMENT_UNKNOWN;
     recordHeader.type=MMT_HEADER;
 
-    listResult.append(recordHeader);
+    result.listRecords.append(recordHeader);
 
-    //    MEMORY_MAP recordData={};
-    MEMORY_MAP recordCode={};
+    if(nCodeOffset<nHeaderSize)
+    {
+        qint64 nDelta=nCodeOffset-nHeaderSize;
+
+        _MEMORY_RECORD recordVirtualCode={};
+
+        recordVirtualCode.nSize=qAbs(nDelta);
+        recordVirtualCode.nOffset=-1;
+        recordVirtualCode.nAddress=nCodeAddress;
+
+        recordVirtualCode.segment=ADDRESS_SEGMENT_CODE; // CODE
+        recordVirtualCode.type=MMT_LOADSECTION;
+
+        result.listRecords.append(recordVirtualCode);
+
+        nCodeSize-=qAbs(nDelta);
+        nCodeOffset=nHeaderSize;
+        nCodeAddress+=qAbs(nDelta);
+    }
+
+    _MEMORY_RECORD recordCode={};
 
     recordCode.nSize=nCodeSize;
     recordCode.nOffset=nCodeOffset;
-    recordCode.nAddress=0;
+    recordCode.nAddress=nCodeAddress;
 
-    recordCode.segment=ADDRESS_SEGMENT_CODE;
+    recordCode.segment=ADDRESS_SEGMENT_CODE; // CODE
     recordCode.type=MMT_LOADSECTION;
 
-    listResult.append(recordCode);
+    result.listRecords.append(recordCode);
+
     // TODO
 
     if(nOverlaySize)
     {
-        MEMORY_MAP recordOverlay={};
+        _MEMORY_RECORD recordOverlay={};
         recordOverlay.nSize=nOverlayOffset;
         recordOverlay.nOffset=nOverlaySize;
         recordOverlay.nAddress=-1;
@@ -302,15 +326,15 @@ QList<XBinary::MEMORY_MAP> XMSDOS::getMemoryMapList()
         recordOverlay.segment=ADDRESS_SEGMENT_UNKNOWN;
         recordOverlay.type=MMT_OVERLAY;
 
-        listResult.append(recordOverlay);
+        result.listRecords.append(recordOverlay);
     }
 
-    return listResult;
+    return result;
 }
 
 qint64 XMSDOS::getEntryPointOffset()
 {
-    return addressToOffset(get_e_ip(),ADDRESS_SEGMENT_CODE);
+    return addressToOffset(get_e_ip());
 }
 
 QMap<quint64, QString> XMSDOS::getImageMagics()

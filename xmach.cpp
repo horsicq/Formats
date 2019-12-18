@@ -691,9 +691,20 @@ qint64 XMACH::getAddressOfEntryPoint()
     return nResult;
 }
 
-QList<XBinary::MEMORY_MAP> XMACH::getMemoryMapList()
+XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 {
-    QList<MEMORY_MAP> listResult;
+    _MEMORY_MAP result={};
+
+    if(is64())
+    {
+        result.fileType=FT_MACH64;
+        result.mode=MODE_64;
+    }
+    else
+    {
+        result.fileType=FT_MACH32;
+        result.mode=MODE_32;
+    }
 
     // TODO
     QList<COMMAND_RECORD> listLC=getCommandRecords();
@@ -704,7 +715,7 @@ QList<XBinary::MEMORY_MAP> XMACH::getMemoryMapList()
 
     for(int i=0; i<nCount; i++)
     {
-        XBinary::MEMORY_MAP record={};
+        XBinary::_MEMORY_RECORD record={};
 
         record.type=MMT_LOADSECTION;
         // TODO number
@@ -712,7 +723,7 @@ QList<XBinary::MEMORY_MAP> XMACH::getMemoryMapList()
         record.nSize=listSegmentRecords.at(i).filesize;
         record.nOffset=listSegmentRecords.at(i).fileoff;
 
-        listResult.append(record);
+        result.listRecords.append(record);
 
 //        // TODO
 //        if(!isImage())
@@ -721,7 +732,7 @@ QList<XBinary::MEMORY_MAP> XMACH::getMemoryMapList()
 //        }
     }
 
-    return listResult;
+    return result;
 }
 
 qint64 XMACH::getEntryPointOffset()
