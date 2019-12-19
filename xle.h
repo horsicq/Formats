@@ -38,10 +38,12 @@ public:
     quint16 getImageVxdHeader_magic();
     quint8 getImageVxdHeader_border();
     quint8 getImageVxdHeader_worder();
+    quint32 getImageVxdHeader_level();
 
     void setImageVxdHeader_magic(quint16 value);
     void setImageVxdHeader_border(quint8 value);
     void setImageVxdHeader_worder(quint8 value);
+    void setImageVxdHeader_level(quint32 value);
 
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();

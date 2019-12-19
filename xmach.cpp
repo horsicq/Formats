@@ -735,7 +735,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
     return result;
 }
 
-qint64 XMACH::getEntryPointOffset()
+qint64 XMACH::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 {
     qint64 nResult=-1;
 
@@ -743,7 +743,7 @@ qint64 XMACH::getEntryPointOffset()
 
     if(nAddress!=-1)
     {
-        nResult=addressToOffset(nAddress);
+        nResult=addressToOffset(pMemoryMap,nAddress);
     }
 
     return nResult;

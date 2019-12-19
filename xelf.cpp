@@ -3215,7 +3215,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     return  result;
 }
 
-qint64 XELF::getEntryPointOffset()
+qint64 XELF::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 {
     qint64 nAddress=-1;
 
@@ -3230,7 +3230,7 @@ qint64 XELF::getEntryPointOffset()
         nAddress=getHdr32_entry();
     }
 
-    return addressToOffset(nAddress);
+    return addressToOffset(pMemoryMap,nAddress);
 }
 
 QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pList, bool bIsImage, QByteArray *pbaSectionTable)

@@ -126,7 +126,7 @@ public:
     qint64 getAddressOfEntryPoint();
 
     virtual _MEMORY_MAP getMemoryMap();
-    virtual qint64 getEntryPointOffset();
+    virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
     QList<LIBRARY_RECORD> getLibraryRecords();
     QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pList);

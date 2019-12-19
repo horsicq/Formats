@@ -1687,9 +1687,9 @@ void XPE::setBaseAddress(qint64 nBaseAddress)
     setOptionalHeader_ImageBase(nBaseAddress);
 }
 
-qint64 XPE::getEntryPointOffset()
+qint64 XPE::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 {
-    return addressToOffset(_getBaseAddress()+getOptionalHeader_AddressOfEntryPoint());
+    return addressToOffset(pMemoryMap,pMemoryMap->nBaseAddress+getOptionalHeader_AddressOfEntryPoint());
 }
 
 void XPE::setEntryPointOffset(qint64 nEntryPointOffset)

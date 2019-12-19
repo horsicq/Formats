@@ -1745,6 +1745,15 @@ bool XBinary::compareSignatureOnAddress(XBinary::_MEMORY_MAP *pMemoryMap, QStrin
 
 qint64 XBinary::getEntryPointOffset()
 {
+    XBinary::_MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getEntryPointOffset(&memoryMap);
+}
+
+qint64 XBinary::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
+{
+    Q_UNUSED(pMemoryMap);
+
     return this->__nEntryPointOffset;
 }
 
@@ -1762,7 +1771,7 @@ qint64 XBinary::getEntryPointAddress()
 
 qint64 XBinary::getEntryPointAddress(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    return offsetToAddress(pMemoryMap,getEntryPointOffset());
+    return offsetToAddress(pMemoryMap,getEntryPointOffset(pMemoryMap));
 }
 
 qint64 XBinary::getLowestAddress(XBinary::_MEMORY_MAP *pMemoryMap)
@@ -2808,17 +2817,22 @@ void XBinary::_infoMessage(QString sMessage)
 
 qint64 XBinary::_calculateRawSize()
 {
-    qint64 nResult=0;
-
     _MEMORY_MAP memoryMap=getMemoryMap();
 
-    int nCount=memoryMap.listRecords.count();
+    return _calculateRawSize(&memoryMap);
+}
+
+qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    qint64 nResult=0;
+
+    int nCount=pMemoryMap->listRecords.count();
 
     for(int i=0; i<nCount; i++)
     {
-        if((memoryMap.listRecords.at(i).nOffset!=-1)&&(memoryMap.listRecords.at(i).type!=MMT_OVERLAY))
+        if((pMemoryMap->listRecords.at(i).nOffset!=-1)&&(pMemoryMap->listRecords.at(i).type!=MMT_OVERLAY))
         {
-            nResult=qMax(nResult,(qint64)(memoryMap.listRecords.at(i).nOffset+memoryMap.listRecords.at(i).nSize));
+            nResult=qMax(nResult,(qint64)(pMemoryMap->listRecords.at(i).nOffset+pMemoryMap->listRecords.at(i).nSize));
         }
     }
 

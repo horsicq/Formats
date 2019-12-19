@@ -312,7 +312,8 @@ public:
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nBaseAddress);
-    virtual qint64 getEntryPointOffset();
+    qint64 getEntryPointOffset();
+    virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     qint64 getEntryPointAddress();
     qint64 getEntryPointAddress(_MEMORY_MAP *pMemoryMap);
@@ -480,7 +481,9 @@ protected:
     bool _isOffsetValid(qint64 nOffset);
     void _errorMessage(QString sMessage);
     void _infoMessage(QString sMessage);
+
     qint64 _calculateRawSize();
+    qint64 _calculateRawSize(_MEMORY_MAP *pMemoryMap);
 
 signals:
     void errorMessage(QString sMessage);

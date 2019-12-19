@@ -306,7 +306,7 @@ public:
     static QMap<quint64,QString> getDynamicTagsS();
 
     virtual _MEMORY_MAP getMemoryMap();
-    virtual qint64 getEntryPointOffset();
+    virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
     static QList<SECTION_RECORD> getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pList,bool bIsImage,QByteArray *pbaSectionTable);
     bool isSectionNamePresent(QString sSectionName);
