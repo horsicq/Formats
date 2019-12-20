@@ -874,15 +874,20 @@ void XPE::setDirectories(QList<XPE_DEF::IMAGE_DATA_DIRECTORY> *pListDirectories)
 
 qint64 XPE::getDataDirectoryOffset(quint32 nNumber)
 {
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getDataDirectoryOffset(&memoryMap,nNumber);
+}
+
+qint64 XPE::getDataDirectoryOffset(XBinary::_MEMORY_MAP *pMemoryMap, quint32 nNumber)
+{
     qint64 nResult=-1;
 
     XPE_DEF::IMAGE_DATA_DIRECTORY dataResources=getOptionalHeader_DataDirectory(nNumber);
 
     if(dataResources.VirtualAddress)
     {
-        _MEMORY_MAP memoryMap=getMemoryMap();
-
-        nResult=addressToOffset(&memoryMap,dataResources.VirtualAddress+memoryMap.nBaseAddress);
+        nResult=addressToOffset(pMemoryMap,dataResources.VirtualAddress+pMemoryMap->nBaseAddress);
     }
 
     return nResult;
@@ -2737,7 +2742,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
     // TODO BE LE
     QList<RESOURCE_RECORD> listResources;
 
-    qint64 nResourceOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
+    qint64 nResourceOffset=getDataDirectoryOffset(pMemoryMap,XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 
     if(nResourceOffset!=-1)
     {

@@ -1868,7 +1868,7 @@ bool XBinary::compareEntryPoint(QString sSignature, qint64 nOffset)
 
 bool XBinary::compareEntryPoint(XBinary::_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset)
 {
-    qint64 nEPOffset=getEntryPointOffset()+nOffset;
+    qint64 nEPOffset=getEntryPointOffset(pMemoryMap)+nOffset;
 
     return compareSignature(pMemoryMap,sSignature,nEPOffset);
 }
@@ -2036,7 +2036,7 @@ QSet<XBinary::FT> XBinary::getFileTypes()
                 {
                     stResult.insert(FT_LE);
                 }
-                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_LX_SIGNATURE) // TODO
+                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_LX_SIGNATURE) // TODO
                 {
                     stResult.insert(FT_LX);
                 }
@@ -3303,8 +3303,15 @@ QList<QString> XBinary::getListFromFile(QString sFileName)
 
 qint64 XBinary::getOverlaySize()
 {
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getOverlaySize(&memoryMap);
+}
+
+qint64 XBinary::getOverlaySize(XBinary::_MEMORY_MAP *pMemoryMap)
+{
     qint64 nSize=getSize();
-    qint64 nOverlayOffset=getOverlayOffset();
+    qint64 nOverlayOffset=getOverlayOffset(pMemoryMap);
     qint64 nDelta=0;
 
     if(nOverlayOffset>0)
@@ -3317,8 +3324,15 @@ qint64 XBinary::getOverlaySize()
 
 qint64 XBinary::getOverlayOffset()
 {
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getOverlayOffset(&memoryMap);
+}
+
+qint64 XBinary::getOverlayOffset(XBinary::_MEMORY_MAP *pMemoryMap)
+{
     qint64 nResult=-1;
-    qint64 nRawSize=_calculateRawSize();
+    qint64 nRawSize=_calculateRawSize(pMemoryMap);
 
     if(nRawSize)
     {
@@ -3330,7 +3344,14 @@ qint64 XBinary::getOverlayOffset()
 
 bool XBinary::isOverlayPresent()
 {
-    return (getOverlaySize()!=0);
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return isOverlayPresent(&memoryMap);
+}
+
+bool XBinary::isOverlayPresent(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    return (getOverlaySize(pMemoryMap)!=0);
 }
 
 bool XBinary::compareOverlay(QString sSignature, qint64 nOffset)
@@ -3344,9 +3365,9 @@ bool XBinary::compareOverlay(XBinary::_MEMORY_MAP *pMemoryMap, QString sSignatur
 {
     bool bResult=false;
 
-    if(isOverlayPresent())
+    if(isOverlayPresent(pMemoryMap))
     {
-        qint64 nOverlayOffset=getOverlayOffset()+nOffset;
+        qint64 nOverlayOffset=getOverlayOffset(pMemoryMap)+nOffset;
 
         bResult=compareSignature(pMemoryMap,sSignature,nOverlayOffset);
     }
@@ -3549,7 +3570,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                         break;
                 }
 
-                nOffset=addressToOffset(pMemoryMap,_nAddress+pMemoryMap->nBaseAddress);
+                nOffset=addressToOffset(pMemoryMap,_nAddress);
 
                 break;
 
@@ -3577,7 +3598,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 break;
         }
 
-        if(!isOffsetValid(nOffset))
+        if(!isOffsetValid(pMemoryMap,nOffset))
         {
             return false;
         }

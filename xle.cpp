@@ -73,6 +73,8 @@ XLE_DEF::IMAGE_VXD_HEADER XLE::getImageVxdHeader()
         result.e32_border=read_uint8(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_border));
         result.e32_worder=read_uint8(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_worder));
         result.e32_level=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_level));
+        result.e32_cpu=read_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_cpu));
+        result.e32_os=read_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_os));
     }
 
     return result;
@@ -134,6 +136,34 @@ quint32 XLE::getImageVxdHeader_level()
     return nResult;
 }
 
+quint16 XLE::getImageVxdHeader_cpu()
+{
+    quint16 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_cpu));
+    }
+
+    return nResult;
+}
+
+quint16 XLE::getImageVxdHeader_os()
+{
+    quint16 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_os));
+    }
+
+    return nResult;
+}
+
 void XLE::setImageVxdHeader_magic(quint16 value)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
@@ -174,11 +204,32 @@ void XLE::setImageVxdHeader_level(quint32 value)
     }
 }
 
+void XLE::setImageVxdHeader_cpu(quint16 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_cpu),value);
+    }
+}
+
+void XLE::setImageVxdHeader_os(quint16 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_os),value);
+    }
+}
+
 QMap<quint64, QString> XLE::getImageLEMagics()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0x454C,"IMAGE_OS2_SIGNATURE_LE");
+    mapResult.insert(0x454C,"IMAGE_VXD_SIGNATURE");
+    mapResult.insert(0x584C,"IMAGE_LX_SIGNATURE");
 
     return mapResult;
 }
@@ -187,7 +238,8 @@ QMap<quint64, QString> XLE::getImageLEMagicsS()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0x454C,"OS2_SIGNATURE_LE");
+    mapResult.insert(0x454C,"VXD_SIGNATURE");
+    mapResult.insert(0x584C,"LX_SIGNATURE");
 
     return mapResult;
 }

@@ -449,8 +449,11 @@ public:
     static QList<QString> getListFromFile(QString sFileName);
 
     qint64 getOverlaySize();
+    qint64 getOverlaySize(_MEMORY_MAP *pMemoryMap);
     qint64 getOverlayOffset();
+    qint64 getOverlayOffset(_MEMORY_MAP *pMemoryMap);
     bool isOverlayPresent();
+    bool isOverlayPresent(_MEMORY_MAP *pMemoryMap);
 
     bool compareOverlay(QString sSignature, qint64 nOffset);
     bool compareOverlay(_MEMORY_MAP *pMemoryMap,QString sSignature, qint64 nOffset);

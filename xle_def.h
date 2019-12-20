@@ -26,16 +26,16 @@
 namespace XLE_DEF
 {
 const quint32 S_IMAGE_VXD_SIGNATURE         =0x454C;      // LE
-const quint32 S_LX_SIGNATURE                =0x584C;      // LX
+const quint32 S_IMAGE_LX_SIGNATURE          =0x584C;      // LX
 
 struct IMAGE_VXD_HEADER
 {      // Windows VXD header
     quint16 e32_magic;                   // Magic number
     quint8 e32_border;                  // The byte ordering for the VXD
     quint8 e32_worder;                  // The word ordering for the VXD
-    quint16 e32_level;                   // The EXE format level for now = 0
-//    WORD   e32_cpu;                     // The CPU type
-//    WORD   e32_os;                      // The OS type
+    quint32 e32_level;                   // The EXE format level for now = 0
+    quint16 e32_cpu;                     // The CPU type
+    quint16 e32_os;                      // The OS type
 //    DWORD  e32_ver;                     // Module version
 //    DWORD  e32_mflags;                  // Module flags
 //    DWORD  e32_mpages;                  // Module # pages
