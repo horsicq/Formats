@@ -39,7 +39,7 @@ bool XLE::isValid()
         {
             quint32 signature=read_uint32(lfanew);
 
-            if(signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE)
+            if((signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE)||(signature==XLE_DEF::S_IMAGE_LX_SIGNATURE))
             {
                 bResult=true;
             }
@@ -75,6 +75,10 @@ XLE_DEF::IMAGE_VXD_HEADER XLE::getImageVxdHeader()
         result.e32_level=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_level));
         result.e32_cpu=read_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_cpu));
         result.e32_os=read_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_os));
+        result.e32_ver=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_ver));
+        result.e32_mflags=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_mflags));
+        result.e32_mpages=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_mpages));
+        result.e32_startobj=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_startobj));
     }
 
     return result;
@@ -164,6 +168,62 @@ quint16 XLE::getImageVxdHeader_os()
     return nResult;
 }
 
+quint32 XLE::getImageVxdHeader_ver()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_ver));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_mflags()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_mflags));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_mpages()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_mpages));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_startobj()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_startobj));
+    }
+
+    return nResult;
+}
+
 void XLE::setImageVxdHeader_magic(quint16 value)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
@@ -221,6 +281,46 @@ void XLE::setImageVxdHeader_os(quint16 value)
     if(nOffset!=-1)
     {
         write_uint16(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_os),value);
+    }
+}
+
+void XLE::setImageVxdHeader_ver(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_ver),value);
+    }
+}
+
+void XLE::setImageVxdHeader_mflags(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_mflags),value);
+    }
+}
+
+void XLE::setImageVxdHeader_mpages(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_mpages),value);
+    }
+}
+
+void XLE::setImageVxdHeader_startobj(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_startobj),value);
     }
 }
 

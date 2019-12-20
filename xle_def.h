@@ -36,10 +36,10 @@ struct IMAGE_VXD_HEADER
     quint32 e32_level;                   // The EXE format level for now = 0
     quint16 e32_cpu;                     // The CPU type
     quint16 e32_os;                      // The OS type
-//    DWORD  e32_ver;                     // Module version
-//    DWORD  e32_mflags;                  // Module flags
-//    DWORD  e32_mpages;                  // Module # pages
-//    DWORD  e32_startobj;                // Object # for instruction pointer
+    quint32 e32_ver;                     // Module version
+    quint32 e32_mflags;                  // Module flags
+    quint32 e32_mpages;                  // Module # pages
+    quint32 e32_startobj;                // Object # for instruction pointer
 //    DWORD  e32_eip;                     // Extended instruction pointer
 //    DWORD  e32_stackobj;                // Object # for stack pointer
 //    DWORD  e32_esp;                     // Extended stack pointer

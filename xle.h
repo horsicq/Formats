@@ -41,6 +41,10 @@ public:
     quint32 getImageVxdHeader_level();
     quint16 getImageVxdHeader_cpu();
     quint16 getImageVxdHeader_os();
+    quint32 getImageVxdHeader_ver();
+    quint32 getImageVxdHeader_mflags();
+    quint32 getImageVxdHeader_mpages();
+    quint32 getImageVxdHeader_startobj();
 
     void setImageVxdHeader_magic(quint16 value);
     void setImageVxdHeader_border(quint8 value);
@@ -48,6 +52,10 @@ public:
     void setImageVxdHeader_level(quint32 value);
     void setImageVxdHeader_cpu(quint16 value);
     void setImageVxdHeader_os(quint16 value);
+    void setImageVxdHeader_ver(quint32 value);
+    void setImageVxdHeader_mflags(quint32 value);
+    void setImageVxdHeader_mpages(quint32 value);
+    void setImageVxdHeader_startobj(quint32 value);
 
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();
