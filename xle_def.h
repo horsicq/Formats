@@ -40,42 +40,42 @@ struct IMAGE_VXD_HEADER
     quint32 e32_mflags;                  // Module flags
     quint32 e32_mpages;                  // Module # pages
     quint32 e32_startobj;                // Object # for instruction pointer
-//    DWORD  e32_eip;                     // Extended instruction pointer
-//    DWORD  e32_stackobj;                // Object # for stack pointer
-//    DWORD  e32_esp;                     // Extended stack pointer
-//    DWORD  e32_pagesize;                // VXD page size
-//    DWORD  e32_lastpagesize;            // Last page size in VXD
-//    DWORD  e32_fixupsize;               // Fixup section size
-//    DWORD  e32_fixupsum;                // Fixup section checksum
-//    DWORD  e32_ldrsize;                 // Loader section size
-//    DWORD  e32_ldrsum;                  // Loader section checksum
-//    DWORD  e32_objtab;                  // Object table offset
-//    DWORD  e32_objcnt;                  // Number of objects in module
-//    DWORD  e32_objmap;                  // Object page map offset
-//    DWORD  e32_itermap;                 // Object iterated data map offset
-//    DWORD  e32_rsrctab;                 // Offset of Resource Table
-//    DWORD  e32_rsrccnt;                 // Number of resource entries
-//    DWORD  e32_restab;                  // Offset of resident name table
-//    DWORD  e32_enttab;                  // Offset of Entry Table
-//    DWORD  e32_dirtab;                  // Offset of Module Directive Table
-//    DWORD  e32_dircnt;                  // Number of module directives
-//    DWORD  e32_fpagetab;                // Offset of Fixup Page Table
-//    DWORD  e32_frectab;                 // Offset of Fixup Record Table
-//    DWORD  e32_impmod;                  // Offset of Import Module Name Table
-//    DWORD  e32_impmodcnt;               // Number of entries in Import Module Name Table
-//    DWORD  e32_impproc;                 // Offset of Import Procedure Name Table
-//    DWORD  e32_pagesum;                 // Offset of Per-Page Checksum Table
-//    DWORD  e32_datapage;                // Offset of Enumerated Data Pages
-//    DWORD  e32_preload;                 // Number of preload pages
-//    DWORD  e32_nrestab;                 // Offset of Non-resident Names Table
-//    DWORD  e32_cbnrestab;               // Size of Non-resident Name Table
-//    DWORD  e32_nressum;                 // Non-resident Name Table Checksum
-//    DWORD  e32_autodata;                // Object # for automatic data object
-//    DWORD  e32_debuginfo;               // Offset of the debugging information
-//    DWORD  e32_debuglen;                // The length of the debugging info. in bytes
-//    DWORD  e32_instpreload;             // Number of instance pages in preload section of VXD file
-//    DWORD  e32_instdemand;              // Number of instance pages in demand load section of VXD file
-//    DWORD  e32_heapsize;                // Size of heap - for 16-bit apps
+    quint32 e32_eip;                     // Extended instruction pointer
+    quint32 e32_stackobj;                // Object # for stack pointer
+    quint32 e32_esp;                     // Extended stack pointer
+    quint32 e32_pagesize;                // VXD page size
+    quint32 e32_lastpagesize;            // Last page size in VXD
+    quint32 e32_fixupsize;               // Fixup section size
+    quint32 e32_fixupsum;                // Fixup section checksum
+    quint32 e32_ldrsize;                 // Loader section size
+    quint32 e32_ldrsum;                  // Loader section checksum
+    quint32 e32_objtab;                  // Object table offset
+    quint32 e32_objcnt;                  // Number of objects in module
+    quint32 e32_objmap;                  // Object page map offset
+    quint32 e32_itermap;                 // Object iterated data map offset
+    quint32 e32_rsrctab;                 // Offset of Resource Table
+    quint32 e32_rsrccnt;                 // Number of resource entries
+    quint32 e32_restab;                  // Offset of resident name table
+    quint32 e32_enttab;                  // Offset of Entry Table
+    quint32 e32_dirtab;                  // Offset of Module Directive Table
+    quint32 e32_dircnt;                  // Number of module directives
+    quint32 e32_fpagetab;                // Offset of Fixup Page Table
+    quint32 e32_frectab;                 // Offset of Fixup Record Table
+    quint32 e32_impmod;                  // Offset of Import Module Name Table
+    quint32 e32_impmodcnt;               // Number of entries in Import Module Name Table
+    quint32 e32_impproc;                 // Offset of Import Procedure Name Table
+    quint32 e32_pagesum;                 // Offset of Per-Page Checksum Table
+    quint32 e32_datapage;                // Offset of Enumerated Data Pages
+    quint32 e32_preload;                 // Number of preload pages
+    quint32 e32_nrestab;                 // Offset of Non-resident Names Table
+    quint32 e32_cbnrestab;               // Size of Non-resident Name Table
+    quint32 e32_nressum;                 // Non-resident Name Table Checksum
+    quint32 e32_autodata;                // Object # for automatic data object
+    quint32 e32_debuginfo;               // Offset of the debugging information
+    quint32 e32_debuglen;                // The length of the debugging info. in bytes
+    quint32 e32_instpreload;             // Number of instance pages in preload section of VXD file
+    quint32 e32_instdemand;              // Number of instance pages in demand load section of VXD file
+    quint32 e32_heapsize;                // Size of heap - for 16-bit apps
 //    BYTE   e32_res3[12];                // Reserved words
 //    DWORD  e32_winresoff;
 //    DWORD  e32_winreslen;
