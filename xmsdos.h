@@ -35,6 +35,11 @@ public:
     quint16 get_magic();
     qint32 get_lfanew();
 
+    qint64 getDosHeaderOffset();
+    qint64 getDosHeaderSize();
+    qint64 getDosHeaderExOffset();
+    qint64 getDosHeaderExSize();
+
     XMSDOS_DEF::IMAGE_DOS_HEADER getDosHeader();
     XMSDOS_DEF::IMAGE_DOS_HEADEREX getDosHeaderEx();
     void setDosHeader(XMSDOS_DEF::IMAGE_DOS_HEADER *pDosHeader);

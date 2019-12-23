@@ -61,6 +61,11 @@ qint64 XLE::getImageVxdHeaderOffset()
     return nResult;
 }
 
+qint64 XLE::getImageVxdHeaderSize()
+{
+    return sizeof(XLE_DEF::IMAGE_VXD_HEADER);
+}
+
 XLE_DEF::IMAGE_VXD_HEADER XLE::getImageVxdHeader()
 {
     XLE_DEF::IMAGE_VXD_HEADER result={};

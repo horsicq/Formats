@@ -33,6 +33,7 @@ public:
     virtual bool isValid();
 
     qint64 getImageVxdHeaderOffset();
+    qint64 getImageVxdHeaderSize();
     XLE_DEF::IMAGE_VXD_HEADER getImageVxdHeader();
 
     quint16 getImageVxdHeader_magic();
