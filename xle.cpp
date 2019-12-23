@@ -321,6 +321,48 @@ quint32 XLE::getImageVxdHeader_pagesize()
     return nResult;
 }
 
+quint32 XLE::getImageVxdHeader_lastpagesize()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_lastpagesize));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_fixupsize()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fixupsize));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_fixupsum()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fixupsum));
+    }
+
+    return nResult;
+}
+
 void XLE::setImageVxdHeader_magic(quint16 value)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
@@ -458,6 +500,36 @@ void XLE::setImageVxdHeader_pagesize(quint32 value)
     if(nOffset!=-1)
     {
         write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_pagesize),value);
+    }
+}
+
+void XLE::setImageVxdHeader_lastpagesize(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_lastpagesize),value);
+    }
+}
+
+void XLE::setImageVxdHeader_fixupsize(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fixupsize),value);
+    }
+}
+
+void XLE::setImageVxdHeader_fixupsum(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fixupsum),value);
     }
 }
 

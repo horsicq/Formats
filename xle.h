@@ -50,6 +50,9 @@ public:
     quint32 getImageVxdHeader_stackobj();
     quint32 getImageVxdHeader_esp();
     quint32 getImageVxdHeader_pagesize();
+    quint32 getImageVxdHeader_lastpagesize();
+    quint32 getImageVxdHeader_fixupsize();
+    quint32 getImageVxdHeader_fixupsum();
 
     void setImageVxdHeader_magic(quint16 value);
     void setImageVxdHeader_border(quint8 value);
@@ -65,6 +68,9 @@ public:
     void setImageVxdHeader_stackobj(quint32 value);
     void setImageVxdHeader_esp(quint32 value);
     void setImageVxdHeader_pagesize(quint32 value);
+    void setImageVxdHeader_lastpagesize(quint32 value);
+    void setImageVxdHeader_fixupsize(quint32 value);
+    void setImageVxdHeader_fixupsum(quint32 value);
 
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();
