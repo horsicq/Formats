@@ -33,6 +33,8 @@ public:
     virtual bool isValid();
 
     qint64 getImageOS2HeaderOffset();
+    qint64 getImageOS2HeaderSize();
+
     XNE_DEF::IMAGE_OS2_HEADER getImageOS2Header();
 
     quint16 getImageOS2Header_magic();

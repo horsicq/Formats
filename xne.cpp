@@ -61,6 +61,11 @@ qint64 XNE::getImageOS2HeaderOffset()
     return nResult;
 }
 
+qint64 XNE::getImageOS2HeaderSize()
+{
+    return sizeof(XNE_DEF::IMAGE_OS2_HEADER);
+}
+
 XNE_DEF::IMAGE_OS2_HEADER XNE::getImageOS2Header()
 {
     XNE_DEF::IMAGE_OS2_HEADER result={};
