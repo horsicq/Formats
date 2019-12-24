@@ -1250,6 +1250,13 @@ bool XBinary::isDirectoryExists(QString sDirectoryName)
     return QDir().exists(sDirectoryName);
 }
 
+bool XBinary::removeDirectory(QString sDirectoryName)
+{
+    QDir dir(sDirectoryName);
+
+    return dir.removeRecursively();
+}
+
 QByteArray XBinary::readFile(QString sFileName)
 {
     QByteArray baResult;
@@ -2272,6 +2279,29 @@ QString XBinary::getDeviceDirectory(QIODevice *pDevice)
             QFileInfo fi(sFileName);
 
             sResult=fi.absolutePath();
+        }
+    }
+
+    return sResult;
+}
+
+QString XBinary::getDeviceFileBaseName(QIODevice *pDevice)
+{
+    QString sResult;
+
+    QString sClassName=pDevice->metaObject()->className();
+
+    if(sClassName=="QFile")
+    {
+        QFile *pFile=(QFile *)pDevice;
+
+        QString sFileName=pFile->fileName(); // TODO
+
+        if(sFileName!="")
+        {
+            QFileInfo fi(sFileName);
+
+            sResult=fi.baseName();
         }
     }
 

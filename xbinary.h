@@ -283,6 +283,7 @@ public:
     static QString getBaseFileName(QString sFileName);
     static bool createDirectory(QString sDirectoryName);
     static bool isDirectoryExists(QString sDirectoryName);
+    static bool removeDirectory(QString sDirectoryName);
 
     static QByteArray readFile(QString sFileName);
 
@@ -367,6 +368,7 @@ public:
     static QString getDeviceFileName(QIODevice *pDevice);
     static QString getDeviceFilePath(QIODevice *pDevice);
     static QString getDeviceDirectory(QIODevice *pDevice);
+    static QString getDeviceFileBaseName(QIODevice *pDevice);
     static QList<qint64> getFixupList(QIODevice *pDevice1,QIODevice *pDevice2,qint64 nDelta);
 
     static QString getHash(HASH hash,QString sFileName);
