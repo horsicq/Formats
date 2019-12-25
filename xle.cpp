@@ -37,7 +37,7 @@ bool XLE::isValid()
 
         if(lfanew>0)
         {
-            quint32 signature=read_uint32(lfanew);
+            quint16 signature=read_uint16(lfanew);
 
             if((signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE)||(signature==XLE_DEF::S_IMAGE_LX_SIGNATURE))
             {
@@ -363,6 +363,412 @@ quint32 XLE::getImageVxdHeader_fixupsum()
     return nResult;
 }
 
+quint32 XLE::getImageVxdHeader_ldrsize()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_ldrsize));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_ldrsum()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_ldrsum));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_objtab()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objtab));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_objcnt()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objcnt));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_objmap()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objmap));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_itermap()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_itermap));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_rsrctab()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_rsrctab));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_rsrccnt()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_rsrccnt));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_restab()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_restab));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_enttab()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_enttab));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_dirtab()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_dirtab));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_dircnt()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_dircnt));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_fpagetab()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fpagetab));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_frectab()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_frectab));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_impmod()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impmod));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_impmodcnt()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impmodcnt));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_impproc()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impproc));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_pagesum()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_pagesum));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_datapage()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_datapage));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_preload()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_preload));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_nrestab()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_nrestab));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_cbnrestab()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_cbnrestab));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_nressum()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_nressum));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_autodata()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_autodata));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_debuginfo()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_debuginfo));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_debuglen()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_debuglen));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_instpreload()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_instpreload));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_instdemand()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_instdemand));
+    }
+
+    return nResult;
+}
+
+quint32 XLE::getImageVxdHeader_heapsize()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_heapsize));
+    }
+
+    return nResult;
+}
+
 void XLE::setImageVxdHeader_magic(quint16 value)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
@@ -530,6 +936,296 @@ void XLE::setImageVxdHeader_fixupsum(quint32 value)
     if(nOffset!=-1)
     {
         write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fixupsum),value);
+    }
+}
+
+void XLE::setImageVxdHeader_ldrsize(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_ldrsize),value);
+    }
+}
+
+void XLE::setImageVxdHeader_ldrsum(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_ldrsum),value);
+    }
+}
+
+void XLE::setImageVxdHeader_objtab(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objtab),value);
+    }
+}
+
+void XLE::setImageVxdHeader_objcnt(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objcnt),value);
+    }
+}
+
+void XLE::setImageVxdHeader_objmap(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objmap),value);
+    }
+}
+
+void XLE::setImageVxdHeader_itermap(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_itermap),value);
+    }
+}
+
+void XLE::setImageVxdHeader_rsrctab(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_rsrctab),value);
+    }
+}
+
+void XLE::setImageVxdHeader_rsrccnt(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_rsrccnt),value);
+    }
+}
+
+void XLE::setImageVxdHeader_restab(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_restab),value);
+    }
+}
+
+void XLE::setImageVxdHeader_enttab(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_enttab),value);
+    }
+}
+
+void XLE::setImageVxdHeader_dirtab(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_dirtab),value);
+    }
+}
+
+void XLE::setImageVxdHeader_dircnt(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_dircnt),value);
+    }
+}
+
+void XLE::setImageVxdHeader_fpagetab(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fpagetab),value);
+    }
+}
+
+void XLE::setImageVxdHeader_frectab(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_frectab),value);
+    }
+}
+
+void XLE::setImageVxdHeader_impmod(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impmod),value);
+    }
+}
+
+void XLE::setImageVxdHeader_impmodcnt(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impmodcnt),value);
+    }
+}
+
+void XLE::setImageVxdHeader_impproc(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impproc),value);
+    }
+}
+
+void XLE::setImageVxdHeader_pagesum(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_pagesum),value);
+    }
+}
+
+void XLE::setImageVxdHeader_datapage(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_datapage),value);
+    }
+}
+
+void XLE::setImageVxdHeader_preload(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_preload),value);
+    }
+}
+
+void XLE::setImageVxdHeader_nrestab(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_nrestab),value);
+    }
+}
+
+void XLE::setImageVxdHeader_cbnrestab(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_cbnrestab),value);
+    }
+}
+
+void XLE::setImageVxdHeader_nressum(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_nressum),value);
+    }
+}
+
+void XLE::setImageVxdHeader_autodata(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_autodata),value);
+    }
+}
+
+void XLE::setImageVxdHeader_debuginfo(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_debuginfo),value);
+    }
+}
+
+void XLE::setImageVxdHeader_debuglen(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_debuglen),value);
+    }
+}
+
+void XLE::setImageVxdHeader_instpreload(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_instpreload),value);
+    }
+}
+
+void XLE::setImageVxdHeader_instdemand(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_instdemand),value);
+    }
+}
+
+void XLE::setImageVxdHeader_heapsize(quint32 value)
+{
+    qint64 nOffset=getImageVxdHeaderOffset();
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_heapsize),value);
     }
 }
 

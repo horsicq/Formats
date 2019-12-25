@@ -369,6 +369,9 @@ public:
     static QString getDeviceFilePath(QIODevice *pDevice);
     static QString getDeviceDirectory(QIODevice *pDevice);
     static QString getDeviceFileBaseName(QIODevice *pDevice);
+    static QString getDeviceFileCompleteSuffix(QIODevice *pDevice);
+    static QString getDeviceFileSuffix(QIODevice *pDevice);
+
     static QList<qint64> getFixupList(QIODevice *pDevice1,QIODevice *pDevice2,qint64 nDelta);
 
     static QString getHash(HASH hash,QString sFileName);

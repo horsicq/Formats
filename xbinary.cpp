@@ -2308,6 +2308,52 @@ QString XBinary::getDeviceFileBaseName(QIODevice *pDevice)
     return sResult;
 }
 
+QString XBinary::getDeviceFileCompleteSuffix(QIODevice *pDevice)
+{
+    QString sResult;
+
+    QString sClassName=pDevice->metaObject()->className();
+
+    if(sClassName=="QFile")
+    {
+        QFile *pFile=(QFile *)pDevice;
+
+        QString sFileName=pFile->fileName(); // TODO
+
+        if(sFileName!="")
+        {
+            QFileInfo fi(sFileName);
+
+            sResult=fi.completeSuffix();
+        }
+    }
+
+    return sResult;
+}
+
+QString XBinary::getDeviceFileSuffix(QIODevice *pDevice)
+{
+    QString sResult;
+
+    QString sClassName=pDevice->metaObject()->className();
+
+    if(sClassName=="QFile")
+    {
+        QFile *pFile=(QFile *)pDevice;
+
+        QString sFileName=pFile->fileName(); // TODO
+
+        if(sFileName!="")
+        {
+            QFileInfo fi(sFileName);
+
+            sResult=fi.suffix();
+        }
+    }
+
+    return sResult;
+}
+
 QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta)
 {
     QList<qint64> listResult;
