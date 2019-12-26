@@ -2904,12 +2904,24 @@ qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap)
 
     int nCount=pMemoryMap->listRecords.count();
 
+    qint64 _nOverlayOffset=-1;
+
     for(int i=0; i<nCount; i++)
     {
         if((pMemoryMap->listRecords.at(i).nOffset!=-1)&&(pMemoryMap->listRecords.at(i).type!=MMT_OVERLAY))
         {
             nResult=qMax(nResult,(qint64)(pMemoryMap->listRecords.at(i).nOffset+pMemoryMap->listRecords.at(i).nSize));
         }
+
+        if(pMemoryMap->listRecords.at(i).type==MMT_OVERLAY)
+        {
+            _nOverlayOffset=pMemoryMap->listRecords.at(i).nOffset;
+        }
+    }
+
+    if(_nOverlayOffset!=-1)
+    {
+        nResult=qMin(nResult,_nOverlayOffset);
     }
 
     return nResult;
