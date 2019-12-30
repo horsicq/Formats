@@ -2490,6 +2490,18 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
     return sResult;
 }
 
+bool XBinary::isFileHashValid(XBinary::HASH hash, QString sFileName, QString sHash)
+{
+    bool bResult=false;
+
+    if(isFileExists(sFileName))
+    {
+        bResult=(getHash(hash,sFileName).toUpper()==sHash.toUpper());
+    }
+
+    return bResult;
+}
+
 quint32 XBinary::getAdler32(QString sFileName)
 {
     quint32 nResult=0;
