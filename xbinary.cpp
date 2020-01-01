@@ -1242,7 +1242,7 @@ QString XBinary::getBaseFileName(QString sFileName)
 
 bool XBinary::createDirectory(QString sDirectoryName)
 {
-    return QDir().mkdir(sDirectoryName);
+    return QDir().mkpath(sDirectoryName);
 }
 
 bool XBinary::isDirectoryExists(QString sDirectoryName)
