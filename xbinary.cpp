@@ -1257,6 +1257,11 @@ bool XBinary::removeDirectory(QString sDirectoryName)
     return dir.removeRecursively();
 }
 
+bool XBinary::isDirectoryEmpty(QString sDirectoryName)
+{
+    return (QDir(sDirectoryName).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count()==0);
+}
+
 QByteArray XBinary::readFile(QString sFileName)
 {
     QByteArray baResult;

@@ -284,6 +284,7 @@ public:
     static bool createDirectory(QString sDirectoryName);
     static bool isDirectoryExists(QString sDirectoryName);
     static bool removeDirectory(QString sDirectoryName);
+    static bool isDirectoryEmpty(QString sDirectoryName);
 
     static QByteArray readFile(QString sFileName);
 
