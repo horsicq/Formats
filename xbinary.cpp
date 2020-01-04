@@ -2044,11 +2044,11 @@ QSet<XBinary::FT> XBinary::getFileTypes()
                 {
                     stResult.insert(FT_NE);
                 }
-                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE) // TODO
+                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE) // mb TODO 16/32
                 {
                     stResult.insert(FT_LE);
                 }
-                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_LX_SIGNATURE) // TODO
+                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_LX_SIGNATURE)
                 {
                     stResult.insert(FT_LX);
                 }
