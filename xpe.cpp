@@ -3443,6 +3443,13 @@ bool XPE::isExportPresent()
 
 XPE::EXPORT_HEADER XPE::getExport()
 {
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getExport(&memoryMap);
+}
+
+XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap)
+{
     EXPORT_HEADER result={};
 
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
@@ -3451,18 +3458,16 @@ XPE::EXPORT_HEADER XPE::getExport()
     {
         read_array(nExportOffset,(char *)&result.directory,sizeof(XPE_DEF::IMAGE_EXPORT_DIRECTORY));
 
-        _MEMORY_MAP memoryMap=getMemoryMap();
-
-        qint64 nNameOffset=addressToOffset(&memoryMap,result.directory.Name+memoryMap.nBaseAddress);
+        qint64 nNameOffset=addressToOffset(pMemoryMap,result.directory.Name+pMemoryMap->nBaseAddress);
 
         if(nNameOffset!=-1)
         {
             result.sName=read_ansiString(nNameOffset);
         }
 
-        qint64 nAddressOfFunctionsOffset=addressToOffset(&memoryMap,result.directory.AddressOfFunctions+memoryMap.nBaseAddress);
-        qint64 nAddressOfNamesOffset=addressToOffset(&memoryMap,result.directory.AddressOfNames+memoryMap.nBaseAddress);
-        qint64 nAddressOfNameOrdinalsOffset=addressToOffset(&memoryMap,result.directory.AddressOfNameOrdinals+memoryMap.nBaseAddress);
+        qint64 nAddressOfFunctionsOffset=addressToOffset(pMemoryMap,result.directory.AddressOfFunctions+pMemoryMap->nBaseAddress);
+        qint64 nAddressOfNamesOffset=addressToOffset(pMemoryMap,result.directory.AddressOfNames+pMemoryMap->nBaseAddress);
+        qint64 nAddressOfNameOrdinalsOffset=addressToOffset(pMemoryMap,result.directory.AddressOfNameOrdinals+pMemoryMap->nBaseAddress);
 
         if(result.directory.NumberOfFunctions<0xFFFF)
         {
@@ -3475,10 +3480,10 @@ XPE::EXPORT_HEADER XPE::getExport()
                     int nIndex=read_uint16(nAddressOfNameOrdinalsOffset+2*i);
                     position.nOrdinal=nIndex+result.directory.Base;
                     position.nRVA=read_uint32(nAddressOfFunctionsOffset+4*nIndex);
-                    position.nAddress=position.nRVA+memoryMap.nBaseAddress;
+                    position.nAddress=position.nRVA+pMemoryMap->nBaseAddress;
                     position.nNameRVA=read_uint32(nAddressOfNamesOffset+4*i);
 
-                    qint64 nFunctionNameOffset=addressToOffset(&memoryMap,position.nNameRVA+memoryMap.nBaseAddress);
+                    qint64 nFunctionNameOffset=addressToOffset(pMemoryMap,position.nNameRVA+pMemoryMap->nBaseAddress);
 
                     if(nFunctionNameOffset!=-1)
                     {

@@ -551,6 +551,7 @@ public:
     bool isExportPresent();
 
     EXPORT_HEADER getExport();
+    EXPORT_HEADER getExport(_MEMORY_MAP *pMemoryMap);
 
     static bool isExportFunctionPresent(QString sFunction,EXPORT_HEADER *pExportHeader);
 
