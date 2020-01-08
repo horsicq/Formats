@@ -447,9 +447,10 @@ public:
     bool isImportPresent();
 
     QList<IMPORT_RECORD> getImportRecords();
+    QList<IMPORT_RECORD> getImportRecords(_MEMORY_MAP *pMemoryMap);
 
-    quint64 getImportHash64();
-    quint32 getImportHash32();
+    quint64 getImportHash64(_MEMORY_MAP *pMemoryMap);
+    quint32 getImportHash32(_MEMORY_MAP *pMemoryMap);
 
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> getImportDescriptors();
     QList<IMAGE_IMPORT_DESCRIPTOR_EX> getImportDescriptorsEx();
@@ -462,7 +463,7 @@ public:
 
     QList<IMPORT_POSITION> getImportPositions(int nIndex);
 
-    QList<quint32> getImportPositionHashes();
+    QList<quint32> getImportPositionHashes(_MEMORY_MAP *pMemoryMap);
 
     bool isImportLibraryPresentI(QString sLibrary);
     static bool isImportLibraryPresentI(QString sLibrary,QList<IMPORT_HEADER> *pListImport);
