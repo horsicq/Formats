@@ -60,6 +60,10 @@ public:
 
     static bool is64(QIODevice *pDevice);
 
+    qint64 getEhdrOffset();
+    qint64 getEhdr32Size();
+    qint64 getEhdr64Size();
+
     quint32 getIdent_Magic();
     void setIdent_Magic(quint32 value);
 

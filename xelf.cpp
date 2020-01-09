@@ -68,6 +68,21 @@ bool XELF::is64(QIODevice *pDevice)
     return bResult;
 }
 
+qint64 XELF::getEhdrOffset()
+{
+    return 0;
+}
+
+qint64 XELF::getEhdr32Size()
+{
+    return sizeof(XELF_DEF::Elf32_Ehdr);
+}
+
+qint64 XELF::getEhdr64Size()
+{
+    return sizeof(XELF_DEF::Elf64_Ehdr);
+}
+
 quint32 XELF::getIdent_Magic()
 {
     return read_uint32((quint64)XELF_DEF::S_EI_MAG0);
