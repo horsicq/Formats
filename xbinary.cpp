@@ -3585,6 +3585,40 @@ bool XBinary::writeToFile(QString sFileName, QByteArray baData)
     return bResult;
 }
 
+qint32 XBinary::getStringNumberFromList(QList<QString> *pList, QString sString)
+{
+    return pList->indexOf(sString);
+}
+
+qint32 XBinary::getStringNumberFromListExp(QList<QString> *pList, QString sString)
+{
+    qint32 nResult=-1;
+
+    qint32 nCount=pList->count();
+
+    for(qint32 i=0;i<nCount;i++)
+    {
+        if(isRegExpPresent(sString,pList->at(i)))
+        {
+            nResult=i;
+
+            break;
+        }
+    }
+
+    return nResult;
+}
+
+bool XBinary::isStringInListPresent(QList<QString> *pList, QString sString)
+{
+    return (getStringNumberFromList(pList,sString)!=-1);
+}
+
+bool XBinary::isStringInListPresentExp(QList<QString> *pList, QString sString)
+{
+    return (getStringNumberFromListExp(pList,sString)!=-1);
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     QList<SIGNATURE_RECORD> result;

@@ -3504,21 +3504,18 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap)
     return result;
 }
 
-bool XPE::isExportFunctionPresent(QString sFunction,XPE::EXPORT_HEADER *pExportHeader)
+QList<QString> XPE::getExportFunctionsList(EXPORT_HEADER *pExportHeader)
 {
-    bool bResult=false;
+    QList<QString> listResult;
 
-    for(int i=0; i<pExportHeader->listPositions.count(); i++)
+    int nCount=pExportHeader->listPositions.count();
+
+    for(int i=0;i<nCount;i++)
     {
-        if(pExportHeader->listPositions.at(i).sFunctionName==sFunction)
-        {
-            bResult=true;
-
-            break;
-        }
+        listResult.append(pExportHeader->listPositions.at(i).sFunctionName);
     }
 
-    return bResult;
+    return listResult;
 }
 
 XPE_DEF::IMAGE_EXPORT_DIRECTORY XPE::getExportDirectory()

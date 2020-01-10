@@ -476,6 +476,11 @@ public:
 
     static bool writeToFile(QString sFileName,QByteArray baData);
 
+    static qint32 getStringNumberFromList(QList<QString> *pList,QString sString);
+    static qint32 getStringNumberFromListExp(QList<QString> *pList,QString sString);
+    static bool isStringInListPresent(QList<QString> *pList,QString sString);
+    static bool isStringInListPresentExp(QList<QString> *pList,QString sString);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);

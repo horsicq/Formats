@@ -553,8 +553,7 @@ public:
 
     EXPORT_HEADER getExport();
     EXPORT_HEADER getExport(_MEMORY_MAP *pMemoryMap);
-
-    static bool isExportFunctionPresent(QString sFunction,EXPORT_HEADER *pExportHeader);
+    static QList<QString> getExportFunctionsList(EXPORT_HEADER *pExportHeader);
 
     XPE_DEF::IMAGE_EXPORT_DIRECTORY getExportDirectory();
     void setExportDirectory(XPE_DEF::IMAGE_EXPORT_DIRECTORY *pExportDirectory);
