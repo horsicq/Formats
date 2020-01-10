@@ -81,6 +81,10 @@ public:
     bool is64();
     static bool is64(QIODevice *pDevice);
 
+    qint64 getHeaderOffset();
+    qint64 getHeader32Size();
+    qint64 getHeader64Size();
+
     quint32 getHeader_magic();
     qint32 getHeader_cputype();
     qint32 getHeader_cpusubtype();

@@ -673,6 +673,7 @@ public:
     static QMap<quint64,QString> getTypes();
     static QMap<quint64,QString> getTypesS();
 
+    qint64 calculateHeadersSize();
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);
 
     bool isDll();

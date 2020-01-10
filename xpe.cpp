@@ -5417,6 +5417,11 @@ void XPE::setNetHeader_EntryPoint(quint32 value)
     }
 }
 
+qint64 XPE::calculateHeadersSize()
+{
+    return _calculateHeadersSize(getSectionsTableOffset(),getFileHeader_NumberOfSections());
+}
+
 qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)
 {
     qint64 nHeadersSize=nSectionsTableOffset+sizeof(XPE_DEF::IMAGE_SECTION_HEADER)*nNumberOfSections;
