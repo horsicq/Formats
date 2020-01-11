@@ -318,6 +318,9 @@ public:
     qint32 getSectionNumber(QString sSectionName);
     static qint32 getSectionNumber(QString sSectionName,QList<SECTION_RECORD> *pListSections);
     static SECTION_RECORD getSectionRecord(QString sSectionName,QList<SECTION_RECORD> *pListSections);
+
+    virtual MODE getMode();
+    virtual QString getArch();
 };
 
 #endif // XELF_H

@@ -133,12 +133,6 @@ public:
         MODE_64
     };
 
-    enum ARCH
-    {
-        ARCH_UNKNOWN=0,
-        ARCH_X86
-    };
-
     struct _MEMORY_MAP
     {
         qint64 nBaseAddress;
@@ -183,7 +177,7 @@ public:
     qint64 getSize();
 
     virtual MODE getMode();
-    virtual ARCH getArch();
+    virtual QString getArch();
 
     static quint32 random32();
     static quint64 random64();

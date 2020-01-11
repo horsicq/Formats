@@ -114,6 +114,9 @@ public:
     QByteArray getDosStub();
     bool isDosStubPresent();
 
+    virtual MODE getMode();
+    virtual QString getArch();
+
 //private:
 //    const qint64 N_DATABASEADDRESS=0x10000;
 //    const qint64 N_CODEBASEADDRESS=0x00000;

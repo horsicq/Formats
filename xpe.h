@@ -273,7 +273,7 @@ public:
     static bool is64(QString sFileName);
 
     virtual MODE getMode();
-    virtual ARCH getArch();
+    virtual QString getArch();
 
     TYPE getType();
 

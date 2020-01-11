@@ -1091,3 +1091,20 @@ qint32 XMACH::getSectionNumber(QString sName)
 
     return getSectionNumber(sName,&listSections);
 }
+
+XBinary::MODE XMACH::getMode()
+{
+    MODE result=MODE_32;
+
+    if(is64())
+    {
+        result=MODE_64;
+    }
+
+    return result;
+}
+
+QString XMACH::getArch()
+{
+    return getHeaderCpuTypesS().value(getHeader_cputype(),QString("UNKNOWN"));
+}

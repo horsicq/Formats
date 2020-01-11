@@ -45,9 +45,9 @@ XBinary::MODE XBinary::getMode()
     return MODE_UNKNOWN;
 }
 
-XBinary::ARCH XBinary::getArch()
+QString XBinary::getArch()
 {
-    return ARCH_UNKNOWN;
+    return QString("UNKNOWN");
 }
 
 quint32 XBinary::random32()

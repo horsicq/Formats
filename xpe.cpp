@@ -100,9 +100,9 @@ XBinary::MODE XPE::getMode()
     return result;
 }
 
-XBinary::ARCH XPE::getArch()
+QString XPE::getArch()
 {
-    return ARCH_X86;
+    return getImageFileHeaderMachinesS().value(getFileHeader_Machine(),QString("UNKNOWN"));
 }
 
 XPE::TYPE XPE::getType()

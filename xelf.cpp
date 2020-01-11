@@ -3359,3 +3359,20 @@ XELF::SECTION_RECORD XELF::getSectionRecord(QString sSectionName, QList<XELF::SE
 
     return result;
 }
+
+XBinary::MODE XELF::getMode()
+{
+    MODE result=MODE_32;
+
+    if(is64())
+    {
+        result=MODE_64;
+    }
+
+    return result;
+}
+
+QString XELF::getArch()
+{
+    return getMachinesS().value(getHdr32_machine(),QString("UNKNOWN"));
+}

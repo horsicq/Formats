@@ -535,3 +535,13 @@ bool XMSDOS::isDosStubPresent()
 {
     return getDosStubSize()!=0;
 }
+
+XBinary::MODE XMSDOS::getMode()
+{
+    return MODE_16;
+}
+
+QString XMSDOS::getArch()
+{
+    return QString("8086");
+}

@@ -152,6 +152,9 @@ public:
 
     static qint32 getSectionNumber(QString sName,QList<SECTION_RECORD> *pList);
     qint32 getSectionNumber(QString sName);
+
+    virtual MODE getMode();
+    virtual QString getArch();
 };
 
 #endif // XMACH_H
