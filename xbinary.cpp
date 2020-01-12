@@ -28,6 +28,9 @@ XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
     setImageBase(nImageBase);
     setEntryPointOffset(0);
     __bIsFindStop=false;
+
+    setMode(MODE_UNKNOWN);
+    setArch("UNKNOWN");
 }
 
 void XBinary::setData(QIODevice *__pDevice)
@@ -40,14 +43,24 @@ qint64 XBinary::getSize()
     return __pDevice->size();
 }
 
+void XBinary::setMode(XBinary::MODE mode)
+{
+    __mode=mode;
+}
+
 XBinary::MODE XBinary::getMode()
 {
-    return MODE_UNKNOWN;
+    return __mode;
+}
+
+void XBinary::setArch(QString sArch)
+{
+    __sArch=sArch;
 }
 
 QString XBinary::getArch()
-{
-    return QString("UNKNOWN");
+{  
+    return __sArch;
 }
 
 quint32 XBinary::random32()

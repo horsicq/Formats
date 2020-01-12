@@ -176,7 +176,10 @@ public:
     void setData(QIODevice *__pDevice);
     qint64 getSize();
 
+    void setMode(MODE mode);
     virtual MODE getMode();
+
+    void setArch(QString sArch);
     virtual QString getArch();
 
     static quint32 random32();
@@ -509,6 +512,9 @@ private:
     qint64 __nImageBase;
 
     bool __bIsFindStop;
+
+    QString __sArch;
+    MODE __mode;
 };
 
 #endif // XBINARY_H
