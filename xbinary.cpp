@@ -30,7 +30,7 @@ XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
     __bIsFindStop=false;
 
     setMode(MODE_UNKNOWN);
-    setArch("UNKNOWN");
+    setArch("NOEXECUTABLE");
 }
 
 void XBinary::setData(QIODevice *__pDevice)
