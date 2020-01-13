@@ -266,7 +266,7 @@ public:
     qint64 find_signature(qint64 nOffset, qint64 nSize, QString sSignature);
     qint64 find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nSize, QString sSignature);
 
-    void stop_findprocess();
+    void setFindProcessEnable(bool bState);
 
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature);
 
@@ -311,7 +311,7 @@ public:
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nBaseAddress);
-    qint64 getEntryPointOffset();
+    qint64 _getEntryPointOffset();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     qint64 getEntryPointAddress();

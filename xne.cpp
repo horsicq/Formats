@@ -846,3 +846,27 @@ QMap<quint64, QString> XNE::getImageNEMagicsS()
 
     return mapResult;
 }
+
+QMap<quint64, QString> XNE::getImageNEFlagsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x0001,"single shared");
+    mapResult.insert(0x0002,"multiple");
+    mapResult.insert(0x0004,"Global initialization");
+    mapResult.insert(0x0008,"Protected mode only");
+    mapResult.insert(0x0010,"8086 instructions");
+    mapResult.insert(0x0020,"80286 instructions");
+    mapResult.insert(0x0040,"80386 instructions");
+    mapResult.insert(0x0080,"80x87 instructions");
+    mapResult.insert(0x0100,"Full screen");
+    mapResult.insert(0x0200,"Compatible with Windows/P.M.");
+//    mapResult.insert(0x0400,"");
+    mapResult.insert(0x0800,"OS/2 family application");
+    mapResult.insert(0x1000,"reserved?");
+    mapResult.insert(0x2000,"Errors in image/executable");
+    mapResult.insert(0x4000,"non-conforming program");
+    mapResult.insert(0x8000,"DLL or driver");
+
+    return mapResult;
+}

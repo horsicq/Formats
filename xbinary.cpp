@@ -27,8 +27,7 @@ XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
     setBaseAddress(0);
     setImageBase(nImageBase);
     setEntryPointOffset(0);
-    __bIsFindStop=false;
-
+    setFindProcessEnable(true);
     setMode(MODE_UNKNOWN);
     setArch("NOEXECUTABLE");
 }
@@ -878,7 +877,6 @@ void XBinary::_write_int64(char *pData, qint64 value, bool bIsBigEndian)
 
 qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint64 nArraySize)
 {
-    __bIsFindStop=false;
     emit findProgressMaximumChanged(100);
     emit findProgressValueChanged(0);
 
@@ -1087,10 +1085,9 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
 
     if(sSignature.contains(".")||sSignature.contains("$")||sSignature.contains("#"))
     {
-        __bIsFindStop=false;
         emit findProgressMaximumChanged(100);
         emit findProgressValueChanged(0);
-         qint64 nCurrentProgress=0;
+        qint64 nCurrentProgress=0;
 
         sSignature=convertSignature(sSignature);
 
@@ -1157,9 +1154,9 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
     return nResult;
 }
 
-void XBinary::stop_findprocess()
+void XBinary::setFindProcessEnable(bool bState)
 {
-    __bIsFindStop=true;
+    __bIsFindStop=!bState;
 }
 
 bool XBinary::isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nSize, QString sSignature)
@@ -1768,7 +1765,7 @@ bool XBinary::compareSignatureOnAddress(XBinary::_MEMORY_MAP *pMemoryMap, QStrin
     return bResult;
 }
 
-qint64 XBinary::getEntryPointOffset()
+qint64 XBinary::_getEntryPointOffset()
 {
     XBinary::_MEMORY_MAP memoryMap=getMemoryMap();
 
