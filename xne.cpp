@@ -870,3 +870,17 @@ QMap<quint64, QString> XNE::getImageNEFlagsS()
 
     return mapResult;
 }
+
+QMap<quint64, QString> XNE::getImageNEExeTypesS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x0000,"unknown");
+    mapResult.insert(0x0001,"OS/2");
+    mapResult.insert(0x0002,"Windows");
+    mapResult.insert(0x0003,"European MS-DOS 4.x");
+    mapResult.insert(0x0004,"Windows 386");
+    mapResult.insert(0x0005,"BOSS (Borland Operating System Services)");
+
+    return mapResult;
+}
