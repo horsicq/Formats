@@ -2831,6 +2831,16 @@ bool XBinary::isValid()
     return true;
 }
 
+QString XBinary::getVersion()
+{
+    return "";
+}
+
+bool XBinary::isEncrypted()
+{
+    return false;
+}
+
 QString XBinary::getSignature(qint64 nOffset, qint64 nSize)
 {
     QString sResult;

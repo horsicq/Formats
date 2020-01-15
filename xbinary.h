@@ -396,6 +396,8 @@ public:
 
     QIODevice *getDevice();
     virtual bool isValid();
+    virtual QString getVersion();
+    virtual bool isEncrypted();
 
     QString getSignature(qint64 nOffset,qint64 nSize);
 
