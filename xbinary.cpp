@@ -1676,6 +1676,13 @@ void XBinary::setIsImage(bool value)
     bIsImage=value;
 }
 
+bool XBinary::compareSignature(QString sSignature, qint64 nOffset)
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return compareSignature(&memoryMap,sSignature,nOffset);
+}
+
 bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap,QString sSignature, qint64 nOffset)
 {
     sSignature=convertSignature(sSignature);
