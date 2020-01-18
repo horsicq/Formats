@@ -99,6 +99,15 @@ public:
     void setImageOS2Header_swaparea(quint16 value);
     void setImageOS2Header_expver(quint16 value);
 
+    qint64 getEntryTableOffset();
+    qint64 getEntryTableSize();
+    qint64 getSegmentTableOffset();
+    qint64 getResourceTableOffset();
+    qint64 getResidentNameTableOffset();
+    qint64 getModuleReferenceTableOffset();
+    qint64 getImportedNamesTableOffset();
+    qint64 getNotResindentNameTableOffset();
+
     static QMap<quint64, QString> getImageNEMagics();
     static QMap<quint64, QString> getImageNEMagicsS();
 

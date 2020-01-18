@@ -829,6 +829,46 @@ void XNE::setImageOS2Header_expver(quint16 value)
     }
 }
 
+qint64 XNE::getEntryTableOffset()
+{
+    return getImageOS2HeaderOffset()+getImageOS2Header_enttab();
+}
+
+qint64 XNE::getEntryTableSize()
+{
+    return getImageOS2Header_cbenttab();
+}
+
+qint64 XNE::getSegmentTableOffset()
+{
+    return getImageOS2HeaderOffset()+getImageOS2Header_segtab();
+}
+
+qint64 XNE::getResourceTableOffset()
+{
+    return getImageOS2HeaderOffset()+getImageOS2Header_rsrctab();
+}
+
+qint64 XNE::getResidentNameTableOffset()
+{
+    return getImageOS2HeaderOffset()+getImageOS2Header_restab();
+}
+
+qint64 XNE::getModuleReferenceTableOffset()
+{
+    return getImageOS2HeaderOffset()+getImageOS2Header_modtab();
+}
+
+qint64 XNE::getImportedNamesTableOffset()
+{
+    return getImageOS2HeaderOffset()+getImageOS2Header_imptab();
+}
+
+qint64 XNE::getNotResindentNameTableOffset()
+{
+    return getImageOS2Header_nrestab();
+}
+
 QMap<quint64, QString> XNE::getImageNEMagics()
 {
     QMap<quint64, QString> mapResult;
