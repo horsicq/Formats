@@ -132,7 +132,8 @@ public:
 
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();
-    static QMap<quint64, QString> getImageLECpuS();
+    static QMap<quint64, QString> getImageLECpusS();
+    static QMap<quint64, QString> getImageLEOssS();
 };
 
 #endif // XLE_H

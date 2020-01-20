@@ -1249,13 +1249,26 @@ QMap<quint64, QString> XLE::getImageLEMagicsS()
     return mapResult;
 }
 
-QMap<quint64, QString> XLE::getImageLECpuS()
+QMap<quint64, QString> XLE::getImageLECpusS()
 {
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x01,"80286");
     mapResult.insert(0x02,"80386");
     mapResult.insert(0x03,"80486");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XLE::getImageLEOssS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00,"Unknown (any new-format OS)");
+    mapResult.insert(0x01,"OS/2 (default)");
+    mapResult.insert(0x02,"Windows");
+    mapResult.insert(0x03,"DOS 4.x");
+    mapResult.insert(0x04,"Windows 386");
 
     return mapResult;
 }
