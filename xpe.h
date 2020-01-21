@@ -188,7 +188,6 @@ public:
         bool bHidden;
         qint64 nCLIHeaderOffset;
         XPE_DEF::IMAGE_COR20_HEADER header;
-
         qint64 nCLI_MetaDataOffset;
         quint32 nCLI_MetaData_Signature;
         quint16 sCLI_MetaData_MajorVersion;
@@ -198,14 +197,11 @@ public:
         QString sCLI_MetaData_Version;
         quint16 sCLI_MetaData_Flags;
         quint16 sCLI_MetaData_Streams;
-
         QList <qint64> listCLI_MetaData_Stream_Offsets;
         QList <qint64> listCLI_MetaData_Stream_Sizes;
         QList <QString> listCLI_MetaData_Stream_Names;
-
         qint64 nCLI_MetaData_TablesHeaderOffset;
         qint64 nCLI_MetaData_TablesSize;
-
         quint32 nCLI_MetaData_Tables_Reserved1;
         quint8 cCLI_MetaData_Tables_MajorVersion;
         quint8 cCLI_MetaData_Tables_MinorVersion;
@@ -217,7 +213,6 @@ public:
         quint32 CLI_MetaData_Tables_TablesNumberOfIndexes[64];
         qint64 CLI_MetaData_Tables_TablesOffsets[64];
         qint64 CLI_MetaData_Tables_TablesSizes[64];
-
         qint64 nCLI_MetaData_StringsOffset;
         qint64 nCLI_MetaData_StringsSize;
         qint64 nCLI_MetaData_USOffset;
@@ -226,10 +221,8 @@ public:
         qint64 nCLI_MetaData_BlobSize;
         qint64 nCLI_MetaData_GUIDOffset;
         qint64 nCLI_MetaData_GUIDSize;
-
         qint64 nEntryPoint;
         qint64 nEntryPointSize;
-
         QList<QString> listAnsiStrings;
         QList<QString> listUnicodeStrings;
     };
