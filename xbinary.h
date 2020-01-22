@@ -397,6 +397,8 @@ public:
 
     QIODevice *getDevice();
     virtual bool isValid();
+
+    void setVersion(QString sVersion);
     virtual QString getVersion();
     virtual bool isEncrypted();
 
@@ -518,6 +520,7 @@ private:
 
     QString __sArch;
     MODE __mode;
+    QString __sVersion;
 };
 
 #endif // XBINARY_H

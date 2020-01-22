@@ -30,6 +30,7 @@ XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
     setFindProcessEnable(true);
     setMode(MODE_UNKNOWN);
     setArch("NOEXECUTABLE");
+    setVersion("");
 }
 
 void XBinary::setData(QIODevice *__pDevice)
@@ -2838,9 +2839,14 @@ bool XBinary::isValid()
     return true;
 }
 
+void XBinary::setVersion(QString sVersion)
+{
+    __sVersion=sVersion;
+}
+
 QString XBinary::getVersion()
 {
-    return "";
+    return __sVersion;
 }
 
 bool XBinary::isEncrypted()
