@@ -298,6 +298,8 @@ public:
     qint64 addressToOffset(qint64 nAddress);
 
     static bool isOffsetValid(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
+    static bool isOffsetAndSizeValid(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize);
+
     static bool isAddressValid(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
 
     static qint64 offsetToAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
@@ -455,6 +457,14 @@ public:
     };
 
     ULEB128 get_uleb128(qint64 nOffset);
+
+    struct PACKEDNUMBER
+    {
+        quint64 nValue;
+        quint32 nByteSize;
+    };
+
+    PACKEDNUMBER get_packedNumber(qint64 nOffset);
 
     static QList<QString> getListFromFile(QString sFileName);
 

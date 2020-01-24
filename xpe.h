@@ -658,10 +658,8 @@ public:
     static QMap<quint64,QString> getResourceTypesS();
     static QMap<quint64,QString> getImageRelBased();
     static QMap<quint64,QString> getImageRelBasedS();
-
     static QMap<quint64,QString> getComImageFlags();
     static QMap<quint64,QString> getComImageFlagsS();
-
     static QMap<quint64,QString> getTypes();
     static QMap<quint64,QString> getTypesS();
 

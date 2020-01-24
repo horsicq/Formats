@@ -1511,6 +1511,20 @@ bool XBinary::isOffsetValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
     return bResult;
 }
 
+bool XBinary::isOffsetAndSizeValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize)
+{
+    bool bResult=false;
+
+    if(nSize>0)
+    {
+        bool bValidOffset=isOffsetValid(pMemoryMap,nOffset);
+        bool bValidSize=isOffsetValid(pMemoryMap,nOffset+nSize-1);
+        bResult=bValidOffset&&bValidSize;
+    }
+
+    return bResult;
+}
+
 bool XBinary::isAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
 {
     bool bResult=false;
@@ -3410,6 +3424,62 @@ XBinary::ULEB128 XBinary::get_uleb128(qint64 nOffset)
         }
         // TODO more checks!
     }
+
+    return result;
+}
+
+XBinary::PACKEDNUMBER XBinary::get_packedNumber(qint64 nOffset)
+{
+    PACKEDNUMBER result={};
+
+    quint8 nFirstByte=0;
+    quint8 nSecondByte=0;
+    quint8 nMask=0;
+    qint64 _nStartOffset=nOffset;
+
+    for(int i=0;i<8;i++)
+    {
+        if(i==0)
+        {
+            nFirstByte=read_uint8(nOffset);
+            nOffset++;
+            if((nFirstByte&0x80)==0)
+            {
+                result.nValue=nFirstByte;
+                break;
+            }
+        }
+        if(i==1)
+        {
+            nSecondByte=read_uint8(nOffset);
+            nOffset++;
+            if((nFirstByte&0x40)==0)
+            {
+                result.nValue=(((quint32)nFirstByte&0x3F)<<8)|nSecondByte;
+                break;
+            }
+            nMask=read_uint8(nOffset);
+            nOffset++;
+            result.nValue=nSecondByte|((quint32)nMask<<8);
+            nMask=0x20;
+        }
+        if(i==2)
+        {
+            if((nFirstByte&nMask)==0)
+            {
+                quint64 nHighPart=nFirstByte&(nMask-1);
+                result.nValue|=(nHighPart<<(8*i));
+                break;
+            }
+
+            quint8 nByte=read_uint8(nOffset);
+            nOffset++;
+            result.nValue|=((quint64)nByte)<<(8*i);
+            nMask>>1;
+        }
+    }
+
+    result.nByteSize=nOffset-_nStartOffset;
 
     return result;
 }
