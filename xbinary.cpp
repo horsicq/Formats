@@ -3475,7 +3475,7 @@ XBinary::PACKEDNUMBER XBinary::get_packedNumber(qint64 nOffset)
             quint8 nByte=read_uint8(nOffset);
             nOffset++;
             result.nValue|=((quint64)nByte)<<(8*i);
-            nMask>>1;
+            nMask>>=1;
         }
     }
 
