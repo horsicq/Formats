@@ -1796,7 +1796,7 @@ qint64 XBinary::_getEntryPointOffset()
 
 qint64 XBinary::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 {
-    Q_UNUSED(pMemoryMap);
+    Q_UNUSED(pMemoryMap)
 
     return this->__nEntryPointOffset;
 }
