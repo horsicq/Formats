@@ -274,6 +274,7 @@ public:
     quint32 getNtHeaders_Signature();
     void setNtHeaders_Signature(quint32 value);
     qint64 getFileHeaderOffset();
+    qint64 getFileHeaderSize();
 
     XPE_DEF::S_IMAGE_FILE_HEADER getFileHeader();
     void setFileHeader(XPE_DEF::S_IMAGE_FILE_HEADER *pFileHeader);

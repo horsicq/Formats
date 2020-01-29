@@ -267,6 +267,7 @@ public:
     qint64 find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nSize, QString sSignature);
 
     void setFindProcessEnable(bool bState);
+    void setDumpProcessEnable(bool bState);
 
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature);
 
@@ -444,7 +445,7 @@ public:
 
     static bool tryToOpen(QIODevice *pDevice);
 
-    static bool checkOffsetSize(OFFSETSIZE os);
+    bool checkOffsetSize(OFFSETSIZE os);
 
     static QString get_uint32_version(quint32 nValue);
     static bool isResizeEnable(QIODevice *pDevice);
@@ -518,6 +519,8 @@ signals:
     void infoMessage(QString sMessage);
     void findProgressMaximumChanged(qint32 nMaximum);
     void findProgressValueChanged(qint32 nValue);
+    void dumpProgressMaximumChanged(qint32 nMaximum);
+    void dumpProgressValueChanged(qint32 nValue);
 
 private:
     QIODevice *__pDevice;
@@ -527,6 +530,7 @@ private:
     qint64 __nImageBase;
 
     bool __bIsFindStop;
+    bool __bIsDumpStop;
 
     QString __sArch;
     MODE __mode;

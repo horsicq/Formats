@@ -1181,6 +1181,8 @@ QList<XELF_DEF::Elf32_Shdr> XELF::getElf32_ShdrList()
     QList<XELF_DEF::Elf32_Shdr> listResult;
 
     quint32 nNumberOfSections=getHdr32_shnum();
+    nNumberOfSections=qMin((quint32)1000,nNumberOfSections);
+
     quint32 offset=getHdr32_shoff();
     bool bIsBigEndian=isBigEndian();
 
@@ -1212,6 +1214,8 @@ QList<XELF_DEF::Elf64_Shdr> XELF::getElf64_ShdrList()
     QList<XELF_DEF::Elf64_Shdr> listResult;
 
     quint32 nNumberOfSections=getHdr64_shnum();
+    nNumberOfSections=qMin((quint32)1000,nNumberOfSections);
+
     quint64 offset=getHdr64_shoff();
     bool bIsBigEndian=isBigEndian();
 
@@ -2071,6 +2075,7 @@ QList<XELF_DEF::Elf32_Phdr> XELF::getElf32_PhdrList()
     QList<XELF_DEF::Elf32_Phdr> result;
 
     quint32 nNumberOfProgramms=getHdr32_phnum();
+    nNumberOfProgramms=qMin((quint32)1000,nNumberOfProgramms);
     quint32 offset=getHdr32_phoff();
     bool bIsBigEndian=isBigEndian();
 
@@ -2100,6 +2105,7 @@ QList<XELF_DEF::Elf64_Phdr> XELF::getElf64_PhdrList()
     QList<XELF_DEF::Elf64_Phdr> result;
 
     quint32 nNumberOfProgramms=getHdr64_phnum();
+    nNumberOfProgramms=qMin((quint32)1000,nNumberOfProgramms);
     quint64 offset=getHdr64_phoff();
     bool bIsBigEndian=isBigEndian();
 

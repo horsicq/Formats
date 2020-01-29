@@ -28,6 +28,7 @@ XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
     setImageBase(nImageBase);
     setEntryPointOffset(0);
     setFindProcessEnable(true);
+    setDumpProcessEnable(true);
     setMode(MODE_UNKNOWN);
     setArch("NOEXECUTABLE");
     setVersion("");
@@ -299,13 +300,18 @@ QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize)
 {
     QByteArray baResult;
 
-    baResult.resize((qint32)nSize);
+    XBinary::OFFSETSIZE os=convertOffsetAndSize(nOffset,nSize);
 
-    qint64 nBytes=read_array(nOffset,baResult.data(),nSize);
-
-    if(nSize!=nBytes)
+    if(os.nOffset!=-1)
     {
-        baResult.resize((qint32)nBytes);
+        baResult.resize((qint32)os.nSize);
+
+        qint64 nBytes=read_array(os.nOffset,baResult.data(),os.nSize);
+
+        if(os.nSize!=nBytes)
+        {
+            baResult.resize((qint32)nBytes);
+        }
     }
 
     return baResult;
@@ -314,6 +320,8 @@ QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize)
 qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 {
     qint64 nResult=0;
+
+    // TODO Checks
 
     qint64 _nTotalSize=getSize();
 
@@ -1160,6 +1168,11 @@ void XBinary::setFindProcessEnable(bool bState)
     __bIsFindStop=!bState;
 }
 
+void XBinary::setDumpProcessEnable(bool bState)
+{
+    __bIsDumpStop=!bState;
+}
+
 bool XBinary::isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nSize, QString sSignature)
 {
     return (find_signature(pMemoryMap,nOffset,nSize,sSignature)!=-1);
@@ -1968,35 +1981,45 @@ bool XBinary::dumpToFile(QString sFileName, const char *pData, qint64 nDataSize)
 
     return bResult;
 }
-// TODO ProgressBar
+
 bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize)
 {
     bool bResult=false;
 
+    qint64 _nProcent=nDataSize/100;
+
     QFile file;
     file.setFileName(sFileName);
-    file.resize(0);
 
     if(file.open(QIODevice::ReadWrite))
     {
-        // TODO
+        file.resize(0);
+
+        emit dumpProgressMaximumChanged(100);
+        emit dumpProgressValueChanged(0);
+
         char *pBuffer=new char[0x1000];
 
         qint64 nSourceOffset=nDataOffset;
         qint64 nDestOffset=0;
+        qint32 _nCurrentProcent=0;
 
         bResult=true;
 
-        while(nDataSize>0)
+        while((nDataSize>0)&&(!__bIsDumpStop))
         {
             qint64 nTempSize=qMin(nDataSize,(qint64)0x1000);
 
-            read_array(nSourceOffset,pBuffer,nTempSize);
-
-            file.seek(nDestOffset);
-
-            if(file.write(pBuffer,nTempSize)==0)
+            if(!((__pDevice->seek(nSourceOffset))&&(__pDevice->read(pBuffer,nTempSize)==nTempSize)))
             {
+                emit errorMessage(QObject::tr("Read error"));
+                bResult=false;
+                break;
+            }
+
+            if(!((file.seek(nDestOffset))&&(file.write(pBuffer,nTempSize)==nTempSize)))
+            {
+                emit errorMessage(QObject::tr("Write error"));
                 bResult=false;
                 break;
             }
@@ -2005,11 +2028,21 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
             nDestOffset+=nTempSize;
 
             nDataSize-=nTempSize;
+
+            if(nDestOffset>((_nCurrentProcent+1)*_nProcent))
+            {
+                _nCurrentProcent++;
+                emit dumpProgressValueChanged(_nCurrentProcent);
+            }
         }
 
         delete [] pBuffer;
 
         file.close();
+    }
+    else
+    {
+        emit errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file")).arg(sFileName));
     }
 
     return bResult;
@@ -3357,7 +3390,12 @@ bool XBinary::tryToOpen(QIODevice *pDevice)
 
 bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE os)
 {
-    return (os.nOffset)&&(os.nSize);
+    qint64 nTotalSize=getSize();
+
+    bool bOffsetValid=(os.nOffset>=0)&&(os.nOffset<nTotalSize);
+    bool bSizeValid=(os.nSize>0)&&((os.nOffset+os.nSize-1)<nTotalSize);
+
+    return (bOffsetValid)&&(bSizeValid);
 }
 
 QString XBinary::get_uint32_version(quint32 nValue)

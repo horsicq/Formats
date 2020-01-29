@@ -157,6 +157,11 @@ qint64 XPE::getFileHeaderOffset()
     return result;
 }
 
+qint64 XPE::getFileHeaderSize()
+{
+    return sizeof(XPE_DEF::S_IMAGE_FILE_HEADER);
+}
+
 XPE_DEF::S_IMAGE_FILE_HEADER XPE::getFileHeader()
 {
     XPE_DEF::S_IMAGE_FILE_HEADER result={};
