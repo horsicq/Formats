@@ -2922,13 +2922,13 @@ XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
 
     qint64 nTotalSize=getSize();
 
-    if((nSize)&&(nOffset>=0)&&(nOffset<nTotalSize))
+    if(nSize==-1)
     {
-        if(nSize==-1)
-        {
-            nSize=nTotalSize-nOffset;
-        }
+        nSize=nTotalSize-nOffset;
+    }
 
+    if((nSize>0)&&(nOffset>=0)&&(nOffset<nTotalSize)&&(nOffset+nSize-1<nTotalSize))
+    {
         result.nOffset=nOffset;
         result.nSize=nSize;
     }
