@@ -295,6 +295,7 @@ public:
     void setFileHeader_Characteristics(quint16 value);
 
     qint64 getOptionalHeaderOffset();
+    qint64 getOptionalHeaderSize();
 
     XPE_DEF::IMAGE_OPTIONAL_HEADER32 getOptionalHeader32();
     XPE_DEF::IMAGE_OPTIONAL_HEADER64 getOptionalHeader64();

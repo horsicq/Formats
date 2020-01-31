@@ -258,6 +258,22 @@ qint64 XPE::getOptionalHeaderOffset()
     return result;
 }
 
+qint64 XPE::getOptionalHeaderSize()
+{
+    qint64 nResult=0;
+
+    if(is64())
+    {
+        nResult=sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER64);
+    }
+    else
+    {
+        nResult=sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER32);
+    }
+
+    return nResult;
+}
+
 XPE_DEF::IMAGE_OPTIONAL_HEADER32 XPE::getOptionalHeader32()
 {
     XPE_DEF::IMAGE_OPTIONAL_HEADER32 result={};
