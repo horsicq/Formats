@@ -749,6 +749,9 @@ public:
     XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 getLoadConfigDirectory32();
     XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 getLoadConfigDirectory64();
 
+    qint64 getLoadConfigDirectoryOffset();
+    qint64 getLoadConfigDirectorySize();
+
     quint32 getLoadConfig_Size();
     quint32 getLoadConfig_TimeDateStamp();
     quint16 getLoadConfig_MajorVersion();

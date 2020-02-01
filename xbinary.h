@@ -297,6 +297,7 @@ public:
 
     qint64 offsetToAddress(qint64 nOffset);
     qint64 addressToOffset(qint64 nAddress);
+    qint64 offsetToRelAddress(qint64 nOffset);
 
     static bool isOffsetValid(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static bool isOffsetAndSizeValid(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize);
@@ -305,6 +306,7 @@ public:
 
     static qint64 offsetToAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static qint64 addressToOffset(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+    static qint64 offsetToRelAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
 
     static _MEMORY_RECORD getOffsetMemoryRecord(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static _MEMORY_RECORD getAddressMemoryRecord(_MEMORY_MAP *pMemoryMap,qint64 nAddress);

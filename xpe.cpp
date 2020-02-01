@@ -4404,6 +4404,16 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64()
     return result;
 }
 
+qint64 XPE::getLoadConfigDirectoryOffset()
+{
+    return getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+}
+
+qint64 XPE::getLoadConfigDirectorySize()
+{
+    return getLoadConfig_Size();
+}
+
 quint32 XPE::getLoadConfig_Size()
 {
     quint32 nResult=0;
@@ -6554,7 +6564,10 @@ XPE::RESOURCES_ID_NAME XPE::getResourcesIDName(qint64 nResourceOffset,quint32 va
         value&=0x7FFFFFFF;
         result.nNameOffset=value;
         result.nID=0;
-        int nStringLength=read_uint16(nResourceOffset+value);
+        quint16 nStringLength=read_uint16(nResourceOffset+value);
+
+        nStringLength=qMin((quint16)1024,nStringLength);
+
         QByteArray baName=read_array(nResourceOffset+value+2,nStringLength*2);
         result.sName=QString::fromUtf16((quint16 *)(baName.data()),nStringLength);
     }
