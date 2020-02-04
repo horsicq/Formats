@@ -5307,6 +5307,25 @@ qint32 XPE::getNumberOfImportThunks(quint32 nNumber, QList<XPE::IMPORT_HEADER> *
     return nResult;
 }
 
+qint64 XPE::getNetHeaderOffset()
+{
+    return getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+}
+
+qint64 XPE::getNetHeaderSize()
+{
+    qint64 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,cb));
+    }
+
+    return nResult;
+}
+
 XPE::NET_HEADER XPE::getNetHeader()
 {
     XPE::NET_HEADER result={};

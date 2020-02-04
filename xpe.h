@@ -811,6 +811,9 @@ public:
     qint32 getNumberOfImportThunks(quint32 nNumber);
     qint32 getNumberOfImportThunks(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
 
+    qint64 getNetHeaderOffset();
+    qint64 getNetHeaderSize();
+
     XPE::NET_HEADER getNetHeader();
 
     quint32 getNetHeader_cb();

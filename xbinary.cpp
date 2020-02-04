@@ -102,6 +102,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
 
     switch(fileType)
     {
+        case FT_UNKNOWN:            sResult=QString("Unknown");     break; // mb TODO translate
         case FT_BINARY:             sResult=QString("Binary");      break;
         case FT_TEXT:               sResult=QString("Text");        break;
         case FT_COM:                sResult=QString("COM");         break;
