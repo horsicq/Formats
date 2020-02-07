@@ -389,6 +389,10 @@ public:
     QByteArray getDataDirectory(quint32 nNumber);
 
     qint64 getSectionsTableOffset();
+
+    qint64 getSectionHeaderOffset(quint32 nNumber);
+    qint64 getSectionHeaderSize();
+
     XPE_DEF::IMAGE_SECTION_HEADER getSectionHeader(quint32 nNumber);
     void setSectionHeader(quint32 nNumber,XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader);
 

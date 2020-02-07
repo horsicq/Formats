@@ -937,15 +937,45 @@ QByteArray XPE::getDataDirectory(quint32 nNumber)
 
 qint64 XPE::getSectionsTableOffset()
 {
-    qint64 nResult=0;
+    qint64 nResult=-1;
 
-    nResult=getOptionalHeaderOffset()+getFileHeader_SizeOfOptionalHeader();
+    qint64 nOptionalHeaderOffset=getOptionalHeaderOffset();
+
+    if(nOptionalHeaderOffset!=-1)
+    {
+        nResult=nOptionalHeaderOffset+getFileHeader_SizeOfOptionalHeader();
+    }
 
     return nResult;
 }
 
+qint64 XPE::getSectionHeaderOffset(quint32 nNumber)
+{
+    qint64 nResult=-1;
+
+    quint32 nNumberOfSections=getFileHeader_NumberOfSections();
+
+    if(nNumber<nNumberOfSections)
+    {
+        qint64 nSectionsTableOffset=getSectionsTableOffset();
+
+        if(nSectionsTableOffset!=-1)
+        {
+            nResult=nSectionsTableOffset+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER);
+        }
+    }
+
+    return nResult;
+}
+
+qint64 XPE::getSectionHeaderSize()
+{
+    return sizeof(XPE_DEF::IMAGE_SECTION_HEADER);
+}
+
 XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionHeader(quint32 nNumber)
 {
+    // TODO
     XPE_DEF::IMAGE_SECTION_HEADER result={};
 
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
@@ -960,6 +990,7 @@ XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionHeader(quint32 nNumber)
 
 void XPE::setSectionHeader(quint32 nNumber, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader)
 {
+    // TODO
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
