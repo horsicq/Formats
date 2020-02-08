@@ -1691,7 +1691,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
 
     result.nBaseAddress=_getBaseAddress();
     result.fileType=FT_BINARY;
-    result.mode=MODE_16;
+    result.mode=MODE_UNKNOWN;
 
     _MEMORY_RECORD record={};
     record.nAddress=_getBaseAddress();
