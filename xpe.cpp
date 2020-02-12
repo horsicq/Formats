@@ -1900,12 +1900,12 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap)
                 if(bIs64)
                 {
                     nThunksOffset+=8;
-                    nRVA+=8;
+                    nRVA+=8; // quint64
                 }
                 else
                 {
                     nThunksOffset+=4;
-                    nRVA+=4;
+                    nRVA+=4; // quint32
                 }
             }
 
@@ -2283,7 +2283,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
     {
         _MEMORY_MAP memoryMap=getMemoryMap();
 
-        bool bIs64=is64();
+        bool bIs64=is64(); // TODO use mode
 
         int _nIndex=0;
 
@@ -4096,6 +4096,7 @@ bool XPE::removeLastSection()
 
 bool XPE::removeLastSection(QIODevice *pDevice,bool bIsImage)
 {
+    // TODO Check
     bool bResult=false;
 
     if(isResizeEnable(pDevice))
@@ -4336,7 +4337,7 @@ QByteArray XPE::createHeaderStub(HEADER_OPTIONS *pHeaderOptions) // TODO options
 {
     QByteArray baResult;
 
-    baResult.resize(0x200);
+    baResult.resize(0x200); // TODO const
     baResult.fill(0);
 
     QBuffer buffer(&baResult);
