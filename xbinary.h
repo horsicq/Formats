@@ -77,6 +77,12 @@ public:
         qint64 nSize;
     };
 
+    struct ADDRESSSIZE
+    {
+        qint64 nAddress;
+        qint64 nSize;
+    };
+
     enum ADDRESS_SEGMENT
     {
         ADDRESS_SEGMENT_UNKNOWN=-1,
