@@ -1164,6 +1164,18 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
     return nResult;
 }
 
+qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
+{
+    // TODO
+    return -1;
+}
+
+qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString)
+{
+    // TODO
+    return -1;
+}
+
 void XBinary::setFindProcessEnable(bool bState)
 {
     __bIsFindStop=!bState;
