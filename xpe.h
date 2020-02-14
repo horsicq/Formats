@@ -779,6 +779,8 @@ public:
     quint64 getLoadConfig_SEHandlerTable();
     quint64 getLoadConfig_SEHandlerCount();
 
+    quint64 getLoadConfig_GuardCFCheckFunctionPointer();
+
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
     void setLoadConfig_MajorVersion(quint16 value);
@@ -801,6 +803,8 @@ public:
     void setLoadConfig_SecurityCookie(quint64 value);
     void setLoadConfig_SEHandlerTable(quint64 value);
     void setLoadConfig_SEHandlerCount(quint64 value);
+
+    void setLoadConfig_GuardCFCheckFunctionPointer(quint64 value);
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 
