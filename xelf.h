@@ -321,6 +321,9 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
+
+    virtual qint64 getBaseAddress();
+    virtual void setBaseAddress(qint64 nValue);
 };
 
 #endif // XELF_H

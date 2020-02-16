@@ -3208,6 +3208,8 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 //    bool bIs64=is64();
     int nCount=listPhdr.count();
 
+    bool bImageAddressInit=false;
+
     // TODO
     for(int i=0; i<nCount; i++)
     {
@@ -3222,6 +3224,14 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
             record.nOffset=listPhdr.at(i).p_offset;
 
             result.listRecords.append(record);
+
+            if(!bImageAddressInit)
+            {
+                result.nBaseAddress=record.nAddress;
+                bImageAddressInit=true;
+            }
+
+            result.nBaseAddress=qMin(record.nAddress,result.nBaseAddress);
         }
 
 //        // TODO
@@ -3381,4 +3391,14 @@ XBinary::MODE XELF::getMode()
 QString XELF::getArch()
 {
     return getMachinesS().value(getHdr32_machine(),QString("UNKNOWN"));
+}
+
+qint64 XELF::getBaseAddress()
+{
+    return getMemoryMap().nBaseAddress;
+}
+
+void XELF::setBaseAddress(qint64 nValue)
+{
+    //  TODO
 }
