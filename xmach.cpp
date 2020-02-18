@@ -721,6 +721,10 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
         result.mode=MODE_32;
     }
 
+    result.nRawSize=getSize();
+    // TODO BaseAddress
+    // SizeofImage
+
     // TODO
     QList<COMMAND_RECORD> listLC=getCommandRecords();
 

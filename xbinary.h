@@ -96,6 +96,7 @@ public:
         MMT_UNKNOWN=0,
         MMT_HEADER,
         MMT_LOADSECTION, // Section in PE; LoadProgram in ELF
+        MMT_NOLOADABLE, // For ELF
         MMT_OVERLAY
     };
 
@@ -143,7 +144,8 @@ public:
     struct _MEMORY_MAP
     {
         qint64 nBaseAddress;
-        // TODO Image Size
+        qint64 nImageSize;
+        qint64 nRawSize;
         FT fileType;
         MODE mode;
         QList<_MEMORY_RECORD> listRecords;

@@ -1527,16 +1527,23 @@ bool XBinary::isOffsetValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
     bool bResult=false;
 
-    int nCount=pMemoryMap->listRecords.count();
-
-    for(int i=0; i<nCount; i++)
+    if(pMemoryMap->nRawSize)
     {
-        if(pMemoryMap->listRecords.at(i).nSize&&(pMemoryMap->listRecords.at(i).nOffset!=-1))
+        bResult=((nOffset>0)&&(nOffset<pMemoryMap->nRawSize));
+    }
+    else
+    {
+        int nCount=pMemoryMap->listRecords.count();
+
+        for(int i=0; i<nCount; i++)
         {
-            if((pMemoryMap->listRecords.at(i).nOffset<=nOffset)&&(nOffset<pMemoryMap->listRecords.at(i).nOffset+pMemoryMap->listRecords.at(i).nSize))
+            if(pMemoryMap->listRecords.at(i).nSize&&(pMemoryMap->listRecords.at(i).nOffset!=-1))
             {
-                bResult=true;
-                break;
+                if((pMemoryMap->listRecords.at(i).nOffset<=nOffset)&&(nOffset<pMemoryMap->listRecords.at(i).nOffset+pMemoryMap->listRecords.at(i).nSize))
+                {
+                    bResult=true;
+                    break;
+                }
             }
         }
     }
@@ -1562,16 +1569,23 @@ bool XBinary::isAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
 {
     bool bResult=false;
 
-    int nCount=pMemoryMap->listRecords.count();
-
-    for(int i=0; i<nCount; i++)
+    if(pMemoryMap->nImageSize)
     {
-        if(pMemoryMap->listRecords.at(i).nSize&&(pMemoryMap->listRecords.at(i).nAddress!=-1))
+        bResult=((pMemoryMap->nBaseAddress<=nAddress)&&(nAddress<(pMemoryMap->nBaseAddress+pMemoryMap->nImageSize)));
+    }
+    else
+    {
+        int nCount=pMemoryMap->listRecords.count();
+
+        for(int i=0; i<nCount; i++)
         {
-            if((pMemoryMap->listRecords.at(i).nAddress<=nAddress)&&(nAddress<pMemoryMap->listRecords.at(i).nAddress+pMemoryMap->listRecords.at(i).nSize))
+            if(pMemoryMap->listRecords.at(i).nSize&&(pMemoryMap->listRecords.at(i).nAddress!=-1))
             {
-                bResult=true;
-                break;
+                if((pMemoryMap->listRecords.at(i).nAddress<=nAddress)&&(nAddress<pMemoryMap->listRecords.at(i).nAddress+pMemoryMap->listRecords.at(i).nSize))
+                {
+                    bResult=true;
+                    break;
+                }
             }
         }
     }
@@ -1702,6 +1716,8 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
     _MEMORY_MAP result={};
 
     result.nBaseAddress=_getBaseAddress();
+    result.nRawSize=getSize();
+    result.nImageSize=getSize();
     result.fileType=FT_BINARY;
     result.mode=MODE_UNKNOWN;
 

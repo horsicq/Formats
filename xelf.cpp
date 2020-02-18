@@ -3203,12 +3203,17 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
         result.mode=MODE_32;
     }
 
+    result.nRawSize=getSize();
+
     QList<XELF_DEF::Elf_Phdr> listPhdr=getElf_PhdrList();
 
 //    bool bIs64=is64();
     int nCount=listPhdr.count();
 
     bool bImageAddressInit=false;
+
+    qint64 nMaxOffset=0;
+    qint64 nMaxAddress=0;
 
     // TODO
     for(int i=0; i<nCount; i++)
@@ -3225,13 +3230,27 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
             result.listRecords.append(record);
 
+            if(listPhdr.at(i).p_memsz>listPhdr.at(i).p_filesz)
+            {
+                XBinary::_MEMORY_RECORD record={};
+
+                record.type=MMT_LOADSECTION;
+                // TODO Section number!
+                record.nAddress=listPhdr.at(i).p_vaddr+listPhdr.at(i).p_filesz;
+                record.nSize=listPhdr.at(i).p_memsz-listPhdr.at(i).p_filesz;
+                record.nOffset=-1;
+            }
+
             if(!bImageAddressInit)
             {
                 result.nBaseAddress=record.nAddress;
                 bImageAddressInit=true;
             }
 
+            nMaxOffset=qMax(nMaxOffset,record.nOffset+record.nSize);
+
             result.nBaseAddress=qMin(record.nAddress,result.nBaseAddress);
+            nMaxAddress=qMax((qint64)(listPhdr.at(i).p_vaddr+listPhdr.at(i).p_memsz),nMaxAddress);
         }
 
 //        // TODO
@@ -3241,7 +3260,23 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 //        }
     }
 
-    // TODO Overlays
+    result.nImageSize=nMaxAddress-result.nBaseAddress; // TODO mb ALIGN_UP
+
+    qint64 nNoLoadableSize=result.nRawSize-nMaxOffset;
+
+    if(nNoLoadableSize>0)
+    {
+        XBinary::_MEMORY_RECORD record={};
+
+        record.type=MMT_NOLOADABLE;
+        // TODO Section number!
+        // TODO virtual sections!
+        record.nAddress=-1;
+        record.nSize=nNoLoadableSize;
+        record.nOffset=nMaxOffset;
+
+        result.listRecords.append(record);
+    }
 
     return  result;
 }
@@ -3400,5 +3435,6 @@ qint64 XELF::getBaseAddress()
 
 void XELF::setBaseAddress(qint64 nValue)
 {
+    Q_UNUSED(nValue)
     //  TODO
 }
