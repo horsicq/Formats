@@ -783,6 +783,7 @@ public:
     quint64 getLoadConfig_GuardCFDispatchFunctionPointer();
     quint64 getLoadConfig_GuardCFFunctionTable();
     quint64 getLoadConfig_GuardCFFunctionCount();
+    quint32 getLoadConfig_GuardFlags();
 
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
@@ -811,6 +812,7 @@ public:
     void setLoadConfig_GuardCFDispatchFunctionPointer(quint64 value);
     void setLoadConfig_GuardCFFunctionTable(quint64 value);
     void setLoadConfig_GuardCFFunctionCount(quint64 value);
+    void setLoadConfig_GuardFlags(quint32 value);
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 

@@ -1523,6 +1523,13 @@ qint64 XBinary::offsetToRelAddress(qint64 nOffset)
     return offsetToRelAddress(&memoryMap,nOffset);
 }
 
+qint64 XBinary::relAddressToOffset(qint64 nRelAddress)
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return relAddressToOffset(&memoryMap,nRelAddress);
+}
+
 bool XBinary::isOffsetValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
     bool bResult=false;
@@ -1653,6 +1660,11 @@ qint64 XBinary::offsetToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOff
     }
 
     return nResult;
+}
+
+qint64 XBinary::relAddressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
+{
+    return addressToOffset(pMemoryMap,nRelAddress+pMemoryMap->nBaseAddress);
 }
 
 XBinary::_MEMORY_RECORD XBinary::getOffsetMemoryRecord(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
