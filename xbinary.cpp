@@ -1536,7 +1536,7 @@ bool XBinary::isOffsetValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 
     if(pMemoryMap->nRawSize)
     {
-        bResult=((nOffset>0)&&(nOffset<pMemoryMap->nRawSize));
+        bResult=((nOffset>=0)&&(nOffset<pMemoryMap->nRawSize));
     }
     else
     {

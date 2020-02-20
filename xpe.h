@@ -232,6 +232,8 @@ public:
         quint32 cb;
         quint16 MajorRuntimeVersion;
         quint16 MinorRuntimeVersion;
+        quint32 MetaData_Address;
+        quint32 MetaData_Size;
         quint32 Flags;
         quint32 EntryPoint;
     };
@@ -784,6 +786,7 @@ public:
     quint64 getLoadConfig_GuardCFFunctionTable();
     quint64 getLoadConfig_GuardCFFunctionCount();
     quint32 getLoadConfig_GuardFlags();
+    quint16 getLoadConfig_CodeIntegrity_Flags();
 
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
@@ -813,6 +816,7 @@ public:
     void setLoadConfig_GuardCFFunctionTable(quint64 value);
     void setLoadConfig_GuardCFFunctionCount(quint64 value);
     void setLoadConfig_GuardFlags(quint32 value);
+    void setLoadConfig_CodeIntegrity_Flags(quint16 value);
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 
@@ -835,12 +839,16 @@ public:
     quint32 getNetHeader_cb();
     quint16 getNetHeader_MajorRuntimeVersion();
     quint16 getNetHeader_MinorRuntimeVersion();
+    quint32 getNetHeader_MetaData_Address();
+    quint32 getNetHeader_MetaData_Size();
     quint32 getNetHeader_Flags();
     quint32 getNetHeader_EntryPoint();
 
     void setNetHeader_cb(quint32 value);
     void setNetHeader_MajorRuntimeVersion(quint16 value);
     void setNetHeader_MinorRuntimeVersion(quint16 value);
+    void setNetHeader_MetaData_Address(quint32 value);
+    void setNetHeader_MetaData_Size(quint32 value);
     void setNetHeader_Flags(quint32 value);
     void setNetHeader_EntryPoint(quint32 value);
 
