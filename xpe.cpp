@@ -4408,6 +4408,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32()
         result.GuardFlags=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardFlags));
         result.CodeIntegrity.Flags=read_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.Flags));
         result.CodeIntegrity.Catalog=read_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.Catalog));
+        result.CodeIntegrity.CatalogOffset=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.CatalogOffset));
     }
 
     return result;
@@ -4448,6 +4449,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64()
         result.GuardFlags=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardFlags));
         result.CodeIntegrity.Flags=read_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.Flags));
         result.CodeIntegrity.Catalog=read_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.Catalog));
+        result.CodeIntegrity.CatalogOffset=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.CatalogOffset));
     }
 
     return result;
@@ -5009,6 +5011,27 @@ quint16 XPE::getLoadConfig_CodeIntegrity_Catalog()
     return nResult;
 }
 
+quint32 XPE::getLoadConfig_CodeIntegrity_CatalogOffset()
+{
+    quint16 nResult=0;
+
+    qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+
+    if(nLoadConfigOffset!=-1)
+    {
+        if(is64())
+        {
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.CatalogOffset));
+        }
+        else
+        {
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.CatalogOffset));
+        }
+    }
+
+    return nResult;
+}
+
 void XPE::setLoadConfig_Size(quint32 value)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
@@ -5447,6 +5470,23 @@ void XPE::setLoadConfig_CodeIntegrity_Catalog(quint16 value)
         else
         {
             write_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.Catalog),value);
+        }
+    }
+}
+
+void XPE::setLoadConfig_CodeIntegrity_CatalogOffset(quint32 value)
+{
+    qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+
+    if(nLoadConfigOffset!=-1)
+    {
+        if(is64())
+        {
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.CatalogOffset),value);
+        }
+        else
+        {
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.CatalogOffset),value);
         }
     }
 }
