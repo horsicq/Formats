@@ -3332,7 +3332,7 @@ bool XBinary::isPlainTextType()
 {
     bool bResult=false;
 
-    QByteArray baData=read_array(0,qMin(getSize(),(qint64)0x1000));
+    QByteArray baData=read_array(0,qMin(getSize(),(qint64)0x100));
 
     unsigned char *pDataOffset=(unsigned char *)baData.data();
     int nDataSize=baData.size();
@@ -3345,6 +3345,7 @@ bool XBinary::isPlainTextType()
         {
             if(pDataOffset[i]<0x9)
             {
+                char cTest=pDataOffset[i];
                 bResult=false;
                 break;
             }
@@ -3374,7 +3375,7 @@ bool XBinary::isUTF8TextType()
 
     if(bResult)
     {
-        baData=read_array(0,qMin(getSize(),(qint64)0x1000));
+        baData=read_array(0,qMin(getSize(),(qint64)0x100));
         unsigned char *pDataOffset=(unsigned char *)baData.data();
         pDataOffset+=3;
 
