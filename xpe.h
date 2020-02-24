@@ -790,6 +790,7 @@ public:
     quint16 getLoadConfig_CodeIntegrity_Catalog();
     quint32 getLoadConfig_CodeIntegrity_CatalogOffset();
     quint32 getLoadConfig_CodeIntegrity_Reserved();
+    quint64 getLoadConfig_GuardAddressTakenIatEntryTable();
 
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
@@ -823,6 +824,7 @@ public:
     void setLoadConfig_CodeIntegrity_Catalog(quint16 value);
     void setLoadConfig_CodeIntegrity_CatalogOffset(quint32 value);
     void setLoadConfig_CodeIntegrity_Reserved(quint32 value);
+    void setLoadConfig_GuardAddressTakenIatEntryTable(quint64 value);
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 
