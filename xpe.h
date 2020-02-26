@@ -792,6 +792,7 @@ public:
     quint32 getLoadConfig_CodeIntegrity_Reserved();
     quint64 getLoadConfig_GuardAddressTakenIatEntryTable();
     quint64 getLoadConfig_GuardAddressTakenIatEntryCount();
+    quint64 getLoadConfig_GuardLongJumpTargetTable();
 
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
@@ -827,6 +828,7 @@ public:
     void setLoadConfig_CodeIntegrity_Reserved(quint32 value);
     void setLoadConfig_GuardAddressTakenIatEntryTable(quint64 value);
     void setLoadConfig_GuardAddressTakenIatEntryCount(quint64 value);
+    void setLoadConfig_GuardLongJumpTargetTable(quint64 value);
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 

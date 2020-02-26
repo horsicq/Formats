@@ -3345,7 +3345,6 @@ bool XBinary::isPlainTextType()
         {
             if(pDataOffset[i]<0x9)
             {
-                char cTest=pDataOffset[i];
                 bResult=false;
                 break;
             }
