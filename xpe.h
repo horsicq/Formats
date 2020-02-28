@@ -621,6 +621,9 @@ public:
     bool isBoundImportPresent();
     bool isDelayImportPresent();
 
+    qint64 getTLSHeaderOffset();
+    qint64 getTLSHeaderSize();
+
     XPE_DEF::S_IMAGE_TLS_DIRECTORY32 getTLSDirectory32();
     XPE_DEF::S_IMAGE_TLS_DIRECTORY64 getTLSDirectory64();
 
@@ -794,6 +797,7 @@ public:
     quint64 getLoadConfig_GuardAddressTakenIatEntryCount();
     quint64 getLoadConfig_GuardLongJumpTargetTable();
     quint64 getLoadConfig_GuardLongJumpTargetCount();
+    quint64 getLoadConfig_DynamicValueRelocTable();
 
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
@@ -831,6 +835,7 @@ public:
     void setLoadConfig_GuardAddressTakenIatEntryCount(quint64 value);
     void setLoadConfig_GuardLongJumpTargetTable(quint64 value);
     void setLoadConfig_GuardLongJumpTargetCount(quint64 value);
+    void setLoadConfig_DynamicValueRelocTable(quint64 value);
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 
