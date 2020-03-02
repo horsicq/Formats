@@ -800,6 +800,7 @@ public:
     quint64 getLoadConfig_DynamicValueRelocTable();
     quint64 getLoadConfig_CHPEMetadataPointer();
     quint64 getLoadConfig_GuardRFFailureRoutine();
+    quint64 getLoadConfig_GuardRFFailureRoutineFunctionPointer();
 
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
@@ -840,6 +841,7 @@ public:
     void setLoadConfig_DynamicValueRelocTable(quint64 value);
     void setLoadConfig_CHPEMetadataPointer(quint64 value);
     void setLoadConfig_GuardRFFailureRoutine(quint64 value);
+    void setLoadConfig_GuardRFFailureRoutineFunctionPointer(quint64 value);
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 
