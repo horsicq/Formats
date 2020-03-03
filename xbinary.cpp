@@ -1667,7 +1667,7 @@ qint64 XBinary::relAddressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRel
     return addressToOffset(pMemoryMap,nRelAddress+pMemoryMap->nBaseAddress);
 }
 
-XBinary::_MEMORY_RECORD XBinary::getOffsetMemoryRecord(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
+XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
     _MEMORY_RECORD result={};
 
@@ -1688,7 +1688,7 @@ XBinary::_MEMORY_RECORD XBinary::getOffsetMemoryRecord(XBinary::_MEMORY_MAP *pMe
     return result;
 }
 
-XBinary::_MEMORY_RECORD XBinary::getAddressMemoryRecord(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
+XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
 {
     _MEMORY_RECORD result={};
 
@@ -1713,7 +1713,7 @@ qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nAddress)
 {
     qint32 nResult=-1;
 
-    _MEMORY_RECORD mm=getAddressMemoryRecord(pMemoryMap,nAddress);
+    _MEMORY_RECORD mm=getMemoryRecordByAddress(pMemoryMap,nAddress);
 
     if(mm.type==MMT_LOADSECTION)
     {
@@ -1721,6 +1721,57 @@ qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nAddress)
     }
 
     return nResult;
+}
+
+QString XBinary::getMemoryRecordInfoByOffset(qint64 nOffset)
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getMemoryRecordInfoByOffset(&memoryMap,nOffset);
+}
+
+QString XBinary::getMemoryRecordInfoByAddress(qint64 nAddress)
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getMemoryRecordInfoByOffset(&memoryMap,nAddress);
+}
+
+QString XBinary::getMemoryRecordInfoByRelAddress(qint64 nRelAddress)
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getMemoryRecordInfoByOffset(&memoryMap,nRelAddress);
+}
+
+QString XBinary::getMemoryRecordInfoByOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
+{
+    XBinary::_MEMORY_RECORD memoryRecord=getMemoryRecordByOffset(pMemoryMap,nOffset);
+
+    return getMemoryRecordInfo(&memoryRecord);
+}
+
+QString XBinary::getMemoryRecordInfoByAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
+{
+    XBinary::_MEMORY_RECORD memoryRecord=getMemoryRecordByAddress(pMemoryMap,nAddress);
+
+    return getMemoryRecordInfo(&memoryRecord);
+}
+
+QString XBinary::getMemoryRecordInfoByRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
+{
+    XBinary::_MEMORY_RECORD memoryRecord=getMemoryRecordByAddress(pMemoryMap,nRelAddress+pMemoryMap->nBaseAddress);
+
+    return getMemoryRecordInfo(&memoryRecord);
+}
+
+QString XBinary::getMemoryRecordInfo(XBinary::_MEMORY_RECORD *pMemoryRecord)
+{
+    QString sRecord;
+
+    sRecord=pMemoryRecord->sName; // TODO
+
+    return sRecord;
 }
 
 XBinary::_MEMORY_MAP XBinary::getMemoryMap()

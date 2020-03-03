@@ -1604,6 +1604,8 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
     {
         _MEMORY_RECORD recordHeaderRaw={};
 
+        QString sHeaderName=QString("PE %1").arg(tr("Header"));
+
         if(!isImage())
         {
             recordHeaderRaw.type=MMT_HEADER;
@@ -1611,6 +1613,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
             recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
             recordHeaderRaw.nOffset=0;
             recordHeaderRaw.nSize=nHeadersSize;
+            recordHeaderRaw.sName=sHeaderName;
 
             result.listRecords.append(recordHeaderRaw);
 
@@ -1623,6 +1626,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                 recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
                 record.nOffset=-1;
                 record.nSize=nVirtualSizeofHeaders-nHeadersSize;
+                record.sName=sHeaderName;
 
                 result.listRecords.append(record);
             }
@@ -1634,6 +1638,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
             recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
             recordHeaderRaw.nOffset=0;
             recordHeaderRaw.nSize=nVirtualSizeofHeaders;
+            recordHeaderRaw.sName=sHeaderName;
 
             result.listRecords.append(recordHeaderRaw);
         }
@@ -1667,6 +1672,15 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                 }
             }
 
+            QString _sSectionName=QString((char *)section.Name);
+
+            if(_sSectionName.size()>8)
+            {
+                _sSectionName.resize(8);
+            }
+
+            QString sSectionName=QString("%1(%2)['%3']").arg(tr("Section")).arg(i).arg(_sSectionName);
+
             if(!isImage())
             {
                 if(nFileSize)
@@ -1679,6 +1693,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                     record.nAddress=nVirtualAddress;
                     record.nOffset=nFileOffset;
                     record.nSize=nFileSize;
+                    record.sName=sSectionName;
 
                     result.listRecords.append(record);
                 }
@@ -1693,6 +1708,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                     record.nAddress=nVirtualAddress+nFileSize;
                     record.nOffset=-1;
                     record.nSize=nVirtualSize-nFileSize;
+                    record.sName=sSectionName;
 
                     result.listRecords.append(record);
                 }
@@ -1707,6 +1723,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                 record.nAddress=nVirtualAddress;
                 record.nOffset=nVirtualAddress-result.nBaseAddress;
                 record.nSize=nVirtualSize;
+                record.sName=sSectionName;
 
                 result.listRecords.append(record);
             }
@@ -1724,6 +1741,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
             record.nOffset=nMaxOffset;
 
             record.nSize=qMax(getSize()-nMaxOffset,(qint64)0);
+            record.sName=tr("Overlay");
 
             if(record.nSize)
             {
@@ -4418,6 +4436,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32()
         result.CHPEMetadataPointer=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CHPEMetadataPointer));
         result.GuardRFFailureRoutine=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardRFFailureRoutine));
         result.GuardRFFailureRoutineFunctionPointer=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardRFFailureRoutineFunctionPointer));
+        result.DynamicValueRelocTableOffset=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DynamicValueRelocTableOffset));
         // TODO
     }
 
@@ -4469,6 +4488,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64()
         result.CHPEMetadataPointer=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CHPEMetadataPointer));
         result.GuardRFFailureRoutine=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardRFFailureRoutine));
         result.GuardRFFailureRoutineFunctionPointer=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardRFFailureRoutineFunctionPointer));
+        result.DynamicValueRelocTableOffset=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,DynamicValueRelocTableOffset));
         // TODO
     }
 
@@ -5241,6 +5261,27 @@ quint64 XPE::getLoadConfig_GuardRFFailureRoutineFunctionPointer()
     return nResult;
 }
 
+quint32 XPE::getLoadConfig_DynamicValueRelocTableOffset()
+{
+    quint32 nResult=0;
+
+    qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+
+    if(nLoadConfigOffset!=-1)
+    {
+        if(is64())
+        {
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,DynamicValueRelocTableOffset));
+        }
+        else
+        {
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DynamicValueRelocTableOffset));
+        }
+    }
+
+    return nResult;
+}
+
 void XPE::setLoadConfig_Size(quint32 value)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
@@ -5849,6 +5890,23 @@ void XPE::setLoadConfig_GuardRFFailureRoutineFunctionPointer(quint64 value)
         else
         {
             write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardRFFailureRoutineFunctionPointer),value);
+        }
+    }
+}
+
+void XPE::setLoadConfig_DynamicValueRelocTableOffset(quint32 value)
+{
+    qint32 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+
+    if(nLoadConfigOffset!=-1)
+    {
+        if(is64())
+        {
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,DynamicValueRelocTableOffset),value);
+        }
+        else
+        {
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DynamicValueRelocTableOffset),value);
         }
     }
 }

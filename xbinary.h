@@ -321,10 +321,20 @@ public:
     static qint64 offsetToRelAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static qint64 relAddressToOffset(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
 
-    static _MEMORY_RECORD getOffsetMemoryRecord(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
-    static _MEMORY_RECORD getAddressMemoryRecord(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+    static _MEMORY_RECORD getMemoryRecordByOffset(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
+    static _MEMORY_RECORD getMemoryRecordByAddress(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
 
     static qint32 addressToLoadSection(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+
+    QString getMemoryRecordInfoByOffset(qint64 nOffset);
+    QString getMemoryRecordInfoByAddress(qint64 nAddress);
+    QString getMemoryRecordInfoByRelAddress(qint64 nRelAddress);
+
+    static QString getMemoryRecordInfoByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
+    static QString getMemoryRecordInfoByAddress(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+    static QString getMemoryRecordInfoByRelAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
+
+    static QString getMemoryRecordInfo(_MEMORY_RECORD *pMemoryRecord);
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getBaseAddress();
