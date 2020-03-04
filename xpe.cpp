@@ -4437,6 +4437,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32()
         result.GuardRFFailureRoutine=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardRFFailureRoutine));
         result.GuardRFFailureRoutineFunctionPointer=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardRFFailureRoutineFunctionPointer));
         result.DynamicValueRelocTableOffset=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DynamicValueRelocTableOffset));
+        result.DynamicValueRelocTableSection=read_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DynamicValueRelocTableSection));
         // TODO
     }
 
@@ -4489,6 +4490,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64()
         result.GuardRFFailureRoutine=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardRFFailureRoutine));
         result.GuardRFFailureRoutineFunctionPointer=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardRFFailureRoutineFunctionPointer));
         result.DynamicValueRelocTableOffset=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,DynamicValueRelocTableOffset));
+        result.DynamicValueRelocTableSection=read_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,DynamicValueRelocTableSection));
         // TODO
     }
 
@@ -5282,6 +5284,27 @@ quint32 XPE::getLoadConfig_DynamicValueRelocTableOffset()
     return nResult;
 }
 
+quint16 XPE::getLoadConfig_DynamicValueRelocTableSection()
+{
+    quint32 nResult=0;
+
+    qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+
+    if(nLoadConfigOffset!=-1)
+    {
+        if(is64())
+        {
+            nResult=read_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,DynamicValueRelocTableSection));
+        }
+        else
+        {
+            nResult=read_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DynamicValueRelocTableSection));
+        }
+    }
+
+    return nResult;
+}
+
 void XPE::setLoadConfig_Size(quint32 value)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
@@ -5907,6 +5930,23 @@ void XPE::setLoadConfig_DynamicValueRelocTableOffset(quint32 value)
         else
         {
             write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DynamicValueRelocTableOffset),value);
+        }
+    }
+}
+
+void XPE::setLoadConfig_DynamicValueRelocTableSection(quint16 value)
+{
+    qint32 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+
+    if(nLoadConfigOffset!=-1)
+    {
+        if(is64())
+        {
+            write_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,DynamicValueRelocTableSection),value);
+        }
+        else
+        {
+            write_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DynamicValueRelocTableSection),value);
         }
     }
 }

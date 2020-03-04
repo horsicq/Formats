@@ -1503,6 +1503,13 @@ bool XBinary::isAddressValid(qint64 nAddress)
     return isAddressValid(&memoryMap,nAddress);
 }
 
+bool XBinary::isRelAddressValid(qint64 nRelAddress)
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return isRelAddressValid(&memoryMap,nRelAddress);
+}
+
 qint64 XBinary::offsetToAddress(qint64 nOffset)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
@@ -1598,6 +1605,11 @@ bool XBinary::isAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
     }
 
     return bResult;
+}
+
+bool XBinary::isRelAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
+{
+    return isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+nRelAddress);
 }
 
 qint64 XBinary::offsetToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
