@@ -3030,6 +3030,10 @@ QString XBinary::getSignature(qint64 nOffset, qint64 nSize)
 
     if(nOffset!=-1)
     {
+        OFFSETSIZE os=convertOffsetAndSize(nOffset,-1);
+
+        nSize=qMin(os.nSize,nSize);
+
         sResult=read_array(nOffset,nSize).toHex().toUpper();
     }
 
