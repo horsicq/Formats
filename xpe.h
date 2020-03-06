@@ -804,6 +804,7 @@ public:
     quint32 getLoadConfig_DynamicValueRelocTableOffset();
     quint16 getLoadConfig_DynamicValueRelocTableSection();
     quint16 getLoadConfig_Reserved2();
+    quint64 getLoadConfig_GuardRFVerifyStackPointerFunctionPointer();
 
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
@@ -848,6 +849,7 @@ public:
     void setLoadConfig_DynamicValueRelocTableOffset(quint32 value);
     void setLoadConfig_DynamicValueRelocTableSection(quint16 value);
     void setLoadConfig_Reserved2(quint16 value);
+    void setLoadConfig_GuardRFVerifyStackPointerFunctionPointer(quint64 value);
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 
