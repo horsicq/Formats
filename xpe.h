@@ -806,6 +806,7 @@ public:
     quint16 getLoadConfig_Reserved2();
     quint64 getLoadConfig_GuardRFVerifyStackPointerFunctionPointer();
     quint32 getLoadConfig_HotPatchTableOffset();
+    quint32 getLoadConfig_Reserved3();
 
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
@@ -852,6 +853,7 @@ public:
     void setLoadConfig_Reserved2(quint16 value);
     void setLoadConfig_GuardRFVerifyStackPointerFunctionPointer(quint64 value);
     void setLoadConfig_HotPatchTableOffset(quint32 value);
+    void setLoadConfig_Reserved3(quint32 value);
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 
