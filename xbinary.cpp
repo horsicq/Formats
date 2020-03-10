@@ -887,6 +887,7 @@ void XBinary::_write_int64(char *pData, qint64 value, bool bIsBigEndian)
 
 qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint64 nArraySize)
 {
+    // TODO Optimize
     emit findProgressMaximumChanged(100);
     emit findProgressValueChanged(0);
 
@@ -1166,7 +1167,74 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
 
 qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
 {
-    // TODO
+    // TODO Optimize
+    emit findProgressMaximumChanged(100);
+    emit findProgressValueChanged(0);
+
+    qint64 nStringSize=sString.size();
+    qint64 _nSize=getSize();
+
+    if(nSize==-1)
+    {
+        nSize=_nSize-nOffset;
+    }
+
+    if(nSize<=0)
+    {
+        return -1;
+    }
+
+    if(nOffset+nSize>_nSize)
+    {
+        return -1;
+    }
+
+    if(nStringSize>nSize)
+    {
+        return -1;
+    }
+
+    qint64 nTemp=0;
+    const int BUFFER_SIZE=0x1000;
+    char *pBuffer=new char[BUFFER_SIZE+(nStringSize-1)];
+
+    qint64 nTotalSize=nSize;
+    qint32 nCurrentProgress=0;
+
+    QByteArray baUpper=sString.toUpper().toLatin1();
+    QByteArray baLower=sString.toLower().toLatin1();;
+
+    while((nSize>nStringSize-1)&&(!__bIsFindStop))
+    {
+        nTemp=qMin((qint64)(BUFFER_SIZE+(nStringSize-1)),nSize);
+
+        if(!read_array(nOffset,pBuffer,nTemp))
+        {
+            break;
+        }
+
+        for(unsigned int i=0; i<nTemp-(nStringSize-1); i++)
+        {
+            if(compareMemoryI(pBuffer+i,baUpper.data(),baLower.data(),nStringSize))
+            {
+                delete[] pBuffer;
+
+                return nOffset+i;
+            }
+        }
+
+        nSize-=nTemp-(nStringSize-1);
+        nOffset+=nTemp-(nStringSize-1);
+
+        if((((nTotalSize-nSize)*100)/nTotalSize)>nCurrentProgress)
+        {
+            nCurrentProgress++;
+            emit findProgressValueChanged(nCurrentProgress);
+        }
+    }
+
+    delete[] pBuffer;
+
     return -1;
 }
 
@@ -1487,6 +1555,27 @@ bool XBinary::compareMemory(char *pMemory1,const char *pMemory2, qint64 nSize)
     }
 
     return true;
+}
+
+bool XBinary::compareMemoryI(char *pMemory, const char *pMemoryU, const char *pMemoryL, qint64 nSize)
+{
+    bool bResult=true;
+
+    while(nSize>0)
+    {
+        if((*(pMemory)!=*(pMemoryU))&&(*(pMemory)!=*(pMemoryL)))
+        {
+            bResult=false;
+            break;
+        }
+
+        pMemory++;
+        pMemoryU++;
+        pMemoryL++;
+        nSize--;
+    }
+
+    return bResult;
 }
 
 bool XBinary::isOffsetValid(qint64 nOffset)
@@ -2981,10 +3070,17 @@ quint32 XBinary::getStringCustomCRC32(QString sString)
     quint32 nResult=0; // not ~0 !!! if ~0 (0xFFFFFFFF) it will be a CRC32C
 
     int nSize=sString.size();
+    QByteArray baString=sString.toLatin1();
 
     for(int i=0; i<nSize; i++)
     {
-        unsigned char _char=(unsigned char)sString.at(i).toLatin1();
+        unsigned char _char=(unsigned char)baString.data()[i];
+        unsigned char _char1=(unsigned char)sString.at(i).toLatin1();
+
+        if(_char!=_char1)
+        {
+            qFatal("Error"); // TODO remove
+        }
 
         nResult^=_char;
 
