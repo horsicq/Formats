@@ -453,6 +453,9 @@ public:
     quint64 getImportHash64(_MEMORY_MAP *pMemoryMap);
     quint32 getImportHash32(_MEMORY_MAP *pMemoryMap);
 
+    qint64 getImportDescriptorOffset(quint32 nNumber);
+    qint64 getImportDescriptorSize();
+
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> getImportDescriptors();
     QList<IMAGE_IMPORT_DESCRIPTOR_EX> getImportDescriptorsEx();
 
@@ -808,6 +811,7 @@ public:
     quint32 getLoadConfig_HotPatchTableOffset();
     quint32 getLoadConfig_Reserved3();
     quint64 getLoadConfig_EnclaveConfigurationPointer();
+    quint64 getLoadConfig_VolatileMetadataPointer();
 
     void setLoadConfig_Size(quint32 value);
     void setLoadConfig_TimeDateStamp(quint32 value);
@@ -856,6 +860,7 @@ public:
     void setLoadConfig_HotPatchTableOffset(quint32 value);
     void setLoadConfig_Reserved3(quint32 value);
     void setLoadConfig_EnclaveConfigurationPointer(quint64 value);
+    void setLoadConfig_VolatileMetadataPointer(quint64 value);
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 

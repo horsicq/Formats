@@ -1973,6 +1973,25 @@ quint32 XPE::getImportHash32(_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
+qint64 XPE::getImportDescriptorOffset(quint32 nNumber)
+{
+    qint64 nResult=-1;
+
+    qint64 nImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
+
+    if(nImportOffset!=-1)
+    {
+        nResult=nImportOffset+nNumber*sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
+    }
+
+    return nResult;
+}
+
+qint64 XPE::getImportDescriptorSize()
+{
+    return sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
+}
+
 QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> XPE::getImportDescriptors()
 {
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> listResult;
@@ -4444,7 +4463,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32()
         result.HotPatchTableOffset=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,HotPatchTableOffset));
         result.Reserved3=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,Reserved3));
         result.EnclaveConfigurationPointer=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,EnclaveConfigurationPointer));
-        // TODO
+        result.VolatileMetadataPointer=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,VolatileMetadataPointer));
     }
 
     return result;
@@ -4502,7 +4521,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64()
         result.HotPatchTableOffset=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,HotPatchTableOffset));
         result.Reserved3=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,Reserved3));
         result.EnclaveConfigurationPointer=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,EnclaveConfigurationPointer));
-        // TODO
+        result.VolatileMetadataPointer=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,VolatileMetadataPointer));
     }
 
     return result;
@@ -5421,6 +5440,27 @@ quint64 XPE::getLoadConfig_EnclaveConfigurationPointer()
     return nResult;
 }
 
+quint64 XPE::getLoadConfig_VolatileMetadataPointer()
+{
+    quint64 nResult=0;
+
+    qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+
+    if(nLoadConfigOffset!=-1)
+    {
+        if(is64())
+        {
+            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,VolatileMetadataPointer));
+        }
+        else
+        {
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,VolatileMetadataPointer));
+        }
+    }
+
+    return nResult;
+}
+
 void XPE::setLoadConfig_Size(quint32 value)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
@@ -6148,6 +6188,23 @@ void XPE::setLoadConfig_EnclaveConfigurationPointer(quint64 value)
         else
         {
             write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,EnclaveConfigurationPointer),value);
+        }
+    }
+}
+
+void XPE::setLoadConfig_VolatileMetadataPointer(quint64 value)
+{
+    qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+
+    if(nLoadConfigOffset!=-1)
+    {
+        if(is64())
+        {
+            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,VolatileMetadataPointer),value);
+        }
+        else
+        {
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,VolatileMetadataPointer),value);
         }
     }
 }
