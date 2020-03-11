@@ -699,7 +699,6 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY64
     quint64 SEHandlerTable;                 // VA
     quint64 SEHandlerCount;
     // Standard
-    // TODO
     quint64 GuardCFCheckFunctionPointer;    // VA
     quint64 GuardCFDispatchFunctionPointer; // VA
     quint64 GuardCFFunctionTable;           // VA
