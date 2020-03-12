@@ -377,6 +377,7 @@ public:
 
     static bool dumpToFile(QString sFileName,const char *pData,qint64 nDataSize);
     bool dumpToFile(QString sFileName,qint64 nDataOffset,qint64 nDataSize);
+    bool virtualDumpToFile(QString sFileName,qint64 nAddress,qint64 nSize);
 
     QSet<FT> getFileTypes();
     static QSet<FT> getFileTypes(QIODevice *pDevice);
