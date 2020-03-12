@@ -2260,6 +2260,12 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
     return bResult;
 }
 
+bool XBinary::virtualDumpToFile(QString sFileName, qint64 nAddress, qint64 nSize)
+{
+    // TODO
+    return false;
+}
+
 QSet<XBinary::FT> XBinary::getFileTypes()
 {
     QSet<XBinary::FT> stResult;
