@@ -2116,6 +2116,41 @@ void XPE::setImportDescriptor(quint32 nNumber, XPE_DEF::IMAGE_IMPORT_DESCRIPTOR 
     }
 }
 
+void XPE::setImportDescriptor_OriginalFirstThunk(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getImportDescriptorOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,OriginalFirstThunk),nValue);
+}
+
+void XPE::setImportDescriptor_TimeDateStamp(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getImportDescriptorOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,TimeDateStamp),nValue);
+}
+
+void XPE::setImportDescriptor_ForwarderChain(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getImportDescriptorOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,ForwarderChain),nValue);
+}
+
+void XPE::setImportDescriptor_Name(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getImportDescriptorOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,Name),nValue);
+}
+
+void XPE::setImportDescriptor_FirstThunk(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getImportDescriptorOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,FirstThunk),nValue);
+}
+
 QList<XPE::IMPORT_HEADER> XPE::getImports()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();

@@ -462,6 +462,12 @@ public:
     XPE_DEF::IMAGE_IMPORT_DESCRIPTOR getImportDescriptor(quint32 nNumber);
     void setImportDescriptor(quint32 nNumber,XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *pImportDescriptor);
 
+    void setImportDescriptor_OriginalFirstThunk(quint32 nNumber,quint32 nValue);
+    void setImportDescriptor_TimeDateStamp(quint32 nNumber,quint32 nValue);
+    void setImportDescriptor_ForwarderChain(quint32 nNumber,quint32 nValue);
+    void setImportDescriptor_Name(quint32 nNumber,quint32 nValue);
+    void setImportDescriptor_FirstThunk(quint32 nNumber,quint32 nValue);
+
     QList<IMPORT_HEADER> getImports();
     QList<IMPORT_HEADER> getImports(_MEMORY_MAP *pMemoryMap);
 
