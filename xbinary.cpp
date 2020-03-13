@@ -1824,6 +1824,15 @@ qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nAddress)
     return nResult;
 }
 
+bool XBinary::isSolidAddressRange(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress, qint64 nSize)
+{
+    bool bResult=false;
+
+    // TODO
+
+    return bResult;
+}
+
 QString XBinary::getMemoryRecordInfoByOffset(qint64 nOffset)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
@@ -2258,12 +2267,6 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
     }
 
     return bResult;
-}
-
-bool XBinary::virtualDumpToFile(QString sFileName, qint64 nAddress, qint64 nSize)
-{
-    // TODO
-    return false;
 }
 
 QSet<XBinary::FT> XBinary::getFileTypes()
@@ -4005,7 +4008,7 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
         {
             i+=_getSignatureRelOffset(&result,sSignature,i);
         }
-        else if(sSignature.at(i)==QChar('#')) // mb TODO BaseAddress
+        else if(sSignature.at(i)==QChar('#')) // TODO Check []
         {
             i+=_getSignatureAddress(&result,sSignature,i);
         }
@@ -4102,6 +4105,8 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                         _nAddress=read_uint64(nOffset); // TODO mb BE<->LE
                         break;
                 }
+
+                // TODO Base address!!!
 
                 nOffset=addressToOffset(pMemoryMap,_nAddress); // TODO!
                 break;
