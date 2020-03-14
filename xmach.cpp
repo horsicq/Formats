@@ -219,9 +219,7 @@ QMap<quint64, QString> XMACH::getHeaderMagicsS()
 QMap<quint64, QString> XMACH::getHeaderCpuTypes()
 {
     QMap<quint64, QString> mapResult;
-
     // https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h
-
     mapResult.insert(1,"CPU_TYPE_VAX");
     mapResult.insert(2,"CPU_TYPE_ROMP");
     mapResult.insert(4,"CPU_TYPE_NS32032");
@@ -673,6 +671,8 @@ qint64 XMACH::getAddressOfEntryPoint()
 {
     qint64 nResult=-1;
 
+    bool bIsBigEndian=isBigEndian();
+
     QList<COMMAND_RECORD> listLC=getCommandRecords();
 
     int nCount=listLC.count();
@@ -684,20 +684,20 @@ qint64 XMACH::getAddressOfEntryPoint()
 
         if((nType==XMACH_DEF::S_LC_THREAD)||(nType==XMACH_DEF::S_LC_UNIXTHREAD))
         {
-            quint32 nFlavor=read_uint32(nOffset+8,isBigEndian());
+            quint32 nFlavor=read_uint32(nOffset+8,bIsBigEndian);
 
             if(nFlavor==XMACH_DEF::S_x86_THREAD_STATE32)
             {
-                nResult=read_uint32(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE32,eip),isBigEndian());
+                nResult=read_uint32(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE32,eip),bIsBigEndian);
             }
             else if(nFlavor==XMACH_DEF::S_x86_THREAD_STATE64)
             {
-                nResult=read_uint64(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE64,rip),isBigEndian());
+                nResult=read_uint64(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE64,rip),bIsBigEndian);
             }
         }
         else if(nType==XMACH_DEF::S_LC_MAIN) // TODO const
         {
-            qint64 nEntryPointOffset=read_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),isBigEndian());
+            qint64 nEntryPointOffset=read_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),bIsBigEndian);
 
             nResult=offsetToAddress(nEntryPointOffset);
         }
