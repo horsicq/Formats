@@ -191,6 +191,7 @@ public:
     void setArch(QString sArch);
     virtual QString getArch();
 
+    static quint32 random16();
     static quint32 random32();
     static quint64 random64();
 

@@ -64,12 +64,15 @@ QString XBinary::getArch()
     return __sArch;
 }
 
-quint32 XBinary::random32()
+quint32 XBinary::random16()
 {
-    static quint32 nSeed=0;
+    quint16 nResult=0;
+
 #if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
-    nSeed=QRandomGenerator::global()->generate();
+    nResult=(quint16)(QRandomGenerator::global()->generate());
 #else
+    static quint32 nSeed=0;
+
     if(!nSeed)
     {
         quint32 nRValue=QDateTime::currentMSecsSinceEpoch()&0xFFFFFFFF;
@@ -77,13 +80,18 @@ quint32 XBinary::random32()
         nSeed^=nRValue;
         qsrand(nSeed);
     }
-
-    quint16 nValue1=(quint16)qrand();
-    quint16 nValue2=(quint16)qrand();
-
-    nSeed^=(nValue1<<16)+nValue2;
+    nResult=(quint16)qrand();
 #endif
-    return nSeed;
+
+    return nResult;
+}
+
+quint32 XBinary::random32()
+{
+    quint16 nValue1=random16();
+    quint16 nValue2=random16();
+
+    return (nValue1<<16)+nValue2;
 }
 
 quint64 XBinary::random64()
