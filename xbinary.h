@@ -109,6 +109,7 @@ public:
         MMT type;
         qint32 nLoadSection;
         QString sName;
+        qint32 nIndex;
     };
 
     enum FT

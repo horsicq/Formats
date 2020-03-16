@@ -276,6 +276,9 @@ quint32 XMSDOS::get_e_lfanew()
 XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 {
     _MEMORY_MAP result={};
+
+    qint32 nIndex=0;
+
     result.fileType=FT_MSDOS;
     result.mode=MODE_16;
     result.nRawSize=getSize();
@@ -304,6 +307,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     recordHeader.nAddress=-1;
     recordHeader.segment=ADDRESS_SEGMENT_UNKNOWN;
     recordHeader.type=MMT_HEADER;
+    recordHeader.nIndex=nIndex++;
 
     result.listRecords.append(recordHeader);
 
@@ -320,6 +324,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 
         recordVirtualCode.segment=ADDRESS_SEGMENT_CODE; // CODE
         recordVirtualCode.type=MMT_LOADSECTION;
+        recordVirtualCode.nIndex=nIndex++;
 
         result.listRecords.append(recordVirtualCode);
 
@@ -336,6 +341,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 
     recordCode.segment=ADDRESS_SEGMENT_CODE; // CODE
     recordCode.type=MMT_LOADSECTION;
+    recordCode.nIndex=nIndex++;
 
     result.listRecords.append(recordCode);
 
@@ -350,6 +356,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 
         recordOverlay.segment=ADDRESS_SEGMENT_UNKNOWN;
         recordOverlay.type=MMT_OVERLAY;
+        recordOverlay.nIndex=nIndex++;
 
         result.listRecords.append(recordOverlay);
     }

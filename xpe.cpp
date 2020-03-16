@@ -1548,6 +1548,8 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
 {
     _MEMORY_MAP result={};
 
+    qint32 nIndex=0;
+
     if(is64())
     {
         result.fileType=FT_PE64;
@@ -1614,6 +1616,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
             recordHeaderRaw.nOffset=0;
             recordHeaderRaw.nSize=nHeadersSize;
             recordHeaderRaw.sName=sHeaderName;
+            recordHeaderRaw.nIndex=nIndex++;
 
             result.listRecords.append(recordHeaderRaw);
 
@@ -1627,6 +1630,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                 record.nOffset=-1;
                 record.nSize=nVirtualSizeofHeaders-nHeadersSize;
                 record.sName=sHeaderName;
+                record.nIndex=nIndex++;
 
                 result.listRecords.append(record);
             }
@@ -1639,6 +1643,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
             recordHeaderRaw.nOffset=0;
             recordHeaderRaw.nSize=nVirtualSizeofHeaders;
             recordHeaderRaw.sName=sHeaderName;
+            recordHeaderRaw.nIndex=nIndex++;
 
             result.listRecords.append(recordHeaderRaw);
         }
@@ -1694,6 +1699,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                     record.nOffset=nFileOffset;
                     record.nSize=nFileSize;
                     record.sName=sSectionName;
+                    record.nIndex=nIndex++;
 
                     result.listRecords.append(record);
                 }
@@ -1709,6 +1715,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                     record.nOffset=-1;
                     record.nSize=nVirtualSize-nFileSize;
                     record.sName=sSectionName;
+                    record.nIndex=nIndex++;
 
                     result.listRecords.append(record);
                 }
@@ -1724,6 +1731,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                 record.nOffset=nVirtualAddress-result.nBaseAddress;
                 record.nSize=nVirtualSize;
                 record.sName=sSectionName;
+                record.nIndex=nIndex++;
 
                 result.listRecords.append(record);
             }
@@ -1742,6 +1750,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
 
             record.nSize=qMax(getSize()-nMaxOffset,(qint64)0);
             record.sName=tr("Overlay");
+            record.nIndex=nIndex++;
 
             if(record.nSize)
             {

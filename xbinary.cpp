@@ -1836,7 +1836,10 @@ bool XBinary::isSolidAddressRange(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddr
 {
     bool bResult=false;
 
-    // TODO
+    qint32 nIndex1=getMemoryRecordByAddress(pMemoryMap,nAddress).nIndex;
+    qint32 nIndex2=getMemoryRecordByAddress(pMemoryMap,nAddress+nSize-1).nIndex;
+
+    bResult=(nIndex1==nIndex2);
 
     return bResult;
 }
@@ -1907,6 +1910,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
     record.segment=ADDRESS_SEGMENT_FLAT;
     record.nOffset=0;
     record.nSize=getSize();
+    record.nIndex=0;
 
     result.listRecords.append(record);
 
