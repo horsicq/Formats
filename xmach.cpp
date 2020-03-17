@@ -710,6 +710,8 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 {
     _MEMORY_MAP result={};
 
+    qint32 nIndex=0;
+
     if(is64())
     {
         result.fileType=FT_MACH64;
@@ -741,6 +743,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
         record.nAddress=listSegmentRecords.at(i).vmaddr;
         record.nSize=listSegmentRecords.at(i).filesize;
         record.nOffset=listSegmentRecords.at(i).fileoff;
+        record.nIndex=nIndex++;
 
         result.listRecords.append(record);
 

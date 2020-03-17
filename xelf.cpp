@@ -3192,6 +3192,8 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 {
     XBinary::_MEMORY_MAP result={};
 
+    qint32 nIndex=0;
+
     if(is64())
     {
         result.fileType=FT_ELF64;
@@ -3227,6 +3229,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
             record.nAddress=listPhdr.at(i).p_vaddr;
             record.nSize=listPhdr.at(i).p_filesz;
             record.nOffset=listPhdr.at(i).p_offset;
+            record.nIndex=nIndex++;
 
             result.listRecords.append(record);
 
@@ -3274,6 +3277,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
         record.nAddress=-1;
         record.nSize=nNoLoadableSize;
         record.nOffset=nMaxOffset;
+        record.nIndex=nIndex++;
 
         result.listRecords.append(record);
     }
