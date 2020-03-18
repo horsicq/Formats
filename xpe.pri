@@ -10,5 +10,5 @@ SOURCES += \
 
 !contains(XCONFIG, xmsdos) {
     XCONFIG += xmsdos
-    include(xmsdos.pri)
+    include($$PWD/xmsdos.pri)
 }
