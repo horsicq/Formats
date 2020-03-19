@@ -80,6 +80,8 @@ public:
     quint16 get_e_lfarlc();
     quint16 get_e_ovno();
     // TODO more
+    quint16 get_e_oemid();
+    quint16 get_e_oeminfo();
     quint32 get_e_lfanew();
 
     virtual _MEMORY_MAP getMemoryMap();

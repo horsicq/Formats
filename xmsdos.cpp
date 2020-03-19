@@ -268,6 +268,16 @@ quint16 XMSDOS::get_e_ovno()
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_ovno));
 }
 
+quint16 XMSDOS::get_e_oemid()
+{
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_oemid));
+}
+
+quint16 XMSDOS::get_e_oeminfo()
+{
+    return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_oeminfo));
+}
+
 quint32 XMSDOS::get_e_lfanew()
 {
     return read_uint32(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_lfanew));
