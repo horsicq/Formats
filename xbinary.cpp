@@ -1855,14 +1855,14 @@ QString XBinary::getMemoryRecordInfoByAddress(qint64 nAddress)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 
-    return getMemoryRecordInfoByOffset(&memoryMap,nAddress);
+    return getMemoryRecordInfoByAddress(&memoryMap,nAddress);
 }
 
 QString XBinary::getMemoryRecordInfoByRelAddress(qint64 nRelAddress)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 
-    return getMemoryRecordInfoByOffset(&memoryMap,nRelAddress);
+    return getMemoryRecordInfoByRelAddress(&memoryMap,nRelAddress);
 }
 
 QString XBinary::getMemoryRecordInfoByOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
