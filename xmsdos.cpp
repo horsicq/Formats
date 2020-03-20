@@ -80,6 +80,7 @@ XMSDOS_DEF::IMAGE_DOS_HEADER XMSDOS::getDosHeader()
 
 XMSDOS_DEF::IMAGE_DOS_HEADEREX XMSDOS::getDosHeaderEx()
 {
+    // TODO
     XMSDOS_DEF::IMAGE_DOS_HEADEREX result={};
 
     read_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_magic),(char *)&result,sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX));
@@ -89,6 +90,7 @@ XMSDOS_DEF::IMAGE_DOS_HEADEREX XMSDOS::getDosHeaderEx()
 
 void XMSDOS::setDosHeader(XMSDOS_DEF::IMAGE_DOS_HEADER *pDosHeader)
 {
+    // TODO
     write_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER,e_magic),(char *)pDosHeader,sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));
 }
 
@@ -268,6 +270,18 @@ quint16 XMSDOS::get_e_ovno()
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_ovno));
 }
 
+quint16 XMSDOS::get_e_res(int nPosition)
+{
+    quint16 nResult=0;
+
+    if(nPosition<10)
+    {
+        nResult=read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_res)+sizeof(quint16)*nPosition);
+    }
+
+    return nResult;
+}
+
 quint16 XMSDOS::get_e_oemid()
 {
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_oemid));
@@ -276,6 +290,18 @@ quint16 XMSDOS::get_e_oemid()
 quint16 XMSDOS::get_e_oeminfo()
 {
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_oeminfo));
+}
+
+quint16 XMSDOS::get_e_res2(int nPosition)
+{
+    quint16 nResult=0;
+
+    if(nPosition<10)
+    {
+        nResult=read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_res2)+sizeof(quint16)*nPosition);
+    }
+
+    return nResult;
 }
 
 quint32 XMSDOS::get_e_lfanew()
