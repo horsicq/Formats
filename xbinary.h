@@ -542,7 +542,6 @@ protected:
     bool _isOffsetValid(qint64 nOffset);
     void _errorMessage(QString sMessage);
     void _infoMessage(QString sMessage);
-
     qint64 _calculateRawSize();
     qint64 _calculateRawSize(_MEMORY_MAP *pMemoryMap);
 
@@ -560,10 +559,8 @@ private:
     qint64 __nBaseAddress;
     qint64 __nEntryPointOffset;
     qint64 __nImageBase;
-
     bool __bIsFindStop;
     bool __bIsDumpStop;
-
     QString __sArch;
     MODE __mode;
     QString __sVersion;
