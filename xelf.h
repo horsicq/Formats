@@ -240,6 +240,9 @@ public:
     quint64 getElf_Shdr_addralign(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
     quint64 getElf_Shdr_entsize(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
 
+    qint64 getShdrOffset(quint32 nIndex);
+    qint64 getShdrSize();
+
     QList<XELF_DEF::Elf32_Phdr> getElf32_PhdrList();
     QList<XELF_DEF::Elf64_Phdr> getElf64_PhdrList();
     QList<XELF_DEF::Elf_Phdr> getElf_PhdrList();

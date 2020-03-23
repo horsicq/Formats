@@ -2070,6 +2070,53 @@ quint64 XELF::getElf_Shdr_entsize(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pLi
     return nResult;
 }
 
+qint64 XELF::getShdrOffset(quint32 nIndex)
+{
+    quint64 nResult=-1;
+
+    bool bIs64=is64();
+    quint32 nNumberOfSections=0;
+
+    if(bIs64)
+    {
+        nNumberOfSections=getHdr64_shnum();
+
+        if(nIndex<nNumberOfSections)
+        {
+            nResult=getHdr64_shoff()+nIndex*sizeof(XELF_DEF::Elf64_Shdr);
+        }
+    }
+    else
+    {
+        nNumberOfSections=getHdr32_shnum();
+
+        if(nIndex<nNumberOfSections)
+        {
+            nResult=getHdr32_shoff()+nIndex*sizeof(XELF_DEF::Elf32_Shdr);
+        }
+    }
+
+    return nResult;
+}
+
+qint64 XELF::getShdrSize()
+{
+    quint64 nResult=0;
+
+    bool bIs64=is64();
+
+    if(bIs64)
+    {
+        nResult=sizeof(XELF_DEF::Elf64_Shdr);
+    }
+    else
+    {
+        nResult=sizeof(XELF_DEF::Elf32_Shdr);
+    }
+
+    return nResult;
+}
+
 QList<XELF_DEF::Elf32_Phdr> XELF::getElf32_PhdrList()
 {
     QList<XELF_DEF::Elf32_Phdr> result;
