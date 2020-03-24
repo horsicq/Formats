@@ -2853,6 +2853,53 @@ quint64 XELF::getElf_Phdr_align(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
     return nResult;
 }
 
+qint64 XELF::getPhdrOffset(quint32 nIndex)
+{
+    quint64 nResult=-1;
+
+    bool bIs64=is64();
+    quint32 nNumberOfPrograms=0;
+
+    if(bIs64)
+    {
+        nNumberOfPrograms=getHdr64_phnum();
+
+        if(nIndex<nNumberOfPrograms)
+        {
+            nResult=getHdr64_phoff()+nIndex*sizeof(XELF_DEF::Elf64_Phdr);
+        }
+    }
+    else
+    {
+        nNumberOfPrograms=getHdr32_phnum();
+
+        if(nIndex<nNumberOfPrograms)
+        {
+            nResult=getHdr32_phoff()+nIndex*sizeof(XELF_DEF::Elf32_Phdr);
+        }
+    }
+
+    return nResult;
+}
+
+qint64 XELF::getPhdrSize()
+{
+    quint64 nResult=0;
+
+    bool bIs64=is64();
+
+    if(bIs64)
+    {
+        nResult=sizeof(XELF_DEF::Elf64_Phdr);
+    }
+    else
+    {
+        nResult=sizeof(XELF_DEF::Elf32_Phdr);
+    }
+
+    return nResult;
+}
+
 int XELF::getSectionIndexByName(QString sSectionName)
 {
     int nResult=-1;
