@@ -304,7 +304,8 @@ public:
     bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset,qint64 nSize,quint32 nBufferSize=1,bool bReverse=false);
     bool zeroFill(qint64 nOffset,qint64 nSize);
     static bool compareMemory(char *pMemory1,const char *pMemory2,qint64 nSize);
-    static bool compareMemoryI(char *pMemory,const char *pMemoryU,const char *pMemoryL,qint64 nSize);
+    static bool compareMemoryByteI(quint8 *pMemory,const quint8 *pMemoryU,const quint8 *pMemoryL,qint64 nSize);
+    static bool compareMemoryWordI(quint16 *pMemory,const quint16 *pMemoryU,const quint16 *pMemoryL,qint64 nSize);
 
     bool isOffsetValid(qint64 nOffset);
     bool isAddressValid(qint64 nAddress);

@@ -1223,7 +1223,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
 
         for(unsigned int i=0; i<nTemp-(nStringSize-1); i++)
         {
-            if(compareMemoryI(pBuffer+i,baUpper.data(),baLower.data(),nStringSize))
+            if(compareMemoryByteI((quint8 *)(pBuffer+i),(quint8 *)baUpper.data(),(quint8 *)baLower.data(),nStringSize))
             {
                 delete[] pBuffer;
 
@@ -1564,7 +1564,28 @@ bool XBinary::compareMemory(char *pMemory1,const char *pMemory2, qint64 nSize)
     return true;
 }
 
-bool XBinary::compareMemoryI(char *pMemory, const char *pMemoryU, const char *pMemoryL, qint64 nSize)
+bool XBinary::compareMemoryByteI(quint8 *pMemory, const quint8 *pMemoryU, const quint8 *pMemoryL, qint64 nSize)
+{
+    bool bResult=true;
+
+    while(nSize>0)
+    {
+        if((*(pMemory)!=*(pMemoryU))&&(*(pMemory)!=*(pMemoryL)))
+        {
+            bResult=false;
+            break;
+        }
+
+        pMemory++;
+        pMemoryU++;
+        pMemoryL++;
+        nSize--;
+    }
+
+    return bResult;
+}
+
+bool XBinary::compareMemoryWordI(quint16 *pMemory, const quint16 *pMemoryU, const quint16 *pMemoryL, qint64 nSize)
 {
     bool bResult=true;
 
