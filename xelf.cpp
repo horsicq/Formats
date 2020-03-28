@@ -3043,6 +3043,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs()
                 while(nSize>0)
                 {
                     TAG_STRUCT tagStruct={};
+                    tagStruct.nOffset=nOffset;
 
                     if(bIs64)
                     {

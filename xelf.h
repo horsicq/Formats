@@ -39,6 +39,7 @@ public:
 
     struct TAG_STRUCT
     {
+        qint64 nOffset;
         qint64 nTag;
         qint64 nValue;
     };
