@@ -49,6 +49,7 @@ bool XELF::isBigEndian()
 {
     return getIdent_data()==XELF_DEF::S_ELFDATA2MSB;
 }
+
 bool XELF::is64()
 {
     return getIdent_class()==XELF_DEF::S_ELFCLASS64;
@@ -3108,6 +3109,44 @@ qint64 XELF::getDynamicArraySize()
     else
     {
         nResult=8; // TODO defs
+    }
+
+    return nResult;
+}
+
+qint64 XELF::getDynamicArrayTag(qint64 nOffset)
+{
+    qint64 nResult=0;
+
+    bool bIs64=is64();
+    bool bIsBigEndian=isBigEndian();
+
+    if(bIs64)
+    {
+        nResult=read_int64(nOffset,bIsBigEndian);
+    }
+    else
+    {
+        nResult=read_int32(nOffset,bIsBigEndian);
+    }
+
+    return nResult;
+}
+
+qint64 XELF::getDynamicArrayValue(qint64 nOffset)
+{
+    qint64 nResult=0;
+
+    bool bIs64=is64();
+    bool bIsBigEndian=isBigEndian();
+
+    if(bIs64)
+    {
+        nResult=read_int64(nOffset+8,bIsBigEndian);
+    }
+    else
+    {
+        nResult=read_int32(nOffset+4,bIsBigEndian);
     }
 
     return nResult;
