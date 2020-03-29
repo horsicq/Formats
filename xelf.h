@@ -316,6 +316,9 @@ public:
     qint64 getDynamicArrayTag(qint64 nOffset);
     qint64 getDynamicArrayValue(qint64 nOffset);
 
+    void setDynamicArrayTag(qint64 nOffset,qint64 nValue);
+    void setDynamicArrayValue(qint64 nOffset,qint64 nValue);
+
     QList<QString> getLibraries(QList<TAG_STRUCT> *pList);
 
     static QMap<quint64,QString> getDynamicTags();

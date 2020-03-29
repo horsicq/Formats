@@ -3152,6 +3152,36 @@ qint64 XELF::getDynamicArrayValue(qint64 nOffset)
     return nResult;
 }
 
+void XELF::setDynamicArrayTag(qint64 nOffset, qint64 nValue)
+{
+    bool bIs64=is64();
+    bool bIsBigEndian=isBigEndian();
+
+    if(bIs64)
+    {
+        write_int64(nOffset,nValue,bIsBigEndian);
+    }
+    else
+    {
+        write_int32(nOffset,(qint32)nValue,bIsBigEndian);
+    }
+}
+
+void XELF::setDynamicArrayValue(qint64 nOffset, qint64 nValue)
+{
+    bool bIs64=is64();
+    bool bIsBigEndian=isBigEndian();
+
+    if(bIs64)
+    {
+        write_int64(nOffset+8,nValue,bIsBigEndian);
+    }
+    else
+    {
+        write_int32(nOffset+4,(qint32)nValue,bIsBigEndian);
+    }
+}
+
 QList<QString> XELF::getLibraries(QList<XELF::TAG_STRUCT> *pList)
 {
     QList<QString> listResult;
