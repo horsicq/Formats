@@ -311,6 +311,8 @@ public:
     QList<TAG_STRUCT> getTagStructs();
     static QList<TAG_STRUCT> getTagStructs(QList<TAG_STRUCT> *pList, qint64 nTag);
 
+    qint64 getDynamicArraySize();
+
     QList<QString> getLibraries(QList<TAG_STRUCT> *pList);
 
     static QMap<quint64,QString> getDynamicTags();

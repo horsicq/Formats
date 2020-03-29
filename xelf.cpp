@@ -3095,6 +3095,24 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF::TAG_STRUCT> *pList,qint6
     return listResult;
 }
 
+qint64 XELF::getDynamicArraySize()
+{
+    quint64 nResult=0;
+
+    bool bIs64=is64();
+
+    if(bIs64)
+    {
+        nResult=16; // TODO defs
+    }
+    else
+    {
+        nResult=8; // TODO defs
+    }
+
+    return nResult;
+}
+
 QList<QString> XELF::getLibraries(QList<XELF::TAG_STRUCT> *pList)
 {
     QList<QString> listResult;
