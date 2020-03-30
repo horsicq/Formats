@@ -309,6 +309,8 @@ public:
     static NOTE getNote(QByteArray &baData,bool bIsBigEndian);
 
     QList<TAG_STRUCT> getTagStructs();
+    QList<TAG_STRUCT> getTagStructs(_MEMORY_MAP *pMemoryMap);
+
     static QList<TAG_STRUCT> getTagStructs(QList<TAG_STRUCT> *pList, qint64 nTag);
 
     qint64 getDynamicArraySize();
@@ -319,7 +321,8 @@ public:
     void setDynamicArrayTag(qint64 nOffset,qint64 nValue);
     void setDynamicArrayValue(qint64 nOffset,qint64 nValue);
 
-    QList<QString> getLibraries(QList<TAG_STRUCT> *pList);
+    QList<QString> getLibraries();
+    QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
 
     static QMap<quint64,QString> getDynamicTags();
     static QMap<quint64,QString> getDynamicTagsS();

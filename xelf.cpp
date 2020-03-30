@@ -3023,9 +3023,15 @@ XELF::NOTE XELF::getNote(QByteArray &baData,bool bIsBigEndian)
 
 QList<XELF::TAG_STRUCT> XELF::getTagStructs()
 {
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getTagStructs(&memoryMap);
+}
+
+QList<XELF::TAG_STRUCT> XELF::getTagStructs(XBinary::_MEMORY_MAP *pMemoryMap)
+{
     QList<TAG_STRUCT> listResult;
 
-    _MEMORY_MAP memoryMap=getMemoryMap();
     bool bIs64=is64();
     bool bIsBigEndian=isBigEndian();
 
@@ -3039,7 +3045,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs()
             qint64 nOffset=listPrograms.at(i).p_offset; //  Check image
             qint64 nSize=listPrograms.at(i).p_filesz;
 
-            if(isOffsetValid(&memoryMap,nOffset))
+            if(isOffsetValid(pMemoryMap,nOffset))
             {
                 while(nSize>0)
                 {
@@ -3182,7 +3188,15 @@ void XELF::setDynamicArrayValue(qint64 nOffset, qint64 nValue)
     }
 }
 
-QList<QString> XELF::getLibraries(QList<XELF::TAG_STRUCT> *pList)
+QList<QString> XELF::getLibraries()
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+    QList<XELF::TAG_STRUCT> listStructs=getTagStructs();
+
+    return getLibraries(&memoryMap,&listStructs);
+}
+
+QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT> *pList)
 {
     QList<QString> listResult;
 
@@ -3190,11 +3204,9 @@ QList<QString> XELF::getLibraries(QList<XELF::TAG_STRUCT> *pList)
     QList<XELF::TAG_STRUCT> listStrTab=XELF::getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
     QList<XELF::TAG_STRUCT> listStrSize=XELF::getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
 
-    _MEMORY_MAP memoryMap=getMemoryMap();
-
     if(listStrTab.count()&&listStrSize.count())
     {
-        qint64 nOffset=addressToOffset(&memoryMap,listStrTab.at(0).nValue);
+        qint64 nOffset=addressToOffset(pMemoryMap,listStrTab.at(0).nValue);
 
         QByteArray baSection=read_array(nOffset,listStrSize.at(0).nValue);
 
