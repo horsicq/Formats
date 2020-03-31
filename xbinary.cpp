@@ -1248,7 +1248,78 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
 
 qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString)
 {
-    // TODO
+    // TODO Optimize
+    // TODO Check!!!
+    emit findProgressMaximumChanged(100);
+    emit findProgressValueChanged(0);
+
+    qint64 nStringSize=sString.size();
+    qint64 _nSize=getSize();
+
+    if(nSize==-1)
+    {
+        nSize=_nSize-nOffset;
+    }
+
+    if(nSize<=0)
+    {
+        return -1;
+    }
+
+    if(nOffset+nSize>_nSize)
+    {
+        return -1;
+    }
+
+    if(nStringSize>nSize)
+    {
+        return -1;
+    }
+
+    qint64 nTemp=0;
+    const int BUFFER_SIZE=0x1000;
+    char *pBuffer=new char[BUFFER_SIZE+2*(nStringSize-1)];
+
+    qint64 nTotalSize=nSize;
+    qint32 nCurrentProgress=0;
+
+//    QByteArray baUpper=sString.toUpper().toStdWString(); // TODO Check!
+//    QByteArray baLower=sString.toLower().toStdWString();
+
+    QByteArray baUpper; // TODO Check!
+    QByteArray baLower;
+
+    while((nSize>2*(nStringSize-1))&&(!__bIsFindStop))
+    {
+        nTemp=qMin((qint64)(BUFFER_SIZE+2*(nStringSize-1)),nSize);
+
+        if(!read_array(nOffset,pBuffer,nTemp))
+        {
+            break;
+        }
+
+        for(unsigned int i=0; i<nTemp-2*(nStringSize-1); i++)
+        {
+            if(compareMemoryWordI((quint16 *)(pBuffer+i),(quint16 *)baUpper.data(),(quint16 *)baLower.data(),nStringSize))
+            {
+                delete[] pBuffer;
+
+                return nOffset+i;
+            }
+        }
+
+        nSize-=nTemp-2*(nStringSize-1);
+        nOffset+=nTemp-2*(nStringSize-1);
+
+        if((((nTotalSize-nSize)*100)/nTotalSize)>nCurrentProgress)
+        {
+            nCurrentProgress++;
+            emit findProgressValueChanged(nCurrentProgress);
+        }
+    }
+
+    delete[] pBuffer;
+
     return -1;
 }
 
