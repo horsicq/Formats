@@ -6332,6 +6332,20 @@ QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList()
     return listResult;
 }
 
+qint64 XPE::getDebugHeaderOffset(quint32 nNumber)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DEBUG);
+
+    nOffset+=sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY)*nNumber;
+
+    return nOffset;
+}
+
+qint64 XPE::getDebugHeaderSize()
+{
+    return sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY);
+}
+
 QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
 {
     QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR>  listResult;

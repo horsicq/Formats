@@ -872,6 +872,9 @@ public:
 
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList();
 
+    qint64 getDebugHeaderOffset(quint32 nNumber);
+    qint64 getDebugHeaderSize();
+
     QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> getDelayImportsList();
 
     qint32 getNumberOfImports();
