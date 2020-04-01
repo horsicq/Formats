@@ -896,6 +896,7 @@ void XBinary::_write_int64(char *pData, qint64 value, bool bIsBigEndian)
 qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint64 nArraySize)
 {
     // TODO Optimize
+    emit findProgressMinimumChanged(0);
     emit findProgressMaximumChanged(100);
     emit findProgressValueChanged(0);
 
@@ -1104,6 +1105,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
 
     if(sSignature.contains(".")||sSignature.contains("$")||sSignature.contains("#"))
     {
+        emit findProgressMinimumChanged(0);
         emit findProgressMaximumChanged(100);
         emit findProgressValueChanged(0);
         qint64 nCurrentProgress=0;
@@ -1176,6 +1178,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
 qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
 {
     // TODO Optimize
+    emit findProgressMinimumChanged(0);
     emit findProgressMaximumChanged(100);
     emit findProgressValueChanged(0);
 
@@ -1250,6 +1253,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
 {
     // TODO Optimize
     // TODO Check!!!
+    emit findProgressMinimumChanged(0);
     emit findProgressMaximumChanged(100);
     emit findProgressValueChanged(0);
 
@@ -2319,6 +2323,7 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
     {
         file.resize(0);
 
+        emit dumpProgressMinimumChanged(0);
         emit dumpProgressMaximumChanged(100);
         emit dumpProgressValueChanged(0);
 

@@ -549,8 +549,10 @@ protected:
 signals:
     void errorMessage(QString sMessage);
     void infoMessage(QString sMessage);
+    void findProgressMinimumChanged(qint32 nMaximum);
     void findProgressMaximumChanged(qint32 nMaximum);
     void findProgressValueChanged(qint32 nValue);
+    void dumpProgressMinimumChanged(qint32 nMaximum);
     void dumpProgressMaximumChanged(qint32 nMaximum);
     void dumpProgressValueChanged(qint32 nValue);
 
