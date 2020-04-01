@@ -2524,6 +2524,18 @@ QSet<XBinary::FT> XBinary::getFileTypes(QString sFileName)
     return result;
 }
 
+QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFT)
+{
+    QList<XBinary::FT> listResult;
+
+    if(stFT.contains(FT_BINARY)) listResult.append(FT_BINARY);
+    if(stFT.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
+    if(stFT.contains(FT_PE32)) listResult.append(FT_PE32);
+    if(stFT.contains(FT_PE64)) listResult.append(FT_PE64);
+
+    return listResult;
+}
+
 QString XBinary::valueToHex(quint8 value)
 {
     return QString("%1").arg(value,2,16,QChar('0'));

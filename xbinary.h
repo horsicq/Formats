@@ -387,6 +387,8 @@ public:
     static QSet<FT> getFileTypes(QIODevice *pDevice); // TODO isImage
     static QSet<FT> getFileTypes(QString sFileName);
 
+    static QList<FT> _getFileTypeListFromSet(QSet<FT> stFT);
+
     static QString valueToHex(quint8 value);
     static QString valueToHex(qint8 value);
     static QString valueToHex(quint16 value);
