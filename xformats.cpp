@@ -1,0 +1,69 @@
+// copyright (c) 2020 hors<horsicq@gmail.com>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+#include "xformats.h"
+
+XFormats::XFormats(QObject *parent) : QObject(parent)
+{
+
+}
+
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(QIODevice *pDevice, XBinary::FT fileType)
+{
+    XBinary::_MEMORY_MAP result={};
+
+    if(fileType==XBinary::FT_BINARY)
+    {
+        XBinary binary(pDevice);
+        result=binary.getMemoryMap();
+    }
+    else if(fileType==XBinary::FT_MSDOS)
+    {
+        XMSDOS msdos(pDevice);
+        result=msdos.getMemoryMap();
+    }
+    else if(fileType==XBinary::FT_NE)
+    {
+        XNE ne(pDevice);
+        result=ne.getMemoryMap();
+    }
+    else if((fileType==XBinary::FT_LE)||(fileType==XBinary::FT_LX))
+    {
+        XLE le(pDevice);
+        result=le.getMemoryMap();
+    }
+    else if((fileType==XBinary::FT_PE)||(fileType==XBinary::FT_PE32)||(fileType==XBinary::FT_PE64))
+    {
+        XPE pe(pDevice);
+        result=pe.getMemoryMap();
+    }
+    else if((fileType==XBinary::FT_ELF)||(fileType==XBinary::FT_ELF32)||(fileType==XBinary::FT_ELF64))
+    {
+        XELF elf(pDevice);
+        result=elf.getMemoryMap();
+    }
+    else if((fileType==XBinary::FT_MACH)||(fileType==XBinary::FT_MACH32)||(fileType==XBinary::FT_MACH64))
+    {
+        XMACH mach(pDevice);
+        result=mach.getMemoryMap();
+    }
+
+    return result;
+}
