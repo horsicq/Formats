@@ -875,6 +875,17 @@ public:
     qint64 getDebugHeaderOffset(quint32 nNumber);
     qint64 getDebugHeaderSize();
 
+    XPE_DEF::S_IMAGE_DEBUG_DIRECTORY getDebugHeader(quint32 nNumber);
+    // TODO Get
+    void setDebugHeader_Characteristics(quint32 nNumber,quint32 nValue);
+    void setDebugHeader_TimeDateStamp(quint32 nNumber,quint32 nValue);
+    void setDebugHeader_MajorVersion(quint32 nNumber,quint16 nValue);
+    void setDebugHeader_MinorVersion(quint32 nNumber,quint16 nValue);
+    void setDebugHeader_Type(quint32 nNumber,quint32 nValue);
+    void setDebugHeader_SizeOfData(quint32 nNumber,quint32 nValue);
+    void setDebugHeader_AddressOfRawData(quint32 nNumber,quint32 nValue);
+    void setDebugHeader_PointerToRawData(quint32 nNumber,quint32 nValue);
+
     QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> getDelayImportsList();
 
     qint32 getNumberOfImports();

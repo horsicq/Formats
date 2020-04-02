@@ -6346,28 +6346,104 @@ qint64 XPE::getDebugHeaderSize()
     return sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY);
 }
 
+XPE_DEF::S_IMAGE_DEBUG_DIRECTORY XPE::getDebugHeader(quint32 nNumber)
+{
+    XPE_DEF::S_IMAGE_DEBUG_DIRECTORY result={};
+
+    // TODO Check number of headers
+
+    qint64 nDebugOffset=getDebugHeaderOffset(nNumber);
+
+    result.Characteristics=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Characteristics));
+    result.TimeDateStamp=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,TimeDateStamp));
+    result.MajorVersion=read_uint16(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MajorVersion));
+    result.MinorVersion=read_uint16(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MinorVersion));
+    result.Type=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Type));
+    result.SizeOfData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,SizeOfData));
+    result.AddressOfRawData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,AddressOfRawData));
+    result.PointerToRawData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,PointerToRawData));
+
+    return result;
+}
+
+void XPE::setDebugHeader_Characteristics(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDebugHeaderOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Characteristics),nValue);
+}
+
+void XPE::setDebugHeader_TimeDateStamp(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDebugHeaderOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,TimeDateStamp),nValue);
+}
+
+void XPE::setDebugHeader_MajorVersion(quint32 nNumber, quint16 nValue)
+{
+    qint64 nOffset=getDebugHeaderOffset(nNumber);
+
+    write_uint16(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MajorVersion),nValue);
+}
+
+void XPE::setDebugHeader_MinorVersion(quint32 nNumber, quint16 nValue)
+{
+    qint64 nOffset=getDebugHeaderOffset(nNumber);
+
+    write_uint16(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MinorVersion),nValue);
+}
+
+void XPE::setDebugHeader_Type(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDebugHeaderOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Type),nValue);
+}
+
+void XPE::setDebugHeader_SizeOfData(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDebugHeaderOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,SizeOfData),nValue);
+}
+
+void XPE::setDebugHeader_AddressOfRawData(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDebugHeaderOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,AddressOfRawData),nValue);
+}
+
+void XPE::setDebugHeader_PointerToRawData(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDebugHeaderOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,PointerToRawData),nValue);
+}
+
 QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
 {
     QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR>  listResult;
 
     _MEMORY_MAP memoryMap=getMemoryMap();
 
-    qint64 nDebugOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
+    qint64 nDelayImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
 
-    if(nDebugOffset!=-1)
+    if(nDelayImportOffset!=-1)
     {
         while(true)
         {
             XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR record={};
 
-            record.AllAttributes=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,AllAttributes));
-            record.DllNameRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,DllNameRVA));
-            record.ModuleHandleRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ModuleHandleRVA));
-            record.ImportAddressTableRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportAddressTableRVA));
-            record.ImportNameTableRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportNameTableRVA));
-            record.BoundImportAddressTableRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,BoundImportAddressTableRVA));
-            record.UnloadInformationTableRVA=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,UnloadInformationTableRVA));
-            record.TimeDateStamp=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,TimeDateStamp));
+            record.AllAttributes=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,AllAttributes));
+            record.DllNameRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,DllNameRVA));
+            record.ModuleHandleRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ModuleHandleRVA));
+            record.ImportAddressTableRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportAddressTableRVA));
+            record.ImportNameTableRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportNameTableRVA));
+            record.BoundImportAddressTableRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,BoundImportAddressTableRVA));
+            record.UnloadInformationTableRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,UnloadInformationTableRVA));
+            record.TimeDateStamp=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,TimeDateStamp));
 
             if( record.DllNameRVA&&
                 isAddressValid(&memoryMap,memoryMap.nBaseAddress+record.DllNameRVA))
@@ -6379,7 +6455,7 @@ QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
                 break;
             }
 
-            nDebugOffset+=sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
+            nDelayImportOffset+=sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
         }
     }
 
