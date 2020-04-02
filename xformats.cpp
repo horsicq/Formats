@@ -67,3 +67,40 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(QIODevice *pDevice, XBinary::FT file
 
     return result;
 }
+
+void XFormats::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)
+{
+    if(fileType==XBinary::FT_BINARY)
+    {
+        pStFileTypes->remove(XBinary::FT_MSDOS);
+        pStFileTypes->remove(XBinary::FT_NE);
+        pStFileTypes->remove(XBinary::FT_LE);
+        pStFileTypes->remove(XBinary::FT_LX);
+        pStFileTypes->remove(XBinary::FT_PE);
+        pStFileTypes->remove(XBinary::FT_PE32);
+        pStFileTypes->remove(XBinary::FT_PE64);
+        pStFileTypes->remove(XBinary::FT_ELF);
+        pStFileTypes->remove(XBinary::FT_ELF32);
+        pStFileTypes->remove(XBinary::FT_ELF64);
+        pStFileTypes->remove(XBinary::FT_MACH);
+        pStFileTypes->remove(XBinary::FT_MACH32);
+        pStFileTypes->remove(XBinary::FT_MACH64);
+    }
+    else if(fileType==XBinary::FT_PE)
+    {
+        pStFileTypes->remove(XBinary::FT_BINARY);
+        pStFileTypes->remove(XBinary::FT_TEXT);
+        pStFileTypes->remove(XBinary::FT_COM);
+        pStFileTypes->remove(XBinary::FT_MSDOS);
+        pStFileTypes->remove(XBinary::FT_NE);
+        pStFileTypes->remove(XBinary::FT_LE);
+        pStFileTypes->remove(XBinary::FT_LX);
+        pStFileTypes->remove(XBinary::FT_ELF);
+        pStFileTypes->remove(XBinary::FT_ELF32);
+        pStFileTypes->remove(XBinary::FT_ELF64);
+        pStFileTypes->remove(XBinary::FT_MACH);
+        pStFileTypes->remove(XBinary::FT_MACH32);
+        pStFileTypes->remove(XBinary::FT_MACH64);
+    }
+    // TODO
+}

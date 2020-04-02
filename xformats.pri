@@ -32,12 +32,12 @@ SOURCES += \
     include($$PWD/xpe.pri)
 }
 
-!contains(XCONFIG, xelf) {
-    XCONFIG += xelf
-    include($$PWD/xelf.pri)
-}
-
 !contains(XCONFIG, xmach) {
     XCONFIG += xmach
     include($$PWD/xmach.pri)
+}
+
+!contains(XCONFIG, xelf) {
+    XCONFIG += xelf
+    include($$PWD/xelf.pri)
 }
