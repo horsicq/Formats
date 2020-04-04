@@ -1256,6 +1256,12 @@ QMap<quint64, QString> XLE::getImageLECpusS()
     mapResult.insert(0x01,"80286");
     mapResult.insert(0x02,"80386");
     mapResult.insert(0x03,"80486");
+    mapResult.insert(0x04,"80586");
+    mapResult.insert(0x20,"i860");
+    mapResult.insert(0x21,"N11");
+    mapResult.insert(0x40,"R2000");
+    mapResult.insert(0x41,"R6000");
+    mapResult.insert(0x42,"R4000");
 
     return mapResult;
 }
