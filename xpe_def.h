@@ -138,6 +138,21 @@ const quint32 S_RT_NEWMENU                                  =(S_RT_MENU|S_RT_NEW
 const quint32 S_RT_NEWDIALOG                                =(S_RT_DIALOG|S_RT_NEWRESOURCE);
 const quint32 S_RT_MANIFEST                                 =24;
 
+const quint32 S_IMAGE_DEBUG_TYPE_UNKNOWN                    =0;
+const quint32 S_IMAGE_DEBUG_TYPE_COFF                       =1;
+const quint32 S_IMAGE_DEBUG_TYPE_CODEVIEW                   =2;
+const quint32 S_IMAGE_DEBUG_TYPE_FPO                        =3;
+const quint32 S_IMAGE_DEBUG_TYPE_MISC                       =4;
+const quint32 S_IMAGE_DEBUG_TYPE_EXCEPTION                  =5;
+const quint32 S_IMAGE_DEBUG_TYPE_FIXUP                      =6;
+const quint32 S_IMAGE_DEBUG_TYPE_OMAP_TO_SRC                =7;
+const quint32 S_IMAGE_DEBUG_TYPE_OMAP_FROM_SRC              =8;
+const quint32 S_IMAGE_DEBUG_TYPE_BORLAND                    =9;
+const quint32 S_IMAGE_DEBUG_TYPE_RESERVED10                 =10;
+const quint32 S_IMAGE_DEBUG_TYPE_CLSID                      =11;
+const quint32 S_IMAGE_DEBUG_TYPE_REPRO                      =16;
+const quint32 S_IMAGE_DEBUG_TYPE_EX_DLLCHARACTERISTICS      =20;
+
 struct S_IMAGE_FILE_HEADER
 {
     quint16 Machine;
