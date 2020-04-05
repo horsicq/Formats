@@ -682,6 +682,8 @@ public:
     static QMap<quint64,QString> getComImageFlagsS();
     static QMap<quint64,QString> getTypes();
     static QMap<quint64,QString> getTypesS();
+    static QMap<quint64,QString> getDebugTypes();
+    static QMap<quint64,QString> getDebugTypesS();
 
     qint64 calculateHeadersSize();
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);

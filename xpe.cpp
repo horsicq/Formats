@@ -9096,3 +9096,47 @@ QMap<quint64, QString> XPE::getTypesS()
 
     return mapResult;
 }
+
+QMap<quint64, QString> XPE::getDebugTypes()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"IMAGE_DEBUG_TYPE_UNKNOWN");
+    mapResult.insert(1,"IMAGE_DEBUG_TYPE_COFF");
+    mapResult.insert(2,"IMAGE_DEBUG_TYPE_CODEVIEW");
+    mapResult.insert(3,"IMAGE_DEBUG_TYPE_FPO");
+    mapResult.insert(4,"IMAGE_DEBUG_TYPE_MISC");
+    mapResult.insert(5,"IMAGE_DEBUG_TYPE_EXCEPTION");
+    mapResult.insert(6,"IMAGE_DEBUG_TYPE_FIXUP");
+    mapResult.insert(7,"IMAGE_DEBUG_TYPE_OMAP_TO_SRC");
+    mapResult.insert(8,"IMAGE_DEBUG_TYPE_OMAP_FROM_SRC");
+    mapResult.insert(9,"IMAGE_DEBUG_TYPE_BORLAND");
+    mapResult.insert(10,"IMAGE_DEBUG_TYPE_RESERVED10");
+    mapResult.insert(11,"IMAGE_DEBUG_TYPE_CLSID");
+    mapResult.insert(16,"IMAGE_DEBUG_TYPE_REPRO");
+    mapResult.insert(20,"IMAGE_DEBUG_TYPE_EX_DLLCHARACTERISTICS");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getDebugTypesS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"UNKNOWN");
+    mapResult.insert(1,"COFF");
+    mapResult.insert(2,"CODEVIEW");
+    mapResult.insert(3,"FPO");
+    mapResult.insert(4,"MISC");
+    mapResult.insert(5,"EXCEPTION");
+    mapResult.insert(6,"FIXUP");
+    mapResult.insert(7,"OMAP_TO_SRC");
+    mapResult.insert(8,"OMAP_FROM_SRC");
+    mapResult.insert(9,"BORLAND");
+    mapResult.insert(10,"RESERVED10");
+    mapResult.insert(11,"CLSID");
+    mapResult.insert(16,"REPRO");
+    mapResult.insert(20,"EX_DLLCHARACTERISTICS");
+
+    return mapResult;
+}
