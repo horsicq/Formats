@@ -7923,7 +7923,7 @@ QList<XPE::RELOCS_HEADER> XPE::getRelocsHeaders()
 
             record.nOffset=nRelocsOffset;
 
-            if(!read_array(nRelocsOffset,(char *)&record.ibr,sizeof(XPE_DEF::IMAGE_BASE_RELOCATION)))
+            if(!read_array(nRelocsOffset,(char *)&record.ibr,sizeof(XPE_DEF::IMAGE_BASE_RELOCATION))) // TODO !!!
             {
                 break;
             }
@@ -7985,6 +7985,16 @@ QList<XPE::RELOCS_POSITION> XPE::getRelocsPositions(qint64 nOffset)
     }
 
     return listResult;
+}
+
+quint32 XPE::getRelocsVirtualAddress(qint64 nOffset)
+{
+    return read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_BASE_RELOCATION,VirtualAddress));
+}
+
+quint32 XPE::getRelocsSizeOfBlock(qint64 nOffset)
+{
+    return read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_BASE_RELOCATION,SizeOfBlock));
 }
 
 bool XPE::addRelocsSection(QList<qint64> *pList)

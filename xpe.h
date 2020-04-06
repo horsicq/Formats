@@ -615,6 +615,9 @@ public:
     QList<RELOCS_HEADER> getRelocsHeaders();
     QList<RELOCS_POSITION> getRelocsPositions(qint64 nOffset);
 
+    quint32 getRelocsVirtualAddress(qint64 nOffset);
+    quint32 getRelocsSizeOfBlock(qint64 nOffset);
+
     bool addRelocsSection(QList<qint64> *pList);
     static bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pList);
     static bool addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pList);
