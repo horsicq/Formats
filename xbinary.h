@@ -326,6 +326,8 @@ public:
     static qint64 addressToOffset(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
     static qint64 offsetToRelAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static qint64 relAddressToOffset(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
+    static qint64 relAddressToAddress(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
+    static qint64 addressToRelAddress(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
 
     static _MEMORY_RECORD getMemoryRecordByOffset(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static _MEMORY_RECORD getMemoryRecordByAddress(_MEMORY_MAP *pMemoryMap,qint64 nAddress);

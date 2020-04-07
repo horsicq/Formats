@@ -1871,6 +1871,30 @@ qint64 XBinary::relAddressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRel
     return addressToOffset(pMemoryMap,nRelAddress+pMemoryMap->nBaseAddress);
 }
 
+qint64 XBinary::relAddressToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
+{
+    qint64 nResult=-1;
+
+    if(isRelAddressValid(pMemoryMap,nRelAddress))
+    {
+        nResult=nRelAddress+pMemoryMap->nBaseAddress;
+    }
+
+    return nResult;
+}
+
+qint64 XBinary::addressToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
+{
+    qint64 nResult=-1;
+
+    if(isAddressValid(pMemoryMap,nAddress))
+    {
+        nResult=nAddress-=pMemoryMap->nBaseAddress;
+    }
+
+    return nResult;
+}
+
 XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
     _MEMORY_RECORD result={};
@@ -1998,7 +2022,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
     result.nRawSize=getSize();
     result.nImageSize=getSize();
     result.fileType=FT_BINARY;
-    result.mode=MODE_UNKNOWN;
+    result.mode=getMode();
 
     _MEMORY_RECORD record={};
     record.nAddress=_getBaseAddress();
