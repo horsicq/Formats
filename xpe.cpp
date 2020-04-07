@@ -7997,6 +7997,16 @@ quint32 XPE::getRelocsSizeOfBlock(qint64 nOffset)
     return read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_BASE_RELOCATION,SizeOfBlock));
 }
 
+void XPE::setRelocsVirtualAddress(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_BASE_RELOCATION,VirtualAddress),nValue);
+}
+
+void XPE::setRelocsSizeOfBlock(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_BASE_RELOCATION,SizeOfBlock),nValue);
+}
+
 bool XPE::addRelocsSection(QList<qint64> *pList)
 {
     return addRelocsSection(getDevice(),isImage(),pList);

@@ -617,6 +617,8 @@ public:
 
     quint32 getRelocsVirtualAddress(qint64 nOffset);
     quint32 getRelocsSizeOfBlock(qint64 nOffset);
+    void setRelocsVirtualAddress(qint64 nOffset,quint32 nValue);
+    void setRelocsSizeOfBlock(qint64 nOffset,quint32 nValue);
 
     bool addRelocsSection(QList<qint64> *pList);
     static bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pList);
