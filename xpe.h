@@ -559,6 +559,8 @@ public:
     XPE_DEF::IMAGE_IMPORT_DESCRIPTOR read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset);
     void write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset,XPE_DEF::IMAGE_IMPORT_DESCRIPTOR value);
 
+    XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR read_IMAGE_DELAYLOAD_DESCRIPTOR(qint64 nOffset);
+
     bool isExportPresent();
 
     EXPORT_HEADER getExport();

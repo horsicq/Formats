@@ -3563,17 +3563,37 @@ bool XPE::isResourceNamePresent(QString sName, QList<XPE::RESOURCE_RECORD> *pLis
 
 XPE_DEF::IMAGE_IMPORT_DESCRIPTOR XPE::read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset)
 {
-    // TODO
     XPE_DEF::IMAGE_IMPORT_DESCRIPTOR result={};
 
-    read_array(nOffset,(char *)&result,sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR));
+    result.OriginalFirstThunk=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,OriginalFirstThunk));
+    result.TimeDateStamp=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,TimeDateStamp));
+    result.ForwarderChain=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,ForwarderChain));
+    result.Name=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,Name));
+    result.FirstThunk=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,FirstThunk));
 
     return result;
 }
 
 void XPE::write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset, XPE_DEF::IMAGE_IMPORT_DESCRIPTOR value)
 {
+    // TODO !!
     write_array(nOffset,(char *)&value,sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR));
+}
+
+XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR XPE::read_IMAGE_DELAYLOAD_DESCRIPTOR(qint64 nOffset)
+{
+    XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR result={};
+
+    result.AllAttributes=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,AllAttributes));
+    result.DllNameRVA=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,DllNameRVA));
+    result.ModuleHandleRVA=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ModuleHandleRVA));
+    result.ImportAddressTableRVA=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportAddressTableRVA));
+    result.ImportNameTableRVA=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportNameTableRVA));
+    result.BoundImportAddressTableRVA=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,BoundImportAddressTableRVA));
+    result.UnloadInformationTableRVA=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,UnloadInformationTableRVA));
+    result.TimeDateStamp=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,TimeDateStamp));
+
+    return result;
 }
 
 bool XPE::isExportPresent()
@@ -6436,14 +6456,7 @@ QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
         {
             XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR record={};
 
-            record.AllAttributes=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,AllAttributes));
-            record.DllNameRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,DllNameRVA));
-            record.ModuleHandleRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ModuleHandleRVA));
-            record.ImportAddressTableRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportAddressTableRVA));
-            record.ImportNameTableRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportNameTableRVA));
-            record.BoundImportAddressTableRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,BoundImportAddressTableRVA));
-            record.UnloadInformationTableRVA=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,UnloadInformationTableRVA));
-            record.TimeDateStamp=read_uint32(nDelayImportOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,TimeDateStamp));
+            record=read_IMAGE_DELAYLOAD_DESCRIPTOR(nDelayImportOffset);
 
             if( record.DllNameRVA&&
                 isAddressValid(&memoryMap,memoryMap.nBaseAddress+record.DllNameRVA))
