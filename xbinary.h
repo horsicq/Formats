@@ -110,6 +110,7 @@ public:
         qint32 nLoadSection;
         QString sName;
         qint32 nIndex;
+        bool bIsVirtual;
     };
 
     enum FT
