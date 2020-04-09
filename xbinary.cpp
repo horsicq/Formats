@@ -2556,6 +2556,8 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFT)
     if(stFT.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
     if(stFT.contains(FT_PE32)) listResult.append(FT_PE32);
     if(stFT.contains(FT_PE64)) listResult.append(FT_PE64);
+    if(stFT.contains(FT_ELF32)) listResult.append(FT_ELF32);
+    if(stFT.contains(FT_ELF64)) listResult.append(FT_ELF64);
 
     return listResult;
 }
