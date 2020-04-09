@@ -1624,6 +1624,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
             {
                 _MEMORY_RECORD record={};
                 record.type=MMT_HEADER;
+                record.bIsVirtual=true;
 
                 record.nAddress=result.nBaseAddress+nHeadersSize;
                 recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
@@ -1707,6 +1708,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                 if(nVirtualSize-nFileSize)
                 {
                     _MEMORY_RECORD record={};
+                    record.bIsVirtual=true;
 
                     record.type=MMT_LOADSECTION;
                     record.nLoadSection=i;
