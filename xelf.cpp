@@ -2975,7 +2975,7 @@ QString XELF::getCompatibleKernelVersion()
     bool bIsBigEndian=isBigEndian();
     NOTE note=getNote(baData,bIsBigEndian);
 
-    if((note.type==1)&&(note.name=="GNU"))
+    if((note.nType==1)&&(note.name=="GNU"))
     {
         quint32 kv[4];
         kv[0]=_read_uint32(note.desc.data()+0,bIsBigEndian);
@@ -3001,13 +3001,13 @@ XELF::NOTE XELF::getNote(QByteArray &baData,bool bIsBigEndian)
 
     if(nDataSize>=12)
     {
-        quint16 nNameLength=   _read_int16(pData+0,bIsBigEndian);
-        quint16 nDescLength=   _read_int16(pData+4,bIsBigEndian);
-        quint16 nType=         _read_int16(pData+8,bIsBigEndian);
+        quint32 nNameLength=   _read_uint32(pData+0,bIsBigEndian);
+        quint32 nDescLength=   _read_uint32(pData+4,bIsBigEndian);
+        quint32 nType=         _read_uint32(pData+8,bIsBigEndian);
 
         if(nDataSize==12+nNameLength+nDescLength)
         {
-            result.type=nType;
+            result.nType=nType;
 
             if(nNameLength>=1)
             {
@@ -3015,6 +3015,35 @@ XELF::NOTE XELF::getNote(QByteArray &baData,bool bIsBigEndian)
             }
 
             result.desc=_read_byteArray((char *)(pData+12+nNameLength),(int)nDescLength);
+        }
+    }
+
+    return result;
+}
+
+XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
+{
+    NOTE result={};
+
+    if(nSize>=6)
+    {
+        quint16 nNameLength=   read_uint32(nOffset+0,bIsBigEndian);
+        quint16 nDescLength=   read_uint32(nOffset+4,bIsBigEndian);
+        quint16 nType=         read_uint32(nOffset+8,bIsBigEndian);
+
+        qint32 nNoteSize=12+nNameLength+nDescLength;
+
+        if(nNoteSize>=nSize)
+        {
+            result.nSize=nNoteSize;
+            result.nType=nType;
+
+            if(nNameLength>=1)
+            {
+                result.name=read_ansiString(nOffset+12,nNameLength-1);
+            }
+
+            result.desc=read_array(nOffset+12+nNameLength,(int)nDescLength);
         }
     }
 
