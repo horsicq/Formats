@@ -3417,10 +3417,12 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     {
         if(listPhdr.at(i).p_type==1) // TODO const
         {
+            QString sName=QString("%1(%2)").arg(tr("Segment")).arg(nSegment);
+
             XBinary::_MEMORY_RECORD record={};
 
             record.type=MMT_LOADSECTION;
-            record.sName=QString("%1(%2)").arg(tr("Segment")).arg(nSegment);
+            record.sName=sName;
             // TODO Section number!
             record.nAddress=listPhdr.at(i).p_vaddr;
             record.nSize=listPhdr.at(i).p_filesz;
@@ -3429,11 +3431,13 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
             result.listRecords.append(record);
 
+            // TODO Align!
             if(listPhdr.at(i).p_memsz>listPhdr.at(i).p_filesz)
             {
                 XBinary::_MEMORY_RECORD record={};
 
                 record.type=MMT_LOADSECTION;
+                record.sName=sName;
                 // TODO Section number!
                 record.nAddress=listPhdr.at(i).p_vaddr+listPhdr.at(i).p_filesz;
                 record.nSize=listPhdr.at(i).p_memsz-listPhdr.at(i).p_filesz;
