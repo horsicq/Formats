@@ -3411,6 +3411,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     qint64 nMaxOffset=0;
     qint64 nMaxAddress=0;
 
+    qint32 nSegment=0;
     // TODO
     for(int i=0; i<nCount; i++)
     {
@@ -3419,6 +3420,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
             XBinary::_MEMORY_RECORD record={};
 
             record.type=MMT_LOADSECTION;
+            record.sName=QString("%1(%2)").arg(tr("Segment")).arg(nSegment);
             // TODO Section number!
             record.nAddress=listPhdr.at(i).p_vaddr;
             record.nSize=listPhdr.at(i).p_filesz;
@@ -3448,6 +3450,8 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
             result.nBaseAddress=qMin(record.nAddress,result.nBaseAddress);
             nMaxAddress=qMax((qint64)(listPhdr.at(i).p_vaddr+listPhdr.at(i).p_memsz),nMaxAddress);
+
+            nSegment++;
         }
 
 //        // TODO
