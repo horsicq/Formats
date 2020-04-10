@@ -354,6 +354,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 
         _MEMORY_RECORD recordVirtualCode={};
 
+        recordVirtualCode.bIsVirtual=true;
         recordVirtualCode.nSize=qAbs(nDelta);
         recordVirtualCode.nOffset=-1;
         recordVirtualCode.nAddress=0;
@@ -389,6 +390,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
         recordOverlay.nSize=nOverlaySize;
         recordOverlay.nOffset=nOverlayOffset;
         recordOverlay.nAddress=-1;
+        recordOverlay.sName=QString("Overlay");
 
         recordOverlay.segment=ADDRESS_SEGMENT_UNKNOWN;
         recordOverlay.type=MMT_OVERLAY;
