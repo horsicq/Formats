@@ -3473,7 +3473,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
                 recordVirtual.type=MMT_LOADSECTION;
                 recordVirtual.sName=sName;
                 // TODO Section number!
-                recordVirtual.nAddress=nVirtualAddress+nVirtualSize;
+                recordVirtual.nAddress=nVirtualAddress+nRawSize;
                 recordVirtual.nSize=nVirtualSize-nRawSize;
                 recordVirtual.nOffset=-1;
                 recordVirtual.nIndex=nIndex++;
@@ -3503,7 +3503,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 //        }
     }
 
-    result.nImageSize=nMaxAddress-result.nBaseAddress; // TODO mb ALIGN_UP
+    result.nImageSize=nMaxAddress-result.nBaseAddress;
 
     qint64 nNoLoadableSize=result.nRawSize-nMaxOffset;
 
