@@ -1937,6 +1937,20 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByAddress(XBinary::_MEMORY_MAP *
     return result;
 }
 
+XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
+{
+    _MEMORY_RECORD result={};
+
+    qint64 nAddress=relAddressToAddress(pMemoryMap,nRelAddress);
+
+    if(nAddress!=-1)
+    {
+        getMemoryRecordByAddress(pMemoryMap,nAddress);
+    }
+
+    return result;
+}
+
 qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nAddress)
 {
     qint32 nResult=-1;

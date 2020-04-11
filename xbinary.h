@@ -332,6 +332,7 @@ public:
 
     static _MEMORY_RECORD getMemoryRecordByOffset(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static _MEMORY_RECORD getMemoryRecordByAddress(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+    static _MEMORY_RECORD getMemoryRecordByRelAddress(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
 
     static qint32 addressToLoadSection(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
 
