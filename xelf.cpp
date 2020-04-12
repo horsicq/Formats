@@ -3064,50 +3064,48 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(XBinary::_MEMORY_MAP *pMemoryMap)
     bool bIs64=is64();
     bool bIsBigEndian=isBigEndian();
 
-    QList<XELF_DEF::Elf_Phdr> listPrograms=getElf_PhdrList();
-    int nCount=listPrograms.count();
+
+    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> listTags=getPrograms(&_listPhdr,2); // TODO const
+
+    int nCount=listTags.count();
 
     for(int i=0;i<nCount;i++)
     {
-        if(listPrograms.at(i).p_type==2) // TODO const!!!
+        qint64 nOffset=listTags.at(i).p_offset; //  Check image
+        qint64 nSize=listTags.at(i).p_filesz;
+
+        if(isOffsetValid(pMemoryMap,nOffset))
         {
-            qint64 nOffset=listPrograms.at(i).p_offset; //  Check image
-            qint64 nSize=listPrograms.at(i).p_filesz;
-
-            if(isOffsetValid(pMemoryMap,nOffset))
+            while(nSize>0)
             {
-                while(nSize>0)
+                TAG_STRUCT tagStruct={};
+                tagStruct.nOffset=nOffset;
+
+                if(bIs64)
                 {
-                    TAG_STRUCT tagStruct={};
-                    tagStruct.nOffset=nOffset;
+                    tagStruct.nTag=read_int64(nOffset,bIsBigEndian);
+                    tagStruct.nValue=read_int64(nOffset+8,bIsBigEndian);
+                    nOffset+=16;
+                    nSize-=16;
+                }
+                else
+                {
+                    tagStruct.nTag=read_int32(nOffset,bIsBigEndian);
+                    tagStruct.nValue=read_int32(nOffset+4,bIsBigEndian);
+                    nOffset+=8;
+                    nSize-=8;
+                }
 
-                    if(bIs64)
-                    {
-                        tagStruct.nTag=read_int64(nOffset,bIsBigEndian);
-                        tagStruct.nValue=read_int64(nOffset+8,bIsBigEndian);
-                        nOffset+=16;
-                        nSize-=16;
-                    }
-                    else
-                    {
-                        tagStruct.nTag=read_int32(nOffset,bIsBigEndian);
-                        tagStruct.nValue=read_int32(nOffset+4,bIsBigEndian);
-                        nOffset+=8;
-                        nSize-=8;
-                    }
-
-                    if(tagStruct.nTag)
-                    {
-                        listResult.append(tagStruct);
-                    }
-                    else
-                    {
-                        break;
-                    }
+                if(tagStruct.nTag)
+                {
+                    listResult.append(tagStruct);
+                }
+                else
+                {
+                    break;
                 }
             }
-
-            break;
         }
     }
 
@@ -3430,81 +3428,68 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
     result.nRawSize=getSize();
 
-    QList<XELF_DEF::Elf_Phdr> listPhdr=getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> listSegments=getPrograms(&_listPhdr,1); // TODO const
 
 //    bool bIs64=is64();
-    int nCount=listPhdr.count();
+    int nCount=listSegments.count();
 
     bool bImageAddressInit=false;
 
     qint64 nMaxOffset=0;
     qint64 nMaxAddress=0;
 
-    qint32 nSegment=0;
-    // TODO
     for(int i=0; i<nCount; i++)
     {
-        if(listPhdr.at(i).p_type==1) // TODO const
+        QString sName=QString("%1(%2)").arg(tr("Segment")).arg(i);
+
+        quint64 nAlign=listSegments.at(i).p_align;
+        qint64 nVirtualAddress=S_ALIGN_DOWN(listSegments.at(i).p_vaddr,nAlign);
+        qint64 nFileOffset=S_ALIGN_DOWN(listSegments.at(i).p_offset,nAlign);
+        qint64 nVirtualSize=S_ALIGN_UP(listSegments.at(i).p_memsz,nAlign);
+        qint64 nFileSize=S_ALIGN_UP(listSegments.at(i).p_filesz,nAlign);
+
+        if(nFileSize)
         {
-            QString sName=QString("%1(%2)").arg(tr("Segment")).arg(nSegment);
+            XBinary::_MEMORY_RECORD record={};
 
-            quint64 nAlign=listPhdr.at(i).p_align;
-            qint64 nVirtualAddress=S_ALIGN_DOWN(listPhdr.at(i).p_vaddr,nAlign);
-            qint64 nFileOffset=S_ALIGN_DOWN(listPhdr.at(i).p_offset,nAlign);
-            qint64 nVirtualSize=S_ALIGN_UP(listPhdr.at(i).p_memsz,nAlign);
-            qint64 nFileSize=S_ALIGN_UP(listPhdr.at(i).p_filesz,nAlign);
+            record.type=MMT_LOADSECTION;
+            record.sName=sName;
+            // TODO Section number!
+            record.nAddress=nVirtualAddress;
+            record.nSize=nFileSize;
+            record.nOffset=nFileOffset;
+            record.nIndex=nIndex++;
 
-            if(nFileSize)
-            {
-                XBinary::_MEMORY_RECORD record={};
-
-                record.type=MMT_LOADSECTION;
-                record.sName=sName;
-                // TODO Section number!
-                record.nAddress=nVirtualAddress;
-                record.nSize=nFileSize;
-                record.nOffset=nFileOffset;
-                record.nIndex=nIndex++;
-
-                result.listRecords.append(record);
-            }
-
-
-            if(nVirtualSize>nFileSize)
-            {
-                XBinary::_MEMORY_RECORD record={};
-
-                record.type=MMT_LOADSECTION;
-                record.sName=sName;
-                // TODO Section number!
-                record.nAddress=nVirtualAddress+nFileSize;
-                record.nSize=nVirtualSize-nFileSize;
-                record.nOffset=-1;
-                record.nIndex=nIndex++;
-                record.bIsVirtual=true;
-
-                result.listRecords.append(record);
-            }
-
-            if(!bImageAddressInit)
-            {
-                result.nBaseAddress=nVirtualAddress;
-                bImageAddressInit=true;
-            }
-
-            nMaxOffset=qMax(nMaxOffset,nFileOffset+nFileSize);
-
-            result.nBaseAddress=qMin(nVirtualAddress,result.nBaseAddress);
-            nMaxAddress=qMax(nVirtualAddress+nVirtualSize,nMaxAddress);
-
-            nSegment++;
+            result.listRecords.append(record);
         }
 
-//        // TODO
-//        if(!isImage())
-//        {
+        if(nVirtualSize>nFileSize)
+        {
+            XBinary::_MEMORY_RECORD record={};
 
-//        }
+            record.type=MMT_LOADSECTION;
+            record.sName=sName;
+            // TODO Section number!
+            record.nAddress=nVirtualAddress+nFileSize;
+            record.nSize=nVirtualSize-nFileSize;
+            record.nOffset=-1;
+            record.nIndex=nIndex++;
+            record.bIsVirtual=true;
+
+            result.listRecords.append(record);
+        }
+
+        if(!bImageAddressInit)
+        {
+            result.nBaseAddress=nVirtualAddress;
+            bImageAddressInit=true;
+        }
+
+        nMaxOffset=qMax(nMaxOffset,nFileOffset+nFileSize);
+
+        result.nBaseAddress=qMin(nVirtualAddress,result.nBaseAddress);
+        nMaxAddress=qMax(nVirtualAddress+nVirtualSize,nMaxAddress);
     }
 
     result.nImageSize=nMaxAddress-result.nBaseAddress;
@@ -3685,4 +3670,21 @@ void XELF::setBaseAddress(qint64 nValue)
 {
     Q_UNUSED(nValue)
     //  TODO
+}
+
+QList<XELF_DEF::Elf_Phdr> XELF::getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, quint32 nType)
+{
+    QList<XELF_DEF::Elf_Phdr> listResult;
+
+    int nCount=pList->count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(pList->at(i).p_type==nType)
+        {
+            listResult.append(pList->at(i));
+        }
+    }
+
+    return listResult;
 }

@@ -344,6 +344,8 @@ public:
 
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nValue);
+
+    QList<XELF_DEF::Elf_Phdr> getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, quint32 nType);
 };
 
 #endif // XELF_H
