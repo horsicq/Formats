@@ -318,6 +318,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     result.fileType=FT_MSDOS;
     result.mode=MODE_16;
     result.nRawSize=getSize();
+    result.nImageSize=0xFFFF;
 
     qint64 nMaxOffset=(get_e_cp()-1)*512+get_e_cblp();
 
@@ -337,66 +338,83 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 
 //    qint64 nBaseAddress=_getBaseAddress();
 
-    _MEMORY_RECORD recordHeader={};
-    recordHeader.nSize=nHeaderSize;
-    recordHeader.nOffset=nHeaderOffset;
-    recordHeader.nAddress=-1;
-    recordHeader.segment=ADDRESS_SEGMENT_UNKNOWN;
-    recordHeader.type=MMT_HEADER;
-    recordHeader.nIndex=nIndex++;
+    {
+        _MEMORY_RECORD record={};
+        record.nSize=nHeaderSize;
+        record.nOffset=nHeaderOffset;
+        record.nAddress=-1;
+        record.segment=ADDRESS_SEGMENT_UNKNOWN;
+        record.type=MMT_HEADER;
+        record.nIndex=nIndex++;
 
-    result.listRecords.append(recordHeader);
+        result.listRecords.append(record);
+    }
 
     // TODO ADDRESS_SEGMENT_DATA
     if(nCodeOffset<0) // Virtual
     {
         qint64 nDelta=nCodeOffset-nHeaderSize;
 
-        _MEMORY_RECORD recordVirtualCode={};
+        _MEMORY_RECORD record={};
 
-        recordVirtualCode.bIsVirtual=true;
-        recordVirtualCode.nSize=qAbs(nDelta);
-        recordVirtualCode.nOffset=-1;
-        recordVirtualCode.nAddress=0;
+        record.bIsVirtual=true;
+        record.nSize=qAbs(nDelta);
+        record.nOffset=-1;
+        record.nAddress=0;
 
-        recordVirtualCode.segment=ADDRESS_SEGMENT_CODE; // CODE
-        recordVirtualCode.type=MMT_LOADSECTION;
-        recordVirtualCode.nIndex=nIndex++;
+        record.segment=ADDRESS_SEGMENT_CODE; // CODE
+        record.type=MMT_LOADSECTION;
+        record.nIndex=nIndex++;
 
-        result.listRecords.append(recordVirtualCode);
+        result.listRecords.append(record);
 
         nCodeSize-=qAbs(nDelta);
         nCodeOffset=nHeaderSize;
         nCodeAddress+=qAbs(nDelta);
     }
 
-    _MEMORY_RECORD recordCode={};
+    {
+        _MEMORY_RECORD record={};
 
-    recordCode.nSize=nCodeSize;
-    recordCode.nOffset=nCodeOffset;
-    recordCode.nAddress=nCodeAddress;
+        record.nSize=nCodeSize;
+        record.nOffset=nCodeOffset;
+        record.nAddress=nCodeAddress;
 
-    recordCode.segment=ADDRESS_SEGMENT_CODE; // CODE
-    recordCode.type=MMT_LOADSECTION;
-    recordCode.nIndex=nIndex++;
+        record.segment=ADDRESS_SEGMENT_CODE; // CODE
+        record.type=MMT_LOADSECTION;
+        record.nIndex=nIndex++;
 
-    result.listRecords.append(recordCode);
+        result.listRecords.append(record);
+    }
 
-    // TODO
+    {
+        _MEMORY_RECORD record={};
+
+        record.bIsVirtual=true;
+        record.nSize=0xFFFF-nCodeSize;
+        record.nOffset=-1;
+        record.nAddress=nCodeAddress+nCodeSize;
+
+        record.segment=ADDRESS_SEGMENT_CODE; // CODE
+        record.type=MMT_LOADSECTION;
+        record.nIndex=nIndex++;
+
+        result.listRecords.append(record);
+    }
 
     if(nOverlaySize)
     {
-        _MEMORY_RECORD recordOverlay={};
-        recordOverlay.nSize=nOverlaySize;
-        recordOverlay.nOffset=nOverlayOffset;
-        recordOverlay.nAddress=-1;
-        recordOverlay.sName=QString("Overlay");
+        _MEMORY_RECORD record={};
+        record.nSize=nOverlaySize;
+        record.nOffset=nOverlayOffset;
+        record.nAddress=-1;
+        record.sName=QString("Overlay");
 
-        recordOverlay.segment=ADDRESS_SEGMENT_UNKNOWN;
-        recordOverlay.type=MMT_OVERLAY;
-        recordOverlay.nIndex=nIndex++;
+        record.segment=ADDRESS_SEGMENT_UNKNOWN;
+        record.type=MMT_OVERLAY;
+        record.nIndex=nIndex++;
 
-        result.listRecords.append(recordOverlay);
+        result.listRecords.append(record);
     }
 
     return result;
