@@ -62,4 +62,12 @@ struct IMAGE_OS2_HEADER  // OS/2 .EXE header
   };
 }
 
+struct NE_SEGMENT
+{
+    quint16 dwFileOffset;
+    quint16 dwFileSize; // 0 -> 64K
+    quint16 dwFlags;
+    quint16 dwMinAllocSize; // 0 -> 64K
+};
+
 #endif // XNE_DEF_H
