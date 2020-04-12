@@ -873,7 +873,17 @@ QList<XNE_DEF::NE_SEGMENT> XNE::getSegmentList()
 {
     QList<XNE_DEF::NE_SEGMENT> listResult;
 
-    // TODO
+    qint64 nOffset=getSegmentTableOffset();
+    int nNumberOfSegments=getImageOS2Header_cseg();
+
+    for(int i=0;i<nNumberOfSegments;i++)
+    {
+        XNE_DEF::NE_SEGMENT segment=_get_NE_SEGMENT(nOffset);
+
+        listResult.append(segment);
+
+        nOffset+=sizeof(XNE_DEF::NE_SEGMENT);
+    }
 
     return listResult;
 }
