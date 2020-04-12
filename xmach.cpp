@@ -734,25 +734,64 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
     int nCount=listSegmentRecords.count();
 
+    bool bImageAddressInit=false;
+
+    qint64 nMaxOffset=0;
+    qint64 nMaxAddress=0;
+
     for(int i=0; i<nCount; i++)
     {
-        XBinary::_MEMORY_RECORD record={};
+        QString sSegmentName=QString("%1(%2)['%3']").arg(tr("Segment")).arg(i).arg(listSegmentRecords.at(i).segname); // TODO Limit
+        // TODO Align
+        qint64 nFileOffset=listSegmentRecords.at(i).fileoff;
+        qint64 nVirtualAddress=listSegmentRecords.at(i).vmaddr;
+        qint64 nFileSize=listSegmentRecords.at(i).filesize;
+        qint64 nVirtualSize=listSegmentRecords.at(i).vmsize;
 
-        record.type=MMT_LOADSECTION;
-        // TODO number
-        record.nAddress=listSegmentRecords.at(i).vmaddr;
-        record.nSize=listSegmentRecords.at(i).filesize;
-        record.nOffset=listSegmentRecords.at(i).fileoff;
-        record.nIndex=nIndex++;
+        if(nFileSize)
+        {
+            XBinary::_MEMORY_RECORD record={};
 
-        result.listRecords.append(record);
+            record.type=MMT_LOADSECTION;
 
-//        // TODO
-//        if(!isImage())
-//        {
+            record.sName=sSegmentName;
+            record.nAddress=nVirtualAddress;
+            record.nSize=nFileSize;
+            record.nOffset=nFileOffset;
+            record.nIndex=nIndex++;
 
-//        }
+            result.listRecords.append(record);
+        }
+
+        if(nVirtualSize>nFileSize)
+        {
+            XBinary::_MEMORY_RECORD record={};
+
+            record.type=MMT_LOADSECTION;
+            record.bIsVirtual=true;
+
+            record.sName=sSegmentName;
+            record.nAddress=nVirtualAddress+nFileSize;
+            record.nSize=nVirtualSize-nFileSize;
+            record.nOffset=-1;
+            record.nIndex=nIndex++;
+
+            result.listRecords.append(record);
+        }
+
+        if(!bImageAddressInit)
+        {
+            result.nBaseAddress=nVirtualAddress;
+            bImageAddressInit=true;
+        }
+
+        nMaxOffset=qMax(nMaxOffset,nFileOffset+nFileSize);
+
+        result.nBaseAddress=qMin(nVirtualAddress,result.nBaseAddress);
+        nMaxAddress=qMax(nVirtualAddress+nVirtualSize,nMaxAddress);
     }
+
+    result.nImageSize=nMaxAddress-result.nBaseAddress;
 
     return result;
 }

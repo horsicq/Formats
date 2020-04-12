@@ -3450,36 +3450,40 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
             quint64 nAlign=listPhdr.at(i).p_align;
             qint64 nVirtualAddress=S_ALIGN_DOWN(listPhdr.at(i).p_vaddr,nAlign);
-            qint64 nRawOffset=S_ALIGN_DOWN(listPhdr.at(i).p_offset,nAlign);
+            qint64 nFileOffset=S_ALIGN_DOWN(listPhdr.at(i).p_offset,nAlign);
             qint64 nVirtualSize=S_ALIGN_UP(listPhdr.at(i).p_memsz,nAlign);
-            qint64 nRawSize=S_ALIGN_UP(listPhdr.at(i).p_filesz,nAlign);
+            qint64 nFileSize=S_ALIGN_UP(listPhdr.at(i).p_filesz,nAlign);
 
-            XBinary::_MEMORY_RECORD record={};
-
-            record.type=MMT_LOADSECTION;
-            record.sName=sName;
-            // TODO Section number!
-            record.nAddress=nVirtualAddress;
-            record.nSize=nRawSize;
-            record.nOffset=nRawOffset;
-            record.nIndex=nIndex++;
-
-            result.listRecords.append(record);
-
-            if(nVirtualSize>nRawSize)
+            if(nFileSize)
             {
-                XBinary::_MEMORY_RECORD recordVirtual={};
+                XBinary::_MEMORY_RECORD record={};
 
-                recordVirtual.type=MMT_LOADSECTION;
-                recordVirtual.sName=sName;
+                record.type=MMT_LOADSECTION;
+                record.sName=sName;
                 // TODO Section number!
-                recordVirtual.nAddress=nVirtualAddress+nRawSize;
-                recordVirtual.nSize=nVirtualSize-nRawSize;
-                recordVirtual.nOffset=-1;
-                recordVirtual.nIndex=nIndex++;
-                recordVirtual.bIsVirtual=true;
+                record.nAddress=nVirtualAddress;
+                record.nSize=nFileSize;
+                record.nOffset=nFileOffset;
+                record.nIndex=nIndex++;
 
-                result.listRecords.append(recordVirtual);
+                result.listRecords.append(record);
+            }
+
+
+            if(nVirtualSize>nFileSize)
+            {
+                XBinary::_MEMORY_RECORD record={};
+
+                record.type=MMT_LOADSECTION;
+                record.sName=sName;
+                // TODO Section number!
+                record.nAddress=nVirtualAddress+nFileSize;
+                record.nSize=nVirtualSize-nFileSize;
+                record.nOffset=-1;
+                record.nIndex=nIndex++;
+                record.bIsVirtual=true;
+
+                result.listRecords.append(record);
             }
 
             if(!bImageAddressInit)
@@ -3488,7 +3492,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
                 bImageAddressInit=true;
             }
 
-            nMaxOffset=qMax(nMaxOffset,nRawOffset+nRawSize);
+            nMaxOffset=qMax(nMaxOffset,nFileOffset+nFileSize);
 
             result.nBaseAddress=qMin(nVirtualAddress,result.nBaseAddress);
             nMaxAddress=qMax(nVirtualAddress+nVirtualSize,nMaxAddress);
