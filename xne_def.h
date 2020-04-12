@@ -59,8 +59,7 @@ struct IMAGE_OS2_HEADER  // OS/2 .EXE header
     quint16 ne_psegrefbytes;            // offset to segment ref. bytes
     quint16 ne_swaparea;                // Minimum code swap area size
     quint16 ne_expver;                  // Expected Windows version number
-  };
-}
+};
 
 struct NE_SEGMENT
 {
@@ -69,5 +68,6 @@ struct NE_SEGMENT
     quint16 dwFlags;
     quint16 dwMinAllocSize; // 0 -> 64K
 };
+}
 
 #endif // XNE_DEF_H

@@ -869,6 +869,27 @@ qint64 XNE::getNotResindentNameTableOffset()
     return getImageOS2Header_nrestab();
 }
 
+QList<XNE_DEF::NE_SEGMENT> XNE::getSegmentList()
+{
+    QList<XNE_DEF::NE_SEGMENT> listResult;
+
+    // TODO
+
+    return listResult;
+}
+
+XNE_DEF::NE_SEGMENT XNE::_get_NE_SEGMENT(qint64 nOffset)
+{
+    XNE_DEF::NE_SEGMENT result={};
+
+    result.dwFileOffset=read_uint16(nOffset+offsetof(XNE_DEF::NE_SEGMENT,dwFileOffset));
+    result.dwFileSize=read_uint16(nOffset+offsetof(XNE_DEF::NE_SEGMENT,dwFileSize));
+    result.dwFlags=read_uint16(nOffset+offsetof(XNE_DEF::NE_SEGMENT,dwFlags));
+    result.dwMinAllocSize=read_uint16(nOffset+offsetof(XNE_DEF::NE_SEGMENT,dwMinAllocSize));
+
+    return result;
+}
+
 QMap<quint64, QString> XNE::getImageNEMagics()
 {
     QMap<quint64, QString> mapResult;
