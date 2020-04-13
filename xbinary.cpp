@@ -3499,6 +3499,11 @@ QString XBinary::hexToString(QString sHex)
     return sResult;
 }
 
+QString XBinary::doubleToString(double dValue)
+{
+    return QString("%1").arg(dValue,0,'f',2);
+}
+
 quint8 XBinary::hexToUint8(QString sHex)
 {
     quint8 nResult=0;
