@@ -3031,7 +3031,7 @@ XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
         quint16 nDescLength=   read_uint32(nOffset+4,bIsBigEndian);
         quint16 nType=         read_uint32(nOffset+8,bIsBigEndian);
 
-        qint32 nNoteSize=12+nNameLength+nDescLength;
+        qint32 nNoteSize=12+S_ALIGN_UP(nNameLength,4)+S_ALIGN_UP(nDescLength,4);
 
         if(nNoteSize>=nSize)
         {
@@ -3043,7 +3043,7 @@ XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
                 result.name=read_ansiString(nOffset+12,nNameLength-1);
             }
 
-            result.desc=read_array(nOffset+12+nNameLength,(int)nDescLength);
+            result.desc=read_array(nOffset+12+S_ALIGN_UP(nNameLength,4),(int)nDescLength);
         }
     }
 
