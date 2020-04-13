@@ -2949,13 +2949,21 @@ QByteArray XELF::getSectionByName(QString sSectionName)
     return baResult;
 }
 
-QString XELF::getProgramInterpreterName()
+XBinary::OS_ANSISTRING XELF::getProgramInterpreterName()
 {
-    QString sResult;
+    OS_ANSISTRING result={};
 
-    sResult.append(getSectionByName(".interp"));
+    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> listInterps=getPrograms(&_listPhdr,3); // TODO const
 
-    return sResult;
+    if(listInterps.count())
+    {
+        result.nOffset=listInterps.at(0).p_offset;
+        result.nSize=listInterps.at(0).p_filesz;
+        result.sAnsiString=read_ansiString(result.nOffset,result.nSize);
+    }
+
+    return result;
 }
 
 QString XELF::getCommentString()

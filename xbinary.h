@@ -71,6 +71,14 @@ class XBinary : public QObject
     Q_OBJECT
 
 public:
+
+    struct OS_ANSISTRING
+    {
+        qint64 nOffset;
+        qint64 nSize;
+        QString sAnsiString;
+    };
+
     struct OFFSETSIZE
     {
         qint64 nOffset;

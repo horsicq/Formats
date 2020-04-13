@@ -303,7 +303,7 @@ public:
     int getSectionIndexByName(QString sSectionName);
     QByteArray getSectionByName(QString sSectionName);
 
-    QString getProgramInterpreterName();
+    OS_ANSISTRING getProgramInterpreterName();
     QString getCommentString();
     QString getCompatibleKernelVersion();
 
