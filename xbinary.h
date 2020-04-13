@@ -280,6 +280,8 @@ public:
     qint64 find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString);
     qint64 find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString);
 
+    QByteArray getUnicodeString(QString sString);
+
     void setFindProcessEnable(bool bState);
     void setDumpProcessEnable(bool bState);
 

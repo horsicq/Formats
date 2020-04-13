@@ -1287,11 +1287,8 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     qint64 nTotalSize=nSize;
     qint32 nCurrentProgress=0;
 
-//    QByteArray baUpper=sString.toUpper().toStdWString(); // TODO Check!
-//    QByteArray baLower=sString.toLower().toStdWString();
-
-    QByteArray baUpper; // TODO Check!
-    QByteArray baLower;
+    QByteArray baUpper=getUnicodeString(sString.toUpper());
+    QByteArray baLower=getUnicodeString(sString.toLower());
 
     while((nSize>2*(nStringSize-1))&&(!__bIsFindStop))
     {
@@ -1325,6 +1322,21 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     delete[] pBuffer;
 
     return -1;
+}
+
+QByteArray XBinary::getUnicodeString(QString sString)
+{
+    QByteArray baResult;
+
+    int nSize=sString.size();
+
+    baResult.resize(nSize*2);
+
+    baResult.fill(0);
+
+    _copyMemory(baResult.data(),(char *)sString.utf16(),nSize*2);
+
+    return baResult;
 }
 
 void XBinary::setFindProcessEnable(bool bState)
