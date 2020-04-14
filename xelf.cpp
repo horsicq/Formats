@@ -2951,10 +2951,16 @@ QByteArray XELF::getSectionByName(QString sSectionName)
 
 XBinary::OS_ANSISTRING XELF::getProgramInterpreterName()
 {
+    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
+
+    return getProgramInterpreterName(&_listPhdr);
+}
+
+XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pPhdrList)
+{
     OS_ANSISTRING result={};
 
-    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
-    QList<XELF_DEF::Elf_Phdr> listInterps=getPrograms(&_listPhdr,3); // TODO const
+    QList<XELF_DEF::Elf_Phdr> listInterps=getPrograms(pPhdrList,3); // TODO const
 
     if(listInterps.count())
     {
@@ -2975,58 +2981,72 @@ QString XELF::getCommentString()
     return sResult;
 }
 
-QString XELF::getCompatibleKernelVersion()
+QList<XELF::NOTE> XELF::getNotes()
 {
-    QString sResult;
+    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
 
-    QByteArray baData=getSectionByName(".note.ABI-tag");
-    bool bIsBigEndian=isBigEndian();
-    NOTE note=getNote(baData,bIsBigEndian);
-
-    if((note.nType==1)&&(note.name=="GNU"))
-    {
-        quint32 kv[4];
-        kv[0]=_read_uint32(note.desc.data()+0,bIsBigEndian);
-        kv[1]=_read_uint32(note.desc.data()+4,bIsBigEndian);
-        kv[2]=_read_uint32(note.desc.data()+8,bIsBigEndian);
-        kv[3]=_read_uint32(note.desc.data()+12,bIsBigEndian);
-
-        if(kv[0]==0)
-        {
-            sResult=QString("%1.%2.%3").arg(kv[1]).arg(kv[2]).arg(kv[3]);
-        }
-    }
-
-    return sResult;
+    return getNotes(&_listPhdr);
 }
 
-XELF::NOTE XELF::getNote(QByteArray &baData,bool bIsBigEndian)
+//QString XELF::getCompatibleKernelVersion()
+//{
+//    QString sResult;
+
+//    QByteArray baData=getSectionByName(".note.ABI-tag");
+//    bool bIsBigEndian=isBigEndian();
+//    NOTE note=getNote(baData,bIsBigEndian);
+
+//    if((note.nType==1)&&(note.name=="GNU"))
+//    {
+//        quint32 kv[4];
+//        kv[0]=_read_uint32(note.desc.data()+0,bIsBigEndian);
+//        kv[1]=_read_uint32(note.desc.data()+4,bIsBigEndian);
+//        kv[2]=_read_uint32(note.desc.data()+8,bIsBigEndian);
+//        kv[3]=_read_uint32(note.desc.data()+12,bIsBigEndian);
+
+//        if(kv[0]==0)
+//        {
+//            sResult=QString("%1.%2.%3").arg(kv[1]).arg(kv[2]).arg(kv[3]);
+//        }
+//    }
+
+//    return sResult;
+//}
+
+QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pPhdrList)
 {
-    NOTE result={};
+    QList<XELF::NOTE> listResult;
 
-    char *pData=baData.data();
-    int nDataSize=baData.size();
+    QList<XELF_DEF::Elf_Phdr> listNotes=getPrograms(pPhdrList,4); // TODO const
 
-    if(nDataSize>=12)
+    bool bIsBigEndian=isBigEndian();
+
+    int nCount=listNotes.count();
+
+    for(int i=0;i<nCount;i++)
     {
-        quint32 nNameLength=   _read_uint32(pData+0,bIsBigEndian);
-        quint32 nDescLength=   _read_uint32(pData+4,bIsBigEndian);
-        quint32 nType=         _read_uint32(pData+8,bIsBigEndian);
+        qint64 nOffset=listNotes.at(i).p_offset;
+        qint64 nSize=listNotes.at(i).p_filesz;
 
-        if(nDataSize==12+nNameLength+nDescLength)
+        while(nSize>0)
         {
-            result.nType=nType;
+            NOTE note=_readNote(nOffset,nSize,bIsBigEndian);
 
-            if(nNameLength>=1)
+            if(note.nSize)
             {
-                result.name=_read_ansiString(pData+12,nNameLength-1);
-            }
+                listResult.append(note);
 
-            result.desc=_read_byteArray((char *)(pData+12+nNameLength),(int)nDescLength);
+                nOffset+=note.nSize;
+                nSize-=note.nSize;
+            }
+            else
+            {
+                break;
+            }
         }
     }
 
-    return result;
+    return listResult;
 }
 
 XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
@@ -3041,8 +3061,9 @@ XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
 
         qint32 nNoteSize=12+S_ALIGN_UP(nNameLength,4)+S_ALIGN_UP(nDescLength,4);
 
-        if(nNoteSize>=nSize)
+        if(nSize>=nNoteSize)
         {
+            result.nOffset=nOffset;
             result.nSize=nNoteSize;
             result.nType=nType;
 
@@ -3051,7 +3072,7 @@ XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
                 result.name=read_ansiString(nOffset+12,nNameLength-1);
             }
 
-            result.desc=read_array(nOffset+12+S_ALIGN_UP(nNameLength,4),(int)nDescLength);
+            result.nDataOffset=nOffset+12+S_ALIGN_UP(nNameLength,4);
         }
     }
 
@@ -3061,20 +3082,19 @@ XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
 QList<XELF::TAG_STRUCT> XELF::getTagStructs()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
+    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
 
-    return getTagStructs(&memoryMap);
+    return getTagStructs(&_listPhdr,&memoryMap);
 }
 
-QList<XELF::TAG_STRUCT> XELF::getTagStructs(XBinary::_MEMORY_MAP *pMemoryMap)
+QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pPhdrList,XBinary::_MEMORY_MAP *pMemoryMap)
 {
     QList<TAG_STRUCT> listResult;
 
     bool bIs64=is64();
     bool bIsBigEndian=isBigEndian();
 
-
-    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
-    QList<XELF_DEF::Elf_Phdr> listTags=getPrograms(&_listPhdr,2); // TODO const
+    QList<XELF_DEF::Elf_Phdr> listTags=getPrograms(pPhdrList,2); // TODO const
 
     int nCount=listTags.count();
 
@@ -3120,7 +3140,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(XBinary::_MEMORY_MAP *pMemoryMap)
     return listResult;
 }
 
-QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF::TAG_STRUCT> *pList,qint64 nTag)
+QList<XELF::TAG_STRUCT> XELF::_getTagStructs(QList<XELF::TAG_STRUCT> *pList,qint64 nTag)
 {
     QList<XELF::TAG_STRUCT> listResult;
 
@@ -3235,9 +3255,9 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
 {
     QList<QString> listResult;
 
-    QList<XELF::TAG_STRUCT> listNeeded=XELF::getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
-    QList<XELF::TAG_STRUCT> listStrTab=XELF::getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
-    QList<XELF::TAG_STRUCT> listStrSize=XELF::getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
+    QList<XELF::TAG_STRUCT> listNeeded=XELF::_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
+    QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
+    QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
 
     if(listStrTab.count()&&listStrSize.count())
     {
@@ -3277,9 +3297,9 @@ XBinary::OS_ANSISTRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<
 {
     OS_ANSISTRING result={};
 
-    QList<XELF::TAG_STRUCT> listRunPath=XELF::getTagStructs(pList,0x1d); // TODO const
-    QList<XELF::TAG_STRUCT> listStrTab=XELF::getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
-    QList<XELF::TAG_STRUCT> listStrSize=XELF::getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
+    QList<XELF::TAG_STRUCT> listRunPath=XELF::_getTagStructs(pList,0x1d); // TODO const
+    QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
+    QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
 
     if(listStrTab.count()&&listStrSize.count()&&listRunPath.count())
     {

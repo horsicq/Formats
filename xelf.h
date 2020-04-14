@@ -32,10 +32,11 @@ class XELF : public XBinary
 public:
     struct NOTE
     {
-        qint32 nSize;
+        qint64 nOffset;
+        qint64 nSize;
         quint32 nType;
         QString name;
-        QByteArray desc;
+        qint64 nDataOffset;
     };
 
     struct TAG_STRUCT
@@ -304,16 +305,17 @@ public:
     QByteArray getSectionByName(QString sSectionName);
 
     OS_ANSISTRING getProgramInterpreterName();
+    OS_ANSISTRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pPhdrList);
     QString getCommentString();
-    QString getCompatibleKernelVersion();
-
-    static NOTE getNote(QByteArray &baData,bool bIsBigEndian); // TODO remove
+//    QStrin
+    QList<NOTE> getNotes();
+    QList<NOTE> getNotes(QList<XELF_DEF::Elf_Phdr> *pPhdrList);
     NOTE _readNote(qint64 nOffset,qint64 nSize,bool bIsBigEndian);
 
     QList<TAG_STRUCT> getTagStructs();
-    QList<TAG_STRUCT> getTagStructs(_MEMORY_MAP *pMemoryMap);
+    QList<TAG_STRUCT> getTagStructs(QList<XELF_DEF::Elf_Phdr> *pPhdrList,_MEMORY_MAP *pMemoryMap);
 
-    static QList<TAG_STRUCT> getTagStructs(QList<TAG_STRUCT> *pList, qint64 nTag);
+    static QList<TAG_STRUCT> _getTagStructs(QList<TAG_STRUCT> *pList, qint64 nTag);
 
     qint64 getDynamicArraySize();
 
