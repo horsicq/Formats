@@ -3069,7 +3069,7 @@ XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
 
             if(nNameLength>=1)
             {
-                result.name=read_ansiString(nOffset+12,nNameLength-1);
+                result.sName=read_ansiString(nOffset+12,nNameLength-1);
             }
 
             result.nDataOffset=nOffset+12+S_ALIGN_UP(nNameLength,4);

@@ -35,7 +35,7 @@ public:
         qint64 nOffset;
         qint64 nSize;
         quint32 nType;
-        QString name;
+        QString sName;
         qint64 nDataOffset;
     };
 
