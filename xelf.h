@@ -326,6 +326,9 @@ public:
     QList<QString> getLibraries();
     QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
 
+    OS_ANSISTRING getRunPath();
+    OS_ANSISTRING getRunPath(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
+
     static QMap<quint64,QString> getDynamicTags();
     static QMap<quint64,QString> getDynamicTagsS();
 
