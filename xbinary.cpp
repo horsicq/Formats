@@ -2687,7 +2687,18 @@ QString XBinary::getBackupName(QIODevice *pDevice)
 QString XBinary::getBackupName(QString sFileName)
 {
     QFileInfo fi(sFileName);
-    QString sResult=fi.absolutePath()+QDir::separator()+fi.completeBaseName()+"."+fi.suffix()+".BAK";
+    QString sResult;
+
+    sResult+=fi.absolutePath()+QDir::separator()+fi.completeBaseName();
+
+    QString sSuffix=fi.suffix();
+
+    if(sSuffix!="")
+    {
+        sResult+="."+sSuffix;
+    }
+
+    sResult+=".BAK";
 
     return sResult;
 }
