@@ -3523,6 +3523,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     }
 
     result.sArch=getArch();
+    result.bIsBigEndian=isBigEndian();
 
     result.nRawSize=getSize();
 

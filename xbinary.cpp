@@ -54,6 +54,33 @@ XBinary::MODE XBinary::getMode()
     return __mode;
 }
 
+QString XBinary::modeIdToString(XBinary::MODE mode)
+{
+    QString sResult="Unknown";
+
+    switch(mode)
+    {
+        case MODE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
+        case MODE_16:               sResult=QString("16");          break;
+        case MODE_32:               sResult=QString("32");          break;
+        case MODE_64:               sResult=QString("64");          break;
+    }
+
+    return sResult;
+}
+
+QString XBinary::endiannessToString(bool bIsBigEndian)
+{
+    QString sResult="LE";
+
+    if(bIsBigEndian)
+    {
+        sResult="BE";
+    }
+
+    return sResult;
+}
+
 void XBinary::setArch(QString sArch)
 {
     __sArch=sArch;

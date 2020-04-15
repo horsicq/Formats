@@ -200,6 +200,9 @@ public:
     void setMode(MODE mode);
     virtual MODE getMode();
 
+    static QString modeIdToString(MODE mode);
+    static QString endiannessToString(bool bIsBigEndian);
+
     void setArch(QString sArch);
     virtual QString getArch();
 
