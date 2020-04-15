@@ -325,6 +325,9 @@ public:
     void setDynamicArrayTag(qint64 nOffset,qint64 nValue);
     void setDynamicArrayValue(qint64 nOffset,qint64 nValue);
 
+    OFFSETSIZE getStringTable();
+    OFFSETSIZE getStringTable(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
+
     QList<QString> getLibraries();
     QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
 
@@ -350,7 +353,7 @@ public:
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nValue);
 
-    QList<XELF_DEF::Elf_Phdr> getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, quint32 nType);
+    QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, quint32 nType);
 };
 
 #endif // XELF_H

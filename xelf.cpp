@@ -2960,7 +2960,7 @@ XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr>
 {
     OS_ANSISTRING result={};
 
-    QList<XELF_DEF::Elf_Phdr> listInterps=getPrograms(pPhdrList,3); // TODO const
+    QList<XELF_DEF::Elf_Phdr> listInterps=_getPrograms(pPhdrList,3); // TODO const
 
     if(listInterps.count())
     {
@@ -3017,7 +3017,7 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pPhdrList)
 {
     QList<XELF::NOTE> listResult;
 
-    QList<XELF_DEF::Elf_Phdr> listNotes=getPrograms(pPhdrList,4); // TODO const
+    QList<XELF_DEF::Elf_Phdr> listNotes=_getPrograms(pPhdrList,4); // TODO const
 
     bool bIsBigEndian=isBigEndian();
 
@@ -3094,7 +3094,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pPhdrList
     bool bIs64=is64();
     bool bIsBigEndian=isBigEndian();
 
-    QList<XELF_DEF::Elf_Phdr> listTags=getPrograms(pPhdrList,2); // TODO const
+    QList<XELF_DEF::Elf_Phdr> listTags=_getPrograms(pPhdrList,2); // TODO const
 
     int nCount=listTags.count();
 
@@ -3243,6 +3243,36 @@ void XELF::setDynamicArrayValue(qint64 nOffset, qint64 nValue)
     }
 }
 
+XBinary::OFFSETSIZE XELF::getStringTable()
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+    QList<XELF::TAG_STRUCT> listStructs=getTagStructs();
+
+    return getStringTable(&memoryMap,&listStructs);
+}
+
+XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pList)
+{
+    OFFSETSIZE result={};
+
+    QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
+    QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
+
+    if(listStrTab.count()&&listStrSize.count())
+    {
+        qint64 nOffset=addressToOffset(pMemoryMap,listStrTab.at(0).nValue);
+        qint64 nSize=listStrSize.at(0).nValue;
+
+        if(isOffsetAndSizeValid(pMemoryMap,nOffset,nSize))
+        {
+            result.nOffset=nOffset;
+            result.nSize=nSize;
+        }
+    }
+
+    return result;
+}
+
 QList<QString> XELF::getLibraries()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
@@ -3256,14 +3286,14 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
     QList<QString> listResult;
 
     QList<XELF::TAG_STRUCT> listNeeded=XELF::_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
-    QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
-    QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
 
-    if(listStrTab.count()&&listStrSize.count())
+    OFFSETSIZE os=getStringTable(pMemoryMap,pList);
+
+    if(os.nSize)
     {
-        qint64 nOffset=addressToOffset(pMemoryMap,listStrTab.at(0).nValue);
+        qint64 nOffset=os.nOffset;
 
-        QByteArray baSection=read_array(nOffset,listStrSize.at(0).nValue);
+        QByteArray baSection=read_array(nOffset,os.nSize);
 
         qint64 nSectionTableSize=baSection.size();
 
@@ -3490,7 +3520,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     result.nRawSize=getSize();
 
     QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
-    QList<XELF_DEF::Elf_Phdr> listSegments=getPrograms(&_listPhdr,1); // TODO const
+    QList<XELF_DEF::Elf_Phdr> listSegments=_getPrograms(&_listPhdr,1); // TODO const
 
 //    bool bIs64=is64();
     int nCount=listSegments.count();
@@ -3733,7 +3763,7 @@ void XELF::setBaseAddress(qint64 nValue)
     //  TODO
 }
 
-QList<XELF_DEF::Elf_Phdr> XELF::getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, quint32 nType)
+QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, quint32 nType)
 {
     QList<XELF_DEF::Elf_Phdr> listResult;
 
