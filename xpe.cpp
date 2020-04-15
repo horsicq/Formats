@@ -48,6 +48,11 @@ bool XPE::isValid()
     return bResult;
 }
 
+bool XPE::is32()
+{
+    return !(is64());
+}
+
 bool XPE::is64()
 {
     quint16 nMachine=getFileHeader_Machine();

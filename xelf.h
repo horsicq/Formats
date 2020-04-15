@@ -59,6 +59,7 @@ public:
 
     virtual bool isValid();
     bool isBigEndian();
+    bool is32();
     bool is64();
 
     static bool is64(QIODevice *pDevice);

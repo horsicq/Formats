@@ -158,6 +158,8 @@ public:
         qint64 nRawSize;
         FT fileType;
         MODE mode;
+        bool bIsBigEndian;
+        QString sArch;
         QList<_MEMORY_RECORD> listRecords;
     };
 
@@ -450,6 +452,10 @@ public:
 
     QIODevice *getDevice();
     virtual bool isValid();
+    virtual bool isBigEndian();
+    virtual bool is16();
+    virtual bool is32();
+    virtual bool is64();
 
     void setVersion(QString sVersion);
     virtual QString getVersion();

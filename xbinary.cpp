@@ -2054,6 +2054,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
     result.nImageSize=getSize();
     result.fileType=FT_BINARY;
     result.mode=getMode();
+    result.sArch=getArch();
 
     _MEMORY_RECORD record={};
     record.nAddress=_getBaseAddress();
@@ -3306,6 +3307,26 @@ QIODevice *XBinary::getDevice()
 bool XBinary::isValid()
 {
     return true;
+}
+
+bool XBinary::isBigEndian()
+{
+    return false;
+}
+
+bool XBinary::is16()
+{
+    return false;
+}
+
+bool XBinary::is32()
+{
+    return false;
+}
+
+bool XBinary::is64()
+{
+    return false;
 }
 
 void XBinary::setVersion(QString sVersion)

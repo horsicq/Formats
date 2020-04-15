@@ -50,6 +50,11 @@ bool XELF::isBigEndian()
     return getIdent_data()==XELF_DEF::S_ELFDATA2MSB;
 }
 
+bool XELF::is32()
+{
+    return getIdent_class()==XELF_DEF::S_ELFCLASS32;
+}
+
 bool XELF::is64()
 {
     return getIdent_class()==XELF_DEF::S_ELFCLASS64;
@@ -3516,6 +3521,8 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
         result.fileType=FT_ELF32;
         result.mode=MODE_32;
     }
+
+    result.sArch=getArch();
 
     result.nRawSize=getSize();
 
