@@ -2984,9 +2984,7 @@ XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr>
 
     if(listInterps.count())
     {
-        result.nOffset=listInterps.at(0).p_offset;
-        result.nSize=listInterps.at(0).p_filesz;
-        result.sAnsiString=read_ansiString(result.nOffset,result.nSize);
+        result=getOsAnsiString(listInterps.at(0).p_offset,listInterps.at(0).p_filesz);
     }
 
     return result;

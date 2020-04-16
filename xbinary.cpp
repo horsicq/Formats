@@ -227,6 +227,17 @@ QString XBinary::convertPathName(QString sPathName)
     return sResult;
 }
 
+XBinary::OS_ANSISTRING XBinary::getOsAnsiString(qint64 nOffset, qint64 nSize)
+{
+    OS_ANSISTRING result={};
+
+    result.nOffset=nOffset;
+    result.nSize=nSize;
+    result.sAnsiString=read_ansiString(nOffset,nSize);
+
+    return result;
+}
+
 //void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
 //{
 //    if((sDirectoryName!=".")&&(sDirectoryName!=".."))
