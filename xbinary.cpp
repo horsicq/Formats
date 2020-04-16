@@ -2636,33 +2636,87 @@ QString XBinary::valueToHex(qint8 value)
     return valueToHex((quint8)value);
 }
 
-QString XBinary::valueToHex(quint16 value)
+QString XBinary::valueToHex(quint16 value,bool bIsBigEndian)
 {
+    if(bIsBigEndian)
+    {
+        value=qFromBigEndian(value);
+    }
+    else
+    {
+        value=qFromLittleEndian(value);
+    }
+
     return QString("%1").arg(value,4,16,QChar('0'));
 }
 
-QString XBinary::valueToHex(qint16 value)
+QString XBinary::valueToHex(qint16 value,bool bIsBigEndian)
 {
+    if(bIsBigEndian)
+    {
+        value=qFromBigEndian(value);
+    }
+    else
+    {
+        value=qFromLittleEndian(value);
+    }
+
     return valueToHex((quint16)value);
 }
 
-QString XBinary::valueToHex(quint32 value)
+QString XBinary::valueToHex(quint32 value,bool bIsBigEndian)
 {
+    if(bIsBigEndian)
+    {
+        value=qFromBigEndian(value);
+    }
+    else
+    {
+        value=qFromLittleEndian(value);
+    }
+
     return QString("%1").arg(value,8,16,QChar('0'));
 }
 
-QString XBinary::valueToHex(qint32 value)
+QString XBinary::valueToHex(qint32 value,bool bIsBigEndian)
 {
+    if(bIsBigEndian)
+    {
+        value=qFromBigEndian(value);
+    }
+    else
+    {
+        value=qFromLittleEndian(value);
+    }
+
     return valueToHex((quint32)value);
 }
 
-QString XBinary::valueToHex(quint64 value)
+QString XBinary::valueToHex(quint64 value,bool bIsBigEndian)
 {
+    if(bIsBigEndian)
+    {
+        value=qFromBigEndian(value);
+    }
+    else
+    {
+        value=qFromLittleEndian(value);
+    }
+
     return QString("%1").arg(value,16,16,QChar('0'));
 }
 
-QString XBinary::valueToHex(qint64 value)
+QString XBinary::valueToHex(qint64 value,bool bIsBigEndian)
 {
+    if(bIsBigEndian)
+    {
+        value=qFromBigEndian(value);
+    }
+    else
+    {
+        value=qFromLittleEndian(value);
+    }
+
     return valueToHex((quint64)value);
 }
 

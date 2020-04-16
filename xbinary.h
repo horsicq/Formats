@@ -411,12 +411,12 @@ public:
 
     static QString valueToHex(quint8 value);
     static QString valueToHex(qint8 value);
-    static QString valueToHex(quint16 value);
-    static QString valueToHex(qint16 value);
-    static QString valueToHex(quint32 value);
-    static QString valueToHex(qint32 value);
-    static QString valueToHex(quint64 value);
-    static QString valueToHex(qint64 value);
+    static QString valueToHex(quint16 value,bool bIsBigEndian=false);
+    static QString valueToHex(qint16 value,bool bIsBigEndian=false);
+    static QString valueToHex(quint32 value,bool bIsBigEndian=false);
+    static QString valueToHex(qint32 value,bool bIsBigEndian=false);
+    static QString valueToHex(quint64 value,bool bIsBigEndian=false);
+    static QString valueToHex(qint64 value,bool bIsBigEndian=false);
 
     static QString getUnpackedName(QIODevice *pDevice);
     static QString getUnpackedName(QString sFileName);
