@@ -3792,6 +3792,24 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagSections(QList<XELF_DEF::Elf_Shd
 {
     QList<XBinary::DATASET> listResult;
 
+    int nCount=pList->count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(pList->at(i).sh_type==3) // TODO const
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=pList->at(i).sh_addr;
+            dataset.nOffset=pList->at(i).sh_offset;
+            dataset.nSize=pList->at(i).sh_size;
+            dataset.nType=DS_STRINGTABLE;
+            dataset.sName=QString("%1[%2]").arg("String table").arg(pList->at(i).sh_name); // TODO mb translate
+
+            listResult.append(dataset);
+        }
+    }
+
     return listResult;
 }
 
