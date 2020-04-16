@@ -1060,7 +1060,7 @@ qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 value, bool bIsB
     return find_array(nOffset,nSize,(char *)&_value,4);
 }
 
-qint64 XBinary::find_uint64(qint64 nOffset, qint64 nSize, qint64 value, bool bIsBigEndian)
+qint64 XBinary::find_uint64(qint64 nOffset, qint64 nSize, quint64 value, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
@@ -1076,7 +1076,7 @@ qint64 XBinary::find_uint64(qint64 nOffset, qint64 nSize, qint64 value, bool bIs
 
 qint64 XBinary::find_int64(qint64 nOffset, qint64 nSize, qint64 value, bool bIsBigEndian)
 {
-    qint64 _value=(qint64)value;
+    quint64 _value=(quint64)value;
 
     if(bIsBigEndian)
     {
@@ -1088,6 +1088,20 @@ qint64 XBinary::find_int64(qint64 nOffset, qint64 nSize, qint64 value, bool bIsB
     }
 
     return find_array(nOffset,nSize,(char *)&_value,8);
+}
+
+qint64 XBinary::find_float(qint64 nOffset, qint64 nSize, float value, bool bIsBigEndian)
+{
+    // TODO
+
+    return -1;
+}
+
+qint64 XBinary::find_double(qint64 nOffset, qint64 nSize, double value, bool bIsBigEndian)
+{
+    // TODO
+
+    return -1;
 }
 
 qint64 XBinary::find_ansiString(qint64 nOffset, qint64 nSize, QString sString)

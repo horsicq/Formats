@@ -284,8 +284,11 @@ public:
     qint64 find_int16(qint64 nOffset,qint64 nSize,qint16 value,bool bIsBigEndian=false);
     qint64 find_uint32(qint64 nOffset,qint64 nSize,quint32 value,bool bIsBigEndian=false);
     qint64 find_int32(qint64 nOffset,qint64 nSize,qint32 value,bool bIsBigEndian=false);
-    qint64 find_uint64(qint64 nOffset,qint64 nSize,qint64 value,bool bIsBigEndian=false);
+    qint64 find_uint64(qint64 nOffset,qint64 nSize,quint64 value,bool bIsBigEndian=false);
     qint64 find_int64(qint64 nOffset,qint64 nSize,qint64 value,bool bIsBigEndian=false);
+    qint64 find_float(qint64 nOffset,qint64 nSize,float value,bool bIsBigEndian=false);
+    qint64 find_double(qint64 nOffset,qint64 nSize,double value,bool bIsBigEndian=false);
+
     qint64 find_ansiString(qint64 nOffset,qint64 nSize,QString sString);
     qint64 find_unicodeString(qint64 nOffset,qint64 nSize,QString sString); // mb TODO endian
     qint64 find_signature(qint64 nOffset, qint64 nSize, QString sSignature);
