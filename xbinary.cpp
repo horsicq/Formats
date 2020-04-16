@@ -1092,16 +1092,56 @@ qint64 XBinary::find_int64(qint64 nOffset, qint64 nSize, qint64 value, bool bIsB
 
 qint64 XBinary::find_float(qint64 nOffset, qint64 nSize, float value, bool bIsBigEndian)
 {
-    // TODO
+    float _value=value;
 
-    return -1;
+    endian_float(&_value,bIsBigEndian);
+
+    return find_array(nOffset,nSize,(char *)&_value,4);
 }
 
 qint64 XBinary::find_double(qint64 nOffset, qint64 nSize, double value, bool bIsBigEndian)
 {
-    // TODO
+    double _value=value;
 
-    return -1;
+    endian_double(&_value,bIsBigEndian);
+
+    return find_array(nOffset,nSize,(char *)&_value,8);
+}
+
+void XBinary::endian_float(float *pValue,bool bIsBigEndian)
+{
+    bool bReverse=false;
+
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+    bReverse=!bIsBigEndian;
+#else
+    bReverse=bIsBigEndian;
+#endif
+
+    if(bReverse)
+    {
+        qSwap(((quint8 *)pValue)[0],((quint8 *)pValue)[3]);
+        qSwap(((quint8 *)pValue)[1],((quint8 *)pValue)[2]);
+    }
+}
+
+void XBinary::endian_double(double *pValue,bool bIsBigEndian)
+{
+    bool bReverse=false;
+
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+    bReverse=!bIsBigEndian;
+#else
+    bReverse=bIsBigEndian;
+#endif
+
+    if(bReverse)
+    {
+        qSwap(((quint8 *)pValue)[0],((quint8 *)pValue)[7]);
+        qSwap(((quint8 *)pValue)[1],((quint8 *)pValue)[6]);
+        qSwap(((quint8 *)pValue)[2],((quint8 *)pValue)[5]);
+        qSwap(((quint8 *)pValue)[3],((quint8 *)pValue)[4]);
+    }
 }
 
 qint64 XBinary::find_ansiString(qint64 nOffset, qint64 nSize, QString sString)
