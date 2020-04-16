@@ -181,6 +181,9 @@ public:
     quint16 getSectionStringTable();
     quint16 getSectionStringTable(bool bIs64);
 
+    OFFSETSIZE getSectionOffsetSize(quint32 nSection);
+    QString getStringFromIndex(qint64 nOffset,qint64 nSize,int nIndex);
+
     QMap<quint32,QString> getStringsFromSection(quint32 nSection);
     QString getStringFromSection(quint32 nIndex,quint32 nSection);
     QMap<quint32,QString> getStringsFromMainSection();

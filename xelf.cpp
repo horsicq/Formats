@@ -1084,6 +1084,38 @@ quint16 XELF::getSectionStringTable(bool bIs64)
     return nResult;
 }
 
+XBinary::OFFSETSIZE XELF::getSectionOffsetSize(quint32 nSection)
+{
+    OFFSETSIZE result={};
+
+    if(is64())
+    {
+        XELF_DEF::Elf64_Shdr section_header=getElf64_Shdr(nSection);
+        result.nOffset=section_header.sh_offset;
+        result.nSize=section_header.sh_size;
+    }
+    else
+    {
+        XELF_DEF::Elf32_Shdr section_header=getElf32_Shdr(nSection);
+        result.nOffset=section_header.sh_offset;
+        result.nSize=section_header.sh_size;
+    }
+
+    return result;
+}
+
+QString XELF::getStringFromIndex(qint64 nOffset, qint64 nSize, int nIndex)
+{
+    QString sResult;
+
+    if(nIndex<nSize)
+    {
+        sResult=read_ansiString(nOffset+nIndex);
+    }
+
+    return sResult;
+}
+
 QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
 {
     QMap<quint32, QString> mapResult;
@@ -1116,26 +1148,9 @@ QString XELF::getStringFromSection(quint32 nIndex, quint32 nSection)
 {
     QString sResult;
 
-    quint64 nOffset=0;
-    quint64 nSize=0;
+    XBinary::OFFSETSIZE os=getSectionOffsetSize(nSection);
 
-    if(is64())
-    {
-        XELF_DEF::Elf64_Shdr section_header=getElf64_Shdr(nSection);
-        nOffset=(isImage())?(section_header.sh_addr):(section_header.sh_offset);
-        nSize=section_header.sh_size;
-    }
-    else
-    {
-        XELF_DEF::Elf32_Shdr section_header=getElf32_Shdr(nSection);
-        nOffset=(isImage())?(section_header.sh_addr):(section_header.sh_offset);
-        nSize=section_header.sh_size;
-    }
-
-    if(nIndex<nSize)
-    {
-        sResult=read_ansiString(nOffset+nIndex);
-    }
+    sResult=getStringFromIndex(os.nOffset,os.nSize,nIndex);
 
     return sResult;
 }
@@ -1151,7 +1166,7 @@ QString XELF::getStringFromMainSection(quint32 nIndex)
 {
     quint32 nSection=getSectionStringTable();
 
-    return getStringFromSection(nIndex,nSection);
+    return getStringFromSection(nIndex,nSection); // TODO optimize
 }
 
 QByteArray XELF::getSection(quint32 nIndex)
@@ -3792,6 +3807,10 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagSections(QList<XELF_DEF::Elf_Shd
 {
     QList<XBinary::DATASET> listResult;
 
+    quint32 nMainStringSection=getSectionStringTable();
+
+    XBinary::OFFSETSIZE osStringTable=getSectionOffsetSize(nMainStringSection);
+
     int nCount=pList->count();
 
     for(int i=0;i<nCount;i++)
@@ -3804,7 +3823,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagSections(QList<XELF_DEF::Elf_Shd
             dataset.nOffset=pList->at(i).sh_offset;
             dataset.nSize=pList->at(i).sh_size;
             dataset.nType=DS_STRINGTABLE;
-            dataset.sName=QString("%1[%2]").arg("String table").arg(pList->at(i).sh_name); // TODO mb translate
+            dataset.sName=QString("%1[%2]").arg("String table").arg(getStringFromIndex(osStringTable.nOffset,osStringTable.nSize,pList->at(i).sh_name)); // TODO mb translate
 
             listResult.append(dataset);
         }
