@@ -71,6 +71,14 @@ class XBinary : public QObject
     Q_OBJECT
 
 public:
+    struct DATASET
+    {
+        qint64 nOffset;
+        qint64 nAddress;
+        qint64 nSize;
+        QString sName;
+        quint32 nType;
+    };
 
     struct OS_ANSISTRING
     {
@@ -423,6 +431,8 @@ public:
     static QString valueToHex(qint32 value,bool bIsBigEndian=false);
     static QString valueToHex(quint64 value,bool bIsBigEndian=false);
     static QString valueToHex(qint64 value,bool bIsBigEndian=false);
+    static QString valueToHex(float value,bool bIsBigEndian=false);
+    static QString valueToHex(double value,bool bIsBigEndian=false);
 
     static QString getUnpackedName(QIODevice *pDevice);
     static QString getUnpackedName(QString sFileName);

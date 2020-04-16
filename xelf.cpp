@@ -3787,3 +3787,24 @@ QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, q
 
     return listResult;
 }
+
+QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(QList<XELF_DEF::Elf_Shdr> *pList)
+{
+    QList<XBinary::DATASET> listResult;
+
+    return listResult;
+}
+
+QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(QList<XELF_DEF::Elf_Phdr> *pList)
+{
+    QList<XBinary::DATASET> listResult;
+
+    return listResult;
+}
+
+QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pList)
+{
+    QList<XBinary::DATASET> listResult;
+
+    return listResult;
+}

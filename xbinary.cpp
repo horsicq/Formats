@@ -2774,6 +2774,18 @@ QString XBinary::valueToHex(qint64 value,bool bIsBigEndian)
     return valueToHex((quint64)value);
 }
 
+QString XBinary::valueToHex(float value, bool bIsBigEndian)
+{
+    // TODO
+    return "";
+}
+
+QString XBinary::valueToHex(double value, bool bIsBigEndian)
+{
+    // TODO
+    return "";
+}
+
 QString XBinary::getUnpackedName(QIODevice *pDevice)
 {
     QString sResult="unpacked";

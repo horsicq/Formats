@@ -30,6 +30,12 @@ class XELF : public XBinary
     Q_OBJECT
 
 public:
+    enum DS
+    {
+        DS_UNKNOWN,
+        DS_SECTIONTABLE
+    };
+
     struct NOTE
     {
         qint64 nOffset;
@@ -355,6 +361,10 @@ public:
     virtual void setBaseAddress(qint64 nValue);
 
     QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, quint32 nType);
+
+    QList<DATASET> getDatasetsFromTagStructs(QList<XELF_DEF::Elf_Shdr> *pList);
+    QList<DATASET> getDatasetsFromTagStructs(QList<XELF_DEF::Elf_Phdr> *pList);
+    QList<DATASET> getDatasetsFromTagStructs(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
 };
 
 #endif // XELF_H
