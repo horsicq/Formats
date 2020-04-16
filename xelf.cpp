@@ -3788,14 +3788,14 @@ QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, q
     return listResult;
 }
 
-QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(QList<XELF_DEF::Elf_Shdr> *pList)
+QList<XBinary::DATASET> XELF::getDatasetsFromTagSections(QList<XELF_DEF::Elf_Shdr> *pList)
 {
     QList<XBinary::DATASET> listResult;
 
     return listResult;
 }
 
-QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(QList<XELF_DEF::Elf_Phdr> *pList)
+QList<XBinary::DATASET> XELF::getDatasetsFromTagPrograms(QList<XELF_DEF::Elf_Phdr> *pList)
 {
     QList<XBinary::DATASET> listResult;
 
@@ -3805,6 +3805,25 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(QList<XELF_DEF::Elf_Phdr
 QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pList)
 {
     QList<XBinary::DATASET> listResult;
+
+    QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
+    QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
+
+    if(listStrTab.count()&&listStrSize.count())
+    {
+        DATASET dataset={};
+
+        dataset.nAddress=listStrTab.at(0).nValue;
+        dataset.nOffset=addressToOffset(pMemoryMap,dataset.nAddress);
+        dataset.nSize=listStrSize.at(0).nValue;
+        dataset.nType=DS_STRINGTABLE;
+        dataset.sName="String table"; // TODO mb translate
+
+        if(isOffsetAndSizeValid(pMemoryMap,dataset.nOffset,dataset.nSize))
+        {
+            listResult.append(dataset);
+        }
+    }
 
     return listResult;
 }
