@@ -299,8 +299,8 @@ public:
     qint64 find_float(qint64 nOffset,qint64 nSize,float value,bool bIsBigEndian=false);
     qint64 find_double(qint64 nOffset,qint64 nSize,double value,bool bIsBigEndian=false);
 
-    void endian_float(float *pValue,bool bIsBigEndian);
-    void endian_double(double *pValue,bool bIsBigEndian);
+    static void endian_float(float *pValue,bool bIsBigEndian);
+    static void endian_double(double *pValue,bool bIsBigEndian);
 
     qint64 find_ansiString(qint64 nOffset,qint64 nSize,QString sString);
     qint64 find_unicodeString(qint64 nOffset,qint64 nSize,QString sString); // mb TODO endian

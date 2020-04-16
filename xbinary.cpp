@@ -2787,14 +2787,28 @@ QString XBinary::valueToHex(qint64 value,bool bIsBigEndian)
 
 QString XBinary::valueToHex(float value, bool bIsBigEndian)
 {
-    // TODO
-    return "";
+    float _value=value;
+
+    endian_float(&_value,bIsBigEndian);
+
+    quint32 _nValue=0;
+
+    _copyMemory((char *)&_nValue,(char *)&_value,4);
+
+    return QString("%1").arg(_nValue,8,16,QChar('0'));
 }
 
 QString XBinary::valueToHex(double value, bool bIsBigEndian)
 {
-    // TODO
-    return "";
+    double _value=value;
+
+    endian_double(&_value,bIsBigEndian);
+
+    quint64 _nValue=0;
+
+    _copyMemory((char *)&_nValue,(char *)&_value,8);
+
+    return QString("%1").arg(_nValue,16,16,QChar('0'));
 }
 
 QString XBinary::getUnpackedName(QIODevice *pDevice)
