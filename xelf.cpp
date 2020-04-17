@@ -3813,7 +3813,21 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagSections(QList<XELF_DEF::Elf_Shd
 
     for(int i=0;i<nCount;i++)
     {
-        if(pList->at(i).sh_type==3) // TODO const
+        QString sSectionName=getStringFromIndex(osStringTable.nOffset,osStringTable.nSize,pList->at(i).sh_name);
+
+        if((pList->at(i).sh_type==1)&&(sSectionName==".interp")) // Interpreter TODO const
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=pList->at(i).sh_addr;
+            dataset.nOffset=pList->at(i).sh_offset;
+            dataset.nSize=pList->at(i).sh_size;
+            dataset.nType=DS_INTERPRETER;
+            dataset.sName=QString("%1[%2]").arg("Interpreter").arg(sSectionName); // TODO mb translate
+
+            listResult.append(dataset);
+        }
+        else if(pList->at(i).sh_type==3) // String table TODO const
         {
             DATASET dataset={};
 
@@ -3821,7 +3835,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagSections(QList<XELF_DEF::Elf_Shd
             dataset.nOffset=pList->at(i).sh_offset;
             dataset.nSize=pList->at(i).sh_size;
             dataset.nType=DS_STRINGTABLE;
-            dataset.sName=QString("%1[%2]").arg("String table").arg(getStringFromIndex(osStringTable.nOffset,osStringTable.nSize,pList->at(i).sh_name)); // TODO mb translate
+            dataset.sName=QString("%1[%2]").arg("String table").arg(sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
@@ -3834,6 +3848,24 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagPrograms(QList<XELF_DEF::Elf_Phd
 {
     QList<XBinary::DATASET> listResult;
 
+    int nCount=pList->count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if((pList->at(i).p_type==3)) // Interpreter TODO const
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=pList->at(i).p_vaddr;
+            dataset.nOffset=pList->at(i).p_offset;
+            dataset.nSize=pList->at(i).p_filesz;
+            dataset.nType=DS_INTERPRETER;
+            dataset.sName=QString("%1").arg("Interpreter"); // TODO mb translate
+
+            listResult.append(dataset);
+        }
+    }
+
     return listResult;
 }
 
@@ -3843,6 +3875,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 
     QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
     QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
+    QList<XELF::TAG_STRUCT> listStrNeeded=XELF::_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
 
     if(listStrTab.count()&&listStrSize.count())
     {
@@ -3858,6 +3891,19 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
         {
             listResult.append(dataset);
         }
+    }
+
+    if(listStrNeeded.count())
+    {
+        DATASET dataset={};
+
+        dataset.nAddress=0;
+        dataset.nOffset=0;
+        dataset.nSize=0;
+        dataset.nType=DS_LIBRARIES;
+        dataset.sName="Libraries"; // TODO mb translate
+
+        listResult.append(dataset);
     }
 
     return listResult;

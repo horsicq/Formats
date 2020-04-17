@@ -33,6 +33,8 @@ public:
     enum DS
     {
         DS_UNKNOWN,
+        DS_INTERPRETER,
+        DS_LIBRARIES,
         DS_STRINGTABLE
     };
 
