@@ -37,6 +37,7 @@ public:
         DS_LIBRARIES,
         DS_RUNPATH,
         DS_NOTES,
+        DS_DYNAMICTAGS,
         DS_STRINGTABLE
     };
 
@@ -329,6 +330,7 @@ public:
 
     QList<TAG_STRUCT> getTagStructs();
     QList<TAG_STRUCT> getTagStructs(QList<XELF_DEF::Elf_Phdr> *pPhdrList,_MEMORY_MAP *pMemoryMap);
+    QList<TAG_STRUCT> _getTagStructs(qint64 nOffset, qint64 nSize, bool bIs64, bool bIsBigEndian);
 
     static QList<TAG_STRUCT> _getTagStructs(QList<TAG_STRUCT> *pList, qint64 nTag);
 
@@ -370,8 +372,8 @@ public:
 
     QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, quint32 nType);
 
-    QList<DATASET> getDatasetsFromTagSections(QList<XELF_DEF::Elf_Shdr> *pList);
-    QList<DATASET> getDatasetsFromTagPrograms(QList<XELF_DEF::Elf_Phdr> *pList);
+    QList<DATASET> getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pList);
+    QList<DATASET> getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pList);
     QList<DATASET> getDatasetsFromTagStructs(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
 };
 

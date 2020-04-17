@@ -3130,37 +3130,46 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pPhdrList
         qint64 nOffset=listTags.at(i).p_offset; //  Check image
         qint64 nSize=listTags.at(i).p_filesz;
 
-        if(isOffsetValid(pMemoryMap,nOffset))
+        if(isOffsetAndSizeValid(pMemoryMap,nOffset,nSize))
         {
-            while(nSize>0)
-            {
-                TAG_STRUCT tagStruct={};
-                tagStruct.nOffset=nOffset;
+            listResult.append(_getTagStructs(nOffset,nSize,bIs64,bIsBigEndian));
+        }
+    }
 
-                if(bIs64)
-                {
-                    tagStruct.nTag=read_int64(nOffset,bIsBigEndian);
-                    tagStruct.nValue=read_int64(nOffset+8,bIsBigEndian);
-                    nOffset+=16;
-                    nSize-=16;
-                }
-                else
-                {
-                    tagStruct.nTag=read_int32(nOffset,bIsBigEndian);
-                    tagStruct.nValue=read_int32(nOffset+4,bIsBigEndian);
-                    nOffset+=8;
-                    nSize-=8;
-                }
+    return listResult;
+}
 
-                if(tagStruct.nTag)
-                {
-                    listResult.append(tagStruct);
-                }
-                else
-                {
-                    break;
-                }
-            }
+QList<XELF::TAG_STRUCT> XELF::_getTagStructs(qint64 nOffset, qint64 nSize, bool bIs64, bool bIsBigEndian)
+{
+    QList<TAG_STRUCT> listResult;
+
+    while(nSize>0)
+    {
+        TAG_STRUCT tagStruct={};
+        tagStruct.nOffset=nOffset;
+
+        if(bIs64)
+        {
+            tagStruct.nTag=read_int64(nOffset,bIsBigEndian);
+            tagStruct.nValue=read_int64(nOffset+8,bIsBigEndian);
+            nOffset+=16;
+            nSize-=16;
+        }
+        else
+        {
+            tagStruct.nTag=read_int32(nOffset,bIsBigEndian);
+            tagStruct.nValue=read_int32(nOffset+4,bIsBigEndian);
+            nOffset+=8;
+            nSize-=8;
+        }
+
+        if(tagStruct.nTag)
+        {
+            listResult.append(tagStruct);
+        }
+        else
+        {
+            break;
         }
     }
 
@@ -3810,7 +3819,7 @@ QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, q
     return listResult;
 }
 
-QList<XBinary::DATASET> XELF::getDatasetsFromTagSections(QList<XELF_DEF::Elf_Shdr> *pList)
+QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pList)
 {
     QList<XBinary::DATASET> listResult;
 
@@ -3848,6 +3857,18 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagSections(QList<XELF_DEF::Elf_Shd
 
             listResult.append(dataset);
         }
+        else if(pList->at(i).sh_type==6) // Dynamic TODO const
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=pList->at(i).sh_addr;
+            dataset.nOffset=pList->at(i).sh_offset;
+            dataset.nSize=pList->at(i).sh_size;
+            dataset.nType=DS_DYNAMICTAGS;
+            dataset.sName=QString("%1[%2]").arg("Dynamic tags").arg(sSectionName); // TODO mb translate
+
+            listResult.append(dataset);
+        }
         else if(pList->at(i).sh_type==7) // Notes TODO const
         {
             DATASET dataset={};
@@ -3865,7 +3886,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagSections(QList<XELF_DEF::Elf_Shd
     return listResult;
 }
 
-QList<XBinary::DATASET> XELF::getDatasetsFromTagPrograms(QList<XELF_DEF::Elf_Phdr> *pList)
+QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pList)
 {
     QList<XBinary::DATASET> listResult;
 
@@ -3894,6 +3915,18 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagPrograms(QList<XELF_DEF::Elf_Phd
             dataset.nSize=pList->at(i).p_filesz;
             dataset.nType=DS_NOTES;
             dataset.sName=QString("%1").arg("Notes"); // TODO mb translate
+
+            listResult.append(dataset);
+        }
+        else if((pList->at(i).p_type==2)) // Tags TODO const
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=pList->at(i).p_vaddr;
+            dataset.nOffset=pList->at(i).p_offset;
+            dataset.nSize=pList->at(i).p_filesz;
+            dataset.nType=DS_DYNAMICTAGS;
+            dataset.sName=QString("%1").arg("Dynamic tags"); // TODO mb translate
 
             listResult.append(dataset);
         }
