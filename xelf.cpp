@@ -3046,21 +3046,30 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pPhdrList)
         qint64 nOffset=listNotes.at(i).p_offset;
         qint64 nSize=listNotes.at(i).p_filesz;
 
-        while(nSize>0)
+        listResult=_getNotes(nOffset,nSize,bIsBigEndian);
+    }
+
+    return listResult;
+}
+
+QList<XELF::NOTE> XELF::_getNotes(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
+{
+    QList<XELF::NOTE> listResult;
+
+    while(nSize>0)
+    {
+        NOTE note=_readNote(nOffset,nSize,bIsBigEndian);
+
+        if(note.nSize)
         {
-            NOTE note=_readNote(nOffset,nSize,bIsBigEndian);
+            listResult.append(note);
 
-            if(note.nSize)
-            {
-                listResult.append(note);
-
-                nOffset+=note.nSize;
-                nSize-=note.nSize;
-            }
-            else
-            {
-                break;
-            }
+            nOffset+=note.nSize;
+            nSize-=note.nSize;
+        }
+        else
+        {
+            break;
         }
     }
 
@@ -3839,6 +3848,18 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagSections(QList<XELF_DEF::Elf_Shd
 
             listResult.append(dataset);
         }
+        else if(pList->at(i).sh_type==7) // Notes TODO const
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=pList->at(i).sh_addr;
+            dataset.nOffset=pList->at(i).sh_offset;
+            dataset.nSize=pList->at(i).sh_size;
+            dataset.nType=DS_NOTES;
+            dataset.sName=QString("%1[%2]").arg("Notes").arg(sSectionName); // TODO mb translate
+
+            listResult.append(dataset);
+        }
     }
 
     return listResult;
@@ -3861,6 +3882,18 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagPrograms(QList<XELF_DEF::Elf_Phd
             dataset.nSize=pList->at(i).p_filesz;
             dataset.nType=DS_INTERPRETER;
             dataset.sName=QString("%1").arg("Interpreter"); // TODO mb translate
+
+            listResult.append(dataset);
+        }
+        else if((pList->at(i).p_type==4)) // Notes TODO const
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=pList->at(i).p_vaddr;
+            dataset.nOffset=pList->at(i).p_offset;
+            dataset.nSize=pList->at(i).p_filesz;
+            dataset.nType=DS_NOTES;
+            dataset.sName=QString("%1").arg("Notes"); // TODO mb translate
 
             listResult.append(dataset);
         }
