@@ -35,6 +35,7 @@ public:
         DS_UNKNOWN,
         DS_INTERPRETER,
         DS_LIBRARIES,
+        DS_RUNPATH,
         DS_STRINGTABLE
     };
 

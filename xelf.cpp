@@ -3876,6 +3876,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
     QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
     QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
     QList<XELF::TAG_STRUCT> listStrNeeded=XELF::_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
+    QList<XELF::TAG_STRUCT> listRunPath=XELF::_getTagStructs(pList,0x1d); // TODO const
 
     if(listStrTab.count()&&listStrSize.count())
     {
@@ -3904,6 +3905,28 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
         dataset.sName="Libraries"; // TODO mb translate
 
         listResult.append(dataset);
+    }
+
+    if(listRunPath.count())
+    {
+        qint64 nAddress=listStrTab.at(0).nValue;
+        qint64 nOffset=addressToOffset(pMemoryMap,nAddress);
+        qint64 nRunPath=listRunPath.at(0).nValue;
+        qint64 nSize=listStrSize.at(0).nValue;
+
+        if(nRunPath<nSize)
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=nAddress+nRunPath;
+            dataset.nOffset=nOffset+nRunPath;
+            QString sAnsiString=read_ansiString(dataset.nOffset);
+            dataset.nSize=sAnsiString.length();
+            dataset.nType=DS_RUNPATH;
+            dataset.sName="Run path"; // TODO mb translate
+
+            listResult.append(dataset);
+        }
     }
 
     return listResult;
