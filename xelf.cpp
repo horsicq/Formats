@@ -3845,6 +3845,18 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
 
             listResult.append(dataset);
         }
+        else if(pList->at(i).sh_type==2) // Symbol table TODO const
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=pList->at(i).sh_addr;
+            dataset.nOffset=pList->at(i).sh_offset;
+            dataset.nSize=pList->at(i).sh_size;
+            dataset.nType=DS_SYMBOLTABLE;
+            dataset.sName=QString("%1[%2]").arg("Symbol table").arg(sSectionName); // TODO mb translate
+
+            listResult.append(dataset);
+        }
         else if(pList->at(i).sh_type==3) // String table TODO const
         {
             DATASET dataset={};

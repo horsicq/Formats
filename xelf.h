@@ -38,7 +38,8 @@ public:
         DS_RUNPATH,
         DS_NOTES,
         DS_DYNAMICTAGS,
-        DS_STRINGTABLE
+        DS_STRINGTABLE,
+        DS_SYMBOLTABLE
     };
 
     struct NOTE
