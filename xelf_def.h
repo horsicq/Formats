@@ -38,6 +38,10 @@ namespace XELF_DEF
 //typedef qint32         Elf64_Sword;
 //typedef quint32        Elf64_Word;
 //typedef quint64        Elf64_Size;
+//typedef int64_t        Elf64_Sxword;
+//typedef uint32_t       Elf64_Word;
+//typedef uint64_t       Elf64_Lword;
+//typedef uint64_t       Elf64_Xword;
 
 const quint8 S_EI_NIDENT                    =16;
 const quint8 S_EI_MAG0                      =0;
@@ -209,5 +213,26 @@ struct Elf_Phdr
     quint64 p_memsz;            /* memory size */
     quint64 p_align;            /* memory & file alignment */
 };
+
+struct Elf32_Sym
+{
+    quint32 st_name;	/* String table index of name. */
+    quint32 st_value;	/* Symbol value. */
+    quint32 st_size;	/* Size of associated object. */
+    quint8 st_info;	/* Type and binding information. */
+    quint8 st_other;	/* Reserved (not used). */
+    quint16 st_shndx;	/* Section index of symbol. */
+};
+
+struct Elf64_Sym
+{
+    quint32 st_name;
+    quint8 st_info;
+    quint8 st_other;
+    quint16 st_shndx;
+    quint64 st_value;
+    quint64 st_size;
+};
+
 }
 #endif // XELF_DEF_H
