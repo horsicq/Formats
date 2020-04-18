@@ -376,6 +376,12 @@ public:
     QList<DATASET> getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pList);
     QList<DATASET> getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pList);
     QList<DATASET> getDatasetsFromTagStructs(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
+
+    QList<XELF_DEF::Elf32_Sym> getElf32_SymList(qint64 nOffset,qint64 nSize);
+    QList<XELF_DEF::Elf64_Sym> getElf64_SymList(qint64 nOffset,qint64 nSize);
+
+    XELF_DEF::Elf32_Sym _readElf32_Sym(qint64 nOffset,bool bIsBigEndian);
+    XELF_DEF::Elf64_Sym _readElf64_Sym(qint64 nOffset,bool bIsBigEndian);
 };
 
 #endif // XELF_H
