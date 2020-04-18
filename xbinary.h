@@ -436,6 +436,17 @@ public:
     static QString valueToHex(float value,bool bIsBigEndian=false);
     static QString valueToHex(double value,bool bIsBigEndian=false);
 
+    static bool checkString_uint8(QString sValue);
+    static bool checkString_int8(QString sValue);
+    static bool checkString_uint16(QString sValue);
+    static bool checkString_int16(QString sValue);
+    static bool checkString_uint32(QString sValue);
+    static bool checkString_int32(QString sValue);
+    static bool checkString_uint64(QString sValue);
+    static bool checkString_int64(QString sValue);
+    static bool checkString_float(QString sValue);
+    static bool checkString_double(QString sValue);
+
     static QString getUnpackedName(QIODevice *pDevice);
     static QString getUnpackedName(QString sFileName);
     static QString getBackupName(QIODevice *pDevice);

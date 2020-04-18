@@ -2811,6 +2811,106 @@ QString XBinary::valueToHex(double value, bool bIsBigEndian)
     return QString("%1").arg(_nValue,16,16,QChar('0'));
 }
 
+bool XBinary::checkString_uint8(QString sValue)
+{
+    bool bResult=false;
+
+    quint16 nValue=sValue.toUShort(&bResult);
+
+    if(bResult)
+    {
+        bResult=((0<=nValue)&&(nValue<=256));
+    }
+
+    return bResult;
+}
+
+bool XBinary::checkString_int8(QString sValue)
+{
+    bool bResult=false;
+
+    qint16 nValue=sValue.toShort(&bResult);
+
+    if(bResult)
+    {
+        bResult=((-127<=nValue)&&(nValue<=128));
+    }
+
+    return bResult;
+}
+
+bool XBinary::checkString_uint16(QString sValue)
+{
+    bool bResult=false;
+
+    sValue.toUShort(&bResult);
+
+    return bResult;
+}
+
+bool XBinary::checkString_int16(QString sValue)
+{
+    bool bResult=false;
+
+    sValue.toShort(&bResult);
+
+    return bResult;
+}
+
+bool XBinary::checkString_uint32(QString sValue)
+{
+    bool bResult=false;
+
+    sValue.toUInt(&bResult);
+
+    return bResult;
+}
+
+bool XBinary::checkString_int32(QString sValue)
+{
+    bool bResult=false;
+
+    sValue.toInt(&bResult);
+
+    return bResult;
+}
+
+bool XBinary::checkString_uint64(QString sValue)
+{
+    bool bResult=false;
+
+    sValue.toULongLong(&bResult);
+
+    return bResult;
+}
+
+bool XBinary::checkString_int64(QString sValue)
+{
+    bool bResult=false;
+
+    sValue.toLongLong(&bResult);
+
+    return bResult;
+}
+
+bool XBinary::checkString_float(QString sValue)
+{
+    bool bResult=false;
+
+    sValue.toFloat(&bResult);
+
+    return bResult;
+}
+
+bool XBinary::checkString_double(QString sValue)
+{
+    bool bResult=false;
+
+    sValue.toDouble(&bResult);
+
+    return bResult;
+}
+
 QString XBinary::getUnpackedName(QIODevice *pDevice)
 {
     QString sResult="unpacked";
