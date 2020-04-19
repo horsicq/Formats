@@ -78,6 +78,8 @@ public:
         qint64 nSize;
         QString sName;
         quint32 nType;
+        qint64 nStringTableOffset; // Optional
+        qint64 nStringTableSize; // Optional
     };
 
     struct OS_ANSISTRING

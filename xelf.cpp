@@ -3855,6 +3855,38 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nType=DS_SYMBOLTABLE;
             dataset.sName=QString("%1[%2]").arg("Symbol table").arg(sSectionName); // TODO mb translate
 
+            int nSectionIndex=getSectionIndexByName(".strtab");
+
+            if(nSectionIndex!=-1)
+            {
+                XBinary::OFFSETSIZE osStringTable=getSectionOffsetSize(nSectionIndex);
+
+                dataset.nStringTableOffset=osStringTable.nOffset;
+                dataset.nStringTableSize=osStringTable.nSize;
+            }
+
+            listResult.append(dataset);
+        }
+        else if(pList->at(i).sh_type==0xb) // Symbol table dynamic TODO const
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=pList->at(i).sh_addr;
+            dataset.nOffset=pList->at(i).sh_offset;
+            dataset.nSize=pList->at(i).sh_size;
+            dataset.nType=DS_SYMBOLTABLE;
+            dataset.sName=QString("%1[%2]").arg("Symbol table").arg(sSectionName); // TODO mb translate
+
+            int nSectionIndex=getSectionIndexByName(".dynstr");
+
+            if(nSectionIndex!=-1)
+            {
+                XBinary::OFFSETSIZE osStringTable=getSectionOffsetSize(nSectionIndex);
+
+                dataset.nStringTableOffset=osStringTable.nOffset;
+                dataset.nStringTableSize=osStringTable.nSize;
+            }
+
             listResult.append(dataset);
         }
         else if(pList->at(i).sh_type==3) // String table TODO const
