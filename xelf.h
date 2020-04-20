@@ -382,6 +382,8 @@ public:
 
     XELF_DEF::Elf32_Sym _readElf32_Sym(qint64 nOffset,bool bIsBigEndian);
     XELF_DEF::Elf64_Sym _readElf64_Sym(qint64 nOffset,bool bIsBigEndian);
+
+    qint64 getSymTableSize(qint64 nOffset);
 };
 
 #endif // XELF_H

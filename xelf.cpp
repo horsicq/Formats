@@ -3987,6 +3987,10 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
     QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
     QList<XELF::TAG_STRUCT> listStrNeeded=XELF::_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
     QList<XELF::TAG_STRUCT> listRunPath=XELF::_getTagStructs(pList,0x1d); // TODO const
+    QList<XELF::TAG_STRUCT> listSymbols=XELF::_getTagStructs(pList,XELF_DEF::S_DT_SYMTAB);
+
+    qint64 nStringTableOffset=0;
+    qint64 nStringTableSize=0;
 
     if(listStrTab.count()&&listStrSize.count())
     {
@@ -4002,6 +4006,9 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
         {
             listResult.append(dataset);
         }
+
+        nStringTableOffset=dataset.nOffset;
+        nStringTableSize=dataset.nSize;
     }
 
     if(listStrNeeded.count())
@@ -4013,6 +4020,8 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
         dataset.nSize=0;
         dataset.nType=DS_LIBRARIES;
         dataset.sName="Libraries"; // TODO mb translate
+        dataset.nStringTableOffset=nStringTableOffset;
+        dataset.nStringTableSize=nStringTableSize;
 
         listResult.append(dataset);
     }
@@ -4037,6 +4046,21 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 
             listResult.append(dataset);
         }
+    }
+
+    if(listSymbols.count())
+    {
+        DATASET dataset={};
+
+        dataset.nAddress=listSymbols.at(0).nValue;
+        dataset.nOffset=addressToOffset(pMemoryMap,dataset.nAddress);
+        dataset.nSize=getSymTableSize(dataset.nOffset);
+        dataset.nType=DS_SYMBOLTABLE;
+        dataset.sName="Symbol table"; // TODO mb translate
+        dataset.nStringTableOffset=nStringTableOffset;
+        dataset.nStringTableSize=nStringTableSize;
+
+        listResult.append(dataset);
     }
 
     return listResult;
@@ -4106,4 +4130,51 @@ XELF_DEF::Elf64_Sym XELF::_readElf64_Sym(qint64 nOffset, bool bIsBigEndian)
     result.st_size=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_size),bIsBigEndian);
 
     return result;
+}
+
+qint64 XELF::getSymTableSize(qint64 nOffset)
+{
+    qint64 nResult=0;
+
+    bool bIsBigEndian=isBigEndian();
+    bool bIs64=is64();
+
+    if(bIs64)
+    {
+        nResult+=sizeof(XELF_DEF::Elf64_Sym);
+        nOffset+=sizeof(XELF_DEF::Elf64_Sym);
+
+        while(true)
+        {
+            XELF_DEF::Elf64_Sym record=_readElf64_Sym(nOffset,bIsBigEndian);
+
+            if((!record.st_info)||(record.st_other))
+            {
+                break;
+            }
+
+            nResult+=sizeof(XELF_DEF::Elf64_Sym);
+            nOffset+=sizeof(XELF_DEF::Elf64_Sym);
+        }
+    }
+    else
+    {
+        nResult+=sizeof(XELF_DEF::Elf32_Sym);
+        nOffset+=sizeof(XELF_DEF::Elf32_Sym);
+
+        while(true)
+        {
+            XELF_DEF::Elf32_Sym record=_readElf32_Sym(nOffset,bIsBigEndian);
+
+            if((!record.st_info)||(record.st_other))
+            {
+                break;
+            }
+
+            nResult+=sizeof(XELF_DEF::Elf32_Sym);
+            nOffset+=sizeof(XELF_DEF::Elf32_Sym);
+        }
+    }
+
+    return nResult;
 }
