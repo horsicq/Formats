@@ -3901,6 +3901,18 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
 
             listResult.append(dataset);
         }
+        else if(pList->at(i).sh_type==4) // RELA TODO const
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=pList->at(i).sh_addr;
+            dataset.nOffset=pList->at(i).sh_offset;
+            dataset.nSize=pList->at(i).sh_size;
+            dataset.nType=DS_RELA;
+            dataset.sName=QString("%1[%2]").arg("Relocations").arg(sSectionName); // TODO mb translate
+
+            listResult.append(dataset);
+        }
         else if(pList->at(i).sh_type==6) // Dynamic TODO const
         {
             DATASET dataset={};
@@ -4255,4 +4267,152 @@ qint64 XELF::getSymTableSize(qint64 nOffset)
     }
 
     return nResult;
+}
+
+XELF_DEF::Elf32_Rel XELF::_readElf32_Rel(qint64 nOffset, bool bIsBigEndian)
+{
+    XELF_DEF::Elf32_Rel result={};
+
+    result.r_offset=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rel,r_offset),bIsBigEndian);
+    result.r_info=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rel,r_info),bIsBigEndian);
+
+    return result;
+}
+
+XELF_DEF::Elf64_Rel XELF::_readElf64_Rel(qint64 nOffset, bool bIsBigEndian)
+{
+    XELF_DEF::Elf64_Rel result={};
+
+    result.r_offset=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rel,r_offset),bIsBigEndian);
+    result.r_info=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rel,r_info),bIsBigEndian);
+
+    return result;
+}
+
+XELF_DEF::Elf32_Rela XELF::_readElf32_Rela(qint64 nOffset, bool bIsBigEndian)
+{
+    XELF_DEF::Elf32_Rela result={};
+
+    result.r_offset=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rela,r_offset),bIsBigEndian);
+    result.r_info=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rela,r_info),bIsBigEndian);
+    result.r_addend=read_int32(nOffset+offsetof(XELF_DEF::Elf32_Rela,r_addend),bIsBigEndian);
+
+    return result;
+}
+
+XELF_DEF::Elf64_Rela XELF::_readElf64_Rela(qint64 nOffset, bool bIsBigEndian)
+{
+    XELF_DEF::Elf64_Rela result={};
+
+    result.r_offset=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_offset),bIsBigEndian);
+    result.r_info=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_info),bIsBigEndian);
+    result.r_addend=read_int64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_addend),bIsBigEndian);
+
+    return result;
+}
+
+QList<XELF_DEF::Elf32_Rel> XELF::getElf32_RelList(qint64 nOffset, qint64 nSize)
+{
+    QList<XELF_DEF::Elf32_Rel> listResult;
+
+    bool bIsBigEndian=isBigEndian();
+
+    while(nSize>0)
+    {
+        XELF_DEF::Elf32_Rel record=_readElf32_Rel(nOffset,bIsBigEndian);
+
+        listResult.append(record);
+
+        nOffset+=sizeof(XELF_DEF::Elf32_Rel);
+        nSize-=sizeof(XELF_DEF::Elf32_Rel);
+    }
+
+    return listResult;
+}
+
+QList<XELF_DEF::Elf64_Rel> XELF::getElf64_RelList(qint64 nOffset, qint64 nSize)
+{
+    QList<XELF_DEF::Elf64_Rel> listResult;
+
+    bool bIsBigEndian=isBigEndian();
+
+    while(nSize>0)
+    {
+        XELF_DEF::Elf64_Rel record=_readElf64_Rel(nOffset,bIsBigEndian);
+
+        listResult.append(record);
+
+        nOffset+=sizeof(XELF_DEF::Elf64_Rel);
+        nSize-=sizeof(XELF_DEF::Elf64_Rel);
+    }
+
+    return listResult;
+}
+
+QList<XELF_DEF::Elf32_Rela> XELF::getElf32_RelaList(qint64 nOffset, qint64 nSize)
+{
+    QList<XELF_DEF::Elf32_Rela> listResult;
+
+    bool bIsBigEndian=isBigEndian();
+
+    while(nSize>0)
+    {
+        XELF_DEF::Elf32_Rela record=_readElf32_Rela(nOffset,bIsBigEndian);
+
+        listResult.append(record);
+
+        nOffset+=sizeof(XELF_DEF::Elf32_Rela);
+        nSize-=sizeof(XELF_DEF::Elf32_Rela);
+    }
+
+    return listResult;
+}
+
+QList<XELF_DEF::Elf64_Rela> XELF::getElf64_RelaList(qint64 nOffset, qint64 nSize)
+{
+    QList<XELF_DEF::Elf64_Rela> listResult;
+
+    bool bIsBigEndian=isBigEndian();
+
+    while(nSize>0)
+    {
+        XELF_DEF::Elf64_Rela record=_readElf64_Rela(nOffset,bIsBigEndian);
+
+        listResult.append(record);
+
+        nOffset+=sizeof(XELF_DEF::Elf64_Rela);
+        nSize-=sizeof(XELF_DEF::Elf64_Rela);
+    }
+
+    return listResult;
+}
+
+void XELF::setElf32_Rela_r_offset(qint64 nOffset, quint32 value, bool bIsBigEndian)
+{
+    write_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rela,r_offset),value,bIsBigEndian);
+}
+
+void XELF::setElf32_Rela_r_info(qint64 nOffset, quint32 value, bool bIsBigEndian)
+{
+    write_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rela,r_info),value,bIsBigEndian);
+}
+
+void XELF::setElf32_Rela_r_addend(qint64 nOffset, quint32 value, bool bIsBigEndian)
+{
+    write_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rela,r_addend),value,bIsBigEndian);
+}
+
+void XELF::setElf64_Rela_r_offset(qint64 nOffset, quint64 value, bool bIsBigEndian)
+{
+    write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_offset),value,bIsBigEndian);
+}
+
+void XELF::setElf64_Rela_r_info(qint64 nOffset, quint64 value, bool bIsBigEndian)
+{
+    write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_info),value,bIsBigEndian);
+}
+
+void XELF::setElf64_Rela_r_addend(qint64 nOffset, quint64 value, bool bIsBigEndian)
+{
+    write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_addend),value,bIsBigEndian);
 }

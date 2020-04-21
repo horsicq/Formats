@@ -39,7 +39,8 @@ public:
         DS_NOTES,
         DS_DYNAMICTAGS,
         DS_STRINGTABLE,
-        DS_SYMBOLTABLE
+        DS_SYMBOLTABLE,
+        DS_RELA
     };
 
     struct NOTE
@@ -400,6 +401,25 @@ public:
     qint64 getSymSize();
 
     qint64 getSymTableSize(qint64 nOffset);
+
+    XELF_DEF::Elf32_Rel _readElf32_Rel(qint64 nOffset,bool bIsBigEndian);
+    XELF_DEF::Elf64_Rel _readElf64_Rel(qint64 nOffset,bool bIsBigEndian);
+    XELF_DEF::Elf32_Rela _readElf32_Rela(qint64 nOffset,bool bIsBigEndian);
+    XELF_DEF::Elf64_Rela _readElf64_Rela(qint64 nOffset,bool bIsBigEndian);
+
+    QList<XELF_DEF::Elf32_Rel> getElf32_RelList(qint64 nOffset,qint64 nSize);
+    QList<XELF_DEF::Elf64_Rel> getElf64_RelList(qint64 nOffset,qint64 nSize);
+
+    QList<XELF_DEF::Elf32_Rela> getElf32_RelaList(qint64 nOffset,qint64 nSize);
+    QList<XELF_DEF::Elf64_Rela> getElf64_RelaList(qint64 nOffset,qint64 nSize);
+
+    void setElf32_Rela_r_offset(qint64 nOffset,quint32 value,bool bIsBigEndian);
+    void setElf32_Rela_r_info(qint64 nOffset,quint32 value,bool bIsBigEndian);
+    void setElf32_Rela_r_addend(qint64 nOffset,quint32 value,bool bIsBigEndian);
+
+    void setElf64_Rela_r_offset(qint64 nOffset,quint64 value,bool bIsBigEndian);
+    void setElf64_Rela_r_info(qint64 nOffset,quint64 value,bool bIsBigEndian);
+    void setElf64_Rela_r_addend(qint64 nOffset,quint64 value,bool bIsBigEndian);
 };
 
 #endif // XELF_H

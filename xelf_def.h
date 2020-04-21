@@ -234,5 +234,31 @@ struct Elf64_Sym
     quint64 st_size;
 };
 
+struct Elf32_Rel
+{
+    quint32 r_offset;
+    quint32 r_info;
+};
+
+struct Elf32_Rela
+{
+    quint32 r_offset;
+    quint32 r_info;
+    qint32 r_addend;
+};
+
+struct Elf64_Rel
+{
+    quint64 r_offset;
+    quint64 r_info;
+};
+
+struct Elf64_Rela
+{
+    quint64 r_offset;
+    quint64 r_info;
+    qint64 r_addend;
+};
+
 }
 #endif // XELF_DEF_H
