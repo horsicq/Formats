@@ -4132,6 +4132,24 @@ XELF_DEF::Elf64_Sym XELF::_readElf64_Sym(qint64 nOffset, bool bIsBigEndian)
     return result;
 }
 
+qint64 XELF::getSymSize()
+{
+    quint64 nResult=0;
+
+    bool bIs64=is64();
+
+    if(bIs64)
+    {
+        nResult=sizeof(XELF_DEF::Elf64_Sym);
+    }
+    else
+    {
+        nResult=sizeof(XELF_DEF::Elf32_Sym);
+    }
+
+    return nResult;
+}
+
 qint64 XELF::getSymTableSize(qint64 nOffset)
 {
     qint64 nResult=0;
