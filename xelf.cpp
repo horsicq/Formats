@@ -4132,6 +4132,66 @@ XELF_DEF::Elf64_Sym XELF::_readElf64_Sym(qint64 nOffset, bool bIsBigEndian)
     return result;
 }
 
+void XELF::setElf32_Sym_st_name(qint64 nOffset, quint32 value, bool bIsBigEndian)
+{
+    write_uint32(nOffset+offsetof(XELF_DEF::Elf32_Sym,st_name),value,bIsBigEndian);
+}
+
+void XELF::setElf32_Sym_st_value(qint64 nOffset, quint32 value, bool bIsBigEndian)
+{
+    write_uint32(nOffset+offsetof(XELF_DEF::Elf32_Sym,st_value),value,bIsBigEndian);
+}
+
+void XELF::setElf32_Sym_st_size(qint64 nOffset, quint32 value, bool bIsBigEndian)
+{
+    write_uint32(nOffset+offsetof(XELF_DEF::Elf32_Sym,st_size),value,bIsBigEndian);
+}
+
+void XELF::setElf32_Sym_st_info(qint64 nOffset, quint8 value)
+{
+    write_uint8(nOffset+offsetof(XELF_DEF::Elf32_Sym,st_info),value);
+}
+
+void XELF::setElf32_Sym_st_other(qint64 nOffset, quint8 value)
+{
+    write_uint8(nOffset+offsetof(XELF_DEF::Elf32_Sym,st_other),value);
+}
+
+void XELF::setElf32_Sym_st_shndx(qint64 nOffset, quint16 value, bool bIsBigEndian)
+{
+    write_uint16(nOffset+offsetof(XELF_DEF::Elf32_Sym,st_shndx),value,bIsBigEndian);
+}
+
+void XELF::setElf64_Sym_st_name(qint64 nOffset, quint32 value, bool bIsBigEndian)
+{
+    write_uint32(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_name),value,bIsBigEndian);
+}
+
+void XELF::setElf64_Sym_st_info(qint64 nOffset, quint8 value)
+{
+    write_uint8(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_info),value);
+}
+
+void XELF::setElf64_Sym_st_other(qint64 nOffset, quint8 value)
+{
+    write_uint8(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_other),value);
+}
+
+void XELF::setElf64_Sym_st_shndx(qint64 nOffset, quint16 value, bool bIsBigEndian)
+{
+    write_uint16(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_shndx),value,bIsBigEndian);
+}
+
+void XELF::setElf64_Sym_st_value(qint64 nOffset, quint64 value, bool bIsBigEndian)
+{
+    write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_value),value,bIsBigEndian);
+}
+
+void XELF::setElf64_Sym_st_size(qint64 nOffset, quint64 value, bool bIsBigEndian)
+{
+    write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_size),value,bIsBigEndian);
+}
+
 qint64 XELF::getSymSize()
 {
     quint64 nResult=0;
