@@ -4406,6 +4406,26 @@ QList<XELF_DEF::Elf64_Rela> XELF::getElf64_RelaList(qint64 nOffset, qint64 nSize
     return listResult;
 }
 
+void XELF::setElf32_Rel_r_offset(qint64 nOffset, quint32 value, bool bIsBigEndian)
+{
+    write_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rel,r_offset),value,bIsBigEndian);
+}
+
+void XELF::setElf32_Rel_r_info(qint64 nOffset, quint32 value, bool bIsBigEndian)
+{
+    write_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rel,r_info),value,bIsBigEndian);
+}
+
+void XELF::setElf64_Rel_r_offset(qint64 nOffset, quint64 value, bool bIsBigEndian)
+{
+    write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rel,r_offset),value,bIsBigEndian);
+}
+
+void XELF::setElf64_Rel_r_info(qint64 nOffset, quint64 value, bool bIsBigEndian)
+{
+    write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rel,r_info),value,bIsBigEndian);
+}
+
 void XELF::setElf32_Rela_r_offset(qint64 nOffset, quint32 value, bool bIsBigEndian)
 {
     write_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rela,r_offset),value,bIsBigEndian);
