@@ -4000,6 +4000,8 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
     QList<XELF::TAG_STRUCT> listStrNeeded=XELF::_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
     QList<XELF::TAG_STRUCT> listRunPath=XELF::_getTagStructs(pList,0x1d); // TODO const
     QList<XELF::TAG_STRUCT> listSymbols=XELF::_getTagStructs(pList,XELF_DEF::S_DT_SYMTAB);
+    QList<XELF::TAG_STRUCT> listRelaTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_RELA);
+    QList<XELF::TAG_STRUCT> listRelaSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_RELASZ);
 
     qint64 nStringTableOffset=0;
     qint64 nStringTableSize=0;
@@ -4021,6 +4023,21 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 
         nStringTableOffset=dataset.nOffset;
         nStringTableSize=dataset.nSize;
+    }
+
+    if(listRelaTab.count()&&listRelaSize.count())
+    {
+        DATASET dataset={};
+
+        dataset.nAddress=listRelaTab.at(0).nValue;
+        dataset.nOffset=addressToOffset(pMemoryMap,dataset.nAddress);
+        dataset.nSize=listRelaSize.at(0).nValue;
+        dataset.nType=DS_RELA;
+        dataset.sName="Relocation"; // TODO mb translate
+        dataset.nStringTableOffset=nStringTableOffset;
+        dataset.nStringTableSize=nStringTableSize;
+
+        listResult.append(dataset);
     }
 
     if(listStrNeeded.count())
@@ -4055,6 +4072,8 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
             dataset.nSize=sAnsiString.length();
             dataset.nType=DS_RUNPATH;
             dataset.sName="Run path"; // TODO mb translate
+            dataset.nStringTableOffset=nStringTableOffset;
+            dataset.nStringTableSize=nStringTableSize;
 
             listResult.append(dataset);
         }
