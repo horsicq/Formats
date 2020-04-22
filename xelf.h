@@ -40,7 +40,8 @@ public:
         DS_DYNAMICTAGS,
         DS_STRINGTABLE,
         DS_SYMBOLTABLE,
-        DS_RELA
+        DS_RELA,
+        DS_REL
     };
 
     struct NOTE

@@ -3909,7 +3909,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset=pList->at(i).sh_offset;
             dataset.nSize=pList->at(i).sh_size;
             dataset.nType=DS_RELA;
-            dataset.sName=QString("%1[%2]").arg("Relocations").arg(sSectionName); // TODO mb translate
+            dataset.sName=QString("%1[%2]").arg("RELA").arg(sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
@@ -3934,6 +3934,18 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nSize=pList->at(i).sh_size;
             dataset.nType=DS_NOTES;
             dataset.sName=QString("%1[%2]").arg("Notes").arg(sSectionName); // TODO mb translate
+
+            listResult.append(dataset);
+        }
+        else if(pList->at(i).sh_type==9) // REL TODO const
+        {
+            DATASET dataset={};
+
+            dataset.nAddress=pList->at(i).sh_addr;
+            dataset.nOffset=pList->at(i).sh_offset;
+            dataset.nSize=pList->at(i).sh_size;
+            dataset.nType=DS_REL;
+            dataset.sName=QString("%1[%2]").arg("REL").arg(sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
@@ -4002,6 +4014,8 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
     QList<XELF::TAG_STRUCT> listSymbols=XELF::_getTagStructs(pList,XELF_DEF::S_DT_SYMTAB);
     QList<XELF::TAG_STRUCT> listRelaTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_RELA);
     QList<XELF::TAG_STRUCT> listRelaSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_RELASZ);
+    QList<XELF::TAG_STRUCT> listRelTab=XELF::_getTagStructs(pList,0x17);  // TODO const
+    QList<XELF::TAG_STRUCT> listRelSize=XELF::_getTagStructs(pList,0x18); // TODO const
 
     qint64 nStringTableOffset=0;
     qint64 nStringTableSize=0;
@@ -4033,7 +4047,22 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
         dataset.nOffset=addressToOffset(pMemoryMap,dataset.nAddress);
         dataset.nSize=listRelaSize.at(0).nValue;
         dataset.nType=DS_RELA;
-        dataset.sName="Relocation"; // TODO mb translate
+        dataset.sName="RELA"; // TODO mb translate
+        dataset.nStringTableOffset=nStringTableOffset;
+        dataset.nStringTableSize=nStringTableSize;
+
+        listResult.append(dataset);
+    }
+
+    if(listRelTab.count()&&listRelSize.count())
+    {
+        DATASET dataset={};
+
+        dataset.nAddress=listRelTab.at(0).nValue;
+        dataset.nOffset=addressToOffset(pMemoryMap,dataset.nAddress);
+        dataset.nSize=listRelSize.at(0).nValue;
+        dataset.nType=DS_REL;
+        dataset.sName="REL"; // TODO mb translate
         dataset.nStringTableOffset=nStringTableOffset;
         dataset.nStringTableSize=nStringTableSize;
 
