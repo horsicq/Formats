@@ -882,6 +882,14 @@ QMap<quint64, QString> XELF::getSectionTypes()
     mapResult.insert(0x70000003,"SHT_ARM_ATTRIBUTES");
     mapResult.insert(0x70000004,"SHT_ARM_DEBUGOVERLAY");
     mapResult.insert(0x70000005,"SHT_ARM_OVERLAYSECTION");
+    mapResult.insert(0x70000006,"SHT_MIPS_REGINFO");
+    mapResult.insert(0x70000007,"SHT_MIPS_PACKAGE");
+    mapResult.insert(0x70000008,"SHT_MIPS_PACKSYM");
+    mapResult.insert(0x70000009,"SHT_MIPS_RELD");
+    mapResult.insert(0x7000000b,"SHT_MIPS_IFACE");
+    mapResult.insert(0x7000000c,"SHT_MIPS_CONTENT");
+    mapResult.insert(0x7000000d,"SHT_MIPS_OPTIONS");
+    // TODO https://github.com/airbus-seclab/elfesteem/pull/2/commits/5a3ec2ed45969458e5943b20dcc8dd17ab7b4e41
     mapResult.insert(0x7fffffff,"SHT_HIPROC");
     mapResult.insert(0x80000000,"SHT_LOUSER");
     mapResult.insert(0xffffffff,"SHT_HIUSER");
@@ -924,6 +932,13 @@ QMap<quint64, QString> XELF::getSectionTypesS()
     mapResult.insert(0x70000003,"ARM_ATTRIBUTES");
     mapResult.insert(0x70000004,"ARM_DEBUGOVERLAY");
     mapResult.insert(0x70000005,"ARM_OVERLAYSECTION");
+    mapResult.insert(0x70000006,"MIPS_REGINFO");
+    mapResult.insert(0x70000007,"MIPS_PACKAGE");
+    mapResult.insert(0x70000008,"MIPS_PACKSYM");
+    mapResult.insert(0x70000009,"MIPS_RELD");
+    mapResult.insert(0x7000000b,"MIPS_IFACE");
+    mapResult.insert(0x7000000c,"MIPS_CONTENT");
+    mapResult.insert(0x7000000d,"MIPS_OPTIONS");
     mapResult.insert(0x7fffffff,"HIPROC");
     mapResult.insert(0x80000000,"LOUSER");
     mapResult.insert(0xffffffff,"HIUSER");
