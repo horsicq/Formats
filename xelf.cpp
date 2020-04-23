@@ -4553,7 +4553,7 @@ void XELF::setElf64_Rela_r_addend(qint64 nOffset, quint64 value, bool bIsBigEndi
     write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_addend),value,bIsBigEndian);
 }
 
-QMap<quint64, QString> XELF::getRelTypes32()
+QMap<quint64, QString> XELF::getRelTypes_x86()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4578,7 +4578,7 @@ QMap<quint64, QString> XELF::getRelTypes32()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getRelTypesS32()
+QMap<quint64, QString> XELF::getRelTypesS_x86()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4603,7 +4603,7 @@ QMap<quint64, QString> XELF::getRelTypesS32()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getRelTypes64()
+QMap<quint64, QString> XELF::getRelTypes_x64()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4628,7 +4628,7 @@ QMap<quint64, QString> XELF::getRelTypes64()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getRelTypesS64()
+QMap<quint64, QString> XELF::getRelTypesS_x64()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4649,6 +4649,146 @@ QMap<quint64, QString> XELF::getRelTypesS64()
     mapResult.insert(14,"X86_64_8");
     mapResult.insert(15,"X86_64_PC8");
     mapResult.insert(24,"X86_64_PC64");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getRelTypes_SPARC()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"R_SPARC_NONE");
+    mapResult.insert(1,"R_SPARC_8");
+    mapResult.insert(2,"R_SPARC_16");
+    mapResult.insert(3,"R_SPARC_32");
+    mapResult.insert(4,"R_SPARC_DISP8");
+    mapResult.insert(5,"R_SPARC_DISP16");
+    mapResult.insert(6,"R_SPARC_DISP32");
+    mapResult.insert(7,"R_SPARC_WDISP30");
+    mapResult.insert(8,"R_SPARC_WDISP22");
+    mapResult.insert(9,"R_SPARC_HI22");
+    mapResult.insert(10,"R_SPARC_22");
+    mapResult.insert(11,"R_SPARC_13");
+    mapResult.insert(12,"R_SPARC_LO10");
+    mapResult.insert(13,"R_SPARC_GOT10");
+    mapResult.insert(14,"R_SPARC_GOT13");
+    mapResult.insert(15,"R_SPARC_GOT22");
+    mapResult.insert(16,"R_SPARC_PC10");
+    mapResult.insert(17,"R_SPARC_PC22");
+    mapResult.insert(18,"R_SPARC_WPLT30");
+    mapResult.insert(19,"R_SPARC_COPY");
+    mapResult.insert(20,"R_SPARC_GLOB_DAT");
+    mapResult.insert(21,"R_SPARC_JMP_SLOT");
+    mapResult.insert(22,"R_SPARC_RELATIVE");
+    mapResult.insert(23,"R_SPARC_UA32");
+    mapResult.insert(24,"R_SPARC_PLT32");
+    mapResult.insert(25,"R_SPARC_HIPLT22");
+    mapResult.insert(26,"R_SPARC_LOPLT10");
+    mapResult.insert(27,"R_SPARC_PCPLT32");
+    mapResult.insert(28,"R_SPARC_PCPLT22");
+    mapResult.insert(29,"R_SPARC_PCPLT10");
+    mapResult.insert(30,"R_SPARC_10");
+    mapResult.insert(31,"R_SPARC_11");
+    mapResult.insert(32,"R_SPARC_64");
+    mapResult.insert(33,"R_SPARC_OLO10");
+    mapResult.insert(34,"R_SPARC_HH22");
+    mapResult.insert(35,"R_SPARC_HM10");
+    mapResult.insert(36,"R_SPARC_LM22");
+    mapResult.insert(37,"R_SPARC_PC_HH22");
+    mapResult.insert(38,"R_SPARC_PC_HM10");
+    mapResult.insert(39,"R_SPARC_PC_LM22");
+    mapResult.insert(40,"R_SPARC_WDISP16");
+    mapResult.insert(41,"R_SPARC_WDISP19");
+    mapResult.insert(43,"R_SPARC_7");
+    mapResult.insert(44,"R_SPARC_5");
+    mapResult.insert(45,"R_SPARC_6");
+    mapResult.insert(46,"R_SPARC_DISP64");
+    mapResult.insert(47,"R_SPARC_PLT64");
+    mapResult.insert(48,"R_SPARC_HIX22");
+    mapResult.insert(49,"R_SPARC_LOX10");
+    mapResult.insert(50,"R_SPARC_H44");
+    mapResult.insert(51,"R_SPARC_M44");
+    mapResult.insert(52,"R_SPARC_L44");
+    mapResult.insert(53,"R_SPARC_REGISTER");
+    mapResult.insert(54,"R_SPARC_UA64");
+    mapResult.insert(55,"R_SPARC_UA16");
+    mapResult.insert(80,"R_SPARC_GOTDATA_HIX22");
+    mapResult.insert(81,"R_SPARC_GOTDATA_LOX10");
+    mapResult.insert(82,"R_SPARC_GOTDATA_OP_HIX22");
+    mapResult.insert(83,"R_SPARC_GOTDATA_OP_LOX10");
+    mapResult.insert(84,"R_SPARC_GOTDATA_OP");
+    mapResult.insert(85,"R_SPARC_SIZE32"); // mb TODO https://docs.oracle.com/cd/E19120-01/open.solaris/819-0690/6n33n7fct/index.html
+    mapResult.insert(87,"R_SPARC_SIZE64");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getRelTypesS_SPARC()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"SPARC_NONE");
+    mapResult.insert(1,"SPARC_8");
+    mapResult.insert(2,"SPARC_16");
+    mapResult.insert(3,"SPARC_32");
+    mapResult.insert(4,"SPARC_DISP8");
+    mapResult.insert(5,"SPARC_DISP16");
+    mapResult.insert(6,"SPARC_DISP32");
+    mapResult.insert(7,"SPARC_WDISP30");
+    mapResult.insert(8,"SPARC_WDISP22");
+    mapResult.insert(9,"SPARC_HI22");
+    mapResult.insert(10,"SPARC_22");
+    mapResult.insert(11,"SPARC_13");
+    mapResult.insert(12,"SPARC_LO10");
+    mapResult.insert(13,"SPARC_GOT10");
+    mapResult.insert(14,"SPARC_GOT13");
+    mapResult.insert(15,"SPARC_GOT22");
+    mapResult.insert(16,"SPARC_PC10");
+    mapResult.insert(17,"SPARC_PC22");
+    mapResult.insert(18,"SPARC_WPLT30");
+    mapResult.insert(19,"SPARC_COPY");
+    mapResult.insert(20,"SPARC_GLOB_DAT");
+    mapResult.insert(21,"SPARC_JMP_SLOT");
+    mapResult.insert(22,"SPARC_RELATIVE");
+    mapResult.insert(23,"SPARC_UA32");
+    mapResult.insert(24,"SPARC_PLT32");
+    mapResult.insert(25,"SPARC_HIPLT22");
+    mapResult.insert(26,"SPARC_LOPLT10");
+    mapResult.insert(27,"SPARC_PCPLT32");
+    mapResult.insert(28,"SPARC_PCPLT22");
+    mapResult.insert(29,"SPARC_PCPLT10");
+    mapResult.insert(30,"SPARC_10");
+    mapResult.insert(31,"SPARC_11");
+    mapResult.insert(32,"SPARC_64");
+    mapResult.insert(33,"SPARC_OLO10");
+    mapResult.insert(34,"SPARC_HH22");
+    mapResult.insert(35,"SPARC_HM10");
+    mapResult.insert(36,"SPARC_LM22");
+    mapResult.insert(37,"SPARC_PC_HH22");
+    mapResult.insert(38,"SPARC_PC_HM10");
+    mapResult.insert(39,"SPARC_PC_LM22");
+    mapResult.insert(40,"SPARC_WDISP16");
+    mapResult.insert(41,"SPARC_WDISP19");
+    mapResult.insert(43,"SPARC_7");
+    mapResult.insert(44,"SPARC_5");
+    mapResult.insert(45,"SPARC_6");
+    mapResult.insert(46,"SPARC_DISP64");
+    mapResult.insert(47,"SPARC_PLT64");
+    mapResult.insert(48,"SPARC_HIX22");
+    mapResult.insert(49,"SPARC_LOX10");
+    mapResult.insert(50,"SPARC_H44");
+    mapResult.insert(51,"SPARC_M44");
+    mapResult.insert(52,"SPARC_L44");
+    mapResult.insert(53,"SPARC_REGISTER");
+    mapResult.insert(54,"SPARC_UA64");
+    mapResult.insert(55,"SPARC_UA16");
+    mapResult.insert(80,"SPARC_GOTDATA_HIX22");
+    mapResult.insert(81,"SPARC_GOTDATA_LOX10");
+    mapResult.insert(82,"SPARC_GOTDATA_OP_HIX22");
+    mapResult.insert(83,"SPARC_GOTDATA_OP_LOX10");
+    mapResult.insert(84,"SPARC_GOTDATA_OP");
+    mapResult.insert(85,"SPARC_SIZE32"); // mb TODO https://docs.oracle.com/cd/E19120-01/open.solaris/819-0690/6n33n7fct/index.html
+    mapResult.insert(87,"SPARC_SIZE64");
 
     return mapResult;
 }
