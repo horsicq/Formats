@@ -4553,7 +4553,7 @@ void XELF::setElf64_Rela_r_addend(qint64 nOffset, quint64 value, bool bIsBigEndi
     write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_addend),value,bIsBigEndian);
 }
 
-QMap<quint64, QString> XELF::getRelTypes()
+QMap<quint64, QString> XELF::getRelTypes32()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4578,7 +4578,7 @@ QMap<quint64, QString> XELF::getRelTypes()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getRelTypesS()
+QMap<quint64, QString> XELF::getRelTypesS32()
 {
     QMap<quint64, QString> mapResult;
 
@@ -4599,6 +4599,56 @@ QMap<quint64, QString> XELF::getRelTypesS()
     mapResult.insert(22,"386_8");
     mapResult.insert(23,"386_PC8");
     mapResult.insert(38,"386_SIZE32");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getRelTypes64()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"R_X86_64_NONE");
+    mapResult.insert(1,"R_X86_64_32");
+    mapResult.insert(2,"R_386_PC32");
+    mapResult.insert(3,"R_386_GOT32");
+    mapResult.insert(4,"R_X86_64_PLT32");
+    mapResult.insert(5,"R_X86_64_COPY");
+    mapResult.insert(6,"R_X86_64_GLOB_DAT");
+    mapResult.insert(7,"R_X86_64_JMP_SLOT");
+    mapResult.insert(8,"R_X86_64_RELATIVE");
+    mapResult.insert(9,"R_X86_64_GOTPCREL");
+    mapResult.insert(10,"R_X86_64_32");
+    mapResult.insert(11,"R_X86_64_32S");
+    mapResult.insert(12,"R_X86_64_16");
+    mapResult.insert(13,"R_X86_64_PC16");
+    mapResult.insert(14,"R_X86_64_8");
+    mapResult.insert(15,"R_X86_64_PC8");
+    mapResult.insert(24,"R_X86_64_PC64");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getRelTypesS64()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"X86_64_NONE");
+    mapResult.insert(1,"X86_64_32");
+    mapResult.insert(2,"386_PC32");
+    mapResult.insert(3,"386_GOT32");
+    mapResult.insert(4,"X86_64_PLT32");
+    mapResult.insert(5,"X86_64_COPY");
+    mapResult.insert(6,"X86_64_GLOB_DAT");
+    mapResult.insert(7,"X86_64_JMP_SLOT");
+    mapResult.insert(8,"X86_64_RELATIVE");
+    mapResult.insert(9,"X86_64_GOTPCREL");
+    mapResult.insert(10,"X86_64_32");
+    mapResult.insert(11,"X86_64_32S");
+    mapResult.insert(12,"X86_64_16");
+    mapResult.insert(13,"X86_64_PC16");
+    mapResult.insert(14,"X86_64_8");
+    mapResult.insert(15,"X86_64_PC8");
+    mapResult.insert(24,"X86_64_PC64");
 
     return mapResult;
 }
