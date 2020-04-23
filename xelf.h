@@ -427,6 +427,9 @@ public:
     void setElf64_Rela_r_offset(qint64 nOffset,quint64 value,bool bIsBigEndian);
     void setElf64_Rela_r_info(qint64 nOffset,quint64 value,bool bIsBigEndian);
     void setElf64_Rela_r_addend(qint64 nOffset,quint64 value,bool bIsBigEndian);
+
+    static QMap<quint64,QString> getRelTypes();
+    static QMap<quint64,QString> getRelTypesS();
 };
 
 #endif // XELF_H

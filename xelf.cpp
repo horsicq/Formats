@@ -4552,3 +4552,53 @@ void XELF::setElf64_Rela_r_addend(qint64 nOffset, quint64 value, bool bIsBigEndi
 {
     write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_addend),value,bIsBigEndian);
 }
+
+QMap<quint64, QString> XELF::getRelTypes()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"R_386_NONE");
+    mapResult.insert(1,"R_386_32");
+    mapResult.insert(2,"R_386_PC32");
+    mapResult.insert(3,"R_386_GOT32");
+    mapResult.insert(4,"R_386_PLT32");
+    mapResult.insert(5,"R_386_COPY");
+    mapResult.insert(6,"R_386_GLOB_DAT");
+    mapResult.insert(7,"R_386_JMP_SLOT");
+    mapResult.insert(8,"R_386_RELATIVE");
+    mapResult.insert(9,"R_386_GOTOFF");
+    mapResult.insert(10,"R_386_GOTPC");
+    mapResult.insert(11,"R_386_32PLT");
+    mapResult.insert(20,"R_386_16");
+    mapResult.insert(21,"R_386_PC16");
+    mapResult.insert(22,"R_386_8");
+    mapResult.insert(23,"R_386_PC8");
+    mapResult.insert(38,"R_386_SIZE32");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getRelTypesS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"386_NONE");
+    mapResult.insert(1,"386_32");
+    mapResult.insert(2,"386_PC32");
+    mapResult.insert(3,"386_GOT32");
+    mapResult.insert(4,"386_PLT32");
+    mapResult.insert(5,"386_COPY");
+    mapResult.insert(6,"386_GLOB_DAT");
+    mapResult.insert(7,"386_JMP_SLOT");
+    mapResult.insert(8,"386_RELATIVE");
+    mapResult.insert(9,"386_GOTOFF");
+    mapResult.insert(10,"386_GOTPC");
+    mapResult.insert(11,"386_32PLT");
+    mapResult.insert(20,"386_16");
+    mapResult.insert(21,"386_PC16");
+    mapResult.insert(22,"386_8");
+    mapResult.insert(23,"386_PC8");
+    mapResult.insert(38,"386_SIZE32");
+
+    return mapResult;
+}
