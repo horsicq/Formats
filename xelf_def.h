@@ -23,6 +23,14 @@
 
 #include <QtGlobal>
 
+#define S_ELF32_R_SYM(i)    ((i)>>8)
+#define S_ELF32_R_TYPE(i)   ((quint8)(i))
+#define S_ELF32_R_INFO(s,t) (((s)<<8)+(quint8)(t))
+
+#define S_ELF64_R_SYM(i)    ((i)>>32)
+#define S_ELF64_R_TYPE(i)   ((i)&0xffffffffL)
+#define S_ELF64_R_INFO(s,t) (((s)<<32)+((t)&0xffffffffL))
+
 namespace XELF_DEF
 {
 //typedef quint32        Elf32_Addr;
