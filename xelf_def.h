@@ -23,13 +23,21 @@
 
 #include <QtGlobal>
 
-#define S_ELF32_R_SYM(i)    ((i)>>8)
-#define S_ELF32_R_TYPE(i)   ((quint8)(i))
-#define S_ELF32_R_INFO(s,t) (((s)<<8)+(quint8)(t))
+#define S_ELF32_R_SYM(info)             ((info)>>8)
+#define S_ELF32_R_TYPE(info)            ((quint8)(info))
+#define S_ELF32_R_INFO(sym,type)        (((sym)<<8)+(quint8)(type))
 
-#define S_ELF64_R_SYM(i)    ((i)>>32)
-#define S_ELF64_R_TYPE(i)   ((i)&0xffffffffL)
-#define S_ELF64_R_INFO(s,t) (((s)<<32)+((t)&0xffffffffL))
+#define S_ELF64_R_SYM(info)             ((info)>>32)
+#define S_ELF64_R_TYPE(info)            ((info)&0xffffffffL)
+#define S_ELF64_R_INFO(sym,type)        (((sym)<<32)+((type)&0xffffffffL))
+
+#define S_ELF32_ST_BIND(info)           ((info)>>4)
+#define S_ELF32_ST_TYPE(info)           ((info)&0xf)
+#define S_ELF32_ST_INFO(bind,type)      (((bind)<<4)+((type)&0xf))
+
+#define S_ELF64_ST_BIND(info)           ((info)>>4)
+#define S_ELF64_ST_TYPE(info)           ((info)&0xf)
+#define S_ELF64_ST_INFO(bind,type)      (((bind)<<4)+((type)&0xf))
 
 namespace XELF_DEF
 {

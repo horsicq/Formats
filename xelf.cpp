@@ -4792,3 +4792,69 @@ QMap<quint64, QString> XELF::getRelTypesS_SPARC()
 
     return mapResult;
 }
+
+QMap<quint64, QString> XELF::getStBinds()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"STB_LOCAL");
+    mapResult.insert(1,"STB_GLOBAL");
+    mapResult.insert(2,"STB_WEAK");
+    mapResult.insert(10,"STB_LOOS");
+    mapResult.insert(12,"STB_HIOS");
+    mapResult.insert(13,"STB_LOPROC");
+    mapResult.insert(15,"STB_HIPROC");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getStBindsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"LOCAL");
+    mapResult.insert(1,"GLOBAL");
+    mapResult.insert(2,"WEAK");
+    mapResult.insert(10,"LOOS");
+    mapResult.insert(12,"HIOS");
+    mapResult.insert(13,"LOPROC");
+    mapResult.insert(15,"HIPROC");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getStTypes()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"STT_NOTYPE");
+    mapResult.insert(1,"STT_OBJECT");
+    mapResult.insert(2,"STT_FUNC");
+    mapResult.insert(3,"STT_SECTION");
+    mapResult.insert(4,"STT_FILE");
+    mapResult.insert(5,"STT_COMMON");
+    mapResult.insert(10,"STT_LOOS");
+    mapResult.insert(12,"STT_HIOS");
+    mapResult.insert(13,"STT_LOPROC"); // STT_SPARC_REGISTER
+    mapResult.insert(15,"STT_HIPROC");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getStTypesS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0,"NOTYPE");
+    mapResult.insert(1,"OBJECT");
+    mapResult.insert(2,"FUNC");
+    mapResult.insert(3,"SECTION");
+    mapResult.insert(4,"FILE");
+    mapResult.insert(5,"COMMON");
+    mapResult.insert(10,"LOOS");
+    mapResult.insert(12,"HIOS");
+    mapResult.insert(13,"LOPROC"); // SPARC_REGISTER
+    mapResult.insert(15,"HIPROC");
+
+    return mapResult;
+}

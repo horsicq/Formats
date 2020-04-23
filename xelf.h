@@ -434,6 +434,11 @@ public:
     static QMap<quint64,QString> getRelTypesS_x64();
     static QMap<quint64,QString> getRelTypes_SPARC();
     static QMap<quint64,QString> getRelTypesS_SPARC();
+
+    static QMap<quint64,QString> getStBinds();
+    static QMap<quint64,QString> getStBindsS();
+    static QMap<quint64,QString> getStTypes();
+    static QMap<quint64,QString> getStTypesS();
 };
 
 #endif // XELF_H
