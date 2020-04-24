@@ -198,11 +198,11 @@ public:
     QString getStringFromMainSection(quint32 nIndex);
     QByteArray getSection(quint32 nIndex);
     bool isSectionValid(quint32 nIndex);
-    // TODO Set
+
     QList<XELF_DEF::Elf32_Shdr> getElf32_ShdrList();
     QList<XELF_DEF::Elf64_Shdr> getElf64_ShdrList();
     QList<XELF_DEF::Elf_Shdr> getElf_ShdrList();
-    // TODO Set
+
     XELF_DEF::Elf32_Shdr getElf32_Shdr(quint32 nIndex);
     XELF_DEF::Elf64_Shdr getElf64_Shdr(quint32 nIndex);
 
@@ -325,7 +325,7 @@ public:
     OS_ANSISTRING getProgramInterpreterName();
     OS_ANSISTRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pPhdrList);
     QString getCommentString();
-//    QStrin
+
     QList<NOTE> getNotes();
     QList<NOTE> getNotes(QList<XELF_DEF::Elf_Phdr> *pPhdrList);
     QList<NOTE> _getNotes(qint64 nOffset,qint64 nSize,bool bIsBigEndian);
