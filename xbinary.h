@@ -224,7 +224,6 @@ public:
 
     static QString convertFileName(QString sFileName);
     static QString convertPathName(QString sPathName);
-//    static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames); // TODO Check
 
     OS_ANSISTRING getOsAnsiString(qint64 nOffset,qint64 nSize);
 

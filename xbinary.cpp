@@ -238,30 +238,6 @@ XBinary::OS_ANSISTRING XBinary::getOsAnsiString(qint64 nOffset, qint64 nSize)
     return result;
 }
 
-//void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
-//{
-//    if((sDirectoryName!=".")&&(sDirectoryName!=".."))
-//    {
-//        QFileInfo fi(sDirectoryName);
-
-//        if(fi.isFile())
-//        {
-//            pListFileNames->append(fi.absoluteFilePath());
-//        }
-//        else if(fi.isDir())
-//        {
-//            QDir dir(sDirectoryName);
-
-//            QFileInfoList eil=dir.entryInfoList();
-
-//            for(int i=0; i<eil.count(); i++)
-//            {
-//                findFiles(eil.at(i).absoluteFilePath(),pListFileNames);
-//            }
-//        }
-//    }
-//}
-
 void XBinary::findFiles(QString sDirectoryName, XBinary::FFOPTIONS *pFFOption, qint32 nLevel)
 {
     *(pFFOption->pnNumberOfFiles)=pFFOption->pListFiles->count();
