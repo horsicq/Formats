@@ -584,6 +584,8 @@ public:
     static bool isStringInListPresent(QList<QString> *pList,QString sString);
     static bool isStringInListPresentExp(QList<QString> *pList,QString sString);
 
+    static quint32 elfHash(const quint8 *pData);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);

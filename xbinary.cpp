@@ -4460,6 +4460,29 @@ bool XBinary::isStringInListPresentExp(QList<QString> *pList, QString sString)
     return (getStringNumberFromListExp(pList,sString)!=-1);
 }
 
+quint32 XBinary::elfHash(const quint8 *pData)
+{
+    quint32 nResult=0;
+
+    while(*pData)
+    {
+        nResult=(nResult<<4)+(*pData);
+
+        quint32 nHigh=nResult&0xF0000000;
+
+        if(nHigh)
+        {
+            nResult^=(nResult>>24);
+        }
+
+        nResult&=(~nHigh);
+
+        pData++;
+    }
+
+    return nResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     QList<SIGNATURE_RECORD> result;
