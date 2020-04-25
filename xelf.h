@@ -275,6 +275,9 @@ public:
     XELF_DEF::Elf32_Phdr getElf32_Phdr(quint32 nIndex);
     XELF_DEF::Elf64_Phdr getElf64_Phdr(quint32 nIndex);
 
+    XELF_DEF::Elf32_Phdr _readElf32_Phdr(qint64 nOffset,bool bIsBigEndian);
+    XELF_DEF::Elf64_Phdr _readElf64_Phdr(qint64 nOffset,bool bIsBigEndian);
+
     quint32 getElf32_Phdr_type(quint32 nIndex);
     quint32 getElf32_Phdr_offset(quint32 nIndex);
     quint32 getElf32_Phdr_vaddr(quint32 nIndex);

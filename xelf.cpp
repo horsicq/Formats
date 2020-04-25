@@ -1282,9 +1282,7 @@ QList<XELF_DEF::Elf32_Shdr> XELF::getElf32_ShdrList()
 
     for(quint32 i=0; i<nNumberOfSections; i++)
     {
-        XELF_DEF::Elf32_Shdr record;
-
-        record=_readElf32_Shdr(nOffset,bIsBigEndian);
+        XELF_DEF::Elf32_Shdr record=_readElf32_Shdr(nOffset,bIsBigEndian);
 
         listResult.append(record);
 
@@ -1306,9 +1304,7 @@ QList<XELF_DEF::Elf64_Shdr> XELF::getElf64_ShdrList()
 
     for(quint32 i=0; i<nNumberOfSections; i++)
     {
-        XELF_DEF::Elf64_Shdr record={};
-
-        record=_readElf64_Shdr(nOffset,bIsBigEndian);
+        XELF_DEF::Elf64_Shdr record=_readElf64_Shdr(nOffset,bIsBigEndian);
 
         listResult.append(record);
 
@@ -2219,25 +2215,16 @@ QList<XELF_DEF::Elf32_Phdr> XELF::getElf32_PhdrList()
 
     quint32 nNumberOfProgramms=getHdr32_phnum();
     nNumberOfProgramms=qMin((quint32)1000,nNumberOfProgramms);
-    quint32 offset=getHdr32_phoff();
+    quint32 nOffset=getHdr32_phoff();
     bool bIsBigEndian=isBigEndian();
 
     for(quint32 i=0; i<nNumberOfProgramms; i++)
     {
-        XELF_DEF::Elf32_Phdr record={};
-
-        record.p_type=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_type),bIsBigEndian);
-        record.p_offset=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_offset),bIsBigEndian);
-        record.p_vaddr=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_vaddr),bIsBigEndian);
-        record.p_paddr=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_paddr),bIsBigEndian);
-        record.p_filesz=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_filesz),bIsBigEndian);
-        record.p_memsz=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_memsz),bIsBigEndian);
-        record.p_flags=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_flags),bIsBigEndian);
-        record.p_align=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_align),bIsBigEndian);
+        XELF_DEF::Elf32_Phdr record=_readElf32_Phdr(nOffset,bIsBigEndian);
 
         result.append(record);
 
-        offset+=sizeof(XELF_DEF::Elf32_Phdr);
+        nOffset+=sizeof(XELF_DEF::Elf32_Phdr);
     }
 
     return result;
@@ -2249,25 +2236,16 @@ QList<XELF_DEF::Elf64_Phdr> XELF::getElf64_PhdrList()
 
     quint32 nNumberOfProgramms=getHdr64_phnum();
     nNumberOfProgramms=qMin((quint32)1000,nNumberOfProgramms);
-    quint64 offset=getHdr64_phoff();
+    quint64 nOffset=getHdr64_phoff();
     bool bIsBigEndian=isBigEndian();
 
     for(quint32 i=0; i<nNumberOfProgramms; i++)
     {
-        XELF_DEF::Elf64_Phdr record={};
-
-        record.p_type=read_uint32(offset+offsetof(XELF_DEF::Elf64_Phdr,p_type),bIsBigEndian);
-        record.p_offset=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_offset),bIsBigEndian);
-        record.p_vaddr=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_vaddr),bIsBigEndian);
-        record.p_paddr=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_paddr),bIsBigEndian);
-        record.p_filesz=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_filesz),bIsBigEndian);
-        record.p_memsz=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_memsz),bIsBigEndian);
-        record.p_flags=read_uint32(offset+offsetof(XELF_DEF::Elf64_Phdr,p_flags),bIsBigEndian);
-        record.p_align=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_align),bIsBigEndian);
+        XELF_DEF::Elf64_Phdr record=_readElf64_Phdr(nOffset,bIsBigEndian);
 
         result.append(record);
 
-        offset+=sizeof(XELF_DEF::Elf64_Phdr);
+        nOffset+=sizeof(XELF_DEF::Elf64_Phdr);
     }
 
     return result;
@@ -2330,20 +2308,13 @@ XELF_DEF::Elf32_Phdr XELF::getElf32_Phdr(quint32 nIndex)
     XELF_DEF::Elf32_Phdr result={};
 
     quint32 nNumberOfPrograms=getHdr32_phnum();
-    quint32 offset=getHdr32_phoff();
+    quint32 nOffset=getHdr32_phoff();
     bool bIsBigEndian=isBigEndian();
 
     if(nIndex<nNumberOfPrograms)
     {
-        offset+=nIndex*sizeof(XELF_DEF::Elf32_Phdr);
-        result.p_type=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_type),bIsBigEndian);
-        result.p_offset=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_offset),bIsBigEndian);
-        result.p_vaddr=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_vaddr),bIsBigEndian);
-        result.p_paddr=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_paddr),bIsBigEndian);
-        result.p_filesz=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_filesz),bIsBigEndian);
-        result.p_memsz=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_memsz),bIsBigEndian);
-        result.p_flags=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_flags),bIsBigEndian);
-        result.p_align=read_uint32(offset+offsetof(XELF_DEF::Elf32_Phdr,p_align),bIsBigEndian);
+        nOffset+=nIndex*sizeof(XELF_DEF::Elf32_Phdr);
+        result=_readElf32_Phdr(nOffset,bIsBigEndian);
     }
 
     return result;
@@ -2354,21 +2325,46 @@ XELF_DEF::Elf64_Phdr XELF::getElf64_Phdr(quint32 nIndex)
     XELF_DEF::Elf64_Phdr result={};
 
     quint32 nNumberOfPrograms=getHdr64_phnum();
-    quint64 offset=getHdr64_phoff();
+    quint64 nOffset=getHdr64_phoff();
     bool bIsBigEndian=isBigEndian();
 
     if(nIndex<nNumberOfPrograms)
     {
-        offset+=nIndex*sizeof(XELF_DEF::Elf64_Phdr);
-        result.p_type=read_uint32(offset+offsetof(XELF_DEF::Elf64_Phdr,p_type),bIsBigEndian);
-        result.p_offset=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_offset),bIsBigEndian);
-        result.p_vaddr=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_vaddr),bIsBigEndian);
-        result.p_paddr=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_paddr),bIsBigEndian);
-        result.p_filesz=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_filesz),bIsBigEndian);
-        result.p_memsz=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_memsz),bIsBigEndian);
-        result.p_flags=read_uint32(offset+offsetof(XELF_DEF::Elf64_Phdr,p_flags),bIsBigEndian);
-        result.p_align=read_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_align),bIsBigEndian);
+        nOffset+=nIndex*sizeof(XELF_DEF::Elf64_Phdr);
+        result=_readElf64_Phdr(nOffset,bIsBigEndian);
     }
+
+    return result;
+}
+
+XELF_DEF::Elf32_Phdr XELF::_readElf32_Phdr(qint64 nOffset, bool bIsBigEndian)
+{
+    XELF_DEF::Elf32_Phdr result={};
+
+    result.p_type=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Phdr,p_type),bIsBigEndian);
+    result.p_offset=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Phdr,p_offset),bIsBigEndian);
+    result.p_vaddr=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Phdr,p_vaddr),bIsBigEndian);
+    result.p_paddr=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Phdr,p_paddr),bIsBigEndian);
+    result.p_filesz=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Phdr,p_filesz),bIsBigEndian);
+    result.p_memsz=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Phdr,p_memsz),bIsBigEndian);
+    result.p_flags=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Phdr,p_flags),bIsBigEndian);
+    result.p_align=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Phdr,p_align),bIsBigEndian);
+
+    return result;
+}
+
+XELF_DEF::Elf64_Phdr XELF::_readElf64_Phdr(qint64 nOffset, bool bIsBigEndian)
+{
+    XELF_DEF::Elf64_Phdr result={};
+
+    result.p_type=read_uint32(nOffset+offsetof(XELF_DEF::Elf64_Phdr,p_type),bIsBigEndian);
+    result.p_offset=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Phdr,p_offset),bIsBigEndian);
+    result.p_vaddr=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Phdr,p_vaddr),bIsBigEndian);
+    result.p_paddr=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Phdr,p_paddr),bIsBigEndian);
+    result.p_filesz=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Phdr,p_filesz),bIsBigEndian);
+    result.p_memsz=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Phdr,p_memsz),bIsBigEndian);
+    result.p_flags=read_uint32(nOffset+offsetof(XELF_DEF::Elf64_Phdr,p_flags),bIsBigEndian);
+    result.p_align=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Phdr,p_align),bIsBigEndian);
 
     return result;
 }
