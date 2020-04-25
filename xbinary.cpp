@@ -3784,9 +3784,9 @@ QString XBinary::hexToString(QString sHex)
     return sResult;
 }
 
-QString XBinary::doubleToString(double dValue)
+QString XBinary::doubleToString(double dValue,int nPrec)
 {
-    return QString("%1").arg(dValue,0,'f',2);
+    return QString("%1").arg(dValue,0,'f',nPrec);
 }
 
 quint8 XBinary::hexToUint8(QString sHex)

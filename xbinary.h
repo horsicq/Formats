@@ -501,7 +501,7 @@ public:
     static bool compareSignatureStrings(QString sBaseSignature, QString sOptSignature);
     static QString stringToHex(QString sString);
     static QString hexToString(QString sHex);
-    static QString doubleToString(double dValue);
+    static QString doubleToString(double dValue, int nPrec=2);
 
     static quint8 hexToUint8(QString sHex);
     static qint8 hexToInt8(QString sHex);
