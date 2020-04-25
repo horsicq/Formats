@@ -73,6 +73,7 @@ public:
 
     virtual bool isValid();
     bool isBigEndian();
+    bool is16();
     bool is32();
     bool is64();
 
@@ -205,6 +206,9 @@ public:
 
     XELF_DEF::Elf32_Shdr getElf32_Shdr(quint32 nIndex);
     XELF_DEF::Elf64_Shdr getElf64_Shdr(quint32 nIndex);
+
+    XELF_DEF::Elf32_Shdr _readElf32_Shdr(qint64 nOffset,bool bIsBigEndian);
+    XELF_DEF::Elf64_Shdr _readElf64_Shdr(qint64 nOffset,bool bIsBigEndian);
 
     quint32 getElf32_Shdr_name(quint32 nIndex);
     quint32 getElf32_Shdr_type(quint32 nIndex);
