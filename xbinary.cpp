@@ -344,8 +344,6 @@ qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 {
     qint64 nResult=0;
 
-    // TODO Checks
-
     qint64 _nTotalSize=getSize();
 
     if((nMaxSize<=(_nTotalSize-nOffset))&&(nOffset>=0))
