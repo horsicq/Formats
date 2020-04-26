@@ -29,6 +29,7 @@ XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
     setEntryPointOffset(0);
     setFindProcessEnable(true);
     setDumpProcessEnable(true);
+    setEntropyProcessEnable(true);
     setMode(MODE_UNKNOWN);
     setArch("NOEXECUTABLE");
     setVersion("");
@@ -1413,6 +1414,11 @@ void XBinary::setFindProcessEnable(bool bState)
 void XBinary::setDumpProcessEnable(bool bState)
 {
     __bIsDumpStop=!bState;
+}
+
+void XBinary::setEntropyProcessEnable(bool bState)
+{
+    __bIsEntropyStop=!bState;
 }
 
 bool XBinary::isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nSize, QString sSignature)
