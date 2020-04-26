@@ -3782,6 +3782,11 @@ QString XBinary::hexToString(QString sHex)
     return sResult;
 }
 
+QString XBinary::floatToString(float fValue, int nPrec)
+{
+    return QString("%1").arg(fValue,0,'f',nPrec);
+}
+
 QString XBinary::doubleToString(double dValue,int nPrec)
 {
     return QString("%1").arg(dValue,0,'f',nPrec);
