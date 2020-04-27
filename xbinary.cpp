@@ -3449,7 +3449,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
             nSize-=nTemp;
             nOffset+=nTemp;
 
-            if(nOffset>((_nCurrentProcent+1)*_nProcent))
+            if(nOffset>(offsize.nOffset+(_nCurrentProcent+1)*_nProcent))
             {
                 _nCurrentProcent++;
                 emit entropyProgressValueChanged(_nCurrentProcent);
