@@ -971,6 +971,8 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
         }
     }
 
+    emit findProgressValueChanged(100);
+
     delete[] pBuffer;
 
     return -1;
@@ -1214,6 +1216,8 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
                     emit findProgressValueChanged(nCurrentProgress);
                 }
             }
+
+            emit findProgressValueChanged(100);
         }
         else
         {
@@ -1231,6 +1235,8 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
                     emit findProgressValueChanged(nCurrentProgress);
                 }
             }
+
+            emit findProgressValueChanged(100);
         }
     }
     else
@@ -1311,6 +1317,8 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
         }
     }
 
+    emit findProgressValueChanged(100);
+
     delete[] pBuffer;
 
     return -1;
@@ -1385,6 +1393,8 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
             emit findProgressValueChanged(nCurrentProgress);
         }
     }
+
+    emit findProgressValueChanged(100);
 
     delete[] pBuffer;
 
@@ -2493,6 +2503,8 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
             }
         }
 
+        emit dumpProgressValueChanged(100);
+
         delete [] pBuffer;
 
         file.close();
@@ -3455,6 +3467,8 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
                 emit entropyProgressValueChanged(_nCurrentProcent);
             }
         }
+
+        emit entropyProgressValueChanged(100);
 
         delete[] pBuffer;
 
