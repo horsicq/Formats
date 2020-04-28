@@ -20,6 +20,8 @@
 //
 #include "xbinary.h"
 
+const double XBinary::D_ENTROPY_THRESHOLD=6.5;
+
 XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
 {
     setData(__pDevice);
@@ -90,6 +92,11 @@ void XBinary::setArch(QString sArch)
 QString XBinary::getArch()
 {  
     return __sArch;
+}
+
+bool XBinary::isPacked(double dEntropy)
+{
+    return (dEntropy>=D_ENTROPY_THRESHOLD);
 }
 
 quint32 XBinary::random16()

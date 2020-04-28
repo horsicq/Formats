@@ -70,6 +70,9 @@ class XBinary : public QObject
 {
     Q_OBJECT
 
+
+static const double D_ENTROPY_THRESHOLD; // 6.5
+
 public:
     struct DATASET
     {
@@ -215,6 +218,8 @@ public:
 
     void setArch(QString sArch);
     virtual QString getArch();
+
+    static bool isPacked(double dEntropy);
 
     static quint32 random16();
     static quint32 random32();
