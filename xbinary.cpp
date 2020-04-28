@@ -3520,9 +3520,9 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
     return dResult;
 }
 
-XBinary::BYTES_STATS XBinary::getBytesStats(qint64 nOffset, qint64 nSize)
+XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
 {
-    BYTES_STATS result={0};
+    BYTE_COUNTS result={0};
 
     OFFSETSIZE offsize=convertOffsetAndSize(nOffset,nSize);
 
@@ -3531,6 +3531,8 @@ XBinary::BYTES_STATS XBinary::getBytesStats(qint64 nOffset, qint64 nSize)
 
     if(nOffset!=-1)
     {
+        result.nSize=nSize;
+
         emit entropyProgressMinimumChanged(0);
         emit entropyProgressMaximumChanged(100);
         emit entropyProgressValueChanged(0);
@@ -3556,7 +3558,7 @@ XBinary::BYTES_STATS XBinary::getBytesStats(qint64 nOffset, qint64 nSize)
 
             for(qint64 i=0; i<nTemp; i++)
             {
-                result.dStat[(unsigned char)pBuffer[i]]+=1;
+                result.nCount[(unsigned char)pBuffer[i]]+=1;
             }
 
             nSize-=nTemp;
@@ -3567,12 +3569,6 @@ XBinary::BYTES_STATS XBinary::getBytesStats(qint64 nOffset, qint64 nSize)
                 _nCurrentProcent++;
                 emit entropyProgressValueChanged(_nCurrentProcent);
             }
-        }
-
-        for(int i=0;i<256;i++)
-        {
-            result.dByte[i]=i;
-            result.dProcent[i]=(result.dStat[i])/nSize;
         }
 
         emit entropyProgressValueChanged(100);

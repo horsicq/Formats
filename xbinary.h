@@ -85,11 +85,10 @@ public:
         qint64 nStringTableSize; // Optional
     };
 
-    struct BYTES_STATS
+    struct BYTE_COUNTS
     {
-        double dByte[256];
-        double dStat[256];
-        double dProcent[256];
+        qint64 nSize;
+        qint64 nCount[256];
     };
 
     struct OS_ANSISTRING
@@ -493,7 +492,7 @@ public:
 
     double getEntropy(qint64 nOffset=0,qint64 nSize=-1);
 
-    BYTES_STATS getBytesStats(qint64 nOffset=0,qint64 nSize=-1);
+    BYTE_COUNTS getByteCounts(qint64 nOffset=0,qint64 nSize=-1);
 
     void _xor(quint8 nXorValue,qint64 nOffset=0,qint64 nSize=-1);
 
