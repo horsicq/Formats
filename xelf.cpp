@@ -3644,11 +3644,28 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     {
         QString sName=QString("%1(%2)").arg(tr("Segment")).arg(i);
 
-        quint64 nAlign=listSegments.at(i).p_align;
-        qint64 nVirtualAddress=S_ALIGN_DOWN(listSegments.at(i).p_vaddr,nAlign);
-        qint64 nFileOffset=S_ALIGN_DOWN(listSegments.at(i).p_offset,nAlign);
-        qint64 nVirtualSize=S_ALIGN_UP(listSegments.at(i).p_memsz,nAlign);
-        qint64 nFileSize=S_ALIGN_UP(listSegments.at(i).p_filesz,nAlign);
+        quint64 nVirtualAlign=listSegments.at(i).p_align; // TODO Check!
+        quint64 nFileAlign=0x1; // TODO Check!!!
+        qint64 nVirtualAddress=S_ALIGN_DOWN(listSegments.at(i).p_vaddr,nVirtualAlign);
+        qint64 nFileOffset=S_ALIGN_DOWN(listSegments.at(i).p_offset,nFileAlign);
+        qint64 nVirtualSize=S_ALIGN_UP(listSegments.at(i).p_memsz,nVirtualAlign);
+        qint64 nFileSize=S_ALIGN_UP(listSegments.at(i).p_filesz,nFileAlign);
+
+        if(listSegments.at(i).p_vaddr>nVirtualAddress)
+        {
+            XBinary::_MEMORY_RECORD record={};
+
+            record.type=MMT_LOADSECTION;
+            record.sName=sName;
+            // TODO Section number!
+            record.nAddress=nVirtualAddress;
+            record.nSize=listSegments.at(i).p_vaddr-nVirtualAddress;
+            record.nOffset=-1;
+            record.nIndex=nIndex++;
+            record.bIsVirtual=true;
+
+            result.listRecords.append(record);
+        }
 
         if(nFileSize)
         {
@@ -3657,7 +3674,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
             record.type=MMT_LOADSECTION;
             record.sName=sName;
             // TODO Section number!
-            record.nAddress=nVirtualAddress;
+            record.nAddress=listSegments.at(i).p_vaddr;
             record.nSize=nFileSize;
             record.nOffset=nFileOffset;
             record.nIndex=nIndex++;
@@ -3665,15 +3682,15 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
             result.listRecords.append(record);
         }
 
-        if(nVirtualSize>nFileSize)
+        if(nVirtualSize>(nFileSize+(listSegments.at(i).p_vaddr-nVirtualAddress)))
         {
             XBinary::_MEMORY_RECORD record={};
 
             record.type=MMT_LOADSECTION;
             record.sName=sName;
             // TODO Section number!
-            record.nAddress=nVirtualAddress+nFileSize;
-            record.nSize=nVirtualSize-nFileSize;
+            record.nAddress=listSegments.at(i).p_vaddr+nFileSize;
+            record.nSize=nVirtualSize-nFileSize-(listSegments.at(i).p_vaddr-nVirtualAddress);
             record.nOffset=-1;
             record.nIndex=nIndex++;
             record.bIsVirtual=true;
