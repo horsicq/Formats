@@ -2157,6 +2157,23 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
     return result;
 }
 
+qint32 XBinary::getNumberOfPhysicalRecords(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    qint32 nResult=0;
+
+    int nCount=pMemoryMap->listRecords.count();
+
+    for(int i=0;i<nCount;i++)
+    {
+        if(!pMemoryMap->listRecords.at(i).bIsVirtual)
+        {
+            nResult++;
+        }
+    }
+
+    return nResult;
+}
+
 qint64 XBinary::getBaseAddress()
 {
     return this->__nBaseAddress;

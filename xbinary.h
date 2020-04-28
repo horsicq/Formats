@@ -388,6 +388,9 @@ public:
     static QString getMemoryRecordInfo(_MEMORY_RECORD *pMemoryRecord);
 
     virtual _MEMORY_MAP getMemoryMap();
+
+    static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);
+
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nBaseAddress);
     qint64 _getEntryPointOffset();
