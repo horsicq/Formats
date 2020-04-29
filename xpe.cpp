@@ -170,7 +170,7 @@ qint64 XPE::getFileHeaderSize()
 XPE_DEF::S_IMAGE_FILE_HEADER XPE::getFileHeader()
 {
     XPE_DEF::S_IMAGE_FILE_HEADER result={};
-
+    // TODO
     read_array(getFileHeaderOffset(),(char *)&result,sizeof(XPE_DEF::S_IMAGE_FILE_HEADER));
 
     return result;
@@ -282,7 +282,7 @@ qint64 XPE::getOptionalHeaderSize()
 XPE_DEF::IMAGE_OPTIONAL_HEADER32 XPE::getOptionalHeader32()
 {
     XPE_DEF::IMAGE_OPTIONAL_HEADER32 result={};
-
+    // TODO
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER32));
 
     return result;
@@ -291,7 +291,7 @@ XPE_DEF::IMAGE_OPTIONAL_HEADER32 XPE::getOptionalHeader32()
 XPE_DEF::IMAGE_OPTIONAL_HEADER64 XPE::getOptionalHeader64()
 {
     XPE_DEF::IMAGE_OPTIONAL_HEADER64 result={};
-
+    // TODO
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER64));
 
     return result;
@@ -310,7 +310,7 @@ void XPE::setOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pOptionalHeader6
 XPE_DEF::IMAGE_OPTIONAL_HEADER32S XPE::getOptionalHeader32S()
 {
     XPE_DEF::IMAGE_OPTIONAL_HEADER32S result={};
-
+    // TODO
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S));
 
     return result;
@@ -319,7 +319,7 @@ XPE_DEF::IMAGE_OPTIONAL_HEADER32S XPE::getOptionalHeader32S()
 XPE_DEF::IMAGE_OPTIONAL_HEADER64S XPE::getOptionalHeader64S()
 {
     XPE_DEF::IMAGE_OPTIONAL_HEADER64S result={};
-
+    // TODO
     read_array(getOptionalHeaderOffset(),(char *)&result,sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S));
 
     return result;
@@ -3138,9 +3138,13 @@ bool XPE::isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders)
     return isResourcePresent(XPE_DEF::S_RT_VERSION,-1,pListHeaders);
 }
 
-XPE_DEF::S_VS_VERSION_INFO XPE::readResourceVersionInfo(qint64 nOffset)
+XPE_DEF::S_VS_VERSION_INFO XPE::readVS_VERSION_INFO(qint64 nOffset)
 {
     XPE_DEF::S_VS_VERSION_INFO result={};
+
+    result.wLength=read_uint16(nOffset+offsetof(XPE_DEF::S_VS_VERSION_INFO,wLength));
+    result.wValueLength=read_uint16(nOffset+offsetof(XPE_DEF::S_VS_VERSION_INFO,wValueLength));
+    result.wType=read_uint16(nOffset+offsetof(XPE_DEF::S_VS_VERSION_INFO,wType));
 
     read_array(nOffset,(char *)&result,sizeof(XPE_DEF::S_VS_VERSION_INFO));
 
@@ -3153,7 +3157,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
 
     if((quint32)nSize>=sizeof(XPE_DEF::S_VS_VERSION_INFO))
     {
-        XPE_DEF::S_VS_VERSION_INFO vi=readResourceVersionInfo(nOffset);
+        XPE_DEF::S_VS_VERSION_INFO vi=readVS_VERSION_INFO(nOffset);
 
         if(vi.wLength<=nSize)
         {

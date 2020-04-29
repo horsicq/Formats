@@ -512,7 +512,7 @@ public:
     bool isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders);
 
     RESOURCE_VERSION getResourceVersion();
-    XPE_DEF::S_VS_VERSION_INFO readResourceVersionInfo(qint64 nOffset);
+    XPE_DEF::S_VS_VERSION_INFO readVS_VERSION_INFO(qint64 nOffset);
 
     RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);
 
