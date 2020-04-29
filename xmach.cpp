@@ -723,6 +723,9 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
         result.mode=MODE_32;
     }
 
+    result.sArch=getArch();
+    result.bIsBigEndian=isBigEndian();
+
     result.nRawSize=getSize();
     // TODO BaseAddress
     // SizeofImage
