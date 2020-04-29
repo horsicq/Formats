@@ -618,6 +618,8 @@ public:
     QList<RELOCS_HEADER> getRelocsHeaders();
     QList<RELOCS_POSITION> getRelocsPositions(qint64 nOffset);
 
+    XPE_DEF::IMAGE_BASE_RELOCATION _readIMAGE_BASE_RELOCATION(qint64 nOffset);
+
     quint32 getRelocsVirtualAddress(qint64 nOffset);
     quint32 getRelocsSizeOfBlock(qint64 nOffset);
     void setRelocsVirtualAddress(qint64 nOffset,quint32 nValue);

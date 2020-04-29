@@ -7975,36 +7975,43 @@ QList<XPE::RELOCS_POSITION> XPE::getRelocsPositions(qint64 nOffset)
 {
     QList<XPE::RELOCS_POSITION> listResult;
 
-    XPE_DEF::IMAGE_BASE_RELOCATION ibr={0};
+    XPE_DEF::IMAGE_BASE_RELOCATION ibr=_readIMAGE_BASE_RELOCATION(nOffset);
 
-    if(read_array(nOffset,(char *)&ibr,sizeof(XPE_DEF::IMAGE_BASE_RELOCATION)))
+    if((ibr.VirtualAddress)&&(ibr.SizeOfBlock))
     {
-        if((ibr.VirtualAddress)&&(ibr.SizeOfBlock))
+        nOffset+=sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
+
+        int nCount=(ibr.SizeOfBlock-sizeof(XPE_DEF::IMAGE_BASE_RELOCATION))/sizeof(quint16);
+
+        nCount&=0xFFFF;
+
+        for(int i=0; i<nCount; i++)
         {
-            nOffset+=sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
+            RELOCS_POSITION record={0};
 
-            int nCount=(ibr.SizeOfBlock-sizeof(XPE_DEF::IMAGE_BASE_RELOCATION))/sizeof(quint16);
+            quint16 nRecord=read_uint16(nOffset);
 
-            nCount&=0xFFFF;
+            record.nTypeOffset=nRecord;
+            record.nAddress=ibr.VirtualAddress+(nRecord&0x0FFF);
+            record.nType=nRecord>>12;
 
-            for(int i=0; i<nCount; i++)
-            {
-                RELOCS_POSITION record={0};
+            listResult.append(record);
 
-                quint16 nRecord=read_uint16(nOffset);
-
-                record.nTypeOffset=nRecord;
-                record.nAddress=ibr.VirtualAddress+(nRecord&0x0FFF);
-                record.nType=nRecord>>12;
-
-                listResult.append(record);
-
-                nOffset+=sizeof(quint16);
-            }
+            nOffset+=sizeof(quint16);
         }
     }
 
     return listResult;
+}
+
+XPE_DEF::IMAGE_BASE_RELOCATION XPE::_readIMAGE_BASE_RELOCATION(qint64 nOffset)
+{
+    XPE_DEF::IMAGE_BASE_RELOCATION result={};
+
+    result.VirtualAddress=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_BASE_RELOCATION,VirtualAddress));
+    result.SizeOfBlock=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_BASE_RELOCATION,SizeOfBlock));
+
+    return result;
 }
 
 quint32 XPE::getRelocsVirtualAddress(qint64 nOffset)
