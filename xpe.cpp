@@ -6544,7 +6544,7 @@ qint32 XPE::getNumberOfImportThunks(quint32 nNumber)
 
 qint32 XPE::getNumberOfImportThunks(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport)
 {
-    qint32 nResult;
+    qint32 nResult=0;
 
     if(nNumber<(quint32)pListImport->count())
     {
