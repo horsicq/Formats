@@ -764,6 +764,22 @@ void XPE::setOptionalHeader_NumberOfRvaAndSizes(quint32 value)
     }
 }
 
+XPE_DEF::IMAGE_DATA_DIRECTORY XPE::read_IMAGE_DATA_DIRECTORY(qint64 nOffset)
+{
+    XPE_DEF::IMAGE_DATA_DIRECTORY result={};
+
+    result.VirtualAddress=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,VirtualAddress));
+    result.Size=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,Size));
+
+    return result;
+}
+
+void XPE::write_IMAGE_DATA_DIRECTORY(qint64 nOffset, XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory)
+{
+    write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,VirtualAddress),pDataDirectory->VirtualAddress);
+    write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,Size),pDataDirectory->Size);
+}
+
 XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getOptionalHeader_DataDirectory(quint32 nNumber)
 {
     XPE_DEF::IMAGE_DATA_DIRECTORY result={};
@@ -773,11 +789,11 @@ XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getOptionalHeader_DataDirectory(quint32 nNumb
     {
         if(is64())
         {
-            read_array(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),(char *)&result,sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+            result=read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
         }
         else
         {
-            read_array(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),(char *)&result,sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+            result=read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
         }
     }
 
@@ -791,11 +807,11 @@ void XPE::setOptionalHeader_DataDirectory(quint32 nNumber,XPE_DEF::IMAGE_DATA_DI
     {
         if(is64())
         {
-            write_array(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),(char *)pDataDirectory,sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+            write_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),pDataDirectory);
         }
         else
         {
-            write_array(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),(char *)pDataDirectory,sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+            write_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),pDataDirectory);
         }
     }
 }
