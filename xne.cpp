@@ -53,7 +53,7 @@ qint64 XNE::getImageOS2HeaderOffset()
 {
     qint64 nResult=get_lfanew();
 
-    if(!isOffsetValid(nResult))
+    if(!_isOffsetValid(nResult))
     {
         nResult=-1;
     }
@@ -878,7 +878,7 @@ QList<XNE_DEF::NE_SEGMENT> XNE::getSegmentList()
 
     for(int i=0;i<nNumberOfSegments;i++)
     {
-        XNE_DEF::NE_SEGMENT segment=_get_NE_SEGMENT(nOffset);
+        XNE_DEF::NE_SEGMENT segment=_read_NE_SEGMENT(nOffset);
 
         listResult.append(segment);
 
@@ -888,7 +888,7 @@ QList<XNE_DEF::NE_SEGMENT> XNE::getSegmentList()
     return listResult;
 }
 
-XNE_DEF::NE_SEGMENT XNE::_get_NE_SEGMENT(qint64 nOffset)
+XNE_DEF::NE_SEGMENT XNE::_read_NE_SEGMENT(qint64 nOffset)
 {
     XNE_DEF::NE_SEGMENT result={};
 
@@ -896,6 +896,90 @@ XNE_DEF::NE_SEGMENT XNE::_get_NE_SEGMENT(qint64 nOffset)
     result.dwFileSize=read_uint16(nOffset+offsetof(XNE_DEF::NE_SEGMENT,dwFileSize));
     result.dwFlags=read_uint16(nOffset+offsetof(XNE_DEF::NE_SEGMENT,dwFlags));
     result.dwMinAllocSize=read_uint16(nOffset+offsetof(XNE_DEF::NE_SEGMENT,dwMinAllocSize));
+
+    return result;
+}
+
+XBinary::_MEMORY_MAP XNE::getMemoryMap()
+{
+    _MEMORY_MAP result={};
+
+    qint32 nIndex=0;
+
+    result.sArch=getArch();
+
+    result.fileType=FT_NE;
+    result.mode=MODE_16SEG;
+    result.nRawSize=getSize();
+
+    QList<XNE_DEF::NE_SEGMENT> listSegments=getSegmentList();
+
+    int nCount=listSegments.count();
+
+    result.nBaseAddress=0x10000;
+    result.nImageSize=nCount*0x10000;
+
+    qint64 nMaxOffset=0;
+
+    for(int i=0;i<nCount;i++)
+    {
+        qint64 nFileSize=listSegments.at(i).dwFileSize;
+        qint64 nFileOffset=listSegments.at(i).dwFileOffset*0x200;
+
+        if(nFileSize==0)
+        {
+            nFileSize=0x10000;
+        }
+
+        nFileSize=S_ALIGN_UP(nFileSize,0x200);
+
+        if(nFileOffset) // if offset = 0 no data
+        {
+            _MEMORY_RECORD record={};
+            record.nSize=nFileSize;
+            record.nOffset=nFileOffset;
+            record.nAddress=(i+1)*0x10000;
+            record.segment=ADDRESS_SEGMENT_UNKNOWN;
+            record.type=MMT_LOADSECTION;
+            record.nIndex=nIndex++;
+
+            result.listRecords.append(record);
+        }
+
+        if(0x10000-nFileSize)
+        {
+            _MEMORY_RECORD record={};
+            record.nSize=0x10000-nFileSize;
+            record.nOffset=-1;
+            record.nAddress=(i+1)*0x10000+nFileSize;
+            record.segment=ADDRESS_SEGMENT_UNKNOWN;
+            record.type=MMT_LOADSECTION;
+            record.nIndex=nIndex++;
+            record.bIsVirtual=true;
+
+            result.listRecords.append(record);
+        }
+
+        if(nFileOffset)
+        {
+            nMaxOffset=qMax(nMaxOffset,nFileOffset+nFileSize);
+        }
+    }
+
+    qint64 nOverlaySize=result.nRawSize-nMaxOffset;
+
+    if(nOverlaySize>0)
+    {
+        XBinary::_MEMORY_RECORD record={};
+
+        record.type=MMT_OVERLAY;
+        record.nAddress=-1;
+        record.nSize=nOverlaySize;
+        record.nOffset=nMaxOffset;
+        record.nIndex=nIndex++;
+
+        result.listRecords.append(record);
+    }
 
     return result;
 }

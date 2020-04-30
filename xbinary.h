@@ -166,6 +166,7 @@ public:
     {
         MODE_UNKNOWN=0,
         MODE_16,
+        MODE_16SEG,
         MODE_32,
         MODE_64
     };

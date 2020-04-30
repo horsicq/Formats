@@ -110,7 +110,9 @@ public:
 
     QList<XNE_DEF::NE_SEGMENT> getSegmentList();
 
-    XNE_DEF::NE_SEGMENT _get_NE_SEGMENT(qint64 nOffset);
+    XNE_DEF::NE_SEGMENT _read_NE_SEGMENT(qint64 nOffset);
+
+    virtual _MEMORY_MAP getMemoryMap();
 
     static QMap<quint64, QString> getImageNEMagics();
     static QMap<quint64, QString> getImageNEMagicsS();
