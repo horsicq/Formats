@@ -3651,7 +3651,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
         qint64 nVirtualSize=S_ALIGN_UP(listSegments.at(i).p_memsz,nVirtualAlign);
         qint64 nFileSize=S_ALIGN_UP(listSegments.at(i).p_filesz,nFileAlign);
 
-        if(listSegments.at(i).p_vaddr>nVirtualAddress)
+        if(listSegments.at(i).p_vaddr>(quint64)nVirtualAddress)
         {
             XBinary::_MEMORY_RECORD record={};
 
@@ -3682,7 +3682,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
             result.listRecords.append(record);
         }
 
-        if(nVirtualSize>(nFileSize+(listSegments.at(i).p_vaddr-nVirtualAddress)))
+        if(nVirtualSize>(nFileSize+((qint64)listSegments.at(i).p_vaddr-nVirtualAddress)))
         {
             XBinary::_MEMORY_RECORD record={};
 
