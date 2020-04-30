@@ -2832,11 +2832,13 @@ bool XBinary::checkString_uint8(QString sValue)
 {
     bool bResult=false;
 
+    // TODO Check
+
     quint16 nValue=sValue.toUShort(&bResult);
 
     if(bResult)
     {
-        bResult=((0<=nValue)&&(nValue<=256));
+        bResult=(nValue<=256);
     }
 
     return bResult;

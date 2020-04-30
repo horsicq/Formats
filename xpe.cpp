@@ -7941,7 +7941,7 @@ QList<qint64> XPE::getRelocsAsRVAList()
         }
     }
 
-    return stResult.toList();
+    return stResult.values();
 }
 
 QList<XPE::RELOCS_HEADER> XPE::getRelocsHeaders()
