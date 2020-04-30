@@ -966,20 +966,21 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
         }
     }
 
-    qint64 nOverlaySize=result.nRawSize-nMaxOffset;
+    // Check overlay!!
+//    qint64 nOverlaySize=result.nRawSize-nMaxOffset;
 
-    if(nOverlaySize>0)
-    {
-        XBinary::_MEMORY_RECORD record={};
+//    if(nOverlaySize>0)
+//    {
+//        XBinary::_MEMORY_RECORD record={};
 
-        record.type=MMT_OVERLAY;
-        record.nAddress=-1;
-        record.nSize=nOverlaySize;
-        record.nOffset=nMaxOffset;
-        record.nIndex=nIndex++;
+//        record.type=MMT_OVERLAY;
+//        record.nAddress=-1;
+//        record.nSize=nOverlaySize;
+//        record.nOffset=nMaxOffset;
+//        record.nIndex=nIndex++;
 
-        result.listRecords.append(record);
-    }
+//        result.listRecords.append(record);
+//    }
 
     return result;
 }
