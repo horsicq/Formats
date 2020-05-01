@@ -1335,7 +1335,6 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
 qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString)
 {
     // TODO Optimize
-    // TODO Check!!!
     emit findProgressMinimumChanged(0);
     emit findProgressMaximumChanged(100);
     emit findProgressValueChanged(0);
@@ -2548,6 +2547,7 @@ QSet<XBinary::FT> XBinary::getFileTypes()
 
     stResult.insert(FT_BINARY);
     // TODO FT_COM
+    // TODO FT_TEXT
 
     QByteArray baHeader;
     baHeader=read_array(0,0x200);
