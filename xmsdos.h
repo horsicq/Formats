@@ -29,6 +29,13 @@ class XMSDOS : public XBinary
     Q_OBJECT
 
 public:
+    struct MS_RICH_RECORD
+    {
+        quint32 nId;
+        quint32 nVersion;
+        quint32 nCount;
+    };
+
     explicit XMSDOS(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
 
@@ -95,13 +102,6 @@ public:
     bool isLX();
     bool isNE();
     bool isPE();
-
-    struct MS_RICH_RECORD
-    {
-        quint32 nId;
-        quint32 nVersion;
-        quint32 nCount;
-    };
 
     bool isRichSignaturePresent(); // PE and LE
     QList<XMSDOS::MS_RICH_RECORD> getRichSignatureRecords();
