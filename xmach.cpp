@@ -695,7 +695,7 @@ qint64 XMACH::getAddressOfEntryPoint()
                 nResult=read_uint64(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE64,rip),bIsBigEndian);
             }
         }
-        else if(nType==XMACH_DEF::S_LC_MAIN) // TODO const
+        else if(nType==XMACH_DEF::S_LC_MAIN)
         {
             qint64 nEntryPointOffset=read_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),bIsBigEndian);
 
@@ -727,10 +727,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
     result.bIsBigEndian=isBigEndian();
 
     result.nRawSize=getSize();
-    // TODO BaseAddress
-    // SizeofImage
 
-    // TODO
     QList<COMMAND_RECORD> listLC=getCommandRecords();
 
     QList<SEGMENT_RECORD> listSegmentRecords=getSegmentRecords(&listLC);
