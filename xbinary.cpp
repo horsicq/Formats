@@ -59,7 +59,7 @@ XBinary::MODE XBinary::getMode()
 
 QString XBinary::modeIdToString(XBinary::MODE mode)
 {
-    QString sResult="Unknown";
+    QString sResult="Unknown"; // mb TODO translate
 
     switch(mode)
     {
@@ -142,7 +142,7 @@ quint64 XBinary::random64()
 
 QString XBinary::fileTypeIdToString(XBinary::FT fileType)
 {
-    QString sResult="Unknown";
+    QString sResult="Unknown"; // mb TODO translate
 
     switch(fileType)
     {
@@ -170,7 +170,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
 
 QString XBinary::convertFileName(QString sFileName)
 {
-#ifdef Q_OS_MAC // TODO Check
+#ifdef Q_OS_MAC // Old Qt(4.X)
     //    if(sFileName.startsWith("/.file/id="))
     //    {
     //        CFStringRef relCFStringRef =
