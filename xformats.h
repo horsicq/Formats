@@ -33,13 +33,10 @@ class XFormats : public QObject
 {
     Q_OBJECT
 public:
-    explicit XFormats(QObject *parent = nullptr);
+    explicit XFormats(QObject *parent=nullptr);
 
     static XBinary::_MEMORY_MAP getMemoryMap(QIODevice *pDevice,XBinary::FT fileType);
     static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType);
-
-signals:
-
 };
 
 #endif // XFORMATS_H
