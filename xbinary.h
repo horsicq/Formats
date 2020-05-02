@@ -508,6 +508,11 @@ public:
     virtual bool is32();
     virtual bool is64();
 
+    bool isBigEndian(_MEMORY_MAP *pMemoryMap);
+    bool is16(_MEMORY_MAP *pMemoryMap);
+    bool is32(_MEMORY_MAP *pMemoryMap);
+    bool is64(_MEMORY_MAP *pMemoryMap);
+
     void setVersion(QString sVersion);
     virtual QString getVersion();
     virtual bool isEncrypted();

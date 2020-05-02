@@ -1935,7 +1935,7 @@ qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddres
 {
     qint64 nResult=-1;
 
-    if(pMemoryMap->mode==MODE_16) // Check COM
+    if(pMemoryMap->mode==MODE_16) // Check COM Check 16SEG
     {
         if(nAddress>0xFFFF)
         {
@@ -3703,6 +3703,26 @@ bool XBinary::is32()
 bool XBinary::is64()
 {
     return false;
+}
+
+bool XBinary::isBigEndian(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    return pMemoryMap->bIsBigEndian;
+}
+
+bool XBinary::is16(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    return (pMemoryMap->mode==MODE_16)||(pMemoryMap->mode==MODE_16SEG);
+}
+
+bool XBinary::is32(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    return (pMemoryMap->mode==MODE_32);
+}
+
+bool XBinary::is64(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    return (pMemoryMap->mode==MODE_64);
 }
 
 void XBinary::setVersion(QString sVersion)
