@@ -3051,7 +3051,7 @@ XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr>
 {
     OS_ANSISTRING result={};
 
-    QList<XELF_DEF::Elf_Phdr> listInterps=_getPrograms(pPhdrList,3); // TODO const
+    QList<XELF_DEF::Elf_Phdr> listInterps=_getPrograms(pPhdrList,XELF_DEF::S_PT_INTERP);
 
     if(listInterps.count())
     {

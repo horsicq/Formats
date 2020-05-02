@@ -98,6 +98,9 @@ const quint32 S_DT_RELASZ                   =8;                     /* Total siz
 const quint32 S_DT_RELAENT                  =9;                     /* Size of one Rela reloc */
 const quint32 S_DT_STRSZ                    =10;                    /* Size of string table */
 
+
+const quint32 S_PT_INTERP                   =3;
+
 struct Elf32_Ehdr
 {
     quint8 e_ident[S_EI_NIDENT];    /* ident bytes */
