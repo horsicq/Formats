@@ -342,6 +342,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 
     {
         _MEMORY_RECORD record={};
+        record.sName=QString("MSDOS %1").arg(tr("Header"));
         record.nSize=nHeaderSize;
         record.nOffset=nHeaderOffset;
         record.nAddress=-1;
