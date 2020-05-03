@@ -3106,7 +3106,7 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pPhdrList)
 {
     QList<XELF::NOTE> listResult;
 
-    QList<XELF_DEF::Elf_Phdr> listNotes=_getPrograms(pPhdrList,4); // TODO const
+    QList<XELF_DEF::Elf_Phdr> listNotes=_getPrograms(pPhdrList,XELF_DEF::S_PT_NOTE); // TODO const
 
     bool bIsBigEndian=isBigEndian();
 

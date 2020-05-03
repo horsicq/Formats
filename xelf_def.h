@@ -100,6 +100,7 @@ const quint32 S_DT_STRSZ                    =10;                    /* Size of s
 
 
 const quint32 S_PT_INTERP                   =3;
+const quint32 S_PT_NOTE                     =4;
 
 struct Elf32_Ehdr
 {
