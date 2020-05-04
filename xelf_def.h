@@ -97,6 +97,7 @@ const quint32 S_DT_RELA                     =7;                     /* Address o
 const quint32 S_DT_RELASZ                   =8;                     /* Total size of Rela relocs */
 const quint32 S_DT_RELAENT                  =9;                     /* Size of one Rela reloc */
 const quint32 S_DT_STRSZ                    =10;                    /* Size of string table */
+const quint32 S_DT_RUNPATH                  =29;                    // Run path
 
 const quint32 S_PT_DYNAMIC                  =2;
 const quint32 S_PT_INTERP                   =3;
