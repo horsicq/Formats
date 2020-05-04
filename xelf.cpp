@@ -3106,7 +3106,7 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pPhdrList)
 {
     QList<XELF::NOTE> listResult;
 
-    QList<XELF_DEF::Elf_Phdr> listNotes=_getPrograms(pPhdrList,XELF_DEF::S_PT_NOTE); // TODO const
+    QList<XELF_DEF::Elf_Phdr> listNotes=_getPrograms(pPhdrList,XELF_DEF::S_PT_NOTE);
 
     bool bIsBigEndian=isBigEndian();
 
@@ -3192,7 +3192,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pPhdrList
     bool bIs64=is64();
     bool bIsBigEndian=isBigEndian();
 
-    QList<XELF_DEF::Elf_Phdr> listTags=_getPrograms(pPhdrList,2); // TODO const
+    QList<XELF_DEF::Elf_Phdr> listTags=_getPrograms(pPhdrList,XELF_DEF::S_PT_DYNAMIC);
 
     int nCount=listTags.count();
 

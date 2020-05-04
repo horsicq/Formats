@@ -98,7 +98,7 @@ const quint32 S_DT_RELASZ                   =8;                     /* Total siz
 const quint32 S_DT_RELAENT                  =9;                     /* Size of one Rela reloc */
 const quint32 S_DT_STRSZ                    =10;                    /* Size of string table */
 
-
+const quint32 S_PT_DYNAMIC                  =2;
 const quint32 S_PT_INTERP                   =3;
 const quint32 S_PT_NOTE                     =4;
 
