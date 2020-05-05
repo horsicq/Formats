@@ -3655,12 +3655,12 @@ quint32 XBinary::getStringCustomCRC32(QString sString)
     for(int i=0; i<nSize; i++)
     {
         unsigned char _char=(unsigned char)baString.data()[i];
-        unsigned char _char1=(unsigned char)sString.at(i).toLatin1();
+//        unsigned char _char1=(unsigned char)sString.at(i).toLatin1();
 
-        if(_char!=_char1)
-        {
-            qFatal("Error"); // TODO remove
-        }
+//        if(_char!=_char1)
+//        {
+//            qFatal("Error"); // TODO remove
+//        }
 
         nResult^=_char;
 
