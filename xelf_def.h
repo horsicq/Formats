@@ -99,6 +99,7 @@ const quint32 S_DT_RELAENT                  =9;                     /* Size of o
 const quint32 S_DT_STRSZ                    =10;                    /* Size of string table */
 const quint32 S_DT_RUNPATH                  =29;                    // Run path
 
+const quint32 S_PT_LOAD                     =1;
 const quint32 S_PT_DYNAMIC                  =2;
 const quint32 S_PT_INTERP                   =3;
 const quint32 S_PT_NOTE                     =4;
