@@ -1003,6 +1003,7 @@ XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionHeader(quint32 nNumber)
 
     if(nNumber<nNumberOfSections)
     {
+        // TODO
         read_array(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER),(char *)&result,sizeof(XPE_DEF::IMAGE_SECTION_HEADER));
     }
 
