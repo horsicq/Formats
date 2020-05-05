@@ -53,7 +53,7 @@ qint64 XLE::getImageVxdHeaderOffset()
 {
     qint64 nResult=get_lfanew();
 
-    if(!isOffsetValid(nResult))
+    if(!_isOffsetValid(nResult))
     {
         nResult=-1;
     }
