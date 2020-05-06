@@ -39,8 +39,8 @@ const quint32 S_MH_CIGAM_64     =0xcffaedfe;        /* NXSwapInt(MH_MAGIC_64) */
 struct mach_header
 {
     quint32 magic;          /* mach magic number identifier */
-    qint32 cputype;        /* cpu specifier */
-    qint32 cpusubtype;     /* machine specifier */
+    qint32 cputype;         /* cpu specifier */
+    qint32 cpusubtype;      /* machine specifier */
     quint32 filetype;       /* type of file */
     quint32 ncmds;          /* number of load commands */
     quint32 sizeofcmds;     /* the size of all the load commands */
@@ -54,8 +54,8 @@ struct mach_header
 struct mach_header_64
 {
     quint32 magic;          /* mach magic number identifier */
-    qint32 cputype;        /* cpu specifier */
-    qint32 cpusubtype;     /* machine specifier */
+    qint32 cputype;         /* cpu specifier */
+    qint32 cpusubtype;      /* machine specifier */
     quint32 filetype;       /* type of file */
     quint32 ncmds;          /* number of load commands */
     quint32 sizeofcmds;     /* the size of all the load commands */
@@ -99,7 +99,8 @@ struct segment_command_64
     quint32 flags;
 };
 
-struct section {            /* for 32-bit architectures */
+struct section              /* for 32-bit architectures */
+{
     char sectname[16];      /* name of this section */
     char segname[16];       /* segment this section goes in */
     quint32	addr;           /* memory address of this section */
@@ -113,7 +114,8 @@ struct section {            /* for 32-bit architectures */
     quint32	reserved2;      /* reserved (for count or sizeof) */
 };
 
-struct section_64 {         /* for 64-bit architectures */
+struct section_64           /* for 64-bit architectures */
+{
     char sectname[16];      /* name of this section */
     char segname[16];       /* segment this section goes in */
     quint64	addr;           /* memory address of this section */
@@ -228,10 +230,10 @@ struct STRUCT_X86_THREAD_STATE64
 
 struct entry_point_command
 {
-    quint32  cmd;               /* LC_MAIN only used in MH_EXECUTE filetypes */
-    quint32  cmdsize;           /* 24 */
-    quint64  entryoff;          /* file (__TEXT) offset of main() */
-    quint64  stacksize;         /* if not zero, initial stack size */
+    quint32 cmd;               /* LC_MAIN only used in MH_EXECUTE filetypes */
+    quint32 cmdsize;           /* 24 */
+    quint64 entryoff;          /* file (__TEXT) offset of main() */
+    quint64 stacksize;         /* if not zero, initial stack size */
 };
 
 struct dylib
