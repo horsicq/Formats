@@ -83,6 +83,16 @@ struct IMAGE_VXD_HEADER
 //    WORD   e32_ddkver;                  // DDK version for VxD
 };
 
+struct o32_obj
+{
+    quint32 o32_size;
+    quint32 o32_base;
+    quint32 o32_flags;
+    quint32 o32_pagemap;
+    quint32 o32_mapsize;
+    quint32 o32_reserved;
+};
+
 struct o32_map
 {
     quint32 o32_pagedataoffset;
