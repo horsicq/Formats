@@ -1243,6 +1243,15 @@ XLE_DEF::o32_obj XLE::_read_o32_obj(qint64 nOffset)
     return result;
 }
 
+QList<XLE_DEF::o32_obj> XLE::getObjects()
+{
+    QList<XLE_DEF::o32_obj> listResult;
+
+    // TODO
+
+    return listResult;
+}
+
 QMap<quint64, QString> XLE::getImageLEMagics()
 {
     QMap<quint64, QString> mapResult;
