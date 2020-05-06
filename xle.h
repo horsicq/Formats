@@ -130,6 +130,8 @@ public:
     void setImageVxdHeader_instdemand(quint32 value);
     void setImageVxdHeader_heapsize(quint32 value);
 
+    XLE_DEF::o32_obj _read_o32_obj(qint64 nOffset);
+
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();
     static QMap<quint64, QString> getImageLECpusS();

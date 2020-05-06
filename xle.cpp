@@ -1229,6 +1229,20 @@ void XLE::setImageVxdHeader_heapsize(quint32 value)
     }
 }
 
+XLE_DEF::o32_obj XLE::_read_o32_obj(qint64 nOffset)
+{
+    XLE_DEF::o32_obj result={};
+
+    result.o32_size=read_uint32(nOffset+offsetof(XLE_DEF::o32_obj,o32_size));
+    result.o32_base=read_uint32(nOffset+offsetof(XLE_DEF::o32_obj,o32_base));
+    result.o32_flags=read_uint32(nOffset+offsetof(XLE_DEF::o32_obj,o32_flags));
+    result.o32_pagemap=read_uint32(nOffset+offsetof(XLE_DEF::o32_obj,o32_pagemap));
+    result.o32_mapsize=read_uint32(nOffset+offsetof(XLE_DEF::o32_obj,o32_mapsize));
+    result.o32_reserved=read_uint32(nOffset+offsetof(XLE_DEF::o32_obj,o32_reserved));
+
+    return result;
+}
+
 QMap<quint64, QString> XLE::getImageLEMagics()
 {
     QMap<quint64, QString> mapResult;
