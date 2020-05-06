@@ -82,6 +82,13 @@ struct IMAGE_VXD_HEADER
 //    WORD   e32_devid;                   // Device ID for VxD
 //    WORD   e32_ddkver;                  // DDK version for VxD
 };
+
+struct o32_map
+{
+    quint32 o32_pagedataoffset;
+    quint16 o32_pagesize;
+    quint16 o32_pageflags;
+};
 }
 
 #endif // XLE_DEF_H
