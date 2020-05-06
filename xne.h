@@ -122,6 +122,8 @@ public:
 
     static QMap<quint64, QString> getImageNEExetypesS();
     static QMap<quint64, QString> getImageNEFlagsothersS();
+
+    static QMap<quint64,QString> getImageSegmentTypesS();
 };
 
 #endif // XNE_H
