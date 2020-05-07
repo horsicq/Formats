@@ -137,6 +137,9 @@ public:
 
     virtual _MEMORY_MAP getMemoryMap();
 
+    virtual MODE getMode();
+    virtual QString getArch();
+
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();
     static QMap<quint64, QString> getImageLECpusS();

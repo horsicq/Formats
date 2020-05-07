@@ -1284,6 +1284,16 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
     return result;
 }
 
+XBinary::MODE XLE::getMode()
+{
+    return MODE_32; // TODO
+}
+
+QString XLE::getArch()
+{
+    return ""; // TODO
+}
+
 QMap<quint64, QString> XLE::getImageLEMagics()
 {
     QMap<quint64, QString> mapResult;
