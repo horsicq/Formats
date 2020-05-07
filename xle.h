@@ -133,6 +133,8 @@ public:
     XLE_DEF::o32_obj _read_o32_obj(qint64 nOffset);
     QList<XLE_DEF::o32_obj> getObjects();
 
+    virtual _MEMORY_MAP getMemoryMap();
+
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();
     static QMap<quint64, QString> getImageLECpusS();

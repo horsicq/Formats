@@ -1247,9 +1247,30 @@ QList<XLE_DEF::o32_obj> XLE::getObjects()
 {
     QList<XLE_DEF::o32_obj> listResult;
 
-    // TODO
+    qint64 nObjOffset=getImageVxdHeaderOffset()+getImageVxdHeader_objtab();
+    quint32 nObjCount=getImageVxdHeader_objcnt();
+
+    for(quint32 i=0;i<nObjCount;i++)
+    {
+        XLE_DEF::o32_obj record=_read_o32_obj(nObjOffset);
+
+        listResult.append(record);
+
+        nObjOffset+=sizeof(XLE_DEF::o32_obj);
+    }
 
     return listResult;
+}
+
+XBinary::_MEMORY_MAP XLE::getMemoryMap()
+{
+    XBinary::_MEMORY_MAP result;
+
+    QList<XLE_DEF::o32_obj> listObjects=XLE::getObjects();
+
+    // TODO
+
+    return result;
 }
 
 QMap<quint64, QString> XLE::getImageLEMagics()
