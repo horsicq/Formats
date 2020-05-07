@@ -792,22 +792,18 @@ public:
     quint32 getLoadConfig_GlobalFlagsClear();
     quint32 getLoadConfig_GlobalFlagsSet();
     quint32 getLoadConfig_CriticalSectionDefaultTimeout();
-
     quint64 getLoadConfig_DeCommitFreeBlockThreshold();
     quint64 getLoadConfig_DeCommitTotalFreeThreshold();
     quint64 getLoadConfig_LockPrefixTable();
     quint64 getLoadConfig_MaximumAllocationSize();
     quint64 getLoadConfig_VirtualMemoryThreshold();
     quint64 getLoadConfig_ProcessAffinityMask();
-
     quint16 getLoadConfig_CSDVersion();
     quint16 getLoadConfig_DependentLoadFlags();
-
     quint64 getLoadConfig_EditList();
     quint64 getLoadConfig_SecurityCookie();
     quint64 getLoadConfig_SEHandlerTable();
     quint64 getLoadConfig_SEHandlerCount();
-
     quint64 getLoadConfig_GuardCFCheckFunctionPointer();
     quint64 getLoadConfig_GuardCFDispatchFunctionPointer();
     quint64 getLoadConfig_GuardCFFunctionTable();
@@ -841,22 +837,18 @@ public:
     void setLoadConfig_GlobalFlagsClear(quint32 value);
     void setLoadConfig_GlobalFlagsSet(quint32 value);
     void setLoadConfig_CriticalSectionDefaultTimeout(quint32 value);
-
     void setLoadConfig_DeCommitFreeBlockThreshold(quint64 value);
     void setLoadConfig_DeCommitTotalFreeThreshold(quint64 value);
     void setLoadConfig_LockPrefixTable(quint64 value);
     void setLoadConfig_MaximumAllocationSize(quint64 value);
     void setLoadConfig_VirtualMemoryThreshold(quint64 value);
     void setLoadConfig_ProcessAffinityMask(quint64 value);
-
     void setLoadConfig_CSDVersion(quint16 value);
     void setLoadConfig_DependentLoadFlags(quint16 value);
-
     void setLoadConfig_EditList(quint64 value);
     void setLoadConfig_SecurityCookie(quint64 value);
     void setLoadConfig_SEHandlerTable(quint64 value);
     void setLoadConfig_SEHandlerCount(quint64 value);
-
     void setLoadConfig_GuardCFCheckFunctionPointer(quint64 value);
     void setLoadConfig_GuardCFDispatchFunctionPointer(quint64 value);
     void setLoadConfig_GuardCFFunctionTable(quint64 value);
@@ -933,7 +925,6 @@ public:
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
-
     RESOURCE_POSITION _getResourcePosition(_MEMORY_MAP *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);
     qint64 _fixHeadersSize();
     qint64 _getMinSectionOffset(); // TODO move to XBinary

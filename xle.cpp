@@ -1243,6 +1243,17 @@ XLE_DEF::o32_obj XLE::_read_o32_obj(qint64 nOffset)
     return result;
 }
 
+XLE_DEF::o32_map XLE::_read_o32_map(qint64 nOffset)
+{
+    XLE_DEF::o32_map result={};
+
+    result.o32_pagedataoffset=read_uint32(nOffset+offsetof(XLE_DEF::o32_map,o32_pagedataoffset));
+    result.o32_pagesize=read_uint32(nOffset+offsetof(XLE_DEF::o32_map,o32_pagesize));
+    result.o32_pageflags=read_uint32(nOffset+offsetof(XLE_DEF::o32_map,o32_pageflags));
+
+    return result;
+}
+
 QList<XLE_DEF::o32_obj> XLE::getObjects()
 {
     QList<XLE_DEF::o32_obj> listResult;
