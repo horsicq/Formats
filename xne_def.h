@@ -30,8 +30,8 @@ const quint16 S_IMAGE_OS2_SIGNATURE     =0x454E;      // NE
 struct IMAGE_OS2_HEADER  // OS/2 .EXE header
 {
     quint16 ne_magic;                   // Magic number
-    quint8  ne_ver;                     // Version number
-    quint8  ne_rev;                     // Revision number
+    quint8 ne_ver;                      // Version number
+    quint8 ne_rev;                      // Revision number
     quint16 ne_enttab;                  // Offset of Entry Table
     quint16 ne_cbenttab;                // Number of bytes in Entry Table
     quint32 ne_crc;                     // Checksum of whole file
@@ -53,8 +53,8 @@ struct IMAGE_OS2_HEADER  // OS/2 .EXE header
     quint16 ne_cmovent;                 // Count of movable entries
     quint16 ne_align;                   // Segment alignment shift count
     quint16 ne_cres;                    // Count of resource segments
-    quint8  ne_exetyp;                  // Target Operating system
-    quint8  ne_flagsothers;             // Other .EXE flags
+    quint8 ne_exetyp;                   // Target Operating system
+    quint8 ne_flagsothers;              // Other .EXE flags
     quint16 ne_pretthunks;              // offset to return thunks
     quint16 ne_psegrefbytes;            // offset to segment ref. bytes
     quint16 ne_swaparea;                // Minimum code swap area size
