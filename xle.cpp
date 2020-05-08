@@ -1291,7 +1291,7 @@ XBinary::MODE XLE::getMode()
 
 QString XLE::getArch()
 {
-    return ""; // TODO
+    return getImageLECpusS().value(getImageVxdHeader_cpu(),QString("UNKNOWN"));
 }
 
 QMap<quint64, QString> XLE::getImageLEMagics()
