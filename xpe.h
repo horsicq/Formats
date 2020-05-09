@@ -486,8 +486,8 @@ public:
     static bool isImportFunctionPresentI(QString sLibrary,QString sFunction,QList<IMPORT_HEADER> *pListImport);
 
     bool setImports(QList<IMPORT_HEADER> *pListHeaders);
-    static bool setImports(QIODevice *pDevice,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
-    static bool setImports(QString sFileName,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
+    bool setImports(QIODevice *pDevice,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
+    bool setImports(QString sFileName,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
 
     QString getImportFunctionName(quint32 nImport,quint32 nFunctionNumber,QList<IMPORT_HEADER> *pListHeaders);
 
@@ -596,16 +596,16 @@ public:
     double getSectionEntropy(quint32 nSection);
 
     bool addImportSection(QMap<qint64,QString> *pMapIAT);
-    static bool addImportSection(QIODevice *pDevice,bool bIsImage,QMap<qint64,QString> *pMapIAT);
-    static bool addImportSection(QString sFileName,bool bIsImage,QMap<qint64,QString> *pMapIAT);
+    bool addImportSection(QIODevice *pDevice,bool bIsImage,QMap<qint64,QString> *pMapIAT);
+    bool addImportSection(QString sFileName,bool bIsImage,QMap<qint64,QString> *pMapIAT);
 
     static QList<XPE::IMPORT_HEADER> mapIATToList(QMap<qint64,QString> *pMapIAT,bool bIs64);
 
     quint32 calculateCheckSum();
 
     bool addSection(XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
-    static bool addSection(QString sFileName,bool bIsImage,XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
-    static bool addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
+    bool addSection(QString sFileName,bool bIsImage,XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
+    bool addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
 
     bool removeLastSection();
     static bool removeLastSection(QIODevice *pDevice, bool bIsImage);
@@ -629,8 +629,8 @@ public:
     void setRelocsSizeOfBlock(qint64 nOffset,quint32 nValue);
 
     bool addRelocsSection(QList<qint64> *pList);
-    static bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pList);
-    static bool addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pList);
+    bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pList);
+    bool addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pList);
     static QByteArray relocsAsRVAListToByteArray(QList<qint64> *pList,bool bIs64);
 
     bool isResourcesPresent();

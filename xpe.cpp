@@ -4123,7 +4123,7 @@ bool XPE::addSection(QString sFileName,bool bIsImage, XPE_DEF::IMAGE_SECTION_HEA
     }
     else
     {
-        qDebug("Cannot open file"); // TODO emit
+        emit errorMessage(QString("%1: %2").arg(tr("Cannot open file")).arg(sFileName));
     }
 
     return bResult;
