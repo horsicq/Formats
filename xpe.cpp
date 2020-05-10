@@ -6313,6 +6313,7 @@ QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList()
     {
         while(true)
         {
+            // TODO read function
             XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY record={};
 
             record.BeginAddress=read_uint32(nExceptionOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,BeginAddress));
