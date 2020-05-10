@@ -6864,6 +6864,8 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
             if((result.header.cb==0x48)&&result.header.MetaData.VirtualAddress&&result.header.MetaData.Size)
             {
+                result.bInit=true;
+
                 result.nEntryPointSize=0;
                 result.nEntryPoint=result.header.EntryPointRVA;
 
@@ -6875,8 +6877,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                     if(result.nCLI_MetaData_Signature==0x424a5342)
                     {
-                        result.bInit=true;
-
+                        // result.bInit=true;
                         result.sCLI_MetaData_MajorVersion=read_uint16(result.nCLI_MetaDataOffset+4);
                         result.sCLI_MetaData_MinorVersion=read_uint16(result.nCLI_MetaDataOffset+6);
                         result.nCLI_MetaData_Reserved=read_uint32(result.nCLI_MetaDataOffset+8);
