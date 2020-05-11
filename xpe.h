@@ -875,6 +875,8 @@ public:
     void setLoadConfig_EnclaveConfigurationPointer(quint64 value);
     void setLoadConfig_VolatileMetadataPointer(quint64 value);
 
+    XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY _read_IMAGE_RUNTIME_FUNCTION_ENTRY(qint64 nOffset);
+
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList();

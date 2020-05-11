@@ -6301,6 +6301,17 @@ void XPE::setLoadConfig_VolatileMetadataPointer(quint64 value)
     }
 }
 
+XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY XPE::_read_IMAGE_RUNTIME_FUNCTION_ENTRY(qint64 nOffset)
+{
+    XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY result={};
+
+    result.BeginAddress=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,BeginAddress));
+    result.EndAddress=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,EndAddress));
+    result.UnwindInfoAddress=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,UnwindInfoAddress));
+
+    return result;
+}
+
 QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList()
 {
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> listResult;
@@ -6314,11 +6325,7 @@ QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList()
         while(true)
         {
             // TODO read function
-            XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY record={};
-
-            record.BeginAddress=read_uint32(nExceptionOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,BeginAddress));
-            record.EndAddress=read_uint32(nExceptionOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,EndAddress));
-            record.UnwindInfoAddress=read_uint32(nExceptionOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,UnwindInfoAddress));
+            XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY record=_read_IMAGE_RUNTIME_FUNCTION_ENTRY(nExceptionOffset);
 
             if( record.BeginAddress&&
                 record.EndAddress&&
