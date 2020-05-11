@@ -6312,6 +6312,39 @@ XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY XPE::_read_IMAGE_RUNTIME_FUNCTION_ENTRY(
     return result;
 }
 
+XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY XPE::_getException(qint32 nNumber)
+{
+    XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY result={};
+
+    qint64 nExceptionOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION);
+
+    if(nExceptionOffset!=-1)
+    {
+        result=_read_IMAGE_RUNTIME_FUNCTION_ENTRY(nExceptionOffset+nNumber*sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY));
+    }
+
+    return result;
+}
+
+qint64 XPE::getExceptionRecordOffset(qint32 nNumber)
+{
+    qint64 nResult=-1;
+
+    qint64 nExceptionOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION);
+
+    if(nExceptionOffset!=-1)
+    {
+        nResult=nExceptionOffset+nNumber*sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY);
+    }
+
+    return nResult;
+}
+
+qint64 XPE::getExceptionRecordSize()
+{
+    return sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY);
+}
+
 QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList()
 {
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> listResult;

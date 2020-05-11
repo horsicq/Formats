@@ -877,6 +877,11 @@ public:
 
     XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY _read_IMAGE_RUNTIME_FUNCTION_ENTRY(qint64 nOffset);
 
+    XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY _getException(qint32 nNumber);
+
+    qint64 getExceptionRecordOffset(qint32 nNumber);
+    qint64 getExceptionRecordSize();
+
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList();
