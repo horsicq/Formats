@@ -3610,7 +3610,7 @@ void XPE::write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset, XPE_DEF::IMAGE_IMPORT_DE
     write_array(nOffset,(char *)&value,sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR));
 }
 
-XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR XPE::read_IMAGE_DELAYLOAD_DESCRIPTOR(qint64 nOffset)
+XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR XPE::_read_IMAGE_DELAYLOAD_DESCRIPTOR(qint64 nOffset)
 {
     XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR result={};
 
@@ -6534,6 +6534,20 @@ void XPE::setDebugHeader_PointerToRawData(quint32 nNumber, quint32 nValue)
     write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,PointerToRawData),nValue);
 }
 
+qint64 XPE::getDelayImportRecordOffset(qint32 nNumber)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
+
+    nOffset+=sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR)*nNumber;
+
+    return nOffset;
+}
+
+qint64 XPE::getDelayImportRecordSize()
+{
+    return sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
+}
+
 QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
 {
     QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR>  listResult;
@@ -6548,7 +6562,7 @@ QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
         {
             XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR record={};
 
-            record=read_IMAGE_DELAYLOAD_DESCRIPTOR(nDelayImportOffset);
+            record=_read_IMAGE_DELAYLOAD_DESCRIPTOR(nDelayImportOffset);
 
             if( record.DllNameRVA&&
                 isAddressValid(&memoryMap,memoryMap.nBaseAddress+record.DllNameRVA))

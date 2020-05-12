@@ -563,7 +563,7 @@ public:
     XPE_DEF::IMAGE_IMPORT_DESCRIPTOR read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset);
     void write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset,XPE_DEF::IMAGE_IMPORT_DESCRIPTOR value);
 
-    XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR read_IMAGE_DELAYLOAD_DESCRIPTOR(qint64 nOffset);
+    XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR _read_IMAGE_DELAYLOAD_DESCRIPTOR(qint64 nOffset);
 
     bool isExportPresent();
 
@@ -903,6 +903,9 @@ public:
     void setDebugHeader_SizeOfData(quint32 nNumber,quint32 nValue);
     void setDebugHeader_AddressOfRawData(quint32 nNumber,quint32 nValue);
     void setDebugHeader_PointerToRawData(quint32 nNumber,quint32 nValue);
+
+    qint64 getDelayImportRecordOffset(qint32 nNumber);
+    qint64 getDelayImportRecordSize();
 
     QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> getDelayImportsList();
 
