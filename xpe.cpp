@@ -1583,6 +1583,8 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
         result.mode=MODE_32;
     }
 
+    result.sArch=getArch();
+
     result.nBaseAddress=_getBaseAddress();
     result.nRawSize=getSize();
     result.nImageSize=S_ALIGN_UP(getOptionalHeader_SizeOfImage(),0x1000);
@@ -6324,6 +6326,27 @@ XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY XPE::_getException(qint32 nNumber)
     }
 
     return result;
+}
+
+void XPE::setException_BeginAddress(qint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION+nNumber*sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY));
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,BeginAddress),nValue);
+}
+
+void XPE::setException_EndAddress(qint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION+nNumber*sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY));
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,EndAddress),nValue);
+}
+
+void XPE::setException_UnwindInfoAddress(qint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION+nNumber*sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY));
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY,UnwindInfoAddress),nValue);
 }
 
 qint64 XPE::getExceptionRecordOffset(qint32 nNumber)

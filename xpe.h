@@ -879,6 +879,10 @@ public:
 
     XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY _getException(qint32 nNumber);
 
+    void setException_BeginAddress(qint32 nNumber,quint32 nValue);
+    void setException_EndAddress(qint32 nNumber,quint32 nValue);
+    void setException_UnwindInfoAddress(qint32 nNumber,quint32 nValue);
+
     qint64 getExceptionRecordOffset(qint32 nNumber);
     qint64 getExceptionRecordSize();
 
