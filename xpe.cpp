@@ -6581,6 +6581,62 @@ QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
     return listResult;
 }
 
+void XPE::setDelayImport_AllAttributes(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDelayImportRecordOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,AllAttributes),nValue);
+}
+
+void XPE::setDelayImport_DllNameRVA(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDelayImportRecordOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,DllNameRVA),nValue);
+}
+
+void XPE::setDelayImport_ModuleHandleRVA(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDelayImportRecordOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ModuleHandleRVA),nValue);
+}
+
+void XPE::setDelayImport_ImportAddressTableRVA(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDelayImportRecordOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportAddressTableRVA),nValue);
+}
+
+void XPE::setDelayImport_ImportNameTableRVA(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDelayImportRecordOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,ImportNameTableRVA),nValue);
+}
+
+void XPE::setDelayImport_BoundImportAddressTableRVA(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDelayImportRecordOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,BoundImportAddressTableRVA),nValue);
+}
+
+void XPE::setDelayImport_UnloadInformationTableRVA(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDelayImportRecordOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,UnloadInformationTableRVA),nValue);
+}
+
+void XPE::setDelayImport_TimeDateStamp(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getDelayImportRecordOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,TimeDateStamp),nValue);
+}
+
 qint32 XPE::getNumberOfImports()
 {
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> listImports=getImportDescriptors();

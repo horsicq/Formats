@@ -909,6 +909,15 @@ public:
 
     QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> getDelayImportsList();
 
+    void setDelayImport_AllAttributes(quint32 nNumber,quint32 nValue);
+    void setDelayImport_DllNameRVA(quint32 nNumber,quint32 nValue);
+    void setDelayImport_ModuleHandleRVA(quint32 nNumber,quint32 nValue);
+    void setDelayImport_ImportAddressTableRVA(quint32 nNumber,quint32 nValue);
+    void setDelayImport_ImportNameTableRVA(quint32 nNumber,quint32 nValue);
+    void setDelayImport_BoundImportAddressTableRVA(quint32 nNumber,quint32 nValue);
+    void setDelayImport_UnloadInformationTableRVA(quint32 nNumber,quint32 nValue);
+    void setDelayImport_TimeDateStamp(quint32 nNumber,quint32 nValue);
+
     qint32 getNumberOfImports();
     QString getImportLibraryName(quint32 nNumber);
     QString getImportLibraryName(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
