@@ -3663,7 +3663,29 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap)
         {
             if((nAddressOfFunctionsOffset!=-1)&&(nAddressOfNamesOffset!=-1)&&(nAddressOfNameOrdinalsOffset!=-1))
             {
-                for(int i=0; i<(int)result.directory.NumberOfFunctions; i++)
+//                for(int i=0; i<(int)result.directory.NumberOfFunctions; i++)
+//                {
+//                    EXPORT_POSITION position={};
+
+//                    int nIndex=read_uint16(nAddressOfNameOrdinalsOffset+2*i);
+//                    position.nOrdinal=nIndex+result.directory.Base;
+//                    position.nRVA=read_uint32(nAddressOfFunctionsOffset+4*nIndex);
+//                    position.nAddress=position.nRVA+pMemoryMap->nBaseAddress;
+//                    position.nNameRVA=read_uint32(nAddressOfNamesOffset+4*i);
+
+//                    qint64 nFunctionNameOffset=addressToOffset(pMemoryMap,position.nNameRVA+pMemoryMap->nBaseAddress);
+
+//                    if(nFunctionNameOffset!=-1)
+//                    {
+//                        position.sFunctionName=read_ansiString(nFunctionNameOffset);
+//                    }
+
+//                    result.listPositions.append(position);
+//                }
+
+                QMap<quint16,EXPORT_POSITION> mapNames;
+
+                for(int i=0; i<(int)result.directory.NumberOfNames; i++)
                 {
                     EXPORT_POSITION position={};
 
@@ -3678,6 +3700,26 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap)
                     if(nFunctionNameOffset!=-1)
                     {
                         position.sFunctionName=read_ansiString(nFunctionNameOffset);
+                    }
+
+                    mapNames.insert(position.nOrdinal,position);
+                }
+
+                for(int i=0; i<(int)result.directory.NumberOfFunctions; i++)
+                {
+                    EXPORT_POSITION position={};
+
+                    int nIndex=i;
+                    position.nOrdinal=nIndex+result.directory.Base;
+
+                    if(mapNames.contains(position.nOrdinal))
+                    {
+                        position=mapNames.value(position.nOrdinal);
+                    }
+                    else
+                    {
+                        position.nRVA=read_uint32(nAddressOfFunctionsOffset+4*nIndex);
+                        position.nAddress=position.nRVA+pMemoryMap->nBaseAddress;
                     }
 
                     result.listPositions.append(position);
