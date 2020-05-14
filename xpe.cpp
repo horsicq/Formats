@@ -6659,6 +6659,15 @@ void XPE::setDelayImport_TimeDateStamp(quint32 nNumber, quint32 nValue)
     write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR,TimeDateStamp),nValue);
 }
 
+QList<XPE::IMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
+{
+    QList<XPE::IMPORT_POSITION> listResult;
+
+    // TODO
+
+    return listResult;
+}
+
 qint32 XPE::getNumberOfImports()
 {
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> listImports=getImportDescriptors();

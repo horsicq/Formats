@@ -918,6 +918,8 @@ public:
     void setDelayImport_UnloadInformationTableRVA(quint32 nNumber,quint32 nValue);
     void setDelayImport_TimeDateStamp(quint32 nNumber,quint32 nValue);
 
+    QList<IMPORT_POSITION> getDelayImportPositions(int nIndex);
+
     qint32 getNumberOfImports();
     QString getImportLibraryName(quint32 nNumber);
     QString getImportLibraryName(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
