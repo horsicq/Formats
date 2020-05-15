@@ -4265,7 +4265,7 @@ XPE::RESOURCE_POSITION XPE::_getResourcePosition(XBinary::_MEMORY_MAP *pMemoryMa
         result.directory=read_IMAGE_RESOURCE_DIRECTORY(nDirectoryOffset);
         nDirectoryOffset+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
 
-        if((result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries<=100)&&(result.directory.Characteristics==0)) // check corrupted
+        if((result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries<=1000)&&(result.directory.Characteristics==0)) // check corrupted
         {
             result.bIsValid=true;
 
