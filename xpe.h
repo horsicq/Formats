@@ -475,6 +475,7 @@ public:
     QList<IMPORT_HEADER> getImports();
     QList<IMPORT_HEADER> getImports(_MEMORY_MAP *pMemoryMap);
 
+    QList<IMPORT_POSITION> _getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap,qint64 nThunksRVA,qint64 nRVA);
     QList<IMPORT_POSITION> getImportPositions(int nIndex);
 
     QList<quint32> getImportPositionHashes(_MEMORY_MAP *pMemoryMap);

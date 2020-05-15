@@ -2271,111 +2271,112 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
                 break;
             }
 
-            while(true)
-            {
-                IMPORT_POSITION importPosition={};
-                importPosition.nThunkRVA=nThunksOriginalRVA;
-                importPosition.nThunkOffset=nThunksOriginalOffset;
-
-                if(bIs64)
-                {
-                    importPosition.nThunkValue=read_uint64(nThunksOffset);
-
-                    if(importPosition.nThunkValue==0)
-                    {
-                        break;
-                    }
-
-                    if(!(importPosition.nThunkValue&0x8000000000000000))
-                    {
-                        qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nThunkValue+nBaseAddress);
-
-                        if(nOffset!=-1)
-                        {
-                            importPosition.nHint=read_uint16(nOffset);
-                            importPosition.sName=read_ansiString(nOffset+2);
-
-                            if(importPosition.sName=="")
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        importPosition.nOrdinal=importPosition.nThunkValue&0x7FFFFFFFFFFFFFFF;
-                    }
-
-                }
-                else
-                {
-                    importPosition.nThunkValue=read_uint32(nThunksOffset);
-
-                    if(importPosition.nThunkValue==0)
-                    {
-                        break;
-                    }
-
-                    if(!(importPosition.nThunkValue&0x80000000))
-                    {
-                        qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nThunkValue+nBaseAddress);
-
-                        if(nOffset!=-1)
-                        {
-                            importPosition.nHint=read_uint16(nOffset);
-                            importPosition.sName=read_ansiString(nOffset+2);
-
-                            if(importPosition.sName=="")
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        importPosition.nOrdinal=importPosition.nThunkValue&0x7FFFFFFF;
-                    }
-                }
-
-                if(importPosition.nOrdinal==0)
-                {
-                    importPosition.sFunction=importPosition.sName;
-                }
-                else
-                {
-                    importPosition.sFunction=QString("%1").arg(importPosition.nOrdinal);
-                }
-
-                if(bIs64)
-                {
-                    nThunksOffset+=8;
-                    nThunksRVA+=8;
-                    nThunksOriginalRVA+=8;
-                    nThunksOriginalOffset+=8;
-                }
-                else
-                {
-                    nThunksOffset+=4;
-                    nThunksRVA+=4;
-                    nThunksOriginalRVA+=4;
-                    nThunksOriginalOffset+=4;
-                }
-
-                importHeader.listPositions.append(importPosition);
-            }
+            importHeader.listPositions=_getImportPositions(pMemoryMap,nThunksRVA,nThunksOriginalRVA);
 
             listResult.append(importHeader);
 
             nImportOffset+=sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
         }
+    }
+
+    return listResult;
+}
+
+QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA,qint64 nRVA)
+{
+    QList<XPE::IMPORT_POSITION> listResult;
+
+    qint64 nThunksOffset=XBinary::relAddressToOffset(pMemoryMap,nThunksRVA);
+
+    bool bIs64=XBinary::is64(pMemoryMap);
+
+    while(true)
+    {
+        IMPORT_POSITION importPosition={};
+        importPosition.nThunkOffset=nThunksOffset;
+        importPosition.nThunkRVA=nThunksRVA;
+
+        if(bIs64)
+        {
+            importPosition.nThunkValue=read_uint64(nThunksOffset);
+
+            if(importPosition.nThunkValue==0)
+            {
+                break;
+            }
+
+            if(!(importPosition.nThunkValue&0x8000000000000000))
+            {
+                qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nThunkValue+pMemoryMap->nBaseAddress);
+
+                if(nOffset!=-1)
+                {
+                    importPosition.nHint=read_uint16(nOffset);
+                    importPosition.sName=read_ansiString(nOffset+2);
+
+                    if(importPosition.sName=="")
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+            else
+            {
+                importPosition.nOrdinal=importPosition.nThunkValue&0x7FFFFFFFFFFFFFFF;
+            }
+        }
+        else
+        {
+            importPosition.nThunkValue=read_uint32(nThunksOffset);
+
+            if(importPosition.nThunkValue==0)
+            {
+                break;
+            }
+
+            if(!(importPosition.nThunkValue&0x80000000))
+            {
+                qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nThunkValue+pMemoryMap->nBaseAddress);
+
+                if(nOffset!=-1)
+                {
+                    importPosition.nHint=read_uint16(nOffset);
+                    importPosition.sName=read_ansiString(nOffset+2);
+
+                    if(importPosition.sName=="")
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+            else
+            {
+                importPosition.nOrdinal=importPosition.nThunkValue&0x7FFFFFFF;
+            }
+        }
+
+        if(bIs64)
+        {
+            nThunksRVA+=8;
+            nThunksOffset+=8;
+            nRVA+=8;
+        }
+        else
+        {
+            nThunksRVA+=8;
+            nThunksOffset+=4;
+            nRVA+=4;
+        }
+
+        listResult.append(importPosition);
     }
 
     return listResult;
@@ -2390,8 +2391,6 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
     if(nImportOffset!=-1)
     {
         _MEMORY_MAP memoryMap=getMemoryMap();
-
-        bool bIs64=is64(); // TODO use mode
 
         int _nIndex=0;
 
@@ -2427,18 +2426,15 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
 
             if(iid.OriginalFirstThunk)
             {
-                nThunksRVA=iid.OriginalFirstThunk+memoryMap.nBaseAddress;
-                nThunksOffset=addressToOffset(&memoryMap,nThunksRVA);
-                //                nRVA=iid.OriginalFirstThunk;
+                nThunksRVA=iid.OriginalFirstThunk;
             }
             else if((iid.FirstThunk))
             {
-                nThunksRVA=iid.FirstThunk+memoryMap.nBaseAddress;
-                nThunksOffset=addressToOffset(&memoryMap,nThunksRVA);
-                //                nRVA=iid.FirstThunk;
+                nThunksRVA=iid.FirstThunk;
             }
 
             nRVA=iid.FirstThunk;
+            nThunksOffset=relAddressToOffset(&memoryMap,nThunksRVA);
 
             if(nThunksOffset==-1)
             {
@@ -2447,94 +2443,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
 
             if(_nIndex==nIndex)
             {
-                while(true)
-                {
-                    IMPORT_POSITION importPosition={};
-                    importPosition.nThunkOffset=nThunksOffset;
-                    importPosition.nThunkRVA=nThunksRVA;
-
-                    if(bIs64)
-                    {
-                        importPosition.nThunkValue=read_uint64(nThunksOffset);
-
-                        if(importPosition.nThunkValue==0)
-                        {
-                            break;
-                        }
-
-                        if(!(importPosition.nThunkValue&0x8000000000000000))
-                        {
-                            qint64 nOffset=addressToOffset(&memoryMap,importPosition.nThunkValue+memoryMap.nBaseAddress);
-
-                            if(nOffset!=-1)
-                            {
-                                importPosition.nHint=read_uint16(nOffset);
-                                importPosition.sName=read_ansiString(nOffset+2);
-
-                                if(importPosition.sName=="")
-                                {
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            importPosition.nOrdinal=importPosition.nThunkValue&0x7FFFFFFFFFFFFFFF;
-                        }
-                    }
-                    else
-                    {
-                        importPosition.nThunkValue=read_uint32(nThunksOffset);
-
-                        if(importPosition.nThunkValue==0)
-                        {
-                            break;
-                        }
-
-                        if(!(importPosition.nThunkValue&0x80000000))
-                        {
-                            qint64 nOffset=addressToOffset(&memoryMap,importPosition.nThunkValue+memoryMap.nBaseAddress);
-
-                            if(nOffset!=-1)
-                            {
-                                importPosition.nHint=read_uint16(nOffset);
-                                importPosition.sName=read_ansiString(nOffset+2);
-
-                                if(importPosition.sName=="")
-                                {
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            importPosition.nOrdinal=importPosition.nThunkValue&0x7FFFFFFF;
-                        }
-                    }
-
-                    if(bIs64)
-                    {
-                        nThunksRVA+=8;
-                        nThunksOffset+=8;
-                        nRVA+=8;
-                    }
-                    else
-                    {
-                        nThunksRVA+=8;
-                        nThunksOffset+=4;
-                        nRVA+=4;
-                    }
-
-                    listResult.append(importPosition);
-                }
+                listResult=_getImportPositions(&memoryMap,nThunksRVA,nRVA);
 
                 break;
             }
