@@ -253,6 +253,14 @@ public:
         QString sLibrary;
     };
 
+    struct BOUND_IMPORT_POSITION
+    {
+        qint64 nIAT;
+        qint64 nName;
+        qint64 nBoundFunction;
+        qint64 nUnloadIAT;
+    };
+
     enum TYPE
     {
         TYPE_UNKNOWN=0,
