@@ -227,17 +227,6 @@ public:
         QList<QString> listUnicodeStrings;
     };
 
-    struct NET_HEADER
-    {
-        quint32 cb;
-        quint16 MajorRuntimeVersion;
-        quint16 MinorRuntimeVersion;
-        quint32 MetaData_Address;
-        quint32 MetaData_Size;
-        quint32 Flags;
-        quint32 EntryPoint;
-    };
-
     struct IMAGE_IMPORT_DESCRIPTOR_EX
     {
         union
@@ -939,7 +928,7 @@ public:
     qint64 getNetHeaderOffset();
     qint64 getNetHeaderSize();
 
-    XPE_DEF::IMAGE_COR20_HEADER getIMAGE_COR20_HEADER();
+    XPE_DEF::IMAGE_COR20_HEADER getNetHeader();
 
     quint32 getNetHeader_cb();
     quint16 getNetHeader_MajorRuntimeVersion();
