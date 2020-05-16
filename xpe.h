@@ -930,6 +930,8 @@ public:
     qint64 getNetHeaderOffset();
     qint64 getNetHeaderSize();
 
+    XPE_DEF::IMAGE_COR20_HEADER _read_IMAGE_COR20_HEADER(qint64 nOffset);
+
     XPE_DEF::IMAGE_COR20_HEADER getNetHeader();
 
     quint32 getNetHeader_cb();
