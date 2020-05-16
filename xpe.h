@@ -371,6 +371,8 @@ public:
     void setOptionalHeader_LoaderFlags(quint32 value);
     void setOptionalHeader_NumberOfRvaAndSizes(quint32 value);
 
+    XPE_DEF::IMAGE_DATA_DIRECTORY _read_IMAGE_DATA_DIRECTORY(qint64 nOffset);
+
     XPE_DEF::IMAGE_DATA_DIRECTORY read_IMAGE_DATA_DIRECTORY(qint64 nOffset);
     void write_IMAGE_DATA_DIRECTORY(qint64 nOffset,XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
 

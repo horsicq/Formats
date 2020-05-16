@@ -6659,12 +6659,15 @@ XPE_DEF::IMAGE_COR20_HEADER XPE::getNetHeader()
         result.cb=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,cb));
         result.MajorRuntimeVersion=read_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MajorRuntimeVersion));
         result.MinorRuntimeVersion=read_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MinorRuntimeVersion));
-        result.MetaData.VirtualAddress=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MetaData.VirtualAddress));
-        result.MetaData.Size=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MetaData.Size));
+        result.MetaData=read_IMAGE_DATA_DIRECTORY(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MetaData));
         result.Flags=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Flags));
         result.EntryPointRVA=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,EntryPointRVA));
-        result.Resources.VirtualAddress=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Resources.VirtualAddress));
-        result.Resources.Size=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Resources.Size));
+        result.Resources=read_IMAGE_DATA_DIRECTORY(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Resources));
+        result.StrongNameSignature=read_IMAGE_DATA_DIRECTORY(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,StrongNameSignature));
+        result.CodeManagerTable=read_IMAGE_DATA_DIRECTORY(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,CodeManagerTable));
+        result.VTableFixups=read_IMAGE_DATA_DIRECTORY(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,VTableFixups));
+        result.ExportAddressTableJumps=read_IMAGE_DATA_DIRECTORY(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,ExportAddressTableJumps));
+        result.ManagedNativeHeader=read_IMAGE_DATA_DIRECTORY(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,ManagedNativeHeader));
     }
 
     return result;
