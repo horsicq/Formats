@@ -6648,9 +6648,9 @@ qint64 XPE::getNetHeaderSize()
     return nResult;
 }
 
-XPE::NET_HEADER XPE::getNetHeader()
+XPE_DEF::IMAGE_COR20_HEADER XPE::getIMAGE_COR20_HEADER()
 {
-    XPE::NET_HEADER result={};
+    XPE_DEF::IMAGE_COR20_HEADER result={};
 
     qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
@@ -6659,10 +6659,10 @@ XPE::NET_HEADER XPE::getNetHeader()
         result.cb=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,cb));
         result.MajorRuntimeVersion=read_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MajorRuntimeVersion));
         result.MinorRuntimeVersion=read_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MinorRuntimeVersion));
-        result.MetaData_Address=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MetaData.VirtualAddress));
-        result.MetaData_Size=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MetaData.Size));
+        result.MetaData.VirtualAddress=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MetaData.VirtualAddress));
+        result.MetaData.Size=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MetaData.Size));
         result.Flags=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Flags));
-        result.EntryPoint=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,EntryPointRVA));
+        result.EntryPointRVA=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,EntryPointRVA));
     }
 
     return result;

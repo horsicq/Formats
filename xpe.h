@@ -939,7 +939,7 @@ public:
     qint64 getNetHeaderOffset();
     qint64 getNetHeaderSize();
 
-    XPE::NET_HEADER getNetHeader();
+    XPE_DEF::IMAGE_COR20_HEADER getIMAGE_COR20_HEADER();
 
     quint32 getNetHeader_cb();
     quint16 getNetHeader_MajorRuntimeVersion();
