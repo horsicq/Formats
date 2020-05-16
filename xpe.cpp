@@ -6988,6 +6988,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
         else
         {
             // mb TODO
+            // TODO Check!
             nCLIHeaderOffset=addressToOffset(pMemoryMap,nBaseAddress+0x2008);
             result.bHidden=true;
         }
