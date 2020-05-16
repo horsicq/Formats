@@ -937,6 +937,8 @@ public:
     quint32 getNetHeader_MetaData_Size();
     quint32 getNetHeader_Flags();
     quint32 getNetHeader_EntryPoint();
+    quint32 getNetHeader_Resources_Address();
+    quint32 getNetHeader_Resources_Size();
 
     void setNetHeader_cb(quint32 value);
     void setNetHeader_MajorRuntimeVersion(quint16 value);
@@ -945,6 +947,8 @@ public:
     void setNetHeader_MetaData_Size(quint32 value);
     void setNetHeader_Flags(quint32 value);
     void setNetHeader_EntryPoint(quint32 value);
+    void setNetHeader_Resources_Address(quint32 value);
+    void setNetHeader_Resources_Size(quint32 value);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
