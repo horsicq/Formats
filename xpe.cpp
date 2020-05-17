@@ -6808,6 +6808,146 @@ quint32 XPE::getNetHeader_Resources_Size()
     return nResult;
 }
 
+quint32 XPE::getNetHeader_StrongNameSignature_Address()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,StrongNameSignature.VirtualAddress));
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getNetHeader_StrongNameSignature_Size()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,StrongNameSignature.Size));
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getNetHeader_CodeManagerTable_Address()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,CodeManagerTable.VirtualAddress));
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getNetHeader_CodeManagerTable_Size()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,CodeManagerTable.Size));
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getNetHeader_VTableFixups_Address()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,VTableFixups.VirtualAddress));
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getNetHeader_VTableFixups_Size()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,VTableFixups.Size));
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getNetHeader_ExportAddressTableJumps_Address()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,ExportAddressTableJumps.VirtualAddress));
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getNetHeader_ExportAddressTableJumps_Size()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,ExportAddressTableJumps.Size));
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getNetHeader_ManagedNativeHeader_Address()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,ManagedNativeHeader.VirtualAddress));
+    }
+
+    return nResult;
+}
+
+quint32 XPE::getNetHeader_ManagedNativeHeader_Size()
+{
+    quint32 nResult=0;
+
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,ManagedNativeHeader.Size));
+    }
+
+    return nResult;
+}
+
 void XPE::setNetHeader_cb(quint32 value)
 {
     qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
@@ -6895,6 +7035,106 @@ void XPE::setNetHeader_Resources_Size(quint32 value)
     if(nOffset!=-1)
     {
         write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Resources.Size),value);
+    }
+}
+
+void XPE::setNetHeader_StrongNameSignature_Address(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,StrongNameSignature.VirtualAddress),value);
+    }
+}
+
+void XPE::setNetHeader_StrongNameSignature_Size(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,StrongNameSignature.Size),value);
+    }
+}
+
+void XPE::setNetHeader_CodeManagerTable_Address(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,CodeManagerTable.VirtualAddress),value);
+    }
+}
+
+void XPE::setNetHeader_CodeManagerTable_Size(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,CodeManagerTable.Size),value);
+    }
+}
+
+void XPE::setNetHeader_VTableFixups_Address(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,VTableFixups.VirtualAddress),value);
+    }
+}
+
+void XPE::setNetHeader_VTableFixups_Size(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,VTableFixups.Size),value);
+    }
+}
+
+void XPE::setNetHeader_ExportAddressTableJumps_Address(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,ExportAddressTableJumps.VirtualAddress),value);
+    }
+}
+
+void XPE::setNetHeader_ExportAddressTableJumps_Size(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,ExportAddressTableJumps.Size),value);
+    }
+}
+
+void XPE::setNetHeader_ManagedNativeHeader_Address(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,ManagedNativeHeader.VirtualAddress),value);
+    }
+}
+
+void XPE::setNetHeader_ManagedNativeHeader_Size(quint32 value)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,ManagedNativeHeader.Size),value);
     }
 }
 
