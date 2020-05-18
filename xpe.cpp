@@ -6316,7 +6316,6 @@ QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList(XBinary::_
     {
         while(true)
         {
-            // TODO read function
             XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY record=_read_IMAGE_RUNTIME_FUNCTION_ENTRY(nExceptionOffset);
 
             if( record.BeginAddress&&
@@ -6338,6 +6337,22 @@ QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList(XBinary::_
     return listResult;
 }
 
+XPE_DEF::S_IMAGE_DEBUG_DIRECTORY XPE::_read_IMAGE_DEBUG_DIRECTORY(qint64 nOffset)
+{
+    XPE_DEF::S_IMAGE_DEBUG_DIRECTORY result={};
+
+    result.Characteristics=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Characteristics));
+    result.TimeDateStamp=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,TimeDateStamp));
+    result.MajorVersion=read_uint16(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MajorVersion));
+    result.MinorVersion=read_uint16(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MinorVersion));
+    result.Type=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Type));
+    result.SizeOfData=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,SizeOfData));
+    result.AddressOfRawData=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,AddressOfRawData));
+    result.PointerToRawData=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,PointerToRawData));
+
+    return result;
+}
+
 QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
@@ -6355,16 +6370,7 @@ QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList(XBinary::_MEMORY_MAP *
     {
         while(true)
         {
-            XPE_DEF::S_IMAGE_DEBUG_DIRECTORY record={};
-
-            record.Characteristics=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Characteristics));
-            record.TimeDateStamp=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,TimeDateStamp));
-            record.MajorVersion=read_uint16(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MajorVersion));
-            record.MinorVersion=read_uint16(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MinorVersion));
-            record.Type=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Type));
-            record.SizeOfData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,SizeOfData));
-            record.AddressOfRawData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,AddressOfRawData));
-            record.PointerToRawData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,PointerToRawData));
+            XPE_DEF::S_IMAGE_DEBUG_DIRECTORY record=_read_IMAGE_DEBUG_DIRECTORY(nDebugOffset);
 
             if( record.AddressOfRawData&&
                 record.PointerToRawData&&
@@ -6407,14 +6413,7 @@ XPE_DEF::S_IMAGE_DEBUG_DIRECTORY XPE::getDebugHeader(quint32 nNumber)
 
     qint64 nDebugOffset=getDebugHeaderOffset(nNumber);
 
-    result.Characteristics=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Characteristics));
-    result.TimeDateStamp=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,TimeDateStamp));
-    result.MajorVersion=read_uint16(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MajorVersion));
-    result.MinorVersion=read_uint16(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,MinorVersion));
-    result.Type=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,Type));
-    result.SizeOfData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,SizeOfData));
-    result.AddressOfRawData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,AddressOfRawData));
-    result.PointerToRawData=read_uint32(nDebugOffset+offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY,PointerToRawData));
+    result=_read_IMAGE_DEBUG_DIRECTORY(nDebugOffset);
 
     return result;
 }

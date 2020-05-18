@@ -889,6 +889,8 @@ public:
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList(XBinary::_MEMORY_MAP *pMemoryMap);
 
+    XPE_DEF::S_IMAGE_DEBUG_DIRECTORY _read_IMAGE_DEBUG_DIRECTORY(qint64 nOffset);
+
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList();
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList(XBinary::_MEMORY_MAP *pMemoryMap);
 
