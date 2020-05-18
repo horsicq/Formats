@@ -6335,9 +6335,14 @@ QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList()
 
 QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList()
 {
-    QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY>  listResult;
-
     _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getDebugList(&memoryMap);
+}
+
+QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY>  listResult;
 
     qint64 nDebugOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DEBUG);
 
@@ -6358,8 +6363,8 @@ QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList()
 
             if( record.AddressOfRawData&&
                 record.PointerToRawData&&
-                isAddressValid(&memoryMap,memoryMap.nBaseAddress+record.AddressOfRawData)&&
-                isOffsetValid(&memoryMap,record.PointerToRawData))
+                isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+record.AddressOfRawData)&&
+                isOffsetValid(pMemoryMap,record.PointerToRawData))
             {
                 listResult.append(record);
             }

@@ -889,6 +889,7 @@ public:
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
 
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList();
+    QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList(XBinary::_MEMORY_MAP *pMemoryMap);
 
     qint64 getDebugHeaderOffset(quint32 nNumber);
     qint64 getDebugHeaderSize();
