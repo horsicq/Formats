@@ -887,6 +887,7 @@ public:
     qint64 getExceptionRecordSize();
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
+    QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList(XBinary::_MEMORY_MAP *pMemoryMap);
 
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList();
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList(XBinary::_MEMORY_MAP *pMemoryMap);

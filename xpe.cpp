@@ -6301,9 +6301,14 @@ qint64 XPE::getExceptionRecordSize()
 
 QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList()
 {
-    QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> listResult;
-
     _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getExceptionsList(&memoryMap);
+}
+
+QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> listResult;
 
     qint64 nExceptionOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 
@@ -6316,8 +6321,8 @@ QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList()
 
             if( record.BeginAddress&&
                 record.EndAddress&&
-                isAddressValid(&memoryMap,memoryMap.nBaseAddress+record.BeginAddress)&&
-                isAddressValid(&memoryMap,memoryMap.nBaseAddress+record.EndAddress))
+                isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+record.BeginAddress)&&
+                isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+record.EndAddress))
             {
                 listResult.append(record);
             }
