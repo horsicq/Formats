@@ -9567,6 +9567,10 @@ QMap<quint64, QString> XPE::getDebugTypes()
     mapResult.insert(9,"IMAGE_DEBUG_TYPE_BORLAND");
     mapResult.insert(10,"IMAGE_DEBUG_TYPE_RESERVED10");
     mapResult.insert(11,"IMAGE_DEBUG_TYPE_CLSID");
+    mapResult.insert(12,"IMAGE_DEBUG_TYPE_VC_FEATURE");
+    mapResult.insert(13,"IMAGE_DEBUG_TYPE_POGO");
+    mapResult.insert(14,"IMAGE_DEBUG_TYPE_ILTCG");
+    mapResult.insert(15,"IMAGE_DEBUG_TYPE_MPX");
     mapResult.insert(16,"IMAGE_DEBUG_TYPE_REPRO");
     mapResult.insert(20,"IMAGE_DEBUG_TYPE_EX_DLLCHARACTERISTICS");
 
@@ -9589,6 +9593,10 @@ QMap<quint64, QString> XPE::getDebugTypesS()
     mapResult.insert(9,"BORLAND");
     mapResult.insert(10,"RESERVED10");
     mapResult.insert(11,"CLSID");
+    mapResult.insert(12,"VC_FEATURE");
+    mapResult.insert(13,"POGO");
+    mapResult.insert(14,"ILTCG");
+    mapResult.insert(15,"MPX");
     mapResult.insert(16,"REPRO");
     mapResult.insert(20,"EX_DLLCHARACTERISTICS");
 
