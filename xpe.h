@@ -664,6 +664,7 @@ public:
     void setTLS_Characteristics(quint32 value);
 
     QList<qint64> getTLS_CallbacksList();
+    QList<qint64> getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap);
 
     TLS_HEADER getTLSHeader();
 
@@ -912,7 +913,7 @@ public:
     qint64 getDelayImportRecordSize();
 
     QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> getDelayImportsList();
-
+    // TODO Get
     void setDelayImport_AllAttributes(quint32 nNumber,quint32 nValue);
     void setDelayImport_DllNameRVA(quint32 nNumber,quint32 nValue);
     void setDelayImport_ModuleHandleRVA(quint32 nNumber,quint32 nValue);

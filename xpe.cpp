@@ -8918,9 +8918,16 @@ void XPE::setTLS_Characteristics(quint32 value)
 
 QList<qint64> XPE::getTLS_CallbacksList()
 {
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getTLS_CallbacksList(&memoryMap);
+}
+
+QList<qint64> XPE::getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap)
+{
     QList<qint64> listResult;
 
-    qint64 nOffset=addressToOffset((qint64)getTLS_AddressOfCallBacks());
+    qint64 nOffset=addressToOffset(pMemoryMap,(qint64)getTLS_AddressOfCallBacks());
 
     if(nOffset!=-1)
     {
@@ -8941,7 +8948,7 @@ QList<qint64> XPE::getTLS_CallbacksList()
                 nOffset+=4;
             }
 
-            if(nAddress&&isAddressValid(nAddress))
+            if(nAddress&&isAddressValid(pMemoryMap,nAddress))
             {
                 listResult.append(nAddress);
             }
