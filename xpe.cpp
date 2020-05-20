@@ -7564,6 +7564,15 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
     return result;
 }
 
+bool XPE::isNetMetadataPresent(XPE::CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    bool bResult=false;
+
+    // TODO
+
+    return bResult;
+}
+
 bool XPE::isNETAnsiStringPresent(QString sString)
 {
     XPE::CLI_INFO cliInfo=getCliInfo(true);
