@@ -8678,6 +8678,7 @@ XPE_DEF::S_IMAGE_TLS_DIRECTORY32 XPE::getTLSDirectory32()
 
     if(nTLSOffset!=-1)
     {
+        // TODO read function!!!
         read_array(nTLSOffset,(char *)&result,sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32));
     }
 
@@ -8692,6 +8693,7 @@ XPE_DEF::S_IMAGE_TLS_DIRECTORY64 XPE::getTLSDirectory64()
 
     if(nTLSOffset!=-1)
     {
+        // TODO read function!!!
         read_array(nTLSOffset,(char *)&result,sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64));
     }
 
