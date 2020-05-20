@@ -7564,13 +7564,18 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
     return result;
 }
 
-bool XPE::isNetMetadataPresent(XPE::CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pMemoryMap)
+bool XPE::isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap)
 {
     bool bResult=false;
 
     // TODO
 
     return bResult;
+}
+
+bool XPE::isNetMetadataPresent(XPE::CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    return isDataDirectoryValid(&(pCliInfo->header.MetaData),pMemoryMap);
 }
 
 bool XPE::isNETAnsiStringPresent(QString sString)
