@@ -2078,14 +2078,19 @@ QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> XPE::getImportDescriptors(XBinary::_MEMO
 
 QList<XPE::IMAGE_IMPORT_DESCRIPTOR_EX> XPE::getImportDescriptorsEx()
 {
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getImportDescriptorsEx(&memoryMap);
+}
+
+QList<XPE::IMAGE_IMPORT_DESCRIPTOR_EX> XPE::getImportDescriptorsEx(XBinary::_MEMORY_MAP *pMemoryMap)
+{
     QList<IMAGE_IMPORT_DESCRIPTOR_EX> listResult;
 
     qint64 nImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 
     if(nImportOffset!=-1)
     {
-        _MEMORY_MAP memoryMap=getMemoryMap();
-
         while(true)
         {
             IMAGE_IMPORT_DESCRIPTOR_EX record={};
@@ -2096,7 +2101,7 @@ QList<XPE::IMAGE_IMPORT_DESCRIPTOR_EX> XPE::getImportDescriptorsEx()
                 break;
             }
 
-            qint64 nOffset=addressToOffset(&memoryMap,iid.Name+memoryMap.nBaseAddress);
+            qint64 nOffset=addressToOffset(pMemoryMap,iid.Name+pMemoryMap->nBaseAddress);
 
             if(nOffset!=-1)
             {

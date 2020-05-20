@@ -462,6 +462,7 @@ public:
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> getImportDescriptors();
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> getImportDescriptors(_MEMORY_MAP *pMemoryMap);
     QList<IMAGE_IMPORT_DESCRIPTOR_EX> getImportDescriptorsEx();
+    QList<IMAGE_IMPORT_DESCRIPTOR_EX> getImportDescriptorsEx(_MEMORY_MAP *pMemoryMap);
 
     XPE_DEF::IMAGE_IMPORT_DESCRIPTOR getImportDescriptor(quint32 nNumber);
     void setImportDescriptor(quint32 nNumber,XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *pImportDescriptor);
