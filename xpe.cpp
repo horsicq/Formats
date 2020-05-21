@@ -7568,7 +7568,9 @@ bool XPE::isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XB
 {
     bool bResult=false;
 
-    // TODO
+    bResult=isRelAddressValid(pMemoryMap,pDataDirectory->VirtualAddress);
+
+    // TODO morechecks
 
     return bResult;
 }
