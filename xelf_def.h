@@ -241,7 +241,7 @@ struct Elf32_Sym
     quint32 st_name;	/* String table index of name. */
     quint32 st_value;	/* Symbol value. */
     quint32 st_size;	/* Size of associated object. */
-    quint8 st_info;	/* Type and binding information. */
+    quint8 st_info;     /* Type and binding information. */
     quint8 st_other;	/* Reserved (not used). */
     quint16 st_shndx;	/* Section index of symbol. */
 };
