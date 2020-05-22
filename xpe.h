@@ -716,6 +716,7 @@ public:
 
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap);
 
+    bool isNetMetadataPresent();
     bool isNetMetadataPresent(CLI_INFO *pCliInfo,XBinary::_MEMORY_MAP *pMemoryMap);
 
     bool isNETAnsiStringPresent(QString sString);
