@@ -182,13 +182,8 @@ public:
         // TODO VarFileInfo
     };
 
-    struct CLI_INFO
+    struct CLI_METADATA
     {
-        bool bInit;
-        bool bHidden;
-        qint64 nCLIHeaderOffset;
-        XPE_DEF::IMAGE_COR20_HEADER header;
-        qint64 nCLI_MetaDataOffset;
         quint32 nCLI_MetaData_Signature;
         quint16 sCLI_MetaData_MajorVersion;
         quint16 sCLI_MetaData_MinorVersion;
@@ -225,6 +220,16 @@ public:
         qint64 nEntryPointSize;
         QList<QString> listAnsiStrings;
         QList<QString> listUnicodeStrings;
+    };
+
+    struct CLI_INFO
+    {
+        bool bInit;
+        bool bHidden;
+        qint64 nCLIHeaderOffset;
+        XPE_DEF::IMAGE_COR20_HEADER header;
+        qint64 nCLI_MetaDataOffset;
+        CLI_METADATA cliMetadata;
     };
 
     struct IMAGE_IMPORT_DESCRIPTOR_EX

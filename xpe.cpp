@@ -7262,46 +7262,46 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
             {
                 result.bInit=true;
 
-                result.nEntryPointSize=0;
-                result.nEntryPoint=result.header.EntryPointRVA;
+                result.cliMetadata.nEntryPointSize=0;
+                result.cliMetadata.nEntryPoint=result.header.EntryPointRVA;
 
                 result.nCLI_MetaDataOffset=addressToOffset(pMemoryMap,nBaseAddress+result.header.MetaData.VirtualAddress);
 
                 if(result.nCLI_MetaDataOffset!=-1)
                 {
-                    result.nCLI_MetaData_Signature=read_uint32(result.nCLI_MetaDataOffset);
+                    result.cliMetadata.nCLI_MetaData_Signature=read_uint32(result.nCLI_MetaDataOffset);
 
-                    if(result.nCLI_MetaData_Signature==0x424a5342)
+                    if(result.cliMetadata.nCLI_MetaData_Signature==0x424a5342)
                     {
                         // result.bInit=true;
-                        result.sCLI_MetaData_MajorVersion=read_uint16(result.nCLI_MetaDataOffset+4);
-                        result.sCLI_MetaData_MinorVersion=read_uint16(result.nCLI_MetaDataOffset+6);
-                        result.nCLI_MetaData_Reserved=read_uint32(result.nCLI_MetaDataOffset+8);
-                        result.nCLI_MetaData_VersionStringLength=read_uint32(result.nCLI_MetaDataOffset+12);
+                        result.cliMetadata.sCLI_MetaData_MajorVersion=read_uint16(result.nCLI_MetaDataOffset+4);
+                        result.cliMetadata.sCLI_MetaData_MinorVersion=read_uint16(result.nCLI_MetaDataOffset+6);
+                        result.cliMetadata.nCLI_MetaData_Reserved=read_uint32(result.nCLI_MetaDataOffset+8);
+                        result.cliMetadata.nCLI_MetaData_VersionStringLength=read_uint32(result.nCLI_MetaDataOffset+12);
 
-                        result.sCLI_MetaData_Version=read_ansiString(result.nCLI_MetaDataOffset+16,result.nCLI_MetaData_VersionStringLength);
-                        result.sCLI_MetaData_Flags=read_uint16(result.nCLI_MetaDataOffset+16+result.nCLI_MetaData_VersionStringLength);
-                        result.sCLI_MetaData_Streams=read_uint16(result.nCLI_MetaDataOffset+16+result.nCLI_MetaData_VersionStringLength+2);
+                        result.cliMetadata.sCLI_MetaData_Version=read_ansiString(result.nCLI_MetaDataOffset+16,result.cliMetadata.nCLI_MetaData_VersionStringLength);
+                        result.cliMetadata.sCLI_MetaData_Flags=read_uint16(result.nCLI_MetaDataOffset+16+result.cliMetadata.nCLI_MetaData_VersionStringLength);
+                        result.cliMetadata.sCLI_MetaData_Streams=read_uint16(result.nCLI_MetaDataOffset+16+result.cliMetadata.nCLI_MetaData_VersionStringLength+2);
 
-                        qint64 nOffset=result.nCLI_MetaDataOffset+20+result.nCLI_MetaData_VersionStringLength;
+                        qint64 nOffset=result.nCLI_MetaDataOffset+20+result.cliMetadata.nCLI_MetaData_VersionStringLength;
 
-                        for(int i=0; i<result.sCLI_MetaData_Streams; i++)
+                        for(int i=0; i<result.cliMetadata.sCLI_MetaData_Streams; i++)
                         {
-                            result.listCLI_MetaData_Stream_Offsets.append(read_uint32(nOffset));
-                            result.listCLI_MetaData_Stream_Sizes.append(read_uint32(nOffset+4));
-                            result.listCLI_MetaData_Stream_Names.append(read_ansiString(nOffset+8));
+                            result.cliMetadata.listCLI_MetaData_Stream_Offsets.append(read_uint32(nOffset));
+                            result.cliMetadata.listCLI_MetaData_Stream_Sizes.append(read_uint32(nOffset+4));
+                            result.cliMetadata.listCLI_MetaData_Stream_Names.append(read_ansiString(nOffset+8));
 
-                            if(result.listCLI_MetaData_Stream_Names.at(i)=="#~")
+                            if(result.cliMetadata.listCLI_MetaData_Stream_Names.at(i)=="#~")
                             {
-                                result.nCLI_MetaData_TablesHeaderOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
-                                result.nCLI_MetaData_TablesSize=result.listCLI_MetaData_Stream_Sizes.at(i);
+                                result.cliMetadata.nCLI_MetaData_TablesHeaderOffset=result.cliMetadata.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.cliMetadata.nCLI_MetaData_TablesSize=result.cliMetadata.listCLI_MetaData_Stream_Sizes.at(i);
                             }
-                            else if(result.listCLI_MetaData_Stream_Names.at(i)=="#Strings")
+                            else if(result.cliMetadata.listCLI_MetaData_Stream_Names.at(i)=="#Strings")
                             {
-                                result.nCLI_MetaData_StringsOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
-                                result.nCLI_MetaData_StringsSize=result.listCLI_MetaData_Stream_Sizes.at(i);
+                                result.cliMetadata.nCLI_MetaData_StringsOffset=result.cliMetadata.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.cliMetadata.nCLI_MetaData_StringsSize=result.cliMetadata.listCLI_MetaData_Stream_Sizes.at(i);
 
-                                QByteArray baStrings=read_array(result.nCLI_MetaData_StringsOffset,result.nCLI_MetaData_StringsSize);
+                                QByteArray baStrings=read_array(result.cliMetadata.nCLI_MetaData_StringsOffset,result.cliMetadata.nCLI_MetaData_StringsSize);
 
                                 char *_pOffset=baStrings.data();
                                 int _nSize=baStrings.size();
@@ -7310,18 +7310,18 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 {
                                     _pOffset++;
                                     QString sTemp=_pOffset;
-                                    result.listAnsiStrings.append(sTemp);
+                                    result.cliMetadata.listAnsiStrings.append(sTemp);
 
                                     _pOffset+=sTemp.size();
                                     i+=sTemp.size();
                                 }
                             }
-                            else if(result.listCLI_MetaData_Stream_Names.at(i)=="#US")
+                            else if(result.cliMetadata.listCLI_MetaData_Stream_Names.at(i)=="#US")
                             {
-                                result.nCLI_MetaData_USOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
-                                result.nCLI_MetaData_USSize=result.listCLI_MetaData_Stream_Sizes.at(i);
+                                result.cliMetadata.nCLI_MetaData_USOffset=result.cliMetadata.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.cliMetadata.nCLI_MetaData_USSize=result.cliMetadata.listCLI_MetaData_Stream_Sizes.at(i);
 
-                                QByteArray baStrings=read_array(result.nCLI_MetaData_USOffset,result.nCLI_MetaData_USSize);
+                                QByteArray baStrings=read_array(result.cliMetadata.nCLI_MetaData_USOffset,result.cliMetadata.nCLI_MetaData_USSize);
 
                                 char *_pOffset=baStrings.data();
                                 char *__pOffset=_pOffset;
@@ -7352,38 +7352,38 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                                     QString sTemp=QString::fromUtf16((ushort *)__pOffset,nStringSize/2);
 
-                                    result.listUnicodeStrings.append(sTemp);
+                                    result.cliMetadata.listUnicodeStrings.append(sTemp);
 
                                     __pOffset+=nStringSize;
                                     i+=nStringSize;
                                 }
                             }
-                            else if(result.listCLI_MetaData_Stream_Names.at(i)=="#Blob")
+                            else if(result.cliMetadata.listCLI_MetaData_Stream_Names.at(i)=="#Blob")
                             {
-                                result.nCLI_MetaData_BlobOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
-                                result.nCLI_MetaData_BlobSize=result.listCLI_MetaData_Stream_Sizes.at(i);
+                                result.cliMetadata.nCLI_MetaData_BlobOffset=result.cliMetadata.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.cliMetadata.nCLI_MetaData_BlobSize=result.cliMetadata.listCLI_MetaData_Stream_Sizes.at(i);
                             }
-                            else if(result.listCLI_MetaData_Stream_Names.at(i)=="#GUID")
+                            else if(result.cliMetadata.listCLI_MetaData_Stream_Names.at(i)=="#GUID")
                             {
-                                result.nCLI_MetaData_GUIDOffset=result.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
-                                result.nCLI_MetaData_GUIDSize=result.listCLI_MetaData_Stream_Sizes.at(i);
+                                result.cliMetadata.nCLI_MetaData_GUIDOffset=result.cliMetadata.listCLI_MetaData_Stream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.cliMetadata.nCLI_MetaData_GUIDSize=result.cliMetadata.listCLI_MetaData_Stream_Sizes.at(i);
                             }
 
                             nOffset+=8;
-                            nOffset+=S_ALIGN_UP((result.listCLI_MetaData_Stream_Names.at(i).length()+1),4);
+                            nOffset+=S_ALIGN_UP((result.cliMetadata.listCLI_MetaData_Stream_Names.at(i).length()+1),4);
                         }
 
-                        if(result.nCLI_MetaData_TablesHeaderOffset)
+                        if(result.cliMetadata.nCLI_MetaData_TablesHeaderOffset)
                         {
-                            result.nCLI_MetaData_Tables_Reserved1=read_uint32(result.nCLI_MetaData_TablesHeaderOffset);
-                            result.cCLI_MetaData_Tables_MajorVersion=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+4);
-                            result.cCLI_MetaData_Tables_MinorVersion=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+5);
-                            result.cCLI_MetaData_Tables_HeapOffsetSizes=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+6);
-                            result.cCLI_MetaData_Tables_Reserved2=read_uint8(result.nCLI_MetaData_TablesHeaderOffset+7);
-                            result.nCLI_MetaData_Tables_Valid=read_uint64(result.nCLI_MetaData_TablesHeaderOffset+8);
-                            result.nCLI_MetaData_Tables_Sorted=read_uint64(result.nCLI_MetaData_TablesHeaderOffset+16);
+                            result.cliMetadata.nCLI_MetaData_Tables_Reserved1=read_uint32(result.cliMetadata.nCLI_MetaData_TablesHeaderOffset);
+                            result.cliMetadata.cCLI_MetaData_Tables_MajorVersion=read_uint8(result.cliMetadata.nCLI_MetaData_TablesHeaderOffset+4);
+                            result.cliMetadata.cCLI_MetaData_Tables_MinorVersion=read_uint8(result.cliMetadata.nCLI_MetaData_TablesHeaderOffset+5);
+                            result.cliMetadata.cCLI_MetaData_Tables_HeapOffsetSizes=read_uint8(result.cliMetadata.nCLI_MetaData_TablesHeaderOffset+6);
+                            result.cliMetadata.cCLI_MetaData_Tables_Reserved2=read_uint8(result.cliMetadata.nCLI_MetaData_TablesHeaderOffset+7);
+                            result.cliMetadata.nCLI_MetaData_Tables_Valid=read_uint64(result.cliMetadata.nCLI_MetaData_TablesHeaderOffset+8);
+                            result.cliMetadata.nCLI_MetaData_Tables_Sorted=read_uint64(result.cliMetadata.nCLI_MetaData_TablesHeaderOffset+16);
 
-                            quint64 nValid=result.nCLI_MetaData_Tables_Valid;
+                            quint64 nValid=result.cliMetadata.nCLI_MetaData_Tables_Valid;
 
                             quint32 nTemp=0;
 
@@ -7392,15 +7392,15 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 nValid&=(nValid-1);
                             }
 
-                            result.nCLI_MetaData_Tables_Valid_NumberOfRows=nTemp;
+                            result.cliMetadata.nCLI_MetaData_Tables_Valid_NumberOfRows=nTemp;
 
-                            nOffset=result.nCLI_MetaData_TablesHeaderOffset+24;
+                            nOffset=result.cliMetadata.nCLI_MetaData_TablesHeaderOffset+24;
 
                             for(int i=0; i<64; i++)
                             {
-                                if(result.nCLI_MetaData_Tables_Valid&((unsigned long long)1<<i))
+                                if(result.cliMetadata.nCLI_MetaData_Tables_Valid&((unsigned long long)1<<i))
                                 {
-                                    result.CLI_MetaData_Tables_TablesNumberOfIndexes[i]=read_uint32(nOffset);
+                                    result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[i]=read_uint32(nOffset);
                                     nOffset+=4;
                                 }
                             }
@@ -7415,7 +7415,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             int nMethodDef=2;
                             int nParamList=2;
 
-                            quint8 cHeapOffsetSizes=result.cCLI_MetaData_Tables_HeapOffsetSizes;
+                            quint8 cHeapOffsetSizes=result.cliMetadata.cCLI_MetaData_Tables_HeapOffsetSizes;
 
                             if(cHeapOffsetSizes&0x01)
                             {
@@ -7433,52 +7433,52 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             }
 
                             // TODO !!!
-                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[0]>0x3FFF)
+                            if(result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[0]>0x3FFF)
                             {
                                 nResolutionScope=4;
                             }
 
-                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[26]>0x3FFF)
+                            if(result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[26]>0x3FFF)
                             {
                                 nResolutionScope=4;
                             }
 
-                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[35]>0x3FFF)
+                            if(result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[35]>0x3FFF)
                             {
                                 nResolutionScope=4;
                             }
 
-                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[1]>0x3FFF)
+                            if(result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[1]>0x3FFF)
                             {
                                 nResolutionScope=4;
                             }
 
-                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[1]>0x3FFF)
+                            if(result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[1]>0x3FFF)
                             {
                                 nTypeDefOrRef=4;
                             }
 
-                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[2]>0x3FFF)
+                            if(result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[2]>0x3FFF)
                             {
                                 nTypeDefOrRef=4;
                             }
 
-                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[27]>0x3FFF)
+                            if(result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[27]>0x3FFF)
                             {
                                 nTypeDefOrRef=4;
                             }
 
-                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[4]>0xFFFF)
+                            if(result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[4]>0xFFFF)
                             {
                                 nField=4;
                             }
 
-                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[6]>0xFFFF)
+                            if(result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[6]>0xFFFF)
                             {
                                 nMethodDef=4;
                             }
 
-                            if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[8]>0xFFFF)
+                            if(result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[8]>0xFFFF)
                             {
                                 nParamList=4;
                             }
@@ -7489,12 +7489,12 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             nSize+=nGUIDIndexSize;
                             nSize+=nGUIDIndexSize;
                             nSize+=nGUIDIndexSize;
-                            result.CLI_MetaData_Tables_TablesSizes[0]=nSize;
+                            result.cliMetadata.CLI_MetaData_Tables_TablesSizes[0]=nSize;
                             nSize=0;
                             nSize+=nResolutionScope;
                             nSize+=nStringIndexSize;
                             nSize+=nStringIndexSize;
-                            result.CLI_MetaData_Tables_TablesSizes[1]=nSize;
+                            result.cliMetadata.CLI_MetaData_Tables_TablesSizes[1]=nSize;
                             nSize=0;
                             nSize+=4;
                             nSize+=nStringIndexSize;
@@ -7502,16 +7502,16 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             nSize+=nTypeDefOrRef;
                             nSize+=nField;
                             nSize+=nMethodDef;
-                            result.CLI_MetaData_Tables_TablesSizes[2]=nSize;
+                            result.cliMetadata.CLI_MetaData_Tables_TablesSizes[2]=nSize;
                             nSize=0;
-                            result.CLI_MetaData_Tables_TablesSizes[3]=nSize;
+                            result.cliMetadata.CLI_MetaData_Tables_TablesSizes[3]=nSize;
                             nSize=0;
                             nSize+=2;
                             nSize+=nStringIndexSize;
                             nSize+=nBLOBIndexSize;
-                            result.CLI_MetaData_Tables_TablesSizes[4]=nSize;
+                            result.cliMetadata.CLI_MetaData_Tables_TablesSizes[4]=nSize;
                             nSize=0;
-                            result.CLI_MetaData_Tables_TablesSizes[5]=nSize;
+                            result.cliMetadata.CLI_MetaData_Tables_TablesSizes[5]=nSize;
                             nSize=0;
                             nSize+=4;
                             nSize+=2;
@@ -7519,38 +7519,38 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             nSize+=nStringIndexSize;
                             nSize+=nBLOBIndexSize;
                             nSize+=nParamList;
-                            result.CLI_MetaData_Tables_TablesSizes[6]=nSize;
+                            result.cliMetadata.CLI_MetaData_Tables_TablesSizes[6]=nSize;
 
                             for(int i=0; i<64; i++)
                             {
-                                if(result.CLI_MetaData_Tables_TablesNumberOfIndexes[i])
+                                if(result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[i])
                                 {
-                                    result.CLI_MetaData_Tables_TablesOffsets[i]=nOffset;
-                                    nOffset+=result.CLI_MetaData_Tables_TablesSizes[i]*result.CLI_MetaData_Tables_TablesNumberOfIndexes[i];
+                                    result.cliMetadata.CLI_MetaData_Tables_TablesOffsets[i]=nOffset;
+                                    nOffset+=result.cliMetadata.CLI_MetaData_Tables_TablesSizes[i]*result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[i];
                                 }
                             }
 
                             if(!(result.header.Flags&XPE_DEF::COMIMAGE_FLAGS_NATIVE_ENTRYPOINT))
                             {
-                                if(((result.nEntryPoint&0xFF000000)>>24)==6)
+                                if(((result.cliMetadata.nEntryPoint&0xFF000000)>>24)==6)
                                 {
-                                    unsigned int nIndex=result.nEntryPoint&0xFFFFFF;
+                                    unsigned int nIndex=result.cliMetadata.nEntryPoint&0xFFFFFF;
 
-                                    if(nIndex<=result.CLI_MetaData_Tables_TablesNumberOfIndexes[6])
+                                    if(nIndex<=result.cliMetadata.CLI_MetaData_Tables_TablesNumberOfIndexes[6])
                                     {
-                                        nOffset=result.CLI_MetaData_Tables_TablesOffsets[6];
-                                        nOffset+=result.CLI_MetaData_Tables_TablesSizes[6]*(nIndex-1);
+                                        nOffset=result.cliMetadata.CLI_MetaData_Tables_TablesOffsets[6];
+                                        nOffset+=result.cliMetadata.CLI_MetaData_Tables_TablesSizes[6]*(nIndex-1);
 
-                                        result.nEntryPoint=read_uint32(nOffset);
+                                        result.cliMetadata.nEntryPoint=read_uint32(nOffset);
                                     }
                                     else
                                     {
-                                        result.nEntryPoint=0;
+                                        result.cliMetadata.nEntryPoint=0;
                                     }
                                 }
                                 else
                                 {
-                                    result.nEntryPoint=0;
+                                    result.cliMetadata.nEntryPoint=0;
                                 }
                             }
                         }
@@ -7597,7 +7597,7 @@ bool XPE::isNETAnsiStringPresent(QString sString)
 
 bool XPE::isNETAnsiStringPresent(QString sString, XPE::CLI_INFO *pCliInfo)
 {
-    return pCliInfo->listAnsiStrings.contains(sString);
+    return pCliInfo->cliMetadata.listAnsiStrings.contains(sString);
 }
 
 bool XPE::isNETUnicodeStringPresent(QString sString)
@@ -7609,7 +7609,7 @@ bool XPE::isNETUnicodeStringPresent(QString sString)
 
 bool XPE::isNETUnicodeStringPresent(QString sString, XPE::CLI_INFO *pCliInfo)
 {
-    return pCliInfo->listUnicodeStrings.contains(sString);
+    return pCliInfo->cliMetadata.listUnicodeStrings.contains(sString);
 }
 
 int XPE::getEntryPointSection()
