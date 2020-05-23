@@ -7271,12 +7271,12 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                 {
                     result.cliMetadata.header=_read_MetadataHeader(result.nCLI_MetaDataOffset);
 
-                    if(result.cliMetadata.header.nCLI_MetaData_Signature==0x424a5342)
+                    if(result.cliMetadata.header.nSignature==0x424a5342)
                     {
                         // result.bInit=true;
-                        qint64 nOffset=result.nCLI_MetaDataOffset+20+result.cliMetadata.header.nCLI_MetaData_VersionStringLength;
+                        qint64 nOffset=result.nCLI_MetaDataOffset+20+result.cliMetadata.header.nVersionStringLength;
 
-                        for(int i=0; i<result.cliMetadata.header.sCLI_MetaData_Streams; i++)
+                        for(int i=0; i<result.cliMetadata.header.nStreams; i++)
                         {
                             result.cliMetadata.listCLI_MetaData_Stream_Offsets.append(read_uint32(nOffset));
                             result.cliMetadata.listCLI_MetaData_Stream_Sizes.append(read_uint32(nOffset+4));
@@ -7594,14 +7594,14 @@ XPE::CLI_METADATA_HEADER XPE::_read_MetadataHeader(qint64 nOffset)
 {
     XPE::CLI_METADATA_HEADER result={};
 
-    result.nCLI_MetaData_Signature=read_uint32(nOffset);
-    result.sCLI_MetaData_MajorVersion=read_uint16(nOffset+4);
-    result.sCLI_MetaData_MinorVersion=read_uint16(nOffset+6);
-    result.nCLI_MetaData_Reserved=read_uint32(nOffset+8);
-    result.nCLI_MetaData_VersionStringLength=read_uint32(nOffset+12);
-    result.sCLI_MetaData_Version=read_ansiString(nOffset+16,result.nCLI_MetaData_VersionStringLength);
-    result.sCLI_MetaData_Flags=read_uint16(nOffset+16+result.nCLI_MetaData_VersionStringLength);
-    result.sCLI_MetaData_Streams=read_uint16(nOffset+16+result.nCLI_MetaData_VersionStringLength+2);
+    result.nSignature=read_uint32(nOffset);
+    result.nMajorVersion=read_uint16(nOffset+4);
+    result.nMinorVersion=read_uint16(nOffset+6);
+    result.nReserved=read_uint32(nOffset+8);
+    result.nVersionStringLength=read_uint32(nOffset+12);
+    result.sVersion=read_ansiString(nOffset+16,result.nVersionStringLength);
+    result.nFlags=read_uint16(nOffset+16+result.nVersionStringLength);
+    result.nStreams=read_uint16(nOffset+16+result.nVersionStringLength+2);
 
     return result;
 }

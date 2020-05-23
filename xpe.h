@@ -184,14 +184,14 @@ public:
 
     struct CLI_METADATA_HEADER
     {
-        quint32 nCLI_MetaData_Signature;
-        quint16 sCLI_MetaData_MajorVersion;
-        quint16 sCLI_MetaData_MinorVersion;
-        quint32 nCLI_MetaData_Reserved;
-        quint32 nCLI_MetaData_VersionStringLength;
-        QString sCLI_MetaData_Version;
-        quint16 sCLI_MetaData_Flags;
-        quint16 sCLI_MetaData_Streams;
+        quint32 nSignature;
+        quint16 nMajorVersion;
+        quint16 nMinorVersion;
+        quint32 nReserved;
+        quint32 nVersionStringLength;
+        QString sVersion;
+        quint16 nFlags;
+        quint16 nStreams;
     };
 
     struct CLI_METADATA
