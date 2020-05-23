@@ -7555,6 +7555,15 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
     return result;
 }
 
+qint64 XPE::getNet_MetadataOffset()
+{
+    qint64 nResult=-1;
+
+    // TODO
+
+    return nResult;
+}
+
 XPE::CLI_METADATA_HEADER XPE::_read_MetadataHeader(qint64 nOffset)
 {
     XPE::CLI_METADATA_HEADER result={};
