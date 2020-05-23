@@ -7254,9 +7254,9 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
         if(nCLIHeaderOffset!=-1)
         {
-            result.nCLIHeaderOffset=nCLIHeaderOffset;
+            result.nHeaderOffset=nCLIHeaderOffset;
 
-            result.header=_read_IMAGE_COR20_HEADER(result.nCLIHeaderOffset);
+            result.header=_read_IMAGE_COR20_HEADER(result.nHeaderOffset);
 
             if((result.header.cb==0x48)&&result.header.MetaData.VirtualAddress&&result.header.MetaData.Size)
             {
@@ -7265,16 +7265,16 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                 result.cliMetadata.nEntryPointSize=0;
                 result.cliMetadata.nEntryPoint=result.header.EntryPointRVA;
 
-                result.nCLI_MetaDataOffset=addressToOffset(pMemoryMap,nBaseAddress+result.header.MetaData.VirtualAddress);
+                result.nMetaDataOffset=addressToOffset(pMemoryMap,nBaseAddress+result.header.MetaData.VirtualAddress);
 
-                if(result.nCLI_MetaDataOffset!=-1)
+                if(result.nMetaDataOffset!=-1)
                 {
-                    result.cliMetadata.header=_read_MetadataHeader(result.nCLI_MetaDataOffset);
+                    result.cliMetadata.header=_read_MetadataHeader(result.nMetaDataOffset);
 
                     if(result.cliMetadata.header.nSignature==0x424a5342)
                     {
                         // result.bInit=true;
-                        qint64 nOffset=result.nCLI_MetaDataOffset+20+result.cliMetadata.header.nVersionStringLength;
+                        qint64 nOffset=result.nMetaDataOffset+20+result.cliMetadata.header.nVersionStringLength;
 
                         for(int i=0; i<result.cliMetadata.header.nStreams; i++)
                         {
@@ -7284,12 +7284,12 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                             if(result.cliMetadata.listStream_Names.at(i)=="#~")
                             {
-                                result.cliMetadata.nTablesHeaderOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.cliMetadata.nTablesHeaderOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nMetaDataOffset;
                                 result.cliMetadata.nTablesSize=result.cliMetadata.listStream_Sizes.at(i);
                             }
                             else if(result.cliMetadata.listStream_Names.at(i)=="#Strings")
                             {
-                                result.cliMetadata.nStringsOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.cliMetadata.nStringsOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nMetaDataOffset;
                                 result.cliMetadata.nStringsSize=result.cliMetadata.listStream_Sizes.at(i);
 
                                 QByteArray baStrings=read_array(result.cliMetadata.nStringsOffset,result.cliMetadata.nStringsSize);
@@ -7309,7 +7309,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             }
                             else if(result.cliMetadata.listStream_Names.at(i)=="#US")
                             {
-                                result.cliMetadata.nUSOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.cliMetadata.nUSOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nMetaDataOffset;
                                 result.cliMetadata.nUSSize=result.cliMetadata.listStream_Sizes.at(i);
 
                                 QByteArray baStrings=read_array(result.cliMetadata.nUSOffset,result.cliMetadata.nUSSize);
@@ -7351,12 +7351,12 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             }
                             else if(result.cliMetadata.listStream_Names.at(i)=="#Blob")
                             {
-                                result.cliMetadata.nBlobOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.cliMetadata.nBlobOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nMetaDataOffset;
                                 result.cliMetadata.nBlobSize=result.cliMetadata.listStream_Sizes.at(i);
                             }
                             else if(result.cliMetadata.listStream_Names.at(i)=="#GUID")
                             {
-                                result.cliMetadata.nGUIDOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nCLI_MetaDataOffset;
+                                result.cliMetadata.nGUIDOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nMetaDataOffset;
                                 result.cliMetadata.nGUIDSize=result.cliMetadata.listStream_Sizes.at(i);
                             }
 
