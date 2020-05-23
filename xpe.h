@@ -724,6 +724,8 @@ public:
     CLI_INFO getCliInfo(bool bFindHidden);
     CLI_INFO getCliInfo(bool bFindHidden,XBinary::_MEMORY_MAP *pMemoryMap);
 
+    OFFSETSIZE getNet_MetadataOffsetSize();
+
     CLI_METADATA_HEADER _read_MetadataHeader(qint64 nOffset);
 
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap);

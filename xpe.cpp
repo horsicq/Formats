@@ -7234,7 +7234,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
     if(isNETPresent()||bFindHidden)
     {
-        qint64 nBaseAddress=_getBaseAddress();
+        qint64 nBaseAddress=pMemoryMap->nBaseAddress;
 
         qint64 nCLIHeaderOffset=-1;
 
@@ -7555,13 +7555,39 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
     return result;
 }
 
-qint64 XPE::getNet_MetadataOffset()
+XBinary::OFFSETSIZE XPE::getNet_MetadataOffsetSize()
 {
-    qint64 nResult=-1;
+    OFFSETSIZE result={};
 
-    // TODO
+    _MEMORY_MAP memoryMap=getMemoryMap();
 
-    return nResult;
+    qint64 nCLIHeaderOffset=-1;
+
+    if(isNETPresent())
+    {
+        XPE_DEF::IMAGE_DATA_DIRECTORY _idd=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+
+        nCLIHeaderOffset=relAddressToOffset(&memoryMap,_idd.VirtualAddress);
+    }
+    else
+    {
+        // mb TODO
+        // TODO Check!
+        nCLIHeaderOffset=addressToOffset(&memoryMap,memoryMap.nBaseAddress+0x2008);
+    }
+
+    if(nCLIHeaderOffset!=-1)
+    {
+        XPE_DEF::IMAGE_COR20_HEADER header=_read_IMAGE_COR20_HEADER(nCLIHeaderOffset);
+
+        if((header.cb==0x48)&&header.MetaData.VirtualAddress&&header.MetaData.Size)
+        {
+            result.nOffset=relAddressToOffset(&memoryMap,header.MetaData.VirtualAddress);
+            result.nSize=header.MetaData.VirtualAddress;
+        }
+    }
+
+    return result;
 }
 
 XPE::CLI_METADATA_HEADER XPE::_read_MetadataHeader(qint64 nOffset)
