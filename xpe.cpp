@@ -7269,20 +7269,11 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                 if(result.nCLI_MetaDataOffset!=-1)
                 {
-                    result.cliMetadata.header.nCLI_MetaData_Signature=read_uint32(result.nCLI_MetaDataOffset);
+                    result.cliMetadata.header=_read_MetadataHeader(result.nCLI_MetaDataOffset);
 
                     if(result.cliMetadata.header.nCLI_MetaData_Signature==0x424a5342)
                     {
                         // result.bInit=true;
-                        result.cliMetadata.header.sCLI_MetaData_MajorVersion=read_uint16(result.nCLI_MetaDataOffset+4);
-                        result.cliMetadata.header.sCLI_MetaData_MinorVersion=read_uint16(result.nCLI_MetaDataOffset+6);
-                        result.cliMetadata.header.nCLI_MetaData_Reserved=read_uint32(result.nCLI_MetaDataOffset+8);
-                        result.cliMetadata.header.nCLI_MetaData_VersionStringLength=read_uint32(result.nCLI_MetaDataOffset+12);
-
-                        result.cliMetadata.header.sCLI_MetaData_Version=read_ansiString(result.nCLI_MetaDataOffset+16,result.cliMetadata.header.nCLI_MetaData_VersionStringLength);
-                        result.cliMetadata.header.sCLI_MetaData_Flags=read_uint16(result.nCLI_MetaDataOffset+16+result.cliMetadata.header.nCLI_MetaData_VersionStringLength);
-                        result.cliMetadata.header.sCLI_MetaData_Streams=read_uint16(result.nCLI_MetaDataOffset+16+result.cliMetadata.header.nCLI_MetaData_VersionStringLength+2);
-
                         qint64 nOffset=result.nCLI_MetaDataOffset+20+result.cliMetadata.header.nCLI_MetaData_VersionStringLength;
 
                         for(int i=0; i<result.cliMetadata.header.sCLI_MetaData_Streams; i++)
@@ -7561,6 +7552,22 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
     }
 
     //    emit appendError(".NET is not present");
+    return result;
+}
+
+XPE::CLI_METADATA_HEADER XPE::_read_MetadataHeader(qint64 nOffset)
+{
+    XPE::CLI_METADATA_HEADER result={};
+
+    result.nCLI_MetaData_Signature=read_uint32(nOffset);
+    result.sCLI_MetaData_MajorVersion=read_uint16(nOffset+4);
+    result.sCLI_MetaData_MinorVersion=read_uint16(nOffset+6);
+    result.nCLI_MetaData_Reserved=read_uint32(nOffset+8);
+    result.nCLI_MetaData_VersionStringLength=read_uint32(nOffset+12);
+    result.sCLI_MetaData_Version=read_ansiString(nOffset+16,result.nCLI_MetaData_VersionStringLength);
+    result.sCLI_MetaData_Flags=read_uint16(nOffset+16+result.nCLI_MetaData_VersionStringLength);
+    result.sCLI_MetaData_Streams=read_uint16(nOffset+16+result.nCLI_MetaData_VersionStringLength+2);
+
     return result;
 }
 
