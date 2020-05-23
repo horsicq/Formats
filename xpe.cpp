@@ -7269,23 +7269,23 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                 if(result.nCLI_MetaDataOffset!=-1)
                 {
-                    result.cliMetadata.nCLI_MetaData_Signature=read_uint32(result.nCLI_MetaDataOffset);
+                    result.cliMetadata.header.nCLI_MetaData_Signature=read_uint32(result.nCLI_MetaDataOffset);
 
-                    if(result.cliMetadata.nCLI_MetaData_Signature==0x424a5342)
+                    if(result.cliMetadata.header.nCLI_MetaData_Signature==0x424a5342)
                     {
                         // result.bInit=true;
-                        result.cliMetadata.sCLI_MetaData_MajorVersion=read_uint16(result.nCLI_MetaDataOffset+4);
-                        result.cliMetadata.sCLI_MetaData_MinorVersion=read_uint16(result.nCLI_MetaDataOffset+6);
-                        result.cliMetadata.nCLI_MetaData_Reserved=read_uint32(result.nCLI_MetaDataOffset+8);
-                        result.cliMetadata.nCLI_MetaData_VersionStringLength=read_uint32(result.nCLI_MetaDataOffset+12);
+                        result.cliMetadata.header.sCLI_MetaData_MajorVersion=read_uint16(result.nCLI_MetaDataOffset+4);
+                        result.cliMetadata.header.sCLI_MetaData_MinorVersion=read_uint16(result.nCLI_MetaDataOffset+6);
+                        result.cliMetadata.header.nCLI_MetaData_Reserved=read_uint32(result.nCLI_MetaDataOffset+8);
+                        result.cliMetadata.header.nCLI_MetaData_VersionStringLength=read_uint32(result.nCLI_MetaDataOffset+12);
 
-                        result.cliMetadata.sCLI_MetaData_Version=read_ansiString(result.nCLI_MetaDataOffset+16,result.cliMetadata.nCLI_MetaData_VersionStringLength);
-                        result.cliMetadata.sCLI_MetaData_Flags=read_uint16(result.nCLI_MetaDataOffset+16+result.cliMetadata.nCLI_MetaData_VersionStringLength);
-                        result.cliMetadata.sCLI_MetaData_Streams=read_uint16(result.nCLI_MetaDataOffset+16+result.cliMetadata.nCLI_MetaData_VersionStringLength+2);
+                        result.cliMetadata.header.sCLI_MetaData_Version=read_ansiString(result.nCLI_MetaDataOffset+16,result.cliMetadata.header.nCLI_MetaData_VersionStringLength);
+                        result.cliMetadata.header.sCLI_MetaData_Flags=read_uint16(result.nCLI_MetaDataOffset+16+result.cliMetadata.header.nCLI_MetaData_VersionStringLength);
+                        result.cliMetadata.header.sCLI_MetaData_Streams=read_uint16(result.nCLI_MetaDataOffset+16+result.cliMetadata.header.nCLI_MetaData_VersionStringLength+2);
 
-                        qint64 nOffset=result.nCLI_MetaDataOffset+20+result.cliMetadata.nCLI_MetaData_VersionStringLength;
+                        qint64 nOffset=result.nCLI_MetaDataOffset+20+result.cliMetadata.header.nCLI_MetaData_VersionStringLength;
 
-                        for(int i=0; i<result.cliMetadata.sCLI_MetaData_Streams; i++)
+                        for(int i=0; i<result.cliMetadata.header.sCLI_MetaData_Streams; i++)
                         {
                             result.cliMetadata.listCLI_MetaData_Stream_Offsets.append(read_uint32(nOffset));
                             result.cliMetadata.listCLI_MetaData_Stream_Sizes.append(read_uint32(nOffset+4));

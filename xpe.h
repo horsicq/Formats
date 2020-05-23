@@ -182,7 +182,7 @@ public:
         // TODO VarFileInfo
     };
 
-    struct CLI_METADATA
+    struct CLI_METADATA_HEADER
     {
         quint32 nCLI_MetaData_Signature;
         quint16 sCLI_MetaData_MajorVersion;
@@ -192,6 +192,11 @@ public:
         QString sCLI_MetaData_Version;
         quint16 sCLI_MetaData_Flags;
         quint16 sCLI_MetaData_Streams;
+    };
+
+    struct CLI_METADATA
+    {
+        CLI_METADATA_HEADER header;
         QList <qint64> listCLI_MetaData_Stream_Offsets;
         QList <qint64> listCLI_MetaData_Stream_Sizes;
         QList <QString> listCLI_MetaData_Stream_Names;
