@@ -7558,6 +7558,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 XBinary::OFFSETSIZE XPE::getNet_MetadataOffsetSize()
 {
     OFFSETSIZE result={};
+    result.nOffset=-1;
 
     _MEMORY_MAP memoryMap=getMemoryMap();
 
@@ -7604,6 +7605,16 @@ XPE::CLI_METADATA_HEADER XPE::_read_MetadataHeader(qint64 nOffset)
     result.nStreams=read_uint16(nOffset+16+result.nVersionStringLength+2);
 
     return result;
+}
+
+void XPE::setMetadataHeader_Signature(quint32 value)
+{
+    qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+0,value);
+    }
 }
 
 bool XPE::isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap)
