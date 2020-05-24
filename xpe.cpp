@@ -7676,12 +7676,26 @@ void XPE::setMetadataHeader_Version(QString value)
 
 void XPE::setMetadataHeader_Flags(quint16 value)
 {
-    // TODO
+    qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
+
+    if(nOffset!=-1)
+    {
+        quint32 nVersionStringLength=read_uint32(nOffset+12);
+
+        write_uint16(nOffset+16+nVersionStringLength,value);
+    }
 }
 
 void XPE::setMetadataHeader_Streams(quint16 value)
 {
-    // TODO
+    qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
+
+    if(nOffset!=-1)
+    {
+        quint32 nVersionStringLength=read_uint32(nOffset+12);
+
+        write_uint16(nOffset+16+nVersionStringLength+2,value);
+    }
 }
 
 bool XPE::isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap)
