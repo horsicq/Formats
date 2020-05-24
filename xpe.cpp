@@ -7617,6 +7617,61 @@ void XPE::setMetadataHeader_Signature(quint32 value)
     }
 }
 
+void XPE::setMetadataHeader_MajorVersion(quint16 value)
+{
+    qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+4,value);
+    }
+}
+
+void XPE::setMetadataHeader_MinorVersion(quint16 value)
+{
+    qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint16(nOffset+6,value);
+    }
+}
+
+void XPE::setMetadataHeader_Reserved(quint32 value)
+{
+    qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+8,value);
+    }
+}
+
+void XPE::setMetadataHeader_VersionStringLength(quint32 value)
+{
+    qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
+
+    if(nOffset!=-1)
+    {
+        write_uint32(nOffset+12,value);
+    }
+}
+
+void XPE::setMetadataHeader_Version(QString value)
+{
+    // TODO
+}
+
+void XPE::setMetadataHeader_Flags(quint16 value)
+{
+    // TODO
+}
+
+void XPE::setMetadataHeader_Streams(quint16 value)
+{
+    // TODO
+}
+
 bool XPE::isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap)
 {
     bool bResult=false;

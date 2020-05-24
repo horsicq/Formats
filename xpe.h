@@ -727,16 +727,15 @@ public:
     OFFSETSIZE getNet_MetadataOffsetSize();
 
     CLI_METADATA_HEADER _read_MetadataHeader(qint64 nOffset);
-    void setMetadataHeader_Signature(quint32 value);
 
-//    quint32 n;
-//    quint16 nMajorVersion;
-//    quint16 nMinorVersion;
-//    quint32 nReserved;
-//    quint32 nVersionStringLength;
-//    QString sVersion;
-//    quint16 nFlags;
-//    quint16 nStreams;
+    void setMetadataHeader_Signature(quint32 value);
+    void setMetadataHeader_MajorVersion(quint16 value);
+    void setMetadataHeader_MinorVersion(quint16 value);
+    void setMetadataHeader_Reserved(quint32 value);
+    void setMetadataHeader_VersionStringLength(quint32 value);
+    void setMetadataHeader_Version(QString value);
+    void setMetadataHeader_Flags(quint16 value);
+    void setMetadataHeader_Streams(quint16 value);
 
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap);
 
