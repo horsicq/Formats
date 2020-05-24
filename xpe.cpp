@@ -7659,7 +7659,19 @@ void XPE::setMetadataHeader_VersionStringLength(quint32 value)
 
 void XPE::setMetadataHeader_Version(QString value)
 {
-    // TODO
+    qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
+
+    if(nOffset!=-1)
+    {
+        quint32 nVersionStringLength=read_uint32(nOffset+12);
+
+        if(value.size()>nVersionStringLength)
+        {
+            value.resize(nVersionStringLength);
+        }
+
+        write_ansiString(nOffset+16,value);
+    }
 }
 
 void XPE::setMetadataHeader_Flags(quint16 value)
