@@ -7278,19 +7278,23 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                         for(int i=0; i<result.cliMetadata.header.nStreams; i++)
                         {
-                            result.cliMetadata.listStream_Offsets.append(read_uint32(nOffset));
-                            result.cliMetadata.listStream_Sizes.append(read_uint32(nOffset+4));
-                            result.cliMetadata.listStream_Names.append(read_ansiString(nOffset+8));
+                            CLI_METADATA_STREAM stream={};
 
-                            if(result.cliMetadata.listStream_Names.at(i)=="#~")
+                            stream.nOffset=read_uint32(nOffset+0);
+                            stream.nSize=read_uint32(nOffset+4);
+                            stream.sName=read_ansiString(nOffset+8);
+
+                            result.cliMetadata.listStreams.append(stream);
+
+                            if(result.cliMetadata.listStreams.at(i).sName=="#~")
                             {
-                                result.cliMetadata.nTablesHeaderOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nMetaDataOffset;
-                                result.cliMetadata.nTablesSize=result.cliMetadata.listStream_Sizes.at(i);
+                                result.cliMetadata.nTablesHeaderOffset=result.cliMetadata.listStreams.at(i).nOffset+result.nMetaDataOffset;
+                                result.cliMetadata.nTablesSize=result.cliMetadata.listStreams.at(i).nSize;
                             }
-                            else if(result.cliMetadata.listStream_Names.at(i)=="#Strings")
+                            else if(result.cliMetadata.listStreams.at(i).sName=="#Strings")
                             {
-                                result.cliMetadata.nStringsOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nMetaDataOffset;
-                                result.cliMetadata.nStringsSize=result.cliMetadata.listStream_Sizes.at(i);
+                                result.cliMetadata.nStringsOffset=result.cliMetadata.listStreams.at(i).nOffset+result.nMetaDataOffset;
+                                result.cliMetadata.nStringsSize=result.cliMetadata.listStreams.at(i).nSize;
 
                                 QByteArray baStrings=read_array(result.cliMetadata.nStringsOffset,result.cliMetadata.nStringsSize);
 
@@ -7307,10 +7311,10 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                     i+=sTemp.size();
                                 }
                             }
-                            else if(result.cliMetadata.listStream_Names.at(i)=="#US")
+                            else if(result.cliMetadata.listStreams.at(i).sName=="#US")
                             {
-                                result.cliMetadata.nUSOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nMetaDataOffset;
-                                result.cliMetadata.nUSSize=result.cliMetadata.listStream_Sizes.at(i);
+                                result.cliMetadata.nUSOffset=result.cliMetadata.listStreams.at(i).nOffset+result.nMetaDataOffset;
+                                result.cliMetadata.nUSSize=result.cliMetadata.listStreams.at(i).nSize;
 
                                 QByteArray baStrings=read_array(result.cliMetadata.nUSOffset,result.cliMetadata.nUSSize);
 
@@ -7349,19 +7353,19 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                     i+=nStringSize;
                                 }
                             }
-                            else if(result.cliMetadata.listStream_Names.at(i)=="#Blob")
+                            else if(result.cliMetadata.listStreams.at(i).sName=="#Blob")
                             {
-                                result.cliMetadata.nBlobOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nMetaDataOffset;
-                                result.cliMetadata.nBlobSize=result.cliMetadata.listStream_Sizes.at(i);
+                                result.cliMetadata.nBlobOffset=result.cliMetadata.listStreams.at(i).nOffset+result.nMetaDataOffset;
+                                result.cliMetadata.nBlobSize=result.cliMetadata.listStreams.at(i).nSize;
                             }
-                            else if(result.cliMetadata.listStream_Names.at(i)=="#GUID")
+                            else if(result.cliMetadata.listStreams.at(i).sName=="#GUID")
                             {
-                                result.cliMetadata.nGUIDOffset=result.cliMetadata.listStream_Offsets.at(i)+result.nMetaDataOffset;
-                                result.cliMetadata.nGUIDSize=result.cliMetadata.listStream_Sizes.at(i);
+                                result.cliMetadata.nGUIDOffset=result.cliMetadata.listStreams.at(i).nOffset+result.nMetaDataOffset;
+                                result.cliMetadata.nGUIDSize=result.cliMetadata.listStreams.at(i).nSize;
                             }
 
                             nOffset+=8;
-                            nOffset+=S_ALIGN_UP((result.cliMetadata.listStream_Names.at(i).length()+1),4);
+                            nOffset+=S_ALIGN_UP((result.cliMetadata.listStreams.at(i).sName.length()+1),4);
                         }
 
                         if(result.cliMetadata.nTablesHeaderOffset)

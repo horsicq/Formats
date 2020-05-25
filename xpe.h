@@ -194,12 +194,17 @@ public:
         quint16 nStreams;
     };
 
+    struct CLI_METADATA_STREAM
+    {
+        qint64 nOffset;
+        qint64 nSize;
+        QString sName;
+    };
+
     struct CLI_METADATA
     {
         CLI_METADATA_HEADER header;
-        QList <qint64> listStream_Offsets; // TODO remake
-        QList <qint64> listStream_Sizes;
-        QList <QString> listStream_Names;
+        QList<CLI_METADATA_STREAM> listStreams;
         qint64 nTablesHeaderOffset;
         qint64 nTablesSize;
         quint32 nTables_Reserved1;
@@ -721,6 +726,7 @@ public:
     bool isDriver();
 
     bool isNETPresent();
+
     CLI_INFO getCliInfo(bool bFindHidden);
     CLI_INFO getCliInfo(bool bFindHidden,XBinary::_MEMORY_MAP *pMemoryMap);
 
