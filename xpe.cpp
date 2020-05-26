@@ -7280,7 +7280,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                         {
                             CLI_METADATA_STREAM stream={};
 
-                            stream.nOffset=read_uint32(nOffset+0);
+                            stream.nOffset=read_uint32(nOffset+0)+result.nMetaDataOffset;
                             stream.nSize=read_uint32(nOffset+4);
                             stream.sName=read_ansiString(nOffset+8);
 
@@ -7288,12 +7288,12 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                             if(result.cliMetadata.listStreams.at(i).sName=="#~")
                             {
-                                result.cliMetadata.nTablesHeaderOffset=result.cliMetadata.listStreams.at(i).nOffset+result.nMetaDataOffset;
+                                result.cliMetadata.nTablesHeaderOffset=result.cliMetadata.listStreams.at(i).nOffset;
                                 result.cliMetadata.nTablesSize=result.cliMetadata.listStreams.at(i).nSize;
                             }
                             else if(result.cliMetadata.listStreams.at(i).sName=="#Strings")
                             {
-                                result.cliMetadata.nStringsOffset=result.cliMetadata.listStreams.at(i).nOffset+result.nMetaDataOffset;
+                                result.cliMetadata.nStringsOffset=result.cliMetadata.listStreams.at(i).nOffset;
                                 result.cliMetadata.nStringsSize=result.cliMetadata.listStreams.at(i).nSize;
 
                                 QByteArray baStrings=read_array(result.cliMetadata.nStringsOffset,result.cliMetadata.nStringsSize);
@@ -7313,7 +7313,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             }
                             else if(result.cliMetadata.listStreams.at(i).sName=="#US")
                             {
-                                result.cliMetadata.nUSOffset=result.cliMetadata.listStreams.at(i).nOffset+result.nMetaDataOffset;
+                                result.cliMetadata.nUSOffset=result.cliMetadata.listStreams.at(i).nOffset;
                                 result.cliMetadata.nUSSize=result.cliMetadata.listStreams.at(i).nSize;
 
                                 QByteArray baStrings=read_array(result.cliMetadata.nUSOffset,result.cliMetadata.nUSSize);
@@ -7355,12 +7355,12 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             }
                             else if(result.cliMetadata.listStreams.at(i).sName=="#Blob")
                             {
-                                result.cliMetadata.nBlobOffset=result.cliMetadata.listStreams.at(i).nOffset+result.nMetaDataOffset;
+                                result.cliMetadata.nBlobOffset=result.cliMetadata.listStreams.at(i).nOffset;
                                 result.cliMetadata.nBlobSize=result.cliMetadata.listStreams.at(i).nSize;
                             }
                             else if(result.cliMetadata.listStreams.at(i).sName=="#GUID")
                             {
-                                result.cliMetadata.nGUIDOffset=result.cliMetadata.listStreams.at(i).nOffset+result.nMetaDataOffset;
+                                result.cliMetadata.nGUIDOffset=result.cliMetadata.listStreams.at(i).nOffset;
                                 result.cliMetadata.nGUIDSize=result.cliMetadata.listStreams.at(i).nSize;
                             }
 
