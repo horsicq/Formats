@@ -8207,7 +8207,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 {
                     if(!_pe.addImportSection(&(pRebuildOptions->mapIAT)))
                     {
-                        _errorMessage(tr("Cannot add import section"));
+//                        _errorMessage(tr("Cannot add import section"));
                     }
                 }
 
