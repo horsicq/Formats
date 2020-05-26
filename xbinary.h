@@ -610,6 +610,9 @@ public:
 
     static quint32 elfHash(const quint8 *pData);
 
+    static QString getVersionString(QString sString);
+    static qint64 getVersionIntValue(QString sString);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);

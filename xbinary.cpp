@@ -4636,6 +4636,45 @@ quint32 XBinary::elfHash(const quint8 *pData)
     return nResult;
 }
 
+QString XBinary::getVersionString(QString sString)
+{
+    QString sResult;
+
+    int nSize=sString.size();
+
+    for(int i=0;i<nSize;i++)
+    {
+        QChar c=sString.at(i);
+
+        if(((QChar('9')>=c)&&(c>=QChar('0')))||(c==QChar('.')))
+        {
+            sResult.append(c);
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return sResult;
+}
+
+qint64 XBinary::getVersionIntValue(QString sString)
+{
+    qint64 nResult=0;
+
+    int nCount=sString.count(QChar('.'));
+
+    for(int i=0;i<(nCount+1);i++)
+    {
+        nResult*=10;
+
+        nResult+=sString.section(QChar('.'),i,i).toLongLong();
+    }
+
+    return nResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     QList<SIGNATURE_RECORD> result;
