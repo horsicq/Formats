@@ -510,13 +510,26 @@ QString XBinary::read_ansiString(qint64 nOffset,qint64 nMaxSize)
 
     if(nMaxSize)
     {
-        if(__pDevice->seek(nOffset))
-        {
-            // TODO optimize
-            QByteArray baData=read_array(nOffset,nMaxSize);
+        quint8 *pBuffer=new quint8[nMaxSize+1];
 
-            sResult=baData.data();
+        for(int i=0; i<nMaxSize; i++)
+        {
+            pBuffer[i]=read_uint8(nOffset+i);
+
+            if(pBuffer[i]==0)
+            {
+                break;
+            }
+
+            if(i==nMaxSize-1)
+            {
+                pBuffer[nMaxSize]=0;
+            }
         }
+
+        sResult.append((char *)pBuffer);
+
+        delete [] pBuffer;
     }
 
     return sResult;
