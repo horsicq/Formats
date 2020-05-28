@@ -7678,7 +7678,7 @@ void XPE::setMetadataHeader_Version(QString value)
     {
         quint32 nVersionStringLength=read_uint32(nOffset+12);
 
-        if(value.size()>nVersionStringLength)
+        if(value.size()>(qint32)nVersionStringLength)
         {
             value.resize(nVersionStringLength);
         }
