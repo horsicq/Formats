@@ -2373,6 +2373,15 @@ QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemo
             }
         }
 
+        if(importPosition.nOrdinal==0)
+        {
+            importPosition.sFunction=importPosition.sName;
+        }
+        else
+        {
+            importPosition.sFunction=QString("%1").arg(importPosition.nOrdinal);
+        }
+
         if(bIs64)
         {
             nThunksRVA+=8;
