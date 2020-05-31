@@ -32,6 +32,7 @@
 class XFormats : public QObject
 {
     Q_OBJECT
+
 public:
     explicit XFormats(QObject *parent=nullptr);
 
