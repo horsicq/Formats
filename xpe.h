@@ -116,9 +116,7 @@ public:
 
     struct RESOURCE_RECORD
     {
-        QString sName[3];
-        quint32 nNameOffset[3];
-        quint32 nID[3];
+        RESOURCES_ID_NAME irin[3];
         qint64 nIRDEOffset;
         qint64 nAddress;
         qint64 nRVA;
