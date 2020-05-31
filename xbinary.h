@@ -46,19 +46,16 @@
 #include <QRandomGenerator>
 #endif
 #include <QDateTime>
-
 #include "xmsdos_def.h"
 #include "xne_def.h"
 #include "xle_def.h"
 #include "xpe_def.h"
 #include "xelf_def.h"
 #include "xmach_def.h"
-
 #include "subdevice.h"
 
 #define S_ALIGN_DOWN(value,align)   ((value)&~(align-1))
 #define S_ALIGN_UP(value,align)     (((value)&(align-1))?S_ALIGN_DOWN(value,align)+align:value)
-
 #define S_LOWORD(value)             ((quint16)((quint32)(value)&0xffff))
 #define S_HIWORD(value)             ((quint16)((quint32)(value)>>16))
 
