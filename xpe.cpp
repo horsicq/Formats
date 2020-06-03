@@ -2276,12 +2276,10 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
             nThunksOffset=addressToOffset(pMemoryMap,nThunksRVA+nBaseAddress);
             nThunksOriginalOffset=addressToOffset(pMemoryMap,nThunksOriginalRVA+nBaseAddress);
 
-            if(nThunksOffset==-1)
+            if(nThunksOffset!=-1)
             {
-                break;
+                importHeader.listPositions=_getImportPositions(pMemoryMap,nThunksRVA,nThunksOriginalRVA);
             }
-
-            importHeader.listPositions=_getImportPositions(pMemoryMap,nThunksRVA,nThunksOriginalRVA);
 
             listResult.append(importHeader);
 
