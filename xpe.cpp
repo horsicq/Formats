@@ -6594,7 +6594,120 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
 {
     QList<XPE::DELAYIMPORT_POSITION> listResult;
 
-    // TODO
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    qint64 nDelayImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
+
+    if(nDelayImportOffset!=-1)
+    {
+        nDelayImportOffset+=sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR)*nIndex;
+
+        XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR idd=_read_IMAGE_DELAYLOAD_DESCRIPTOR(nDelayImportOffset);
+
+        qint64 nThunksRVA=idd.ImportNameTableRVA;
+
+        qint64 nThunksOffset=XBinary::relAddressToOffset(&memoryMap,nThunksRVA);
+
+        bool bIs64=XBinary::is64(&memoryMap);
+
+        while(true)
+        {
+            DELAYIMPORT_POSITION importPosition={};
+            importPosition.nNameThunkOffset=nThunksOffset;
+            importPosition.nNameThunkRVA=nThunksRVA;
+
+            if(bIs64)
+            {
+                importPosition.nNameThunkValue=read_uint64(nThunksOffset);
+
+                if(importPosition.nNameThunkValue==0)
+                {
+                    break;
+                }
+
+                if(!(importPosition.nNameThunkValue&0x8000000000000000))
+                {
+                    qint64 nOffset=addressToOffset(&memoryMap,importPosition.nNameThunkValue+memoryMap.nBaseAddress);
+
+                    if(nOffset!=-1)
+                    {
+                        importPosition.nHint=read_uint16(nOffset);
+                        importPosition.sName=read_ansiString(nOffset+2);
+
+                        if(importPosition.sName=="")
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    importPosition.nOrdinal=importPosition.nNameThunkValue&0x7FFFFFFFFFFFFFFF;
+                }
+            }
+            else
+            {
+                importPosition.nNameThunkValue=read_uint32(nThunksOffset);
+
+                if(importPosition.nNameThunkValue==0)
+                {
+                    break;
+                }
+
+                if(!(importPosition.nNameThunkValue&0x80000000))
+                {
+                    qint64 nOffset=addressToOffset(&memoryMap,importPosition.nNameThunkValue+memoryMap.nBaseAddress);
+
+                    if(nOffset!=-1)
+                    {
+                        importPosition.nHint=read_uint16(nOffset);
+                        importPosition.sName=read_ansiString(nOffset+2);
+
+                        if(importPosition.sName=="")
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    importPosition.nOrdinal=importPosition.nNameThunkValue&0x7FFFFFFF;
+                }
+            }
+
+            if(importPosition.nOrdinal==0)
+            {
+                importPosition.sFunction=importPosition.sName;
+            }
+            else
+            {
+                importPosition.sFunction=QString("%1").arg(importPosition.nOrdinal);
+            }
+
+            if(bIs64)
+            {
+                nThunksRVA+=8;
+                nThunksOffset+=8;
+//                nRVA+=8;
+            }
+            else
+            {
+                nThunksRVA+=8;
+                nThunksOffset+=4;
+//                nRVA+=4;
+            }
+
+            listResult.append(importPosition);
+        }
+    }
 
     return listResult;
 }

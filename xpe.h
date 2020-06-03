@@ -73,9 +73,9 @@ public:
 
     struct DELAYIMPORT_POSITION
     {
-        qint64 nThunkRVA;
-        qint64 nThunkOffset;
-        quint64 nThunkValue;
+        qint64 nNameThunkRVA;
+        qint64 nNameThunkOffset;
+        quint64 nNameThunkValue;
         QString sName;
         quint16 nHint;
         qint64 nOrdinal;
