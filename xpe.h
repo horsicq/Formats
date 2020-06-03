@@ -71,6 +71,17 @@ public:
         QList<IMPORT_POSITION> listPositions;
     };
 
+    struct DELAYIMPORT_POSITION
+    {
+        qint64 nThunkRVA;
+        qint64 nThunkOffset;
+        quint64 nThunkValue;
+        QString sName;
+        quint16 nHint;
+        qint64 nOrdinal;
+        QString sFunction;
+    };
+
     struct EXPORT_RECORD
     {
         quint32 nOrdinal;
@@ -957,7 +968,7 @@ public:
     void setDelayImport_UnloadInformationTableRVA(quint32 nNumber,quint32 nValue);
     void setDelayImport_TimeDateStamp(quint32 nNumber,quint32 nValue);
 
-    QList<IMPORT_POSITION> getDelayImportPositions(int nIndex);
+    QList<DELAYIMPORT_POSITION> getDelayImportPositions(int nIndex);
 
     qint32 getNumberOfImports();
     QString getImportLibraryName(quint32 nNumber);
