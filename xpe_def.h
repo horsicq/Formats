@@ -751,5 +751,12 @@ struct S_IMAGE_DELAYLOAD_DESCRIPTOR {
     quint32 TimeDateStamp;                    // 0 if not bound,
                                               // Otherwise, date/time of the target DLL
 };
+
+struct S_IMAGE_BOUND_IMPORT_DESCRIPTOR {
+    quint32 TimeDateStamp;
+    quint16 OffsetModuleName;
+    quint16 NumberOfModuleForwarderRefs;
+// Array of zero or more IMAGE_BOUND_FORWARDER_REF follows
+};
 }
 #endif // XPE_DEF_H
