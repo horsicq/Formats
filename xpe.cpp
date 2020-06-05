@@ -2388,7 +2388,7 @@ QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemo
         }
         else
         {
-            nThunksRVA+=8;
+            nThunksRVA+=4;
             nThunksOffset+=4;
             nRVA+=4;
         }
@@ -6602,26 +6602,33 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
 
         XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR idd=_read_IMAGE_DELAYLOAD_DESCRIPTOR(nDelayImportOffset);
 
-        qint64 nThunksRVA=idd.ImportNameTableRVA;
+        qint64 nNameThunksRVA=idd.ImportNameTableRVA;
+        qint64 nAddressThunksRVA=idd.ImportAddressTableRVA;
 
-        qint64 nThunksOffset=XBinary::relAddressToOffset(&memoryMap,nThunksRVA);
+        qint64 nNameThunksOffset=XBinary::relAddressToOffset(&memoryMap,nNameThunksRVA);
+        qint64 nAddressThunksOffset=XBinary::relAddressToOffset(&memoryMap,nAddressThunksRVA);
 
         bool bIs64=XBinary::is64(&memoryMap);
 
         while(true)
         {
             DELAYIMPORT_POSITION importPosition={};
-            importPosition.nNameThunkOffset=nThunksOffset;
-            importPosition.nNameThunkRVA=nThunksRVA;
+            importPosition.nNameThunkOffset=nNameThunksOffset;
+            importPosition.nNameThunkRVA=nNameThunksRVA;
+            importPosition.nAddressThunkOffset=nNameThunksOffset;
+            importPosition.nAddressThunkRVA=nAddressThunksOffset;
 
             if(bIs64)
             {
-                importPosition.nNameThunkValue=read_uint64(nThunksOffset);
+                importPosition.nNameThunkValue=read_uint64(nNameThunksOffset);
+                importPosition.nAddressThunkValue=read_uint64(nAddressThunksOffset);
 
                 if(importPosition.nNameThunkValue==0)
                 {
                     break;
                 }
+
+                // mb TODO check importPosition.nAddressThunkValue
 
                 if(!(importPosition.nNameThunkValue&0x8000000000000000))
                 {
@@ -6649,7 +6656,7 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
             }
             else
             {
-                importPosition.nNameThunkValue=read_uint32(nThunksOffset);
+                importPosition.nNameThunkValue=read_uint32(nNameThunksOffset);
 
                 if(importPosition.nNameThunkValue==0)
                 {
@@ -6692,14 +6699,18 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
 
             if(bIs64)
             {
-                nThunksRVA+=8;
-                nThunksOffset+=8;
+                nNameThunksRVA+=8;
+                nNameThunksOffset+=8;
+                nAddressThunksRVA+=8;
+                nAddressThunksOffset+=8;
 //                nRVA+=8;
             }
             else
             {
-                nThunksRVA+=8;
-                nThunksOffset+=4;
+                nNameThunksRVA+=4;
+                nNameThunksOffset+=4;
+                nAddressThunksRVA+=4;
+                nAddressThunksOffset+=4;
 //                nRVA+=4;
             }
 

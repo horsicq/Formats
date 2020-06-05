@@ -80,6 +80,9 @@ public:
         quint16 nHint;
         qint64 nOrdinal;
         QString sFunction;
+        qint64 nAddressThunkRVA;
+        qint64 nAddressThunkOffset;
+        quint64 nAddressThunkValue;
     };
 
     struct EXPORT_RECORD
