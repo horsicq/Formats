@@ -83,6 +83,9 @@ public:
         qint64 nAddressThunkRVA;
         qint64 nAddressThunkOffset;
         quint64 nAddressThunkValue;
+        qint64 nBoundThunkRVA;
+        qint64 nBoundThunkOffset;
+        quint64 nBoundThunkValue;
     };
 
     struct EXPORT_RECORD
