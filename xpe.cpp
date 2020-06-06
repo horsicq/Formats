@@ -6737,6 +6737,22 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
     return listResult;
 }
 
+QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportsPosition()
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getBoundImportsPosition(&memoryMap);
+}
+
+QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportsPosition(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    QList<XPE::BOUND_IMPORT_POSITION> listResult;
+
+    // TODO
+
+    return listResult;
+}
+
 qint32 XPE::getNumberOfImports()
 {
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> listImports=getImportDescriptors();
