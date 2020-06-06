@@ -732,7 +732,8 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY64
     quint64 VolatileMetadataPointer;         // VA
 };
 
-struct S_IMAGE_DELAYLOAD_DESCRIPTOR {
+struct S_IMAGE_DELAYLOAD_DESCRIPTOR
+{
     union
     {
         quint32 AllAttributes;
@@ -752,7 +753,8 @@ struct S_IMAGE_DELAYLOAD_DESCRIPTOR {
                                               // Otherwise, date/time of the target DLL
 };
 
-struct S_IMAGE_BOUND_IMPORT_DESCRIPTOR {
+struct S_IMAGE_BOUND_IMPORT_DESCRIPTOR
+{
     quint32 TimeDateStamp;
     quint16 OffsetModuleName;
     quint16 NumberOfModuleForwarderRefs;
