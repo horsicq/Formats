@@ -977,8 +977,8 @@ public:
 
     QList<DELAYIMPORT_POSITION> getDelayImportPositions(int nIndex);
 
-    QList<BOUND_IMPORT_POSITION> getBoundImportsPosition();
-    QList<BOUND_IMPORT_POSITION> getBoundImportsPosition(XBinary::_MEMORY_MAP *pMemoryMap);
+    QList<BOUND_IMPORT_POSITION> getBoundImportPositions();
+    QList<BOUND_IMPORT_POSITION> getBoundImportPositions(XBinary::_MEMORY_MAP *pMemoryMap);
 
     qint32 getNumberOfImports();
     QString getImportLibraryName(quint32 nNumber);

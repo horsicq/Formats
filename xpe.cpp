@@ -6737,14 +6737,14 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
     return listResult;
 }
 
-QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportsPosition()
+QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportPositions()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 
-    return getBoundImportsPosition(&memoryMap);
+    return getBoundImportPositions(&memoryMap);
 }
 
-QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportsPosition(XBinary::_MEMORY_MAP *pMemoryMap)
+QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportPositions(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     QList<XPE::BOUND_IMPORT_POSITION> listResult;
 
