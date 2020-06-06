@@ -6501,9 +6501,14 @@ qint64 XPE::getDelayImportRecordSize()
 
 QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
 {
-    QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR>  listResult;
-
     _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getDelayImportsList(&memoryMap);
+}
+
+QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR>  listResult;
 
     qint64 nDelayImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
 
@@ -6516,7 +6521,7 @@ QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList()
             record=_read_IMAGE_DELAYLOAD_DESCRIPTOR(nDelayImportOffset);
 
             if( record.DllNameRVA&&
-                isAddressValid(&memoryMap,memoryMap.nBaseAddress+record.DllNameRVA))
+                isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+record.DllNameRVA))
             {
                 listResult.append(record);
             }

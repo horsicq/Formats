@@ -964,6 +964,7 @@ public:
     qint64 getDelayImportRecordSize();
 
     QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> getDelayImportsList();
+    QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> getDelayImportsList(XBinary::_MEMORY_MAP *pMemoryMap);
     // TODO Get
     void setDelayImport_AllAttributes(quint32 nNumber,quint32 nValue);
     void setDelayImport_DllNameRVA(quint32 nNumber,quint32 nValue);
