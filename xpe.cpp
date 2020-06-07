@@ -6748,9 +6748,31 @@ QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportPositions(XBinary::_MEMORY_
 {
     QList<XPE::BOUND_IMPORT_POSITION> listResult;
 
-    // TODO
+    qint64 nBoundImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
+
+    if(nBoundImportOffset!=-1)
+    {
+        while(true)
+        {
+
+        }
+    }
 
     return listResult;
+}
+
+qint64 XPE::getBoundImportRecordOffset(qint32 nNumber)
+{
+    qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
+
+    nOffset+=sizeof(XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR)*nNumber;
+
+    return nOffset;
+}
+
+qint64 XPE::getBoundImportRecordSize()
+{
+    return sizeof(XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR);
 }
 
 qint32 XPE::getNumberOfImports()
