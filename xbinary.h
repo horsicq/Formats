@@ -615,7 +615,6 @@ public:
     {
         DT_TYPE_UNKNOWN=0,
         DT_TYPE_POSIX
-        // TODO More
     };
 
     static QString valueToTimeString(quint64 value, DT_TYPE type);
