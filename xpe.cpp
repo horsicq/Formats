@@ -6754,9 +6754,20 @@ QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportPositions(XBinary::_MEMORY_
 
         while(true)
         {
-            XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR record=_read_IMAGE_BOUND_IMPORT_DESCRIPTOR(nOffset);
+            BOUND_IMPORT_POSITION record={};
 
-            // TODO
+            record.descriptor=_read_IMAGE_BOUND_IMPORT_DESCRIPTOR(nOffset);
+
+            if((record.descriptor.TimeDateStamp)&&(record.descriptor.OffsetModuleName))
+            {
+                record.sName=read_ansiString(nBoundImportOffset+record.descriptor.OffsetModuleName);
+
+                listResult.append(record);
+            }
+            else
+            {
+                break;
+            }
 
             nOffset+=sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
         }

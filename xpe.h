@@ -274,9 +274,7 @@ public:
 
     struct BOUND_IMPORT_POSITION
     {
-        quint32 TimeDateStamp;
-        quint16 OffsetModuleName;
-        quint16 NumberOfModuleForwarderRefs;
+        XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR descriptor;
         QString sName;
     };
 
