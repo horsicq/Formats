@@ -6769,7 +6769,7 @@ QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportPositions(XBinary::_MEMORY_
                 break;
             }
 
-            nOffset+=sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
+            nOffset+=sizeof(XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR);
         }
     }
 

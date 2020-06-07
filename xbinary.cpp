@@ -1923,6 +1923,11 @@ bool XBinary::isRelAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAdd
     return isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+nRelAddress);
 }
 
+bool XBinary::isAddressPhysical(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
+{
+    return (addressToOffset(pMemoryMap,nAddress)!=-1);
+}
+
 qint64 XBinary::offsetToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
     qint64 nResult=-1;

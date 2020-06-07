@@ -365,6 +365,8 @@ public:
     static bool isAddressValid(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
     static bool isRelAddressValid(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
 
+    static bool isAddressPhysical(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+
     static qint64 offsetToAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static qint64 addressToOffset(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
     static qint64 offsetToRelAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
