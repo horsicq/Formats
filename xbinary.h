@@ -611,6 +611,15 @@ public:
     static QString getVersionString(QString sString);
     static qint64 getVersionIntValue(QString sString);
 
+    enum DT_TYPE
+    {
+        DT_TYPE_UNKNOWN=0,
+        DT_TYPE_POSIX
+        // TODO More
+    };
+
+    static QString valueToTimeString(quint64 value, DT_TYPE type);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);

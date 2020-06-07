@@ -4693,6 +4693,21 @@ qint64 XBinary::getVersionIntValue(QString sString)
     return nResult;
 }
 
+QString XBinary::valueToTimeString(quint64 value, XBinary::DT_TYPE type)
+{
+    QString sResult;
+
+    if(type==DT_TYPE_POSIX)
+    {
+        QDateTime dt;
+        dt.setMSecsSinceEpoch(value*1000);
+
+        sResult=dt.toString("yyyy-MM-dd hh:mm:ss");
+    }
+
+    return sResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     QList<SIGNATURE_RECORD> result;
