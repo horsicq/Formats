@@ -6801,6 +6801,27 @@ qint64 XPE::getBoundImportRecordSize()
     return sizeof(XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR);
 }
 
+void XPE::setBoundImport_TimeDateStamp(quint32 nNumber, quint32 nValue)
+{
+    qint64 nOffset=getBoundImportRecordOffset(nNumber);
+
+    write_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR,TimeDateStamp),nValue);
+}
+
+void XPE::setBoundImport_OffsetModuleName(quint32 nNumber, quint16 nValue)
+{
+    qint64 nOffset=getBoundImportRecordOffset(nNumber);
+
+    write_uint16(nOffset+offsetof(XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR,OffsetModuleName),nValue);
+}
+
+void XPE::setBoundImport_NumberOfModuleForwarderRefs(quint32 nNumber, quint16 nValue)
+{
+    qint64 nOffset=getBoundImportRecordOffset(nNumber);
+
+    write_uint16(nOffset+offsetof(XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR,NumberOfModuleForwarderRefs),nValue);
+}
+
 qint32 XPE::getNumberOfImports()
 {
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> listImports=getImportDescriptors();

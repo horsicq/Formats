@@ -983,6 +983,10 @@ public:
     qint64 getBoundImportRecordOffset(qint32 nNumber);
     qint64 getBoundImportRecordSize();
 
+    void setBoundImport_TimeDateStamp(quint32 nNumber,quint32 nValue);
+    void setBoundImport_OffsetModuleName(quint32 nNumber,quint16 nValue);
+    void setBoundImport_NumberOfModuleForwarderRefs(quint32 nNumber,quint16 nValue);
+
     qint32 getNumberOfImports();
     QString getImportLibraryName(quint32 nNumber);
     QString getImportLibraryName(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
