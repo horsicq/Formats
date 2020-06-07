@@ -6516,9 +6516,7 @@ QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList(XBinary::_
     {
         while(true)
         {
-            XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR record={};
-
-            record=_read_IMAGE_DELAYLOAD_DESCRIPTOR(nDelayImportOffset);
+            XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR record=_read_IMAGE_DELAYLOAD_DESCRIPTOR(nDelayImportOffset);
 
             if( record.DllNameRVA&&
                 isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+record.DllNameRVA))
@@ -6752,13 +6750,30 @@ QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportPositions(XBinary::_MEMORY_
 
     if(nBoundImportOffset!=-1)
     {
+        qint64 nOffset=nBoundImportOffset;
+
         while(true)
         {
+            XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR record=_read_IMAGE_BOUND_IMPORT_DESCRIPTOR(nOffset);
 
+            // TODO
+
+            nOffset+=sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
         }
     }
 
     return listResult;
+}
+
+XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR XPE::_read_IMAGE_BOUND_IMPORT_DESCRIPTOR(qint64 nOffset)
+{
+    XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR result={};
+
+    result.TimeDateStamp=read_uint32(nOffset+offsetof(XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR,TimeDateStamp));
+    result.OffsetModuleName=read_uint16(nOffset+offsetof(XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR,OffsetModuleName));
+    result.NumberOfModuleForwarderRefs=read_uint16(nOffset+offsetof(XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR,NumberOfModuleForwarderRefs));
+
+    return result;
 }
 
 qint64 XPE::getBoundImportRecordOffset(qint32 nNumber)

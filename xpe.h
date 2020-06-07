@@ -980,6 +980,8 @@ public:
     QList<BOUND_IMPORT_POSITION> getBoundImportPositions();
     QList<BOUND_IMPORT_POSITION> getBoundImportPositions(XBinary::_MEMORY_MAP *pMemoryMap);
 
+    XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR _read_IMAGE_BOUND_IMPORT_DESCRIPTOR(qint64 nOffset);
+
     qint64 getBoundImportRecordOffset(qint32 nNumber);
     qint64 getBoundImportRecordSize();
 
