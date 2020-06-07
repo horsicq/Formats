@@ -3425,7 +3425,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
 
         for(int i=0;i<256;i++)
         {
-            quint32 crc = i;
+            quint32 crc=i;
             for (int j=0;j<8;j++)
             {
                 crc=(crc&1)?((crc>>1)^0xEDB88320):(crc>>1);
