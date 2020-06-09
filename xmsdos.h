@@ -29,7 +29,7 @@ class XMSDOS : public XBinary
     Q_OBJECT
 
 public:
-    struct MS_RICH_RECORD
+    struct MS_RICH_RECORD // For PE and LE
     {
         quint32 nId;
         quint32 nVersion;
