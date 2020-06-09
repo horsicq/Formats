@@ -2369,7 +2369,10 @@ qint64 XBinary::getTotalVirtualSize(XBinary::_MEMORY_MAP *pMemoryMap)
 
     for(int i=0;i<nCount;i++)
     {
-        nResult+=pMemoryMap->listRecords.at(i).nSize;
+        if(pMemoryMap->listRecords.at(i).type!=MMT_OVERLAY) // TODO Check ELF
+        {
+            nResult+=pMemoryMap->listRecords.at(i).nSize;
+        }
     }
 
     return nResult;
