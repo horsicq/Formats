@@ -37,6 +37,8 @@ public:
     explicit XFormats(QObject *parent=nullptr);
 
     static XBinary::_MEMORY_MAP getMemoryMap(QIODevice *pDevice,XBinary::FT fileType);
+    static bool isOverlayPresent(QIODevice *pDevice,XBinary::FT fileType);
+    static qint64 getOverlayOffset(QIODevice *pDevice,XBinary::FT fileType);
     static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType);
 };
 
