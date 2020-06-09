@@ -25,133 +25,47 @@ XFormats::XFormats(QObject *parent) : QObject(parent)
 
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(QIODevice *pDevice, XBinary::FT fileType)
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,qint64 nImageBase)
 {
     XBinary::_MEMORY_MAP result={};
 
     if(fileType==XBinary::FT_BINARY)
     {
-        XBinary binary(pDevice);
+        XBinary binary(pDevice,bIsImage,nImageBase);
         result=binary.getMemoryMap();
     }
     else if(fileType==XBinary::FT_MSDOS)
     {
-        XMSDOS msdos(pDevice);
+        XMSDOS msdos(pDevice,bIsImage,nImageBase);
         result=msdos.getMemoryMap();
     }
     else if(fileType==XBinary::FT_NE)
     {
-        XNE ne(pDevice);
+        XNE ne(pDevice,bIsImage,nImageBase);
         result=ne.getMemoryMap();
     }
     else if((fileType==XBinary::FT_LE)||(fileType==XBinary::FT_LX))
     {
-        XLE le(pDevice);
+        XLE le(pDevice,bIsImage,nImageBase);
         result=le.getMemoryMap();
     }
     else if((fileType==XBinary::FT_PE)||(fileType==XBinary::FT_PE32)||(fileType==XBinary::FT_PE64))
     {
-        XPE pe(pDevice);
+        XPE pe(pDevice,bIsImage,nImageBase);
         result=pe.getMemoryMap();
     }
     else if((fileType==XBinary::FT_ELF)||(fileType==XBinary::FT_ELF32)||(fileType==XBinary::FT_ELF64))
     {
-        XELF elf(pDevice);
+        XELF elf(pDevice,bIsImage,nImageBase);
         result=elf.getMemoryMap();
     }
     else if((fileType==XBinary::FT_MACH)||(fileType==XBinary::FT_MACH32)||(fileType==XBinary::FT_MACH64))
     {
-        XMACH mach(pDevice);
+        XMACH mach(pDevice,bIsImage,nImageBase);
         result=mach.getMemoryMap();
     }
 
     return result;
-}
-
-bool XFormats::isOverlayPresent(QIODevice *pDevice, XBinary::FT fileType)
-{
-    bool bResult=false;
-
-    if(fileType==XBinary::FT_BINARY)
-    {
-        XBinary binary(pDevice);
-        bResult=binary.isOverlayPresent();
-    }
-    else if(fileType==XBinary::FT_MSDOS)
-    {
-        XMSDOS msdos(pDevice);
-        bResult=msdos.isOverlayPresent();
-    }
-    else if(fileType==XBinary::FT_NE)
-    {
-        XNE ne(pDevice);
-        bResult=ne.isOverlayPresent();
-    }
-    else if((fileType==XBinary::FT_LE)||(fileType==XBinary::FT_LX))
-    {
-        XLE le(pDevice);
-        bResult=le.isOverlayPresent();
-    }
-    else if((fileType==XBinary::FT_PE)||(fileType==XBinary::FT_PE32)||(fileType==XBinary::FT_PE64))
-    {
-        XPE pe(pDevice);
-        bResult=pe.isOverlayPresent();
-    }
-    else if((fileType==XBinary::FT_ELF)||(fileType==XBinary::FT_ELF32)||(fileType==XBinary::FT_ELF64))
-    {
-        XELF elf(pDevice);
-        bResult=elf.isOverlayPresent();
-    }
-    else if((fileType==XBinary::FT_MACH)||(fileType==XBinary::FT_MACH32)||(fileType==XBinary::FT_MACH64))
-    {
-        XMACH mach(pDevice);
-        bResult=mach.isOverlayPresent();
-    }
-
-    return bResult;
-}
-
-qint64 XFormats::getOverlayOffset(QIODevice *pDevice, XBinary::FT fileType)
-{
-    qint64 nResult=-1;
-
-    if(fileType==XBinary::FT_BINARY)
-    {
-        XBinary binary(pDevice);
-        nResult=binary.getOverlayOffset();
-    }
-    else if(fileType==XBinary::FT_MSDOS)
-    {
-        XMSDOS msdos(pDevice);
-        nResult=msdos.getOverlayOffset();
-    }
-    else if(fileType==XBinary::FT_NE)
-    {
-        XNE ne(pDevice);
-        nResult=ne.getOverlayOffset();
-    }
-    else if((fileType==XBinary::FT_LE)||(fileType==XBinary::FT_LX))
-    {
-        XLE le(pDevice);
-        nResult=le.getOverlayOffset();
-    }
-    else if((fileType==XBinary::FT_PE)||(fileType==XBinary::FT_PE32)||(fileType==XBinary::FT_PE64))
-    {
-        XPE pe(pDevice);
-        nResult=pe.getOverlayOffset();
-    }
-    else if((fileType==XBinary::FT_ELF)||(fileType==XBinary::FT_ELF32)||(fileType==XBinary::FT_ELF64))
-    {
-        XELF elf(pDevice);
-        nResult=elf.getOverlayOffset();
-    }
-    else if((fileType==XBinary::FT_MACH)||(fileType==XBinary::FT_MACH32)||(fileType==XBinary::FT_MACH64))
-    {
-        XMACH mach(pDevice);
-        nResult=mach.getOverlayOffset();
-    }
-
-    return nResult;
 }
 
 void XFormats::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)

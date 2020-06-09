@@ -2710,6 +2710,60 @@ QSet<XBinary::FT> XBinary::getFileTypes(QString sFileName)
     return result;
 }
 
+XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice)
+{
+    XBinary::FT result=FT_UNKNOWN;
+
+    QSet<XBinary::FT> stFT=getFileTypes(pDevice);
+
+    if(stFT.contains(FT_PE32))
+    {
+        result=FT_PE32;
+    }
+    if(stFT.contains(FT_PE64))
+    {
+        result=FT_PE64;
+    }
+    else if(stFT.contains(FT_MACH32))
+    {
+        result=FT_MACH32;
+    }
+    else if(stFT.contains(FT_MACH64))
+    {
+        result=FT_MACH32;
+    }
+    else if(stFT.contains(FT_ELF32))
+    {
+        result=FT_ELF32;
+    }
+    else if(stFT.contains(FT_ELF64))
+    {
+        result=FT_ELF64;
+    }
+    else if(stFT.contains(FT_LE))
+    {
+        result=FT_LE;
+    }
+    else if(stFT.contains(FT_LX))
+    {
+        result=FT_LX;
+    }
+    else if(stFT.contains(FT_NE))
+    {
+        result=FT_NE;
+    }
+    else if(stFT.contains(FT_MSDOS))
+    {
+        result=FT_MSDOS;
+    }
+    else if(stFT.contains(FT_BINARY))
+    {
+        result=FT_BINARY;
+    }
+
+    return result;
+}
+
 QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFT)
 {
     QList<XBinary::FT> listResult;
