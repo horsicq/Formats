@@ -735,9 +735,7 @@ public:
     bool isDll();
     static bool isDll(QString sFileName);
     bool isConsole();
-
     bool isDriver();
-
     bool isNETPresent();
 
     CLI_INFO getCliInfo(bool bFindHidden);
