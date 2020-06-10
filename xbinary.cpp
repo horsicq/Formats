@@ -2722,7 +2722,7 @@ XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice)
     {
         result=FT_PE32;
     }
-    if(stFT.contains(FT_PE64))
+    else if(stFT.contains(FT_PE64))
     {
         result=FT_PE64;
     }
