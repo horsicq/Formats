@@ -320,7 +320,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     result.fileType=FT_MSDOS;
     result.mode=MODE_16;
     result.nRawSize=getSize();
-    result.nImageSize=0x10000;
+    result.nImageSize=0xFFFF;
 
     qint64 nMaxOffset=(get_e_cp()-1)*512+get_e_cblp();
 
