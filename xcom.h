@@ -18,27 +18,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-#ifndef XFORMATS_H
-#define XFORMATS_H
+#ifndef XCOM_H
+#define XCOM_H
 
 #include "xbinary.h"
-#include "xcom.h"
-#include "xmsdos.h"
-#include "xne.h"
-#include "xle.h"
-#include "xpe.h"
-#include "xelf.h"
-#include "xmach.h"
+#include "xcom_def.h"
 
-class XFormats : public QObject
+class XCOM : public XBinary
 {
     Q_OBJECT
 
 public:
-    explicit XFormats(QObject *parent=nullptr);
+    explicit XCOM(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
+    ~XCOM();
+    virtual bool isValid();
+    virtual qint64 getBaseAddress();
 
-    static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nImageBase=0);
-    static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType);
+    virtual _MEMORY_MAP getMemoryMap();
+    virtual QString getArch();
+    virtual MODE getMode();
 };
 
-#endif // XFORMATS_H
+#endif // XCOM_H

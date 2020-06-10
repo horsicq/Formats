@@ -18,27 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-#ifndef XFORMATS_H
-#define XFORMATS_H
+#ifndef XCOM_DEF_H
+#define XCOM_DEF_H
 
-#include "xbinary.h"
-#include "xcom.h"
-#include "xmsdos.h"
-#include "xne.h"
-#include "xle.h"
-#include "xpe.h"
-#include "xelf.h"
-#include "xmach.h"
+#include <QtGlobal>
 
-class XFormats : public QObject
+namespace XCOM_DEF
 {
-    Q_OBJECT
+const quint32 S_ADDRESS_BEGIN               =0x100; 
+}
 
-public:
-    explicit XFormats(QObject *parent=nullptr);
-
-    static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nImageBase=0);
-    static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType);
-};
-
-#endif // XFORMATS_H
+#endif // XCOM_DEF_H

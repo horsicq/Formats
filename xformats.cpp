@@ -34,6 +34,11 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
         XBinary binary(pDevice,bIsImage,nImageBase);
         result=binary.getMemoryMap();
     }
+    else if(fileType==XBinary::FT_COM)
+    {
+        XCOM com(pDevice,bIsImage,nImageBase);
+        result=com.getMemoryMap();
+    }
     else if(fileType==XBinary::FT_MSDOS)
     {
         XMSDOS msdos(pDevice,bIsImage,nImageBase);

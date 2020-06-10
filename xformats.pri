@@ -12,6 +12,11 @@ SOURCES += \
     include($$PWD/xbinary.pri)
 }
 
+!contains(XCONFIG, xcom) {
+    XCONFIG += xcom
+    include($$PWD/xcom.pri)
+}
+
 !contains(XCONFIG, xmsdos) {
     XCONFIG += xmsdos
     include($$PWD/xmsdos.pri)

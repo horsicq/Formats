@@ -18,27 +18,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-#ifndef XFORMATS_H
-#define XFORMATS_H
-
-#include "xbinary.h"
 #include "xcom.h"
-#include "xmsdos.h"
-#include "xne.h"
-#include "xle.h"
-#include "xpe.h"
-#include "xelf.h"
-#include "xmach.h"
 
-class XFormats : public QObject
+XCOM::XCOM(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
 {
-    Q_OBJECT
 
-public:
-    explicit XFormats(QObject *parent=nullptr);
+}
 
-    static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nImageBase=0);
-    static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType);
-};
+XCOM::~XCOM()
+{
 
-#endif // XFORMATS_H
+}
+
+bool XCOM::isValid()
+{
+    return true;
+}
+
+qint64 XCOM::getBaseAddress()
+{
+    return XCOM_DEF::S_ADDRESS_BEGIN;
+}
+
+XBinary::_MEMORY_MAP XCOM::getMemoryMap()
+{
+    _MEMORY_MAP result={};
+
+    result.nBaseAddress=_getBaseAddress();
+    result.nRawSize=getSize();
+    result.nImageSize=getSize();
+    result.fileType=FT_COM;
+    result.mode=getMode();
+    result.sArch=getArch();
+
+    _MEMORY_RECORD record={};
+    record.nAddress=_getBaseAddress();
+    record.segment=ADDRESS_SEGMENT_FLAT;
+    record.nOffset=0;
+    record.nSize=getSize();
+    record.nIndex=0;
+
+    result.listRecords.append(record);
+
+    return result;
+}
+
+QString XCOM::getArch()
+{
+    return "8086";
+}
+
+XBinary::MODE XCOM::getMode()
+{
+    return MODE_16;
+}
