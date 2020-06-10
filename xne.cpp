@@ -1062,3 +1062,13 @@ QMap<quint64, QString> XNE::getImageSegmentTypesS()
 
     return mapResult;
 }
+
+XBinary::MODE XNE::getMode()
+{
+    return MODE_16SEG;
+}
+
+QString XNE::getArch()
+{
+    return "8086";
+}
