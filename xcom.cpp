@@ -72,3 +72,8 @@ XBinary::MODE XCOM::getMode()
 {
     return MODE_16;
 }
+
+qint64 XCOM::getEntryPointOffset()
+{
+    return 0;
+}

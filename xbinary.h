@@ -140,6 +140,8 @@ public:
     {
         FT_UNKNOWN=0,
         FT_BINARY,
+        FT_BINARY32,
+        FT_BINARY64,
         FT_TEXT,
         FT_COM,
         FT_MSDOS,
