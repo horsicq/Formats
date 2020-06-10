@@ -1286,7 +1286,21 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
 
 XBinary::MODE XLE::getMode()
 {
-    return MODE_32; // TODO
+    MODE result=MODE_16SEG;
+
+    qint32 lfanew=get_lfanew();
+    quint16 signature=read_uint16(lfanew);
+
+    if(signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE)
+    {
+        result=MODE_16SEG;
+    }
+    else if(signature==XLE_DEF::S_IMAGE_LX_SIGNATURE)
+    {
+        result=MODE_32;
+    }
+
+    return result;
 }
 
 QString XLE::getArch()
