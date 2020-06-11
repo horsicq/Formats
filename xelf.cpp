@@ -50,35 +50,6 @@ bool XELF::isBigEndian()
     return getIdent_data()==XELF_DEF::S_ELFDATA2MSB;
 }
 
-bool XELF::is16()
-{
-    return false;
-}
-
-bool XELF::is32()
-{
-    return getIdent_class()==XELF_DEF::S_ELFCLASS32;
-}
-
-bool XELF::is64()
-{
-    return getIdent_class()==XELF_DEF::S_ELFCLASS64;
-}
-
-bool XELF::is64(QIODevice *pDevice)
-{
-    bool bResult=false;
-
-    XELF xelf(pDevice);
-
-    if(xelf.isValid())
-    {
-        bResult=xelf.is64();
-    }
-
-    return bResult;
-}
-
 qint64 XELF::getEhdrOffset()
 {
     return 0;
@@ -3866,7 +3837,13 @@ XBinary::MODE XELF::getMode()
 {
     MODE result=MODE_32;
 
-    if(is64())
+    quint8 ident=getIdent_class();
+
+    if(ident==XELF_DEF::S_ELFCLASS32)
+    {
+        result=MODE_32;
+    }
+    else if(ident==XELF_DEF::S_ELFCLASS64)
     {
         result=MODE_64;
     }

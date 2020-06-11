@@ -48,58 +48,21 @@ bool XPE::isValid()
     return bResult;
 }
 
-bool XPE::is32()
-{
-    return !(is64());
-}
-
-bool XPE::is64()
-{
-    quint16 nMachine=getFileHeader_Machine();
-
-    return  (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)||
-            (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_IA64)||
-            (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64);
-}
-
-bool XPE::is64(QIODevice *pDevice)
-{
-    bool bResult=false;
-
-    XPE pe(pDevice);
-
-    if(pe.isValid())
-    {
-        bResult=pe.is64();
-    }
-
-    return bResult;
-}
-
-bool XPE::is64(QString sFileName)
-{
-    bool bResult=false;
-
-    QFile file;
-    file.setFileName(sFileName);
-
-    if(file.open(QIODevice::ReadOnly))
-    {
-        bResult=XPE::is64(&file);
-
-        file.close();
-    }
-
-    return bResult;
-}
-
 XBinary::MODE XPE::getMode()
 {
     MODE result=MODE_32;
 
-    if(is64())
+    quint16 nMachine=getFileHeader_Machine();
+
+    if( (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)||
+        (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_IA64)||
+        (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64))
     {
         result=MODE_64;
+    }
+    else
+    {
+        result=MODE_32;
     }
 
     return result;

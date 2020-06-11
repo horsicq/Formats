@@ -62,25 +62,6 @@ bool XMACH::isBigEndian()
     return bResult;
 }
 
-bool XMACH::is64()
-{
-    return (getHeader_magic()==XMACH_DEF::S_MH_MAGIC_64);
-}
-
-bool XMACH::is64(QIODevice *pDevice)
-{
-    bool bResult=false;
-
-    XMACH xmach(pDevice);
-
-    if(xmach.isValid())
-    {
-        bResult=xmach.is64();
-    }
-
-    return bResult;
-}
-
 qint64 XMACH::getHeaderOffset()
 {
     return 0;
@@ -1147,9 +1128,13 @@ XBinary::MODE XMACH::getMode()
 {
     MODE result=MODE_32;
 
-    if(is64())
+    if(getHeader_magic()==XMACH_DEF::S_MH_MAGIC_64)
     {
         result=MODE_64;
+    }
+    else
+    {
+        result=MODE_32;
     }
 
     return result;

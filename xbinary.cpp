@@ -3769,17 +3769,23 @@ bool XBinary::isBigEndian()
 
 bool XBinary::is16()
 {
-    return false;
+    MODE mode=getMode();
+
+    return ((mode==MODE_16)||(mode==MODE_16SEG));
 }
 
 bool XBinary::is32()
 {
-    return false;
+    MODE mode=getMode();
+
+    return (mode==MODE_32);
 }
 
 bool XBinary::is64()
 {
-    return false;
+    MODE mode=getMode();
+
+    return (mode==MODE_64);
 }
 
 bool XBinary::isBigEndian(XBinary::_MEMORY_MAP *pMemoryMap)

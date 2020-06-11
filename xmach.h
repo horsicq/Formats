@@ -78,8 +78,6 @@ public:
 
     bool isValid();
     bool isBigEndian();
-    bool is64();
-    static bool is64(QIODevice *pDevice);
 
     qint64 getHeaderOffset();
     qint64 getHeader32Size();

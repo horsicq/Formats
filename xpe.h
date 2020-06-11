@@ -288,10 +288,6 @@ public:
 
     explicit XPE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
-    bool is32();
-    bool is64();
-    static bool is64(QIODevice *pDevice);
-    static bool is64(QString sFileName);
 
     virtual MODE getMode();
     virtual QString getArch();

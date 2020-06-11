@@ -506,9 +506,9 @@ public:
     QIODevice *getDevice();
     virtual bool isValid();
     virtual bool isBigEndian();
-    virtual bool is16(); // TODO not virtual from mode
-    virtual bool is32(); // TODO not virtual from mode
-    virtual bool is64(); // TODO not virtual from mode
+    bool is16();
+    bool is32();
+    bool is64();
 
     bool isBigEndian(_MEMORY_MAP *pMemoryMap);
     bool is16(_MEMORY_MAP *pMemoryMap);

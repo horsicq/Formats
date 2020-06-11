@@ -77,8 +77,3 @@ qint64 XCOM::getEntryPointOffset()
 {
     return 0;
 }
-
-bool XCOM::is16()
-{
-    return true;
-}

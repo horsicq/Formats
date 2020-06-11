@@ -73,11 +73,6 @@ public:
 
     virtual bool isValid();
     bool isBigEndian();
-    bool is16();
-    bool is32();
-    bool is64();
-
-    static bool is64(QIODevice *pDevice);
 
     qint64 getEhdrOffset();
     qint64 getEhdr32Size();
