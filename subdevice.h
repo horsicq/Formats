@@ -26,6 +26,8 @@
 
 class SubDevice : public QIODevice
 {
+    Q_OBJECT
+
 public:
     SubDevice(QIODevice *pDevice,qint64 nOffset=0,qint64 nSize=-1,QObject *parent=nullptr);
     ~SubDevice();
