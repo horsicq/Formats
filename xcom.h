@@ -38,6 +38,7 @@ public:
     virtual QString getArch();
     virtual MODE getMode();
     virtual qint64 getEntryPointOffset();
+    virtual bool is16();
 };
 
 #endif // XCOM_H
