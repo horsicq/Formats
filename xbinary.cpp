@@ -2570,8 +2570,6 @@ QSet<XBinary::FT> XBinary::getFileTypes()
     QSet<XBinary::FT> stResult;
 
     stResult.insert(FT_BINARY);
-    // TODO FT_COM
-    // TODO FT_TEXT
 
     QByteArray baHeader;
     baHeader=read_array(0,0x200);
