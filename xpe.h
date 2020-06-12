@@ -268,8 +268,7 @@ public:
         quint32   ForwarderChain;
         quint32   Name;
         quint32   FirstThunk;
-        //
-        QString sLibrary;
+        QString sLibrary; // Extra
     };
 
     struct BOUND_IMPORT_POSITION
