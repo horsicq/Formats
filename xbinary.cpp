@@ -2771,17 +2771,21 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFT)
 {
     QList<XBinary::FT> listResult;
 
-    if(stFT.contains(FT_BINARY)) listResult.append(FT_BINARY);
-    if(stFT.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
-    if(stFT.contains(FT_NE)) listResult.append(FT_NE);
-    if(stFT.contains(FT_LE)) listResult.append(FT_LE);
-    if(stFT.contains(FT_LX)) listResult.append(FT_LX);
-    if(stFT.contains(FT_PE32)) listResult.append(FT_PE32);
-    if(stFT.contains(FT_PE64)) listResult.append(FT_PE64);
-    if(stFT.contains(FT_ELF32)) listResult.append(FT_ELF32);
-    if(stFT.contains(FT_ELF64)) listResult.append(FT_ELF64);
-    if(stFT.contains(FT_MACH32)) listResult.append(FT_MACH32);
-    if(stFT.contains(FT_MACH64)) listResult.append(FT_MACH64);
+    if(stFT.contains(FT_BINARY))    listResult.append(FT_BINARY);
+    if(stFT.contains(FT_BINARY16))  listResult.append(FT_BINARY16);
+    if(stFT.contains(FT_BINARY32))  listResult.append(FT_BINARY32);
+    if(stFT.contains(FT_BINARY64))  listResult.append(FT_BINARY64);
+    if(stFT.contains(FT_COM))       listResult.append(FT_COM);
+    if(stFT.contains(FT_MSDOS))     listResult.append(FT_MSDOS);
+    if(stFT.contains(FT_NE))        listResult.append(FT_NE);
+    if(stFT.contains(FT_LE))        listResult.append(FT_LE);
+    if(stFT.contains(FT_LX))        listResult.append(FT_LX);
+    if(stFT.contains(FT_PE32))      listResult.append(FT_PE32);
+    if(stFT.contains(FT_PE64))      listResult.append(FT_PE64);
+    if(stFT.contains(FT_ELF32))     listResult.append(FT_ELF32);
+    if(stFT.contains(FT_ELF64))     listResult.append(FT_ELF64);
+    if(stFT.contains(FT_MACH32))    listResult.append(FT_MACH32);
+    if(stFT.contains(FT_MACH64))    listResult.append(FT_MACH64);
 
     return listResult;
 }
