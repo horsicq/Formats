@@ -140,6 +140,7 @@ public:
     {
         FT_UNKNOWN=0,
         FT_BINARY,
+        FT_BINARY16,
         FT_BINARY32,
         FT_BINARY64,
         FT_TEXT,
