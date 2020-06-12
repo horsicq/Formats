@@ -20,7 +20,7 @@
 //
 #include "xcom.h"
 
-XCOM::XCOM(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
+XCOM::XCOM(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase) : XBinary(__pDevice,bIsImage,nImageBase)
 {
 
 }
