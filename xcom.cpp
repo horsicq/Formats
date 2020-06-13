@@ -73,7 +73,9 @@ XBinary::MODE XCOM::getMode()
     return MODE_16;
 }
 
-qint64 XCOM::getEntryPointOffset()
+qint64 XCOM::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 {
+    Q_UNUSED(pMemoryMap)
+
     return 0;
 }
