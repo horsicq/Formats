@@ -401,7 +401,7 @@ public:
 
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nBaseAddress);
-    qint64 _getEntryPointOffset();
+    qint64 _getEntryPointOffset(); // TODO rename
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     qint64 getEntryPointAddress();
