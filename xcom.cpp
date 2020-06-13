@@ -46,7 +46,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
 
     result.nBaseAddress=_getBaseAddress();
     result.nRawSize=getSize();
-    result.nImageSize=getSize();
+    result.nImageSize=getSize(); // TODO Check
     result.fileType=FT_COM;
     result.mode=getMode();
     result.sArch=getArch();
