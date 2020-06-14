@@ -1641,7 +1641,13 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
         for(quint32 i=0; i<nNumberOfSections; i++)
         {
             XPE_DEF::IMAGE_SECTION_HEADER section=getSectionHeader(i);
+
             // TODO for corrupted files
+            if(section.SizeOfRawData>result.nRawSize)
+            {
+                break; // TODO
+            }
+
             qint64 nFileOffset=section.PointerToRawData;
             //
             nFileOffset=S_ALIGN_DOWN(nFileOffset,nFileAlignment);
