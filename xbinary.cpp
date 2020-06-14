@@ -1614,6 +1614,26 @@ void XBinary::_zeroMemory(char *pDest, qint64 nSize)
     }
 }
 
+bool XBinary::_isMemoryZeroFilled(char *pDest, qint64 nSize)
+{
+    bool bResult=true;
+
+    while(nSize)
+    {
+        if(*pDest)
+        {
+            bResult=false;
+
+            break;
+        }
+
+        pDest++;
+        nSize--;
+    }
+
+    return bResult;
+}
+
 bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice,qint64 nSourceOffset,QIODevice *pDestDevice,qint64 nDestOffset,qint64 nSize,quint32 nBufferSize)
 {
     // TODO optimize
