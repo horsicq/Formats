@@ -376,6 +376,13 @@ QByteArray XBinary::read_array(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
     return binary.read_array(nOffset,nSize);
 }
 
+qint64 XBinary::read_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize)
+{
+    XBinary binary(pDevice);
+
+    return binary.read_array(nOffset,pBuffer,nSize);
+}
+
 quint8 XBinary::read_uint8(qint64 nOffset)
 {
     quint8 result=0;
@@ -1592,6 +1599,17 @@ void XBinary::_copyMemory(char *pDest,char *pSource, qint64 nSize)
         *pDest=*pSource;
         pDest++;
         pSource++;
+        nSize--;
+    }
+}
+
+void XBinary::_zeroMemory(char *pDest, qint64 nSize)
+{
+    // TODO optimize
+    while(nSize)
+    {
+        *pDest=0;
+        pDest++;
         nSize--;
     }
 }

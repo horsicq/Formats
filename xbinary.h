@@ -254,6 +254,7 @@ public:
     qint64 write_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
 
     static QByteArray read_array(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
+    static qint64 read_array(QIODevice *pDevice,qint64 nOffset,char *pBuffer,qint64 nSize);
 
     quint8 read_uint8(qint64 nOffset);
     qint8 read_int8(qint64 nOffset);
@@ -345,6 +346,7 @@ public:
     static QByteArray readFile(QString sFileName);
 
     static void _copyMemory(char *pDest,char *pSource, qint64 nSize);
+    static void _zeroMemory(char *pDest,qint64 nSize);
     static bool copyDeviceMemory(QIODevice *pSourceDevice,qint64 nSourceOffset,QIODevice *pDestDevice,qint64 nDestOffset,qint64 nSize,quint32 nBufferSize=0x1000);
     bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset,qint64 nSize,quint32 nBufferSize=1,bool bReverse=false);
     bool zeroFill(qint64 nOffset,qint64 nSize);
