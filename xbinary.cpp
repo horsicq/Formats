@@ -4814,6 +4814,20 @@ QString XBinary::valueToTimeString(quint64 value, XBinary::DT_TYPE type)
     return sResult;
 }
 
+bool XBinary::isX86asm(QString sArch)
+{
+    bool bResult=false;
+
+    if((sArch=="8086")||
+       (sArch=="386")||
+       (sArch=="AMD64"))
+    {
+        bResult=true;
+    }
+
+    return bResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     QList<SIGNATURE_RECORD> result;

@@ -627,6 +627,8 @@ public:
 
     static QString valueToTimeString(quint64 value, DT_TYPE type);
 
+    static bool isX86asm(QString sArch);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);
