@@ -2197,9 +2197,11 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
 {
     _MEMORY_MAP result={};
 
+    qint64 nTotalSize=getSize();
+
     result.nBaseAddress=_getBaseAddress();
-    result.nRawSize=getSize();
-    result.nImageSize=getSize();
+    result.nRawSize=nTotalSize;
+    result.nImageSize=nTotalSize;
     result.fileType=FT_BINARY;
     result.mode=getMode();
     result.sArch=getArch();
@@ -2208,7 +2210,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
     record.nAddress=_getBaseAddress();
     record.segment=ADDRESS_SEGMENT_FLAT;
     record.nOffset=0;
-    record.nSize=getSize();
+    record.nSize=nTotalSize;
     record.nIndex=0;
 
     result.listRecords.append(record);
