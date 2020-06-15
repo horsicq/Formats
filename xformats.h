@@ -36,7 +36,6 @@ class XFormats : public QObject
 
 public:
     explicit XFormats(QObject *parent=nullptr);
-
     static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nImageBase=0);
     static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType);
 };
