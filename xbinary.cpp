@@ -28,6 +28,7 @@ XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
     setIsImage(bIsImage);
     setBaseAddress(0);
     setImageBase(nImageBase);
+    setEndianness(false);
     setEntryPointOffset(0);
     setFindProcessEnable(true);
     setDumpProcessEnable(true);
@@ -75,11 +76,15 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
 
 QString XBinary::endiannessToString(bool bIsBigEndian)
 {
-    QString sResult="LE";
+    QString sResult;
 
     if(bIsBigEndian)
     {
         sResult="BE";
+    }
+    else
+    {
+        sResult="LE";
     }
 
     return sResult;
@@ -93,6 +98,11 @@ void XBinary::setArch(QString sArch)
 QString XBinary::getArch()
 {  
     return __sArch;
+}
+
+void XBinary::setEndianness(bool bIsBigEndian)
+{
+    __bIsBigEndian=bIsBigEndian;
 }
 
 bool XBinary::isPacked(double dEntropy)
@@ -3807,7 +3817,7 @@ bool XBinary::isValid()
 
 bool XBinary::isBigEndian()
 {
-    return false;
+    return __bIsBigEndian;
 }
 
 bool XBinary::is16()

@@ -225,6 +225,8 @@ public:
     void setArch(QString sArch);
     virtual QString getArch();
 
+    void setEndianness(bool bIsBigEndian);
+
     static bool isPacked(double dEntropy);
 
     static quint32 random16();
@@ -667,6 +669,7 @@ private:
     qint64 __nBaseAddress;
     qint64 __nEntryPointOffset;
     qint64 __nImageBase;
+    bool __bIsBigEndian;
     bool __bIsFindStop;
     bool __bIsDumpStop;
     bool __bIsEntropyStop;
