@@ -2190,8 +2190,6 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
 
     if(nImportOffset!=-1)
     {
-        bool bIs64=is64();
-
         while(true)
         {
             XPE_DEF::IMAGE_IMPORT_DESCRIPTOR iid=read_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
@@ -6713,6 +6711,8 @@ QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportPositions()
 
 QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportPositions(XBinary::_MEMORY_MAP *pMemoryMap)
 {
+    Q_UNUSED(pMemoryMap)
+
     QList<XPE::BOUND_IMPORT_POSITION> listResult;
 
     qint64 nBoundImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);

@@ -461,6 +461,8 @@ public:
     static QString valueToHex(float value,bool bIsBigEndian=false);
     static QString valueToHex(double value,bool bIsBigEndian=false);
 
+    static QString valueToHex(MODE mode, quint64 value, bool bIsBigEndian=false);
+
     static bool checkString_uint8(QString sValue);
     static bool checkString_int8(QString sValue);
     static bool checkString_uint16(QString sValue);

@@ -2959,6 +2959,26 @@ QString XBinary::valueToHex(double value, bool bIsBigEndian)
     return QString("%1").arg(_nValue,16,16,QChar('0'));
 }
 
+QString XBinary::valueToHex(XBinary::MODE mode, quint64 value, bool bIsBigEndian)
+{
+    QString sResult;
+
+    if(mode==MODE_16)
+    {
+        sResult=valueToHex((quint16)value,bIsBigEndian);
+    }
+    else if(mode==MODE_32)
+    {
+        sResult=valueToHex((quint32)value,bIsBigEndian);
+    }
+    else if(mode==MODE_64)
+    {
+        sResult=valueToHex((quint64)value,bIsBigEndian);
+    }
+
+    return sResult;
+}
+
 bool XBinary::checkString_uint8(QString sValue)
 {
     bool bResult=false;
