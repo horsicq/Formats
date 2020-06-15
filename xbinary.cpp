@@ -1141,7 +1141,7 @@ void XBinary::endian_float(float *pValue,bool bIsBigEndian)
 {
     bool bReverse=false;
 
-#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+#if Q_BYTE_ORDER==Q_BIG_ENDIAN
     bReverse=!bIsBigEndian;
 #else
     bReverse=bIsBigEndian;
@@ -1158,7 +1158,7 @@ void XBinary::endian_double(double *pValue,bool bIsBigEndian)
 {
     bool bReverse=false;
 
-#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+#if Q_BYTE_ORDER==Q_BIG_ENDIAN
     bReverse=!bIsBigEndian;
 #else
     bReverse=bIsBigEndian;
