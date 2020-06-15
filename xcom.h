@@ -37,6 +37,7 @@ public:
     virtual _MEMORY_MAP getMemoryMap();
     virtual QString getArch();
     virtual MODE getMode();
+    virtual bool isBigEndian();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 };
 

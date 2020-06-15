@@ -2215,6 +2215,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
     result.fileType=FT_BINARY;
     result.mode=getMode();
     result.sArch=getArch();
+    result.bIsBigEndian=isBigEndian();
 
     _MEMORY_RECORD record={};
     record.nAddress=_getBaseAddress();

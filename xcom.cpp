@@ -52,6 +52,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
     result.fileType=FT_COM;
     result.mode=getMode();
     result.sArch=getArch();
+    result.bIsBigEndian=isBigEndian();
 
     _MEMORY_RECORD record={};
     record.nAddress=_getBaseAddress();
@@ -73,6 +74,11 @@ QString XCOM::getArch()
 XBinary::MODE XCOM::getMode()
 {
     return MODE_16;
+}
+
+bool XCOM::isBigEndian()
+{
+    return false;
 }
 
 qint64 XCOM::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
