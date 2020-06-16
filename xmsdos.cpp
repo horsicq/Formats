@@ -318,7 +318,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     result.sArch=getArch();
 
     result.fileType=FT_MSDOS;
-    result.mode=MODE_16;
+    result.mode=getMode();
     result.nRawSize=getSize();
     result.nImageSize=0xFFFF;
 
