@@ -1072,3 +1072,8 @@ QString XNE::getArch()
 {
     return "8086";
 }
+
+qint64 XNE::getEntryPointOffset(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    return addressToOffset(pMemoryMap,getImageOS2Header_csip());
+}

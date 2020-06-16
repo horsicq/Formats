@@ -126,6 +126,8 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
+
+    virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 };
 
 #endif // XNE_H
