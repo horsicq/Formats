@@ -182,12 +182,6 @@ public:
         QList<_MEMORY_RECORD> listRecords;
     };
 
-    struct UNPACK_OPTIONS
-    {
-        // PE/PE+
-        bool bCopyOverlay;     // In
-    };
-
     enum HASH
     {
         HASH_MD5=0,
