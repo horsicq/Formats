@@ -223,7 +223,7 @@ public:
 
     static bool isPacked(double dEntropy);
 
-    static quint32 random16();
+    static quint16 random16();
     static quint32 random32();
     static quint64 random64();
 

@@ -110,7 +110,7 @@ bool XBinary::isPacked(double dEntropy)
     return (dEntropy>=D_ENTROPY_THRESHOLD);
 }
 
-quint32 XBinary::random16()
+quint16 XBinary::random16()
 {
     quint16 nResult=0;
 
