@@ -454,7 +454,6 @@ public:
     static QString valueToHex(qint64 value,bool bIsBigEndian=false);
     static QString valueToHex(float value,bool bIsBigEndian=false);
     static QString valueToHex(double value,bool bIsBigEndian=false);
-
     static QString valueToHex(MODE mode, quint64 value, bool bIsBigEndian=false);
 
     static bool checkString_uint8(QString sValue);
@@ -506,6 +505,7 @@ public:
     static quint32 getStringCustomCRC32(QString sString);
 
     QIODevice *getDevice();
+
     virtual bool isValid();
     virtual bool isBigEndian();
     bool is16();
