@@ -517,6 +517,7 @@ public:
     QString getImportFunctionName(quint32 nImport,quint32 nFunctionNumber,QList<IMPORT_HEADER> *pListHeaders);
 
     RESOURCE_HEADER getResourceHeader();
+    RESOURCE_HEADER getResourceHeader(_MEMORY_MAP *pMemoryMap);
     QList<RESOURCE_RECORD> getResources();
     QList<RESOURCE_RECORD> getResources(_MEMORY_MAP *pMemoryMap);
 

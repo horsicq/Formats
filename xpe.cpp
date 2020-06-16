@@ -2753,14 +2753,19 @@ QString XPE::getImportFunctionName(quint32 nImport, quint32 nFunctionNumber, QLi
 
 XPE::RESOURCE_HEADER XPE::getResourceHeader()
 {
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getResourceHeader(&memoryMap);
+}
+
+XPE::RESOURCE_HEADER XPE::getResourceHeader(_MEMORY_MAP *pMemoryMap)
+{
     RESOURCE_HEADER result={};
 
     qint64 nResourceOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 
     if(nResourceOffset!=-1)
     {
-        _MEMORY_MAP memoryMap=getMemoryMap();
-
         qint64 nOffset=nResourceOffset;
 
         result.nOffset=nOffset;
@@ -2772,7 +2777,7 @@ XPE::RESOURCE_HEADER XPE::getResourceHeader()
 
             for(int i=0; i<result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries; i++)
             {
-                RESOURCE_POSITION rp=_getResourcePosition(&memoryMap,memoryMap.nBaseAddress,nResourceOffset,nOffset,0);
+                RESOURCE_POSITION rp=_getResourcePosition(pMemoryMap,pMemoryMap->nBaseAddress,nResourceOffset,nOffset,0);
 
                 if(!rp.bIsValid)
                 {
