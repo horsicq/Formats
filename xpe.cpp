@@ -7897,6 +7897,13 @@ void XPE::setMetadataHeader_Streams(quint16 value)
     }
 }
 
+bool XPE::isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory)
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return isDataDirectoryValid(pDataDirectory,&memoryMap);
+}
+
 bool XPE::isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap)
 {
     bool bResult=false;

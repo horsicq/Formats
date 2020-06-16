@@ -749,6 +749,7 @@ public:
     void setMetadataHeader_Flags(quint16 value);
     void setMetadataHeader_Streams(quint16 value);
 
+    bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap);
 
     bool isNetMetadataPresent();
