@@ -2277,15 +2277,15 @@ bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap,QString sSignature, qint6
 {
     sSignature=convertSignature(sSignature);
 
-    //Convert to List
-    //int nType
-    //0: compare bytes
-    //1: relative offset(fix)
-    //2: relative offset
-    //3: address
-    //QByteArray bytes
-    //int size of address/offset
-    //int Base of address
+    // Convert to List
+    // int nType
+    // 0: compare bytes
+    // 1: relative offset(fix)
+    // 2: relative offset
+    // 3: address
+    // QByteArray bytes
+    // int size of address/offset
+    // int Base of address
 
     QList<SIGNATURE_RECORD> records=getSignatureRecords(sSignature);
 
