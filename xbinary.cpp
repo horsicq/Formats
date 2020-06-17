@@ -4857,8 +4857,8 @@ bool XBinary::isX86asm(QString sArch)
         (sArch=="80486")||
         (sArch=="80586")||
         (sArch=="386")||
-        (sArch=="AMD64")||
         (sArch=="I386")||
+        (sArch=="AMD64")||
         (sArch=="X86_64"))
     {
         bResult=true;
