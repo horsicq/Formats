@@ -3584,15 +3584,14 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
     qint32 nIndex=0;
 
-    if(is64())
+    result.mode=getMode();
+    if(result.mode==MODE_64)
     {
         result.fileType=FT_ELF64;
-        result.mode=MODE_64;
     }
     else
     {
         result.fileType=FT_ELF32;
-        result.mode=MODE_32;
     }
 
     result.sArch=getArch();

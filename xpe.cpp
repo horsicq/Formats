@@ -1535,15 +1535,15 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
 
     qint32 nIndex=0;
 
-    if(is64())
+    result.mode=getMode();
+
+    if(result.mode==MODE_64)
     {
         result.fileType=FT_PE64;
-        result.mode=MODE_64;
     }
     else
     {
         result.fileType=FT_PE32;
-        result.mode=MODE_32;
     }
 
     result.sArch=getArch();

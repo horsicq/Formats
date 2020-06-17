@@ -695,7 +695,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
     result.mode=getMode();
 
-    if(result.mode=MODE_64)
+    if(result.mode==MODE_64)
     {
         result.fileType=FT_MACH64;
     }
