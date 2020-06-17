@@ -1278,7 +1278,6 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
     XBinary::_MEMORY_MAP result;
 
     result.sArch=getArch();
-
     result.mode=getMode();
 
     if(result.mode==MODE_16SEG)
