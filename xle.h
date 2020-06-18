@@ -139,6 +139,7 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
+    virtual bool isBigEndian();
 
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();
