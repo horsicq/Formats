@@ -1547,6 +1547,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
     }
 
     result.sArch=getArch();
+    result.bIsBigEndian=isBigEndian();
 
     result.nBaseAddress=_getBaseAddress();
     result.nRawSize=getSize();
