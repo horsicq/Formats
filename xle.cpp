@@ -1279,6 +1279,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
 
     result.sArch=getArch();
     result.mode=getMode();
+    result.bIsBigEndian=isBigEndian();
 
     if(result.mode==MODE_16SEG)
     {
