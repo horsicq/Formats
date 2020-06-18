@@ -100,5 +100,4 @@ struct o32_map
     quint16 o32_pageflags;
 };
 }
-
 #endif // XLE_DEF_H
