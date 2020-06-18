@@ -1324,6 +1324,11 @@ QString XLE::getArch()
     return getImageLECpusS().value(getImageVxdHeader_cpu(),QString("UNKNOWN"));
 }
 
+bool XLE::isBigEndian()
+{
+    return false;
+}
+
 QMap<quint64, QString> XLE::getImageLEMagics()
 {
     QMap<quint64, QString> mapResult;
