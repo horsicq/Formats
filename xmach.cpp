@@ -724,6 +724,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
     {
         QString sSegmentName=QString("%1(%2)['%3']").arg(tr("Segment")).arg(i).arg(listSegmentRecords.at(i).segname); // TODO Limit
         // TODO Align
+        // TODO File size
         qint64 nFileOffset=listSegmentRecords.at(i).fileoff;
         qint64 nVirtualAddress=listSegmentRecords.at(i).vmaddr;
         qint64 nFileSize=listSegmentRecords.at(i).filesize;
