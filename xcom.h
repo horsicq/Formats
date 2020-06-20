@@ -33,7 +33,6 @@ public:
     ~XCOM();
     virtual bool isValid();
     virtual qint64 getBaseAddress();
-
     virtual _MEMORY_MAP getMemoryMap();
     virtual QString getArch();
     virtual MODE getMode();
