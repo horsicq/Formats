@@ -905,15 +905,20 @@ qint64 XPE::getDataDirectoryOffset(XBinary::_MEMORY_MAP *pMemoryMap, quint32 nNu
 
 QByteArray XPE::getDataDirectory(quint32 nNumber)
 {
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getDataDirectory(&memoryMap,nNumber);
+}
+
+QByteArray XPE::getDataDirectory(XBinary::_MEMORY_MAP *pMemoryMap, quint32 nNumber)
+{
     QByteArray baResult;
 
     XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory=getOptionalHeader_DataDirectory(nNumber);
 
     if(dataDirectory.VirtualAddress)
     {
-        _MEMORY_MAP memoryMap=getMemoryMap();
-
-        qint64 nOffset=addressToOffset(&memoryMap,dataDirectory.VirtualAddress+memoryMap.nBaseAddress);
+        qint64 nOffset=addressToOffset(pMemoryMap,dataDirectory.VirtualAddress+pMemoryMap->nBaseAddress);
 
         if(nOffset!=-1)
         {
