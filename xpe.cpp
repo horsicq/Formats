@@ -141,6 +141,7 @@ XPE_DEF::S_IMAGE_FILE_HEADER XPE::getFileHeader()
 
 void XPE::setFileHeader(XPE_DEF::S_IMAGE_FILE_HEADER *pFileHeader)
 {
+    // TODO
     write_array(getFileHeaderOffset(),(char *)pFileHeader,sizeof(XPE_DEF::S_IMAGE_FILE_HEADER));
 }
 
