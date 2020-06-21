@@ -6703,7 +6703,6 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(XBinary::_MEMORY_M
                 nAddressThunksOffset+=8;
                 nBoundThunksRVA+=8;
                 nBoundThunksOffset+=8;
-//                nRVA+=8;
             }
             else
             {
@@ -6713,7 +6712,6 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(XBinary::_MEMORY_M
                 nAddressThunksOffset+=4;
                 nBoundThunksRVA+=4;
                 nBoundThunksOffset+=4;
-//                nRVA+=4;
             }
 
             listResult.append(importPosition);
