@@ -6576,9 +6576,14 @@ void XPE::setDelayImport_TimeDateStamp(quint32 nNumber, quint32 nValue)
 
 QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
 {
-    QList<XPE::DELAYIMPORT_POSITION> listResult;
-
     _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getDelayImportPositions(&memoryMap,nIndex);
+}
+
+QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, int nIndex)
+{
+    QList<XPE::DELAYIMPORT_POSITION> listResult;
 
     qint64 nDelayImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
 
@@ -6592,11 +6597,11 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
         qint64 nAddressThunksRVA=idd.ImportAddressTableRVA;
         qint64 nBoundThunksRVA=idd.BoundImportAddressTableRVA;
 
-        qint64 nNameThunksOffset=XBinary::relAddressToOffset(&memoryMap,nNameThunksRVA);
-        qint64 nAddressThunksOffset=XBinary::relAddressToOffset(&memoryMap,nAddressThunksRVA);
-        qint64 nBoundThunksOffset=XBinary::relAddressToOffset(&memoryMap,nBoundThunksRVA);
+        qint64 nNameThunksOffset=XBinary::relAddressToOffset(pMemoryMap,nNameThunksRVA);
+        qint64 nAddressThunksOffset=XBinary::relAddressToOffset(pMemoryMap,nAddressThunksRVA);
+        qint64 nBoundThunksOffset=XBinary::relAddressToOffset(pMemoryMap,nBoundThunksRVA);
 
-        bool bIs64=XBinary::is64(&memoryMap);
+        bool bIs64=XBinary::is64(pMemoryMap);
 
         while(true)
         {
@@ -6623,7 +6628,7 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
 
                 if(!(importPosition.nNameThunkValue&0x8000000000000000))
                 {
-                    qint64 nOffset=addressToOffset(&memoryMap,importPosition.nNameThunkValue+memoryMap.nBaseAddress);
+                    qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nNameThunkValue+pMemoryMap->nBaseAddress);
 
                     if(nOffset!=-1)
                     {
@@ -6658,7 +6663,7 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
 
                 if(!(importPosition.nNameThunkValue&0x80000000))
                 {
-                    qint64 nOffset=addressToOffset(&memoryMap,importPosition.nNameThunkValue+memoryMap.nBaseAddress);
+                    qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nNameThunkValue+pMemoryMap->nBaseAddress);
 
                     if(nOffset!=-1)
                     {
