@@ -826,6 +826,7 @@ bool XPE::isOptionalHeader_DataDirectoryPresent(quint32 nNumber)
 
     //    return (dd.Size)&&(dd.VirtualAddress)&&(isAddressValid(dd.VirtualAddress+getBaseAddress())); // TODO Check
     //    return (dd.Size)&&(dd.VirtualAddress);
+    // TODO more checks
     return (dd.VirtualAddress);
 }
 
