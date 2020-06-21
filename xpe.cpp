@@ -263,11 +263,13 @@ XPE_DEF::IMAGE_OPTIONAL_HEADER64 XPE::getOptionalHeader64()
 
 void XPE::setOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pOptionalHeader32)
 {
+    // TODO
     write_array(getOptionalHeaderOffset(),(char *)pOptionalHeader32,sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER32));
 }
 
 void XPE::setOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pOptionalHeader64)
 {
+    // TODO
     write_array(getOptionalHeaderOffset(),(char *)pOptionalHeader64,sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER64));
 }
 
