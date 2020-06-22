@@ -1808,7 +1808,7 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap)
 
     if(nImportOffset!=-1)
     {
-        bool bIs64=is64();
+        bool bIs64=is64(pMemoryMap);
 
         while(true)
         {
