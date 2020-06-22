@@ -73,6 +73,11 @@ QString XPE::getArch()
     return getImageFileHeaderMachinesS().value(getFileHeader_Machine(),QString("UNKNOWN"));
 }
 
+bool XPE::isBigEndian()
+{
+    return false;
+}
+
 XPE::TYPE XPE::getType()
 {
     TYPE result=TYPE_EXE;
