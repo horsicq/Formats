@@ -6606,7 +6606,7 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(XBinary::_MEMORY_M
         qint64 nAddressThunksOffset=XBinary::relAddressToOffset(pMemoryMap,nAddressThunksRVA);
         qint64 nBoundThunksOffset=XBinary::relAddressToOffset(pMemoryMap,nBoundThunksRVA);
 
-        bool bIs64=XBinary::is64(pMemoryMap);
+        bool bIs64=is64(pMemoryMap);
 
         while(true)
         {
