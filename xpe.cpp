@@ -2279,7 +2279,7 @@ QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemo
 
     qint64 nThunksOffset=XBinary::relAddressToOffset(pMemoryMap,nThunksRVA);
 
-    bool bIs64=XBinary::is64(pMemoryMap);
+    bool bIs64=is64(pMemoryMap);
 
     while(true)
     {
