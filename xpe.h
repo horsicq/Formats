@@ -401,7 +401,6 @@ public:
 
     XPE_DEF::IMAGE_DATA_DIRECTORY getOptionalHeader_DataDirectory(quint32 nNumber);
     void setOptionalHeader_DataDirectory(quint32 nNumber,XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
-
     void setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber,quint32 value);
     void setOptionalHeader_DataDirectory_Size(quint32 nNumber,quint32 value);
 
