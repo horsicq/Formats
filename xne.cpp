@@ -1073,6 +1073,11 @@ QString XNE::getArch()
     return "8086";
 }
 
+bool XNE::isBigEndian()
+{
+    return false;
+}
+
 qint64 XNE::getEntryPointOffset(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     return addressToOffset(pMemoryMap,getImageOS2Header_csip());

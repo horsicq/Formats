@@ -126,6 +126,7 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
+    virtual bool isBigEndian();
 
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 };
