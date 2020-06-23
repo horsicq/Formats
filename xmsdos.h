@@ -119,6 +119,7 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
+    virtual bool isBigEndian();
 };
 
 #endif // XMSDOS_H

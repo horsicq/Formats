@@ -612,3 +612,8 @@ QString XMSDOS::getArch()
 {
     return QString("8086");
 }
+
+bool XMSDOS::isBigEndian()
+{
+    return false;
+}
