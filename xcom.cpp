@@ -61,6 +61,8 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
     record.nSize=nTotalSize;
     record.nIndex=0;
 
+    // TODO Virtual address
+
     result.listRecords.append(record);
 
     return result;
