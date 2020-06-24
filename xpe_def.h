@@ -580,15 +580,6 @@ struct S_IMAGE_TLS_DIRECTORY32
     quint32 Characteristics;
 };
 
-//union {
-//        quint32 Characteristics;
-//        struct {
-//            quint32 Reserved0 : 20;
-//            quint32 Alignment : 4;
-//            quint32 Reserved1 : 8;
-//        } DUMMYSTRUCTNAME;
-//    } DUMMYUNIONNAME;
-
 struct S_IMAGE_ALPHA64_RUNTIME_FUNCTION_ENTRY
 {
     quint64 BeginAddress;
