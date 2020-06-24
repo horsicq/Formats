@@ -48,7 +48,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
 
     result.nBaseAddress=_getBaseAddress();
     result.nRawSize=nTotalSize;
-    result.nImageSize=nTotalSize; // TODO Check 0x10000?
+    result.nImageSize=0x10000; // TODO Check 0x10000?
     result.fileType=FT_COM;
     result.mode=getMode();
     result.sArch=getArch();
@@ -61,9 +61,22 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
     record.nSize=nTotalSize;
     record.nIndex=0;
 
-    // TODO Virtual address
-
     result.listRecords.append(record);
+
+    qint64 nVirtualSize=result.nImageSize-nTotalSize;
+
+    if(nVirtualSize>0)
+    {
+        _MEMORY_RECORD record={};
+        record.nAddress=_getBaseAddress()+nTotalSize;
+        record.segment=ADDRESS_SEGMENT_FLAT;
+        record.nOffset=-1;
+        record.nSize=nVirtualSize;
+        record.nIndex=1;
+        record.bIsVirtual=true;
+
+        result.listRecords.append(record);
+    }
 
     return result;
 }
