@@ -24,7 +24,6 @@
 #include "xbinary.h"
 #include "xelf_def.h"
 
-// TODO buffer big Endian();
 class XELF : public XBinary
 {
     Q_OBJECT
