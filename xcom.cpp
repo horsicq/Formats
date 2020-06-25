@@ -78,6 +78,8 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
         result.listRecords.append(record);
     }
 
+    // Check overlay ?
+
     return result;
 }
 
