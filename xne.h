@@ -112,22 +112,17 @@ public:
 
     XNE_DEF::NE_SEGMENT _read_NE_SEGMENT(qint64 nOffset);
 
-    virtual _MEMORY_MAP getMemoryMap();
-
     static QMap<quint64, QString> getImageNEMagics();
     static QMap<quint64, QString> getImageNEMagicsS();
-
     static QMap<quint64, QString> getImageNEFlagsS();
-
     static QMap<quint64, QString> getImageNEExetypesS();
     static QMap<quint64, QString> getImageNEFlagsothersS();
+    static QMap<quint64, QString> getImageSegmentTypesS();
 
-    static QMap<quint64,QString> getImageSegmentTypesS();
-
+    virtual _MEMORY_MAP getMemoryMap();
     virtual MODE getMode();
     virtual QString getArch();
     virtual bool isBigEndian();
-
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 };
 
