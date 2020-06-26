@@ -136,10 +136,10 @@ public:
     QList<XLE_DEF::o32_obj> getObjects();
 
     virtual _MEMORY_MAP getMemoryMap();
-
     virtual MODE getMode();
     virtual QString getArch();
     virtual bool isBigEndian();
+    virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();

@@ -1334,6 +1334,13 @@ bool XLE::isBigEndian()
     return false;
 }
 
+qint64 XLE::getEntryPointOffset(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    Q_UNUSED(pMemoryMap)
+    // TODO
+    return 0;
+}
+
 QMap<quint64, QString> XLE::getImageLEMagics()
 {
     QMap<quint64, QString> mapResult;
