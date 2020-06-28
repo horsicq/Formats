@@ -781,6 +781,8 @@ public:
     int getConstDataSection();
     int getConstDataSection(XBinary::_MEMORY_MAP *pMemoryMap);
 
+    // TODO .INIT section
+
     struct REBUILD_OPTIONS
     {
         bool bOptimize;
