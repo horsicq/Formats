@@ -148,7 +148,7 @@ public:
         FT_COM,
         FT_MSDOS,
         FT_NE,
-        FT_LE, // mb TODO 16/32
+        FT_LE,
         FT_LX,
         FT_PE,
         FT_PE32,
