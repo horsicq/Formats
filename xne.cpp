@@ -916,7 +916,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
 
     int nCount=listSegments.count();
 
-    result.nBaseAddress=0x10000;
+    result.nBaseAddress=0x10000; // TODO const
     result.nImageSize=nCount*0x10000;
 
     qint64 nMaxOffset=0;
@@ -931,14 +931,14 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
             nFileSize=0x10000;
         }
 
-        nFileSize=S_ALIGN_UP(nFileSize,0x200);
+        nFileSize=S_ALIGN_UP(nFileSize,0x200); // TODO const
 
         if(nFileOffset) // if offset = 0 no data
         {
             _MEMORY_RECORD record={};
             record.nSize=nFileSize;
             record.nOffset=nFileOffset;
-            record.nAddress=(i+1)*0x10000;
+            record.nAddress=(i+1)*0x10000;  // TODO const
             record.segment=ADDRESS_SEGMENT_UNKNOWN;
             record.type=MMT_LOADSECTION;
             record.nIndex=nIndex++;
@@ -951,7 +951,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
             _MEMORY_RECORD record={};
             record.nSize=0x10000-nFileSize;
             record.nOffset=-1;
-            record.nAddress=(i+1)*0x10000+nFileSize;
+            record.nAddress=(i+1)*0x10000+nFileSize;  // TODO const
             record.segment=ADDRESS_SEGMENT_UNKNOWN;
             record.type=MMT_LOADSECTION;
             record.nIndex=nIndex++;
