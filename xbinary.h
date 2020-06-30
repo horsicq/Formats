@@ -243,6 +243,7 @@ public:
         qint32 *pnNumberOfFiles;
     };
     static void findFiles(QString sDirectoryName,FFOPTIONS *pFFOption,qint32 nLevel=0);
+    static void findFiles(QString sDirectoryName, QList<QString> *pListFileNames);
 
     static QString regExp(QString sRegExp,QString sString,int nIndex);
     static bool isRegExpPresent(QString sRegExp,QString sString);

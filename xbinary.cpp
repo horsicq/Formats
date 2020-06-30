@@ -293,6 +293,32 @@ void XBinary::findFiles(QString sDirectoryName, XBinary::FFOPTIONS *pFFOption, q
     }
 }
 
+void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
+{
+    QFileInfo fi(sDirectoryName);
+
+    QString sFN=fi.fileName();
+
+    if((sFN!=".")&&(sFN!=".."))
+    {
+        if(fi.isFile())
+        {
+            pListFileNames->append(fi.absoluteFilePath());
+        }
+        else if(fi.isDir())
+        {
+            QDir dir(sDirectoryName);
+
+            QFileInfoList eil=dir.entryInfoList();
+
+            for(int i=0;i<eil.count();i++)
+            {
+                findFiles(eil.at(i).absoluteFilePath(),pListFileNames);
+            }
+        }
+    }
+}
+
 QString XBinary::regExp(QString sRegExp, QString sString, int nIndex)
 {
     QString sResult;
