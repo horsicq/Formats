@@ -1291,6 +1291,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
     }
 
     result.nRawSize=getSize();
+    // TODO Image size CONST
 //    result.nImageSize=0xFFFF;
 
     QList<XLE_DEF::o32_obj> listObjects=XLE::getObjects();
