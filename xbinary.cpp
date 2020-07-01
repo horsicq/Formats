@@ -4053,6 +4053,7 @@ qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap)
 QString XBinary::convertSignature(QString sSignature)
 {
     // 'AnsiString'
+    // TODO more defs
     if(sSignature.contains(QChar(39)))
     {
         QString sTemp;
