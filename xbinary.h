@@ -85,7 +85,7 @@ public:
     struct BYTE_COUNTS
     {
         qint64 nSize;
-        qint64 nCount[256];
+        qint64 nCount[256]; // TODO const
     };
 
     struct OS_ANSISTRING
