@@ -79,8 +79,15 @@ void XFormats::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_NE)||
         pStFileTypes->contains(XBinary::FT_LE)||
         pStFileTypes->contains(XBinary::FT_LX)||
+        pStFileTypes->contains(XBinary::FT_PE)||
         pStFileTypes->contains(XBinary::FT_PE32)||
-        pStFileTypes->contains(XBinary::FT_PE64))
+        pStFileTypes->contains(XBinary::FT_PE64)||
+        pStFileTypes->contains(XBinary::FT_ELF)||
+        pStFileTypes->contains(XBinary::FT_ELF32)||
+        pStFileTypes->contains(XBinary::FT_ELF64)||
+        pStFileTypes->contains(XBinary::FT_MACH)||
+        pStFileTypes->contains(XBinary::FT_MACH32)||
+        pStFileTypes->contains(XBinary::FT_MACH64))
     {
         pStFileTypes->remove(XBinary::FT_BINARY);
     }
