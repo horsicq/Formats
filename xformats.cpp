@@ -75,7 +75,10 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
 
 void XFormats::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 {
-    if( pStFileTypes->contains(XBinary::FT_PE)||
+    if( pStFileTypes->contains(XBinary::FT_MSDOS)||
+        pStFileTypes->contains(XBinary::FT_NE)||
+        pStFileTypes->contains(XBinary::FT_LE)||
+        pStFileTypes->contains(XBinary::FT_LX)||
         pStFileTypes->contains(XBinary::FT_PE32)||
         pStFileTypes->contains(XBinary::FT_PE64))
     {
