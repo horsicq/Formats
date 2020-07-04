@@ -1339,6 +1339,7 @@ qint64 XLE::getEntryPointOffset(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     Q_UNUSED(pMemoryMap)
     // TODO
+    // startobj:eip
     return 0;
 }
 
