@@ -1275,7 +1275,7 @@ QList<XLE_DEF::o32_obj> XLE::getObjects()
 
 XBinary::_MEMORY_MAP XLE::getMemoryMap()
 {
-    XBinary::_MEMORY_MAP result;
+    XBinary::_MEMORY_MAP result={};
 
     result.sArch=getArch();
     result.mode=getMode();
