@@ -103,7 +103,8 @@ public:
     bool isNE();
     bool isPE();
 
-    bool isRichSignaturePresent(); // PE and LE
+    // rich for PE and LE
+    bool isRichSignaturePresent();
     QList<XMSDOS::MS_RICH_RECORD> getRichSignatureRecords();
 
     qint32 getNumberOfRichIDs();
