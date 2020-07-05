@@ -2600,7 +2600,7 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
 
         while((nDataSize>0)&&(!__bIsDumpStop))
         {
-            qint64 nTempSize=qMin(nDataSize,(qint64)0x1000);
+            qint64 nTempSize=qMin(nDataSize,(qint64)0x1000); // TODO const
 
             if(!((__pDevice->seek(nSourceOffset))&&(__pDevice->read(pBuffer,nTempSize)==nTempSize)))
             {
@@ -2649,7 +2649,7 @@ QSet<XBinary::FT> XBinary::getFileTypes()
     stResult.insert(FT_BINARY);
 
     QByteArray baHeader;
-    baHeader=read_array(0,0x200);
+    baHeader=read_array(0,0x200); // TODO const
     char *pOffset=baHeader.data();
     unsigned int nSize=getSize();
 
