@@ -2590,7 +2590,7 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
         emit dumpProgressMaximumChanged(100);
         emit dumpProgressValueChanged(0);
 
-        char *pBuffer=new char[0x1000];
+        char *pBuffer=new char[0x1000]; // TODO const
 
         qint64 nSourceOffset=nDataOffset;
         qint64 nDestOffset=0;
