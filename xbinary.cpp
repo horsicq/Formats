@@ -1346,7 +1346,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
     }
 
     qint64 nTemp=0;
-    const int BUFFER_SIZE=0x1000;
+    const int BUFFER_SIZE=0x1000; // TODO const
     char *pBuffer=new char[BUFFER_SIZE+(nStringSize-1)];
 
     qint64 nTotalSize=nSize;
@@ -1422,7 +1422,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     }
 
     qint64 nTemp=0;
-    const int BUFFER_SIZE=0x1000;
+    const int BUFFER_SIZE=0x1000; // TODO const
     char *pBuffer=new char[BUFFER_SIZE+2*(nStringSize-1)];
 
     qint64 nTotalSize=nSize;
