@@ -113,6 +113,7 @@ public:
     bool isRichVersionPresent(quint32 nVersion);
     bool isRichVersionPresent(quint32 nVersion,QList<MS_RICH_RECORD> *pListRich);
 
+    // dos stub for LE, NE and PE
     qint64 getDosStubSize();
     qint64 getDosStubOffset();
     QByteArray getDosStub();
