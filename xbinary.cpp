@@ -2282,6 +2282,11 @@ void XBinary::setBaseAddress(qint64 nBaseAddress)
     this->__nBaseAddress=nBaseAddress;
 }
 
+qint64 XBinary::getImageSize()
+{
+    return getSize();
+}
+
 bool XBinary::isImage()
 {
     return bIsImage;
