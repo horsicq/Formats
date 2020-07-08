@@ -430,7 +430,7 @@ qint64 XMSDOS::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 
 qint64 XMSDOS::getImageSize()
 {
-    return 0x1000;
+    return 0x1000; // TODO Check
 }
 
 QMap<quint64, QString> XMSDOS::getImageMagics()
