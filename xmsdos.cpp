@@ -320,7 +320,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     result.fileType=FT_MSDOS;
     result.mode=getMode();
     result.nRawSize=getSize();
-    result.nImageSize=0xFFFF;
+    result.nImageSize=getImageSize();
 
     qint64 nMaxOffset=(get_e_cp()-1)*512+get_e_cblp();
 
@@ -426,6 +426,11 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 qint64 XMSDOS::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 {
     return addressToOffset(pMemoryMap,get_e_ip());
+}
+
+qint64 XMSDOS::getImageSize()
+{
+    return 0x1000;
 }
 
 QMap<quint64, QString> XMSDOS::getImageMagics()
