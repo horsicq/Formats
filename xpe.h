@@ -229,9 +229,9 @@ public:
         quint64 nTables_Valid;
         quint64 nTables_Sorted;
         quint32 nTables_Valid_NumberOfRows;
-        quint32 Tables_TablesNumberOfIndexes[64];
-        qint64 Tables_TablesOffsets[64];
-        qint64 Tables_TablesSizes[64];
+        quint32 Tables_TablesNumberOfIndexes[64]; // TODO const
+        qint64 Tables_TablesOffsets[64]; // TODO const
+        qint64 Tables_TablesSizes[64]; // TODO const
         qint64 nStringsOffset;
         qint64 nStringsSize;
         qint64 nUSOffset;
