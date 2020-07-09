@@ -260,13 +260,13 @@ public:
     {
         union
         {
-            quint32   Characteristics;
-            quint32   OriginalFirstThunk;
+            quint32 Characteristics;
+            quint32 OriginalFirstThunk;
         };
-        quint32   TimeDateStamp;
-        quint32   ForwarderChain;
-        quint32   Name;
-        quint32   FirstThunk;
+        quint32 TimeDateStamp;
+        quint32 ForwarderChain;
+        quint32 Name;
+        quint32 FirstThunk;
         QString sLibrary; // Extra
     };
 
