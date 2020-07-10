@@ -2241,7 +2241,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
             qint64 nThunksOffset=-1;
             qint64 nThunksRVA=0;
             qint64 nThunksOriginalRVA=0;
-            qint64 nThunksOriginalOffset=0;
+//          qint64 nThunksOriginalOffset=0;
 
             if(iid.OriginalFirstThunk)
             {
@@ -2257,7 +2257,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
             nThunksOriginalRVA=iid.FirstThunk;
 
             nThunksOffset=addressToOffset(pMemoryMap,nThunksRVA+nBaseAddress);
-            nThunksOriginalOffset=addressToOffset(pMemoryMap,nThunksOriginalRVA+nBaseAddress);
+//            nThunksOriginalOffset=addressToOffset(pMemoryMap,nThunksOriginalRVA+nBaseAddress);
 
             if(nThunksOffset!=-1)
             {
