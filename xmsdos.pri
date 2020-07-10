@@ -12,4 +12,3 @@ SOURCES += \
     XCONFIG += xbinary
     include($$PWD/xbinary.pri)
 }
-    
