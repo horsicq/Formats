@@ -48,7 +48,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
 
     result.nBaseAddress=_getBaseAddress();
     result.nRawSize=nTotalSize;
-    result.nImageSize=0x10000;
+    result.nImageSize=getImageSize();
     result.fileType=FT_COM;
     result.mode=getMode();
     result.sArch=getArch();
@@ -103,4 +103,9 @@ qint64 XCOM::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
     Q_UNUSED(pMemoryMap)
 
     return 0;
+}
+
+qint64 XCOM::getImageSize()
+{
+    return 0x10000;
 }

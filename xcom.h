@@ -38,6 +38,7 @@ public:
     virtual MODE getMode();
     virtual bool isBigEndian();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
+    virtual qint64 getImageSize();
 };
 
 #endif // XCOM_H
