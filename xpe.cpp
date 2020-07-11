@@ -30,7 +30,8 @@ bool XPE::isValid()
 
     quint16 magic=get_magic();
 
-    if(magic==(quint16)XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)
+    if( (magic==(quint16)XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||
+        (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
     {
         qint32 lfanew=get_lfanew();
 
