@@ -917,7 +917,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
     int nCount=listSegments.count();
 
     result.nBaseAddress=0x10000; // TODO const
-    result.nImageSize=nCount*0x10000;
+    result.nImageSize=nCount*0x10000; // TODO Check
 
     qint64 nMaxOffset=0;
 
