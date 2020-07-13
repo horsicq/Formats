@@ -490,6 +490,8 @@ public:
     static QString getHash(HASH hash,QIODevice *pDevice);
     QString getHash(HASH hash,qint64 nOffset=0,qint64 nSize=-1);
 
+    static QSet<HASH> getAvailableHashes();
+
     static bool isFileHashValid(HASH hash,QString sFileName,QString sHash);
 
     static quint32 getAdler32(QString sFileName);

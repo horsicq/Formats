@@ -3450,6 +3450,25 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
     return sResult;
 }
 
+QSet<XBinary::HASH> XBinary::getAvailableHashes()
+{
+    QSet<XBinary::HASH> stResult;
+
+    stResult.insert(HASH_MD4);
+    stResult.insert(HASH_MD5);
+    stResult.insert(HASH_SHA1);
+
+    return stResult;
+}
+
+QString XBinary::hashIdToString(XBinary::HASH hash)
+{
+    QString sResult;
+
+
+    return sResult;
+}
+
 bool XBinary::isFileHashValid(XBinary::HASH hash, QString sFileName, QString sHash)
 {
     bool bResult=false;
