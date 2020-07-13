@@ -3419,6 +3419,7 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 
         switch(hash)
         {
+            case HASH_MD4:      algorithm=QCryptographicHash::Md4;      break;
             case HASH_MD5:      algorithm=QCryptographicHash::Md5;      break;
             case HASH_SHA1:     algorithm=QCryptographicHash::Sha1;     break;
         }

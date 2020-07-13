@@ -185,7 +185,8 @@ public:
 
     enum HASH
     {
-        HASH_MD5=0,
+        HASH_MD4=0,
+        HASH_MD5,
         HASH_SHA1
     };
 
