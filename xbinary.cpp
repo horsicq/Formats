@@ -3419,14 +3419,18 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 
         switch(hash)
         {
-            case HASH_MD4:      algorithm=QCryptographicHash::Md4;      break;
-            case HASH_MD5:      algorithm=QCryptographicHash::Md5;      break;
-            case HASH_SHA1:     algorithm=QCryptographicHash::Sha1;     break;
+            case HASH_MD4:          algorithm=QCryptographicHash::Md4;          break;
+            case HASH_MD5:          algorithm=QCryptographicHash::Md5;          break;
+            case HASH_SHA1:         algorithm=QCryptographicHash::Sha1;         break;
 #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
-            case HASH_SHA224:   algorithm=QCryptographicHash::Sha224;   break;
-            case HASH_SHA256:   algorithm=QCryptographicHash::Sha256;   break;
-            case HASH_SHA384:   algorithm=QCryptographicHash::Sha384;   break;
-            case HASH_SHA512:   algorithm=QCryptographicHash::Sha512;   break;
+            case HASH_SHA224:       algorithm=QCryptographicHash::Sha224;       break;
+            case HASH_SHA256:       algorithm=QCryptographicHash::Sha256;       break;
+            case HASH_SHA384:       algorithm=QCryptographicHash::Sha384;       break;
+            case HASH_SHA512:       algorithm=QCryptographicHash::Sha512;       break;
+            case HASH_KECCAK_224:   algorithm=QCryptographicHash::Keccak_224;   break;
+            case HASH_KECCAK_256:   algorithm=QCryptographicHash::Keccak_256;   break;
+            case HASH_KECCAK_384:   algorithm=QCryptographicHash::Keccak_384;   break;
+            case HASH_KECCAK_512:   algorithm=QCryptographicHash::Keccak_512;   break;
 #endif
         }
 
@@ -3486,6 +3490,10 @@ QString XBinary::hashIdToString(XBinary::HASH hash)
         case HASH_SHA256:       sResult=QString("SHA256");      break;
         case HASH_SHA384:       sResult=QString("SHA384");      break;
         case HASH_SHA512:       sResult=QString("SHA512");      break;
+        case HASH_KECCAK_224:   sResult=QString("KECCAK_224");  break;
+        case HASH_KECCAK_256:   sResult=QString("KECCAK_256");  break;
+        case HASH_KECCAK_384:   sResult=QString("KECCAK_384");  break;
+        case HASH_KECCAK_512:   sResult=QString("KECCAK_512");  break;
     }
 
     return sResult;
