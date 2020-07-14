@@ -3490,6 +3490,7 @@ QString XBinary::hashIdToString(XBinary::HASH hash)
         case HASH_MD4:          sResult=QString("MD4");         break;
         case HASH_MD5:          sResult=QString("MD5");         break;
         case HASH_SHA1:         sResult=QString("SHA1");        break;
+#ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
         case HASH_SHA224:       sResult=QString("SHA224");      break;
         case HASH_SHA256:       sResult=QString("SHA256");      break;
         case HASH_SHA384:       sResult=QString("SHA384");      break;
@@ -3498,6 +3499,7 @@ QString XBinary::hashIdToString(XBinary::HASH hash)
         case HASH_KECCAK_256:   sResult=QString("Keccak_256");  break;
         case HASH_KECCAK_384:   sResult=QString("Keccak_384");  break;
         case HASH_KECCAK_512:   sResult=QString("Keccak_512");  break;
+#endif
     }
 
     return sResult;
