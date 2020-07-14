@@ -3463,8 +3463,14 @@ QSet<XBinary::HASH> XBinary::getAvailableHashes()
 
 QString XBinary::hashIdToString(XBinary::HASH hash)
 {
-    QString sResult;
+    QString sResult="Unknown"; // mb TODO translate
 
+    switch(hash)
+    {
+        case HASH_MD4:          sResult=QString("MD4");         break;
+        case HASH_MD5:          sResult=QString("MD5");         break;
+        case HASH_SHA1:         sResult=QString("SHA1");        break;
+    }
 
     return sResult;
 }
