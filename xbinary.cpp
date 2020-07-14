@@ -3461,6 +3461,10 @@ QSet<XBinary::HASH> XBinary::getAvailableHashes()
     stResult.insert(HASH_MD4);
     stResult.insert(HASH_MD5);
     stResult.insert(HASH_SHA1);
+    stResult.insert(HASH_SHA224);
+    stResult.insert(HASH_SHA256);
+    stResult.insert(HASH_SHA384);
+    stResult.insert(HASH_SHA512);
 
     return stResult;
 }
