@@ -3422,10 +3422,12 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
             case HASH_MD4:      algorithm=QCryptographicHash::Md4;      break;
             case HASH_MD5:      algorithm=QCryptographicHash::Md5;      break;
             case HASH_SHA1:     algorithm=QCryptographicHash::Sha1;     break;
+#ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
             case HASH_SHA224:   algorithm=QCryptographicHash::Sha224;   break;
             case HASH_SHA256:   algorithm=QCryptographicHash::Sha256;   break;
             case HASH_SHA384:   algorithm=QCryptographicHash::Sha384;   break;
             case HASH_SHA512:   algorithm=QCryptographicHash::Sha512;   break;
+#endif
         }
 
         QCryptographicHash crypto(algorithm);
@@ -3461,10 +3463,12 @@ QSet<XBinary::HASH> XBinary::getAvailableHashes()
     stResult.insert(HASH_MD4);
     stResult.insert(HASH_MD5);
     stResult.insert(HASH_SHA1);
+#ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
     stResult.insert(HASH_SHA224);
     stResult.insert(HASH_SHA256);
     stResult.insert(HASH_SHA384);
     stResult.insert(HASH_SHA512);
+#endif
 
     return stResult;
 }
