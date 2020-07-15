@@ -3423,7 +3423,7 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
             case HASH_MD5:          algorithm=QCryptographicHash::Md5;          break;
             case HASH_SHA1:         algorithm=QCryptographicHash::Sha1;         break;
 #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
-            case HASH_SHA224:       algorithm=QCryptographicHash::Sha224;       break;
+            case HASH_SHA224:       algorithm=QCryptographicHash::Sha224;       break; // Keccak_224 ?
             case HASH_SHA256:       algorithm=QCryptographicHash::Sha256;       break;
             case HASH_SHA384:       algorithm=QCryptographicHash::Sha384;       break;
             case HASH_SHA512:       algorithm=QCryptographicHash::Sha512;       break;
