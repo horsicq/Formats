@@ -3481,6 +3481,27 @@ QSet<XBinary::HASH> XBinary::getHashMethods()
     return stResult;
 }
 
+QList<XBinary::HASH> XBinary::getHashMethodsAsList()
+{
+    QList<XBinary::HASH> listResult;
+
+    listResult.append(HASH_MD4);
+    listResult.append(HASH_MD5);
+    listResult.append(HASH_SHA1);
+#ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
+    listResult.append(HASH_SHA224);
+    listResult.append(HASH_SHA256);
+    listResult.append(HASH_SHA384);
+    listResult.append(HASH_SHA512);
+//    stResult.insert(HASH_KECCAK_224);
+//    stResult.insert(HASH_KECCAK_256);
+//    stResult.insert(HASH_KECCAK_384);
+//    stResult.insert(HASH_KECCAK_512);
+#endif
+
+    return listResult;
+}
+
 QString XBinary::hashIdToString(XBinary::HASH hash)
 {
     QString sResult="Unknown"; // mb TODO translate

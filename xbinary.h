@@ -502,6 +502,7 @@ public:
     QString getHash(HASH hash,qint64 nOffset=0,qint64 nSize=-1);
 
     static QSet<HASH> getHashMethods();
+    static QList<HASH> getHashMethodsAsList();
     static QString hashIdToString(HASH hash);
 
     static bool isFileHashValid(HASH hash,QString sFileName,QString sHash);
