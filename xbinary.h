@@ -367,6 +367,7 @@ public:
     bool isOffsetValid(qint64 nOffset);
     bool isAddressValid(qint64 nAddress);
     bool isRelAddressValid(qint64 nRelAddress);
+    bool isAddressPhysical(qint64 nAddress);
 
     qint64 offsetToAddress(qint64 nOffset);
     qint64 addressToOffset(qint64 nAddress);

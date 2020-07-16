@@ -5283,3 +5283,10 @@ bool XBinary::_isOffsetValid(qint64 nOffset)
     
     return (nOffset<nFileSize);
 }
+
+bool XBinary::isAddressPhysical(qint64 nAddress)
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return isAddressPhysical(&memoryMap,nAddress);
+}
