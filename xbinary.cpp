@@ -3460,7 +3460,7 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
     return sResult;
 }
 
-QSet<XBinary::HASH> XBinary::getAvailableHashes()
+QSet<XBinary::HASH> XBinary::getHashMethods()
 {
     QSet<XBinary::HASH> stResult;
 

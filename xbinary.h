@@ -501,7 +501,7 @@ public:
     static QString getHash(HASH hash,QIODevice *pDevice);
     QString getHash(HASH hash,qint64 nOffset=0,qint64 nSize=-1);
 
-    static QSet<HASH> getAvailableHashes();
+    static QSet<HASH> getHashMethods();
     static QString hashIdToString(HASH hash);
 
     static bool isFileHashValid(HASH hash,QString sFileName,QString sHash);
