@@ -580,7 +580,14 @@ void XPE::setOptionalHeader_BaseOfData(quint32 value)
 {
     // There is no BaseOfData for PE64
     // TODO error string
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,BaseOfData),value);
+    if(is64())
+    {
+        // TODO
+    }
+    else
+    {
+        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,BaseOfData),value);
+    }
 }
 
 void XPE::setOptionalHeader_ImageBase(quint64 value)
