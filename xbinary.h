@@ -33,7 +33,7 @@
 #include <QTemporaryFile>
 #include <QCryptographicHash>
 #include <QCoreApplication>
-#if (QT_VERSION_MAJOR<5)
+#if (QT_VERSION_MAJOR<5) // TODO Check
 #include <QRegExp>
 #else
 #include <QRegularExpression>
