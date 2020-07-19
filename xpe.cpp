@@ -578,9 +578,8 @@ void XPE::setOptionalHeader_BaseOfCode(quint32 value)
 
 void XPE::setOptionalHeader_BaseOfData(quint32 value)
 {
-    // There is no BaseOfData for PE64
     // TODO error string
-    if(is64())
+    if(is64()) // There is no BaseOfData for PE64
     {
         // TODO
     }
