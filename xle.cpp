@@ -1273,6 +1273,15 @@ QList<XLE_DEF::o32_obj> XLE::getObjects()
     return listResult;
 }
 
+QList<XLE_DEF::o32_map> XLE::getMaps()
+{
+    QList<XLE_DEF::o32_map> listResult;
+
+    // TODO
+
+    return listResult;
+}
+
 XBinary::_MEMORY_MAP XLE::getMemoryMap()
 {
     XBinary::_MEMORY_MAP result={};
