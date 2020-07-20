@@ -88,8 +88,8 @@ struct o32_obj
     quint32 o32_size;
     quint32 o32_base;
     quint32 o32_flags;
-    quint32 o32_pagemap;
-    quint32 o32_mapsize;
+    quint32 o32_pagemap;                // index in map
+    quint32 o32_mapsize;                // number of entry
     quint32 o32_reserved;
 };
 
