@@ -134,6 +134,7 @@ public:
     XLE_DEF::o32_map _read_o32_map(qint64 nOffset);
 
     QList<XLE_DEF::o32_obj> getObjects();
+    QList<XLE_DEF::o32_map> getMaps();
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual MODE getMode();
@@ -145,6 +146,7 @@ public:
     static QMap<quint64, QString> getImageLEMagicsS();
     static QMap<quint64, QString> getImageLECpusS();
     static QMap<quint64, QString> getImageLEOssS();
+    static QMap<quint64, QString> getImageLEMflagsS();
 };
 
 #endif // XLE_H
