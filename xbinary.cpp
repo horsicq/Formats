@@ -657,29 +657,29 @@ QString XBinary::read_utf8String(qint64 nOffset, qint64 nMaxSize)
     return sResult;
 }
 
-void XBinary::write_uint8(qint64 nOffset, quint8 value)
+void XBinary::write_uint8(qint64 nOffset, quint8 nValue)
 {
-    write_array(nOffset,(char *)(&value),1);
+    write_array(nOffset,(char *)(&nValue),1);
 }
 
-void XBinary::write_int8(qint64 nOffset, qint8 value)
+void XBinary::write_int8(qint64 nOffset, qint8 nValue)
 {
-    quint8 _value=(quint8)value;
+    quint8 _value=(quint8)nValue;
     write_array(nOffset,(char *)(&_value),1);
 }
 
-void XBinary::write_uint16(qint64 nOffset, quint16 value, bool bIsBigEndian)
+void XBinary::write_uint16(qint64 nOffset, quint16 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    write_array(nOffset,(char *)(&value),2);
+    write_array(nOffset,(char *)(&nValue),2);
 }
 
 void XBinary::write_int16(qint64 nOffset, qint16 value, bool bIsBigEndian)
@@ -698,23 +698,23 @@ void XBinary::write_int16(qint64 nOffset, qint16 value, bool bIsBigEndian)
     write_array(nOffset,(char *)(&_value),2);
 }
 
-void XBinary::write_uint32(qint64 nOffset, quint32 value, bool bIsBigEndian)
+void XBinary::write_uint32(qint64 nOffset, quint32 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    write_array(nOffset,(char *)(&value),4);
+    write_array(nOffset,(char *)(&nValue),4);
 }
 
-void XBinary::write_int32(qint64 nOffset, qint32 value, bool bIsBigEndian)
+void XBinary::write_int32(qint64 nOffset, qint32 nValue, bool bIsBigEndian)
 {
-    quint32 _value=(quint32)value;
+    quint32 _value=(quint32)nValue;
 
     if(bIsBigEndian)
     {
@@ -728,23 +728,23 @@ void XBinary::write_int32(qint64 nOffset, qint32 value, bool bIsBigEndian)
     write_array(nOffset,(char *)(&_value),4);
 }
 
-void XBinary::write_uint64(qint64 nOffset, quint64 value, bool bIsBigEndian)
+void XBinary::write_uint64(qint64 nOffset, quint64 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    write_array(nOffset,(char *)(&value),8);
+    write_array(nOffset,(char *)(&nValue),8);
 }
 
-void XBinary::write_int64(qint64 nOffset, qint64 value, bool bIsBigEndian)
+void XBinary::write_int64(qint64 nOffset, qint64 nValue, bool bIsBigEndian)
 {
-    qint64 _value=(qint64)value;
+    qint64 _value=(qint64)nValue;
 
     if(bIsBigEndian)
     {

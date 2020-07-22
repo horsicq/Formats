@@ -119,8 +119,8 @@ public:
     {
         MMT_UNKNOWN=0,
         MMT_HEADER,
-        MMT_LOADSECTION, // Section in PE; LoadProgram in ELF
-        MMT_NOLOADABLE, // For ELF
+        MMT_LOADSECTION,    // Section in PE; LoadProgram in ELF
+        MMT_NOLOADABLE,     // For ELF
         MMT_OVERLAY
     };
 
@@ -280,14 +280,14 @@ public:
     QString read_unicodeString(qint64 nOffset,qint64 nMaxSize=256,bool bIsBigEndian=false);
     QString read_utf8String(qint64 nOffset,qint64 nMaxSize=256);
 
-    void write_uint8(qint64 nOffset,quint8 value);
-    void write_int8(qint64 nOffset,qint8 value);
-    void write_uint16(qint64 nOffset,quint16 value,bool bIsBigEndian=false);
-    void write_int16(qint64 nOffset,qint16 value,bool bIsBigEndian=false);
-    void write_uint32(qint64 nOffset,quint32 value,bool bIsBigEndian=false);
-    void write_int32(qint64 nOffset,qint32 value,bool bIsBigEndian=false);
-    void write_uint64(qint64 nOffset,quint64 value,bool bIsBigEndian=false);
-    void write_int64(qint64 nOffset,qint64 value,bool bIsBigEndian=false);
+    void write_uint8(qint64 nOffset,quint8 nValue);
+    void write_int8(qint64 nOffset,qint8 nValue);
+    void write_uint16(qint64 nOffset,quint16 nValue,bool bIsBigEndian=false);
+    void write_int16(qint64 nOffset,qint16 nValue,bool bIsBigEndian=false);
+    void write_uint32(qint64 nOffset,quint32 nValue,bool bIsBigEndian=false);
+    void write_int32(qint64 nOffset,qint32 nValue,bool bIsBigEndian=false);
+    void write_uint64(qint64 nOffset,quint64 nValue,bool bIsBigEndian=false);
+    void write_int64(qint64 nOffset,qint64 nValue,bool bIsBigEndian=false);
 
     static quint8 _read_uint8(char *pData);
     static qint8 _read_int8(char *pData);
