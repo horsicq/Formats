@@ -300,14 +300,14 @@ public:
     static QString _read_ansiString(char *pData,int nMaxSize=50);
     static QByteArray _read_byteArray(char *pData,int nSize);
 
-    static void _write_uint8(char *pData,quint8 value);
-    static void _write_int8(char *pData,qint8 value);
-    static void _write_uint16(char *pData,quint16 value,bool bIsBigEndian=false);
-    static void _write_int16(char *pData,qint16 value,bool bIsBigEndian=false);
-    static void _write_uint32(char *pData,quint32 value,bool bIsBigEndian=false);
-    static void _write_int32(char *pData,qint32 value,bool bIsBigEndian=false);
-    static void _write_uint64(char *pData,qint64 value,bool bIsBigEndian=false);
-    static void _write_int64(char *pData,qint64 value,bool bIsBigEndian=false);
+    static void _write_uint8(char *pData,quint8 nValue);
+    static void _write_int8(char *pData,qint8 nValue);
+    static void _write_uint16(char *pData,quint16 nValue,bool bIsBigEndian=false);
+    static void _write_int16(char *pData,qint16 nValue,bool bIsBigEndian=false);
+    static void _write_uint32(char *pData,quint32 nValue,bool bIsBigEndian=false);
+    static void _write_int32(char *pData,qint32 nValue,bool bIsBigEndian=false);
+    static void _write_uint64(char *pData,qint64 nValue,bool bIsBigEndian=false);
+    static void _write_int64(char *pData,qint64 nValue,bool bIsBigEndian=false);
 
     qint64 find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize);
     qint64 find_uint8(qint64 nOffset,qint64 nSize,quint8 value);

@@ -879,98 +879,98 @@ QByteArray XBinary::_read_byteArray(char *pData, int nSize)
     return QByteArray(pData,nSize);
 }
 
-void XBinary::_write_uint8(char *pData, quint8 value)
+void XBinary::_write_uint8(char *pData, quint8 nValue)
 {
-    *(quint8 *)pData=value;
+    *(quint8 *)pData=nValue;
 }
 
-void XBinary::_write_int8(char *pData, qint8 value)
+void XBinary::_write_int8(char *pData, qint8 nValue)
 {
-    *(qint8 *)pData=value;
+    *(qint8 *)pData=nValue;
 }
 
-void XBinary::_write_uint16(char *pData, quint16 value, bool bIsBigEndian)
+void XBinary::_write_uint16(char *pData, quint16 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qToBigEndian(value);
+        nValue=qToBigEndian(nValue);
     }
     else
     {
-        value=qToLittleEndian(value);
+        nValue=qToLittleEndian(nValue);
     }
 
-    *(quint16 *)pData=value;
+    *(quint16 *)pData=nValue;
 }
 
-void XBinary::_write_int16(char *pData, qint16 value, bool bIsBigEndian)
+void XBinary::_write_int16(char *pData, qint16 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qToBigEndian(value);
+        nValue=qToBigEndian(nValue);
     }
     else
     {
-        value=qToLittleEndian(value);
+        nValue=qToLittleEndian(nValue);
     }
 
-    *(qint16 *)pData=value;
+    *(qint16 *)pData=nValue;
 }
 
-void XBinary::_write_uint32(char *pData, quint32 value, bool bIsBigEndian)
+void XBinary::_write_uint32(char *pData, quint32 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qToBigEndian(value);
+        nValue=qToBigEndian(nValue);
     }
     else
     {
-        value=qToLittleEndian(value);
+        nValue=qToLittleEndian(nValue);
     }
 
-    *(quint32 *)pData=value;
+    *(quint32 *)pData=nValue;
 }
 
-void XBinary::_write_int32(char *pData, qint32 value, bool bIsBigEndian)
+void XBinary::_write_int32(char *pData, qint32 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qToBigEndian(value);
+        nValue=qToBigEndian(nValue);
     }
     else
     {
-        value=qToLittleEndian(value);
+        nValue=qToLittleEndian(nValue);
     }
 
-    *(qint32 *)pData=value;
+    *(qint32 *)pData=nValue;
 }
 
-void XBinary::_write_uint64(char *pData, qint64 value, bool bIsBigEndian)
+void XBinary::_write_uint64(char *pData, qint64 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qToBigEndian(value);
+        nValue=qToBigEndian(nValue);
     }
     else
     {
-        value=qToLittleEndian(value);
+        nValue=qToLittleEndian(nValue);
     }
 
-    *(qint64 *)pData=value;
+    *(qint64 *)pData=nValue;
 }
 
-void XBinary::_write_int64(char *pData, qint64 value, bool bIsBigEndian)
+void XBinary::_write_int64(char *pData, qint64 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qToBigEndian(value);
+        nValue=qToBigEndian(nValue);
     }
     else
     {
-        value=qToLittleEndian(value);
+        nValue=qToLittleEndian(nValue);
     }
 
-    *(qint64 *)pData=value;
+    *(qint64 *)pData=nValue;
 }
 
 qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint64 nArraySize)
