@@ -273,6 +273,7 @@ public:
     qint32 read_int32(qint64 nOffset,bool bIsBigEndian=false);
     quint64 read_uint64(qint64 nOffset,bool bIsBigEndian=false);
     qint64 read_int64(qint64 nOffset,bool bIsBigEndian=false);
+    // TODO double dloat
 
     qint64 write_ansiString(qint64 nOffset,QString sString);
 
@@ -310,16 +311,16 @@ public:
     static void _write_int64(char *pData,qint64 nValue,bool bIsBigEndian=false);
 
     qint64 find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize);
-    qint64 find_uint8(qint64 nOffset,qint64 nSize,quint8 value);
-    qint64 find_int8(qint64 nOffset,qint64 nSize,qint8 value);
-    qint64 find_uint16(qint64 nOffset,qint64 nSize,quint16 value,bool bIsBigEndian=false);
-    qint64 find_int16(qint64 nOffset,qint64 nSize,qint16 value,bool bIsBigEndian=false);
-    qint64 find_uint32(qint64 nOffset,qint64 nSize,quint32 value,bool bIsBigEndian=false);
-    qint64 find_int32(qint64 nOffset,qint64 nSize,qint32 value,bool bIsBigEndian=false);
-    qint64 find_uint64(qint64 nOffset,qint64 nSize,quint64 value,bool bIsBigEndian=false);
-    qint64 find_int64(qint64 nOffset,qint64 nSize,qint64 value,bool bIsBigEndian=false);
-    qint64 find_float(qint64 nOffset,qint64 nSize,float value,bool bIsBigEndian=false);
-    qint64 find_double(qint64 nOffset,qint64 nSize,double value,bool bIsBigEndian=false);
+    qint64 find_uint8(qint64 nOffset,qint64 nSize,quint8 nValue);
+    qint64 find_int8(qint64 nOffset,qint64 nSize,qint8 nValue);
+    qint64 find_uint16(qint64 nOffset,qint64 nSize,quint16 nValue,bool bIsBigEndian=false);
+    qint64 find_int16(qint64 nOffset,qint64 nSize,qint16 nValue,bool bIsBigEndian=false);
+    qint64 find_uint32(qint64 nOffset,qint64 nSize,quint32 nValue,bool bIsBigEndian=false);
+    qint64 find_int32(qint64 nOffset,qint64 nSize,qint32 nValue,bool bIsBigEndian=false);
+    qint64 find_uint64(qint64 nOffset,qint64 nSize,quint64 nValue,bool bIsBigEndian=false);
+    qint64 find_int64(qint64 nOffset,qint64 nSize,qint64 nValue,bool bIsBigEndian=false);
+    qint64 find_float(qint64 nOffset,qint64 nSize,float fValue,bool bIsBigEndian=false);
+    qint64 find_double(qint64 nOffset,qint64 nSize,double dValue,bool bIsBigEndian=false);
 
     static void endian_float(float *pValue,bool bIsBigEndian);
     static void endian_double(double *pValue,bool bIsBigEndian);

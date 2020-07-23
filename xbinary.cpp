@@ -1045,33 +1045,33 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
     return -1;
 }
 
-qint64 XBinary::find_uint8(qint64 nOffset, qint64 nSize, quint8 value)
+qint64 XBinary::find_uint8(qint64 nOffset, qint64 nSize, quint8 nValue)
 {
-    return find_array(nOffset,nSize,(char *)&value,1);
+    return find_array(nOffset,nSize,(char *)&nValue,1);
 }
 
-qint64 XBinary::find_int8(qint64 nOffset, qint64 nSize, qint8 value)
+qint64 XBinary::find_int8(qint64 nOffset, qint64 nSize, qint8 nValue)
 {
-    return find_array(nOffset,nSize,(char *)&value,1);
+    return find_array(nOffset,nSize,(char *)&nValue,1);
 }
 
-qint64 XBinary::find_uint16(qint64 nOffset, qint64 nSize, quint16 value, bool bIsBigEndian)
+qint64 XBinary::find_uint16(qint64 nOffset, qint64 nSize, quint16 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    return find_array(nOffset,nSize,(char *)&value,2);
+    return find_array(nOffset,nSize,(char *)&nValue,2);
 }
 
-qint64 XBinary::find_int16(qint64 nOffset, qint64 nSize, qint16 value, bool bIsBigEndian)
+qint64 XBinary::find_int16(qint64 nOffset, qint64 nSize, qint16 nValue, bool bIsBigEndian)
 {
-    quint16 _value=(quint16)value;
+    quint16 _value=(quint16)nValue;
 
     if(bIsBigEndian)
     {
@@ -1085,23 +1085,23 @@ qint64 XBinary::find_int16(qint64 nOffset, qint64 nSize, qint16 value, bool bIsB
     return find_array(nOffset,nSize,(char *)&_value,2);
 }
 
-qint64 XBinary::find_uint32(qint64 nOffset, qint64 nSize, quint32 value, bool bIsBigEndian)
+qint64 XBinary::find_uint32(qint64 nOffset, qint64 nSize, quint32 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    return find_array(nOffset,nSize,(char *)&value,4);
+    return find_array(nOffset,nSize,(char *)&nValue,4);
 }
 
-qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 value, bool bIsBigEndian)
+qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIsBigEndian)
 {
-    quint32 _value=(quint32)value;
+    quint32 _value=(quint32)nValue;
 
     if(bIsBigEndian)
     {
@@ -1115,23 +1115,23 @@ qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 value, bool bIsB
     return find_array(nOffset,nSize,(char *)&_value,4);
 }
 
-qint64 XBinary::find_uint64(qint64 nOffset, qint64 nSize, quint64 value, bool bIsBigEndian)
+qint64 XBinary::find_uint64(qint64 nOffset, qint64 nSize, quint64 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    return find_array(nOffset,nSize,(char *)&value,8);
+    return find_array(nOffset,nSize,(char *)&nValue,8);
 }
 
-qint64 XBinary::find_int64(qint64 nOffset, qint64 nSize, qint64 value, bool bIsBigEndian)
+qint64 XBinary::find_int64(qint64 nOffset, qint64 nSize, qint64 nValue, bool bIsBigEndian)
 {
-    quint64 _value=(quint64)value;
+    quint64 _value=(quint64)nValue;
 
     if(bIsBigEndian)
     {
@@ -1145,18 +1145,18 @@ qint64 XBinary::find_int64(qint64 nOffset, qint64 nSize, qint64 value, bool bIsB
     return find_array(nOffset,nSize,(char *)&_value,8);
 }
 
-qint64 XBinary::find_float(qint64 nOffset, qint64 nSize, float value, bool bIsBigEndian)
+qint64 XBinary::find_float(qint64 nOffset, qint64 nSize, float fValue, bool bIsBigEndian)
 {
-    float _value=value;
+    float _value=fValue;
 
     endian_float(&_value,bIsBigEndian);
 
     return find_array(nOffset,nSize,(char *)&_value,4);
 }
 
-qint64 XBinary::find_double(qint64 nOffset, qint64 nSize, double value, bool bIsBigEndian)
+qint64 XBinary::find_double(qint64 nOffset, qint64 nSize, double dValue, bool bIsBigEndian)
 {
-    double _value=value;
+    double _value=dValue;
 
     endian_double(&_value,bIsBigEndian);
 
