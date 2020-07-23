@@ -78,25 +78,25 @@ public:
     qint64 getEhdr64Size();
 
     quint32 getIdent_Magic();
-    void setIdent_Magic(quint32 value);
+    void setIdent_Magic(quint32 nValue);
 
     quint8 getIdent_mag(int nMag);
-    void setIdent_mag(quint8 value,int nMag);
+    void setIdent_mag(quint8 nValue,int nMag);
 
     quint8 getIdent_class();
-    void setIdent_class(quint8 value);
+    void setIdent_class(quint8 nValue);
     quint8 getIdent_data();
-    void setIdent_data(quint8 value);
+    void setIdent_data(quint8 nValue);
     quint8 getIdent_version();
-    void setIdent_version(quint8 value);
+    void setIdent_version(quint8 nValue);
 
     quint8 getIdent_osabi();
-    void setIdent_osabi(quint8 value);
+    void setIdent_osabi(quint8 nValue);
     quint8 getIdent_abiversion();
-    void setIdent_abiversion(quint8 value);
+    void setIdent_abiversion(quint8 nValue);
 
     quint8 getIdent_pad(int nPad);
-    void setIdent_pad(quint8 value,int nPad);
+    void setIdent_pad(quint8 nValue,int nPad);
 
     // TODO Hdr32 getHdr32();
     quint16 getHdr32_type();
