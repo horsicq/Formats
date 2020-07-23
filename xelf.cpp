@@ -300,9 +300,9 @@ quint16 XELF::getHdr64_type()
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_type),isBigEndian());
 }
 
-void XELF::setHdr64_type(quint16 value)
+void XELF::setHdr64_type(quint16 nValue)
 {
-    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_type),value,isBigEndian());
+    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_type),nValue,isBigEndian());
 }
 
 quint16 XELF::getHdr64_machine()
@@ -310,9 +310,9 @@ quint16 XELF::getHdr64_machine()
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_machine),isBigEndian());
 }
 
-void XELF::setHdr64_machine(quint16 value)
+void XELF::setHdr64_machine(quint16 nValue)
 {
-    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_machine),value,isBigEndian());
+    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_machine),nValue,isBigEndian());
 }
 
 quint32 XELF::getHdr64_version()
@@ -320,9 +320,9 @@ quint32 XELF::getHdr64_version()
     return read_uint32(offsetof(XELF_DEF::Elf64_Ehdr,e_version),isBigEndian());
 }
 
-void XELF::setHdr64_version(quint32 value)
+void XELF::setHdr64_version(quint32 nValue)
 {
-    write_uint32(offsetof(XELF_DEF::Elf64_Ehdr,e_version),value,isBigEndian());
+    write_uint32(offsetof(XELF_DEF::Elf64_Ehdr,e_version),nValue,isBigEndian());
 }
 
 quint64 XELF::getHdr64_entry()
@@ -330,9 +330,9 @@ quint64 XELF::getHdr64_entry()
     return read_uint64(offsetof(XELF_DEF::Elf64_Ehdr,e_entry),isBigEndian());
 }
 
-void XELF::setHdr64_entry(quint64 value)
+void XELF::setHdr64_entry(quint64 nValue)
 {
-    write_uint64(offsetof(XELF_DEF::Elf64_Ehdr,e_entry),value,isBigEndian());
+    write_uint64(offsetof(XELF_DEF::Elf64_Ehdr,e_entry),nValue,isBigEndian());
 }
 
 quint64 XELF::getHdr64_phoff()
@@ -340,9 +340,9 @@ quint64 XELF::getHdr64_phoff()
     return read_uint64(offsetof(XELF_DEF::Elf64_Ehdr,e_phoff),isBigEndian());
 }
 
-void XELF::setHdr64_phoff(quint64 value)
+void XELF::setHdr64_phoff(quint64 nValue)
 {
-    write_uint64(offsetof(XELF_DEF::Elf64_Ehdr,e_phoff),value,isBigEndian());
+    write_uint64(offsetof(XELF_DEF::Elf64_Ehdr,e_phoff),nValue,isBigEndian());
 }
 
 quint64 XELF::getHdr64_shoff()
@@ -350,9 +350,9 @@ quint64 XELF::getHdr64_shoff()
     return read_uint64(offsetof(XELF_DEF::Elf64_Ehdr,e_shoff),isBigEndian());
 }
 
-void XELF::setHdr64_shoff(quint64 value)
+void XELF::setHdr64_shoff(quint64 nValue)
 {
-    write_uint64(offsetof(XELF_DEF::Elf64_Ehdr,e_shoff),value,isBigEndian());
+    write_uint64(offsetof(XELF_DEF::Elf64_Ehdr,e_shoff),nValue,isBigEndian());
 }
 
 quint32 XELF::getHdr64_flags()
@@ -360,9 +360,9 @@ quint32 XELF::getHdr64_flags()
     return read_uint32(offsetof(XELF_DEF::Elf64_Ehdr,e_flags),isBigEndian());
 }
 
-void XELF::setHdr64_flags(quint32 value)
+void XELF::setHdr64_flags(quint32 nValue)
 {
-    write_uint32(offsetof(XELF_DEF::Elf64_Ehdr,e_flags),value,isBigEndian());
+    write_uint32(offsetof(XELF_DEF::Elf64_Ehdr,e_flags),nValue,isBigEndian());
 }
 
 quint16 XELF::getHdr64_ehsize()
@@ -370,9 +370,9 @@ quint16 XELF::getHdr64_ehsize()
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_ehsize),isBigEndian());
 }
 
-void XELF::setHdr64_ehsize(quint16 value)
+void XELF::setHdr64_ehsize(quint16 nValue)
 {
-    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_ehsize),value,isBigEndian());
+    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_ehsize),nValue,isBigEndian());
 }
 
 quint16 XELF::getHdr64_phentsize()
@@ -380,9 +380,9 @@ quint16 XELF::getHdr64_phentsize()
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_phentsize),isBigEndian());
 }
 
-void XELF::setHdr64_phentsize(quint16 value)
+void XELF::setHdr64_phentsize(quint16 nValue)
 {
-    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_phentsize),value,isBigEndian());
+    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_phentsize),nValue,isBigEndian());
 }
 
 quint16 XELF::getHdr64_phnum()
@@ -390,9 +390,9 @@ quint16 XELF::getHdr64_phnum()
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_phnum),isBigEndian());
 }
 
-void XELF::setHdr64_phnum(quint16 value)
+void XELF::setHdr64_phnum(quint16 nValue)
 {
-    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_phnum),value,isBigEndian());
+    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_phnum),nValue,isBigEndian());
 }
 
 quint16 XELF::getHdr64_shentsize()
@@ -400,9 +400,9 @@ quint16 XELF::getHdr64_shentsize()
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_shentsize),isBigEndian());
 }
 
-void XELF::setHdr64_shentsize(quint16 value)
+void XELF::setHdr64_shentsize(quint16 nValue)
 {
-    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_shentsize),value,isBigEndian());
+    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_shentsize),nValue,isBigEndian());
 }
 
 quint16 XELF::getHdr64_shnum()
@@ -410,9 +410,9 @@ quint16 XELF::getHdr64_shnum()
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_shnum),isBigEndian());
 }
 
-void XELF::setHdr64_shnum(quint16 value)
+void XELF::setHdr64_shnum(quint16 nValue)
 {
-    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_shnum),value,isBigEndian());
+    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_shnum),nValue,isBigEndian());
 }
 
 quint16 XELF::getHdr64_shstrndx()
@@ -420,9 +420,9 @@ quint16 XELF::getHdr64_shstrndx()
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_shstrndx),isBigEndian());
 }
 
-void XELF::setHdr64_shstrndx(quint16 value)
+void XELF::setHdr64_shstrndx(quint16 nValue)
 {
-    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_shstrndx),value,isBigEndian());
+    write_uint16(offsetof(XELF_DEF::Elf64_Ehdr,e_shstrndx),nValue,isBigEndian());
 }
 
 XELF_DEF::Elf_Ehdr XELF::getHdr()

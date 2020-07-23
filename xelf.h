@@ -127,31 +127,31 @@ public:
     void setHdr32_shstrndx(quint16 nValue);
 
     quint16 getHdr64_type();
-    void setHdr64_type(quint16 value);
+    void setHdr64_type(quint16 nValue);
     quint16 getHdr64_machine();
-    void setHdr64_machine(quint16 value);
+    void setHdr64_machine(quint16 nValue);
     quint32 getHdr64_version();
-    void setHdr64_version(quint32 value);
+    void setHdr64_version(quint32 nValue);
     quint64 getHdr64_entry();
-    void setHdr64_entry(quint64 value);
+    void setHdr64_entry(quint64 nValue);
     quint64 getHdr64_phoff();
-    void setHdr64_phoff(quint64 value);
+    void setHdr64_phoff(quint64 nValue);
     quint64 getHdr64_shoff();
-    void setHdr64_shoff(quint64 value);
+    void setHdr64_shoff(quint64 nValue);
     quint32 getHdr64_flags();
-    void setHdr64_flags(quint32 value);
+    void setHdr64_flags(quint32 nValue);
     quint16 getHdr64_ehsize();
-    void setHdr64_ehsize(quint16 value);
+    void setHdr64_ehsize(quint16 nValue);
     quint16 getHdr64_phentsize();
-    void setHdr64_phentsize(quint16 value);
+    void setHdr64_phentsize(quint16 nValue);
     quint16 getHdr64_phnum();
-    void setHdr64_phnum(quint16 value);
+    void setHdr64_phnum(quint16 nValue);
     quint16 getHdr64_shentsize();
-    void setHdr64_shentsize(quint16 value);
+    void setHdr64_shentsize(quint16 nValue);
     quint16 getHdr64_shnum();
-    void setHdr64_shnum(quint16 value);
+    void setHdr64_shnum(quint16 nValue);
     quint16 getHdr64_shstrndx();
-    void setHdr64_shstrndx(quint16 value);
+    void setHdr64_shstrndx(quint16 nValue);
 
     XELF_DEF::Elf_Ehdr getHdr();
 
