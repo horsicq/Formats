@@ -215,16 +215,16 @@ public:
     quint32 getElf32_Shdr_addralign(quint32 nIndex);
     quint32 getElf32_Shdr_entsize(quint32 nIndex);
 
-    void setElf32_Shdr_name(quint32 nIndex,quint32 value);
-    void setElf32_Shdr_type(quint32 nIndex,quint32 value);
-    void setElf32_Shdr_flags(quint32 nIndex,quint32 value);
-    void setElf32_Shdr_addr(quint32 nIndex,quint32 value);
-    void setElf32_Shdr_offset(quint32 nIndex,quint32 value);
-    void setElf32_Shdr_size(quint32 nIndex,quint32 value);
-    void setElf32_Shdr_link(quint32 nIndex,quint32 value);
-    void setElf32_Shdr_info(quint32 nIndex,quint32 value);
-    void setElf32_Shdr_addralign(quint32 nIndex,quint32 value);
-    void setElf32_Shdr_entsize(quint32 nIndex,quint32 value);
+    void setElf32_Shdr_name(quint32 nIndex,quint32 nValue);
+    void setElf32_Shdr_type(quint32 nIndex,quint32 nValue);
+    void setElf32_Shdr_flags(quint32 nIndex,quint32 nValue);
+    void setElf32_Shdr_addr(quint32 nIndex,quint32 nValue);
+    void setElf32_Shdr_offset(quint32 nIndex,quint32 nValue);
+    void setElf32_Shdr_size(quint32 nIndex,quint32 nValue);
+    void setElf32_Shdr_link(quint32 nIndex,quint32 nValue);
+    void setElf32_Shdr_info(quint32 nIndex,quint32 nValue);
+    void setElf32_Shdr_addralign(quint32 nIndex,quint32 nValue);
+    void setElf32_Shdr_entsize(quint32 nIndex,quint32 nValue);
 
     quint32 getElf64_Shdr_name(quint32 nIndex);
     quint32 getElf64_Shdr_type(quint32 nIndex);
