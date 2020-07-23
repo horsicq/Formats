@@ -170,9 +170,9 @@ quint16 XELF::getHdr32_type()
     return read_uint16(offsetof(XELF_DEF::Elf32_Ehdr,e_type),isBigEndian());
 }
 
-void XELF::setHdr32_type(quint16 value)
+void XELF::setHdr32_type(quint16 nValue)
 {
-    write_uint16(offsetof(XELF_DEF::Elf32_Ehdr,e_type),value,isBigEndian());
+    write_uint16(offsetof(XELF_DEF::Elf32_Ehdr,e_type),nValue,isBigEndian());
 }
 
 quint16 XELF::getHdr32_machine()
@@ -180,9 +180,9 @@ quint16 XELF::getHdr32_machine()
     return read_uint16(offsetof(XELF_DEF::Elf32_Ehdr,e_machine),isBigEndian());
 }
 
-void XELF::setHdr32_machine(quint16 value)
+void XELF::setHdr32_machine(quint16 nValue)
 {
-    write_uint16(offsetof(XELF_DEF::Elf32_Ehdr,e_machine),value,isBigEndian());
+    write_uint16(offsetof(XELF_DEF::Elf32_Ehdr,e_machine),nValue,isBigEndian());
 }
 
 quint32 XELF::getHdr32_version()
@@ -190,9 +190,9 @@ quint32 XELF::getHdr32_version()
     return read_uint32(offsetof(XELF_DEF::Elf32_Ehdr,e_version),isBigEndian());
 }
 
-void XELF::setHdr32_version(quint32 value)
+void XELF::setHdr32_version(quint32 nValue)
 {
-    write_uint32(offsetof(XELF_DEF::Elf32_Ehdr,e_version),value,isBigEndian());
+    write_uint32(offsetof(XELF_DEF::Elf32_Ehdr,e_version),nValue,isBigEndian());
 }
 
 quint32 XELF::getHdr32_entry()

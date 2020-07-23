@@ -100,11 +100,11 @@ public:
 
     // TODO Hdr32 getHdr32();
     quint16 getHdr32_type();
-    void setHdr32_type(quint16 value);
+    void setHdr32_type(quint16 nValue);
     quint16 getHdr32_machine();
-    void setHdr32_machine(quint16 value);
+    void setHdr32_machine(quint16 nValue);
     quint32 getHdr32_version();
-    void setHdr32_version(quint32 value);
+    void setHdr32_version(quint32 nValue);
     quint32 getHdr32_entry();
     void setHdr32_entry(quint32 value);
     quint32 getHdr32_phoff();
