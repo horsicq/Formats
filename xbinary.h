@@ -462,17 +462,17 @@ public:
 
     static QList<FT> _getFileTypeListFromSet(QSet<FT> stFT);
 
-    static QString valueToHex(quint8 value);
-    static QString valueToHex(qint8 value);
-    static QString valueToHex(quint16 value,bool bIsBigEndian=false);
-    static QString valueToHex(qint16 value,bool bIsBigEndian=false);
-    static QString valueToHex(quint32 value,bool bIsBigEndian=false);
-    static QString valueToHex(qint32 value,bool bIsBigEndian=false);
-    static QString valueToHex(quint64 value,bool bIsBigEndian=false);
-    static QString valueToHex(qint64 value,bool bIsBigEndian=false);
-    static QString valueToHex(float value,bool bIsBigEndian=false);
-    static QString valueToHex(double value,bool bIsBigEndian=false);
-    static QString valueToHex(MODE mode, quint64 value, bool bIsBigEndian=false);
+    static QString valueToHex(quint8 nValue);
+    static QString valueToHex(qint8 nValue);
+    static QString valueToHex(quint16 nValue,bool bIsBigEndian=false);
+    static QString valueToHex(qint16 nValue,bool bIsBigEndian=false);
+    static QString valueToHex(quint32 nValue,bool bIsBigEndian=false);
+    static QString valueToHex(qint32 nValue,bool bIsBigEndian=false);
+    static QString valueToHex(quint64 nValue,bool bIsBigEndian=false);
+    static QString valueToHex(qint64 nValue,bool bIsBigEndian=false);
+    static QString valueToHex(float fValue,bool bIsBigEndian=false);
+    static QString valueToHex(double dValue,bool bIsBigEndian=false);
+    static QString valueToHex(MODE mode, quint64 nValue, bool bIsBigEndian=false);
 
     static bool checkString_uint8(QString sValue);
     static bool checkString_int8(QString sValue);

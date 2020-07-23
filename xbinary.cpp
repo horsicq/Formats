@@ -2870,103 +2870,103 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFT)
     return listResult;
 }
 
-QString XBinary::valueToHex(quint8 value)
+QString XBinary::valueToHex(quint8 nValue)
 {
-    return QString("%1").arg(value,2,16,QChar('0'));
+    return QString("%1").arg(nValue,2,16,QChar('0'));
 }
 
-QString XBinary::valueToHex(qint8 value)
+QString XBinary::valueToHex(qint8 nValue)
 {
-    return valueToHex((quint8)value);
+    return valueToHex((quint8)nValue);
 }
 
-QString XBinary::valueToHex(quint16 value,bool bIsBigEndian)
+QString XBinary::valueToHex(quint16 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    return QString("%1").arg(value,4,16,QChar('0'));
+    return QString("%1").arg(nValue,4,16,QChar('0'));
 }
 
-QString XBinary::valueToHex(qint16 value,bool bIsBigEndian)
+QString XBinary::valueToHex(qint16 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    return valueToHex((quint16)value);
+    return valueToHex((quint16)nValue);
 }
 
-QString XBinary::valueToHex(quint32 value,bool bIsBigEndian)
+QString XBinary::valueToHex(quint32 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    return QString("%1").arg(value,8,16,QChar('0'));
+    return QString("%1").arg(nValue,8,16,QChar('0'));
 }
 
-QString XBinary::valueToHex(qint32 value,bool bIsBigEndian)
+QString XBinary::valueToHex(qint32 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    return valueToHex((quint32)value);
+    return valueToHex((quint32)nValue);
 }
 
-QString XBinary::valueToHex(quint64 value,bool bIsBigEndian)
+QString XBinary::valueToHex(quint64 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    return QString("%1").arg(value,16,16,QChar('0'));
+    return QString("%1").arg(nValue,16,16,QChar('0'));
 }
 
-QString XBinary::valueToHex(qint64 value,bool bIsBigEndian)
+QString XBinary::valueToHex(qint64 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
-        value=qFromBigEndian(value);
+        nValue=qFromBigEndian(nValue);
     }
     else
     {
-        value=qFromLittleEndian(value);
+        nValue=qFromLittleEndian(nValue);
     }
 
-    return valueToHex((quint64)value);
+    return valueToHex((quint64)nValue);
 }
 
-QString XBinary::valueToHex(float value, bool bIsBigEndian)
+QString XBinary::valueToHex(float fValue, bool bIsBigEndian)
 {
-    float _value=value;
+    float _value=fValue;
 
     endian_float(&_value,bIsBigEndian);
 
@@ -2990,21 +2990,21 @@ QString XBinary::valueToHex(double value, bool bIsBigEndian)
     return QString("%1").arg(_nValue,16,16,QChar('0'));
 }
 
-QString XBinary::valueToHex(XBinary::MODE mode, quint64 value, bool bIsBigEndian)
+QString XBinary::valueToHex(XBinary::MODE mode, quint64 nValue, bool bIsBigEndian)
 {
     QString sResult;
 
     if(mode==MODE_16)
     {
-        sResult=valueToHex((quint16)value,bIsBigEndian);
+        sResult=valueToHex((quint16)nValue,bIsBigEndian);
     }
     else if(mode==MODE_32)
     {
-        sResult=valueToHex((quint32)value,bIsBigEndian);
+        sResult=valueToHex((quint32)nValue,bIsBigEndian);
     }
     else if(mode==MODE_64)
     {
-        sResult=valueToHex((quint64)value,bIsBigEndian);
+        sResult=valueToHex((quint64)nValue,bIsBigEndian);
     }
 
     return sResult;
