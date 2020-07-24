@@ -114,9 +114,9 @@ quint32 XPE::getNtHeaders_Signature()
     return read_uint32(nOffset);
 }
 
-void XPE::setNtHeaders_Signature(quint32 value)
+void XPE::setNtHeaders_Signature(quint32 nValue)
 {
-    write_uint32(getNtHeadersOffset(),value);
+    write_uint32(getNtHeadersOffset(),nValue);
 }
 
 qint64 XPE::getFileHeaderOffset()
@@ -186,39 +186,39 @@ quint16 XPE::getFileHeader_Characteristics()
     return read_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,Characteristics));
 }
 
-void XPE::setFileHeader_Machine(quint16 value)
+void XPE::setFileHeader_Machine(quint16 nValue)
 {
-    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,Machine),value);
+    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,Machine),nValue);
 }
 
-void XPE::setFileHeader_NumberOfSections(quint16 value)
+void XPE::setFileHeader_NumberOfSections(quint16 nValue)
 {
-    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,NumberOfSections),value);
+    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,NumberOfSections),nValue);
 }
 
-void XPE::setFileHeader_TimeDateStamp(quint32 value)
+void XPE::setFileHeader_TimeDateStamp(quint32 nValue)
 {
-    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,TimeDateStamp),value);
+    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,TimeDateStamp),nValue);
 }
 
-void XPE::setFileHeader_PointerToSymbolTable(quint32 value)
+void XPE::setFileHeader_PointerToSymbolTable(quint32 nValue)
 {
-    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,PointerToSymbolTable),value);
+    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,PointerToSymbolTable),nValue);
 }
 
-void XPE::setFileHeader_NumberOfSymbols(quint32 value)
+void XPE::setFileHeader_NumberOfSymbols(quint32 nValue)
 {
-    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,NumberOfSymbols),value);
+    write_uint32(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,NumberOfSymbols),nValue);
 }
 
-void XPE::setFileHeader_SizeOfOptionalHeader(quint16 value)
+void XPE::setFileHeader_SizeOfOptionalHeader(quint16 nValue)
 {
-    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,SizeOfOptionalHeader),value);
+    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,SizeOfOptionalHeader),nValue);
 }
 
-void XPE::setFileHeader_Characteristics(quint16 value)
+void XPE::setFileHeader_Characteristics(quint16 nValue)
 {
-    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,Characteristics),value);
+    write_uint16(getFileHeaderOffset()+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,Characteristics),nValue);
 }
 
 qint64 XPE::getOptionalHeaderOffset()

@@ -295,7 +295,7 @@ public:
 
     qint64 getNtHeadersOffset();
     quint32 getNtHeaders_Signature();
-    void setNtHeaders_Signature(quint32 value);
+    void setNtHeaders_Signature(quint32 nValue);
     qint64 getFileHeaderOffset();
     qint64 getFileHeaderSize();
 
@@ -310,13 +310,13 @@ public:
     quint16 getFileHeader_SizeOfOptionalHeader();
     quint16 getFileHeader_Characteristics();
 
-    void setFileHeader_Machine(quint16 value);
-    void setFileHeader_NumberOfSections(quint16 value);
-    void setFileHeader_TimeDateStamp(quint32 value);
-    void setFileHeader_PointerToSymbolTable(quint32 value);
-    void setFileHeader_NumberOfSymbols(quint32 value);
-    void setFileHeader_SizeOfOptionalHeader(quint16 value);
-    void setFileHeader_Characteristics(quint16 value);
+    void setFileHeader_Machine(quint16 nValue);
+    void setFileHeader_NumberOfSections(quint16 nValue);
+    void setFileHeader_TimeDateStamp(quint32 nValue);
+    void setFileHeader_PointerToSymbolTable(quint32 nValue);
+    void setFileHeader_NumberOfSymbols(quint32 nValue);
+    void setFileHeader_SizeOfOptionalHeader(quint16 nValue);
+    void setFileHeader_Characteristics(quint16 nValue);
 
     qint64 getOptionalHeaderOffset();
     qint64 getOptionalHeaderSize();
