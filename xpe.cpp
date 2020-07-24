@@ -537,34 +537,34 @@ quint32 XPE::getOptionalHeader_NumberOfRvaAndSizes()
     return nResult;
 }
 
-void XPE::setOptionalHeader_Magic(quint16 value)
+void XPE::setOptionalHeader_Magic(quint16 nValue)
 {
-    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,Magic),value);
+    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,Magic),nValue);
 }
 
-void XPE::setOptionalHeader_MajorLinkerVersion(quint8 value)
+void XPE::setOptionalHeader_MajorLinkerVersion(quint8 nValue)
 {
-    write_uint8(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MajorLinkerVersion),value);
+    write_uint8(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MajorLinkerVersion),nValue);
 }
 
-void XPE::setOptionalHeader_MinorLinkerVersion(quint8 value)
+void XPE::setOptionalHeader_MinorLinkerVersion(quint8 nValue)
 {
-    write_uint8(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MinorLinkerVersion),value);
+    write_uint8(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MinorLinkerVersion),nValue);
 }
 
-void XPE::setOptionalHeader_SizeOfCode(quint32 value)
+void XPE::setOptionalHeader_SizeOfCode(quint32 nValue)
 {
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfCode),value);
+    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfCode),nValue);
 }
 
-void XPE::setOptionalHeader_SizeOfInitializedData(quint32 value)
+void XPE::setOptionalHeader_SizeOfInitializedData(quint32 nValue)
 {
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfInitializedData),value);
+    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfInitializedData),nValue);
 }
 
-void XPE::setOptionalHeader_SizeOfUninitializedData(quint32 value)
+void XPE::setOptionalHeader_SizeOfUninitializedData(quint32 nValue)
 {
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfUninitializedData),value);
+    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfUninitializedData),nValue);
 }
 
 void XPE::setOptionalHeader_AddressOfEntryPoint(quint32 value)

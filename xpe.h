@@ -364,12 +364,12 @@ public:
     quint32 getOptionalHeader_LoaderFlags();
     quint32 getOptionalHeader_NumberOfRvaAndSizes();
 
-    void setOptionalHeader_Magic(quint16 value);
-    void setOptionalHeader_MajorLinkerVersion(quint8 value);
-    void setOptionalHeader_MinorLinkerVersion(quint8 value);
-    void setOptionalHeader_SizeOfCode(quint32 value);
-    void setOptionalHeader_SizeOfInitializedData(quint32 value);
-    void setOptionalHeader_SizeOfUninitializedData(quint32 value);
+    void setOptionalHeader_Magic(quint16 nValue);
+    void setOptionalHeader_MajorLinkerVersion(quint8 nValue);
+    void setOptionalHeader_MinorLinkerVersion(quint8 nValue);
+    void setOptionalHeader_SizeOfCode(quint32 nValue);
+    void setOptionalHeader_SizeOfInitializedData(quint32 nValue);
+    void setOptionalHeader_SizeOfUninitializedData(quint32 nValue);
     void setOptionalHeader_AddressOfEntryPoint(quint32 value);
     void setOptionalHeader_BaseOfCode(quint32 value);
     void setOptionalHeader_BaseOfData(quint32 value);
