@@ -68,16 +68,16 @@ public:
     quint16 getImageOS2Header_swaparea();
     quint16 getImageOS2Header_expver();
 
-    void setImageOS2Header_magic(quint16 value);
-    void setImageOS2Header_ver(quint8 value);
-    void setImageOS2Header_rev(quint8 value);
-    void setImageOS2Header_enttab(quint16 value);
-    void setImageOS2Header_cbenttab(quint16 value);
-    void setImageOS2Header_crc(quint32 value);
-    void setImageOS2Header_flags(quint16 value);
-    void setImageOS2Header_autodata(quint16 value);
-    void setImageOS2Header_heap(quint16 value);
-    void setImageOS2Header_stack(quint16 value);
+    void setImageOS2Header_magic(quint16 nValue);
+    void setImageOS2Header_ver(quint8 nValue);
+    void setImageOS2Header_rev(quint8 nValue);
+    void setImageOS2Header_enttab(quint16 nValue);
+    void setImageOS2Header_cbenttab(quint16 nValue);
+    void setImageOS2Header_crc(quint32 nValue);
+    void setImageOS2Header_flags(quint16 nValue);
+    void setImageOS2Header_autodata(quint16 nValue);
+    void setImageOS2Header_heap(quint16 nValue);
+    void setImageOS2Header_stack(quint16 nValue);
     void setImageOS2Header_csip(quint32 value);
     void setImageOS2Header_sssp(quint32 value);
     void setImageOS2Header_cseg(quint16 value);

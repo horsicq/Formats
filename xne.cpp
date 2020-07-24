@@ -529,103 +529,103 @@ quint16 XNE::getImageOS2Header_expver()
     return nResult;
 }
 
-void XNE::setImageOS2Header_magic(quint16 value)
+void XNE::setImageOS2Header_magic(quint16 nValue)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_magic),value);
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_magic),nValue);
     }
 }
 
-void XNE::setImageOS2Header_ver(quint8 value)
+void XNE::setImageOS2Header_ver(quint8 nValue)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint8(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_ver),value);
+        write_uint8(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_ver),nValue);
     }
 }
 
-void XNE::setImageOS2Header_rev(quint8 value)
+void XNE::setImageOS2Header_rev(quint8 nValue)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint8(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_rev),value);
+        write_uint8(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_rev),nValue);
     }
 }
 
-void XNE::setImageOS2Header_enttab(quint16 value)
+void XNE::setImageOS2Header_enttab(quint16 nValue)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_enttab),value);
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_enttab),nValue);
     }
 }
 
-void XNE::setImageOS2Header_cbenttab(quint16 value)
+void XNE::setImageOS2Header_cbenttab(quint16 nValue)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_cbenttab),value);
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_cbenttab),nValue);
     }
 }
 
-void XNE::setImageOS2Header_crc(quint32 value)
+void XNE::setImageOS2Header_crc(quint32 nValue)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_crc),value);
+        write_uint32(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_crc),nValue);
     }
 }
 
-void XNE::setImageOS2Header_flags(quint16 value)
+void XNE::setImageOS2Header_flags(quint16 nValue)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_flags),value);
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_flags),nValue);
     }
 }
 
-void XNE::setImageOS2Header_autodata(quint16 value)
+void XNE::setImageOS2Header_autodata(quint16 nValue)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_autodata),value);
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_autodata),nValue);
     }
 }
 
-void XNE::setImageOS2Header_heap(quint16 value)
+void XNE::setImageOS2Header_heap(quint16 nValue)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_heap),value);
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_heap),nValue);
     }
 }
 
-void XNE::setImageOS2Header_stack(quint16 value)
+void XNE::setImageOS2Header_stack(quint16 nValue)
 {
     qint64 nOffset=getImageOS2HeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_stack),value);
+        write_uint16(nOffset+offsetof(XNE_DEF::IMAGE_OS2_HEADER,ne_stack),nValue);
     }
 }
 
