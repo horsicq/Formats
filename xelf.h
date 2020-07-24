@@ -415,19 +415,19 @@ public:
     QList<XELF_DEF::Elf32_Rela> getElf32_RelaList(qint64 nOffset,qint64 nSize);
     QList<XELF_DEF::Elf64_Rela> getElf64_RelaList(qint64 nOffset,qint64 nSize);
 
-    void setElf32_Rel_r_offset(qint64 nOffset,quint32 value,bool bIsBigEndian);
-    void setElf32_Rel_r_info(qint64 nOffset,quint32 value,bool bIsBigEndian);
+    void setElf32_Rel_r_offset(qint64 nOffset,quint32 nValue,bool bIsBigEndian);
+    void setElf32_Rel_r_info(qint64 nOffset,quint32 nValue,bool bIsBigEndian);
 
-    void setElf64_Rel_r_offset(qint64 nOffset,quint64 value,bool bIsBigEndian);
-    void setElf64_Rel_r_info(qint64 nOffset,quint64 value,bool bIsBigEndian);
+    void setElf64_Rel_r_offset(qint64 nOffset,quint64 nValue,bool bIsBigEndian);
+    void setElf64_Rel_r_info(qint64 nOffset,quint64 nValue,bool bIsBigEndian);
 
-    void setElf32_Rela_r_offset(qint64 nOffset,quint32 value,bool bIsBigEndian);
-    void setElf32_Rela_r_info(qint64 nOffset,quint32 value,bool bIsBigEndian);
-    void setElf32_Rela_r_addend(qint64 nOffset,quint32 value,bool bIsBigEndian);
+    void setElf32_Rela_r_offset(qint64 nOffset,quint32 nValue,bool bIsBigEndian);
+    void setElf32_Rela_r_info(qint64 nOffset,quint32 nValue,bool bIsBigEndian);
+    void setElf32_Rela_r_addend(qint64 nOffset,quint32 nValue,bool bIsBigEndian);
 
-    void setElf64_Rela_r_offset(qint64 nOffset,quint64 value,bool bIsBigEndian);
-    void setElf64_Rela_r_info(qint64 nOffset,quint64 value,bool bIsBigEndian);
-    void setElf64_Rela_r_addend(qint64 nOffset,quint64 value,bool bIsBigEndian);
+    void setElf64_Rela_r_offset(qint64 nOffset,quint64 nValue,bool bIsBigEndian);
+    void setElf64_Rela_r_info(qint64 nOffset,quint64 nValue,bool bIsBigEndian);
+    void setElf64_Rela_r_addend(qint64 nOffset,quint64 nValue,bool bIsBigEndian);
 
     static QMap<quint64,QString> getRelTypes_x86();
     static QMap<quint64,QString> getRelTypesS_x86();
