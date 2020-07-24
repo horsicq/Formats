@@ -631,115 +631,115 @@ void XPE::setOptionalHeader_MinorImageVersion(quint16 nValue)
     write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MinorImageVersion),nValue);
 }
 
-void XPE::setOptionalHeader_MajorSubsystemVersion(quint16 value)
+void XPE::setOptionalHeader_MajorSubsystemVersion(quint16 nValue)
 {
-    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MajorSubsystemVersion),value);
+    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MajorSubsystemVersion),nValue);
 }
 
-void XPE::setOptionalHeader_MinorSubsystemVersion(quint16 value)
+void XPE::setOptionalHeader_MinorSubsystemVersion(quint16 nValue)
 {
-    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MinorSubsystemVersion),value);
+    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MinorSubsystemVersion),nValue);
 }
 
-void XPE::setOptionalHeader_Win32VersionValue(quint32 value)
+void XPE::setOptionalHeader_Win32VersionValue(quint32 nValue)
 {
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,Win32VersionValue),value);
+    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,Win32VersionValue),nValue);
 }
 
-void XPE::setOptionalHeader_SizeOfImage(quint32 value)
+void XPE::setOptionalHeader_SizeOfImage(quint32 nValue)
 {
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfImage),value);
+    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfImage),nValue);
 }
 
-void XPE::setOptionalHeader_SizeOfHeaders(quint32 value)
+void XPE::setOptionalHeader_SizeOfHeaders(quint32 nValue)
 {
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfHeaders),value);
+    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfHeaders),nValue);
 }
 
-void XPE::setOptionalHeader_CheckSum(quint32 value)
+void XPE::setOptionalHeader_CheckSum(quint32 nValue)
 {
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,CheckSum),value);
+    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,CheckSum),nValue);
 }
 
-void XPE::setOptionalHeader_Subsystem(quint16 value)
+void XPE::setOptionalHeader_Subsystem(quint16 nValue)
 {
-    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,Subsystem),value);
+    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,Subsystem),nValue);
 }
 
-void XPE::setOptionalHeader_DllCharacteristics(quint16 value)
+void XPE::setOptionalHeader_DllCharacteristics(quint16 nValue)
 {
-    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DllCharacteristics),value);
+    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DllCharacteristics),nValue);
 }
 
-void XPE::setOptionalHeader_SizeOfStackReserve(quint64 value)
+void XPE::setOptionalHeader_SizeOfStackReserve(quint64 nValue)
 {
     if(is64())
     {
-        write_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfStackReserve),value);
+        write_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfStackReserve),nValue);
     }
     else
     {
-        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfStackReserve),value);
+        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfStackReserve),nValue);
     }
 }
 
-void XPE::setOptionalHeader_SizeOfStackCommit(quint64 value)
+void XPE::setOptionalHeader_SizeOfStackCommit(quint64 nValue)
 {
     if(is64())
     {
-        write_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfStackCommit),value);
+        write_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfStackCommit),nValue);
     }
     else
     {
-        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfStackCommit),value);
+        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfStackCommit),nValue);
     }
 }
 
-void XPE::setOptionalHeader_SizeOfHeapReserve(quint64 value)
+void XPE::setOptionalHeader_SizeOfHeapReserve(quint64 nValue)
 {
     if(is64())
     {
-        write_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfHeapReserve),value);
+        write_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfHeapReserve),nValue);
     }
     else
     {
-        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfHeapReserve),value);
+        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfHeapReserve),nValue);
     }
 }
 
-void XPE::setOptionalHeader_SizeOfHeapCommit(quint64 value)
+void XPE::setOptionalHeader_SizeOfHeapCommit(quint64 nValue)
 {
     if(is64())
     {
-        write_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfHeapCommit),value);
+        write_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,SizeOfHeapCommit),nValue);
     }
     else
     {
-        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfHeapCommit),value);
+        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfHeapCommit),nValue);
     }
 }
 
-void XPE::setOptionalHeader_LoaderFlags(quint32 value)
+void XPE::setOptionalHeader_LoaderFlags(quint32 nValue)
 {
     if(is64())
     {
-        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,LoaderFlags),value);
+        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,LoaderFlags),nValue);
     }
     else
     {
-        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,LoaderFlags),value);
+        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,LoaderFlags),nValue);
     }
 }
 
-void XPE::setOptionalHeader_NumberOfRvaAndSizes(quint32 value)
+void XPE::setOptionalHeader_NumberOfRvaAndSizes(quint32 nValue)
 {
     if(is64())
     {
-        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,NumberOfRvaAndSizes),value);
+        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,NumberOfRvaAndSizes),nValue);
     }
     else
     {
-        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,NumberOfRvaAndSizes),value);
+        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,NumberOfRvaAndSizes),nValue);
     }
 }
 
