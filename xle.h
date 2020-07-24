@@ -83,15 +83,15 @@ public:
     quint32 getImageVxdHeader_instdemand();
     quint32 getImageVxdHeader_heapsize();
 
-    void setImageVxdHeader_magic(quint16 value);
-    void setImageVxdHeader_border(quint8 value);
-    void setImageVxdHeader_worder(quint8 value);
-    void setImageVxdHeader_level(quint32 value);
-    void setImageVxdHeader_cpu(quint16 value);
-    void setImageVxdHeader_os(quint16 value);
-    void setImageVxdHeader_ver(quint32 value);
-    void setImageVxdHeader_mflags(quint32 value);
-    void setImageVxdHeader_mpages(quint32 value);
+    void setImageVxdHeader_magic(quint16 nValue);
+    void setImageVxdHeader_border(quint8 nValue);
+    void setImageVxdHeader_worder(quint8 nValue);
+    void setImageVxdHeader_level(quint32 nValue);
+    void setImageVxdHeader_cpu(quint16 nValue);
+    void setImageVxdHeader_os(quint16 nValue);
+    void setImageVxdHeader_ver(quint32 nValue);
+    void setImageVxdHeader_mflags(quint32 nValue);
+    void setImageVxdHeader_mpages(quint32 nValue);
     void setImageVxdHeader_startobj(quint32 value);
     void setImageVxdHeader_eip(quint32 value);
     void setImageVxdHeader_stackobj(quint32 value);
