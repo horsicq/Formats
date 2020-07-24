@@ -567,17 +567,17 @@ void XPE::setOptionalHeader_SizeOfUninitializedData(quint32 nValue)
     write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SizeOfUninitializedData),nValue);
 }
 
-void XPE::setOptionalHeader_AddressOfEntryPoint(quint32 value)
+void XPE::setOptionalHeader_AddressOfEntryPoint(quint32 nValue)
 {
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,AddressOfEntryPoint),value);
+    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,AddressOfEntryPoint),nValue);
 }
 
-void XPE::setOptionalHeader_BaseOfCode(quint32 value)
+void XPE::setOptionalHeader_BaseOfCode(quint32 nValue)
 {
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,BaseOfCode),value);
+    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,BaseOfCode),nValue);
 }
 
-void XPE::setOptionalHeader_BaseOfData(quint32 value)
+void XPE::setOptionalHeader_BaseOfData(quint32 nValue)
 {
     if(is64()) // There is no BaseOfData for PE64
     {
@@ -585,50 +585,50 @@ void XPE::setOptionalHeader_BaseOfData(quint32 value)
     }
     else
     {
-        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,BaseOfData),value);
+        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,BaseOfData),nValue);
     }
 }
 
-void XPE::setOptionalHeader_ImageBase(quint64 value)
+void XPE::setOptionalHeader_ImageBase(quint64 nValue)
 {
     if(is64())
     {
-        write_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,ImageBase),value);
+        write_uint64(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,ImageBase),nValue);
     }
     else
     {
-        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,ImageBase),value);
+        write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,ImageBase),nValue);
     }
 }
 
-void XPE::setOptionalHeader_SectionAlignment(quint32 value)
+void XPE::setOptionalHeader_SectionAlignment(quint32 nValue)
 {
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SectionAlignment),value);
+    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,SectionAlignment),nValue);
 }
 
-void XPE::setOptionalHeader_FileAlignment(quint32 value)
+void XPE::setOptionalHeader_FileAlignment(quint32 nValue)
 {
-    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,FileAlignment),value);
+    write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,FileAlignment),nValue);
 }
 
-void XPE::setOptionalHeader_MajorOperatingSystemVersion(quint16 value)
+void XPE::setOptionalHeader_MajorOperatingSystemVersion(quint16 nValue)
 {
-    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MajorOperatingSystemVersion),value);
+    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MajorOperatingSystemVersion),nValue);
 }
 
-void XPE::setOptionalHeader_MinorOperatingSystemVersion(quint16 value)
+void XPE::setOptionalHeader_MinorOperatingSystemVersion(quint16 nValue)
 {
-    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MinorOperatingSystemVersion),value);
+    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MinorOperatingSystemVersion),nValue);
 }
 
-void XPE::setOptionalHeader_MajorImageVersion(quint16 value)
+void XPE::setOptionalHeader_MajorImageVersion(quint16 nValue)
 {
-    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MajorImageVersion),value);
+    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MajorImageVersion),nValue);
 }
 
-void XPE::setOptionalHeader_MinorImageVersion(quint16 value)
+void XPE::setOptionalHeader_MinorImageVersion(quint16 nValue)
 {
-    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MinorImageVersion),value);
+    write_uint16(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MinorImageVersion),nValue);
 }
 
 void XPE::setOptionalHeader_MajorSubsystemVersion(quint16 value)
