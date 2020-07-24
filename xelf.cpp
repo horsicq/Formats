@@ -2716,7 +2716,7 @@ quint64 XELF::getElf64_Phdr_align(quint32 nIndex)
     return result;
 }
 
-void XELF::setElf64_Phdr_type(quint32 nIndex, quint32 value)
+void XELF::setElf64_Phdr_type(quint32 nIndex, quint32 nValue)
 {
     quint32 nNumberOfPrograms=getHdr64_phnum();
     quint64 offset=getHdr64_phoff();
@@ -2725,11 +2725,11 @@ void XELF::setElf64_Phdr_type(quint32 nIndex, quint32 value)
     if(nIndex<nNumberOfPrograms)
     {
         offset+=nIndex*sizeof(XELF_DEF::Elf64_Phdr);
-        write_uint32(offset+offsetof(XELF_DEF::Elf64_Phdr,p_type),value,bIsBigEndian);
+        write_uint32(offset+offsetof(XELF_DEF::Elf64_Phdr,p_type),nValue,bIsBigEndian);
     }
 }
 
-void XELF::setElf64_Phdr_offset(quint32 nIndex, quint64 value)
+void XELF::setElf64_Phdr_offset(quint32 nIndex, quint64 nValue)
 {
     quint32 nNumberOfPrograms=getHdr64_phnum();
     quint64 offset=getHdr64_phoff();
@@ -2738,11 +2738,11 @@ void XELF::setElf64_Phdr_offset(quint32 nIndex, quint64 value)
     if(nIndex<nNumberOfPrograms)
     {
         offset+=nIndex*sizeof(XELF_DEF::Elf64_Phdr);
-        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_offset),value,bIsBigEndian);
+        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_offset),nValue,bIsBigEndian);
     }
 }
 
-void XELF::setElf64_Phdr_vaddr(quint32 nIndex, quint64 value)
+void XELF::setElf64_Phdr_vaddr(quint32 nIndex, quint64 nValue)
 {
     quint32 nNumberOfPrograms=getHdr64_phnum();
     quint64 offset=getHdr64_phoff();
@@ -2751,11 +2751,11 @@ void XELF::setElf64_Phdr_vaddr(quint32 nIndex, quint64 value)
     if(nIndex<nNumberOfPrograms)
     {
         offset+=nIndex*sizeof(XELF_DEF::Elf64_Phdr);
-        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_vaddr),value,bIsBigEndian);
+        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_vaddr),nValue,bIsBigEndian);
     }
 }
 
-void XELF::setElf64_Phdr_paddr(quint32 nIndex, quint64 value)
+void XELF::setElf64_Phdr_paddr(quint32 nIndex, quint64 nValue)
 {
     quint32 nNumberOfPrograms=getHdr64_phnum();
     quint64 offset=getHdr64_phoff();
@@ -2764,11 +2764,11 @@ void XELF::setElf64_Phdr_paddr(quint32 nIndex, quint64 value)
     if(nIndex<nNumberOfPrograms)
     {
         offset+=nIndex*sizeof(XELF_DEF::Elf64_Phdr);
-        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_paddr),value,bIsBigEndian);
+        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_paddr),nValue,bIsBigEndian);
     }
 }
 
-void XELF::setElf64_Phdr_filesz(quint32 nIndex, quint64 value)
+void XELF::setElf64_Phdr_filesz(quint32 nIndex, quint64 nValue)
 {
     quint32 nNumberOfPrograms=getHdr64_phnum();
     quint64 offset=getHdr64_phoff();
@@ -2777,11 +2777,11 @@ void XELF::setElf64_Phdr_filesz(quint32 nIndex, quint64 value)
     if(nIndex<nNumberOfPrograms)
     {
         offset+=nIndex*sizeof(XELF_DEF::Elf64_Phdr);
-        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_filesz),value,bIsBigEndian);
+        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_filesz),nValue,bIsBigEndian);
     }
 }
 
-void XELF::setElf64_Phdr_memsz(quint32 nIndex, quint64 value)
+void XELF::setElf64_Phdr_memsz(quint32 nIndex, quint64 nValue)
 {
     quint32 nNumberOfPrograms=getHdr64_phnum();
     quint64 offset=getHdr64_phoff();
@@ -2790,11 +2790,11 @@ void XELF::setElf64_Phdr_memsz(quint32 nIndex, quint64 value)
     if(nIndex<nNumberOfPrograms)
     {
         offset+=nIndex*sizeof(XELF_DEF::Elf64_Phdr);
-        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_memsz),value,bIsBigEndian);
+        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_memsz),nValue,bIsBigEndian);
     }
 }
 
-void XELF::setElf64_Phdr_flags(quint32 nIndex, quint32 value)
+void XELF::setElf64_Phdr_flags(quint32 nIndex, quint32 nValue)
 {
     quint32 nNumberOfPrograms=getHdr64_phnum();
     quint64 offset=getHdr64_phoff();
@@ -2803,11 +2803,11 @@ void XELF::setElf64_Phdr_flags(quint32 nIndex, quint32 value)
     if(nIndex<nNumberOfPrograms)
     {
         offset+=nIndex*sizeof(XELF_DEF::Elf64_Phdr);
-        write_uint32(offset+offsetof(XELF_DEF::Elf64_Phdr,p_flags),value,bIsBigEndian);
+        write_uint32(offset+offsetof(XELF_DEF::Elf64_Phdr,p_flags),nValue,bIsBigEndian);
     }
 }
 
-void XELF::setElf64_Phdr_align(quint32 nIndex, quint64 value)
+void XELF::setElf64_Phdr_align(quint32 nIndex, quint64 nValue)
 {
     quint32 nNumberOfPrograms=getHdr64_phnum();
     quint64 offset=getHdr64_phoff();
@@ -2816,7 +2816,7 @@ void XELF::setElf64_Phdr_align(quint32 nIndex, quint64 value)
     if(nIndex<nNumberOfPrograms)
     {
         offset+=nIndex*sizeof(XELF_DEF::Elf64_Phdr);
-        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_align),value,bIsBigEndian);
+        write_uint64(offset+offsetof(XELF_DEF::Elf64_Phdr,p_align),nValue,bIsBigEndian);
     }
 }
 
