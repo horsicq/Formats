@@ -400,8 +400,8 @@ public:
 
     XPE_DEF::IMAGE_DATA_DIRECTORY getOptionalHeader_DataDirectory(quint32 nNumber);
     void setOptionalHeader_DataDirectory(quint32 nNumber,XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
-    void setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber,quint32 value);
-    void setOptionalHeader_DataDirectory_Size(quint32 nNumber,quint32 value);
+    void setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber,quint32 nValue);
+    void setOptionalHeader_DataDirectory_Size(quint32 nNumber,quint32 nValue);
 
     void clearOptionalHeader_DataDirectory(quint32 nNumber);
 
@@ -442,15 +442,15 @@ public:
     quint32 getSection_Characteristics(quint32 nNumber);
 
     void setSection_NameAsString(quint32 nNumber,QString sName);
-    void setSection_VirtualSize(quint32 nNumber,quint32 value);
-    void setSection_VirtualAddress(quint32 nNumber,quint32 value);
-    void setSection_SizeOfRawData(quint32 nNumber,quint32 value);
-    void setSection_PointerToRawData(quint32 nNumber,quint32 value);
-    void setSection_PointerToRelocations(quint32 nNumber,quint32 value);
-    void setSection_PointerToLinenumbers(quint32 nNumber,quint32 value);
-    void setSection_NumberOfRelocations(quint32 nNumber,quint16 value);
-    void setSection_NumberOfLinenumbers(quint32 nNumber,quint16 value);
-    void setSection_Characteristics(quint32 nNumber,quint32 value);
+    void setSection_VirtualSize(quint32 nNumber,quint32 nValue);
+    void setSection_VirtualAddress(quint32 nNumber,quint32 nValue);
+    void setSection_SizeOfRawData(quint32 nNumber,quint32 nValue);
+    void setSection_PointerToRawData(quint32 nNumber,quint32 nValue);
+    void setSection_PointerToRelocations(quint32 nNumber,quint32 nValue);
+    void setSection_PointerToLinenumbers(quint32 nNumber,quint32 nValue);
+    void setSection_NumberOfRelocations(quint32 nNumber,quint16 nValue);
+    void setSection_NumberOfLinenumbers(quint32 nNumber,quint16 nValue);
+    void setSection_Characteristics(quint32 nNumber,quint32 nValue);
 
     QString getSection_NameAsString(quint32 nNumber,QList<QString> *pListSectionNames);
     quint32 getSection_VirtualSize(quint32 nNumber,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);

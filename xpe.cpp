@@ -795,32 +795,32 @@ void XPE::setOptionalHeader_DataDirectory(quint32 nNumber,XPE_DEF::IMAGE_DATA_DI
     }
 }
 
-void XPE::setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber, quint32 value)
+void XPE::setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber, quint32 nValue)
 {
     if(nNumber<getOptionalHeader_NumberOfRvaAndSizes())
     {
         if(is64())
         {
-            write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY)+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,VirtualAddress),value);
+            write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY)+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,VirtualAddress),nValue);
         }
         else
         {
-            write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY)+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,VirtualAddress),value);
+            write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY)+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,VirtualAddress),nValue);
         }
     }
 }
 
-void XPE::setOptionalHeader_DataDirectory_Size(quint32 nNumber, quint32 value)
+void XPE::setOptionalHeader_DataDirectory_Size(quint32 nNumber, quint32 nValue)
 {
     if(nNumber<getOptionalHeader_NumberOfRvaAndSizes())
     {
         if(is64())
         {
-            write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY)+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,Size),value);
+            write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY)+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,Size),nValue);
         }
         else
         {
-            write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY)+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,Size),value);
+            write_uint32(getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY)+offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY,Size),nValue);
         }
     }
 }
@@ -1258,93 +1258,93 @@ void XPE::setSection_NameAsString(quint32 nNumber, QString sName)
     }
 }
 
-void XPE::setSection_VirtualSize(quint32 nNumber, quint32 value)
+void XPE::setSection_VirtualSize(quint32 nNumber, quint32 nValue)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
     {
-        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,Misc.VirtualSize),value);
+        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,Misc.VirtualSize),nValue);
     }
 }
 
-void XPE::setSection_VirtualAddress(quint32 nNumber, quint32 value)
+void XPE::setSection_VirtualAddress(quint32 nNumber, quint32 nValue)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
     {
-        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,VirtualAddress),value);
+        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,VirtualAddress),nValue);
     }
 }
 
-void XPE::setSection_SizeOfRawData(quint32 nNumber, quint32 value)
+void XPE::setSection_SizeOfRawData(quint32 nNumber, quint32 nValue)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
     {
-        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,SizeOfRawData),value);
+        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,SizeOfRawData),nValue);
     }
 }
 
-void XPE::setSection_PointerToRawData(quint32 nNumber, quint32 value)
+void XPE::setSection_PointerToRawData(quint32 nNumber, quint32 nValue)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
     {
-        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,PointerToRawData),value);
+        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,PointerToRawData),nValue);
     }
 }
 
-void XPE::setSection_PointerToRelocations(quint32 nNumber, quint32 value)
+void XPE::setSection_PointerToRelocations(quint32 nNumber, quint32 nValue)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
     {
-        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,PointerToRelocations),value);
+        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,PointerToRelocations),nValue);
     }
 }
 
-void XPE::setSection_PointerToLinenumbers(quint32 nNumber, quint32 value)
+void XPE::setSection_PointerToLinenumbers(quint32 nNumber, quint32 nValue)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
     {
-        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,PointerToLinenumbers),value);
+        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,PointerToLinenumbers),nValue);
     }
 }
 
-void XPE::setSection_NumberOfRelocations(quint32 nNumber, quint16 value)
+void XPE::setSection_NumberOfRelocations(quint32 nNumber, quint16 nValue)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
     {
-        write_uint16(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,NumberOfRelocations),value);
+        write_uint16(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,NumberOfRelocations),nValue);
     }
 }
 
-void XPE::setSection_NumberOfLinenumbers(quint32 nNumber, quint16 value)
+void XPE::setSection_NumberOfLinenumbers(quint32 nNumber, quint16 nValue)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
     {
-        write_uint16(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,NumberOfLinenumbers),value);
+        write_uint16(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,NumberOfLinenumbers),nValue);
     }
 }
 
-void XPE::setSection_Characteristics(quint32 nNumber, quint32 value)
+void XPE::setSection_Characteristics(quint32 nNumber, quint32 nValue)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
     if(nNumber<nNumberOfSections)
     {
-        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,Characteristics),value);
+        write_uint32(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,Characteristics),nValue);
     }
 }
 
