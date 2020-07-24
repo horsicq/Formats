@@ -859,373 +859,373 @@ void XLE::setImageVxdHeader_mpages(quint32 nValue)
     }
 }
 
-void XLE::setImageVxdHeader_startobj(quint32 value)
+void XLE::setImageVxdHeader_startobj(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_startobj),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_startobj),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_eip(quint32 value)
+void XLE::setImageVxdHeader_eip(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_eip),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_eip),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_stackobj(quint32 value)
+void XLE::setImageVxdHeader_stackobj(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_stackobj),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_stackobj),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_esp(quint32 value)
+void XLE::setImageVxdHeader_esp(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_esp),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_esp),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_pagesize(quint32 value)
+void XLE::setImageVxdHeader_pagesize(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_pagesize),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_pagesize),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_lastpagesize(quint32 value)
+void XLE::setImageVxdHeader_lastpagesize(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_lastpagesize),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_lastpagesize),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_fixupsize(quint32 value)
+void XLE::setImageVxdHeader_fixupsize(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fixupsize),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fixupsize),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_fixupsum(quint32 value)
+void XLE::setImageVxdHeader_fixupsum(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fixupsum),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fixupsum),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_ldrsize(quint32 value)
+void XLE::setImageVxdHeader_ldrsize(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_ldrsize),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_ldrsize),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_ldrsum(quint32 value)
+void XLE::setImageVxdHeader_ldrsum(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_ldrsum),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_ldrsum),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_objtab(quint32 value)
+void XLE::setImageVxdHeader_objtab(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objtab),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objtab),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_objcnt(quint32 value)
+void XLE::setImageVxdHeader_objcnt(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objcnt),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objcnt),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_objmap(quint32 value)
+void XLE::setImageVxdHeader_objmap(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objmap),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_objmap),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_itermap(quint32 value)
+void XLE::setImageVxdHeader_itermap(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_itermap),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_itermap),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_rsrctab(quint32 value)
+void XLE::setImageVxdHeader_rsrctab(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_rsrctab),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_rsrctab),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_rsrccnt(quint32 value)
+void XLE::setImageVxdHeader_rsrccnt(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_rsrccnt),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_rsrccnt),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_restab(quint32 value)
+void XLE::setImageVxdHeader_restab(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_restab),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_restab),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_enttab(quint32 value)
+void XLE::setImageVxdHeader_enttab(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_enttab),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_enttab),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_dirtab(quint32 value)
+void XLE::setImageVxdHeader_dirtab(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_dirtab),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_dirtab),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_dircnt(quint32 value)
+void XLE::setImageVxdHeader_dircnt(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_dircnt),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_dircnt),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_fpagetab(quint32 value)
+void XLE::setImageVxdHeader_fpagetab(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fpagetab),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_fpagetab),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_frectab(quint32 value)
+void XLE::setImageVxdHeader_frectab(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_frectab),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_frectab),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_impmod(quint32 value)
+void XLE::setImageVxdHeader_impmod(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impmod),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impmod),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_impmodcnt(quint32 value)
+void XLE::setImageVxdHeader_impmodcnt(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impmodcnt),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impmodcnt),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_impproc(quint32 value)
+void XLE::setImageVxdHeader_impproc(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impproc),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_impproc),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_pagesum(quint32 value)
+void XLE::setImageVxdHeader_pagesum(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_pagesum),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_pagesum),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_datapage(quint32 value)
+void XLE::setImageVxdHeader_datapage(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_datapage),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_datapage),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_preload(quint32 value)
+void XLE::setImageVxdHeader_preload(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_preload),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_preload),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_nrestab(quint32 value)
+void XLE::setImageVxdHeader_nrestab(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_nrestab),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_nrestab),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_cbnrestab(quint32 value)
+void XLE::setImageVxdHeader_cbnrestab(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_cbnrestab),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_cbnrestab),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_nressum(quint32 value)
+void XLE::setImageVxdHeader_nressum(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_nressum),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_nressum),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_autodata(quint32 value)
+void XLE::setImageVxdHeader_autodata(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_autodata),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_autodata),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_debuginfo(quint32 value)
+void XLE::setImageVxdHeader_debuginfo(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_debuginfo),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_debuginfo),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_debuglen(quint32 value)
+void XLE::setImageVxdHeader_debuglen(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_debuglen),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_debuglen),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_instpreload(quint32 value)
+void XLE::setImageVxdHeader_instpreload(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_instpreload),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_instpreload),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_instdemand(quint32 value)
+void XLE::setImageVxdHeader_instdemand(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_instdemand),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_instdemand),nValue);
     }
 }
 
-void XLE::setImageVxdHeader_heapsize(quint32 value)
+void XLE::setImageVxdHeader_heapsize(quint32 nValue)
 {
     qint64 nOffset=getImageVxdHeaderOffset();
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_heapsize),value);
+        write_uint32(nOffset+offsetof(XLE_DEF::IMAGE_VXD_HEADER,e32_heapsize),nValue);
     }
 }
 
