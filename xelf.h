@@ -386,19 +386,19 @@ public:
     XELF_DEF::Elf32_Sym _readElf32_Sym(qint64 nOffset,bool bIsBigEndian);
     XELF_DEF::Elf64_Sym _readElf64_Sym(qint64 nOffset,bool bIsBigEndian);
 
-    void setElf32_Sym_st_name(qint64 nOffset,quint32 value,bool bIsBigEndian);
-    void setElf32_Sym_st_value(qint64 nOffset,quint32 value,bool bIsBigEndian);
-    void setElf32_Sym_st_size(qint64 nOffset,quint32 value,bool bIsBigEndian);
-    void setElf32_Sym_st_info(qint64 nOffset,quint8 value);
-    void setElf32_Sym_st_other(qint64 nOffset,quint8 value);
-    void setElf32_Sym_st_shndx(qint64 nOffset,quint16 value,bool bIsBigEndian);
+    void setElf32_Sym_st_name(qint64 nOffset,quint32 nValue,bool bIsBigEndian);
+    void setElf32_Sym_st_value(qint64 nOffset,quint32 nValue,bool bIsBigEndian);
+    void setElf32_Sym_st_size(qint64 nOffset,quint32 nValue,bool bIsBigEndian);
+    void setElf32_Sym_st_info(qint64 nOffset,quint8 nValue);
+    void setElf32_Sym_st_other(qint64 nOffset,quint8 nValue);
+    void setElf32_Sym_st_shndx(qint64 nOffset,quint16 nValue,bool bIsBigEndian);
 
-    void setElf64_Sym_st_name(qint64 nOffset,quint32 value,bool bIsBigEndian);
-    void setElf64_Sym_st_info(qint64 nOffset,quint8 value);
-    void setElf64_Sym_st_other(qint64 nOffset,quint8 value);
-    void setElf64_Sym_st_shndx(qint64 nOffset,quint16 value,bool bIsBigEndian);
-    void setElf64_Sym_st_value(qint64 nOffset,quint64 value,bool bIsBigEndian);
-    void setElf64_Sym_st_size(qint64 nOffset,quint64 value,bool bIsBigEndian);
+    void setElf64_Sym_st_name(qint64 nOffset,quint32 nValue,bool bIsBigEndian);
+    void setElf64_Sym_st_info(qint64 nOffset,quint8 nValue);
+    void setElf64_Sym_st_other(qint64 nOffset,quint8 nValue);
+    void setElf64_Sym_st_shndx(qint64 nOffset,quint16 nValue,bool bIsBigEndian);
+    void setElf64_Sym_st_value(qint64 nOffset,quint64 nValue,bool bIsBigEndian);
+    void setElf64_Sym_st_size(qint64 nOffset,quint64 nValue,bool bIsBigEndian);
 
     qint64 getSymSize();
 
