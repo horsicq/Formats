@@ -740,14 +740,14 @@ public:
 
     CLI_METADATA_HEADER _read_MetadataHeader(qint64 nOffset);
 
-    void setMetadataHeader_Signature(quint32 value);
-    void setMetadataHeader_MajorVersion(quint16 value);
-    void setMetadataHeader_MinorVersion(quint16 value);
-    void setMetadataHeader_Reserved(quint32 value);
-    void setMetadataHeader_VersionStringLength(quint32 value);
-    void setMetadataHeader_Version(QString value);
-    void setMetadataHeader_Flags(quint16 value);
-    void setMetadataHeader_Streams(quint16 value);
+    void setMetadataHeader_Signature(quint32 nValue);
+    void setMetadataHeader_MajorVersion(quint16 nValue);
+    void setMetadataHeader_MinorVersion(quint16 nValue);
+    void setMetadataHeader_Reserved(quint32 nValue);
+    void setMetadataHeader_VersionStringLength(quint32 nValue);
+    void setMetadataHeader_Version(QString sValue);
+    void setMetadataHeader_Flags(quint16 nValue);
+    void setMetadataHeader_Streams(quint16 nValue);
 
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap);

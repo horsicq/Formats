@@ -7837,57 +7837,57 @@ XPE::CLI_METADATA_HEADER XPE::_read_MetadataHeader(qint64 nOffset)
     return result;
 }
 
-void XPE::setMetadataHeader_Signature(quint32 value)
+void XPE::setMetadataHeader_Signature(quint32 nValue)
 {
     qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+0,value);
+        write_uint32(nOffset+0,nValue);
     }
 }
 
-void XPE::setMetadataHeader_MajorVersion(quint16 value)
+void XPE::setMetadataHeader_MajorVersion(quint16 nValue)
 {
     qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
 
     if(nOffset!=-1)
     {
-        write_uint16(nOffset+4,value);
+        write_uint16(nOffset+4,nValue);
     }
 }
 
-void XPE::setMetadataHeader_MinorVersion(quint16 value)
+void XPE::setMetadataHeader_MinorVersion(quint16 nValue)
 {
     qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
 
     if(nOffset!=-1)
     {
-        write_uint16(nOffset+6,value);
+        write_uint16(nOffset+6,nValue);
     }
 }
 
-void XPE::setMetadataHeader_Reserved(quint32 value)
+void XPE::setMetadataHeader_Reserved(quint32 nValue)
 {
     qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+8,value);
+        write_uint32(nOffset+8,nValue);
     }
 }
 
-void XPE::setMetadataHeader_VersionStringLength(quint32 value)
+void XPE::setMetadataHeader_VersionStringLength(quint32 nValue)
 {
     qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+12,value);
+        write_uint32(nOffset+12,nValue);
     }
 }
 
-void XPE::setMetadataHeader_Version(QString value)
+void XPE::setMetadataHeader_Version(QString sValue)
 {
     qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
 
@@ -7895,16 +7895,16 @@ void XPE::setMetadataHeader_Version(QString value)
     {
         quint32 nVersionStringLength=read_uint32(nOffset+12);
 
-        if(value.size()>(qint32)nVersionStringLength)
+        if(sValue.size()>(qint32)nVersionStringLength)
         {
-            value.resize(nVersionStringLength);
+            sValue.resize(nVersionStringLength);
         }
 
-        write_ansiString(nOffset+16,value);
+        write_ansiString(nOffset+16,sValue);
     }
 }
 
-void XPE::setMetadataHeader_Flags(quint16 value)
+void XPE::setMetadataHeader_Flags(quint16 nValue)
 {
     qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
 
@@ -7912,11 +7912,11 @@ void XPE::setMetadataHeader_Flags(quint16 value)
     {
         quint32 nVersionStringLength=read_uint32(nOffset+12);
 
-        write_uint16(nOffset+16+nVersionStringLength,value);
+        write_uint16(nOffset+16+nVersionStringLength,nValue);
     }
 }
 
-void XPE::setMetadataHeader_Streams(quint16 value)
+void XPE::setMetadataHeader_Streams(quint16 nValue)
 {
     qint64 nOffset=getNet_MetadataOffsetSize().nOffset;
 
@@ -7924,7 +7924,7 @@ void XPE::setMetadataHeader_Streams(quint16 value)
     {
         quint32 nVersionStringLength=read_uint32(nOffset+12);
 
-        write_uint16(nOffset+16+nVersionStringLength+2,value);
+        write_uint16(nOffset+16+nVersionStringLength+2,nValue);
     }
 }
 
