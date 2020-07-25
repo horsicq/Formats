@@ -5849,7 +5849,7 @@ void XPE::setLoadConfig_GuardCFDispatchFunctionPointer(quint64 nValue)
     }
 }
 
-void XPE::setLoadConfig_GuardCFFunctionTable(quint64 value)
+void XPE::setLoadConfig_GuardCFFunctionTable(quint64 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -5857,16 +5857,16 @@ void XPE::setLoadConfig_GuardCFFunctionTable(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardCFFunctionTable),value);
+            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardCFFunctionTable),nValue);
         }
         else
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardCFFunctionTable),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardCFFunctionTable),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_GuardCFFunctionCount(quint64 value)
+void XPE::setLoadConfig_GuardCFFunctionCount(quint64 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -5874,16 +5874,16 @@ void XPE::setLoadConfig_GuardCFFunctionCount(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardCFFunctionCount),value);
+            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardCFFunctionCount),nValue);
         }
         else
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardCFFunctionCount),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardCFFunctionCount),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_GuardFlags(quint32 value)
+void XPE::setLoadConfig_GuardFlags(quint32 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -5891,16 +5891,16 @@ void XPE::setLoadConfig_GuardFlags(quint32 value)
     {
         if(is64())
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardFlags),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardFlags),nValue);
         }
         else
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardFlags),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardFlags),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_CodeIntegrity_Flags(quint16 value)
+void XPE::setLoadConfig_CodeIntegrity_Flags(quint16 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -5908,16 +5908,16 @@ void XPE::setLoadConfig_CodeIntegrity_Flags(quint16 value)
     {
         if(is64())
         {
-            write_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.Flags),value);
+            write_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.Flags),nValue);
         }
         else
         {
-            write_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.Flags),value);
+            write_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.Flags),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_CodeIntegrity_Catalog(quint16 value)
+void XPE::setLoadConfig_CodeIntegrity_Catalog(quint16 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -5925,16 +5925,16 @@ void XPE::setLoadConfig_CodeIntegrity_Catalog(quint16 value)
     {
         if(is64())
         {
-            write_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.Catalog),value);
+            write_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.Catalog),nValue);
         }
         else
         {
-            write_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.Catalog),value);
+            write_uint16(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.Catalog),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_CodeIntegrity_CatalogOffset(quint32 value)
+void XPE::setLoadConfig_CodeIntegrity_CatalogOffset(quint32 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -5942,16 +5942,16 @@ void XPE::setLoadConfig_CodeIntegrity_CatalogOffset(quint32 value)
     {
         if(is64())
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.CatalogOffset),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.CatalogOffset),nValue);
         }
         else
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.CatalogOffset),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.CatalogOffset),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_CodeIntegrity_Reserved(quint32 value)
+void XPE::setLoadConfig_CodeIntegrity_Reserved(quint32 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -5959,16 +5959,16 @@ void XPE::setLoadConfig_CodeIntegrity_Reserved(quint32 value)
     {
         if(is64())
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.Reserved),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CodeIntegrity.Reserved),nValue);
         }
         else
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.Reserved),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CodeIntegrity.Reserved),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_GuardAddressTakenIatEntryTable(quint64 value)
+void XPE::setLoadConfig_GuardAddressTakenIatEntryTable(quint64 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -5976,16 +5976,16 @@ void XPE::setLoadConfig_GuardAddressTakenIatEntryTable(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardAddressTakenIatEntryTable),value);
+            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardAddressTakenIatEntryTable),nValue);
         }
         else
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardAddressTakenIatEntryTable),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardAddressTakenIatEntryTable),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_GuardAddressTakenIatEntryCount(quint64 value)
+void XPE::setLoadConfig_GuardAddressTakenIatEntryCount(quint64 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -5993,16 +5993,16 @@ void XPE::setLoadConfig_GuardAddressTakenIatEntryCount(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardAddressTakenIatEntryCount),value);
+            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardAddressTakenIatEntryCount),nValue);
         }
         else
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardAddressTakenIatEntryCount),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardAddressTakenIatEntryCount),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_GuardLongJumpTargetTable(quint64 value)
+void XPE::setLoadConfig_GuardLongJumpTargetTable(quint64 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -6010,16 +6010,16 @@ void XPE::setLoadConfig_GuardLongJumpTargetTable(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardLongJumpTargetTable),value);
+            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardLongJumpTargetTable),nValue);
         }
         else
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardLongJumpTargetTable),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardLongJumpTargetTable),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_GuardLongJumpTargetCount(quint64 value)
+void XPE::setLoadConfig_GuardLongJumpTargetCount(quint64 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -6027,16 +6027,16 @@ void XPE::setLoadConfig_GuardLongJumpTargetCount(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardLongJumpTargetTable),value);
+            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardLongJumpTargetTable),nValue);
         }
         else
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardLongJumpTargetTable),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardLongJumpTargetTable),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_DynamicValueRelocTable(quint64 value)
+void XPE::setLoadConfig_DynamicValueRelocTable(quint64 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -6044,16 +6044,16 @@ void XPE::setLoadConfig_DynamicValueRelocTable(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,DynamicValueRelocTable),value);
+            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,DynamicValueRelocTable),nValue);
         }
         else
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DynamicValueRelocTable),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,DynamicValueRelocTable),nValue);
         }
     }
 }
 
-void XPE::setLoadConfig_CHPEMetadataPointer(quint64 value)
+void XPE::setLoadConfig_CHPEMetadataPointer(quint64 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
@@ -6061,11 +6061,11 @@ void XPE::setLoadConfig_CHPEMetadataPointer(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CHPEMetadataPointer),value);
+            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CHPEMetadataPointer),nValue);
         }
         else
         {
-            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CHPEMetadataPointer),value);
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CHPEMetadataPointer),nValue);
         }
     }
 }
