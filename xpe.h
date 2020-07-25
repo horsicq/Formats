@@ -1018,15 +1018,15 @@ public:
     quint32 getNetHeader_ManagedNativeHeader_Address();
     quint32 getNetHeader_ManagedNativeHeader_Size();
 
-    void setNetHeader_cb(quint32 value);
-    void setNetHeader_MajorRuntimeVersion(quint16 value);
-    void setNetHeader_MinorRuntimeVersion(quint16 value);
-    void setNetHeader_MetaData_Address(quint32 value);
-    void setNetHeader_MetaData_Size(quint32 value);
-    void setNetHeader_Flags(quint32 value);
-    void setNetHeader_EntryPoint(quint32 value);
-    void setNetHeader_Resources_Address(quint32 value);
-    void setNetHeader_Resources_Size(quint32 value);
+    void setNetHeader_cb(quint32 nValue);
+    void setNetHeader_MajorRuntimeVersion(quint16 nValue);
+    void setNetHeader_MinorRuntimeVersion(quint16 nValue);
+    void setNetHeader_MetaData_Address(quint32 nValue);
+    void setNetHeader_MetaData_Size(quint32 nValue);
+    void setNetHeader_Flags(quint32 nValue);
+    void setNetHeader_EntryPoint(quint32 nValue);
+    void setNetHeader_Resources_Address(quint32 nValue);
+    void setNetHeader_Resources_Size(quint32 nValue);
     void setNetHeader_StrongNameSignature_Address(quint32 value);
     void setNetHeader_StrongNameSignature_Size(quint32 value);
     void setNetHeader_CodeManagerTable_Address(quint32 value);

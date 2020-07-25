@@ -7193,93 +7193,93 @@ quint32 XPE::getNetHeader_ManagedNativeHeader_Size()
     return nResult;
 }
 
-void XPE::setNetHeader_cb(quint32 value)
+void XPE::setNetHeader_cb(quint32 nValue)
 {
     qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,cb),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,cb),nValue);
     }
 }
 
-void XPE::setNetHeader_MajorRuntimeVersion(quint16 value)
+void XPE::setNetHeader_MajorRuntimeVersion(quint16 nValue)
 {
     qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
     if(nOffset!=-1)
     {
-        write_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MajorRuntimeVersion),value);
+        write_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MajorRuntimeVersion),nValue);
     }
 }
 
-void XPE::setNetHeader_MinorRuntimeVersion(quint16 value)
+void XPE::setNetHeader_MinorRuntimeVersion(quint16 nValue)
 {
     qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
     if(nOffset!=-1)
     {
-        write_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MinorRuntimeVersion),value);
+        write_uint16(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MinorRuntimeVersion),nValue);
     }
 }
 
-void XPE::setNetHeader_MetaData_Address(quint32 value)
+void XPE::setNetHeader_MetaData_Address(quint32 nValue)
 {
     qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MetaData.VirtualAddress),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MetaData.VirtualAddress),nValue);
     }
 }
 
-void XPE::setNetHeader_MetaData_Size(quint32 value)
+void XPE::setNetHeader_MetaData_Size(quint32 nValue)
 {
     qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MetaData.Size),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,MetaData.Size),nValue);
     }
 }
 
-void XPE::setNetHeader_Flags(quint32 value)
+void XPE::setNetHeader_Flags(quint32 nValue)
 {
     qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Flags),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Flags),nValue);
     }
 }
 
-void XPE::setNetHeader_EntryPoint(quint32 value)
+void XPE::setNetHeader_EntryPoint(quint32 nValue)
 {
     qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,EntryPointRVA),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,EntryPointRVA),nValue);
     }
 }
 
-void XPE::setNetHeader_Resources_Address(quint32 value)
+void XPE::setNetHeader_Resources_Address(quint32 nValue)
 {
     qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Resources.VirtualAddress),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Resources.VirtualAddress),nValue);
     }
 }
 
-void XPE::setNetHeader_Resources_Size(quint32 value)
+void XPE::setNetHeader_Resources_Size(quint32 nValue)
 {
     qint64 nOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Resources.Size),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,Resources.Size),nValue);
     }
 }
 
