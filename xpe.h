@@ -1027,16 +1027,16 @@ public:
     void setNetHeader_EntryPoint(quint32 nValue);
     void setNetHeader_Resources_Address(quint32 nValue);
     void setNetHeader_Resources_Size(quint32 nValue);
-    void setNetHeader_StrongNameSignature_Address(quint32 value);
-    void setNetHeader_StrongNameSignature_Size(quint32 value);
-    void setNetHeader_CodeManagerTable_Address(quint32 value);
-    void setNetHeader_CodeManagerTable_Size(quint32 value);
-    void setNetHeader_VTableFixups_Address(quint32 value);
-    void setNetHeader_VTableFixups_Size(quint32 value);
-    void setNetHeader_ExportAddressTableJumps_Address(quint32 value);
-    void setNetHeader_ExportAddressTableJumps_Size(quint32 value);
-    void setNetHeader_ManagedNativeHeader_Address(quint32 value);
-    void setNetHeader_ManagedNativeHeader_Size(quint32 value);
+    void setNetHeader_StrongNameSignature_Address(quint32 nValue);
+    void setNetHeader_StrongNameSignature_Size(quint32 nValue);
+    void setNetHeader_CodeManagerTable_Address(quint32 nValue);
+    void setNetHeader_CodeManagerTable_Size(quint32 nValue);
+    void setNetHeader_VTableFixups_Address(quint32 nValue);
+    void setNetHeader_VTableFixups_Size(quint32 nValue);
+    void setNetHeader_ExportAddressTableJumps_Address(quint32 nValue);
+    void setNetHeader_ExportAddressTableJumps_Size(quint32 nValue);
+    void setNetHeader_ManagedNativeHeader_Address(quint32 nValue);
+    void setNetHeader_ManagedNativeHeader_Size(quint32 nValue);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
