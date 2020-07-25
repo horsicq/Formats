@@ -682,9 +682,9 @@ void XBinary::write_uint16(qint64 nOffset, quint16 nValue, bool bIsBigEndian)
     write_array(nOffset,(char *)(&nValue),2);
 }
 
-void XBinary::write_int16(qint64 nOffset, qint16 value, bool bIsBigEndian)
+void XBinary::write_int16(qint64 nOffset, qint16 nValue, bool bIsBigEndian)
 {
-    quint16 _value=(quint16)value;
+    quint16 _value=(quint16)nValue;
 
     if(bIsBigEndian)
     {
@@ -2977,9 +2977,9 @@ QString XBinary::valueToHex(float fValue, bool bIsBigEndian)
     return QString("%1").arg(_nValue,8,16,QChar('0'));
 }
 
-QString XBinary::valueToHex(double value, bool bIsBigEndian)
+QString XBinary::valueToHex(double dValue, bool bIsBigEndian)
 {
-    double _value=value;
+    double _value=dValue;
 
     endian_double(&_value,bIsBigEndian);
 
