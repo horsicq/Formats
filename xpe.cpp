@@ -3216,133 +3216,133 @@ QString XPE::getFileVersion(RESOURCE_VERSION *pResourceVersion)
     return QString("%1.%2").arg(get_uint32_version(pResourceVersion->fileInfo.dwFileVersionMS)).arg(get_uint32_version(pResourceVersion->fileInfo.dwFileVersionLS));
 }
 
-void XPE::setFixedFileInfo_dwSignature(quint32 value)
+void XPE::setFixedFileInfo_dwSignature(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwSignature),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwSignature),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwStrucVersion(quint32 value)
+void XPE::setFixedFileInfo_dwStrucVersion(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwStrucVersion),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwStrucVersion),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwFileVersionMS(quint32 value)
+void XPE::setFixedFileInfo_dwFileVersionMS(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionMS),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionMS),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwFileVersionLS(quint32 value)
+void XPE::setFixedFileInfo_dwFileVersionLS(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionLS),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionLS),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwProductVersionMS(quint32 value)
+void XPE::setFixedFileInfo_dwProductVersionMS(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionMS),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionMS),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwProductVersionLS(quint32 value)
+void XPE::setFixedFileInfo_dwProductVersionLS(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionLS),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionLS),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwFileFlagsMask(quint32 value)
+void XPE::setFixedFileInfo_dwFileFlagsMask(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlagsMask),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlagsMask),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwFileFlags(quint32 value)
+void XPE::setFixedFileInfo_dwFileFlags(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlags),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlags),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwFileOS(quint32 value)
+void XPE::setFixedFileInfo_dwFileOS(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileOS),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileOS),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwFileType(quint32 value)
+void XPE::setFixedFileInfo_dwFileType(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileType),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileType),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwFileSubtype(quint32 value)
+void XPE::setFixedFileInfo_dwFileSubtype(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileSubtype),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileSubtype),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwFileDateMS(quint32 value)
+void XPE::setFixedFileInfo_dwFileDateMS(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateMS),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateMS),nValue);
     }
 }
 
-void XPE::setFixedFileInfo_dwFileDateLS(quint32 value)
+void XPE::setFixedFileInfo_dwFileDateLS(quint32 nValue)
 {
     qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
-        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateLS),value);
+        write_uint32(nOffset+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateLS),nValue);
     }
 }
 

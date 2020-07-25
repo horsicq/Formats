@@ -547,19 +547,19 @@ public:
     QString getFileVersion();
     QString getFileVersion(RESOURCE_VERSION *pResourceVersion);
 
-    void setFixedFileInfo_dwSignature(quint32 value);
-    void setFixedFileInfo_dwStrucVersion(quint32 value);
-    void setFixedFileInfo_dwFileVersionMS(quint32 value);
-    void setFixedFileInfo_dwFileVersionLS(quint32 value);
-    void setFixedFileInfo_dwProductVersionMS(quint32 value);
-    void setFixedFileInfo_dwProductVersionLS(quint32 value);
-    void setFixedFileInfo_dwFileFlagsMask(quint32 value);
-    void setFixedFileInfo_dwFileFlags(quint32 value);
-    void setFixedFileInfo_dwFileOS(quint32 value);
-    void setFixedFileInfo_dwFileType(quint32 value);
-    void setFixedFileInfo_dwFileSubtype(quint32 value);
-    void setFixedFileInfo_dwFileDateMS(quint32 value);
-    void setFixedFileInfo_dwFileDateLS(quint32 value);
+    void setFixedFileInfo_dwSignature(quint32 nValue);
+    void setFixedFileInfo_dwStrucVersion(quint32 nValue);
+    void setFixedFileInfo_dwFileVersionMS(quint32 nValue);
+    void setFixedFileInfo_dwFileVersionLS(quint32 nValue);
+    void setFixedFileInfo_dwProductVersionMS(quint32 nValue);
+    void setFixedFileInfo_dwProductVersionLS(quint32 nValue);
+    void setFixedFileInfo_dwFileFlagsMask(quint32 nValue);
+    void setFixedFileInfo_dwFileFlags(quint32 nValue);
+    void setFixedFileInfo_dwFileOS(quint32 nValue);
+    void setFixedFileInfo_dwFileType(quint32 nValue);
+    void setFixedFileInfo_dwFileSubtype(quint32 nValue);
+    void setFixedFileInfo_dwFileDateMS(quint32 nValue);
+    void setFixedFileInfo_dwFileDateLS(quint32 nValue);
 
     QString getResourceVersionValue(QString sKey);
     static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion);
