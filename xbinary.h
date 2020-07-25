@@ -434,7 +434,7 @@ public:
     qint64 _getBaseAddress();
 
     bool isImage();
-    void setIsImage(bool value);
+    void setIsImage(bool bValue);
 
     static qint64 getPhysSize(char *pBuffer,qint64 nSize); // TODO
     static bool isEmptyData(char *pBuffer,qint64 nSize);

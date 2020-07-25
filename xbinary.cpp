@@ -2292,9 +2292,9 @@ bool XBinary::isImage()
     return bIsImage;
 }
 
-void XBinary::setIsImage(bool value)
+void XBinary::setIsImage(bool bValue)
 {
-    bIsImage=value;
+    bIsImage=bValue;
 }
 
 bool XBinary::compareSignature(QString sSignature, qint64 nOffset)
