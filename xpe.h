@@ -910,16 +910,16 @@ public:
     void setLoadConfig_GuardLongJumpTargetCount(quint64 nValue);
     void setLoadConfig_DynamicValueRelocTable(quint64 nValue);
     void setLoadConfig_CHPEMetadataPointer(quint64 nValue);
-    void setLoadConfig_GuardRFFailureRoutine(quint64 value);
-    void setLoadConfig_GuardRFFailureRoutineFunctionPointer(quint64 value);
-    void setLoadConfig_DynamicValueRelocTableOffset(quint32 value);
-    void setLoadConfig_DynamicValueRelocTableSection(quint16 value);
-    void setLoadConfig_Reserved2(quint16 value);
-    void setLoadConfig_GuardRFVerifyStackPointerFunctionPointer(quint64 value);
-    void setLoadConfig_HotPatchTableOffset(quint32 value);
-    void setLoadConfig_Reserved3(quint32 value);
-    void setLoadConfig_EnclaveConfigurationPointer(quint64 value);
-    void setLoadConfig_VolatileMetadataPointer(quint64 value);
+    void setLoadConfig_GuardRFFailureRoutine(quint64 nValue);
+    void setLoadConfig_GuardRFFailureRoutineFunctionPointer(quint64 nValue);
+    void setLoadConfig_DynamicValueRelocTableOffset(quint32 nValue);
+    void setLoadConfig_DynamicValueRelocTableSection(quint16 nValue);
+    void setLoadConfig_Reserved2(quint16 nValue);
+    void setLoadConfig_GuardRFVerifyStackPointerFunctionPointer(quint64 nValue);
+    void setLoadConfig_HotPatchTableOffset(quint32 nValue);
+    void setLoadConfig_Reserved3(quint32 nValue);
+    void setLoadConfig_EnclaveConfigurationPointer(quint64 nValue);
+    void setLoadConfig_VolatileMetadataPointer(quint64 nValue);
 
     XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY _read_IMAGE_RUNTIME_FUNCTION_ENTRY(qint64 nOffset);
 
