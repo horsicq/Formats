@@ -8663,26 +8663,26 @@ XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY XPE::read_IMAGE_RESOURCE_DATA_ENTRY(qint64 nO
     return result;
 }
 
-XPE::RESOURCES_ID_NAME XPE::getResourcesIDName(qint64 nResourceOffset,quint32 value)
+XPE::RESOURCES_ID_NAME XPE::getResourcesIDName(qint64 nResourceOffset, quint32 nValue)
 {
     RESOURCES_ID_NAME result={};
 
-    if(value&0x80000000)
+    if(nValue&0x80000000)
     {
         result.bIsName=true;
-        value&=0x7FFFFFFF;
-        result.nNameOffset=value;
+        nValue&=0x7FFFFFFF;
+        result.nNameOffset=nValue;
         result.nID=0;
-        quint16 nStringLength=read_uint16(nResourceOffset+value);
+        quint16 nStringLength=read_uint16(nResourceOffset+nValue);
 
         nStringLength=qMin((quint16)1024,nStringLength);
 
-        QByteArray baName=read_array(nResourceOffset+value+2,nStringLength*2);
+        QByteArray baName=read_array(nResourceOffset+nValue+2,nStringLength*2);
         result.sName=QString::fromUtf16((quint16 *)(baName.data()),nStringLength);
     }
     else
     {
-        result.nID=value;
+        result.nID=nValue;
         result.sName="";
         result.nNameOffset=0;
     }
@@ -9221,7 +9221,7 @@ quint32 XPE::getTLS_Characteristics()
     return nResult;
 }
 
-void XPE::setTLS_StartAddressOfRawData(quint64 value)
+void XPE::setTLS_StartAddressOfRawData(quint64 nValue)
 {
     qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
 
@@ -9229,16 +9229,16 @@ void XPE::setTLS_StartAddressOfRawData(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,StartAddressOfRawData),value);
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,StartAddressOfRawData),nValue);
         }
         else
         {
-            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,StartAddressOfRawData),value);
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,StartAddressOfRawData),nValue);
         }
     }
 }
 
-void XPE::setTLS_EndAddressOfRawData(quint64 value)
+void XPE::setTLS_EndAddressOfRawData(quint64 nValue)
 {
     qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
 
@@ -9246,16 +9246,16 @@ void XPE::setTLS_EndAddressOfRawData(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,EndAddressOfRawData),value);
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,EndAddressOfRawData),nValue);
         }
         else
         {
-            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,EndAddressOfRawData),value);
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,EndAddressOfRawData),nValue);
         }
     }
 }
 
-void XPE::setTLS_AddressOfIndex(quint64 value)
+void XPE::setTLS_AddressOfIndex(quint64 nValue)
 {
     qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
 
@@ -9263,16 +9263,16 @@ void XPE::setTLS_AddressOfIndex(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,AddressOfIndex),value);
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,AddressOfIndex),nValue);
         }
         else
         {
-            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,AddressOfIndex),value);
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,AddressOfIndex),nValue);
         }
     }
 }
 
-void XPE::setTLS_AddressOfCallBacks(quint64 value)
+void XPE::setTLS_AddressOfCallBacks(quint64 nValue)
 {
     qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
 
@@ -9280,16 +9280,16 @@ void XPE::setTLS_AddressOfCallBacks(quint64 value)
     {
         if(is64())
         {
-            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,AddressOfCallBacks),value);
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,AddressOfCallBacks),nValue);
         }
         else
         {
-            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,AddressOfCallBacks),value);
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,AddressOfCallBacks),nValue);
         }
     }
 }
 
-void XPE::setTLS_SizeOfZeroFill(quint32 value)
+void XPE::setTLS_SizeOfZeroFill(quint32 nValue)
 {
     qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
 
@@ -9297,16 +9297,16 @@ void XPE::setTLS_SizeOfZeroFill(quint32 value)
     {
         if(is64())
         {
-            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,SizeOfZeroFill),value);
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,SizeOfZeroFill),nValue);
         }
         else
         {
-            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,SizeOfZeroFill),value);
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,SizeOfZeroFill),nValue);
         }
     }
 }
 
-void XPE::setTLS_Characteristics(quint32 value)
+void XPE::setTLS_Characteristics(quint32 nValue)
 {
     qint64 nTLSOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
 
@@ -9314,11 +9314,11 @@ void XPE::setTLS_Characteristics(quint32 value)
     {
         if(is64())
         {
-            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,Characteristics),value);
+            write_uint64(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64,Characteristics),nValue);
         }
         else
         {
-            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,Characteristics),value);
+            write_uint32(nTLSOffset+offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32,Characteristics),nValue);
         }
     }
 }

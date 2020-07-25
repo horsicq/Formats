@@ -639,7 +639,7 @@ public:
     XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY read_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset);
     XPE_DEF::IMAGE_RESOURCE_DIRECTORY read_IMAGE_RESOURCE_DIRECTORY(qint64 nOffset);
     XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY read_IMAGE_RESOURCE_DATA_ENTRY(qint64 nOffset);
-    XPE::RESOURCES_ID_NAME getResourcesIDName(qint64 nResourceOffset, quint32 value);
+    XPE::RESOURCES_ID_NAME getResourcesIDName(qint64 nResourceOffset, quint32 nValue);
 
     QList<qint64> getRelocsAsRVAList();
 
@@ -681,12 +681,12 @@ public:
     quint32 getTLS_SizeOfZeroFill();
     quint32 getTLS_Characteristics();
 
-    void setTLS_StartAddressOfRawData(quint64 value);
-    void setTLS_EndAddressOfRawData(quint64 value);
-    void setTLS_AddressOfIndex(quint64 value);
-    void setTLS_AddressOfCallBacks(quint64 value);
-    void setTLS_SizeOfZeroFill(quint32 value);
-    void setTLS_Characteristics(quint32 value);
+    void setTLS_StartAddressOfRawData(quint64 nValue);
+    void setTLS_EndAddressOfRawData(quint64 nValue);
+    void setTLS_AddressOfIndex(quint64 nValue);
+    void setTLS_AddressOfCallBacks(quint64 nValue);
+    void setTLS_SizeOfZeroFill(quint32 nValue);
+    void setTLS_Characteristics(quint32 nValue);
 
     QList<qint64> getTLS_CallbacksList();
     QList<qint64> getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap);
