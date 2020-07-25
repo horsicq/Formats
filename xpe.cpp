@@ -3664,113 +3664,113 @@ void XPE::setExportDirectory(XPE_DEF::IMAGE_EXPORT_DIRECTORY *pExportDirectory)
     }
 }
 
-void XPE::setExportDirectory_Characteristics(quint32 value)
+void XPE::setExportDirectory_Characteristics(quint32 nValue)
 {
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if(nExportOffset!=-1)
     {
-        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,Characteristics),value);
+        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,Characteristics),nValue);
     }
 }
 
-void XPE::setExportDirectory_TimeDateStamp(quint32 value)
+void XPE::setExportDirectory_TimeDateStamp(quint32 nValue)
 {
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if(nExportOffset!=-1)
     {
-        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,TimeDateStamp),value);
+        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,TimeDateStamp),nValue);
     }
 }
 
-void XPE::setExportDirectory_MajorVersion(quint16 value)
+void XPE::setExportDirectory_MajorVersion(quint16 nValue)
 {
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if(nExportOffset!=-1)
     {
-        write_uint16(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,MajorVersion),value);
+        write_uint16(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,MajorVersion),nValue);
     }
 }
 
-void XPE::setExportDirectory_MinorVersion(quint16 value)
+void XPE::setExportDirectory_MinorVersion(quint16 nValue)
 {
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if(nExportOffset!=-1)
     {
-        write_uint16(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,MinorVersion),value);
+        write_uint16(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,MinorVersion),nValue);
     }
 }
 
-void XPE::setExportDirectory_Name(quint32 value)
+void XPE::setExportDirectory_Name(quint32 nValue)
 {
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if(nExportOffset!=-1)
     {
-        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,Name),value);
+        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,Name),nValue);
     }
 }
 
-void XPE::setExportDirectory_Base(quint32 value)
+void XPE::setExportDirectory_Base(quint32 nValue)
 {
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if(nExportOffset!=-1)
     {
-        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,Base),value);
+        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,Base),nValue);
     }
 }
 
-void XPE::setExportDirectory_NumberOfFunctions(quint32 value)
+void XPE::setExportDirectory_NumberOfFunctions(quint32 nValue)
 {
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if(nExportOffset!=-1)
     {
-        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,NumberOfFunctions),value);
+        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,NumberOfFunctions),nValue);
     }
 }
 
-void XPE::setExportDirectory_NumberOfNames(quint32 value)
+void XPE::setExportDirectory_NumberOfNames(quint32 nValue)
 {
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if(nExportOffset!=-1)
     {
-        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,NumberOfNames),value);
+        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,NumberOfNames),nValue);
     }
 }
 
-void XPE::setExportDirectory_AddressOfFunctions(quint32 value)
+void XPE::setExportDirectory_AddressOfFunctions(quint32 nValue)
 {
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if(nExportOffset!=-1)
     {
-        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,AddressOfFunctions),value);
+        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,AddressOfFunctions),nValue);
     }
 }
 
-void XPE::setExportDirectory_AddressOfNames(quint32 value)
+void XPE::setExportDirectory_AddressOfNames(quint32 nValue)
 {
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if(nExportOffset!=-1)
     {
-        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,AddressOfNames),value);
+        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,AddressOfNames),nValue);
     }
 }
 
-void XPE::setExportDirectory_AddressOfNameOrdinals(quint32 value)
+void XPE::setExportDirectory_AddressOfNameOrdinals(quint32 nValue)
 {
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if(nExportOffset!=-1)
     {
-        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,AddressOfNameOrdinals),value);
+        write_uint32(nExportOffset+offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY,AddressOfNameOrdinals),nValue);
     }
 }
 
