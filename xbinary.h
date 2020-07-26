@@ -235,6 +235,7 @@ public:
 
     static bool isPacked(double dEntropy);
 
+    static quint8 random8();
     static quint16 random16();
     static quint32 random32();
     static quint64 random64();
