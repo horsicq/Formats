@@ -77,14 +77,14 @@ void XELF::setIdent_Magic(quint32 nValue)
 
 quint8 XELF::getIdent_mag(int nMag)
 {
-    quint8 value=0;
+    quint8 nValue=0;
 
     if(nMag<4)
     {
-        value=read_uint8(nMag);
+        nValue=read_uint8(nMag);
     }
 
-    return value;
+    return nValue;
 }
 
 void XELF::setIdent_mag(quint8 nValue, int nMag)

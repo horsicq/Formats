@@ -645,7 +645,7 @@ public:
         DT_TYPE_POSIX
     };
 
-    static QString valueToTimeString(quint64 value, DT_TYPE type);
+    static QString valueToTimeString(quint64 nValue, DT_TYPE type);
 
     static bool isX86asm(QString sArch);
 

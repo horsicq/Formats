@@ -4941,14 +4941,14 @@ qint64 XBinary::getVersionIntValue(QString sString)
     return nResult;
 }
 
-QString XBinary::valueToTimeString(quint64 value, XBinary::DT_TYPE type)
+QString XBinary::valueToTimeString(quint64 nValue, XBinary::DT_TYPE type)
 {
     QString sResult;
 
     if(type==DT_TYPE_POSIX)
     {
         QDateTime dt;
-        dt.setMSecsSinceEpoch(value*1000);
+        dt.setMSecsSinceEpoch(nValue*1000);
 
         sResult=dt.toString("yyyy-MM-dd hh:mm:ss");
     }

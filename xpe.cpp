@@ -3519,10 +3519,10 @@ XPE_DEF::IMAGE_IMPORT_DESCRIPTOR XPE::read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffse
     return result;
 }
 
-void XPE::write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset, XPE_DEF::IMAGE_IMPORT_DESCRIPTOR value)
+void XPE::write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset, XPE_DEF::IMAGE_IMPORT_DESCRIPTOR idd)
 {
     // TODO !!
-    write_array(nOffset,(char *)&value,sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR));
+    write_array(nOffset,(char *)&idd,sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR));
 }
 
 XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR XPE::_read_IMAGE_DELAYLOAD_DESCRIPTOR(qint64 nOffset)

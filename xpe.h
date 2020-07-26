@@ -586,7 +586,7 @@ public:
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     XPE_DEF::IMAGE_IMPORT_DESCRIPTOR read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset);
-    void write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset,XPE_DEF::IMAGE_IMPORT_DESCRIPTOR value);
+    void write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset,XPE_DEF::IMAGE_IMPORT_DESCRIPTOR idd);
 
     XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR _read_IMAGE_DELAYLOAD_DESCRIPTOR(qint64 nOffset);
 
