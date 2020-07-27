@@ -4549,6 +4549,38 @@ void XELF::setElf64_Rela_r_addend(qint64 nOffset, quint64 nValue, bool bIsBigEnd
     write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_addend),nValue,bIsBigEndian);
 }
 
+bool XELF::isSectionsTablePresent()
+{
+    bool bResult=false;
+
+    if(is64())
+    {
+        bResult=getHdr64_shnum();
+    }
+    else
+    {
+        bResult=getHdr32_shnum();
+    }
+
+    return bResult;
+}
+
+bool XELF::isProgramsTablePresent()
+{
+    bool bResult=false;
+
+    if(is64())
+    {
+        bResult=getHdr64_phnum();
+    }
+    else
+    {
+        bResult=getHdr32_phnum();
+    }
+
+    return bResult;
+}
+
 QMap<quint64, QString> XELF::getRelTypes_x86()
 {
     QMap<quint64, QString> mapResult;

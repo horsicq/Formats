@@ -429,6 +429,9 @@ public:
     void setElf64_Rela_r_info(qint64 nOffset,quint64 nValue,bool bIsBigEndian);
     void setElf64_Rela_r_addend(qint64 nOffset,quint64 nValue,bool bIsBigEndian);
 
+    bool isSectionsTablePresent();
+    bool isProgramsTablePresent();
+
     static QMap<quint64,QString> getRelTypes_x86();
     static QMap<quint64,QString> getRelTypesS_x86();
     static QMap<quint64,QString> getRelTypes_x64();
