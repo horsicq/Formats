@@ -979,6 +979,11 @@ qint64 XPE::getSectionHeaderSize()
     return sizeof(XPE_DEF::IMAGE_SECTION_HEADER);
 }
 
+bool XPE::isSectionsTablePresent()
+{
+    return (bool)getFileHeader_NumberOfSections();
+}
+
 XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionHeader(quint32 nNumber)
 {
     // TODO

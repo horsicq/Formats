@@ -429,6 +429,9 @@ public:
     void setElf64_Rela_r_info(qint64 nOffset,quint64 nValue,bool bIsBigEndian);
     void setElf64_Rela_r_addend(qint64 nOffset,quint64 nValue,bool bIsBigEndian);
 
+    quint16 getNumberOfSections();
+    quint16 getNumberOfPrograms();
+
     bool isSectionsTablePresent();
     bool isProgramsTablePresent();
 

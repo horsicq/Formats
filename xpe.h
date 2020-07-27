@@ -420,6 +420,8 @@ public:
     qint64 getSectionHeaderOffset(quint32 nNumber);
     qint64 getSectionHeaderSize();
 
+    bool isSectionsTablePresent();
+
     XPE_DEF::IMAGE_SECTION_HEADER getSectionHeader(quint32 nNumber);
     void setSectionHeader(quint32 nNumber,XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader);
 
