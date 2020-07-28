@@ -419,8 +419,9 @@ public:
 
     virtual qint64 getImageSize();
 
-    qint64 _getEntryPointOffset(); // TODO rename
+    qint64 _getEntryPointOffset();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
+
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     qint64 getEntryPointAddress();
     qint64 getEntryPointAddress(_MEMORY_MAP *pMemoryMap);
