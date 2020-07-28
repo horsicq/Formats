@@ -279,7 +279,8 @@ public:
     enum TYPE
     {
         TYPE_UNKNOWN=0,
-        TYPE_EXE,
+        TYPE_GUI,
+        TYPE_CONSOLE,
         TYPE_DLL,
         TYPE_DRIVER
     };
@@ -291,7 +292,7 @@ public:
     virtual QString getArch();
     virtual bool isBigEndian();
 
-    TYPE getType();
+    virtual int getType();
 
     qint64 getNtHeadersOffset();
     quint32 getNtHeaders_Signature();

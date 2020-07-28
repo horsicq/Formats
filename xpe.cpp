@@ -79,17 +79,31 @@ bool XPE::isBigEndian()
     return false;
 }
 
-XPE::TYPE XPE::getType()
+int XPE::getType()
 {
-    TYPE result=TYPE_EXE;
+    TYPE result=TYPE_UNKNOWN;
 
-    if(isDll())
-    {
-        result=TYPE_DLL;
-    }
-    else if(isDriver())
+    quint16 nSubsystem=getOptionalHeader_Subsystem();
+
+    if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE)
     {
         result=TYPE_DRIVER;
+    }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI)
+    {
+        result=TYPE_CONSOLE;
+    }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_GUI)
+    {
+        result=TYPE_GUI;
+    }
+
+    if(result!=TYPE_DRIVER)
+    {
+        if((getFileHeader_Characteristics()&XPE_DEF::S_IMAGE_FILE_DLL))
+        {
+            result=TYPE_DLL;
+        }
     }
 
     return result;

@@ -58,6 +58,21 @@ XBinary::MODE XBinary::getMode()
     return __mode;
 }
 
+void XBinary::setType(int nType)
+{
+    __nType=nType;
+}
+
+int XBinary::getType()
+{
+    return __nType;
+}
+
+QString XBinary::typeIdToString()
+{
+    return "Unknown";
+}
+
 QString XBinary::modeIdToString(XBinary::MODE mode)
 {
     QString sResult="Unknown"; // mb TODO translate

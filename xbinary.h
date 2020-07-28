@@ -225,6 +225,10 @@ public:
     void setMode(MODE mode);
     virtual MODE getMode();
 
+    void setType(int nType);
+    virtual int getType();
+    virtual QString typeIdToString();
+
     static QString modeIdToString(MODE mode);
     static QString endiannessToString(bool bIsBigEndian);
 
@@ -696,6 +700,7 @@ private:
     QString __sArch;
     MODE __mode;
     QString __sVersion;
+    int __nType;
 };
 
 #endif // XBINARY_H
