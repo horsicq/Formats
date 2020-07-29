@@ -1146,3 +1146,65 @@ QString XMACH::getArch()
 {
     return getHeaderCpuTypesS().value(getHeader_cputype(),QString("UNKNOWN"));
 }
+
+int XMACH::getType()
+{
+    int nResult=TYPE_UNKNOWN;
+
+    quint32 nFileType=getHeader_filetype();
+
+    if(nFileType==XMACH_DEF::S_MH_OBJECT)
+    {
+        nResult=TYPE_OBJECT;
+    }
+    else if(nFileType==XMACH_DEF::S_MH_EXECUTE)
+    {
+        nResult=TYPE_EXECUTE;
+    }
+    else if(nFileType==XMACH_DEF::S_MH_FVMLIB)
+    {
+        nResult=TYPE_FVMLIB;
+    }
+    else if(nFileType==XMACH_DEF::S_MH_CORE)
+    {
+        nResult=TYPE_CORE;
+    }
+    else if(nFileType==XMACH_DEF::S_MH_PRELOAD)
+    {
+        nResult=TYPE_PRELOAD;
+    }
+    else if(nFileType==XMACH_DEF::S_MH_DYLIB)
+    {
+        nResult=TYPE_DYLIB;
+    }
+    else if(nFileType==XMACH_DEF::S_MH_DYLINKER)
+    {
+        nResult=TYPE_DYLINKER;
+    }
+    else if(nFileType==XMACH_DEF::S_MH_BUNDLE)
+    {
+        nResult=TYPE_BUNDLE;
+    }
+
+    return nResult;
+}
+
+QString XMACH::typeIdToString(int nType)
+{
+    QString sResult="Unknown"; // mb TODO translate
+
+    switch(nType)
+    {
+        case TYPE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_OBJECT:           sResult=QString("OBJECT");      break;
+        case TYPE_EXECUTE:          sResult=QString("EXECUTE");     break;
+        case TYPE_FVMLIB:           sResult=QString("FVMLIB");      break;
+        case TYPE_CORE:             sResult=QString("CORE");        break;
+        case TYPE_PRELOAD:          sResult=QString("PRELOAD");     break;
+        case TYPE_DYLIB:            sResult=QString("DYLIB");       break;
+        case TYPE_DYLINKER:         sResult=QString("DYLINKER");    break;
+        case TYPE_BUNDLE:           sResult=QString("BUNDLE");      break;
+    }
+
+    return sResult;
+}

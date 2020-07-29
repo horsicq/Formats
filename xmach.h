@@ -73,6 +73,19 @@ public:
         quint32	flags;
     };
 
+    enum TYPE
+    {
+        TYPE_UNKNOWN=0,
+        TYPE_OBJECT,
+        TYPE_EXECUTE,
+        TYPE_FVMLIB,
+        TYPE_CORE,
+        TYPE_PRELOAD,
+        TYPE_DYLIB,
+        TYPE_DYLINKER,
+        TYPE_BUNDLE
+    };
+
     XMACH(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
     ~XMACH();
 
@@ -155,6 +168,8 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
+    virtual int getType();
+    virtual QString typeIdToString(int nType);
 };
 
 #endif // XMACH_H

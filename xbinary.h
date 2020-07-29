@@ -661,6 +661,7 @@ public:
     static QString valueToTimeString(quint64 nValue, DT_TYPE type);
 
     static bool isX86asm(QString sArch);
+    static bool checkFileType(XBinary::FT fileTypeMain,XBinary::FT fileTypeOptional);
 
 private:
     static QString convertSignature(QString sSignature);

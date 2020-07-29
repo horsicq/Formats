@@ -7435,14 +7435,7 @@ qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOf
 
 bool XPE::isDll()
 {
-    bool bResult=false;
-
-    if(getOptionalHeader_Subsystem()!=XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE)
-    {
-        bResult=(getFileHeader_Characteristics()&XPE_DEF::S_IMAGE_FILE_DLL);
-    }
-
-    return bResult;
+    return (getType()==TYPE_DLL);
 }
 
 bool XPE::isDll(QString sFileName)
@@ -7469,12 +7462,12 @@ bool XPE::isDll(QString sFileName)
 
 bool XPE::isConsole()
 {
-    return (getOptionalHeader_Subsystem()==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI);
+    return (getType()==TYPE_CONSOLE);
 }
 
 bool XPE::isDriver()
 {
-    return (getOptionalHeader_Subsystem()==XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE);
+    return (getType()==TYPE_DRIVER);
 }
 
 bool XPE::isNETPresent()

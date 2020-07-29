@@ -29,42 +29,42 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
 {
     XBinary::_MEMORY_MAP result={};
 
-    if(fileType==XBinary::FT_BINARY)
+    if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
     {
         XBinary binary(pDevice,bIsImage,nImageBase);
         result=binary.getMemoryMap();
     }
-    else if(fileType==XBinary::FT_COM)
+    else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
     {
         XCOM com(pDevice,bIsImage,nImageBase);
         result=com.getMemoryMap();
     }
-    else if(fileType==XBinary::FT_MSDOS)
+    else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
     {
         XMSDOS msdos(pDevice,bIsImage,nImageBase);
         result=msdos.getMemoryMap();
     }
-    else if(fileType==XBinary::FT_NE)
+    else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
     {
         XNE ne(pDevice,bIsImage,nImageBase);
         result=ne.getMemoryMap();
     }
-    else if((fileType==XBinary::FT_LE)||(fileType==XBinary::FT_LX))
+    else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
     {
         XLE le(pDevice,bIsImage,nImageBase);
         result=le.getMemoryMap();
     }
-    else if((fileType==XBinary::FT_PE)||(fileType==XBinary::FT_PE32)||(fileType==XBinary::FT_PE64))
+    else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
         XPE pe(pDevice,bIsImage,nImageBase);
         result=pe.getMemoryMap();
     }
-    else if((fileType==XBinary::FT_ELF)||(fileType==XBinary::FT_ELF32)||(fileType==XBinary::FT_ELF64))
+    else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
     {
         XELF elf(pDevice,bIsImage,nImageBase);
         result=elf.getMemoryMap();
     }
-    else if((fileType==XBinary::FT_MACH)||(fileType==XBinary::FT_MACH32)||(fileType==XBinary::FT_MACH64))
+    else if(XBinary::checkFileType(XBinary::FT_MACH,fileType))
     {
         XMACH mach(pDevice,bIsImage,nImageBase);
         result=mach.getMemoryMap();
@@ -77,42 +77,42 @@ qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, 
 {
     qint64 nResult=0;
 
-    if(fileType==XBinary::FT_BINARY)
+    if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
     {
         XBinary binary(pDevice,bIsImage,nImageBase);
         nResult=binary.getEntryPointAddress();
     }
-    else if(fileType==XBinary::FT_COM)
+    else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
     {
         XCOM com(pDevice,bIsImage,nImageBase);
         nResult=com.getEntryPointAddress();
     }
-    else if(fileType==XBinary::FT_MSDOS)
+    else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
     {
         XMSDOS msdos(pDevice,bIsImage,nImageBase);
         nResult=msdos.getEntryPointAddress();
     }
-    else if(fileType==XBinary::FT_NE)
+    else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
     {
         XNE ne(pDevice,bIsImage,nImageBase);
         nResult=ne.getEntryPointAddress();
     }
-    else if((fileType==XBinary::FT_LE)||(fileType==XBinary::FT_LX))
+    else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
     {
         XLE le(pDevice,bIsImage,nImageBase);
         nResult=le.getEntryPointAddress();
     }
-    else if((fileType==XBinary::FT_PE)||(fileType==XBinary::FT_PE32)||(fileType==XBinary::FT_PE64))
+    else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
         XPE pe(pDevice,bIsImage,nImageBase);
         nResult=pe.getEntryPointAddress();
     }
-    else if((fileType==XBinary::FT_ELF)||(fileType==XBinary::FT_ELF32)||(fileType==XBinary::FT_ELF64))
+    else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
     {
         XELF elf(pDevice,bIsImage,nImageBase);
         nResult=elf.getEntryPointAddress();
     }
-    else if((fileType==XBinary::FT_MACH)||(fileType==XBinary::FT_MACH32)||(fileType==XBinary::FT_MACH64))
+    else if(XBinary::checkFileType(XBinary::FT_MACH,fileType))
     {
         XMACH mach(pDevice,bIsImage,nImageBase);
         nResult=mach.getEntryPointAddress();
@@ -125,42 +125,42 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
 {
     qint64 nResult=0;
 
-    if(fileType==XBinary::FT_BINARY)
+    if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
     {
         XBinary binary(pDevice,bIsImage,nImageBase);
         nResult=binary._getEntryPointOffset();
     }
-    else if(fileType==XBinary::FT_COM)
+    else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
     {
         XCOM com(pDevice,bIsImage,nImageBase);
         nResult=com._getEntryPointOffset();
     }
-    else if(fileType==XBinary::FT_MSDOS)
+    else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
     {
         XMSDOS msdos(pDevice,bIsImage,nImageBase);
         nResult=msdos._getEntryPointOffset();
     }
-    else if(fileType==XBinary::FT_NE)
+    else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
     {
         XNE ne(pDevice,bIsImage,nImageBase);
         nResult=ne._getEntryPointOffset();
     }
-    else if((fileType==XBinary::FT_LE)||(fileType==XBinary::FT_LX))
+    else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
     {
         XLE le(pDevice,bIsImage,nImageBase);
         nResult=le._getEntryPointOffset();
     }
-    else if((fileType==XBinary::FT_PE)||(fileType==XBinary::FT_PE32)||(fileType==XBinary::FT_PE64))
+    else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
         XPE pe(pDevice,bIsImage,nImageBase);
         nResult=pe._getEntryPointOffset();
     }
-    else if((fileType==XBinary::FT_ELF)||(fileType==XBinary::FT_ELF32)||(fileType==XBinary::FT_ELF64))
+    else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
     {
         XELF elf(pDevice,bIsImage,nImageBase);
         nResult=elf._getEntryPointOffset();
     }
-    else if((fileType==XBinary::FT_MACH)||(fileType==XBinary::FT_MACH32)||(fileType==XBinary::FT_MACH64))
+    else if(XBinary::checkFileType(XBinary::FT_MACH,fileType))
     {
         XMACH mach(pDevice,bIsImage,nImageBase);
         nResult=mach._getEntryPointOffset();

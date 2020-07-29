@@ -2847,7 +2847,7 @@ XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice)
     }
     else if(stFT.contains(FT_MACH64))
     {
-        result=FT_MACH32;
+        result=FT_MACH64;
     }
     else if(stFT.contains(FT_ELF32))
     {
@@ -5008,6 +5008,46 @@ bool XBinary::isX86asm(QString sArch)
     }
 
     return bResult;
+}
+
+bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOptional)
+{
+    bool bResult=false;
+
+    if((fileTypeMain==FT_BINARY)&&(fileTypeOptional==FT_BINARY))
+    {
+        bResult=true;
+    }
+    else if((fileTypeMain==FT_COM)&&(fileTypeOptional==FT_COM))
+    {
+        bResult=true;
+    }
+    else if((fileTypeMain==FT_MSDOS)&&(fileTypeOptional==FT_MSDOS))
+    {
+        bResult=true;
+    }
+    else if((fileTypeMain==FT_NE)&&(fileTypeOptional==FT_NE))
+    {
+        bResult=true;
+    }
+    else if((fileTypeMain==FT_LE)&&((fileTypeOptional==FT_LE)||(fileTypeOptional==FT_LX)))
+    {
+        bResult=true;
+    }
+    else if((fileTypeMain==FT_PE)&&((fileTypeOptional==FT_PE)||(fileTypeOptional==FT_PE32)||(fileTypeOptional==FT_PE64)))
+    {
+        bResult=true;
+    }
+    else if((fileTypeMain==FT_ELF)&&((fileTypeOptional==FT_ELF)||(fileTypeOptional==FT_ELF32)||(fileTypeOptional==FT_ELF64)))
+    {
+        bResult=true;
+    }
+    else if((fileTypeMain==FT_MACH)&&((fileTypeOptional==FT_MACH)||(fileTypeOptional==FT_MACH32)||(fileTypeOptional==FT_MACH64)))
+    {
+        bResult=true;
+    }
+
+    return  bResult;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
