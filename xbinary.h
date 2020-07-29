@@ -180,6 +180,7 @@ public:
         MODE mode;
         bool bIsBigEndian;
         QString sArch;
+        QString sType;
         QList<_MEMORY_RECORD> listRecords;
     };
 
