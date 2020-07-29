@@ -36,6 +36,12 @@ public:
         quint32 nCount;
     };
 
+    enum TYPE
+    {
+        TYPE_UNKNOWN=0,
+        TYPE_EXE
+    };
+
     explicit XMSDOS(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
 
@@ -124,6 +130,8 @@ public:
     virtual MODE getMode();
     virtual QString getArch();
     virtual bool isBigEndian();
+    virtual int getType();
+    virtual QString typeIdToString(int nType);
 };
 
 #endif // XMSDOS_H

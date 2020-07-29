@@ -623,3 +623,21 @@ bool XMSDOS::isBigEndian()
 {
     return false;
 }
+
+int XMSDOS::getType()
+{
+    return TYPE_EXE;
+}
+
+QString XMSDOS::typeIdToString(int nType)
+{
+    QString sResult="Unknown"; // mb TODO translate
+
+    switch(nType)
+    {
+        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_EXE:          sResult=QString("EXE");         break;
+    }
+
+    return sResult;
+}
