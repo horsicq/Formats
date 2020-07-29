@@ -109,6 +109,22 @@ int XPE::getType()
     return result;
 }
 
+QString XPE::typeIdToString(int nType)
+{
+    QString sResult="Unknown"; // mb TODO translate
+
+    switch(nType)
+    {
+        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_GUI:          sResult=QString("GUI");         break;
+        case TYPE_CONSOLE:      sResult=QString("Console");     break;
+        case TYPE_DLL:          sResult=QString("DLL");         break;
+        case TYPE_DRIVER:       sResult=QString("Driver");      break;
+    }
+
+    return sResult;
+}
+
 qint64 XPE::getNtHeadersOffset()
 {
     qint64 result=get_lfanew();

@@ -293,6 +293,7 @@ public:
     virtual bool isBigEndian();
 
     virtual int getType();
+    virtual QString typeIdToString(int nType);
 
     qint64 getNtHeadersOffset();
     quint32 getNtHeaders_Signature();
