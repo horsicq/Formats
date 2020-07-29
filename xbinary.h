@@ -201,6 +201,11 @@ public:
 #endif
     };
 
+    enum TYPE
+    {
+        TYPE_UNKNOWN=0,
+    };
+
 private:
     enum ST
     {
@@ -228,7 +233,8 @@ public:
 
     void setType(int nType);
     virtual int getType();
-    virtual QString typeIdToString();
+    virtual QString typeIdToString(int nType);
+    QString getTypeAsString();
 
     static QString modeIdToString(MODE mode);
     static QString endiannessToString(bool bIsBigEndian);

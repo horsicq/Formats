@@ -907,6 +907,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
     qint32 nIndex=0;
 
     result.sArch=getArch();
+    result.sType=getTypeAsString();
 
     result.fileType=FT_NE;
     result.mode=MODE_16SEG;

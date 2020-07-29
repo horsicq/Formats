@@ -316,6 +316,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     qint32 nIndex=0;
 
     result.sArch=getArch();
+    result.sType=getTypeAsString();
 
     result.fileType=FT_MSDOS;
     result.mode=getMode();

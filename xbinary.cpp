@@ -36,6 +36,7 @@ XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
     setMode(MODE_UNKNOWN);
     setArch("NOEXECUTABLE");
     setVersion("");
+    setType(TYPE_UNKNOWN);
 }
 
 void XBinary::setData(QIODevice *__pDevice)
@@ -68,9 +69,21 @@ int XBinary::getType()
     return __nType;
 }
 
-QString XBinary::typeIdToString()
+QString XBinary::typeIdToString(int nType)
 {
-    return "Unknown";
+    QString sResult="Unknown"; // mb TODO translate
+
+    switch(nType)
+    {
+        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
+    }
+
+    return sResult;
+}
+
+QString XBinary::getTypeAsString()
+{
+    return typeIdToString(getType());
 }
 
 QString XBinary::modeIdToString(XBinary::MODE mode)
@@ -2262,6 +2275,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
     result.mode=getMode();
     result.sArch=getArch();
     result.bIsBigEndian=isBigEndian();
+    result.sType=getTypeAsString();
 
     _MEMORY_RECORD record={};
     record.nAddress=_getBaseAddress();

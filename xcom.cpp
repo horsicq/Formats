@@ -53,6 +53,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
     result.mode=getMode();
     result.sArch=getArch();
     result.bIsBigEndian=isBigEndian();
+    result.sType=getTypeAsString();
 
     _MEMORY_RECORD record={};
     record.nAddress=_getBaseAddress();

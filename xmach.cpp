@@ -706,6 +706,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
     result.sArch=getArch();
     result.bIsBigEndian=isBigEndian();
+    result.sType=getTypeAsString();
 
     result.nRawSize=getSize();
 
