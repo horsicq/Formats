@@ -3858,14 +3858,57 @@ QString XELF::getArch()
 
 int XELF::getType()
 {
-    return 0;
-    // TODO
+    int nResult=TYPE_UNKNOWN;
+
+    quint16 nType=0;
+
+    if(is64())
+    {
+        nType=getHdr64_type();
+    }
+    else
+    {
+        nType=getHdr32_type();
+    }
+
+    if(nType==XELF_DEF::S_ET_REL)
+    {
+        nResult=TYPE_REL;
+    }
+    else if(nType==XELF_DEF::S_ET_EXEC)
+    {
+        nResult=TYPE_EXEC;
+    }
+    else if(nType=XELF_DEF::S_ET_DYN)
+    {
+        nResult=TYPE_DYN;
+    }
+    else if(nType==XELF_DEF::S_ET_CORE)
+    {
+        nResult=TYPE_CORE;
+    }
+    else if(nType==XELF_DEF::S_ET_NUM)
+    {
+        nResult=TYPE_NUM;
+    }
+
+    return nResult;
 }
 
 QString XELF::typeIdToString(int nType)
 {
-    return "";
-    // TODO
+    QString sResult="Unknown"; // mb TODO translate
+
+    switch(nType)
+    {
+        case TYPE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_EXEC:             sResult=QString("EXEC");        break;
+        case TYPE_DYN:              sResult=QString("DYN");         break;
+        case TYPE_CORE:             sResult=QString("CORE");        break;
+        case TYPE_NUM:              sResult=QString("NUM");         break;
+    }
+
+    return sResult;
 }
 
 qint64 XELF::getBaseAddress()

@@ -67,6 +67,16 @@ public:
         qint64 nFlags;
     };
 
+    enum TYPE
+    {
+        TYPE_UNKNOWN=0,
+        TYPE_REL,
+        TYPE_EXEC,
+        TYPE_DYN,
+        TYPE_CORE,
+        TYPE_NUM
+    };
+
     XELF(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     ~XELF();
 
@@ -370,6 +380,8 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
+    virtual int getType();
+    virtual QString typeIdToString(int nType);
 
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nValue);

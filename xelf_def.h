@@ -86,6 +86,15 @@ const quint8 S_EI_OSABI                     =7;                     /* Operating
 const quint8 S_EI_ABIVERSION                =8;                     /* ABI version */
 const quint8 S_SHN_UNDEF                    =0;
 
+const quint16 S_ET_NONE                     =0;
+const quint16 S_ET_REL                      =1;
+const quint16 S_ET_EXEC                     =2;
+const quint16 S_ET_DYN                      =3;
+const quint16 S_ET_CORE                     =4;
+const quint16 S_ET_NUM                      =5;
+const quint16 S_ET_LOPROC                   =0xff00;
+const quint16 S_ET_HIPROC                   =0xffff;
+
 const quint32 S_DT_NULL                     =0;                     /* Marks end of dynamic section */
 const quint32 S_DT_NEEDED                   =1;                     /* Name of needed library */
 const quint32 S_DT_PLTRELSZ                 =2;                     /* Size in bytes of PLT relocs */
