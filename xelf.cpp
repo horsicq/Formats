@@ -3856,6 +3856,18 @@ QString XELF::getArch()
     return getMachinesS().value(getHdr32_machine(),QString("UNKNOWN"));
 }
 
+int XELF::getType()
+{
+    return 0;
+    // TODO
+}
+
+QString XELF::typeIdToString(int nType)
+{
+    return "";
+    // TODO
+}
+
 qint64 XELF::getBaseAddress()
 {
     return getMemoryMap().nBaseAddress;
