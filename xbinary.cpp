@@ -291,6 +291,16 @@ QString XBinary::convertPathName(QString sPathName)
         sResult.replace("/",QDir::separator());
     }
 
+    if(sPathName.contains("$data"))
+    {
+#ifdef Q_OS_MAC
+        sResult.replace("$data",QCoreApplication::applicationDirPath()+"/../Resources");
+#else
+        sResult.replace("$data",QCoreApplication::applicationDirPath());
+#endif
+        sResult.replace("/",QDir::separator());
+    }
+
     return sResult;
 }
 
