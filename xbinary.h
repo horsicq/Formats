@@ -250,6 +250,7 @@ public:
     static quint16 random16();
     static quint32 random32();
     static quint64 random64();
+    static quint64 random(quint64 nLimit);
 
     static QString fileTypeIdToString(FT fileType);
 

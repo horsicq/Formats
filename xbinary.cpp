@@ -183,6 +183,18 @@ quint64 XBinary::random64()
     return nVal1+nVal2;
 }
 
+quint64 XBinary::random(quint64 nLimit)
+{
+    quint64 nResult=0;
+
+    if(nLimit)
+    {
+        nResult=(random64())%nLimit;
+    }
+
+    return nResult;
+}
+
 QString XBinary::fileTypeIdToString(XBinary::FT fileType)
 {
     QString sResult="Unknown"; // mb TODO translate
