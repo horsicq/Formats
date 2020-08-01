@@ -1083,3 +1083,13 @@ qint64 XNE::getEntryPointOffset(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     return addressToOffset(pMemoryMap,getImageOS2Header_csip());
 }
+
+int XNE::getType()
+{
+    return XMSDOS::getType(); // TODO
+}
+
+QString XNE::typeIdToString(int nType)
+{
+    return XMSDOS::typeIdToString(nType); // TODO
+}
