@@ -1071,7 +1071,7 @@ XBinary::MODE XNE::getMode()
 
 QString XNE::getArch()
 {
-    return "8086";
+    return "8086"; // TODO Check mb 286?
 }
 
 bool XNE::isBigEndian()
