@@ -1366,6 +1366,16 @@ qint64 XLE::getEntryPointOffset(XBinary::_MEMORY_MAP *pMemoryMap)
     return 0;
 }
 
+int XLE::getType()
+{
+    return XMSDOS::getType(); // TODO
+}
+
+QString XLE::typeIdToString(int nType)
+{
+    return XMSDOS::typeIdToString(nType); // TODO
+}
+
 QMap<quint64, QString> XLE::getImageLEMagics()
 {
     QMap<quint64, QString> mapResult;

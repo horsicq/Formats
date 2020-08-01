@@ -141,6 +141,8 @@ public:
     virtual QString getArch();
     virtual bool isBigEndian();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
+    virtual int getType();
+    virtual QString typeIdToString(int nType);
 
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();
