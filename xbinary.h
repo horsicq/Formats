@@ -664,6 +664,9 @@ public:
     static bool isX86asm(QString sArch);
     static bool checkFileType(XBinary::FT fileTypeMain,XBinary::FT fileTypeOptional);
 
+    static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes);
+    static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar c);
