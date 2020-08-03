@@ -29,6 +29,12 @@ class XLE : public XMSDOS
     Q_OBJECT
 
 public:
+    enum TYPE
+    {
+        TYPE_UNKNOWN=0,
+        TYPE_EXE
+    };
+
     explicit XLE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
 
