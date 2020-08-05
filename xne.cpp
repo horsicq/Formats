@@ -1086,10 +1086,18 @@ qint64 XNE::getEntryPointOffset(XBinary::_MEMORY_MAP *pMemoryMap)
 
 int XNE::getType()
 {
-    return XMSDOS::getType(); // TODO
+    return TYPE_EXE; // TODO
 }
 
 QString XNE::typeIdToString(int nType)
 {
-    return XMSDOS::typeIdToString(nType); // TODO
+    QString sResult="Unknown"; // mb TODO translate
+
+    switch(nType)
+    {
+        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_EXE:          sResult=QString("EXE");         break;
+    }
+
+    return sResult;
 }
