@@ -617,12 +617,12 @@ public:
 
     QByteArray getHeaders();
 
-    OFFSETSIZE __getSectionOffsetAndSize(quint32 nSection);
+    OFFSETSIZE __getSectionOffsetAndSize(quint32 nSection); // TODO move to Xbinary
 
-    QByteArray getSection(quint32 nSection);
+    QByteArray getSection(quint32 nSection); // TODO move to Xbinary
 
-    QString getSectionHash(HASH hash,quint32 nSection);
-    double getSectionEntropy(quint32 nSection);
+    QString getSectionHash(HASH hash,quint32 nSection); // TODO move to Xbinary
+    double getSectionEntropy(quint32 nSection); // TODO move to Xbinary
 
     bool addImportSection(QMap<qint64,QString> *pMapIAT);
     bool addImportSection(QIODevice *pDevice,bool bIsImage,QMap<qint64,QString> *pMapIAT);
