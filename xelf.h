@@ -191,6 +191,21 @@ public:
     static QMap<quint64,QString> getProgramFlags();
     static QMap<quint64,QString> getProgramFlagsS();
 
+    static QMap<quint64,QString> getDynamicTags();
+    static QMap<quint64,QString> getDynamicTagsS();
+
+    static QMap<quint64,QString> getRelTypes_x86();
+    static QMap<quint64,QString> getRelTypesS_x86();
+    static QMap<quint64,QString> getRelTypes_x64();
+    static QMap<quint64,QString> getRelTypesS_x64();
+    static QMap<quint64,QString> getRelTypes_SPARC();
+    static QMap<quint64,QString> getRelTypesS_SPARC();
+
+    static QMap<quint64,QString> getStBinds();
+    static QMap<quint64,QString> getStBindsS();
+    static QMap<quint64,QString> getStTypes();
+    static QMap<quint64,QString> getStTypesS();
+
     quint16 getSectionStringTable();
     quint16 getSectionStringTable(bool bIs64);
 
@@ -365,9 +380,6 @@ public:
     OS_ANSISTRING getRunPath();
     OS_ANSISTRING getRunPath(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
 
-    static QMap<quint64,QString> getDynamicTags();
-    static QMap<quint64,QString> getDynamicTagsS();
-
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
@@ -446,18 +458,6 @@ public:
 
     bool isSectionsTablePresent();
     bool isProgramsTablePresent();
-
-    static QMap<quint64,QString> getRelTypes_x86();
-    static QMap<quint64,QString> getRelTypesS_x86();
-    static QMap<quint64,QString> getRelTypes_x64();
-    static QMap<quint64,QString> getRelTypesS_x64();
-    static QMap<quint64,QString> getRelTypes_SPARC();
-    static QMap<quint64,QString> getRelTypesS_SPARC();
-
-    static QMap<quint64,QString> getStBinds();
-    static QMap<quint64,QString> getStBindsS();
-    static QMap<quint64,QString> getStTypes();
-    static QMap<quint64,QString> getStTypesS();
 };
 
 #endif // XELF_H
