@@ -3812,6 +3812,7 @@ void XPE::setExportDirectory_AddressOfNameOrdinals(quint32 nValue)
 
 QByteArray XPE::getHeaders()
 {
+    // TODO Check
     QByteArray baResult;
 
     int nSizeOfHeaders=getOptionalHeader_SizeOfHeaders();
