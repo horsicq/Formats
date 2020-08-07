@@ -147,14 +147,14 @@ void XELF::setIdent_abiversion(quint8 nValue)
 
 quint8 XELF::getIdent_pad(int nPad)
 {
-    quint8 value=0;
+    quint8 nValue=0;
 
     if(nPad<7)
     {
-        value=read_uint8(XELF_DEF::S_EI_ABIVERSION+1+nPad);
+        nValue=read_uint8(XELF_DEF::S_EI_ABIVERSION+1+nPad);
     }
 
-    return value;
+    return nValue;
 }
 
 void XELF::setIdent_pad(quint8 nValue, int nPad)
