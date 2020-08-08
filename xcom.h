@@ -29,6 +29,12 @@ class XCOM : public XBinary
     Q_OBJECT
 
 public:
+    enum TYPE
+    {
+        TYPE_UNKNOWN=0,
+        TYPE_EXE
+    };
+
     explicit XCOM(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     ~XCOM();
     virtual bool isValid();
