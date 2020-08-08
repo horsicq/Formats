@@ -110,3 +110,21 @@ qint64 XCOM::getImageSize()
 {
     return 0x10000;
 }
+
+int XCOM::getType()
+{
+    return TYPE_EXE;
+}
+
+QString XCOM::typeIdToString(int nType)
+{
+    QString sResult="Unknown"; // mb TODO translate
+
+    switch(nType)
+    {
+        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_EXE:          sResult=QString("EXE");         break;
+    }
+
+    return sResult;
+}
