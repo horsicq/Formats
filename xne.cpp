@@ -1097,6 +1097,8 @@ QString XNE::typeIdToString(int nType)
     {
         case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
         case TYPE_EXE:          sResult=QString("EXE");         break;
+        case TYPE_DLL:          sResult=QString("DLL");         break;
+        case TYPE_DRIVER:       sResult=QString("Driver");      break;
     }
 
     return sResult;
