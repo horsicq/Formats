@@ -32,7 +32,7 @@ XCOM::~XCOM()
 
 bool XCOM::isValid()
 {
-    return true;
+    return true; // mb TODO
 }
 
 qint64 XCOM::getBaseAddress()
