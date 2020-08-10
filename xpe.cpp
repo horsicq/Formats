@@ -101,6 +101,10 @@ int XPE::getType()
     {
         result=TYPE_EFIBOOT;
     }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX)
+    {
+        result=TYPE_XBOX;
+    }
 
     if(result!=TYPE_DRIVER)
     {
@@ -125,6 +129,7 @@ QString XPE::typeIdToString(int nType)
         case TYPE_DLL:          sResult=QString("DLL");         break;
         case TYPE_DRIVER:       sResult=QString("Driver");      break;
         case TYPE_EFIBOOT:      sResult=QString("EFI Boot");    break;
+        case TYPE_XBOX:         sResult=QString("XBOX");        break;
     }
 
     return sResult;

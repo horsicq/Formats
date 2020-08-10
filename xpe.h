@@ -283,7 +283,8 @@ public:
         TYPE_CONSOLE,
         TYPE_DLL,
         TYPE_DRIVER,
-        TYPE_EFIBOOT
+        TYPE_EFIBOOT,
+        TYPE_XBOX
         // TODO more from subsystems
     };
 
