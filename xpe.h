@@ -282,8 +282,9 @@ public:
         TYPE_GUI,
         TYPE_CONSOLE,
         TYPE_DLL,
-        TYPE_DRIVER
-        // TODO UEFI
+        TYPE_DRIVER,
+        TYPE_EFIBOOT
+        // TODO more from subsystems
     };
 
     explicit XPE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);

@@ -97,6 +97,10 @@ int XPE::getType()
     {
         result=TYPE_GUI;
     }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)
+    {
+        result=TYPE_EFIBOOT;
+    }
 
     if(result!=TYPE_DRIVER)
     {
@@ -120,6 +124,7 @@ QString XPE::typeIdToString(int nType)
         case TYPE_CONSOLE:      sResult=QString("Console");     break;
         case TYPE_DLL:          sResult=QString("DLL");         break;
         case TYPE_DRIVER:       sResult=QString("Driver");      break;
+        case TYPE_EFIBOOT:      sResult=QString("EFI Boot");    break;
     }
 
     return sResult;
