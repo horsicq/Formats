@@ -283,6 +283,7 @@ public:
         TYPE_CONSOLE,
         TYPE_DLL,
         TYPE_DRIVER
+        // TODO UEFI
     };
 
     explicit XPE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
