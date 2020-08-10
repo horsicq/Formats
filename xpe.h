@@ -284,7 +284,9 @@ public:
         TYPE_DLL,
         TYPE_DRIVER,
         TYPE_EFIBOOT,
-        TYPE_XBOX
+        TYPE_XBOX,
+        TYPE_OS2,
+        TYPE_POSIX
         // TODO more from subsystems
     };
 

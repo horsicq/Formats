@@ -105,6 +105,14 @@ int XPE::getType()
     {
         result=TYPE_XBOX;
     }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI)
+    {
+        result=TYPE_OS2;
+    }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI)
+    {
+        result=TYPE_POSIX;
+    }
 
     if(result!=TYPE_DRIVER)
     {
@@ -130,6 +138,8 @@ QString XPE::typeIdToString(int nType)
         case TYPE_DRIVER:       sResult=QString("Driver");      break;
         case TYPE_EFIBOOT:      sResult=QString("EFI Boot");    break;
         case TYPE_XBOX:         sResult=QString("XBOX");        break;
+        case TYPE_OS2:          sResult=QString("OS2");         break;
+        case TYPE_POSIX:        sResult=QString("POSIX");       break;
     }
 
     return sResult;
