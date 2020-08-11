@@ -113,8 +113,12 @@ int XPE::getType()
     {
         result=TYPE_POSIX;
     }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
+    {
+        result=TYPE_CE;
+    }
 
-    if(result!=TYPE_DRIVER)
+    if(result!=TYPE_DRIVER) // TODO Check
     {
         if((getFileHeader_Characteristics()&XPE_DEF::S_IMAGE_FILE_DLL))
         {
@@ -140,6 +144,7 @@ QString XPE::typeIdToString(int nType)
         case TYPE_XBOX:         sResult=QString("XBOX");        break;
         case TYPE_OS2:          sResult=QString("OS2");         break;
         case TYPE_POSIX:        sResult=QString("POSIX");       break;
+        case TYPE_CE:           sResult=QString("CE");          break;
     }
 
     return sResult;

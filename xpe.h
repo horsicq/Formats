@@ -286,7 +286,8 @@ public:
         TYPE_EFIBOOT,
         TYPE_XBOX,
         TYPE_OS2,
-        TYPE_POSIX
+        TYPE_POSIX,
+        TYPE_CE
         // TODO more from subsystems
     };
 
