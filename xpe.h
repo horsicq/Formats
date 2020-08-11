@@ -278,6 +278,7 @@ public:
 
     enum TYPE
     {
+        // mb TODO CEDLL
         TYPE_UNKNOWN=0,
         TYPE_GUI,
         TYPE_CONSOLE,
