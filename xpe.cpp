@@ -105,6 +105,10 @@ int XPE::getType()
     {
         result=TYPE_EFI;
     }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)
+    {
+        result=TYPE_EFIRUNTIMEDRIVER;
+    }
     else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX)
     {
         result=TYPE_XBOX;
@@ -139,17 +143,18 @@ QString XPE::typeIdToString(int nType)
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
-        case TYPE_GUI:          sResult=QString("GUI");         break;
-        case TYPE_CONSOLE:      sResult=QString("Console");     break;
-        case TYPE_DLL:          sResult=QString("DLL");         break;
-        case TYPE_DRIVER:       sResult=QString("Driver");      break;
-        case TYPE_EFIBOOT:      sResult=QString("EFI Boot");    break;
-        case TYPE_EFI:          sResult=QString("EFI");         break;
-        case TYPE_XBOX:         sResult=QString("XBOX");        break;
-        case TYPE_OS2:          sResult=QString("OS2");         break;
-        case TYPE_POSIX:        sResult=QString("POSIX");       break;
-        case TYPE_CE:           sResult=QString("CE");          break;
+        case TYPE_UNKNOWN:          sResult=QString("Unknown");             break; // mb TODO translate
+        case TYPE_GUI:              sResult=QString("GUI");                 break;
+        case TYPE_CONSOLE:          sResult=QString("Console");             break;
+        case TYPE_DLL:              sResult=QString("DLL");                 break;
+        case TYPE_DRIVER:           sResult=QString("Driver");              break;
+        case TYPE_EFIBOOT:          sResult=QString("EFI Boot");            break;
+        case TYPE_EFI:              sResult=QString("EFI");                 break;
+        case TYPE_EFIRUNTIMEDRIVER: sResult=QString("EFI Runtime driver");  break;
+        case TYPE_XBOX:             sResult=QString("XBOX");                break;
+        case TYPE_OS2:              sResult=QString("OS2");                 break;
+        case TYPE_POSIX:            sResult=QString("POSIX");               break;
+        case TYPE_CE:               sResult=QString("CE");                  break;
     }
 
     return sResult;
