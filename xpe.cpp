@@ -76,6 +76,7 @@ QString XPE::getArch()
 
 bool XPE::isBigEndian()
 {
+    // TODO Check Machine
     return false;
 }
 
