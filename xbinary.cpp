@@ -4575,9 +4575,9 @@ bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE os)
 
 QString XBinary::get_uint32_version(quint32 nValue)
 {
-    return QString("%1.%2.%3")  .arg((nValue >> 16) & 0xff)
-                                .arg((nValue >> 8) & 0xff)
-                                .arg((nValue) & 0xff);
+    return QString("%1.%2.%3")  .arg((nValue>>16)&0xFF)
+                                .arg((nValue>>8)&0xFF)
+                                .arg((nValue)&0xFF);
 }
 
 bool XBinary::isResizeEnable(QIODevice *pDevice)
