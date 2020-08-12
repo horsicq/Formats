@@ -73,15 +73,15 @@ bool SubDevice::isSequential() const
     return false;
 }
 
-bool SubDevice::seek(qint64 pos)
+bool SubDevice::seek(qint64 nPos)
 {
     bool bResult=false;
 
-    if((pos<nSize)&&(pos>=0))
+    if((nPos<nSize)&&(nPos>=0))
     {
-        if(pDevice->seek(nOffset+pos))
+        if(pDevice->seek(nOffset+nPos))
         {
-            bResult=QIODevice::seek(pos);
+            bResult=QIODevice::seek(nPos);
         }
     }
 
@@ -116,25 +116,25 @@ qint64 SubDevice::pos() const
     return QIODevice::pos();
 }
 
-qint64 SubDevice::readData(char *data, qint64 maxSize)
+qint64 SubDevice::readData(char *pData, qint64 nMaxSize)
 {
-    maxSize=qMin(maxSize,nSize-pos());
+    nMaxSize=qMin(nMaxSize,nSize-pos());
 
-    qint64 nLen=pDevice->read(data,maxSize);
+    qint64 nLen=pDevice->read(pData,nMaxSize);
 
     return nLen;
 }
 
-qint64 SubDevice::writeData(const char *data, qint64 maxSize)
+qint64 SubDevice::writeData(const char *pData, qint64 nMaxSize)
 {
-    maxSize=qMin(maxSize,nSize-pos());
+    nMaxSize=qMin(nMaxSize,nSize-pos());
 
-    qint64 nLen=pDevice->write(data,maxSize);
+    qint64 nLen=pDevice->write(pData,nMaxSize);
 
     return nLen;
 }
 
-void SubDevice::setErrorString(const QString &str)
+void SubDevice::setErrorString(const QString &sStr)
 {
-    QIODevice::setErrorString(str);
+    QIODevice::setErrorString(sStr);
 }

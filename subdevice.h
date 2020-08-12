@@ -35,7 +35,7 @@ public:
     virtual qint64 size() const;
     //    virtual qint64 bytesAvailable() const;
     virtual bool isSequential() const;
-    virtual bool seek(qint64 pos);
+    virtual bool seek(qint64 nPos);
     virtual bool reset();
     virtual bool open(OpenMode mode);
     virtual bool atEnd() const;
@@ -43,9 +43,9 @@ public:
     virtual qint64 pos() const;
 
 protected:
-    virtual qint64 readData(char *data, qint64 maxSize);
-    virtual qint64 writeData(const char *data, qint64 maxSize);
-    virtual void setErrorString(const QString &str);
+    virtual qint64 readData(char *pData, qint64 nMaxSize);
+    virtual qint64 writeData(const char *pData, qint64 nMaxSize);
+    virtual void setErrorString(const QString &sStr);
 
 private:
     QIODevice *pDevice;
