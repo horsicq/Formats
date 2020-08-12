@@ -5301,6 +5301,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 break;
 
             case XBinary::ST_RELOFFSETFIX:
+                // TODO Check
                 nOffset+=pListSignatures->at(i).nBaseAddress;
                 break;
 
