@@ -286,7 +286,7 @@ public:
     qint32 read_int32(qint64 nOffset,bool bIsBigEndian=false);
     quint64 read_uint64(qint64 nOffset,bool bIsBigEndian=false);
     qint64 read_int64(qint64 nOffset,bool bIsBigEndian=false);
-    // TODO double dloat
+    // TODO double float
 
     qint64 write_ansiString(qint64 nOffset,QString sString);
 
