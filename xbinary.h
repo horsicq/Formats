@@ -669,7 +669,7 @@ public:
 
 private:
     static QString convertSignature(QString sSignature);
-    static QString qcharToHex(QChar c);
+    static QString qcharToHex(QChar cSymbol);
 
     QList<SIGNATURE_RECORD> getSignatureRecords(QString sSignature);
     bool _compareSignature(_MEMORY_MAP *pMemoryMap,QList<SIGNATURE_RECORD> *pListSignatures,qint64 nOffset);

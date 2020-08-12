@@ -4234,10 +4234,10 @@ QString XBinary::convertSignature(QString sSignature)
     return sSignature;
 }
 
-QString XBinary::qcharToHex(QChar c)
+QString XBinary::qcharToHex(QChar cSymbol)
 {
     // TODO mb
-    return QString("%1").arg((quint8)(c.toLatin1()),2,16,QChar('0'));
+    return QString("%1").arg((quint8)(cSymbol.toLatin1()),2,16,QChar('0'));
 }
 
 QString XBinary::stringToHex(QString sString)
