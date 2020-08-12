@@ -4892,6 +4892,8 @@ bool XBinary::writeToFile(QString sFileName, QByteArray baData)
 
     if(file.open(QIODevice::ReadWrite))
     {
+        file.resize(0);
+
         file.write(baData.data(),baData.size());
 
         file.close();
