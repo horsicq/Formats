@@ -174,8 +174,8 @@ struct IMAGE_OPTIONAL_HEADER32
 {
     // Standard fields.
     quint16 Magic;
-    quint8  MajorLinkerVersion;
-    quint8  MinorLinkerVersion;
+    quint8 MajorLinkerVersion;
+    quint8 MinorLinkerVersion;
     quint32 SizeOfCode;
     quint32 SizeOfInitializedData;
     quint32 SizeOfUninitializedData;
@@ -211,8 +211,8 @@ struct IMAGE_OPTIONAL_HEADER32S
 {
     // Standard fields.
     quint16 Magic;
-    quint8  MajorLinkerVersion;
-    quint8  MinorLinkerVersion;
+    quint8 MajorLinkerVersion;
+    quint8 MinorLinkerVersion;
     quint32 SizeOfCode;
     quint32 SizeOfInitializedData;
     quint32 SizeOfUninitializedData;
@@ -247,8 +247,8 @@ struct IMAGE_OPTIONAL_HEADER64
 {
     // Standard fields.
     quint16 Magic;
-    quint8  MajorLinkerVersion;
-    quint8  MinorLinkerVersion;
+    quint8 MajorLinkerVersion;
+    quint8 MinorLinkerVersion;
     quint32 SizeOfCode;
     quint32 SizeOfInitializedData;
     quint32 SizeOfUninitializedData;
@@ -283,8 +283,8 @@ struct IMAGE_OPTIONAL_HEADER64S
 {
     // Standard fields.
     quint16 Magic;
-    quint8  MajorLinkerVersion;
-    quint8  MinorLinkerVersion;
+    quint8 MajorLinkerVersion;
+    quint8 MinorLinkerVersion;
     quint32 SizeOfCode;
     quint32 SizeOfInitializedData;
     quint32 SizeOfUninitializedData;
@@ -330,7 +330,7 @@ struct IMAGE_NT_HEADERS32
 
 struct IMAGE_SECTION_HEADER
 {
-    quint8  Name[S_IMAGE_SIZEOF_SHORT_NAME];
+    quint8 Name[S_IMAGE_SIZEOF_SHORT_NAME];
     union
     {
         quint32 PhysicalAddress;
