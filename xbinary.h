@@ -42,7 +42,7 @@
 #include <math.h>
 #include <QDebug>
 #include <QElapsedTimer>
-#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
+#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10) // TODO CHECK
 #include <QRandomGenerator>
 #endif
 #include <QDateTime>
