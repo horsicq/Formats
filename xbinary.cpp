@@ -2747,11 +2747,16 @@ QSet<XBinary::FT> XBinary::getFileTypes()
                 {
                     stResult.insert(FT_PE);
 
+                    // TODO Optimize
                     if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)
                     {
                         stResult.insert(FT_PE64);
                     }
                     else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==XPE_DEF::S_IMAGE_FILE_MACHINE_IA64)
+                    {
+                        stResult.insert(FT_PE64);
+                    }
+                    else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine)==XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64)
                     {
                         stResult.insert(FT_PE64);
                     }
