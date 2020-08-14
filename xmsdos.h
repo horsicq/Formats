@@ -40,6 +40,7 @@ public:
     {
         TYPE_UNKNOWN=0,
         TYPE_EXE
+        // TODO EXTENDER?
     };
 
     explicit XMSDOS(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
