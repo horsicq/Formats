@@ -171,7 +171,7 @@ void XMSDOS::set_e_ovno(quint16 nValue)
 
 void XMSDOS::set_e_res(int nPosition, quint16 nValue)
 {
-    if(nPosition<4)
+    if(nPosition<4) // TODO nPosition>=0
     {
         write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_res)+sizeof(quint16)*nPosition,nValue);
     }
@@ -189,7 +189,7 @@ void XMSDOS::set_e_oeminfo(quint16 nValue)
 
 void XMSDOS::set_e_res2(int nPosition, quint16 nValue)
 {
-    if(nPosition<10)
+    if(nPosition<10) // TODO nPosition>=0
     {
         write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_res2)+sizeof(quint16)*nPosition,nValue);
     }
@@ -274,7 +274,7 @@ quint16 XMSDOS::get_e_res(int nPosition)
 {
     quint16 nResult=0;
 
-    if(nPosition<10)
+    if(nPosition<10) // TODO nPosition>=0
     {
         nResult=read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_res)+sizeof(quint16)*nPosition);
     }
@@ -296,7 +296,7 @@ quint16 XMSDOS::get_e_res2(int nPosition)
 {
     quint16 nResult=0;
 
-    if(nPosition<10)
+    if(nPosition<10) // TODO nPosition>=0
     {
         nResult=read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_res2)+sizeof(quint16)*nPosition);
     }
