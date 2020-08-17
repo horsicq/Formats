@@ -732,8 +732,6 @@ public:
     static QMap<quint64,QString> getImageRelBasedS();
     static QMap<quint64,QString> getComImageFlags();
     static QMap<quint64,QString> getComImageFlagsS();
-    static QMap<quint64,QString> getTypes();
-    static QMap<quint64,QString> getTypesS();
     static QMap<quint64,QString> getDebugTypes();
     static QMap<quint64,QString> getDebugTypesS();
 
