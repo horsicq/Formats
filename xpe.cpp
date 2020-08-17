@@ -205,11 +205,12 @@ qint64 XPE::getFileHeaderSize()
 XPE_DEF::S_IMAGE_FILE_HEADER XPE::getFileHeader()
 {
     XPE_DEF::S_IMAGE_FILE_HEADER result={};
-    // TODO check BE/LE
+
     qint64 nFileHeaderOffset=getFileHeaderOffset();
 
     if(nFileHeaderOffset!=-1)
     {
+        // TODO check BE/LE
         read_array(nFileHeaderOffset,(char *)&result,sizeof(XPE_DEF::S_IMAGE_FILE_HEADER));
     }
 
@@ -223,6 +224,7 @@ void XPE::setFileHeader(XPE_DEF::S_IMAGE_FILE_HEADER *pFileHeader)
 
     if(nFileHeaderOffset!=-1)
     {
+        // TODO check BE/LE
         write_array(nFileHeaderOffset,(char *)pFileHeader,sizeof(XPE_DEF::S_IMAGE_FILE_HEADER));
     }
 }
