@@ -2749,6 +2749,7 @@ QSet<XBinary::FT> XBinary::getFileTypes()
 
                     quint16 nMachine=((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine;
 
+                    // TODO more
                     if( (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)||
                         (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_IA64)||
                         (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64))
