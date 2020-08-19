@@ -45,7 +45,7 @@ public:
 protected:
     virtual qint64 readData(char *pData, qint64 nMaxSize);
     virtual qint64 writeData(const char *pData, qint64 nMaxSize);
-    virtual void setErrorString(const QString &sStr);
+    virtual void setErrorString(const QString &sString);
 
 private:
     QIODevice *pDevice;

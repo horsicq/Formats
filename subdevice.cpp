@@ -134,7 +134,7 @@ qint64 SubDevice::writeData(const char *pData, qint64 nMaxSize)
     return nLen;
 }
 
-void SubDevice::setErrorString(const QString &sStr)
+void SubDevice::setErrorString(const QString &sString)
 {
-    QIODevice::setErrorString(sStr);
+    QIODevice::setErrorString(sString);
 }
