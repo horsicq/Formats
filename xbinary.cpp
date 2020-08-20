@@ -5021,6 +5021,8 @@ bool XBinary::isX86asm(QString sArch)
 {
     bool bResult=false;
 
+    sArch=sArch.toUpper();
+
     // TODO Check
     if( (sArch=="8086")||
         (sArch=="80286")||
