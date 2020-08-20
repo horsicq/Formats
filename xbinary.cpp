@@ -4852,6 +4852,7 @@ bool XBinary::isSignatureInLoadSectionPresent(XBinary::_MEMORY_MAP *pMemoryMap, 
 
 QString XBinary::getStringCollision(QList<QString> *pListStrings, QString sString1, QString sString2)
 {
+    // TODO Check&optimize
     QString sResult;
 
     int nCount=pListStrings->count();
