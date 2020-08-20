@@ -5005,6 +5005,7 @@ QString XBinary::valueToTimeString(quint64 nValue, XBinary::DT_TYPE type)
 {
     QString sResult;
 
+    // TODO more
     if(type==DT_TYPE_POSIX)
     {
         QDateTime dt;
