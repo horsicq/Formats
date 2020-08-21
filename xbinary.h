@@ -224,8 +224,8 @@ private:
     };
 
 public:
-    explicit XBinary(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
-    void setData(QIODevice *__pDevice);
+    explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
+    void setData(QIODevice *pDevice);
     qint64 getSize();
 
     void setMode(MODE mode);
