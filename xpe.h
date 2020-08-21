@@ -294,7 +294,7 @@ public:
         // TODO more from subsystems
     };
 
-    explicit XPE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
+    explicit XPE(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
 
     virtual MODE getMode();

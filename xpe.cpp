@@ -20,7 +20,7 @@
 //
 #include "xpe.h"
 
-XPE::XPE(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase): XMSDOS(__pDevice,bIsImage,nImageBase)
+XPE::XPE(QIODevice *pDevice, bool bIsImage, qint64 nImageBase): XMSDOS(pDevice,bIsImage,nImageBase)
 {
 }
 
