@@ -28,7 +28,7 @@ XBinary::XBinary(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase)
     setIsImage(bIsImage);
     setBaseAddress(0);
     setImageBase(nImageBase);
-    setEndianness(false);
+    setEndianness(false); // LE
     setEntryPointOffset(0);
     setFindProcessEnable(true);
     setDumpProcessEnable(true);
