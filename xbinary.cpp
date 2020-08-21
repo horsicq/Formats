@@ -41,12 +41,12 @@ XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
 
 void XBinary::setData(QIODevice *pDevice)
 {
-    this->__pDevice=pDevice;
+    this->g_pDevice=pDevice;
 }
 
 qint64 XBinary::getSize()
 {
-    return __pDevice->size();
+    return g_pDevice->size();
 }
 
 void XBinary::setMode(XBinary::MODE mode)
@@ -409,14 +409,14 @@ qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 {
     qint64 nResult=0;
 
-    if(__pDevice->seek(nOffset))
+    if(g_pDevice->seek(nOffset))
     {
         if(nMaxSize==-1)
         {
             nMaxSize=getSize()-nOffset;
         }
 
-        nResult=__pDevice->read(pBuffer,nMaxSize);  // Check for read large files
+        nResult=g_pDevice->read(pBuffer,nMaxSize);  // Check for read large files
     }
 
     return nResult;
@@ -451,9 +451,9 @@ qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 
     if((nMaxSize<=(_nTotalSize-nOffset))&&(nOffset>=0))
     {
-        if(__pDevice->seek(nOffset))
+        if(g_pDevice->seek(nOffset))
         {
-            nResult=__pDevice->write(pBuffer,nMaxSize);
+            nResult=g_pDevice->write(pBuffer,nMaxSize);
         }
     }
 
@@ -1831,11 +1831,11 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
     quint8 cZero=0;
 
     // TODO optimize with dwords
-    if(__pDevice->seek(nOffset))
+    if(g_pDevice->seek(nOffset))
     {
         while(nSize>0)
         {
-            __pDevice->write((char *)&cZero,1);
+            g_pDevice->write((char *)&cZero,1);
             nSize--;
         }
     }
@@ -2345,12 +2345,12 @@ qint64 XBinary::getImageSize()
 
 bool XBinary::isImage()
 {
-    return bIsImage;
+    return g_bIsImage;
 }
 
 void XBinary::setIsImage(bool bValue)
 {
-    bIsImage=bValue;
+    g_bIsImage=bValue;
 }
 
 bool XBinary::compareSignature(QString sSignature, qint64 nOffset)
@@ -2663,7 +2663,7 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
         {
             qint64 nTempSize=qMin(nDataSize,(qint64)0x1000); // TODO const
 
-            if(!((__pDevice->seek(nSourceOffset))&&(__pDevice->read(pBuffer,nTempSize)==nTempSize)))
+            if(!((g_pDevice->seek(nSourceOffset))&&(g_pDevice->read(pBuffer,nTempSize)==nTempSize)))
             {
                 emit errorMessage(QObject::tr("Read error"));
                 bResult=false;
@@ -3993,7 +3993,7 @@ quint32 XBinary::getStringCustomCRC32(QString sString)
 
 QIODevice *XBinary::getDevice()
 {
-    return __pDevice;
+    return g_pDevice;
 }
 
 bool XBinary::isValid()

@@ -224,7 +224,7 @@ private:
     };
 
 public:
-    explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
+    explicit XBinary(QIODevice *pDevice=nullptr,bool g_bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
     void setData(QIODevice *pDevice); // TODO rename -> setDevice
     qint64 getSize();
 
@@ -700,8 +700,8 @@ signals:
     void entropyProgressValueChanged(qint32 nValue);
 
 private:
-    QIODevice *__pDevice;
-    bool bIsImage;
+    QIODevice *g_pDevice;
+    bool g_bIsImage;
     qint64 __nBaseAddress;
     qint64 __nEntryPointOffset;
     qint64 __nImageBase;
