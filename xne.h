@@ -37,7 +37,7 @@ public:
         TYPE_DRIVER
     };
 
-    explicit XNE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
+    explicit XNE(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
 
     qint64 getImageOS2HeaderOffset();

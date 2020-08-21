@@ -20,7 +20,7 @@
 //
 #include "xne.h"
 
-XNE::XNE(QIODevice *__pDevice, bool bIsImage, qint64 nImageBase) : XMSDOS(__pDevice,bIsImage,nImageBase)
+XNE::XNE(QIODevice *pDevice, bool bIsImage, qint64 nImageBase) : XMSDOS(pDevice,bIsImage,nImageBase)
 {
 
 }
