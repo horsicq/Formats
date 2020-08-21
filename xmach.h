@@ -86,7 +86,7 @@ public:
         TYPE_BUNDLE
     };
 
-    XMACH(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
+    XMACH(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
     ~XMACH();
 
     bool isValid();
