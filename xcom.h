@@ -35,7 +35,7 @@ public:
         TYPE_EXE
     };
 
-    explicit XCOM(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
+    explicit XCOM(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     ~XCOM();
     virtual bool isValid();
     virtual qint64 getBaseAddress();
