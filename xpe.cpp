@@ -7622,15 +7622,15 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                                 QByteArray baStrings=read_array(result.cliMetadata.nUSOffset,result.cliMetadata.nUSSize);
 
-                                char *_pOffset=baStrings.data();
-                                char *__pOffset=_pOffset;
+                                char *pStringOffset=baStrings.data();
+                                char *pStringCurrentOffsetOffset=pStringOffset;
                                 int _nSize=baStrings.size();
 
-                                __pOffset++;
+                                pStringCurrentOffsetOffset++;
 
                                 for(int i=1; i<_nSize; i++)
                                 {
-                                    int nStringSize=(*((unsigned char *)__pOffset));
+                                    int nStringSize=(*((unsigned char *)pStringCurrentOffsetOffset));
 
                                     if(nStringSize==0x80)
                                     {
@@ -7642,18 +7642,18 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                         break;
                                     }
 
-                                    __pOffset++;
+                                    pStringCurrentOffsetOffset++;
 
-                                    if(__pOffset>_pOffset+_nSize)
+                                    if(pStringCurrentOffsetOffset>pStringOffset+_nSize)
                                     {
                                         break;
                                     }
 
-                                    QString sTemp=QString::fromUtf16((ushort *)__pOffset,nStringSize/2);
+                                    QString sTemp=QString::fromUtf16((ushort *)pStringCurrentOffsetOffset,nStringSize/2);
 
                                     result.cliMetadata.listUnicodeStrings.append(sTemp);
 
-                                    __pOffset+=nStringSize;
+                                    pStringCurrentOffsetOffset+=nStringSize;
                                     i+=nStringSize;
                                 }
                             }
