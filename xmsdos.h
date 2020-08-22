@@ -43,7 +43,7 @@ public:
         // TODO EXTENDER?
     };
 
-    explicit XMSDOS(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
+    explicit XMSDOS(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
 
     quint16 get_magic();
