@@ -35,7 +35,7 @@ public:
         TYPE_EXE
     };
 
-    explicit XLE(QIODevice *__pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
+    explicit XLE(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
 
     qint64 getImageVxdHeaderOffset();
