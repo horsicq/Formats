@@ -120,12 +120,12 @@ QString XBinary::endiannessToString(bool bIsBigEndian)
 
 void XBinary::setArch(QString sArch)
 {
-    __sArch=sArch;
+    g_sArch=sArch;
 }
 
 QString XBinary::getArch()
 {  
-    return __sArch;
+    return g_sArch;
 }
 
 void XBinary::setEndianness(bool bIsBigEndian)

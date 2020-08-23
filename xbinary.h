@@ -709,7 +709,7 @@ private:
     bool g_bIsFindStop;
     bool g_bIsDumpStop;
     bool g_bIsEntropyStop;
-    QString __sArch;
+    QString g_sArch;
     MODE __mode;
     QString __sVersion;
     int __nType;
