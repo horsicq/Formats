@@ -2460,12 +2460,12 @@ qint64 XBinary::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 {
     Q_UNUSED(pMemoryMap)
 
-    return this->__nEntryPointOffset;
+    return this->g_nEntryPointOffset;
 }
 
 void XBinary::setEntryPointOffset(qint64 nEntryPointOffset)
 {
-    this->__nEntryPointOffset=nEntryPointOffset;
+    this->g_nEntryPointOffset=nEntryPointOffset;
 }
 
 qint64 XBinary::getEntryPointAddress()

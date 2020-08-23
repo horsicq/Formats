@@ -703,7 +703,7 @@ private:
     QIODevice *g_pDevice;
     bool g_bIsImage;
     qint64 g_nBaseAddress;
-    qint64 __nEntryPointOffset;
+    qint64 g_nEntryPointOffset;
     qint64 __nImageBase;
     bool __bIsBigEndian;
     bool __bIsFindStop;
