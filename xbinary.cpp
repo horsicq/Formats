@@ -1064,7 +1064,7 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
     qint64 nTotalSize=nSize;
     qint32 nCurrentProgress=0;
 
-    while((nSize>nArraySize-1)&&(!__bIsFindStop))
+    while((nSize>nArraySize-1)&&(!g_bIsFindStop))
     {
         nTemp=qMin((qint64)(BUFFER_SIZE+(nArraySize-1)),nSize);
 
@@ -1312,7 +1312,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
             char *pData=baFirst.data();
             qint32 nDataSize=baFirst.size();
 
-            for(qint64 i=0;(i<nSize)&&(!__bIsFindStop);)
+            for(qint64 i=0;(i<nSize)&&(!g_bIsFindStop);)
             {
                 qint64 nTempOffset=find_array(nOffset+i,nSize-1,pData,nDataSize);
 
@@ -1343,7 +1343,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
         }
         else
         {
-            for(qint64 i=0;(i<nSize)&&(!__bIsFindStop); i++)
+            for(qint64 i=0;(i<nSize)&&(!g_bIsFindStop); i++)
             {
                 if(_compareSignature(pMemoryMap,&records,nOffset+i))
                 {
@@ -1410,7 +1410,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
     QByteArray baUpper=sString.toUpper().toLatin1();
     QByteArray baLower=sString.toLower().toLatin1();;
 
-    while((nSize>nStringSize-1)&&(!__bIsFindStop))
+    while((nSize>nStringSize-1)&&(!g_bIsFindStop))
     {
         nTemp=qMin((qint64)(BUFFER_SIZE+(nStringSize-1)),nSize);
 
@@ -1486,7 +1486,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     QByteArray baUpper=getUnicodeString(sString.toUpper());
     QByteArray baLower=getUnicodeString(sString.toLower());
 
-    while((nSize>2*(nStringSize-1))&&(!__bIsFindStop))
+    while((nSize>2*(nStringSize-1))&&(!g_bIsFindStop))
     {
         nTemp=qMin((qint64)(BUFFER_SIZE+2*(nStringSize-1)),nSize);
 
@@ -1539,7 +1539,7 @@ QByteArray XBinary::getUnicodeString(QString sString)
 
 void XBinary::setFindProcessEnable(bool bState)
 {
-    __bIsFindStop=!bState;
+    g_bIsFindStop=!bState;
 }
 
 void XBinary::setDumpProcessEnable(bool bState)

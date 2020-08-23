@@ -706,7 +706,7 @@ private:
     qint64 g_nEntryPointOffset;
     qint64 g_nImageBase;
     bool g_bIsBigEndian;
-    bool __bIsFindStop;
+    bool g_bIsFindStop;
     bool __bIsDumpStop;
     bool __bIsEntropyStop;
     QString __sArch;
