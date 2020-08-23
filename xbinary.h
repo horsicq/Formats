@@ -707,7 +707,7 @@ private:
     qint64 g_nImageBase;
     bool g_bIsBigEndian;
     bool g_bIsFindStop;
-    bool __bIsDumpStop;
+    bool g_bIsDumpStop;
     bool __bIsEntropyStop;
     QString __sArch;
     MODE __mode;

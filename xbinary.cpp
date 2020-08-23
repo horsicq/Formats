@@ -1544,7 +1544,7 @@ void XBinary::setFindProcessEnable(bool bState)
 
 void XBinary::setDumpProcessEnable(bool bState)
 {
-    __bIsDumpStop=!bState;
+    g_bIsDumpStop=!bState;
 }
 
 void XBinary::setEntropyProcessEnable(bool bState)
@@ -2659,7 +2659,7 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
 
         bResult=true;
 
-        while((nDataSize>0)&&(!__bIsDumpStop))
+        while((nDataSize>0)&&(!g_bIsDumpStop))
         {
             qint64 nTempSize=qMin(nDataSize,(qint64)0x1000); // TODO const
 
