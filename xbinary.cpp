@@ -130,7 +130,7 @@ QString XBinary::getArch()
 
 void XBinary::setEndianness(bool bIsBigEndian)
 {
-    __bIsBigEndian=bIsBigEndian;
+    g_bIsBigEndian=bIsBigEndian;
 }
 
 bool XBinary::isPacked(double dEntropy)
@@ -4003,7 +4003,7 @@ bool XBinary::isValid()
 
 bool XBinary::isBigEndian()
 {
-    return __bIsBigEndian;
+    return g_bIsBigEndian;
 }
 
 bool XBinary::is16()
