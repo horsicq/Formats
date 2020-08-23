@@ -704,7 +704,7 @@ private:
     bool g_bIsImage;
     qint64 g_nBaseAddress;
     qint64 g_nEntryPointOffset;
-    qint64 __nImageBase;
+    qint64 g_nImageBase;
     bool __bIsBigEndian;
     bool __bIsFindStop;
     bool __bIsDumpStop;

@@ -2542,12 +2542,12 @@ qint64 XBinary::positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPositio
 
 qint64 XBinary::getImageAddress()
 {
-    return this->__nImageBase;
+    return this->g_nImageBase;
 }
 
 void XBinary::setImageBase(qint64 nValue)
 {
-    this->__nImageBase=nValue;
+    this->g_nImageBase=nValue;
 }
 
 qint64 XBinary::_getBaseAddress()
