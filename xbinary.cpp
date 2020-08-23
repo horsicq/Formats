@@ -1549,7 +1549,7 @@ void XBinary::setDumpProcessEnable(bool bState)
 
 void XBinary::setEntropyProcessEnable(bool bState)
 {
-    __bIsEntropyStop=!bState;
+    g_bIsEntropyStop=!bState;
 }
 
 bool XBinary::isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nSize, QString sSignature)
@@ -3786,7 +3786,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
         qint64 nTemp=0;
         char *pBuffer=new char[BUFFER_SIZE];
 
-        while((nSize>0)&&(!__bIsEntropyStop))
+        while((nSize>0)&&(!g_bIsEntropyStop))
         {
             nTemp=qMin((qint64)BUFFER_SIZE,nSize);
 
@@ -3815,7 +3815,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
 
         delete[] pBuffer;
 
-        if(!__bIsEntropyStop)
+        if(!g_bIsEntropyStop)
         {
             for(int j=0; j<256; j++)
             {
@@ -3831,7 +3831,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
         dResult=dResult/(double)offsize.nSize;
     }
 
-    if(__bIsEntropyStop)
+    if(g_bIsEntropyStop)
     {
         dResult=0;
     }
@@ -3864,7 +3864,7 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
         qint64 nTemp=0;
         char *pBuffer=new char[BUFFER_SIZE];
 
-        while((nSize>0)&&(!__bIsEntropyStop))
+        while((nSize>0)&&(!g_bIsEntropyStop))
         {
             nTemp=qMin((qint64)BUFFER_SIZE,nSize);
 
@@ -3895,7 +3895,7 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
         delete[] pBuffer;
     }
 
-    if(__bIsEntropyStop)
+    if(g_bIsEntropyStop)
     {
         result={0};
     }

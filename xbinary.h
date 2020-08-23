@@ -708,7 +708,7 @@ private:
     bool g_bIsBigEndian;
     bool g_bIsFindStop;
     bool g_bIsDumpStop;
-    bool __bIsEntropyStop;
+    bool g_bIsEntropyStop;
     QString __sArch;
     MODE __mode;
     QString __sVersion;
