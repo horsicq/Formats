@@ -51,12 +51,12 @@ qint64 XBinary::getSize()
 
 void XBinary::setMode(XBinary::MODE mode)
 {
-    __mode=mode;
+    g_mode=mode;
 }
 
 XBinary::MODE XBinary::getMode()
 {
-    return __mode;
+    return g_mode;
 }
 
 void XBinary::setType(int nType)

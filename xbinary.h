@@ -710,7 +710,7 @@ private:
     bool g_bIsDumpStop;
     bool g_bIsEntropyStop;
     QString g_sArch;
-    MODE __mode;
+    MODE g_mode;
     QString __sVersion;
     int __nType;
 };
