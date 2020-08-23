@@ -702,7 +702,7 @@ signals:
 private:
     QIODevice *g_pDevice;
     bool g_bIsImage;
-    qint64 __nBaseAddress;
+    qint64 g_nBaseAddress;
     qint64 __nEntryPointOffset;
     qint64 __nImageBase;
     bool __bIsBigEndian;

@@ -2330,12 +2330,12 @@ qint32 XBinary::getNumberOfPhysicalRecords(XBinary::_MEMORY_MAP *pMemoryMap)
 
 qint64 XBinary::getBaseAddress()
 {
-    return this->__nBaseAddress;
+    return this->g_nBaseAddress;
 }
 
 void XBinary::setBaseAddress(qint64 nBaseAddress)
 {
-    this->__nBaseAddress=nBaseAddress;
+    this->g_nBaseAddress=nBaseAddress;
 }
 
 qint64 XBinary::getImageSize()
