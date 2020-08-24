@@ -61,12 +61,12 @@ XBinary::MODE XBinary::getMode()
 
 void XBinary::setType(int nType)
 {
-    __nType=nType;
+    g_nType=nType;
 }
 
 int XBinary::getType()
 {
-    return __nType;
+    return g_nType;
 }
 
 QString XBinary::typeIdToString(int nType)

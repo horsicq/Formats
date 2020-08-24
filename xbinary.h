@@ -712,7 +712,7 @@ private:
     QString g_sArch;
     MODE g_mode;
     QString g_sVersion;
-    int __nType;
+    int g_nType;
 };
 
 #endif // XBINARY_H
