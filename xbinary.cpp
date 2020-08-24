@@ -24,7 +24,7 @@ const double XBinary::D_ENTROPY_THRESHOLD=6.5;
 
 XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
 {
-    setData(pDevice);
+    setDevice(pDevice);
     setIsImage(bIsImage);
     setBaseAddress(0);
     setImageBase(nImageBase);
@@ -39,7 +39,7 @@ XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
     setType(TYPE_UNKNOWN);
 }
 
-void XBinary::setData(QIODevice *pDevice)
+void XBinary::setDevice(QIODevice *pDevice)
 {
     this->g_pDevice=pDevice;
 }
