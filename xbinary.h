@@ -711,7 +711,7 @@ private:
     bool g_bIsEntropyStop;
     QString g_sArch;
     MODE g_mode;
-    QString __sVersion;
+    QString g_sVersion;
     int __nType;
 };
 

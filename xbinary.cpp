@@ -4049,12 +4049,12 @@ bool XBinary::is64(XBinary::_MEMORY_MAP *pMemoryMap)
 
 void XBinary::setVersion(QString sVersion)
 {
-    __sVersion=sVersion;
+    g_sVersion=sVersion;
 }
 
 QString XBinary::getVersion()
 {
-    return __sVersion;
+    return g_sVersion;
 }
 
 bool XBinary::isEncrypted()
