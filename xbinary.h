@@ -67,7 +67,7 @@ class XBinary : public QObject
 {
     Q_OBJECT
 
-static const double D_ENTROPY_THRESHOLD; // 6.5
+    static const double D_ENTROPY_THRESHOLD; // 6.5
 
 public:
     struct DATASET
@@ -112,7 +112,7 @@ public:
         ADDRESS_SEGMENT_UNKNOWN=-1,
         ADDRESS_SEGMENT_FLAT=0,
         ADDRESS_SEGMENT_CODE,
-//        ADDRESS_SEGMENT_DATA
+        //        ADDRESS_SEGMENT_DATA
     };
 
     enum MMT
@@ -194,10 +194,10 @@ public:
         HASH_SHA256,
         HASH_SHA384,
         HASH_SHA512,
-//        HASH_KECCAK_224,
-//        HASH_KECCAK_256,
-//        HASH_KECCAK_384,
-//        HASH_KECCAK_512
+        //        HASH_KECCAK_224,
+        //        HASH_KECCAK_256,
+        //        HASH_KECCAK_384,
+        //        HASH_KECCAK_512
 #endif
     };
 
@@ -536,8 +536,8 @@ public:
 
     void _xor(quint8 nXorValue,qint64 nOffset=0,qint64 nSize=-1);
 
-//    static quint32 _ror32(quint32 nValue,quint32 nShift);
-//    static quint32 _rol32(quint32 nValue,quint32 nShift);
+    //    static quint32 _ror32(quint32 nValue,quint32 nShift);
+    //    static quint32 _rol32(quint32 nValue,quint32 nShift);
     static quint32 getStringCustomCRC32(QString sString);
 
     QIODevice *getDevice();

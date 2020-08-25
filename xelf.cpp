@@ -427,7 +427,7 @@ void XELF::setHdr64_shstrndx(quint16 nValue)
 
 XELF_DEF::Elf_Ehdr XELF::getHdr()
 {
-    XELF_DEF::Elf_Ehdr result={};
+    XELF_DEF::Elf_Ehdr result= {};
 
     bool bIsbigEndian=isBigEndian();
 
@@ -1045,9 +1045,9 @@ QMap<quint64, QString> XELF::getProgramTypes()
     mapResult.insert(0x6fffffff,"PT_HIOS"); // PT_HISUNW
     mapResult.insert(0x70000000,"PT_LOPROC");
     mapResult.insert(0x7fffffff,"PT_HIPROC");
-//    mapResult.insert(0x70000000,"PT_MIPXELF_DEF::REGINFO");
+    //    mapResult.insert(0x70000000,"PT_MIPXELF_DEF::REGINFO");
 
-    return mapResult;   
+    return mapResult;
 }
 
 QMap<quint64, QString> XELF::getProgramTypesS()
@@ -1076,7 +1076,7 @@ QMap<quint64, QString> XELF::getProgramTypesS()
     mapResult.insert(0x6fffffff,"HIOS"); // HISUNW
     mapResult.insert(0x70000000,"LOPROC");
     mapResult.insert(0x7fffffff,"HIPROC");
-//    mapResult.insert(0x70000000,"MIPXELF_DEF::REGINFO");
+    //    mapResult.insert(0x70000000,"MIPXELF_DEF::REGINFO");
 
     return mapResult;
 }
@@ -1130,7 +1130,7 @@ quint16 XELF::getSectionStringTable(bool bIs64)
 
 XBinary::OFFSETSIZE XELF::getSectionOffsetSize(quint32 nSection)
 {
-    OFFSETSIZE result={};
+    OFFSETSIZE result= {};
 
     if(is64())
     {
@@ -1296,9 +1296,9 @@ QList<XELF_DEF::Elf_Shdr> XELF::getElf_ShdrList()
         QList<XELF_DEF::Elf64_Shdr> list=getElf64_ShdrList();
         int nCount=list.count();
 
-        for(int i=0;i<nCount;i++)
+        for(int i=0; i<nCount; i++)
         {
-            XELF_DEF::Elf_Shdr record={};
+            XELF_DEF::Elf_Shdr record= {};
 
             record.sh_name=list.at(i).sh_name;
             record.sh_type=list.at(i).sh_type;
@@ -1319,9 +1319,9 @@ QList<XELF_DEF::Elf_Shdr> XELF::getElf_ShdrList()
         QList<XELF_DEF::Elf32_Shdr> list=getElf32_ShdrList();
         int nCount=list.count();
 
-        for(int i=0;i<nCount;i++)
+        for(int i=0; i<nCount; i++)
         {
-            XELF_DEF::Elf_Shdr record={};
+            XELF_DEF::Elf_Shdr record= {};
 
             record.sh_name=list.at(i).sh_name;
             record.sh_type=list.at(i).sh_type;
@@ -1343,7 +1343,7 @@ QList<XELF_DEF::Elf_Shdr> XELF::getElf_ShdrList()
 
 XELF_DEF::Elf32_Shdr XELF::getElf32_Shdr(quint32 nIndex)
 {
-    XELF_DEF::Elf32_Shdr result={};
+    XELF_DEF::Elf32_Shdr result= {};
 
     quint32 nNumberOfSections=getHdr32_shnum();
     quint32 nOffset=getHdr32_shoff();
@@ -1361,7 +1361,7 @@ XELF_DEF::Elf32_Shdr XELF::getElf32_Shdr(quint32 nIndex)
 
 XELF_DEF::Elf64_Shdr XELF::getElf64_Shdr(quint32 nIndex)
 {
-    XELF_DEF::Elf64_Shdr result={};
+    XELF_DEF::Elf64_Shdr result= {};
 
     quint32 nNumberOfSections=getHdr64_shnum();
     quint64 nOffset=getHdr64_shoff();
@@ -1379,7 +1379,7 @@ XELF_DEF::Elf64_Shdr XELF::getElf64_Shdr(quint32 nIndex)
 
 XELF_DEF::Elf32_Shdr XELF::_readElf32_Shdr(qint64 nOffset,bool bIsBigEndian)
 {
-    XELF_DEF::Elf32_Shdr result={};
+    XELF_DEF::Elf32_Shdr result= {};
 
     result.sh_name=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Shdr,sh_name),bIsBigEndian);
     result.sh_type=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Shdr,sh_type),bIsBigEndian);
@@ -1397,7 +1397,7 @@ XELF_DEF::Elf32_Shdr XELF::_readElf32_Shdr(qint64 nOffset,bool bIsBigEndian)
 
 XELF_DEF::Elf64_Shdr XELF::_readElf64_Shdr(qint64 nOffset,bool bIsBigEndian)
 {
-    XELF_DEF::Elf64_Shdr result={};
+    XELF_DEF::Elf64_Shdr result= {};
 
     result.sh_name=read_uint32(nOffset+offsetof(XELF_DEF::Elf64_Shdr,sh_name),bIsBigEndian);
     result.sh_type=read_uint32(nOffset+offsetof(XELF_DEF::Elf64_Shdr,sh_type),bIsBigEndian);
@@ -2233,9 +2233,9 @@ QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList()
         QList<XELF_DEF::Elf64_Phdr> list=getElf64_PhdrList();
         int nCount=list.count();
 
-        for(int i=0;i<nCount;i++)
+        for(int i=0; i<nCount; i++)
         {
-            XELF_DEF::Elf_Phdr record={};
+            XELF_DEF::Elf_Phdr record= {};
 
             record.p_type=list.at(i).p_type;
             record.p_flags=list.at(i).p_flags;
@@ -2254,9 +2254,9 @@ QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList()
         QList<XELF_DEF::Elf32_Phdr> list=getElf32_PhdrList();
         int nCount=list.count();
 
-        for(int i=0;i<nCount;i++)
+        for(int i=0; i<nCount; i++)
         {
-            XELF_DEF::Elf_Phdr record={};
+            XELF_DEF::Elf_Phdr record= {};
 
             record.p_type=list.at(i).p_type;
             record.p_flags=list.at(i).p_flags;
@@ -2276,7 +2276,7 @@ QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList()
 
 XELF_DEF::Elf32_Phdr XELF::getElf32_Phdr(quint32 nIndex)
 {
-    XELF_DEF::Elf32_Phdr result={};
+    XELF_DEF::Elf32_Phdr result= {};
 
     quint32 nNumberOfPrograms=getHdr32_phnum();
     quint32 nOffset=getHdr32_phoff();
@@ -2293,7 +2293,7 @@ XELF_DEF::Elf32_Phdr XELF::getElf32_Phdr(quint32 nIndex)
 
 XELF_DEF::Elf64_Phdr XELF::getElf64_Phdr(quint32 nIndex)
 {
-    XELF_DEF::Elf64_Phdr result={};
+    XELF_DEF::Elf64_Phdr result= {};
 
     quint32 nNumberOfPrograms=getHdr64_phnum();
     quint64 nOffset=getHdr64_phoff();
@@ -2310,7 +2310,7 @@ XELF_DEF::Elf64_Phdr XELF::getElf64_Phdr(quint32 nIndex)
 
 XELF_DEF::Elf32_Phdr XELF::_readElf32_Phdr(qint64 nOffset, bool bIsBigEndian)
 {
-    XELF_DEF::Elf32_Phdr result={};
+    XELF_DEF::Elf32_Phdr result= {};
 
     result.p_type=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Phdr,p_type),bIsBigEndian);
     result.p_offset=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Phdr,p_offset),bIsBigEndian);
@@ -2326,7 +2326,7 @@ XELF_DEF::Elf32_Phdr XELF::_readElf32_Phdr(qint64 nOffset, bool bIsBigEndian)
 
 XELF_DEF::Elf64_Phdr XELF::_readElf64_Phdr(qint64 nOffset, bool bIsBigEndian)
 {
-    XELF_DEF::Elf64_Phdr result={};
+    XELF_DEF::Elf64_Phdr result= {};
 
     result.p_type=read_uint32(nOffset+offsetof(XELF_DEF::Elf64_Phdr,p_type),bIsBigEndian);
     result.p_offset=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Phdr,p_offset),bIsBigEndian);
@@ -3020,7 +3020,7 @@ XBinary::OS_ANSISTRING XELF::getProgramInterpreterName()
 
 XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pPhdrList)
 {
-    OS_ANSISTRING result={};
+    OS_ANSISTRING result= {};
 
     QList<XELF_DEF::Elf_Phdr> listInterps=_getPrograms(pPhdrList,XELF_DEF::S_PT_INTERP);
 
@@ -3083,7 +3083,7 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pPhdrList)
 
     int nCount=listNotes.count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0; i<nCount; i++)
     {
         qint64 nOffset=listNotes.at(i).p_offset;
         qint64 nSize=listNotes.at(i).p_filesz;
@@ -3120,7 +3120,7 @@ QList<XELF::NOTE> XELF::_getNotes(qint64 nOffset, qint64 nSize, bool bIsBigEndia
 
 XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
 {
-    NOTE result={};
+    NOTE result= {};
 
     if(nSize>=6)
     {
@@ -3167,7 +3167,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pPhdrList
 
     int nCount=listTags.count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0; i<nCount; i++)
     {
         qint64 nOffset=listTags.at(i).p_offset; //  Check image
         qint64 nSize=listTags.at(i).p_filesz;
@@ -3187,7 +3187,7 @@ QList<XELF::TAG_STRUCT> XELF::_getTagStructs(qint64 nOffset, qint64 nSize, bool 
 
     while(nSize>0)
     {
-        TAG_STRUCT tagStruct={};
+        TAG_STRUCT tagStruct= {};
         tagStruct.nOffset=nOffset;
 
         if(bIs64)
@@ -3224,7 +3224,7 @@ QList<XELF::TAG_STRUCT> XELF::_getTagStructs(QList<XELF::TAG_STRUCT> *pList,qint
 
     int nCount=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0; i<nCount; i++)
     {
         if(pList->at(i).nTag==nTag)
         {
@@ -3331,7 +3331,7 @@ XBinary::OFFSETSIZE XELF::getStringTable()
 
 XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pList)
 {
-    OFFSETSIZE result={};
+    OFFSETSIZE result= {};
 
     QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
     QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
@@ -3377,7 +3377,7 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
 
         int nCount=listNeeded.count();
 
-        for(int i=0;i<nCount;i++)
+        for(int i=0; i<nCount; i++)
         {
             qint64 nValue=listNeeded.at(i).nValue;
 
@@ -3403,7 +3403,7 @@ XBinary::OS_ANSISTRING XELF::getRunPath()
 
 XBinary::OS_ANSISTRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pList)
 {
-    OS_ANSISTRING result={};
+    OS_ANSISTRING result= {};
 
     QList<XELF::TAG_STRUCT> listRunPath=XELF::_getTagStructs(pList,XELF_DEF::S_DT_RUNPATH);
     QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
@@ -3578,13 +3578,14 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     return mapResult;
 }
 
- XBinary::_MEMORY_MAP XELF::getMemoryMap()
+XBinary::_MEMORY_MAP XELF::getMemoryMap()
 {
-    XBinary::_MEMORY_MAP result={};
+    XBinary::_MEMORY_MAP result= {};
 
     qint32 nIndex=0;
 
     result.mode=getMode();
+
     if(result.mode==MODE_64)
     {
         result.fileType=FT_ELF64;
@@ -3603,7 +3604,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
     QList<XELF_DEF::Elf_Phdr> listSegments=_getPrograms(&_listPhdr,XELF_DEF::S_PT_LOAD);
 
-//    bool bIs64=is64();
+    //    bool bIs64=is64();
     int nCount=listSegments.count();
 
     bool bImageAddressInit=false;
@@ -3624,7 +3625,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
         if(listSegments.at(i).p_vaddr>(quint64)nVirtualAddress)
         {
-            XBinary::_MEMORY_RECORD record={};
+            XBinary::_MEMORY_RECORD record= {};
 
             record.type=MMT_LOADSECTION;
             record.sName=sName;
@@ -3640,7 +3641,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
         if(nFileSize)
         {
-            XBinary::_MEMORY_RECORD record={};
+            XBinary::_MEMORY_RECORD record= {};
 
             record.type=MMT_LOADSECTION;
             record.sName=sName;
@@ -3655,7 +3656,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
         if(nVirtualSize>(nFileSize+((qint64)listSegments.at(i).p_vaddr-nVirtualAddress)))
         {
-            XBinary::_MEMORY_RECORD record={};
+            XBinary::_MEMORY_RECORD record= {};
 
             record.type=MMT_LOADSECTION;
             record.sName=sName;
@@ -3687,7 +3688,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
     if(nNoLoadableSize>0)
     {
-        XBinary::_MEMORY_RECORD record={};
+        XBinary::_MEMORY_RECORD record= {};
 
         record.type=MMT_NOLOADABLE;
         // TODO Section number!
@@ -3728,9 +3729,9 @@ QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *p
     int nCount=pList->count();
     quint32 nSectionTableSize=pbaSectionTable->size();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0; i<nCount; i++)
     {
-        SECTION_RECORD record={};
+        SECTION_RECORD record= {};
 
         record.nSize=pList->at(i).sh_size;
         record.nFlags=pList->at(i).sh_flags;
@@ -3817,7 +3818,7 @@ qint32 XELF::getSectionNumber(QString sSectionName, QList<XELF::SECTION_RECORD> 
 
 XELF::SECTION_RECORD XELF::getSectionRecord(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSections)
 {
-    SECTION_RECORD result={};
+    SECTION_RECORD result= {};
 
     int nNumberOfSections=pListSections->count();
 
@@ -3901,11 +3902,25 @@ QString XELF::typeIdToString(int nType)
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
-        case TYPE_EXEC:             sResult=QString("EXEC");        break;
-        case TYPE_DYN:              sResult=QString("DYN");         break;
-        case TYPE_CORE:             sResult=QString("CORE");        break;
-        case TYPE_NUM:              sResult=QString("NUM");         break;
+        case TYPE_UNKNOWN:
+            sResult=QString("Unknown");
+            break; // mb TODO translate
+
+        case TYPE_EXEC:
+            sResult=QString("EXEC");
+            break;
+
+        case TYPE_DYN:
+            sResult=QString("DYN");
+            break;
+
+        case TYPE_CORE:
+            sResult=QString("CORE");
+            break;
+
+        case TYPE_NUM:
+            sResult=QString("NUM");
+            break;
     }
 
     return sResult;
@@ -3928,7 +3943,7 @@ QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, q
 
     int nCount=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0; i<nCount; i++)
     {
         if(pList->at(i).p_type==nType)
         {
@@ -3949,13 +3964,13 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
 
     int nCount=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0; i<nCount; i++)
     {
         QString sSectionName=getStringFromIndex(osStringTable.nOffset,osStringTable.nSize,pList->at(i).sh_name);
 
         if((pList->at(i).sh_type==1)&&(sSectionName==".interp")) // Interpreter TODO const
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=pList->at(i).sh_addr;
             dataset.nOffset=pList->at(i).sh_offset;
@@ -3967,7 +3982,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
         }
         else if(pList->at(i).sh_type==2) // Symbol table TODO const
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=pList->at(i).sh_addr;
             dataset.nOffset=pList->at(i).sh_offset;
@@ -3989,7 +4004,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
         }
         else if(pList->at(i).sh_type==0xb) // Symbol table dynamic TODO const
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=pList->at(i).sh_addr;
             dataset.nOffset=pList->at(i).sh_offset;
@@ -4011,7 +4026,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
         }
         else if(pList->at(i).sh_type==3) // String table TODO const
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=pList->at(i).sh_addr;
             dataset.nOffset=pList->at(i).sh_offset;
@@ -4023,7 +4038,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
         }
         else if(pList->at(i).sh_type==4) // RELA TODO const
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=pList->at(i).sh_addr;
             dataset.nOffset=pList->at(i).sh_offset;
@@ -4035,7 +4050,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
         }
         else if(pList->at(i).sh_type==6) // Dynamic TODO const
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=pList->at(i).sh_addr;
             dataset.nOffset=pList->at(i).sh_offset;
@@ -4047,7 +4062,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
         }
         else if(pList->at(i).sh_type==7) // Notes TODO const
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=pList->at(i).sh_addr;
             dataset.nOffset=pList->at(i).sh_offset;
@@ -4059,7 +4074,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
         }
         else if(pList->at(i).sh_type==9) // REL TODO const
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=pList->at(i).sh_addr;
             dataset.nOffset=pList->at(i).sh_offset;
@@ -4080,11 +4095,11 @@ QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> 
 
     int nCount=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0; i<nCount; i++)
     {
         if((pList->at(i).p_type==3)) // Interpreter TODO const
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=pList->at(i).p_vaddr;
             dataset.nOffset=pList->at(i).p_offset;
@@ -4096,7 +4111,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> 
         }
         else if((pList->at(i).p_type==4)) // Notes TODO const
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=pList->at(i).p_vaddr;
             dataset.nOffset=pList->at(i).p_offset;
@@ -4108,7 +4123,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> 
         }
         else if((pList->at(i).p_type==2)) // Tags TODO const
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=pList->at(i).p_vaddr;
             dataset.nOffset=pList->at(i).p_offset;
@@ -4142,7 +4157,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 
     if(listStrTab.count()&&listStrSize.count())
     {
-        DATASET dataset={};
+        DATASET dataset= {};
 
         dataset.nAddress=listStrTab.at(0).nValue;
         dataset.nOffset=addressToOffset(pMemoryMap,dataset.nAddress);
@@ -4161,7 +4176,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 
     if(listRelaTab.count()&&listRelaSize.count())
     {
-        DATASET dataset={};
+        DATASET dataset= {};
 
         dataset.nAddress=listRelaTab.at(0).nValue;
         dataset.nOffset=addressToOffset(pMemoryMap,dataset.nAddress);
@@ -4176,7 +4191,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 
     if(listRelTab.count()&&listRelSize.count())
     {
-        DATASET dataset={};
+        DATASET dataset= {};
 
         dataset.nAddress=listRelTab.at(0).nValue;
         dataset.nOffset=addressToOffset(pMemoryMap,dataset.nAddress);
@@ -4191,7 +4206,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 
     if(listStrNeeded.count())
     {
-        DATASET dataset={};
+        DATASET dataset= {};
 
         dataset.nAddress=0;
         dataset.nOffset=0;
@@ -4213,7 +4228,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 
         if(nRunPath<nSize)
         {
-            DATASET dataset={};
+            DATASET dataset= {};
 
             dataset.nAddress=nAddress+nRunPath;
             dataset.nOffset=nOffset+nRunPath;
@@ -4230,7 +4245,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 
     if(listSymbols.count())
     {
-        DATASET dataset={};
+        DATASET dataset= {};
 
         dataset.nAddress=listSymbols.at(0).nValue;
         dataset.nOffset=addressToOffset(pMemoryMap,dataset.nAddress);
@@ -4286,7 +4301,7 @@ QList<XELF_DEF::Elf64_Sym> XELF::getElf64_SymList(qint64 nOffset, qint64 nSize)
 
 XELF_DEF::Elf32_Sym XELF::_readElf32_Sym(qint64 nOffset, bool bIsBigEndian)
 {
-    XELF_DEF::Elf32_Sym result={};
+    XELF_DEF::Elf32_Sym result= {};
 
     result.st_name=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Sym,st_name),bIsBigEndian);
     result.st_value=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Sym,st_value),bIsBigEndian);
@@ -4300,7 +4315,7 @@ XELF_DEF::Elf32_Sym XELF::_readElf32_Sym(qint64 nOffset, bool bIsBigEndian)
 
 XELF_DEF::Elf64_Sym XELF::_readElf64_Sym(qint64 nOffset, bool bIsBigEndian)
 {
-    XELF_DEF::Elf64_Sym result={};
+    XELF_DEF::Elf64_Sym result= {};
 
     result.st_name=read_uint32(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_name),bIsBigEndian);
     result.st_info=read_uint8(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_info));
@@ -4439,7 +4454,7 @@ qint64 XELF::getSymTableSize(qint64 nOffset)
 
 XELF_DEF::Elf32_Rel XELF::_readElf32_Rel(qint64 nOffset, bool bIsBigEndian)
 {
-    XELF_DEF::Elf32_Rel result={};
+    XELF_DEF::Elf32_Rel result= {};
 
     result.r_offset=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rel,r_offset),bIsBigEndian);
     result.r_info=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rel,r_info),bIsBigEndian);
@@ -4449,7 +4464,7 @@ XELF_DEF::Elf32_Rel XELF::_readElf32_Rel(qint64 nOffset, bool bIsBigEndian)
 
 XELF_DEF::Elf64_Rel XELF::_readElf64_Rel(qint64 nOffset, bool bIsBigEndian)
 {
-    XELF_DEF::Elf64_Rel result={};
+    XELF_DEF::Elf64_Rel result= {};
 
     result.r_offset=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rel,r_offset),bIsBigEndian);
     result.r_info=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rel,r_info),bIsBigEndian);
@@ -4459,7 +4474,7 @@ XELF_DEF::Elf64_Rel XELF::_readElf64_Rel(qint64 nOffset, bool bIsBigEndian)
 
 XELF_DEF::Elf32_Rela XELF::_readElf32_Rela(qint64 nOffset, bool bIsBigEndian)
 {
-    XELF_DEF::Elf32_Rela result={};
+    XELF_DEF::Elf32_Rela result= {};
 
     result.r_offset=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rela,r_offset),bIsBigEndian);
     result.r_info=read_uint32(nOffset+offsetof(XELF_DEF::Elf32_Rela,r_info),bIsBigEndian);
@@ -4470,7 +4485,7 @@ XELF_DEF::Elf32_Rela XELF::_readElf32_Rela(qint64 nOffset, bool bIsBigEndian)
 
 XELF_DEF::Elf64_Rela XELF::_readElf64_Rela(qint64 nOffset, bool bIsBigEndian)
 {
-    XELF_DEF::Elf64_Rela result={};
+    XELF_DEF::Elf64_Rela result= {};
 
     result.r_offset=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_offset),bIsBigEndian);
     result.r_info=read_uint64(nOffset+offsetof(XELF_DEF::Elf64_Rela,r_info),bIsBigEndian);

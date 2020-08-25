@@ -25,7 +25,7 @@
 
 namespace XCOM_DEF
 {
-const quint32 S_ADDRESS_BEGIN               =0x100; 
+const quint32 S_ADDRESS_BEGIN               =0x100;
 }
 
 #endif // XCOM_DEF_H

@@ -42,7 +42,7 @@ qint64 XCOM::getBaseAddress()
 
 XBinary::_MEMORY_MAP XCOM::getMemoryMap()
 {
-    _MEMORY_MAP result={};
+    _MEMORY_MAP result= {};
 
     qint64 nTotalSize=getSize();
 
@@ -55,7 +55,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
     result.bIsBigEndian=isBigEndian();
     result.sType=getTypeAsString();
 
-    _MEMORY_RECORD record={};
+    _MEMORY_RECORD record= {};
     record.nAddress=_getBaseAddress();
     record.segment=ADDRESS_SEGMENT_FLAT;
     record.nOffset=0;
@@ -68,7 +68,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
 
     if(nVirtualSize>0)
     {
-        _MEMORY_RECORD record={};
+        _MEMORY_RECORD record= {};
         record.nAddress=_getBaseAddress()+nTotalSize;
         record.segment=ADDRESS_SEGMENT_FLAT;
         record.nOffset=-1;
@@ -122,8 +122,13 @@ QString XCOM::typeIdToString(int nType)
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
-        case TYPE_EXE:          sResult=QString("EXE");         break;
+        case TYPE_UNKNOWN:
+            sResult=QString("Unknown");
+            break; // mb TODO translate
+
+        case TYPE_EXE:
+            sResult=QString("EXE");
+            break;
     }
 
     return sResult;

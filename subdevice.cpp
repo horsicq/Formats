@@ -112,7 +112,7 @@ void SubDevice::close()
 
 qint64 SubDevice::pos() const
 {
-//    return pDevice->pos()-nOffset;
+    //    return pDevice->pos()-nOffset;
     return QIODevice::pos();
 }
 
