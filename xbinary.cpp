@@ -75,9 +75,7 @@ QString XBinary::typeIdToString(int nType)
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:
-            sResult=QString("Unknown");
-            break; // mb TODO translate
+        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
     }
 
     return sResult;
@@ -94,25 +92,11 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
 
     switch(mode)
     {
-        case MODE_UNKNOWN:
-            sResult=QString("Unknown");
-            break; // mb TODO translate
-
-        case MODE_16:
-            sResult=QString("16");
-            break;
-
-        case MODE_16SEG:
-            sResult=QString("16SEG");
-            break;
-
-        case MODE_32:
-            sResult=QString("32");
-            break;
-
-        case MODE_64:
-            sResult=QString("64");
-            break;
+        case MODE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
+        case MODE_16:               sResult=QString("16");          break;
+        case MODE_16SEG:            sResult=QString("16SEG");       break;
+        case MODE_32:               sResult=QString("32");          break;
+        case MODE_64:               sResult=QString("64");          break;
     }
 
     return sResult;
@@ -140,7 +124,7 @@ void XBinary::setArch(QString sArch)
 }
 
 QString XBinary::getArch()
-{
+{  
     return g_sArch;
 }
 
@@ -175,7 +159,6 @@ quint16 XBinary::random16()
         nSeed^=nRValue;
         qsrand(nSeed);
     }
-
     nResult=(quint16)qrand();
 #endif
 
@@ -218,85 +201,26 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
 
     switch(fileType)
     {
-        case FT_UNKNOWN:
-            sResult=QString("Unknown");
-            break; // mb TODO translate
-
-        case FT_BINARY:
-            sResult=QString("Binary");
-            break;
-
-        case FT_BINARY16:
-            sResult=QString("Binary16");
-            break;
-
-        case FT_BINARY32:
-            sResult=QString("Binary32");
-            break;
-
-        case FT_BINARY64:
-            sResult=QString("Binary64");
-            break;
-
-        case FT_TEXT:
-            sResult=QString("Text");
-            break;
-
-        case FT_COM:
-            sResult=QString("COM");
-            break;
-
-        case FT_MSDOS:
-            sResult=QString("MSDOS");
-            break;
-
-        case FT_NE:
-            sResult=QString("NE");
-            break;
-
-        case FT_LE:
-            sResult=QString("LE");
-            break;
-
-        case FT_LX:
-            sResult=QString("LX");
-            break;
-
-        case FT_PE:
-            sResult=QString("PE");
-            break;
-
-        case FT_PE32:
-            sResult=QString("PE32");
-            break;
-
-        case FT_PE64:
-            sResult=QString("PE64");
-            break;
-
-        case FT_ELF:
-            sResult=QString("ELF");
-            break;
-
-        case FT_ELF32:
-            sResult=QString("ELF32");
-            break;
-
-        case FT_ELF64:
-            sResult=QString("ELF64");
-            break;
-
-        case FT_MACH:
-            sResult=QString("MACH");
-            break;
-
-        case FT_MACH32:
-            sResult=QString("MACH32");
-            break;
-
-        case FT_MACH64:
-            sResult=QString("MACH64");
-            break;
+        case FT_UNKNOWN:            sResult=QString("Unknown");     break; // mb TODO translate
+        case FT_BINARY:             sResult=QString("Binary");      break;
+        case FT_BINARY16:           sResult=QString("Binary16");    break;
+        case FT_BINARY32:           sResult=QString("Binary32");    break;
+        case FT_BINARY64:           sResult=QString("Binary64");    break;
+        case FT_TEXT:               sResult=QString("Text");        break;
+        case FT_COM:                sResult=QString("COM");         break;
+        case FT_MSDOS:              sResult=QString("MSDOS");       break;
+        case FT_NE:                 sResult=QString("NE");          break;
+        case FT_LE:                 sResult=QString("LE");          break;
+        case FT_LX:                 sResult=QString("LX");          break;
+        case FT_PE:                 sResult=QString("PE");          break;
+        case FT_PE32:               sResult=QString("PE32");        break;
+        case FT_PE64:               sResult=QString("PE64");        break;
+        case FT_ELF:                sResult=QString("ELF");         break;
+        case FT_ELF32:              sResult=QString("ELF32");       break;
+        case FT_ELF64:              sResult=QString("ELF64");       break;
+        case FT_MACH:               sResult=QString("MACH");        break;
+        case FT_MACH32:             sResult=QString("MACH32");      break;
+        case FT_MACH64:             sResult=QString("MACH64");      break;
     }
 
     return sResult;
@@ -382,7 +306,7 @@ QString XBinary::convertPathName(QString sPathName)
 
 XBinary::OS_ANSISTRING XBinary::getOsAnsiString(qint64 nOffset, qint64 nSize)
 {
-    OS_ANSISTRING result= {};
+    OS_ANSISTRING result={};
 
     result.nOffset=nOffset;
     result.nSize=nSize;
@@ -442,7 +366,7 @@ void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
 
             QFileInfoList eil=dir.entryInfoList();
 
-            for(int i=0; i<eil.count(); i++)
+            for(int i=0;i<eil.count();i++)
             {
                 findFiles(eil.at(i).absoluteFilePath(),pListFileNames);
             }
@@ -463,7 +387,6 @@ QString XBinary::regExp(QString sRegExp, QString sString, int nIndex)
     {
         sResult=list.at(nIndex);
     }
-
 #else
     QRegularExpression rxString(sRegExp);
     QRegularExpressionMatch matchString=rxString.match(sString);
@@ -472,7 +395,6 @@ QString XBinary::regExp(QString sRegExp, QString sString, int nIndex)
     {
         sResult=matchString.captured(nIndex);
     }
-
 #endif
 
     return sResult;
@@ -1390,7 +1312,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
             char *pData=baFirst.data();
             qint32 nDataSize=baFirst.size();
 
-            for(qint64 i=0; (i<nSize)&&(!g_bIsFindStop);)
+            for(qint64 i=0;(i<nSize)&&(!g_bIsFindStop);)
             {
                 qint64 nTempOffset=find_array(nOffset+i,nSize-1,pData,nDataSize);
 
@@ -1421,7 +1343,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
         }
         else
         {
-            for(qint64 i=0; (i<nSize)&&(!g_bIsFindStop); i++)
+            for(qint64 i=0;(i<nSize)&&(!g_bIsFindStop); i++)
             {
                 if(_compareSignature(pMemoryMap,&records,nOffset+i))
                 {
@@ -2231,7 +2153,7 @@ qint64 XBinary::addressToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAd
 
 XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
-    _MEMORY_RECORD result= {};
+    _MEMORY_RECORD result={};
 
     int nCount=pMemoryMap->listRecords.count();
 
@@ -2252,7 +2174,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByOffset(XBinary::_MEMORY_MAP *p
 
 XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
 {
-    _MEMORY_RECORD result= {};
+    _MEMORY_RECORD result={};
 
     int nCount=pMemoryMap->listRecords.count();
 
@@ -2273,7 +2195,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByAddress(XBinary::_MEMORY_MAP *
 
 XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
 {
-    _MEMORY_RECORD result= {};
+    _MEMORY_RECORD result={};
 
     qint64 nAddress=relAddressToAddress(pMemoryMap,nRelAddress);
 
@@ -2364,7 +2286,7 @@ QString XBinary::getMemoryRecordInfo(XBinary::_MEMORY_RECORD *pMemoryRecord)
 
 XBinary::_MEMORY_MAP XBinary::getMemoryMap()
 {
-    _MEMORY_MAP result= {};
+    _MEMORY_MAP result={};
 
     qint64 nTotalSize=getSize();
 
@@ -2377,7 +2299,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
     result.bIsBigEndian=isBigEndian();
     result.sType=getTypeAsString();
 
-    _MEMORY_RECORD record= {};
+    _MEMORY_RECORD record={};
     record.nAddress=_getBaseAddress();
     record.segment=ADDRESS_SEGMENT_FLAT;
     record.nOffset=0;
@@ -2395,7 +2317,7 @@ qint32 XBinary::getNumberOfPhysicalRecords(XBinary::_MEMORY_MAP *pMemoryMap)
 
     int nCount=pMemoryMap->listRecords.count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
         if(!pMemoryMap->listRecords.at(i).bIsVirtual)
         {
@@ -2564,7 +2486,7 @@ qint64 XBinary::getLowestAddress(XBinary::_MEMORY_MAP *pMemoryMap)
 
     int nCount=pMemoryMap->listRecords.count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
         if(pMemoryMap->listRecords.at(i).nAddress!=-1)
         {
@@ -2586,7 +2508,7 @@ qint64 XBinary::getTotalVirtualSize(XBinary::_MEMORY_MAP *pMemoryMap)
 
     int nCount=pMemoryMap->listRecords.count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
         if(pMemoryMap->listRecords.at(i).type!=MMT_OVERLAY) // TODO Check ELF
         {
@@ -2605,14 +2527,14 @@ qint64 XBinary::positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPositio
 
     qint64 _nSize=0;
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
         if((_nSize<=nPosition)&&(nPosition<_nSize+pMemoryMap->listRecords.at(i).nSize))
         {
             nResult=pMemoryMap->listRecords.at(i).nAddress+(nPosition-_nSize);
         }
 
-        _nSize+=pMemoryMap->listRecords.at(i).nSize;
+       _nSize+=pMemoryMap->listRecords.at(i).nSize;
     }
 
     return nResult;
@@ -2828,9 +2750,9 @@ QSet<XBinary::FT> XBinary::getFileTypes()
                     quint16 nMachine=((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine;
 
                     // TODO more
-                    if((nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)||
-                            (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_IA64)||
-                            (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64))
+                    if( (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)||
+                        (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_IA64)||
+                        (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64))
                     {
                         stResult.insert(FT_PE64);
                     }
@@ -2859,10 +2781,10 @@ QSet<XBinary::FT> XBinary::getFileTypes()
 
     if(nSize>=(int)sizeof(XELF_DEF::Elf32_Ehdr))
     {
-        if((((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[0]==0x7f) &&
-                (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[1]=='E') &&
-                (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[2]=='L') &&
-                (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[3]=='F'))
+        if( (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[0]==0x7f) &&
+            (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[1]=='E') &&
+            (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[2]=='L') &&
+            (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[3]=='F'))
         {
             stResult.insert(FT_ELF);
 
@@ -2894,10 +2816,10 @@ QSet<XBinary::FT> XBinary::getFileTypes()
         }
     }
 
-    //    if(isPlainTextType())
-    //    {
-    //        stResult.insert(FT_TEXT);
-    //    }
+//    if(isPlainTextType())
+//    {
+//        stResult.insert(FT_TEXT);
+//    }
 
     return stResult;
 }
@@ -2986,80 +2908,21 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFT)
 {
     QList<XBinary::FT> listResult;
 
-    if(stFT.contains(FT_BINARY))
-    {
-        listResult.append(FT_BINARY);
-    }
-
-    if(stFT.contains(FT_BINARY16))
-    {
-        listResult.append(FT_BINARY16);
-    }
-
-    if(stFT.contains(FT_BINARY32))
-    {
-        listResult.append(FT_BINARY32);
-    }
-
-    if(stFT.contains(FT_BINARY64))
-    {
-        listResult.append(FT_BINARY64);
-    }
-
-    if(stFT.contains(FT_COM))
-    {
-        listResult.append(FT_COM);
-    }
-
-    if(stFT.contains(FT_MSDOS))
-    {
-        listResult.append(FT_MSDOS);
-    }
-
-    if(stFT.contains(FT_NE))
-    {
-        listResult.append(FT_NE);
-    }
-
-    if(stFT.contains(FT_LE))
-    {
-        listResult.append(FT_LE);
-    }
-
-    if(stFT.contains(FT_LX))
-    {
-        listResult.append(FT_LX);
-    }
-
-    if(stFT.contains(FT_PE32))
-    {
-        listResult.append(FT_PE32);
-    }
-
-    if(stFT.contains(FT_PE64))
-    {
-        listResult.append(FT_PE64);
-    }
-
-    if(stFT.contains(FT_ELF32))
-    {
-        listResult.append(FT_ELF32);
-    }
-
-    if(stFT.contains(FT_ELF64))
-    {
-        listResult.append(FT_ELF64);
-    }
-
-    if(stFT.contains(FT_MACH32))
-    {
-        listResult.append(FT_MACH32);
-    }
-
-    if(stFT.contains(FT_MACH64))
-    {
-        listResult.append(FT_MACH64);
-    }
+    if(stFT.contains(FT_BINARY))    listResult.append(FT_BINARY);
+    if(stFT.contains(FT_BINARY16))  listResult.append(FT_BINARY16);
+    if(stFT.contains(FT_BINARY32))  listResult.append(FT_BINARY32);
+    if(stFT.contains(FT_BINARY64))  listResult.append(FT_BINARY64);
+    if(stFT.contains(FT_COM))       listResult.append(FT_COM);
+    if(stFT.contains(FT_MSDOS))     listResult.append(FT_MSDOS);
+    if(stFT.contains(FT_NE))        listResult.append(FT_NE);
+    if(stFT.contains(FT_LE))        listResult.append(FT_LE);
+    if(stFT.contains(FT_LX))        listResult.append(FT_LX);
+    if(stFT.contains(FT_PE32))      listResult.append(FT_PE32);
+    if(stFT.contains(FT_PE64))      listResult.append(FT_PE64);
+    if(stFT.contains(FT_ELF32))     listResult.append(FT_ELF32);
+    if(stFT.contains(FT_ELF64))     listResult.append(FT_ELF64);
+    if(stFT.contains(FT_MACH32))    listResult.append(FT_MACH32);
+    if(stFT.contains(FT_MACH64))    listResult.append(FT_MACH64);
 
     return listResult;
 }
@@ -3613,38 +3476,18 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 
         switch(hash) // TODO Check new versions of Qt
         {
-            case HASH_MD4:
-                algorithm=QCryptographicHash::Md4;
-                break;
-
-            case HASH_MD5:
-                algorithm=QCryptographicHash::Md5;
-                break;
-
-            case HASH_SHA1:
-                algorithm=QCryptographicHash::Sha1;
-                break;
+            case HASH_MD4:          algorithm=QCryptographicHash::Md4;          break;
+            case HASH_MD5:          algorithm=QCryptographicHash::Md5;          break;
+            case HASH_SHA1:         algorithm=QCryptographicHash::Sha1;         break;
 #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
-
-            case HASH_SHA224:
-                algorithm=QCryptographicHash::Sha224;
-                break; // Keccak_224 ?
-
-            case HASH_SHA256:
-                algorithm=QCryptographicHash::Sha256;
-                break;
-
-            case HASH_SHA384:
-                algorithm=QCryptographicHash::Sha384;
-                break;
-
-            case HASH_SHA512:
-                algorithm=QCryptographicHash::Sha512;
-                break;
-                //            case HASH_KECCAK_224:   algorithm=QCryptographicHash::Keccak_224;   break;
-                //            case HASH_KECCAK_256:   algorithm=QCryptographicHash::Keccak_256;   break;
-                //            case HASH_KECCAK_384:   algorithm=QCryptographicHash::Keccak_384;   break;
-                //            case HASH_KECCAK_512:   algorithm=QCryptographicHash::Keccak_512;   break;
+            case HASH_SHA224:       algorithm=QCryptographicHash::Sha224;       break; // Keccak_224 ?
+            case HASH_SHA256:       algorithm=QCryptographicHash::Sha256;       break;
+            case HASH_SHA384:       algorithm=QCryptographicHash::Sha384;       break;
+            case HASH_SHA512:       algorithm=QCryptographicHash::Sha512;       break;
+//            case HASH_KECCAK_224:   algorithm=QCryptographicHash::Keccak_224;   break;
+//            case HASH_KECCAK_256:   algorithm=QCryptographicHash::Keccak_256;   break;
+//            case HASH_KECCAK_384:   algorithm=QCryptographicHash::Keccak_384;   break;
+//            case HASH_KECCAK_512:   algorithm=QCryptographicHash::Keccak_512;   break;
 #endif
         }
 
@@ -3686,10 +3529,10 @@ QSet<XBinary::HASH> XBinary::getHashMethods()
     stResult.insert(HASH_SHA256);
     stResult.insert(HASH_SHA384);
     stResult.insert(HASH_SHA512);
-    //    stResult.insert(HASH_KECCAK_224);
-    //    stResult.insert(HASH_KECCAK_256);
-    //    stResult.insert(HASH_KECCAK_384);
-    //    stResult.insert(HASH_KECCAK_512);
+//    stResult.insert(HASH_KECCAK_224);
+//    stResult.insert(HASH_KECCAK_256);
+//    stResult.insert(HASH_KECCAK_384);
+//    stResult.insert(HASH_KECCAK_512);
 #endif
 
     return stResult;
@@ -3707,10 +3550,10 @@ QList<XBinary::HASH> XBinary::getHashMethodsAsList()
     listResult.append(HASH_SHA256);
     listResult.append(HASH_SHA384);
     listResult.append(HASH_SHA512);
-    //    stResult.insert(HASH_KECCAK_224);
-    //    stResult.insert(HASH_KECCAK_256);
-    //    stResult.insert(HASH_KECCAK_384);
-    //    stResult.insert(HASH_KECCAK_512);
+//    stResult.insert(HASH_KECCAK_224);
+//    stResult.insert(HASH_KECCAK_256);
+//    stResult.insert(HASH_KECCAK_384);
+//    stResult.insert(HASH_KECCAK_512);
 #endif
 
     return listResult;
@@ -3722,38 +3565,18 @@ QString XBinary::hashIdToString(XBinary::HASH hash)
 
     switch(hash)
     {
-        case HASH_MD4:
-            sResult=QString("MD4");
-            break;
-
-        case HASH_MD5:
-            sResult=QString("MD5");
-            break;
-
-        case HASH_SHA1:
-            sResult=QString("SHA1");
-            break;
+        case HASH_MD4:          sResult=QString("MD4");         break;
+        case HASH_MD5:          sResult=QString("MD5");         break;
+        case HASH_SHA1:         sResult=QString("SHA1");        break;
 #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
-
-        case HASH_SHA224:
-            sResult=QString("SHA224");
-            break;
-
-        case HASH_SHA256:
-            sResult=QString("SHA256");
-            break;
-
-        case HASH_SHA384:
-            sResult=QString("SHA384");
-            break;
-
-        case HASH_SHA512:
-            sResult=QString("SHA512");
-            break;
-            //        case HASH_KECCAK_224:   sResult=QString("Keccak_224");  break;
-            //        case HASH_KECCAK_256:   sResult=QString("Keccak_256");  break;
-            //        case HASH_KECCAK_384:   sResult=QString("Keccak_384");  break;
-            //        case HASH_KECCAK_512:   sResult=QString("Keccak_512");  break;
+        case HASH_SHA224:       sResult=QString("SHA224");      break;
+        case HASH_SHA256:       sResult=QString("SHA256");      break;
+        case HASH_SHA384:       sResult=QString("SHA384");      break;
+        case HASH_SHA512:       sResult=QString("SHA512");      break;
+//        case HASH_KECCAK_224:   sResult=QString("Keccak_224");  break;
+//        case HASH_KECCAK_256:   sResult=QString("Keccak_256");  break;
+//        case HASH_KECCAK_384:   sResult=QString("Keccak_384");  break;
+//        case HASH_KECCAK_512:   sResult=QString("Keccak_512");  break;
 #endif
     }
 
@@ -3898,15 +3721,13 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
 
         quint32 crc_table[256];
 
-        for(int i=0; i<256; i++)
+        for(int i=0;i<256;i++)
         {
             quint32 crc=i;
-
-            for(int j=0; j<8; j++)
+            for (int j=0;j<8;j++)
             {
                 crc=(crc&1)?((crc>>1)^0xEDB88320):(crc>>1);
             }
-
             crc_table[i]=crc;
         }
 
@@ -3923,7 +3744,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
                 return 0;
             }
 
-            for(int i=0; i<nTemp; i++)
+            for(int i=0;i<nTemp;i++)
             {
                 nResult=crc_table[(nResult^((quint8)pBuffer[i]))&0xFF]^(nResult>>8);
             }
@@ -3958,7 +3779,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
         qint64 _nProcent=nSize/100;
         qint32 _nCurrentProcent=0;
 
-        double bytes[256]= {0.0};
+        double bytes[256]={0.0};
 
         const int BUFFER_SIZE=0x1000;
 
@@ -4020,7 +3841,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
 
 XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
 {
-    BYTE_COUNTS result= {0};
+    BYTE_COUNTS result={0};
 
     OFFSETSIZE offsize=convertOffsetAndSize(nOffset,nSize);
 
@@ -4076,7 +3897,7 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
 
     if(g_bIsEntropyStop)
     {
-        result= {0};
+        result={0};
     }
 
     return result;
@@ -4107,7 +3928,7 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
                     break;
                 }
 
-                for(int i=0; i<nTemp; i++)
+                for(int i=0;i<nTemp;i++)
                 {
                     *(pBuffer+i)^=nXorValue;
                 }
@@ -4150,12 +3971,12 @@ quint32 XBinary::getStringCustomCRC32(QString sString)
     for(int i=0; i<nSize; i++)
     {
         unsigned char _char=(unsigned char)baString.data()[i];
-        //        unsigned char _char1=(unsigned char)sString.at(i).toLatin1();
+//        unsigned char _char1=(unsigned char)sString.at(i).toLatin1();
 
-        //        if(_char!=_char1)
-        //        {
-        //            qFatal("Error"); // TODO remove
-        //        }
+//        if(_char!=_char1)
+//        {
+//            qFatal("Error"); // TODO remove
+//        }
 
         nResult^=_char;
 
@@ -4259,7 +4080,7 @@ QString XBinary::getSignature(qint64 nOffset, qint64 nSize)
 
 XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
 {
-    OFFSETSIZE result= {};
+    OFFSETSIZE result={};
 
     result.nOffset=-1;
     result.nSize=0;
@@ -4594,7 +4415,7 @@ QString XBinary::invertHexByteString(QString sHex)
 
 void XBinary::_swapBytes(char *pSource, int nSize)
 {
-    for(int i=0; i<(nSize/2); i++)
+    for(int i=0;i<(nSize/2);i++)
     {
         char cTemp=pSource[i];
         pSource[i]=pSource[(nSize-1)-i];
@@ -4724,7 +4545,6 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType()
             result=UNICODE_TYPE_NONE;
         }
     }
-
     // TODO 0 end
 
     return result;
@@ -4757,8 +4577,8 @@ bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE os)
 QString XBinary::get_uint32_version(quint32 nValue)
 {
     return QString("%1.%2.%3")  .arg((nValue>>16)&0xFF)
-           .arg((nValue>>8)&0xFF)
-           .arg((nValue)&0xFF);
+                                .arg((nValue>>8)&0xFF)
+                                .arg((nValue)&0xFF);
 }
 
 bool XBinary::isResizeEnable(QIODevice *pDevice)
@@ -4800,7 +4620,7 @@ bool XBinary::resize(QIODevice *pDevice, qint64 nSize)
 
 XBinary::ULEB128 XBinary::get_uleb128(qint64 nOffset)
 {
-    ULEB128 result= {};
+    ULEB128 result={};
 
     quint32 nShift=0;
 
@@ -4816,7 +4636,6 @@ XBinary::ULEB128 XBinary::get_uleb128(qint64 nOffset)
         {
             break;
         }
-
         // TODO more checks!
     }
 
@@ -4825,44 +4644,39 @@ XBinary::ULEB128 XBinary::get_uleb128(qint64 nOffset)
 
 XBinary::PACKEDNUMBER XBinary::get_packedNumber(qint64 nOffset)
 {
-    PACKEDNUMBER result= {};
+    PACKEDNUMBER result={};
 
     quint8 nFirstByte=0;
     quint8 nSecondByte=0;
     quint8 nMask=0;
     qint64 _nStartOffset=nOffset;
 
-    for(int i=0; i<8; i++)
+    for(int i=0;i<8;i++)
     {
         if(i==0)
         {
             nFirstByte=read_uint8(nOffset);
             nOffset++;
-
             if((nFirstByte&0x80)==0)
             {
                 result.nValue=nFirstByte;
                 break;
             }
         }
-
         if(i==1)
         {
             nSecondByte=read_uint8(nOffset);
             nOffset++;
-
             if((nFirstByte&0x40)==0)
             {
                 result.nValue=(((quint32)nFirstByte&0x3F)<<8)|nSecondByte;
                 break;
             }
-
             nMask=read_uint8(nOffset);
             nOffset++;
             result.nValue=nSecondByte|((quint32)nMask<<8);
             nMask=0x20;
         }
-
         if(i==2)
         {
             if((nFirstByte&nMask)==0)
@@ -4894,11 +4708,9 @@ QList<QString> XBinary::getListFromFile(QString sFileName)
     if(file.open(QIODevice::ReadOnly))
     {
         QTextStream in(&file);
-
         while(!in.atEnd())
         {
             QString sLine=in.readLine().trimmed();
-
             if(sLine!="")
             {
                 listResult.append(sLine);
@@ -5022,7 +4834,7 @@ bool XBinary::isSignatureInLoadSectionPresent(XBinary::_MEMORY_MAP *pMemoryMap, 
 
     int nCount=pMemoryMap->listRecords.count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
         if((pMemoryMap->listRecords.at(i).type==MMT_LOADSECTION)&&(pMemoryMap->listRecords.at(i).nLoadSection==nLoadSection))
         {
@@ -5048,7 +4860,7 @@ QString XBinary::getStringCollision(QList<QString> *pListStrings, QString sStrin
     QString sRoot1;
     QString sRoot2;
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
         QString sCurrentString=pListStrings->at(i);
 
@@ -5104,7 +4916,7 @@ qint32 XBinary::getStringNumberFromListExp(QList<QString> *pList, QString sStrin
 
     qint32 nCount=pList->count();
 
-    for(qint32 i=0; i<nCount; i++)
+    for(qint32 i=0;i<nCount;i++)
     {
         if(isRegExpPresent(sString,pList->at(i)))
         {
@@ -5156,7 +4968,7 @@ QString XBinary::getVersionString(QString sString)
 
     int nSize=sString.size();
 
-    for(int i=0; i<nSize; i++)
+    for(int i=0;i<nSize;i++)
     {
         QChar c=sString.at(i);
 
@@ -5179,7 +4991,7 @@ qint64 XBinary::getVersionIntValue(QString sString)
 
     int nCount=sString.count(QChar('.'));
 
-    for(int i=0; i<(nCount+1); i++)
+    for(int i=0;i<(nCount+1);i++)
     {
         nResult*=10;
 
@@ -5212,15 +5024,15 @@ bool XBinary::isX86asm(QString sArch)
     sArch=sArch.toUpper();
 
     // TODO Check
-    if((sArch=="8086")||
-            (sArch=="80286")||
-            (sArch=="80386")||
-            (sArch=="80486")||
-            (sArch=="80586")||
-            (sArch=="386")||
-            (sArch=="I386")||
-            (sArch=="AMD64")||
-            (sArch=="X86_64"))
+    if( (sArch=="8086")||
+        (sArch=="80286")||
+        (sArch=="80386")||
+        (sArch=="80486")||
+        (sArch=="80586")||
+        (sArch=="386")||
+        (sArch=="I386")||
+        (sArch=="AMD64")||
+        (sArch=="X86_64"))
     {
         bResult=true;
     }
@@ -5270,19 +5082,19 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
 
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 {
-    if(pStFileTypes->contains(XBinary::FT_MSDOS)||
-            pStFileTypes->contains(XBinary::FT_NE)||
-            pStFileTypes->contains(XBinary::FT_LE)||
-            pStFileTypes->contains(XBinary::FT_LX)||
-            pStFileTypes->contains(XBinary::FT_PE)||
-            pStFileTypes->contains(XBinary::FT_PE32)||
-            pStFileTypes->contains(XBinary::FT_PE64)||
-            pStFileTypes->contains(XBinary::FT_ELF)||
-            pStFileTypes->contains(XBinary::FT_ELF32)||
-            pStFileTypes->contains(XBinary::FT_ELF64)||
-            pStFileTypes->contains(XBinary::FT_MACH)||
-            pStFileTypes->contains(XBinary::FT_MACH32)||
-            pStFileTypes->contains(XBinary::FT_MACH64))
+    if( pStFileTypes->contains(XBinary::FT_MSDOS)||
+        pStFileTypes->contains(XBinary::FT_NE)||
+        pStFileTypes->contains(XBinary::FT_LE)||
+        pStFileTypes->contains(XBinary::FT_LX)||
+        pStFileTypes->contains(XBinary::FT_PE)||
+        pStFileTypes->contains(XBinary::FT_PE32)||
+        pStFileTypes->contains(XBinary::FT_PE64)||
+        pStFileTypes->contains(XBinary::FT_ELF)||
+        pStFileTypes->contains(XBinary::FT_ELF32)||
+        pStFileTypes->contains(XBinary::FT_ELF64)||
+        pStFileTypes->contains(XBinary::FT_MACH)||
+        pStFileTypes->contains(XBinary::FT_MACH32)||
+        pStFileTypes->contains(XBinary::FT_MACH64))
     {
         pStFileTypes->remove(XBinary::FT_BINARY);
     }
@@ -5479,22 +5291,22 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
         switch(pListSignatures->at(i).st)
         {
             case XBinary::ST_COMPAREBYTES:
-            {
-                QByteArray baData=read_array(nOffset,pListSignatures->at(i).baData.size());
-
-                if(baData.size()!=pListSignatures->at(i).baData.size())
                 {
-                    return false;
-                }
+                    QByteArray baData=read_array(nOffset,pListSignatures->at(i).baData.size());
 
-                if(!compareMemory(baData.data(),(char *)(pListSignatures->at(i).baData.data()),baData.size()))
-                {
-                    return false;
-                }
+                    if(baData.size()!=pListSignatures->at(i).baData.size())
+                    {
+                        return false;
+                    }
 
-                nOffset+=baData.size();
-            }
-            break;
+                    if(!compareMemory(baData.data(),(char *)(pListSignatures->at(i).baData.data()),baData.size()))
+                    {
+                        return false;
+                    }
+
+                    nOffset+=baData.size();
+                }
+                break;
 
             case XBinary::ST_RELOFFSETFIX:
                 // TODO Check
@@ -5558,7 +5370,6 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
             return false;
         }
     }
-
     //    CompareBytes,
     //    RelOffsetFix,
     //    RelOffset,
@@ -5586,7 +5397,7 @@ int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSi
 
     if(nResult)
     {
-        SIGNATURE_RECORD record= {};
+        SIGNATURE_RECORD record={};
 
         record.st=XBinary::ST_RELOFFSETFIX;
         record.nSizeOfAddr=0;
@@ -5618,7 +5429,7 @@ int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSigna
 
     if(nResult)
     {
-        SIGNATURE_RECORD record= {};
+        SIGNATURE_RECORD record={};
 
         record.st=XBinary::ST_RELOFFSET;
         record.nSizeOfAddr=nResult/2;
@@ -5669,7 +5480,7 @@ int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
 
     if(nResult)
     {
-        SIGNATURE_RECORD record= {};
+        SIGNATURE_RECORD record={};
 
         record.st=XBinary::ST_ADDRESS;
         record.nSizeOfAddr=nSizeOfAddress/2;
@@ -5690,8 +5501,8 @@ int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignature
 
     for(int i=nStartIndex; i<nSignatureSize; i++)
     {
-        if(((sSignature.at(i)>=QChar('a'))&&(sSignature.at(i)<=QChar('f'))) ||
-                (((sSignature.at(i)>=QChar('0'))&&(sSignature.at(i)<=QChar('9')))))
+        if( ((sSignature.at(i)>=QChar('a'))&&(sSignature.at(i)<=QChar('f'))) ||
+            (((sSignature.at(i)>=QChar('0'))&&(sSignature.at(i)<=QChar('9')))))
         {
             nResult++;
             sBytes.append(sSignature.at(i));
@@ -5706,7 +5517,7 @@ int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignature
 
     if(nResult)
     {
-        SIGNATURE_RECORD record= {};
+        SIGNATURE_RECORD record={};
 
         record.st=XBinary::ST_COMPAREBYTES;
         record.nSizeOfAddr=0;
@@ -5759,7 +5570,7 @@ bool XBinary::isEmptyData(char *pBuffer, qint64 nSize) // TODO dwords
 bool XBinary::_isOffsetValid(qint64 nOffset)
 {
     qint64 nFileSize=getSize();
-
+    
     return (nOffset<nFileSize);
 }
 
