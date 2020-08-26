@@ -159,7 +159,6 @@ public:
         FT_MACH,
         FT_MACH32,
         FT_MACH64
-        // mb TODO Archive
     };
 
     enum MODE
