@@ -469,7 +469,7 @@ public:
     bool dumpToFile(QString sFileName,qint64 nDataOffset,qint64 nDataSize);
 
     QSet<FT> getFileTypes();
-    static QSet<FT> getFileTypes(QIODevice *pDevice); // TODO isImage
+    static QSet<FT> getFileTypes(QIODevice *pDevice); // mb TODO isImage
     static QSet<FT> getFileTypes(QString sFileName);
 
     static FT getPrefFileType(QIODevice *pDevice);
