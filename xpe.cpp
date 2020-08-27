@@ -224,13 +224,17 @@ XPE_DEF::S_IMAGE_FILE_HEADER XPE::getFileHeader()
 
 void XPE::setFileHeader(XPE_DEF::S_IMAGE_FILE_HEADER *pFileHeader)
 {
-    // TODO check BE/LE
     qint64 nFileHeaderOffset=getFileHeaderOffset();
 
     if(nFileHeaderOffset!=-1)
     {
-        // TODO check BE/LE
-        write_array(nFileHeaderOffset,(char *)pFileHeader,sizeof(XPE_DEF::S_IMAGE_FILE_HEADER));
+        write_uint16(nFileHeaderOffset+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,Machine),pFileHeader->Machine);
+        write_uint16(nFileHeaderOffset+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,NumberOfSections),pFileHeader->NumberOfSections);
+        write_uint32(nFileHeaderOffset+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,TimeDateStamp),pFileHeader->TimeDateStamp);
+        write_uint32(nFileHeaderOffset+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,PointerToSymbolTable),pFileHeader->PointerToSymbolTable);
+        write_uint32(nFileHeaderOffset+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,NumberOfSymbols),pFileHeader->NumberOfSymbols);
+        write_uint16(nFileHeaderOffset+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,SizeOfOptionalHeader),pFileHeader->SizeOfOptionalHeader);
+        write_uint16(nFileHeaderOffset+offsetof(XPE_DEF::S_IMAGE_FILE_HEADER,Characteristics),pFileHeader->Characteristics);
     }
 }
 
