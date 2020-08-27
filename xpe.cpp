@@ -1176,7 +1176,9 @@ QList<XPE::SECTIONRVA_RECORD> XPE::getSectionRVARecords()
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSH=getSectionHeaders();
     qint32 nSectionAlignment=getOptionalHeader_SectionAlignment();
 
-    for(int i=0; i<listSH.count(); i++)
+    int nNumberOfSections=listSH.count();
+
+    for(int i=0; i<nNumberOfSections; i++)
     {
         SECTIONRVA_RECORD record={};
 
