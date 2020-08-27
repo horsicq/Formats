@@ -2063,9 +2063,9 @@ quint64 XPE::getImportHash64(_MEMORY_MAP *pMemoryMap)
 
     QList<XPE::IMPORT_RECORD> listImports=getImportRecords(pMemoryMap);
 
-    int nCount=listImports.count();
+    int nNumberOfImports=listImports.count();
 
-    for(int i=0;i<nCount; i++)
+    for(int i=0;i<nNumberOfImports; i++)
     {
         QString sRecord=listImports.at(i).sLibrary+" "+listImports.at(i).sFunction;
 
@@ -2081,11 +2081,11 @@ quint32 XPE::getImportHash32(_MEMORY_MAP *pMemoryMap)
 
     QList<XPE::IMPORT_RECORD> listImports=getImportRecords(pMemoryMap);
 
-    int nCount=listImports.count();
+    int nnNumberOfImports=listImports.count();
 
     QString sRecord;
 
-    for(int i=0;i<nCount; i++)
+    for(int i=0;i<nnNumberOfImports; i++)
     {
         sRecord+=listImports.at(i).sLibrary+listImports.at(i).sFunction;
     }
@@ -2564,17 +2564,17 @@ QList<quint32> XPE::getImportPositionHashes(_MEMORY_MAP *pMemoryMap)
 
     QList<IMPORT_HEADER> listImports=getImports(pMemoryMap);
 
-    int nCount=listImports.count();
+    int nNumberOfImports=listImports.count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfImports;i++)
     {
         IMPORT_HEADER record=listImports.at(i);
 
-        int _nCount=record.listPositions.count();
+        int nNumberOfPositions=record.listPositions.count();
 
         QString sString;
 
-        for(int j=0;j<_nCount;j++)
+        for(int j=0;j<nNumberOfPositions;j++)
         {
             sString+=record.sName;
             sString+=record.listPositions.at(j).sFunction;
@@ -2597,7 +2597,9 @@ bool XPE::isImportLibraryPresentI(QString sLibrary, QList<XPE::IMPORT_HEADER> *p
 {
     bool bResult=false;
 
-    for(int i=0; i<pListImport->count(); i++)
+    int nNumberOfImports=pListImport->count();
+
+    for(int i=0; i<nNumberOfImports; i++)
     {
         if(pListImport->at(i).sName.toUpper()==sLibrary.toUpper())
         {
@@ -2619,6 +2621,8 @@ bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction)
 bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction, QList<XPE::IMPORT_HEADER> *pListImport)
 {
     bool bResult=false;
+
+    // TODO Optimize!
 
     for(int i=0; i<pListImport->count(); i++)
     {

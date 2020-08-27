@@ -42,7 +42,7 @@ qint64 XCOM::getBaseAddress()
 
 XBinary::_MEMORY_MAP XCOM::getMemoryMap()
 {
-    _MEMORY_MAP result= {};
+    _MEMORY_MAP result={};
 
     qint64 nTotalSize=getSize();
 
@@ -55,31 +55,52 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
     result.bIsBigEndian=isBigEndian();
     result.sType=getTypeAsString();
 
-    _MEMORY_RECORD record= {};
-    record.nAddress=_getBaseAddress();
+    qint64 nCodeSize=qMin(nTotalSize,(qint64)(XCOM_DEF::S_IMAGESIZE-XCOM_DEF::S_ADDRESS_BEGIN));
+
+    _MEMORY_RECORD record={};
+    record.nAddress=0;
     record.segment=ADDRESS_SEGMENT_FLAT;
-    record.nOffset=0;
-    record.nSize=nTotalSize;
-    record.nIndex=0;
+    record.nOffset=-1;
+    record.nSize=XCOM_DEF::S_ADDRESS_BEGIN;
+    record.nIndex++;
 
     result.listRecords.append(record);
 
-    qint64 nVirtualSize=result.nImageSize-nTotalSize;
+    _MEMORY_RECORD recordMain={};
+    recordMain.nAddress=XCOM_DEF::S_ADDRESS_BEGIN;
+    recordMain.segment=ADDRESS_SEGMENT_FLAT;
+    recordMain.nOffset=0;
+    recordMain.nSize=nCodeSize;
+    recordMain.nIndex++;
+
+    result.listRecords.append(recordMain);
+
+    qint64 nVirtualSize=(qint64)(XCOM_DEF::S_IMAGESIZE-XCOM_DEF::S_ADDRESS_BEGIN)-nTotalSize;
 
     if(nVirtualSize>0)
     {
-        _MEMORY_RECORD record= {};
-        record.nAddress=_getBaseAddress()+nTotalSize;
+        _MEMORY_RECORD record={};
+        record.nAddress=XCOM_DEF::S_ADDRESS_BEGIN+nCodeSize;
         record.segment=ADDRESS_SEGMENT_FLAT;
         record.nOffset=-1;
         record.nSize=nVirtualSize;
-        record.nIndex=1;
+        record.nIndex++;
         record.bIsVirtual=true;
 
         result.listRecords.append(record);
     }
 
-    // Check overlay ?
+    if(nTotalSize>nCodeSize)
+    {
+        _MEMORY_RECORD recordOverlay={};
+        recordOverlay.nAddress=-1;
+        recordOverlay.nOffset=nCodeSize;
+        recordOverlay.nSize=nTotalSize-nCodeSize;
+        recordOverlay.nIndex++;
+        recordOverlay.type=MMT_OVERLAY;
+
+        result.listRecords.append(recordOverlay);
+    }
 
     return result;
 }
@@ -122,13 +143,8 @@ QString XCOM::typeIdToString(int nType)
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:
-            sResult=QString("Unknown");
-            break; // mb TODO translate
-
-        case TYPE_EXE:
-            sResult=QString("EXE");
-            break;
+        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_EXE:          sResult=QString("EXE");         break;
     }
 
     return sResult;
