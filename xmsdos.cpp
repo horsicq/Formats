@@ -30,8 +30,8 @@ bool XMSDOS::isValid()
 
     quint16 magic=get_magic();
 
-    if((magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||
-            (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
+    if( (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||
+        (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
     {
         bResult=true;
     }
@@ -71,7 +71,7 @@ qint64 XMSDOS::getDosHeaderExSize()
 
 XMSDOS_DEF::IMAGE_DOS_HEADER XMSDOS::getDosHeader()
 {
-    XMSDOS_DEF::IMAGE_DOS_HEADER result= {};
+    XMSDOS_DEF::IMAGE_DOS_HEADER result={};
     // TODO
     read_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER,e_magic),(char *)&result,sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));
 
@@ -80,7 +80,7 @@ XMSDOS_DEF::IMAGE_DOS_HEADER XMSDOS::getDosHeader()
 
 XMSDOS_DEF::IMAGE_DOS_HEADEREX XMSDOS::getDosHeaderEx()
 {
-    XMSDOS_DEF::IMAGE_DOS_HEADEREX result= {};
+    XMSDOS_DEF::IMAGE_DOS_HEADEREX result={};
     // TODO
     read_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_magic),(char *)&result,sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX));
 
@@ -311,7 +311,7 @@ quint32 XMSDOS::get_e_lfanew()
 
 XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 {
-    _MEMORY_MAP result= {};
+    _MEMORY_MAP result={};
 
     qint32 nIndex=0;
 
@@ -329,20 +329,20 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     qint64 nHeaderSize=(quint16)(get_e_cparhdr()*16);
     //    qint64 nDataOffset=nHeaderOffset+nHeaderSize;
     //    qint64 nDataSize=get_e_cs()*16;
-    //    qint64 nCodeOffset=(quint16)((quint16)(get_e_cparhdr()*16)+(quint16)(get_e_cs()*16));
+//    qint64 nCodeOffset=(quint16)((quint16)(get_e_cparhdr()*16)+(quint16)(get_e_cs()*16));
     qint64 nCodeOffset=((qint16)get_e_cparhdr()*16)+((qint16)get_e_cs()*16);
 
     qint64 nCodeAddress=0;
 
     qint64 nCodeSize=S_ALIGN_UP(nMaxOffset-nCodeOffset,512);
-    //    nCodeSize=qMin(nCodeSize,getSize());
+//    nCodeSize=qMin(nCodeSize,getSize());
     qint64 nOverlayOffset=nMaxOffset;
     qint64 nOverlaySize=qMax(getSize()-nMaxOffset,(qint64)0);
 
-    //    qint64 nBaseAddress=_getBaseAddress();
+//    qint64 nBaseAddress=_getBaseAddress();
 
     {
-        _MEMORY_RECORD record= {};
+        _MEMORY_RECORD record={};
         record.sName=QString("MSDOS %1").arg(tr("Header"));
         record.nSize=nHeaderSize;
         record.nOffset=nHeaderOffset;
@@ -359,7 +359,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     {
         qint64 nDelta=nCodeOffset-nHeaderSize;
 
-        _MEMORY_RECORD record= {};
+        _MEMORY_RECORD record={};
 
         record.bIsVirtual=true;
         record.nSize=qAbs(nDelta);
@@ -378,7 +378,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     }
 
     {
-        _MEMORY_RECORD record= {};
+        _MEMORY_RECORD record={};
 
         record.nSize=nCodeSize;
         record.nOffset=nCodeOffset;
@@ -392,7 +392,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     }
 
     {
-        _MEMORY_RECORD record= {};
+        _MEMORY_RECORD record={};
 
         record.bIsVirtual=true;
         record.nSize=0xFFFF-nCodeSize;
@@ -408,7 +408,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 
     if(nOverlaySize)
     {
-        _MEMORY_RECORD record= {};
+        _MEMORY_RECORD record={};
         record.nSize=nOverlaySize;
         record.nOffset=nOverlayOffset;
         record.nAddress=-1;
@@ -525,7 +525,7 @@ QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords()
 
                 for(; nCurrentOffset<nOffset; nCurrentOffset+=8)
                 {
-                    MS_RICH_RECORD record= {};
+                    MS_RICH_RECORD record={};
 
                     quint32 nValue1=read_uint32(nCurrentOffset)^nXORkey;
                     record.nId=nValue1>>16;
@@ -570,9 +570,9 @@ bool XMSDOS::isRichVersionPresent(quint32 nVersion, QList<XMSDOS::MS_RICH_RECORD
 {
     bool bResult=false;
 
-    int nCount=pListRich->count();
+    int nNumberOfRichVersions=pListRich->count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nNumberOfRichVersions;i++)
     {
         if(pListRich->at(i).nVersion==nVersion)
         {
@@ -635,13 +635,8 @@ QString XMSDOS::typeIdToString(int nType)
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:
-            sResult=QString("Unknown");
-            break; // mb TODO translate
-
-        case TYPE_EXE:
-            sResult=QString("EXE");
-            break;
+        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_EXE:          sResult=QString("EXE");         break;
     }
 
     return sResult;
