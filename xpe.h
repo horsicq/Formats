@@ -248,7 +248,7 @@ public:
 
     struct CLI_INFO
     {
-        bool bInit;
+        bool bValid;
         bool bHidden;
         qint64 nHeaderOffset;
         XPE_DEF::IMAGE_COR20_HEADER header;

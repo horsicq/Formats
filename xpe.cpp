@@ -7579,7 +7579,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
             if((result.header.cb==0x48)&&result.header.MetaData.VirtualAddress&&result.header.MetaData.Size)
             {
-                result.bInit=true;
+                result.bValid=true;
 
                 result.cliMetadata.nEntryPointSize=0;
                 result.cliMetadata.nEntryPoint=result.header.EntryPointRVA;
