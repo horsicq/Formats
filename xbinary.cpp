@@ -5016,9 +5016,9 @@ qint64 XBinary::getVersionIntValue(QString sString)
 {
     qint64 nResult=0;
 
-    int nCount=sString.count(QChar('.'));
+    int nNumberOfDots=sString.count(QChar('.'));
 
-    for(int i=0;i<(nCount+1);i++)
+    for(int i=0;i<(nNumberOfDots+1);i++)
     {
         nResult*=10;
 
