@@ -68,7 +68,7 @@ qint64 XLE::getImageVxdHeaderSize()
 
 XLE_DEF::IMAGE_VXD_HEADER XLE::getImageVxdHeader()
 {
-    XLE_DEF::IMAGE_VXD_HEADER result= {};
+    XLE_DEF::IMAGE_VXD_HEADER result={};
 
     qint64 nOffset=getImageVxdHeaderOffset();
 
@@ -1231,7 +1231,7 @@ void XLE::setImageVxdHeader_heapsize(quint32 nValue)
 
 XLE_DEF::o32_obj XLE::_read_o32_obj(qint64 nOffset)
 {
-    XLE_DEF::o32_obj result= {};
+    XLE_DEF::o32_obj result={};
 
     result.o32_size=read_uint32(nOffset+offsetof(XLE_DEF::o32_obj,o32_size));
     result.o32_base=read_uint32(nOffset+offsetof(XLE_DEF::o32_obj,o32_base));
@@ -1245,7 +1245,7 @@ XLE_DEF::o32_obj XLE::_read_o32_obj(qint64 nOffset)
 
 XLE_DEF::o32_map XLE::_read_o32_map(qint64 nOffset)
 {
-    XLE_DEF::o32_map result= {};
+    XLE_DEF::o32_map result={};
 
     result.o32_pagedataoffset=read_uint32(nOffset+offsetof(XLE_DEF::o32_map,o32_pagedataoffset));
     result.o32_pagesize=read_uint32(nOffset+offsetof(XLE_DEF::o32_map,o32_pagesize));
@@ -1259,9 +1259,9 @@ QList<XLE_DEF::o32_obj> XLE::getObjects()
     QList<XLE_DEF::o32_obj> listResult;
 
     qint64 nObjOffset=getImageVxdHeaderOffset()+getImageVxdHeader_objtab();
-    quint32 nObjCount=getImageVxdHeader_objcnt();
+    quint32 nNumberOfObjects=getImageVxdHeader_objcnt();
 
-    for(quint32 i=0; i<nObjCount; i++)
+    for(quint32 i=0;i<nNumberOfObjects;i++)
     {
         XLE_DEF::o32_obj record=_read_o32_obj(nObjOffset);
 
@@ -1280,7 +1280,7 @@ QList<XLE_DEF::o32_map> XLE::getMaps()
     qint64 nMapOffset=getImageVxdHeaderOffset()+getImageVxdHeader_objmap();
     quint32 nMapCount=getImageVxdHeader_itermap();
 
-    for(quint32 i=0; i<nMapCount; i++)
+    for(quint32 i=0;i<nMapCount;i++)
     {
         XLE_DEF::o32_map record=_read_o32_map(nMapOffset);
 
@@ -1294,7 +1294,7 @@ QList<XLE_DEF::o32_map> XLE::getMaps()
 
 XBinary::_MEMORY_MAP XLE::getMemoryMap()
 {
-    XBinary::_MEMORY_MAP result= {};
+    XBinary::_MEMORY_MAP result={};
 
     result.sArch=getArch();
     result.mode=getMode();
@@ -1313,7 +1313,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
     result.nRawSize=getSize();
     // TODO Image size CONST
     // TODO Image Base
-    //    result.nImageSize=0xFFFF;
+//    result.nImageSize=0xFFFF;
 
     QList<XLE_DEF::o32_map> listMaps=XLE::getMaps();
 
@@ -1321,7 +1321,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
 
     int nCount=listObjects.count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
         // TODO
     }
@@ -1377,13 +1377,8 @@ QString XLE::typeIdToString(int nType)
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:
-            sResult=QString("Unknown");
-            break; // mb TODO translate
-
-        case TYPE_EXE:
-            sResult=QString("EXE");
-            break;
+        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_EXE:          sResult=QString("EXE");         break;
     }
 
     return sResult;
