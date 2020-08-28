@@ -4882,12 +4882,12 @@ QString XBinary::getStringCollision(QList<QString> *pListStrings, QString sStrin
     // TODO Check&optimize
     QString sResult;
 
-    int nCount=pListStrings->count();
+    int nNumberOfStrings=pListStrings->count();
 
     QString sRoot1;
     QString sRoot2;
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfStrings;i++)
     {
         QString sCurrentString=pListStrings->at(i);
 
