@@ -49,6 +49,31 @@ qint64 XBinary::getSize()
     return g_pDevice->size();
 }
 
+qint64 XBinary::getSize(QIODevice *pDevice)
+{
+    XBinary binary(pDevice);
+
+    return binary.getSize();
+}
+
+qint64 XBinary::getSize(QString sFileName)
+{
+    qint64 nResult=0;
+
+    QFile file;
+
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        nResult=getSize(&file);
+
+        file.close();
+    }
+
+    return nResult;
+}
+
 void XBinary::setMode(XBinary::MODE mode)
 {
     g_mode=mode;

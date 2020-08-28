@@ -1278,9 +1278,9 @@ QList<XLE_DEF::o32_map> XLE::getMaps()
     QList<XLE_DEF::o32_map> listResult;
 
     qint64 nMapOffset=getImageVxdHeaderOffset()+getImageVxdHeader_objmap();
-    quint32 nMapCount=getImageVxdHeader_itermap();
+    quint32 nNumberOfMaps=getImageVxdHeader_itermap();
 
-    for(quint32 i=0;i<nMapCount;i++)
+    for(quint32 i=0;i<nNumberOfMaps;i++)
     {
         XLE_DEF::o32_map record=_read_o32_map(nMapOffset);
 
