@@ -1987,9 +1987,9 @@ bool XBinary::isOffsetValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
     }
     else
     {
-        int nCount=pMemoryMap->listRecords.count();
+        int nNumberOfRecords=pMemoryMap->listRecords.count();
 
-        for(int i=0; i<nCount; i++)
+        for(int i=0; i<nNumberOfRecords; i++)
         {
             if(pMemoryMap->listRecords.at(i).nSize&&(pMemoryMap->listRecords.at(i).nOffset!=-1))
             {
