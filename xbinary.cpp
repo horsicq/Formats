@@ -2550,11 +2550,11 @@ qint64 XBinary::positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPositio
 {
     qint64 nResult=-1;
 
-    int nCount=pMemoryMap->listRecords.count();
+    int nNumberOfRecords=pMemoryMap->listRecords.count();
 
     qint64 _nSize=0;
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfRecords;i++)
     {
         if((_nSize<=nPosition)&&(nPosition<_nSize+pMemoryMap->listRecords.at(i).nSize))
         {
