@@ -350,7 +350,8 @@ public:
 
     OS_ANSISTRING getProgramInterpreterName();
     OS_ANSISTRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pPhdrList);
-    QString getCommentString();
+    QString getCommentString(); // TODO remove
+    QList<QString> getCommentStrings();
 
     QList<NOTE> getNotes();
     QList<NOTE> getNotes(QList<XELF_DEF::Elf_Phdr> *pPhdrList);

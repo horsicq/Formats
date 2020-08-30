@@ -3041,6 +3041,12 @@ QString XELF::getCommentString()
     return sResult;
 }
 
+QList<QString> XELF::getCommentStrings()
+{
+    // TODO Optimize
+    return getStringsFromSection(getSectionIndexByName(".comment")).values();
+}
+
 QList<XELF::NOTE> XELF::getNotes()
 {
     QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
