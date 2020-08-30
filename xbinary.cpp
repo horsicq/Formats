@@ -2511,9 +2511,9 @@ qint64 XBinary::getLowestAddress(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     qint64 nResult=-1;
 
-    int nCount=pMemoryMap->listRecords.count();
+    int nNumberOfRecords=pMemoryMap->listRecords.count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfRecords;i++)
     {
         if(pMemoryMap->listRecords.at(i).nAddress!=-1)
         {
