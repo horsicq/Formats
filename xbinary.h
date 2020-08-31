@@ -351,6 +351,7 @@ public:
     void setFindProcessEnable(bool bState);
     void setDumpProcessEnable(bool bState);
     void setEntropyProcessEnable(bool bState);
+    void setHashProcessEnable(bool bState);
 
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature);
 
@@ -699,6 +700,10 @@ signals:
     void entropyProgressMinimumChanged(qint32 nMaximum);
     void entropyProgressMaximumChanged(qint32 nMaximum);
     void entropyProgressValueChanged(qint32 nValue);
+    void hashProgressMinimumChanged(qint32 nMaximum);
+    void hashProgressMaximumChanged(qint32 nMaximum);
+    void hashProgressValueChanged(qint32 nValue);
+
 
 private:
     QIODevice *g_pDevice;
@@ -710,6 +715,7 @@ private:
     bool g_bIsFindStop;
     bool g_bIsDumpStop;
     bool g_bIsEntropyStop;
+    bool g_bIsHashStop;
     QString g_sArch;
     MODE g_mode;
     QString g_sVersion;

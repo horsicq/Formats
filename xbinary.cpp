@@ -33,6 +33,7 @@ XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
     setFindProcessEnable(true);
     setDumpProcessEnable(true);
     setEntropyProcessEnable(true);
+    setHashProcessEnable(true);
     setMode(MODE_UNKNOWN);
     setArch("NOEXECUTABLE");
     setVersion("");
@@ -1577,6 +1578,11 @@ void XBinary::setDumpProcessEnable(bool bState)
 void XBinary::setEntropyProcessEnable(bool bState)
 {
     g_bIsEntropyStop=!bState;
+}
+
+void XBinary::setHashProcessEnable(bool bState)
+{
+    g_bIsHashStop=!bState;
 }
 
 bool XBinary::isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nSize, QString sSignature)
@@ -3494,6 +3500,13 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 
     if(nOffset!=-1)
     {
+        emit hashProgressMinimumChanged(0);
+        emit hashProgressMaximumChanged(100);
+        emit hashProgressValueChanged(0);
+
+        qint64 _nProcent=nSize/100;
+        qint32 _nCurrentProcent=0;
+
         const int BUFFER_SIZE=0x1000;
 
         quint64 nTemp=0;
@@ -3520,7 +3533,7 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 
         QCryptographicHash crypto(algorithm);
 
-        while(nSize>0)
+        while((nSize>0)&&(!g_bIsHashStop))
         {
             nTemp=qMin((qint64)BUFFER_SIZE,nSize);
 
@@ -3534,6 +3547,12 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 
             nSize-=nTemp;
             nOffset+=nTemp;
+
+            if(nOffset>(offsize.nOffset+(_nCurrentProcent+1)*_nProcent))
+            {
+                _nCurrentProcent++;
+                emit hashProgressValueChanged(_nCurrentProcent);
+            }
         }
 
         delete[] pBuffer;
