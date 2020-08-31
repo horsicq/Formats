@@ -36,10 +36,10 @@ bool XMACH::isValid()
 
     quint32 nMagic=read_uint32(0);
 
-    if((nMagic==XMACH_DEF::S_MH_MAGIC)||
-            (nMagic==XMACH_DEF::S_MH_CIGAM)||
-            (nMagic==XMACH_DEF::S_MH_MAGIC_64)||
-            (nMagic==XMACH_DEF::S_MH_CIGAM_64))
+    if( (nMagic==XMACH_DEF::S_MH_MAGIC)||
+        (nMagic==XMACH_DEF::S_MH_CIGAM)||
+        (nMagic==XMACH_DEF::S_MH_MAGIC_64)||
+        (nMagic==XMACH_DEF::S_MH_CIGAM_64))
     {
         bResult=true;
     }
@@ -53,8 +53,8 @@ bool XMACH::isBigEndian()
 
     quint32 nMagic=read_uint32(0);
 
-    if((nMagic==XMACH_DEF::S_MH_CIGAM)||
-            (nMagic==XMACH_DEF::S_MH_CIGAM_64))
+    if( (nMagic==XMACH_DEF::S_MH_CIGAM)||
+        (nMagic==XMACH_DEF::S_MH_CIGAM_64))
     {
         bResult=true;
     }
@@ -496,7 +496,7 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
 
     for(quint32 i=0; i<nNumberOfCommands; i++)
     {
-        COMMAND_RECORD record= {};
+        COMMAND_RECORD record={};
 
         record.nOffset=nOffset;
         record.nType=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmd),bIsBigEndian);
@@ -531,9 +531,9 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<
 {
     QList<COMMAND_RECORD> listResult;
 
-    int nCount=pList->count();
+    int nNumberOfCommands=pList->count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0; i<nNumberOfCommands; i++)
     {
         if(pList->at(i).nType==nCommandID)
         {
@@ -658,7 +658,7 @@ qint64 XMACH::getAddressOfEntryPoint()
 
     int nCount=listLC.count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
         quint32 nType=listLC.at(i).nType;
         qint64 nOffset=listLC.at(i).nOffset;
@@ -689,7 +689,7 @@ qint64 XMACH::getAddressOfEntryPoint()
 
 XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 {
-    _MEMORY_MAP result= {};
+    _MEMORY_MAP result={};
 
     qint32 nIndex=0;
 
@@ -733,7 +733,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
         if(nFileSize)
         {
-            XBinary::_MEMORY_RECORD record= {};
+            XBinary::_MEMORY_RECORD record={};
 
             record.type=MMT_LOADSECTION;
 
@@ -748,7 +748,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
         if(nVirtualSize>nFileSize)
         {
-            XBinary::_MEMORY_RECORD record= {};
+            XBinary::_MEMORY_RECORD record={};
 
             record.type=MMT_LOADSECTION;
             record.bIsVirtual=true;
@@ -810,9 +810,9 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECOR
 
     int nCount=listLCLibraries.count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
-        LIBRARY_RECORD record= {};
+        LIBRARY_RECORD record={};
 
         qint64 nOffset=listLCLibraries.at(i).nOffset;
 
@@ -831,11 +831,11 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECOR
 
 XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QString sName, QList<XMACH::LIBRARY_RECORD> *pList)
 {
-    LIBRARY_RECORD result= {};
+    LIBRARY_RECORD result={};
 
     int nCount=pList->count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
         if(pList->at(i).sName==sName)
         {
@@ -861,7 +861,7 @@ bool XMACH::isLibraryRecordNamePresent(QString sName, QList<XMACH::LIBRARY_RECOR
 
     int nCount=pList->count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
         if(pList->at(i).sName==sName)
         {
@@ -894,11 +894,11 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
         int nCount=listLCSegments.count();
 
-        for(int i=0; i<nCount; i++)
+        for(int i=0;i<nCount;i++)
         {
             qint64 nOffset=listLCSegments.at(i).nOffset;
 
-            SEGMENT_RECORD record= {};
+            SEGMENT_RECORD record={};
 
             record.nStructOffset=nOffset+sizeof(XMACH_DEF::load_command);
             read_array(nOffset+offsetof(XMACH_DEF::segment_command_64,segname),record.segname,sizeof(record.segname));
@@ -920,11 +920,11 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
         int nCount=listLCSegments.count();
 
-        for(int i=0; i<nCount; i++)
+        for(int i=0;i<nCount;i++)
         {
             qint64 nOffset=listLCSegments.at(i).nOffset;
 
-            SEGMENT_RECORD record= {};
+            SEGMENT_RECORD record={};
 
             record.nStructOffset=nOffset+sizeof(XMACH_DEF::load_command);
             read_array(nOffset+offsetof(XMACH_DEF::segment_command,segname),record.segname,sizeof(record.segname));
@@ -964,16 +964,16 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
         int nCount=listLCSegments.count();
 
-        for(int i=0; i<nCount; i++)
+        for(int i=0;i<nCount;i++)
         {
             qint64 nOffset=listLCSegments.at(i).nOffset;
             int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,nsects),bIsBigEndian);
 
             nOffset+=sizeof(XMACH_DEF::segment_command_64);
 
-            for(int j=0; j<nNumberOfSections; j++)
+            for(int j=0;j<nNumberOfSections;j++)
             {
-                SECTION_RECORD record= {};
+                SECTION_RECORD record={};
 
                 record.nStructOffset=nOffset;
 
@@ -999,16 +999,16 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
         int nCount=listLCSegments.count();
 
-        for(int i=0; i<nCount; i++)
+        for(int i=0;i<nCount;i++)
         {
             qint64 nOffset=listLCSegments.at(i).nOffset;
             int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),bIsBigEndian);
 
             nOffset+=sizeof(XMACH_DEF::segment_command);
 
-            for(int j=0; j<nNumberOfSections; j++)
+            for(int j=0;j<nNumberOfSections;j++)
             {
-                SECTION_RECORD record= {};
+                SECTION_RECORD record={};
 
                 record.nStructOffset=nOffset;
 
@@ -1052,7 +1052,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pList)
 
         int nCount=listLCSegments.count();
 
-        for(int i=0; i<nCount; i++)
+        for(int i=0;i<nCount;i++)
         {
             qint64 nOffset=listLCSegments.at(i).nOffset;
             int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,nsects),bIsBigEndian);
@@ -1066,7 +1066,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pList)
 
         int nCount=listLCSegments.count();
 
-        for(int i=0; i<nCount; i++)
+        for(int i=0;i<nCount;i++)
         {
             qint64 nOffset=listLCSegments.at(i).nOffset;
             int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),bIsBigEndian);
@@ -1096,15 +1096,13 @@ qint32 XMACH::getSectionNumber(QString sName, QList<XMACH::SECTION_RECORD> *pLis
 
     int nCount=pList->count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nCount;i++)
     {
         QString _sName=QString(pList->at(i).sectname);
-
         if(_sName.size()>16)
         {
             _sName.resize(16);
         }
-
         if(_sName==sName)
         {
             nResult=i;
@@ -1197,41 +1195,15 @@ QString XMACH::typeIdToString(int nType)
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:
-            sResult=QString("Unknown");
-            break; // mb TODO translate
-
-        case TYPE_OBJECT:
-            sResult=QString("OBJECT");
-            break;
-
-        case TYPE_EXECUTE:
-            sResult=QString("EXECUTE");
-            break;
-
-        case TYPE_FVMLIB:
-            sResult=QString("FVMLIB");
-            break;
-
-        case TYPE_CORE:
-            sResult=QString("CORE");
-            break;
-
-        case TYPE_PRELOAD:
-            sResult=QString("PRELOAD");
-            break;
-
-        case TYPE_DYLIB:
-            sResult=QString("DYLIB");
-            break;
-
-        case TYPE_DYLINKER:
-            sResult=QString("DYLINKER");
-            break;
-
-        case TYPE_BUNDLE:
-            sResult=QString("BUNDLE");
-            break;
+        case TYPE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_OBJECT:           sResult=QString("OBJECT");      break;
+        case TYPE_EXECUTE:          sResult=QString("EXECUTE");     break;
+        case TYPE_FVMLIB:           sResult=QString("FVMLIB");      break;
+        case TYPE_CORE:             sResult=QString("CORE");        break;
+        case TYPE_PRELOAD:          sResult=QString("PRELOAD");     break;
+        case TYPE_DYLIB:            sResult=QString("DYLIB");       break;
+        case TYPE_DYLINKER:         sResult=QString("DYLINKER");    break;
+        case TYPE_BUNDLE:           sResult=QString("BUNDLE");      break;
     }
 
     return sResult;
