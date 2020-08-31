@@ -68,7 +68,7 @@ qint64 XNE::getImageOS2HeaderSize()
 
 XNE_DEF::IMAGE_OS2_HEADER XNE::getImageOS2Header()
 {
-    XNE_DEF::IMAGE_OS2_HEADER result= {};
+    XNE_DEF::IMAGE_OS2_HEADER result={};
 
     qint64 nOffset=getImageOS2HeaderOffset();
 
@@ -876,7 +876,7 @@ QList<XNE_DEF::NE_SEGMENT> XNE::getSegmentList()
     qint64 nOffset=getSegmentTableOffset();
     int nNumberOfSegments=getImageOS2Header_cseg();
 
-    for(int i=0; i<nNumberOfSegments; i++)
+    for(int i=0;i<nNumberOfSegments;i++)
     {
         XNE_DEF::NE_SEGMENT segment=_read_NE_SEGMENT(nOffset);
 
@@ -890,7 +890,7 @@ QList<XNE_DEF::NE_SEGMENT> XNE::getSegmentList()
 
 XNE_DEF::NE_SEGMENT XNE::_read_NE_SEGMENT(qint64 nOffset)
 {
-    XNE_DEF::NE_SEGMENT result= {};
+    XNE_DEF::NE_SEGMENT result={};
 
     result.dwFileOffset=read_uint16(nOffset+offsetof(XNE_DEF::NE_SEGMENT,dwFileOffset));
     result.dwFileSize=read_uint16(nOffset+offsetof(XNE_DEF::NE_SEGMENT,dwFileSize));
@@ -902,7 +902,7 @@ XNE_DEF::NE_SEGMENT XNE::_read_NE_SEGMENT(qint64 nOffset)
 
 XBinary::_MEMORY_MAP XNE::getMemoryMap()
 {
-    _MEMORY_MAP result= {};
+    _MEMORY_MAP result={};
 
     qint32 nIndex=0;
 
@@ -915,14 +915,14 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
 
     QList<XNE_DEF::NE_SEGMENT> listSegments=getSegmentList();
 
-    int nCount=listSegments.count();
+    int nNumberOfSegments=listSegments.count();
 
     result.nBaseAddress=0x10000; // TODO const
-    result.nImageSize=nCount*0x10000; // TODO Check
+    result.nImageSize=nNumberOfSegments*0x10000; // TODO Check
 
     qint64 nMaxOffset=0;
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0;i<nNumberOfSegments;i++)
     {
         qint64 nFileSize=listSegments.at(i).dwFileSize;
         qint64 nFileOffset=listSegments.at(i).dwFileOffset*0x200;
@@ -936,7 +936,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
 
         if(nFileOffset) // if offset = 0 no data
         {
-            _MEMORY_RECORD record= {};
+            _MEMORY_RECORD record={};
             record.nSize=nFileSize;
             record.nOffset=nFileOffset;
             record.nAddress=(i+1)*0x10000;  // TODO const
@@ -949,7 +949,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
 
         if(0x10000-nFileSize)
         {
-            _MEMORY_RECORD record= {};
+            _MEMORY_RECORD record={};
             record.nSize=0x10000-nFileSize;
             record.nOffset=-1;
             record.nAddress=(i+1)*0x10000+nFileSize;  // TODO const
@@ -968,20 +968,20 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
     }
 
     // Check overlay!!
-    //    qint64 nOverlaySize=result.nRawSize-nMaxOffset;
+//    qint64 nOverlaySize=result.nRawSize-nMaxOffset;
 
-    //    if(nOverlaySize>0)
-    //    {
-    //        XBinary::_MEMORY_RECORD record={};
+//    if(nOverlaySize>0)
+//    {
+//        XBinary::_MEMORY_RECORD record={};
 
-    //        record.type=MMT_OVERLAY;
-    //        record.nAddress=-1;
-    //        record.nSize=nOverlaySize;
-    //        record.nOffset=nMaxOffset;
-    //        record.nIndex=nIndex++;
+//        record.type=MMT_OVERLAY;
+//        record.nAddress=-1;
+//        record.nSize=nOverlaySize;
+//        record.nOffset=nMaxOffset;
+//        record.nIndex=nIndex++;
 
-    //        result.listRecords.append(record);
-    //    }
+//        result.listRecords.append(record);
+//    }
 
     return result;
 }
@@ -1018,7 +1018,7 @@ QMap<quint64, QString> XNE::getImageNEFlagsS()
     mapResult.insert(0x0080,"80x87 instructions");
     mapResult.insert(0x0100,"Full screen");
     mapResult.insert(0x0200,"Compatible with Windows/P.M.");
-    //    mapResult.insert(0x0400,""); // TODO Check
+//    mapResult.insert(0x0400,""); // TODO Check
     mapResult.insert(0x0800,"OS/2 family application");
     mapResult.insert(0x1000,"reserved?");
     mapResult.insert(0x2000,"Errors in image/executable");
@@ -1099,21 +1099,10 @@ QString XNE::typeIdToString(int nType)
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:
-            sResult=QString("Unknown");
-            break; // mb TODO translate
-
-        case TYPE_EXE:
-            sResult=QString("EXE");
-            break;
-
-        case TYPE_DLL:
-            sResult=QString("DLL");
-            break;
-
-        case TYPE_DRIVER:
-            sResult=QString("Driver");
-            break;
+        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_EXE:          sResult=QString("EXE");         break;
+        case TYPE_DLL:          sResult=QString("DLL");         break;
+        case TYPE_DRIVER:       sResult=QString("Driver");      break;
     }
 
     return sResult;
