@@ -2624,7 +2624,9 @@ bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction, QList<XP
 
     // TODO Optimize!
 
-    for(int i=0; i<pListImport->count(); i++)
+    int nNumberOfImports=pListImport->count();
+
+    for(int i=0; i<nNumberOfImports; i++)
     {
         if(pListImport->at(i).sName.toUpper()==sLibrary.toUpper())
         {
