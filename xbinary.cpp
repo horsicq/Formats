@@ -4878,9 +4878,9 @@ bool XBinary::isSignatureInLoadSectionPresent(XBinary::_MEMORY_MAP *pMemoryMap, 
 {
     bool bResult=false;
 
-    int nCount=pMemoryMap->listRecords.count();
+    int nNumberOfRecords=pMemoryMap->listRecords.count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfRecords;i++)
     {
         if((pMemoryMap->listRecords.at(i).type==MMT_LOADSECTION)&&(pMemoryMap->listRecords.at(i).nLoadSection==nLoadSection))
         {
