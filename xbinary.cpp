@@ -2421,9 +2421,9 @@ bool XBinary::_compareByteArrayWithSignature(QByteArray baData, QString sSignatu
     if(sHex.size()==sSignature.size())
     {
         bResult=true;
-        int nCount=sSignature.size();
+        int nNumberOfSymbols=sSignature.size();
 
-        for(int i=0; i<nCount; i++)
+        for(int i=0; i<nNumberOfSymbols; i++)
         {
             if(sSignature.at(i)!=QChar('.'))
             {
