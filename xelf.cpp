@@ -2231,6 +2231,7 @@ QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList()
     if(bIs64)
     {
         QList<XELF_DEF::Elf64_Phdr> list=getElf64_PhdrList();
+
         int nNumberOfPrograms=list.count();
 
         for(int i=0;i<nNumberOfPrograms;i++)
@@ -2252,9 +2253,10 @@ QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList()
     else
     {
         QList<XELF_DEF::Elf32_Phdr> list=getElf32_PhdrList();
-        int nCount=list.count();
 
-        for(int i=0;i<nCount;i++)
+        int nNumberOfPrograms=list.count();
+
+        for(int i=0;i<nNumberOfPrograms;i++)
         {
             XELF_DEF::Elf_Phdr record={};
 
