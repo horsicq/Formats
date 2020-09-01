@@ -669,6 +669,17 @@ public:
     static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes);
     static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType);
 
+    struct PROCENT
+    {
+        qint64 nCurrentValue;
+        qint64 nMaxValue;
+        qint32 nCurrentProcent;
+        qint32 nMaxProcent;
+    };
+
+    static PROCENT procentInit(qint64 nMaxValue);
+    static bool procentSetCurrentValue(PROCENT *pProcent,qint64 nCurrentValue);
+
 private:
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar cSymbol);
@@ -703,7 +714,6 @@ signals:
     void hashProgressMinimumChanged(qint32 nMaximum);
     void hashProgressMaximumChanged(qint32 nMaximum);
     void hashProgressValueChanged(qint32 nValue);
-
 
 private:
     QIODevice *g_pDevice;
