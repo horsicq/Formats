@@ -4960,9 +4960,9 @@ qint32 XBinary::getStringNumberFromListExp(QList<QString> *pList, QString sStrin
 {
     qint32 nResult=-1;
 
-    qint32 nCount=pList->count();
+    qint32 nNumberOfRecords=pList->count();
 
-    for(qint32 i=0;i<nCount;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         if(isRegExpPresent(sString,pList->at(i)))
         {
