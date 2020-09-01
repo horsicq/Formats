@@ -1169,18 +1169,18 @@ QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
         QByteArray section=getSection(nSection);
         int nSize=section.size();
         char *pOffset=section.data();
-        quint32 nCount=0;
+        quint32 nCurrentOffset=0;
 
         while(nSize>0)
         {
-            QString sString(pOffset+nCount);
+            QString sString(pOffset+nCurrentOffset);
 
             if(sString.length())
             {
-                mapResult.insert(nCount,sString);
+                mapResult.insert(nCurrentOffset,sString);
             }
 
-            nCount+=(quint32)sString.length()+1;
+            nCurrentOffset+=(quint32)sString.length()+1;
             nSize-=sString.length()+1;
         }
     }
