@@ -3173,9 +3173,9 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pPhdrList
 
     QList<XELF_DEF::Elf_Phdr> listTags=_getPrograms(pPhdrList,XELF_DEF::S_PT_DYNAMIC);
 
-    int nCount=listTags.count();
+    int nNumberOfTags=listTags.count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfTags;i++)
     {
         qint64 nOffset=listTags.at(i).p_offset; //  Check image
         qint64 nSize=listTags.at(i).p_filesz;
