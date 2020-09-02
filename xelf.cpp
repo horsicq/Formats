@@ -3934,9 +3934,9 @@ QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, q
 {
     QList<XELF_DEF::Elf_Phdr> listResult;
 
-    int nCount=pList->count();
+    int nNumberOfPrograms=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfPrograms;i++)
     {
         if(pList->at(i).p_type==nType)
         {
@@ -3955,9 +3955,9 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
 
     XBinary::OFFSETSIZE osStringTable=getSectionOffsetSize(nMainStringSection);
 
-    int nCount=pList->count();
+    int nNumberOfSections=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfSections;i++)
     {
         QString sSectionName=getStringFromIndex(osStringTable.nOffset,osStringTable.nSize,pList->at(i).sh_name);
 
