@@ -3230,9 +3230,9 @@ QList<XELF::TAG_STRUCT> XELF::_getTagStructs(QList<XELF::TAG_STRUCT> *pList,qint
 {
     QList<XELF::TAG_STRUCT> listResult;
 
-    int nCount=pList->count();
+    int nNumberOfTags=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfTags;i++)
     {
         if(pList->at(i).nTag==nTag)
         {
