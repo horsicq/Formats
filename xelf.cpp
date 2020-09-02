@@ -4086,9 +4086,9 @@ QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> 
 {
     QList<XBinary::DATASET> listResult;
 
-    int nCount=pList->count();
+    int nNumberOfPrograms=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfPrograms;i++)
     {
         if((pList->at(i).p_type==3)) // Interpreter TODO const
         {
