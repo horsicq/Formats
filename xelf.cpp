@@ -3612,14 +3612,14 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     QList<XELF_DEF::Elf_Phdr> listSegments=_getPrograms(&_listPhdr,XELF_DEF::S_PT_LOAD);
 
 //    bool bIs64=is64();
-    int nCount=listSegments.count();
+    int nNumberOfSegments=listSegments.count();
 
     bool bImageAddressInit=false;
 
     qint64 nMaxOffset=0;
     qint64 nMaxAddress=0;
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0; i<nNumberOfSegments; i++)
     {
         QString sName=QString("%1(%2)").arg(tr("Segment")).arg(i);
 
