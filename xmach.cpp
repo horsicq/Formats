@@ -892,9 +892,9 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
     {
         QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pList);
 
-        int nCount=listLCSegments.count();
+        int nNumberOfSegments=listLCSegments.count();
 
-        for(int i=0;i<nCount;i++)
+        for(int i=0;i<nNumberOfSegments;i++)
         {
             qint64 nOffset=listLCSegments.at(i).nOffset;
 
@@ -918,9 +918,9 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
     {
         QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pList);
 
-        int nCount=listLCSegments.count();
+        int nNumberOfSegments=listLCSegments.count();
 
-        for(int i=0;i<nCount;i++)
+        for(int i=0;i<nNumberOfSegments;i++)
         {
             qint64 nOffset=listLCSegments.at(i).nOffset;
 
