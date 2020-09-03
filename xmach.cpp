@@ -621,11 +621,11 @@ bool XMACH::setCommand(quint32 nCommandID, QByteArray baData, int nIndex, QList<
 {
     bool bResult=false;
 
-    int nCount=pList->count();
+    int nNumberOfCommands=pList->count();
 
     int nCurrentIndex=0;
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0; i<nNumberOfCommands; i++)
     {
         if(pList->at(i).nType==nCommandID)
         {
