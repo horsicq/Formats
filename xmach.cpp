@@ -833,9 +833,9 @@ XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QString sName, QList<XMACH::
 {
     LIBRARY_RECORD result={};
 
-    int nCount=pList->count();
+    int nNumberOfLibraries=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfLibraries;i++)
     {
         if(pList->at(i).sName==sName)
         {
@@ -859,9 +859,9 @@ bool XMACH::isLibraryRecordNamePresent(QString sName, QList<XMACH::LIBRARY_RECOR
 {
     bool bResult=false;
 
-    int nCount=pList->count();
+    int nNumberOfLibraries=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfLibraries;i++)
     {
         if(pList->at(i).sName==sName)
         {
