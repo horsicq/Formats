@@ -656,9 +656,9 @@ qint64 XMACH::getAddressOfEntryPoint()
 
     QList<COMMAND_RECORD> listLC=getCommandRecords();
 
-    int nCount=listLC.count();
+    int nNumberOfCommands=listLC.count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfCommands;i++)
     {
         quint32 nType=listLC.at(i).nType;
         qint64 nOffset=listLC.at(i).nOffset;
