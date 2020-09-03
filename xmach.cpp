@@ -595,11 +595,11 @@ QByteArray XMACH::getCommand(quint32 nCommandID, int nIndex, QList<XMACH::COMMAN
 {
     QByteArray baResult;
 
-    int nCount=pList->count();
+    int nNumberOfCommands=pList->count();
 
     int nCurrentIndex=0;
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0; i<nNumberOfCommands; i++)
     {
         if(pList->at(i).nType==nCommandID)
         {
