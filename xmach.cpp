@@ -808,9 +808,9 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECOR
 
     QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(XMACH_DEF::S_LC_LOAD_DYLIB,pList);
 
-    int nCount=listLCLibraries.count();
+    int nNumberOfCommands=listLCLibraries.count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfCommands;i++)
     {
         LIBRARY_RECORD record={};
 
