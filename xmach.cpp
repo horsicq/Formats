@@ -714,14 +714,14 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
     QList<SEGMENT_RECORD> listSegmentRecords=getSegmentRecords(&listLC);
 
-    int nCount=listSegmentRecords.count();
+    int nNumberOfSegments=listSegmentRecords.count();
 
     bool bImageAddressInit=false;
 
     qint64 nMaxOffset=0;
     qint64 nMaxAddress=0;
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0; i<nNumberOfSegments; i++)
     {
         QString sSegmentName=QString("%1(%2)['%3']").arg(tr("Segment")).arg(i).arg(listSegmentRecords.at(i).segname); // TODO Limit
         // TODO Align
