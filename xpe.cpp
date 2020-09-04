@@ -3743,9 +3743,9 @@ QList<QString> XPE::getExportFunctionsList(EXPORT_HEADER *pExportHeader)
 {
     QList<QString> listResult;
 
-    int nCount=pExportHeader->listPositions.count();
+    int nNumberOfPositions=pExportHeader->listPositions.count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfPositions;i++)
     {
         listResult.append(pExportHeader->listPositions.at(i).sFunctionName);
     }
@@ -8664,9 +8664,9 @@ qint64 XPE::_getMinSectionOffset()
 
     _MEMORY_MAP memoryMap=getMemoryMap();
 
-    int nCount=memoryMap.listRecords.count();
+    int nNumberOfRecords=memoryMap.listRecords.count();
 
-    for(int i=0; i<nCount; i++)
+    for(int i=0; i<nNumberOfRecords; i++)
     {
         if(memoryMap.listRecords.at(i).type==MMT_LOADSECTION)
         {
