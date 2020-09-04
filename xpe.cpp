@@ -8822,11 +8822,11 @@ QList<qint64> XPE::getRelocsAsRVAList()
 
             nRelocsOffset+=sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
 
-            int nCount=(ibr.SizeOfBlock-sizeof(XPE_DEF::IMAGE_BASE_RELOCATION))/sizeof(quint16);
+            int nNumberOfBlocks=(ibr.SizeOfBlock-sizeof(XPE_DEF::IMAGE_BASE_RELOCATION))/sizeof(quint16);
 
-            nCount=qMin(nCount,(int)0xFFFF);
+            nNumberOfBlocks=qMin(nNumberOfBlocks,(int)0xFFFF);
 
-            for(int i=0; i<nCount; i++)
+            for(int i=0; i<nNumberOfBlocks; i++)
             {
                 quint16 nRecord=read_uint16(nRelocsOffset);
 
