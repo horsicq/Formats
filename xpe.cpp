@@ -3055,7 +3055,9 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, QString sName2, QList<
 
     result.nOffset=-1;
 
-    for(int i=0; i<pListRecords->count(); i++)
+    int nNumberOfResources=pListRecords->count();
+
+    for(int i=0; i<nNumberOfResources; i++)
     {
         if((pListRecords->at(i).irin[0].nID==nID1)&&(pListRecords->at(i).irin[1].sName==sName2))
         {
@@ -3074,7 +3076,9 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<
 
     result.nOffset=-1;
 
-    for(int i=0; i<pListRecords->count(); i++)
+    int nNumberOfResources=pListRecords->count();
+
+    for(int i=0; i<nNumberOfResources; i++)
     {
         if(pListRecords->at(i).irin[0].sName==sName1)
         {
@@ -3096,7 +3100,9 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, QString sName2, QLis
 
     result.nOffset=-1;
 
-    for(int i=0; i<pListRecords->count(); i++)
+    int nNumberOfResources=pListRecords->count();
+
+    for(int i=0; i<nNumberOfResources; i++)
     {
         if((pListRecords->at(i).irin[0].sName==sName1)&&(pListRecords->at(i).irin[1].sName==sName2))
         {
