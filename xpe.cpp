@@ -8966,9 +8966,9 @@ bool XPE::addRelocsSection(QIODevice *pDevice,bool bIsImage, QList<qint64> *pLis
 
             QList<qint64> listRVAs;
 
-            int _nCount=pList->count();
+            int nNumberOfRelocs=pList->count();
 
-            for(int i=0; i<_nCount; i++)
+            for(int i=0; i<nNumberOfRelocs; i++)
             {
                 if(pe.isAddressValid(&memoryMap,pList->at(i)+memoryMap.nBaseAddress))
                 {
