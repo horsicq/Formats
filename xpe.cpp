@@ -2630,7 +2630,9 @@ bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction, QList<XP
     {
         if(pListImport->at(i).sName.toUpper()==sLibrary.toUpper())
         {
-            for(int j=0;j<pListImport->at(i).listPositions.count();j++)
+            int nNumberOfPositions=pListImport->at(i).listPositions.count();
+
+            for(int j=0;j<nNumberOfPositions;j++)
             {
                 if(pListImport->at(i).listPositions.at(j).sFunction==sFunction)
                 {
@@ -3467,7 +3469,9 @@ QString XPE::getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVer
 {
     QString sResult;
 
-    for(int i=0; i<pResVersion->listRecords.count(); i++)
+    int nNumberOfRecords=pResVersion->listRecords.count();
+
+    for(int i=0; i<nNumberOfRecords; i++)
     {
         QString sRecord=pResVersion->listRecords.at(i).section(".",3,-1);
         QString _sKey=sRecord.section(":",0,0);
