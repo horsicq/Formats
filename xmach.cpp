@@ -1094,9 +1094,9 @@ qint32 XMACH::getSectionNumber(QString sName, QList<XMACH::SECTION_RECORD> *pLis
 {
     qint32 nResult=-1;
 
-    int nCount=pList->count();
+    int nNumberOfSections=pList->count();
 
-    for(int i=0;i<nCount;i++)
+    for(int i=0;i<nNumberOfSections;i++)
     {
         QString _sName=QString(pList->at(i).sectname);
         if(_sName.size()>16)
