@@ -1064,9 +1064,9 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pList)
     {
         QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pList);
 
-        int nNUmberOfSegments=listLCSegments.count();
+        int nNumberOfSegments=listLCSegments.count();
 
-        for(int i=0;i<nNUmberOfSegments;i++)
+        for(int i=0;i<nNumberOfSegments;i++)
         {
             qint64 nOffset=listLCSegments.at(i).nOffset;
             int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),bIsBigEndian);
