@@ -2686,10 +2686,12 @@ bool XPE::setImports(QIODevice *pDevice,bool bIsImage, QList<XPE::IMPORT_HEADER>
             for(int i=0; i<nNumberOfHeaders; i++)
             {
                 // TODO 64
-                nIATSize+=(pListHeaders->at(i).listPositions.count()+1)*nAddressSize;
+                int nNumberOfPositions=pListHeaders->at(i).listPositions.count();
+
+                nIATSize+=(nNumberOfPositions+1)*nAddressSize;
                 nAnsiDataSize+=pListHeaders->at(i).sName.length()+3;
 
-                for(int j=0; j<pListHeaders->at(i).listPositions.count(); j++)
+                for(int j=0; j<nNumberOfPositions; j++)
                 {
                     if(pListHeaders->at(i).listPositions.at(j).sName!="")
                     {
@@ -2711,7 +2713,9 @@ bool XPE::setImports(QIODevice *pDevice,bool bIsImage, QList<XPE::IMPORT_HEADER>
             char *pOIAT=pDataOffset+nIATSize+nImportTableSize;
             char *pAnsiData=pDataOffset+nIATSize+nImportTableSize+nIATSize;
 
-            for(int i=0; i<pListHeaders->count(); i++)
+            nNumberOfHeaders=pListHeaders->count();
+
+            for(int i=0; i<nNumberOfHeaders; i++)
             {
                 pIID->FirstThunk=pIAT-pDataOffset;
                 listPatches.append((char *)pIID-pDataOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,FirstThunk));
@@ -2725,7 +2729,9 @@ bool XPE::setImports(QIODevice *pDevice,bool bIsImage, QList<XPE::IMPORT_HEADER>
                 strcpy(pAnsiData,pListHeaders->at(i).sName.toLatin1().data());
                 pAnsiData+=pListHeaders->at(i).sName.length()+3;
 
-                for(int j=0; j<pListHeaders->at(i).listPositions.count(); j++)
+                int nNumberOfPositions=pListHeaders->at(i).listPositions.count();
+
+                for(int j=0; j<nNumberOfPositions; j++)
                 {
                     if(pListHeaders->at(i).listPositions.at(j).sName!="")
                     {
