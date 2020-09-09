@@ -2796,7 +2796,9 @@ bool XPE::setImports(QIODevice *pDevice,bool bIsImage, QList<XPE::IMPORT_HEADER>
                 pe.setOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IAT,&iddIAT);
                 pe.setOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT,&iddImportTable);
 
-                for(int i=0; i<listPatches.count(); i++)
+                int nNumberOfPatches=listPatches.count();
+
+                for(int i=0; i<nNumberOfPatches; i++)
                 {
                     // TODO 64
                     qint64 nCurrentOffset=ish.PointerToRawData+listPatches.at(i);
