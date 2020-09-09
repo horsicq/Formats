@@ -2081,11 +2081,11 @@ quint32 XPE::getImportHash32(_MEMORY_MAP *pMemoryMap)
 
     QList<XPE::IMPORT_RECORD> listImports=getImportRecords(pMemoryMap);
 
-    int nnNumberOfImports=listImports.count();
+    int nNumberOfImports=listImports.count();
 
     QString sRecord;
 
-    for(int i=0;i<nnNumberOfImports; i++)
+    for(int i=0;i<nNumberOfImports; i++)
     {
         sRecord+=listImports.at(i).sLibrary+listImports.at(i).sFunction;
     }
