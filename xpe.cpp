@@ -9063,7 +9063,9 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
     char *pSizeOfBlock=0;
     quint32 nCurrentBlockSize=0;
 
-    for(int i=0; i<pList->count(); i++)
+    nNumberOfRelocs=pList->count();
+
+    for(int i=0; i<nNumberOfRelocs; i++)
     {
         qint32 _nBaseAddress=S_ALIGN_DOWN(pList->at(i),0x1000);
 
