@@ -2806,7 +2806,9 @@ bool XPE::setImports(QIODevice *pDevice,bool bIsImage, QList<XPE::IMPORT_HEADER>
                     pe.write_uint32(nCurrentOffset,nValue+ish.VirtualAddress);
                 }
 
-                for(int i=0; i<pListHeaders->count(); i++)
+                int _nNumberOfHeaders=pListHeaders->count();
+
+                for(int i=0; i<_nNumberOfHeaders; i++)
                 {
                     if(pListHeaders->at(i).nFirstThunk)
                     {
