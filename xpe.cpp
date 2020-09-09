@@ -1106,7 +1106,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders()
     qint64 nSectionOffset=getSectionsTableOffset();
 
     // Fix
-    if(nNumberOfSections>100)
+    if(nNumberOfSections>100)  // TODO const
     {
         nNumberOfSections=100;
     }
@@ -9457,7 +9457,7 @@ QList<qint64> XPE::getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap)
 
     if(nOffset!=-1)
     {
-        for(int i=0;i<100;i++)
+        for(int i=0;i<100;i++) // TODO const
         {
             qint64 nAddress=0;
 
