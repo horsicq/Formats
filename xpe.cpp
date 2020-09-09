@@ -1670,7 +1670,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
     result.nRawSize=getSize();
     result.nImageSize=S_ALIGN_UP(getOptionalHeader_SizeOfImage(),0x1000);
 
-    quint32 nNumberOfSections=qMin((int)getFileHeader_NumberOfSections(),100);
+    quint32 nNumberOfSections=qMin((int)getFileHeader_NumberOfSections(),100); // TODO const
     quint32 nFileAlignment=getOptionalHeader_FileAlignment();
     quint32 nSectionAlignment=getOptionalHeader_SectionAlignment();
     //qint64 nBaseAddress=getOptionalHeader_ImageBase();
