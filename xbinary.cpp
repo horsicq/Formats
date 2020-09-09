@@ -378,23 +378,23 @@ void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
 {
     QFileInfo fi(sDirectoryName);
 
-    QString sFN=fi.fileName();
-
-    if((sFN!=".")&&(sFN!=".."))
+    if(fi.isFile())
     {
-        if(fi.isFile())
+        pListFileNames->append(fi.absoluteFilePath());
+    }
+    else if(fi.isDir())
+    {
+        QDir dir(sDirectoryName);
+
+        QFileInfoList eil=dir.entryInfoList();
+
+        int nNumberOfFiles=eil.count();
+
+        for(int i=0;i<nNumberOfFiles;i++)
         {
-            pListFileNames->append(fi.absoluteFilePath());
-        }
-        else if(fi.isDir())
-        {
-            QDir dir(sDirectoryName);
+            QString sFN=eil.at(i).fileName();
 
-            QFileInfoList eil=dir.entryInfoList();
-
-            int nNumberOfFiles=eil.count();
-
-            for(int i=0;i<nNumberOfFiles;i++)
+            if((sFN!=".")&&(sFN!=".."))
             {
                 findFiles(eil.at(i).absoluteFilePath(),pListFileNames);
             }
