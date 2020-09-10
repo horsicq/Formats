@@ -62,8 +62,8 @@ public:
     struct SECTION_RECORD
     {
         qint64 nStructOffset;
-        char sectname[16];
-        char segname[16];
+        char sectname[16]; // TODO const
+        char segname[16]; // TODO const
         quint64	addr;
         quint64	size;
         quint32	offset;
