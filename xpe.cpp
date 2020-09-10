@@ -3039,21 +3039,21 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
     return listResources;
 }
 
-XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListRecords)
+XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     RESOURCE_RECORD result={};
 
     result.nOffset=-1;
 
-    int nNumberOfResources=pListRecords->count();
+    int nNumberOfResources=pListResourceRecords->count();
 
     for(int i=0; i<nNumberOfResources; i++)
     {
-        if(pListRecords->at(i).irin[0].nID==nID1)
+        if(pListResourceRecords->at(i).irin[0].nID==nID1)
         {
-            if((pListRecords->at(i).irin[1].nID==nID2)||(nID2==(quint32)-1))
+            if((pListResourceRecords->at(i).irin[1].nID==nID2)||(nID2==(quint32)-1))
             {
-                result=pListRecords->at(i);
+                result=pListResourceRecords->at(i);
 
                 break;
             }
@@ -3063,19 +3063,19 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, quint32 nID2, QList<XP
     return result;
 }
 
-XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListRecords)
+XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     RESOURCE_RECORD result={};
 
     result.nOffset=-1;
 
-    int nNumberOfResources=pListRecords->count();
+    int nNumberOfResources=pListResourceRecords->count();
 
     for(int i=0; i<nNumberOfResources; i++)
     {
-        if((pListRecords->at(i).irin[0].nID==nID1)&&(pListRecords->at(i).irin[1].sName==sName2))
+        if((pListResourceRecords->at(i).irin[0].nID==nID1)&&(pListResourceRecords->at(i).irin[1].sName==sName2))
         {
-            result=pListRecords->at(i);
+            result=pListResourceRecords->at(i);
 
             break;
         }
@@ -3084,21 +3084,21 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, QString sName2, QList<
     return result;
 }
 
-XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListRecords)
+XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     RESOURCE_RECORD result={};
 
     result.nOffset=-1;
 
-    int nNumberOfResources=pListRecords->count();
+    int nNumberOfResources=pListResourceRecords->count();
 
     for(int i=0; i<nNumberOfResources; i++)
     {
-        if(pListRecords->at(i).irin[0].sName==sName1)
+        if(pListResourceRecords->at(i).irin[0].sName==sName1)
         {
-            if((pListRecords->at(i).irin[0].nID==nID2)||(nID2==(quint32)-1))
+            if((pListResourceRecords->at(i).irin[0].nID==nID2)||(nID2==(quint32)-1))
             {
-                result=pListRecords->at(i);
+                result=pListResourceRecords->at(i);
 
                 break;
             }
@@ -3108,19 +3108,19 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<
     return result;
 }
 
-XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListRecords)
+XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     RESOURCE_RECORD result={};
 
     result.nOffset=-1;
 
-    int nNumberOfResources=pListRecords->count();
+    int nNumberOfResources=pListResourceRecords->count();
 
     for(int i=0; i<nNumberOfResources; i++)
     {
-        if((pListRecords->at(i).irin[0].sName==sName1)&&(pListRecords->at(i).irin[1].sName==sName2))
+        if((pListResourceRecords->at(i).irin[0].sName==sName1)&&(pListResourceRecords->at(i).irin[1].sName==sName2))
         {
-            result=pListRecords->at(i);
+            result=pListResourceRecords->at(i);
 
             break;
         }
@@ -3129,24 +3129,24 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, QString sName2, QLis
     return result;
 }
 
-bool XPE::isResourcePresent(quint32 nID1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListRecords)
+bool XPE::isResourcePresent(quint32 nID1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
-    return (getResourceRecord(nID1,nID2,pListRecords).nSize);
+    return (getResourceRecord(nID1,nID2,pListResourceRecords).nSize);
 }
 
-bool XPE::isResourcePresent(quint32 nID1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListRecords)
+bool XPE::isResourcePresent(quint32 nID1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
-    return (getResourceRecord(nID1,sName2,pListRecords).nSize);
+    return (getResourceRecord(nID1,sName2,pListResourceRecords).nSize);
 }
 
-bool XPE::isResourcePresent(QString sName1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListRecords)
+bool XPE::isResourcePresent(QString sName1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
-    return (getResourceRecord(sName1,nID2,pListRecords).nSize);
+    return (getResourceRecord(sName1,nID2,pListResourceRecords).nSize);
 }
 
-bool XPE::isResourcePresent(QString sName1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListRecords)
+bool XPE::isResourcePresent(QString sName1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
-    return (getResourceRecord(sName1,sName2,pListRecords).nSize);
+    return (getResourceRecord(sName1,sName2,pListResourceRecords).nSize);
 }
 
 bool XPE::isResourceManifestPresent()

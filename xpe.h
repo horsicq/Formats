@@ -531,15 +531,15 @@ public:
     QList<RESOURCE_RECORD> getResources();
     QList<RESOURCE_RECORD> getResources(_MEMORY_MAP *pMemoryMap);
 
-    static RESOURCE_RECORD getResourceRecord(quint32 nID1,quint32 nID2,QList<RESOURCE_RECORD> *pListRecords);
-    static RESOURCE_RECORD getResourceRecord(quint32 nID1,QString sName2,QList<RESOURCE_RECORD> *pListRecords);
-    static RESOURCE_RECORD getResourceRecord(QString sName1,quint32 nID2,QList<RESOURCE_RECORD> *pListRecords);
-    static RESOURCE_RECORD getResourceRecord(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListRecords);
+    static RESOURCE_RECORD getResourceRecord(quint32 nID1,quint32 nID2,QList<RESOURCE_RECORD> *pListResourceRecords);
+    static RESOURCE_RECORD getResourceRecord(quint32 nID1,QString sName2,QList<RESOURCE_RECORD> *pListResourceRecords);
+    static RESOURCE_RECORD getResourceRecord(QString sName1,quint32 nID2,QList<RESOURCE_RECORD> *pListResourceRecords);
+    static RESOURCE_RECORD getResourceRecord(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListResourceRecords);
 
-    static bool isResourcePresent(quint32 nID1,quint32 nID2,QList<RESOURCE_RECORD> *pListHeaders);
-    static bool isResourcePresent(quint32 nID1,QString sName2,QList<RESOURCE_RECORD> *pListHeaders);
-    static bool isResourcePresent(QString sName1,quint32 nID2,QList<RESOURCE_RECORD> *pListHeaders);
-    static bool isResourcePresent(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListHeaders);
+    static bool isResourcePresent(quint32 nID1,quint32 nID2,QList<RESOURCE_RECORD> *pListResourceRecords);
+    static bool isResourcePresent(quint32 nID1,QString sName2,QList<RESOURCE_RECORD> *pListResourceRecords);
+    static bool isResourcePresent(QString sName1,quint32 nID2,QList<RESOURCE_RECORD> *pListResourceRecords);
+    static bool isResourcePresent(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListResourceRecords);
 
     bool isResourceManifestPresent();
     bool isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders);
