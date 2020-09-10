@@ -3156,9 +3156,9 @@ bool XPE::isResourceManifestPresent()
     return isResourceManifestPresent(&listResources);
 }
 
-bool XPE::isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders)
+bool XPE::isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
-    return isResourcePresent(XPE_DEF::S_RT_MANIFEST,-1,pListHeaders);
+    return isResourcePresent(XPE_DEF::S_RT_MANIFEST,-1,pListResourceRecords);
 }
 
 QString XPE::getResourceManifest()
@@ -3168,11 +3168,11 @@ QString XPE::getResourceManifest()
     return getResourceManifest(&listResources);
 }
 
-QString XPE::getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListRecords)
+QString XPE::getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     QString sResult;
 
-    RESOURCE_RECORD rh=getResourceRecord(XPE_DEF::S_RT_MANIFEST,-1,pListRecords);
+    RESOURCE_RECORD rh=getResourceRecord(XPE_DEF::S_RT_MANIFEST,-1,pListResourceRecords);
 
     if(rh.nOffset!=-1)
     {
@@ -3190,9 +3190,9 @@ bool XPE::isResourceVersionPresent()
     return isResourceVersionPresent(&listResources);
 }
 
-bool XPE::isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders)
+bool XPE::isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
-    return isResourcePresent(XPE_DEF::S_RT_VERSION,-1,pListHeaders);
+    return isResourcePresent(XPE_DEF::S_RT_VERSION,-1,pListResourceRecords);
 }
 
 XPE_DEF::S_VS_VERSION_INFO XPE::readVS_VERSION_INFO(qint64 nOffset)
@@ -3312,12 +3312,12 @@ XPE::RESOURCE_VERSION XPE::getResourceVersion()
     return getResourceVersion(&listRH);
 }
 
-XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders)
+XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     RESOURCE_VERSION result={};
     result.nFixedFileInfoOffset=-1;
 
-    RESOURCE_RECORD rh=getResourceRecord(XPE_DEF::S_RT_VERSION,-1,pListHeaders);
+    RESOURCE_RECORD rh=getResourceRecord(XPE_DEF::S_RT_VERSION,-1,pListResourceRecords);
 
     if(rh.nOffset!=-1)
     {
@@ -3506,13 +3506,13 @@ quint32 XPE::getResourceIdByNumber(quint32 nNumber)
     return getResourceIdByNumber(nNumber,&listResources);
 }
 
-quint32 XPE::getResourceIdByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pList)
+quint32 XPE::getResourceIdByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     quint32 nResult=0;
 
-    if((qint32)nNumber<pList->count())
+    if((qint32)nNumber<pListResourceRecords->count())
     {
-        nResult=pList->at(nNumber).irin[1].nID;
+        nResult=pListResourceRecords->at(nNumber).irin[1].nID;
     }
 
     return nResult;
@@ -3525,13 +3525,13 @@ QString XPE::getResourceNameByNumber(quint32 nNumber)
     return getResourceNameByNumber(nNumber,&listResources);
 }
 
-QString XPE::getResourceNameByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pList)
+QString XPE::getResourceNameByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     QString sResult;
 
-    if((qint32)nNumber<pList->count())
+    if((qint32)nNumber<pListResourceRecords->count())
     {
-        sResult=pList->at(nNumber).irin[1].sName;
+        sResult=pListResourceRecords->at(nNumber).irin[1].sName;
     }
 
     return sResult;
@@ -3544,13 +3544,13 @@ qint64 XPE::getResourceOffsetByNumber(quint32 nNumber)
     return getResourceOffsetByNumber(nNumber,&listResources);
 }
 
-qint64 XPE::getResourceOffsetByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pList)
+qint64 XPE::getResourceOffsetByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     qint64 nResult=-1;
 
-    if((qint32)nNumber<pList->count())
+    if((qint32)nNumber<pListResourceRecords->count())
     {
-        nResult=pList->at(nNumber).nOffset;
+        nResult=pListResourceRecords->at(nNumber).nOffset;
     }
 
     return nResult;
@@ -3563,13 +3563,13 @@ qint64 XPE::getResourceSizeByNumber(quint32 nNumber)
     return getResourceSizeByNumber(nNumber,&listResources);
 }
 
-qint64 XPE::getResourceSizeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pList)
+qint64 XPE::getResourceSizeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     qint64 nResult=0;
 
-    if((qint32)nNumber<pList->count())
+    if((qint32)nNumber<pListResourceRecords->count())
     {
-        nResult=pList->at(nNumber).nSize;
+        nResult=pListResourceRecords->at(nNumber).nSize;
     }
 
     return nResult;
@@ -3582,13 +3582,13 @@ quint32 XPE::getResourceTypeByNumber(quint32 nNumber)
     return getResourceTypeByNumber(nNumber,&listResources);
 }
 
-quint32 XPE::getResourceTypeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pList)
+quint32 XPE::getResourceTypeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     qint64 nResult=0;
 
-    if((qint32)nNumber<pList->count())
+    if((qint32)nNumber<pListResourceRecords->count())
     {
-        nResult=pList->at(nNumber).irin[0].nID;
+        nResult=pListResourceRecords->at(nNumber).irin[0].nID;
     }
 
     return nResult;

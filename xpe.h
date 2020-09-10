@@ -542,18 +542,18 @@ public:
     static bool isResourcePresent(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListResourceRecords);
 
     bool isResourceManifestPresent();
-    bool isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders);
+    bool isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     QString getResourceManifest();
-    QString getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListHeaders);
+    QString getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     bool isResourceVersionPresent();
-    bool isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListHeaders);
+    bool isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     RESOURCE_VERSION getResourceVersion();
     XPE_DEF::S_VS_VERSION_INFO readVS_VERSION_INFO(qint64 nOffset);
 
-    RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListHeaders);
+    RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     QString getFileVersion();
     QString getFileVersion(RESOURCE_VERSION *pResourceVersion);
@@ -576,15 +576,15 @@ public:
     static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion);
 
     quint32 getResourceIdByNumber(quint32 nNumber);
-    quint32 getResourceIdByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pList);
+    quint32 getResourceIdByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     QString getResourceNameByNumber(quint32 nNumber);
-    QString getResourceNameByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pList);
+    QString getResourceNameByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     qint64 getResourceOffsetByNumber(quint32 nNumber);
-    qint64 getResourceOffsetByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pList);
+    qint64 getResourceOffsetByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     qint64 getResourceSizeByNumber(quint32 nNumber);
-    qint64 getResourceSizeByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pList);
+    qint64 getResourceSizeByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     quint32 getResourceTypeByNumber(quint32 nNumber);
-    quint32 getResourceTypeByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pList);
+    quint32 getResourceTypeByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     qint64 getResourceNameOffset(QString sName);
     qint64 getResourceNameOffset(QString sName,QList<XPE::RESOURCE_RECORD> *pList);
