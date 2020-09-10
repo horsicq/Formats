@@ -573,7 +573,7 @@ public:
     void setFixedFileInfo_dwFileDateLS(quint32 nValue);
 
     QString getResourceVersionValue(QString sKey);
-    static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion);
+    static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResourceVersion);
 
     quint32 getResourceIdByNumber(quint32 nNumber);
     quint32 getResourceIdByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
@@ -587,9 +587,9 @@ public:
     quint32 getResourceTypeByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     qint64 getResourceNameOffset(QString sName);
-    qint64 getResourceNameOffset(QString sName,QList<XPE::RESOURCE_RECORD> *pList);
+    qint64 getResourceNameOffset(QString sName,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     bool isResourceNamePresent(QString sName);
-    bool isResourceNamePresent(QString sName,QList<XPE::RESOURCE_RECORD> *pList);
+    bool isResourceNamePresent(QString sName,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getBaseAddress();
@@ -665,8 +665,8 @@ public:
     void setRelocsSizeOfBlock(qint64 nOffset,quint32 nValue);
 
     bool addRelocsSection(QList<qint64> *pList);
-    bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pList);
-    bool addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pList);
+    bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pListRelocs);
+    bool addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pListRelocs);
     static QByteArray relocsAsRVAListToByteArray(QList<qint64> *pList,bool bIs64);
 
     bool isResourcesPresent();

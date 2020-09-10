@@ -3477,15 +3477,15 @@ QString XPE::getResourceVersionValue(QString sKey)
     return getResourceVersionValue(sKey,&resVersion);
 }
 
-QString XPE::getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResVersion)
+QString XPE::getResourceVersionValue(QString sKey, XPE::RESOURCE_VERSION *pResourceVersion)
 {
     QString sResult;
 
-    int nNumberOfRecords=pResVersion->listRecords.count();
+    int nNumberOfRecords=pResourceVersion->listRecords.count();
 
     for(int i=0; i<nNumberOfRecords; i++)
     {
-        QString sRecord=pResVersion->listRecords.at(i).section(".",3,-1);
+        QString sRecord=pResourceVersion->listRecords.at(i).section(".",3,-1);
         QString _sKey=sRecord.section(":",0,0);
 
         if(_sKey==sKey)
@@ -3601,17 +3601,17 @@ qint64 XPE::getResourceNameOffset(QString sName)
     return getResourceNameOffset(sName,&listResources);
 }
 
-qint64 XPE::getResourceNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pList)
+qint64 XPE::getResourceNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     qint64 nResult=-1;
 
-    int nNumberOfResources=pList->count();
+    int nNumberOfResources=pListResourceRecords->count();
 
     for(int i=0;i<nNumberOfResources;i++)
     {
-        if(pList->at(i).irin[1].sName==sName)
+        if(pListResourceRecords->at(i).irin[1].sName==sName)
         {
-            nResult=pList->at(i).nOffset;
+            nResult=pListResourceRecords->at(i).nOffset;
             break;
         }
     }
@@ -3626,9 +3626,9 @@ bool XPE::isResourceNamePresent(QString sName)
     return isResourceNamePresent(sName,&listResources);
 }
 
-bool XPE::isResourceNamePresent(QString sName, QList<XPE::RESOURCE_RECORD> *pList)
+bool XPE::isResourceNamePresent(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
-    return (getResourceNameOffset(sName,pList)!=-1);
+    return (getResourceNameOffset(sName,pListResourceRecords)!=-1);
 }
 
 XPE_DEF::IMAGE_IMPORT_DESCRIPTOR XPE::read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset)
@@ -8963,11 +8963,11 @@ bool XPE::addRelocsSection(QList<qint64> *pList)
     return addRelocsSection(getDevice(),isImage(),pList);
 }
 
-bool XPE::addRelocsSection(QIODevice *pDevice,bool bIsImage, QList<qint64> *pList)
+bool XPE::addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pListRelocs)
 {
     bool bResult=false;
 
-    if((isResizeEnable(pDevice))&&(pList->count()))
+    if((isResizeEnable(pDevice))&&(pListRelocs->count()))
     {
         XPE pe(pDevice,bIsImage);
 
@@ -8978,13 +8978,13 @@ bool XPE::addRelocsSection(QIODevice *pDevice,bool bIsImage, QList<qint64> *pLis
 
             QList<qint64> listRVAs;
 
-            int nNumberOfRelocs=pList->count();
+            int nNumberOfRelocs=pListRelocs->count();
 
             for(int i=0; i<nNumberOfRelocs; i++)
             {
-                if(pe.isAddressValid(&memoryMap,pList->at(i)+memoryMap.nBaseAddress))
+                if(pe.isAddressValid(&memoryMap,pListRelocs->at(i)+memoryMap.nBaseAddress))
                 {
-                    listRVAs.append(pList->at(i));
+                    listRVAs.append(pListRelocs->at(i));
                 }
             }
 
@@ -9015,7 +9015,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice,bool bIsImage, QList<qint64> *pLis
     return bResult;
 }
 
-bool XPE::addRelocsSection(QString sFileName,bool bIsImage, QList<qint64> *pList)
+bool XPE::addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pListRelocs)
 {
     bool bResult=false;
 
@@ -9023,7 +9023,7 @@ bool XPE::addRelocsSection(QString sFileName,bool bIsImage, QList<qint64> *pList
 
     if(file.open(QIODevice::ReadWrite))
     {
-        bResult=addRelocsSection(&file,bIsImage,pList);
+        bResult=addRelocsSection(&file,bIsImage,pListRelocs);
 
         file.close();
     }
