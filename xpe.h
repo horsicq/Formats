@@ -426,7 +426,6 @@ public:
     QByteArray getDataDirectory(_MEMORY_MAP *pMemoryMap,quint32 nNumber);
 
     qint64 getSectionsTableOffset();
-
     qint64 getSectionHeaderOffset(quint32 nNumber);
     qint64 getSectionHeaderSize();
 
