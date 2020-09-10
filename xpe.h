@@ -415,7 +415,6 @@ public:
     void setOptionalHeader_DataDirectory_Size(quint32 nNumber,quint32 nValue);
 
     void clearOptionalHeader_DataDirectory(quint32 nNumber);
-
     bool isOptionalHeader_DataDirectoryPresent(quint32 nNumber);
 
     QList<XPE_DEF::IMAGE_DATA_DIRECTORY> getDirectories();
