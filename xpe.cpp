@@ -4387,13 +4387,13 @@ XPE::RESOURCE_POSITION XPE::_getResourcePosition(XBinary::_MEMORY_MAP *pMemoryMa
 
     result.nOffset=nOffset;
     result.nLevel=nLevel;
-    result.dir_entry=read_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffset);
-    result.rin=getResourcesIDName(nResourceOffset,result.dir_entry.Name);
-    result.bIsDataDirectory=result.dir_entry.DataIsDirectory;
+    result.dirEntry=read_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffset);
+    result.rin=getResourcesIDName(nResourceOffset,result.dirEntry.Name);
+    result.bIsDataDirectory=result.dirEntry.DataIsDirectory;
 
     if(result.bIsDataDirectory)
     {
-        qint64 nDirectoryOffset=nResourceOffset+result.dir_entry.OffsetToDirectory;
+        qint64 nDirectoryOffset=nResourceOffset+result.dirEntry.OffsetToDirectory;
         result.directory=read_IMAGE_RESOURCE_DIRECTORY(nDirectoryOffset);
         nDirectoryOffset+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
 
@@ -4418,8 +4418,8 @@ XPE::RESOURCE_POSITION XPE::_getResourcePosition(XBinary::_MEMORY_MAP *pMemoryMa
     else
     {
         result.bIsValid=true;
-        result.data_entry=read_IMAGE_RESOURCE_DATA_ENTRY(nResourceOffset+result.dir_entry.OffsetToData);
-        result.nDataAddress=nBaseAddress+result.data_entry.OffsetToData;
+        result.dataEntry=read_IMAGE_RESOURCE_DATA_ENTRY(nResourceOffset+result.dirEntry.OffsetToData);
+        result.nDataAddress=nBaseAddress+result.dataEntry.OffsetToData;
         result.nDataOffset=addressToOffset(pMemoryMap,result.nDataAddress);
     }
 

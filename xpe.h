@@ -148,8 +148,8 @@ public:
         bool bIsDataDirectory;
         RESOURCES_ID_NAME rin;
         XPE_DEF::IMAGE_RESOURCE_DIRECTORY directory;
-        XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY dir_entry;
-        XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY data_entry;
+        XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY dirEntry;
+        XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY dataEntry;
         qint64 nDataAddress;
         qint64 nDataOffset;
         QList<RESOURCE_POSITION> listPositions;
