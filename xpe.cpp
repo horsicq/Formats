@@ -2593,15 +2593,15 @@ bool XPE::isImportLibraryPresentI(QString sLibrary)
     return isImportLibraryPresentI(sLibrary,&listImports);
 }
 
-bool XPE::isImportLibraryPresentI(QString sLibrary, QList<XPE::IMPORT_HEADER> *pListImport)
+bool XPE::isImportLibraryPresentI(QString sLibrary, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
 {
     bool bResult=false;
 
-    int nNumberOfImports=pListImport->count();
+    int nNumberOfImports=pListImportHeaders->count();
 
     for(int i=0; i<nNumberOfImports; i++)
     {
-        if(pListImport->at(i).sName.toUpper()==sLibrary.toUpper())
+        if(pListImportHeaders->at(i).sName.toUpper()==sLibrary.toUpper())
         {
             bResult=true;
             break;
@@ -2618,23 +2618,23 @@ bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction)
     return isImportFunctionPresentI(sLibrary,sFunction,&listImports);
 }
 
-bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction, QList<XPE::IMPORT_HEADER> *pListImport)
+bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
 {
     bool bResult=false;
 
     // TODO Optimize!
 
-    int nNumberOfImports=pListImport->count();
+    int nNumberOfImports=pListImportHeaders->count();
 
     for(int i=0; i<nNumberOfImports; i++)
     {
-        if(pListImport->at(i).sName.toUpper()==sLibrary.toUpper())
+        if(pListImportHeaders->at(i).sName.toUpper()==sLibrary.toUpper())
         {
-            int nNumberOfPositions=pListImport->at(i).listPositions.count();
+            int nNumberOfPositions=pListImportHeaders->at(i).listPositions.count();
 
             for(int j=0;j<nNumberOfPositions;j++)
             {
-                if(pListImport->at(i).listPositions.at(j).sFunction==sFunction)
+                if(pListImportHeaders->at(i).listPositions.at(j).sFunction==sFunction)
                 {
                     bResult=true;
                     break;

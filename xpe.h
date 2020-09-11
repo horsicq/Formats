@@ -515,10 +515,10 @@ public:
     QList<quint32> getImportPositionHashes(_MEMORY_MAP *pMemoryMap);
 
     bool isImportLibraryPresentI(QString sLibrary);
-    static bool isImportLibraryPresentI(QString sLibrary,QList<IMPORT_HEADER> *pListImport);
+    static bool isImportLibraryPresentI(QString sLibrary,QList<IMPORT_HEADER> *pListImportHeaders);
 
     bool isImportFunctionPresentI(QString sLibrary,QString sFunction);
-    static bool isImportFunctionPresentI(QString sLibrary,QString sFunction,QList<IMPORT_HEADER> *pListImport);
+    static bool isImportFunctionPresentI(QString sLibrary,QString sFunction,QList<IMPORT_HEADER> *pListImportHeaders);
 
     bool setImports(QList<IMPORT_HEADER> *pListHeaders);
     bool setImports(QIODevice *pDevice,bool bIsImage,QList<IMPORT_HEADER> *pListImportHeaders);
