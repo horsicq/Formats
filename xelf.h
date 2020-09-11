@@ -274,7 +274,7 @@ public:
     void setElf64_Shdr_entsize(quint32 nIndex,quint64 nValue);
 
     quint32 getElf_Shdr_name(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    quint32 getElf_Shdr_type(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+    quint32 getElf_Shdr_type(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
     quint64 getElf_Shdr_flags(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
     quint64 getElf_Shdr_addr(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
     quint64 getElf_Shdr_offset(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);

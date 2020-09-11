@@ -2025,13 +2025,13 @@ quint32 XELF::getElf_Shdr_name(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListS
     return nResult;
 }
 
-quint32 XELF::getElf_Shdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList)
+quint32 XELF::getElf_Shdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
 {
     quint32 nResult=0;
 
-    if(nIndex<(quint32)pList->count())
+    if(nIndex<(quint32)pListSectionHeaders->count())
     {
-        nResult=pList->at(nIndex).sh_type;
+        nResult=pListSectionHeaders->at(nIndex).sh_type;
     }
 
     return nResult;
