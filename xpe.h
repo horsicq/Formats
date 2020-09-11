@@ -521,7 +521,7 @@ public:
     static bool isImportFunctionPresentI(QString sLibrary,QString sFunction,QList<IMPORT_HEADER> *pListImport);
 
     bool setImports(QList<IMPORT_HEADER> *pListHeaders);
-    bool setImports(QIODevice *pDevice,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
+    bool setImports(QIODevice *pDevice,bool bIsImage,QList<IMPORT_HEADER> *pListImportHeaders);
     bool setImports(QString sFileName,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
 
     QString getImportFunctionName(quint32 nImport,quint32 nFunctionNumber,QList<IMPORT_HEADER> *pListHeaders);
