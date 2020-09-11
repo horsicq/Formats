@@ -4431,7 +4431,7 @@ void XPE::fixCheckSum()
     setOptionalHeader_CheckSum(calculateCheckSum());
 }
 
-QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_DEF::IMAGE_SECTION_HEADER shOriginal, quint32 nBlockSize)
+QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_DEF::IMAGE_SECTION_HEADER sectionHeaderOriginal, quint32 nBlockSize)
 {
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listResult;
     //    int nBlockSize=0x1000;
@@ -4441,7 +4441,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
     int nCount=nSize/nBlockSize;
 //    quint64 nVirtualAddress=shOriginal.VirtualAddress;
     qint64 nRelVirtualStart=0;
-    qint64 nRelVirtualEnd=S_ALIGN_UP(shOriginal.Misc.VirtualSize,nBlockSize);
+    qint64 nRelVirtualEnd=S_ALIGN_UP(sectionHeaderOriginal.Misc.VirtualSize,nBlockSize);
     qint64 nRelCurrent=nRelVirtualStart;
 
     if(nCount>1)
@@ -4461,12 +4461,12 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
 
         if(pOffset!=pOffsetStart)
         {
-            XPE_DEF::IMAGE_SECTION_HEADER sh=shOriginal;
+            XPE_DEF::IMAGE_SECTION_HEADER sectionHeader=sectionHeaderOriginal;
 //            sh.VirtualAddress=nVirtualAddress;
             //            sh.Misc.VirtualSize=pOffset-pOffsetStart;
-            sh.Misc.VirtualSize=nRelCurrent-nRelVirtualStart;
-            sh.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
-            listResult.append(sh);
+            sectionHeader.Misc.VirtualSize=nRelCurrent-nRelVirtualStart;
+            sectionHeader.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,sectionHeader.Misc.VirtualSize);
+            listResult.append(sectionHeader);
 
 //            nVirtualAddress+=sh.Misc.VirtualSize;
         }
@@ -4485,12 +4485,12 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
             {
                 if(bNew)
                 {
-                    XPE_DEF::IMAGE_SECTION_HEADER sh=shOriginal;
+                    XPE_DEF::IMAGE_SECTION_HEADER sectionHeader=sectionHeaderOriginal;
 //                    sh.VirtualAddress=nVirtualAddress;
                     //                    sh.Misc.VirtualSize=pOffset-pOffsetStart;
-                    sh.Misc.VirtualSize=nRelCurrent-nRelVirtualStart;
-                    sh.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,sh.Misc.VirtualSize);
-                    listResult.append(sh);
+                    sectionHeader.Misc.VirtualSize=nRelCurrent-nRelVirtualStart;
+                    sectionHeader.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,sectionHeader.Misc.VirtualSize);
+                    listResult.append(sectionHeader);
 
 //                    nVirtualAddress+=sh.Misc.VirtualSize;
 
@@ -4507,15 +4507,15 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
 
         if(pOffset!=pOffsetStart)
         {
-            XPE_DEF::IMAGE_SECTION_HEADER sh=shOriginal;
+            XPE_DEF::IMAGE_SECTION_HEADER sectionHeader=sectionHeaderOriginal;
 //            sh.VirtualAddress=nVirtualAddress;
             //            sh.Misc.VirtualSize=pOffset-pOffsetStart;
-            sh.Misc.VirtualSize=nRelVirtualEnd-nRelVirtualStart;
-            sh.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,nSize-(pOffsetStart-pbaData->data()));
+            sectionHeader.Misc.VirtualSize=nRelVirtualEnd-nRelVirtualStart;
+            sectionHeader.SizeOfRawData=(quint32)XBinary::getPhysSize(pOffsetStart,nSize-(pOffsetStart-pbaData->data()));
 
-            if(sh.Misc.VirtualSize)
+            if(sectionHeader.Misc.VirtualSize)
             {
-                listResult.append(sh);
+                listResult.append(sectionHeader);
             }
 
 //            nVirtualAddress+=sh.Misc.VirtualSize;
@@ -4523,7 +4523,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
     }
     else
     {
-        listResult.append(shOriginal);
+        listResult.append(sectionHeaderOriginal);
     }
 
     return listResult;
