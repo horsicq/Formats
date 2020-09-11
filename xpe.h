@@ -522,7 +522,7 @@ public:
 
     bool setImports(QList<IMPORT_HEADER> *pListHeaders);
     bool setImports(QIODevice *pDevice,bool bIsImage,QList<IMPORT_HEADER> *pListImportHeaders);
-    bool setImports(QString sFileName,bool bIsImage,QList<IMPORT_HEADER> *pListHeaders);
+    bool setImports(QString sFileName,bool bIsImage,QList<IMPORT_HEADER> *pListImportHeaders);
 
     QString getImportFunctionName(quint32 nImport,quint32 nFunctionNumber,QList<IMPORT_HEADER> *pListHeaders);
 

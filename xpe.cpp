@@ -2858,7 +2858,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
     return bResult;
 }
 
-bool XPE::setImports(QString sFileName,bool bIsImage,QList<XPE::IMPORT_HEADER> *pListHeaders)
+bool XPE::setImports(QString sFileName, bool bIsImage, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
 {
     bool bResult=false;
 
@@ -2866,7 +2866,7 @@ bool XPE::setImports(QString sFileName,bool bIsImage,QList<XPE::IMPORT_HEADER> *
 
     if(file.open(QIODevice::ReadWrite))
     {
-        bResult=setImports(&file,bIsImage,pListHeaders);
+        bResult=setImports(&file,bIsImage,pListImportHeaders);
 
         file.close();
     }
