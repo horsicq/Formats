@@ -1155,15 +1155,15 @@ QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_H
     return listResult;
 }
 
-QList<QString> XPE::getSectionNames(QList<XPE::SECTION_RECORD> *pList)
+QList<QString> XPE::getSectionNames(QList<XPE::SECTION_RECORD> *pListSectionRecords)
 {
     QList<QString> listResult;
 
-    int nNumberOfSections=pList->count();
+    int nNumberOfSections=pListSectionRecords->count();
 
     for(int i=0; i<nNumberOfSections; i++)
     {
-        listResult.append(pList->at(i).sName);
+        listResult.append(pListSectionRecords->at(i).sName);
     }
 
     return listResult;
