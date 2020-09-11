@@ -1123,31 +1123,31 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders()
     return listResult;
 }
 
-QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pList, bool bIsImage)
+QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders, bool bIsImage)
 {
     QList<XPE::SECTION_RECORD> listResult;
 
-    int nNumberOfSections=pList->count();
+    int nNumberOfSections=pListSectionHeaders->count();
 
     for(int i=0; i<nNumberOfSections; i++)
     {
         XPE::SECTION_RECORD record={};
 
-        record.sName=QString((char *)pList->at(i).Name);
+        record.sName=QString((char *)pListSectionHeaders->at(i).Name);
         record.sName.resize(qMin(record.sName.length(),XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
 
         if(bIsImage)
         {
-            record.nOffset=pList->at(i).VirtualAddress;
+            record.nOffset=pListSectionHeaders->at(i).VirtualAddress;
         }
         else
         {
-            record.nOffset=pList->at(i).PointerToRawData;
+            record.nOffset=pListSectionHeaders->at(i).PointerToRawData;
         }
-        record.nRVA=pList->at(i).VirtualAddress;
+        record.nRVA=pListSectionHeaders->at(i).VirtualAddress;
 
-        record.nSize=pList->at(i).SizeOfRawData;
-        record.nCharacteristics=pList->at(i).Characteristics;
+        record.nSize=pListSectionHeaders->at(i).SizeOfRawData;
+        record.nCharacteristics=pListSectionHeaders->at(i).Characteristics;
 
         listResult.append(record);
     }
