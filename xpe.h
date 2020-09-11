@@ -524,7 +524,7 @@ public:
     bool setImports(QIODevice *pDevice,bool bIsImage,QList<IMPORT_HEADER> *pListImportHeaders);
     bool setImports(QString sFileName,bool bIsImage,QList<IMPORT_HEADER> *pListImportHeaders);
 
-    QString getImportFunctionName(quint32 nImport,quint32 nFunctionNumber,QList<IMPORT_HEADER> *pListHeaders);
+    QString getImportFunctionName(quint32 nImport,quint32 nFunctionNumber,QList<IMPORT_HEADER> *pListImportHeaders);
 
     RESOURCE_HEADER getResourceHeader();
     RESOURCE_HEADER getResourceHeader(_MEMORY_MAP *pMemoryMap);

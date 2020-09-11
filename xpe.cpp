@@ -2874,15 +2874,15 @@ bool XPE::setImports(QString sFileName, bool bIsImage, QList<XPE::IMPORT_HEADER>
     return bResult;
 }
 
-QString XPE::getImportFunctionName(quint32 nImport, quint32 nFunctionNumber, QList<XPE::IMPORT_HEADER> *pListHeaders)
+QString XPE::getImportFunctionName(quint32 nImport, quint32 nFunctionNumber, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
 {
     QString sResult;
 
-    if(nImport<(quint32)pListHeaders->count())
+    if(nImport<(quint32)pListImportHeaders->count())
     {
-        if(nFunctionNumber<(quint32)pListHeaders->at(nImport).listPositions.count())
+        if(nFunctionNumber<(quint32)pListImportHeaders->at(nImport).listPositions.count())
         {
-            sResult=pListHeaders->at(nImport).listPositions.at(nFunctionNumber).sFunction;
+            sResult=pListImportHeaders->at(nImport).listPositions.at(nFunctionNumber).sFunction;
         }
     }
 
