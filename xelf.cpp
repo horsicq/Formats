@@ -2846,13 +2846,13 @@ quint64 XELF::getElf_Phdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pLis
     return nResult;
 }
 
-quint64 XELF::getElf_Phdr_vaddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList)
+quint64 XELF::getElf_Phdr_vaddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     quint64 nResult=0;
 
-    if(nIndex<(quint32)pList->count())
+    if(nIndex<(quint32)pListProgramHeaders->count())
     {
-        nResult=pList->at(nIndex).p_vaddr;
+        nResult=pListProgramHeaders->at(nIndex).p_vaddr;
     }
 
     return nResult;
