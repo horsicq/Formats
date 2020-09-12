@@ -2085,13 +2085,13 @@ quint64 XELF::getElf_Shdr_size(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListS
     return nResult;
 }
 
-quint32 XELF::getElf_Shdr_link(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList)
+quint32 XELF::getElf_Shdr_link(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
 {
     quint32 nResult=0;
 
-    if(nIndex<(quint32)pList->count())
+    if(nIndex<(quint32)pListSectionHeaders->count())
     {
-        nResult=pList->at(nIndex).sh_link;
+        nResult=pListSectionHeaders->at(nIndex).sh_link;
     }
 
     return nResult;
