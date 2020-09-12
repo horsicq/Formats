@@ -2822,13 +2822,13 @@ void XELF::setElf64_Phdr_align(quint32 nIndex, quint64 nValue)
     }
 }
 
-quint32 XELF::getElf_Phdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList)
+quint32 XELF::getElf_Phdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     quint32 nResult=0;
 
-    if(nIndex<(quint32)pList->count())
+    if(nIndex<(quint32)pListProgramHeaders->count())
     {
-        nResult=pList->at(nIndex).p_type;
+        nResult=pListProgramHeaders->at(nIndex).p_type;
     }
 
     return nResult;
