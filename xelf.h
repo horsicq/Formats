@@ -282,7 +282,7 @@ public:
     quint32 getElf_Shdr_link(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
     quint32 getElf_Shdr_info(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
     quint64 getElf_Shdr_addralign(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    quint64 getElf_Shdr_entsize(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pList);
+    quint64 getElf_Shdr_entsize(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
 
     qint64 getShdrOffset(quint32 nIndex);
     qint64 getShdrSize();
