@@ -2049,13 +2049,13 @@ quint64 XELF::getElf_Shdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList
     return nResult;
 }
 
-quint64 XELF::getElf_Shdr_addr(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList)
+quint64 XELF::getElf_Shdr_addr(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
 {
     quint64 nResult=0;
 
-    if(nIndex<(quint32)pList->count())
+    if(nIndex<(quint32)pListSectionHeaders->count())
     {
-        nResult=pList->at(nIndex).sh_addr;
+        nResult=pListSectionHeaders->at(nIndex).sh_addr;
     }
 
     return nResult;
