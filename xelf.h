@@ -376,7 +376,7 @@ public:
     OFFSETSIZE getStringTable(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
     QList<QString> getLibraries();
-    QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
+    QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
     OS_ANSISTRING getRunPath();
     OS_ANSISTRING getRunPath(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
