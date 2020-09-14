@@ -373,7 +373,7 @@ public:
     void setDynamicArrayValue(qint64 nOffset,qint64 nValue);
 
     OFFSETSIZE getStringTable();
-    OFFSETSIZE getStringTable(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
+    OFFSETSIZE getStringTable(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
     QList<QString> getLibraries();
     QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
