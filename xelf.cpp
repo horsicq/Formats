@@ -3164,14 +3164,14 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs()
     return getTagStructs(&_listPhdr,&memoryMap);
 }
 
-QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pPhdrList,XBinary::_MEMORY_MAP *pMemoryMap)
+QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, XBinary::_MEMORY_MAP *pMemoryMap)
 {
     QList<TAG_STRUCT> listResult;
 
     bool bIs64=is64();
     bool bIsBigEndian=isBigEndian();
 
-    QList<XELF_DEF::Elf_Phdr> listTags=_getPrograms(pPhdrList,XELF_DEF::S_PT_DYNAMIC);
+    QList<XELF_DEF::Elf_Phdr> listTags=_getPrograms(pListProgramHeaders,XELF_DEF::S_PT_DYNAMIC);
 
     int nNumberOfTags=listTags.count();
 
