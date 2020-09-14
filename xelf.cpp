@@ -3020,11 +3020,11 @@ XBinary::OS_ANSISTRING XELF::getProgramInterpreterName()
     return getProgramInterpreterName(&_listPhdr);
 }
 
-XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pPhdrList)
+XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     OS_ANSISTRING result={};
 
-    QList<XELF_DEF::Elf_Phdr> listInterps=_getPrograms(pPhdrList,XELF_DEF::S_PT_INTERP);
+    QList<XELF_DEF::Elf_Phdr> listInterps=_getPrograms(pListProgramHeaders,XELF_DEF::S_PT_INTERP);
 
     if(listInterps.count())
     {

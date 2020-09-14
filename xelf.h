@@ -349,7 +349,7 @@ public:
     QByteArray getSectionByName(QString sSectionName);
 
     OS_ANSISTRING getProgramInterpreterName();
-    OS_ANSISTRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pPhdrList);
+    OS_ANSISTRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
     QString getCommentString(); // TODO remove
     QList<QString> getCommentStrings();
 
