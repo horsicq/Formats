@@ -3409,13 +3409,13 @@ XBinary::OS_ANSISTRING XELF::getRunPath()
     return getRunPath(&memoryMap,&listStructs);
 }
 
-XBinary::OS_ANSISTRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pList)
+XBinary::OS_ANSISTRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs)
 {
     OS_ANSISTRING result={};
 
-    QList<XELF::TAG_STRUCT> listRunPath=XELF::_getTagStructs(pList,XELF_DEF::S_DT_RUNPATH);
-    QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
-    QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
+    QList<XELF::TAG_STRUCT> listRunPath=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_RUNPATH);
+    QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRTAB);
+    QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRSZ);
 
     if(listStrTab.count()&&listStrSize.count()&&listRunPath.count())
     {

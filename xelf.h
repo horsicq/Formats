@@ -379,7 +379,7 @@ public:
     QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
     OS_ANSISTRING getRunPath();
-    OS_ANSISTRING getRunPath(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pList);
+    OS_ANSISTRING getRunPath(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
