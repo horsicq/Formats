@@ -340,7 +340,7 @@ public:
     quint64 getElf_Phdr_filesz(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
     quint64 getElf_Phdr_memsz(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
     quint32 getElf_Phdr_flags(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    quint64 getElf_Phdr_align(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pList);
+    quint64 getElf_Phdr_align(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
 
     qint64 getPhdrOffset(quint32 nIndex);
     qint64 getPhdrSize();

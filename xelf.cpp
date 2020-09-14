@@ -2906,13 +2906,13 @@ quint32 XELF::getElf_Phdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
     return nResult;
 }
 
-quint64 XELF::getElf_Phdr_align(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList)
+quint64 XELF::getElf_Phdr_align(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     quint64 nResult=0;
 
-    if(nIndex<(quint32)pList->count())
+    if(nIndex<(quint32)pListProgramHeaders->count())
     {
-        nResult=pList->at(nIndex).p_align;
+        nResult=pListProgramHeaders->at(nIndex).p_align;
     }
 
     return nResult;
