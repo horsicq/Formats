@@ -4131,19 +4131,19 @@ QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> 
     return listResult;
 }
 
-QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pList)
+QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs)
 {
     QList<XBinary::DATASET> listResult;
 
-    QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRTAB);
-    QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_STRSZ);
-    QList<XELF::TAG_STRUCT> listStrNeeded=XELF::_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
-    QList<XELF::TAG_STRUCT> listRunPath=XELF::_getTagStructs(pList,0x1d); // TODO const
-    QList<XELF::TAG_STRUCT> listSymbols=XELF::_getTagStructs(pList,XELF_DEF::S_DT_SYMTAB);
-    QList<XELF::TAG_STRUCT> listRelaTab=XELF::_getTagStructs(pList,XELF_DEF::S_DT_RELA);
-    QList<XELF::TAG_STRUCT> listRelaSize=XELF::_getTagStructs(pList,XELF_DEF::S_DT_RELASZ);
-    QList<XELF::TAG_STRUCT> listRelTab=XELF::_getTagStructs(pList,17);  // TODO const
-    QList<XELF::TAG_STRUCT> listRelSize=XELF::_getTagStructs(pList,18); // TODO const
+    QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRTAB);
+    QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRSZ);
+    QList<XELF::TAG_STRUCT> listStrNeeded=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_NEEDED);
+    QList<XELF::TAG_STRUCT> listRunPath=XELF::_getTagStructs(pListTagStructs,0x1d); // TODO const
+    QList<XELF::TAG_STRUCT> listSymbols=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_SYMTAB);
+    QList<XELF::TAG_STRUCT> listRelaTab=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_RELA);
+    QList<XELF::TAG_STRUCT> listRelaSize=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_RELASZ);
+    QList<XELF::TAG_STRUCT> listRelTab=XELF::_getTagStructs(pListTagStructs,17);  // TODO const
+    QList<XELF::TAG_STRUCT> listRelSize=XELF::_getTagStructs(pListTagStructs,18); // TODO const
 
     qint64 nStringTableOffset=0;
     qint64 nStringTableSize=0;
