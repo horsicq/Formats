@@ -3823,17 +3823,17 @@ qint32 XELF::getSectionNumber(QString sSectionName, QList<XELF::SECTION_RECORD> 
     return nResult;
 }
 
-XELF::SECTION_RECORD XELF::getSectionRecord(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSections)
+XELF::SECTION_RECORD XELF::getSectionRecord(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
 {
     SECTION_RECORD result={};
 
-    int nNumberOfSections=pListSections->count();
+    int nNumberOfSections=pListSectionRecords->count();
 
     for(int i=0; i<nNumberOfSections; i++)
     {
-        if(pListSections->at(i).sName==sSectionName)
+        if(pListSectionRecords->at(i).sName==sSectionName)
         {
-            result=pListSections->at(i);
+            result=pListSectionRecords->at(i);
             break;
         }
     }

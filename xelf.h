@@ -389,7 +389,7 @@ public:
     static bool isSectionNamePresent(QString sSectionName,QList<SECTION_RECORD> *pListSectionRecords);
     qint32 getSectionNumber(QString sSectionName);
     static qint32 getSectionNumber(QString sSectionName,QList<SECTION_RECORD> *pListSections);
-    static SECTION_RECORD getSectionRecord(QString sSectionName,QList<SECTION_RECORD> *pListSections);
+    static SECTION_RECORD getSectionRecord(QString sSectionName,QList<SECTION_RECORD> *pListSectionRecords);
 
     virtual MODE getMode();
     virtual QString getArch();
