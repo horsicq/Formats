@@ -362,7 +362,7 @@ public:
     QList<TAG_STRUCT> getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders,_MEMORY_MAP *pMemoryMap);
     QList<TAG_STRUCT> _getTagStructs(qint64 nOffset, qint64 nSize, bool bIs64, bool bIsBigEndian);
 
-    static QList<TAG_STRUCT> _getTagStructs(QList<TAG_STRUCT> *pList, qint64 nTag);
+    static QList<TAG_STRUCT> _getTagStructs(QList<TAG_STRUCT> *pListTagStructs, qint64 nTag);
 
     qint64 getDynamicArraySize();
 

@@ -3226,17 +3226,17 @@ QList<XELF::TAG_STRUCT> XELF::_getTagStructs(qint64 nOffset, qint64 nSize, bool 
     return listResult;
 }
 
-QList<XELF::TAG_STRUCT> XELF::_getTagStructs(QList<XELF::TAG_STRUCT> *pList,qint64 nTag)
+QList<XELF::TAG_STRUCT> XELF::_getTagStructs(QList<XELF::TAG_STRUCT> *pListTagStructs, qint64 nTag)
 {
     QList<XELF::TAG_STRUCT> listResult;
 
-    int nNumberOfTags=pList->count();
+    int nNumberOfTags=pListTagStructs->count();
 
     for(int i=0;i<nNumberOfTags;i++)
     {
-        if(pList->at(i).nTag==nTag)
+        if(pListTagStructs->at(i).nTag==nTag)
         {
-            listResult.append(pList->at(i));
+            listResult.append(pListTagStructs->at(i));
         }
     }
 
