@@ -3081,11 +3081,11 @@ QList<XELF::NOTE> XELF::getNotes()
 //    return sResult;
 //}
 
-QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pPhdrList)
+QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     QList<XELF::NOTE> listResult;
 
-    QList<XELF_DEF::Elf_Phdr> listNotes=_getPrograms(pPhdrList,XELF_DEF::S_PT_NOTE);
+    QList<XELF_DEF::Elf_Phdr> listNotes=_getPrograms(pListProgramHeaders,XELF_DEF::S_PT_NOTE);
 
     bool bIsBigEndian=isBigEndian();
 

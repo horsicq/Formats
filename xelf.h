@@ -354,7 +354,7 @@ public:
     QList<QString> getCommentStrings();
 
     QList<NOTE> getNotes();
-    QList<NOTE> getNotes(QList<XELF_DEF::Elf_Phdr> *pPhdrList);
+    QList<NOTE> getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
     QList<NOTE> _getNotes(qint64 nOffset,qint64 nSize,bool bIsBigEndian);
     NOTE _readNote(qint64 nOffset,qint64 nSize,bool bIsBigEndian);
 
