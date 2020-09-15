@@ -401,7 +401,7 @@ public:
 
     QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType);
 
-    QList<DATASET> getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pList);
+    QList<DATASET> getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
     QList<DATASET> getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
     QList<DATASET> getDatasetsFromTagStructs(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 

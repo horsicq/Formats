@@ -3947,7 +3947,7 @@ QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pListPro
     return listResult;
 }
 
-QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pList)
+QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
 {
     QList<XBinary::DATASET> listResult;
 
@@ -3955,31 +3955,31 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
 
     XBinary::OFFSETSIZE osStringTable=getSectionOffsetSize(nMainStringSection);
 
-    int nNumberOfSections=pList->count();
+    int nNumberOfSections=pListSectionHeaders->count();
 
     for(int i=0;i<nNumberOfSections;i++)
     {
-        QString sSectionName=getStringFromIndex(osStringTable.nOffset,osStringTable.nSize,pList->at(i).sh_name);
+        QString sSectionName=getStringFromIndex(osStringTable.nOffset,osStringTable.nSize,pListSectionHeaders->at(i).sh_name);
 
-        if((pList->at(i).sh_type==1)&&(sSectionName==".interp")) // Interpreter TODO const
+        if((pListSectionHeaders->at(i).sh_type==1)&&(sSectionName==".interp")) // Interpreter TODO const
         {
             DATASET dataset={};
 
-            dataset.nAddress=pList->at(i).sh_addr;
-            dataset.nOffset=pList->at(i).sh_offset;
-            dataset.nSize=pList->at(i).sh_size;
+            dataset.nAddress=pListSectionHeaders->at(i).sh_addr;
+            dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
+            dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_INTERPRETER;
             dataset.sName=QString("%1[%2]").arg("Interpreter").arg(sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
-        else if(pList->at(i).sh_type==2) // Symbol table TODO const
+        else if(pListSectionHeaders->at(i).sh_type==2) // Symbol table TODO const
         {
             DATASET dataset={};
 
-            dataset.nAddress=pList->at(i).sh_addr;
-            dataset.nOffset=pList->at(i).sh_offset;
-            dataset.nSize=pList->at(i).sh_size;
+            dataset.nAddress=pListSectionHeaders->at(i).sh_addr;
+            dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
+            dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_SYMBOLTABLE;
             dataset.sName=QString("%1[%2]").arg("Symbol table").arg(sSectionName); // TODO mb translate
 
@@ -3995,13 +3995,13 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
 
             listResult.append(dataset);
         }
-        else if(pList->at(i).sh_type==0xb) // Symbol table dynamic TODO const
+        else if(pListSectionHeaders->at(i).sh_type==0xb) // Symbol table dynamic TODO const
         {
             DATASET dataset={};
 
-            dataset.nAddress=pList->at(i).sh_addr;
-            dataset.nOffset=pList->at(i).sh_offset;
-            dataset.nSize=pList->at(i).sh_size;
+            dataset.nAddress=pListSectionHeaders->at(i).sh_addr;
+            dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
+            dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_SYMBOLTABLE;
             dataset.sName=QString("%1[%2]").arg("Symbol table").arg(sSectionName); // TODO mb translate
 
@@ -4017,61 +4017,61 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
 
             listResult.append(dataset);
         }
-        else if(pList->at(i).sh_type==3) // String table TODO const
+        else if(pListSectionHeaders->at(i).sh_type==3) // String table TODO const
         {
             DATASET dataset={};
 
-            dataset.nAddress=pList->at(i).sh_addr;
-            dataset.nOffset=pList->at(i).sh_offset;
-            dataset.nSize=pList->at(i).sh_size;
+            dataset.nAddress=pListSectionHeaders->at(i).sh_addr;
+            dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
+            dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_STRINGTABLE;
             dataset.sName=QString("%1[%2]").arg("String table").arg(sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
-        else if(pList->at(i).sh_type==4) // RELA TODO const
+        else if(pListSectionHeaders->at(i).sh_type==4) // RELA TODO const
         {
             DATASET dataset={};
 
-            dataset.nAddress=pList->at(i).sh_addr;
-            dataset.nOffset=pList->at(i).sh_offset;
-            dataset.nSize=pList->at(i).sh_size;
+            dataset.nAddress=pListSectionHeaders->at(i).sh_addr;
+            dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
+            dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_RELA;
             dataset.sName=QString("%1[%2]").arg("RELA").arg(sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
-        else if(pList->at(i).sh_type==6) // Dynamic TODO const
+        else if(pListSectionHeaders->at(i).sh_type==6) // Dynamic TODO const
         {
             DATASET dataset={};
 
-            dataset.nAddress=pList->at(i).sh_addr;
-            dataset.nOffset=pList->at(i).sh_offset;
-            dataset.nSize=pList->at(i).sh_size;
+            dataset.nAddress=pListSectionHeaders->at(i).sh_addr;
+            dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
+            dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_DYNAMICTAGS;
             dataset.sName=QString("%1[%2]").arg("Dynamic tags").arg(sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
-        else if(pList->at(i).sh_type==7) // Notes TODO const
+        else if(pListSectionHeaders->at(i).sh_type==7) // Notes TODO const
         {
             DATASET dataset={};
 
-            dataset.nAddress=pList->at(i).sh_addr;
-            dataset.nOffset=pList->at(i).sh_offset;
-            dataset.nSize=pList->at(i).sh_size;
+            dataset.nAddress=pListSectionHeaders->at(i).sh_addr;
+            dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
+            dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_NOTES;
             dataset.sName=QString("%1[%2]").arg("Notes").arg(sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
-        else if(pList->at(i).sh_type==9) // REL TODO const
+        else if(pListSectionHeaders->at(i).sh_type==9) // REL TODO const
         {
             DATASET dataset={};
 
-            dataset.nAddress=pList->at(i).sh_addr;
-            dataset.nOffset=pList->at(i).sh_offset;
-            dataset.nSize=pList->at(i).sh_size;
+            dataset.nAddress=pListSectionHeaders->at(i).sh_addr;
+            dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
+            dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_REL;
             dataset.sName=QString("%1[%2]").arg("REL").arg(sSectionName); // TODO mb translate
 
