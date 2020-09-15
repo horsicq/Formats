@@ -3930,17 +3930,17 @@ void XELF::setBaseAddress(qint64 nValue)
     //  TODO
 }
 
-QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pList, quint32 nType)
+QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType)
 {
     QList<XELF_DEF::Elf_Phdr> listResult;
 
-    int nNumberOfPrograms=pList->count();
+    int nNumberOfPrograms=pListProgramHeaders->count();
 
     for(int i=0;i<nNumberOfPrograms;i++)
     {
-        if(pList->at(i).p_type==nType)
+        if(pListProgramHeaders->at(i).p_type==nType)
         {
-            listResult.append(pList->at(i));
+            listResult.append(pListProgramHeaders->at(i));
         }
     }
 
