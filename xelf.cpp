@@ -3729,32 +3729,32 @@ qint64 XELF::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
     return addressToOffset(pMemoryMap,nAddress);
 }
 
-QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pList, bool bIsImage, QByteArray *pbaSectionTable)
+QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, bool bIsImage, QByteArray *pbaSectionTable)
 {
     QList<SECTION_RECORD> listRecords;
 
-    int nNumberOfSections=pList->count();
+    int nNumberOfSections=pListSectionHeaders->count();
     quint32 nSectionTableSize=pbaSectionTable->size();
 
     for(int i=0;i<nNumberOfSections;i++)
     {
         SECTION_RECORD record={};
 
-        record.nSize=pList->at(i).sh_size;
-        record.nFlags=pList->at(i).sh_flags;
+        record.nSize=pListSectionHeaders->at(i).sh_size;
+        record.nFlags=pListSectionHeaders->at(i).sh_flags;
 
         if(bIsImage)
         {
-            record.nOffset=pList->at(i).sh_addr;
+            record.nOffset=pListSectionHeaders->at(i).sh_addr;
         }
         else
         {
-            record.nOffset=pList->at(i).sh_offset;
+            record.nOffset=pListSectionHeaders->at(i).sh_offset;
         }
 
-        if(pList->at(i).sh_name<nSectionTableSize)
+        if(pListSectionHeaders->at(i).sh_name<nSectionTableSize)
         {
-            record.sName=pbaSectionTable->data()+pList->at(i).sh_name;
+            record.sName=pbaSectionTable->data()+pListSectionHeaders->at(i).sh_name;
         }
 
         listRecords.append(record);
@@ -4082,45 +4082,45 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
     return listResult;
 }
 
-QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pList)
+QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     QList<XBinary::DATASET> listResult;
 
-    int nNumberOfPrograms=pList->count();
+    int nNumberOfPrograms=pListProgramHeaders->count();
 
     for(int i=0;i<nNumberOfPrograms;i++)
     {
-        if((pList->at(i).p_type==3)) // Interpreter TODO const
+        if((pListProgramHeaders->at(i).p_type==3)) // Interpreter TODO const
         {
             DATASET dataset={};
 
-            dataset.nAddress=pList->at(i).p_vaddr;
-            dataset.nOffset=pList->at(i).p_offset;
-            dataset.nSize=pList->at(i).p_filesz;
+            dataset.nAddress=pListProgramHeaders->at(i).p_vaddr;
+            dataset.nOffset=pListProgramHeaders->at(i).p_offset;
+            dataset.nSize=pListProgramHeaders->at(i).p_filesz;
             dataset.nType=DS_INTERPRETER;
             dataset.sName=QString("%1").arg("Interpreter"); // TODO mb translate
 
             listResult.append(dataset);
         }
-        else if((pList->at(i).p_type==4)) // Notes TODO const
+        else if((pListProgramHeaders->at(i).p_type==4)) // Notes TODO const
         {
             DATASET dataset={};
 
-            dataset.nAddress=pList->at(i).p_vaddr;
-            dataset.nOffset=pList->at(i).p_offset;
-            dataset.nSize=pList->at(i).p_filesz;
+            dataset.nAddress=pListProgramHeaders->at(i).p_vaddr;
+            dataset.nOffset=pListProgramHeaders->at(i).p_offset;
+            dataset.nSize=pListProgramHeaders->at(i).p_filesz;
             dataset.nType=DS_NOTES;
             dataset.sName=QString("%1").arg("Notes"); // TODO mb translate
 
             listResult.append(dataset);
         }
-        else if((pList->at(i).p_type==2)) // Tags TODO const
+        else if((pListProgramHeaders->at(i).p_type==2)) // Tags TODO const
         {
             DATASET dataset={};
 
-            dataset.nAddress=pList->at(i).p_vaddr;
-            dataset.nOffset=pList->at(i).p_offset;
-            dataset.nSize=pList->at(i).p_filesz;
+            dataset.nAddress=pListProgramHeaders->at(i).p_vaddr;
+            dataset.nOffset=pListProgramHeaders->at(i).p_offset;
+            dataset.nSize=pListProgramHeaders->at(i).p_filesz;
             dataset.nType=DS_DYNAMICTAGS;
             dataset.sName=QString("%1").arg("Dynamic tags"); // TODO mb translate
 

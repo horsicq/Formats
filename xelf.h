@@ -384,7 +384,7 @@ public:
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
-    static QList<SECTION_RECORD> getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pList,bool bIsImage,QByteArray *pbaSectionTable);
+    static QList<SECTION_RECORD> getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders,bool bIsImage,QByteArray *pbaSectionTable);
     bool isSectionNamePresent(QString sSectionName);
     static bool isSectionNamePresent(QString sSectionName,QList<SECTION_RECORD> *pListSectionRecords);
     qint32 getSectionNumber(QString sSectionName);
@@ -402,7 +402,7 @@ public:
     QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType);
 
     QList<DATASET> getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pList);
-    QList<DATASET> getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pList);
+    QList<DATASET> getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
     QList<DATASET> getDatasetsFromTagStructs(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
     QList<XELF_DEF::Elf32_Sym> getElf32_SymList(qint64 nOffset,qint64 nSize);
