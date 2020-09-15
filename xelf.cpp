@@ -3805,15 +3805,15 @@ qint32 XELF::getSectionNumber(QString sSectionName)
     return getSectionNumber(sSectionName,&listSR);
 }
 
-qint32 XELF::getSectionNumber(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSections)
+qint32 XELF::getSectionNumber(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
 {
     qint32 nResult=-1;
 
-    int nNumberOfSections=pListSections->count();
+    int nNumberOfSections=pListSectionRecords->count();
 
     for(int i=0; i<nNumberOfSections; i++)
     {
-        if(pListSections->at(i).sName==sSectionName)
+        if(pListSectionRecords->at(i).sName==sSectionName)
         {
             nResult=i;
             break;
