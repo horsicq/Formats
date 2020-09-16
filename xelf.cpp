@@ -1166,23 +1166,33 @@ QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
 
     if(nSection!=XELF_DEF::S_SHN_UNDEF)
     {
-        QByteArray section=getSection(nSection);
-        int nSize=section.size();
-        char *pOffset=section.data();
-        quint32 nCurrentOffset=0;
+        QByteArray baSection=getSection(nSection);
 
-        while(nSize>0)
+        mapResult=getStringsFromSectionData(&baSection);
+    }
+
+    return mapResult;
+}
+
+QMap<quint32, QString> XELF::getStringsFromSectionData(QByteArray *pbaData)
+{
+    QMap<quint32, QString> mapResult;
+
+    int nSize=pbaData->size();
+    char *pOffset=pbaData->data();
+    quint32 nCurrentOffset=0;
+
+    while(nSize>0)
+    {
+        QString sString(pOffset+nCurrentOffset);
+
+        if(sString.length())
         {
-            QString sString(pOffset+nCurrentOffset);
-
-            if(sString.length())
-            {
-                mapResult.insert(nCurrentOffset,sString);
-            }
-
-            nCurrentOffset+=(quint32)sString.length()+1;
-            nSize-=sString.length()+1;
+            mapResult.insert(nCurrentOffset,sString);
         }
+
+        nCurrentOffset+=(quint32)sString.length()+1;
+        nSize-=sString.length()+1;
     }
 
     return mapResult;
@@ -3034,19 +3044,15 @@ XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr>
     return result;
 }
 
-QString XELF::getCommentString()
-{
-    QString sResult;
-
-    sResult.append(getSectionByName(".comment"));
-
-    return sResult;
-}
-
 QList<QString> XELF::getCommentStrings()
 {
     // TODO Optimize
-    return getStringsFromSection(getSectionIndexByName(".comment")).values();
+    return getCommentStrings(getSectionIndexByName(".comment"));
+}
+
+QList<QString> XELF::getCommentStrings(int nSection)
+{
+    return getStringsFromSection(nSection).values();
 }
 
 QList<XELF::NOTE> XELF::getNotes()

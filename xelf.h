@@ -213,6 +213,7 @@ public:
     QString getStringFromIndex(qint64 nOffset,qint64 nSize,int nIndex);
 
     QMap<quint32,QString> getStringsFromSection(quint32 nSection);
+    QMap<quint32,QString> getStringsFromSectionData(QByteArray *pbaData);
     QString getStringFromSection(quint32 nIndex,quint32 nSection);
     QMap<quint32,QString> getStringsFromMainSection();
     QString getStringFromMainSection(quint32 nIndex);
@@ -350,8 +351,9 @@ public:
 
     OS_ANSISTRING getProgramInterpreterName();
     OS_ANSISTRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    QString getCommentString(); // TODO remove
+
     QList<QString> getCommentStrings();
+    QList<QString> getCommentStrings(int nSection);
 
     QList<NOTE> getNotes();
     QList<NOTE> getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
