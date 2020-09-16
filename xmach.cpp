@@ -829,17 +829,17 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECOR
     return listResult;
 }
 
-XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QString sName, QList<XMACH::LIBRARY_RECORD> *pList)
+XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QString sName, QList<XMACH::LIBRARY_RECORD> *pListLibraryRecords)
 {
     LIBRARY_RECORD result={};
 
-    int nNumberOfLibraries=pList->count();
+    int nNumberOfLibraries=pListLibraryRecords->count();
 
     for(int i=0;i<nNumberOfLibraries;i++)
     {
-        if(pList->at(i).sName==sName)
+        if(pListLibraryRecords->at(i).sName==sName)
         {
-            result=pList->at(i);
+            result=pListLibraryRecords->at(i);
 
             break;
         }
