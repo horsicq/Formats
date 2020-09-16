@@ -135,7 +135,7 @@ public:
 
     QByteArray getCommand(quint32 nCommandID,int nIndex=0);
     bool setCommand(quint32 nCommandID,QByteArray baData,int nIndex=0);
-    QByteArray getCommand(quint32 nCommandID,int nIndex,QList<COMMAND_RECORD> *pList);
+    QByteArray getCommand(quint32 nCommandID,int nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
     bool setCommand(quint32 nCommandID,QByteArray baData,int nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
 
     qint64 getAddressOfEntryPoint();
