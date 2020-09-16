@@ -161,7 +161,7 @@ public:
     bool isSectionNamePresent(QString sName);
     static bool isSectionNamePresent(QString sName,QList<SECTION_RECORD> *pListSectionRecords);
 
-    static qint32 getSectionNumber(QString sName,QList<SECTION_RECORD> *pList);
+    static qint32 getSectionNumber(QString sName,QList<SECTION_RECORD> *pListSectionRecords);
     qint32 getSectionNumber(QString sName);
 
     quint32 getLibraryCurrentVersion(QString sName,QList<LIBRARY_RECORD> *pList);

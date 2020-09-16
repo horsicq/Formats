@@ -1090,15 +1090,15 @@ bool XMACH::isSectionNamePresent(QString sName, QList<XMACH::SECTION_RECORD> *pL
     return (getSectionNumber(sName,pListSectionRecords)!=-1);
 }
 
-qint32 XMACH::getSectionNumber(QString sName, QList<XMACH::SECTION_RECORD> *pList)
+qint32 XMACH::getSectionNumber(QString sName, QList<XMACH::SECTION_RECORD> *pListSectionRecords)
 {
     qint32 nResult=-1;
 
-    int nNumberOfSections=pList->count();
+    int nNumberOfSections=pListSectionRecords->count();
 
     for(int i=0;i<nNumberOfSections;i++)
     {
-        QString _sName=QString(pList->at(i).sectname);
+        QString _sName=QString(pListSectionRecords->at(i).sectname);
         if(_sName.size()>16)
         {
             _sName.resize(16);
