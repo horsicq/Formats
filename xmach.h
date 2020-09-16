@@ -128,7 +128,7 @@ public:
     static QMap<quint64,QString> getLoadCommandTypesS();
 
     QList<COMMAND_RECORD> getCommandRecords();
-    static QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID,QList<COMMAND_RECORD> *pList);
+    static QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID,QList<COMMAND_RECORD> *pListCommandRecords);
 
     bool isCommandPresent(quint32 nCommandID,int nIndex);
     bool isCommandPresent(quint32 nCommandID,int nIndex,QList<COMMAND_RECORD> *pList);

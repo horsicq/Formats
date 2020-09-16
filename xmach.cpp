@@ -527,17 +527,17 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
     return listResult;
 }
 
-QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *pList)
+QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     QList<COMMAND_RECORD> listResult;
 
-    int nNumberOfCommands=pList->count();
+    int nNumberOfCommands=pListCommandRecords->count();
 
     for(int i=0; i<nNumberOfCommands; i++)
     {
-        if(pList->at(i).nType==nCommandID)
+        if(pListCommandRecords->at(i).nType==nCommandID)
         {
-            listResult.append(pList->at(i));
+            listResult.append(pListCommandRecords->at(i));
         }
     }
 
