@@ -855,15 +855,15 @@ bool XMACH::isLibraryRecordNamePresent(QString sName)
     return isLibraryRecordNamePresent(sName,&listLibraries);
 }
 
-bool XMACH::isLibraryRecordNamePresent(QString sName, QList<XMACH::LIBRARY_RECORD> *pList)
+bool XMACH::isLibraryRecordNamePresent(QString sName, QList<XMACH::LIBRARY_RECORD> *pListLibraryRecords)
 {
     bool bResult=false;
 
-    int nNumberOfLibraries=pList->count();
+    int nNumberOfLibraries=pListLibraryRecords->count();
 
     for(int i=0;i<nNumberOfLibraries;i++)
     {
-        if(pList->at(i).sName==sName)
+        if(pListLibraryRecords->at(i).sName==sName)
         {
             bResult=true;
 
