@@ -159,7 +159,7 @@ public:
     quint32 getNumberOfSections(QList<COMMAND_RECORD> *pListCommandRecords);
 
     bool isSectionNamePresent(QString sName);
-    static bool isSectionNamePresent(QString sName,QList<SECTION_RECORD> *pList);
+    static bool isSectionNamePresent(QString sName,QList<SECTION_RECORD> *pListSectionRecords);
 
     static qint32 getSectionNumber(QString sName,QList<SECTION_RECORD> *pList);
     qint32 getSectionNumber(QString sName);

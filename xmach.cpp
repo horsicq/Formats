@@ -1085,9 +1085,9 @@ bool XMACH::isSectionNamePresent(QString sName)
     return isSectionNamePresent(sName,&listSections);
 }
 
-bool XMACH::isSectionNamePresent(QString sName, QList<XMACH::SECTION_RECORD> *pList)
+bool XMACH::isSectionNamePresent(QString sName, QList<XMACH::SECTION_RECORD> *pListSectionRecords)
 {
-    return (getSectionNumber(sName,pList)!=-1);
+    return (getSectionNumber(sName,pListSectionRecords)!=-1);
 }
 
 qint32 XMACH::getSectionNumber(QString sName, QList<XMACH::SECTION_RECORD> *pList)
