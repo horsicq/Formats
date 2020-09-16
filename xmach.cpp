@@ -617,25 +617,25 @@ QByteArray XMACH::getCommand(quint32 nCommandID, int nIndex, QList<XMACH::COMMAN
     return baResult;
 }
 
-bool XMACH::setCommand(quint32 nCommandID, QByteArray baData, int nIndex, QList<XMACH::COMMAND_RECORD> *pList)
+bool XMACH::setCommand(quint32 nCommandID, QByteArray baData, int nIndex, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     bool bResult=false;
 
-    int nNumberOfCommands=pList->count();
+    int nNumberOfCommands=pListCommandRecords->count();
 
     int nCurrentIndex=0;
 
     for(int i=0; i<nNumberOfCommands; i++)
     {
-        if(pList->at(i).nType==nCommandID)
+        if(pListCommandRecords->at(i).nType==nCommandID)
         {
             qint32 nSize=baData.size();
 
             if(nCurrentIndex==nIndex)
             {
-                if(nSize==pList->at(i).nSize)
+                if(nSize==pListCommandRecords->at(i).nSize)
                 {
-                    bResult=(write_array(pList->at(i).nOffset,baData.data(),pList->at(i).nSize)==nSize);
+                    bResult=(write_array(pListCommandRecords->at(i).nOffset,baData.data(),pListCommandRecords->at(i).nSize)==nSize);
                 }
 
                 break;
