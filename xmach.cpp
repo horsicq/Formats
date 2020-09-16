@@ -800,13 +800,13 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords()
     return getLibraryRecords(&listLC);
 }
 
-QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECORD> *pList)
+QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     QList<LIBRARY_RECORD> listResult;
 
     bool bIsBigEndian=isBigEndian();
 
-    QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(XMACH_DEF::S_LC_LOAD_DYLIB,pList);
+    QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(XMACH_DEF::S_LC_LOAD_DYLIB,pListCommandRecords);
 
     int nNumberOfCommands=listLCLibraries.count();
 
@@ -1039,7 +1039,7 @@ quint32 XMACH::getNumberOfSections()
     return getNumberOfSections(&listCR);
 }
 
-quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pList)
+quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     quint32 nResult=0;
 
@@ -1048,7 +1048,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pList)
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pList);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1062,7 +1062,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pList)
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pList);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 

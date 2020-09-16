@@ -144,7 +144,7 @@ public:
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
     QList<LIBRARY_RECORD> getLibraryRecords();
-    QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pList);
+    QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords);
     static LIBRARY_RECORD getLibraryRecordByName(QString sName,QList<LIBRARY_RECORD> *pList);
     bool isLibraryRecordNamePresent(QString sName);
     static bool isLibraryRecordNamePresent(QString sName,QList<LIBRARY_RECORD> *pList);
@@ -156,7 +156,7 @@ public:
     QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
     quint32 getNumberOfSections();
-    quint32 getNumberOfSections(QList<COMMAND_RECORD> *pList);
+    quint32 getNumberOfSections(QList<COMMAND_RECORD> *pListCommandRecords);
 
     bool isSectionNamePresent(QString sName);
     static bool isSectionNamePresent(QString sName,QList<SECTION_RECORD> *pList);
