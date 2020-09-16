@@ -551,17 +551,17 @@ bool XMACH::isCommandPresent(quint32 nCommandID, int nIndex)
     return isCommandPresent(nCommandID,nIndex,&listCommandRecords);
 }
 
-bool XMACH::isCommandPresent(quint32 nCommandID, int nIndex, QList<XMACH::COMMAND_RECORD> *pList)
+bool XMACH::isCommandPresent(quint32 nCommandID, int nIndex, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     bool bResult=false;
 
-    int nNumberOfCommands=pList->count();
+    int nNumberOfCommands=pListCommandRecords->count();
 
     int nCurrentIndex=0;
 
     for(int i=0; i<nNumberOfCommands; i++)
     {
-        if(pList->at(i).nType==nCommandID)
+        if(pListCommandRecords->at(i).nType==nCommandID)
         {
             if(nCurrentIndex==nIndex)
             {
