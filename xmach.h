@@ -150,7 +150,7 @@ public:
     static bool isLibraryRecordNamePresent(QString sName,QList<LIBRARY_RECORD> *pList);
 
     QList<SEGMENT_RECORD> getSegmentRecords();
-    QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pList);
+    QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
     QList<SECTION_RECORD> getSectionRecords();
     QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pList);
