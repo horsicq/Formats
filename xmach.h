@@ -153,7 +153,7 @@ public:
     QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
     QList<SECTION_RECORD> getSectionRecords();
-    QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pList);
+    QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
     quint32 getNumberOfSections();
     quint32 getNumberOfSections(QList<COMMAND_RECORD> *pList);

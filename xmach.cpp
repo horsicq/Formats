@@ -951,7 +951,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords()
     return getSectionRecords(&listCR);
 }
 
-QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECORD> *pList)
+QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     QList<SECTION_RECORD> listResult;
 
@@ -960,7 +960,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pList);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -995,7 +995,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pList);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
