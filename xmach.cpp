@@ -654,14 +654,14 @@ qint64 XMACH::getAddressOfEntryPoint()
 
     bool bIsBigEndian=isBigEndian();
 
-    QList<COMMAND_RECORD> listLC=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
 
-    int nNumberOfCommands=listLC.count();
+    int nNumberOfCommands=listCommandRecords.count();
 
     for(int i=0;i<nNumberOfCommands;i++)
     {
-        quint32 nType=listLC.at(i).nType;
-        qint64 nOffset=listLC.at(i).nOffset;
+        quint32 nType=listCommandRecords.at(i).nType;
+        qint64 nOffset=listCommandRecords.at(i).nOffset;
 
         if((nType==XMACH_DEF::S_LC_THREAD)||(nType==XMACH_DEF::S_LC_UNIXTHREAD))
         {
