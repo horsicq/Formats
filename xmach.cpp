@@ -579,9 +579,9 @@ bool XMACH::isCommandPresent(quint32 nCommandID, int nIndex, QList<XMACH::COMMAN
 
 QByteArray XMACH::getCommand(quint32 nCommandID, int nIndex)
 {
-    QList<COMMAND_RECORD> list=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
 
-    return getCommand(nCommandID,nIndex,&list);
+    return getCommand(nCommandID,nIndex,&listCommandRecords);
 }
 
 bool XMACH::setCommand(quint32 nCommandID, QByteArray baData, int nIndex)
