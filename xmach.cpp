@@ -795,9 +795,9 @@ qint64 XMACH::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 
 QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords()
 {
-    QList<COMMAND_RECORD> listLC=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
 
-    return getLibraryRecords(&listLC);
+    return getLibraryRecords(&listCommandRecords);
 }
 
 QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
@@ -850,9 +850,9 @@ XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QString sName, QList<XMACH::
 
 bool XMACH::isLibraryRecordNamePresent(QString sName)
 {
-    QList<XMACH::LIBRARY_RECORD> listLibraries=getLibraryRecords();
+    QList<XMACH::LIBRARY_RECORD> listLibraryRecords=getLibraryRecords();
 
-    return isLibraryRecordNamePresent(sName,&listLibraries);
+    return isLibraryRecordNamePresent(sName,&listLibraryRecords);
 }
 
 bool XMACH::isLibraryRecordNamePresent(QString sName, QList<XMACH::LIBRARY_RECORD> *pListLibraryRecords)
