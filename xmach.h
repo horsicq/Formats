@@ -164,7 +164,7 @@ public:
     static qint32 getSectionNumber(QString sName,QList<SECTION_RECORD> *pListSectionRecords);
     qint32 getSectionNumber(QString sName);
 
-    quint32 getLibraryCurrentVersion(QString sName,QList<LIBRARY_RECORD> *pList);
+    quint32 getLibraryCurrentVersion(QString sName,QList<LIBRARY_RECORD> *pListLibraryRecords);
 
     virtual MODE getMode();
     virtual QString getArch();
