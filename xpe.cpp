@@ -8870,21 +8870,21 @@ QList<XPE::RELOCS_HEADER> XPE::getRelocsHeaders()
 
             record.nOffset=nRelocsOffset;
 
-            record.ibr=_readIMAGE_BASE_RELOCATION(nRelocsOffset);
+            record.baseRelocation=_readIMAGE_BASE_RELOCATION(nRelocsOffset);
 
-            if((record.ibr.VirtualAddress==0)||(record.ibr.SizeOfBlock==0))
+            if((record.baseRelocation.VirtualAddress==0)||(record.baseRelocation.SizeOfBlock==0))
             {
                 break;
             }
 
-            if(record.ibr.VirtualAddress&0xFFF)
+            if(record.baseRelocation.VirtualAddress&0xFFF)
             {
                 break;
             }
 
             nRelocsOffset+=sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
 
-            record.nCount=(record.ibr.SizeOfBlock-sizeof(XPE_DEF::IMAGE_BASE_RELOCATION))/sizeof(quint16);
+            record.nCount=(record.baseRelocation.SizeOfBlock-sizeof(XPE_DEF::IMAGE_BASE_RELOCATION))/sizeof(quint16);
 
             nRelocsOffset+=sizeof(quint16)*record.nCount;
 

@@ -172,7 +172,7 @@ public:
     struct RELOCS_HEADER
     {
         qint64 nOffset;
-        XPE_DEF::IMAGE_BASE_RELOCATION ibr;
+        XPE_DEF::IMAGE_BASE_RELOCATION baseRelocation;
         qint32 nCount;
     };
 
