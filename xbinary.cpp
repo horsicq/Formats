@@ -3231,8 +3231,8 @@ QString XBinary::getUnpackedName(QIODevice *pDevice)
 
 QString XBinary::getUnpackedName(QString sFileName)
 {
-    QFileInfo fi(sFileName);
-    QString sResult=fi.absolutePath()+QDir::separator()+fi.completeBaseName()+".unp."+fi.suffix();
+    QFileInfo fileInfo(sFileName);
+    QString sResult=fileInfo.absolutePath()+QDir::separator()+fileInfo.completeBaseName()+".unp."+fileInfo.suffix();
     //            sResult=fi.absolutePath()+QDir::separator()+fi.baseName()+".unp."+fi.completeSuffix();
 
     return sResult;
