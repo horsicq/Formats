@@ -223,7 +223,7 @@ private:
     };
 
 public:
-    explicit XBinary(QIODevice *pDevice=nullptr,bool g_bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
+    explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
     void setDevice(QIODevice *pDevice); // TODO rename -> setDevice
     qint64 getSize();
     static qint64 getSize(QIODevice *pDevice);
