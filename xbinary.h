@@ -262,7 +262,7 @@ public:
 
     struct FFOPTIONS
     {
-        QList<QString> *pListFiles;
+        QList<QString> *pListFileNames;
         bool bSubdirectories;
         bool *pbIsStop;
         qint32 *pnNumberOfFiles;

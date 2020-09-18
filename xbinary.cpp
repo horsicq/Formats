@@ -343,7 +343,7 @@ XBinary::OS_ANSISTRING XBinary::getOsAnsiString(qint64 nOffset, qint64 nSize)
 
 void XBinary::findFiles(QString sDirectoryName, XBinary::FFOPTIONS *pFFOption, qint32 nLevel)
 {
-    *(pFFOption->pnNumberOfFiles)=pFFOption->pListFiles->count();
+    *(pFFOption->pnNumberOfFiles)=pFFOption->pListFileNames->count();
 
     if(!(*pFFOption->pbIsStop))
     {
@@ -351,7 +351,7 @@ void XBinary::findFiles(QString sDirectoryName, XBinary::FFOPTIONS *pFFOption, q
 
         if(fi.isFile())
         {
-            pFFOption->pListFiles->append(fi.absoluteFilePath());
+            pFFOption->pListFileNames->append(fi.absoluteFilePath());
         }
         else if(fi.isDir()&&((pFFOption->bSubdirectories)||(nLevel==0)))
         {
