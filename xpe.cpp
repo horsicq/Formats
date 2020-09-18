@@ -9031,7 +9031,7 @@ bool XPE::addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pLis
     return bResult;
 }
 
-QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
+QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pListRelocs, bool bIs64)
 {
     QByteArray baResult;
     // GetHeaders
@@ -9040,11 +9040,11 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
     qint32 nBaseAddress=-1;
     quint32 nSize=0;
 
-    int nNumberOfRelocs=pList->count();
+    int nNumberOfRelocs=pListRelocs->count();
 
     for(int i=0; i<nNumberOfRelocs; i++)
     {
-        qint32 _nBaseAddress=S_ALIGN_DOWN(pList->at(i),0x1000);
+        qint32 _nBaseAddress=S_ALIGN_DOWN(pListRelocs->at(i),0x1000);
 
         if(nBaseAddress!=_nBaseAddress)
         {
@@ -9067,11 +9067,11 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
     char *pSizeOfBlock=0;
     quint32 nCurrentBlockSize=0;
 
-    nNumberOfRelocs=pList->count();
+    nNumberOfRelocs=pListRelocs->count();
 
     for(int i=0; i<nNumberOfRelocs; i++)
     {
-        qint32 _nBaseAddress=S_ALIGN_DOWN(pList->at(i),0x1000);
+        qint32 _nBaseAddress=S_ALIGN_DOWN(pListRelocs->at(i),0x1000);
 
         if(nBaseAddress!=_nBaseAddress)
         {
@@ -9100,11 +9100,11 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pList, bool bIs64)
 
         if(!bIs64)
         {
-            XBinary::_write_uint16(pData+nOffset,pList->at(i)-nBaseAddress+0x3000);
+            XBinary::_write_uint16(pData+nOffset,pListRelocs->at(i)-nBaseAddress+0x3000);
         }
         else
         {
-            XBinary::_write_uint16(pData+nOffset,pList->at(i)-nBaseAddress+0xA000);
+            XBinary::_write_uint16(pData+nOffset,pListRelocs->at(i)-nBaseAddress+0xA000);
         }
 
         nOffset+=2;

@@ -667,7 +667,7 @@ public:
     bool addRelocsSection(QList<qint64> *pList);
     bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pListRelocs);
     bool addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pListRelocs);
-    static QByteArray relocsAsRVAListToByteArray(QList<qint64> *pList,bool bIs64);
+    static QByteArray relocsAsRVAListToByteArray(QList<qint64> *pListRelocs,bool bIs64);
 
     bool isResourcesPresent();
     bool isRelocsPresent();
