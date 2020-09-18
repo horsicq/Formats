@@ -3307,9 +3307,9 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResourceVersionResult,
 
 XPE::RESOURCE_VERSION XPE::getResourceVersion()
 {
-    QList<XPE::RESOURCE_RECORD> listRH=getResources();
+    QList<XPE::RESOURCE_RECORD> listResourceRecords=getResources();
 
-    return getResourceVersion(&listRH);
+    return getResourceVersion(&listResourceRecords);
 }
 
 XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
@@ -3317,11 +3317,11 @@ XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pList
     RESOURCE_VERSION result={};
     result.nFixedFileInfoOffset=-1;
 
-    RESOURCE_RECORD rh=getResourceRecord(XPE_DEF::S_RT_VERSION,-1,pListResourceRecords);
+    RESOURCE_RECORD resourceRecord=getResourceRecord(XPE_DEF::S_RT_VERSION,-1,pListResourceRecords);
 
-    if(rh.nOffset!=-1)
+    if(resourceRecord.nOffset!=-1)
     {
-        __getResourceVersion(&result,rh.nOffset,rh.nSize,"",0);
+        __getResourceVersion(&result,resourceRecord.nOffset,resourceRecord.nSize,"",0);
     }
 
     return result;
