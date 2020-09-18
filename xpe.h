@@ -253,7 +253,7 @@ public:
         qint64 nHeaderOffset;
         XPE_DEF::IMAGE_COR20_HEADER header;
         qint64 nMetaDataOffset;
-        CLI_METADATA cliMetadata;
+        CLI_METADATA metaData;
     };
 
     struct IMAGE_IMPORT_DESCRIPTOR_EX
