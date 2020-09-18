@@ -476,7 +476,7 @@ public:
 
     static FT getPrefFileType(QIODevice *pDevice);
 
-    static QList<FT> _getFileTypeListFromSet(QSet<FT> stFT);
+    static QList<FT> _getFileTypeListFromSet(QSet<FT> stFileTypes);
 
     static QString valueToHex(quint8 nValue);
     static QString valueToHex(qint8 nValue);
