@@ -3208,7 +3208,7 @@ XPE_DEF::S_VS_VERSION_INFO XPE::readVS_VERSION_INFO(qint64 nOffset)
     return result;
 }
 
-quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset, qint64 nSize, QString sPrefix, int nLevel)
+quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResourceVersionResult, qint64 nOffset, qint64 nSize, QString sPrefix, int nLevel)
 {
     quint32 nResult=0;
 
@@ -3237,21 +3237,21 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
                 {
                     if(vi.wValueLength>=sizeof(XPE_DEF::S_tagVS_FIXEDFILEINFO))
                     {
-                        pResult->nFixedFileInfoOffset=nOffset+nDelta;
+                        pResourceVersionResult->nFixedFileInfoOffset=nOffset+nDelta;
                         // TODO Check Signature?
-                        pResult->fileInfo.dwSignature=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwSignature));
-                        pResult->fileInfo.dwStrucVersion=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwStrucVersion));
-                        pResult->fileInfo.dwFileVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionMS));
-                        pResult->fileInfo.dwFileVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionLS));
-                        pResult->fileInfo.dwProductVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionMS));
-                        pResult->fileInfo.dwProductVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionLS));
-                        pResult->fileInfo.dwFileFlagsMask=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlagsMask));
-                        pResult->fileInfo.dwFileFlags=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlags));
-                        pResult->fileInfo.dwFileOS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileOS));
-                        pResult->fileInfo.dwFileType=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileType));
-                        pResult->fileInfo.dwFileSubtype=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileSubtype));
-                        pResult->fileInfo.dwFileDateMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateMS));
-                        pResult->fileInfo.dwFileDateLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateLS));
+                        pResourceVersionResult->fileInfo.dwSignature=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwSignature));
+                        pResourceVersionResult->fileInfo.dwStrucVersion=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwStrucVersion));
+                        pResourceVersionResult->fileInfo.dwFileVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionMS));
+                        pResourceVersionResult->fileInfo.dwFileVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileVersionLS));
+                        pResourceVersionResult->fileInfo.dwProductVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionMS));
+                        pResourceVersionResult->fileInfo.dwProductVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwProductVersionLS));
+                        pResourceVersionResult->fileInfo.dwFileFlagsMask=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlagsMask));
+                        pResourceVersionResult->fileInfo.dwFileFlags=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileFlags));
+                        pResourceVersionResult->fileInfo.dwFileOS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileOS));
+                        pResourceVersionResult->fileInfo.dwFileType=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileType));
+                        pResourceVersionResult->fileInfo.dwFileSubtype=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileSubtype));
+                        pResourceVersionResult->fileInfo.dwFileDateMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateMS));
+                        pResourceVersionResult->fileInfo.dwFileDateLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::S_tagVS_FIXEDFILEINFO,dwFileDateLS));
                     }
                 }
 
@@ -3260,7 +3260,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
                     QString sValue=read_unicodeString(nOffset+nDelta);
                     sPrefix+=QString(":%1").arg(sValue);
 
-                    pResult->listRecords.append(sPrefix);
+                    pResourceVersionResult->listRecords.append(sPrefix);
                 }
 
                 if(sPrefix=="VS_VERSION_INFO.VarFileInfo.Translation")
@@ -3271,7 +3271,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
                         QString sValue=XBinary::valueToHex(nValue);
                         sPrefix+=QString(":%1").arg(sValue);
 
-                        pResult->listRecords.append(sPrefix);
+                        pResourceVersionResult->listRecords.append(sPrefix);
                     }
                 }
 
@@ -3283,7 +3283,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResult, qint64 nOffset
                 {
                     while(_nSize>0)
                     {
-                        qint32 _nDelta=__getResourceVersion(pResult,nOffset+nDelta,vi.wLength-nDelta,sPrefix,nLevel+1);
+                        qint32 _nDelta=__getResourceVersion(pResourceVersionResult,nOffset+nDelta,vi.wLength-nDelta,sPrefix,nLevel+1);
 
                         if(_nDelta==0)
                         {
