@@ -2893,49 +2893,49 @@ XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice)
 {
     XBinary::FT result=FT_UNKNOWN;
 
-    QSet<XBinary::FT> stFT=getFileTypes(pDevice);
+    QSet<XBinary::FT> stFileTypes=getFileTypes(pDevice);
 
-    if(stFT.contains(FT_PE32))
+    if(stFileTypes.contains(FT_PE32))
     {
         result=FT_PE32;
     }
-    else if(stFT.contains(FT_PE64))
+    else if(stFileTypes.contains(FT_PE64))
     {
         result=FT_PE64;
     }
-    else if(stFT.contains(FT_MACH32))
+    else if(stFileTypes.contains(FT_MACH32))
     {
         result=FT_MACH32;
     }
-    else if(stFT.contains(FT_MACH64))
+    else if(stFileTypes.contains(FT_MACH64))
     {
         result=FT_MACH64;
     }
-    else if(stFT.contains(FT_ELF32))
+    else if(stFileTypes.contains(FT_ELF32))
     {
         result=FT_ELF32;
     }
-    else if(stFT.contains(FT_ELF64))
+    else if(stFileTypes.contains(FT_ELF64))
     {
         result=FT_ELF64;
     }
-    else if(stFT.contains(FT_LE))
+    else if(stFileTypes.contains(FT_LE))
     {
         result=FT_LE;
     }
-    else if(stFT.contains(FT_LX))
+    else if(stFileTypes.contains(FT_LX))
     {
         result=FT_LX;
     }
-    else if(stFT.contains(FT_NE))
+    else if(stFileTypes.contains(FT_NE))
     {
         result=FT_NE;
     }
-    else if(stFT.contains(FT_MSDOS))
+    else if(stFileTypes.contains(FT_MSDOS))
     {
         result=FT_MSDOS;
     }
-    else if(stFT.contains(FT_BINARY))
+    else if(stFileTypes.contains(FT_BINARY))
     {
         result=FT_BINARY;
     }
