@@ -520,7 +520,7 @@ public:
     bool isImportFunctionPresentI(QString sLibrary,QString sFunction);
     static bool isImportFunctionPresentI(QString sLibrary,QString sFunction,QList<IMPORT_HEADER> *pListImportHeaders);
 
-    bool setImports(QList<IMPORT_HEADER> *pListHeaders);
+    bool setImports(QList<IMPORT_HEADER> *pListImportHeaders);
     bool setImports(QIODevice *pDevice,bool bIsImage,QList<IMPORT_HEADER> *pListImportHeaders);
     bool setImports(QString sFileName,bool bIsImage,QList<IMPORT_HEADER> *pListImportHeaders);
 

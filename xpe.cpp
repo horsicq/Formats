@@ -2646,9 +2646,9 @@ bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction, QList<XP
     return bResult;
 }
 
-bool XPE::setImports(QList<XPE::IMPORT_HEADER> *pListHeaders)
+bool XPE::setImports(QList<XPE::IMPORT_HEADER> *pListImportHeaders)
 {
-    return setImports(getDevice(),isImage(),pListHeaders);
+    return setImports(getDevice(),isImage(),pListImportHeaders);
 }
 
 bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
