@@ -3893,10 +3893,10 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
 {
     BYTE_COUNTS result={0};
 
-    OFFSETSIZE offsize=convertOffsetAndSize(nOffset,nSize);
+    OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
 
-    nOffset=offsize.nOffset;
-    nSize=offsize.nSize;
+    nOffset=offsetSize.nOffset;
+    nSize=offsetSize.nSize;
 
     if(nOffset!=-1)
     {
@@ -3932,7 +3932,7 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
             nSize-=nTemp;
             nOffset+=nTemp;
 
-            if(procentSetCurrentValue(&procent,nOffset-offsize.nOffset))
+            if(procentSetCurrentValue(&procent,nOffset-offsetSize.nOffset))
             {
                 emit entropyProgressValueChanged(procent.nCurrentProcent);
             }
