@@ -1202,9 +1202,9 @@ QString XELF::getStringFromSection(quint32 nIndex, quint32 nSection)
 {
     QString sResult;
 
-    XBinary::OFFSETSIZE os=getSectionOffsetSize(nSection);
+    XBinary::OFFSETSIZE offsetSize=getSectionOffsetSize(nSection);
 
-    sResult=getStringFromIndex(os.nOffset,os.nSize,nIndex);
+    sResult=getStringFromIndex(offsetSize.nOffset,offsetSize.nSize,nIndex);
 
     return sResult;
 }
@@ -3379,13 +3379,13 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
 
     QList<XELF::TAG_STRUCT> listNeeded=XELF::_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
 
-    OFFSETSIZE os=getStringTable(pMemoryMap,pList);
+    OFFSETSIZE offsetSize=getStringTable(pMemoryMap,pList);
 
-    if(os.nSize)
+    if(offsetSize.nSize)
     {
-        qint64 nOffset=os.nOffset;
+        qint64 nOffset=offsetSize.nOffset;
 
-        QByteArray baSection=read_array(nOffset,os.nSize);
+        QByteArray baSection=read_array(nOffset,offsetSize.nSize);
 
         qint64 nSectionTableSize=baSection.size();
 
