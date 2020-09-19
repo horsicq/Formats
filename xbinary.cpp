@@ -3499,10 +3499,10 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 {
     QString sResult;
 
-    OFFSETSIZE offsize=convertOffsetAndSize(nOffset,nSize);
+    OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
 
-    nOffset=offsize.nOffset;
-    nSize=offsize.nSize;
+    nOffset=offsetSize.nOffset;
+    nSize=offsetSize.nSize;
 
     if(nOffset!=-1)
     {
@@ -3553,7 +3553,7 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
             nSize-=nTemp;
             nOffset+=nTemp;
 
-            if(procentSetCurrentValue(&procent,nOffset-offsize.nOffset))
+            if(procentSetCurrentValue(&procent,nOffset-offsetSize.nOffset))
             {
                 emit hashProgressValueChanged(procent.nCurrentProcent);
             }
