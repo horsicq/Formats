@@ -3953,10 +3953,10 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
 
 void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
 {
-    OFFSETSIZE offsize=convertOffsetAndSize(nOffset,nSize);
+    OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
 
-    nOffset=offsize.nOffset;
-    nSize=offsize.nSize;
+    nOffset=offsetSize.nOffset;
+    nSize=offsetSize.nSize;
 
     if(nOffset!=-1)
     {
