@@ -4041,11 +4041,11 @@ bool XPE::addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QStri
 
         if(pe.isValid())
         {
-            QList<XPE::IMPORT_HEADER> list=mapIATToList(pMapIAT,pe.is64());
+            QList<XPE::IMPORT_HEADER> listImportHeaders=mapIATToList(pMapIAT,pe.is64());
 #ifdef QT_DEBUG
             qDebug("XPE::addImportSection:mapIATToList: %lld msec",timer.elapsed());
 #endif
-            bResult=setImports(pDevice,bIsImage,&list);
+            bResult=setImports(pDevice,bIsImage,&listImportHeaders);
 #ifdef QT_DEBUG
             qDebug("XPE::addImportSection:setImports: %lld msec",timer.elapsed());
 #endif
