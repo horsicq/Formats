@@ -4010,11 +4010,11 @@ double XPE::getSectionEntropy(quint32 nSection)
 {
     double dResult=0;
 
-    OFFSETSIZE offsize=__getSectionOffsetAndSize(nSection);
+    OFFSETSIZE offsetSize=__getSectionOffsetAndSize(nSection);
 
-    if(offsize.nOffset!=-1)
+    if(offsetSize.nOffset!=-1)
     {
-        dResult=getEntropy(offsize.nOffset,offsize.nSize);
+        dResult=getEntropy(offsetSize.nOffset,offsetSize.nSize);
     }
 
     return dResult;
