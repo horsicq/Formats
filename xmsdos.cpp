@@ -549,9 +549,9 @@ QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords()
 
 qint32 XMSDOS::getNumberOfRichIDs()
 {
-    QList<MS_RICH_RECORD> listRecords=getRichSignatureRecords();
+    QList<MS_RICH_RECORD> listRichSignatureRecords=getRichSignatureRecords();
 
-    return getNumberOfRichIDs(&listRecords);
+    return getNumberOfRichIDs(&listRichSignatureRecords);
 }
 
 qint32 XMSDOS::getNumberOfRichIDs(QList<XMSDOS::MS_RICH_RECORD> *pListRichRecords)
