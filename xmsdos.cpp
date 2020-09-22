@@ -412,7 +412,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
         record.nSize=nOverlaySize;
         record.nOffset=nOverlayOffset;
         record.nAddress=-1;
-        record.sName=QString("Overlay");
+        record.sName=tr("Overlay");
 
         record.segment=ADDRESS_SEGMENT_UNKNOWN;
         record.type=MMT_OVERLAY;
