@@ -554,9 +554,9 @@ qint32 XMSDOS::getNumberOfRichIDs()
     return getNumberOfRichIDs(&listRichSignatureRecords);
 }
 
-qint32 XMSDOS::getNumberOfRichIDs(QList<XMSDOS::MS_RICH_RECORD> *pListRichRecords)
+qint32 XMSDOS::getNumberOfRichIDs(QList<XMSDOS::MS_RICH_RECORD> *pListRichSignatureRecords)
 {
-    return pListRichRecords->count();
+    return pListRichSignatureRecords->count();
 }
 
 bool XMSDOS::isRichVersionPresent(quint32 nVersion)
