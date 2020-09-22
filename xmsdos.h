@@ -117,7 +117,7 @@ public:
     QList<XMSDOS::MS_RICH_RECORD> getRichSignatureRecords();
 
     qint32 getNumberOfRichIDs();
-    qint32 getNumberOfRichIDs(QList<MS_RICH_RECORD> *pListRich);
+    qint32 getNumberOfRichIDs(QList<MS_RICH_RECORD> *pListRichRecords);
 
     bool isRichVersionPresent(quint32 nVersion);
     bool isRichVersionPresent(quint32 nVersion,QList<MS_RICH_RECORD> *pListRichRecords);

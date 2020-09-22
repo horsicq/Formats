@@ -554,9 +554,9 @@ qint32 XMSDOS::getNumberOfRichIDs()
     return getNumberOfRichIDs(&listRecords);
 }
 
-qint32 XMSDOS::getNumberOfRichIDs(QList<XMSDOS::MS_RICH_RECORD> *pListRich)
+qint32 XMSDOS::getNumberOfRichIDs(QList<XMSDOS::MS_RICH_RECORD> *pListRichRecords)
 {
-    return pListRich->count();
+    return pListRichRecords->count();
 }
 
 bool XMSDOS::isRichVersionPresent(quint32 nVersion)
