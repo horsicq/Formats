@@ -4953,9 +4953,9 @@ bool XBinary::writeToFile(QString sFileName, QByteArray baData)
     return bResult;
 }
 
-qint32 XBinary::getStringNumberFromList(QList<QString> *pList, QString sString)
+qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, QString sString)
 {
-    return pList->indexOf(sString);
+    return pListStrings->indexOf(sString);
 }
 
 qint32 XBinary::getStringNumberFromListExp(QList<QString> *pList, QString sString)
