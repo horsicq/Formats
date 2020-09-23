@@ -476,7 +476,7 @@ public:
 
     bool isSectionNamePresent(QString sSectionName);
     static bool isSectionNamePresent(QString sSectionName,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
-    static XPE_DEF::IMAGE_SECTION_HEADER getSectionByName(QString sSectionName,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections);
+    static XPE_DEF::IMAGE_SECTION_HEADER getSectionByName(QString sSectionName,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
 
     qint32 getSectionNumber(QString sSectionName);
     static qint32 getSectionNumber(QString sSectionName,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections);

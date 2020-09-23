@@ -1590,20 +1590,20 @@ bool XPE::isSectionNamePresent(QString sSectionName, QList<XPE_DEF::IMAGE_SECTIO
     return bResult;
 }
 
-XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionByName(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections)
+XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionByName(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
 {
     XPE_DEF::IMAGE_SECTION_HEADER result={};
 
-    int nNumberOfSections=pListSections->count();
+    int nNumberOfSections=pListSectionHeaders->count();
 
     for(int i=0; i<nNumberOfSections; i++)
     {
-        QString _sSectionName=QString((char *)pListSections->at(i).Name);
+        QString _sSectionName=QString((char *)pListSectionHeaders->at(i).Name);
         _sSectionName.resize(qMin(_sSectionName.length(),XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
 
         if(_sSectionName==sSectionName)
         {
-            result=pListSections->at(i);
+            result=pListSectionHeaders->at(i);
 
             break;
         }
