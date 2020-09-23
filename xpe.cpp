@@ -1442,13 +1442,13 @@ void XPE::setSection_Characteristics(quint32 nNumber, quint32 nValue)
     }
 }
 
-QString XPE::getSection_NameAsString(quint32 nNumber, QList<QString> *pListSectionNames)
+QString XPE::getSection_NameAsString(quint32 nNumber, QList<QString> *pListSectionNameStrings)
 {
     QString sResult;
 
-    if(nNumber<(quint32)pListSectionNames->count())
+    if(nNumber<(quint32)pListSectionNameStrings->count())
     {
-        sResult=pListSectionNames->at(nNumber);
+        sResult=pListSectionNameStrings->at(nNumber);
     }
 
     return sResult;

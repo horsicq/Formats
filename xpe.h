@@ -463,7 +463,7 @@ public:
     void setSection_NumberOfLinenumbers(quint32 nNumber,quint16 nValue);
     void setSection_Characteristics(quint32 nNumber,quint32 nValue);
 
-    QString getSection_NameAsString(quint32 nNumber,QList<QString> *pListSectionNames);
+    QString getSection_NameAsString(quint32 nNumber,QList<QString> *pListSectionNameStrings);
     quint32 getSection_VirtualSize(quint32 nNumber,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
     quint32 getSection_VirtualAddress(quint32 nNumber,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
     quint32 getSection_SizeOfRawData(quint32 nNumber,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
