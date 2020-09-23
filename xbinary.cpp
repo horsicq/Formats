@@ -4958,15 +4958,15 @@ qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, QString sS
     return pListStrings->indexOf(sString);
 }
 
-qint32 XBinary::getStringNumberFromListExp(QList<QString> *pList, QString sString)
+qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, QString sString)
 {
     qint32 nResult=-1;
 
-    qint32 nNumberOfRecords=pList->count();
+    qint32 nNumberOfRecords=pListStrings->count();
 
     for(qint32 i=0;i<nNumberOfRecords;i++)
     {
-        if(isRegExpPresent(sString,pList->at(i)))
+        if(isRegExpPresent(sString,pListStrings->at(i)))
         {
             nResult=i;
 
