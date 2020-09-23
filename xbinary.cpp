@@ -4977,9 +4977,9 @@ qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, QString
     return nResult;
 }
 
-bool XBinary::isStringInListPresent(QList<QString> *pList, QString sString)
+bool XBinary::isStringInListPresent(QList<QString> *pListStrings, QString sString)
 {
-    return (getStringNumberFromList(pList,sString)!=-1);
+    return (getStringNumberFromList(pListStrings,sString)!=-1);
 }
 
 bool XBinary::isStringInListPresentExp(QList<QString> *pList, QString sString)
