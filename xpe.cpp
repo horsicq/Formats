@@ -1619,15 +1619,15 @@ qint32 XPE::getSectionNumber(QString sSectionName)
     return getSectionNumber(sSectionName,&listSectionHeaders);
 }
 
-qint32 XPE::getSectionNumber(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSections)
+qint32 XPE::getSectionNumber(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
 {
     qint32 nResult=-1;
 
-    int nNumberOfSections=pListSections->count();
+    int nNumberOfSections=pListSectionHeaders->count();
 
     for(int i=0; i<nNumberOfSections; i++)
     {
-        QString _sSectionName=QString((char *)pListSections->at(i).Name);
+        QString _sSectionName=QString((char *)pListSectionHeaders->at(i).Name);
         _sSectionName.resize(qMin(_sSectionName.length(),XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
 
         if(_sSectionName==sSectionName)
