@@ -2562,13 +2562,13 @@ QList<quint32> XPE::getImportPositionHashes(_MEMORY_MAP *pMemoryMap)
 {
     QList<quint32> listResult;
 
-    QList<IMPORT_HEADER> listImports=getImports(pMemoryMap);
+    QList<IMPORT_HEADER> listImportHeaders=getImports(pMemoryMap);
 
-    int nNumberOfImports=listImports.count();
+    int nNumberOfImports=listImportHeaders.count();
 
     for(int i=0;i<nNumberOfImports;i++)
     {
-        IMPORT_HEADER record=listImports.at(i);
+        IMPORT_HEADER record=listImportHeaders.at(i);
 
         int nNumberOfPositions=record.listPositions.count();
 
