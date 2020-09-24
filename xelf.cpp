@@ -1303,46 +1303,46 @@ QList<XELF_DEF::Elf_Shdr> XELF::getElf_ShdrList()
 
     if(bIs64)
     {
-        QList<XELF_DEF::Elf64_Shdr> list=getElf64_ShdrList();
-        int nNumberOfSections=list.count();
+        QList<XELF_DEF::Elf64_Shdr> listSectionHeaders=getElf64_ShdrList();
+        int nNumberOfSections=listSectionHeaders.count();
 
         for(int i=0;i<nNumberOfSections;i++)
         {
             XELF_DEF::Elf_Shdr record={};
 
-            record.sh_name=list.at(i).sh_name;
-            record.sh_type=list.at(i).sh_type;
-            record.sh_flags=list.at(i).sh_flags;
-            record.sh_addr=list.at(i).sh_addr;
-            record.sh_offset=list.at(i).sh_offset;
-            record.sh_size=list.at(i).sh_size;
-            record.sh_link=list.at(i).sh_link;
-            record.sh_info=list.at(i).sh_info;
-            record.sh_addralign=list.at(i).sh_addralign;
-            record.sh_entsize=list.at(i).sh_entsize;
+            record.sh_name=listSectionHeaders.at(i).sh_name;
+            record.sh_type=listSectionHeaders.at(i).sh_type;
+            record.sh_flags=listSectionHeaders.at(i).sh_flags;
+            record.sh_addr=listSectionHeaders.at(i).sh_addr;
+            record.sh_offset=listSectionHeaders.at(i).sh_offset;
+            record.sh_size=listSectionHeaders.at(i).sh_size;
+            record.sh_link=listSectionHeaders.at(i).sh_link;
+            record.sh_info=listSectionHeaders.at(i).sh_info;
+            record.sh_addralign=listSectionHeaders.at(i).sh_addralign;
+            record.sh_entsize=listSectionHeaders.at(i).sh_entsize;
 
             listResult.append(record);
         }
     }
     else
     {
-        QList<XELF_DEF::Elf32_Shdr> list=getElf32_ShdrList();
-        int nNumberOfSections=list.count();
+        QList<XELF_DEF::Elf32_Shdr> listSectionHeaders=getElf32_ShdrList();
+        int nNumberOfSections=listSectionHeaders.count();
 
         for(int i=0;i<nNumberOfSections;i++)
         {
             XELF_DEF::Elf_Shdr record={};
 
-            record.sh_name=list.at(i).sh_name;
-            record.sh_type=list.at(i).sh_type;
-            record.sh_flags=list.at(i).sh_flags;
-            record.sh_addr=list.at(i).sh_addr;
-            record.sh_offset=list.at(i).sh_offset;
-            record.sh_size=list.at(i).sh_size;
-            record.sh_link=list.at(i).sh_link;
-            record.sh_info=list.at(i).sh_info;
-            record.sh_addralign=list.at(i).sh_addralign;
-            record.sh_entsize=list.at(i).sh_entsize;
+            record.sh_name=listSectionHeaders.at(i).sh_name;
+            record.sh_type=listSectionHeaders.at(i).sh_type;
+            record.sh_flags=listSectionHeaders.at(i).sh_flags;
+            record.sh_addr=listSectionHeaders.at(i).sh_addr;
+            record.sh_offset=listSectionHeaders.at(i).sh_offset;
+            record.sh_size=listSectionHeaders.at(i).sh_size;
+            record.sh_link=listSectionHeaders.at(i).sh_link;
+            record.sh_info=listSectionHeaders.at(i).sh_info;
+            record.sh_addralign=listSectionHeaders.at(i).sh_addralign;
+            record.sh_entsize=listSectionHeaders.at(i).sh_entsize;
 
             listResult.append(record);
         }

@@ -648,7 +648,7 @@ public:
     static qint32 getStringNumberFromList(QList<QString> *pListStrings,QString sString);
     static qint32 getStringNumberFromListExp(QList<QString> *pListStrings,QString sString);
     static bool isStringInListPresent(QList<QString> *pListStrings,QString sString);
-    static bool isStringInListPresentExp(QList<QString> *pList,QString sString);
+    static bool isStringInListPresentExp(QList<QString> *pListStrings,QString sString);
 
     static quint32 elfHash(const quint8 *pData);
 

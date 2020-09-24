@@ -4982,9 +4982,9 @@ bool XBinary::isStringInListPresent(QList<QString> *pListStrings, QString sStrin
     return (getStringNumberFromList(pListStrings,sString)!=-1);
 }
 
-bool XBinary::isStringInListPresentExp(QList<QString> *pList, QString sString)
+bool XBinary::isStringInListPresentExp(QList<QString> *pListStrings, QString sString)
 {
-    return (getStringNumberFromListExp(pList,sString)!=-1);
+    return (getStringNumberFromListExp(pListStrings,sString)!=-1);
 }
 
 quint32 XBinary::elfHash(const quint8 *pData)
