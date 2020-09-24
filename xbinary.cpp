@@ -5328,7 +5328,7 @@ bool XBinary::procentSetCurrentValue(XBinary::PROCENT *pProcent, qint64 nCurrent
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
-    QList<SIGNATURE_RECORD> result;
+    QList<SIGNATURE_RECORD> listResult;
 
     int nSignatureSize=sSignature.size();
 
@@ -5336,19 +5336,19 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
     {
         if(sSignature.at(i)==QChar('.'))
         {
-            i+=_getSignatureRelOffsetFix(&result,sSignature,i);
+            i+=_getSignatureRelOffsetFix(&listResult,sSignature,i);
         }
         else if(sSignature.at(i)==QChar('$'))
         {
-            i+=_getSignatureRelOffset(&result,sSignature,i);
+            i+=_getSignatureRelOffset(&listResult,sSignature,i);
         }
         else if(sSignature.at(i)==QChar('#')) // TODO Check []
         {
-            i+=_getSignatureAddress(&result,sSignature,i);
+            i+=_getSignatureAddress(&listResult,sSignature,i);
         }
         else
         {
-            int nBytes=_getSignatureBytes(&result,sSignature,i);
+            int nBytes=_getSignatureBytes(&listResult,sSignature,i);
 
             if(nBytes)
             {
@@ -5361,7 +5361,7 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
         }
     }
 
-    return result;
+    return listResult;
 }
 
 bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATURE_RECORD> *pListSignatures, qint64 nOffset)
