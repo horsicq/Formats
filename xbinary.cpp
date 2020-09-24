@@ -1334,11 +1334,11 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
 
         sSignature=convertSignature(sSignature);
 
-        QList<SIGNATURE_RECORD> records=getSignatureRecords(sSignature);
+        QList<SIGNATURE_RECORD> listSignatureRecords=getSignatureRecords(sSignature);
 
-        if(records.count()&&(records.at(0).st==ST_COMPAREBYTES))
+        if(listSignatureRecords.count()&&(listSignatureRecords.at(0).st==ST_COMPAREBYTES))
         {
-            QByteArray baFirst=records.at(0).baData;
+            QByteArray baFirst=listSignatureRecords.at(0).baData;
 
             char *pData=baFirst.data();
             qint32 nDataSize=baFirst.size();
@@ -1349,7 +1349,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
 
                 if(nTempOffset!=-1)
                 {
-                    if(_compareSignature(pMemoryMap,&records,nTempOffset))
+                    if(_compareSignature(pMemoryMap,&listSignatureRecords,nTempOffset))
                     {
                         nResult=nTempOffset;
 
@@ -1375,7 +1375,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
         {
             for(qint64 i=0;(i<nSize)&&(!g_bIsFindStop); i++)
             {
-                if(_compareSignature(pMemoryMap,&records,nOffset+i))
+                if(_compareSignature(pMemoryMap,&listSignatureRecords,nOffset+i))
                 {
                     nResult=nOffset+i;
                     break;
