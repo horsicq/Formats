@@ -2061,13 +2061,13 @@ quint64 XPE::getImportHash64(_MEMORY_MAP *pMemoryMap)
 {
     quint64 nResult=0;
 
-    QList<XPE::IMPORT_RECORD> listImports=getImportRecords(pMemoryMap);
+    QList<XPE::IMPORT_RECORD> listImportRecords=getImportRecords(pMemoryMap);
 
-    int nNumberOfImports=listImports.count();
+    int nNumberOfImports=listImportRecords.count();
 
     for(int i=0;i<nNumberOfImports; i++)
     {
-        QString sRecord=listImports.at(i).sLibrary+" "+listImports.at(i).sFunction;
+        QString sRecord=listImportRecords.at(i).sLibrary+" "+listImportRecords.at(i).sFunction;
 
         nResult+=getStringCustomCRC32(sRecord);
     }
@@ -2079,15 +2079,15 @@ quint32 XPE::getImportHash32(_MEMORY_MAP *pMemoryMap)
 {
     quint64 nResult=0;
 
-    QList<XPE::IMPORT_RECORD> listImports=getImportRecords(pMemoryMap);
+    QList<XPE::IMPORT_RECORD> listImportRecords=getImportRecords(pMemoryMap);
 
-    int nNumberOfImports=listImports.count();
+    int nNumberOfImports=listImportRecords.count();
 
     QString sRecord;
 
     for(int i=0;i<nNumberOfImports; i++)
     {
-        sRecord+=listImports.at(i).sLibrary+listImports.at(i).sFunction;
+        sRecord+=listImportRecords.at(i).sLibrary+listImportRecords.at(i).sFunction;
     }
 
     nResult=getStringCustomCRC32(sRecord);
