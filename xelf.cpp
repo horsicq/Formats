@@ -2240,44 +2240,44 @@ QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList()
 
     if(bIs64)
     {
-        QList<XELF_DEF::Elf64_Phdr> list=getElf64_PhdrList();
+        QList<XELF_DEF::Elf64_Phdr> listProgramHeaders=getElf64_PhdrList();
 
-        int nNumberOfPrograms=list.count();
+        int nNumberOfPrograms=listProgramHeaders.count();
 
         for(int i=0;i<nNumberOfPrograms;i++)
         {
             XELF_DEF::Elf_Phdr record={};
 
-            record.p_type=list.at(i).p_type;
-            record.p_flags=list.at(i).p_flags;
-            record.p_offset=list.at(i).p_offset;
-            record.p_vaddr=list.at(i).p_vaddr;
-            record.p_paddr=list.at(i).p_paddr;
-            record.p_filesz=list.at(i).p_filesz;
-            record.p_memsz=list.at(i).p_memsz;
-            record.p_align=list.at(i).p_align;
+            record.p_type=listProgramHeaders.at(i).p_type;
+            record.p_flags=listProgramHeaders.at(i).p_flags;
+            record.p_offset=listProgramHeaders.at(i).p_offset;
+            record.p_vaddr=listProgramHeaders.at(i).p_vaddr;
+            record.p_paddr=listProgramHeaders.at(i).p_paddr;
+            record.p_filesz=listProgramHeaders.at(i).p_filesz;
+            record.p_memsz=listProgramHeaders.at(i).p_memsz;
+            record.p_align=listProgramHeaders.at(i).p_align;
 
             listResult.append(record);
         }
     }
     else
     {
-        QList<XELF_DEF::Elf32_Phdr> list=getElf32_PhdrList();
+        QList<XELF_DEF::Elf32_Phdr> listProgramHeaders=getElf32_PhdrList();
 
-        int nNumberOfPrograms=list.count();
+        int nNumberOfPrograms=listProgramHeaders.count();
 
         for(int i=0;i<nNumberOfPrograms;i++)
         {
             XELF_DEF::Elf_Phdr record={};
 
-            record.p_type=list.at(i).p_type;
-            record.p_flags=list.at(i).p_flags;
-            record.p_offset=list.at(i).p_offset;
-            record.p_vaddr=list.at(i).p_vaddr;
-            record.p_paddr=list.at(i).p_paddr;
-            record.p_filesz=list.at(i).p_filesz;
-            record.p_memsz=list.at(i).p_memsz;
-            record.p_align=list.at(i).p_align;
+            record.p_type=listProgramHeaders.at(i).p_type;
+            record.p_flags=listProgramHeaders.at(i).p_flags;
+            record.p_offset=listProgramHeaders.at(i).p_offset;
+            record.p_vaddr=listProgramHeaders.at(i).p_vaddr;
+            record.p_paddr=listProgramHeaders.at(i).p_paddr;
+            record.p_filesz=listProgramHeaders.at(i).p_filesz;
+            record.p_memsz=listProgramHeaders.at(i).p_memsz;
+            record.p_align=listProgramHeaders.at(i).p_align;
 
             listResult.append(record);
         }
