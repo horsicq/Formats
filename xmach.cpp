@@ -710,9 +710,9 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
     result.nRawSize=getSize();
 
-    QList<COMMAND_RECORD> listLC=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
 
-    QList<SEGMENT_RECORD> listSegmentRecords=getSegmentRecords(&listLC);
+    QList<SEGMENT_RECORD> listSegmentRecords=getSegmentRecords(&listCommandRecords);
 
     int nNumberOfSegments=listSegmentRecords.count();
 
