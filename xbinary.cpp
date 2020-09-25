@@ -2889,6 +2889,26 @@ QSet<XBinary::FT> XBinary::getFileTypes(QString sFileName)
     return result;
 }
 
+QSet<XBinary::FT> XBinary::getFileTypes(QByteArray *pbaData)
+{
+    QSet<XBinary::FT> result;
+
+    QBuffer buffer;
+
+    buffer.setBuffer(pbaData);
+
+    if(buffer.open(QIODevice::ReadOnly))
+    {
+        XBinary _binary(&buffer);
+
+        result=_binary.getFileTypes();
+
+        buffer.close();
+    }
+
+    return result;
+}
+
 XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice)
 {
     XBinary::FT result=FT_UNKNOWN;

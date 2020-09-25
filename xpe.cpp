@@ -2377,7 +2377,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
 
 QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA,qint64 nRVA)
 {
-    QList<XPE::IMPORT_POSITION> listResult;
+    QList<IMPORT_POSITION> listResult;
 
     qint64 nThunksOffset=XBinary::relAddressToOffset(pMemoryMap,nThunksRVA);
 
@@ -2588,7 +2588,7 @@ QList<quint32> XPE::getImportPositionHashes(_MEMORY_MAP *pMemoryMap)
 
 bool XPE::isImportLibraryPresentI(QString sLibrary)
 {
-    QList<XPE::IMPORT_HEADER> listImports=getImports();
+    QList<IMPORT_HEADER> listImports=getImports();
 
     return isImportLibraryPresentI(sLibrary,&listImports);
 }
@@ -3151,7 +3151,7 @@ bool XPE::isResourcePresent(QString sName1, QString sName2, QList<XPE::RESOURCE_
 
 bool XPE::isResourceManifestPresent()
 {
-    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+    QList<RESOURCE_RECORD> listResources=getResources();
 
     return isResourceManifestPresent(&listResources);
 }
@@ -3163,7 +3163,7 @@ bool XPE::isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRe
 
 QString XPE::getResourceManifest()
 {
-    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+    QList<RESOURCE_RECORD> listResources=getResources();
 
     return getResourceManifest(&listResources);
 }
@@ -3185,7 +3185,7 @@ QString XPE::getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListResourceRecor
 
 bool XPE::isResourceVersionPresent()
 {
-    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+    QList<RESOURCE_RECORD> listResources=getResources();
 
     return isResourceVersionPresent(&listResources);
 }
@@ -3307,7 +3307,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResourceVersionResult,
 
 XPE::RESOURCE_VERSION XPE::getResourceVersion()
 {
-    QList<XPE::RESOURCE_RECORD> listResourceRecords=getResources();
+    QList<RESOURCE_RECORD> listResourceRecords=getResources();
 
     return getResourceVersion(&listResourceRecords);
 }
@@ -3471,8 +3471,8 @@ void XPE::setFixedFileInfo_dwFileDateLS(quint32 nValue)
 
 QString XPE::getResourceVersionValue(QString sKey)
 {
-    QList<XPE::RESOURCE_RECORD> listResourceRecords=getResources();
-    XPE::RESOURCE_VERSION resVersion=getResourceVersion(&listResourceRecords);
+    QList<RESOURCE_RECORD> listResourceRecords=getResources();
+    RESOURCE_VERSION resVersion=getResourceVersion(&listResourceRecords);
 
     return getResourceVersionValue(sKey,&resVersion);
 }
@@ -3501,7 +3501,7 @@ QString XPE::getResourceVersionValue(QString sKey, XPE::RESOURCE_VERSION *pResou
 
 quint32 XPE::getResourceIdByNumber(quint32 nNumber)
 {
-    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+    QList<RESOURCE_RECORD> listResources=getResources();
 
     return getResourceIdByNumber(nNumber,&listResources);
 }
@@ -3520,7 +3520,7 @@ quint32 XPE::getResourceIdByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> 
 
 QString XPE::getResourceNameByNumber(quint32 nNumber)
 {
-    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+    QList<RESOURCE_RECORD> listResources=getResources();
 
     return getResourceNameByNumber(nNumber,&listResources);
 }
@@ -3539,7 +3539,7 @@ QString XPE::getResourceNameByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD
 
 qint64 XPE::getResourceOffsetByNumber(quint32 nNumber)
 {
-    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+    QList<RESOURCE_RECORD> listResources=getResources();
 
     return getResourceOffsetByNumber(nNumber,&listResources);
 }
@@ -3558,7 +3558,7 @@ qint64 XPE::getResourceOffsetByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECOR
 
 qint64 XPE::getResourceSizeByNumber(quint32 nNumber)
 {
-    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+    QList<RESOURCE_RECORD> listResources=getResources();
 
     return getResourceSizeByNumber(nNumber,&listResources);
 }
@@ -3577,7 +3577,7 @@ qint64 XPE::getResourceSizeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD>
 
 quint32 XPE::getResourceTypeByNumber(quint32 nNumber)
 {
-    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+    QList<RESOURCE_RECORD> listResources=getResources();
 
     return getResourceTypeByNumber(nNumber,&listResources);
 }
@@ -3596,7 +3596,7 @@ quint32 XPE::getResourceTypeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD
 
 qint64 XPE::getResourceNameOffset(QString sName)
 {
-    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+    QList<RESOURCE_RECORD> listResources=getResources();
 
     return getResourceNameOffset(sName,&listResources);
 }
@@ -3621,7 +3621,7 @@ qint64 XPE::getResourceNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pL
 
 bool XPE::isResourceNamePresent(QString sName)
 {
-    QList<XPE::RESOURCE_RECORD> listResources=getResources();
+    QList<RESOURCE_RECORD> listResources=getResources();
 
     return isResourceNamePresent(sName,&listResources);
 }
@@ -4041,7 +4041,7 @@ bool XPE::addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QStri
 
         if(pe.isValid())
         {
-            QList<XPE::IMPORT_HEADER> listImportHeaders=mapIATToList(pMapIAT,pe.is64());
+            QList<IMPORT_HEADER> listImportHeaders=mapIATToList(pMapIAT,pe.is64());
 #ifdef QT_DEBUG
             qDebug("XPE::addImportSection:mapIATToList: %lld msec",timer.elapsed());
 #endif
@@ -4077,7 +4077,7 @@ bool XPE::addImportSection(QString sFileName,bool bIsImage, QMap<qint64, QString
 
 QList<XPE::IMPORT_HEADER> XPE::mapIATToList(QMap<qint64, QString> *pMapIAT,bool bIs64)
 {
-    QList<XPE::IMPORT_HEADER> listResult;
+    QList<IMPORT_HEADER> listResult;
 
     IMPORT_HEADER record={};
 
@@ -6721,7 +6721,7 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
 
 QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, int nIndex)
 {
-    QList<XPE::DELAYIMPORT_POSITION> listResult;
+    QList<DELAYIMPORT_POSITION> listResult;
 
     qint64 nDelayImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
 
@@ -6870,7 +6870,7 @@ QList<XPE::BOUND_IMPORT_POSITION> XPE::getBoundImportPositions(XBinary::_MEMORY_
 {
     Q_UNUSED(pMemoryMap)
 
-    QList<XPE::BOUND_IMPORT_POSITION> listResult;
+    QList<BOUND_IMPORT_POSITION> listResult;
 
     qint64 nBoundImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
 
@@ -6959,7 +6959,7 @@ QString XPE::getImportLibraryName(quint32 nNumber)
 {
     QString sResult;
 
-    QList<XPE::IMAGE_IMPORT_DESCRIPTOR_EX> listImports=getImportDescriptorsEx(); // TODO Check
+    QList<IMAGE_IMPORT_DESCRIPTOR_EX> listImports=getImportDescriptorsEx(); // TODO Check
 
     if(nNumber<(quint32)listImports.count())
     {
@@ -8858,7 +8858,7 @@ QList<qint64> XPE::getRelocsAsRVAList()
 
 QList<XPE::RELOCS_HEADER> XPE::getRelocsHeaders()
 {
-    QList<XPE::RELOCS_HEADER> listResult;
+    QList<RELOCS_HEADER> listResult;
 
     qint64 nRelocsOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
 
@@ -8897,7 +8897,7 @@ QList<XPE::RELOCS_HEADER> XPE::getRelocsHeaders()
 
 QList<XPE::RELOCS_POSITION> XPE::getRelocsPositions(qint64 nOffset)
 {
-    QList<XPE::RELOCS_POSITION> listResult;
+    QList<RELOCS_POSITION> listResult;
 
     XPE_DEF::IMAGE_BASE_RELOCATION ibr=_readIMAGE_BASE_RELOCATION(nOffset);
 

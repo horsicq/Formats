@@ -473,6 +473,7 @@ public:
     QSet<FT> getFileTypes();
     static QSet<FT> getFileTypes(QIODevice *pDevice); // mb TODO isImage
     static QSet<FT> getFileTypes(QString sFileName);
+    static QSet<FT> getFileTypes(QByteArray *pbaData);
 
     static FT getPrefFileType(QIODevice *pDevice);
 
