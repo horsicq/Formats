@@ -876,9 +876,9 @@ bool XMACH::isLibraryRecordNamePresent(QString sName, QList<XMACH::LIBRARY_RECOR
 
 QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords()
 {
-    QList<XMACH::COMMAND_RECORD> listCR=getCommandRecords();
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords();
 
-    return getSegmentRecords(&listCR);
+    return getSegmentRecords(&listCommandRecords);
 }
 
 QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
