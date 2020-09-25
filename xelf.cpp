@@ -3614,8 +3614,8 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
     result.nRawSize=getSize();
 
-    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
-    QList<XELF_DEF::Elf_Phdr> listSegments=_getPrograms(&_listPhdr,XELF_DEF::S_PT_LOAD);
+    QList<XELF_DEF::Elf_Phdr> listProgramHeaders=getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> listSegments=_getPrograms(&listProgramHeaders,XELF_DEF::S_PT_LOAD);
 
 //    bool bIs64=is64();
     int nNumberOfSegments=listSegments.count();
