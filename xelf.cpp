@@ -3025,9 +3025,9 @@ QByteArray XELF::getSectionByName(QString sSectionName)
 
 XBinary::OS_ANSISTRING XELF::getProgramInterpreterName()
 {
-    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> listProgramHeaders=getElf_PhdrList();
 
-    return getProgramInterpreterName(&_listPhdr);
+    return getProgramInterpreterName(&listProgramHeaders);
 }
 
 XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
