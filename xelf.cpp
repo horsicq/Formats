@@ -3057,9 +3057,9 @@ QList<QString> XELF::getCommentStrings(int nSection)
 
 QList<XELF::NOTE> XELF::getNotes()
 {
-    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> listProgramHeaders=getElf_PhdrList();
 
-    return getNotes(&_listPhdr);
+    return getNotes(&listProgramHeaders);
 }
 
 //QString XELF::getCompatibleKernelVersion()
