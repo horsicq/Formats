@@ -3165,9 +3165,9 @@ XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
 QList<XELF::TAG_STRUCT> XELF::getTagStructs()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
-    QList<XELF_DEF::Elf_Phdr> _listPhdr=getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> listProgramHeaders=getElf_PhdrList();
 
-    return getTagStructs(&_listPhdr,&memoryMap);
+    return getTagStructs(&listProgramHeaders,&memoryMap);
 }
 
 QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, XBinary::_MEMORY_MAP *pMemoryMap)
