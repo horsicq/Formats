@@ -1116,9 +1116,9 @@ qint32 XMACH::getSectionNumber(QString sName, QList<XMACH::SECTION_RECORD> *pLis
 
 qint32 XMACH::getSectionNumber(QString sName)
 {
-    QList<SECTION_RECORD> listSections=getSectionRecords();
+    QList<SECTION_RECORD> listSectionRecords=getSectionRecords();
 
-    return getSectionNumber(sName,&listSections);
+    return getSectionNumber(sName,&listSectionRecords);
 }
 
 quint32 XMACH::getLibraryCurrentVersion(QString sName, QList<XMACH::LIBRARY_RECORD> *pListLibraryRecords)
