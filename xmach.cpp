@@ -586,9 +586,9 @@ QByteArray XMACH::getCommand(quint32 nCommandID, int nIndex)
 
 bool XMACH::setCommand(quint32 nCommandID, QByteArray baData, int nIndex)
 {
-    QList<COMMAND_RECORD> list=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
 
-    return setCommand(nCommandID,baData,nIndex,&list);
+    return setCommand(nCommandID,baData,nIndex,&listCommandRecords);
 }
 
 QByteArray XMACH::getCommand(quint32 nCommandID, int nIndex, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
