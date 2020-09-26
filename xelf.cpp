@@ -3806,9 +3806,9 @@ qint32 XELF::getSectionNumber(QString sSectionName)
     QByteArray baStringTable=getSection(nStringTableSection);
     QList<XELF_DEF::Elf_Shdr> listSH=getElf_ShdrList();
 
-    QList<XELF::SECTION_RECORD> listSR=getSectionRecords(&listSH,bIs64,&baStringTable);
+    QList<XELF::SECTION_RECORD> listSectionRecords=getSectionRecords(&listSH,bIs64,&baStringTable);
 
-    return getSectionNumber(sSectionName,&listSR);
+    return getSectionNumber(sSectionName,&listSectionRecords);
 }
 
 qint32 XELF::getSectionNumber(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
