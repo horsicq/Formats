@@ -3410,9 +3410,9 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
 XBinary::OS_ANSISTRING XELF::getRunPath()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
-    QList<XELF::TAG_STRUCT> listStructs=getTagStructs();
+    QList<XELF::TAG_STRUCT> listTagStructs=getTagStructs();
 
-    return getRunPath(&memoryMap,&listStructs);
+    return getRunPath(&memoryMap,&listTagStructs);
 }
 
 XBinary::OS_ANSISTRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs)
