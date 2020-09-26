@@ -946,9 +946,9 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
 QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords()
 {
-    QList<XMACH::COMMAND_RECORD> listCR=getCommandRecords();
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords();
 
-    return getSectionRecords(&listCR);
+    return getSectionRecords(&listCommandRecords);
 }
 
 QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
