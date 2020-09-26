@@ -3368,9 +3368,9 @@ XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList
 QList<QString> XELF::getLibraries()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
-    QList<XELF::TAG_STRUCT> listStructs=getTagStructs();
+    QList<XELF::TAG_STRUCT> listTagStructs=getTagStructs();
 
-    return getLibraries(&memoryMap,&listStructs);
+    return getLibraries(&memoryMap,&listTagStructs);
 }
 
 QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT> *pList)
