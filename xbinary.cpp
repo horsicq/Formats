@@ -5483,7 +5483,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
     return true;
 }
 
-int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSignatures, QString sSignature, int nStartIndex)
+int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex)
 {
     int nResult=0;
     int nSignatureSize=sSignature.size();
@@ -5508,7 +5508,7 @@ int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSi
         record.nSizeOfAddr=0;
         record.nBaseAddress=nResult/2;
 
-        pListSignatures->append(record);
+        pListSignatureRecords->append(record);
     }
 
     return nResult;
