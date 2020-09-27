@@ -8080,7 +8080,7 @@ bool XPE::isNetMetadataPresent(XPE::CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pM
 
 bool XPE::isNETAnsiStringPresent(QString sString)
 {
-    XPE::CLI_INFO cliInfo=getCliInfo(true);
+    CLI_INFO cliInfo=getCliInfo(true);
 
     return isNETAnsiStringPresent(sString,&cliInfo);
 }
