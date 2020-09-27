@@ -2588,9 +2588,9 @@ QList<quint32> XPE::getImportPositionHashes(_MEMORY_MAP *pMemoryMap)
 
 bool XPE::isImportLibraryPresentI(QString sLibrary)
 {
-    QList<IMPORT_HEADER> listImports=getImports();
+    QList<IMPORT_HEADER> listImportHeaders=getImports();
 
-    return isImportLibraryPresentI(sLibrary,&listImports);
+    return isImportLibraryPresentI(sLibrary,&listImportHeaders);
 }
 
 bool XPE::isImportLibraryPresentI(QString sLibrary, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
@@ -2613,9 +2613,9 @@ bool XPE::isImportLibraryPresentI(QString sLibrary, QList<XPE::IMPORT_HEADER> *p
 
 bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction)
 {
-    QList<XPE::IMPORT_HEADER> listImports=getImports();
+    QList<IMPORT_HEADER> listImportHeaders=getImports();
 
-    return isImportFunctionPresentI(sLibrary,sFunction,&listImports);
+    return isImportFunctionPresentI(sLibrary,sFunction,&listImportHeaders);
 }
 
 bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
