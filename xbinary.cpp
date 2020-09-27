@@ -5514,7 +5514,7 @@ int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSi
     return nResult;
 }
 
-int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSignatures, QString sSignature, int nStartIndex)
+int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex)
 {
     int nResult=0;
 
@@ -5540,7 +5540,7 @@ int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSigna
         record.nSizeOfAddr=nResult/2;
         record.nBaseAddress=0;
 
-        pListSignatures->append(record);
+        pListSignatureRecords->append(record);
     }
 
     return nResult;
