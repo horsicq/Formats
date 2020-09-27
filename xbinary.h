@@ -691,7 +691,7 @@ private:
     int _getSignatureRelOffsetFix(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     int _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     int _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
-    int _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatures,QString sSignature,int nStartIndex);
+    int _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
 
 protected:
     bool _isOffsetValid(qint64 nOffset);

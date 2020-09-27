@@ -5597,7 +5597,7 @@ int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
     return nResult;
 }
 
-int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignatures, QString sSignature, int nStartIndex)
+int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex)
 {
     int nResult=0;
 
@@ -5631,7 +5631,7 @@ int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignature
         baData.append(sBytes);
         record.baData=QByteArray::fromHex(baData);
 
-        pListSignatures->append(record);
+        pListSignatureRecords->append(record);
     }
 
     return nResult;
