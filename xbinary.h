@@ -686,7 +686,7 @@ private:
     static QString qcharToHex(QChar cSymbol);
 
     QList<SIGNATURE_RECORD> getSignatureRecords(QString sSignature);
-    bool _compareSignature(_MEMORY_MAP *pMemoryMap,QList<SIGNATURE_RECORD> *pListSignatures,qint64 nOffset);
+    bool _compareSignature(_MEMORY_MAP *pMemoryMap,QList<SIGNATURE_RECORD> *pListSignatureRecords,qint64 nOffset);
 
     int _getSignatureRelOffsetFix(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     int _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);

@@ -5384,27 +5384,27 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
     return listResult;
 }
 
-bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATURE_RECORD> *pListSignatures, qint64 nOffset)
+bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, qint64 nOffset)
 {
     // TODO optimize
-    int nNumberOfSignatures=pListSignatures->count();
+    int nNumberOfSignatures=pListSignatureRecords->count();
 
     for(int i=0; i<nNumberOfSignatures; i++)
     {
         qint64 _nAddress=0;
 
-        switch(pListSignatures->at(i).st)
+        switch(pListSignatureRecords->at(i).st)
         {
             case XBinary::ST_COMPAREBYTES:
                 {
-                    QByteArray baData=read_array(nOffset,pListSignatures->at(i).baData.size());
+                    QByteArray baData=read_array(nOffset,pListSignatureRecords->at(i).baData.size());
 
-                    if(baData.size()!=pListSignatures->at(i).baData.size())
+                    if(baData.size()!=pListSignatureRecords->at(i).baData.size())
                     {
                         return false;
                     }
 
-                    if(!compareMemory(baData.data(),(char *)(pListSignatures->at(i).baData.data()),baData.size()))
+                    if(!compareMemory(baData.data(),(char *)(pListSignatureRecords->at(i).baData.data()),baData.size()))
                     {
                         return false;
                     }
@@ -5415,13 +5415,13 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
 
             case XBinary::ST_RELOFFSETFIX:
                 // TODO Check
-                nOffset+=pListSignatures->at(i).nBaseAddress;
+                nOffset+=pListSignatureRecords->at(i).nBaseAddress;
                 break;
 
             case XBinary::ST_RELOFFSET:
                 _nAddress=offsetToAddress(pMemoryMap,nOffset);
 
-                switch(pListSignatures->at(i).nSizeOfAddr)
+                switch(pListSignatureRecords->at(i).nSizeOfAddr)
                 {
                     case 1:
                         _nAddress+=1+read_int8(nOffset);
@@ -5445,7 +5445,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 break;
 
             case XBinary::ST_ADDRESS:
-                switch(pListSignatures->at(i).nSizeOfAddr)
+                switch(pListSignatureRecords->at(i).nSizeOfAddr)
                 {
                     case 1:
                         _nAddress=read_uint8(nOffset);
