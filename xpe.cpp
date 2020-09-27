@@ -1125,13 +1125,13 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders()
 
 QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders, bool bIsImage)
 {
-    QList<XPE::SECTION_RECORD> listResult;
+    QList<SECTION_RECORD> listResult;
 
     int nNumberOfSections=pListSectionHeaders->count();
 
     for(int i=0; i<nNumberOfSections; i++)
     {
-        XPE::SECTION_RECORD record={};
+        SECTION_RECORD record={};
 
         record.sName=QString((char *)pListSectionHeaders->at(i).Name);
         record.sName.resize(qMin(record.sName.length(),XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
