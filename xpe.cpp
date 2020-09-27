@@ -8092,7 +8092,7 @@ bool XPE::isNETAnsiStringPresent(QString sString, XPE::CLI_INFO *pCliInfo)
 
 bool XPE::isNETUnicodeStringPresent(QString sString)
 {
-    XPE::CLI_INFO cliInfo=getCliInfo(true);
+    CLI_INFO cliInfo=getCliInfo(true);
 
     return isNETUnicodeStringPresent(sString,&cliInfo);
 }
@@ -8988,7 +8988,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pLi
                 }
             }
 
-            QByteArray baRelocs=XPE::relocsAsRVAListToByteArray(&listRVAs,pe.is64());
+            QByteArray baRelocs=relocsAsRVAListToByteArray(&listRVAs,pe.is64());
 
             XPE_DEF::IMAGE_SECTION_HEADER ish={};
 
