@@ -3089,7 +3089,7 @@ QList<XELF::NOTE> XELF::getNotes()
 
 QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
-    QList<XELF::NOTE> listResult;
+    QList<NOTE> listResult;
 
     QList<XELF_DEF::Elf_Phdr> listNotes=_getPrograms(pListProgramHeaders,XELF_DEF::S_PT_NOTE);
 
@@ -3110,7 +3110,7 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 
 QList<XELF::NOTE> XELF::_getNotes(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
 {
-    QList<XELF::NOTE> listResult;
+    QList<NOTE> listResult;
 
     while(nSize>0)
     {
