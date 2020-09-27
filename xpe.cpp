@@ -2061,7 +2061,7 @@ quint64 XPE::getImportHash64(_MEMORY_MAP *pMemoryMap)
 {
     quint64 nResult=0;
 
-    QList<XPE::IMPORT_RECORD> listImportRecords=getImportRecords(pMemoryMap);
+    QList<IMPORT_RECORD> listImportRecords=getImportRecords(pMemoryMap);
 
     int nNumberOfImports=listImportRecords.count();
 
@@ -2079,7 +2079,7 @@ quint32 XPE::getImportHash32(_MEMORY_MAP *pMemoryMap)
 {
     quint64 nResult=0;
 
-    QList<XPE::IMPORT_RECORD> listImportRecords=getImportRecords(pMemoryMap);
+    QList<IMPORT_RECORD> listImportRecords=getImportRecords(pMemoryMap);
 
     int nNumberOfImports=listImportRecords.count();
 
