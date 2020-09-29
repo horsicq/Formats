@@ -29,8 +29,7 @@ const quint32 S_IMAGE_VXD_SIGNATURE         =0x454C;      // LE
 const quint32 S_IMAGE_LX_SIGNATURE          =0x584C;      // LX
 
 struct IMAGE_VXD_HEADER
-{
-    // Windows VXD header
+{      // Windows VXD header
     quint16 e32_magic;                  // Magic number
     quint8 e32_border;                  // The byte ordering for the VXD
     quint8 e32_worder;                  // The word ordering for the VXD
@@ -77,11 +76,11 @@ struct IMAGE_VXD_HEADER
     quint32 e32_instpreload;            // Number of instance pages in preload section of VXD file
     quint32 e32_instdemand;             // Number of instance pages in demand load section of VXD file
     quint32 e32_heapsize;               // Size of heap - for 16-bit apps
-    //    BYTE   e32_res3[12];              // Reserved words
-    //    DWORD  e32_winresoff;
-    //    DWORD  e32_winreslen;
-    //    WORD   e32_devid;                   // Device ID for VxD
-    //    WORD   e32_ddkver;                  // DDK version for VxD
+//    BYTE   e32_res3[12];              // Reserved words
+//    DWORD  e32_winresoff;
+//    DWORD  e32_winreslen;
+//    WORD   e32_devid;                   // Device ID for VxD
+//    WORD   e32_ddkver;                  // DDK version for VxD
 };
 
 struct o32_obj
