@@ -806,15 +806,15 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECOR
 
     bool bIsBigEndian=isBigEndian();
 
-    QList<COMMAND_RECORD> listLCLibraries=getCommandRecords(XMACH_DEF::S_LC_LOAD_DYLIB,pListCommandRecords);
+    QList<COMMAND_RECORD> listLibraryCommandRecords=getCommandRecords(XMACH_DEF::S_LC_LOAD_DYLIB,pListCommandRecords);
 
-    int nNumberOfCommands=listLCLibraries.count();
+    int nNumberOfCommands=listLibraryCommandRecords.count();
 
     for(int i=0;i<nNumberOfCommands;i++)
     {
         LIBRARY_RECORD record={};
 
-        qint64 nOffset=listLCLibraries.at(i).nOffset;
+        qint64 nOffset=listLibraryCommandRecords.at(i).nOffset;
 
         qint64 nNameOffset=read_uint32(nOffset+8+offsetof(XMACH_DEF::dylib,name),bIsBigEndian);
         record.sFullName=read_ansiString(nOffset+nNameOffset);
