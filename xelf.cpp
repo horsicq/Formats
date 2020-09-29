@@ -3234,7 +3234,7 @@ QList<XELF::TAG_STRUCT> XELF::_getTagStructs(qint64 nOffset, qint64 nSize, bool 
 
 QList<XELF::TAG_STRUCT> XELF::_getTagStructs(QList<XELF::TAG_STRUCT> *pListTagStructs, qint64 nTag)
 {
-    QList<XELF::TAG_STRUCT> listResult;
+    QList<TAG_STRUCT> listResult;
 
     int nNumberOfTags=pListTagStructs->count();
 
