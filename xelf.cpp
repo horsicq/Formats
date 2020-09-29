@@ -3347,8 +3347,8 @@ XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList
 {
     OFFSETSIZE result={};
 
-    QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRTAB);
-    QList<TAG_STRUCT> listStrSize=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRSZ);
+    QList<TAG_STRUCT> listStrTab=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRTAB);
+    QList<TAG_STRUCT> listStrSize=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRSZ);
 
     if(listStrTab.count()&&listStrSize.count())
     {
@@ -3377,7 +3377,7 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
 {
     QList<QString> listResult;
 
-    QList<TAG_STRUCT> listNeeded=XELF::_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
+    QList<TAG_STRUCT> listNeeded=_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
 
     OFFSETSIZE offsetSize=getStringTable(pMemoryMap,pList);
 
@@ -3410,7 +3410,7 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
 XBinary::OS_ANSISTRING XELF::getRunPath()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
-    QList<XELF::TAG_STRUCT> listTagStructs=getTagStructs();
+    QList<TAG_STRUCT> listTagStructs=getTagStructs();
 
     return getRunPath(&memoryMap,&listTagStructs);
 }
@@ -3419,9 +3419,9 @@ XBinary::OS_ANSISTRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<
 {
     OS_ANSISTRING result={};
 
-    QList<XELF::TAG_STRUCT> listRunPath=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_RUNPATH);
-    QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRTAB);
-    QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRSZ);
+    QList<TAG_STRUCT> listRunPath=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_RUNPATH);
+    QList<TAG_STRUCT> listStrTab=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRTAB);
+    QList<TAG_STRUCT> listStrSize=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRSZ);
 
     if(listStrTab.count()&&listStrSize.count()&&listRunPath.count())
     {
