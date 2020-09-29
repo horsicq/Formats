@@ -3348,7 +3348,7 @@ XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList
     OFFSETSIZE result={};
 
     QList<XELF::TAG_STRUCT> listStrTab=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRTAB);
-    QList<XELF::TAG_STRUCT> listStrSize=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRSZ);
+    QList<TAG_STRUCT> listStrSize=XELF::_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRSZ);
 
     if(listStrTab.count()&&listStrSize.count())
     {
@@ -3368,7 +3368,7 @@ XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList
 QList<QString> XELF::getLibraries()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
-    QList<XELF::TAG_STRUCT> listTagStructs=getTagStructs();
+    QList<TAG_STRUCT> listTagStructs=getTagStructs();
 
     return getLibraries(&memoryMap,&listTagStructs);
 }
@@ -3377,7 +3377,7 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
 {
     QList<QString> listResult;
 
-    QList<XELF::TAG_STRUCT> listNeeded=XELF::_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
+    QList<TAG_STRUCT> listNeeded=XELF::_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
 
     OFFSETSIZE offsetSize=getStringTable(pMemoryMap,pList);
 
