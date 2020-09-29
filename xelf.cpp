@@ -3338,7 +3338,7 @@ void XELF::setDynamicArrayValue(qint64 nOffset, qint64 nValue)
 XBinary::OFFSETSIZE XELF::getStringTable()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
-    QList<XELF::TAG_STRUCT> listStructs=getTagStructs();
+    QList<TAG_STRUCT> listStructs=getTagStructs();
 
     return getStringTable(&memoryMap,&listStructs);
 }
