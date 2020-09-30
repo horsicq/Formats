@@ -850,7 +850,7 @@ XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QString sName, QList<XMACH::
 
 bool XMACH::isLibraryRecordNamePresent(QString sName)
 {
-    QList<XMACH::LIBRARY_RECORD> listLibraryRecords=getLibraryRecords();
+    QList<LIBRARY_RECORD> listLibraryRecords=getLibraryRecords();
 
     return isLibraryRecordNamePresent(sName,&listLibraryRecords);
 }
