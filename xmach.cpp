@@ -1034,7 +1034,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
 quint32 XMACH::getNumberOfSections()
 {
-    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
 
     return getNumberOfSections(&listCommandRecords);
 }
