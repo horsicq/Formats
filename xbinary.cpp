@@ -247,6 +247,12 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_MACH:               sResult=QString("MACH");        break;
         case FT_MACH32:             sResult=QString("MACH32");      break;
         case FT_MACH64:             sResult=QString("MACH64");      break;
+        // Extra
+        case FT_ZIP:                sResult=QString("ZIP");         break;
+        case FT_CAB:                sResult=QString("CAB");         break;
+        case FT_RAR:                sResult=QString("RAR");         break;
+        case FT_7Z:                 sResult=QString("7Z");          break;
+        case FT_PNG:                sResult=QString("PNG");         break;
     }
 
     return sResult;
@@ -2742,7 +2748,7 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
     return bResult;
 }
 
-QSet<XBinary::FT> XBinary::getFileTypes()
+QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
 {
     QSet<XBinary::FT> stResult;
 
@@ -2855,6 +2861,22 @@ QSet<XBinary::FT> XBinary::getFileTypes()
         }
     }
 
+    if(bExtra)
+    {
+        _MEMORY_MAP memoryMap=XBinary::getMemoryMap();
+
+        if(compareSignature(&memoryMap,"'PK'0304",0)||compareSignature(&memoryMap,"'PK'0506",0))
+        {
+            stResult.insert(FT_ZIP);
+            // TODO Check APK, JAR
+        }
+        else if(compareSignature(&memoryMap,"89'PNG\r\n'1A0A........'IHDR'",0))
+        {
+            stResult.insert(FT_PNG);
+        }
+        // TODO more
+    }
+
 //    if(isPlainTextType())
 //    {
 //        stResult.insert(FT_TEXT);
@@ -2863,14 +2885,14 @@ QSet<XBinary::FT> XBinary::getFileTypes()
     return stResult;
 }
 
-QSet<XBinary::FT> XBinary::getFileTypes(QIODevice *pDevice)
+QSet<XBinary::FT> XBinary::getFileTypes(QIODevice *pDevice,bool bExtra)
 {
     XBinary _binary(pDevice);
 
-    return _binary.getFileTypes();
+    return _binary.getFileTypes(bExtra);
 }
 
-QSet<XBinary::FT> XBinary::getFileTypes(QString sFileName)
+QSet<XBinary::FT> XBinary::getFileTypes(QString sFileName,bool bExtra)
 {
     QSet<XBinary::FT> result;
 
@@ -2881,7 +2903,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(QString sFileName)
     {
         XBinary _binary(&file);
 
-        result=_binary.getFileTypes();
+        result=_binary.getFileTypes(bExtra);
 
         file.close();
     }
@@ -2889,7 +2911,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(QString sFileName)
     return result;
 }
 
-QSet<XBinary::FT> XBinary::getFileTypes(QByteArray *pbaData)
+QSet<XBinary::FT> XBinary::getFileTypes(QByteArray *pbaData,bool bExtra)
 {
     QSet<XBinary::FT> result;
 
@@ -2901,7 +2923,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(QByteArray *pbaData)
     {
         XBinary _binary(&buffer);
 
-        result=_binary.getFileTypes();
+        result=_binary.getFileTypes(bExtra);
 
         buffer.close();
     }

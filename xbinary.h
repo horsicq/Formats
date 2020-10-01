@@ -158,7 +158,13 @@ public:
         FT_ELF64,
         FT_MACH,
         FT_MACH32,
-        FT_MACH64
+        FT_MACH64,
+        // Extra
+        FT_ZIP,
+        FT_CAB,
+        FT_RAR,
+        FT_7Z,
+        FT_PNG,
     };
 
     enum MODE
@@ -470,10 +476,10 @@ public:
     static bool dumpToFile(QString sFileName,const char *pData,qint64 nDataSize);
     bool dumpToFile(QString sFileName,qint64 nDataOffset,qint64 nDataSize);
 
-    QSet<FT> getFileTypes();
-    static QSet<FT> getFileTypes(QIODevice *pDevice); // mb TODO isImage
-    static QSet<FT> getFileTypes(QString sFileName);
-    static QSet<FT> getFileTypes(QByteArray *pbaData);
+    QSet<FT> getFileTypes(bool bExtra=false);
+    static QSet<FT> getFileTypes(QIODevice *pDevice,bool bExtra=false); // mb TODO isImage
+    static QSet<FT> getFileTypes(QString sFileName,bool bExtra=false);
+    static QSet<FT> getFileTypes(QByteArray *pbaData,bool bExtra=false);
 
     static FT getPrefFileType(QIODevice *pDevice);
 
