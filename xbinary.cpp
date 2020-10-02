@@ -252,6 +252,8 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_RAR:                sResult=QString("RAR");         break;
         case FT_7Z:                 sResult=QString("7Z");          break;
         case FT_PNG:                sResult=QString("PNG");         break;
+        case FT_JPEG:               sResult=QString("JPEG");        break;
+        case FT_GIF:                sResult=QString("GIF");         break;
         case FT_TEXT:               sResult=QString("Text");        break;
         case FT_PLAINTEXT:          sResult=QString("Plain Text");  break;
         case FT_UTF8:               sResult=QString("UTF8");        break;
@@ -2880,7 +2882,16 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         {
             stResult.insert(FT_PNG);
         }
-        else if(isPlainTextType(&baHeader))
+        else if(compareSignature(&memoryMap,"FFD8FFE0....'JFIF'00",0))// TODO baHeader
+        {
+            stResult.insert(FT_JPEG);
+        }
+        else if(compareSignature(&memoryMap,"'GIF8'",0))// TODO baHeader
+        {
+            stResult.insert(FT_GIF);
+        }
+
+        if(isPlainTextType(&baHeader))
         {
             stResult.insert(FT_TEXT);
             stResult.insert(FT_PLAINTEXT);
@@ -2906,6 +2917,13 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         }
 
         // TODO more
+
+        // Fix
+
+        if(stResult.contains(FT_GIF)&&stResult.contains(FT_TEXT))
+        {
+            stResult.remove(FT_GIF);
+        }
     }
 
     return stResult;

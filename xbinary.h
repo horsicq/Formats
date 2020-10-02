@@ -164,6 +164,8 @@ public:
         FT_RAR,
         FT_7Z,
         FT_PNG,
+        FT_JPEG,
+        FT_GIF,
         FT_TEXT,
         FT_PLAINTEXT,
         FT_UTF8,
