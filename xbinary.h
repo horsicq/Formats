@@ -166,6 +166,8 @@ public:
         FT_PNG,
         FT_JPEG,
         FT_GIF,
+        FT_TIFF,
+        FT_DEX, // TODO detect
         FT_TEXT,
         FT_PLAINTEXT,
         FT_UTF8,

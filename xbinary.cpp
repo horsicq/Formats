@@ -254,6 +254,8 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_PNG:                sResult=QString("PNG");         break;
         case FT_JPEG:               sResult=QString("JPEG");        break;
         case FT_GIF:                sResult=QString("GIF");         break;
+        case FT_TIFF:               sResult=QString("TIFF");        break;
+        case FT_DEX:                sResult=QString("DEX");         break;
         case FT_TEXT:               sResult=QString("Text");        break;
         case FT_PLAINTEXT:          sResult=QString("Plain Text");  break;
         case FT_UTF8:               sResult=QString("UTF8");        break;
@@ -2878,17 +2880,21 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_ZIP);
             // TODO Check APK, JAR
         }
-        else if(compareSignature(&memoryMap,"89'PNG\r\n'1A0A........'IHDR'",0))// TODO baHeader
+        else if(compareSignature(&memoryMap,"89'PNG\r\n'1A0A........'IHDR'",0))
         {
             stResult.insert(FT_PNG);
         }
-        else if(compareSignature(&memoryMap,"FFD8FFE0....'JFIF'00",0))// TODO baHeader
+        else if(compareSignature(&memoryMap,"FFD8FFE0....'JFIF'00",0))
         {
             stResult.insert(FT_JPEG);
         }
-        else if(compareSignature(&memoryMap,"'GIF8'",0))// TODO baHeader
+        else if(compareSignature(&memoryMap,"'GIF8'",0))
         {
             stResult.insert(FT_GIF);
+        }
+        else if(compareSignature(&memoryMap,"'MM'002A",0)||compareSignature(&memoryMap,"'II'2A00",0))
+        {
+            stResult.insert(FT_TIFF);
         }
 
         if(isPlainTextType(&baHeader))
