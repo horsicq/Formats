@@ -2896,6 +2896,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         {
             stResult.insert(FT_TIFF);
         }
+        // TODO DEX
 
         if(isPlainTextType(&baHeader))
         {
