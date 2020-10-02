@@ -4030,7 +4030,7 @@ bool XPE::addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QStri
 #ifdef QT_DEBUG
     QElapsedTimer timer;
     timer.start();
-    qDebug("XPE::addImportSection");
+    qDebug("addImportSection");
 #endif
 
     bool bResult=false;
@@ -4043,17 +4043,17 @@ bool XPE::addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QStri
         {
             QList<IMPORT_HEADER> listImportHeaders=mapIATToList(pMapIAT,pe.is64());
 #ifdef QT_DEBUG
-            qDebug("XPE::addImportSection:mapIATToList: %lld msec",timer.elapsed());
+            qDebug("addImportSection:mapIATToList: %lld msec",timer.elapsed());
 #endif
             bResult=setImports(pDevice,bIsImage,&listImportHeaders);
 #ifdef QT_DEBUG
-            qDebug("XPE::addImportSection:setImports: %lld msec",timer.elapsed());
+            qDebug("addImportSection:setImports: %lld msec",timer.elapsed());
 #endif
         }
     }
 
 #ifdef QT_DEBUG
-    qDebug("XPE::addImportSection: %lld msec",timer.elapsed());
+    qDebug("addImportSection: %lld msec",timer.elapsed());
 #endif
 
     return bResult;
