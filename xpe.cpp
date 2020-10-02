@@ -7942,7 +7942,7 @@ XBinary::OFFSETSIZE XPE::getNet_MetadataOffsetSize()
 
 XPE::CLI_METADATA_HEADER XPE::_read_MetadataHeader(qint64 nOffset)
 {
-    XPE::CLI_METADATA_HEADER result={};
+    CLI_METADATA_HEADER result={};
 
     result.nSignature=read_uint32(nOffset);
     result.nMajorVersion=read_uint16(nOffset+4);
