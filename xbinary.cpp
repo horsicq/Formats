@@ -232,7 +232,6 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_BINARY16:           sResult=QString("Binary16");    break;
         case FT_BINARY32:           sResult=QString("Binary32");    break;
         case FT_BINARY64:           sResult=QString("Binary64");    break;
-        case FT_TEXT:               sResult=QString("Text");        break;
         case FT_COM:                sResult=QString("COM");         break;
         case FT_MSDOS:              sResult=QString("MSDOS");       break;
         case FT_NE:                 sResult=QString("NE");          break;
@@ -253,6 +252,12 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_RAR:                sResult=QString("RAR");         break;
         case FT_7Z:                 sResult=QString("7Z");          break;
         case FT_PNG:                sResult=QString("PNG");         break;
+        case FT_TEXT:               sResult=QString("Text");        break;
+        case FT_PLAINTEXT:          sResult=QString("Plain Text");  break;
+        case FT_UTF8:               sResult=QString("UTF8");        break;
+        case FT_UNICODE:            sResult=QString("Unicode");     break;
+        case FT_UNICODE_LE:         sResult=QString("Unicode LE");  break;
+        case FT_UNICODE_BE:         sResult=QString("Unicode BE");  break;
     }
 
     return sResult;
@@ -2755,7 +2760,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     stResult.insert(FT_BINARY);
 
     QByteArray baHeader;
-    baHeader=read_array(0,0x200); // TODO const
+    baHeader=read_array(0,qMin(getSize(),(qint64)0x200)); // TODO const
     char *pOffset=baHeader.data();
     unsigned int nSize=getSize();
 
@@ -2864,23 +2869,44 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     if(bExtra)
     {
         _MEMORY_MAP memoryMap=XBinary::getMemoryMap();
+        UNICODE_TYPE unicodeType=getUnicodeType(&baHeader);
 
-        if(compareSignature(&memoryMap,"'PK'0304",0)||compareSignature(&memoryMap,"'PK'0506",0))
+        if(compareSignature(&memoryMap,"'PK'0304",0)||compareSignature(&memoryMap,"'PK'0506",0)) // TODO baHeader
         {
             stResult.insert(FT_ZIP);
             // TODO Check APK, JAR
         }
-        else if(compareSignature(&memoryMap,"89'PNG\r\n'1A0A........'IHDR'",0))
+        else if(compareSignature(&memoryMap,"89'PNG\r\n'1A0A........'IHDR'",0))// TODO baHeader
         {
             stResult.insert(FT_PNG);
         }
+        else if(isPlainTextType(&baHeader))
+        {
+            stResult.insert(FT_TEXT);
+            stResult.insert(FT_PLAINTEXT);
+        }
+        else if(isUTF8TextType(&baHeader))
+        {
+            stResult.insert(FT_TEXT);
+            stResult.insert(FT_UTF8);
+        }
+        else if(unicodeType!=UNICODE_TYPE_NONE)
+        {
+            stResult.insert(FT_TEXT);
+            stResult.insert(FT_UNICODE);
+
+            if(unicodeType==UNICODE_TYPE_LE)
+            {
+                stResult.insert(FT_UNICODE_LE);
+            }
+            else
+            {
+                stResult.insert(FT_UNICODE_BE);
+            }
+        }
+
         // TODO more
     }
-
-//    if(isPlainTextType())
-//    {
-//        stResult.insert(FT_TEXT);
-//    }
 
     return stResult;
 }
@@ -4536,12 +4562,17 @@ quint64 XBinary::swapBytes(quint64 nValue)
 
 bool XBinary::isPlainTextType()
 {
-    bool bResult=false;
-
     QByteArray baData=read_array(0,qMin(getSize(),(qint64)0x100));
 
-    unsigned char *pDataOffset=(unsigned char *)baData.data();
-    int nDataSize=baData.size();
+    return isPlainTextType(&baData);
+}
+
+bool XBinary::isPlainTextType(QByteArray *pbaData)
+{
+    bool bResult=false;
+
+    unsigned char *pDataOffset=(unsigned char *)(pbaData->data());
+    int nDataSize=pbaData->size();
 
     if(nDataSize)
     {
@@ -4562,15 +4593,20 @@ bool XBinary::isPlainTextType()
 
 bool XBinary::isUTF8TextType()
 {
+    QByteArray baData=read_array(0,qMin(getSize(),(qint64)0x100));
+
+    return isUTF8TextType(&baData);
+}
+
+bool XBinary::isUTF8TextType(QByteArray *pbaData)
+{
     // EFBBBF
     bool bResult=false;
 
-    QByteArray baData=read_array(0,qMin(getSize(),(qint64)3));
+    unsigned char *pDataOffset=(unsigned char *)(pbaData->data());
+    int nDataSize=pbaData->size();
 
-    unsigned char *pDataOffset=(unsigned char *)baData.data();
-    int nDataSize=baData.size();
-
-    if(nDataSize==3)
+    if(nDataSize>=3)
     {
         if((pDataOffset[0]==0xEF)&&(pDataOffset[1]==0xBB)&&(pDataOffset[2]==0xBF))
         {
@@ -4580,11 +4616,10 @@ bool XBinary::isUTF8TextType()
 
     if(bResult)
     {
-        baData=read_array(0,qMin(getSize(),(qint64)0x100));
-        unsigned char *pDataOffset=(unsigned char *)baData.data();
+        unsigned char *pDataOffset=(unsigned char *)(pbaData->data());
         pDataOffset+=3;
 
-        nDataSize=baData.size();
+        nDataSize=pbaData->size();
         nDataSize=nDataSize-3;
 
         for(int i=0; i<nDataSize; i++)
@@ -4609,12 +4644,17 @@ bool XBinary::isPlainTextType(QIODevice *pDevice)
 
 XBinary::UNICODE_TYPE XBinary::getUnicodeType()
 {
-    XBinary::UNICODE_TYPE result=XBinary::UNICODE_TYPE_NONE;
-
     QByteArray baData=read_array(0,qMin(getSize(),(qint64)0x2));
 
-    unsigned char *pDataOffset=(unsigned char *)baData.data();
-    int nDataSize=baData.size();
+    return getUnicodeType(&baData);
+}
+
+XBinary::UNICODE_TYPE XBinary::getUnicodeType(QByteArray *pbaData)
+{
+    XBinary::UNICODE_TYPE result=XBinary::UNICODE_TYPE_NONE;
+
+    unsigned char *pDataOffset=(unsigned char *)(pbaData->data());
+    int nDataSize=pbaData->size();
 
     if(nDataSize)
     {
@@ -5172,6 +5212,7 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
 
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 {
+    // TODO optimize! new Types
     if( pStFileTypes->contains(XBinary::FT_MSDOS)||
         pStFileTypes->contains(XBinary::FT_NE)||
         pStFileTypes->contains(XBinary::FT_LE)||
@@ -5196,6 +5237,7 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)
 {
+    // TODO optimize!
     if(fileType==XBinary::FT_BINARY)
     {
         pStFileTypes->remove(XBinary::FT_COM);
@@ -5233,7 +5275,6 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
     else if(fileType==XBinary::FT_MSDOS)
     {
         pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_TEXT);
         pStFileTypes->remove(XBinary::FT_COM);
         pStFileTypes->remove(XBinary::FT_NE);
         pStFileTypes->remove(XBinary::FT_LE);
@@ -5251,7 +5292,6 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
     else if(fileType==XBinary::FT_NE)
     {
         pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_TEXT);
         pStFileTypes->remove(XBinary::FT_COM);
         pStFileTypes->remove(XBinary::FT_MSDOS);
         pStFileTypes->remove(XBinary::FT_LE);
@@ -5269,7 +5309,6 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
     else if((fileType==XBinary::FT_LE)||(fileType==XBinary::FT_LX))
     {
         pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_TEXT);
         pStFileTypes->remove(XBinary::FT_COM);
         pStFileTypes->remove(XBinary::FT_MSDOS);
         pStFileTypes->remove(XBinary::FT_NE);
@@ -5286,7 +5325,6 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
     else if(fileType==XBinary::FT_PE)
     {
         pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_TEXT);
         pStFileTypes->remove(XBinary::FT_COM);
         pStFileTypes->remove(XBinary::FT_MSDOS);
         pStFileTypes->remove(XBinary::FT_NE);
@@ -5302,7 +5340,6 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
     else if(fileType==XBinary::FT_ELF)
     {
         pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_TEXT);
         pStFileTypes->remove(XBinary::FT_COM);
         pStFileTypes->remove(XBinary::FT_MSDOS);
         pStFileTypes->remove(XBinary::FT_NE);
@@ -5318,7 +5355,6 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
     else if(fileType==XBinary::FT_MACH)
     {
         pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_TEXT);
         pStFileTypes->remove(XBinary::FT_COM);
         pStFileTypes->remove(XBinary::FT_MSDOS);
         pStFileTypes->remove(XBinary::FT_NE);

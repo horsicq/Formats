@@ -144,7 +144,6 @@ public:
         FT_BINARY16,
         FT_BINARY32,
         FT_BINARY64,
-        FT_TEXT,
         FT_COM,
         FT_MSDOS,
         FT_NE,
@@ -165,6 +164,12 @@ public:
         FT_RAR,
         FT_7Z,
         FT_PNG,
+        FT_TEXT,
+        FT_PLAINTEXT,
+        FT_UTF8,
+        FT_UNICODE,
+        FT_UNICODE_LE,
+        FT_UNICODE_BE
     };
 
     enum MODE
@@ -593,7 +598,9 @@ public:
     static quint64 swapBytes(quint64 nValue);
 
     bool isPlainTextType();
+    bool isPlainTextType(QByteArray *pbaData);
     bool isUTF8TextType();
+    bool isUTF8TextType(QByteArray *pbaData);
 
     static bool isPlainTextType(QIODevice *pDevice);
 
@@ -605,6 +612,7 @@ public:
     };
 
     UNICODE_TYPE getUnicodeType();
+    UNICODE_TYPE getUnicodeType(QByteArray *pbaData);
 
     static bool tryToOpen(QIODevice *pDevice);
 
