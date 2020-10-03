@@ -2926,11 +2926,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 stResult.insert(FT_UNICODE_BE);
             }
         }
-
         // TODO more
+        // TODO MIME
 
         // Fix
-
         if(stResult.contains(FT_GIF)&&stResult.contains(FT_TEXT))
         {
             stResult.remove(FT_GIF);
