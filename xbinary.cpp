@@ -2896,7 +2896,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         {
             stResult.insert(FT_TIFF);
         }
-        // TODO DEX
+        else if(compareSignature(&memoryMap,"'dex\n'......00"))
+        {
+            stResult.insert(FT_DEX);
+        }
 
         if(isPlainTextType(&baHeader))
         {
