@@ -2879,6 +2879,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         {
             stResult.insert(FT_ZIP);
             // TODO Check APK, JAR
+            // TODO basic ZIP
         }
         else if(compareSignature(&memoryMap,"89'PNG\r\n'1A0A........'IHDR'",0))
         {
