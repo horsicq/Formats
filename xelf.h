@@ -93,6 +93,9 @@ public:
     quint8 getIdent_mag(int nMag);
     void setIdent_mag(quint8 nValue,int nMag);
 
+    quint32 getIdent_mag_LE();
+    void setIdent_mag_LE(quint32 nValue);
+
     quint8 getIdent_class();
     void setIdent_class(quint8 nValue);
     quint8 getIdent_data();
@@ -167,6 +170,8 @@ public:
 
     static QMap<quint64,QString> getHeaderVersionList();
 
+    static QMap<quint64,QString> getIndentMag();
+    static QMap<quint64,QString> getIndentMagS();
     static QMap<quint64,QString> getIndentClasses();
     static QMap<quint64,QString> getIndentClassesS();
     static QMap<quint64,QString> getIndentDatas();

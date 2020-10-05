@@ -755,6 +755,17 @@ QString XBinary::read_utf8String(qint64 nOffset, qint64 nMaxSize)
     return sResult;
 }
 
+QString XBinary::_read_utf8String(qint64 nOffset)
+{
+    QString sResult;
+
+    ULEB128 ulebSize=get_uleb128(nOffset);
+
+    sResult=read_utf8String(nOffset+ulebSize.nByteSize,ulebSize.nValue); // TODO mutf8
+
+    return sResult;
+}
+
 void XBinary::write_uint8(qint64 nOffset, quint8 nValue)
 {
     write_array(nOffset,(char *)(&nValue),1);

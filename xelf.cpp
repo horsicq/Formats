@@ -95,6 +95,16 @@ void XELF::setIdent_mag(quint8 nValue, int nMag)
     }
 }
 
+quint32 XELF::getIdent_mag_LE()
+{
+    return read_uint32(0,false);
+}
+
+void XELF::setIdent_mag_LE(quint32 nValue)
+{
+    write_uint32(0,nValue,false);
+}
+
 quint8 XELF::getIdent_class()
 {
     return read_uint8(XELF_DEF::S_EI_CLASS);
@@ -703,6 +713,24 @@ QMap<quint64, QString> XELF::getHeaderVersionList()
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(1,"EV_CURRENT");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getIndentMag()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x464C457F,"ELFMAG");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XELF::getIndentMagS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x464C457F,"ELFMAG");
 
     return mapResult;
 }
