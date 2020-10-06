@@ -256,6 +256,8 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_GIF:                sResult=QString("GIF");         break;
         case FT_TIFF:               sResult=QString("TIFF");        break;
         case FT_DEX:                sResult=QString("DEX");         break;
+        case FT_APK:                sResult=QString("APJ");         break;
+        case FT_JAR:                sResult=QString("JAR");         break;
         case FT_TEXT:               sResult=QString("Text");        break;
         case FT_PLAINTEXT:          sResult=QString("Plain Text");  break;
         case FT_UTF8:               sResult=QString("UTF8");        break;

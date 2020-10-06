@@ -168,6 +168,8 @@ public:
         FT_GIF,
         FT_TIFF,
         FT_DEX,
+        FT_APK,
+        FT_JAR,
         FT_TEXT,
         FT_PLAINTEXT,
         FT_UTF8,
