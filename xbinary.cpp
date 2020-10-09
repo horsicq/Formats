@@ -227,43 +227,45 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
 
     switch(fileType)
     {
-        case FT_UNKNOWN:            sResult=QString("Unknown");     break; // mb TODO translate
-        case FT_BINARY:             sResult=QString("Binary");      break;
-        case FT_BINARY16:           sResult=QString("Binary16");    break;
-        case FT_BINARY32:           sResult=QString("Binary32");    break;
-        case FT_BINARY64:           sResult=QString("Binary64");    break;
-        case FT_COM:                sResult=QString("COM");         break;
-        case FT_MSDOS:              sResult=QString("MSDOS");       break;
-        case FT_NE:                 sResult=QString("NE");          break;
-        case FT_LE:                 sResult=QString("LE");          break;
-        case FT_LX:                 sResult=QString("LX");          break;
-        case FT_PE:                 sResult=QString("PE");          break;
-        case FT_PE32:               sResult=QString("PE32");        break;
-        case FT_PE64:               sResult=QString("PE64");        break;
-        case FT_ELF:                sResult=QString("ELF");         break;
-        case FT_ELF32:              sResult=QString("ELF32");       break;
-        case FT_ELF64:              sResult=QString("ELF64");       break;
-        case FT_MACH:               sResult=QString("MACH");        break;
-        case FT_MACH32:             sResult=QString("MACH32");      break;
-        case FT_MACH64:             sResult=QString("MACH64");      break;
+        case FT_UNKNOWN:            sResult=QString("Unknown");         break; // mb TODO translate
+        case FT_BINARY:             sResult=QString("Binary");          break;
+        case FT_BINARY16:           sResult=QString("Binary16");        break;
+        case FT_BINARY32:           sResult=QString("Binary32");        break;
+        case FT_BINARY64:           sResult=QString("Binary64");        break;
+        case FT_COM:                sResult=QString("COM");             break;
+        case FT_MSDOS:              sResult=QString("MSDOS");           break;
+        case FT_NE:                 sResult=QString("NE");              break;
+        case FT_LE:                 sResult=QString("LE");              break;
+        case FT_LX:                 sResult=QString("LX");              break;
+        case FT_PE:                 sResult=QString("PE");              break;
+        case FT_PE32:               sResult=QString("PE32");            break;
+        case FT_PE64:               sResult=QString("PE64");            break;
+        case FT_ELF:                sResult=QString("ELF");             break;
+        case FT_ELF32:              sResult=QString("ELF32");           break;
+        case FT_ELF64:              sResult=QString("ELF64");           break;
+        case FT_MACH:               sResult=QString("MACH");            break;
+        case FT_MACH32:             sResult=QString("MACH32");          break;
+        case FT_MACH64:             sResult=QString("MACH64");          break;
         // Extra
-        case FT_ZIP:                sResult=QString("ZIP");         break;
-        case FT_CAB:                sResult=QString("CAB");         break;
-        case FT_RAR:                sResult=QString("RAR");         break;
-        case FT_7Z:                 sResult=QString("7Z");          break;
-        case FT_PNG:                sResult=QString("PNG");         break;
-        case FT_JPEG:               sResult=QString("JPEG");        break;
-        case FT_GIF:                sResult=QString("GIF");         break;
-        case FT_TIFF:               sResult=QString("TIFF");        break;
-        case FT_DEX:                sResult=QString("DEX");         break;
-        case FT_APK:                sResult=QString("APJ");         break;
-        case FT_JAR:                sResult=QString("JAR");         break;
-        case FT_TEXT:               sResult=QString("Text");        break;
-        case FT_PLAINTEXT:          sResult=QString("Plain Text");  break;
-        case FT_UTF8:               sResult=QString("UTF8");        break;
-        case FT_UNICODE:            sResult=QString("Unicode");     break;
-        case FT_UNICODE_LE:         sResult=QString("Unicode LE");  break;
-        case FT_UNICODE_BE:         sResult=QString("Unicode BE");  break;
+        case FT_ZIP:                sResult=QString("ZIP");             break;
+        case FT_CAB:                sResult=QString("CAB");             break;
+        case FT_RAR:                sResult=QString("RAR");             break;
+        case FT_7Z:                 sResult=QString("7Z");              break;
+        case FT_PNG:                sResult=QString("PNG");             break;
+        case FT_JPEG:               sResult=QString("JPEG");            break;
+        case FT_GIF:                sResult=QString("GIF");             break;
+        case FT_TIFF:               sResult=QString("TIFF");            break;
+        case FT_DEX:                sResult=QString("DEX");             break;
+        case FT_ANDROIDASRC:        sResult=QString("Android ASRC");    break;
+        case FT_ANDROIDXML:         sResult=QString("Android XML");     break;
+        case FT_APK:                sResult=QString("APJ");             break;
+        case FT_JAR:                sResult=QString("JAR");             break;
+        case FT_TEXT:               sResult=QString("Text");            break;
+        case FT_PLAINTEXT:          sResult=QString("Plain Text");      break;
+        case FT_UTF8:               sResult=QString("UTF8");            break;
+        case FT_UNICODE:            sResult=QString("Unicode");         break;
+        case FT_UNICODE_LE:         sResult=QString("Unicode LE");      break;
+        case FT_UNICODE_BE:         sResult=QString("Unicode BE");      break;
     }
 
     return sResult;
@@ -2913,6 +2915,14 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         else if(compareSignature(&memoryMap,"'dex\n'......00"))
         {
             stResult.insert(FT_DEX);
+        }
+        else if(compareSignature(&memoryMap,"02000C00"))
+        {
+            stResult.insert(FT_ANDROIDASRC);
+        }
+        else if(compareSignature(&memoryMap,"03000800"))
+        {
+            stResult.insert(FT_ANDROIDXML);
         }
 
         if(isPlainTextType(&baHeader))
