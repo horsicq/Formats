@@ -5289,6 +5289,7 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)
 {
     // TODO optimize!
+    // TODO DEX
     if(fileType==XBinary::FT_BINARY)
     {
         pStFileTypes->remove(XBinary::FT_COM);
