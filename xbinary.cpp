@@ -258,7 +258,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_DEX:                sResult=QString("DEX");             break;
         case FT_ANDROIDASRC:        sResult=QString("Android ASRC");    break;
         case FT_ANDROIDXML:         sResult=QString("Android XML");     break;
-        case FT_APK:                sResult=QString("APJ");             break;
+        case FT_APK:                sResult=QString("APK");             break;
         case FT_JAR:                sResult=QString("JAR");             break;
         case FT_TEXT:               sResult=QString("Text");            break;
         case FT_PLAINTEXT:          sResult=QString("Plain Text");      break;
