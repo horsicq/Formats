@@ -718,14 +718,14 @@ private:
 
 protected:
     bool _isOffsetValid(qint64 nOffset);
-    void _errorMessage(QString sMessage);
-    void _infoMessage(QString sMessage);
+    void _errorMessage(QString sErrorMessage);
+    void _infoMessage(QString sInfoMessage);
     qint64 _calculateRawSize();
     qint64 _calculateRawSize(_MEMORY_MAP *pMemoryMap);
 
 signals:
-    void errorMessage(QString sMessage);
-    void infoMessage(QString sMessage);
+    void errorMessage(QString sErrorMessage);
+    void infoMessage(QString sInfoMessage);
     void findProgressMinimumChanged(qint32 nMaximum);
     void findProgressMaximumChanged(qint32 nMaximum);
     void findProgressValueChanged(qint32 nValue);

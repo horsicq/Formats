@@ -4304,20 +4304,20 @@ bool XBinary::compareSignatureStrings(QString sBaseSignature, QString sOptSignat
     return true;
 }
 
-void XBinary::_errorMessage(QString sMessage)
+void XBinary::_errorMessage(QString sErrorMessage)
 {
 #ifdef QT_DEBUG
-    qDebug("Error: %s",sMessage.toLatin1().data());
+    qDebug("Error: %s",sErrorMessage.toLatin1().data());
 #endif
-    emit errorMessage(sMessage);
+    emit errorMessage(sErrorMessage);
 }
 
-void XBinary::_infoMessage(QString sMessage)
+void XBinary::_infoMessage(QString sInfoMessage)
 {
 #ifdef QT_DEBUG
-    qDebug("Info: %s",sMessage.toLatin1().data());
+    qDebug("Info: %s",sInfoMessage.toLatin1().data());
 #endif
-    emit infoMessage(sMessage);
+    emit infoMessage(sInfoMessage);
 }
 
 qint64 XBinary::_calculateRawSize()
