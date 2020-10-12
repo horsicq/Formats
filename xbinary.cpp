@@ -1465,9 +1465,6 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
     const int BUFFER_SIZE=0x1000; // TODO const
     char *pBuffer=new char[BUFFER_SIZE+(nStringSize-1)];
 
-    qint64 nTotalSize=nSize;
-    qint32 nCurrentProgress=0;
-
     QByteArray baUpper=sString.toUpper().toLatin1();
     QByteArray baLower=sString.toLower().toLatin1();
 
@@ -1543,9 +1540,6 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     qint64 nTemp=0;
     const int BUFFER_SIZE=0x1000; // TODO const
     char *pBuffer=new char[BUFFER_SIZE+2*(nStringSize-1)];
-
-    qint64 nTotalSize=nSize;
-    qint32 nCurrentProgress=0;
 
     QByteArray baUpper=getUnicodeString(sString.toUpper());
     QByteArray baLower=getUnicodeString(sString.toLower());
@@ -2725,7 +2719,6 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
 
         qint64 nSourceOffset=nDataOffset;
         qint64 nDestOffset=0;
-        qint32 _nCurrentProcent=0;
 
         bResult=true;
 
