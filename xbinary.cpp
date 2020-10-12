@@ -5329,6 +5329,10 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
         if(pStFileTypes->contains(XBinary::FT_MACH32)) stFileTypesNew.insert(XBinary::FT_MACH32);
         if(pStFileTypes->contains(XBinary::FT_MACH64)) stFileTypesNew.insert(XBinary::FT_MACH64);
     }
+    else if(fileType==XBinary::FT_DEX)
+    {
+        if(pStFileTypes->contains(XBinary::FT_DEX)) stFileTypesNew.insert(XBinary::FT_DEX);
+    }
 
     *pStFileTypes=stFileTypesNew;
 }
