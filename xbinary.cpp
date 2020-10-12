@@ -5288,137 +5288,49 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)
 {
-    // TODO optimize!
+    QSet<XBinary::FT> stFileTypesNew;
     // TODO DEX
     if(fileType==XBinary::FT_BINARY)
     {
-        pStFileTypes->remove(XBinary::FT_COM);
-        pStFileTypes->remove(XBinary::FT_MSDOS);
-        pStFileTypes->remove(XBinary::FT_NE);
-        pStFileTypes->remove(XBinary::FT_LE);
-        pStFileTypes->remove(XBinary::FT_LX);
-        pStFileTypes->remove(XBinary::FT_PE);
-        pStFileTypes->remove(XBinary::FT_PE32);
-        pStFileTypes->remove(XBinary::FT_PE64);
-        pStFileTypes->remove(XBinary::FT_ELF);
-        pStFileTypes->remove(XBinary::FT_ELF32);
-        pStFileTypes->remove(XBinary::FT_ELF64);
-        pStFileTypes->remove(XBinary::FT_MACH);
-        pStFileTypes->remove(XBinary::FT_MACH32);
-        pStFileTypes->remove(XBinary::FT_MACH64);
+        if(pStFileTypes->contains(XBinary::FT_BINARY)) stFileTypesNew.insert(XBinary::FT_BINARY);
     }
     else if(fileType==XBinary::FT_COM)
     {
-        pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_MSDOS);
-        pStFileTypes->remove(XBinary::FT_NE);
-        pStFileTypes->remove(XBinary::FT_LE);
-        pStFileTypes->remove(XBinary::FT_LX);
-        pStFileTypes->remove(XBinary::FT_PE);
-        pStFileTypes->remove(XBinary::FT_PE32);
-        pStFileTypes->remove(XBinary::FT_PE64);
-        pStFileTypes->remove(XBinary::FT_ELF);
-        pStFileTypes->remove(XBinary::FT_ELF32);
-        pStFileTypes->remove(XBinary::FT_ELF64);
-        pStFileTypes->remove(XBinary::FT_MACH);
-        pStFileTypes->remove(XBinary::FT_MACH32);
-        pStFileTypes->remove(XBinary::FT_MACH64);
+        if(pStFileTypes->contains(XBinary::FT_COM)) stFileTypesNew.insert(XBinary::FT_COM);
     }
     else if(fileType==XBinary::FT_MSDOS)
     {
-        pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_COM);
-        pStFileTypes->remove(XBinary::FT_NE);
-        pStFileTypes->remove(XBinary::FT_LE);
-        pStFileTypes->remove(XBinary::FT_LX);
-        pStFileTypes->remove(XBinary::FT_PE);
-        pStFileTypes->remove(XBinary::FT_PE32);
-        pStFileTypes->remove(XBinary::FT_PE64);
-        pStFileTypes->remove(XBinary::FT_ELF);
-        pStFileTypes->remove(XBinary::FT_ELF32);
-        pStFileTypes->remove(XBinary::FT_ELF64);
-        pStFileTypes->remove(XBinary::FT_MACH);
-        pStFileTypes->remove(XBinary::FT_MACH32);
-        pStFileTypes->remove(XBinary::FT_MACH64);
+        if(pStFileTypes->contains(XBinary::FT_MSDOS)) stFileTypesNew.insert(XBinary::FT_MSDOS);
     }
     else if(fileType==XBinary::FT_NE)
     {
-        pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_COM);
-        pStFileTypes->remove(XBinary::FT_MSDOS);
-        pStFileTypes->remove(XBinary::FT_LE);
-        pStFileTypes->remove(XBinary::FT_LX);
-        pStFileTypes->remove(XBinary::FT_PE);
-        pStFileTypes->remove(XBinary::FT_PE32);
-        pStFileTypes->remove(XBinary::FT_PE64);
-        pStFileTypes->remove(XBinary::FT_ELF);
-        pStFileTypes->remove(XBinary::FT_ELF32);
-        pStFileTypes->remove(XBinary::FT_ELF64);
-        pStFileTypes->remove(XBinary::FT_MACH);
-        pStFileTypes->remove(XBinary::FT_MACH32);
-        pStFileTypes->remove(XBinary::FT_MACH64);
+       if(pStFileTypes->contains(XBinary::FT_NE)) stFileTypesNew.insert(XBinary::FT_NE);
     }
     else if((fileType==XBinary::FT_LE)||(fileType==XBinary::FT_LX))
     {
-        pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_COM);
-        pStFileTypes->remove(XBinary::FT_MSDOS);
-        pStFileTypes->remove(XBinary::FT_NE);
-        pStFileTypes->remove(XBinary::FT_PE);
-        pStFileTypes->remove(XBinary::FT_PE32);
-        pStFileTypes->remove(XBinary::FT_PE64);
-        pStFileTypes->remove(XBinary::FT_ELF);
-        pStFileTypes->remove(XBinary::FT_ELF32);
-        pStFileTypes->remove(XBinary::FT_ELF64);
-        pStFileTypes->remove(XBinary::FT_MACH);
-        pStFileTypes->remove(XBinary::FT_MACH32);
-        pStFileTypes->remove(XBinary::FT_MACH64);
+        if(pStFileTypes->contains(XBinary::FT_LE)) stFileTypesNew.insert(XBinary::FT_LE);
+        if(pStFileTypes->contains(XBinary::FT_LX)) stFileTypesNew.insert(XBinary::FT_LX);
     }
     else if(fileType==XBinary::FT_PE)
     {
-        pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_COM);
-        pStFileTypes->remove(XBinary::FT_MSDOS);
-        pStFileTypes->remove(XBinary::FT_NE);
-        pStFileTypes->remove(XBinary::FT_LE);
-        pStFileTypes->remove(XBinary::FT_LX);
-        pStFileTypes->remove(XBinary::FT_ELF);
-        pStFileTypes->remove(XBinary::FT_ELF32);
-        pStFileTypes->remove(XBinary::FT_ELF64);
-        pStFileTypes->remove(XBinary::FT_MACH);
-        pStFileTypes->remove(XBinary::FT_MACH32);
-        pStFileTypes->remove(XBinary::FT_MACH64);
+        if(pStFileTypes->contains(XBinary::FT_PE)) stFileTypesNew.insert(XBinary::FT_PE);
+        if(pStFileTypes->contains(XBinary::FT_PE32)) stFileTypesNew.insert(XBinary::FT_PE32);
+        if(pStFileTypes->contains(XBinary::FT_PE64)) stFileTypesNew.insert(XBinary::FT_PE64);
     }
     else if(fileType==XBinary::FT_ELF)
     {
-        pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_COM);
-        pStFileTypes->remove(XBinary::FT_MSDOS);
-        pStFileTypes->remove(XBinary::FT_NE);
-        pStFileTypes->remove(XBinary::FT_LE);
-        pStFileTypes->remove(XBinary::FT_LX);
-        pStFileTypes->remove(XBinary::FT_PE);
-        pStFileTypes->remove(XBinary::FT_PE32);
-        pStFileTypes->remove(XBinary::FT_PE64);
-        pStFileTypes->remove(XBinary::FT_MACH);
-        pStFileTypes->remove(XBinary::FT_MACH32);
-        pStFileTypes->remove(XBinary::FT_MACH64);
+        if(pStFileTypes->contains(XBinary::FT_ELF)) stFileTypesNew.insert(XBinary::FT_ELF);
+        if(pStFileTypes->contains(XBinary::FT_ELF32)) stFileTypesNew.insert(XBinary::FT_ELF32);
+        if(pStFileTypes->contains(XBinary::FT_ELF64)) stFileTypesNew.insert(XBinary::FT_ELF64);
     }
     else if(fileType==XBinary::FT_MACH)
     {
-        pStFileTypes->remove(XBinary::FT_BINARY);
-        pStFileTypes->remove(XBinary::FT_COM);
-        pStFileTypes->remove(XBinary::FT_MSDOS);
-        pStFileTypes->remove(XBinary::FT_NE);
-        pStFileTypes->remove(XBinary::FT_LE);
-        pStFileTypes->remove(XBinary::FT_LX);
-        pStFileTypes->remove(XBinary::FT_PE);
-        pStFileTypes->remove(XBinary::FT_PE32);
-        pStFileTypes->remove(XBinary::FT_PE64);
-        pStFileTypes->remove(XBinary::FT_ELF);
-        pStFileTypes->remove(XBinary::FT_ELF32);
-        pStFileTypes->remove(XBinary::FT_ELF64);
+        if(pStFileTypes->contains(XBinary::FT_MACH)) stFileTypesNew.insert(XBinary::FT_MACH);
+        if(pStFileTypes->contains(XBinary::FT_MACH32)) stFileTypesNew.insert(XBinary::FT_MACH32);
+        if(pStFileTypes->contains(XBinary::FT_MACH64)) stFileTypesNew.insert(XBinary::FT_MACH64);
     }
+
+    *pStFileTypes=stFileTypesNew;
 }
 
 XBinary::PROCENT XBinary::procentInit(qint64 nMaxValue)
