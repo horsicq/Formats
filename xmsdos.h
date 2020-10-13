@@ -104,8 +104,8 @@ public:
 
     virtual qint64 getImageSize();
 
-    static QMap<quint64, QString> getImageMagics();
-    static QMap<quint64, QString> getImageMagicsS();
+    static QMap<quint64,QString> getImageMagics();
+    static QMap<quint64,QString> getImageMagicsS();
 
     bool isLE();
     bool isLX();

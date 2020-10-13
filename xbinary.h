@@ -390,11 +390,11 @@ public:
 
     static QByteArray readFile(QString sFileName);
 
-    static void _copyMemory(char *pDest,char *pSource, qint64 nSize);
+    static void _copyMemory(char *pDest,char *pSource,qint64 nSize);
     static void _zeroMemory(char *pDest,qint64 nSize);
     static bool _isMemoryZeroFilled(char *pDest,qint64 nSize);
     static bool copyDeviceMemory(QIODevice *pSourceDevice,qint64 nSourceOffset,QIODevice *pDestDevice,qint64 nDestOffset,qint64 nSize,quint32 nBufferSize=0x1000);
-    bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset,qint64 nSize,quint32 nBufferSize=1,bool bReverse=false);
+    bool copyMemory(qint64 nSourceOffset,qint64 nDestOffset,qint64 nSize,quint32 nBufferSize=1,bool bReverse=false);
     bool zeroFill(qint64 nOffset,qint64 nSize);
     static bool compareMemory(char *pMemory1,const char *pMemory2,qint64 nSize);
     static bool compareMemoryByteI(quint8 *pMemory,const quint8 *pMemoryU,const quint8 *pMemoryL,qint64 nSize);
@@ -415,7 +415,7 @@ public:
     static bool isOffsetAndSizeValid(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize);
 
     static bool isAddressValid(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
-    static bool isRelAddressValid(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
+    static bool isRelAddressValid(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
 
     static bool isAddressPhysical(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
 
@@ -438,9 +438,9 @@ public:
     QString getMemoryRecordInfoByAddress(qint64 nAddress);
     QString getMemoryRecordInfoByRelAddress(qint64 nRelAddress);
 
-    static QString getMemoryRecordInfoByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
+    static QString getMemoryRecordInfoByOffset(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static QString getMemoryRecordInfoByAddress(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
-    static QString getMemoryRecordInfoByRelAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
+    static QString getMemoryRecordInfoByRelAddress(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
 
     static QString getMemoryRecordInfo(_MEMORY_RECORD *pMemoryRecord);
 
@@ -509,7 +509,7 @@ public:
     static QString valueToHex(qint64 nValue,bool bIsBigEndian=false);
     static QString valueToHex(float fValue,bool bIsBigEndian=false);
     static QString valueToHex(double dValue,bool bIsBigEndian=false);
-    static QString valueToHex(MODE mode, quint64 nValue, bool bIsBigEndian=false);
+    static QString valueToHex(MODE mode,quint64 nValue,bool bIsBigEndian=false);
 
     static bool checkString_uint8(QString sValue);
     static bool checkString_int8(QString sValue);
@@ -584,11 +584,11 @@ public:
 
     OFFSETSIZE convertOffsetAndSize(qint64 nOffset,qint64 nSize);
 
-    static bool compareSignatureStrings(QString sBaseSignature, QString sOptSignature);
+    static bool compareSignatureStrings(QString sBaseSignature,QString sOptSignature);
     static QString stringToHex(QString sString);
     static QString hexToString(QString sHex);
-    static QString floatToString(float fValue, int nPrec=2);
-    static QString doubleToString(double dValue, int nPrec=2);
+    static QString floatToString(float fValue,int nPrec=2);
+    static QString doubleToString(double dValue,int nPrec=2);
 
     static quint8 hexToUint8(QString sHex);
     static qint8 hexToInt8(QString sHex);
@@ -601,7 +601,7 @@ public:
 
     static QString invertHexByteString(QString sHex);
 
-    static void _swapBytes(char *pSource, int nSize);
+    static void _swapBytes(char *pSource,int nSize);
     static quint16 swapBytes(quint16 nValue);
     static quint32 swapBytes(quint32 nValue);
     static quint64 swapBytes(quint64 nValue);
@@ -656,8 +656,8 @@ public:
     bool isOverlayPresent();
     bool isOverlayPresent(_MEMORY_MAP *pMemoryMap);
 
-    bool compareOverlay(QString sSignature, qint64 nOffset);
-    bool compareOverlay(_MEMORY_MAP *pMemoryMap,QString sSignature, qint64 nOffset);
+    bool compareOverlay(QString sSignature,qint64 nOffset);
+    bool compareOverlay(_MEMORY_MAP *pMemoryMap,QString sSignature,qint64 nOffset);
 
     bool addOverlay(char *pData,qint64 nDataSize);
     bool removeOverlay();
@@ -685,13 +685,13 @@ public:
         DT_TYPE_POSIX
     };
 
-    static QString valueToTimeString(quint64 nValue, DT_TYPE type);
+    static QString valueToTimeString(quint64 nValue,DT_TYPE type);
 
     static bool isX86asm(QString sArch);
     static bool checkFileType(XBinary::FT fileTypeMain,XBinary::FT fileTypeOptional);
 
     static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes); // TODO Check!
-    static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType); // TODO Check!
+    static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes,XBinary::FT fileType); // TODO Check!
 
     struct PROCENT
     {

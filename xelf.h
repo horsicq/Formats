@@ -367,9 +367,9 @@ public:
 
     QList<TAG_STRUCT> getTagStructs();
     QList<TAG_STRUCT> getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders,_MEMORY_MAP *pMemoryMap);
-    QList<TAG_STRUCT> _getTagStructs(qint64 nOffset, qint64 nSize, bool bIs64, bool bIsBigEndian);
+    QList<TAG_STRUCT> _getTagStructs(qint64 nOffset,qint64 nSize,bool bIs64,bool bIsBigEndian);
 
-    static QList<TAG_STRUCT> _getTagStructs(QList<TAG_STRUCT> *pListTagStructs, qint64 nTag);
+    static QList<TAG_STRUCT> _getTagStructs(QList<TAG_STRUCT> *pListTagStructs,qint64 nTag);
 
     qint64 getDynamicArraySize();
 
@@ -380,13 +380,13 @@ public:
     void setDynamicArrayValue(qint64 nOffset,qint64 nValue);
 
     OFFSETSIZE getStringTable();
-    OFFSETSIZE getStringTable(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
+    OFFSETSIZE getStringTable(_MEMORY_MAP *pMemoryMap,QList<TAG_STRUCT> *pListTagStructs);
 
     QList<QString> getLibraries();
-    QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
+    QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap,QList<TAG_STRUCT> *pListTagStructs);
 
     OS_ANSISTRING getRunPath();
-    OS_ANSISTRING getRunPath(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
+    OS_ANSISTRING getRunPath(_MEMORY_MAP *pMemoryMap,QList<TAG_STRUCT> *pListTagStructs);
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
@@ -406,11 +406,11 @@ public:
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nValue);
 
-    QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType);
+    QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders,quint32 nType);
 
     QList<DATASET> getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
     QList<DATASET> getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    QList<DATASET> getDatasetsFromTagStructs(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
+    QList<DATASET> getDatasetsFromTagStructs(_MEMORY_MAP *pMemoryMap,QList<TAG_STRUCT> *pListTagStructs);
 
     QList<XELF_DEF::Elf32_Sym> getElf32_SymList(qint64 nOffset,qint64 nSize);
     QList<XELF_DEF::Elf64_Sym> getElf64_SymList(qint64 nOffset,qint64 nSize);
