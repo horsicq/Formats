@@ -243,7 +243,7 @@ private:
 
 public:
     explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
-    void setDevice(QIODevice *pDevice); // TODO rename -> setDevice
+    void setDevice(QIODevice *pDevice);
     qint64 getSize();
     static qint64 getSize(QIODevice *pDevice);
     static qint64 getSize(QString sFileName);
@@ -287,7 +287,7 @@ public:
         qint32 *pnNumberOfFiles;
     };
     static void findFiles(QString sDirectoryName,FFOPTIONS *pFFOption,qint32 nLevel=0);
-    static void findFiles(QString sDirectoryName, QList<QString> *pListFileNames);
+    static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames);
 
     static QString regExp(QString sRegExp,QString sString,int nIndex);
     static bool isRegExpPresent(QString sRegExp,QString sString);
