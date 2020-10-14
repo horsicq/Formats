@@ -150,11 +150,11 @@ public:
     virtual int getType();
     virtual QString typeIdToString(int nType);
 
-    static QMap<quint64, QString> getImageLEMagics();
-    static QMap<quint64, QString> getImageLEMagicsS();
-    static QMap<quint64, QString> getImageLECpusS();
-    static QMap<quint64, QString> getImageLEOssS();
-    static QMap<quint64, QString> getImageLEMflagsS();
+    static QMap<quint64,QString> getImageLEMagics();
+    static QMap<quint64,QString> getImageLEMagicsS();
+    static QMap<quint64,QString> getImageLECpusS();
+    static QMap<quint64,QString> getImageLEOssS();
+    static QMap<quint64,QString> getImageLEMflagsS();
 };
 
 #endif // XLE_H
