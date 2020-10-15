@@ -641,6 +641,7 @@ public:
     };
 
     ULEB128 get_uleb128(qint64 nOffset);
+    ULEB128 _get_uleb128(char *pData);
 
     struct PACKEDNUMBER
     {

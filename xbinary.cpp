@@ -4821,6 +4821,30 @@ XBinary::ULEB128 XBinary::get_uleb128(qint64 nOffset)
     return result;
 }
 
+XBinary::ULEB128 XBinary::_get_uleb128(char *pData)
+{
+    ULEB128 result={};
+
+    quint32 nShift=0;
+
+    while(true)
+    {
+        quint8 nByte=(quint8)(*pData);
+        result.nValue|=((nByte&0x7F)<<nShift);
+        result.nByteSize++;
+        nShift+=7;
+        pData++;
+
+        if((nByte&0x80)==0)
+        {
+            break;
+        }
+        // TODO more checks!
+    }
+
+    return result;
+}
+
 XBinary::PACKEDNUMBER XBinary::get_packedNumber(qint64 nOffset)
 {
     PACKEDNUMBER result={};
