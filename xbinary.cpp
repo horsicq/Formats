@@ -260,12 +260,15 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_ANDROIDXML:         sResult=QString("Android XML");     break;
         case FT_APK:                sResult=QString("APK");             break;
         case FT_JAR:                sResult=QString("JAR");             break;
-        case FT_TEXT:               sResult=QString("Text");            break;
+        case FT_TEXT:               sResult=tr("Text");                 break;
         case FT_PLAINTEXT:          sResult=QString("Plain Text");      break;
         case FT_UTF8:               sResult=QString("UTF8");            break;
         case FT_UNICODE:            sResult=QString("Unicode");         break;
         case FT_UNICODE_LE:         sResult=QString("Unicode LE");      break;
         case FT_UNICODE_BE:         sResult=QString("Unicode BE");      break;
+        case FT_DOCUMENT:           sResult=tr("Document");             break;
+        case FT_IMAGE:              sResult=tr("Image");                break;
+        case FT_ARCHIVE:            sResult=tr("Archive");              break;
     }
 
     return sResult;
@@ -3059,21 +3062,23 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
 {
     QList<XBinary::FT> listResult;
 
-    if(stFileTypes.contains(FT_BINARY))    listResult.append(FT_BINARY);
-    if(stFileTypes.contains(FT_BINARY16))  listResult.append(FT_BINARY16);
-    if(stFileTypes.contains(FT_BINARY32))  listResult.append(FT_BINARY32);
-    if(stFileTypes.contains(FT_BINARY64))  listResult.append(FT_BINARY64);
-    if(stFileTypes.contains(FT_COM))       listResult.append(FT_COM);
-    if(stFileTypes.contains(FT_MSDOS))     listResult.append(FT_MSDOS);
-    if(stFileTypes.contains(FT_NE))        listResult.append(FT_NE);
-    if(stFileTypes.contains(FT_LE))        listResult.append(FT_LE);
-    if(stFileTypes.contains(FT_LX))        listResult.append(FT_LX);
-    if(stFileTypes.contains(FT_PE32))      listResult.append(FT_PE32);
-    if(stFileTypes.contains(FT_PE64))      listResult.append(FT_PE64);
-    if(stFileTypes.contains(FT_ELF32))     listResult.append(FT_ELF32);
-    if(stFileTypes.contains(FT_ELF64))     listResult.append(FT_ELF64);
-    if(stFileTypes.contains(FT_MACH32))    listResult.append(FT_MACH32);
-    if(stFileTypes.contains(FT_MACH64))    listResult.append(FT_MACH64);
+    if(stFileTypes.contains(FT_BINARY))     listResult.append(FT_BINARY);
+    if(stFileTypes.contains(FT_BINARY16))   listResult.append(FT_BINARY16);
+    if(stFileTypes.contains(FT_BINARY32))   listResult.append(FT_BINARY32);
+    if(stFileTypes.contains(FT_BINARY64))   listResult.append(FT_BINARY64);
+    if(stFileTypes.contains(FT_ZIP))        listResult.append(FT_ZIP);
+    if(stFileTypes.contains(FT_DEX))        listResult.append(FT_DEX);
+    if(stFileTypes.contains(FT_COM))        listResult.append(FT_COM);
+    if(stFileTypes.contains(FT_MSDOS))      listResult.append(FT_MSDOS);
+    if(stFileTypes.contains(FT_NE))         listResult.append(FT_NE);
+    if(stFileTypes.contains(FT_LE))         listResult.append(FT_LE);
+    if(stFileTypes.contains(FT_LX))         listResult.append(FT_LX);
+    if(stFileTypes.contains(FT_PE32))       listResult.append(FT_PE32);
+    if(stFileTypes.contains(FT_PE64))       listResult.append(FT_PE64);
+    if(stFileTypes.contains(FT_ELF32))      listResult.append(FT_ELF32);
+    if(stFileTypes.contains(FT_ELF64))      listResult.append(FT_ELF64);
+    if(stFileTypes.contains(FT_MACH32))     listResult.append(FT_MACH32);
+    if(stFileTypes.contains(FT_MACH64))     listResult.append(FT_MACH64);
 
     return listResult;
 }
@@ -5269,7 +5274,9 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_ELF64)||
         pStFileTypes->contains(XBinary::FT_MACH)||
         pStFileTypes->contains(XBinary::FT_MACH32)||
-        pStFileTypes->contains(XBinary::FT_MACH64))
+        pStFileTypes->contains(XBinary::FT_MACH64)||
+        pStFileTypes->contains(XBinary::FT_DEX)||
+        pStFileTypes->contains(XBinary::FT_ZIP))
     {
         pStFileTypes->remove(XBinary::FT_BINARY);
     }
@@ -5282,7 +5289,7 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)
 {
     QSet<XBinary::FT> stFileTypesNew;
-    // TODO DEX
+
     if(fileType==XBinary::FT_BINARY)
     {
         if(pStFileTypes->contains(XBinary::FT_BINARY)) stFileTypesNew.insert(XBinary::FT_BINARY);
@@ -5325,6 +5332,10 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
     else if(fileType==XBinary::FT_DEX)
     {
         if(pStFileTypes->contains(XBinary::FT_DEX)) stFileTypesNew.insert(XBinary::FT_DEX);
+    }
+    else if(fileType==XBinary::FT_ZIP)
+    {
+        if(pStFileTypes->contains(XBinary::FT_ZIP)) stFileTypesNew.insert(XBinary::FT_ZIP);
     }
 
     *pStFileTypes=stFileTypesNew;

@@ -177,7 +177,10 @@ public:
         FT_UTF8,
         FT_UNICODE,
         FT_UNICODE_LE,
-        FT_UNICODE_BE
+        FT_UNICODE_BE,
+        FT_DOCUMENT,
+        FT_IMAGE,
+        FT_ARCHIVE
     };
 
     enum MODE
