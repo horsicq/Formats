@@ -773,6 +773,29 @@ QString XBinary::_read_utf8String(qint64 nOffset)
     return sResult;
 }
 
+QString XBinary::_read_utf8String(char *pData)
+{
+    QString sResult;
+
+    ULEB128 ulebSize=_get_uleb128(pData);
+
+    sResult=QString::fromUtf8(pData+ulebSize.nByteSize,ulebSize.nValue);
+
+    return sResult;
+}
+
+QString XBinary::_read_utf8String(qint64 nOffset, char *pData, qint32 nDataSize, qint32 nDataOffset)
+{
+    QString sResult;
+
+    if((nOffset>=nDataOffset)&&(nOffset<(nDataOffset+nDataSize)))
+    {
+        sResult=XBinary::_read_utf8String(pData+(nOffset-nDataOffset));
+    }
+
+    return sResult;
+}
+
 void XBinary::write_uint8(qint64 nOffset, quint8 nValue)
 {
     write_array(nOffset,(char *)(&nValue),1);

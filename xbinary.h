@@ -317,6 +317,8 @@ public:
     QString read_unicodeString(qint64 nOffset,qint64 nMaxSize=256,bool bIsBigEndian=false);
     QString read_utf8String(qint64 nOffset,qint64 nMaxSize=256);
     QString _read_utf8String(qint64 nOffset);
+    QString _read_utf8String(char *pData);
+    QString _read_utf8String(qint64 nOffset,char *pData,qint32 nDataSize,qint32 nDataOffset);
 
     void write_uint8(qint64 nOffset,quint8 nValue);
     void write_int8(qint64 nOffset,qint8 nValue);
