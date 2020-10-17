@@ -112,6 +112,7 @@ public:
     void setIdent_pad(quint8 nValue,int nPad);
 
     // TODO Hdr32 getHdr32();
+    // TODO Hdr64 getHdr64();
     quint16 getHdr32_type();
     void setHdr32_type(quint16 nValue);
     quint16 getHdr32_machine();
