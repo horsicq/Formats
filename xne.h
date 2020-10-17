@@ -120,12 +120,12 @@ public:
 
     XNE_DEF::NE_SEGMENT _read_NE_SEGMENT(qint64 nOffset);
 
-    static QMap<quint64, QString> getImageNEMagics();
-    static QMap<quint64, QString> getImageNEMagicsS();
-    static QMap<quint64, QString> getImageNEFlagsS();
-    static QMap<quint64, QString> getImageNEExetypesS();
-    static QMap<quint64, QString> getImageNEFlagsothersS();
-    static QMap<quint64, QString> getImageSegmentTypesS();
+    static QMap<quint64,QString> getImageNEMagics();
+    static QMap<quint64,QString> getImageNEMagicsS();
+    static QMap<quint64,QString> getImageNEFlagsS();
+    static QMap<quint64,QString> getImageNEExetypesS();
+    static QMap<quint64,QString> getImageNEFlagsothersS();
+    static QMap<quint64,QString> getImageSegmentTypesS();
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual MODE getMode();
