@@ -641,16 +641,16 @@ public:
 
     bool addSection(XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
     bool addSection(QString sFileName,bool bIsImage,XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
-    bool addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
+    bool addSection(QIODevice *pDevice,bool bIsImage,XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader,char *pData,qint64 nDataSize);
 
     bool removeLastSection();
-    static bool removeLastSection(QIODevice *pDevice, bool bIsImage);
+    static bool removeLastSection(QIODevice *pDevice,bool bIsImage);
     static bool removeLastSection(QString sFileName,bool bIsImage);
     // TODO copy Overlay function -> XBinary
     XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY read_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset);
     XPE_DEF::IMAGE_RESOURCE_DIRECTORY read_IMAGE_RESOURCE_DIRECTORY(qint64 nOffset);
     XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY read_IMAGE_RESOURCE_DATA_ENTRY(qint64 nOffset);
-    XPE::RESOURCES_ID_NAME getResourcesIDName(qint64 nResourceOffset, quint32 nValue);
+    XPE::RESOURCES_ID_NAME getResourcesIDName(qint64 nResourceOffset,quint32 nValue);
 
     QList<qint64> getRelocsAsRVAList();
 
@@ -665,8 +665,8 @@ public:
     void setRelocsSizeOfBlock(qint64 nOffset,quint32 nValue);
 
     bool addRelocsSection(QList<qint64> *pList);
-    bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pListRelocs);
-    bool addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pListRelocs);
+    bool addRelocsSection(QIODevice *pDevice,bool bIsImage,QList<qint64> *pListRelocs);
+    bool addRelocsSection(QString sFileName,bool bIsImage,QList<qint64> *pListRelocs);
     static QByteArray relocsAsRVAListToByteArray(QList<qint64> *pListRelocs,bool bIs64);
 
     bool isResourcesPresent();
