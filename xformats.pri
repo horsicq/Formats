@@ -46,3 +46,12 @@ SOURCES += \
     XCONFIG += xelf
     include($$PWD/xelf.pri)
 }
+
+contains(XCONFIG, use_dex) {
+    DEFINES += USE_DEX
+
+    !contains(XCONFIG, xdex) {
+        XCONFIG += xdex
+        include($$PWD/../XDEX/xdex.pri)
+    }
+}

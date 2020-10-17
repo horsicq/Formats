@@ -69,6 +69,13 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
         XMACH mach(pDevice,bIsImage,nImageBase);
         result=mach.getMemoryMap();
     }
+#ifdef USE_DEX
+    else if(XBinary::checkFileType(XBinary::FT_DEX,fileType))
+    {
+        XDEX dex(pDevice);
+        result=dex.getMemoryMap();
+    }
+#endif
 
     return result;
 }

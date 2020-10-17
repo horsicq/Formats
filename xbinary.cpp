@@ -773,13 +773,18 @@ QString XBinary::_read_utf8String(qint64 nOffset)
     return sResult;
 }
 
-QString XBinary::_read_utf8String(char *pData)
+QString XBinary::_read_utf8String(char *pData, qint32 nDataSize)
 {
     QString sResult;
 
     ULEB128 ulebSize=_get_uleb128(pData);
 
-    sResult=QString::fromUtf8(pData+ulebSize.nByteSize,ulebSize.nValue);
+    qint32 nStringSize=qMin((qint32)ulebSize.nValue,nDataSize);
+
+    if(nStringSize>0)
+    {
+        sResult=QString::fromUtf8(pData+ulebSize.nByteSize,nStringSize);
+    }
 
     return sResult;
 }
@@ -790,7 +795,9 @@ QString XBinary::_read_utf8String(qint64 nOffset, char *pData, qint32 nDataSize,
 
     if((nOffset>=nDataOffset)&&(nOffset<(nDataOffset+nDataSize)))
     {
-        sResult=XBinary::_read_utf8String(pData+(nOffset-nDataOffset));
+        char *pStringData=pData+(nOffset-nDataOffset);
+        qint32 nStringSize=nDataSize-(nOffset-nDataOffset);
+        sResult=XBinary::_read_utf8String(pStringData,nStringSize);
     }
 
     return sResult;
@@ -5165,6 +5172,23 @@ bool XBinary::isStringInListPresentExp(QList<QString> *pListStrings, QString sSt
     return (getStringNumberFromListExp(pListStrings,sString)!=-1);
 }
 
+QString XBinary::getStringByIndex(QList<QString> *pListStrings, int nIndex, qint32 nNumberOfStrings)
+{
+    QString sResult;
+
+    if(nNumberOfStrings==-1)
+    {
+        nNumberOfStrings=pListStrings->count();
+    }
+
+    if((nIndex>0)&&(nIndex<nNumberOfStrings))
+    {
+        sResult=pListStrings->at(nIndex);
+    }
+
+    return sResult;
+}
+
 quint32 XBinary::elfHash(const quint8 *pData)
 {
     quint32 nResult=0;
@@ -5270,23 +5294,7 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
 {
     bool bResult=false;
 
-    if((fileTypeMain==FT_BINARY)&&(fileTypeOptional==FT_BINARY))
-    {
-        bResult=true;
-    }
-    else if((fileTypeMain==FT_COM)&&(fileTypeOptional==FT_COM))
-    {
-        bResult=true;
-    }
-    else if((fileTypeMain==FT_MSDOS)&&(fileTypeOptional==FT_MSDOS))
-    {
-        bResult=true;
-    }
-    else if((fileTypeMain==FT_NE)&&(fileTypeOptional==FT_NE))
-    {
-        bResult=true;
-    }
-    else if((fileTypeMain==FT_LE)&&((fileTypeOptional==FT_LE)||(fileTypeOptional==FT_LX)))
+    if((fileTypeMain==FT_LE)&&((fileTypeOptional==FT_LE)||(fileTypeOptional==FT_LX)))
     {
         bResult=true;
     }
@@ -5299,6 +5307,10 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
         bResult=true;
     }
     else if((fileTypeMain==FT_MACH)&&((fileTypeOptional==FT_MACH)||(fileTypeOptional==FT_MACH32)||(fileTypeOptional==FT_MACH64)))
+    {
+        bResult=true;
+    }
+    else if(fileTypeMain==fileTypeOptional)
     {
         bResult=true;
     }

@@ -317,7 +317,7 @@ public:
     QString read_unicodeString(qint64 nOffset,qint64 nMaxSize=256,bool bIsBigEndian=false);
     QString read_utf8String(qint64 nOffset,qint64 nMaxSize=256);
     QString _read_utf8String(qint64 nOffset);
-    QString _read_utf8String(char *pData);
+    QString _read_utf8String(char *pData,qint32 nDataSize);
     QString _read_utf8String(qint64 nOffset,char *pData,qint32 nDataSize,qint32 nDataOffset);
 
     void write_uint8(qint64 nOffset,quint8 nValue);
@@ -679,6 +679,7 @@ public:
     static qint32 getStringNumberFromListExp(QList<QString> *pListStrings,QString sString);
     static bool isStringInListPresent(QList<QString> *pListStrings,QString sString);
     static bool isStringInListPresentExp(QList<QString> *pListStrings,QString sString);
+    static QString getStringByIndex(QList<QString> *pListStrings,int nIndex,qint32 nNumberOfStrings=-1);
 
     static quint32 elfHash(const quint8 *pData);
 

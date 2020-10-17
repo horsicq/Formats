@@ -22,6 +22,9 @@
 #define XFORMATS_H
 
 #include "xbinary.h"
+#ifdef USE_DEX
+#include "xdex.h"
+#endif
 #include "xcom.h"
 #include "xmsdos.h"
 #include "xne.h"
