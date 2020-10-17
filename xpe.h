@@ -734,7 +734,7 @@ public:
     static QMap<quint64,QString> getDebugTypesS();
 
     qint64 calculateHeadersSize();
-    qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);
+    qint64 _calculateHeadersSize(qint64 nSectionsTableOffset,quint32 nNumberOfSections);
 
     bool isDll();
     static bool isDll(QString sFileName);
@@ -759,7 +759,7 @@ public:
     void setMetadataHeader_Streams(quint16 nValue);
 
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
-    bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap);
+    bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory,XBinary::_MEMORY_MAP *pMemoryMap);
 
     bool isNetMetadataPresent();
     bool isNetMetadataPresent(CLI_INFO *pCliInfo,XBinary::_MEMORY_MAP *pMemoryMap);
@@ -995,10 +995,10 @@ public:
 
     qint32 getNumberOfImports();
     QString getImportLibraryName(quint32 nNumber);
-    QString getImportLibraryName(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
+    QString getImportLibraryName(quint32 nNumber,QList<XPE::IMPORT_HEADER> *pListImport);
 
     qint32 getNumberOfImportThunks(quint32 nNumber);
-    qint32 getNumberOfImportThunks(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
+    qint32 getNumberOfImportThunks(quint32 nNumber,QList<XPE::IMPORT_HEADER> *pListImport);
 
     qint64 getNetHeaderOffset();
     qint64 getNetHeaderSize();
@@ -1049,7 +1049,7 @@ public:
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
-    RESOURCE_POSITION _getResourcePosition(_MEMORY_MAP *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);
+    RESOURCE_POSITION _getResourcePosition(_MEMORY_MAP *pMemoryMap,qint64 nBaseAddress,qint64 nResourceOffset,qint64 nOffset,quint32 nLevel);
     qint64 _fixHeadersSize();
     qint64 _getMinSectionOffset(); // TODO move to XBinary
     void _fixFileOffsets(qint64 nDelta);
