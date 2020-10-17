@@ -43,8 +43,8 @@ public:
     virtual qint64 pos() const;
 
 protected:
-    virtual qint64 readData(char *pData, qint64 nMaxSize);
-    virtual qint64 writeData(const char *pData, qint64 nMaxSize);
+    virtual qint64 readData(char *pData,qint64 nMaxSize);
+    virtual qint64 writeData(const char *pData,qint64 nMaxSize);
     virtual void setErrorString(const QString &sString);
 
 private:
