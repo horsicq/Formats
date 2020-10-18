@@ -1729,6 +1729,8 @@ QString XBinary::convertFileNameSymbols(QString sFileName)
     sFileName=sFileName.replace(">","_");
     sFileName=sFileName.replace("|","_");
     sFileName=sFileName.replace(":","_");
+    sFileName=sFileName.replace("\n","_");
+    sFileName=sFileName.replace("\r","_");
 
     return sFileName;
 }
