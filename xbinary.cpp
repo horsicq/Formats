@@ -690,7 +690,7 @@ QString XBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize,bool bIsBigE
 {
     QString sResult;
 
-    if(nMaxSize)
+    if((nMaxSize>0)&&(nMaxSize<0x10000))
     {
         quint16 *pBuffer=new quint16[nMaxSize+1];
 

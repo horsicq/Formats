@@ -121,6 +121,7 @@ public:
         MMT_HEADER,
         MMT_LOADSECTION,    // Section in PE; LoadProgram in ELF
         MMT_NOLOADABLE,     // For ELF
+        MMT_FILESEGMENT,
         MMT_OVERLAY
     };
 
