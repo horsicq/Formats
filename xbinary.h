@@ -329,6 +329,7 @@ public:
     void write_int32(qint64 nOffset,qint32 nValue,bool bIsBigEndian=false);
     void write_uint64(qint64 nOffset,quint64 nValue,bool bIsBigEndian=false);
     void write_int64(qint64 nOffset,qint64 nValue,bool bIsBigEndian=false);
+    // TODO double float
 
     static quint8 _read_uint8(char *pData);
     static qint8 _read_int8(char *pData);
@@ -340,6 +341,7 @@ public:
     static qint64 _read_int64(char *pData,bool bIsBigEndian=false);
     static QString _read_ansiString(char *pData,int nMaxSize=50);
     static QByteArray _read_byteArray(char *pData,int nSize);
+    // TODO double float
 
     static void _write_uint8(char *pData,quint8 nValue);
     static void _write_int8(char *pData,qint8 nValue);
@@ -349,6 +351,7 @@ public:
     static void _write_int32(char *pData,qint32 nValue,bool bIsBigEndian=false);
     static void _write_uint64(char *pData,qint64 nValue,bool bIsBigEndian=false);
     static void _write_int64(char *pData,qint64 nValue,bool bIsBigEndian=false);
+    // TODO double float
 
     qint64 find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize);
     qint64 find_uint8(qint64 nOffset,qint64 nSize,quint8 nValue);
