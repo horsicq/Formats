@@ -5253,6 +5253,17 @@ qint64 XBinary::getVersionIntValue(QString sString)
     return nResult;
 }
 
+bool XBinary::checkStringNumber(QString sString, quint32 nMin, quint32 nMax)
+{
+    bool bResult=false;
+
+    quint32 nValue=sString.toUInt();
+
+    bResult=((nValue>=nMin)&&(nValue<=nMax));
+
+    return bResult;
+}
+
 QString XBinary::valueToTimeString(quint64 nValue, XBinary::DT_TYPE type)
 {
     QString sResult;

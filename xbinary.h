@@ -689,6 +689,7 @@ public:
 
     static QString getVersionString(QString sString);
     static qint64 getVersionIntValue(QString sString);
+    static bool checkStringNumber(QString sString,quint32 nMin,quint32 nMax);
 
     enum DT_TYPE
     {
