@@ -5333,6 +5333,7 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
 
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 {
+    // TODO Check!
     // TODO optimize! new Types create remove function
     if( pStFileTypes->contains(XBinary::FT_MSDOS)||
         pStFileTypes->contains(XBinary::FT_NE)||
@@ -5360,6 +5361,7 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)
 {
+    // TODO Check!
     QSet<XBinary::FT> stFileTypesNew;
 
     if(fileType==XBinary::FT_BINARY)

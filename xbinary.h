@@ -702,8 +702,8 @@ public:
     static bool isX86asm(QString sArch);
     static bool checkFileType(XBinary::FT fileTypeMain,XBinary::FT fileTypeOptional);
 
-    static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes); // TODO Check!
-    static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes,XBinary::FT fileType); // TODO Check!
+    static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes);
+    static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes,XBinary::FT fileType);
 
     struct PROCENT
     {
