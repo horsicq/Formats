@@ -5191,6 +5191,33 @@ QString XBinary::getStringByIndex(QList<QString> *pListStrings, int nIndex, qint
     return sResult;
 }
 
+bool XBinary::isStringUnicode(QString sString, qint32 nMaxCheckSize)
+{
+    // TODO Optimize
+    bool bResult=false;
+
+    if(nMaxCheckSize==-1)
+    {
+        nMaxCheckSize=sString.size();
+    }
+    else
+    {
+        nMaxCheckSize=qMin(sString.size(),nMaxCheckSize);
+    }
+
+    for(int i=0;i<nMaxCheckSize;i++)
+    {
+        char cChar=sString.at(i).toLatin1();
+        if((cChar>127)||(cChar<27))
+        {
+            bResult=true;
+            break;
+        }
+    }
+
+    return bResult;
+}
+
 quint32 XBinary::elfHash(const quint8 *pData)
 {
     quint32 nResult=0;

@@ -686,6 +686,8 @@ public:
     static bool isStringInListPresentExp(QList<QString> *pListStrings,QString sString);
     static QString getStringByIndex(QList<QString> *pListStrings,int nIndex,qint32 nNumberOfStrings=-1);
 
+    static bool isStringUnicode(QString sString,qint32 nMaxCheckSize=-1);
+
     static quint32 elfHash(const quint8 *pData);
 
     static QString getVersionString(QString sString);
