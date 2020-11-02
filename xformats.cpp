@@ -76,6 +76,11 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
         result=dex.getMemoryMap();
     }
 #endif
+    else
+    {
+        XBinary binary(pDevice,bIsImage,nImageBase);
+        result=binary.getMemoryMap();
+    }
 
     return result;
 }
