@@ -5142,6 +5142,13 @@ bool XBinary::writeToFile(QString sFileName, QByteArray baData)
 
 qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, QString sString, bool *pbIsStop)
 {
+    bool _bIsStop=false;
+
+    if(pbIsStop==nullptr)
+    {
+        pbIsStop=&_bIsStop;
+    }
+
     qint32 nResult=-1;
 
     qint32 nNumberOfRecords=pListStrings->count();
@@ -5161,6 +5168,13 @@ qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, QString sS
 
 qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, QString sString, bool *pbIsStop)
 {
+    bool _bIsStop=false;
+
+    if(pbIsStop==nullptr)
+    {
+        pbIsStop=&_bIsStop;
+    }
+
     qint32 nResult=-1;
 
     qint32 nNumberOfRecords=pListStrings->count();
