@@ -650,13 +650,13 @@ public:
     ULEB128 get_uleb128(qint64 nOffset);
     ULEB128 _get_uleb128(char *pData);
 
-    struct PACKEDNUMBER
+    struct PACKED
     {
         quint64 nValue;
         quint32 nByteSize;
     };
 
-    PACKEDNUMBER get_packedNumber(qint64 nOffset);
+    PACKED get_packedNumber(qint64 nOffset);
 
     static QList<QString> getListFromFile(QString sFileName);
 
@@ -680,10 +680,10 @@ public:
 
     static bool writeToFile(QString sFileName,QByteArray baData);
 
-    static qint32 getStringNumberFromList(QList<QString> *pListStrings,QString sString);
-    static qint32 getStringNumberFromListExp(QList<QString> *pListStrings,QString sString);
-    static bool isStringInListPresent(QList<QString> *pListStrings,QString sString);
-    static bool isStringInListPresentExp(QList<QString> *pListStrings,QString sString);
+    static qint32 getStringNumberFromList(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
+    static qint32 getStringNumberFromListExp(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
+    static bool isStringInListPresent(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
+    static bool isStringInListPresentExp(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
     static QString getStringByIndex(QList<QString> *pListStrings,int nIndex,qint32 nNumberOfStrings=-1);
 
     static bool isStringUnicode(QString sString,qint32 nMaxCheckSize=-1);

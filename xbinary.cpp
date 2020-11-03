@@ -4877,9 +4877,9 @@ XBinary::ULEB128 XBinary::_get_uleb128(char *pData)
     return result;
 }
 
-XBinary::PACKEDNUMBER XBinary::get_packedNumber(qint64 nOffset)
+XBinary::PACKED XBinary::get_packedNumber(qint64 nOffset)
 {
-    PACKEDNUMBER result={};
+    PACKED result={};
 
     quint8 nFirstByte=0;
     quint8 nSecondByte=0;
@@ -5140,18 +5140,32 @@ bool XBinary::writeToFile(QString sFileName, QByteArray baData)
     return bResult;
 }
 
-qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, QString sString)
-{
-    return pListStrings->indexOf(sString);
-}
-
-qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, QString sString)
+qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, QString sString, bool *pbIsStop)
 {
     qint32 nResult=-1;
 
     qint32 nNumberOfRecords=pListStrings->count();
 
-    for(qint32 i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;(i<nNumberOfRecords)&&(!(*pbIsStop));i++)
+    {
+        if(pListStrings->at(i)==sString)
+        {
+            nResult=i;
+
+            break;
+        }
+    }
+
+    return nResult;
+}
+
+qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, QString sString, bool *pbIsStop)
+{
+    qint32 nResult=-1;
+
+    qint32 nNumberOfRecords=pListStrings->count();
+
+    for(qint32 i=0;(i<nNumberOfRecords)&&(!(*pbIsStop));i++)
     {
         if(isRegExpPresent(sString,pListStrings->at(i)))
         {
@@ -5164,14 +5178,14 @@ qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, QString
     return nResult;
 }
 
-bool XBinary::isStringInListPresent(QList<QString> *pListStrings, QString sString)
+bool XBinary::isStringInListPresent(QList<QString> *pListStrings, QString sString, bool *pbIsStop)
 {
-    return (getStringNumberFromList(pListStrings,sString)!=-1);
+    return (getStringNumberFromList(pListStrings,sString,pbIsStop)!=-1);
 }
 
-bool XBinary::isStringInListPresentExp(QList<QString> *pListStrings, QString sString)
+bool XBinary::isStringInListPresentExp(QList<QString> *pListStrings, QString sString, bool *pbIsStop)
 {
-    return (getStringNumberFromListExp(pListStrings,sString)!=-1);
+    return (getStringNumberFromListExp(pListStrings,sString,pbIsStop)!=-1);
 }
 
 QString XBinary::getStringByIndex(QList<QString> *pListStrings, int nIndex, qint32 nNumberOfStrings)
@@ -5391,28 +5405,7 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
     // TODO Check!
     QSet<XBinary::FT> stFileTypesNew;
 
-    if(fileType==XBinary::FT_BINARY)
-    {
-        if(pStFileTypes->contains(XBinary::FT_BINARY)) stFileTypesNew.insert(XBinary::FT_BINARY);
-    }
-    else if(fileType==XBinary::FT_COM)
-    {
-        if(pStFileTypes->contains(XBinary::FT_COM)) stFileTypesNew.insert(XBinary::FT_COM);
-    }
-    else if(fileType==XBinary::FT_MSDOS)
-    {
-        if(pStFileTypes->contains(XBinary::FT_MSDOS)) stFileTypesNew.insert(XBinary::FT_MSDOS);
-    }
-    else if(fileType==XBinary::FT_NE)
-    {
-       if(pStFileTypes->contains(XBinary::FT_NE)) stFileTypesNew.insert(XBinary::FT_NE);
-    }
-    else if((fileType==XBinary::FT_LE)||(fileType==XBinary::FT_LX))
-    {
-        if(pStFileTypes->contains(XBinary::FT_LE)) stFileTypesNew.insert(XBinary::FT_LE);
-        if(pStFileTypes->contains(XBinary::FT_LX)) stFileTypesNew.insert(XBinary::FT_LX);
-    }
-    else if(fileType==XBinary::FT_PE)
+    if(fileType==XBinary::FT_PE)
     {
         if(pStFileTypes->contains(XBinary::FT_PE)) stFileTypesNew.insert(XBinary::FT_PE);
         if(pStFileTypes->contains(XBinary::FT_PE32)) stFileTypesNew.insert(XBinary::FT_PE32);
@@ -5430,13 +5423,9 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
         if(pStFileTypes->contains(XBinary::FT_MACH32)) stFileTypesNew.insert(XBinary::FT_MACH32);
         if(pStFileTypes->contains(XBinary::FT_MACH64)) stFileTypesNew.insert(XBinary::FT_MACH64);
     }
-    else if(fileType==XBinary::FT_DEX)
+    else
     {
-        if(pStFileTypes->contains(XBinary::FT_DEX)) stFileTypesNew.insert(XBinary::FT_DEX);
-    }
-    else if(fileType==XBinary::FT_ZIP)
-    {
-        if(pStFileTypes->contains(XBinary::FT_ZIP)) stFileTypesNew.insert(XBinary::FT_ZIP);
+        if(pStFileTypes->contains(fileType)) stFileTypesNew.insert(fileType);
     }
 
     *pStFileTypes=stFileTypesNew;
