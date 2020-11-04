@@ -1154,8 +1154,6 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
     const int BUFFER_SIZE=0x1000;
     char *pBuffer=new char[BUFFER_SIZE+(nArraySize-1)];
 
-    qint64 nTotalSize=nSize;
-
     qint64 nStartOffset=nOffset;
 
     while((nSize>nArraySize-1)&&(!g_bIsFindStop))
