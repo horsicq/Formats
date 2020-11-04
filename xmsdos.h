@@ -115,10 +115,8 @@ public:
     // rich for PE and LE
     bool isRichSignaturePresent();
     QList<XMSDOS::MS_RICH_RECORD> getRichSignatureRecords();
-
     qint32 getNumberOfRichIDs();
     qint32 getNumberOfRichIDs(QList<MS_RICH_RECORD> *pListRichSignatureRecords);
-
     bool isRichVersionPresent(quint32 nVersion);
     bool isRichVersionPresent(quint32 nVersion,QList<MS_RICH_RECORD> *pListRichSignatureRecords);
 
