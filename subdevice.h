@@ -48,9 +48,9 @@ protected:
     virtual void setErrorString(const QString &sString);
 
 private:
-    QIODevice *pDevice;
-    qint64 nOffset;
-    qint64 nSize;
+    QIODevice *g_pDevice;
+    qint64 g_nOffset;
+    qint64 g_nSize;
 };
 
 #endif // SUBDEVICE_H
