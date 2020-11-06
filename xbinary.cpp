@@ -650,6 +650,24 @@ qint64 XBinary::read_int64(qint64 nOffset, bool bIsBigEndian)
     return (qint64)result;
 }
 
+quint32 XBinary::read_uint24(qint64 nOffset, bool bIsBigEndian)
+{
+    quint32 result=0;
+
+    if(bIsBigEndian)
+    {
+        read_array(nOffset,(char *)(&result)+1,3);
+        result=qFromBigEndian(result);
+    }
+    else
+    {
+        read_array(nOffset,(char *)(&result)+0,3);
+        result=qFromLittleEndian(result);
+    }
+
+    return (result&(0xFFFFFF));
+}
+
 qint64 XBinary::write_ansiString(qint64 nOffset, QString sString)
 {
     return write_array(nOffset,sString.toLatin1().data(),sString.length()+1);
@@ -2103,6 +2121,13 @@ bool XBinary::isOffsetValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 bool XBinary::isOffsetAndSizeValid(XBinary::_MEMORY_MAP *pMemoryMap, XBinary::OFFSETSIZE *pOffsetSize)
 {
     return isOffsetAndSizeValid(pMemoryMap,pOffsetSize->nOffset,pOffsetSize->nSize);
+}
+
+bool XBinary::isOffsetAndSizeValid(qint64 nOffset, qint64 nSize)
+{
+    XBinary::_MEMORY_MAP memoryMap=getMemoryMap();
+
+    return isOffsetAndSizeValid(&memoryMap,nOffset,nSize);
 }
 
 bool XBinary::isOffsetAndSizeValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize)

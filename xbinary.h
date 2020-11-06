@@ -313,6 +313,8 @@ public:
     qint64 read_int64(qint64 nOffset,bool bIsBigEndian=false);
     // TODO double float
 
+    quint32 read_uint24(qint64 nOffset,bool bIsBigEndian=false); // Uses UPX in header
+
     qint64 write_ansiString(qint64 nOffset,QString sString);
 
     QString read_ansiString(qint64 nOffset,qint64 nMaxSize=256);
@@ -422,6 +424,7 @@ public:
 
     static bool isOffsetValid(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static bool isOffsetAndSizeValid(_MEMORY_MAP *pMemoryMap,OFFSETSIZE *pOffsetSize);
+    bool isOffsetAndSizeValid(qint64 nOffset,qint64 nSize);
     static bool isOffsetAndSizeValid(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize);
 
     static bool isAddressValid(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
