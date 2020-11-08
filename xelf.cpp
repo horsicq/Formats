@@ -3622,6 +3622,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
 XBinary::_MEMORY_MAP XELF::getMemoryMap()
 {
+    // TODO Check alignment!
     XBinary::_MEMORY_MAP result={};
 
     qint32 nIndex=0;
