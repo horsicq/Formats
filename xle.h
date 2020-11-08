@@ -33,6 +33,7 @@ public:
     {
         TYPE_UNKNOWN=0,
         TYPE_EXE
+        // TODO More
     };
 
     explicit XLE(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
