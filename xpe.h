@@ -815,7 +815,7 @@ public:
 
     static QList<XPE_DEF::IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData,XPE_DEF::IMAGE_SECTION_HEADER sectionHeaderOriginal,quint32 nBlockSize);
 
-    struct HEADER_OPTIONS
+    struct HEADER_OPTIONS // TODO CHeck
     {
         quint16 nMachine;
         quint16 nCharacteristics;
