@@ -129,6 +129,10 @@ qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, 
         XMACH mach(pDevice,bIsImage,nImageBase);
         nResult=mach.getEntryPointAddress();
     }
+    else
+    {
+        nResult=0;
+    }
 
     return nResult;
 }
@@ -176,6 +180,10 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
     {
         XMACH mach(pDevice,bIsImage,nImageBase);
         nResult=mach._getEntryPointOffset();
+    }
+    else
+    {
+        nResult=0;
     }
 
     return nResult;
