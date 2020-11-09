@@ -32,6 +32,9 @@
 #include "xpe.h"
 #include "xelf.h"
 #include "xmach.h"
+#ifdef USE_ARCHIVE
+#include "xarchives.h"
+#endif
 
 class XFormats : public QObject
 {

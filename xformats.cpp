@@ -76,6 +76,13 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
         result=dex.getMemoryMap();
     }
 #endif
+#ifdef USE_ARCHIVE
+    else if(XBinary::checkFileType(XBinary::FT_ZIP,fileType))
+    {
+        XZip zip(pDevice);
+        result=zip.getMemoryMap();
+    }
+#endif
     else
     {
         XBinary binary(pDevice,bIsImage,nImageBase);
