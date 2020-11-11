@@ -243,9 +243,9 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_ELF:                sResult=QString("ELF");             break;
         case FT_ELF32:              sResult=QString("ELF32");           break;
         case FT_ELF64:              sResult=QString("ELF64");           break;
-        case FT_MACH:               sResult=QString("MACH");            break;
-        case FT_MACH32:             sResult=QString("MACH32");          break;
-        case FT_MACH64:             sResult=QString("MACH64");          break;
+        case FT_MACH:               sResult=QString("Mach-O");          break;
+        case FT_MACH32:             sResult=QString("Mach-O32");        break;
+        case FT_MACH64:             sResult=QString("Mach-O64");        break;
         // Extra
         case FT_ZIP:                sResult=QString("ZIP");             break;
         case FT_CAB:                sResult=QString("CAB");             break;
