@@ -697,11 +697,11 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
     if(result.mode==MODE_64)
     {
-        result.fileType=FT_MACH64;
+        result.fileType=FT_MACHO64;
     }
     else
     {
-        result.fileType=FT_MACH32;
+        result.fileType=FT_MACHO32;
     }
 
     result.sArch=getArch();

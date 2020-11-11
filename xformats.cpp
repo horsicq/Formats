@@ -64,7 +64,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
         XELF elf(pDevice,bIsImage,nImageBase);
         result=elf.getMemoryMap();
     }
-    else if(XBinary::checkFileType(XBinary::FT_MACH,fileType))
+    else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
     {
         XMACH mach(pDevice,bIsImage,nImageBase);
         result=mach.getMemoryMap();
@@ -131,7 +131,7 @@ qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, 
         XELF elf(pDevice,bIsImage,nImageBase);
         nResult=elf.getEntryPointAddress();
     }
-    else if(XBinary::checkFileType(XBinary::FT_MACH,fileType))
+    else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
     {
         XMACH mach(pDevice,bIsImage,nImageBase);
         nResult=mach.getEntryPointAddress();
@@ -183,7 +183,7 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
         XELF elf(pDevice,bIsImage,nImageBase);
         nResult=elf._getEntryPointOffset();
     }
-    else if(XBinary::checkFileType(XBinary::FT_MACH,fileType))
+    else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
     {
         XMACH mach(pDevice,bIsImage,nImageBase);
         nResult=mach._getEntryPointOffset();

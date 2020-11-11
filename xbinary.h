@@ -157,9 +157,9 @@ public:
         FT_ELF,
         FT_ELF32,
         FT_ELF64,
-        FT_MACH,
-        FT_MACH32,
-        FT_MACH64,
+        FT_MACHO,
+        FT_MACHO32,
+        FT_MACHO64,
         // Extra
         FT_ZIP,
         FT_CAB,

@@ -243,9 +243,9 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_ELF:                sResult=QString("ELF");             break;
         case FT_ELF32:              sResult=QString("ELF32");           break;
         case FT_ELF64:              sResult=QString("ELF64");           break;
-        case FT_MACH:               sResult=QString("Mach-O");          break;
-        case FT_MACH32:             sResult=QString("Mach-O32");        break;
-        case FT_MACH64:             sResult=QString("Mach-O64");        break;
+        case FT_MACHO:              sResult=QString("Mach-O");          break;
+        case FT_MACHO32:            sResult=QString("Mach-O32");        break;
+        case FT_MACHO64:            sResult=QString("Mach-O64");        break;
         // Extra
         case FT_ZIP:                sResult=QString("ZIP");             break;
         case FT_CAB:                sResult=QString("CAB");             break;
@@ -2925,13 +2925,13 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         {
             if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_MAGIC)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_CIGAM))
             {
-                stResult.insert(FT_MACH);
-                stResult.insert(FT_MACH32);
+                stResult.insert(FT_MACHO);
+                stResult.insert(FT_MACHO32);
             }
             else if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_MAGIC_64)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_CIGAM_64))
             {
-                stResult.insert(FT_MACH);
-                stResult.insert(FT_MACH64);
+                stResult.insert(FT_MACHO);
+                stResult.insert(FT_MACHO64);
             }
         }
     }
@@ -3073,13 +3073,13 @@ XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice)
     {
         result=FT_PE64;
     }
-    else if(stFileTypes.contains(FT_MACH32))
+    else if(stFileTypes.contains(FT_MACHO32))
     {
-        result=FT_MACH32;
+        result=FT_MACHO32;
     }
-    else if(stFileTypes.contains(FT_MACH64))
+    else if(stFileTypes.contains(FT_MACHO64))
     {
-        result=FT_MACH64;
+        result=FT_MACHO64;
     }
     else if(stFileTypes.contains(FT_ELF32))
     {
@@ -3132,8 +3132,8 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if(stFileTypes.contains(FT_PE64))       listResult.append(FT_PE64);
     if(stFileTypes.contains(FT_ELF32))      listResult.append(FT_ELF32);
     if(stFileTypes.contains(FT_ELF64))      listResult.append(FT_ELF64);
-    if(stFileTypes.contains(FT_MACH32))     listResult.append(FT_MACH32);
-    if(stFileTypes.contains(FT_MACH64))     listResult.append(FT_MACH64);
+    if(stFileTypes.contains(FT_MACHO32))     listResult.append(FT_MACHO32);
+    if(stFileTypes.contains(FT_MACHO64))     listResult.append(FT_MACHO64);
 
     return listResult;
 }
@@ -5397,7 +5397,7 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
     {
         bResult=true;
     }
-    else if((fileTypeMain==FT_MACH)&&((fileTypeOptional==FT_MACH)||(fileTypeOptional==FT_MACH32)||(fileTypeOptional==FT_MACH64)))
+    else if((fileTypeMain==FT_MACHO)&&((fileTypeOptional==FT_MACHO)||(fileTypeOptional==FT_MACHO32)||(fileTypeOptional==FT_MACHO64)))
     {
         bResult=true;
     }
@@ -5423,9 +5423,9 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_ELF)||
         pStFileTypes->contains(XBinary::FT_ELF32)||
         pStFileTypes->contains(XBinary::FT_ELF64)||
-        pStFileTypes->contains(XBinary::FT_MACH)||
-        pStFileTypes->contains(XBinary::FT_MACH32)||
-        pStFileTypes->contains(XBinary::FT_MACH64)||
+        pStFileTypes->contains(XBinary::FT_MACHO)||
+        pStFileTypes->contains(XBinary::FT_MACHO32)||
+        pStFileTypes->contains(XBinary::FT_MACHO64)||
         pStFileTypes->contains(XBinary::FT_DEX)||
         pStFileTypes->contains(XBinary::FT_ZIP))
     {
@@ -5454,11 +5454,11 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
         if(pStFileTypes->contains(XBinary::FT_ELF32)) stFileTypesNew.insert(XBinary::FT_ELF32);
         if(pStFileTypes->contains(XBinary::FT_ELF64)) stFileTypesNew.insert(XBinary::FT_ELF64);
     }
-    else if(fileType==XBinary::FT_MACH)
+    else if(fileType==XBinary::FT_MACHO)
     {
-        if(pStFileTypes->contains(XBinary::FT_MACH)) stFileTypesNew.insert(XBinary::FT_MACH);
-        if(pStFileTypes->contains(XBinary::FT_MACH32)) stFileTypesNew.insert(XBinary::FT_MACH32);
-        if(pStFileTypes->contains(XBinary::FT_MACH64)) stFileTypesNew.insert(XBinary::FT_MACH64);
+        if(pStFileTypes->contains(XBinary::FT_MACHO)) stFileTypesNew.insert(XBinary::FT_MACHO);
+        if(pStFileTypes->contains(XBinary::FT_MACHO32)) stFileTypesNew.insert(XBinary::FT_MACHO32);
+        if(pStFileTypes->contains(XBinary::FT_MACHO64)) stFileTypesNew.insert(XBinary::FT_MACHO64);
     }
     else
     {
