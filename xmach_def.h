@@ -32,6 +32,9 @@ const quint32 S_MH_CIGAM        =0xcefaedfe	;       /* NXSwapInt(MH_MAGIC) */
 const quint32 S_MH_MAGIC_64     =0xfeedfacf;        /* the 64-bit mach magic number */
 const quint32 S_MH_CIGAM_64     =0xcffaedfe;        /* NXSwapInt(MH_MAGIC_64) */
 
+const quint32 S_FAT_MAGIC       =0xCAFEBABE;
+const quint32 S_FAT_CIGAM       =0xBEBAFECA;
+
 /*
  * The 32-bit mach header appears at the very beginning of the object file for
  * 32-bit architectures.
