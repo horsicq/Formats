@@ -35,6 +35,22 @@ const quint32 S_MH_CIGAM_64     =0xcffaedfe;        /* NXSwapInt(MH_MAGIC_64) */
 const quint32 S_FAT_MAGIC       =0xCAFEBABE;
 const quint32 S_FAT_CIGAM       =0xBEBAFECA;
 
+
+struct fat_header
+{
+    quint32 magic;
+    quint32 nfat_arch;
+};
+
+struct fat_arch
+{
+    quint32 cputype;
+    quint32 cpusubtype;
+    quint32 offset;
+    quint32 size;
+    quint32 align;
+};
+
 /*
  * The 32-bit mach header appears at the very beginning of the object file for
  * 32-bit architectures.
