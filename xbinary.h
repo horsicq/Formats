@@ -165,6 +165,7 @@ public:
         FT_CAB,
         FT_RAR,
         FT_7Z,
+        FT_MACHOFAT,
         FT_PNG,
         FT_JPEG,
         FT_GIF,
