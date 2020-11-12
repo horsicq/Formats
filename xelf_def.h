@@ -61,7 +61,7 @@ namespace XELF_DEF
 
 const quint8 S_EI_NIDENT                    =16;
 const quint8 S_EI_MAG0                      =0;
-const quint8 S_ELFMAG0                      =0x7f;
+const quint8 S_ELFMAG0                      =0x7F;
 const quint8 S_EI_MAG1                      =1;
 const quint8 S_ELFMAG1                      ='E';
 const quint8 S_EI_MAG2                      =2;
@@ -92,8 +92,8 @@ const quint16 S_ET_EXEC                     =2;
 const quint16 S_ET_DYN                      =3;
 const quint16 S_ET_CORE                     =4;
 const quint16 S_ET_NUM                      =5;
-const quint16 S_ET_LOPROC                   =0xff00;
-const quint16 S_ET_HIPROC                   =0xffff;
+const quint16 S_ET_LOPROC                   =0xFF00;
+const quint16 S_ET_HIPROC                   =0xFFFF;
 
 const quint32 S_DT_NULL                     =0;                     /* Marks end of dynamic section */
 const quint32 S_DT_NEEDED                   =1;                     /* Name of needed library */
