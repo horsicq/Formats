@@ -24,6 +24,7 @@
 #include "xbinary.h"
 #ifdef USE_DEX
 #include "xdex.h"
+#include "xandroidbinary.h"
 #endif
 #include "xcom.h"
 #include "xmsdos.h"

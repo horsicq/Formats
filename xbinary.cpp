@@ -2948,6 +2948,20 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             // TODO Check APK, JAR
             // TODO basic ZIP
         }
+        else if(compareSignature(&memoryMap,"CAFEBABE",0))
+        {
+            if(read_uint32(4,true)<10)
+            {
+                stResult.insert(FT_MACHOFAT);
+            }
+        }
+        else if(compareSignature(&memoryMap,"BEBAFECA",0))
+        {
+            if(read_uint32(4,false)<10)
+            {
+                stResult.insert(FT_MACHOFAT);
+            }
+        }
         else if(compareSignature(&memoryMap,"89'PNG\r\n'1A0A........'IHDR'",0))
         {
             stResult.insert(FT_PNG);
