@@ -1376,7 +1376,7 @@ qint64 XBinary::find_unicodeString(qint64 nOffset, qint64 nSize, QString sString
 
 qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
 {
-    _MEMORY_MAP memoryMap=getMemoryMap();
+    _MEMORY_MAP memoryMap=XBinary::getMemoryMap();
 
     return find_signature(&memoryMap,nOffset,nSize,sSignature);
 }
