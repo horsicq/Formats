@@ -22,10 +22,6 @@
 #define XFORMATS_H
 
 #include "xbinary.h"
-#ifdef USE_DEX
-#include "xdex.h"
-#include "xandroidbinary.h"
-#endif
 #include "xcom.h"
 #include "xmsdos.h"
 #include "xne.h"
@@ -33,6 +29,10 @@
 #include "xpe.h"
 #include "xelf.h"
 #include "xmach.h"
+#ifdef USE_DEX
+#include "xdex.h"
+#include "xandroidbinary.h"
+#endif
 #ifdef USE_ARCHIVE
 #include "xarchives.h"
 #endif
