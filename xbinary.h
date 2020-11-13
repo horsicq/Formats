@@ -218,6 +218,7 @@ public:
         HASH_SHA256,
         HASH_SHA384,
         HASH_SHA512,
+        // TODO CHeck more
 //        HASH_KECCAK_224,
 //        HASH_KECCAK_256,
 //        HASH_KECCAK_384,
