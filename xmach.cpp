@@ -214,9 +214,9 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypes()
     mapResult.insert(0xC,"CPU_TYPE_ARM");
     mapResult.insert(0x100000C,"CPU_TYPE_ARM64");
     mapResult.insert(0xD,"CPU_TYPE_MC88000");
-    mapResult.insert(0xF,"CPU_TYPE_SPARC");
-    mapResult.insert(0xD,"CPU_TYPE_I860");
-    mapResult.insert(0xF,"CPU_TYPE_I860_LITTLE");
+    mapResult.insert(0xE,"CPU_TYPE_SPARC");
+    mapResult.insert(0xF,"CPU_TYPE_I860");
+    mapResult.insert(0x10,"CPU_TYPE_I860_LITTLE");
     mapResult.insert(0x11,"CPU_TYPE_RS6000");
     mapResult.insert(0x12,"CPU_TYPE_POWERPC");
     mapResult.insert(0x1000012,"CPU_TYPE_POWERPC64");
@@ -242,9 +242,9 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypesS()
     mapResult.insert(0xC,"ARM");
     mapResult.insert(0x100000C,"ARM64");
     mapResult.insert(0xD,"MC88000");
-    mapResult.insert(0xF,"SPARC");
-    mapResult.insert(0xD,"I860");
-    mapResult.insert(0xF,"I860_LITTLE");
+    mapResult.insert(0xE,"SPARC");
+    mapResult.insert(0xF,"I860");
+    mapResult.insert(0x10,"I860_LITTLE");
     mapResult.insert(0x11,"RS6000");
     mapResult.insert(0x12,"POWERPC");
     mapResult.insert(0x1000012,"POWERPC64");
