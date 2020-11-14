@@ -118,7 +118,7 @@ const quint32 S_IMAGE_SCN_ALIGN_MASK                        =0x00F00000;
 
 /* Predefined resource types */
 const quint32 S_RT_NEWRESOURCE                              =0x2000;
-const quint32 S_RT_ERROR                                    =0x7fff;
+const quint32 S_RT_ERROR                                    =0x7FFF;
 const quint32 S_RT_CURSOR                                   =1;
 const quint32 S_RT_BITMAP                                   =2;
 const quint32 S_RT_ICON                                     =3;
