@@ -2837,7 +2837,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
 
     if(nSize>=(int)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX))
     {
-        if((((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||(((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==0x4D5A))
+        if( (((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||
+            (((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
         {
             unsigned int nLfanew=0;
             nLfanew=((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_lfanew;
