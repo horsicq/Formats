@@ -40,7 +40,9 @@
 #include <QRegularExpressionMatch>
 #endif
 #include <math.h>
+#ifdef QT_DEBUG
 #include <QDebug>
+#endif
 #include <QElapsedTimer>
 #if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10) // TODO CHECK
 #include <QRandomGenerator>
