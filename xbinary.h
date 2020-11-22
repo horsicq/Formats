@@ -296,6 +296,7 @@ public:
         bool *pbIsStop;
         qint32 *pnNumberOfFiles;
     };
+
     static void findFiles(QString sDirectoryName,FFOPTIONS *pFFOption,qint32 nLevel=0);
     static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames);
 
