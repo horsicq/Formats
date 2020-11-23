@@ -180,6 +180,7 @@ public:
     {
         quint32 nImageBase;
         quint32 nAddressOfEntryPoint;
+        // TODO Check
         //        bool bClearHeader;
         //        bool bCheckImport;
         //        QMap<qint64,QString> mapImport;
