@@ -249,15 +249,15 @@ struct STRUCT_X86_THREAD_STATE64
 
 struct entry_point_command
 {
-    quint32 cmd;               /* LC_MAIN only used in MH_EXECUTE filetypes */
-    quint32 cmdsize;           /* 24 */
-    quint64 entryoff;          /* file (__TEXT) offset of main() */
-    quint64 stacksize;         /* if not zero, initial stack size */
+    quint32 cmd;                /* LC_MAIN only used in MH_EXECUTE filetypes */
+    quint32 cmdsize;            /* 24 */
+    quint64 entryoff;           /* file (__TEXT) offset of main() */
+    quint64 stacksize;          /* if not zero, initial stack size */
 };
 
 struct dylib
 {
-    quint32 name; // rel offset
+    quint32 name;               // rel offset
     quint32 timestamp;
     quint32 current_version;
     quint32 compatibility_version;
