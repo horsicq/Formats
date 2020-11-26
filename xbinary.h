@@ -28,27 +28,27 @@
 #include <QDir>
 #include <QtEndian>
 #include <QMap>
-#include <QBuffer>
 #include <QSet>
+#include <QBuffer>
 #include <QTemporaryFile>
 #include <QCryptographicHash>
 #include <QCoreApplication>
+#include <QTextStream>
+#include <QDateTime>
+#include <QElapsedTimer>
+#include <math.h>
 #if (QT_VERSION_MAJOR<5) // TODO Check
 #include <QRegExp>
 #else
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #endif
-#include <math.h>
 #ifdef QT_DEBUG
 #include <QDebug>
 #endif
-#include <QTextStream>
-#include <QElapsedTimer>
 #if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10) // TODO CHECK
 #include <QRandomGenerator>
 #endif
-#include <QDateTime>
 #include "xmsdos_def.h"
 #include "xne_def.h"
 #include "xle_def.h"
