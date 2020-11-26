@@ -1192,6 +1192,20 @@ void XBinary::_write_int64(char *pData, qint64 nValue, bool bIsBigEndian)
     *(qint64 *)pData=nValue;
 }
 
+void XBinary::_write_float(char *pData, float fValue, bool bIsBigEndian)
+{
+    endian_float(&fValue,bIsBigEndian);
+
+    *(float *)pData=fValue;
+}
+
+void XBinary::_write_double(char *pData, double dValue, bool bIsBigEndian)
+{
+    endian_double(&dValue,bIsBigEndian);
+
+    *(double *)pData=dValue;
+}
+
 qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint64 nArraySize)
 {
     // TODO Optimize

@@ -366,7 +366,8 @@ public:
     static void _write_int32(char *pData,qint32 nValue,bool bIsBigEndian=false);
     static void _write_uint64(char *pData,qint64 nValue,bool bIsBigEndian=false);
     static void _write_int64(char *pData,qint64 nValue,bool bIsBigEndian=false);
-    // TODO double float
+    static void _write_float(char *pData,float fValue,bool bIsBigEndian=false); // TODO Check
+    static void _write_double(char *pData,double dValue,bool bIsBigEndian=false); // TODO Check
 
     qint64 find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize);
     qint64 find_uint8(qint64 nOffset,qint64 nSize,quint8 nValue);
