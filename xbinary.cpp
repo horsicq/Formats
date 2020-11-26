@@ -1080,6 +1080,24 @@ QByteArray XBinary::_read_byteArray(char *pData, int nSize)
     return QByteArray(pData,nSize);
 }
 
+float XBinary::_read_float(char *pData, bool bIsBigEndian)
+{
+    float result=*(float *)pData;
+
+    endian_float(&result,bIsBigEndian);
+
+    return result;
+}
+
+double XBinary::_read_double(char *pData, bool bIsBigEndian)
+{
+    double result=*(double *)pData;
+
+    endian_double(&result,bIsBigEndian);
+
+    return result;
+}
+
 void XBinary::_write_uint8(char *pData, quint8 nValue)
 {
     *(quint8 *)pData=nValue;

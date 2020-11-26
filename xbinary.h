@@ -355,7 +355,8 @@ public:
     static qint64 _read_int64(char *pData,bool bIsBigEndian=false);
     static QString _read_ansiString(char *pData,int nMaxSize=50);
     static QByteArray _read_byteArray(char *pData,int nSize);
-    // TODO double float
+    static float _read_float(char *pData,bool bIsBigEndian=false); // TODO Check
+    static double _read_double(char *pData,bool bIsBigEndian=false); // TODO Check
 
     static void _write_uint8(char *pData,quint8 nValue);
     static void _write_int8(char *pData,qint8 nValue);
