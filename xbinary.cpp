@@ -931,7 +931,7 @@ void XBinary::write_uint64(qint64 nOffset, quint64 nValue, bool bIsBigEndian)
 
 void XBinary::write_int64(qint64 nOffset, qint64 nValue, bool bIsBigEndian)
 {
-    qint64 _value=(qint64)nValue;
+    quint64 _value=(quint64)nValue;
 
     if(bIsBigEndian)
     {
@@ -943,6 +943,20 @@ void XBinary::write_int64(qint64 nOffset, qint64 nValue, bool bIsBigEndian)
     }
 
     write_array(nOffset,(char *)(&_value),8);
+}
+
+void XBinary::write_float(qint64 nOffset, float fValue, bool bIsBigEndian)
+{
+    endian_float(&fValue,bIsBigEndian);
+
+    write_array(nOffset,(char *)(&fValue),2);
+}
+
+void XBinary::write_double(qint64 nOffset, double dValue, bool bIsBigEndian)
+{
+    endian_double(&dValue,bIsBigEndian);
+
+    write_array(nOffset,(char *)(&dValue),4);
 }
 
 quint8 XBinary::_read_uint8(char *pData)

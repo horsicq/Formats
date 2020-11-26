@@ -342,7 +342,8 @@ public:
     void write_int32(qint64 nOffset,qint32 nValue,bool bIsBigEndian=false);
     void write_uint64(qint64 nOffset,quint64 nValue,bool bIsBigEndian=false);
     void write_int64(qint64 nOffset,qint64 nValue,bool bIsBigEndian=false);
-    // TODO double float
+    void write_float(qint64 nOffset,float fValue,bool bIsBigEndian=false); // TODO Check
+    void write_double(qint64 nOffset,double dValue,bool bIsBigEndian=false); // TODO Check
 
     static quint8 _read_uint8(char *pData);
     static qint8 _read_int8(char *pData);
