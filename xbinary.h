@@ -319,7 +319,8 @@ public:
     qint32 read_int32(qint64 nOffset,bool bIsBigEndian=false);
     quint64 read_uint64(qint64 nOffset,bool bIsBigEndian=false);
     qint64 read_int64(qint64 nOffset,bool bIsBigEndian=false);
-    // TODO double float
+    float read_float(qint64 nOffset,bool bIsBigEndian=false); // TODO Check
+    double read_double(qint64 nOffset,bool bIsBigEndian=false); // TODO Check
 
     quint32 read_uint24(qint64 nOffset,bool bIsBigEndian=false); // Uses UPX in header
 

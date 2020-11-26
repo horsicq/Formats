@@ -651,6 +651,28 @@ qint64 XBinary::read_int64(qint64 nOffset, bool bIsBigEndian)
     return (qint64)result;
 }
 
+float XBinary::read_float(qint64 nOffset, bool bIsBigEndian)
+{
+    float result=0;
+
+    read_array(nOffset,(char *)(&result),2);
+
+    endian_float(&result,bIsBigEndian);
+
+    return result;
+}
+
+double XBinary::read_double(qint64 nOffset, bool bIsBigEndian)
+{
+    double result=0;
+
+    read_array(nOffset,(char *)(&result),4);
+
+    endian_double(&result,bIsBigEndian);
+
+    return result;
+}
+
 quint32 XBinary::read_uint24(qint64 nOffset, bool bIsBigEndian)
 {
     quint32 result=0;
