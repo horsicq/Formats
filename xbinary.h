@@ -57,6 +57,7 @@
 #include "xmach_def.h"
 #include "subdevice.h"
 
+// TODO Check 64
 #define S_ALIGN_DOWN(value,align)   ((value)&~(align-1))
 #define S_ALIGN_UP(value,align)     (((value)&(align-1))?S_ALIGN_DOWN(value,align)+align:value)
 #define S_LOWORD(value)             ((quint16)((quint32)(value)&0xFFFF))
