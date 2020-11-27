@@ -33,6 +33,7 @@ public:
     {
         TYPE_UNKNOWN=0,
         TYPE_EXE
+        // TODO more
     };
 
     explicit XCOM(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
