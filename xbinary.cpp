@@ -2908,6 +2908,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         if( (((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||
             (((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
         {
+            // TODO rewrite for NE, LE
             unsigned int nLfanew=0;
             nLfanew=((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_lfanew;
             unsigned int nHeaderSize=baHeader.size()-sizeof(XPE_DEF::IMAGE_NT_HEADERS32);
