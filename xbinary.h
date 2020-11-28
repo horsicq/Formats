@@ -144,7 +144,6 @@ public:
 
     enum FT
     {
-        // TODO IMAGE
         FT_UNKNOWN=0,
         FT_BINARY,
         FT_BINARY16,
