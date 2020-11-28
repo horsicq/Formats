@@ -3056,7 +3056,6 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         }
         else if(compareSignature(&memoryMap,"'dex\n'......00"))
         {
-            stResult.insert(FT_IMAGE);
             stResult.insert(FT_DEX);
         }
         else if(compareSignature(&memoryMap,"02000C00"))
