@@ -2913,27 +2913,27 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             unsigned int nLfanew=0;
             nLfanew=((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_lfanew;
             unsigned int nHeaderSize=baHeader.size()-sizeof(XPE_DEF::IMAGE_NT_HEADERS32);
-            QByteArray baNTHeaders;
+            QByteArray baNewHeader;
 
-            bool isHeaderValid=false;
+            bool bIsNewHeaderValid=false;
 
             if((nLfanew<nHeaderSize)&&((quint32)baHeader.size()>sizeof(XPE_DEF::IMAGE_NT_HEADERS32)))
             {
                 pOffset+=nLfanew;
-                isHeaderValid=true;
+                bIsNewHeaderValid=true;
             }
             else
             {
-                baNTHeaders=read_array(nLfanew,sizeof(XPE_DEF::IMAGE_NT_HEADERS32));
+                baNewHeader=read_array(nLfanew,sizeof(XPE_DEF::IMAGE_NT_HEADERS32));
 
-                if(baNTHeaders.size()==sizeof(XPE_DEF::IMAGE_NT_HEADERS32))
+                if(baNewHeader.size()==sizeof(XPE_DEF::IMAGE_NT_HEADERS32))
                 {
-                    pOffset=baNTHeaders.data();
-                    isHeaderValid=true;
+                    pOffset=baNewHeader.data();
+                    bIsNewHeaderValid=true;
                 }
             }
 
-            if(isHeaderValid)
+            if(bIsNewHeaderValid)
             {
                 if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XPE_DEF::S_IMAGE_NT_SIGNATURE)
                 {
