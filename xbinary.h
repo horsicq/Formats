@@ -188,6 +188,7 @@ public:
         FT_DOCUMENT,
         FT_IMAGE,
         FT_ARCHIVE
+        // TODO more
     };
 
     enum MODE
