@@ -3036,22 +3036,27 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         }
         else if(compareSignature(&memoryMap,"89'PNG\r\n'1A0A........'IHDR'",0))
         {
+            stResult.insert(FT_IMAGE);
             stResult.insert(FT_PNG);
         }
         else if(compareSignature(&memoryMap,"FFD8FFE0....'JFIF'00",0))
         {
+            stResult.insert(FT_IMAGE);
             stResult.insert(FT_JPEG);
         }
         else if(compareSignature(&memoryMap,"'GIF8'",0))
         {
+            stResult.insert(FT_IMAGE);
             stResult.insert(FT_GIF);
         }
         else if(compareSignature(&memoryMap,"'MM'002A",0)||compareSignature(&memoryMap,"'II'2A00",0))
         {
+            stResult.insert(FT_IMAGE);
             stResult.insert(FT_TIFF);
         }
         else if(compareSignature(&memoryMap,"'dex\n'......00"))
         {
+            stResult.insert(FT_IMAGE);
             stResult.insert(FT_DEX);
         }
         else if(compareSignature(&memoryMap,"02000C00"))
