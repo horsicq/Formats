@@ -3022,6 +3022,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         {
             if(read_uint32(4,true)<10)
             {
+                stResult.insert(FT_ARCHIVE);
                 stResult.insert(FT_MACHOFAT);
             }
         }
@@ -3029,6 +3030,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         {
             if(read_uint32(4,false)<10)
             {
+                stResult.insert(FT_ARCHIVE);
                 stResult.insert(FT_MACHOFAT);
             }
         }
