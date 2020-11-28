@@ -3013,6 +3013,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
 
         if(compareSignature(&memoryMap,"'PK'0304",0)||compareSignature(&memoryMap,"'PK'0506",0)) // TODO baHeader
         {
+            stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_ZIP);
             // TODO Check APK, JAR
             // TODO basic ZIP
