@@ -2908,6 +2908,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         if( (((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||
             (((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
         {
+            stResult.insert(FT_MSDOS);
             // TODO rewrite for NE, LE
             unsigned int nLfanew=0;
             nLfanew=((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_lfanew;
@@ -2965,8 +2966,6 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                     stResult.insert(FT_LX);
                 }
             }
-
-            stResult.insert(FT_MSDOS);
         }
     }
 
