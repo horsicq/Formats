@@ -2916,7 +2916,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
 
             bool bIsNewHeaderValid=false;
 
-            if((nLfanew<nHeaderSize)&&((quint32)baHeader.size()>sizeof(XPE_DEF::IMAGE_NT_HEADERS32))) // TODO do not use IMAGE_NT_HEADERS32
+            if((nLfanew<nHeaderSize)&&((quint32)baHeader.size()>(nLfanew+sizeof(XPE_DEF::IMAGE_NT_HEADERS32)))) // TODO do not use IMAGE_NT_HEADERS32
             {
                 pOffset+=nLfanew;
                 bIsNewHeaderValid=true;
