@@ -2956,7 +2956,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 {
                     stResult.insert(FT_NE);
                 }
-                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE) // mb TODO 16/32
+                else if((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE)
                 {
                     stResult.insert(FT_LE);
                 }
