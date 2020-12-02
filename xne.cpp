@@ -967,6 +967,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
         }
     }
 
+    // TODO Overlay !!!
     // Check overlay!!
 //    qint64 nOverlaySize=result.nRawSize-nMaxOffset;
 
