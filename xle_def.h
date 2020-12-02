@@ -79,8 +79,8 @@ struct IMAGE_VXD_HEADER
 //    BYTE   e32_res3[12];              // Reserved words
 //    DWORD  e32_winresoff;
 //    DWORD  e32_winreslen;
-//    WORD   e32_devid;                   // Device ID for VxD
-//    WORD   e32_ddkver;                  // DDK version for VxD
+//    WORD   e32_devid;                 // Device ID for VxD
+//    WORD   e32_ddkver;                // DDK version for VxD
 };
 
 struct o32_obj
