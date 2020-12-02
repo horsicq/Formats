@@ -21,7 +21,6 @@
 #ifndef SUBDEVICE_H
 #define SUBDEVICE_H
 
-#include <QObject>
 #include <QIODevice>
 
 class SubDevice : public QIODevice
