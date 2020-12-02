@@ -31,7 +31,7 @@ const quint16 S_FLAG_8086               =0x0010;
 const quint16 S_FLAG_80286              =0x0020;
 const quint16 S_FLAG_80386              =0x0040;
 
-struct IMAGE_OS2_HEADER  // OS/2 .EXE header
+struct IMAGE_OS2_HEADER                 // OS/2 .EXE header
 {
     quint16 ne_magic;                   // Magic number
     quint8 ne_ver;                      // Version number
