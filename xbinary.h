@@ -193,6 +193,7 @@ public:
     enum MODE
     {
         MODE_UNKNOWN=0,
+        MODE_DATA,
         MODE_16,
         MODE_16SEG,
         MODE_32,
