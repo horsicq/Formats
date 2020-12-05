@@ -46,7 +46,7 @@
 #ifdef QT_DEBUG
 #include <QDebug>
 #endif
-#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10) // TODO CHECK
+#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
 #include <QRandomGenerator>
 #endif
 #include "xmsdos_def.h"
