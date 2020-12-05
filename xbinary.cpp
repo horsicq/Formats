@@ -119,7 +119,7 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
     switch(mode)
     {
         case MODE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
-        case MODE_DATA:             sResult=QString("Data");        break;
+        case MODE_DATA:             sResult=QString("Data");        break; // mb TODO translate
         case MODE_16:               sResult=QString("16");          break;
         case MODE_16SEG:            sResult=QString("16SEG");       break;
         case MODE_32:               sResult=QString("32");          break;
