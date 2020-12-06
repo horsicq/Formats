@@ -198,6 +198,7 @@ public:
         MODE_16SEG,
         MODE_32,
         MODE_64
+        // TODO more
     };
 
     struct _MEMORY_MAP
