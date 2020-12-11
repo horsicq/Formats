@@ -201,6 +201,13 @@ public:
         // TODO more
     };
 
+    enum DM
+    {
+        DM_X86_16=0,
+        DM_X86_32,
+        DM_X86_64
+    };
+
     struct _MEMORY_MAP
     {
         qint64 nBaseAddress;
