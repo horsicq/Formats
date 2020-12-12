@@ -205,7 +205,9 @@ public:
     {
         DM_X86_16=0,
         DM_X86_32,
-        DM_X86_64
+        DM_X86_64,
+        DM_ARM_LE,
+        DM_ARM_BE
     };
 
     struct _MEMORY_MAP
