@@ -5481,6 +5481,8 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_X86_16:             sResult=QString("X86-16");          break;
         case DM_X86_32:             sResult=QString("X86-32");          break;
         case DM_X86_64:             sResult=QString("X86-64");          break;
+        case DM_ARM_LE:             sResult=QString("ARM");             break;
+        case DM_ARM_BE:             sResult=QString("ARM BE");          break;
     }
 
     return sResult;
