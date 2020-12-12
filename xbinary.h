@@ -207,7 +207,8 @@ public:
         DM_X86_32,
         DM_X86_64,
         DM_ARM_LE,
-        DM_ARM_BE
+        DM_ARM_BE,
+        DM_CORTEXM
     };
 
     struct _MEMORY_MAP
