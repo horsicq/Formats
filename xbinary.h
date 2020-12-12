@@ -208,6 +208,8 @@ public:
         DM_X86_64,
         DM_ARM_LE,
         DM_ARM_BE,
+        DM_ARM64_LE,
+        DM_ARM64_BE,
         DM_CORTEXM,
         DM_THUMB_LE,
         DM_THUMB_BE,
