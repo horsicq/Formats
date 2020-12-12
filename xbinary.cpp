@@ -5484,6 +5484,8 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_ARM_LE:             sResult=QString("ARM");             break;
         case DM_ARM_BE:             sResult=QString("ARM BE");          break;
         case DM_CORTEXM:            sResult=QString("CORTEXM");         break;
+        case DM_THUMB_LE:           sResult=QString("THUMB");           break;
+        case DM_THUMB_BE:           sResult=QString("THUMB BE");        break;
     }
 
     return sResult;
