@@ -5472,6 +5472,20 @@ bool XBinary::isX86asm(QString sArch)
     return bResult;
 }
 
+QString XBinary::disasmIdToString(XBinary::DM disasmMode)
+{
+    QString sResult="Unknown"; // mb TODO translate
+
+    switch(disasmMode)
+    {
+        case DM_X86_16:             sResult=QString("X86-16");          break;
+        case DM_X86_32:             sResult=QString("X86-32");          break;
+        case DM_X86_64:             sResult=QString("X86-64");          break;
+    }
+
+    return sResult;
+}
+
 bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOptional)
 {
     bool bResult=false;
