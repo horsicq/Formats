@@ -215,6 +215,8 @@ public:
         DM_THUMB_BE,
         DM_MIPS_LE,
         DM_MIPS_BE,
+        DM_MIPS64_LE,
+        DM_MIPS64_BE,
     };
 
     struct _MEMORY_MAP
