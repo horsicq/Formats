@@ -213,6 +213,8 @@ public:
         DM_CORTEXM,
         DM_THUMB_LE,
         DM_THUMB_BE,
+        DM_MIPS_LE,
+        DM_MIPS_BE,
     };
 
     struct _MEMORY_MAP
