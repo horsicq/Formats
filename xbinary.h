@@ -217,8 +217,9 @@ public:
         DM_MIPS_BE,
         DM_MIPS64_LE,
         DM_MIPS64_BE,
-        DM_PPS64_LE,
-        DM_PPS64_BE,
+        DM_PPC64_LE,
+        DM_PPC64_BE,
+        DM_SPARC,
     };
 
     struct _MEMORY_MAP

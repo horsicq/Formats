@@ -5492,6 +5492,9 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_MIPS_BE:            sResult=QString("MIPS BE");         break;
         case DM_MIPS64_LE:          sResult=QString("MIPS64");          break;
         case DM_MIPS64_BE:          sResult=QString("MIPS64 BE");       break;
+        case DM_PPC64_LE:           sResult=QString("PPC64");           break;
+        case DM_PPC64_BE:           sResult=QString("PPC64 BE");        break;
+        case DM_SPARC:              sResult=QString("SPARC");           break;
     }
 
     return sResult;
