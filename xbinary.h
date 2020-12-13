@@ -220,7 +220,7 @@ public:
         DM_PPC64_LE,
         DM_PPC64_BE,
         DM_SPARC,
-        DM_SYSTEMZ,
+        DM_S390X
     };
 
     struct _MEMORY_MAP

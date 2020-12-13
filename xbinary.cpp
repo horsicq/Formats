@@ -5495,7 +5495,7 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_PPC64_LE:           sResult=QString("PPC64");           break;
         case DM_PPC64_BE:           sResult=QString("PPC64 BE");        break;
         case DM_SPARC:              sResult=QString("SPARC");           break;
-        case DM_SYSTEMZ:            sResult=QString("SYSTEMZ");         break;
+        case DM_S390X:              sResult=QString("S390X");           break;
     }
 
     return sResult;
