@@ -220,6 +220,7 @@ public:
         DM_PPC64_LE,
         DM_PPC64_BE,
         DM_SPARC,
+        DM_SYSTEMZ,
     };
 
     struct _MEMORY_MAP
