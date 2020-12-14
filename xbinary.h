@@ -48,6 +48,8 @@
 #endif
 #if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
 #include <QRandomGenerator>
+#elif (QT_VERSION_MAJOR>=6)
+#include <QRandomGenerator>
 #endif
 #include "xmsdos_def.h"
 #include "xne_def.h"

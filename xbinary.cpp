@@ -176,6 +176,8 @@ quint16 XBinary::random16()
 
 #if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
     nResult=(quint16)(QRandomGenerator::global()->generate());
+#elif (QT_VERSION_MAJOR>=6)
+    nResult=(quint16)(QRandomGenerator::global()->generate());
 #else
     static quint32 nSeed=0;
 
@@ -5906,9 +5908,7 @@ int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignature
         record.st=XBinary::ST_COMPAREBYTES;
         record.nSizeOfAddr=0;
         record.nBaseAddress=0;
-        QByteArray baData;
-        baData.append(sBytes);
-        record.baData=QByteArray::fromHex(baData);
+        record.baData=QByteArray::fromHex(sBytes.toUtf8()); // TODO Check
 
         pListSignatureRecords->append(record);
     }
