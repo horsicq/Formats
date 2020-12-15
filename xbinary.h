@@ -225,7 +225,8 @@ public:
         DM_S390X,
         DM_XCORE,
         DM_M68K,
-        DM_M68K40
+        DM_M68K40,
+        DM_TMS320C64X
     };
 
     struct _MEMORY_MAP
