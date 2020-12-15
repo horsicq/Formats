@@ -5500,6 +5500,7 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_S390X:              sResult=QString("S390X");           break;
         case DM_XCORE:              sResult=QString("XCORE");           break;
         case DM_M68K:               sResult=QString("M68K");            break;
+        case DM_M68K40:             sResult=QString("M68K40");          break;
     }
 
     return sResult;
