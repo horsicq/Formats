@@ -226,7 +226,13 @@ public:
         DM_XCORE,
         DM_M68K,
         DM_M68K40,
-        DM_TMS320C64X
+        DM_TMS320C64X,
+        DM_M6800,
+        DM_M6801,
+        DM_M6805,
+        DM_M6808,
+        DM_M6809,
+        DM_M6811,
     };
 
     struct _MEMORY_MAP
