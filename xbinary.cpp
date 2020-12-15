@@ -5502,6 +5502,12 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_M68K:               sResult=QString("M68K");            break;
         case DM_M68K40:             sResult=QString("M68K40");          break;
         case DM_TMS320C64X:         sResult=QString("TMS320C64X");      break;
+        case DM_M6800:              sResult=QString("M6800");           break;
+        case DM_M6801:              sResult=QString("M6801");           break;
+        case DM_M6805:              sResult=QString("M6805");           break;
+        case DM_M6808:              sResult=QString("M6808");           break;
+        case DM_M6809:              sResult=QString("M6809");           break;
+        case DM_M6811:              sResult=QString("M6811");           break;
     }
 
     return sResult;
