@@ -235,7 +235,8 @@ public:
         DM_M6811,
         DM_CPU12,
         DM_HD6301,
-        DM_HD6309
+        DM_HD6309,
+        DM_HCS08
     };
 
     struct _MEMORY_MAP
