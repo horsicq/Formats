@@ -5510,6 +5510,7 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_M6811:              sResult=QString("M6811");           break;
         case DM_CPU12:              sResult=QString("CPU12");           break;
         case DM_HD6301:             sResult=QString("HD6301");          break;
+        case DM_HD6309:             sResult=QString("HD6309");          break;
     }
 
     return sResult;
