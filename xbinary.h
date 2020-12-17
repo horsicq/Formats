@@ -764,6 +764,8 @@ public:
 
     static QString disasmIdToString(DM disasmMode);
 
+    static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
+
     static bool checkFileType(XBinary::FT fileTypeMain,XBinary::FT fileTypeOptional);
 
     static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes);

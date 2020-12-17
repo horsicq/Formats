@@ -5517,6 +5517,25 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
     return sResult;
 }
 
+XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    XBinary::DM dmResult=DM_X86_16;
+
+    if(pMemoryMap->sArch=="PPC64")
+    {
+        if(pMemoryMap->bIsBigEndian)
+        {
+            dmResult=DM_PPC64_BE;
+        }
+        else
+        {
+            dmResult=DM_PPC64_LE;
+        }
+    }
+
+    return dmResult;
+}
+
 bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOptional)
 {
     bool bResult=false;
