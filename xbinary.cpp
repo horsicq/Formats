@@ -120,6 +120,7 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
     {
         case MODE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
         case MODE_DATA:             sResult=QString("Data");        break; // mb TODO translate
+        case MODE_8:                sResult=QString("8");           break;
         case MODE_16:               sResult=QString("16");          break;
         case MODE_16SEG:            sResult=QString("16SEG");       break;
         case MODE_32:               sResult=QString("32");          break;
@@ -5656,6 +5657,30 @@ bool XBinary::procentSetCurrentValue(XBinary::PROCENT *pProcent, qint64 nCurrent
     }
 
     return bResult;
+}
+
+XBinary::MODE XBinary::getModeFromSize(quint64 nSize)
+{
+    MODE result=MODE_64;
+
+    if(((quint64)nSize)>=0xFFFFFFFF)
+    {
+        result=MODE_64;
+    }
+    else if(((quint64)nSize)>=0xFFFF)
+    {
+        result=MODE_32;
+    }
+    else if(((quint64)nSize)>=0xFF)
+    {
+        result=MODE_16;
+    }
+    else
+    {
+        result=MODE_8;
+    }
+
+    return result;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)

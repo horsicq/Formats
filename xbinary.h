@@ -196,6 +196,7 @@ public:
     {
         MODE_UNKNOWN=0,
         MODE_DATA,
+        MODE_8,
         MODE_16,
         MODE_16SEG,
         MODE_32,
@@ -781,6 +782,8 @@ public:
 
     static PROCENT procentInit(qint64 nMaxValue);
     static bool procentSetCurrentValue(PROCENT *pProcent,qint64 nCurrentValue);
+
+    static MODE getModeFromSize(quint64 nSize);
 
 private:
     static QString convertSignature(QString sSignature);
