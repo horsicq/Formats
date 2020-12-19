@@ -5513,6 +5513,7 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_HD6301:             sResult=QString("HD6301");          break;
         case DM_HD6309:             sResult=QString("HD6309");          break;
         case DM_HCS08:              sResult=QString("HCS08");           break;
+        case DM_EVM:                sResult=QString("EVM");             break;
     }
 
     return sResult;
