@@ -240,6 +240,7 @@ public:
         DM_HCS08,
         DM_EVM,
         DM_MOS65XX
+        // TODO Check more
     };
 
     struct _MEMORY_MAP
