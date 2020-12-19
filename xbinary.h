@@ -21,7 +21,6 @@
 #ifndef XBINARY_H
 #define XBINARY_H
 
-#include <QObject>
 #include <QIODevice>
 #include <QFile>
 #include <QFileInfo>
