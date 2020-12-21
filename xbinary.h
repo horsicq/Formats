@@ -237,8 +237,8 @@ public:
         DM_HD6301,
         DM_HD6309,
         DM_HCS08,
-        DM_EVM,
-        DM_MOS65XX
+        // DM_EVM, TODO Check!
+        // DM_MOS65XX TODO Check!
         // TODO Check more
     };
 
