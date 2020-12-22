@@ -5535,6 +5535,17 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
             dmResult=DM_PPC64_LE;
         }
     }
+    else if(pMemoryMap->sArch=="MIPS")
+    {
+        if(pMemoryMap->bIsBigEndian)
+        {
+            dmResult=DM_MIPS_BE;
+        }
+        else
+        {
+            dmResult=DM_MIPS_LE;
+        }
+    }
 
     return dmResult;
 }
