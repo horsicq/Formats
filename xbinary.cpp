@@ -5524,6 +5524,8 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     XBinary::DM dmResult=DM_X86_16;
 
+    qDebug(pMemoryMap->sArch.toLatin1().data());
+
     if(pMemoryMap->sArch=="PPC64")
     {
         if(pMemoryMap->bIsBigEndian)
@@ -5544,6 +5546,17 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
         else
         {
             dmResult=DM_MIPS_LE;
+        }
+    }
+    else if(pMemoryMap->sArch=="ARM")
+    {
+        if(pMemoryMap->bIsBigEndian)
+        {
+            dmResult=DM_ARM_BE;
+        }
+        else
+        {
+            dmResult=DM_ARM_LE;
         }
     }
 
