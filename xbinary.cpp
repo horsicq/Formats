@@ -5559,6 +5559,17 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
             dmResult=DM_ARM_LE;
         }
     }
+    else if(pMemoryMap->sArch=="AARCH64")
+    {
+        if(pMemoryMap->bIsBigEndian)
+        {
+            dmResult=DM_ARM64_BE;
+        }
+        else
+        {
+            dmResult=DM_ARM64_LE;
+        }
+    }
 
     return dmResult;
 }
