@@ -5578,7 +5578,7 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
     {
         dmResult=DM_X86_32;
     }
-    else if(pMemoryMap->sArch=="AMD64")
+    else if((pMemoryMap->sArch=="AMD64")||(pMemoryMap->sArch=="X86_64"))
     {
         dmResult=DM_X86_64;
     }
