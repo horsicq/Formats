@@ -5570,6 +5570,10 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
             dmResult=DM_ARM64_LE;
         }
     }
+    else if(pMemoryMap->sArch=="386")
+    {
+        dmResult=DM_X86_32;
+    }
 
     return dmResult;
 }
