@@ -5524,7 +5524,7 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     XBinary::DM dmResult=DM_X86_16;
 
-    qDebug(pMemoryMap->sArch.toLatin1().data());
+//    qDebug(pMemoryMap->sArch.toLatin1().data());
 
     if(pMemoryMap->sArch=="PPC64")
     {
@@ -5569,6 +5569,10 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
         {
             dmResult=DM_ARM64_LE;
         }
+    }
+    else if(pMemoryMap->sArch=="8086") // TODO
+    {
+        dmResult=DM_X86_16;
     }
     else if((pMemoryMap->sArch=="386")||(pMemoryMap->sArch=="I386"))
     {
