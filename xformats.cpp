@@ -195,3 +195,41 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
 
     return nResult;
 }
+#ifdef QT_GUI_LIB
+void XFormats::setFileTypeComboBox(QComboBox *pComboBox, QList<XBinary::FT> *pListFileTypes, XBinary::FT fileType)
+{
+    const QSignalBlocker blocker(pComboBox);
+
+    pComboBox->clear();
+
+    int nNumberOfListTypes=pListFileTypes->count();
+
+    for(int i=0;i<nNumberOfListTypes;i++)
+    {
+        XBinary::FT fileType=pListFileTypes->at(i);
+        pComboBox->addItem(XBinary::fileTypeIdToString(fileType),fileType);
+    }
+
+    if(nNumberOfListTypes)
+    {
+        if(fileType==XBinary::FT_UNKNOWN)
+        {
+            pComboBox->setCurrentIndex(nNumberOfListTypes-1);
+        }
+        else
+        {
+            int nNumberOfItems=pComboBox->count();
+
+            for(int i=0;i<nNumberOfItems;i++)
+            {
+                if(pComboBox->itemData(i).toUInt()==fileType)
+                {
+                    pComboBox->setCurrentIndex(i);
+
+                    break;
+                }
+            }
+        }
+    }
+}
+#endif

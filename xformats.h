@@ -36,6 +36,9 @@
 #ifdef USE_ARCHIVE
 #include "xarchives.h"
 #endif
+#ifdef QT_GUI_LIB
+#include <QComboBox>
+#endif
 
 class XFormats : public QObject
 {
@@ -46,6 +49,9 @@ public:
     static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nImageBase=0);
     static qint64 getEntryPointAddress(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nImageBase=0);
     static qint64 getEntryPointOffset(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nImageBase=0);
+#ifdef QT_GUI_LIB
+    static void setFileTypeComboBox(QComboBox *pComboBox,QList<XBinary::FT> *pListFileTypes,XBinary::FT fileType);
+#endif
 };
 
 #endif // XFORMATS_H

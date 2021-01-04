@@ -219,6 +219,8 @@ public:
         DM_MIPS_BE,
         DM_MIPS64_LE,
         DM_MIPS64_BE,
+        DM_PPC_LE,
+        DM_PPC_BE,
         DM_PPC64_LE,
         DM_PPC64_BE,
         DM_SPARC,

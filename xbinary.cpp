@@ -26,10 +26,10 @@ XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
 {
     setDevice(pDevice);
     setIsImage(bIsImage);
-    setBaseAddress(0);
+    g_nBaseAddress=0;
     setImageBase(nImageBase);
     setEndianness(false); // LE
-    setEntryPointOffset(0);
+    g_nEntryPointOffset=0;
     setFindProcessEnable(true);
     setDumpProcessEnable(true);
     setEntropyProcessEnable(true);
@@ -5495,6 +5495,8 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_MIPS_BE:            sResult=QString("MIPS BE");         break;
         case DM_MIPS64_LE:          sResult=QString("MIPS64");          break;
         case DM_MIPS64_BE:          sResult=QString("MIPS64 BE");       break;
+        case DM_PPC_LE:             sResult=QString("PPC");             break;
+        case DM_PPC_BE:             sResult=QString("PPC BE");          break;
         case DM_PPC64_LE:           sResult=QString("PPC64");           break;
         case DM_PPC64_BE:           sResult=QString("PPC64 BE");        break;
         case DM_SPARC:              sResult=QString("SPARC");           break;
@@ -5524,9 +5526,20 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     XBinary::DM dmResult=DM_X86_16;
 
-//    qDebug(pMemoryMap->sArch.toLatin1().data());
+    qDebug(pMemoryMap->sArch.toLatin1().data());
 
-    if(pMemoryMap->sArch=="PPC64")
+    if(pMemoryMap->sArch=="PPC")
+    {
+        if(pMemoryMap->bIsBigEndian)
+        {
+            dmResult=DM_PPC_BE;
+        }
+        else
+        {
+            dmResult=DM_PPC_LE;
+        }
+    }
+    else if(pMemoryMap->sArch=="PPC64")
     {
         if(pMemoryMap->bIsBigEndian)
         {
@@ -5559,7 +5572,8 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
             dmResult=DM_ARM_LE;
         }
     }
-    else if((pMemoryMap->sArch=="AARCH64")||(pMemoryMap->sArch=="ARM64"))
+    else if((pMemoryMap->sArch=="AARCH64")||
+            (pMemoryMap->sArch=="ARM64"))
     {
         if(pMemoryMap->bIsBigEndian)
         {
@@ -5574,14 +5588,26 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
     {
         dmResult=DM_X86_16;
     }
-    else if((pMemoryMap->sArch=="386")||(pMemoryMap->sArch=="I386"))
+    else if((pMemoryMap->sArch=="386")||
+            (pMemoryMap->sArch=="I386")||
+            (pMemoryMap->sArch=="486"))
     {
         dmResult=DM_X86_32;
     }
-    else if((pMemoryMap->sArch=="AMD64")||(pMemoryMap->sArch=="X86_64"))
+    else if((pMemoryMap->sArch=="AMD64")||
+            (pMemoryMap->sArch=="X86_64"))
     {
         dmResult=DM_X86_64;
     }
+    else if(pMemoryMap->sArch=="68K")
+    {
+        dmResult=DM_M68K;
+    }
+    else if(pMemoryMap->sArch=="SPARC")
+    {
+        dmResult=DM_SPARC;
+    }
+    // TODO SH
 
     return dmResult;
 }
