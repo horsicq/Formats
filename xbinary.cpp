@@ -2257,7 +2257,7 @@ bool XBinary::isAddressPhysical(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddres
 
 qint64 XBinary::offsetToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
-    qint64 nResult=-1;
+    qint64 nResult=0;
 
     int nNumberOfRecords=pMemoryMap->listRecords.count();
 
@@ -4087,6 +4087,11 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
 
     nOffset=offsetSize.nOffset;
     nSize=offsetSize.nSize;
+
+    if(nSize==0)
+    {
+        dResult=0;
+    }
 
     if(nOffset!=-1)
     {
