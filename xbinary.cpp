@@ -5531,8 +5531,6 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     XBinary::DM dmResult=DM_X86_16;
 
-    qDebug(pMemoryMap->sArch.toLatin1().data());
-
     if(pMemoryMap->sArch=="PPC")
     {
         if(pMemoryMap->bIsBigEndian)
