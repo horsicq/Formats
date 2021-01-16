@@ -31,7 +31,7 @@ bool XNE::isValid()
 
     quint16 magic=get_magic();
 
-    if(magic==(quint16)XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)
+    if(magic==(quint16)XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ)
     {
         qint32 lfanew=get_lfanew();
 

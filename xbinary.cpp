@@ -2909,7 +2909,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
 
     if(nSize>=(int)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX))
     {
-        if( (((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||
+        if( (((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ)||
             (((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
         {
             stResult.insert(FT_MSDOS);

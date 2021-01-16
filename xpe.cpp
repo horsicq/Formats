@@ -30,7 +30,7 @@ bool XPE::isValid()
 
     quint16 magic=get_magic();
 
-    if( (magic==(quint16)XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||
+    if( (magic==(quint16)XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ)||
         (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
     {
         qint32 lfanew=get_lfanew();
@@ -4542,7 +4542,7 @@ QByteArray XPE::createHeaderStub(HEADER_OPTIONS *pHeaderOptions) // TODO options
     {
         XPE pe(&buffer);
 
-        pe.set_e_magic(XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE);
+        pe.set_e_magic(XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ);
         pe.set_e_lfanew(0x40);
         pe.setNtHeaders_Signature(XPE_DEF::S_IMAGE_NT_SIGNATURE);
         pe.setFileHeader_SizeOfOptionalHeader(0xE0); // TODO
