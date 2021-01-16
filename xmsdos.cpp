@@ -30,7 +30,7 @@ bool XMSDOS::isValid()
 
     quint16 magic=get_magic();
 
-    if( (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE)||
+    if( (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ)||
         (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
     {
         bResult=true;
