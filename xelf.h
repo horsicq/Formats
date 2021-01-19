@@ -402,6 +402,7 @@ public:
     virtual MODE getMode();
     virtual QString getArch();
     virtual int getType();
+    virtual FT getFileType();
     virtual QString typeIdToString(int nType);
 
     virtual qint64 getBaseAddress();

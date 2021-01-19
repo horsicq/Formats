@@ -35,6 +35,7 @@ XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
     setEntropyProcessEnable(true);
     setHashProcessEnable(true);
     setMode(MODE_UNKNOWN);
+    setFileType(FT_BINARY);
     setArch("NOEXEC");
     setVersion("");
     setType(TYPE_UNKNOWN);
@@ -110,6 +111,16 @@ QString XBinary::typeIdToString(int nType)
 QString XBinary::getTypeAsString()
 {
     return typeIdToString(getType());
+}
+
+void XBinary::setFileType(XBinary::FT fileType)
+{
+    g_fileType=fileType;
+}
+
+XBinary::FT XBinary::getFileType()
+{
+    return g_fileType;
 }
 
 QString XBinary::modeIdToString(XBinary::MODE mode)

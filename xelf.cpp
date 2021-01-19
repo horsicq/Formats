@@ -3938,6 +3938,24 @@ int XELF::getType()
     return nResult;
 }
 
+XBinary::FT XELF::getFileType()
+{
+    FT result;
+
+    MODE mode=getMode();
+
+    if(mode==MODE_32)
+    {
+        result=FT_ELF32;
+    }
+    else if(mode==MODE_64)
+    {
+        result=FT_ELF64;
+    }
+
+    return result;
+}
+
 QString XELF::typeIdToString(int nType)
 {
     QString sResult="Unknown"; // mb TODO translate

@@ -314,6 +314,9 @@ public:
     virtual QString typeIdToString(int nType);
     QString getTypeAsString();
 
+    void setFileType(FT fileType);
+    virtual FT getFileType();
+
     static QString modeIdToString(MODE mode);
     static QString endiannessToString(bool bIsBigEndian);
 
@@ -839,6 +842,7 @@ private:
     MODE g_mode;
     QString g_sVersion;
     int g_nType;
+    FT g_fileType;
 };
 
 #endif // XBINARY_H
