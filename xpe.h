@@ -302,6 +302,7 @@ public:
     virtual QString getArch();
     virtual bool isBigEndian();
 
+    virtual FT getFileType();
     virtual int getType();
     virtual QString typeIdToString(int nType);
 

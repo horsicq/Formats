@@ -80,6 +80,24 @@ bool XPE::isBigEndian()
     return false;
 }
 
+XBinary::FT XPE::getFileType()
+{
+    FT result;
+
+    MODE mode=getMode();
+
+    if(mode==MODE_32)
+    {
+        result=FT_PE32;
+    }
+    else if(mode==MODE_64)
+    {
+        result=FT_PE64;
+    }
+
+    return result;
+}
+
 int XPE::getType()
 {
     TYPE result=TYPE_UNKNOWN;
