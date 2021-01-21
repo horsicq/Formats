@@ -1149,6 +1149,24 @@ QString XMACH::getArch()
     return getHeaderCpuTypesS().value(getHeader_cputype(),QString("UNKNOWN"));
 }
 
+XBinary::FT XMACH::getFileType()
+{
+    FT result=FT_MACHO32;
+
+    MODE mode=getMode();
+
+    if(mode==MODE_32)
+    {
+        result=FT_MACHO32;
+    }
+    else if(mode==MODE_64)
+    {
+        result=FT_MACHO64;
+    }
+
+    return result;
+}
+
 int XMACH::getType()
 {
     int nResult=TYPE_UNKNOWN;

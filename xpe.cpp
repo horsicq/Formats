@@ -30,7 +30,7 @@ bool XPE::isValid()
 
     quint16 magic=get_magic();
 
-    if( (magic==(quint16)XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ)||
+    if( (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ)||
         (magic==XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM))
     {
         qint32 lfanew=get_lfanew();
@@ -82,7 +82,7 @@ bool XPE::isBigEndian()
 
 XBinary::FT XPE::getFileType()
 {
-    FT result;
+    FT result=FT_PE32;
 
     MODE mode=getMode();
 

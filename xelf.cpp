@@ -3940,7 +3940,7 @@ int XELF::getType()
 
 XBinary::FT XELF::getFileType()
 {
-    FT result;
+    FT result=FT_ELF32;
 
     MODE mode=getMode();
 

@@ -168,6 +168,7 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
+    virtual FT getFileType();
     virtual int getType();
     virtual QString typeIdToString(int nType);
 };
