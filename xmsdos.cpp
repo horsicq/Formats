@@ -624,6 +624,11 @@ bool XMSDOS::isBigEndian()
     return false;
 }
 
+XBinary::FT XMSDOS::getFileType()
+{
+    return FT_MSDOS;
+}
+
 int XMSDOS::getType()
 {
     return TYPE_EXE;
