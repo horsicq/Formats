@@ -1089,6 +1089,11 @@ qint64 XNE::getEntryPointOffset(XBinary::_MEMORY_MAP *pMemoryMap)
     return addressToOffset(pMemoryMap,getImageOS2Header_csip());
 }
 
+XBinary::FT XNE::getFileType()
+{
+    return FT_NE;
+}
+
 int XNE::getType()
 {
     return TYPE_EXE; // TODO
