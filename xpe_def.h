@@ -93,6 +93,9 @@ const quint32 S_IMAGE_FILE_MACHINE_AMD64                    =0x8664;  // AMD64 (
 const quint32 S_IMAGE_FILE_MACHINE_M32R                     =0x9041;  // M32R little-endian
 const quint32 S_IMAGE_FILE_MACHINE_CEE                      =0xC0EE;
 const quint32 S_IMAGE_FILE_MACHINE_ARM64                    =0xAA64;
+const quint32 S_IMAGE_FILE_MACHINE_RISCV32                  =0x5032;  // RISC-V 32bit
+const quint32 S_IMAGE_FILE_MACHINE_RISCV64                  =0x5064;  // RISC-V 64bit
+const quint32 S_IMAGE_FILE_MACHINE_RISCV128                 =0x5128;  // RISC-V 128bit
 
 const quint32 S_IMAGE_SUBSYSTEM_UNKNOWN                     =0;
 const quint32 S_IMAGE_SUBSYSTEM_NATIVE                      =1;
