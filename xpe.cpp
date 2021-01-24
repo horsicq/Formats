@@ -9613,6 +9613,9 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachines()
     mapResult.insert(0x9041,"IMAGE_FILE_MACHINE_M32R");
     mapResult.insert(0xC0EE,"IMAGE_FILE_MACHINE_CEE");
     mapResult.insert(0xAA64,"IMAGE_FILE_MACHINE_ARM64");
+    mapResult.insert(0x5032,"IMAGE_FILE_MACHINE_RISCV32");
+    mapResult.insert(0x5064,"IMAGE_FILE_MACHINE_RISCV64");
+    mapResult.insert(0x5128,"IMAGE_FILE_MACHINE_RISCV128");
 
     return mapResult;
 }
@@ -9651,6 +9654,9 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
     mapResult.insert(0x9041,"M32R");
     mapResult.insert(0xC0EE,"CEE");
     mapResult.insert(0xAA64,"ARM64");
+    mapResult.insert(0x5032,"RISCV32");
+    mapResult.insert(0x5064,"RISCV64");
+    mapResult.insert(0x5128,"RISCV128");
 
     return mapResult;
 }
