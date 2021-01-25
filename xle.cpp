@@ -1366,6 +1366,24 @@ qint64 XLE::getEntryPointOffset(XBinary::_MEMORY_MAP *pMemoryMap)
     return 0;
 }
 
+XBinary::FT XLE::getFileType()
+{
+    FT result=FT_LE;
+
+    MODE mode=getMode();
+
+    if(mode==MODE_16SEG)
+    {
+        result=FT_LE;
+    }
+    else if(mode==MODE_32)
+    {
+        result=FT_LX;
+    }
+
+    return result;
+}
+
 int XLE::getType()
 {
     return TYPE_EXE; // TODO
