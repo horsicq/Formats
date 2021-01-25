@@ -1300,15 +1300,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
     result.mode=getMode();
     result.bIsBigEndian=isBigEndian();
     result.sType=getTypeAsString();
-
-    if(result.mode==MODE_16SEG)
-    {
-        result.fileType=FT_LE;
-    }
-    else if(result.mode==MODE_32)
-    {
-        result.fileType=FT_LX;
-    }
+    result.fileType=getFileType();
 
     result.nRawSize=getSize();
     // TODO Image size CONST
