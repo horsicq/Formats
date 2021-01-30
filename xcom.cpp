@@ -132,6 +132,11 @@ qint64 XCOM::getImageSize()
     return 0x10000;
 }
 
+XBinary::FT XCOM::getFileType()
+{
+    return FT_COM;
+}
+
 int XCOM::getType()
 {
     return TYPE_EXE;
