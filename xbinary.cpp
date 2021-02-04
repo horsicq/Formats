@@ -1457,16 +1457,23 @@ qint64 XBinary::find_unicodeString(qint64 nOffset, qint64 nSize, QString sString
     return find_array(nOffset,nSize,(char *)sString.utf16(),sString.size()*2);
 }
 
-qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature)
+qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize)
 {
     _MEMORY_MAP memoryMap=XBinary::getMemoryMap();
 
-    return find_signature(&memoryMap,nOffset,nSize,sSignature);
+    return find_signature(&memoryMap,nOffset,nSize,sSignature,pnResultSize);
 }
 
-qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nSize, QString sSignature)
+qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize)
 {
     qint64 _nSize=getSize();
+
+    qint64 nResultSize=0;
+
+    if(pnResultSize==0)
+    {
+        pnResultSize=&nResultSize;
+    }
 
     if(nSize==-1)
     {
@@ -1484,6 +1491,15 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset, qint64 nS
     }
 
     sSignature=convertSignature(sSignature);
+
+    if(sSignature.contains("$")||sSignature.contains("#"))
+    {
+        *pnResultSize=1;
+    }
+    else
+    {
+        *pnResultSize=sSignature.size()/2;
+    }
 
     qint64 nResult=-1;
 
@@ -3366,6 +3382,11 @@ QString XBinary::valueToHex(double dValue, bool bIsBigEndian)
 QString XBinary::valueToHex(XBinary::MODE mode, quint64 nValue, bool bIsBigEndian)
 {
     QString sResult;
+
+    if(mode==MODE_UNKNOWN)
+    {
+        mode=getModeFromSize(nValue);
+    }
 
     if(mode==MODE_16)
     {
