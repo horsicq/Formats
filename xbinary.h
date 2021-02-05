@@ -769,9 +769,7 @@ public:
     static QString valueToTimeString(quint64 nValue,DT_TYPE type);
 
     static bool isX86asm(QString sArch);
-
     static QString disasmIdToString(DM disasmMode);
-
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
 
     static bool checkFileType(XBinary::FT fileTypeMain,XBinary::FT fileTypeOptional);
