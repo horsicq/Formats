@@ -2515,7 +2515,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
     result.nBaseAddress=_getBaseAddress();
     result.nRawSize=nTotalSize;
     result.nImageSize=nTotalSize;
-    result.fileType=FT_BINARY;
+    result.fileType=getFileType();
     result.mode=getMode();
     result.sArch=getArch();
     result.bIsBigEndian=isBigEndian();
