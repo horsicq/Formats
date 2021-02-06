@@ -41,6 +41,9 @@ public:
     virtual void close();
     virtual qint64 pos() const;
 
+private:
+    void _close();
+
 protected:
     virtual qint64 readData(char *pData,qint64 nMaxSize);
     virtual qint64 writeData(const char *pData,qint64 nMaxSize);

@@ -54,7 +54,7 @@ SubDevice::~SubDevice()
 {
     if(isOpen())
     {
-        close();
+        _close();
     }
 }
 
@@ -107,13 +107,18 @@ bool SubDevice::atEnd() const
 
 void SubDevice::close()
 {
-    setOpenMode(NotOpen);
+    _close();
 }
 
 qint64 SubDevice::pos() const
 {
 //    return pDevice->pos()-nOffset;
     return QIODevice::pos();
+}
+
+void SubDevice::_close()
+{
+    setOpenMode(NotOpen);
 }
 
 qint64 SubDevice::readData(char *pData, qint64 nMaxSize)
