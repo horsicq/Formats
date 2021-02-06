@@ -49,7 +49,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
     result.nBaseAddress=_getBaseAddress();
     result.nRawSize=nTotalSize;
     result.nImageSize=getImageSize();
-    result.fileType=FT_COM;
+    result.fileType=getFileType();
     result.mode=getMode();
     result.sArch=getArch();
     result.bIsBigEndian=isBigEndian();
