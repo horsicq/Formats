@@ -2284,7 +2284,7 @@ bool XBinary::isAddressPhysical(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddres
 
 qint64 XBinary::offsetToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
-    qint64 nResult=0;
+    qint64 nResult=-1;
 
     int nNumberOfRecords=pMemoryMap->listRecords.count();
 
