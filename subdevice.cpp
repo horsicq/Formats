@@ -58,6 +58,11 @@ SubDevice::~SubDevice()
     }
 }
 
+qint64 SubDevice::getInitOffset()
+{
+    return g_nOffset;
+}
+
 qint64 SubDevice::size() const
 {
     return g_nSize;

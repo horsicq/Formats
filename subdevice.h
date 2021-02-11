@@ -31,6 +31,8 @@ public:
     SubDevice(QIODevice *pDevice,qint64 nOffset=0,qint64 nSize=-1,QObject *pParent=nullptr);
     ~SubDevice();
 
+    qint64 getInitOffset();
+
     virtual qint64 size() const;
     //    virtual qint64 bytesAvailable() const;
     virtual bool isSequential() const;
