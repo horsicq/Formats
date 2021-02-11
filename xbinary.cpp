@@ -1293,6 +1293,11 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
     return -1;
 }
 
+qint64 XBinary::find_byteArray(qint64 nOffset, qint64 nSize, QByteArray baData)
+{
+    return find_array(nOffset,nSize,baData.data(),baData.size());
+}
+
 qint64 XBinary::find_uint8(qint64 nOffset, qint64 nSize, quint8 nValue)
 {
     return find_array(nOffset,nSize,(char *)&nValue,1);
@@ -1492,7 +1497,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
     sSignature=convertSignature(sSignature);
 
-    if(sSignature.contains("$")||sSignature.contains("#"))
+    if(sSignature.contains("$")||sSignature.contains("#")||sSignature.contains("+"))
     {
         *pnResultSize=1;
     }
@@ -1503,7 +1508,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
     qint64 nResult=-1;
 
-    if(sSignature.contains(".")||sSignature.contains("$")||sSignature.contains("#"))
+    if(sSignature.contains(".")||sSignature.contains("$")||sSignature.contains("#")||sSignature.contains("+"))
     {
         PROCENT procent=procentInit(nSize);
 
@@ -1515,7 +1520,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
         QList<SIGNATURE_RECORD> listSignatureRecords=getSignatureRecords(sSignature);
 
-        if(listSignatureRecords.count()&&(listSignatureRecords.at(0).st==ST_COMPAREBYTES))
+        if(listSignatureRecords.count()&&((listSignatureRecords.at(0).st==ST_COMPAREBYTES)||(listSignatureRecords.at(0).st==ST_FINDBYTES)))
         {
             QByteArray baFirst=listSignatureRecords.at(0).baData;
 
@@ -2585,16 +2590,6 @@ bool XBinary::compareSignature(QString sSignature, qint64 nOffset)
 bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap,QString sSignature, qint64 nOffset)
 {
     sSignature=convertSignature(sSignature);
-
-    // Convert to List
-    // int nType
-    // 0: compare bytes
-    // 1: relative offset(fix)
-    // 2: relative offset
-    // 3: address
-    // QByteArray bytes
-    // int size of address/offset
-    // int Base of address
 
     QList<SIGNATURE_RECORD> listSignatureRecords=getSignatureRecords(sSignature);
 
@@ -5805,6 +5800,10 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
         {
             i+=_getSignatureRelOffsetFix(&listResult,sSignature,i);
         }
+        else if(sSignature.at(i)==QChar('+'))
+        {
+            i+=_getSignatureDelta(&listResult,sSignature,i);
+        }
         else if(sSignature.at(i)==QChar('$'))
         {
             i+=_getSignatureRelOffset(&listResult,sSignature,i);
@@ -5857,6 +5856,19 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                     }
 
                     nOffset+=baData.size();
+                }
+                break;
+
+            case XBinary::ST_FINDBYTES:
+                {
+                    qint64 nResult=find_byteArray(nOffset,pListSignatureRecords->at(i).nFindDelta+pListSignatureRecords->at(i).baData.size(),pListSignatureRecords->at(i).baData);
+
+                    if(nResult==-1)
+                    {
+                        return false;
+                    }
+
+                    nOffset=nResult+pListSignatureRecords->at(i).baData.size();
                 }
                 break;
 
@@ -5956,6 +5968,48 @@ int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSi
         record.nBaseAddress=nResult/2;
 
         pListSignatureRecords->append(record);
+    }
+
+    return nResult;
+}
+
+int XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex)
+{
+    // TODO Check!!!
+    int nResult=0;
+    int nSignatureSize=sSignature.size();
+
+    for(int i=nStartIndex; i<nSignatureSize; i++)
+    {
+        if(sSignature.at(i)==QChar('+'))
+        {
+            nResult++;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    if(nResult)
+    {
+        QList<XBinary::SIGNATURE_RECORD> _listSignatureRecords;
+        qint32 nTemp=_getSignatureBytes(&_listSignatureRecords,sSignature,nStartIndex+nResult);
+
+        if(_listSignatureRecords.count())
+        {
+            SIGNATURE_RECORD record={};
+
+            record.st=XBinary::ST_FINDBYTES;
+            record.nSizeOfAddr=0;
+            record.nBaseAddress=0;
+            record.baData=_listSignatureRecords.at(0).baData;
+            record.nFindDelta=32*nResult;
+
+            pListSignatureRecords->append(record);
+
+            nResult+=nTemp;
+        }
     }
 
     return nResult;

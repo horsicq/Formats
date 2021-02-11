@@ -286,6 +286,7 @@ private:
     enum ST
     {
         ST_COMPAREBYTES=0,
+        ST_FINDBYTES,
         ST_RELOFFSETFIX,
         ST_RELOFFSET,
         ST_ADDRESS
@@ -297,6 +298,7 @@ private:
         ST st;
         QByteArray baData;
         quint32 nSizeOfAddr;
+        qint64 nFindDelta;
     };
 
 public:
@@ -419,6 +421,7 @@ public:
     static void _write_double(char *pData,double dValue,bool bIsBigEndian=false); // TODO Check
 
     qint64 find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize);
+    qint64 find_byteArray(qint64 nOffset,qint64 nSize,QByteArray baData);
     qint64 find_uint8(qint64 nOffset,qint64 nSize,quint8 nValue);
     qint64 find_int8(qint64 nOffset,qint64 nSize,qint8 nValue);
     qint64 find_uint16(qint64 nOffset,qint64 nSize,quint16 nValue,bool bIsBigEndian=false);
@@ -798,6 +801,7 @@ private:
     bool _compareSignature(_MEMORY_MAP *pMemoryMap,QList<SIGNATURE_RECORD> *pListSignatureRecords,qint64 nOffset);
 
     int _getSignatureRelOffsetFix(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
+    int _getSignatureDelta(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     int _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     int _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     int _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
