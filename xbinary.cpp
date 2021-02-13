@@ -5790,6 +5790,7 @@ XBinary::MODE XBinary::getModeFromSize(quint64 nSize)
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
+    // TODO Error checks!
     QList<SIGNATURE_RECORD> listResult;
 
     int nSignatureSize=sSignature.size();
