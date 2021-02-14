@@ -201,6 +201,7 @@ public:
         MODE_32,
         MODE_64
         // TODO more
+        // mb bits
     };
 
     enum DM
