@@ -3974,7 +3974,7 @@ QString XELF::typeIdToString(int nType)
 
 qint64 XELF::getBaseAddress()
 {
-    return getMemoryMap().nBaseAddress;
+    return getMemoryMap().nBaseAddress; // TODO Check !!!
 }
 
 QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType)
