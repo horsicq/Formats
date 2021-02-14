@@ -32,7 +32,7 @@ SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize, QObject *
         nOffset=0;
     }
 
-    if((nSize+nOffset>pDevice->size())||(nSize==-1))
+    if((nSize+nOffset>pDevice->size())||(nSize==-1)) // TODO Check
     {
         nSize=pDevice->size()-nOffset;
     }
