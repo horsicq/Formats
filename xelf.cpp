@@ -3977,12 +3977,6 @@ qint64 XELF::getBaseAddress()
     return getMemoryMap().nBaseAddress;
 }
 
-void XELF::setBaseAddress(qint64 nValue)
-{
-    Q_UNUSED(nValue)
-    //  TODO
-}
-
 QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType)
 {
     QList<XELF_DEF::Elf_Phdr> listResult;

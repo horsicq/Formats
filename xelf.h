@@ -406,7 +406,6 @@ public:
     virtual QString typeIdToString(int nType);
 
     virtual qint64 getBaseAddress();
-    virtual void setBaseAddress(qint64 nValue);
 
     QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders,quint32 nType);
 
