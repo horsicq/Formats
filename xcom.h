@@ -39,7 +39,6 @@ public:
     explicit XCOM(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     ~XCOM();
     virtual bool isValid();
-    virtual qint64 getBaseAddress();
     virtual _MEMORY_MAP getMemoryMap();
     virtual QString getArch();
     virtual MODE getMode();

@@ -22,7 +22,7 @@
 
 XCOM::XCOM(QIODevice *pDevice, bool bIsImage, qint64 nImageBase) : XBinary(pDevice,bIsImage,nImageBase)
 {
-
+    XBinary::setBaseAddress(XCOM_DEF::S_ADDRESS_BEGIN);
 }
 
 XCOM::~XCOM()
@@ -33,11 +33,6 @@ XCOM::~XCOM()
 bool XCOM::isValid()
 {
     return true; // mb TODO
-}
-
-qint64 XCOM::getBaseAddress()
-{
-    return XCOM_DEF::S_ADDRESS_BEGIN;
 }
 
 XBinary::_MEMORY_MAP XCOM::getMemoryMap()
