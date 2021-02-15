@@ -1689,8 +1689,8 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
     result.nImageSize=S_ALIGN_UP(getOptionalHeader_SizeOfImage(),0x1000);
 
     quint32 nNumberOfSections=qMin((int)getFileHeader_NumberOfSections(),100); // TODO const
-    quint32 nFileAlignment=getOptionalHeader_FileAlignment();
-    quint32 nSectionAlignment=getOptionalHeader_SectionAlignment();
+    quint32 nFileAlignment=getOptionalHeader_FileAlignment(); // TODO Check mb qint64
+    quint32 nSectionAlignment=getOptionalHeader_SectionAlignment(); // TODO Check mb qint64
     //qint64 nBaseAddress=getOptionalHeader_ImageBase();
     quint32 nHeadersSize=getOptionalHeader_SizeOfHeaders(); // mb TODO calc for UPX
 
