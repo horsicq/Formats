@@ -461,6 +461,8 @@ public:
     qint64 find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString);
     qint64 find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString);
 
+    QList<MS_RECORD> multiSearch_AllStrings(qint64 nOffset,qint64 nSize);
+
     QByteArray getUnicodeString(QString sString);
 
     void setSearchProcessEnable(bool bState);
@@ -810,6 +812,9 @@ public:
     static bool procentSetCurrentValue(PROCENT *pProcent,qint64 nCurrentValue);
 
     static MODE getModeFromSize(quint64 nSize);
+
+    static bool isAnsiSymbol(quint8 cCode);
+    static bool isUnicodeSymbol(quint16 nCode);
 
 private:
     static QString convertSignature(QString sSignature);
