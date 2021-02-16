@@ -286,10 +286,10 @@ public:
 
     enum MS_RECORD_TYPE
     {
-        RECORD_TYPE_UNKNOWN=0,
-        RECORD_TYPE_ANSI,
-        RECORD_TYPE_UNICODE,
-        RECORD_TYPE_SIGNATURE
+        MS_RECORD_TYPE_UNKNOWN=0,
+        MS_RECORD_TYPE_ANSI,
+        MS_RECORD_TYPE_UNICODE,
+        MS_RECORD_TYPE_SIGNATURE
     };
 
     struct MS_RECORD

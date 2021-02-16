@@ -1833,7 +1833,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_AllStrings(qint64 nOffset,qint64 
                     if(bAnsi)
                     {
                         MS_RECORD record={};
-                        record.recordType=RECORD_TYPE_ANSI;
+                        record.recordType=MS_RECORD_TYPE_ANSI;
                         record.nOffset=nCurrentAnsiOffset;
                         record.nSize=nCurrentAnsiSize;
                         record.sString=pAnsiBuffer;
@@ -1889,7 +1889,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_AllStrings(qint64 nOffset,qint64 
                         if(bUnicode)
                         {
                             MS_RECORD record={};
-                            record.recordType=RECORD_TYPE_UNICODE;
+                            record.recordType=MS_RECORD_TYPE_UNICODE;
                             record.nOffset=nCurrentUnicodeOffset[nParity];
                             record.nSize=nCurrentUnicodeSize[nParity];
                             record.sString=QString::fromUtf16(pUnicodeBuffer[nParity]);
@@ -1923,7 +1923,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_AllStrings(qint64 nOffset,qint64 
                             if(bUnicode)
                             {
                                 MS_RECORD record={};
-                                record.recordType=RECORD_TYPE_UNICODE;
+                                record.recordType=MS_RECORD_TYPE_UNICODE;
                                 record.nOffset=nCurrentUnicodeOffset[nO];
                                 record.nSize=nCurrentUnicodeSize[nO];
                                 record.sString=QString::fromUtf16(pUnicodeBuffer[nO]);
