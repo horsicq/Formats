@@ -447,7 +447,7 @@ public:
 
     QByteArray getUnicodeString(QString sString);
 
-    void setFindProcessEnable(bool bState);
+    void setSearchProcessEnable(bool bState);
     void setDumpProcessEnable(bool bState);
     void setEntropyProcessEnable(bool bState);
     void setHashProcessEnable(bool bState);
@@ -818,9 +818,9 @@ protected:
 signals:
     void errorMessage(QString sErrorMessage);
     void infoMessage(QString sInfoMessage);
-    void findProgressMinimumChanged(qint32 nMaximum);
-    void findProgressMaximumChanged(qint32 nMaximum);
-    void findProgressValueChanged(qint32 nValue);
+    void searchProgressMinimumChanged(qint32 nMaximum);
+    void searchProgressMaximumChanged(qint32 nMaximum);
+    void searchProgressValueChanged(qint32 nValue);
     void dumpProgressMinimumChanged(qint32 nMaximum);
     void dumpProgressMaximumChanged(qint32 nMaximum);
     void dumpProgressValueChanged(qint32 nValue);
@@ -838,7 +838,7 @@ private:
     qint64 g_nEntryPointOffset;
     qint64 g_nImageBase;
     bool g_bIsBigEndian;
-    bool g_bIsFindStop;
+    bool g_bIsSearchStop;
     bool g_bIsDumpStop;
     bool g_bIsEntropyStop;
     bool g_bIsHashStop;

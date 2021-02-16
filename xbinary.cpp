@@ -30,7 +30,7 @@ XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
     setImageBase(nImageBase);
     setEndianness(false); // LE
     XBinary::setEntryPointOffset(0);
-    setFindProcessEnable(true);
+    setSearchProcessEnable(true);
     setDumpProcessEnable(true);
     setEntropyProcessEnable(true);
     setHashProcessEnable(true);
@@ -1248,9 +1248,9 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
 
     PROCENT procent=procentInit(nSize);
 
-    emit findProgressMinimumChanged(0);
-    emit findProgressMaximumChanged(procent.nMaxProcent);
-    emit findProgressValueChanged(0);
+    emit searchProgressMinimumChanged(0);
+    emit searchProgressMaximumChanged(procent.nMaxProcent);
+    emit searchProgressValueChanged(0);
 
     qint64 nTemp=0;
     const int BUFFER_SIZE=0x1000;
@@ -1258,7 +1258,7 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
 
     qint64 nStartOffset=nOffset;
 
-    while((nSize>nArraySize-1)&&(!g_bIsFindStop))
+    while((nSize>nArraySize-1)&&(!g_bIsSearchStop))
     {
         nTemp=qMin((qint64)(BUFFER_SIZE+(nArraySize-1)),nSize);
 
@@ -1282,11 +1282,11 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
 
         if(procentSetCurrentValue(&procent,nOffset-nStartOffset))
         {
-            emit findProgressValueChanged(procent.nCurrentProcent);
+            emit searchProgressValueChanged(procent.nCurrentProcent);
         }
     }
 
-    emit findProgressValueChanged(procent.nMaxProcent);
+    emit searchProgressValueChanged(procent.nMaxProcent);
 
     delete[] pBuffer;
 
@@ -1512,9 +1512,9 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
     {
         PROCENT procent=procentInit(nSize);
 
-        emit findProgressMinimumChanged(0);
-        emit findProgressMaximumChanged(procent.nMaxProcent);
-        emit findProgressValueChanged(0);
+        emit searchProgressMinimumChanged(0);
+        emit searchProgressMaximumChanged(procent.nMaxProcent);
+        emit searchProgressValueChanged(0);
 
         sSignature=convertSignature(sSignature);
 
@@ -1527,9 +1527,11 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
             char *pData=baFirst.data();
             qint32 nDataSize=baFirst.size();
 
-            for(qint64 i=0;(i<nSize)&&(!g_bIsFindStop);)
+            for(qint64 i=0;(i<nSize)&&(!g_bIsSearchStop);)
             {
+                // TODO disable emits
                 qint64 nTempOffset=find_array(nOffset+i,nSize-1,pData,nDataSize);
+                // TODO enable emits
 
                 if(nTempOffset!=-1)
                 {
@@ -1549,15 +1551,15 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
                 if(procentSetCurrentValue(&procent,i))
                 {
-                    emit findProgressValueChanged(procent.nCurrentProcent);
+                    emit searchProgressValueChanged(procent.nCurrentProcent);
                 }
             }
 
-            emit findProgressValueChanged(procent.nMaxProcent);
+            emit searchProgressValueChanged(procent.nMaxProcent);
         }
         else
         {
-            for(qint64 i=0;(i<nSize)&&(!g_bIsFindStop); i++)
+            for(qint64 i=0;(i<nSize)&&(!g_bIsSearchStop); i++)
             {
                 if(_compareSignature(pMemoryMap,&listSignatureRecords,nOffset+i))
                 {
@@ -1567,11 +1569,11 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
                 if(procentSetCurrentValue(&procent,i))
                 {
-                    emit findProgressValueChanged(procent.nCurrentProcent);
+                    emit searchProgressValueChanged(procent.nCurrentProcent);
                 }
             }
 
-            emit findProgressValueChanged(100);
+            emit searchProgressValueChanged(100);
         }
     }
     else
@@ -1611,9 +1613,9 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
 
     PROCENT procent=procentInit(nSize);
 
-    emit findProgressMinimumChanged(0);
-    emit findProgressMaximumChanged(procent.nMaxProcent);
-    emit findProgressValueChanged(0);
+    emit searchProgressMinimumChanged(0);
+    emit searchProgressMaximumChanged(procent.nMaxProcent);
+    emit searchProgressValueChanged(0);
 
     qint64 nTemp=0;
     const int BUFFER_SIZE=0x1000; // TODO const
@@ -1624,7 +1626,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
 
     qint64 nStartOffset=nOffset;
 
-    while((nSize>nStringSize-1)&&(!g_bIsFindStop))
+    while((nSize>nStringSize-1)&&(!g_bIsSearchStop))
     {
         nTemp=qMin((qint64)(BUFFER_SIZE+(nStringSize-1)),nSize);
 
@@ -1648,11 +1650,11 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
 
         if(procentSetCurrentValue(&procent,nOffset-nStartOffset))
         {
-            emit findProgressValueChanged(procent.nCurrentProcent);
+            emit searchProgressValueChanged(procent.nCurrentProcent);
         }
     }
 
-    emit findProgressValueChanged(procent.nMaxProcent);
+    emit searchProgressValueChanged(procent.nMaxProcent);
 
     delete[] pBuffer;
 
@@ -1687,9 +1689,9 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
 
     PROCENT procent=procentInit(nSize);
 
-    emit findProgressMinimumChanged(0);
-    emit findProgressMaximumChanged(procent.nMaxProcent);
-    emit findProgressValueChanged(0);
+    emit searchProgressMinimumChanged(0);
+    emit searchProgressMaximumChanged(procent.nMaxProcent);
+    emit searchProgressValueChanged(0);
 
     qint64 nTemp=0;
     const int BUFFER_SIZE=0x1000; // TODO const
@@ -1700,7 +1702,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
 
     qint64 nStartOffset=nOffset;
 
-    while((nSize>2*(nStringSize-1))&&(!g_bIsFindStop))
+    while((nSize>2*(nStringSize-1))&&(!g_bIsSearchStop))
     {
         nTemp=qMin((qint64)(BUFFER_SIZE+2*(nStringSize-1)),nSize);
 
@@ -1724,11 +1726,11 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
 
         if(procentSetCurrentValue(&procent,nOffset-nStartOffset))
         {
-            emit findProgressValueChanged(procent.nCurrentProcent);
+            emit searchProgressValueChanged(procent.nCurrentProcent);
         }
     }
 
-    emit findProgressValueChanged(procent.nMaxProcent);
+    emit searchProgressValueChanged(procent.nMaxProcent);
 
     delete[] pBuffer;
 
@@ -1750,9 +1752,9 @@ QByteArray XBinary::getUnicodeString(QString sString)
     return baResult;
 }
 
-void XBinary::setFindProcessEnable(bool bState)
+void XBinary::setSearchProcessEnable(bool bState)
 {
-    g_bIsFindStop=!bState;
+    g_bIsSearchStop=!bState;
 }
 
 void XBinary::setDumpProcessEnable(bool bState)
