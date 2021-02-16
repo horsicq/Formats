@@ -1737,246 +1737,247 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     return -1;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_AllStrings(qint64 nOffset, qint64 nSize)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_AllStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode)
 {
     QList<XBinary::MS_RECORD> listResult;
 
-//    const qint64 N_BUFFER_SIZE=0x1000;
-//    const qint64 N_MAX_STRING_SIZE=128;
+    const qint64 N_BUFFER_SIZE=0x1000;
+    const qint64 N_MAX_STRING_SIZE=128;
 
-//    qint64 _nSize=g_pDevice->size();
-//    qint64 _nOffset=0;
-//    qint64 _nRawOffset=0;
-//    qint64 _nProcent=_nSize/100;
-//    qint32 _nCurrentProcent=0;
+    qint64 _nSize=nSize;
+    qint64 _nOffset=nOffset;
+    qint64 _nRawOffset=0;
+    qint64 _nProcent=_nSize/100;
+    qint32 _nCurrentProcent=0;
 
-//    bool bReadError=false;
+    bool bReadError=false;
 
-//    char *pBuffer=new char[N_BUFFER_SIZE];
-//    char *pAnsiBuffer=new char[N_MAX_STRING_SIZE+1];
+    char *pBuffer=new char[N_BUFFER_SIZE];
+    char *pAnsiBuffer=new char[N_MAX_STRING_SIZE+1];
 
-//    quint16 *pUnicodeBuffer[2]={new quint16[N_MAX_STRING_SIZE+1],new quint16[N_MAX_STRING_SIZE+1]};
-//    qint64 nCurrentUnicodeSize[2]={0,0};
-//    qint64 nCurrentUnicodeOffset[2]={0,0};
+    quint16 *pUnicodeBuffer[2]={new quint16[N_MAX_STRING_SIZE+1],new quint16[N_MAX_STRING_SIZE+1]};
+    qint64 nCurrentUnicodeSize[2]={0,0};
+    qint64 nCurrentUnicodeOffset[2]={0,0};
 
-//    qint64 nCurrentAnsiSize=0;
-//    qint64 nCurrentAnsiOffset=0;
+    qint64 nCurrentAnsiSize=0;
+    qint64 nCurrentAnsiOffset=0;
 
-//    bool bIsStart=true;
-//    char cPrevSymbol=0;
+    bool bIsStart=true;
+    char cPrevSymbol=0;
 
-//    emit progressValue(_nCurrentProcent);
+    PROCENT procent=procentInit(nSize);
 
-//    g_bIsStop=false;
+    emit searchProgressMinimumChanged(0);
+    emit searchProgressMaximumChanged(procent.nMaxProcent);
+    emit searchProgressValueChanged(0);
 
-//    int nCurrentRecords=0;
+    int nCurrentRecords=0;
 
-//    while((_nSize>0)&&(!g_bIsStop))
-//    {
-//        qint64 nCurrentSize=qMin(N_BUFFER_SIZE,_nSize);
+    while((_nSize>0)&&(!g_bIsSearchStop))
+    {
+        qint64 nCurrentSize=qMin(N_BUFFER_SIZE,_nSize);
 
-//        if(g_pDevice->seek(_nOffset))
-//        {
-//            if(g_pDevice->read(pBuffer,nCurrentSize)!=nCurrentSize)
-//            {
-//                bReadError=true;
-//                break;
-//            }
-//        }
-//        else
-//        {
-//            bReadError=true;
-//            break;
-//        }
+        if(g_pDevice->seek(_nOffset))
+        {
+            if(g_pDevice->read(pBuffer,nCurrentSize)!=nCurrentSize)
+            {
+                bReadError=true;
+                break;
+            }
+        }
+        else
+        {
+            bReadError=true;
+            break;
+        }
 
-//        for(qint64 i=0; i<nCurrentSize; i++)
-//        {
-//            bool bIsEnd=((i==(nCurrentSize-1))&&(_nSize==nCurrentSize));
-//            int nParity=(_nOffset+i)%2;
+        for(qint64 i=0; i<nCurrentSize; i++)
+        {
+            bool bIsEnd=((i==(nCurrentSize-1))&&(_nSize==nCurrentSize));
+            int nParity=(_nOffset+i)%2;
 
-//            char cSymbol=*(pBuffer+i);
+            char cSymbol=*(pBuffer+i);
 
-//            bool bIsAnsiSymbol=isAnsiSymbol((quint8)cSymbol);
+            bool bIsAnsiSymbol=isAnsiSymbol((quint8)cSymbol);
 
-//            if(bIsAnsiSymbol)
-//            {
-//                if(nCurrentAnsiSize==0)
-//                {
-//                    nCurrentAnsiOffset=_nOffset+i;
-//                }
+            if(bIsAnsiSymbol)
+            {
+                if(nCurrentAnsiSize==0)
+                {
+                    nCurrentAnsiOffset=_nOffset+i;
+                }
 
-//                if(nCurrentAnsiSize<N_MAX_STRING_SIZE)
-//                {
-//                    *(pAnsiBuffer+nCurrentAnsiSize)=cSymbol;
-//                }
+                if(nCurrentAnsiSize<N_MAX_STRING_SIZE)
+                {
+                    *(pAnsiBuffer+nCurrentAnsiSize)=cSymbol;
+                }
 
-//                nCurrentAnsiSize++;
-//            }
+                nCurrentAnsiSize++;
+            }
 
-//            if((!bIsAnsiSymbol)||(bIsEnd))
-//            {
-//                if(nCurrentAnsiSize>=g_options.nMinLenght)
-//                {
-//                    if(nCurrentAnsiSize-1<N_MAX_STRING_SIZE)
-//                    {
-//                        pAnsiBuffer[nCurrentAnsiSize]=0;
-//                    }
-//                    else
-//                    {
-//                        pAnsiBuffer[N_MAX_STRING_SIZE]=0;
-//                    }
+            if((!bIsAnsiSymbol)||(bIsEnd))
+            {
+                if(nCurrentAnsiSize>=nMinLenght)
+                {
+                    if(nCurrentAnsiSize-1<N_MAX_STRING_SIZE)
+                    {
+                        pAnsiBuffer[nCurrentAnsiSize]=0;
+                    }
+                    else
+                    {
+                        pAnsiBuffer[N_MAX_STRING_SIZE]=0;
+                    }
 
-//                    if(g_options.bSearchAnsi)
-//                    {
-//                        RECORD record;
-//                        record.recordType=RECORD_TYPE_ANSI;
-//                        record.nOffset=nCurrentAnsiOffset;
-//                        record.nSize=nCurrentAnsiSize;
-//                        record.sString=pAnsiBuffer;
+                    if(bAnsi)
+                    {
+                        MS_RECORD record={};
+                        record.recordType=RECORD_TYPE_ANSI;
+                        record.nOffset=nCurrentAnsiOffset;
+                        record.nSize=nCurrentAnsiSize;
+                        record.sString=pAnsiBuffer;
 
-//                        g_pListRecords->append(record);
+                        listResult.append(record);
 
-//                        nCurrentRecords++;
+                        nCurrentRecords++;
 
-//                        if(nCurrentRecords>=N_MAX)
-//                        {
-//                            break;
-//                        }
-//                    }
-//                }
+                        if(nCurrentRecords>=nLimit)
+                        {
+                            break;
+                        }
+                    }
+                }
 
-//                nCurrentAnsiSize=0;
-//            }
+                nCurrentAnsiSize=0;
+            }
 
-//            if(!bIsStart)
-//            {
-//                quint16 nCode=cPrevSymbol+(cSymbol<<8); // TODO BE/LE
+            if(!bIsStart)
+            {
+                quint16 nCode=cPrevSymbol+(cSymbol<<8); // TODO BE/LE
 
-//                bool bIsUnicodeSymbol=isUnicodeSymbol(nCode);
+                bool bIsUnicodeSymbol=isUnicodeSymbol(nCode);
 
-//                if(bIsUnicodeSymbol)
-//                {
-//                    if(nCurrentUnicodeSize[nParity]==0)
-//                    {
-//                        nCurrentUnicodeOffset[nParity]=_nOffset-1+i;
-//                    }
+                if(bIsUnicodeSymbol)
+                {
+                    if(nCurrentUnicodeSize[nParity]==0)
+                    {
+                        nCurrentUnicodeOffset[nParity]=_nOffset-1+i;
+                    }
 
-//                    if(nCurrentUnicodeSize[nParity]<N_MAX_STRING_SIZE)
-//                    {
-//                        *(pUnicodeBuffer[nParity]+nCurrentUnicodeSize[nParity])=nCode;
-//                    }
+                    if(nCurrentUnicodeSize[nParity]<N_MAX_STRING_SIZE)
+                    {
+                        *(pUnicodeBuffer[nParity]+nCurrentUnicodeSize[nParity])=nCode;
+                    }
 
-//                    nCurrentUnicodeSize[nParity]++;
-//                }
+                    nCurrentUnicodeSize[nParity]++;
+                }
 
-//                if((!bIsUnicodeSymbol)||(bIsEnd))
-//                {
-//                    if(nCurrentUnicodeSize[nParity]>=g_options.nMinLenght)
-//                    {
-//                        if(nCurrentUnicodeSize[nParity]-1<N_MAX_STRING_SIZE)
-//                        {
-//                            pUnicodeBuffer[nParity][nCurrentUnicodeSize[nParity]]=0;
-//                        }
-//                        else
-//                        {
-//                            pUnicodeBuffer[nParity][N_MAX_STRING_SIZE]=0;
-//                        }
+                if((!bIsUnicodeSymbol)||(bIsEnd))
+                {
+                    if(nCurrentUnicodeSize[nParity]>=nMinLenght)
+                    {
+                        if(nCurrentUnicodeSize[nParity]-1<N_MAX_STRING_SIZE)
+                        {
+                            pUnicodeBuffer[nParity][nCurrentUnicodeSize[nParity]]=0;
+                        }
+                        else
+                        {
+                            pUnicodeBuffer[nParity][N_MAX_STRING_SIZE]=0;
+                        }
 
-//                        if(g_options.bSearchUnicode)
-//                        {
-//                            RECORD record;
-//                            record.recordType=RECORD_TYPE_UNICODE;
-//                            record.nOffset=nCurrentUnicodeOffset[nParity];
-//                            record.nSize=nCurrentUnicodeSize[nParity];
-//                            record.sString=QString::fromUtf16(pUnicodeBuffer[nParity]);
+                        if(bUnicode)
+                        {
+                            MS_RECORD record={};
+                            record.recordType=RECORD_TYPE_UNICODE;
+                            record.nOffset=nCurrentUnicodeOffset[nParity];
+                            record.nSize=nCurrentUnicodeSize[nParity];
+                            record.sString=QString::fromUtf16(pUnicodeBuffer[nParity]);
 
-//                            g_pListRecords->append(record);
+                            listResult.append(record);
 
-//                            nCurrentRecords++;
+                            nCurrentRecords++;
 
-//                            if(nCurrentRecords>=N_MAX)
-//                            {
-//                                break;
-//                            }
-//                        }
-//                    }
+                            if(nCurrentRecords>=nLimit)
+                            {
+                                break;
+                            }
+                        }
+                    }
 
-//                    if(bIsEnd)
-//                    {
-//                        int nO=(nParity==1)?(0):(1);
+                    if(bIsEnd)
+                    {
+                        int nO=(nParity==1)?(0):(1);
 
-//                        if(nCurrentUnicodeSize[nO]>=g_options.nMinLenght)
-//                        {
-//                            if(nCurrentUnicodeSize[nO]-1<N_MAX_STRING_SIZE)
-//                            {
-//                                pUnicodeBuffer[nO][nCurrentUnicodeSize[nO]]=0;
-//                            }
-//                            else
-//                            {
-//                                pUnicodeBuffer[nO][N_MAX_STRING_SIZE]=0;
-//                            }
+                        if(nCurrentUnicodeSize[nO]>=nMinLenght)
+                        {
+                            if(nCurrentUnicodeSize[nO]-1<N_MAX_STRING_SIZE)
+                            {
+                                pUnicodeBuffer[nO][nCurrentUnicodeSize[nO]]=0;
+                            }
+                            else
+                            {
+                                pUnicodeBuffer[nO][N_MAX_STRING_SIZE]=0;
+                            }
 
-//                            if(g_options.bSearchUnicode)
-//                            {
-//                                RECORD record;
-//                                record.recordType=RECORD_TYPE_UNICODE;
-//                                record.nOffset=nCurrentUnicodeOffset[nO];
-//                                record.nSize=nCurrentUnicodeSize[nO];
-//                                record.sString=QString::fromUtf16(pUnicodeBuffer[nO]);
+                            if(bUnicode)
+                            {
+                                MS_RECORD record={};
+                                record.recordType=RECORD_TYPE_UNICODE;
+                                record.nOffset=nCurrentUnicodeOffset[nO];
+                                record.nSize=nCurrentUnicodeSize[nO];
+                                record.sString=QString::fromUtf16(pUnicodeBuffer[nO]);
 
-//                                g_pListRecords->append(record);
+                                listResult.append(record);
 
-//                                nCurrentRecords++;
+                                nCurrentRecords++;
 
-//                                if(nCurrentRecords>=N_MAX)
-//                                {
-//                                    break;
-//                                }
-//                            }
-//                        }
-//                    }
+                                if(nCurrentRecords>=nLimit)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
 
-//                    nCurrentUnicodeSize[nParity]=0;
-//                }
-//            }
+                    nCurrentUnicodeSize[nParity]=0;
+                }
+            }
 
-//            cPrevSymbol=cSymbol;
+            cPrevSymbol=cSymbol;
 
-//            if(bIsStart)
-//            {
-//                bIsStart=false;
-//            }
-//        }
+            if(bIsStart)
+            {
+                bIsStart=false;
+            }
+        }
 
-//        _nSize-=nCurrentSize;
-//        _nOffset+=nCurrentSize;
-//        _nRawOffset+=nCurrentSize;
+        _nSize-=nCurrentSize;
+        _nOffset+=nCurrentSize;
+        _nRawOffset+=nCurrentSize;
 
-//        if(_nRawOffset>((_nCurrentProcent+1)*_nProcent))
-//        {
-//            _nCurrentProcent++;
-//            emit progressValue(_nCurrentProcent);
-//        }
+        if(procentSetCurrentValue(&procent,_nRawOffset))
+        {
+            emit searchProgressValueChanged(procent.nCurrentProcent);
+        }
 
-//        if(nCurrentRecords>=N_MAX)
-//        {
-//            emit errorMessage(QString("%1: %2").arg(tr("Maximum")).arg(nCurrentRecords));
+        if(nCurrentRecords>=nLimit)
+        {
+            emit errorMessage(QString("%1: %2").arg(tr("Maximum")).arg(nCurrentRecords));
 
-//            break;
-//        }
-//    }
+            break;
+        }
+    }
 
-//    if(bReadError)
-//    {
-//        emit errorMessage(tr("Read error"));
-//    }
+    emit searchProgressValueChanged(procent.nMaxProcent);
 
-//    g_bIsStop=false;
+    if(bReadError)
+    {
+        emit errorMessage(tr("Read error"));
+    }
 
-//    delete [] pBuffer;
-//    delete [] pAnsiBuffer;
-//    delete [] pUnicodeBuffer[0];
-//    delete [] pUnicodeBuffer[1];
+    delete [] pBuffer;
+    delete [] pAnsiBuffer;
+    delete [] pUnicodeBuffer[0];
+    delete [] pUnicodeBuffer[1];
 
     return listResult;
 }
