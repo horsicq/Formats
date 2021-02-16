@@ -1956,7 +1956,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_AllStrings(qint64 nOffset,qint64 
         _nOffset+=nCurrentSize;
         _nRawOffset+=nCurrentSize;
 
-        if(procentSetCurrentValue(&procent,_nRawOffset))
+        if(procentSetCurrentValue(&procent,_nOffset-nOffset))
         {
             emit searchProgressValueChanged(procent.nCurrentProcent);
         }
