@@ -284,6 +284,22 @@ public:
         // TODO more
     };
 
+    enum MS_RECORD_TYPE
+    {
+        RECORD_TYPE_UNKNOWN=0,
+        RECORD_TYPE_ANSI,
+        RECORD_TYPE_UNICODE,
+        RECORD_TYPE_SIGNATURE
+    };
+
+    struct MS_RECORD
+    {
+        qint64 nOffset;
+        qint64 nSize;
+        MS_RECORD_TYPE recordType;
+        QString sString;
+    };
+
 private:
     enum ST
     {
