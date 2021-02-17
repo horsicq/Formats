@@ -298,6 +298,7 @@ public:
         qint64 nSize;
         MS_RECORD_TYPE recordType;
         QString sString;
+        QString sInfo;
     };
 
 private:
@@ -461,7 +462,9 @@ public:
     qint64 find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString);
     qint64 find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString);
 
-    QList<MS_RECORD> multiSearch_AllStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode);
+    QList<MS_RECORD> multiSearch_allStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode);
+    QList<MS_RECORD> multiSearch_signature(qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="");
+    QList<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="");
 
     QByteArray getUnicodeString(QString sString);
 

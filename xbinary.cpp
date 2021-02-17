@@ -1737,7 +1737,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     return -1;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_AllStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode)
 {
     QList<XBinary::MS_RECORD> listResult;
 
@@ -1980,6 +1980,70 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_AllStrings(qint64 nOffset,qint64 
     delete [] pAnsiBuffer;
     delete [] pUnicodeBuffer[0];
     delete [] pUnicodeBuffer[1];
+
+    return listResult;
+}
+
+QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo)
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return multiSearch_signature(&memoryMap,nOffset,nSize,nLimit,sSignature,sInfo);
+}
+
+QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo)
+{
+    QList<XBinary::MS_RECORD> listResult;
+
+    qint64 _nSize=nSize;
+    qint64 _nOffset=nOffset;
+
+    PROCENT procent=procentInit(nSize);
+
+    emit searchProgressMinimumChanged(0);
+    emit searchProgressMaximumChanged(procent.nMaxProcent);
+    emit searchProgressValueChanged(0);
+
+    int nCurrentRecords=0;
+
+    while((_nSize>0)&&(!g_bIsSearchStop))
+    {
+        qint64 nSignatureSize=0;
+        qint64 nSignatureOffset=find_signature(pMemoryMap,_nOffset,_nSize,sSignature,&nSignatureSize);
+
+        if(nSignatureOffset==-1)
+        {
+            break;
+        }
+
+        MS_RECORD record={};
+        record.recordType=MS_RECORD_TYPE_SIGNATURE;
+        record.nOffset=nSignatureOffset;
+        record.nSize=nSignatureSize;
+        record.sString=sSignature;
+        record.sInfo=sInfo;
+
+        listResult.append(record);
+
+        nCurrentRecords++;
+
+        if(nCurrentRecords>=nLimit)
+        {
+            emit errorMessage(QString("%1: %2").arg(tr("Maximum")).arg(nCurrentRecords));
+
+            break;
+        }
+
+        _nOffset=nSignatureOffset+nSignatureSize;
+        _nSize=nSize-(_nOffset-nOffset);
+
+        if(procentSetCurrentValue(&procent,_nOffset-nOffset))
+        {
+            emit searchProgressValueChanged(procent.nCurrentProcent);
+        }
+    }
+
+    emit searchProgressValueChanged(procent.nMaxProcent);
 
     return listResult;
 }
