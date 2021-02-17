@@ -1530,9 +1530,24 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
             for(qint64 i=0;(i<nSize)&&(!g_bIsSearchStop);)
             {
-                setProcessSignalsEnable(false);
+                bool bDisableSignals=true;
+
+                if(g_bIsProcessSignalsDisable) // If we call find_signature in another search function
+                {
+                    bDisableSignals=false;
+                }
+
+                if(bDisableSignals)
+                {
+                    setProcessSignalsEnable(false);
+                }
+
                 qint64 nTempOffset=find_array(nOffset+i,nSize-1,pData,nDataSize);
-                setProcessSignalsEnable(true);
+
+                if(bDisableSignals)
+                {
+                    setProcessSignalsEnable(true);
+                }
 
                 if(nTempOffset!=-1)
                 {
@@ -6494,57 +6509,90 @@ void XBinary::_searchProgressMinimumChanged(qint32 nMaximum)
 
 void XBinary::_searchProgressMaximumChanged(qint32 nMaximum)
 {
-    emit searchProgressMinimumChanged(nMaximum);
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit searchProgressMinimumChanged(nMaximum);
+    }
 }
 
 void XBinary::_searchProgressValueChanged(qint32 nValue)
 {
-    emit searchProgressValueChanged(nValue);
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit searchProgressValueChanged(nValue);
+    }
 }
 
 void XBinary::_dumpProgressMinimumChanged(qint32 nMaximum)
 {
-    emit dumpProgressMinimumChanged(nMaximum);
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit dumpProgressMinimumChanged(nMaximum);
+    }
 }
 
 void XBinary::_dumpProgressMaximumChanged(qint32 nMaximum)
 {
-    emit dumpProgressMaximumChanged(nMaximum);
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit dumpProgressMaximumChanged(nMaximum);
+    }
 }
 
 void XBinary::_dumpProgressValueChanged(qint32 nValue)
 {
-    emit dumpProgressValueChanged(nValue);
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit dumpProgressValueChanged(nValue);
+    }
 }
 
 void XBinary::_entropyProgressMinimumChanged(qint32 nMaximum)
 {
-    emit entropyProgressMinimumChanged(nMaximum);
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit entropyProgressMinimumChanged(nMaximum);
+    }
 }
 
 void XBinary::_entropyProgressMaximumChanged(qint32 nMaximum)
 {
-    emit entropyProgressMaximumChanged(nMaximum);
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit entropyProgressMaximumChanged(nMaximum);
+    }
 }
 
 void XBinary::_entropyProgressValueChanged(qint32 nValue)
 {
-    emit entropyProgressValueChanged(nValue);
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit entropyProgressValueChanged(nValue);
+    }
 }
 
 void XBinary::_hashProgressMinimumChanged(qint32 nMaximum)
 {
-    emit hashProgressMinimumChanged(nMaximum);
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit hashProgressMinimumChanged(nMaximum);
+    }
 }
 
 void XBinary::_hashProgressMaximumChanged(qint32 nMaximum)
 {
-    emit hashProgressMaximumChanged(nMaximum);
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit hashProgressMaximumChanged(nMaximum);
+    }
 }
 
 void XBinary::_hashProgressValueChanged(qint32 nValue)
 {
-    emit hashProgressValueChanged(nValue);
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit hashProgressValueChanged(nValue);
+    }
 }
 
 qint64 XBinary::getPhysSize(char *pBuffer, qint64 nSize)
