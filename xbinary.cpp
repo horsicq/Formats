@@ -6083,6 +6083,10 @@ XBinary::PROCENT XBinary::procentInit(qint64 nMaxValue)
     {
         result.nMaxProcent=10;
     }
+    else if(result.nMaxValue>0x1000)
+    {
+        result.nMaxProcent=5;
+    }
 
     return result;
 }
@@ -6093,7 +6097,7 @@ bool XBinary::procentSetCurrentValue(XBinary::PROCENT *pProcent, qint64 nCurrent
 
     pProcent->nCurrentValue=nCurrentValue;
 
-    if(pProcent->nCurrentValue>(pProcent->nCurrentProcent+1)*(pProcent->nMaxValue/pProcent->nMaxProcent))
+    if(pProcent->nCurrentValue>((pProcent->nCurrentProcent+1)*(pProcent->nMaxValue/pProcent->nMaxProcent)))
     {
         pProcent->nCurrentProcent++;
         bResult=true;
@@ -6519,6 +6523,7 @@ void XBinary::_searchProgressValueChanged(qint32 nValue)
 {
     if(!g_bIsProcessSignalsDisable)
     {
+        qDebug("Progress: %d",nValue);
         emit searchProgressValueChanged(nValue);
     }
 }
