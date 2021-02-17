@@ -472,6 +472,7 @@ public:
     void setDumpProcessEnable(bool bState);
     void setEntropyProcessEnable(bool bState);
     void setHashProcessEnable(bool bState);
+    void setProcessSignalsEnable(bool bState);
 
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature);
 
@@ -866,6 +867,7 @@ private:
     bool g_bIsDumpStop;
     bool g_bIsEntropyStop;
     bool g_bIsHashStop;
+    bool g_bIsProcessSignalsDisable;
     QString g_sArch;
     MODE g_mode;
     QString g_sVersion;
