@@ -1530,9 +1530,9 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
             for(qint64 i=0;(i<nSize)&&(!g_bIsSearchStop);)
             {
-                // TODO disable emits
+                setProcessSignalsEnable(false);
                 qint64 nTempOffset=find_array(nOffset+i,nSize-1,pData,nDataSize);
-                // TODO enable emits
+                setProcessSignalsEnable(true);
 
                 if(nTempOffset!=-1)
                 {
@@ -2009,8 +2009,12 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
 
     while((_nSize>0)&&(!g_bIsSearchStop))
     {
+        setProcessSignalsEnable(false);
+
         qint64 nSignatureSize=0;
         qint64 nSignatureOffset=find_signature(pMemoryMap,_nOffset,_nSize,sSignature,&nSignatureSize);
+
+        setProcessSignalsEnable(true);
 
         if(nSignatureOffset==-1)
         {
