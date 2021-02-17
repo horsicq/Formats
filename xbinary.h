@@ -833,6 +833,19 @@ private:
     int _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     int _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
 
+    void _searchProgressMinimumChanged(qint32 nMaximum);
+    void _searchProgressMaximumChanged(qint32 nMaximum);
+    void _searchProgressValueChanged(qint32 nValue);
+    void _dumpProgressMinimumChanged(qint32 nMaximum);
+    void _dumpProgressMaximumChanged(qint32 nMaximum);
+    void _dumpProgressValueChanged(qint32 nValue);
+    void _entropyProgressMinimumChanged(qint32 nMaximum);
+    void _entropyProgressMaximumChanged(qint32 nMaximum);
+    void _entropyProgressValueChanged(qint32 nValue);
+    void _hashProgressMinimumChanged(qint32 nMaximum);
+    void _hashProgressMaximumChanged(qint32 nMaximum);
+    void _hashProgressValueChanged(qint32 nValue);
+
 protected:
     bool _isOffsetValid(qint64 nOffset);
     void _errorMessage(QString sErrorMessage);

@@ -6480,6 +6480,69 @@ int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignature
     return nResult;
 }
 
+void XBinary::_searchProgressMinimumChanged(qint32 nMaximum)
+{
+    if(!g_bIsProcessSignalsDisable)
+    {
+        emit searchProgressMinimumChanged(nMaximum);
+    }
+}
+
+void XBinary::_searchProgressMaximumChanged(qint32 nMaximum)
+{
+    emit searchProgressMinimumChanged(nMaximum);
+}
+
+void XBinary::_searchProgressValueChanged(qint32 nValue)
+{
+    emit searchProgressValueChanged(nValue);
+}
+
+void XBinary::_dumpProgressMinimumChanged(qint32 nMaximum)
+{
+    emit dumpProgressMinimumChanged(nMaximum);
+}
+
+void XBinary::_dumpProgressMaximumChanged(qint32 nMaximum)
+{
+    emit dumpProgressMaximumChanged(nMaximum);
+}
+
+void XBinary::_dumpProgressValueChanged(qint32 nValue)
+{
+    emit dumpProgressValueChanged(nValue);
+}
+
+void XBinary::_entropyProgressMinimumChanged(qint32 nMaximum)
+{
+    emit entropyProgressMinimumChanged(nMaximum);
+}
+
+void XBinary::_entropyProgressMaximumChanged(qint32 nMaximum)
+{
+    emit entropyProgressMaximumChanged(nMaximum);
+}
+
+void XBinary::_entropyProgressValueChanged(qint32 nValue)
+{
+    emit entropyProgressValueChanged(nValue);
+}
+
+void XBinary::_hashProgressMinimumChanged(qint32 nMaximum)
+{
+    emit hashProgressMinimumChanged(nMaximum);
+}
+
+void XBinary::_hashProgressMaximumChanged(qint32 nMaximum)
+{
+    emit hashProgressMaximumChanged(nMaximum);
+}
+
+void XBinary::_hashProgressValueChanged(qint32 nValue)
+{
+    emit hashProgressValueChanged(nValue);
+}
+
 qint64 XBinary::getPhysSize(char *pBuffer, qint64 nSize)
 {
     while(nSize>0)
