@@ -268,7 +268,10 @@ XBinary::FT XFormats::setFileTypeComboBox(QComboBox *pComboBox, QList<XBinary::F
     {
         if(fileType==XBinary::FT_UNKNOWN)
         {
-            pComboBox->setCurrentIndex(nNumberOfListTypes-1);
+            if(pComboBox->itemData(nNumberOfListTypes-1).toUInt()!=XBinary::FT_COM)
+            {
+                pComboBox->setCurrentIndex(nNumberOfListTypes-1);
+            }
         }
         else
         {
