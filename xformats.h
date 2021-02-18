@@ -49,8 +49,10 @@ public:
     static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nImageBase=0);
     static qint64 getEntryPointAddress(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nImageBase=0);
     static qint64 getEntryPointOffset(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nImageBase=0);
+    static bool isBigEndian(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nImageBase=0);
 #ifdef QT_GUI_LIB
-    static void setFileTypeComboBox(QComboBox *pComboBox,QList<XBinary::FT> *pListFileTypes,XBinary::FT fileType);
+    static XBinary::FT setFileTypeComboBox(QComboBox *pComboBox,QList<XBinary::FT> *pListFileTypes,XBinary::FT fileType);
+    static bool setEndianessComboBox(QComboBox *pComboBox,bool bIsBigEndian);
 #endif
 };
 

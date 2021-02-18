@@ -196,8 +196,61 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
 
     return nResult;
 }
+
+bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
+{
+    bool bResult=false;
+
+    if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
+    {
+        XBinary binary(pDevice,bIsImage,nImageBase);
+        bResult=binary.isBigEndian();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
+    {
+        XCOM com(pDevice,bIsImage,nImageBase);
+        bResult=com.isBigEndian();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
+    {
+        XMSDOS msdos(pDevice,bIsImage,nImageBase);
+        bResult=msdos.isBigEndian();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
+    {
+        XNE ne(pDevice,bIsImage,nImageBase);
+        bResult=ne.isBigEndian();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
+    {
+        XLE le(pDevice,bIsImage,nImageBase);
+        bResult=le.isBigEndian();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
+    {
+        XPE pe(pDevice,bIsImage,nImageBase);
+        bResult=pe.isBigEndian();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
+    {
+        XELF elf(pDevice,bIsImage,nImageBase);
+        bResult=elf.isBigEndian();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
+    {
+        XMACH mach(pDevice,bIsImage,nImageBase);
+        bResult=mach.isBigEndian();
+    }
+    else
+    {
+        bResult=false;
+    }
+
+    return bResult;
+}
+
 #ifdef QT_GUI_LIB
-void XFormats::setFileTypeComboBox(QComboBox *pComboBox, QList<XBinary::FT> *pListFileTypes, XBinary::FT fileType)
+XBinary::FT XFormats::setFileTypeComboBox(QComboBox *pComboBox, QList<XBinary::FT> *pListFileTypes, XBinary::FT fileType)
 {
     const QSignalBlocker blocker(pComboBox);
 
@@ -232,5 +285,27 @@ void XFormats::setFileTypeComboBox(QComboBox *pComboBox, QList<XBinary::FT> *pLi
             }
         }
     }
+
+    return (XBinary::FT)(pComboBox->currentData().toUInt());
+}
+#endif
+#ifdef QT_GUI_LIB
+bool XFormats::setEndianessComboBox(QComboBox *pComboBox, bool bIsBigEndian)
+{
+    const QSignalBlocker blocker(pComboBox);
+
+    bool bResult=bIsBigEndian;
+
+    pComboBox->clear();
+
+    pComboBox->addItem("LE",false);
+    pComboBox->addItem("BE",true);
+
+    if(bIsBigEndian)
+    {
+        pComboBox->setCurrentIndex(0);
+    }
+
+    return bResult;
 }
 #endif
