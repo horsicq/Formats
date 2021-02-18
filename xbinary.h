@@ -815,7 +815,8 @@ public:
     static PROCENT procentInit(qint64 nMaxValue);
     static bool procentSetCurrentValue(PROCENT *pProcent,qint64 nCurrentValue);
 
-    static MODE getModeFromSize(quint64 nSize);
+    static MODE getWidthModeFromSize(quint64 nSize);
+    static MODE getWidthModeFromMemoryMap(_MEMORY_MAP *pMemoryMap);
 
     static bool isAnsiSymbol(quint8 cCode);
     static bool isUnicodeSymbol(quint16 nCode);

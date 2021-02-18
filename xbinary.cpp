@@ -3718,7 +3718,7 @@ QString XBinary::valueToHex(XBinary::MODE mode, quint64 nValue, bool bIsBigEndia
 
     if(mode==MODE_UNKNOWN)
     {
-        mode=getModeFromSize(nValue);
+        mode=getWidthModeFromSize(nValue);
     }
 
     if(mode==MODE_16)
@@ -6106,9 +6106,9 @@ bool XBinary::procentSetCurrentValue(XBinary::PROCENT *pProcent, qint64 nCurrent
     return bResult;
 }
 
-XBinary::MODE XBinary::getModeFromSize(quint64 nSize)
+XBinary::MODE XBinary::getWidthModeFromSize(quint64 nSize)
 {
-    MODE result=MODE_64;
+    MODE result=MODE_32;
 
     if(((quint64)nSize)>=0xFFFFFFFF)
     {
@@ -6126,6 +6126,17 @@ XBinary::MODE XBinary::getModeFromSize(quint64 nSize)
     {
         result=MODE_8;
     }
+
+    return result;
+}
+
+XBinary::MODE XBinary::getWidthModeFromMemoryMap(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    MODE result=MODE_32;
+
+    qint64 nMax=qMax(pMemoryMap->nBaseAddress+pMemoryMap->nImageSize,pMemoryMap->nRawSize);
+
+    result=getWidthModeFromSize(nMax);
 
     return result;
 }
