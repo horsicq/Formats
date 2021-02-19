@@ -291,7 +291,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
     return sResult;
 }
 
-QString XBinary::convertFileName(QString sFileName)
+QString XBinary::convertFileName(QString sFileName) // TODO Check
 {
 #ifdef Q_OS_MAC // Old Qt(4.X)
     //    if(sFileName.startsWith("/.file/id="))
