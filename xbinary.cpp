@@ -278,7 +278,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_APK:                sResult=QString("APK");             break;
         case FT_JAR:                sResult=QString("JAR");             break;
         case FT_TEXT:               sResult=tr("Text");                 break;
-        case FT_PLAINTEXT:          sResult=QString("Plain Text");      break;
+        case FT_PLAINTEXT:          sResult=QString("Plain Text");      break; // mb TODO translate
         case FT_UTF8:               sResult=QString("UTF8");            break;
         case FT_UNICODE:            sResult=QString("Unicode");         break;
         case FT_UNICODE_LE:         sResult=QString("Unicode LE");      break;
