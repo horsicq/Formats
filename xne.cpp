@@ -1019,7 +1019,7 @@ QMap<quint64, QString> XNE::getImageNEFlagsS()
     mapResult.insert(0x0080,"80x87 instructions");
     mapResult.insert(0x0100,"Full screen");
     mapResult.insert(0x0200,"Compatible with Windows/P.M.");
-//    mapResult.insert(0x0400,""); // TODO Check
+//    mapResult.insert(0x0400,""); // TODO Check !!!
     mapResult.insert(0x0800,"OS/2 family application");
     mapResult.insert(0x1000,"reserved?");
     mapResult.insert(0x2000,"Errors in image/executable");
