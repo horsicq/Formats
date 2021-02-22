@@ -6534,7 +6534,6 @@ void XBinary::_searchProgressValueChanged(qint32 nValue)
 {
     if(!g_bIsProcessSignalsDisable)
     {
-        qDebug("Progress: %d",nValue);
         emit searchProgressValueChanged(nValue);
     }
 }
