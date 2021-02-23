@@ -40,11 +40,57 @@ XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
     setArch("NOEXEC");
     setVersion("");
     setType(TYPE_UNKNOWN);
+
+    g_pReadWriteMutex=nullptr;
 }
 
 void XBinary::setDevice(QIODevice *pDevice)
 {
-    this->g_pDevice=pDevice;
+    g_pDevice=pDevice;
+}
+
+void XBinary::setReadWriteMutex(QMutex *pReadWriteMutex)
+{
+    g_pReadWriteMutex=pReadWriteMutex;
+}
+
+qint64 XBinary::safeReadDevice(QIODevice *pDevice, char *pData, qint64 nMaxLen)
+{
+    qint64 nResult=0;
+
+    if(g_pReadWriteMutex) g_pReadWriteMutex->lock();
+
+    nResult=pDevice->read(pData,nMaxLen);
+
+    if(g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+
+    return nResult;
+}
+
+qint64 XBinary::safeWriteDevice(QIODevice *pDevice, const char *pData, qint64 nLen)
+{
+    qint64 nResult=0;
+
+    if(g_pReadWriteMutex) g_pReadWriteMutex->lock();
+
+    nResult=pDevice->write(pData,nLen);
+
+    if(g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+
+    return nResult;
+}
+
+bool XBinary::safeSeekDevice(QIODevice *pDevice, qint64 nPos)
+{
+    qint64 bResult=false;
+
+    if(g_pReadWriteMutex) g_pReadWriteMutex->lock();
+
+    bResult=pDevice->seek(nPos);
+
+    if(g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+
+    return bResult;
 }
 
 qint64 XBinary::getSize()
@@ -476,14 +522,14 @@ qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 {
     qint64 nResult=0;
 
-    if(g_pDevice->seek(nOffset))
+    if(safeSeekDevice(g_pDevice,nOffset))
     {
         if(nMaxSize==-1)
         {
             nMaxSize=getSize()-nOffset;
         }
 
-        nResult=g_pDevice->read(pBuffer,nMaxSize);  // Check for read large files
+        nResult=safeReadDevice(g_pDevice,pBuffer,nMaxSize);  // Check for read large files
     }
 
     return nResult;
@@ -518,9 +564,9 @@ qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 
     if((nMaxSize<=(_nTotalSize-nOffset))&&(nOffset>=0))
     {
-        if(g_pDevice->seek(nOffset))
+        if(safeSeekDevice(g_pDevice,nOffset))
         {
-            nResult=g_pDevice->write(pBuffer,nMaxSize);
+            nResult=safeWriteDevice(g_pDevice,pBuffer,nMaxSize);
         }
     }
 
@@ -1254,14 +1300,14 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
     _searchProgressValueChanged(0);
 
     qint64 nTemp=0;
-    const int BUFFER_SIZE=0x1000;
-    char *pBuffer=new char[BUFFER_SIZE+(nArraySize-1)];
+
+    char *pBuffer=new char[READWRITE_BUFFER_SIZE+(nArraySize-1)];
 
     qint64 nStartOffset=nOffset;
 
     while((nSize>nArraySize-1)&&(!g_bIsSearchStop))
     {
-        nTemp=qMin((qint64)(BUFFER_SIZE+(nArraySize-1)),nSize);
+        nTemp=qMin((qint64)(READWRITE_BUFFER_SIZE+(nArraySize-1)),nSize);
 
         if(!read_array(nOffset,pBuffer,nTemp))
         {
@@ -1634,8 +1680,8 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
     _searchProgressValueChanged(0);
 
     qint64 nTemp=0;
-    const int BUFFER_SIZE=0x1000; // TODO const
-    char *pBuffer=new char[BUFFER_SIZE+(nStringSize-1)];
+
+    char *pBuffer=new char[READWRITE_BUFFER_SIZE+(nStringSize-1)];
 
     QByteArray baUpper=sString.toUpper().toLatin1();
     QByteArray baLower=sString.toLower().toLatin1();
@@ -1644,7 +1690,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
 
     while((nSize>nStringSize-1)&&(!g_bIsSearchStop))
     {
-        nTemp=qMin((qint64)(BUFFER_SIZE+(nStringSize-1)),nSize);
+        nTemp=qMin((qint64)(READWRITE_BUFFER_SIZE+(nStringSize-1)),nSize);
 
         if(!read_array(nOffset,pBuffer,nTemp))
         {
@@ -1710,8 +1756,8 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     _searchProgressValueChanged(0);
 
     qint64 nTemp=0;
-    const int BUFFER_SIZE=0x1000; // TODO const
-    char *pBuffer=new char[BUFFER_SIZE+2*(nStringSize-1)];
+
+    char *pBuffer=new char[READWRITE_BUFFER_SIZE+2*(nStringSize-1)];
 
     QByteArray baUpper=getUnicodeString(sString.toUpper());
     QByteArray baLower=getUnicodeString(sString.toLower());
@@ -1720,7 +1766,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
 
     while((nSize>2*(nStringSize-1))&&(!g_bIsSearchStop))
     {
-        nTemp=qMin((qint64)(BUFFER_SIZE+2*(nStringSize-1)),nSize);
+        nTemp=qMin((qint64)(READWRITE_BUFFER_SIZE+2*(nStringSize-1)),nSize);
 
         if(!read_array(nOffset,pBuffer,nTemp))
         {
@@ -1762,15 +1808,13 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
         nMaxLenght=128;
     }
 
-    const qint64 N_BUFFER_SIZE=0x1000;
-
     qint64 _nSize=nSize;
     qint64 _nOffset=nOffset;
     qint64 _nRawOffset=0;
 
     bool bReadError=false;
 
-    char *pBuffer=new char[N_BUFFER_SIZE];
+    char *pBuffer=new char[READWRITE_BUFFER_SIZE];
     char *pAnsiBuffer=new char[nMaxLenght+1];
 
     quint16 *pUnicodeBuffer[2]={new quint16[nMaxLenght+1],new quint16[nMaxLenght+1]};
@@ -1793,11 +1837,11 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
     while((_nSize>0)&&(!g_bIsSearchStop))
     {
-        qint64 nCurrentSize=qMin(N_BUFFER_SIZE,_nSize);
+        qint64 nCurrentSize=qMin((qint64)READWRITE_BUFFER_SIZE,_nSize);
 
-        if(g_pDevice->seek(_nOffset))
+        if(safeSeekDevice(g_pDevice,_nOffset))
         {
-            if(g_pDevice->read(pBuffer,nCurrentSize)!=nCurrentSize)
+            if(safeReadDevice(g_pDevice,pBuffer,nCurrentSize)!=nCurrentSize)
             {
                 bReadError=true;
                 break;
@@ -2024,12 +2068,25 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
 
     while((_nSize>0)&&(!g_bIsSearchStop))
     {
-        setProcessSignalsEnable(false);
+        bool bDisableSignals=true;
+
+        if(g_bIsProcessSignalsDisable) // If we call find_signature in another search function
+        {
+            bDisableSignals=false;
+        }
+
+        if(bDisableSignals)
+        {
+            setProcessSignalsEnable(false);
+        }
 
         qint64 nSignatureSize=0;
         qint64 nSignatureOffset=find_signature(pMemoryMap,_nOffset,_nSize,sSignature,&nSignatureSize);
 
-        setProcessSignalsEnable(true);
+        if(bDisableSignals)
+        {
+            setProcessSignalsEnable(true);
+        }
 
         if(nSignatureOffset==-1)
         {
@@ -2389,11 +2446,11 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
     quint8 cZero=0;
 
     // TODO optimize with dwords
-    if(g_pDevice->seek(nOffset))
+    if(safeSeekDevice(g_pDevice,nOffset))
     {
         while(nSize>0)
         {
-            g_pDevice->write((char *)&cZero,1);
+            safeWriteDevice(g_pDevice,(char *)&cZero,1);
             nSize--;
         }
     }
@@ -3217,7 +3274,7 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
         {
             qint64 nTempSize=qMin(nDataSize,(qint64)0x1000); // TODO const
 
-            if(!((g_pDevice->seek(nSourceOffset))&&(g_pDevice->read(pBuffer,nTempSize)==nTempSize)))
+            if(!((g_pDevice->seek(nSourceOffset))&&(safeReadDevice(g_pDevice,pBuffer,nTempSize)==nTempSize)))
             {
                 _errorMessage(QObject::tr("Read error"));
                 bResult=false;
@@ -4051,14 +4108,14 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
     {
         qint64 nSize=nSize1;
         qint64 nTemp=0;
-        const int BUFFER_SIZE=0x1000;
-        char *pBuffer1=new char[BUFFER_SIZE+3];
-        char *pBuffer2=new char[BUFFER_SIZE+3];
+
+        char *pBuffer1=new char[READWRITE_BUFFER_SIZE+3];
+        char *pBuffer2=new char[READWRITE_BUFFER_SIZE+3];
         qint64 nOffset=0;
 
         while(nSize>3)
         {
-            nTemp=qMin((qint64)(BUFFER_SIZE+3),nSize);
+            nTemp=qMin((qint64)(READWRITE_BUFFER_SIZE+3),nSize);
 
             pDevice1->seek(nOffset);
 
@@ -4143,10 +4200,8 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
         _hashProgressMaximumChanged(procent.nMaxProcent);
         _hashProgressValueChanged(0);
 
-        const int BUFFER_SIZE=0x1000;
-
         quint64 nTemp=0;
-        char *pBuffer=new char[BUFFER_SIZE];
+        char *pBuffer=new char[READWRITE_BUFFER_SIZE];
 
         QCryptographicHash::Algorithm algorithm=QCryptographicHash::Md4;
 
@@ -4171,7 +4226,7 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 
         while((nSize>0)&&(!g_bIsHashStop))
         {
-            nTemp=qMin((qint64)BUFFER_SIZE,nSize);
+            nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
             if(!read_array(nOffset,pBuffer,nTemp))
             {
@@ -4322,17 +4377,15 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize)
 
     if(nOffset!=-1)
     {
-        const int BUFFER_SIZE=0x1000;
-
         qint64 nTemp=0;
-        char *pBuffer=new char[BUFFER_SIZE];
+        char *pBuffer=new char[READWRITE_BUFFER_SIZE];
 
         quint32 a=1;
         quint32 b=0;
 
         while(nSize>0)
         {
-            nTemp=qMin((qint64)BUFFER_SIZE,nSize);
+            nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
             if(!read_array(nOffset,pBuffer,nTemp))
             {
@@ -4400,8 +4453,6 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
 
     if(nOffset!=-1)
     {
-        const int BUFFER_SIZE=0x1000;
-
         quint32 crc_table[256];
 
         for(int i=0;i<256;i++)
@@ -4415,11 +4466,11 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
         }
 
         qint64 nTemp=0;
-        char *pBuffer=new char[BUFFER_SIZE];
+        char *pBuffer=new char[READWRITE_BUFFER_SIZE];
 
         while(nSize>0)
         {
-            nTemp=qMin((qint64)BUFFER_SIZE,nSize);
+            nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
             if(!read_array(nOffset,pBuffer,nTemp))
             {
@@ -4468,14 +4519,12 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
 
         double bytes[256]={0.0};
 
-        const int BUFFER_SIZE=0x1000;
-
         qint64 nTemp=0;
-        char *pBuffer=new char[BUFFER_SIZE];
+        char *pBuffer=new char[READWRITE_BUFFER_SIZE];
 
         while((nSize>0)&&(!g_bIsEntropyStop))
         {
-            nTemp=qMin((qint64)BUFFER_SIZE,nSize);
+            nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
             if(!read_array(nOffset,pBuffer,nTemp))
             {
@@ -4544,14 +4593,12 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
         _entropyProgressMaximumChanged(procent.nMaxProcent);
         _entropyProgressValueChanged(0);
 
-        const int BUFFER_SIZE=0x1000;
-
         qint64 nTemp=0;
-        char *pBuffer=new char[BUFFER_SIZE];
+        char *pBuffer=new char[READWRITE_BUFFER_SIZE];
 
         while((nSize>0)&&(!g_bIsEntropyStop))
         {
-            nTemp=qMin((qint64)BUFFER_SIZE,nSize);
+            nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
             if(!read_array(nOffset,pBuffer,nTemp))
             {
@@ -4598,14 +4645,12 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
     {
         if(nOffset!=-1)
         {
-            const int BUFFER_SIZE=0x1000;
-
             qint64 nTemp=0;
-            char *pBuffer=new char[BUFFER_SIZE];
+            char *pBuffer=new char[READWRITE_BUFFER_SIZE];
 
             while(nSize>0)
             {
-                nTemp=qMin((qint64)BUFFER_SIZE,nSize);
+                nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
                 if(!read_array(nOffset,pBuffer,nTemp))
                 {
@@ -6067,25 +6112,34 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
     *pStFileTypes=stFileTypesNew;
 }
 
-XBinary::PROCENT XBinary::procentInit(qint64 nMaxValue)
+XBinary::PROCENT XBinary::procentInit(qint64 nMaxValue,bool bTimer)
 {
     PROCENT result={};
+    result.bTimer=bTimer;
 
     result.nMaxValue=nMaxValue;
 
-    result.nMaxProcent=1;
+    if(!(result.bTimer))
+    {
+        result.nMaxProcent=1;
 
-    if(result.nMaxValue>0x100000000)
+        if(result.nMaxValue>0x100000000)
+        {
+            result.nMaxProcent=100;
+        }
+        else if(result.nMaxValue>0x100000)
+        {
+            result.nMaxProcent=10;
+        }
+        else if(result.nMaxValue>0x1000)
+        {
+            result.nMaxProcent=5;
+        }
+    }
+    else
     {
+        result.timer.start();
         result.nMaxProcent=100;
-    }
-    else if(result.nMaxValue>0x100000)
-    {
-        result.nMaxProcent=10;
-    }
-    else if(result.nMaxValue>0x1000)
-    {
-        result.nMaxProcent=5;
     }
 
     return result;
@@ -6097,10 +6151,28 @@ bool XBinary::procentSetCurrentValue(XBinary::PROCENT *pProcent, qint64 nCurrent
 
     pProcent->nCurrentValue=nCurrentValue;
 
-    if(pProcent->nCurrentValue>((pProcent->nCurrentProcent+1)*(pProcent->nMaxValue/pProcent->nMaxProcent)))
+    if(!(pProcent->bTimer))
     {
-        pProcent->nCurrentProcent++;
-        bResult=true;
+        if(pProcent->nCurrentValue>((pProcent->nCurrentProcent+1)*(pProcent->nMaxValue/pProcent->nMaxProcent)))
+        {
+            pProcent->nCurrentProcent++;
+            bResult=true;
+        }
+    }
+    else
+    {
+        if(pProcent->timer.elapsed()>=1000) // TODO Check speed
+        {
+            pProcent->timer.restart();
+
+            qint32 _nCurrent=(pProcent->nCurrentValue*100)/(pProcent->nMaxValue);
+
+            if(pProcent->nCurrentProcent!=_nCurrent)
+            {
+                pProcent->nCurrentProcent=_nCurrent;
+                bResult=true;
+            }
+        }
     }
 
     return bResult;

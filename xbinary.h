@@ -35,6 +35,7 @@
 #include <QTextStream>
 #include <QDateTime>
 #include <QElapsedTimer>
+#include <QMutex>
 #include <math.h>
 #if (QT_VERSION_MAJOR<5) // TODO Check
 #include <QRegExp>
@@ -323,6 +324,10 @@ private:
 public:
     explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
     void setDevice(QIODevice *pDevice);
+    void setReadWriteMutex(QMutex *pReadWriteMutex);
+    qint64 safeReadDevice(QIODevice *pDevice,char *pData,qint64 nMaxLen);
+    qint64 safeWriteDevice(QIODevice *pDevice,const char *pData,qint64 nLen);
+    bool safeSeekDevice(QIODevice *pDevice,qint64 nPos);
     qint64 getSize();
     static qint64 getSize(QIODevice *pDevice);
     static qint64 getSize(QString sFileName);
@@ -467,12 +472,6 @@ public:
     QList<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="");
 
     QByteArray getUnicodeString(QString sString);
-
-    void setSearchProcessEnable(bool bState);
-    void setDumpProcessEnable(bool bState);
-    void setEntropyProcessEnable(bool bState);
-    void setHashProcessEnable(bool bState);
-    void setProcessSignalsEnable(bool bState);
 
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature);
 
@@ -811,9 +810,11 @@ public:
         qint64 nMaxValue;
         qint32 nCurrentProcent;
         qint32 nMaxProcent;
+        bool bTimer;
+        QElapsedTimer timer;
     };
 
-    static PROCENT procentInit(qint64 nMaxValue);
+    static PROCENT procentInit(qint64 nMaxValue,bool bTimer=false);
     static bool procentSetCurrentValue(PROCENT *pProcent,qint64 nCurrentValue);
 
     static MODE getWidthModeFromSize(quint64 nSize);
@@ -822,7 +823,16 @@ public:
     static bool isAnsiSymbol(quint8 cCode);
     static bool isUnicodeSymbol(quint16 nCode);
 
+public slots:
+    void setSearchProcessEnable(bool bState);
+    void setDumpProcessEnable(bool bState);
+    void setEntropyProcessEnable(bool bState);
+    void setHashProcessEnable(bool bState);
+    void setProcessSignalsEnable(bool bState);
+
 private:
+
+    static const int READWRITE_BUFFER_SIZE=0x1000;
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar cSymbol);
 
@@ -873,6 +883,7 @@ signals:
 
 private:
     QIODevice *g_pDevice;
+    QMutex *g_pReadWriteMutex;
     bool g_bIsImage;
     qint64 g_nBaseAddress;
     qint64 g_nEntryPointOffset;
