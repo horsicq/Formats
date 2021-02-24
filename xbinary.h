@@ -325,9 +325,8 @@ public:
     explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
     void setDevice(QIODevice *pDevice);
     void setReadWriteMutex(QMutex *pReadWriteMutex);
-    qint64 safeReadDevice(QIODevice *pDevice,char *pData,qint64 nMaxLen);
-    qint64 safeWriteDevice(QIODevice *pDevice,const char *pData,qint64 nLen);
-    bool safeSeekDevice(QIODevice *pDevice,qint64 nPos);
+    qint64 safeReadData(QIODevice *pDevice,qint64 nPos,char *pData,qint64 nMaxLen);
+    qint64 safeWriteData(QIODevice *pDevice,qint64 nPos,const char *pData,qint64 nLen);
     qint64 getSize();
     static qint64 getSize(QIODevice *pDevice);
     static qint64 getSize(QString sFileName);
@@ -822,6 +821,8 @@ public:
 
     static bool isAnsiSymbol(quint8 cCode);
     static bool isUnicodeSymbol(quint16 nCode);
+
+    static QList<QString> getAllFilesFromDirectory(QString sDirectory,QString sExtension);
 
 public slots:
     void setSearchProcessEnable(bool bState);

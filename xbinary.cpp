@@ -54,43 +54,36 @@ void XBinary::setReadWriteMutex(QMutex *pReadWriteMutex)
     g_pReadWriteMutex=pReadWriteMutex;
 }
 
-qint64 XBinary::safeReadDevice(QIODevice *pDevice, char *pData, qint64 nMaxLen)
+qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen)
 {
     qint64 nResult=0;
 
     if(g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
-    nResult=pDevice->read(pData,nMaxLen);
+    if(pDevice->seek(nPos))
+    {
+        nResult=pDevice->read(pData,nMaxLen);
+    }
 
     if(g_pReadWriteMutex) g_pReadWriteMutex->unlock();
 
     return nResult;
 }
 
-qint64 XBinary::safeWriteDevice(QIODevice *pDevice, const char *pData, qint64 nLen)
+qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen)
 {
     qint64 nResult=0;
 
     if(g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
-    nResult=pDevice->write(pData,nLen);
+    if(pDevice->seek(nPos))
+    {
+        nResult=pDevice->write(pData,nLen);
+    }
 
     if(g_pReadWriteMutex) g_pReadWriteMutex->unlock();
 
     return nResult;
-}
-
-bool XBinary::safeSeekDevice(QIODevice *pDevice, qint64 nPos)
-{
-    qint64 bResult=false;
-
-    if(g_pReadWriteMutex) g_pReadWriteMutex->lock();
-
-    bResult=pDevice->seek(nPos);
-
-    if(g_pReadWriteMutex) g_pReadWriteMutex->unlock();
-
-    return bResult;
 }
 
 qint64 XBinary::getSize()
@@ -522,15 +515,7 @@ qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 {
     qint64 nResult=0;
 
-    if(safeSeekDevice(g_pDevice,nOffset))
-    {
-        if(nMaxSize==-1)
-        {
-            nMaxSize=getSize()-nOffset;
-        }
-
-        nResult=safeReadDevice(g_pDevice,pBuffer,nMaxSize);  // Check for read large files
-    }
+    nResult=safeReadData(g_pDevice,nOffset,pBuffer,nMaxSize);  // Check for read large files
 
     return nResult;
 }
@@ -564,10 +549,7 @@ qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 
     if((nMaxSize<=(_nTotalSize-nOffset))&&(nOffset>=0))
     {
-        if(safeSeekDevice(g_pDevice,nOffset))
-        {
-            nResult=safeWriteDevice(g_pDevice,pBuffer,nMaxSize);
-        }
+        nResult=safeReadData(g_pDevice,nOffset,pBuffer,nMaxSize);
     }
 
     return nResult;
@@ -1839,15 +1821,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
     {
         qint64 nCurrentSize=qMin((qint64)READWRITE_BUFFER_SIZE,_nSize);
 
-        if(safeSeekDevice(g_pDevice,_nOffset))
-        {
-            if(safeReadDevice(g_pDevice,pBuffer,nCurrentSize)!=nCurrentSize)
-            {
-                bReadError=true;
-                break;
-            }
-        }
-        else
+        if(safeReadData(g_pDevice,_nOffset,pBuffer,nCurrentSize)!=nCurrentSize)
         {
             bReadError=true;
             break;
@@ -2255,7 +2229,7 @@ QString XBinary::getBaseFileName(QString sFileName)
 {
     QFileInfo fi(sFileName);
 
-    return fi.fileName();
+    return fi.baseName();
 }
 
 bool XBinary::createDirectory(QString sDirectoryName)
@@ -2445,14 +2419,10 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
 
     quint8 cZero=0;
 
-    // TODO optimize with dwords
-    if(safeSeekDevice(g_pDevice,nOffset))
+    // TODO optimize with dwords    
+    for(int i=0;i<nSize;i++)
     {
-        while(nSize>0)
-        {
-            safeWriteDevice(g_pDevice,(char *)&cZero,1);
-            nSize--;
-        }
+        safeWriteData(g_pDevice,nOffset,(char *)&cZero,1);
     }
 
     return true;
@@ -3274,7 +3244,7 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
         {
             qint64 nTempSize=qMin(nDataSize,(qint64)0x1000); // TODO const
 
-            if(!((g_pDevice->seek(nSourceOffset))&&(safeReadDevice(g_pDevice,pBuffer,nTempSize)==nTempSize)))
+            if(safeWriteData(g_pDevice,nSourceOffset,pBuffer,nTempSize)!=nTempSize)
             {
                 _errorMessage(QObject::tr("Read error"));
                 bResult=false;
@@ -6167,11 +6137,8 @@ bool XBinary::procentSetCurrentValue(XBinary::PROCENT *pProcent, qint64 nCurrent
 
             qint32 _nCurrent=(pProcent->nCurrentValue*100)/(pProcent->nMaxValue);
 
-            if(pProcent->nCurrentProcent!=_nCurrent)
-            {
-                pProcent->nCurrentProcent=_nCurrent;
-                bResult=true;
-            }
+            pProcent->nCurrentProcent=_nCurrent;
+            bResult=true;
         }
     }
 
@@ -6235,6 +6202,13 @@ bool XBinary::isUnicodeSymbol(quint16 nCode)
     }
 
     return bResult;
+}
+
+QList<QString> XBinary::getAllFilesFromDirectory(QString sDirectory, QString sExtension)
+{
+    QDir directory(sDirectory);
+
+    return directory.entryList(QStringList()<<sExtension,QDir::Files);
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
