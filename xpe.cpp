@@ -3689,14 +3689,14 @@ bool XPE::isExportPresent()
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 }
 
-XPE::EXPORT_HEADER XPE::getExport()
+XPE::EXPORT_HEADER XPE::getExport(bool bValidOnly)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 
-    return getExport(&memoryMap);
+    return getExport(&memoryMap,bValidOnly);
 }
 
-XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap)
+XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
 {
     EXPORT_HEADER result={};
 
@@ -3760,7 +3760,20 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap)
                         position.nAddress=position.nRVA+pMemoryMap->nBaseAddress;
                     }
 
-                    result.listPositions.append(position);
+                    bool bInsert=true;
+
+                    if(bValidOnly)
+                    {
+                        if((position.nRVA==0)||(!isAddressValid(pMemoryMap,position.nAddress)))
+                        {
+                            bInsert=false;
+                        }
+                    }
+
+                    if(bInsert)
+                    {
+                        result.listPositions.append(position);
+                    }
                 }
             }
         }

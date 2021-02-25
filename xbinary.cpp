@@ -24,6 +24,8 @@ const double XBinary::D_ENTROPY_THRESHOLD=6.5;
 
 XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
 {
+    g_pReadWriteMutex=nullptr;
+
     setDevice(pDevice);
     setIsImage(bIsImage);
     XBinary::setBaseAddress(0);
@@ -41,12 +43,21 @@ XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
     setVersion("");
     setType(TYPE_UNKNOWN);
 
-    g_pReadWriteMutex=nullptr;
+    g_bLog=false;
 }
 
 void XBinary::setDevice(QIODevice *pDevice)
 {
     g_pDevice=pDevice;
+
+    if(g_pDevice)
+    {
+        if(g_pReadWriteMutex) g_pReadWriteMutex->lock();
+
+        g_nSize=g_pDevice->size();
+
+        if(g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+    }
 }
 
 void XBinary::setReadWriteMutex(QMutex *pReadWriteMutex)
@@ -88,7 +99,7 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
 
 qint64 XBinary::getSize()
 {
-    return g_pDevice->size();
+    return g_nSize;
 }
 
 qint64 XBinary::getSize(QIODevice *pDevice)
@@ -1291,8 +1302,9 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
     {
         nTemp=qMin((qint64)(READWRITE_BUFFER_SIZE+(nArraySize-1)),nSize);
 
-        if(!read_array(nOffset,pBuffer,nTemp))
+        if(read_array(nOffset,pBuffer,nTemp)!=nTemp)
         {
+            _errorMessage(tr("Read error"));
             break;
         }
 
@@ -1617,7 +1629,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                 }
             }
 
-            _searchProgressValueChanged(100);
+            _searchProgressValueChanged(procent.nMaxProcent);
         }
     }
     else
@@ -1674,8 +1686,9 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
     {
         nTemp=qMin((qint64)(READWRITE_BUFFER_SIZE+(nStringSize-1)),nSize);
 
-        if(!read_array(nOffset,pBuffer,nTemp))
+        if(read_array(nOffset,pBuffer,nTemp)!=nTemp)
         {
+            _errorMessage(tr("Read error"));
             break;
         }
 
@@ -1750,8 +1763,9 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     {
         nTemp=qMin((qint64)(READWRITE_BUFFER_SIZE+2*(nStringSize-1)),nSize);
 
-        if(!read_array(nOffset,pBuffer,nTemp))
+        if(read_array(nOffset,pBuffer,nTemp)!=nTemp)
         {
+            _errorMessage(tr("Read error"));
             break;
         }
 
@@ -4198,8 +4212,9 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
         {
             nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
-            if(!read_array(nOffset,pBuffer,nTemp))
+            if(read_array(nOffset,pBuffer,nTemp)!=nTemp)
             {
+                _errorMessage(tr("Read error"));
                 delete[] pBuffer;
                 return "";
             }
@@ -4357,8 +4372,9 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize)
         {
             nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
-            if(!read_array(nOffset,pBuffer,nTemp))
+            if(read_array(nOffset,pBuffer,nTemp)!=nTemp)
             {
+                _errorMessage(tr("Read error"));
                 delete[] pBuffer;
                 return 0;
             }
@@ -4442,8 +4458,9 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
         {
             nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
-            if(!read_array(nOffset,pBuffer,nTemp))
+            if(read_array(nOffset,pBuffer,nTemp)!=nTemp)
             {
+                _errorMessage(tr("Read error"));
                 delete[] pBuffer;
                 return 0;
             }
@@ -4496,8 +4513,9 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
         {
             nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
-            if(!read_array(nOffset,pBuffer,nTemp))
+            if(read_array(nOffset,pBuffer,nTemp)!=nTemp)
             {
+                _errorMessage(tr("Read error"));
                 delete[] pBuffer;
                 return 0;
             }
@@ -4570,8 +4588,9 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
         {
             nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
-            if(!read_array(nOffset,pBuffer,nTemp))
+            if(read_array(nOffset,pBuffer,nTemp)!=nTemp)
             {
+                _errorMessage(tr("Read error"));
                 delete[] pBuffer;
 
                 return {0};
@@ -4622,8 +4641,9 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
             {
                 nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
-                if(!read_array(nOffset,pBuffer,nTemp))
+                if(read_array(nOffset,pBuffer,nTemp)!=nTemp)
                 {
+                    _errorMessage(tr("Read error"));
                     break;
                 }
 
@@ -4634,6 +4654,7 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
 
                 if(!write_array(nOffset,pBuffer,nTemp))
                 {
+                    _errorMessage(tr("Write error"));
                     break;
                 }
 

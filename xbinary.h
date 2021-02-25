@@ -900,6 +900,8 @@ private:
     QString g_sVersion;
     int g_nType;
     FT g_fileType;
+    bool g_bLog;
+    qint64 g_nSize;
 };
 
 #endif // XBINARY_H
