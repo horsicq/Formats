@@ -400,6 +400,7 @@ QString XBinary::convertPathName(QString sPathName)
 {
     QString sResult=sPathName;
 
+    // TODO more
     if(sPathName.contains("$app"))
     {
         sResult.replace("$app",QCoreApplication::applicationDirPath());
