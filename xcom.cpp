@@ -58,6 +58,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
     record.nOffset=-1;
     record.nSize=XCOM_DEF::S_ADDRESS_BEGIN;
     record.nIndex++;
+    record.bIsVirtual=true;
 
     result.listRecords.append(record);
 
