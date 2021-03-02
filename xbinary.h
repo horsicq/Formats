@@ -279,7 +279,7 @@ public:
 #endif
     };
 
-    enum TYPE // TODO setType
+    enum TYPE
     {
         TYPE_UNKNOWN=0,
         // TODO more
