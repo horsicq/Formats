@@ -625,7 +625,7 @@ public:
 
     static QString getUnpackedName(QIODevice *pDevice);
     static QString getUnpackedName(QString sFileName);
-    static QString getBackupName(QIODevice *pDevice);
+    static QString getBackupName(QIODevice *pDevice); // TODO rename getBackupFileName
     static QString getBackupName(QString sFileName);
     static QString getDeviceFileName(QIODevice *pDevice);
     static QString getDeviceFilePath(QIODevice *pDevice);
@@ -770,6 +770,7 @@ public:
     static QString getStringCollision(QList<QString> *pListStrings,QString sString1,QString sString2);
 
     static bool writeToFile(QString sFileName,QByteArray baData);
+    static bool writeToFile(QString sFileName,QIODevice *pDevice);
 
     static qint32 getStringNumberFromList(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
     static qint32 getStringNumberFromListExp(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);

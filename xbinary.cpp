@@ -3913,6 +3913,7 @@ QString XBinary::getUnpackedName(QString sFileName)
 
 QString XBinary::getBackupName(QIODevice *pDevice)
 {
+    // mb TODO name + Date
     QString sResult="backup";
 
     QString sClassName=pDevice->metaObject()->className();
@@ -5659,6 +5660,26 @@ bool XBinary::writeToFile(QString sFileName, QByteArray baData)
 
         file.close();
         bResult=true;
+    }
+
+    return bResult;
+}
+
+bool XBinary::writeToFile(QString sFileName, QIODevice *pDevice)
+{
+    bool bResult=false;
+
+    if(createFile(sFileName,pDevice->size()))
+    {
+        QFile file;
+        file.setFileName(sFileName);
+
+        if(file.open(QIODevice::ReadWrite))
+        {
+            bResult=copyDeviceMemory(pDevice,0,&file,0,pDevice->size(),READWRITE_BUFFER_SIZE);
+
+            file.close();
+        }
     }
 
     return bResult;
