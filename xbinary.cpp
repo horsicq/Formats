@@ -1796,9 +1796,11 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     return -1;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode,QString sExpFilter)
 {
     QList<XBinary::MS_RECORD> listResult;
+
+    bool bFilter=(sExpFilter!="");
 
     if(nMaxLenght==0)
     {
@@ -1881,19 +1883,31 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
                     if(bAnsi)
                     {
-                        MS_RECORD record={};
-                        record.recordType=MS_RECORD_TYPE_ANSI;
-                        record.nOffset=nCurrentAnsiOffset;
-                        record.nSize=nCurrentAnsiSize;
-                        record.sString=pAnsiBuffer;
+                        QString sString=pAnsiBuffer;
 
-                        listResult.append(record);
+                        bool bAdd=true;
 
-                        nCurrentRecords++;
-
-                        if(nCurrentRecords>=nLimit)
+                        if(bFilter)
                         {
-                            break;
+                            bAdd=isRegExpPresent(sExpFilter,sString);
+                        }
+
+                        if(bAdd)
+                        {
+                            MS_RECORD record={};
+                            record.recordType=MS_RECORD_TYPE_ANSI;
+                            record.nOffset=nCurrentAnsiOffset;
+                            record.nSize=nCurrentAnsiSize;
+                            record.sString=sString;
+
+                            listResult.append(record);
+
+                            nCurrentRecords++;
+
+                            if(nCurrentRecords>=nLimit)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
@@ -1937,19 +1951,31 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
                         if(bUnicode)
                         {
-                            MS_RECORD record={};
-                            record.recordType=MS_RECORD_TYPE_UNICODE;
-                            record.nOffset=nCurrentUnicodeOffset[nParity];
-                            record.nSize=nCurrentUnicodeSize[nParity];
-                            record.sString=QString::fromUtf16(pUnicodeBuffer[nParity]);
+                            QString sString=QString::fromUtf16(pUnicodeBuffer[nParity]);
 
-                            listResult.append(record);
+                            bool bAdd=true;
 
-                            nCurrentRecords++;
-
-                            if(nCurrentRecords>=nLimit)
+                            if(bFilter)
                             {
-                                break;
+                                bAdd=isRegExpPresent(sExpFilter,sString);
+                            }
+
+                            if(bAdd)
+                            {
+                                MS_RECORD record={};
+                                record.recordType=MS_RECORD_TYPE_UNICODE;
+                                record.nOffset=nCurrentUnicodeOffset[nParity];
+                                record.nSize=nCurrentUnicodeSize[nParity];
+                                record.sString=sString;
+
+                                listResult.append(record);
+
+                                nCurrentRecords++;
+
+                                if(nCurrentRecords>=nLimit)
+                                {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -1971,19 +1997,31 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
                             if(bUnicode)
                             {
-                                MS_RECORD record={};
-                                record.recordType=MS_RECORD_TYPE_UNICODE;
-                                record.nOffset=nCurrentUnicodeOffset[nO];
-                                record.nSize=nCurrentUnicodeSize[nO];
-                                record.sString=QString::fromUtf16(pUnicodeBuffer[nO]);
+                                QString sString=QString::fromUtf16(pUnicodeBuffer[nO]);
 
-                                listResult.append(record);
+                                bool bAdd=true;
 
-                                nCurrentRecords++;
-
-                                if(nCurrentRecords>=nLimit)
+                                if(bFilter)
                                 {
-                                    break;
+                                    bAdd=isRegExpPresent(sExpFilter,sString);
+                                }
+
+                                if(bAdd)
+                                {
+                                    MS_RECORD record={};
+                                    record.recordType=MS_RECORD_TYPE_UNICODE;
+                                    record.nOffset=nCurrentUnicodeOffset[nO];
+                                    record.nSize=nCurrentUnicodeSize[nO];
+                                    record.sString=sString;
+
+                                    listResult.append(record);
+
+                                    nCurrentRecords++;
+
+                                    if(nCurrentRecords>=nLimit)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
                         }
