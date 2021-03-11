@@ -890,7 +890,7 @@ private:
     qint64 g_nBaseAddress;
     qint64 g_nEntryPointOffset;
     qint64 g_nImageBase;
-    bool g_bIsBigEndian;
+    bool g_bIsBigEndian; // TODO enum
     bool g_bIsSearchStop;
     bool g_bIsDumpStop;
     bool g_bIsEntropyStop;
