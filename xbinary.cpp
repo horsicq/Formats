@@ -1802,9 +1802,19 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
     bool bFilter=(sExpFilter!="");
 
+    if(nMinLenght==0)
+    {
+        nMinLenght=1;
+    }
+
     if(nMaxLenght==0)
     {
         nMaxLenght=128;
+    }
+
+    if(nSize==-1)
+    {
+        nSize=getSize()-nOffset;
     }
 
     qint64 _nSize=nSize;
