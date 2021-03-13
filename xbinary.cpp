@@ -1809,7 +1809,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
     if(nMaxLenght==0)
     {
-        nMaxLenght=128;
+        nMaxLenght=128; // TODO Check
     }
 
     if(nSize==-1)
