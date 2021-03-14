@@ -1307,7 +1307,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
     // TODO Image Base
 //    result.nImageSize=0xFFFF;
 
-    QList<XLE_DEF::o32_map> listMaps=XLE::getMaps();
+    QList<XLE_DEF::o32_map> listMaps=XLE::getMaps(); // TODO Check
 
     QList<XLE_DEF::o32_obj> listObjects=XLE::getObjects();
 
