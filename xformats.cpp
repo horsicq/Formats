@@ -241,6 +241,20 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
         XMACH mach(pDevice,bIsImage,nImageBase);
         bResult=mach.isBigEndian();
     }
+#ifdef USE_DEX // TODO Check !!!
+    else if(XBinary::checkFileType(XBinary::FT_DEX,fileType))
+    {
+        XDEX dex(pDevice);
+        bResult=dex.isBigEndian();
+    }
+#endif
+#ifdef USE_ARCHIVE
+    else if(XBinary::checkFileType(XBinary::FT_ZIP,fileType))
+    {
+        XZip zip(pDevice);
+        bResult=zip.isBigEndian();
+    }
+#endif
     else
     {
         bResult=false;
