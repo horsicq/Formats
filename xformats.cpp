@@ -241,7 +241,7 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
         XMACH mach(pDevice,bIsImage,nImageBase);
         bResult=mach.isBigEndian();
     }
-#ifdef USE_DEX // TODO Check !!!
+#ifdef USE_DEX
     else if(XBinary::checkFileType(XBinary::FT_DEX,fileType))
     {
         XDEX dex(pDevice);
