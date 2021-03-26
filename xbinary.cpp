@@ -3962,7 +3962,7 @@ QString XBinary::getUnpackedName(QString sFileName)
 QString XBinary::getBackupName(QIODevice *pDevice)
 {
     // mb TODO name + Date
-    QString sResult="backup";
+    QString sResult=QString("Backup.%1.BAK").arg(getCurrentBackupDate());
 
     QString sClassName=pDevice->metaObject()->className();
 
@@ -3995,7 +3995,7 @@ QString XBinary::getBackupName(QString sFileName)
         sResult+="."+sSuffix;
     }
 
-    sResult+=".BAK";
+    sResult+=QString(".%1.BAK").arg(getCurrentBackupDate());
 
     return sResult;
 }
@@ -4127,6 +4127,46 @@ QString XBinary::getDeviceFileSuffix(QIODevice *pDevice)
             sResult=fi.suffix();
         }
     }
+
+    return sResult;
+}
+
+bool XBinary::isBackupPresent(QIODevice *pDevice)
+{
+    return XBinary::isFileExists(XBinary::getBackupName(pDevice));
+}
+
+bool XBinary::saveBackup(QIODevice *pDevice)
+{
+    bool bResult=false;
+
+    QString sBackupFileName=XBinary::getBackupName(pDevice);
+
+    if(sBackupFileName!="")
+    {
+        if(!QFile::exists(sBackupFileName))
+        {
+            QString sFileName=XBinary::getDeviceFileName(pDevice);
+
+            if(sFileName!="")
+            {
+                bResult=QFile::copy(sFileName,sBackupFileName);
+            }
+            else
+            {
+                bResult=XBinary::writeToFile(sBackupFileName,pDevice);
+            }
+        }
+    }
+
+    return bResult;
+}
+
+QString XBinary::getCurrentBackupDate()
+{
+    QString sResult;
+
+    sResult=QDate::currentDate().toString("yyyy-MM-dd");
 
     return sResult;
 }
