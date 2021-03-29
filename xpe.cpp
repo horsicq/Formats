@@ -3782,6 +3782,13 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
     return result;
 }
 
+QList<QString> XPE::getExportFunctionsList()
+{
+    EXPORT_HEADER exportHeader=getExport(false);
+
+    return getExportFunctionsList(&exportHeader);
+}
+
 QList<QString> XPE::getExportFunctionsList(EXPORT_HEADER *pExportHeader)
 {
     QList<QString> listResult;
