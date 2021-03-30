@@ -37,7 +37,7 @@
 #include "xarchives.h"
 #endif
 #ifdef QT_GUI_LIB
-#include <QComboBox>
+#include <QComboBox> // TODO Check TESTLIB !!!
 #endif
 
 class XFormats : public QObject
