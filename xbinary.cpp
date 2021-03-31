@@ -1903,6 +1903,11 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                             bAdd=isRegExpPresent(sExpFilter,sString);
                         }
 
+                        if(bCStrings&&cSymbol)
+                        {
+                            bAdd=false;
+                        }
+
                         if(bAdd)
                         {
                             MS_RECORD record={};
@@ -1969,6 +1974,11 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                             if(bFilter)
                             {
                                 bAdd=isRegExpPresent(sExpFilter,sString);
+                            }
+
+                            if(bCStrings&&nCode)
+                            {
+                                bAdd=false;
                             }
 
                             if(bAdd)
