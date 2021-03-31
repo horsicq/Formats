@@ -1796,8 +1796,9 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     return -1;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode,QString sExpFilter)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode,bool bCStrings,QString sExpFilter)
 {
+    // TODO C-strings
     QList<XBinary::MS_RECORD> listResult;
 
     bool bFilter=(sExpFilter!="");
