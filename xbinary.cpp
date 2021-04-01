@@ -6224,6 +6224,27 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
     *pStFileTypes=stFileTypesNew;
 }
 
+bool XBinary::isFileTypePresent(QSet<XBinary::FT> *pStFileTypes, QSet<XBinary::FT> *pStAvailableFileTypes)
+{
+    bool bResult=false;
+
+    QSet<XBinary::FT>::iterator i=pStFileTypes->begin();
+
+    while(i!=pStFileTypes->end())
+    {
+        if(pStAvailableFileTypes->contains(*i))
+        {
+            bResult=true;
+
+            break;
+        }
+
+        i++;
+    }
+
+    return bResult;
+}
+
 XBinary::PROCENT XBinary::procentInit(qint64 nMaxValue,bool bTimer)
 {
     PROCENT result={};
