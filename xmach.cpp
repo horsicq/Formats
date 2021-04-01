@@ -253,6 +253,24 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypesS()
     return mapResult;
 }
 
+QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
+{
+    QMap<quint64, QString> mapResult;
+
+    // TODO
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
+{
+    QMap<quint64, QString> mapResult;
+
+    // TODO
+
+    return mapResult;
+}
+
 QMap<quint64, QString> XMACH::getHeaderFileTypes()
 {
     QMap<quint64, QString> mapResult;
