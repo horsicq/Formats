@@ -310,6 +310,11 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
         mapResult.insert(2,"CPU_SUBTYPE_MC68040");
         mapResult.insert(3,"CPU_SUBTYPE_MC68030_ONLY");
     }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_HPPA)
+    {
+        mapResult.insert(0,"CPU_SUBTYPE_HPPA_7100");
+        mapResult.insert(1,"CPU_SUBTYPE_HPPA_7100LC");
+    }
 
     return mapResult;
 }
@@ -370,6 +375,11 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
         mapResult.insert(1,"MC68030");
         mapResult.insert(2,"MC68040");
         mapResult.insert(3,"MC68030_ONLY");
+    }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_HPPA)
+    {
+        mapResult.insert(0,"HPPA_7100");
+        mapResult.insert(1,"HPPA_7100LC");
     }
 
     return mapResult;
