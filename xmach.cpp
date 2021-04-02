@@ -280,6 +280,17 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
         mapResult.insert(2,"CPU_SUBTYPE_RT_APC");
         mapResult.insert(3,"CPU_SUBTYPE_RT_135");
     }
+    else if((nCpuType==XMACH_DEF::CPU_TYPE_NS32032)||
+            (nCpuType==XMACH_DEF::CPU_TYPE_NS32332)||
+            (nCpuType==XMACH_DEF::CPU_TYPE_NS32532))
+    {
+        mapResult.insert(0,"CPU_SUBTYPE_MMAX_ALL");
+        mapResult.insert(1,"CPU_SUBTYPE_MMAX_DPC");
+        mapResult.insert(2,"CPU_SUBTYPE_SQT");
+        mapResult.insert(3,"CPU_SUBTYPE_MMAX_APC_FPU");
+        mapResult.insert(4,"CPU_SUBTYPE_MMAX_APC_FPA");
+        mapResult.insert(5,"CPU_SUBTYPE_MMAX_XPC");
+    }
 
     return mapResult;
 }
@@ -310,6 +321,17 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
         mapResult.insert(1,"RT_PC");
         mapResult.insert(2,"RT_APC");
         mapResult.insert(3,"RT_135");
+    }
+    else if((nCpuType==XMACH_DEF::CPU_TYPE_NS32032)||
+            (nCpuType==XMACH_DEF::CPU_TYPE_NS32332)||
+            (nCpuType==XMACH_DEF::CPU_TYPE_NS32532))
+    {
+        mapResult.insert(0,"MMAX_ALL");
+        mapResult.insert(1,"MMAX_DPC");
+        mapResult.insert(2,"SQT");
+        mapResult.insert(3,"MMAX_APC_FPU");
+        mapResult.insert(4,"MMAX_APC_FPA");
+        mapResult.insert(5,"MMAX_XPC");
     }
 
     return mapResult;
