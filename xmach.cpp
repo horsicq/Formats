@@ -304,6 +304,12 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
         mapResult.insert(3,"CPU_SUBTYPE_MIPS_R2800");
         mapResult.insert(4,"CPU_SUBTYPE_MIPS_R2000a");
     }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_MC680x0)
+    {
+        mapResult.insert(1,"CPU_SUBTYPE_MC68030");
+        mapResult.insert(2,"CPU_SUBTYPE_MC68040");
+        mapResult.insert(3,"CPU_SUBTYPE_MC68030_ONLY");
+    }
 
     return mapResult;
 }
@@ -358,6 +364,12 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
         mapResult.insert(2,"MIPS_R2600");
         mapResult.insert(3,"MIPS_R2800");
         mapResult.insert(4,"MIPS_R2000a");
+    }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_MC680x0)
+    {
+        mapResult.insert(1,"MC68030");
+        mapResult.insert(2,"MC68040");
+        mapResult.insert(3,"MC68030_ONLY");
     }
 
     return mapResult;
