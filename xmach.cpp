@@ -344,6 +344,11 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
         mapResult.insert(0,"CPU_SUBTYPE_MC98000_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_MC98601");
     }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_I860)
+    {
+        mapResult.insert(0,"CPU_SUBTYPE_I860_ALL");
+        mapResult.insert(1,"CPU_SUBTYPE_I860_860");
+    }
 
     return mapResult;
 }
@@ -438,6 +443,11 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
     {
         mapResult.insert(0,"MC98000_ALL");
         mapResult.insert(1,"MC98601");
+    }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_I860)
+    {
+        mapResult.insert(0,"I860_ALL");
+        mapResult.insert(1,"I860_860");
     }
 
     return mapResult;
