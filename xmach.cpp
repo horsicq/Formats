@@ -273,6 +273,13 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
         mapResult.insert(11,"CPU_SUBTYPE_VAX8800");
         mapResult.insert(12,"CPU_SUBTYPE_UVAXIII");
     }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_ROMP)
+    {
+        mapResult.insert(0,"CPU_SUBTYPE_RT_ALL");
+        mapResult.insert(1,"CPU_SUBTYPE_RT_PC");
+        mapResult.insert(2,"CPU_SUBTYPE_RT_APC");
+        mapResult.insert(3,"CPU_SUBTYPE_RT_135");
+    }
 
     return mapResult;
 }
@@ -296,6 +303,13 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
         mapResult.insert(10,"VAX8650");
         mapResult.insert(11,"VAX8800");
         mapResult.insert(12,"UVAXIII");
+    }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_ROMP)
+    {
+        mapResult.insert(0,"RT_ALL");
+        mapResult.insert(1,"RT_PC");
+        mapResult.insert(2,"RT_APC");
+        mapResult.insert(3,"RT_135");
     }
 
     return mapResult;
