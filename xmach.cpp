@@ -291,7 +291,8 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
         mapResult.insert(4,"CPU_SUBTYPE_MMAX_APC_FPA");
         mapResult.insert(5,"CPU_SUBTYPE_MMAX_XPC");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_I386)
+    else if((nCpuType==XMACH_DEF::CPU_TYPE_I386)||
+            (nCpuType==XMACH_DEF::CPU_TYPE_X86_64))
     {
         mapResult.insert(3,"CPU_SUBTYPE_386");
         // TODO
@@ -314,6 +315,23 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
     {
         mapResult.insert(0,"CPU_SUBTYPE_HPPA_7100");
         mapResult.insert(1,"CPU_SUBTYPE_HPPA_7100LC");
+    }
+    else if((nCpuType==XMACH_DEF::CPU_TYPE_ARM)||
+            (nCpuType==XMACH_DEF::CPU_TYPE_ARM64))
+    {
+        mapResult.insert(0,"CPU_SUBTYPE_ARM_ALL");
+        mapResult.insert(1,"CPU_SUBTYPE_ARM_A500_ARCH");
+        mapResult.insert(2,"CPU_SUBTYPE_ARM_A500");
+        mapResult.insert(3,"CPU_SUBTYPE_ARM_A440");
+        mapResult.insert(4,"CPU_SUBTYPE_ARM_M4");
+        mapResult.insert(5,"CPU_SUBTYPE_ARM_V4T");
+        mapResult.insert(6,"CPU_SUBTYPE_ARM_V6");
+        mapResult.insert(7,"CPU_SUBTYPE_ARM_V5TEJ");
+        mapResult.insert(8,"CPU_SUBTYPE_ARM_XSCALE");
+        mapResult.insert(9,"CPU_SUBTYPE_ARM_V7");
+        mapResult.insert(10,"CPU_SUBTYPE_ARM_V7F");
+        mapResult.insert(11,"CPU_SUBTYPE_ARM_V7S");
+        mapResult.insert(12,"CPU_SUBTYPE_ARM_V7K");
     }
 
     return mapResult;
@@ -357,7 +375,8 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
         mapResult.insert(4,"MMAX_APC_FPA");
         mapResult.insert(5,"MMAX_XPC");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_I386)
+    else if((nCpuType==XMACH_DEF::CPU_TYPE_I386)||
+            (nCpuType==XMACH_DEF::CPU_TYPE_X86_64))
     {
         mapResult.insert(3,"386");
         // TODO
@@ -380,6 +399,23 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
     {
         mapResult.insert(0,"HPPA_7100");
         mapResult.insert(1,"HPPA_7100LC");
+    }
+    else if((nCpuType==XMACH_DEF::CPU_TYPE_ARM)||
+            (nCpuType==XMACH_DEF::CPU_TYPE_ARM64))
+    {
+        mapResult.insert(0,"ARM_ALL");
+        mapResult.insert(1,"ARM_A500_ARCH");
+        mapResult.insert(2,"ARM_A500");
+        mapResult.insert(3,"ARM_A440");
+        mapResult.insert(4,"ARM_M4");
+        mapResult.insert(5,"ARM_V4T");
+        mapResult.insert(6,"ARM_V6");
+        mapResult.insert(7,"ARM_V5TEJ");
+        mapResult.insert(8,"ARM_XSCALE");
+        mapResult.insert(9,"ARM_V7");
+        mapResult.insert(10,"ARM_V7F");
+        mapResult.insert(11,"ARM_V7S");
+        mapResult.insert(12,"ARM_V7K");
     }
 
     return mapResult;
