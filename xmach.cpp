@@ -257,7 +257,22 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
 {
     QMap<quint64, QString> mapResult;
 
-    // TODO
+    if(nCpuType==XMACH_DEF::CPU_TYPE_VAX)
+    {
+        mapResult.insert(0,"CPU_SUBTYPE_VAX_ALL");
+        mapResult.insert(1,"CPU_SUBTYPE_VAX780");
+        mapResult.insert(2,"CPU_SUBTYPE_VAX785");
+        mapResult.insert(3,"CPU_SUBTYPE_VAX750");
+        mapResult.insert(4,"CPU_SUBTYPE_VAX730");
+        mapResult.insert(5,"CPU_SUBTYPE_UVAXI");
+        mapResult.insert(6,"CPU_SUBTYPE_UVAXII");
+        mapResult.insert(7,"CPU_SUBTYPE_VAX8200");
+        mapResult.insert(8,"CPU_SUBTYPE_VAX8500");
+        mapResult.insert(9,"CPU_SUBTYPE_VAX8600");
+        mapResult.insert(10,"CPU_SUBTYPE_VAX8650");
+        mapResult.insert(11,"CPU_SUBTYPE_VAX8800");
+        mapResult.insert(12,"CPU_SUBTYPE_UVAXIII");
+    }
 
     return mapResult;
 }
@@ -266,7 +281,22 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
 {
     QMap<quint64, QString> mapResult;
 
-    // TODO
+    if(nCpuType==XMACH_DEF::CPU_TYPE_VAX)
+    {
+        mapResult.insert(0,"VAX_ALL");
+        mapResult.insert(1,"VAX780");
+        mapResult.insert(2,"VAX785");
+        mapResult.insert(3,"VAX750");
+        mapResult.insert(4,"VAX730");
+        mapResult.insert(5,"UVAXI");
+        mapResult.insert(6,"UVAXII");
+        mapResult.insert(7,"VAX8200");
+        mapResult.insert(8,"VAX8500");
+        mapResult.insert(9,"VAX8600");
+        mapResult.insert(10,"VAX8650");
+        mapResult.insert(11,"VAX8800");
+        mapResult.insert(12,"UVAXIII");
+    }
 
     return mapResult;
 }
