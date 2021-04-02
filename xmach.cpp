@@ -291,6 +291,11 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
         mapResult.insert(4,"CPU_SUBTYPE_MMAX_APC_FPA");
         mapResult.insert(5,"CPU_SUBTYPE_MMAX_XPC");
     }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_I386)
+    {
+        mapResult.insert(3,"CPU_SUBTYPE_386");
+        // TODO
+    }
 
     return mapResult;
 }
@@ -332,6 +337,11 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
         mapResult.insert(3,"MMAX_APC_FPU");
         mapResult.insert(4,"MMAX_APC_FPA");
         mapResult.insert(5,"MMAX_XPC");
+    }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_I386)
+    {
+        mapResult.insert(3,"386");
+        // TODO
     }
 
     return mapResult;
