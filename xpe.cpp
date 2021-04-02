@@ -1822,7 +1822,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                 {
                     _MEMORY_RECORD record={};
 
-                    record.type=MMT_LOADSECTION;
+                    record.type=MMT_LOADSEGMENT;
                     record.nLoadSection=i;
                     record.segment=ADDRESS_SEGMENT_FLAT;
                     record.nAddress=nVirtualAddress;
@@ -1839,7 +1839,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                     _MEMORY_RECORD record={};
                     record.bIsVirtual=true;
 
-                    record.type=MMT_LOADSECTION;
+                    record.type=MMT_LOADSEGMENT;
                     record.nLoadSection=i;
                     record.segment=ADDRESS_SEGMENT_FLAT;
                     record.nAddress=nVirtualAddress+nFileSize;
@@ -1855,7 +1855,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
             {
                 _MEMORY_RECORD record={};
 
-                record.type=MMT_LOADSECTION;
+                record.type=MMT_LOADSEGMENT;
                 record.nLoadSection=i;
                 record.segment=ADDRESS_SEGMENT_FLAT;
                 record.nAddress=nVirtualAddress;
@@ -8718,7 +8718,7 @@ qint64 XPE::_getMinSectionOffset()
 
     for(int i=0; i<nNumberOfRecords; i++)
     {
-        if(memoryMap.listRecords.at(i).type==MMT_LOADSECTION)
+        if(memoryMap.listRecords.at(i).type==MMT_LOADSEGMENT)
         {
             if(nResult==-1)
             {

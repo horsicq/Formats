@@ -367,7 +367,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
         record.nAddress=0;
 
         record.segment=ADDRESS_SEGMENT_CODE; // CODE
-        record.type=MMT_LOADSECTION;
+        record.type=MMT_LOADSEGMENT;
         record.nIndex=nIndex++;
 
         result.listRecords.append(record);
@@ -385,7 +385,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
         record.nAddress=nCodeAddress;
 
         record.segment=ADDRESS_SEGMENT_CODE; // CODE
-        record.type=MMT_LOADSECTION;
+        record.type=MMT_LOADSEGMENT;
         record.nIndex=nIndex++;
 
         result.listRecords.append(record);
@@ -400,7 +400,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
         record.nAddress=nCodeAddress+nCodeSize;
 
         record.segment=ADDRESS_SEGMENT_CODE; // CODE
-        record.type=MMT_LOADSECTION;
+        record.type=MMT_LOADSEGMENT;
         record.nIndex=nIndex++;
 
         result.listRecords.append(record);

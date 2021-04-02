@@ -126,7 +126,7 @@ public:
     {
         MMT_UNKNOWN=0,
         MMT_HEADER,
-        MMT_LOADSECTION,    // Section in PE; LoadProgram in ELF
+        MMT_LOADSEGMENT,    // Section in PE; LoadProgram in ELF; Segments in MACH
         MMT_NOLOADABLE,     // For ELF
         MMT_FILESEGMENT,
         MMT_OVERLAY
@@ -769,8 +769,8 @@ public:
     bool addOverlay(char *pData,qint64 nDataSize);
     bool removeOverlay();
 
-    bool isSignatureInLoadSectionPresent(qint32 nLoadSection,QString sSignature);
-    bool isSignatureInLoadSectionPresent(_MEMORY_MAP *pMemoryMap,qint32 nLoadSection,QString sSignature);
+    bool isSignatureInLoadSegmentPresent(qint32 nLoadSegment,QString sSignature);
+    bool isSignatureInLoadSegmentPresent(_MEMORY_MAP *pMemoryMap,qint32 nLoadSegment,QString sSignature);
 
     static QString getStringCollision(QList<QString> *pListStrings,QString sString1,QString sString2);
 

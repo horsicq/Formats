@@ -3669,7 +3669,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
         {
             XBinary::_MEMORY_RECORD record={};
 
-            record.type=MMT_LOADSECTION;
+            record.type=MMT_LOADSEGMENT;
             record.sName=sName;
             // TODO Section number!
             record.nAddress=nVirtualAddress;
@@ -3685,7 +3685,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
         {
             XBinary::_MEMORY_RECORD record={};
 
-            record.type=MMT_LOADSECTION;
+            record.type=MMT_LOADSEGMENT;
             record.sName=sName;
             // TODO Section number!
             record.nAddress=listSegments.at(i).p_vaddr;
@@ -3700,7 +3700,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
         {
             XBinary::_MEMORY_RECORD record={};
 
-            record.type=MMT_LOADSECTION;
+            record.type=MMT_LOADSEGMENT;
             record.sName=sName;
             // TODO Section number!
             record.nAddress=listSegments.at(i).p_vaddr+nFileSize;

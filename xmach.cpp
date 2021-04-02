@@ -869,7 +869,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
         {
             XBinary::_MEMORY_RECORD record={};
 
-            record.type=MMT_LOADSECTION;
+            record.type=MMT_LOADSEGMENT;
 
             record.sName=sSegmentName;
             record.nAddress=nVirtualAddress;
@@ -884,7 +884,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
         {
             XBinary::_MEMORY_RECORD record={};
 
-            record.type=MMT_LOADSECTION;
+            record.type=MMT_LOADSEGMENT;
             record.bIsVirtual=true;
 
             record.sName=sSegmentName;

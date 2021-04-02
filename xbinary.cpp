@@ -2879,7 +2879,7 @@ qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nAddress)
 
     _MEMORY_RECORD mm=getMemoryRecordByAddress(pMemoryMap,nAddress);
 
-    if(mm.type==MMT_LOADSECTION)
+    if(mm.type==MMT_LOADSEGMENT)
     {
         nResult=mm.nLoadSection;
     }
@@ -5680,14 +5680,14 @@ bool XBinary::removeOverlay()
     return addOverlay(0,0);
 }
 
-bool XBinary::isSignatureInLoadSectionPresent(qint32 nLoadSection, QString sSignature)
+bool XBinary::isSignatureInLoadSegmentPresent(qint32 nLoadSegment, QString sSignature)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 
-    return isSignatureInLoadSectionPresent(&memoryMap,nLoadSection,sSignature);
+    return isSignatureInLoadSegmentPresent(&memoryMap,nLoadSegment,sSignature);
 }
 
-bool XBinary::isSignatureInLoadSectionPresent(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nLoadSection, QString sSignature)
+bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, QString sSignature)
 {
     bool bResult=false;
 
@@ -5695,7 +5695,7 @@ bool XBinary::isSignatureInLoadSectionPresent(XBinary::_MEMORY_MAP *pMemoryMap, 
 
     for(int i=0;i<nNumberOfRecords;i++)
     {
-        if((pMemoryMap->listRecords.at(i).type==MMT_LOADSECTION)&&(pMemoryMap->listRecords.at(i).nLoadSection==nLoadSection))
+        if((pMemoryMap->listRecords.at(i).type==MMT_LOADSEGMENT)&&(pMemoryMap->listRecords.at(i).nLoadSection==nLoadSegment))
         {
             if(pMemoryMap->listRecords.at(i).nOffset!=-1)
             {
