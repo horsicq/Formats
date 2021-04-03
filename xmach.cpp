@@ -358,6 +358,23 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
     {
         mapResult.insert(0,"CPU_SUBTYPE_SPARC_ALL");
     }
+    else if((nCpuType==XMACH_DEF::CPU_TYPE_POWERPC)||
+            (nCpuType==XMACH_DEF::CPU_TYPE_POWERPC64))
+    {
+        mapResult.insert(0,"CPU_SUBTYPE_POWERPC_ALL");
+        mapResult.insert(1,"CPU_SUBTYPE_POWERPC_601");
+        mapResult.insert(2,"CPU_SUBTYPE_POWERPC_602");
+        mapResult.insert(3,"CPU_SUBTYPE_POWERPC_603");
+        mapResult.insert(4,"CPU_SUBTYPE_POWERPC_603e");
+        mapResult.insert(5,"CPU_SUBTYPE_POWERPC_603ev");
+        mapResult.insert(6,"CPU_SUBTYPE_POWERPC_604");
+        mapResult.insert(7,"CPU_SUBTYPE_POWERPC_604e");
+        mapResult.insert(8,"CPU_SUBTYPE_POWERPC_620");
+        mapResult.insert(9,"CPU_SUBTYPE_POWERPC_750");
+        mapResult.insert(10,"CPU_SUBTYPE_POWERPC_7400");
+        mapResult.insert(11,"CPU_SUBTYPE_POWERPC_7450");
+        mapResult.insert(100,"CPU_SUBTYPE_POWERPC_970");
+    }
 
     return mapResult;
 }
@@ -466,6 +483,23 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
     else if(nCpuType==XMACH_DEF::CPU_TYPE_SPARC)
     {
         mapResult.insert(0,"SPARC_ALL");
+    }
+    else if((nCpuType==XMACH_DEF::CPU_TYPE_POWERPC)||
+            (nCpuType==XMACH_DEF::CPU_TYPE_POWERPC64))
+    {
+        mapResult.insert(0,"POWERPC_ALL");
+        mapResult.insert(1,"POWERPC_601");
+        mapResult.insert(2,"POWERPC_602");
+        mapResult.insert(3,"POWERPC_603");
+        mapResult.insert(4,"POWERPC_603e");
+        mapResult.insert(5,"POWERPC_603ev");
+        mapResult.insert(6,"POWERPC_604");
+        mapResult.insert(7,"POWERPC_604e");
+        mapResult.insert(8,"POWERPC_620");
+        mapResult.insert(9,"POWERPC_750");
+        mapResult.insert(10,"POWERPC_7400");
+        mapResult.insert(11,"POWERPC_7450");
+        mapResult.insert(100,"POWERPC_970");
     }
 
     return mapResult;
