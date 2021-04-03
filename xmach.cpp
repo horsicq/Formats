@@ -354,6 +354,10 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
         mapResult.insert(0,"CPU_SUBTYPE_RS6000_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_RS6000");
     }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_SPARC)
+    {
+        mapResult.insert(0,"CPU_SUBTYPE_SPARC_ALL");
+    }
 
     return mapResult;
 }
@@ -458,6 +462,10 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
     {
         mapResult.insert(0,"RS6000_ALL");
         mapResult.insert(1,"RS6000");
+    }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_SPARC)
+    {
+        mapResult.insert(0,"SPARC_ALL");
     }
 
     return mapResult;
