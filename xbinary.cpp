@@ -3457,12 +3457,12 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     {
         if(((XMACH_DEF::mach_header *)pOffset)->filetype<0xFFFF)
         {
-            if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_MAGIC)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_CIGAM))
+            if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::MH_MAGIC)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::MH_CIGAM))
             {
                 stResult.insert(FT_MACHO);
                 stResult.insert(FT_MACHO32);
             }
-            else if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_MAGIC_64)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_CIGAM_64))
+            else if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::MH_MAGIC_64)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::MH_CIGAM_64))
             {
                 stResult.insert(FT_MACHO);
                 stResult.insert(FT_MACHO64);

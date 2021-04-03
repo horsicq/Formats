@@ -36,10 +36,10 @@ bool XMACH::isValid()
 
     quint32 nMagic=read_uint32(0);
 
-    if( (nMagic==XMACH_DEF::S_MH_MAGIC)||
-        (nMagic==XMACH_DEF::S_MH_CIGAM)||
-        (nMagic==XMACH_DEF::S_MH_MAGIC_64)||
-        (nMagic==XMACH_DEF::S_MH_CIGAM_64))
+    if( (nMagic==XMACH_DEF::MH_MAGIC)||
+        (nMagic==XMACH_DEF::MH_CIGAM)||
+        (nMagic==XMACH_DEF::MH_MAGIC_64)||
+        (nMagic==XMACH_DEF::MH_CIGAM_64))
     {
         bResult=true;
     }
@@ -53,8 +53,8 @@ bool XMACH::isBigEndian()
 
     quint32 nMagic=read_uint32(0);
 
-    if( (nMagic==XMACH_DEF::S_MH_CIGAM)||
-        (nMagic==XMACH_DEF::S_MH_CIGAM_64))
+    if( (nMagic==XMACH_DEF::MH_CIGAM)||
+        (nMagic==XMACH_DEF::MH_CIGAM_64))
     {
         bResult=true;
     }
@@ -1398,7 +1398,7 @@ XBinary::MODE XMACH::getMode()
 {
     MODE result=MODE_32;
 
-    if(getHeader_magic()==XMACH_DEF::S_MH_MAGIC_64)
+    if(getHeader_magic()==XMACH_DEF::MH_MAGIC_64)
     {
         result=MODE_64;
     }
