@@ -375,6 +375,13 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
         mapResult.insert(11,"CPU_SUBTYPE_POWERPC_7450");
         mapResult.insert(100,"CPU_SUBTYPE_POWERPC_970");
     }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_VEO)
+    {
+        mapResult.insert(1,"CPU_SUBTYPE_VEO_1");
+        mapResult.insert(2,"CPU_SUBTYPE_VEO_2");
+        mapResult.insert(3,"CPU_SUBTYPE_VEO_3");
+        mapResult.insert(4,"CPU_SUBTYPE_VEO_4");
+    }
 
     return mapResult;
 }
@@ -500,6 +507,13 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
         mapResult.insert(10,"POWERPC_7400");
         mapResult.insert(11,"POWERPC_7450");
         mapResult.insert(100,"POWERPC_970");
+    }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_VEO)
+    {
+        mapResult.insert(1,"VEO_1");
+        mapResult.insert(2,"VEO_2");
+        mapResult.insert(3,"VEO_3");
+        mapResult.insert(4,"VEO_4");
     }
 
     return mapResult;
