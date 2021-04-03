@@ -22,7 +22,7 @@
 
 XCOM::XCOM(QIODevice *pDevice, bool bIsImage, qint64 nImageBase) : XBinary(pDevice,bIsImage,nImageBase)
 {
-    XBinary::setBaseAddress(XCOM_DEF::S_ADDRESS_BEGIN);
+    XBinary::setBaseAddress(XCOM_DEF::ADDRESS_BEGIN);
 }
 
 XCOM::~XCOM()
@@ -50,20 +50,20 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
     result.bIsBigEndian=isBigEndian();
     result.sType=getTypeAsString();
 
-    qint64 nCodeSize=qMin(nTotalSize,(qint64)(XCOM_DEF::S_IMAGESIZE-XCOM_DEF::S_ADDRESS_BEGIN));
+    qint64 nCodeSize=qMin(nTotalSize,(qint64)(XCOM_DEF::IMAGESIZE-XCOM_DEF::ADDRESS_BEGIN));
 
     _MEMORY_RECORD record={};
     record.nAddress=0;
     record.segment=ADDRESS_SEGMENT_FLAT;
     record.nOffset=-1;
-    record.nSize=XCOM_DEF::S_ADDRESS_BEGIN;
+    record.nSize=XCOM_DEF::ADDRESS_BEGIN;
     record.nIndex++;
     record.bIsVirtual=true;
 
     result.listRecords.append(record);
 
     _MEMORY_RECORD recordMain={};
-    recordMain.nAddress=XCOM_DEF::S_ADDRESS_BEGIN;
+    recordMain.nAddress=XCOM_DEF::ADDRESS_BEGIN;
     recordMain.segment=ADDRESS_SEGMENT_FLAT;
     recordMain.nOffset=0;
     recordMain.nSize=nCodeSize;
@@ -71,12 +71,12 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
 
     result.listRecords.append(recordMain);
 
-    qint64 nVirtualSize=(qint64)(XCOM_DEF::S_IMAGESIZE-XCOM_DEF::S_ADDRESS_BEGIN)-nTotalSize;
+    qint64 nVirtualSize=(qint64)(XCOM_DEF::IMAGESIZE-XCOM_DEF::ADDRESS_BEGIN)-nTotalSize;
 
     if(nVirtualSize>0)
     {
         _MEMORY_RECORD record={};
-        record.nAddress=XCOM_DEF::S_ADDRESS_BEGIN+nCodeSize;
+        record.nAddress=XCOM_DEF::ADDRESS_BEGIN+nCodeSize;
         record.segment=ADDRESS_SEGMENT_FLAT;
         record.nOffset=-1;
         record.nSize=nVirtualSize;
