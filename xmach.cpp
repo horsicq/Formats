@@ -253,7 +253,7 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypesS()
     return mapResult;
 }
 
-QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
+QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
 {
     QMap<quint64, QString> mapResult;
 
@@ -349,11 +349,16 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypes(quint32 nCpuType)
         mapResult.insert(0,"CPU_SUBTYPE_I860_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_I860_860");
     }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_RS6000)
+    {
+        mapResult.insert(0,"CPU_SUBTYPE_RS6000_ALL");
+        mapResult.insert(1,"CPU_SUBTYPE_RS6000");
+    }
 
     return mapResult;
 }
 
-QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
+QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
 {
     QMap<quint64, QString> mapResult;
 
@@ -448,6 +453,11 @@ QMap<quint64, QString> XMACH::getHeaderSubCpuTypesS(quint32 nCpuType)
     {
         mapResult.insert(0,"I860_ALL");
         mapResult.insert(1,"I860_860");
+    }
+    else if(nCpuType==XMACH_DEF::CPU_TYPE_RS6000)
+    {
+        mapResult.insert(0,"RS6000_ALL");
+        mapResult.insert(1,"RS6000");
     }
 
     return mapResult;

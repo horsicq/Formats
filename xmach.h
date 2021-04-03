@@ -120,8 +120,8 @@ public:
     static QMap<quint64,QString> getHeaderMagicsS();
     static QMap<quint64,QString> getHeaderCpuTypes();
     static QMap<quint64,QString> getHeaderCpuTypesS();
-    static QMap<quint64,QString> getHeaderSubCpuTypes(quint32 nCpuType);
-    static QMap<quint64,QString> getHeaderSubCpuTypesS(quint32 nCpuType);
+    static QMap<quint64,QString> getHeaderCpuSubTypes(quint32 nCpuType);
+    static QMap<quint64,QString> getHeaderCpuSubTypesS(quint32 nCpuType);
     static QMap<quint64,QString> getHeaderFileTypes();
     static QMap<quint64,QString> getHeaderFileTypesS();
     static QMap<quint64,QString> getHeaderFlags();

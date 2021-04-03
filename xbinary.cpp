@@ -561,7 +561,7 @@ qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 
     if((nMaxSize<=(_nTotalSize-nOffset))&&(nOffset>=0))
     {
-        nResult=safeReadData(g_pDevice,nOffset,pBuffer,nMaxSize);
+        nResult=safeWriteData(g_pDevice,nOffset,pBuffer,nMaxSize);
     }
 
     return nResult;
