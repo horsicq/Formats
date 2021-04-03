@@ -3062,7 +3062,7 @@ XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr>
 {
     OS_ANSISTRING result={};
 
-    QList<XELF_DEF::Elf_Phdr> listInterps=_getPrograms(pListProgramHeaders,XELF_DEF::S_PT_INTERP);
+    QList<XELF_DEF::Elf_Phdr> listInterps=_getPrograms(pListProgramHeaders,XELF_DEF::PT_INTERP);
 
     if(listInterps.count())
     {
@@ -3119,7 +3119,7 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     QList<NOTE> listResult;
 
-    QList<XELF_DEF::Elf_Phdr> listNotes=_getPrograms(pListProgramHeaders,XELF_DEF::S_PT_NOTE);
+    QList<XELF_DEF::Elf_Phdr> listNotes=_getPrograms(pListProgramHeaders,XELF_DEF::PT_NOTE);
 
     bool bIsBigEndian=isBigEndian();
 
@@ -3205,7 +3205,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProg
     bool bIs64=is64();
     bool bIsBigEndian=isBigEndian();
 
-    QList<XELF_DEF::Elf_Phdr> listTags=_getPrograms(pListProgramHeaders,XELF_DEF::S_PT_DYNAMIC);
+    QList<XELF_DEF::Elf_Phdr> listTags=_getPrograms(pListProgramHeaders,XELF_DEF::PT_DYNAMIC);
 
     int nNumberOfTags=listTags.count();
 
@@ -3375,8 +3375,8 @@ XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList
 {
     OFFSETSIZE result={};
 
-    QList<TAG_STRUCT> listStrTab=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRTAB);
-    QList<TAG_STRUCT> listStrSize=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRSZ);
+    QList<TAG_STRUCT> listStrTab=_getTagStructs(pListTagStructs,XELF_DEF::DT_STRTAB);
+    QList<TAG_STRUCT> listStrSize=_getTagStructs(pListTagStructs,XELF_DEF::DT_STRSZ);
 
     if(listStrTab.count()&&listStrSize.count())
     {
@@ -3405,7 +3405,7 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
 {
     QList<QString> listResult;
 
-    QList<TAG_STRUCT> listNeeded=_getTagStructs(pList,XELF_DEF::S_DT_NEEDED);
+    QList<TAG_STRUCT> listNeeded=_getTagStructs(pList,XELF_DEF::DT_NEEDED);
 
     OFFSETSIZE offsetSize=getStringTable(pMemoryMap,pList);
 
@@ -3447,9 +3447,9 @@ XBinary::OS_ANSISTRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<
 {
     OS_ANSISTRING result={};
 
-    QList<TAG_STRUCT> listRunPath=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_RUNPATH);
-    QList<TAG_STRUCT> listStrTab=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRTAB);
-    QList<TAG_STRUCT> listStrSize=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRSZ);
+    QList<TAG_STRUCT> listRunPath=_getTagStructs(pListTagStructs,XELF_DEF::DT_RUNPATH);
+    QList<TAG_STRUCT> listStrTab=_getTagStructs(pListTagStructs,XELF_DEF::DT_STRTAB);
+    QList<TAG_STRUCT> listStrSize=_getTagStructs(pListTagStructs,XELF_DEF::DT_STRSZ);
 
     if(listStrTab.count()&&listStrSize.count()&&listRunPath.count())
     {
@@ -3644,7 +3644,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
     result.nRawSize=getSize();
 
     QList<XELF_DEF::Elf_Phdr> listProgramHeaders=getElf_PhdrList();
-    QList<XELF_DEF::Elf_Phdr> listSegments=_getPrograms(&listProgramHeaders,XELF_DEF::S_PT_LOAD);
+    QList<XELF_DEF::Elf_Phdr> listSegments=_getPrograms(&listProgramHeaders,XELF_DEF::PT_LOAD);
 
 //    bool bIs64=is64();
     int nNumberOfSegments=listSegments.count();
@@ -4182,13 +4182,13 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 {
     QList<XBinary::DATASET> listResult;
 
-    QList<TAG_STRUCT> listStrTab=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRTAB);
-    QList<TAG_STRUCT> listStrSize=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_STRSZ);
-    QList<TAG_STRUCT> listStrNeeded=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_NEEDED);
+    QList<TAG_STRUCT> listStrTab=_getTagStructs(pListTagStructs,XELF_DEF::DT_STRTAB);
+    QList<TAG_STRUCT> listStrSize=_getTagStructs(pListTagStructs,XELF_DEF::DT_STRSZ);
+    QList<TAG_STRUCT> listStrNeeded=_getTagStructs(pListTagStructs,XELF_DEF::DT_NEEDED);
     QList<TAG_STRUCT> listRunPath=_getTagStructs(pListTagStructs,0x1d); // TODO const
-    QList<TAG_STRUCT> listSymbols=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_SYMTAB);
-    QList<TAG_STRUCT> listRelaTab=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_RELA);
-    QList<TAG_STRUCT> listRelaSize=_getTagStructs(pListTagStructs,XELF_DEF::S_DT_RELASZ);
+    QList<TAG_STRUCT> listSymbols=_getTagStructs(pListTagStructs,XELF_DEF::DT_SYMTAB);
+    QList<TAG_STRUCT> listRelaTab=_getTagStructs(pListTagStructs,XELF_DEF::DT_RELA);
+    QList<TAG_STRUCT> listRelaSize=_getTagStructs(pListTagStructs,XELF_DEF::DT_RELASZ);
     QList<TAG_STRUCT> listRelTab=_getTagStructs(pListTagStructs,17);  // TODO const
     QList<TAG_STRUCT> listRelSize=_getTagStructs(pListTagStructs,18); // TODO const
 

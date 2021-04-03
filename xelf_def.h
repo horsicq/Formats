@@ -95,23 +95,23 @@ const quint16 S_ET_NUM                      =5;
 const quint16 S_ET_LOPROC                   =0xFF00;
 const quint16 S_ET_HIPROC                   =0xFFFF;
 
-const quint32 S_DT_NULL                     =0;                     /* Marks end of dynamic section */
-const quint32 S_DT_NEEDED                   =1;                     /* Name of needed library */
-const quint32 S_DT_PLTRELSZ                 =2;                     /* Size in bytes of PLT relocs */
-const quint32 S_DT_PLTGOT                   =3;                     /* Processor defined value */
-const quint32 S_DT_HASH                     =4;                     /* Address of symbol hash table */
-const quint32 S_DT_STRTAB                   =5;                     /* Address of string table */
-const quint32 S_DT_SYMTAB                   =6;                     /* Address of symbol table */
-const quint32 S_DT_RELA                     =7;                     /* Address of Rela relocs */
-const quint32 S_DT_RELASZ                   =8;                     /* Total size of Rela relocs */
-const quint32 S_DT_RELAENT                  =9;                     /* Size of one Rela reloc */
-const quint32 S_DT_STRSZ                    =10;                    /* Size of string table */
-const quint32 S_DT_RUNPATH                  =29;                    // Run path
+const quint32 DT_NULL                       =0;                     /* Marks end of dynamic section */
+const quint32 DT_NEEDED                     =1;                     /* Name of needed library */
+const quint32 DT_PLTRELSZ                   =2;                     /* Size in bytes of PLT relocs */
+const quint32 DT_PLTGOT                     =3;                     /* Processor defined value */
+const quint32 DT_HASH                       =4;                     /* Address of symbol hash table */
+const quint32 DT_STRTAB                     =5;                     /* Address of string table */
+const quint32 DT_SYMTAB                     =6;                     /* Address of symbol table */
+const quint32 DT_RELA                       =7;                     /* Address of Rela relocs */
+const quint32 DT_RELASZ                     =8;                     /* Total size of Rela relocs */
+const quint32 DT_RELAENT                    =9;                     /* Size of one Rela reloc */
+const quint32 DT_STRSZ                      =10;                    /* Size of string table */
+const quint32 DT_RUNPATH                    =29;                    // Run path
 
-const quint32 S_PT_LOAD                     =1;
-const quint32 S_PT_DYNAMIC                  =2;
-const quint32 S_PT_INTERP                   =3;
-const quint32 S_PT_NOTE                     =4;
+const quint32 PT_LOAD                       =1;
+const quint32 PT_DYNAMIC                    =2;
+const quint32 PT_INTERP                     =3;
+const quint32 PT_NOTE                       =4;
 
 struct Elf32_Ehdr
 {
