@@ -79,7 +79,7 @@ qint64 XMACH::getHeader64Size()
 
 quint32 XMACH::getHeader_magic()
 {
-    return read_uint32(offsetof(XMACH_DEF::mach_header,magic),isBigEndian());
+    return read_uint32(offsetof(XMACH_DEF::mach_header,magic));
 }
 
 qint32 XMACH::getHeader_cputype()
@@ -119,7 +119,7 @@ quint32 XMACH::getHeader_reserved()
 
 void XMACH::setHeader_magic(quint32 nValue)
 {
-    write_uint32(offsetof(XMACH_DEF::mach_header,magic),nValue,isBigEndian());
+    write_uint32(offsetof(XMACH_DEF::mach_header,magic),nValue);
 }
 
 void XMACH::setHeader_cputype(qint32 nValue)
@@ -754,6 +754,12 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
     QList<COMMAND_RECORD> listResult;
 
     quint32 nNumberOfCommands=getHeader_ncmds();
+
+    if(nNumberOfCommands&0xFFFF0000)
+    {
+        nNumberOfCommands=0;
+    }
+
     quint32 nSizeOfCommands=getHeader_sizeofcmds();
 
     qint64 nOffset=getHeaderSize();
