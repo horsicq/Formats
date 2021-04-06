@@ -749,6 +749,27 @@ QMap<quint64, QString> XMACH::getLoadCommandTypesS()
     return mapResult;
 }
 
+XMACH::COMMAND_RECORD XMACH::_readCommand(qint64 nOffset,bool bIsBigEndian)
+{
+    COMMAND_RECORD record={};
+
+    record.nOffset=nOffset;
+    record.nType=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmd),bIsBigEndian);
+    record.nSize=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmdsize),bIsBigEndian);
+
+    return record;
+}
+
+void XMACH::setCommand_cmd(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmd),nValue,isBigEndian());
+}
+
+void XMACH::setCommand_cmdsize(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmdsize),nValue,isBigEndian());
+}
+
 QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
 {
     QList<COMMAND_RECORD> listResult;
@@ -770,11 +791,7 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords()
 
     for(quint32 i=0; i<nNumberOfCommands; i++)
     {
-        COMMAND_RECORD record={};
-
-        record.nOffset=nOffset;
-        record.nType=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmd),bIsBigEndian);
-        record.nSize=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmdsize),bIsBigEndian);
+        COMMAND_RECORD record=_readCommand(nOffset,bIsBigEndian);
 
         listResult.append(record);
 
@@ -920,6 +937,11 @@ bool XMACH::setCommand(quint32 nCommandID, QByteArray baData, int nIndex, QList<
     }
 
     return bResult;
+}
+
+qint64 XMACH::getCommandHeaderSize()
+{
+    return sizeof(XMACH_DEF::load_command);
 }
 
 qint64 XMACH::getAddressOfEntryPoint()

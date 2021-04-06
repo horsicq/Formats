@@ -31,8 +31,8 @@ class XMACH : public XBinary
 public:
     struct COMMAND_RECORD
     {
-        quint32 nType;
         qint64 nOffset;
+        quint32 nType;
         qint64 nSize;
     };
 
@@ -129,6 +129,11 @@ public:
     static QMap<quint64,QString> getLoadCommandTypes();
     static QMap<quint64,QString> getLoadCommandTypesS();
 
+    COMMAND_RECORD _readCommand(qint64 nOffset,bool bIsBigEndian);
+
+    void setCommand_cmd(qint64 nOffset,quint32 nValue);
+    void setCommand_cmdsize(qint64 nOffset,quint32 nValue);
+
     QList<COMMAND_RECORD> getCommandRecords();
     static QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID,QList<COMMAND_RECORD> *pListCommandRecords);
 
@@ -139,6 +144,8 @@ public:
     bool setCommand(quint32 nCommandID,QByteArray baData,int nIndex=0);
     QByteArray getCommand(quint32 nCommandID,int nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
     bool setCommand(quint32 nCommandID,QByteArray baData,int nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
+
+    qint64 getCommandHeaderSize();
 
     qint64 getAddressOfEntryPoint();
 
