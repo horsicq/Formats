@@ -71,6 +71,9 @@ public:
         quint32	reloff;
         quint32	nreloc;
         quint32	flags;
+        quint32	reserved1;
+        quint32	reserved2;
+        quint32	reserved3;
     };
 
     enum TYPE
@@ -164,6 +167,8 @@ public:
     QList<SECTION_RECORD> getSectionRecords();
     QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
+    qint64 getSegmentHeaderSize();
+
     quint32 getNumberOfSections();
     quint32 getNumberOfSections(QList<COMMAND_RECORD> *pListCommandRecords);
 
@@ -172,6 +177,8 @@ public:
 
     static qint32 getSectionNumber(QString sName,QList<SECTION_RECORD> *pListSectionRecords);
     qint32 getSectionNumber(QString sName);
+
+    qint64 getSectionHeaderSize();
 
     quint32 getLibraryCurrentVersion(QString sName,QList<LIBRARY_RECORD> *pListLibraryRecords);
 
