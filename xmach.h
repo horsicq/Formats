@@ -132,7 +132,7 @@ public:
     static QMap<quint64,QString> getLoadCommandTypes();
     static QMap<quint64,QString> getLoadCommandTypesS();
 
-    COMMAND_RECORD _readCommand(qint64 nOffset,bool bIsBigEndian);
+    COMMAND_RECORD _readLoadCommand(qint64 nOffset,bool bIsBigEndian);
 
     void setCommand_cmd(qint64 nOffset,quint32 nValue);
     void setCommand_cmdsize(qint64 nOffset,quint32 nValue);
@@ -164,8 +164,14 @@ public:
     QList<SEGMENT_RECORD> getSegmentRecords();
     QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
+    XMACH_DEF::segment_command _readSegment32(qint64 nOffset,bool bIsBigEndian);
+    XMACH_DEF::segment_command_64 _readSegment64(qint64 nOffset,bool bIsBigEndian);
+
     QList<SECTION_RECORD> getSectionRecords();
     QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pListCommandRecords);
+
+    XMACH_DEF::section _readSection32(qint64 nOffset,bool bIsBigEndian);
+    XMACH_DEF::section_64 _readSection64(qint64 nOffset,bool bIsBigEndian);
 
     qint64 getSegmentHeaderSize();
 
