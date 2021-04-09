@@ -193,6 +193,18 @@ public:
     XMACH_DEF::section _readSection32(qint64 nOffset,bool bIsBigEndian);
     XMACH_DEF::section_64 _readSection64(qint64 nOffset,bool bIsBigEndian);
 
+    void _setSection32_sectname(qint64 nOffset,QString sValue);
+    void _setSection32_segname(qint64 nOffset,QString sValue);
+    void _setSection32_addr(qint64 nOffset,quint32 nValue);
+    void _setSection32_size(qint64 nOffset,quint32 nValue);
+    void _setSection32_offset(qint64 nOffset,quint32 nValue);
+    void _setSection32_align(qint64 nOffset,quint32 nValue);
+    void _setSection32_reloff(qint64 nOffset,quint32 nValue);
+    void _setSection32_nreloc(qint64 nOffset,quint32 nValue);
+    void _setSection32_flags(qint64 nOffset,quint32 nValue);
+    void _setSection32_reserved1(qint64 nOffset,quint32 nValue);
+    void _setSection32_reserved2(qint64 nOffset,quint32 nValue);
+
     qint64 getSegmentHeaderSize();
 
     quint32 getNumberOfSections();

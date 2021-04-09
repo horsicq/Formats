@@ -1496,6 +1496,61 @@ XMACH_DEF::section_64 XMACH::_readSection64(qint64 nOffset, bool bIsBigEndian)
     return result;
 }
 
+void XMACH::_setSection32_sectname(qint64 nOffset, QString sValue)
+{
+    // TODO
+}
+
+void XMACH::_setSection32_segname(qint64 nOffset, QString sValue)
+{
+    // TODO
+}
+
+void XMACH::_setSection32_addr(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section,addr),nValue,isBigEndian());
+}
+
+void XMACH::_setSection32_size(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section,size),nValue,isBigEndian());
+}
+
+void XMACH::_setSection32_offset(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section,offset),nValue,isBigEndian());
+}
+
+void XMACH::_setSection32_align(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section,align),nValue,isBigEndian());
+}
+
+void XMACH::_setSection32_reloff(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section,reloff),nValue,isBigEndian());
+}
+
+void XMACH::_setSection32_nreloc(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section,nreloc),nValue,isBigEndian());
+}
+
+void XMACH::_setSection32_flags(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section,flags),nValue,isBigEndian());
+}
+
+void XMACH::_setSection32_reserved1(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section,reserved1),nValue,isBigEndian());
+}
+
+void XMACH::_setSection32_reserved2(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section,reserved2),nValue,isBigEndian());
+}
+
 qint64 XMACH::getSegmentHeaderSize()
 {
     qint64 nResult=0;
