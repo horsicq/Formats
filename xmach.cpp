@@ -760,12 +760,12 @@ XMACH::COMMAND_RECORD XMACH::_readLoadCommand(qint64 nOffset,bool bIsBigEndian)
     return record;
 }
 
-void XMACH::setCommand_cmd(qint64 nOffset, quint32 nValue)
+void XMACH::_setCommand_cmd(qint64 nOffset, quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmd),nValue,isBigEndian());
 }
 
-void XMACH::setCommand_cmdsize(qint64 nOffset, quint32 nValue)
+void XMACH::_setCommand_cmdsize(qint64 nOffset, quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmdsize),nValue,isBigEndian());
 }
@@ -1274,47 +1274,47 @@ XMACH_DEF::segment_command_64 XMACH::_readSegment64(qint64 nOffset, bool bIsBigE
     return result;
 }
 
-void XMACH::setSegment32_segname(qint64 nOffset, QString sValue)
+void XMACH::_setSegment32_segname(qint64 nOffset, QString sValue)
 {
     // TODO
 }
 
-void XMACH::setSegment32_vmaddr(qint64 nOffset, quint32 nValue)
+void XMACH::_setSegment32_vmaddr(qint64 nOffset, quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::segment_command,vmaddr),nValue,isBigEndian());
 }
 
-void XMACH::setSegment32_vmsize(qint64 nOffset, quint32 nValue)
+void XMACH::_setSegment32_vmsize(qint64 nOffset, quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::segment_command,vmsize),nValue,isBigEndian());
 }
 
-void XMACH::setSegment32_fileoff(qint64 nOffset, quint32 nValue)
+void XMACH::_setSegment32_fileoff(qint64 nOffset, quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::segment_command,fileoff),nValue,isBigEndian());
 }
 
-void XMACH::setSegment32_filesize(qint64 nOffset, quint32 nValue)
+void XMACH::_setSegment32_filesize(qint64 nOffset, quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::segment_command,filesize),nValue,isBigEndian());
 }
 
-void XMACH::setSegment32_maxprot(qint64 nOffset, qint32 nValue)
+void XMACH::_setSegment32_maxprot(qint64 nOffset, qint32 nValue)
 {
     write_int32(nOffset+offsetof(XMACH_DEF::segment_command,maxprot),nValue,isBigEndian());
 }
 
-void XMACH::setSegment32_initprot(qint64 nOffset, qint32 nValue)
+void XMACH::_setSegment32_initprot(qint64 nOffset, qint32 nValue)
 {
     write_int32(nOffset+offsetof(XMACH_DEF::segment_command,initprot),nValue,isBigEndian());
 }
 
-void XMACH::setSegment32_nsects(qint64 nOffset, quint32 nValue)
+void XMACH::_setSegment32_nsects(qint64 nOffset, quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),nValue,isBigEndian());
 }
 
-void XMACH::setSegment32_flags(qint64 nOffset, quint32 nValue)
+void XMACH::_setSegment32_flags(qint64 nOffset, quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::segment_command,flags),nValue,isBigEndian());
 }

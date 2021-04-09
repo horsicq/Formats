@@ -134,8 +134,8 @@ public:
 
     COMMAND_RECORD _readLoadCommand(qint64 nOffset,bool bIsBigEndian);
 
-    void setCommand_cmd(qint64 nOffset,quint32 nValue);
-    void setCommand_cmdsize(qint64 nOffset,quint32 nValue);
+    void _setCommand_cmd(qint64 nOffset,quint32 nValue);
+    void _setCommand_cmdsize(qint64 nOffset,quint32 nValue);
 
     QList<COMMAND_RECORD> getCommandRecords();
     static QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID,QList<COMMAND_RECORD> *pListCommandRecords);
@@ -167,15 +167,15 @@ public:
     XMACH_DEF::segment_command _readSegment32(qint64 nOffset,bool bIsBigEndian);
     XMACH_DEF::segment_command_64 _readSegment64(qint64 nOffset,bool bIsBigEndian);
 
-    void setSegment32_segname(qint64 nOffset,QString sValue);
-    void setSegment32_vmaddr(qint64 nOffset,quint32 nValue);
-    void setSegment32_vmsize(qint64 nOffset,quint32 nValue);
-    void setSegment32_fileoff(qint64 nOffset,quint32 nValue);
-    void setSegment32_filesize(qint64 nOffset,quint32 nValue);
-    void setSegment32_maxprot(qint64 nOffset,qint32 nValue);
-    void setSegment32_initprot(qint64 nOffset,qint32 nValue);
-    void setSegment32_nsects(qint64 nOffset,quint32 nValue);
-    void setSegment32_flags(qint64 nOffset,quint32 nValue);
+    void _setSegment32_segname(qint64 nOffset,QString sValue);
+    void _setSegment32_vmaddr(qint64 nOffset,quint32 nValue);
+    void _setSegment32_vmsize(qint64 nOffset,quint32 nValue);
+    void _setSegment32_fileoff(qint64 nOffset,quint32 nValue);
+    void _setSegment32_filesize(qint64 nOffset,quint32 nValue);
+    void _setSegment32_maxprot(qint64 nOffset,qint32 nValue);
+    void _setSegment32_initprot(qint64 nOffset,qint32 nValue);
+    void _setSegment32_nsects(qint64 nOffset,quint32 nValue);
+    void _setSegment32_flags(qint64 nOffset,quint32 nValue);
 
     QList<SECTION_RECORD> getSectionRecords();
     QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pListCommandRecords);
