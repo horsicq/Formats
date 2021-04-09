@@ -177,6 +177,16 @@ public:
     void _setSegment32_nsects(qint64 nOffset,quint32 nValue);
     void _setSegment32_flags(qint64 nOffset,quint32 nValue);
 
+    void _setSegment64_segname(qint64 nOffset,QString sValue);
+    void _setSegment64_vmaddr(qint64 nOffset,quint64 nValue);
+    void _setSegment64_vmsize(qint64 nOffset,quint64 nValue);
+    void _setSegment64_fileoff(qint64 nOffset,quint64 nValue);
+    void _setSegment64_filesize(qint64 nOffset,quint64 nValue);
+    void _setSegment64_maxprot(qint64 nOffset,qint32 nValue);
+    void _setSegment64_initprot(qint64 nOffset,qint32 nValue);
+    void _setSegment64_nsects(qint64 nOffset,quint32 nValue);
+    void _setSegment64_flags(qint64 nOffset,quint32 nValue);
+
     QList<SECTION_RECORD> getSectionRecords();
     QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
