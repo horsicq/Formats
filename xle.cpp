@@ -39,7 +39,7 @@ bool XLE::isValid()
         {
             quint16 signature=read_uint16(lfanew);
 
-            if((signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE)||(signature==XLE_DEF::S_IMAGE_LX_SIGNATURE))
+            if((signature==XLE_DEF::IMAGE_VXD_SIGNATURE)||(signature==XLE_DEF::IMAGE_LX_SIGNATURE))
             {
                 bResult=true;
             }
@@ -1328,11 +1328,11 @@ XBinary::MODE XLE::getMode()
     qint32 lfanew=get_lfanew();
     quint16 signature=read_uint16(lfanew);
 
-    if(signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE)
+    if(signature==XLE_DEF::IMAGE_VXD_SIGNATURE)
     {
         result=MODE_16SEG;
     }
-    else if(signature==XLE_DEF::S_IMAGE_LX_SIGNATURE)
+    else if(signature==XLE_DEF::IMAGE_LX_SIGNATURE)
     {
         result=MODE_32;
     }
