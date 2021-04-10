@@ -25,11 +25,11 @@
 
 namespace XNE_DEF
 {
-const quint16 S_IMAGE_OS2_SIGNATURE     =0x454E;      // NE
+const quint16 IMAGE_OS2_SIGNATURE       =0x454E;      // NE
 
-const quint16 S_FLAG_8086               =0x0010;
-const quint16 S_FLAG_80286              =0x0020;
-const quint16 S_FLAG_80386              =0x0040;
+const quint16 FLAG_8086                 =0x0010;
+const quint16 FLAG_80286                =0x0020;
+const quint16 FLAG_80386                =0x0040;
 
 struct IMAGE_OS2_HEADER                 // OS/2 .EXE header
 {

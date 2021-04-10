@@ -3435,7 +3435,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                         stResult.insert(FT_PE32);
                     }
                 }
-                else if((((XNE_DEF::IMAGE_OS2_HEADER *)pOffset))->ne_magic==XNE_DEF::S_IMAGE_OS2_SIGNATURE)
+                else if((((XNE_DEF::IMAGE_OS2_HEADER *)pOffset))->ne_magic==XNE_DEF::IMAGE_OS2_SIGNATURE)
                 {
                     stResult.insert(FT_NE);
                 }
