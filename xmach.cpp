@@ -1551,6 +1551,66 @@ void XMACH::_setSection32_reserved2(qint64 nOffset, quint32 nValue)
     write_uint32(nOffset+offsetof(XMACH_DEF::section,reserved2),nValue,isBigEndian());
 }
 
+void XMACH::_setSection64_sectname(qint64 nOffset, QString sValue)
+{
+    // TODO
+}
+
+void XMACH::_setSection64_segname(qint64 nOffset, QString sValue)
+{
+    // TODO
+}
+
+void XMACH::_setSection64_addr(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::section_64,addr),nValue,isBigEndian());
+}
+
+void XMACH::_setSection64_size(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::section_64,size),nValue,isBigEndian());
+}
+
+void XMACH::_setSection64_offset(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section_64,offset),nValue,isBigEndian());
+}
+
+void XMACH::_setSection64_align(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section_64,align),nValue,isBigEndian());
+}
+
+void XMACH::_setSection64_reloff(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section_64,reloff),nValue,isBigEndian());
+}
+
+void XMACH::_setSection64_nreloc(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section_64,nreloc),nValue,isBigEndian());
+}
+
+void XMACH::_setSection64_flags(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section_64,flags),nValue,isBigEndian());
+}
+
+void XMACH::_setSection64_reserved1(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section_64,reserved1),nValue,isBigEndian());
+}
+
+void XMACH::_setSection64_reserved2(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section_64,reserved2),nValue,isBigEndian());
+}
+
+void XMACH::_setSection64_reserved3(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::section_64,reserved3),nValue,isBigEndian());
+}
+
 qint64 XMACH::getSegmentHeaderSize()
 {
     qint64 nResult=0;

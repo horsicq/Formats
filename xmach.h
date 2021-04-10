@@ -205,6 +205,19 @@ public:
     void _setSection32_reserved1(qint64 nOffset,quint32 nValue);
     void _setSection32_reserved2(qint64 nOffset,quint32 nValue);
 
+    void _setSection64_sectname(qint64 nOffset,QString sValue);
+    void _setSection64_segname(qint64 nOffset,QString sValue);
+    void _setSection64_addr(qint64 nOffset,quint64 nValue);
+    void _setSection64_size(qint64 nOffset,quint64 nValue);
+    void _setSection64_offset(qint64 nOffset,quint32 nValue);
+    void _setSection64_align(qint64 nOffset,quint32 nValue);
+    void _setSection64_reloff(qint64 nOffset,quint32 nValue);
+    void _setSection64_nreloc(qint64 nOffset,quint32 nValue);
+    void _setSection64_flags(qint64 nOffset,quint32 nValue);
+    void _setSection64_reserved1(qint64 nOffset,quint32 nValue);
+    void _setSection64_reserved2(qint64 nOffset,quint32 nValue);
+    void _setSection64_reserved3(qint64 nOffset,quint32 nValue);
+
     qint64 getSegmentHeaderSize();
 
     quint32 getNumberOfSections();
