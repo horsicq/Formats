@@ -1276,7 +1276,7 @@ XMACH_DEF::segment_command_64 XMACH::_readSegment64(qint64 nOffset, bool bIsBigE
 
 void XMACH::_setSegment32_segname(qint64 nOffset, QString sValue)
 {
-    // TODO
+    write_ansiStringFix(nOffset+offsetof(XMACH_DEF::segment_command,segname),16,sValue);
 }
 
 void XMACH::_setSegment32_vmaddr(qint64 nOffset, quint32 nValue)
@@ -1321,7 +1321,7 @@ void XMACH::_setSegment32_flags(qint64 nOffset, quint32 nValue)
 
 void XMACH::_setSegment64_segname(qint64 nOffset, QString sValue)
 {
-    // TODO
+    write_ansiStringFix(nOffset+offsetof(XMACH_DEF::segment_command_64,segname),16,sValue);
 }
 
 void XMACH::_setSegment64_vmaddr(qint64 nOffset, quint64 nValue)
@@ -1498,12 +1498,12 @@ XMACH_DEF::section_64 XMACH::_readSection64(qint64 nOffset, bool bIsBigEndian)
 
 void XMACH::_setSection32_sectname(qint64 nOffset, QString sValue)
 {
-    // TODO
+    write_ansiStringFix(nOffset+offsetof(XMACH_DEF::section,sectname),16,sValue);
 }
 
 void XMACH::_setSection32_segname(qint64 nOffset, QString sValue)
 {
-    // TODO
+    write_ansiStringFix(nOffset+offsetof(XMACH_DEF::section,segname),16,sValue);
 }
 
 void XMACH::_setSection32_addr(qint64 nOffset, quint32 nValue)
@@ -1553,12 +1553,12 @@ void XMACH::_setSection32_reserved2(qint64 nOffset, quint32 nValue)
 
 void XMACH::_setSection64_sectname(qint64 nOffset, QString sValue)
 {
-    // TODO
+    write_ansiStringFix(nOffset+offsetof(XMACH_DEF::section_64,sectname),16,sValue);
 }
 
 void XMACH::_setSection64_segname(qint64 nOffset, QString sValue)
 {
-    // TODO
+    write_ansiStringFix(nOffset+offsetof(XMACH_DEF::section_64,segname),16,sValue);
 }
 
 void XMACH::_setSection64_addr(qint64 nOffset, quint64 nValue)

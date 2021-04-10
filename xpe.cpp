@@ -1358,15 +1358,9 @@ void XPE::setSection_NameAsString(quint32 nNumber, QString sName)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
-    char cBuffer[9]={0};
-
-    sName.resize(8);
-
-    strcpy(cBuffer,sName.toLatin1().data());
-
     if(nNumber<nNumberOfSections)
     {
-        XBinary::write_array(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,Name),cBuffer,8);
+        write_ansiStringFix(getSectionsTableOffset()+nNumber*sizeof(XPE_DEF::IMAGE_SECTION_HEADER)+offsetof(XPE_DEF::IMAGE_SECTION_HEADER,Name),8,sName);
     }
 }
 
@@ -2744,7 +2738,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                 pIID->OriginalFirstThunk=pOIAT-pDataOffset;
                 listPatches.append((char *)pIID-pDataOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,OriginalFirstThunk));
 
-                strcpy(pAnsiData,pListImportHeaders->at(i).sName.toLatin1().data());
+                std::strcpy(pAnsiData,pListImportHeaders->at(i).sName.toLatin1().data()); // TODO replace to strcpy_s
                 pAnsiData+=pListImportHeaders->at(i).sName.length()+3;
 
                 int nNumberOfPositions=pListImportHeaders->at(i).listPositions.count();
@@ -2762,7 +2756,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                         *((quint16 *)pAnsiData)=pListImportHeaders->at(i).listPositions.at(j).nHint;
                         pAnsiData+=2;
 
-                        strcpy(pAnsiData,pListImportHeaders->at(i).listPositions.at(j).sName.toLatin1().data());
+                        std::strcpy(pAnsiData,pListImportHeaders->at(i).listPositions.at(j).sName.toLatin1().data()); // TODO replace to strcpy_s
 
                         pAnsiData+=pListImportHeaders->at(i).listPositions.at(j).sName.length()+1;
                     }

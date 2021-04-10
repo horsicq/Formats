@@ -399,6 +399,7 @@ public:
     quint32 read_uint24(qint64 nOffset,bool bIsBigEndian=false); // Uses UPX in header
 
     qint64 write_ansiString(qint64 nOffset,QString sString);
+    void write_ansiStringFix(qint64 nOffset,qint64 nSize,QString sString);
     // TODO write unicodestring
 
     QString read_ansiString(qint64 nOffset,qint64 nMaxSize=256);
