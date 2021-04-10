@@ -959,20 +959,20 @@ qint64 XMACH::getAddressOfEntryPoint()
         quint32 nType=listCommandRecords.at(i).nType;
         qint64 nOffset=listCommandRecords.at(i).nOffset;
 
-        if((nType==XMACH_DEF::S_LC_THREAD)||(nType==XMACH_DEF::S_LC_UNIXTHREAD))
+        if((nType==XMACH_DEF::LC_THREAD)||(nType==XMACH_DEF::LC_UNIXTHREAD))
         {
             quint32 nFlavor=read_uint32(nOffset+8,bIsBigEndian);
 
-            if(nFlavor==XMACH_DEF::S_x86_THREAD_STATE32)
+            if(nFlavor==XMACH_DEF::x86_THREAD_STATE32)
             {
                 nResult=read_uint32(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE32,eip),bIsBigEndian);
             }
-            else if(nFlavor==XMACH_DEF::S_x86_THREAD_STATE64)
+            else if(nFlavor==XMACH_DEF::x86_THREAD_STATE64)
             {
                 nResult=read_uint64(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE64,rip),bIsBigEndian);
             }
         }
-        else if(nType==XMACH_DEF::S_LC_MAIN)
+        else if(nType==XMACH_DEF::LC_MAIN)
         {
             qint64 nEntryPointOffset=read_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),bIsBigEndian);
 
@@ -1102,7 +1102,7 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECOR
 
     bool bIsBigEndian=isBigEndian();
 
-    QList<COMMAND_RECORD> listLibraryCommandRecords=getCommandRecords(XMACH_DEF::S_LC_LOAD_DYLIB,pListCommandRecords);
+    QList<COMMAND_RECORD> listLibraryCommandRecords=getCommandRecords(XMACH_DEF::LC_LOAD_DYLIB,pListCommandRecords);
 
     int nNumberOfCommands=listLibraryCommandRecords.count();
 
@@ -1186,7 +1186,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT_64,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1212,7 +1212,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1380,7 +1380,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT_64,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1418,7 +1418,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1645,7 +1645,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pListCommandRec
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT_64,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1659,7 +1659,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pListCommandRec
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1786,35 +1786,35 @@ int XMACH::getType()
 
     quint32 nFileType=getHeader_filetype();
 
-    if(nFileType==XMACH_DEF::S_MH_OBJECT)
+    if(nFileType==XMACH_DEF::MH_OBJECT)
     {
         nResult=TYPE_OBJECT;
     }
-    else if(nFileType==XMACH_DEF::S_MH_EXECUTE)
+    else if(nFileType==XMACH_DEF::MH_EXECUTE)
     {
         nResult=TYPE_EXECUTE;
     }
-    else if(nFileType==XMACH_DEF::S_MH_FVMLIB)
+    else if(nFileType==XMACH_DEF::MH_FVMLIB)
     {
         nResult=TYPE_FVMLIB;
     }
-    else if(nFileType==XMACH_DEF::S_MH_CORE)
+    else if(nFileType==XMACH_DEF::MH_CORE)
     {
         nResult=TYPE_CORE;
     }
-    else if(nFileType==XMACH_DEF::S_MH_PRELOAD)
+    else if(nFileType==XMACH_DEF::MH_PRELOAD)
     {
         nResult=TYPE_PRELOAD;
     }
-    else if(nFileType==XMACH_DEF::S_MH_DYLIB)
+    else if(nFileType==XMACH_DEF::MH_DYLIB)
     {
         nResult=TYPE_DYLIB;
     }
-    else if(nFileType==XMACH_DEF::S_MH_DYLINKER)
+    else if(nFileType==XMACH_DEF::MH_DYLINKER)
     {
         nResult=TYPE_DYLINKER;
     }
-    else if(nFileType==XMACH_DEF::S_MH_BUNDLE)
+    else if(nFileType==XMACH_DEF::MH_BUNDLE)
     {
         nResult=TYPE_BUNDLE;
     }
