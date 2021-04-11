@@ -32,11 +32,11 @@ bool XELF::isValid()
 {
     bool bResult=false;
 
-    if(getIdent_Magic()==XELF_DEF::S_ELFMAG)
+    if(getIdent_Magic()== XELF_DEF::ELFMAG)
     {
         quint8 nClass=getIdent_class();
 
-        if((nClass==XELF_DEF::S_ELFCLASS32)||(nClass==XELF_DEF::S_ELFCLASS64))
+        if((nClass== XELF_DEF::ELFCLASS32)||(nClass== XELF_DEF::ELFCLASS64))
         {
             bResult=true;
         }
@@ -47,7 +47,7 @@ bool XELF::isValid()
 
 bool XELF::isBigEndian()
 {
-    return getIdent_data()==XELF_DEF::S_ELFDATA2MSB;
+    return getIdent_data()== XELF_DEF::ELFDATA2MSB;
 }
 
 qint64 XELF::getEhdrOffset()
@@ -67,12 +67,12 @@ qint64 XELF::getEhdr64Size()
 
 quint32 XELF::getIdent_Magic()
 {
-    return read_uint32((quint64)XELF_DEF::S_EI_MAG0);
+    return read_uint32((quint64) XELF_DEF::EI_MAG0);
 }
 
 void XELF::setIdent_Magic(quint32 nValue)
 {
-    write_uint32((quint64)XELF_DEF::S_EI_MAG0,nValue);
+    write_uint32((quint64) XELF_DEF::EI_MAG0,nValue);
 }
 
 quint8 XELF::getIdent_mag(int nMag)
@@ -107,52 +107,52 @@ void XELF::setIdent_mag_LE(quint32 nValue)
 
 quint8 XELF::getIdent_class()
 {
-    return read_uint8(XELF_DEF::S_EI_CLASS);
+    return read_uint8( XELF_DEF::EI_CLASS);
 }
 
 void XELF::setIdent_class(quint8 nValue)
 {
-    write_uint8(XELF_DEF::S_EI_CLASS,nValue);
+    write_uint8( XELF_DEF::EI_CLASS,nValue);
 }
 
 quint8 XELF::getIdent_data()
 {
-    return read_uint8(XELF_DEF::S_EI_DATA);
+    return read_uint8( XELF_DEF::EI_DATA);
 }
 
 void XELF::setIdent_data(quint8 nValue)
 {
-    write_uint8(XELF_DEF::S_EI_DATA,nValue);
+    write_uint8( XELF_DEF::EI_DATA,nValue);
 }
 
 quint8 XELF::getIdent_version()
 {
-    return read_uint8(XELF_DEF::S_EI_VERSION);
+    return read_uint8( XELF_DEF::EI_VERSION);
 }
 
 void XELF::setIdent_version(quint8 nValue)
 {
-    write_uint8(XELF_DEF::S_EI_VERSION,nValue);
+    write_uint8( XELF_DEF::EI_VERSION,nValue);
 }
 
 quint8 XELF::getIdent_osabi()
 {
-    return read_uint8(XELF_DEF::S_EI_OSABI);
+    return read_uint8( XELF_DEF::EI_OSABI);
 }
 
 void XELF::setIdent_osabi(quint8 nValue)
 {
-    write_uint8(XELF_DEF::S_EI_OSABI,nValue);
+    write_uint8( XELF_DEF::EI_OSABI,nValue);
 }
 
 quint8 XELF::getIdent_abiversion()
 {
-    return read_uint8(XELF_DEF::S_EI_ABIVERSION);
+    return read_uint8( XELF_DEF::EI_ABIVERSION);
 }
 
 void XELF::setIdent_abiversion(quint8 nValue)
 {
-    write_uint8(XELF_DEF::S_EI_ABIVERSION,nValue);
+    write_uint8( XELF_DEF::EI_ABIVERSION,nValue);
 }
 
 quint8 XELF::getIdent_pad(int nPad)
@@ -161,7 +161,7 @@ quint8 XELF::getIdent_pad(int nPad)
 
     if(nPad<7)
     {
-        nValue=read_uint8(XELF_DEF::S_EI_ABIVERSION+1+nPad);
+        nValue=read_uint8( XELF_DEF::EI_ABIVERSION+1+nPad);
     }
 
     return nValue;
@@ -171,7 +171,7 @@ void XELF::setIdent_pad(quint8 nValue, int nPad)
 {
     if(nPad<7)
     {
-        write_uint8(XELF_DEF::S_EI_ABIVERSION+1+nPad,nValue);
+        write_uint8( XELF_DEF::EI_ABIVERSION+1+nPad,nValue);
     }
 }
 
@@ -1192,7 +1192,7 @@ QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
 {
     QMap<quint32, QString> mapResult;
 
-    if(nSection!=XELF_DEF::S_SHN_UNDEF)
+    if(nSection!= XELF_DEF::SHN_UNDEF)
     {
         QByteArray baSection=getSection(nSection);
 
@@ -3882,11 +3882,11 @@ XBinary::MODE XELF::getMode()
 
     quint8 ident=getIdent_class();
 
-    if(ident==XELF_DEF::S_ELFCLASS32)
+    if(ident== XELF_DEF::ELFCLASS32)
     {
         result=MODE_32;
     }
-    else if(ident==XELF_DEF::S_ELFCLASS64)
+    else if(ident== XELF_DEF::ELFCLASS64)
     {
         result=MODE_64;
     }
@@ -3914,23 +3914,23 @@ int XELF::getType()
         nType=getHdr32_type();
     }
 
-    if(nType==XELF_DEF::S_ET_REL)
+    if(nType== XELF_DEF::ET_REL)
     {
         nResult=TYPE_REL;
     }
-    else if(nType==XELF_DEF::S_ET_EXEC)
+    else if(nType== XELF_DEF::ET_EXEC)
     {
         nResult=TYPE_EXEC;
     }
-    else if(nType=XELF_DEF::S_ET_DYN)
+    else if(nType= XELF_DEF::ET_DYN)
     {
         nResult=TYPE_DYN;
     }
-    else if(nType==XELF_DEF::S_ET_CORE)
+    else if(nType== XELF_DEF::ET_CORE)
     {
         nResult=TYPE_CORE;
     }
-    else if(nType==XELF_DEF::S_ET_NUM)
+    else if(nType== XELF_DEF::ET_NUM)
     {
         nResult=TYPE_NUM;
     }
