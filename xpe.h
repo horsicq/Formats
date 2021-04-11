@@ -192,7 +192,7 @@ public:
     struct RESOURCE_VERSION
     {
         qint64 nFixedFileInfoOffset;
-        XPE_DEF::S_tagVS_FIXEDFILEINFO fileInfo;
+        XPE_DEF::tagVS_FIXEDFILEINFO fileInfo;
         QList<QString> listRecords; // TODO rename
         // TODO VarFileInfo
     };
@@ -273,7 +273,7 @@ public:
 
     struct BOUND_IMPORT_POSITION
     {
-        XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR descriptor;
+        XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR descriptor;
         QString sName;
     };
 
@@ -312,8 +312,8 @@ public:
     qint64 getFileHeaderOffset();
     qint64 getFileHeaderSize();
 
-    XPE_DEF::S_IMAGE_FILE_HEADER getFileHeader();
-    void setFileHeader(XPE_DEF::S_IMAGE_FILE_HEADER *pFileHeader);
+    XPE_DEF::IMAGE_FILE_HEADER getFileHeader();
+    void setFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pFileHeader);
 
     quint16 getFileHeader_Machine();
     quint16 getFileHeader_NumberOfSections();
@@ -987,7 +987,7 @@ public:
     QList<BOUND_IMPORT_POSITION> getBoundImportPositions();
     QList<BOUND_IMPORT_POSITION> getBoundImportPositions(XBinary::_MEMORY_MAP *pMemoryMap);
 
-    XPE_DEF::S_IMAGE_BOUND_IMPORT_DESCRIPTOR _read_IMAGE_BOUND_IMPORT_DESCRIPTOR(qint64 nOffset);
+    XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR _read_IMAGE_BOUND_IMPORT_DESCRIPTOR(qint64 nOffset);
 
     qint64 getBoundImportRecordOffset(qint32 nNumber);
     qint64 getBoundImportRecordSize();

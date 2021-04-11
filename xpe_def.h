@@ -156,7 +156,7 @@ const quint32 S_IMAGE_DEBUG_TYPE_CLSID                      =11;
 const quint32 S_IMAGE_DEBUG_TYPE_REPRO                      =16;
 const quint32 S_IMAGE_DEBUG_TYPE_EX_DLLCHARACTERISTICS      =20;
 
-struct S_IMAGE_FILE_HEADER
+struct IMAGE_FILE_HEADER
 {
     quint16 Machine;
     quint16 NumberOfSections;
@@ -320,14 +320,14 @@ struct IMAGE_OPTIONAL_HEADER64S
 struct IMAGE_NT_HEADERS64
 {
     quint32 Signature;
-    S_IMAGE_FILE_HEADER FileHeader;
+    IMAGE_FILE_HEADER FileHeader;
     IMAGE_OPTIONAL_HEADER64 OptionalHeader;
 };
 
 struct IMAGE_NT_HEADERS32
 {
     quint32 Signature;
-    S_IMAGE_FILE_HEADER FileHeader;
+    IMAGE_FILE_HEADER FileHeader;
     IMAGE_OPTIONAL_HEADER32 OptionalHeader;
 };
 
@@ -545,7 +545,7 @@ struct S_VS_VERSION_INFO
     quint16 wType;
 };
 
-struct S_tagVS_FIXEDFILEINFO
+struct tagVS_FIXEDFILEINFO
 {
     quint32 dwSignature;        // e.g.  0xfeef04bd
     quint32 dwStrucVersion;     // e.g.  0x00000042 = "0.42"
@@ -747,7 +747,7 @@ struct S_IMAGE_DELAYLOAD_DESCRIPTOR
                                               // Otherwise, date/time of the target DLL
 };
 
-struct S_IMAGE_BOUND_IMPORT_DESCRIPTOR
+struct IMAGE_BOUND_IMPORT_DESCRIPTOR
 {
     quint32 TimeDateStamp;
     quint16 OffsetModuleName;
