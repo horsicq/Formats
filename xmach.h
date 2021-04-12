@@ -31,18 +31,22 @@ class XMACH : public XBinary
 public:
     struct COMMAND_RECORD
     {
-        qint64 nOffset;
+        qint64 nStructOffset;
         quint32 nType;
         qint64 nSize;
     };
 
     struct LIBRARY_RECORD
     {
+        qint64 nStructOffset;
+        qint64 nStructSize;
         QString sName;
         QString sFullName;
+        quint32 name;
         quint32 timestamp;
         quint32 current_version;
         quint32 compatibility_version;
+        qint64 nMaxStringSize;
     };
 
     struct SEGMENT_RECORD
@@ -155,11 +159,18 @@ public:
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
-    QList<LIBRARY_RECORD> getLibraryRecords();
-    QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords);
+    QList<LIBRARY_RECORD> getLibraryRecords(int nType=XMACH_DEF::LC_LOAD_DYLIB);
+    QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords,int nType=XMACH_DEF::LC_LOAD_DYLIB);
     static LIBRARY_RECORD getLibraryRecordByName(QString sName,QList<LIBRARY_RECORD> *pListLibraryRecords);
     bool isLibraryRecordNamePresent(QString sName);
     static bool isLibraryRecordNamePresent(QString sName,QList<LIBRARY_RECORD> *pListLibraryRecords);
+
+    LIBRARY_RECORD _readLibraryRecord(qint64 nOffset,bool bIsBigEndian);
+
+    void _setLibraryRecord_timestamp(qint64 nOffset,quint32 nValue);
+    void _setLibraryRecord_current_version(qint64 nOffset,quint32 nValue);
+    void _setLibraryRecord_compatibility_version(qint64 nOffset,quint32 nValue);
+    void _setLibraryRecord_name(qint64 nOffset,QString sValue);
 
     QList<SEGMENT_RECORD> getSegmentRecords();
     QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pListCommandRecords);

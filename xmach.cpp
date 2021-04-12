@@ -751,13 +751,13 @@ QMap<quint64, QString> XMACH::getLoadCommandTypesS()
 
 XMACH::COMMAND_RECORD XMACH::_readLoadCommand(qint64 nOffset,bool bIsBigEndian)
 {
-    COMMAND_RECORD record={};
+    COMMAND_RECORD result={};
 
-    record.nOffset=nOffset;
-    record.nType=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmd),bIsBigEndian);
-    record.nSize=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmdsize),bIsBigEndian);
+    result.nStructOffset=nOffset;
+    result.nType=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmd),bIsBigEndian);
+    result.nSize=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmdsize),bIsBigEndian);
 
-    return record;
+    return result;
 }
 
 void XMACH::_setCommand_cmd(qint64 nOffset, quint32 nValue)
@@ -896,7 +896,7 @@ QByteArray XMACH::getCommand(quint32 nCommandID, int nIndex, QList<XMACH::COMMAN
         {
             if(nCurrentIndex==nIndex)
             {
-                baResult=read_array(pListCommandRecords->at(i).nOffset,pListCommandRecords->at(i).nSize);
+                baResult=read_array(pListCommandRecords->at(i).nStructOffset,pListCommandRecords->at(i).nSize);
 
                 break;
             }
@@ -926,7 +926,7 @@ bool XMACH::setCommand(quint32 nCommandID, QByteArray baData, int nIndex, QList<
             {
                 if(nSize==pListCommandRecords->at(i).nSize)
                 {
-                    bResult=(write_array(pListCommandRecords->at(i).nOffset,baData.data(),pListCommandRecords->at(i).nSize)==nSize);
+                    bResult=(write_array(pListCommandRecords->at(i).nStructOffset,baData.data(),pListCommandRecords->at(i).nSize)==nSize);
                 }
 
                 break;
@@ -957,7 +957,7 @@ qint64 XMACH::getAddressOfEntryPoint()
     for(int i=0;i<nNumberOfCommands;i++)
     {
         quint32 nType=listCommandRecords.at(i).nType;
-        qint64 nOffset=listCommandRecords.at(i).nOffset;
+        qint64 nOffset=listCommandRecords.at(i).nStructOffset;
 
         if((nType==XMACH_DEF::LC_THREAD)||(nType==XMACH_DEF::LC_UNIXTHREAD))
         {
@@ -1089,35 +1089,26 @@ qint64 XMACH::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords()
+QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(int nType)
 {
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
 
-    return getLibraryRecords(&listCommandRecords);
+    return getLibraryRecords(&listCommandRecords,nType);
 }
 
-QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords,int nType)
 {
     QList<LIBRARY_RECORD> listResult;
 
     bool bIsBigEndian=isBigEndian();
 
-    QList<COMMAND_RECORD> listLibraryCommandRecords=getCommandRecords(XMACH_DEF::LC_LOAD_DYLIB,pListCommandRecords);
+    QList<COMMAND_RECORD> listLibraryCommandRecords=getCommandRecords(nType,pListCommandRecords);
 
     int nNumberOfCommands=listLibraryCommandRecords.count();
 
     for(int i=0;i<nNumberOfCommands;i++)
     {
-        LIBRARY_RECORD record={};
-
-        qint64 nOffset=listLibraryCommandRecords.at(i).nOffset;
-
-        qint64 nNameOffset=read_uint32(nOffset+8+offsetof(XMACH_DEF::dylib,name),bIsBigEndian);
-        record.sFullName=read_ansiString(nOffset+nNameOffset);
-        record.sName=record.sFullName.section("/",-1,-1);
-        record.timestamp=read_uint32(nOffset+8+offsetof(XMACH_DEF::dylib,timestamp),bIsBigEndian);
-        record.current_version=read_uint32(nOffset+8+offsetof(XMACH_DEF::dylib,current_version),bIsBigEndian);
-        record.compatibility_version=read_uint32(nOffset+8+offsetof(XMACH_DEF::dylib,compatibility_version),bIsBigEndian);
+        LIBRARY_RECORD record=_readLibraryRecord(listLibraryCommandRecords.at(i).nStructOffset,bIsBigEndian);
 
         listResult.append(record);
     }
@@ -1170,6 +1161,55 @@ bool XMACH::isLibraryRecordNamePresent(QString sName, QList<XMACH::LIBRARY_RECOR
     return bResult;
 }
 
+XMACH::LIBRARY_RECORD XMACH::_readLibraryRecord(qint64 nOffset, bool bIsBigEndian)
+{
+    LIBRARY_RECORD result={};
+
+    result.name=read_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::dylib,name),bIsBigEndian);
+
+    result.nStructOffset=nOffset;
+    result.nStructSize=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmdsize),bIsBigEndian);
+    result.sFullName=read_ansiString(nOffset+result.name);
+    result.sName=result.sFullName.section("/",-1,-1);
+    result.timestamp=read_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::dylib,timestamp),bIsBigEndian);
+    result.current_version=read_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::dylib,current_version),bIsBigEndian);
+    result.compatibility_version=read_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::dylib,compatibility_version),bIsBigEndian);
+    result.nMaxStringSize=result.nStructSize-sizeof(XMACH_DEF::dylib_command)-2;
+
+    if(result.nMaxStringSize<result.sFullName.size())
+    {
+        result.nMaxStringSize=0;
+    }
+
+    return result;
+}
+
+void XMACH::_setLibraryRecord_timestamp(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::dylib,timestamp),nValue,isBigEndian());
+}
+
+void XMACH::_setLibraryRecord_current_version(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::dylib,current_version),nValue,isBigEndian());
+}
+
+void XMACH::_setLibraryRecord_compatibility_version(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::dylib,compatibility_version),nValue,isBigEndian());
+}
+
+void XMACH::_setLibraryRecord_name(qint64 nOffset, QString sValue)
+{
+    bool bIsBigEndian=isBigEndian();
+    LIBRARY_RECORD libraryRecord=_readLibraryRecord(nOffset,bIsBigEndian);
+
+    if(libraryRecord.name==sizeof(XMACH_DEF::dylib_command))
+    {
+        write_ansiStringFix(nOffset+sizeof(XMACH_DEF::dylib_command),libraryRecord.nStructSize-libraryRecord.name-2,sValue);
+    }
+}
+
 QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords()
 {
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
@@ -1192,7 +1232,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
         for(int i=0;i<nNumberOfSegments;i++)
         {
-            qint64 nOffset=listLCSegments.at(i).nOffset;
+            qint64 nOffset=listLCSegments.at(i).nStructOffset;
 
             SEGMENT_RECORD record={};
 
@@ -1218,7 +1258,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
         for(int i=0;i<nNumberOfSegments;i++)
         {
-            qint64 nOffset=listLCSegments.at(i).nOffset;
+            qint64 nOffset=listLCSegments.at(i).nStructOffset;
 
             SEGMENT_RECORD record={};
 
@@ -1386,7 +1426,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
         for(int i=0;i<nNumberOfSegments;i++)
         {
-            qint64 nOffset=listLCSegments.at(i).nOffset;
+            qint64 nOffset=listLCSegments.at(i).nStructOffset;
             int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,nsects),bIsBigEndian);
 
             nOffset+=sizeof(XMACH_DEF::segment_command_64);
@@ -1424,7 +1464,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
         for(int i=0;i<nNumberOfSegments;i++)
         {
-            qint64 nOffset=listLCSegments.at(i).nOffset;
+            qint64 nOffset=listLCSegments.at(i).nStructOffset;
             int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),bIsBigEndian);
 
             nOffset+=sizeof(XMACH_DEF::segment_command);
@@ -1651,7 +1691,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pListCommandRec
 
         for(int i=0;i<nNumberOfSegments;i++)
         {
-            qint64 nOffset=listLCSegments.at(i).nOffset;
+            qint64 nOffset=listLCSegments.at(i).nStructOffset;
             int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,nsects),bIsBigEndian);
 
             nResult+=nNumberOfSections;
@@ -1665,7 +1705,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pListCommandRec
 
         for(int i=0;i<nNumberOfSegments;i++)
         {
-            qint64 nOffset=listLCSegments.at(i).nOffset;
+            qint64 nOffset=listLCSegments.at(i).nStructOffset;
             int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),bIsBigEndian);
 
             nResult+=nNumberOfSections;

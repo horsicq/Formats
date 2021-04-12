@@ -3914,23 +3914,23 @@ int XELF::getType()
         nType=getHdr32_type();
     }
 
-    if(nType== XELF_DEF::ET_REL)
+    if(nType==XELF_DEF::ET_REL)
     {
         nResult=TYPE_REL;
     }
-    else if(nType== XELF_DEF::ET_EXEC)
+    else if(nType==XELF_DEF::ET_EXEC)
     {
         nResult=TYPE_EXEC;
     }
-    else if(nType= XELF_DEF::ET_DYN)
+    else if(nType==XELF_DEF::ET_DYN)
     {
         nResult=TYPE_DYN;
     }
-    else if(nType== XELF_DEF::ET_CORE)
+    else if(nType==XELF_DEF::ET_CORE)
     {
         nResult=TYPE_CORE;
     }
-    else if(nType== XELF_DEF::ET_NUM)
+    else if(nType==XELF_DEF::ET_NUM)
     {
         nResult=TYPE_NUM;
     }
