@@ -211,6 +211,8 @@ const quint32 LC_LOAD_WEAK_DYLIB                    =(0x18|LC_REQ_DYLD);
 const quint32 LC_SEGMENT_64                         =0x19;	        /* 64-bit segment of this file to bemapped */
 const quint32 LC_ROUTINES_64                        =0x1A;	        /* 64-bit image routines */
 const quint32 LC_UUID                               =0x1B;	        /* the uuid */
+const quint32 LC_DYLD_INFO                          =0x22;
+const quint32 LC_DYLD_INFO_ONLY                     =(0x22|LC_REQ_DYLD);
 const quint32 LC_MAIN                               =(0x28|LC_REQ_DYLD);       /* main */
 
 const quint32 MH_OBJECT                             =0x1;		/* relocatable object file */
@@ -289,6 +291,24 @@ struct dylib_command
     quint32 cmdsize;
     dylib _dylib;
 };
+
+struct dyld_info_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 rebase_off;
+    quint32 rebase_size;
+    quint32 bind_off;
+    quint32 bind_size;
+    quint32 weak_bind_off;
+    quint32 weak_bind_size;
+    quint32 lazy_bind_off;
+    quint32 lazy_bind_size;
+    quint32 export_off;
+    quint32 export_size;
+};
+
+// https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html
 
 enum reloc_type_x86_64
 {

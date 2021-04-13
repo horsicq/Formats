@@ -868,6 +868,11 @@ bool XMACH::isCommandPresent(quint32 nCommandID, int nIndex, QList<XMACH::COMMAN
     return bResult;
 }
 
+bool XMACH::isCommandPresent(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+{
+    return isCommandPresent(nCommandID,0,pListCommandRecords);
+}
+
 QByteArray XMACH::getCommand(quint32 nCommandID, int nIndex)
 {
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
