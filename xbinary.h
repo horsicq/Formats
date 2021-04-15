@@ -420,6 +420,9 @@ public:
     void write_float(qint64 nOffset,float fValue,bool bIsBigEndian=false); // TODO Check
     void write_double(qint64 nOffset,double dValue,bool bIsBigEndian=false); // TODO Check
 
+    QString read_UUID(qint64 nOffset);
+    void write_UUID(qint64 nOffset,QString sValue);
+
     static quint8 _read_uint8(char *pData);
     static qint8 _read_int8(char *pData);
     static quint16 _read_uint16(char *pData,bool bIsBigEndian=false);

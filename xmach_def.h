@@ -213,6 +213,12 @@ const quint32 LC_ROUTINES_64                        =0x1A;	        /* 64-bit ima
 const quint32 LC_UUID                               =0x1B;	        /* the uuid */
 const quint32 LC_DYLD_INFO                          =0x22;
 const quint32 LC_DYLD_INFO_ONLY                     =(0x22|LC_REQ_DYLD);
+const quint32 LC_VERSION_MIN_MACOSX                 =0x24;
+const quint32 LC_VERSION_MIN_IPHONEOS               =0x25;
+const quint32 LC_VERSION_MIN_TVOS                   =0x2F;
+const quint32 LC_VERSION_MIN_WATCHOS                =0x30;
+
+
 const quint32 LC_MAIN                               =(0x28|LC_REQ_DYLD);       /* main */
 
 const quint32 MH_OBJECT                             =0x1;		/* relocatable object file */
@@ -308,7 +314,58 @@ struct dyld_info_command
     quint32 export_size;
 };
 
+struct uuid_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint8 uuid[16];
+};
+
+struct symtab_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 symoff;
+    quint32 nsyms;
+    quint32 stroff;
+    quint32 strsize;
+};
+
+struct dysymtab_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 ilocalsym;
+    quint32 nlocalsym;
+    quint32 iextdefsym;
+    quint32 nextdefsym;
+    quint32 iundefsym;
+    quint32 nundefsym;
+    quint32 tocoff;
+    quint32 ntoc;
+    quint32 modtaboff;
+    quint32 nmodtab;
+    quint32 extrefsymoff;
+    quint32 nextrefsyms;
+    quint32 indirectsymoff;
+    quint32 nindirectsyms;
+    quint32 extreloff;
+    quint32 nextrel;
+    quint32 locreloff;
+    quint32 nlocrel;
+};
+
+struct version_min_command
+{
+    quint32 cmd;     // LC_VERSION_MIN_MACOSX or
+                    // LC_VERSION_MIN_IPHONEOS
+    quint32 cmdsize; // sizeof(struct version_min_command)
+    quint32 version; // X.Y.Z is encoded in nibbles xxxx.yy.zz
+    quint32 sdk;     // X.Y.Z is encoded in nibbles xxxx.yy.zz
+};
+
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html
+// https://gist.github.com/yamaya/2924292
 
 enum reloc_type_x86_64
 {
