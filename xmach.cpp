@@ -1222,7 +1222,7 @@ void XMACH::_setLibraryRecord_name(qint64 nOffset, QString sValue)
 
     if(libraryRecord.name==sizeof(XMACH_DEF::dylib_command))
     {
-        write_ansiStringFix(nOffset+sizeof(XMACH_DEF::dylib_command),libraryRecord.nStructSize-libraryRecord.name-2,sValue);
+        write_ansiStringFix(nOffset+sizeof(XMACH_DEF::dylib_command),libraryRecord.nStructSize-libraryRecord.name-1,sValue);
     }
 }
 
@@ -1912,6 +1912,68 @@ void XMACH::setUUID(QString sValue)
     }
 }
 
+QString XMACH::getLoadDylinker()
+{
+    QString sResult;
+
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_LOAD_DYLINKER,0);
+
+    if(nOffset!=-1)
+    {
+        qint64 nStringOffset=read_uint32(nOffset+offsetof(XMACH_DEF::dylinker_command,name));
+
+        sResult=read_ansiString(nOffset+nStringOffset);
+    }
+
+    return sResult;
+}
+
+void XMACH::setLoadDylinker(QString sValue)
+{
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_LOAD_DYLINKER,0);
+
+    if(nOffset!=-1)
+    {
+        XMACH_DEF::dylinker_command dylinker=_read_dylinker_command(nOffset);
+
+        if(dylinker.name==sizeof(XMACH_DEF::dylinker_command))
+        {
+            write_ansiStringFix(nOffset+dylinker.name,dylinker.cmdsize-dylinker.name-1,sValue);
+        }
+    }
+}
+
+QString XMACH::getRPath()
+{
+    QString sResult;
+
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_RPATH,0);
+
+    if(nOffset!=-1)
+    {
+        qint64 nStringOffset=read_uint32(nOffset+offsetof(XMACH_DEF::rpath_command,path));
+
+        sResult=read_ansiString(nOffset+nStringOffset);
+    }
+
+    return sResult;
+}
+
+void XMACH::setRPath(QString sValue)
+{
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_RPATH,0);
+
+    if(nOffset!=-1)
+    {
+        XMACH_DEF::rpath_command rpath=_read_rpath_command(nOffset);
+
+        if(rpath.path==sizeof(XMACH_DEF::rpath_command))
+        {
+            write_ansiStringFix(nOffset+rpath.path,rpath.cmdsize-rpath.path-1,sValue);
+        }
+    }
+}
+
 XMACH_DEF::symtab_command XMACH::get_symtab_command()
 {
     XMACH_DEF::symtab_command result={};
@@ -2147,6 +2209,32 @@ void XMACH::_set_version_min_command_version(qint64 nOffset, quint32 nValue)
 void XMACH::_set_version_min_command_sdk(qint64 nOffset, quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::version_min_command,sdk),nValue,isBigEndian());
+}
+
+XMACH_DEF::dylinker_command XMACH::_read_dylinker_command(qint64 nOffset)
+{
+    XMACH_DEF::dylinker_command result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.cmd=read_uint32(nOffset+offsetof(XMACH_DEF::dylinker_command,cmd),bIsBigEndian);
+    result.cmdsize=read_uint32(nOffset+offsetof(XMACH_DEF::dylinker_command,cmdsize),bIsBigEndian);
+    result.name=read_uint32(nOffset+offsetof(XMACH_DEF::dylinker_command,name),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::rpath_command XMACH::_read_rpath_command(qint64 nOffset)
+{
+    XMACH_DEF::rpath_command result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.cmd=read_uint32(nOffset+offsetof(XMACH_DEF::rpath_command,cmd),bIsBigEndian);
+    result.cmdsize=read_uint32(nOffset+offsetof(XMACH_DEF::rpath_command,cmdsize),bIsBigEndian);
+    result.path=read_uint32(nOffset+offsetof(XMACH_DEF::rpath_command,path),bIsBigEndian);
+
+    return result;
 }
 
 XBinary::MODE XMACH::getMode()

@@ -211,6 +211,7 @@ const quint32 LC_LOAD_WEAK_DYLIB                    =(0x18|LC_REQ_DYLD);
 const quint32 LC_SEGMENT_64                         =0x19;	        /* 64-bit segment of this file to bemapped */
 const quint32 LC_ROUTINES_64                        =0x1A;	        /* 64-bit image routines */
 const quint32 LC_UUID                               =0x1B;	        /* the uuid */
+const quint32 LC_RPATH                              =0x1C|0x80000000;
 const quint32 LC_DYLD_INFO                          =0x22;
 const quint32 LC_DYLD_INFO_ONLY                     =(0x22|LC_REQ_DYLD);
 const quint32 LC_VERSION_MIN_MACOSX                 =0x24;
@@ -362,6 +363,20 @@ struct version_min_command
     quint32 cmdsize; // sizeof(struct version_min_command)
     quint32 version; // X.Y.Z is encoded in nibbles xxxx.yy.zz
     quint32 sdk;     // X.Y.Z is encoded in nibbles xxxx.yy.zz
+};
+
+struct dylinker_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 name;
+};
+
+struct rpath_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 path;
 };
 
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html

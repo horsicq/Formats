@@ -266,6 +266,12 @@ public:
     QString getUUID();
     void setUUID(QString sValue);
 
+    QString getLoadDylinker();
+    void setLoadDylinker(QString sValue);
+
+    QString getRPath();
+    void setRPath(QString sValue);
+
     XMACH_DEF::symtab_command get_symtab_command();
     XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
 
@@ -307,6 +313,9 @@ public:
 
     void _set_version_min_command_version(qint64 nOffset,quint32 nValue);
     void _set_version_min_command_sdk(qint64 nOffset,quint32 nValue);
+
+    XMACH_DEF::dylinker_command _read_dylinker_command(qint64 nOffset);
+    XMACH_DEF::rpath_command _read_rpath_command(qint64 nOffset);
 
     virtual MODE getMode();
     virtual QString getArch();
