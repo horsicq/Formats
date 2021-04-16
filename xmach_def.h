@@ -407,6 +407,40 @@ struct encryption_info_command_64
     quint32 pad;
 };
 
+struct dylib_module
+{
+    quint32 module_name;
+    quint32 iextdefsym;
+    quint32 nextdefsym;
+    quint32 irefsym;
+    quint32 nrefsym;
+    quint32 ilocalsym;
+    quint32 nlocalsym;
+    quint32 iextrel;
+    quint32 nextrel;
+    quint32 iinit_iterm;
+    quint32 ninit_nterm;
+    quint32 objc_module_info_addr;
+    quint32 objc_module_info_size;
+};
+
+struct dylib_module_64
+{
+    quint32 module_name;
+    quint32 iextdefsym;
+    quint32 nextdefsym;
+    quint32 irefsym;
+    quint32 nrefsym;
+    quint32 ilocalsym;
+    quint32 nlocalsym;
+    quint32 iextrel;
+    quint32 nextrel;
+    quint32 iinit_iterm;
+    quint32 ninit_nterm;
+    quint32 objc_module_info_size;
+    quint64 objc_module_info_addr;
+};
+
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html
 // https://gist.github.com/yamaya/2924292
 
