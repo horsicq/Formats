@@ -1296,7 +1296,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
     return listResult;
 }
 
-XMACH_DEF::segment_command XMACH::_readSegment32(qint64 nOffset, bool bIsBigEndian)
+XMACH_DEF::segment_command XMACH::_read_segment_command(qint64 nOffset, bool bIsBigEndian)
 {
     XMACH_DEF::segment_command result={};
 
@@ -1313,7 +1313,7 @@ XMACH_DEF::segment_command XMACH::_readSegment32(qint64 nOffset, bool bIsBigEndi
     return result;
 }
 
-XMACH_DEF::segment_command_64 XMACH::_readSegment64(qint64 nOffset, bool bIsBigEndian)
+XMACH_DEF::segment_command_64 XMACH::_read_segment_command_64(qint64 nOffset, bool bIsBigEndian)
 {
     XMACH_DEF::segment_command_64 result={};
 
@@ -1513,7 +1513,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
     return listResult;
 }
 
-XMACH_DEF::section XMACH::_readSection32(qint64 nOffset, bool bIsBigEndian)
+XMACH_DEF::section XMACH::_read_section(qint64 nOffset, bool bIsBigEndian)
 {
     XMACH_DEF::section result={};
 
@@ -1532,7 +1532,7 @@ XMACH_DEF::section XMACH::_readSection32(qint64 nOffset, bool bIsBigEndian)
     return result;
 }
 
-XMACH_DEF::section_64 XMACH::_readSection64(qint64 nOffset, bool bIsBigEndian)
+XMACH_DEF::section_64 XMACH::_read_section_64(qint64 nOffset, bool bIsBigEndian)
 {
     XMACH_DEF::section_64 result={};
 
@@ -2211,6 +2211,65 @@ void XMACH::_set_version_min_command_sdk(qint64 nOffset, quint32 nValue)
     write_uint32(nOffset+offsetof(XMACH_DEF::version_min_command,sdk),nValue,isBigEndian());
 }
 
+quint64 XMACH::getSourceVersion()
+{
+    quint64 nResult=0;
+
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_SOURCE_VERSION,0);
+
+    if(nOffset!=-1)
+    {
+        nResult=read_uint64(nOffset+offsetof(XMACH_DEF::source_version_command,version),isBigEndian());
+    }
+
+    return nResult;
+}
+
+void XMACH::setSourceVersion(quint64 nValue)
+{
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_SOURCE_VERSION,0);
+
+    if(nOffset!=-1)
+    {
+        write_uint64(nOffset+offsetof(XMACH_DEF::source_version_command,version),nValue,isBigEndian());
+    }
+}
+
+qint64 XMACH::get_source_version_command_size()
+{
+    return sizeof(XMACH_DEF::source_version_command);
+}
+
+void XMACH::_set_encryption_info_command_64_cryptoff(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command_64,cryptoff),nValue,isBigEndian());
+}
+
+void XMACH::_set_encryption_info_command_64_cryptsize(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command_64,cryptsize),nValue,isBigEndian());
+}
+
+void XMACH::_set_encryption_info_command_64_cryptid(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command_64,cryptid),nValue,isBigEndian());
+}
+
+void XMACH::_set_encryption_info_command_64_pad(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command_64,pad),nValue,isBigEndian());
+}
+
+qint64 XMACH::get_encryption_info_command_size()
+{
+    return sizeof(XMACH_DEF::encryption_info_command);
+}
+
+qint64 XMACH::get_encryption_info_command_64_size()
+{
+    return sizeof(XMACH_DEF::encryption_info_command_64);
+}
+
 XMACH_DEF::dylinker_command XMACH::_read_dylinker_command(qint64 nOffset)
 {
     XMACH_DEF::dylinker_command result={};
@@ -2233,6 +2292,50 @@ XMACH_DEF::rpath_command XMACH::_read_rpath_command(qint64 nOffset)
     result.cmd=read_uint32(nOffset+offsetof(XMACH_DEF::rpath_command,cmd),bIsBigEndian);
     result.cmdsize=read_uint32(nOffset+offsetof(XMACH_DEF::rpath_command,cmdsize),bIsBigEndian);
     result.path=read_uint32(nOffset+offsetof(XMACH_DEF::rpath_command,path),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::source_version_command XMACH::_read_source_version_command(qint64 nOffset)
+{
+    XMACH_DEF::source_version_command result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.cmd=read_uint32(nOffset+offsetof(XMACH_DEF::source_version_command,cmd),bIsBigEndian);
+    result.cmdsize=read_uint32(nOffset+offsetof(XMACH_DEF::source_version_command,cmdsize),bIsBigEndian);
+    result.version=read_uint64(nOffset+offsetof(XMACH_DEF::source_version_command,version),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::encryption_info_command XMACH::_read_encryption_info_command(qint64 nOffset)
+{
+    XMACH_DEF::encryption_info_command result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.cmd=read_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command,cmd),bIsBigEndian);
+    result.cmdsize=read_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command,cmdsize),bIsBigEndian);
+    result.cryptoff=read_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command,cryptoff),bIsBigEndian);
+    result.cryptsize=read_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command,cryptsize),bIsBigEndian);
+    result.cryptid=read_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command,cryptid),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::encryption_info_command_64 XMACH::_read_encryption_info_command_64(qint64 nOffset)
+{
+    XMACH_DEF::encryption_info_command_64 result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.cmd=read_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command_64,cmd),bIsBigEndian);
+    result.cmdsize=read_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command_64,cmdsize),bIsBigEndian);
+    result.cryptoff=read_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command_64,cryptoff),bIsBigEndian);
+    result.cryptsize=read_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command_64,cryptsize),bIsBigEndian);
+    result.cryptid=read_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command_64,cryptid),bIsBigEndian);
+    result.pad=read_uint32(nOffset+offsetof(XMACH_DEF::encryption_info_command_64,pad),bIsBigEndian);
 
     return result;
 }

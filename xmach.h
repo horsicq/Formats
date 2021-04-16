@@ -178,8 +178,8 @@ public:
     QList<SEGMENT_RECORD> getSegmentRecords();
     QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
-    XMACH_DEF::segment_command _readSegment32(qint64 nOffset,bool bIsBigEndian);
-    XMACH_DEF::segment_command_64 _readSegment64(qint64 nOffset,bool bIsBigEndian);
+    XMACH_DEF::segment_command _read_segment_command(qint64 nOffset,bool bIsBigEndian);
+    XMACH_DEF::segment_command_64 _read_segment_command_64(qint64 nOffset,bool bIsBigEndian);
 
     void _setSegment32_segname(qint64 nOffset,QString sValue);
     void _setSegment32_vmaddr(qint64 nOffset,quint32 nValue);
@@ -204,8 +204,8 @@ public:
     QList<SECTION_RECORD> getSectionRecords();
     QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
-    XMACH_DEF::section _readSection32(qint64 nOffset,bool bIsBigEndian);
-    XMACH_DEF::section_64 _readSection64(qint64 nOffset,bool bIsBigEndian);
+    XMACH_DEF::section _read_section(qint64 nOffset,bool bIsBigEndian);
+    XMACH_DEF::section_64 _read_section_64(qint64 nOffset,bool bIsBigEndian);
 
     void _setSection32_sectname(qint64 nOffset,QString sValue);
     void _setSection32_segname(qint64 nOffset,QString sValue);
@@ -248,7 +248,6 @@ public:
     quint32 getLibraryCurrentVersion(QString sName,QList<LIBRARY_RECORD> *pListLibraryRecords);
 
     XMACH_DEF::dyld_info_command get_dyld_info_command();
-    XMACH_DEF::dyld_info_command _read_dyld_info_command(qint64 nOffset);
 
     qint64 get_dyld_info_command_size();
 
@@ -273,7 +272,6 @@ public:
     void setRPath(QString sValue);
 
     XMACH_DEF::symtab_command get_symtab_command();
-    XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
 
     qint64 get_symtab_command_size();
 
@@ -283,7 +281,6 @@ public:
     void _set_symtab_command_strsize(qint64 nOffset,quint32 nValue);
 
     XMACH_DEF::dysymtab_command get_dysymtab_command();
-    XMACH_DEF::dysymtab_command _read_dysymtab_command(qint64 nOffset);
 
     qint64 get_dysymtab_command_size();
 
@@ -307,15 +304,34 @@ public:
     void _set_dysymtab_command_nlocrel(qint64 nOffset,quint32 nValue);
 
     XMACH_DEF::version_min_command get_version_min_command();
-    XMACH_DEF::version_min_command _read_version_min_command(qint64 nOffset);
 
     qint64 get_version_min_command_size();
 
     void _set_version_min_command_version(qint64 nOffset,quint32 nValue);
     void _set_version_min_command_sdk(qint64 nOffset,quint32 nValue);
 
+    quint64 getSourceVersion();
+    void setSourceVersion(quint64 nValue);
+
+    qint64 get_source_version_command_size();
+
+    void _set_encryption_info_command_64_cryptoff(qint64 nOffset,quint32 nValue);
+    void _set_encryption_info_command_64_cryptsize(qint64 nOffset,quint32 nValue);
+    void _set_encryption_info_command_64_cryptid(qint64 nOffset,quint32 nValue);
+    void _set_encryption_info_command_64_pad(qint64 nOffset,quint32 nValue);
+
+    qint64 get_encryption_info_command_size();
+    qint64 get_encryption_info_command_64_size();
+
+    XMACH_DEF::dyld_info_command _read_dyld_info_command(qint64 nOffset);
+    XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
+    XMACH_DEF::dysymtab_command _read_dysymtab_command(qint64 nOffset);
+    XMACH_DEF::version_min_command _read_version_min_command(qint64 nOffset);
     XMACH_DEF::dylinker_command _read_dylinker_command(qint64 nOffset);
     XMACH_DEF::rpath_command _read_rpath_command(qint64 nOffset);
+    XMACH_DEF::source_version_command _read_source_version_command(qint64 nOffset);
+    XMACH_DEF::encryption_info_command _read_encryption_info_command(qint64 nOffset);
+    XMACH_DEF::encryption_info_command_64 _read_encryption_info_command_64(qint64 nOffset);
 
     virtual MODE getMode();
     virtual QString getArch();

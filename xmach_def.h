@@ -212,13 +212,15 @@ const quint32 LC_SEGMENT_64                         =0x19;	        /* 64-bit seg
 const quint32 LC_ROUTINES_64                        =0x1A;	        /* 64-bit image routines */
 const quint32 LC_UUID                               =0x1B;	        /* the uuid */
 const quint32 LC_RPATH                              =0x1C|0x80000000;
+const quint32 LC_ENCRYPTION_INFO                    =0x21;
 const quint32 LC_DYLD_INFO                          =0x22;
 const quint32 LC_DYLD_INFO_ONLY                     =(0x22|LC_REQ_DYLD);
 const quint32 LC_VERSION_MIN_MACOSX                 =0x24;
 const quint32 LC_VERSION_MIN_IPHONEOS               =0x25;
+const quint32 LC_SOURCE_VERSION                     =0x2A;
+const quint32 LC_ENCRYPTION_INFO_64                 =0x2C;
 const quint32 LC_VERSION_MIN_TVOS                   =0x2F;
 const quint32 LC_VERSION_MIN_WATCHOS                =0x30;
-
 
 const quint32 LC_MAIN                               =(0x28|LC_REQ_DYLD);       /* main */
 
@@ -377,6 +379,32 @@ struct rpath_command
     quint32 cmd;
     quint32 cmdsize;
     quint32 path;
+};
+
+struct source_version_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint64 version;
+};
+
+struct encryption_info_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 cryptoff;
+    quint32 cryptsize;
+    quint32 cryptid;
+};
+
+struct encryption_info_command_64
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 cryptoff;
+    quint32 cryptsize;
+    quint32 cryptid;
+    quint32 pad;
 };
 
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html
