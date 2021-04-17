@@ -472,6 +472,7 @@ struct routines_command_64
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html
 // http://formats.kaitai.io/mach_o/
 // https://gist.github.com/yamaya/2924292
+// TODO code_signature_command
 
 enum reloc_type_x86_64
 {
