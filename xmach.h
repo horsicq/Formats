@@ -332,6 +332,7 @@ public:
     XMACH_DEF::source_version_command _read_source_version_command(qint64 nOffset);
     XMACH_DEF::encryption_info_command _read_encryption_info_command(qint64 nOffset);
     XMACH_DEF::encryption_info_command_64 _read_encryption_info_command_64(qint64 nOffset);
+    XMACH_DEF::entry_point_command _read_entry_point_command(qint64 nOffset);
 
     virtual MODE getMode();
     virtual QString getArch();

@@ -2340,6 +2340,20 @@ XMACH_DEF::encryption_info_command_64 XMACH::_read_encryption_info_command_64(qi
     return result;
 }
 
+XMACH_DEF::entry_point_command XMACH::_read_entry_point_command(qint64 nOffset)
+{
+    XMACH_DEF::entry_point_command result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.cmd=read_uint32(nOffset+offsetof(XMACH_DEF::entry_point_command,cmd),bIsBigEndian);
+    result.cmdsize=read_uint32(nOffset+offsetof(XMACH_DEF::entry_point_command,cmdsize),bIsBigEndian);
+    result.entryoff=read_uint32(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),bIsBigEndian);
+    result.stacksize=read_uint32(nOffset+offsetof(XMACH_DEF::entry_point_command,stacksize),bIsBigEndian);
+
+    return result;
+}
+
 XBinary::MODE XMACH::getMode()
 {
     MODE result=MODE_32;
