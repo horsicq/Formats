@@ -441,6 +441,34 @@ struct dylib_module_64
     quint64 objc_module_info_addr;
 };
 
+struct routines_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 init_address;
+    quint32 init_module;
+    quint32 reserved1;
+    quint32 reserved2;
+    quint32 reserved3;
+    quint32 reserved4;
+    quint32 reserved5;
+    quint32 reserved6;
+};
+
+struct routines_command_64
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint64 init_address;
+    quint64 init_module;
+    quint64 reserved1;
+    quint64 reserved2;
+    quint64 reserved3;
+    quint64 reserved4;
+    quint64 reserved5;
+    quint64 reserved6;
+};
+
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html
 // https://gist.github.com/yamaya/2924292
 
