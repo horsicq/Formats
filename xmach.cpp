@@ -2380,6 +2380,37 @@ XMACH_DEF::x86_thread_state32_t XMACH::_read_x86_thread_state32_t(qint64 nOffset
     return result;
 }
 
+XMACH_DEF::x86_thread_state64_t XMACH::_read_x86_thread_state64_t(qint64 nOffset)
+{
+    XMACH_DEF::x86_thread_state64_t result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.rax=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rax),bIsBigEndian);
+    result.rbx=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rbx),bIsBigEndian);
+    result.rcx=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rcx),bIsBigEndian);
+    result.rdx=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rdx),bIsBigEndian);
+    result.rdi=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rdi),bIsBigEndian);
+    result.rsi=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rsi),bIsBigEndian);
+    result.rbp=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rbp),bIsBigEndian);
+    result.rsp=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rsp),bIsBigEndian);
+    result.r8=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r8),bIsBigEndian);
+    result.r9=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r9),bIsBigEndian);
+    result.r10=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r10),bIsBigEndian);
+    result.r11=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r11),bIsBigEndian);
+    result.r12=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r12),bIsBigEndian);
+    result.r13=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r13),bIsBigEndian);
+    result.r14=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r14),bIsBigEndian);
+    result.r15=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r15),bIsBigEndian);
+    result.rip=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rip),bIsBigEndian);
+    result.rflags=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rflags),bIsBigEndian);
+    result.cs=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,cs),bIsBigEndian);
+    result.fs=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,fs),bIsBigEndian);
+    result.gs=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,gs),bIsBigEndian);
+
+    return result;
+}
+
 XBinary::MODE XMACH::getMode()
 {
     MODE result=MODE_32;

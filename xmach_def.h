@@ -526,6 +526,12 @@ enum PPCThreadFlavors
     PPC_THREAD_STATE_NONE=7
 };
 
+struct state_hdr_t
+{
+    quint32 flavor;
+    quint32 count;
+};
+
 struct entry_point_command
 {
     quint32 cmd;                /* LC_MAIN only used in MH_EXECUTE filetypes */
