@@ -333,6 +333,7 @@ public:
     XMACH_DEF::encryption_info_command _read_encryption_info_command(qint64 nOffset);
     XMACH_DEF::encryption_info_command_64 _read_encryption_info_command_64(qint64 nOffset);
     XMACH_DEF::entry_point_command _read_entry_point_command(qint64 nOffset);
+    XMACH_DEF::x86_thread_state32_t _read_x86_thread_state32_t(qint64 nOffset);
 
     virtual MODE getMode();
     virtual QString getArch();

@@ -360,7 +360,6 @@ struct x86_exception_state64_t
     quint64 faultvaddr;
 };
 
-
 struct x86_state_hdr_t
 {
     quint32 flavor;
