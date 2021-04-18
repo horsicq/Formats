@@ -169,20 +169,6 @@ struct section_64           /* for 64-bit architectures */
     quint32	reserved3;      /* reserved */
 };
 
-const quint32 x86_THREAD_STATE32                    =1;
-const quint32 x86_FLOAT_STATE32                     =2;
-const quint32 x86_EXCEPTION_STATE32                 =3;
-const quint32 x86_THREAD_STATE64                    =4;
-const quint32 x86_FLOAT_STATE64                     =5;
-const quint32 x86_EXCEPTION_STATE64                 =6;
-const quint32 x86_THREAD_STATE                      =7;
-const quint32 x86_FLOAT_STATE                       =8;
-const quint32 x86_EXCEPTION_STATE                   =9;
-const quint32 x86_DEBUG_STATE32                     =10;
-const quint32 x86_DEBUG_STATE64                     =11;
-const quint32 x86_DEBUG_STATE                       =12;
-const quint32 THREAD_STATE_NONE                     =13;
-
 const quint32 LC_REQ_DYLD                           =0x80000000;
 const quint32 LC_SEGMENT                            =0x1;           /* segment of this file to be mapped */
 const quint32 LC_SYMTAB                             =0x2;           /* link-edit stab symbol table info */
@@ -233,49 +219,265 @@ const quint32 MH_DYLIB                              =0x6;		/* dynamicly bound sh
 const quint32 MH_DYLINKER	                        =0x7;		/* dynamic link editor */
 const quint32 MH_BUNDLE                             =0x8;		/* dynamicly bound bundle file */
 
-struct STRUCT_X86_THREAD_STATE32
-{
-    quint32 eax;
-    quint32 ebx;
-    quint32 ecx;
-    quint32 edx;
-    quint32 edi;
-    quint32 esi;
-    quint32 ebp;
-    quint32 esp;
-    quint32 ss;
-    quint32 eflags;
-    quint32 eip;
-    quint32 cs;
-    quint32 ds;
-    quint32 es;
-    quint32 fs;
-    quint32 gs;
+struct x86_thread_state32_t {
+  uint32_t eax;
+  uint32_t ebx;
+  uint32_t ecx;
+  uint32_t edx;
+  uint32_t edi;
+  uint32_t esi;
+  uint32_t ebp;
+  uint32_t esp;
+  uint32_t ss;
+  uint32_t eflags;
+  uint32_t eip;
+  uint32_t cs;
+  uint32_t ds;
+  uint32_t es;
+  uint32_t fs;
+  uint32_t gs;
 };
 
-struct STRUCT_X86_THREAD_STATE64
-{
-    quint64 rax;
-    quint64 rbx;
-    quint64 rcx;
-    quint64 rdx;
-    quint64 rdi;
-    quint64 rsi;
-    quint64 rbp;
-    quint64 rsp;
-    quint64 r8;
-    quint64 r9;
-    quint64 r10;
-    quint64 r11;
-    quint64 r12;
-    quint64 r13;
-    quint64 r14;
-    quint64 r15;
-    quint64 rip;
-    quint64 rflags;
-    quint64 cs;
-    quint64 fs;
-    quint64 gs;
+struct x86_thread_state64_t {
+  uint64_t rax;
+  uint64_t rbx;
+  uint64_t rcx;
+  uint64_t rdx;
+  uint64_t rdi;
+  uint64_t rsi;
+  uint64_t rbp;
+  uint64_t rsp;
+  uint64_t r8;
+  uint64_t r9;
+  uint64_t r10;
+  uint64_t r11;
+  uint64_t r12;
+  uint64_t r13;
+  uint64_t r14;
+  uint64_t r15;
+  uint64_t rip;
+  uint64_t rflags;
+  uint64_t cs;
+  uint64_t fs;
+  uint64_t gs;
+};
+
+struct fp_control_t {
+  unsigned short invalid : 1, denorm : 1, zdiv : 1, ovrfl : 1, undfl : 1,
+      precis : 1, : 2, pc : 2, rc : 2, : 1, : 3;
+};
+
+struct fp_status_t {
+  unsigned short invalid : 1, denorm : 1, zdiv : 1, ovrfl : 1, undfl : 1,
+      precis : 1, stkflt : 1, errsumm : 1, c0 : 1, c1 : 1, c2 : 1, tos : 3,
+      c3 : 1, busy : 1;
+};
+
+struct mmst_reg_t {
+  char mmst_reg[10];
+  char mmst_rsrv[6];
+};
+
+struct xmm_reg_t {
+  char xmm_reg[16];
+};
+
+struct x86_float_state64_t {
+  int32_t fpu_reserved[2];
+  fp_control_t fpu_fcw;
+  fp_status_t fpu_fsw;
+  uint8_t fpu_ftw;
+  uint8_t fpu_rsrv1;
+  uint16_t fpu_fop;
+  uint32_t fpu_ip;
+  uint16_t fpu_cs;
+  uint16_t fpu_rsrv2;
+  uint32_t fpu_dp;
+  uint16_t fpu_ds;
+  uint16_t fpu_rsrv3;
+  uint32_t fpu_mxcsr;
+  uint32_t fpu_mxcsrmask;
+  mmst_reg_t fpu_stmm0;
+  mmst_reg_t fpu_stmm1;
+  mmst_reg_t fpu_stmm2;
+  mmst_reg_t fpu_stmm3;
+  mmst_reg_t fpu_stmm4;
+  mmst_reg_t fpu_stmm5;
+  mmst_reg_t fpu_stmm6;
+  mmst_reg_t fpu_stmm7;
+  xmm_reg_t fpu_xmm0;
+  xmm_reg_t fpu_xmm1;
+  xmm_reg_t fpu_xmm2;
+  xmm_reg_t fpu_xmm3;
+  xmm_reg_t fpu_xmm4;
+  xmm_reg_t fpu_xmm5;
+  xmm_reg_t fpu_xmm6;
+  xmm_reg_t fpu_xmm7;
+  xmm_reg_t fpu_xmm8;
+  xmm_reg_t fpu_xmm9;
+  xmm_reg_t fpu_xmm10;
+  xmm_reg_t fpu_xmm11;
+  xmm_reg_t fpu_xmm12;
+  xmm_reg_t fpu_xmm13;
+  xmm_reg_t fpu_xmm14;
+  xmm_reg_t fpu_xmm15;
+  char fpu_rsrv4[6 * 16];
+  uint32_t fpu_reserved1;
+};
+
+struct x86_exception_state64_t {
+  uint16_t trapno;
+  uint16_t cpu;
+  uint32_t err;
+  uint64_t faultvaddr;
+};
+
+
+struct x86_state_hdr_t {
+  uint32_t flavor;
+  uint32_t count;
+};
+
+struct x86_thread_state_t {
+  x86_state_hdr_t tsh;
+  union {
+    x86_thread_state64_t ts64;
+    x86_thread_state32_t ts32;
+  } uts;
+};
+
+struct x86_float_state_t {
+  x86_state_hdr_t fsh;
+  union {
+    x86_float_state64_t fs64;
+  } ufs;
+};
+
+struct x86_exception_state_t {
+  x86_state_hdr_t esh;
+  union {
+    x86_exception_state64_t es64;
+  } ues;
+};
+
+enum X86ThreadFlavors {
+  x86_THREAD_STATE32 = 1,
+  x86_FLOAT_STATE32 = 2,
+  x86_EXCEPTION_STATE32 = 3,
+  x86_THREAD_STATE64 = 4,
+  x86_FLOAT_STATE64 = 5,
+  x86_EXCEPTION_STATE64 = 6,
+  x86_THREAD_STATE = 7,
+  x86_FLOAT_STATE = 8,
+  x86_EXCEPTION_STATE = 9,
+  x86_DEBUG_STATE32 = 10,
+  x86_DEBUG_STATE64 = 11,
+  x86_DEBUG_STATE = 12
+};
+
+struct arm_thread_state32_t {
+  uint32_t r[13];
+  uint32_t sp;
+  uint32_t lr;
+  uint32_t pc;
+  uint32_t cpsr;
+};
+
+struct arm_thread_state64_t {
+  uint64_t x[29];
+  uint64_t fp;
+  uint64_t lr;
+  uint64_t sp;
+  uint64_t pc;
+  uint32_t cpsr;
+  uint32_t pad;
+};
+
+struct arm_state_hdr_t {
+  uint32_t flavor;
+  uint32_t count;
+};
+
+struct arm_thread_state_t {
+  arm_state_hdr_t tsh;
+  union {
+    arm_thread_state32_t ts32;
+  } uts;
+};
+
+enum ARMThreadFlavors {
+  ARM_THREAD_STATE = 1,
+  ARM_VFP_STATE = 2,
+  ARM_EXCEPTION_STATE = 3,
+  ARM_DEBUG_STATE = 4,
+  ARN_THREAD_STATE_NONE = 5,
+  ARM_THREAD_STATE64 = 6,
+  ARM_EXCEPTION_STATE64 = 7
+};
+
+struct ppc_thread_state32_t {
+  uint32_t srr0;
+  uint32_t srr1;
+  uint32_t r0;
+  uint32_t r1;
+  uint32_t r2;
+  uint32_t r3;
+  uint32_t r4;
+  uint32_t r5;
+  uint32_t r6;
+  uint32_t r7;
+  uint32_t r8;
+  uint32_t r9;
+  uint32_t r10;
+  uint32_t r11;
+  uint32_t r12;
+  uint32_t r13;
+  uint32_t r14;
+  uint32_t r15;
+  uint32_t r16;
+  uint32_t r17;
+  uint32_t r18;
+  uint32_t r19;
+  uint32_t r20;
+  uint32_t r21;
+  uint32_t r22;
+  uint32_t r23;
+  uint32_t r24;
+  uint32_t r25;
+  uint32_t r26;
+  uint32_t r27;
+  uint32_t r28;
+  uint32_t r29;
+  uint32_t r30;
+  uint32_t r31;
+  uint32_t ct;
+  uint32_t xer;
+  uint32_t lr;
+  uint32_t ctr;
+  uint32_t mq;
+  uint32_t vrsave;
+};
+
+struct ppc_state_hdr_t {
+  uint32_t flavor;
+  uint32_t count;
+};
+
+struct ppc_thread_state_t {
+  ppc_state_hdr_t tsh;
+  union {
+    ppc_thread_state32_t ts32;
+  } uts;
+};
+
+enum PPCThreadFlavors {
+  PPC_THREAD_STATE = 1,
+  PPC_FLOAT_STATE = 2,
+  PPC_EXCEPTION_STATE = 3,
+  PPC_VECTOR_STATE = 4,
+  PPC_THREAD_STATE64 = 5,
+  PPC_EXCEPTION_STATE64 = 6,
+  PPC_THREAD_STATE_NONE = 7
 };
 
 struct entry_point_command

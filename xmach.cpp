@@ -981,11 +981,11 @@ qint64 XMACH::getAddressOfEntryPoint()
 
             if(nFlavor==XMACH_DEF::x86_THREAD_STATE32)
             {
-                nResult=read_uint32(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE32,eip),bIsBigEndian);
+                nResult=read_uint32(nOffset+16+offsetof(XMACH_DEF::x86_thread_state32_t,eip),bIsBigEndian);
             }
             else if(nFlavor==XMACH_DEF::x86_THREAD_STATE64)
             {
-                nResult=read_uint64(nOffset+16+offsetof(XMACH_DEF::STRUCT_X86_THREAD_STATE64,rip),bIsBigEndian);
+                nResult=read_uint64(nOffset+16+offsetof(XMACH_DEF::x86_thread_state64_t,rip),bIsBigEndian);
             }
         }
         else if(nType==XMACH_DEF::LC_MAIN)
