@@ -366,131 +366,145 @@ struct x86_float_state_t
     } ufs;
 };
 
-struct x86_exception_state_t {
-  x86_state_hdr_t esh;
-  union {
-    x86_exception_state64_t es64;
-  } ues;
+struct x86_exception_state_t
+{
+    x86_state_hdr_t esh;
+    union
+    {
+        x86_exception_state64_t es64;
+    } ues;
 };
 
-enum X86ThreadFlavors {
-  x86_THREAD_STATE32 = 1,
-  x86_FLOAT_STATE32 = 2,
-  x86_EXCEPTION_STATE32 = 3,
-  x86_THREAD_STATE64 = 4,
-  x86_FLOAT_STATE64 = 5,
-  x86_EXCEPTION_STATE64 = 6,
-  x86_THREAD_STATE = 7,
-  x86_FLOAT_STATE = 8,
-  x86_EXCEPTION_STATE = 9,
-  x86_DEBUG_STATE32 = 10,
-  x86_DEBUG_STATE64 = 11,
-  x86_DEBUG_STATE = 12
+enum X86ThreadFlavors
+{
+    x86_THREAD_STATE32=1,
+    x86_FLOAT_STATE32=2,
+    x86_EXCEPTION_STATE32=3,
+    x86_THREAD_STATE64=4,
+    x86_FLOAT_STATE64=5,
+    x86_EXCEPTION_STATE64=6,
+    x86_THREAD_STATE=7,
+    x86_FLOAT_STATE=8,
+    x86_EXCEPTION_STATE=9,
+    x86_DEBUG_STATE32=10,
+    x86_DEBUG_STATE64=11,
+    x86_DEBUG_STATE=12
 };
 
-struct arm_thread_state32_t {
-  uint32_t r[13];
-  uint32_t sp;
-  uint32_t lr;
-  uint32_t pc;
-  uint32_t cpsr;
+struct arm_thread_state32_t
+{
+    quint32 r[13];
+    quint32 sp;
+    quint32 lr;
+    quint32 pc;
+    quint32 cpsr;
 };
 
-struct arm_thread_state64_t {
-  uint64_t x[29];
-  uint64_t fp;
-  uint64_t lr;
-  uint64_t sp;
-  uint64_t pc;
-  uint32_t cpsr;
-  uint32_t pad;
+struct arm_thread_state64_t
+{
+    quint64 x[29];
+    quint64 fp;
+    quint64 lr;
+    quint64 sp;
+    quint64 pc;
+    quint32 cpsr;
+    quint32 pad;
 };
 
-struct arm_state_hdr_t {
-  uint32_t flavor;
-  uint32_t count;
+struct arm_state_hdr_t
+{
+    quint32 flavor;
+    quint32 count;
 };
 
-struct arm_thread_state_t {
-  arm_state_hdr_t tsh;
-  union {
-    arm_thread_state32_t ts32;
-  } uts;
+struct arm_thread_state_t
+{
+    arm_state_hdr_t tsh;
+    union
+    {
+        arm_thread_state32_t ts32;
+    } uts;
 };
 
-enum ARMThreadFlavors {
-  ARM_THREAD_STATE = 1,
-  ARM_VFP_STATE = 2,
-  ARM_EXCEPTION_STATE = 3,
-  ARM_DEBUG_STATE = 4,
-  ARN_THREAD_STATE_NONE = 5,
-  ARM_THREAD_STATE64 = 6,
-  ARM_EXCEPTION_STATE64 = 7
+enum ARMThreadFlavors
+{
+    ARM_THREAD_STATE=1,
+    ARM_VFP_STATE=2,
+    ARM_EXCEPTION_STATE=3,
+    ARM_DEBUG_STATE=4,
+    ARN_THREAD_STATE_NONE=5,
+    ARM_THREAD_STATE64=6,
+    ARM_EXCEPTION_STATE64=7
 };
 
-struct ppc_thread_state32_t {
-  uint32_t srr0;
-  uint32_t srr1;
-  uint32_t r0;
-  uint32_t r1;
-  uint32_t r2;
-  uint32_t r3;
-  uint32_t r4;
-  uint32_t r5;
-  uint32_t r6;
-  uint32_t r7;
-  uint32_t r8;
-  uint32_t r9;
-  uint32_t r10;
-  uint32_t r11;
-  uint32_t r12;
-  uint32_t r13;
-  uint32_t r14;
-  uint32_t r15;
-  uint32_t r16;
-  uint32_t r17;
-  uint32_t r18;
-  uint32_t r19;
-  uint32_t r20;
-  uint32_t r21;
-  uint32_t r22;
-  uint32_t r23;
-  uint32_t r24;
-  uint32_t r25;
-  uint32_t r26;
-  uint32_t r27;
-  uint32_t r28;
-  uint32_t r29;
-  uint32_t r30;
-  uint32_t r31;
-  uint32_t ct;
-  uint32_t xer;
-  uint32_t lr;
-  uint32_t ctr;
-  uint32_t mq;
-  uint32_t vrsave;
+struct ppc_thread_state32_t
+{
+    quint32 srr0;
+    quint32 srr1;
+    quint32 r0;
+    quint32 r1;
+    quint32 r2;
+    quint32 r3;
+    quint32 r4;
+    quint32 r5;
+    quint32 r6;
+    quint32 r7;
+    quint32 r8;
+    quint32 r9;
+    quint32 r10;
+    quint32 r11;
+    quint32 r12;
+    quint32 r13;
+    quint32 r14;
+    quint32 r15;
+    quint32 r16;
+    quint32 r17;
+    quint32 r18;
+    quint32 r19;
+    quint32 r20;
+    quint32 r21;
+    quint32 r22;
+    quint32 r23;
+    quint32 r24;
+    quint32 r25;
+    quint32 r26;
+    quint32 r27;
+    quint32 r28;
+    quint32 r29;
+    quint32 r30;
+    quint32 r31;
+    quint32 ct;
+    quint32 xer;
+    quint32 lr;
+    quint32 ctr;
+    quint32 mq;
+    quint32 vrsave;
 };
 
-struct ppc_state_hdr_t {
-  uint32_t flavor;
-  uint32_t count;
+struct ppc_state_hdr_t
+{
+    quint32 flavor;
+    quint32 count;
 };
 
-struct ppc_thread_state_t {
-  ppc_state_hdr_t tsh;
-  union {
-    ppc_thread_state32_t ts32;
-  } uts;
+struct ppc_thread_state_t
+{
+    ppc_state_hdr_t tsh;
+    union
+    {
+        ppc_thread_state32_t ts32;
+    } uts;
 };
 
-enum PPCThreadFlavors {
-  PPC_THREAD_STATE = 1,
-  PPC_FLOAT_STATE = 2,
-  PPC_EXCEPTION_STATE = 3,
-  PPC_VECTOR_STATE = 4,
-  PPC_THREAD_STATE64 = 5,
-  PPC_EXCEPTION_STATE64 = 6,
-  PPC_THREAD_STATE_NONE = 7
+enum PPCThreadFlavors
+{
+    PPC_THREAD_STATE=1,
+    PPC_FLOAT_STATE=2,
+    PPC_EXCEPTION_STATE=3,
+    PPC_VECTOR_STATE=4,
+    PPC_THREAD_STATE64=5,
+    PPC_EXCEPTION_STATE64=6,
+    PPC_THREAD_STATE_NONE=7
 };
 
 struct entry_point_command
