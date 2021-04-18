@@ -264,95 +264,106 @@ struct x86_thread_state64_t
     quint64 gs;
 };
 
-struct fp_control_t {
-  unsigned short invalid : 1, denorm : 1, zdiv : 1, ovrfl : 1, undfl : 1,
-      precis : 1, : 2, pc : 2, rc : 2, : 1, : 3;
+struct fp_control_t
+{
+    quint16 invalid : 1, denorm : 1, zdiv : 1, ovrfl : 1, undfl : 1,
+        precis : 1, : 2, pc : 2, rc : 2, : 1, : 3;
 };
 
-struct fp_status_t {
-  unsigned short invalid : 1, denorm : 1, zdiv : 1, ovrfl : 1, undfl : 1,
-      precis : 1, stkflt : 1, errsumm : 1, c0 : 1, c1 : 1, c2 : 1, tos : 3,
-      c3 : 1, busy : 1;
+struct fp_status_t
+{
+    quint16 invalid : 1, denorm : 1, zdiv : 1, ovrfl : 1, undfl : 1,
+        precis : 1, stkflt : 1, errsumm : 1, c0 : 1, c1 : 1, c2 : 1, tos : 3,
+        c3 : 1, busy : 1;
 };
 
-struct mmst_reg_t {
-  char mmst_reg[10];
-  char mmst_rsrv[6];
+struct mmst_reg_t
+{
+    qint8 mmst_reg[10];
+    qint8 mmst_rsrv[6];
 };
 
-struct xmm_reg_t {
-  char xmm_reg[16];
+struct xmm_reg_t
+{
+    qint8 xmm_reg[16];
 };
 
-struct x86_float_state64_t {
-  int32_t fpu_reserved[2];
-  fp_control_t fpu_fcw;
-  fp_status_t fpu_fsw;
-  uint8_t fpu_ftw;
-  uint8_t fpu_rsrv1;
-  uint16_t fpu_fop;
-  uint32_t fpu_ip;
-  uint16_t fpu_cs;
-  uint16_t fpu_rsrv2;
-  uint32_t fpu_dp;
-  uint16_t fpu_ds;
-  uint16_t fpu_rsrv3;
-  uint32_t fpu_mxcsr;
-  uint32_t fpu_mxcsrmask;
-  mmst_reg_t fpu_stmm0;
-  mmst_reg_t fpu_stmm1;
-  mmst_reg_t fpu_stmm2;
-  mmst_reg_t fpu_stmm3;
-  mmst_reg_t fpu_stmm4;
-  mmst_reg_t fpu_stmm5;
-  mmst_reg_t fpu_stmm6;
-  mmst_reg_t fpu_stmm7;
-  xmm_reg_t fpu_xmm0;
-  xmm_reg_t fpu_xmm1;
-  xmm_reg_t fpu_xmm2;
-  xmm_reg_t fpu_xmm3;
-  xmm_reg_t fpu_xmm4;
-  xmm_reg_t fpu_xmm5;
-  xmm_reg_t fpu_xmm6;
-  xmm_reg_t fpu_xmm7;
-  xmm_reg_t fpu_xmm8;
-  xmm_reg_t fpu_xmm9;
-  xmm_reg_t fpu_xmm10;
-  xmm_reg_t fpu_xmm11;
-  xmm_reg_t fpu_xmm12;
-  xmm_reg_t fpu_xmm13;
-  xmm_reg_t fpu_xmm14;
-  xmm_reg_t fpu_xmm15;
-  char fpu_rsrv4[6 * 16];
-  uint32_t fpu_reserved1;
+struct x86_float_state64_t
+{
+    qint32 fpu_reserved[2];
+    fp_control_t fpu_fcw;
+    fp_status_t fpu_fsw;
+    quint8 fpu_ftw;
+    quint8 fpu_rsrv1;
+    quint16 fpu_fop;
+    quint32 fpu_ip;
+    quint16 fpu_cs;
+    quint16 fpu_rsrv2;
+    quint32 fpu_dp;
+    quint16 fpu_ds;
+    quint16 fpu_rsrv3;
+    quint32 fpu_mxcsr;
+    quint32 fpu_mxcsrmask;
+    mmst_reg_t fpu_stmm0;
+    mmst_reg_t fpu_stmm1;
+    mmst_reg_t fpu_stmm2;
+    mmst_reg_t fpu_stmm3;
+    mmst_reg_t fpu_stmm4;
+    mmst_reg_t fpu_stmm5;
+    mmst_reg_t fpu_stmm6;
+    mmst_reg_t fpu_stmm7;
+    xmm_reg_t fpu_xmm0;
+    xmm_reg_t fpu_xmm1;
+    xmm_reg_t fpu_xmm2;
+    xmm_reg_t fpu_xmm3;
+    xmm_reg_t fpu_xmm4;
+    xmm_reg_t fpu_xmm5;
+    xmm_reg_t fpu_xmm6;
+    xmm_reg_t fpu_xmm7;
+    xmm_reg_t fpu_xmm8;
+    xmm_reg_t fpu_xmm9;
+    xmm_reg_t fpu_xmm10;
+    xmm_reg_t fpu_xmm11;
+    xmm_reg_t fpu_xmm12;
+    xmm_reg_t fpu_xmm13;
+    xmm_reg_t fpu_xmm14;
+    xmm_reg_t fpu_xmm15;
+    qint8 fpu_rsrv4[6*16];
+    quint32 fpu_reserved1;
 };
 
-struct x86_exception_state64_t {
-  uint16_t trapno;
-  uint16_t cpu;
-  uint32_t err;
-  uint64_t faultvaddr;
+struct x86_exception_state64_t
+{
+    quint16 trapno;
+    quint16 cpu;
+    quint32 err;
+    quint64 faultvaddr;
 };
 
 
-struct x86_state_hdr_t {
-  uint32_t flavor;
-  uint32_t count;
+struct x86_state_hdr_t
+{
+    quint32 flavor;
+    quint32 count;
 };
 
-struct x86_thread_state_t {
-  x86_state_hdr_t tsh;
-  union {
-    x86_thread_state64_t ts64;
-    x86_thread_state32_t ts32;
-  } uts;
+struct x86_thread_state_t
+{
+    x86_state_hdr_t tsh;
+    union
+    {
+        x86_thread_state64_t ts64;
+        x86_thread_state32_t ts32;
+    } uts;
 };
 
-struct x86_float_state_t {
-  x86_state_hdr_t fsh;
-  union {
-    x86_float_state64_t fs64;
-  } ufs;
+struct x86_float_state_t
+{
+    x86_state_hdr_t fsh;
+    union
+    {
+        x86_float_state64_t fs64;
+    } ufs;
 };
 
 struct x86_exception_state_t {
