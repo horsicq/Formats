@@ -219,47 +219,49 @@ const quint32 MH_DYLIB                              =0x6;		/* dynamicly bound sh
 const quint32 MH_DYLINKER	                        =0x7;		/* dynamic link editor */
 const quint32 MH_BUNDLE                             =0x8;		/* dynamicly bound bundle file */
 
-struct x86_thread_state32_t {
-  uint32_t eax;
-  uint32_t ebx;
-  uint32_t ecx;
-  uint32_t edx;
-  uint32_t edi;
-  uint32_t esi;
-  uint32_t ebp;
-  uint32_t esp;
-  uint32_t ss;
-  uint32_t eflags;
-  uint32_t eip;
-  uint32_t cs;
-  uint32_t ds;
-  uint32_t es;
-  uint32_t fs;
-  uint32_t gs;
+struct x86_thread_state32_t
+{
+    quint32 eax;
+    quint32 ebx;
+    quint32 ecx;
+    quint32 edx;
+    quint32 edi;
+    quint32 esi;
+    quint32 ebp;
+    quint32 esp;
+    quint32 ss;
+    quint32 eflags;
+    quint32 eip;
+    quint32 cs;
+    quint32 ds;
+    quint32 es;
+    quint32 fs;
+    quint32 gs;
 };
 
-struct x86_thread_state64_t {
-  uint64_t rax;
-  uint64_t rbx;
-  uint64_t rcx;
-  uint64_t rdx;
-  uint64_t rdi;
-  uint64_t rsi;
-  uint64_t rbp;
-  uint64_t rsp;
-  uint64_t r8;
-  uint64_t r9;
-  uint64_t r10;
-  uint64_t r11;
-  uint64_t r12;
-  uint64_t r13;
-  uint64_t r14;
-  uint64_t r15;
-  uint64_t rip;
-  uint64_t rflags;
-  uint64_t cs;
-  uint64_t fs;
-  uint64_t gs;
+struct x86_thread_state64_t
+{
+    quint64 rax;
+    quint64 rbx;
+    quint64 rcx;
+    quint64 rdx;
+    quint64 rdi;
+    quint64 rsi;
+    quint64 rbp;
+    quint64 rsp;
+    quint64 r8;
+    quint64 r9;
+    quint64 r10;
+    quint64 r11;
+    quint64 r12;
+    quint64 r13;
+    quint64 r14;
+    quint64 r15;
+    quint64 rip;
+    quint64 rflags;
+    quint64 cs;
+    quint64 fs;
+    quint64 gs;
 };
 
 struct fp_control_t {
