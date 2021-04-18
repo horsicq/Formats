@@ -266,15 +266,35 @@ struct x86_thread_state64_t
 
 struct fp_control_t
 {
-    quint16 invalid:1, denorm:1, zdiv:1, ovrfl:1, undfl:1,
-        precis:1,:2, pc:2, rc:2,:1,:3;
+    quint16 invalid:1;
+    quint16 denorm:1;
+    quint16 zdiv:1;
+    quint16 ovrfl:1;
+    quint16 undfl:1;
+    quint16 precis:1;
+    quint16 :2;
+    quint16 pc:2;
+    quint16 rc:2;
+    quint16 :1;
+    quint16 :3;
 };
 
 struct fp_status_t
 {
-    quint16 invalid:1, denorm:1, zdiv:1, ovrfl:1, undfl:1,
-        precis:1, stkflt:1, errsumm:1, c0:1, c1:1, c2:1, tos:3,
-        c3:1, busy:1;
+    quint16 invalid:1;
+    quint16 denorm:1;
+    quint16 zdiv:1;
+    quint16 ovrfl:1;
+    quint16 undfl:1;
+    quint16 precis:1;
+    quint16 stkflt:1;
+    quint16 errsumm:1;
+    quint16 c0:1;
+    quint16 c1:1;
+    quint16 c2:1;
+    quint16 tos:3;
+    quint16 c3:1;
+    quint16 busy:1;
 };
 
 struct mmst_reg_t
