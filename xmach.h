@@ -323,6 +323,11 @@ public:
     qint64 get_encryption_info_command_size();
     qint64 get_encryption_info_command_64_size();
 
+    void _set_linkedit_data_command_dataoff(qint64 nOffset,quint32 nValue);
+    void _set_linkedit_data_command_datasize(qint64 nOffset,quint32 nValue);
+
+    qint64 get_linkedit_data_command_size();
+
     XMACH_DEF::dyld_info_command _read_dyld_info_command(qint64 nOffset);
     XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
     XMACH_DEF::dysymtab_command _read_dysymtab_command(qint64 nOffset);
@@ -335,6 +340,11 @@ public:
     XMACH_DEF::entry_point_command _read_entry_point_command(qint64 nOffset);
     XMACH_DEF::x86_thread_state32_t _read_x86_thread_state32_t(qint64 nOffset);
     XMACH_DEF::x86_thread_state64_t _read_x86_thread_state64_t(qint64 nOffset);
+    XMACH_DEF::ppc_thread_state32_t _read_ppc_thread_state32_t(qint64 nOffset);
+    XMACH_DEF::arm_thread_state32_t _read_arm_thread_state32_t(qint64 nOffset);
+    XMACH_DEF::arm_thread_state64_t _read_arm_thread_state64_t(qint64 nOffset);
+    XMACH_DEF::state_hdr_t _read_state_hdr_t(qint64 nOffset);
+    XMACH_DEF::linkedit_data_command _read_linkedit_data_command(qint64 nOffset);
 
     virtual MODE getMode();
     virtual QString getArch();

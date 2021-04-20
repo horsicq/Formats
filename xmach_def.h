@@ -197,12 +197,14 @@ const quint32 LC_LOAD_WEAK_DYLIB                    =(0x18|LC_REQ_DYLD);
 const quint32 LC_SEGMENT_64                         =0x19;	        /* 64-bit segment of this file to bemapped */
 const quint32 LC_ROUTINES_64                        =0x1A;	        /* 64-bit image routines */
 const quint32 LC_UUID                               =0x1B;	        /* the uuid */
-const quint32 LC_RPATH                              =0x1C|0x80000000;
+const quint32 LC_RPATH                              =(0x1C|LC_REQ_DYLD);
 const quint32 LC_ENCRYPTION_INFO                    =0x21;
 const quint32 LC_DYLD_INFO                          =0x22;
 const quint32 LC_DYLD_INFO_ONLY                     =(0x22|LC_REQ_DYLD);
 const quint32 LC_VERSION_MIN_MACOSX                 =0x24;
 const quint32 LC_VERSION_MIN_IPHONEOS               =0x25;
+const quint32 LC_FUNCTION_STARTS                    =0x26;
+const quint32 LC_DATA_IN_CODE                       =0x29;
 const quint32 LC_SOURCE_VERSION                     =0x2A;
 const quint32 LC_ENCRYPTION_INFO_64                 =0x2C;
 const quint32 LC_VERSION_MIN_TVOS                   =0x2F;
@@ -721,6 +723,14 @@ struct routines_command_64
     quint64 reserved4;
     quint64 reserved5;
     quint64 reserved6;
+};
+
+struct linkedit_data_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 dataoff;
+    quint32 datasize;
 };
 
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html

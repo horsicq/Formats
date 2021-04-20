@@ -181,6 +181,7 @@ public:
         FT_ANDROIDXML,
         FT_APK,
         FT_JAR,
+        FT_IPA,
         FT_TEXT,
         FT_PLAINTEXT,
         FT_UTF8,
