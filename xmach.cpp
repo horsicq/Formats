@@ -962,6 +962,20 @@ qint64 XMACH::getCommandRecordOffset(quint32 nCommandID, int nIndex)
     return nResult;
 }
 
+qint64 XMACH::getCommandRecordOffset(quint32 nCommandID, int nIndex, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+{
+    qint64 nResult=-1;
+
+    QList<COMMAND_RECORD> listCR=getCommandRecords(nCommandID,pListCommandRecords);
+
+    if(nIndex<listCR.count())
+    {
+        nResult=listCR.at(nIndex).nStructOffset;
+    }
+
+    return nResult;
+}
+
 qint64 XMACH::getCommandHeaderSize()
 {
     return sizeof(XMACH_DEF::load_command);

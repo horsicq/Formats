@@ -155,6 +155,7 @@ public:
     bool setCommandData(quint32 nCommandID,QByteArray baData,int nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
 
     qint64 getCommandRecordOffset(quint32 nCommandID,int nIndex);
+    qint64 getCommandRecordOffset(quint32 nCommandID,int nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
 
     qint64 getCommandHeaderSize();
 
