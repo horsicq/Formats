@@ -47,6 +47,13 @@ bool XMACH::isValid()
     return bResult;
 }
 
+bool XMACH::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XMACH xmach(pDevice,bIsImage,nImageAddress);
+
+    return xmach.isValid();
+}
+
 bool XMACH::isBigEndian()
 {
     bool bResult=false;
@@ -2285,6 +2292,36 @@ qint64 XMACH::get_linkedit_data_command_size()
     return sizeof(XMACH_DEF::linkedit_data_command);
 }
 
+void XMACH::_set_entry_point_command_entryoff(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),nValue,isBigEndian());
+}
+
+void XMACH::_set_entry_point_command_stacksize(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,stacksize),nValue,isBigEndian());
+}
+
+qint64 XMACH::get_entry_point_command_size()
+{
+    return sizeof(XMACH_DEF::entry_point_command);
+}
+
+void XMACH::_set_unix_thread_command_flavor(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::unix_thread_command,flavor),nValue,isBigEndian());
+}
+
+void XMACH::_set_unix_thread_command_count(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::unix_thread_command,count),nValue,isBigEndian());
+}
+
+qint64 XMACH::get_unix_thread_command_size()
+{
+    return sizeof(XMACH_DEF::unix_thread_command);
+}
+
 XMACH_DEF::dylinker_command XMACH::_read_dylinker_command(qint64 nOffset)
 {
     XMACH_DEF::dylinker_command result={};
@@ -2536,6 +2573,20 @@ XMACH_DEF::linkedit_data_command XMACH::_read_linkedit_data_command(qint64 nOffs
     result.cmdsize=read_uint32(nOffset+offsetof(XMACH_DEF::linkedit_data_command,cmdsize),bIsBigEndian);
     result.dataoff=read_uint32(nOffset+offsetof(XMACH_DEF::linkedit_data_command,dataoff),bIsBigEndian);
     result.datasize=read_uint32(nOffset+offsetof(XMACH_DEF::linkedit_data_command,datasize),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::unix_thread_command XMACH::_read_unix_thread_command(qint64 nOffset)
+{
+    XMACH_DEF::unix_thread_command result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.cmd=read_uint32(nOffset+offsetof(XMACH_DEF::unix_thread_command,cmd),bIsBigEndian);
+    result.cmdsize=read_uint32(nOffset+offsetof(XMACH_DEF::unix_thread_command,cmdsize),bIsBigEndian);
+    result.flavor=read_uint32(nOffset+offsetof(XMACH_DEF::unix_thread_command,flavor),bIsBigEndian);
+    result.count=read_uint32(nOffset+offsetof(XMACH_DEF::unix_thread_command,count),bIsBigEndian);
 
     return result;
 }

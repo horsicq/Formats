@@ -198,6 +198,7 @@ const quint32 LC_SEGMENT_64                         =0x19;	        /* 64-bit seg
 const quint32 LC_ROUTINES_64                        =0x1A;	        /* 64-bit image routines */
 const quint32 LC_UUID                               =0x1B;	        /* the uuid */
 const quint32 LC_RPATH                              =(0x1C|LC_REQ_DYLD);
+const quint32 LC_CODE_SIGNATURE                     =0x1D;
 const quint32 LC_ENCRYPTION_INFO                    =0x21;
 const quint32 LC_DYLD_INFO                          =0x22;
 const quint32 LC_DYLD_INFO_ONLY                     =(0x22|LC_REQ_DYLD);
@@ -540,6 +541,14 @@ struct entry_point_command
     quint32 cmdsize;            /* 24 */
     quint64 entryoff;           /* file (__TEXT) offset of main() */
     quint64 stacksize;          /* if not zero, initial stack size */
+};
+
+struct unix_thread_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 flavor;
+    quint32 count;
 };
 
 struct dylib
