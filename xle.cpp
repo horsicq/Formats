@@ -49,6 +49,13 @@ bool XLE::isValid()
     return bResult;
 }
 
+bool XLE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XLE xle(pDevice,bIsImage,nImageAddress);
+
+    return xle.isValid();
+}
+
 qint64 XLE::getImageVxdHeaderOffset()
 {
     qint64 nResult=get_lfanew();
