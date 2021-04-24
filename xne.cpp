@@ -39,7 +39,7 @@ bool XNE::isValid()
         {
             quint32 signature=read_uint16(lfanew);
 
-            if(signature==XNE_DEF::IMAGE_OS2_SIGNATURE)
+            if(signature==XNE_DEF::S_IMAGE_OS2_SIGNATURE)
             {
                 bResult=true;
             }
