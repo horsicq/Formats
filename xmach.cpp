@@ -989,31 +989,47 @@ qint64 XMACH::getAddressOfEntryPoint()
 
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
 
-    int nNumberOfCommands=listCommandRecords.count();
-
-    for(int i=0;i<nNumberOfCommands;i++)
+    if(isCommandPresent(XMACH_DEF::LC_MAIN,&listCommandRecords))
     {
-        quint32 nType=listCommandRecords.at(i).nType;
-        qint64 nOffset=listCommandRecords.at(i).nStructOffset;
+        qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_MAIN,0,&listCommandRecords);
 
-        if((nType==XMACH_DEF::LC_THREAD)||(nType==XMACH_DEF::LC_UNIXTHREAD))
+        qint64 nEntryPointOffset=read_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),bIsBigEndian);
+
+        nResult=offsetToAddress(nEntryPointOffset);
+    }
+    else if(isCommandPresent(XMACH_DEF::LC_UNIXTHREAD,&listCommandRecords)) // TODO Check LC_THREAD
+    {
+        qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_UNIXTHREAD,0,&listCommandRecords);
+
+        quint32 nMachine=getHeader_cputype();
+
+        nOffset+=sizeof(XMACH_DEF::load_command);
+
+        XMACH_DEF::state_hdr_t _state_hdr=_read_state_hdr_t(nOffset);
+
+        nOffset+=sizeof(XMACH_DEF::state_hdr_t);
+
+        if((nMachine==XMACH_DEF::CPU_TYPE_I386)||(nMachine==XMACH_DEF::CPU_TYPE_X86_64))
         {
-            quint32 nFlavor=read_uint32(nOffset+8,bIsBigEndian);
-
-            if(nFlavor==XMACH_DEF::x86_THREAD_STATE32)
+            if(_state_hdr.flavor==XMACH_DEF::x86_THREAD_STATE32)
             {
-                nResult=read_uint32(nOffset+16+offsetof(XMACH_DEF::x86_thread_state32_t,eip),bIsBigEndian);
+                nResult=read_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,eip),bIsBigEndian);
             }
-            else if(nFlavor==XMACH_DEF::x86_THREAD_STATE64)
+            else if(_state_hdr.flavor==XMACH_DEF::x86_THREAD_STATE64)
             {
-                nResult=read_uint64(nOffset+16+offsetof(XMACH_DEF::x86_thread_state64_t,rip),bIsBigEndian);
+                nResult=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rip),bIsBigEndian);
             }
         }
-        else if(nType==XMACH_DEF::LC_MAIN)
+        else if((nMachine==XMACH_DEF::CPU_TYPE_ARM)||(nMachine==XMACH_DEF::CPU_TYPE_ARM64))
         {
-            qint64 nEntryPointOffset=read_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),bIsBigEndian);
-
-            nResult=offsetToAddress(nEntryPointOffset);
+            if(_state_hdr.flavor==XMACH_DEF::ARM_THREAD_STATE)
+            {
+                nResult=read_uint32(nOffset+offsetof(XMACH_DEF::arm_thread_state32_t,pc),bIsBigEndian);
+            }
+            else if(_state_hdr.flavor==XMACH_DEF::ARM_THREAD_STATE64)
+            {
+                nResult=read_uint64(nOffset+offsetof(XMACH_DEF::arm_thread_state64_t,pc),bIsBigEndian);
+            }
         }
     }
 
