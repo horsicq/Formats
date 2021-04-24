@@ -49,6 +49,13 @@ bool XNE::isValid()
     return bResult;
 }
 
+bool XNE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XNE xne(pDevice,bIsImage,nImageAddress);
+
+    return xne.isValid();
+}
+
 qint64 XNE::getImageOS2HeaderOffset()
 {
     qint64 nResult=get_lfanew();

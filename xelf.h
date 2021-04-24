@@ -81,6 +81,7 @@ public:
     ~XELF();
 
     virtual bool isValid();
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
     bool isBigEndian();
 
     qint64 getEhdrOffset();
