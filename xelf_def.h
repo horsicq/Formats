@@ -113,7 +113,22 @@ const quint32 PT_DYNAMIC                    =2;
 const quint32 PT_INTERP                     =3;
 const quint32 PT_NOTE                       =4;
 
+const quint32 ELFOSABI_HPUX                 =1;
+const quint32 ELFOSABI_NETBSD               =2;
 const quint32 ELFOSABI_LINUX                =3;
+const quint32 ELFOSABI_HURD                 =4;
+const quint32 ELFOSABI_86OPEN               =5;
+const quint32 ELFOSABI_SOLARIS              =6;
+const quint32 ELFOSABI_AIX                  =7;
+const quint32 ELFOSABI_IRIX                 =8;
+const quint32 ELFOSABI_FREEBSD              =9;
+const quint32 ELFOSABI_TRU64                =10;
+const quint32 ELFOSABI_MODESTO              =11;
+const quint32 ELFOSABI_OPENBSD              =12;
+const quint32 ELFOSABI_OPENVMS              =13;
+const quint32 ELFOSABI_NSK                  =14;
+const quint32 ELFOSABI_AROS                 =15;
+const quint32 ELFOSABI_FENIXOS              =16;
 
 struct Elf32_Ehdr
 {
