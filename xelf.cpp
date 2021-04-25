@@ -815,7 +815,7 @@ QMap<quint64, QString> XELF::getIndentOsabis()
     mapResult.insert(4,"ELFOSABI_HURD");
     mapResult.insert(5,"ELFOSABI_86OPEN");
     mapResult.insert(6,"ELFOSABI_SOLARIS");
-    mapResult.insert(7,"ELFOSABI_MONTEREY");
+    mapResult.insert(7,"ELFOSABI_AIX");
     mapResult.insert(8,"ELFOSABI_IRIX");
     mapResult.insert(9,"ELFOSABI_FREEBSD");
     mapResult.insert(10,"ELFOSABI_TRU64");
@@ -824,6 +824,8 @@ QMap<quint64, QString> XELF::getIndentOsabis()
     mapResult.insert(13,"ELFOSABI_OPENVMS");
     mapResult.insert(14,"ELFOSABI_NSK");
     mapResult.insert(15,"ELFOSABI_AROS");
+    mapResult.insert(16,"ELFOSABI_FENIXOS");
+    mapResult.insert(17,"ELFOSABI_CLOUDABI");
     mapResult.insert(64,"ELFOSABI_ARM_AEABI");
     mapResult.insert(97,"ELFOSABI_ARM");
     mapResult.insert(255,"ELFOSABI_STANDALONE");
@@ -842,7 +844,7 @@ QMap<quint64, QString> XELF::getIndentOsabisS()
     mapResult.insert(4,"HURD");
     mapResult.insert(5,"86OPEN");
     mapResult.insert(6,"SOLARIS");
-    mapResult.insert(7,"MONTEREY");
+    mapResult.insert(7,"AIX");
     mapResult.insert(8,"IRIX");
     mapResult.insert(9,"FREEBSD");
     mapResult.insert(10,"TRU64");
@@ -851,6 +853,8 @@ QMap<quint64, QString> XELF::getIndentOsabisS()
     mapResult.insert(13,"OPENVMS");
     mapResult.insert(14,"NSK");
     mapResult.insert(15,"AROS");
+    mapResult.insert(16,"FENIXOS");
+    mapResult.insert(17,"CLOUDABI");
     mapResult.insert(64,"ARM_AEABI");
     mapResult.insert(97,"ARM");
     mapResult.insert(255,"STANDALONE");
