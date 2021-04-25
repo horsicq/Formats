@@ -113,6 +113,8 @@ const quint32 PT_DYNAMIC                    =2;
 const quint32 PT_INTERP                     =3;
 const quint32 PT_NOTE                       =4;
 
+const quint32 ELFOSABI_LINUX                =3;
+
 struct Elf32_Ehdr
 {
     quint8 e_ident[EI_NIDENT];      /* ident bytes */
