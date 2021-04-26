@@ -4862,6 +4862,13 @@ bool XBinary::isValid()
     return true;
 }
 
+bool XBinary::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XBinary xbinary(pDevice,bIsImage,nImageAddress);
+
+    return xbinary.isValid();
+}
+
 bool XBinary::isBigEndian()
 {
     return g_bIsBigEndian;

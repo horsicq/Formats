@@ -677,6 +677,8 @@ public:
     QIODevice *getDevice();
 
     virtual bool isValid();
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
+
     virtual bool isBigEndian();
     bool is16();
     bool is32();
