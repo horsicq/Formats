@@ -90,7 +90,10 @@ public:
         TYPE_PRELOAD,
         TYPE_DYLIB,
         TYPE_DYLINKER,
-        TYPE_BUNDLE
+        TYPE_BUNDLE,
+        TYPE_DYLIB_STUB,
+        TYPE_DSYM,
+        TYPE_KEXT_BUNDLE
     };
 
     XMACH(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);

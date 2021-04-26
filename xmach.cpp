@@ -2666,38 +2666,17 @@ int XMACH::getType()
 
     quint32 nFileType=getHeader_filetype();
 
-    if(nFileType==XMACH_DEF::MH_OBJECT)
-    {
-        nResult=TYPE_OBJECT;
-    }
-    else if(nFileType==XMACH_DEF::MH_EXECUTE)
-    {
-        nResult=TYPE_EXECUTE;
-    }
-    else if(nFileType==XMACH_DEF::MH_FVMLIB)
-    {
-        nResult=TYPE_FVMLIB;
-    }
-    else if(nFileType==XMACH_DEF::MH_CORE)
-    {
-        nResult=TYPE_CORE;
-    }
-    else if(nFileType==XMACH_DEF::MH_PRELOAD)
-    {
-        nResult=TYPE_PRELOAD;
-    }
-    else if(nFileType==XMACH_DEF::MH_DYLIB)
-    {
-        nResult=TYPE_DYLIB;
-    }
-    else if(nFileType==XMACH_DEF::MH_DYLINKER)
-    {
-        nResult=TYPE_DYLINKER;
-    }
-    else if(nFileType==XMACH_DEF::MH_BUNDLE)
-    {
-        nResult=TYPE_BUNDLE;
-    }
+    if      (nFileType==XMACH_DEF::MH_OBJECT)       nResult=TYPE_OBJECT;
+    else if (nFileType==XMACH_DEF::MH_EXECUTE)      nResult=TYPE_EXECUTE;
+    else if (nFileType==XMACH_DEF::MH_FVMLIB)       nResult=TYPE_FVMLIB;
+    else if (nFileType==XMACH_DEF::MH_CORE)         nResult=TYPE_CORE;
+    else if (nFileType==XMACH_DEF::MH_PRELOAD)      nResult=TYPE_PRELOAD;
+    else if (nFileType==XMACH_DEF::MH_DYLIB)        nResult=TYPE_DYLIB;
+    else if (nFileType==XMACH_DEF::MH_DYLINKER)     nResult=TYPE_DYLINKER;
+    else if (nFileType==XMACH_DEF::MH_BUNDLE)       nResult=TYPE_BUNDLE;
+    else if (nFileType==XMACH_DEF::MH_DYLIB_STUB)   nResult=TYPE_DYLIB_STUB;
+    else if (nFileType==XMACH_DEF::MH_DSYM)         nResult=TYPE_DSYM;
+    else if (nFileType==XMACH_DEF::MH_KEXT_BUNDLE)  nResult=TYPE_KEXT_BUNDLE;
 
     return nResult;
 }
@@ -2717,6 +2696,9 @@ QString XMACH::typeIdToString(int nType)
         case TYPE_DYLIB:            sResult=QString("DYLIB");       break;
         case TYPE_DYLINKER:         sResult=QString("DYLINKER");    break;
         case TYPE_BUNDLE:           sResult=QString("BUNDLE");      break;
+        case TYPE_DYLIB_STUB:       sResult=QString("DYLIB_STUB");  break;
+        case TYPE_DSYM:             sResult=QString("DSYM");        break;
+        case TYPE_KEXT_BUNDLE:      sResult=QString("KEXT_BUNDLE"); break;
     }
 
     return sResult;

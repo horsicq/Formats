@@ -221,6 +221,9 @@ const quint32 MH_PRELOAD	                        =0x5;		/* preloaded executable 
 const quint32 MH_DYLIB                              =0x6;		/* dynamicly bound shared library file*/
 const quint32 MH_DYLINKER	                        =0x7;		/* dynamic link editor */
 const quint32 MH_BUNDLE                             =0x8;		/* dynamicly bound bundle file */
+const quint32 MH_DYLIB_STUB                         =0x9;
+const quint32 MH_DSYM                               =0xa;
+const quint32 MH_KEXT_BUNDLE                        =0xb;
 
 struct x86_thread_state32_t
 {
