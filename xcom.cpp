@@ -35,6 +35,13 @@ bool XCOM::isValid()
     return true; // mb TODO
 }
 
+bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XCOM xcom(pDevice,bIsImage,nImageAddress);
+
+    return xcom.isValid();
+}
+
 XBinary::_MEMORY_MAP XCOM::getMemoryMap()
 {
     _MEMORY_MAP result={};
