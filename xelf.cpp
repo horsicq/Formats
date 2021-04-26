@@ -3974,6 +3974,7 @@ QString XELF::typeIdToString(int nType)
     switch(nType)
     {
         case TYPE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_REL:              sResult=QString("REL");         break;
         case TYPE_EXEC:             sResult=QString("EXEC");        break;
         case TYPE_DYN:              sResult=QString("DYN");         break;
         case TYPE_CORE:             sResult=QString("CORE");        break;
