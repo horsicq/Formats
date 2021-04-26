@@ -343,6 +343,12 @@ public:
 
     qint64 get_unix_thread_command_size();
 
+    qint64 get_x86_thread_state32_t_size();
+    qint64 get_x86_thread_state64_t_size();
+    qint64 get_ppc_thread_state32_t_size();
+    qint64 get_arm_thread_state32_t_size();
+    qint64 get_arm_thread_state64_t_size();
+
     XMACH_DEF::dyld_info_command _read_dyld_info_command(qint64 nOffset);
     XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
     XMACH_DEF::dysymtab_command _read_dysymtab_command(qint64 nOffset);

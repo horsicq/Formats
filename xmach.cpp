@@ -2352,6 +2352,31 @@ qint64 XMACH::get_unix_thread_command_size()
     return sizeof(XMACH_DEF::unix_thread_command);
 }
 
+qint64 XMACH::get_x86_thread_state32_t_size()
+{
+    return sizeof(XMACH_DEF::x86_thread_state32_t);
+}
+
+qint64 XMACH::get_x86_thread_state64_t_size()
+{
+    return sizeof(XMACH_DEF::x86_thread_state64_t);
+}
+
+qint64 XMACH::get_ppc_thread_state32_t_size()
+{
+    return sizeof(XMACH_DEF::ppc_thread_state32_t);
+}
+
+qint64 XMACH::get_arm_thread_state32_t_size()
+{
+    return sizeof(XMACH_DEF::arm_thread_state32_t);
+}
+
+qint64 XMACH::get_arm_thread_state64_t_size()
+{
+    return sizeof(XMACH_DEF::arm_thread_state64_t);
+}
+
 XMACH_DEF::dylinker_command XMACH::_read_dylinker_command(qint64 nOffset)
 {
     XMACH_DEF::dylinker_command result={};
