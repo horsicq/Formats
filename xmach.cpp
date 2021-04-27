@@ -2352,6 +2352,86 @@ qint64 XMACH::get_unix_thread_command_size()
     return sizeof(XMACH_DEF::unix_thread_command);
 }
 
+void XMACH::_set_x86_thread_state32_t_eax(qint64 nOffset, quint32 nValue)
+{
+     write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,eax),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_ebx(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,ebx),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_ecx(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,ecx),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_edx(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,edx),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_edi(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,edi),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_esi(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,esi),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_ebp(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,ebp),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_esp(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,esp),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_ss(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,ss),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_eflags(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,eflags),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_eip(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,eip),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_cs(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,cs),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_ds(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,ds),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_es(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,es),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_fs(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,fs),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state32_t_gs(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,gs),nValue,isBigEndian());
+}
+
 qint64 XMACH::get_x86_thread_state32_t_size()
 {
     return sizeof(XMACH_DEF::x86_thread_state32_t);

@@ -343,6 +343,23 @@ public:
 
     qint64 get_unix_thread_command_size();
 
+    void _set_x86_thread_state32_t_eax(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_ebx(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_ecx(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_edx(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_edi(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_esi(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_ebp(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_esp(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_ss(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_eflags(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_eip(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_cs(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_ds(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_es(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_fs(qint64 nOffset,quint32 nValue);
+    void _set_x86_thread_state32_t_gs(qint64 nOffset,quint32 nValue);
+
     qint64 get_x86_thread_state32_t_size();
     qint64 get_x86_thread_state64_t_size();
     qint64 get_ppc_thread_state32_t_size();
