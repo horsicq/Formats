@@ -405,6 +405,15 @@ public:
     void _set_arm_thread_state32_t_cpsr(qint64 nOffset,quint32 nValue);
 
     qint64 get_arm_thread_state32_t_size();
+
+    void _set_arm_thread_state64_t_x(qint64 nOffset,quint64 nValue,qint32 nIndex);
+    void _set_arm_thread_state64_t_fp(qint64 nOffset,quint64 nValue);
+    void _set_arm_thread_state64_t_lr(qint64 nOffset,quint64 nValue);
+    void _set_arm_thread_state64_t_sp(qint64 nOffset,quint64 nValue);
+    void _set_arm_thread_state64_t_pc(qint64 nOffset,quint64 nValue);
+    void _set_arm_thread_state64_t_cpsr(qint64 nOffset,quint64 nValue);
+    void _set_arm_thread_state64_t_pad(qint64 nOffset,quint64 nValue);
+
     qint64 get_arm_thread_state64_t_size();
 
     XMACH_DEF::dyld_info_command _read_dyld_info_command(qint64 nOffset);
