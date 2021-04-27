@@ -385,6 +385,17 @@ public:
     void _set_x86_thread_state64_t_gs(qint64 nOffset,quint64 nValue);
 
     qint64 get_x86_thread_state64_t_size();
+
+    void _set_ppc_thread_state32_t_srr0(qint64 nOffset,quint32 nValue);
+    void _set_ppc_thread_state32_t_srr1(qint64 nOffset,quint32 nValue);
+    void _set_ppc_thread_state32_t_r(qint64 nOffset,quint32 nValue,qint32 nIndex);
+    void _set_ppc_thread_state32_t_ct(qint64 nOffset,quint32 nValue);
+    void _set_ppc_thread_state32_t_xer(qint64 nOffset,quint32 nValue);
+    void _set_ppc_thread_state32_t_lr(qint64 nOffset,quint32 nValue);
+    void _set_ppc_thread_state32_t_ctr(qint64 nOffset,quint32 nValue);
+    void _set_ppc_thread_state32_t_mq(qint64 nOffset,quint32 nValue);
+    void _set_ppc_thread_state32_t_vrsave(qint64 nOffset,quint32 nValue);
+
     qint64 get_ppc_thread_state32_t_size();
     qint64 get_arm_thread_state32_t_size();
     qint64 get_arm_thread_state64_t_size();
