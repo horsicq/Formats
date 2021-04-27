@@ -2437,6 +2437,111 @@ qint64 XMACH::get_x86_thread_state32_t_size()
     return sizeof(XMACH_DEF::x86_thread_state32_t);
 }
 
+void XMACH::_set_x86_thread_state64_t_rax(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rax),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_rbx(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rbx),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_rcx(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rcx),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_rdx(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rdx),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_rdi(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rdi),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_rsi(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rsi),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_rbp(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rbp),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_rsp(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rsp),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_r8(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r8),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_r9(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r9),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_r10(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r10),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_r11(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r11),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_r12(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r12),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_r13(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r13),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_r14(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r14),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_r15(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,r15),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_rip(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rip),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_rflags(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rflags),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_cs(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,cs),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_fs(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,fs),nValue,isBigEndian());
+}
+
+void XMACH::_set_x86_thread_state64_t_gs(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,gs),nValue,isBigEndian());
+}
+
 qint64 XMACH::get_x86_thread_state64_t_size()
 {
     return sizeof(XMACH_DEF::x86_thread_state64_t);

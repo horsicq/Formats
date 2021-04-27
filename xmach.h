@@ -361,6 +361,29 @@ public:
     void _set_x86_thread_state32_t_gs(qint64 nOffset,quint32 nValue);
 
     qint64 get_x86_thread_state32_t_size();
+
+    void _set_x86_thread_state64_t_rax(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_rbx(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_rcx(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_rdx(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_rdi(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_rsi(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_rbp(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_rsp(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_r8(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_r9(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_r10(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_r11(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_r12(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_r13(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_r14(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_r15(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_rip(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_rflags(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_cs(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_fs(qint64 nOffset,quint64 nValue);
+    void _set_x86_thread_state64_t_gs(qint64 nOffset,quint64 nValue);
+
     qint64 get_x86_thread_state64_t_size();
     qint64 get_ppc_thread_state32_t_size();
     qint64 get_arm_thread_state32_t_size();
