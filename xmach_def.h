@@ -725,6 +725,7 @@ struct data_in_code_entry
 // http://formats.kaitai.io/mach_o/
 // https://github.com/phausler/Shinobi/blob/master/include/llvm/Support/MachO.h
 // https://gist.github.com/yamaya/2924292
+// https://github.com/aidansteele/osx-abi-macho-file-format-reference
 // TODO code_signature_command
 
 enum reloc_type_x86_64
