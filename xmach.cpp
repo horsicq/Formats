@@ -2561,7 +2561,7 @@ void XMACH::_set_ppc_thread_state32_t_r(qint64 nOffset, quint32 nValue, qint32 n
 {
     if(nIndex<32)
     {
-        write_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r0)+sizeof(quint32)*nIndex,nValue,isBigEndian());
+        write_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r)+sizeof(quint32)*nIndex,nValue,isBigEndian());
     }
 }
 
@@ -2825,38 +2825,12 @@ XMACH_DEF::ppc_thread_state32_t XMACH::_read_ppc_thread_state32_t(qint64 nOffset
 
     result.srr0=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,srr0),bIsBigEndian);
     result.srr1=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,srr1),bIsBigEndian);
-    result.r0=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r0),bIsBigEndian);
-    result.r1=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r1),bIsBigEndian);
-    result.r2=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r2),bIsBigEndian);
-    result.r3=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r3),bIsBigEndian);
-    result.r4=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r4),bIsBigEndian);
-    result.r5=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r5),bIsBigEndian);
-    result.r6=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r6),bIsBigEndian);
-    result.r7=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r7),bIsBigEndian);
-    result.r8=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r8),bIsBigEndian);
-    result.r9=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r9),bIsBigEndian);
-    result.r10=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r10),bIsBigEndian);
-    result.r11=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r11),bIsBigEndian);
-    result.r12=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r12),bIsBigEndian);
-    result.r13=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r13),bIsBigEndian);
-    result.r14=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r14),bIsBigEndian);
-    result.r15=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r15),bIsBigEndian);
-    result.r16=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r16),bIsBigEndian);
-    result.r17=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r17),bIsBigEndian);
-    result.r18=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r18),bIsBigEndian);
-    result.r19=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r19),bIsBigEndian);
-    result.r20=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r20),bIsBigEndian);
-    result.r21=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r21),bIsBigEndian);
-    result.r22=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r22),bIsBigEndian);
-    result.r23=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r23),bIsBigEndian);
-    result.r24=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r24),bIsBigEndian);
-    result.r25=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r25),bIsBigEndian);
-    result.r26=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r26),bIsBigEndian);
-    result.r27=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r27),bIsBigEndian);
-    result.r28=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r28),bIsBigEndian);
-    result.r29=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r29),bIsBigEndian);
-    result.r30=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r30),bIsBigEndian);
-    result.r31=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r31),bIsBigEndian);
+
+    for(int i=0;i<32;i++)
+    {
+        result.r[i]=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r)+sizeof(quint32)*i,bIsBigEndian);
+    }
+
     result.ct=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,ct),bIsBigEndian);
     result.xer=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,xer),bIsBigEndian);
     result.lr=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,lr),bIsBigEndian);

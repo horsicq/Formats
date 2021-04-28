@@ -466,38 +466,7 @@ struct ppc_thread_state32_t
 {
     quint32 srr0;
     quint32 srr1;
-    quint32 r0;
-    quint32 r1;
-    quint32 r2;
-    quint32 r3;
-    quint32 r4;
-    quint32 r5;
-    quint32 r6;
-    quint32 r7;
-    quint32 r8;
-    quint32 r9;
-    quint32 r10;
-    quint32 r11;
-    quint32 r12;
-    quint32 r13;
-    quint32 r14;
-    quint32 r15;
-    quint32 r16;
-    quint32 r17;
-    quint32 r18;
-    quint32 r19;
-    quint32 r20;
-    quint32 r21;
-    quint32 r22;
-    quint32 r23;
-    quint32 r24;
-    quint32 r25;
-    quint32 r26;
-    quint32 r27;
-    quint32 r28;
-    quint32 r29;
-    quint32 r30;
-    quint32 r31;
+    quint32 r[32];
     quint32 ct;
     quint32 xer;
     quint32 lr;
@@ -745,8 +714,16 @@ struct linkedit_data_command
     quint32 datasize;
 };
 
+struct data_in_code_entry
+{
+    quint32 offset;  /* from mach_header to start of data range*/
+    quint16 length;  /* number of bytes in data range */
+    quint16 kind;    /* a DICE_KIND_* value  */
+};
+
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html
 // http://formats.kaitai.io/mach_o/
+// https://github.com/phausler/Shinobi/blob/master/include/llvm/Support/MachO.h
 // https://gist.github.com/yamaya/2924292
 // TODO code_signature_command
 
