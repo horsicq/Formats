@@ -6414,6 +6414,18 @@ bool XBinary::isUnicodeSymbol(quint16 nCode)
     return bResult;
 }
 
+QString XBinary::getStringFromIndex(qint64 nOffset, qint64 nSize, int nIndex)
+{
+    QString sResult;
+
+    if(nIndex<nSize)
+    {
+        sResult=read_ansiString(nOffset+nIndex);
+    }
+
+    return sResult;
+}
+
 QList<QString> XBinary::getAllFilesFromDirectory(QString sDirectory, QString sExtension)
 {
     QDir directory(sDirectory);

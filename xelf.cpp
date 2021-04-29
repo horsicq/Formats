@@ -1187,18 +1187,6 @@ XBinary::OFFSETSIZE XELF::getSectionOffsetSize(quint32 nSection)
     return result;
 }
 
-QString XELF::getStringFromIndex(qint64 nOffset, qint64 nSize, int nIndex)
-{
-    QString sResult;
-
-    if(nIndex<nSize)
-    {
-        sResult=read_ansiString(nOffset+nIndex);
-    }
-
-    return sResult;
-}
-
 QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
 {
     QMap<quint32, QString> mapResult;

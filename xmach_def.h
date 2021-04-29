@@ -721,6 +721,24 @@ struct data_in_code_entry
     quint16 kind;    /* a DICE_KIND_* value  */
 };
 
+struct nlist
+{
+    quint32 n_strx;
+    quint8 n_type;
+    quint8 n_sect;
+    quint16 n_desc;
+    quint32 n_value;
+};
+
+struct nlist_64
+{
+    quint32 n_strx;
+    quint8 n_type;
+    quint8 n_sect;
+    quint16 n_desc;
+    quint64 n_value;
+};
+
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html
 // http://formats.kaitai.io/mach_o/
 // https://github.com/phausler/Shinobi/blob/master/include/llvm/Support/MachO.h

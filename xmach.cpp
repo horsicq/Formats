@@ -301,7 +301,8 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
     else if((nCpuType==XMACH_DEF::CPU_TYPE_I386)||
             (nCpuType==XMACH_DEF::CPU_TYPE_X86_64))
     {
-        mapResult.insert(3,"CPU_SUBTYPE_386");
+        mapResult.insert(3,"CPU_SUBTYPE_386_ALL");
+        mapResult.insert(0x80000003,"CPU_SUBTYPE_X86_64_ALL");
         // TODO
     }
     else if(nCpuType==XMACH_DEF::CPU_TYPE_MIPS)
@@ -434,7 +435,8 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
     else if((nCpuType==XMACH_DEF::CPU_TYPE_I386)||
             (nCpuType==XMACH_DEF::CPU_TYPE_X86_64))
     {
-        mapResult.insert(3,"386");
+        mapResult.insert(3,"386_ALL");
+        mapResult.insert(0x80000003,"X86_64_ALL");
         // TODO
     }
     else if(nCpuType==XMACH_DEF::CPU_TYPE_MIPS)

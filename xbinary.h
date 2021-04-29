@@ -836,6 +836,7 @@ public:
 
     static bool isAnsiSymbol(quint8 cCode);
     static bool isUnicodeSymbol(quint16 nCode);
+    QString getStringFromIndex(qint64 nOffset, qint64 nSize, int nIndex);
 
     static QList<QString> getAllFilesFromDirectory(QString sDirectory,QString sExtension);
 
