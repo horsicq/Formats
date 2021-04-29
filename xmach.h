@@ -69,6 +69,16 @@ public:
         }s;
     };
 
+    struct NLIST_RECORD
+    {
+        qint64 nStructOffset;
+        union
+        {
+            XMACH_DEF::nlist nlist32;
+            XMACH_DEF::nlist_64 nlist64;
+        }s;
+    };
+
     enum TYPE
     {
         TYPE_UNKNOWN=0,
@@ -405,6 +415,22 @@ public:
 
     qint64 get_arm_thread_state64_t_size();
 
+    void _set_nlist_n_strx(qint64 nOffset,quint32 nValue);
+    void _set_nlist_n_type(qint64 nOffset,quint8 nValue);
+    void _set_nlist_n_sect(qint64 nOffset,quint8 nValue);
+    void _set_nlist_n_desc(qint64 nOffset,quint16 nValue);
+    void _set_nlist_n_value(qint64 nOffset,quint32 nValue);
+
+    qint64 get_nlist_size();
+
+    void _set_nlist_64_n_strx(qint64 nOffset,quint32 nValue);
+    void _set_nlist_64_n_type(qint64 nOffset,quint8 nValue);
+    void _set_nlist_64_n_sect(qint64 nOffset,quint8 nValue);
+    void _set_nlist_64_n_desc(qint64 nOffset,quint16 nValue);
+    void _set_nlist_64_n_value(qint64 nOffset,quint64 nValue);
+
+    qint64 get_nlist_64_size();
+
     XMACH_DEF::dyld_info_command _read_dyld_info_command(qint64 nOffset);
     XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
     XMACH_DEF::dysymtab_command _read_dysymtab_command(qint64 nOffset);
@@ -423,6 +449,11 @@ public:
     XMACH_DEF::state_hdr_t _read_state_hdr_t(qint64 nOffset);
     XMACH_DEF::linkedit_data_command _read_linkedit_data_command(qint64 nOffset);
     XMACH_DEF::unix_thread_command _read_unix_thread_command(qint64 nOffset);
+    XMACH_DEF::nlist _read_nlist(qint64 nOffset);
+    XMACH_DEF::nlist_64 _read_nlist_64(qint64 nOffset);
+
+    QList<NLIST_RECORD> getNlistRecords();
+    QList<NLIST_RECORD> getNlistRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
     virtual MODE getMode();
     virtual QString getArch();

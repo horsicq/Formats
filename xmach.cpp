@@ -2658,6 +2658,66 @@ qint64 XMACH::get_arm_thread_state64_t_size()
     return sizeof(XMACH_DEF::arm_thread_state64_t);
 }
 
+void XMACH::_set_nlist_n_strx(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::nlist,n_strx),nValue,isBigEndian());
+}
+
+void XMACH::_set_nlist_n_type(qint64 nOffset, quint8 nValue)
+{
+    write_uint8(nOffset+offsetof(XMACH_DEF::nlist,n_type),nValue);
+}
+
+void XMACH::_set_nlist_n_sect(qint64 nOffset, quint8 nValue)
+{
+    write_uint8(nOffset+offsetof(XMACH_DEF::nlist,n_sect),nValue);
+}
+
+void XMACH::_set_nlist_n_desc(qint64 nOffset, quint16 nValue)
+{
+    write_uint16(nOffset+offsetof(XMACH_DEF::nlist,n_desc),nValue,isBigEndian());
+}
+
+void XMACH::_set_nlist_n_value(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::nlist,n_value),nValue,isBigEndian());
+}
+
+qint64 XMACH::get_nlist_size()
+{
+    return sizeof(XMACH_DEF::nlist);
+}
+
+void XMACH::_set_nlist_64_n_strx(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::nlist_64,n_strx),nValue,isBigEndian());
+}
+
+void XMACH::_set_nlist_64_n_type(qint64 nOffset, quint8 nValue)
+{
+    write_uint8(nOffset+offsetof(XMACH_DEF::nlist_64,n_type),nValue);
+}
+
+void XMACH::_set_nlist_64_n_sect(qint64 nOffset, quint8 nValue)
+{
+    write_uint8(nOffset+offsetof(XMACH_DEF::nlist_64,n_sect),nValue);
+}
+
+void XMACH::_set_nlist_64_n_desc(qint64 nOffset, quint16 nValue)
+{
+    write_uint16(nOffset+offsetof(XMACH_DEF::nlist_64,n_desc),nValue,isBigEndian());
+}
+
+void XMACH::_set_nlist_64_n_value(qint64 nOffset, quint64 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::nlist_64,n_value),nValue,isBigEndian());
+}
+
+qint64 XMACH::get_nlist_64_size()
+{
+    return sizeof(XMACH_DEF::nlist_64);
+}
+
 XMACH_DEF::dylinker_command XMACH::_read_dylinker_command(qint64 nOffset)
 {
     XMACH_DEF::dylinker_command result={};
@@ -2899,6 +2959,81 @@ XMACH_DEF::unix_thread_command XMACH::_read_unix_thread_command(qint64 nOffset)
     result.count=read_uint32(nOffset+offsetof(XMACH_DEF::unix_thread_command,count),bIsBigEndian);
 
     return result;
+}
+
+XMACH_DEF::nlist XMACH::_read_nlist(qint64 nOffset)
+{
+    XMACH_DEF::nlist result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.n_strx=read_uint32(nOffset+offsetof(XMACH_DEF::nlist,n_strx),bIsBigEndian);
+    result.n_type=read_uint8(nOffset+offsetof(XMACH_DEF::nlist,n_type));
+    result.n_sect=read_uint8(nOffset+offsetof(XMACH_DEF::nlist,n_sect));
+    result.n_desc=read_uint16(nOffset+offsetof(XMACH_DEF::nlist,n_desc),bIsBigEndian);
+    result.n_value=read_uint32(nOffset+offsetof(XMACH_DEF::nlist,n_value),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::nlist_64 XMACH::_read_nlist_64(qint64 nOffset)
+{
+    XMACH_DEF::nlist_64 result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.n_strx=read_uint32(nOffset+offsetof(XMACH_DEF::nlist_64,n_strx),bIsBigEndian);
+    result.n_type=read_uint8(nOffset+offsetof(XMACH_DEF::nlist_64,n_type));
+    result.n_sect=read_uint8(nOffset+offsetof(XMACH_DEF::nlist_64,n_sect));
+    result.n_desc=read_uint16(nOffset+offsetof(XMACH_DEF::nlist_64,n_desc),bIsBigEndian);
+    result.n_value=read_uint64(nOffset+offsetof(XMACH_DEF::nlist_64,n_value),bIsBigEndian);
+
+    return result;
+}
+
+QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords()
+{
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
+
+    return getNlistRecords(&listCommandRecords);
+}
+
+QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+{
+    QList<NLIST_RECORD> listResult;
+
+    bool bIs64=is64();
+
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_SYMTAB,0,pListCommandRecords);
+
+    if(nOffset!=-1)
+    {
+        XMACH_DEF::symtab_command symtab=_read_symtab_command(nOffset);
+
+        nOffset=symtab.symoff;
+
+        for(int i=0;i<symtab.nsyms;i++)
+        {
+            NLIST_RECORD record={};
+
+            record.nStructOffset=nOffset;
+
+            if(bIs64)
+            {
+                record.s.nlist64=_read_nlist_64(nOffset);
+
+                nOffset+=get_nlist_64_size();
+            }
+            else
+            {
+                record.s.nlist32=_read_nlist(nOffset);
+
+                nOffset+=get_nlist_size();
+            }
+        }
+    }
+
+    return listResult;
 }
 
 XBinary::MODE XMACH::getMode()
