@@ -3012,7 +3012,7 @@ QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords(QList<XMACH::COMMAND_RECORD> *
 
         nOffset=symtab.symoff;
 
-        for(int i=0;i<symtab.nsyms;i++)
+        for(int i=0;i<(int)(symtab.nsyms);i++)
         {
             NLIST_RECORD record={};
 
@@ -3023,13 +3023,25 @@ QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords(QList<XMACH::COMMAND_RECORD> *
                 record.s.nlist64=_read_nlist_64(nOffset);
 
                 nOffset+=get_nlist_64_size();
+
+                if(record.s.nlist64.n_strx==0)
+                {
+                    break;
+                }
             }
             else
             {
                 record.s.nlist32=_read_nlist(nOffset);
 
                 nOffset+=get_nlist_size();
+
+                if(record.s.nlist32.n_strx==0)
+                {
+                    break;
+                }
             }
+
+            listResult.append(record);
         }
     }
 
