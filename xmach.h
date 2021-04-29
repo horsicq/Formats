@@ -52,15 +52,12 @@ public:
     struct SEGMENT_RECORD
     {
         qint64 nStructOffset;
-        char segname[16];
-        quint64 vmaddr;
-        quint64 vmsize;
-        quint64 fileoff;
-        quint64 filesize;
-        qint32 maxprot;
-        qint32 initprot;
-        quint32 nsects;
-        quint32 flags;
+
+        union
+        {
+            XMACH_DEF::segment_command segment32;
+            XMACH_DEF::segment_command_64 segment64;
+        }s;
     };
 
     struct SECTION_RECORD

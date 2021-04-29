@@ -1072,15 +1072,34 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
     qint64 nMaxOffset=0;
     qint64 nMaxAddress=0;
 
+    bool bIs64=is64();
+
     for(int i=0; i<nNumberOfSegments; i++)
     {
-        QString sSegmentName=QString("%1(%2)['%3']").arg(tr("Segment")).arg(i).arg(listSegmentRecords.at(i).segname); // TODO Limit
+        QString sSegmentName; // TODO Limit
         // TODO Align
         // TODO File size
-        qint64 nFileOffset=listSegmentRecords.at(i).fileoff;
-        qint64 nVirtualAddress=listSegmentRecords.at(i).vmaddr;
-        qint64 nFileSize=listSegmentRecords.at(i).filesize;
-        qint64 nVirtualSize=listSegmentRecords.at(i).vmsize;
+        qint64 nFileOffset=0;
+        qint64 nVirtualAddress=0;
+        qint64 nFileSize=0;
+        qint64 nVirtualSize=0;
+
+        if(bIs64)
+        {
+            sSegmentName=QString("%1(%2)['%3']").arg(tr("Segment")).arg(i).arg(listSegmentRecords.at(i).s.segment64.segname); // TODO Limit
+            nFileOffset=listSegmentRecords.at(i).s.segment64.fileoff;
+            nVirtualAddress=listSegmentRecords.at(i).s.segment64.vmaddr;
+            nFileSize=listSegmentRecords.at(i).s.segment64.filesize;
+            nVirtualSize=listSegmentRecords.at(i).s.segment64.vmsize;
+        }
+        else
+        {
+            sSegmentName=QString("%1(%2)['%3']").arg(tr("Segment")).arg(i).arg(listSegmentRecords.at(i).s.segment32.segname); // TODO Limit
+            nFileOffset=listSegmentRecords.at(i).s.segment32.fileoff;
+            nVirtualAddress=listSegmentRecords.at(i).s.segment32.vmaddr;
+            nFileSize=listSegmentRecords.at(i).s.segment32.filesize;
+            nVirtualSize=listSegmentRecords.at(i).s.segment32.vmsize;
+        }
 
         if(nFileSize)
         {
@@ -1292,15 +1311,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
             SEGMENT_RECORD record={};
 
             record.nStructOffset=nOffset;
-            read_array(nOffset+offsetof(XMACH_DEF::segment_command_64,segname),record.segname,sizeof(record.segname));
-            record.vmaddr=read_uint64(nOffset+offsetof(XMACH_DEF::segment_command_64,vmaddr),bIsBigEndian);
-            record.vmsize=read_uint64(nOffset+offsetof(XMACH_DEF::segment_command_64,vmsize),bIsBigEndian);
-            record.fileoff=read_uint64(nOffset+offsetof(XMACH_DEF::segment_command_64,fileoff),bIsBigEndian);
-            record.filesize=read_uint64(nOffset+offsetof(XMACH_DEF::segment_command_64,filesize),bIsBigEndian);
-            record.maxprot=read_int32(nOffset+offsetof(XMACH_DEF::segment_command_64,maxprot),bIsBigEndian);
-            record.initprot=read_int32(nOffset+offsetof(XMACH_DEF::segment_command_64,initprot),bIsBigEndian);
-            record.nsects=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,nsects),bIsBigEndian);
-            record.flags=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,flags),bIsBigEndian);
+            record.s.segment64=_read_segment_command_64(nOffset,bIsBigEndian);
 
             listResult.append(record);
         }
@@ -1318,15 +1329,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
             SEGMENT_RECORD record={};
 
             record.nStructOffset=nOffset;
-            read_array(nOffset+offsetof(XMACH_DEF::segment_command,segname),record.segname,sizeof(record.segname));
-            record.vmaddr=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,vmaddr),bIsBigEndian);
-            record.vmsize=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,vmsize),bIsBigEndian);
-            record.fileoff=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,fileoff),bIsBigEndian);
-            record.filesize=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,filesize),bIsBigEndian);
-            record.maxprot=read_int32(nOffset+offsetof(XMACH_DEF::segment_command,maxprot),bIsBigEndian);
-            record.initprot=read_int32(nOffset+offsetof(XMACH_DEF::segment_command,initprot),bIsBigEndian);
-            record.nsects=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),bIsBigEndian);
-            record.flags=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,flags),bIsBigEndian);
+            record.s.segment32=_read_segment_command(nOffset,bIsBigEndian);
 
             listResult.append(record);
         }
