@@ -1494,19 +1494,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
                 SECTION_RECORD record={};
 
                 record.nStructOffset=nOffset;
-
-                read_array(nOffset+offsetof(XMACH_DEF::section_64,sectname),record.sectname,16);
-                read_array(nOffset+offsetof(XMACH_DEF::section_64,segname),record.segname,16);
-                record.addr=read_uint64(nOffset+offsetof(XMACH_DEF::section_64,addr),bIsBigEndian);
-                record.size=read_uint64(nOffset+offsetof(XMACH_DEF::section_64,size),bIsBigEndian);
-                record.offset=read_uint32(nOffset+offsetof(XMACH_DEF::section_64,offset),bIsBigEndian);
-                record.align=read_uint32(nOffset+offsetof(XMACH_DEF::section_64,align),bIsBigEndian);
-                record.reloff=read_uint32(nOffset+offsetof(XMACH_DEF::section_64,reloff),bIsBigEndian);
-                record.nreloc=read_uint32(nOffset+offsetof(XMACH_DEF::section_64,nreloc),bIsBigEndian);
-                record.flags=read_uint32(nOffset+offsetof(XMACH_DEF::section_64,flags),bIsBigEndian);
-                record.reserved1=read_uint32(nOffset+offsetof(XMACH_DEF::section_64,reserved1),bIsBigEndian);
-                record.reserved2=read_uint32(nOffset+offsetof(XMACH_DEF::section_64,reserved2),bIsBigEndian);
-                record.reserved3=read_uint32(nOffset+offsetof(XMACH_DEF::section_64,reserved3),bIsBigEndian);
+                record.s.section64=_read_section_64(nOffset,bIsBigEndian);
 
                 listResult.append(record);
 
@@ -1532,18 +1520,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
                 SECTION_RECORD record={};
 
                 record.nStructOffset=nOffset;
-
-                read_array(nOffset+offsetof(XMACH_DEF::section,sectname),record.sectname,16);
-                read_array(nOffset+offsetof(XMACH_DEF::section,segname),record.segname,16);
-                record.addr=read_uint32(nOffset+offsetof(XMACH_DEF::section,addr),bIsBigEndian);
-                record.size=read_uint32(nOffset+offsetof(XMACH_DEF::section,size),bIsBigEndian);
-                record.offset=read_uint32(nOffset+offsetof(XMACH_DEF::section,offset),bIsBigEndian);
-                record.align=read_uint32(nOffset+offsetof(XMACH_DEF::section,align),bIsBigEndian);
-                record.reloff=read_uint32(nOffset+offsetof(XMACH_DEF::section,reloff),bIsBigEndian);
-                record.nreloc=read_uint32(nOffset+offsetof(XMACH_DEF::section,nreloc),bIsBigEndian);
-                record.flags=read_uint32(nOffset+offsetof(XMACH_DEF::section,flags),bIsBigEndian);
-                record.reserved1=read_uint32(nOffset+offsetof(XMACH_DEF::section,reserved1),bIsBigEndian);
-                record.reserved2=read_uint32(nOffset+offsetof(XMACH_DEF::section,reserved2),bIsBigEndian);
+                record.s.section32=_read_section(nOffset,bIsBigEndian);
 
                 listResult.append(record);
 
@@ -1793,7 +1770,7 @@ qint32 XMACH::getSectionNumber(QString sName, QList<XMACH::SECTION_RECORD> *pLis
 
     for(int i=0;i<nNumberOfSections;i++)
     {
-        QString _sName=QString(pListSectionRecords->at(i).sectname);
+        QString _sName=QString(pListSectionRecords->at(i).s.section32.sectname); // TODO Check 64
         if(_sName.size()>16)
         {
             _sName.resize(16);

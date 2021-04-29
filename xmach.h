@@ -52,7 +52,6 @@ public:
     struct SEGMENT_RECORD
     {
         qint64 nStructOffset;
-
         union
         {
             XMACH_DEF::segment_command segment32;
@@ -63,18 +62,11 @@ public:
     struct SECTION_RECORD
     {
         qint64 nStructOffset;
-        char sectname[16]; // TODO const
-        char segname[16]; // TODO const
-        quint64	addr;
-        quint64	size;
-        quint32	offset;
-        quint32	align;
-        quint32	reloff;
-        quint32	nreloc;
-        quint32	flags;
-        quint32	reserved1;
-        quint32	reserved2;
-        quint32	reserved3;
+        union
+        {
+            XMACH_DEF::section section32;
+            XMACH_DEF::section_64 section64;
+        }s;
     };
 
     enum TYPE
