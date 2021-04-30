@@ -451,6 +451,7 @@ public:
     XMACH_DEF::unix_thread_command _read_unix_thread_command(qint64 nOffset);
     XMACH_DEF::nlist _read_nlist(qint64 nOffset);
     XMACH_DEF::nlist_64 _read_nlist_64(qint64 nOffset);
+    XMACH_DEF::data_in_code_entry _read_data_in_code_entry(qint64 nOffset);
 
     QList<NLIST_RECORD> getNlistRecords();
     QList<NLIST_RECORD> getNlistRecords(QList<COMMAND_RECORD> *pListCommandRecords);

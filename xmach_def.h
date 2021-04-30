@@ -739,6 +739,86 @@ struct nlist_64
     quint64 n_value;
 };
 
+struct sub_framework_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 umbrella;
+};
+
+struct sub_client_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 client;
+};
+
+struct sub_umbrella_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 sub_umbrella;
+};
+
+struct sub_library_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 sub_library;
+};
+
+struct prebound_dylib_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 name;
+    quint32 nmodules;
+    quint32 linked_modules;
+};
+
+struct thread_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+};
+
+struct twolevel_hints_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 offset;
+    quint32 nhints;
+};
+
+struct prebind_cksum_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 cksum;
+};
+
+struct symseg_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 offset;
+    quint32 size;
+};
+
+struct ident_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+};
+
+struct fvmfile_command
+{
+    quint32 cmd;
+    quint32 cmdsize;
+    quint32 name;
+    quint32 header_addr;
+};
+
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html
 // http://formats.kaitai.io/mach_o/
 // https://github.com/phausler/Shinobi/blob/master/include/llvm/Support/MachO.h
