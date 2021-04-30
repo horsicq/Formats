@@ -3117,6 +3117,22 @@ XMACH_DEF::symtab_command XMACH::get_symtab()
     return result;
 }
 
+XMACH_DEF::dysymtab_command XMACH::get_dysymtab()
+{
+    XMACH_DEF::dysymtab_command result={};
+
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_DYSYMTAB);
+
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_DYSYMTAB,0,&listCommandRecords);
+
+    if(nOffset!=-1)
+    {
+        result=_read_dysymtab_command(nOffset);
+    }
+
+    return result;
+}
+
 XBinary::MODE XMACH::getMode()
 {
     MODE result=MODE_32;
