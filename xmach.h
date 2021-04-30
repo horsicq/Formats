@@ -455,6 +455,9 @@ public:
     QList<NLIST_RECORD> getNlistRecords();
     QList<NLIST_RECORD> getNlistRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
+    OFFSETSIZE getStringTableOS();
+    OFFSETSIZE getStringTableOS(QList<COMMAND_RECORD> *pListCommandRecords);
+
     virtual MODE getMode();
     virtual QString getArch();
     virtual FT getFileType();

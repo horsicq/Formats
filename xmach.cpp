@@ -3048,6 +3048,30 @@ QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords(QList<XMACH::COMMAND_RECORD> *
     return listResult;
 }
 
+XBinary::OFFSETSIZE XMACH::getStringTableOS()
+{
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
+
+    return getStringTableOS(&listCommandRecords);
+}
+
+XBinary::OFFSETSIZE XMACH::getStringTableOS(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+{
+    OFFSETSIZE result={};
+
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_SYMTAB,0,pListCommandRecords);
+
+    if(nOffset!=-1)
+    {
+        XMACH_DEF::symtab_command symtab=_read_symtab_command(nOffset);
+
+        result.nOffset=symtab.stroff;
+        result.nSize=symtab.stroff;
+    }
+
+    return result;
+}
+
 XBinary::MODE XMACH::getMode()
 {
     MODE result=MODE_32;
