@@ -843,7 +843,7 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<
 
 bool XMACH::isCommandPresent(quint32 nCommandID, int nIndex)
 {
-    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(nCommandID);
 
     return isCommandPresent(nCommandID,nIndex,&listCommandRecords);
 }
@@ -881,14 +881,14 @@ bool XMACH::isCommandPresent(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *p
 
 QByteArray XMACH::getCommandData(quint32 nCommandID, int nIndex)
 {
-    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(nCommandID);
 
     return getCommandData(nCommandID,nIndex,&listCommandRecords);
 }
 
 bool XMACH::setCommandData(quint32 nCommandID, QByteArray baData, int nIndex)
 {
-    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(nCommandID);
 
     return setCommandData(nCommandID,baData,nIndex,&listCommandRecords);
 }
@@ -1165,7 +1165,7 @@ qint64 XMACH::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 
 QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(int nType)
 {
-    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(nType);
 
     return getLibraryRecords(&listCommandRecords,nType);
 }
@@ -2993,7 +2993,7 @@ XMACH_DEF::nlist_64 XMACH::_read_nlist_64(qint64 nOffset)
 
 QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords()
 {
-    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_SYMTAB);
 
     return getNlistRecords(&listCommandRecords);
 }
@@ -3050,7 +3050,7 @@ QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords(QList<XMACH::COMMAND_RECORD> *
 
 XBinary::OFFSETSIZE XMACH::getStringTableOS()
 {
-    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_SYMTAB);
 
     return getStringTableOS(&listCommandRecords);
 }
@@ -3067,6 +3067,22 @@ XBinary::OFFSETSIZE XMACH::getStringTableOS(QList<XMACH::COMMAND_RECORD> *pListC
 
         result.nOffset=symtab.stroff;
         result.nSize=symtab.stroff;
+    }
+
+    return result;
+}
+
+XMACH_DEF::dyld_info_command XMACH::get_dyld_info()
+{
+    XMACH_DEF::dyld_info_command result={};
+
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_DYLD_INFO_ONLY);
+
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_DYLD_INFO_ONLY,0,&listCommandRecords);
+
+    if(nOffset!=-1)
+    {
+        result=_read_dyld_info_command(nOffset);
     }
 
     return result;
