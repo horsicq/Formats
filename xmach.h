@@ -459,6 +459,7 @@ public:
     OFFSETSIZE getStringTableOS(QList<COMMAND_RECORD> *pListCommandRecords);
 
     XMACH_DEF::dyld_info_command get_dyld_info();
+    XMACH_DEF::symtab_command get_symtab();
 
     virtual MODE getMode();
     virtual QString getArch();

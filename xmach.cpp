@@ -3088,6 +3088,22 @@ XMACH_DEF::dyld_info_command XMACH::get_dyld_info()
     return result;
 }
 
+XMACH_DEF::symtab_command XMACH::get_symtab()
+{
+    XMACH_DEF::symtab_command result={};
+
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_SYMTAB);
+
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_SYMTAB,0,&listCommandRecords);
+
+    if(nOffset!=-1)
+    {
+        result=_read_symtab_command(nOffset);
+    }
+
+    return result;
+}
+
 XBinary::MODE XMACH::getMode()
 {
     MODE result=MODE_32;
