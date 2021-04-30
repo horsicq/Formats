@@ -2991,6 +2991,19 @@ XMACH_DEF::nlist_64 XMACH::_read_nlist_64(qint64 nOffset)
     return result;
 }
 
+XMACH_DEF::data_in_code_entry XMACH::_read_data_in_code_entry(qint64 nOffset)
+{
+    XMACH_DEF::data_in_code_entry result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.offset=read_uint32(nOffset+offsetof(XMACH_DEF::data_in_code_entry,offset),bIsBigEndian);
+    result.length=read_uint16(nOffset+offsetof(XMACH_DEF::data_in_code_entry,length),bIsBigEndian);
+    result.kind=read_uint16(nOffset+offsetof(XMACH_DEF::data_in_code_entry,kind),bIsBigEndian);
+
+    return result;
+}
+
 QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords()
 {
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_SYMTAB);
