@@ -4389,10 +4389,6 @@ QSet<XBinary::HASH> XBinary::getHashMethods()
     stResult.insert(HASH_SHA256);
     stResult.insert(HASH_SHA384);
     stResult.insert(HASH_SHA512);
-//    stResult.insert(HASH_KECCAK_224);
-//    stResult.insert(HASH_KECCAK_256);
-//    stResult.insert(HASH_KECCAK_384);
-//    stResult.insert(HASH_KECCAK_512);
 #endif
 
     return stResult;
@@ -4410,10 +4406,6 @@ QList<XBinary::HASH> XBinary::getHashMethodsAsList()
     listResult.append(HASH_SHA256);
     listResult.append(HASH_SHA384);
     listResult.append(HASH_SHA512);
-//    stResult.insert(HASH_KECCAK_224);
-//    stResult.insert(HASH_KECCAK_256);
-//    stResult.insert(HASH_KECCAK_384);
-//    stResult.insert(HASH_KECCAK_512);
 #endif
 
     return listResult;
@@ -4433,10 +4425,6 @@ QString XBinary::hashIdToString(XBinary::HASH hash)
         case HASH_SHA256:       sResult=QString("SHA256");      break;
         case HASH_SHA384:       sResult=QString("SHA384");      break;
         case HASH_SHA512:       sResult=QString("SHA512");      break;
-//        case HASH_KECCAK_224:   sResult=QString("Keccak_224");  break;
-//        case HASH_KECCAK_256:   sResult=QString("Keccak_256");  break;
-//        case HASH_KECCAK_384:   sResult=QString("Keccak_384");  break;
-//        case HASH_KECCAK_512:   sResult=QString("Keccak_512");  break;
 #endif
     }
 
