@@ -502,8 +502,8 @@ public:
     bool zeroFill(qint64 nOffset,qint64 nSize);
     static bool compareMemory(char *pMemory1,const char *pMemory2,qint64 nSize);
     // For strings compare
-    static bool compareMemoryByteI(quint8 *pMemory,const quint8 *pMemoryU,const quint8 *pMemoryL,qint64 nSize);
-    static bool compareMemoryWordI(quint16 *pMemory,const quint16 *pMemoryU,const quint16 *pMemoryL,qint64 nSize);
+    static bool compareMemoryByteI(quint8 *pMemory,const quint8 *pMemoryU,const quint8 *pMemoryL,qint64 nSize);     // Ansi
+    static bool compareMemoryWordI(quint16 *pMemory,const quint16 *pMemoryU,const quint16 *pMemoryL,qint64 nSize);  // Unicode
 
     bool isOffsetValid(qint64 nOffset);
     bool isAddressValid(qint64 nAddress);
@@ -848,7 +848,6 @@ public slots:
     void setProcessSignalsEnable(bool bState);
 
 private:
-
     static const int READWRITE_BUFFER_SIZE=0x1000;
     static QString convertSignature(QString sSignature);
     static QString qcharToHex(QChar cSymbol);
