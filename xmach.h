@@ -462,6 +462,8 @@ public:
     XMACH_DEF::dyld_info_command get_dyld_info();
     XMACH_DEF::symtab_command get_symtab();
     XMACH_DEF::dysymtab_command get_dysymtab();
+    XMACH_DEF::encryption_info_command get_encryption_info();
+    XMACH_DEF::encryption_info_command_64 get_encryption_info_64();
 
     virtual MODE getMode();
     virtual QString getArch();

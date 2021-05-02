@@ -3133,6 +3133,38 @@ XMACH_DEF::dysymtab_command XMACH::get_dysymtab()
     return result;
 }
 
+XMACH_DEF::encryption_info_command XMACH::get_encryption_info()
+{
+    XMACH_DEF::encryption_info_command result={};
+
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_ENCRYPTION_INFO);
+
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_ENCRYPTION_INFO,0,&listCommandRecords);
+
+    if(nOffset!=-1)
+    {
+        result=_read_encryption_info_command(nOffset);
+    }
+
+    return result;
+}
+
+XMACH_DEF::encryption_info_command_64 XMACH::get_encryption_info_64()
+{
+    XMACH_DEF::encryption_info_command_64 result={};
+
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_ENCRYPTION_INFO_64);
+
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_ENCRYPTION_INFO_64,0,&listCommandRecords);
+
+    if(nOffset!=-1)
+    {
+        result=_read_encryption_info_command_64(nOffset);
+    }
+
+    return result;
+}
+
 XBinary::MODE XMACH::getMode()
 {
     MODE result=MODE_32;
