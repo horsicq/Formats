@@ -3165,6 +3165,22 @@ XMACH_DEF::encryption_info_command_64 XMACH::get_encryption_info_64()
     return result;
 }
 
+XMACH_DEF::linkedit_data_command XMACH::get_linkedit_data(quint32 nCommandID)
+{
+    XMACH_DEF::linkedit_data_command result={};
+
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(nCommandID);
+
+    qint64 nOffset=getCommandRecordOffset(nCommandID,0,&listCommandRecords);
+
+    if(nOffset!=-1)
+    {
+        result=_read_linkedit_data_command(nOffset);
+    }
+
+    return result;
+}
+
 XBinary::MODE XMACH::getMode()
 {
     MODE result=MODE_32;

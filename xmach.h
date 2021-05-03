@@ -464,6 +464,7 @@ public:
     XMACH_DEF::dysymtab_command get_dysymtab();
     XMACH_DEF::encryption_info_command get_encryption_info();
     XMACH_DEF::encryption_info_command_64 get_encryption_info_64();
+    XMACH_DEF::linkedit_data_command get_linkedit_data(quint32 nCommandID);
 
     virtual MODE getMode();
     virtual QString getArch();
