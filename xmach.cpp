@@ -3181,6 +3181,37 @@ XMACH_DEF::linkedit_data_command XMACH::get_linkedit_data(quint32 nCommandID)
     return result;
 }
 
+QList<XMACH::FUNCTION_RECORD> XMACH::getFunctionRecords(qint64 nOffset, qint64 nSize)
+{
+    QList<FUNCTION_RECORD> listRecords;
+
+    XBinary::_MEMORY_MAP memoryMap=getMemoryMap();
+
+    qint32 nRawOffset=0;
+
+    for(qint64 nCurrentOffset=nOffset;nCurrentOffset<(nOffset+nSize);)
+    {
+        ULEB128 uleb128=read_uleb128(nCurrentOffset);
+
+        nCurrentOffset+=uleb128.nByteSize;
+
+        if((uleb128.nValue==0)&&(nCurrentOffset!=nOffset))
+        {
+            break;
+        }
+
+        nRawOffset+=uleb128.nValue;
+
+        FUNCTION_RECORD record={};
+        record.nOffset=nRawOffset;
+        record.nAddress=offsetToAddress(&memoryMap,nRawOffset);
+
+        listRecords.append(record);
+    }
+
+    return listRecords;
+}
+
 XBinary::MODE XMACH::getMode()
 {
     MODE result=MODE_32;

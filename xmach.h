@@ -79,6 +79,12 @@ public:
         }s;
     };
 
+    struct FUNCTION_RECORD
+    {
+        qint64 nOffset;
+        qint64 nAddress;
+    };
+
     enum TYPE
     {
         TYPE_UNKNOWN=0,
@@ -465,6 +471,8 @@ public:
     XMACH_DEF::encryption_info_command get_encryption_info();
     XMACH_DEF::encryption_info_command_64 get_encryption_info_64();
     XMACH_DEF::linkedit_data_command get_linkedit_data(quint32 nCommandID);
+
+    QList<FUNCTION_RECORD> getFunctionRecords(qint64 nOffset,qint64 nSize);
 
     virtual MODE getMode();
     virtual QString getArch();

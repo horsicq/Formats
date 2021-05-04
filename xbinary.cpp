@@ -882,7 +882,7 @@ QString XBinary::_read_utf8String(qint64 nOffset)
 {
     QString sResult;
 
-    ULEB128 ulebSize=get_uleb128(nOffset);
+    ULEB128 ulebSize=read_uleb128(nOffset);
 
     sResult=read_utf8String(nOffset+ulebSize.nByteSize,ulebSize.nValue); // TODO mutf8
 
@@ -893,7 +893,7 @@ QString XBinary::_read_utf8String(char *pData, qint32 nDataSize)
 {
     QString sResult;
 
-    ULEB128 ulebSize=_get_uleb128(pData);
+    ULEB128 ulebSize=_read_uleb128(pData);
 
     qint32 nStringSize=qMin((qint32)ulebSize.nValue,nDataSize);
 
@@ -5484,7 +5484,7 @@ bool XBinary::resize(QIODevice *pDevice, qint64 nSize)
     return bResult;
 }
 
-XBinary::ULEB128 XBinary::get_uleb128(qint64 nOffset)
+XBinary::ULEB128 XBinary::read_uleb128(qint64 nOffset)
 {
     ULEB128 result={};
 
@@ -5508,7 +5508,7 @@ XBinary::ULEB128 XBinary::get_uleb128(qint64 nOffset)
     return result;
 }
 
-XBinary::ULEB128 XBinary::_get_uleb128(char *pData)
+XBinary::ULEB128 XBinary::_read_uleb128(char *pData)
 {
     ULEB128 result={};
 
