@@ -696,6 +696,7 @@ public:
     QString getSignature(qint64 nOffset,qint64 nSize);
 
     OFFSETSIZE convertOffsetAndSize(qint64 nOffset,qint64 nSize);
+    static OFFSETSIZE convertOffsetAndSize(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
     static bool compareSignatureStrings(QString sBaseSignature,QString sOptSignature);
     static QString stringToHex(QString sString);

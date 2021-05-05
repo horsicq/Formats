@@ -4953,6 +4953,13 @@ XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
     return result;
 }
 
+XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
+{
+    XBinary binary(pDevice);
+
+    return binary.convertOffsetAndSize(nOffset,nSize);
+}
+
 bool XBinary::compareSignatureStrings(QString sBaseSignature, QString sOptSignature)
 {
     // TODO optimize

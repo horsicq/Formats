@@ -72,6 +72,7 @@ public:
     struct NLIST_RECORD
     {
         qint64 nStructOffset;
+        bool bIs64;
         union
         {
             XMACH_DEF::nlist nlist32;
@@ -79,10 +80,17 @@ public:
         }s;
     };
 
+    struct DICE_RECORD
+    {
+        qint64 nStructOffset;
+        XMACH_DEF::data_in_code_entry dice;
+    };
+
     struct FUNCTION_RECORD
     {
-        qint64 nOffset;
-        qint64 nAddress;
+        qint64 nDataOffset;
+        qint64 nFunctionOffset;
+        qint64 nFunctionAddress;
     };
 
     enum TYPE
@@ -437,6 +445,12 @@ public:
 
     qint64 get_nlist_64_size();
 
+    void _set_data_in_code_entry_offset(qint64 nOffset,quint32 nValue);
+    void _set_data_in_code_entry_length(qint64 nOffset,quint16 nValue);
+    void _set_data_in_code_entry_kind(qint64 nOffset,quint16 nValue);
+
+    qint64 get_data_in_code_entry_size();
+
     XMACH_DEF::dyld_info_command _read_dyld_info_command(qint64 nOffset);
     XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
     XMACH_DEF::dysymtab_command _read_dysymtab_command(qint64 nOffset);
@@ -462,6 +476,8 @@ public:
     QList<NLIST_RECORD> getNlistRecords();
     QList<NLIST_RECORD> getNlistRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
+    static NLIST_RECORD searchNlistRecordByValue(QList<NLIST_RECORD> *pList,quint64 nValue);
+
     OFFSETSIZE getStringTableOS();
     OFFSETSIZE getStringTableOS(QList<COMMAND_RECORD> *pListCommandRecords);
 
@@ -473,6 +489,8 @@ public:
     XMACH_DEF::linkedit_data_command get_linkedit_data(quint32 nCommandID);
 
     QList<FUNCTION_RECORD> getFunctionRecords(qint64 nOffset,qint64 nSize);
+
+    QList<DICE_RECORD> getDiceRecords(qint64 nOffset,qint64 nSize);
 
     virtual MODE getMode();
     virtual QString getArch();

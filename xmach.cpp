@@ -2718,6 +2718,26 @@ qint64 XMACH::get_nlist_64_size()
     return sizeof(XMACH_DEF::nlist_64);
 }
 
+void XMACH::_set_data_in_code_entry_offset(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::data_in_code_entry,offset),nValue,isBigEndian());
+}
+
+void XMACH::_set_data_in_code_entry_length(qint64 nOffset, quint16 nValue)
+{
+    write_uint16(nOffset+offsetof(XMACH_DEF::data_in_code_entry,length),nValue,isBigEndian());
+}
+
+void XMACH::_set_data_in_code_entry_kind(qint64 nOffset, quint16 nValue)
+{
+    write_uint16(nOffset+offsetof(XMACH_DEF::data_in_code_entry,kind),nValue,isBigEndian());
+}
+
+qint64 XMACH::get_data_in_code_entry_size()
+{
+    return sizeof(XMACH_DEF::data_in_code_entry);
+}
+
 XMACH_DEF::dylinker_command XMACH::_read_dylinker_command(qint64 nOffset)
 {
     XMACH_DEF::dylinker_command result={};
@@ -3030,6 +3050,7 @@ QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords(QList<XMACH::COMMAND_RECORD> *
             NLIST_RECORD record={};
 
             record.nStructOffset=nOffset;
+            record.bIs64=bIs64;
 
             if(bIs64)
             {
@@ -3059,6 +3080,37 @@ QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords(QList<XMACH::COMMAND_RECORD> *
     }
 
     return listResult;
+}
+
+XMACH::NLIST_RECORD XMACH::searchNlistRecordByValue(QList<XMACH::NLIST_RECORD> *pList, quint64 nValue)
+{
+    XMACH::NLIST_RECORD result={};
+
+    int nNumberOfRecords=pList->count();
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        if(pList->at(i).bIs64)
+        {
+            if(pList->at(i).s.nlist64.n_value==nValue)
+            {
+                result=pList->at(i);
+
+                break;
+            }
+        }
+        else
+        {
+            if(pList->at(i).s.nlist32.n_value==(quint32)nValue)
+            {
+                result=pList->at(i);
+
+                break;
+            }
+        }
+    }
+
+    return result;
 }
 
 XBinary::OFFSETSIZE XMACH::getStringTableOS()
@@ -3193,8 +3245,6 @@ QList<XMACH::FUNCTION_RECORD> XMACH::getFunctionRecords(qint64 nOffset, qint64 n
     {
         ULEB128 uleb128=read_uleb128(nCurrentOffset);
 
-        nCurrentOffset+=uleb128.nByteSize;
-
         if((uleb128.nValue==0)&&(nCurrentOffset!=nOffset))
         {
             break;
@@ -3203,10 +3253,31 @@ QList<XMACH::FUNCTION_RECORD> XMACH::getFunctionRecords(qint64 nOffset, qint64 n
         nRawOffset+=uleb128.nValue;
 
         FUNCTION_RECORD record={};
-        record.nOffset=nRawOffset;
-        record.nAddress=offsetToAddress(&memoryMap,nRawOffset);
+        record.nDataOffset=nCurrentOffset;
+        record.nFunctionOffset=nRawOffset;
+        record.nFunctionAddress=offsetToAddress(&memoryMap,nRawOffset);
 
         listRecords.append(record);
+
+        nCurrentOffset+=uleb128.nByteSize;
+    }
+
+    return listRecords;
+}
+
+QList<XMACH::DICE_RECORD> XMACH::getDiceRecords(qint64 nOffset, qint64 nSize)
+{
+    QList<XMACH::DICE_RECORD> listRecords;
+
+    for(qint64 nCurrentOffset=nOffset;nCurrentOffset<(nOffset+nSize);)
+    {
+        XMACH::DICE_RECORD record={};
+        record.nStructOffset=nCurrentOffset;
+        record.dice=_read_data_in_code_entry(nCurrentOffset);
+
+        listRecords.append(record);
+
+        nCurrentOffset+=sizeof(XMACH_DEF::data_in_code_entry);
     }
 
     return listRecords;
