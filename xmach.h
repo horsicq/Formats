@@ -114,6 +114,7 @@ public:
 
     bool isValid();
     static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
     bool isBigEndian();
 
     qint64 getHeaderOffset();
@@ -152,6 +153,14 @@ public:
     static QMap<quint64,QString> getHeaderFlagsS();
     static QMap<quint64,QString> getLoadCommandTypes();
     static QMap<quint64,QString> getLoadCommandTypesS();
+    static QMap<quint64,QString> getVMProtections();
+    static QMap<quint64,QString> getVMProtectionsS();
+    static QMap<quint64,QString> getSectionFlagsTypes();
+    static QMap<quint64,QString> getSectionFlagsTypesS();
+    static QMap<quint64,QString> getSectionAttributesUsr();
+    static QMap<quint64,QString> getSectionAttributesUsrS();
+    static QMap<quint64,QString> getSectionAttributesSys();
+    static QMap<quint64,QString> getSectionAttributesSysS();
 
     COMMAND_RECORD _readLoadCommand(qint64 nOffset,bool bIsBigEndian);
 

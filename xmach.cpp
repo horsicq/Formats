@@ -54,6 +54,13 @@ bool XMACH::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
     return xmach.isValid();
 }
 
+XBinary::MODE XMACH::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XMACH xmach(pDevice,bIsImage,nImageAddress);
+
+    return xmach.getMode();
+}
+
 bool XMACH::isBigEndian()
 {
     bool bResult=false;
@@ -748,6 +755,142 @@ QMap<quint64, QString> XMACH::getLoadCommandTypesS()
     mapResult.insert(0x2E,"LINKER_OPTIMIZATION_HINT");
     mapResult.insert(0x2F,"VERSION_MIN_TVOS");
     mapResult.insert(0x30,"VERSION_MIN_WATCHOS");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getVMProtections()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x1,"VM_PROT_READ");
+    mapResult.insert(0x2,"VM_PROT_WRITE");
+    mapResult.insert(0x4,"VM_PROT_EXECUTE");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getVMProtectionsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x1,"READ");
+    mapResult.insert(0x2,"WRITE");
+    mapResult.insert(0x4,"EXECUTE");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getSectionFlagsTypes()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00,"S_REGULAR");
+    mapResult.insert(0x01,"S_ZEROFILL");
+    mapResult.insert(0x02,"S_CSTRING_LITERALS");
+    mapResult.insert(0x03,"S_4BYTE_LITERALS");
+    mapResult.insert(0x04,"S_8BYTE_LITERALS");
+    mapResult.insert(0x05,"S_LITERAL_POINTERS");
+    mapResult.insert(0x06,"S_NON_LAZY_SYMBOL_POINTERS");
+    mapResult.insert(0x07,"S_LAZY_SYMBOL_POINTERS");
+    mapResult.insert(0x08,"S_SYMBOL_STUBS");
+    mapResult.insert(0x09,"S_MOD_INIT_FUNC_POINTERS");
+    mapResult.insert(0x0A,"S_MOD_TERM_FUNC_POINTERS");
+    mapResult.insert(0x0B,"S_COALESCED");
+    mapResult.insert(0x0C,"S_GB_ZEROFILL");
+    mapResult.insert(0x0D,"S_INTERPOSING");
+    mapResult.insert(0x0E,"S_16BYTE_LITERALS");
+    mapResult.insert(0x0F,"S_DTRACE_DOF");
+    mapResult.insert(0x10,"S_LAZY_DYLIB_SYMBOL_POINTERS");
+    mapResult.insert(0x11,"S_THREAD_LOCAL_REGULAR");
+    mapResult.insert(0x12,"S_THREAD_LOCAL_ZEROFILL");
+    mapResult.insert(0x13,"S_THREAD_LOCAL_VARIABLES");
+    mapResult.insert(0x14,"S_THREAD_LOCAL_VARIABLE_POINTERS");
+    mapResult.insert(0x15,"S_THREAD_LOCAL_INIT_FUNCTION_POINTERS");
+    mapResult.insert(0x16,"S_INIT_FUNC_OFFSETS");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getSectionFlagsTypesS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00,"REGULAR");
+    mapResult.insert(0x01,"ZEROFILL");
+    mapResult.insert(0x02,"CSTRING_LITERALS");
+    mapResult.insert(0x03,"4BYTE_LITERALS");
+    mapResult.insert(0x04,"8BYTE_LITERALS");
+    mapResult.insert(0x05,"LITERAL_POINTERS");
+    mapResult.insert(0x06,"NON_LAZY_SYMBOL_POINTERS");
+    mapResult.insert(0x07,"LAZY_SYMBOL_POINTERS");
+    mapResult.insert(0x08,"SYMBOL_STUBS");
+    mapResult.insert(0x09,"MOD_INIT_FUNC_POINTERS");
+    mapResult.insert(0x0A,"MOD_TERM_FUNC_POINTERS");
+    mapResult.insert(0x0B,"COALESCED");
+    mapResult.insert(0x0C,"GB_ZEROFILL");
+    mapResult.insert(0x0D,"INTERPOSING");
+    mapResult.insert(0x0E,"16BYTE_LITERALS");
+    mapResult.insert(0x0F,"DTRACE_DOF");
+    mapResult.insert(0x10,"LAZY_DYLIB_SYMBOL_POINTERS");
+    mapResult.insert(0x11,"THREAD_LOCAL_REGULAR");
+    mapResult.insert(0x12,"THREAD_LOCAL_ZEROFILL");
+    mapResult.insert(0x13,"THREAD_LOCAL_VARIABLES");
+    mapResult.insert(0x14,"THREAD_LOCAL_VARIABLE_POINTERS");
+    mapResult.insert(0x15,"THREAD_LOCAL_INIT_FUNCTION_POINTERS");
+    mapResult.insert(0x16,"INIT_FUNC_OFFSETS");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getSectionAttributesUsr()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x02000000,"S_ATTR_DEBUG");
+    mapResult.insert(0x04000000,"S_ATTR_SELF_MODIFYING_CODE");
+    mapResult.insert(0x08000000,"S_ATTR_LIVE_SUPPORT");
+    mapResult.insert(0x10000000,"S_ATTR_NO_DEAD_STRIP");
+    mapResult.insert(0x20000000,"S_ATTR_STRIP_STATIC_SYMS");
+    mapResult.insert(0x40000000,"S_ATTR_NO_TOC");
+    mapResult.insert(0x80000000,"S_ATTR_PURE_INSTRUCTIONS");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getSectionAttributesUsrS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x02000000,"DEBUG");
+    mapResult.insert(0x04000000,"SELF_MODIFYING_CODE");
+    mapResult.insert(0x08000000,"LIVE_SUPPORT");
+    mapResult.insert(0x10000000,"NO_DEAD_STRIP");
+    mapResult.insert(0x20000000,"STRIP_STATIC_SYMS");
+    mapResult.insert(0x40000000,"NO_TOC");
+    mapResult.insert(0x80000000,"PURE_INSTRUCTIONS");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getSectionAttributesSys()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000100,"S_ATTR_LOC_RELOC");
+    mapResult.insert(0x00000200,"S_ATTR_EXT_RELOC");
+    mapResult.insert(0x00000400,"S_ATTR_SOME_INSTRUCTIONS");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getSectionAttributesSysS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000100,"LOC_RELOC");
+    mapResult.insert(0x00000200,"EXT_RELOC");
+    mapResult.insert(0x00000400,"SOME_INSTRUCTIONS");
 
     return mapResult;
 }

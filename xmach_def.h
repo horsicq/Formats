@@ -225,6 +225,15 @@ const quint32 MH_DYLIB_STUB                         =0x9;
 const quint32 MH_DSYM                               =0xa;
 const quint32 MH_KEXT_BUNDLE                        =0xb;
 
+const quint32 VM_PROT_NONE                          =0x00;
+const quint32 VM_PROT_READ                          =0x01;      /* read permission */
+const quint32 VM_PROT_WRITE                         =0x02;      /* write permission */
+const quint32 VM_PROT_EXECUTE                       =0x04;      /* execute permission */
+
+const quint32 SECTION_TYPE                          =0x000000ff;
+const quint32 SECTION_ATTRIBUTES_SYS                =0x00ffff00;	/* system setable attributes */
+const quint32 SECTION_ATTRIBUTES_USR                =0xff000000;    /* User setable attributes */
+
 struct x86_thread_state32_t
 {
     quint32 eax;
