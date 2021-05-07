@@ -46,6 +46,7 @@ public:
     explicit XMSDOS(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
     static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
 
     quint16 get_magic();
     qint32 get_lfanew();

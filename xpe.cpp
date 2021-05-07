@@ -56,6 +56,13 @@ bool XPE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
     return xpe.isValid();
 }
 
+XBinary::MODE XPE::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XPE xpe(pDevice,bIsImage,nImageAddress);
+
+    return xpe.getMode();
+}
+
 XBinary::MODE XPE::getMode()
 {
     MODE result=MODE_32;

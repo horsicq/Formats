@@ -4853,6 +4853,13 @@ bool XBinary::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
     return xbinary.isValid();
 }
 
+XBinary::MODE XBinary::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XBinary xbinary(pDevice,bIsImage,nImageAddress);
+
+    return xbinary.getMode();
+}
+
 bool XBinary::isBigEndian()
 {
     return g_bIsBigEndian;

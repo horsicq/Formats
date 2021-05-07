@@ -42,6 +42,13 @@ bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
     return xcom.isValid();
 }
 
+XBinary::MODE XCOM::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XCOM xcom(pDevice,bIsImage,nImageAddress);
+
+    return xcom.getMode();
+}
+
 XBinary::_MEMORY_MAP XCOM::getMemoryMap()
 {
     _MEMORY_MAP result={};

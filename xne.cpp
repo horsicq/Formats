@@ -56,6 +56,13 @@ bool XNE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
     return xne.isValid();
 }
 
+XBinary::MODE XNE::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XNE xne(pDevice,bIsImage,nImageAddress);
+
+    return xne.getMode();
+}
+
 qint64 XNE::getImageOS2HeaderOffset()
 {
     qint64 nResult=get_lfanew();

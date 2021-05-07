@@ -46,6 +46,13 @@ bool XMSDOS::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
     return xmsdos.isValid();
 }
 
+XBinary::MODE XMSDOS::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XMSDOS xmsdos(pDevice,bIsImage,nImageAddress);
+
+    return xmsdos.getMode();
+}
+
 quint16 XMSDOS::get_magic()
 {
     return read_uint16((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_magic));

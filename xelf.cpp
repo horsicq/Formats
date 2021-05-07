@@ -52,6 +52,13 @@ bool XELF::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
     return xelf.isValid();
 }
 
+XBinary::MODE XELF::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+{
+    XELF xelf(pDevice,bIsImage,nImageAddress);
+
+    return xelf.getMode();
+}
+
 bool XELF::isBigEndian()
 {
     return getIdent_data()== XELF_DEF::ELFDATA2MSB;

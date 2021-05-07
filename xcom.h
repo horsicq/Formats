@@ -40,6 +40,7 @@ public:
     ~XCOM();
     virtual bool isValid();
     static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual QString getArch();

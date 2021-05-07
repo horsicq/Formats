@@ -39,6 +39,7 @@ public:
     explicit XLE(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
     virtual bool isValid();
     static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
 
     qint64 getImageVxdHeaderOffset();
     qint64 getImageVxdHeaderSize();
