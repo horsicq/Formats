@@ -851,43 +851,106 @@ enum reloc_type_x86_64
 
 enum reloc_type_arm
 {
-    ARM_RELOC_VANILLA,	/* generic relocation as discribed above */
-    ARM_RELOC_PAIR,	/* the second relocation entry of a pair */
-    ARM_RELOC_SECTDIFF,	/* a PAIR follows with subtract symbol value */
-    ARM_RELOC_LOCAL_SECTDIFF, /* like ARM_RELOC_SECTDIFF, but the symbol referenced was local.  */
-    ARM_RELOC_PB_LA_PTR,/* prebound lazy pointer */
-    ARM_RELOC_BR24,	/* 24 bit branch displacement (to a word address) */
-    ARM_THUMB_RELOC_BR22, /* 22 bit branch displacement (to a half-word address) */
+    ARM_RELOC_VANILLA,          /* generic relocation as discribed above */
+    ARM_RELOC_PAIR,             /* the second relocation entry of a pair */
+    ARM_RELOC_SECTDIFF,         /* a PAIR follows with subtract symbol value */
+    ARM_RELOC_LOCAL_SECTDIFF,   /* like ARM_RELOC_SECTDIFF, but the symbol referenced was local.  */
+    ARM_RELOC_PB_LA_PTR,        /* prebound lazy pointer */
+    ARM_RELOC_BR24,             /* 24 bit branch displacement (to a word address) */
+    ARM_THUMB_RELOC_BR22,       /* 22 bit branch displacement (to a half-word address) */
 };
 
 enum reloc_type_ppc
 {
-    PPC_RELOC_VANILLA,	/* generic relocation as discribed above */
-    PPC_RELOC_PAIR,	/* the second relocation entry of a pair */
-    PPC_RELOC_BR14,	/* 14 bit branch displacement (to a word address) */
-    PPC_RELOC_BR24,	/* 24 bit branch displacement (to a word address) */
-    PPC_RELOC_HI16,	/* a PAIR follows with the low half */
-    PPC_RELOC_LO16,	/* a PAIR follows with the high half */
-    PPC_RELOC_HA16,	/* Same as the RELOC_HI16 except the low 16 bits and the
-             * high 16 bits are added together with the low 16 bits
-             * sign extened first.  This means if bit 15 of the low
-             * 16 bits is set the high 16 bits stored in the
-             * instruction will be adjusted.
-             */
-    PPC_RELOC_LO14,	/* Same as the LO16 except that the low 2 bits are not
-             * stored in the instruction and are always zero.  This
-             * is used in double word load/store instructions.
-             */
-    PPC_RELOC_SECTDIFF,	/* a PAIR follows with subtract symbol value */
-    PPC_RELOC_PB_LA_PTR,/* prebound lazy pointer */
-    PPC_RELOC_HI16_SECTDIFF, /* section difference forms of above.  a PAIR */
-    PPC_RELOC_LO16_SECTDIFF, /* follows these with subtract symbol value */
+    PPC_RELOC_VANILLA,          /* generic relocation as discribed above */
+    PPC_RELOC_PAIR,             /* the second relocation entry of a pair */
+    PPC_RELOC_BR14,             /* 14 bit branch displacement (to a word address) */
+    PPC_RELOC_BR24,             /* 24 bit branch displacement (to a word address) */
+    PPC_RELOC_HI16,             /* a PAIR follows with the low half */
+    PPC_RELOC_LO16,             /* a PAIR follows with the high half */
+    PPC_RELOC_HA16,             /* Same as the RELOC_HI16 except the low 16 bits and the
+                                 * high 16 bits are added together with the low 16 bits
+                                 * sign extened first.  This means if bit 15 of the low
+                                 * 16 bits is set the high 16 bits stored in the
+                                 * instruction will be adjusted.
+                                 */
+    PPC_RELOC_LO14,             /* Same as the LO16 except that the low 2 bits are not
+                                 * stored in the instruction and are always zero.  This
+                                 * is used in double word load/store instructions.
+                                 */
+    PPC_RELOC_SECTDIFF,         /* a PAIR follows with subtract symbol value */
+    PPC_RELOC_PB_LA_PTR,        /* prebound lazy pointer */
+    PPC_RELOC_HI16_SECTDIFF,    /* section difference forms of above.  a PAIR */
+    PPC_RELOC_LO16_SECTDIFF,    /* follows these with subtract symbol value */
     PPC_RELOC_HA16_SECTDIFF,
     PPC_RELOC_JBSR,
     PPC_RELOC_LO14_SECTDIFF,
-    PPC_RELOC_LOCAL_SECTDIFF  /* like PPC_RELOC_SECTDIFF, but the symbol
-                 referenced was local.  */
+    PPC_RELOC_LOCAL_SECTDIFF    /* like PPC_RELOC_SECTDIFF, but the symbol
+                                referenced was local.  */
 };
+
+/*
+ * The following are used to encode rebasing information
+ */
+const quint32 REBASE_TYPE_POINTER                                       =1;
+const quint32 REBASE_TYPE_TEXT_ABSOLUTE32                               =2;
+const quint32 REBASE_TYPE_TEXT_PCREL32                                  =3;
+
+const quint32 REBASE_OPCODE_MASK                                        =0xF0;
+const quint32 REBASE_IMMEDIATE_MASK                                     =0x0F;
+const quint32 REBASE_OPCODE_DONE                                        =0x00;
+const quint32 REBASE_OPCODE_SET_TYPE_IMM                                =0x10;
+const quint32 REBASE_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB                 =0x20;
+const quint32 REBASE_OPCODE_ADD_ADDR_ULEB                               =0x30;
+const quint32 REBASE_OPCODE_ADD_ADDR_IMM_SCALED                         =0x40;
+const quint32 REBASE_OPCODE_DO_REBASE_IMM_TIMES                         =0x50;
+const quint32 REBASE_OPCODE_DO_REBASE_ULEB_TIMES                        =0x60;
+const quint32 REBASE_OPCODE_DO_REBASE_ADD_ADDR_ULEB                     =0x70;
+const quint32 REBASE_OPCODE_DO_REBASE_ULEB_TIMES_SKIPPING_ULEB          =0x80;
+/*
+ * The following are used to encode binding information
+ */
+const quint32 BIND_TYPE_POINTER                                         =1;
+const quint32 BIND_TYPE_TEXT_ABSOLUTE32                                 =2;
+const quint32 BIND_TYPE_TEXT_PCREL32                                    =3;
+
+const quint32 BIND_SPECIAL_DYLIB_SELF                                   =0;
+const quint32 BIND_SPECIAL_DYLIB_MAIN_EXECUTABLE                        =-1;
+const quint32 BIND_SPECIAL_DYLIB_FLAT_LOOKUP                            =-2;
+const quint32 BIND_SPECIAL_DYLIB_WEAK_LOOKUP                            =-3;
+
+const quint32 BIND_SYMBOL_FLAGS_WEAK_IMPORT                             =0x1;
+const quint32 BIND_SYMBOL_FLAGS_NON_WEAK_DEFINITION                     =0x8;
+
+const quint32 BIND_OPCODE_MASK                                          =0xF0;
+const quint32 BIND_IMMEDIATE_MASK                                       =0x0F;
+const quint32 BIND_OPCODE_DONE                                          =0x00;
+const quint32 BIND_OPCODE_SET_DYLIB_ORDINAL_IMM                         =0x10;
+const quint32 BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB                        =0x20;
+const quint32 BIND_OPCODE_SET_DYLIB_SPECIAL_IMM                         =0x30;
+const quint32 BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM                 =0x40;
+const quint32 BIND_OPCODE_SET_TYPE_IMM                                  =0x50;
+const quint32 BIND_OPCODE_SET_ADDEND_SLEB                               =0x60;
+const quint32 BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB                   =0x70;
+const quint32 BIND_OPCODE_ADD_ADDR_ULEB                                 =0x80;
+const quint32 BIND_OPCODE_DO_BIND                                       =0x90;
+const quint32 BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB                         =0xA0;
+const quint32 BIND_OPCODE_DO_BIND_ADD_ADDR_IMM_SCALED                   =0xB0;
+const quint32 BIND_OPCODE_DO_BIND_ULEB_TIMES_SKIPPING_ULEB              =0xC0;
+const quint32 BIND_OPCODE_THREADED                                      =0xD0;
+const quint32 BIND_SUBOPCODE_THREADED_SET_BIND_ORDINAL_TABLE_SIZE_ULEB  =0x00;
+const quint32 BIND_SUBOPCODE_THREADED_APPLY                             =0x01;
+/*
+ * The following are used on the flags byte of a terminal node
+ * in the export information.
+ */
+const quint32 EXPORT_SYMBOL_FLAGS_KIND_MASK                             =0x03;
+const quint32 EXPORT_SYMBOL_FLAGS_KIND_REGULAR                          =0x00;
+const quint32 EXPORT_SYMBOL_FLAGS_KIND_THREAD_LOCAL                     =0x01;
+const quint32 EXPORT_SYMBOL_FLAGS_KIND_ABSOLUTE                         =0x02;
+const quint32 EXPORT_SYMBOL_FLAGS_WEAK_DEFINITION                       =0x04;
+const quint32 EXPORT_SYMBOL_FLAGS_REEXPORT                              =0x08;
+const quint32 EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER                     =0x10;
 }
 
 #endif // QMACH_DEF_H
