@@ -895,6 +895,32 @@ QMap<quint64, QString> XMACH::getSectionAttributesSysS()
     return mapResult;
 }
 
+QMap<quint64, QString> XMACH::getDICEKinds()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000001,"DICE_KIND_DATA");
+    mapResult.insert(0x00000002,"DICE_KIND_JUMP_TABLE8");
+    mapResult.insert(0x00000003,"DICE_KIND_JUMP_TABLE16");
+    mapResult.insert(0x00000004,"DICE_KIND_JUMP_TABLE32");
+    mapResult.insert(0x00000005,"DICE_KIND_ABS_JUMP_TABLE32");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getDICEKindsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000001,"DATA");
+    mapResult.insert(0x00000002,"JUMP_TABLE8");
+    mapResult.insert(0x00000003,"JUMP_TABLE16");
+    mapResult.insert(0x00000004,"JUMP_TABLE32");
+    mapResult.insert(0x00000005,"ABS_JUMP_TABLE32");
+
+    return mapResult;
+}
+
 XMACH::COMMAND_RECORD XMACH::_readLoadCommand(qint64 nOffset,bool bIsBigEndian)
 {
     COMMAND_RECORD result={};
