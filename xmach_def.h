@@ -828,6 +828,20 @@ struct fvmfile_command
     quint32 header_addr;
 };
 
+/*
+ * The entries in the reference symbol table are used when loading the module
+ * (both by the static and dynamic link editors) and if the module is unloaded
+ * or replaced.  Therefore all external symbols (defined and undefined) are
+ * listed in the module's reference table.  The flags describe the type of
+ * reference that is being made.  The constants for the flags are defined in
+ * <mach-o/nlist.h> as they are also used for symbol table entries.
+ */
+struct dylib_reference
+{
+    uint32_t isym:24;       /* index into the symbol table */
+    uint32_t flags:8;       /* flags to indicate the type of reference */
+};
+
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html
 // http://formats.kaitai.io/mach_o/
 // https://github.com/phausler/Shinobi/blob/master/include/llvm/Support/MachO.h
