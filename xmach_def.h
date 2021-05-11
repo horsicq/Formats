@@ -26,35 +26,35 @@
 namespace XMACH_DEF
 {
 /* Constant for the magic field of the mach_header (32-bit architectures) */
-const quint32 MH_MAGIC          =0xFEEDFACE;        /* the mach magic number */
-const quint32 MH_CIGAM          =0xCEFAEDFE	;       /* NXSwapInt(MH_MAGIC) */
+const quint32 MH_MAGIC              =0xFEEDFACE;        /* the mach magic number */
+const quint32 MH_CIGAM              =0xCEFAEDFE	;       /* NXSwapInt(MH_MAGIC) */
 /* Constant for the magic field of the mach_header_64 (64-bit architectures) */
-const quint32 MH_MAGIC_64       =0xFEEDFACF;        /* the 64-bit mach magic number */
-const quint32 MH_CIGAM_64       =0xCFFAEDFE;        /* NXSwapInt(MH_MAGIC_64) */
+const quint32 MH_MAGIC_64           =0xFEEDFACF;        /* the 64-bit mach magic number */
+const quint32 MH_CIGAM_64           =0xCFFAEDFE;        /* NXSwapInt(MH_MAGIC_64) */
 
-const quint32 FAT_MAGIC         =0xCAFEBABE;
-const quint32 FAT_CIGAM         =0xBEBAFECA;
+const quint32 FAT_MAGIC             =0xCAFEBABE;
+const quint32 FAT_CIGAM             =0xBEBAFECA;
 
-const quint32 CPU_TYPE_VAX      =0x0000001;
-const quint32 CPU_TYPE_ROMP     =0x0000002;
-const quint32 CPU_TYPE_NS32032  =0x0000004;
-const quint32 CPU_TYPE_NS32332  =0x0000005;
-const quint32 CPU_TYPE_MC680x0  =0x0000006;
-const quint32 CPU_TYPE_I386     =0x0000007;
-const quint32 CPU_TYPE_X86_64   =0x1000007;
-const quint32 CPU_TYPE_MIPS     =0x0000008;
-const quint32 CPU_TYPE_NS32532  =0x0000009;
-const quint32 CPU_TYPE_HPPA     =0x000000B;
-const quint32 CPU_TYPE_ARM      =0x000000C;
-const quint32 CPU_TYPE_ARM64    =0x100000C;
-const quint32 CPU_TYPE_MC88000  =0x000000D;
-const quint32 CPU_TYPE_SPARC    =0x000000E;
-const quint32 CPU_TYPE_I860     =0x000000F;
-const quint32 CPU_TYPE_RS6000   =0x0000011;
-const quint32 CPU_TYPE_MC98000  =0x0000012;
-const quint32 CPU_TYPE_POWERPC  =0x0000012;
-const quint32 CPU_TYPE_POWERPC64=0x1000012;
-const quint32 CPU_TYPE_VEO      =0x00000FF;
+const quint32 CPU_TYPE_VAX          =0x0000001;
+const quint32 CPU_TYPE_ROMP         =0x0000002;
+const quint32 CPU_TYPE_NS32032      =0x0000004;
+const quint32 CPU_TYPE_NS32332      =0x0000005;
+const quint32 CPU_TYPE_MC680x0      =0x0000006;
+const quint32 CPU_TYPE_I386         =0x0000007;
+const quint32 CPU_TYPE_X86_64       =0x1000007;
+const quint32 CPU_TYPE_MIPS         =0x0000008;
+const quint32 CPU_TYPE_NS32532      =0x0000009;
+const quint32 CPU_TYPE_HPPA         =0x000000B;
+const quint32 CPU_TYPE_ARM          =0x000000C;
+const quint32 CPU_TYPE_ARM64        =0x100000C;
+const quint32 CPU_TYPE_MC88000      =0x000000D;
+const quint32 CPU_TYPE_SPARC        =0x000000E;
+const quint32 CPU_TYPE_I860         =0x000000F;
+const quint32 CPU_TYPE_RS6000       =0x0000011;
+const quint32 CPU_TYPE_MC98000      =0x0000012;
+const quint32 CPU_TYPE_POWERPC      =0x0000012;
+const quint32 CPU_TYPE_POWERPC64    =0x1000012;
+const quint32 CPU_TYPE_VEO          =0x00000FF;
 
 struct fat_header
 {
@@ -838,8 +838,8 @@ struct fvmfile_command
  */
 struct dylib_reference
 {
-    uint32_t isym:24;       /* index into the symbol table */
-    uint32_t flags:8;       /* flags to indicate the type of reference */
+    quint32 isym:24;        /* index into the symbol table */
+    quint32 flags:8;        /* flags to indicate the type of reference */
 };
 
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html

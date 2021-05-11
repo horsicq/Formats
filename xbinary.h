@@ -303,6 +303,13 @@ public:
         QString sInfo;
     };
 
+    struct OPCODE
+    {
+        qint64 nOffset;
+        qint64 nSize;
+        QString sName;
+    };
+
 private:
     enum ST
     {
@@ -406,8 +413,8 @@ public:
     QString read_ansiString(qint64 nOffset,qint64 nMaxSize=256);
     QString read_unicodeString(qint64 nOffset,qint64 nMaxSize=256,bool bIsBigEndian=false);
     QString read_utf8String(qint64 nOffset,qint64 nMaxSize=256);
-    QString _read_utf8String(qint64 nOffset);
-    QString _read_utf8String(char *pData,qint32 nDataSize);
+    QString _read_utf8String(qint64 nOffset,qint64 nMaxSize=256);
+    QString _read_utf8String(char *pData,qint64 nMaxSize);
     QString _read_utf8String(qint64 nOffset,char *pData,qint32 nDataSize,qint32 nDataOffset);
 
     void write_uint8(qint64 nOffset,quint8 nValue);
@@ -748,12 +755,13 @@ public:
 
     struct ULEB128
     {
+        bool bIsValid;
         quint64 nValue;
         quint32 nByteSize;
     };
 
-    ULEB128 read_uleb128(qint64 nOffset);
-    ULEB128 _read_uleb128(char *pData);
+    ULEB128 read_uleb128(qint64 nOffset,qint64 nSize);
+    ULEB128 _read_uleb128(char *pData,qint64 nSize);
 
     struct PACKED
     {
@@ -841,6 +849,16 @@ public:
     QString getStringFromIndex(qint64 nOffset, qint64 nSize, int nIndex);
 
     static QList<QString> getAllFilesFromDirectory(QString sDirectory,QString sExtension);
+
+    enum ERROR
+    {
+        ERROR_NONE=0,
+        ERROR_UNKNOWN,
+        ERROR_NOTENOUGHMEMORY
+    };
+
+    QList<OPCODE> getOpcodes(qint64 nOffset,qint64 nSize,quint32 nType);
+    virtual bool readOpcode(quint32 nType,char *pData,qint64 nSize,OPCODE *pOpcode,ERROR *pError);
 
 public slots:
     void setSearchProcessEnable(bool bState);

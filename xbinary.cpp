@@ -878,24 +878,24 @@ QString XBinary::read_utf8String(qint64 nOffset, qint64 nMaxSize)
     return sResult;
 }
 
-QString XBinary::_read_utf8String(qint64 nOffset)
+QString XBinary::_read_utf8String(qint64 nOffset, qint64 nMaxSize)
 {
     QString sResult;
 
-    ULEB128 ulebSize=read_uleb128(nOffset);
+    ULEB128 ulebSize=read_uleb128(nOffset,nMaxSize);
 
     sResult=read_utf8String(nOffset+ulebSize.nByteSize,ulebSize.nValue); // TODO mutf8
 
     return sResult;
 }
 
-QString XBinary::_read_utf8String(char *pData, qint32 nDataSize)
+QString XBinary::_read_utf8String(char *pData, qint64 nMaxSize)
 {
     QString sResult;
 
-    ULEB128 ulebSize=_read_uleb128(pData);
+    ULEB128 ulebSize=_read_uleb128(pData,nMaxSize);
 
-    qint32 nStringSize=qMin((qint32)ulebSize.nValue,nDataSize);
+    qint32 nStringSize=qMin((qint64)ulebSize.nValue,nMaxSize-ulebSize.nByteSize);
 
     if(nStringSize>0)
     {
@@ -1304,6 +1304,7 @@ void XBinary::_write_double(char *pData, double dValue, bool bIsBigEndian)
 
 qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint64 nArraySize)
 {
+    // TODO CheckSize function
     // TODO Optimize
     qint64 _nSize=getSize();
 
@@ -1553,6 +1554,7 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature,
 
 qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize)
 {
+    // TODO CheckSize function
     qint64 _nSize=getSize();
 
     qint64 nResultSize=0;
@@ -1684,6 +1686,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
 qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
 {
+    // TODO CheckSize function
     // TODO Optimize
     qint64 nStringSize=sString.size();
     qint64 _nSize=getSize();
@@ -1761,6 +1764,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
 
 qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString)
 {
+    // TODO CheckSize function
     // TODO Optimize
     qint64 nStringSize=sString.size();
     qint64 _nSize=getSize();
@@ -1838,7 +1842,11 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
 
 QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode,bool bCStrings,QString sExpFilter)
 {
-    // TODO C-strings
+    OFFSETSIZE os=convertOffsetAndSize(nOffset,nSize);
+
+    nOffset=os.nOffset;
+    nSize=os.nSize;
+
     QList<XBinary::MS_RECORD> listResult;
 
     bool bFilter=(sExpFilter!="");
@@ -1851,11 +1859,6 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
     if(nMaxLenght==0)
     {
         nMaxLenght=128; // TODO Check
-    }
-
-    if(nSize==-1)
-    {
-        nSize=getSize()-nOffset;
     }
 
     qint64 _nSize=nSize;
@@ -5498,49 +5501,47 @@ bool XBinary::resize(QIODevice *pDevice, qint64 nSize)
     return bResult;
 }
 
-XBinary::ULEB128 XBinary::read_uleb128(qint64 nOffset)
+XBinary::ULEB128 XBinary::read_uleb128(qint64 nOffset,qint64 nSize)
 {
     ULEB128 result={};
 
     quint32 nShift=0;
 
-    while(true)
+    for(int i=0;i<nSize;i++)
     {
-        quint8 nByte=read_uint8(nOffset);
+        quint8 nByte=read_uint8(nOffset+i);
         result.nValue|=((nByte&0x7F)<<nShift);
         result.nByteSize++;
         nShift+=7;
-        nOffset++;
 
         if((nByte&0x80)==0)
         {
+            result.bIsValid=true;
             break;
         }
-        // TODO more checks!
     }
 
     return result;
 }
 
-XBinary::ULEB128 XBinary::_read_uleb128(char *pData)
+XBinary::ULEB128 XBinary::_read_uleb128(char *pData,qint64 nSize)
 {
     ULEB128 result={};
 
     quint32 nShift=0;
 
-    while(true)
+    for(int i=0;i<nSize;i++)
     {
-        quint8 nByte=(quint8)(*pData);
+        quint8 nByte=(quint8)(*(pData+i));
         result.nValue|=((nByte&0x7F)<<nShift);
         result.nByteSize++;
         nShift+=7;
-        pData++;
 
         if((nByte&0x80)==0)
         {
+            result.bIsValid=true;
             break;
         }
-        // TODO more checks!
     }
 
     return result;
@@ -6429,6 +6430,78 @@ QList<QString> XBinary::getAllFilesFromDirectory(QString sDirectory, QString sEx
     QDir directory(sDirectory);
 
     return directory.entryList(QStringList()<<sExtension,QDir::Files);
+}
+
+QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nSize, quint32 nType)
+{
+    QList<OPCODE> listResult;
+
+    OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
+
+    nOffset=offsetSize.nOffset;
+    nSize=offsetSize.nSize;
+
+    if(nOffset!=-1)
+    {
+        char *pBuffer=new char[READWRITE_BUFFER_SIZE];
+
+        while(nSize>0)
+        {
+            quint64 nTempSize=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
+
+            if(read_array(nOffset,pBuffer,nTempSize)!=nTempSize)
+            {
+                _errorMessage(tr("Read error"));
+
+                break;
+            }
+
+            qint64 _nOpcodesSize=0;
+            ERROR error=ERROR_NONE;
+
+            for(int i=0;i<nTempSize;)
+            {
+                OPCODE opcode={};
+
+                if(!readOpcode(nType,pBuffer+i,nTempSize-_nOpcodesSize,&opcode,&error))
+                {
+                    break;
+                }
+
+                _nOpcodesSize+=opcode.nSize;
+                i+=opcode.nSize;
+
+                listResult.append(opcode);
+            }
+
+            if(error==ERROR_NOTENOUGHMEMORY)
+            {
+                if((nOffset+nTempSize)==(offsetSize.nOffset+offsetSize.nSize)) // End
+                {
+                    break;
+                }
+            }
+
+            nSize-=_nOpcodesSize;
+            nOffset+=_nOpcodesSize;
+        }
+
+        delete[] pBuffer;
+    }
+
+    return listResult;
+}
+
+bool XBinary::readOpcode(quint32 nType, char *pData, qint64 nSize, XBinary::OPCODE *pOpcode, XBinary::ERROR *pError)
+{
+    Q_UNUSED(nType)
+    Q_UNUSED(pData)
+    Q_UNUSED(nSize)
+    Q_UNUSED(pOpcode)
+
+    *pError=ERROR_UNKNOWN;
+
+    return false;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)

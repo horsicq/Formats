@@ -3412,7 +3412,7 @@ QList<XMACH::FUNCTION_RECORD> XMACH::getFunctionRecords(qint64 nOffset, qint64 n
 
     for(qint64 nCurrentOffset=nOffset;nCurrentOffset<(nOffset+nSize);)
     {
-        ULEB128 uleb128=read_uleb128(nCurrentOffset);
+        ULEB128 uleb128=read_uleb128(nCurrentOffset,(nOffset+nSize)-nCurrentOffset);
 
         if((uleb128.nValue==0)&&(nCurrentOffset!=nOffset))
         {
