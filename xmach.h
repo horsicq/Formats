@@ -509,6 +509,16 @@ public:
     virtual int getType();
     virtual QString typeIdToString(int nType);
 
+    enum OPCODE_TYPE
+    {
+        OPCODE_TYPE_UNKNOWN=0,
+        OPCODE_TYPE_BIND,
+        OPCODE_TYPE_EXPORT,
+        OPCODE_TYPE_LAZY_BIND,
+        OPCODE_TYPE_REBASE,
+        OPCODE_TYPE_WEAK_BIND
+    };
+
     virtual bool readOpcode(quint32 nType,char *pData,qint64 nSize,OPCODE *pOpcode,B_ERROR *pError);
 };
 
