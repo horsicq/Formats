@@ -850,15 +850,15 @@ public:
 
     static QList<QString> getAllFilesFromDirectory(QString sDirectory,QString sExtension);
 
-    enum ERROR
+    enum B_ERROR
     {
-        ERROR_NONE=0,
-        ERROR_UNKNOWN,
-        ERROR_NOTENOUGHMEMORY
+        B_ERROR_NONE=0,
+        B_ERROR_UNKNOWN,
+        B_ERROR_NOTENOUGHMEMORY
     };
 
     QList<OPCODE> getOpcodes(qint64 nOffset,qint64 nSize,quint32 nType);
-    virtual bool readOpcode(quint32 nType,char *pData,qint64 nSize,OPCODE *pOpcode,ERROR *pError);
+    virtual bool readOpcode(quint32 nType,char *pData,qint64 nSize,OPCODE *pOpcode,B_ERROR *pError);
 
 public slots:
     void setSearchProcessEnable(bool bState);

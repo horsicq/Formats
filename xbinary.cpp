@@ -3500,12 +3500,12 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     {
         if(((XMACH_DEF::mach_header *)pOffset)->filetype<0xFFFF)
         {
-            if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::MH_MAGIC)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::MH_CIGAM))
+            if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_MAGIC)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_CIGAM))
             {
                 stResult.insert(FT_MACHO);
                 stResult.insert(FT_MACHO32);
             }
-            else if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::MH_MAGIC_64)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::MH_CIGAM_64))
+            else if((((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_MAGIC_64)||(((XMACH_DEF::mach_header *)pOffset)->magic==XMACH_DEF::S_MH_CIGAM_64))
             {
                 stResult.insert(FT_MACHO);
                 stResult.insert(FT_MACHO64);
@@ -6457,11 +6457,12 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nSize, quint32
             }
 
             qint64 _nOpcodesSize=0;
-            ERROR error=ERROR_NONE;
+            B_ERROR error=B_ERROR_NONE;
 
             for(int i=0;i<nTempSize;)
             {
                 OPCODE opcode={};
+                opcode.nOffset=nOffset+i;
 
                 if(!readOpcode(nType,pBuffer+i,nTempSize-_nOpcodesSize,&opcode,&error))
                 {
@@ -6474,7 +6475,7 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nSize, quint32
                 listResult.append(opcode);
             }
 
-            if(error==ERROR_NOTENOUGHMEMORY)
+            if(error==B_ERROR_NOTENOUGHMEMORY)
             {
                 if((nOffset+nTempSize)==(offsetSize.nOffset+offsetSize.nSize)) // End
                 {
@@ -6492,14 +6493,14 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nSize, quint32
     return listResult;
 }
 
-bool XBinary::readOpcode(quint32 nType, char *pData, qint64 nSize, XBinary::OPCODE *pOpcode, XBinary::ERROR *pError)
+bool XBinary::readOpcode(quint32 nType, char *pData, qint64 nSize, XBinary::OPCODE *pOpcode, B_ERROR *pError)
 {
     Q_UNUSED(nType)
     Q_UNUSED(pData)
     Q_UNUSED(nSize)
     Q_UNUSED(pOpcode)
 
-    *pError=ERROR_UNKNOWN;
+    *pError=B_ERROR_UNKNOWN;
 
     return false;
 }

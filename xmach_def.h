@@ -26,35 +26,35 @@
 namespace XMACH_DEF
 {
 /* Constant for the magic field of the mach_header (32-bit architectures) */
-const quint32 MH_MAGIC              =0xFEEDFACE;        /* the mach magic number */
-const quint32 MH_CIGAM              =0xCEFAEDFE	;       /* NXSwapInt(MH_MAGIC) */
+const quint32 S_MH_MAGIC              =0xFEEDFACE;        /* the mach magic number */
+const quint32 S_MH_CIGAM              =0xCEFAEDFE	;       /* NXSwapInt(MH_MAGIC) */
 /* Constant for the magic field of the mach_header_64 (64-bit architectures) */
-const quint32 MH_MAGIC_64           =0xFEEDFACF;        /* the 64-bit mach magic number */
-const quint32 MH_CIGAM_64           =0xCFFAEDFE;        /* NXSwapInt(MH_MAGIC_64) */
+const quint32 S_MH_MAGIC_64           =0xFEEDFACF;        /* the 64-bit mach magic number */
+const quint32 S_MH_CIGAM_64           =0xCFFAEDFE;        /* NXSwapInt(MH_MAGIC_64) */
 
-const quint32 FAT_MAGIC             =0xCAFEBABE;
-const quint32 FAT_CIGAM             =0xBEBAFECA;
+const quint32 S_FAT_MAGIC             =0xCAFEBABE;
+const quint32 S_FAT_CIGAM             =0xBEBAFECA;
 
-const quint32 CPU_TYPE_VAX          =0x0000001;
-const quint32 CPU_TYPE_ROMP         =0x0000002;
-const quint32 CPU_TYPE_NS32032      =0x0000004;
-const quint32 CPU_TYPE_NS32332      =0x0000005;
-const quint32 CPU_TYPE_MC680x0      =0x0000006;
-const quint32 CPU_TYPE_I386         =0x0000007;
-const quint32 CPU_TYPE_X86_64       =0x1000007;
-const quint32 CPU_TYPE_MIPS         =0x0000008;
-const quint32 CPU_TYPE_NS32532      =0x0000009;
-const quint32 CPU_TYPE_HPPA         =0x000000B;
-const quint32 CPU_TYPE_ARM          =0x000000C;
-const quint32 CPU_TYPE_ARM64        =0x100000C;
-const quint32 CPU_TYPE_MC88000      =0x000000D;
-const quint32 CPU_TYPE_SPARC        =0x000000E;
-const quint32 CPU_TYPE_I860         =0x000000F;
-const quint32 CPU_TYPE_RS6000       =0x0000011;
-const quint32 CPU_TYPE_MC98000      =0x0000012;
-const quint32 CPU_TYPE_POWERPC      =0x0000012;
-const quint32 CPU_TYPE_POWERPC64    =0x1000012;
-const quint32 CPU_TYPE_VEO          =0x00000FF;
+const quint32 S_CPU_TYPE_VAX          =0x0000001;
+const quint32 S_CPU_TYPE_ROMP         =0x0000002;
+const quint32 S_CPU_TYPE_NS32032      =0x0000004;
+const quint32 S_CPU_TYPE_NS32332      =0x0000005;
+const quint32 S_CPU_TYPE_MC680x0      =0x0000006;
+const quint32 S_CPU_TYPE_I386         =0x0000007;
+const quint32 S_CPU_TYPE_X86_64       =0x1000007;
+const quint32 S_CPU_TYPE_MIPS         =0x0000008;
+const quint32 S_CPU_TYPE_NS32532      =0x0000009;
+const quint32 S_CPU_TYPE_HPPA         =0x000000B;
+const quint32 S_CPU_TYPE_ARM          =0x000000C;
+const quint32 S_CPU_TYPE_ARM64        =0x100000C;
+const quint32 S_CPU_TYPE_MC88000      =0x000000D;
+const quint32 S_CPU_TYPE_SPARC        =0x000000E;
+const quint32 S_CPU_TYPE_I860         =0x000000F;
+const quint32 S_CPU_TYPE_RS6000       =0x0000011;
+const quint32 S_CPU_TYPE_MC98000      =0x0000012;
+const quint32 S_CPU_TYPE_POWERPC      =0x0000012;
+const quint32 S_CPU_TYPE_POWERPC64    =0x1000012;
+const quint32 S_CPU_TYPE_VEO          =0x00000FF;
 
 struct fat_header
 {
@@ -169,70 +169,70 @@ struct section_64           /* for 64-bit architectures */
     quint32	reserved3;      /* reserved */
 };
 
-const quint32 LC_REQ_DYLD                           =0x80000000;
-const quint32 LC_SEGMENT                            =0x1;           /* segment of this file to be mapped */
-const quint32 LC_SYMTAB                             =0x2;           /* link-edit stab symbol table info */
-const quint32 LC_SYMSEG                             =0x3;        	/* link-edit gdb symbol table info (obsolete) */
-const quint32 LC_THREAD                             =0x4;	        /* thread */
-const quint32 LC_UNIXTHREAD                         =0x5;	        /* unix thread (includes a stack) */
-const quint32 LC_LOADFVMLIB                         =0x6;	        /* load a specified fixed VM shared library */
-const quint32 LC_IDFVMLIB                           =0x7;	        /* fixed VM shared library identification */
-const quint32 LC_IDENT                              =0x8;	        /* object identification info (obsolete) */
-const quint32 LC_FVMFILE                            =0x9;	        /* fixed VM file inclusion (internal use) */
-const quint32 LC_PREPAGE                            =0xA;           /* prepage command (internal use) */
-const quint32 LC_DYSYMTAB                           =0xB;	        /* dynamic link-edit symbol table info */
-const quint32 LC_LOAD_DYLIB                         =0xC;	        /* load a dynamicly linked shared library */
-const quint32 LC_ID_DYLIB                           =0xD;	        /* dynamicly linked shared lib identification */
-const quint32 LC_LOAD_DYLINKER                      =0xE;	        /* load a dynamic linker */
-const quint32 LC_ID_DYLINKER                        =0xF;	        /* dynamic linker identification */
-const quint32 LC_PREBOUND_DYLIB                     =0x10;	        /* modules prebound for a dynamicly */
-const quint32 LC_ROUTINES                           =0x11;	        /* image routines */
-const quint32 LC_SUB_FRAMEWORK                      =0x12;	        /* sub framework */
-const quint32 LC_SUB_UMBRELLA                       =0x13;	        /* sub umbrella */
-const quint32 LC_SUB_CLIENT                         =0x14;	        /* sub client */
-const quint32 LC_SUB_LIBRARY                        =0x15;	        /* sub library */
-const quint32 LC_TWOLEVEL_HINTS                     =0x16;	        /* two-level namespace lookup hints */
-const quint32 LC_PREBIND_CKSUM                      =0x17;	        /* prebind checksum */
-const quint32 LC_LOAD_WEAK_DYLIB                    =(0x18|LC_REQ_DYLD);
-const quint32 LC_SEGMENT_64                         =0x19;	        /* 64-bit segment of this file to bemapped */
-const quint32 LC_ROUTINES_64                        =0x1A;	        /* 64-bit image routines */
-const quint32 LC_UUID                               =0x1B;	        /* the uuid */
-const quint32 LC_RPATH                              =(0x1C|LC_REQ_DYLD);
-const quint32 LC_CODE_SIGNATURE                     =0x1D;
-const quint32 LC_ENCRYPTION_INFO                    =0x21;
-const quint32 LC_DYLD_INFO                          =0x22;
-const quint32 LC_DYLD_INFO_ONLY                     =(0x22|LC_REQ_DYLD);
-const quint32 LC_VERSION_MIN_MACOSX                 =0x24;
-const quint32 LC_VERSION_MIN_IPHONEOS               =0x25;
-const quint32 LC_FUNCTION_STARTS                    =0x26;
-const quint32 LC_DATA_IN_CODE                       =0x29;
-const quint32 LC_SOURCE_VERSION                     =0x2A;
-const quint32 LC_ENCRYPTION_INFO_64                 =0x2C;
-const quint32 LC_VERSION_MIN_TVOS                   =0x2F;
-const quint32 LC_VERSION_MIN_WATCHOS                =0x30;
+const quint32 S_LC_REQ_DYLD                           =0x80000000;
+const quint32 S_LC_SEGMENT                            =0x1;           /* segment of this file to be mapped */
+const quint32 S_LC_SYMTAB                             =0x2;           /* link-edit stab symbol table info */
+const quint32 S_LC_SYMSEG                             =0x3;        	/* link-edit gdb symbol table info (obsolete) */
+const quint32 S_LC_THREAD                             =0x4;	        /* thread */
+const quint32 S_LC_UNIXTHREAD                         =0x5;	        /* unix thread (includes a stack) */
+const quint32 S_LC_LOADFVMLIB                         =0x6;	        /* load a specified fixed VM shared library */
+const quint32 S_LC_IDFVMLIB                           =0x7;	        /* fixed VM shared library identification */
+const quint32 S_LC_IDENT                              =0x8;	        /* object identification info (obsolete) */
+const quint32 S_LC_FVMFILE                            =0x9;	        /* fixed VM file inclusion (internal use) */
+const quint32 S_LC_PREPAGE                            =0xA;           /* prepage command (internal use) */
+const quint32 S_LC_DYSYMTAB                           =0xB;	        /* dynamic link-edit symbol table info */
+const quint32 S_LC_LOAD_DYLIB                         =0xC;	        /* load a dynamicly linked shared library */
+const quint32 S_LC_ID_DYLIB                           =0xD;	        /* dynamicly linked shared lib identification */
+const quint32 S_LC_LOAD_DYLINKER                      =0xE;	        /* load a dynamic linker */
+const quint32 S_LC_ID_DYLINKER                        =0xF;	        /* dynamic linker identification */
+const quint32 S_LC_PREBOUND_DYLIB                     =0x10;	        /* modules prebound for a dynamicly */
+const quint32 S_LC_ROUTINES                           =0x11;	        /* image routines */
+const quint32 S_LC_SUB_FRAMEWORK                      =0x12;	        /* sub framework */
+const quint32 S_LC_SUB_UMBRELLA                       =0x13;	        /* sub umbrella */
+const quint32 S_LC_SUB_CLIENT                         =0x14;	        /* sub client */
+const quint32 S_LC_SUB_LIBRARY                        =0x15;	        /* sub library */
+const quint32 S_LC_TWOLEVEL_HINTS                     =0x16;	        /* two-level namespace lookup hints */
+const quint32 S_LC_PREBIND_CKSUM                      =0x17;	        /* prebind checksum */
+const quint32 S_LC_LOAD_WEAK_DYLIB                    =(0x18|S_LC_REQ_DYLD);
+const quint32 S_LC_SEGMENT_64                         =0x19;	        /* 64-bit segment of this file to bemapped */
+const quint32 S_LC_ROUTINES_64                        =0x1A;	        /* 64-bit image routines */
+const quint32 S_LC_UUID                               =0x1B;	        /* the uuid */
+const quint32 S_LC_RPATH                              =(0x1C|S_LC_REQ_DYLD);
+const quint32 S_LC_CODE_SIGNATURE                     =0x1D;
+const quint32 S_LC_ENCRYPTION_INFO                    =0x21;
+const quint32 S_LC_DYLD_INFO                          =0x22;
+const quint32 S_LC_DYLD_INFO_ONLY                     =(0x22|S_LC_REQ_DYLD);
+const quint32 S_LC_VERSION_MIN_MACOSX                 =0x24;
+const quint32 S_LC_VERSION_MIN_IPHONEOS               =0x25;
+const quint32 S_LC_FUNCTION_STARTS                    =0x26;
+const quint32 S_LC_DATA_IN_CODE                       =0x29;
+const quint32 S_LC_SOURCE_VERSION                     =0x2A;
+const quint32 S_LC_ENCRYPTION_INFO_64                 =0x2C;
+const quint32 S_LC_VERSION_MIN_TVOS                   =0x2F;
+const quint32 S_LC_VERSION_MIN_WATCHOS                =0x30;
 
-const quint32 LC_MAIN                               =(0x28|LC_REQ_DYLD);       /* main */
+const quint32 S_LC_MAIN                               =(0x28|S_LC_REQ_DYLD);       /* main */
 
-const quint32 MH_OBJECT                             =0x1;		/* relocatable object file */
-const quint32 MH_EXECUTE	                        =0x2;		/* demand paged executable file */
-const quint32 MH_FVMLIB                             =0x3;		/* fixed VM shared library file */
-const quint32 MH_CORE		                        =0x4;		/* core file */
-const quint32 MH_PRELOAD	                        =0x5;		/* preloaded executable file */
-const quint32 MH_DYLIB                              =0x6;		/* dynamicly bound shared library file*/
-const quint32 MH_DYLINKER	                        =0x7;		/* dynamic link editor */
-const quint32 MH_BUNDLE                             =0x8;		/* dynamicly bound bundle file */
-const quint32 MH_DYLIB_STUB                         =0x9;
-const quint32 MH_DSYM                               =0xa;
-const quint32 MH_KEXT_BUNDLE                        =0xb;
+const quint32 S_MH_OBJECT                               =0x1;		/* relocatable object file */
+const quint32 S_MH_EXECUTE                              =0x2;		/* demand paged executable file */
+const quint32 S_MH_FVMLIB                               =0x3;		/* fixed VM shared library file */
+const quint32 S_MH_CORE                                 =0x4;		/* core file */
+const quint32 S_MH_PRELOAD                              =0x5;		/* preloaded executable file */
+const quint32 S_MH_DYLIB                                =0x6;		/* dynamicly bound shared library file*/
+const quint32 S_MH_DYLINKER                             =0x7;		/* dynamic link editor */
+const quint32 S_MH_BUNDLE                               =0x8;		/* dynamicly bound bundle file */
+const quint32 S_MH_DYLIB_STUB                           =0x9;
+const quint32 S_MH_DSYM                                 =0xa;
+const quint32 S_MH_KEXT_BUNDLE                          =0xb;
 
-const quint32 VM_PROT_NONE                          =0x00;
-const quint32 VM_PROT_READ                          =0x01;      /* read permission */
-const quint32 VM_PROT_WRITE                         =0x02;      /* write permission */
-const quint32 VM_PROT_EXECUTE                       =0x04;      /* execute permission */
+const quint32 S_VM_PROT_NONE                            =0x00;
+const quint32 S_VM_PROT_READ                            =0x01;      /* read permission */
+const quint32 S_VM_PROT_WRITE                           =0x02;      /* write permission */
+const quint32 S_VM_PROT_EXECUTE                         =0x04;      /* execute permission */
 
-const quint32 SECTION_TYPE                          =0x000000ff;
-const quint32 SECTION_ATTRIBUTES_SYS                =0x00ffff00;	/* system setable attributes */
-const quint32 SECTION_ATTRIBUTES_USR                =0xff000000;    /* User setable attributes */
+const quint32 S_SECTION_TYPE                            =0x000000ff;
+const quint32 S_SECTION_ATTRIBUTES_SYS                  =0x00ffff00;	/* system setable attributes */
+const quint32 S_SECTION_ATTRIBUTES_USR                  =0xff000000;    /* User setable attributes */
 
 struct x86_thread_state32_t
 {
@@ -906,65 +906,65 @@ enum reloc_type_ppc
 /*
  * The following are used to encode rebasing information
  */
-const quint32 REBASE_TYPE_POINTER                                       =1;
-const quint32 REBASE_TYPE_TEXT_ABSOLUTE32                               =2;
-const quint32 REBASE_TYPE_TEXT_PCREL32                                  =3;
+const quint32 S_REBASE_TYPE_POINTER                                       =1;
+const quint32 S_REBASE_TYPE_TEXT_ABSOLUTE32                               =2;
+const quint32 S_REBASE_TYPE_TEXT_PCREL32                                  =3;
 
-const quint32 REBASE_OPCODE_MASK                                        =0xF0;
-const quint32 REBASE_IMMEDIATE_MASK                                     =0x0F;
-const quint32 REBASE_OPCODE_DONE                                        =0x00;
-const quint32 REBASE_OPCODE_SET_TYPE_IMM                                =0x10;
-const quint32 REBASE_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB                 =0x20;
-const quint32 REBASE_OPCODE_ADD_ADDR_ULEB                               =0x30;
-const quint32 REBASE_OPCODE_ADD_ADDR_IMM_SCALED                         =0x40;
-const quint32 REBASE_OPCODE_DO_REBASE_IMM_TIMES                         =0x50;
-const quint32 REBASE_OPCODE_DO_REBASE_ULEB_TIMES                        =0x60;
-const quint32 REBASE_OPCODE_DO_REBASE_ADD_ADDR_ULEB                     =0x70;
-const quint32 REBASE_OPCODE_DO_REBASE_ULEB_TIMES_SKIPPING_ULEB          =0x80;
+const quint32 S_REBASE_OPCODE_MASK                                        =0xF0;
+const quint32 S_REBASE_IMMEDIATE_MASK                                     =0x0F;
+const quint32 S_REBASE_OPCODE_DONE                                        =0x00;
+const quint32 S_REBASE_OPCODE_SET_TYPE_IMM                                =0x10;
+const quint32 S_REBASE_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB                 =0x20;
+const quint32 S_REBASE_OPCODE_ADD_ADDR_ULEB                               =0x30;
+const quint32 S_REBASE_OPCODE_ADD_ADDR_IMM_SCALED                         =0x40;
+const quint32 S_REBASE_OPCODE_DO_REBASE_IMM_TIMES                         =0x50;
+const quint32 S_REBASE_OPCODE_DO_REBASE_ULEB_TIMES                        =0x60;
+const quint32 S_REBASE_OPCODE_DO_REBASE_ADD_ADDR_ULEB                     =0x70;
+const quint32 S_REBASE_OPCODE_DO_REBASE_ULEB_TIMES_SKIPPING_ULEB          =0x80;
 /*
  * The following are used to encode binding information
  */
-const quint32 BIND_TYPE_POINTER                                         =1;
-const quint32 BIND_TYPE_TEXT_ABSOLUTE32                                 =2;
-const quint32 BIND_TYPE_TEXT_PCREL32                                    =3;
+const quint32 S_BIND_TYPE_POINTER                                         =1;
+const quint32 S_BIND_TYPE_TEXT_ABSOLUTE32                                 =2;
+const quint32 S_BIND_TYPE_TEXT_PCREL32                                    =3;
 
-const quint32 BIND_SPECIAL_DYLIB_SELF                                   =0;
-const quint32 BIND_SPECIAL_DYLIB_MAIN_EXECUTABLE                        =-1;
-const quint32 BIND_SPECIAL_DYLIB_FLAT_LOOKUP                            =-2;
-const quint32 BIND_SPECIAL_DYLIB_WEAK_LOOKUP                            =-3;
+const quint32 S_BIND_SPECIAL_DYLIB_SELF                                   =0;
+const quint32 S_BIND_SPECIAL_DYLIB_MAIN_EXECUTABLE                        =-1;
+const quint32 S_BIND_SPECIAL_DYLIB_FLAT_LOOKUP                            =-2;
+const quint32 S_BIND_SPECIAL_DYLIB_WEAK_LOOKUP                            =-3;
 
-const quint32 BIND_SYMBOL_FLAGS_WEAK_IMPORT                             =0x1;
-const quint32 BIND_SYMBOL_FLAGS_NON_WEAK_DEFINITION                     =0x8;
+const quint32 S_BIND_SYMBOL_FLAGS_WEAK_IMPORT                             =0x1;
+const quint32 S_BIND_SYMBOL_FLAGS_NON_WEAK_DEFINITION                     =0x8;
 
-const quint32 BIND_OPCODE_MASK                                          =0xF0;
-const quint32 BIND_IMMEDIATE_MASK                                       =0x0F;
-const quint32 BIND_OPCODE_DONE                                          =0x00;
-const quint32 BIND_OPCODE_SET_DYLIB_ORDINAL_IMM                         =0x10;
-const quint32 BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB                        =0x20;
-const quint32 BIND_OPCODE_SET_DYLIB_SPECIAL_IMM                         =0x30;
-const quint32 BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM                 =0x40;
-const quint32 BIND_OPCODE_SET_TYPE_IMM                                  =0x50;
-const quint32 BIND_OPCODE_SET_ADDEND_SLEB                               =0x60;
-const quint32 BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB                   =0x70;
-const quint32 BIND_OPCODE_ADD_ADDR_ULEB                                 =0x80;
-const quint32 BIND_OPCODE_DO_BIND                                       =0x90;
-const quint32 BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB                         =0xA0;
-const quint32 BIND_OPCODE_DO_BIND_ADD_ADDR_IMM_SCALED                   =0xB0;
-const quint32 BIND_OPCODE_DO_BIND_ULEB_TIMES_SKIPPING_ULEB              =0xC0;
-const quint32 BIND_OPCODE_THREADED                                      =0xD0;
-const quint32 BIND_SUBOPCODE_THREADED_SET_BIND_ORDINAL_TABLE_SIZE_ULEB  =0x00;
-const quint32 BIND_SUBOPCODE_THREADED_APPLY                             =0x01;
+const quint32 S_BIND_OPCODE_MASK                                          =0xF0;
+const quint32 S_BIND_IMMEDIATE_MASK                                       =0x0F;
+const quint32 S_BIND_OPCODE_DONE                                          =0x00;
+const quint32 S_BIND_OPCODE_SET_DYLIB_ORDINAL_IMM                         =0x10;
+const quint32 S_BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB                        =0x20;
+const quint32 S_BIND_OPCODE_SET_DYLIB_SPECIAL_IMM                         =0x30;
+const quint32 S_BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM                 =0x40;
+const quint32 S_BIND_OPCODE_SET_TYPE_IMM                                  =0x50;
+const quint32 S_BIND_OPCODE_SET_ADDEND_SLEB                               =0x60;
+const quint32 S_BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB                   =0x70;
+const quint32 S_BIND_OPCODE_ADD_ADDR_ULEB                                 =0x80;
+const quint32 S_BIND_OPCODE_DO_BIND                                       =0x90;
+const quint32 S_BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB                         =0xA0;
+const quint32 S_BIND_OPCODE_DO_BIND_ADD_ADDR_IMM_SCALED                   =0xB0;
+const quint32 S_BIND_OPCODE_DO_BIND_ULEB_TIMES_SKIPPING_ULEB              =0xC0;
+const quint32 S_BIND_OPCODE_THREADED                                      =0xD0;
+const quint32 S_BIND_SUBOPCODE_THREADED_SET_BIND_ORDINAL_TABLE_SIZE_ULEB  =0x00;
+const quint32 S_BIND_SUBOPCODE_THREADED_APPLY                             =0x01;
 /*
  * The following are used on the flags byte of a terminal node
  * in the export information.
  */
-const quint32 EXPORT_SYMBOL_FLAGS_KIND_MASK                             =0x03;
-const quint32 EXPORT_SYMBOL_FLAGS_KIND_REGULAR                          =0x00;
-const quint32 EXPORT_SYMBOL_FLAGS_KIND_THREAD_LOCAL                     =0x01;
-const quint32 EXPORT_SYMBOL_FLAGS_KIND_ABSOLUTE                         =0x02;
-const quint32 EXPORT_SYMBOL_FLAGS_WEAK_DEFINITION                       =0x04;
-const quint32 EXPORT_SYMBOL_FLAGS_REEXPORT                              =0x08;
-const quint32 EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER                     =0x10;
+const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_MASK                             =0x03;
+const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_REGULAR                          =0x00;
+const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_THREAD_LOCAL                     =0x01;
+const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_ABSOLUTE                         =0x02;
+const quint32 S_EXPORT_SYMBOL_FLAGS_WEAK_DEFINITION                       =0x04;
+const quint32 S_EXPORT_SYMBOL_FLAGS_REEXPORT                              =0x08;
+const quint32 S_EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER                     =0x10;
 }
 
 #endif // QMACH_DEF_H

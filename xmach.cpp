@@ -36,10 +36,10 @@ bool XMACH::isValid()
 
     quint32 nMagic=read_uint32(0);
 
-    if( (nMagic==XMACH_DEF::MH_MAGIC)||
-        (nMagic==XMACH_DEF::MH_CIGAM)||
-        (nMagic==XMACH_DEF::MH_MAGIC_64)||
-        (nMagic==XMACH_DEF::MH_CIGAM_64))
+    if( (nMagic==XMACH_DEF::S_MH_MAGIC)||
+        (nMagic==XMACH_DEF::S_MH_CIGAM)||
+        (nMagic==XMACH_DEF::S_MH_MAGIC_64)||
+        (nMagic==XMACH_DEF::S_MH_CIGAM_64))
     {
         bResult=true;
     }
@@ -67,8 +67,8 @@ bool XMACH::isBigEndian()
 
     quint32 nMagic=read_uint32(0);
 
-    if( (nMagic==XMACH_DEF::MH_CIGAM)||
-        (nMagic==XMACH_DEF::MH_CIGAM_64))
+    if( (nMagic==XMACH_DEF::S_MH_CIGAM)||
+        (nMagic==XMACH_DEF::S_MH_CIGAM_64))
     {
         bResult=true;
     }
@@ -271,7 +271,7 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
 {
     QMap<quint64, QString> mapResult;
 
-    if(nCpuType==XMACH_DEF::CPU_TYPE_VAX)
+    if(nCpuType==XMACH_DEF::S_CPU_TYPE_VAX)
     {
         mapResult.insert(0,"CPU_SUBTYPE_VAX_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_VAX780");
@@ -287,16 +287,16 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
         mapResult.insert(11,"CPU_SUBTYPE_VAX8800");
         mapResult.insert(12,"CPU_SUBTYPE_UVAXIII");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_ROMP)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_ROMP)
     {
         mapResult.insert(0,"CPU_SUBTYPE_RT_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_RT_PC");
         mapResult.insert(2,"CPU_SUBTYPE_RT_APC");
         mapResult.insert(3,"CPU_SUBTYPE_RT_135");
     }
-    else if((nCpuType==XMACH_DEF::CPU_TYPE_NS32032)||
-            (nCpuType==XMACH_DEF::CPU_TYPE_NS32332)||
-            (nCpuType==XMACH_DEF::CPU_TYPE_NS32532))
+    else if((nCpuType==XMACH_DEF::S_CPU_TYPE_NS32032)||
+            (nCpuType==XMACH_DEF::S_CPU_TYPE_NS32332)||
+            (nCpuType==XMACH_DEF::S_CPU_TYPE_NS32532))
     {
         mapResult.insert(0,"CPU_SUBTYPE_MMAX_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_MMAX_DPC");
@@ -305,14 +305,14 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
         mapResult.insert(4,"CPU_SUBTYPE_MMAX_APC_FPA");
         mapResult.insert(5,"CPU_SUBTYPE_MMAX_XPC");
     }
-    else if((nCpuType==XMACH_DEF::CPU_TYPE_I386)||
-            (nCpuType==XMACH_DEF::CPU_TYPE_X86_64))
+    else if((nCpuType==XMACH_DEF::S_CPU_TYPE_I386)||
+            (nCpuType==XMACH_DEF::S_CPU_TYPE_X86_64))
     {
         mapResult.insert(3,"CPU_SUBTYPE_386_ALL");
         mapResult.insert(0x80000003,"CPU_SUBTYPE_X86_64_ALL");
         // TODO
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_MIPS)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_MIPS)
     {
         mapResult.insert(0,"CPU_SUBTYPE_MIPS_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_MIPS_R2300");
@@ -320,19 +320,19 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
         mapResult.insert(3,"CPU_SUBTYPE_MIPS_R2800");
         mapResult.insert(4,"CPU_SUBTYPE_MIPS_R2000a");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_MC680x0)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_MC680x0)
     {
         mapResult.insert(1,"CPU_SUBTYPE_MC68030");
         mapResult.insert(2,"CPU_SUBTYPE_MC68040");
         mapResult.insert(3,"CPU_SUBTYPE_MC68030_ONLY");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_HPPA)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_HPPA)
     {
         mapResult.insert(0,"CPU_SUBTYPE_HPPA_7100");
         mapResult.insert(1,"CPU_SUBTYPE_HPPA_7100LC");
     }
-    else if((nCpuType==XMACH_DEF::CPU_TYPE_ARM)||
-            (nCpuType==XMACH_DEF::CPU_TYPE_ARM64))
+    else if((nCpuType==XMACH_DEF::S_CPU_TYPE_ARM)||
+            (nCpuType==XMACH_DEF::S_CPU_TYPE_ARM64))
     {
         mapResult.insert(0,"CPU_SUBTYPE_ARM_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_ARM_A500_ARCH");
@@ -348,33 +348,33 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
         mapResult.insert(11,"CPU_SUBTYPE_ARM_V7S");
         mapResult.insert(12,"CPU_SUBTYPE_ARM_V7K");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_MC88000)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_MC88000)
     {
         mapResult.insert(0,"CPU_SUBTYPE_MC88000_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_MC88100");
         mapResult.insert(2,"CPU_SUBTYPE_MC88110");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_MC98000)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_MC98000)
     {
         mapResult.insert(0,"CPU_SUBTYPE_MC98000_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_MC98601");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_I860)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_I860)
     {
         mapResult.insert(0,"CPU_SUBTYPE_I860_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_I860_860");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_RS6000)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_RS6000)
     {
         mapResult.insert(0,"CPU_SUBTYPE_RS6000_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_RS6000");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_SPARC)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_SPARC)
     {
         mapResult.insert(0,"CPU_SUBTYPE_SPARC_ALL");
     }
-    else if((nCpuType==XMACH_DEF::CPU_TYPE_POWERPC)||
-            (nCpuType==XMACH_DEF::CPU_TYPE_POWERPC64))
+    else if((nCpuType==XMACH_DEF::S_CPU_TYPE_POWERPC)||
+            (nCpuType==XMACH_DEF::S_CPU_TYPE_POWERPC64))
     {
         mapResult.insert(0,"CPU_SUBTYPE_POWERPC_ALL");
         mapResult.insert(1,"CPU_SUBTYPE_POWERPC_601");
@@ -390,7 +390,7 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
         mapResult.insert(11,"CPU_SUBTYPE_POWERPC_7450");
         mapResult.insert(100,"CPU_SUBTYPE_POWERPC_970");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_VEO)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_VEO)
     {
         mapResult.insert(1,"CPU_SUBTYPE_VEO_1");
         mapResult.insert(2,"CPU_SUBTYPE_VEO_2");
@@ -405,7 +405,7 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
 {
     QMap<quint64, QString> mapResult;
 
-    if(nCpuType==XMACH_DEF::CPU_TYPE_VAX)
+    if(nCpuType==XMACH_DEF::S_CPU_TYPE_VAX)
     {
         mapResult.insert(0,"VAX_ALL");
         mapResult.insert(1,"VAX780");
@@ -421,16 +421,16 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
         mapResult.insert(11,"VAX8800");
         mapResult.insert(12,"UVAXIII");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_ROMP)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_ROMP)
     {
         mapResult.insert(0,"RT_ALL");
         mapResult.insert(1,"RT_PC");
         mapResult.insert(2,"RT_APC");
         mapResult.insert(3,"RT_135");
     }
-    else if((nCpuType==XMACH_DEF::CPU_TYPE_NS32032)||
-            (nCpuType==XMACH_DEF::CPU_TYPE_NS32332)||
-            (nCpuType==XMACH_DEF::CPU_TYPE_NS32532))
+    else if((nCpuType==XMACH_DEF::S_CPU_TYPE_NS32032)||
+            (nCpuType==XMACH_DEF::S_CPU_TYPE_NS32332)||
+            (nCpuType==XMACH_DEF::S_CPU_TYPE_NS32532))
     {
         mapResult.insert(0,"MMAX_ALL");
         mapResult.insert(1,"MMAX_DPC");
@@ -439,14 +439,14 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
         mapResult.insert(4,"MMAX_APC_FPA");
         mapResult.insert(5,"MMAX_XPC");
     }
-    else if((nCpuType==XMACH_DEF::CPU_TYPE_I386)||
-            (nCpuType==XMACH_DEF::CPU_TYPE_X86_64))
+    else if((nCpuType==XMACH_DEF::S_CPU_TYPE_I386)||
+            (nCpuType==XMACH_DEF::S_CPU_TYPE_X86_64))
     {
         mapResult.insert(3,"386_ALL");
         mapResult.insert(0x80000003,"X86_64_ALL");
         // TODO
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_MIPS)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_MIPS)
     {
         mapResult.insert(0,"MIPS_ALL");
         mapResult.insert(1,"MIPS_R2300");
@@ -454,19 +454,19 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
         mapResult.insert(3,"MIPS_R2800");
         mapResult.insert(4,"MIPS_R2000a");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_MC680x0)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_MC680x0)
     {
         mapResult.insert(1,"MC68030");
         mapResult.insert(2,"MC68040");
         mapResult.insert(3,"MC68030_ONLY");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_HPPA)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_HPPA)
     {
         mapResult.insert(0,"HPPA_7100");
         mapResult.insert(1,"HPPA_7100LC");
     }
-    else if((nCpuType==XMACH_DEF::CPU_TYPE_ARM)||
-            (nCpuType==XMACH_DEF::CPU_TYPE_ARM64))
+    else if((nCpuType==XMACH_DEF::S_CPU_TYPE_ARM)||
+            (nCpuType==XMACH_DEF::S_CPU_TYPE_ARM64))
     {
         mapResult.insert(0,"ARM_ALL");
         mapResult.insert(1,"ARM_A500_ARCH");
@@ -482,33 +482,33 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
         mapResult.insert(11,"ARM_V7S");
         mapResult.insert(12,"ARM_V7K");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_MC88000)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_MC88000)
     {
         mapResult.insert(0,"MC88000_ALL");
         mapResult.insert(1,"MC88100");
         mapResult.insert(2,"MC88110");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_MC98000)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_MC98000)
     {
         mapResult.insert(0,"MC98000_ALL");
         mapResult.insert(1,"MC98601");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_I860)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_I860)
     {
         mapResult.insert(0,"I860_ALL");
         mapResult.insert(1,"I860_860");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_RS6000)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_RS6000)
     {
         mapResult.insert(0,"RS6000_ALL");
         mapResult.insert(1,"RS6000");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_SPARC)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_SPARC)
     {
         mapResult.insert(0,"SPARC_ALL");
     }
-    else if((nCpuType==XMACH_DEF::CPU_TYPE_POWERPC)||
-            (nCpuType==XMACH_DEF::CPU_TYPE_POWERPC64))
+    else if((nCpuType==XMACH_DEF::S_CPU_TYPE_POWERPC)||
+            (nCpuType==XMACH_DEF::S_CPU_TYPE_POWERPC64))
     {
         mapResult.insert(0,"POWERPC_ALL");
         mapResult.insert(1,"POWERPC_601");
@@ -524,7 +524,7 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
         mapResult.insert(11,"POWERPC_7450");
         mapResult.insert(100,"POWERPC_970");
     }
-    else if(nCpuType==XMACH_DEF::CPU_TYPE_VEO)
+    else if(nCpuType==XMACH_DEF::S_CPU_TYPE_VEO)
     {
         mapResult.insert(1,"VEO_1");
         mapResult.insert(2,"VEO_2");
@@ -1160,17 +1160,17 @@ qint64 XMACH::getAddressOfEntryPoint()
 
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords();
 
-    if(isCommandPresent(XMACH_DEF::LC_MAIN,&listCommandRecords))
+    if(isCommandPresent(XMACH_DEF::S_LC_MAIN,&listCommandRecords))
     {
-        qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_MAIN,0,&listCommandRecords);
+        qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_MAIN,0,&listCommandRecords);
 
         qint64 nEntryPointOffset=read_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),bIsBigEndian);
 
         nResult=offsetToAddress(nEntryPointOffset);
     }
-    else if(isCommandPresent(XMACH_DEF::LC_UNIXTHREAD,&listCommandRecords)) // TODO Check LC_THREAD
+    else if(isCommandPresent(XMACH_DEF::S_LC_UNIXTHREAD,&listCommandRecords)) // TODO Check LC_THREAD
     {
-        qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_UNIXTHREAD,0,&listCommandRecords);
+        qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_UNIXTHREAD,0,&listCommandRecords);
 
         quint32 nMachine=getHeader_cputype();
 
@@ -1180,7 +1180,7 @@ qint64 XMACH::getAddressOfEntryPoint()
 
         nOffset+=sizeof(XMACH_DEF::state_hdr_t);
 
-        if((nMachine==XMACH_DEF::CPU_TYPE_I386)||(nMachine==XMACH_DEF::CPU_TYPE_X86_64))
+        if((nMachine==XMACH_DEF::S_CPU_TYPE_I386)||(nMachine==XMACH_DEF::S_CPU_TYPE_X86_64))
         {
             if(_state_hdr.flavor==XMACH_DEF::x86_THREAD_STATE32)
             {
@@ -1191,7 +1191,7 @@ qint64 XMACH::getAddressOfEntryPoint()
                 nResult=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rip),bIsBigEndian);
             }
         }
-        else if((nMachine==XMACH_DEF::CPU_TYPE_ARM)||(nMachine==XMACH_DEF::CPU_TYPE_ARM64))
+        else if((nMachine==XMACH_DEF::S_CPU_TYPE_ARM)||(nMachine==XMACH_DEF::S_CPU_TYPE_ARM64))
         {
             if(_state_hdr.flavor==XMACH_DEF::ARM_THREAD_STATE)
             {
@@ -1202,6 +1202,7 @@ qint64 XMACH::getAddressOfEntryPoint()
                 nResult=read_uint64(nOffset+offsetof(XMACH_DEF::arm_thread_state64_t,pc),bIsBigEndian);
             }
         }
+        // TODO PPC
     }
 
     return nResult;
@@ -1469,7 +1470,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT_64,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1487,7 +1488,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1647,7 +1648,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT_64,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1673,7 +1674,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1889,7 +1890,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pListCommandRec
 
     if(bIs64)
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT_64,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT_64,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1903,7 +1904,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pListCommandRec
     }
     else
     {
-        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::LC_SEGMENT,pListCommandRecords);
+        QList<COMMAND_RECORD> listLCSegments=getCommandRecords(XMACH_DEF::S_LC_SEGMENT,pListCommandRecords);
 
         int nNumberOfSegments=listLCSegments.count();
 
@@ -1989,7 +1990,7 @@ XMACH_DEF::dyld_info_command XMACH::get_dyld_info_command()
 {
     XMACH_DEF::dyld_info_command result={};
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_DYLD_INFO_ONLY,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_DYLD_INFO_ONLY,0);
 
     if(nOffset!=-1)
     {
@@ -2080,7 +2081,7 @@ QString XMACH::getUUID()
 {
     QString sResult;
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_UUID,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_UUID,0);
 
     if(nOffset!=-1)
     {
@@ -2092,7 +2093,7 @@ QString XMACH::getUUID()
 
 void XMACH::setUUID(QString sValue)
 {
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_UUID,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_UUID,0);
 
     if(nOffset!=-1)
     {
@@ -2104,7 +2105,7 @@ QString XMACH::getLoadDylinker()
 {
     QString sResult;
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_LOAD_DYLINKER,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_LOAD_DYLINKER,0);
 
     if(nOffset!=-1)
     {
@@ -2118,7 +2119,7 @@ QString XMACH::getLoadDylinker()
 
 void XMACH::setLoadDylinker(QString sValue)
 {
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_LOAD_DYLINKER,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_LOAD_DYLINKER,0);
 
     if(nOffset!=-1)
     {
@@ -2135,7 +2136,7 @@ QString XMACH::getRPath()
 {
     QString sResult;
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_RPATH,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_RPATH,0);
 
     if(nOffset!=-1)
     {
@@ -2149,7 +2150,7 @@ QString XMACH::getRPath()
 
 void XMACH::setRPath(QString sValue)
 {
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_RPATH,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_RPATH,0);
 
     if(nOffset!=-1)
     {
@@ -2166,7 +2167,7 @@ XMACH_DEF::symtab_command XMACH::get_symtab_command()
 {
     XMACH_DEF::symtab_command result={};
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_SYMTAB,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_SYMTAB,0);
 
     if(nOffset!=-1)
     {
@@ -2221,7 +2222,7 @@ XMACH_DEF::dysymtab_command XMACH::get_dysymtab_command()
 {
     XMACH_DEF::dysymtab_command result={};
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_DYSYMTAB,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_DYSYMTAB,0);
 
     if(nOffset!=-1)
     {
@@ -2360,7 +2361,7 @@ XMACH_DEF::version_min_command XMACH::get_version_min_command() // TODO Iphone!!
 {
     XMACH_DEF::version_min_command result={};
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_VERSION_MIN_MACOSX,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_MACOSX,0);
 
     if(nOffset!=-1)
     {
@@ -2403,7 +2404,7 @@ quint64 XMACH::getSourceVersion()
 {
     quint64 nResult=0;
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_SOURCE_VERSION,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_SOURCE_VERSION,0);
 
     if(nOffset!=-1)
     {
@@ -2415,7 +2416,7 @@ quint64 XMACH::getSourceVersion()
 
 void XMACH::setSourceVersion(quint64 nValue)
 {
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_SOURCE_VERSION,0);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_SOURCE_VERSION,0);
 
     if(nOffset!=-1)
     {
@@ -3195,7 +3196,7 @@ XMACH_DEF::data_in_code_entry XMACH::_read_data_in_code_entry(qint64 nOffset)
 
 QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords()
 {
-    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_SYMTAB);
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::S_LC_SYMTAB);
 
     return getNlistRecords(&listCommandRecords);
 }
@@ -3206,7 +3207,7 @@ QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords(QList<XMACH::COMMAND_RECORD> *
 
     bool bIs64=is64();
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_SYMTAB,0,pListCommandRecords);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_SYMTAB,0,pListCommandRecords);
 
     if(nOffset!=-1)
     {
@@ -3284,7 +3285,7 @@ XMACH::NLIST_RECORD XMACH::searchNlistRecordByValue(QList<XMACH::NLIST_RECORD> *
 
 XBinary::OFFSETSIZE XMACH::getStringTableOS()
 {
-    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_SYMTAB);
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::S_LC_SYMTAB);
 
     return getStringTableOS(&listCommandRecords);
 }
@@ -3293,7 +3294,7 @@ XBinary::OFFSETSIZE XMACH::getStringTableOS(QList<XMACH::COMMAND_RECORD> *pListC
 {
     OFFSETSIZE result={};
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_SYMTAB,0,pListCommandRecords);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_SYMTAB,0,pListCommandRecords);
 
     if(nOffset!=-1)
     {
@@ -3310,9 +3311,9 @@ XMACH_DEF::dyld_info_command XMACH::get_dyld_info()
 {
     XMACH_DEF::dyld_info_command result={};
 
-    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_DYLD_INFO_ONLY);
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::S_LC_DYLD_INFO_ONLY);
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_DYLD_INFO_ONLY,0,&listCommandRecords);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_DYLD_INFO_ONLY,0,&listCommandRecords);
 
     if(nOffset!=-1)
     {
@@ -3326,9 +3327,9 @@ XMACH_DEF::symtab_command XMACH::get_symtab()
 {
     XMACH_DEF::symtab_command result={};
 
-    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_SYMTAB);
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::S_LC_SYMTAB);
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_SYMTAB,0,&listCommandRecords);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_SYMTAB,0,&listCommandRecords);
 
     if(nOffset!=-1)
     {
@@ -3342,9 +3343,9 @@ XMACH_DEF::dysymtab_command XMACH::get_dysymtab()
 {
     XMACH_DEF::dysymtab_command result={};
 
-    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_DYSYMTAB);
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::S_LC_DYSYMTAB);
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_DYSYMTAB,0,&listCommandRecords);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_DYSYMTAB,0,&listCommandRecords);
 
     if(nOffset!=-1)
     {
@@ -3358,9 +3359,9 @@ XMACH_DEF::encryption_info_command XMACH::get_encryption_info()
 {
     XMACH_DEF::encryption_info_command result={};
 
-    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_ENCRYPTION_INFO);
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::S_LC_ENCRYPTION_INFO);
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_ENCRYPTION_INFO,0,&listCommandRecords);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_ENCRYPTION_INFO,0,&listCommandRecords);
 
     if(nOffset!=-1)
     {
@@ -3374,9 +3375,9 @@ XMACH_DEF::encryption_info_command_64 XMACH::get_encryption_info_64()
 {
     XMACH_DEF::encryption_info_command_64 result={};
 
-    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::LC_ENCRYPTION_INFO_64);
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::S_LC_ENCRYPTION_INFO_64);
 
-    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::LC_ENCRYPTION_INFO_64,0,&listCommandRecords);
+    qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_ENCRYPTION_INFO_64,0,&listCommandRecords);
 
     if(nOffset!=-1)
     {
@@ -3456,7 +3457,7 @@ XBinary::MODE XMACH::getMode()
 {
     MODE result=MODE_32;
 
-    if(getHeader_magic()==XMACH_DEF::MH_MAGIC_64)
+    if(getHeader_magic()==XMACH_DEF::S_MH_MAGIC_64)
     {
         result=MODE_64;
     }
@@ -3497,17 +3498,17 @@ int XMACH::getType()
 
     quint32 nFileType=getHeader_filetype();
 
-    if      (nFileType==XMACH_DEF::MH_OBJECT)       nResult=TYPE_OBJECT;
-    else if (nFileType==XMACH_DEF::MH_EXECUTE)      nResult=TYPE_EXECUTE;
-    else if (nFileType==XMACH_DEF::MH_FVMLIB)       nResult=TYPE_FVMLIB;
-    else if (nFileType==XMACH_DEF::MH_CORE)         nResult=TYPE_CORE;
-    else if (nFileType==XMACH_DEF::MH_PRELOAD)      nResult=TYPE_PRELOAD;
-    else if (nFileType==XMACH_DEF::MH_DYLIB)        nResult=TYPE_DYLIB;
-    else if (nFileType==XMACH_DEF::MH_DYLINKER)     nResult=TYPE_DYLINKER;
-    else if (nFileType==XMACH_DEF::MH_BUNDLE)       nResult=TYPE_BUNDLE;
-    else if (nFileType==XMACH_DEF::MH_DYLIB_STUB)   nResult=TYPE_DYLIB_STUB;
-    else if (nFileType==XMACH_DEF::MH_DSYM)         nResult=TYPE_DSYM;
-    else if (nFileType==XMACH_DEF::MH_KEXT_BUNDLE)  nResult=TYPE_KEXT_BUNDLE;
+    if      (nFileType==XMACH_DEF::S_MH_OBJECT)       nResult=TYPE_OBJECT;
+    else if (nFileType==XMACH_DEF::S_MH_EXECUTE)      nResult=TYPE_EXECUTE;
+    else if (nFileType==XMACH_DEF::S_MH_FVMLIB)       nResult=TYPE_FVMLIB;
+    else if (nFileType==XMACH_DEF::S_MH_CORE)         nResult=TYPE_CORE;
+    else if (nFileType==XMACH_DEF::S_MH_PRELOAD)      nResult=TYPE_PRELOAD;
+    else if (nFileType==XMACH_DEF::S_MH_DYLIB)        nResult=TYPE_DYLIB;
+    else if (nFileType==XMACH_DEF::S_MH_DYLINKER)     nResult=TYPE_DYLINKER;
+    else if (nFileType==XMACH_DEF::S_MH_BUNDLE)       nResult=TYPE_BUNDLE;
+    else if (nFileType==XMACH_DEF::S_MH_DYLIB_STUB)   nResult=TYPE_DYLIB_STUB;
+    else if (nFileType==XMACH_DEF::S_MH_DSYM)         nResult=TYPE_DSYM;
+    else if (nFileType==XMACH_DEF::S_MH_KEXT_BUNDLE)  nResult=TYPE_KEXT_BUNDLE;
 
     return nResult;
 }
@@ -3533,4 +3534,14 @@ QString XMACH::typeIdToString(int nType)
     }
 
     return sResult;
+}
+
+bool XMACH::readOpcode(quint32 nType, char *pData, qint64 nSize, XBinary::OPCODE *pOpcode, B_ERROR *pError)
+{
+    bool bResult=true;
+
+    pOpcode->nSize=1;
+    pOpcode->sName="Name";
+
+    return bResult;
 }

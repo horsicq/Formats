@@ -191,8 +191,8 @@ public:
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
-    QList<LIBRARY_RECORD> getLibraryRecords(int nType=XMACH_DEF::LC_LOAD_DYLIB);
-    QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords,int nType=XMACH_DEF::LC_LOAD_DYLIB);
+    QList<LIBRARY_RECORD> getLibraryRecords(int nType=XMACH_DEF::S_LC_LOAD_DYLIB);
+    QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords,int nType=XMACH_DEF::S_LC_LOAD_DYLIB);
     static LIBRARY_RECORD getLibraryRecordByName(QString sName,QList<LIBRARY_RECORD> *pListLibraryRecords);
     bool isLibraryRecordNamePresent(QString sName);
     static bool isLibraryRecordNamePresent(QString sName,QList<LIBRARY_RECORD> *pListLibraryRecords);
@@ -508,6 +508,8 @@ public:
     virtual FT getFileType();
     virtual int getType();
     virtual QString typeIdToString(int nType);
+
+    virtual bool readOpcode(quint32 nType,char *pData,qint64 nSize,OPCODE *pOpcode,B_ERROR *pError);
 };
 
 #endif // XMACH_H
