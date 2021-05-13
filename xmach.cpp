@@ -3536,12 +3536,21 @@ QString XMACH::typeIdToString(int nType)
     return sResult;
 }
 
-bool XMACH::readOpcode(quint32 nType, char *pData, qint64 nSize, XBinary::OPCODE *pOpcode, B_ERROR *pError)
+qint64 XMACH::readOpcodes(quint32 nType, char *pData, qint64 nStartAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, XBinary::B_ERROR *pError)
 {
-    bool bResult=true;
+    qint64 nResult=0;
 
-    pOpcode->nSize=1;
-    pOpcode->sName="Name";
+    for(int i=0;i<nSize;)
+    {
+        OPCODE opcode={};
+        opcode.nAddress=nStartAddress+i;
+        opcode.nSize=1;
+        opcode.sName="Name";
 
-    return bResult;
+        pListOpcodes->append(opcode);
+
+        i+=i;
+    }
+
+    return nResult;
 }

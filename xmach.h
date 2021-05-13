@@ -519,7 +519,7 @@ public:
         OPCODE_TYPE_WEAK_BIND
     };
 
-    virtual bool readOpcode(quint32 nType,char *pData,qint64 nSize,OPCODE *pOpcode,B_ERROR *pError);
+    virtual qint64 readOpcodes(quint32 nType,char *pData,qint64 nStartAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,B_ERROR *pError);
 };
 
 #endif // XMACH_H

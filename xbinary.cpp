@@ -6432,7 +6432,7 @@ QList<QString> XBinary::getAllFilesFromDirectory(QString sDirectory, QString sEx
     return directory.entryList(QStringList()<<sExtension,QDir::Files);
 }
 
-QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nSize, quint32 nType)
+QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nStartAddress, qint64 nSize, quint32 nType)
 {
     QList<OPCODE> listResult;
 
@@ -6456,26 +6456,11 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nSize, quint32
                 break;
             }
 
-            qint64 _nOpcodesSize=0;
             B_ERROR error=B_ERROR_NONE;
 
-            for(int i=0;i<nTempSize;)
-            {
-                OPCODE opcode={};
-                opcode.nOffset=nOffset+i;
+            qint64 _nOpcodesSize=readOpcodes(nType,pBuffer,nStartAddress,nTempSize-_nOpcodesSize,&listResult,&error);
 
-                if(!readOpcode(nType,pBuffer+i,nTempSize-_nOpcodesSize,&opcode,&error))
-                {
-                    break;
-                }
-
-                _nOpcodesSize+=opcode.nSize;
-                i+=opcode.nSize;
-
-                listResult.append(opcode);
-            }
-
-            if(error==B_ERROR_NOTENOUGHMEMORY)
+            if(error==B_ERROR_NOTENOUGHMEMORY) // TODO Check
             {
                 if((nOffset+nTempSize)==(offsetSize.nOffset+offsetSize.nSize)) // End
                 {
@@ -6485,6 +6470,7 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nSize, quint32
 
             nSize-=_nOpcodesSize;
             nOffset+=_nOpcodesSize;
+            nStartAddress+=_nOpcodesSize;
         }
 
         delete[] pBuffer;
@@ -6493,12 +6479,13 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nSize, quint32
     return listResult;
 }
 
-bool XBinary::readOpcode(quint32 nType, char *pData, qint64 nSize, XBinary::OPCODE *pOpcode, B_ERROR *pError)
+qint64 XBinary::readOpcodes(quint32 nType, char *pData, qint64 nStartAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, B_ERROR *pError)
 {
     Q_UNUSED(nType)
     Q_UNUSED(pData)
+    Q_UNUSED(nStartAddress)
     Q_UNUSED(nSize)
-    Q_UNUSED(pOpcode)
+    Q_UNUSED(pListOpcodes)
 
     *pError=B_ERROR_UNKNOWN;
 
