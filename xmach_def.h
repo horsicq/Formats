@@ -906,65 +906,65 @@ enum reloc_type_ppc
 /*
  * The following are used to encode rebasing information
  */
-const quint32 S_REBASE_TYPE_POINTER                                       =1;
-const quint32 S_REBASE_TYPE_TEXT_ABSOLUTE32                               =2;
-const quint32 S_REBASE_TYPE_TEXT_PCREL32                                  =3;
+const quint32 S_REBASE_TYPE_POINTER                                         =1;
+const quint32 S_REBASE_TYPE_TEXT_ABSOLUTE32                                 =2;
+const quint32 S_REBASE_TYPE_TEXT_PCREL32                                    =3;
 
-const quint32 S_REBASE_OPCODE_MASK                                        =0xF0;
-const quint32 S_REBASE_IMMEDIATE_MASK                                     =0x0F;
-const quint32 S_REBASE_OPCODE_DONE                                        =0x00;
-const quint32 S_REBASE_OPCODE_SET_TYPE_IMM                                =0x10;
-const quint32 S_REBASE_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB                 =0x20;
-const quint32 S_REBASE_OPCODE_ADD_ADDR_ULEB                               =0x30;
-const quint32 S_REBASE_OPCODE_ADD_ADDR_IMM_SCALED                         =0x40;
-const quint32 S_REBASE_OPCODE_DO_REBASE_IMM_TIMES                         =0x50;
-const quint32 S_REBASE_OPCODE_DO_REBASE_ULEB_TIMES                        =0x60;
-const quint32 S_REBASE_OPCODE_DO_REBASE_ADD_ADDR_ULEB                     =0x70;
-const quint32 S_REBASE_OPCODE_DO_REBASE_ULEB_TIMES_SKIPPING_ULEB          =0x80;
+const quint32 S_REBASE_OPCODE_MASK                                          =0xF0;
+const quint32 S_REBASE_IMMEDIATE_MASK                                       =0x0F;
+const quint32 S_REBASE_OPCODE_DONE                                          =0x00;
+const quint32 S_REBASE_OPCODE_SET_TYPE_IMM                                  =0x10;
+const quint32 S_REBASE_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB                   =0x20;
+const quint32 S_REBASE_OPCODE_ADD_ADDR_ULEB                                 =0x30;
+const quint32 S_REBASE_OPCODE_ADD_ADDR_IMM_SCALED                           =0x40;
+const quint32 S_REBASE_OPCODE_DO_REBASE_IMM_TIMES                           =0x50;
+const quint32 S_REBASE_OPCODE_DO_REBASE_ULEB_TIMES                          =0x60;
+const quint32 S_REBASE_OPCODE_DO_REBASE_ADD_ADDR_ULEB                       =0x70;
+const quint32 S_REBASE_OPCODE_DO_REBASE_ULEB_TIMES_SKIPPING_ULEB            =0x80;
 /*
  * The following are used to encode binding information
  */
-const quint32 S_BIND_TYPE_POINTER                                         =1;
-const quint32 S_BIND_TYPE_TEXT_ABSOLUTE32                                 =2;
-const quint32 S_BIND_TYPE_TEXT_PCREL32                                    =3;
+const quint32 S_BIND_TYPE_POINTER                                           =1;
+const quint32 S_BIND_TYPE_TEXT_ABSOLUTE32                                   =2;
+const quint32 S_BIND_TYPE_TEXT_PCREL32                                      =3;
 
-const quint32 S_BIND_SPECIAL_DYLIB_SELF                                   =0;
-const quint32 S_BIND_SPECIAL_DYLIB_MAIN_EXECUTABLE                        =-1;
-const quint32 S_BIND_SPECIAL_DYLIB_FLAT_LOOKUP                            =-2;
-const quint32 S_BIND_SPECIAL_DYLIB_WEAK_LOOKUP                            =-3;
+const quint32 S_BIND_SPECIAL_DYLIB_SELF                                     =0;
+const quint32 S_BIND_SPECIAL_DYLIB_MAIN_EXECUTABLE                          =-1;
+const quint32 S_BIND_SPECIAL_DYLIB_FLAT_LOOKUP                              =-2;
+const quint32 S_BIND_SPECIAL_DYLIB_WEAK_LOOKUP                              =-3;
 
-const quint32 S_BIND_SYMBOL_FLAGS_WEAK_IMPORT                             =0x1;
-const quint32 S_BIND_SYMBOL_FLAGS_NON_WEAK_DEFINITION                     =0x8;
+const quint32 S_BIND_SYMBOL_FLAGS_WEAK_IMPORT                               =0x1;
+const quint32 S_BIND_SYMBOL_FLAGS_NON_WEAK_DEFINITION                       =0x8;
 
-const quint32 S_BIND_OPCODE_MASK                                          =0xF0;
-const quint32 S_BIND_IMMEDIATE_MASK                                       =0x0F;
-const quint32 S_BIND_OPCODE_DONE                                          =0x00;
-const quint32 S_BIND_OPCODE_SET_DYLIB_ORDINAL_IMM                         =0x10;
-const quint32 S_BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB                        =0x20;
-const quint32 S_BIND_OPCODE_SET_DYLIB_SPECIAL_IMM                         =0x30;
-const quint32 S_BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM                 =0x40;
-const quint32 S_BIND_OPCODE_SET_TYPE_IMM                                  =0x50;
-const quint32 S_BIND_OPCODE_SET_ADDEND_SLEB                               =0x60;
-const quint32 S_BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB                   =0x70;
-const quint32 S_BIND_OPCODE_ADD_ADDR_ULEB                                 =0x80;
-const quint32 S_BIND_OPCODE_DO_BIND                                       =0x90;
-const quint32 S_BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB                         =0xA0;
-const quint32 S_BIND_OPCODE_DO_BIND_ADD_ADDR_IMM_SCALED                   =0xB0;
-const quint32 S_BIND_OPCODE_DO_BIND_ULEB_TIMES_SKIPPING_ULEB              =0xC0;
-const quint32 S_BIND_OPCODE_THREADED                                      =0xD0;
-const quint32 S_BIND_SUBOPCODE_THREADED_SET_BIND_ORDINAL_TABLE_SIZE_ULEB  =0x00;
-const quint32 S_BIND_SUBOPCODE_THREADED_APPLY                             =0x01;
+const quint32 S_BIND_OPCODE_MASK                                            =0xF0;
+const quint32 S_BIND_IMMEDIATE_MASK                                         =0x0F;
+const quint32 S_BIND_OPCODE_DONE                                            =0x00;
+const quint32 S_BIND_OPCODE_SET_DYLIB_ORDINAL_IMM                           =0x10;
+const quint32 S_BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB                          =0x20;
+const quint32 S_BIND_OPCODE_SET_DYLIB_SPECIAL_IMM                           =0x30;
+const quint32 S_BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM                   =0x40;
+const quint32 S_BIND_OPCODE_SET_TYPE_IMM                                    =0x50;
+const quint32 S_BIND_OPCODE_SET_ADDEND_SLEB                                 =0x60;
+const quint32 S_BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB                     =0x70;
+const quint32 S_BIND_OPCODE_ADD_ADDR_ULEB                                   =0x80;
+const quint32 S_BIND_OPCODE_DO_BIND                                         =0x90;
+const quint32 S_BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB                           =0xA0;
+const quint32 S_BIND_OPCODE_DO_BIND_ADD_ADDR_IMM_SCALED                     =0xB0;
+const quint32 S_BIND_OPCODE_DO_BIND_ULEB_TIMES_SKIPPING_ULEB                =0xC0;
+const quint32 S_BIND_OPCODE_THREADED                                        =0xD0;
+const quint32 S_BIND_SUBOPCODE_THREADED_SET_BIND_ORDINAL_TABLE_SIZE_ULEB    =0x00;
+const quint32 S_BIND_SUBOPCODE_THREADED_APPLY                               =0x01;
 /*
  * The following are used on the flags byte of a terminal node
  * in the export information.
  */
-const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_MASK                             =0x03;
-const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_REGULAR                          =0x00;
-const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_THREAD_LOCAL                     =0x01;
-const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_ABSOLUTE                         =0x02;
-const quint32 S_EXPORT_SYMBOL_FLAGS_WEAK_DEFINITION                       =0x04;
-const quint32 S_EXPORT_SYMBOL_FLAGS_REEXPORT                              =0x08;
-const quint32 S_EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER                     =0x10;
+const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_MASK                               =0x03;
+const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_REGULAR                            =0x00;
+const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_THREAD_LOCAL                       =0x01;
+const quint32 S_EXPORT_SYMBOL_FLAGS_KIND_ABSOLUTE                           =0x02;
+const quint32 S_EXPORT_SYMBOL_FLAGS_WEAK_DEFINITION                         =0x04;
+const quint32 S_EXPORT_SYMBOL_FLAGS_REEXPORT                                =0x08;
+const quint32 S_EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER                       =0x10;
 }
 
 #endif // QMACH_DEF_H

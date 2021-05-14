@@ -3536,20 +3536,356 @@ QString XMACH::typeIdToString(int nType)
     return sResult;
 }
 
-qint64 XMACH::readOpcodes(quint32 nType, char *pData, qint64 nStartAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, XBinary::B_ERROR *pError)
+qint64 XMACH::readOpcodes(quint32 nType, char *pData, qint64 nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
     qint64 nResult=0;
 
-    for(int i=0;i<nSize;)
+    if(nType==OPCODE_TYPE_REBASE)
     {
-        OPCODE opcode={};
-        opcode.nAddress=nStartAddress+i;
-        opcode.nSize=1;
-        opcode.sName="Name";
+        nResult=readOpcodesInterface_rebase(pData,nAddress,nSize,pListOpcodes,pOpcodeStatus);
+    }
+    else if(nType==OPCODE_TYPE_BIND)
+    {
+        nResult=readOpcodesInterface_bind(pData,nAddress,nSize,pListOpcodes,pOpcodeStatus,true);
+    }
+    else if(nType==OPCODE_TYPE_LAZY_BIND)
+    {
+        nResult=readOpcodesInterface_bind(pData,nAddress,nSize,pListOpcodes,pOpcodeStatus,false);
+    }
+    else if(nType==OPCODE_TYPE_WEAK_BIND)
+    {
+        nResult=readOpcodesInterface_bind(pData,nAddress,nSize,pListOpcodes,pOpcodeStatus,true);
+    }
+    else if(nType==OPCODE_TYPE_EXPORT)
+    {
+        nResult=readOpcodesInterface_export(pData,nAddress,nSize,pListOpcodes,pOpcodeStatus);
+    }
 
-        pListOpcodes->append(opcode);
+    return nResult;
+}
 
-        i+=i;
+qint64 XMACH::readOpcodesInterface_rebase(char *pData, qint64 nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
+{
+    qint64 nResult=0;
+
+    if(nSize>0)
+    {
+        OPCODE opcodeMain={};
+        OPCODE opcodeUleb1={};
+        OPCODE opcodeUleb2={};
+
+        quint8 nByte=_read_uint8(pData);
+
+        bool bSuccess=true;
+        bool bUleb1=false;
+        bool bUleb2=false;
+        bool bImm=false;
+
+        switch(nByte&XMACH_DEF::S_REBASE_OPCODE_MASK)
+        {
+            case XMACH_DEF::S_REBASE_OPCODE_SET_TYPE_IMM:
+                opcodeMain.sName=QString("REBASE_OPCODE_SET_TYPE_IMM");
+                bImm=true;
+                break;
+            case XMACH_DEF::S_REBASE_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB:
+                opcodeMain.sName=QString("REBASE_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB");
+                bImm=true;
+                bUleb1=true;
+                break;
+            case XMACH_DEF::S_REBASE_OPCODE_ADD_ADDR_ULEB:
+                opcodeMain.sName=QString("REBASE_OPCODE_ADD_ADDR_ULEB");
+                bUleb1=true;
+                break;
+            case XMACH_DEF::S_REBASE_OPCODE_ADD_ADDR_IMM_SCALED:
+                opcodeMain.sName=QString("REBASE_OPCODE_ADD_ADDR_IMM_SCALED");
+                bImm=true;
+                break;
+            case XMACH_DEF::S_REBASE_OPCODE_DO_REBASE_IMM_TIMES:
+                opcodeMain.sName=QString("REBASE_OPCODE_DO_REBASE_IMM_TIMES");
+                bImm=true;
+                break;
+            case XMACH_DEF::S_REBASE_OPCODE_DO_REBASE_ULEB_TIMES:
+                opcodeMain.sName=QString("REBASE_OPCODE_DO_REBASE_ULEB_TIMES");
+                bUleb1=true;
+                break;
+            case XMACH_DEF::S_REBASE_OPCODE_DO_REBASE_ADD_ADDR_ULEB:
+                opcodeMain.sName=QString("REBASE_OPCODE_DO_REBASE_ADD_ADDR_ULEB");
+                bUleb1=true;
+                break;
+            case XMACH_DEF::S_REBASE_OPCODE_DO_REBASE_ULEB_TIMES_SKIPPING_ULEB:
+                opcodeMain.sName=QString("REBASE_OPCODE_DO_REBASE_ULEB_TIMES_SKIPPING_ULEB");
+                bUleb1=true;
+                bUleb2=true;
+                break;
+            default:
+                *pOpcodeStatus=OPCODE_STATUS_END;
+        }
+
+        if(nByte==XMACH_DEF::S_REBASE_OPCODE_DONE)
+        {
+            opcodeMain.sName=QString("REBASE_OPCODE_DONE");
+        }
+
+        opcodeMain.nAddress=nAddress;
+        opcodeMain.nSize=1;
+
+        nSize--;
+        pData++;
+        nResult++;
+        nAddress++;
+
+        if(bImm)
+        {
+            opcodeMain.sName+=QString("(%1)").arg(nByte&XMACH_DEF::S_REBASE_IMMEDIATE_MASK);
+        }
+
+        if(bUleb1&&bSuccess)
+        {
+            bSuccess=_read_opcode_uleb128(&opcodeUleb1,&pData,&nSize,&nAddress,&nResult,"ULEB128");
+        }
+
+        if(bUleb2&&bSuccess)
+        {
+            bSuccess=_read_opcode_uleb128(&opcodeUleb2,&pData,&nSize,&nAddress,&nResult,"ULEB128");
+        }
+
+        if(bSuccess)
+        {
+            pListOpcodes->append(opcodeMain);
+
+            if(bUleb1)  pListOpcodes->append(opcodeUleb1);
+            if(bUleb2)  pListOpcodes->append(opcodeUleb2);
+        }
+        else
+        {
+            nResult=0;
+        }
+    }
+
+    return nResult;
+}
+
+qint64 XMACH::readOpcodesInterface_bind(char *pData, qint64 nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus,bool bNullEnd)
+{
+    qint64 nResult=0;
+
+    if(nSize>0)
+    {
+        OPCODE opcodeMain={};
+        OPCODE opcodeUleb1={};
+        OPCODE opcodeUleb2={};
+        OPCODE opcodeString={};
+
+        quint8 nByte=_read_uint8(pData);
+
+        bool bSuccess=true;
+        bool bUleb1=false;
+        bool bUleb2=false;
+        bool bString=false;
+        bool bImm=false;
+
+        switch(nByte&XMACH_DEF::S_BIND_OPCODE_MASK)
+        {
+            case XMACH_DEF::S_BIND_OPCODE_SET_DYLIB_ORDINAL_IMM:
+                opcodeMain.sName=QString("BIND_OPCODE_SET_DYLIB_ORDINAL_IMM");
+                bImm=true;
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB:
+                opcodeMain.sName=QString("BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB");
+                bUleb1=true;
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_SET_DYLIB_SPECIAL_IMM:
+                opcodeMain.sName=QString("BIND_OPCODE_SET_DYLIB_SPECIAL_IMM");
+                bImm=true;
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM:
+                opcodeMain.sName=QString("BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM");
+                bImm=true;
+                bString=true;
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_SET_TYPE_IMM:
+                opcodeMain.sName=QString("BIND_OPCODE_SET_TYPE_IMM");
+                bImm=true;
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_SET_ADDEND_SLEB:
+                opcodeMain.sName=QString("BIND_OPCODE_SET_ADDEND_SLEB");
+                bUleb1=true;
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB:
+                opcodeMain.sName=QString("BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB");
+                bImm=true;
+                bUleb1=true;
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_ADD_ADDR_ULEB:
+                opcodeMain.sName=QString("BIND_OPCODE_ADD_ADDR_ULEB");
+                bUleb1=true;
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_DO_BIND:
+                opcodeMain.sName=QString("BIND_OPCODE_DO_BIND");
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB:
+                opcodeMain.sName=QString("BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB");
+                bUleb1=true;
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_DO_BIND_ADD_ADDR_IMM_SCALED:
+                opcodeMain.sName=QString("BIND_OPCODE_DO_BIND_ADD_ADDR_IMM_SCALED");
+                bImm=true;
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_DO_BIND_ULEB_TIMES_SKIPPING_ULEB:
+                opcodeMain.sName=QString("BIND_OPCODE_DO_BIND_ULEB_TIMES_SKIPPING_ULEB");
+                bUleb1=true;
+                bUleb2=true;
+                break;
+            case XMACH_DEF::S_BIND_OPCODE_THREADED:
+                opcodeMain.sName=QString("BIND_OPCODE_THREADED");
+                bImm=true;
+                break;
+            default:
+                *pOpcodeStatus=OPCODE_STATUS_END;
+        }
+
+        if(nByte==XMACH_DEF::S_BIND_OPCODE_DONE)
+        {
+            opcodeMain.sName=QString("BIND_OPCODE_DONE");
+
+            if(bNullEnd)
+            {
+                *pOpcodeStatus=OPCODE_STATUS_END;
+            }
+            else
+            {
+                *pOpcodeStatus=OPCODE_STATUS_SUCCESS;
+            }
+        }
+
+        opcodeMain.nAddress=nAddress;
+        opcodeMain.nSize=1;
+
+        nSize--;
+        pData++;
+        nResult++;
+        nAddress++;
+
+        if(bImm)
+        {
+            opcodeMain.sName+=QString("(%1)").arg(nByte&XMACH_DEF::S_REBASE_IMMEDIATE_MASK);
+        }
+
+        if(bString&&bSuccess)
+        {
+            bSuccess=_read_opcode_ansiString(&opcodeString,&pData,&nSize,&nAddress,&nResult,"String");
+        }
+
+        if(bUleb1&&bSuccess)
+        {
+            bSuccess=_read_opcode_uleb128(&opcodeUleb1,&pData,&nSize,&nAddress,&nResult,"ULEB128");
+        }
+
+        if(bUleb2&&bSuccess)
+        {
+            bSuccess=_read_opcode_uleb128(&opcodeUleb2,&pData,&nSize,&nAddress,&nResult,"ULEB128");
+        }
+
+        if(bSuccess)
+        {
+            pListOpcodes->append(opcodeMain);
+
+            if(bString) pListOpcodes->append(opcodeString);
+            if(bUleb1)  pListOpcodes->append(opcodeUleb1);
+            if(bUleb2)  pListOpcodes->append(opcodeUleb2);
+        }
+        else
+        {
+            nResult=0;
+        }
+    }
+
+    return nResult;
+}
+
+qint64 XMACH::readOpcodesInterface_export(char *pData, qint64 nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
+{
+    qint64 nResult=0;
+
+    if(nSize>0)
+    {
+        bool bSuccess=false;
+
+        OPCODE opcodeTerminalSize={};
+        OPCODE opcodeFlags={};
+        OPCODE opcodeSymbolOffset={};
+        OPCODE opcodeChildCount={};
+        QList<OPCODE> listChildren;
+
+        bool bFlags=false;
+        bool bSymbolOffset=false;
+
+        ULEB128 uTerminalSize=_read_uleb128(pData,nSize);
+
+        if((qint64)uTerminalSize.nValue<nSize)
+        {
+            bSuccess=_read_opcode_uleb128(&opcodeTerminalSize,&pData,&nSize,&nAddress,&nResult,"Terminal size");
+
+            if(uTerminalSize.nValue>0)
+            {
+                bFlags=true;
+                bSymbolOffset=true;
+            }
+        }
+
+        if(bFlags&&bSuccess)
+        {
+            bSuccess=_read_opcode_uleb128(&opcodeFlags,&pData,&nSize,&nAddress,&nResult,"Flags");
+        }
+
+        if(bSymbolOffset&&bSuccess)
+        {
+            bSuccess=_read_opcode_uleb128(&opcodeSymbolOffset,&pData,&nSize,&nAddress,&nResult,"Symbol offset");
+        }
+
+        ULEB128 uChildCount=_read_uleb128(pData,nSize);
+
+        if(bSuccess)
+        {
+            bSuccess=_read_opcode_uleb128(&opcodeChildCount,&pData,&nSize,&nAddress,&nResult,"Child count");
+        }
+
+        for(quint64 i=0;i<uChildCount.nValue;i++)
+        {
+            OPCODE opcodeLabel={};
+            OPCODE opcodeOffset={};
+
+            if(bSuccess)    bSuccess=_read_opcode_ansiString(&opcodeLabel,&pData,&nSize,&nAddress,&nResult,"Node label");
+            if(bSuccess)    bSuccess=_read_opcode_uleb128(&opcodeOffset,&pData,&nSize,&nAddress,&nResult,"Node offset");
+
+            if(bSuccess)
+            {
+                listChildren.append(opcodeLabel);
+                listChildren.append(opcodeOffset);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if((uTerminalSize.nValue==0)&&(uChildCount.nValue==0))
+        {
+            bSuccess=false;
+        }
+
+        if(bSuccess)
+        {
+            pListOpcodes->append(opcodeTerminalSize);
+            if(bFlags)          pListOpcodes->append(opcodeFlags);
+            if(bSymbolOffset)   pListOpcodes->append(opcodeSymbolOffset);
+            pListOpcodes->append(opcodeChildCount);
+            pListOpcodes->append(listChildren);
+        }
+        else
+        {
+            nResult=0;
+        }
     }
 
     return nResult;

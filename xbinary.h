@@ -841,7 +841,7 @@ public:
     static PROCENT procentInit(qint64 nMaxValue,bool bTimer=false);
     static bool procentSetCurrentValue(PROCENT *pProcent,qint64 nCurrentValue);
 
-    static MODE getWidthModeFromSize(quint64 nSize);
+    static MODE getWidthModeFromSize(quint64 nSize); // TODO rename
     static MODE getWidthModeFromMemoryMap(_MEMORY_MAP *pMemoryMap);
 
     static bool isAnsiSymbol(quint8 cCode);
@@ -850,15 +850,17 @@ public:
 
     static QList<QString> getAllFilesFromDirectory(QString sDirectory,QString sExtension);
 
-    enum B_ERROR
+    enum OPCODE_STATUS
     {
-        B_ERROR_NONE=0,
-        B_ERROR_UNKNOWN,
-        B_ERROR_NOTENOUGHMEMORY
+        OPCODE_STATUS_SUCCESS=0,
+        OPCODE_STATUS_END
     };
 
     QList<OPCODE> getOpcodes(qint64 nOffset,qint64 nStartAddress,qint64 nSize,quint32 nType);
-    virtual qint64 readOpcodes(quint32 nType,char *pData,qint64 nStartAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,B_ERROR *pError);
+    virtual qint64 readOpcodes(quint32 nType,char *pData,qint64 nStartAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
+
+    bool _read_opcode_uleb128(OPCODE *pOpcode,char **ppData,qint64 *pnSize,qint64 *pnAddress,qint64 *pnResult,QString sPrefix);
+    bool _read_opcode_ansiString(OPCODE *pOpcode,char **ppData,qint64 *pnSize,qint64 *pnAddress,qint64 *pnResult,QString sPrefix);
 
 public slots:
     void setSearchProcessEnable(bool bState);

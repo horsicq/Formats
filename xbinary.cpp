@@ -3865,7 +3865,11 @@ QString XBinary::valueToHex(XBinary::MODE mode, quint64 nValue, bool bIsBigEndia
         mode=getWidthModeFromSize(nValue);
     }
 
-    if(mode==MODE_16)
+    if(mode==MODE_8)
+    {
+        sResult=valueToHex((quint8)nValue);
+    }
+    else if(mode==MODE_16)
     {
         sResult=valueToHex((quint16)nValue,bIsBigEndian);
     }
@@ -6456,21 +6460,31 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nStartAddress,
                 break;
             }
 
-            B_ERROR error=B_ERROR_NONE;
+            qint64 nOpcodesSize=0;
+            OPCODE_STATUS opcodeStatus=OPCODE_STATUS_SUCCESS;
 
-            qint64 _nOpcodesSize=readOpcodes(nType,pBuffer,nStartAddress,nTempSize-_nOpcodesSize,&listResult,&error);
-
-            if(error==B_ERROR_NOTENOUGHMEMORY) // TODO Check
+            for(int i=0;i<nTempSize;)
             {
-                if((nOffset+nTempSize)==(offsetSize.nOffset+offsetSize.nSize)) // End
+                qint64 _nSize=readOpcodes(nType,pBuffer+i,nStartAddress+i,nTempSize-i,&listResult,&opcodeStatus);
+
+                i+=_nSize;
+                nOpcodesSize+=_nSize;
+
+                if((_nSize==0)||(opcodeStatus==OPCODE_STATUS_END))
                 {
                     break;
                 }
             }
 
-            nSize-=_nOpcodesSize;
-            nOffset+=_nOpcodesSize;
-            nStartAddress+=_nOpcodesSize;
+            if((nOpcodesSize==0)||(opcodeStatus==OPCODE_STATUS_END))
+            {
+//                _errorMessage(tr("Read error"));
+                break;
+            }
+
+            nSize-=nOpcodesSize;
+            nOffset+=nOpcodesSize;
+            nStartAddress+=nOpcodesSize;
         }
 
         delete[] pBuffer;
@@ -6479,7 +6493,7 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nStartAddress,
     return listResult;
 }
 
-qint64 XBinary::readOpcodes(quint32 nType, char *pData, qint64 nStartAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, B_ERROR *pError)
+qint64 XBinary::readOpcodes(quint32 nType, char *pData, qint64 nStartAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
     Q_UNUSED(nType)
     Q_UNUSED(pData)
@@ -6487,9 +6501,61 @@ qint64 XBinary::readOpcodes(quint32 nType, char *pData, qint64 nStartAddress, qi
     Q_UNUSED(nSize)
     Q_UNUSED(pListOpcodes)
 
-    *pError=B_ERROR_UNKNOWN;
+    *pOpcodeStatus=OPCODE_STATUS_END;
 
     return false;
+}
+
+bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSize, qint64 *pnAddress, qint64 *pnResult, QString sPrefix)
+{
+    bool bResult=false;;
+
+    if(*pnSize>0)
+    {
+        ULEB128 uleb128=_read_uleb128(*ppData,*pnSize);
+
+        if(uleb128.bIsValid)
+        {
+            pOpcode->nAddress=*pnAddress;
+            pOpcode->nSize=uleb128.nByteSize;
+            pOpcode->sName=QString("%1(%2)").arg(sPrefix).arg((qint64)uleb128.nValue);
+
+            *pnSize-=pOpcode->nSize;
+            *ppData+=pOpcode->nSize;
+            *pnResult+=pOpcode->nSize;
+            *pnAddress+=pOpcode->nSize;
+
+            bResult=true;
+        }
+    }
+
+    return bResult;
+}
+
+bool XBinary::_read_opcode_ansiString(XBinary::OPCODE *pOpcode, char **ppData, qint64 *pnSize, qint64 *pnAddress, qint64 *pnResult, QString sPrefix)
+{
+    bool bResult=false;;
+
+    if(*pnSize>0)
+    {
+        QString sString=*ppData;
+
+        if(sString.size()<(*pnSize)) // We need cstring with \0
+        {
+            pOpcode->nAddress=*pnAddress;
+            pOpcode->nSize=sString.size()+1;
+            pOpcode->sName=QString("%1(\"%2\")").arg(sPrefix).arg(sString);
+
+            *pnSize-=pOpcode->nSize;
+            *ppData+=pOpcode->nSize;
+            *pnResult+=pOpcode->nSize;
+            *pnAddress+=pOpcode->nSize;
+
+            bResult=true;
+        }
+    }
+
+    return bResult;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)

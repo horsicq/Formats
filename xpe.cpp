@@ -3745,7 +3745,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
 
                     if(nFunctionNameOffset!=-1)
                     {
-                        position.sFunctionName=read_ansiString(nFunctionNameOffset,512);
+                        position.sFunctionName=read_ansiString(nFunctionNameOffset,1024);
                     }
 
                     mapNames.insert(position.nOrdinal,position);

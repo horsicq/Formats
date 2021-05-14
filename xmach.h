@@ -513,13 +513,16 @@ public:
     {
         OPCODE_TYPE_UNKNOWN=0,
         OPCODE_TYPE_BIND,
-        OPCODE_TYPE_EXPORT,
+        OPCODE_TYPE_WEAK_BIND,
         OPCODE_TYPE_LAZY_BIND,
-        OPCODE_TYPE_REBASE,
-        OPCODE_TYPE_WEAK_BIND
+        OPCODE_TYPE_EXPORT,
+        OPCODE_TYPE_REBASE
     };
 
-    virtual qint64 readOpcodes(quint32 nType,char *pData,qint64 nStartAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,B_ERROR *pError);
+    virtual qint64 readOpcodes(quint32 nType,char *pData,qint64 nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
+    qint64 readOpcodesInterface_rebase(char *pData,qint64 nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
+    qint64 readOpcodesInterface_bind(char *pData,qint64 nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus,bool bNullEnd);
+    qint64 readOpcodesInterface_export(char *pData,qint64 nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
 };
 
 #endif // XMACH_H
