@@ -6558,6 +6558,34 @@ bool XBinary::_read_opcode_ansiString(XBinary::OPCODE *pOpcode, char **ppData, q
     return bResult;
 }
 
+QList<quint32> XBinary::get_uint32_list(qint64 nOffset, qint32 nNumberOfRecords, bool bIsBigEndian)
+{
+    QList<quint32> listResult;
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        quint32 nRecord=read_uint32(nOffset+i*(sizeof quint32),bIsBigEndian);
+
+        listResult.append(nRecord);
+    }
+
+    return listResult;
+}
+
+QList<quint64> XBinary::get_uint64_list(qint64 nOffset, qint32 nNumberOfRecords, bool bIsBigEndian)
+{
+    QList<quint64> listResult;
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        quint64 nRecord=read_uint64(nOffset+i*(sizeof quint64),bIsBigEndian);
+
+        listResult.append(nRecord);
+    }
+
+    return listResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!

@@ -3283,6 +3283,72 @@ XMACH::NLIST_RECORD XMACH::searchNlistRecordByValue(QList<XMACH::NLIST_RECORD> *
     return result;
 }
 
+QList<quint32> XMACH::get_toc_list()
+{
+    QList<quint32> listResult;
+
+    XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
+
+    listResult=get_uint32_list(dysymtab.tocoff,dysymtab.ntoc,isBigEndian());
+
+    return listResult;
+}
+
+QList<quint32> XMACH::get_modtab_list()
+{
+    QList<quint32> listResult;
+
+    XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
+
+    listResult=get_uint32_list(dysymtab.modtaboff,dysymtab.nmodtab,isBigEndian());
+
+    return listResult;
+}
+
+QList<quint32> XMACH::get_extrefsyms_list()
+{
+    QList<quint32> listResult;
+
+    XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
+
+    listResult=get_uint32_list(dysymtab.extrefsymoff,dysymtab.nextrefsyms,isBigEndian());
+
+    return listResult;
+}
+
+QList<quint32> XMACH::get_indirectsyms_list()
+{
+    QList<quint32> listResult;
+
+    XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
+
+    listResult=get_uint32_list(dysymtab.indirectsymoff,dysymtab.nindirectsyms,isBigEndian());
+
+    return listResult;
+}
+
+QList<quint32> XMACH::get_extrel_list()
+{
+    QList<quint32> listResult;
+
+    XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
+
+    listResult=get_uint32_list(dysymtab.extreloff,dysymtab.nextrel,isBigEndian());
+
+    return listResult;
+}
+
+QList<quint32> XMACH::get_locrel_list()
+{
+    QList<quint32> listResult;
+
+    XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
+
+    listResult=get_uint32_list(dysymtab.locreloff,dysymtab.nlocrel,isBigEndian());
+
+    return listResult;
+}
+
 XBinary::OFFSETSIZE XMACH::getStringTableOS()
 {
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::S_LC_SYMTAB);

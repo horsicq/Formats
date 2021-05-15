@@ -489,6 +489,13 @@ public:
 
     static NLIST_RECORD searchNlistRecordByValue(QList<NLIST_RECORD> *pList,quint64 nValue);
 
+    QList<quint32> get_toc_list();
+    QList<quint32> get_modtab_list();
+    QList<quint32> get_extrefsyms_list();
+    QList<quint32> get_indirectsyms_list();
+    QList<quint32> get_extrel_list();
+    QList<quint32> get_locrel_list();
+
     OFFSETSIZE getStringTableOS();
     OFFSETSIZE getStringTableOS(QList<COMMAND_RECORD> *pListCommandRecords);
 

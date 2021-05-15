@@ -862,6 +862,9 @@ public:
     bool _read_opcode_uleb128(OPCODE *pOpcode,char **ppData,qint64 *pnSize,qint64 *pnAddress,qint64 *pnResult,QString sPrefix);
     bool _read_opcode_ansiString(OPCODE *pOpcode,char **ppData,qint64 *pnSize,qint64 *pnAddress,qint64 *pnResult,QString sPrefix);
 
+    QList<quint32> get_uint32_list(qint64 nOffset,qint32 nNumberOfRecords,bool bIsBigEndian=false);
+    QList<quint64> get_uint64_list(qint64 nOffset,qint32 nNumberOfRecords,bool bIsBigEndian=false);
+
 public slots:
     void setSearchProcessEnable(bool bState);
     void setDumpProcessEnable(bool bState);
