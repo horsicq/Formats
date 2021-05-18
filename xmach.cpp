@@ -1480,6 +1480,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
             SEGMENT_RECORD record={};
 
+            record.bIs64=bIs64;
             record.nStructOffset=nOffset;
             record.s.segment64=_read_segment_command_64(nOffset,bIsBigEndian);
 
@@ -1498,6 +1499,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
 
             SEGMENT_RECORD record={};
 
+            record.bIs64=bIs64;
             record.nStructOffset=nOffset;
             record.s.segment32=_read_segment_command(nOffset,bIsBigEndian);
 
@@ -1663,6 +1665,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
             {
                 SECTION_RECORD record={};
 
+                record.bIs64=bIs64;
                 record.nStructOffset=nOffset;
                 record.s.section64=_read_section_64(nOffset,bIsBigEndian);
 
@@ -1689,6 +1692,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
             {
                 SECTION_RECORD record={};
 
+                record.bIs64=bIs64;
                 record.nStructOffset=nOffset;
                 record.s.section32=_read_section(nOffset,bIsBigEndian);
 
@@ -2888,6 +2892,22 @@ qint64 XMACH::get_nlist_64_size()
     return sizeof(XMACH_DEF::nlist_64);
 }
 
+qint64 XMACH::get_nlist_MODE_size()
+{
+    qint64 nResult=0;
+
+    if(is64())
+    {
+        nResult=get_nlist_64_size();
+    }
+    else
+    {
+        nResult=get_nlist_size();
+    }
+
+    return nResult;
+}
+
 void XMACH::_set_data_in_code_entry_offset(qint64 nOffset, quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::data_in_code_entry,offset),nValue,isBigEndian());
@@ -2906,6 +2926,146 @@ void XMACH::_set_data_in_code_entry_kind(qint64 nOffset, quint16 nValue)
 qint64 XMACH::get_data_in_code_entry_size()
 {
     return sizeof(XMACH_DEF::data_in_code_entry);
+}
+
+void XMACH::_set_dylib_module_module_name(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,module_name),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_iextdefsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,iextdefsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_nextdefsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,nextdefsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_irefsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,irefsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_nrefsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,nrefsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_ilocalsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,ilocalsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_nlocalsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,nlocalsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_iextrel(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,iextrel),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_nextrel(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,nextrel),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_iinit_iterm(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,iinit_iterm),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_ninit_nterm(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,ninit_nterm),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_objc_module_info_addr(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,objc_module_info_addr),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_objc_module_info_size(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,objc_module_info_size),nValue,isBigEndian());
+}
+
+qint64 XMACH::get_dylib_module_size()
+{
+    return sizeof(XMACH_DEF::dylib_module);
+}
+
+void XMACH::_set_dylib_module_64_module_name(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,module_name),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_iextdefsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,iextdefsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_nextdefsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,nextdefsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_irefsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,irefsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_nrefsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,nrefsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_ilocalsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,ilocalsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_nlocalsym(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,nlocalsym),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_iextrel(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,iextrel),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_nextrel(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,nextrel),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_iinit_iterm(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,iinit_iterm),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_ninit_nterm(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,ninit_nterm),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_objc_module_info_size(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,objc_module_info_size),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_module_64_objc_module_info_addr(qint64 nOffset, quint32 nValue)
+{
+    write_uint64(nOffset+offsetof(XMACH_DEF::dylib_module_64,objc_module_info_addr),nValue,isBigEndian());
+}
+
+qint64 XMACH::get_dylib_module_64_size()
+{
+    return sizeof(XMACH_DEF::dylib_module_64);
 }
 
 XMACH_DEF::dylinker_command XMACH::_read_dylinker_command(qint64 nOffset)
@@ -3194,6 +3354,69 @@ XMACH_DEF::data_in_code_entry XMACH::_read_data_in_code_entry(qint64 nOffset)
     return result;
 }
 
+struct dylib_module_64
+{
+    quint32 module_name;
+    quint32 iextdefsym;
+    quint32 nextdefsym;
+    quint32 irefsym;
+    quint32 nrefsym;
+    quint32 ilocalsym;
+    quint32 nlocalsym;
+    quint32 iextrel;
+    quint32 nextrel;
+    quint32 iinit_iterm;
+    quint32 ninit_nterm;
+    quint32 objc_module_info_size;
+    quint64 objc_module_info_addr;
+};
+
+XMACH_DEF::dylib_module XMACH::_read_dylib_module(qint64 nOffset)
+{
+    XMACH_DEF::dylib_module result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.module_name=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,module_name),bIsBigEndian);
+    result.iextdefsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,iextdefsym),bIsBigEndian);
+    result.nextdefsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,nextdefsym),bIsBigEndian);
+    result.irefsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,irefsym),bIsBigEndian);
+    result.nrefsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,nrefsym),bIsBigEndian);
+    result.ilocalsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,ilocalsym),bIsBigEndian);
+    result.nlocalsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,nlocalsym),bIsBigEndian);
+    result.iextrel=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,iextrel),bIsBigEndian);
+    result.nextrel=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,nextrel),bIsBigEndian);
+    result.iinit_iterm=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,iinit_iterm),bIsBigEndian);
+    result.ninit_nterm=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,ninit_nterm),bIsBigEndian);
+    result.objc_module_info_addr=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,objc_module_info_addr),bIsBigEndian);
+    result.objc_module_info_size=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module,objc_module_info_size),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::dylib_module_64 XMACH::_read_dylib_module_64(qint64 nOffset)
+{
+    XMACH_DEF::dylib_module_64 result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.module_name=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,module_name),bIsBigEndian);
+    result.iextdefsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,iextdefsym),bIsBigEndian);
+    result.nextdefsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,nextdefsym),bIsBigEndian);
+    result.irefsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,irefsym),bIsBigEndian);
+    result.nrefsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,nrefsym),bIsBigEndian);
+    result.ilocalsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,ilocalsym),bIsBigEndian);
+    result.nlocalsym=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,nlocalsym),bIsBigEndian);
+    result.iextrel=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,iextrel),bIsBigEndian);
+    result.nextrel=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,nextrel),bIsBigEndian);
+    result.iinit_iterm=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,iinit_iterm),bIsBigEndian);
+    result.ninit_nterm=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,ninit_nterm),bIsBigEndian);
+    result.objc_module_info_size=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_module_64,objc_module_info_size),bIsBigEndian);
+    result.objc_module_info_addr=read_uint64(nOffset+offsetof(XMACH_DEF::dylib_module_64,objc_module_info_addr),bIsBigEndian);
+
+    return result;
+}
+
 QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords()
 {
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::S_LC_SYMTAB);
@@ -3283,24 +3506,55 @@ XMACH::NLIST_RECORD XMACH::searchNlistRecordByValue(QList<XMACH::NLIST_RECORD> *
     return result;
 }
 
-QList<quint32> XMACH::get_toc_list()
+QList<quint64> XMACH::get_toc_list()
 {
-    QList<quint32> listResult;
+    QList<quint64> listResult;
 
     XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
 
-    listResult=get_uint32_list(dysymtab.tocoff,dysymtab.ntoc,isBigEndian());
+    listResult=get_uint64_list(dysymtab.tocoff,dysymtab.ntoc,isBigEndian());
 
     return listResult;
 }
 
-QList<quint32> XMACH::get_modtab_list()
+QList<XMACH::MODTAB_RECORD> XMACH::get_modtab_list()
 {
-    QList<quint32> listResult;
+    QList<MODTAB_RECORD> listResult;
 
     XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
 
-    listResult=get_uint32_list(dysymtab.modtaboff,dysymtab.nmodtab,isBigEndian());
+    bool bIs64=is64();
+
+    qint64 nOffset=dysymtab.modtaboff;
+    int nNumberOfRecords=dysymtab.nmodtab;
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        MODTAB_RECORD record={};
+
+        record.nStructOffset=nOffset;
+        record.bIs64=bIs64;
+
+        if(bIs64)
+        {
+            record.s.module64=_read_dylib_module_64(nOffset);
+        }
+        else
+        {
+            record.s.module32=_read_dylib_module(nOffset);
+        }
+
+        listResult.append(record);
+
+        if(bIs64)
+        {
+            nOffset+get_dylib_module_64_size();
+        }
+        else
+        {
+            nOffset+get_dylib_module_size();
+        }
+    }
 
     return listResult;
 }
@@ -3327,24 +3581,24 @@ QList<quint32> XMACH::get_indirectsyms_list()
     return listResult;
 }
 
-QList<quint32> XMACH::get_extrel_list()
+QList<quint64> XMACH::get_extrel_list()
 {
-    QList<quint32> listResult;
+    QList<quint64> listResult;
 
     XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
 
-    listResult=get_uint32_list(dysymtab.extreloff,dysymtab.nextrel,isBigEndian());
+    listResult=get_uint64_list(dysymtab.extreloff,dysymtab.nextrel,isBigEndian());
 
     return listResult;
 }
 
-QList<quint32> XMACH::get_locrel_list()
+QList<quint64> XMACH::get_locrel_list()
 {
-    QList<quint32> listResult;
+    QList<quint64> listResult;
 
     XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
 
-    listResult=get_uint32_list(dysymtab.locreloff,dysymtab.nlocrel,isBigEndian());
+    listResult=get_uint64_list(dysymtab.locreloff,dysymtab.nlocrel,isBigEndian());
 
     return listResult;
 }

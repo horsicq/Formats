@@ -310,6 +310,12 @@ public:
         QString sName;
     };
 
+    struct MEMORY_REPLACE // For debuggers&breakpoints
+    {
+        qint64 nAddress;
+        QByteArray baOriginal;
+    };
+
 private:
     enum ST
     {

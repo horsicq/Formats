@@ -52,6 +52,7 @@ public:
     struct SEGMENT_RECORD
     {
         qint64 nStructOffset;
+        bool bIs64;
         union
         {
             XMACH_DEF::segment_command segment32;
@@ -62,6 +63,7 @@ public:
     struct SECTION_RECORD
     {
         qint64 nStructOffset;
+        bool bIs64;
         union
         {
             XMACH_DEF::section section32;
@@ -77,6 +79,17 @@ public:
         {
             XMACH_DEF::nlist nlist32;
             XMACH_DEF::nlist_64 nlist64;
+        }s;
+    };
+
+    struct MODTAB_RECORD
+    {
+        qint64 nStructOffset;
+        bool bIs64;
+        union
+        {
+            XMACH_DEF::dylib_module module32;
+            XMACH_DEF::dylib_module_64 module64;
         }s;
     };
 
@@ -456,11 +469,45 @@ public:
 
     qint64 get_nlist_64_size();
 
+    qint64 get_nlist_MODE_size();
+
     void _set_data_in_code_entry_offset(qint64 nOffset,quint32 nValue);
     void _set_data_in_code_entry_length(qint64 nOffset,quint16 nValue);
     void _set_data_in_code_entry_kind(qint64 nOffset,quint16 nValue);
 
     qint64 get_data_in_code_entry_size();
+
+    void _set_dylib_module_module_name(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_iextdefsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_nextdefsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_irefsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_nrefsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_ilocalsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_nlocalsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_iextrel(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_nextrel(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_iinit_iterm(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_ninit_nterm(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_objc_module_info_addr(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_objc_module_info_size(qint64 nOffset,quint32 nValue);
+
+    qint64 get_dylib_module_size();
+
+    void _set_dylib_module_64_module_name(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_iextdefsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_nextdefsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_irefsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_nrefsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_ilocalsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_nlocalsym(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_iextrel(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_nextrel(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_iinit_iterm(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_ninit_nterm(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_objc_module_info_size(qint64 nOffset,quint32 nValue);
+    void _set_dylib_module_64_objc_module_info_addr(qint64 nOffset,quint32 nValue);
+
+    qint64 get_dylib_module_64_size();
 
     XMACH_DEF::dyld_info_command _read_dyld_info_command(qint64 nOffset);
     XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
@@ -483,18 +530,20 @@ public:
     XMACH_DEF::nlist _read_nlist(qint64 nOffset);
     XMACH_DEF::nlist_64 _read_nlist_64(qint64 nOffset);
     XMACH_DEF::data_in_code_entry _read_data_in_code_entry(qint64 nOffset);
+    XMACH_DEF::dylib_module _read_dylib_module(qint64 nOffset);
+    XMACH_DEF::dylib_module_64 _read_dylib_module_64(qint64 nOffset);
 
     QList<NLIST_RECORD> getNlistRecords();
     QList<NLIST_RECORD> getNlistRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
     static NLIST_RECORD searchNlistRecordByValue(QList<NLIST_RECORD> *pList,quint64 nValue);
 
-    QList<quint32> get_toc_list();
-    QList<quint32> get_modtab_list();
+    QList<quint64> get_toc_list();
+    QList<MODTAB_RECORD> get_modtab_list();
     QList<quint32> get_extrefsyms_list();
     QList<quint32> get_indirectsyms_list();
-    QList<quint32> get_extrel_list();
-    QList<quint32> get_locrel_list();
+    QList<quint64> get_extrel_list();
+    QList<quint64> get_locrel_list();
 
     OFFSETSIZE getStringTableOS();
     OFFSETSIZE getStringTableOS(QList<COMMAND_RECORD> *pListCommandRecords);
