@@ -3475,7 +3475,7 @@ QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords(QList<XMACH::COMMAND_RECORD> *
     return listResult;
 }
 
-XMACH::NLIST_RECORD XMACH::searchNlistRecordByValue(QList<XMACH::NLIST_RECORD> *pList, quint64 nValue)
+XMACH::NLIST_RECORD XMACH::searchNlistRecordByValue(QList<XMACH::NLIST_RECORD> *pList, quint64 nValue, bool bValidName)
 {
     XMACH::NLIST_RECORD result={};
 
@@ -3483,23 +3483,50 @@ XMACH::NLIST_RECORD XMACH::searchNlistRecordByValue(QList<XMACH::NLIST_RECORD> *
 
     for(int i=0;i<nNumberOfRecords;i++)
     {
+        bool bSuccess=false;
+
         if(pList->at(i).bIs64)
         {
             if(pList->at(i).s.nlist64.n_value==nValue)
             {
-                result=pList->at(i);
-
-                break;
+                bSuccess=true;
             }
         }
         else
         {
             if(pList->at(i).s.nlist32.n_value==(quint32)nValue)
             {
-                result=pList->at(i);
-
-                break;
+                bSuccess=true;
             }
+        }
+
+        if(bSuccess)
+        {
+            if(bValidName)
+            {
+                bSuccess=false;
+
+                if(pList->at(i).bIs64)
+                {
+                    if(pList->at(i).s.nlist64.n_strx>1)
+                    {
+                        bSuccess=true;
+                    }
+                }
+                else
+                {
+                    if(pList->at(i).s.nlist32.n_strx>1)
+                    {
+                        bSuccess=true;
+                    }
+                }
+            }
+        }
+
+        if(bSuccess)
+        {
+            result=pList->at(i);
+            break;
         }
     }
 

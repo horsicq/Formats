@@ -536,7 +536,7 @@ public:
     QList<NLIST_RECORD> getNlistRecords();
     QList<NLIST_RECORD> getNlistRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
-    static NLIST_RECORD searchNlistRecordByValue(QList<NLIST_RECORD> *pList,quint64 nValue);
+    static NLIST_RECORD searchNlistRecordByValue(QList<NLIST_RECORD> *pList,quint64 nValue,bool bValidName=false);
 
     QList<quint64> get_toc_list();
     QList<MODTAB_RECORD> get_modtab_list();

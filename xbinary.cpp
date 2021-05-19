@@ -2356,7 +2356,9 @@ bool XBinary::createDirectory(QString sDirectoryName)
 
 bool XBinary::isDirectoryExists(QString sDirectoryName)
 {
-    return QDir().exists(sDirectoryName);
+    QFileInfo fi(sDirectoryName);
+
+    return (fi.exists()&&fi.isDir());
 }
 
 bool XBinary::removeDirectory(QString sDirectoryName)
@@ -6564,7 +6566,7 @@ QList<quint32> XBinary::get_uint32_list(qint64 nOffset, qint32 nNumberOfRecords,
 
     for(int i=0;i<nNumberOfRecords;i++)
     {
-        quint32 nRecord=read_uint32(nOffset+i*(sizeof quint32),bIsBigEndian);
+        quint32 nRecord=read_uint32(nOffset+i*sizeof(quint32),bIsBigEndian);
 
         listResult.append(nRecord);
     }
@@ -6578,7 +6580,7 @@ QList<quint64> XBinary::get_uint64_list(qint64 nOffset, qint32 nNumberOfRecords,
 
     for(int i=0;i<nNumberOfRecords;i++)
     {
-        quint64 nRecord=read_uint64(nOffset+i*(sizeof quint64),bIsBigEndian);
+        quint64 nRecord=read_uint64(nOffset+i*sizeof(quint64),bIsBigEndian);
 
         listResult.append(nRecord);
     }

@@ -26,35 +26,38 @@
 namespace XMACH_DEF
 {
 /* Constant for the magic field of the mach_header (32-bit architectures) */
-const quint32 S_MH_MAGIC              =0xFEEDFACE;        /* the mach magic number */
-const quint32 S_MH_CIGAM              =0xCEFAEDFE	;       /* NXSwapInt(MH_MAGIC) */
+const quint32 S_MH_MAGIC                =0xFEEDFACE;        /* the mach magic number */
+const quint32 S_MH_CIGAM                =0xCEFAEDFE	;       /* NXSwapInt(MH_MAGIC) */
 /* Constant for the magic field of the mach_header_64 (64-bit architectures) */
-const quint32 S_MH_MAGIC_64           =0xFEEDFACF;        /* the 64-bit mach magic number */
-const quint32 S_MH_CIGAM_64           =0xCFFAEDFE;        /* NXSwapInt(MH_MAGIC_64) */
+const quint32 S_MH_MAGIC_64             =0xFEEDFACF;        /* the 64-bit mach magic number */
+const quint32 S_MH_CIGAM_64             =0xCFFAEDFE;        /* NXSwapInt(MH_MAGIC_64) */
 
-const quint32 S_FAT_MAGIC             =0xCAFEBABE;
-const quint32 S_FAT_CIGAM             =0xBEBAFECA;
+const quint32 S_FAT_MAGIC               =0xCAFEBABE;
+const quint32 S_FAT_CIGAM               =0xBEBAFECA;
 
-const quint32 S_CPU_TYPE_VAX          =0x0000001;
-const quint32 S_CPU_TYPE_ROMP         =0x0000002;
-const quint32 S_CPU_TYPE_NS32032      =0x0000004;
-const quint32 S_CPU_TYPE_NS32332      =0x0000005;
-const quint32 S_CPU_TYPE_MC680x0      =0x0000006;
-const quint32 S_CPU_TYPE_I386         =0x0000007;
-const quint32 S_CPU_TYPE_X86_64       =0x1000007;
-const quint32 S_CPU_TYPE_MIPS         =0x0000008;
-const quint32 S_CPU_TYPE_NS32532      =0x0000009;
-const quint32 S_CPU_TYPE_HPPA         =0x000000B;
-const quint32 S_CPU_TYPE_ARM          =0x000000C;
-const quint32 S_CPU_TYPE_ARM64        =0x100000C;
-const quint32 S_CPU_TYPE_MC88000      =0x000000D;
-const quint32 S_CPU_TYPE_SPARC        =0x000000E;
-const quint32 S_CPU_TYPE_I860         =0x000000F;
-const quint32 S_CPU_TYPE_RS6000       =0x0000011;
-const quint32 S_CPU_TYPE_MC98000      =0x0000012;
-const quint32 S_CPU_TYPE_POWERPC      =0x0000012;
-const quint32 S_CPU_TYPE_POWERPC64    =0x1000012;
-const quint32 S_CPU_TYPE_VEO          =0x00000FF;
+const quint32 S_CPU_TYPE_VAX            =0x00000001;
+const quint32 S_CPU_TYPE_ROMP           =0x00000002;
+const quint32 S_CPU_TYPE_NS32032        =0x00000004;
+const quint32 S_CPU_TYPE_NS32332        =0x00000005;
+const quint32 S_CPU_TYPE_MC680x0        =0x00000006;
+const quint32 S_CPU_TYPE_I386           =0x00000007;
+const quint32 S_CPU_TYPE_X86_64         =0x10000007;
+const quint32 S_CPU_TYPE_MIPS           =0x00000008;
+const quint32 S_CPU_TYPE_NS32532        =0x00000009;
+const quint32 S_CPU_TYPE_HPPA           =0x0000000B;
+const quint32 S_CPU_TYPE_ARM            =0x0000000C;
+const quint32 S_CPU_TYPE_ARM64          =0x1000000C;
+const quint32 S_CPU_TYPE_MC88000        =0x0000000D;
+const quint32 S_CPU_TYPE_SPARC          =0x0000000E;
+const quint32 S_CPU_TYPE_I860           =0x0000000F;
+const quint32 S_CPU_TYPE_RS6000         =0x00000011;
+const quint32 S_CPU_TYPE_MC98000        =0x00000012;
+const quint32 S_CPU_TYPE_POWERPC        =0x00000012;
+const quint32 S_CPU_TYPE_POWERPC64      =0x10000012;
+const quint32 S_CPU_TYPE_VEO            =0x000000FF;
+
+const quint32 S_INDIRECT_SYMBOL_LOCAL   =0x80000000;
+const quint32 S_INDIRECT_SYMBOL_ABS     =0x40000000;
 
 struct fat_header
 {
@@ -78,8 +81,8 @@ struct fat_arch
 struct mach_header
 {
     quint32 magic;          /* mach magic number identifier */
-    qint32 cputype;         /* cpu specifier */
-    qint32 cpusubtype;      /* machine specifier */
+    quint32 cputype;         /* cpu specifier */
+    quint32 cpusubtype;      /* machine specifier */
     quint32 filetype;       /* type of file */
     quint32 ncmds;          /* number of load commands */
     quint32 sizeofcmds;     /* the size of all the load commands */
@@ -93,8 +96,8 @@ struct mach_header
 struct mach_header_64
 {
     quint32 magic;          /* mach magic number identifier */
-    qint32 cputype;         /* cpu specifier */
-    qint32 cpusubtype;      /* machine specifier */
+    quint32 cputype;         /* cpu specifier */
+    quint32 cpusubtype;      /* machine specifier */
     quint32 filetype;       /* type of file */
     quint32 ncmds;          /* number of load commands */
     quint32 sizeofcmds;     /* the size of all the load commands */
@@ -117,8 +120,8 @@ struct segment_command
     quint32 vmsize;
     quint32 fileoff;
     quint32 filesize;
-    qint32 maxprot;
-    qint32 initprot;
+    quint32 maxprot;
+    quint32 initprot;
     quint32 nsects;
     quint32 flags;
 };
@@ -132,8 +135,8 @@ struct segment_command_64
     quint64 vmsize;
     quint64 fileoff;
     quint64 filesize;
-    qint32 maxprot;
-    qint32 initprot;
+    quint32 maxprot;
+    quint32 initprot;
     quint32 nsects;
     quint32 flags;
 };
@@ -826,6 +829,22 @@ struct fvmfile_command
     quint32 cmdsize;
     quint32 name;
     quint32 header_addr;
+};
+
+struct dylib_table_of_contents
+{
+    quint32 symbol_index;       /* the defined external symbol (index into the symbol table) */
+    quint32 module_index;       /* index into the module table this symbol is defined in */
+};
+
+struct relocation_info
+{
+    quint32 r_address;          /* offset in the section to what is being relocated */
+    quint32 r_symbolnum:24;     /* symbol index if r_extern == 1 or section ordinal if r_extern == 0 */
+    quint32 r_pcrel:1;          /* was relocated pc relative already */
+    quint32 r_length:2;         /* 0=byte, 1=word, 2=long, 3=quad */
+    quint32 r_extern:1;         /* does not include value of sym referenced */
+    quint32 r_type:4;           /* if not 0, machine specific relocation type */
 };
 
 /*
