@@ -93,6 +93,30 @@ public:
         }s;
     };
 
+    struct TOC_RECORD
+    {
+        qint64 nStructOffset;
+        XMACH_DEF::dylib_table_of_contents toc;
+    };
+
+    struct RELOC_RECORD
+    {
+        qint64 nStructOffset;
+        XMACH_DEF::relocation_info reloc;
+    };
+
+    struct VALUE32_RECORD
+    {
+        qint64 nStructOffset;
+        quint32 nValue;
+    };
+
+    struct REFERENCE_RECORD
+    {
+        qint64 nStructOffset;
+        XMACH_DEF::dylib_reference reference;
+    };
+
     struct DICE_RECORD
     {
         qint64 nStructOffset;
@@ -509,6 +533,22 @@ public:
 
     qint64 get_dylib_module_64_size();
 
+    void _set_dylib_table_of_contents_symbol_index(qint64 nOffset,quint32 nValue);
+    void _set_dylib_table_of_contents_module_index(qint64 nOffset,quint32 nValue);
+
+    qint64 get_dylib_table_of_contents_size();
+
+    void _set_relocation_info_r_address(qint64 nOffset,quint32 nValue);
+    void _set_relocation_info_value(qint64 nOffset,quint32 nValue);
+
+    qint64 get_relocation_info_size();
+
+    void _set_value32_value(qint64 nOffset,quint32 nValue);
+
+    qint64 get_value32_size();
+
+    qint64 get_dylib_reference_size();
+
     XMACH_DEF::dyld_info_command _read_dyld_info_command(qint64 nOffset);
     XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
     XMACH_DEF::dysymtab_command _read_dysymtab_command(qint64 nOffset);
@@ -532,18 +572,23 @@ public:
     XMACH_DEF::data_in_code_entry _read_data_in_code_entry(qint64 nOffset);
     XMACH_DEF::dylib_module _read_dylib_module(qint64 nOffset);
     XMACH_DEF::dylib_module_64 _read_dylib_module_64(qint64 nOffset);
+    XMACH_DEF::dylib_table_of_contents _read_dylib_table_of_contents(qint64 nOffset);
+    XMACH_DEF::relocation_info _read_relocation_info(qint64 nOffset);
+    XMACH_DEF::dylib_reference _read_dylib_reference(qint64 nOffset);
 
     QList<NLIST_RECORD> getNlistRecords();
     QList<NLIST_RECORD> getNlistRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
     static NLIST_RECORD searchNlistRecordByValue(QList<NLIST_RECORD> *pList,quint64 nValue,bool bValidName=false);
 
-    QList<quint64> get_toc_list();
+    QList<TOC_RECORD> get_toc_list();
     QList<MODTAB_RECORD> get_modtab_list();
-    QList<quint32> get_extrefsyms_list();
-    QList<quint32> get_indirectsyms_list();
-    QList<quint64> get_extrel_list();
-    QList<quint64> get_locrel_list();
+    QList<REFERENCE_RECORD> get_extrefsyms_list();
+    QList<VALUE32_RECORD> get_indirectsyms_list();
+    QList<RELOC_RECORD> get_extrel_list();
+    QList<RELOC_RECORD> get_locrel_list();
+    QList<RELOC_RECORD> getRelocRecords(qint64 nOffset,qint32 nNumberOfRecords);
+    QList<VALUE32_RECORD> getValue32Records(qint64 nOffset,qint32 nNumberOfRecords);
 
     OFFSETSIZE getStringTableOS();
     OFFSETSIZE getStringTableOS(QList<COMMAND_RECORD> *pListCommandRecords);
@@ -558,6 +603,9 @@ public:
     QList<FUNCTION_RECORD> getFunctionRecords(qint64 nOffset,qint64 nSize);
 
     QList<DICE_RECORD> getDiceRecords(qint64 nOffset,qint64 nSize);
+
+    QString getIndexSymbolName(quint32 nValue);
+    QString getIndexSymbolName(quint32 nValue,QList<NLIST_RECORD> *pNlistList,qint64 nStringTableOffset,qint64 nStringTableSize);
 
     virtual MODE getMode();
     virtual QString getArch();

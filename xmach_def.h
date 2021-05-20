@@ -840,11 +840,18 @@ struct dylib_table_of_contents
 struct relocation_info
 {
     quint32 r_address;          /* offset in the section to what is being relocated */
-    quint32 r_symbolnum:24;     /* symbol index if r_extern == 1 or section ordinal if r_extern == 0 */
-    quint32 r_pcrel:1;          /* was relocated pc relative already */
-    quint32 r_length:2;         /* 0=byte, 1=word, 2=long, 3=quad */
-    quint32 r_extern:1;         /* does not include value of sym referenced */
-    quint32 r_type:4;           /* if not 0, machine specific relocation type */
+    union
+    {
+        quint32 value;
+        struct
+        {
+            quint32 r_symbolnum:24;     /* symbol index if r_extern == 1 or section ordinal if r_extern == 0 */
+            quint32 r_pcrel:1;          /* was relocated pc relative already */
+            quint32 r_length:2;         /* 0=byte, 1=word, 2=long, 3=quad */
+            quint32 r_extern:1;         /* does not include value of sym referenced */
+            quint32 r_type:4;           /* if not 0, machine specific relocation type */
+        } _value;
+    } s;
 };
 
 /*
@@ -857,8 +864,15 @@ struct relocation_info
  */
 struct dylib_reference
 {
-    quint32 isym:24;        /* index into the symbol table */
-    quint32 flags:8;        /* flags to indicate the type of reference */
+    union
+    {
+        quint32 value;
+        struct
+        {
+            quint32 isym:24;        /* index into the symbol table */
+            quint32 flags:8;        /* flags to indicate the type of reference */
+        } _value;
+    } s;
 };
 
 // https://llvm.org/doxygen/BinaryFormat_2MachO_8h_source.html

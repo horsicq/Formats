@@ -3068,6 +3068,51 @@ qint64 XMACH::get_dylib_module_64_size()
     return sizeof(XMACH_DEF::dylib_module_64);
 }
 
+void XMACH::_set_dylib_table_of_contents_symbol_index(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_table_of_contents,symbol_index),nValue,isBigEndian());
+}
+
+void XMACH::_set_dylib_table_of_contents_module_index(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::dylib_table_of_contents,module_index),nValue,isBigEndian());
+}
+
+qint64 XMACH::get_dylib_table_of_contents_size()
+{
+    return sizeof(XMACH_DEF::dylib_table_of_contents);
+}
+
+void XMACH::_set_relocation_info_r_address(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::relocation_info,r_address),nValue,isBigEndian());
+}
+
+void XMACH::_set_relocation_info_value(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::relocation_info,s),nValue,isBigEndian());
+}
+
+qint64 XMACH::get_relocation_info_size()
+{
+    return sizeof(XMACH_DEF::relocation_info);
+}
+
+void XMACH::_set_value32_value(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset,nValue,isBigEndian());
+}
+
+qint64 XMACH::get_value32_size()
+{
+    return sizeof(quint32);
+}
+
+qint64 XMACH::get_dylib_reference_size()
+{
+    return sizeof(XMACH_DEF::dylib_reference);
+}
+
 XMACH_DEF::dylinker_command XMACH::_read_dylinker_command(qint64 nOffset)
 {
     XMACH_DEF::dylinker_command result={};
@@ -3417,6 +3462,41 @@ XMACH_DEF::dylib_module_64 XMACH::_read_dylib_module_64(qint64 nOffset)
     return result;
 }
 
+XMACH_DEF::dylib_table_of_contents XMACH::_read_dylib_table_of_contents(qint64 nOffset)
+{
+    XMACH_DEF::dylib_table_of_contents result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.symbol_index=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_table_of_contents,symbol_index),bIsBigEndian);
+    result.module_index=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_table_of_contents,module_index),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::relocation_info XMACH::_read_relocation_info(qint64 nOffset)
+{
+    XMACH_DEF::relocation_info result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.r_address=read_uint32(nOffset+offsetof(XMACH_DEF::relocation_info,r_address),bIsBigEndian);
+    result.s.value=read_uint32(nOffset+offsetof(XMACH_DEF::relocation_info,s),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::dylib_reference XMACH::_read_dylib_reference(qint64 nOffset)
+{
+    XMACH_DEF::dylib_reference result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.s.value=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_reference,s),bIsBigEndian);
+
+    return result;
+}
+
 QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords()
 {
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::S_LC_SYMTAB);
@@ -3533,13 +3613,27 @@ XMACH::NLIST_RECORD XMACH::searchNlistRecordByValue(QList<XMACH::NLIST_RECORD> *
     return result;
 }
 
-QList<quint64> XMACH::get_toc_list()
+QList<XMACH::TOC_RECORD> XMACH::get_toc_list()
 {
-    QList<quint64> listResult;
+    QList<TOC_RECORD> listResult;
 
     XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
 
-    listResult=get_uint64_list(dysymtab.tocoff,dysymtab.ntoc,isBigEndian());
+    qint64 nOffset=dysymtab.tocoff;
+    int nNumberOfRecords=dysymtab.ntoc;
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        TOC_RECORD record={};
+
+        record.nStructOffset=nOffset;
+
+        record.toc=_read_dylib_table_of_contents(nOffset);
+
+        listResult.append(record);
+
+        nOffset+=get_dylib_table_of_contents_size();
+    }
 
     return listResult;
 }
@@ -3575,57 +3669,109 @@ QList<XMACH::MODTAB_RECORD> XMACH::get_modtab_list()
 
         if(bIs64)
         {
-            nOffset+get_dylib_module_64_size();
+            nOffset+=get_dylib_module_64_size();
         }
         else
         {
-            nOffset+get_dylib_module_size();
+            nOffset+=get_dylib_module_size();
         }
     }
 
     return listResult;
 }
 
-QList<quint32> XMACH::get_extrefsyms_list()
+QList<XMACH::REFERENCE_RECORD> XMACH::get_extrefsyms_list()
 {
-    QList<quint32> listResult;
+    QList<REFERENCE_RECORD> listResult;
 
     XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
+    bool bIsBigEndian=isBigEndian();
 
-    listResult=get_uint32_list(dysymtab.extrefsymoff,dysymtab.nextrefsyms,isBigEndian());
+    qint64 nOffset=dysymtab.extrefsymoff;
+    qint32 nNumberOfRecords=dysymtab.nextrefsyms;
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        REFERENCE_RECORD record={};
+        record.nStructOffset=nOffset;
+        record.reference.s.value=read_uint32(nOffset,bIsBigEndian);
+
+        listResult.append(record);
+
+        nOffset+=get_dylib_reference_size();
+    }
 
     return listResult;
 }
 
-QList<quint32> XMACH::get_indirectsyms_list()
+QList<XMACH::VALUE32_RECORD> XMACH::get_indirectsyms_list()
 {
-    QList<quint32> listResult;
+    QList<VALUE32_RECORD> listResult;
 
     XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
 
-    listResult=get_uint32_list(dysymtab.indirectsymoff,dysymtab.nindirectsyms,isBigEndian());
+    listResult=getValue32Records(dysymtab.indirectsymoff,dysymtab.nindirectsyms);
 
     return listResult;
 }
 
-QList<quint64> XMACH::get_extrel_list()
+QList<XMACH::RELOC_RECORD> XMACH::get_extrel_list()
 {
-    QList<quint64> listResult;
+    QList<RELOC_RECORD> listResult;
 
     XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
 
-    listResult=get_uint64_list(dysymtab.extreloff,dysymtab.nextrel,isBigEndian());
+    listResult=getRelocRecords(dysymtab.extreloff,dysymtab.nextrel);
 
     return listResult;
 }
 
-QList<quint64> XMACH::get_locrel_list()
+QList<XMACH::RELOC_RECORD> XMACH::get_locrel_list()
 {
-    QList<quint64> listResult;
+    QList<RELOC_RECORD> listResult;
 
     XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
 
-    listResult=get_uint64_list(dysymtab.locreloff,dysymtab.nlocrel,isBigEndian());
+    listResult=getRelocRecords(dysymtab.locreloff,dysymtab.nlocrel);
+
+    return listResult;
+}
+
+QList<XMACH::RELOC_RECORD> XMACH::getRelocRecords(qint64 nOffset, qint32 nNumberOfRecords)
+{
+    QList<XMACH::RELOC_RECORD> listResult;
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        RELOC_RECORD record={};
+
+        record.nStructOffset=nOffset;
+
+        record.reloc=_read_relocation_info(nOffset);
+
+        listResult.append(record);
+
+        nOffset+=get_relocation_info_size();
+    }
+
+    return listResult;
+}
+
+QList<XMACH::VALUE32_RECORD> XMACH::getValue32Records(qint64 nOffset, qint32 nNumberOfRecords)
+{
+    QList<VALUE32_RECORD> listResult;
+    bool bIsBigEndian=isBigEndian();
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        VALUE32_RECORD record={};
+        record.nStructOffset=nOffset;
+        record.nValue=read_uint32(nOffset,bIsBigEndian);
+
+        listResult.append(record);
+
+        nOffset+=get_value32_size();
+    }
 
     return listResult;
 }
@@ -3798,6 +3944,43 @@ QList<XMACH::DICE_RECORD> XMACH::getDiceRecords(qint64 nOffset, qint64 nSize)
     }
 
     return listRecords;
+}
+
+QString XMACH::getIndexSymbolName(quint32 nValue)
+{
+    QList<XMACH::NLIST_RECORD> listNlist=getNlistRecords();
+    XBinary::OFFSETSIZE osStringTable=getStringTableOS();
+
+    return getIndexSymbolName(nValue,&listNlist,osStringTable.nOffset,osStringTable.nSize);
+}
+
+QString XMACH::getIndexSymbolName(quint32 nValue, QList<XMACH::NLIST_RECORD> *pNlistList, qint64 nStringTableOffset, qint64 nStringTableSize)
+{
+    QString sResult;
+
+    if(nValue==XMACH_DEF::S_INDIRECT_SYMBOL_ABS)
+    {
+        sResult="INDIRECT_SYMBOL_ABS";
+    }
+    else if(nValue==XMACH_DEF::S_INDIRECT_SYMBOL_LOCAL)
+    {
+        sResult="INDIRECT_SYMBOL_LOCAL";
+    }
+    else if(nValue<(quint32)pNlistList->count())
+    {
+        XMACH::NLIST_RECORD nlist_record=pNlistList->at(nValue);
+
+        if(nlist_record.bIs64)
+        {
+            sResult=getStringFromIndex(nStringTableOffset,nStringTableSize,nlist_record.s.nlist64.n_strx);
+        }
+        else
+        {
+            sResult=getStringFromIndex(nStringTableOffset,nStringTableSize,nlist_record.s.nlist32.n_strx);
+        }
+    }
+
+    return sResult;
 }
 
 XBinary::MODE XMACH::getMode()
