@@ -573,6 +573,7 @@ public:
     XMACH_DEF::dylib_module _read_dylib_module(qint64 nOffset);
     XMACH_DEF::dylib_module_64 _read_dylib_module_64(qint64 nOffset);
     XMACH_DEF::dylib_table_of_contents _read_dylib_table_of_contents(qint64 nOffset);
+    XMACH_DEF::dylib_table_of_contents _read_dylib_table_of_contents(qint64 nOffset,bool bIsBigEndian);
     XMACH_DEF::relocation_info _read_relocation_info(qint64 nOffset);
     XMACH_DEF::dylib_reference _read_dylib_reference(qint64 nOffset);
 

@@ -3464,9 +3464,14 @@ XMACH_DEF::dylib_module_64 XMACH::_read_dylib_module_64(qint64 nOffset)
 
 XMACH_DEF::dylib_table_of_contents XMACH::_read_dylib_table_of_contents(qint64 nOffset)
 {
-    XMACH_DEF::dylib_table_of_contents result={};
-
     bool bIsBigEndian=isBigEndian();
+
+    return _read_dylib_table_of_contents(nOffset,bIsBigEndian);
+}
+
+XMACH_DEF::dylib_table_of_contents XMACH::_read_dylib_table_of_contents(qint64 nOffset, bool bIsBigEndian)
+{
+    XMACH_DEF::dylib_table_of_contents result={};
 
     result.symbol_index=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_table_of_contents,symbol_index),bIsBigEndian);
     result.module_index=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_table_of_contents,module_index),bIsBigEndian);
@@ -3618,6 +3623,7 @@ QList<XMACH::TOC_RECORD> XMACH::get_toc_list()
     QList<TOC_RECORD> listResult;
 
     XMACH_DEF::dysymtab_command dysymtab=get_dysymtab();
+    bool bIsBigEndian=isBigEndian();
 
     qint64 nOffset=dysymtab.tocoff;
     int nNumberOfRecords=dysymtab.ntoc;
@@ -3628,7 +3634,7 @@ QList<XMACH::TOC_RECORD> XMACH::get_toc_list()
 
         record.nStructOffset=nOffset;
 
-        record.toc=_read_dylib_table_of_contents(nOffset);
+        record.toc=_read_dylib_table_of_contents(nOffset,bIsBigEndian);
 
         listResult.append(record);
 
