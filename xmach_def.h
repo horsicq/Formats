@@ -173,33 +173,33 @@ struct section_64           /* for 64-bit architectures */
 };
 
 const quint32 S_LC_REQ_DYLD                           =0x80000000;
-const quint32 S_LC_SEGMENT                            =0x1;           /* segment of this file to be mapped */
-const quint32 S_LC_SYMTAB                             =0x2;           /* link-edit stab symbol table info */
-const quint32 S_LC_SYMSEG                             =0x3;        	/* link-edit gdb symbol table info (obsolete) */
-const quint32 S_LC_THREAD                             =0x4;	        /* thread */
-const quint32 S_LC_UNIXTHREAD                         =0x5;	        /* unix thread (includes a stack) */
-const quint32 S_LC_LOADFVMLIB                         =0x6;	        /* load a specified fixed VM shared library */
-const quint32 S_LC_IDFVMLIB                           =0x7;	        /* fixed VM shared library identification */
-const quint32 S_LC_IDENT                              =0x8;	        /* object identification info (obsolete) */
-const quint32 S_LC_FVMFILE                            =0x9;	        /* fixed VM file inclusion (internal use) */
-const quint32 S_LC_PREPAGE                            =0xA;           /* prepage command (internal use) */
-const quint32 S_LC_DYSYMTAB                           =0xB;	        /* dynamic link-edit symbol table info */
-const quint32 S_LC_LOAD_DYLIB                         =0xC;	        /* load a dynamicly linked shared library */
-const quint32 S_LC_ID_DYLIB                           =0xD;	        /* dynamicly linked shared lib identification */
-const quint32 S_LC_LOAD_DYLINKER                      =0xE;	        /* load a dynamic linker */
-const quint32 S_LC_ID_DYLINKER                        =0xF;	        /* dynamic linker identification */
-const quint32 S_LC_PREBOUND_DYLIB                     =0x10;	        /* modules prebound for a dynamicly */
-const quint32 S_LC_ROUTINES                           =0x11;	        /* image routines */
-const quint32 S_LC_SUB_FRAMEWORK                      =0x12;	        /* sub framework */
-const quint32 S_LC_SUB_UMBRELLA                       =0x13;	        /* sub umbrella */
-const quint32 S_LC_SUB_CLIENT                         =0x14;	        /* sub client */
-const quint32 S_LC_SUB_LIBRARY                        =0x15;	        /* sub library */
-const quint32 S_LC_TWOLEVEL_HINTS                     =0x16;	        /* two-level namespace lookup hints */
-const quint32 S_LC_PREBIND_CKSUM                      =0x17;	        /* prebind checksum */
+const quint32 S_LC_SEGMENT                            =0x1;                     /* segment of this file to be mapped */
+const quint32 S_LC_SYMTAB                             =0x2;                     /* link-edit stab symbol table info */
+const quint32 S_LC_SYMSEG                             =0x3;                     /* link-edit gdb symbol table info (obsolete) */
+const quint32 S_LC_THREAD                             =0x4;                     /* thread */
+const quint32 S_LC_UNIXTHREAD                         =0x5;                     /* unix thread (includes a stack) */
+const quint32 S_LC_LOADFVMLIB                         =0x6;                     /* load a specified fixed VM shared library */
+const quint32 S_LC_IDFVMLIB                           =0x7;                     /* fixed VM shared library identification */
+const quint32 S_LC_IDENT                              =0x8;                     /* object identification info (obsolete) */
+const quint32 S_LC_FVMFILE                            =0x9;                     /* fixed VM file inclusion (internal use) */
+const quint32 S_LC_PREPAGE                            =0xA;                     /* prepage command (internal use) */
+const quint32 S_LC_DYSYMTAB                           =0xB;                     /* dynamic link-edit symbol table info */
+const quint32 S_LC_LOAD_DYLIB                         =0xC;                     /* load a dynamicly linked shared library */
+const quint32 S_LC_ID_DYLIB                           =0xD;                     /* dynamicly linked shared lib identification */
+const quint32 S_LC_LOAD_DYLINKER                      =0xE;                     /* load a dynamic linker */
+const quint32 S_LC_ID_DYLINKER                        =0xF;                     /* dynamic linker identification */
+const quint32 S_LC_PREBOUND_DYLIB                     =0x10;                    /* modules prebound for a dynamicly */
+const quint32 S_LC_ROUTINES                           =0x11;                    /* image routines */
+const quint32 S_LC_SUB_FRAMEWORK                      =0x12;                    /* sub framework */
+const quint32 S_LC_SUB_UMBRELLA                       =0x13;                    /* sub umbrella */
+const quint32 S_LC_SUB_CLIENT                         =0x14;                    /* sub client */
+const quint32 S_LC_SUB_LIBRARY                        =0x15;                    /* sub library */
+const quint32 S_LC_TWOLEVEL_HINTS                     =0x16;                    /* two-level namespace lookup hints */
+const quint32 S_LC_PREBIND_CKSUM                      =0x17;                    /* prebind checksum */
 const quint32 S_LC_LOAD_WEAK_DYLIB                    =(0x18|S_LC_REQ_DYLD);
-const quint32 S_LC_SEGMENT_64                         =0x19;	        /* 64-bit segment of this file to bemapped */
-const quint32 S_LC_ROUTINES_64                        =0x1A;	        /* 64-bit image routines */
-const quint32 S_LC_UUID                               =0x1B;	        /* the uuid */
+const quint32 S_LC_SEGMENT_64                         =0x19;                    /* 64-bit segment of this file to bemapped */
+const quint32 S_LC_ROUTINES_64                        =0x1A;                    /* 64-bit image routines */
+const quint32 S_LC_UUID                               =0x1B;                    /* the uuid */
 const quint32 S_LC_RPATH                              =(0x1C|S_LC_REQ_DYLD);
 const quint32 S_LC_CODE_SIGNATURE                     =0x1D;
 const quint32 S_LC_ENCRYPTION_INFO                    =0x21;
@@ -513,6 +513,34 @@ enum PPCThreadFlavors
     PPC_THREAD_STATE_NONE=7
 };
 
+struct m68k_thread_state32_t
+{
+    quint32 dreg[8];        /* data registers */
+    quint32 areg[8];        /* address registers (incl stack pointer) */
+    quint16 pad0;           /* not used */
+    quint16 sr;             /* user's status register */
+    quint32 pc;             /* user's program counter */
+};
+
+struct m68k_state_hdr_t
+{
+    quint32 flavor;
+    quint32 count;
+};
+
+struct m68k_thread_state_t
+{
+    m68k_state_hdr_t tsh;
+    union
+    {
+        m68k_thread_state32_t ts32;
+    } uts;
+};
+
+const quint32 S_M68K_THREAD_STATE_REGS          =1;     /* normal registers */
+const quint32 S_M68K_THREAD_STATE_68882         =2;     /* 68882 registers */
+const quint32 S_M68K_THREAD_STATE_USER_REG      =3;     /* additional user register */
+
 struct state_hdr_t
 {
     quint32 flavor;
@@ -564,6 +592,31 @@ struct dyld_info_command
     quint32 lazy_bind_size;
     quint32 export_off;
     quint32 export_size;
+};
+/*
+ * Fixed virtual memory shared libraries are identified by two things.  The
+ * target pathname (the name of the library as found for execution), and the
+ * minor version number.  The address of where the headers are loaded is in
+ * header_addr.
+ */
+struct fvmlib
+{
+    quint32	name;               /* library's target pathname */
+    quint32	minor_version;      /* library's minor version number */
+    quint32 header_addr;        /* library's header address */
+};
+
+/*
+ * A fixed virtual shared library (filetype == MH_FVMLIB in the mach header)
+ * contains a fvmlib_command (cmd == LC_IDFVMLIB) to identify the library.
+ * An object that uses a fixed virtual shared library also contains a
+ * fvmlib_command (cmd == LC_LOADFVMLIB) for each library it uses.
+ */
+struct fvmlib_command
+{
+    quint32 cmd;                /* LC_IDFVMLIB or LC_LOADFVMLIB */
+    quint32 cmdsize;            /* includes pathname string */
+    struct fvmlib fvmlib;       /* the library identification */
 };
 
 struct uuid_command
@@ -881,8 +934,7 @@ struct dylib_reference
 // https://gist.github.com/yamaya/2924292
 // https://github.com/aidansteele/osx-abi-macho-file-format-reference
 // https://code.woboq.org/llvm/lld/lib/ReaderWriter/MachO/MachONormalizedFile.h.html
-// TODO code_signature_command
-
+// https://stuff.mit.edu/afs/sipb/project/gnu/share/gcc-lib/m68k-next-mach31/2.5.4/include/mach/m68k/thread_status.h
 enum reloc_type_x86_64
 {
     X86_64_RELOC_UNSIGNED,		// for absolute addresses

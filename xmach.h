@@ -467,6 +467,14 @@ public:
 
     qint64 get_arm_thread_state32_t_size();
 
+    void _set_m68k_thread_state32_t_dreg(qint64 nOffset,quint32 nValue,qint32 nIndex);
+    void _set_m68k_thread_state32_t_areg(qint64 nOffset,quint32 nValue,qint32 nIndex);
+    void _set_m68k_thread_state32_t_pad0(qint64 nOffset,quint16 nValue);
+    void _set_m68k_thread_state32_t_sr(qint64 nOffset,quint16 nValue);
+    void _set_m68k_thread_state32_t_pc(qint64 nOffset,quint32 nValue);
+
+    qint64 get_m68k_thread_state32_t_size();
+
     void _set_arm_thread_state64_t_x(qint64 nOffset,quint64 nValue,qint32 nIndex);
     void _set_arm_thread_state64_t_fp(qint64 nOffset,quint64 nValue);
     void _set_arm_thread_state64_t_lr(qint64 nOffset,quint64 nValue);
@@ -564,6 +572,7 @@ public:
     XMACH_DEF::ppc_thread_state32_t _read_ppc_thread_state32_t(qint64 nOffset);
     XMACH_DEF::arm_thread_state32_t _read_arm_thread_state32_t(qint64 nOffset);
     XMACH_DEF::arm_thread_state64_t _read_arm_thread_state64_t(qint64 nOffset);
+    XMACH_DEF::m68k_thread_state32_t _read_m68k_thread_state32_t(qint64 nOffset);
     XMACH_DEF::state_hdr_t _read_state_hdr_t(qint64 nOffset);
     XMACH_DEF::linkedit_data_command _read_linkedit_data_command(qint64 nOffset);
     XMACH_DEF::unix_thread_command _read_unix_thread_command(qint64 nOffset);

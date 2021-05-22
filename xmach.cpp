@@ -1176,33 +1176,34 @@ qint64 XMACH::getAddressOfEntryPoint()
 
         nOffset+=sizeof(XMACH_DEF::load_command);
 
-        XMACH_DEF::state_hdr_t _state_hdr=_read_state_hdr_t(nOffset);
+//        XMACH_DEF::state_hdr_t _state_hdr=_read_state_hdr_t(nOffset);
 
         nOffset+=sizeof(XMACH_DEF::state_hdr_t);
 
-        if((nMachine==XMACH_DEF::S_CPU_TYPE_I386)||(nMachine==XMACH_DEF::S_CPU_TYPE_X86_64))
+        if(nMachine==XMACH_DEF::S_CPU_TYPE_I386)
         {
-            if(_state_hdr.flavor==XMACH_DEF::x86_THREAD_STATE32)
-            {
-                nResult=read_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,eip),bIsBigEndian);
-            }
-            else if(_state_hdr.flavor==XMACH_DEF::x86_THREAD_STATE64)
-            {
-                nResult=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rip),bIsBigEndian);
-            }
+            nResult=read_uint32(nOffset+offsetof(XMACH_DEF::x86_thread_state32_t,eip),bIsBigEndian);
         }
-        else if((nMachine==XMACH_DEF::S_CPU_TYPE_ARM)||(nMachine==XMACH_DEF::S_CPU_TYPE_ARM64))
+        else if(nMachine==XMACH_DEF::S_CPU_TYPE_X86_64)
         {
-            if(_state_hdr.flavor==XMACH_DEF::ARM_THREAD_STATE)
-            {
-                nResult=read_uint32(nOffset+offsetof(XMACH_DEF::arm_thread_state32_t,pc),bIsBigEndian);
-            }
-            else if(_state_hdr.flavor==XMACH_DEF::ARM_THREAD_STATE64)
-            {
-                nResult=read_uint64(nOffset+offsetof(XMACH_DEF::arm_thread_state64_t,pc),bIsBigEndian);
-            }
+            nResult=read_uint64(nOffset+offsetof(XMACH_DEF::x86_thread_state64_t,rip),bIsBigEndian);
         }
-        // TODO PPC
+        else if(nMachine==XMACH_DEF::S_CPU_TYPE_ARM)
+        {
+            nResult=read_uint32(nOffset+offsetof(XMACH_DEF::arm_thread_state32_t,pc),bIsBigEndian);
+        }
+        else if(nMachine==XMACH_DEF::S_CPU_TYPE_ARM64)
+        {
+            nResult=read_uint64(nOffset+offsetof(XMACH_DEF::arm_thread_state64_t,pc),bIsBigEndian);
+        }
+//        else if(nMachine==XMACH_DEF::S_CPU_TYPE_POWERPC)
+//        {
+//            nResult=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,pc),bIsBigEndian);
+//        }
+        else if(nMachine==XMACH_DEF::S_CPU_TYPE_MC680x0)
+        {
+            nResult=read_uint32(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,pc),bIsBigEndian);
+        }
     }
 
     return nResult;
@@ -2789,6 +2790,42 @@ qint64 XMACH::get_arm_thread_state32_t_size()
     return sizeof(XMACH_DEF::arm_thread_state32_t);
 }
 
+void XMACH::_set_m68k_thread_state32_t_dreg(qint64 nOffset, quint32 nValue, qint32 nIndex)
+{
+    if(nIndex<8)
+    {
+        write_uint32(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,dreg)+sizeof(quint32)*nIndex,nValue,isBigEndian());
+    }
+}
+
+void XMACH::_set_m68k_thread_state32_t_areg(qint64 nOffset, quint32 nValue, qint32 nIndex)
+{
+    if(nIndex<8)
+    {
+        write_uint32(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,areg)+sizeof(quint32)*nIndex,nValue,isBigEndian());
+    }
+}
+
+void XMACH::_set_m68k_thread_state32_t_pad0(qint64 nOffset, quint16 nValue)
+{
+    write_uint16(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,pad0),nValue,isBigEndian());
+}
+
+void XMACH::_set_m68k_thread_state32_t_sr(qint64 nOffset, quint16 nValue)
+{
+    write_uint16(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,sr),nValue,isBigEndian());
+}
+
+void XMACH::_set_m68k_thread_state32_t_pc(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,pc),nValue,isBigEndian());
+}
+
+qint64 XMACH::get_m68k_thread_state32_t_size()
+{
+    return sizeof(XMACH_DEF::m68k_thread_state32_t);
+}
+
 void XMACH::_set_arm_thread_state64_t_x(qint64 nOffset, quint64 nValue, qint32 nIndex)
 {
     if(nIndex<29)
@@ -3312,6 +3349,29 @@ XMACH_DEF::arm_thread_state64_t XMACH::_read_arm_thread_state64_t(qint64 nOffset
     result.pc=read_uint64(nOffset+offsetof(XMACH_DEF::arm_thread_state64_t,pc),bIsBigEndian);
     result.cpsr=read_uint32(nOffset+offsetof(XMACH_DEF::arm_thread_state64_t,cpsr),bIsBigEndian);
     result.pad=read_uint32(nOffset+offsetof(XMACH_DEF::arm_thread_state64_t,pad),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::m68k_thread_state32_t XMACH::_read_m68k_thread_state32_t(qint64 nOffset)
+{
+    XMACH_DEF::m68k_thread_state32_t result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    for(int i=0;i<8;i++)
+    {
+        result.dreg[i]=read_uint32(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,dreg)+sizeof(quint32)*i,bIsBigEndian);
+    }
+
+    for(int i=0;i<8;i++)
+    {
+        result.areg[i]=read_uint32(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,areg)+sizeof(quint32)*i,bIsBigEndian);
+    }
+
+    result.pad0=read_uint16(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,pad0),bIsBigEndian);
+    result.sr=read_uint16(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,sr),bIsBigEndian);
+    result.pc=read_uint32(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,pc),bIsBigEndian);
 
     return result;
 }
@@ -4007,7 +4067,22 @@ XBinary::MODE XMACH::getMode()
 
 QString XMACH::getArch()
 {
-    return getHeaderCpuTypesS().value(getHeader_cputype(),QString("UNKNOWN"));
+    quint32 nCpuType=getHeader_cputype();
+    quint32 nCpuSubType=getHeader_cpusubtype();
+
+    QString sResult=getHeaderCpuTypesS().value(nCpuType,QString("UNKNOWN"));
+
+    if(nCpuType==XMACH_DEF::S_CPU_TYPE_MC680x0)
+    {
+        QMap<quint64,QString> mapCpuSubTypesS=getHeaderCpuSubTypesS(nCpuType);
+
+        if(mapCpuSubTypesS.contains(nCpuSubType))
+        {
+            sResult=mapCpuSubTypesS.value(nCpuSubType,QString("UNKNOWN"));
+        }
+    }
+
+    return sResult;
 }
 
 XBinary::FT XMACH::getFileType()
