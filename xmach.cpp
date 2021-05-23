@@ -1429,6 +1429,100 @@ XMACH::LIBRARY_RECORD XMACH::_readLibraryRecord(qint64 nOffset, bool bIsBigEndia
     return result;
 }
 
+QList<XMACH::FVM_LIBRARY_RECORD> XMACH::getFvmLibraryRecords(int nType)
+{
+    QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(nType);
+
+    return getFvmLibraryRecords(&listCommandRecords,nType);
+}
+
+QList<XMACH::FVM_LIBRARY_RECORD> XMACH::getFvmLibraryRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords, int nType)
+{
+    QList<FVM_LIBRARY_RECORD> listResult;
+
+    bool bIsBigEndian=isBigEndian();
+
+    QList<COMMAND_RECORD> listLibraryCommandRecords=getCommandRecords(nType,pListCommandRecords);
+
+    int nNumberOfCommands=listLibraryCommandRecords.count();
+
+    for(int i=0;i<nNumberOfCommands;i++)
+    {
+        FVM_LIBRARY_RECORD record=_readFvmLibraryRecord(listLibraryCommandRecords.at(i).nStructOffset,bIsBigEndian);
+
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
+XMACH::FVM_LIBRARY_RECORD XMACH::getFvmLibraryRecordByName(QString sName, QList<XMACH::FVM_LIBRARY_RECORD> *pListLibraryRecords)
+{
+    FVM_LIBRARY_RECORD result={};
+
+    int nNumberOfLibraries=pListLibraryRecords->count();
+
+    for(int i=0;i<nNumberOfLibraries;i++)
+    {
+        if(pListLibraryRecords->at(i).sName==sName)
+        {
+            result=pListLibraryRecords->at(i);
+
+            break;
+        }
+    }
+
+    return result;
+}
+
+bool XMACH::isFvmLibraryRecordNamePresent(QString sName)
+{
+    QList<FVM_LIBRARY_RECORD> listLibraryRecords=getFvmLibraryRecords();
+
+    return isFvmLibraryRecordNamePresent(sName,&listLibraryRecords);
+}
+
+bool XMACH::isFvmLibraryRecordNamePresent(QString sName, QList<XMACH::FVM_LIBRARY_RECORD> *pListLibraryRecords)
+{
+    bool bResult=false;
+
+    int nNumberOfLibraries=pListLibraryRecords->count();
+
+    for(int i=0;i<nNumberOfLibraries;i++)
+    {
+        if(pListLibraryRecords->at(i).sName==sName)
+        {
+            bResult=true;
+
+            break;
+        }
+    }
+
+    return bResult;
+}
+
+XMACH::FVM_LIBRARY_RECORD XMACH::_readFvmLibraryRecord(qint64 nOffset, bool bIsBigEndian)
+{
+    FVM_LIBRARY_RECORD result={};
+
+    result.name=read_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::fvmlib,name),bIsBigEndian);
+
+    result.nStructOffset=nOffset;
+    result.nStructSize=read_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmdsize),bIsBigEndian);
+    result.sFullName=read_ansiString(nOffset+result.name);
+    result.sName=result.sFullName.section("/",-1,-1);
+    result.minor_version=read_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::fvmlib,minor_version),bIsBigEndian);
+    result.header_addr=read_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::fvmlib,header_addr),bIsBigEndian);
+    result.nMaxStringSize=result.nStructSize-sizeof(XMACH_DEF::fvmlib_command)-2;
+
+    if(result.nMaxStringSize<result.sFullName.size())
+    {
+        result.nMaxStringSize=0;
+    }
+
+    return result;
+}
+
 void XMACH::_setLibraryRecord_timestamp(qint64 nOffset, quint32 nValue)
 {
     write_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::dylib,timestamp),nValue,isBigEndian());
@@ -1448,6 +1542,27 @@ void XMACH::_setLibraryRecord_name(qint64 nOffset, QString sValue)
 {
     bool bIsBigEndian=isBigEndian();
     LIBRARY_RECORD libraryRecord=_readLibraryRecord(nOffset,bIsBigEndian);
+
+    if(libraryRecord.name==sizeof(XMACH_DEF::dylib_command))
+    {
+        write_ansiStringFix(nOffset+sizeof(XMACH_DEF::dylib_command),libraryRecord.nStructSize-libraryRecord.name-1,sValue);
+    }
+}
+
+void XMACH::_setFvmLibraryRecord_minor_version(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::fvmlib,minor_version),nValue,isBigEndian());
+}
+
+void XMACH::_setFvmLibraryRecord_header_addr(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::fvmlib,header_addr),nValue,isBigEndian());
+}
+
+void XMACH::_setFvmLibraryRecord_name(qint64 nOffset, QString sValue)
+{
+    bool bIsBigEndian=isBigEndian();
+    FVM_LIBRARY_RECORD libraryRecord=_readFvmLibraryRecord(nOffset,bIsBigEndian);
 
     if(libraryRecord.name==sizeof(XMACH_DEF::dylib_command))
     {
@@ -1984,6 +2099,49 @@ qint64 XMACH::getSectionHeaderSize()
     }
 
     return nResult;
+}
+
+bool XMACH::isSegmentNamePresent(QString sName)
+{
+    QList<SEGMENT_RECORD> listSegmentRecords=getSegmentRecords();
+
+    return isSegmentNamePresent(sName,&listSegmentRecords);
+}
+
+bool XMACH::isSegmentNamePresent(QString sName, QList<XMACH::SEGMENT_RECORD> *pListSegmentRecords)
+{
+    return (getSegmentNumber(sName,pListSegmentRecords)!=-1);
+}
+
+qint32 XMACH::getSegmentNumber(QString sName, QList<XMACH::SEGMENT_RECORD> *pListSegmentRecords)
+{
+    qint32 nResult=-1;
+
+    int nNumberOfSegments=pListSegmentRecords->count();
+
+    for(int i=0;i<nNumberOfSegments;i++)
+    {
+        QString _sName=QString(pListSegmentRecords->at(i).s.segment32.segname); // TODO Check 64
+        if(_sName.size()>16)
+        {
+            _sName.resize(16);
+        }
+        if(_sName==sName)
+        {
+            nResult=i;
+
+            break;
+        }
+    }
+
+    return nResult;
+}
+
+qint32 XMACH::getSegmentNumber(QString sName)
+{
+    QList<SEGMENT_RECORD> listSegmentRecords=getSegmentRecords();
+
+    return getSegmentNumber(sName,&listSegmentRecords);
 }
 
 quint32 XMACH::getLibraryCurrentVersion(QString sName, QList<XMACH::LIBRARY_RECORD> *pListLibraryRecords)

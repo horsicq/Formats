@@ -49,6 +49,18 @@ public:
         qint64 nMaxStringSize;
     };
 
+    struct FVM_LIBRARY_RECORD
+    {
+        qint64 nStructOffset;
+        qint64 nStructSize;
+        QString sName;
+        QString sFullName;
+        quint32 name;
+        quint32 minor_version;
+        quint32 header_addr;
+        qint64 nMaxStringSize;
+    };
+
     struct SEGMENT_RECORD
     {
         qint64 nStructOffset;
@@ -236,10 +248,22 @@ public:
 
     LIBRARY_RECORD _readLibraryRecord(qint64 nOffset,bool bIsBigEndian);
 
+    QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(int nType=XMACH_DEF::S_LC_LOAD_DYLIB);
+    QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords,int nType=XMACH_DEF::S_LC_LOADFVMLIB);
+    static FVM_LIBRARY_RECORD getFvmLibraryRecordByName(QString sName,QList<FVM_LIBRARY_RECORD> *pListLibraryRecords);
+    bool isFvmLibraryRecordNamePresent(QString sName);
+    static bool isFvmLibraryRecordNamePresent(QString sName,QList<FVM_LIBRARY_RECORD> *pListLibraryRecords);
+
+    FVM_LIBRARY_RECORD _readFvmLibraryRecord(qint64 nOffset,bool bIsBigEndian);
+
     void _setLibraryRecord_timestamp(qint64 nOffset,quint32 nValue);
     void _setLibraryRecord_current_version(qint64 nOffset,quint32 nValue);
     void _setLibraryRecord_compatibility_version(qint64 nOffset,quint32 nValue);
     void _setLibraryRecord_name(qint64 nOffset,QString sValue);
+
+    void _setFvmLibraryRecord_minor_version(qint64 nOffset,quint32 nValue);
+    void _setFvmLibraryRecord_header_addr(qint64 nOffset,quint32 nValue);
+    void _setFvmLibraryRecord_name(qint64 nOffset,QString sValue);
 
     QList<SEGMENT_RECORD> getSegmentRecords();
     QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pListCommandRecords);
@@ -310,6 +334,12 @@ public:
     qint32 getSectionNumber(QString sName);
 
     qint64 getSectionHeaderSize();
+
+    bool isSegmentNamePresent(QString sName);
+    static bool isSegmentNamePresent(QString sName,QList<SEGMENT_RECORD> *pListSegmentRecords);
+
+    static qint32 getSegmentNumber(QString sName,QList<SEGMENT_RECORD> *pListSegmentRecords);
+    qint32 getSegmentNumber(QString sName);
 
     quint32 getLibraryCurrentVersion(QString sName,QList<LIBRARY_RECORD> *pListLibraryRecords);
 
