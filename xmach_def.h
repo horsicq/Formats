@@ -80,13 +80,13 @@ struct fat_arch
  */
 struct mach_header
 {
-    quint32 magic;          /* mach magic number identifier */
-    quint32 cputype;         /* cpu specifier */
-    quint32 cpusubtype;      /* machine specifier */
-    quint32 filetype;       /* type of file */
-    quint32 ncmds;          /* number of load commands */
-    quint32 sizeofcmds;     /* the size of all the load commands */
-    quint32 flags;          /* flags */
+    quint32 magic;              /* mach magic number identifier */
+    quint32 cputype;            /* cpu specifier */
+    quint32 cpusubtype;         /* machine specifier */
+    quint32 filetype;           /* type of file */
+    quint32 ncmds;              /* number of load commands */
+    quint32 sizeofcmds;         /* the size of all the load commands */
+    quint32 flags;              /* flags */
 };
 
 /*
@@ -95,14 +95,15 @@ struct mach_header
  */
 struct mach_header_64
 {
-    quint32 magic;          /* mach magic number identifier */
-    quint32 cputype;         /* cpu specifier */
-    quint32 cpusubtype;      /* machine specifier */
-    quint32 filetype;       /* type of file */
-    quint32 ncmds;          /* number of load commands */
-    quint32 sizeofcmds;     /* the size of all the load commands */
-    quint32 flags;          /* flags */
-    quint32 reserved;       /* reserved */
+    quint32 magic;              /* mach magic number identifier */
+    quint32 cputype;            /* cpu specifier */
+    quint32 cpusubtype;         /* machine specifier */
+    quint32 filetype;           /* type of file */
+    quint32 ncmds;              /* number of load commands */
+    quint32 sizeofcmds;         /* the size of all the load commands */
+    quint32 flags;              /* flags */
+    quint32 reserved;
+    /* reserved */
 };
 
 struct load_command
