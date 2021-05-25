@@ -313,6 +313,8 @@ public:
     struct MEMORY_REPLACE // For debuggers&breakpoints
     {
         qint64 nAddress;
+        qint64 nOffset;
+        qint64 nSize;
         QByteArray baOriginal;
     };
 
@@ -870,6 +872,10 @@ public:
 
     QList<quint32> get_uint32_list(qint64 nOffset,qint32 nNumberOfRecords,bool bIsBigEndian=false);
     QList<quint64> get_uint64_list(qint64 nOffset,qint32 nNumberOfRecords,bool bIsBigEndian=false);
+
+    static bool _isOffsetsCrossed(qint64 nOffset1,qint64 nSize1,qint64 nOffset2,qint64 nSize2);
+    static bool _isReplaced(qint64 nOffset,qint64 nSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
+    static bool _replaceMemory(qint64 nDataOffset,char *pData,qint64 nDataSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
 
 public slots:
     void setSearchProcessEnable(bool bState);

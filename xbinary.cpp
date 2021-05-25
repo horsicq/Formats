@@ -6591,6 +6591,65 @@ QList<quint64> XBinary::get_uint64_list(qint64 nOffset, qint32 nNumberOfRecords,
     return listResult;
 }
 
+bool XBinary::_isOffsetsCrossed(qint64 nOffset1, qint64 nSize1, qint64 nOffset2, qint64 nSize2)
+{
+    bool bResult=false;
+
+    if(((nOffset2>=nOffset1)&&((nOffset1+nSize1)>nOffset2))||((nOffset1>=nOffset2)&&((nOffset2+nSize2)>nOffset1)))
+    {
+        bResult=true;
+    }
+
+    return bResult;
+}
+
+bool XBinary::_isReplaced(qint64 nOffset, qint64 nSize, QList<XBinary::MEMORY_REPLACE> *pListMemoryReplace)
+{
+    bool bResult=false;
+
+    int nNumberOfRecords=pListMemoryReplace->count();
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        if(_isOffsetsCrossed(nOffset,nSize,pListMemoryReplace->at(i).nOffset,pListMemoryReplace->at(i).nSize))
+        {
+            bResult=true;
+            break;
+        }
+    }
+
+    return bResult;
+}
+
+bool XBinary::_replaceMemory(qint64 nDataOffset, char *pData, qint64 nDataSize, QList<XBinary::MEMORY_REPLACE> *pListMemoryReplace)
+{
+    bool bResult=false;
+
+    int nNumberOfRecords=pListMemoryReplace->count();
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        if(_isOffsetsCrossed(nDataOffset,nDataSize,pListMemoryReplace->at(i).nOffset,pListMemoryReplace->at(i).nSize))
+        {
+            MEMORY_REPLACE memoryReplace=pListMemoryReplace->at(i);
+
+            for(int j=0;j<memoryReplace.nSize;j++)
+            {
+                bResult=true;
+
+                pData[(memoryReplace.nOffset+j)-nDataOffset]=memoryReplace.baOriginal.data()[j];
+
+                if((memoryReplace.nOffset+j)>(nDataOffset+nDataSize))
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    return bResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!
