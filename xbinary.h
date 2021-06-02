@@ -387,6 +387,7 @@ public:
         bool bSubdirectories;
         bool *pbIsStop;
         qint32 *pnNumberOfFiles;
+        // TODO filter
     };
 
     static void findFiles(QString sDirectoryName,FFOPTIONS *pFFOption,qint32 nLevel=0);
