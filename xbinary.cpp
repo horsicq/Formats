@@ -1129,9 +1129,9 @@ qint32 XBinary::_read_int32(char *pData, bool bIsBigEndian)
     return result;
 }
 
-qint64 XBinary::_read_uint64(char *pData, bool bIsBigEndian)
+quint64 XBinary::_read_uint64(char *pData, bool bIsBigEndian)
 {
-    qint64 result=*(qint64 *)pData;
+    quint64 result=*(quint64 *)pData;
 
     if(bIsBigEndian)
     {
@@ -1192,6 +1192,30 @@ double XBinary::_read_double(char *pData, bool bIsBigEndian)
     endian_double(&result,bIsBigEndian);
 
     return result;
+}
+
+quint64 XBinary::_read_value(MODE mode, char *pData, bool bIsBigEndian)
+{
+    quint64 nResult=0;
+
+    if(mode==MODE::MODE_8)
+    {
+        nResult=_read_uint8(pData);
+    }
+    else if(mode==MODE::MODE_16)
+    {
+        nResult=_read_uint16(pData,bIsBigEndian);
+    }
+    else if(mode==MODE::MODE_32)
+    {
+        nResult=_read_uint32(pData,bIsBigEndian);
+    }
+    else if(mode==MODE::MODE_64)
+    {
+        nResult=_read_uint64(pData,bIsBigEndian);
+    }
+
+    return nResult;
 }
 
 void XBinary::_write_uint8(char *pData, quint8 nValue)
@@ -1260,7 +1284,7 @@ void XBinary::_write_int32(char *pData, qint32 nValue, bool bIsBigEndian)
     *(qint32 *)pData=nValue;
 }
 
-void XBinary::_write_uint64(char *pData, qint64 nValue, bool bIsBigEndian)
+void XBinary::_write_uint64(char *pData, quint64 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
@@ -1271,7 +1295,7 @@ void XBinary::_write_uint64(char *pData, qint64 nValue, bool bIsBigEndian)
         nValue=qToLittleEndian(nValue);
     }
 
-    *(qint64 *)pData=nValue;
+    *(quint64 *)pData=nValue;
 }
 
 void XBinary::_write_int64(char *pData, qint64 nValue, bool bIsBigEndian)
@@ -1300,6 +1324,26 @@ void XBinary::_write_double(char *pData, double dValue, bool bIsBigEndian)
     endian_double(&dValue,bIsBigEndian);
 
     *(double *)pData=dValue;
+}
+
+void XBinary::_write_value(MODE mode, char *pData, quint64 nValue, bool bIsBigEndian)
+{
+    if(mode==MODE::MODE_8)
+    {
+        _write_uint8(pData,nValue);
+    }
+    else if(mode==MODE::MODE_16)
+    {
+        _write_uint16(pData,nValue,bIsBigEndian);
+    }
+    else if(mode==MODE::MODE_32)
+    {
+        _write_uint32(pData,nValue,bIsBigEndian);
+    }
+    else if(mode==MODE::MODE_64)
+    {
+        _write_uint64(pData,nValue,bIsBigEndian);
+    }
 }
 
 qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint64 nArraySize)
@@ -6394,6 +6438,30 @@ XBinary::MODE XBinary::getWidthModeFromMemoryMap(XBinary::_MEMORY_MAP *pMemoryMa
     qint64 nMax=qMax(pMemoryMap->nBaseAddress+pMemoryMap->nImageSize,pMemoryMap->nRawSize);
 
     result=getWidthModeFromSize(nMax);
+
+    return result;
+}
+
+XBinary::MODE XBinary::getWidthModeFromByteSize(quint32 nByteSize)
+{
+    MODE result=MODE_32;
+
+    if(nByteSize==2)
+    {
+        result=MODE_8;
+    }
+    else if(nByteSize==4)
+    {
+        result=MODE_16;
+    }
+    else if(nByteSize==8)
+    {
+        result=MODE_32;
+    }
+    else if(nByteSize==16)
+    {
+        result=MODE_64;
+    }
 
     return result;
 }

@@ -446,12 +446,14 @@ public:
     static qint16 _read_int16(char *pData,bool bIsBigEndian=false);
     static quint32 _read_uint32(char *pData,bool bIsBigEndian=false);
     static qint32 _read_int32(char *pData,bool bIsBigEndian=false);
-    static qint64 _read_uint64(char *pData,bool bIsBigEndian=false);
+    static quint64 _read_uint64(char *pData,bool bIsBigEndian=false);
     static qint64 _read_int64(char *pData,bool bIsBigEndian=false);
     static QString _read_ansiString(char *pData,int nMaxSize=50);
     static QByteArray _read_byteArray(char *pData,int nSize);
     static float _read_float(char *pData,bool bIsBigEndian=false); // TODO Check
     static double _read_double(char *pData,bool bIsBigEndian=false); // TODO Check
+
+    static quint64 _read_value(MODE mode,char *pData,bool bIsBigEndian=false);
 
     static void _write_uint8(char *pData,quint8 nValue);
     static void _write_int8(char *pData,qint8 nValue);
@@ -459,10 +461,12 @@ public:
     static void _write_int16(char *pData,qint16 nValue,bool bIsBigEndian=false);
     static void _write_uint32(char *pData,quint32 nValue,bool bIsBigEndian=false);
     static void _write_int32(char *pData,qint32 nValue,bool bIsBigEndian=false);
-    static void _write_uint64(char *pData,qint64 nValue,bool bIsBigEndian=false);
+    static void _write_uint64(char *pData,quint64 nValue,bool bIsBigEndian=false);
     static void _write_int64(char *pData,qint64 nValue,bool bIsBigEndian=false);
     static void _write_float(char *pData,float fValue,bool bIsBigEndian=false); // TODO Check
     static void _write_double(char *pData,double dValue,bool bIsBigEndian=false); // TODO Check
+
+    static void _write_value(MODE mode,char *pData,quint64 nValue,bool bIsBigEndian=false);
 
     qint64 find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize);
     qint64 find_byteArray(qint64 nOffset,qint64 nSize,QByteArray baData);
@@ -852,6 +856,8 @@ public:
 
     static MODE getWidthModeFromSize(quint64 nSize); // TODO rename
     static MODE getWidthModeFromMemoryMap(_MEMORY_MAP *pMemoryMap);
+
+    static MODE getWidthModeFromByteSize(quint32 nByteSize);
 
     static bool isAnsiSymbol(quint8 cCode);
     static bool isUnicodeSymbol(quint16 nCode);
