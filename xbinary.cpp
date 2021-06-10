@@ -4375,7 +4375,7 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
         _hashProgressMaximumChanged(procent.nMaxProcent);
         _hashProgressValueChanged(0);
 
-        quint64 nTemp=0;
+        qint64 nTemp=0;
         char *pBuffer=new char[READWRITE_BUFFER_SIZE];
 
         QCryptographicHash::Algorithm algorithm=QCryptographicHash::Md4;
