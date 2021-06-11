@@ -5959,6 +5959,7 @@ QString XBinary::getStringByIndex(QList<QString> *pListStrings, int nIndex, qint
 bool XBinary::isStringUnicode(QString sString, qint32 nMaxCheckSize)
 {
     // TODO Optimize
+    // TODO Check
     bool bResult=false;
 
     if(nMaxCheckSize==-1)
@@ -6524,7 +6525,7 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nStartAddress,
 
         while(nSize>0)
         {
-            quint64 nTempSize=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
+            qint64 nTempSize=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
             if(read_array(nOffset,pBuffer,nTempSize)!=nTempSize)
             {

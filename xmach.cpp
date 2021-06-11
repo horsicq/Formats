@@ -4574,6 +4574,8 @@ qint64 XMACH::readOpcodesInterface_bind(char *pData, qint64 nAddress, qint64 nSi
 
 qint64 XMACH::readOpcodesInterface_export(char *pData, qint64 nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
+    Q_UNUSED(pOpcodeStatus)
+
     qint64 nResult=0;
 
     if(nSize>0)
