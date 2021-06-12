@@ -5973,7 +5973,7 @@ bool XBinary::isStringUnicode(QString sString, qint32 nMaxCheckSize)
 
     for(int i=0;i<nMaxCheckSize;i++)
     {
-        char cChar=sString.at(i).toLatin1();
+        unsigned char cChar=sString.at(i).toLatin1();
         if((cChar>127)||(cChar<27))
         {
             bResult=true;
