@@ -77,6 +77,7 @@ class XBinary : public QObject
 static const double D_ENTROPY_THRESHOLD; // 6.5
 
 public:
+
     struct DATASET
     {
         qint64 nOffset;
@@ -250,7 +251,7 @@ public:
 
     struct _MEMORY_MAP
     {
-        qint64 nBaseAddress;
+        qint64 nModuleAddress;
         qint64 nImageSize;
         qint64 nRawSize;
         FT fileType;
@@ -259,6 +260,14 @@ public:
         QString sArch;
         QString sType;
         QList<_MEMORY_RECORD> listRecords;
+    };
+
+    struct FUNCTION_ADDRESS
+    {
+        qint64 nAddress;
+        qint64 nModuleAddress;
+        qint32 nOrdinal; // For Windows;
+        QString sName;
     };
 
     enum HASH
@@ -593,7 +602,7 @@ public:
     qint64 getImageAddress();
     void setImageBase(qint64 nValue);
 
-    qint64 _getBaseAddress();
+    qint64 getModuleAddress();
 
     bool isImage();
     void setIsImage(bool bValue);
@@ -883,6 +892,8 @@ public:
     static bool _isOffsetsCrossed(qint64 nOffset1,qint64 nSize1,qint64 nOffset2,qint64 nSize2);
     static bool _isReplaced(qint64 nOffset,qint64 nSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
     static bool _replaceMemory(qint64 nDataOffset,char *pData,qint64 nDataSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
+
+    static void removeFunctionAddressesByModule(QMap<qint64,FUNCTION_ADDRESS> *pMapFunctionAddresses,qint64 nModuleAddress);
 
 public slots:
     void setSearchProcessEnable(bool bState);

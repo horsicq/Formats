@@ -55,7 +55,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
 
     qint64 nTotalSize=getSize();
 
-    result.nBaseAddress=_getBaseAddress();
+    result.nModuleAddress=getModuleAddress();
     result.nRawSize=nTotalSize;
     result.nImageSize=getImageSize();
     result.fileType=getFileType();

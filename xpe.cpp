@@ -1028,7 +1028,7 @@ qint64 XPE::getDataDirectoryOffset(XBinary::_MEMORY_MAP *pMemoryMap, quint32 nNu
 
     if(dataResources.VirtualAddress)
     {
-        nResult=addressToOffset(pMemoryMap,dataResources.VirtualAddress+pMemoryMap->nBaseAddress);
+        nResult=addressToOffset(pMemoryMap,dataResources.VirtualAddress+pMemoryMap->nModuleAddress);
     }
 
     return nResult;
@@ -1049,7 +1049,7 @@ QByteArray XPE::getDataDirectory(XBinary::_MEMORY_MAP *pMemoryMap, quint32 nNumb
 
     if(dataDirectory.VirtualAddress)
     {
-        qint64 nOffset=addressToOffset(pMemoryMap,dataDirectory.VirtualAddress+pMemoryMap->nBaseAddress);
+        qint64 nOffset=addressToOffset(pMemoryMap,dataDirectory.VirtualAddress+pMemoryMap->nModuleAddress);
 
         if(nOffset!=-1)
         {
@@ -1692,7 +1692,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
     result.bIsBigEndian=isBigEndian();
     result.sType=getTypeAsString();
 
-    result.nBaseAddress=_getBaseAddress();
+    result.nModuleAddress=getModuleAddress();
     result.nRawSize=getSize();
     result.nImageSize=S_ALIGN_UP(getOptionalHeader_SizeOfImage(),0x1000);
 
@@ -1742,7 +1742,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
         if(!isImage())
         {
             recordHeaderRaw.type=MMT_HEADER;
-            recordHeaderRaw.nAddress=result.nBaseAddress;
+            recordHeaderRaw.nAddress=result.nModuleAddress;
             recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
             recordHeaderRaw.nOffset=0;
             recordHeaderRaw.nSize=nHeadersSize;
@@ -1757,7 +1757,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                 record.type=MMT_HEADER;
                 record.bIsVirtual=true;
 
-                record.nAddress=result.nBaseAddress+nHeadersSize;
+                record.nAddress=result.nModuleAddress+nHeadersSize;
                 recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
                 record.nOffset=-1;
                 record.nSize=nVirtualSizeofHeaders-nHeadersSize;
@@ -1770,7 +1770,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
         else
         {
             recordHeaderRaw.type=MMT_HEADER;
-            recordHeaderRaw.nAddress=result.nBaseAddress;
+            recordHeaderRaw.nAddress=result.nModuleAddress;
             recordHeaderRaw.segment=ADDRESS_SEGMENT_FLAT;
             recordHeaderRaw.nOffset=0;
             recordHeaderRaw.nSize=nVirtualSizeofHeaders;
@@ -1797,7 +1797,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
             nFileOffset=S_ALIGN_DOWN(nFileOffset,nFileAlignment);
             //        qint64 nFileSize=__ALIGN_UP(section.SizeOfRawData,nFileAlignment);
             qint64 nFileSize=section.SizeOfRawData+(section.PointerToRawData-nFileOffset);
-            qint64 nVirtualAddress=result.nBaseAddress+section.VirtualAddress;
+            qint64 nVirtualAddress=result.nModuleAddress+section.VirtualAddress;
             qint64 nVirtualSize=S_ALIGN_UP(section.Misc.VirtualSize,nSectionAlignment);
 
             if(!isImage())
@@ -1867,7 +1867,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                 record.nLoadSection=i;
                 record.segment=ADDRESS_SEGMENT_FLAT;
                 record.nAddress=nVirtualAddress;
-                record.nOffset=nVirtualAddress-result.nBaseAddress;
+                record.nOffset=nVirtualAddress-result.nModuleAddress;
                 record.nSize=nVirtualSize;
                 record.sName=sSectionName;
                 record.nIndex=nIndex++;
@@ -1913,12 +1913,12 @@ void XPE::setBaseAddress(qint64 nBaseAddress)
 
 qint64 XPE::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 {
-    return addressToOffset(pMemoryMap,pMemoryMap->nBaseAddress+getOptionalHeader_AddressOfEntryPoint());
+    return addressToOffset(pMemoryMap,pMemoryMap->nModuleAddress+getOptionalHeader_AddressOfEntryPoint());
 }
 
 void XPE::setEntryPointOffset(qint64 nEntryPointOffset)
 {
-    setOptionalHeader_AddressOfEntryPoint(offsetToAddress(nEntryPointOffset)-_getBaseAddress());
+    setOptionalHeader_AddressOfEntryPoint(offsetToAddress(nEntryPointOffset)-getModuleAddress());
 }
 
 QList<XPE::IMPORT_RECORD> XPE::getImportRecords()
@@ -1949,7 +1949,7 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap)
                 break;
             }
 
-            qint64 nOffset=addressToOffset(pMemoryMap,iid.Name+pMemoryMap->nBaseAddress);
+            qint64 nOffset=addressToOffset(pMemoryMap,iid.Name+pMemoryMap->nModuleAddress);
 
             if(nOffset!=-1)
             {
@@ -1970,12 +1970,12 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap)
 
             if(iid.OriginalFirstThunk)
             {
-                nThunksOffset=addressToOffset(pMemoryMap,iid.OriginalFirstThunk+pMemoryMap->nBaseAddress);
+                nThunksOffset=addressToOffset(pMemoryMap,iid.OriginalFirstThunk+pMemoryMap->nModuleAddress);
                 //                nRVA=iid.OriginalFirstThunk;
             }
             else if((iid.FirstThunk))
             {
-                nThunksOffset=addressToOffset(pMemoryMap,iid.FirstThunk+pMemoryMap->nBaseAddress);
+                nThunksOffset=addressToOffset(pMemoryMap,iid.FirstThunk+pMemoryMap->nModuleAddress);
                 //                nRVA=iid.FirstThunk;
             }
 
@@ -2001,7 +2001,7 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap)
 
                     if(!(nThunk64&0x8000000000000000))
                     {
-                        qint64 nOffset=addressToOffset(pMemoryMap,nThunk64+pMemoryMap->nBaseAddress);
+                        qint64 nOffset=addressToOffset(pMemoryMap,nThunk64+pMemoryMap->nModuleAddress);
 
                         if(nOffset!=-1)
                         {
@@ -2033,7 +2033,7 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap)
 
                     if(!(nThunk32&0x80000000))
                     {
-                        qint64 nOffset=addressToOffset(pMemoryMap,nThunk32+pMemoryMap->nBaseAddress);
+                        qint64 nOffset=addressToOffset(pMemoryMap,nThunk32+pMemoryMap->nModuleAddress);
 
                         if(nOffset!=-1)
                         {
@@ -2164,7 +2164,7 @@ QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> XPE::getImportDescriptors(XBinary::_MEMO
                 break;
             }
 
-            qint64 nOffset=addressToOffset(pMemoryMap,iid.Name+pMemoryMap->nBaseAddress);
+            qint64 nOffset=addressToOffset(pMemoryMap,iid.Name+pMemoryMap->nModuleAddress);
 
             if(nOffset!=-1)
             {
@@ -2214,7 +2214,7 @@ QList<XPE::IMAGE_IMPORT_DESCRIPTOR_EX> XPE::getImportDescriptorsEx(XBinary::_MEM
                 break;
             }
 
-            qint64 nOffset=addressToOffset(pMemoryMap,iid.Name+pMemoryMap->nBaseAddress);
+            qint64 nOffset=addressToOffset(pMemoryMap,iid.Name+pMemoryMap->nModuleAddress);
 
             if(nOffset!=-1)
             {
@@ -2322,14 +2322,14 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
 
     XPE_DEF::IMAGE_DATA_DIRECTORY dataResources=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 
-    qint64 nBaseAddress=_getBaseAddress();
+    qint64 nModuleAddress=getModuleAddress();
     qint64 nImportOffset=-1;
     qint64 nImportOffsetTest=-1;
 
     if(dataResources.VirtualAddress)
     {
-        nImportOffset=addressToOffset(pMemoryMap,dataResources.VirtualAddress+nBaseAddress);
-        nImportOffsetTest=addressToOffset(pMemoryMap,dataResources.VirtualAddress+nBaseAddress+sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR)-2); // Test for some (Win)Upack stubs
+        nImportOffset=addressToOffset(pMemoryMap,dataResources.VirtualAddress+nModuleAddress);
+        nImportOffsetTest=addressToOffset(pMemoryMap,dataResources.VirtualAddress+nModuleAddress+sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR)-2); // Test for some (Win)Upack stubs
     }
 
     if(nImportOffset!=-1)
@@ -2350,7 +2350,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
                 break;
             }
 
-            qint64 nOffset=addressToOffset(pMemoryMap,iid.Name+nBaseAddress);
+            qint64 nOffset=addressToOffset(pMemoryMap,iid.Name+nModuleAddress);
 
             if(nOffset!=-1)
             {
@@ -2384,7 +2384,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
 
             nThunksOriginalRVA=iid.FirstThunk;
 
-            nThunksOffset=addressToOffset(pMemoryMap,nThunksRVA+nBaseAddress);
+            nThunksOffset=addressToOffset(pMemoryMap,nThunksRVA+nModuleAddress);
 //            nThunksOriginalOffset=addressToOffset(pMemoryMap,nThunksOriginalRVA+nBaseAddress);
 
             if(nThunksOffset!=-1)
@@ -2426,7 +2426,7 @@ QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemo
 
             if(!(importPosition.nThunkValue&0x8000000000000000))
             {
-                qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nThunkValue+pMemoryMap->nBaseAddress);
+                qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nThunkValue+pMemoryMap->nModuleAddress);
 
                 if(nOffset!=-1)
                 {
@@ -2459,7 +2459,7 @@ QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemo
 
             if(!(importPosition.nThunkValue&0x80000000))
             {
-                qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nThunkValue+pMemoryMap->nBaseAddress);
+                qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nThunkValue+pMemoryMap->nModuleAddress);
 
                 if(nOffset!=-1)
                 {
@@ -2532,7 +2532,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
                 break;
             }
 
-            qint64 nOffset=addressToOffset(&memoryMap,iid.Name+memoryMap.nBaseAddress);
+            qint64 nOffset=addressToOffset(&memoryMap,iid.Name+memoryMap.nModuleAddress);
 
             if(nOffset!=-1)
             {
@@ -2842,8 +2842,8 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                         //                        qDebug("FirstThunk(%d): %x",i,(quint32)iid.FirstThunk);
                         //                        qDebug("Import offset(%d): %x",i,(quint32)pe.getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT));
 
-                        qint64 nSrcOffset=pe.addressToOffset(&memoryMap,iid.FirstThunk+memoryMap.nBaseAddress);
-                        qint64 nDstOffset=pe.addressToOffset(&memoryMap,pListImportHeaders->at(i).nFirstThunk+memoryMap.nBaseAddress);
+                        qint64 nSrcOffset=pe.addressToOffset(&memoryMap,iid.FirstThunk+memoryMap.nModuleAddress);
+                        qint64 nDstOffset=pe.addressToOffset(&memoryMap,pListImportHeaders->at(i).nFirstThunk+memoryMap.nModuleAddress);
 
                         //                        qDebug("src: %x",(quint32)nSrcOffset);
                         //                        qDebug("dst: %x",(quint32)nDstOffset);
@@ -2939,7 +2939,7 @@ XPE::RESOURCE_HEADER XPE::getResourceHeader(_MEMORY_MAP *pMemoryMap)
 
             for(int i=0; i<result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries; i++)
             {
-                RESOURCE_POSITION rp=_getResourcePosition(pMemoryMap,pMemoryMap->nBaseAddress,nResourceOffset,nOffset,0);
+                RESOURCE_POSITION rp=_getResourcePosition(pMemoryMap,pMemoryMap->nModuleAddress,nResourceOffset,nOffset,0);
 
                 if(!rp.bIsValid)
                 {
@@ -2971,7 +2971,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
 
     if(nResourceOffset!=-1)
     {
-        qint64 nBaseAddress=_getBaseAddress();
+        qint64 nModuleAddress=getModuleAddress();
         RESOURCE_RECORD record={};
 
         qint64 nOffsetLevel[3]={};
@@ -3041,7 +3041,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
                                 record.nIRDEOffset=rde[2].OffsetToData;
                                 XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY irde=read_IMAGE_RESOURCE_DATA_ENTRY(nResourceOffset+record.nIRDEOffset);
                                 record.nRVA=irde.OffsetToData;
-                                record.nAddress=irde.OffsetToData+nBaseAddress;
+                                record.nAddress=irde.OffsetToData+nModuleAddress;
                                 record.nOffset=addressToOffset(pMemoryMap,record.nAddress);
                                 record.nSize=irde.Size;
 
@@ -3713,16 +3713,16 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
     {
         read_array(nExportOffset,(char *)&result.directory,sizeof(XPE_DEF::IMAGE_EXPORT_DIRECTORY));
 
-        qint64 nNameOffset=addressToOffset(pMemoryMap,result.directory.Name+pMemoryMap->nBaseAddress);
+        qint64 nNameOffset=addressToOffset(pMemoryMap,result.directory.Name+pMemoryMap->nModuleAddress);
 
         if(nNameOffset!=-1)
         {
             result.sName=read_ansiString(nNameOffset);
         }
 
-        qint64 nAddressOfFunctionsOffset=addressToOffset(pMemoryMap,result.directory.AddressOfFunctions+pMemoryMap->nBaseAddress);
-        qint64 nAddressOfNamesOffset=addressToOffset(pMemoryMap,result.directory.AddressOfNames+pMemoryMap->nBaseAddress);
-        qint64 nAddressOfNameOrdinalsOffset=addressToOffset(pMemoryMap,result.directory.AddressOfNameOrdinals+pMemoryMap->nBaseAddress);
+        qint64 nAddressOfFunctionsOffset=addressToOffset(pMemoryMap,result.directory.AddressOfFunctions+pMemoryMap->nModuleAddress);
+        qint64 nAddressOfNamesOffset=addressToOffset(pMemoryMap,result.directory.AddressOfNames+pMemoryMap->nModuleAddress);
+        qint64 nAddressOfNameOrdinalsOffset=addressToOffset(pMemoryMap,result.directory.AddressOfNameOrdinals+pMemoryMap->nModuleAddress);
 
         if(result.directory.NumberOfFunctions<0xFFFF)
         {
@@ -3737,10 +3737,10 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
                     int nIndex=read_uint16(nAddressOfNameOrdinalsOffset+2*i);
                     position.nOrdinal=nIndex+result.directory.Base;
                     position.nRVA=read_uint32(nAddressOfFunctionsOffset+4*nIndex);
-                    position.nAddress=position.nRVA+pMemoryMap->nBaseAddress;
+                    position.nAddress=position.nRVA+pMemoryMap->nModuleAddress;
                     position.nNameRVA=read_uint32(nAddressOfNamesOffset+4*i);
 
-                    qint64 nFunctionNameOffset=addressToOffset(pMemoryMap,position.nNameRVA+pMemoryMap->nBaseAddress);
+                    qint64 nFunctionNameOffset=addressToOffset(pMemoryMap,position.nNameRVA+pMemoryMap->nModuleAddress);
 
                     if(nFunctionNameOffset!=-1)
                     {
@@ -3764,7 +3764,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
                     else
                     {
                         position.nRVA=read_uint32(nAddressOfFunctionsOffset+4*nIndex);
-                        position.nAddress=position.nRVA+pMemoryMap->nBaseAddress;
+                        position.nAddress=position.nRVA+pMemoryMap->nModuleAddress;
                     }
 
                     bool bInsert=true;
@@ -3808,6 +3808,31 @@ QList<QString> XPE::getExportFunctionsList(EXPORT_HEADER *pExportHeader)
     }
 
     return listResult;
+}
+
+QMap<qint64,XBinary::FUNCTION_ADDRESS> XPE::getExportFunctionAddresses()
+{
+    QMap<qint64,FUNCTION_ADDRESS> mapResult;
+
+    EXPORT_HEADER exportHeader=getExport(false);
+
+    int nNumberOfPositions=exportHeader.listPositions.count();
+
+    qint64 nModuleAddress=getModuleAddress();
+
+    for(int i=0;i<nNumberOfPositions;i++)
+    {
+        FUNCTION_ADDRESS record={};
+
+        record.nAddress=exportHeader.listPositions.at(i).nAddress;
+        record.nModuleAddress=nModuleAddress;
+        record.nOrdinal=exportHeader.listPositions.at(i).nOrdinal;
+        record.sName=exportHeader.listPositions.at(i).sFunctionName;
+
+        mapResult.insert(record.nAddress,record);
+    }
+
+    return mapResult;
 }
 
 XPE_DEF::IMAGE_EXPORT_DIRECTORY XPE::getExportDirectory()
@@ -6497,8 +6522,8 @@ QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> XPE::getExceptionsList(XBinary::_
 
             if( record.BeginAddress&&
                 record.EndAddress&&
-                isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+record.BeginAddress)&&
-                isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+record.EndAddress))
+                isAddressValid(pMemoryMap,pMemoryMap->nModuleAddress+record.BeginAddress)&&
+                isAddressValid(pMemoryMap,pMemoryMap->nModuleAddress+record.EndAddress))
             {
                 listResult.append(record);
             }
@@ -6551,7 +6576,7 @@ QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList(XBinary::_MEMORY_MAP *
 
             if( record.AddressOfRawData&&
                 record.PointerToRawData&&
-                isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+record.AddressOfRawData)&&
+                isAddressValid(pMemoryMap,pMemoryMap->nModuleAddress+record.AddressOfRawData)&&
                 isOffsetValid(pMemoryMap,record.PointerToRawData))
             {
                 listResult.append(record);
@@ -6685,7 +6710,7 @@ QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> XPE::getDelayImportsList(XBinary::_
             XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR record=_read_IMAGE_DELAYLOAD_DESCRIPTOR(nDelayImportOffset);
 
             if( record.DllNameRVA&&
-                isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+record.DllNameRVA))
+                isAddressValid(pMemoryMap,pMemoryMap->nModuleAddress+record.DllNameRVA))
             {
                 listResult.append(record);
             }
@@ -6811,7 +6836,7 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(XBinary::_MEMORY_M
 
                 if(!(importPosition.nNameThunkValue&0x8000000000000000))
                 {
-                    qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nNameThunkValue+pMemoryMap->nBaseAddress);
+                    qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nNameThunkValue+pMemoryMap->nModuleAddress);
 
                     if(nOffset!=-1)
                     {
@@ -6846,7 +6871,7 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(XBinary::_MEMORY_M
 
                 if(!(importPosition.nNameThunkValue&0x80000000))
                 {
-                    qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nNameThunkValue+pMemoryMap->nBaseAddress);
+                    qint64 nOffset=addressToOffset(pMemoryMap,importPosition.nNameThunkValue+pMemoryMap->nModuleAddress);
 
                     if(nOffset!=-1)
                     {
@@ -7624,7 +7649,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
     if(isNETPresent()||bFindHidden)
     {
-        qint64 nBaseAddress=pMemoryMap->nBaseAddress;
+        qint64 nBaseAddress=pMemoryMap->nModuleAddress;
 
         qint64 nCLIHeaderOffset=-1;
 
@@ -7968,7 +7993,7 @@ XBinary::OFFSETSIZE XPE::getNet_MetadataOffsetSize()
     {
         // mb TODO
         // TODO Check!
-        nCLIHeaderOffset=addressToOffset(&memoryMap,memoryMap.nBaseAddress+0x2008);
+        nCLIHeaderOffset=addressToOffset(&memoryMap,memoryMap.nModuleAddress+0x2008);
     }
 
     if(nCLIHeaderOffset!=-1)
@@ -8162,7 +8187,7 @@ int XPE::getEntryPointSection(_MEMORY_MAP *pMemoryMap)
 
     if(nAddressOfEntryPoint)
     {
-        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfEntryPoint);
+        nResult=addressToLoadSection(pMemoryMap,getModuleAddress()+nAddressOfEntryPoint);
     }
 
     return nResult;
@@ -8183,7 +8208,7 @@ int XPE::getImportSection(_MEMORY_MAP *pMemoryMap)
 
     if(nAddressOfImport)
     {
-        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfImport);
+        nResult=addressToLoadSection(pMemoryMap,getModuleAddress()+nAddressOfImport);
     }
 
     return nResult;
@@ -8204,7 +8229,7 @@ int XPE::getExportSection(_MEMORY_MAP *pMemoryMap)
 
     if(nAddressOfExport)
     {
-        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfExport);
+        nResult=addressToLoadSection(pMemoryMap,getModuleAddress()+nAddressOfExport);
     }
 
     return nResult;
@@ -8225,7 +8250,7 @@ int XPE::getTLSSection(_MEMORY_MAP *pMemoryMap)
 
     if(nAddressOfTLS)
     {
-        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfTLS);
+        nResult=addressToLoadSection(pMemoryMap,getModuleAddress()+nAddressOfTLS);
     }
 
     return nResult;
@@ -8246,7 +8271,7 @@ int XPE::getResourcesSection(_MEMORY_MAP *pMemoryMap)
 
     if(nAddressOfResources)
     {
-        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfResources);
+        nResult=addressToLoadSection(pMemoryMap,getModuleAddress()+nAddressOfResources);
     }
 
     return nResult;
@@ -8267,7 +8292,7 @@ int XPE::getRelocsSection(_MEMORY_MAP *pMemoryMap)
 
     if(nAddressOfRelocs)
     {
-        nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+nAddressOfRelocs);
+        nResult=addressToLoadSection(pMemoryMap,getModuleAddress()+nAddressOfRelocs);
     }
 
     return nResult;
@@ -8302,7 +8327,7 @@ int XPE::getNormalCodeSection(_MEMORY_MAP *pMemoryMap)
                 (nSectionCharacteristics==0x60000020)&&
                 (listSections.at(i).SizeOfRawData))
         {
-            nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+listSections.at(i).VirtualAddress);
+            nResult=addressToLoadSection(pMemoryMap,getModuleAddress()+listSections.at(i).VirtualAddress);
             break;
         }
     }
@@ -8313,7 +8338,7 @@ int XPE::getNormalCodeSection(_MEMORY_MAP *pMemoryMap)
         {
             if(listSections.at(0).SizeOfRawData)
             {
-                nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+listSections.at(0).VirtualAddress);
+                nResult=addressToLoadSection(pMemoryMap,getModuleAddress()+listSections.at(0).VirtualAddress);
             }
         }
     }
@@ -8353,7 +8378,7 @@ int XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
             (listSections.at(i).SizeOfRawData)&&
             (nImportSection!=i))
         {
-            nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+listSections.at(i).VirtualAddress);
+            nResult=addressToLoadSection(pMemoryMap,getModuleAddress()+listSections.at(i).VirtualAddress);
             break;
         }
     }
@@ -8366,7 +8391,7 @@ int XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
                 (listSections.at(i).Characteristics!=0x60000020)&&
                 (listSections.at(i).Characteristics!=0x40000040))
             {
-                nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+listSections.at(i).VirtualAddress);
+                nResult=addressToLoadSection(pMemoryMap,getModuleAddress()+listSections.at(i).VirtualAddress);
                 break;
             }
         }
@@ -8404,7 +8429,7 @@ int XPE::getConstDataSection(_MEMORY_MAP *pMemoryMap)
                 (nSectionCharacteristics==0x40000040)&&
                 (listSections.at(i).SizeOfRawData))
         {
-            nResult=addressToLoadSection(pMemoryMap,_getBaseAddress()+listSections.at(i).VirtualAddress);
+            nResult=addressToLoadSection(pMemoryMap,getModuleAddress()+listSections.at(i).VirtualAddress);
             break;
         }
     }
@@ -9027,7 +9052,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pLi
 
             for(int i=0; i<nNumberOfRelocs; i++)
             {
-                if(pe.isAddressValid(&memoryMap,pListRelocs->at(i)+memoryMap.nBaseAddress))
+                if(pe.isAddressValid(&memoryMap,pListRelocs->at(i)+memoryMap.nModuleAddress))
                 {
                     listRVAs.append(pListRelocs->at(i));
                 }

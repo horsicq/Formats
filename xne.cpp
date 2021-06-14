@@ -931,7 +931,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
 
     int nNumberOfSegments=listSegments.count();
 
-    result.nBaseAddress=0x10000; // TODO const
+    result.nModuleAddress=0x10000; // TODO const
     result.nImageSize=nNumberOfSegments*0x10000; // TODO Check
 
     qint64 nMaxOffset=0;

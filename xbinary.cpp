@@ -2783,7 +2783,7 @@ bool XBinary::isAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
 
     if(pMemoryMap->nImageSize)
     {
-        bResult=((pMemoryMap->nBaseAddress<=nAddress)&&(nAddress<(pMemoryMap->nBaseAddress+pMemoryMap->nImageSize)));
+        bResult=((pMemoryMap->nModuleAddress<=nAddress)&&(nAddress<(pMemoryMap->nModuleAddress+pMemoryMap->nImageSize)));
     }
     else
     {
@@ -2807,7 +2807,7 @@ bool XBinary::isAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
 
 bool XBinary::isRelAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
 {
-    return isAddressValid(pMemoryMap,pMemoryMap->nBaseAddress+nRelAddress);
+    return isAddressValid(pMemoryMap,pMemoryMap->nModuleAddress+nRelAddress);
 }
 
 bool XBinary::isAddressPhysical(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
@@ -2871,7 +2871,7 @@ qint64 XBinary::offsetToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOff
 
     if(nResult!=-1)
     {
-        nResult-=pMemoryMap->nBaseAddress;
+        nResult-=pMemoryMap->nModuleAddress;
     }
 
     return nResult;
@@ -2879,7 +2879,7 @@ qint64 XBinary::offsetToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOff
 
 qint64 XBinary::relAddressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
 {
-    return addressToOffset(pMemoryMap,nRelAddress+pMemoryMap->nBaseAddress);
+    return addressToOffset(pMemoryMap,nRelAddress+pMemoryMap->nModuleAddress);
 }
 
 qint64 XBinary::relAddressToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
@@ -2888,7 +2888,7 @@ qint64 XBinary::relAddressToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRe
 
     if(isRelAddressValid(pMemoryMap,nRelAddress))
     {
-        nResult=nRelAddress+pMemoryMap->nBaseAddress;
+        nResult=nRelAddress+pMemoryMap->nModuleAddress;
     }
 
     return nResult;
@@ -2900,7 +2900,7 @@ qint64 XBinary::addressToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAd
 
     if(isAddressValid(pMemoryMap,nAddress))
     {
-        nResult=nAddress-=pMemoryMap->nBaseAddress;
+        nResult=nAddress-=pMemoryMap->nModuleAddress;
     }
 
     return nResult;
@@ -3025,7 +3025,7 @@ QString XBinary::getMemoryRecordInfoByAddress(XBinary::_MEMORY_MAP *pMemoryMap, 
 
 QString XBinary::getMemoryRecordInfoByRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
 {
-    XBinary::_MEMORY_RECORD memoryRecord=getMemoryRecordByAddress(pMemoryMap,nRelAddress+pMemoryMap->nBaseAddress);
+    XBinary::_MEMORY_RECORD memoryRecord=getMemoryRecordByAddress(pMemoryMap,nRelAddress+pMemoryMap->nModuleAddress);
 
     return getMemoryRecordInfo(&memoryRecord);
 }
@@ -3045,7 +3045,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
 
     qint64 nTotalSize=getSize();
 
-    result.nBaseAddress=_getBaseAddress();
+    result.nModuleAddress=getModuleAddress();
     result.nRawSize=nTotalSize;
     result.nImageSize=nTotalSize;
     result.fileType=getFileType();
@@ -3055,7 +3055,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap()
     result.sType=getTypeAsString();
 
     _MEMORY_RECORD record={};
-    record.nAddress=_getBaseAddress();
+    record.nAddress=result.nModuleAddress;
     record.segment=ADDRESS_SEGMENT_FLAT;
     record.nOffset=0;
     record.nSize=nTotalSize;
@@ -3295,7 +3295,7 @@ void XBinary::setImageBase(qint64 nValue)
     this->g_nImageBase=nValue;
 }
 
-qint64 XBinary::_getBaseAddress()
+qint64 XBinary::getModuleAddress()
 {
     qint64 nResult=0;
 
@@ -6436,7 +6436,7 @@ XBinary::MODE XBinary::getWidthModeFromMemoryMap(XBinary::_MEMORY_MAP *pMemoryMa
 {
     MODE result=MODE_32;
 
-    qint64 nMax=qMax(pMemoryMap->nBaseAddress+pMemoryMap->nImageSize,pMemoryMap->nRawSize);
+    qint64 nMax=qMax(pMemoryMap->nModuleAddress+pMemoryMap->nImageSize,pMemoryMap->nRawSize);
 
     result=getWidthModeFromSize(nMax);
 
@@ -6717,6 +6717,22 @@ bool XBinary::_replaceMemory(qint64 nDataOffset, char *pData, qint64 nDataSize, 
     }
 
     return bResult;
+}
+
+void XBinary::removeFunctionAddressesByModule(QMap<qint64, FUNCTION_ADDRESS> *pMapFunctionAddresses, qint64 nModuleAddress)
+{
+    // TODO Check !!!
+    for(QMap<qint64, FUNCTION_ADDRESS>::iterator it=pMapFunctionAddresses->begin();it!=pMapFunctionAddresses->end();)
+    {
+        if(it.value().nModuleAddress==nModuleAddress)
+        {
+            it=pMapFunctionAddresses->erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)

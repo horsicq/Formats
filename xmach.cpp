@@ -1305,17 +1305,17 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
         if(!bImageAddressInit)
         {
-            result.nBaseAddress=nVirtualAddress;
+            result.nModuleAddress=nVirtualAddress;
             bImageAddressInit=true;
         }
 
         nMaxOffset=qMax(nMaxOffset,nFileOffset+nFileSize);
 
-        result.nBaseAddress=qMin(nVirtualAddress,result.nBaseAddress);
+        result.nModuleAddress=qMin(nVirtualAddress,result.nModuleAddress);
         nMaxAddress=qMax(nVirtualAddress+nVirtualSize,nMaxAddress);
     }
 
-    result.nImageSize=nMaxAddress-result.nBaseAddress;
+    result.nImageSize=nMaxAddress-result.nModuleAddress;
 
     return result;
 }

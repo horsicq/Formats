@@ -612,6 +612,8 @@ public:
     QList<QString> getExportFunctionsList();
     static QList<QString> getExportFunctionsList(EXPORT_HEADER *pExportHeader);
 
+    QMap<qint64,FUNCTION_ADDRESS> getExportFunctionAddresses();
+
     XPE_DEF::IMAGE_EXPORT_DIRECTORY getExportDirectory();
     void setExportDirectory(XPE_DEF::IMAGE_EXPORT_DIRECTORY *pExportDirectory);
 

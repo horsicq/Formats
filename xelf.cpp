@@ -3720,17 +3720,17 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 
         if(!bImageAddressInit)
         {
-            result.nBaseAddress=nVirtualAddress;
+            result.nModuleAddress=nVirtualAddress;
             bImageAddressInit=true;
         }
 
         nMaxOffset=qMax(nMaxOffset,nFileOffset+nFileSize);
 
-        result.nBaseAddress=qMin(nVirtualAddress,result.nBaseAddress);
+        result.nModuleAddress=qMin(nVirtualAddress,result.nModuleAddress);
         nMaxAddress=qMax(nVirtualAddress+nVirtualSize,nMaxAddress);
     }
 
-    result.nImageSize=nMaxAddress-result.nBaseAddress;
+    result.nImageSize=nMaxAddress-result.nModuleAddress;
 
     qint64 nNoLoadableSize=result.nRawSize-nMaxOffset;
 
@@ -3981,7 +3981,7 @@ QString XELF::typeIdToString(int nType)
 
 qint64 XELF::getBaseAddress()
 {
-    return getMemoryMap().nBaseAddress; // TODO Check !!!
+    return getMemoryMap().nModuleAddress; // TODO Check !!!
 }
 
 QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType)
