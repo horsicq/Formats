@@ -6735,6 +6735,40 @@ void XBinary::removeFunctionAddressesByModule(QMap<qint64, FUNCTION_ADDRESS> *pM
     }
 }
 
+XBinary::FUNCTION_ADDRESS XBinary::findFunctionAddressesByName(QMap<qint64, FUNCTION_ADDRESS> *pMapFunctionAddresses, QString sName)
+{
+    FUNCTION_ADDRESS result={};
+
+    for(QMap<qint64, FUNCTION_ADDRESS>::iterator it=pMapFunctionAddresses->begin();it!=pMapFunctionAddresses->end();)
+    {
+        if(it.value().sName==sName)
+        {
+            result=it.value();
+        }
+
+        ++it;
+    }
+
+    return result;
+}
+
+XBinary::FUNCTION_ADDRESS XBinary::findFunctionAddressesByOrdinal(QMap<qint64, FUNCTION_ADDRESS> *pMapFunctionAddresses, qint32 nOrdinal)
+{
+    FUNCTION_ADDRESS result={};
+
+    for(QMap<qint64, FUNCTION_ADDRESS>::iterator it=pMapFunctionAddresses->begin();it!=pMapFunctionAddresses->end();)
+    {
+        if(it.value().nOrdinal==nOrdinal)
+        {
+            result=it.value();
+        }
+
+        ++it;
+    }
+
+    return result;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!

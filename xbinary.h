@@ -894,6 +894,8 @@ public:
     static bool _replaceMemory(qint64 nDataOffset,char *pData,qint64 nDataSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
 
     static void removeFunctionAddressesByModule(QMap<qint64,FUNCTION_ADDRESS> *pMapFunctionAddresses,qint64 nModuleAddress);
+    static FUNCTION_ADDRESS findFunctionAddressesByName(QMap<qint64,FUNCTION_ADDRESS> *pMapFunctionAddresses,QString sName);
+    static FUNCTION_ADDRESS findFunctionAddressesByOrdinal(QMap<qint64,FUNCTION_ADDRESS> *pMapFunctionAddresses,qint32 nOrdinal);
 
 public slots:
     void setSearchProcessEnable(bool bState);
