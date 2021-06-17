@@ -22,6 +22,7 @@
 #define XBINARY_H
 
 #include <QIODevice>
+#include <QUuid>
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
@@ -657,10 +658,12 @@ public:
     static bool checkString_float(QString sValue);
     static bool checkString_double(QString sValue);
 
-    static QString getUnpackedName(QIODevice *pDevice);
-    static QString getUnpackedName(QString sFileName);
-    static QString getBackupName(QIODevice *pDevice); // TODO rename getBackupFileName
-    static QString getBackupName(QString sFileName);
+    static QString getUnpackedFileName(QIODevice *pDevice);
+    static QString getUnpackedFileName(QString sFileName);
+    static QString getBackupFileName(QIODevice *pDevice);
+    static QString getBackupFileName(QString sFileName);
+    static QString getTraceFileName(QIODevice *pDevice);
+    static QString getTraceFileName(QString sFileName);
     static QString getDeviceFileName(QIODevice *pDevice);
     static QString getDeviceFilePath(QIODevice *pDevice);
     static QString getDeviceDirectory(QIODevice *pDevice);
@@ -816,6 +819,9 @@ public:
     static bool writeToFile(QString sFileName,QByteArray baData);
     static bool writeToFile(QString sFileName,QIODevice *pDevice);
 
+    static bool appendToFile(QString sFileName,QString sString);
+    static bool clearFile(QString sFileName);
+
     static qint32 getStringNumberFromList(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
     static qint32 getStringNumberFromListExp(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
     static bool isStringInListPresent(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
@@ -896,6 +902,8 @@ public:
     static void removeFunctionAddressesByModule(QMap<qint64,FUNCTION_ADDRESS> *pMapFunctionAddresses,qint64 nModuleAddress);
     static FUNCTION_ADDRESS findFunctionAddressesByName(QMap<qint64,FUNCTION_ADDRESS> *pMapFunctionAddresses,QString sName);
     static FUNCTION_ADDRESS findFunctionAddressesByOrdinal(QMap<qint64,FUNCTION_ADDRESS> *pMapFunctionAddresses,qint32 nOrdinal);
+
+    static QString generateUUID();
 
 public slots:
     void setSearchProcessEnable(bool bState);

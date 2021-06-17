@@ -4030,7 +4030,7 @@ bool XBinary::checkString_double(QString sValue)
     return bResult;
 }
 
-QString XBinary::getUnpackedName(QIODevice *pDevice)
+QString XBinary::getUnpackedFileName(QIODevice *pDevice)
 {
     QString sResult="unpacked";
 
@@ -4044,14 +4044,14 @@ QString XBinary::getUnpackedName(QIODevice *pDevice)
 
         if(sFileName!="")
         {
-            sResult=getUnpackedName(sFileName);
+            sResult=getUnpackedFileName(sFileName);
         }
     }
 
     return sResult;
 }
 
-QString XBinary::getUnpackedName(QString sFileName)
+QString XBinary::getUnpackedFileName(QString sFileName)
 {
     QFileInfo fileInfo(sFileName);
     QString sResult=fileInfo.absolutePath()+QDir::separator()+fileInfo.completeBaseName()+".unp."+fileInfo.suffix();
@@ -4060,9 +4060,8 @@ QString XBinary::getUnpackedName(QString sFileName)
     return sResult;
 }
 
-QString XBinary::getBackupName(QIODevice *pDevice)
+QString XBinary::getBackupFileName(QIODevice *pDevice)
 {
-    // mb TODO name + Date
     QString sResult=QString("Backup.%1.BAK").arg(getCurrentBackupDate());
 
     QString sClassName=pDevice->metaObject()->className();
@@ -4075,14 +4074,14 @@ QString XBinary::getBackupName(QIODevice *pDevice)
 
         if(sFileName!="")
         {
-            sResult=getBackupName(sFileName);
+            sResult=getBackupFileName(sFileName);
         }
     }
 
     return sResult;
 }
 
-QString XBinary::getBackupName(QString sFileName)
+QString XBinary::getBackupFileName(QString sFileName)
 {
     QFileInfo fi(sFileName);
     QString sResult;
@@ -4097,6 +4096,36 @@ QString XBinary::getBackupName(QString sFileName)
     }
 
     sResult+=QString(".%1.BAK").arg(getCurrentBackupDate());
+
+    return sResult;
+}
+
+QString XBinary::getTraceFileName(QIODevice *pDevice)
+{
+    QString sResult=QString("trace.txt");
+
+    QString sClassName=pDevice->metaObject()->className();
+
+    if(sClassName=="QFile")
+    {
+        QFile *pFile=(QFile *)pDevice;
+
+        QString sFileName=pFile->fileName(); // TODO
+
+        if(sFileName!="")
+        {
+            sResult=getTraceFileName(sFileName);
+        }
+    }
+
+    return sResult;
+}
+
+QString XBinary::getTraceFileName(QString sFileName)
+{
+    // mb TODO if file exists write other .1 .2 ...
+    QFileInfo fileInfo(sFileName);
+    QString sResult=fileInfo.absolutePath()+QDir::separator()+fileInfo.completeBaseName()+"."+fileInfo.suffix()+".trace.txt";
 
     return sResult;
 }
@@ -4234,14 +4263,14 @@ QString XBinary::getDeviceFileSuffix(QIODevice *pDevice)
 
 bool XBinary::isBackupPresent(QIODevice *pDevice)
 {
-    return XBinary::isFileExists(XBinary::getBackupName(pDevice));
+    return XBinary::isFileExists(XBinary::getBackupFileName(pDevice));
 }
 
 bool XBinary::saveBackup(QIODevice *pDevice)
 {
     bool bResult=false;
 
-    QString sBackupFileName=XBinary::getBackupName(pDevice);
+    QString sBackupFileName=XBinary::getBackupFileName(pDevice);
 
     if(sBackupFileName!="")
     {
@@ -4997,6 +5026,11 @@ XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
     qint64 nTotalSize=getSize();
 
     if(nSize==-1)
+    {
+        nSize=nTotalSize-nOffset;
+    }
+
+    if((nOffset+nSize>nTotalSize)&&(nOffset<nTotalSize))
     {
         nSize=nTotalSize-nOffset;
     }
@@ -5872,6 +5906,43 @@ bool XBinary::writeToFile(QString sFileName, QIODevice *pDevice)
 
             file.close();
         }
+    }
+
+    return bResult;
+}
+
+bool XBinary::appendToFile(QString sFileName, QString sString)
+{
+    bool bResult=false;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadWrite|QIODevice::Append))
+    {
+        sString+="\r\n"; // TODO Linux
+        file.write(sString.toUtf8());
+
+        file.close();
+        bResult=true;
+    }
+
+    return bResult;
+}
+
+bool XBinary::clearFile(QString sFileName)
+{
+    bool bResult=false;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadWrite))
+    {
+        file.resize(0);
+
+        file.close();
+        bResult=true;
     }
 
     return bResult;
@@ -6767,6 +6838,11 @@ XBinary::FUNCTION_ADDRESS XBinary::findFunctionAddressesByOrdinal(QMap<qint64, F
     }
 
     return result;
+}
+
+QString XBinary::generateUUID()
+{
+    return QUuid::createUuid().toString().remove("{").remove("}");
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
