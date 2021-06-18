@@ -20,7 +20,7 @@
 //
 #include "xne.h"
 
-XNE::XNE(QIODevice *pDevice, bool bIsImage, qint64 nImageBase) : XMSDOS(pDevice,bIsImage,nImageBase)
+XNE::XNE(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress) : XMSDOS(pDevice,bIsImage,nModuleAddress)
 {
 
 }
@@ -49,16 +49,16 @@ bool XNE::isValid()
     return bResult;
 }
 
-bool XNE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+bool XNE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XNE xne(pDevice,bIsImage,nImageAddress);
+    XNE xne(pDevice,bIsImage,nModuleAddress);
 
     return xne.isValid();
 }
 
-XBinary::MODE XNE::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+XBinary::MODE XNE::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XNE xne(pDevice,bIsImage,nImageAddress);
+    XNE xne(pDevice,bIsImage,nModuleAddress);
 
     return xne.getMode();
 }

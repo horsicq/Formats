@@ -158,12 +158,12 @@ public:
         TYPE_KEXT_BUNDLE
     };
 
-    XMACH(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageAddress=-1);
+    XMACH(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
     ~XMACH();
 
     bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
     bool isBigEndian();
 
     qint64 getHeaderOffset();

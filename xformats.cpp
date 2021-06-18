@@ -25,48 +25,48 @@ XFormats::XFormats(QObject *pParent) : QObject(pParent)
 
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,qint64 nImageBase)
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
 {
     XBinary::_MEMORY_MAP result={};
 
     if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
     {
-        XBinary binary(pDevice,bIsImage,nImageBase);
+        XBinary binary(pDevice,bIsImage,nModuleAddress);
         result=binary.getMemoryMap();
     }
     else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
     {
-        XCOM com(pDevice,bIsImage,nImageBase);
+        XCOM com(pDevice,bIsImage,nModuleAddress);
         result=com.getMemoryMap();
     }
     else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
     {
-        XMSDOS msdos(pDevice,bIsImage,nImageBase);
+        XMSDOS msdos(pDevice,bIsImage,nModuleAddress);
         result=msdos.getMemoryMap();
     }
     else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
     {
-        XNE ne(pDevice,bIsImage,nImageBase);
+        XNE ne(pDevice,bIsImage,nModuleAddress);
         result=ne.getMemoryMap();
     }
     else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
     {
-        XLE le(pDevice,bIsImage,nImageBase);
+        XLE le(pDevice,bIsImage,nModuleAddress);
         result=le.getMemoryMap();
     }
     else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
-        XPE pe(pDevice,bIsImage,nImageBase);
+        XPE pe(pDevice,bIsImage,nModuleAddress);
         result=pe.getMemoryMap();
     }
     else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
     {
-        XELF elf(pDevice,bIsImage,nImageBase);
+        XELF elf(pDevice,bIsImage,nModuleAddress);
         result=elf.getMemoryMap();
     }
     else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
     {
-        XMACH mach(pDevice,bIsImage,nImageBase);
+        XMACH mach(pDevice,bIsImage,nModuleAddress);
         result=mach.getMemoryMap();
     }
 #ifdef USE_DEX // TODO Check !!!
@@ -85,56 +85,56 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
 #endif
     else
     {
-        XBinary binary(pDevice,bIsImage,nImageBase);
+        XBinary binary(pDevice,bIsImage,nModuleAddress);
         result=binary.getMemoryMap();
     }
 
     return result;
 }
 
-qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
+qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
     // TODO pMemoryMap
     qint64 nResult=0; // FT_DEX, FT_ZIP
 
     if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
     {
-        XBinary binary(pDevice,bIsImage,nImageBase);
+        XBinary binary(pDevice,bIsImage,nModuleAddress);
         nResult=binary.getEntryPointAddress();
     }
     else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
     {
-        XCOM com(pDevice,bIsImage,nImageBase);
+        XCOM com(pDevice,bIsImage,nModuleAddress);
         nResult=com.getEntryPointAddress();
     }
     else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
     {
-        XMSDOS msdos(pDevice,bIsImage,nImageBase);
+        XMSDOS msdos(pDevice,bIsImage,nModuleAddress);
         nResult=msdos.getEntryPointAddress();
     }
     else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
     {
-        XNE ne(pDevice,bIsImage,nImageBase);
+        XNE ne(pDevice,bIsImage,nModuleAddress);
         nResult=ne.getEntryPointAddress();
     }
     else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
     {
-        XLE le(pDevice,bIsImage,nImageBase);
+        XLE le(pDevice,bIsImage,nModuleAddress);
         nResult=le.getEntryPointAddress();
     }
     else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
-        XPE pe(pDevice,bIsImage,nImageBase);
+        XPE pe(pDevice,bIsImage,nModuleAddress);
         nResult=pe.getEntryPointAddress();
     }
     else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
     {
-        XELF elf(pDevice,bIsImage,nImageBase);
+        XELF elf(pDevice,bIsImage,nModuleAddress);
         nResult=elf.getEntryPointAddress();
     }
     else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
     {
-        XMACH mach(pDevice,bIsImage,nImageBase);
+        XMACH mach(pDevice,bIsImage,nModuleAddress);
         nResult=mach.getEntryPointAddress();
     }
     else
@@ -145,48 +145,48 @@ qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, 
     return nResult;
 }
 
-qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
+qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
     qint64 nResult=0;
 
     if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
     {
-        XBinary binary(pDevice,bIsImage,nImageBase);
+        XBinary binary(pDevice,bIsImage,nModuleAddress);
         nResult=binary._getEntryPointOffset();
     }
     else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
     {
-        XCOM com(pDevice,bIsImage,nImageBase);
+        XCOM com(pDevice,bIsImage,nModuleAddress);
         nResult=com._getEntryPointOffset();
     }
     else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
     {
-        XMSDOS msdos(pDevice,bIsImage,nImageBase);
+        XMSDOS msdos(pDevice,bIsImage,nModuleAddress);
         nResult=msdos._getEntryPointOffset();
     }
     else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
     {
-        XNE ne(pDevice,bIsImage,nImageBase);
+        XNE ne(pDevice,bIsImage,nModuleAddress);
         nResult=ne._getEntryPointOffset();
     }
     else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
     {
-        XLE le(pDevice,bIsImage,nImageBase);
+        XLE le(pDevice,bIsImage,nModuleAddress);
         nResult=le._getEntryPointOffset();
     }
     else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
-        XPE pe(pDevice,bIsImage,nImageBase);
+        XPE pe(pDevice,bIsImage,nModuleAddress);
         nResult=pe._getEntryPointOffset();
     }
     else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
     {
-        XELF elf(pDevice,bIsImage,nImageBase);
+        XELF elf(pDevice,bIsImage,nModuleAddress);
         nResult=elf._getEntryPointOffset();
     }
     else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
     {
-        XMACH mach(pDevice,bIsImage,nImageBase);
+        XMACH mach(pDevice,bIsImage,nModuleAddress);
         nResult=mach._getEntryPointOffset();
     }
     else
@@ -197,48 +197,48 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
     return nResult;
 }
 
-bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
+bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
     bool bResult=false;
 
     if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
     {
-        XBinary binary(pDevice,bIsImage,nImageBase);
+        XBinary binary(pDevice,bIsImage,nModuleAddress);
         bResult=binary.isBigEndian();
     }
     else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
     {
-        XCOM com(pDevice,bIsImage,nImageBase);
+        XCOM com(pDevice,bIsImage,nModuleAddress);
         bResult=com.isBigEndian();
     }
     else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
     {
-        XMSDOS msdos(pDevice,bIsImage,nImageBase);
+        XMSDOS msdos(pDevice,bIsImage,nModuleAddress);
         bResult=msdos.isBigEndian();
     }
     else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
     {
-        XNE ne(pDevice,bIsImage,nImageBase);
+        XNE ne(pDevice,bIsImage,nModuleAddress);
         bResult=ne.isBigEndian();
     }
     else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
     {
-        XLE le(pDevice,bIsImage,nImageBase);
+        XLE le(pDevice,bIsImage,nModuleAddress);
         bResult=le.isBigEndian();
     }
     else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
-        XPE pe(pDevice,bIsImage,nImageBase);
+        XPE pe(pDevice,bIsImage,nModuleAddress);
         bResult=pe.isBigEndian();
     }
     else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
     {
-        XELF elf(pDevice,bIsImage,nImageBase);
+        XELF elf(pDevice,bIsImage,nModuleAddress);
         bResult=elf.isBigEndian();
     }
     else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
     {
-        XMACH mach(pDevice,bIsImage,nImageBase);
+        XMACH mach(pDevice,bIsImage,nModuleAddress);
         bResult=mach.isBigEndian();
     }
 #ifdef USE_DEX

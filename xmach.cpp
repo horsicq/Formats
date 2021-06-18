@@ -20,7 +20,7 @@
 //
 #include "xmach.h"
 
-XMACH::XMACH(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress): XBinary(pDevice,bIsImage,nImageAddress)
+XMACH::XMACH(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress): XBinary(pDevice,bIsImage,nModuleAddress)
 {
 
 }
@@ -47,16 +47,16 @@ bool XMACH::isValid()
     return bResult;
 }
 
-bool XMACH::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+bool XMACH::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XMACH xmach(pDevice,bIsImage,nImageAddress);
+    XMACH xmach(pDevice,bIsImage,nModuleAddress);
 
     return xmach.isValid();
 }
 
-XBinary::MODE XMACH::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+XBinary::MODE XMACH::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XMACH xmach(pDevice,bIsImage,nImageAddress);
+    XMACH xmach(pDevice,bIsImage,nModuleAddress);
 
     return xmach.getMode();
 }

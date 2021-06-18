@@ -36,11 +36,11 @@ public:
         // TODO more
     };
 
-    explicit XCOM(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
+    explicit XCOM(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
     ~XCOM();
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual QString getArch();

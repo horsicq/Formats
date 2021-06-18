@@ -20,7 +20,7 @@
 //
 #include "xmsdos.h"
 
-XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, qint64 nImageBase): XBinary(pDevice,bIsImage,nImageBase)
+XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress): XBinary(pDevice,bIsImage,nModuleAddress)
 {
 }
 
@@ -39,16 +39,16 @@ bool XMSDOS::isValid()
     return bResult;
 }
 
-bool XMSDOS::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+bool XMSDOS::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XMSDOS xmsdos(pDevice,bIsImage,nImageAddress);
+    XMSDOS xmsdos(pDevice,bIsImage,nModuleAddress);
 
     return xmsdos.isValid();
 }
 
-XBinary::MODE XMSDOS::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+XBinary::MODE XMSDOS::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XMSDOS xmsdos(pDevice,bIsImage,nImageAddress);
+    XMSDOS xmsdos(pDevice,bIsImage,nModuleAddress);
 
     return xmsdos.getMode();
 }

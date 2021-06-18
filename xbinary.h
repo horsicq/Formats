@@ -263,10 +263,20 @@ public:
         QList<_MEMORY_RECORD> listRecords;
     };
 
-    struct FUNCTION_ADDRESS
+    enum SYMBOL_TYPE
+    {
+        SYMBOL_TYPE_UNKNOWN,
+        SYMBOL_TYPE_EXPORT,
+        SYMBOL_TYPE_IMPORT,
+        SYMBOL_TYPE_LABEL
+    };
+
+    struct SYMBOL_RECORD
     {
         qint64 nAddress;
+        qint64 nSize;
         qint64 nModuleAddress;
+        SYMBOL_TYPE symbolType;
         qint32 nOrdinal; // For Windows;
         QString sName;
     };
@@ -348,7 +358,7 @@ private:
     };
 
 public:
-    explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1); // mb TODO parent for signals/slot
+    explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1); // mb TODO parent for signals/slot
     void setDevice(QIODevice *pDevice);
     void setReadWriteMutex(QMutex *pReadWriteMutex);
     qint64 safeReadData(QIODevice *pDevice,qint64 nPos,char *pData,qint64 nMaxLen);
@@ -600,8 +610,7 @@ public:
     static qint64 getTotalVirtualSize(_MEMORY_MAP *pMemoryMap);
     static qint64 positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPosition);
 
-    qint64 getImageAddress();
-    void setImageBase(qint64 nValue);
+    void setModuleAddress(qint64 nValue);
 
     qint64 getModuleAddress();
 
@@ -709,8 +718,8 @@ public:
     QIODevice *getDevice();
 
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
 
     virtual bool isBigEndian();
     bool is16();
@@ -899,9 +908,10 @@ public:
     static bool _isReplaced(qint64 nOffset,qint64 nSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
     static bool _replaceMemory(qint64 nDataOffset,char *pData,qint64 nDataSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
 
-    static void removeFunctionAddressesByModule(QMap<qint64,FUNCTION_ADDRESS> *pMapFunctionAddresses,qint64 nModuleAddress);
-    static FUNCTION_ADDRESS findFunctionAddressesByName(QMap<qint64,FUNCTION_ADDRESS> *pMapFunctionAddresses,QString sName);
-    static FUNCTION_ADDRESS findFunctionAddressesByOrdinal(QMap<qint64,FUNCTION_ADDRESS> *pMapFunctionAddresses,qint32 nOrdinal);
+    virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap);
+    static SYMBOL_RECORD findSymbolByAddress(QList<SYMBOL_RECORD> *pListSymbolRecords,qint64 nAddress);
+    static SYMBOL_RECORD findSymbolByName(QList<SYMBOL_RECORD> *pListSymbolRecords,QString sName);
+    static SYMBOL_RECORD findSymbolByOrdinal(QList<SYMBOL_RECORD> *pListSymbolRecords,qint32 nOrdinal);
 
     static QString generateUUID();
 
@@ -968,7 +978,7 @@ private:
     bool g_bIsImage;
     qint64 g_nBaseAddress;
     qint64 g_nEntryPointOffset;
-    qint64 g_nImageBase;
+    qint64 g_nModuleAddress;
     bool g_bIsBigEndian; // TODO enum
     bool g_bIsSearchStop;
     bool g_bIsDumpStop;

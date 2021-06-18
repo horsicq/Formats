@@ -20,7 +20,7 @@
 //
 #include "xpe.h"
 
-XPE::XPE(QIODevice *pDevice, bool bIsImage, qint64 nImageBase): XMSDOS(pDevice,bIsImage,nImageBase)
+XPE::XPE(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress): XMSDOS(pDevice,bIsImage,nModuleAddress)
 {
 }
 
@@ -49,16 +49,16 @@ bool XPE::isValid()
     return bResult;
 }
 
-bool XPE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+bool XPE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XPE xpe(pDevice,bIsImage,nImageAddress);
+    XPE xpe(pDevice,bIsImage,nModuleAddress);
 
     return xpe.isValid();
 }
 
-XBinary::MODE XPE::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+XBinary::MODE XPE::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XPE xpe(pDevice,bIsImage,nImageAddress);
+    XPE xpe(pDevice,bIsImage,nModuleAddress);
 
     return xpe.getMode();
 }
@@ -3810,31 +3810,6 @@ QList<QString> XPE::getExportFunctionsList(EXPORT_HEADER *pExportHeader)
     return listResult;
 }
 
-QMap<qint64,XBinary::FUNCTION_ADDRESS> XPE::getExportFunctionAddresses()
-{
-    QMap<qint64,FUNCTION_ADDRESS> mapResult;
-
-    EXPORT_HEADER exportHeader=getExport(false);
-
-    int nNumberOfPositions=exportHeader.listPositions.count();
-
-    qint64 nModuleAddress=getModuleAddress();
-
-    for(int i=0;i<nNumberOfPositions;i++)
-    {
-        FUNCTION_ADDRESS record={};
-
-        record.nAddress=exportHeader.listPositions.at(i).nAddress;
-        record.nModuleAddress=nModuleAddress;
-        record.nOrdinal=exportHeader.listPositions.at(i).nOrdinal;
-        record.sName=exportHeader.listPositions.at(i).sFunctionName;
-
-        mapResult.insert(record.nAddress,record);
-    }
-
-    return mapResult;
-}
-
 XPE_DEF::IMAGE_EXPORT_DIRECTORY XPE::getExportDirectory()
 {
     XPE_DEF::IMAGE_EXPORT_DIRECTORY result={};
@@ -7577,6 +7552,32 @@ void XPE::setNetHeader_ManagedNativeHeader_Size(quint32 nValue)
     {
         write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_COR20_HEADER,ManagedNativeHeader.Size),nValue);
     }
+}
+
+QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    QList<SYMBOL_RECORD> listResult;
+
+    EXPORT_HEADER exportHeader=getExport(false);
+
+    int nNumberOfPositions=exportHeader.listPositions.count();
+
+    qint64 nModuleAddress=getModuleAddress();
+
+    for(int i=0;i<nNumberOfPositions;i++)
+    {
+        SYMBOL_RECORD record={};
+
+        record.symbolType=SYMBOL_TYPE_EXPORT;
+        record.nAddress=exportHeader.listPositions.at(i).nAddress;
+        record.nModuleAddress=nModuleAddress;
+        record.nOrdinal=exportHeader.listPositions.at(i).nOrdinal;
+        record.sName=exportHeader.listPositions.at(i).sFunctionName;
+
+        listResult.append(record);
+    }
+
+    return listResult;
 }
 
 qint64 XPE::calculateHeadersSize()

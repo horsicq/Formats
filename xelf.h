@@ -77,12 +77,12 @@ public:
         TYPE_NUM
     };
 
-    XELF(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
+    XELF(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
     ~XELF();
 
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
     bool isBigEndian();
 
     qint64 getEhdrOffset();

@@ -20,7 +20,7 @@
 //
 #include "xle.h"
 
-XLE::XLE(QIODevice *pDevice, bool bIsImage, qint64 nImageBase) : XMSDOS(pDevice,bIsImage,nImageBase)
+XLE::XLE(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress) : XMSDOS(pDevice,bIsImage,nModuleAddress)
 {
 
 }
@@ -49,16 +49,16 @@ bool XLE::isValid()
     return bResult;
 }
 
-bool XLE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+bool XLE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XLE xle(pDevice,bIsImage,nImageAddress);
+    XLE xle(pDevice,bIsImage,nModuleAddress);
 
     return xle.isValid();
 }
 
-XBinary::MODE XLE::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+XBinary::MODE XLE::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XLE xle(pDevice,bIsImage,nImageAddress);
+    XLE xle(pDevice,bIsImage,nModuleAddress);
 
     return xle.getMode();
 }

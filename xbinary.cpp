@@ -22,14 +22,14 @@
 
 const double XBinary::D_ENTROPY_THRESHOLD=6.5;
 
-XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nImageBase)
+XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
     g_pReadWriteMutex=nullptr;
 
     setDevice(pDevice);
     setIsImage(bIsImage);
     XBinary::setBaseAddress(0);
-    setImageBase(nImageBase);
+    setModuleAddress(nModuleAddress);
     setEndianness(false); // LE
     XBinary::setEntryPointOffset(0);
     setSearchProcessEnable(true);
@@ -3285,25 +3285,18 @@ qint64 XBinary::positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPositio
     return nResult;
 }
 
-qint64 XBinary::getImageAddress()
+void XBinary::setModuleAddress(qint64 nValue)
 {
-    return this->g_nImageBase;
-}
-
-void XBinary::setImageBase(qint64 nValue)
-{
-    this->g_nImageBase=nValue;
+    this->g_nModuleAddress=nValue;
 }
 
 qint64 XBinary::getModuleAddress()
 {
     qint64 nResult=0;
 
-    qint64 nImageAddress=getImageAddress();
-
-    if(isImage()&&(nImageAddress!=-1))
+    if(g_nModuleAddress!=-1)
     {
-        nResult=nImageAddress;
+        nResult=g_nModuleAddress;
     }
     else
     {
@@ -4925,16 +4918,16 @@ bool XBinary::isValid()
     return true;
 }
 
-bool XBinary::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+bool XBinary::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XBinary xbinary(pDevice,bIsImage,nImageAddress);
+    XBinary xbinary(pDevice,bIsImage,nModuleAddress);
 
     return xbinary.isValid();
 }
 
-XBinary::MODE XBinary::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+XBinary::MODE XBinary::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XBinary xbinary(pDevice,bIsImage,nImageAddress);
+    XBinary xbinary(pDevice,bIsImage,nModuleAddress);
 
     return xbinary.getMode();
 }
@@ -5025,7 +5018,7 @@ XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
 
     qint64 nTotalSize=getSize();
 
-    if(nSize==-1)
+    if((nSize==-1)&&(nTotalSize>nOffset))
     {
         nSize=nTotalSize-nOffset;
     }
@@ -6790,51 +6783,67 @@ bool XBinary::_replaceMemory(qint64 nDataOffset, char *pData, qint64 nDataSize, 
     return bResult;
 }
 
-void XBinary::removeFunctionAddressesByModule(QMap<qint64, FUNCTION_ADDRESS> *pMapFunctionAddresses, qint64 nModuleAddress)
+QList<XBinary::SYMBOL_RECORD> XBinary::getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    // TODO Check !!!
-    for(QMap<qint64, FUNCTION_ADDRESS>::iterator it=pMapFunctionAddresses->begin();it!=pMapFunctionAddresses->end();)
-    {
-        if(it.value().nModuleAddress==nModuleAddress)
-        {
-            it=pMapFunctionAddresses->erase(it);
-        }
-        else
-        {
-            ++it;
-        }
-    }
+    Q_UNUSED(pMemoryMap)
+
+    QList<XBinary::SYMBOL_RECORD> listResult;
+
+    return listResult;
 }
 
-XBinary::FUNCTION_ADDRESS XBinary::findFunctionAddressesByName(QMap<qint64, FUNCTION_ADDRESS> *pMapFunctionAddresses, QString sName)
+XBinary::SYMBOL_RECORD XBinary::findSymbolByAddress(QList<SYMBOL_RECORD> *pListSymbolRecords, qint64 nAddress)
 {
-    FUNCTION_ADDRESS result={};
+    SYMBOL_RECORD result={};
 
-    for(QMap<qint64, FUNCTION_ADDRESS>::iterator it=pMapFunctionAddresses->begin();it!=pMapFunctionAddresses->end();)
+    qint32 nNumberOfRecords=pListSymbolRecords->count();
+
+    for(int i=0;i<nNumberOfRecords;i++)
     {
-        if(it.value().sName==sName)
+        if(pListSymbolRecords->at(i).nAddress==nAddress)
         {
-            result=it.value();
-        }
+            result=pListSymbolRecords->at(i);
 
-        ++it;
+            break;
+        }
     }
 
     return result;
 }
 
-XBinary::FUNCTION_ADDRESS XBinary::findFunctionAddressesByOrdinal(QMap<qint64, FUNCTION_ADDRESS> *pMapFunctionAddresses, qint32 nOrdinal)
+XBinary::SYMBOL_RECORD XBinary::findSymbolByName(QList<SYMBOL_RECORD> *pListSymbolRecords, QString sName)
 {
-    FUNCTION_ADDRESS result={};
+    SYMBOL_RECORD result={};
 
-    for(QMap<qint64, FUNCTION_ADDRESS>::iterator it=pMapFunctionAddresses->begin();it!=pMapFunctionAddresses->end();)
+    qint32 nNumberOfRecords=pListSymbolRecords->count();
+
+    for(int i=0;i<nNumberOfRecords;i++)
     {
-        if(it.value().nOrdinal==nOrdinal)
+        if(pListSymbolRecords->at(i).sName==sName)
         {
-            result=it.value();
-        }
+            result=pListSymbolRecords->at(i);
 
-        ++it;
+            break;
+        }
+    }
+
+    return result;
+}
+
+XBinary::SYMBOL_RECORD XBinary::findSymbolByOrdinal(QList<SYMBOL_RECORD> *pListSymbolRecords, qint32 nOrdinal)
+{
+    SYMBOL_RECORD result={};
+
+    qint32 nNumberOfRecords=pListSymbolRecords->count();
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        if(pListSymbolRecords->at(i).nOrdinal==nOrdinal)
+        {
+            result=pListSymbolRecords->at(i);
+
+            break;
+        }
     }
 
     return result;

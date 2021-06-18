@@ -295,10 +295,10 @@ public:
         // TODO more from subsystems
     };
 
-    explicit XPE(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nImageBase=-1);
+    explicit XPE(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nImageAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
 
     virtual MODE getMode();
     virtual QString getArch();
@@ -611,8 +611,6 @@ public:
     EXPORT_HEADER getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly=false);
     QList<QString> getExportFunctionsList();
     static QList<QString> getExportFunctionsList(EXPORT_HEADER *pExportHeader);
-
-    QMap<qint64,FUNCTION_ADDRESS> getExportFunctionAddresses();
 
     XPE_DEF::IMAGE_EXPORT_DIRECTORY getExportDirectory();
     void setExportDirectory(XPE_DEF::IMAGE_EXPORT_DIRECTORY *pExportDirectory);
@@ -1053,6 +1051,8 @@ public:
     void setNetHeader_ExportAddressTableJumps_Size(quint32 nValue);
     void setNetHeader_ManagedNativeHeader_Address(quint32 nValue);
     void setNetHeader_ManagedNativeHeader_Size(quint32 nValue);
+
+    virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

@@ -20,7 +20,7 @@
 //
 #include "xelf.h"
 
-XELF::XELF(QIODevice *pDevice, bool bIsImage, qint64 nImageBase): XBinary(pDevice,bIsImage,nImageBase)
+XELF::XELF(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress): XBinary(pDevice,bIsImage,nModuleAddress)
 {
 }
 
@@ -45,16 +45,16 @@ bool XELF::isValid()
     return bResult;
 }
 
-bool XELF::isValid(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+bool XELF::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XELF xelf(pDevice,bIsImage,nImageAddress);
+    XELF xelf(pDevice,bIsImage,nModuleAddress);
 
     return xelf.isValid();
 }
 
-XBinary::MODE XELF::getMode(QIODevice *pDevice, bool bIsImage, qint64 nImageAddress)
+XBinary::MODE XELF::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XELF xelf(pDevice,bIsImage,nImageAddress);
+    XELF xelf(pDevice,bIsImage,nModuleAddress);
 
     return xelf.getMode();
 }
