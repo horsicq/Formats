@@ -7556,9 +7556,10 @@ void XPE::setNetHeader_ManagedNativeHeader_Size(quint32 nValue)
 
 QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap)
 {
+    // TODO Import
     QList<SYMBOL_RECORD> listResult;
 
-    EXPORT_HEADER exportHeader=getExport(false);
+    EXPORT_HEADER exportHeader=getExport(pMemoryMap,false);
 
     int nNumberOfPositions=exportHeader.listPositions.count();
 
