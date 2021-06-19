@@ -839,8 +839,8 @@ public:
 
     static QByteArray createHeaderStub(HEADER_OPTIONS *pHeaderOptions);
 
-    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 getLoadConfigDirectory32();
-    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 getLoadConfigDirectory64();
+    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 getLoadConfigDirectory32(); // TODO check size
+    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 getLoadConfigDirectory64(); // TODO check size
 
     qint64 getLoadConfigDirectoryOffset();
     qint64 getLoadConfigDirectorySize();
@@ -889,6 +889,12 @@ public:
     quint32 getLoadConfig_Reserved3();
     quint64 getLoadConfig_EnclaveConfigurationPointer();
     quint64 getLoadConfig_VolatileMetadataPointer();
+    quint64 getLoadConfig_GuardEHContinuationTable();
+    quint64 getLoadConfig_GuardEHContinuationCount();
+    quint64 getLoadConfig_GuardXFGCheckFunctionPointer();
+    quint64 getLoadConfig_GuardXFGDispatchFunctionPointer();
+    quint64 getLoadConfig_GuardXFGTableDispatchFunctionPointer();
+    quint64 getLoadConfig_CastGuardOsDeterminedFailureMode();
 
     void setLoadConfig_Size(quint32 nValue);
     void setLoadConfig_TimeDateStamp(quint32 nValue);
@@ -934,6 +940,12 @@ public:
     void setLoadConfig_Reserved3(quint32 nValue);
     void setLoadConfig_EnclaveConfigurationPointer(quint64 nValue);
     void setLoadConfig_VolatileMetadataPointer(quint64 nValue);
+    void setLoadConfig_GuardEHContinuationTable(quint64 nValue);
+    void setLoadConfig_GuardEHContinuationCount(quint64 nValue);
+    void setLoadConfig_GuardXFGCheckFunctionPointer(quint64 nValue);
+    void setLoadConfig_GuardXFGDispatchFunctionPointer(quint64 nValue);
+    void setLoadConfig_GuardXFGTableDispatchFunctionPointer(quint64 nValue);
+    void setLoadConfig_CastGuardOsDeterminedFailureMode(quint64 nValue);
 
     XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY _read_IMAGE_RUNTIME_FUNCTION_ENTRY(qint64 nOffset);
 

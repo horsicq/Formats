@@ -677,6 +677,12 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY32
     quint32 Reserved3;
     quint32 EnclaveConfigurationPointer;    // VA
     quint32 VolatileMetadataPointer;        // VA
+    quint32 GuardEHContinuationTable;
+    quint32 GuardEHContinuationCount;
+    quint32 GuardXFGCheckFunctionPointer;
+    quint32 GuardXFGDispatchFunctionPointer;
+    quint32 GuardXFGTableDispatchFunctionPointer;
+    quint32 CastGuardOsDeterminedFailureMode;
 };
 
 struct S_IMAGE_LOAD_CONFIG_DIRECTORY64
@@ -724,6 +730,12 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY64
     quint32 Reserved3;
     quint64 EnclaveConfigurationPointer;     // VA
     quint64 VolatileMetadataPointer;         // VA
+    quint64 GuardEHContinuationTable;
+    quint64 GuardEHContinuationCount;
+    quint64 GuardXFGCheckFunctionPointer;
+    quint64 GuardXFGDispatchFunctionPointer;
+    quint64 GuardXFGTableDispatchFunctionPointer;
+    quint64 CastGuardOsDeterminedFailureMode;
 };
 
 struct S_IMAGE_DELAYLOAD_DESCRIPTOR
