@@ -7794,28 +7794,62 @@ void XPE::setNetHeader_ManagedNativeHeader_Size(quint32 nValue)
     }
 }
 
-QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap)
+QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap,SYMBOL_TYPE symbolType)
 {
     // TODO Import
     QList<SYMBOL_RECORD> listResult;
 
-    EXPORT_HEADER exportHeader=getExport(pMemoryMap,false);
+     qint64 nModuleAddress=getModuleAddress();
 
-    int nNumberOfPositions=exportHeader.listPositions.count();
-
-    qint64 nModuleAddress=getModuleAddress();
-
-    for(int i=0;i<nNumberOfPositions;i++)
+    if(symbolType&SYMBOL_TYPE_EXPORT)
     {
-        SYMBOL_RECORD record={};
+        EXPORT_HEADER exportHeader=getExport(pMemoryMap,false);
 
-        record.symbolType=SYMBOL_TYPE_EXPORT;
-        record.nAddress=exportHeader.listPositions.at(i).nAddress;
-        record.nModuleAddress=nModuleAddress;
-        record.nOrdinal=exportHeader.listPositions.at(i).nOrdinal;
-        record.sName=exportHeader.listPositions.at(i).sFunctionName;
+        int nNumberOfPositions=exportHeader.listPositions.count();
 
-        listResult.append(record);
+        for(int i=0;i<nNumberOfPositions;i++)
+        {
+            SYMBOL_RECORD record={};
+
+            record.symbolType=SYMBOL_TYPE_EXPORT;
+            record.nAddress=exportHeader.listPositions.at(i).nAddress;
+            record.nSize=0; // Check
+            record.nModuleAddress=nModuleAddress;
+            record.nOrdinal=exportHeader.listPositions.at(i).nOrdinal;
+            record.sName=exportHeader.listPositions.at(i).sFunctionName;
+            record.sFunction=record.sName;
+
+            listResult.append(record);
+        }
+    }
+
+    if(symbolType&SYMBOL_TYPE_IMPORT)
+    {
+        QList<XPE::IMPORT_HEADER> importHeaders=getImports(pMemoryMap);
+
+        int nNumberOfRecords=importHeaders.count();
+
+        for(int i=0;i<nNumberOfRecords;i++)
+        {
+            QString sName=importHeaders.at(i).sName.toUpper();
+
+            int nNumberOfPositions=importHeaders.at(i).listPositions.count();
+
+            for(int j=0;i<nNumberOfPositions;j++)
+            {
+                SYMBOL_RECORD record={};
+
+                record.symbolType=SYMBOL_TYPE_IMPORT;
+                record.nAddress=importHeaders.at(i).listPositions.at(j).nThunkValue;
+                record.nSize=0; // TODO 4/8
+                record.nModuleAddress=nModuleAddress;
+                record.nOrdinal=importHeaders.at(i).listPositions.at(j).nOrdinal;
+                record.sName=importHeaders.at(i).listPositions.at(j).sName;
+                record.sFunction=QString("%1#%2").arg(sName).arg(importHeaders.at(i).listPositions.at(j).sFunction);
+
+                listResult.append(record);
+            }
+        }
     }
 
     return listResult;

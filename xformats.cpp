@@ -263,6 +263,88 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
     return bResult;
 }
 
+QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress, XBinary::SYMBOL_TYPE symBolType)
+{
+    QList<XBinary::SYMBOL_RECORD> listResult;
+
+    if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
+    {
+        XBinary binary(pDevice,bIsImage,nModuleAddress);
+
+        XBinary::_MEMORY_MAP memoryMap=binary.getMemoryMap();
+        listResult=binary.getSymbolRecords(&memoryMap,symBolType);
+    }
+    else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
+    {
+        XCOM com(pDevice,bIsImage,nModuleAddress);
+
+        XBinary::_MEMORY_MAP memoryMap=com.getMemoryMap();
+        listResult=com.getSymbolRecords(&memoryMap,symBolType);
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
+    {
+        XMSDOS msdos(pDevice,bIsImage,nModuleAddress);
+
+        XBinary::_MEMORY_MAP memoryMap=msdos.getMemoryMap();
+        listResult=msdos.getSymbolRecords(&memoryMap,symBolType);
+    }
+    else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
+    {
+        XNE ne(pDevice,bIsImage,nModuleAddress);
+
+        XBinary::_MEMORY_MAP memoryMap=ne.getMemoryMap();
+        listResult=ne.getSymbolRecords(&memoryMap,symBolType);
+    }
+    else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+
+        XBinary::_MEMORY_MAP memoryMap=le.getMemoryMap();
+        listResult=le.getSymbolRecords(&memoryMap,symBolType);
+    }
+    else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
+    {
+        XPE pe(pDevice,bIsImage,nModuleAddress);
+
+        XBinary::_MEMORY_MAP memoryMap=pe.getMemoryMap();
+        listResult=pe.getSymbolRecords(&memoryMap,symBolType);
+    }
+    else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
+    {
+        XELF elf(pDevice,bIsImage,nModuleAddress);
+
+        XBinary::_MEMORY_MAP memoryMap=elf.getMemoryMap();
+        listResult=elf.getSymbolRecords(&memoryMap,symBolType);
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
+    {
+        XMACH mach(pDevice,bIsImage,nModuleAddress);
+
+        XBinary::_MEMORY_MAP memoryMap=mach.getMemoryMap();
+        listResult=mach.getSymbolRecords(&memoryMap,symBolType);
+    }
+#ifdef USE_DEX
+    else if(XBinary::checkFileType(XBinary::FT_DEX,fileType))
+    {
+        XDEX dex(pDevice);
+
+        XBinary::_MEMORY_MAP memoryMap=dex.getMemoryMap();
+        listResult=dex.getSymbolRecords(&memoryMap,symBolType);
+    }
+#endif
+#ifdef USE_ARCHIVE
+    else if(XBinary::checkFileType(XBinary::FT_ZIP,fileType))
+    {
+        XZip zip(pDevice);
+
+        XBinary::_MEMORY_MAP memoryMap=zip.getMemoryMap();
+        listResult=zip.getSymbolRecords(&memoryMap,symBolType);
+    }
+#endif
+
+    return listResult;
+}
+
 #ifdef QT_GUI_LIB
 XBinary::FT XFormats::setFileTypeComboBox(QComboBox *pComboBox, QList<XBinary::FT> *pListFileTypes, XBinary::FT fileType)
 {

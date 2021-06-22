@@ -4053,6 +4053,35 @@ QString XBinary::getUnpackedFileName(QString sFileName)
     return sResult;
 }
 
+QString XBinary::getDumpFileName(QIODevice *pDevice)
+{
+    QString sResult="dump";
+
+    QString sClassName=pDevice->metaObject()->className();
+
+    if(sClassName=="QFile")
+    {
+        QFile *pFile=(QFile *)pDevice;
+
+        QString sFileName=pFile->fileName(); // TODO
+
+        if(sFileName!="")
+        {
+            sResult=getDumpFileName(sFileName);
+        }
+    }
+
+    return sResult;
+}
+
+QString XBinary::getDumpFileName(QString sFileName)
+{
+    QFileInfo fileInfo(sFileName);
+    QString sResult=fileInfo.absolutePath()+QDir::separator()+fileInfo.completeBaseName()+".dump."+fileInfo.suffix();
+
+    return sResult;
+}
+
 QString XBinary::getBackupFileName(QIODevice *pDevice)
 {
     QString sResult=QString("Backup.%1.BAK").arg(getCurrentBackupDate());
@@ -6783,9 +6812,10 @@ bool XBinary::_replaceMemory(qint64 nDataOffset, char *pData, qint64 nDataSize, 
     return bResult;
 }
 
-QList<XBinary::SYMBOL_RECORD> XBinary::getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap)
+QList<XBinary::SYMBOL_RECORD> XBinary::getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap,SYMBOL_TYPE symbolType)
 {
     Q_UNUSED(pMemoryMap)
+    Q_UNUSED(symbolType)
 
     QList<XBinary::SYMBOL_RECORD> listResult;
 

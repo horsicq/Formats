@@ -266,9 +266,10 @@ public:
     enum SYMBOL_TYPE
     {
         SYMBOL_TYPE_UNKNOWN,
-        SYMBOL_TYPE_EXPORT,
-        SYMBOL_TYPE_IMPORT,
-        SYMBOL_TYPE_LABEL
+        SYMBOL_TYPE_EXPORT      =0x00000001,
+        SYMBOL_TYPE_IMPORT      =0x00000002,
+        SYMBOL_TYPE_LABEL       =0x00000004,
+        SYMBOL_TYPE_ALL         =0xFFFFFFFF
     };
 
     struct SYMBOL_RECORD
@@ -279,6 +280,7 @@ public:
         SYMBOL_TYPE symbolType;
         qint32 nOrdinal; // For Windows;
         QString sName;
+        QString sFunction;
     };
 
     enum HASH
@@ -669,6 +671,8 @@ public:
 
     static QString getUnpackedFileName(QIODevice *pDevice);
     static QString getUnpackedFileName(QString sFileName);
+    static QString getDumpFileName(QIODevice *pDevice);
+    static QString getDumpFileName(QString sFileName);
     static QString getBackupFileName(QIODevice *pDevice);
     static QString getBackupFileName(QString sFileName);
     static QString getTraceFileName(QIODevice *pDevice);
@@ -908,7 +912,7 @@ public:
     static bool _isReplaced(qint64 nOffset,qint64 nSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
     static bool _replaceMemory(qint64 nDataOffset,char *pData,qint64 nDataSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
 
-    virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap);
+    virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap,SYMBOL_TYPE symbolType=SYMBOL_TYPE_ALL);
     static SYMBOL_RECORD findSymbolByAddress(QList<SYMBOL_RECORD> *pListSymbolRecords,qint64 nAddress);
     static SYMBOL_RECORD findSymbolByName(QList<SYMBOL_RECORD> *pListSymbolRecords,QString sName);
     static SYMBOL_RECORD findSymbolByOrdinal(QList<SYMBOL_RECORD> *pListSymbolRecords,qint32 nOrdinal);

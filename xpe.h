@@ -1064,7 +1064,7 @@ public:
     void setNetHeader_ManagedNativeHeader_Address(quint32 nValue);
     void setNetHeader_ManagedNativeHeader_Size(quint32 nValue);
 
-    virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap);
+    virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap,SYMBOL_TYPE symbolType=SYMBOL_TYPE_ALL);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
