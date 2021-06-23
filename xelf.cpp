@@ -3190,6 +3190,39 @@ XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
             }
 
             result.nDataOffset=nOffset+12+S_ALIGN_UP(nNameLength,4);
+            result.nDataSize=qMax((nOffset+nSize)-result.nDataOffset,(qint64)0);
+        }
+    }
+
+    return result;
+}
+
+bool XELF::isNotePresent(QList<NOTE> *pListNotes, QString sName)
+{
+    bool bResult=false;
+
+    for(int i=0;i<pListNotes->count();i++)
+    {
+        if(pListNotes->at(i).sName==sName)
+        {
+            bResult=true;
+            false;
+        }
+    }
+
+    return bResult;
+}
+
+XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, QString sName)
+{
+    NOTE result={};
+
+    for(int i=0;i<pListNotes->count();i++)
+    {
+        if(pListNotes->at(i).sName==sName)
+        {
+            result=pListNotes->at(i);
+            false;
         }
     }
 

@@ -50,6 +50,7 @@ public:
         quint32 nType;
         QString sName;
         qint64 nDataOffset;
+        qint64 nDataSize;
     };
 
     struct TAG_STRUCT
@@ -366,6 +367,9 @@ public:
     QList<NOTE> getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
     QList<NOTE> _getNotes(qint64 nOffset,qint64 nSize,bool bIsBigEndian);
     NOTE _readNote(qint64 nOffset,qint64 nSize,bool bIsBigEndian);
+
+    static bool isNotePresent(QList<NOTE> *pListNotes,QString sName);
+    static NOTE getNote(QList<NOTE> *pListNotes,QString sName);
 
     QList<TAG_STRUCT> getTagStructs();
     QList<TAG_STRUCT> getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders,_MEMORY_MAP *pMemoryMap);
