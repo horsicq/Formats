@@ -657,6 +657,7 @@ public:
     static QString valueToHex(float fValue,bool bIsBigEndian=false);
     static QString valueToHex(double dValue,bool bIsBigEndian=false);
     static QString valueToHex(MODE mode,quint64 nValue,bool bIsBigEndian=false);
+    static QString valueToHexEx(quint64 nValue,bool bIsBigEndian=false);
 
     static bool checkString_uint8(QString sValue);
     static bool checkString_int8(QString sValue);

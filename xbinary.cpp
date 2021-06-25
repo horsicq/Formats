@@ -3921,6 +3921,13 @@ QString XBinary::valueToHex(XBinary::MODE mode, quint64 nValue, bool bIsBigEndia
     return sResult;
 }
 
+QString XBinary::valueToHexEx(quint64 nValue, bool bIsBigEndian)
+{
+    XBinary::MODE mode=getWidthModeFromSize(nValue);
+
+    return valueToHex(mode,nValue,bIsBigEndian);
+}
+
 bool XBinary::checkString_uint8(QString sValue)
 {
     bool bResult=false;
