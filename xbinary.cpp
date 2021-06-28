@@ -4129,9 +4129,9 @@ QString XBinary::getBackupFileName(QString sFileName)
     return sResult;
 }
 
-QString XBinary::getTraceFileName(QIODevice *pDevice)
+QString XBinary::getResultFileName(QIODevice *pDevice, QString sAppendix)
 {
-    QString sResult=QString("trace.txt");
+    QString sResult=sAppendix;
 
     QString sClassName=pDevice->metaObject()->className();
 
@@ -4143,18 +4143,18 @@ QString XBinary::getTraceFileName(QIODevice *pDevice)
 
         if(sFileName!="")
         {
-            sResult=getTraceFileName(sFileName);
+            sResult=getResultFileName(sFileName,sAppendix);
         }
     }
 
     return sResult;
 }
 
-QString XBinary::getTraceFileName(QString sFileName)
+QString XBinary::getResultFileName(QString sFileName,QString sAppendix)
 {
     // mb TODO if file exists write other .1 .2 ...
     QFileInfo fileInfo(sFileName);
-    QString sResult=fileInfo.absolutePath()+QDir::separator()+fileInfo.completeBaseName()+"."+fileInfo.suffix()+".trace.txt";
+    QString sResult=fileInfo.absolutePath()+QDir::separator()+fileInfo.completeBaseName()+"."+fileInfo.suffix()+"."+sAppendix;
 
     return sResult;
 }
