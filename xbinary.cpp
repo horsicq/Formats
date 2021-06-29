@@ -5082,6 +5082,7 @@ XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(QIODevice *pDevice, qint64 nOf
 
 bool XBinary::compareSignatureStrings(QString sBaseSignature, QString sOptSignature)
 {
+    bool bResult=false;
     // TODO optimize
     // TODO check
     sBaseSignature=convertSignature(sBaseSignature);
@@ -5089,31 +5090,28 @@ bool XBinary::compareSignatureStrings(QString sBaseSignature, QString sOptSignat
 
     int nSize=qMin(sBaseSignature.size(),sOptSignature.size());
 
-    if(!nSize)
+    if((nSize)&&(sBaseSignature.size()>=sOptSignature.size()))
     {
-        return false;
-    }
+        bResult=true;
 
-    if(sBaseSignature.size()<sOptSignature.size())
-    {
-        return false;
-    }
-
-    for(int i=0; i<nSize; i++)
-    {
-        QChar _qchar1=sBaseSignature.at(i);
-        QChar _qchar2=sOptSignature.at(i);
-
-        if((_qchar1!=QChar('.'))&&(_qchar2!=QChar('.')))
+        for(int i=0; i<nSize; i++)
         {
-            if(_qchar1!=_qchar2)
+            QChar _qchar1=sBaseSignature.at(i);
+            QChar _qchar2=sOptSignature.at(i);
+
+            if((_qchar1!=QChar('.'))&&(_qchar2!=QChar('.')))
             {
-                return false;
+                if(_qchar1!=_qchar2)
+                {
+                    bResult=false;
+
+                    break;
+                }
             }
         }
     }
 
-    return true;
+    return bResult;
 }
 
 void XBinary::_errorMessage(QString sErrorMessage)
