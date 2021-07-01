@@ -218,6 +218,18 @@ QString XBinary::getArch()
     return g_sArch;
 }
 
+bool XBinary::isSigned()
+{
+    return false;
+}
+
+XBinary::OFFSETSIZE XBinary::getSignOS()
+{
+    OFFSETSIZE result={};
+
+    return result;
+}
+
 void XBinary::setEndianness(bool bIsBigEndian)
 {
     g_bIsBigEndian=bIsBigEndian;
@@ -3695,6 +3707,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(QByteArray *pbaData,bool bExtra)
 
 XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice)
 {
+    // TODO add ZIP
     XBinary::FT result=FT_UNKNOWN;
 
     QSet<XBinary::FT> stFileTypes=getFileTypes(pDevice);

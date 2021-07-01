@@ -388,6 +388,9 @@ public:
     void setArch(QString sArch);
     virtual QString getArch();
 
+    virtual bool isSigned();
+    virtual OFFSETSIZE getSignOS();
+
     void setEndianness(bool bIsBigEndian);
 
     static bool isPacked(double dEntropy);
@@ -510,7 +513,7 @@ public:
 
     qint64 find_ansiString(qint64 nOffset,qint64 nSize,QString sString);
     qint64 find_unicodeString(qint64 nOffset,qint64 nSize,QString sString); // mb TODO endian
-    qint64 find_signature(qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize=0);
+    qint64 find_signature(qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize=0);
     qint64 find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize=0);
     qint64 find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString);
     qint64 find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString);
@@ -892,7 +895,7 @@ public:
 
     static bool isAnsiSymbol(quint8 cCode);
     static bool isUnicodeSymbol(quint16 nCode);
-    QString getStringFromIndex(qint64 nOffset, qint64 nSize, int nIndex);
+    QString getStringFromIndex(qint64 nOffset,qint64 nSize,int nIndex);
 
     static QList<QString> getAllFilesFromDirectory(QString sDirectory,QString sExtension);
 
