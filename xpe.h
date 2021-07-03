@@ -295,6 +295,8 @@ public:
         // TODO more from subsystems
     };
 
+    // TODO isSigned
+    // TODO getSighOS
     explicit XPE(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
     virtual bool isValid();
     static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
