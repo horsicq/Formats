@@ -193,6 +193,29 @@ QString XPE::typeIdToString(int nType)
     return sResult;
 }
 
+bool XPE::isSigned()
+{
+    return getSignOS().nSize;
+}
+
+XBinary::OFFSETSIZE XPE::getSignOS()
+{
+    OFFSETSIZE result={};
+
+    XPE_DEF::IMAGE_DATA_DIRECTORY idSecurity=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY);
+
+    OFFSETSIZE osSecurity={};
+    osSecurity.nOffset=idSecurity.VirtualAddress;
+    osSecurity.nSize=idSecurity.Size;
+
+    if(checkOffsetSize(osSecurity))
+    {
+        result=osSecurity;
+    }
+
+    return result;
+}
+
 qint64 XPE::getNtHeadersOffset()
 {
     qint64 result=get_lfanew();
