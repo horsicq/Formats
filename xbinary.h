@@ -314,6 +314,7 @@ public:
     {
         MS_RECORD_TYPE_UNKNOWN=0,
         MS_RECORD_TYPE_ANSI,
+        MS_RECORD_TYPE_UTF8,
         MS_RECORD_TYPE_UNICODE,
         MS_RECORD_TYPE_SIGNATURE
     };
@@ -518,7 +519,19 @@ public:
     qint64 find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString);
     qint64 find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString);
 
-    QList<MS_RECORD> multiSearch_allStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode,bool bCStrings,QString sExpFilter="");
+    struct STRINGSEARCH_OPTIONS
+    {
+        qint32 nLimit;
+        qint64 nMinLenght;
+        qint64 nMaxLenght;
+        bool bAnsi;
+        bool bUTF8;
+        bool bUnicode;
+        bool bCStrings;
+        QString sExpFilter;
+    };
+
+    QList<MS_RECORD> multiSearch_allStrings(qint64 nOffset,qint64 nSize,STRINGSEARCH_OPTIONS ssOptions);
     QList<MS_RECORD> multiSearch_signature(qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="");
     QList<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="");
 
@@ -893,8 +906,9 @@ public:
 
     static MODE getWidthModeFromByteSize(quint32 nByteSize);
 
-    static bool isAnsiSymbol(quint8 cCode);
-    static bool isUnicodeSymbol(quint16 nCode);
+    static bool isAnsiSymbol(quint8 cCode,bool bExtra=false);
+    static bool isUTF8Symbol(quint8 cCode,qint32 *pnWidth);
+    static bool isUnicodeSymbol(quint16 nCode,bool bExtra=false);
     QString getStringFromIndex(qint64 nOffset,qint64 nSize,int nIndex);
 
     static QList<QString> getAllFilesFromDirectory(QString sDirectory,QString sExtension);

@@ -862,6 +862,7 @@ QString XBinary::read_utf8String(qint64 nOffset, qint64 nMaxSize)
                 break;
             }
 
+            // TODO Check !!!
             if((nByte>>7)&0x1)
             {
                 nRealSize++;
@@ -1896,7 +1897,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     return -1;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 nSize,qint32 nLimit,qint64 nMinLenght,qint64 nMaxLenght,bool bAnsi,bool bUnicode,bool bCStrings,QString sExpFilter)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 nSize,STRINGSEARCH_OPTIONS ssOptions)
 {
     OFFSETSIZE os=convertOffsetAndSize(nOffset,nSize);
 
@@ -1905,16 +1906,16 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
     QList<XBinary::MS_RECORD> listResult;
 
-    bool bFilter=(sExpFilter!="");
+    bool bFilter=(ssOptions.sExpFilter!="");
 
-    if(nMinLenght==0)
+    if(ssOptions.nMinLenght==0)
     {
-        nMinLenght=1;
+        ssOptions.nMinLenght=1;
     }
 
-    if(nMaxLenght==0)
+    if(ssOptions.nMaxLenght==0)
     {
-        nMaxLenght=128; // TODO Check
+        ssOptions.nMaxLenght=128; // TODO Check
     }
 
     qint64 _nSize=nSize;
@@ -1924,14 +1925,20 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
     bool bReadError=false;
 
     char *pBuffer=new char[READWRITE_BUFFER_SIZE];
-    char *pAnsiBuffer=new char[nMaxLenght+1];
+    char *pAnsiBuffer=new char[ssOptions.nMaxLenght+1];
+    char *pUTF8Buffer=new char[ssOptions.nMaxLenght*4+1];
 
-    quint16 *pUnicodeBuffer[2]={new quint16[nMaxLenght+1],new quint16[nMaxLenght+1]};
+    quint16 *pUnicodeBuffer[2]={new quint16[ssOptions.nMaxLenght+1],new quint16[ssOptions.nMaxLenght+1]};
     qint64 nCurrentUnicodeSize[2]={0,0};
     qint64 nCurrentUnicodeOffset[2]={0,0};
 
     qint64 nCurrentAnsiSize=0;
     qint64 nCurrentAnsiOffset=0;
+
+    qint64 nCurrentUTF8Size=0;
+    qint64 nCurrentUTF8Offset=0;
+    qint32 nLastUTF8Width=0;
+    qint64 nLastUTF8Offset=-1;
 
     bool bIsStart=true;
     char cPrevSymbol=0;
@@ -1961,7 +1968,51 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
             char cSymbol=*(pBuffer+i);
 
-            bool bIsAnsiSymbol=isAnsiSymbol((quint8)cSymbol);
+            bool bIsAnsiSymbol=false;
+            bool bIsUTF8Symbol=false;
+            bool bNewUTF8String=false;
+
+            if(ssOptions.bAnsi)
+            {
+                bIsAnsiSymbol=isAnsiSymbol((quint8)cSymbol);
+            }
+
+            if(ssOptions.bUTF8)
+            {
+                qint32 nUTF8SymbolWidth=0;
+
+                bIsUTF8Symbol=isUTF8Symbol((quint8)cSymbol,&nUTF8SymbolWidth);
+
+                if(bIsUTF8Symbol)
+                {
+                    if(nLastUTF8Offset==-1)
+                    {
+                        if(nUTF8SymbolWidth==0) // Cannot start with rest
+                        {
+                            bIsUTF8Symbol=false;
+                        }
+                        else
+                        {
+                            nLastUTF8Offset=_nOffset+i;
+                            nLastUTF8Width=nUTF8SymbolWidth;
+                        }
+                    }
+                    else
+                    {
+                        if(nUTF8SymbolWidth)
+                        {
+                            if(((_nOffset+i)-nLastUTF8Offset)<=nLastUTF8Width)
+                            {
+                                bIsUTF8Symbol=false;
+                                bNewUTF8String=true;
+                            }
+
+                            nLastUTF8Offset=_nOffset+i;
+                            nLastUTF8Width=nUTF8SymbolWidth;
+                        }
+                    }
+                }
+            }
 
             if(bIsAnsiSymbol)
             {
@@ -1970,7 +2021,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                     nCurrentAnsiOffset=_nOffset+i;
                 }
 
-                if(nCurrentAnsiSize<nMaxLenght)
+                if(nCurrentAnsiSize<ssOptions.nMaxLenght)
                 {
                     *(pAnsiBuffer+nCurrentAnsiSize)=cSymbol;
                 }
@@ -1978,20 +2029,35 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                 nCurrentAnsiSize++;
             }
 
+            if(bIsUTF8Symbol)
+            {
+                if(nCurrentUTF8Size==0)
+                {
+                    nCurrentUTF8Offset=_nOffset+i;
+                }
+
+                if(nCurrentUTF8Size<ssOptions.nMaxLenght)
+                {
+                    *(pUTF8Buffer+nCurrentUTF8Size)=cSymbol;
+                }
+
+                nCurrentUTF8Size++;
+            }
+
             if((!bIsAnsiSymbol)||(bIsEnd))
             {
-                if(nCurrentAnsiSize>=nMinLenght)
+                if(nCurrentAnsiSize>=ssOptions.nMinLenght)
                 {
-                    if(nCurrentAnsiSize-1<nMaxLenght)
+                    if(nCurrentAnsiSize-1<ssOptions.nMaxLenght)
                     {
                         pAnsiBuffer[nCurrentAnsiSize]=0;
                     }
                     else
                     {
-                        pAnsiBuffer[nMaxLenght]=0;
+                        pAnsiBuffer[ssOptions.nMaxLenght]=0;
                     }
 
-                    if(bAnsi)
+                    if(ssOptions.bAnsi)
                     {
                         QString sString=pAnsiBuffer;
 
@@ -1999,10 +2065,10 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
                         if(bFilter)
                         {
-                            bAdd=isRegExpPresent(sExpFilter,sString);
+                            bAdd=isRegExpPresent(ssOptions.sExpFilter,sString);
                         }
 
-                        if(bCStrings&&cSymbol)
+                        if(ssOptions.bCStrings&&cSymbol) // mb TODO MaxLenght
                         {
                             bAdd=false;
                         }
@@ -2019,7 +2085,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
                             nCurrentRecords++;
 
-                            if(nCurrentRecords>=nLimit)
+                            if(nCurrentRecords>=ssOptions.nLimit)
                             {
                                 break;
                             }
@@ -2030,11 +2096,82 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                 nCurrentAnsiSize=0;
             }
 
+            if((!bIsUTF8Symbol)||(bIsEnd))
+            {
+                if(nCurrentUTF8Size>=ssOptions.nMinLenght)
+                {
+                    pUTF8Buffer[nCurrentUTF8Size]=0;
+
+                    if(ssOptions.bUTF8)
+                    {
+                        QString sString=QString::fromUtf8(pUTF8Buffer,nCurrentUTF8Size);
+
+                        qint32 nStringSize=sString.size();
+
+                        bool bAdd=true;
+
+                        if(bFilter)
+                        {
+                            bAdd=isRegExpPresent(ssOptions.sExpFilter,sString);
+                        }
+
+                        if(ssOptions.bCStrings&&cSymbol)
+                        {
+                            bAdd=false;
+                        }
+
+                        if(nStringSize<ssOptions.nMinLenght)
+                        {
+                             bAdd=false;
+                        }
+
+                        if((nStringSize==nCurrentUTF8Size)&&(ssOptions.bAnsi))
+                        {
+                            bAdd=false;
+                        }
+
+                        if(bAdd)
+                        {
+                            MS_RECORD record={};
+                            record.recordType=MS_RECORD_TYPE_UTF8;
+                            record.nOffset=nCurrentUTF8Offset;
+                            record.nSize=nCurrentUTF8Size;
+                            record.sString=sString;
+
+                            listResult.append(record);
+
+                            nCurrentRecords++;
+
+                            if(nCurrentRecords>=ssOptions.nLimit)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if(bNewUTF8String)
+                {
+                    *(pUTF8Buffer+nCurrentUTF8Size)=cSymbol;
+                    nCurrentUTF8Size=1;
+                }
+                else
+                {
+                    nCurrentUTF8Size=0;
+                    nLastUTF8Offset=-1;
+                }
+            }
+
             if(!bIsStart)
             {
                 quint16 nCode=cPrevSymbol+(cSymbol<<8); // TODO BE/LE
 
-                bool bIsUnicodeSymbol=isUnicodeSymbol(nCode);
+                bool bIsUnicodeSymbol=false;
+
+                if(ssOptions.bAnsi)
+                {
+                    bIsUnicodeSymbol=isUnicodeSymbol(nCode);
+                }
 
                 if(bIsUnicodeSymbol)
                 {
@@ -2043,7 +2180,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                         nCurrentUnicodeOffset[nParity]=_nOffset-1+i;
                     }
 
-                    if(nCurrentUnicodeSize[nParity]<nMaxLenght)
+                    if(nCurrentUnicodeSize[nParity]<ssOptions.nMaxLenght)
                     {
                         *(pUnicodeBuffer[nParity]+nCurrentUnicodeSize[nParity])=nCode;
                     }
@@ -2053,18 +2190,18 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
                 if((!bIsUnicodeSymbol)||(bIsEnd))
                 {
-                    if(nCurrentUnicodeSize[nParity]>=nMinLenght)
+                    if(nCurrentUnicodeSize[nParity]>=ssOptions.nMinLenght)
                     {
-                        if(nCurrentUnicodeSize[nParity]-1<nMaxLenght)
+                        if(nCurrentUnicodeSize[nParity]-1<ssOptions.nMaxLenght)
                         {
                             pUnicodeBuffer[nParity][nCurrentUnicodeSize[nParity]]=0;
                         }
                         else
                         {
-                            pUnicodeBuffer[nParity][nMaxLenght]=0;
+                            pUnicodeBuffer[nParity][ssOptions.nMaxLenght]=0;
                         }
 
-                        if(bUnicode)
+                        if(ssOptions.bUnicode)
                         {
                             QString sString=QString::fromUtf16(pUnicodeBuffer[nParity]);
 
@@ -2072,10 +2209,10 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
                             if(bFilter)
                             {
-                                bAdd=isRegExpPresent(sExpFilter,sString);
+                                bAdd=isRegExpPresent(ssOptions.sExpFilter,sString);
                             }
 
-                            if(bCStrings&&nCode)
+                            if(ssOptions.bCStrings&&nCode)
                             {
                                 bAdd=false;
                             }
@@ -2085,14 +2222,14 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                                 MS_RECORD record={};
                                 record.recordType=MS_RECORD_TYPE_UNICODE;
                                 record.nOffset=nCurrentUnicodeOffset[nParity];
-                                record.nSize=nCurrentUnicodeSize[nParity];
+                                record.nSize=nCurrentUnicodeSize[nParity]*2;
                                 record.sString=sString;
 
                                 listResult.append(record);
 
                                 nCurrentRecords++;
 
-                                if(nCurrentRecords>=nLimit)
+                                if(nCurrentRecords>=ssOptions.nLimit)
                                 {
                                     break;
                                 }
@@ -2104,18 +2241,18 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                     {
                         int nO=(nParity==1)?(0):(1);
 
-                        if(nCurrentUnicodeSize[nO]>=nMinLenght)
+                        if(nCurrentUnicodeSize[nO]>=ssOptions.nMinLenght)
                         {
-                            if(nCurrentUnicodeSize[nO]-1<nMaxLenght)
+                            if(nCurrentUnicodeSize[nO]-1<ssOptions.nMaxLenght)
                             {
                                 pUnicodeBuffer[nO][nCurrentUnicodeSize[nO]]=0;
                             }
                             else
                             {
-                                pUnicodeBuffer[nO][nMaxLenght]=0;
+                                pUnicodeBuffer[nO][ssOptions.nMaxLenght]=0;
                             }
 
-                            if(bUnicode)
+                            if(ssOptions.bUnicode)
                             {
                                 QString sString=QString::fromUtf16(pUnicodeBuffer[nO]);
 
@@ -2123,7 +2260,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
                                 if(bFilter)
                                 {
-                                    bAdd=isRegExpPresent(sExpFilter,sString);
+                                    bAdd=isRegExpPresent(ssOptions.sExpFilter,sString);
                                 }
 
                                 if(bAdd)
@@ -2131,14 +2268,14 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                                     MS_RECORD record={};
                                     record.recordType=MS_RECORD_TYPE_UNICODE;
                                     record.nOffset=nCurrentUnicodeOffset[nO];
-                                    record.nSize=nCurrentUnicodeSize[nO];
+                                    record.nSize=nCurrentUnicodeSize[nO]*2;
                                     record.sString=sString;
 
                                     listResult.append(record);
 
                                     nCurrentRecords++;
 
-                                    if(nCurrentRecords>=nLimit)
+                                    if(nCurrentRecords>=ssOptions.nLimit)
                                     {
                                         break;
                                     }
@@ -2168,7 +2305,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
             _searchProgressValueChanged(procent.nCurrentProcent);
         }
 
-        if(nCurrentRecords>=nLimit)
+        if(nCurrentRecords>=ssOptions.nLimit)
         {
             _errorMessage(QString("%1: %2").arg(tr("Maximum")).arg(nCurrentRecords));
 
@@ -2185,6 +2322,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
     delete [] pBuffer;
     delete [] pAnsiBuffer;
+    delete [] pUTF8Buffer;
     delete [] pUnicodeBuffer[0];
     delete [] pUnicodeBuffer[1];
 
@@ -6578,25 +6716,81 @@ XBinary::MODE XBinary::getWidthModeFromByteSize(quint32 nByteSize)
     return result;
 }
 
-bool XBinary::isAnsiSymbol(quint8 cCode)
+bool XBinary::isAnsiSymbol(quint8 cCode, bool bExtra)
 {
     bool bResult=false;
 
-    if((cCode>=20)&&(cCode<0x80))
+    if(!bExtra)
     {
-        bResult=true;
+        if((cCode>=20)&&(cCode<0x80))
+        {
+            bResult=true;
+        }
+    }
+    else
+    {
+        if(cCode>=20)
+        {
+            bResult=true;
+        }
     }
 
     return bResult;
 }
 
-bool XBinary::isUnicodeSymbol(quint16 nCode)
+bool XBinary::isUTF8Symbol(quint8 cCode, qint32 *pnWidth)
 {
     bool bResult=false;
 
-    if((nCode>=20)&&(nCode<0x80))
+    if(cCode>=20)
     {
-        bResult=true;
+        if((cCode>>7)==0)
+        {
+            *pnWidth=1;
+            bResult=true;
+        }
+        else if((cCode>>5)==0x6)
+        {
+            *pnWidth=2;
+            bResult=true;
+        }
+        else if((cCode>>4)==0xE)
+        {
+            *pnWidth=3;
+            bResult=true;
+        }
+        else if((cCode>>3)==0x1E)
+        {
+            *pnWidth=4;
+            bResult=true;
+        }
+        else if((cCode>>6)==0x2) // Rest bytes
+        {
+            *pnWidth=0;
+            bResult=true;
+        }
+    }
+
+    return bResult;
+}
+
+bool XBinary::isUnicodeSymbol(quint16 nCode, bool bExtra)
+{
+    bool bResult=false;
+
+    if(!bExtra)
+    {
+        if((nCode>=20)&&(nCode<0x80))
+        {
+            bResult=true;
+        }
+    }
+    else
+    {
+        if((nCode>=20)&&(nCode<=0xFF))
+        {
+            bResult=true;
+        }
     }
 
     return bResult;
