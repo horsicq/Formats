@@ -37,6 +37,7 @@
 #include <QDateTime>
 #include <QElapsedTimer>
 #include <QMutex>
+#include <QTextCodec>
 #include <math.h>
 #if (QT_VERSION_MAJOR<5) // TODO Check
 #include <QRegExp>
@@ -529,6 +530,7 @@ public:
         bool bUnicode;
         bool bCStrings;
         QString sExpFilter;
+        QString sANSICodec;
     };
 
     QList<MS_RECORD> multiSearch_allStrings(qint64 nOffset,qint64 nSize,STRINGSEARCH_OPTIONS ssOptions);
