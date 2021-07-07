@@ -161,6 +161,8 @@ public:
     XMACH(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
     ~XMACH();
 
+    // TODO isSigned
+    // TODO getSignOS
     bool isValid();
     static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
     static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);

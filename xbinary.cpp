@@ -3884,12 +3884,11 @@ QSet<XBinary::FT> XBinary::getFileTypes(QByteArray *pbaData,bool bExtra)
     return result;
 }
 
-XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice)
+XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice, bool bExtra)
 {
-    // TODO add ZIP
     XBinary::FT result=FT_UNKNOWN;
 
-    QSet<XBinary::FT> stFileTypes=getFileTypes(pDevice);
+    QSet<XBinary::FT> stFileTypes=getFileTypes(pDevice,bExtra);
 
     if(stFileTypes.contains(FT_PE32))
     {
@@ -3930,6 +3929,10 @@ XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice)
     else if(stFileTypes.contains(FT_MSDOS))
     {
         result=FT_MSDOS;
+    }
+    else if(stFileTypes.contains(FT_ZIP))
+    {
+        result=FT_ZIP;
     }
     else if(stFileTypes.contains(FT_BINARY))
     {

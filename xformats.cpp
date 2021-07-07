@@ -263,6 +263,170 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
     return bResult;
 }
 
+bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+{
+    bool bResult=false;
+
+    if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
+    {
+        XBinary binary(pDevice,bIsImage,nModuleAddress);
+        bResult=binary.isSigned();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
+    {
+        XCOM com(pDevice,bIsImage,nModuleAddress);
+        bResult=com.isSigned();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
+    {
+        XMSDOS msdos(pDevice,bIsImage,nModuleAddress);
+        bResult=msdos.isSigned();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
+    {
+        XNE ne(pDevice,bIsImage,nModuleAddress);
+        bResult=ne.isSigned();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        bResult=le.isSigned();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
+    {
+        XPE pe(pDevice,bIsImage,nModuleAddress);
+        bResult=pe.isSigned();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
+    {
+        XELF elf(pDevice,bIsImage,nModuleAddress);
+        bResult=elf.isSigned();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
+    {
+        XMACH mach(pDevice,bIsImage,nModuleAddress);
+        bResult=mach.isSigned();
+    }
+#ifdef USE_DEX
+    else if(XBinary::checkFileType(XBinary::FT_DEX,fileType))
+    {
+        XDEX dex(pDevice);
+        bResult=dex.isSigned();
+    }
+#endif
+#ifdef USE_ARCHIVE
+    else if(XBinary::checkFileType(XBinary::FT_ZIP,fileType))
+    {
+        XZip zip(pDevice);
+        bResult=zip.isSigned();
+    }
+#endif
+    else
+    {
+        bResult=false;
+    }
+
+    return bResult;
+}
+
+XBinary::OFFSETSIZE XFormats::getSignOS(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+{
+    XBinary::OFFSETSIZE result={};
+
+    if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
+    {
+        XBinary binary(pDevice,bIsImage,nModuleAddress);
+        result=binary.getSignOS();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
+    {
+        XCOM com(pDevice,bIsImage,nModuleAddress);
+        result=com.getSignOS();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
+    {
+        XMSDOS msdos(pDevice,bIsImage,nModuleAddress);
+        result=msdos.getSignOS();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
+    {
+        XNE ne(pDevice,bIsImage,nModuleAddress);
+        result=ne.getSignOS();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        result=le.getSignOS();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
+    {
+        XPE pe(pDevice,bIsImage,nModuleAddress);
+        result=pe.getSignOS();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
+    {
+        XELF elf(pDevice,bIsImage,nModuleAddress);
+        result=elf.getSignOS();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
+    {
+        XMACH mach(pDevice,bIsImage,nModuleAddress);
+        result=mach.getSignOS();
+    }
+#ifdef USE_DEX
+    else if(XBinary::checkFileType(XBinary::FT_DEX,fileType))
+    {
+        XDEX dex(pDevice);
+        result=dex.getSignOS();
+    }
+#endif
+#ifdef USE_ARCHIVE
+    else if(XBinary::checkFileType(XBinary::FT_ZIP,fileType))
+    {
+        XZip zip(pDevice);
+        result=zip.getSignOS();
+    }
+#endif
+
+    return result;
+}
+
+XBinary::OFFSETSIZE XFormats::getSignOS(QString sFileName)
+{
+    XBinary::OFFSETSIZE result={};
+
+    QFile file;
+
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        result=getSignOS(XBinary::getPrefFileType(&file,true),&file);
+
+        file.close();
+    }
+
+    return result;
+}
+
+bool XFormats::isSigned(QString sFileName)
+{
+    bool bResult=false;
+
+    QFile file;
+
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        bResult=isSigned(XBinary::getPrefFileType(&file,true),&file);
+
+        file.close();
+    }
+
+    return bResult;
+}
+
 QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress, XBinary::SYMBOL_TYPE symBolType)
 {
     QList<XBinary::SYMBOL_RECORD> listResult;
