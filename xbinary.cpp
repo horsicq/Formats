@@ -1919,7 +1919,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
     }
 
     bool bANSICodec=false;
-    QTextCodec *pCodec;
+    QTextCodec *pCodec=nullptr;
 
     if(ssOptions.sANSICodec!="")
     {
