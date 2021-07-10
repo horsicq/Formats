@@ -76,7 +76,7 @@ class XBinary : public QObject
 {
     Q_OBJECT
 
-static const double D_ENTROPY_THRESHOLD; // 6.5
+static const double D_ENTROPY_THRESHOLD; // S6.5
 
 public:
 
@@ -269,7 +269,7 @@ public:
         SYMBOL_TYPE_UNKNOWN,
         SYMBOL_TYPE_EXPORT          =0x00000001,
         SYMBOL_TYPE_IMPORT          =0x00000002,
-        SYMBOL_TYPE_LABEL           =0x00000004,
+        SYMBOL_TYPE_LABEL           =0x00000004, // DATA
         SYMBOL_TYPE_ANSISTRING      =0x00000008,
         SYMBOL_TYPE_UNICODESTRING   =0x00000010,
         SYMBOL_TYPE_ALL             =0xFFFFFFFF
