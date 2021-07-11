@@ -2533,6 +2533,7 @@ bool XBinary::removeFile(QString sFileName)
 
 bool XBinary::copyFile(QString sSrcFileName,QString sDestFileName)
 {
+    // mb TODO remove first
     return QFile::copy(sSrcFileName,sDestFileName);
 }
 
