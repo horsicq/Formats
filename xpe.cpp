@@ -3747,7 +3747,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
         qint64 nAddressOfNamesOffset=addressToOffset(pMemoryMap,result.directory.AddressOfNames+pMemoryMap->nModuleAddress);
         qint64 nAddressOfNameOrdinalsOffset=addressToOffset(pMemoryMap,result.directory.AddressOfNameOrdinals+pMemoryMap->nModuleAddress);
 
-        if(result.directory.NumberOfFunctions<0xFFFF)
+        if((result.directory.NumberOfFunctions<0xFFFF)&&(result.directory.NumberOfNames<0xFFFF))
         {
             if((nAddressOfFunctionsOffset!=-1)&&(nAddressOfNamesOffset!=-1)&&(nAddressOfNameOrdinalsOffset!=-1))
             {
