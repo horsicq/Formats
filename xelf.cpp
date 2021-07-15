@@ -3146,6 +3146,8 @@ QList<XELF::NOTE> XELF::_getNotes(qint64 nOffset, qint64 nSize, bool bIsBigEndia
 {
     QList<NOTE> listResult;
 
+    int nNumberOfRecords=0;
+
     while(nSize>0)
     {
         NOTE note=_readNote(nOffset,nSize,bIsBigEndian);
@@ -3158,6 +3160,13 @@ QList<XELF::NOTE> XELF::_getNotes(qint64 nOffset, qint64 nSize, bool bIsBigEndia
             nSize-=note.nSize;
         }
         else
+        {
+            break;
+        }
+
+        nNumberOfRecords++;
+
+        if(nNumberOfRecords>1000)
         {
             break;
         }
