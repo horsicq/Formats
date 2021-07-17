@@ -3724,6 +3724,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             {
                 stResult.insert(FT_ELF64);
             }
+            // mb TODO another e_ident[4]
         }
     }
 
