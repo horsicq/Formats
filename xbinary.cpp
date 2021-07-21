@@ -3414,7 +3414,9 @@ qint64 XBinary::getEntryPointAddress()
 
 qint64 XBinary::getEntryPointAddress(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    return offsetToAddress(pMemoryMap,getEntryPointOffset(pMemoryMap));
+    qint64 nEntryPointOffset=getEntryPointOffset(pMemoryMap);
+
+    return offsetToAddress(pMemoryMap,nEntryPointOffset);
 }
 
 qint64 XBinary::getLowestAddress(XBinary::_MEMORY_MAP *pMemoryMap)
