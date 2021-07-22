@@ -730,6 +730,8 @@ public:
     static quint32 _getCRC32(QIODevice *pDevice);
     quint32 _getCRC32(qint64 nOffset=0,qint64 nSize=-1);
 
+    static double getEntropy(QString sFileName);
+    static double getEntropy(QIODevice *pDevice);
     double getEntropy(qint64 nOffset=0,qint64 nSize=-1);
 
     BYTE_COUNTS getByteCounts(qint64 nOffset=0,qint64 nSize=-1);

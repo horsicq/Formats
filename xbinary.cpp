@@ -4914,6 +4914,37 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
     return nResult;
 }
 
+double XBinary::getEntropy(QString sFileName)
+{
+    double dResult=0;
+
+    QFile file;
+
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        dResult=XBinary::getEntropy(&file);
+
+        file.close();
+    }
+
+    return dResult;
+}
+
+double XBinary::getEntropy(QIODevice *pDevice)
+{
+    double dResult=0;
+
+    XBinary binary(pDevice);
+
+    dResult=binary.getEntropy(0,-1);
+
+    pDevice->reset();
+
+    return dResult;
+}
+
 double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
 {
     double dResult=1.4426950408889634073599246810023;
