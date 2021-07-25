@@ -203,6 +203,7 @@ public:
     static QMap<quint64,QString> getDynamicTags();
     static QMap<quint64,QString> getDynamicTagsS();
 
+    // TODO more
     static QMap<quint64,QString> getRelTypes_x86();
     static QMap<quint64,QString> getRelTypesS_x86();
     static QMap<quint64,QString> getRelTypes_x64();
