@@ -766,5 +766,12 @@ struct IMAGE_BOUND_IMPORT_DESCRIPTOR
     quint16 NumberOfModuleForwarderRefs;
 // Array of zero or more IMAGE_BOUND_FORWARDER_REF follows
 };
+
+struct WIN_CERT_RECORD
+{
+    quint32 dwLength;
+    quint16 wRevision;
+    quint16 wCertificateType;
+};
 }
 #endif // XPE_DEF_H

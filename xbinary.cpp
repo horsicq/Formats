@@ -6970,7 +6970,7 @@ qint64 XBinary::readOpcodes(quint32 nType, char *pData, qint64 nStartAddress, qi
 
 bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSize, qint64 *pnAddress, qint64 *pnResult, QString sPrefix)
 {
-    bool bResult=false;;
+    bool bResult=false;
 
     if(*pnSize>0)
     {
@@ -6996,7 +6996,7 @@ bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSiz
 
 bool XBinary::_read_opcode_ansiString(XBinary::OPCODE *pOpcode, char **ppData, qint64 *pnSize, qint64 *pnAddress, qint64 *pnResult, QString sPrefix)
 {
-    bool bResult=false;;
+    bool bResult=false;
 
     if(*pnSize>0)
     {

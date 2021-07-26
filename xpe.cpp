@@ -7878,6 +7878,53 @@ QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemor
     return listResult;
 }
 
+XPE_DEF::WIN_CERT_RECORD XPE::read_WIN_CERT_RECORD(qint64 nOffset)
+{
+    XPE_DEF::WIN_CERT_RECORD result={};
+
+    result.dwLength=read_uint32(nOffset+offsetof(XPE_DEF::WIN_CERT_RECORD,dwLength));
+    result.wRevision=read_uint16(nOffset+offsetof(XPE_DEF::WIN_CERT_RECORD,wRevision));
+    result.wCertificateType=read_uint16(nOffset+offsetof(XPE_DEF::WIN_CERT_RECORD,wCertificateType));
+
+    return result;
+}
+
+QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
+{
+    QList<CERT> listResult;
+
+    while(nSize>0)
+    {
+        CERT record={};
+        record.nOffset=nOffset;
+        record.record=read_WIN_CERT_RECORD(nOffset);
+
+        if(record.record.dwLength>nSize)
+        {
+            break;
+        }
+
+        if(record.record.wRevision!=0x0200)
+        {
+            break;
+        }
+
+        listResult.append(record);
+
+        nOffset+=(record.record.dwLength+sizeof(XPE_DEF::WIN_CERT_RECORD));
+        nSize-=(record.record.dwLength+sizeof(XPE_DEF::WIN_CERT_RECORD));
+    }
+
+    return listResult;
+}
+
+QList<XPE::CERT> XPE::getCertList(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
+{
+    XPE pe(pDevice);
+
+    return pe.getCertList(nOffset,nSize);
+}
+
 qint64 XPE::calculateHeadersSize()
 {
     return _calculateHeadersSize(getSectionsTableOffset(),getFileHeader_NumberOfSections());

@@ -277,6 +277,12 @@ public:
         QString sName;
     };
 
+    struct CERT
+    {
+        qint64 nOffset;
+        XPE_DEF::WIN_CERT_RECORD record;
+    };
+
     enum TYPE
     {
         // mb TODO CEDLL
@@ -1068,6 +1074,10 @@ public:
     void setNetHeader_ManagedNativeHeader_Size(quint32 nValue);
 
     virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap,SYMBOL_TYPE symbolType=SYMBOL_TYPE_ALL);
+
+    XPE_DEF::WIN_CERT_RECORD read_WIN_CERT_RECORD(qint64 nOffset);
+    QList<CERT> getCertList(qint64 nOffset,qint64 nSize);
+    static QList<CERT> getCertList(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
