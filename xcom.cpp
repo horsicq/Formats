@@ -32,7 +32,7 @@ XCOM::~XCOM()
 
 bool XCOM::isValid()
 {
-    return true; // mb TODO
+    return true; // mb TODO mb TODO Check size
 }
 
 bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
