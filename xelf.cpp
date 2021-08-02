@@ -4065,7 +4065,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
             dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_INTERPRETER;
-            dataset.sName=QString("%1[%2]").arg("Interpreter").arg(sSectionName); // TODO mb translate
+            dataset.sName=QString("%1[%2]").arg("Interpreter",sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
@@ -4077,7 +4077,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
             dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_SYMBOLTABLE;
-            dataset.sName=QString("%1[%2]").arg("Symbol table").arg(sSectionName); // TODO mb translate
+            dataset.sName=QString("%1[%2]").arg("Symbol table",sSectionName); // TODO mb translate
 
             int nSectionIndex=getSectionIndexByName(".strtab");
 
@@ -4099,7 +4099,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
             dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_SYMBOLTABLE;
-            dataset.sName=QString("%1[%2]").arg("Symbol table").arg(sSectionName); // TODO mb translate
+            dataset.sName=QString("%1[%2]").arg("Symbol table",sSectionName); // TODO mb translate
 
             int nSectionIndex=getSectionIndexByName(".dynstr");
 
@@ -4121,7 +4121,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
             dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_STRINGTABLE;
-            dataset.sName=QString("%1[%2]").arg("String table").arg(sSectionName); // TODO mb translate
+            dataset.sName=QString("%1[%2]").arg("String table",sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
@@ -4133,7 +4133,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
             dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_RELA;
-            dataset.sName=QString("%1[%2]").arg("RELA").arg(sSectionName); // TODO mb translate
+            dataset.sName=QString("%1[%2]").arg("RELA",sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
@@ -4145,7 +4145,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
             dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_DYNAMICTAGS;
-            dataset.sName=QString("%1[%2]").arg("Dynamic tags").arg(sSectionName); // TODO mb translate
+            dataset.sName=QString("%1[%2]").arg("Dynamic tags",sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
@@ -4157,7 +4157,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
             dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_NOTES;
-            dataset.sName=QString("%1[%2]").arg("Notes").arg(sSectionName); // TODO mb translate
+            dataset.sName=QString("%1[%2]").arg("Notes",sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
@@ -4169,7 +4169,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset=pListSectionHeaders->at(i).sh_offset;
             dataset.nSize=pListSectionHeaders->at(i).sh_size;
             dataset.nType=DS_REL;
-            dataset.sName=QString("%1[%2]").arg("REL").arg(sSectionName); // TODO mb translate
+            dataset.sName=QString("%1[%2]").arg("REL",sSectionName); // TODO mb translate
 
             listResult.append(dataset);
         }
