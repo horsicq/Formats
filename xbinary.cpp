@@ -2348,7 +2348,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
         if(nCurrentRecords>=ssOptions.nLimit)
         {
-            _errorMessage(QString("%1: %2").arg(tr("Maximum")).arg(nCurrentRecords));
+            _errorMessage(QString("%1: %2").arg(tr("Maximum"),nCurrentRecords));
 
             break;
         }
@@ -2432,7 +2432,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
 
         if(nCurrentRecords>=nLimit)
         {
-            _errorMessage(QString("%1: %2").arg(tr("Maximum")).arg(nCurrentRecords));
+            _errorMessage(QString("%1: %2").arg(tr("Maximum"),nCurrentRecords));
 
             break;
         }
@@ -3627,7 +3627,7 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
     }
     else
     {
-        _errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file")).arg(sFileName));
+        _errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file"),sFileName));
     }
 
     return bResult;
@@ -5797,9 +5797,11 @@ bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE os)
 
 QString XBinary::get_uint32_version(quint32 nValue)
 {
-    return QString("%1.%2.%3")  .arg((nValue>>16)&0xFF)
-                                .arg((nValue>>8)&0xFF)
-                                .arg((nValue)&0xFF);
+    QString sResult=QString("%1.%2.%3").arg(    (nValue>>16)&0xFF,
+                                                (nValue>>8)&0xFF,
+                                                (nValue)&0xFF);
+
+    return sResult;
 }
 
 bool XBinary::isResizeEnable(QIODevice *pDevice)
@@ -6980,7 +6982,7 @@ bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSiz
         {
             pOpcode->nAddress=*pnAddress;
             pOpcode->nSize=uleb128.nByteSize;
-            pOpcode->sName=QString("%1(%2)").arg(sPrefix).arg((qint64)uleb128.nValue);
+            pOpcode->sName=QString("%1(%2)").arg(sPrefix,(qint64)uleb128.nValue);
 
             *pnSize-=pOpcode->nSize;
             *ppData+=pOpcode->nSize;
@@ -7006,7 +7008,7 @@ bool XBinary::_read_opcode_ansiString(XBinary::OPCODE *pOpcode, char **ppData, q
         {
             pOpcode->nAddress=*pnAddress;
             pOpcode->nSize=sString.size()+1;
-            pOpcode->sName=QString("%1(\"%2\")").arg(sPrefix).arg(sString);
+            pOpcode->sName=QString("%1(\"%2\")").arg(sPrefix,sString);
 
             *pnSize-=pOpcode->nSize;
             *ppData+=pOpcode->nSize;
