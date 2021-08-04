@@ -1257,7 +1257,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
         if(bIs64)
         {
-            sSegmentName=QString("%1(%2)['%3']").arg(tr("Segment")).arg(i).arg(listSegmentRecords.at(i).s.segment64.segname); // TODO Limit
+            sSegmentName=QString("%1(%2)['%3']").arg(tr("Segment"),QString::number(i),listSegmentRecords.at(i).s.segment64.segname); // TODO Limit
             nFileOffset=listSegmentRecords.at(i).s.segment64.fileoff;
             nVirtualAddress=listSegmentRecords.at(i).s.segment64.vmaddr;
             nFileSize=listSegmentRecords.at(i).s.segment64.filesize;
@@ -1265,7 +1265,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
         }
         else
         {
-            sSegmentName=QString("%1(%2)['%3']").arg(tr("Segment")).arg(i).arg(listSegmentRecords.at(i).s.segment32.segname); // TODO Limit
+            sSegmentName=QString("%1(%2)['%3']").arg(tr("Segment"),QString::number(i),listSegmentRecords.at(i).s.segment32.segname); // TODO Limit
             nFileOffset=listSegmentRecords.at(i).s.segment32.fileoff;
             nVirtualAddress=listSegmentRecords.at(i).s.segment32.vmaddr;
             nFileSize=listSegmentRecords.at(i).s.segment32.filesize;

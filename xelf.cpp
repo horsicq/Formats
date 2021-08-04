@@ -3704,7 +3704,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 
     for(int i=0; i<nNumberOfSegments; i++)
     {
-        QString sName=QString("%1(%2)").arg(tr("Segment")).arg(i);
+        QString sName=QString("%1(%2)").arg(tr("Segment"),i);
 
         quint64 nVirtualAlign=listSegments.at(i).p_align; // TODO Check!
         quint64 nFileAlign=0x1; // TODO Check!!!
