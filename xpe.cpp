@@ -1845,7 +1845,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
                 _sSectionName.resize(8);
             }
 
-            QString sSectionName=QString("%1(%2)['%3']").arg(tr("Section")).arg(i).arg(_sSectionName);
+            QString sSectionName=QString("%1(%2)['%3']").arg(tr("Section"),QString::number(i),_sSectionName);
 
             if(!isImage())
             {
@@ -4256,7 +4256,7 @@ bool XPE::addSection(QString sFileName,bool bIsImage, XPE_DEF::IMAGE_SECTION_HEA
     }
     else
     {
-        emit errorMessage(QString("%1: %2").arg(tr("Cannot open file")).arg(sFileName));
+        emit errorMessage(QString("%1: %2").arg(tr("Cannot open file"),sFileName));
     }
 
     return bResult;
@@ -7868,7 +7868,7 @@ QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemor
                 record.nModuleAddress=nModuleAddress;
                 record.nOrdinal=importHeaders.at(i).listPositions.at(j).nOrdinal;
                 record.sName=importHeaders.at(i).listPositions.at(j).sName;
-                record.sFunction=QString("%1#%2").arg(sName).arg(importHeaders.at(i).listPositions.at(j).sFunction);
+                record.sFunction=QString("%1#%2").arg(sName,importHeaders.at(i).listPositions.at(j).sFunction);
 
                 listResult.append(record);
             }
