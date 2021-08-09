@@ -7909,7 +7909,26 @@ QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
             break;
         }
 
+        qint64 _nOffset=nOffset+sizeof(XPE_DEF::WIN_CERT_RECORD);
+
+        CERT_TAG certTagConstruct=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
+
+        if(!certTagConstruct.bValid)
+        {
+            break;
+        }
+
+        _nOffset+=certTagConstruct.nHeaderSize;
+
+        CERT_TAG certTagOID=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_OID));
+
+        if(!certTagOID.bValid)
+        {
+            break;
+        }
+
         listResult.append(record);
+
 
         nOffset+=(record.record.dwLength+sizeof(XPE_DEF::WIN_CERT_RECORD));
         nSize-=(record.record.dwLength+sizeof(XPE_DEF::WIN_CERT_RECORD));
@@ -7923,6 +7942,26 @@ QList<XPE::CERT> XPE::getCertList(QIODevice *pDevice, qint64 nOffset, qint64 nSi
     XPE pe(pDevice);
 
     return pe.getCertList(nOffset,nSize);
+}
+
+
+XPE::CERT_TAG XPE::read_CertTag(qint64 nOffset, qint32 nTag)
+{
+    CERT_TAG result={};
+
+    result.nOffset=nOffset;
+    result.nTag=read_uint8(nOffset);
+    result.bValid=(result.nTag==nTag);
+
+    if(result.bValid)
+    {
+        PACKED_INT packedInt=read_acn1_integer(nOffset+1,4);
+        result.bValid=packedInt.bIsValid;
+        result.nSize=packedInt.nValue;
+        result.nHeaderSize=packedInt.nByteSize+1;
+    }
+
+    return result;
 }
 
 qint64 XPE::calculateHeadersSize()

@@ -4130,7 +4130,7 @@ QList<XMACH::FUNCTION_RECORD> XMACH::getFunctionRecords(qint64 nOffset, qint64 n
 
     for(qint64 nCurrentOffset=nOffset;nCurrentOffset<(nOffset+nSize);)
     {
-        ULEB128 uleb128=read_uleb128(nCurrentOffset,(nOffset+nSize)-nCurrentOffset);
+        PACKED_INT uleb128=read_uleb128(nCurrentOffset,(nOffset+nSize)-nCurrentOffset);
 
         if((uleb128.nValue==0)&&(nCurrentOffset!=nOffset))
         {
@@ -4591,7 +4591,7 @@ qint64 XMACH::readOpcodesInterface_export(char *pData, qint64 nAddress, qint64 n
         bool bFlags=false;
         bool bSymbolOffset=false;
 
-        ULEB128 uTerminalSize=_read_uleb128(pData,nSize);
+        PACKED_INT uTerminalSize=_read_uleb128(pData,nSize);
 
         if((qint64)uTerminalSize.nValue<nSize)
         {
@@ -4614,7 +4614,7 @@ qint64 XMACH::readOpcodesInterface_export(char *pData, qint64 nAddress, qint64 n
             bSuccess=_read_opcode_uleb128(&opcodeSymbolOffset,&pData,&nSize,&nAddress,&nResult,"Symbol offset");
         }
 
-        ULEB128 uChildCount=_read_uleb128(pData,nSize);
+        PACKED_INT uChildCount=_read_uleb128(pData,nSize);
 
         if(bSuccess)
         {

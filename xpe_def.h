@@ -156,6 +156,26 @@ const quint32 S_IMAGE_DEBUG_TYPE_CLSID                      =11;
 const quint32 S_IMAGE_DEBUG_TYPE_REPRO                      =16;
 const quint32 S_IMAGE_DEBUG_TYPE_EX_DLLCHARACTERISTICS      =20;
 
+const quint32 S_MBEDTLS_ASN1_BOOLEAN                        =0x01;
+const quint32 S_MBEDTLS_ASN1_INTEGER                        =0x02;
+const quint32 S_MBEDTLS_ASN1_BIT_STRING                     =0x03;
+const quint32 S_MBEDTLS_ASN1_OCTET_STRING                   =0x04;
+const quint32 S_MBEDTLS_ASN1_NULL                           =0x05;
+const quint32 S_MBEDTLS_ASN1_OID                            =0x06;
+const quint32 S_MBEDTLS_ASN1_UTF8_STRING                    =0x0C;
+const quint32 S_MBEDTLS_ASN1_SEQUENCE                       =0x10;
+const quint32 S_MBEDTLS_ASN1_SET                            =0x11;
+const quint32 S_MBEDTLS_ASN1_PRINTABLE_STRING               =0x13;
+const quint32 S_MBEDTLS_ASN1_T61_STRING                     =0x14;
+const quint32 S_MBEDTLS_ASN1_IA5_STRING                     =0x16;
+const quint32 S_MBEDTLS_ASN1_UTC_TIME                       =0x17;
+const quint32 S_MBEDTLS_ASN1_GENERALIZED_TIME               =0x18;
+const quint32 S_MBEDTLS_ASN1_UNIVERSAL_STRING               =0x1C;
+const quint32 S_MBEDTLS_ASN1_BMP_STRING                     =0x1E;
+const quint32 S_MBEDTLS_ASN1_PRIMITIVE                      =0x00;
+const quint32 S_MBEDTLS_ASN1_CONSTRUCTED                    =0x20;
+const quint32 S_MBEDTLS_ASN1_CONTEXT_SPECIFIC               =0x80;
+
 struct IMAGE_FILE_HEADER
 {
     quint16 Machine;

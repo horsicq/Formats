@@ -277,10 +277,20 @@ public:
         QString sName;
     };
 
+    struct CERT_TAG
+    {
+        bool bValid;
+        quint32 nTag;
+        qint64 nOffset;
+        qint32 nHeaderSize;
+        qint32 nSize;
+    };
+
     struct CERT
     {
         qint64 nOffset;
         XPE_DEF::WIN_CERT_RECORD record;
+        // TODO More
     };
 
     enum TYPE
@@ -1078,6 +1088,8 @@ public:
     XPE_DEF::WIN_CERT_RECORD read_WIN_CERT_RECORD(qint64 nOffset);
     QList<CERT> getCertList(qint64 nOffset,qint64 nSize);
     static QList<CERT> getCertList(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
+
+    CERT_TAG read_CertTag(qint64 nOffset,qint32 nTag);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

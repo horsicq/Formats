@@ -895,7 +895,7 @@ QString XBinary::_read_utf8String(qint64 nOffset, qint64 nMaxSize)
 {
     QString sResult;
 
-    ULEB128 ulebSize=read_uleb128(nOffset,nMaxSize);
+    PACKED_INT ulebSize=read_uleb128(nOffset,nMaxSize);
 
     sResult=read_utf8String(nOffset+ulebSize.nByteSize,ulebSize.nValue); // TODO mutf8
 
@@ -906,7 +906,7 @@ QString XBinary::_read_utf8String(char *pData, qint64 nMaxSize)
 {
     QString sResult;
 
-    ULEB128 ulebSize=_read_uleb128(pData,nMaxSize);
+    PACKED_INT ulebSize=_read_uleb128(pData,nMaxSize);
 
     qint32 nStringSize=qMin((qint64)ulebSize.nValue,nMaxSize-ulebSize.nByteSize);
 
@@ -5797,9 +5797,9 @@ bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE os)
 
 QString XBinary::get_uint32_version(quint32 nValue)
 {
-    QString sResult=QString("%1.%2.%3").arg(    (nValue>>16)&0xFF,
-                                                (nValue>>8)&0xFF,
-                                                (nValue)&0xFF);
+    QString sResult=QString("%1.%2.%3").arg(    QString::number((nValue>>16)&0xFF),
+                                                QString::number((nValue>>8)&0xFF),
+                                                QString::number((nValue)&0xFF));
 
     return sResult;
 }
@@ -5841,9 +5841,9 @@ bool XBinary::resize(QIODevice *pDevice, qint64 nSize)
     return bResult;
 }
 
-XBinary::ULEB128 XBinary::read_uleb128(qint64 nOffset,qint64 nSize)
+XBinary::PACKED_INT XBinary::read_uleb128(qint64 nOffset,qint64 nSize)
 {
-    ULEB128 result={};
+    PACKED_INT result={};
 
     quint32 nShift=0;
 
@@ -5864,9 +5864,9 @@ XBinary::ULEB128 XBinary::read_uleb128(qint64 nOffset,qint64 nSize)
     return result;
 }
 
-XBinary::ULEB128 XBinary::_read_uleb128(char *pData,qint64 nSize)
+XBinary::PACKED_INT XBinary::_read_uleb128(char *pData,qint64 nSize)
 {
-    ULEB128 result={};
+    PACKED_INT result={};
 
     quint32 nShift=0;
 
@@ -5881,6 +5881,41 @@ XBinary::ULEB128 XBinary::_read_uleb128(char *pData,qint64 nSize)
         {
             result.bIsValid=true;
             break;
+        }
+    }
+
+    return result;
+}
+
+XBinary::PACKED_INT XBinary::read_acn1_integer(qint64 nOffset, qint64 nSize)
+{
+    PACKED_INT result={};
+
+    if(nSize>0)
+    {
+        quint8 nByte=read_uint8(nOffset);
+
+        if((nByte&0x80)==0)
+        {
+            result.bIsValid=true;
+            result.nByteSize=1;
+            result.nValue=nByte;
+        }
+        else
+        {
+            quint8 _nSize=(nByte&0x7F);
+
+            if((_nSize<=4)&&(_nSize<=nSize))
+            {
+                result.bIsValid=true;
+                result.nByteSize=1+_nSize;
+
+                for(int i=0;i<_nSize;i++)
+                {
+                    result.nValue<<=8;
+                    result.nValue|=read_uint8(nOffset+1+i);
+                }
+            }
         }
     }
 
@@ -6976,7 +7011,7 @@ bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSiz
 
     if(*pnSize>0)
     {
-        ULEB128 uleb128=_read_uleb128(*ppData,*pnSize);
+        PACKED_INT uleb128=_read_uleb128(*ppData,*pnSize);
 
         if(uleb128.bIsValid)
         {

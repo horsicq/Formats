@@ -814,15 +814,17 @@ public:
     static bool isResizeEnable(QIODevice *pDevice);
     static bool resize(QIODevice *pDevice,qint64 nSize);
 
-    struct ULEB128
+    struct PACKED_INT
     {
         bool bIsValid;
         quint64 nValue;
         quint32 nByteSize;
     };
 
-    ULEB128 read_uleb128(qint64 nOffset,qint64 nSize);
-    ULEB128 _read_uleb128(char *pData,qint64 nSize);
+    PACKED_INT read_uleb128(qint64 nOffset,qint64 nSize);
+    PACKED_INT _read_uleb128(char *pData,qint64 nSize);
+
+    PACKED_INT read_acn1_integer(qint64 nOffset,qint64 nSize);
 
     struct PACKED
     {
