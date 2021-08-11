@@ -7910,22 +7910,50 @@ QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
         }
 
         qint64 _nOffset=nOffset+sizeof(XPE_DEF::WIN_CERT_RECORD);
+        qint64 _nSize=nSize-sizeof(XPE_DEF::WIN_CERT_RECORD);
 
-        CERT_TAG certTagConstruct=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
-
-        if(!certTagConstruct.bValid)
+        while(_nSize>0)
         {
-            break;
+            CERT_TAG certTag=read_CertTag(_nOffset,0);
+
+            if(!certTag.bValid)
+            {
+                break;
+            }
+
+            if(certTag.nSize>_nSize)
+            {
+                break;
+            }
+
+//            qDebug("Tag: %x",certTag.nTag);
+//            qDebug("Size: %x",certTag.nSize);
+
+            _nOffset+=certTag.nHeaderSize;
+            _nSize-=certTag.nHeaderSize;
+
+            if((certTag.nTag&(0xF)))
+            {
+                _nOffset+=certTag.nSize;
+                _nSize-=certTag.nSize;
+            }
         }
 
-        _nOffset+=certTagConstruct.nHeaderSize;
+//        CERT_TAG certTagConstruct=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
 
-        CERT_TAG certTagOID=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_OID));
+//        if(!certTagConstruct.bValid)
+//        {
+//            break;
+//        }
 
-        if(!certTagOID.bValid)
-        {
-            break;
-        }
+//        _nOffset+=certTagConstruct.nHeaderSize;
+
+//        CERT_TAG certTagOID=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_OID));
+
+//        if(!certTagOID.bValid)
+//        {
+//            break;
+//        }
 
         listResult.append(record);
 
@@ -7951,7 +7979,15 @@ XPE::CERT_TAG XPE::read_CertTag(qint64 nOffset, qint32 nTag)
 
     result.nOffset=nOffset;
     result.nTag=read_uint8(nOffset);
-    result.bValid=(result.nTag==nTag);
+
+    if(nTag)
+    {
+        result.bValid=(result.nTag==nTag);
+    }
+    else
+    {
+        result.bValid=result.nTag;
+    }
 
     if(result.bValid)
     {

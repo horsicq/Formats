@@ -2348,7 +2348,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
         if(nCurrentRecords>=ssOptions.nLimit)
         {
-            _errorMessage(QString("%1: %2").arg(tr("Maximum"),nCurrentRecords));
+            _errorMessage(QString("%1: %2").arg(tr("Maximum"),QString::number(nCurrentRecords)));
 
             break;
         }
