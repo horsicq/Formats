@@ -7912,31 +7912,63 @@ QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
         qint64 _nOffset=nOffset+sizeof(XPE_DEF::WIN_CERT_RECORD);
         qint64 _nSize=nSize-sizeof(XPE_DEF::WIN_CERT_RECORD);
 
-        while(_nSize>0)
         {
-            CERT_TAG certTag=read_CertTag(_nOffset,0);
+            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
 
-            if(!certTag.bValid)
-            {
-                break;
-            }
+            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
 
-            if(certTag.nSize>_nSize)
-            {
-                break;
-            }
+            _nOffset+=certTag.nHeaderSize;
+            _nSize-=certTag.nHeaderSize;
+        }
 
-//            qDebug("Tag: %x",certTag.nTag);
-//            qDebug("Size: %x",certTag.nSize);
+        {
+            CERT_TAG certTag=read_CertTag(_nOffset,XPE_DEF::S_MBEDTLS_ASN1_OID);
+
+            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
 
             _nOffset+=certTag.nHeaderSize;
             _nSize-=certTag.nHeaderSize;
 
-            if((certTag.nTag&(0xF)))
+            QString sOID=read_OIDString(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
+
+            if(sOID!="1.2.840.113549.1.7.2") // "PKCS #7 Signed Data"
             {
-                _nOffset+=certTag.nSize;
-                _nSize-=certTag.nSize;
+                break;
             }
+
+            _nOffset+=certTag.nSize;
+            _nSize-=certTag.nSize;
+        }
+
+        {
+            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_CONTEXT_SPECIFIC));
+
+            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+            _nOffset+=certTag.nHeaderSize;
+            _nSize-=certTag.nHeaderSize;
+        }
+
+        {
+            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
+
+            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+            _nOffset+=certTag.nHeaderSize;
+            _nSize-=certTag.nHeaderSize;
+        }
+
+        while(_nSize>0)
+        {
+            CERT_TAG certTag=read_CertTag(_nOffset,0);
+
+            if((!certTag.bValid)||(certTag.nSize>_nSize))   break;
+
+            _nOffset+=certTag.nHeaderSize;
+            _nSize-=certTag.nHeaderSize;
+
+            _nOffset+=certTag.nSize;
+            _nSize-=certTag.nSize;
         }
 
 //        CERT_TAG certTagConstruct=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
@@ -7998,6 +8030,42 @@ XPE::CERT_TAG XPE::read_CertTag(qint64 nOffset, qint32 nTag)
     }
 
     return result;
+}
+
+QString XPE::read_OIDString(qint64 nOffset, qint64 nSize)
+{
+    QString sResult;
+
+    if(nSize>0)
+    {
+        quint8 nStart=read_uint8(nOffset);
+
+        sResult+=QString("%1.%2").arg(QString::number(nStart/40),QString::number(nStart%40));
+
+        nOffset++;
+        nSize--;
+
+        quint64 nValue=0;
+
+        while(nSize>0)
+        {
+            quint8 nByte=read_uint8(nOffset);
+
+            nValue<<=7;
+            nValue+=(nByte&0x7F);
+
+            if(!(nByte&0x80))
+            {
+                sResult+=QString(".%1").arg(nValue);
+                nValue=0;
+            }
+
+            nOffset++;
+            nSize--;
+        }
+    }
+
+    return sResult;
 }
 
 qint64 XPE::calculateHeadersSize()

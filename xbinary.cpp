@@ -2432,7 +2432,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
 
         if(nCurrentRecords>=nLimit)
         {
-            _errorMessage(QString("%1: %2").arg(tr("Maximum"),nCurrentRecords));
+            _errorMessage(QString("%1: %2").arg(tr("Maximum"),QString::number(nCurrentRecords)));
 
             break;
         }
@@ -7017,7 +7017,7 @@ bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSiz
         {
             pOpcode->nAddress=*pnAddress;
             pOpcode->nSize=uleb128.nByteSize;
-            pOpcode->sName=QString("%1(%2)").arg(sPrefix,(qint64)uleb128.nValue);
+            pOpcode->sName=QString("%1(%2)").arg(sPrefix,QString::number((qint64)uleb128.nValue));
 
             *pnSize-=pOpcode->nSize;
             *ppData+=pOpcode->nSize;

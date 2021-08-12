@@ -290,6 +290,7 @@ public:
     {
         qint64 nOffset;
         XPE_DEF::WIN_CERT_RECORD record;
+        bool bIsValid;
         // TODO More
     };
 
@@ -1090,6 +1091,7 @@ public:
     static QList<CERT> getCertList(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
 
     CERT_TAG read_CertTag(qint64 nOffset,qint32 nTag);
+    QString read_OIDString(qint64 nOffset,qint64 nSize); // TODO move to XBinary;
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
