@@ -7920,7 +7920,6 @@ QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
             _nOffset+=certTag.nHeaderSize;
             _nSize-=certTag.nHeaderSize;
         }
-
         {
             CERT_TAG certTag=read_CertTag(_nOffset,XPE_DEF::S_MBEDTLS_ASN1_OID);
 
@@ -7929,7 +7928,7 @@ QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
             _nOffset+=certTag.nHeaderSize;
             _nSize-=certTag.nHeaderSize;
 
-            QString sOID=read_OIDString(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
+            QString sOID=read_ASN_OIDString(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
 
             if(sOID!="1.2.840.113549.1.7.2") // "PKCS #7 Signed Data"
             {
@@ -7939,7 +7938,6 @@ QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
             _nOffset+=certTag.nSize;
             _nSize-=certTag.nSize;
         }
-
         {
             CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_CONTEXT_SPECIFIC));
 
@@ -7948,7 +7946,6 @@ QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
             _nOffset+=certTag.nHeaderSize;
             _nSize-=certTag.nHeaderSize;
         }
-
         {
             CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
 
@@ -7956,6 +7953,19 @@ QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
 
             _nOffset+=certTag.nHeaderSize;
             _nSize-=certTag.nHeaderSize;
+        }
+        {
+            CERT_TAG certTag=read_CertTag(_nOffset,XPE_DEF::S_MBEDTLS_ASN1_INTEGER);
+
+            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+            _nOffset+=certTag.nHeaderSize;
+            _nSize-=certTag.nHeaderSize;
+
+            // TODO read Integer!
+
+            _nOffset+=certTag.nSize;
+            _nSize-=certTag.nSize;
         }
 
         while(_nSize>0)
@@ -8032,7 +8042,7 @@ XPE::CERT_TAG XPE::read_CertTag(qint64 nOffset, qint32 nTag)
     return result;
 }
 
-QString XPE::read_OIDString(qint64 nOffset, qint64 nSize)
+QString XPE::read_ASN_OIDString(qint64 nOffset, qint64 nSize)
 {
     QString sResult;
 
