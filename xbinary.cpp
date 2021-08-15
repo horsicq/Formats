@@ -3594,7 +3594,7 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
         {
             qint64 nTempSize=qMin(nDataSize,(qint64)0x1000); // TODO const
 
-            if(safeWriteData(g_pDevice,nSourceOffset,pBuffer,nTempSize)!=nTempSize)
+            if(safeReadData(g_pDevice,nSourceOffset,pBuffer,nTempSize)!=nTempSize)
             {
                 _errorMessage(QObject::tr("Read error"));
                 bResult=false;
