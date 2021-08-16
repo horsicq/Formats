@@ -1092,6 +1092,7 @@ public:
 
     CERT_TAG read_CertTag(qint64 nOffset,qint32 nTag);
     QString read_ASN_OIDString(qint64 nOffset,qint64 nSize); // TODO move to XBinary;
+    qint64 read_ASN_Integer(qint64 nOffset,qint64 nSize);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

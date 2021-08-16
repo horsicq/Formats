@@ -7962,7 +7962,43 @@ QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
             _nOffset+=certTag.nHeaderSize;
             _nSize-=certTag.nHeaderSize;
 
-            // TODO read Integer!
+            qint64 nVersion=read_ASN_Integer(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
+
+            if(nVersion!=1) // Version=1
+            {
+                break;
+            }
+
+            _nOffset+=certTag.nSize;
+            _nSize-=certTag.nSize;
+        }
+        {
+            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SET));
+
+            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+            _nOffset+=certTag.nHeaderSize;
+            _nSize-=certTag.nHeaderSize;
+        }
+        {
+            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
+
+            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+            _nOffset+=certTag.nHeaderSize;
+            _nSize-=certTag.nHeaderSize;
+        }
+        {
+            CERT_TAG certTag=read_CertTag(_nOffset,XPE_DEF::S_MBEDTLS_ASN1_OID);
+
+            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+            _nOffset+=certTag.nHeaderSize;
+            _nSize-=certTag.nHeaderSize;
+
+            QString sOID=read_ASN_OIDString(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
+
+            // TODO SHA1
 
             _nOffset+=certTag.nSize;
             _nSize-=certTag.nSize;
@@ -8076,6 +8112,20 @@ QString XPE::read_ASN_OIDString(qint64 nOffset, qint64 nSize)
     }
 
     return sResult;
+}
+
+qint64 XPE::read_ASN_Integer(qint64 nOffset, qint64 nSize)
+{
+    qint64 nResult=0;
+
+    PACKED_INT packedInt=read_acn1_integer(nOffset,nSize);
+
+    if(packedInt.bIsValid)
+    {
+        nResult=packedInt.nValue;
+    }
+
+    return nResult;
 }
 
 qint64 XPE::calculateHeadersSize()
