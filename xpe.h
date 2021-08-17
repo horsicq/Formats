@@ -286,12 +286,19 @@ public:
         qint32 nSize;
     };
 
+    struct CERT_RECORD
+    {
+        CERT_TAG certTag;
+        QVariant varValue;
+        QList<CERT_RECORD> listRecords;
+    };
+
     struct CERT
     {
         qint64 nOffset;
         XPE_DEF::WIN_CERT_RECORD record;
         bool bIsValid;
-        // TODO More
+        CERT_RECORD certRecord;
     };
 
     enum TYPE
@@ -1093,6 +1100,8 @@ public:
     CERT_TAG read_CertTag(qint64 nOffset,qint32 nTag);
     QString read_ASN_OIDString(qint64 nOffset,qint64 nSize); // TODO move to XBinary;
     qint64 read_ASN_Integer(qint64 nOffset,qint64 nSize);
+
+    void getCertRecord(CERT *pCert,qint64 nOffset,qint64 nSize,CERT_RECORD *pCertRecord);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

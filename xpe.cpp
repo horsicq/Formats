@@ -7912,110 +7912,273 @@ QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
         qint64 _nOffset=nOffset+sizeof(XPE_DEF::WIN_CERT_RECORD);
         qint64 _nSize=nSize-sizeof(XPE_DEF::WIN_CERT_RECORD);
 
-        {
-            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
+        record.bIsValid=true;
 
-            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+        getCertRecord(&record,_nOffset,_nSize,&(record.certRecord));
 
-            _nOffset+=certTag.nHeaderSize;
-            _nSize-=certTag.nHeaderSize;
-        }
-        {
-            CERT_TAG certTag=read_CertTag(_nOffset,XPE_DEF::S_MBEDTLS_ASN1_OID);
+        // TODO Check function
 
-            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+//        while(_nSize>0)
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,0);
 
-            _nOffset+=certTag.nHeaderSize;
-            _nSize-=certTag.nHeaderSize;
+//            if((!certTag.bValid)||(certTag.nSize>_nSize))
+//            {
+//                break;
+//            }
 
-            QString sOID=read_ASN_OIDString(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
 
-            if(sOID!="1.2.840.113549.1.7.2") // "PKCS #7 Signed Data"
-            {
-                break;
-            }
+//        #ifdef QT_DEBUG
+//            qDebug("TAG: %x",certTag.nTag);
+//            qDebug("Size: %d",certTag.nSize);
+//            qDebug("_Size: %d",_nSize);
+//        #endif
 
-            _nOffset+=certTag.nSize;
-            _nSize-=certTag.nSize;
-        }
-        {
-            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_CONTEXT_SPECIFIC));
+//            if(certTag.nTag==XPE_DEF::S_MBEDTLS_ASN1_OID)
+//            {
+//                QString sOID=read_ASN_OIDString(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
+//            #ifdef QT_DEBUG
+//                qDebug("OID %s",sOID.toLatin1().data());
+//            #endif
+//                _nOffset+=certTag.nSize;
+//                _nSize-=certTag.nSize;
+//            }
+//            else if(certTag.nTag==XPE_DEF::S_MBEDTLS_ASN1_INTEGER)
+//            {
+//                qint64 nVersion=read_ASN_Integer(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
+//            #ifdef QT_DEBUG
+//                qDebug("INTEGER %d",nVersion);
+//            #endif
+//                _nOffset+=certTag.nSize;
+//                _nSize-=certTag.nSize;
+//            }
+//            else if(certTag.nTag==XPE_DEF::S_MBEDTLS_ASN1_BIT_STRING)
+//            {
+//            #ifdef QT_DEBUG
+//                qDebug("BIT_STRING TODO");
+//            #endif
+//                _nOffset+=certTag.nSize;
+//                _nSize-=certTag.nSize;
+//            }
+//            else if(certTag.nTag==XPE_DEF::S_MBEDTLS_ASN1_OCTET_STRING)
+//            {
+//            #ifdef QT_DEBUG
+//                qDebug("OCTET_STRING TODO");
+//            #endif
+//                _nOffset+=certTag.nSize;
+//                _nSize-=certTag.nSize;
+//            }
+//            else if(certTag.nTag==XPE_DEF::S_MBEDTLS_ASN1_CONTEXT_SPECIFIC)
+//            {
+//            #ifdef QT_DEBUG
+//                qDebug("CONTEXT_SPECIFIC TODO");
+//            #endif
+//                _nOffset+=certTag.nSize;
+//                _nSize-=certTag.nSize;
+//            }
+//            else if(certTag.nTag==XPE_DEF::S_MBEDTLS_ASN1_BOOLEAN)
+//            {
+//            #ifdef QT_DEBUG
+//                qDebug("BOOLEAN TODO");
+//            #endif
+//                _nOffset+=certTag.nSize;
+//                _nSize-=certTag.nSize;
+//            }
+//            else if(certTag.nTag==(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED+XPE_DEF::S_MBEDTLS_ASN1_PRINTABLE_STRING))
+//            {
+//            #ifdef QT_DEBUG
+//                qDebug("PRINTABLE_STRING TODO");
+//            #endif
+//                _nOffset+=certTag.nSize;
+//                _nSize-=certTag.nSize;
+//            }
+//            else if(certTag.nTag==XPE_DEF::S_MBEDTLS_ASN1_PRINTABLE_STRING)
+//            {
+//            #ifdef QT_DEBUG
+//                qDebug("PRINTABLE_STRING TODO");
+//            #endif
+//                _nOffset+=certTag.nSize;
+//                _nSize-=certTag.nSize;
+//            }
+//            else if(certTag.nTag==XPE_DEF::S_MBEDTLS_ASN1_UTC_TIME)
+//            {
+//            #ifdef QT_DEBUG
+//                qDebug("UTC_TIME TODO");
+//            #endif
+//                _nOffset+=certTag.nSize;
+//                _nSize-=certTag.nSize;
+//            }
+//            else if(certTag.nTag==(XPE_DEF::S_MBEDTLS_ASN1_CONTEXT_SPECIFIC+XPE_DEF::S_MBEDTLS_ASN1_BOOLEAN))
+//            {
+//            #ifdef QT_DEBUG
+//                qDebug("BOOLEAN TODO");
+//            #endif
+//                _nOffset+=certTag.nSize;
+//                _nSize-=certTag.nSize;
+//            }
+//        }
 
-            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
 
-            _nOffset+=certTag.nHeaderSize;
-            _nSize-=certTag.nHeaderSize;
-        }
-        {
-            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
 
-            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+//        }
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,XPE_DEF::S_MBEDTLS_ASN1_OID);
 
-            _nOffset+=certTag.nHeaderSize;
-            _nSize-=certTag.nHeaderSize;
-        }
-        {
-            CERT_TAG certTag=read_CertTag(_nOffset,XPE_DEF::S_MBEDTLS_ASN1_INTEGER);
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
 
-            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
 
-            _nOffset+=certTag.nHeaderSize;
-            _nSize-=certTag.nHeaderSize;
+//            QString sOID=read_ASN_OIDString(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
 
-            qint64 nVersion=read_ASN_Integer(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
+//            if(sOID!="1.2.840.113549.1.7.2") // "PKCS #7 Signed Data"
+//            {
+//                break;
+//            }
 
-            if(nVersion!=1) // Version=1
-            {
-                break;
-            }
+//            _nOffset+=certTag.nSize;
+//            _nSize-=certTag.nSize;
+//        }
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_CONTEXT_SPECIFIC));
 
-            _nOffset+=certTag.nSize;
-            _nSize-=certTag.nSize;
-        }
-        {
-            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SET));
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
 
-            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+//        }
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
 
-            _nOffset+=certTag.nHeaderSize;
-            _nSize-=certTag.nHeaderSize;
-        }
-        {
-            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
 
-            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+//        }
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,XPE_DEF::S_MBEDTLS_ASN1_INTEGER);
 
-            _nOffset+=certTag.nHeaderSize;
-            _nSize-=certTag.nHeaderSize;
-        }
-        {
-            CERT_TAG certTag=read_CertTag(_nOffset,XPE_DEF::S_MBEDTLS_ASN1_OID);
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
 
-            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
 
-            _nOffset+=certTag.nHeaderSize;
-            _nSize-=certTag.nHeaderSize;
+//            qint64 nVersion=read_ASN_Integer(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
 
-            QString sOID=read_ASN_OIDString(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
+//            if(nVersion!=1) // Version=1
+//            {
+//                break;
+//            }
 
-            // TODO SHA1
+//            _nOffset+=certTag.nSize;
+//            _nSize-=certTag.nSize;
+//        }
 
-            _nOffset+=certTag.nSize;
-            _nSize-=certTag.nSize;
-        }
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SET));
 
-        while(_nSize>0)
-        {
-            CERT_TAG certTag=read_CertTag(_nOffset,0);
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
 
-            if((!certTag.bValid)||(certTag.nSize>_nSize))   break;
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+//        }
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
 
-            _nOffset+=certTag.nHeaderSize;
-            _nSize-=certTag.nHeaderSize;
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
 
-            _nOffset+=certTag.nSize;
-            _nSize-=certTag.nSize;
-        }
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+//        }
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,XPE_DEF::S_MBEDTLS_ASN1_OID);
+
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+
+//            QString sOID=read_ASN_OIDString(certTag.nOffset+certTag.nHeaderSize,certTag.nSize);
+
+//            // TODO SHA1
+
+//            _nOffset+=certTag.nSize;
+//            _nSize-=certTag.nSize;
+//        }
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,XPE_DEF::S_MBEDTLS_ASN1_NULL);
+
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+//        }
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
+
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+//        }
+
+//        while(_nSize>0)
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,0);
+
+//            if((!certTag.bValid)||(certTag.nSize>_nSize))   break;
+
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+
+//            _nOffset+=certTag.nSize;
+//            _nSize-=certTag.nSize;
+//        }
+
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_CONTEXT_SPECIFIC));
+
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+//        }
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
+
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+//        }
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
+
+//            if((!certTag.bValid)||(certTag.nSize>_nSize)) break;
+
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+//        }
+
+//        while(_nSize>0)
+//        {
+//            CERT_TAG certTag=read_CertTag(_nOffset,0);
+
+//            if((!certTag.bValid)||(certTag.nSize>_nSize))   break;
+
+//            _nOffset+=certTag.nHeaderSize;
+//            _nSize-=certTag.nHeaderSize;
+
+//            _nOffset+=certTag.nSize;
+//            _nSize-=certTag.nSize;
+//        }
 
 //        CERT_TAG certTagConstruct=read_CertTag(_nOffset,(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED)|(XPE_DEF::S_MBEDTLS_ASN1_SEQUENCE));
 
@@ -8064,7 +8227,7 @@ XPE::CERT_TAG XPE::read_CertTag(qint64 nOffset, qint32 nTag)
     }
     else
     {
-        result.bValid=result.nTag;
+        result.bValid=true;
     }
 
     if(result.bValid)
@@ -8126,6 +8289,41 @@ qint64 XPE::read_ASN_Integer(qint64 nOffset, qint64 nSize)
     }
 
     return nResult;
+}
+
+void XPE::getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize, CERT_RECORD *pCertRecord)
+{
+    while((nSize>0)&&(pCert->bIsValid))
+    {
+        CERT_RECORD certRecord={};
+
+        certRecord.certTag=read_CertTag(nOffset,0);
+
+        if((!certRecord.certTag.bValid)||(certRecord.certTag.nSize>nSize))
+        {
+            pCert->bIsValid=false;
+            break;
+        }
+
+        nOffset+=certRecord.certTag.nHeaderSize;
+        nSize-=certRecord.certTag.nHeaderSize;
+
+        #ifdef QT_DEBUG
+            qDebug("TAG: %x",certRecord.certTag.nTag);
+            qDebug("Offset: %x",certRecord.certTag.nOffset);
+            qDebug("Size: %d",certRecord.certTag.nSize);
+        #endif
+
+        if((certRecord.certTag.nTag)&(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED))
+        {
+            getCertRecord(pCert,nOffset,certRecord.certTag.nSize,&certRecord);
+        }
+
+        nOffset+=certRecord.certTag.nSize;
+        nSize-=certRecord.certTag.nSize;
+
+        pCertRecord->listRecords.append(certRecord);
+    }
 }
 
 qint64 XPE::calculateHeadersSize()
