@@ -8379,6 +8379,15 @@ void XPE::getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize, CERT_RECORD *
     }
 }
 
+QString XPE::certTagToString(quint32 nTag)
+{
+    QString sResult;
+
+    // TODO
+
+    return sResult;
+}
+
 qint64 XPE::calculateHeadersSize()
 {
     return _calculateHeadersSize(getSectionsTableOffset(),getFileHeader_NumberOfSections());
