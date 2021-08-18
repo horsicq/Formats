@@ -4234,6 +4234,31 @@ bool XBinary::checkString_double(QString sValue)
     return bResult;
 }
 
+QString XBinary::boolToString(bool bValue)
+{
+    QString sResult;
+
+    if(bValue)
+    {
+        sResult="true";
+    }
+    else
+    {
+        sResult="false";
+    }
+
+    return sResult;
+}
+
+QString XBinary::getSpaces(qint32 nNumberOfSpaces)
+{
+    QString sResult;
+
+    sResult=sResult.rightJustified(nNumberOfSpaces,QChar(' '));
+
+    return sResult;
+}
+
 QString XBinary::getUnpackedFileName(QIODevice *pDevice)
 {
     QString sResult="unpacked";

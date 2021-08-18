@@ -7889,6 +7889,13 @@ XPE_DEF::WIN_CERT_RECORD XPE::read_WIN_CERT_RECORD(qint64 nOffset)
     return result;
 }
 
+QList<XPE::CERT> XPE::getCertList()
+{
+    XPE_DEF::IMAGE_DATA_DIRECTORY dd=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY);
+
+    return getCertList(dd.VirtualAddress,dd.Size);
+}
+
 QList<XPE::CERT> XPE::getCertList(qint64 nOffset, qint64 nSize)
 {
     QList<CERT> listResult;
@@ -8213,6 +8220,54 @@ QList<XPE::CERT> XPE::getCertList(QIODevice *pDevice, qint64 nOffset, qint64 nSi
     return pe.getCertList(nOffset,nSize);
 }
 
+QString XPE::certListToString(QList<CERT> *pCertList)
+{
+    QString sResult;
+
+    int nNumberOfCerts=pCertList->count();
+
+    for(int i=0;i<nNumberOfCerts;i++)
+    {
+        sResult+=QString("Valid: %1\n").arg(XBinary::boolToString(pCertList->at(i).bIsValid));
+        sResult+=QString("Offset: %1\n").arg(XBinary::valueToHex(MODE_UNKNOWN,pCertList->at(i).nOffset));
+        sResult+=QString("dwLength: %1\n").arg(XBinary::valueToHex(MODE_UNKNOWN,pCertList->at(i).record.dwLength));
+        sResult+=QString("wRevision: %1\n").arg(XBinary::valueToHex(MODE_UNKNOWN,pCertList->at(i).record.wRevision));
+        sResult+=QString("wCertificateType: %1\n").arg(XBinary::valueToHex(MODE_UNKNOWN,pCertList->at(i).record.wCertificateType));
+
+        int nNumberOfRecords=pCertList->at(i).certRecord.listRecords.count();
+
+        for(int j=0;j<nNumberOfRecords;j++)
+        {
+            sResult+=certRecordToString(pCertList->at(i).certRecord.listRecords.at(j),0);
+        }
+    }
+
+    return sResult;
+}
+
+QString XPE::certRecordToString(CERT_RECORD certRecord, qint32 nLevel)
+{
+    QString sResult;
+
+    sResult+=getSpaces(2*nLevel)+QString("Valid: %1\n").arg(XBinary::boolToString(certRecord.certTag.bIsValid));
+    sResult+=getSpaces(2*nLevel)+QString("Tag: %1\n").arg(XBinary::valueToHex(MODE_UNKNOWN,certRecord.certTag.nTag));
+    sResult+=getSpaces(2*nLevel)+QString("Offset: %1\n").arg(XBinary::valueToHex(MODE_UNKNOWN,certRecord.certTag.nOffset));
+    sResult+=getSpaces(2*nLevel)+QString("Size: %1\n").arg(XBinary::valueToHex(MODE_UNKNOWN,certRecord.certTag.nSize));
+
+    if(certRecord.varValue.toString().size())
+    {
+        sResult+=getSpaces(2*nLevel)+QString("Value: %1\n").arg(certRecord.varValue.toString());
+    }
+
+    int nNumberOfRecords=certRecord.listRecords.count();
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        sResult+=certRecordToString(certRecord.listRecords.at(i),nLevel+1);
+    }
+
+    return sResult;
+}
 
 XPE::CERT_TAG XPE::read_CertTag(qint64 nOffset, qint32 nTag)
 {
@@ -8223,17 +8278,17 @@ XPE::CERT_TAG XPE::read_CertTag(qint64 nOffset, qint32 nTag)
 
     if(nTag)
     {
-        result.bValid=(result.nTag==nTag);
+        result.bIsValid=(result.nTag==nTag);
     }
     else
     {
-        result.bValid=true;
+        result.bIsValid=true;
     }
 
-    if(result.bValid)
+    if(result.bIsValid)
     {
         PACKED_INT packedInt=read_acn1_integer(nOffset+1,4);
-        result.bValid=packedInt.bIsValid;
+        result.bIsValid=packedInt.bIsValid;
         result.nSize=packedInt.nValue;
         result.nHeaderSize=packedInt.nByteSize+1;
     }
@@ -8299,7 +8354,7 @@ void XPE::getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize, CERT_RECORD *
 
         certRecord.certTag=read_CertTag(nOffset,0);
 
-        if((!certRecord.certTag.bValid)||(certRecord.certTag.nSize>nSize))
+        if((!certRecord.certTag.bIsValid)||(certRecord.certTag.nSize>nSize))
         {
             pCert->bIsValid=false;
             break;
@@ -8308,15 +8363,13 @@ void XPE::getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize, CERT_RECORD *
         nOffset+=certRecord.certTag.nHeaderSize;
         nSize-=certRecord.certTag.nHeaderSize;
 
-        #ifdef QT_DEBUG
-            qDebug("TAG: %x",certRecord.certTag.nTag);
-            qDebug("Offset: %x",certRecord.certTag.nOffset);
-            qDebug("Size: %d",certRecord.certTag.nSize);
-        #endif
-
         if((certRecord.certTag.nTag)&(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED))
         {
             getCertRecord(pCert,nOffset,certRecord.certTag.nSize,&certRecord);
+        }
+        else
+        {
+            certRecord.varValue=read_array(nOffset,certRecord.certTag.nSize).toHex().data();
         }
 
         nOffset+=certRecord.certTag.nSize;

@@ -690,6 +690,9 @@ public:
     static bool checkString_float(QString sValue);
     static bool checkString_double(QString sValue);
 
+    static QString boolToString(bool bValue);
+    static QString getSpaces(qint32 nNumberOfSpaces);
+
     static QString getUnpackedFileName(QIODevice *pDevice);
     static QString getUnpackedFileName(QString sFileName);
     static QString getDumpFileName(QIODevice *pDevice);

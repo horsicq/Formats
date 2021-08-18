@@ -279,7 +279,7 @@ public:
 
     struct CERT_TAG
     {
-        bool bValid;
+        bool bIsValid;
         quint32 nTag;
         qint64 nOffset;
         qint32 nHeaderSize;
@@ -1094,8 +1094,12 @@ public:
     virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap,SYMBOL_TYPE symbolType=SYMBOL_TYPE_ALL);
 
     XPE_DEF::WIN_CERT_RECORD read_WIN_CERT_RECORD(qint64 nOffset);
+    QList<CERT> getCertList();
     QList<CERT> getCertList(qint64 nOffset,qint64 nSize);
     static QList<CERT> getCertList(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
+
+    static QString certListToString(QList<CERT> *pCertList);
+    static QString certRecordToString(CERT_RECORD certRecord,qint32 nLevel);
 
     CERT_TAG read_CertTag(qint64 nOffset,qint32 nTag);
     QString read_ASN_OIDString(qint64 nOffset,qint64 nSize); // TODO move to XBinary;
