@@ -8363,13 +8363,20 @@ void XPE::getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize, CERT_RECORD *
         nOffset+=certRecord.certTag.nHeaderSize;
         nSize-=certRecord.certTag.nHeaderSize;
 
-        if((certRecord.certTag.nTag)&(XPE_DEF::S_MBEDTLS_ASN1_CONSTRUCTED))
+        if((certRecord.certTag.nTag)&(XPE_DEF::S_ASN1_CONSTRUCTED))
         {
             getCertRecord(pCert,nOffset,certRecord.certTag.nSize,&certRecord);
         }
         else
         {
-            certRecord.varValue=read_array(nOffset,certRecord.certTag.nSize).toHex().data();
+            if(certRecord.certTag.nTag==XPE_DEF::S_ASN1_OBJECT_ID)
+            {
+                certRecord.varValue=read_ASN_OIDString(nOffset,certRecord.certTag.nSize);
+            }
+            else if(certRecord.certTag.nTag==XPE_DEF::S_ASN1_INTEGER)
+            {
+                certRecord.varValue=read_ASN_Integer(nOffset,certRecord.certTag.nSize);
+            }
         }
 
         nOffset+=certRecord.certTag.nSize;
