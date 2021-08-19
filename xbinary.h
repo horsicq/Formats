@@ -948,6 +948,8 @@ public:
 
     static QString generateUUID();
 
+    static QString appendText(QString sResult,QString sString,QString sSeparate);
+
 public slots:
     void setSearchProcessEnable(bool bState);
     void setDumpProcessEnable(bool bState);

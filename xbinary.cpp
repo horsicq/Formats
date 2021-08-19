@@ -7246,6 +7246,17 @@ QString XBinary::generateUUID()
     return QUuid::createUuid().toString().remove("{").remove("}");
 }
 
+QString XBinary::appendText(QString sResult, QString sString, QString sSeparate)
+{
+    if(sString!="")
+    {
+        if(sResult!="") sResult+=sSeparate;
+        sResult+=sString;
+    }
+
+    return sResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!
