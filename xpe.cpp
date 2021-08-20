@@ -8390,7 +8390,40 @@ QString XPE::certTagToString(quint32 nTag)
 {
     QString sResult;
 
+    QString sSeparate=" | ";
+
     // TODO
+    if(nTag&(XPE_DEF::S_ASN1_CONSTRUCTED))          sResult=appendText(sResult,"CONSTRUCTED",sSeparate);
+    if(nTag&(XPE_DEF::S_ASN1_CONTEXT_SPECIFIC))     sResult=appendText(sResult,"CONTEXT_SPECIFIC",sSeparate);
+
+    nTag&=0x1F;
+
+    if(nTag==(XPE_DEF::S_ASN1_BOOLEAN))             sResult=appendText(sResult,"BOOLEAN",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_INTEGER))             sResult=appendText(sResult,"INTEGER",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_BIT_STRING))          sResult=appendText(sResult,"BIT_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_OCTET_STRING))        sResult=appendText(sResult,"OCTET_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_NULL))                sResult=appendText(sResult,"NULL",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_OBJECT_ID))           sResult=appendText(sResult,"OBJECT_ID",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_OBJECT_DESCRIPTOR))   sResult=appendText(sResult,"OBJECT_DESCRIPTOR",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_REAL))                sResult=appendText(sResult,"REAL",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_ENUMERATED))          sResult=appendText(sResult,"ENUMERATED",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_EMBEDDED_PDV))        sResult=appendText(sResult,"EMBEDDED_PDV",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_UTF8_STRING))         sResult=appendText(sResult,"UTF8_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_SEQUENCE))            sResult=appendText(sResult,"SEQUENCE",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_SET))                 sResult=appendText(sResult,"SET",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_NUMERIC_STRING))      sResult=appendText(sResult,"NUMERIC_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_PRINTABLE_STRING))    sResult=appendText(sResult,"PRINTABLE_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_T61_STRING))          sResult=appendText(sResult,"T61_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_VIDEOTEX_STRING))     sResult=appendText(sResult,"VIDEOTEX_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_IA5_STRING))          sResult=appendText(sResult,"IA5_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_UTC_TIME))            sResult=appendText(sResult,"UTC_TIME",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_GENERALIZED_TIME))    sResult=appendText(sResult,"GENERALIZED_TIME",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_ASN1_GRAPHIC_STRING)) sResult=appendText(sResult,"ASN1_GRAPHIC_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_VISIBLE_STRING))      sResult=appendText(sResult,"VISIBLE_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_GENERAL_STRING))      sResult=appendText(sResult,"GENERAL_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_UNIVERSAL_STRING))    sResult=appendText(sResult,"UNIVERSAL_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_BMP_STRING))          sResult=appendText(sResult,"BMP_STRING",sSeparate);
+    if(nTag==(XPE_DEF::S_ASN1_PRIMITIVE))           sResult=appendText(sResult,"PRIMITIVE",sSeparate);
 
     return sResult;
 }
