@@ -79,7 +79,6 @@ class XBinary : public QObject
 static const double D_ENTROPY_THRESHOLD; // S6.5
 
 public:
-
     struct DATASET
     {
         qint64 nOffset;
