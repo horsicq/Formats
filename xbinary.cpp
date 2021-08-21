@@ -4647,6 +4647,7 @@ QString XBinary::getHash(XBinary::HASH hash, QIODevice *pDevice)
 
 QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 {
+    // TODO optimize
     QString sResult;
 
     OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
