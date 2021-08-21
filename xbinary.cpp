@@ -1050,12 +1050,12 @@ void XBinary::write_double(qint64 nOffset, double dValue, bool bIsBigEndian)
 QString XBinary::read_UUID(qint64 nOffset)
 {
     // TODO check!
-    QString sResult=QString("%1-%2-%3-%4-%5")
-            .arg(read_array(nOffset+0,4).toHex().data())
-            .arg(read_array(nOffset+4,2).toHex().data())
-            .arg(read_array(nOffset+6,2).toHex().data())
-            .arg(read_array(nOffset+8,2).toHex().data())
-            .arg(read_array(nOffset+10,6).toHex().data());
+    QString sResult=QString("%1-%2-%3-%4-%5").arg(
+            read_array(nOffset+0,4).toHex().data(),
+            read_array(nOffset+4,2).toHex().data(),
+            read_array(nOffset+6,2).toHex().data(),
+            read_array(nOffset+8,2).toHex().data(),
+            read_array(nOffset+10,6).toHex().data());
 
     return sResult;
 }
