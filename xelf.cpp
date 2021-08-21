@@ -3114,7 +3114,7 @@ QList<XELF::NOTE> XELF::getNotes()
 
 //        if(kv[0]==0)
 //        {
-//            sResult=QString("%1.%2.%3").arg(kv[1]).arg(kv[2]).arg(kv[3]);
+//            sResult=QString("%1.%2.%3").arg(QString::number(kv[1]),QString::number(kv[2]),QString::number(kv[3]));
 //        }
 //    }
 
