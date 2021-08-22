@@ -3692,6 +3692,31 @@ qint64 XPE::getResourceGroupNameOffset(QString sName, QList<XPE::RESOURCE_RECORD
     return nResult;
 }
 
+qint64 XPE::getResourceGroupIdOffset(quint32 nID)
+{
+    QList<RESOURCE_RECORD> listResources=getResources();
+
+    return getResourceGroupIdOffset(nID,&listResources);
+}
+
+qint64 XPE::getResourceGroupIdOffset(quint32 nID, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+{
+    qint64 nResult=-1;
+
+    int nNumberOfResources=pListResourceRecords->count();
+
+    for(int i=0;i<nNumberOfResources;i++)
+    {
+        if(pListResourceRecords->at(i).irin[0].nID==nID)
+        {
+            nResult=pListResourceRecords->at(i).nOffset;
+            break;
+        }
+    }
+
+    return nResult;
+}
+
 bool XPE::isResourceNamePresent(QString sName)
 {
     QList<RESOURCE_RECORD> listResources=getResources();
@@ -3714,6 +3739,18 @@ bool XPE::isResourceGroupNamePresent(QString sName)
 bool XPE::isResourceGroupNamePresent(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     return (getResourceGroupNameOffset(sName,pListResourceRecords)!=-1);
+}
+
+bool XPE::isResourceGroupIdPresent(quint32 nID)
+{
+    QList<RESOURCE_RECORD> listResources=getResources();
+
+    return isResourceGroupIdPresent(nID,&listResources);
+}
+
+bool XPE::isResourceGroupIdPresent(quint32 nID, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+{
+    return (getResourceGroupIdOffset(nID,pListResourceRecords)!=-1);
 }
 
 XPE_DEF::IMAGE_IMPORT_DESCRIPTOR XPE::read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset)

@@ -621,10 +621,14 @@ public:
     qint64 getResourceNameOffset(QString sName,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     qint64 getResourceGroupNameOffset(QString sName);
     qint64 getResourceGroupNameOffset(QString sName,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    qint64 getResourceGroupIdOffset(quint32 nID);
+    qint64 getResourceGroupIdOffset(quint32 nID,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     bool isResourceNamePresent(QString sName);
     bool isResourceNamePresent(QString sName,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     bool isResourceGroupNamePresent(QString sName);
     bool isResourceGroupNamePresent(QString sName,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    bool isResourceGroupIdPresent(quint32 nID);
+    bool isResourceGroupIdPresent(quint32 nID,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getBaseAddress();
