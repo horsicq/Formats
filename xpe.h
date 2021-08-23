@@ -1117,6 +1117,7 @@ public:
     void getCertRecord(CERT *pCert,qint64 nOffset,qint64 nSize,CERT_RECORD *pCertRecord);
 
     static QString certTagToString(quint32 nTag);
+    static QString objectIdToString(QString sObjectID);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

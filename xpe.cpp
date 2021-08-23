@@ -8466,7 +8466,6 @@ QString XPE::certTagToString(quint32 nTag)
 
     QString sSeparate=" | ";
 
-    // TODO
     if(nTag&(XPE_DEF::S_ASN1_CONSTRUCTED))          sResult=appendText(sResult,"CONSTRUCTED",sSeparate);
     if(nTag&(XPE_DEF::S_ASN1_CONTEXT_SPECIFIC))     sResult=appendText(sResult,"CONTEXT_SPECIFIC",sSeparate);
 
@@ -8498,6 +8497,63 @@ QString XPE::certTagToString(quint32 nTag)
     if(nTag==(XPE_DEF::S_ASN1_UNIVERSAL_STRING))    sResult=appendText(sResult,"UNIVERSAL_STRING",sSeparate);
     if(nTag==(XPE_DEF::S_ASN1_BMP_STRING))          sResult=appendText(sResult,"BMP_STRING",sSeparate);
     if(nTag==(XPE_DEF::S_ASN1_PRIMITIVE))           sResult=appendText(sResult,"PRIMITIVE",sSeparate);
+
+    return sResult;
+}
+
+QString XPE::objectIdToString(QString sObjectID)
+{
+    QString sResult;
+
+    if      (sObjectID=="1.2.840.113549.1.1.1")         sResult="RSA";
+    else if (sObjectID=="1.2.840.113549.1.1.5")         sResult="SHA1-RSA";
+    else if (sObjectID=="1.2.840.113549.1.1.11")        sResult="SHA256-RSA";
+    else if (sObjectID=="1.2.840.113549.1.1.12")        sResult="SHA384-RSA";
+    else if (sObjectID=="1.2.840.113549.1.7.2")         sResult="RSA over SignedData";
+    else if (sObjectID=="1.2.840.113549.1.7.1")         sResult="id-data";
+    else if (sObjectID=="1.2.840.113549.1.9.3")         sResult="id-contentType";
+    else if (sObjectID=="1.2.840.113549.1.9.4")         sResult="id-messageDigest";
+    else if (sObjectID=="1.2.840.113549.1.9.5")         sResult="id-signingTime";
+    else if (sObjectID=="1.2.840.113549.1.9.6")         sResult="id-countersignature";
+    else if (sObjectID=="1.2.840.113549.1.9.16.1.4")    sResult="id-ct-TSTInfo";
+    else if (sObjectID=="1.2.840.113549.1.9.16.2.12")   sResult="S/MIME signing certificate";
+    else if (sObjectID=="1.2.840.113549.1.9.16.2.47")   sResult="Signing certificate V2";
+    else if (sObjectID=="1.3.6.1.4.1.311.20.2")         sResult="szOID_ENROLL_CERTTYPE_EXTENSION";
+    else if (sObjectID=="1.3.6.1.4.1.311.21.1")         sResult="Certificate services Certification Authority (CA) version";
+    else if (sObjectID=="1.3.6.1.4.1.311.2.1.4")        sResult="SPC_INDIRECT_DATA_OBJID";
+    else if (sObjectID=="1.3.6.1.4.1.311.2.1.11")       sResult="SPC_STATEMENT_TYPE_OBJID";
+    else if (sObjectID=="1.3.6.1.4.1.311.2.1.12")       sResult="SPC_SP_OPUS_INFO_OBJID";
+    else if (sObjectID=="1.3.6.1.4.1.311.2.1.15")       sResult="SPC_PE_IMAGE_DATA_OBJID";
+    else if (sObjectID=="1.3.6.1.4.1.311.2.1.21")       sResult="SPC_INDIVIDUAL_SP_KEY_PURPOSE_OBJID";
+    else if (sObjectID=="1.3.6.1.4.1.311.2.4.1")        sResult="Ms-SpcNestedSignature";
+    else if (sObjectID=="1.3.6.1.4.1.311.3.3.1")        sResult="Timestamping signature (Ms-CounterSign)";
+    else if (sObjectID=="1.3.6.1.5.5.7.1.1")            sResult="Certificate authority information access";
+//    else if (sObjectID=="1.3.6.1.4.1.311.10.3.28")      sResult="";
+    else if (sObjectID=="1.3.6.1.4.1.601.10.3.2")       sResult="SPC_STATEMENT_TYPE_OBJID";
+    else if (sObjectID=="1.3.14.3.2.26")                sResult="SHA-1";
+    else if (sObjectID=="2.5.4.3")                      sResult="Common name";
+    else if (sObjectID=="2.5.4.6")                      sResult="Country name";
+    else if (sObjectID=="2.5.4.7")                      sResult="Locality Name";
+    else if (sObjectID=="2.5.4.8")                      sResult="State or Province name";
+    else if (sObjectID=="2.5.4.9")                      sResult="Street address";
+    else if (sObjectID=="2.5.4.10")                     sResult="Organization name";
+    else if (sObjectID=="2.5.4.11")                     sResult="Organization unit name";
+    else if (sObjectID=="2.5.29.14")                    sResult="Subject key identifier";
+    else if (sObjectID=="2.5.29.15")                    sResult="Key usage";
+    else if (sObjectID=="2.5.29.17")                    sResult="subjectAltName";
+    else if (sObjectID=="2.5.29.19")                    sResult="Basic constraints";
+    else if (sObjectID=="2.5.29.31")                    sResult="Certificate Revocation List distribution points";
+    else if (sObjectID=="2.5.29.32")                    sResult="Certificate policies";
+    else if (sObjectID=="2.5.29.35")                    sResult="Authority key identifier";
+    else if (sObjectID=="2.5.29.37")                    sResult="Certificate extension: \"extKeyUsage\" (Extended key usage)";
+    else if (sObjectID=="2.16.840.1.113730.1.1")        sResult="Netscape certificate type";
+    else if (sObjectID=="2.16.840.1.101.3.4.2.1")       sResult="SHA256";
+    else
+    {
+    #ifdef QT_DEBUG
+        qDebug("Object ID: %s",sObjectID.toLatin1().data());
+    #endif
+    }
 
     return sResult;
 }
