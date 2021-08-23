@@ -8420,6 +8420,15 @@ qint64 XPE::read_ASN_Integer(qint64 nOffset, qint64 nSize)
     return nResult;
 }
 
+bool XPE::read_ASN_Bool(qint64 nOffset, qint64 nSize)
+{
+    bool bResult=false;
+
+    // TODO
+
+    return bResult;
+}
+
 void XPE::getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize, CERT_RECORD *pCertRecord)
 {
     while((nSize>0)&&(pCert->bIsValid))
