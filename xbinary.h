@@ -717,6 +717,7 @@ public:
     static QString getHash(HASH hash,QString sFileName);
     static QString getHash(HASH hash,QIODevice *pDevice);
     QString getHash(HASH hash,qint64 nOffset=0,qint64 nSize=-1);
+    QString getHash(HASH hash,QList<OFFSETSIZE> *pListOS);
 
     static QSet<HASH> getHashMethods();
     static QList<HASH> getHashMethodsAsList();
@@ -908,6 +909,8 @@ public:
 
     static PROCENT procentInit(qint64 nMaxValue,bool bTimer=false);
     static bool procentSetCurrentValue(PROCENT *pProcent,qint64 nCurrentValue);
+
+    static qint64 getTotalOSSize(QList<OFFSETSIZE> *pListOS);
 
     static MODE getWidthModeFromSize(quint64 nSize); // TODO rename
     static MODE getWidthModeFromMemoryMap(_MEMORY_MAP *pMemoryMap);

@@ -4647,7 +4647,6 @@ QString XBinary::getHash(XBinary::HASH hash, QIODevice *pDevice)
 
 QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 {
-    // TODO optimize
     QString sResult;
 
     OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
@@ -4657,31 +4656,53 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 
     if(nOffset!=-1)
     {
-        PROCENT procent=procentInit(nSize);
+        QList<OFFSETSIZE> listOS;
+        listOS.append(offsetSize);
 
-        _hashProgressMinimumChanged(0);
-        _hashProgressMaximumChanged(procent.nMaxProcent);
-        _hashProgressValueChanged(0);
+        sResult=getHash(hash,&listOS);
+    }
 
-        qint64 nTemp=0;
-        char *pBuffer=new char[READWRITE_BUFFER_SIZE];
+    return sResult;
+}
 
-        QCryptographicHash::Algorithm algorithm=QCryptographicHash::Md4;
+QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS)
+{
+    QString sResult;
 
-        switch(hash) // TODO Check new versions of Qt
-        {
-            case HASH_MD4:          algorithm=QCryptographicHash::Md4;          break;
-            case HASH_MD5:          algorithm=QCryptographicHash::Md5;          break;
-            case HASH_SHA1:         algorithm=QCryptographicHash::Sha1;         break;
-        #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
-            case HASH_SHA224:       algorithm=QCryptographicHash::Sha224;       break; // Keccak_224 ?
-            case HASH_SHA256:       algorithm=QCryptographicHash::Sha256;       break;
-            case HASH_SHA384:       algorithm=QCryptographicHash::Sha384;       break;
-            case HASH_SHA512:       algorithm=QCryptographicHash::Sha512;       break;
-        #endif
-        }
+    PROCENT procent=procentInit(getTotalOSSize(pListOS));
 
-        QCryptographicHash crypto(algorithm);
+    _hashProgressMinimumChanged(0);
+    _hashProgressMaximumChanged(procent.nMaxProcent);
+    _hashProgressValueChanged(0);
+
+    qint64 nTemp=0;
+    char *pBuffer=new char[READWRITE_BUFFER_SIZE];
+
+    QCryptographicHash::Algorithm algorithm=QCryptographicHash::Md4;
+
+    switch(hash) // TODO Check new versions of Qt
+    {
+        case HASH_MD4:          algorithm=QCryptographicHash::Md4;          break;
+        case HASH_MD5:          algorithm=QCryptographicHash::Md5;          break;
+        case HASH_SHA1:         algorithm=QCryptographicHash::Sha1;         break;
+    #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
+        case HASH_SHA224:       algorithm=QCryptographicHash::Sha224;       break; // Keccak_224 ?
+        case HASH_SHA256:       algorithm=QCryptographicHash::Sha256;       break;
+        case HASH_SHA384:       algorithm=QCryptographicHash::Sha384;       break;
+        case HASH_SHA512:       algorithm=QCryptographicHash::Sha512;       break;
+    #endif
+    }
+
+    QCryptographicHash crypto(algorithm);
+
+    int nNumberOfRecords=pListOS->count();
+
+    qint64 nCurrentSize=0;
+
+    for(int i=0;(i<nNumberOfRecords)&&(!g_bIsHashStop);i++)
+    {
+        qint64 nOffset=pListOS->at(i).nOffset;
+        qint64 nSize=pListOS->at(i).nSize;
 
         while((nSize>0)&&(!g_bIsHashStop))
         {
@@ -4698,19 +4719,20 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 
             nSize-=nTemp;
             nOffset+=nTemp;
+            nCurrentSize+=nTemp;
 
-            if(procentSetCurrentValue(&procent,nOffset-offsetSize.nOffset))
+            if(procentSetCurrentValue(&procent,nCurrentSize))
             {
                 _hashProgressValueChanged(procent.nCurrentProcent);
             }
         }
-
-        _hashProgressValueChanged(procent.nMaxProcent);
-
-        delete[] pBuffer;
-
-        sResult=crypto.result().toHex();
     }
+
+    _hashProgressValueChanged(procent.nMaxProcent);
+
+    delete[] pBuffer;
+
+    sResult=crypto.result().toHex();
 
     return sResult;
 }
@@ -6803,6 +6825,20 @@ bool XBinary::procentSetCurrentValue(XBinary::PROCENT *pProcent, qint64 nCurrent
     }
 
     return bResult;
+}
+
+qint64 XBinary::getTotalOSSize(QList<OFFSETSIZE> *pListOS)
+{
+    qint64 nResult=0;
+
+    int nNumberOfRecords=pListOS->count();
+
+    for(int i=0;i<nNumberOfRecords;i++)
+    {
+        nResult+=pListOS->at(i).nSize;
+    }
+
+    return nResult;
 }
 
 XBinary::MODE XBinary::getWidthModeFromSize(quint64 nSize)
