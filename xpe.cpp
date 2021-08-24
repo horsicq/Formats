@@ -8567,6 +8567,15 @@ QString XPE::objectIdToString(QString sObjectID)
     return sResult;
 }
 
+QString XPE::getCertHash(XBinary::HASH hash)
+{
+    QString sResult;
+
+    // TODO
+
+    return sResult;
+}
+
 qint64 XPE::calculateHeadersSize()
 {
     return _calculateHeadersSize(getSectionsTableOffset(),getFileHeader_NumberOfSections());

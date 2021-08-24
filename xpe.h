@@ -1119,6 +1119,8 @@ public:
     static QString certTagToString(quint32 nTag);
     static QString objectIdToString(QString sObjectID);
 
+    QString getCertHash(HASH hash);
+
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     RESOURCE_POSITION _getResourcePosition(_MEMORY_MAP *pMemoryMap,qint64 nBaseAddress,qint64 nResourceOffset,qint64 nOffset,quint32 nLevel);
