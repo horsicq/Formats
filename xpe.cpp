@@ -8429,6 +8429,15 @@ bool XPE::read_ASN_Bool(qint64 nOffset, qint64 nSize)
     return bResult;
 }
 
+QDateTime XPE::read_ASN_DateTime(qint64 nOffset, qint64 nSize)
+{
+    QDateTime dtResult;
+
+    // TODO
+
+    return dtResult;
+}
+
 void XPE::getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize, CERT_RECORD *pCertRecord)
 {
     while((nSize>0)&&(pCert->bIsValid))

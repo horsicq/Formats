@@ -1113,6 +1113,7 @@ public:
     QString read_ASN_OIDString(qint64 nOffset,qint64 nSize); // TODO move to XBinary;
     qint64 read_ASN_Integer(qint64 nOffset,qint64 nSize);
     bool read_ASN_Bool(qint64 nOffset,qint64 nSize);
+    QDateTime read_ASN_DateTime(qint64 nOffset,qint64 nSize);
 
     void getCertRecord(CERT *pCert,qint64 nOffset,qint64 nSize,CERT_RECORD *pCertRecord);
 
