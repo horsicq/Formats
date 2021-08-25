@@ -54,7 +54,6 @@ public:
     static bool isSigned(QString sFileName);
     static XBinary::OFFSETSIZE getSignOS(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
     static XBinary::OFFSETSIZE getSignOS(QString sFileName);
-
     static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1,XBinary::SYMBOL_TYPE symBolType=XBinary::SYMBOL_TYPE_ALL);
 #ifdef QT_GUI_LIB
     static XBinary::FT setFileTypeComboBox(QComboBox *pComboBox,QList<XBinary::FT> *pListFileTypes,XBinary::FT fileType);
