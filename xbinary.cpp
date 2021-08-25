@@ -3669,9 +3669,13 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             }
             else
             {
-                baNewHeader=read_array(nLfanew,sizeof(XPE_DEF::IMAGE_NT_HEADERS32));
+                qint64 nNtHeadersSize=4+sizeof(XPE_DEF::IMAGE_FILE_HEADER);
 
-                if(baNewHeader.size()==sizeof(XPE_DEF::IMAGE_NT_HEADERS32))
+                baNewHeader=read_array(nLfanew,nNtHeadersSize);
+
+                nHeaderSize=baNewHeader.size();
+
+                if(nHeaderSize==nNtHeadersSize)
                 {
                     pOffset=baNewHeader.data();
                     bIsNewHeaderValid=true;
