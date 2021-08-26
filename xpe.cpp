@@ -1661,6 +1661,25 @@ XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionByName(QString sSectionName, QList<
     return result;
 }
 
+XPE::SECTION_RECORD XPE::getSectionRecordByName(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords)
+{
+    SECTION_RECORD result={};
+
+    int nNumberOfSections=pListSectionRecords->count();
+
+    for(int i=0; i<nNumberOfSections; i++)
+    {
+        if(pListSectionRecords->at(i).sName==sSectionName)
+        {
+            result=pListSectionRecords->at(i);
+
+            break;
+        }
+    }
+
+    return result;
+}
+
 qint32 XPE::getSectionNumber(QString sSectionName)
 {
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSectionHeaders=getSectionHeaders();
