@@ -897,6 +897,7 @@ public:
     static bool isX86asm(QString sArch);
     static QString disasmIdToString(DM disasmMode);
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
+    static DMFAMILY getDisasmFamily(DM disasmMode);
 
     static bool checkFileType(XBinary::FT fileTypeMain,XBinary::FT fileTypeOptional);
 

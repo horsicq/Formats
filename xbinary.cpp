@@ -6660,6 +6660,18 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
     return dmResult;
 }
 
+XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
+{
+    DMFAMILY result=DMFAMILY_UNKNOWN;
+
+    if((disasmMode==DM_X86_16)||(disasmMode==DM_X86_32)||(disasmMode==DM_X86_64))
+    {
+        result=DMFAMILY_X86;
+    }
+
+    return result;
+}
+
 bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOptional)
 {
     bool bResult=false;
