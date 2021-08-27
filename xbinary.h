@@ -213,7 +213,8 @@ public:
     enum DMFAMILY
     {
         DMFAMILY_UNKNOWN,
-        DMFAMILY_X86
+        DMFAMILY_X86,
+        DMFAMILY_ARM
     };
 
     enum DM
