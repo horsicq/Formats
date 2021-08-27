@@ -209,9 +209,17 @@ public:
         // mb bits
     };
 
+    // TODO getFamily Function
+    enum DMFAMILY
+    {
+        DMFAMILY_UNKNOWN,
+        DMFAMILY_X86
+    };
+
     enum DM
     {
-        DM_X86_16=0,
+        DM_UNKNOWN=0,
+        DM_X86_16,
         DM_X86_32,
         DM_X86_64,
         DM_ARM_LE,
