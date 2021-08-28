@@ -6676,6 +6676,10 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
     {
         result=DMFAMILY_MIPS;
     }
+    else if((disasmMode==DM_PPC64_BE)||(disasmMode==DM_PPC64_LE)||(disasmMode==DM_PPC_BE)||(disasmMode==DM_PPC_LE))
+    {
+        result=DMFAMILY_PPC;
+    }
 
     return result;
 }

@@ -215,7 +215,8 @@ public:
         DMFAMILY_UNKNOWN,
         DMFAMILY_X86,
         DMFAMILY_ARM,
-        DMFAMILY_MIPS
+        DMFAMILY_MIPS,
+        DMFAMILY_PPC
     };
 
     enum DM
