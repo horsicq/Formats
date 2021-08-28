@@ -209,7 +209,6 @@ public:
         // mb bits
     };
 
-    // TODO getFamily Function
     enum DMFAMILY
     {
         DMFAMILY_UNKNOWN,
