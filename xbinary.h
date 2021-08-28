@@ -76,7 +76,7 @@ class XBinary : public QObject
 {
     Q_OBJECT
 
-static const double D_ENTROPY_THRESHOLD; // S6.5
+static const double D_ENTROPY_THRESHOLD; // 6.5
 
 public:
     struct DATASET
