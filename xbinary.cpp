@@ -6680,6 +6680,10 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
     {
         result=DMFAMILY_PPC;
     }
+    else if(disasmMode==DM_SPARC)
+    {
+        result=DMFAMILY_SPARC;
+    }
 
     return result;
 }
