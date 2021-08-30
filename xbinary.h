@@ -214,6 +214,7 @@ public:
         DMFAMILY_UNKNOWN,
         DMFAMILY_X86,
         DMFAMILY_ARM,
+        DMFAMILY_ARM64,
         DMFAMILY_MIPS,
         DMFAMILY_PPC,
         DMFAMILY_SPARC
