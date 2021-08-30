@@ -6692,6 +6692,10 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
     {
         result=DMFAMILY_XCORE;
     }
+    else if((disasmMode==DM_M68K)||(disasmMode==DM_M68K40))
+    {
+        result=DMFAMILY_M68K;
+    }
 
     return result;
 }
