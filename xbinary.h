@@ -220,7 +220,8 @@ public:
         DMFAMILY_SPARC,
         DMFAMILY_SYSZ,
         DMFAMILY_XCORE,
-        DMFAMILY_M68K
+        DMFAMILY_M68K,
+        DMFAMILY_M68OK
     };
 
     enum DM
