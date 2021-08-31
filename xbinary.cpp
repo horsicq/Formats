@@ -6688,6 +6688,10 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
     {
         result=DMFAMILY_SPARC;
     }
+    else if(disasmMode==DM_S390X)
+    {
+        result=DMFAMILY_SYSZ;
+    }
     else if(disasmMode==DM_XCORE)
     {
         result=DMFAMILY_XCORE;

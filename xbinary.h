@@ -218,6 +218,7 @@ public:
         DMFAMILY_MIPS,
         DMFAMILY_PPC,
         DMFAMILY_SPARC,
+        DMFAMILY_SYSZ,
         DMFAMILY_XCORE,
         DMFAMILY_M68K
     };
