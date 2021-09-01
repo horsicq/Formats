@@ -222,7 +222,8 @@ public:
         DMFAMILY_XCORE,
         DMFAMILY_M68K,
         DMFAMILY_M68OK,
-        DMFAMILY_RISCV
+        DMFAMILY_RISCV,
+        DMFAMILY_EVM
     };
 
     enum DM

@@ -6728,6 +6728,10 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
     {
         result=DMFAMILY_RISCV;
     }
+    else if(disasmMode==DM_EVM)
+    {
+        result=DMFAMILY_EVM;
+    }
 
     return result;
 }
