@@ -6560,6 +6560,9 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_HD6309:             sResult=QString("HD6309");          break;
         case DM_HCS08:              sResult=QString("HCS08");           break;
         case DM_EVM:                sResult=QString("EVM");             break;
+        case DM_RISKV32:            sResult=QString("RISKV32");         break;
+        case DM_RISKV64:            sResult=QString("RISKV64");         break;
+        case DM_RISKVC:             sResult=QString("RISKVC");          break;
 //        case DM_MOS65XX:            sResult=QString("MOS65XX");         break;
     }
 
@@ -6655,6 +6658,17 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
     {
         dmResult=DM_SPARC;
     }
+    else if(pMemoryMap->sArch=="EM_RISC_V")
+    {
+        if(pMemoryMap->mode==MODE_64)
+        {
+            dmResult=DM_RISKV64;
+        }
+        else
+        {
+            dmResult=DM_RISKV32;
+        }
+    }
     // TODO SH
 
     return dmResult;
@@ -6676,11 +6690,13 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
     {
         result=DMFAMILY_ARM64;
     }
-    else if((disasmMode==DM_MIPS64_BE)||(disasmMode==DM_MIPS64_LE)||(disasmMode==DM_MIPS_BE)||(disasmMode==DM_MIPS_LE))
+    else if((disasmMode==DM_MIPS64_BE)||(disasmMode==DM_MIPS64_LE)||
+            (disasmMode==DM_MIPS_BE)||(disasmMode==DM_MIPS_LE))
     {
         result=DMFAMILY_MIPS;
     }
-    else if((disasmMode==DM_PPC64_BE)||(disasmMode==DM_PPC64_LE)||(disasmMode==DM_PPC_BE)||(disasmMode==DM_PPC_LE))
+    else if((disasmMode==DM_PPC64_BE)||(disasmMode==DM_PPC64_LE)||
+            (disasmMode==DM_PPC_BE)||(disasmMode==DM_PPC_LE))
     {
         result=DMFAMILY_PPC;
     }
@@ -6699,6 +6715,18 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
     else if((disasmMode==DM_M68K)||(disasmMode==DM_M68K40))
     {
         result=DMFAMILY_M68K;
+    }
+    else if((disasmMode==DM_M6800)||(disasmMode==DM_M6801)||
+            (disasmMode==DM_M6805)||(disasmMode==DM_M6808)||
+            (disasmMode==DM_M6809)||(disasmMode==DM_M6811)||
+            (disasmMode==DM_CPU12)||(disasmMode==DM_HD6301)||
+            (disasmMode==DM_HD6309)||(disasmMode==DM_HCS08))
+    {
+        result=DMFAMILY_M68OK;
+    }
+    else if((disasmMode==DM_RISKV32)||(disasmMode==DM_RISKV64)||(disasmMode==DM_RISKVC))
+    {
+        result=DMFAMILY_RISCV;
     }
 
     return result;

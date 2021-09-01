@@ -221,7 +221,8 @@ public:
         DMFAMILY_SYSZ,
         DMFAMILY_XCORE,
         DMFAMILY_M68K,
-        DMFAMILY_M68OK
+        DMFAMILY_M68OK,
+        DMFAMILY_RISCV
     };
 
     enum DM
@@ -262,6 +263,9 @@ public:
         DM_HD6309,
         DM_HCS08,
         DM_EVM,
+        DM_RISKV32,
+        DM_RISKV64,
+        DM_RISKVC
         // DM_MOS65XX TODO Check!
         // TODO Check more
     };
