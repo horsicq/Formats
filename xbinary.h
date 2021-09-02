@@ -224,7 +224,11 @@ public:
         DMFAMILY_M68OK,
         DMFAMILY_RISCV,
         DMFAMILY_EVM
-        // TODO more
+        // DM_MOS65XX TODO Check!
+        // TODO Check more
+        // TODO WASM
+        // TODO BPF
+        // TODO MOS65XX
     };
 
     enum DM
