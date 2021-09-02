@@ -224,6 +224,7 @@ public:
         DMFAMILY_M68OK,
         DMFAMILY_RISCV,
         DMFAMILY_EVM
+        // TODO more
     };
 
     enum DM
@@ -269,6 +270,9 @@ public:
         DM_RISKVC
         // DM_MOS65XX TODO Check!
         // TODO Check more
+        // TODO WASM
+        // TODO BPF
+        // TODO MOS65XX
     };
 
     struct _MEMORY_MAP
