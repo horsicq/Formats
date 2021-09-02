@@ -6563,7 +6563,7 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_RISKV32:            sResult=QString("RISKV32");         break;
         case DM_RISKV64:            sResult=QString("RISKV64");         break;
         case DM_RISKVC:             sResult=QString("RISKVC");          break;
-//        case DM_MOS65XX:            sResult=QString("MOS65XX");         break;
+        case DM_MOS65XX:            sResult=QString("MOS65XX");         break;
     }
 
     return sResult;

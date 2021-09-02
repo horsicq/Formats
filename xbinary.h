@@ -271,8 +271,8 @@ public:
         DM_EVM,
         DM_RISKV32,
         DM_RISKV64,
-        DM_RISKVC
-        // DM_MOS65XX TODO Check!
+        DM_RISKVC,
+        DM_MOS65XX
         // TODO Check more
         // TODO WASM
         // TODO BPF
