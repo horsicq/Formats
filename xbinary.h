@@ -271,7 +271,7 @@ public:
         DM_RISKV64,
         DM_RISKVC,
         DM_MOS65XX,
-        DM_WASM
+        DM_WASM,
         // TODO BPF
     };
 
