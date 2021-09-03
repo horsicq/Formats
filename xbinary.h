@@ -224,10 +224,8 @@ public:
         DMFAMILY_M68OK,
         DMFAMILY_RISCV,
         DMFAMILY_EVM,
-        DMFAMILY_MOS65XX
-        // DM_MOS65XX TODO Check!
-        // TODO Check more
-        // TODO WASM
+        DMFAMILY_MOS65XX,
+        DMFAMILY_WASM
         // TODO BPF
     };
 
@@ -272,9 +270,8 @@ public:
         DM_RISKV32,
         DM_RISKV64,
         DM_RISKVC,
-        DM_MOS65XX
-        // TODO Check more
-        // TODO WASM
+        DM_MOS65XX,
+        DM_WASM
         // TODO BPF
     };
 

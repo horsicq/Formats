@@ -6736,6 +6736,10 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
     {
         result=DMFAMILY_MOS65XX;
     }
+    else if(disasmMode==DM_WASM)
+    {
+        result=DMFAMILY_WASM;
+    }
 
     return result;
 }
