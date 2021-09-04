@@ -6498,6 +6498,7 @@ QString XBinary::valueToTimeString(quint64 nValue, XBinary::DT_TYPE type)
 
 bool XBinary::isX86asm(QString sArch)
 {
+    // TODO remove, use getDisasmMode
     bool bResult=false;
 
     sArch=sArch.toUpper();
