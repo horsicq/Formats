@@ -6565,6 +6565,8 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_RISKVC:             sResult=QString("RISKVC");          break;
         case DM_MOS65XX:            sResult=QString("MOS65XX");         break;
         case DM_WASM:               sResult=QString("WASM");            break;
+        case DM_BPF_LE:             sResult=QString("BPF LE");          break;
+        case DM_BPF_BE:             sResult=QString("BPF BE");          break;
     }
 
     return sResult;
@@ -6740,6 +6742,10 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
     else if(disasmMode==DM_WASM)
     {
         result=DMFAMILY_WASM;
+    }
+    else if((disasmMode==DM_BPF_LE)||(disasmMode==DM_BPF_BE))
+    {
+        result=DMFAMILY_BPF;
     }
 
     return result;

@@ -225,8 +225,8 @@ public:
         DMFAMILY_RISCV,
         DMFAMILY_EVM,
         DMFAMILY_MOS65XX,
-        DMFAMILY_WASM
-        // TODO BPF
+        DMFAMILY_WASM,
+        DMFAMILY_BPF
     };
 
     enum DM
@@ -272,7 +272,8 @@ public:
         DM_RISKVC,
         DM_MOS65XX,
         DM_WASM,
-        // TODO BPF
+        DM_BPF_LE,
+        DM_BPF_BE
     };
 
     struct _MEMORY_MAP
