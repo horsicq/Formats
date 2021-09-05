@@ -6575,11 +6575,16 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
 
 XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
 {
+    return getDisasmMode(pMemoryMap->sArch,pMemoryMap->bIsBigEndian,pMemoryMap->mode);
+}
+
+XBinary::DM XBinary::getDisasmMode(QString sArch,bool bIsBigEndian,MODE mode)
+{
     XBinary::DM dmResult=DM_X86_16;
 
-    if(pMemoryMap->sArch=="PPC")
+    if(sArch=="PPC")
     {
-        if(pMemoryMap->bIsBigEndian)
+        if(bIsBigEndian)
         {
             dmResult=DM_PPC_BE;
         }
@@ -6588,9 +6593,9 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
             dmResult=DM_PPC_LE;
         }
     }
-    else if(pMemoryMap->sArch=="PPC64")
+    else if(sArch=="PPC64")
     {
-        if(pMemoryMap->bIsBigEndian)
+        if(bIsBigEndian)
         {
             dmResult=DM_PPC64_BE;
         }
@@ -6599,9 +6604,9 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
             dmResult=DM_PPC64_LE;
         }
     }
-    else if(pMemoryMap->sArch=="MIPS")
+    else if(sArch=="MIPS")
     {
-        if(pMemoryMap->bIsBigEndian)
+        if(bIsBigEndian)
         {
             dmResult=DM_MIPS_BE;
         }
@@ -6610,9 +6615,9 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
             dmResult=DM_MIPS_LE;
         }
     }
-    else if(pMemoryMap->sArch=="ARM")
+    else if(sArch=="ARM")
     {
-        if(pMemoryMap->bIsBigEndian)
+        if(bIsBigEndian)
         {
             dmResult=DM_ARM_BE;
         }
@@ -6621,10 +6626,10 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
             dmResult=DM_ARM_LE;
         }
     }
-    else if((pMemoryMap->sArch=="AARCH64")||
-            (pMemoryMap->sArch=="ARM64"))
+    else if((sArch=="AARCH64")||
+            (sArch=="ARM64"))
     {
-        if(pMemoryMap->bIsBigEndian)
+        if(bIsBigEndian)
         {
             dmResult=DM_ARM64_BE;
         }
@@ -6633,38 +6638,38 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
             dmResult=DM_ARM64_LE;
         }
     }
-    else if(pMemoryMap->sArch=="8086") // TODO
+    else if(sArch=="8086") // TODO
     {
         dmResult=DM_X86_16;
     }
-    else if((pMemoryMap->sArch=="386")||
-            (pMemoryMap->sArch=="I386")||
-            (pMemoryMap->sArch=="486"))
+    else if((sArch=="386")||
+            (sArch=="I386")||
+            (sArch=="486"))
     {
         dmResult=DM_X86_32;
     }
-    else if((pMemoryMap->sArch=="AMD64")||
-            (pMemoryMap->sArch=="X86_64"))
+    else if((sArch=="AMD64")||
+            (sArch=="X86_64"))
     {
         dmResult=DM_X86_64;
     }
-    else if((pMemoryMap->sArch=="68K")||
-            (pMemoryMap->sArch=="MC680x0")||
-            (pMemoryMap->sArch=="MC68030"))
+    else if((sArch=="68K")||
+            (sArch=="MC680x0")||
+            (sArch=="MC68030"))
     {
         dmResult=DM_M68K;
     }
-    else if(pMemoryMap->sArch=="MC68040")
+    else if(sArch=="MC68040")
     {
         dmResult=DM_M68K40;
     }
-    else if(pMemoryMap->sArch=="SPARC")
+    else if(sArch=="SPARC")
     {
         dmResult=DM_SPARC;
     }
-    else if(pMemoryMap->sArch=="EM_RISC_V")
+    else if(sArch=="EM_RISC_V")
     {
-        if(pMemoryMap->mode==MODE_64)
+        if(mode==MODE_64)
         {
             dmResult=DM_RISKV64;
         }
