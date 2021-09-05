@@ -90,7 +90,7 @@ QString XPE::getArch()
 
 bool XPE::isBigEndian()
 {
-    // TODO Check Machine
+    // TODO Check Machine !!!
     return false;
 }
 
