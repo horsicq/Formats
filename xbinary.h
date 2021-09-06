@@ -306,7 +306,7 @@ public:
         qint64 nSize;
         qint64 nModuleAddress;
         SYMBOL_TYPE symbolType;
-        qint32 nOrdinal; // For Windows;
+        qint32 nOrdinal; // For Windows OS;
         QString sName;
         QString sFunction;
     };
