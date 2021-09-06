@@ -6757,6 +6757,11 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
     return result;
 }
 
+XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    return getDisasmFamily(getDisasmMode(pMemoryMap));
+}
+
 bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOptional)
 {
     bool bResult=false;

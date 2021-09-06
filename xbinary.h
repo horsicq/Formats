@@ -917,6 +917,7 @@ public:
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
     static DM getDisasmMode(QString sArch,bool bIsBigEndian=false,MODE mode=MODE_UNKNOWN);
     static DMFAMILY getDisasmFamily(DM disasmMode);
+    static DMFAMILY getDisasmFamily(_MEMORY_MAP *pMemoryMap);
 
     static bool checkFileType(XBinary::FT fileTypeMain,XBinary::FT fileTypeOptional);
 
