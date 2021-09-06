@@ -31,7 +31,7 @@ public:
     SubDevice(QIODevice *pDevice,qint64 nOffset=0,qint64 nSize=-1,QObject *pParent=nullptr);
     ~SubDevice();
 
-    qint64 getInitOffset();
+    qint64 getInitOffset(); // TODO Check
 
     virtual qint64 size() const;
     //    virtual qint64 bytesAvailable() const;
