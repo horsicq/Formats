@@ -6573,6 +6573,22 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
     return sResult;
 }
 
+QString XBinary::syntaxIdToString(SYNTAX syntax)
+{
+    QString sResult=tr("Unknown");
+
+    switch(syntax)
+    {
+        case SYNTAX_DEFAULT:            sResult=tr("Default");              break;
+        case SYNTAX_ATT:                sResult=QString("ATT");             break;
+        case SYNTAX_INTEL:              sResult=QString("INTEL");           break;
+        case SYNTAX_MASM:               sResult=QString("MASM");            break;
+        case SYNTAX_MOTOROLA:           sResult=QString("MOTOROLA");        break;
+    }
+
+    return sResult;
+}
+
 XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     return getDisasmMode(pMemoryMap->sArch,pMemoryMap->bIsBigEndian,pMemoryMap->mode);
@@ -6760,6 +6776,24 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
 XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     return getDisasmFamily(getDisasmMode(pMemoryMap));
+}
+
+QList<XBinary::SYNTAX> XBinary::getDisasmSyntax(DM disasmMode)
+{
+    QList<SYNTAX> listResult;
+
+    listResult.append(SYNTAX_DEFAULT);
+
+    if(getDisasmFamily(disasmMode)==DMFAMILY_X86)
+    {
+        listResult.append(SYNTAX_ATT);
+        listResult.append(SYNTAX_INTEL);
+        listResult.append(SYNTAX_MASM);
+    }
+
+    // TODO Motorola
+
+    return listResult;
 }
 
 bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOptional)

@@ -923,10 +923,12 @@ public:
 
     static bool isX86asm(QString sArch);
     static QString disasmIdToString(DM disasmMode);
+    static QString syntaxIdToString(SYNTAX syntax);
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
     static DM getDisasmMode(QString sArch,bool bIsBigEndian=false,MODE mode=MODE_UNKNOWN);
     static DMFAMILY getDisasmFamily(DM disasmMode);
     static DMFAMILY getDisasmFamily(_MEMORY_MAP *pMemoryMap);
+    static QList<SYNTAX> getDisasmSyntax(DM disasmMode);
 
     static bool checkFileType(XBinary::FT fileTypeMain,XBinary::FT fileTypeOptional);
 
