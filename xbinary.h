@@ -276,6 +276,15 @@ public:
         DM_BPF_BE
     };
 
+    enum SYNTAX
+    {
+        SYNTAX_DEFAULT=0,
+        SYNTAX_INTEL,
+        SYNTAX_ATT,
+        SYNTAX_MASM,
+        SYNTAX_MOTOROLA
+    };
+
     struct _MEMORY_MAP
     {
         qint64 nModuleAddress;
