@@ -176,11 +176,11 @@ XBinary::FT XBinary::getFileType()
 
 QString XBinary::modeIdToString(XBinary::MODE mode)
 {
-    QString sResult="Unknown"; // mb TODO translate
+    QString sResult=tr("Unknown");
 
     switch(mode)
     {
-        case MODE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
+        case MODE_UNKNOWN:          sResult=tr("Unknown");          break; // mb TODO translate
         case MODE_DATA:             sResult=QString("Data");        break; // mb TODO translate
         case MODE_8:                sResult=QString("8");           break;
         case MODE_16:               sResult=QString("16");          break;
