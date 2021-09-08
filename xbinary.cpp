@@ -6569,7 +6569,7 @@ bool XBinary::isX86asm(QString sArch)
 
 QString XBinary::disasmIdToString(XBinary::DM disasmMode)
 {
-    QString sResult="Unknown"; // mb TODO translate
+    QString sResult=tr("Unknown");
 
     switch(disasmMode)
     {
