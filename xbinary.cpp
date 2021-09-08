@@ -4824,7 +4824,7 @@ QList<XBinary::HASH> XBinary::getHashMethodsAsList()
 
 QString XBinary::hashIdToString(XBinary::HASH hash)
 {
-    QString sResult="Unknown"; // mb TODO translate
+    QString sResult=tr("Unknown");
 
     switch(hash)
     {
