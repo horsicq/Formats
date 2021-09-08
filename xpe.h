@@ -24,6 +24,13 @@
 #include "xmsdos.h"
 #include "xpe_def.h"
 
+#if defined(_MSC_VER) // For WinTrust
+#include <windows.h>
+#include <Softpub.h>
+#include <wincrypt.h>
+#include <wintrust.h>
+#endif
+
 class XPE : public XMSDOS
 {
     Q_OBJECT
@@ -1124,6 +1131,8 @@ public:
     static QString objectIdToString(QString sObjectID);
 
     QString getCertHash(HASH hash);
+
+    static void getCertInfo(QString sFileName);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

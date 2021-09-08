@@ -399,6 +399,9 @@ private:
 
 public:
     explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1); // mb TODO parent for signals/slot
+    XBinary(QString sFileName);
+    ~XBinary();
+    void setData(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
     void setDevice(QIODevice *pDevice);
     void setReadWriteMutex(QMutex *pReadWriteMutex);
     qint64 safeReadData(QIODevice *pDevice,qint64 nPos,char *pData,qint64 nMaxLen);
@@ -576,7 +579,7 @@ public:
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature);
 
     static bool createFile(QString sFileName,qint64 nFileSize=0);
-    static bool isFileExists(QString sFileName);
+    static bool isFileExists(QString sFileName,bool bTryToOpen=false);
     static bool removeFile(QString sFileName);
     static bool copyFile(QString sSrcFileName,QString sDestFileName);
     static bool moveFile(QString sSrcFileName,QString sDestFileName);
@@ -1051,6 +1054,7 @@ signals:
 
 private:
     QIODevice *g_pDevice;
+    QString g_sFileName;
     QMutex *g_pReadWriteMutex;
     bool g_bIsImage;
     qint64 g_nBaseAddress;

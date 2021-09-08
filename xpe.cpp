@@ -8613,6 +8613,48 @@ QString XPE::getCertHash(XBinary::HASH hash)
     return sResult;
 }
 
+void XPE::getCertInfo(QString sFileName)
+{
+#if defined(_MSC_VER)
+    wchar_t wszFilePath[512]={};
+
+    if(sFileName.toWCharArray(wszFilePath))
+    {
+        WINTRUST_FILE_INFO wintrustFileInfo={};
+        wintrustFileInfo.cbStruct=sizeof(WINTRUST_FILE_INFO);
+        wintrustFileInfo.pcwszFilePath=wszFilePath;
+        wintrustFileInfo.hFile=NULL;
+        wintrustFileInfo.pgKnownSubject=NULL;
+
+        GUID WVTPolicyGUID=WINTRUST_ACTION_GENERIC_VERIFY_V2;
+        WINTRUST_DATA wintrustData={};
+        wintrustData.cbStruct=sizeof(wintrustData);
+        wintrustData.pPolicyCallbackData=NULL;
+        wintrustData.pSIPClientData=NULL;
+        wintrustData.dwUIChoice=WTD_UI_NONE;
+        wintrustData.fdwRevocationChecks=WTD_REVOKE_NONE;
+        wintrustData.dwUnionChoice=WTD_CHOICE_FILE;
+        wintrustData.dwStateAction=WTD_STATEACTION_VERIFY;
+        wintrustData.hWVTStateData=NULL;
+        wintrustData.pwszURLReference=NULL;
+        wintrustData.dwUIContext=0;
+        wintrustData.pFile=&wintrustFileInfo;
+
+        LONG lStatus=WinVerifyTrust(NULL,&WVTPolicyGUID,&wintrustData);
+
+#ifdef QT_DEBUG
+        qDebug("%X",lStatus);
+#endif
+
+        TRUST_E_NOSIGNATURE;
+
+        wintrustData.dwStateAction=WTD_STATEACTION_CLOSE;
+
+        lStatus=WinVerifyTrust(NULL,&WVTPolicyGUID,&wintrustData);
+    }
+#endif
+}
+
 qint64 XPE::calculateHeadersSize()
 {
     return _calculateHeadersSize(getSectionsTableOffset(),getFileHeader_NumberOfSections());

@@ -12,3 +12,7 @@ SOURCES += \
     XCONFIG += xmsdos
     include($$PWD/xmsdos.pri)
 }
+
+win32-msvc* {
+    LIBS += wintrust.lib # for WinTrust
+}

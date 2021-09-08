@@ -24,6 +24,35 @@ const double XBinary::D_ENTROPY_THRESHOLD=6.5;
 
 XBinary::XBinary(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
+    setData(pDevice,bIsImage,nModuleAddress);
+}
+
+XBinary::XBinary(QString sFileName)
+{
+    g_sFileName=sFileName;
+
+    QFile *pFile=new QFile(sFileName);
+
+    tryToOpen(pFile);
+
+    setData(pFile);
+}
+
+XBinary::~XBinary()
+{
+    if(g_sFileName!="")
+    {
+        QFile *pFile=dynamic_cast<QFile *>(g_pDevice);
+
+        if(pFile)
+        {
+            pFile->close();
+        }
+    }
+}
+
+void XBinary::setData(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+{
     g_pReadWriteMutex=nullptr;
 
     setDevice(pDevice);
@@ -180,7 +209,7 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
 
     switch(mode)
     {
-        case MODE_UNKNOWN:          sResult=tr("Unknown");          break; // mb TODO translate
+        case MODE_UNKNOWN:          sResult=tr("Unknown");          break;
         case MODE_DATA:             sResult=QString("Data");        break; // mb TODO translate
         case MODE_8:                sResult=QString("8");           break;
         case MODE_16:               sResult=QString("16");          break;
@@ -2524,11 +2553,24 @@ bool XBinary::createFile(QString sFileName, qint64 nFileSize)
     return bResult;
 }
 
-bool XBinary::isFileExists(QString sFileName)
+bool XBinary::isFileExists(QString sFileName, bool bTryToOpen)
 {
+    bool bResult=false;
+
     QFileInfo fi(sFileName);
 
-    return (fi.exists()&&fi.isFile());
+    bResult=((fi.exists()&&fi.isFile()));
+
+    if(bResult&&bTryToOpen)
+    {
+        QFile file(sFileName);
+
+        bResult=tryToOpen(&file);
+
+        file.close();
+    }
+
+    return bResult;
 }
 
 bool XBinary::removeFile(QString sFileName)
@@ -3575,6 +3617,8 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
 {
     bool bResult=false;
 
+    // TODO convert -1 to fileSize
+
     PROCENT procent=procentInit(nDataSize);
 
     QFile file;
@@ -3622,6 +3666,11 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
             {
                 _dumpProgressValueChanged(procent.nCurrentProcent);
             }
+        }
+
+        if(g_bIsDumpStop)
+        {
+            bResult=false; // Aborted
         }
 
         _dumpProgressValueChanged(procent.nMaxProcent);
@@ -4269,7 +4318,7 @@ QString XBinary::getUnpackedFileName(QIODevice *pDevice)
 
     QString sClassName=pDevice->metaObject()->className();
 
-    if(sClassName=="QFile")
+    if(sClassName=="QFile") // TODO Static cast to QFile !!!
     {
         QFile *pFile=(QFile *)pDevice;
 
@@ -4396,12 +4445,10 @@ QString XBinary::getDeviceFileName(QIODevice *pDevice)
 {
     QString sResult;
 
-    QString sClassName=pDevice->metaObject()->className();
+    QFile *pFile=dynamic_cast<QFile *>(pDevice);
 
-    if(sClassName=="QFile")
+    if(pFile)
     {
-        QFile *pFile=(QFile *)pDevice;
-
         sResult=pFile->fileName();
     }
 
