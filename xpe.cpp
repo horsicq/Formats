@@ -172,11 +172,11 @@ int XPE::getType()
 
 QString XPE::typeIdToString(int nType)
 {
-    QString sResult="Unknown"; // mb TODO translate
+    QString sResult=tr("Unknown");
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:          sResult=QString("Unknown");             break; // mb TODO translate
+        case TYPE_UNKNOWN:          sResult=tr("Unknown");                  break;
         case TYPE_GUI:              sResult=QString("GUI");                 break;
         case TYPE_CONSOLE:          sResult=QString("Console");             break;
         case TYPE_DLL:              sResult=QString("DLL");                 break;
