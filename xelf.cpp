@@ -4008,11 +4008,11 @@ XBinary::FT XELF::getFileType()
 
 QString XELF::typeIdToString(int nType)
 {
-    QString sResult="Unknown"; // mb TODO translate
+    QString sResult=tr("Unknown");
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_UNKNOWN:          sResult=tr("Unknown");          break;
         case TYPE_REL:              sResult=QString("REL");         break;
         case TYPE_EXEC:             sResult=QString("EXEC");        break;
         case TYPE_DYN:              sResult=QString("DYN");         break;
