@@ -4284,11 +4284,11 @@ int XMACH::getType()
 
 QString XMACH::typeIdToString(int nType)
 {
-    QString sResult="Unknown"; // mb TODO translate
+    QString sResult=tr("Unknown");
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:          sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_UNKNOWN:          sResult=tr("Unknown");          break;
         case TYPE_OBJECT:           sResult=QString("OBJECT");      break;
         case TYPE_EXECUTE:          sResult=QString("EXECUTE");     break;
         case TYPE_FVMLIB:           sResult=QString("FVMLIB");      break;
