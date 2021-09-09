@@ -211,6 +211,7 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
     {
         case MODE_UNKNOWN:          sResult=tr("Unknown");          break;
         case MODE_DATA:             sResult=QString("Data");        break; // mb TODO translate
+        case MODE_BIT:              sResult=QString("BIT");         break; // mb TODO translate
         case MODE_8:                sResult=QString("8");           break;
         case MODE_16:               sResult=QString("16");          break;
         case MODE_16SEG:            sResult=QString("16SEG");       break;
@@ -4158,7 +4159,18 @@ QString XBinary::valueToHex(XBinary::MODE mode, quint64 nValue, bool bIsBigEndia
         mode=getWidthModeFromSize(nValue);
     }
 
-    if(mode==MODE_8)
+    if(mode==MODE_BIT)
+    {
+        if(nValue)
+        {
+            sResult="1";
+        }
+        else
+        {
+            sResult="0";
+        }
+    }
+    else if(mode==MODE_8)
     {
         sResult=valueToHex((quint8)nValue);
     }
