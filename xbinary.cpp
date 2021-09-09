@@ -6742,7 +6742,9 @@ XBinary::DM XBinary::getDisasmMode(QString sArch,bool bIsBigEndian,MODE mode)
     {
         dmResult=DM_SPARC;
     }
-    else if(sArch=="EM_RISC_V")
+    else if((sArch=="RISC_V")||
+            (sArch=="RISCV32")||
+            (sArch=="RISCV64"))
     {
         if(mode==MODE_64)
         {
