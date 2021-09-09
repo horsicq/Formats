@@ -1115,11 +1115,11 @@ int XNE::getType()
 
 QString XNE::typeIdToString(int nType)
 {
-    QString sResult="Unknown"; // mb TODO translate
+    QString sResult=tr("Unknown");
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:      sResult=QString("Unknown");     break; // mb TODO translate
+        case TYPE_UNKNOWN:      sResult=tr("Unknown");          break;
         case TYPE_EXE:          sResult=QString("EXE");         break;
         case TYPE_DLL:          sResult=QString("DLL");         break;
         case TYPE_DRIVER:       sResult=QString("Driver");      break;
