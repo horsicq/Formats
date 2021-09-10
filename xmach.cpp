@@ -4228,7 +4228,7 @@ QString XMACH::getArch()
     quint32 nCpuType=getHeader_cputype();
     quint32 nCpuSubType=getHeader_cpusubtype();
 
-    QString sResult=getHeaderCpuTypesS().value(nCpuType,QString("UNKNOWN"));
+    QString sResult=getHeaderCpuTypesS().value(nCpuType,tr("Unknown"));
 
     if(nCpuType==XMACH_DEF::S_CPU_TYPE_MC680x0)
     {
