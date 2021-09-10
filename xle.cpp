@@ -1356,7 +1356,7 @@ XBinary::MODE XLE::getMode()
 
 QString XLE::getArch()
 {
-    return getImageLECpusS().value(getImageVxdHeader_cpu(),QString("UNKNOWN"));
+    return getImageLECpusS().value(getImageVxdHeader_cpu(),tr("Unknown"));
 }
 
 bool XLE::isBigEndian()
