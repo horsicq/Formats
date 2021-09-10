@@ -85,7 +85,7 @@ XBinary::MODE XPE::getMode()
 
 QString XPE::getArch()
 {
-    return getImageFileHeaderMachinesS().value(getFileHeader_Machine(),QString("UNKNOWN"));
+    return getImageFileHeaderMachinesS().value(getFileHeader_Machine(),tr("Unknown"));
 }
 
 bool XPE::isBigEndian()
