@@ -3020,7 +3020,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
         XPE_DEF::IMAGE_RESOURCE_DIRECTORY rd[3]={};
         XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY rde[3]={};
 
-#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
+#if QT_VERSION >= QT_VERSION_CHECK(5,10,0)
         RESOURCES_ID_NAME irin[3]={};
 #else
         RESOURCES_ID_NAME irin[3]={0}; // MinGW 4.9 bug?
@@ -8613,8 +8613,10 @@ QString XPE::getCertHash(XBinary::HASH hash)
     return sResult;
 }
 
-void XPE::getCertInfo(QString sFileName)
+XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
 {
+    XPE::XCERT_INFO result={};
+
 #if defined(_MSC_VER)
     wchar_t wszFilePath[512]={};
 
@@ -8642,17 +8644,80 @@ void XPE::getCertInfo(QString sFileName)
 
         LONG lStatus=WinVerifyTrust(NULL,&WVTPolicyGUID,&wintrustData);
 
-#ifdef QT_DEBUG
-        qDebug("%X",lStatus);
-#endif
+        if(lStatus==ERROR_SUCCESS)
+        {
+            result.bIsValid=true;
+            result.sStatus=tr("The file is signed and the signature was verified");
+        }
+        else if(lStatus==TRUST_E_NOSIGNATURE)
+        {
+            result.sStatus=tr("The file is not signed");
+        }
+        else if(lStatus==TRUST_E_EXPLICIT_DISTRUST)
+        {
+            result.sStatus=tr("The signature is present, but specifically disallowed");
+        }
+        else if(lStatus==TRUST_E_SUBJECT_NOT_TRUSTED)
+        {
+            result.sStatus=tr("The signature is present, but not trusted");
+        }
+        else if(lStatus==CRYPT_E_SECURITY_SETTINGS)
+        {
+            result.sStatus=tr("The signature error");
+        }
+        else
+        {
+            result.sStatus=QString("%1: %2").arg(tr("Error"),valueToHex(lStatus));
+        }
 
-        TRUST_E_NOSIGNATURE;
+        HCERTSTORE hStore=NULL;
+        HCRYPTMSG hMsg=NULL;
+        PCCERT_CONTEXT pCertContext=NULL;
+        DWORD dwEncoding=0;
+        DWORD dwContentType=0;
+        DWORD dwFormatType=0;
+        DWORD dwSignerInfo=0;
+
+        if(CryptQueryObject(CERT_QUERY_OBJECT_FILE,
+                            wszFilePath,
+                            CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED,
+                            CERT_QUERY_FORMAT_FLAG_BINARY,
+                            0,
+                            &dwEncoding,
+                            &dwContentType,
+                            &dwFormatType,
+                            &hStore,
+                            &hMsg,
+                            NULL))
+        {
+            if(CryptMsgGetParam(hMsg,
+                    CMSG_SIGNER_INFO_PARAM,
+                    0,
+                    NULL,
+                    &dwSignerInfo))
+            {
+                char *pBuffer=new char[dwSignerInfo];
+
+                if(CryptMsgGetParam(hMsg,
+                                   CMSG_SIGNER_INFO_PARAM,
+                                   0,
+                                   (PVOID)pBuffer,
+                                   &dwSignerInfo))
+                {
+                    // TODO
+                }
+
+                delete [] pBuffer;
+            }
+        }
 
         wintrustData.dwStateAction=WTD_STATEACTION_CLOSE;
 
         lStatus=WinVerifyTrust(NULL,&WVTPolicyGUID,&wintrustData);
     }
 #endif
+
+    return result;
 }
 
 qint64 XPE::calculateHeadersSize()

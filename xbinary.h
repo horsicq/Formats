@@ -48,7 +48,7 @@
 #ifdef QT_DEBUG
 #include <QDebug>
 #endif
-#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
+#if QT_VERSION >= QT_VERSION_CHECK(5,10,0)
 #include <QRandomGenerator>
 #elif (QT_VERSION_MAJOR>=6) // TODO Check
 #include <QRandomGenerator>

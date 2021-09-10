@@ -1132,7 +1132,13 @@ public:
 
     QString getCertHash(HASH hash);
 
-    static void getCertInfo(QString sFileName);
+    struct XCERT_INFO
+    {
+        bool bIsValid;
+        QString sStatus;
+    };
+
+    static XCERT_INFO getCertInfo(QString sFileName);
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

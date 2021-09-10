@@ -3946,7 +3946,7 @@ XBinary::MODE XELF::getMode()
 
 QString XELF::getArch()
 {
-    return getMachinesS().value(getHdr32_machine(),QString("UNKNOWN"));
+    return getMachinesS().value(getHdr32_machine(),tr("Unknown"));
 }
 
 int XELF::getType()

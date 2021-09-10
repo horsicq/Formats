@@ -14,5 +14,6 @@ SOURCES += \
 }
 
 win32-msvc* {
-    LIBS += wintrust.lib # for WinTrust
+    LIBS += wintrust.lib    # for WinTrust
+    LIBS += crypt32.lib     # for WinTrust
 }

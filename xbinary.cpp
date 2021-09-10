@@ -279,7 +279,7 @@ quint16 XBinary::random16()
 {
     quint16 nResult=0;
 
-#if (QT_VERSION_MAJOR>=5)&&(QT_VERSION_MINOR>=10)
+#if QT_VERSION >=QT_VERSION_CHECK(5,10,0)
     nResult=(quint16)(QRandomGenerator::global()->generate());
 #elif (QT_VERSION_MAJOR>=6)
     nResult=(quint16)(QRandomGenerator::global()->generate());
