@@ -4236,7 +4236,7 @@ QString XMACH::getArch()
 
         if(mapCpuSubTypesS.contains(nCpuSubType))
         {
-            sResult=mapCpuSubTypesS.value(nCpuSubType,QString("UNKNOWN"));
+            sResult=mapCpuSubTypesS.value(nCpuSubType,tr("Unknown"));
         }
     }
 
