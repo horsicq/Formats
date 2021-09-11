@@ -117,7 +117,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
 
 QString XCOM::getArch()
 {
-    return "8086";
+    return QString("8086");
 }
 
 XBinary::MODE XCOM::getMode()
