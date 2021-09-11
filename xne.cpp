@@ -1086,7 +1086,7 @@ XBinary::MODE XNE::getMode()
 
 QString XNE::getArch()
 {
-    QString sResult="8086";
+    QString sResult=QString("8086");
 
     // TODO
 
