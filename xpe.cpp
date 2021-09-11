@@ -11304,7 +11304,7 @@ QMap<quint64, QString> XPE::getDebugTypesS()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0,"UNKNOWN");
+    mapResult.insert(0,tr("Unknown"));
     mapResult.insert(1,"COFF");
     mapResult.insert(2,"CODEVIEW");
     mapResult.insert(3,"FPO");
