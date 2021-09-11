@@ -32,7 +32,7 @@ XCOM::~XCOM()
 
 bool XCOM::isValid()
 {
-    bool bResult;
+    bool bResult=false;
 
     // mb TODO mb
     if(getSize()<XCOM_DEF::IMAGESIZE)
