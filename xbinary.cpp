@@ -1092,6 +1092,7 @@ QString XBinary::read_UUID(qint64 nOffset)
 
 void XBinary::write_UUID(qint64 nOffset, QString sValue)
 {
+    // TODO Check
     sValue=sValue.remove("-");
 
     QByteArray baUUID=QByteArray::fromHex(sValue.toLatin1().data());
