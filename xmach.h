@@ -360,8 +360,8 @@ public:
     void _set_dyld_info_command_export_off(qint64 nOffset,quint32 nValue);
     void _set_dyld_info_command_export_size(qint64 nOffset,quint32 nValue);
 
-    QString getUUID();
-    void setUUID(QString sValue);
+    QString getModuleUUID();
+    void setModuleUUID(QString sValue);
 
     QString getLoadDylinker();
     void setLoadDylinker(QString sValue);

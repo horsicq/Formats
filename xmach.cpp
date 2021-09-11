@@ -2240,7 +2240,7 @@ void XMACH::_set_dyld_info_command_export_size(qint64 nOffset, quint32 nValue)
     write_uint32(nOffset+offsetof(XMACH_DEF::dyld_info_command,export_size),nValue,isBigEndian());
 }
 
-QString XMACH::getUUID()
+QString XMACH::getModuleUUID()
 {
     QString sResult;
 
@@ -2254,7 +2254,7 @@ QString XMACH::getUUID()
     return sResult;
 }
 
-void XMACH::setUUID(QString sValue)
+void XMACH::setModuleUUID(QString sValue)
 {
     qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_UUID,0);
 
