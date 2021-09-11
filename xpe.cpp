@@ -8720,6 +8720,17 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
     return result;
 }
 
+QString XPE::bytesCountToString(qint64 nValue)
+{
+    QString sResult;
+#if QT_VERSION >=QT_VERSION_CHECK(5,10,0)
+    sResult=QLocale().formattedDataSize(nValue,2,QLocale::DataSizeTraditionalFormat);
+#else
+    // TODO
+#endif
+    return sResult;
+}
+
 qint64 XPE::calculateHeadersSize()
 {
     return _calculateHeadersSize(getSectionsTableOffset(),getFileHeader_NumberOfSections());

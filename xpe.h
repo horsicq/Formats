@@ -1140,6 +1140,8 @@ public:
 
     static XCERT_INFO getCertInfo(QString sFileName);
 
+    static QString bytesCountToString(qint64 nValue);
+
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);
     RESOURCE_POSITION _getResourcePosition(_MEMORY_MAP *pMemoryMap,qint64 nBaseAddress,qint64 nResourceOffset,qint64 nOffset,quint32 nLevel);
