@@ -10948,7 +10948,7 @@ QMap<quint64, QString> XPE::getImageOptionalHeaderSubsystemS()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0,"UNKNOWN");
+    mapResult.insert(0,tr("Unknown"));
     mapResult.insert(1,"NATIVE");
     mapResult.insert(2,"WINDOWS_GUI");
     mapResult.insert(3,"WINDOWS_CUI");
