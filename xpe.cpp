@@ -10817,7 +10817,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0,"UNKNOWN");
+    mapResult.insert(0,tr("Unknown"));
     mapResult.insert(0x014c,"I386");
     mapResult.insert(0x0162,"R3000");
     mapResult.insert(0x0166,"R4000");
