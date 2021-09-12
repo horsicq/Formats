@@ -632,8 +632,8 @@ public:
     QList<RELOC_RECORD> getRelocRecords(qint64 nOffset,qint32 nNumberOfRecords);
     QList<VALUE32_RECORD> getValue32Records(qint64 nOffset,qint32 nNumberOfRecords);
 
-    OFFSETSIZE getStringTableOS();
-    OFFSETSIZE getStringTableOS(QList<COMMAND_RECORD> *pListCommandRecords);
+    OFFSETSIZE getStringTableOffsetSize();
+    OFFSETSIZE getStringTableOffsetSize(QList<COMMAND_RECORD> *pListCommandRecords);
 
     XMACH_DEF::dyld_info_command get_dyld_info();
     XMACH_DEF::symtab_command get_symtab();

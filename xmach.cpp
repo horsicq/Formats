@@ -4000,14 +4000,14 @@ QList<XMACH::VALUE32_RECORD> XMACH::getValue32Records(qint64 nOffset, qint32 nNu
     return listResult;
 }
 
-XBinary::OFFSETSIZE XMACH::getStringTableOS()
+XBinary::OFFSETSIZE XMACH::getStringTableOffsetSize()
 {
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(XMACH_DEF::S_LC_SYMTAB);
 
-    return getStringTableOS(&listCommandRecords);
+    return getStringTableOffsetSize(&listCommandRecords);
 }
 
-XBinary::OFFSETSIZE XMACH::getStringTableOS(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+XBinary::OFFSETSIZE XMACH::getStringTableOffsetSize(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     OFFSETSIZE result={};
 
@@ -4173,7 +4173,7 @@ QList<XMACH::DICE_RECORD> XMACH::getDiceRecords(qint64 nOffset, qint64 nSize)
 QString XMACH::getIndexSymbolName(quint32 nValue)
 {
     QList<XMACH::NLIST_RECORD> listNlist=getNlistRecords();
-    XBinary::OFFSETSIZE osStringTable=getStringTableOS();
+    XBinary::OFFSETSIZE osStringTable=getStringTableOffsetSize();
 
     return getIndexSymbolName(nValue,&listNlist,osStringTable.nOffset,osStringTable.nSize);
 }
