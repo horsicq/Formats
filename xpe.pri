@@ -14,6 +14,7 @@ SOURCES += \
 }
 
 win32-msvc* {
+    # TODO Check MinGW
     LIBS += wintrust.lib    # for WinTrust
     LIBS += crypt32.lib     # for WinTrust
 }
