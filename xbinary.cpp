@@ -2237,7 +2237,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
                 bool bIsUnicodeSymbol=false;
 
-                if(ssOptions.bAnsi)
+                if(ssOptions.bUnicode)
                 {
                     bIsUnicodeSymbol=isUnicodeSymbol(nCode,true);
                 }
@@ -7494,6 +7494,17 @@ QString XBinary::appendText(QString sResult, QString sString, QString sSeparate)
         sResult+=sString;
     }
 
+    return sResult;
+}
+
+QString XBinary::bytesCountToString(qint64 nValue)
+{
+    QString sResult;
+#if QT_VERSION >=QT_VERSION_CHECK(5,10,0)
+    sResult=QLocale().formattedDataSize(nValue,2,QLocale::DataSizeTraditionalFormat);
+#else
+    // TODO
+#endif
     return sResult;
 }
 
