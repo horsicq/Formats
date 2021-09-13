@@ -7551,6 +7551,15 @@ QString XBinary::numberToString(quint64 nValue)
     return sResult;
 }
 
+QString XBinary::versionDwordToString(quint32 nValue)
+{
+    QString sResult;
+
+    sResult=QString("\"%1\"").arg(get_uint32_version(nValue));
+
+    return sResult;
+}
+
 QString XBinary::formatXML(QString sXML)
 {
     QString sResult;

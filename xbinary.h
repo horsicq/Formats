@@ -1000,6 +1000,7 @@ public:
 
     static QString bytesCountToString(quint64 nValue);
     static QString numberToString(quint64 nValue);
+    static QString versionDwordToString(quint32 nValue);
     static QString formatXML(QString sXML);
 
 public slots:
