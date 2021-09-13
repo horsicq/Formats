@@ -7551,6 +7551,26 @@ QString XBinary::numberToString(quint64 nValue)
     return sResult;
 }
 
+QString XBinary::formatXML(QString sXML)
+{
+    QString sResult;
+
+    QXmlStreamReader reader(sXML);
+    QXmlStreamWriter writer(&sResult);
+    writer.setAutoFormatting(true);
+
+    while(!reader.atEnd())
+    {
+        reader.readNext();
+        if(!reader.isWhitespace())
+        {
+            writer.writeCurrentToken(reader);
+        }
+    }
+
+    return sResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!

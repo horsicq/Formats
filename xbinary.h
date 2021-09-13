@@ -39,6 +39,8 @@
 #include <QMutex>
 #include <QTextCodec>
 #include <math.h>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 #if (QT_VERSION_MAJOR<5) // TODO Check
 #include <QRegExp>
 #else
@@ -998,6 +1000,7 @@ public:
 
     static QString bytesCountToString(quint64 nValue);
     static QString numberToString(quint64 nValue);
+    static QString formatXML(QString sXML);
 
 public slots:
     void setSearchProcessEnable(bool bState);
