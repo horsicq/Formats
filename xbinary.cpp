@@ -7531,6 +7531,7 @@ QString XBinary::bytesCountToString(quint64 nValue)
 //        sValue=QString::number((double)nValue/(N_KB*N_KB*N_KB),'f',2);
 //        sUnit=tr("TB");
 //    }
+    // TODO TB
 
     sResult=QString("%1 %2").arg(sValue,sUnit);
 
