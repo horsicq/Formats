@@ -997,6 +997,7 @@ public:
     static QString appendText(QString sResult,QString sString,QString sSeparate);
 
     static QString bytesCountToString(qint64 nValue);
+    static QString numberToString(quint64 nValue);
 
 public slots:
     void setSearchProcessEnable(bool bState);

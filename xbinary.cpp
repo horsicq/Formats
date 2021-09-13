@@ -7508,6 +7508,15 @@ QString XBinary::bytesCountToString(qint64 nValue)
     return sResult;
 }
 
+QString XBinary::numberToString(quint64 nValue)
+{
+    QString sResult;
+
+    sResult=QString("\"%1\"").arg(nValue);
+
+    return sResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!
