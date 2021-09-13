@@ -6743,6 +6743,17 @@ XBinary::DM XBinary::getDisasmMode(QString sArch,bool bIsBigEndian,MODE mode)
     {
         dmResult=DM_M68K40;
     }
+    else if(sArch=="POWERPC")
+    {
+        if(bIsBigEndian)
+        {
+            dmResult=DM_PPC_BE;
+        }
+        else
+        {
+            dmResult=DM_PPC_LE;
+        }
+    }
     else if(sArch=="SPARC")
     {
         dmResult=DM_SPARC;
