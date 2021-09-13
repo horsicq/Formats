@@ -6680,8 +6680,12 @@ XBinary::DM XBinary::getDisasmMode(QString sArch,bool bIsBigEndian,MODE mode)
             dmResult=DM_PPC64_LE;
         }
     }
-    else if(sArch=="MIPS")
-    {
+    else if((sArch=="MIPS")||
+            (sArch=="R3000")||
+            (sArch=="R4000")||
+            (sArch=="R10000")||
+            (sArch=="WCEMIPSV2"))
+    {        
         if(bIsBigEndian)
         {
             dmResult=DM_MIPS_BE;
