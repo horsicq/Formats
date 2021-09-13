@@ -7497,14 +7497,48 @@ QString XBinary::appendText(QString sResult, QString sString, QString sSeparate)
     return sResult;
 }
 
-QString XBinary::bytesCountToString(qint64 nValue)
+QString XBinary::bytesCountToString(quint64 nValue)
 {
     QString sResult;
-#if QT_VERSION >=QT_VERSION_CHECK(5,10,0)
-    sResult=QLocale().formattedDataSize(nValue,2,QLocale::DataSizeTraditionalFormat);
-#else
-    // TODO
-#endif
+
+    const quint64 N_KB=1024;
+
+    QString sValue;
+    QString sUnit;
+
+    if(nValue<N_KB)
+    {
+        sValue=QString::number(nValue);
+        sUnit=tr("Bytes");
+    }
+    else if(nValue<(N_KB*N_KB))
+    {
+        sValue=QString::number((double)nValue/N_KB,'f',2);
+        sUnit=tr("kB");
+    }
+    else if(nValue<(N_KB*N_KB*N_KB))
+    {
+        sValue=QString::number((double)nValue/(N_KB*N_KB),'f',2);
+        sUnit=tr("MB");
+    }
+    else if(nValue<(N_KB*N_KB*N_KB))
+    {
+        sValue=QString::number((double)nValue/(N_KB*N_KB),'f',2);
+        sUnit=tr("GB");
+    }
+//    else if(nValue<(N_KB*N_KB*N_KB*N_KB))
+//    {
+//        sValue=QString::number((double)nValue/(N_KB*N_KB*N_KB),'f',2);
+//        sUnit=tr("TB");
+//    }
+
+    sResult=QString("%1 %2").arg(sValue,sUnit);
+
+//#if QT_VERSION >=QT_VERSION_CHECK(5,10,0)
+//    sResult=QLocale().formattedDataSize(nValue,2,QLocale::DataSizeTraditionalFormat);
+//#else
+//    // TODO
+//#endif
     return sResult;
 }
 
