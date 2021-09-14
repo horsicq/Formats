@@ -4729,11 +4729,11 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
     return sResult;
 }
 
-QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS)
+QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOffsetSize)
 {
     QString sResult;
 
-    PROCENT procent=procentInit(getTotalOSSize(pListOS));
+    PROCENT procent=procentInit(getTotalOSSize(pListOffsetSize));
 
     _hashProgressMinimumChanged(0);
     _hashProgressMaximumChanged(procent.nMaxProcent);
@@ -4759,14 +4759,14 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS)
 
     QCryptographicHash crypto(algorithm);
 
-    int nNumberOfRecords=pListOS->count();
+    int nNumberOfRecords=pListOffsetSize->count();
 
     qint64 nCurrentSize=0;
 
     for(int i=0;(i<nNumberOfRecords)&&(!g_bIsHashStop);i++)
     {
-        qint64 nOffset=pListOS->at(i).nOffset;
-        qint64 nSize=pListOS->at(i).nSize;
+        qint64 nOffset=pListOffsetSize->at(i).nOffset;
+        qint64 nSize=pListOffsetSize->at(i).nSize;
 
         while((nSize>0)&&(!g_bIsHashStop))
         {
