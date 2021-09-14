@@ -433,7 +433,7 @@ public:
     virtual bool isSigned();
     virtual OFFSETSIZE getSignOS(); // TODO rename
 
-    void setEndianness(bool bIsBigEndian);
+    void setEndianness(bool bIsBigEndian); // TODO enum
 
     static bool isPacked(double dEntropy);
 
