@@ -1057,6 +1057,30 @@ qint64 XPE::getDataDirectoryOffset(XBinary::_MEMORY_MAP *pMemoryMap, quint32 nNu
     return nResult;
 }
 
+qint64 XPE::getDataDirectoryHeaderOffset(quint32 nNumber)
+{
+    qint64 nResult=-1;
+
+    if(nNumber<16)
+    {
+        if(is64())
+        {
+            nResult=getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY);
+        }
+        else
+        {
+            nResult=getOptionalHeaderOffset()+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DataDirectory)+nNumber*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY);
+        }
+    }
+
+    return nResult;
+}
+
+qint64 XPE::getDataDirectoryHeaderSize()
+{
+    return sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY);
+}
+
 QByteArray XPE::getDataDirectory(quint32 nNumber)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();

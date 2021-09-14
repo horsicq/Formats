@@ -460,6 +460,10 @@ public:
 
     qint64 getDataDirectoryOffset(quint32 nNumber);
     qint64 getDataDirectoryOffset(_MEMORY_MAP *pMemoryMap,quint32 nNumber);
+
+    qint64 getDataDirectoryHeaderOffset(quint32 nNumber);
+    qint64 getDataDirectoryHeaderSize();
+
     QByteArray getDataDirectory(quint32 nNumber);
     QByteArray getDataDirectory(_MEMORY_MAP *pMemoryMap,quint32 nNumber);
 
