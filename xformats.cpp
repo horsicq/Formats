@@ -329,69 +329,69 @@ bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
     return bResult;
 }
 
-XBinary::OFFSETSIZE XFormats::getSignOS(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
     XBinary::OFFSETSIZE result={};
 
     if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
     {
         XBinary binary(pDevice,bIsImage,nModuleAddress);
-        result=binary.getSignOS();
+        result=binary.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
     {
         XCOM com(pDevice,bIsImage,nModuleAddress);
-        result=com.getSignOS();
+        result=com.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
     {
         XMSDOS msdos(pDevice,bIsImage,nModuleAddress);
-        result=msdos.getSignOS();
+        result=msdos.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
     {
         XNE ne(pDevice,bIsImage,nModuleAddress);
-        result=ne.getSignOS();
+        result=ne.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
     {
         XLE le(pDevice,bIsImage,nModuleAddress);
-        result=le.getSignOS();
+        result=le.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
         XPE pe(pDevice,bIsImage,nModuleAddress);
-        result=pe.getSignOS();
+        result=pe.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
     {
         XELF elf(pDevice,bIsImage,nModuleAddress);
-        result=elf.getSignOS();
+        result=elf.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
     {
         XMACH mach(pDevice,bIsImage,nModuleAddress);
-        result=mach.getSignOS();
+        result=mach.getSignOffsetSize();
     }
 #ifdef USE_DEX
     else if(XBinary::checkFileType(XBinary::FT_DEX,fileType))
     {
         XDEX dex(pDevice);
-        result=dex.getSignOS();
+        result=dex.getSignOffsetSize();
     }
 #endif
 #ifdef USE_ARCHIVE
     else if(XBinary::checkFileType(XBinary::FT_ZIP,fileType))
     {
         XZip zip(pDevice);
-        result=zip.getSignOS();
+        result=zip.getSignOffsetSize();
     }
 #endif
 
     return result;
 }
 
-XBinary::OFFSETSIZE XFormats::getSignOS(QString sFileName)
+XBinary::OFFSETSIZE XFormats::getSignOffsetSize(QString sFileName)
 {
     XBinary::OFFSETSIZE result={};
 
@@ -401,7 +401,7 @@ XBinary::OFFSETSIZE XFormats::getSignOS(QString sFileName)
 
     if(file.open(QIODevice::ReadOnly))
     {
-        result=getSignOS(XBinary::getPrefFileType(&file,true),&file);
+        result=getSignOffsetSize(XBinary::getPrefFileType(&file,true),&file);
 
         file.close();
     }

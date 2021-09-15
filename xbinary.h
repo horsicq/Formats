@@ -431,7 +431,7 @@ public:
     virtual QString getArch();
 
     virtual bool isSigned();
-    virtual OFFSETSIZE getSignOS(); // TODO rename
+    virtual OFFSETSIZE getSignOffsetSize(); // TODO rename
 
     void setEndianness(bool bIsBigEndian); // TODO enum
 

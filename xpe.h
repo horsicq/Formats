@@ -340,7 +340,7 @@ public:
     virtual QString typeIdToString(int nType);
 
     virtual bool isSigned();
-    virtual OFFSETSIZE getSignOS();
+    virtual OFFSETSIZE getSignOffsetSize();
 
     qint64 getNtHeadersOffset();
     quint32 getNtHeaders_Signature();

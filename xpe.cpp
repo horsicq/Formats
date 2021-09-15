@@ -195,10 +195,10 @@ QString XPE::typeIdToString(int nType)
 
 bool XPE::isSigned()
 {
-    return getSignOS().nSize;
+    return getSignOffsetSize().nSize;
 }
 
-XBinary::OFFSETSIZE XPE::getSignOS()
+XBinary::OFFSETSIZE XPE::getSignOffsetSize()
 {
     OFFSETSIZE result={};
 

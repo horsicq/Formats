@@ -253,7 +253,7 @@ bool XBinary::isSigned()
     return false;
 }
 
-XBinary::OFFSETSIZE XBinary::getSignOS()
+XBinary::OFFSETSIZE XBinary::getSignOffsetSize()
 {
     OFFSETSIZE result={};
 
