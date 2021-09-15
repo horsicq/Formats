@@ -4720,10 +4720,10 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 
     if(nOffset!=-1)
     {
-        QList<OFFSETSIZE> listOS;
-        listOS.append(offsetSize);
+        QList<OFFSETSIZE> listOffsetSize;
+        listOffsetSize.append(offsetSize);
 
-        sResult=getHash(hash,&listOS);
+        sResult=getHash(hash,&listOffsetSize);
     }
 
     return sResult;
