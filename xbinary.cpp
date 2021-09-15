@@ -7044,15 +7044,15 @@ bool XBinary::procentSetCurrentValue(XBinary::PROCENT *pProcent, qint64 nCurrent
     return bResult;
 }
 
-qint64 XBinary::getTotalOSSize(QList<OFFSETSIZE> *pListOS)
+qint64 XBinary::getTotalOSSize(QList<OFFSETSIZE> *pListOffsetSize)
 {
     qint64 nResult=0;
 
-    int nNumberOfRecords=pListOS->count();
+    int nNumberOfRecords=pListOffsetSize->count();
 
     for(int i=0;i<nNumberOfRecords;i++)
     {
-        nResult+=pListOS->at(i).nSize;
+        nResult+=pListOffsetSize->at(i).nSize;
     }
 
     return nResult;

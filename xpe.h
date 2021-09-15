@@ -1139,6 +1139,9 @@ public:
     struct XCERT_INFO
     {
         bool bIsValid;
+        QString sProgramName;
+        QString sPublisher;
+        QString sMoreInfo;
         QString sStatus;
     };
 

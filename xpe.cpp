@@ -8696,7 +8696,6 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
 
         HCERTSTORE hStore=NULL;
         HCRYPTMSG hMsg=NULL;
-        PCCERT_CONTEXT pCertContext=NULL;
         DWORD dwEncoding=0;
         DWORD dwContentType=0;
         DWORD dwFormatType=0;
@@ -8720,18 +8719,96 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
                     NULL,
                     &dwSignerInfo))
             {
-                char *pBuffer=new char[dwSignerInfo];
+                char *_pSignerInfo=new char[dwSignerInfo];
 
                 if(CryptMsgGetParam(hMsg,
                                    CMSG_SIGNER_INFO_PARAM,
                                    0,
-                                   (PVOID)pBuffer,
+                                   (PVOID)_pSignerInfo,
                                    &dwSignerInfo))
                 {
-                    // TODO
+                    if(dwSignerInfo>=sizeof(CMSG_SIGNER_INFO))
+                    {
+                        CMSG_SIGNER_INFO *pSignerInfo=(CMSG_SIGNER_INFO *)_pSignerInfo;
+
+                        for(DWORD n=0;n<pSignerInfo->AuthAttrs.cAttr;n++)
+                        {
+                            if(QString(pSignerInfo->AuthAttrs.rgAttr[n].pszObjId)==QString(SPC_SP_OPUS_INFO_OBJID))
+                            {
+                                DWORD dwOpusInfo=0;
+
+                                if(CryptDecodeObject(X509_ASN_ENCODING|PKCS_7_ASN_ENCODING,
+                                                     SPC_SP_OPUS_INFO_OBJID,
+                                                     pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].pbData,
+                                                     pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].cbData,
+                                                     0,
+                                                     NULL,
+                                                     &dwOpusInfo))
+                                {
+                                    char *_pOpusInfo=new char[dwOpusInfo];
+
+                                    if(CryptDecodeObject(X509_ASN_ENCODING|PKCS_7_ASN_ENCODING,
+                                                         SPC_SP_OPUS_INFO_OBJID,
+                                                         pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].pbData,
+                                                         pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].cbData,
+                                                         0,
+                                                         (PVOID)_pOpusInfo,
+                                                         &dwOpusInfo))
+                                    {
+                                        SPC_SP_OPUS_INFO *pOpusInfo=(SPC_SP_OPUS_INFO *)_pOpusInfo;
+
+                                        result.sProgramName=QString::fromWCharArray(pOpusInfo->pwszProgramName);
+
+                                        if(pOpusInfo->pPublisherInfo)
+                                        {
+                                            if(pOpusInfo->pPublisherInfo->dwLinkChoice==SPC_URL_LINK_CHOICE)
+                                            {
+                                                result.sPublisher=QString::fromWCharArray(pOpusInfo->pPublisherInfo->pwszUrl);
+                                            }
+                                            else if(pOpusInfo->pPublisherInfo->dwLinkChoice==SPC_FILE_LINK_CHOICE)
+                                            {
+                                                result.sPublisher=QString::fromWCharArray(pOpusInfo->pPublisherInfo->pwszFile);
+                                            }
+                                        }
+
+                                        if(pOpusInfo->pMoreInfo)
+                                        {
+                                            if(pOpusInfo->pMoreInfo->dwLinkChoice==SPC_URL_LINK_CHOICE)
+                                            {
+                                                result.sMoreInfo=QString::fromWCharArray(pOpusInfo->pMoreInfo->pwszUrl);
+                                            }
+                                            else if(pOpusInfo->pMoreInfo->dwLinkChoice==SPC_FILE_LINK_CHOICE)
+                                            {
+                                                result.sMoreInfo=QString::fromWCharArray(pOpusInfo->pMoreInfo->pwszFile);
+                                            }
+                                        }
+                                    }
+
+                                    CERT_INFO CertInfo={};
+
+                                    CertInfo.Issuer=pSignerInfo->Issuer;
+                                    CertInfo.SerialNumber=pSignerInfo->SerialNumber;
+
+                                    PCCERT_CONTEXT pCertContext=CertFindCertificateInStore(hStore,
+                                                                                           X509_ASN_ENCODING|PKCS_7_ASN_ENCODING,
+                                                                                           0,
+                                                                                           CERT_FIND_SUBJECT_CERT,
+                                                                                           (PVOID)&CertInfo,
+                                                                                           NULL);
+
+                                    if(pCertContext)
+                                    {
+                                        // TODO
+                                    }
+
+                                    delete [] _pOpusInfo;
+                                }
+                            }
+                        }
+                    }
                 }
 
-                delete [] pBuffer;
+                delete [] _pSignerInfo;
             }
         }
 

@@ -956,7 +956,7 @@ public:
     static PROCENT procentInit(qint64 nMaxValue,bool bTimer=false);
     static bool procentSetCurrentValue(PROCENT *pProcent,qint64 nCurrentValue);
 
-    static qint64 getTotalOSSize(QList<OFFSETSIZE> *pListOS);
+    static qint64 getTotalOSSize(QList<OFFSETSIZE> *pListOffsetSize);
 
     static MODE getWidthModeFromSize(quint64 nSize); // TODO rename
     static MODE getWidthModeFromMemoryMap(_MEMORY_MAP *pMemoryMap);
