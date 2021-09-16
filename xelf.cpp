@@ -3457,13 +3457,13 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
 
     QList<TAG_STRUCT> listNeeded=_getTagStructs(pList,XELF_DEF::DT_NEEDED);
 
-    OFFSETSIZE offsetSize=getStringTable(pMemoryMap,pList);
+    OFFSETSIZE osStringTable=getStringTable(pMemoryMap,pList);
 
-    if(offsetSize.nSize)
+    if(osStringTable.nSize)
     {
-        qint64 nOffset=offsetSize.nOffset;
+        qint64 nOffset=osStringTable.nOffset;
 
-        QByteArray baSection=read_array(nOffset,offsetSize.nSize);
+        QByteArray baSection=read_array(nOffset,osStringTable.nSize);
 
         qint64 nSectionTableSize=baSection.size();
 
