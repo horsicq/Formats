@@ -1143,6 +1143,7 @@ public:
         QString sPublisher;
         QString sMoreInfo;
         QString sStatus;
+        QString sSerialNumber;
     };
 
     static XCERT_INFO getCertInfo(QString sFileName);

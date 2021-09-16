@@ -8465,6 +8465,9 @@ qint64 XPE::read_ASN_Integer(qint64 nOffset, qint64 nSize)
 
 bool XPE::read_ASN_Bool(qint64 nOffset, qint64 nSize)
 {
+    Q_UNUSED(nOffset)
+    Q_UNUSED(nSize)
+
     bool bResult=false;
 
     // TODO
@@ -8474,6 +8477,9 @@ bool XPE::read_ASN_Bool(qint64 nOffset, qint64 nSize)
 
 QDateTime XPE::read_ASN_DateTime(qint64 nOffset, qint64 nSize)
 {
+    Q_UNUSED(nOffset)
+    Q_UNUSED(nSize)
+
     QDateTime dtResult;
 
     // TODO
@@ -8483,6 +8489,9 @@ QDateTime XPE::read_ASN_DateTime(qint64 nOffset, qint64 nSize)
 
 QString XPE::read_ASN_AnsiString(qint64 nOffset, qint64 nSize)
 {
+    Q_UNUSED(nOffset)
+    Q_UNUSED(nSize)
+
     QString sResult;
 
     // TODO
@@ -8630,6 +8639,8 @@ QString XPE::objectIdToString(QString sObjectID)
 
 QString XPE::getCertHash(XBinary::HASH hash)
 {
+    Q_UNUSED(hash)
+
     QString sResult;
 
     // TODO
@@ -8798,6 +8809,11 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
 
                                     if(pCertContext)
                                     {
+                                        DWORD dwData=pCertContext->pCertInfo->SerialNumber.cbData;
+                                        for(DWORD n=0;n<dwData;n++)
+                                        {
+                                            result.sSerialNumber.append(QString("%1 ").arg(XBinary::valueToHex(pCertContext->pCertInfo->SerialNumber.pbData[dwData-(n+1)])));
+                                        }
                                         // TODO
                                     }
 
