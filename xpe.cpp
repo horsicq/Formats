@@ -4109,7 +4109,7 @@ QByteArray XPE::getHeaders()
 
 XBinary::OFFSETSIZE XPE::__getSectionOffsetAndSize(quint32 nSection)
 {
-    OFFSETSIZE result={};
+    OFFSETSIZE osResult={};
 
     XPE_DEF::IMAGE_SECTION_HEADER sectionHeader=getSectionHeader(nSection);
     quint32 nSectionAlignment=getOptionalHeader_SectionAlignment();
@@ -4148,14 +4148,14 @@ XBinary::OFFSETSIZE XPE::__getSectionOffsetAndSize(quint32 nSection)
             nSectionSize=sectionHeader.Misc.VirtualSize;
         }
 
-        result=convertOffsetAndSize(nSectionOffset,nSectionSize);
+        osResult=convertOffsetAndSize(nSectionOffset,nSectionSize);
     }
     else
     {
-        result.nOffset=-1;
+        osResult.nOffset=-1;
     }
 
-    return result;
+    return osResult;
 }
 
 QByteArray XPE::getSection(quint32 nSection)
