@@ -1144,9 +1144,26 @@ public:
         QString sMoreInfo;
         QString sStatus;
         QString sSerialNumber;
+        QString sIssuer;
+        QString sSubject;
+        QString sAlgorithm;
+        QString sTSSerialNumber;
+        QString sTSIssuer;
+        QString sTSSubject;
     };
 
     static XCERT_INFO getCertInfo(QString sFileName);
+
+#if defined(_MSC_VER)
+    enum CERTNAMESTRING
+    {
+        CERTNAMESTRING_UNKNOWN=0,
+        CERTNAMESTRING_ISSUER,
+        CERTNAMESTRING_SUBJECT
+    };
+
+    static QString getCertNameString(PCCERT_CONTEXT pCertContext,CERTNAMESTRING certNameString);
+#endif
 
 private:
     quint16 _checkSum(qint64 nStartValue,qint64 nDataSize);

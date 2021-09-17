@@ -8629,6 +8629,7 @@ QString XPE::objectIdToString(QString sObjectID)
     else if (sObjectID=="2.16.840.1.101.3.4.2.1")       sResult="SHA256";
     else
     {
+        sResult=sObjectID;
     #ifdef QT_DEBUG
         qDebug("Object ID: %s",sObjectID.toLatin1().data());
     #endif
@@ -8744,6 +8745,8 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
 
                         for(DWORD n=0;n<pSignerInfo->AuthAttrs.cAttr;n++)
                         {
+//                            qDebug("%s",pSignerInfo->AuthAttrs.rgAttr[n].pszObjId);
+
                             if(QString(pSignerInfo->AuthAttrs.rgAttr[n].pszObjId)==QString(SPC_SP_OPUS_INFO_OBJID))
                             {
                                 DWORD dwOpusInfo=0;
@@ -8814,11 +8817,76 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
                                         {
                                             result.sSerialNumber.append(QString("%1 ").arg(XBinary::valueToHex(pCertContext->pCertInfo->SerialNumber.pbData[dwData-(n+1)])));
                                         }
-                                        // TODO
+
+                                        result.sIssuer=getCertNameString(pCertContext,CERTNAMESTRING_ISSUER);
+                                        result.sSubject=getCertNameString(pCertContext,CERTNAMESTRING_SUBJECT);
                                     }
 
                                     delete [] _pOpusInfo;
                                 }
+                            }
+                        }
+
+                        for(DWORD n=0;n<pSignerInfo->UnauthAttrs.cAttr;n++)
+                        {
+                            qDebug("%s",pSignerInfo->UnauthAttrs.rgAttr[n].pszObjId);
+
+                            if(QString(pSignerInfo->UnauthAttrs.rgAttr[n].pszObjId)==QString(szOID_RSA_counterSign))
+//                            if(QString(pSignerInfo->UnauthAttrs.rgAttr[n].pszObjId)==QString(szOID_RFC3161_counterSign))
+                            {
+                                DWORD dwCounterSignerInfo=0;
+
+                                if(CryptDecodeObject(X509_ASN_ENCODING|PKCS_7_ASN_ENCODING,
+                                                     PKCS7_SIGNER_INFO,
+                                                     pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
+                                                     pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData,
+                                                     0,
+                                                     NULL,
+                                                     &dwCounterSignerInfo))
+                                {
+                                    char *_pCounterSignerInfo=new char[dwCounterSignerInfo];
+
+                                    if(CryptDecodeObject(X509_ASN_ENCODING|PKCS_7_ASN_ENCODING,
+                                                         PKCS7_SIGNER_INFO,
+                                                         pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
+                                                         pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData,
+                                                         0,
+                                                         (PVOID)_pCounterSignerInfo,
+                                                         &dwCounterSignerInfo))
+                                    {
+                                        CMSG_SIGNER_INFO *pCounterSignerInfo=(CMSG_SIGNER_INFO *)_pCounterSignerInfo;
+
+                                        CERT_INFO CertInfo={};
+
+                                        CertInfo.Issuer=pCounterSignerInfo->Issuer;
+                                        CertInfo.SerialNumber=pCounterSignerInfo->SerialNumber;
+
+                                        PCCERT_CONTEXT pCertContext=CertFindCertificateInStore(hStore,
+                                                                                               X509_ASN_ENCODING|PKCS_7_ASN_ENCODING,
+                                                                                               0,
+                                                                                               CERT_FIND_SUBJECT_CERT,
+                                                                                               (PVOID)&CertInfo,
+                                                                                               NULL);
+
+                                        if(pCertContext)
+                                        {
+                                            DWORD dwData=pCertContext->pCertInfo->SerialNumber.cbData;
+                                            for(DWORD n=0;n<dwData;n++)
+                                            {
+                                                result.sTSSerialNumber.append(QString("%1 ").arg(XBinary::valueToHex(pCertContext->pCertInfo->SerialNumber.pbData[dwData-(n+1)])));
+                                            }
+
+                                            result.sTSIssuer=getCertNameString(pCertContext,CERTNAMESTRING_ISSUER);
+                                            result.sTSSubject=getCertNameString(pCertContext,CERTNAMESTRING_SUBJECT);
+                                        }
+                                    }
+
+                                    delete [] _pCounterSignerInfo;
+                                }
+//                                else
+//                                {
+//                                    qDebug("GetLastError: %X",GetLastError());
+//                                }
                             }
                         }
                     }
@@ -8836,7 +8904,52 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
 
     return result;
 }
+#if defined(_MSC_VER)
+QString XPE::getCertNameString(PCCERT_CONTEXT pCertContext, CERTNAMESTRING certNameString)
+{
+    QString sResult;
 
+    DWORD dwType=0;
+    DWORD dwFlags=0;
+
+    if(certNameString==CERTNAMESTRING_ISSUER)
+    {
+        dwType=CERT_NAME_SIMPLE_DISPLAY_TYPE;
+        dwFlags=CERT_NAME_ISSUER_FLAG;
+    }
+    else if(certNameString==CERTNAMESTRING_SUBJECT)
+    {
+        dwType=CERT_NAME_SIMPLE_DISPLAY_TYPE;
+        dwFlags=0;
+    }
+
+    DWORD dwData=CertGetNameStringW(pCertContext,
+                                   dwType,
+                                   dwFlags,
+                                   NULL,
+                                   NULL,
+                                   0);
+
+    if(dwData)
+    {
+        char *_pBuffer=new char[dwData*sizeof(TCHAR)];
+
+        if(CertGetNameStringW(pCertContext,
+                             dwType,
+                             dwFlags,
+                             NULL,
+                             (LPWSTR)_pBuffer,
+                             dwData))
+        {
+            sResult=QString::fromWCharArray((wchar_t *)_pBuffer);
+        }
+
+        delete [] _pBuffer;
+    }
+
+    return sResult;
+}
+#endif
 qint64 XPE::calculateHeadersSize()
 {
     return _calculateHeadersSize(getSectionsTableOffset(),getFileHeader_NumberOfSections());
