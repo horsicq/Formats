@@ -3217,7 +3217,7 @@ bool XELF::isNotePresent(QList<NOTE> *pListNotes, QString sName)
         if(pListNotes->at(i).sName==sName)
         {
             bResult=true;
-            false;
+            break;
         }
     }
 
@@ -3233,7 +3233,7 @@ XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, QString sName)
         if(pListNotes->at(i).sName==sName)
         {
             result=pListNotes->at(i);
-            false;
+            break;
         }
     }
 

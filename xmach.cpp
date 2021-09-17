@@ -4009,7 +4009,7 @@ XBinary::OFFSETSIZE XMACH::getStringTableOffsetSize()
 
 XBinary::OFFSETSIZE XMACH::getStringTableOffsetSize(QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
-    OFFSETSIZE result={};
+    OFFSETSIZE osResult={};
 
     qint64 nOffset=getCommandRecordOffset(XMACH_DEF::S_LC_SYMTAB,0,pListCommandRecords);
 
@@ -4017,11 +4017,11 @@ XBinary::OFFSETSIZE XMACH::getStringTableOffsetSize(QList<XMACH::COMMAND_RECORD>
     {
         XMACH_DEF::symtab_command symtab=_read_symtab_command(nOffset);
 
-        result.nOffset=symtab.stroff;
-        result.nSize=symtab.stroff;
+        osResult.nOffset=symtab.stroff;
+        osResult.nSize=symtab.stroff;
     }
 
-    return result;
+    return osResult;
 }
 
 XMACH_DEF::dyld_info_command XMACH::get_dyld_info()
