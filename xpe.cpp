@@ -200,7 +200,7 @@ bool XPE::isSigned()
 
 XBinary::OFFSETSIZE XPE::getSignOffsetSize()
 {
-    OFFSETSIZE result={};
+    OFFSETSIZE osResult={};
 
     XPE_DEF::IMAGE_DATA_DIRECTORY idSecurity=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY);
 
@@ -210,10 +210,10 @@ XBinary::OFFSETSIZE XPE::getSignOffsetSize()
 
     if(checkOffsetSize(osSecurity))
     {
-        result=osSecurity;
+        osResult=osSecurity;
     }
 
-    return result;
+    return osResult;
 }
 
 qint64 XPE::getNtHeadersOffset()
