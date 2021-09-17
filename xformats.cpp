@@ -331,64 +331,64 @@ bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
 
 XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
-    XBinary::OFFSETSIZE result={};
+    XBinary::OFFSETSIZE osResult={};
 
     if(XBinary::checkFileType(XBinary::FT_BINARY,fileType))
     {
         XBinary binary(pDevice,bIsImage,nModuleAddress);
-        result=binary.getSignOffsetSize();
+        osResult=binary.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_COM,fileType))
     {
         XCOM com(pDevice,bIsImage,nModuleAddress);
-        result=com.getSignOffsetSize();
+        osResult=com.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
     {
         XMSDOS msdos(pDevice,bIsImage,nModuleAddress);
-        result=msdos.getSignOffsetSize();
+        osResult=msdos.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
     {
         XNE ne(pDevice,bIsImage,nModuleAddress);
-        result=ne.getSignOffsetSize();
+        osResult=ne.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
     {
         XLE le(pDevice,bIsImage,nModuleAddress);
-        result=le.getSignOffsetSize();
+        osResult=le.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
         XPE pe(pDevice,bIsImage,nModuleAddress);
-        result=pe.getSignOffsetSize();
+        osResult=pe.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
     {
         XELF elf(pDevice,bIsImage,nModuleAddress);
-        result=elf.getSignOffsetSize();
+        osResult=elf.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
     {
         XMACH mach(pDevice,bIsImage,nModuleAddress);
-        result=mach.getSignOffsetSize();
+        osResult=mach.getSignOffsetSize();
     }
 #ifdef USE_DEX
     else if(XBinary::checkFileType(XBinary::FT_DEX,fileType))
     {
         XDEX dex(pDevice);
-        result=dex.getSignOffsetSize();
+        osResult=dex.getSignOffsetSize();
     }
 #endif
 #ifdef USE_ARCHIVE
     else if(XBinary::checkFileType(XBinary::FT_ZIP,fileType))
     {
         XZip zip(pDevice);
-        result=zip.getSignOffsetSize();
+        osResult=zip.getSignOffsetSize();
     }
 #endif
 
-    return result;
+    return osResult;
 }
 
 XBinary::OFFSETSIZE XFormats::getSignOffsetSize(QString sFileName)
