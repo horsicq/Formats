@@ -255,9 +255,9 @@ bool XBinary::isSigned()
 
 XBinary::OFFSETSIZE XBinary::getSignOffsetSize()
 {
-    OFFSETSIZE result={};
+    OFFSETSIZE osResult={};
 
-    return result;
+    return osResult;
 }
 
 void XBinary::setEndianness(bool bIsBigEndian)
