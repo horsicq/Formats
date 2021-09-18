@@ -4713,15 +4713,12 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 {
     QString sResult;
 
-    OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
+    OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
 
-    nOffset=offsetSize.nOffset;
-    nSize=offsetSize.nSize;
-
-    if(nOffset!=-1)
+    if(osRegion.nOffset!=-1)
     {
         QList<OFFSETSIZE> listOffsetSize;
-        listOffsetSize.append(offsetSize);
+        listOffsetSize.append(osRegion);
 
         sResult=getHash(hash,&listOffsetSize);
     }
