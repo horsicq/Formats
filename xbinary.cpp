@@ -1931,10 +1931,10 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
 
 QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 nSize,STRINGSEARCH_OPTIONS ssOptions)
 {
-    OFFSETSIZE os=convertOffsetAndSize(nOffset,nSize);
+    OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
 
-    nOffset=os.nOffset;
-    nSize=os.nSize;
+    nOffset=osRegion.nOffset;
+    nSize=osRegion.nSize;
 
     QList<XBinary::MS_RECORD> listResult;
 
