@@ -10902,7 +10902,7 @@ QList<qint64> XPE::getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap)
 
     if(nOffset!=-1)
     {
-        for(int i=0;i<100;i++) // TODO const
+        for(int i=0;i<100;i++) // TODO const !!!
         {
             qint64 nAddress=0;
 
@@ -10931,6 +10931,18 @@ QList<qint64> XPE::getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap)
     }
 
     return listResult;
+}
+
+bool XPE::isTLSCallbacksPresent()
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return isTLSCallbacksPresent(&memoryMap);
+}
+
+bool XPE::isTLSCallbacksPresent(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    return getTLS_CallbacksList(pMemoryMap).count();
 }
 
 XPE::TLS_HEADER XPE::getTLSHeader()

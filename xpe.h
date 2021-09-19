@@ -755,6 +755,9 @@ public:
     QList<qint64> getTLS_CallbacksList();
     QList<qint64> getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap);
 
+    bool isTLSCallbacksPresent();
+    bool isTLSCallbacksPresent(XBinary::_MEMORY_MAP *pMemoryMap);
+
     TLS_HEADER getTLSHeader();
 
     static QMap<quint64,QString> getImageNtHeadersSignatures();
