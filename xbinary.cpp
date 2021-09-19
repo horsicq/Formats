@@ -4899,10 +4899,10 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize)
     // TODO optimize!!!
     quint32 nResult=0;
 
-    OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
+    OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
 
-    nOffset=offsetSize.nOffset;
-    nSize=offsetSize.nSize;
+    nOffset=osRegion.nOffset;
+    nSize=osRegion.nSize;
 
     const quint32 MOD_ADLER=65521;
 
