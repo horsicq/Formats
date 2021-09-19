@@ -3254,24 +3254,24 @@ QString XBinary::getMemoryRecordInfoByOffset(XBinary::_MEMORY_MAP *pMemoryMap, q
 {
     XBinary::_MEMORY_RECORD memoryRecord=getMemoryRecordByOffset(pMemoryMap,nOffset);
 
-    return getMemoryRecordInfo(&memoryRecord);
+    return getMemoryRecordName(&memoryRecord);
 }
 
 QString XBinary::getMemoryRecordInfoByAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
 {
     XBinary::_MEMORY_RECORD memoryRecord=getMemoryRecordByAddress(pMemoryMap,nAddress);
 
-    return getMemoryRecordInfo(&memoryRecord);
+    return getMemoryRecordName(&memoryRecord);
 }
 
 QString XBinary::getMemoryRecordInfoByRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
 {
     XBinary::_MEMORY_RECORD memoryRecord=getMemoryRecordByAddress(pMemoryMap,nRelAddress+pMemoryMap->nModuleAddress);
 
-    return getMemoryRecordInfo(&memoryRecord);
+    return getMemoryRecordName(&memoryRecord);
 }
 
-QString XBinary::getMemoryRecordInfo(XBinary::_MEMORY_RECORD *pMemoryRecord)
+QString XBinary::getMemoryRecordName(XBinary::_MEMORY_RECORD *pMemoryRecord)
 {
     QString sRecord;
 
