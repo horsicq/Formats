@@ -579,15 +579,15 @@ QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize)
 {
     QByteArray baResult;
 
-    XBinary::OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
+    XBinary::OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
 
-    if(offsetSize.nOffset!=-1)
+    if(osRegion.nOffset!=-1)
     {
-        baResult.resize((qint32)offsetSize.nSize);
+        baResult.resize((qint32)osRegion.nSize);
 
-        qint64 nBytes=read_array(offsetSize.nOffset,baResult.data(),offsetSize.nSize);
+        qint64 nBytes=read_array(osRegion.nOffset,baResult.data(),osRegion.nSize);
 
-        if(offsetSize.nSize!=nBytes)
+        if(osRegion.nSize!=nBytes)
         {
             baResult.resize((qint32)nBytes);
         }
