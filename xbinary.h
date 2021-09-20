@@ -1003,6 +1003,16 @@ public:
     static QString versionDwordToString(quint32 nValue);
     static QString formatXML(QString sXML);
 
+    struct XDWORD
+    {
+        quint16 nValue1;
+        quint16 nValue2;
+    };
+
+    static quint32 make_dword(XDWORD xdword);
+    static quint32 make_dword(quint16 nValue1,quint16 nValue2);
+    static XDWORD make_xdword(quint32 nValue);
+
 public slots:
     void setSearchProcessEnable(bool bState);
     void setDumpProcessEnable(bool bState);

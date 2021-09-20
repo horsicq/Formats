@@ -7593,6 +7593,35 @@ QString XBinary::formatXML(QString sXML)
     return sResult;
 }
 
+quint32 XBinary::make_dword(XBinary::XDWORD xdword)
+{
+    quint32 nResult=0;
+
+    nResult+=(xdword.nValue1)<<16;
+    nResult+=xdword.nValue2;
+
+    return nResult;
+}
+
+quint32 XBinary::make_dword(quint16 nValue1, quint16 nValue2)
+{
+    XDWORD xdword={};
+    xdword.nValue1=nValue1;
+    xdword.nValue2=nValue2;
+
+    return make_dword(xdword);
+}
+
+XBinary::XDWORD XBinary::make_xdword(quint32 nValue)
+{
+    XDWORD result={};
+
+    result.nValue1=(quint16)(nValue>>16);
+    result.nValue2=(quint16)(nValue&0xFFFF);
+
+    return result;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!

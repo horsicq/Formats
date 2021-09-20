@@ -444,6 +444,9 @@ public:
     void setOptionalHeader_LoaderFlags(quint32 nValue);
     void setOptionalHeader_NumberOfRvaAndSizes(quint32 nValue);
 
+    quint32 getOperatingSystemVersion();
+    void setOperatingSystemVersion(quint32 nValue);
+
     XPE_DEF::IMAGE_DATA_DIRECTORY read_IMAGE_DATA_DIRECTORY(qint64 nOffset);
     void write_IMAGE_DATA_DIRECTORY(qint64 nOffset,XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
 

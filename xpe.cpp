@@ -885,6 +885,26 @@ void XPE::setOptionalHeader_NumberOfRvaAndSizes(quint32 nValue)
     }
 }
 
+quint32 XPE::getOperatingSystemVersion()
+{
+    qint64 nOptionalHeaderOffset=getOptionalHeaderOffset();
+
+    quint16 nValue1=read_uint16(nOptionalHeaderOffset+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MajorOperatingSystemVersion));
+    quint16 nValue2=read_uint16(nOptionalHeaderOffset+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MinorOperatingSystemVersion));
+
+    return make_dword(nValue1,nValue2);
+}
+
+void XPE::setOperatingSystemVersion(quint32 nValue)
+{
+    XDWORD xdword=make_xdword(nValue);
+
+    qint64 nOptionalHeaderOffset=getOptionalHeaderOffset();
+
+    write_uint16(nOptionalHeaderOffset+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MajorOperatingSystemVersion),xdword.nValue1);
+    write_uint16(nOptionalHeaderOffset+offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,MinorOperatingSystemVersion),xdword.nValue2);
+}
+
 XPE_DEF::IMAGE_DATA_DIRECTORY XPE::read_IMAGE_DATA_DIRECTORY(qint64 nOffset)
 {
     XPE_DEF::IMAGE_DATA_DIRECTORY result={};
