@@ -1178,22 +1178,22 @@ quint16 XELF::getSectionStringTable(bool bIs64)
 
 XBinary::OFFSETSIZE XELF::getSectionOffsetSize(quint32 nSection)
 {
-    OFFSETSIZE result={};
+    OFFSETSIZE osResult={};
 
     if(is64())
     {
         XELF_DEF::Elf64_Shdr section_header=getElf64_Shdr(nSection);
-        result.nOffset=section_header.sh_offset;
-        result.nSize=section_header.sh_size;
+        osResult.nOffset=section_header.sh_offset;
+        osResult.nSize=section_header.sh_size;
     }
     else
     {
         XELF_DEF::Elf32_Shdr section_header=getElf32_Shdr(nSection);
-        result.nOffset=section_header.sh_offset;
-        result.nSize=section_header.sh_size;
+        osResult.nOffset=section_header.sh_offset;
+        osResult.nSize=section_header.sh_size;
     }
 
-    return result;
+    return osResult;
 }
 
 QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
