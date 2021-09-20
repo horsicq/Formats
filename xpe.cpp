@@ -11587,3 +11587,21 @@ QMap<quint64, QString> XPE::getDebugTypesS()
 
     return mapResult;
 }
+
+QMap<quint64, QString> XPE::getOperatingSystemVersions()
+{
+    QMap<quint64, QString> mapResult;
+
+    // TODO
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getOperatingSystemVersionsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    // TODO
+
+    return mapResult;
+}

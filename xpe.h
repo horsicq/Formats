@@ -792,6 +792,9 @@ public:
     static QMap<quint64,QString> getDebugTypes();
     static QMap<quint64,QString> getDebugTypesS();
 
+    static QMap<quint64,QString> getOperatingSystemVersions();
+    static QMap<quint64,QString> getOperatingSystemVersionsS();
+
     qint64 calculateHeadersSize();
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset,quint32 nNumberOfSections);
 
