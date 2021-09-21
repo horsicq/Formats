@@ -11592,7 +11592,21 @@ QMap<quint64, QString> XPE::getOperatingSystemVersions()
 {
     QMap<quint64, QString> mapResult;
 
-    // TODO
+    mapResult.insert(0x00000000,tr("Unknown"));
+    mapResult.insert(0x0003000A,QString("Windows NT 3.1"));
+    mapResult.insert(0x00030032,QString("Windows NT 3.5"));
+    mapResult.insert(0x00030033,QString("Windows NT 3.51"));
+    mapResult.insert(0x00040000,QString("Windows 95"));
+    mapResult.insert(0x00040001,QString("Windows 98"));
+    mapResult.insert(0x00040009,QString("Windows Millenium"));
+    mapResult.insert(0x00050000,QString("Windows 2000"));
+    mapResult.insert(0x00050001,QString("Windows XP"));
+    mapResult.insert(0x00050002,QString("Windows Server 2003"));
+    mapResult.insert(0x00060000,QString("Windows Vista"));
+    mapResult.insert(0x00060001,QString("Windows 7"));
+    mapResult.insert(0x00060002,QString("Windows 8"));
+    mapResult.insert(0x00060003,QString("Windows 8.1"));
+    mapResult.insert(0x000A0000,QString("Windows 10"));
 
     return mapResult;
 }
@@ -11601,7 +11615,21 @@ QMap<quint64, QString> XPE::getOperatingSystemVersionsS()
 {
     QMap<quint64, QString> mapResult;
 
-    // TODO
+    mapResult.insert(0x00000000,tr("Unknown"));
+    mapResult.insert(0x0003000A,QString("NT 3.1"));
+    mapResult.insert(0x00030032,QString("NT 3.5"));
+    mapResult.insert(0x00030033,QString("NT 3.51"));
+    mapResult.insert(0x00040000,QString("95"));
+    mapResult.insert(0x00040001,QString("98"));
+    mapResult.insert(0x00040009,QString("Millenium"));
+    mapResult.insert(0x00050000,QString("2000"));
+    mapResult.insert(0x00050001,QString("XP"));
+    mapResult.insert(0x00050002,QString("Server 2003"));
+    mapResult.insert(0x00060000,QString("Vista"));
+    mapResult.insert(0x00060001,QString("7"));
+    mapResult.insert(0x00060002,QString("8"));
+    mapResult.insert(0x00060003,QString("8.1"));
+    mapResult.insert(0x000A0000,QString("10"));
 
     return mapResult;
 }
