@@ -4978,10 +4978,10 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
     // TODO optimize!!!
     quint32 nResult=0xFFFFFFFF; // ~0
 
-    OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
+    OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
 
-    nOffset=offsetSize.nOffset;
-    nSize=offsetSize.nSize;
+    nOffset=osRegion.nOffset;
+    nSize=osRegion.nSize;
 
     if(nOffset!=-1)
     {
