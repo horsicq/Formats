@@ -5392,10 +5392,10 @@ QString XBinary::getSignature(qint64 nOffset, qint64 nSize)
 
 XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
 {
-    OFFSETSIZE result={};
+    OFFSETSIZE osResult={};
 
-    result.nOffset=-1;
-    result.nSize=0;
+    osResult.nOffset=-1;
+    osResult.nSize=0;
 
     qint64 nTotalSize=getSize();
 
@@ -5411,11 +5411,11 @@ XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(qint64 nOffset, qint64 nSize)
 
     if((nSize>0)&&(nOffset>=0)&&(nOffset<nTotalSize)&&(nOffset+nSize-1<nTotalSize))
     {
-        result.nOffset=nOffset;
-        result.nSize=nSize;
+        osResult.nOffset=nOffset;
+        osResult.nSize=nSize;
     }
 
-    return result;
+    return osResult;
 }
 
 XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
