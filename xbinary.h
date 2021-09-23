@@ -288,6 +288,14 @@ public:
         SYNTAX_MOTOROLA
     };
 
+    enum OS
+    {
+        OS_UNKNOWN=0,
+        OS_UNIX,
+        OS_MSDOS,
+        OS_WINDOWS
+    };
+
     struct _MEMORY_MAP
     {
         qint64 nModuleAddress;
@@ -927,9 +935,10 @@ public:
 
     static QString valueToTimeString(quint64 nValue,DT_TYPE type);
 
-    static bool isX86asm(QString sArch);
+    static bool isX86asm(QString sArch); // TODO remove use getDisasmMode
     static QString disasmIdToString(DM disasmMode);
     static QString syntaxIdToString(SYNTAX syntax);
+    static QString osIdToString(OS os);
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
     static DM getDisasmMode(QString sArch,bool bIsBigEndian=false,MODE mode=MODE_UNKNOWN);
     static DMFAMILY getDisasmFamily(DM disasmMode);

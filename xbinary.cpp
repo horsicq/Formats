@@ -5143,10 +5143,10 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
 {
     BYTE_COUNTS result={0};
 
-    OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
+    OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
 
-    nOffset=offsetSize.nOffset;
-    nSize=offsetSize.nSize;
+    nOffset=osRegion.nOffset;
+    nSize=osRegion.nSize;
 
     if(nOffset!=-1)
     {
@@ -5181,7 +5181,7 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
             nSize-=nTemp;
             nOffset+=nTemp;
 
-            if(procentSetCurrentValue(&procent,nOffset-offsetSize.nOffset))
+            if(procentSetCurrentValue(&procent,nOffset-osRegion.nOffset))
             {
                 _entropyProgressValueChanged(procent.nCurrentProcent);
             }
@@ -6641,6 +6641,20 @@ QString XBinary::syntaxIdToString(SYNTAX syntax)
         case SYNTAX_INTEL:              sResult=QString("INTEL");           break;
         case SYNTAX_MASM:               sResult=QString("MASM");            break;
         case SYNTAX_MOTOROLA:           sResult=QString("MOTOROLA");        break;
+    }
+
+    return sResult;
+}
+
+QString XBinary::osIdToString(OS os)
+{
+    QString sResult=tr("Unknown");
+
+    switch(os)
+    {
+        case OS_UNIX:                   sResult=QString("Unix");            break;
+        case OS_WINDOWS:                sResult=QString("Windows");         break;
+        case OS_MSDOS:                  sResult=QString("MSDOS");           break;
     }
 
     return sResult;
