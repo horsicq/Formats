@@ -1238,9 +1238,9 @@ QString XELF::getStringFromSection(quint32 nIndex, quint32 nSection)
 {
     QString sResult;
 
-    XBinary::OFFSETSIZE offsetSize=getSectionOffsetSize(nSection);
+    XBinary::OFFSETSIZE osRegion=getSectionOffsetSize(nSection);
 
-    sResult=getStringFromIndex(offsetSize.nOffset,offsetSize.nSize,nIndex);
+    sResult=getStringFromIndex(osRegion.nOffset,osRegion.nSize,nIndex);
 
     return sResult;
 }
