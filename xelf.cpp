@@ -3423,7 +3423,7 @@ XBinary::OFFSETSIZE XELF::getStringTable()
 
 XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs)
 {
-    OFFSETSIZE result={};
+    OFFSETSIZE osResult={};
 
     QList<TAG_STRUCT> listStrTab=_getTagStructs(pListTagStructs,XELF_DEF::DT_STRTAB);
     QList<TAG_STRUCT> listStrSize=_getTagStructs(pListTagStructs,XELF_DEF::DT_STRSZ);
@@ -3435,12 +3435,12 @@ XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList
 
         if(isOffsetAndSizeValid(pMemoryMap,nOffset,nSize))
         {
-            result.nOffset=nOffset;
-            result.nSize=nSize;
+            osResult.nOffset=nOffset;
+            osResult.nSize=nSize;
         }
     }
 
-    return result;
+    return osResult;
 }
 
 QList<QString> XELF::getLibraries()
