@@ -5380,9 +5380,9 @@ QString XBinary::getSignature(qint64 nOffset, qint64 nSize)
 
     if(nOffset!=-1)
     {
-        OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,-1);
+        OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,-1);
 
-        nSize=qMin(offsetSize.nSize,nSize);
+        nSize=qMin(osRegion.nSize,nSize);
 
         sResult=read_array(nOffset,nSize).toHex().toUpper();
     }
