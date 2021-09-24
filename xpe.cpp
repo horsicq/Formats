@@ -4201,11 +4201,11 @@ QString XPE::getSectionHash(HASH hash,quint32 nSection)
 {
     QString sResult;
 
-    OFFSETSIZE offsetSize=__getSectionOffsetAndSize(nSection);
+    OFFSETSIZE osRegion=__getSectionOffsetAndSize(nSection);
 
-    if(offsetSize.nOffset!=-1)
+    if(osRegion.nOffset!=-1)
     {
-        sResult=getHash(hash,offsetSize.nOffset,offsetSize.nSize);
+        sResult=getHash(hash,osRegion.nOffset,osRegion.nSize);
     }
 
     return sResult;
