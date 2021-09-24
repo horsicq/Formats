@@ -5063,10 +5063,10 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
 {
     double dResult=1.4426950408889634073599246810023;
 
-    OFFSETSIZE offsetSize=convertOffsetAndSize(nOffset,nSize);
+    OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
 
-    nOffset=offsetSize.nOffset;
-    nSize=offsetSize.nSize;
+    nOffset=osRegion.nOffset;
+    nSize=osRegion.nSize;
 
     if(nSize==0)
     {
@@ -5105,7 +5105,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
             nSize-=nTemp;
             nOffset+=nTemp;
 
-            if(procentSetCurrentValue(&procent,nOffset-offsetSize.nOffset))
+            if(procentSetCurrentValue(&procent,nOffset-osRegion.nOffset))
             {
                 _entropyProgressValueChanged(procent.nCurrentProcent);
             }
@@ -5119,7 +5119,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
         {
             for(int j=0; j<256; j++)
             {
-                double dTemp=bytes[j]/(double)offsetSize.nSize;
+                double dTemp=bytes[j]/(double)osRegion.nSize;
 
                 if(dTemp)
                 {
@@ -5128,7 +5128,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
             }
         }
 
-        dResult=dResult/(double)offsetSize.nSize;
+        dResult=dResult/(double)osRegion.nSize;
     }
 
     if(g_bIsEntropyStop)
