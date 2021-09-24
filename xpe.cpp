@@ -4182,13 +4182,13 @@ QByteArray XPE::getSection(quint32 nSection)
 {
     QByteArray baResult;
 
-    OFFSETSIZE offsetSize=__getSectionOffsetAndSize(nSection);
+    OFFSETSIZE osRegion=__getSectionOffsetAndSize(nSection);
 
-    if(offsetSize.nOffset!=-1)
+    if(osRegion.nOffset!=-1)
     {
-        baResult=read_array(offsetSize.nOffset,offsetSize.nSize);
+        baResult=read_array(osRegion.nOffset,osRegion.nSize);
 
-        if(baResult.size()!=offsetSize.nSize) // TODO check???
+        if(baResult.size()!=osRegion.nSize) // TODO check???
         {
             baResult.resize(0);
         }
