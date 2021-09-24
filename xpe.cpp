@@ -9367,8 +9367,8 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
 XBinary::OFFSETSIZE XPE::getNet_MetadataOffsetSize()
 {
-    OFFSETSIZE result={};
-    result.nOffset=-1;
+    OFFSETSIZE osResult={};
+    osResult.nOffset=-1;
 
     _MEMORY_MAP memoryMap=getMemoryMap();
 
@@ -9393,12 +9393,12 @@ XBinary::OFFSETSIZE XPE::getNet_MetadataOffsetSize()
 
         if((header.cb==0x48)&&header.MetaData.VirtualAddress&&header.MetaData.Size)
         {
-            result.nOffset=relAddressToOffset(&memoryMap,header.MetaData.VirtualAddress);
-            result.nSize=header.MetaData.VirtualAddress;
+            osResult.nOffset=relAddressToOffset(&memoryMap,header.MetaData.VirtualAddress);
+            osResult.nSize=header.MetaData.VirtualAddress;
         }
     }
 
-    return result;
+    return osResult;
 }
 
 XPE::CLI_METADATA_HEADER XPE::_read_MetadataHeader(qint64 nOffset)
