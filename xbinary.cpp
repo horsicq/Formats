@@ -2992,9 +2992,9 @@ bool XBinary::isOffsetValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
     return bResult;
 }
 
-bool XBinary::isOffsetAndSizeValid(XBinary::_MEMORY_MAP *pMemoryMap, XBinary::OFFSETSIZE *pOffsetSize)
+bool XBinary::isOffsetAndSizeValid(XBinary::_MEMORY_MAP *pMemoryMap, XBinary::OFFSETSIZE *pOsRegion)
 {
-    return isOffsetAndSizeValid(pMemoryMap,pOffsetSize->nOffset,pOffsetSize->nSize);
+    return isOffsetAndSizeValid(pMemoryMap,pOsRegion->nOffset,pOsRegion->nSize);
 }
 
 bool XBinary::isOffsetAndSizeValid(qint64 nOffset, qint64 nSize)
