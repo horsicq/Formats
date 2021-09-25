@@ -5910,11 +5910,19 @@ bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE osRegion)
     return (bOffsetValid)&&(bSizeValid);
 }
 
-QString XBinary::get_uint32_version(quint32 nValue)
+QString XBinary::get_uint32_full_version(quint32 nValue)
 {
     QString sResult=QString("%1.%2.%3").arg(    QString::number((nValue>>16)&0xFF),
                                                 QString::number((nValue>>8)&0xFF),
                                                 QString::number((nValue)&0xFF));
+
+    return sResult;
+}
+
+QString XBinary::get_uint32_version(quint32 nValue)
+{
+    QString sResult=QString("%1.%2").arg(    QString::number((nValue>>16)&0xFFFF),
+                                                QString::number((nValue)&0xFFFF));
 
     return sResult;
 }
@@ -7574,6 +7582,15 @@ QString XBinary::numberToString(quint64 nValue)
     QString sResult;
 
     sResult=QString("\"%1\"").arg(nValue);
+
+    return sResult;
+}
+
+QString XBinary::fullVersionDwordToString(quint32 nValue)
+{
+    QString sResult;
+
+    sResult=QString("\"%1\"").arg(get_uint32_full_version(nValue));
 
     return sResult;
 }

@@ -816,8 +816,8 @@ public:
 
     QString getSignature(qint64 nOffset,qint64 nSize);
 
-    OFFSETSIZE convertOffsetAndSize(qint64 nOffset,qint64 nSize);
-    static OFFSETSIZE convertOffsetAndSize(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
+    OFFSETSIZE convertOffsetAndSize(qint64 nOffset,qint64 nSize); // TODO rename
+    static OFFSETSIZE convertOffsetAndSize(QIODevice *pDevice,qint64 nOffset,qint64 nSize); // TODO rename
 
     static bool compareSignatureStrings(QString sBaseSignature,QString sOptSignature);
     static QString stringToHex(QString sString);
@@ -862,6 +862,7 @@ public:
 
     bool checkOffsetSize(OFFSETSIZE osRegion);
 
+    static QString get_uint32_full_version(quint32 nValue);
     static QString get_uint32_version(quint32 nValue);
     static bool isResizeEnable(QIODevice *pDevice);
     static bool resize(QIODevice *pDevice,qint64 nSize);
@@ -1009,6 +1010,7 @@ public:
 
     static QString bytesCountToString(quint64 nValue);
     static QString numberToString(quint64 nValue);
+    static QString fullVersionDwordToString(quint32 nValue);
     static QString versionDwordToString(quint32 nValue);
     static QString formatXML(QString sXML);
 
