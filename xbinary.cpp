@@ -5900,12 +5900,12 @@ bool XBinary::tryToOpen(QIODevice *pDevice)
     return bResult;
 }
 
-bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE offsetSize)
+bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE osRegion)
 {
     qint64 nTotalSize=getSize();
 
-    bool bOffsetValid=(offsetSize.nOffset>=0)&&(offsetSize.nOffset<nTotalSize);
-    bool bSizeValid=(offsetSize.nSize>0)&&((offsetSize.nOffset+offsetSize.nSize-1)<nTotalSize);
+    bool bOffsetValid=(osRegion.nOffset>=0)&&(osRegion.nOffset<nTotalSize);
+    bool bSizeValid=(osRegion.nSize>0)&&((osRegion.nOffset+osRegion.nSize-1)<nTotalSize);
 
     return (bOffsetValid)&&(bSizeValid);
 }

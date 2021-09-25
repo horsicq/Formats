@@ -860,7 +860,7 @@ public:
 
     static bool tryToOpen(QIODevice *pDevice);
 
-    bool checkOffsetSize(OFFSETSIZE offsetSize);
+    bool checkOffsetSize(OFFSETSIZE osRegion);
 
     static QString get_uint32_version(quint32 nValue);
     static bool isResizeEnable(QIODevice *pDevice);
