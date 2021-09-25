@@ -4717,10 +4717,10 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
 
     if(osRegion.nOffset!=-1)
     {
-        QList<OFFSETSIZE> listOffsetSize;
-        listOffsetSize.append(osRegion);
+        QList<OFFSETSIZE> listOS;
+        listOS.append(osRegion);
 
-        sResult=getHash(hash,&listOffsetSize);
+        sResult=getHash(hash,&listOS);
     }
 
     return sResult;
