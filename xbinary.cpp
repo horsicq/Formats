@@ -214,11 +214,11 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
         case MODE_UNKNOWN:          sResult=tr("Unknown");          break;
         case MODE_DATA:             sResult=QString("Data");        break; // mb TODO translate
         case MODE_BIT:              sResult=QString("BIT");         break; // mb TODO translate
-        case MODE_8:                sResult=QString("8");           break;
-        case MODE_16:               sResult=QString("16");          break;
+        case MODE_8:                sResult=tr("8 bits");           break;
+        case MODE_16:               sResult=tr("16 bits");          break;
         case MODE_16SEG:            sResult=QString("16SEG");       break;
-        case MODE_32:               sResult=QString("32");          break;
-        case MODE_64:               sResult=QString("64");          break;
+        case MODE_32:               sResult=tr("32 bits");          break;
+        case MODE_64:               sResult=tr("64 bits");          break;
     }
 
     return sResult;
