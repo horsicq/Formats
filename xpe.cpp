@@ -105,6 +105,7 @@ XBinary::OSINFO XPE::getOsInfo()
     OSINFO result={};
 
     result.osType=OSTYPE_WINDOWS;
+    result.sOsVersion=""; // TODO
 
     // TODO
 

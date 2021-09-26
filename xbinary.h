@@ -300,7 +300,8 @@ public:
         OSTYPE_UNIX,
         OSTYPE_POSIX,
         OSTYPE_MSDOS,
-        OSTYPE_WINDOWS
+        OSTYPE_WINDOWS,
+        OSTYPE_UEFI
     };
 
     struct OSINFO
