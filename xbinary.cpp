@@ -6654,15 +6654,15 @@ QString XBinary::syntaxIdToString(SYNTAX syntax)
     return sResult;
 }
 
-QString XBinary::osIdToString(OS os)
+QString XBinary::osTypeIdToString(OSTYPE osType)
 {
     QString sResult=tr("Unknown");
 
-    switch(os)
+    switch(osType)
     {
-        case OS_UNIX:                   sResult=QString("Unix");            break;
-        case OS_WINDOWS:                sResult=QString("Windows");         break;
-        case OS_MSDOS:                  sResult=QString("MSDOS");           break;
+        case OSTYPE_UNIX:               sResult=QString("Unix");            break;
+        case OSTYPE_WINDOWS:            sResult=QString("Windows");         break;
+        case OSTYPE_MSDOS:              sResult=QString("MSDOS");           break;
     }
 
     return sResult;

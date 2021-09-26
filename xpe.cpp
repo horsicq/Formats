@@ -114,7 +114,7 @@ XBinary::FT XPE::getFileType()
 
 int XPE::getType()
 {
-    TYPE result=TYPE_UNKNOWN;
+    TYPE result=TYPE_CONSOLE;
 
     quint16 nSubsystem=getOptionalHeader_Subsystem();
 
@@ -159,6 +159,7 @@ int XPE::getType()
         result=TYPE_CE;
     }
 
+    // TODO from Resource/Version
     if(result!=TYPE_DRIVER) // TODO Check
     {
         if((getFileHeader_Characteristics()&XPE_DEF::S_IMAGE_FILE_DLL))
@@ -11588,7 +11589,7 @@ QMap<quint64, QString> XPE::getDebugTypesS()
     return mapResult;
 }
 
-QMap<quint64, QString> XPE::getOperatingSystemVersions()
+QMap<quint64, QString> XPE::getWindowsOperatingSystemVersions()
 {
     QMap<quint64, QString> mapResult;
 
@@ -11611,7 +11612,7 @@ QMap<quint64, QString> XPE::getOperatingSystemVersions()
     return mapResult;
 }
 
-QMap<quint64, QString> XPE::getOperatingSystemVersionsS()
+QMap<quint64, QString> XPE::getWindowsOperatingSystemVersionsS()
 {
     QMap<quint64, QString> mapResult;
 

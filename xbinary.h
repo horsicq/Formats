@@ -288,12 +288,20 @@ public:
         SYNTAX_MOTOROLA
     };
 
-    enum OS
+    enum OSTYPE
     {
-        OS_UNKNOWN=0,
-        OS_UNIX,
-        OS_MSDOS,
-        OS_WINDOWS
+        OSTYPE_UNKNOWN=0,
+        OSTYPE_UNIX,
+        OSTYPE_POSIX,
+        OSTYPE_MSDOS,
+        OSTYPE_WINDOWS
+    };
+
+    struct OSINFO
+    {
+        OSTYPE osType;
+        QString sVersion;
+        // TODO more
     };
 
     struct _MEMORY_MAP
@@ -939,7 +947,7 @@ public:
     static bool isX86asm(QString sArch); // TODO remove use getDisasmMode
     static QString disasmIdToString(DM disasmMode);
     static QString syntaxIdToString(SYNTAX syntax);
-    static QString osIdToString(OS os);
+    static QString osTypeIdToString(OSTYPE osType);
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
     static DM getDisasmMode(QString sArch,bool bIsBigEndian=false,MODE mode=MODE_UNKNOWN);
     static DMFAMILY getDisasmFamily(DM disasmMode);
