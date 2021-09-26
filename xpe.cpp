@@ -100,6 +100,17 @@ XBinary::OSTYPE XPE::getOsType()
     return OSTYPE_WINDOWS;
 }
 
+XBinary::OSINFO XPE::getOsInfo()
+{
+    OSINFO result={};
+
+    result.osType=OSTYPE_WINDOWS;
+
+    // TODO
+
+    return result;
+}
+
 XBinary::FT XPE::getFileType()
 {
     FT result=FT_PE32;
