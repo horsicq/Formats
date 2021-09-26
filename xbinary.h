@@ -449,6 +449,9 @@ public:
     virtual bool isSigned();
     virtual OFFSETSIZE getSignOffsetSize(); // TODO rename
 
+    void setOsType(OSTYPE osType);
+    virtual OSTYPE getOsType();
+
     void setEndianness(bool bIsBigEndian); // TODO enum
 
     static bool isPacked(double dEntropy);
@@ -1104,6 +1107,7 @@ private:
     bool g_bIsHashStop;
     bool g_bIsProcessSignalsDisable;
     QString g_sArch;
+    OSTYPE g_osType;
     MODE g_mode;
     QString g_sVersion;
     int g_nType;

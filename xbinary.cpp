@@ -71,6 +71,7 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
     setArch("NOEXEC");
     setVersion("");
     setType(TYPE_UNKNOWN);
+    setOsType(OSTYPE_UNKNOWN);
 
     g_bLog=false;
 }
@@ -258,6 +259,16 @@ XBinary::OFFSETSIZE XBinary::getSignOffsetSize()
     OFFSETSIZE osResult={};
 
     return osResult;
+}
+
+void XBinary::setOsType(OSTYPE osType)
+{
+    g_osType=osType;
+}
+
+XBinary::OSTYPE XBinary::getOsType()
+{
+    return g_osType;
 }
 
 void XBinary::setEndianness(bool bIsBigEndian)
@@ -6661,6 +6672,7 @@ QString XBinary::osTypeIdToString(OSTYPE osType)
     switch(osType)
     {
         case OSTYPE_UNIX:               sResult=QString("Unix");            break;
+        case OSTYPE_POSIX:              sResult=QString("Posix");           break;
         case OSTYPE_WINDOWS:            sResult=QString("Windows");         break;
         case OSTYPE_MSDOS:              sResult=QString("MSDOS");           break;
     }

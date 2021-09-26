@@ -94,6 +94,12 @@ bool XPE::isBigEndian()
     return false;
 }
 
+XBinary::OSTYPE XPE::getOsType()
+{
+    // TODO !!!
+    return OSTYPE_WINDOWS;
+}
+
 XBinary::FT XPE::getFileType()
 {
     FT result=FT_PE32;
@@ -142,22 +148,22 @@ int XPE::getType()
     {
         result=TYPE_EFIRUNTIMEDRIVER;
     }
-    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX)
-    {
-        result=TYPE_XBOX;
-    }
-    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI)
-    {
-        result=TYPE_OS2;
-    }
-    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI)
-    {
-        result=TYPE_POSIX;
-    }
-    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
-    {
-        result=TYPE_CE;
-    }
+//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX)
+//    {
+//        result=TYPE_XBOX;
+//    }
+//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI)
+//    {
+//        result=TYPE_OS2;
+//    }
+//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI)
+//    {
+//        result=TYPE_POSIX;
+//    }
+//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
+//    {
+//        result=TYPE_CE;
+//    }
 
     // TODO from Resource/Version
     if(result!=TYPE_DRIVER) // TODO Check
@@ -178,17 +184,18 @@ QString XPE::typeIdToString(int nType)
     switch(nType)
     {
         case TYPE_UNKNOWN:          sResult=tr("Unknown");                  break;
+        case TYPE_APPLICATION:      sResult=tr("Application");              break;
         case TYPE_GUI:              sResult=QString("GUI");                 break;
         case TYPE_CONSOLE:          sResult=QString("Console");             break;
         case TYPE_DLL:              sResult=QString("DLL");                 break;
-        case TYPE_DRIVER:           sResult=QString("Driver");              break;
+        case TYPE_DRIVER:           sResult=tr("Driver");                   break;
         case TYPE_EFIBOOT:          sResult=QString("EFI Boot");            break;
         case TYPE_EFI:              sResult=QString("EFI");                 break;
         case TYPE_EFIRUNTIMEDRIVER: sResult=QString("EFI Runtime driver");  break;
-        case TYPE_XBOX:             sResult=QString("XBOX");                break;
-        case TYPE_OS2:              sResult=QString("OS2");                 break;
-        case TYPE_POSIX:            sResult=QString("POSIX");               break;
-        case TYPE_CE:               sResult=QString("CE");                  break;
+//        case TYPE_XBOX:             sResult=QString("XBOX");                break;
+//        case TYPE_OS2:              sResult=QString("OS2");                 break;
+//        case TYPE_POSIX:            sResult=QString("POSIX");               break;
+//        case TYPE_CE:               sResult=QString("CE");                  break;
     }
 
     return sResult;
@@ -11589,48 +11596,56 @@ QMap<quint64, QString> XPE::getDebugTypesS()
     return mapResult;
 }
 
-QMap<quint64, QString> XPE::getWindowsOperatingSystemVersions()
+QMap<quint64, QString> XPE::getOperatingSystemVersions(OSTYPE osType)
 {
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x00000000,tr("Unknown"));
-    mapResult.insert(0x0003000A,QString("Windows NT 3.1"));
-    mapResult.insert(0x00030032,QString("Windows NT 3.5"));
-    mapResult.insert(0x00030033,QString("Windows NT 3.51"));
-    mapResult.insert(0x00040000,QString("Windows 95"));
-    mapResult.insert(0x00040001,QString("Windows 98"));
-    mapResult.insert(0x00040009,QString("Windows Millenium"));
-    mapResult.insert(0x00050000,QString("Windows 2000"));
-    mapResult.insert(0x00050001,QString("Windows XP"));
-    mapResult.insert(0x00050002,QString("Windows Server 2003"));
-    mapResult.insert(0x00060000,QString("Windows Vista"));
-    mapResult.insert(0x00060001,QString("Windows 7"));
-    mapResult.insert(0x00060002,QString("Windows 8"));
-    mapResult.insert(0x00060003,QString("Windows 8.1"));
-    mapResult.insert(0x000A0000,QString("Windows 10"));
+
+    if(osType==OSTYPE_WINDOWS)
+    {
+        mapResult.insert(0x0003000A,QString("Windows NT 3.1"));
+        mapResult.insert(0x00030032,QString("Windows NT 3.5"));
+        mapResult.insert(0x00030033,QString("Windows NT 3.51"));
+        mapResult.insert(0x00040000,QString("Windows 95"));
+        mapResult.insert(0x00040001,QString("Windows 98"));
+        mapResult.insert(0x00040009,QString("Windows Millenium"));
+        mapResult.insert(0x00050000,QString("Windows 2000"));
+        mapResult.insert(0x00050001,QString("Windows XP"));
+        mapResult.insert(0x00050002,QString("Windows Server 2003"));
+        mapResult.insert(0x00060000,QString("Windows Vista"));
+        mapResult.insert(0x00060001,QString("Windows 7"));
+        mapResult.insert(0x00060002,QString("Windows 8"));
+        mapResult.insert(0x00060003,QString("Windows 8.1"));
+        mapResult.insert(0x000A0000,QString("Windows 10"));
+    }
 
     return mapResult;
 }
 
-QMap<quint64, QString> XPE::getWindowsOperatingSystemVersionsS()
+QMap<quint64, QString> XPE::getOperatingSystemVersionsS(OSTYPE osType)
 {
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x00000000,tr("Unknown"));
-    mapResult.insert(0x0003000A,QString("NT 3.1"));
-    mapResult.insert(0x00030032,QString("NT 3.5"));
-    mapResult.insert(0x00030033,QString("NT 3.51"));
-    mapResult.insert(0x00040000,QString("95"));
-    mapResult.insert(0x00040001,QString("98"));
-    mapResult.insert(0x00040009,QString("Millenium"));
-    mapResult.insert(0x00050000,QString("2000"));
-    mapResult.insert(0x00050001,QString("XP"));
-    mapResult.insert(0x00050002,QString("Server 2003"));
-    mapResult.insert(0x00060000,QString("Vista"));
-    mapResult.insert(0x00060001,QString("7"));
-    mapResult.insert(0x00060002,QString("8"));
-    mapResult.insert(0x00060003,QString("8.1"));
-    mapResult.insert(0x000A0000,QString("10"));
+
+    if(osType==OSTYPE_WINDOWS)
+    {
+        mapResult.insert(0x0003000A,QString("NT 3.1"));
+        mapResult.insert(0x00030032,QString("NT 3.5"));
+        mapResult.insert(0x00030033,QString("NT 3.51"));
+        mapResult.insert(0x00040000,QString("95"));
+        mapResult.insert(0x00040001,QString("98"));
+        mapResult.insert(0x00040009,QString("Millenium"));
+        mapResult.insert(0x00050000,QString("2000"));
+        mapResult.insert(0x00050001,QString("XP"));
+        mapResult.insert(0x00050002,QString("Server 2003"));
+        mapResult.insert(0x00060000,QString("Vista"));
+        mapResult.insert(0x00060001,QString("7"));
+        mapResult.insert(0x00060002,QString("8"));
+        mapResult.insert(0x00060003,QString("8.1"));
+        mapResult.insert(0x000A0000,QString("10"));
+    }
 
     return mapResult;
 }

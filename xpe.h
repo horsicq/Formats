@@ -312,6 +312,7 @@ public:
     {
         // mb TODO CEDLL
         TYPE_UNKNOWN=0,
+        TYPE_APPLICATION,
         TYPE_GUI,
         TYPE_CONSOLE,
         TYPE_DLL,
@@ -319,10 +320,10 @@ public:
         TYPE_EFIBOOT,
         TYPE_EFI,
         TYPE_EFIRUNTIMEDRIVER,
-        TYPE_XBOX,
-        TYPE_OS2,
-        TYPE_POSIX,
-        TYPE_CE
+//        TYPE_XBOX,
+//        TYPE_OS2,
+//        TYPE_POSIX,
+//        TYPE_CE
         // TODO more from subsystems
     };
 
@@ -334,6 +335,8 @@ public:
     virtual MODE getMode();
     virtual QString getArch();
     virtual bool isBigEndian();
+
+    virtual OSTYPE getOsType();
 
     virtual FT getFileType();
     virtual int getType();
@@ -792,8 +795,8 @@ public:
     static QMap<quint64,QString> getDebugTypes();
     static QMap<quint64,QString> getDebugTypesS();
 
-    static QMap<quint64,QString> getWindowsOperatingSystemVersions();
-    static QMap<quint64,QString> getWindowsOperatingSystemVersionsS();
+    static QMap<quint64,QString> getOperatingSystemVersions(OSTYPE osType=OSTYPE_WINDOWS);
+    static QMap<quint64,QString> getOperatingSystemVersionsS(OSTYPE osType=OSTYPE_WINDOWS);
 
     qint64 calculateHeadersSize();
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset,quint32 nNumberOfSections);
