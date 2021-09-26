@@ -288,6 +288,12 @@ public:
         SYNTAX_MOTOROLA
     };
 
+    enum TYPE
+    {
+        TYPE_UNKNOWN=0,
+        // TODO more
+    };
+
     enum OSTYPE
     {
         OSTYPE_UNKNOWN=0,
@@ -300,8 +306,10 @@ public:
     struct OSINFO
     {
         OSTYPE osType;
-        QString sVersion;
-        // TODO more
+        QString sOsVersion;
+        QString sArch;
+        MODE mode;
+        QString sType;
     };
 
     struct _MEMORY_MAP
@@ -356,12 +364,6 @@ public:
 //        HASH_KECCAK_384,
 //        HASH_KECCAK_512
 #endif
-    };
-
-    enum TYPE
-    {
-        TYPE_UNKNOWN=0,
-        // TODO more
     };
 
     enum MS_RECORD_TYPE
@@ -451,6 +453,9 @@ public:
 
     void setOsType(OSTYPE osType);
     virtual OSTYPE getOsType();
+    void setOsVersion(QString sOsVersion);
+    virtual QString getOsVersion();
+    OSINFO getOsInfo();
 
     void setEndianness(bool bIsBigEndian); // TODO enum
 
@@ -1108,6 +1113,7 @@ private:
     bool g_bIsProcessSignalsDisable;
     QString g_sArch;
     OSTYPE g_osType;
+    QString g_sOsVersion;
     MODE g_mode;
     QString g_sVersion;
     int g_nType;

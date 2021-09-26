@@ -72,6 +72,7 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
     setVersion("");
     setType(TYPE_UNKNOWN);
     setOsType(OSTYPE_UNKNOWN);
+    setOsVersion("");
 
     g_bLog=false;
 }
@@ -269,6 +270,29 @@ void XBinary::setOsType(OSTYPE osType)
 XBinary::OSTYPE XBinary::getOsType()
 {
     return g_osType;
+}
+
+void XBinary::setOsVersion(QString sOsVersion)
+{
+    g_sOsVersion=sOsVersion;
+}
+
+QString XBinary::getOsVersion()
+{
+    return g_sOsVersion;
+}
+
+XBinary::OSINFO XBinary::getOsInfo()
+{
+    OSINFO result={};
+
+    result.osType=getOsType();
+    result.sOsVersion=getOsVersion();
+    result.sArch=getArch();
+    result.mode=getMode();
+    result.sType=typeIdToString(getType());
+
+    return result;
 }
 
 void XBinary::setEndianness(bool bIsBigEndian)
