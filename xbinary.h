@@ -299,6 +299,7 @@ public:
         OSTYPE_UNKNOWN=0,
         OSTYPE_UNIX,
         OSTYPE_POSIX,
+        OSTYPE_LINUX,
         OSTYPE_MSDOS,
         OSTYPE_WINDOWS,
         OSTYPE_UEFI,

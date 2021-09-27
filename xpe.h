@@ -802,6 +802,9 @@ public:
     static QMap<quint64,QString> getResourcesFixedFileInfoSignatures();
     static QMap<quint64,QString> getResourcesFixedFileInfoSignaturesS();
 
+    static QMap<quint64,QString> getResourcesFixedFileInfoFileFlags();
+    static QMap<quint64,QString> getResourcesFixedFileInfoFileFlagsS();
+
     qint64 calculateHeadersSize();
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset,quint32 nNumberOfSections);
 

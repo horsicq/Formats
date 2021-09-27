@@ -11666,7 +11666,6 @@ QMap<quint64, QString> XPE::getResourcesFixedFileInfoSignatures()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0x00000000,tr("Unknown"));
     mapResult.insert(0xFEEF04BD,QString("FIXEDFILEINFO Signature"));
 
     return mapResult;
@@ -11676,8 +11675,35 @@ QMap<quint64, QString> XPE::getResourcesFixedFileInfoSignaturesS()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0x00000000,tr("Unknown"));
     mapResult.insert(0xFEEF04BD,QString("Signature"));
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileFlags()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000001,QString("VS_FF_DEBUG"));
+    mapResult.insert(0x00000010,QString("VS_FF_INFOINFERRED"));
+    mapResult.insert(0x00000004,QString("VS_FF_PATCHED"));
+    mapResult.insert(0x00000002,QString("VS_FF_PRERELEASE"));
+    mapResult.insert(0x00000008,QString("VS_FF_PRIVATEBUILD"));
+    mapResult.insert(0x00000020,QString("VS_FF_SPECIALBUILD"));
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileFlagsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000001,QString("DEBUG"));
+    mapResult.insert(0x00000010,QString("INFOINFERRED"));
+    mapResult.insert(0x00000004,QString("PATCHED"));
+    mapResult.insert(0x00000002,QString("PRERELEASE"));
+    mapResult.insert(0x00000008,QString("PRIVATEBUILD"));
+    mapResult.insert(0x00000020,QString("SPECIALBUILD"));
 
     return mapResult;
 }
