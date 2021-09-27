@@ -148,18 +148,18 @@ int XPE::getType()
     {
         result=TYPE_GUI;
     }
-    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)
-    {
-        result=TYPE_EFIBOOT;
-    }
-    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)
-    {
-        result=TYPE_EFI;
-    }
-    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)
-    {
-        result=TYPE_EFIRUNTIMEDRIVER;
-    }
+//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)
+//    {
+//        result=TYPE_EFIBOOT;
+//    }
+//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)
+//    {
+//        result=TYPE_EFI;
+//    }
+//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)
+//    {
+//        result=TYPE_EFIRUNTIMEDRIVER;
+//    }
 //    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX)
 //    {
 //        result=TYPE_XBOX;
@@ -201,9 +201,9 @@ QString XPE::typeIdToString(int nType)
         case TYPE_CONSOLE:          sResult=QString("Console");             break;
         case TYPE_DLL:              sResult=QString("DLL");                 break;
         case TYPE_DRIVER:           sResult=tr("Driver");                   break;
-        case TYPE_EFIBOOT:          sResult=QString("EFI Boot");            break;
-        case TYPE_EFI:              sResult=QString("EFI");                 break;
-        case TYPE_EFIRUNTIMEDRIVER: sResult=QString("EFI Runtime driver");  break;
+//        case TYPE_EFIBOOT:          sResult=QString("EFI Boot");            break;
+//        case TYPE_EFI:              sResult=QString("EFI");                 break;
+//        case TYPE_EFIRUNTIMEDRIVER: sResult=QString("EFI Runtime driver");  break;
 //        case TYPE_XBOX:             sResult=QString("XBOX");                break;
 //        case TYPE_OS2:              sResult=QString("OS2");                 break;
 //        case TYPE_POSIX:            sResult=QString("POSIX");               break;
@@ -3338,7 +3338,7 @@ XPE_DEF::S_VS_VERSION_INFO XPE::readVS_VERSION_INFO(qint64 nOffset)
     return result;
 }
 
-quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResourceVersionResult, qint64 nOffset, qint64 nSize, QString sPrefix, int nLevel)
+quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResult, qint64 nOffset, qint64 nSize, QString sPrefix, int nLevel)
 {
     quint32 nResult=0;
 
@@ -3367,21 +3367,21 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResourceVersionResult,
                 {
                     if(vi.wValueLength>=sizeof(XPE_DEF::tagVS_FIXEDFILEINFO))
                     {
-                        pResourceVersionResult->nFixedFileInfoOffset=nOffset+nDelta;
+                        pResourcesVersionResult->nFixedFileInfoOffset=nOffset+nDelta;
                         // TODO Check Signature?
-                        pResourceVersionResult->fileInfo.dwSignature=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwSignature));
-                        pResourceVersionResult->fileInfo.dwStrucVersion=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwStrucVersion));
-                        pResourceVersionResult->fileInfo.dwFileVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileVersionMS));
-                        pResourceVersionResult->fileInfo.dwFileVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileVersionLS));
-                        pResourceVersionResult->fileInfo.dwProductVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwProductVersionMS));
-                        pResourceVersionResult->fileInfo.dwProductVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwProductVersionLS));
-                        pResourceVersionResult->fileInfo.dwFileFlagsMask=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileFlagsMask));
-                        pResourceVersionResult->fileInfo.dwFileFlags=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileFlags));
-                        pResourceVersionResult->fileInfo.dwFileOS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileOS));
-                        pResourceVersionResult->fileInfo.dwFileType=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileType));
-                        pResourceVersionResult->fileInfo.dwFileSubtype=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileSubtype));
-                        pResourceVersionResult->fileInfo.dwFileDateMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileDateMS));
-                        pResourceVersionResult->fileInfo.dwFileDateLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileDateLS));
+                        pResourcesVersionResult->fileInfo.dwSignature=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwSignature));
+                        pResourcesVersionResult->fileInfo.dwStrucVersion=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwStrucVersion));
+                        pResourcesVersionResult->fileInfo.dwFileVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileVersionMS));
+                        pResourcesVersionResult->fileInfo.dwFileVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileVersionLS));
+                        pResourcesVersionResult->fileInfo.dwProductVersionMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwProductVersionMS));
+                        pResourcesVersionResult->fileInfo.dwProductVersionLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwProductVersionLS));
+                        pResourcesVersionResult->fileInfo.dwFileFlagsMask=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileFlagsMask));
+                        pResourcesVersionResult->fileInfo.dwFileFlags=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileFlags));
+                        pResourcesVersionResult->fileInfo.dwFileOS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileOS));
+                        pResourcesVersionResult->fileInfo.dwFileType=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileType));
+                        pResourcesVersionResult->fileInfo.dwFileSubtype=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileSubtype));
+                        pResourcesVersionResult->fileInfo.dwFileDateMS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileDateMS));
+                        pResourcesVersionResult->fileInfo.dwFileDateLS=read_uint32(nOffset+nDelta+offsetof(XPE_DEF::tagVS_FIXEDFILEINFO,dwFileDateLS));
                     }
                 }
 
@@ -3390,7 +3390,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResourceVersionResult,
                     QString sValue=read_unicodeString(nOffset+nDelta);
                     sPrefix+=QString(":%1").arg(sValue);
 
-                    pResourceVersionResult->listRecords.append(sPrefix);
+                    pResourcesVersionResult->listRecords.append(sPrefix);
                 }
 
                 if(sPrefix=="VS_VERSION_INFO.VarFileInfo.Translation")
@@ -3401,7 +3401,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResourceVersionResult,
                         QString sValue=XBinary::valueToHex(nValue);
                         sPrefix+=QString(":%1").arg(sValue);
 
-                        pResourceVersionResult->listRecords.append(sPrefix);
+                        pResourcesVersionResult->listRecords.append(sPrefix);
                     }
                 }
 
@@ -3413,7 +3413,7 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResourceVersionResult,
                 {
                     while(_nSize>0)
                     {
-                        qint32 _nDelta=__getResourceVersion(pResourceVersionResult,nOffset+nDelta,vi.wLength-nDelta,sPrefix,nLevel+1);
+                        qint32 _nDelta=__getResourcesVersion(pResourcesVersionResult,nOffset+nDelta,vi.wLength-nDelta,sPrefix,nLevel+1);
 
                         if(_nDelta==0)
                         {
@@ -3435,23 +3435,23 @@ quint32 XPE::__getResourceVersion(XPE::RESOURCE_VERSION *pResourceVersionResult,
     return nResult;
 }
 
-XPE::RESOURCE_VERSION XPE::getResourceVersion()
+XPE::RESOURCES_VERSION XPE::getResourcesVersion()
 {
     QList<RESOURCE_RECORD> listResourceRecords=getResources();
 
-    return getResourceVersion(&listResourceRecords);
+    return getResourcesVersion(&listResourceRecords);
 }
 
-XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+XPE::RESOURCES_VERSION XPE::getResourcesVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
-    RESOURCE_VERSION result={};
+    RESOURCES_VERSION result={};
     result.nFixedFileInfoOffset=-1;
 
     RESOURCE_RECORD resourceRecord=getResourceRecord(XPE_DEF::S_RT_VERSION,-1,pListResourceRecords);
 
     if(resourceRecord.nOffset!=-1)
     {
-        __getResourceVersion(&result,resourceRecord.nOffset,resourceRecord.nSize,"",0);
+        __getResourcesVersion(&result,resourceRecord.nOffset,resourceRecord.nSize,"",0);
     }
 
     return result;
@@ -3459,20 +3459,20 @@ XPE::RESOURCE_VERSION XPE::getResourceVersion(QList<XPE::RESOURCE_RECORD> *pList
 
 QString XPE::getFileVersion()
 {
-    RESOURCE_VERSION resourveVersion=getResourceVersion();
+    RESOURCES_VERSION resoursesVersion=getResourcesVersion();
 
-    return getFileVersion(&resourveVersion);
+    return getFileVersion(&resoursesVersion);
 }
 
-QString XPE::getFileVersion(RESOURCE_VERSION *pResourceVersion)
+QString XPE::getFileVersion(RESOURCES_VERSION *pResourceVersion)
 {
 //    return QString("%1.%2").arg(get_uint32_version(pResourceVersion->fileInfo.dwFileVersionMS)).arg(get_uint32_version(pResourceVersion->fileInfo.dwFileVersionLS));
-    return getResourceVersionValue("FileVersion",pResourceVersion);
+    return getResourcesVersionValue("FileVersion",pResourceVersion);
 }
 
 void XPE::setFixedFileInfo_dwSignature(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3482,7 +3482,7 @@ void XPE::setFixedFileInfo_dwSignature(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwStrucVersion(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3492,7 +3492,7 @@ void XPE::setFixedFileInfo_dwStrucVersion(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwFileVersionMS(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3502,7 +3502,7 @@ void XPE::setFixedFileInfo_dwFileVersionMS(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwFileVersionLS(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3512,7 +3512,7 @@ void XPE::setFixedFileInfo_dwFileVersionLS(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwProductVersionMS(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3522,7 +3522,7 @@ void XPE::setFixedFileInfo_dwProductVersionMS(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwProductVersionLS(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3532,7 +3532,7 @@ void XPE::setFixedFileInfo_dwProductVersionLS(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwFileFlagsMask(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3542,7 +3542,7 @@ void XPE::setFixedFileInfo_dwFileFlagsMask(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwFileFlags(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3552,7 +3552,7 @@ void XPE::setFixedFileInfo_dwFileFlags(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwFileOS(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3562,7 +3562,7 @@ void XPE::setFixedFileInfo_dwFileOS(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwFileType(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3572,7 +3572,7 @@ void XPE::setFixedFileInfo_dwFileType(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwFileSubtype(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3582,7 +3582,7 @@ void XPE::setFixedFileInfo_dwFileSubtype(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwFileDateMS(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3592,7 +3592,7 @@ void XPE::setFixedFileInfo_dwFileDateMS(quint32 nValue)
 
 void XPE::setFixedFileInfo_dwFileDateLS(quint32 nValue)
 {
-    qint64 nOffset=getResourceVersion().nFixedFileInfoOffset;
+    qint64 nOffset=getResourcesVersion().nFixedFileInfoOffset;
 
     if(nOffset!=-1)
     {
@@ -3600,23 +3600,23 @@ void XPE::setFixedFileInfo_dwFileDateLS(quint32 nValue)
     }
 }
 
-QString XPE::getResourceVersionValue(QString sKey)
+QString XPE::getResourcesVersionValue(QString sKey)
 {
     QList<RESOURCE_RECORD> listResourceRecords=getResources();
-    RESOURCE_VERSION resVersion=getResourceVersion(&listResourceRecords);
+    RESOURCES_VERSION resVersion=getResourcesVersion(&listResourceRecords);
 
-    return getResourceVersionValue(sKey,&resVersion);
+    return getResourcesVersionValue(sKey,&resVersion);
 }
 
-QString XPE::getResourceVersionValue(QString sKey, XPE::RESOURCE_VERSION *pResourceVersion)
+QString XPE::getResourcesVersionValue(QString sKey, XPE::RESOURCES_VERSION *pResourcesVersion)
 {
     QString sResult;
 
-    int nNumberOfRecords=pResourceVersion->listRecords.count();
+    int nNumberOfRecords=pResourcesVersion->listRecords.count();
 
     for(int i=0; i<nNumberOfRecords; i++)
     {
-        QString sRecord=pResourceVersion->listRecords.at(i).section(".",3,-1);
+        QString sRecord=pResourcesVersion->listRecords.at(i).section(".",3,-1);
         QString _sKey=sRecord.section(":",0,0);
 
         if(_sKey==sKey)
@@ -11658,6 +11658,26 @@ QMap<quint64, QString> XPE::getOperatingSystemVersionsS(OSTYPE osType)
         mapResult.insert(0x00060003,QString("8.1"));
         mapResult.insert(0x000A0000,QString("10"));
     }
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getResourcesFixedFileInfoSignatures()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000000,tr("Unknown"));
+    mapResult.insert(0xFEEF04BD,QString("FIXEDFILEINFO Signature"));
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getResourcesFixedFileInfoSignaturesS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000000,tr("Unknown"));
+    mapResult.insert(0xFEEF04BD,QString("Signature"));
 
     return mapResult;
 }

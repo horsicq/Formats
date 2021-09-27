@@ -214,11 +214,11 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
         case MODE_UNKNOWN:          sResult=tr("Unknown");          break;
         case MODE_DATA:             sResult=QString("Data");        break; // mb TODO translate
         case MODE_BIT:              sResult=QString("BIT");         break; // mb TODO translate
-        case MODE_8:                sResult=tr("8 bits");           break;
-        case MODE_16:               sResult=tr("16 bits");          break;
+        case MODE_8:                sResult=tr("8-bit");            break;
+        case MODE_16:               sResult=tr("16-bit");           break;
         case MODE_16SEG:            sResult=QString("16SEG");       break;
-        case MODE_32:               sResult=tr("32 bits");          break;
-        case MODE_64:               sResult=tr("64 bits");          break;
+        case MODE_32:               sResult=tr("32-bit");           break;
+        case MODE_64:               sResult=tr("64-bit");           break;
     }
 
     return sResult;
@@ -6700,6 +6700,8 @@ QString XBinary::osTypeIdToString(OSTYPE osType)
         case OSTYPE_WINDOWS:            sResult=QString("Windows");         break;
         case OSTYPE_MSDOS:              sResult=QString("MSDOS");           break;
         case OSTYPE_UEFI:               sResult=QString("UEFI");            break;
+        case OSTYPE_XBOX:               sResult=QString("XBOX");            break;
+        case OSTYPE_OS2:                sResult=QString("OS2");             break;
     }
 
     return sResult;

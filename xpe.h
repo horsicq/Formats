@@ -196,7 +196,7 @@ public:
         //        bool bSaveIAT;
     };
 
-    struct RESOURCE_VERSION
+    struct RESOURCES_VERSION
     {
         qint64 nFixedFileInfoOffset;
         XPE_DEF::tagVS_FIXEDFILEINFO fileInfo;
@@ -317,9 +317,9 @@ public:
         TYPE_CONSOLE,
         TYPE_DLL,
         TYPE_DRIVER,
-        TYPE_EFIBOOT,
-        TYPE_EFI,
-        TYPE_EFIRUNTIMEDRIVER,
+        TYPE_BOOTAPPLICATION,
+        TYPE_SERVICEDRIVER,
+        TYPE_RUNTIMEDRIVER
 //        TYPE_XBOX,
 //        TYPE_OS2,
 //        TYPE_POSIX,
@@ -601,13 +601,13 @@ public:
     bool isResourceVersionPresent();
     bool isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
-    RESOURCE_VERSION getResourceVersion();
+    RESOURCES_VERSION getResourcesVersion();
     XPE_DEF::S_VS_VERSION_INFO readVS_VERSION_INFO(qint64 nOffset);
 
-    RESOURCE_VERSION getResourceVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    RESOURCES_VERSION getResourcesVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     QString getFileVersion();
-    QString getFileVersion(RESOURCE_VERSION *pResourceVersion);
+    QString getFileVersion(RESOURCES_VERSION *pResourceVersion);
 
     void setFixedFileInfo_dwSignature(quint32 nValue);
     void setFixedFileInfo_dwStrucVersion(quint32 nValue);
@@ -623,8 +623,8 @@ public:
     void setFixedFileInfo_dwFileDateMS(quint32 nValue);
     void setFixedFileInfo_dwFileDateLS(quint32 nValue);
 
-    QString getResourceVersionValue(QString sKey);
-    static QString getResourceVersionValue(QString sKey,XPE::RESOURCE_VERSION *pResourceVersion);
+    QString getResourcesVersionValue(QString sKey);
+    static QString getResourcesVersionValue(QString sKey,XPE::RESOURCES_VERSION *pResourcesVersion);
 
     quint32 getResourceIdByNumber(quint32 nNumber);
     quint32 getResourceIdByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
@@ -798,6 +798,9 @@ public:
 
     static QMap<quint64,QString> getOperatingSystemVersions(OSTYPE osType=OSTYPE_WINDOWS);
     static QMap<quint64,QString> getOperatingSystemVersionsS(OSTYPE osType=OSTYPE_WINDOWS);
+
+    static QMap<quint64,QString> getResourcesFixedFileInfoSignatures();
+    static QMap<quint64,QString> getResourcesFixedFileInfoSignaturesS();
 
     qint64 calculateHeadersSize();
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset,quint32 nNumberOfSections);
@@ -1184,7 +1187,7 @@ private:
     qint64 _fixHeadersSize();
     qint64 _getMinSectionOffset(); // TODO move to XBinary
     void _fixFileOffsets(qint64 nDelta);
-    quint32 __getResourceVersion(RESOURCE_VERSION *pResourceVersionResult,qint64 nOffset,qint64 nSize,QString sPrefix,int nLevel);
+    quint32 __getResourcesVersion(RESOURCES_VERSION *pResourcesVersionResult,qint64 nOffset,qint64 nSize,QString sPrefix,int nLevel);
 };
 
 #endif // XPE_H
