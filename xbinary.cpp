@@ -6704,6 +6704,7 @@ QString XBinary::osTypeIdToString(OSTYPE osType)
         case OSTYPE_UEFI:               sResult=QString("UEFI");            break;
         case OSTYPE_XBOX:               sResult=QString("XBOX");            break;
         case OSTYPE_OS2:                sResult=QString("OS2");             break;
+        case OSTYPE_OSX:                sResult=QString("OSX");             break;
     }
 
     return sResult;

@@ -157,7 +157,7 @@ XBinary::FT XPE::getFileType()
 
 int XPE::getType()
 {
-    TYPE result=TYPE_CONSOLE;
+    TYPE result=TYPE_APPLICATION;
 
     quint16 nSubsystem=getOptionalHeader_Subsystem();
 

@@ -305,7 +305,8 @@ public:
         OSTYPE_WINDOWSCE,
         OSTYPE_UEFI,
         OSTYPE_OS2,
-        OSTYPE_XBOX
+        OSTYPE_XBOX,
+        OSTYPE_OSX
     };
 
     struct OSINFO
