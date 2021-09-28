@@ -302,6 +302,7 @@ public:
         OSTYPE_LINUX,
         OSTYPE_MSDOS,
         OSTYPE_WINDOWS,
+        OSTYPE_WINDOWSCE,
         OSTYPE_UEFI,
         OSTYPE_OS2,
         OSTYPE_XBOX

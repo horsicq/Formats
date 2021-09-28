@@ -96,15 +96,40 @@ bool XPE::isBigEndian()
 
 XBinary::OSTYPE XPE::getOsType()
 {
+    OSTYPE result=OSTYPE_WINDOWS;
+
+    quint16 nSubsystem=getOptionalHeader_Subsystem();
+
+    if((nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)||(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)||(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)||(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION))
+    {
+        result=OSTYPE_UEFI;
+    }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX)
+    {
+        result=OSTYPE_XBOX;
+    }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI)
+    {
+        result=OSTYPE_OS2;
+    }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI)
+    {
+        result=OSTYPE_POSIX;
+    }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
+    {
+        result=OSTYPE_WINDOWSCE;
+    }
+
     // TODO !!!
-    return OSTYPE_WINDOWS;
+    return result;
 }
 
 XBinary::OSINFO XPE::getOsInfo()
 {
     OSINFO result={};
 
-    result.osType=OSTYPE_WINDOWS;
+    result.osType=getOsType();
     result.sOsVersion=""; // TODO
 
     // TODO

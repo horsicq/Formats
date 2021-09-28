@@ -6699,6 +6699,7 @@ QString XBinary::osTypeIdToString(OSTYPE osType)
         case OSTYPE_POSIX:              sResult=QString("Posix");           break;
         case OSTYPE_LINUX:              sResult=QString("Linux");           break;
         case OSTYPE_WINDOWS:            sResult=QString("Windows");         break;
+        case OSTYPE_WINDOWSCE:          sResult=QString("Windows CE");      break;
         case OSTYPE_MSDOS:              sResult=QString("MSDOS");           break;
         case OSTYPE_UEFI:               sResult=QString("UEFI");            break;
         case OSTYPE_XBOX:               sResult=QString("XBOX");            break;
