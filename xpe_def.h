@@ -111,6 +111,7 @@ const quint32 S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER          =12;
 const quint32 S_IMAGE_SUBSYSTEM_EFI_ROM                     =13;
 const quint32 S_IMAGE_SUBSYSTEM_XBOX                        =14;
 const quint32 S_IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION    =16;
+const quint32 S_IMAGE_SUBSYSTEM_XBOX_CODE_CATALOG           =17;
 
 const qint32 S_IMAGE_SIZEOF_SHORT_NAME                      =8;
 

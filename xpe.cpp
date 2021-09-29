@@ -161,15 +161,19 @@ int XPE::getType()
 
     quint16 nSubsystem=getOptionalHeader_Subsystem();
 
-    if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE)
+    if( (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE)||
+        (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS))
     {
         result=TYPE_DRIVER;
     }
-    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI)
+    else if((nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI)||
+            (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI)||
+            (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI))
     {
         result=TYPE_CONSOLE;
     }
-    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_GUI)
+    else if((nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_GUI)||
+            (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI))
     {
         result=TYPE_GUI;
     }
@@ -223,7 +227,7 @@ QString XPE::typeIdToString(int nType)
         case TYPE_UNKNOWN:          sResult=tr("Unknown");                  break;
         case TYPE_APPLICATION:      sResult=tr("Application");              break;
         case TYPE_GUI:              sResult=QString("GUI");                 break;
-        case TYPE_CONSOLE:          sResult=QString("Console");             break;
+        case TYPE_CONSOLE:          sResult=tr("Console");                  break;
         case TYPE_DLL:              sResult=QString("DLL");                 break;
         case TYPE_DRIVER:           sResult=tr("Driver");                   break;
 //        case TYPE_EFIBOOT:          sResult=QString("EFI Boot");            break;
@@ -11729,6 +11733,54 @@ QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileFlagsS()
     mapResult.insert(0x00000002,QString("PRERELEASE"));
     mapResult.insert(0x00000008,QString("PRIVATEBUILD"));
     mapResult.insert(0x00000020,QString("SPECIALBUILD"));
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileOses()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000000L,QString("VOS_UNKNOWN"));
+    mapResult.insert(0x00010000L,QString("VOS_DOS"));
+    mapResult.insert(0x00020000L,QString("VOS_OS216"));
+    mapResult.insert(0x00030000L,QString("VOS_OS232"));
+    mapResult.insert(0x00040000L,QString("VOS_NT"));
+    mapResult.insert(0x00050000L,QString("VOS_WINCE"));
+    mapResult.insert(0x00000000L,QString("VOS__BASE"));
+    mapResult.insert(0x00000001L,QString("VOS__WINDOWS16"));
+    mapResult.insert(0x00000002L,QString("VOS__PM16"));
+    mapResult.insert(0x00000003L,QString("VOS__PM32"));
+    mapResult.insert(0x00000004L,QString("VOS__WINDOWS32"));
+    mapResult.insert(0x00010001L,QString("VOS_DOS_WINDOWS16"));
+    mapResult.insert(0x00010004L,QString("VOS_DOS_WINDOWS32"));
+    mapResult.insert(0x00020002L,QString("VOS_OS216_PM16"));
+    mapResult.insert(0x00030003L,QString("VOS_OS232_PM32"));
+    mapResult.insert(0x00040004L,QString("VOS_NT_WINDOWS32"));
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileOsesS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000000L,QString("UNKNOWN"));
+    mapResult.insert(0x00010000L,QString("DOS"));
+    mapResult.insert(0x00020000L,QString("OS216"));
+    mapResult.insert(0x00030000L,QString("OS232"));
+    mapResult.insert(0x00040000L,QString("NT"));
+    mapResult.insert(0x00050000L,QString("WINCE"));
+    mapResult.insert(0x00000000L,QString("_BASE"));
+    mapResult.insert(0x00000001L,QString("_WINDOWS16"));
+    mapResult.insert(0x00000002L,QString("_PM16"));
+    mapResult.insert(0x00000003L,QString("_PM32"));
+    mapResult.insert(0x00000004L,QString("_WINDOWS32"));
+    mapResult.insert(0x00010001L,QString("DOS_WINDOWS16"));
+    mapResult.insert(0x00010004L,QString("DOS_WINDOWS32"));
+    mapResult.insert(0x00020002L,QString("OS216_PM16"));
+    mapResult.insert(0x00030003L,QString("OS232_PM32"));
+    mapResult.insert(0x00040004L,QString("NT_WINDOWS32"));
 
     return mapResult;
 }
