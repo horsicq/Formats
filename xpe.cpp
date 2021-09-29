@@ -94,34 +94,37 @@ bool XPE::isBigEndian()
     return false;
 }
 
-XBinary::OSTYPE XPE::getOsType()
+XBinary::OSNAME XPE::getOsName()
 {
-    OSTYPE result=OSTYPE_WINDOWS;
+    OSNAME result=OSNAME_WINDOWS;
 
     quint16 nSubsystem=getOptionalHeader_Subsystem();
 
-    if((nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)||(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)||(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)||(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION))
+    if( (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)||
+        (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)||
+        (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)||
+        (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_ROM))
     {
-        result=OSTYPE_UEFI;
+        result=OSNAME_UEFI;
     }
-    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX)
+    else if((nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX)||
+            (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX_CODE_CATALOG))
     {
-        result=OSTYPE_XBOX;
+        result=OSNAME_XBOX;
     }
     else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI)
     {
-        result=OSTYPE_OS2;
+        result=OSNAME_OS2;
     }
     else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI)
     {
-        result=OSTYPE_POSIX;
+        result=OSNAME_POSIX;
     }
     else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
     {
-        result=OSTYPE_WINDOWSCE;
+        result=OSNAME_WINDOWSCE;
     }
 
-    // TODO !!!
     return result;
 }
 
@@ -129,10 +132,39 @@ XBinary::OSINFO XPE::getOsInfo()
 {
     OSINFO result={};
 
-    result.osType=getOsType();
-    result.sOsVersion=""; // TODO
+    bool bIs64=is64();
 
-    // TODO
+    result.osName=getOsName();
+
+    if(result.osName==OSNAME_WINDOWS)
+    {
+        quint32 nOSVersion=getOperatingSystemVersion();
+
+        if(bIs64) // Correct version
+        {
+            if(nOSVersion<0x00050002)
+            {
+                // Server 2003
+                nOSVersion=0x00050002;
+            }
+        }
+
+        QMap<quint64,QString> mapOSVersion=XPE::getOperatingSystemVersionsS(OSNAME_WINDOWS);
+
+        if(!mapOSVersion.contains(nOSVersion)||(nOSVersion==0))
+        {
+            if(bIs64)
+            {
+                nOSVersion=0x00050002; // Server 2003
+            }
+            else
+            {
+                nOSVersion=0x00050001; // XP
+            }
+        }
+
+        result.sOsVersion=mapOSVersion.value(nOSVersion);
+    }
 
     return result;
 }
@@ -11637,13 +11669,13 @@ QMap<quint64, QString> XPE::getDebugTypesS()
     return mapResult;
 }
 
-QMap<quint64, QString> XPE::getOperatingSystemVersions(OSTYPE osType)
+QMap<quint64, QString> XPE::getOperatingSystemVersions(OSNAME osName)
 {
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x00000000,tr("Unknown"));
 
-    if(osType==OSTYPE_WINDOWS)
+    if(osName==OSNAME_WINDOWS)
     {
         mapResult.insert(0x0003000A,QString("Windows NT 3.1"));
         mapResult.insert(0x00030032,QString("Windows NT 3.5"));
@@ -11664,13 +11696,13 @@ QMap<quint64, QString> XPE::getOperatingSystemVersions(OSTYPE osType)
     return mapResult;
 }
 
-QMap<quint64, QString> XPE::getOperatingSystemVersionsS(OSTYPE osType)
+QMap<quint64, QString> XPE::getOperatingSystemVersionsS(OSNAME osName)
 {
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x00000000,tr("Unknown"));
 
-    if(osType==OSTYPE_WINDOWS)
+    if(osName==OSNAME_WINDOWS)
     {
         mapResult.insert(0x0003000A,QString("NT 3.1"));
         mapResult.insert(0x00030032,QString("NT 3.5"));

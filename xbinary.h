@@ -294,26 +294,27 @@ public:
         // TODO more
     };
 
-    enum OSTYPE
+    enum OSNAME
     {
-        OSTYPE_UNKNOWN=0,
-        OSTYPE_UNIX,
-        OSTYPE_POSIX,
-        OSTYPE_LINUX,
-        OSTYPE_MSDOS,
-        OSTYPE_WINDOWS,
-        OSTYPE_WINDOWSCE,
-        OSTYPE_UEFI,
-        OSTYPE_OS2,
-        OSTYPE_XBOX,
-        OSTYPE_OSX,
-        OSTYPE_ANDROID,
-        OSTYPE_FREEBSD
+        OSNAME_UNKNOWN=0,
+        OSNAME_UNIX,
+        OSNAME_POSIX,
+        OSNAME_LINUX,
+        OSNAME_MSDOS,
+        OSNAME_WINDOWS,
+        OSNAME_WINDOWSCE,
+        OSNAME_UEFI,
+        OSNAME_OS2,
+        OSNAME_XBOX,
+        OSNAME_OSX,
+        OSNAME_ANDROID,
+        OSNAME_FREEBSD,
+        OSNAME_OPENBSD
     };
 
     struct OSINFO
     {
-        OSTYPE osType;
+        OSNAME osName;
         QString sOsVersion;
         QString sArch;
         MODE mode;
@@ -459,8 +460,8 @@ public:
     virtual bool isSigned();
     virtual OFFSETSIZE getSignOffsetSize(); // TODO rename
 
-    void setOsType(OSTYPE osType);
-    virtual OSTYPE getOsType();
+    void setOsType(OSNAME osName);
+    virtual OSNAME getOsName();
     void setOsVersion(QString sOsVersion);
     virtual QString getOsVersion();
     OSINFO getOsInfo();
@@ -964,7 +965,7 @@ public:
     static bool isX86asm(QString sArch); // TODO remove use getDisasmMode
     static QString disasmIdToString(DM disasmMode);
     static QString syntaxIdToString(SYNTAX syntax);
-    static QString osTypeIdToString(OSTYPE osType);
+    static QString osNameIdToString(OSNAME osName);
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
     static DM getDisasmMode(QString sArch,bool bIsBigEndian=false,MODE mode=MODE_UNKNOWN);
     static DMFAMILY getDisasmFamily(DM disasmMode);
@@ -1121,7 +1122,7 @@ private:
     bool g_bIsHashStop;
     bool g_bIsProcessSignalsDisable;
     QString g_sArch;
-    OSTYPE g_osType;
+    OSNAME g_osName;
     QString g_sOsVersion;
     MODE g_mode;
     QString g_sVersion;

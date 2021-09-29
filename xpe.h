@@ -336,7 +336,7 @@ public:
     virtual QString getArch();
     virtual bool isBigEndian();
 
-    virtual OSTYPE getOsType();
+    virtual OSNAME getOsName();
     virtual OSINFO getOsInfo();
 
     virtual FT getFileType();
@@ -796,8 +796,8 @@ public:
     static QMap<quint64,QString> getDebugTypes();
     static QMap<quint64,QString> getDebugTypesS();
 
-    static QMap<quint64,QString> getOperatingSystemVersions(OSTYPE osType=OSTYPE_WINDOWS);
-    static QMap<quint64,QString> getOperatingSystemVersionsS(OSTYPE osType=OSTYPE_WINDOWS);
+    static QMap<quint64,QString> getOperatingSystemVersions(OSNAME osName=OSNAME_WINDOWS);
+    static QMap<quint64,QString> getOperatingSystemVersionsS(OSNAME osName=OSNAME_WINDOWS);
 
     static QMap<quint64,QString> getResourcesFixedFileInfoSignatures();
     static QMap<quint64,QString> getResourcesFixedFileInfoSignaturesS();
