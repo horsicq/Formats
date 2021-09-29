@@ -135,6 +135,9 @@ XBinary::OSINFO XPE::getOsInfo()
     bool bIs64=is64();
 
     result.osName=getOsName();
+    result.sArch=getArch();
+    result.mode=getMode();
+    result.sType=getTypeAsString();
 
     if(result.osName==OSNAME_WINDOWS)
     {
