@@ -307,7 +307,8 @@ public:
         OSTYPE_OS2,
         OSTYPE_XBOX,
         OSTYPE_OSX,
-        OSTYPE_ANDROID
+        OSTYPE_ANDROID,
+        OSTYPE_FREEBSD
     };
 
     struct OSINFO
