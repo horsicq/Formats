@@ -6705,6 +6705,7 @@ QString XBinary::osTypeIdToString(OSTYPE osType)
         case OSTYPE_XBOX:               sResult=QString("XBOX");            break;
         case OSTYPE_OS2:                sResult=QString("OS2");             break;
         case OSTYPE_OSX:                sResult=QString("OSX");             break;
+        case OSTYPE_ANDROID:            sResult=QString("Android");         break;
     }
 
     return sResult;
