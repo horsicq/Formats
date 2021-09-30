@@ -648,6 +648,11 @@ int XMSDOS::getType()
     return TYPE_EXE;
 }
 
+XBinary::OSNAME XMSDOS::getOsName()
+{
+    return OSNAME_MSDOS;
+}
+
 QString XMSDOS::typeIdToString(int nType)
 {
     QString sResult=tr("Unknown");

@@ -100,10 +100,17 @@ XBinary::OSNAME XPE::getOsName()
 
     quint16 nSubsystem=getOptionalHeader_Subsystem();
 
-    if( (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)||
-        (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)||
-        (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)||
-        (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_ROM))
+    if( (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_GUI)||
+        (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI)||
+        (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS)||
+        (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION))
+    {
+        result=OSNAME_WINDOWS;
+    }
+    else if((nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)||
+            (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)||
+            (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)||
+            (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_ROM))
     {
         result=OSNAME_UEFI;
     }
@@ -128,19 +135,14 @@ XBinary::OSNAME XPE::getOsName()
     return result;
 }
 
-XBinary::OSINFO XPE::getOsInfo()
+QString XPE::getOsVersion()
 {
-    OSINFO result={};
+    QString sResult;
 
-    bool bIs64=is64();
-
-    result.osName=getOsName();
-    result.sArch=getArch();
-    result.mode=getMode();
-    result.sType=getTypeAsString();
-
-    if(result.osName==OSNAME_WINDOWS)
+    if(getOsName()==OSNAME_WINDOWS)
     {
+        bool bIs64=is64();
+
         quint32 nOSVersion=getOperatingSystemVersion();
 
         if(bIs64) // Correct version
@@ -166,10 +168,10 @@ XBinary::OSINFO XPE::getOsInfo()
             }
         }
 
-        result.sOsVersion=mapOSVersion.value(nOSVersion);
+        sResult=mapOSVersion.value(nOSVersion);
     }
 
-    return result;
+    return sResult;
 }
 
 XBinary::FT XPE::getFileType()

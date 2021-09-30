@@ -133,6 +133,7 @@ public:
     virtual bool isBigEndian();
     virtual FT getFileType();
     virtual int getType();
+    virtual OSNAME getOsName();
     virtual QString typeIdToString(int nType);
 };
 
