@@ -409,6 +409,7 @@ public:
     virtual QString getArch();
     virtual int getType();
     virtual FT getFileType();
+    virtual OSNAME getOsName();
     virtual QString typeIdToString(int nType);
 
     virtual qint64 getBaseAddress();

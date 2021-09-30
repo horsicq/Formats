@@ -4006,6 +4006,11 @@ XBinary::FT XELF::getFileType()
     return result;
 }
 
+XBinary::OSNAME XELF::getOsName()
+{
+    return OSNAME_UNIX; // TODO
+}
+
 QString XELF::typeIdToString(int nType)
 {
     QString sResult=tr("Unknown");
