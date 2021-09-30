@@ -4282,6 +4282,12 @@ int XMACH::getType()
     return nResult;
 }
 
+XBinary::OSNAME XMACH::getOsName()
+{
+    // TODO more
+    return OSNAME_OSX;
+}
+
 QString XMACH::typeIdToString(int nType)
 {
     QString sResult=tr("Unknown");
