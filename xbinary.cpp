@@ -6707,20 +6707,21 @@ QString XBinary::osNameIdToString(OSNAME osName)
 
     switch(osName)
     {
-        case OSNAME_UNIX:               sResult=QString("Unix");            break;
-        case OSNAME_POSIX:              sResult=QString("Posix");           break;
-        case OSNAME_LINUX:              sResult=QString("Linux");           break;
-        case OSNAME_WINDOWS:            sResult=QString("Windows");         break;
-        case OSNAME_WINDOWSCE:          sResult=QString("Windows CE");      break;
-        case OSNAME_MSDOS:              sResult=QString("MSDOS");           break;
-        case OSNAME_UEFI:               sResult=QString("UEFI");            break;
-        case OSNAME_XBOX:               sResult=QString("XBOX");            break;
-        case OSNAME_OS2:                sResult=QString("OS2");             break;
-        case OSNAME_OSX:                sResult=QString("OSX");             break;
-        case OSNAME_ANDROID:            sResult=QString("Android");         break;
-        case OSNAME_FREEBSD:            sResult=QString("FreeBSD");         break;
-        case OSNAME_OPENBSD:            sResult=QString("OpenBSD");         break;
-        case OSNAME_NETBSD:             sResult=QString("NetBSD");          break;
+        case OSNAME_UNIX:               sResult=QString("Unix");                    break;
+        case OSNAME_POSIX:              sResult=QString("Posix");                   break;
+        case OSNAME_LINUX:              sResult=QString("Linux");                   break;
+        case OSNAME_WINDOWS:            sResult=QString("Windows");                 break;
+        case OSNAME_WINDOWSCE:          sResult=QString("Windows CE");              break;
+        case OSNAME_MSDOS:              sResult=QString("MSDOS");                   break;
+        case OSNAME_UEFI:               sResult=QString("UEFI");                    break;
+        case OSNAME_XBOX:               sResult=QString("XBOX");                    break;
+        case OSNAME_OS2:                sResult=QString("OS2");                     break;
+        case OSNAME_OSX:                sResult=QString("OSX");                     break;
+        case OSNAME_ANDROID:            sResult=QString("Android");                 break;
+        case OSNAME_FREEBSD:            sResult=QString("FreeBSD");                 break;
+        case OSNAME_OPENBSD:            sResult=QString("OpenBSD");                 break;
+        case OSNAME_NETBSD:             sResult=QString("NetBSD");                  break;
+        case OSNAME_HPUX:               sResult=QString("Hewlett-Packard HP-UX");   break;
     }
 
     return sResult;

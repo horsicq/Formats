@@ -310,7 +310,8 @@ public:
         OSNAME_ANDROID,
         OSNAME_FREEBSD,
         OSNAME_OPENBSD,
-        OSNAME_NETBSD
+        OSNAME_NETBSD,
+        OSNAME_HPUX
     };
 
     struct OSINFO
