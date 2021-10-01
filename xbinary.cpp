@@ -6720,6 +6720,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_ANDROID:            sResult=QString("Android");         break;
         case OSNAME_FREEBSD:            sResult=QString("FreeBSD");         break;
         case OSNAME_OPENBSD:            sResult=QString("OpenBSD");         break;
+        case OSNAME_NETBSD:             sResult=QString("NetBSD");          break;
     }
 
     return sResult;

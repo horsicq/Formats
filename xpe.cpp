@@ -11778,22 +11778,22 @@ QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileOses()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0x00000000L,QString("VOS_UNKNOWN"));
-    mapResult.insert(0x00010000L,QString("VOS_DOS"));
-    mapResult.insert(0x00020000L,QString("VOS_OS216"));
-    mapResult.insert(0x00030000L,QString("VOS_OS232"));
-    mapResult.insert(0x00040000L,QString("VOS_NT"));
-    mapResult.insert(0x00050000L,QString("VOS_WINCE"));
-    mapResult.insert(0x00000000L,QString("VOS__BASE"));
-    mapResult.insert(0x00000001L,QString("VOS__WINDOWS16"));
-    mapResult.insert(0x00000002L,QString("VOS__PM16"));
-    mapResult.insert(0x00000003L,QString("VOS__PM32"));
-    mapResult.insert(0x00000004L,QString("VOS__WINDOWS32"));
-    mapResult.insert(0x00010001L,QString("VOS_DOS_WINDOWS16"));
-    mapResult.insert(0x00010004L,QString("VOS_DOS_WINDOWS32"));
-    mapResult.insert(0x00020002L,QString("VOS_OS216_PM16"));
-    mapResult.insert(0x00030003L,QString("VOS_OS232_PM32"));
-    mapResult.insert(0x00040004L,QString("VOS_NT_WINDOWS32"));
+    mapResult.insert(0x00000000,QString("VOS_UNKNOWN"));
+    mapResult.insert(0x00010000,QString("VOS_DOS"));
+    mapResult.insert(0x00020000,QString("VOS_OS216"));
+    mapResult.insert(0x00030000,QString("VOS_OS232"));
+    mapResult.insert(0x00040000,QString("VOS_NT"));
+    mapResult.insert(0x00050000,QString("VOS_WINCE"));
+    mapResult.insert(0x00000000,QString("VOS__BASE"));
+    mapResult.insert(0x00000001,QString("VOS__WINDOWS16"));
+    mapResult.insert(0x00000002,QString("VOS__PM16"));
+    mapResult.insert(0x00000003,QString("VOS__PM32"));
+    mapResult.insert(0x00000004,QString("VOS__WINDOWS32"));
+    mapResult.insert(0x00010001,QString("VOS_DOS_WINDOWS16"));
+    mapResult.insert(0x00010004,QString("VOS_DOS_WINDOWS32"));
+    mapResult.insert(0x00020002,QString("VOS_OS216_PM16"));
+    mapResult.insert(0x00030003,QString("VOS_OS232_PM32"));
+    mapResult.insert(0x00040004,QString("VOS_NT_WINDOWS32"));
 
     return mapResult;
 }
@@ -11802,22 +11802,52 @@ QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileOsesS()
 {
     QMap<quint64, QString> mapResult;
 
+    mapResult.insert(0x00000000,QString("UNKNOWN"));
+    mapResult.insert(0x00010000,QString("DOS"));
+    mapResult.insert(0x00020000,QString("OS216"));
+    mapResult.insert(0x00030000,QString("OS232"));
+    mapResult.insert(0x00040000,QString("NT"));
+    mapResult.insert(0x00050000,QString("WINCE"));
+    mapResult.insert(0x00000000,QString("_BASE"));
+    mapResult.insert(0x00000001,QString("_WINDOWS16"));
+    mapResult.insert(0x00000002,QString("_PM16"));
+    mapResult.insert(0x00000003,QString("_PM32"));
+    mapResult.insert(0x00000004,QString("_WINDOWS32"));
+    mapResult.insert(0x00010001,QString("DOS_WINDOWS16"));
+    mapResult.insert(0x00010004,QString("DOS_WINDOWS32"));
+    mapResult.insert(0x00020002,QString("OS216_PM16"));
+    mapResult.insert(0x00030003,QString("OS232_PM32"));
+    mapResult.insert(0x00040004,QString("NT_WINDOWS32"));
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileTypes()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00000000L,QString("VFT_UNKNOWN"));
+    mapResult.insert(0x00000001L,QString("VFT_APP"));
+    mapResult.insert(0x00000002L,QString("VFT_DLL"));
+    mapResult.insert(0x00000003L,QString("VFT_DRV"));
+    mapResult.insert(0x00000004L,QString("VFT_FONT"));
+    mapResult.insert(0x00000005L,QString("VFT_VXD"));
+    mapResult.insert(0x00000007L,QString("VFT_STATIC_LIB"));
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileTypesS()
+{
+    QMap<quint64, QString> mapResult;
+
     mapResult.insert(0x00000000L,QString("UNKNOWN"));
-    mapResult.insert(0x00010000L,QString("DOS"));
-    mapResult.insert(0x00020000L,QString("OS216"));
-    mapResult.insert(0x00030000L,QString("OS232"));
-    mapResult.insert(0x00040000L,QString("NT"));
-    mapResult.insert(0x00050000L,QString("WINCE"));
-    mapResult.insert(0x00000000L,QString("_BASE"));
-    mapResult.insert(0x00000001L,QString("_WINDOWS16"));
-    mapResult.insert(0x00000002L,QString("_PM16"));
-    mapResult.insert(0x00000003L,QString("_PM32"));
-    mapResult.insert(0x00000004L,QString("_WINDOWS32"));
-    mapResult.insert(0x00010001L,QString("DOS_WINDOWS16"));
-    mapResult.insert(0x00010004L,QString("DOS_WINDOWS32"));
-    mapResult.insert(0x00020002L,QString("OS216_PM16"));
-    mapResult.insert(0x00030003L,QString("OS232_PM32"));
-    mapResult.insert(0x00040004L,QString("NT_WINDOWS32"));
+    mapResult.insert(0x00000001L,QString("APP"));
+    mapResult.insert(0x00000002L,QString("DLL"));
+    mapResult.insert(0x00000003L,QString("DRV"));
+    mapResult.insert(0x00000004L,QString("FONT"));
+    mapResult.insert(0x00000005L,QString("VXD"));
+    mapResult.insert(0x00000007L,QString("STATIC_LIB"));
 
     return mapResult;
 }
