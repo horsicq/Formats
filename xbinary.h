@@ -315,7 +315,8 @@ public:
         OSNAME_SOLARIS,
         OSNAME_AIX,
         OSNAME_IRIX,
-        OSNAME_TRU64
+        OSNAME_TRU64,
+        OSNAME_MODESTO
     };
 
     struct OSINFO
