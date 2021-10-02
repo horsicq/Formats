@@ -314,7 +314,8 @@ public:
         OSNAME_HPUX,
         OSNAME_SOLARIS,
         OSNAME_AIX,
-        OSNAME_IRIX
+        OSNAME_IRIX,
+        OSNAME_TRU64
     };
 
     struct OSINFO

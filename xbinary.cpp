@@ -6725,6 +6725,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_SOLARIS:            sResult=QString("Sun Solaris");             break;
         case OSNAME_AIX:                sResult=QString("AIX");                     break;
         case OSNAME_IRIX:               sResult=QString("IRIX");                    break;
+        case OSNAME_TRU64:              sResult=QString("Compaq TRU64 UNIX");       break;
     }
 
     return sResult;
