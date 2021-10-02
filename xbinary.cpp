@@ -6724,6 +6724,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_HPUX:               sResult=QString("Hewlett-Packard HP-UX");   break;
         case OSNAME_SOLARIS:            sResult=QString("Sun Solaris");             break;
         case OSNAME_AIX:                sResult=QString("AIX");                     break;
+        case OSNAME_IRIX:               sResult=QString("IRIX");                    break;
     }
 
     return sResult;

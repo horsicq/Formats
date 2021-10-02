@@ -313,7 +313,8 @@ public:
         OSNAME_NETBSD,
         OSNAME_HPUX,
         OSNAME_SOLARIS,
-        OSNAME_AIX
+        OSNAME_AIX,
+        OSNAME_IRIX
     };
 
     struct OSINFO
