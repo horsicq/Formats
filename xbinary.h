@@ -316,7 +316,8 @@ public:
         OSNAME_AIX,
         OSNAME_IRIX,
         OSNAME_TRU64,
-        OSNAME_MODESTO
+        OSNAME_MODESTO,
+        OSNAME_OPENVMS
     };
 
     struct OSINFO
