@@ -35,7 +35,7 @@ public:
         TYPE_EXE,
         TYPE_DLL,
         TYPE_DRIVER
-        // TODO More
+        // TODO Check More
     };
 
     explicit XNE(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
