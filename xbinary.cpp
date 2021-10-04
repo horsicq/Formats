@@ -4431,12 +4431,10 @@ QString XBinary::getBackupFileName(QIODevice *pDevice)
 {
     QString sResult=QString("Backup.%1.BAK").arg(getCurrentBackupDate());
 
-    QString sClassName=pDevice->metaObject()->className();
+    QFile *pFile=dynamic_cast<QFile *>(pDevice);
 
-    if(sClassName=="QFile")
+    if(pFile)
     {
-        QFile *pFile=(QFile *)pDevice;
-
         QString sFileName=pFile->fileName(); // TODO
 
         if(sFileName!="")
@@ -4471,12 +4469,10 @@ QString XBinary::getResultFileName(QIODevice *pDevice, QString sAppendix)
 {
     QString sResult=sAppendix;
 
-    QString sClassName=pDevice->metaObject()->className();
+    QFile *pFile=dynamic_cast<QFile *>(pDevice);
 
-    if(sClassName=="QFile")
+    if(pFile)
     {
-        QFile *pFile=(QFile *)pDevice;
-
         QString sFileName=pFile->fileName(); // TODO
 
         if(sFileName!="")
