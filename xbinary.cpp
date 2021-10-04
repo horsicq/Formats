@@ -4404,13 +4404,11 @@ QString XBinary::getDumpFileName(QIODevice *pDevice)
 {
     QString sResult="dump";
 
-    QString sClassName=pDevice->metaObject()->className();
+    QFile *pFile=dynamic_cast<QFile *>(pDevice);
 
-    if(sClassName=="QFile")
+    if(pFile)
     {
-        QFile *pFile=(QFile *)pDevice;
-
-        QString sFileName=pFile->fileName(); // TODO
+        QString sFileName=pFile->fileName();
 
         if(sFileName!="")
         {
