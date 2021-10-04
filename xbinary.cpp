@@ -6728,6 +6728,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_TRU64:              sResult=QString("Compaq TRU64 UNIX");       break;
         case OSNAME_MODESTO:            sResult=QString("Novell Modesto");          break;
         case OSNAME_OPENVMS:            sResult=QString("Open VMS");                break;
+        case OSNAME_FENIXOS:            sResult=QString("FenixOS");                 break;
     }
 
     return sResult;
@@ -7519,6 +7520,8 @@ QList<XBinary::SYMBOL_RECORD> XBinary::getSymbolRecords(XBinary::_MEMORY_MAP *pM
     Q_UNUSED(symbolType)
 
     QList<XBinary::SYMBOL_RECORD> listResult;
+
+    // TODO
 
     return listResult;
 }
