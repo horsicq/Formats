@@ -4376,12 +4376,10 @@ QString XBinary::getUnpackedFileName(QIODevice *pDevice)
 {
     QString sResult="unpacked";
 
-    QString sClassName=pDevice->metaObject()->className();
+    QFile *pFile=dynamic_cast<QFile *>(pDevice);
 
-    if(sClassName=="QFile") // TODO Static cast to QFile !!!
+    if(pFile)
     {
-        QFile *pFile=(QFile *)pDevice;
-
         QString sFileName=pFile->fileName(); // TODO
 
         if(sFileName!="")
