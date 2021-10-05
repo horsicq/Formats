@@ -71,7 +71,9 @@ XBinary::MODE XPE::getMode()
 
     if( (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)||
         (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_IA64)||
-        (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64))
+        (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64)||
+        (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_ALPHA64)||
+        (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_RISCV64))
     {
         result=MODE_64;
     }
