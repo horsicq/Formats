@@ -87,12 +87,14 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 
     g_bLog=false;
 
+#ifdef X_USE_MAP
     QFileDevice *pFileDevice=dynamic_cast<QFileDevice *>(pDevice);
 
     if(pFileDevice)
     {
         g_pMemory=(char *)pFileDevice->map(0,pFileDevice->size());
     }
+#endif
 }
 
 void XBinary::setDevice(QIODevice *pDevice)
