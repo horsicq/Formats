@@ -222,10 +222,10 @@ int XPE::getType()
     {
         result=TYPE_APPLICATION;
     }
-//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)
-//    {
-//        result=TYPE_EFIBOOT;
-//    }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)
+    {
+        result=TYPE_BOOTSERVICEDRIVER;
+    }
 //    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)
 //    {
 //        result=TYPE_EFI;
@@ -269,12 +269,15 @@ QString XPE::typeIdToString(int nType)
 
     switch(nType)
     {
-        case TYPE_UNKNOWN:          sResult=tr("Unknown");                  break;
-        case TYPE_APPLICATION:      sResult=tr("Application");              break;
-        case TYPE_GUI:              sResult=QString("GUI");                 break;
-        case TYPE_CONSOLE:          sResult=tr("Console");                  break;
-        case TYPE_DLL:              sResult=QString("DLL");                 break;
-        case TYPE_DRIVER:           sResult=tr("Driver");                   break;
+        case TYPE_UNKNOWN:              sResult=tr("Unknown");                  break;
+        case TYPE_APPLICATION:          sResult=tr("Application");              break;
+        case TYPE_GUI:                  sResult=QString("GUI");                 break;
+        case TYPE_CONSOLE:              sResult=tr("Console");                  break;
+        case TYPE_DLL:                  sResult=QString("DLL");                 break;
+        case TYPE_DRIVER:               sResult=tr("Driver");                   break;
+        case TYPE_BOOTAPPLICATION:      sResult=tr("Boot application");         break;
+        case TYPE_RUNTIMEDRIVER:        sResult=tr("Runtime driver");           break;
+        case TYPE_BOOTSERVICEDRIVER:    sResult=tr("Boot service driver");      break;
 //        case TYPE_EFIBOOT:          sResult=QString("EFI Boot");            break;
 //        case TYPE_EFI:              sResult=QString("EFI");                 break;
 //        case TYPE_EFIRUNTIMEDRIVER: sResult=QString("EFI Runtime driver");  break;

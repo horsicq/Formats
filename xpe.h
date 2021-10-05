@@ -318,8 +318,9 @@ public:
         TYPE_DLL,
         TYPE_DRIVER,
         TYPE_BOOTAPPLICATION,
-        TYPE_SERVICEDRIVER,
-        TYPE_RUNTIMEDRIVER
+//        TYPE_SERVICEDRIVER,
+        TYPE_RUNTIMEDRIVER,
+        TYPE_BOOTSERVICEDRIVER
 //        TYPE_XBOX,
 //        TYPE_OS2,
 //        TYPE_POSIX,
