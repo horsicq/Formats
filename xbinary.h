@@ -1118,6 +1118,7 @@ signals:
 
 private:
     QIODevice *g_pDevice;
+    char *g_pMemory;
     QString g_sFileName;
     QMutex *g_pReadWriteMutex;
     bool g_bIsImage;

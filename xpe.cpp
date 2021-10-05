@@ -226,30 +226,10 @@ int XPE::getType()
     {
         result=TYPE_BOOTSERVICEDRIVER;
     }
-//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)
-//    {
-//        result=TYPE_EFI;
-//    }
-//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)
-//    {
-//        result=TYPE_EFIRUNTIMEDRIVER;
-//    }
-//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX)
-//    {
-//        result=TYPE_XBOX;
-//    }
-//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI)
-//    {
-//        result=TYPE_OS2;
-//    }
-//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI)
-//    {
-//        result=TYPE_POSIX;
-//    }
-//    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
-//    {
-//        result=TYPE_CE;
-//    }
+    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)
+    {
+        result=TYPE_RUNTIMEDRIVER;
+    }
 
     // TODO from Resource/Version
     if(result!=TYPE_DRIVER) // TODO Check

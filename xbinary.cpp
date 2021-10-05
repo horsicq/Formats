@@ -40,6 +40,16 @@ XBinary::XBinary(QString sFileName)
 
 XBinary::~XBinary()
 {
+    if(g_pMemory)
+    {
+        QFileDevice *pFileDevice=dynamic_cast<QFileDevice *>(g_pDevice);
+
+        if(pFileDevice)
+        {
+            pFileDevice->unmap((unsigned char *)g_pMemory);
+        }
+    }
+
     if(g_sFileName!="")
     {
         QFile *pFile=dynamic_cast<QFile *>(g_pDevice);
@@ -54,6 +64,7 @@ XBinary::~XBinary()
 void XBinary::setData(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
     g_pReadWriteMutex=nullptr;
+    g_pMemory=0;
 
     setDevice(pDevice);
     setIsImage(bIsImage);
@@ -75,6 +86,13 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
     setOsVersion("");
 
     g_bLog=false;
+
+    QFileDevice *pFileDevice=dynamic_cast<QFileDevice *>(pDevice);
+
+    if(pFileDevice)
+    {
+        g_pMemory=(char *)pFileDevice->map(0,pFileDevice->size());
+    }
 }
 
 void XBinary::setDevice(QIODevice *pDevice)
@@ -102,9 +120,21 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 
     if(g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
-    if(pDevice->seek(nPos))
+    if(g_pMemory)
     {
-        nResult=pDevice->read(pData,nMaxLen);
+        nMaxLen=qMin(getSize()-nPos,nMaxLen);
+        nMaxLen=qMax(nMaxLen,(qint64)0);
+
+        _copyMemory(pData,g_pMemory+nPos,nMaxLen);
+
+        nResult=nMaxLen;
+    }
+    else
+    {
+        if(pDevice->seek(nPos))
+        {
+            nResult=pDevice->read(pData,nMaxLen);
+        }
     }
 
     if(g_pReadWriteMutex) g_pReadWriteMutex->unlock();
@@ -2000,7 +2030,17 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
     bool bReadError=false;
 
-    char *pBuffer=new char[READWRITE_BUFFER_SIZE];
+    char *pBuffer=0;
+
+    if(!g_pMemory)
+    {
+        pBuffer=new char[READWRITE_BUFFER_SIZE];
+    }
+    else
+    {
+        pBuffer=g_pMemory+nOffset;
+    }
+
     char *pAnsiBuffer=new char[ssOptions.nMaxLenght+1];
     char *pUTF8Buffer=new char[ssOptions.nMaxLenght*4+1];
 
@@ -2031,12 +2071,17 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
     while((_nSize>0)&&(!g_bIsSearchStop))
     {
-        qint64 nCurrentSize=qMin((qint64)READWRITE_BUFFER_SIZE,_nSize);
+        qint64 nCurrentSize=_nSize;
 
-        if(safeReadData(g_pDevice,_nOffset,pBuffer,nCurrentSize)!=nCurrentSize)
+        if(!g_pMemory)
         {
-            bReadError=true;
-            break;
+            nCurrentSize=qMin((qint64)READWRITE_BUFFER_SIZE,nCurrentSize);
+
+            if(safeReadData(g_pDevice,_nOffset,pBuffer,nCurrentSize)!=nCurrentSize)
+            {
+                bReadError=true;
+                break;
+            }
         }
 
         for(qint64 i=0; i<nCurrentSize; i++)
@@ -2432,7 +2477,11 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
         _errorMessage(tr("Read error"));
     }
 
-    delete [] pBuffer;
+    if(!g_pMemory)
+    {
+        delete [] pBuffer;
+    }
+
     delete [] pAnsiBuffer;
     delete [] pUTF8Buffer;
     delete [] pUnicodeBuffer[0];
