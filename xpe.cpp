@@ -91,6 +91,7 @@ QString XPE::getArch()
 bool XPE::isBigEndian()
 {
     // TODO Check Machine !!!
+    // TODO find samples
     return false;
 }
 
