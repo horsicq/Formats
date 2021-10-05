@@ -4380,7 +4380,7 @@ QString XBinary::getUnpackedFileName(QIODevice *pDevice)
 
     if(pFile)
     {
-        QString sFileName=pFile->fileName(); // TODO
+        QString sFileName=pFile->fileName();
 
         if(sFileName!="")
         {
@@ -4435,7 +4435,7 @@ QString XBinary::getBackupFileName(QIODevice *pDevice)
 
     if(pFile)
     {
-        QString sFileName=pFile->fileName(); // TODO
+        QString sFileName=pFile->fileName();
 
         if(sFileName!="")
         {
@@ -4473,7 +4473,7 @@ QString XBinary::getResultFileName(QIODevice *pDevice, QString sAppendix)
 
     if(pFile)
     {
-        QString sFileName=pFile->fileName(); // TODO
+        QString sFileName=pFile->fileName();
 
         if(sFileName!="")
         {
@@ -4515,7 +4515,7 @@ QString XBinary::getDeviceFilePath(QIODevice *pDevice)
 
     if(pFile)
     {
-        QString sFileName=pFile->fileName(); // TODO
+        QString sFileName=pFile->fileName();
 
         if(sFileName!="")
         {
@@ -4536,7 +4536,7 @@ QString XBinary::getDeviceDirectory(QIODevice *pDevice)
 
     if(pFile)
     {
-        QString sFileName=pFile->fileName(); // TODO
+        QString sFileName=pFile->fileName();
 
         if(sFileName!="")
         {
@@ -4557,7 +4557,7 @@ QString XBinary::getDeviceFileBaseName(QIODevice *pDevice)
 
     if(pFile)
     {
-        QString sFileName=pFile->fileName(); // TODO
+        QString sFileName=pFile->fileName();
 
         if(sFileName!="")
         {
@@ -4574,13 +4574,12 @@ QString XBinary::getDeviceFileCompleteSuffix(QIODevice *pDevice)
 {
     QString sResult;
 
-    QString sClassName=pDevice->metaObject()->className();
+    QFile *pFile=dynamic_cast<QFile *>(pDevice);
 
-    if(sClassName=="QFile")
+    if(pFile)
     {
-        QFile *pFile=(QFile *)pDevice;
 
-        QString sFileName=pFile->fileName(); // TODO
+        QString sFileName=pFile->fileName();
 
         if(sFileName!="")
         {
