@@ -217,6 +217,11 @@ int XPE::getType()
     {
         result=TYPE_GUI;
     }
+    else if((nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX)||
+            (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION))
+    {
+        result=TYPE_APPLICATION;
+    }
 //    else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)
 //    {
 //        result=TYPE_EFIBOOT;
