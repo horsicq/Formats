@@ -5979,7 +5979,7 @@ bool XBinary::resize(QIODevice *pDevice, qint64 nSize)
 {
     bool bResult=false;
 
-    QString sClassName=pDevice->metaObject()->className();
+    QString sClassName=pDevice->metaObject()->className(); // TODO
 
     if(sClassName=="QFile")
     {
