@@ -4532,12 +4532,10 @@ QString XBinary::getDeviceDirectory(QIODevice *pDevice)
 {
     QString sResult;
 
-    QString sClassName=pDevice->metaObject()->className();
+    QFile *pFile=dynamic_cast<QFile *>(pDevice);
 
-    if(sClassName=="QFile")
+    if(pFile)
     {
-        QFile *pFile=(QFile *)pDevice;
-
         QString sFileName=pFile->fileName(); // TODO
 
         if(sFileName!="")
