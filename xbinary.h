@@ -21,25 +21,25 @@
 #ifndef XBINARY_H
 #define XBINARY_H
 
-#include <QIODevice>
-#include <QUuid>
+#include <QBuffer>
+#include <QCoreApplication>
+#include <QCryptographicHash>
+#include <QDataStream>
+#include <QDateTime>
+#include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
-#include <QDataStream>
-#include <QDir>
-#include <QtEndian>
+#include <QIODevice>
 #include <QMap>
-#include <QSet>
-#include <QBuffer>
-#include <QTemporaryFile>
-#include <QCryptographicHash>
-#include <QCoreApplication>
-#include <QTextStream>
-#include <QDateTime>
-#include <QElapsedTimer>
 #include <QMutex>
+#include <QSet>
+#include <QTemporaryFile>
+#include <QTextStream>
+#include <QUuid>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+#include <QtEndian>
 #if (QT_VERSION_MAJOR<6) // TODO Check
 #include <QTextCodec>
 #endif
@@ -58,12 +58,12 @@
 #include <QRandomGenerator>
 #endif
 #include <math.h>
+#include "xelf_def.h"
+#include "xle_def.h"
+#include "xmach_def.h"
 #include "xmsdos_def.h"
 #include "xne_def.h"
-#include "xle_def.h"
 #include "xpe_def.h"
-#include "xelf_def.h"
-#include "xmach_def.h"
 #include "subdevice.h"
 
 // TODO Check 64
