@@ -25,6 +25,7 @@
 #include <QUuid>
 #include <QFile>
 #include <QFileInfo>
+#include <QDataStream>
 #include <QDir>
 #include <QtEndian>
 #include <QMap>
@@ -37,12 +38,11 @@
 #include <QDateTime>
 #include <QElapsedTimer>
 #include <QMutex>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 #if (QT_VERSION_MAJOR<6) // TODO Check
 #include <QTextCodec>
 #endif
-#include <math.h>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 #if (QT_VERSION_MAJOR<5) // TODO Check
 #include <QRegExp>
 #else
@@ -57,6 +57,7 @@
 #elif (QT_VERSION_MAJOR>=6) // TODO Check
 #include <QRandomGenerator>
 #endif
+#include <math.h>
 #include "xmsdos_def.h"
 #include "xne_def.h"
 #include "xle_def.h"
