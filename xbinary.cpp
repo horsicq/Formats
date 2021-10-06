@@ -150,9 +150,21 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
 
     if(g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
-    if(pDevice->seek(nPos))
+    if(g_pMemory)
     {
-        nResult=pDevice->write(pData,nLen);
+        nLen=qMin(getSize()-nPos,nLen);
+        nLen=qMax(nLen,(qint64)0);
+
+        _copyMemory(g_pMemory+nPos,(char *)pData,nLen);
+
+        nResult=nLen;
+    }
+    else
+    {
+        if(pDevice->seek(nPos))
+        {
+            nResult=pDevice->write(pData,nLen);
+        }
     }
 
     if(g_pReadWriteMutex) g_pReadWriteMutex->unlock();
@@ -2018,6 +2030,8 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
     }
 
     bool bANSICodec=false;
+
+    // TODO Check Qt6
     QTextCodec *pCodec=nullptr;
 
     if(ssOptions.sANSICodec!="")

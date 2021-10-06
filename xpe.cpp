@@ -8800,7 +8800,7 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
         }
         else
         {
-            result.sStatus=QString("%1: %2").arg(tr("Error"),valueToHex(lStatus));
+            result.sStatus=QString("%1: %2").arg(tr("Error"),valueToHex((quint32)lStatus));
         }
 
         HCERTSTORE hStore=NULL;

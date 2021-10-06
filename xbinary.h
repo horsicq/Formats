@@ -37,7 +37,9 @@
 #include <QDateTime>
 #include <QElapsedTimer>
 #include <QMutex>
+#if (QT_VERSION_MAJOR<6) // TODO Check
 #include <QTextCodec>
+#endif
 #include <math.h>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
