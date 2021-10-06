@@ -606,6 +606,7 @@ public:
 
     struct STRINGSEARCH_OPTIONS
     {
+        // TODO more
         qint32 nLimit;
         qint64 nMinLenght;
         qint64 nMaxLenght;
