@@ -2219,6 +2219,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                         }
                         else
                         {
+                            // TODO Check Qt6
                             QByteArray baString=QByteArray(pAnsiBuffer,nCurrentAnsiSize);
                             sString=pCodec->toUnicode(baString);
                         }
