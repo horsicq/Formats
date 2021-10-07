@@ -804,18 +804,18 @@ struct WIN_CERT_RECORD
     quint16 wCertificateType;
 };
 
-struct NB10I                       // NB10 debug info
+struct NB10I                        // NB10 debug info
 {
-    quint32 dwSig;                 // NB10
-    quint32 dwOffset;              // offset, always 0
+    quint32 dwSig;                  // NB10
+    quint32 dwOffset;               // offset, always 0
     quint32 sig;
     quint32 age;
     char szPdb[260];
 };
 
-struct RSDSI                       // RSDS debug info
+struct RSDSI                        // RSDS debug info
 {
-    quint32 dwSig;                 // RSDS
+    quint32 dwSig;                  // RSDS
     XBINARY_DEF::S_GUID guidSig;
     quint32 age;
     char szPdb[260*3];
