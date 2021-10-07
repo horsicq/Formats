@@ -58,6 +58,7 @@
 #include <QRandomGenerator>
 #endif
 #include <math.h>
+#include "xbinary_def.h"
 #include "xelf_def.h"
 #include "xle_def.h"
 #include "xmach_def.h"
@@ -551,8 +552,8 @@ public:
     void write_float(qint64 nOffset,float fValue,bool bIsBigEndian=false); // TODO Check
     void write_double(qint64 nOffset,double dValue,bool bIsBigEndian=false); // TODO Check
 
-    QString read_UUID(qint64 nOffset);
-    void write_UUID(qint64 nOffset,QString sValue);
+    QString read_UUID(qint64 nOffset);              // uuid [16]
+    void write_UUID(qint64 nOffset,QString sValue); // uuid [16]
 
     static quint8 _read_uint8(char *pData);
     static qint8 _read_int8(char *pData);
