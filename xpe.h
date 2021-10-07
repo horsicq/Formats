@@ -24,7 +24,7 @@
 #include "xmsdos.h"
 #include "xpe_def.h"
 
-#if defined(_MSC_VER) // For WinTrust
+#if defined(_MSC_VER) // For WinTrust TODO Check minGW
 #include <windows.h>
 #include <Softpub.h>
 #include <wincrypt.h>
