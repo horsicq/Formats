@@ -25,8 +25,8 @@
 
 namespace XBINARY_DEF
 {
-struct S_GUID
-{          // size is 16
+struct S_GUID           // size is 16
+{
     quint32 Data1;
     quint16 Data2;
     quint16 Data3;

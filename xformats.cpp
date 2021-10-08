@@ -510,7 +510,7 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
 }
 
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(QComboBox *pComboBox, QList<XBinary::FT> *pListFileTypes, XBinary::FT fileType)
+XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(5,3,0)
     const QSignalBlocker block(pComboBox);
@@ -518,13 +518,26 @@ XBinary::FT XFormats::setFileTypeComboBox(QComboBox *pComboBox, QList<XBinary::F
     const bool bBlocked1=pComboBox->blockSignals(true);
 #endif
 
+    QList<XBinary::FT> listFileTypes;
+
+    if(fileType!=XBinary::FT_REGION)
+    {
+        QSet<XBinary::FT> stFileType=XBinary::getFileTypes(pDevice,true);
+
+        listFileTypes=XBinary::_getFileTypeListFromSet(stFileType);
+    }
+    else
+    {
+        listFileTypes.append(XBinary::FT_REGION);
+    }
+
     pComboBox->clear();
 
-    int nNumberOfListTypes=pListFileTypes->count();
+    int nNumberOfListTypes=listFileTypes.count();
 
     for(int i=0;i<nNumberOfListTypes;i++)
     {
-        XBinary::FT fileType=pListFileTypes->at(i);
+        XBinary::FT fileType=listFileTypes.at(i);
         pComboBox->addItem(XBinary::fileTypeIdToString(fileType),fileType);
     }
 
@@ -561,6 +574,24 @@ XBinary::FT XFormats::setFileTypeComboBox(QComboBox *pComboBox, QList<XBinary::F
 }
 #endif
 #ifdef QT_GUI_LIB
+XBinary::FT XFormats::setFileTypeComboBox(QString sFileName,QComboBox *pComboBox)
+{
+    XBinary::FT result=XBinary::FT_UNKNOWN;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        result=setFileTypeComboBox(XBinary::FT_UNKNOWN,&file,pComboBox);
+
+        file.close();
+    }
+
+    return result;
+}
+#endif
+#ifdef QT_GUI_LIB
 bool XFormats::setEndianessComboBox(QComboBox *pComboBox, bool bIsBigEndian)
 { 
 #if QT_VERSION >= QT_VERSION_CHECK(5,3,0)
@@ -578,7 +609,7 @@ bool XFormats::setEndianessComboBox(QComboBox *pComboBox, bool bIsBigEndian)
 
     if(bIsBigEndian)
     {
-        pComboBox->setCurrentIndex(0);
+        pComboBox->setCurrentIndex(1);
     }
 
 #if QT_VERSION < QT_VERSION_CHECK(5,3,0)

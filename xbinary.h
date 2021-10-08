@@ -156,6 +156,7 @@ public:
     enum FT
     {
         FT_UNKNOWN=0,
+        FT_REGION, // For Memory regions
         FT_BINARY,
         FT_BINARY16,
         FT_BINARY32,

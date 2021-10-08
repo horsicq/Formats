@@ -415,6 +415,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
     switch(fileType)
     {
         case FT_UNKNOWN:            sResult=tr("Unknown");              break;
+        case FT_REGION:             sResult=tr("Region");               break;
         case FT_BINARY:             sResult=QString("Binary");          break;
         case FT_BINARY16:           sResult=QString("Binary16");        break;
         case FT_BINARY32:           sResult=QString("Binary32");        break;
@@ -3797,6 +3798,11 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
 
     stResult.insert(FT_BINARY);
 
+    if(bExtra)
+    {
+        stResult.insert(FT_COM);
+    }
+
     QByteArray baHeader;
     baHeader=read_array(0,qMin(getSize(),(qint64)0x200)); // TODO const
     char *pOffset=baHeader.data();
@@ -4112,6 +4118,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
 {
     QList<XBinary::FT> listResult;
 
+    if(stFileTypes.contains(FT_REGION))     listResult.append(FT_REGION);
     if(stFileTypes.contains(FT_BINARY))     listResult.append(FT_BINARY);
     if(stFileTypes.contains(FT_BINARY16))   listResult.append(FT_BINARY16);
     if(stFileTypes.contains(FT_BINARY32))   listResult.append(FT_BINARY32);
@@ -6859,12 +6866,14 @@ XBinary::DM XBinary::getDisasmMode(QString sArch,bool bIsBigEndian,MODE mode)
     }
     else if((sArch=="386")||
             (sArch=="I386")||
-            (sArch=="486"))
+            (sArch=="486")||
+            (sArch=="X86"))
     {
         dmResult=DM_X86_32;
     }
     else if((sArch=="AMD64")||
-            (sArch=="X86_64"))
+            (sArch=="X86_64")||
+            (sArch=="X64"))
     {
         dmResult=DM_X86_64;
     }
