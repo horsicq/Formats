@@ -206,8 +206,8 @@ public:
     enum MODE
     {
         MODE_UNKNOWN=0,
-        MODE_DATA,
-        MODE_BIT, // 1/0
+        MODE_DATA,      // Raw data
+        MODE_BIT,       // 1/0
         MODE_8,
         MODE_16,
         MODE_16SEG,
