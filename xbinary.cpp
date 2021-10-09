@@ -2048,7 +2048,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
     bool bReadError=false;
 
-    char *pBuffer=0;
+    char *pBuffer=nullptr;
 
     if(!g_pMemory)
     {
