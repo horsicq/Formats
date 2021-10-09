@@ -64,7 +64,7 @@ XBinary::~XBinary()
 void XBinary::setData(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
     g_pReadWriteMutex=nullptr;
-    g_pMemory=0;
+    g_pMemory=nullptr;
 
     setDevice(pDevice);
     setIsImage(bIsImage);
