@@ -3798,11 +3798,6 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
 
     stResult.insert(FT_BINARY);
 
-    if(bExtra)
-    {
-        stResult.insert(FT_COM);
-    }
-
     QByteArray baHeader;
     baHeader=read_array(0,qMin(getSize(),(qint64)0x200)); // TODO const
     char *pOffset=baHeader.data();
@@ -4004,6 +3999,14 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         if(stResult.contains(FT_GIF)&&stResult.contains(FT_TEXT))
         {
             stResult.remove(FT_GIF);
+        }
+    }
+
+    if(bExtra)
+    {
+        if(stResult.count()<=1)
+        {
+            stResult.insert(FT_COM);
         }
     }
 
