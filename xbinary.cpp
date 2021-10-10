@@ -932,7 +932,7 @@ QString XBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize,bool bIsBigE
     {
         quint16 *pBuffer=new quint16[nMaxSize+1];
 
-        for(int i=0; i<nMaxSize; i++)
+        for(int i=0;i<nMaxSize;i++)
         {
             pBuffer[i]=read_uint16(nOffset+2*i,bIsBigEndian);
 
