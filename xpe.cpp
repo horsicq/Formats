@@ -1099,7 +1099,7 @@ QList<XPE_DEF::IMAGE_DATA_DIRECTORY> XPE::getDirectories()
         nDirectoriesOffset+=offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DataDirectory);
     }
 
-    for(int i=0; i<nNumberNumberOfRvaAndSizes; i++)
+    for(int i=0;i<nNumberNumberOfRvaAndSizes;i++)
     {
         XPE_DEF::IMAGE_DATA_DIRECTORY record={};
 
