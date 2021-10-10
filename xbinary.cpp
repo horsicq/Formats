@@ -574,7 +574,7 @@ void XBinary::findFiles(QString sDirectoryName, XBinary::FFOPTIONS *pFFOption, q
 
             int nNumberOfFiles=eil.count();
 
-            for(int i=0; (i<nNumberOfFiles)&&(!(*(pFFOption->pbIsStop))); i++)
+            for(int i=0;(i<nNumberOfFiles)&&(!(*(pFFOption->pbIsStop)));i++)
             {
                 QString sFN=eil.at(i).fileName();
 
@@ -901,7 +901,7 @@ QString XBinary::read_ansiString(qint64 nOffset,qint64 nMaxSize)
     {
         quint8 *pBuffer=new quint8[nMaxSize+1];
 
-        for(int i=0; i<nMaxSize; i++)
+        for(int i=0;i<nMaxSize;i++)
         {
             pBuffer[i]=read_uint8(nOffset+i);
 
