@@ -963,7 +963,7 @@ QString XBinary::read_utf8String(qint64 nOffset, qint64 nMaxSize)
     {
         qint32 nRealSize=0;
 
-        for(int i=0; i<nMaxSize; i++)
+        for(int i=0;i<nMaxSize;i++)
         {
             quint8 nByte=read_uint8(nOffset+nRealSize);
 
