@@ -5831,7 +5831,7 @@ QString XBinary::invertHexByteString(QString sHex)
 {
     QString sResult;
 
-    for(int i=sHex.length()-2; i>=0; i-=2)
+    for(int i=sHex.length()-2;i>=0;i-=2)
     {
         sResult+=sHex.mid(i,2);
     }
