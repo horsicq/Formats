@@ -1828,7 +1828,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
         }
         else
         {
-            for(qint64 i=0;(i<nSize)&&(!g_bIsSearchStop); i++)
+            for(qint64 i=0;(i<nSize)&&(!g_bIsSearchStop);i++)
             {
                 if(_compareSignature(pMemoryMap,&listSignatureRecords,nOffset+i))
                 {
@@ -1906,7 +1906,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString)
             break;
         }
 
-        for(unsigned int i=0; i<nTemp-(nStringSize-1); i++)
+        for(unsigned int i=0;i<nTemp-(nStringSize-1);i++)
         {
             if(compareMemoryByteI((quint8 *)(pBuffer+i),(quint8 *)baUpper.data(),(quint8 *)baLower.data(),nStringSize))
             {
