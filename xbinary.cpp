@@ -1984,7 +1984,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
             break;
         }
 
-        for(unsigned int i=0; i<nTemp-2*(nStringSize-1); i++)
+        for(unsigned int i=0;i<nTemp-2*(nStringSize-1);i++)
         {
             if(compareMemoryWordI((quint16 *)(pBuffer+i),(quint16 *)baUpper.data(),(quint16 *)baLower.data(),nStringSize))
             {
