@@ -1520,7 +1520,7 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
             break;
         }
 
-        for(unsigned int i=0; i<nTemp-(nArraySize-1); i++)
+        for(unsigned int i=0;i<nTemp-(nArraySize-1);i++)
         {
             if(compareMemory(pBuffer+i,pArray,nArraySize))
             {
