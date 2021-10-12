@@ -3194,7 +3194,7 @@ qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddres
 
     int nNumberOfRecords=pMemoryMap->listRecords.count();
 
-    for(int i=0; i<nNumberOfRecords; i++)
+    for(int i=0;i<nNumberOfRecords;i++)
     {
         if(pMemoryMap->listRecords.at(i).nSize&&(pMemoryMap->listRecords.at(i).nAddress!=-1)&&(pMemoryMap->listRecords.at(i).nOffset!=-1))
         {
