@@ -3575,7 +3575,7 @@ bool XBinary::_compareByteArrayWithSignature(QByteArray baData, QString sSignatu
         bResult=true;
         int nNumberOfSymbols=sSignature.size();
 
-        for(int i=0; i<nNumberOfSymbols; i++)
+        for(int i=0;i<nNumberOfSymbols;i++)
         {
             if(sSignature.at(i)!=QChar('.'))
             {
