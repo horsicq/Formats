@@ -2010,6 +2010,102 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     return -1;
 }
 
+quint8 XBinary::getBits_uint8(quint8 nValue, qint32 nBitOffset, qint32 nBitSize)
+{
+    quint8 nResult=nValue;
+
+    if(nBitSize)
+    {
+        quint8 nMask=0xFF;
+
+        for(int i=0;i<nBitOffset;i++)
+        {
+            nResult=nResult>>1;
+        }
+
+        for(int i=0;i<nBitSize;i++)
+        {
+            nMask=nMask<<1;
+        }
+
+        nResult=nResult&(~nMask);
+    }
+
+    return nResult;
+}
+
+quint16 XBinary::getBits_uint16(quint16 nValue, qint32 nBitOffset, qint32 nBitSize)
+{
+    quint16 nResult=nValue;
+
+    if(nBitSize)
+    {
+        quint16 nMask=0xFFFF;
+
+        for(int i=0;i<nBitOffset;i++)
+        {
+            nResult=nResult>>1;
+        }
+
+        for(int i=0;i<nBitSize;i++)
+        {
+            nMask=nMask<<1;
+        }
+
+        nResult=nResult&(~nMask);
+    }
+
+    return nResult;
+}
+
+quint32 XBinary::getBits_uint32(quint32 nValue, qint32 nBitOffset, qint32 nBitSize)
+{
+    quint32 nResult=nValue;
+
+    if(nBitSize)
+    {
+        quint32 nMask=0xFFFFFFFF;
+
+        for(int i=0;i<nBitOffset;i++)
+        {
+            nResult=nResult>>1;
+        }
+
+        for(int i=0;i<nBitSize;i++)
+        {
+            nMask=nMask<<1;
+        }
+
+        nResult=nResult&(~nMask);
+    }
+
+    return nResult;
+}
+
+quint64 XBinary::getBits_uint64(quint64 nValue, qint32 nBitOffset, qint32 nBitSize)
+{
+    quint64 nResult=nValue;
+
+    if(nBitSize)
+    {
+        quint64 nMask=0xFFFFFFFFFFFFFFFF;
+
+        for(int i=0;i<nBitOffset;i++)
+        {
+            nResult=nResult>>1;
+        }
+
+        for(int i=0;i<nBitSize;i++)
+        {
+            nMask=nMask<<1;
+        }
+
+        nResult=nResult&(~nMask);
+    }
+
+    return nResult;
+}
+
 QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 nSize,STRINGSEARCH_OPTIONS ssOptions)
 {
     OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
@@ -3277,7 +3373,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByAddress(XBinary::_MEMORY_MAP *
 
     int nNumberOfRecords=pMemoryMap->listRecords.count();
 
-    for(int i=0; i<nNumberOfRecords; i++)
+    for(int i=0;i<nNumberOfRecords;i++)
     {
         if(pMemoryMap->listRecords.at(i).nSize&&(pMemoryMap->listRecords.at(i).nAddress!=-1))
         {

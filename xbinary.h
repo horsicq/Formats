@@ -606,6 +606,11 @@ public:
     qint64 find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString);
     qint64 find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString);
 
+    static quint8 getBits_uint8(quint8 nValue,qint32 nBitOffset,qint32 nBitSize);
+    static quint16 getBits_uint16(quint16 nValue,qint32 nBitOffset,qint32 nBitSize);
+    static quint32 getBits_uint32(quint32 nValue,qint32 nBitOffset,qint32 nBitSize);
+    static quint64 getBits_uint64(quint64 nValue,qint32 nBitOffset,qint32 nBitSize);
+
     struct STRINGSEARCH_OPTIONS
     {
         // TODO more
