@@ -5128,7 +5128,7 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize)
                 return 0;
             }
 
-            for(qint64 i=0; i<nTemp; i++)
+            for(qint64 i=0;i<nTemp;i++)
             {
                 a=(a+(quint8)(pBuffer[nOffset+i]))%MOD_ADLER;
                 b=(b+a)%MOD_ADLER;
