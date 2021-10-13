@@ -609,6 +609,7 @@ public:
 
     QString getFileVersion();
     QString getFileVersion(RESOURCES_VERSION *pResourceVersion);
+    QString getFileVersionMS(RESOURCES_VERSION *pResourceVersion);
 
     void setFixedFileInfo_dwSignature(quint32 nValue);
     void setFixedFileInfo_dwStrucVersion(quint32 nValue);

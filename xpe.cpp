@@ -3523,8 +3523,14 @@ QString XPE::getFileVersion()
 
 QString XPE::getFileVersion(RESOURCES_VERSION *pResourceVersion)
 {
+    // TODO !!!
 //    return QString("%1.%2").arg(get_uint32_version(pResourceVersion->fileInfo.dwFileVersionMS)).arg(get_uint32_version(pResourceVersion->fileInfo.dwFileVersionLS));
     return getResourcesVersionValue("FileVersion",pResourceVersion);
+}
+
+QString XPE::getFileVersionMS(RESOURCES_VERSION *pResourceVersion)
+{
+    return get_uint32_version(pResourceVersion->fileInfo.dwFileVersionMS);
 }
 
 void XPE::setFixedFileInfo_dwSignature(quint32 nValue)

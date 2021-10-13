@@ -6028,8 +6028,8 @@ QString XBinary::get_uint32_full_version(quint32 nValue)
 
 QString XBinary::get_uint32_version(quint32 nValue)
 {
-    QString sResult=QString("%1.%2").arg(    QString::number((nValue>>16)&0xFFFF),
-                                                QString::number((nValue)&0xFFFF));
+    QString sResult=QString("%1.%2").arg(   QString::number((nValue>>16)&0xFFFF),
+                                            QString::number((nValue)&0xFFFF));
 
     return sResult;
 }
