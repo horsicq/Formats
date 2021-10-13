@@ -3597,7 +3597,7 @@ QString XBinary::_createSignature(QString sSignature1, QString sSignature2)
 
     if(sSignature1.size()==sSignature2.size())
     {
-        for(int i=0; i<sSignature1.size(); i+=2)
+        for(int i=0;i<sSignature1.size();i+=2)
         {
             if(sSignature1.mid(i,2)==sSignature2.mid(i,2))
             {
