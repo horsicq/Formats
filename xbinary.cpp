@@ -4860,7 +4860,7 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
                 break;
             }
 
-            for(unsigned int i=0; i<nTemp-3; i++)
+            for(unsigned int i=0;i<nTemp-3;i++)
             {
                 qint32 nValue1=*(qint32 *)(pBuffer1+i);
                 qint32 nValue2=*(qint32 *)(pBuffer2+i);
