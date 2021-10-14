@@ -5376,7 +5376,7 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
                 return {0};
             }
 
-            for(qint64 i=0; i<nTemp; i++)
+            for(qint64 i=0;i<nTemp;i++)
             {
                 result.nCount[(unsigned char)pBuffer[i]]+=1;
             }
