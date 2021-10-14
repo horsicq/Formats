@@ -5642,7 +5642,7 @@ bool XBinary::compareSignatureStrings(QString sBaseSignature, QString sOptSignat
     {
         bResult=true;
 
-        for(int i=0; i<nSize; i++)
+        for(int i=0;i<nSize;i++)
         {
             QChar _qchar1=sBaseSignature.at(i);
             QChar _qchar2=sOptSignature.at(i);
