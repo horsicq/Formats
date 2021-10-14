@@ -5469,7 +5469,7 @@ quint32 XBinary::getStringCustomCRC32(QString sString)
     int nSize=sString.size();
     QByteArray baString=sString.toLatin1();
 
-    for(int i=0; i<nSize; i++)
+    for(int i=0;i<nSize;i++)
     {
         unsigned char _char=(unsigned char)baString.data()[i];
 //        unsigned char _char1=(unsigned char)sString.at(i).toLatin1();
