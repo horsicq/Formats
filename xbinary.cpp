@@ -5724,7 +5724,7 @@ QString XBinary::convertSignature(QString sSignature)
         int nStringSize=sSignature.size();
         bool bAnsiString=false;
 
-        for(int i=0; i<nStringSize; i++)
+        for(int i=0;i<nStringSize;i++)
         {
             QChar c=sSignature.at(i);
 
