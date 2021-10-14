@@ -5987,7 +5987,7 @@ bool XBinary::isPlainTextType(QByteArray *pbaData)
     {
         bResult=true;
 
-        for(int i=0; i<nDataSize; i++)
+        for(int i=0;i<nDataSize;i++)
         {
             if(pDataOffset[i]<0x9)
             {
