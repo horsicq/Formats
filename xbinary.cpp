@@ -6031,7 +6031,7 @@ bool XBinary::isUTF8TextType(QByteArray *pbaData)
         nDataSize=pbaData->size();
         nDataSize=nDataSize-3;
 
-        for(int i=0; i<nDataSize; i++)
+        for(int i=0;i<nDataSize;i++)
         {
             if(pDataOffset[i]==0)
             {
@@ -7886,7 +7886,7 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
 
     int nSignatureSize=sSignature.size();
 
-    for(int i=0; i<nSignatureSize;)
+    for(int i=0;i<nSignatureSize;)
     {
         if(sSignature.at(i)==QChar('.'))
         {
@@ -7927,7 +7927,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
     // TODO optimize
     int nNumberOfSignatures=pListSignatureRecords->count();
 
-    for(int i=0; i<nNumberOfSignatures; i++)
+    for(int i=0;i<nNumberOfSignatures;i++)
     {
         qint64 _nAddress=0;
 
