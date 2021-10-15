@@ -1354,7 +1354,7 @@ QList<XPE::SECTIONRVA_RECORD> XPE::getSectionRVARecords()
 
     int nNumberOfSections=listSH.count();
 
-    for(int i=0; i<nNumberOfSections; i++)
+    for(int i=0;i<nNumberOfSections;i++)
     {
         SECTIONRVA_RECORD record={};
 
