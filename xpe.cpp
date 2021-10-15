@@ -1287,7 +1287,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders()
         nNumberOfSections=100;
     }
 
-    for(int i=0; i<(int)nNumberOfSections; i++)
+    for(int i=0;i<(int)nNumberOfSections;i++)
     {
         XPE_DEF::IMAGE_SECTION_HEADER record={};
 
