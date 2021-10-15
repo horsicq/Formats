@@ -8039,7 +8039,7 @@ int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSi
     int nResult=0;
     int nSignatureSize=sSignature.size();
 
-    for(int i=nStartIndex; i<nSignatureSize; i++)
+    for(int i=nStartIndex;i<nSignatureSize;i++)
     {
         if(sSignature.at(i)==QChar('.'))
         {

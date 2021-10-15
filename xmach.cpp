@@ -698,6 +698,10 @@ QMap<quint64, QString> XMACH::getLoadCommandTypes()
     mapResult.insert(0x2E,"LC_LINKER_OPTIMIZATION_HINT");
     mapResult.insert(0x2F,"LC_VERSION_MIN_TVOS");
     mapResult.insert(0x30,"LC_VERSION_MIN_WATCHOS");
+    mapResult.insert(0x31,"LC_NOTE");
+    mapResult.insert(0x32,"LC_BUILD_VERSION");
+    mapResult.insert(0x33|0x80000000,"LC_DYLD_EXPORTS_TRIE");
+    mapResult.insert(0x34|0x80000000,"LC_DYLD_CHAINED_FIXUPS");
 
     return mapResult;
 }
@@ -755,6 +759,10 @@ QMap<quint64, QString> XMACH::getLoadCommandTypesS()
     mapResult.insert(0x2E,"LINKER_OPTIMIZATION_HINT");
     mapResult.insert(0x2F,"VERSION_MIN_TVOS");
     mapResult.insert(0x30,"VERSION_MIN_WATCHOS");
+    mapResult.insert(0x31,"NOTE");
+    mapResult.insert(0x32,"BUILD_VERSION");
+    mapResult.insert(0x33|0x80000000,"DYLD_EXPORTS_TRIE");
+    mapResult.insert(0x34|0x80000000,"DYLD_CHAINED_FIXUPS");
 
     return mapResult;
 }
