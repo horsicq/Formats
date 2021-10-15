@@ -1305,7 +1305,7 @@ QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_H
 
     int nNumberOfSections=pListSectionHeaders->count();
 
-    for(int i=0; i<nNumberOfSections; i++)
+    for(int i=0;i<nNumberOfSections;i++)
     {
         SECTION_RECORD record={};
 
