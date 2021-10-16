@@ -1297,7 +1297,7 @@ QList<XELF_DEF::Elf32_Shdr> XELF::getElf32_ShdrList()
     quint32 nOffset=getHdr32_shoff();
     bool bIsBigEndian=isBigEndian();
 
-    for(quint32 i=0; i<nNumberOfSections; i++)
+    for(quint32 i=0;i<nNumberOfSections;i++)
     {
         XELF_DEF::Elf32_Shdr record=_readElf32_Shdr(nOffset,bIsBigEndian);
 
