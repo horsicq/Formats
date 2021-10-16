@@ -8113,7 +8113,7 @@ int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSigna
 
     int nSignatureSize=sSignature.size();
 
-    for(int i=nStartIndex; i<nSignatureSize; i++)
+    for(int i=nStartIndex;i<nSignatureSize;i++)
     {
         if(sSignature.at(i)==QChar('$'))
         {
