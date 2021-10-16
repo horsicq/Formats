@@ -1766,7 +1766,7 @@ XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionByName(QString sSectionName, QList<
 
     int nNumberOfSections=pListSectionHeaders->count();
 
-    for(int i=0; i<nNumberOfSections; i++)
+    for(int i=0;i<nNumberOfSections;i++)
     {
         QString _sSectionName=QString((char *)pListSectionHeaders->at(i).Name);
         _sSectionName.resize(qMin(_sSectionName.length(),XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
