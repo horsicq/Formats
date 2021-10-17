@@ -8197,10 +8197,10 @@ int XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignature
     int nSignatureSize=sSignature.size();
     QString sBytes;
 
-    for(int i=nStartIndex; i<nSignatureSize; i++)
+    for(int i=nStartIndex;i<nSignatureSize;i++)
     {
-        if( ((sSignature.at(i)>=QChar('a'))&&(sSignature.at(i)<=QChar('f'))) ||
-            (((sSignature.at(i)>=QChar('0'))&&(sSignature.at(i)<=QChar('9')))))
+        if( ((sSignature.at(i)>=QChar('a'))&&(sSignature.at(i)<=QChar('f')))||
+            ((sSignature.at(i)>=QChar('0'))&&(sSignature.at(i)<=QChar('9'))))
         {
             nResult++;
             sBytes.append(sSignature.at(i));
