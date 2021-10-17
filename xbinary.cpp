@@ -8148,7 +8148,7 @@ int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
     bool bIsBaseAddress=false;
     int nSizeOfAddress=0;
 
-    for(int i=nStartIndex; i<nSignatureSize; i++)
+    for(int i=nStartIndex;i<nSignatureSize;i++)
     {
         if(sSignature.at(i)==QChar('#'))
         {
