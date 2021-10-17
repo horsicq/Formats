@@ -2235,7 +2235,7 @@ QList<XELF_DEF::Elf32_Phdr> XELF::getElf32_PhdrList()
     quint32 nOffset=getHdr32_phoff();
     bool bIsBigEndian=isBigEndian();
 
-    for(quint32 i=0; i<nNumberOfProgramms; i++)
+    for(quint32 i=0;i<nNumberOfProgramms;i++)
     {
         XELF_DEF::Elf32_Phdr record=_readElf32_Phdr(nOffset,bIsBigEndian);
 
