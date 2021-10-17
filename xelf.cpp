@@ -1319,7 +1319,7 @@ QList<XELF_DEF::Elf64_Shdr> XELF::getElf64_ShdrList()
     quint64 nOffset=getHdr64_shoff();
     bool bIsBigEndian=isBigEndian();
 
-    for(quint32 i=0; i<nNumberOfSections; i++)
+    for(quint32 i=0;i<nNumberOfSections;i++)
     {
         XELF_DEF::Elf64_Shdr record=_readElf64_Shdr(nOffset,bIsBigEndian);
 
