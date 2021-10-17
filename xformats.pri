@@ -62,3 +62,7 @@ contains(XCONFIG, use_archive) {
         include($$PWD/../XArchive/xarchives.pri)
     }
 }
+
+DISTFILES += \
+    $$PWD/LICENSE \
+    $$PWD/README.md
