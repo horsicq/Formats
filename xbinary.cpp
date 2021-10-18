@@ -6872,7 +6872,9 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_UEFI:               sResult=QString("UEFI");                    break;
         case OSNAME_XBOX:               sResult=QString("XBOX");                    break;
         case OSNAME_OS2:                sResult=QString("OS2");                     break;
-        case OSNAME_OSX:                sResult=QString("OSX");                     break;
+        case OSNAME_MAC_OS_X:           sResult=QString("Mac OS X");                break;
+        case OSNAME_OS_X:               sResult=QString("OS X");                    break;
+        case OSNAME_MACOS:              sResult=QString("macOS");                   break;
         case OSNAME_ANDROID:            sResult=QString("Android");                 break;
         case OSNAME_FREEBSD:            sResult=QString("FreeBSD");                 break;
         case OSNAME_OPENBSD:            sResult=QString("OpenBSD");                 break;
@@ -8345,7 +8347,7 @@ bool XBinary::isEmptyData(char *pBuffer, qint64 nSize) // TODO dwords
 {
     bool bResult=true;
 
-    for(qint64 i=0; i<nSize; i++)
+    for(qint64 i=0;i<nSize;i++)
     {
         char *pOffset=(pBuffer+i);
 

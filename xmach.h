@@ -654,6 +654,7 @@ public:
     virtual FT getFileType();
     virtual int getType();
     virtual OSNAME getOsName();
+    virtual QString getOsVersion();
     virtual QString typeIdToString(int nType);
 
     enum OPCODE_TYPE

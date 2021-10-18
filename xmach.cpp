@@ -4293,7 +4293,16 @@ int XMACH::getType()
 XBinary::OSNAME XMACH::getOsName()
 {
     // TODO more
-    return OSNAME_OSX;
+    return OSNAME_MAC_OS_X;
+}
+
+QString XMACH::getOsVersion()
+{
+    QString sResult;
+
+    // TODO
+
+    return sResult;
 }
 
 QString XMACH::typeIdToString(int nType)
