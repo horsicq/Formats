@@ -1788,7 +1788,7 @@ XPE::SECTION_RECORD XPE::getSectionRecordByName(QString sSectionName, QList<SECT
 
     int nNumberOfSections=pListSectionRecords->count();
 
-    for(int i=0; i<nNumberOfSections; i++)
+    for(int i=0;i<nNumberOfSections;i++)
     {
         if(pListSectionRecords->at(i).sName==sSectionName)
         {
