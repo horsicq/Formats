@@ -3017,7 +3017,7 @@ int XELF::getSectionIndexByName(QString sSectionName)
 
     if(is64())
     {
-        for(quint32 i=0; i<getHdr64_shnum(); i++)
+        for(quint32 i=0;i<getHdr64_shnum();i++)
         {
             quint32 nCurrentNameIndex=getElf64_Shdr_name(i);
 
