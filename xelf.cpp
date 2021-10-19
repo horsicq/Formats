@@ -3030,7 +3030,7 @@ int XELF::getSectionIndexByName(QString sSectionName)
     }
     else
     {
-        for(quint32 i=0; i<getHdr32_shnum(); i++)
+        for(quint32 i=0;i<getHdr32_shnum();i++)
         {
             quint32 nCurrentNameIndex=getElf32_Shdr_name(i);
 
