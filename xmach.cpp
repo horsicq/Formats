@@ -2556,6 +2556,22 @@ XMACH_DEF::version_min_command XMACH::_read_version_min_command(qint64 nOffset)
     return result;
 }
 
+XMACH_DEF::build_version_command XMACH::_read_build_version_command(qint64 nOffset)
+{
+    XMACH_DEF::build_version_command result={};
+
+    bool bIsBigEndian=isBigEndian();
+
+    result.cmd=read_uint32(nOffset+offsetof(XMACH_DEF::build_version_command,cmd),bIsBigEndian);
+    result.cmdsize=read_uint32(nOffset+offsetof(XMACH_DEF::build_version_command,cmdsize),bIsBigEndian);
+    result.platform=read_uint32(nOffset+offsetof(XMACH_DEF::build_version_command,platform),bIsBigEndian);
+    result.minos=read_uint32(nOffset+offsetof(XMACH_DEF::build_version_command,minos),bIsBigEndian);
+    result.sdk=read_uint32(nOffset+offsetof(XMACH_DEF::build_version_command,sdk),bIsBigEndian);
+    result.ntools=read_uint32(nOffset+offsetof(XMACH_DEF::build_version_command,ntools),bIsBigEndian);
+
+    return result;
+}
+
 qint64 XMACH::get_version_min_command_size()
 {
     return sizeof(XMACH_DEF::version_min_command);
@@ -4290,19 +4306,69 @@ int XMACH::getType()
     return nResult;
 }
 
-XBinary::OSNAME XMACH::getOsName()
+XBinary::OSINFO XMACH::getOsInfo()
 {
-    // TODO more
-    return OSNAME_MAC_OS_X;
-}
+    OSINFO result={};
 
-QString XMACH::getOsVersion()
-{
-    QString sResult;
+    result.osName=OSNAME_MAC_OS_X;
 
-    // TODO
+    qint64 nVersionMinOffset=-1;
+    qint64 nBuildVersionOffset=-1;
 
-    return sResult;
+    QList<XMACH::COMMAND_RECORD> listCommandRecords=getCommandRecords();
+
+    if(isCommandPresent(XMACH_DEF::S_LC_BUILD_VERSION,&listCommandRecords))
+    {
+        nBuildVersionOffset=getCommandRecordOffset(XMACH_DEF::S_LC_BUILD_VERSION,0,&listCommandRecords);
+    }
+    else if(isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_IPHONEOS,&listCommandRecords))
+    {
+        nVersionMinOffset=getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_IPHONEOS,0,&listCommandRecords);
+        result.osName=OSNAME_IOS;
+    }
+    else if(isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_MACOSX,&listCommandRecords))
+    {
+        nVersionMinOffset=getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_MACOSX,0,&listCommandRecords);
+        result.osName=OSNAME_MACOS;
+    }
+    else if(isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_TVOS,&listCommandRecords))
+    {
+        nVersionMinOffset=getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_TVOS,0,&listCommandRecords);
+        result.osName=OSNAME_TVOS;
+    }
+    else if(isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_WATCHOS,&listCommandRecords))
+    {
+        nVersionMinOffset=getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_WATCHOS,0,&listCommandRecords);
+        result.osName=OSNAME_WATCHOS;
+    }
+
+    if(nBuildVersionOffset!=-1)
+    {
+        XMACH_DEF::build_version_command build_version=_read_build_version_command(nBuildVersionOffset);
+
+        if      (build_version.platform==XMACH_DEF::S_PLATFORM_MACOS)       result.osName=OSNAME_MACOS;
+        else if (build_version.platform==XMACH_DEF::S_PLATFORM_BRIDGEOS)    result.osName=OSNAME_BRIDGEOS;
+        else if (build_version.platform==XMACH_DEF::S_PLATFORM_IOS)         result.osName=OSNAME_IOS;
+        else if (build_version.platform==XMACH_DEF::S_PLATFORM_TVOS)        result.osName=OSNAME_TVOS;
+        else if (build_version.platform==XMACH_DEF::S_PLATFORM_WATCHOS)     result.osName=OSNAME_WATCHOS;
+
+        if(build_version.sdk)
+        {
+            result.sOsVersion=XBinary::get_uint32_full_version(build_version.sdk);
+        }
+    }
+    else if(nVersionMinOffset!=-1)
+    {
+        XMACH_DEF::version_min_command version_min=_read_version_min_command(nVersionMinOffset);
+
+        result.sOsVersion=XBinary::get_uint32_full_version(version_min.version);
+    }
+
+    result.sArch=getArch();
+    result.mode=getMode();
+    result.sType=typeIdToString(getType());
+
+    return result;
 }
 
 QString XMACH::typeIdToString(int nType)

@@ -593,6 +593,7 @@ public:
     XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
     XMACH_DEF::dysymtab_command _read_dysymtab_command(qint64 nOffset);
     XMACH_DEF::version_min_command _read_version_min_command(qint64 nOffset);
+    XMACH_DEF::build_version_command _read_build_version_command(qint64 nOffset);
     XMACH_DEF::dylinker_command _read_dylinker_command(qint64 nOffset);
     XMACH_DEF::rpath_command _read_rpath_command(qint64 nOffset);
     XMACH_DEF::source_version_command _read_source_version_command(qint64 nOffset);
@@ -653,8 +654,7 @@ public:
     virtual QString getArch();
     virtual FT getFileType();
     virtual int getType();
-    virtual OSNAME getOsName();
-    virtual QString getOsVersion();
+    virtual OSINFO getOsInfo();
     virtual QString typeIdToString(int nType);
 
     enum OPCODE_TYPE

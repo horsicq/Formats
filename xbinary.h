@@ -310,9 +310,14 @@ public:
         OSNAME_UEFI,
         OSNAME_OS2,
         OSNAME_XBOX,
+        OSNAME_MAC_OS,
         OSNAME_MAC_OS_X,
         OSNAME_OS_X,
         OSNAME_MACOS,
+        OSNAME_IOS,
+        OSNAME_WATCHOS,
+        OSNAME_TVOS,
+        OSNAME_BRIDGEOS,
         OSNAME_ANDROID,
         OSNAME_FREEBSD,
         OSNAME_OPENBSD,
@@ -476,10 +481,8 @@ public:
     virtual OFFSETSIZE getSignOffsetSize(); // TODO rename
 
     void setOsType(OSNAME osName);
-    virtual OSNAME getOsName();
     void setOsVersion(QString sOsVersion);
-    virtual QString getOsVersion();
-    OSINFO getOsInfo();
+    virtual OSINFO getOsInfo();
 
     void setEndianness(bool bIsBigEndian); // TODO enum
 

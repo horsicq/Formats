@@ -337,8 +337,7 @@ public:
     virtual QString getArch();
     virtual bool isBigEndian();
 
-    virtual OSNAME getOsName();
-    virtual QString getOsVersion();
+    virtual OSINFO getOsInfo();
 
     virtual FT getFileType();
     virtual int getType();

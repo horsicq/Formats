@@ -648,9 +648,17 @@ int XMSDOS::getType()
     return TYPE_EXE;
 }
 
-XBinary::OSNAME XMSDOS::getOsName()
+XBinary::OSINFO XMSDOS::getOsInfo()
 {
-    return OSNAME_MSDOS;
+    OSINFO result={};
+
+    result.osName=OSNAME_MSDOS;
+    result.sOsVersion=""; // TODO
+    result.sArch=getArch();
+    result.mode=getMode();
+    result.sType=typeIdToString(getType());
+
+    return result;
 }
 
 QString XMSDOS::typeIdToString(int nType)

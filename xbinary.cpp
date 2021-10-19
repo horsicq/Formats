@@ -311,27 +311,17 @@ void XBinary::setOsType(OSNAME osName)
     g_osName=osName;
 }
 
-XBinary::OSNAME XBinary::getOsName()
-{
-    return g_osName;
-}
-
 void XBinary::setOsVersion(QString sOsVersion)
 {
     g_sOsVersion=sOsVersion;
-}
-
-QString XBinary::getOsVersion()
-{
-    return g_sOsVersion;
 }
 
 XBinary::OSINFO XBinary::getOsInfo()
 {
     OSINFO result={};
 
-    result.osName=getOsName();
-    result.sOsVersion=getOsVersion();
+    result.osName=g_osName;
+    result.sOsVersion=g_sOsVersion;
     result.sArch=getArch();
     result.mode=getMode();
     result.sType=typeIdToString(getType());
@@ -6872,9 +6862,14 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_UEFI:               sResult=QString("UEFI");                    break;
         case OSNAME_XBOX:               sResult=QString("XBOX");                    break;
         case OSNAME_OS2:                sResult=QString("OS2");                     break;
+        case OSNAME_MAC_OS:             sResult=QString("Mac OS");                  break;
         case OSNAME_MAC_OS_X:           sResult=QString("Mac OS X");                break;
         case OSNAME_OS_X:               sResult=QString("OS X");                    break;
         case OSNAME_MACOS:              sResult=QString("macOS");                   break;
+        case OSNAME_IOS:                sResult=QString("iOS");                     break;
+        case OSNAME_WATCHOS:            sResult=QString("watchOS");                 break;
+        case OSNAME_TVOS:               sResult=QString("tvOS");                    break;
+        case OSNAME_BRIDGEOS:           sResult=QString("bridgeOS");                break;
         case OSNAME_ANDROID:            sResult=QString("Android");                 break;
         case OSNAME_FREEBSD:            sResult=QString("FreeBSD");                 break;
         case OSNAME_OPENBSD:            sResult=QString("OpenBSD");                 break;

@@ -893,6 +893,35 @@ struct fvmfile_command
     quint32 header_addr;
 };
 
+struct build_version_command
+{
+    quint32 cmd;            /* LC_BUILD_VERSION */
+    quint32 cmdsize;        /* sizeof(struct build_version_command) plus */
+    /* ntools * sizeof(struct build_tool_version) */
+    quint32 platform;       /* platform */
+    quint32 minos;          /* X.Y.Z is encoded in nibbles xxxx.yy.zz */
+    quint32 sdk;            /* X.Y.Z is encoded in nibbles xxxx.yy.zz */
+    quint32 ntools;         /* number of tool entries following this */
+};
+
+struct build_tool_version
+{
+    quint32 tool;           /* enum for the tool */
+    quint32 version;        /* version number of the tool */
+};
+
+/* Known values for the platform field above. */
+const quint32 S_PLATFORM_MACOS              =1;
+const quint32 S_PLATFORM_IOS                =2;
+const quint32 S_PLATFORM_TVOS               =3;
+const quint32 S_PLATFORM_WATCHOS            =4;
+const quint32 S_PLATFORM_BRIDGEOS           =5;
+
+/* Known values for the tool field above. */
+const quint32 S_TOOL_CLANG                  =1;
+const quint32 S_TOOL_SWIFT                  =2;
+const quint32 S_TOOL_LD                     =3;
+
 struct dylib_table_of_contents
 {
     quint32 symbol_index;       /* the defined external symbol (index into the symbol table) */

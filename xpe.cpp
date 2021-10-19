@@ -97,9 +97,11 @@ bool XPE::isBigEndian()
     return false;
 }
 
-XBinary::OSNAME XPE::getOsName()
+XBinary::OSINFO XPE::getOsInfo()
 {
-    OSNAME result=OSNAME_WINDOWS;
+    OSINFO result={};
+
+    result.osName=OSNAME_WINDOWS;
 
     quint16 nSubsystem=getOptionalHeader_Subsystem();
 
@@ -108,41 +110,34 @@ XBinary::OSNAME XPE::getOsName()
         (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS)||
         (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION))
     {
-        result=OSNAME_WINDOWS;
+        result.osName=OSNAME_WINDOWS;
     }
     else if((nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)||
             (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)||
             (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)||
             (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_ROM))
     {
-        result=OSNAME_UEFI;
+        result.osName=OSNAME_UEFI;
     }
     else if((nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX)||
             (nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX_CODE_CATALOG))
     {
-        result=OSNAME_XBOX;
+        result.osName=OSNAME_XBOX;
     }
     else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI)
     {
-        result=OSNAME_OS2;
+        result.osName=OSNAME_OS2;
     }
     else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI)
     {
-        result=OSNAME_POSIX;
+        result.osName=OSNAME_POSIX;
     }
     else if(nSubsystem==XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
     {
-        result=OSNAME_WINDOWSCE;
+        result.osName=OSNAME_WINDOWSCE;
     }
 
-    return result;
-}
-
-QString XPE::getOsVersion()
-{
-    QString sResult;
-
-    if(getOsName()==OSNAME_WINDOWS)
+    if(result.osName==OSNAME_WINDOWS)
     {
         bool bIs64=is64();
 
@@ -171,10 +166,14 @@ QString XPE::getOsVersion()
             }
         }
 
-        sResult=mapOSVersion.value(nOSVersion);
+        result.sOsVersion=mapOSVersion.value(nOSVersion);
     }
 
-    return sResult;
+    result.sArch=getArch();
+    result.mode=getMode();
+    result.sType=getType();
+
+    return result;
 }
 
 XBinary::FT XPE::getFileType()
