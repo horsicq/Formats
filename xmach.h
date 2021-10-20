@@ -408,6 +408,10 @@ public:
     void _set_version_min_command_version(qint64 nOffset,quint32 nValue);
     void _set_version_min_command_sdk(qint64 nOffset,quint32 nValue);
 
+    qint64 get_build_version_command_size();
+
+    // TODO Set
+
     quint64 getSourceVersion();
     void setSourceVersion(quint64 nValue);
 

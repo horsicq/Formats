@@ -2587,6 +2587,11 @@ void XMACH::_set_version_min_command_sdk(qint64 nOffset, quint32 nValue)
     write_uint32(nOffset+offsetof(XMACH_DEF::version_min_command,sdk),nValue,isBigEndian());
 }
 
+qint64 XMACH::get_build_version_command_size()
+{
+    return sizeof(XMACH_DEF::build_version_command);
+}
+
 quint64 XMACH::getSourceVersion()
 {
     quint64 nResult=0;

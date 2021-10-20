@@ -3242,7 +3242,9 @@ bool XBinary::isRelAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAdd
 
 bool XBinary::isAddressPhysical(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
 {
-    return (addressToOffset(pMemoryMap,nAddress)!=-1);
+    qint64 nOffset=addressToOffset(pMemoryMap,nAddress);
+
+    return (nOffset!=-1);
 }
 
 qint64 XBinary::offsetToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
