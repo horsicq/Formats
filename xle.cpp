@@ -1327,7 +1327,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
 
     int nNumberOfObjects=listObjects.count();
 
-    for(int i=0;i<nNumberOfObjects;i++)
+    for(qint32 i=0;i<nNumberOfObjects;i++)
     {
         // TODO
     }
