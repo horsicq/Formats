@@ -891,7 +891,7 @@ QString XBinary::read_ansiString(qint64 nOffset,qint64 nMaxSize)
     {
         quint8 *pBuffer=new quint8[nMaxSize+1];
 
-        for(int i=0;i<nMaxSize;i++)
+        for(qint32 i=0;i<nMaxSize;i++)
         {
             pBuffer[i]=read_uint8(nOffset+i);
 
