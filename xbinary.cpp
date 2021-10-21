@@ -564,7 +564,7 @@ void XBinary::findFiles(QString sDirectoryName, XBinary::FFOPTIONS *pFFOption, q
 
             int nNumberOfFiles=eil.count();
 
-            for(int i=0;(i<nNumberOfFiles)&&(!(*(pFFOption->pbIsStop)));i++)
+            for(qint32 i=0;(i<nNumberOfFiles)&&(!(*(pFFOption->pbIsStop)));i++)
             {
                 QString sFN=eil.at(i).fileName();
 
