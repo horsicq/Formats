@@ -56,6 +56,20 @@ const quint32 S_CPU_TYPE_POWERPC        =0x00000012;
 const quint32 S_CPU_TYPE_POWERPC64      =0x01000012;
 const quint32 S_CPU_TYPE_VEO            =0x000000FF;
 
+const quint32 S_CPU_SUBTYPE_ARM_ALL         =0;
+const quint32 S_CPU_SUBTYPE_ARM_A500_ARCH   =1;
+const quint32 S_CPU_SUBTYPE_ARM_A500        =2;
+const quint32 S_CPU_SUBTYPE_ARM_A440        =3;
+const quint32 S_CPU_SUBTYPE_ARM_M4          =4;
+const quint32 S_CPU_SUBTYPE_ARM_V4T         =5;
+const quint32 S_CPU_SUBTYPE_ARM_V6          =6;
+const quint32 S_CPU_SUBTYPE_ARM_V5TEJ       =7;
+const quint32 S_CPU_SUBTYPE_ARM_XSCALE      =8;
+const quint32 S_CPU_SUBTYPE_ARM_V7          =9;
+const quint32 S_CPU_SUBTYPE_ARM_V7F         =10;
+const quint32 S_CPU_SUBTYPE_ARM_V7S         =11;
+const quint32 S_CPU_SUBTYPE_ARM_V7K         =12;
+
 const quint32 S_INDIRECT_SYMBOL_LOCAL   =0x80000000;
 const quint32 S_INDIRECT_SYMBOL_ABS     =0x40000000;
 

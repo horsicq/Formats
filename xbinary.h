@@ -314,6 +314,8 @@ public:
         OSNAME_MAC_OS_X,
         OSNAME_OS_X,
         OSNAME_MACOS,
+        OSNAME_IPHONEOS,
+        OSNAME_IPADOS,
         OSNAME_IOS,
         OSNAME_WATCHOS,
         OSNAME_TVOS,

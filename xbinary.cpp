@@ -6107,7 +6107,7 @@ bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE osRegion)
 
 QString XBinary::get_uint32_full_version(quint32 nValue)
 {
-    QString sResult=QString("%1.%2.%3").arg(    QString::number((nValue>>16)&0xFF),
+    QString sResult=QString("%1.%2.%3").arg(    QString::number((nValue>>16)&0xFFFF),
                                                 QString::number((nValue>>8)&0xFF),
                                                 QString::number((nValue)&0xFF));
 
@@ -6868,6 +6868,8 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_MAC_OS_X:           sResult=QString("Mac OS X");                break;
         case OSNAME_OS_X:               sResult=QString("OS X");                    break;
         case OSNAME_MACOS:              sResult=QString("macOS");                   break;
+        case OSNAME_IPHONEOS:           sResult=QString("iPhone OS");               break;
+        case OSNAME_IPADOS:             sResult=QString("iPadOS");                  break;
         case OSNAME_IOS:                sResult=QString("iOS");                     break;
         case OSNAME_WATCHOS:            sResult=QString("watchOS");                 break;
         case OSNAME_TVOS:               sResult=QString("tvOS");                    break;

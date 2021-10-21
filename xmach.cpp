@@ -4268,6 +4268,15 @@ QString XMACH::getArch()
             sResult=mapCpuSubTypesS.value(nCpuSubType,tr("Unknown"));
         }
     }
+    else if((nCpuType==XMACH_DEF::S_CPU_TYPE_ARM)||(nCpuType==XMACH_DEF::S_CPU_TYPE_ARM64))
+    {
+        QMap<quint64,QString> mapCpuSubTypesS=getHeaderCpuSubTypesS(nCpuType);
+
+        if(nCpuSubType&&(mapCpuSubTypesS.contains(nCpuSubType)))
+        {
+            sResult=mapCpuSubTypesS.value(nCpuSubType,tr("Unknown"));
+        }
+    }
 
     return sResult;
 }
@@ -4315,7 +4324,61 @@ XBinary::OSINFO XMACH::getOsInfo()
 {
     OSINFO result={};
 
-    result.osName=OSNAME_MAC_OS_X;
+    result.osName=OSNAME_MAC_OS;
+
+    result.sArch=getArch();
+    result.mode=getMode();
+    result.sType=typeIdToString(getType());
+
+    quint32 nCPUType=getHeader_cputype();
+    quint32 nCpuSubType=getHeader_cpusubtype();
+
+    if(nCPUType==XMACH_DEF::S_CPU_TYPE_MC680x0)
+    {
+        result.osName=OSNAME_MAC_OS;
+        result.sOsVersion="1.0-8.1";
+    }
+    else if(nCPUType==XMACH_DEF::S_CPU_TYPE_POWERPC)
+    {
+        result.osName=OSNAME_MAC_OS;
+        result.sOsVersion="7.1.2-9.22";
+    }
+    else if(nCPUType==XMACH_DEF::S_CPU_TYPE_POWERPC64)
+    {
+        result.osName=OSNAME_MAC_OS_X;
+        result.sOsVersion="10.4-10.6";
+    }
+    else if(nCPUType==XMACH_DEF::S_CPU_TYPE_I386)
+    {
+        result.osName=OSNAME_MAC_OS_X;
+        result.sOsVersion="10.4-10.14";
+    }
+    else if(nCPUType==XMACH_DEF::S_CPU_TYPE_X86_64)
+    {
+        result.osName=OSNAME_MAC_OS_X;
+        result.sOsVersion="10.4-10.14";
+    }
+    else if((nCPUType==XMACH_DEF::S_CPU_TYPE_ARM)||
+            (nCPUType==XMACH_DEF::S_CPU_TYPE_ARM64))
+    {
+        result.osName=OSNAME_IOS;
+
+        if(nCpuSubType==XMACH_DEF::S_CPU_SUBTYPE_ARM_V6)
+        {
+            result.osName=OSNAME_IPHONEOS;
+            result.sOsVersion="1.0-4.2.1"; // TODO Check
+        }
+        else if(nCpuSubType==XMACH_DEF::S_CPU_SUBTYPE_ARM_V7)
+        {
+            result.osName=OSNAME_IPHONEOS;
+            result.sOsVersion="3.0-10.3.4"; // TODO Check
+        }
+        else if(nCPUType==XMACH_DEF::S_CPU_TYPE_ARM64)
+        {
+            result.osName=OSNAME_IOS;
+            result.sOsVersion="7.0-15.0"; // TODO Check
+        }
+    }
 
     qint64 nVersionMinOffset=-1;
     qint64 nBuildVersionOffset=-1;
@@ -4353,7 +4416,7 @@ XBinary::OSINFO XMACH::getOsInfo()
 
         if      (build_version.platform==XMACH_DEF::S_PLATFORM_MACOS)       result.osName=OSNAME_MACOS;
         else if (build_version.platform==XMACH_DEF::S_PLATFORM_BRIDGEOS)    result.osName=OSNAME_BRIDGEOS;
-        else if (build_version.platform==XMACH_DEF::S_PLATFORM_IOS)         result.osName=OSNAME_IOS;
+        else if (build_version.platform==XMACH_DEF::S_PLATFORM_IOS)         result.osName=OSNAME_IOS; // TODO iPadOS
         else if (build_version.platform==XMACH_DEF::S_PLATFORM_TVOS)        result.osName=OSNAME_TVOS;
         else if (build_version.platform==XMACH_DEF::S_PLATFORM_WATCHOS)     result.osName=OSNAME_WATCHOS;
 
@@ -4368,10 +4431,6 @@ XBinary::OSINFO XMACH::getOsInfo()
 
         result.sOsVersion=XBinary::get_uint32_full_version(version_min.version);
     }
-
-    result.sArch=getArch();
-    result.mode=getMode();
-    result.sType=typeIdToString(getType());
 
     return result;
 }
