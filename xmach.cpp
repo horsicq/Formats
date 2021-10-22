@@ -2592,6 +2592,26 @@ qint64 XMACH::get_build_version_command_size()
     return sizeof(XMACH_DEF::build_version_command);
 }
 
+void XMACH::_set_build_version_command_platform(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::build_version_command,platform),nValue,isBigEndian());
+}
+
+void XMACH::_set_build_version_command_minos(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::build_version_command,minos),nValue,isBigEndian());
+}
+
+void XMACH::_set_build_version_command_sdk(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::build_version_command,sdk),nValue,isBigEndian());
+}
+
+void XMACH::_set_build_version_command_ntools(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::build_version_command,ntools),nValue,isBigEndian());
+}
+
 quint64 XMACH::getSourceVersion()
 {
     quint64 nResult=0;

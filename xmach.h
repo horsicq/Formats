@@ -410,7 +410,10 @@ public:
 
     qint64 get_build_version_command_size();
 
-    // TODO Set
+    void _set_build_version_command_platform(qint64 nOffset,quint32 nValue);
+    void _set_build_version_command_minos(qint64 nOffset,quint32 nValue);
+    void _set_build_version_command_sdk(qint64 nOffset,quint32 nValue);
+    void _set_build_version_command_ntools(qint64 nOffset,quint32 nValue);
 
     quint64 getSourceVersion();
     void setSourceVersion(quint64 nValue);
