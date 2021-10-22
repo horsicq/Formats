@@ -65,4 +65,5 @@ contains(XCONFIG, use_archive) {
 
 DISTFILES += \
     $$PWD/LICENSE \
-    $$PWD/README.md
+    $$PWD/README.md \
+    $$PWD/xformats.cmake
