@@ -888,9 +888,9 @@ QList<XNE_DEF::NE_SEGMENT> XNE::getSegmentList()
     QList<XNE_DEF::NE_SEGMENT> listResult;
 
     qint64 nOffset=getSegmentTableOffset();
-    int nNumberOfSegments=getImageOS2Header_cseg();
+    qint32 nNumberOfSegments=getImageOS2Header_cseg();
 
-    for(int i=0;i<nNumberOfSegments;i++)
+    for(qint32 i=0;i<nNumberOfSegments;i++)
     {
         XNE_DEF::NE_SEGMENT segment=_read_NE_SEGMENT(nOffset);
 
