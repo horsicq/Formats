@@ -2013,7 +2013,7 @@ quint8 XBinary::getBits_uint8(quint8 nValue, qint32 nBitOffset, qint32 nBitSize)
             nResult=nResult>>1;
         }
 
-        for(int i=0;i<nBitSize;i++)
+        for(qint32 i=0;i<nBitSize;i++)
         {
             nMask=nMask<<1;
         }
