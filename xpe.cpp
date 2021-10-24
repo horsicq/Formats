@@ -171,7 +171,7 @@ XBinary::OSINFO XPE::getOsInfo()
 
     result.sArch=getArch();
     result.mode=getMode();
-    result.sType=getType();
+    result.sType=typeIdToString(getType());
 
     return result;
 }

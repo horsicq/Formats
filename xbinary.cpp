@@ -591,7 +591,7 @@ void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
 
         QFileInfoList eil=dir.entryInfoList();
 
-        int nNumberOfFiles=eil.count();
+        qint32 nNumberOfFiles=eil.count();
 
         for(qint32 i=0;i<nNumberOfFiles;i++)
         {
@@ -2056,12 +2056,12 @@ quint32 XBinary::getBits_uint32(quint32 nValue, qint32 nBitOffset, qint32 nBitSi
     {
         quint32 nMask=0xFFFFFFFF;
 
-        for(int i=0;i<nBitOffset;i++)
+        for(qint32 i=0;i<nBitOffset;i++)
         {
             nResult=nResult>>1;
         }
 
-        for(int i=0;i<nBitSize;i++)
+        for(qint32 i=0;i<nBitSize;i++)
         {
             nMask=nMask<<1;
         }
