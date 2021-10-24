@@ -2032,12 +2032,12 @@ quint16 XBinary::getBits_uint16(quint16 nValue, qint32 nBitOffset, qint32 nBitSi
     {
         quint16 nMask=0xFFFF;
 
-        for(int i=0;i<nBitOffset;i++)
+        for(qint32 i=0;i<nBitOffset;i++)
         {
             nResult=nResult>>1;
         }
 
-        for(int i=0;i<nBitSize;i++)
+        for(qint32 i=0;i<nBitSize;i++)
         {
             nMask=nMask<<1;
         }
