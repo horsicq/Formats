@@ -2171,7 +2171,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
     _searchProgressMaximumChanged(procent.nMaxProcent);
     _searchProgressValueChanged(0);
 
-    int nCurrentRecords=0;
+    qint32 nCurrentRecords=0;
 
     while((_nSize>0)&&(!g_bIsSearchStop))
     {
