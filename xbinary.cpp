@@ -2080,12 +2080,12 @@ quint64 XBinary::getBits_uint64(quint64 nValue, qint32 nBitOffset, qint32 nBitSi
     {
         quint64 nMask=0xFFFFFFFFFFFFFFFF;
 
-        for(int i=0;i<nBitOffset;i++)
+        for(qint32 i=0;i<nBitOffset;i++)
         {
             nResult=nResult>>1;
         }
 
-        for(int i=0;i<nBitSize;i++)
+        for(qint32 i=0;i<nBitSize;i++)
         {
             nMask=nMask<<1;
         }

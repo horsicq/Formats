@@ -4440,9 +4440,9 @@ XBinary::OSINFO XMACH::getOsInfo()
         else if (build_version.platform==XMACH_DEF::S_PLATFORM_TVOS)        result.osName=OSNAME_TVOS;
         else if (build_version.platform==XMACH_DEF::S_PLATFORM_WATCHOS)     result.osName=OSNAME_WATCHOS;
 
-        if(build_version.sdk)
+        if(build_version.minos)
         {
-            result.sOsVersion=XBinary::get_uint32_full_version(build_version.sdk);
+            result.sOsVersion=XBinary::get_uint32_full_version(build_version.minos);
         }
     }
     else if(nVersionMinOffset!=-1)
@@ -4450,6 +4450,52 @@ XBinary::OSINFO XMACH::getOsInfo()
         XMACH_DEF::version_min_command version_min=_read_version_min_command(nVersionMinOffset);
 
         result.sOsVersion=XBinary::get_uint32_full_version(version_min.version);
+    }
+    else
+    {
+        QList<XMACH::LIBRARY_RECORD> listLibraryRecords=getLibraryRecords(XMACH_DEF::S_LC_LOAD_DYLIB);
+
+        if(XMACH::isLibraryRecordNamePresent("CoreFoundation",&listLibraryRecords))
+        {
+            quint32 nVersion=XMACH::getLibraryCurrentVersion("CoreFoundation",&listLibraryRecords);
+
+            if((result.osName==OSNAME_MAC_OS_X)||(result.osName==OSNAME_OS_X)||(result.osName==OSNAME_MACOS))
+            {
+                if      ((nVersion>=S_FULL_VERSION(397,40,0))&&(nVersion<S_FULL_VERSION(425,0,0)))      result.sOsVersion="10.0.0";
+                else if (nVersion<S_FULL_VERSION(567,0,0))                                              result.sOsVersion="10.3.0";
+                else if (nVersion<S_FULL_VERSION(677,0,0))                                              result.sOsVersion="10.4.0";
+                else if (nVersion<S_FULL_VERSION(677,24,0))                                             result.sOsVersion="10.5.0";
+                else if (nVersion<S_FULL_VERSION(751,0,0))                                              result.sOsVersion="10.5.7";
+                else if (nVersion<S_FULL_VERSION(833,10,0))                                             result.sOsVersion="10.6.0";
+                else if (nVersion<S_FULL_VERSION(833,25,0))                                             result.sOsVersion="10.7.0";
+                else if (nVersion<S_FULL_VERSION(945,18,0))                                             result.sOsVersion="10.7.4";
+                else if (nVersion<S_FULL_VERSION(1151,16,0))                                            result.sOsVersion="10.8.4";
+                else if (nVersion<S_FULL_VERSION(1200,0,0))                                             result.sOsVersion="10.10.0"; // TODO Check
+            }
+            else if((result.osName==OSNAME_IPHONEOS)||(result.osName==OSNAME_IOS)||(result.osName==OSNAME_IPADOS))
+            {
+                if      (nVersion<S_FULL_VERSION(678,24,0))                                             result.sOsVersion="1.0.0";
+                else if (nVersion<S_FULL_VERSION(678,26,0))                                             result.sOsVersion="2.0.0";
+                else if (nVersion<S_FULL_VERSION(678,29,0))                                             result.sOsVersion="2.1.0";
+                else if (nVersion<S_FULL_VERSION(678,47,0))                                             result.sOsVersion="2.2.0";
+                else if (nVersion<S_FULL_VERSION(678,51,0))                                             result.sOsVersion="3.0.0";
+                else if (nVersion<S_FULL_VERSION(678,60,0))                                             result.sOsVersion="3.1.0";
+                else if (nVersion<S_FULL_VERSION(751,32,0))                                             result.sOsVersion="3.2.0";
+                else if (nVersion<S_FULL_VERSION(751,37,0))                                             result.sOsVersion="4.0.0";
+                else if (nVersion<S_FULL_VERSION(751,49,0))                                             result.sOsVersion="4.1.0";
+                else if (nVersion<S_FULL_VERSION(881,0,0))                                              result.sOsVersion="4.2.0";
+                else if (nVersion<S_FULL_VERSION(890,10,0))                                             result.sOsVersion="5.0.0";
+                else if (nVersion<S_FULL_VERSION(992,0,0))                                              result.sOsVersion="5.1.0";
+                else if (nVersion<S_FULL_VERSION(993,0,0))                                              result.sOsVersion="6.0.0";
+                else if (nVersion<S_FULL_VERSION(1047,20,0))                                            result.sOsVersion="6.1.0";
+                else if (nVersion<S_FULL_VERSION(1047,25,0))                                            result.sOsVersion="7.0.0";
+                else if (nVersion<S_FULL_VERSION(1140,11,0))                                            result.sOsVersion="7.1.0";
+                else if (nVersion<S_FULL_VERSION(1141,1,0))                                             result.sOsVersion="8.0.0";
+                else if (nVersion<S_FULL_VERSION(1142,14,0))                                            result.sOsVersion="8.1.0";
+                else if (nVersion<S_FULL_VERSION(1144,17,0))                                            result.sOsVersion="8.2.0";
+                else if (nVersion<S_FULL_VERSION(1200,0,0))                                             result.sOsVersion="8.3.0"; // TODO Check
+            }
+        }
     }
 
     return result;
