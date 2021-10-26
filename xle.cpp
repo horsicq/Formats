@@ -1325,7 +1325,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
 
     QList<XLE_DEF::o32_obj> listObjects=XLE::getObjects();
 
-    int nNumberOfObjects=listObjects.count();
+    qint32 nNumberOfObjects=listObjects.count();
 
     for(qint32 i=0;i<nNumberOfObjects;i++)
     {
