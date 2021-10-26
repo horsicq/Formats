@@ -8488,7 +8488,7 @@ QString XPE::certRecordToString(CERT_RECORD certRecord, qint32 nLevel)
     return sResult;
 }
 
-XPE::CERT_TAG XPE::read_CertTag(qint64 nOffset, qint32 nTag)
+XPE::CERT_TAG XPE::read_CertTag(qint64 nOffset, quint32 nTag)
 {
     CERT_TAG result={};
 
