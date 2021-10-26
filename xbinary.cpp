@@ -2680,7 +2680,7 @@ QByteArray XBinary::getUnicodeString(QString sString)
 {
     QByteArray baResult;
 
-    int nSize=sString.size();
+    qint32 nSize=sString.size();
 
     baResult.resize(nSize*2);
 
@@ -3013,7 +3013,7 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
     quint8 cZero=0;
 
     // TODO optimize with dwords    
-    for(int i=0;i<nSize;i++)
+    for(qint32 i=0;i<nSize;i++)
     {
         safeWriteData(g_pDevice,nOffset,(char *)&cZero,1);
     }
