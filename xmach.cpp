@@ -1005,9 +1005,9 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<
 {
     QList<COMMAND_RECORD> listResult;
 
-    int nNumberOfCommands=pListCommandRecords->count();
+    qint32 nNumberOfCommands=pListCommandRecords->count();
 
-    for(int i=0; i<nNumberOfCommands; i++)
+    for(qint32 i=0;i<nNumberOfCommands;i++)
     {
         if(pListCommandRecords->at(i).nType==nCommandID)
         {

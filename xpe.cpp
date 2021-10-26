@@ -1112,7 +1112,7 @@ QList<XPE_DEF::IMAGE_DATA_DIRECTORY> XPE::getDirectories()
 
 void XPE::setDirectories(QList<XPE_DEF::IMAGE_DATA_DIRECTORY> *pListDirectories)
 {
-    int nNumberOfRvaAndSizes=getOptionalHeader_NumberOfRvaAndSizes();
+    qint32 nNumberOfRvaAndSizes=getOptionalHeader_NumberOfRvaAndSizes();
     nNumberOfRvaAndSizes=qMin(nNumberOfRvaAndSizes,16);
 
     qint64 nDirectoriesOffset=getOptionalHeaderOffset();
@@ -1126,7 +1126,7 @@ void XPE::setDirectories(QList<XPE_DEF::IMAGE_DATA_DIRECTORY> *pListDirectories)
         nDirectoriesOffset+=offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32,DataDirectory);
     }
 
-    for(int i=0;i<nNumberOfRvaAndSizes;i++)
+    for(qint32 i=0;i<nNumberOfRvaAndSizes;i++)
     {
         write_array(nDirectoriesOffset+i*sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),(char *)&(pListDirectories->at(i)),sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
     }

@@ -1,5 +1,7 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
+# TODO
+
 set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/xbinary.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xcom.cpp
