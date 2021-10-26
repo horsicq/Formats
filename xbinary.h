@@ -73,7 +73,7 @@
 #define S_ALIGN_UP(value,align)                 (((value)&(align-1))?S_ALIGN_DOWN(value,align)+align:value)
 #define S_LOWORD(value)                         ((quint16)((quint32)(value)&0xFFFF))
 #define S_HIWORD(value)                         ((quint16)((quint32)(value)>>16))
-#define S_FULL_VERSION(value1,value2,value3)    ((((quint16)value1)<<0x16)|(((quint8)value2)<<0x8)|((quint8)value3))
+#define S_FULL_VERSION(value1,value2,value3)    ((quint32)((((quint16)value1)<<16)|(((quint8)value2)<<8)|((quint8)value3)))
 
 #ifdef Q_OS_MAC
 #include <CoreFoundation/CoreFoundation.h> // Check

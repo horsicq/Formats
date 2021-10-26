@@ -4455,9 +4455,9 @@ XBinary::OSINFO XMACH::getOsInfo()
     {
         QList<XMACH::LIBRARY_RECORD> listLibraryRecords=getLibraryRecords(XMACH_DEF::S_LC_LOAD_DYLIB);
 
-        if(XMACH::isLibraryRecordNamePresent("CoreFoundation",&listLibraryRecords))
+        if(XMACH::isLibraryRecordNamePresent("Foundation",&listLibraryRecords))
         {
-            quint32 nVersion=XMACH::getLibraryCurrentVersion("CoreFoundation",&listLibraryRecords);
+            quint32 nVersion=XMACH::getLibraryCurrentVersion("Foundation",&listLibraryRecords);
 
             if((result.osName==OSNAME_MAC_OS_X)||(result.osName==OSNAME_OS_X)||(result.osName==OSNAME_MACOS))
             {
@@ -4471,6 +4471,11 @@ XBinary::OSINFO XMACH::getOsInfo()
                 else if (nVersion<S_FULL_VERSION(945,18,0))                                             result.sOsVersion="10.7.4";
                 else if (nVersion<S_FULL_VERSION(1151,16,0))                                            result.sOsVersion="10.8.4";
                 else if (nVersion<S_FULL_VERSION(1200,0,0))                                             result.sOsVersion="10.10.0"; // TODO Check
+
+                if(nVersion<S_FULL_VERSION(833,10,0))
+                {
+                    result.osName=OSNAME_MAC_OS_X;
+                }
             }
             else if((result.osName==OSNAME_IPHONEOS)||(result.osName==OSNAME_IOS)||(result.osName==OSNAME_IPADOS))
             {
@@ -4494,6 +4499,11 @@ XBinary::OSINFO XMACH::getOsInfo()
                 else if (nVersion<S_FULL_VERSION(1142,14,0))                                            result.sOsVersion="8.1.0";
                 else if (nVersion<S_FULL_VERSION(1144,17,0))                                            result.sOsVersion="8.2.0";
                 else if (nVersion<S_FULL_VERSION(1200,0,0))                                             result.sOsVersion="8.3.0"; // TODO Check
+
+                if(nVersion<S_FULL_VERSION(751,32,0))
+                {
+                    result.osName=OSNAME_IPHONEOS;
+                }
             }
         }
     }
