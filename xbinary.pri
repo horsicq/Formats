@@ -9,3 +9,6 @@ HEADERS += \
 SOURCES += \
     $$PWD/subdevice.cpp \
     $$PWD/xbinary.cpp
+
+DISTFILES += \
+    $$PWD/xbinary.cmake
