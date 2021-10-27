@@ -155,7 +155,7 @@ XBinary::FT XCOM::getFileType()
     return FT_COM;
 }
 
-int XCOM::getType()
+qint32 XCOM::getType()
 {
     return TYPE_EXE;
 }

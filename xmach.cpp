@@ -4319,7 +4319,7 @@ XBinary::FT XMACH::getFileType()
     return result;
 }
 
-int XMACH::getType()
+qint32 XMACH::getType()
 {
     int nResult=TYPE_UNKNOWN;
 
@@ -4476,6 +4476,7 @@ XBinary::OSINFO XMACH::getOsInfo()
                 {
                     result.osName=OSNAME_MAC_OS_X;
                 }
+                // TODO !
             }
             else if((result.osName==OSNAME_IPHONEOS)||(result.osName==OSNAME_IOS)||(result.osName==OSNAME_IPADOS))
             {
@@ -4503,6 +4504,10 @@ XBinary::OSINFO XMACH::getOsInfo()
                 if(nVersion<S_FULL_VERSION(751,32,0))
                 {
                     result.osName=OSNAME_IPHONEOS;
+                }
+                else
+                {
+                    result.osName=OSNAME_IOS;
                 }
             }
         }

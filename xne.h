@@ -136,7 +136,7 @@ public:
     virtual bool isBigEndian();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
     virtual FT getFileType();
-    virtual int getType();
+    virtual qint32 getType();
     virtual QString typeIdToString(int nType);
 };
 

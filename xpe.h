@@ -340,7 +340,7 @@ public:
     virtual OSINFO getOsInfo();
 
     virtual FT getFileType();
-    virtual int getType();
+    virtual qint32 getType();
     virtual QString typeIdToString(int nType);
 
     virtual bool isSigned();

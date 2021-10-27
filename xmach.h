@@ -660,7 +660,7 @@ public:
     virtual MODE getMode();
     virtual QString getArch();
     virtual FT getFileType();
-    virtual int getType();
+    virtual qint32 getType();
     virtual OSINFO getOsInfo();
     virtual QString typeIdToString(int nType);
 

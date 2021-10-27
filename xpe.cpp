@@ -194,7 +194,7 @@ XBinary::FT XPE::getFileType()
     return result;
 }
 
-int XPE::getType()
+qint32 XPE::getType()
 {
     TYPE result=TYPE_APPLICATION;
 

@@ -467,7 +467,7 @@ public:
     virtual MODE getMode();
 
     void setType(int nType);
-    virtual int getType();
+    virtual qint32 getType();
     virtual QString typeIdToString(int nType);
     QString getTypeAsString();
 
@@ -1154,7 +1154,7 @@ private:
     QString g_sOsVersion;
     MODE g_mode;
     QString g_sVersion;
-    int g_nType;
+    qint32 g_nType;
     FT g_fileType;
     bool g_bLog;
     qint64 g_nSize;

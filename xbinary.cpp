@@ -217,7 +217,7 @@ void XBinary::setType(int nType)
     g_nType=nType;
 }
 
-int XBinary::getType()
+qint32 XBinary::getType()
 {
     return g_nType;
 }

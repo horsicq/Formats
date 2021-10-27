@@ -3949,7 +3949,7 @@ QString XELF::getArch()
     return getMachinesS().value(getHdr32_machine(),tr("Unknown"));
 }
 
-int XELF::getType()
+qint32 XELF::getType()
 {
     int nResult=TYPE_UNKNOWN;
 

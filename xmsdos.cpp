@@ -643,7 +643,7 @@ XBinary::FT XMSDOS::getFileType()
     return FT_MSDOS;
 }
 
-int XMSDOS::getType()
+qint32 XMSDOS::getType()
 {
     return TYPE_EXE;
 }

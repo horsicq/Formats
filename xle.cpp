@@ -1391,7 +1391,7 @@ XBinary::FT XLE::getFileType()
     return result;
 }
 
-int XLE::getType()
+qint32 XLE::getType()
 {
     return TYPE_EXE; // TODO
 }

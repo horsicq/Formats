@@ -1108,7 +1108,7 @@ XBinary::FT XNE::getFileType()
     return FT_NE;
 }
 
-int XNE::getType()
+qint32 XNE::getType()
 {
     return TYPE_EXE; // TODO
 }

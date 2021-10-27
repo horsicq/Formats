@@ -407,7 +407,7 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
-    virtual int getType();
+    virtual qint32 getType();
     virtual FT getFileType();
     virtual OSNAME getOsName();
     virtual QString typeIdToString(int nType);
