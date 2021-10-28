@@ -3703,11 +3703,11 @@ qint64 XBinary::positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPositio
 {
     qint64 nResult=-1;
 
-    int nNumberOfRecords=pMemoryMap->listRecords.count();
+    qint32 nNumberOfRecords=pMemoryMap->listRecords.count();
 
     qint64 _nSize=0;
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         if((_nSize<=nPosition)&&(nPosition<_nSize+pMemoryMap->listRecords.at(i).nSize))
         {
@@ -4409,6 +4409,24 @@ QString XBinary::valueToHexOS(quint64 nValue,bool bIsBigEndian)
     }
 
     return valueToHex(mode,nValue,bIsBigEndian);
+}
+
+QString XBinary::valueToHexColon(MODE mode, quint64 nValue, bool bIsBigEndian)
+{
+    QString sResult;
+
+    if(mode==MODE_64)
+    {
+        quint32 nHigh=(quint32)(nValue>>32);
+        quint32 nLow=(quint32)(nValue);
+        sResult=QString("%1:%2").arg(valueToHex(nHigh)).arg(valueToHex(nLow));
+    }
+    else
+    {
+        sResult=valueToHex(mode,nValue,bIsBigEndian);
+    }
+
+    return sResult;
 }
 
 bool XBinary::checkString_uint8(QString sValue)
