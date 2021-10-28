@@ -5992,13 +5992,13 @@ bool XBinary::isPlainTextType(QByteArray *pbaData)
     bool bResult=false;
 
     unsigned char *pDataOffset=(unsigned char *)(pbaData->data());
-    int nDataSize=pbaData->size();
+    qint32 nDataSize=pbaData->size();
 
     if(nDataSize)
     {
         bResult=true;
 
-        for(int i=0;i<nDataSize;i++)
+        for(qint32 i=0;i<nDataSize;i++)
         {
             if(pDataOffset[i]<0x9)
             {
