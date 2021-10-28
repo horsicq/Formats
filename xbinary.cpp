@@ -5477,10 +5477,10 @@ quint32 XBinary::getStringCustomCRC32(QString sString)
 {
     quint32 nResult=0; // not ~0 !!! if ~0 (0xFFFFFFFF) it will be a CRC32C
 
-    int nSize=sString.size();
+    qint32 nSize=sString.size();
     QByteArray baString=sString.toLatin1();
 
-    for(int i=0;i<nSize;i++)
+    for(qint32 i=0;i<nSize;i++)
     {
         unsigned char _char=(unsigned char)baString.data()[i];
 //        unsigned char _char1=(unsigned char)sString.at(i).toLatin1();
