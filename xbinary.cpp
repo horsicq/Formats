@@ -4970,11 +4970,11 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS)
 
     QCryptographicHash crypto(algorithm);
 
-    int nNumberOfRecords=pListOS->count();
+    qint32 nNumberOfRecords=pListOS->count();
 
     qint64 nCurrentSize=0;
 
-    for(int i=0;(i<nNumberOfRecords)&&(!g_bIsHashStop);i++)
+    for(qint32 i=0;(i<nNumberOfRecords)&&(!g_bIsHashStop);i++)
     {
         qint64 nOffset=pListOS->at(i).nOffset;
         qint64 nSize=pListOS->at(i).nSize;
