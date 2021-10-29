@@ -5225,7 +5225,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
                 return 0;
             }
 
-            for(int i=0;i<nTemp;i++)
+            for(qint32 i=0;i<nTemp;i++)
             {
                 nResult=crc_table[(nResult^((quint8)pBuffer[i]))&0xFF]^(nResult>>8);
             }
