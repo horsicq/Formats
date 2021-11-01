@@ -6209,7 +6209,7 @@ XBinary::PACKED_INT XBinary::_read_uleb128(char *pData,qint64 nSize)
 
     quint32 nShift=0;
 
-    for(int i=0;i<nSize;i++)
+    for(qint32 i=0;i<nSize;i++)
     {
         quint8 nByte=(quint8)(*(pData+i));
         result.nValue|=((nByte&0x7F)<<nShift);
