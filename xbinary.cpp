@@ -5494,7 +5494,7 @@ quint32 XBinary::getStringCustomCRC32(QString sString)
 
         nResult^=_char;
 
-        for(int k=0; k<8; k++)
+        for(qint32 k=0; k<8; k++)
         {
             nResult=(nResult&1)?((nResult>>1)^0x82f63b78):(nResult>>1);
         }
