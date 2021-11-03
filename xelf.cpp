@@ -1363,9 +1363,9 @@ QList<XELF_DEF::Elf_Shdr> XELF::getElf_ShdrList()
     else
     {
         QList<XELF_DEF::Elf32_Shdr> listSectionHeaders=getElf32_ShdrList();
-        int nNumberOfSections=listSectionHeaders.count();
+        qint32 nNumberOfSections=listSectionHeaders.count();
 
-        for(int i=0;i<nNumberOfSections;i++)
+        for(qint32 i=0;i<nNumberOfSections;i++)
         {
             XELF_DEF::Elf_Shdr record={};
 
