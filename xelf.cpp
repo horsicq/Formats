@@ -1340,9 +1340,9 @@ QList<XELF_DEF::Elf_Shdr> XELF::getElf_ShdrList()
     if(bIs64)
     {
         QList<XELF_DEF::Elf64_Shdr> listSectionHeaders=getElf64_ShdrList();
-        int nNumberOfSections=listSectionHeaders.count();
+        qint32 nNumberOfSections=listSectionHeaders.count();
 
-        for(int i=0;i<nNumberOfSections;i++)
+        for(qint32 i=0;i<nNumberOfSections;i++)
         {
             XELF_DEF::Elf_Shdr record={};
 
