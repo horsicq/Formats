@@ -613,6 +613,7 @@ public:
     qint64 find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize=0);
     qint64 find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString);
     qint64 find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString);
+    // TODO find UTF8 string
 
     static quint8 getBits_uint8(quint8 nValue,qint32 nBitOffset,qint32 nBitSize);
     static quint16 getBits_uint16(quint16 nValue,qint32 nBitOffset,qint32 nBitSize);

@@ -5201,7 +5201,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
     {
         quint32 crc_table[256];
 
-        for(int i=0;i<256;i++)
+        for(qint32 i=0;i<256;i++)
         {
             quint32 crc=i;
 
@@ -5480,7 +5480,7 @@ quint32 XBinary::getStringCustomCRC32(QString sString)
     quint32 nResult=0; // not ~0 !!! if ~0 (0xFFFFFFFF) it will be a CRC32C
 
     qint32 nSize=sString.size();
-    QByteArray baString=sString.toLatin1();
+    QByteArray baString=sString.toUtf8();
 
     for(qint32 i=0;i<nSize;i++)
     {
