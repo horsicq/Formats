@@ -3027,7 +3027,7 @@ bool XBinary::compareMemory(char *pMemory1,const char *pMemory2, qint64 nSize)
     {
         if(nSize>=4)
         {
-            if(*((unsigned int *)pMemory1)!=*((unsigned int *)pMemory2))
+            if(*((quint32 *)pMemory1)!=*((quint32 *)pMemory2))
             {
                 return false;
             }
@@ -3038,7 +3038,7 @@ bool XBinary::compareMemory(char *pMemory1,const char *pMemory2, qint64 nSize)
         }
         else if(nSize>=2)
         {
-            if(*((unsigned short *)pMemory1)!=*((unsigned short *)pMemory2))
+            if(*((quint16 *)pMemory1)!=*((quint16 *)pMemory2))
             {
                 return false;
             }
