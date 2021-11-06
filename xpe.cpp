@@ -1334,9 +1334,9 @@ QList<QString> XPE::getSectionNames(QList<XPE::SECTION_RECORD> *pListSectionReco
 {
     QList<QString> listResult;
 
-    int nNumberOfSections=pListSectionRecords->count();
+    qint32 nNumberOfSections=pListSectionRecords->count();
 
-    for(int i=0;i<nNumberOfSections;i++)
+    for(qint32 i=0;i<nNumberOfSections;i++)
     {
         listResult.append(pListSectionRecords->at(i).sName);
     }
