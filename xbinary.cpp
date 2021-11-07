@@ -5649,13 +5649,13 @@ bool XBinary::compareSignatureStrings(QString sBaseSignature, QString sOptSignat
     sBaseSignature=convertSignature(sBaseSignature);
     sOptSignature=convertSignature(sOptSignature);
 
-    int nSize=qMin(sBaseSignature.size(),sOptSignature.size());
+    qint32 nSize=qMin(sBaseSignature.size(),sOptSignature.size());
 
     if((nSize)&&(sBaseSignature.size()>=sOptSignature.size()))
     {
         bResult=true;
 
-        for(int i=0;i<nSize;i++)
+        for(qint32 i=0;i<nSize;i++)
         {
             QChar _qchar1=sBaseSignature.at(i);
             QChar _qchar2=sOptSignature.at(i);
