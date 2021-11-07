@@ -6715,9 +6715,9 @@ QString XBinary::getVersionString(QString sString)
 {
     QString sResult;
 
-    int nSize=sString.size();
+    qint32 nSize=sString.size();
 
-    for(int i=0;i<nSize;i++)
+    for(qint32 i=0;i<nSize;i++)
     {
         QChar c=sString.at(i);
 
