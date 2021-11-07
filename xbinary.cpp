@@ -5702,11 +5702,11 @@ qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     qint64 nResult=0;
 
-    int nNumberOfRecords=pMemoryMap->listRecords.count();
+    qint32 nNumberOfRecords=pMemoryMap->listRecords.count();
 
     qint64 _nOverlayOffset=-1;
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         if((pMemoryMap->listRecords.at(i).nOffset!=-1)&&(pMemoryMap->listRecords.at(i).type!=MMT_OVERLAY))
         {
