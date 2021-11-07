@@ -6451,9 +6451,9 @@ bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, 
 {
     bool bResult=false;
 
-    int nNumberOfRecords=pMemoryMap->listRecords.count();
+    qint32 nNumberOfRecords=pMemoryMap->listRecords.count();
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         if((pMemoryMap->listRecords.at(i).type==MMT_LOADSEGMENT)&&(pMemoryMap->listRecords.at(i).nLoadSection==nLoadSegment))
         {
