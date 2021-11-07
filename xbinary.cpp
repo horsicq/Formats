@@ -6738,9 +6738,9 @@ qint64 XBinary::getVersionIntValue(QString sString)
 {
     qint64 nResult=0;
 
-    int nNumberOfDots=sString.count(QChar('.'));
+    qint32 nNumberOfDots=sString.count(QChar('.'));
 
-    for(int i=0;i<(nNumberOfDots+1);i++)
+    for(qint32 i=0;i<(nNumberOfDots+1);i++)
     {
         nResult*=10;
 
