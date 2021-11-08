@@ -6026,7 +6026,7 @@ bool XBinary::isUTF8TextType(QByteArray *pbaData)
     bool bResult=false;
 
     unsigned char *pDataOffset=(unsigned char *)(pbaData->data());
-    int nDataSize=pbaData->size();
+    qint32 nDataSize=pbaData->size();
 
     if(nDataSize>=3)
     {
