@@ -6076,7 +6076,7 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType(QByteArray *pbaData)
     XBinary::UNICODE_TYPE result=XBinary::UNICODE_TYPE_NONE;
 
     unsigned char *pDataOffset=(unsigned char *)(pbaData->data());
-    int nDataSize=pbaData->size();
+    qint32 nDataSize=pbaData->size();
 
     if(nDataSize)
     {
