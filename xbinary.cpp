@@ -5953,7 +5953,7 @@ QString XBinary::invertHexByteString(QString sHex)
 
 void XBinary::_swapBytes(char *pSource, int nSize)
 {
-    for(int i=0;i<(nSize/2);i++)
+    for(qint32 i=0;i<(nSize/2);i++)
     {
         char cTemp=pSource[i];
         pSource[i]=pSource[(nSize-1)-i];
