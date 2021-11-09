@@ -263,6 +263,7 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
         case MODE_16SEG:            sResult=QString("16SEG");       break;
         case MODE_32:               sResult=tr("32-bit");           break;
         case MODE_64:               sResult=tr("64-bit");           break;
+        case MODE_128:              sResult=tr("128-bit");          break;
     }
 
     return sResult;
@@ -4429,6 +4430,42 @@ QString XBinary::valueToHexColon(MODE mode, quint64 nValue, bool bIsBigEndian)
     return sResult;
 }
 
+QString XBinary::xVariantToHex(XVARIANT value)
+{
+    QString sResult;
+
+    if(value.mode==MODE_BIT)
+    {
+        if(value.var.v_bool)
+        {
+            sResult="1";
+        }
+        else
+        {
+            sResult="0";
+        }
+    }
+    else if(value.mode==MODE_8)
+    {
+        sResult=valueToHex(value.var.v_uint8);
+    }
+    else if(value.mode==MODE_16)
+    {
+        sResult=valueToHex(value.var.v_uint16);
+    }
+    else if(value.mode==MODE_32)
+    {
+        sResult=valueToHex(value.var.v_uint32);
+    }
+    else if(value.mode==MODE_64)
+    {
+        sResult=valueToHex(value.var.v_uint64);
+    }
+    // TODO more
+
+    return sResult;
+}
+
 bool XBinary::checkString_uint8(QString sValue)
 {
     bool bResult=false;
@@ -7313,9 +7350,9 @@ qint64 XBinary::getTotalOSSize(QList<OFFSETSIZE> *pListOffsetSize)
 {
     qint64 nResult=0;
 
-    int nNumberOfRecords=pListOffsetSize->count();
+    qint32 nNumberOfRecords=pListOffsetSize->count();
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         nResult+=pListOffsetSize->at(i).nSize;
     }

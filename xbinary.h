@@ -213,7 +213,8 @@ public:
         MODE_16,
         MODE_16SEG,
         MODE_32,
-        MODE_64
+        MODE_64,
+        MODE_128
         // TODO more
     };
 
@@ -429,6 +430,27 @@ public:
         qint64 nOffset;
         qint64 nSize;
         QByteArray baOriginal;
+    };
+
+    struct XUINT128
+    {
+        quint64 low;
+        quint64 high;
+    };
+
+    struct XVARIANT
+    {
+        MODE mode;
+        bool bIsBigEndian;
+        union DUMMYUNION
+        {
+            bool v_bool;
+            quint8 v_uint8;
+            quint16 v_uint16;
+            quint32 v_uint32;
+            quint64 v_uint64;
+            XUINT128 v_uint128;
+        } var;
     };
 
 private:
@@ -781,6 +803,7 @@ public:
     static QString valueToHexEx(quint64 nValue,bool bIsBigEndian=false);
     static QString valueToHexOS(quint64 nValue,bool bIsBigEndian=false);
     static QString valueToHexColon(MODE mode,quint64 nValue,bool bIsBigEndian=false);
+    static QString xVariantToHex(XVARIANT value);
 
     static bool checkString_uint8(QString sValue);
     static bool checkString_int8(QString sValue);
