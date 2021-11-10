@@ -1,4 +1,4 @@
-// copyright (c) 2017-2021 hors<horsicq@gmail.com>
+// Copyright (c) 2017-2021 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -4451,17 +4451,30 @@ QString XBinary::xVariantToHex(XVARIANT value)
     }
     else if(value.mode==MODE_16)
     {
-        sResult=valueToHex(value.var.v_uint16);
+        sResult=valueToHex(value.var.v_uint16,value.bIsBigEndian);
     }
     else if(value.mode==MODE_32)
     {
-        sResult=valueToHex(value.var.v_uint32);
+        sResult=valueToHex(value.var.v_uint32,value.bIsBigEndian);
     }
     else if(value.mode==MODE_64)
     {
-        sResult=valueToHex(value.var.v_uint64);
+        sResult=valueToHex(value.var.v_uint64,value.bIsBigEndian);
     }
-    // TODO more
+    else if(value.mode==MODE_128)
+    {
+        QString sLow=valueToHex(value.var.v_uint128.low,value.bIsBigEndian);
+        QString sHigh=valueToHex(value.var.v_uint128.high,value.bIsBigEndian);
+
+        if(value.bIsBigEndian)
+        {
+            sResult=sLow+sHigh;
+        }
+        else
+        {
+            sResult=sHigh+sLow;
+        }
+    }
 
     return sResult;
 }
@@ -6223,7 +6236,7 @@ XBinary::PACKED_INT XBinary::read_uleb128(qint64 nOffset,qint64 nSize)
 
     quint32 nShift=0;
 
-    for(int i=0;i<nSize;i++)
+    for(qint32 i=0;i<nSize;i++)
     {
         quint8 nByte=read_uint8(nOffset+i);
         result.nValue|=((nByte&0x7F)<<nShift);
