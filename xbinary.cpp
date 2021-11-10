@@ -7783,7 +7783,7 @@ XBinary::SYMBOL_RECORD XBinary::findSymbolByName(QList<SYMBOL_RECORD> *pListSymb
 
     qint32 nNumberOfRecords=pListSymbolRecords->count();
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         if(pListSymbolRecords->at(i).sName==sName)
         {
