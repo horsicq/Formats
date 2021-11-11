@@ -5786,10 +5786,10 @@ QString XBinary::convertSignature(QString sSignature)
     if(sSignature.contains(QChar(39)))
     {
         QString sTemp;
-        int nStringSize=sSignature.size();
+        qint32 nStringSize=sSignature.size();
         bool bAnsiString=false;
 
-        for(int i=0;i<nStringSize;i++)
+        for(qint32 i=0;i<nStringSize;i++)
         {
             QChar c=sSignature.at(i);
 
