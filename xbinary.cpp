@@ -7564,7 +7564,7 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nStartAddress,
             qint64 nOpcodesSize=0;
             OPCODE_STATUS opcodeStatus=OPCODE_STATUS_SUCCESS;
 
-            for(int i=0;i<nTempSize;)
+            for(qint32 i=0;i<nTempSize;)
             {
                 qint64 _nSize=readOpcodes(nType,pBuffer+i,nStartAddress+i,nTempSize-i,&listResult,&opcodeStatus);
 

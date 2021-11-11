@@ -565,6 +565,9 @@ public:
 
     QList<quint32> getImportPositionHashes(QList<IMPORT_HEADER> *pListImport);
 
+    bool isImportLibraryPresent(QString sLibrary);
+    static bool isImportLibraryPresent(QString sLibrary,QList<IMPORT_HEADER> *pListImportHeaders);
+
     bool isImportLibraryPresentI(QString sLibrary);
     static bool isImportLibraryPresentI(QString sLibrary,QList<IMPORT_HEADER> *pListImportHeaders);
 
