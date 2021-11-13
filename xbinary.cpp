@@ -2616,7 +2616,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
     _searchProgressMaximumChanged(procent.nMaxProcent);
     _searchProgressValueChanged(0);
 
-    int nCurrentRecords=0;
+    qint32 nCurrentRecords=0;
 
     while((_nSize>0)&&(!g_bIsSearchStop))
     {
