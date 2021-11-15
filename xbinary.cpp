@@ -7953,6 +7953,18 @@ XBinary::XDWORD XBinary::make_xdword(quint32 nValue)
     return result;
 }
 
+bool XBinary::isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion, qint64 nAddress)
+{
+    bool bResult=false;
+
+    if((pMemoryRegion->nAddress<=nAddress)&&(nAddress<(pMemoryRegion->nAddress+pMemoryRegion->nSize)))
+    {
+        bResult=true;
+    }
+
+    return bResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!

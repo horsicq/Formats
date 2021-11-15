@@ -158,6 +158,21 @@ public:
         bool bIsVirtual;
     };
 
+    struct MEMORY_FLAGS
+    {
+        bool bRead;
+        bool bWrite;
+        bool bExecute;
+        // TODO more
+    };
+
+    struct MEMORY_REGION
+    {
+        qint64 nAddress;
+        qint64 nSize;
+        MEMORY_FLAGS mf;
+    };
+
     enum FT
     {
         FT_UNKNOWN=0,
@@ -344,6 +359,7 @@ public:
     {
         OSNAME osName;
         QString sOsVersion;
+        QString sBuild;
         QString sArch;
         MODE mode;
         QString sType;
@@ -1105,6 +1121,8 @@ public:
     static quint32 make_dword(XDWORD xdword);
     static quint32 make_dword(quint16 nValue1,quint16 nValue2);
     static XDWORD make_xdword(quint32 nValue);
+
+    static bool isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion,qint64 nAddress);
 
 public slots:
     void setSearchProcessEnable(bool bState);
