@@ -4422,7 +4422,13 @@ QString XBinary::valueToHexColon(MODE mode, quint64 nValue, bool bIsBigEndian)
     {
         quint32 nHigh=(quint32)(nValue>>32);
         quint32 nLow=(quint32)(nValue);
-        sResult=QString("%1:%2").arg(valueToHex(nHigh)).arg(valueToHex(nLow));
+        sResult=QString("%1:%2").arg(valueToHex(nHigh),valueToHex(nLow));
+    }
+    else if(mode==MODE_32)
+    {
+        quint16 nHigh=(quint16)(nValue>>16);
+        quint16 nLow=(quint16)(nValue);
+        sResult=QString("%1:%2").arg(valueToHex(nHigh),valueToHex(nLow));
     }
     else
     {
