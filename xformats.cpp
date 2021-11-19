@@ -509,6 +509,54 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
     return listResult;
 }
 
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra)
+{
+    QSet<XBinary::FT> stResult=XBinary::getFileTypes(pDevice,bExtra);
+#ifdef USE_ARCHIVE
+    if(stResult.contains(XBinary::FT_ZIP))
+    {
+        XZip xzip(pDevice);
+
+        QList<XArchive::RECORD> listArchiveRecords=xzip.getRecords();
+
+        if(XArchive::isArchiveRecordPresent("META-INF/MANIFEST.MF",&listArchiveRecords))
+        {
+            stResult.insert(XBinary::FT_JAR);
+        }
+
+        if(XArchive::isArchiveRecordPresent("classes.dex",&listArchiveRecords))
+        {
+            stResult.insert(XBinary::FT_APK);
+        }
+
+        if(XArchive::isArchiveRecordPresent("Payload/",&listArchiveRecords))
+        {
+            stResult.insert(XBinary::FT_IPA);
+        }
+    }
+#endif
+
+    return stResult;
+}
+
+QSet<XBinary::FT> XFormats::getFileTypes(QString sFileName, bool bExtra)
+{
+    QSet<XBinary::FT> stResult;
+
+    QFile file;
+
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        stResult=getFileTypes(&file,bExtra);
+
+        file.close();
+    }
+
+    return stResult;
+}
+
 #ifdef QT_GUI_LIB
 XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox)
 {
@@ -522,7 +570,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
 
     if(fileType!=XBinary::FT_REGION)
     {
-        QSet<XBinary::FT> stFileType=XBinary::getFileTypes(pDevice,true);
+        QSet<XBinary::FT> stFileType=XFormats::getFileTypes(pDevice,true);
 
         listFileTypes=XBinary::_getFileTypeListFromSet(stFileType);
     }

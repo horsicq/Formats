@@ -4213,12 +4213,16 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
 {
     QList<XBinary::FT> listResult;
 
+    // TODO optimize !
     if(stFileTypes.contains(FT_REGION))     listResult.append(FT_REGION);
     if(stFileTypes.contains(FT_BINARY))     listResult.append(FT_BINARY);
     if(stFileTypes.contains(FT_BINARY16))   listResult.append(FT_BINARY16);
     if(stFileTypes.contains(FT_BINARY32))   listResult.append(FT_BINARY32);
     if(stFileTypes.contains(FT_BINARY64))   listResult.append(FT_BINARY64);
     if(stFileTypes.contains(FT_ZIP))        listResult.append(FT_ZIP);
+    if(stFileTypes.contains(FT_JAR))        listResult.append(FT_JAR);
+    if(stFileTypes.contains(FT_APK))        listResult.append(FT_APK);
+    if(stFileTypes.contains(FT_IPA))        listResult.append(FT_IPA);
     if(stFileTypes.contains(FT_DEX))        listResult.append(FT_DEX);
     if(stFileTypes.contains(FT_COM))        listResult.append(FT_COM);
     if(stFileTypes.contains(FT_MSDOS))      listResult.append(FT_MSDOS);
