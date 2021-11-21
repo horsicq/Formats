@@ -7673,7 +7673,7 @@ QList<quint32> XBinary::get_uint32_list(qint64 nOffset, qint32 nNumberOfRecords,
 {
     QList<quint32> listResult;
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         quint32 nRecord=read_uint32(nOffset+i*sizeof(quint32),bIsBigEndian);
 
