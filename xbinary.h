@@ -135,6 +135,14 @@ public:
 //        ADDRESS_SEGMENT_DATA
     };
 
+    enum FILEPART
+    {
+        FILEPART_UNKNOWN=0,
+        FILEPART_ARCHIVERECORD,
+        FILEPART_HEADER,
+        FILEPART_OVERLAY
+    };
+
     enum MMT
     {
         MMT_UNKNOWN=0,
@@ -903,10 +911,10 @@ public:
     bool is32();
     bool is64();
 
-    bool isBigEndian(_MEMORY_MAP *pMemoryMap);
-    bool is16(_MEMORY_MAP *pMemoryMap);
-    bool is32(_MEMORY_MAP *pMemoryMap);
-    bool is64(_MEMORY_MAP *pMemoryMap);
+    static bool isBigEndian(_MEMORY_MAP *pMemoryMap);
+    static bool is16(_MEMORY_MAP *pMemoryMap);
+    static bool is32(_MEMORY_MAP *pMemoryMap);
+    static bool is64(_MEMORY_MAP *pMemoryMap);
 
     void setVersion(QString sVersion);
     virtual QString getVersion();
@@ -1038,6 +1046,7 @@ public:
     static QString disasmIdToString(DM disasmMode);
     static QString syntaxIdToString(SYNTAX syntax);
     static QString osNameIdToString(OSNAME osName);
+    DM getDisasmMode();
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
     static DM getDisasmMode(QString sArch,bool bIsBigEndian=false,MODE mode=MODE_UNKNOWN);
     static DMFAMILY getDisasmFamily(DM disasmMode);
@@ -1123,6 +1132,8 @@ public:
     static XDWORD make_xdword(quint32 nValue);
 
     static bool isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion,qint64 nAddress);
+
+    static QString recordFilePartIdToString(FILEPART id);
 
 public slots:
     void setSearchProcessEnable(bool bState);

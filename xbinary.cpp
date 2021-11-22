@@ -6974,6 +6974,13 @@ QString XBinary::osNameIdToString(OSNAME osName)
     return sResult;
 }
 
+XBinary::DM XBinary::getDisasmMode()
+{
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getDisasmMode(&memoryMap);
+}
+
 XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     return getDisasmMode(pMemoryMap->sArch,pMemoryMap->bIsBigEndian,pMemoryMap->mode);
@@ -7973,6 +7980,22 @@ bool XBinary::isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion, qint64 nAddr
     }
 
     return bResult;
+}
+
+QString XBinary::recordFilePartIdToString(FILEPART id)
+{
+    QString sResult=tr("Unknown");
+
+    switch(id)
+    {
+        // TODO more
+        case FILEPART_UNKNOWN:                          sResult=tr("Unknown");                                          break;
+        case FILEPART_HEADER:                           sResult=tr("Header");                                           break;
+        case FILEPART_OVERLAY:                          sResult=tr("Overlay");                                          break;
+        case FILEPART_ARCHIVERECORD:                    sResult=tr("Archive record");                                   break;
+    }
+
+    return sResult;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
