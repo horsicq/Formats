@@ -1085,6 +1085,7 @@ QMap<quint64, QString> XELF::getProgramTypes()
     mapResult.insert(0x6474e550,"PT_GNU_EH_FRAME"); // PT_SUNW_EH_FRAME
     mapResult.insert(0x6474e551,"PT_GNU_STACK");
     mapResult.insert(0x6474e552,"PT_GNU_RELRO");
+    mapResult.insert(0x65041580,"PT_PAX_FLAGS");
     mapResult.insert(0x6ffffffa,"PT_LOSUNW");
     mapResult.insert(0x6ffffffa,"PT_SUNWBSS");
     mapResult.insert(0x6ffffffb,"PT_SUNWSTACK");
@@ -1116,6 +1117,7 @@ QMap<quint64, QString> XELF::getProgramTypesS()
     mapResult.insert(0x6474e550,"GNU_EH_FRAME"); // SUNW_EH_FRAME
     mapResult.insert(0x6474e551,"GNU_STACK");
     mapResult.insert(0x6474e552,"GNU_RELRO");
+    mapResult.insert(0x65041580,"PAX_FLAGS");
     mapResult.insert(0x6ffffffa,"LOSUNW");
     mapResult.insert(0x6ffffffa,"SUNWBSS");
     mapResult.insert(0x6ffffffb,"SUNWSTACK");
@@ -3706,7 +3708,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 
     for(int i=0;i<nNumberOfSegments;i++)
     {
-        QString sName=QString("%1(%2)").arg(tr("Segment"),QString::number(i));
+        QString sName=QString("%1(%2)").arg(QString("PT_LOAD"),QString::number(i));
 
         quint64 nVirtualAlign=listSegments.at(i).p_align; // TODO Check!
         quint64 nFileAlign=0x1; // TODO Check!!!
