@@ -2280,9 +2280,9 @@ QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList()
     {
         QList<XELF_DEF::Elf64_Phdr> listProgramHeaders=getElf64_PhdrList();
 
-        int nNumberOfPrograms=listProgramHeaders.count();
+        qint32 nNumberOfPrograms=listProgramHeaders.count();
 
-        for(int i=0;i<nNumberOfPrograms;i++)
+        for(qint32 i=0;i<nNumberOfPrograms;i++)
         {
             XELF_DEF::Elf_Phdr record={};
 
