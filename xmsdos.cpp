@@ -504,8 +504,8 @@ bool XMSDOS::isRichSignaturePresent()
 {
     bool bResult=false;
 
-    int nOffset=sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
-    int nSize=get_lfanew()-sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
+    qint32 nOffset=sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
+    qint32 nSize=get_lfanew()-sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
 
     if((nSize>0)&&(nSize<=0x200))
     {
