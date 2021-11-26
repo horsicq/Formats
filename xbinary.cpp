@@ -5652,6 +5652,13 @@ bool XBinary::isEncrypted()
     return false;
 }
 
+QString XBinary::getSignature(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
+{
+    XBinary binary(pDevice);
+
+    return binary.getSignature(nOffset,nSize);
+}
+
 QString XBinary::getSignature(qint64 nOffset, qint64 nSize)
 {
     QString sResult;

@@ -1031,7 +1031,7 @@ bool XMACH::isCommandPresent(quint32 nCommandID, int nIndex, QList<XMACH::COMMAN
 
     qint32 nNumberOfCommands=pListCommandRecords->count();
 
-    int nCurrentIndex=0;
+    qint32 nCurrentIndex=0;
 
     for(qint32 i=0; i<nNumberOfCommands; i++)
     {

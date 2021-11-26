@@ -918,6 +918,7 @@ public:
     virtual QString getVersion();
     virtual bool isEncrypted();
 
+    static QString getSignature(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
     QString getSignature(qint64 nOffset,qint64 nSize);
 
     OFFSETSIZE convertOffsetAndSize(qint64 nOffset,qint64 nSize); // TODO rename
