@@ -6113,7 +6113,7 @@ bool XBinary::isUTF8TextType(QByteArray *pbaData)
         nDataSize=pbaData->size();
         nDataSize=nDataSize-3;
 
-        for(int i=0;i<nDataSize;i++)
+        for(qint32 i=0;i<nDataSize;i++)
         {
             if(pDataOffset[i]==0)
             {
