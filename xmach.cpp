@@ -2109,6 +2109,44 @@ qint64 XMACH::getSectionHeaderSize()
     return nResult;
 }
 
+quint32 XMACH::getSectionFileOffset(quint32 nIndex, QList<SECTION_RECORD> *pListSectionRecords)
+{
+    quint32 nResult=0;
+
+    if(nIndex<(quint32)pListSectionRecords->count())
+    {
+        if(pListSectionRecords->at(nIndex).bIs64)
+        {
+            nResult=pListSectionRecords->at(nIndex).s.section64.offset;
+        }
+        else
+        {
+            nResult=pListSectionRecords->at(nIndex).s.section32.offset;
+        }
+    }
+
+    return nResult;
+}
+
+quint32 XMACH::getSectionFileSize(quint32 nIndex, QList<SECTION_RECORD> *pListSectionRecords)
+{
+    quint32 nResult=0;
+
+    if(nIndex<(quint32)pListSectionRecords->count())
+    {
+        if(pListSectionRecords->at(nIndex).bIs64)
+        {
+            nResult=pListSectionRecords->at(nIndex).s.section64.size;
+        }
+        else
+        {
+            nResult=pListSectionRecords->at(nIndex).s.section32.size;
+        }
+    }
+
+    return nResult;
+}
+
 bool XMACH::isSegmentNamePresent(QString sName)
 {
     QList<SEGMENT_RECORD> listSegmentRecords=getSegmentRecords();
