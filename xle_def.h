@@ -93,11 +93,24 @@ struct o32_obj
     quint32 o32_reserved;
 };
 
+//struct o32_map
+//{
+//    quint32 o32_pagedataoffset;
+//    quint16 o32_pagesize;
+//    quint16 o32_pageflags;
+//};
+
+struct o16_map
+{
+    quint8 o16_pagenum[3];
+    quint8 o16_pageflags;
+};
+
 struct o32_map
 {
-    quint32 o32_pagedataoffset;
-    quint16 o32_pagesize;
-    quint16 o32_pageflags;
+    quint16 o32_pagedataoffset;
+    quint8 o32_pagesize;
+    quint8 o32_pageflags;
 };
 }
 #endif // XLE_DEF_H

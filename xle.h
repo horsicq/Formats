@@ -140,10 +140,13 @@ public:
     void setImageVxdHeader_heapsize(quint32 nValue);
 
     XLE_DEF::o32_obj _read_o32_obj(qint64 nOffset);
+
+    XLE_DEF::o16_map _read_o16_map(qint64 nOffset);
     XLE_DEF::o32_map _read_o32_map(qint64 nOffset);
 
     QList<XLE_DEF::o32_obj> getObjects();
-    QList<XLE_DEF::o32_map> getMaps();
+    QList<XLE_DEF::o16_map> getMapsLE();
+    QList<XLE_DEF::o32_map> getMapsLX();
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual MODE getMode();
@@ -153,6 +156,7 @@ public:
     virtual FT getFileType();
     virtual qint32 getType();
     virtual QString typeIdToString(int nType);
+    virtual OSINFO getOsInfo();
 
     static QMap<quint64,QString> getImageLEMagics();
     static QMap<quint64,QString> getImageLEMagicsS();

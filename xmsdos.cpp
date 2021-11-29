@@ -337,7 +337,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     result.nRawSize=getSize();
     result.nImageSize=getImageSize();
 
-    qint64 nMaxOffset=(get_e_cp()-1)*512+get_e_cblp();
+    qint64 nMaxOffset=(get_e_cp()-1)*512+get_e_cblp(); // TODO Check if get_e_cp()=0
 
     qint64 nHeaderOffset=0;
     qint64 nHeaderSize=(quint16)(get_e_cparhdr()*16);

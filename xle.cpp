@@ -1257,13 +1257,25 @@ XLE_DEF::o32_obj XLE::_read_o32_obj(qint64 nOffset)
     return result;
 }
 
+XLE_DEF::o16_map XLE::_read_o16_map(qint64 nOffset)
+{
+    XLE_DEF::o16_map result={};
+
+    result.o16_pagenum[0]=read_uint8(nOffset+offsetof(XLE_DEF::o16_map,o16_pagenum)+0);
+    result.o16_pagenum[1]=read_uint8(nOffset+offsetof(XLE_DEF::o16_map,o16_pagenum)+1);
+    result.o16_pagenum[2]=read_uint8(nOffset+offsetof(XLE_DEF::o16_map,o16_pagenum)+2);
+    result.o16_pageflags=read_uint8(nOffset+offsetof(XLE_DEF::o16_map,o16_pageflags));
+
+    return result;
+}
+
 XLE_DEF::o32_map XLE::_read_o32_map(qint64 nOffset)
 {
     XLE_DEF::o32_map result={};
 
-    result.o32_pagedataoffset=read_uint32(nOffset+offsetof(XLE_DEF::o32_map,o32_pagedataoffset));
-    result.o32_pagesize=read_uint32(nOffset+offsetof(XLE_DEF::o32_map,o32_pagesize));
-    result.o32_pageflags=read_uint32(nOffset+offsetof(XLE_DEF::o32_map,o32_pageflags));
+    result.o32_pagedataoffset=read_uint16(nOffset+offsetof(XLE_DEF::o32_map,o32_pagedataoffset));
+    result.o32_pagesize=read_uint8(nOffset+offsetof(XLE_DEF::o32_map,o32_pagesize));
+    result.o32_pageflags=read_uint8(nOffset+offsetof(XLE_DEF::o32_map,o32_pageflags));
 
     return result;
 }
@@ -1287,12 +1299,44 @@ QList<XLE_DEF::o32_obj> XLE::getObjects()
     return listResult;
 }
 
-QList<XLE_DEF::o32_map> XLE::getMaps()
+QList<XLE_DEF::o16_map> XLE::getMapsLE()
+{
+    QList<XLE_DEF::o16_map> listResult;
+
+    qint64 nMapOffset=getImageVxdHeaderOffset()+getImageVxdHeader_objmap();
+    quint32 nNumberOfMaps=getImageVxdHeader_mpages();
+
+    // TODO LX/LE
+
+//    if (bisLe) {
+//                page_num = reader.readNextUnsignedByte();
+//                page_num = page_num << 8;
+//                page_num |= reader.readNextUnsignedByte();
+//                page_num = page_num << 8;
+//                page_num |= reader.readNextUnsignedByte();
+//            } else {
+//                page_data_offset = reader.readNextShort();
+//                data_size = reader.readNextUnsignedByte();
+//            }
+
+    for(quint32 i=0;i<nNumberOfMaps;i++)
+    {
+        XLE_DEF::o16_map record=_read_o16_map(nMapOffset);
+
+        listResult.append(record);
+
+        nMapOffset+=sizeof(XLE_DEF::o16_map);
+    }
+
+    return listResult;
+}
+
+QList<XLE_DEF::o32_map> XLE::getMapsLX()
 {
     QList<XLE_DEF::o32_map> listResult;
 
     qint64 nMapOffset=getImageVxdHeaderOffset()+getImageVxdHeader_objmap();
-    quint32 nNumberOfMaps=getImageVxdHeader_itermap();
+    quint32 nNumberOfMaps=getImageVxdHeader_mpages();
 
     for(quint32 i=0;i<nNumberOfMaps;i++)
     {
@@ -1321,15 +1365,46 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
     // TODO Image Base
 //    result.nImageSize=0xFFFF;
 
-    QList<XLE_DEF::o32_map> listMaps=XLE::getMaps(); // TODO Check
+    quint32 nNumberOfPages=getImageVxdHeader_mpages();
+    quint32 nLastPageSize=getImageVxdHeader_lastpagesize();
+    quint32 nPageSize=getImageVxdHeader_pagesize();
+
+    qint32 nLoaderSize=0;
+
+    if(nNumberOfPages>0)
+    {
+        nLoaderSize=(nNumberOfPages-1)*nPageSize+nLastPageSize;
+    }
+    qint64 nObjOffset=getImageVxdHeaderOffset()+getImageVxdHeader_objtab();
+    qint64 nTest=getImageVxdHeaderOffset()+nLoaderSize;
+    qint64 nNResTab=getImageVxdHeaderOffset()+getImageVxdHeader_nrestab();
+
+    // 908b
+    // 9c8b nres
 
     QList<XLE_DEF::o32_obj> listObjects=XLE::getObjects();
 
-    qint32 nNumberOfObjects=listObjects.count();
-
-    for(qint32 i=0;i<nNumberOfObjects;i++)
+    if(result.mode==MODE_16SEG)
     {
-        // TODO
+        QList<XLE_DEF::o16_map> listMaps=XLE::getMapsLE();
+
+        qint32 nNumberOfObjects=listObjects.count();
+
+        for(qint32 i=0;i<nNumberOfObjects;i++)
+        {
+            // TODO
+        }
+    }
+    else if(result.mode==MODE_32)
+    {
+        QList<XLE_DEF::o32_map> listMaps=XLE::getMapsLX();
+
+        qint32 nNumberOfObjects=listObjects.count();
+
+        for(qint32 i=0;i<nNumberOfObjects;i++)
+        {
+            // TODO
+        }
     }
 
     return result;
@@ -1362,15 +1437,6 @@ QString XLE::getArch()
 bool XLE::isBigEndian()
 {
     return false;
-}
-
-qint64 XLE::getEntryPointOffset(XBinary::_MEMORY_MAP *pMemoryMap)
-{
-    Q_UNUSED(pMemoryMap)
-    // TODO
-    // Check !!!
-    // startobj:eip
-    return 0;
 }
 
 XBinary::FT XLE::getFileType()
@@ -1407,6 +1473,41 @@ QString XLE::typeIdToString(int nType)
     }
 
     return sResult;
+}
+
+XBinary::OSINFO XLE::getOsInfo()
+{
+    OSINFO result={};
+
+    result.osName=OSNAME_UNKNOWN;
+    result.sOsVersion="";
+
+    quint16 nOS=getImageVxdHeader_os();
+
+    if(nOS==1)
+    {
+        result.osName=OSNAME_OS2;
+    }
+    else if(nOS==2)
+    {
+        result.osName=OSNAME_WINDOWS;
+    }
+    else if(nOS==3)
+    {
+        result.osName=OSNAME_MSDOS;
+        result.sOsVersion="4.X";
+    }
+    else if(nOS==4)
+    {
+        result.osName=OSNAME_WINDOWS;
+        result.sOsVersion="386";
+    }
+
+    result.sArch=getArch();
+    result.mode=getMode();
+    result.sType=typeIdToString(getType());
+
+    return result;
 }
 
 QMap<quint64, QString> XLE::getImageLEMagics()
@@ -1466,4 +1567,21 @@ QMap<quint64, QString> XLE::getImageLEMflagsS()
     // TODO
 
     return mapResult;
+}
+
+qint64 XLE::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
+{
+    quint32 nStartObj=getImageVxdHeader_startobj();
+    quint32 nEIP=getImageVxdHeader_eip();
+
+    QList<XLE_DEF::o32_obj> listObjects=getObjects();
+
+    qint32 nEntryPointAddress=0;
+
+    if(nStartObj<listObjects.count())
+    {
+        nEntryPointAddress=listObjects.at(nStartObj).o32_base+nEIP;
+    }
+
+    return addressToOffset(pMemoryMap,pMemoryMap->nModuleAddress+nEntryPointAddress);
 }

@@ -2192,7 +2192,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
         for(qint64 i=0;i<nCurrentSize;i++)
         {
             bool bIsEnd=((i==(nCurrentSize-1))&&(_nSize==nCurrentSize));
-            int nParity=(_nOffset+i)%2;
+            qint32 nParity=(_nOffset+i)%2;
 
             char cSymbol=*(pBuffer+i);
 
