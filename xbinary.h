@@ -358,7 +358,8 @@ public:
         OSNAME_TRU64,
         OSNAME_MODESTO,
         OSNAME_OPENVMS,
-        OSNAME_FENIXOS
+        OSNAME_FENIXOS,
+        OSNAME_BORLANDOSSERVICES
     };
 
     struct OSINFO

@@ -1306,19 +1306,6 @@ QList<XLE_DEF::o16_map> XLE::getMapsLE()
     qint64 nMapOffset=getImageVxdHeaderOffset()+getImageVxdHeader_objmap();
     quint32 nNumberOfMaps=getImageVxdHeader_mpages();
 
-    // TODO LX/LE
-
-//    if (bisLe) {
-//                page_num = reader.readNextUnsignedByte();
-//                page_num = page_num << 8;
-//                page_num |= reader.readNextUnsignedByte();
-//                page_num = page_num << 8;
-//                page_num |= reader.readNextUnsignedByte();
-//            } else {
-//                page_data_offset = reader.readNextShort();
-//                data_size = reader.readNextUnsignedByte();
-//            }
-
     for(quint32 i=0;i<nNumberOfMaps;i++)
     {
         XLE_DEF::o16_map record=_read_o16_map(nMapOffset);
@@ -1354,6 +1341,9 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
 {
     XBinary::_MEMORY_MAP result={};
 
+//    bool bIsLE=isLE();
+//    bool bIsLX=isLX();
+
     result.sArch=getArch();
     result.mode=getMode();
     result.bIsBigEndian=isBigEndian();
@@ -1368,6 +1358,20 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
     quint32 nNumberOfPages=getImageVxdHeader_mpages();
     quint32 nLastPageSize=getImageVxdHeader_lastpagesize();
     quint32 nPageSize=getImageVxdHeader_pagesize();
+    qint64 nDataPageOffset=getImageVxdHeader_datapage();
+
+    if(nDataPageOffset>0)
+    {
+        _MEMORY_RECORD memoryRecord={};
+
+        memoryRecord.nAddress=-1;
+        memoryRecord.nOffset=0;
+        memoryRecord.nSize=nDataPageOffset;
+        memoryRecord.sName=tr("Header");
+        memoryRecord.type=MMT_HEADER;
+
+        result.listRecords.append(memoryRecord);
+    }
 
     qint32 nLoaderSize=0;
 
@@ -1375,36 +1379,49 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
     {
         nLoaderSize=(nNumberOfPages-1)*nPageSize+nLastPageSize;
     }
-    qint64 nObjOffset=getImageVxdHeaderOffset()+getImageVxdHeader_objtab();
-    qint64 nTest=getImageVxdHeaderOffset()+nLoaderSize;
-    qint64 nNResTab=getImageVxdHeaderOffset()+getImageVxdHeader_nrestab();
-
-    // 908b
-    // 9c8b nres
 
     QList<XLE_DEF::o32_obj> listObjects=XLE::getObjects();
 
-    if(result.mode==MODE_16SEG)
+//    if(bIsLE)
+//    {
+////        QList<XLE_DEF::o16_map> listMaps=XLE::getMapsLE();
+//    }
+//    else if(bIsLX)
+//    {
+//        QList<XLE_DEF::o32_map> listMaps=XLE::getMapsLX();
+//    }
+
+    qint32 nNumberOfObjects=listObjects.count();
+
+    for(qint32 i=0;i<nNumberOfObjects;i++)
     {
-        QList<XLE_DEF::o16_map> listMaps=XLE::getMapsLE();
+        _MEMORY_RECORD memoryRecord={};
 
-        qint32 nNumberOfObjects=listObjects.count();
+        memoryRecord.nIndex=i;
+        memoryRecord.nAddress=listObjects.at(i).o32_base;
+        memoryRecord.nOffset=nDataPageOffset+nPageSize*(listObjects.at(i).o32_pagemap-1); // TODO Check
+        memoryRecord.nSize=nPageSize*listObjects.at(i).o32_mapsize;
+        memoryRecord.sName=QString("%1(%2)").arg(tr("Object"),QString::number(i));
+        memoryRecord.type=MMT_LOADSEGMENT;
 
-        for(qint32 i=0;i<nNumberOfObjects;i++)
-        {
-            // TODO
-        }
+        memoryRecord.nSize=qMin(memoryRecord.nSize,(nDataPageOffset+nLoaderSize)-memoryRecord.nOffset);
+
+        result.listRecords.append(memoryRecord);
     }
-    else if(result.mode==MODE_32)
+
+    qint64 nOverlaySize=result.nRawSize-(nDataPageOffset+nLoaderSize);
+
+    if(nOverlaySize>0)
     {
-        QList<XLE_DEF::o32_map> listMaps=XLE::getMapsLX();
+        _MEMORY_RECORD memoryRecord={};
 
-        qint32 nNumberOfObjects=listObjects.count();
+        memoryRecord.nAddress=-1;
+        memoryRecord.nOffset=nDataPageOffset+nLoaderSize;
+        memoryRecord.nSize=nOverlaySize;
+        memoryRecord.sName=tr("Overlay");
+        memoryRecord.type=MMT_OVERLAY;
 
-        for(qint32 i=0;i<nNumberOfObjects;i++)
-        {
-            // TODO
-        }
+        result.listRecords.append(memoryRecord);
     }
 
     return result;
@@ -1412,6 +1429,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
 
 XBinary::MODE XLE::getMode()
 {
+    // TODO CHECK MODE_16SEG
     MODE result=MODE_16SEG;
 
     qint32 lfanew=get_lfanew();
@@ -1419,7 +1437,8 @@ XBinary::MODE XLE::getMode()
 
     if(signature==XLE_DEF::S_IMAGE_VXD_SIGNATURE)
     {
-        result=MODE_16SEG;
+//        result=MODE_16SEG;
+        result=MODE_32;
     }
     else if(signature==XLE_DEF::S_IMAGE_LX_SIGNATURE)
     {
@@ -1443,13 +1462,11 @@ XBinary::FT XLE::getFileType()
 {
     FT result=FT_LE;
 
-    MODE mode=getMode();
-
-    if(mode==MODE_16SEG)
+    if(isLE())
     {
         result=FT_LE;
     }
-    else if(mode==MODE_32)
+    else if(isLX())
     {
         result=FT_LX;
     }
@@ -1578,9 +1595,9 @@ qint64 XLE::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 
     qint32 nEntryPointAddress=0;
 
-    if(nStartObj<listObjects.count())
+    if((nStartObj<=(quint32)listObjects.count())&&(nStartObj>0))
     {
-        nEntryPointAddress=listObjects.at(nStartObj).o32_base+nEIP;
+        nEntryPointAddress=listObjects.at(nStartObj-1).o32_base+nEIP;
     }
 
     return addressToOffset(pMemoryMap,pMemoryMap->nModuleAddress+nEntryPointAddress);

@@ -137,6 +137,7 @@ public:
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
     virtual FT getFileType();
     virtual qint32 getType();
+    virtual OSINFO getOsInfo();
     virtual QString typeIdToString(int nType);
 };
 

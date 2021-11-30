@@ -6953,7 +6953,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_MSDOS:              sResult=QString("MSDOS");                   break;
         case OSNAME_UEFI:               sResult=QString("UEFI");                    break;
         case OSNAME_XBOX:               sResult=QString("XBOX");                    break;
-        case OSNAME_OS2:                sResult=QString("OS2");                     break;
+        case OSNAME_OS2:                sResult=QString("OS/2");                    break;
         case OSNAME_MAC_OS:             sResult=QString("Mac OS");                  break;
         case OSNAME_MAC_OS_X:           sResult=QString("Mac OS X");                break;
         case OSNAME_OS_X:               sResult=QString("OS X");                    break;
@@ -6976,6 +6976,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_MODESTO:            sResult=QString("Novell Modesto");          break;
         case OSNAME_OPENVMS:            sResult=QString("Open VMS");                break;
         case OSNAME_FENIXOS:            sResult=QString("FenixOS");                 break;
+        case OSNAME_BORLANDOSSERVICES:  sResult=QString("Borland OS Services");     break;
     }
 
     return sResult;
@@ -7062,6 +7063,9 @@ XBinary::DM XBinary::getDisasmMode(QString sArch,bool bIsBigEndian,MODE mode)
         dmResult=DM_X86_16;
     }
     else if((sArch=="386")||
+            (sArch=="80386")||
+            (sArch=="80486")||
+            (sArch=="80586")||
             (sArch=="I386")||
             (sArch=="486")||
             (sArch=="X86"))

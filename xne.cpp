@@ -1113,6 +1113,46 @@ qint32 XNE::getType()
     return TYPE_EXE; // TODO
 }
 
+XBinary::OSINFO XNE::getOsInfo()
+{
+    OSINFO result={};
+
+    result.osName=OSNAME_UNKNOWN;
+    result.sOsVersion="";
+
+    quint16 nOS=getImageOS2Header_exetyp();
+
+    if(nOS==1)
+    {
+        result.osName=OSNAME_OS2;
+    }
+    else if(nOS==2)
+    {
+        result.osName=OSNAME_WINDOWS;
+    }
+    else if(nOS==3)
+    {
+        result.osName=OSNAME_MSDOS;
+        result.sOsVersion="4.X";
+    }
+    else if(nOS==4)
+    {
+        result.osName=OSNAME_WINDOWS;
+        result.sOsVersion="386";
+    }
+    else if(nOS==4)
+    {
+        result.osName=OSNAME_BORLANDOSSERVICES;
+        result.sOsVersion="386";
+    }
+
+    result.sArch=getArch();
+    result.mode=getMode();
+    result.sType=typeIdToString(getType());
+
+    return result;
+}
+
 QString XNE::typeIdToString(int nType)
 {
     QString sResult=tr("Unknown");
