@@ -517,7 +517,7 @@ public:
 
     void setType(int nType);
     virtual qint32 getType();
-    virtual QString typeIdToString(int nType);
+    virtual QString typeIdToString(qint32 nType);
     QString getTypeAsString();
 
     void setFileType(FT fileType);

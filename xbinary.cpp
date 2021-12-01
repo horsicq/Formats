@@ -222,7 +222,7 @@ qint32 XBinary::getType()
     return g_nType;
 }
 
-QString XBinary::typeIdToString(int nType)
+QString XBinary::typeIdToString(qint32 nType)
 {
     QString sResult=tr("Unknown");
 

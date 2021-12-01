@@ -160,7 +160,7 @@ qint32 XCOM::getType()
     return TYPE_EXE;
 }
 
-QString XCOM::typeIdToString(int nType)
+QString XCOM::typeIdToString(qint32 nType)
 {
     QString sResult=tr("Unknown");
 

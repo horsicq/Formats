@@ -10377,6 +10377,39 @@ XPE::RESOURCES_ID_NAME XPE::getResourcesIDName(qint64 nResourceOffset, quint32 n
     return result;
 }
 
+QString XPE::resourceIdNameToString(RESOURCES_ID_NAME resourceIdName, qint32 nNumber)
+{
+    QString sResult;
+
+    if(resourceIdName.bIsName)
+    {
+        sResult=QString("\"%1\"").arg(resourceIdName.sName);
+    }
+    else
+    {
+        if(nNumber==0)
+        {
+            QMap<quint64, QString> mapRT=XPE::getResourceTypes();
+            QString sType=mapRT.value(resourceIdName.nID);
+
+            if(sType!="")
+            {
+                sResult=QString("%1(%2)").arg(sType,QString::number(resourceIdName.nID));
+            }
+            else
+            {
+                sResult=QString("%1").arg(resourceIdName.nID);
+            }
+        }
+        else
+        {
+            sResult=QString("%1").arg(resourceIdName.nID);
+        }
+    }
+
+    return sResult;
+}
+
 QList<qint64> XPE::getRelocsAsRVAList()
 {
     QSet<qint64> stResult;

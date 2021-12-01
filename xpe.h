@@ -716,6 +716,8 @@ public:
     XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY read_IMAGE_RESOURCE_DATA_ENTRY(qint64 nOffset);
     XPE::RESOURCES_ID_NAME getResourcesIDName(qint64 nResourceOffset,quint32 nValue);
 
+    static QString resourceIdNameToString(RESOURCES_ID_NAME resourceIdName,qint32 nNumber);
+
     QList<qint64> getRelocsAsRVAList();
 
     QList<RELOCS_HEADER> getRelocsHeaders();

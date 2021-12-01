@@ -927,6 +927,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
     result.mode=MODE_16SEG;
     result.nRawSize=getSize();
 
+    quint16 nShift=getImageOS2Header_align();
     QList<XNE_DEF::NE_SEGMENT> listSegments=getSegmentList();
 
     int nNumberOfSegments=listSegments.count();
@@ -939,7 +940,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
     for(int i=0;i<nNumberOfSegments;i++)
     {
         qint64 nFileSize=listSegments.at(i).dwFileSize;
-        qint64 nFileOffset=listSegments.at(i).dwFileOffset*0x200;
+        qint64 nFileOffset=listSegments.at(i).dwFileOffset<<nShift;
 
         if(nFileSize==0)
         {
