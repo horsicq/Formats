@@ -542,8 +542,8 @@ QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords()
                     MS_RICH_RECORD record={};
 
                     quint32 nValue1=read_uint32(nCurrentOffset)^nXORkey;
-                    record.nId=nValue1>>16;
-                    record.nVersion=nValue1&0xFFFF;
+                    record.nId=(quint16)(nValue1>>16);
+                    record.nVersion=(quint16)(nValue1&0xFFFF);
 
                     quint32 nValue2=read_uint32(nCurrentOffset+4)^nXORkey;
                     record.nCount=nValue2;

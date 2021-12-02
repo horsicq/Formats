@@ -31,8 +31,8 @@ class XMSDOS : public XBinary
 public:
     struct MS_RICH_RECORD // For PE and LE
     {
-        quint32 nId;
-        quint32 nVersion;
+        quint16 nId;
+        quint16 nVersion;
         quint32 nCount;
     };
 
