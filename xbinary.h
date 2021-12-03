@@ -55,6 +55,11 @@
 #elif (QT_VERSION_MAJOR>=6) // TODO Check
 #include <QRandomGenerator>
 #endif
+
+#ifdef QT_GUI_LIB
+#include <QColor>
+#endif
+
 #include <math.h>
 #include "xbinary_def.h"
 #include "xelf_def.h"
@@ -478,6 +483,33 @@ public:
             quint64 v_uint64;
             XUINT128 v_uint128;
         } var;
+    };
+
+    struct SCANID
+    {
+        bool bVirtual;
+        QString sUuid;
+        XBinary::FT fileType;
+        XBinary::FILEPART filePart;
+        QString sArch;
+        QString sVersion;
+        QString sInfo;
+    };
+
+    struct SCANSTRUCT
+    {
+        qint64 nSize;
+        qint64 nOffset;
+        XBinary::SCANID id;
+        XBinary::SCANID parentId;
+        QString sType;
+        QString sName;
+        QString sVersion;
+        QString sInfo;
+        bool bIsHeuristic;
+    #ifdef QT_GUI_LIB
+        QColor colText;
+    #endif
     };
 
 private:
@@ -1134,6 +1166,10 @@ public:
     static bool isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion,qint64 nAddress);
 
     static QString recordFilePartIdToString(FILEPART id);
+
+    static QString createTypeString(const SCANSTRUCT *pScanStruct);
+    static SCANSTRUCT createHeaderScanStruct(const SCANSTRUCT *pScanStruct);
+    static QString createResultString2(const SCANSTRUCT *pScanStruct);
 
 public slots:
     void setSearchProcessEnable(bool bState);
