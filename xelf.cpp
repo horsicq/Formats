@@ -3133,9 +3133,9 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 
     bool bIsBigEndian=isBigEndian();
 
-    int nNumberOfNotes=listNotes.count();
+    qint32 nNumberOfNotes=listNotes.count();
 
-    for(int i=0;i<nNumberOfNotes;i++)
+    for(qint32 i=0;i<nNumberOfNotes;i++)
     {
         qint64 nOffset=listNotes.at(i).p_offset;
         qint64 nSize=listNotes.at(i).p_filesz;
