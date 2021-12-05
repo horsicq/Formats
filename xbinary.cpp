@@ -2501,7 +2501,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
 
                     if(bIsEnd)
                     {
-                        int nO=(nParity==1)?(0):(1);
+                        qint32 nO=(nParity==1)?(0):(1);
 
                         if(nCurrentUnicodeSize[nO]>=ssOptions.nMinLenght)
                         {
