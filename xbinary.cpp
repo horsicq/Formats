@@ -6318,7 +6318,7 @@ XBinary::PACKED_INT XBinary::read_acn1_integer(qint64 nOffset, qint64 nSize)
                 result.bIsValid=true;
                 result.nByteSize=1+_nSize;
 
-                for(int i=0;i<_nSize;i++)
+                for(qint32 i=0;i<_nSize;i++)
                 {
                     result.nValue<<=8;
                     result.nValue|=read_uint8(nOffset+1+i);
