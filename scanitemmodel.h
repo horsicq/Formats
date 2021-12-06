@@ -67,10 +67,10 @@ public:
     ScanItem *rootItem();
 
 private:
-    void _toXML(QXmlStreamWriter *pXml,ScanItem *pItem);
-    void _toJSON(QJsonObject *pJsonObject,ScanItem *pItem);
-    void _toCSV(QString *pString,ScanItem *pItem);
-    void _toTSV(QString *pString,ScanItem *pItem);
+    void _toXML(QXmlStreamWriter *pXml,ScanItem *pItem,qint32 nLevel);
+    void _toJSON(QJsonObject *pJsonObject,ScanItem *pItem,qint32 nLevel);
+    void _toCSV(QString *pString,ScanItem *pItem,qint32 nLevel);
+    void _toTSV(QString *pString,ScanItem *pItem,qint32 nLevel);
     void _toString(QString *pString,ScanItem *pItem,qint32 nLevel);
 
 private:

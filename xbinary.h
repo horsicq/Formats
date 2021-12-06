@@ -494,19 +494,23 @@ public:
         QString sArch;
         QString sVersion;
         QString sInfo;
+
+        XBinary::MODE mode;
+        bool bIsBigEndian;
+        QString sType;
+        qint64 nSize;
+        qint64 nOffset;
     };
 
     struct SCANSTRUCT
     {
-        qint64 nSize;
-        qint64 nOffset;
+        bool bIsHeuristic;
         XBinary::SCANID id;
         XBinary::SCANID parentId;
         QString sType;
         QString sName;
         QString sVersion;
         QString sInfo;
-        bool bIsHeuristic;
     #ifdef QT_GUI_LIB
         QColor colText;
     #endif

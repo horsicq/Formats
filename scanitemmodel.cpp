@@ -180,50 +180,10 @@ QVariant ScanItemModel::data(const QModelIndex &index, int nRole) const
             result=pItem->data(index.column());
         }
 #ifdef QT_GUI_LIB
-//        else if(nRole==Qt::ForegroundRole)
-//        {
-//            SpecAbstract::RECORD_TYPE rt=pItem->scanStruct().type;
-
-//            // TODO more
-//            if(     (rt==SpecAbstract::RECORD_TYPE_INSTALLER)||
-//                    (rt==SpecAbstract::RECORD_TYPE_SFX))
-//            {
-//                result=QVariant(QColor(Qt::blue));
-//            }
-//            else if((rt==SpecAbstract::RECORD_TYPE_PROTECTOR)||
-//                    (rt==SpecAbstract::RECORD_TYPE_APKOBFUSCATOR)||
-//                    (rt==SpecAbstract::RECORD_TYPE_JAROBFUSCATOR)||
-//                    (rt==SpecAbstract::RECORD_TYPE_NETOBFUSCATOR)||
-//                    (rt==SpecAbstract::RECORD_TYPE_NETCOMPRESSOR)||
-//                    (rt==SpecAbstract::RECORD_TYPE_DONGLEPROTECTION)||
-//                    (rt==SpecAbstract::RECORD_TYPE_JOINER)||
-//                    (rt==SpecAbstract::RECORD_TYPE_PACKER))
-//            {
-//                result=QVariant(QColor(Qt::red));
-//            }
-//            else if((rt==SpecAbstract::RECORD_TYPE_PETOOL)||
-//                    (rt==SpecAbstract::RECORD_TYPE_APKTOOL))
-//            {
-//                result=QVariant(QColor(Qt::green));
-//            }
-//            else if((rt==SpecAbstract::RECORD_TYPE_OPERATIONSYSTEM)||
-//                    (rt==SpecAbstract::RECORD_TYPE_VIRTUALMACHINE))
-//            {
-//                result=QVariant(QColor(Qt::darkYellow));
-//            }
-//            else if(rt==SpecAbstract::RECORD_TYPE_SIGNTOOL)
-//            {
-//                result=QVariant(QColor(Qt::darkMagenta));
-//            }
-//            else if(rt==SpecAbstract::RECORD_TYPE_LANGUAGE)
-//            {
-//                result=QVariant(QColor(Qt::darkCyan));
-//            }
-//            else
-//            {
-//                result=QVariant(QApplication::palette().text().color());
-//            }
-//        }
+        else if(nRole==Qt::ForegroundRole)
+        {
+            result=QVariant(pItem->scanStruct().colText);
+        }
 #endif
     }
 
@@ -249,7 +209,7 @@ QString ScanItemModel::toXML()
 
     xml.setAutoFormatting(true);
 
-    _toXML(&xml,g_pRootItem);
+    _toXML(&xml,g_pRootItem,0);
 
     return sResult;
 }
@@ -260,7 +220,7 @@ QString ScanItemModel::toJSON()
 
     QJsonObject jsonResult;
 
-    _toJSON(&jsonResult,g_pRootItem);
+    _toJSON(&jsonResult,g_pRootItem,0);
 
     QJsonDocument saveFormat(jsonResult);
 
@@ -275,7 +235,7 @@ QString ScanItemModel::toCSV()
 {
     QString sResult;
 
-    _toCSV(&sResult,g_pRootItem);
+    _toCSV(&sResult,g_pRootItem,0);
 
     return sResult;
 }
@@ -284,7 +244,7 @@ QString ScanItemModel::toTSV()
 {
     QString sResult;
 
-    _toTSV(&sResult,g_pRootItem);
+    _toTSV(&sResult,g_pRootItem,0);
 
     return sResult;
 }
@@ -331,7 +291,7 @@ ScanItem *ScanItemModel::rootItem()
     return this->g_pRootItem;
 }
 
-void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem)
+void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLevel)
 {
     if(pItem->childCount())
     {
@@ -341,7 +301,7 @@ void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem)
 
         for(qint32 i=0;i<nNumberOfChildren;i++)
         {
-            _toXML(pXml,pItem->child(i));
+            _toXML(pXml,pItem->child(i),nLevel+1);
         }
 
         pXml->writeEndElement();
@@ -360,7 +320,7 @@ void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem)
     }
 }
 
-void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem)
+void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem,qint32 nLevel)
 {
     if(pItem->childCount())
     {
@@ -384,7 +344,7 @@ void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem)
         {
             QJsonObject jsRecord;
 
-            _toJSON(&jsRecord,pItem->child(i));
+            _toJSON(&jsRecord,pItem->child(i),nLevel+1);
 
             jsArray.append(jsRecord);
         }
@@ -403,7 +363,7 @@ void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem)
     }
 }
 
-void ScanItemModel::_toCSV(QString *pString, ScanItem *pItem)
+void ScanItemModel::_toCSV(QString *pString, ScanItem *pItem,qint32 nLevel)
 {
     if(pItem->childCount())
     {
@@ -411,7 +371,7 @@ void ScanItemModel::_toCSV(QString *pString, ScanItem *pItem)
 
         for(qint32 i=0;i<nNumberOfChildren;i++)
         {
-            _toCSV(pString,pItem->child(i));
+            _toCSV(pString,pItem->child(i),nLevel+1);
         }
     }
     else
@@ -429,7 +389,7 @@ void ScanItemModel::_toCSV(QString *pString, ScanItem *pItem)
     }
 }
 
-void ScanItemModel::_toTSV(QString *pString, ScanItem *pItem)
+void ScanItemModel::_toTSV(QString *pString, ScanItem *pItem,qint32 nLevel)
 {
     if(pItem->childCount())
     {
@@ -437,7 +397,7 @@ void ScanItemModel::_toTSV(QString *pString, ScanItem *pItem)
 
         for(qint32 i=0;i<nNumberOfChildren;i++)
         {
-            _toTSV(pString,pItem->child(i));
+            _toTSV(pString,pItem->child(i),nLevel+1);
         }
     }
     else
