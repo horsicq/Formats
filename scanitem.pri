@@ -13,3 +13,6 @@ SOURCES += \
     XCONFIG += xbinary
     include($$PWD/xbinary.pri)
 }
+
+DISTFILES += \
+    $$PWD/scanitem.cmake
