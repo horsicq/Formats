@@ -8077,9 +8077,9 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
     // TODO Error checks!
     QList<SIGNATURE_RECORD> listResult;
 
-    int nSignatureSize=sSignature.size();
+    qint32 nSignatureSize=sSignature.size();
 
-    for(int i=0;i<nSignatureSize;)
+    for(qint32 i=0;i<nSignatureSize;)
     {
         if(sSignature.at(i)==QChar('.'))
         {
