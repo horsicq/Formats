@@ -7731,9 +7731,9 @@ bool XBinary::_isReplaced(qint64 nOffset, qint64 nSize, QList<XBinary::MEMORY_RE
 {
     bool bResult=false;
 
-    int nNumberOfRecords=pListMemoryReplace->count();
+    qint32 nNumberOfRecords=pListMemoryReplace->count();
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         if(_isOffsetsCrossed(nOffset,nSize,pListMemoryReplace->at(i).nOffset,pListMemoryReplace->at(i).nSize))
         {
@@ -8304,9 +8304,9 @@ int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSigna
 {
     int nResult=0;
 
-    int nSignatureSize=sSignature.size();
+    qint32 nSignatureSize=sSignature.size();
 
-    for(int i=nStartIndex;i<nSignatureSize;i++)
+    for(qint32 i=nStartIndex;i<nSignatureSize;i++)
     {
         if(sSignature.at(i)==QChar('$'))
         {
