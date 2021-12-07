@@ -2251,9 +2251,9 @@ quint64 XPE::getImportHash64(_MEMORY_MAP *pMemoryMap)
 
     QList<IMPORT_RECORD> listImportRecords=getImportRecords(pMemoryMap);
 
-    int nNumberOfImports=listImportRecords.count();
+    qint32 nNumberOfImports=listImportRecords.count();
 
-    for(int i=0;i<nNumberOfImports; i++)
+    for(qint32 i=0;i<nNumberOfImports; i++)
     {
         QString sRecord=listImportRecords.at(i).sLibrary+" "+listImportRecords.at(i).sFunction;
 
