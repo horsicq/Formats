@@ -600,9 +600,9 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
         }
         else
         {
-            int nNumberOfItems=pComboBox->count();
+            qint32 nNumberOfItems=pComboBox->count();
 
-            for(int i=0;i<nNumberOfItems;i++)
+            for(qint32 i=0;i<nNumberOfItems;i++)
             {
                 if(pComboBox->itemData(i).toUInt()==fileType)
                 {
