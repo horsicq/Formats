@@ -1244,7 +1244,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
     QList<SEGMENT_RECORD> listSegmentRecords=getSegmentRecords(&listCommandRecords);
 
-    int nNumberOfSegments=listSegmentRecords.count();
+    qint32 nNumberOfSegments=listSegmentRecords.count();
 
     bool bImageAddressInit=false;
 
@@ -1253,7 +1253,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
 
     bool bIs64=is64();
 
-    for(int i=0; i<nNumberOfSegments; i++)
+    for(qint32 i=0; i<nNumberOfSegments; i++)
     {
         QString sSegmentName; // TODO Limit
         // TODO Align
