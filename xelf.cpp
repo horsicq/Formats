@@ -3820,10 +3820,10 @@ QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *p
 {
     QList<SECTION_RECORD> listRecords;
 
-    int nNumberOfSections=pListSectionHeaders->count();
+    qint32 nNumberOfSections=pListSectionHeaders->count();
     quint32 nSectionTableSize=pbaSectionTable->size();
 
-    for(int i=0;i<nNumberOfSections;i++)
+    for(qint32 i=0;i<nNumberOfSections;i++)
     {
         SECTION_RECORD record={};
 
