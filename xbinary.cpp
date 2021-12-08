@@ -7757,7 +7757,7 @@ bool XBinary::_replaceMemory(qint64 nDataOffset, char *pData, qint64 nDataSize, 
         {
             MEMORY_REPLACE memoryReplace=pListMemoryReplace->at(i);
 
-            for(int j=0;j<memoryReplace.nSize;j++)
+            for(qint32 j=0;j<memoryReplace.nSize;j++)
             {
                 bResult=true;
 
