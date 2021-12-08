@@ -3214,7 +3214,9 @@ bool XELF::isNotePresent(QList<NOTE> *pListNotes, QString sName)
 {
     bool bResult=false;
 
-    for(int i=0;i<pListNotes->count();i++)
+    qint32 nNumberOfNotes=pListNotes->count();
+
+    for(qint32 i=0;i<nNumberOfNotes;i++)
     {
         if(pListNotes->at(i).sName==sName)
         {
