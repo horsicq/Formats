@@ -5503,7 +5503,7 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
                     break;
                 }
 
-                for(int i=0;i<nTemp;i++)
+                for(qint32 i=0;i<nTemp;i++)
                 {
                     *(pBuffer+i)^=nXorValue;
                 }
