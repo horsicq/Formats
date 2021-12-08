@@ -1357,9 +1357,9 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECOR
 
     QList<COMMAND_RECORD> listLibraryCommandRecords=getCommandRecords(nType,pListCommandRecords);
 
-    int nNumberOfCommands=listLibraryCommandRecords.count();
+    qint32 nNumberOfCommands=listLibraryCommandRecords.count();
 
-    for(int i=0;i<nNumberOfCommands;i++)
+    for(qint32 i=0;i<nNumberOfCommands;i++)
     {
         LIBRARY_RECORD record=_readLibraryRecord(listLibraryCommandRecords.at(i).nStructOffset,bIsBigEndian);
 
