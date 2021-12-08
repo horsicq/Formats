@@ -7749,9 +7749,9 @@ bool XBinary::_replaceMemory(qint64 nDataOffset, char *pData, qint64 nDataSize, 
 {
     bool bResult=false;
 
-    int nNumberOfRecords=pListMemoryReplace->count();
+    qint32 nNumberOfRecords=pListMemoryReplace->count();
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         if(_isOffsetsCrossed(nDataOffset,nDataSize,pListMemoryReplace->at(i).nOffset,pListMemoryReplace->at(i).nSize))
         {
