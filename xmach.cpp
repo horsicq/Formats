@@ -1100,11 +1100,11 @@ bool XMACH::setCommandData(quint32 nCommandID, QByteArray baData, int nIndex, QL
 {
     bool bResult=false;
 
-    int nNumberOfCommands=pListCommandRecords->count();
+    qint32 nNumberOfCommands=pListCommandRecords->count();
 
     int nCurrentIndex=0;
 
-    for(int i=0; i<nNumberOfCommands; i++)
+    for(qint32 i=0; i<nNumberOfCommands; i++)
     {
         if(pListCommandRecords->at(i).nType==nCommandID)
         {
