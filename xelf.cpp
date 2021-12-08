@@ -3471,7 +3471,7 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
 
         qint64 nSectionTableSize=baSection.size();
 
-        int nNumberOfNeededs=listNeeded.count();
+        qint32 nNumberOfNeededs=listNeeded.count();
 
         for(int i=0;i<nNumberOfNeededs;i++)
         {
