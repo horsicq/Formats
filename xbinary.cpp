@@ -8118,9 +8118,9 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
 bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, qint64 nOffset)
 {
     // TODO optimize
-    int nNumberOfSignatures=pListSignatureRecords->count();
+    qint32 nNumberOfSignatures=pListSignatureRecords->count();
 
-    for(int i=0;i<nNumberOfSignatures;i++)
+    for(qint32 i=0;i<nNumberOfSignatures;i++)
     {
         qint64 _nAddress=0;
 
