@@ -3232,7 +3232,7 @@ XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, QString sName)
 {
     NOTE result={};
 
-    for(int i=0;i<pListNotes->count();i++)
+    for(qint32 i=0;i<pListNotes->count();i++)
     {
         if(pListNotes->at(i).sName==sName)
         {
