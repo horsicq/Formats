@@ -4027,6 +4027,21 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 stResult.insert(FT_MACHOFAT);
             }
         }
+        else if(&memoryMap,compareSignature("'RE~^'")||&memoryMap,compareSignature("'Rar!'1A07"))
+        {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_RAR);
+        }
+        else if(compareSignature(&memoryMap,"'MSCF'",0))
+        {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_CAB);
+        }
+        else if(compareSignature(&memoryMap,"'7z'BCAF271C",0))
+        {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_7Z);
+        }
         else if(compareSignature(&memoryMap,"89'PNG\r\n'1A0A........'IHDR'",0))
         {
             stResult.insert(FT_IMAGE);
@@ -8004,6 +8019,7 @@ QString XBinary::recordFilePartIdToString(FILEPART id)
         case FILEPART_HEADER:                           sResult=tr("Header");                                           break;
         case FILEPART_OVERLAY:                          sResult=tr("Overlay");                                          break;
         case FILEPART_ARCHIVERECORD:                    sResult=tr("Archive record");                                   break;
+        case FILEPART_RESOURCE:                         sResult=tr("Resource");                                         break;
     }
 
     return sResult;
@@ -8099,7 +8115,7 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
         }
         else
         {
-            int nBytes=_getSignatureBytes(&listResult,sSignature,i);
+            qint32 nBytes=_getSignatureBytes(&listResult,sSignature,i);
 
             if(nBytes)
             {

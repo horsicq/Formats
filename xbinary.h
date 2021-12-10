@@ -143,7 +143,8 @@ public:
         FILEPART_UNKNOWN=0,
         FILEPART_ARCHIVERECORD,
         FILEPART_HEADER,
-        FILEPART_OVERLAY
+        FILEPART_OVERLAY,
+        FILEPART_RESOURCE
     };
 
     enum MMT
