@@ -2756,11 +2756,11 @@ QList<quint32> XPE::getImportPositionHashes(QList<IMPORT_HEADER> *pListImport)
     {
         IMPORT_HEADER record=pListImport->at(i);
 
-        int nNumberOfPositions=record.listPositions.count();
+        qint32 nNumberOfPositions=record.listPositions.count();
 
         QString sString;
 
-        for(int j=0;j<nNumberOfPositions;j++)
+        for(qint32 j=0;j<nNumberOfPositions;j++)
         {
             sString+=record.sName;
             sString+=record.listPositions.at(j).sFunction;

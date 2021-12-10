@@ -8246,9 +8246,9 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
 int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex)
 {
     int nResult=0;
-    int nSignatureSize=sSignature.size();
+    qint32 nSignatureSize=sSignature.size();
 
-    for(int i=nStartIndex;i<nSignatureSize;i++)
+    for(qint32 i=nStartIndex;i<nSignatureSize;i++)
     {
         if(sSignature.at(i)==QChar('.'))
         {
