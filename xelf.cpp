@@ -3868,9 +3868,9 @@ bool XELF::isSectionNamePresent(QString sSectionName, QList<XELF::SECTION_RECORD
 {
     bool bResult=false;
 
-    int nNumberOfSections=pListSectionRecords->count();
+    qint32 nNumberOfSections=pListSectionRecords->count();
 
-    for(int i=0;i<nNumberOfSections;i++)
+    for(qint32 i=0;i<nNumberOfSections;i++)
     {
         if(pListSectionRecords->at(i).sName==sSectionName)
         {
