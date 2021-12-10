@@ -1811,9 +1811,9 @@ qint32 XPE::getSectionNumber(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_
 {
     qint32 nResult=-1;
 
-    int nNumberOfSections=pListSectionHeaders->count();
+    qint32 nNumberOfSections=pListSectionHeaders->count();
 
-    for(int i=0;i<nNumberOfSections;i++)
+    for(qint32 i=0;i<nNumberOfSections;i++)
     {
         QString _sSectionName=QString((char *)pListSectionHeaders->at(i).Name);
         _sSectionName.resize(qMin(_sSectionName.length(),XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
