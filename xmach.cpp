@@ -1452,9 +1452,9 @@ QList<XMACH::FVM_LIBRARY_RECORD> XMACH::getFvmLibraryRecords(QList<XMACH::COMMAN
 
     QList<COMMAND_RECORD> listLibraryCommandRecords=getCommandRecords(nType,pListCommandRecords);
 
-    int nNumberOfCommands=listLibraryCommandRecords.count();
+    qint32 nNumberOfCommands=listLibraryCommandRecords.count();
 
-    for(int i=0;i<nNumberOfCommands;i++)
+    for(qint32 i=0;i<nNumberOfCommands;i++)
     {
         FVM_LIBRARY_RECORD record=_readFvmLibraryRecord(listLibraryCommandRecords.at(i).nStructOffset,bIsBigEndian);
 
