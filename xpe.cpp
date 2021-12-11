@@ -9521,6 +9521,11 @@ XPE::CLI_METADATA_HEADER XPE::_read_MetadataHeader(qint64 nOffset)
     result.nFlags=read_uint16(nOffset+16+result.nVersionStringLength);
     result.nStreams=read_uint16(nOffset+16+result.nVersionStringLength+2);
 
+    if(!checkVersionString(result.sVersion))
+    {
+        result.sVersion="";
+    }
+
     return result;
 }
 

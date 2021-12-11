@@ -8088,6 +8088,40 @@ QString XBinary::createResultString2(const SCANSTRUCT *pScanStruct)
     return sResult;
 }
 
+bool XBinary::checkVersionString(QString sVersion)
+{
+    bool bResult=false;
+
+    if(sVersion.trimmed()!="")
+    {
+        bResult=true;
+
+        qint32 nStringSize=sVersion.size();
+
+        // TODO
+        for(qint32 i=0;i<nStringSize;i++)
+        {
+            QChar _char=sVersion.at(i);
+
+            if((_char>=QChar('0'))&&(_char<=QChar('9')))
+            {
+
+            }
+            else if(_char==QChar('.'))
+            {
+
+            }
+            else
+            {
+                bResult=false;
+                break;
+            }
+        }
+    }
+
+    return bResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!
@@ -8352,12 +8386,12 @@ int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
 {
     int nResult=0;
 
-    int nSignatureSize=sSignature.size();
+    qint32 nSignatureSize=sSignature.size();
     QString sBaseAddress;
     bool bIsBaseAddress=false;
     int nSizeOfAddress=0;
 
-    for(int i=nStartIndex;i<nSignatureSize;i++)
+    for(qint32 i=nStartIndex;i<nSignatureSize;i++)
     {
         if(sSignature.at(i)==QChar('#'))
         {

@@ -1176,6 +1176,8 @@ public:
     static SCANSTRUCT createHeaderScanStruct(const SCANSTRUCT *pScanStruct);
     static QString createResultString2(const SCANSTRUCT *pScanStruct);
 
+    static bool checkVersionString(QString sVersion);
+
 public slots:
     void setSearchProcessEnable(bool bState);
     void setDumpProcessEnable(bool bState);
