@@ -2750,9 +2750,9 @@ QList<quint32> XPE::getImportPositionHashes(QList<IMPORT_HEADER> *pListImport)
 {
     QList<quint32> listResult;
 
-    int nNumberOfImports=pListImport->count();
+    qint32 nNumberOfImports=pListImport->count();
 
-    for(int i=0;i<nNumberOfImports;i++)
+    for(qint32 i=0;i<nNumberOfImports;i++)
     {
         IMPORT_HEADER record=pListImport->at(i);
 
