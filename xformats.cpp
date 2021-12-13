@@ -54,6 +54,11 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
         XLE le(pDevice,bIsImage,nModuleAddress);
         result=le.getMemoryMap();
     }
+    else if(XBinary::checkFileType(XBinary::FT_LX,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        result=le.getMemoryMap();
+    }
     else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
         XPE pe(pDevice,bIsImage,nModuleAddress);
@@ -122,6 +127,11 @@ qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, 
         XLE le(pDevice,bIsImage,nModuleAddress);
         nResult=le.getEntryPointAddress();
     }
+    else if(XBinary::checkFileType(XBinary::FT_LX,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        nResult=le.getEntryPointAddress();
+    }
     else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
         XPE pe(pDevice,bIsImage,nModuleAddress);
@@ -174,6 +184,11 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
         XLE le(pDevice,bIsImage,nModuleAddress);
         nResult=le._getEntryPointOffset();
     }
+    else if(XBinary::checkFileType(XBinary::FT_LX,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        nResult=le._getEntryPointOffset();
+    }
     else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
         XPE pe(pDevice,bIsImage,nModuleAddress);
@@ -222,6 +237,11 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
         bResult=ne.isBigEndian();
     }
     else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        bResult=le.isBigEndian();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_LX,fileType))
     {
         XLE le(pDevice,bIsImage,nModuleAddress);
         bResult=le.isBigEndian();
@@ -292,6 +312,11 @@ bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
         XLE le(pDevice,bIsImage,nModuleAddress);
         bResult=le.isSigned();
     }
+    else if(XBinary::checkFileType(XBinary::FT_LX,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        bResult=le.isSigned();
+    }
     else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
     {
         XPE pe(pDevice,bIsImage,nModuleAddress);
@@ -354,6 +379,11 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice 
         osResult=ne.getSignOffsetSize();
     }
     else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        osResult=le.getSignOffsetSize();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_LX,fileType))
     {
         XLE le(pDevice,bIsImage,nModuleAddress);
         osResult=le.getSignOffsetSize();
@@ -460,6 +490,13 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
         listResult=ne.getSymbolRecords(&memoryMap,symBolType);
     }
     else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+
+        XBinary::_MEMORY_MAP memoryMap=le.getMemoryMap();
+        listResult=le.getSymbolRecords(&memoryMap,symBolType);
+    }
+    else if(XBinary::checkFileType(XBinary::FT_LX,fileType))
     {
         XLE le(pDevice,bIsImage,nModuleAddress);
 

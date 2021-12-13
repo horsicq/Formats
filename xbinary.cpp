@@ -7237,11 +7237,7 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
 {
     bool bResult=false;
 
-    if((fileTypeMain==FT_LE)&&((fileTypeOptional==FT_LE)||(fileTypeOptional==FT_LX)))
-    {
-        bResult=true;
-    }
-    else if((fileTypeMain==FT_PE)&&((fileTypeOptional==FT_PE)||(fileTypeOptional==FT_PE32)||(fileTypeOptional==FT_PE64)))
+    if((fileTypeMain==FT_PE)&&((fileTypeOptional==FT_PE)||(fileTypeOptional==FT_PE32)||(fileTypeOptional==FT_PE64)))
     {
         bResult=true;
     }
