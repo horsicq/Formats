@@ -160,6 +160,19 @@ qint32 XCOM::getType()
     return TYPE_EXE;
 }
 
+XBinary::OSINFO XCOM::getOsInfo()
+{
+    OSINFO result={};
+
+    result.osName=OSNAME_MSDOS;
+    result.sOsVersion=""; // TODO
+    result.sArch=getArch();
+    result.mode=getMode();
+    result.sType=typeIdToString(getType());
+
+    return result;
+}
+
 QString XCOM::typeIdToString(qint32 nType)
 {
     QString sResult=tr("Unknown");

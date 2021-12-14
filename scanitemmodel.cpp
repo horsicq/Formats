@@ -253,7 +253,7 @@ QString ScanItemModel::toFormattedString()
 {
     QString sResult;
 
-    _toString(&sResult,g_pRootItem,0);
+    _toFormattedString(&sResult,g_pRootItem,0);
 
     return sResult;
 }
@@ -416,23 +416,33 @@ void ScanItemModel::_toTSV(QString *pString, ScanItem *pItem,qint32 nLevel)
     }
 }
 
-void ScanItemModel::_toString(QString *pString, ScanItem *pItem, qint32 nLevel)
+void ScanItemModel::_toFormattedString(QString *pString, ScanItem *pItem, qint32 nLevel)
 {
-    if(nLevel)
-    {
-        QString sResult;
-        sResult=sResult.leftJustified(4*(nLevel-1),' '); // TODO function
-        sResult.append(QString("%1\n").arg(pItem->data(0).toString()));
-        pString->append(sResult);
-    }
-
     if(pItem->childCount())
     {
+        if(nLevel)
+        {
+            QString sResult;
+            sResult=sResult.leftJustified(4*(nLevel-1),' '); // TODO function
+            sResult.append(QString("%1\n").arg(pItem->data(0).toString()));
+            pString->append(sResult);
+        }
+
         qint32 nNumberOfChildren=pItem->childCount();
 
         for(qint32 i=0;i<nNumberOfChildren;i++)
         {
-            _toString(pString,pItem->child(i),nLevel+1);
+            _toFormattedString(pString,pItem->child(i),nLevel+1);
+        }
+    }
+    else
+    {
+        if(nLevel)
+        {
+            QString sResult;
+            sResult=sResult.leftJustified(4*(nLevel-1),' '); // TODO function
+            sResult.append(QString("%1\n").arg(pItem->data(0).toString()));
+            pString->append(sResult);
         }
     }
 }

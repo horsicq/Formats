@@ -1489,6 +1489,11 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint
         return -1;
     }
 
+    if(nOffset<0)
+    {
+        return -1;
+    }
+
     PROCENT procent=procentInit(nSize);
 
     _searchProgressMinimumChanged(0);
@@ -8056,7 +8061,9 @@ XBinary::SCANSTRUCT XBinary::createHeaderScanStruct(const SCANSTRUCT *pScanStruc
     result.sName="";
     result.sVersion="";
     result.sInfo="";
-
+#ifdef QT_GUI_LIB
+    result.colText=QColor();
+#endif
     return result;
 }
 
