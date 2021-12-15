@@ -56,9 +56,26 @@ QVariant ScanItem::data(int nColumn) const
 {
     QVariant result;
 
-    if(nColumn==0)
+    if(nColumn<g_nNumberOfColumns)
     {
-        result=g_sString;
+        if(nColumn==0)
+        {
+            result=g_sString;
+        }
+        else if(nColumn==1)
+        {
+            if(childCount()==0)
+            {
+                result="S";
+            }
+        }
+        else if(nColumn==2)
+        {
+            if(childCount()==0)
+            {
+                result="?";
+            }
+        }
     }
 
     return result;

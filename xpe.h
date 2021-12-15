@@ -537,8 +537,8 @@ public:
     QList<IMPORT_RECORD> getImportRecords();
     QList<IMPORT_RECORD> getImportRecords(_MEMORY_MAP *pMemoryMap);
 
-    quint64 getImportHash64(_MEMORY_MAP *pMemoryMap);
-    quint32 getImportHash32(_MEMORY_MAP *pMemoryMap);
+    quint64 getImportHash64(QList<IMPORT_RECORD> *pListImportRecords);
+    quint32 getImportHash32(QList<IMPORT_RECORD> *pListImportRecords);
 
     qint64 getImportDescriptorOffset(quint32 nNumber);
     qint64 getImportDescriptorSize();
@@ -563,7 +563,7 @@ public:
     QList<IMPORT_POSITION> _getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap,qint64 nThunksRVA,qint64 nRVA);
     QList<IMPORT_POSITION> getImportPositions(int nIndex);
 
-    QList<quint32> getImportPositionHashes(QList<IMPORT_HEADER> *pListImport);
+    QList<quint32> getImportPositionHashes(QList<IMPORT_HEADER> *pListImport,bool nLibraryName=false);
 
     bool isImportLibraryPresent(QString sLibrary);
     static bool isImportLibraryPresent(QString sLibrary,QList<IMPORT_HEADER> *pListImportHeaders);

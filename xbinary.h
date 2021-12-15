@@ -512,6 +512,7 @@ public:
         QString sName;
         QString sVersion;
         QString sInfo;
+        QString varInfo; // Signature in die scripts
     #ifdef QT_GUI_LIB
         QColor colText;
     #endif

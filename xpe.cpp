@@ -2245,17 +2245,15 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap)
     return listResult;
 }
 
-quint64 XPE::getImportHash64(_MEMORY_MAP *pMemoryMap)
+quint64 XPE::getImportHash64(QList<IMPORT_RECORD> *pListImportRecords)
 {
     quint64 nResult=0;
 
-    QList<IMPORT_RECORD> listImportRecords=getImportRecords(pMemoryMap);
-
-    qint32 nNumberOfImports=listImportRecords.count();
+    qint32 nNumberOfImports=pListImportRecords->count();
 
     for(qint32 i=0;i<nNumberOfImports; i++)
     {
-        QString sRecord=listImportRecords.at(i).sLibrary+" "+listImportRecords.at(i).sFunction;
+        QString sRecord=pListImportRecords->at(i).sLibrary+" "+pListImportRecords->at(i).sFunction;
 
         nResult+=getStringCustomCRC32(sRecord);
     }
@@ -2263,19 +2261,17 @@ quint64 XPE::getImportHash64(_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-quint32 XPE::getImportHash32(_MEMORY_MAP *pMemoryMap)
+quint32 XPE::getImportHash32(QList<IMPORT_RECORD> *pListImportRecords)
 {
     quint64 nResult=0;
 
-    QList<IMPORT_RECORD> listImportRecords=getImportRecords(pMemoryMap);
-
-    qint32 nNumberOfImports=listImportRecords.count();
+    qint32 nNumberOfImports=pListImportRecords->count();
 
     QString sRecord;
 
     for(qint32 i=0;i<nNumberOfImports; i++)
     {
-        sRecord+=listImportRecords.at(i).sLibrary+listImportRecords.at(i).sFunction;
+        sRecord+=pListImportRecords->at(i).sLibrary+pListImportRecords->at(i).sFunction;
     }
 
     nResult=getStringCustomCRC32(sRecord);
@@ -2746,7 +2742,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
     return listResult;
 }
 
-QList<quint32> XPE::getImportPositionHashes(QList<IMPORT_HEADER> *pListImport)
+QList<quint32> XPE::getImportPositionHashes(QList<IMPORT_HEADER> *pListImport, bool nLibraryName)
 {
     QList<quint32> listResult;
 
@@ -2762,7 +2758,11 @@ QList<quint32> XPE::getImportPositionHashes(QList<IMPORT_HEADER> *pListImport)
 
         for(qint32 j=0;j<nNumberOfPositions;j++)
         {
-            sString+=record.sName;
+            if(nLibraryName)
+            {
+                sString+=record.sName;
+            }
+
             sString+=record.listPositions.at(j).sFunction;
         }
 
