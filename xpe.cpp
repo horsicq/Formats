@@ -2742,7 +2742,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
     return listResult;
 }
 
-QList<quint32> XPE::getImportPositionHashes(QList<IMPORT_HEADER> *pListImport, bool nLibraryName)
+QList<quint32> XPE::getImportPositionHashes(QList<IMPORT_HEADER> *pListImport, bool bLibraryName)
 {
     QList<quint32> listResult;
 
@@ -2758,7 +2758,7 @@ QList<quint32> XPE::getImportPositionHashes(QList<IMPORT_HEADER> *pListImport, b
 
         for(qint32 j=0;j<nNumberOfPositions;j++)
         {
-            if(nLibraryName)
+            if(bLibraryName)
             {
                 sString+=record.sName;
             }
