@@ -20,11 +20,12 @@
  */
 #include "scanitem.h"
 
-ScanItem::ScanItem(const QString &sString, ScanItem *pParentItem, qint32 nNumberOfColumns)
+ScanItem::ScanItem(const QString &sString, ScanItem *pParentItem, qint32 nNumberOfColumns, bool bIsParent)
 {
     this->g_pParentItem=pParentItem;
     this->g_sString=sString;
     this->g_nNumberOfColumns=nNumberOfColumns;
+    this->g_bIsParent=bIsParent;
 }
 
 ScanItem::~ScanItem()
@@ -64,14 +65,14 @@ QVariant ScanItem::data(int nColumn) const
         }
         else if(nColumn==1)
         {
-            if(childCount()==0)
+            if(!g_bIsParent)
             {
                 result="S";
             }
         }
         else if(nColumn==2)
         {
-            if(childCount()==0)
+            if(!g_bIsParent)
             {
                 result="?";
             }

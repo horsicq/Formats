@@ -23,7 +23,7 @@
 ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, QObject *pParent, int nNumberOfColumns)
     : QAbstractItemModel(pParent)
 {
-    g_pRootItem=new ScanItem(tr("Result"),nullptr,nNumberOfColumns);
+    g_pRootItem=new ScanItem(tr("Result"),nullptr,nNumberOfColumns,true);
     XBinary::SCANSTRUCT emptySS={};
     g_pRootItem->setScanStruct(emptySS);
 
@@ -48,7 +48,7 @@ ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, QObje
 
             QString sParent=XBinary::createTypeString(&pListScanStructs->at(i));
 
-            ScanItem *pItemParent=new ScanItem(sParent,_itemParent,nNumberOfColumns);
+            ScanItem *pItemParent=new ScanItem(sParent,_itemParent,nNumberOfColumns,true);
             XBinary::SCANSTRUCT ss=XBinary::createHeaderScanStruct(&pListScanStructs->at(i));
             pItemParent->setScanStruct(ss);
             _itemParent->appendChild(pItemParent);
@@ -56,12 +56,15 @@ ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, QObje
             mapParents.insert(pListScanStructs->at(i).id.sUuid,pItemParent);
         }
 
-        ScanItem *pItemParent=mapParents.value(pListScanStructs->at(i).id.sUuid);
+        if(pListScanStructs->at(i).sName!="")
+        {
+            ScanItem *pItemParent=mapParents.value(pListScanStructs->at(i).id.sUuid);
 
-        QString sItem=XBinary::createResultString2(&pListScanStructs->at(i));
-        ScanItem *pItem=new ScanItem(sItem,pItemParent,nNumberOfColumns);
-        pItem->setScanStruct(pListScanStructs->at(i));
-        pItemParent->appendChild(pItem);
+            QString sItem=XBinary::createResultString2(&pListScanStructs->at(i));
+            ScanItem *pItem=new ScanItem(sItem,pItemParent,nNumberOfColumns,false);
+            pItem->setScanStruct(pListScanStructs->at(i));
+            pItemParent->appendChild(pItem);
+        }
     }
 }
 
@@ -179,11 +182,15 @@ QVariant ScanItemModel::data(const QModelIndex &index, int nRole) const
         {
             result=pItem->data(index.column());
         }
-        else if(nRole==Qt::UserRole)
+        else if(nRole==Qt::UserRole+UD_FILETYPE)
+        {
+            result=pItem->scanStruct().id.fileType;
+        }
+        else if(nRole==Qt::UserRole+UD_NAME)
         {
             result=pItem->scanStruct().sName;
         }
-        else if(nRole==Qt::UserRole+1)
+        else if(nRole==Qt::UserRole+UD_INFO)
         {
             result=pItem->scanStruct().varInfo;
         }

@@ -26,7 +26,7 @@
 class ScanItem
 {
 public:
-    ScanItem(const QString &sString,ScanItem *pParentItem=nullptr,qint32 nNumberOfColumns=1);
+    ScanItem(const QString &sString,ScanItem *pParentItem=nullptr,qint32 nNumberOfColumns=1,bool bIsParent=false);
     ~ScanItem();
 
     void appendChild(ScanItem *pChild);
@@ -44,6 +44,7 @@ private:
     QString g_sString;
     ScanItem *g_pParentItem;
     qint32 g_nNumberOfColumns;
+    bool g_bIsParent;
     XBinary::SCANSTRUCT g_scanStruct;
 };
 

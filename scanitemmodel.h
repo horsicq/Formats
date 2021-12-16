@@ -48,6 +48,13 @@ public:
         FORMATTYPE_TSV
     };
 
+    enum UD
+    {
+        UD_FILETYPE=0,
+        UD_NAME,
+        UD_INFO
+    };
+
     explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,QObject *pParent=nullptr,int nNumberOfColumns=1);
     ~ScanItemModel() override;
 
