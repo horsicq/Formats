@@ -930,14 +930,14 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
     quint16 nShift=getImageOS2Header_align();
     QList<XNE_DEF::NE_SEGMENT> listSegments=getSegmentList();
 
-    int nNumberOfSegments=listSegments.count();
+    qint32 nNumberOfSegments=listSegments.count();
 
     result.nModuleAddress=0x10000; // TODO const
     result.nImageSize=nNumberOfSegments*0x10000; // TODO Check
 
     qint64 nMaxOffset=0;
 
-    for(int i=0;i<nNumberOfSegments;i++)
+    for(qint32 i=0;i<nNumberOfSegments;i++)
     {
         qint64 nFileSize=listSegments.at(i).dwFileSize;
         qint64 nFileOffset=listSegments.at(i).dwFileOffset<<nShift;

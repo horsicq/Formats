@@ -576,6 +576,22 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra)
     return stResult;
 }
 
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
+{
+    QSet<XBinary::FT> result;
+
+    SubDevice sd(pDevice,nOffset,nSize);
+
+    if(sd.open(QIODevice::ReadOnly))
+    {
+        result=getFileTypes(&sd,bExtra);
+
+        sd.close();
+    }
+
+    return result;
+}
+
 QSet<XBinary::FT> XFormats::getFileTypes(QString sFileName, bool bExtra)
 {
     QSet<XBinary::FT> stResult;

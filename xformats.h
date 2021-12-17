@@ -56,6 +56,7 @@ public:
     static XBinary::OFFSETSIZE getSignOffsetSize(QString sFileName);
     static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1,XBinary::SYMBOL_TYPE symBolType=XBinary::SYMBOL_TYPE_ALL);
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,bool bExtra=false);
+    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,qint64 nOffset,qint64 nSize,bool bExtra=false);
     static QSet<XBinary::FT> getFileTypes(QString sFileName,bool bExtra=false);
 #ifdef QT_GUI_LIB
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType,QIODevice *pDevice,QComboBox *pComboBox);

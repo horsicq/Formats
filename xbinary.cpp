@@ -4171,6 +4171,22 @@ QSet<XBinary::FT> XBinary::getFileTypes(QByteArray *pbaData,bool bExtra)
     return result;
 }
 
+QSet<XBinary::FT> XBinary::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
+{
+    QSet<XBinary::FT> result;
+
+    SubDevice sd(pDevice,nOffset,nSize);
+
+    if(sd.open(QIODevice::ReadOnly))
+    {
+        result=getFileTypes(&sd,bExtra);
+
+        sd.close();
+    }
+
+    return result;
+}
+
 XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice, bool bExtra)
 {
     XBinary::FT result=FT_UNKNOWN;
