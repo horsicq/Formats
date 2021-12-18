@@ -348,10 +348,21 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 
     qint64 nCodeAddress=0;
 
-    qint64 nCodeSize=S_ALIGN_UP(nMaxOffset-nCodeOffset,512);
-//    nCodeSize=qMin(nCodeSize,getSize());
-    qint64 nOverlayOffset=nMaxOffset;
-    qint64 nOverlaySize=qMax(getSize()-nMaxOffset,(qint64)0);
+    qint64 nCodeSize=0;
+    qint64 nOverlayOffset=0;
+    qint64 nOverlaySize=0;
+
+    if(nMaxOffset>nCodeOffset)
+    {
+        nCodeSize=S_ALIGN_UP(nMaxOffset-nCodeOffset,512);
+    //    nCodeSize=qMin(nCodeSize,getSize());
+        nOverlayOffset=nMaxOffset;
+        nOverlaySize=qMax(getSize()-nMaxOffset,(qint64)0);
+    }
+    else
+    {
+        nCodeSize=getSize()-nCodeOffset;
+    }
 
 //    qint64 nBaseAddress=_getBaseAddress();
 
