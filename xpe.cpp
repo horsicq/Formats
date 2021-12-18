@@ -1948,10 +1948,16 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
         {
             XPE_DEF::IMAGE_SECTION_HEADER section=getSectionHeader(i);
 
+            if(section.PointerToRawData>result.nRawSize)
+            {
+                section.PointerToRawData=0;
+            }
+
             // TODO for corrupted files
             if(section.SizeOfRawData>result.nRawSize)
             {
-                break; // TODO
+                // Corrupted files
+                section.SizeOfRawData=result.nRawSize-section.PointerToRawData;
             }
 
             qint64 nFileOffset=section.PointerToRawData;
