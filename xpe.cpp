@@ -2818,9 +2818,9 @@ bool XPE::isImportLibraryPresent(QString sLibrary, QList<IMPORT_HEADER> *pListIm
 {
     bool bResult=false;
 
-    int nNumberOfImports=pListImportHeaders->count();
+    qint32 nNumberOfImports=pListImportHeaders->count();
 
-    for(int i=0; i<nNumberOfImports; i++)
+    for(qint32 i=0; i<nNumberOfImports; i++)
     {
         if(pListImportHeaders->at(i).sName==sLibrary)
         {
