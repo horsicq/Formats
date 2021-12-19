@@ -3907,8 +3907,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         {
             stResult.insert(FT_MSDOS);
             // TODO rewrite for NE, LE
-            unsigned int nLfanew=((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_lfanew;
-            unsigned int nHeaderSize=baHeader.size()-sizeof(XPE_DEF::IMAGE_NT_HEADERS32);
+            quint32 nLfanew=((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_lfanew;
+            quint32 nHeaderSize=baHeader.size()-sizeof(XPE_DEF::IMAGE_NT_HEADERS32);
             QByteArray baNewHeader;
 
             bool bIsNewHeaderValid=false;
