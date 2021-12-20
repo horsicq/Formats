@@ -595,9 +595,9 @@ bool XMSDOS::isRichVersionPresent(quint32 nVersion, QList<XMSDOS::MS_RICH_RECORD
 {
     bool bResult=false;
 
-    int nNumberOfRichVersions=pListRichSignatureRecords->count();
+    qint32 nNumberOfRichVersions=pListRichSignatureRecords->count();
 
-    for(int i=0;i<nNumberOfRichVersions;i++)
+    for(qint32 i=0;i<nNumberOfRichVersions;i++)
     {
         if(pListRichSignatureRecords->at(i).nVersion==nVersion)
         {
