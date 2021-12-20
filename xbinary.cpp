@@ -3278,24 +3278,41 @@ qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddres
 {
     qint64 nResult=-1;
 
-    if(pMemoryMap->mode==MODE_16) // Check COM Check 16SEG
+//    if(pMemoryMap->mode==MODE_16) // Check COM Check 16SEG
+//    {
+//        if(nAddress>0xFFFF)
+//        {
+//            nAddress=((nAddress>>16)&0xFFFF)*16+(nAddress&0xFFFF);
+//        }
+//    }
+
+    if(pMemoryMap->fileType==FT_MSDOS)
     {
-        if(nAddress>0xFFFF)
+        if(nAddress>=0x10000000)
         {
-            nAddress=((nAddress>>16)&0xFFFF)*16+(nAddress&0xFFFF);
+            nAddress-=0x10000000;
+        }
+
+        nResult=((nAddress>>16)&0xFFFF)*16+(nAddress&0xFFFF)+pMemoryMap->nSegmentBase;
+
+        if(nResult>pMemoryMap->nRawSize)
+        {
+            nResult=-1;
         }
     }
-
-    qint32 nNumberOfRecords=pMemoryMap->listRecords.count();
-
-    for(qint32 i=0;i<nNumberOfRecords;i++)
+    else
     {
-        if(pMemoryMap->listRecords.at(i).nSize&&(pMemoryMap->listRecords.at(i).nAddress!=-1)&&(pMemoryMap->listRecords.at(i).nOffset!=-1))
+        qint32 nNumberOfRecords=pMemoryMap->listRecords.count();
+
+        for(qint32 i=0;i<nNumberOfRecords;i++)
         {
-            if((pMemoryMap->listRecords.at(i).nAddress<=nAddress)&&(nAddress<pMemoryMap->listRecords.at(i).nAddress+pMemoryMap->listRecords.at(i).nSize))
+            if(pMemoryMap->listRecords.at(i).nSize&&(pMemoryMap->listRecords.at(i).nAddress!=-1)&&(pMemoryMap->listRecords.at(i).nOffset!=-1))
             {
-                nResult=(nAddress-pMemoryMap->listRecords.at(i).nAddress)+pMemoryMap->listRecords.at(i).nOffset;
-                break;
+                if((pMemoryMap->listRecords.at(i).nAddress<=nAddress)&&(nAddress<pMemoryMap->listRecords.at(i).nAddress+pMemoryMap->listRecords.at(i).nSize))
+                {
+                    nResult=(nAddress-pMemoryMap->listRecords.at(i).nAddress)+pMemoryMap->listRecords.at(i).nOffset;
+                    break;
+                }
             }
         }
     }
@@ -3644,9 +3661,7 @@ qint64 XBinary::_getEntryPointOffset()
 
 qint64 XBinary::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 {
-    Q_UNUSED(pMemoryMap)
-
-    return this->g_nEntryPointOffset;
+    return addressToOffset(pMemoryMap,pMemoryMap->nEntryPointAddress);
 }
 
 void XBinary::setEntryPointOffset(qint64 nEntryPointOffset)
@@ -3663,9 +3678,7 @@ qint64 XBinary::getEntryPointAddress()
 
 qint64 XBinary::getEntryPointAddress(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    qint64 nEntryPointOffset=getEntryPointOffset(pMemoryMap);
-
-    return offsetToAddress(pMemoryMap,nEntryPointOffset);
+    return pMemoryMap->nEntryPointAddress;
 }
 
 qint64 XBinary::getLowestAddress(XBinary::_MEMORY_MAP *pMemoryMap)
@@ -3898,7 +3911,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     QByteArray baHeader;
     baHeader=read_array(0,qMin(getSize(),(qint64)0x200)); // TODO const
     char *pOffset=baHeader.data();
-    unsigned int nSize=getSize();
+    quint32 nSize=getSize();
 
     if(nSize>=(int)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX))
     {

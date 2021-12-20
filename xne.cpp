@@ -934,6 +934,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
 
     result.nModuleAddress=0x10000; // TODO const
     result.nImageSize=nNumberOfSegments*0x10000; // TODO Check
+    result.nEntryPointAddress=getImageOS2Header_csip();
 
     qint64 nMaxOffset=0;
 
@@ -1097,11 +1098,6 @@ QString XNE::getArch()
 bool XNE::isBigEndian()
 {
     return false;
-}
-
-qint64 XNE::getEntryPointOffset(XBinary::_MEMORY_MAP *pMemoryMap)
-{
-    return addressToOffset(pMemoryMap,getImageOS2Header_csip());
 }
 
 XBinary::FT XNE::getFileType()

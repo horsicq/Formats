@@ -102,9 +102,9 @@ public:
     quint32 get_e_lfanew();
 
     virtual _MEMORY_MAP getMemoryMap();
-    virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
     virtual qint64 getImageSize();
+    qint64 getModuleAddress();
 
     static QMap<quint64,QString> getImageMagics();
     static QMap<quint64,QString> getImageMagicsS();

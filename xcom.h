@@ -46,7 +46,6 @@ public:
     virtual QString getArch();
     virtual MODE getMode();
     virtual bool isBigEndian();
-    virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
     virtual qint64 getImageSize();
     virtual FT getFileType();
     virtual qint32 getType();

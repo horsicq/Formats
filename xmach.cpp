@@ -1324,22 +1324,9 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
     }
 
     result.nImageSize=nMaxAddress-result.nModuleAddress;
+    result.nEntryPointAddress=getAddressOfEntryPoint();
 
     return result;
-}
-
-qint64 XMACH::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
-{
-    qint64 nResult=-1;
-
-    qint64 nAddress=getAddressOfEntryPoint();
-
-    if(nAddress!=-1)
-    {
-        nResult=addressToOffset(pMemoryMap,nAddress);
-    }
-
-    return nResult;
 }
 
 QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(int nType)

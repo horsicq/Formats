@@ -152,7 +152,6 @@ public:
     virtual MODE getMode();
     virtual QString getArch();
     virtual bool isBigEndian();
-    virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
     virtual FT getFileType();
     virtual qint32 getType();
     virtual QString typeIdToString(int nType);

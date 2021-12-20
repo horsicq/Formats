@@ -1351,6 +1351,17 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
     result.fileType=getFileType();
 
     result.nRawSize=getSize();
+
+    quint32 nStartObj=getImageVxdHeader_startobj();
+    quint32 nEIP=getImageVxdHeader_eip();
+
+    QList<XLE_DEF::o32_obj> listObjects=getObjects();
+
+    if((nStartObj<=(quint32)listObjects.count())&&(nStartObj>0))
+    {
+        result.nEntryPointAddress=listObjects.at(nStartObj-1).o32_base+nEIP;
+    }
+
     // TODO Image size CONST
     // TODO Image Base
 //    result.nImageSize=0xFFFF;
@@ -1379,8 +1390,6 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap()
     {
         nLoaderSize=(nNumberOfPages-1)*nPageSize+nLastPageSize;
     }
-
-    QList<XLE_DEF::o32_obj> listObjects=XLE::getObjects();
 
 //    if(bIsLE)
 //    {
@@ -1584,21 +1593,4 @@ QMap<quint64, QString> XLE::getImageLEMflagsS()
     // TODO
 
     return mapResult;
-}
-
-qint64 XLE::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
-{
-    quint32 nStartObj=getImageVxdHeader_startobj();
-    quint32 nEIP=getImageVxdHeader_eip();
-
-    QList<XLE_DEF::o32_obj> listObjects=getObjects();
-
-    qint32 nEntryPointAddress=0;
-
-    if((nStartObj<=(quint32)listObjects.count())&&(nStartObj>0))
-    {
-        nEntryPointAddress=listObjects.at(nStartObj-1).o32_base+nEIP;
-    }
-
-    return addressToOffset(pMemoryMap,pMemoryMap->nModuleAddress+nEntryPointAddress);
 }

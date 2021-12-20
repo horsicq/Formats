@@ -383,6 +383,8 @@ public:
         qint64 nModuleAddress;
         qint64 nImageSize;
         qint64 nRawSize;
+        qint64 nEntryPointAddress;
+        qint64 nSegmentBase; // For MSDOS
         FT fileType;
         MODE mode;
         bool bIsBigEndian;

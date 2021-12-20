@@ -64,6 +64,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap()
     qint64 nTotalSize=getSize();
 
     result.nModuleAddress=getModuleAddress();
+    result.nEntryPointAddress=result.nModuleAddress;
     result.nRawSize=nTotalSize;
     result.nImageSize=getImageSize();
     result.fileType=getFileType();
@@ -136,13 +137,6 @@ XBinary::MODE XCOM::getMode()
 bool XCOM::isBigEndian()
 {
     return false;
-}
-
-qint64 XCOM::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
-{
-    Q_UNUSED(pMemoryMap)
-
-    return 0;
 }
 
 qint64 XCOM::getImageSize()

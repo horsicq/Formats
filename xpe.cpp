@@ -1857,6 +1857,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
     result.nModuleAddress=getModuleAddress();
     result.nRawSize=getSize();
     result.nImageSize=S_ALIGN_UP(getOptionalHeader_SizeOfImage(),0x1000);
+    result.nEntryPointAddress=result.nImageSize+getOptionalHeader_AddressOfEntryPoint();
 
     quint32 nNumberOfSections=qMin((int)getFileHeader_NumberOfSections(),100); // TODO const
     quint32 nFileAlignment=getOptionalHeader_FileAlignment(); // TODO Check mb qint64
@@ -2077,11 +2078,6 @@ qint64 XPE::getBaseAddress()
 void XPE::setBaseAddress(qint64 nBaseAddress)
 {
     setOptionalHeader_ImageBase(nBaseAddress);
-}
-
-qint64 XPE::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
-{
-    return addressToOffset(pMemoryMap,pMemoryMap->nModuleAddress+getOptionalHeader_AddressOfEntryPoint());
 }
 
 void XPE::setEntryPointOffset(qint64 nEntryPointOffset)

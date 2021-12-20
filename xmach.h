@@ -240,7 +240,6 @@ public:
     qint64 getAddressOfEntryPoint();
 
     virtual _MEMORY_MAP getMemoryMap();
-    virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
     QList<LIBRARY_RECORD> getLibraryRecords(int nType=XMACH_DEF::S_LC_LOAD_DYLIB);
     QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords,int nType=XMACH_DEF::S_LC_LOAD_DYLIB);

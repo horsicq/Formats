@@ -3780,6 +3780,15 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 
     result.nImageSize=nMaxAddress-result.nModuleAddress;
 
+    if(result.fileType==FT_ELF64)
+    {
+        result.nEntryPointAddress=getHdr64_entry();
+    }
+    else
+    {
+        result.nEntryPointAddress=getHdr32_entry();
+    }
+
     qint64 nNoLoadableSize=result.nRawSize-nMaxOffset;
 
     if(nNoLoadableSize>0)
@@ -3802,20 +3811,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 
 qint64 XELF::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 {
-    qint64 nAddress=-1;
-
-    bool bIs64=is64();
-
-    if(bIs64)
-    {
-        nAddress=getHdr64_entry();
-    }
-    else
-    {
-        nAddress=getHdr32_entry();
-    }
-
-    return addressToOffset(pMemoryMap,nAddress);
+    return addressToOffset(pMemoryMap,pMemoryMap->nEntryPointAddress);
 }
 
 QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, bool bIsImage, QByteArray *pbaSectionTable)

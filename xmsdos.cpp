@@ -336,6 +336,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     result.mode=getMode();
     result.nRawSize=getSize();
     result.nImageSize=getImageSize();
+    result.nModuleAddress=getModuleAddress();
 
     qint64 nMaxOffset=(get_e_cp()-1)*512+get_e_cblp(); // TODO Check if get_e_cp()=0
 
@@ -345,8 +346,10 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     //    qint64 nDataSize=get_e_cs()*16;
 //    qint64 nCodeOffset=(quint16)((quint16)(get_e_cparhdr()*16)+(quint16)(get_e_cs()*16));
     qint64 nCodeOffset=((qint16)get_e_cparhdr()*16)+((qint16)get_e_cs()*16);
+    qint64 nCodeAddress=(qint16)get_e_cs()*0x10000+0x10000000;
 
-    qint64 nCodeAddress=0;
+    result.nEntryPointAddress=nCodeAddress+get_e_ip();
+    result.nSegmentBase=((qint16)get_e_cparhdr()*16);
 
     qint64 nCodeSize=0;
     qint64 nOverlayOffset=0;
@@ -401,6 +404,23 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
         nCodeOffset=nHeaderSize;
         nCodeAddress+=qAbs(nDelta);
     }
+    else
+    {
+        qint64 nDelta=nCodeOffset-nHeaderSize;
+
+        _MEMORY_RECORD record={};
+
+        record.bIsVirtual=false;
+        record.nSize=qAbs(nDelta);
+        record.nOffset=nHeaderSize;
+        record.nAddress=0x10000000;
+
+        record.segment=ADDRESS_SEGMENT_CODE; // CODE
+        record.type=MMT_LOADSEGMENT;
+        record.nIndex=nIndex++;
+
+        result.listRecords.append(record);
+    }
 
     {
         _MEMORY_RECORD record={};
@@ -416,20 +436,20 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
         result.listRecords.append(record);
     }
 
-    {
-        _MEMORY_RECORD record={};
+//    {
+//        _MEMORY_RECORD record={};
 
-        record.bIsVirtual=true;
-        record.nSize=0xFFFF-nCodeSize;
-        record.nOffset=-1;
-        record.nAddress=nCodeAddress+nCodeSize;
+//        record.bIsVirtual=true;
+//        record.nSize=0xFFFF-nCodeSize;
+//        record.nOffset=-1;
+//        record.nAddress=nCodeAddress+nCodeSize;
 
-        record.segment=ADDRESS_SEGMENT_CODE; // CODE
-        record.type=MMT_LOADSEGMENT;
-        record.nIndex=nIndex++;
+//        record.segment=ADDRESS_SEGMENT_CODE; // CODE
+//        record.type=MMT_LOADSEGMENT;
+//        record.nIndex=nIndex++;
 
-        result.listRecords.append(record);
-    }
+//        result.listRecords.append(record);
+//    }
 
     if(nOverlaySize)
     {
@@ -449,14 +469,14 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     return result;
 }
 
-qint64 XMSDOS::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
-{
-    return addressToOffset(pMemoryMap,get_e_ip());
-}
-
 qint64 XMSDOS::getImageSize()
 {
     return 0x1000; // TODO Check
+}
+
+qint64 XMSDOS::getModuleAddress()
+{
+    return 0x10000000; // TODO Check
 }
 
 QMap<quint64, QString> XMSDOS::getImageMagics()
