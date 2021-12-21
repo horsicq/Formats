@@ -8346,7 +8346,7 @@ int XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignature
     int nResult=0;
     int nSignatureSize=sSignature.size();
 
-    for(int i=nStartIndex;i<nSignatureSize;i++)
+    for(qint32 i=nStartIndex;i<nSignatureSize;i++)
     {
         if(sSignature.at(i)==QChar('+'))
         {
