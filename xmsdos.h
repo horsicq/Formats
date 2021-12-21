@@ -75,7 +75,7 @@ public:
     void set_e_cs(quint16 nValue);
     void set_e_lfarlc(quint16 nValue);
     void set_e_ovno(quint16 nValue);
-    void set_e_res(int nPosition,quint16 nValue);
+    void set_e_res(qint32 nPosition,quint16 nValue);
     void set_e_oemid(quint16 nValue);
     void set_e_oeminfo(quint16 nValue);
     void set_e_res2(int nPosition,quint16 nValue);
