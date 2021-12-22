@@ -1455,7 +1455,7 @@ XMACH::FVM_LIBRARY_RECORD XMACH::getFvmLibraryRecordByName(QString sName, QList<
 {
     FVM_LIBRARY_RECORD result={};
 
-    int nNumberOfLibraries=pListLibraryRecords->count();
+    qint32 nNumberOfLibraries=pListLibraryRecords->count();
 
     for(int i=0;i<nNumberOfLibraries;i++)
     {
