@@ -2782,7 +2782,7 @@ bool XPE::isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 
     {
         qint32 nNumberOfImports=pListImportHashes->count();
 
-        for(int i=0;i<nNumberOfImports;i++)
+        for(qint32 i=0;i<nNumberOfImports;i++)
         {
             if(pListImportHashes->at(i)==nHash)
             {
