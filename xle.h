@@ -154,7 +154,7 @@ public:
     virtual bool isBigEndian();
     virtual FT getFileType();
     virtual qint32 getType();
-    virtual QString typeIdToString(int nType);
+    virtual QString typeIdToString(qint32 nType);
     virtual OSINFO getOsInfo();
 
     static QMap<quint64,QString> getImageLEMagics();

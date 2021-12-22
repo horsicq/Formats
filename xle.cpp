@@ -1488,7 +1488,7 @@ qint32 XLE::getType()
     return TYPE_EXE; // TODO
 }
 
-QString XLE::typeIdToString(int nType)
+QString XLE::typeIdToString(qint32 nType)
 {
     QString sResult=tr("Unknown");
 
