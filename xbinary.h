@@ -555,7 +555,7 @@ public:
     void setMode(MODE mode);
     virtual MODE getMode();
 
-    void setType(int nType);
+    void setType(qint32 nType);
     virtual qint32 getType();
     virtual QString typeIdToString(qint32 nType);
     QString getTypeAsString();

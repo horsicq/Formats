@@ -212,7 +212,7 @@ XBinary::MODE XBinary::getMode()
     return g_mode;
 }
 
-void XBinary::setType(int nType)
+void XBinary::setType(qint32 nType)
 {
     g_nType=nType;
 }
