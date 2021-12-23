@@ -4045,7 +4045,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 stResult.insert(FT_MACHOFAT);
             }
         }
-        else if(&memoryMap,compareSignature("'RE~^'")||&memoryMap,compareSignature("'Rar!'1A07"))
+        else if(compareSignature(&memoryMap,"'RE~^'")||compareSignature(&memoryMap,"'Rar!'1A07"))
         {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_RAR);

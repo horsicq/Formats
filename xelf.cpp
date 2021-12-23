@@ -3013,9 +3013,9 @@ qint64 XELF::getPhdrSize()
     return nResult;
 }
 
-int XELF::getSectionIndexByName(QString sSectionName)
+qint32 XELF::getSectionIndexByName(QString sSectionName)
 {
-    int nResult=-1;
+    qint32 nResult=-1;
 
     if(is64())
     {

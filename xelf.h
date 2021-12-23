@@ -355,7 +355,7 @@ public:
     qint64 getPhdrOffset(quint32 nIndex);
     qint64 getPhdrSize();
 
-    int getSectionIndexByName(QString sSectionName);
+    qint32 getSectionIndexByName(QString sSectionName);
     QByteArray getSectionByName(QString sSectionName);
 
     OS_ANSISTRING getProgramInterpreterName();
