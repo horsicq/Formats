@@ -1201,7 +1201,7 @@ private:
     int _getSignatureDelta(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     int _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     int _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
-    int _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
+    qint32 _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,qint32 nStartIndex);
 
     void _searchProgressMinimumChanged(qint32 nMaximum);
     void _searchProgressMaximumChanged(qint32 nMaximum);
