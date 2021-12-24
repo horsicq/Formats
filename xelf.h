@@ -93,7 +93,7 @@ public:
     quint32 getIdent_Magic();
     void setIdent_Magic(quint32 nValue);
 
-    quint8 getIdent_mag(int nMag);
+    quint8 getIdent_mag(qint32 nMag);
     void setIdent_mag(quint8 nValue,int nMag);
 
     quint32 getIdent_mag_LE();

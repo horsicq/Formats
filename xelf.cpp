@@ -89,7 +89,7 @@ void XELF::setIdent_Magic(quint32 nValue)
     write_uint32((quint64) XELF_DEF::EI_MAG0,nValue);
 }
 
-quint8 XELF::getIdent_mag(int nMag)
+quint8 XELF::getIdent_mag(qint32 nMag)
 {
     quint8 nValue=0;
 
