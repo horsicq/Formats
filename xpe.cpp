@@ -1857,7 +1857,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
     result.nModuleAddress=getModuleAddress();
     result.nRawSize=getSize();
     result.nImageSize=S_ALIGN_UP(getOptionalHeader_SizeOfImage(),0x1000);
-    result.nEntryPointAddress=result.nImageSize+getOptionalHeader_AddressOfEntryPoint();
+    result.nEntryPointAddress=result.nModuleAddress+getOptionalHeader_AddressOfEntryPoint();
 
     quint32 nNumberOfSections=qMin((int)getFileHeader_NumberOfSections(),100); // TODO const
     quint32 nFileAlignment=getOptionalHeader_FileAlignment(); // TODO Check mb qint64
@@ -2742,6 +2742,13 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
     }
 
     return listResult;
+}
+
+QList<quint32> XPE::getImportPositionHashes(bool bLibraryName)
+{
+    QList<IMPORT_HEADER> listImport=getImports();
+
+    return getImportPositionHashes(&listImport,bLibraryName);
 }
 
 QList<quint32> XPE::getImportPositionHashes(QList<IMPORT_HEADER> *pListImport, bool bLibraryName)

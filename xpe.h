@@ -563,6 +563,7 @@ public:
     QList<IMPORT_POSITION> _getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap,qint64 nThunksRVA,qint64 nRVA);
     QList<IMPORT_POSITION> getImportPositions(int nIndex);
 
+    QList<quint32> getImportPositionHashes(bool bLibraryName=false);
     QList<quint32> getImportPositionHashes(QList<IMPORT_HEADER> *pListImport,bool bLibraryName=false);
     static bool isImportPositionHashPresent(QList<quint32> *pListImportHashes,qint32 nIndex,quint32 nHash);
 
