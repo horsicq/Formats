@@ -284,7 +284,7 @@ quint16 XMSDOS::get_e_ovno()
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_ovno));
 }
 
-quint16 XMSDOS::get_e_res(int nPosition)
+quint16 XMSDOS::get_e_res(qint32 nPosition)
 {
     quint16 nResult=0;
 
@@ -306,7 +306,7 @@ quint16 XMSDOS::get_e_oeminfo()
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_oeminfo));
 }
 
-quint16 XMSDOS::get_e_res2(int nPosition)
+quint16 XMSDOS::get_e_res2(qint32 nPosition)
 {
     quint16 nResult=0;
 

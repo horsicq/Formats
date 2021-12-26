@@ -95,10 +95,10 @@ public:
     quint16 get_e_cs();
     quint16 get_e_lfarlc();
     quint16 get_e_ovno();
-    quint16 get_e_res(int nPosition);
+    quint16 get_e_res(qint32 nPosition);
     quint16 get_e_oemid();
     quint16 get_e_oeminfo();
-    quint16 get_e_res2(int nPosition);
+    quint16 get_e_res2(qint32 nPosition);
     quint32 get_e_lfanew();
 
     virtual _MEMORY_MAP getMemoryMap();
