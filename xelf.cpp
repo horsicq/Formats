@@ -101,7 +101,7 @@ quint8 XELF::getIdent_mag(qint32 nMag)
     return nValue;
 }
 
-void XELF::setIdent_mag(quint8 nValue, int nMag)
+void XELF::setIdent_mag(quint8 nValue, qint32 nMag)
 {
     if(nMag<4)
     {
