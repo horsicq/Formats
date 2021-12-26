@@ -888,7 +888,12 @@ QString XBinary::read_ansiString(qint64 nOffset,qint64 nMaxSize)
 {
     QString sResult;
 
-    if(nMaxSize)
+    if(nMaxSize>0x10000)
+    {
+        nMaxSize=0x10000;
+    }
+
+    if(nMaxSize>0)
     {
         quint8 *pBuffer=new quint8[nMaxSize+1];
 
