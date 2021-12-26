@@ -1160,7 +1160,7 @@ qint64 XMACH::getCommandHeaderSize()
     return sizeof(XMACH_DEF::load_command);
 }
 
-qint64 XMACH::getAddressOfEntryPoint()
+qint64 XMACH::getAddressOfEntryPoint(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     qint64 nResult=-1;
 
@@ -1174,8 +1174,8 @@ qint64 XMACH::getAddressOfEntryPoint()
 
         qint64 nEntryPointOffset=read_uint64(nOffset+offsetof(XMACH_DEF::entry_point_command,entryoff),bIsBigEndian);
 
-//        nResult=offsetToAddress(nEntryPointOffset);
-        nResult=nEntryPointOffset; // TODO Check
+        nResult=offsetToAddress(pMemoryMap,nEntryPointOffset);
+//        nResult=nEntryPointOffset+getMo; // TODO Check
     }
     else if(isCommandPresent(XMACH_DEF::S_LC_UNIXTHREAD,&listCommandRecords)) // TODO Check LC_THREAD
     {
@@ -1330,7 +1330,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
     }
 
     result.nImageSize=nMaxAddress-result.nModuleAddress;
-    result.nEntryPointAddress=getAddressOfEntryPoint();
+    result.nEntryPointAddress=getAddressOfEntryPoint(&result);
 
     return result;
 }

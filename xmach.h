@@ -237,7 +237,7 @@ public:
 
     qint64 getCommandHeaderSize();
 
-    qint64 getAddressOfEntryPoint();
+    qint64 getAddressOfEntryPoint(_MEMORY_MAP *pMemoryMap);
 
     virtual _MEMORY_MAP getMemoryMap();
 
