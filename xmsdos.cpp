@@ -201,7 +201,7 @@ void XMSDOS::set_e_oeminfo(quint16 nValue)
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_oeminfo),nValue);
 }
 
-void XMSDOS::set_e_res2(int nPosition, quint16 nValue)
+void XMSDOS::set_e_res2(qint32 nPosition, quint16 nValue)
 {
     if(nPosition<10) // TODO nPosition>=0
     {
