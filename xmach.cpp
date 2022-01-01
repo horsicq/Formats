@@ -1778,7 +1778,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
 
             nOffset+=sizeof(XMACH_DEF::segment_command_64);
 
-            for(int j=0;j<nNumberOfSections;j++)
+            for(qint32 j=0;j<nNumberOfSections;j++)
             {
                 SECTION_RECORD record={};
 
