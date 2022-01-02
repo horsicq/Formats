@@ -2879,9 +2879,9 @@ bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction, QList<XP
     {
         if(pListImportHeaders->at(i).sName.toUpper()==sLibrary.toUpper())
         {
-            int nNumberOfPositions=pListImportHeaders->at(i).listPositions.count();
+            qint32 nNumberOfPositions=pListImportHeaders->at(i).listPositions.count();
 
-            for(int j=0;j<nNumberOfPositions;j++)
+            for(qint32 j=0;j<nNumberOfPositions;j++)
             {
                 if(pListImportHeaders->at(i).listPositions.at(j).sFunction==sFunction)
                 {
