@@ -692,7 +692,7 @@ XBinary::OSINFO XMSDOS::getOsInfo()
     return result;
 }
 
-QString XMSDOS::typeIdToString(int nType)
+QString XMSDOS::typeIdToString(qint32 nType)
 {
     QString sResult=tr("Unknown");
 
