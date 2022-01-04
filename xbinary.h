@@ -185,6 +185,15 @@ public:
         MEMORY_FLAGS mf;
     };
 
+    enum FORMATTYPE
+    {
+        FORMATTYPE_TEXT=0,
+        FORMATTYPE_XML,
+        FORMATTYPE_JSON,
+        FORMATTYPE_CSV,
+        FORMATTYPE_TSV
+    };
+
     enum FT
     {
         FT_UNKNOWN=0,

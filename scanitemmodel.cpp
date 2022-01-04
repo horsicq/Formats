@@ -273,23 +273,23 @@ QString ScanItemModel::toFormattedString()
     return sResult;
 }
 
-QString ScanItemModel::toString(FORMATTYPE formatType)
+QString ScanItemModel::toString(XBinary::FORMATTYPE formatType)
 {
     QString sResult;
 
-    if(formatType==FORMATTYPE_XML)
+    if(formatType==XBinary::FORMATTYPE_XML)
     {
         sResult=toXML();
     }
-    else if(formatType==FORMATTYPE_JSON)
+    else if(formatType==XBinary::FORMATTYPE_JSON)
     {
         sResult=toJSON();
     }
-    else if(formatType==FORMATTYPE_CSV)
+    else if(formatType==XBinary::FORMATTYPE_CSV)
     {
         sResult=toCSV();
     }
-    else if(formatType==FORMATTYPE_TSV)
+    else if(formatType==XBinary::FORMATTYPE_TSV)
     {
         sResult=toTSV();
     }
@@ -433,31 +433,18 @@ void ScanItemModel::_toTSV(QString *pString, ScanItem *pItem,qint32 nLevel)
 
 void ScanItemModel::_toFormattedString(QString *pString, ScanItem *pItem, qint32 nLevel)
 {
-    if(pItem->childCount())
+    if(nLevel)
     {
-        if(nLevel)
-        {
-            QString sResult;
-            sResult=sResult.leftJustified(4*(nLevel-1),' '); // TODO function
-            sResult.append(QString("%1\n").arg(pItem->data(0).toString()));
-            pString->append(sResult);
-        }
-
-        qint32 nNumberOfChildren=pItem->childCount();
-
-        for(qint32 i=0;i<nNumberOfChildren;i++)
-        {
-            _toFormattedString(pString,pItem->child(i),nLevel+1);
-        }
+        QString sResult;
+        sResult=sResult.leftJustified(4*(nLevel-1),' '); // TODO function
+        sResult.append(QString("%1\n").arg(pItem->data(0).toString()));
+        pString->append(sResult);
     }
-    else
+
+    qint32 nNumberOfChildren=pItem->childCount();
+
+    for(qint32 i=0;i<nNumberOfChildren;i++)
     {
-        if(nLevel)
-        {
-            QString sResult;
-            sResult=sResult.leftJustified(4*(nLevel-1),' '); // TODO function
-            sResult.append(QString("%1\n").arg(pItem->data(0).toString()));
-            pString->append(sResult);
-        }
+        _toFormattedString(pString,pItem->child(i),nLevel+1);
     }
 }

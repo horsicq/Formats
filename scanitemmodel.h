@@ -39,15 +39,6 @@ class ScanItemModel : public QAbstractItemModel
 
 public:
 
-    enum FORMATTYPE
-    {
-        FORMATTYPE_TEXT=0,
-        FORMATTYPE_XML,
-        FORMATTYPE_JSON,
-        FORMATTYPE_CSV,
-        FORMATTYPE_TSV
-    };
-
     enum UD
     {
         UD_FILETYPE=0,
@@ -70,7 +61,7 @@ public:
     QString toCSV();
     QString toTSV();
     QString toFormattedString();
-    QString toString(FORMATTYPE formatType);
+    QString toString(XBinary::FORMATTYPE formatType);
     ScanItem *rootItem();
 
 private:
