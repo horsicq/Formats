@@ -4545,6 +4545,26 @@ QString XBinary::xVariantToHex(XVARIANT value)
     return sResult;
 }
 
+QString XBinary::thisToString(qint64 nDelta)
+{
+    QString sResult;
+
+    if(nDelta==0)
+    {
+        sResult="$ ==>";
+    }
+    else if(nDelta>0)
+    {
+        sResult=QString("$+%1").arg(nDelta,0,16);
+    }
+    else if(nDelta<0)
+    {
+        sResult=QString("$-%1").arg(-nDelta,0,16);
+    }
+
+    return sResult;
+}
+
 bool XBinary::checkString_uint8(QString sValue)
 {
     bool bResult=false;

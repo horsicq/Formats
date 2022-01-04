@@ -873,6 +873,8 @@ public:
     static QString valueToHexColon(MODE mode,quint64 nValue,bool bIsBigEndian=false);
     static QString xVariantToHex(XVARIANT value);
 
+    static QString thisToString(qint64 nDelta);
+
     static bool checkString_uint8(QString sValue);
     static bool checkString_int8(QString sValue);
     static bool checkString_uint16(QString sValue);
