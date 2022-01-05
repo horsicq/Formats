@@ -3158,7 +3158,7 @@ XPE::RESOURCE_HEADER XPE::getResourceHeader(_MEMORY_MAP *pMemoryMap)
         result.nOffset=nOffset;
         result.directory=read_IMAGE_RESOURCE_DIRECTORY(nOffset);
 
-        if((result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries<=100)&&(result.directory.Characteristics==0)) // check corrupted
+        if((result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries<=1000)&&(result.directory.Characteristics==0)) // check corrupted
         {
             nOffset+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
 
@@ -3212,7 +3212,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
         nOffsetLevel[0]=nResourceOffset;
         rd[0]=read_IMAGE_RESOURCE_DIRECTORY(nOffsetLevel[0]);
 
-        if((rd[0].NumberOfIdEntries+rd[0].NumberOfNamedEntries<=100)&&(rd[0].Characteristics==0)) // check corrupted  TODO const
+        if((rd[0].NumberOfIdEntries+rd[0].NumberOfNamedEntries<=1000)&&(rd[0].Characteristics==0)) // check corrupted  TODO const
         {
             nOffsetLevel[0]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
 
@@ -3234,7 +3234,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
 
                 nOffsetLevel[1]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
 
-                if(rd[1].NumberOfIdEntries+rd[1].NumberOfNamedEntries<=100)
+                if(rd[1].NumberOfIdEntries+rd[1].NumberOfNamedEntries<=1000)
                 {
                     for(qint32 j=0; j<rd[1].NumberOfIdEntries+rd[1].NumberOfNamedEntries; j++)
                     {
@@ -3254,7 +3254,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
 
                         nOffsetLevel[2]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
 
-                        if(rd[2].NumberOfIdEntries+rd[2].NumberOfNamedEntries<=100)
+                        if(rd[2].NumberOfIdEntries+rd[2].NumberOfNamedEntries<=1000)
                         {
                             for(int k=0; k<rd[2].NumberOfIdEntries+rd[2].NumberOfNamedEntries; k++)
                             {
