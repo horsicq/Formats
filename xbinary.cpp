@@ -4806,9 +4806,20 @@ QString XBinary::getResultFileName(QIODevice *pDevice, QString sAppendix)
 
 QString XBinary::getResultFileName(QString sFileName,QString sAppendix)
 {
+    QString sResult;
     // mb TODO if file exists write other .1 .2 ...
     QFileInfo fileInfo(sFileName);
-    QString sResult=fileInfo.absolutePath()+QDir::separator()+fileInfo.completeBaseName()+"."+fileInfo.suffix()+"."+sAppendix;
+
+    QString sSuffix=fileInfo.suffix();
+
+    sResult+=fileInfo.absolutePath()+QDir::separator()+fileInfo.completeBaseName()+".";
+
+    if(sSuffix!="")
+    {
+        sResult+=sSuffix+".";
+    }
+
+    sResult+=sAppendix;
 
     return sResult;
 }
