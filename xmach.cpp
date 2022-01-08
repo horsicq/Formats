@@ -1487,9 +1487,9 @@ bool XMACH::isFvmLibraryRecordNamePresent(QString sName, QList<XMACH::FVM_LIBRAR
 {
     bool bResult=false;
 
-    int nNumberOfLibraries=pListLibraryRecords->count();
+    qint32 nNumberOfLibraries=pListLibraryRecords->count();
 
-    for(int i=0;i<nNumberOfLibraries;i++)
+    for(qint32 i=0;i<nNumberOfLibraries;i++)
     {
         if(pListLibraryRecords->at(i).sName==sName)
         {
