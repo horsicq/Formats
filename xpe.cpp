@@ -2935,12 +2935,12 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
             for(int i=0; i<nNumberOfHeaders; i++)
             {
                 // TODO 64
-                int nNumberOfPositions=pListImportHeaders->at(i).listPositions.count();
+                qint32 nNumberOfPositions=pListImportHeaders->at(i).listPositions.count();
 
                 nIATSize+=(nNumberOfPositions+1)*nAddressSize;
                 nAnsiDataSize+=pListImportHeaders->at(i).sName.length()+3;
 
-                for(int j=0; j<nNumberOfPositions; j++)
+                for(qint32 j=0; j<nNumberOfPositions; j++)
                 {
                     if(pListImportHeaders->at(i).listPositions.at(j).sName!="")
                     {
