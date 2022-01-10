@@ -8376,11 +8376,11 @@ int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSi
     return nResult;
 }
 
-int XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex)
+qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex)
 {
     // TODO Check!!!
-    int nResult=0;
-    int nSignatureSize=sSignature.size();
+    qint32 nResult=0;
+    qint32 nSignatureSize=sSignature.size();
 
     for(qint32 i=nStartIndex;i<nSignatureSize;i++)
     {

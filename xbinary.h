@@ -1209,7 +1209,7 @@ private:
     bool _compareSignature(_MEMORY_MAP *pMemoryMap,QList<SIGNATURE_RECORD> *pListSignatureRecords,qint64 nOffset);
 
     int _getSignatureRelOffsetFix(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
-    int _getSignatureDelta(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
+    qint32 _getSignatureDelta(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     int _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     int _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     qint32 _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,qint32 nStartIndex);
