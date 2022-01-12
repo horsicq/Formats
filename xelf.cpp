@@ -3210,6 +3210,13 @@ XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
     return result;
 }
 
+bool XELF::isNotePresent(QString sName)
+{
+    QList<XELF::NOTE> listNotes=getNotes();
+
+    return isNotePresent(&listNotes,sName);
+}
+
 bool XELF::isNotePresent(QList<NOTE> *pListNotes, QString sName)
 {
     bool bResult=false;
@@ -4006,9 +4013,162 @@ XBinary::FT XELF::getFileType()
     return result;
 }
 
-XBinary::OSNAME XELF::getOsName()
+XBinary::OSINFO XELF::getOsInfo()
 {
-    return OSNAME_UNIX; // TODO
+    OSINFO result={};
+
+    result.osName=OSNAME_UNIX;
+
+    quint8 osabi=getIdent_osabi();
+
+    if      (osabi==XELF_DEF::ELFOSABI_HPUX)        result.osName=OSNAME_HPUX;
+    else if (osabi==XELF_DEF::ELFOSABI_NETBSD)      result.osName=OSNAME_NETBSD;
+    else if (osabi==XELF_DEF::ELFOSABI_LINUX)       result.osName=OSNAME_LINUX;
+    else if (osabi==XELF_DEF::ELFOSABI_SOLARIS)     result.osName=OSNAME_SOLARIS;
+    else if (osabi==XELF_DEF::ELFOSABI_AIX)         result.osName=OSNAME_AIX;
+    else if (osabi==XELF_DEF::ELFOSABI_IRIX)        result.osName=OSNAME_IRIX;
+    else if (osabi==XELF_DEF::ELFOSABI_FREEBSD)     result.osName=OSNAME_FREEBSD;
+    else if (osabi==XELF_DEF::ELFOSABI_TRU64)       result.osName=OSNAME_TRU64;
+    else if (osabi==XELF_DEF::ELFOSABI_MODESTO)     result.osName=OSNAME_MODESTO;
+    else if (osabi==XELF_DEF::ELFOSABI_OPENBSD)     result.osName=OSNAME_OPENBSD;
+    else if (osabi==XELF_DEF::ELFOSABI_OPENVMS)     result.osName=OSNAME_OPENVMS;
+    else if (osabi==XELF_DEF::ELFOSABI_NSK)         result.osName=OSNAME_NSK;
+    else if (osabi==XELF_DEF::ELFOSABI_AROS)        result.osName=OSNAME_AROS;
+    else if (osabi==XELF_DEF::ELFOSABI_FENIXOS)     result.osName=OSNAME_FENIXOS;
+
+    if(isNotePresent("Android")||isSectionNamePresent(".note.android.ident"))
+    {
+        result.osName=OSNAME_ANDROID;
+    }
+
+    if((result.osName==OSNAME_UNIX)||(result.osName==OSNAME_LINUX))
+    {
+        QList<QString> listComments=getCommentStrings();
+
+        qint32 nNumberOfComments=listComments.count();
+
+        for(qint32 i=0;i<nNumberOfComments;i++)
+        {
+            bool bFound=false;
+
+            QString sComment=listComments.at(i);
+
+            if(sComment.contains("Ubuntu")||sComment.contains("ubuntu"))
+            {
+                result.osName=OSNAME_UBUNTULINUX;
+
+                if(sComment.contains("ubuntu1~"))
+                {
+                    result.sOsVersion=sComment.section("ubuntu1~",1,-1).section(")",0,0);
+                }
+
+                bFound=true;
+            }
+            else if(sComment.contains("Debian")||sComment.contains("debian"))
+            {
+                result.osName=OSNAME_DEBIANLINUX;
+
+                bFound=true;
+            }
+            else if(sComment.contains("StartOS"))
+            {
+                result.osName=OSNAME_STARTOSLINUX;
+
+                bFound=true;
+            }
+            else if(sComment.contains("Gentoo"))
+            {
+                result.osName=OSNAME_GENTOOLINUX;
+
+                bFound=true;
+            }
+            else if(sComment.contains("Alpine"))
+            {
+                result.osName=OSNAME_ALPINELINUX;
+
+                bFound=true;
+            }
+            else if(sComment.contains("Wind River Linux"))
+            {
+                result.osName=OSNAME_WINDRIVERLINUX;
+
+                bFound=true;
+            }
+            else if(sComment.contains("SuSE")||sComment.contains("SUSE Linux"))
+            {
+                result.osName=OSNAME_SUSELINUX;
+
+                bFound=true;
+            }
+            else if(sComment.contains("Mandrakelinux")||sComment.contains("Linux-Mandrake")||sComment.contains("Mandrake Linux"))
+            {
+                result.osName=OSNAME_MANDRAKELINUX;
+
+                bFound=true;
+            }
+            else if(sComment.contains("ASPLinux"))
+            {
+                result.osName=OSNAME_ASPLINUX;
+
+                bFound=true;
+            }
+            else if(sComment.contains("Red Hat"))
+            {
+                result.osName=OSNAME_REDHATLINUX;
+
+                bFound=true;
+            }
+            else if(sComment.contains("Hancom Linux"))
+            {
+                result.osName=OSNAME_HANCOMLINUX;
+
+                bFound=true;
+            }
+            else if(sComment.contains("TurboLinux"))
+            {
+                result.osName=OSNAME_TURBOLINUX;
+
+                bFound=true;
+            }
+            else if(sComment.contains("Vine Linux"))
+            {
+                result.osName=OSNAME_VINELINUX;
+
+                bFound=true;
+            }
+
+            if(result.osName!=OSNAME_LINUX)
+            {
+                if(sComment.contains("SunOS"))
+                {
+                    result.osName=OSNAME_SUNOS;
+
+                    if(sComment.contains("@(#)SunOS "))
+                    {
+                        result.sOsVersion=sComment.section("@(#)SunOS ",1,-1);
+                    }
+
+                    bFound=true;
+                }
+            }
+
+            if(bFound)
+            {
+                break;
+            }
+        }
+    }
+
+    if(result.osName==OSNAME_UNIX)
+    {
+        result.sOsVersion=QString("%1").arg(osabi);
+    }
+
+    result.sArch=getArch();
+    result.mode=getMode();
+    result.sType=typeIdToString(getType());
+
+    return result;
 }
 
 QString XELF::typeIdToString(int nType)

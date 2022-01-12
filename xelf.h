@@ -369,6 +369,7 @@ public:
     QList<NOTE> _getNotes(qint64 nOffset,qint64 nSize,bool bIsBigEndian);
     NOTE _readNote(qint64 nOffset,qint64 nSize,bool bIsBigEndian);
 
+    bool isNotePresent(QString sName);
     static bool isNotePresent(QList<NOTE> *pListNotes,QString sName);
     static NOTE getNote(QList<NOTE> *pListNotes,QString sName);
 
@@ -409,7 +410,7 @@ public:
     virtual QString getArch();
     virtual qint32 getType();
     virtual FT getFileType();
-    virtual OSNAME getOsName();
+    virtual OSINFO getOsInfo();
     virtual QString typeIdToString(int nType);
 
     virtual qint64 getBaseAddress();

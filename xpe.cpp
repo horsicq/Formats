@@ -2930,9 +2930,9 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
             quint32 nImportTableSize=(pListImportHeaders->count()+1)*sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
             quint32 nAnsiDataSize=0;
 
-            int nNumberOfHeaders=pListImportHeaders->count();
+            qint32 nNumberOfHeaders=pListImportHeaders->count();
 
-            for(int i=0; i<nNumberOfHeaders; i++)
+            for(qint32 i=0; i<nNumberOfHeaders; i++)
             {
                 // TODO 64
                 qint32 nNumberOfPositions=pListImportHeaders->at(i).listPositions.count();
