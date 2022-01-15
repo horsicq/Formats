@@ -2131,6 +2131,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
     bool bANSICodec=false;
 
     // TODO Check Qt6
+#if (QT_VERSION_MAJOR<6)
     QTextCodec *pCodec=nullptr;
 
     if(ssOptions.sANSICodec!="")
@@ -2138,6 +2139,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
         bANSICodec=true;
         pCodec=QTextCodec::codecForName(ssOptions.sANSICodec.toLatin1().data());
     }
+#endif
 
     qint64 _nSize=nSize;
     qint64 _nOffset=nOffset;
@@ -2320,7 +2322,11 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                         {
                             // TODO Check Qt6
                             QByteArray baString=QByteArray(pAnsiBuffer,nCurrentAnsiSize);
+                        #if (QT_VERSION_MAJOR<6)
                             sString=pCodec->toUnicode(baString);
+                        #else
+                            sString=QString::fromLatin1(baString); // TODO
+                        #endif
                         }
 
                         bool bAdd=true;
