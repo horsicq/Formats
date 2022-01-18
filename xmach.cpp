@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021 hors<horsicq@gmail.com>
+/* Copyright (c) 2017-2022 hors<horsicq@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -1801,7 +1801,7 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
         for(qint32 i=0;i<nNumberOfSegments;i++)
         {
             qint64 nOffset=listLCSegments.at(i).nStructOffset;
-            int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),bIsBigEndian);
+            qint32 nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),bIsBigEndian);
 
             nOffset+=sizeof(XMACH_DEF::segment_command);
 
