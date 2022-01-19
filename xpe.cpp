@@ -3886,9 +3886,9 @@ qint64 XPE::getResourceGroupNameOffset(QString sName, QList<XPE::RESOURCE_RECORD
 {
     qint64 nResult=-1;
 
-    int nNumberOfResources=pListResourceRecords->count();
+    qint32 nNumberOfResources=pListResourceRecords->count();
 
-    for(int i=0;i<nNumberOfResources;i++)
+    for(qint32 i=0;i<nNumberOfResources;i++)
     {
         if(pListResourceRecords->at(i).irin[0].sName==sName)
         {
