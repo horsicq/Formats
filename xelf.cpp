@@ -3715,7 +3715,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
     qint64 nMaxOffset=0;
     qint64 nMaxAddress=0;
 
-    for(int i=0;i<nNumberOfSegments;i++)
+    for(qint32 i=0;i<nNumberOfSegments;i++)
     {
         QString sName=QString("%1(%2)").arg(QString("PT_LOAD"),QString::number(i));
 
