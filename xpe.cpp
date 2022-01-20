@@ -8110,9 +8110,9 @@ QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemor
     {
         EXPORT_HEADER exportHeader=getExport(pMemoryMap,false);
 
-        int nNumberOfPositions=exportHeader.listPositions.count();
+        qint32 nNumberOfPositions=exportHeader.listPositions.count();
 
-        for(int i=0;i<nNumberOfPositions;i++)
+        for(qint32 i=0;i<nNumberOfPositions;i++)
         {
             SYMBOL_RECORD record={};
 
