@@ -3708,7 +3708,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
     QList<XELF_DEF::Elf_Phdr> listSegments=_getPrograms(&listProgramHeaders,XELF_DEF::PT_LOAD);
 
 //    bool bIs64=is64();
-    int nNumberOfSegments=listSegments.count();
+    qint32 nNumberOfSegments=listSegments.count();
 
     bool bImageAddressInit=false;
 
