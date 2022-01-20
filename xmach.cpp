@@ -4066,7 +4066,7 @@ QList<XMACH::VALUE32_RECORD> XMACH::getValue32Records(qint64 nOffset, qint32 nNu
     QList<VALUE32_RECORD> listResult;
     bool bIsBigEndian=isBigEndian();
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         VALUE32_RECORD record={};
         record.nStructOffset=nOffset;
