@@ -8140,7 +8140,7 @@ QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemor
 
             int nNumberOfPositions=importHeaders.at(i).listPositions.count();
 
-            for(int j=0;i<nNumberOfPositions;j++)
+            for(int j=0;j<nNumberOfPositions;j++)
             {
                 SYMBOL_RECORD record={};
 
