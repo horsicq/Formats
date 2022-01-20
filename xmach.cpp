@@ -2018,7 +2018,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pListCommandRec
         for(qint32 i=0;i<nNumberOfSegments;i++)
         {
             qint64 nOffset=listLCSegments.at(i).nStructOffset;
-            int nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,nsects),bIsBigEndian);
+            qint32 nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,nsects),bIsBigEndian);
 
             nResult+=nNumberOfSections;
         }
