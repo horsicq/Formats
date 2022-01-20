@@ -3538,7 +3538,7 @@ XMACH_DEF::ppc_thread_state32_t XMACH::_read_ppc_thread_state32_t(qint64 nOffset
     result.srr0=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,srr0),bIsBigEndian);
     result.srr1=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,srr1),bIsBigEndian);
 
-    for(int i=0;i<32;i++)
+    for(qint32 i=0;i<32;i++)
     {
         result.r[i]=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,r)+sizeof(quint32)*i,bIsBigEndian);
     }
