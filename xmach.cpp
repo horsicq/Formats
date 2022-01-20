@@ -3951,9 +3951,9 @@ QList<XMACH::MODTAB_RECORD> XMACH::get_modtab_list()
     bool bIs64=is64();
 
     qint64 nOffset=dysymtab.modtaboff;
-    int nNumberOfRecords=dysymtab.nmodtab;
+    qint32 nNumberOfRecords=dysymtab.nmodtab;
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         MODTAB_RECORD record={};
 
