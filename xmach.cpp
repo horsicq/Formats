@@ -4045,7 +4045,7 @@ QList<XMACH::RELOC_RECORD> XMACH::getRelocRecords(qint64 nOffset, qint32 nNumber
 {
     QList<XMACH::RELOC_RECORD> listResult;
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         RELOC_RECORD record={};
 
