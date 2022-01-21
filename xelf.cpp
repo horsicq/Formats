@@ -4197,9 +4197,9 @@ QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pListPro
 {
     QList<XELF_DEF::Elf_Phdr> listResult;
 
-    int nNumberOfPrograms=pListProgramHeaders->count();
+    qint32 nNumberOfPrograms=pListProgramHeaders->count();
 
-    for(int i=0;i<nNumberOfPrograms;i++)
+    for(qint32 i=0;i<nNumberOfPrograms;i++)
     {
         if(pListProgramHeaders->at(i).p_type==nType)
         {
