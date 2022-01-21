@@ -3821,7 +3821,7 @@ QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords(QList<XMACH::COMMAND_RECORD> *
 
         nOffset=symtab.symoff;
 
-        for(int i=0;i<(int)(symtab.nsyms);i++)
+        for(qint32 i=0;i<(int)(symtab.nsyms);i++)
         {
             NLIST_RECORD record={};
 
