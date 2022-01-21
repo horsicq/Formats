@@ -2158,7 +2158,7 @@ qint32 XMACH::getSegmentNumber(QString sName, QList<XMACH::SEGMENT_RECORD> *pLis
 
     int nNumberOfSegments=pListSegmentRecords->count();
 
-    for(int i=0;i<nNumberOfSegments;i++)
+    for(qint32 i=0;i<nNumberOfSegments;i++)
     {
         QString _sName=QString(pListSegmentRecords->at(i).s.segment32.segname); // TODO Check 64
         if(_sName.size()>16)
