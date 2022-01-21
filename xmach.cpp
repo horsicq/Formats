@@ -3994,7 +3994,7 @@ QList<XMACH::REFERENCE_RECORD> XMACH::get_extrefsyms_list()
     qint64 nOffset=dysymtab.extrefsymoff;
     qint32 nNumberOfRecords=dysymtab.nextrefsyms;
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         REFERENCE_RECORD record={};
         record.nStructOffset=nOffset;
