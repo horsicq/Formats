@@ -436,7 +436,7 @@ void ScanItemModel::_toFormattedString(QString *pString, ScanItem *pItem, qint32
     if(nLevel)
     {
         QString sResult;
-        sResult=sResult.leftJustified(4*(nLevel-1),' '); // TODO function
+        sResult=sResult.leftJustified(4*(nLevel-1),' '); // TODO function !!!
         sResult.append(QString("%1\n").arg(pItem->data(0).toString()));
         pString->append(sResult);
     }
