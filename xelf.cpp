@@ -3137,8 +3137,31 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 
     for(qint32 i=0;i<nNumberOfNotes;i++)
     {
+        // TODO Image
         qint64 nOffset=listNotes.at(i).p_offset;
         qint64 nSize=listNotes.at(i).p_filesz;
+
+        listResult=_getNotes(nOffset,nSize,bIsBigEndian);
+    }
+
+    return listResult;
+}
+
+QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
+    QList<NOTE> listResult;
+
+    QList<XELF_DEF::Elf_Shdr> listNotes=_getSections(pListSectionHeaders,XELF_DEF::SHT_NOTE);
+
+    bool bIsBigEndian=isBigEndian();
+
+    qint32 nNumberOfNotes=listNotes.count();
+
+    for(qint32 i=0;i<nNumberOfNotes;i++)
+    {
+        // TODO Image
+        qint64 nOffset=listNotes.at(i).sh_offset;
+        qint64 nSize=listNotes.at(i).sh_size;
 
         listResult=_getNotes(nOffset,nSize,bIsBigEndian);
     }
@@ -4204,6 +4227,23 @@ QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pListPro
         if(pListProgramHeaders->at(i).p_type==nType)
         {
             listResult.append(pListProgramHeaders->at(i));
+        }
+    }
+
+    return listResult;
+}
+
+QList<XELF_DEF::Elf_Shdr> XELF::_getSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, quint32 nType)
+{
+    QList<XELF_DEF::Elf_Shdr> listResult;
+
+    qint32 nNumberOfPrograms=pListSectionHeaders->count();
+
+    for(qint32 i=0;i<nNumberOfPrograms;i++)
+    {
+        if(pListSectionHeaders->at(i).sh_type==nType)
+        {
+            listResult.append(pListSectionHeaders->at(i));
         }
     }
 

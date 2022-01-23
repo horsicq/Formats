@@ -113,6 +113,8 @@ const quint32 PT_DYNAMIC                    =2;
 const quint32 PT_INTERP                     =3;
 const quint32 PT_NOTE                       =4;
 
+const quint32 SHT_NOTE                      =7;
+
 const quint32 ELFOSABI_HPUX                 =1;
 const quint32 ELFOSABI_NETBSD               =2;
 const quint32 ELFOSABI_LINUX                =3;

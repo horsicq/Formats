@@ -366,6 +366,7 @@ public:
 
     QList<NOTE> getNotes();
     QList<NOTE> getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    QList<NOTE> getNotes(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
     QList<NOTE> _getNotes(qint64 nOffset,qint64 nSize,bool bIsBigEndian);
     NOTE _readNote(qint64 nOffset,qint64 nSize,bool bIsBigEndian);
 
@@ -416,6 +417,7 @@ public:
     virtual qint64 getBaseAddress();
 
     QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders,quint32 nType);
+    QList<XELF_DEF::Elf_Shdr> _getSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders,quint32 nType);
 
     QList<DATASET> getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
     QList<DATASET> getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
