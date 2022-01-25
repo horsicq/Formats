@@ -347,6 +347,10 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
         mapResult.insert(10,"CPU_SUBTYPE_ARM_V7F");
         mapResult.insert(11,"CPU_SUBTYPE_ARM_V7S");
         mapResult.insert(12,"CPU_SUBTYPE_ARM_V7K");
+        mapResult.insert(14,"CPU_SUBTYPE_ARM_V6M");
+        mapResult.insert(15,"CPU_SUBTYPE_ARM_V7M");
+        mapResult.insert(16,"CPU_SUBTYPE_ARM_V7EM");
+        mapResult.insert(0x80000002,"CPU_SUBTYPE_ARM64E");
     }
     else if(nCpuType==XMACH_DEF::S_CPU_TYPE_MC88000)
     {
@@ -481,6 +485,10 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
         mapResult.insert(10,"ARM_V7F");
         mapResult.insert(11,"ARM_V7S");
         mapResult.insert(12,"ARM_V7K");
+        mapResult.insert(14,"ARM_V6M");
+        mapResult.insert(15,"ARM_V7M");
+        mapResult.insert(16,"ARM_V7EM");
+        mapResult.insert(0x80000002,"ARM64E");
     }
     else if(nCpuType==XMACH_DEF::S_CPU_TYPE_MC88000)
     {
@@ -1269,7 +1277,6 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
             QString _sSegmentName=QString(listSegmentRecords.at(i).s.segment64.segname); // TODO Limit
 
             sSegmentName=QString("%1(%2)['%3']").arg(tr("Segment"),QString::number(i),_sSegmentName);
-            sSegmentName=QString("%1").arg(tr("Segment"));
             nFileOffset=listSegmentRecords.at(i).s.segment64.fileoff;
             nVirtualAddress=listSegmentRecords.at(i).s.segment64.vmaddr;
             nFileSize=listSegmentRecords.at(i).s.segment64.filesize;
