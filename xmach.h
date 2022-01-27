@@ -598,6 +598,17 @@ public:
 
     qint64 get_dylib_reference_size();
 
+    void _set_SC_SuperBlob_magic(qint64 nOffset,quint32 nValue);
+    void _set_SC_SuperBlob_length(qint64 nOffset,quint32 nValue);
+    void _set_SC_SuperBlob_count(qint64 nOffset,quint32 nValue);
+
+    qint64 get_SC_SuperBlob_size();
+
+    void _set_BlobIndex_type(qint64 nOffset,quint32 nValue);
+    void _set_BlobIndex_offset(qint64 nOffset,quint32 nValue);
+
+    qint64 get_BlobIndex_size();
+
     XMACH_DEF::dyld_info_command _read_dyld_info_command(qint64 nOffset);
     XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
     XMACH_DEF::dysymtab_command _read_dysymtab_command(qint64 nOffset);
@@ -627,6 +638,8 @@ public:
     XMACH_DEF::dylib_table_of_contents _read_dylib_table_of_contents(qint64 nOffset,bool bIsBigEndian);
     XMACH_DEF::relocation_info _read_relocation_info(qint64 nOffset);
     XMACH_DEF::dylib_reference _read_dylib_reference(qint64 nOffset);
+    XMACH_DEF::__SC_SuperBlob _read_SC_SuperBlob(qint64 nOffset);
+    XMACH_DEF::__BlobIndex _read_BlobIndex(qint64 nOffset);
 
     QList<NLIST_RECORD> getNlistRecords();
     QList<NLIST_RECORD> getNlistRecords(QList<COMMAND_RECORD> *pListCommandRecords);

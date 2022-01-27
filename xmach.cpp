@@ -3395,6 +3395,41 @@ qint64 XMACH::get_dylib_reference_size()
     return sizeof(XMACH_DEF::dylib_reference);
 }
 
+void XMACH::_set_SC_SuperBlob_magic(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::__SC_SuperBlob,magic),nValue,true);
+}
+
+void XMACH::_set_SC_SuperBlob_length(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::__SC_SuperBlob,length),nValue,true);
+}
+
+void XMACH::_set_SC_SuperBlob_count(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::__SC_SuperBlob,count),nValue,true);
+}
+
+qint64 XMACH::get_SC_SuperBlob_size()
+{
+    return sizeof(XMACH_DEF::__SC_SuperBlob);
+}
+
+void XMACH::_set_BlobIndex_type(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::__BlobIndex,type),nValue,true);
+}
+
+void XMACH::_set_BlobIndex_offset(qint64 nOffset, quint32 nValue)
+{
+    write_uint32(nOffset+offsetof(XMACH_DEF::__BlobIndex,offset),nValue,true);
+}
+
+qint64 XMACH::get_BlobIndex_size()
+{
+    return sizeof(XMACH_DEF::__BlobIndex);
+}
+
 XMACH_DEF::dylinker_command XMACH::_read_dylinker_command(qint64 nOffset)
 {
     XMACH_DEF::dylinker_command result={};
@@ -3803,6 +3838,31 @@ XMACH_DEF::dylib_reference XMACH::_read_dylib_reference(qint64 nOffset)
     bool bIsBigEndian=isBigEndian();
 
     result.s.value=read_uint32(nOffset+offsetof(XMACH_DEF::dylib_reference,s),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::__SC_SuperBlob XMACH::_read_SC_SuperBlob(qint64 nOffset)
+{
+    XMACH_DEF::__SC_SuperBlob result={};
+
+    bool bIsBigEndian=true;
+
+    result.magic=read_uint32(nOffset+offsetof(XMACH_DEF::__SC_SuperBlob,magic),bIsBigEndian);
+    result.length=read_uint32(nOffset+offsetof(XMACH_DEF::__SC_SuperBlob,length),bIsBigEndian);
+    result.count=read_uint32(nOffset+offsetof(XMACH_DEF::__SC_SuperBlob,count),bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::__BlobIndex XMACH::_read_BlobIndex(qint64 nOffset)
+{
+    XMACH_DEF::__BlobIndex result={};
+
+    bool bIsBigEndian=true;
+
+    result.type=read_uint32(nOffset+offsetof(XMACH_DEF::__BlobIndex,type),bIsBigEndian);
+    result.offset=read_uint32(nOffset+offsetof(XMACH_DEF::__BlobIndex,offset),bIsBigEndian);
 
     return result;
 }
@@ -4387,6 +4447,7 @@ XBinary::OSINFO XMACH::getOsInfo()
     result.sArch=getArch();
     result.mode=getMode();
     result.sType=typeIdToString(getType());
+    result.bIsBigEndian=isBigEndian();
 
     quint32 nCPUType=getHeader_cputype();
     quint32 nCpuSubType=getHeader_cpusubtype();

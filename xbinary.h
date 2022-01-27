@@ -403,6 +403,7 @@ public:
         QString sArch;
         MODE mode;
         QString sType;
+        bool bIsBigEndian;
     };
 
     struct _MEMORY_MAP

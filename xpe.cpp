@@ -172,6 +172,7 @@ XBinary::OSINFO XPE::getOsInfo()
     result.sArch=getArch();
     result.mode=getMode();
     result.sType=typeIdToString(getType());
+    result.bIsBigEndian=isBigEndian();
 
     return result;
 }

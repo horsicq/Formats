@@ -1532,6 +1532,7 @@ XBinary::OSINFO XLE::getOsInfo()
     result.sArch=getArch();
     result.mode=getMode();
     result.sType=typeIdToString(getType());
+    result.bIsBigEndian=isBigEndian();
 
     return result;
 }

@@ -1141,15 +1141,15 @@ struct __CodeDirectory
 
 struct __BlobIndex
 {
-    uint32_t type;					/* type of entry */
-    uint32_t offset;				/* offset of entry */
+    quint32 type;					/* type of entry */
+    quint32 offset;                 /* offset of entry */
 };
 
 struct __SC_SuperBlob
 {
-    uint32_t magic;					/* magic number */
-    uint32_t length;				/* total length of SuperBlob */
-    uint32_t count;					/* number of index entries following */
+    quint32 magic;					/* magic number */
+    quint32 length;                 /* total length of SuperBlob */
+    quint32 count;					/* number of index entries following */
 //	CS_BlobIndex index[];			/* (count) entries */
     /* followed by Blobs in no particular order as indicated by offsets in index */
 };

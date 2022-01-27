@@ -1146,6 +1146,7 @@ XBinary::OSINFO XNE::getOsInfo()
     result.sArch=getArch();
     result.mode=getMode();
     result.sType=typeIdToString(getType());
+    result.bIsBigEndian=isBigEndian();
 
     return result;
 }
