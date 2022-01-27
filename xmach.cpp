@@ -3619,7 +3619,7 @@ XMACH_DEF::arm_thread_state64_t XMACH::_read_arm_thread_state64_t(qint64 nOffset
 
     bool bIsBigEndian=isBigEndian();
 
-    for(int i=0;i<29;i++)
+    for(qint32 i=0;i<29;i++)
     {
         result.x[i]=read_uint64(nOffset+offsetof(XMACH_DEF::arm_thread_state64_t,x)+sizeof(quint64)*i,bIsBigEndian);
     }

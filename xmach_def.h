@@ -1103,35 +1103,35 @@ const quint32 S_EXPORT_SYMBOL_FLAGS_WEAK_DEFINITION                         =0x0
 const quint32 S_EXPORT_SYMBOL_FLAGS_REEXPORT                                =0x08;
 const quint32 S_EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER                       =0x10;
 
-const quint32 S_CSMAGIC_REQUIREMENT                                         =0xfade0c00;		/* single Requirement blob */
-const quint32 S_CSMAGIC_REQUIREMENTS                                        =0xfade0c01;		/* Requirements vector (internal requirements) */
-const quint32 S_CSMAGIC_CODEDIRECTORY                                       =0xfade0c02;		/* CodeDirectory blob */
-const quint32 S_CSMAGIC_EMBEDDED_SIGNATURE                                  =0xfade0cc0; /* embedded form of signature data */
-const quint32 S_CSMAGIC_EMBEDDED_SIGNATURE_OLD                              =0xfade0b02;	/* XXX */
-const quint32 S_CSMAGIC_EMBEDDED_ENTITLEMENTS                               =0xfade7171;	/* embedded entitlements */
-const quint32 S_CSMAGIC_DETACHED_SIGNATURE                                  =0xfade0cc1; /* multi-arch collection of embedded signatures */
-const quint32 S_CSMAGIC_BLOBWRAPPER                                         =0xfade0b01;	/* CMS Signature, among other things */
+const quint32 S_CSMAGIC_REQUIREMENT                                         =0xfade0c00;        /* single Requirement blob */
+const quint32 S_CSMAGIC_REQUIREMENTS                                        =0xfade0c01;        /* Requirements vector (internal requirements) */
+const quint32 S_CSMAGIC_CODEDIRECTORY                                       =0xfade0c02;        /* CodeDirectory blob */
+const quint32 S_CSMAGIC_EMBEDDED_SIGNATURE                                  =0xfade0cc0;        /* embedded form of signature data */
+const quint32 S_CSMAGIC_EMBEDDED_SIGNATURE_OLD                              =0xfade0b02;        /* XXX */
+const quint32 S_CSMAGIC_EMBEDDED_ENTITLEMENTS                               =0xfade7171;        /* embedded entitlements */
+const quint32 S_CSMAGIC_DETACHED_SIGNATURE                                  =0xfade0cc1;        /* multi-arch collection of embedded signatures */
+const quint32 S_CSMAGIC_BLOBWRAPPER                                         =0xfade0b01;        /* CMS Signature, among other things */
 
 struct __CodeDirectory
 {
-    uint32_t magic;					/* magic number (CSMAGIC_CODEDIRECTORY) */
-    uint32_t length;				/* total length of CodeDirectory blob */
-    uint32_t version;				/* compatibility version */
-    uint32_t flags;					/* setup and mode flags */
-    uint32_t hashOffset;			/* offset of hash slot element at index zero */
-    uint32_t identOffset;			/* offset of identifier string */
-    uint32_t nSpecialSlots;			/* number of special hash slots */
-    uint32_t nCodeSlots;			/* number of ordinary (code) hash slots */
-    uint32_t codeLimit;				/* limit to main image signature range */
-    uint8_t hashSize;				/* size of each hash in bytes */
-    uint8_t hashType;				/* type of hash (cdHashType* constants) */
-    uint8_t platform;				/* platform identifier; zero if not platform binary */
-    uint8_t	pageSize;				/* log2(page size in bytes); 0 => infinite */
-    uint32_t spare2;				/* unused (must be zero) */
+    quint32 magic;                  /* magic number (CSMAGIC_CODEDIRECTORY) */
+    quint32 length;                 /* total length of CodeDirectory blob */
+    quint32 version;                /* compatibility version */
+    quint32 flags;                  /* setup and mode flags */
+    quint32 hashOffset;             /* offset of hash slot element at index zero */
+    quint32 identOffset;            /* offset of identifier string */
+    quint32 nSpecialSlots;          /* number of special hash slots */
+    quint32 nCodeSlots;             /* number of ordinary (code) hash slots */
+    quint32 codeLimit;              /* limit to main image signature range */
+    quint32 hashSize;               /* size of each hash in bytes */
+    quint32 hashType;               /* type of hash (cdHashType* constants) */
+    quint32 platform;               /* platform identifier; zero if not platform binary */
+    quint32	pageSize;               /* log2(page size in bytes); 0 => infinite */
+    quint32 spare2;                 /* unused (must be zero) */
     /* Version 0x20100 */
-    uint32_t scatterOffset;				/* offset of optional scatter vector */
+    quint32 scatterOffset;          /* offset of optional scatter vector */
     /* Version 0x20200 */
-    uint32_t teamOffset;				/* offset of optional team identifier */
+    quint32 teamOffset;             /* offset of optional team identifier */
     /* followed by dynamic content as located by offset fields above */
 };
 
@@ -1141,16 +1141,16 @@ struct __CodeDirectory
 
 struct __BlobIndex
 {
-    quint32 type;					/* type of entry */
+    quint32 type;                   /* type of entry */
     quint32 offset;                 /* offset of entry */
 };
 
 struct __SC_SuperBlob
 {
-    quint32 magic;					/* magic number */
+    quint32 magic;                  /* magic number */
     quint32 length;                 /* total length of SuperBlob */
-    quint32 count;					/* number of index entries following */
-//	CS_BlobIndex index[];			/* (count) entries */
+    quint32 count;                  /* number of index entries following */
+//	CS_BlobIndex index[];           /* (count) entries */
     /* followed by Blobs in no particular order as indicated by offsets in index */
 };
 
