@@ -4270,6 +4270,25 @@ XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice, bool bExtra)
     return result;
 }
 
+XBinary::FT XBinary::getPrefFileType(QString sFileName, bool bExtra)
+{
+    XBinary::FT result=XBinary::FT_UNKNOWN;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        XBinary _binary(&file);
+
+        result=_binary.getPrefFileType(&file,bExtra);
+
+        file.close();
+    }
+
+    return result;
+}
+
 QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileTypes)
 {
     QList<XBinary::FT> listResult;

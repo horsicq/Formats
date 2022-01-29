@@ -882,6 +882,7 @@ public:
     static QSet<FT> getFileTypes(QByteArray *pbaData,bool bExtra=false);
 
     static FT getPrefFileType(QIODevice *pDevice,bool bExtra=false);
+    static FT getPrefFileType(QString sFileName,bool bExtra=false);
 
     static QList<FT> _getFileTypeListFromSet(QSet<FT> stFileTypes);
 
