@@ -131,6 +131,7 @@ const quint32 ELFOSABI_OPENVMS              =13;
 const quint32 ELFOSABI_NSK                  =14;
 const quint32 ELFOSABI_AROS                 =15;
 const quint32 ELFOSABI_FENIXOS              =16;
+const quint32 ELFOSABI_OPENVOS              =18;
 
 struct Elf32_Ehdr
 {

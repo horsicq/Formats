@@ -392,7 +392,8 @@ public:
         OSNAME_HANCOMLINUX,
         OSNAME_TURBOLINUX,
         OSNAME_VINELINUX,
-        OSNAME_SUNOS
+        OSNAME_SUNOS,
+        OSNAME_OPENVOS
     };
 
     struct OSINFO

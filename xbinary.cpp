@@ -7104,6 +7104,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_TURBOLINUX:         sResult=QString("Turbolinux");                      break;
         case OSNAME_VINELINUX:          sResult=QString("Vine Linux");                      break;
         case OSNAME_SUNOS:              sResult=QString("SunOS");                           break;
+        case OSNAME_OPENVOS:            sResult=QString("Open VOS");                        break;
     }
 
     return sResult;

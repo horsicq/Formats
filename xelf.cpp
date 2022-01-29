@@ -835,6 +835,7 @@ QMap<quint64, QString> XELF::getIndentOsabis()
     mapResult.insert(15,"ELFOSABI_AROS");
     mapResult.insert(16,"ELFOSABI_FENIXOS");
     mapResult.insert(17,"ELFOSABI_CLOUDABI");
+    mapResult.insert(18,"ELFOSABI_OPENVOS");
     mapResult.insert(64,"ELFOSABI_ARM_AEABI");
     mapResult.insert(97,"ELFOSABI_ARM");
     mapResult.insert(255,"ELFOSABI_STANDALONE");
@@ -864,6 +865,7 @@ QMap<quint64, QString> XELF::getIndentOsabisS()
     mapResult.insert(15,"AROS");
     mapResult.insert(16,"FENIXOS");
     mapResult.insert(17,"CLOUDABI");
+    mapResult.insert(18,"OPENVOS");
     mapResult.insert(64,"ARM_AEABI");
     mapResult.insert(97,"ARM");
     mapResult.insert(255,"STANDALONE");
@@ -4058,6 +4060,7 @@ XBinary::OSINFO XELF::getOsInfo()
     else if (osabi==XELF_DEF::ELFOSABI_NSK)         result.osName=OSNAME_NSK;
     else if (osabi==XELF_DEF::ELFOSABI_AROS)        result.osName=OSNAME_AROS;
     else if (osabi==XELF_DEF::ELFOSABI_FENIXOS)     result.osName=OSNAME_FENIXOS;
+    else if (osabi==XELF_DEF::ELFOSABI_OPENVOS)     result.osName=OSNAME_OPENVOS;
 
     if(isNotePresent("Android")||isSectionNamePresent(".note.android.ident"))
     {
