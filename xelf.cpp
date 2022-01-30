@@ -4184,6 +4184,29 @@ XBinary::OSINFO XELF::getOsInfo()
             }
         }
     }
+    else if(result.osName==OSNAME_FREEBSD)
+    {
+        QList<QString> listComments=getCommentStrings();
+
+        qint32 nNumberOfComments=listComments.count();
+
+        for(qint32 i=0;i<nNumberOfComments;i++)
+        {
+            bool bFound=false;
+
+            QString sComment=listComments.at(i);
+
+            if(sComment.contains("FreeBSD: release/"))
+            {
+                result.sOsVersion=sComment.section("FreeBSD: release/",1,-1).section("/",0,0);
+            }
+
+            if(bFound)
+            {
+                break;
+            }
+        }
+    }
 
     if(result.osName==OSNAME_UNIX)
     {
