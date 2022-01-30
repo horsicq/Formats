@@ -7680,7 +7680,7 @@ bool XBinary::isUnicodeSymbol(quint16 nCode, bool bExtra)
     return bResult;
 }
 
-QString XBinary::getStringFromIndex(qint64 nOffset, qint64 nSize, int nIndex)
+QString XBinary::getStringFromIndex(qint64 nOffset, qint64 nSize, qint32 nIndex)
 {
     QString sResult;
 

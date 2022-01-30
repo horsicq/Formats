@@ -1159,7 +1159,7 @@ public:
     static bool isAnsiSymbol(quint8 cCode,bool bExtra=false);
     static bool isUTF8Symbol(quint8 cCode,qint32 *pnWidth);
     static bool isUnicodeSymbol(quint16 nCode,bool bExtra=false);
-    QString getStringFromIndex(qint64 nOffset,qint64 nSize,int nIndex);
+    QString getStringFromIndex(qint64 nOffset, qint64 nSize, qint32 nIndex);
 
     static QList<QString> getAllFilesFromDirectory(QString sDirectory,QString sExtension);
 
