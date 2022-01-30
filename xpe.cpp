@@ -4112,9 +4112,9 @@ QList<QString> XPE::getExportFunctionsList(EXPORT_HEADER *pExportHeader)
 {
     QList<QString> listResult;
 
-    int nNumberOfPositions=pExportHeader->listPositions.count();
+    qint32 nNumberOfPositions=pExportHeader->listPositions.count();
 
-    for(int i=0;i<nNumberOfPositions;i++)
+    for(qint32 i=0;i<nNumberOfPositions;i++)
     {
         listResult.append(pExportHeader->listPositions.at(i).sFunctionName);
     }
