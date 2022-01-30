@@ -130,6 +130,8 @@ public:
     static QMap<quint64,QString> getImageNEFlagsothersS();
     static QMap<quint64,QString> getImageSegmentTypesS();
 
+    qint64 getModuleAddress();
+
     virtual _MEMORY_MAP getMemoryMap();
     virtual MODE getMode();
     virtual QString getArch();

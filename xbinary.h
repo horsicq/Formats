@@ -847,6 +847,9 @@ public:
     qint64 getEntryPointAddress();
     qint64 getEntryPointAddress(_MEMORY_MAP *pMemoryMap);
 
+    qint64 getEntryPointRVA();
+    qint64 getEntryPointRVA(_MEMORY_MAP *pMemoryMap);
+
     static qint64 getLowestAddress(_MEMORY_MAP *pMemoryMap);
     static qint64 getTotalVirtualSize(_MEMORY_MAP *pMemoryMap);
     static qint64 positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPosition);

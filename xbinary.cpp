@@ -3693,6 +3693,16 @@ qint64 XBinary::getEntryPointAddress(XBinary::_MEMORY_MAP *pMemoryMap)
     return pMemoryMap->nEntryPointAddress;
 }
 
+qint64 XBinary::getEntryPointRVA()
+{
+
+}
+
+qint64 XBinary::getEntryPointRVA(_MEMORY_MAP *pMemoryMap)
+{
+    return (pMemoryMap->nEntryPointAddress)-pMemoryMap->nModuleAddress;
+}
+
 qint64 XBinary::getLowestAddress(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     qint64 nResult=-1;

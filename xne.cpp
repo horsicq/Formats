@@ -932,7 +932,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
 
     qint32 nNumberOfSegments=listSegments.count();
 
-    result.nModuleAddress=0x10000; // TODO const
+    result.nModuleAddress=getModuleAddress(); // TODO const
     result.nImageSize=nNumberOfSegments*0x10000; // TODO Check
     result.nEntryPointAddress=getImageOS2Header_csip();
 
@@ -1079,6 +1079,11 @@ QMap<quint64, QString> XNE::getImageSegmentTypesS()
     mapResult.insert(0x0001,"DATA");
 
     return mapResult;
+}
+
+qint64 XNE::getModuleAddress()
+{
+    return 0x10000;
 }
 
 XBinary::MODE XNE::getMode()

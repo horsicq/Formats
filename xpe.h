@@ -656,6 +656,8 @@ public:
     bool isResourceGroupIdPresent(quint32 nID);
     bool isResourceGroupIdPresent(quint32 nID,QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
+    qint64 getModuleAddress();
+
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getBaseAddress();
     virtual void setBaseAddress(qint64 nBaseAddress);

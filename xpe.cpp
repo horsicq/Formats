@@ -3962,6 +3962,12 @@ bool XPE::isResourceGroupIdPresent(quint32 nID, QList<XPE::RESOURCE_RECORD> *pLi
     return (getResourceGroupIdOffset(nID,pListResourceRecords)!=-1);
 }
 
+qint64 XPE::getModuleAddress()
+{
+    // mb TODO
+    return XBinary::getModuleAddress();
+}
+
 XPE_DEF::IMAGE_IMPORT_DESCRIPTOR XPE::read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset)
 {
     XPE_DEF::IMAGE_IMPORT_DESCRIPTOR result={};
