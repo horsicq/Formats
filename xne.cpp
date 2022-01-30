@@ -1156,7 +1156,7 @@ XBinary::OSINFO XNE::getOsInfo()
     return result;
 }
 
-QString XNE::typeIdToString(int nType)
+QString XNE::typeIdToString(qint32 nType)
 {
     QString sResult=tr("Unknown");
 
