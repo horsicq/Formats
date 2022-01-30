@@ -4003,7 +4003,7 @@ QString XELF::getArch()
 
 qint32 XELF::getType()
 {
-    int nResult=TYPE_UNKNOWN;
+    qint32 nResult=TYPE_UNKNOWN;
 
     quint16 nType=0;
 
