@@ -139,7 +139,7 @@ public:
     virtual FT getFileType();
     virtual qint32 getType();
     virtual OSINFO getOsInfo();
-    virtual QString typeIdToString(int nType);
+    virtual QString typeIdToString(qint32 nType);
 };
 
 #endif // XNE_H

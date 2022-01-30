@@ -4792,7 +4792,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
 {
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listResult;
     //    int nBlockSize=0x1000;
-    int nSize=pbaData->size();
+    qint32 nSize=pbaData->size();
     char *pOffset=pbaData->data();
     char *pOffsetStart=pOffset;
     int nCount=nSize/nBlockSize;
