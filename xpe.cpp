@@ -3738,9 +3738,9 @@ QString XPE::getResourcesVersionValue(QString sKey, XPE::RESOURCES_VERSION *pRes
 {
     QString sResult;
 
-    int nNumberOfRecords=pResourcesVersion->listRecords.count();
+    qint32 nNumberOfRecords=pResourcesVersion->listRecords.count();
 
-    for(int i=0; i<nNumberOfRecords; i++)
+    for(qint32 i=0; i<nNumberOfRecords; i++)
     {
         QString sRecord=pResourcesVersion->listRecords.at(i).section(".",3,-1);
         QString _sKey=sRecord.section(":",0,0);
