@@ -4333,7 +4333,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
 
     int nNumberOfSections=pListSectionHeaders->count();
 
-    for(int i=0;i<nNumberOfSections;i++)
+    for(qint32 i=0;i<nNumberOfSections;i++)
     {
         QString sSectionName=getStringFromIndex(osStringTable.nOffset,osStringTable.nSize,pListSectionHeaders->at(i).sh_name);
 
