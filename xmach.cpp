@@ -2163,7 +2163,7 @@ qint32 XMACH::getSegmentNumber(QString sName, QList<XMACH::SEGMENT_RECORD> *pLis
 {
     qint32 nResult=-1;
 
-    int nNumberOfSegments=pListSegmentRecords->count();
+    qint32 nNumberOfSegments=pListSegmentRecords->count();
 
     for(qint32 i=0;i<nNumberOfSegments;i++)
     {
