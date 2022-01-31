@@ -527,7 +527,7 @@ QMap<quint64, QString> XELF::getMachines()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0,"EM_NONE"); // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_XELF_DEF::Elf.h https://github.com/Mm7/oatrev/blob/master/elfio/elf_types.hpp
+    mapResult.insert(0,"EM_NONE"); // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_elf.h https://github.com/Mm7/oatrev/blob/master/elfio/elf_types.hpp
     mapResult.insert(1,"EM_M32");
     mapResult.insert(2,"EM_SPARC");
     mapResult.insert(3,"EM_386");
@@ -624,6 +624,13 @@ QMap<quint64, QString> XELF::getMachines()
     mapResult.insert(111,"EM_EXCESS");
     mapResult.insert(112,"EM_DXP");
     mapResult.insert(113,"EM_ALTERA_NIOS2");
+    mapResult.insert(114,"EM_CRX");
+    mapResult.insert(115,"EM_XGATE");
+    mapResult.insert(116,"EM_C166");
+    mapResult.insert(117,"EM_M16C");
+    mapResult.insert(118,"EM_DSPIC30F");
+    mapResult.insert(119,"EM_CE");
+    mapResult.insert(120,"EM_M32C");
     mapResult.insert(140,"EM_TI_C6000");
     mapResult.insert(183,"EM_AARCH64");
     mapResult.insert(243,"EM_RISC_V");
@@ -742,6 +749,13 @@ QMap<quint64, QString> XELF::getMachinesS()
     mapResult.insert(111,"EXCESS");
     mapResult.insert(112,"DXP");
     mapResult.insert(113,"ALTERA_NIOS2");
+    mapResult.insert(114,"CRX");
+    mapResult.insert(115,"XGATE");
+    mapResult.insert(116,"C166");
+    mapResult.insert(117,"M16C");
+    mapResult.insert(118,"DSPIC30F");
+    mapResult.insert(119,"CE");
+    mapResult.insert(120,"M32C");
     mapResult.insert(140,"TI_C6000");
     mapResult.insert(183,"AARCH64");
     mapResult.insert(243,"RISC_V");
