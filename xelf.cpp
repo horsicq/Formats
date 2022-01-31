@@ -3990,7 +3990,7 @@ XELF::SECTION_RECORD XELF::getSectionRecord(QString sSectionName, QList<XELF::SE
 {
     SECTION_RECORD result={};
 
-    int nNumberOfSections=pListSectionRecords->count();
+    qint32 nNumberOfSections=pListSectionRecords->count();
 
     for(qint32 i=0; i<nNumberOfSections; i++)
     {
