@@ -3217,7 +3217,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
         {
             nOffsetLevel[0]+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
 
-            for(int i=0; i<rd[0].NumberOfIdEntries+rd[0].NumberOfNamedEntries; i++)
+            for(qint32 i=0; i<rd[0].NumberOfIdEntries+rd[0].NumberOfNamedEntries; i++)
             {
                 rde[0]=read_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffsetLevel[0]);
 
