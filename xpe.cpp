@@ -4261,7 +4261,7 @@ QByteArray XPE::getHeaders()
     // TODO Check
     QByteArray baResult;
 
-    int nSizeOfHeaders=getOptionalHeader_SizeOfHeaders();
+    qint32 nSizeOfHeaders=getOptionalHeader_SizeOfHeaders();
 
     if(isImage())
     {
