@@ -3297,7 +3297,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, quint32 nID2, QList<XP
 
     qint32 nNumberOfResources=pListResourceRecords->count();
 
-    for(int i=0; i<nNumberOfResources; i++)
+    for(qint32 i=0; i<nNumberOfResources; i++)
     {
         if(pListResourceRecords->at(i).irin[0].nID==nID1)
         {
