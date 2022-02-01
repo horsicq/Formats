@@ -3644,7 +3644,7 @@ XMACH_DEF::m68k_thread_state32_t XMACH::_read_m68k_thread_state32_t(qint64 nOffs
         result.dreg[i]=read_uint32(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,dreg)+sizeof(quint32)*i,bIsBigEndian);
     }
 
-    for(int i=0;i<8;i++)
+    for(qint32 i=0;i<8;i++)
     {
         result.areg[i]=read_uint32(nOffset+offsetof(XMACH_DEF::m68k_thread_state32_t,areg)+sizeof(quint32)*i,bIsBigEndian);
     }
