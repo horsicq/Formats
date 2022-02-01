@@ -3929,7 +3929,7 @@ XMACH::NLIST_RECORD XMACH::searchNlistRecordByValue(QList<XMACH::NLIST_RECORD> *
 {
     XMACH::NLIST_RECORD result={};
 
-    int nNumberOfRecords=pList->count();
+    qint32 nNumberOfRecords=pList->count();
 
     for(qint32 i=0;i<nNumberOfRecords;i++)
     {
