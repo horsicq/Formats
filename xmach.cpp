@@ -4419,7 +4419,7 @@ XBinary::FT XMACH::getFileType()
 
 qint32 XMACH::getType()
 {
-    int nResult=TYPE_UNKNOWN;
+    qint32 nResult=TYPE_UNKNOWN;
 
     quint32 nFileType=getHeader_filetype();
 
