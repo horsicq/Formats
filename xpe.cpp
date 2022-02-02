@@ -2976,7 +2976,8 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                 pIID->OriginalFirstThunk=pOIAT-pDataOffset;
                 listPatches.append((char *)pIID-pDataOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,OriginalFirstThunk));
 
-                strcpy(pAnsiData,pListImportHeaders->at(i).sName.toLatin1().data()); // TODO replace to strcpy_s
+//                strcpy_s(pAnsiData,pListImportHeaders->at(i).sName.size(),pListImportHeaders->at(i).sName.toLatin1().data());
+                strcpy(pAnsiData,pListImportHeaders->at(i).sName.toLatin1().data());
                 pAnsiData+=pListImportHeaders->at(i).sName.length()+3;
 
                 qint32 nNumberOfPositions=pListImportHeaders->at(i).listPositions.count();
@@ -2994,7 +2995,8 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                         *((quint16 *)pAnsiData)=pListImportHeaders->at(i).listPositions.at(j).nHint;
                         pAnsiData+=2;
 
-                        strcpy(pAnsiData,pListImportHeaders->at(i).listPositions.at(j).sName.toLatin1().data()); // TODO replace to strcpy_s
+//                        strcpy_s(pAnsiData,pListImportHeaders->at(i).listPositions.at(j).sName.size(),pListImportHeaders->at(i).listPositions.at(j).sName.toLatin1().data());
+                        strcpy(pAnsiData,pListImportHeaders->at(i).listPositions.at(j).sName.toLatin1().data());
 
                         pAnsiData+=pListImportHeaders->at(i).listPositions.at(j).sName.length()+1;
                     }

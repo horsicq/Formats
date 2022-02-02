@@ -4615,7 +4615,7 @@ XBinary::OSINFO XMACH::getOsInfo()
     return result;
 }
 
-QString XMACH::typeIdToString(int nType)
+QString XMACH::typeIdToString(qint32 nType)
 {
     QString sResult=tr("Unknown");
 
