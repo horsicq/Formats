@@ -8550,7 +8550,7 @@ QString XPE::certRecordToString(CERT_RECORD certRecord, qint32 nLevel)
         sResult+=getSpaces(2*nLevel)+QString("Value: %1\n").arg(certRecord.varValue.toString());
     }
 
-    int nNumberOfRecords=certRecord.listRecords.count();
+    qint32 nNumberOfRecords=certRecord.listRecords.count();
 
     for(int i=0;i<nNumberOfRecords;i++)
     {
