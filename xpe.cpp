@@ -8525,7 +8525,7 @@ QString XPE::certListToString(QList<CERT> *pCertList)
         sResult+=QString("wRevision: %1\n").arg(XBinary::valueToHex(MODE_UNKNOWN,pCertList->at(i).record.wRevision));
         sResult+=QString("wCertificateType: %1\n").arg(XBinary::valueToHex(MODE_UNKNOWN,pCertList->at(i).record.wCertificateType));
 
-        int nNumberOfRecords=pCertList->at(i).certRecord.listRecords.count();
+        qint32 nNumberOfRecords=pCertList->at(i).certRecord.listRecords.count();
 
         for(qint32 j=0;j<nNumberOfRecords;j++)
         {
