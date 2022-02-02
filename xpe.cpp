@@ -8525,7 +8525,7 @@ QString XPE::certListToString(QList<CERT> *pCertList)
 
         int nNumberOfRecords=pCertList->at(i).certRecord.listRecords.count();
 
-        for(int j=0;j<nNumberOfRecords;j++)
+        for(qint32 j=0;j<nNumberOfRecords;j++)
         {
             sResult+=certRecordToString(pCertList->at(i).certRecord.listRecords.at(j),0);
         }
