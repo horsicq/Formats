@@ -197,7 +197,14 @@ QVariant ScanItemModel::data(const QModelIndex &index, int nRole) const
 #ifdef QT_GUI_LIB
         else if(nRole==Qt::ForegroundRole)
         {
-            result=QVariant(pItem->scanStruct().colText);
+            QColor colText=pItem->scanStruct().colText;
+
+            if(colText==QColor(Qt::black))
+            {
+                colText=QApplication::palette().text().color();
+            }
+
+            result=QVariant(colText);
         }
 #endif
     }
