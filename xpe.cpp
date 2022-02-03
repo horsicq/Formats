@@ -8141,7 +8141,7 @@ QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemor
     {
         QList<XPE::IMPORT_HEADER> importHeaders=getImports(pMemoryMap);
 
-        int nNumberOfRecords=importHeaders.count();
+        qint32 nNumberOfRecords=importHeaders.count();
 
         for(int i=0;i<nNumberOfRecords;i++)
         {
