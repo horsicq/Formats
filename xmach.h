@@ -224,7 +224,7 @@ public:
     static QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID,QList<COMMAND_RECORD> *pListCommandRecords);
 
     bool isCommandPresent(quint32 nCommandID,qint32 nIndex=0);
-    bool isCommandPresent(quint32 nCommandID,int nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
+    bool isCommandPresent(quint32 nCommandID,qint32 nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
     bool isCommandPresent(quint32 nCommandID,QList<COMMAND_RECORD> *pListCommandRecords);
 
     QByteArray getCommandData(quint32 nCommandID,int nIndex=0);

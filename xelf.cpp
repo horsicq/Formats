@@ -4331,7 +4331,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
 
     XBinary::OFFSETSIZE osStringTable=getSectionOffsetSize(nMainStringSection);
 
-    int nNumberOfSections=pListSectionHeaders->count();
+    qint32 nNumberOfSections=pListSectionHeaders->count();
 
     for(qint32 i=0;i<nNumberOfSections;i++)
     {

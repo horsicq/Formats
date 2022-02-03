@@ -1033,7 +1033,7 @@ bool XMACH::isCommandPresent(quint32 nCommandID, qint32 nIndex)
     return isCommandPresent(nCommandID,nIndex,&listCommandRecords);
 }
 
-bool XMACH::isCommandPresent(quint32 nCommandID, int nIndex, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+bool XMACH::isCommandPresent(quint32 nCommandID, qint32 nIndex, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     bool bResult=false;
 
