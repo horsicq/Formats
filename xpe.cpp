@@ -3916,7 +3916,7 @@ qint64 XPE::getResourceGroupIdOffset(quint32 nID, QList<XPE::RESOURCE_RECORD> *p
 
     qint32 nNumberOfResources=pListResourceRecords->count();
 
-    for(int i=0;i<nNumberOfResources;i++)
+    for(qint32 i=0;i<nNumberOfResources;i++)
     {
         if(pListResourceRecords->at(i).irin[0].nID==nID)
         {
