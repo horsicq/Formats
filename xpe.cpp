@@ -4660,7 +4660,7 @@ bool XPE::removeLastSection(QIODevice *pDevice,bool bIsImage)
 
         if(pe.isValid())
         {
-            int nNumberOfSections=pe.getFileHeader_NumberOfSections();
+            qint32 nNumberOfSections=pe.getFileHeader_NumberOfSections();
 
             if(nNumberOfSections)
             {
