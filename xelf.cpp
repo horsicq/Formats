@@ -4359,7 +4359,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nType=DS_SYMBOLTABLE;
             dataset.sName=QString("%1[%2]").arg("Symbol table",sSectionName); // TODO mb translate
 
-            int nSectionIndex=getSectionIndexByName(".strtab");
+            qint32 nSectionIndex=getSectionIndexByName(".strtab");
 
             if(nSectionIndex!=-1)
             {
