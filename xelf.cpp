@@ -3136,7 +3136,7 @@ QList<QString> XELF::getCommentStrings()
     return getCommentStrings(getSectionIndexByName(".comment"));
 }
 
-QList<QString> XELF::getCommentStrings(int nSection)
+QList<QString> XELF::getCommentStrings(qint32 nSection)
 {
     return getStringsFromSection(nSection).values();
 }
