@@ -4267,7 +4267,7 @@ XBinary::OSINFO XELF::getOsInfo()
     return result;
 }
 
-QString XELF::typeIdToString(int nType)
+QString XELF::typeIdToString(qint32 nType)
 {
     QString sResult=tr("Unknown");
 
@@ -4381,7 +4381,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nType=DS_SYMBOLTABLE;
             dataset.sName=QString("%1[%2]").arg("Symbol table",sSectionName); // TODO mb translate
 
-            int nSectionIndex=getSectionIndexByName(".dynstr");
+            qint32 nSectionIndex=getSectionIndexByName(".dynstr");
 
             if(nSectionIndex!=-1)
             {

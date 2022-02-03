@@ -362,7 +362,7 @@ public:
     OS_ANSISTRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
 
     QList<QString> getCommentStrings();
-    QList<QString> getCommentStrings(int nSection);
+    QList<QString> getCommentStrings(qint32 nSection);
 
     QList<NOTE> getNotes();
     QList<NOTE> getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
@@ -412,7 +412,7 @@ public:
     virtual qint32 getType();
     virtual FT getFileType();
     virtual OSINFO getOsInfo();
-    virtual QString typeIdToString(int nType);
+    virtual QString typeIdToString(qint32 nType);
 
     virtual qint64 getBaseAddress();
 
