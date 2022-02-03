@@ -223,7 +223,7 @@ public:
     QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID=0);
     static QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID,QList<COMMAND_RECORD> *pListCommandRecords);
 
-    bool isCommandPresent(quint32 nCommandID,int nIndex=0);
+    bool isCommandPresent(quint32 nCommandID,qint32 nIndex=0);
     bool isCommandPresent(quint32 nCommandID,int nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
     bool isCommandPresent(quint32 nCommandID,QList<COMMAND_RECORD> *pListCommandRecords);
 

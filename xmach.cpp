@@ -1026,7 +1026,7 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<
     return listResult;
 }
 
-bool XMACH::isCommandPresent(quint32 nCommandID, int nIndex)
+bool XMACH::isCommandPresent(quint32 nCommandID, qint32 nIndex)
 {
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(nCommandID);
 
