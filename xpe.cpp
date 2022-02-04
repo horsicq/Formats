@@ -4797,7 +4797,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
     qint32 nSize=pbaData->size();
     char *pOffset=pbaData->data();
     char *pOffsetStart=pOffset;
-    int nCount=nSize/nBlockSize;
+    qint32 nCount=nSize/nBlockSize;
 //    quint64 nVirtualAddress=shOriginal.VirtualAddress;
     qint64 nRelVirtualStart=0;
     qint64 nRelVirtualEnd=S_ALIGN_UP(sectionHeaderOriginal.Misc.VirtualSize,nBlockSize);
