@@ -8147,7 +8147,7 @@ QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemor
         {
             QString sName=importHeaders.at(i).sName.toUpper();
 
-            int nNumberOfPositions=importHeaders.at(i).listPositions.count();
+            qint32 nNumberOfPositions=importHeaders.at(i).listPositions.count();
 
             for(int j=0;j<nNumberOfPositions;j++)
             {
