@@ -1437,7 +1437,7 @@ XMACH::LIBRARY_RECORD XMACH::_readLibraryRecord(qint64 nOffset, bool bIsBigEndia
     return result;
 }
 
-QList<XMACH::FVM_LIBRARY_RECORD> XMACH::getFvmLibraryRecords(int nType)
+QList<XMACH::FVM_LIBRARY_RECORD> XMACH::getFvmLibraryRecords(qint32 nType)
 {
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(nType);
 

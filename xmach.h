@@ -249,7 +249,7 @@ public:
 
     LIBRARY_RECORD _readLibraryRecord(qint64 nOffset,bool bIsBigEndian);
 
-    QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(int nType=XMACH_DEF::S_LC_LOAD_DYLIB);
+    QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(qint32 nType=XMACH_DEF::S_LC_LOAD_DYLIB);
     QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords,int nType=XMACH_DEF::S_LC_LOADFVMLIB);
     static FVM_LIBRARY_RECORD getFvmLibraryRecordByName(QString sName,QList<FVM_LIBRARY_RECORD> *pListLibraryRecords);
     bool isFvmLibraryRecordNamePresent(QString sName);
