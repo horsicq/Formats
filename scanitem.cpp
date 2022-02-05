@@ -20,7 +20,7 @@
  */
 #include "scanitem.h"
 
-ScanItem::ScanItem(const QString &sString, ScanItem *pParentItem, qint32 nNumberOfColumns, bool bIsParent)
+ScanItem::ScanItem(const QString &sString,ScanItem *pParentItem,qint32 nNumberOfColumns,bool bIsParent)
 {
     this->g_pParentItem=pParentItem;
     this->g_sString=sString;
