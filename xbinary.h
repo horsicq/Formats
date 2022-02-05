@@ -177,14 +177,25 @@ public:
         bool bRead;
         bool bWrite;
         bool bExecute;
-        // TODO more
+        // TODO more for Windows
+    #ifdef Q_OS_LINUX
+        bool bShare;
+        bool bPrivate;
+    #endif
     };
 
     struct MEMORY_REGION
     {
-        qint64 nAddress;
-        qint64 nSize;
+        quint64 nAddress;
+        quint64 nSize;
         MEMORY_FLAGS mf;
+        // TODO more for Windows
+    #ifdef Q_OS_LINUX
+        qint64 nOffset;
+        QString sDevice;
+        qint64 nInode;
+        QString sFileName;
+    #endif
     };
 
     enum FORMATTYPE
@@ -1018,7 +1029,7 @@ public:
 
     static QString invertHexByteString(QString sHex);
 
-    static void _swapBytes(char *pSource,int nSize);
+    static void _swapBytes(char *pSource,qint32 nSize);
     static quint16 swapBytes(quint16 nValue);
     static quint32 swapBytes(quint32 nValue);
     static quint64 swapBytes(quint64 nValue);

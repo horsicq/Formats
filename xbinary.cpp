@@ -4947,7 +4947,6 @@ QString XBinary::getDeviceFileCompleteSuffix(QIODevice *pDevice)
 
     if(pFile)
     {
-
         QString sFileName=pFile->fileName();
 
         if(sFileName!="")
@@ -6143,7 +6142,7 @@ QString XBinary::invertHexByteString(QString sHex)
     return sResult;
 }
 
-void XBinary::_swapBytes(char *pSource, int nSize)
+void XBinary::_swapBytes(char *pSource,qint32 nSize)
 {
     for(qint32 i=0;i<(nSize/2);i++)
     {
