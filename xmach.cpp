@@ -1342,7 +1342,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
     return result;
 }
 
-QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(int nType)
+QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(qint32 nType)
 {
     QList<COMMAND_RECORD> listCommandRecords=getCommandRecords(nType);
 
