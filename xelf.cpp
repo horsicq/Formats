@@ -151,7 +151,7 @@ void XELF::setIdent_version(quint8 nValue)
 
 quint8 XELF::getIdent_osabi()
 {
-    return read_uint8( XELF_DEF::EI_OSABI);
+    return read_uint8(XELF_DEF::EI_OSABI);
 }
 
 void XELF::setIdent_osabi(quint8 nValue)
@@ -169,13 +169,13 @@ void XELF::setIdent_abiversion(quint8 nValue)
     write_uint8( XELF_DEF::EI_ABIVERSION,nValue);
 }
 
-quint8 XELF::getIdent_pad(int nPad)
+quint8 XELF::getIdent_pad(qint32 nPad)
 {
     quint8 nValue=0;
 
     if(nPad<7)
     {
-        nValue=read_uint8( XELF_DEF::EI_ABIVERSION+1+nPad);
+        nValue=read_uint8(XELF_DEF::EI_ABIVERSION+1+nPad);
     }
 
     return nValue;
