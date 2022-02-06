@@ -20,7 +20,7 @@
  */
 #include "scanitemmodel.h"
 
-ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, QObject *pParent, int nNumberOfColumns)
+ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,QObject *pParent,int nNumberOfColumns)
     : QAbstractItemModel(pParent)
 {
     g_pRootItem=new ScanItem(tr("Result"),nullptr,nNumberOfColumns,true);

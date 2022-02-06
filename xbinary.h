@@ -194,7 +194,7 @@ public:
         qint64 nOffset;
         QString sDevice;
         qint64 nInode;
-        QString sFileName;
+        QString sPathName;
     #endif
     };
 
