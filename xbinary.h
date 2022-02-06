@@ -193,8 +193,8 @@ public:
     #ifdef Q_OS_LINUX
         qint64 nOffset;
         QString sDevice;
-        qint64 nInode;
-        QString sPathName;
+        qint64 nFile;
+        QString sFileName;
     #endif
     };
 
