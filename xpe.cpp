@@ -9259,9 +9259,9 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 QByteArray baStrings=read_array(result.metaData.nStringsOffset,result.metaData.nStringsSize);
 
                                 char *_pOffset=baStrings.data();
-                                int _nSize=baStrings.size();
+                                qint32 _nSize=baStrings.size();
 
-                                for(int i=1; i<_nSize; i++)
+                                for(qint32 i=1; i<_nSize; i++)
                                 {
                                     _pOffset++;
                                     QString sTemp=_pOffset;
