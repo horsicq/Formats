@@ -189,7 +189,12 @@ public:
         quint64 nAddress;
         quint64 nSize;
         MEMORY_FLAGS mf;
-        // TODO more for Windows
+    #ifdef Q_OS_WINDOWS
+        quint64 nAllocationBase;
+        MEMORY_FLAGS mfAllocation;
+        quint32 nState;
+        quint32 nType;
+    #endif
     #ifdef Q_OS_LINUX
         qint64 nOffset;
         QString sDevice;
@@ -1227,6 +1232,8 @@ public:
     static QString createResultString2(const SCANSTRUCT *pScanStruct);
 
     static bool checkVersionString(QString sVersion);
+
+    static QString memoryFlagsToString(MEMORY_FLAGS mf);
 
 public slots:
     void setSearchProcessEnable(bool bState);

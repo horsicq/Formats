@@ -121,32 +121,32 @@ void XELF::setIdent_mag_LE(quint32 nValue)
 
 quint8 XELF::getIdent_class()
 {
-    return read_uint8( XELF_DEF::EI_CLASS);
+    return read_uint8(XELF_DEF::EI_CLASS);
 }
 
 void XELF::setIdent_class(quint8 nValue)
 {
-    write_uint8( XELF_DEF::EI_CLASS,nValue);
+    write_uint8(XELF_DEF::EI_CLASS,nValue);
 }
 
 quint8 XELF::getIdent_data()
 {
-    return read_uint8( XELF_DEF::EI_DATA);
+    return read_uint8(XELF_DEF::EI_DATA);
 }
 
 void XELF::setIdent_data(quint8 nValue)
 {
-    write_uint8( XELF_DEF::EI_DATA,nValue);
+    write_uint8(XELF_DEF::EI_DATA,nValue);
 }
 
 quint8 XELF::getIdent_version()
 {
-    return read_uint8( XELF_DEF::EI_VERSION);
+    return read_uint8(XELF_DEF::EI_VERSION);
 }
 
 void XELF::setIdent_version(quint8 nValue)
 {
-    write_uint8( XELF_DEF::EI_VERSION,nValue);
+    write_uint8(XELF_DEF::EI_VERSION,nValue);
 }
 
 quint8 XELF::getIdent_osabi()
@@ -156,17 +156,17 @@ quint8 XELF::getIdent_osabi()
 
 void XELF::setIdent_osabi(quint8 nValue)
 {
-    write_uint8( XELF_DEF::EI_OSABI,nValue);
+    write_uint8(XELF_DEF::EI_OSABI,nValue);
 }
 
 quint8 XELF::getIdent_abiversion()
 {
-    return read_uint8( XELF_DEF::EI_ABIVERSION);
+    return read_uint8(XELF_DEF::EI_ABIVERSION);
 }
 
 void XELF::setIdent_abiversion(quint8 nValue)
 {
-    write_uint8( XELF_DEF::EI_ABIVERSION,nValue);
+    write_uint8(XELF_DEF::EI_ABIVERSION,nValue);
 }
 
 quint8 XELF::getIdent_pad(qint32 nPad)
@@ -181,11 +181,11 @@ quint8 XELF::getIdent_pad(qint32 nPad)
     return nValue;
 }
 
-void XELF::setIdent_pad(quint8 nValue, int nPad)
+void XELF::setIdent_pad(quint8 nValue,qint32 nPad)
 {
     if(nPad<7)
     {
-        write_uint8( XELF_DEF::EI_ABIVERSION+1+nPad,nValue);
+        write_uint8(XELF_DEF::EI_ABIVERSION+1+nPad,nValue);
     }
 }
 

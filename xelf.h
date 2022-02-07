@@ -112,7 +112,7 @@ public:
     void setIdent_abiversion(quint8 nValue);
 
     quint8 getIdent_pad(qint32 nPad);
-    void setIdent_pad(quint8 nValue,int nPad);
+    void setIdent_pad(quint8 nValue,qint32 nPad);
 
     // TODO Hdr32 getHdr32();
     // TODO Hdr64 getHdr64();

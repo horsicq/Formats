@@ -8244,6 +8244,18 @@ bool XBinary::checkVersionString(QString sVersion)
     return bResult;
 }
 
+QString XBinary::memoryFlagsToString(MEMORY_FLAGS mf)
+{
+    QString sResult;
+
+    if(mf.bRead)        sResult+="R";
+    if(mf.bWrite)       sResult+="W";
+    if(mf.bExecute)     sResult+="E";
+    // TODO more
+
+    return sResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!
