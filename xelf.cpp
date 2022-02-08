@@ -4115,6 +4115,27 @@ XBinary::OSINFO XELF::getOsInfo()
 
     if((result.osName==OSNAME_UNIX)||(result.osName==OSNAME_LINUX))
     {
+//        QString sInterpteter=getProgramInterpreterName()
+
+        //Unknown(Interpreter__libexec_ld-elf.so.1)
+        //Unknown(Interpreter__lib_ld.so.1)
+        //Unknown(Interpreter__lib_ld-linux.so.1)
+        //Unknown(Interpreter__lib_ld-linux.so.2)
+        //Unknown(Interpreter__lib_ld-linux.so.3)
+        //Unknown(Interpreter__lib_ld-linux-nios2.so.1)
+        //Unknown(Interpreter__lib_ld-uClibc.so.0)
+        //Unknown(Interpreter__system_bin_linker)
+        //Unknown(Interpreter__usr_libexec_ld-elf.so.1)
+        //Unknown(Interpreter__usr_lib_ld.so.1)
+        //Unknown(Interpreter__usr_lib_ldqnx.so.1)
+        //Unknown(Interpreter__usr_lib_libc.so.1)
+
+        // 64
+        // Unknown(Interpreter_._llib_ld-linux-x86-64.so.2)
+        // Unknown(Interpreter__lib64_ld-linux-x86-64.so.2)
+        // Unknown(Interpreter__lib_ld-linux-riscv64-lp64.so.1)
+        // Unknown(Interpreter__system_bin_linker64)
+
         QList<QString> listComments=getCommentStrings();
 
         qint32 nNumberOfComments=listComments.count();
@@ -4230,7 +4251,8 @@ XBinary::OSINFO XELF::getOsInfo()
             }
         }
     }
-    else if(result.osName==OSNAME_FREEBSD)
+
+    if(result.osName==OSNAME_FREEBSD)
     {
         QList<QString> listComments=getCommentStrings();
 
