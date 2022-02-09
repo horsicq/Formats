@@ -4136,6 +4136,8 @@ XBinary::OSINFO XELF::getOsInfo()
         // Unknown(Interpreter__lib_ld-linux-riscv64-lp64.so.1)
         // Unknown(Interpreter__system_bin_linker64)
 
+        // liblog.so
+
         QList<QString> listComments=getCommentStrings();
 
         qint32 nNumberOfComments=listComments.count();
