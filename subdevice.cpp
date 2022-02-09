@@ -135,7 +135,7 @@ qint64 SubDevice::readData(char *pData, qint64 nMaxSize)
     return nLen;
 }
 
-qint64 SubDevice::writeData(const char *pData, qint64 nMaxSize)
+qint64 SubDevice::writeData(const char *pData,qint64 nMaxSize)
 {
     nMaxSize=qMin(nMaxSize,g_nSize-pos());
 
