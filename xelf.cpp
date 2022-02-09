@@ -4152,18 +4152,7 @@ XBinary::OSINFO XELF::getOsInfo()
 
     QList<QString> listLibraries=getLibraries(&memoryMap,&listTagStructs);
 
-    if((result.osName==OSNAME_UNIX))
-    {
-        if( isNotePresent(&listNotes,"Android")||
-            isSectionNamePresent(".note.android.ident",&listSectionRecords)||
-            (XBinary::isStringInListPresent(&listLibraries,"liblog.so"))||
-            ((sInterpteter=="system/bin/linker")||(sInterpteter=="system/bin/linker64")))
-        {
-            result.osName=OSNAME_ANDROID;
-        }
-    }
-
-    if((result.osName==OSNAME_UNIX))
+    if(result.osName==OSNAME_UNIX)
     {
         if(sInterpteter.contains("ld-elf.so"))
         {
@@ -4171,7 +4160,7 @@ XBinary::OSINFO XELF::getOsInfo()
         }
     }
 
-    if((result.osName==OSNAME_UNIX))
+    if(result.osName==OSNAME_UNIX)
     {
         if(sInterpteter.contains("linux"))
         {
@@ -4179,7 +4168,7 @@ XBinary::OSINFO XELF::getOsInfo()
         }
     }
 
-    if((result.osName==OSNAME_UNIX))
+    if(result.osName==OSNAME_UNIX)
     {
         if(sInterpteter.contains("ldqnx"))
         {
@@ -4187,7 +4176,7 @@ XBinary::OSINFO XELF::getOsInfo()
         }
     }
 
-    if((result.osName==OSNAME_UNIX))
+    if(result.osName==OSNAME_UNIX)
     {
         if(sInterpteter.contains("uClibc"))
         {
@@ -4330,6 +4319,17 @@ XBinary::OSINFO XELF::getOsInfo()
             {
                 break;
             }
+        }
+    }
+
+    if(result.osName==OSNAME_UNIX)
+    {
+        if( isNotePresent(&listNotes,"Android")||
+            isSectionNamePresent(".note.android.ident",&listSectionRecords)||
+            (XBinary::isStringInListPresent(&listLibraries,"liblog.so"))||
+            ((sInterpteter=="system/bin/linker")||(sInterpteter=="system/bin/linker64")))
+        {
+            result.osName=OSNAME_ANDROID;
         }
     }
 
