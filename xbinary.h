@@ -409,7 +409,9 @@ public:
         OSNAME_TURBOLINUX,
         OSNAME_VINELINUX,
         OSNAME_SUNOS,
-        OSNAME_OPENVOS
+        OSNAME_OPENVOS,
+        OSNAME_MCLINUX,
+        OSNAME_QNX
     };
 
     struct OSINFO

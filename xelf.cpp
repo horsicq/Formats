@@ -3130,6 +3130,21 @@ XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr>
     return result;
 }
 
+
+XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<SECTION_RECORD> *pListSectionRecords)
+{
+    OS_ANSISTRING result={};
+
+    QList<SECTION_RECORD> listInterps=_getSectionRecords(pListSectionRecords,".interp");
+
+    if(listInterps.count())
+    {
+        result=getOsAnsiString(listInterps.at(0).nOffset,listInterps.at(0).nSize);
+    }
+
+    return result;
+}
+
 QList<QString> XELF::getCommentStrings()
 {
     // TODO Optimize
@@ -4108,38 +4123,80 @@ XBinary::OSINFO XELF::getOsInfo()
     else if (osabi==XELF_DEF::ELFOSABI_FENIXOS)     result.osName=OSNAME_FENIXOS;
     else if (osabi==XELF_DEF::ELFOSABI_OPENVOS)     result.osName=OSNAME_OPENVOS;
 
-    if(isNotePresent("Android")||isSectionNamePresent(".note.android.ident"))
+    QList<XELF_DEF::Elf_Phdr> listProgramHeaders=getElf_PhdrList();
+    QList<XELF_DEF::Elf_Shdr> listSectionHeaders=getElf_ShdrList();
+
+    qint32 nStringTableSection=getSectionStringTable();
+    QByteArray baStringTable=getSection(nStringTableSection);
+
+    QList<SECTION_RECORD> listSectionRecords=XELF::getSectionRecords(&listSectionHeaders,isImage(),&baStringTable);
+
+    QList<QString> listComments=getCommentStrings();
+
+    QList<NOTE> listNotes=getNotes(&listProgramHeaders);
+
+    if(listNotes.count()==0)
     {
-        result.osName=OSNAME_ANDROID;
+        listNotes=getNotes(&listSectionHeaders);
+    }
+
+    QString sInterpteter=getProgramInterpreterName(&listProgramHeaders).sAnsiString;
+
+    if(sInterpteter=="")
+    {
+        sInterpteter=getProgramInterpreterName(&listSectionRecords).sAnsiString;
+    }
+
+    XBinary::_MEMORY_MAP memoryMap=getMemoryMap();
+    QList<TAG_STRUCT> listTagStructs=getTagStructs(&listProgramHeaders,&memoryMap);
+
+    QList<QString> listLibraries=getLibraries(&memoryMap,&listTagStructs);
+
+    if((result.osName==OSNAME_UNIX))
+    {
+        if( isNotePresent(&listNotes,"Android")||
+            isSectionNamePresent(".note.android.ident",&listSectionRecords)||
+            (XBinary::isStringInListPresent(&listLibraries,"liblog.so"))||
+            ((sInterpteter=="system/bin/linker")||(sInterpteter=="system/bin/linker64")))
+        {
+            result.osName=OSNAME_ANDROID;
+        }
+    }
+
+    if((result.osName==OSNAME_UNIX))
+    {
+        if(sInterpteter.contains("ld-elf.so"))
+        {
+            result.osName=OSNAME_FREEBSD;
+        }
+    }
+
+    if((result.osName==OSNAME_UNIX))
+    {
+        if(sInterpteter.contains("linux"))
+        {
+            result.osName=OSNAME_LINUX;
+        }
+    }
+
+    if((result.osName==OSNAME_UNIX))
+    {
+        if(sInterpteter.contains("ldqnx"))
+        {
+            result.osName=OSNAME_QNX;
+        }
+    }
+
+    if((result.osName==OSNAME_UNIX))
+    {
+        if(sInterpteter.contains("uClibc"))
+        {
+            result.osName=OSNAME_MCLINUX;
+        }
     }
 
     if((result.osName==OSNAME_UNIX)||(result.osName==OSNAME_LINUX))
     {
-//        QString sInterpteter=getProgramInterpreterName()
-
-        //Unknown(Interpreter__libexec_ld-elf.so.1)
-        //Unknown(Interpreter__lib_ld.so.1)
-        //Unknown(Interpreter__lib_ld-linux.so.1)
-        //Unknown(Interpreter__lib_ld-linux.so.2)
-        //Unknown(Interpreter__lib_ld-linux.so.3)
-        //Unknown(Interpreter__lib_ld-linux-nios2.so.1)
-        //Unknown(Interpreter__lib_ld-uClibc.so.0)
-        //Unknown(Interpreter__system_bin_linker)
-        //Unknown(Interpreter__usr_libexec_ld-elf.so.1)
-        //Unknown(Interpreter__usr_lib_ld.so.1)
-        //Unknown(Interpreter__usr_lib_ldqnx.so.1)
-        //Unknown(Interpreter__usr_lib_libc.so.1)
-
-        // 64
-        // Unknown(Interpreter_._llib_ld-linux-x86-64.so.2)
-        // Unknown(Interpreter__lib64_ld-linux-x86-64.so.2)
-        // Unknown(Interpreter__lib_ld-linux-riscv64-lp64.so.1)
-        // Unknown(Interpreter__system_bin_linker64)
-
-        // liblog.so
-
-        QList<QString> listComments=getCommentStrings();
-
         qint32 nNumberOfComments=listComments.count();
 
         for(qint32 i=0;i<nNumberOfComments;i++)
@@ -4256,8 +4313,6 @@ XBinary::OSINFO XELF::getOsInfo()
 
     if(result.osName==OSNAME_FREEBSD)
     {
-        QList<QString> listComments=getCommentStrings();
-
         qint32 nNumberOfComments=listComments.count();
 
         for(qint32 i=0;i<nNumberOfComments;i++)
@@ -4334,13 +4389,30 @@ QList<XELF_DEF::Elf_Shdr> XELF::_getSections(QList<XELF_DEF::Elf_Shdr> *pListSec
 {
     QList<XELF_DEF::Elf_Shdr> listResult;
 
-    qint32 nNumberOfPrograms=pListSectionHeaders->count();
+    qint32 nNumberOfSections=pListSectionHeaders->count();
 
-    for(qint32 i=0;i<nNumberOfPrograms;i++)
+    for(qint32 i=0;i<nNumberOfSections;i++)
     {
         if(pListSectionHeaders->at(i).sh_type==nType)
         {
             listResult.append(pListSectionHeaders->at(i));
+        }
+    }
+
+    return listResult;
+}
+
+QList<XELF::SECTION_RECORD> XELF::_getSectionRecords(QList<SECTION_RECORD> *pListSectionRecords, QString sName)
+{
+    QList<SECTION_RECORD> listResult;
+
+    qint32 nNumberOfSections=pListSectionRecords->count();
+
+    for(qint32 i=0;i<nNumberOfSections;i++)
+    {
+        if(pListSectionRecords->at(i).sName==sName)
+        {
+            listResult.append(pListSectionRecords->at(i));
         }
     }
 
