@@ -9236,7 +9236,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                         // result.bInit=true;
                         qint64 nOffset=result.nMetaDataOffset+20+result.metaData.header.nVersionStringLength;
 
-                        for(int i=0; i<result.metaData.header.nStreams; i++)
+                        for(qint32 i=0;i<result.metaData.header.nStreams;i++)
                         {
                             CLI_METADATA_STREAM stream={};
 
