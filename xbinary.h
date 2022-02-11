@@ -189,7 +189,7 @@ public:
         quint64 nAddress;
         quint64 nSize;
         MEMORY_FLAGS mf;
-    #ifdef Q_OS_WINDOWS
+    #ifdef Q_OS_WIN
         quint64 nAllocationBase;
         MEMORY_FLAGS mfAllocation;
         quint32 nState;
