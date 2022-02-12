@@ -230,7 +230,7 @@ public:
     QByteArray getCommandData(quint32 nCommandID,qint32 nIndex=0);
     bool setCommandData(quint32 nCommandID, QByteArray baData, qint32 nIndex=0);
     QByteArray getCommandData(quint32 nCommandID,qint32 nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
-    bool setCommandData(quint32 nCommandID,QByteArray baData,int nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
+    bool setCommandData(quint32 nCommandID,QByteArray baData,qint32 nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
 
     qint64 getCommandRecordOffset(quint32 nCommandID,int nIndex);
     qint64 getCommandRecordOffset(quint32 nCommandID,int nIndex,QList<COMMAND_RECORD> *pListCommandRecords);
