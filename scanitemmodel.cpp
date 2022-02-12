@@ -89,7 +89,7 @@ QModelIndex ScanItemModel::index(int nRow, int nColumn, const QModelIndex &paren
 {
     QModelIndex result;
 
-    if(hasIndex(nRow, nColumn, parent))
+    if(hasIndex(nRow,nColumn,parent))
     {
         ScanItem *pParentItem=nullptr;
 
