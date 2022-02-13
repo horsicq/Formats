@@ -106,7 +106,7 @@ QModelIndex ScanItemModel::index(int nRow, int nColumn, const QModelIndex &paren
 
         if(pChildItem)
         {
-            result=createIndex(nRow, nColumn, pChildItem);
+            result=createIndex(nRow,nColumn,pChildItem);
         }
     }
 
