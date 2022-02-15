@@ -8515,9 +8515,9 @@ QString XPE::certListToString(QList<CERT> *pCertList)
 {
     QString sResult;
 
-    int nNumberOfCerts=pCertList->count();
+    qint32 nNumberOfCerts=pCertList->count();
 
-    for(int i=0;i<nNumberOfCerts;i++)
+    for(qint32 i=0;i<nNumberOfCerts;i++)
     {
         sResult+=QString("Valid: %1\n").arg(XBinary::boolToString(pCertList->at(i).bIsValid));
         sResult+=QString("Offset: %1\n").arg(XBinary::valueToHex(MODE_UNKNOWN,pCertList->at(i).nOffset));
