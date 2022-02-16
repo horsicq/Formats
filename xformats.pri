@@ -55,6 +55,14 @@ contains(XCONFIG, use_dex) {
     }
 }
 
+contains(XCONFIG, use_pdf) {
+    DEFINES += USE_PDF
+    !contains(XCONFIG, xpdf) {
+        XCONFIG += xpdf
+        include($$PWD/../XPDF/xpdf.pri)
+    }
+}
+
 contains(XCONFIG, use_archive) {
     DEFINES += USE_ARCHIVE
     !contains(XCONFIG, xarchives) {

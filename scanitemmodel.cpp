@@ -73,7 +73,7 @@ ScanItemModel::~ScanItemModel()
     delete g_pRootItem;
 }
 
-QVariant ScanItemModel::headerData(int nSection, Qt::Orientation orientation, int nRole) const
+QVariant ScanItemModel::headerData(int nSection,Qt::Orientation orientation,int nRole) const
 {
     QVariant result;
 

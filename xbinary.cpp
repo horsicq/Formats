@@ -441,6 +441,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_JAR:                sResult=QString("JAR");             break;
         case FT_JPEG:               sResult=QString("JPEG");            break;
         case FT_MACHOFAT:           sResult=QString("Mach-O FAT");      break;
+        case FT_PDF:                sResult=QString("PDF");             break;
         case FT_PLAINTEXT:          sResult=QString("Plain Text");      break; // mb TODO translate
         case FT_PNG:                sResult=QString("PNG");             break;
         case FT_RAR:                sResult=QString("RAR");             break;
@@ -4115,6 +4116,11 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         else if(compareSignature(&memoryMap,"03000800"))
         {
             stResult.insert(FT_ANDROIDXML);
+        }
+        else if(compareSignature(&memoryMap,"'%PDF'",0))
+        {
+            stResult.insert(FT_DOCUMENT);
+            stResult.insert(FT_PDF);
         }
 
         if(isPlainTextType(&baHeader))

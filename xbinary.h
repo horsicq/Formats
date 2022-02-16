@@ -249,6 +249,7 @@ public:
         FT_JAR,
         FT_JPEG,
         FT_MACHOFAT,
+        FT_PDF,
         FT_PLAINTEXT,
         FT_PNG,
         FT_RAR,

@@ -33,6 +33,9 @@
 #include "xdex.h"
 #include "xandroidbinary.h"
 #endif
+#ifdef USE_PDF
+#include "xpdf.h"
+#endif
 #ifdef USE_ARCHIVE
 #include "xarchives.h"
 #endif

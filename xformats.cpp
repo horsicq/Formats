@@ -81,6 +81,13 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
         result=dex.getMemoryMap();
     }
 #endif
+#ifdef USE_PDF // TODO Check !!!
+    else if(XBinary::checkFileType(XBinary::FT_PDF,fileType))
+    {
+        XPDF pdf(pDevice);
+        result=pdf.getMemoryMap();
+    }
+#endif
 #ifdef USE_ARCHIVE
     else if(XBinary::checkFileType(XBinary::FT_ZIP,fileType))
     {
@@ -268,6 +275,13 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
         bResult=dex.isBigEndian();
     }
 #endif
+#ifdef USE_PDF
+    else if(XBinary::checkFileType(XBinary::FT_PDF,fileType))
+    {
+        XPDF pdf(pDevice);
+        bResult=pdf.isBigEndian();
+    }
+#endif
 #ifdef USE_ARCHIVE
     else if(XBinary::checkFileType(XBinary::FT_ZIP,fileType))
     {
@@ -339,6 +353,13 @@ bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
         bResult=dex.isSigned();
     }
 #endif
+#ifdef USE_PDF
+    else if(XBinary::checkFileType(XBinary::FT_PDF,fileType))
+    {
+        XPDF pdf(pDevice);
+        bResult=pdf.isSigned();
+    }
+#endif
 #ifdef USE_ARCHIVE
     else if(XBinary::checkFileType(XBinary::FT_ZIP,fileType))
     {
@@ -408,6 +429,13 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice 
     {
         XDEX dex(pDevice);
         osResult=dex.getSignOffsetSize();
+    }
+#endif
+#ifdef USE_PDF
+    else if(XBinary::checkFileType(XBinary::FT_PDF,fileType))
+    {
+        XPDF pdf(pDevice);
+        osResult=pdf.getSignOffsetSize();
     }
 #endif
 #ifdef USE_ARCHIVE
@@ -531,6 +559,15 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
 
         XBinary::_MEMORY_MAP memoryMap=dex.getMemoryMap();
         listResult=dex.getSymbolRecords(&memoryMap,symBolType);
+    }
+#endif
+#ifdef USE_PDF
+    else if(XBinary::checkFileType(XBinary::FT_PDF,fileType))
+    {
+        XPDF pdf(pDevice);
+
+        XBinary::_MEMORY_MAP memoryMap=pdf.getMemoryMap();
+        listResult=pdf.getSymbolRecords(&memoryMap,symBolType);
     }
 #endif
 #ifdef USE_ARCHIVE
