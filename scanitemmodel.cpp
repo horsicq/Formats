@@ -438,7 +438,7 @@ void ScanItemModel::_toTSV(QString *pString, ScanItem *pItem,qint32 nLevel)
     }
 }
 
-void ScanItemModel::_toFormattedString(QString *pString, ScanItem *pItem, qint32 nLevel)
+void ScanItemModel::_toFormattedString(QString *pString,ScanItem *pItem,qint32 nLevel)
 {
     if(nLevel)
     {
