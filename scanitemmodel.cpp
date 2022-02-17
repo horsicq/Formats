@@ -313,7 +313,7 @@ ScanItem *ScanItemModel::rootItem()
     return this->g_pRootItem;
 }
 
-void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLevel)
+void ScanItemModel::_toXML(QXmlStreamWriter *pXml,ScanItem *pItem,qint32 nLevel)
 {
     if(pItem->childCount())
     {

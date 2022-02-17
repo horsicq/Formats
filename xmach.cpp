@@ -1135,7 +1135,7 @@ bool XMACH::setCommandData(quint32 nCommandID, QByteArray baData, qint32 nIndex,
     return bResult;
 }
 
-qint64 XMACH::getCommandRecordOffset(quint32 nCommandID, int nIndex)
+qint64 XMACH::getCommandRecordOffset(quint32 nCommandID, qint32 nIndex)
 {
     qint64 nResult=-1;
 
