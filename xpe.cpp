@@ -9750,9 +9750,9 @@ int XPE::getImportSection()
     return getImportSection(&memoryMap);
 }
 
-int XPE::getImportSection(_MEMORY_MAP *pMemoryMap)
+qint32 XPE::getImportSection(_MEMORY_MAP *pMemoryMap)
 {
-    int nResult=-1;
+    qint32 nResult=-1;
 
     qint64 nAddressOfImport=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT).VirtualAddress;
 
