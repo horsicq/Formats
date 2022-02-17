@@ -859,7 +859,7 @@ public:
 
     int getEntryPointSection();
     qint32 getEntryPointSection(XBinary::_MEMORY_MAP *pMemoryMap);
-    int getImportSection();
+    qint32 getImportSection();
     qint32 getImportSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getExportSection();
     int getExportSection(XBinary::_MEMORY_MAP *pMemoryMap);
