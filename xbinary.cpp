@@ -4322,6 +4322,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if(stFileTypes.contains(FT_APK))        listResult.append(FT_APK);
     if(stFileTypes.contains(FT_IPA))        listResult.append(FT_IPA);
     if(stFileTypes.contains(FT_DEX))        listResult.append(FT_DEX);
+    if(stFileTypes.contains(FT_PDF))        listResult.append(FT_PDF);
     if(stFileTypes.contains(FT_COM))        listResult.append(FT_COM);
     if(stFileTypes.contains(FT_MSDOS))      listResult.append(FT_MSDOS);
     if(stFileTypes.contains(FT_NE))         listResult.append(FT_NE);

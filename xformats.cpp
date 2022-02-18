@@ -104,6 +104,24 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
     return result;
 }
 
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage, qint64 nModuleAddress)
+{
+    XBinary::_MEMORY_MAP result={};
+
+    QFile file;
+
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        result=getMemoryMap(XBinary::getPrefFileType(&file,true),&file,bIsImage,nModuleAddress);
+
+        file.close();
+    }
+
+    return result;
+}
+
 qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
 {
     // TODO pMemoryMap
