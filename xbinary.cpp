@@ -8365,15 +8365,15 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                         break;
 
                     case 2:
-                        _nAddress+=2+read_int16(nOffset); // TODO mb BE<->LE
+                        _nAddress+=2+read_uint16(nOffset); // TODO mb BE<->LE
                         break;
 
                     case 4:
-                        _nAddress+=4+read_int32(nOffset); // TODO mb BE<->LE
+                        _nAddress+=4+read_uint32(nOffset); // TODO mb BE<->LE
                         break;
 
                     case 8:
-                        _nAddress+=8+read_int64(nOffset); // TODO mb BE<->LE
+                        _nAddress+=8+read_uint64(nOffset); // TODO mb BE<->LE
                         break;
                 }
 
