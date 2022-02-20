@@ -639,7 +639,7 @@ bool XBinary::isRegExpPresent(QString sRegExp, QString sString)
     return (regExp(sRegExp,sString,0)!="");
 }
 
-qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
+qint64 XBinary::read_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize)
 {
     qint64 nResult=0;
 
