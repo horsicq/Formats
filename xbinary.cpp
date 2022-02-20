@@ -116,7 +116,7 @@ void XBinary::setReadWriteMutex(QMutex *pReadWriteMutex)
     g_pReadWriteMutex=pReadWriteMutex;
 }
 
-qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen)
+qint64 XBinary::safeReadData(QIODevice *pDevice,qint64 nPos,char *pData,qint64 nMaxLen)
 {
     qint64 nResult=0;
 
