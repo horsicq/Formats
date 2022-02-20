@@ -411,7 +411,7 @@ void ScanItemModel::_toCSV(QString *pString,ScanItem *pItem,qint32 nLevel)
     }
 }
 
-void ScanItemModel::_toTSV(QString *pString, ScanItem *pItem,qint32 nLevel)
+void ScanItemModel::_toTSV(QString *pString,ScanItem *pItem,qint32 nLevel)
 {
     if(pItem->childCount())
     {
