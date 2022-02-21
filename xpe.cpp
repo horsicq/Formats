@@ -11627,7 +11627,10 @@ QMap<quint64, QString> XPE::getResourceTypes()
     mapResult.insert(11,"RT_MESSAGETABLE");
     mapResult.insert(12,"RT_GROUP_CURSOR");
     mapResult.insert(14,"RT_GROUP_ICON");
+    mapResult.insert(15,"S_RT_NAMETABLE");
     mapResult.insert(16,"RT_VERSION");
+    mapResult.insert(17,"RT_DLGINCLUDE");
+    mapResult.insert(23,"RT_HTML");
     mapResult.insert(24,"RT_MANIFEST");
     mapResult.insert(0x2000+2,"RT_NEWBITMAP");
     mapResult.insert(0x2000+4,"RT_NEWMENU");
@@ -11653,7 +11656,10 @@ QMap<quint64, QString> XPE::getResourceTypesS()
     mapResult.insert(11,"MESSAGETABLE");
     mapResult.insert(12,"GROUP_CURSOR");
     mapResult.insert(14,"GROUP_ICON");
+    mapResult.insert(15,"NAMETABLE");
     mapResult.insert(16,"VERSION");
+    mapResult.insert(17,"DLGINCLUDE");
+    mapResult.insert(23,"HTML");
     mapResult.insert(24,"MANIFEST");
     mapResult.insert(0x2000+2,"NEWBITMAP");
     mapResult.insert(0x2000+4,"NEWMENU");

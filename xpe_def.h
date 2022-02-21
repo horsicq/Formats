@@ -136,10 +136,13 @@ const quint32 S_RT_RCDATA                                   =10;
 const quint32 S_RT_MESSAGETABLE                             =11;
 const quint32 S_RT_GROUP_CURSOR                             =12;
 const quint32 S_RT_GROUP_ICON                               =14;
+const quint32 S_RT_NAMETABLE                                =15;
 const quint32 S_RT_VERSION                                  =16;
+const quint32 S_RT_DLGINCLUDE                               =17;
 const quint32 S_RT_NEWBITMAP                                =(S_RT_BITMAP|S_RT_NEWRESOURCE);
 const quint32 S_RT_NEWMENU                                  =(S_RT_MENU|S_RT_NEWRESOURCE);
 const quint32 S_RT_NEWDIALOG                                =(S_RT_DIALOG|S_RT_NEWRESOURCE);
+const quint32 S_RT_HTML                                     =23;
 const quint32 S_RT_MANIFEST                                 =24;
 
 const quint32 S_IMAGE_DEBUG_TYPE_UNKNOWN                    =0;
