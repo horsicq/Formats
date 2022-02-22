@@ -177,7 +177,10 @@ public:
         bool bRead;
         bool bWrite;
         bool bExecute;
-        // TODO more for Windows
+    #ifdef Q_OS_WIN
+        bool bGuard;
+        bool bCopy;
+    #endif
     #ifdef Q_OS_LINUX
         bool bShare;
         bool bPrivate;

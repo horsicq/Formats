@@ -8257,10 +8257,15 @@ QString XBinary::memoryFlagsToString(MEMORY_FLAGS mf)
 {
     QString sResult;
 
+#ifdef Q_OS_WIN
+    if(mf.bGuard)       sResult+="G";
+#endif
     if(mf.bRead)        sResult+="R";
     if(mf.bWrite)       sResult+="W";
     if(mf.bExecute)     sResult+="E";
-    // TODO more
+#ifdef Q_OS_WIN
+    if(mf.bCopy)        sResult+="C";
+#endif
 
     return sResult;
 }

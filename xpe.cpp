@@ -243,7 +243,7 @@ qint32 XPE::getType()
     return result;
 }
 
-QString XPE::typeIdToString(int nType)
+QString XPE::typeIdToString(qint32 nType)
 {
     QString sResult=tr("Unknown");
 

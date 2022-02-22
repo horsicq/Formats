@@ -341,7 +341,7 @@ public:
 
     virtual FT getFileType();
     virtual qint32 getType();
-    virtual QString typeIdToString(int nType);
+    virtual QString typeIdToString(qint32 nType);
 
     virtual bool isSigned();
     virtual OFFSETSIZE getSignOffsetSize();
