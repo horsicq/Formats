@@ -85,7 +85,7 @@ QVariant ScanItemModel::headerData(int nSection,Qt::Orientation orientation,int 
     return result;
 }
 
-QModelIndex ScanItemModel::index(int nRow, int nColumn, const QModelIndex &parent) const
+QModelIndex ScanItemModel::index(int nRow,int nColumn,const QModelIndex &parent) const
 {
     QModelIndex result;
 
