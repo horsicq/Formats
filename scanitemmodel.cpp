@@ -170,7 +170,7 @@ int ScanItemModel::columnCount(const QModelIndex &parent) const
     return nResult;
 }
 
-QVariant ScanItemModel::data(const QModelIndex &index, int nRole) const
+QVariant ScanItemModel::data(const QModelIndex &index,int nRole) const
 {
     QVariant result;
 
