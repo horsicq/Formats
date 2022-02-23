@@ -52,7 +52,7 @@ bool XELF::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
     return xelf.isValid();
 }
 
-XBinary::MODE XELF::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+XBinary::MODE XELF::getMode(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
 {
     XELF xelf(pDevice,bIsImage,nModuleAddress);
 
