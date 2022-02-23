@@ -342,7 +342,7 @@ void ScanItemModel::_toXML(QXmlStreamWriter *pXml,ScanItem *pItem,qint32 nLevel)
     }
 }
 
-void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem,qint32 nLevel)
+void ScanItemModel::_toJSON(QJsonObject *pJsonObject,ScanItem *pItem,qint32 nLevel)
 {
     if(pItem->childCount())
     {

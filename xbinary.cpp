@@ -669,15 +669,15 @@ QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize)
     return baResult;
 }
 
-qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
+qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nSize)
 {
     qint64 nResult=0;
 
     qint64 _nTotalSize=getSize();
 
-    if((nMaxSize<=(_nTotalSize-nOffset))&&(nOffset>=0))
+    if((nSize<=(_nTotalSize-nOffset))&&(nOffset>=0))
     {
-        nResult=safeWriteData(g_pDevice,nOffset,pBuffer,nMaxSize);
+        nResult=safeWriteData(g_pDevice,nOffset,pBuffer,nSize);
     }
 
     return nResult;
@@ -695,6 +695,13 @@ qint64 XBinary::read_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qi
     XBinary binary(pDevice);
 
     return binary.read_array(nOffset,pBuffer,nSize);
+}
+
+qint64 XBinary::write_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize)
+{
+    XBinary binary(pDevice);
+
+    return binary.write_array(nOffset,pBuffer,nSize);
 }
 
 quint8 XBinary::read_uint8(qint64 nOffset)
@@ -8125,7 +8132,7 @@ XBinary::XDWORD XBinary::make_xdword(quint32 nValue)
     return result;
 }
 
-bool XBinary::isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion, qint64 nAddress)
+bool XBinary::isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion, quint64 nAddress)
 {
     bool bResult=false;
 
@@ -8135,6 +8142,27 @@ bool XBinary::isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion, qint64 nAddr
     }
 
     return bResult;
+}
+
+XBinary::MEMORY_REGION XBinary::getMemoryRegionByAddress(QList<MEMORY_REGION> *pListMemoryRegions, quint64 nAddress)
+{
+    MEMORY_REGION result={};
+
+    qint32 nNumberOfRecords=pListMemoryRegions->count();
+
+    for(qint32 i=0;i<nNumberOfRecords;i++)
+    {
+        MEMORY_REGION memoryRegion=pListMemoryRegions->at(i);
+
+        if(isAddressInMemoryRegion(&memoryRegion,nAddress))
+        {
+            result=pListMemoryRegions->at(i);
+
+            break;
+        }
+    }
+
+    return result;
 }
 
 QString XBinary::recordFilePartIdToString(FILEPART id)

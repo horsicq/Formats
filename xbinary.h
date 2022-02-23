@@ -660,10 +660,11 @@ public:
     static bool isRegExpPresent(QString sRegExp,QString sString);
     qint64 read_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
     QByteArray read_array(qint64 nOffset,qint64 nSize);
-    qint64 write_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
+    qint64 write_array(qint64 nOffset,char *pBuffer,qint64 nSize);
 
     static QByteArray read_array(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
     static qint64 read_array(QIODevice *pDevice,qint64 nOffset,char *pBuffer,qint64 nSize);
+    static qint64 write_array(QIODevice *pDevice,qint64 nOffset,char *pBuffer,qint64 nSize);
 
     quint8 read_uint8(qint64 nOffset);
     qint8 read_int8(qint64 nOffset);
@@ -1229,7 +1230,8 @@ public:
     static quint32 make_dword(quint16 nValue1,quint16 nValue2);
     static XDWORD make_xdword(quint32 nValue);
 
-    static bool isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion,qint64 nAddress);
+    static bool isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion,quint64 nAddress);
+    static MEMORY_REGION getMemoryRegionByAddress(QList<MEMORY_REGION> *pListMemoryRegions,quint64 nAddress);
 
     static QString recordFilePartIdToString(FILEPART id);
 
