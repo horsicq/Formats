@@ -7925,6 +7925,35 @@ bool XBinary::_replaceMemory(qint64 nDataOffset, char *pData, qint64 nDataSize, 
     return bResult;
 }
 
+bool XBinary::_updateReplaces(qint64 nDataOffset, char *pData, qint64 nDataSize, QList<MEMORY_REPLACE> *pListMemoryReplace)
+{
+    bool bResult=false;
+
+    qint32 nNumberOfRecords=pListMemoryReplace->count();
+
+    for(qint32 i=0;i<nNumberOfRecords;i++)
+    {
+        if(_isOffsetsCrossed(nDataOffset,nDataSize,pListMemoryReplace->at(i).nOffset,pListMemoryReplace->at(i).nSize))
+        {
+            MEMORY_REPLACE memoryReplace=pListMemoryReplace->at(i);
+
+            for(qint32 j=0;j<memoryReplace.nSize;j++)
+            {
+                bResult=true;
+
+                memoryReplace.baOriginal.data()[j]=pData[(memoryReplace.nOffset+j)-nDataOffset];
+
+                if((memoryReplace.nOffset+j)>(nDataOffset+nDataSize))
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    return bResult;
+}
+
 QList<XBinary::SYMBOL_RECORD> XBinary::getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap,SYMBOL_TYPE symbolType)
 {
     Q_UNUSED(pMemoryMap)

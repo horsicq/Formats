@@ -1204,6 +1204,7 @@ public:
     static bool _isOffsetsCrossed(qint64 nOffset1,qint64 nSize1,qint64 nOffset2,qint64 nSize2);
     static bool _isReplaced(qint64 nOffset,qint64 nSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
     static bool _replaceMemory(qint64 nDataOffset,char *pData,qint64 nDataSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
+    static bool _updateReplaces(qint64 nDataOffset,char *pData,qint64 nDataSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
 
     virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap,SYMBOL_TYPE symbolType=SYMBOL_TYPE_ALL);
     static SYMBOL_RECORD findSymbolByAddress(QList<SYMBOL_RECORD> *pListSymbolRecords,qint64 nAddress);
