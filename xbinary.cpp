@@ -852,7 +852,7 @@ double XBinary::read_double(qint64 nOffset, bool bIsBigEndian)
     return result;
 }
 
-quint32 XBinary::read_uint24(qint64 nOffset, bool bIsBigEndian)
+quint32 XBinary::read_uint24(qint64 nOffset,bool bIsBigEndian)
 {
     quint32 result=0;
 
