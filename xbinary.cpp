@@ -608,7 +608,7 @@ void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
     }
 }
 
-QString XBinary::regExp(QString sRegExp, QString sString, qint32 nIndex)
+QString XBinary::regExp(QString sRegExp,QString sString,qint32 nIndex)
 {
     QString sResult;
 #if (QT_VERSION_MAJOR<5)
