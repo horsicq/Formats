@@ -995,9 +995,9 @@ QMap<quint64, QString> XELF::getSectionTypes()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionTypesS()
+QMap<quint64,QString> XELF::getSectionTypesS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0,"NULL");
     mapResult.insert(1,"PROGBITS");
