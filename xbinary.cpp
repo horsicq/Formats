@@ -697,7 +697,7 @@ qint64 XBinary::read_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qi
     return binary.read_array(nOffset,pBuffer,nSize);
 }
 
-qint64 XBinary::write_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize)
+qint64 XBinary::write_array(QIODevice *pDevice,qint64 nOffset,char *pBuffer,qint64 nSize)
 {
     XBinary binary(pDevice);
 
