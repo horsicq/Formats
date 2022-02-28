@@ -144,7 +144,7 @@ qint64 XBinary::safeReadData(QIODevice *pDevice,qint64 nPos,char *pData,qint64 n
     return nResult;
 }
 
-qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen)
+qint64 XBinary::safeWriteData(QIODevice *pDevice,qint64 nPos,const char *pData,qint64 nLen)
 {
     qint64 nResult=0;
 
