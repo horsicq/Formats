@@ -126,7 +126,7 @@ void SubDevice::_close()
     setOpenMode(NotOpen);
 }
 
-qint64 SubDevice::readData(char *pData, qint64 nMaxSize)
+qint64 SubDevice::readData(char *pData,qint64 nMaxSize)
 {
     nMaxSize=qMin(nMaxSize,g_nSize-pos());
 
