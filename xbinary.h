@@ -656,7 +656,7 @@ public:
     static void findFiles(QString sDirectoryName,FFOPTIONS *pFFOption,qint32 nLevel=0);
     static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames);
 
-    static QString regExp(QString sRegExp, QString sString, qint32 nIndex);
+    static QString regExp(QString sRegExp,QString sString,qint32 nIndex);
     static bool isRegExpPresent(QString sRegExp,QString sString);
     qint64 read_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
     QByteArray read_array(qint64 nOffset,qint64 nSize);
