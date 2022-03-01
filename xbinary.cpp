@@ -547,7 +547,7 @@ XBinary::OS_ANSISTRING XBinary::getOsAnsiString(qint64 nOffset, qint64 nSize)
     return result;
 }
 
-void XBinary::findFiles(QString sDirectoryName, XBinary::FFOPTIONS *pFFOption, qint32 nLevel)
+void XBinary::findFiles(QString sDirectoryName,XBinary::FFOPTIONS *pFFOption,qint32 nLevel)
 {
     *(pFFOption->pnNumberOfFiles)=pFFOption->pListFileNames->count();
 
