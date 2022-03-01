@@ -39,7 +39,7 @@ bool XMSDOS::isValid()
     return bResult;
 }
 
-bool XMSDOS::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+bool XMSDOS::isValid(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
 {
     XMSDOS xmsdos(pDevice,bIsImage,nModuleAddress);
 
