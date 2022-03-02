@@ -8552,7 +8552,7 @@ QString XPE::certRecordToString(CERT_RECORD certRecord, qint32 nLevel)
 
     qint32 nNumberOfRecords=certRecord.listRecords.count();
 
-    for(int i=0;i<nNumberOfRecords;i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         sResult+=certRecordToString(certRecord.listRecords.at(i),nLevel+1);
     }
