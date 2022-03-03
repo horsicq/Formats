@@ -81,12 +81,12 @@ qint64 XELF::getEhdr64Size()
 
 quint32 XELF::getIdent_Magic()
 {
-    return read_uint32((quint64) XELF_DEF::EI_MAG0);
+    return read_uint32(XELF_DEF::EI_MAG0);
 }
 
 void XELF::setIdent_Magic(quint32 nValue)
 {
-    write_uint32((quint64) XELF_DEF::EI_MAG0,nValue);
+    write_uint32(XELF_DEF::EI_MAG0,nValue);
 }
 
 quint8 XELF::getIdent_mag(qint32 nMag)
