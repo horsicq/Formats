@@ -536,7 +536,7 @@ QString XBinary::convertPathName(QString sPathName)
     return sResult;
 }
 
-XBinary::OS_ANSISTRING XBinary::getOsAnsiString(qint64 nOffset, qint64 nSize)
+XBinary::OS_ANSISTRING XBinary::getOsAnsiString(qint64 nOffset,qint64 nSize)
 {
     OS_ANSISTRING result={};
 
