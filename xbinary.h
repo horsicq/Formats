@@ -1141,6 +1141,14 @@ public:
 
     static QString valueToTimeString(quint64 nValue,DT_TYPE type);
 
+    enum VL_TYPE
+    {
+        VL_TYPE_LIST=0,
+        VL_TYPE_FLAGS
+    };
+
+    static QString valueToFlagsString(quint64 nValue,QMap<quint64,QString> mapFlags,VL_TYPE vlType);
+
     static bool isX86asm(QString sArch); // TODO remove use getDisasmMode
     static QString disasmIdToString(DM disasmMode);
     static QString syntaxIdToString(SYNTAX syntax);

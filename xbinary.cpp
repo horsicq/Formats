@@ -6982,6 +6982,39 @@ QString XBinary::valueToTimeString(quint64 nValue, XBinary::DT_TYPE type)
     return sResult;
 }
 
+QString XBinary::valueToFlagsString(quint64 nValue, QMap<quint64, QString> mapFlags, VL_TYPE vlType)
+{
+    QString sResult;
+
+    if(vlType==VL_TYPE_LIST)
+    {
+        sResult=mapFlags.value(nValue);
+    }
+    else if(vlType==VL_TYPE_FLAGS)
+    {
+        QMapIterator<quint64,QString> iter(mapFlags);
+
+        while(iter.hasNext())
+        {
+            iter.next();
+
+            quint64 nFlag=iter.key();
+
+            if(nValue&nFlag)
+            {
+                if(sResult!="")
+                {
+                    sResult+="|";
+                }
+
+                sResult+=iter.value();
+            }
+        }
+    }
+
+    return sResult;
+}
+
 bool XBinary::isX86asm(QString sArch)
 {
     // TODO remove, use getDisasmMode
