@@ -45,7 +45,7 @@ bool XELF::isValid()
     return bResult;
 }
 
-bool XELF::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+bool XELF::isValid(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
 {
     XELF xelf(pDevice,bIsImage,nModuleAddress);
 
