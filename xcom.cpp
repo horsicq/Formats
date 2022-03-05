@@ -43,7 +43,7 @@ bool XCOM::isValid()
     return bResult;
 }
 
-bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+bool XCOM::isValid(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
 {
     XCOM xcom(pDevice,bIsImage,nModuleAddress);
 
