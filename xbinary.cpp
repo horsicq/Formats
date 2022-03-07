@@ -4221,6 +4221,62 @@ QSet<XBinary::FT> XBinary::getFileTypes(QByteArray *pbaData,bool bExtra)
     return result;
 }
 
+XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
+{
+    XBinary::FT result=FT_UNKNOWN;
+
+    if(pStFileTypes->contains(FT_PE32))
+    {
+        result=FT_PE32;
+    }
+    else if(pStFileTypes->contains(FT_PE64))
+    {
+        result=FT_PE64;
+    }
+    else if(pStFileTypes->contains(FT_MACHO32))
+    {
+        result=FT_MACHO32;
+    }
+    else if(pStFileTypes->contains(FT_MACHO64))
+    {
+        result=FT_MACHO64;
+    }
+    else if(pStFileTypes->contains(FT_ELF32))
+    {
+        result=FT_ELF32;
+    }
+    else if(pStFileTypes->contains(FT_ELF64))
+    {
+        result=FT_ELF64;
+    }
+    else if(pStFileTypes->contains(FT_LE))
+    {
+        result=FT_LE;
+    }
+    else if(pStFileTypes->contains(FT_LX))
+    {
+        result=FT_LX;
+    }
+    else if(pStFileTypes->contains(FT_NE))
+    {
+        result=FT_NE;
+    }
+    else if(pStFileTypes->contains(FT_MSDOS))
+    {
+        result=FT_MSDOS;
+    }
+    else if(pStFileTypes->contains(FT_ZIP))
+    {
+        result=FT_ZIP;
+    }
+    else if(pStFileTypes->contains(FT_BINARY))
+    {
+        result=FT_BINARY;
+    }
+
+    return result;
+}
+
 QSet<XBinary::FT> XBinary::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
 {
     QSet<XBinary::FT> result;
@@ -4239,60 +4295,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint
 
 XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice, bool bExtra)
 {
-    XBinary::FT result=FT_UNKNOWN;
-
     QSet<XBinary::FT> stFileTypes=getFileTypes(pDevice,bExtra);
 
-    if(stFileTypes.contains(FT_PE32))
-    {
-        result=FT_PE32;
-    }
-    else if(stFileTypes.contains(FT_PE64))
-    {
-        result=FT_PE64;
-    }
-    else if(stFileTypes.contains(FT_MACHO32))
-    {
-        result=FT_MACHO32;
-    }
-    else if(stFileTypes.contains(FT_MACHO64))
-    {
-        result=FT_MACHO64;
-    }
-    else if(stFileTypes.contains(FT_ELF32))
-    {
-        result=FT_ELF32;
-    }
-    else if(stFileTypes.contains(FT_ELF64))
-    {
-        result=FT_ELF64;
-    }
-    else if(stFileTypes.contains(FT_LE))
-    {
-        result=FT_LE;
-    }
-    else if(stFileTypes.contains(FT_LX))
-    {
-        result=FT_LX;
-    }
-    else if(stFileTypes.contains(FT_NE))
-    {
-        result=FT_NE;
-    }
-    else if(stFileTypes.contains(FT_MSDOS))
-    {
-        result=FT_MSDOS;
-    }
-    else if(stFileTypes.contains(FT_ZIP))
-    {
-        result=FT_ZIP;
-    }
-    else if(stFileTypes.contains(FT_BINARY))
-    {
-        result=FT_BINARY;
-    }
-
-    return result;
+    return _getPrefFileType(&stFileTypes);
 }
 
 XBinary::FT XBinary::getPrefFileType(QString sFileName, bool bExtra)
