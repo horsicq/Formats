@@ -62,6 +62,7 @@ public:
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,bool bExtra=false);
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,qint64 nOffset,qint64 nSize,bool bExtra=false);
     static QSet<XBinary::FT> getFileTypes(QString sFileName,bool bExtra=false);
+    static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData,bool bExtra=false);
 #ifdef QT_GUI_LIB
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType,QIODevice *pDevice,QComboBox *pComboBox);
     static XBinary::FT setFileTypeComboBox(QString sFileName,QComboBox *pComboBox);

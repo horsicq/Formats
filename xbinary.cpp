@@ -4269,6 +4269,14 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
     {
         result=FT_ZIP;
     }
+    else if(pStFileTypes->contains(FT_ANDROIDXML))
+    {
+        result=FT_ANDROIDXML;
+    }
+    else if(pStFileTypes->contains(FT_DEX))
+    {
+        result=FT_DEX;
+    }
     else if(pStFileTypes->contains(FT_BINARY))
     {
         result=FT_BINARY;

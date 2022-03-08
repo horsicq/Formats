@@ -668,6 +668,24 @@ QSet<XBinary::FT> XFormats::getFileTypes(QString sFileName, bool bExtra)
     return stResult;
 }
 
+QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
+{
+    QSet<XBinary::FT> stResult;
+
+    QBuffer buffer;
+
+    buffer.setBuffer(pbaData);
+
+    if(buffer.open(QIODevice::ReadOnly))
+    {
+        stResult=getFileTypes(&buffer,bExtra);
+
+        buffer.close();
+    }
+
+    return stResult;
+}
+
 #ifdef QT_GUI_LIB
 XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox)
 {
