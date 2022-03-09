@@ -63,11 +63,18 @@ public:
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,qint64 nOffset,qint64 nSize,bool bExtra=false);
     static QSet<XBinary::FT> getFileTypes(QString sFileName,bool bExtra=false);
     static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData,bool bExtra=false);
+#ifdef USE_ARCHIVE
+    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,XArchive::RECORD *pRecord,bool bExtra=false);
+    static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice,QList<XArchive::RECORD> *pListRecords,qint32 nLevel=0);
+#endif
 #ifdef QT_GUI_LIB
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType,QIODevice *pDevice,QComboBox *pComboBox);
     static XBinary::FT setFileTypeComboBox(QString sFileName,QComboBox *pComboBox);
     static bool setEndianessComboBox(QComboBox *pComboBox,bool bIsBigEndian);
 #endif
+
+private:
+    static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice,bool bExtra=false,qint32 nLevel=0);
 };
 
 #endif // XFORMATS_H

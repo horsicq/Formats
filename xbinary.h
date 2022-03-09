@@ -242,6 +242,7 @@ public:
         FT_ANDROIDASRC,
         FT_ANDROIDXML,
         FT_APK,
+        FT_APKS,
         FT_ARCHIVE,
         FT_CAB,
         FT_DEX,

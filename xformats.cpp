@@ -603,32 +603,7 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
 
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra)
 {
-    QSet<XBinary::FT> stResult=XBinary::getFileTypes(pDevice,bExtra);
-#ifdef USE_ARCHIVE
-    if(stResult.contains(XBinary::FT_ZIP))
-    {
-        XZip xzip(pDevice);
-
-        QList<XArchive::RECORD> listArchiveRecords=xzip.getRecords();
-
-        if(XArchive::isArchiveRecordPresent("META-INF/MANIFEST.MF",&listArchiveRecords))
-        {
-            stResult.insert(XBinary::FT_JAR);
-        }
-
-        if(XArchive::isArchiveRecordPresent("classes.dex",&listArchiveRecords))
-        {
-            stResult.insert(XBinary::FT_APK);
-        }
-
-        if(XArchive::isArchiveRecordPresent("Payload/",&listArchiveRecords))
-        {
-            stResult.insert(XBinary::FT_IPA);
-        }
-    }
-#endif
-
-    return stResult;
+    return _getFileTypes(pDevice,bExtra,0);
 }
 
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
@@ -682,6 +657,112 @@ QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
 
         buffer.close();
     }
+
+    return stResult;
+}
+
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra)
+{
+    QSet<XBinary::FT> stResult;
+
+    QByteArray baData=XArchives::decompress(pDevice,pRecord,true);
+
+    stResult=XFormats::getFileTypes(&baData,bExtra);
+
+    return stResult;
+}
+
+QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, qint32 nLevel)
+{
+    QSet<XBinary::FT> stResult;
+
+    if(XArchive::isArchiveRecordPresent("META-INF/MANIFEST.MF",pListRecords))
+    {
+        stResult.insert(XBinary::FT_JAR);
+    }
+
+    if(XArchive::isArchiveRecordPresent("classes.dex",pListRecords)||XArchive::isArchiveRecordPresent("AndroidManifest.xml",pListRecords))
+    {
+        stResult.insert(XBinary::FT_APK);
+    }
+
+    if(XArchive::isArchiveRecordPresent("Payload/",pListRecords))
+    {
+        stResult.insert(XBinary::FT_IPA);
+    }
+
+    if(nLevel==0)
+    {
+        if( (!stResult.contains(XBinary::FT_JAR))&&
+            (!stResult.contains(XBinary::FT_APK))&&
+            (!stResult.contains(XBinary::FT_IPA)))
+        {
+            qint32 nNumberOfRecords=pListRecords->count();
+
+            bool bAPKS=false;
+
+            if(nNumberOfRecords)
+            {
+                bAPKS=true;
+            }
+
+            for(qint32 i=0;i<nNumberOfRecords;i++)
+            {
+                if(pListRecords->at(i).compressMethod==XArchive::COMPRESS_METHOD_STORE)
+                {
+                    XArchive::RECORD record=pListRecords->at(i);
+
+                    SubDevice subDevice(pDevice,record.nDataOffset,record.nUncompressedSize);
+
+                    if(subDevice.open(QIODevice::ReadOnly))
+                    {
+                        QSet<XBinary::FT> _stResult=_getFileTypes(&subDevice,true,nLevel+1);
+
+                        if(!(_stResult.contains(XBinary::FT_APK)))
+                        {
+                            bAPKS=false;
+                        }
+
+                        subDevice.close();
+                    }
+                }
+                else
+                {
+                    bAPKS=false;
+                }
+
+                if(!bAPKS)
+                {
+                    break;
+                }
+            }
+
+            if(bAPKS)
+            {
+                stResult.insert(XBinary::FT_APKS);
+            }
+        }
+    }
+
+    return stResult;
+}
+
+QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, qint32 nLevel)
+{
+    QSet<XBinary::FT> stResult=XBinary::getFileTypes(pDevice,bExtra);
+#ifdef USE_ARCHIVE
+    if(stResult.contains(XBinary::FT_ZIP))
+    {
+        XZip xzip(pDevice);
+
+        if(xzip.isValid())
+        {
+            QList<XArchive::RECORD> listArchiveRecords=xzip.getRecords();
+
+            stResult+=getFileTypesZIP(pDevice,&listArchiveRecords,nLevel);
+        }
+    }
+#endif
 
     return stResult;
 }
