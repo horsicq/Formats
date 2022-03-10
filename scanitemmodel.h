@@ -26,6 +26,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QXmlStreamWriter>
+#ifdef Q_OS_WIN
+#include <Windows.h>
+#endif
 #ifdef QT_GUI_LIB
 #include <QApplication>
 #include <QColor>
@@ -61,6 +64,7 @@ public:
     QString toCSV();
     QString toTSV();
     QString toFormattedString();
+    void coloredOutput();
     QString toString(XBinary::FORMATTYPE formatType);
     ScanItem *rootItem();
 
@@ -70,6 +74,8 @@ private:
     void _toCSV(QString *pString,ScanItem *pItem,qint32 nLevel);
     void _toTSV(QString *pString,ScanItem *pItem,qint32 nLevel);
     void _toFormattedString(QString *pString,ScanItem *pItem,qint32 nLevel);
+    void _coloredOutput(ScanItem *pItem,qint32 nLevel);
+    void _coloredItem(ScanItem *pItem);
 
 private:
     ScanItem *g_pRootItem;

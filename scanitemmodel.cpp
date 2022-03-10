@@ -197,11 +197,15 @@ QVariant ScanItemModel::data(const QModelIndex &index,int nRole) const
 #ifdef QT_GUI_LIB
         else if(nRole==Qt::ForegroundRole)
         {
-            QColor colText=pItem->scanStruct().colText;
+            QColor colText;
 
-            if(colText==QColor(Qt::black))
+            if(pItem->scanStruct().globalColor==Qt::transparent)
             {
                 colText=QApplication::palette().text().color();
+            }
+            else
+            {
+                colText=QColor(pItem->scanStruct().globalColor);
             }
 
             result=QVariant(colText);
@@ -278,6 +282,11 @@ QString ScanItemModel::toFormattedString()
     _toFormattedString(&sResult,g_pRootItem,0);
 
     return sResult;
+}
+
+void ScanItemModel::coloredOutput()
+{
+    _coloredOutput(g_pRootItem,0);
 }
 
 QString ScanItemModel::toString(XBinary::FORMATTYPE formatType)
@@ -454,4 +463,177 @@ void ScanItemModel::_toFormattedString(QString *pString,ScanItem *pItem,qint32 n
     {
         _toFormattedString(pString,pItem->child(i),nLevel+1);
     }
+}
+
+void ScanItemModel::_coloredOutput(ScanItem *pItem, qint32 nLevel)
+{
+#ifdef QT_GUI_LIB
+    Q_UNUSED(pItem)
+    Q_UNUSED(nLevel)
+#else
+    if(nLevel)
+    {
+        QString sPrefix;
+        sPrefix=sPrefix.leftJustified(4*(nLevel-1),' ');
+        printf("%s",sPrefix.toLatin1().data());
+        _coloredItem(pItem);
+        printf("\n");
+    }
+
+    qint32 nNumberOfChildren=pItem->childCount();
+
+    for(qint32 i=0;i<nNumberOfChildren;i++)
+    {
+        _coloredOutput(pItem->child(i),nLevel+1);
+    }
+#endif
+}
+
+void ScanItemModel::_coloredItem(ScanItem *pItem)
+{
+#ifdef QT_GUI_LIB
+    Q_UNUSED(pItem)
+#else
+#ifdef Q_OS_WIN
+    HANDLE hConsole=0;
+    WORD wOldAttribute=0;
+
+    if(pItem->scanStruct().globalColor!=Qt::transparent)
+    {
+        hConsole=GetStdHandle(STD_OUTPUT_HANDLE);
+
+        CONSOLE_SCREEN_BUFFER_INFO csbi={};
+
+        if(GetConsoleScreenBufferInfo(hConsole,&csbi))
+        {
+            wOldAttribute=csbi.wAttributes;
+        }
+
+        WORD wAttribute=0;
+
+        if(pItem->scanStruct().globalColor==Qt::blue)
+        {
+            wAttribute=FOREGROUND_BLUE;
+        }
+        else if(pItem->scanStruct().globalColor==Qt::red)
+        {
+            wAttribute=FOREGROUND_RED;
+        }
+        else if(pItem->scanStruct().globalColor==Qt::green)
+        {
+            wAttribute=FOREGROUND_GREEN;
+        }
+        else if(pItem->scanStruct().globalColor==Qt::yellow)
+        {
+            wAttribute=FOREGROUND_RED|FOREGROUND_GREEN;
+        }
+        else if(pItem->scanStruct().globalColor==Qt::magenta)
+        {
+            wAttribute=FOREGROUND_RED|FOREGROUND_BLUE;
+        }
+        else if(pItem->scanStruct().globalColor==Qt::cyan)
+        {
+            wAttribute=FOREGROUND_GREEN|FOREGROUND_BLUE;
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkBlue)
+        {
+            wAttribute=FOREGROUND_BLUE|FOREGROUND_INTENSITY;
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkRed)
+        {
+            wAttribute=FOREGROUND_RED|FOREGROUND_INTENSITY;
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkGreen)
+        {
+            wAttribute=FOREGROUND_GREEN|FOREGROUND_INTENSITY;
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkYellow)
+        {
+            wAttribute=FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_INTENSITY;
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkMagenta)
+        {
+            wAttribute=FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_INTENSITY;
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkCyan)
+        {
+            wAttribute=FOREGROUND_GREEN|FOREGROUND_BLUE|FOREGROUND_INTENSITY;
+        }
+
+        if(wAttribute)
+        {
+            SetConsoleTextAttribute(hConsole,wAttribute);
+        }
+    }
+#else
+    if(pItem->scanStruct().globalColor!=Qt::transparent)
+    {
+        if(pItem->scanStruct().globalColor==Qt::blue)
+        {
+            printf("\033[0;34m");
+        }
+        else if(pItem->scanStruct().globalColor==Qt::red)
+        {
+            printf("\033[0;31m");
+        }
+        else if(pItem->scanStruct().globalColor==Qt::green)
+        {
+            printf("\033[0;32m");
+        }
+        else if(pItem->scanStruct().globalColor==Qt::yellow)
+        {
+            printf("\033[0;33m");
+        }
+        else if(pItem->scanStruct().globalColor==Qt::magenta)
+        {
+            printf("\033[0;35m");
+        }
+        else if(pItem->scanStruct().globalColor==Qt::cyan)
+        {
+            printf("\033[0;36m");
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkBlue)
+        {
+            printf("\033[1;34m");
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkRed)
+        {
+            printf("\033[1;31m");
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkGreen)
+        {
+            printf("\033[1;32m");
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkYellow)
+        {
+            printf("\033[1;33m");
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkMagenta)
+        {
+            printf("\033[1;35m");
+        }
+        else if(pItem->scanStruct().globalColor==Qt::darkCyan)
+        {
+            printf("\033[1;36m");
+        }
+    }
+#endif
+
+    printf("%s",pItem->data(0).toString().toLatin1().data());
+
+#ifdef Q_OS_WIN
+    if(pItem->scanStruct().globalColor!=Qt::transparent)
+    {
+        if(wOldAttribute)
+        {
+            SetConsoleTextAttribute(hConsole,wOldAttribute);
+        }
+    }
+#else
+    if(pItem->scanStruct().globalColor!=Qt::transparent)
+    {
+        printf("\033[0m");
+    }
+#endif
+#endif
 }

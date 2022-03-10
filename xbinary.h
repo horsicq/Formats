@@ -567,9 +567,7 @@ public:
         QString sVersion;
         QString sInfo;
         QString varInfo; // Signature in die scripts
-    #ifdef QT_GUI_LIB
-        QColor colText;
-    #endif
+        Qt::GlobalColor globalColor;
     };
 
 private:

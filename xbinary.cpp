@@ -8293,9 +8293,8 @@ XBinary::SCANSTRUCT XBinary::createHeaderScanStruct(const SCANSTRUCT *pScanStruc
     result.sName="";
     result.sVersion="";
     result.sInfo="";
-#ifdef QT_GUI_LIB
-    result.colText=QColor();
-#endif
+    result.globalColor=Qt::transparent;
+
     return result;
 }
 
