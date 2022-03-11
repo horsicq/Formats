@@ -689,6 +689,8 @@ public:
     QString _read_utf8String(char *pData,qint64 nMaxSize);
     QString _read_utf8String(qint64 nOffset,char *pData,qint32 nDataSize,qint32 nDataOffset);
 
+    bool isUnicodeStringLatin(qint64 nOffset,qint64 nMaxSize=256,bool bIsBigEndian=false);
+
     void write_uint8(qint64 nOffset,quint8 nValue);
     void write_int8(qint64 nOffset,qint8 nValue);
     void write_uint16(qint64 nOffset,quint16 nValue,bool bIsBigEndian=false);

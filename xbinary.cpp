@@ -1048,6 +1048,31 @@ QString XBinary::_read_utf8String(qint64 nOffset, char *pData, qint32 nDataSize,
     return sResult;
 }
 
+bool XBinary::isUnicodeStringLatin(qint64 nOffset, qint64 nMaxSize, bool bIsBigEndian)
+{
+    bool bResult=true;
+
+    if((nMaxSize>0)&&(nMaxSize<0x10000))
+    {
+        for(qint32 i=0;i<nMaxSize;i++)
+        {
+            quint16 nWord=read_uint16(nOffset+2*i,bIsBigEndian);
+
+            if(nWord==0)
+            {
+                break;
+            }
+            else if(nWord>0x7F)
+            {
+                bResult=false;
+                break;
+            }
+        }
+    }
+
+    return bResult;
+}
+
 void XBinary::write_uint8(qint64 nOffset, quint8 nValue)
 {
     write_array(nOffset,(char *)(&nValue),1);
