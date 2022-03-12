@@ -850,7 +850,7 @@ XBinary::FT XFormats::setFileTypeComboBox(QString sFileName,QComboBox *pComboBox
 }
 #endif
 #ifdef QT_GUI_LIB
-bool XFormats::setEndianessComboBox(QComboBox *pComboBox, bool bIsBigEndian)
+bool XFormats::setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian)
 { 
 #if QT_VERSION >= QT_VERSION_CHECK(5,3,0)
     const QSignalBlocker blocker(pComboBox);
