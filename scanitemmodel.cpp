@@ -465,7 +465,7 @@ void ScanItemModel::_toFormattedString(QString *pString,ScanItem *pItem,qint32 n
     }
 }
 
-void ScanItemModel::_coloredOutput(ScanItem *pItem, qint32 nLevel)
+void ScanItemModel::_coloredOutput(ScanItem *pItem,qint32 nLevel)
 {
 #ifdef QT_GUI_LIB
     Q_UNUSED(pItem)
