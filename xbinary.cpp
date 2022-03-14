@@ -1048,7 +1048,7 @@ QString XBinary::_read_utf8String(qint64 nOffset, char *pData, qint32 nDataSize,
     return sResult;
 }
 
-bool XBinary::isUnicodeStringLatin(qint64 nOffset, qint64 nMaxSize, bool bIsBigEndian)
+bool XBinary::isUnicodeStringLatin(qint64 nOffset,qint64 nMaxSize,bool bIsBigEndian)
 {
     bool bResult=true;
 
