@@ -601,7 +601,7 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
     return listResult;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra)
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice,bool bExtra)
 {
     return _getFileTypes(pDevice,bExtra,0);
 }
