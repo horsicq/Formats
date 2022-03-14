@@ -842,7 +842,7 @@ float XBinary::read_float(qint64 nOffset, bool bIsBigEndian)
     return result;
 }
 
-double XBinary::read_double(qint64 nOffset, bool bIsBigEndian)
+double XBinary::read_double(qint64 nOffset,bool bIsBigEndian)
 {
     double result=0;
 
