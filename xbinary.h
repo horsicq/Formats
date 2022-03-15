@@ -713,7 +713,7 @@ public:
     static qint32 _read_int32(char *pData,bool bIsBigEndian=false);
     static quint64 _read_uint64(char *pData,bool bIsBigEndian=false);
     static qint64 _read_int64(char *pData,bool bIsBigEndian=false);
-    static QString _read_ansiString(char *pData, qint32 nMaxSize=50);
+    static QString _read_ansiString(char *pData,qint32 nMaxSize=50);
     static QByteArray _read_byteArray(char *pData,int nSize);
     static float _read_float(char *pData,bool bIsBigEndian=false); // TODO Check
     static double _read_double(char *pData,bool bIsBigEndian=false); // TODO Check
