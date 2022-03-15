@@ -315,7 +315,7 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
     return bResult;
 }
 
-bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+bool XFormats::isSigned(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
 {
     bool bResult=false;
 
