@@ -723,7 +723,7 @@ qint8 XBinary::read_int8(qint64 nOffset)
     return (qint8)result;
 }
 
-quint16 XBinary::read_uint16(qint64 nOffset, bool bIsBigEndian)
+quint16 XBinary::read_uint16(qint64 nOffset,bool bIsBigEndian)
 {
     quint16 result=0;
 
