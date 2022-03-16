@@ -5570,7 +5570,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
 
         if(!g_bIsEntropyStop)
         {
-            for(qint32 j=0; j<256; j++)
+            for(qint32 j=0;j<256;j++)
             {
                 double dTemp=bytes[j]/(double)osRegion.nSize;
 
