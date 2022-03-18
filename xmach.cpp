@@ -1086,7 +1086,7 @@ QByteArray XMACH::getCommandData(quint32 nCommandID, qint32 nIndex, QList<XMACH:
 
     qint32 nCurrentIndex=0;
 
-    for(qint32 i=0; i<nNumberOfCommands; i++)
+    for(qint32 i=0;i<nNumberOfCommands;i++)
     {
         if(pListCommandRecords->at(i).nType==nCommandID)
         {
