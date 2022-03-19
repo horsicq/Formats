@@ -788,9 +788,9 @@ QMap<quint64, QString> XELF::getIndentMag()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentMagS()
+QMap<quint64,QString> XELF::getIndentMagS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x464C457F,"ELFMAG");
 
