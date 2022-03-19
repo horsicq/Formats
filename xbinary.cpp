@@ -1413,7 +1413,7 @@ void XBinary::_write_int16(char *pData, qint16 nValue, bool bIsBigEndian)
     *(qint16 *)pData=nValue;
 }
 
-void XBinary::_write_uint32(char *pData, quint32 nValue, bool bIsBigEndian)
+void XBinary::_write_uint32(char *pData,quint32 nValue,bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
