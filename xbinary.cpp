@@ -1351,7 +1351,7 @@ double XBinary::_read_double(char *pData,bool bIsBigEndian)
     return result;
 }
 
-quint64 XBinary::_read_value(MODE mode, char *pData, bool bIsBigEndian)
+quint64 XBinary::_read_value(MODE mode,char *pData,bool bIsBigEndian)
 {
     quint64 nResult=0;
 
