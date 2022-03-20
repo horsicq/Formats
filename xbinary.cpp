@@ -1342,7 +1342,7 @@ float XBinary::_read_float(char *pData, bool bIsBigEndian)
     return result;
 }
 
-double XBinary::_read_double(char *pData, bool bIsBigEndian)
+double XBinary::_read_double(char *pData,bool bIsBigEndian)
 {
     double result=*(double *)pData;
 
