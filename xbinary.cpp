@@ -1318,7 +1318,7 @@ qint64 XBinary::_read_int64(char *pData, bool bIsBigEndian)
     return result;
 }
 
-QString XBinary::_read_ansiString(char *pData, qint32 nMaxSize)
+QString XBinary::_read_ansiString(char *pData,qint32 nMaxSize)
 {
     QString sResult;
 
