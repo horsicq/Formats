@@ -1181,7 +1181,7 @@ void XBinary::write_float(qint64 nOffset, float fValue, bool bIsBigEndian)
     write_array(nOffset,(char *)(&fValue),2);
 }
 
-void XBinary::write_double(qint64 nOffset, double dValue, bool bIsBigEndian)
+void XBinary::write_double(qint64 nOffset,double dValue,bool bIsBigEndian)
 {
     endian_double(&dValue,bIsBigEndian);
 
