@@ -1512,7 +1512,7 @@ quint32 XPE::getSection_Characteristics(quint32 nNumber)
     return nResult;
 }
 
-void XPE::setSection_NameAsString(quint32 nNumber, QString sName)
+void XPE::setSection_NameAsString(quint32 nNumber,QString sName)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
