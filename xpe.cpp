@@ -11114,7 +11114,7 @@ QList<qint64> XPE::getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap)
 
     if(nOffset!=-1)
     {
-        for(int i=0;i<100;i++) // TODO const !!!
+        for(qint32 i=0;i<100;i++) // TODO const !!!
         {
             qint64 nAddress=0;
 
