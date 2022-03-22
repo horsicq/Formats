@@ -9361,14 +9361,14 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             }
 
                             quint32 nSize=0;
-                            int nStringIndexSize=2;
-                            int nGUIDIndexSize=2;
-                            int nBLOBIndexSize=2;
-                            int nResolutionScope=2;
-                            int nTypeDefOrRef=2;
-                            int nField=2;
-                            int nMethodDef=2;
-                            int nParamList=2;
+                            qint32 nStringIndexSize=2;
+                            qint32 nGUIDIndexSize=2;
+                            qint32 nBLOBIndexSize=2;
+                            qint32 nResolutionScope=2;
+                            qint32 nTypeDefOrRef=2;
+                            qint32 nField=2;
+                            qint32 nMethodDef=2;
+                            qint32 nParamList=2;
 
                             quint8 cHeapOffsetSizes=result.metaData.cTables_HeapOffsetSizes;
 
