@@ -2941,7 +2941,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                 nIATSize+=(nNumberOfPositions+1)*nAddressSize;
                 nAnsiDataSize+=pListImportHeaders->at(i).sName.length()+3;
 
-                for(qint32 j=0; j<nNumberOfPositions; j++)
+                for(qint32 j=0;j<nNumberOfPositions;j++)
                 {
                     if(pListImportHeaders->at(i).listPositions.at(j).sName!="")
                     {
