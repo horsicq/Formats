@@ -660,7 +660,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
 
     return stResult;
 }
-
+#ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra)
 {
     QSet<XBinary::FT> stResult;
@@ -671,7 +671,8 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *p
 
     return stResult;
 }
-
+#endif
+#ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, qint32 nLevel)
 {
     QSet<XBinary::FT> stResult;
@@ -746,7 +747,7 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::
 
     return stResult;
 }
-
+#endif
 QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, qint32 nLevel)
 {
     QSet<XBinary::FT> stResult=XBinary::getFileTypes(pDevice,bExtra);

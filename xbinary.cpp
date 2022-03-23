@@ -961,7 +961,7 @@ QString XBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize,bool bIsBigE
     return sResult;
 }
 
-QString XBinary::read_utf8String(qint64 nOffset, qint64 nMaxSize)
+QString XBinary::read_utf8String(qint64 nOffset,qint64 nMaxSize)
 {
     QString sResult;
 
