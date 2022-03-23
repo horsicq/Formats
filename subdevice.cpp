@@ -20,7 +20,7 @@
  */
 #include "subdevice.h"
 
-SubDevice::SubDevice(QIODevice *pDevice,qint64 nOffset,qint64 nSize,QObject *pParent) : QIODevice(pParent)
+SubDevice::SubDevice(QIODevice *pDevice,qint64 nOffset,qint64 nSize,QObject *pParent) : XIODevice(pParent)
 {
     if(nOffset>pDevice->size())
     {
@@ -86,7 +86,7 @@ bool SubDevice::seek(qint64 nPos)
     {
         if(g_pDevice->seek(g_nOffset+nPos))
         {
-            bResult=QIODevice::seek(nPos);
+            bResult=XIODevice::seek(nPos);
         }
     }
 
@@ -105,11 +105,6 @@ bool SubDevice::open(QIODevice::OpenMode mode)
     return true;
 }
 
-bool SubDevice::atEnd() const
-{
-    return (bytesAvailable()==0);
-}
-
 void SubDevice::close()
 {
     _close();
@@ -118,7 +113,7 @@ void SubDevice::close()
 qint64 SubDevice::pos() const
 {
 //    return pDevice->pos()-nOffset;
-    return QIODevice::pos();
+    return XIODevice::pos();
 }
 
 void SubDevice::_close()
@@ -142,9 +137,4 @@ qint64 SubDevice::writeData(const char *pData,qint64 nMaxSize)
     qint64 nLen=g_pDevice->write(pData,nMaxSize);
 
     return nLen;
-}
-
-void SubDevice::setErrorString(const QString &sString)
-{
-    QIODevice::setErrorString(sString);
 }

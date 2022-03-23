@@ -2933,7 +2933,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
 
             qint32 nNumberOfHeaders=pListImportHeaders->count();
 
-            for(qint32 i=0; i<nNumberOfHeaders; i++)
+            for(qint32 i=0;i<nNumberOfHeaders;i++)
             {
                 // TODO 64
                 qint32 nNumberOfPositions=pListImportHeaders->at(i).listPositions.count();

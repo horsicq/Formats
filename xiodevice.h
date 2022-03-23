@@ -18,41 +18,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SUBDEVICE_H
-#define SUBDEVICE_H
+#ifndef XIODEVICE_H
+#define XIODEVICE_H
 
-#include "xiodevice.h"
+#include <QIODevice>
 
-class SubDevice : public XIODevice
+class XIODevice : public QIODevice
 {
     Q_OBJECT
 
 public:
-    SubDevice(QIODevice *pDevice,qint64 nOffset=0,qint64 nSize=-1,QObject *pParent=nullptr);
-    ~SubDevice();
-
-    qint64 getInitOffset(); // TODO Check
+    XIODevice(QObject *pParent);
 
     virtual qint64 size() const;
-    //    virtual qint64 bytesAvailable() const;
     virtual bool isSequential() const;
     virtual bool seek(qint64 nPos);
     virtual bool reset();
     virtual bool open(OpenMode mode);
+    virtual bool atEnd() const;
     virtual void close();
     virtual qint64 pos() const;
-
-private:
-    void _close();
 
 protected:
     virtual qint64 readData(char *pData,qint64 nMaxSize);
     virtual qint64 writeData(const char *pData,qint64 nMaxSize);
-
-private:
-    QIODevice *g_pDevice;
-    qint64 g_nOffset;
-    qint64 g_nSize;
+    virtual void setErrorString(const QString &sString);
 };
 
-#endif // SUBDEVICE_H
+#endif // XIODEVICE_H
