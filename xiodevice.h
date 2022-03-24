@@ -30,6 +30,10 @@ class XIODevice : public QIODevice
 public:
     XIODevice(QObject *pParent);
 
+    void setSize(quint64 nSize);
+    void setInitOffset(quint64 nOffset);
+    quint64 getInitOffset();
+
     virtual qint64 size() const;
     virtual bool isSequential() const;
     virtual bool seek(qint64 nPos);
@@ -43,6 +47,10 @@ protected:
     virtual qint64 readData(char *pData,qint64 nMaxSize);
     virtual qint64 writeData(const char *pData,qint64 nMaxSize);
     virtual void setErrorString(const QString &sString);
+
+private:
+    quint64 g_nSize;
+    quint64 g_nInitOffset;
 };
 
 #endif // XIODEVICE_H

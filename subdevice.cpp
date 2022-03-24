@@ -43,8 +43,9 @@ SubDevice::SubDevice(QIODevice *pDevice,qint64 nOffset,qint64 nSize,QObject *pPa
     }
 
     this->g_pDevice=pDevice;
-    this->g_nOffset=nOffset;
-    this->g_nSize=nSize;
+
+    setInitOffset(nOffset);
+    setSize(nSize);
 
     //    reset();
     pDevice->seek(nOffset);
@@ -54,39 +55,19 @@ SubDevice::~SubDevice()
 {
     if(isOpen())
     {
-        _close();
+        setOpenMode(NotOpen);
     }
-}
-
-qint64 SubDevice::getInitOffset()
-{
-    return g_nOffset;
-}
-
-qint64 SubDevice::size() const
-{
-    return g_nSize;
-}
-
-//qint64 SubDevice::bytesAvailable() const
-//{
-//    return nSize;
-//}
-
-bool SubDevice::isSequential() const
-{
-    return false;
 }
 
 bool SubDevice::seek(qint64 nPos)
 {
     bool bResult=false;
 
-    if((nPos<g_nSize)&&(nPos>=0))
+    if((nPos<size())&&(nPos>=0))
     {
-        if(g_pDevice->seek(g_nOffset+nPos))
+        if(g_pDevice->seek(getInitOffset()+nPos))
         {
-            bResult=XIODevice::seek(nPos);
+            bResult=QIODevice::seek(nPos);
         }
     }
 
@@ -98,32 +79,9 @@ bool SubDevice::reset()
     return seek(0);
 }
 
-bool SubDevice::open(QIODevice::OpenMode mode)
-{
-    setOpenMode(mode);
-
-    return true;
-}
-
-void SubDevice::close()
-{
-    _close();
-}
-
-qint64 SubDevice::pos() const
-{
-//    return pDevice->pos()-nOffset;
-    return XIODevice::pos();
-}
-
-void SubDevice::_close()
-{
-    setOpenMode(NotOpen);
-}
-
 qint64 SubDevice::readData(char *pData,qint64 nMaxSize)
 {
-    nMaxSize=qMin(nMaxSize,g_nSize-pos());
+    nMaxSize=qMin(nMaxSize,size()-pos());
 
     qint64 nLen=g_pDevice->read(pData,nMaxSize);
 
@@ -132,7 +90,7 @@ qint64 SubDevice::readData(char *pData,qint64 nMaxSize)
 
 qint64 SubDevice::writeData(const char *pData,qint64 nMaxSize)
 {
-    nMaxSize=qMin(nMaxSize,g_nSize-pos());
+    nMaxSize=qMin(nMaxSize,size()-pos());
 
     qint64 nLen=g_pDevice->write(pData,nMaxSize);
 

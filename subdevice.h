@@ -31,19 +31,8 @@ public:
     SubDevice(QIODevice *pDevice,qint64 nOffset=0,qint64 nSize=-1,QObject *pParent=nullptr);
     ~SubDevice();
 
-    qint64 getInitOffset(); // TODO Check
-
-    virtual qint64 size() const;
-    //    virtual qint64 bytesAvailable() const;
-    virtual bool isSequential() const;
     virtual bool seek(qint64 nPos);
     virtual bool reset();
-    virtual bool open(OpenMode mode);
-    virtual void close();
-    virtual qint64 pos() const;
-
-private:
-    void _close();
 
 protected:
     virtual qint64 readData(char *pData,qint64 nMaxSize);
@@ -51,8 +40,6 @@ protected:
 
 private:
     QIODevice *g_pDevice;
-    qint64 g_nOffset;
-    qint64 g_nSize;
 };
 
 #endif // SUBDEVICE_H

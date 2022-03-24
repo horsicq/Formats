@@ -22,31 +22,50 @@
 
 XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent)
 {
+    g_nSize=0;
+    g_nInitOffset=0;
+}
 
+void XIODevice::setSize(quint64 nSize)
+{
+    g_nSize=nSize;
+}
+
+void XIODevice::setInitOffset(quint64 nOffset)
+{
+    g_nInitOffset=nOffset;
+}
+
+quint64 XIODevice::getInitOffset()
+{
+    return g_nInitOffset;
 }
 
 qint64 XIODevice::size() const
 {
-#ifdef QT_DEBUG
-    qCritical("XIODevice::size");
-#endif
-
-    return 0;
+    return g_nSize;
 }
 
 bool XIODevice::isSequential() const
 {
-    return QIODevice::isSequential();
+    return false;
 }
 
 bool XIODevice::seek(qint64 nPos)
 {
-    return QIODevice::seek(nPos);
+    bool bResult=false;
+
+    if((nPos<size())&&(nPos>=0))
+    {
+        bResult=QIODevice::seek(nPos);
+    }
+
+    return bResult;
 }
 
 bool XIODevice::reset()
 {
-    return QIODevice::reset();
+    return seek(0);
 }
 
 bool XIODevice::open(OpenMode mode)
