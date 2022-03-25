@@ -660,10 +660,12 @@ public:
     qint64 read_array(qint64 nOffset,char *pBuffer,qint64 nMaxSize);
     QByteArray read_array(qint64 nOffset,qint64 nSize);
     qint64 write_array(qint64 nOffset,char *pBuffer,qint64 nSize);
+    qint64 write_array(qint64 nOffset,QByteArray baData);
 
     static QByteArray read_array(QIODevice *pDevice,qint64 nOffset,qint64 nSize);
     static qint64 read_array(QIODevice *pDevice,qint64 nOffset,char *pBuffer,qint64 nSize);
     static qint64 write_array(QIODevice *pDevice,qint64 nOffset,char *pBuffer,qint64 nSize);
+    static qint64 write_array(QIODevice *pDevice,qint64 nOffset,QByteArray baData);
 
     quint8 read_uint8(qint64 nOffset);
     qint8 read_int8(qint64 nOffset);
@@ -780,7 +782,10 @@ public:
     QList<MS_RECORD> multiSearch_signature(qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="");
     QList<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="");
 
-    QByteArray getUnicodeString(QString sString);
+    static QString msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId);
+
+    static QByteArray getUnicodeString(QString sString); // TODO remove, use getStringData
+    static QByteArray getStringData(MS_RECORD_TYPE msRecordTypeId,QString sString,bool bAddNull);
 
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature);
 

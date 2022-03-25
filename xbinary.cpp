@@ -684,6 +684,11 @@ qint64 XBinary::write_array(qint64 nOffset,char *pBuffer,qint64 nSize)
     return nResult;
 }
 
+qint64 XBinary::write_array(qint64 nOffset, QByteArray baData)
+{
+    return write_array(nOffset,baData.data(),baData.size());
+}
+
 QByteArray XBinary::read_array(QIODevice *pDevice,qint64 nOffset,qint64 nSize)
 {
     XBinary binary(pDevice);
@@ -703,6 +708,13 @@ qint64 XBinary::write_array(QIODevice *pDevice,qint64 nOffset,char *pBuffer,qint
     XBinary binary(pDevice);
 
     return binary.write_array(nOffset,pBuffer,nSize);
+}
+
+qint64 XBinary::write_array(QIODevice *pDevice, qint64 nOffset, QByteArray baData)
+{
+    XBinary binary(pDevice);
+
+    return binary.write_array(nOffset,baData);
 }
 
 quint8 XBinary::read_uint8(qint64 nOffset)
@@ -1144,7 +1156,7 @@ void XBinary::write_int32(qint64 nOffset, qint32 nValue, bool bIsBigEndian)
     write_array(nOffset,(char *)(&_value),4);
 }
 
-void XBinary::write_uint64(qint64 nOffset, quint64 nValue, bool bIsBigEndian)
+void XBinary::write_uint64(qint64 nOffset,quint64 nValue,bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
@@ -2728,6 +2740,26 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
     return listResult;
 }
 
+QString XBinary::msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId)
+{
+    QString sResult;
+
+    if(msRecordTypeId==XBinary::MS_RECORD_TYPE_ANSI)
+    {
+        sResult="A";
+    }
+    else if(msRecordTypeId==XBinary::MS_RECORD_TYPE_UTF8)
+    {
+        sResult="UTF8";
+    }
+    else if(msRecordTypeId==XBinary::MS_RECORD_TYPE_UNICODE)
+    {
+        sResult="U";
+    }
+
+    return sResult;
+}
+
 QByteArray XBinary::getUnicodeString(QString sString)
 {
     QByteArray baResult;
@@ -2739,6 +2771,47 @@ QByteArray XBinary::getUnicodeString(QString sString)
     baResult.fill(0);
 
     _copyMemory(baResult.data(),(char *)sString.utf16(),nSize*2);
+
+    return baResult;
+}
+
+QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString, bool bAddNull)
+{
+    QByteArray baResult;
+
+    qint32 nSize=sString.size();
+
+    if(msRecordTypeId==MS_RECORD_TYPE_ANSI)
+    {
+        baResult=sString.toLatin1();
+
+        if(bAddNull)
+        {
+            baResult.append(1,0);
+        }
+    }
+    else if(msRecordTypeId==MS_RECORD_TYPE_UNICODE)
+    {
+        baResult.resize(nSize*2);
+
+        baResult.fill(0);
+
+        _copyMemory(baResult.data(),(char *)sString.utf16(),sString.size()*2);
+
+        if(bAddNull)
+        {
+            baResult.append(2,0);
+        }
+    }
+    else if(msRecordTypeId==MS_RECORD_TYPE_UTF8)
+    {
+        baResult=sString.toUtf8();
+
+        if(bAddNull)
+        {
+            baResult.append(1,0);
+        }
+    }
 
     return baResult;
 }
