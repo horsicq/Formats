@@ -56,7 +56,7 @@ bool XLE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
     return xle.isValid();
 }
 
-XBinary::MODE XLE::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+XBinary::MODE XLE::getMode(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
 {
     XLE xle(pDevice,bIsImage,nModuleAddress);
 
