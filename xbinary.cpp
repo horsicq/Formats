@@ -1085,7 +1085,7 @@ bool XBinary::isUnicodeStringLatin(qint64 nOffset,qint64 nMaxSize,bool bIsBigEnd
     return bResult;
 }
 
-void XBinary::write_uint8(qint64 nOffset, quint8 nValue)
+void XBinary::write_uint8(qint64 nOffset,quint8 nValue)
 {
     write_array(nOffset,(char *)(&nValue),1);
 }
