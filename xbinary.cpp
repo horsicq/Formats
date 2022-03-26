@@ -1110,7 +1110,7 @@ void XBinary::write_uint16(qint64 nOffset,quint16 nValue,bool bIsBigEndian)
     write_array(nOffset,(char *)(&nValue),2);
 }
 
-void XBinary::write_int16(qint64 nOffset, qint16 nValue, bool bIsBigEndian)
+void XBinary::write_int16(qint64 nOffset,qint16 nValue,bool bIsBigEndian)
 {
     quint16 _value=(quint16)nValue;
 
