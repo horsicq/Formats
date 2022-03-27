@@ -797,7 +797,7 @@ QMap<quint64,QString> XELF::getIndentMagS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentClasses()
+QMap<quint64,QString> XELF::getIndentClasses()
 {
     QMap<quint64, QString> mapResult;
 
