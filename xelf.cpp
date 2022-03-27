@@ -1115,7 +1115,7 @@ QMap<quint64,QString> XELF::getSectionFlagsS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getProgramTypes()
+QMap<quint64,QString> XELF::getProgramTypes()
 {
     QMap<quint64, QString> mapResult;
 
