@@ -779,7 +779,7 @@ QMap<quint64, QString> XELF::getHeaderVersionList()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentMag()
+QMap<quint64,QString> XELF::getIndentMag()
 {
     QMap<quint64, QString> mapResult;
 
