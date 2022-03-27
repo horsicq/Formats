@@ -1192,7 +1192,7 @@ QMap<quint64,QString> XELF::getProgramFlags()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getProgramFlagsS()
+QMap<quint64,QString> XELF::getProgramFlagsS()
 {
     QMap<quint64, QString> mapResult;
 
