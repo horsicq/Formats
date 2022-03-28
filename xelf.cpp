@@ -525,7 +525,7 @@ QMap<quint64, QString> XELF::getTypesS()
 
 QMap<quint64, QString> XELF::getMachines()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0,"EM_NONE"); // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_elf.h https://github.com/Mm7/oatrev/blob/master/elfio/elf_types.hpp
     mapResult.insert(1,"EM_M32");
