@@ -2058,7 +2058,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     return -1;
 }
 
-quint8 XBinary::getBits_uint8(quint8 nValue, qint32 nBitOffset, qint32 nBitSize)
+quint8 XBinary::getBits_uint8(quint8 nValue,qint32 nBitOffset,qint32 nBitSize)
 {
     quint8 nResult=nValue;
 
