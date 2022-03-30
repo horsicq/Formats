@@ -524,7 +524,7 @@ QString XBinary::convertPathName(QString sPathName)
         sResult.replace("/",QDir::separator());
     }
 
-    if(sPathName.contains("$data"))
+    if(sPathName.contains("$data")) // TODO Check Linux
     {
 #ifdef Q_OS_MAC
         sResult.replace("$data",QCoreApplication::applicationDirPath()+"/../Resources");
