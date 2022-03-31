@@ -25,7 +25,7 @@ XFormats::XFormats(QObject *pParent) : QObject(pParent)
 
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
 {
     XBinary::_MEMORY_MAP result={};
 
@@ -104,7 +104,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDev
     return result;
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName,bool bIsImage,qint64 nModuleAddress)
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName,bool bIsImage,quint64 nModuleAddress)
 {
     XBinary::_MEMORY_MAP result={};
 
@@ -122,7 +122,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName,bool bIsImage,qint
     return result;
 }
 
-qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
 {
     // TODO pMemoryMap
     qint64 nResult=0; // FT_DEX, FT_ZIP
@@ -180,7 +180,7 @@ qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, 
     return nResult;
 }
 
-qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
 {
     qint64 nResult=0;
 
@@ -237,7 +237,7 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
     return nResult;
 }
 
-bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
 {
     bool bResult=false;
 
@@ -315,7 +315,7 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
     return bResult;
 }
 
-bool XFormats::isSigned(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
+bool XFormats::isSigned(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,quint64 nModuleAddress)
 {
     bool bResult=false;
 
@@ -393,7 +393,7 @@ bool XFormats::isSigned(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,qi
     return bResult;
 }
 
-XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
 {
     XBinary::OFFSETSIZE osResult={};
 
@@ -503,7 +503,7 @@ bool XFormats::isSigned(QString sFileName)
     return bResult;
 }
 
-QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress, XBinary::SYMBOL_TYPE symBolType)
+QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress, XBinary::SYMBOL_TYPE symBolType)
 {
     QList<XBinary::SYMBOL_RECORD> listResult;
 
