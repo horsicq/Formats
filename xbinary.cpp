@@ -888,7 +888,7 @@ qint64 XBinary::write_ansiString(qint64 nOffset, QString sString)
     return write_array(nOffset,sString.toLatin1().data(),sString.length()+1);
 }
 
-void XBinary::write_ansiStringFix(qint64 nOffset, qint64 nSize, QString sString)
+void XBinary::write_ansiStringFix(qint64 nOffset,qint64 nSize,QString sString)
 {
     char *pBuffer=new char[nSize+1]; // mb TODO Check
 
