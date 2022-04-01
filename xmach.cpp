@@ -239,9 +239,9 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypes()
     return mapResult;
 }
 
-QMap<quint64, QString> XMACH::getHeaderCpuTypesS()
+QMap<quint64,QString> XMACH::getHeaderCpuTypesS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(1,"VAX");
     mapResult.insert(2,"ROMP");
