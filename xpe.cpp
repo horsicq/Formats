@@ -2965,7 +2965,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
 
             nNumberOfHeaders=pListImportHeaders->count();
 
-            for(qint32 i=0; i<nNumberOfHeaders; i++)
+            for(qint32 i=0;i<nNumberOfHeaders;i++)
             {
                 pIID->FirstThunk=pIAT-pDataOffset;
                 listPatches.append((char *)pIID-pDataOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,FirstThunk));
