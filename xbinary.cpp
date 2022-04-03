@@ -1439,7 +1439,7 @@ void XBinary::_write_uint32(char *pData,quint32 nValue,bool bIsBigEndian)
     *(quint32 *)pData=nValue;
 }
 
-void XBinary::_write_int32(char *pData, qint32 nValue, bool bIsBigEndian)
+void XBinary::_write_int32(char *pData,qint32 nValue,bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
