@@ -1345,7 +1345,7 @@ QByteArray XBinary::_read_byteArray(char *pData,int nSize)
     return QByteArray(pData,nSize);
 }
 
-float XBinary::_read_float(char *pData, bool bIsBigEndian)
+float XBinary::_read_float(char *pData,bool bIsBigEndian)
 {
     float result=*(float *)pData;
 
