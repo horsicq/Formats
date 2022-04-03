@@ -1314,7 +1314,7 @@ quint64 XBinary::_read_uint64(char *pData,bool bIsBigEndian)
     return result;
 }
 
-qint64 XBinary::_read_int64(char *pData, bool bIsBigEndian)
+qint64 XBinary::_read_int64(char *pData,bool bIsBigEndian)
 {
     qint64 result=*(qint64 *)pData;
 
