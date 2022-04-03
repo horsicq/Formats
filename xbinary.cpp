@@ -1387,7 +1387,7 @@ quint64 XBinary::_read_value(MODE mode,char *pData,bool bIsBigEndian)
     return nResult;
 }
 
-void XBinary::_write_uint8(char *pData, quint8 nValue)
+void XBinary::_write_uint8(char *pData,quint8 nValue)
 {
     *(quint8 *)pData=nValue;
 }
