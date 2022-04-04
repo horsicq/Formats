@@ -3348,7 +3348,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<
     {
         if(pListResourceRecords->at(i).irin[0].sName==sName1)
         {
-            if((pListResourceRecords->at(i).irin[0].nID==nID2)||(nID2==(quint32)-1))
+            if((pListResourceRecords->at(i).irin[1].nID==nID2)||(nID2==(quint32)-1))
             {
                 result=pListResourceRecords->at(i);
 
@@ -3381,6 +3381,26 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, QString sName2, QLis
     return result;
 }
 
+QList<XPE::RESOURCE_RECORD> XPE::getResourceRecords(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords)
+{
+    QList<XPE::RESOURCE_RECORD> listResult;
+
+    qint32 nNumberOfResources=pListResourceRecords->count();
+
+    for(qint32 i=0; i<nNumberOfResources; i++)
+    {
+        if(pListResourceRecords->at(i).irin[0].nID==nID1)
+        {
+            if((pListResourceRecords->at(i).irin[1].nID==nID2)||(nID2==(quint32)-1))
+            {
+                listResult.append(pListResourceRecords->at(i));
+            }
+        }
+    }
+
+    return listResult;
+}
+
 bool XPE::isResourcePresent(quint32 nID1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     return (getResourceRecord(nID1,nID2,pListResourceRecords).nSize);
@@ -3399,6 +3419,88 @@ bool XPE::isResourcePresent(QString sName1, quint32 nID2, QList<XPE::RESOURCE_RE
 bool XPE::isResourcePresent(QString sName1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     return (getResourceRecord(sName1,sName2,pListResourceRecords).nSize);
+}
+
+bool XPE::isResourceStringTablePresent()
+{
+    QList<RESOURCE_RECORD> listResources=getResources();
+
+    return isResourceStringTablePresent(&listResources);
+}
+
+bool XPE::isResourceStringTablePresent(QList<RESOURCE_RECORD> *pListResourceRecords)
+{
+    return isResourcePresent(XPE_DEF::S_RT_STRING,-1,pListResourceRecords);
+}
+
+QList<XPE::RESOURCE_STRINGTABLE_RECORD> XPE::getResourceStringTableRecords()
+{
+    QList<RESOURCE_RECORD> listResources=getResources();
+    _MEMORY_MAP memoryMap=getMemoryMap();
+
+    return getResourceStringTableRecords(&listResources,&memoryMap);
+}
+
+QList<XPE::RESOURCE_STRINGTABLE_RECORD> XPE::getResourceStringTableRecords(QList<RESOURCE_RECORD> *pListResourceRecords,XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    QList<XPE::RESOURCE_STRINGTABLE_RECORD> listResult;
+
+    QList<XPE::RESOURCE_RECORD> listResourceRecords=getResourceRecords(XPE_DEF::S_RT_STRING,-1,pListResourceRecords);
+
+    qint32 nNumberOfRecords=listResourceRecords.count();
+
+    for(qint32 i=0;i<nNumberOfRecords;i++)
+    {
+        RESOURCE_RECORD rh=listResourceRecords.at(i);
+
+        if(rh.nOffset!=-1)
+        {
+            qint64 nDataOffset=rh.nOffset;
+            qint64 nDataSize=rh.nSize;
+
+            if(isOffsetAndSizeValid(pMemoryMap,nDataOffset,nDataSize))
+            {
+                quint32 nStartID=(rh.irin[1].nID-1)*16;
+                quint32 nLanguage=rh.irin[2].nID;
+
+                qint64 nCurrentOffset=nDataOffset;
+
+                for(qint32 j=0;j<16;j++)
+                {
+                    quint16 nStringSize=read_uint16(nCurrentOffset);
+                    nCurrentOffset+=2;
+
+                    if(nCurrentOffset-nDataOffset>=nDataSize)
+                    {
+                        break;
+                    }
+
+                    if(nStringSize)
+                    {
+                        nStringSize=qMin((quint16)((nDataSize-nCurrentOffset)/2),nStringSize);
+
+                        QString sString=read_unicodeString(nCurrentOffset,nStringSize);
+
+                        XPE::RESOURCE_STRINGTABLE_RECORD record={};
+                        record.nID=nStartID+j;
+                        record.nLanguage=nLanguage;
+                        record.sString=sString;
+
+                        listResult.append(record);
+
+                        nCurrentOffset+=2*nStringSize;
+
+                        if(nCurrentOffset-nDataOffset>=nDataSize)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return listResult;
 }
 
 bool XPE::isResourceManifestPresent()

@@ -169,6 +169,13 @@ public:
         QList<RESOURCE_POSITION> listPositions;
     };
 
+    struct RESOURCE_STRINGTABLE_RECORD
+    {
+        quint32 nID;
+        quint32 nLanguage;
+        QString sString;
+    };
+
     struct RELOCS_POSITION
     {
         qint16 nTypeOffset;
@@ -592,10 +599,18 @@ public:
     static RESOURCE_RECORD getResourceRecord(QString sName1,quint32 nID2,QList<RESOURCE_RECORD> *pListResourceRecords);
     static RESOURCE_RECORD getResourceRecord(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListResourceRecords);
 
+    static QList<RESOURCE_RECORD> getResourceRecords(quint32 nID1,quint32 nID2,QList<RESOURCE_RECORD> *pListResourceRecords);
+
     static bool isResourcePresent(quint32 nID1,quint32 nID2,QList<RESOURCE_RECORD> *pListResourceRecords);
     static bool isResourcePresent(quint32 nID1,QString sName2,QList<RESOURCE_RECORD> *pListResourceRecords);
     static bool isResourcePresent(QString sName1,quint32 nID2,QList<RESOURCE_RECORD> *pListResourceRecords);
     static bool isResourcePresent(QString sName1,QString sName2,QList<RESOURCE_RECORD> *pListResourceRecords);
+
+    bool isResourceStringTablePresent();
+    bool isResourceStringTablePresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+
+    QList<XPE::RESOURCE_STRINGTABLE_RECORD> getResourceStringTableRecords();
+    QList<XPE::RESOURCE_STRINGTABLE_RECORD> getResourceStringTableRecords(QList<XPE::RESOURCE_RECORD> *pListResourceRecords,XBinary::_MEMORY_MAP *pMemoryMap);
 
     bool isResourceManifestPresent();
     bool isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
