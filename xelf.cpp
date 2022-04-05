@@ -491,9 +491,9 @@ XELF_DEF::Elf_Ehdr XELF::getHdr()
     return result;
 }
 
-QMap<quint64, QString> XELF::getTypes()
+QMap<quint64,QString> XELF::getTypes()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0,"ET_NONE");
     mapResult.insert(1,"ET_REL");
