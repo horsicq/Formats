@@ -2781,13 +2781,15 @@ QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString
 
     qint32 nSize=sString.size();
 
+    char buffer[4]={};
+
     if(msRecordTypeId==MS_RECORD_TYPE_ANSI)
     {
         baResult=sString.toLatin1();
 
         if(bAddNull)
         {
-            baResult.append(1,0);
+            baResult.append(buffer,1);
         }
     }
     else if(msRecordTypeId==MS_RECORD_TYPE_UNICODE)
@@ -2800,7 +2802,7 @@ QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString
 
         if(bAddNull)
         {
-            baResult.append(2,0);
+            baResult.append(buffer,2);
         }
     }
     else if(msRecordTypeId==MS_RECORD_TYPE_UTF8)
@@ -2809,7 +2811,7 @@ QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString
 
         if(bAddNull)
         {
-            baResult.append(1,0);
+            baResult.append(buffer,1);
         }
     }
 
