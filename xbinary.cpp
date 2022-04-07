@@ -8473,6 +8473,70 @@ QString XBinary::memoryFlagsToString(MEMORY_FLAGS mf)
     return sResult;
 }
 
+XBinary::XVARIANT XBinary::getXVariant(bool bValue)
+{
+    XVARIANT result={};
+
+    result.mode=MODE_BIT;
+    result.var.v_bool=bValue;
+
+    return result;
+}
+
+XBinary::XVARIANT XBinary::getXVariant(quint8 nValue)
+{
+    XVARIANT result={};
+
+    result.mode=MODE_8;
+    result.var.v_uint8=nValue;
+
+    return result;
+}
+
+XBinary::XVARIANT XBinary::getXVariant(quint16 nValue, bool bIsBigEndian)
+{
+    XVARIANT result={};
+
+    result.bIsBigEndian=bIsBigEndian;
+    result.mode=MODE_16;
+    result.var.v_uint16=nValue;
+
+    return result;
+}
+
+XBinary::XVARIANT XBinary::getXVariant(quint32 nValue, bool bIsBigEndian)
+{
+    XVARIANT result={};
+
+    result.bIsBigEndian=bIsBigEndian;
+    result.mode=MODE_32;
+    result.var.v_uint32=nValue;
+
+    return result;
+}
+
+XBinary::XVARIANT XBinary::getXVariant(quint64 nValue, bool bIsBigEndian)
+{
+    XVARIANT result={};
+
+    result.bIsBigEndian=bIsBigEndian;
+    result.mode=MODE_64;
+    result.var.v_uint64=nValue;
+
+    return result;
+}
+
+XBinary::XVARIANT XBinary::getXVariant(XUINT128 value, bool bIsBigEndian)
+{
+    XVARIANT result={};
+
+    result.bIsBigEndian=bIsBigEndian;
+    result.mode=MODE_128;
+    result.var.v_uint128=value;
+
+    return result;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!

@@ -187,7 +187,7 @@ public:
     #endif
     };
 
-    struct MEMORY_REGION
+    struct MEMORY_REGION // TODO move to XProcess
     {
         quint64 nAddress;
         quint64 nSize;
@@ -206,68 +206,7 @@ public:
     #endif
     };
 
-    struct REG_OPTIONS
-    {
-        bool bGeneral;
-        bool bIP;
-        bool bFlags;
-        bool bSegments;
-        bool bDebug;
-        bool bFloat;
-        bool bXMM;
-    };
-
-    struct REGISTERS
-    {
-        bool bIsValid;
-    #ifdef Q_PROCESSOR_X86_32
-        quint32 EAX;
-        quint32 ECX;
-        quint32 EDX;
-        quint32 EBX;
-        quint32 ESP;
-        quint32 EBP;
-        quint32 ESI;
-        quint32 EDI;
-        quint32 EIP;
-    #endif
-    #ifdef Q_PROCESSOR_X86_64
-        quint64 RAX;
-        quint64 RCX;
-        quint64 RDX;
-        quint64 RBX;
-        quint64 RSP;
-        quint64 RBP;
-        quint64 RSI;
-        quint64 RDI;
-        quint64 R8;
-        quint64 R9;
-        quint64 R10;
-        quint64 R11;
-        quint64 R12;
-        quint64 R13;
-        quint64 R14;
-        quint64 R15;
-        quint64 RIP;
-    #endif
-    #ifdef Q_PROCESSOR_X86
-        quint32 EFLAGS;
-        quint16 CS;
-        quint16 DS;
-        quint16 ES;
-        quint16 FS;
-        quint16 GS;
-        quint16 SS;
-    #endif
-    #ifdef Q_PROCESSOR_X86_32
-        quint32 DR[8];
-    #endif
-    #ifdef Q_PROCESSOR_X86_64
-        quint64 DR[8];
-    #endif
-    };
-
-    struct PROCESS_INFO
+    struct PROCESS_INFO // TODO move to XProcess
     {
         QString sName;
         //        qint64 nParentID;
@@ -277,19 +216,12 @@ public:
         quint64 nImageSize;
     };
 
-    struct MODULE
+    struct MODULE // TODO move to XProcess
     {
         quint64 nAddress;
         quint64 nSize;
         QString sName;
         QString sFileName;
-    };
-
-    struct STATUS
-    {
-        REGISTERS registers;
-        QList<MEMORY_REGION> listMemoryRegions;
-        QList<MODULE> listModules;
     };
 
     enum FORMATTYPE
@@ -1344,6 +1276,13 @@ public:
     static bool checkVersionString(QString sVersion);
 
     static QString memoryFlagsToString(MEMORY_FLAGS mf);
+
+    static XVARIANT getXVariant(bool bValue);
+    static XVARIANT getXVariant(quint8 nValue);
+    static XVARIANT getXVariant(quint16 nValue,bool bIsBigEndian=false);
+    static XVARIANT getXVariant(quint32 nValue,bool bIsBigEndian=false);
+    static XVARIANT getXVariant(quint64 nValue,bool bIsBigEndian=false);
+    static XVARIANT getXVariant(XUINT128 value,bool bIsBigEndian=false);
 
 public slots:
     void setSearchProcessEnable(bool bState);
