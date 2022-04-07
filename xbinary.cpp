@@ -8537,6 +8537,26 @@ XBinary::XVARIANT XBinary::getXVariant(XUINT128 value, bool bIsBigEndian)
     return result;
 }
 
+bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
+{
+    bool bResult=false;
+
+    if((value1.mode==value2.mode)&&(value1.bIsBigEndian==value2.bIsBigEndian))
+    {
+        if      (value1.mode==MODE_BIT)     bResult=(value1.var.v_bool==value2.var.v_bool);
+        else if (value1.mode==MODE_8)       bResult=(value1.var.v_uint8==value2.var.v_uint8);
+        else if (value1.mode==MODE_16)      bResult=(value1.var.v_uint16==value2.var.v_uint16);
+        else if (value1.mode==MODE_32)      bResult=(value1.var.v_uint32==value2.var.v_uint32);
+        else if (value1.mode==MODE_64)      bResult=(value1.var.v_uint64==value2.var.v_uint64);
+        else if (value1.mode==MODE_128)
+        {
+            bResult=(value1.var.v_uint128.high==value2.var.v_uint128.high)&&(value1.var.v_uint128.low==value2.var.v_uint128.low);
+        }
+    }
+
+    return bResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
 {
     // TODO Error checks!

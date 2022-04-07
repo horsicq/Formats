@@ -1284,6 +1284,8 @@ public:
     static XVARIANT getXVariant(quint64 nValue,bool bIsBigEndian=false);
     static XVARIANT getXVariant(XUINT128 value,bool bIsBigEndian=false);
 
+    static bool isXVariantEqual(XVARIANT value1,XVARIANT value2);
+
 public slots:
     void setSearchProcessEnable(bool bState);
     void setDumpProcessEnable(bool bState);
