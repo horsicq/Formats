@@ -1604,7 +1604,7 @@ qint64 XBinary::find_uint8(qint64 nOffset, qint64 nSize, quint8 nValue)
     return find_array(nOffset,nSize,(char *)&nValue,1);
 }
 
-qint64 XBinary::find_int8(qint64 nOffset, qint64 nSize, qint8 nValue)
+qint64 XBinary::find_int8(qint64 nOffset,qint64 nSize,qint8 nValue)
 {
     return find_array(nOffset,nSize,(char *)&nValue,1);
 }
