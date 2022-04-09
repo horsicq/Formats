@@ -1046,7 +1046,7 @@ QString XBinary::_read_utf8String(char *pData,qint64 nMaxSize)
     return sResult;
 }
 
-QString XBinary::_read_utf8String(qint64 nOffset, char *pData, qint32 nDataSize, qint32 nDataOffset)
+QString XBinary::_read_utf8String(qint64 nOffset,char *pData,qint32 nDataSize,qint32 nDataOffset)
 {
     QString sResult;
 
