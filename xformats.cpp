@@ -180,7 +180,7 @@ qint64 XFormats::getEntryPointAddress(XBinary::FT fileType,QIODevice *pDevice,bo
     return nResult;
 }
 
-qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
+qint64 XFormats::getEntryPointOffset(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,quint64 nModuleAddress)
 {
     qint64 nResult=0;
 
