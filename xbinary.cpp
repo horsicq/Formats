@@ -1495,7 +1495,7 @@ void XBinary::_write_double(char *pData, double dValue, bool bIsBigEndian)
     *(double *)pData=dValue;
 }
 
-void XBinary::_write_value(MODE mode, char *pData, quint64 nValue, bool bIsBigEndian)
+void XBinary::_write_value(MODE mode,char *pData,quint64 nValue,bool bIsBigEndian)
 {
     if(mode==MODE::MODE_8)
     {
