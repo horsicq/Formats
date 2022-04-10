@@ -90,7 +90,7 @@ qint64 XIODevice::pos() const
     return QIODevice::pos();
 }
 
-qint64 XIODevice::readData(char *pData, qint64 nMaxSize)
+qint64 XIODevice::readData(char *pData,qint64 nMaxSize)
 {
     Q_UNUSED(pData)
     Q_UNUSED(nMaxSize)
