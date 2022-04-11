@@ -172,58 +172,6 @@ public:
         bool bIsVirtual;
     };
 
-    struct MEMORY_FLAGS
-    {
-        bool bRead;
-        bool bWrite;
-        bool bExecute;
-    #ifdef Q_OS_WIN
-        bool bGuard;
-        bool bCopy;
-    #endif
-    #ifdef Q_OS_LINUX
-        bool bShare;
-        bool bPrivate;
-    #endif
-    };
-
-    struct MEMORY_REGION // TODO move to XProcess
-    {
-        quint64 nAddress;
-        quint64 nSize;
-        MEMORY_FLAGS mf;
-    #ifdef Q_OS_WIN
-        quint64 nAllocationBase;
-        MEMORY_FLAGS mfAllocation;
-        quint32 nState;
-        quint32 nType;
-    #endif
-    #ifdef Q_OS_LINUX
-        qint64 nOffset;
-        QString sDevice;
-        qint64 nFile;
-        QString sFileName;
-    #endif
-    };
-
-    struct PROCESS_INFO // TODO move to XProcess
-    {
-        QString sName;
-        //        qint64 nParentID;
-        qint64 nID;
-        QString sFilePath;
-        quint64 nImageAddress;
-        quint64 nImageSize;
-    };
-
-    struct MODULE // TODO move to XProcess
-    {
-        quint64 nAddress;
-        quint64 nSize;
-        QString sName;
-        QString sFileName;
-    };
-
     enum FORMATTYPE
     {
         FORMATTYPE_TEXT=0,
@@ -1264,9 +1212,6 @@ public:
     static quint32 make_dword(quint16 nValue1,quint16 nValue2);
     static XDWORD make_xdword(quint32 nValue);
 
-    static bool isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion,quint64 nAddress);
-    static MEMORY_REGION getMemoryRegionByAddress(QList<MEMORY_REGION> *pListMemoryRegions,quint64 nAddress);
-
     static QString recordFilePartIdToString(FILEPART id);
 
     static QString createTypeString(const SCANSTRUCT *pScanStruct);
@@ -1274,8 +1219,6 @@ public:
     static QString createResultString2(const SCANSTRUCT *pScanStruct);
 
     static bool checkVersionString(QString sVersion);
-
-    static QString memoryFlagsToString(MEMORY_FLAGS mf);
 
     static XVARIANT getXVariant(bool bValue);
     static XVARIANT getXVariant(quint8 nValue);

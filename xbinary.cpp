@@ -8308,39 +8308,6 @@ XBinary::XDWORD XBinary::make_xdword(quint32 nValue)
     return result;
 }
 
-bool XBinary::isAddressInMemoryRegion(MEMORY_REGION *pMemoryRegion, quint64 nAddress)
-{
-    bool bResult=false;
-
-    if((pMemoryRegion->nAddress<=nAddress)&&(nAddress<(pMemoryRegion->nAddress+pMemoryRegion->nSize)))
-    {
-        bResult=true;
-    }
-
-    return bResult;
-}
-
-XBinary::MEMORY_REGION XBinary::getMemoryRegionByAddress(QList<MEMORY_REGION> *pListMemoryRegions, quint64 nAddress)
-{
-    MEMORY_REGION result={};
-
-    qint32 nNumberOfRecords=pListMemoryRegions->count();
-
-    for(qint32 i=0;i<nNumberOfRecords;i++)
-    {
-        MEMORY_REGION memoryRegion=pListMemoryRegions->at(i);
-
-        if(isAddressInMemoryRegion(&memoryRegion,nAddress))
-        {
-            result=pListMemoryRegions->at(i);
-
-            break;
-        }
-    }
-
-    return result;
-}
-
 QString XBinary::recordFilePartIdToString(FILEPART id)
 {
     QString sResult=tr("Unknown");
@@ -8454,23 +8421,6 @@ bool XBinary::checkVersionString(QString sVersion)
     }
 
     return bResult;
-}
-
-QString XBinary::memoryFlagsToString(MEMORY_FLAGS mf)
-{
-    QString sResult;
-
-#ifdef Q_OS_WIN
-    if(mf.bGuard)       sResult+="G";
-#endif
-    if(mf.bRead)        sResult+="R";
-    if(mf.bWrite)       sResult+="W";
-    if(mf.bExecute)     sResult+="E";
-#ifdef Q_OS_WIN
-    if(mf.bCopy)        sResult+="C";
-#endif
-
-    return sResult;
 }
 
 XBinary::XVARIANT XBinary::getXVariant(bool bValue)
