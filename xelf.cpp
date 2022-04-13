@@ -808,9 +808,9 @@ QMap<quint64,QString> XELF::getIndentClasses()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentClassesS()
+QMap<quint64,QString> XELF::getIndentClassesS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0,"NONE");
     mapResult.insert(1,"32");
