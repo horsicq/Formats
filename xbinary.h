@@ -459,6 +459,7 @@ public:
         MS_RECORD_TYPE_UTF8,
         MS_RECORD_TYPE_UNICODE,
         MS_RECORD_TYPE_SIGNATURE
+        // TODO more PASCAL(A/U)
     };
 
     struct MS_RECORD
