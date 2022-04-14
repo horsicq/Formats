@@ -25,7 +25,7 @@ XFormats::XFormats(QObject *pParent) : QObject(pParent)
 
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,quint64 nModuleAddress)
 {
     XBinary::_MEMORY_MAP result={};
 

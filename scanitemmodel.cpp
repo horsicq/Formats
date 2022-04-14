@@ -475,7 +475,7 @@ void ScanItemModel::_coloredOutput(ScanItem *pItem,qint32 nLevel)
     {
         QString sPrefix;
         sPrefix=sPrefix.leftJustified(4*(nLevel-1),' ');
-        printf("%s",sPrefix.toLatin1().data());
+        printf("%s",sPrefix.toUtf8().data());
         _coloredItem(pItem);
         printf("\n");
     }
@@ -619,7 +619,7 @@ void ScanItemModel::_coloredItem(ScanItem *pItem)
     }
 #endif
 
-    printf("%s",pItem->data(0).toString().toLatin1().data());
+    printf("%s",pItem->data(0).toString().toUtf8().data());
 
 #ifdef Q_OS_WIN
     if(pItem->scanStruct().globalColor!=Qt::transparent)
