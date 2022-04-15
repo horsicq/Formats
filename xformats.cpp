@@ -393,7 +393,7 @@ bool XFormats::isSigned(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,qu
     return bResult;
 }
 
-XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
+XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,quint64 nModuleAddress)
 {
     XBinary::OFFSETSIZE osResult={};
 
