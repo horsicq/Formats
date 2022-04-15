@@ -237,7 +237,7 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType,QIODevice *pDevice,boo
     return nResult;
 }
 
-bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
+bool XFormats::isBigEndian(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,quint64 nModuleAddress)
 {
     bool bResult=false;
 
