@@ -2982,7 +2982,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
 
                 qint32 nNumberOfPositions=pListImportHeaders->at(i).listPositions.count();
 
-                for(qint32 j=0; j<nNumberOfPositions; j++)
+                for(qint32 j=0;j<nNumberOfPositions;j++)
                 {
                     if(pListImportHeaders->at(i).listPositions.at(j).sName!="")
                     {
