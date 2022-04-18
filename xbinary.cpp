@@ -8521,7 +8521,7 @@ quint8 XBinary::getByteFromQword(quint64 nValue, qint32 nIndex)
 
     if(nIndex<8)
     {
-        nValue=nValue>>(nIndex*32);
+        nValue=nValue>>(nIndex*8);
 
         nResult=nValue&0xFF;
     }
