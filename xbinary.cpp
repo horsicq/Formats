@@ -8487,6 +8487,20 @@ XBinary::XVARIANT XBinary::getXVariant(XUINT128 value, bool bIsBigEndian)
     return result;
 }
 
+quint32 XBinary::getDwordFromQword(quint64 nValue, qint32 nIndex)
+{
+    quint32 nResult=0;
+
+    if(nIndex<2)
+    {
+        nValue=nValue>>(nIndex*32);
+
+        nResult=nValue&0xFFFFFFFF;
+    }
+
+    return nResult;
+}
+
 bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
 {
     bool bResult=false;

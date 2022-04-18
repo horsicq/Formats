@@ -1228,6 +1228,8 @@ public:
     static XVARIANT getXVariant(quint64 nValue,bool bIsBigEndian=false);
     static XVARIANT getXVariant(XUINT128 value,bool bIsBigEndian=false);
 
+    static quint32 getDwordFromQword(quint64 nValue,qint32 nIndex);
+
     static bool isXVariantEqual(XVARIANT value1,XVARIANT value2);
 
 public slots:
