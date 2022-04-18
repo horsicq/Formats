@@ -8501,6 +8501,20 @@ quint32 XBinary::getDwordFromQword(quint64 nValue, qint32 nIndex)
     return nResult;
 }
 
+quint16 XBinary::getWordFromQword(quint64 nValue, qint32 nIndex)
+{
+    quint16 nResult=0;
+
+    if(nIndex<4)
+    {
+        nValue=nValue>>(nIndex*16);
+
+        nResult=nValue&0xFFFF;
+    }
+
+    return nResult;
+}
+
 bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
 {
     bool bResult=false;

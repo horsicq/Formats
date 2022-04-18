@@ -1229,6 +1229,7 @@ public:
     static XVARIANT getXVariant(XUINT128 value,bool bIsBigEndian=false);
 
     static quint32 getDwordFromQword(quint64 nValue,qint32 nIndex);
+    static quint16 getWordFromQword(quint64 nValue,qint32 nIndex);
 
     static bool isXVariantEqual(XVARIANT value1,XVARIANT value2);
 
