@@ -1230,6 +1230,7 @@ public:
 
     static quint32 getDwordFromQword(quint64 nValue,qint32 nIndex);
     static quint16 getWordFromQword(quint64 nValue,qint32 nIndex);
+    static quint8 getByteFromQword(quint64 nValue,qint32 nIndex);
 
     static bool isXVariantEqual(XVARIANT value1,XVARIANT value2);
 
