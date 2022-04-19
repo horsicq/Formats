@@ -84,6 +84,8 @@
 #define S_HIWORD(value)                         ((quint16)((quint32)(value)>>16))
 #define S_FULL_VERSION(value1,value2,value3)    ((quint32)((((quint16)value1)<<16)|(((quint8)value2)<<8)|((quint8)value3)))
 
+#define XADDR quint64
+
 #ifdef Q_OS_MAC
 #include <CoreFoundation/CoreFoundation.h> // Check
 #endif
@@ -98,7 +100,7 @@ public:
     struct DATASET
     {
         qint64 nOffset;
-        qint64 nAddress;
+        XADDR nAddress;
         qint64 nSize;
         QString sName;
         quint32 nType;
@@ -128,7 +130,7 @@ public:
 
     struct ADDRESSSIZE
     {
-        qint64 nAddress;
+        XADDR nAddress;
         qint64 nSize;
     };
 
@@ -162,7 +164,7 @@ public:
     struct _MEMORY_RECORD
     {
         qint64 nOffset;
-        qint64 nAddress;
+        XADDR nAddress;
         ADDRESS_SEGMENT segment;
         qint64 nSize;
         MMT type;
@@ -398,10 +400,10 @@ public:
 
     struct _MEMORY_MAP
     {
-        qint64 nModuleAddress;
+        XADDR nModuleAddress;
         qint64 nImageSize;
         qint64 nRawSize;
-        qint64 nEntryPointAddress;
+        XADDR nEntryPointAddress;
         qint64 nSegmentBase; // For MSDOS
         FT fileType;
         MODE mode;
@@ -424,9 +426,9 @@ public:
 
     struct SYMBOL_RECORD
     {
-        qint64 nAddress;
+        XADDR nAddress;
         qint64 nSize;
-        qint64 nModuleAddress;
+        XADDR nModuleAddress;
         SYMBOL_TYPE symbolType;
         qint32 nOrdinal; // For Windows OS;
         QString sName;
@@ -473,14 +475,14 @@ public:
 
     struct OPCODE
     {
-        qint64 nAddress;
+        XADDR nAddress;
         qint64 nSize;
         QString sName;
     };
 
     struct MEMORY_REPLACE // For debuggers&breakpoints
     {
-        qint64 nAddress;
+        XADDR nAddress;
         qint64 nOffset;
         qint64 nSize;
         QByteArray baOriginal;
@@ -549,7 +551,7 @@ private:
 
     struct SIGNATURE_RECORD
     {
-        qint64 nBaseAddress;
+        XADDR nBaseAddress;
         ST st;
         QByteArray baData;
         quint32 nSizeOfAddr;
@@ -557,10 +559,10 @@ private:
     };
 
 public:
-    explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1); // mb TODO parent for signals/slot
+    explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1); // mb TODO parent for signals/slot
     XBinary(QString sFileName);
     ~XBinary();
-    void setData(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
+    void setData(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
     void setDevice(QIODevice *pDevice);
     void setReadWriteMutex(QMutex *pReadWriteMutex);
     qint64 safeReadData(QIODevice *pDevice,qint64 nPos,char *pData,qint64 nMaxLen);
@@ -783,13 +785,13 @@ public:
     static bool compareMemoryWordI(quint16 *pMemory,const quint16 *pMemoryU,const quint16 *pMemoryL,qint64 nSize);  // Unicode
 
     bool isOffsetValid(qint64 nOffset);
-    bool isAddressValid(qint64 nAddress);
+    bool isAddressValid(XADDR nAddress);
     bool isRelAddressValid(qint64 nRelAddress);
-    bool isAddressPhysical(qint64 nAddress);
+    bool isAddressPhysical(XADDR nAddress);
 
-    qint64 offsetToAddress(qint64 nOffset);
-    qint64 addressToOffset(qint64 nAddress);
-    qint64 offsetToRelAddress(qint64 nOffset);
+    XADDR offsetToAddress(qint64 nOffset);
+    qint64 addressToOffset(XADDR nAddress);
+    XADDR offsetToRelAddress(qint64 nOffset);
     qint64 relAddressToOffset(qint64 nRelAddress);
 
     static bool isOffsetValid(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
@@ -797,32 +799,32 @@ public:
     bool isOffsetAndSizeValid(qint64 nOffset,qint64 nSize);
     static bool isOffsetAndSizeValid(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize);
 
-    static bool isAddressValid(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+    static bool isAddressValid(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
     static bool isRelAddressValid(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
 
-    static bool isAddressPhysical(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+    static bool isAddressPhysical(_MEMORY_MAP *pMemoryMap,XADDR nAddress);
 
-    static qint64 offsetToAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
-    static qint64 addressToOffset(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+    static XADDR offsetToAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
+    static qint64 addressToOffset(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
     static qint64 offsetToRelAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static qint64 relAddressToOffset(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
     static qint64 relAddressToAddress(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
-    static qint64 addressToRelAddress(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+    static qint64 addressToRelAddress(_MEMORY_MAP *pMemoryMap,XADDR nAddress);
 
     static _MEMORY_RECORD getMemoryRecordByOffset(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
-    static _MEMORY_RECORD getMemoryRecordByAddress(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+    static _MEMORY_RECORD getMemoryRecordByAddress(_MEMORY_MAP *pMemoryMap,XADDR nAddress);
     static _MEMORY_RECORD getMemoryRecordByRelAddress(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
 
-    static qint32 addressToLoadSection(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+    static qint32 addressToLoadSection(_MEMORY_MAP *pMemoryMap,XADDR nAddress);
 
-    static bool isSolidAddressRange(_MEMORY_MAP *pMemoryMap,qint64 nAddress,qint64 nSize);
+    static bool isSolidAddressRange(_MEMORY_MAP *pMemoryMap,XADDR nAddress,qint64 nSize);
 
     QString getMemoryRecordInfoByOffset(qint64 nOffset);
-    QString getMemoryRecordInfoByAddress(qint64 nAddress);
+    QString getMemoryRecordInfoByAddress(XADDR nAddress);
     QString getMemoryRecordInfoByRelAddress(qint64 nRelAddress);
 
     static QString getMemoryRecordInfoByOffset(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
-    static QString getMemoryRecordInfoByAddress(_MEMORY_MAP *pMemoryMap,qint64 nAddress);
+    static QString getMemoryRecordInfoByAddress(_MEMORY_MAP *pMemoryMap,XADDR nAddress);
     static QString getMemoryRecordInfoByRelAddress(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
 
     static QString getMemoryRecordName(_MEMORY_RECORD *pMemoryRecord);
@@ -831,8 +833,8 @@ public:
 
     static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);
 
-    virtual qint64 getBaseAddress();
-    virtual void setBaseAddress(qint64 nBaseAddress);
+    virtual XADDR getBaseAddress();
+    virtual void setBaseAddress(XADDR nBaseAddress);
 
     virtual qint64 getImageSize();
 
@@ -840,19 +842,19 @@ public:
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
-    qint64 getEntryPointAddress();
-    qint64 getEntryPointAddress(_MEMORY_MAP *pMemoryMap);
+    XADDR getEntryPointAddress();
+    XADDR getEntryPointAddress(_MEMORY_MAP *pMemoryMap);
 
     qint64 getEntryPointRVA();
     qint64 getEntryPointRVA(_MEMORY_MAP *pMemoryMap);
 
-    static qint64 getLowestAddress(_MEMORY_MAP *pMemoryMap);
+    static XADDR getLowestAddress(_MEMORY_MAP *pMemoryMap);
     static qint64 getTotalVirtualSize(_MEMORY_MAP *pMemoryMap);
-    static qint64 positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPosition);
+    static XADDR positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPosition);
 
-    void setModuleAddress(qint64 nValue);
+    void setModuleAddress(XADDR nValue);
 
-    qint64 getModuleAddress();
+    XADDR getModuleAddress();
 
     bool isImage();
     void setIsImage(bool bValue);
@@ -864,8 +866,8 @@ public:
     static bool _compareByteArrayWithSignature(QByteArray baData,QString sSignature);
     static QString _createSignature(QString sSignature1,QString sSignature2);
 
-    bool compareSignatureOnAddress(QString sSignature,qint64 nAddress);
-    bool compareSignatureOnAddress(_MEMORY_MAP *pMemoryMap,QString sSignature,qint64 nAddress);
+    bool compareSignatureOnAddress(QString sSignature,XADDR nAddress);
+    bool compareSignatureOnAddress(_MEMORY_MAP *pMemoryMap,QString sSignature,XADDR nAddress);
 
     bool compareEntryPoint(QString sSignature,qint64 nOffset=0);
     bool compareEntryPoint(_MEMORY_MAP *pMemoryMap,QString sSignature,qint64 nOffset=0);
@@ -975,8 +977,8 @@ public:
     QIODevice *getDevice();
 
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
 
     virtual bool isBigEndian();
     bool is16();
@@ -1174,11 +1176,11 @@ public:
         OPCODE_STATUS_END
     };
 
-    QList<OPCODE> getOpcodes(qint64 nOffset,qint64 nStartAddress,qint64 nSize,quint32 nType);
-    virtual qint64 readOpcodes(quint32 nType,char *pData,qint64 nStartAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
+    QList<OPCODE> getOpcodes(qint64 nOffset,XADDR nStartAddress,qint64 nSize,quint32 nType);
+    virtual XADDR readOpcodes(quint32 nType,char *pData,XADDR nStartAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
 
-    bool _read_opcode_uleb128(OPCODE *pOpcode,char **ppData,qint64 *pnSize,qint64 *pnAddress,qint64 *pnResult,QString sPrefix);
-    bool _read_opcode_ansiString(OPCODE *pOpcode,char **ppData,qint64 *pnSize,qint64 *pnAddress,qint64 *pnResult,QString sPrefix);
+    bool _read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, QString sPrefix);
+    bool _read_opcode_ansiString(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, QString sPrefix);
 
     QList<quint32> get_uint32_list(qint64 nOffset,qint32 nNumberOfRecords,bool bIsBigEndian=false);
     QList<quint64> get_uint64_list(qint64 nOffset,qint32 nNumberOfRecords,bool bIsBigEndian=false);
@@ -1189,7 +1191,7 @@ public:
     static bool _updateReplaces(qint64 nDataOffset,char *pData,qint64 nDataSize,QList<MEMORY_REPLACE> *pListMemoryReplace);
 
     virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap,SYMBOL_TYPE symbolType=SYMBOL_TYPE_ALL);
-    static SYMBOL_RECORD findSymbolByAddress(QList<SYMBOL_RECORD> *pListSymbolRecords,qint64 nAddress);
+    static SYMBOL_RECORD findSymbolByAddress(QList<SYMBOL_RECORD> *pListSymbolRecords,XADDR nAddress);
     static SYMBOL_RECORD findSymbolByName(QList<SYMBOL_RECORD> *pListSymbolRecords,QString sName);
     static SYMBOL_RECORD findSymbolByOrdinal(QList<SYMBOL_RECORD> *pListSymbolRecords,qint32 nOrdinal);
 
@@ -1231,6 +1233,10 @@ public:
     static quint32 getDwordFromQword(quint64 nValue,qint32 nIndex);
     static quint16 getWordFromQword(quint64 nValue,qint32 nIndex);
     static quint8 getByteFromQword(quint64 nValue,qint32 nIndex);
+
+    static quint64 setDwordToQword(quint64 nInit,quint32 nValue,qint32 nIndex);
+    static quint64 setWordToQword(quint64 nInit,quint16 nValue,qint32 nIndex);
+    static quint64 setByteToQword(quint64 nInit,quint8 nValue,qint32 nIndex);
 
     static bool isXVariantEqual(XVARIANT value1,XVARIANT value2);
 
@@ -1297,9 +1303,9 @@ private:
     QString g_sFileName;
     QMutex *g_pReadWriteMutex;
     bool g_bIsImage;
-    qint64 g_nBaseAddress;
+    XADDR g_nBaseAddress;
     qint64 g_nEntryPointOffset;
-    qint64 g_nModuleAddress;
+    XADDR g_nModuleAddress;
     bool g_bIsBigEndian; // TODO enum
     bool g_bIsSearchStop;
     bool g_bIsDumpStop;

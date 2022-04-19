@@ -43,10 +43,10 @@ public:
         // TODO EXTENDER?
     };
 
-    explicit XMSDOS(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
+    explicit XMSDOS(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
 
     quint16 get_magic();
     qint32 get_lfanew();

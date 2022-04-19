@@ -20,7 +20,7 @@
  */
 #include "xcom.h"
 
-XCOM::XCOM(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress) : XBinary(pDevice,bIsImage,nModuleAddress)
+XCOM::XCOM(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice,bIsImage,nModuleAddress)
 {
     XBinary::setBaseAddress(XCOM_DEF::ADDRESS_BEGIN);
 }
@@ -43,14 +43,14 @@ bool XCOM::isValid()
     return bResult;
 }
 
-bool XCOM::isValid(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
+bool XCOM::isValid(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     XCOM xcom(pDevice,bIsImage,nModuleAddress);
 
     return xcom.isValid();
 }
 
-XBinary::MODE XCOM::getMode(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
+XBinary::MODE XCOM::getMode(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     XCOM xcom(pDevice,bIsImage,nModuleAddress);
 

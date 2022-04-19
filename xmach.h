@@ -158,14 +158,14 @@ public:
         TYPE_KEXT_BUNDLE
     };
 
-    XMACH(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
+    XMACH(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
     ~XMACH();
 
     // TODO isSigned
     // TODO getSignOS
     bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
     bool isBigEndian();
 
     qint64 getHeaderOffset();
@@ -689,10 +689,10 @@ public:
         OPCODE_TYPE_REBASE
     };
 
-    virtual qint64 readOpcodes(quint32 nType,char *pData,qint64 nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
-    qint64 readOpcodesInterface_rebase(char *pData,qint64 nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
-    qint64 readOpcodesInterface_bind(char *pData,qint64 nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus,bool bNullEnd);
-    qint64 readOpcodesInterface_export(char *pData,qint64 nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
+    virtual XADDR readOpcodes(quint32 nType,char *pData,XADDR nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
+    XADDR readOpcodesInterface_rebase(char *pData,XADDR nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
+    XADDR readOpcodesInterface_bind(char *pData,XADDR nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus,bool bNullEnd);
+    XADDR readOpcodesInterface_export(char *pData,XADDR nAddress,qint64 nSize,QList<OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus);
 };
 
 #endif // XMACH_H

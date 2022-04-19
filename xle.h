@@ -36,10 +36,10 @@ public:
         // TODO More
     };
 
-    explicit XLE(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
+    explicit XLE(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
 
     qint64 getImageVxdHeaderOffset();
     qint64 getImageVxdHeaderSize();

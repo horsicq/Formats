@@ -78,12 +78,12 @@ public:
         TYPE_NUM
     };
 
-    XELF(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
+    XELF(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
     ~XELF();
 
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
     bool isBigEndian();
 
     qint64 getEhdrOffset();
@@ -415,7 +415,7 @@ public:
     virtual OSINFO getOsInfo();
     virtual QString typeIdToString(qint32 nType);
 
-    virtual qint64 getBaseAddress();
+    virtual XADDR getBaseAddress();
 
     QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders,quint32 nType);
     QList<XELF_DEF::Elf_Shdr> _getSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders,quint32 nType);

@@ -22,7 +22,7 @@
 
 const double XBinary::D_ENTROPY_THRESHOLD=6.5;
 
-XBinary::XBinary(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
+XBinary::XBinary(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     setData(pDevice,bIsImage,nModuleAddress);
 }
@@ -61,7 +61,7 @@ XBinary::~XBinary()
     }
 }
 
-void XBinary::setData(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
+void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     g_pReadWriteMutex=nullptr;
     g_pMemory=nullptr;
@@ -3239,7 +3239,7 @@ bool XBinary::isOffsetValid(qint64 nOffset)
     return isOffsetValid(&memoryMap,nOffset);
 }
 
-bool XBinary::isAddressValid(qint64 nAddress)
+bool XBinary::isAddressValid(XADDR nAddress)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 
@@ -3253,20 +3253,20 @@ bool XBinary::isRelAddressValid(qint64 nRelAddress)
     return isRelAddressValid(&memoryMap,nRelAddress);
 }
 
-qint64 XBinary::offsetToAddress(qint64 nOffset)
+XADDR XBinary::offsetToAddress(qint64 nOffset)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 
     return offsetToAddress(&memoryMap,nOffset);
 }
 
-qint64 XBinary::addressToOffset(qint64 nAddress)
+qint64 XBinary::addressToOffset(quint64 nAddress)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
     return addressToOffset(&memoryMap,nAddress);
 }
 
-qint64 XBinary::offsetToRelAddress(qint64 nOffset)
+XADDR XBinary::offsetToRelAddress(qint64 nOffset)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 
@@ -3334,7 +3334,7 @@ bool XBinary::isOffsetAndSizeValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOff
     return bResult;
 }
 
-bool XBinary::isAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
+bool XBinary::isAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
     bool bResult=false;
 
@@ -3367,16 +3367,16 @@ bool XBinary::isRelAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAdd
     return isAddressValid(pMemoryMap,pMemoryMap->nModuleAddress+nRelAddress);
 }
 
-bool XBinary::isAddressPhysical(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
+bool XBinary::isAddressPhysical(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
     qint64 nOffset=addressToOffset(pMemoryMap,nAddress);
 
     return (nOffset!=-1);
 }
 
-qint64 XBinary::offsetToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
+XADDR XBinary::offsetToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
-    qint64 nResult=-1;
+    XADDR nResult=-1;
 
     qint32 nNumberOfRecords=pMemoryMap->listRecords.count();
 
@@ -3395,7 +3395,7 @@ qint64 XBinary::offsetToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset
     return nResult;
 }
 
-qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
+qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
     qint64 nResult=-1;
 
@@ -3470,7 +3470,7 @@ qint64 XBinary::relAddressToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRe
     return nResult;
 }
 
-qint64 XBinary::addressToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
+qint64 XBinary::addressToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
     qint64 nResult=-1;
 
@@ -3503,7 +3503,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByOffset(XBinary::_MEMORY_MAP *p
     return result;
 }
 
-XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
+XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByAddress(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
     _MEMORY_RECORD result={};
 
@@ -3528,7 +3528,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByRelAddress(XBinary::_MEMORY_MA
 {
     _MEMORY_RECORD result={};
 
-    qint64 nAddress=relAddressToAddress(pMemoryMap,nRelAddress);
+    XADDR nAddress=relAddressToAddress(pMemoryMap,nRelAddress);
 
     if(nAddress!=-1)
     {
@@ -3538,7 +3538,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByRelAddress(XBinary::_MEMORY_MA
     return result;
 }
 
-qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nAddress)
+qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
     qint32 nResult=-1;
 
@@ -3552,7 +3552,7 @@ qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nAddress)
     return nResult;
 }
 
-bool XBinary::isSolidAddressRange(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress, qint64 nSize)
+bool XBinary::isSolidAddressRange(XBinary::_MEMORY_MAP *pMemoryMap, quint64 nAddress, qint64 nSize)
 {
     bool bResult=false;
 
@@ -3571,7 +3571,7 @@ QString XBinary::getMemoryRecordInfoByOffset(qint64 nOffset)
     return getMemoryRecordInfoByOffset(&memoryMap,nOffset);
 }
 
-QString XBinary::getMemoryRecordInfoByAddress(qint64 nAddress)
+QString XBinary::getMemoryRecordInfoByAddress(XADDR nAddress)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 
@@ -3592,7 +3592,7 @@ QString XBinary::getMemoryRecordInfoByOffset(XBinary::_MEMORY_MAP *pMemoryMap, q
     return getMemoryRecordName(&memoryRecord);
 }
 
-QString XBinary::getMemoryRecordInfoByAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nAddress)
+QString XBinary::getMemoryRecordInfoByAddress(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
     XBinary::_MEMORY_RECORD memoryRecord=getMemoryRecordByAddress(pMemoryMap,nAddress);
 
@@ -3659,12 +3659,12 @@ qint32 XBinary::getNumberOfPhysicalRecords(XBinary::_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-qint64 XBinary::getBaseAddress()
+XADDR XBinary::getBaseAddress()
 {
     return this->g_nBaseAddress;
 }
 
-void XBinary::setBaseAddress(qint64 nBaseAddress)
+void XBinary::setBaseAddress(XADDR nBaseAddress)
 {
     this->g_nBaseAddress=nBaseAddress;
 }
@@ -3752,14 +3752,14 @@ QString XBinary::_createSignature(QString sSignature1, QString sSignature2)
     return sResult;
 }
 
-bool XBinary::compareSignatureOnAddress(QString sSignature, qint64 nAddress)
+bool XBinary::compareSignatureOnAddress(QString sSignature, XADDR nAddress)
 {
     XBinary::_MEMORY_MAP memoryMap=getMemoryMap();
 
     return compareSignatureOnAddress(&memoryMap,sSignature,nAddress);
 }
 
-bool XBinary::compareSignatureOnAddress(XBinary::_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nAddress)
+bool XBinary::compareSignatureOnAddress(XBinary::_MEMORY_MAP *pMemoryMap, QString sSignature, XADDR nAddress)
 {
     bool bResult=false;
 
@@ -3790,14 +3790,14 @@ void XBinary::setEntryPointOffset(qint64 nEntryPointOffset)
     this->g_nEntryPointOffset=nEntryPointOffset;
 }
 
-qint64 XBinary::getEntryPointAddress()
+XADDR XBinary::getEntryPointAddress()
 {
     XBinary::_MEMORY_MAP memoryMap=getMemoryMap();
 
     return getEntryPointAddress(&memoryMap);
 }
 
-qint64 XBinary::getEntryPointAddress(XBinary::_MEMORY_MAP *pMemoryMap)
+XADDR XBinary::getEntryPointAddress(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     return pMemoryMap->nEntryPointAddress;
 }
@@ -3814,9 +3814,9 @@ qint64 XBinary::getEntryPointRVA(_MEMORY_MAP *pMemoryMap)
     return (pMemoryMap->nEntryPointAddress)-pMemoryMap->nModuleAddress;
 }
 
-qint64 XBinary::getLowestAddress(XBinary::_MEMORY_MAP *pMemoryMap)
+XADDR XBinary::getLowestAddress(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    qint64 nResult=-1;
+    XADDR nResult=-1;
 
     qint32 nNumberOfRecords=pMemoryMap->listRecords.count();
 
@@ -3853,9 +3853,9 @@ qint64 XBinary::getTotalVirtualSize(XBinary::_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-qint64 XBinary::positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPosition)
+quint64 XBinary::positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPosition)
 {
-    qint64 nResult=-1;
+    XADDR nResult=-1;
 
     qint32 nNumberOfRecords=pMemoryMap->listRecords.count();
 
@@ -3874,14 +3874,14 @@ qint64 XBinary::positionToVirtualAddress(_MEMORY_MAP *pMemoryMap,qint64 nPositio
     return nResult;
 }
 
-void XBinary::setModuleAddress(qint64 nValue)
+void XBinary::setModuleAddress(quint64 nValue)
 {
     this->g_nModuleAddress=nValue;
 }
 
-qint64 XBinary::getModuleAddress()
+XADDR XBinary::getModuleAddress()
 {
-    qint64 nResult=0;
+    XADDR nResult=0;
 
     if(g_nModuleAddress!=-1)
     {
@@ -5827,14 +5827,14 @@ bool XBinary::isValid()
     return true;
 }
 
-bool XBinary::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+bool XBinary::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     XBinary xbinary(pDevice,bIsImage,nModuleAddress);
 
     return xbinary.isValid();
 }
 
-XBinary::MODE XBinary::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+XBinary::MODE XBinary::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     XBinary xbinary(pDevice,bIsImage,nModuleAddress);
 
@@ -7729,7 +7729,7 @@ XBinary::MODE XBinary::getWidthModeFromMemoryMap(XBinary::_MEMORY_MAP *pMemoryMa
 {
     MODE result=MODE_32;
 
-    qint64 nMax=qMax(pMemoryMap->nModuleAddress+pMemoryMap->nImageSize,pMemoryMap->nRawSize);
+    qint64 nMax=qMax(pMemoryMap->nModuleAddress+pMemoryMap->nImageSize,(XADDR)(pMemoryMap->nRawSize));
 
     result=getWidthModeFromSize(nMax);
 
@@ -7863,7 +7863,7 @@ QList<QString> XBinary::getAllFilesFromDirectory(QString sDirectory, QString sEx
     return directory.entryList(QStringList()<<sExtension,QDir::Files);
 }
 
-QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nStartAddress, qint64 nSize, quint32 nType)
+QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, XADDR nStartAddress, qint64 nSize, quint32 nType)
 {
     QList<OPCODE> listResult;
 
@@ -7920,7 +7920,7 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, qint64 nStartAddress,
     return listResult;
 }
 
-qint64 XBinary::readOpcodes(quint32 nType, char *pData, qint64 nStartAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
+XADDR XBinary::readOpcodes(quint32 nType, char *pData, XADDR nStartAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
     Q_UNUSED(nType)
     Q_UNUSED(pData)
@@ -7933,7 +7933,7 @@ qint64 XBinary::readOpcodes(quint32 nType, char *pData, qint64 nStartAddress, qi
     return false;
 }
 
-bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSize, qint64 *pnAddress, qint64 *pnResult, QString sPrefix)
+bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, QString sPrefix)
 {
     bool bResult=false;
 
@@ -7959,7 +7959,7 @@ bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSiz
     return bResult;
 }
 
-bool XBinary::_read_opcode_ansiString(XBinary::OPCODE *pOpcode, char **ppData, qint64 *pnSize, qint64 *pnAddress, qint64 *pnResult, QString sPrefix)
+bool XBinary::_read_opcode_ansiString(XBinary::OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, QString sPrefix)
 {
     bool bResult=false;
 
@@ -8113,7 +8113,7 @@ QList<XBinary::SYMBOL_RECORD> XBinary::getSymbolRecords(XBinary::_MEMORY_MAP *pM
     return listResult;
 }
 
-XBinary::SYMBOL_RECORD XBinary::findSymbolByAddress(QList<SYMBOL_RECORD> *pListSymbolRecords, qint64 nAddress)
+XBinary::SYMBOL_RECORD XBinary::findSymbolByAddress(QList<SYMBOL_RECORD> *pListSymbolRecords, XADDR nAddress)
 {
     SYMBOL_RECORD result={};
 
@@ -8529,6 +8529,63 @@ quint8 XBinary::getByteFromQword(quint64 nValue, qint32 nIndex)
     return nResult;
 }
 
+quint64 XBinary::setDwordToQword(quint64 nInit, quint32 nValue, qint32 nIndex)
+{
+    quint64 nResult=nInit;
+
+    if(nIndex<2)
+    {
+        quint64 nFF=0xFFFFFFFF;
+        quint64 _nValue=nValue;
+
+        nFF=nFF<<(nIndex*32);
+        _nValue=_nValue<<(nIndex*32);
+
+        nResult=nResult|nFF;
+        nResult=nResult&_nValue;
+    }
+
+    return nResult;
+}
+
+quint64 XBinary::setWordToQword(quint64 nInit, quint16 nValue, qint32 nIndex)
+{
+    quint64 nResult=nInit;
+
+    if(nIndex<4)
+    {
+        quint64 nFF=0xFFFF;
+        quint64 _nValue=nValue;
+
+        nFF=nFF<<(nIndex*16);
+        _nValue=_nValue<<(nIndex*16);
+
+        nResult=nResult|nFF;
+        nResult=nResult&_nValue;
+    }
+
+    return nResult;
+}
+
+quint64 XBinary::setByteToQword(quint64 nInit, quint8 nValue, qint32 nIndex)
+{
+    quint64 nResult=nInit;
+
+    if(nIndex<8)
+    {
+        quint64 nFF=0xFF;
+        quint64 _nValue=nValue;
+
+        nFF=nFF<<(nIndex*8);
+        _nValue=_nValue<<(nIndex*8);
+
+        nResult=nResult|nFF;
+        nResult=nResult&_nValue;
+    }
+
+    return nResult;
+}
+
 bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
 {
     bool bResult=false;
@@ -8599,7 +8656,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
 
     for(qint32 i=0;i<nNumberOfSignatures;i++)
     {
-        qint64 _nAddress=0;
+        XADDR _nAddress=0;
 
         switch(pListSignatureRecords->at(i).st)
         {
@@ -9044,7 +9101,7 @@ bool XBinary::_isOffsetValid(qint64 nOffset)
     return (nOffset<nFileSize);
 }
 
-bool XBinary::isAddressPhysical(qint64 nAddress)
+bool XBinary::isAddressPhysical(XADDR nAddress)
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 

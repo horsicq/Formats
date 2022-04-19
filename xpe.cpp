@@ -20,7 +20,7 @@
  */
 #include "xpe.h"
 
-XPE::XPE(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress): XMSDOS(pDevice,bIsImage,nModuleAddress)
+XPE::XPE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress): XMSDOS(pDevice,bIsImage,nModuleAddress)
 {
 }
 
@@ -49,14 +49,14 @@ bool XPE::isValid()
     return bResult;
 }
 
-bool XPE::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+bool XPE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     XPE xpe(pDevice,bIsImage,nModuleAddress);
 
     return xpe.isValid();
 }
 
-XBinary::MODE XPE::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+XBinary::MODE XPE::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     XPE xpe(pDevice,bIsImage,nModuleAddress);
 
@@ -1967,7 +1967,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
             nFileOffset=S_ALIGN_DOWN(nFileOffset,nFileAlignment);
             //        qint64 nFileSize=__ALIGN_UP(section.SizeOfRawData,nFileAlignment);
             qint64 nFileSize=section.SizeOfRawData+(section.PointerToRawData-nFileOffset);
-            qint64 nVirtualAddress=result.nModuleAddress+section.VirtualAddress;
+            XADDR nVirtualAddress=result.nModuleAddress+section.VirtualAddress;
             qint64 nVirtualSize=S_ALIGN_UP(section.Misc.VirtualSize,nSectionAlignment);
 
             if(!isImage())
@@ -2071,12 +2071,12 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
     return result;
 }
 
-qint64 XPE::getBaseAddress()
+XADDR XPE::getBaseAddress()
 {
     return (qint64)getOptionalHeader_ImageBase();
 }
 
-void XPE::setBaseAddress(qint64 nBaseAddress)
+void XPE::setBaseAddress(XADDR nBaseAddress)
 {
     setOptionalHeader_ImageBase(nBaseAddress);
 }
@@ -2483,7 +2483,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
 
     XPE_DEF::IMAGE_DATA_DIRECTORY dataResources=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 
-    qint64 nModuleAddress=getModuleAddress();
+    XADDR nModuleAddress=getModuleAddress();
     qint64 nImportOffset=-1;
     qint64 nImportOffsetTest=-1;
 
@@ -2923,7 +2923,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
             }
 
             QByteArray baImport;
-            QList<qint64> listPatches; // Addresses for patch
+            QList<XADDR> listPatches; // Addresses for patch
             //    QMap<qint64,qint64> mapMove;
 
             // Calculate
@@ -3199,7 +3199,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
 
     if(nResourceOffset!=-1)
     {
-        qint64 nModuleAddress=getModuleAddress();
+        XADDR nModuleAddress=getModuleAddress();
         RESOURCE_RECORD record={};
 
         qint64 nOffsetLevel[3]={};
@@ -4900,7 +4900,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_
     char *pOffset=pbaData->data();
     char *pOffsetStart=pOffset;
     qint32 nCount=nSize/nBlockSize;
-//    quint64 nVirtualAddress=shOriginal.VirtualAddress;
+//    XADDR nVirtualAddress=shOriginal.VirtualAddress;
     qint64 nRelVirtualStart=0;
     qint64 nRelVirtualEnd=S_ALIGN_UP(sectionHeaderOriginal.Misc.VirtualSize,nBlockSize);
     qint64 nRelCurrent=nRelVirtualStart;
@@ -8215,7 +8215,7 @@ QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemor
     // TODO Import
     QList<SYMBOL_RECORD> listResult;
 
-     qint64 nModuleAddress=getModuleAddress();
+     XADDR nModuleAddress=getModuleAddress();
 
     if(symbolType&SYMBOL_TYPE_EXPORT)
     {
@@ -9835,7 +9835,7 @@ qint32 XPE::getEntryPointSection(_MEMORY_MAP *pMemoryMap)
 {
     int nResult=-1;
 
-    qint64 nAddressOfEntryPoint=getOptionalHeader_AddressOfEntryPoint();
+    XADDR nAddressOfEntryPoint=getOptionalHeader_AddressOfEntryPoint();
 
     if(nAddressOfEntryPoint)
     {
@@ -9856,7 +9856,7 @@ qint32 XPE::getImportSection(_MEMORY_MAP *pMemoryMap)
 {
     qint32 nResult=-1;
 
-    qint64 nAddressOfImport=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT).VirtualAddress;
+    XADDR nAddressOfImport=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT).VirtualAddress;
 
     if(nAddressOfImport)
     {
@@ -9877,7 +9877,7 @@ int XPE::getExportSection(_MEMORY_MAP *pMemoryMap)
 {
     int nResult=-1;
 
-    qint64 nAddressOfExport=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT).VirtualAddress;
+    XADDR nAddressOfExport=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT).VirtualAddress;
 
     if(nAddressOfExport)
     {
@@ -9898,7 +9898,7 @@ int XPE::getTLSSection(_MEMORY_MAP *pMemoryMap)
 {
     int nResult=-1;
 
-    qint64 nAddressOfTLS=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS).VirtualAddress;
+    XADDR nAddressOfTLS=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS).VirtualAddress;
 
     if(nAddressOfTLS)
     {
@@ -9919,7 +9919,7 @@ int XPE::getResourcesSection(_MEMORY_MAP *pMemoryMap)
 {
     int nResult=-1;
 
-    qint64 nAddressOfResources=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE).VirtualAddress;
+    XADDR nAddressOfResources=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE).VirtualAddress;
 
     if(nAddressOfResources)
     {
@@ -9940,7 +9940,7 @@ int XPE::getRelocsSection(_MEMORY_MAP *pMemoryMap)
 {
     int nResult=-1;
 
-    qint64 nAddressOfRelocs=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC).VirtualAddress;
+    XADDR nAddressOfRelocs=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC).VirtualAddress;
 
     if(nAddressOfRelocs)
     {
@@ -10244,13 +10244,13 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 {
                     _MEMORY_MAP memoryMap=getMemoryMap();
 
-                    QMapIterator<qint64, quint64> i(pRebuildOptions->mapPatches);
+                    QMapIterator<XADDR, quint64> i(pRebuildOptions->mapPatches);
 
                     while(i.hasNext())
                     {
                         i.next();
 
-                        qint64 nAddress=i.key();
+                        XADDR nAddress=i.key();
                         quint64 nValue=i.value();
 
                         quint64 nOffset=_pe.addressToOffset(&memoryMap,nAddress);
@@ -10792,7 +10792,7 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pListRelocs, bool bIs6
     // GetHeaders
     // pList must be sorted!
 
-    qint32 nBaseAddress=-1;
+    XADDR nBaseAddress=-1;
     quint32 nSize=0;
 
     int nNumberOfRelocs=pListRelocs->count();
@@ -11201,24 +11201,24 @@ void XPE::setTLS_Characteristics(quint32 nValue)
     }
 }
 
-QList<qint64> XPE::getTLS_CallbacksList()
+QList<XADDR> XPE::getTLS_CallbacksList()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 
     return getTLS_CallbacksList(&memoryMap);
 }
 
-QList<qint64> XPE::getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap)
+QList<XADDR> XPE::getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    QList<qint64> listResult;
+    QList<XADDR> listResult;
 
-    qint64 nOffset=addressToOffset(pMemoryMap,(qint64)getTLS_AddressOfCallBacks());
+    qint64 nOffset=addressToOffset(pMemoryMap,getTLS_AddressOfCallBacks());
 
     if(nOffset!=-1)
     {
         for(qint32 i=0;i<100;i++) // TODO const !!!
         {
-            qint64 nAddress=0;
+            XADDR nAddress=0;
 
             if(is64())
             {

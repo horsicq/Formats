@@ -20,7 +20,7 @@
  */
 #include "xmsdos.h"
 
-XMSDOS::XMSDOS(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress): XBinary(pDevice,bIsImage,nModuleAddress)
+XMSDOS::XMSDOS(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress): XBinary(pDevice,bIsImage,nModuleAddress)
 {
 }
 
@@ -39,14 +39,14 @@ bool XMSDOS::isValid()
     return bResult;
 }
 
-bool XMSDOS::isValid(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
+bool XMSDOS::isValid(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     XMSDOS xmsdos(pDevice,bIsImage,nModuleAddress);
 
     return xmsdos.isValid();
 }
 
-XBinary::MODE XMSDOS::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+XBinary::MODE XMSDOS::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     XMSDOS xmsdos(pDevice,bIsImage,nModuleAddress);
 
@@ -346,7 +346,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
     //    qint64 nDataSize=get_e_cs()*16;
 //    qint64 nCodeOffset=(quint16)((quint16)(get_e_cparhdr()*16)+(quint16)(get_e_cs()*16));
     qint64 nCodeOffset=((qint16)get_e_cparhdr()*16)+((qint16)get_e_cs()*16);
-    qint64 nCodeAddress=(qint16)get_e_cs()*0x10000+0x10000000;
+    XADDR nCodeAddress=(qint16)get_e_cs()*0x10000+0x10000000;
 
     result.nEntryPointAddress=nCodeAddress+get_e_ip();
     result.nSegmentBase=((qint16)get_e_cparhdr()*16);
@@ -367,7 +367,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
         nCodeSize=getSize()-nCodeOffset;
     }
 
-//    qint64 nBaseAddress=_getBaseAddress();
+//    XADDR nBaseAddress=_getBaseAddress();
 
     {
         _MEMORY_RECORD record={};

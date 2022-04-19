@@ -107,7 +107,7 @@ public:
     {
         quint16 nOrdinal;
         quint32 nRVA;
-        qint64 nAddress;
+        XADDR nAddress;
         quint32 nNameRVA;
         QString sFunctionName;
     };
@@ -141,7 +141,7 @@ public:
     {
         RESOURCES_ID_NAME irin[3];
         qint64 nIRDEOffset;
-        qint64 nAddress;
+        XADDR nAddress;
         qint64 nRVA;
         qint64 nOffset;
         qint64 nSize;
@@ -157,7 +157,7 @@ public:
         XPE_DEF::IMAGE_RESOURCE_DIRECTORY directory;
         XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY dirEntry;
         XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY dataEntry;
-        qint64 nDataAddress;
+        XADDR nDataAddress;
         qint64 nDataOffset;
         QList<RESOURCE_POSITION> listPositions;
     };
@@ -180,7 +180,7 @@ public:
     {
         qint16 nTypeOffset;
         quint32 nType;
-        qint64 nAddress;
+        XADDR nAddress;
     };
 
     struct RELOCS_HEADER
@@ -335,10 +335,10 @@ public:
         // TODO more from subsystems
     };
 
-    explicit XPE(QIODevice *pDevice=nullptr,bool bIsImage=false,qint64 nModuleAddress=-1);
+    explicit XPE(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,qint64 nModuleAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
 
     virtual MODE getMode();
     virtual QString getArch();
@@ -674,8 +674,8 @@ public:
     qint64 getModuleAddress();
 
     virtual _MEMORY_MAP getMemoryMap();
-    virtual qint64 getBaseAddress();
-    virtual void setBaseAddress(qint64 nBaseAddress);
+    virtual XADDR getBaseAddress();
+    virtual void setBaseAddress(XADDR nBaseAddress);
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     XPE_DEF::IMAGE_IMPORT_DESCRIPTOR read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset);
     void write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset,XPE_DEF::IMAGE_IMPORT_DESCRIPTOR idd);
@@ -783,8 +783,8 @@ public:
     void setTLS_SizeOfZeroFill(quint32 nValue);
     void setTLS_Characteristics(quint32 nValue);
 
-    QList<qint64> getTLS_CallbacksList();
-    QList<qint64> getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap);
+    QList<XADDR> getTLS_CallbacksList();
+    QList<XADDR> getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap);
 
     bool isTLSCallbacksPresent();
     bool isTLSCallbacksPresent(XBinary::_MEMORY_MAP *pMemoryMap);
@@ -902,7 +902,7 @@ public:
         quint32 nEntryPoint;
         //        bool bAddImportSection;
         QMap<qint64,QString> mapIAT;
-        QMap<qint64,quint64> mapPatches;
+        QMap<XADDR,quint64> mapPatches;
         //        bool bAddRelocsSection;
         QList<qint64> listRelocsRVAs;
         bool bRenameSections;

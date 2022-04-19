@@ -49,16 +49,16 @@ class XFormats : public QObject
 
 public:
     explicit XFormats(QObject *pParent=nullptr);
-    static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,quint64 nModuleAddress=-1);
-    static XBinary::_MEMORY_MAP getMemoryMap(QString sFileName,bool bIsImage=false,quint64 nModuleAddress=-1);
-    static qint64 getEntryPointAddress(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,quint64 nModuleAddress=-1);
-    static qint64 getEntryPointOffset(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,quint64 nModuleAddress=-1);
-    static bool isBigEndian(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,quint64 nModuleAddress=-1);
-    static bool isSigned(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,quint64 nModuleAddress=-1);
+    static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static XBinary::_MEMORY_MAP getMemoryMap(QString sFileName,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static qint64 getEntryPointAddress(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static qint64 getEntryPointOffset(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static bool isBigEndian(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static bool isSigned(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
     static bool isSigned(QString sFileName);
-    static XBinary::OFFSETSIZE getSignOffsetSize(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,quint64 nModuleAddress=-1);
+    static XBinary::OFFSETSIZE getSignOffsetSize(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
     static XBinary::OFFSETSIZE getSignOffsetSize(QString sFileName);
-    static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,quint64 nModuleAddress=-1,XBinary::SYMBOL_TYPE symBolType=XBinary::SYMBOL_TYPE_ALL);
+    static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1,XBinary::SYMBOL_TYPE symBolType=XBinary::SYMBOL_TYPE_ALL);
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,bool bExtra=false);
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,qint64 nOffset,qint64 nSize,bool bExtra=false);
     static QSet<XBinary::FT> getFileTypes(QString sFileName,bool bExtra=false);

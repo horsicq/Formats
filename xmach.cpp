@@ -20,7 +20,7 @@
  */
 #include "xmach.h"
 
-XMACH::XMACH(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress): XBinary(pDevice,bIsImage,nModuleAddress)
+XMACH::XMACH(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress): XBinary(pDevice,bIsImage,nModuleAddress)
 {
 
 }
@@ -47,14 +47,14 @@ bool XMACH::isValid()
     return bResult;
 }
 
-bool XMACH::isValid(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+bool XMACH::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     XMACH xmach(pDevice,bIsImage,nModuleAddress);
 
     return xmach.isValid();
 }
 
-XBinary::MODE XMACH::getMode(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress)
+XBinary::MODE XMACH::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     XMACH xmach(pDevice,bIsImage,nModuleAddress);
 
@@ -1258,7 +1258,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
     bool bImageAddressInit=false;
 
     qint64 nMaxOffset=0;
-    qint64 nMaxAddress=0;
+    XADDR nMaxAddress=0;
 
     bool bIs64=is64();
 
@@ -1268,7 +1268,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap()
         // TODO Align
         // TODO File size
         qint64 nFileOffset=0;
-        qint64 nVirtualAddress=0;
+        XADDR nVirtualAddress=0;
         qint64 nFileSize=0;
         qint64 nVirtualSize=0;
 
@@ -4638,9 +4638,9 @@ QString XMACH::typeIdToString(qint32 nType)
     return sResult;
 }
 
-qint64 XMACH::readOpcodes(quint32 nType, char *pData, qint64 nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
+XADDR XMACH::readOpcodes(quint32 nType, char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
-    qint64 nResult=0;
+    XADDR nResult=0;
 
     if(nType==OPCODE_TYPE_REBASE)
     {
@@ -4666,9 +4666,9 @@ qint64 XMACH::readOpcodes(quint32 nType, char *pData, qint64 nAddress, qint64 nS
     return nResult;
 }
 
-qint64 XMACH::readOpcodesInterface_rebase(char *pData, qint64 nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
+XADDR XMACH::readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
-    qint64 nResult=0;
+    XADDR nResult=0;
 
     if(nSize>0)
     {
@@ -4767,9 +4767,9 @@ qint64 XMACH::readOpcodesInterface_rebase(char *pData, qint64 nAddress, qint64 n
     return nResult;
 }
 
-qint64 XMACH::readOpcodesInterface_bind(char *pData, qint64 nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus,bool bNullEnd)
+XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus,bool bNullEnd)
 {
-    qint64 nResult=0;
+    XADDR nResult=0;
 
     if(nSize>0)
     {
@@ -4905,11 +4905,11 @@ qint64 XMACH::readOpcodesInterface_bind(char *pData, qint64 nAddress, qint64 nSi
     return nResult;
 }
 
-qint64 XMACH::readOpcodesInterface_export(char *pData, qint64 nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
+XADDR XMACH::readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
     Q_UNUSED(pOpcodeStatus)
 
-    qint64 nResult=0;
+    XADDR nResult=0;
 
     if(nSize>0)
     {

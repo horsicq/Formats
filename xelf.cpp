@@ -20,7 +20,7 @@
  */
 #include "xelf.h"
 
-XELF::XELF(QIODevice *pDevice, bool bIsImage, qint64 nModuleAddress): XBinary(pDevice,bIsImage,nModuleAddress)
+XELF::XELF(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress): XBinary(pDevice,bIsImage,nModuleAddress)
 {
 }
 
@@ -45,14 +45,14 @@ bool XELF::isValid()
     return bResult;
 }
 
-bool XELF::isValid(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
+bool XELF::isValid(QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
 {
     XELF xelf(pDevice,bIsImage,nModuleAddress);
 
     return xelf.isValid();
 }
 
-XBinary::MODE XELF::getMode(QIODevice *pDevice,bool bIsImage,qint64 nModuleAddress)
+XBinary::MODE XELF::getMode(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     XELF xelf(pDevice,bIsImage,nModuleAddress);
 
@@ -3799,7 +3799,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
     bool bImageAddressInit=false;
 
     qint64 nMaxOffset=0;
-    qint64 nMaxAddress=0;
+    XADDR nMaxAddress=0;
 
     for(qint32 i=0;i<nNumberOfSegments;i++)
     {
@@ -3807,7 +3807,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 
         quint64 nVirtualAlign=listSegments.at(i).p_align; // TODO Check!
         quint64 nFileAlign=0x1; // TODO Check!!!
-        qint64 nVirtualAddress=S_ALIGN_DOWN(listSegments.at(i).p_vaddr,nVirtualAlign);
+        XADDR nVirtualAddress=S_ALIGN_DOWN(listSegments.at(i).p_vaddr,nVirtualAlign);
         qint64 nFileOffset=S_ALIGN_DOWN(listSegments.at(i).p_offset,nFileAlign);
         qint64 nVirtualSize=S_ALIGN_UP(listSegments.at(i).p_memsz,nVirtualAlign);
         qint64 nFileSize=S_ALIGN_UP(listSegments.at(i).p_filesz,nFileAlign);
@@ -3843,7 +3843,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
             result.listRecords.append(record);
         }
 
-        if(nVirtualSize>(nFileSize+((qint64)listSegments.at(i).p_vaddr-nVirtualAddress)))
+        if((quint64)nVirtualSize>(nFileSize+((qint64)listSegments.at(i).p_vaddr-nVirtualAddress)))
         {
             XBinary::_MEMORY_RECORD record={};
 
@@ -4363,7 +4363,7 @@ QString XELF::typeIdToString(qint32 nType)
     return sResult;
 }
 
-qint64 XELF::getBaseAddress()
+quint64 XELF::getBaseAddress()
 {
     return getMemoryMap().nModuleAddress; // TODO Check !!!
 }
@@ -4686,7 +4686,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 
     if(listRunPath.count())
     {
-        qint64 nAddress=listStrTab.at(0).nValue;
+        XADDR nAddress=listStrTab.at(0).nValue;
         qint64 nOffset=addressToOffset(pMemoryMap,nAddress);
         qint64 nRunPath=listRunPath.at(0).nValue;
         qint64 nSize=listStrSize.at(0).nValue;
