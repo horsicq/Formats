@@ -748,10 +748,10 @@ public:
     void setRelocsVirtualAddress(qint64 nOffset,quint32 nValue);
     void setRelocsSizeOfBlock(qint64 nOffset,quint32 nValue);
 
-    bool addRelocsSection(QList<qint64> *pList);
-    bool addRelocsSection(QIODevice *pDevice,bool bIsImage,QList<qint64> *pListRelocs);
-    bool addRelocsSection(QString sFileName,bool bIsImage,QList<qint64> *pListRelocs);
-    static QByteArray relocsAsRVAListToByteArray(QList<qint64> *pListRelocs,bool bIs64);
+    bool addRelocsSection(QList<XADDR> *pList);
+    bool addRelocsSection(QIODevice *pDevice,bool bIsImage,QList<XADDR> *pListRelocs);
+    bool addRelocsSection(QString sFileName,bool bIsImage,QList<XADDR> *pListRelocs);
+    static QByteArray relocsAsRVAListToByteArray(QList<XADDR> *pListRelocs, bool bIs64);
 
     bool isResourcesPresent();
     bool isRelocsPresent();
@@ -904,7 +904,7 @@ public:
         QMap<qint64,QString> mapIAT;
         QMap<XADDR,quint64> mapPatches;
         //        bool bAddRelocsSection;
-        QList<qint64> listRelocsRVAs;
+        QList<XADDR> listRelocsRVAs;
         bool bRenameSections;
         QString sSectionName;
         bool bFixChecksum;

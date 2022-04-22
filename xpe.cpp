@@ -10713,12 +10713,12 @@ void XPE::setRelocsSizeOfBlock(qint64 nOffset, quint32 nValue)
     write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_BASE_RELOCATION,SizeOfBlock),nValue);
 }
 
-bool XPE::addRelocsSection(QList<qint64> *pList)
+bool XPE::addRelocsSection(QList<XADDR> *pList)
 {
     return addRelocsSection(getDevice(),isImage(),pList);
 }
 
-bool XPE::addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pListRelocs)
+bool XPE::addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<XADDR> *pListRelocs)
 {
     bool bResult=false;
 
@@ -10731,7 +10731,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pLi
             // Check valid
             _MEMORY_MAP memoryMap=pe.getMemoryMap();
 
-            QList<qint64> listRVAs;
+            QList<XADDR> listRVAs;
 
             int nNumberOfRelocs=pListRelocs->count();
 
@@ -10770,7 +10770,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<qint64> *pLi
     return bResult;
 }
 
-bool XPE::addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pListRelocs)
+bool XPE::addRelocsSection(QString sFileName, bool bIsImage, QList<XADDR> *pListRelocs)
 {
     bool bResult=false;
 
@@ -10786,7 +10786,7 @@ bool XPE::addRelocsSection(QString sFileName, bool bIsImage, QList<qint64> *pLis
     return bResult;
 }
 
-QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pListRelocs, bool bIs64)
+QByteArray XPE::relocsAsRVAListToByteArray(QList<XADDR> *pListRelocs, bool bIs64)
 {
     QByteArray baResult;
     // GetHeaders
@@ -10799,7 +10799,7 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<qint64> *pListRelocs, bool bIs6
 
     for(int i=0; i<nNumberOfRelocs; i++)
     {
-        qint32 _nBaseAddress=S_ALIGN_DOWN(pListRelocs->at(i),0x1000);
+        XADDR _nBaseAddress=S_ALIGN_DOWN(pListRelocs->at(i),0x1000);
 
         if(nBaseAddress!=_nBaseAddress)
         {
