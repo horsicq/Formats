@@ -7337,7 +7337,7 @@ XBinary::DM XBinary::getDisasmMode(QString sArch,bool bIsBigEndian,MODE mode)
             dmResult=DM_MIPS_LE;
         }
     }
-    else if(sArch=="ARM")
+    else if((sArch=="ARM")||(sArch=="ARM_V7"))
     {
         if(bIsBigEndian)
         {
@@ -7431,13 +7431,9 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
     {
         result=DMFAMILY_X86;
     }
-    else if((disasmMode==DM_ARM_BE)||(disasmMode==DM_ARM_LE))
+    else if((disasmMode==DM_ARM_BE)||(disasmMode==DM_ARM_LE)||(disasmMode==DM_ARM64_BE)||(disasmMode==DM_ARM64_LE))
     {
         result=DMFAMILY_ARM;
-    }
-    else if((disasmMode==DM_ARM64_BE)||(disasmMode==DM_ARM64_LE))
-    {
-        result=DMFAMILY_ARM64;
     }
     else if((disasmMode==DM_MIPS64_BE)||(disasmMode==DM_MIPS64_LE)||
             (disasmMode==DM_MIPS_BE)||(disasmMode==DM_MIPS_LE))
