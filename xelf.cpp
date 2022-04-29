@@ -3787,6 +3787,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
     result.sArch=getArch();
     result.bIsBigEndian=isBigEndian();
     result.sType=getTypeAsString();
+    XADDR _nModuleAddress=getModuleAddress();
 
     result.nRawSize=getSize();
 
@@ -3807,7 +3808,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 
         quint64 nVirtualAlign=listSegments.at(i).p_align; // TODO Check!
         quint64 nFileAlign=0x1; // TODO Check!!!
-        XADDR nVirtualAddress=S_ALIGN_DOWN(listSegments.at(i).p_vaddr,nVirtualAlign);
+        XADDR nVirtualAddress=S_ALIGN_DOWN(listSegments.at(i).p_vaddr,nVirtualAlign)+_nModuleAddress;
         qint64 nFileOffset=S_ALIGN_DOWN(listSegments.at(i).p_offset,nFileAlign);
         qint64 nVirtualSize=S_ALIGN_UP(listSegments.at(i).p_memsz,nVirtualAlign);
         qint64 nFileSize=S_ALIGN_UP(listSegments.at(i).p_filesz,nFileAlign);
@@ -3835,7 +3836,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
             record.type=MMT_LOADSEGMENT;
             record.sName=sName;
             // TODO Section number!
-            record.nAddress=listSegments.at(i).p_vaddr;
+            record.nAddress=listSegments.at(i).p_vaddr+_nModuleAddress;
             record.nSize=nFileSize;
             record.nOffset=nFileOffset;
             record.nIndex=nIndex++;
@@ -3850,7 +3851,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
             record.type=MMT_LOADSEGMENT;
             record.sName=sName;
             // TODO Section number!
-            record.nAddress=listSegments.at(i).p_vaddr+nFileSize;
+            record.nAddress=listSegments.at(i).p_vaddr+nFileSize+_nModuleAddress;
             record.nSize=nVirtualSize-nFileSize-(listSegments.at(i).p_vaddr-nVirtualAddress);
             record.nOffset=-1;
             record.nIndex=nIndex++;
@@ -3875,11 +3876,11 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 
     if(result.fileType==FT_ELF64)
     {
-        result.nEntryPointAddress=getHdr64_entry();
+        result.nEntryPointAddress=getHdr64_entry()+_nModuleAddress;
     }
     else
     {
-        result.nEntryPointAddress=getHdr32_entry();
+        result.nEntryPointAddress=getHdr32_entry()+_nModuleAddress;
     }
 
     qint64 nNoLoadableSize=result.nRawSize-nMaxOffset;

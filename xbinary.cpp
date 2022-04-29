@@ -3883,7 +3883,7 @@ XADDR XBinary::getModuleAddress()
 {
     XADDR nResult=0;
 
-    if(g_nModuleAddress!=-1)
+    if(g_nModuleAddress!=(XADDR)-1)
     {
         nResult=g_nModuleAddress;
     }
