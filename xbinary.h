@@ -1128,6 +1128,7 @@ public:
     static bool isX86asm(QString sArch); // TODO remove use getDisasmMode
     static QString disasmIdToString(DM disasmMode);
     static QString syntaxIdToString(SYNTAX syntax);
+    static SYNTAX stringToSyntaxId(QString sString);
     static QString osNameIdToString(OSNAME osName);
     DM getDisasmMode();
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
@@ -1229,6 +1230,8 @@ public:
     static XVARIANT getXVariant(quint32 nValue,bool bIsBigEndian=false);
     static XVARIANT getXVariant(quint64 nValue,bool bIsBigEndian=false);
     static XVARIANT getXVariant(XUINT128 value,bool bIsBigEndian=false);
+
+    static quint64 xVariantToQword(XVARIANT xvariant);
 
     static quint32 getDwordFromQword(quint64 nValue,qint32 nIndex);
     static quint16 getWordFromQword(quint64 nValue,qint32 nIndex);

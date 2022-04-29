@@ -7222,6 +7222,18 @@ QString XBinary::syntaxIdToString(SYNTAX syntax)
     return sResult;
 }
 
+XBinary::SYNTAX XBinary::stringToSyntaxId(QString sString)
+{
+    SYNTAX result=SYNTAX_DEFAULT;
+
+    if      (sString=="ATT")        result=SYNTAX_ATT;
+    else if (sString=="INTEL")      result=SYNTAX_INTEL;
+    else if (sString=="MASM")       result=SYNTAX_MASM;
+    else if (sString=="MOTOROLA")   result=SYNTAX_MOTOROLA;
+
+    return result;
+}
+
 QString XBinary::osNameIdToString(OSNAME osName)
 {
     QString sResult=tr("Unknown");
@@ -8485,6 +8497,18 @@ XBinary::XVARIANT XBinary::getXVariant(XUINT128 value, bool bIsBigEndian)
     result.var.v_uint128=value;
 
     return result;
+}
+
+quint64 XBinary::xVariantToQword(XVARIANT xvariant)
+{
+    quint64 nResult=0;
+
+    if      (xvariant.mode==MODE_8)     nResult=xvariant.var.v_uint8;
+    else if (xvariant.mode==MODE_16)    nResult=xvariant.var.v_uint16;
+    else if (xvariant.mode==MODE_32)    nResult=xvariant.var.v_uint32;
+    else if (xvariant.mode==MODE_64)    nResult=xvariant.var.v_uint64;
+
+    return nResult;
 }
 
 quint32 XBinary::getDwordFromQword(quint64 nValue, qint32 nIndex)

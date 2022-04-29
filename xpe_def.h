@@ -157,7 +157,11 @@ const quint32 S_IMAGE_DEBUG_TYPE_OMAP_FROM_SRC              =8;
 const quint32 S_IMAGE_DEBUG_TYPE_BORLAND                    =9;
 const quint32 S_IMAGE_DEBUG_TYPE_RESERVED10                 =10;
 const quint32 S_IMAGE_DEBUG_TYPE_CLSID                      =11;
-const quint32 S_IMAGE_DEBUG_TYPE_REPRO                      =16;
+const quint32 S_IMAGE_DEBUG_TYPE_VC_FEATURE                 =12;
+const quint32 S_IMAGE_DEBUG_TYPE_POGO                       =13;
+const quint32 S_IMAGE_DEBUG_TYPE_ILTCG                      =14;
+const quint32 S_IMAGE_DEBUG_TYPE_MPX                        =15;
+const quint32 S_IMAGE_DEBUG_TYPE_NO_TIMESTAMP               =16;
 const quint32 S_IMAGE_DEBUG_TYPE_EX_DLLCHARACTERISTICS      =20;
 
 const quint32 S_ASN1_BOOLEAN                                =0x01;
