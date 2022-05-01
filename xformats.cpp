@@ -503,7 +503,7 @@ bool XFormats::isSigned(QString sFileName)
     return bResult;
 }
 
-QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::SYMBOL_TYPE symBolType)
+QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress,XBinary::SYMBOL_TYPE symBolType)
 {
     QList<XBinary::SYMBOL_RECORD> listResult;
 
