@@ -3050,7 +3050,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
 
                 int nNumberOfPatches=listPatches.count();
 
-                for(qint32 i=0; i<nNumberOfPatches; i++)
+                for(qint32 i=0;i<nNumberOfPatches;i++)
                 {
                     // TODO 64
                     qint64 nCurrentOffset=ish.PointerToRawData+listPatches.at(i);
