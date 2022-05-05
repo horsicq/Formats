@@ -3060,7 +3060,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
 
                 qint32 _nNumberOfHeaders=pListImportHeaders->count();
 
-                for(qint32 i=0; i<_nNumberOfHeaders; i++)
+                for(qint32 i=0;i<_nNumberOfHeaders;i++)
                 {
                     if(pListImportHeaders->at(i).nFirstThunk)
                     {
