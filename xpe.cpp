@@ -3165,7 +3165,7 @@ XPE::RESOURCE_HEADER XPE::getResourceHeader(_MEMORY_MAP *pMemoryMap)
         {
             nOffset+=sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
 
-            for(qint32 i=0; i<result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries; i++)
+            for(qint32 i=0;i<result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries;i++)
             {
                 RESOURCE_POSITION rp=_getResourcePosition(pMemoryMap,pMemoryMap->nModuleAddress,nResourceOffset,nOffset,0);
 
