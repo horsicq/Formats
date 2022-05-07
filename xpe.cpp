@@ -9453,7 +9453,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                             nOffset=result.metaData.nTablesHeaderOffset+24;
 
-                            for(int i=0; i<64; i++)
+                            for(qint32 i=0;i<64;i++)
                             {
                                 if(result.metaData.nTables_Valid&((unsigned long long)1<<i))
                                 {
