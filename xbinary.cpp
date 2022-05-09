@@ -581,7 +581,7 @@ void XBinary::findFiles(QString sDirectoryName,XBinary::FFOPTIONS *pFFOption,qin
     }
 }
 
-void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
+void XBinary::findFiles(QString sDirectoryName,QList<QString> *pListFileNames)
 {
     QFileInfo fi(sDirectoryName);
 
@@ -8628,6 +8628,22 @@ bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
     }
 
     return bResult;
+}
+
+XBinary::MODE XBinary::getModeOS()
+{
+    XBinary::MODE modeResult=XBinary::MODE_UNKNOWN;
+
+    if(sizeof(void *)==8)
+    {
+        modeResult=XBinary::MODE_64;
+    }
+    else
+    {
+        modeResult=XBinary::MODE_32;
+    }
+
+    return modeResult;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)

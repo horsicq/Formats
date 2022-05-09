@@ -1243,6 +1243,8 @@ public:
 
     static bool isXVariantEqual(XVARIANT value1,XVARIANT value2);
 
+    static MODE getModeOS();
+
 public slots:
     void setSearchProcessEnable(bool bState);
     void setDumpProcessEnable(bool bState);
