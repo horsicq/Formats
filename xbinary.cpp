@@ -7291,6 +7291,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_OPENVOS:            sResult=QString("Open VOS");                        break;
         case OSNAME_MCLINUX:            sResult=QString("mClinux");                         break;
         case OSNAME_QNX:                sResult=QString("QNX");                             break;
+        case OSNAME_SYLLABLE:           sResult=QString("Syllable ");                       break;
     }
 
     return sResult;

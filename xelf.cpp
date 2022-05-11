@@ -3337,6 +3337,47 @@ XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, QString sName)
     return result;
 }
 
+bool XELF::isNotePresent(quint32 nType)
+{
+    QList<XELF::NOTE> listNotes=getNotes();
+
+    return isNotePresent(&listNotes,nType);
+}
+
+bool XELF::isNotePresent(QList<NOTE> *pListNotes, quint32 nType)
+{
+    bool bResult=false;
+
+    qint32 nNumberOfNotes=pListNotes->count();
+
+    for(qint32 i=0;i<nNumberOfNotes;i++)
+    {
+        if(pListNotes->at(i).nType==nType)
+        {
+            bResult=true;
+            break;
+        }
+    }
+
+    return bResult;
+}
+
+XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType)
+{
+    NOTE result={};
+
+    for(qint32 i=0;i<pListNotes->count();i++)
+    {
+        if(pListNotes->at(i).nType==nType)
+        {
+            result=pListNotes->at(i);
+            break;
+        }
+    }
+
+    return result;
+}
+
 QList<XELF::TAG_STRUCT> XELF::getTagStructs()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
@@ -3807,13 +3848,17 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
         QString sName=QString("%1(%2)").arg(QString("PT_LOAD"),QString::number(i));
 
         quint64 nVirtualAlign=listSegments.at(i).p_align; // TODO Check!
-        quint64 nFileAlign=0x1; // TODO Check!!!
+//        quint64 nFileAlign=0x1; // TODO Check!!!
+        quint64 nFileAlign=nVirtualAlign;
         XADDR nVirtualAddress=S_ALIGN_DOWN(listSegments.at(i).p_vaddr,nVirtualAlign)+_nModuleAddress;
         qint64 nFileOffset=S_ALIGN_DOWN(listSegments.at(i).p_offset,nFileAlign);
-        qint64 nVirtualSize=S_ALIGN_UP(listSegments.at(i).p_memsz,nVirtualAlign);
-        qint64 nFileSize=S_ALIGN_UP(listSegments.at(i).p_filesz,nFileAlign);
 
-        if(listSegments.at(i).p_vaddr>(quint64)nVirtualAddress)
+        qint64 nVirtualDelta=listSegments.at(i).p_vaddr-nVirtualAddress;
+        qint64 nFileDelta=listSegments.at(i).p_offset-nFileOffset;
+
+        qint64 nVirtualSize=S_ALIGN_UP(nVirtualDelta+listSegments.at(i).p_memsz,nVirtualAlign);
+        qint64 nFileSize=S_ALIGN_UP(nFileDelta+listSegments.at(i).p_filesz,nFileAlign);
+
         {
             XBinary::_MEMORY_RECORD record={};
 
@@ -3821,44 +3866,75 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
             record.sName=sName;
             // TODO Section number!
             record.nAddress=nVirtualAddress;
-            record.nSize=listSegments.at(i).p_vaddr-nVirtualAddress;
-            record.nOffset=-1;
-            record.nIndex=nIndex++;
-            record.bIsVirtual=true;
-
-            result.listRecords.append(record);
-        }
-
-        if(nFileSize)
-        {
-            XBinary::_MEMORY_RECORD record={};
-
-            record.type=MMT_LOADSEGMENT;
-            record.sName=sName;
-            // TODO Section number!
-            record.nAddress=listSegments.at(i).p_vaddr+_nModuleAddress;
             record.nSize=nFileSize;
             record.nOffset=nFileOffset;
             record.nIndex=nIndex++;
+            record.bIsVirtual=false;
 
             result.listRecords.append(record);
         }
 
-        if((quint64)nVirtualSize>(nFileSize+((qint64)listSegments.at(i).p_vaddr-nVirtualAddress)))
+        if(nVirtualSize>nFileSize)
         {
             XBinary::_MEMORY_RECORD record={};
 
             record.type=MMT_LOADSEGMENT;
             record.sName=sName;
             // TODO Section number!
-            record.nAddress=listSegments.at(i).p_vaddr+nFileSize+_nModuleAddress;
-            record.nSize=nVirtualSize-nFileSize-(listSegments.at(i).p_vaddr-nVirtualAddress);
+            record.nAddress=nVirtualAddress+nFileSize;
+            record.nSize=nVirtualSize-nFileSize;
             record.nOffset=-1;
             record.nIndex=nIndex++;
             record.bIsVirtual=true;
 
             result.listRecords.append(record);
         }
+//        if(listSegments.at(i).p_vaddr>(quint64)nVirtualAddress)
+//        {
+//            XBinary::_MEMORY_RECORD record={};
+
+//            record.type=MMT_LOADSEGMENT;
+//            record.sName=sName;
+//            // TODO Section number!
+//            record.nAddress=nVirtualAddress;
+//            record.nSize=listSegments.at(i).p_vaddr-nVirtualAddress;
+//            record.nOffset=-1;
+//            record.nIndex=nIndex++;
+//            record.bIsVirtual=true;
+
+//            result.listRecords.append(record);
+//        }
+
+//        if(nFileSize)
+//        {
+//            XBinary::_MEMORY_RECORD record={};
+
+//            record.type=MMT_LOADSEGMENT;
+//            record.sName=sName;
+//            // TODO Section number!
+//            record.nAddress=listSegments.at(i).p_vaddr+_nModuleAddress;
+//            record.nSize=nFileSize;
+//            record.nOffset=nFileOffset;
+//            record.nIndex=nIndex++;
+
+//            result.listRecords.append(record);
+//        }
+
+//        if((quint64)nVirtualSize>(nFileSize+((qint64)listSegments.at(i).p_vaddr-nVirtualAddress)))
+//        {
+//            XBinary::_MEMORY_RECORD record={};
+
+//            record.type=MMT_LOADSEGMENT;
+//            record.sName=sName;
+//            // TODO Section number!
+//            record.nAddress=listSegments.at(i).p_vaddr+nFileSize+_nModuleAddress;
+//            record.nSize=nVirtualSize-nFileSize-(listSegments.at(i).p_vaddr-nVirtualAddress);
+//            record.nOffset=-1;
+//            record.nIndex=nIndex++;
+//            record.bIsVirtual=true;
+
+//            result.listRecords.append(record);
+//        }
 
         if(!bImageAddressInit)
         {
@@ -4332,6 +4408,30 @@ XBinary::OSINFO XELF::getOsInfo()
         {
             result.osName=OSNAME_ANDROID;
         }
+    }
+
+    if(isNotePresent(&listNotes,1))
+    {
+        NOTE note=getNote(&listNotes,1);
+
+        quint32 nOS=read_uint32(note.nDataOffset);
+        quint32 nMajor=read_uint32(note.nDataOffset+4);
+        quint32 nMinor=read_uint32(note.nDataOffset+8);
+        quint32 nSubMinor=read_uint32(note.nDataOffset+12);
+
+        if(result.osName==OSNAME_UNIX)
+        {
+            if      (nOS==0)  result.osName=OSNAME_LINUX;
+//            else if (nOS==1)  result.osName=OSNAME_GNU;
+            else if (nOS==2)  result.osName=OSNAME_SOLARIS;
+            else if (nOS==3)  result.osName=OSNAME_FREEBSD;
+            else if (nOS==4)  result.osName=OSNAME_NETBSD;
+            else if (nOS==5)  result.osName=OSNAME_SYLLABLE;
+        }
+
+        QString sABI=QString("ABI: %1.%2.%3").arg(QString::number(nMajor),QString::number(nMinor),QString::number(nSubMinor));
+
+        result.sOsVersion=appendText(result.sOsVersion,sABI,",");
     }
 
     if(result.osName==OSNAME_UNIX)

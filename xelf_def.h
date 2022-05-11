@@ -133,6 +133,13 @@ const quint32 ELFOSABI_AROS                 =15;
 const quint32 ELFOSABI_FENIXOS              =16;
 const quint32 ELFOSABI_OPENVOS              =18;
 
+const quint32 ELF_NOTE_OS_LINUX             =0;
+const quint32 ELF_NOTE_OS_GNU               =1;
+const quint32 ELF_NOTE_OS_SOLARIS2          =2;
+const quint32 ELF_NOTE_OS_FREEBSD           =3;
+const quint32 ELF_NOTE_OS_NETBSD            =4;
+const quint32 ELF_NOTE_OS_SYLLABLE          =5;
+
 struct Elf32_Ehdr
 {
     quint8 e_ident[EI_NIDENT];      /* ident bytes */

@@ -384,7 +384,8 @@ public:
         OSNAME_SUNOS,
         OSNAME_OPENVOS,
         OSNAME_MCLINUX,
-        OSNAME_QNX
+        OSNAME_QNX,
+        OSNAME_SYLLABLE
     };
 
     struct OSINFO
