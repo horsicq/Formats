@@ -3378,6 +3378,47 @@ XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType)
     return result;
 }
 
+bool XELF::isNotePresent(quint32 nType, QString sName)
+{
+    QList<XELF::NOTE> listNotes=getNotes();
+
+    return isNotePresent(&listNotes,nType,sName);
+}
+
+bool XELF::isNotePresent(QList<NOTE> *pListNotes, quint32 nType, QString sName)
+{
+    bool bResult=false;
+
+    qint32 nNumberOfNotes=pListNotes->count();
+
+    for(qint32 i=0;i<nNumberOfNotes;i++)
+    {
+        if((pListNotes->at(i).nType==nType)&&(pListNotes->at(i).sName==sName))
+        {
+            bResult=true;
+            break;
+        }
+    }
+
+    return bResult;
+}
+
+XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType, QString sName)
+{
+    NOTE result={};
+
+    for(qint32 i=0;i<pListNotes->count();i++)
+    {
+        if((pListNotes->at(i).nType==nType)&&(pListNotes->at(i).sName==sName))
+        {
+            result=pListNotes->at(i);
+            break;
+        }
+    }
+
+    return result;
+}
+
 QList<XELF::TAG_STRUCT> XELF::getTagStructs()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
@@ -4410,9 +4451,9 @@ XBinary::OSINFO XELF::getOsInfo()
         }
     }
 
-    if(isNotePresent(&listNotes,1))
+    if(isNotePresent(&listNotes,1,"GNU"))
     {
-        NOTE note=getNote(&listNotes,1);
+        NOTE note=getNote(&listNotes,1,"GNU");
 
         quint32 nOS=read_uint32(note.nDataOffset);
         quint32 nMajor=read_uint32(note.nDataOffset+4);
