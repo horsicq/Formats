@@ -1763,6 +1763,13 @@ qint64 XBinary::find_unicodeString(qint64 nOffset, qint64 nSize, QString sString
     return find_array(nOffset,nSize,(char *)sString.utf16(),sString.size()*2);
 }
 
+qint64 XBinary::find_utf8String(qint64 nOffset, qint64 nSize, QString sString)
+{
+    QByteArray baData=sString.toUtf8();
+
+    return find_array(nOffset,nSize,(char *)baData.data(),baData.size());
+}
+
 qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize)
 {
     _MEMORY_MAP memoryMap=XBinary::getMemoryMap();
@@ -2056,6 +2063,12 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     delete[] pBuffer;
 
     return -1;
+}
+
+qint64 XBinary::find_utf8StringI(qint64 nOffset, qint64 nSize, QString sString)
+{
+    // TODO !!!
+    return find_utf8String(nOffset,nSize,sString);
 }
 
 quint8 XBinary::getBits_uint8(quint8 nValue,qint32 nBitOffset,qint32 nBitSize)
