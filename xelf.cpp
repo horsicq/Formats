@@ -3898,7 +3898,16 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
         qint64 nFileDelta=listSegments.at(i).p_offset-nFileOffset;
 
         qint64 nVirtualSize=S_ALIGN_UP(nVirtualDelta+listSegments.at(i).p_memsz,nVirtualAlign);
-        qint64 nFileSize=S_ALIGN_UP(nFileDelta+listSegments.at(i).p_filesz,nFileAlign);
+        qint64 nFileSize=0;
+
+        if(i!=(nNumberOfSegments-1))
+        {
+            nFileSize=S_ALIGN_UP(nFileDelta+listSegments.at(i).p_filesz,nFileAlign);
+        }
+        else
+        {
+            nFileSize=nFileDelta+listSegments.at(i).p_filesz;
+        }
 
         {
             XBinary::_MEMORY_RECORD record={};
@@ -3930,6 +3939,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 
             result.listRecords.append(record);
         }
+
 //        if(listSegments.at(i).p_vaddr>(quint64)nVirtualAddress)
 //        {
 //            XBinary::_MEMORY_RECORD record={};
