@@ -770,7 +770,7 @@ QMap<quint64, QString> XELF::getMachinesS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getHeaderVersionList()
+QMap<quint64,QString> XELF::getHeaderVersionList()
 {
     QMap<quint64, QString> mapResult;
 
