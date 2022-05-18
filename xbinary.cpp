@@ -3387,6 +3387,13 @@ bool XBinary::isAddressPhysical(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress
     return (nOffset!=-1);
 }
 
+bool XBinary::isRelAddressPhysical(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
+{
+    qint64 nOffset=relAddressToOffset(pMemoryMap,nAddress);
+
+    return (nOffset!=-1);
+}
+
 XADDR XBinary::offsetToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
     XADDR nResult=-1;

@@ -292,6 +292,16 @@ struct Elf64_Sym
     quint64 st_size;
 };
 
+struct Elf_Sym
+{
+    quint32 st_name;
+    quint8 st_info;
+    quint8 st_other;
+    quint16 st_shndx;
+    quint64 st_value;
+    quint64 st_size;
+};
+
 struct Elf32_Rel
 {
     quint32 r_offset;

@@ -3844,7 +3844,7 @@ QString XPE::getResourcesVersionValue(QString sKey, XPE::RESOURCES_VERSION *pRes
 
     qint32 nNumberOfRecords=pResourcesVersion->listRecords.count();
 
-    for(qint32 i=0; i<nNumberOfRecords; i++)
+    for(qint32 i=0;i<nNumberOfRecords;i++)
     {
         QString sRecord=pResourcesVersion->listRecords.at(i).section(".",3,-1);
         QString _sKey=sRecord.section(":",0,0);

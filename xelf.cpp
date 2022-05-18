@@ -4911,6 +4911,52 @@ QList<XELF_DEF::Elf64_Sym> XELF::getElf64_SymList(qint64 nOffset, qint64 nSize)
     return listResult;
 }
 
+QList<XELF_DEF::Elf_Sym> XELF::getElf_SymList(qint64 nOffset, qint64 nSize)
+{
+    QList<XELF_DEF::Elf_Sym> listResult;
+
+    bool bIsBigEndian=isBigEndian();
+    bool bIs64=is64();
+
+    while(nSize>0)
+    {
+        XELF_DEF::Elf_Sym record={};
+
+        if(bIs64)
+        {
+            XELF_DEF::Elf64_Sym _record=_readElf64_Sym(nOffset,bIsBigEndian);
+
+            record.st_name=_record.st_name;
+            record.st_info=_record.st_info;
+            record.st_other=_record.st_other;
+            record.st_shndx=_record.st_shndx;
+            record.st_value=_record.st_value;
+            record.st_size=_record.st_size;
+
+            nOffset+=sizeof(XELF_DEF::Elf64_Sym);
+            nSize-=sizeof(XELF_DEF::Elf64_Sym);
+        }
+        else
+        {
+            XELF_DEF::Elf32_Sym _record=_readElf32_Sym(nOffset,bIsBigEndian);
+
+            record.st_name=_record.st_name;
+            record.st_info=_record.st_info;
+            record.st_other=_record.st_other;
+            record.st_shndx=_record.st_shndx;
+            record.st_value=_record.st_value;
+            record.st_size=_record.st_size;
+
+            nOffset+=sizeof(XELF_DEF::Elf32_Sym);
+            nSize-=sizeof(XELF_DEF::Elf32_Sym);
+        }
+
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
 XELF_DEF::Elf32_Sym XELF::_readElf32_Sym(qint64 nOffset, bool bIsBigEndian)
 {
     XELF_DEF::Elf32_Sym result={};

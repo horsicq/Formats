@@ -805,6 +805,7 @@ public:
     static bool isRelAddressValid(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
 
     static bool isAddressPhysical(_MEMORY_MAP *pMemoryMap,XADDR nAddress);
+    static bool isRelAddressPhysical(_MEMORY_MAP *pMemoryMap,XADDR nAddress);
 
     static XADDR offsetToAddress(_MEMORY_MAP *pMemoryMap,qint64 nOffset);
     static qint64 addressToOffset(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
