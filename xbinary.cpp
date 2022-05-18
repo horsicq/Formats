@@ -7363,7 +7363,7 @@ XBinary::DM XBinary::getDisasmMode(QString sArch,bool bIsBigEndian,MODE mode)
             dmResult=DM_MIPS_LE;
         }
     }
-    else if((sArch=="ARM")||(sArch=="ARM_V7"))
+    else if((sArch=="ARM")||(sArch=="ARM_V6")||(sArch=="ARM_V7"))
     {
         if(bIsBigEndian)
         {
