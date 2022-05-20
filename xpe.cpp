@@ -4146,7 +4146,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
             {
                 QMap<quint16,EXPORT_POSITION> mapNames;
 
-                for(qint32 i=0; i<(int)result.directory.NumberOfNames; i++)
+                for(qint32 i=0;i<(int)result.directory.NumberOfNames;i++)
                 {
                     EXPORT_POSITION position={};
 
