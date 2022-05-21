@@ -4166,7 +4166,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
                     mapNames.insert(position.nOrdinal,position);
                 }
 
-                for(int i=0; i<(int)result.directory.NumberOfFunctions; i++)
+                for(int i=0;i<(int)result.directory.NumberOfFunctions;i++)
                 {
                     EXPORT_POSITION position={};
 
