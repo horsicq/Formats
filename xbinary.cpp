@@ -4182,22 +4182,6 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             // TODO Check APK, JAR
             // TODO basic ZIP
         }
-        else if(compareSignature(&memoryMap,"CAFEBABE",0))
-        {
-            if(read_uint32(4,true)<10)
-            {
-                stResult.insert(FT_ARCHIVE);
-                stResult.insert(FT_MACHOFAT);
-            }
-        }
-        else if(compareSignature(&memoryMap,"BEBAFECA",0))
-        {
-            if(read_uint32(4,false)<10)
-            {
-                stResult.insert(FT_ARCHIVE);
-                stResult.insert(FT_MACHOFAT);
-            }
-        }
         else if(compareSignature(&memoryMap,"'RE~^'")||compareSignature(&memoryMap,"'Rar!'1A07"))
         {
             stResult.insert(FT_ARCHIVE);
@@ -4273,6 +4257,25 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             else
             {
                 stResult.insert(FT_UNICODE_BE);
+            }
+        }
+        else if(nSize>=(int)sizeof(XMACH_DEF::fat_header)+(int)sizeof(XMACH_DEF::fat_arch))
+        {
+            if(read_uint32(0,true)==XMACH_DEF::S_FAT_MAGIC)
+            {
+                if(read_uint32(4,true)<10)
+                {
+                    stResult.insert(FT_ARCHIVE);
+                    stResult.insert(FT_MACHOFAT);
+                }
+            }
+            else if(read_uint32(0,false)==XMACH_DEF::S_FAT_MAGIC)
+            {
+                if(read_uint32(4,false)<10)
+                {
+                    stResult.insert(FT_ARCHIVE);
+                    stResult.insert(FT_MACHOFAT);
+                }
             }
         }
         // TODO more
@@ -4473,8 +4476,9 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if(stFileTypes.contains(FT_PE64))       listResult.append(FT_PE64);
     if(stFileTypes.contains(FT_ELF32))      listResult.append(FT_ELF32);
     if(stFileTypes.contains(FT_ELF64))      listResult.append(FT_ELF64);
-    if(stFileTypes.contains(FT_MACHO32))     listResult.append(FT_MACHO32);
-    if(stFileTypes.contains(FT_MACHO64))     listResult.append(FT_MACHO64);
+    if(stFileTypes.contains(FT_MACHO32))    listResult.append(FT_MACHO32);
+    if(stFileTypes.contains(FT_MACHO64))    listResult.append(FT_MACHO64);
+    if(stFileTypes.contains(FT_MACHOFAT))   listResult.append(FT_MACHOFAT);
 
     return listResult;
 }

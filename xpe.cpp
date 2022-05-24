@@ -10425,7 +10425,7 @@ void XPE::_fixFileOffsets(qint64 nDelta)
         setOptionalHeader_SizeOfHeaders(getOptionalHeader_SizeOfHeaders()+nDelta);
         quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
-        for(quint32 i=0; i<nNumberOfSections; i++)
+        for(quint32 i=0;i<nNumberOfSections;i++)
         {
             quint32 nFileOffset=getSection_PointerToRawData(i);
             setSection_PointerToRawData(i,nFileOffset+nDelta);
