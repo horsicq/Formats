@@ -4365,6 +4365,10 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
     {
         result=FT_MACHO64;
     }
+    else if(pStFileTypes->contains(FT_MACHOFAT))
+    {
+        result=FT_MACHOFAT;
+    }
     else if(pStFileTypes->contains(FT_ELF32))
     {
         result=FT_ELF32;
