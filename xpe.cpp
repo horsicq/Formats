@@ -10593,7 +10593,7 @@ QList<qint64> XPE::getRelocsAsRVAList()
 
             nNumberOfBlocks=qMin(nNumberOfBlocks,(int)0xFFFF);
 
-            for(int i=0; i<nNumberOfBlocks; i++)
+            for(int i=0;i<nNumberOfBlocks;i++)
             {
                 quint16 nRecord=read_uint16(nRelocsOffset);
 
