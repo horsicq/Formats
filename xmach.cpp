@@ -267,9 +267,9 @@ QMap<quint64,QString> XMACH::getHeaderCpuTypesS()
     return mapResult;
 }
 
-QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
+QMap<quint64,QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     if(nCpuType==XMACH_DEF::S_CPU_TYPE_VAX)
     {
