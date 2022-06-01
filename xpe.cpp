@@ -10400,7 +10400,7 @@ qint64 XPE::_getMinSectionOffset()
 
     int nNumberOfRecords=memoryMap.listRecords.count();
 
-    for(int i=0; i<nNumberOfRecords; i++)
+    for(int i=0;i<nNumberOfRecords;i++)
     {
         if(memoryMap.listRecords.at(i).type==MMT_LOADSEGMENT)
         {
