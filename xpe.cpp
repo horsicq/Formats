@@ -9444,7 +9444,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                             quint32 nTemp=0;
 
-                            for(nTemp=0; nValid; nTemp++)
+                            for(nTemp=0;nValid;nTemp++)
                             {
                                 nValid&=(nValid-1);
                             }
