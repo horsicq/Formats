@@ -10292,7 +10292,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
                 {
                     int nNumberOfSections=_pe.getFileHeader_NumberOfSections();
 
-                    for(int i=0; i<nNumberOfSections; i++)
+                    for(int i=0;i<nNumberOfSections;i++)
                     {
                         QString sSection=_pe.getSection_NameAsString(i);
 
