@@ -606,7 +606,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice,bool bExtra)
     return _getFileTypes(pDevice,bExtra,0);
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice,qint64 nOffset,qint64 nSize,bool bExtra)
 {
     QSet<XBinary::FT> result;
 
