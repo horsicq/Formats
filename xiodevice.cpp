@@ -102,7 +102,7 @@ qint64 XIODevice::readData(char *pData,qint64 nMaxSize)
     return 0;
 }
 
-qint64 XIODevice::writeData(const char *pData, qint64 nMaxSize)
+qint64 XIODevice::writeData(const char *pData,qint64 nMaxSize)
 {
     Q_UNUSED(pData)
     Q_UNUSED(nMaxSize)
