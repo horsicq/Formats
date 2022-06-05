@@ -39,7 +39,7 @@ public:
     explicit XCOM(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
     ~XCOM();
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice, bool bIsImage=false, XADDR nModuleAddress=-1);
+    static bool isValid(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
     static MODE getMode(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
 
     virtual _MEMORY_MAP getMemoryMap();
