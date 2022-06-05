@@ -22,7 +22,7 @@
 
 const double XBinary::D_ENTROPY_THRESHOLD=6.5;
 
-XBinary::XBinary(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+XBinary::XBinary(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     setData(pDevice,bIsImage,nModuleAddress);
 }
