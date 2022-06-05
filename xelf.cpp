@@ -507,7 +507,7 @@ QMap<quint64,QString> XELF::getTypes()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getTypesS()
+QMap<quint64,QString> XELF::getTypesS()
 {
     QMap<quint64, QString> mapResult;
 
