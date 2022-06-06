@@ -1574,9 +1574,9 @@ QMap<quint64, QString> XLE::getImageLECpusS()
     return mapResult;
 }
 
-QMap<quint64, QString> XLE::getImageLEOssS()
+QMap<quint64,QString> XLE::getImageLEOssS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x00,"Unknown (any new-format OS)");
     mapResult.insert(0x01,"OS/2 (default)");
