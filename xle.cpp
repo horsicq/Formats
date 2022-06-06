@@ -1587,7 +1587,7 @@ QMap<quint64,QString> XLE::getImageLEOssS()
     return mapResult;
 }
 
-QMap<quint64, QString> XLE::getImageLEMflagsS()
+QMap<quint64,QString> XLE::getImageLEMflagsS()
 {
     QMap<quint64, QString> mapResult;
 
