@@ -673,7 +673,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *p
 }
 #endif
 #ifdef USE_ARCHIVE
-QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, qint32 nLevel)
+QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice,QList<XArchive::RECORD> *pListRecords,qint32 nLevel)
 {
     QSet<XBinary::FT> stResult;
 
