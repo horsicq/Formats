@@ -773,7 +773,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, qint3
 }
 
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox)
+XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType,QIODevice *pDevice,QComboBox *pComboBox)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(5,3,0)
     const QSignalBlocker block(pComboBox);
