@@ -789,7 +789,7 @@ quint32 XBinary::read_uint32(qint64 nOffset, bool bIsBigEndian)
     return result;
 }
 
-qint32 XBinary::read_int32(qint64 nOffset, bool bIsBigEndian)
+qint32 XBinary::read_int32(qint64 nOffset,bool bIsBigEndian)
 {
     quint32 result=0;
 
