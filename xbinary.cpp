@@ -1515,7 +1515,7 @@ void XBinary::_write_value(MODE mode,char *pData,quint64 nValue,bool bIsBigEndia
     }
 }
 
-qint64 XBinary::find_array(qint64 nOffset, qint64 nSize,const char *pArray, qint64 nArraySize)
+qint64 XBinary::find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize)
 {
     // TODO CheckSize function
     // TODO Optimize
