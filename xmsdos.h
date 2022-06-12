@@ -78,7 +78,7 @@ public:
     void set_e_res(qint32 nPosition,quint16 nValue);
     void set_e_oemid(quint16 nValue);
     void set_e_oeminfo(quint16 nValue);
-    void set_e_res2(qint32 nPosition, quint16 nValue);
+    void set_e_res2(qint32 nPosition,quint16 nValue);
     void set_e_lfanew(quint32 nValue);
 
     quint16 get_e_magic();
