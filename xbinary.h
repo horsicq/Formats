@@ -801,7 +801,7 @@ public:
     bool isOffsetAndSizeValid(qint64 nOffset,qint64 nSize);
     static bool isOffsetAndSizeValid(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize);
 
-    static bool isAddressValid(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
+    static bool isAddressValid(_MEMORY_MAP *pMemoryMap,XADDR nAddress);
     static bool isRelAddressValid(_MEMORY_MAP *pMemoryMap,qint64 nRelAddress);
 
     static bool isAddressPhysical(_MEMORY_MAP *pMemoryMap,XADDR nAddress);
