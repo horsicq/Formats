@@ -942,7 +942,7 @@ QString XBinary::read_ansiString(qint64 nOffset,qint64 nMaxSize)
     return sResult;
 }
 
-QString XBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize,bool bIsBigEndian)
+QString XBinary::read_unicodeString(qint64 nOffset,qint64 nMaxSize,bool bIsBigEndian)
 {
     QString sResult;
 
