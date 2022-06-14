@@ -1623,7 +1623,7 @@ qint64 XBinary::find_uint16(qint64 nOffset,qint64 nSize,quint16 nValue,bool bIsB
     return find_array(nOffset,nSize,(char *)&nValue,2);
 }
 
-qint64 XBinary::find_int16(qint64 nOffset, qint64 nSize, qint16 nValue, bool bIsBigEndian)
+qint64 XBinary::find_int16(qint64 nOffset,qint64 nSize,qint16 nValue,bool bIsBigEndian)
 {
     quint16 _value=(quint16)nValue;
 

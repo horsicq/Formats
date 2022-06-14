@@ -486,15 +486,15 @@ struct arm_thread_state_t
     } uts;
 };
 
-enum ARMThreadFlavors
+enum S_ARMThreadFlavors
 {
-    ARM_THREAD_STATE=1,
-    ARM_VFP_STATE=2,
-    ARM_EXCEPTION_STATE=3,
-    ARM_DEBUG_STATE=4,
-    ARN_THREAD_STATE_NONE=5,
-    ARM_THREAD_STATE64=6,
-    ARM_EXCEPTION_STATE64=7
+    S_ARM_THREAD_STATE=1,
+    S_ARM_VFP_STATE=2,
+    S_ARM_EXCEPTION_STATE=3,
+    S_ARM_DEBUG_STATE=4,
+    S_ARN_THREAD_STATE_NONE=5,
+    S_ARM_THREAD_STATE64=6,
+    S_ARM_EXCEPTION_STATE64=7
 };
 
 struct ppc_thread_state32_t
