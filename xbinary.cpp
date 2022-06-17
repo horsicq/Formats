@@ -1250,7 +1250,7 @@ quint16 XBinary::_read_uint16(char *pData, bool bIsBigEndian)
     return result;
 }
 
-qint16 XBinary::_read_int16(char *pData, bool bIsBigEndian)
+qint16 XBinary::_read_int16(char *pData,bool bIsBigEndian)
 {
     qint16 result=*(qint16 *)pData;
 
@@ -8594,8 +8594,8 @@ quint64 XBinary::setDwordToQword(quint64 nInit, quint32 nValue, qint32 nIndex)
         nFF=nFF<<(nIndex*32);
         _nValue=_nValue<<(nIndex*32);
 
-        nResult=nResult|nFF;
-        nResult=nResult&_nValue;
+        nResult=nResult&(~nFF);
+        nResult=nResult|_nValue;
     }
 
     return nResult;
@@ -8613,8 +8613,8 @@ quint64 XBinary::setWordToQword(quint64 nInit, quint16 nValue, qint32 nIndex)
         nFF=nFF<<(nIndex*16);
         _nValue=_nValue<<(nIndex*16);
 
-        nResult=nResult|nFF;
-        nResult=nResult&_nValue;
+        nResult=nResult&(~nFF);
+        nResult=nResult|_nValue;
     }
 
     return nResult;
@@ -8632,8 +8632,8 @@ quint64 XBinary::setByteToQword(quint64 nInit, quint8 nValue, qint32 nIndex)
         nFF=nFF<<(nIndex*8);
         _nValue=_nValue<<(nIndex*8);
 
-        nResult=nResult|nFF;
-        nResult=nResult&_nValue;
+        nResult=nResult&(~nFF);
+        nResult=nResult|_nValue;
     }
 
     return nResult;
