@@ -1777,7 +1777,7 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature,
     return find_signature(&memoryMap,nOffset,nSize,sSignature,pnResultSize);
 }
 
-qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize)
+qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize)
 {
     // TODO CheckSize function
     qint64 _nSize=getSize();
