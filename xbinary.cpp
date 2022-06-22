@@ -74,7 +74,6 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     XBinary::setEntryPointOffset(0);
     setSearchProcessEnable(true);
     setDumpProcessEnable(true);
-    setEntropyProcessEnable(true);
     setHashProcessEnable(true);
     setProcessSignalsEnable(true);
     setMode(MODE_UNKNOWN);
@@ -2839,11 +2838,6 @@ void XBinary::setSearchProcessEnable(bool bState)
 void XBinary::setDumpProcessEnable(bool bState)
 {
     g_bIsDumpStop=!bState;
-}
-
-void XBinary::setEntropyProcessEnable(bool bState)
-{
-    g_bIsEntropyStop=!bState;
 }
 
 void XBinary::setHashProcessEnable(bool bState)
@@ -5615,9 +5609,16 @@ double XBinary::getEntropy(QIODevice *pDevice)
     return dResult;
 }
 
-double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
+double XBinary::getEntropy(qint64 nOffset,qint64 nSize,PDSTRUCT *pProcessData)
 {
     double dResult=1.4426950408889634073599246810023;
+
+    PDSTRUCT processDataEmpty={};
+
+    if(!pProcessData)
+    {
+        pProcessData=&processDataEmpty;
+    }
 
     OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
 
@@ -5629,20 +5630,16 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
         dResult=0;
     }
 
-    if(nOffset!=-1)
+    if((nOffset!=-1)&&(!(pProcessData->bIsStop)))
     {
-        PROCENT procent=procentInit(nSize);
-
-        _entropyProgressMinimumChanged(0);
-        _entropyProgressMaximumChanged(procent.nMaxProcent);
-        _entropyProgressValueChanged(0);
+        pProcessData->pdRecord.nTotal=nSize;
 
         double bytes[256]={0.0};
 
         qint64 nTemp=0;
         char *pBuffer=new char[READWRITE_BUFFER_SIZE];
 
-        while((nSize>0)&&(!g_bIsEntropyStop))
+        while((nSize>0)&&(!(pProcessData->bIsStop)))
         {
             nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
@@ -5661,17 +5658,12 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
             nSize-=nTemp;
             nOffset+=nTemp;
 
-            if(procentSetCurrentValue(&procent,nOffset-osRegion.nOffset))
-            {
-                _entropyProgressValueChanged(procent.nCurrentProcent);
-            }
+            pProcessData->pdRecord.nCurrent=nOffset-osRegion.nOffset;
         }
-
-        _entropyProgressValueChanged(procent.nMaxProcent);
 
         delete[] pBuffer;
 
-        if(!g_bIsEntropyStop)
+        if(!(pProcessData->bIsStop))
         {
             for(qint32 j=0;j<256;j++)
             {
@@ -5687,37 +5679,46 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize)
         dResult=dResult/(double)osRegion.nSize;
     }
 
-    if(g_bIsEntropyStop)
+    if(pProcessData->bIsStop)
     {
         dResult=0;
     }
+    else
+    {
+        pProcessData->pdRecord.bSuccess=true;
+    }
+
+    pProcessData->pdRecord.bFinished=true;
 
     return dResult;
 }
 
-XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
+XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset,qint64 nSize,PDSTRUCT *pProcessData)
 {
     BYTE_COUNTS result={0};
+
+    PDSTRUCT processDataEmpty={};
+
+    if(!pProcessData)
+    {
+        pProcessData=&processDataEmpty;
+    }
 
     OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
 
     nOffset=osRegion.nOffset;
     nSize=osRegion.nSize;
 
-    if(nOffset!=-1)
+    if((nOffset!=-1)&&(!(pProcessData->bIsStop)))
     {
         result.nSize=nSize;
 
-        PROCENT procent=procentInit(nSize);
-
-        _entropyProgressMinimumChanged(0);
-        _entropyProgressMaximumChanged(procent.nMaxProcent);
-        _entropyProgressValueChanged(0);
+        pProcessData->pdRecord.nTotal=nSize;
 
         qint64 nTemp=0;
         char *pBuffer=new char[READWRITE_BUFFER_SIZE];
 
-        while((nSize>0)&&(!g_bIsEntropyStop))
+        while((nSize>0)&&(!(pProcessData->bIsStop)))
         {
             nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
@@ -5737,21 +5738,22 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize)
             nSize-=nTemp;
             nOffset+=nTemp;
 
-            if(procentSetCurrentValue(&procent,nOffset-osRegion.nOffset))
-            {
-                _entropyProgressValueChanged(procent.nCurrentProcent);
-            }
+            pProcessData->pdRecord.nCurrent=nOffset-osRegion.nOffset;
         }
-
-        _entropyProgressValueChanged(procent.nMaxProcent);
 
         delete[] pBuffer;
     }
 
-    if(g_bIsEntropyStop)
+    if(pProcessData->bIsStop)
     {
         result={0};
     }
+    else
+    {
+        pProcessData->pdRecord.bSuccess=true;
+    }
+
+    pProcessData->pdRecord.bFinished=true;
 
     return result;
 }
@@ -9077,30 +9079,6 @@ void XBinary::_dumpProgressValueChanged(qint32 nValue)
     if(!g_bIsProcessSignalsDisable)
     {
         emit dumpProgressValueChanged(nValue);
-    }
-}
-
-void XBinary::_entropyProgressMinimumChanged(qint32 nMaximum)
-{
-    if(!g_bIsProcessSignalsDisable)
-    {
-        emit entropyProgressMinimumChanged(nMaximum);
-    }
-}
-
-void XBinary::_entropyProgressMaximumChanged(qint32 nMaximum)
-{
-    if(!g_bIsProcessSignalsDisable)
-    {
-        emit entropyProgressMaximumChanged(nMaximum);
-    }
-}
-
-void XBinary::_entropyProgressValueChanged(qint32 nValue)
-{
-    if(!g_bIsProcessSignalsDisable)
-    {
-        emit entropyProgressValueChanged(nValue);
     }
 }
 

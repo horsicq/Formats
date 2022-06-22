@@ -540,6 +540,23 @@ public:
         Qt::GlobalColor globalColor;
     };
 
+    struct PDRECORD
+    {
+        qint64 nCurrent;
+        qint64 nTotal;
+        QString sStatus;
+        bool bSuccess;
+        bool bFinished;
+        bool bIsValid; // For optional
+    };
+
+    struct PDSTRUCT
+    {
+        PDRECORD pdRecord;
+        PDRECORD pdRecordOpt;
+        bool bIsStop;
+    };
+
 private:
     enum ST
     {
@@ -965,11 +982,11 @@ public:
     static quint32 _getCRC32(QIODevice *pDevice);
     quint32 _getCRC32(qint64 nOffset=0,qint64 nSize=-1);
 
-    static double getEntropy(QString sFileName);
-    static double getEntropy(QIODevice *pDevice);
-    double getEntropy(qint64 nOffset=0,qint64 nSize=-1);
+    static double getEntropy(QString sFileName);  // TODO ProcessData
+    static double getEntropy(QIODevice *pDevice);  // TODO ProcessData
+    double getEntropy(qint64 nOffset=0,qint64 nSize=-1,PDSTRUCT *pProcessData=nullptr);
 
-    BYTE_COUNTS getByteCounts(qint64 nOffset=0,qint64 nSize=-1);
+    BYTE_COUNTS getByteCounts(qint64 nOffset=0,qint64 nSize=-1,PDSTRUCT *pProcessData=nullptr);
 
     void _xor(quint8 nXorValue,qint64 nOffset=0,qint64 nSize=-1);
 
@@ -1251,7 +1268,6 @@ public:
 public slots:
     void setSearchProcessEnable(bool bState);
     void setDumpProcessEnable(bool bState);
-    void setEntropyProcessEnable(bool bState);
     void setHashProcessEnable(bool bState);
     void setProcessSignalsEnable(bool bState);
 
@@ -1275,9 +1291,6 @@ private:
     void _dumpProgressMinimumChanged(qint32 nMaximum);
     void _dumpProgressMaximumChanged(qint32 nMaximum);
     void _dumpProgressValueChanged(qint32 nValue);
-    void _entropyProgressMinimumChanged(qint32 nMaximum);
-    void _entropyProgressMaximumChanged(qint32 nMaximum);
-    void _entropyProgressValueChanged(qint32 nValue);
     void _hashProgressMinimumChanged(qint32 nMaximum);
     void _hashProgressMaximumChanged(qint32 nMaximum);
     void _hashProgressValueChanged(qint32 nValue);
@@ -1298,9 +1311,6 @@ signals:
     void dumpProgressMinimumChanged(qint32 nMaximum);
     void dumpProgressMaximumChanged(qint32 nMaximum);
     void dumpProgressValueChanged(qint32 nValue);
-    void entropyProgressMinimumChanged(qint32 nMaximum);
-    void entropyProgressMaximumChanged(qint32 nMaximum);
-    void entropyProgressValueChanged(qint32 nValue);
     void hashProgressMinimumChanged(qint32 nMaximum);
     void hashProgressMaximumChanged(qint32 nMaximum);
     void hashProgressValueChanged(qint32 nValue);
@@ -1317,7 +1327,6 @@ private:
     bool g_bIsBigEndian; // TODO enum
     bool g_bIsSearchStop;
     bool g_bIsDumpStop;
-    bool g_bIsEntropyStop;
     bool g_bIsHashStop;
     bool g_bIsProcessSignalsDisable;
     QString g_sArch;
