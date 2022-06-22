@@ -2679,7 +2679,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 
     return multiSearch_signature(&memoryMap,nOffset,nSize,nLimit,sSignature,sInfo);
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature, QString sInfo)
 {
     QList<XBinary::MS_RECORD> listResult;
 
