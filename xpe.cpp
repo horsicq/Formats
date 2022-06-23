@@ -4461,7 +4461,7 @@ QString XPE::getSectionHash(HASH hash,quint32 nSection)
 
     if(osRegion.nOffset!=-1)
     {
-        sResult=getHash(hash,osRegion.nOffset,osRegion.nSize);
+        sResult=getHash(hash,osRegion.nOffset,osRegion.nSize); // TODO ProcessData
     }
 
     return sResult;

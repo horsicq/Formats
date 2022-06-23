@@ -74,7 +74,6 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     XBinary::setEntryPointOffset(0);
     setSearchProcessEnable(true);
     setDumpProcessEnable(true);
-    setHashProcessEnable(true);
     setProcessSignalsEnable(true);
     setMode(MODE_UNKNOWN);
     setFileType(FT_BINARY);
@@ -2840,11 +2839,6 @@ void XBinary::setDumpProcessEnable(bool bState)
     g_bIsDumpStop=!bState;
 }
 
-void XBinary::setHashProcessEnable(bool bState)
-{
-    g_bIsHashStop=!bState;
-}
-
 void XBinary::setProcessSignalsEnable(bool bState)
 {
     g_bIsProcessSignalsDisable=!bState;
@@ -5244,20 +5238,20 @@ QString XBinary::getHash(XBinary::HASH hash, QString sFileName)
     return sResult;
 }
 
-QString XBinary::getHash(XBinary::HASH hash, QIODevice *pDevice)
+QString XBinary::getHash(XBinary::HASH hash, QIODevice *pDevice, PDSTRUCT *pProcessData)
 {
     QString sResult;
 
     XBinary binary(pDevice);
 
-    sResult=binary.getHash(hash,0,-1);
+    sResult=binary.getHash(hash,0,-1,pProcessData);
 
     pDevice->reset();
 
     return sResult;
 }
 
-QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
+QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
 {
     QString sResult;
 
@@ -5268,21 +5262,22 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize)
         QList<OFFSETSIZE> listOS;
         listOS.append(osRegion);
 
-        sResult=getHash(hash,&listOS);
+        sResult=getHash(hash,&listOS,pProcessData);
     }
 
     return sResult;
 }
 
-QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS)
+QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pProcessData)
 {
     QString sResult;
 
-    PROCENT procent=procentInit(getTotalOSSize(pListOS));
+    PDSTRUCT processDataEmpty={};
 
-    _hashProgressMinimumChanged(0);
-    _hashProgressMaximumChanged(procent.nMaxProcent);
-    _hashProgressValueChanged(0);
+    if(!pProcessData)
+    {
+        pProcessData=&processDataEmpty;
+    }
 
     qint64 nTemp=0;
     char *pBuffer=new char[READWRITE_BUFFER_SIZE];
@@ -5308,12 +5303,14 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS)
 
     qint64 nCurrentSize=0;
 
-    for(qint32 i=0;(i<nNumberOfRecords)&&(!g_bIsHashStop);i++)
+    for(qint32 i=0;(i<nNumberOfRecords)&&(!(pProcessData->bIsStop));i++)
     {
         qint64 nOffset=pListOS->at(i).nOffset;
         qint64 nSize=pListOS->at(i).nSize;
 
-        while((nSize>0)&&(!g_bIsHashStop))
+        pProcessData->pdRecord.nTotal=nSize;
+
+        while((nSize>0)&&(!(pProcessData->bIsStop)))
         {
             nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
@@ -5330,14 +5327,16 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS)
             nOffset+=nTemp;
             nCurrentSize+=nTemp;
 
-            if(procentSetCurrentValue(&procent,nCurrentSize))
-            {
-                _hashProgressValueChanged(procent.nCurrentProcent);
-            }
+            pProcessData->pdRecord.nCurrent=nCurrentSize;
         }
     }
 
-    _hashProgressValueChanged(procent.nMaxProcent);
+    if(!(pProcessData->bIsStop))
+    {
+        pProcessData->pdRecord.bSuccess=true;
+    }
+
+    pProcessData->pdRecord.bFinished=true;
 
     delete[] pBuffer;
 
@@ -5596,13 +5595,13 @@ double XBinary::getEntropy(QString sFileName)
     return dResult;
 }
 
-double XBinary::getEntropy(QIODevice *pDevice)
+double XBinary::getEntropy(QIODevice *pDevice, PDSTRUCT *pProcessData)
 {
     double dResult=0;
 
     XBinary binary(pDevice);
 
-    dResult=binary.getEntropy(0,-1);
+    dResult=binary.getEntropy(0,-1,pProcessData);
 
     pDevice->reset();
 
@@ -9079,30 +9078,6 @@ void XBinary::_dumpProgressValueChanged(qint32 nValue)
     if(!g_bIsProcessSignalsDisable)
     {
         emit dumpProgressValueChanged(nValue);
-    }
-}
-
-void XBinary::_hashProgressMinimumChanged(qint32 nMaximum)
-{
-    if(!g_bIsProcessSignalsDisable)
-    {
-        emit hashProgressMinimumChanged(nMaximum);
-    }
-}
-
-void XBinary::_hashProgressMaximumChanged(qint32 nMaximum)
-{
-    if(!g_bIsProcessSignalsDisable)
-    {
-        emit hashProgressMaximumChanged(nMaximum);
-    }
-}
-
-void XBinary::_hashProgressValueChanged(qint32 nValue)
-{
-    if(!g_bIsProcessSignalsDisable)
-    {
-        emit hashProgressValueChanged(nValue);
     }
 }
 

@@ -963,10 +963,10 @@ public:
 
     static QList<qint64> getFixupList(QIODevice *pDevice1,QIODevice *pDevice2,qint64 nDelta);
 
-    static QString getHash(HASH hash,QString sFileName);
-    static QString getHash(HASH hash,QIODevice *pDevice);
-    QString getHash(HASH hash,qint64 nOffset=0,qint64 nSize=-1);
-    QString getHash(HASH hash,QList<OFFSETSIZE> *pListOS);
+    static QString getHash(HASH hash,QString sFileName);  // TODO ProcessData
+    static QString getHash(HASH hash, QIODevice *pDevice, PDSTRUCT *pProcessData=nullptr);
+    QString getHash(HASH hash,qint64 nOffset=0,qint64 nSize=-1,PDSTRUCT *pProcessData=nullptr);
+    QString getHash(HASH hash,QList<OFFSETSIZE> *pListOS,PDSTRUCT *pProcessData=nullptr);
 
     static QSet<HASH> getHashMethods();
     static QList<HASH> getHashMethodsAsList();
@@ -983,7 +983,7 @@ public:
     quint32 _getCRC32(qint64 nOffset=0,qint64 nSize=-1);
 
     static double getEntropy(QString sFileName);  // TODO ProcessData
-    static double getEntropy(QIODevice *pDevice);  // TODO ProcessData
+    static double getEntropy(QIODevice *pDevice,PDSTRUCT *pProcessData=nullptr);
     double getEntropy(qint64 nOffset=0,qint64 nSize=-1,PDSTRUCT *pProcessData=nullptr);
 
     BYTE_COUNTS getByteCounts(qint64 nOffset=0,qint64 nSize=-1,PDSTRUCT *pProcessData=nullptr);
@@ -1268,7 +1268,6 @@ public:
 public slots:
     void setSearchProcessEnable(bool bState);
     void setDumpProcessEnable(bool bState);
-    void setHashProcessEnable(bool bState);
     void setProcessSignalsEnable(bool bState);
 
 private:
@@ -1291,9 +1290,6 @@ private:
     void _dumpProgressMinimumChanged(qint32 nMaximum);
     void _dumpProgressMaximumChanged(qint32 nMaximum);
     void _dumpProgressValueChanged(qint32 nValue);
-    void _hashProgressMinimumChanged(qint32 nMaximum);
-    void _hashProgressMaximumChanged(qint32 nMaximum);
-    void _hashProgressValueChanged(qint32 nValue);
 
 protected:
     bool _isOffsetValid(qint64 nOffset);
@@ -1311,9 +1307,6 @@ signals:
     void dumpProgressMinimumChanged(qint32 nMaximum);
     void dumpProgressMaximumChanged(qint32 nMaximum);
     void dumpProgressValueChanged(qint32 nValue);
-    void hashProgressMinimumChanged(qint32 nMaximum);
-    void hashProgressMaximumChanged(qint32 nMaximum);
-    void hashProgressValueChanged(qint32 nValue);
 
 private:
     QIODevice *g_pDevice;
@@ -1327,7 +1320,6 @@ private:
     bool g_bIsBigEndian; // TODO enum
     bool g_bIsSearchStop;
     bool g_bIsDumpStop;
-    bool g_bIsHashStop;
     bool g_bIsProcessSignalsDisable;
     QString g_sArch;
     OSNAME g_osName;
