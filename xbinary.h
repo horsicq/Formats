@@ -555,6 +555,7 @@ public:
         PDRECORD pdRecord;
         PDRECORD pdRecordOpt;
         bool bIsStop;
+        bool bIsDisable;
     };
 
 private:
@@ -639,7 +640,7 @@ public:
         // TODO filter
     };
 
-    static void findFiles(QString sDirectoryName,FFOPTIONS *pFFOption,qint32 nLevel=0);
+    static void findFiles(QString sDirectoryName,FFOPTIONS *pFFOption,qint32 nLevel=0); // TODO ProcessData
     static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames);
 
     static QString regExp(QString sRegExp,QString sString,qint32 nIndex);
@@ -722,30 +723,30 @@ public:
 
     static void _write_value(MODE mode,char *pData,quint64 nValue,bool bIsBigEndian=false);
 
-    qint64 find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize);
-    qint64 find_byteArray(qint64 nOffset,qint64 nSize,QByteArray baData);
-    qint64 find_uint8(qint64 nOffset,qint64 nSize,quint8 nValue);
-    qint64 find_int8(qint64 nOffset,qint64 nSize,qint8 nValue);
-    qint64 find_uint16(qint64 nOffset,qint64 nSize,quint16 nValue,bool bIsBigEndian=false);
-    qint64 find_int16(qint64 nOffset,qint64 nSize,qint16 nValue,bool bIsBigEndian=false);
-    qint64 find_uint32(qint64 nOffset,qint64 nSize,quint32 nValue,bool bIsBigEndian=false);
-    qint64 find_int32(qint64 nOffset,qint64 nSize,qint32 nValue,bool bIsBigEndian=false);
-    qint64 find_uint64(qint64 nOffset,qint64 nSize,quint64 nValue,bool bIsBigEndian=false);
-    qint64 find_int64(qint64 nOffset,qint64 nSize,qint64 nValue,bool bIsBigEndian=false);
-    qint64 find_float(qint64 nOffset,qint64 nSize,float fValue,bool bIsBigEndian=false);
-    qint64 find_double(qint64 nOffset,qint64 nSize,double dValue,bool bIsBigEndian=false);
+    qint64 find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_byteArray(qint64 nOffset,qint64 nSize,QByteArray baData,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_uint8(qint64 nOffset,qint64 nSize,quint8 nValue,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_int8(qint64 nOffset,qint64 nSize,qint8 nValue,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_uint16(qint64 nOffset,qint64 nSize,quint16 nValue,bool bIsBigEndian=false,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_int16(qint64 nOffset,qint64 nSize,qint16 nValue,bool bIsBigEndian=false,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_uint32(qint64 nOffset,qint64 nSize,quint32 nValue,bool bIsBigEndian=false,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_int32(qint64 nOffset,qint64 nSize,qint32 nValue,bool bIsBigEndian=false,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_uint64(qint64 nOffset,qint64 nSize,quint64 nValue,bool bIsBigEndian=false,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_int64(qint64 nOffset,qint64 nSize,qint64 nValue,bool bIsBigEndian=false,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_float(qint64 nOffset,qint64 nSize,float fValue,bool bIsBigEndian=false,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_double(qint64 nOffset,qint64 nSize,double dValue,bool bIsBigEndian=false,PDSTRUCT *pProcessData=nullptr);
 
     static void endian_float(float *pValue,bool bIsBigEndian);
     static void endian_double(double *pValue,bool bIsBigEndian);
 
-    qint64 find_ansiString(qint64 nOffset,qint64 nSize,QString sString);
-    qint64 find_unicodeString(qint64 nOffset,qint64 nSize,QString sString); // mb TODO endian
-    qint64 find_utf8String(qint64 nOffset,qint64 nSize,QString sString);
-    qint64 find_signature(qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize=0);
-    qint64 find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize=0);
-    qint64 find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString);
-    qint64 find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString); // mb TODO endian
-    qint64 find_utf8StringI(qint64 nOffset,qint64 nSize,QString sString);
+    qint64 find_ansiString(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_unicodeString(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr); // mb TODO endian
+    qint64 find_utf8String(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_signature(qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize=0,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize=0,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr); // mb TODO endian
+    qint64 find_utf8StringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr);
 
     static quint8 getBits_uint8(quint8 nValue,qint32 nBitOffset,qint32 nBitSize);
     static quint16 getBits_uint16(quint16 nValue,qint32 nBitOffset,qint32 nBitSize);
@@ -766,16 +767,16 @@ public:
         QString sANSICodec;
     };
 
-    QList<MS_RECORD> multiSearch_allStrings(qint64 nOffset,qint64 nSize,STRINGSEARCH_OPTIONS ssOptions);
-    QList<MS_RECORD> multiSearch_signature(qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="");
-    QList<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="");
+    QList<MS_RECORD> multiSearch_allStrings(qint64 nOffset,qint64 nSize,STRINGSEARCH_OPTIONS ssOptions,PDSTRUCT *pProcessData=nullptr);
+    QList<MS_RECORD> multiSearch_signature(qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="",PDSTRUCT *pProcessData=nullptr);
+    QList<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="",PDSTRUCT *pProcessData=nullptr);
 
     static QString msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId);
 
     static QByteArray getUnicodeString(QString sString); // TODO remove, use getStringData
     static QByteArray getStringData(MS_RECORD_TYPE msRecordTypeId,QString sString,bool bAddNull);
 
-    bool isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature);
+    bool isSignaturePresent(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature,PDSTRUCT *pProcessData=nullptr);
 
     static bool createFile(QString sFileName,qint64 nFileSize=0);
     static bool isFileExists(QString sFileName,bool bTryToOpen=false);
@@ -895,7 +896,7 @@ public:
     bool moveMemory(qint64 nSourceOffset,qint64 nDestOffset,qint64 nSize);
 
     static bool dumpToFile(QString sFileName,const char *pData,qint64 nDataSize);
-    bool dumpToFile(QString sFileName,qint64 nDataOffset,qint64 nDataSize);
+    bool dumpToFile(QString sFileName,qint64 nDataOffset,qint64 nDataSize,PDSTRUCT *pProcessData=nullptr);
 
     QSet<FT> getFileTypes(bool bExtra=false);
     static QSet<FT> getFileTypes(QIODevice *pDevice,bool bExtra=false); // mb TODO isImage
@@ -1114,10 +1115,10 @@ public:
     static bool appendToFile(QString sFileName,QString sString);
     static bool clearFile(QString sFileName);
 
-    static qint32 getStringNumberFromList(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
-    static qint32 getStringNumberFromListExp(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
-    static bool isStringInListPresent(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
-    static bool isStringInListPresentExp(QList<QString> *pListStrings,QString sString,bool *pbIsStop=nullptr);
+    static qint32 getStringNumberFromList(QList<QString> *pListStrings,QString sString,PDSTRUCT *pProcessData=nullptr);
+    static qint32 getStringNumberFromListExp(QList<QString> *pListStrings,QString sString,PDSTRUCT *pProcessData=nullptr);
+    static bool isStringInListPresent(QList<QString> *pListStrings,QString sString,PDSTRUCT *pProcessData=nullptr);
+    static bool isStringInListPresentExp(QList<QString> *pListStrings,QString sString,PDSTRUCT *pProcessData=nullptr);
     static QString getStringByIndex(QList<QString> *pListStrings,int nIndex,qint32 nNumberOfStrings=-1);
 
     static bool isStringUnicode(QString sString,qint32 nMaxCheckSize=-1);
@@ -1265,10 +1266,9 @@ public:
 
     static MODE getModeOS();
 
-public slots:
-    void setSearchProcessEnable(bool bState);
-    void setDumpProcessEnable(bool bState);
-    void setProcessSignalsEnable(bool bState);
+    static void setPdStructTotal(PDSTRUCT *pPdStruct,qint64 nValue);
+    static void setPdStructCurrent(PDSTRUCT *pPdStruct,qint64 nValue);
+    static bool setPdStructFinished(PDSTRUCT *pPdStruct);
 
 private:
     static const int READWRITE_BUFFER_SIZE=0x1000;
@@ -1284,13 +1284,6 @@ private:
     int _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex);
     qint32 _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,qint32 nStartIndex);
 
-    void _searchProgressMinimumChanged(qint32 nMaximum);
-    void _searchProgressMaximumChanged(qint32 nMaximum);
-    void _searchProgressValueChanged(qint32 nValue);
-    void _dumpProgressMinimumChanged(qint32 nMaximum);
-    void _dumpProgressMaximumChanged(qint32 nMaximum);
-    void _dumpProgressValueChanged(qint32 nValue);
-
 protected:
     bool _isOffsetValid(qint64 nOffset);
     void _errorMessage(QString sErrorMessage);
@@ -1301,12 +1294,6 @@ protected:
 signals:
     void errorMessage(QString sErrorMessage);
     void infoMessage(QString sInfoMessage);
-    void searchProgressMinimumChanged(qint32 nMaximum);
-    void searchProgressMaximumChanged(qint32 nMaximum);
-    void searchProgressValueChanged(qint32 nValue);
-    void dumpProgressMinimumChanged(qint32 nMaximum);
-    void dumpProgressMaximumChanged(qint32 nMaximum);
-    void dumpProgressValueChanged(qint32 nValue);
 
 private:
     QIODevice *g_pDevice;
@@ -1318,9 +1305,6 @@ private:
     qint64 g_nEntryPointOffset;
     XADDR g_nModuleAddress;
     bool g_bIsBigEndian; // TODO enum
-    bool g_bIsSearchStop;
-    bool g_bIsDumpStop;
-    bool g_bIsProcessSignalsDisable;
     QString g_sArch;
     OSNAME g_osName;
     QString g_sOsVersion;
