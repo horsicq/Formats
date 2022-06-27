@@ -604,6 +604,39 @@ void XBinary::findFiles(QString sDirectoryName,QList<QString> *pListFileNames)
     }
 }
 
+void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct)
+{
+    pPdStruct->pdRecord.nCurrent=pListFileNames->count();
+
+    if(!(pPdStruct->bIsStop))
+    {
+        QFileInfo fi(sDirectoryName);
+
+        if(fi.isFile())
+        {
+            pListFileNames->append(fi.absoluteFilePath());
+        }
+        else if(fi.isDir()&&((bSubDirectories)||(nLevel==0)))
+        {
+            QDir dir(sDirectoryName);
+
+            QFileInfoList eil=dir.entryInfoList();
+
+            qint32 nNumberOfFiles=eil.count();
+
+            for(qint32 i=0;(i<nNumberOfFiles)&&(!(pPdStruct->bIsStop));i++)
+            {
+                QString sFN=eil.at(i).fileName();
+
+                if((sFN!=".")&&(sFN!=".."))
+                {
+                    findFiles(eil.at(i).absoluteFilePath(),pListFileNames,bSubDirectories,nLevel+1,pPdStruct);
+                }
+            }
+        }
+    }
+}
+
 QString XBinary::regExp(QString sRegExp,QString sString,qint32 nIndex)
 {
     QString sResult;
@@ -1589,7 +1622,7 @@ qint64 XBinary::find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64
     return -1;
 }
 
-qint64 XBinary::find_byteArray(qint64 nOffset, qint64 nSize, QByteArray baData, PDSTRUCT *pProcessData)
+qint64 XBinary::find_byteArray(qint64 nOffset,qint64 nSize,QByteArray baData,PDSTRUCT *pProcessData)
 {
     return find_array(nOffset,nSize,baData.data(),baData.size(),pProcessData);
 }

@@ -556,6 +556,7 @@ public:
         PDRECORD pdRecordOpt;
         bool bIsStop;
         bool bIsDisable;
+        QString sStatus;
     };
 
 private:
@@ -640,8 +641,9 @@ public:
         // TODO filter
     };
 
-    static void findFiles(QString sDirectoryName,FFOPTIONS *pFFOption,qint32 nLevel=0); // TODO ProcessData
+    static void findFiles(QString sDirectoryName,FFOPTIONS *pFFOption,qint32 nLevel=0);
     static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames);
+    static void findFiles(QString sDirectoryName,QList<QString> *pListFileNames,bool bSubDirectories,qint32 nLevel,PDSTRUCT *pPdStruct=nullptr);
 
     static QString regExp(QString sRegExp,QString sString,qint32 nIndex);
     static bool isRegExpPresent(QString sRegExp,QString sString);
