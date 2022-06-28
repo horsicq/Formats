@@ -710,8 +710,8 @@ public:
 
     QByteArray getSection(quint32 nSection); // TODO move to Xbinary
 
-    QString getSectionHash(HASH hash,quint32 nSection); // TODO move to Xbinary
-    double getSectionEntropy(quint32 nSection); // TODO move to Xbinary
+    QString getSectionHash(HASH hash,quint32 nSection); // TODO move to Xbinary  // TODO ProcessData
+    double getSectionEntropy(quint32 nSection); // TODO move to Xbinary  // TODO ProcessData
 
     bool addImportSection(QMap<qint64,QString> *pMapIAT);
     bool addImportSection(QIODevice *pDevice,bool bIsImage,QMap<qint64,QString> *pMapIAT);

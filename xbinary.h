@@ -966,7 +966,7 @@ public:
 
     static QList<qint64> getFixupList(QIODevice *pDevice1,QIODevice *pDevice2,qint64 nDelta);
 
-    static QString getHash(HASH hash,QString sFileName);  // TODO ProcessData
+    static QString getHash(HASH hash,QString sFileName, PDSTRUCT *pProcessData=nullptr);
     static QString getHash(HASH hash, QIODevice *pDevice, PDSTRUCT *pProcessData=nullptr);
     QString getHash(HASH hash,qint64 nOffset=0,qint64 nSize=-1,PDSTRUCT *pProcessData=nullptr);
     QString getHash(HASH hash,QList<OFFSETSIZE> *pListOS,PDSTRUCT *pProcessData=nullptr);

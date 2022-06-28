@@ -604,7 +604,7 @@ void XBinary::findFiles(QString sDirectoryName,QList<QString> *pListFileNames)
     }
 }
 
-void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct)
+void XBinary::findFiles(QString sDirectoryName,QList<QString> *pListFileNames,bool bSubDirectories,qint32 nLevel,PDSTRUCT *pPdStruct)
 {
     pPdStruct->pdRecord.nCurrent=pListFileNames->count();
 
@@ -5221,7 +5221,7 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
     return listResult;
 }
 
-QString XBinary::getHash(XBinary::HASH hash, QString sFileName)
+QString XBinary::getHash(XBinary::HASH hash, QString sFileName, PDSTRUCT *pProcessData)
 {
     QString sResult;
 
@@ -5230,7 +5230,7 @@ QString XBinary::getHash(XBinary::HASH hash, QString sFileName)
 
     if(file.open(QIODevice::ReadOnly))
     {
-        sResult=XBinary::getHash(hash,&file);
+        sResult=XBinary::getHash(hash,&file,pProcessData);
 
         file.close();
     }
