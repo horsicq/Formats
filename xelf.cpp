@@ -2169,7 +2169,7 @@ quint64 XELF::getElf_Shdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pLis
     return nResult;
 }
 
-quint64 XELF::getElf_Shdr_size(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+quint64 XELF::getElf_Shdr_size(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
 {
     quint64 nResult=0;
 

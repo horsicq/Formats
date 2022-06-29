@@ -1001,6 +1001,17 @@ QString XBinary::read_unicodeString(qint64 nOffset,qint64 nMaxSize,bool bIsBigEn
     return sResult;
 }
 
+QString XBinary::read_UCSDString(qint64 nOffset)
+{
+    QString sResult;
+
+    quint8 nSize=read_uint8(nOffset);
+
+    sResult=read_ansiString(nOffset+1,nSize);
+
+    return sResult;
+}
+
 QString XBinary::read_utf8String(qint64 nOffset,qint64 nMaxSize)
 {
     QString sResult;

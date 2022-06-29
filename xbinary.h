@@ -676,6 +676,7 @@ public:
 
     QString read_ansiString(qint64 nOffset,qint64 nMaxSize=256);
     QString read_unicodeString(qint64 nOffset,qint64 nMaxSize=256,bool bIsBigEndian=false);
+    QString read_UCSDString(qint64 nOffset);
     QString read_utf8String(qint64 nOffset,qint64 nMaxSize=256);
     QString _read_utf8String(qint64 nOffset,qint64 nMaxSize=256);
     QString _read_utf8String(char *pData,qint64 nMaxSize);
@@ -745,7 +746,7 @@ public:
     qint64 find_unicodeString(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr); // mb TODO endian
     qint64 find_utf8String(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr);
     qint64 find_signature(qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize=0,PDSTRUCT *pProcessData=nullptr);
-    qint64 find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize=0,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize=nullptr,PDSTRUCT *pProcessData=nullptr);
     qint64 find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr);
     qint64 find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr); // mb TODO endian
     qint64 find_utf8StringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr);
