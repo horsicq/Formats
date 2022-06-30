@@ -35,7 +35,7 @@ ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,QObjec
     {
         if(!mapParents.contains(pListScanStructs->at(i).id.sUuid))
         {
-            ScanItem *_itemParent;
+            ScanItem *_itemParent=nullptr;
 
             if(pListScanStructs->at(i).parentId.sUuid=="")
             {
@@ -44,6 +44,11 @@ ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,QObjec
             else
             {
                 _itemParent=mapParents.value(pListScanStructs->at(i).parentId.sUuid);
+            }
+
+            if(_itemParent==nullptr)
+            {
+                _itemParent=g_pRootItem;
             }
 
             QString sParent=XBinary::createTypeString(&pListScanStructs->at(i));

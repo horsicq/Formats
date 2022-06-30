@@ -554,6 +554,7 @@ public:
     {
         PDRECORD pdRecord;
         PDRECORD pdRecordOpt;
+        PDRECORD pdRecordObj;
         bool bIsStop;
         bool bIsDisable;
         QString sStatus;
@@ -676,7 +677,7 @@ public:
 
     QString read_ansiString(qint64 nOffset,qint64 nMaxSize=256);
     QString read_unicodeString(qint64 nOffset,qint64 nMaxSize=256,bool bIsBigEndian=false);
-    QString read_UCSDString(qint64 nOffset);
+    QString read_ucsdString(qint64 nOffset);
     QString read_utf8String(qint64 nOffset,qint64 nMaxSize=256);
     QString _read_utf8String(qint64 nOffset,qint64 nMaxSize=256);
     QString _read_utf8String(char *pData,qint64 nMaxSize);
@@ -967,8 +968,8 @@ public:
 
     static QList<qint64> getFixupList(QIODevice *pDevice1,QIODevice *pDevice2,qint64 nDelta);
 
-    static QString getHash(HASH hash,QString sFileName, PDSTRUCT *pProcessData=nullptr);
-    static QString getHash(HASH hash, QIODevice *pDevice, PDSTRUCT *pProcessData=nullptr);
+    static QString getHash(HASH hash,QString sFileName,PDSTRUCT *pProcessData=nullptr);
+    static QString getHash(HASH hash,QIODevice *pDevice,PDSTRUCT *pProcessData=nullptr);
     QString getHash(HASH hash,qint64 nOffset=0,qint64 nSize=-1,PDSTRUCT *pProcessData=nullptr);
     QString getHash(HASH hash,QList<OFFSETSIZE> *pListOS,PDSTRUCT *pProcessData=nullptr);
 
@@ -980,11 +981,11 @@ public:
 
     static quint32 getAdler32(QString sFileName);
     static quint32 getAdler32(QIODevice *pDevice);
-    quint32 getAdler32(qint64 nOffset=0,qint64 nSize=-1);
+    quint32 getAdler32(qint64 nOffset=0,qint64 nSize=-1); // TODO pProcessData
 
     static quint32 _getCRC32(QString sFileName);
     static quint32 _getCRC32(QIODevice *pDevice);
-    quint32 _getCRC32(qint64 nOffset=0,qint64 nSize=-1);
+    quint32 _getCRC32(qint64 nOffset=0,qint64 nSize=-1,PDSTRUCT *pProcessData=nullptr);
 
     static double getEntropy(QString sFileName);  // TODO ProcessData
     static double getEntropy(QIODevice *pDevice,PDSTRUCT *pProcessData=nullptr);
@@ -1108,7 +1109,7 @@ public:
     bool removeOverlay();
 
     bool isSignatureInLoadSegmentPresent(qint32 nLoadSegment,QString sSignature);
-    bool isSignatureInLoadSegmentPresent(_MEMORY_MAP *pMemoryMap,qint32 nLoadSegment,QString sSignature);
+    bool isSignatureInLoadSegmentPresent(_MEMORY_MAP *pMemoryMap,qint32 nLoadSegment,QString sSignature,PDSTRUCT *pProcessData=nullptr);
 
     static QString getStringCollision(QList<QString> *pListStrings,QString sString1,QString sString2);
 

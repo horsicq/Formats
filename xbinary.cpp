@@ -1001,7 +1001,7 @@ QString XBinary::read_unicodeString(qint64 nOffset,qint64 nMaxSize,bool bIsBigEn
     return sResult;
 }
 
-QString XBinary::read_UCSDString(qint64 nOffset)
+QString XBinary::read_ucsdString(qint64 nOffset)
 {
     QString sResult;
 
@@ -5526,18 +5526,27 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice)
     return nResult;
 }
 
-quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
+quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
 {
     // TODO optimize!!!
     quint32 nResult=0xFFFFFFFF; // ~0
+
+    PDSTRUCT processDataEmpty={};
+
+    if(!pProcessData)
+    {
+        pProcessData=&processDataEmpty;
+    }
 
     OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
 
     nOffset=osRegion.nOffset;
     nSize=osRegion.nSize;
 
-    if(nOffset!=-1)
+    if((nOffset!=-1)&&(!(pProcessData->bIsStop)))
     {
+        setPdStructTotal(pProcessData,nSize);
+
         quint32 crc_table[256];
 
         for(qint32 i=0;i<256;i++)
@@ -5573,12 +5582,21 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize)
 
             nSize-=nTemp;
             nOffset+=nTemp;
+
+            setPdStructCurrent(pProcessData,nOffset);
         }
 
         delete[] pBuffer;
     }
 
     nResult^=0xFFFFFFFF;
+
+    setPdStructFinished(pProcessData);
+
+    if(pProcessData->bIsStop)
+    {
+        nResult=0;
+    }
 
     return nResult;
 }
@@ -6793,7 +6811,7 @@ bool XBinary::isSignatureInLoadSegmentPresent(qint32 nLoadSegment, QString sSign
     return isSignatureInLoadSegmentPresent(&memoryMap,nLoadSegment,sSignature);
 }
 
-bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, QString sSignature)
+bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, QString sSignature, PDSTRUCT *pProcessData)
 {
     bool bResult=false;
 
@@ -6805,7 +6823,7 @@ bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, 
         {
             if(pMemoryMap->listRecords.at(i).nOffset!=-1)
             {
-                bResult=isSignaturePresent(pMemoryMap,pMemoryMap->listRecords.at(i).nOffset,pMemoryMap->listRecords.at(i).nSize,sSignature);
+                bResult=isSignaturePresent(pMemoryMap,pMemoryMap->listRecords.at(i).nOffset,pMemoryMap->listRecords.at(i).nSize,sSignature,pProcessData);
 
                 break;
             }
