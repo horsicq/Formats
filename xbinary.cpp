@@ -61,7 +61,7 @@ XBinary::~XBinary()
     }
 }
 
-void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+void XBinary::setData(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     g_pReadWriteMutex=nullptr;
     g_pMemory=nullptr;
