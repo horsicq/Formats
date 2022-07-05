@@ -748,7 +748,7 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice,QList<XArchive::R
     return stResult;
 }
 #endif
-QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, qint32 nLevel)
+QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice,bool bExtra,qint32 nLevel)
 {
 #ifndef USE_ARCHIVE
     Q_UNUSED(nLevel);
