@@ -7125,18 +7125,23 @@ bool XBinary::checkStringNumber(QString sString, quint32 nMin, quint32 nMax)
     return bResult;
 }
 
+QDateTime XBinary::valueToTime(quint64 nValue, DT_TYPE type)
+{
+    QDateTime result;
+
+    if(type==DT_TYPE_POSIX)
+    {
+        result.setMSecsSinceEpoch(nValue*1000);
+    }
+
+    return result;
+}
+
 QString XBinary::valueToTimeString(quint64 nValue, XBinary::DT_TYPE type)
 {
     QString sResult;
 
-    // TODO more
-    if(type==DT_TYPE_POSIX)
-    {
-        QDateTime dt;
-        dt.setMSecsSinceEpoch(nValue*1000);
-
-        sResult=dt.toString("yyyy-MM-dd hh:mm:ss");
-    }
+    sResult=valueToTime(nValue,type).toString("yyyy-MM-dd hh:mm:ss");
 
     return sResult;
 }

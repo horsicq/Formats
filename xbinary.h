@@ -1140,6 +1140,7 @@ public:
         // TODO more
     };
 
+    static QDateTime valueToTime(quint64 nValue,DT_TYPE type);
     static QString valueToTimeString(quint64 nValue,DT_TYPE type);
 
     enum VL_TYPE
