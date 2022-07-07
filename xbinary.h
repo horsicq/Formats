@@ -555,6 +555,7 @@ public:
         PDRECORD pdRecord;
         PDRECORD pdRecordOpt;
         PDRECORD pdRecordObj;
+        PDRECORD pdRecordFiles;
         bool bIsStop;
         bool bIsDisable;
         QString sStatus;
