@@ -661,7 +661,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
     return stResult;
 }
 #ifdef USE_ARCHIVE
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra)
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice,XArchive::RECORD *pRecord,bool bExtra)
 {
     QSet<XBinary::FT> stResult;
 
