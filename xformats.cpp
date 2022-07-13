@@ -660,6 +660,54 @@ QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
 
     return stResult;
 }
+
+XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    XBinary::OSINFO result={};
+
+    if(XBinary::checkFileType(XBinary::FT_COM,fileType))
+    {
+        XCOM com(pDevice,bIsImage,nModuleAddress);
+        result=com.getOsInfo();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
+    {
+        XMSDOS msdos(pDevice,bIsImage,nModuleAddress);
+        result=msdos.getOsInfo();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
+    {
+        XNE ne(pDevice,bIsImage,nModuleAddress);
+        result=ne.getOsInfo();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        result=le.getOsInfo();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_LX,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        result=le.getOsInfo();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
+    {
+        XPE pe(pDevice,bIsImage,nModuleAddress);
+        result=pe.getOsInfo();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
+    {
+        XELF elf(pDevice,bIsImage,nModuleAddress);
+        result=elf.getOsInfo();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
+    {
+        XMACH mach(pDevice,bIsImage,nModuleAddress);
+        result=mach.getOsInfo();
+    }
+
+    return result;
+}
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice,XArchive::RECORD *pRecord,bool bExtra)
 {
