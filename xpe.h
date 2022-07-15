@@ -541,8 +541,8 @@ public:
 
     bool isImportPresent();
 
-    QList<IMPORT_RECORD> getImportRecords();
-    QList<IMPORT_RECORD> getImportRecords(_MEMORY_MAP *pMemoryMap);
+    QList<IMPORT_RECORD> getImportRecords(PDSTRUCT *pPdStruct=nullptr);
+    QList<IMPORT_RECORD> getImportRecords(_MEMORY_MAP *pMemoryMap,PDSTRUCT *pPdStruct=nullptr);
 
     quint64 getImportHash64(QList<IMPORT_RECORD> *pListImportRecords);
     quint32 getImportHash32(QList<IMPORT_RECORD> *pListImportRecords);
@@ -564,11 +564,11 @@ public:
     void setImportDescriptor_Name(quint32 nNumber,quint32 nValue);
     void setImportDescriptor_FirstThunk(quint32 nNumber,quint32 nValue);
 
-    QList<IMPORT_HEADER> getImports();
-    QList<IMPORT_HEADER> getImports(_MEMORY_MAP *pMemoryMap);
+    QList<IMPORT_HEADER> getImports(PDSTRUCT *pPdStruct=nullptr);
+    QList<IMPORT_HEADER> getImports(_MEMORY_MAP *pMemoryMap,PDSTRUCT *pPdStruct=nullptr);
 
-    QList<IMPORT_POSITION> _getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap,qint64 nThunksRVA,qint64 nRVA);
-    QList<IMPORT_POSITION> getImportPositions(int nIndex);
+    QList<IMPORT_POSITION> _getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap,qint64 nThunksRVA,qint64 nRVA,PDSTRUCT *pPdStruct=nullptr);
+    QList<IMPORT_POSITION> getImportPositions(int nIndex,PDSTRUCT *pPdStruct=nullptr);
 
     QList<quint32> getImportPositionHashes(bool bLibraryName=false);
     QList<quint32> getImportPositionHashes(QList<IMPORT_HEADER> *pListImport,bool bLibraryName=false);
@@ -684,10 +684,10 @@ public:
 
     bool isExportPresent();
 
-    EXPORT_HEADER getExport(bool bValidOnly=false);
-    EXPORT_HEADER getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly=false);
-    QList<QString> getExportFunctionsList();
-    static QList<QString> getExportFunctionsList(EXPORT_HEADER *pExportHeader);
+    EXPORT_HEADER getExport(bool bValidOnly=false,PDSTRUCT *pPdStruct=nullptr);
+    EXPORT_HEADER getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly=false,PDSTRUCT *pPdStruct=nullptr);
+    QList<QString> getExportFunctionsList(PDSTRUCT *pPdStruct=nullptr);
+    static QList<QString> getExportFunctionsList(EXPORT_HEADER *pExportHeader,PDSTRUCT *pPdStruct=nullptr);
 
     XPE_DEF::IMAGE_EXPORT_DIRECTORY getExportDirectory();
     void setExportDirectory(XPE_DEF::IMAGE_EXPORT_DIRECTORY *pExportDirectory);

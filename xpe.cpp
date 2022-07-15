@@ -2086,15 +2086,29 @@ void XPE::setEntryPointOffset(qint64 nEntryPointOffset)
     setOptionalHeader_AddressOfEntryPoint(offsetToAddress(nEntryPointOffset)-getModuleAddress());
 }
 
-QList<XPE::IMPORT_RECORD> XPE::getImportRecords()
+QList<XPE::IMPORT_RECORD> XPE::getImportRecords(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty={};
+
+    if(!pPdStruct)
+    {
+        pPdStruct=&pdStructEmpty;
+    }
+
     _MEMORY_MAP memoryMap=getMemoryMap();
 
-    return getImportRecords(&memoryMap);
+    return getImportRecords(&memoryMap,pPdStruct);
 }
 
-QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap)
+QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap,PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty={};
+
+    if(!pPdStruct)
+    {
+        pPdStruct=&pdStructEmpty;
+    }
+
     QList<IMPORT_RECORD> listResult;
 
     qint64 nImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
@@ -2103,7 +2117,7 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap)
     {
         bool bIs64=is64(pMemoryMap);
 
-        while(true)
+        while(!(pPdStruct->bIsStop))
         {
             XPE_DEF::IMAGE_IMPORT_DESCRIPTOR iid=read_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
 
@@ -2470,15 +2484,29 @@ void XPE::setImportDescriptor_FirstThunk(quint32 nNumber, quint32 nValue)
     write_uint32(nOffset+offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR,FirstThunk),nValue);
 }
 
-QList<XPE::IMPORT_HEADER> XPE::getImports()
+QList<XPE::IMPORT_HEADER> XPE::getImports(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty={};
+
+    if(!pPdStruct)
+    {
+        pPdStruct=&pdStructEmpty;
+    }
+
     _MEMORY_MAP memoryMap=getMemoryMap();
 
-    return getImports(&memoryMap);
+    return getImports(&memoryMap,pPdStruct);
 }
 
-QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
+QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap,PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty={};
+
+    if(!pPdStruct)
+    {
+        pPdStruct=&pdStructEmpty;
+    }
+
     QList<IMPORT_HEADER> listResult;
 
     XPE_DEF::IMAGE_DATA_DIRECTORY dataResources=getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
@@ -2495,7 +2523,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
 
     if(nImportOffset!=-1)
     {
-        while(true)
+        while(!(pPdStruct->bIsStop))
         {
             XPE_DEF::IMAGE_IMPORT_DESCRIPTOR iid=read_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
 
@@ -2550,7 +2578,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
 
             if(nThunksOffset!=-1)
             {
-                importHeader.listPositions=_getImportPositions(pMemoryMap,nThunksRVA,nThunksOriginalRVA);
+                importHeader.listPositions=_getImportPositions(pMemoryMap,nThunksRVA,nThunksOriginalRVA,pPdStruct);
             }
 
             listResult.append(importHeader);
@@ -2562,15 +2590,22 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap)
     return listResult;
 }
 
-QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA,qint64 nRVA)
+QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA,qint64 nRVA,PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty={};
+
+    if(!pPdStruct)
+    {
+        pPdStruct=&pdStructEmpty;
+    }
+
     QList<IMPORT_POSITION> listResult;
 
     qint64 nThunksOffset=XBinary::relAddressToOffset(pMemoryMap,nThunksRVA);
 
     bool bIs64=is64(pMemoryMap);
 
-    while(true)
+    while(!(pPdStruct->bIsStop))
     {
         IMPORT_POSITION importPosition={};
         importPosition.nThunkOffset=nThunksOffset;
@@ -2671,8 +2706,15 @@ QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemo
     return listResult;
 }
 
-QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
+QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex,PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty={};
+
+    if(!pPdStruct)
+    {
+        pPdStruct=&pdStructEmpty;
+    }
+
     QList<IMPORT_POSITION> listResult;
 
     qint64 nImportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
@@ -2683,7 +2725,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex)
 
         int _nIndex=0;
 
-        while(true)
+        while(!(pPdStruct->bIsStop))
         {
             IMPORT_HEADER importHeader={};
             XPE_DEF::IMAGE_IMPORT_DESCRIPTOR iid=read_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
@@ -4112,15 +4154,29 @@ bool XPE::isExportPresent()
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 }
 
-XPE::EXPORT_HEADER XPE::getExport(bool bValidOnly)
+XPE::EXPORT_HEADER XPE::getExport(bool bValidOnly,PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty={};
+
+    if(!pPdStruct)
+    {
+        pPdStruct=&pdStructEmpty;
+    }
+
     _MEMORY_MAP memoryMap=getMemoryMap();
 
-    return getExport(&memoryMap,bValidOnly);
+    return getExport(&memoryMap,bValidOnly,pPdStruct);
 }
 
-XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
+XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly,PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty={};
+
+    if(!pPdStruct)
+    {
+        pPdStruct=&pdStructEmpty;
+    }
+
     EXPORT_HEADER result={};
 
     qint64 nExportOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
@@ -4146,7 +4202,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
             {
                 QMap<quint16,EXPORT_POSITION> mapNames;
 
-                for(qint32 i=0;i<(int)result.directory.NumberOfNames;i++)
+                for(qint32 i=0;(i<(int)result.directory.NumberOfNames)&&(!(pPdStruct->bIsStop));i++)
                 {
                     EXPORT_POSITION position={};
 
@@ -4166,7 +4222,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
                     mapNames.insert(position.nOrdinal,position);
                 }
 
-                for(int i=0;i<(int)result.directory.NumberOfFunctions;i++)
+                for(int i=0;(i<(int)result.directory.NumberOfFunctions)&&(!(pPdStruct->bIsStop));i++)
                 {
                     EXPORT_POSITION position={};
 
@@ -4205,20 +4261,34 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly)
     return result;
 }
 
-QList<QString> XPE::getExportFunctionsList()
+QList<QString> XPE::getExportFunctionsList(PDSTRUCT *pPdStruct)
 {
-    EXPORT_HEADER exportHeader=getExport(false);
+    PDSTRUCT pdStructEmpty={};
 
-    return getExportFunctionsList(&exportHeader);
+    if(!pPdStruct)
+    {
+        pPdStruct=&pdStructEmpty;
+    }
+
+    EXPORT_HEADER exportHeader=getExport(false,pPdStruct);
+
+    return getExportFunctionsList(&exportHeader,pPdStruct);
 }
 
-QList<QString> XPE::getExportFunctionsList(EXPORT_HEADER *pExportHeader)
+QList<QString> XPE::getExportFunctionsList(EXPORT_HEADER *pExportHeader, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty={};
+
+    if(!pPdStruct)
+    {
+        pPdStruct=&pdStructEmpty;
+    }
+
     QList<QString> listResult;
 
     qint32 nNumberOfPositions=pExportHeader->listPositions.count();
 
-    for(qint32 i=0;i<nNumberOfPositions;i++)
+    for(qint32 i=0;(i<nNumberOfPositions)&&(!(pPdStruct->bIsStop));i++)
     {
         listResult.append(pExportHeader->listPositions.at(i).sFunctionName);
     }
