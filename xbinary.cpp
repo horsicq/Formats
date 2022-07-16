@@ -1809,7 +1809,7 @@ qint64 XBinary::find_utf8String(qint64 nOffset, qint64 nSize, QString sString, P
     return find_array(nOffset,nSize,(char *)baData.data(),baData.size(),pProcessData);
 }
 
-qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize, PDSTRUCT *pProcessData)
+qint64 XBinary::find_signature(qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize,PDSTRUCT *pProcessData)
 {
     _MEMORY_MAP memoryMap=XBinary::getMemoryMap();
 
