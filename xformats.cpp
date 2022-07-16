@@ -661,7 +661,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
     return stResult;
 }
 
-XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     XBinary::OSINFO result={};
 
