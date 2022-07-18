@@ -2966,7 +2966,7 @@ quint64 XELF::getElf_Phdr_paddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
     return nResult;
 }
 
-quint64 XELF::getElf_Phdr_filesz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+quint64 XELF::getElf_Phdr_filesz(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     quint64 nResult=0;
 
@@ -2978,7 +2978,7 @@ quint64 XELF::getElf_Phdr_filesz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pLis
     return nResult;
 }
 
-quint64 XELF::getElf_Phdr_memsz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+quint64 XELF::getElf_Phdr_memsz(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     quint64 nResult=0;
 
@@ -2990,7 +2990,7 @@ quint64 XELF::getElf_Phdr_memsz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
     return nResult;
 }
 
-quint32 XELF::getElf_Phdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+quint32 XELF::getElf_Phdr_flags(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     quint32 nResult=0;
 
@@ -3002,7 +3002,7 @@ quint32 XELF::getElf_Phdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
     return nResult;
 }
 
-quint64 XELF::getElf_Phdr_align(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+quint64 XELF::getElf_Phdr_align(quint32 nIndex,QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     quint64 nResult=0;
 
