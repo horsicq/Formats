@@ -992,6 +992,7 @@ public:
     quint64 getLoadConfig_GuardXFGDispatchFunctionPointer();
     quint64 getLoadConfig_GuardXFGTableDispatchFunctionPointer();
     quint64 getLoadConfig_CastGuardOsDeterminedFailureMode();
+    quint64 getLoadConfig_GuardMemcpyFunctionPointer();
 
     void setLoadConfig_Size(quint32 nValue);
     void setLoadConfig_TimeDateStamp(quint32 nValue);
@@ -1043,6 +1044,7 @@ public:
     void setLoadConfig_GuardXFGDispatchFunctionPointer(quint64 nValue);
     void setLoadConfig_GuardXFGTableDispatchFunctionPointer(quint64 nValue);
     void setLoadConfig_CastGuardOsDeterminedFailureMode(quint64 nValue);
+    void setLoadConfig_GuardMemcpyFunctionPointer(quint64 nValue);
 
     XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY _read_IMAGE_RUNTIME_FUNCTION_ENTRY(qint64 nOffset);
 

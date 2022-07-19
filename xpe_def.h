@@ -720,6 +720,7 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY32
     quint32 GuardXFGDispatchFunctionPointer;
     quint32 GuardXFGTableDispatchFunctionPointer;
     quint32 CastGuardOsDeterminedFailureMode;
+    quint32 GuardMemcpyFunctionPointer;
 };
 
 struct S_IMAGE_LOAD_CONFIG_DIRECTORY64
@@ -773,6 +774,7 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY64
     quint64 GuardXFGDispatchFunctionPointer;
     quint64 GuardXFGTableDispatchFunctionPointer;
     quint64 CastGuardOsDeterminedFailureMode;
+    quint64 GuardMemcpyFunctionPointer;
 };
 
 struct S_IMAGE_DELAYLOAD_DESCRIPTOR

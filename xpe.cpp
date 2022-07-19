@@ -5158,6 +5158,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32()
         result.GuardXFGDispatchFunctionPointer=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardXFGDispatchFunctionPointer));
         result.GuardXFGTableDispatchFunctionPointer=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardXFGTableDispatchFunctionPointer));
         result.CastGuardOsDeterminedFailureMode=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CastGuardOsDeterminedFailureMode));
+        result.GuardMemcpyFunctionPointer=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardMemcpyFunctionPointer));
     }
 
     return result;
@@ -5222,6 +5223,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64()
         result.GuardXFGDispatchFunctionPointer=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardXFGDispatchFunctionPointer));
         result.GuardXFGTableDispatchFunctionPointer=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardXFGTableDispatchFunctionPointer));
         result.CastGuardOsDeterminedFailureMode=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,CastGuardOsDeterminedFailureMode));
+        result.GuardMemcpyFunctionPointer=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardMemcpyFunctionPointer));
     }
 
     return result;
@@ -6287,6 +6289,27 @@ quint64 XPE::getLoadConfig_CastGuardOsDeterminedFailureMode()
     return nResult;
 }
 
+quint64 XPE::getLoadConfig_GuardMemcpyFunctionPointer()
+{
+    quint64 nResult=0;
+
+    qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+
+    if(nLoadConfigOffset!=-1)
+    {
+        if(is64())
+        {
+            nResult=read_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardMemcpyFunctionPointer));
+        }
+        else
+        {
+            nResult=read_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardMemcpyFunctionPointer));
+        }
+    }
+
+    return nResult;
+}
+
 void XPE::setLoadConfig_Size(quint32 nValue)
 {
     qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
@@ -7133,6 +7156,23 @@ void XPE::setLoadConfig_CastGuardOsDeterminedFailureMode(quint64 nValue)
         else
         {
             write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,CastGuardOsDeterminedFailureMode),nValue);
+        }
+    }
+}
+
+void XPE::setLoadConfig_GuardMemcpyFunctionPointer(quint64 nValue)
+{
+    qint64 nLoadConfigOffset=getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
+
+    if(nLoadConfigOffset!=-1)
+    {
+        if(is64())
+        {
+            write_uint64(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64,GuardMemcpyFunctionPointer),nValue);
+        }
+        else
+        {
+            write_uint32(nLoadConfigOffset+offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32,GuardMemcpyFunctionPointer),nValue);
         }
     }
 }

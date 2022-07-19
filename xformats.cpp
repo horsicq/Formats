@@ -625,7 +625,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice,qint64 nOffset,qint6
     return result;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QString sFileName, bool bExtra)
+QSet<XBinary::FT> XFormats::getFileTypes(QString sFileName,bool bExtra)
 {
     QSet<XBinary::FT> stResult;
 
@@ -643,7 +643,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QString sFileName, bool bExtra)
     return stResult;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
+QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData,bool bExtra)
 {
     QSet<XBinary::FT> stResult;
 
