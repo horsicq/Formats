@@ -1537,7 +1537,7 @@ XBinary::OSINFO XLE::getOsInfo()
     return result;
 }
 
-QMap<quint64, QString> XLE::getImageLEMagics()
+QMap<quint64,QString> XLE::getImageLEMagics()
 {
     QMap<quint64, QString> mapResult;
 
@@ -1547,7 +1547,7 @@ QMap<quint64, QString> XLE::getImageLEMagics()
     return mapResult;
 }
 
-QMap<quint64, QString> XLE::getImageLEMagicsS()
+QMap<quint64,QString> XLE::getImageLEMagicsS()
 {
     QMap<quint64, QString> mapResult;
 
@@ -1557,7 +1557,7 @@ QMap<quint64, QString> XLE::getImageLEMagicsS()
     return mapResult;
 }
 
-QMap<quint64, QString> XLE::getImageLECpusS()
+QMap<quint64,QString> XLE::getImageLECpusS()
 {
     QMap<quint64, QString> mapResult;
 
