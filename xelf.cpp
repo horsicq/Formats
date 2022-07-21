@@ -4035,7 +4035,7 @@ qint64 XELF::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
     return addressToOffset(pMemoryMap,pMemoryMap->nEntryPointAddress);
 }
 
-QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, bool bIsImage, QByteArray *pbaSectionTable)
+QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders,bool bIsImage,QByteArray *pbaSectionTable)
 {
     QList<SECTION_RECORD> listRecords;
 
