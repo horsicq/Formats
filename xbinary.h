@@ -700,6 +700,8 @@ public:
     QString read_UUID(qint64 nOffset);              // uuid [16]
     void write_UUID(qint64 nOffset,QString sValue); // uuid [16]
 
+    QString read_UUID2(qint64 nOffset,bool bIsBigEndian=false);
+
     static quint8 _read_uint8(char *pData);
     static qint8 _read_int8(char *pData);
     static quint16 _read_uint16(char *pData,bool bIsBigEndian=false);
@@ -1227,7 +1229,7 @@ public:
 
     static QString appendText(QString sResult,QString sString,QString sSeparate);
 
-    static QString bytesCountToString(quint64 nValue);
+    static QString bytesCountToString(quint64 nValue,quint64 nBase=1024);
     static QString numberToString(quint64 nValue);
     static QString fullVersionDwordToString(quint32 nValue);
     static QString versionDwordToString(quint32 nValue);

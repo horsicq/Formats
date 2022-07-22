@@ -875,7 +875,7 @@ float XBinary::read_float(qint64 nOffset, bool bIsBigEndian)
 {
     float result=0;
 
-    read_array(nOffset,(char *)(&result),2);
+    read_array(nOffset,(char *)(&result),4);
 
     endian_float(&result,bIsBigEndian);
 
@@ -886,7 +886,7 @@ double XBinary::read_double(qint64 nOffset,bool bIsBigEndian)
 {
     double result=0;
 
-    read_array(nOffset,(char *)(&result),4);
+    read_array(nOffset,(char *)(&result),8);
 
     endian_double(&result,bIsBigEndian);
 
@@ -1229,14 +1229,14 @@ void XBinary::write_float(qint64 nOffset,float fValue,bool bIsBigEndian)
 {
     endian_float(&fValue,bIsBigEndian);
 
-    write_array(nOffset,(char *)(&fValue),2);
+    write_array(nOffset,(char *)(&fValue),4);
 }
 
 void XBinary::write_double(qint64 nOffset,double dValue,bool bIsBigEndian)
 {
     endian_double(&dValue,bIsBigEndian);
 
-    write_array(nOffset,(char *)(&dValue),4);
+    write_array(nOffset,(char *)(&dValue),8);
 }
 
 QString XBinary::read_UUID(qint64 nOffset)
@@ -1261,6 +1261,18 @@ void XBinary::write_UUID(qint64 nOffset, QString sValue)
     QByteArray baUUID=QByteArray::fromHex(sValue.toLatin1().data());
 
     write_array(nOffset,baUUID.data(),16);
+}
+
+QString XBinary::read_UUID2(qint64 nOffset, bool bIsBigEndian)
+{
+    QString sResult=QString("%1-%2-%3-%4-%5").arg(
+            valueToHex(read_uint32(nOffset+0,bIsBigEndian),bIsBigEndian),
+            valueToHex(read_uint16(nOffset+4,bIsBigEndian),bIsBigEndian),
+            valueToHex(read_uint16(nOffset+6,bIsBigEndian),bIsBigEndian),
+            valueToHex(read_uint16(nOffset+8,bIsBigEndian),bIsBigEndian),
+            read_array(nOffset+10,6).toHex().data());
+
+    return sResult;
 }
 
 quint8 XBinary::_read_uint8(char *pData)
@@ -8249,53 +8261,54 @@ QString XBinary::appendText(QString sResult, QString sString, QString sSeparate)
     return sResult;
 }
 
-QString XBinary::bytesCountToString(quint64 nValue)
+QString XBinary::bytesCountToString(quint64 nValue, quint64 nBase)
 {
     QString sResult;
 
-    const quint64 N_KB=1024;
+    if(nBase!=1024)
+    {
+        nBase=1000;
+    }
 
     QString sValue;
     QString sUnit;
 
-    if(nValue<N_KB)
+    if(nValue<nBase)
     {
         sValue=QString::number(nValue);
         sUnit=tr("Bytes");
     }
-    else if(nValue<(N_KB*N_KB))
+    else if(nValue<(nBase*nBase))
     {
-        sValue=QString::number((double)nValue/N_KB,'f',2);
-        sUnit=tr("kB");
+        sValue=QString::number((double)nValue/nBase,'f',2);
+
+        if (nBase==1024) sUnit=tr("KiB");
+        else tr("kB");
     }
-    else if(nValue<(N_KB*N_KB*N_KB))
+    else if(nValue<(nBase*nBase*nBase))
     {
-        sValue=QString::number((double)nValue/(N_KB*N_KB),'f',2);
-        sUnit=tr("MB");
+        sValue=QString::number((double)nValue/(nBase*nBase),'f',2);
+
+        if (nBase==1024) sUnit=tr("MiB");
+        else tr("MB");
     }
-    else if(nValue<(N_KB*N_KB*N_KB*N_KB))
+    else if(nValue<(nBase*nBase*nBase*nBase))
     {
-        sValue=QString::number((double)nValue/(N_KB*N_KB*N_KB),'f',2);
-        sUnit=tr("GB");
+        sValue=QString::number((double)nValue/(nBase*nBase*nBase),'f',2);
+
+        if (nBase==1024) sUnit=tr("GiB");
+        else tr("GB");
     }
     else
     {
-        sValue=QString::number((double)nValue/(N_KB*N_KB*N_KB*N_KB),'f',2);
-        sUnit=tr("TB");
+        sValue=QString::number((double)nValue/(nBase*nBase*nBase*nBase),'f',2);
+
+        if (nBase==1024) sUnit=tr("TiB");
+        else tr("TB");
     }
-//    else if(nValue<(N_KB*N_KB*N_KB*N_KB))
-//    {
-//        sValue=QString::number((double)nValue/(N_KB*N_KB*N_KB),'f',2);
-//        sUnit=tr("TB");
-//    }
 
     sResult=QString("%1 %2").arg(sValue,sUnit);
 
-//#if QT_VERSION >=QT_VERSION_CHECK(5,10,0)
-//    sResult=QLocale().formattedDataSize(nValue,2,QLocale::DataSizeTraditionalFormat);
-//#else
-//    // TODO
-//#endif
     return sResult;
 }
 
