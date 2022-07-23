@@ -2294,7 +2294,7 @@ QString XMACH::getModuleUUID()
 
     if(nOffset!=-1)
     {
-        sResult=read_UUID(nOffset+offsetof(XMACH_DEF::uuid_command,uuid));
+        sResult=read_UUID_bytes(nOffset+offsetof(XMACH_DEF::uuid_command,uuid));
     }
 
     return sResult;
@@ -2306,7 +2306,7 @@ void XMACH::setModuleUUID(QString sValue)
 
     if(nOffset!=-1)
     {
-        write_UUID(nOffset+offsetof(XMACH_DEF::uuid_command,uuid),sValue);
+        write_UUID_bytes(nOffset+offsetof(XMACH_DEF::uuid_command,uuid),sValue);
     }
 }
 

@@ -1239,7 +1239,7 @@ void XBinary::write_double(qint64 nOffset,double dValue,bool bIsBigEndian)
     write_array(nOffset,(char *)(&dValue),8);
 }
 
-QString XBinary::read_UUID(qint64 nOffset)
+QString XBinary::read_UUID_bytes(qint64 nOffset)
 {
     // TODO check!
     // TODO Check Endian
@@ -1253,7 +1253,7 @@ QString XBinary::read_UUID(qint64 nOffset)
     return sResult;
 }
 
-void XBinary::write_UUID(qint64 nOffset, QString sValue)
+void XBinary::write_UUID_bytes(qint64 nOffset, QString sValue)
 {
     // TODO Check
     sValue=sValue.remove("-");
@@ -1263,7 +1263,7 @@ void XBinary::write_UUID(qint64 nOffset, QString sValue)
     write_array(nOffset,baUUID.data(),16);
 }
 
-QString XBinary::read_UUID2(qint64 nOffset, bool bIsBigEndian)
+QString XBinary::read_UUID(qint64 nOffset, bool bIsBigEndian)
 {
     QString sResult=QString("%1-%2-%3-%4-%5").arg(
             valueToHex(read_uint32(nOffset+0,bIsBigEndian),bIsBigEndian),

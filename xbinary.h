@@ -697,10 +697,10 @@ public:
     void write_float(qint64 nOffset,float fValue,bool bIsBigEndian=false); // TODO Check
     void write_double(qint64 nOffset,double dValue,bool bIsBigEndian=false); // TODO Check
 
-    QString read_UUID(qint64 nOffset);              // uuid [16]
-    void write_UUID(qint64 nOffset,QString sValue); // uuid [16]
+    QString read_UUID_bytes(qint64 nOffset);              // uuid [16]
+    void write_UUID_bytes(qint64 nOffset,QString sValue); // uuid [16]
 
-    QString read_UUID2(qint64 nOffset,bool bIsBigEndian=false);
+    QString read_UUID(qint64 nOffset,bool bIsBigEndian=false);
 
     static quint8 _read_uint8(char *pData);
     static qint8 _read_int8(char *pData);
