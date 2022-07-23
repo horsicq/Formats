@@ -1549,7 +1549,7 @@ QMap<quint64,QString> XLE::getImageLEMagics()
 
 QMap<quint64,QString> XLE::getImageLEMagicsS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x454C,"VXD_SIGNATURE");
     mapResult.insert(0x584C,"LX_SIGNATURE");
