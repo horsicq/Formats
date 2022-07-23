@@ -54,7 +54,7 @@ bool XMACH::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     return xmach.isValid();
 }
 
-XBinary::MODE XMACH::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+XBinary::MODE XMACH::getMode(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     XMACH xmach(pDevice,bIsImage,nModuleAddress);
 
