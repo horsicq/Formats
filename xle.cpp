@@ -1539,7 +1539,7 @@ XBinary::OSINFO XLE::getOsInfo()
 
 QMap<quint64,QString> XLE::getImageLEMagics()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x454C,"IMAGE_VXD_SIGNATURE");
     mapResult.insert(0x584C,"IMAGE_LX_SIGNATURE");
