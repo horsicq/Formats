@@ -49,7 +49,7 @@ bool XLE::isValid()
     return bResult;
 }
 
-bool XLE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+bool XLE::isValid(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     XLE xle(pDevice,bIsImage,nModuleAddress);
 
