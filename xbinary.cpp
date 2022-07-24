@@ -1650,7 +1650,7 @@ qint64 XBinary::find_byteArray(qint64 nOffset,qint64 nSize,QByteArray baData,PDS
     return find_array(nOffset,nSize,baData.data(),baData.size(),pProcessData);
 }
 
-qint64 XBinary::find_uint8(qint64 nOffset, qint64 nSize, quint8 nValue, PDSTRUCT *pProcessData)
+qint64 XBinary::find_uint8(qint64 nOffset,qint64 nSize,quint8 nValue,PDSTRUCT *pProcessData)
 {
     return find_array(nOffset,nSize,(char *)&nValue,1,pProcessData);
 }
