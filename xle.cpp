@@ -1559,7 +1559,7 @@ QMap<quint64,QString> XLE::getImageLEMagicsS()
 
 QMap<quint64,QString> XLE::getImageLECpusS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x01,"80286");
     mapResult.insert(0x02,"80386");
@@ -1589,7 +1589,7 @@ QMap<quint64,QString> XLE::getImageLEOssS()
 
 QMap<quint64,QString> XLE::getImageLEMflagsS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     // TODO
 

@@ -1828,7 +1828,7 @@ qint64 XBinary::find_signature(qint64 nOffset,qint64 nSize,QString sSignature,qi
     return find_signature(&memoryMap,nOffset,nSize,sSignature,pnResultSize,pProcessData);
 }
 
-qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize, PDSTRUCT *pProcessData)
+qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,QString sSignature,qint64 *pnResultSize,PDSTRUCT *pProcessData)
 {
     PDSTRUCT processDataEmpty={};
 
