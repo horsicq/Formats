@@ -49,7 +49,7 @@ public:
         UD_INFO
     };
 
-    explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,QObject *pParent=nullptr,int nNumberOfColumns=1);
+    explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,int nNumberOfColumns=1);
     ~ScanItemModel() override;
 
     QVariant headerData(int nSection,Qt::Orientation orientation,int nRole=Qt::DisplayRole) const override;

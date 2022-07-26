@@ -1104,7 +1104,7 @@ QByteArray XMACH::getCommandData(quint32 nCommandID, qint32 nIndex, QList<XMACH:
     return baResult;
 }
 
-bool XMACH::setCommandData(quint32 nCommandID, QByteArray baData, qint32 nIndex, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+bool XMACH::setCommandData(quint32 nCommandID,QByteArray baData,qint32 nIndex,QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     bool bResult=false;
 

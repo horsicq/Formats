@@ -3729,11 +3729,24 @@ bool XBinary::compareSignature(QString sSignature, qint64 nOffset)
 
 bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap,QString sSignature, qint64 nOffset)
 {
+    bool bResult=false;
+
+    QString sOrigin=sSignature;
+
     sSignature=convertSignature(sSignature);
 
     QList<SIGNATURE_RECORD> listSignatureRecords=getSignatureRecords(sSignature);
 
-    return _compareSignature(pMemoryMap,&listSignatureRecords,nOffset);
+    if(listSignatureRecords.count())
+    {
+        bResult=_compareSignature(pMemoryMap,&listSignatureRecords,nOffset);
+    }
+    else
+    {
+        emit errorMessage(QString("%1: %2").arg(tr("Invalid signature"),sOrigin));
+    }
+
+    return bResult;
 }
 
 bool XBinary::_compareByteArrayWithSignature(QByteArray baData, QString sSignature)
@@ -8791,6 +8804,7 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
 bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, qint64 nOffset)
 {
     // TODO optimize
+
     qint32 nNumberOfSignatures=pListSignatureRecords->count();
 
     for(qint32 i=0;i<nNumberOfSignatures;i++)
@@ -8895,7 +8909,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 break;
         }
 
-        if(!isOffsetValid(pMemoryMap,nOffset))
+        if((!isOffsetValid(pMemoryMap,nOffset))&&(nOffset!=getSize()))
         {
             return false;
         }
