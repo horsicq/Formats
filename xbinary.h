@@ -40,7 +40,7 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include <QtEndian>
-#if (QT_VERSION_MAJOR<6)
+#if (QT_VERSION_MAJOR<6)||defined(QT_CORE5COMPAT_LIB)
 #include <QTextCodec> // Qt5 Compat
 #endif
 #if (QT_VERSION_MAJOR<5) // TODO Check
