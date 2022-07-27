@@ -841,9 +841,9 @@ QMap<quint64, QString> XELF::getIndentDatasS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentVersions()
+QMap<quint64,QString> XELF::getIndentVersions()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(1,"EV_CURRENT");
 
