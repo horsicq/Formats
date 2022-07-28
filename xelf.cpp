@@ -20,7 +20,7 @@
  */
 #include "xelf.h"
 
-XELF::XELF(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress): XBinary(pDevice,bIsImage,nModuleAddress)
+XELF::XELF(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress): XBinary(pDevice,bIsImage,nModuleAddress)
 {
 }
 
