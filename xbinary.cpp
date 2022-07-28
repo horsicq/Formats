@@ -1099,6 +1099,24 @@ QString XBinary::_read_utf8String(qint64 nOffset,char *pData,qint32 nDataSize,qi
     return sResult;
 }
 
+QString XBinary::read_codePageString(QString sCodePage, qint64 nOffset, qint64 nMaxByteSize)
+{
+    QString sResult;
+
+#if (QT_VERSION_MAJOR<6)||defined(QT_CORE5COMPAT_LIB)
+    QByteArray baData=read_array(nOffset,nMaxByteSize);
+
+    QTextCodec *pCodec=QTextCodec::codecForName(sCodePage.toLatin1().data());
+
+    if(pCodec)
+    {
+        sResult=pCodec->toUnicode(baData);
+    }
+#endif
+
+    return sResult;
+}
+
 bool XBinary::isUnicodeStringLatin(qint64 nOffset,qint64 nMaxSize,bool bIsBigEndian)
 {
     bool bResult=true;

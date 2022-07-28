@@ -3510,6 +3510,8 @@ QList<XPE::RESOURCE_STRINGTABLE_RECORD> XPE::getResourceStringTableRecords(QList
                 for(qint32 j=0;j<16;j++)
                 {
                     quint16 nStringSize=read_uint16(nCurrentOffset);
+                    qint64 _nOffset=nCurrentOffset;
+
                     nCurrentOffset+=2;
 
                     if(nCurrentOffset-nDataOffset>=nDataSize)
@@ -3527,6 +3529,9 @@ QList<XPE::RESOURCE_STRINGTABLE_RECORD> XPE::getResourceStringTableRecords(QList
                         record.nID=nStartID+j;
                         record.nLanguage=nLanguage;
                         record.sString=sString;
+                        record.nOffset=_nOffset;
+                        record.nAddress=offsetToAddress(pMemoryMap,_nOffset);
+                        record.nSize=nStringSize;
 
                         listResult.append(record);
 

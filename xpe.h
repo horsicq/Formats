@@ -174,6 +174,9 @@ public:
         quint32 nID;
         quint32 nLanguage;
         QString sString;
+        XADDR nAddress;
+        quint64 nOffset;
+        quint32 nSize;
     };
 
     struct RELOCS_POSITION
