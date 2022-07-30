@@ -1099,7 +1099,7 @@ QString XBinary::_read_utf8String(qint64 nOffset,char *pData,qint32 nDataSize,qi
     return sResult;
 }
 
-QString XBinary::read_codePageString(QString sCodePage, qint64 nOffset, qint64 nMaxByteSize)
+QString XBinary::read_codePageString(QString sCodePage,qint64 nOffset,qint64 nMaxByteSize)
 {
     QString sResult;
 
