@@ -9134,7 +9134,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
     return nResult;
 }
 
-qint64 XBinary::getPhysSize(char *pBuffer, qint64 nSize)
+qint64 XBinary::getPhysSize(char *pBuffer,qint64 nSize)
 {
     while(nSize>0)
     {
