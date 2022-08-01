@@ -1099,7 +1099,7 @@ QString XBinary::_read_utf8String(qint64 nOffset,char *pData,qint32 nDataSize,qi
     return sResult;
 }
 
-QString XBinary::read_codePageString(QString sCodePage,qint64 nOffset,qint64 nMaxByteSize)
+QString XBinary::read_codePageString(qint64 nOffset,qint64 nMaxByteSize,QString sCodePage)
 {
     QString sResult;
 
@@ -1480,7 +1480,7 @@ void XBinary::_write_uint16(char *pData,quint16 nValue,bool bIsBigEndian)
     *(quint16 *)pData=nValue;
 }
 
-void XBinary::_write_int16(char *pData,qint16 nValue,bool bIsBigEndian)
+void XBinary::_write_int16(char *pData, qint16 nValue, bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
@@ -3767,7 +3767,7 @@ bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap,QString sSignature, qint6
     return bResult;
 }
 
-bool XBinary::_compareByteArrayWithSignature(QByteArray baData,QString sSignature)
+bool XBinary::_compareByteArrayWithSignature(QByteArray baData, QString sSignature)
 {
     bool bResult=false;
 
@@ -9045,7 +9045,7 @@ int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSigna
     return nResult;
 }
 
-int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,int nStartIndex)
+int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex)
 {
     int nResult=0;
 
@@ -9096,7 +9096,7 @@ int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
     return nResult;
 }
 
-qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords,QString sSignature,qint32 nStartIndex)
+qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, qint32 nStartIndex)
 {
     int nResult=0;
 
@@ -9134,7 +9134,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
     return nResult;
 }
 
-qint64 XBinary::getPhysSize(char *pBuffer,qint64 nSize)
+qint64 XBinary::getPhysSize(char *pBuffer, qint64 nSize)
 {
     while(nSize>0)
     {
