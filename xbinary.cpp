@@ -2122,7 +2122,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     return -1;
 }
 
-qint64 XBinary::find_utf8StringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData)
+qint64 XBinary::find_utf8StringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData)
 {
     // TODO !!!
     return find_utf8String(nOffset,nSize,sString,pProcessData);
