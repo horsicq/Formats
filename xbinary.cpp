@@ -871,6 +871,59 @@ qint64 XBinary::read_int64(qint64 nOffset, bool bIsBigEndian)
     return (qint64)result;
 }
 
+float XBinary::read_float16(qint64 nOffset, bool bIsBigEndian)
+{
+    // TODO Check
+    quint16 float16_value=read_uint16(nOffset,bIsBigEndian);
+
+    // MSB -> LSB
+    // float16=1bit: sign, 5bit: exponent, 10bit: fraction
+    // float32=1bit: sign, 8bit: exponent, 23bit: fraction
+    // for normal exponent(1 to 0x1e): value=2**(exponent-15)*(1.fraction)
+    // for denormalized exponent(0): value=2**-14*(0.fraction)
+    uint32_t sign = float16_value >> 15;
+    uint32_t exponent = (float16_value >> 10) & 0x1F;
+    uint32_t fraction = (float16_value & 0x3FF);
+    uint32_t float32_value=0;
+    if (exponent == 0)
+    {
+        if (fraction == 0)
+        {
+          // zero
+          float32_value = (sign << 31);
+        }
+        else
+        {
+          // can be represented as ordinary value in float32
+          // 2 ** -14 * 0.0101
+          // => 2 ** -16 * 1.0100
+          // int int_exponent = -14;
+          exponent = 127 - 14;
+          while ((fraction & (1 << 10)) == 0)
+          {
+            //int_exponent--;
+            exponent--;
+            fraction <<= 1;
+          }
+          fraction &= 0x3FF;
+          // int_exponent += 127;
+          float32_value = (sign << 31) | (exponent << 23) | (fraction << 13);
+        }
+    }
+    else if (exponent == 0x1F)
+    {
+        /* Inf or NaN */
+        float32_value = (sign << 31) | (0xFF << 23) | (fraction << 13);
+    }
+    else
+    {
+        /* ordinary number */
+        float32_value = (sign << 31) | ((exponent + (127-15)) << 23) | (fraction << 13);
+    }
+
+    return *((float*)&float32_value);
+}
+
 float XBinary::read_float(qint64 nOffset, bool bIsBigEndian)
 {
     float result=0;
@@ -1241,6 +1294,30 @@ void XBinary::write_int64(qint64 nOffset,qint64 nValue,bool bIsBigEndian)
     }
 
     write_array(nOffset,(char *)(&_value),8);
+}
+
+void XBinary::write_float16(qint64 nOffset, float fValue, bool bIsBigEndian)
+{
+    // TODO Check
+    quint32 fltInt32=*(quint32 *)(&fValue);
+    quint16 fltInt16=0;
+
+    fltInt16 = (fltInt32 >> 31) << 5;
+    quint16 tmp = (fltInt32 >> 23) & 0xff;
+    tmp = (tmp - 0x70) & ((quint32)((qint32)(0x70 - tmp) >> 4) >> 27);
+    fltInt16 = (fltInt16 | tmp) << 10;
+    fltInt16 |= (fltInt32 >> 13) & 0x3ff;
+
+    if(bIsBigEndian)
+    {
+        fltInt16=qFromBigEndian(fltInt16);
+    }
+    else
+    {
+        fltInt16=qFromLittleEndian(fltInt16);
+    }
+
+    write_array(nOffset,(char *)(&fltInt16),2);
 }
 
 void XBinary::write_float(qint64 nOffset,float fValue,bool bIsBigEndian)

@@ -667,6 +667,7 @@ public:
     qint32 read_int32(qint64 nOffset,bool bIsBigEndian=false);
     quint64 read_uint64(qint64 nOffset,bool bIsBigEndian=false);
     qint64 read_int64(qint64 nOffset,bool bIsBigEndian=false);
+    float read_float16(qint64 nOffset,bool bIsBigEndian=false); // TODO Check
     float read_float(qint64 nOffset,bool bIsBigEndian=false); // TODO Check
     double read_double(qint64 nOffset,bool bIsBigEndian=false); // TODO Check
 
@@ -696,6 +697,7 @@ public:
     void write_int32(qint64 nOffset,qint32 nValue,bool bIsBigEndian=false);
     void write_uint64(qint64 nOffset,quint64 nValue,bool bIsBigEndian=false);
     void write_int64(qint64 nOffset,qint64 nValue,bool bIsBigEndian=false);
+    void write_float16(qint64 nOffset,float fValue,bool bIsBigEndian=false); // TODO Check
     void write_float(qint64 nOffset,float fValue,bool bIsBigEndian=false); // TODO Check
     void write_double(qint64 nOffset,double dValue,bool bIsBigEndian=false); // TODO Check
 
@@ -756,6 +758,8 @@ public:
     qint64 find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr);
     qint64 find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr); // mb TODO endian
     qint64 find_utf8StringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData=nullptr);
+    // TODO find_codePageString
+    // TODO find_codePageStringI
 
     static quint8 getBits_uint8(quint8 nValue,qint32 nBitOffset,qint32 nBitSize);
     static quint16 getBits_uint16(quint16 nValue,qint32 nBitOffset,qint32 nBitSize);
