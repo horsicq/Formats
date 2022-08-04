@@ -1296,7 +1296,7 @@ void XBinary::write_int64(qint64 nOffset,qint64 nValue,bool bIsBigEndian)
     write_array(nOffset,(char *)(&_value),8);
 }
 
-void XBinary::write_float16(qint64 nOffset, float fValue, bool bIsBigEndian)
+void XBinary::write_float16(qint64 nOffset,float fValue,bool bIsBigEndian)
 {
     // TODO Check
     quint32 fltInt32=*(quint32 *)(&fValue);
