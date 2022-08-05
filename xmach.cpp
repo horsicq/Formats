@@ -1783,6 +1783,11 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
             qint64 nOffset=listLCSegments.at(i).nStructOffset;
             qint32 nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command_64,nsects),bIsBigEndian);
 
+            if(nNumberOfSections&0xFFFFFF00)
+            {
+                nNumberOfSections=0;
+            }
+
             nOffset+=sizeof(XMACH_DEF::segment_command_64);
 
             for(qint32 j=0;j<nNumberOfSections;j++)
@@ -1809,6 +1814,11 @@ QList<XMACH::SECTION_RECORD> XMACH::getSectionRecords(QList<XMACH::COMMAND_RECOR
         {
             qint64 nOffset=listLCSegments.at(i).nStructOffset;
             qint32 nNumberOfSections=read_uint32(nOffset+offsetof(XMACH_DEF::segment_command,nsects),bIsBigEndian);
+
+            if(nNumberOfSections&0xFFFFFF00)
+            {
+                nNumberOfSections=0;
+            }
 
             nOffset+=sizeof(XMACH_DEF::segment_command);
 
