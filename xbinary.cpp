@@ -881,10 +881,10 @@ float XBinary::read_float16(qint64 nOffset, bool bIsBigEndian)
     // float32=1bit: sign, 8bit: exponent, 23bit: fraction
     // for normal exponent(1 to 0x1e): value=2**(exponent-15)*(1.fraction)
     // for denormalized exponent(0): value=2**-14*(0.fraction)
-    uint32_t sign = float16_value >> 15;
-    uint32_t exponent = (float16_value >> 10) & 0x1F;
-    uint32_t fraction = (float16_value & 0x3FF);
-    uint32_t float32_value=0;
+    quint32 sign = float16_value >> 15;
+    quint32 exponent = (float16_value >> 10) & 0x1F;
+    quint32 fraction = (float16_value & 0x3FF);
+    quint32 float32_value=0;
     if (exponent == 0)
     {
         if (fraction == 0)
