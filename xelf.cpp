@@ -2181,7 +2181,7 @@ quint64 XELF::getElf_Shdr_size(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pListSe
     return nResult;
 }
 
-quint32 XELF::getElf_Shdr_link(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+quint32 XELF::getElf_Shdr_link(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
 {
     quint32 nResult=0;
 
