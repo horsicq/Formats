@@ -1023,7 +1023,7 @@ QMap<quint64, QString> XNE::getImageNEMagicsS()
 
 QMap<quint64, QString> XNE::getImageNEFlagsS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x0001,"single shared");
     mapResult.insert(0x0002,"multiple");
