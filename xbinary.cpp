@@ -1634,7 +1634,7 @@ void XBinary::_write_float(char *pData, float fValue, bool bIsBigEndian)
     *(float *)pData=fValue;
 }
 
-void XBinary::_write_double(char *pData, double dValue, bool bIsBigEndian)
+void XBinary::_write_double(char *pData,double dValue,bool bIsBigEndian)
 {
     endian_double(&dValue,bIsBigEndian);
 
