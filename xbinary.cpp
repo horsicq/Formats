@@ -8675,6 +8675,18 @@ XBinary::XVARIANT XBinary::getXVariant(XUINT128 value, bool bIsBigEndian)
     return result;
 }
 
+XBinary::XVARIANT XBinary::getXVariant(quint64 nLow, quint64 nHigh, bool bIsBigEndian)
+{
+    XVARIANT result={};
+
+    result.bIsBigEndian=bIsBigEndian;
+    result.mode=MODE_128;
+    result.var.v_uint128.high=nHigh;
+    result.var.v_uint128.low=nLow;
+
+    return result;
+}
+
 quint64 XBinary::xVariantToQword(XVARIANT xvariant)
 {
     quint64 nResult=0;

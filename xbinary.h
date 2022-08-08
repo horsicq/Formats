@@ -1265,6 +1265,7 @@ public:
     static XVARIANT getXVariant(quint32 nValue,bool bIsBigEndian=false);
     static XVARIANT getXVariant(quint64 nValue,bool bIsBigEndian=false);
     static XVARIANT getXVariant(XUINT128 value,bool bIsBigEndian=false);
+    static XVARIANT getXVariant(quint64 nLow,quint64 nHigh,bool bIsBigEndian=false);
 
     static quint64 xVariantToQword(XVARIANT xvariant);
 
