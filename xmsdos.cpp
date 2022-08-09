@@ -183,7 +183,7 @@ void XMSDOS::set_e_ovno(quint16 nValue)
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX,e_ovno),nValue);
 }
 
-void XMSDOS::set_e_res(qint32 nPosition, quint16 nValue)
+void XMSDOS::set_e_res(qint32 nPosition,quint16 nValue)
 {
     if(nPosition<4) // TODO nPosition>=0
     {
