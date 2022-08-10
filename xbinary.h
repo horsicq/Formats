@@ -672,6 +672,7 @@ public:
     double read_double(qint64 nOffset,bool bIsBigEndian=false); // TODO Check
 
     quint32 read_uint24(qint64 nOffset,bool bIsBigEndian=false); // Uses UPX in header
+    qint32 read_int24(qint64 nOffset,bool bIsBigEndian=false);
 
     qint64 write_ansiString(qint64 nOffset,QString sString);
     void write_ansiStringFix(qint64 nOffset,qint64 nSize,QString sString);

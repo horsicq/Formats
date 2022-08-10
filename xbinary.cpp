@@ -964,6 +964,11 @@ quint32 XBinary::read_uint24(qint64 nOffset,bool bIsBigEndian)
     return (result&(0xFFFFFF));
 }
 
+qint32 XBinary::read_int24(qint64 nOffset, bool bIsBigEndian)
+{
+    return (qint32)(read_uint24(nOffset,bIsBigEndian));
+}
+
 qint64 XBinary::write_ansiString(qint64 nOffset,QString sString)
 {
     return write_array(nOffset,sString.toLatin1().data(),sString.length()+1);
@@ -1815,7 +1820,7 @@ qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIs
     return find_array(nOffset,nSize,(char *)&_value,4,pProcessData);
 }
 
-qint64 XBinary::find_uint64(qint64 nOffset, qint64 nSize, quint64 nValue, bool bIsBigEndian, PDSTRUCT *pProcessData)
+qint64 XBinary::find_uint64(qint64 nOffset,qint64 nSize,quint64 nValue,bool bIsBigEndian,PDSTRUCT *pProcessData)
 {
     if(bIsBigEndian)
     {
