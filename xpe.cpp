@@ -2943,7 +2943,7 @@ bool XPE::setImports(QList<XPE::IMPORT_HEADER> *pListImportHeaders)
     return setImports(getDevice(),isImage(),pListImportHeaders);
 }
 
-bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
+bool XPE::setImports(QIODevice *pDevice,bool bIsImage,QList<XPE::IMPORT_HEADER> *pListImportHeaders)
 {
     bool bResult=false;
 
