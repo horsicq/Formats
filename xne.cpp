@@ -1073,7 +1073,7 @@ QMap<quint64, QString> XNE::getImageNEFlagsothersS()
 
 QMap<quint64, QString> XNE::getImageSegmentTypesS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x0000,"CODE");
     mapResult.insert(0x0001,"DATA");
