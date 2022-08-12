@@ -2590,7 +2590,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap,PDSTR
     return listResult;
 }
 
-QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA,qint64 nRVA,PDSTRUCT *pPdStruct)
+QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap,qint64 nThunksRVA,qint64 nRVA,PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty={};
 
