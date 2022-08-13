@@ -1205,7 +1205,7 @@ void XBinary::write_uint8(qint64 nOffset,quint8 nValue)
     write_array(nOffset,(char *)(&nValue),1);
 }
 
-void XBinary::write_int8(qint64 nOffset, qint8 nValue)
+void XBinary::write_int8(qint64 nOffset,qint8 nValue)
 {
     quint8 _value=(quint8)nValue;
     write_array(nOffset,(char *)(&_value),1);
