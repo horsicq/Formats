@@ -562,7 +562,7 @@ QMap<quint64, QString> XMACH::getHeaderFileTypes()
     return mapResult;
 }
 
-QMap<quint64, QString> XMACH::getHeaderFileTypesS()
+QMap<quint64,QString> XMACH::getHeaderFileTypesS()
 {
     QMap<quint64, QString> mapResult;
 
