@@ -853,7 +853,7 @@ quint64 XBinary::read_uint64(qint64 nOffset, bool bIsBigEndian)
     return result;
 }
 
-qint64 XBinary::read_int64(qint64 nOffset, bool bIsBigEndian)
+qint64 XBinary::read_int64(qint64 nOffset,bool bIsBigEndian)
 {
     qint64 result=0;
 
