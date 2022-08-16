@@ -3545,12 +3545,19 @@ qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress
 
     if(pMemoryMap->fileType==FT_MSDOS)
     {
-        if(nAddress>=0x10000000)
+        qint64 _nResult=((nAddress>>16)&0xFFFF)*16+(nAddress&0xFFFF);
+
+        if(_nResult>=0x10000000)
         {
-            nAddress-=0x10000000;
+            _nResult-=0x10000000;
         }
 
-        nResult=((nAddress>>16)&0xFFFF)*16+(nAddress&0xFFFF)+pMemoryMap->nSegmentBase;
+        if(_nResult==0x100000)
+        {
+            _nResult=0;
+        }
+
+        nResult=_nResult+pMemoryMap->nSegmentBase;
 
         if(nResult>pMemoryMap->nRawSize)
         {
