@@ -357,11 +357,11 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
 
     result.nEntryPointAddress=nCodeAddress+get_e_ip();
 
-    if(get_e_cs()*16+get_e_ip()==0x100000)
+    if(get_e_cs()*16+get_e_ip()>=0x100000)
     {
         nCodeAddress=0x100000;
         result.nEntryPointAddress=get_e_cs()*0x10000+get_e_ip();
-        nCodeOffset=get_e_cparhdr()*16;
+        nCodeOffset=get_e_cparhdr()*16; // TODO Check
     }
 
     result.nSegmentBase=((qint16)get_e_cparhdr()*16);
