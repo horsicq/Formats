@@ -3491,7 +3491,7 @@ bool XBinary::isAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress)
     return bResult;
 }
 
-bool XBinary::isRelAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
+bool XBinary::isRelAddressValid(XBinary::_MEMORY_MAP *pMemoryMap,qint64 nRelAddress)
 {
     return isAddressValid(pMemoryMap,pMemoryMap->nModuleAddress+nRelAddress);
 }
