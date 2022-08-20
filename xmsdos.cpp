@@ -515,7 +515,7 @@ qint64 XMSDOS::getModuleAddress()
     return 0x100000;
 }
 
-QMap<quint64, QString> XMSDOS::getImageMagics()
+QMap<quint64,QString> XMSDOS::getImageMagics()
 {
     QMap<quint64, QString> mapResult;
 
