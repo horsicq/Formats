@@ -819,7 +819,7 @@ QMap<quint64,QString> XELF::getIndentClassesS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentDatas()
+QMap<quint64,QString> XELF::getIndentDatas()
 {
     QMap<quint64, QString> mapResult;
 
