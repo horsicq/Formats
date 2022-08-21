@@ -4915,7 +4915,7 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
     return nResult;
 }
 
-XADDR XMACH::readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
+XADDR XMACH::readOpcodesInterface_export(char *pData,XADDR nAddress,qint64 nSize,QList<XBinary::OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus)
 {
     Q_UNUSED(pOpcodeStatus)
 
