@@ -1149,7 +1149,7 @@ qint64 XMACH::getCommandRecordOffset(quint32 nCommandID, qint32 nIndex)
     return nResult;
 }
 
-qint64 XMACH::getCommandRecordOffset(quint32 nCommandID, int nIndex, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+qint64 XMACH::getCommandRecordOffset(quint32 nCommandID,int nIndex,QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     qint64 nResult=-1;
 

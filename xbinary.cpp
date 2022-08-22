@@ -2306,6 +2306,32 @@ quint64 XBinary::getBits_uint64(quint64 nValue, qint32 nBitOffset, qint32 nBitSi
     return nResult;
 }
 
+bool XBinary::_addMultiSearchStringRecord(QList<MS_RECORD> *pList, MS_RECORD *pRecord, STRINGSEARCH_OPTIONS *pSsOptions)
+{
+    bool bResult=false;
+
+    bool bAdd=true;
+
+    if(pSsOptions->bLinks)
+    {
+        bAdd=false;
+
+        if(pRecord->sString.contains("http:")||pRecord->sString.contains("www.")||pRecord->sString.contains("mailto:"))
+        {
+            bAdd=true;
+        }
+    }
+
+    if(bAdd)
+    {
+        pList->append(*pRecord);
+
+        bResult=true;
+    }
+
+    return bResult;
+}
+
 QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 nSize,STRINGSEARCH_OPTIONS ssOptions,PDSTRUCT *pProcessData)
 {
     PDSTRUCT processDataEmpty={};
@@ -2552,9 +2578,10 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                             record.nSize=nCurrentAnsiSize;
                             record.sString=sString;
 
-                            listResult.append(record);
-
-                            nCurrentRecords++;
+                            if(_addMultiSearchStringRecord(&listResult,&record,&ssOptions))
+                            {
+                                nCurrentRecords++;
+                            }
 
                             if(nCurrentRecords>=ssOptions.nLimit)
                             {
@@ -2610,9 +2637,10 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                             record.nSize=nCurrentUTF8Size;
                             record.sString=sString;
 
-                            listResult.append(record);
-
-                            nCurrentRecords++;
+                            if(_addMultiSearchStringRecord(&listResult,&record,&ssOptions))
+                            {
+                                nCurrentRecords++;
+                            }
 
                             if(nCurrentRecords>=ssOptions.nLimit)
                             {
@@ -2705,9 +2733,10 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                                 record.nSize=nCurrentUnicodeSize[nParity]*2;
                                 record.sString=sString;
 
-                                listResult.append(record);
-
-                                nCurrentRecords++;
+                                if(_addMultiSearchStringRecord(&listResult,&record,&ssOptions))
+                                {
+                                    nCurrentRecords++;
+                                }
 
                                 if(nCurrentRecords>=ssOptions.nLimit)
                                 {
@@ -2752,9 +2781,10 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset,qint64 
                                     record.nSize=nCurrentUnicodeSize[nO]*2;
                                     record.sString=sString;
 
-                                    listResult.append(record);
-
-                                    nCurrentRecords++;
+                                    if(_addMultiSearchStringRecord(&listResult,&record,&ssOptions))
+                                    {
+                                        nCurrentRecords++;
+                                    }
 
                                     if(nCurrentRecords>=ssOptions.nLimit)
                                     {
@@ -7770,32 +7800,35 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)
 {
     // TODO Check!
-    QSet<XBinary::FT> stFileTypesNew;
+    if(fileType!=XBinary::FT_UNKNOWN)
+    {
+        QSet<XBinary::FT> stFileTypesNew;
 
-    if(fileType==XBinary::FT_PE)
-    {
-        if(pStFileTypes->contains(XBinary::FT_PE)) stFileTypesNew.insert(XBinary::FT_PE);
-        if(pStFileTypes->contains(XBinary::FT_PE32)) stFileTypesNew.insert(XBinary::FT_PE32);
-        if(pStFileTypes->contains(XBinary::FT_PE64)) stFileTypesNew.insert(XBinary::FT_PE64);
-    }
-    else if(fileType==XBinary::FT_ELF)
-    {
-        if(pStFileTypes->contains(XBinary::FT_ELF)) stFileTypesNew.insert(XBinary::FT_ELF);
-        if(pStFileTypes->contains(XBinary::FT_ELF32)) stFileTypesNew.insert(XBinary::FT_ELF32);
-        if(pStFileTypes->contains(XBinary::FT_ELF64)) stFileTypesNew.insert(XBinary::FT_ELF64);
-    }
-    else if(fileType==XBinary::FT_MACHO)
-    {
-        if(pStFileTypes->contains(XBinary::FT_MACHO)) stFileTypesNew.insert(XBinary::FT_MACHO);
-        if(pStFileTypes->contains(XBinary::FT_MACHO32)) stFileTypesNew.insert(XBinary::FT_MACHO32);
-        if(pStFileTypes->contains(XBinary::FT_MACHO64)) stFileTypesNew.insert(XBinary::FT_MACHO64);
-    }
-    else
-    {
-        if(pStFileTypes->contains(fileType)) stFileTypesNew.insert(fileType);
-    }
+        if(fileType==XBinary::FT_PE)
+        {
+            if(pStFileTypes->contains(XBinary::FT_PE)) stFileTypesNew.insert(XBinary::FT_PE);
+            if(pStFileTypes->contains(XBinary::FT_PE32)) stFileTypesNew.insert(XBinary::FT_PE32);
+            if(pStFileTypes->contains(XBinary::FT_PE64)) stFileTypesNew.insert(XBinary::FT_PE64);
+        }
+        else if(fileType==XBinary::FT_ELF)
+        {
+            if(pStFileTypes->contains(XBinary::FT_ELF)) stFileTypesNew.insert(XBinary::FT_ELF);
+            if(pStFileTypes->contains(XBinary::FT_ELF32)) stFileTypesNew.insert(XBinary::FT_ELF32);
+            if(pStFileTypes->contains(XBinary::FT_ELF64)) stFileTypesNew.insert(XBinary::FT_ELF64);
+        }
+        else if(fileType==XBinary::FT_MACHO)
+        {
+            if(pStFileTypes->contains(XBinary::FT_MACHO)) stFileTypesNew.insert(XBinary::FT_MACHO);
+            if(pStFileTypes->contains(XBinary::FT_MACHO32)) stFileTypesNew.insert(XBinary::FT_MACHO32);
+            if(pStFileTypes->contains(XBinary::FT_MACHO64)) stFileTypesNew.insert(XBinary::FT_MACHO64);
+        }
+        else
+        {
+            if(pStFileTypes->contains(fileType)) stFileTypesNew.insert(fileType);
+        }
 
-    *pStFileTypes=stFileTypesNew;
+        *pStFileTypes=stFileTypesNew;
+    }
 }
 
 bool XBinary::isFileTypePresent(QSet<XBinary::FT> *pStFileTypes, QSet<XBinary::FT> *pStAvailableFileTypes)

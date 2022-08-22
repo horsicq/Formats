@@ -779,7 +779,10 @@ public:
         bool bCStrings;
         QString sExpFilter;
         QString sANSICodec;
+        bool bLinks;
     };
+
+    bool _addMultiSearchStringRecord(QList<MS_RECORD> *pList,MS_RECORD *pRecord,STRINGSEARCH_OPTIONS *pSsOptions);
 
     QList<MS_RECORD> multiSearch_allStrings(qint64 nOffset,qint64 nSize,STRINGSEARCH_OPTIONS ssOptions,PDSTRUCT *pProcessData=nullptr);
     QList<MS_RECORD> multiSearch_signature(qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo="",PDSTRUCT *pProcessData=nullptr);
