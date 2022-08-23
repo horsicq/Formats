@@ -525,9 +525,9 @@ QMap<quint64,QString> XMSDOS::getImageMagics()
     return mapResult;
 }
 
-QMap<quint64, QString> XMSDOS::getImageMagicsS()
+QMap<quint64,QString> XMSDOS::getImageMagicsS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x5A4D,"DOS_SIGNATURE");
     mapResult.insert(0x4D5A,"DOS_SIGNATURE_ZM");
