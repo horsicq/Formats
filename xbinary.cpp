@@ -1859,7 +1859,7 @@ qint64 XBinary::find_float(qint64 nOffset,qint64 nSize,float fValue,bool bIsBigE
     return find_array(nOffset,nSize,(char *)&_value,4,pProcessData);
 }
 
-qint64 XBinary::find_double(qint64 nOffset, qint64 nSize, double dValue, bool bIsBigEndian, PDSTRUCT *pProcessData)
+qint64 XBinary::find_double(qint64 nOffset,qint64 nSize,double dValue,bool bIsBigEndian,PDSTRUCT *pProcessData)
 {
     double _value=dValue;
 
