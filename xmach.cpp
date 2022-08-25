@@ -1444,7 +1444,7 @@ QList<XMACH::FVM_LIBRARY_RECORD> XMACH::getFvmLibraryRecords(qint32 nType)
     return getFvmLibraryRecords(&listCommandRecords,nType);
 }
 
-QList<XMACH::FVM_LIBRARY_RECORD> XMACH::getFvmLibraryRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords, int nType)
+QList<XMACH::FVM_LIBRARY_RECORD> XMACH::getFvmLibraryRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords,int nType)
 {
     QList<FVM_LIBRARY_RECORD> listResult;
 
