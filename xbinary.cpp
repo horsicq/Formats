@@ -427,6 +427,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_ANDROIDXML:         sResult=QString("Android XML");     break;
         case FT_APK:                sResult=QString("APK");             break;
         case FT_APKS:               sResult=QString("APKS");            break;
+        case FT_AR:                 sResult=QString("ar");              break; // TODO DEB
         case FT_ARCHIVE:            sResult=tr("Archive");              break;
         case FT_CAB:                sResult=QString("CAB");             break;
         case FT_DEX:                sResult=QString("DEX");             break;
@@ -4342,6 +4343,12 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_ZIP);
             // TODO Check APK, JAR
             // TODO basic ZIP
+        }
+        else if(compareSignature(&memoryMap,"'!<arch>'0a"))
+        {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_AR);
+            // TODO DEB
         }
         else if(compareSignature(&memoryMap,"'RE~^'")||compareSignature(&memoryMap,"'Rar!'1A07"))
         {

@@ -211,6 +211,7 @@ public:
         FT_ANDROIDXML,
         FT_APK,
         FT_APKS,
+        FT_AR,
         FT_ARCHIVE,
         FT_CAB,
         FT_DEX,

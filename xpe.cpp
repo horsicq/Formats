@@ -3609,7 +3609,7 @@ XPE_DEF::S_VS_VERSION_INFO XPE::readVS_VERSION_INFO(qint64 nOffset)
     return result;
 }
 
-quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResult, qint64 nOffset, qint64 nSize, QString sPrefix, int nLevel)
+quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResult,qint64 nOffset,qint64 nSize,QString sPrefix,int nLevel)
 {
     quint32 nResult=0;
 
