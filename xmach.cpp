@@ -1464,7 +1464,7 @@ QList<XMACH::FVM_LIBRARY_RECORD> XMACH::getFvmLibraryRecords(QList<XMACH::COMMAN
     return listResult;
 }
 
-XMACH::FVM_LIBRARY_RECORD XMACH::getFvmLibraryRecordByName(QString sName, QList<XMACH::FVM_LIBRARY_RECORD> *pListLibraryRecords)
+XMACH::FVM_LIBRARY_RECORD XMACH::getFvmLibraryRecordByName(QString sName,QList<XMACH::FVM_LIBRARY_RECORD> *pListLibraryRecords)
 {
     FVM_LIBRARY_RECORD result={};
 
