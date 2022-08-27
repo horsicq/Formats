@@ -517,7 +517,7 @@ qint64 XMSDOS::getModuleAddress()
 
 QMap<quint64,QString> XMSDOS::getImageMagics()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x5A4D,"IMAGE_DOS_SIGNATURE");
     mapResult.insert(0x4D5A,"IMAGE_DOS_SIGNATURE_ZM");
