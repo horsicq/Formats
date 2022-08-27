@@ -1414,7 +1414,7 @@ bool XMACH::isLibraryRecordNamePresent(QString sName,QList<XMACH::LIBRARY_RECORD
     return bResult;
 }
 
-XMACH::LIBRARY_RECORD XMACH::_readLibraryRecord(qint64 nOffset, bool bIsBigEndian)
+XMACH::LIBRARY_RECORD XMACH::_readLibraryRecord(qint64 nOffset,bool bIsBigEndian)
 {
     LIBRARY_RECORD result={};
 
