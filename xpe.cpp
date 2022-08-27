@@ -11525,7 +11525,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
     return mapResult;
 }
 
-QMap<quint64, QString> XPE::getImageFileHeaderCharacteristics()
+QMap<quint64,QString> XPE::getImageFileHeaderCharacteristics()
 {
     QMap<quint64, QString> mapResult;
 
