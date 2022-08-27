@@ -49,7 +49,7 @@ bool XNE::isValid()
     return bResult;
 }
 
-bool XNE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+bool XNE::isValid(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     XNE xne(pDevice,bIsImage,nModuleAddress);
 
