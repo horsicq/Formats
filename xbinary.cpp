@@ -1835,7 +1835,7 @@ qint64 XBinary::find_uint64(qint64 nOffset,qint64 nSize,quint64 nValue,bool bIsB
     return find_array(nOffset,nSize,(char *)&nValue,8,pProcessData);
 }
 
-qint64 XBinary::find_int64(qint64 nOffset, qint64 nSize, qint64 nValue, bool bIsBigEndian, PDSTRUCT *pProcessData)
+qint64 XBinary::find_int64(qint64 nOffset,qint64 nSize,qint64 nValue,bool bIsBigEndian,PDSTRUCT *pProcessData)
 {
     quint64 _value=(quint64)nValue;
 
