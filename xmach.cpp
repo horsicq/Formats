@@ -1509,7 +1509,7 @@ bool XMACH::isFvmLibraryRecordNamePresent(QString sName,QList<XMACH::FVM_LIBRARY
     return bResult;
 }
 
-XMACH::FVM_LIBRARY_RECORD XMACH::_readFvmLibraryRecord(qint64 nOffset, bool bIsBigEndian)
+XMACH::FVM_LIBRARY_RECORD XMACH::_readFvmLibraryRecord(qint64 nOffset,bool bIsBigEndian)
 {
     FVM_LIBRARY_RECORD result={};
 
