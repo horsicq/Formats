@@ -1660,7 +1660,7 @@ quint32 XPE::getSection_SizeOfRawData(quint32 nNumber, QList<XPE_DEF::IMAGE_SECT
     return nResult;
 }
 
-quint32 XPE::getSection_PointerToRawData(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+quint32 XPE::getSection_PointerToRawData(quint32 nNumber,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
 {
     quint32 nResult=0;
 
