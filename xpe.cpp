@@ -1672,7 +1672,7 @@ quint32 XPE::getSection_PointerToRawData(quint32 nNumber,QList<XPE_DEF::IMAGE_SE
     return nResult;
 }
 
-quint32 XPE::getSection_PointerToRelocations(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+quint32 XPE::getSection_PointerToRelocations(quint32 nNumber,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
 {
     quint32 nResult=0;
 
