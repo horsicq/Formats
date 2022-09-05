@@ -1185,7 +1185,7 @@ QByteArray XPE::getDataDirectory(quint32 nNumber)
     return getDataDirectory(&memoryMap,nNumber);
 }
 
-QByteArray XPE::getDataDirectory(XBinary::_MEMORY_MAP *pMemoryMap, quint32 nNumber)
+QByteArray XPE::getDataDirectory(XBinary::_MEMORY_MAP *pMemoryMap,quint32 nNumber)
 {
     QByteArray baResult;
 
