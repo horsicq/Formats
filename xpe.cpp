@@ -1263,7 +1263,7 @@ XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionHeader(quint32 nNumber)
     return result;
 }
 
-void XPE::setSectionHeader(quint32 nNumber, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader)
+void XPE::setSectionHeader(quint32 nNumber,XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader)
 {
     // TODO
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
