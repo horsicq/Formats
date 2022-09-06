@@ -1651,7 +1651,7 @@ XMACH_DEF::segment_command XMACH::_read_segment_command(qint64 nOffset, bool bIs
     return result;
 }
 
-XMACH_DEF::segment_command_64 XMACH::_read_segment_command_64(qint64 nOffset, bool bIsBigEndian)
+XMACH_DEF::segment_command_64 XMACH::_read_segment_command_64(qint64 nOffset,bool bIsBigEndian)
 {
     XMACH_DEF::segment_command_64 result={};
 
