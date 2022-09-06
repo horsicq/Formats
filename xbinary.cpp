@@ -2307,7 +2307,7 @@ quint64 XBinary::getBits_uint64(quint64 nValue, qint32 nBitOffset, qint32 nBitSi
     return nResult;
 }
 
-bool XBinary::_addMultiSearchStringRecord(QList<MS_RECORD> *pList, MS_RECORD *pRecord, STRINGSEARCH_OPTIONS *pSsOptions)
+bool XBinary::_addMultiSearchStringRecord(QList<MS_RECORD> *pList,MS_RECORD *pRecord,STRINGSEARCH_OPTIONS *pSsOptions)
 {
     bool bResult=false;
 
