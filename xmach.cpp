@@ -1557,7 +1557,7 @@ void XMACH::_setLibraryRecord_name(qint64 nOffset, QString sValue)
     }
 }
 
-void XMACH::_setFvmLibraryRecord_minor_version(qint64 nOffset, quint32 nValue)
+void XMACH::_setFvmLibraryRecord_minor_version(qint64 nOffset,quint32 nValue)
 {
     write_uint32(nOffset+sizeof(XMACH_DEF::load_command)+offsetof(XMACH_DEF::fvmlib,minor_version),nValue,isBigEndian());
 }
