@@ -1354,7 +1354,7 @@ QString XBinary::read_UUID_bytes(qint64 nOffset)
     return sResult;
 }
 
-void XBinary::write_UUID_bytes(qint64 nOffset, QString sValue)
+void XBinary::write_UUID_bytes(qint64 nOffset,QString sValue)
 {
     // TODO Check
     sValue=sValue.remove("-");
