@@ -859,7 +859,7 @@ QMap<quint64, QString> XMACH::getSectionFlagsTypesS()
     return mapResult;
 }
 
-QMap<quint64, QString> XMACH::getSectionAttributesUsr()
+QMap<quint64,QString> XMACH::getSectionAttributesUsr()
 {
     QMap<quint64, QString> mapResult;
 
