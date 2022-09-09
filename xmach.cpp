@@ -874,7 +874,7 @@ QMap<quint64,QString> XMACH::getSectionAttributesUsr()
     return mapResult;
 }
 
-QMap<quint64, QString> XMACH::getSectionAttributesUsrS()
+QMap<quint64,QString> XMACH::getSectionAttributesUsrS()
 {
     QMap<quint64, QString> mapResult;
 
