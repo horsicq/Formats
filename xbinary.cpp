@@ -1619,7 +1619,7 @@ void XBinary::_write_uint64(char *pData,quint64 nValue,bool bIsBigEndian)
     *(quint64 *)pData=nValue;
 }
 
-void XBinary::_write_int64(char *pData, qint64 nValue, bool bIsBigEndian)
+void XBinary::_write_int64(char *pData,qint64 nValue,bool bIsBigEndian)
 {
     if(bIsBigEndian)
     {
