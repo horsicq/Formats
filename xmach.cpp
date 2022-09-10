@@ -797,9 +797,9 @@ QMap<quint64, QString> XMACH::getVMProtectionsS()
     return mapResult;
 }
 
-QMap<quint64, QString> XMACH::getSectionFlagsTypes()
+QMap<quint64,QString> XMACH::getSectionFlagsTypes()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x00,"S_REGULAR");
     mapResult.insert(0x01,"S_ZEROFILL");
