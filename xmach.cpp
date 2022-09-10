@@ -617,9 +617,9 @@ QMap<quint64,QString> XMACH::getHeaderFlags()
     return mapResult;
 }
 
-QMap<quint64, QString> XMACH::getHeaderFlagsS()
+QMap<quint64,QString> XMACH::getHeaderFlagsS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x1,"NOUNDEFS");
     mapResult.insert(0x2,"INCRLINK");
