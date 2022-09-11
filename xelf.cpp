@@ -859,9 +859,9 @@ QMap<quint64,QString> XELF::getIndentVersionsS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentOsabis()
+QMap<quint64,QString> XELF::getIndentOsabis()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0,"ELFOSABI_SYSV");
     mapResult.insert(1,"ELFOSABI_HPUX");
