@@ -1012,9 +1012,9 @@ QMap<quint64, QString> XNE::getImageNEMagics()
     return mapResult;
 }
 
-QMap<quint64, QString> XNE::getImageNEMagicsS()
+QMap<quint64,QString> XNE::getImageNEMagicsS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x454E,"OS2_SIGNATURE");
 
