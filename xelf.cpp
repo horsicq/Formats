@@ -919,9 +919,9 @@ QMap<quint64,QString> XELF::getIndentOsabisS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionTypes()
+QMap<quint64,QString> XELF::getSectionTypes()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0,"SHT_NULL");
     mapResult.insert(1,"SHT_PROGBITS");
