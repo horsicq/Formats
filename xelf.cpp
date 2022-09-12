@@ -852,7 +852,7 @@ QMap<quint64,QString> XELF::getIndentVersions()
 
 QMap<quint64,QString> XELF::getIndentVersionsS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(1,"CURRENT");
 
