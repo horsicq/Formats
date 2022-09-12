@@ -889,9 +889,9 @@ QMap<quint64,QString> XELF::getIndentOsabis()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentOsabisS()
+QMap<quint64,QString> XELF::getIndentOsabisS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0,"SYSV");
     mapResult.insert(1,"HPUX");
