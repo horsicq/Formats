@@ -2283,7 +2283,7 @@ quint32 XBinary::getBits_uint32(quint32 nValue, qint32 nBitOffset, qint32 nBitSi
     return nResult;
 }
 
-quint64 XBinary::getBits_uint64(quint64 nValue, qint32 nBitOffset, qint32 nBitSize)
+quint64 XBinary::getBits_uint64(quint64 nValue,qint32 nBitOffset,qint32 nBitSize)
 {
     quint64 nResult=nValue;
 
