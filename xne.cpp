@@ -1021,7 +1021,7 @@ QMap<quint64,QString> XNE::getImageNEMagicsS()
     return mapResult;
 }
 
-QMap<quint64, QString> XNE::getImageNEFlagsS()
+QMap<quint64,QString> XNE::getImageNEFlagsS()
 {
     QMap<quint64,QString> mapResult;
 
