@@ -1140,7 +1140,7 @@ qint64 XPE::getDataDirectoryOffset(quint32 nNumber)
     return getDataDirectoryOffset(&memoryMap,nNumber);
 }
 
-qint64 XPE::getDataDirectoryOffset(XBinary::_MEMORY_MAP *pMemoryMap, quint32 nNumber)
+qint64 XPE::getDataDirectoryOffset(XBinary::_MEMORY_MAP *pMemoryMap,quint32 nNumber)
 {
     qint64 nResult=-1;
 
