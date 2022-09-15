@@ -2128,7 +2128,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString,P
     return -1;
 }
 
-qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData)
+qint64 XBinary::find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData)
 {
     PDSTRUCT processDataEmpty={};
 
