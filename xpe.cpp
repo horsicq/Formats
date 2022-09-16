@@ -11331,7 +11331,7 @@ QList<XADDR> XPE::getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap)
 
     if(nOffset!=-1)
     {
-        for(qint32 i=0;i<100;i++) // TODO const !!!
+        for(qint32 i=0;i<100;i++) // TODO const or parameter
         {
             XADDR nAddress=0;
 
