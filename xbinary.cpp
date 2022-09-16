@@ -2230,7 +2230,7 @@ quint8 XBinary::getBits_uint8(quint8 nValue,qint32 nBitOffset,qint32 nBitSize)
     return nResult;
 }
 
-quint16 XBinary::getBits_uint16(quint16 nValue, qint32 nBitOffset, qint32 nBitSize)
+quint16 XBinary::getBits_uint16(quint16 nValue,qint32 nBitOffset,qint32 nBitSize)
 {
     quint16 nResult=nValue;
 
