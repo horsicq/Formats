@@ -1938,12 +1938,12 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSi
         pProcessData=&processDataEmpty;
     }
 
-    bool bDisableSignals=true;
+//    bool bDisableSignals=true;
 
-    if(pProcessData->bIsDisable) // If we call find_signature in another search function
-    {
-        bDisableSignals=false;
-    }
+//    if(pProcessData->bIsDisable) // If we call find_signature in another search function
+//    {
+//        bDisableSignals=false; // TODO Check !!!
+//    }
 
     // TODO CheckSize function
     qint64 _nSize=getSize();
@@ -2058,8 +2058,9 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString,P
     {
         pProcessData=&processDataEmpty;
     }
+
+    qint64 nResult=-1;
     // TODO CheckSize function
-    // TODO Optimize
     qint64 nStringSize=sString.size();
     qint64 _nSize=getSize();
 
@@ -2068,68 +2069,62 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString,P
         nSize=_nSize-nOffset;
     }
 
-    if(nSize<=0)
+    if((nSize>0)&&(nOffset+nSize<=_nSize)&&(nStringSize<=nSize))
     {
-        return -1;
-    }
+        setPdStructTotal(pProcessData,nSize);
 
-    if(nOffset+nSize>_nSize)
-    {
-        return -1;
-    }
+        qint64 nTemp=0;
 
-    if(nStringSize>nSize)
-    {
-        return -1;
-    }
+        char *pBuffer=new char[READWRITE_BUFFER_SIZE+(nStringSize-1)];
 
-    setPdStructTotal(pProcessData,nSize);
+        QByteArray baUpper=sString.toUpper().toLatin1();
+        QByteArray baLower=sString.toLower().toLatin1();
 
-    qint64 nTemp=0;
+        qint64 nStartOffset=nOffset;
 
-    char *pBuffer=new char[READWRITE_BUFFER_SIZE+(nStringSize-1)];
-
-    QByteArray baUpper=sString.toUpper().toLatin1();
-    QByteArray baLower=sString.toLower().toLatin1();
-
-    qint64 nStartOffset=nOffset;
-
-    while((nSize>nStringSize-1)&&(!(pProcessData->bIsStop)))
-    {
-        nTemp=qMin((qint64)(READWRITE_BUFFER_SIZE+(nStringSize-1)),nSize);
-
-        if(read_array(nOffset,pBuffer,nTemp)!=nTemp)
+        while((nSize>nStringSize-1)&&(!(pProcessData->bIsStop)))
         {
-            _errorMessage(tr("Read error"));
-            break;
-        }
+            nTemp=qMin((qint64)(READWRITE_BUFFER_SIZE+(nStringSize-1)),nSize);
 
-        for(unsigned int i=0;i<nTemp-(nStringSize-1);i++)
-        {
-            if(compareMemoryByteI((quint8 *)(pBuffer+i),(quint8 *)baUpper.data(),(quint8 *)baLower.data(),nStringSize))
+            if(read_array(nOffset,pBuffer,nTemp)!=nTemp)
             {
-                delete[] pBuffer;
+                _errorMessage(tr("Read error"));
 
-                // TODO !!!
-                return nOffset+i;
+                break;
             }
+
+            for(unsigned int i=0;i<nTemp-(nStringSize-1);i++)
+            {
+                if(compareMemoryByteI((quint8 *)(pBuffer+i),(quint8 *)baUpper.data(),(quint8 *)baLower.data(),nStringSize))
+                {
+                    nResult=nOffset+i;
+
+                    break;
+                }
+            }
+
+            if(nResult!=-1)
+            {
+                break;
+            }
+
+            nSize-=nTemp-(nStringSize-1);
+            nOffset+=nTemp-(nStringSize-1);
+
+            setPdStructCurrent(pProcessData,nOffset-nStartOffset);
         }
 
-        nSize-=nTemp-(nStringSize-1);
-        nOffset+=nTemp-(nStringSize-1);
+        setPdStructFinished(pProcessData);
 
-        setPdStructCurrent(pProcessData,nOffset-nStartOffset);
+        delete[] pBuffer;
     }
 
-    setPdStructFinished(pProcessData);
-
-    delete[] pBuffer;
-
-    return -1;
+    return nResult;
 }
 
 qint64 XBinary::find_unicodeStringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData)
 {
+    // TODO optimize
     PDSTRUCT processDataEmpty={};
 
     if(!pProcessData)
