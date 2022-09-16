@@ -11316,7 +11316,7 @@ void XPE::setTLS_Characteristics(quint32 nValue)
     }
 }
 
-QList<XADDR> XPE::getTLS_CallbacksList()
+QList<XADDR> XPE::getTLS_CallbacksList() // TODO limit
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
 
