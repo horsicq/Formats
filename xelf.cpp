@@ -1260,9 +1260,9 @@ QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
     return mapResult;
 }
 
-QMap<quint32, QString> XELF::getStringsFromSectionData(QByteArray *pbaData)
+QMap<quint32,QString> XELF::getStringsFromSectionData(QByteArray *pbaData)
 {
-    QMap<quint32, QString> mapResult;
+    QMap<quint32,QString> mapResult;
 
     qint32 nSize=pbaData->size();
     char *pOffset=pbaData->data();
