@@ -1246,9 +1246,9 @@ XBinary::OFFSETSIZE XELF::getSectionOffsetSize(quint32 nSection)
     return osResult;
 }
 
-QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
+QMap<quint32,QString> XELF::getStringsFromSection(quint32 nSection)
 {
-    QMap<quint32, QString> mapResult;
+    QMap<quint32,QString> mapResult;
 
     if(nSection!= XELF_DEF::SHN_UNDEF)
     {
