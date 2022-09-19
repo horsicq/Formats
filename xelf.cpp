@@ -1095,7 +1095,7 @@ QMap<quint64,QString> XELF::getSectionFlags()
 
 QMap<quint64,QString> XELF::getSectionFlagsS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x00000001,"WRITE");
     mapResult.insert(0x00000002,"ALLOC");
