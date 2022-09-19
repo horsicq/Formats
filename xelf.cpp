@@ -830,9 +830,9 @@ QMap<quint64,QString> XELF::getIndentDatas()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentDatasS()
+QMap<quint64,QString> XELF::getIndentDatasS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0,"NONE");
     mapResult.insert(1,"2LSB");
