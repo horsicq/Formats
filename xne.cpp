@@ -1003,9 +1003,9 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap()
     return result;
 }
 
-QMap<quint64, QString> XNE::getImageNEMagics()
+QMap<quint64,QString> XNE::getImageNEMagics()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x454E,"IMAGE_OS2_SIGNATURE");
 

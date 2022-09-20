@@ -94,7 +94,7 @@ class XBinary : public QObject
 {
     Q_OBJECT
 
-static const double D_ENTROPY_THRESHOLD; // 6.5
+static const double D_ENTROPY_THRESHOLD; // 6.5 TODO set get
 
 public:
     struct DATASET
@@ -557,6 +557,7 @@ public:
         PDRECORD pdRecordOpt;
         PDRECORD pdRecordObj;
         PDRECORD pdRecordFiles;
+//        QList<PDRECORD> listRecords; // TODO
         bool bIsStop;
         bool bIsDisable;
         QString sStatus;
