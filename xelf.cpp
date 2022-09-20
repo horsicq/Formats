@@ -4990,7 +4990,7 @@ void XELF::setElf32_Sym_st_name(qint64 nOffset, quint32 nValue, bool bIsBigEndia
     write_uint32(nOffset+offsetof(XELF_DEF::Elf32_Sym,st_name),nValue,bIsBigEndian);
 }
 
-void XELF::setElf32_Sym_st_value(qint64 nOffset, quint32 nValue, bool bIsBigEndian)
+void XELF::setElf32_Sym_st_value(qint64 nOffset,quint32 nValue,bool bIsBigEndian)
 {
     write_uint32(nOffset+offsetof(XELF_DEF::Elf32_Sym,st_value),nValue,bIsBigEndian);
 }

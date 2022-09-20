@@ -290,6 +290,17 @@ QString XBinary::getArch()
     return g_sArch;
 }
 
+void XBinary::setName(QString sName)
+{
+    g_sName=sName;
+}
+
+QString XBinary::getName()
+{
+    // TODO baseFileName from pDevice
+    return g_sName;
+}
+
 bool XBinary::isSigned()
 {
     return false;
