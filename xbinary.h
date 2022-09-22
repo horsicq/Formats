@@ -1009,7 +1009,7 @@ public:
     static double getEntropy(QIODevice *pDevice,PDSTRUCT *pProcessData=nullptr);
     double getEntropy(qint64 nOffset=0,qint64 nSize=-1,PDSTRUCT *pProcessData=nullptr);
 
-    BYTE_COUNTS getByteCounts(qint64 nOffset=0,qint64 nSize=-1,PDSTRUCT *pProcessData=nullptr);
+    BYTE_COUNTS getByteCounts(qint64 nOffset=0,qint64 nSize=-1,PDSTRUCT *pPdStruct=nullptr);
 
     void _xor(quint8 nXorValue,qint64 nOffset=0,qint64 nSize=-1);
 

@@ -2855,7 +2855,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset,qint64 n
     return multiSearch_signature(&memoryMap,nOffset,nSize,nLimit,sSignature,sInfo,pProcessData);
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature, QString sInfo,PDSTRUCT *pProcessData)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize,qint32 nLimit,QString sSignature,QString sInfo,PDSTRUCT *pProcessData)
 {
     PDSTRUCT processDataEmpty={};
 
@@ -5887,15 +5887,15 @@ double XBinary::getEntropy(qint64 nOffset,qint64 nSize,PDSTRUCT *pProcessData)
     return dResult;
 }
 
-XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset,qint64 nSize,PDSTRUCT *pProcessData)
+XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset,qint64 nSize,PDSTRUCT *pPdStruct)
 {
     BYTE_COUNTS result={0};
 
-    PDSTRUCT processDataEmpty={};
+    PDSTRUCT pdStructEmpty={};
 
-    if(!pProcessData)
+    if(!pPdStruct)
     {
-        pProcessData=&processDataEmpty;
+        pPdStruct=&pdStructEmpty;
     }
 
     OFFSETSIZE osRegion=convertOffsetAndSize(nOffset,nSize);
@@ -5903,16 +5903,16 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset,qint64 nSize,PDSTRUCT
     nOffset=osRegion.nOffset;
     nSize=osRegion.nSize;
 
-    if((nOffset!=-1)&&(!(pProcessData->bIsStop)))
+    if((nOffset!=-1)&&(!(pPdStruct->bIsStop)))
     {
         result.nSize=nSize;
 
-        pProcessData->pdRecord.nTotal=nSize;
+        setPdStructTotal(pPdStruct,nSize);
 
         qint64 nTemp=0;
         char *pBuffer=new char[READWRITE_BUFFER_SIZE];
 
-        while((nSize>0)&&(!(pProcessData->bIsStop)))
+        while((nSize>0)&&(!(pPdStruct->bIsStop)))
         {
             nTemp=qMin((qint64)READWRITE_BUFFER_SIZE,nSize);
 
@@ -5932,15 +5932,15 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset,qint64 nSize,PDSTRUCT
             nSize-=nTemp;
             nOffset+=nTemp;
 
-            setPdStructCurrent(pProcessData,nOffset-osRegion.nOffset);
+            setPdStructCurrent(pPdStruct,nOffset-osRegion.nOffset);
         }
 
         delete[] pBuffer;
     }
 
-    setPdStructFinished(pProcessData);
+    setPdStructFinished(pPdStruct);
 
-    if(pProcessData->bIsStop)
+    if(pPdStruct->bIsStop)
     {
         result={0};
     }
