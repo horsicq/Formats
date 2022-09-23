@@ -1009,7 +1009,7 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID)
     return listResult;
 }
 
-QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID,QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     QList<COMMAND_RECORD> listResult;
 
