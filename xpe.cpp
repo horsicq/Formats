@@ -2286,7 +2286,7 @@ quint32 XPE::getImportHash32(QList<IMPORT_RECORD> *pListImportRecords)
 
     QString sRecord;
 
-    for(qint32 i=0;i<nNumberOfImports; i++)
+    for(qint32 i=0;i<nNumberOfImports;i++)
     {
         sRecord+=pListImportRecords->at(i).sLibrary+pListImportRecords->at(i).sFunction;
     }
