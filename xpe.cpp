@@ -2268,7 +2268,7 @@ quint64 XPE::getImportHash64(QList<IMPORT_RECORD> *pListImportRecords)
 
     qint32 nNumberOfImports=pListImportRecords->count();
 
-    for(qint32 i=0;i<nNumberOfImports; i++)
+    for(qint32 i=0;i<nNumberOfImports;i++)
     {
         QString sRecord=pListImportRecords->at(i).sLibrary+" "+pListImportRecords->at(i).sFunction;
 
