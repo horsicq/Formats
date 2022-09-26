@@ -10291,7 +10291,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 #endif
             int nNumberOfSections=getFileHeader_NumberOfSections();
 
-            for(int i=0;i<nNumberOfSections;i++)
+            for(qint32 i=0;i<nNumberOfSections;i++)
             {
                 if(pRebuildOptions->bOptimize)
                 {
