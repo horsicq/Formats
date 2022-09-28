@@ -4227,7 +4227,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap,bool bValidOnly,PDSTRU
                     mapNames.insert(position.nOrdinal,position);
                 }
 
-                for(int i=0;(i<(int)result.directory.NumberOfFunctions)&&(!(pPdStruct->bIsStop));i++)
+                for(qint32 i=0;(i<(int)result.directory.NumberOfFunctions)&&(!(pPdStruct->bIsStop));i++)
                 {
                     EXPORT_POSITION position={};
 

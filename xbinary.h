@@ -612,8 +612,8 @@ public:
     void setArch(QString sArch);
     virtual QString getArch();
 
-    void setName(QString sName);
-    virtual QString getName();
+    void setFileFormatName(QString sFileFormatName);
+    virtual QString getFileFormatName();
 
     virtual bool isSigned();
     virtual OFFSETSIZE getSignOffsetSize(); // TODO rename
@@ -1330,7 +1330,7 @@ private:
     XADDR g_nModuleAddress;
     bool g_bIsBigEndian; // TODO enum
     QString g_sArch;
-    QString g_sName;
+    QString g_sFileFormatName;
     OSNAME g_osName;
     QString g_sOsVersion;
     MODE g_mode;

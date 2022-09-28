@@ -290,15 +290,15 @@ QString XBinary::getArch()
     return g_sArch;
 }
 
-void XBinary::setName(QString sName)
+void XBinary::setFileFormatName(QString sFileFormatName)
 {
-    g_sName=sName;
+    g_sFileFormatName=sFileFormatName;
 }
 
-QString XBinary::getName()
+QString XBinary::getFileFormatName()
 {
     // TODO baseFileName from pDevice
-    return g_sName;
+    return g_sFileFormatName;
 }
 
 bool XBinary::isSigned()
