@@ -4937,7 +4937,7 @@ XPE::RESOURCE_POSITION XPE::_getResourcePosition(XBinary::_MEMORY_MAP *pMemoryMa
         {
             result.bIsValid=true;
 
-            for(int i=0;i<result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries;i++)
+            for(qint32 i=0;i<result.directory.NumberOfIdEntries+result.directory.NumberOfNamedEntries;i++)
             {
                 RESOURCE_POSITION rp=_getResourcePosition(pMemoryMap,nBaseAddress,nResourceOffset,nDirectoryOffset,nLevel+1);
 

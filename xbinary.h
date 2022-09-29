@@ -232,7 +232,8 @@ public:
         FT_UNICODE_BE,
         FT_UNICODE_LE,
         FT_UTF8,
-        FT_ZIP
+        FT_ZIP,
+        FT_GZIP,
         // TODO more
     };
 
