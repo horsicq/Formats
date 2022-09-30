@@ -80,6 +80,11 @@ void XBinary::setData(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
     setOsType(OSNAME_UNKNOWN);
     setOsVersion("");
 
+    if(pDevice)
+    {
+        setFileFormatSize(pDevice->size());
+    }
+
     g_bLog=false;
 
 #ifdef X_USE_MAP
@@ -299,6 +304,16 @@ QString XBinary::getFileFormatName()
 {
     // TODO baseFileName from pDevice
     return g_sFileFormatName;
+}
+
+void XBinary::setFileFormatSize(qint64 nFileFormatSize)
+{
+    g_nFileFormatSize=nFileFormatSize;
+}
+
+qint64 XBinary::getFileFormatSize()
+{
+    return g_nFileFormatSize;
 }
 
 bool XBinary::isSigned()

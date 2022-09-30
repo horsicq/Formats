@@ -9501,7 +9501,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                                 pStringCurrentOffsetOffset++;
 
-                                for(int i=1; i<_nSize; i++)
+                                for(qint32 i=1; i<_nSize; i++)
                                 {
                                     int nStringSize=(*((unsigned char *)pStringCurrentOffsetOffset));
 

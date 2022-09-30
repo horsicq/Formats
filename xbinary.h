@@ -616,6 +616,9 @@ public:
     void setFileFormatName(QString sFileFormatName);
     virtual QString getFileFormatName();
 
+    void setFileFormatSize(qint64 nFileFormatSize);
+    virtual qint64 getFileFormatSize();
+
     virtual bool isSigned();
     virtual OFFSETSIZE getSignOffsetSize(); // TODO rename
 
@@ -1332,6 +1335,7 @@ private:
     bool g_bIsBigEndian; // TODO enum
     QString g_sArch;
     QString g_sFileFormatName;
+    qint64 g_nFileFormatSize;
     OSNAME g_osName;
     QString g_sOsVersion;
     MODE g_mode;
