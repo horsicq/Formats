@@ -1624,7 +1624,7 @@ QString XPE::getSection_NameAsString(quint32 nNumber, QList<QString> *pListSecti
     return sResult;
 }
 
-quint32 XPE::getSection_VirtualSize(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+quint32 XPE::getSection_VirtualSize(quint32 nNumber,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
 {
     quint32 nResult=0;
 
