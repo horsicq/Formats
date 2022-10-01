@@ -10081,7 +10081,7 @@ int XPE::getNormalCodeSection(_MEMORY_MAP *pMemoryMap)
     int nNumberOfSections=listSections.count();
     nNumberOfSections=qMin(nNumberOfSections,2);
 
-    for(int i=0;i<nNumberOfSections;i++)
+    for(qint32 i=0;i<nNumberOfSections;i++)
     {
         QString sSectionName=QString((char *)listSections.at(i).Name);
         sSectionName.resize(qMin(sSectionName.length(),XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
