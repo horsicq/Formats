@@ -10130,7 +10130,7 @@ int XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
 
     int nImportSection=getImportSection(pMemoryMap);
 
-    for(int i=1; i<nNumberOfSections; i++)
+    for(qint32 i=1; i<nNumberOfSections; i++)
     {
         // 0xc0700040 MinGW
         // 0xc0600040 MinGW
