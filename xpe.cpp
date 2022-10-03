@@ -10152,7 +10152,7 @@ int XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
 
     if(nResult==-1)
     {
-        for(int i=1; i<nNumberOfSections; i++)
+        for(qint32 i=1; i<nNumberOfSections; i++)
         {
             if( listSections.at(i).SizeOfRawData&&(nImportSection!=i)&&
                 (listSections.at(i).Characteristics!=0x60000020)&&
