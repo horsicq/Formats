@@ -3109,16 +3109,16 @@ QByteArray XELF::getSectionByName(QString sSectionName)
     return baResult;
 }
 
-XBinary::OS_ANSISTRING XELF::getProgramInterpreterName()
+XBinary::OS_STRING XELF::getProgramInterpreterName()
 {
     QList<XELF_DEF::Elf_Phdr> listProgramHeaders=getElf_PhdrList();
 
     return getProgramInterpreterName(&listProgramHeaders);
 }
 
-XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+XBinary::OS_STRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
-    OS_ANSISTRING result={};
+    OS_STRING result={};
 
     QList<XELF_DEF::Elf_Phdr> listInterps=_getPrograms(pListProgramHeaders,XELF_DEF::PT_INTERP);
 
@@ -3131,9 +3131,9 @@ XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr>
 }
 
 
-XBinary::OS_ANSISTRING XELF::getProgramInterpreterName(QList<SECTION_RECORD> *pListSectionRecords)
+XBinary::OS_STRING XELF::getProgramInterpreterName(QList<SECTION_RECORD> *pListSectionRecords)
 {
-    OS_ANSISTRING result={};
+    OS_STRING result={};
 
     QList<SECTION_RECORD> listInterps=_getSectionRecords(pListSectionRecords,".interp");
 
@@ -3664,7 +3664,7 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT
     return listResult;
 }
 
-XBinary::OS_ANSISTRING XELF::getRunPath()
+XBinary::OS_STRING XELF::getRunPath()
 {
     _MEMORY_MAP memoryMap=getMemoryMap();
     QList<TAG_STRUCT> listTagStructs=getTagStructs();
@@ -3672,9 +3672,9 @@ XBinary::OS_ANSISTRING XELF::getRunPath()
     return getRunPath(&memoryMap,&listTagStructs);
 }
 
-XBinary::OS_ANSISTRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs)
+XBinary::OS_STRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs)
 {
-    OS_ANSISTRING result={};
+    OS_STRING result={};
 
     QList<TAG_STRUCT> listRunPath=_getTagStructs(pListTagStructs,XELF_DEF::DT_RUNPATH);
     QList<TAG_STRUCT> listStrTab=_getTagStructs(pListTagStructs,XELF_DEF::DT_STRTAB);
@@ -3689,8 +3689,8 @@ XBinary::OS_ANSISTRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<
         if(nRunPath<nSize)
         {
             result.nOffset=nOffset+nRunPath;
-            result.sAnsiString=read_ansiString(result.nOffset);
-            result.nSize=result.sAnsiString.length();
+            result.sString=read_ansiString(result.nOffset);
+            result.nSize=result.sString.length();
         }
     }
 
@@ -4268,11 +4268,11 @@ XBinary::OSINFO XELF::getOsInfo()
         listNotes=getNotes(&listSectionHeaders);
     }
 
-    QString sInterpteter=getProgramInterpreterName(&listProgramHeaders).sAnsiString;
+    QString sInterpteter=getProgramInterpreterName(&listProgramHeaders).sString;
 
     if(sInterpteter=="")
     {
-        sInterpteter=getProgramInterpreterName(&listSectionRecords).sAnsiString;
+        sInterpteter=getProgramInterpreterName(&listSectionRecords).sString;
     }
 
     XBinary::_MEMORY_MAP memoryMap=getMemoryMap();

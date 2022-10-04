@@ -10182,7 +10182,7 @@ int XPE::getConstDataSection(_MEMORY_MAP *pMemoryMap)
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSections=getSectionHeaders();
     int nNumberOfSections=listSections.count();
 
-    for(int i=1; i<nNumberOfSections; i++)
+    for(qint32 i=1;i<nNumberOfSections;i++)
     {
         // 0x40700040 MinGW
         // 0x40600040 MinGW

@@ -358,9 +358,9 @@ public:
     qint32 getSectionIndexByName(QString sSectionName);
     QByteArray getSectionByName(QString sSectionName);
 
-    OS_ANSISTRING getProgramInterpreterName();
-    OS_ANSISTRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    OS_ANSISTRING getProgramInterpreterName(QList<SECTION_RECORD> *pListSectionRecords);
+    OS_STRING getProgramInterpreterName();
+    OS_STRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    OS_STRING getProgramInterpreterName(QList<SECTION_RECORD> *pListSectionRecords);
 
     QList<QString> getCommentStrings();
     QList<QString> getCommentStrings(qint32 nSection);
@@ -403,8 +403,8 @@ public:
     QList<QString> getLibraries();
     QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap,QList<TAG_STRUCT> *pListTagStructs);
 
-    OS_ANSISTRING getRunPath();
-    OS_ANSISTRING getRunPath(_MEMORY_MAP *pMemoryMap,QList<TAG_STRUCT> *pListTagStructs);
+    OS_STRING getRunPath();
+    OS_STRING getRunPath(_MEMORY_MAP *pMemoryMap,QList<TAG_STRUCT> *pListTagStructs);
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);

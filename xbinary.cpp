@@ -559,13 +559,13 @@ QString XBinary::convertPathName(QString sPathName)
     return sResult;
 }
 
-XBinary::OS_ANSISTRING XBinary::getOsAnsiString(qint64 nOffset,qint64 nSize)
+XBinary::OS_STRING XBinary::getOsAnsiString(qint64 nOffset,qint64 nSize)
 {
-    OS_ANSISTRING result={};
+    OS_STRING result={};
 
     result.nOffset=nOffset;
     result.nSize=nSize;
-    result.sAnsiString=read_ansiString(nOffset,nSize);
+    result.sString=read_ansiString(nOffset,nSize);
 
     return result;
 }

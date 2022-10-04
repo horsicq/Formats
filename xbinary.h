@@ -115,11 +115,11 @@ public:
         qint64 nCount[256]; // TODO const
     };
 
-    struct OS_ANSISTRING
+    struct OS_STRING
     {
         qint64 nOffset;
         qint64 nSize;
-        QString sAnsiString;
+        QString sString;
     };
 
     struct OFFSETSIZE
@@ -641,7 +641,7 @@ public:
     static QString convertFileName(QString sFileName);
     static QString convertPathName(QString sPathName);
 
-    OS_ANSISTRING getOsAnsiString(qint64 nOffset,qint64 nSize);
+    OS_STRING getOsAnsiString(qint64 nOffset,qint64 nSize);
 
     struct FFOPTIONS
     {
