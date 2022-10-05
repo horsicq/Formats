@@ -388,6 +388,7 @@ public:
         OSNAME_MCLINUX,
         OSNAME_QNX,
         OSNAME_SYLLABLE
+        // TODO more
     };
 
     struct OSINFO

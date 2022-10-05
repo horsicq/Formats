@@ -10250,7 +10250,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 
             nTotalSize+=S_ALIGN_UP(nHeaderSize,nFileAlignment);
 
-            for(int i=0;i<listSectionsSize.size();i++)
+            for(qint32 i=0;i<listSectionsSize.size();i++)
             {
                 listSectionsOffsets.append(nTotalSize);
 
