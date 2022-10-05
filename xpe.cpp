@@ -10939,7 +10939,7 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<XADDR> *pListRelocs, bool bIs64
 
     nNumberOfRelocs=pListRelocs->count();
 
-    for(int i=0;i<nNumberOfRelocs;i++)
+    for(qint32 i=0;i<nNumberOfRelocs;i++)
     {
         XADDR _nBaseAddress=S_ALIGN_DOWN(pListRelocs->at(i),0x1000);
 
