@@ -10779,7 +10779,7 @@ QList<XPE::RELOCS_POSITION> XPE::getRelocsPositions(qint64 nOffset)
 
         nCount&=0xFFFF;
 
-        for(int i=0;i<nCount;i++)
+        for(qint32 i=0;i<nCount;i++)
         {
             RELOCS_POSITION record={0};
 
