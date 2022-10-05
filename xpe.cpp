@@ -10850,7 +10850,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<XADDR> *pLis
 
             int nNumberOfRelocs=pListRelocs->count();
 
-            for(int i=0;i<nNumberOfRelocs;i++)
+            for(qint32 i=0;i<nNumberOfRelocs;i++)
             {
                 if(pe.isAddressValid(&memoryMap,pListRelocs->at(i)+memoryMap.nModuleAddress))
                 {
