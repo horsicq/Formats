@@ -10241,7 +10241,7 @@ bool XPE::rebuildDump(QString sResultFile,REBUILD_OPTIONS *pRebuildOptions)
 
             nHeaderSize=(quint32)XBinary::getPhysSize(baHeader.data(),baHeader.size());
 
-            for(int i=0;i<nNumberOfSections;i++)
+            for(qint32 i=0;i<nNumberOfSections;i++)
             {
                 QByteArray baSection=read_array(getSection_VirtualAddress(i),getSection_VirtualSize(i));
                 quint32 nSectionSize=(quint32)XBinary::getPhysSize(baSection.data(),baSection.size());
