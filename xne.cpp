@@ -1047,7 +1047,7 @@ QMap<quint64,QString> XNE::getImageNEFlagsS()
 
 QMap<quint64, QString> XNE::getImageNEExetypesS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x0000,tr("Unknown"));
     mapResult.insert(0x0001,"OS/2");
