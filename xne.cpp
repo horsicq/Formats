@@ -1061,7 +1061,7 @@ QMap<quint64, QString> XNE::getImageNEExetypesS()
 
 QMap<quint64, QString> XNE::getImageNEFlagsothersS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x0001,"Long filename support");
     mapResult.insert(0x0002,"2.x protected mode");
