@@ -3952,7 +3952,7 @@ qint64 XPE::getResourceOffsetByNumber(quint32 nNumber)
     return getResourceOffsetByNumber(nNumber,&listResources);
 }
 
-qint64 XPE::getResourceOffsetByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+qint64 XPE::getResourceOffsetByNumber(quint32 nNumber,QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     qint64 nResult=-1;
 
