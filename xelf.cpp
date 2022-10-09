@@ -2018,7 +2018,7 @@ void XELF::setElf64_Shdr_flags(quint32 nIndex,quint64 nValue)
     }
 }
 
-void XELF::setElf64_Shdr_addr(quint32 nIndex, quint64 nValue)
+void XELF::setElf64_Shdr_addr(quint32 nIndex,quint64 nValue)
 {
     quint32 nNumberOfSections=getHdr64_shnum();
     quint64 offset=getHdr64_shoff();
