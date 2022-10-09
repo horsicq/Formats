@@ -1708,7 +1708,7 @@ quint16 XPE::getSection_NumberOfRelocations(quint32 nNumber, QList<XPE_DEF::IMAG
     return nResult;
 }
 
-quint16 XPE::getSection_NumberOfLinenumbers(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+quint16 XPE::getSection_NumberOfLinenumbers(quint32 nNumber,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
 {
     quint16 nResult=0;
 
@@ -3458,7 +3458,7 @@ bool XPE::isResourcePresent(QString sName1, quint32 nID2, QList<XPE::RESOURCE_RE
     return (getResourceRecord(sName1,nID2,pListResourceRecords).nSize);
 }
 
-bool XPE::isResourcePresent(QString sName1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+bool XPE::isResourcePresent(QString sName1,QString sName2,QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     return (getResourceRecord(sName1,sName2,pListResourceRecords).nSize);
 }
