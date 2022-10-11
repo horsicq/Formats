@@ -3100,7 +3100,7 @@ bool XBinary::moveFile(QString sSrcFileName, QString sDestFileName)
     return bResult;
 }
 
-bool XBinary::moveFileToDirectory(QString sSrcFileName, QString sDestDirectory)
+bool XBinary::moveFileToDirectory(QString sSrcFileName,QString sDestDirectory)
 {
     QFileInfo fi(sSrcFileName);
 
