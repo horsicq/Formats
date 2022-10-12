@@ -475,6 +475,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_UNICODE_LE:         sResult=QString("Unicode LE");      break;
         case FT_UTF8:               sResult=QString("UTF8");            break;
         case FT_ZIP:                sResult=QString("ZIP");             break;
+        case FT_GZIP:               sResult=QString("GZIP");            break;
     }
 
     return sResult;
@@ -4365,6 +4366,12 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             // TODO Check APK, JAR
             // TODO basic ZIP
         }
+        else if(compareSignature(&memoryMap,"1F8B"))
+        {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_GZIP);
+            // TODO DEB
+        }
         else if(compareSignature(&memoryMap,"'!<arch>'0a"))
         {
             stResult.insert(FT_ARCHIVE);
@@ -4586,6 +4593,10 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
     {
         result=FT_ZIP;
     }
+    else if(pStFileTypes->contains(FT_GZIP))
+    {
+        result=FT_GZIP;
+    }
     else if(pStFileTypes->contains(FT_ANDROIDXML))
     {
         result=FT_ANDROIDXML;
@@ -4655,6 +4666,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if(stFileTypes.contains(FT_BINARY32))   listResult.append(FT_BINARY32);
     if(stFileTypes.contains(FT_BINARY64))   listResult.append(FT_BINARY64);
     if(stFileTypes.contains(FT_ZIP))        listResult.append(FT_ZIP);
+    if(stFileTypes.contains(FT_GZIP))       listResult.append(FT_GZIP);
     if(stFileTypes.contains(FT_JAR))        listResult.append(FT_JAR);
     if(stFileTypes.contains(FT_APK))        listResult.append(FT_APK);
     if(stFileTypes.contains(FT_IPA))        listResult.append(FT_IPA);
@@ -7815,7 +7827,8 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_MACHO32)||
         pStFileTypes->contains(XBinary::FT_MACHO64)||
         pStFileTypes->contains(XBinary::FT_DEX)||
-        pStFileTypes->contains(XBinary::FT_ZIP))
+        pStFileTypes->contains(XBinary::FT_ZIP)||
+        pStFileTypes->contains(XBinary::FT_GZIP))
     {
         pStFileTypes->remove(XBinary::FT_BINARY);
     }

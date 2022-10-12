@@ -775,7 +775,7 @@ QMap<quint64, QString> XMACH::getLoadCommandTypesS()
     return mapResult;
 }
 
-QMap<quint64, QString> XMACH::getVMProtections()
+QMap<quint64,QString> XMACH::getVMProtections()
 {
     QMap<quint64, QString> mapResult;
 
