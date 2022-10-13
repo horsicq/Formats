@@ -2406,7 +2406,7 @@ XELF_DEF::Elf64_Phdr XELF::getElf64_Phdr(quint32 nIndex)
     return result;
 }
 
-XELF_DEF::Elf32_Phdr XELF::_readElf32_Phdr(qint64 nOffset, bool bIsBigEndian)
+XELF_DEF::Elf32_Phdr XELF::_readElf32_Phdr(qint64 nOffset,bool bIsBigEndian)
 {
     XELF_DEF::Elf32_Phdr result={};
 
