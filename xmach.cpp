@@ -1634,7 +1634,7 @@ QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords(QList<XMACH::COMMAND_RECOR
     return listResult;
 }
 
-XMACH_DEF::segment_command XMACH::_read_segment_command(qint64 nOffset, bool bIsBigEndian)
+XMACH_DEF::segment_command XMACH::_read_segment_command(qint64 nOffset,bool bIsBigEndian)
 {
     XMACH_DEF::segment_command result={};
 

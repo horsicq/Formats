@@ -548,21 +548,22 @@ public:
         qint64 nCurrent;
         qint64 nTotal;
         QString sStatus;
-        bool bSuccess;
-        bool bFinished;
-        bool bIsValid; // For optional
+//        bool bSuccess;
+//        bool bFinished;
+        bool bIsValid;
     };
+
+    const static qint32 N_NUMBER_PDRECORDS=5;
 
     struct PDSTRUCT
     {
-        PDRECORD pdRecord;
-        PDRECORD pdRecordOpt;
-        PDRECORD pdRecordObj;
-        PDRECORD pdRecordFiles;
-//        QList<PDRECORD> listRecords; // TODO
+        PDRECORD _pdRecord[N_NUMBER_PDRECORDS];
         bool bIsStop;
-        bool bIsDisable;
-        QString sStatus;
+        quint64 nFinished;
+//        bool bIsDisable;
+//        QString sStatus;
+//        bool bErrors;
+//        bool bSuccess; // TODO important
     };
 
 private:
@@ -1295,9 +1296,16 @@ public:
 
     static MODE getModeOS();
 
-    static void setPdStructTotal(PDSTRUCT *pPdStruct,qint64 nValue);
-    static void setPdStructCurrent(PDSTRUCT *pPdStruct,qint64 nValue);
-    static bool setPdStructFinished(PDSTRUCT *pPdStruct);
+    static void setPdStructInit(PDSTRUCT *pPdStruct,qint32 nIndex,qint64 nTotal);
+    static void setPdStructTotal(PDSTRUCT *pPdStruct,qint32 nIndex,qint64 nValue);
+    static void setPdStructCurrent(PDSTRUCT *pPdStruct,qint32 nIndex,qint64 nValue);
+    static void setPdStructCurrentIncrement(PDSTRUCT *pPdStruct,qint32 nIndex);
+    static void setPdStructStatus(PDSTRUCT *pPdStruct,qint32 nIndex,QString sStatus);
+    static void setPdStructFinished(PDSTRUCT *pPdStruct,qint32 nIndex);
+    static qint32 getFreeIndex(PDSTRUCT *pPdStruct);
+    static bool isPdStructFinished(PDSTRUCT *pPdStruct);
+    static bool isPdStructSuccess(PDSTRUCT *pPdStruct);
+    static qint32 getPdStructProcent(PDSTRUCT *pPdStruct); // 0-100
 
 private:
     static const int READWRITE_BUFFER_SIZE=0x1000;
