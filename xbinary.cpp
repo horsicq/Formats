@@ -1671,7 +1671,7 @@ void XBinary::_write_int64(char *pData,qint64 nValue,bool bIsBigEndian)
     *(qint64 *)pData=nValue;
 }
 
-void XBinary::_write_float(char *pData, float fValue, bool bIsBigEndian)
+void XBinary::_write_float(char *pData,float fValue,bool bIsBigEndian)
 {
     endian_float(&fValue,bIsBigEndian);
 
