@@ -2089,7 +2089,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSi
     return nResult;
 }
 
-qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString,PDSTRUCT *pProcessData)
+qint64 XBinary::find_ansiStringI(qint64 nOffset,qint64 nSize,QString sString,PDSTRUCT *pProcessData)
 {
     PDSTRUCT processDataEmpty={};
 
