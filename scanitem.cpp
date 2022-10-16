@@ -22,10 +22,11 @@
 
 ScanItem::ScanItem(const QString &sString,ScanItem *pParentItem,qint32 nNumberOfColumns,bool bIsParent)
 {
-    this->g_pParentItem=pParentItem;
-    this->g_sString=sString;
-    this->g_nNumberOfColumns=nNumberOfColumns;
-    this->g_bIsParent=bIsParent;
+    g_pParentItem=pParentItem;
+    g_sString=sString;
+    g_nNumberOfColumns=nNumberOfColumns;
+    g_bIsParent=bIsParent;
+    g_scanStruct={};
 }
 
 ScanItem::~ScanItem()
