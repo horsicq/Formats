@@ -2205,7 +2205,7 @@ quint32 XELF::getElf_Shdr_info(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListS
     return nResult;
 }
 
-quint64 XELF::getElf_Shdr_addralign(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+quint64 XELF::getElf_Shdr_addralign(quint32 nIndex,QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
 {
     quint64 nResult=0;
 
