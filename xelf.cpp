@@ -3303,7 +3303,7 @@ bool XELF::isNotePresent(QString sName)
     return isNotePresent(&listNotes,sName);
 }
 
-bool XELF::isNotePresent(QList<NOTE> *pListNotes, QString sName)
+bool XELF::isNotePresent(QList<NOTE> *pListNotes,QString sName)
 {
     bool bResult=false;
 
