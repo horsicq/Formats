@@ -2298,7 +2298,7 @@ quint16 XBinary::getBits_uint16(quint16 nValue,qint32 nBitOffset,qint32 nBitSize
     return nResult;
 }
 
-quint32 XBinary::getBits_uint32(quint32 nValue, qint32 nBitOffset, qint32 nBitSize)
+quint32 XBinary::getBits_uint32(quint32 nValue,qint32 nBitOffset,qint32 nBitSize)
 {
     quint32 nResult=nValue;
 
@@ -5671,6 +5671,7 @@ quint32 XBinary::getAdler32(QIODevice *pDevice)
 
 quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize)
 {
+    // TODO Check crash
     // TODO optimize!!!
     quint32 nResult=0;
 
