@@ -5035,7 +5035,7 @@ void XELF::setElf64_Sym_st_shndx(qint64 nOffset, quint16 nValue, bool bIsBigEndi
     write_uint16(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_shndx),nValue,bIsBigEndian);
 }
 
-void XELF::setElf64_Sym_st_value(qint64 nOffset, quint64 nValue, bool bIsBigEndian)
+void XELF::setElf64_Sym_st_value(qint64 nOffset,quint64 nValue,bool bIsBigEndian)
 {
     write_uint64(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_value),nValue,bIsBigEndian);
 }
@@ -5375,7 +5375,7 @@ QMap<quint64, QString> XELF::getRelTypes_x64()
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0,"R_X86_64_NONE");
-    mapResult.insert(1,"R_X86_64_32");
+    mapResult.insert(1,"R_X86_64_64");
     mapResult.insert(2,"R_386_PC32");
     mapResult.insert(3,"R_386_GOT32");
     mapResult.insert(4,"R_X86_64_PLT32");
@@ -5400,7 +5400,7 @@ QMap<quint64, QString> XELF::getRelTypesS_x64()
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0,"X86_64_NONE");
-    mapResult.insert(1,"X86_64_32");
+    mapResult.insert(1,"X86_64_64");
     mapResult.insert(2,"386_PC32");
     mapResult.insert(3,"386_GOT32");
     mapResult.insert(4,"X86_64_PLT32");
