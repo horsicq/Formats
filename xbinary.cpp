@@ -3252,7 +3252,7 @@ bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice,qint64 nSourceOffset,QIO
     return (bool)(nSize==0);
 }
 
-bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize, bool bReverse)
+bool XBinary::copyMemory(qint64 nSourceOffset,qint64 nDestOffset,qint64 nSize,quint32 nBufferSize,bool bReverse)
 {
     // TODO optimize
     if(nBufferSize==0)
