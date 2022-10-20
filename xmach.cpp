@@ -3053,7 +3053,7 @@ void XMACH::_set_m68k_thread_state32_t_dreg(qint64 nOffset, quint32 nValue, qint
     }
 }
 
-void XMACH::_set_m68k_thread_state32_t_areg(qint64 nOffset, quint32 nValue, qint32 nIndex)
+void XMACH::_set_m68k_thread_state32_t_areg(qint64 nOffset,quint32 nValue,qint32 nIndex)
 {
     if(nIndex<8)
     {
