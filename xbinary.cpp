@@ -4174,7 +4174,7 @@ bool XBinary::dumpToFile(QString sFileName, const char *pData, qint64 nDataSize)
     return bResult;
 }
 
-bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pProcessData)
+bool XBinary::dumpToFile(QString sFileName,qint64 nDataOffset,qint64 nDataSize,PDSTRUCT *pProcessData)
 {
     bool bResult=false;
 
