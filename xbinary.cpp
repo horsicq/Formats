@@ -2984,7 +2984,7 @@ QByteArray XBinary::getUnicodeString(QString sString)
     return baResult;
 }
 
-QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString, bool bAddNull)
+QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId,QString sString,bool bAddNull)
 {
     QByteArray baResult;
 
