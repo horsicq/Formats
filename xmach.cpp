@@ -1859,7 +1859,7 @@ XMACH_DEF::section XMACH::_read_section(qint64 nOffset, bool bIsBigEndian)
     return result;
 }
 
-XMACH_DEF::section_64 XMACH::_read_section_64(qint64 nOffset, bool bIsBigEndian)
+XMACH_DEF::section_64 XMACH::_read_section_64(qint64 nOffset,bool bIsBigEndian)
 {
     XMACH_DEF::section_64 result={};
 
