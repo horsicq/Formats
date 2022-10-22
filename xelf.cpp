@@ -3232,7 +3232,7 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
     return listResult;
 }
 
-QList<XELF::NOTE> XELF::_getNotes(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
+QList<XELF::NOTE> XELF::_getNotes(qint64 nOffset,qint64 nSize,bool bIsBigEndian)
 {
     QList<NOTE> listResult;
 
