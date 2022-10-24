@@ -4873,7 +4873,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
     return listResult;
 }
 
-QList<XELF_DEF::Elf32_Sym> XELF::getElf32_SymList(qint64 nOffset, qint64 nSize)
+QList<XELF_DEF::Elf32_Sym> XELF::getElf32_SymList(qint64 nOffset,qint64 nSize)
 {
     QList<XELF_DEF::Elf32_Sym> listResult;
 
