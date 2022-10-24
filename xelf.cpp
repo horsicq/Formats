@@ -3452,7 +3452,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProg
     return listResult;
 }
 
-QList<XELF::TAG_STRUCT> XELF::_getTagStructs(qint64 nOffset, qint64 nSize, bool bIs64, bool bIsBigEndian)
+QList<XELF::TAG_STRUCT> XELF::_getTagStructs(qint64 nOffset,qint64 nSize,bool bIs64,bool bIsBigEndian)
 {
     QList<TAG_STRUCT> listResult;
 
