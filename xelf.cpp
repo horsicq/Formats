@@ -4750,7 +4750,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> 
     return listResult;
 }
 
-QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs)
+QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pMemoryMap,QList<XELF::TAG_STRUCT> *pListTagStructs)
 {
     QList<XBinary::DATASET> listResult;
 
