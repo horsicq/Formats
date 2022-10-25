@@ -2652,7 +2652,7 @@ void XELF::setElf32_Phdr_memsz(quint32 nIndex, quint32 nValue)
     }
 }
 
-void XELF::setElf32_Phdr_flags(quint32 nIndex, quint32 nValue)
+void XELF::setElf32_Phdr_flags(quint32 nIndex,quint32 nValue)
 {
     quint32 nNumberOfPrograms=getHdr32_phnum();
     quint32 offset=getHdr32_phoff();
