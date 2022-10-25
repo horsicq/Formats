@@ -821,7 +821,7 @@ QMap<quint64,QString> XELF::getIndentClassesS()
 
 QMap<quint64,QString> XELF::getIndentDatas()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0,"ELFDATANONE");
     mapResult.insert(1,"ELFDATA2LSB");

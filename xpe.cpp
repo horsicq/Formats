@@ -1562,7 +1562,7 @@ void XPE::setSection_PointerToRawData(quint32 nNumber, quint32 nValue)
     }
 }
 
-void XPE::setSection_PointerToRelocations(quint32 nNumber, quint32 nValue)
+void XPE::setSection_PointerToRelocations(quint32 nNumber,quint32 nValue)
 {
     quint32 nNumberOfSections=getFileHeader_NumberOfSections();
 
