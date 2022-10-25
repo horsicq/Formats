@@ -751,7 +751,7 @@ qint64 XBinary::write_array(qint64 nOffset,char *pBuffer,qint64 nSize)
     return nResult;
 }
 
-qint64 XBinary::write_array(qint64 nOffset, QByteArray baData)
+qint64 XBinary::write_array(qint64 nOffset,QByteArray baData)
 {
     return write_array(nOffset,baData.data(),baData.size());
 }
