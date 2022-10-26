@@ -1284,7 +1284,7 @@ QMap<quint32,QString> XELF::getStringsFromSectionData(QByteArray *pbaData)
     return mapResult;
 }
 
-QString XELF::getStringFromSection(quint32 nIndex, quint32 nSection)
+QString XELF::getStringFromSection(quint32 nIndex,quint32 nSection)
 {
     QString sResult;
 
