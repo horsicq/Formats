@@ -1194,7 +1194,7 @@ QMap<quint64,QString> XELF::getProgramFlags()
 
 QMap<quint64,QString> XELF::getProgramFlagsS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0x00000001,"X");
     mapResult.insert(0x00000002,"W");
