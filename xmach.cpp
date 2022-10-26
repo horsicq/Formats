@@ -948,7 +948,7 @@ XMACH::COMMAND_RECORD XMACH::_readLoadCommand(qint64 nOffset,bool bIsBigEndian)
     return result;
 }
 
-void XMACH::_setCommand_cmd(qint64 nOffset, quint32 nValue)
+void XMACH::_setCommand_cmd(qint64 nOffset,quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmd),nValue,isBigEndian());
 }
