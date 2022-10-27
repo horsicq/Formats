@@ -1636,7 +1636,7 @@ quint32 XPE::getSection_VirtualSize(quint32 nNumber,QList<XPE_DEF::IMAGE_SECTION
     return nResult;
 }
 
-quint32 XPE::getSection_VirtualAddress(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+quint32 XPE::getSection_VirtualAddress(quint32 nNumber,QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
 {
     quint32 nResult=0;
 
