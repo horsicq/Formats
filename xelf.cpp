@@ -509,7 +509,7 @@ QMap<quint64,QString> XELF::getTypes()
 
 QMap<quint64,QString> XELF::getTypesS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64,QString> mapResult;
 
     mapResult.insert(0,"NONE");
     mapResult.insert(1,"REL");
@@ -523,7 +523,7 @@ QMap<quint64,QString> XELF::getTypesS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getMachines()
+QMap<quint64,QString> XELF::getMachines()
 {
     QMap<quint64,QString> mapResult;
 
