@@ -3376,7 +3376,7 @@ bool XBinary::compareMemory(char *pMemory1,const char *pMemory2, qint64 nSize)
     return true;
 }
 
-bool XBinary::compareMemoryByteI(quint8 *pMemory, const quint8 *pMemoryU, const quint8 *pMemoryL, qint64 nSize)
+bool XBinary::compareMemoryByteI(quint8 *pMemory,const quint8 *pMemoryU,const quint8 *pMemoryL,qint64 nSize)
 {
     bool bResult=true;
 
