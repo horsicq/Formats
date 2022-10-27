@@ -953,7 +953,7 @@ void XMACH::_setCommand_cmd(qint64 nOffset,quint32 nValue)
     write_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmd),nValue,isBigEndian());
 }
 
-void XMACH::_setCommand_cmdsize(qint64 nOffset, quint32 nValue)
+void XMACH::_setCommand_cmdsize(qint64 nOffset,quint32 nValue)
 {
     write_uint32(nOffset+offsetof(XMACH_DEF::load_command,cmdsize),nValue,isBigEndian());
 }
