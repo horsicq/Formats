@@ -92,9 +92,17 @@ QString XPE::getArch()
 
 bool XPE::isBigEndian()
 {
-    // TODO Check Machine !!!
-    // TODO find samples
-    return false;
+    bool bResult=false;
+
+    quint16 nMachine=getFileHeader_Machine();
+
+    if( (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_R3000_BE)||
+        (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_POWERPC_BE))
+    {
+        bResult=true;
+    }
+
+    return bResult;
 }
 
 XBinary::OSINFO XPE::getOsInfo()

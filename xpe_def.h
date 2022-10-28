@@ -65,6 +65,7 @@ const quint32 S_IMAGE_FILE_BYTES_REVERSED_HI                =0x8000;  // Bytes o
 
 const quint32 S_IMAGE_FILE_MACHINE_UNKNOWN                  =0;
 const quint32 S_IMAGE_FILE_MACHINE_I386                     =0x014C;  // Intel 386.
+const quint32 S_IMAGE_FILE_MACHINE_R3000_BE                 =0x0160;
 const quint32 S_IMAGE_FILE_MACHINE_R3000                    =0x0162;  // MIPS little-endian, 0x160 big-endian
 const quint32 S_IMAGE_FILE_MACHINE_R4000                    =0x0166;  // MIPS little-endian
 const quint32 S_IMAGE_FILE_MACHINE_R10000                   =0x0168;  // MIPS little-endian
@@ -80,6 +81,7 @@ const quint32 S_IMAGE_FILE_MACHINE_THUMB                    =0x01C2;
 const quint32 S_IMAGE_FILE_MACHINE_AM33                     =0x01D3;
 const quint32 S_IMAGE_FILE_MACHINE_POWERPC                  =0x01F0;  // IBM PowerPC Little-Endian
 const quint32 S_IMAGE_FILE_MACHINE_POWERPCFP                =0x01F1;
+const quint32 S_IMAGE_FILE_MACHINE_POWERPC_BE               =0x01F2;
 const quint32 S_IMAGE_FILE_MACHINE_IA64                     =0x0200;  // Intel 64
 const quint32 S_IMAGE_FILE_MACHINE_MIPS16                   =0x0266;  // MIPS
 const quint32 S_IMAGE_FILE_MACHINE_ALPHA64                  =0x0284;  // ALPHA64
