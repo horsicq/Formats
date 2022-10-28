@@ -7701,6 +7701,10 @@ XBinary::DM XBinary::getDisasmMode(QString sArch,bool bIsBigEndian,MODE mode)
             dmResult=DM_PPC_LE;
         }
     }
+    else if(sArch=="POWERPC_BE")
+    {
+        dmResult=DM_PPC_BE;
+    }
     else if(sArch=="SPARC")
     {
         dmResult=DM_SPARC;
