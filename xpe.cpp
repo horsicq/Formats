@@ -11449,6 +11449,9 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachines()
 
     mapResult.insert(0,"IMAGE_FILE_MACHINE_UNKNOWN");
     mapResult.insert(0x014c,"IMAGE_FILE_MACHINE_I386");
+    mapResult.insert(0x014d,"IMAGE_FILE_MACHINE_I486");
+    mapResult.insert(0x014e,"IMAGE_FILE_MACHINE_PENTIUM");
+    mapResult.insert(0x0160,"IMAGE_FILE_MACHINE_R3000_BE");
     mapResult.insert(0x0162,"IMAGE_FILE_MACHINE_R3000");
     mapResult.insert(0x0166,"IMAGE_FILE_MACHINE_R4000");
     mapResult.insert(0x0168,"IMAGE_FILE_MACHINE_R10000");
@@ -11465,6 +11468,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachines()
     mapResult.insert(0x01d3,"IMAGE_FILE_MACHINE_AM33");
     mapResult.insert(0x01F0,"IMAGE_FILE_MACHINE_POWERPC");
     mapResult.insert(0x01f1,"IMAGE_FILE_MACHINE_POWERPCFP");
+    mapResult.insert(0x01f2,"IMAGE_FILE_MACHINE_POWERPC_BE");
     mapResult.insert(0x0200,"IMAGE_FILE_MACHINE_IA64");
     mapResult.insert(0x0266,"IMAGE_FILE_MACHINE_MIPS16");
     mapResult.insert(0x0284,"IMAGE_FILE_MACHINE_ALPHA64");
@@ -11490,6 +11494,9 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
 
     mapResult.insert(0,tr("Unknown"));
     mapResult.insert(0x014c,"I386");
+    mapResult.insert(0x014d,"I486");
+    mapResult.insert(0x014e,"PENTIUM");
+    mapResult.insert(0x0160,"R3000_BE");
     mapResult.insert(0x0162,"R3000");
     mapResult.insert(0x0166,"R4000");
     mapResult.insert(0x0168,"R10000");
@@ -11506,6 +11513,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
     mapResult.insert(0x01d3,"AM33");
     mapResult.insert(0x01F0,"POWERPC");
     mapResult.insert(0x01f1,"POWERPCFP");
+    mapResult.insert(0x01f2,"POWERPC_BE");
     mapResult.insert(0x0200,"IA64");
     mapResult.insert(0x0266,"MIPS16");
     mapResult.insert(0x0284,"ALPHA64");
