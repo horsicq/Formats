@@ -746,7 +746,7 @@ public:
 
     static void _write_value(MODE mode,char *pData,quint64 nValue,bool bIsBigEndian=false);
 
-    qint64 find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize,PDSTRUCT *pProcessData=nullptr);
+    qint64 find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize,PDSTRUCT *pPdStruct=nullptr);
     qint64 find_byteArray(qint64 nOffset,qint64 nSize,QByteArray baData,PDSTRUCT *pProcessData=nullptr);
     qint64 find_uint8(qint64 nOffset,qint64 nSize,quint8 nValue,PDSTRUCT *pProcessData=nullptr);
     qint64 find_int8(qint64 nOffset,qint64 nSize,qint8 nValue,PDSTRUCT *pProcessData=nullptr);

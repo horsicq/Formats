@@ -1705,15 +1705,15 @@ void XBinary::_write_value(MODE mode,char *pData,quint64 nValue,bool bIsBigEndia
     }
 }
 
-qint64 XBinary::find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize,PDSTRUCT *pProcessData)
+qint64 XBinary::find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64 nArraySize,PDSTRUCT *pPdStruct)
 {
     qint64 nResult=-1;
 
     PDSTRUCT processDataEmpty={};
 
-    if(!pProcessData)
+    if(!pPdStruct)
     {
-        pProcessData=&processDataEmpty;
+        pPdStruct=&processDataEmpty;
     }
     // TODO CheckSize function
     // TODO Optimize
@@ -1746,14 +1746,14 @@ qint64 XBinary::find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64
 
     qint64 nTemp=0;
 
-    qint32 _nFreeIndex=XBinary::getFreeIndex(pProcessData);
-    XBinary::setPdStructInit(pProcessData,_nFreeIndex,nSize);
+    qint32 _nFreeIndex=XBinary::getFreeIndex(pPdStruct);
+    XBinary::setPdStructInit(pPdStruct,_nFreeIndex,nSize);
 
     qint64 nStartOffset=nOffset;
 
     char *pBuffer=new char[READWRITE_BUFFER_SIZE+(nArraySize-1)];
 
-    while((nSize>nArraySize-1)&&(!(pProcessData->bIsStop)))
+    while((nSize>nArraySize-1)&&(!(pPdStruct->bIsStop)))
     {
         nTemp=qMin((qint64)(READWRITE_BUFFER_SIZE+(nArraySize-1)),nSize);
 
@@ -1777,12 +1777,12 @@ qint64 XBinary::find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64
         nSize-=nTemp-(nArraySize-1);
         nOffset+=nTemp-(nArraySize-1);
 
-        XBinary::setPdStructCurrent(pProcessData,_nFreeIndex,nOffset-nStartOffset);
+        XBinary::setPdStructCurrent(pPdStruct,_nFreeIndex,nOffset-nStartOffset);
     }
 
     delete[] pBuffer;
 
-    setPdStructFinished(pProcessData,_nFreeIndex);
+    setPdStructFinished(pPdStruct,_nFreeIndex);
 
     return nResult;
 }
