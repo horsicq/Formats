@@ -2057,7 +2057,7 @@ void XELF::setElf64_Shdr_size(quint32 nIndex,quint64 nValue)
     }
 }
 
-void XELF::setElf64_Shdr_link(quint32 nIndex, quint32 nValue)
+void XELF::setElf64_Shdr_link(quint32 nIndex,quint32 nValue)
 {
     quint32 nNumberOfSections=getHdr64_shnum();
     quint64 offset=getHdr64_shoff();
@@ -2070,7 +2070,7 @@ void XELF::setElf64_Shdr_link(quint32 nIndex, quint32 nValue)
     }
 }
 
-void XELF::setElf64_Shdr_info(quint32 nIndex, quint32 nValue)
+void XELF::setElf64_Shdr_info(quint32 nIndex,quint32 nValue)
 {
     quint32 nNumberOfSections=getHdr64_shnum();
     quint64 offset=getHdr64_shoff();
