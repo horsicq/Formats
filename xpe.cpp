@@ -49,7 +49,7 @@ bool XPE::isValid()
     return bResult;
 }
 
-bool XPE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+bool XPE::isValid(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     XPE xpe(pDevice,bIsImage,nModuleAddress);
 
