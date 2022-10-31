@@ -56,7 +56,7 @@ bool XPE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     return xpe.isValid();
 }
 
-XBinary::MODE XPE::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+XBinary::MODE XPE::getMode(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     XPE xpe(pDevice,bIsImage,nModuleAddress);
 
