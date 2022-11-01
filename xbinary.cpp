@@ -3334,7 +3334,7 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
     return true;
 }
 
-bool XBinary::compareMemory(char *pMemory1,const char *pMemory2, qint64 nSize)
+bool XBinary::compareMemory(char *pMemory1,const char *pMemory2,qint64 nSize)
 {
     while(nSize>0)
     {
