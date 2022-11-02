@@ -616,7 +616,7 @@ public:
     virtual QString getArch();
 
     void setFileFormatName(QString sFileFormatName);
-    virtual QString getFileFormatName();
+    virtual QString getFileFormatString();
 
     void setFileFormatSize(qint64 nFileFormatSize);
     virtual qint64 getFileFormatSize();

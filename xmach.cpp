@@ -47,7 +47,7 @@ bool XMACH::isValid()
     return bResult;
 }
 
-bool XMACH::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+bool XMACH::isValid(QIODevice *pDevice,bool bIsImage,XADDR nModuleAddress)
 {
     XMACH xmach(pDevice,bIsImage,nModuleAddress);
 

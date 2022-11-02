@@ -300,7 +300,7 @@ void XBinary::setFileFormatName(QString sFileFormatName)
     g_sFileFormatName=sFileFormatName;
 }
 
-QString XBinary::getFileFormatName()
+QString XBinary::getFileFormatString()
 {
     // TODO baseFileName from pDevice
     return g_sFileFormatName;
@@ -448,7 +448,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_MACHO32:            sResult=QString("Mach-O32");        break;
         case FT_MACHO64:            sResult=QString("Mach-O64");        break;
         // Extra
-        case FT_7Z:                 sResult=QString("7Z");              break;
+        case FT_7Z:                 sResult=QString("7-Zip");           break;
         case FT_ANDROIDASRC:        sResult=QString("Android ASRC");    break;
         case FT_ANDROIDXML:         sResult=QString("Android XML");     break;
         case FT_APK:                sResult=QString("APK");             break;
@@ -1772,6 +1772,11 @@ qint64 XBinary::find_array(qint64 nOffset,qint64 nSize,const char *pArray,qint64
 
                 break;
             }
+        }
+
+        if(nResult!=-1)
+        {
+            break;
         }
 
         nSize-=nTemp-(nArraySize-1);
