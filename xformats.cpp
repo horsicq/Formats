@@ -930,6 +930,80 @@ QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice, 
 
     return sResult;
 }
+
+QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    QString sResult;
+
+    if(XBinary::checkFileType(XBinary::FT_COM,fileType))
+    {
+        XCOM com(pDevice,bIsImage,nModuleAddress);
+        sResult=com.getFileFormatExt();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MSDOS,fileType))
+    {
+        XMSDOS msdos(pDevice,bIsImage,nModuleAddress);
+        sResult=msdos.getFileFormatExt();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_NE,fileType))
+    {
+        XNE ne(pDevice,bIsImage,nModuleAddress);
+        sResult=ne.getFileFormatExt();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_LE,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        sResult=le.getFileFormatExt();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_LX,fileType))
+    {
+        XLE le(pDevice,bIsImage,nModuleAddress);
+        sResult=le.getFileFormatExt();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_PE,fileType))
+    {
+        XPE pe(pDevice,bIsImage,nModuleAddress);
+        sResult=pe.getFileFormatExt();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_ELF,fileType))
+    {
+        XELF elf(pDevice,bIsImage,nModuleAddress);
+        sResult=elf.getFileFormatExt();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_MACHO,fileType))
+    {
+        XMACH mach(pDevice,bIsImage,nModuleAddress);
+        sResult=mach.getFileFormatExt();
+    }
+#ifdef USE_DEX
+    else if(XBinary::checkFileType(XBinary::FT_DEX,fileType))
+    {
+        XDEX dex(pDevice);
+        sResult=dex.getFileFormatExt();
+    }
+#endif
+#ifdef USE_PDF
+    else if(XBinary::checkFileType(XBinary::FT_PDF,fileType))
+    {
+        XPDF pdf(pDevice);
+        sResult=pdf.getFileFormatExt();
+    }
+#endif
+#ifdef USE_ARCHIVE
+    else if(XBinary::checkFileType(XBinary::FT_ZIP,fileType))
+    {
+        XZip zip(pDevice);
+        sResult=zip.getFileFormatExt();
+    }
+    else if(XBinary::checkFileType(XBinary::FT_7Z,fileType))
+    {
+        XSevenZip zip(pDevice);
+        sResult=zip.getFileFormatExt();
+    }
+#endif
+
+    return sResult;
+}
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice,XArchive::RECORD *pRecord,bool bExtra)
 {

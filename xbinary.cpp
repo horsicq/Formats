@@ -295,15 +295,30 @@ QString XBinary::getArch()
     return g_sArch;
 }
 
-void XBinary::setFileFormatName(QString sFileFormatName)
+void XBinary::setFileFormatName(QString sFileFormatString)
 {
-    g_sFileFormatName=sFileFormatName;
+    g_sFileFormatString=sFileFormatString;
 }
 
 QString XBinary::getFileFormatString()
 {
-    // TODO baseFileName from pDevice
-    return g_sFileFormatName;
+#ifdef QT_DEBUG
+    qDebug("TODO: XBinary::getFileFormatString()");
+#endif
+    return g_sFileFormatString;
+}
+
+void XBinary::setFileFormatExt(QString sFileFormatExt)
+{
+    g_sFileFormatExt=sFileFormatExt;
+}
+
+QString XBinary::getFileFormatExt()
+{
+#ifdef QT_DEBUG
+    qDebug("TODO: XBinary::getFileFormatExt()");
+#endif
+    return g_sFileFormatExt;
 }
 
 void XBinary::setFileFormatSize(qint64 nFileFormatSize)
@@ -313,6 +328,10 @@ void XBinary::setFileFormatSize(qint64 nFileFormatSize)
 
 qint64 XBinary::getFileFormatSize()
 {
+#ifdef QT_DEBUG
+    qDebug("TODO: XBinary::setFileFormatSize()");
+#endif
+
     return g_nFileFormatSize;
 }
 
@@ -3511,7 +3530,7 @@ bool XBinary::isOffsetAndSizeValid(qint64 nOffset, qint64 nSize)
     return isOffsetAndSizeValid(&memoryMap,nOffset,nSize);
 }
 
-bool XBinary::isOffsetAndSizeValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize)
+bool XBinary::isOffsetAndSizeValid(XBinary::_MEMORY_MAP *pMemoryMap,qint64 nOffset,qint64 nSize)
 {
     bool bResult=false;
 

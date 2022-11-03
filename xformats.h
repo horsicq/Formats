@@ -68,6 +68,7 @@ public:
     static bool isValid(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
     static qint64 getFileFormatSize(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
     static QString getFileFormatString(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static QString getFileFormatExt(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
 #ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,XArchive::RECORD *pRecord,bool bExtra=false);
     static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice,QList<XArchive::RECORD> *pListRecords,qint32 nLevel=0);

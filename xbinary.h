@@ -589,6 +589,7 @@ public:
     explicit XBinary(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1); // mb TODO parent for signals/slot
     XBinary(QString sFileName);
     ~XBinary();
+
     void setData(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
     void setDevice(QIODevice *pDevice);
     void setReadWriteMutex(QMutex *pReadWriteMutex);
@@ -615,8 +616,11 @@ public:
     void setArch(QString sArch);
     virtual QString getArch();
 
-    void setFileFormatName(QString sFileFormatName);
+    void setFileFormatName(QString sFileFormatString);
     virtual QString getFileFormatString();
+
+    void setFileFormatExt(QString sFileFormatExt);
+    virtual QString getFileFormatExt();
 
     void setFileFormatSize(qint64 nFileFormatSize);
     virtual qint64 getFileFormatSize();
@@ -1343,7 +1347,8 @@ private:
     XADDR g_nModuleAddress;
     bool g_bIsBigEndian; // TODO enum
     QString g_sArch;
-    QString g_sFileFormatName;
+    QString g_sFileFormatString;
+    QString g_sFileFormatExt;
     qint64 g_nFileFormatSize;
     OSNAME g_osName;
     QString g_sOsVersion;
