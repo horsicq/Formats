@@ -5030,7 +5030,7 @@ void XELF::setElf64_Sym_st_other(qint64 nOffset, quint8 nValue)
     write_uint8(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_other),nValue);
 }
 
-void XELF::setElf64_Sym_st_shndx(qint64 nOffset, quint16 nValue, bool bIsBigEndian)
+void XELF::setElf64_Sym_st_shndx(qint64 nOffset,quint16 nValue,bool bIsBigEndian)
 {
     write_uint16(nOffset+offsetof(XELF_DEF::Elf64_Sym,st_shndx),nValue,bIsBigEndian);
 }
