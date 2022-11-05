@@ -34,9 +34,9 @@ ScanItem::~ScanItem()
     qDeleteAll(g_listChildItems);
 }
 
-void ScanItem::appendChild(ScanItem *pChild)
+void ScanItem::appendChild(ScanItem *pItemChild)
 {
-    g_listChildItems.append(pChild);
+    g_listChildItems.append(pItemChild);
 }
 
 ScanItem *ScanItem::child(int nRow)

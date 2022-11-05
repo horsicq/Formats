@@ -29,7 +29,7 @@ public:
     ScanItem(const QString &sString,ScanItem *pParentItem=nullptr,qint32 nNumberOfColumns=1,bool bIsParent=false);
     ~ScanItem();
 
-    void appendChild(ScanItem *pChild);
+    void appendChild(ScanItem *pItemChild);
     ScanItem *child(int nRow);
     int childCount() const;
     int columnCount() const;
