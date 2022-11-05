@@ -1443,7 +1443,7 @@ qint8 XBinary::_read_int8(char *pData)
     return *(qint8 *)pData;
 }
 
-quint16 XBinary::_read_uint16(char *pData, bool bIsBigEndian)
+quint16 XBinary::_read_uint16(char *pData,bool bIsBigEndian)
 {
     quint16 result=*(quint16 *)pData;
 
