@@ -1705,7 +1705,7 @@ void XELF::setElf32_Shdr_type(quint32 nIndex, quint32 nValue)
     }
 }
 
-void XELF::setElf32_Shdr_flags(quint32 nIndex, quint32 nValue)
+void XELF::setElf32_Shdr_flags(quint32 nIndex,quint32 nValue)
 {
     quint32 nNumberOfSections=getHdr32_shnum();
     quint32 offset=getHdr32_shoff();
