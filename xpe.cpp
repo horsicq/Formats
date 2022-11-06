@@ -1889,10 +1889,10 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap()
         nHeadersSize=(quint32)getSize();
     }
 
-    if(nFileAlignment==nSectionAlignment)
-    {
-        nFileAlignment=1;
-    }
+//    if(nFileAlignment==nSectionAlignment)
+//    {
+//        nFileAlignment=1;
+//    }
 
     quint32 nVirtualSizeofHeaders=S_ALIGN_UP(nHeadersSize,nSectionAlignment);
     qint64 nMaxOffset=0;
