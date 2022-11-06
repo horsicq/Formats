@@ -107,11 +107,11 @@ QModelIndex ScanItemModel::index(int nRow,int nColumn,const QModelIndex &parent)
             pParentItem=static_cast<ScanItem *>(parent.internalPointer());
         }
 
-        ScanItem *pChildItem=pParentItem->child(nRow);
+        ScanItem *pItemChild=pParentItem->child(nRow);
 
-        if(pChildItem)
+        if(pItemChild)
         {
-            result=createIndex(nRow,nColumn,pChildItem);
+            result=createIndex(nRow,nColumn,pItemChild);
         }
     }
 
