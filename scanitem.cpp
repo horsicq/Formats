@@ -20,9 +20,9 @@
  */
 #include "scanitem.h"
 
-ScanItem::ScanItem(const QString &sString,ScanItem *pParentItem,qint32 nNumberOfColumns,bool bIsParent)
+ScanItem::ScanItem(const QString &sString,ScanItem *pItemParent,qint32 nNumberOfColumns,bool bIsParent)
 {
-    g_pParentItem=pParentItem;
+    g_pParentItem=pItemParent;
     g_sString=sString;
     g_nNumberOfColumns=nNumberOfColumns;
     g_bIsParent=bIsParent;

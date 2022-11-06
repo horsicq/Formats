@@ -26,7 +26,7 @@
 class ScanItem
 {
 public:
-    ScanItem(const QString &sString,ScanItem *pParentItem=nullptr,qint32 nNumberOfColumns=1,bool bIsParent=false);
+    ScanItem(const QString &sString,ScanItem *pItemParent=nullptr,qint32 nNumberOfColumns=1,bool bIsParent=false);
     ~ScanItem();
 
     void appendChild(ScanItem *pItemChild);
