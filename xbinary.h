@@ -387,7 +387,8 @@ public:
         OSNAME_OPENVOS,
         OSNAME_MCLINUX,
         OSNAME_QNX,
-        OSNAME_SYLLABLE
+        OSNAME_SYLLABLE,
+        OSNAME_MINIX
         // TODO more
     };
 

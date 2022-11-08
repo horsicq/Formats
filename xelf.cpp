@@ -4453,7 +4453,6 @@ XBinary::OSINFO XELF::getOsInfo()
     if(result.osName==OSNAME_UNIX)
     {
         if( isNotePresent(&listNotes,"Android")||
-            isSectionNamePresent(".note.android.ident",&listSectionRecords)||
             (XBinary::isStringInListPresent(&listLibraries,"liblog.so"))||
             ((sInterpteter=="system/bin/linker")||(sInterpteter=="system/bin/linker64")))
         {
@@ -4483,6 +4482,14 @@ XBinary::OSINFO XELF::getOsInfo()
         QString sABI=QString("ABI: %1.%2.%3").arg(QString::number(nMajor),QString::number(nMinor),QString::number(nSubMinor));
 
         result.sOsVersion=appendText(result.sOsVersion,sABI,",");
+    }
+
+    if(result.osName==OSNAME_UNIX)
+    {
+        if      (isSectionNamePresent(".note.android.ident",&listSectionRecords))   result.osName=OSNAME_ANDROID;
+        else if (isSectionNamePresent(".note.minix.ident",&listSectionRecords))     result.osName=OSNAME_MINIX;
+        else if (isSectionNamePresent(".note.netbsd.ident",&listSectionRecords))    result.osName=OSNAME_NETBSD;
+        else if (isSectionNamePresent(".note.openbsd.ident",&listSectionRecords))   result.osName=OSNAME_OPENBSD;
     }
 
     if(result.osName==OSNAME_UNIX)

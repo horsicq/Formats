@@ -3224,10 +3224,10 @@ void XBinary::_zeroMemory(char *pDest, qint64 nSize)
     }
 }
 
-bool XBinary::_isMemoryZeroFilled(char *pDest, qint64 nSize)
+bool XBinary::_isMemoryZeroFilled(char *pDest,qint64 nSize)
 {
     bool bResult=true;
-
+    // TODO optimize
     while(nSize)
     {
         if(*pDest)
@@ -3749,7 +3749,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByAddress(XBinary::_MEMORY_MAP *
     return result;
 }
 
-XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
+XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByRelAddress(XBinary::_MEMORY_MAP *pMemoryMap,qint64 nRelAddress)
 {
     _MEMORY_RECORD result={};
 
@@ -7603,7 +7603,8 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_OPENVOS:            sResult=QString("Open VOS");                        break;
         case OSNAME_MCLINUX:            sResult=QString("mClinux");                         break;
         case OSNAME_QNX:                sResult=QString("QNX");                             break;
-        case OSNAME_SYLLABLE:           sResult=QString("Syllable ");                       break;
+        case OSNAME_SYLLABLE:           sResult=QString("Syllable");                        break;
+        case OSNAME_MINIX:              sResult=QString("Minix");                           break;
     }
 
     return sResult;
