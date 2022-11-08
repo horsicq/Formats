@@ -4648,7 +4648,7 @@ QString XMACH::typeIdToString(qint32 nType)
     return sResult;
 }
 
-XADDR XMACH::readOpcodes(quint32 nType, char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
+XADDR XMACH::readOpcodes(quint32 nType,char *pData,XADDR nAddress,qint64 nSize,QList<XBinary::OPCODE> *pListOpcodes,OPCODE_STATUS *pOpcodeStatus)
 {
     XADDR nResult=0;
 
