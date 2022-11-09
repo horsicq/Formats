@@ -356,6 +356,10 @@ public:
     virtual bool isSigned();
     virtual OFFSETSIZE getSignOffsetSize();
 
+    virtual QString getFileFormatString();
+    virtual QString getFileFormatExt();
+    virtual qint64 getFileFormatSize();
+
     qint64 getNtHeadersOffset();
     quint32 getNtHeaders_Signature();
     void setNtHeaders_Signature(quint32 nValue);

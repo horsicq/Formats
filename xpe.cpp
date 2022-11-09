@@ -97,7 +97,7 @@ bool XPE::isBigEndian()
     quint16 nMachine=getFileHeader_Machine();
 
     if( (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_R3000_BE)||
-        (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_POWERPC_BE))
+        (nMachine==XPE_DEF::S_IMAGE_FILE_MACHINE_POWERPCBE))
     {
         bResult=true;
     }
@@ -299,6 +299,38 @@ XBinary::OFFSETSIZE XPE::getSignOffsetSize()
     }
 
     return osResult;
+}
+
+QString XPE::getFileFormatString()
+{
+    QString sResult;
+
+    sResult=QString("PE(%1)").arg(getArch());
+
+    return sResult;
+}
+
+QString XPE::getFileFormatExt()
+{
+    QString sResult="exe";
+
+    TYPE _type=(TYPE)getType();
+
+    if(_type==TYPE_DLL)
+    {
+        sResult="dll";
+    }
+    else if((_type==TYPE_DRIVER)||(_type==TYPE_BOOTSERVICEDRIVER)||(_type==TYPE_RUNTIMEDRIVER))
+    {
+        sResult="sys";
+    }
+
+    return sResult;
+}
+
+qint64 XPE::getFileFormatSize()
+{
+    return _calculateRawSize();
 }
 
 qint64 XPE::getNtHeadersOffset()
@@ -11476,7 +11508,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachines()
     mapResult.insert(0x01d3,"IMAGE_FILE_MACHINE_AM33");
     mapResult.insert(0x01F0,"IMAGE_FILE_MACHINE_POWERPC");
     mapResult.insert(0x01f1,"IMAGE_FILE_MACHINE_POWERPCFP");
-    mapResult.insert(0x01f2,"IMAGE_FILE_MACHINE_POWERPC_BE");
+    mapResult.insert(0x01f2,"IMAGE_FILE_MACHINE_POWERPCBE");
     mapResult.insert(0x0200,"IMAGE_FILE_MACHINE_IA64");
     mapResult.insert(0x0266,"IMAGE_FILE_MACHINE_MIPS16");
     mapResult.insert(0x0284,"IMAGE_FILE_MACHINE_ALPHA64");
@@ -11521,7 +11553,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
     mapResult.insert(0x01d3,"AM33");
     mapResult.insert(0x01F0,"POWERPC");
     mapResult.insert(0x01f1,"POWERPCFP");
-    mapResult.insert(0x01f2,"POWERPC_BE");
+    mapResult.insert(0x01f2,"POWERPCBE");
     mapResult.insert(0x0200,"IA64");
     mapResult.insert(0x0266,"MIPS16");
     mapResult.insert(0x0284,"ALPHA64");
