@@ -3777,7 +3777,7 @@ qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
     return nResult;
 }
 
-bool XBinary::isSolidAddressRange(XBinary::_MEMORY_MAP *pMemoryMap, quint64 nAddress, qint64 nSize)
+bool XBinary::isSolidAddressRange(XBinary::_MEMORY_MAP *pMemoryMap,quint64 nAddress,qint64 nSize)
 {
     bool bResult=false;
 
