@@ -26,7 +26,7 @@
 class XIODevice : public QIODevice {
     Q_OBJECT
 
-   public:
+public:
     XIODevice(QObject *pParent);
 
     void setSize(quint64 nSize);
@@ -42,12 +42,12 @@ class XIODevice : public QIODevice {
     virtual void close();
     virtual qint64 pos() const;
 
-   protected:
+protected:
     virtual qint64 readData(char *pData, qint64 nMaxSize);
     virtual qint64 writeData(const char *pData, qint64 nMaxSize);
     virtual void setErrorString(const QString &sString);
 
-   private:
+private:
     quint64 g_nSize;
     quint64 g_nInitOffset;
 };

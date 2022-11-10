@@ -27,21 +27,19 @@
 class XCOM : public XBinary {
     Q_OBJECT
 
-   public:
+public:
     enum TYPE {
         TYPE_UNKNOWN = 0,
-        TYPE_EXE
+        TYPE_EXECUTABLE
         // TODO more
     };
 
-    explicit XCOM(QIODevice *pDevice = nullptr, bool bIsImage = false,
-                  XADDR nModuleAddress = -1);
+    explicit XCOM(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XCOM();
+
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice, bool bIsImage = false,
-                        XADDR nModuleAddress = -1);
-    static MODE getMode(QIODevice *pDevice, bool bIsImage = false,
-                        XADDR nModuleAddress = -1);
+    static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
+    static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual QString getArch();

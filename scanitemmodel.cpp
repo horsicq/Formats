@@ -20,9 +20,7 @@
  */
 #include "scanitemmodel.h"
 
-ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,
-                             int nNumberOfColumns)
-    : QAbstractItemModel(0) {
+ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns) : QAbstractItemModel(0) {
     g_pRootItem = new ScanItem(tr("Result"), nullptr, nNumberOfColumns, true);
     XBinary::SCANSTRUCT emptySS = {};
     g_pRootItem->setScanStruct(emptySS);
@@ -38,21 +36,17 @@ ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,
             if (pListScanStructs->at(i).parentId.sUuid == "") {
                 _itemParent = g_pRootItem;
             } else {
-                _itemParent =
-                    mapParents.value(pListScanStructs->at(i).parentId.sUuid);
+                _itemParent = mapParents.value(pListScanStructs->at(i).parentId.sUuid);
             }
 
             if (_itemParent == nullptr) {
                 _itemParent = g_pRootItem;
             }
 
-            QString sParent =
-                XBinary::createTypeString(&pListScanStructs->at(i));
+            QString sParent = XBinary::createTypeString(&pListScanStructs->at(i));
 
-            ScanItem *pItemParent =
-                new ScanItem(sParent, _itemParent, nNumberOfColumns, true);
-            XBinary::SCANSTRUCT ss =
-                XBinary::createHeaderScanStruct(&pListScanStructs->at(i));
+            ScanItem *pItemParent = new ScanItem(sParent, _itemParent, nNumberOfColumns, true);
+            XBinary::SCANSTRUCT ss = XBinary::createHeaderScanStruct(&pListScanStructs->at(i));
             pItemParent->setScanStruct(ss);
             _itemParent->appendChild(pItemParent);
 
@@ -60,23 +54,21 @@ ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,
         }
 
         if (pListScanStructs->at(i).sName != "") {
-            ScanItem *pItemParent =
-                mapParents.value(pListScanStructs->at(i).id.sUuid);
+            ScanItem *pItemParent = mapParents.value(pListScanStructs->at(i).id.sUuid);
 
-            QString sItem =
-                XBinary::createResultString2(&pListScanStructs->at(i));
-            ScanItem *pItem =
-                new ScanItem(sItem, pItemParent, nNumberOfColumns, false);
+            QString sItem = XBinary::createResultString2(&pListScanStructs->at(i));
+            ScanItem *pItem = new ScanItem(sItem, pItemParent, nNumberOfColumns, false);
             pItem->setScanStruct(pListScanStructs->at(i));
             pItemParent->appendChild(pItem);
         }
     }
 }
 
-ScanItemModel::~ScanItemModel() { delete g_pRootItem; }
+ScanItemModel::~ScanItemModel() {
+    delete g_pRootItem;
+}
 
-QVariant ScanItemModel::headerData(int nSection, Qt::Orientation orientation,
-                                   int nRole) const {
+QVariant ScanItemModel::headerData(int nSection, Qt::Orientation orientation, int nRole) const {
     QVariant result;
 
     if ((orientation == Qt::Horizontal) && (nRole == Qt::DisplayRole)) {
@@ -86,8 +78,7 @@ QVariant ScanItemModel::headerData(int nSection, Qt::Orientation orientation,
     return result;
 }
 
-QModelIndex ScanItemModel::index(int nRow, int nColumn,
-                                 const QModelIndex &parent) const {
+QModelIndex ScanItemModel::index(int nRow, int nColumn, const QModelIndex &parent) const {
     QModelIndex result;
 
     if (hasIndex(nRow, nColumn, parent)) {
@@ -146,8 +137,7 @@ int ScanItemModel::columnCount(const QModelIndex &parent) const {
     int nResult = 0;
 
     if (parent.isValid()) {
-        nResult =
-            static_cast<ScanItem *>(parent.internalPointer())->columnCount();
+        nResult = static_cast<ScanItem *>(parent.internalPointer())->columnCount();
     } else {
         nResult = g_pRootItem->columnCount();
     }
@@ -249,7 +239,9 @@ QString ScanItemModel::toFormattedString() {
     return sResult;
 }
 
-void ScanItemModel::coloredOutput() { _coloredOutput(g_pRootItem, 0); }
+void ScanItemModel::coloredOutput() {
+    _coloredOutput(g_pRootItem, 0);
+}
 
 QString ScanItemModel::toString(XBinary::FORMATTYPE formatType) {
     QString sResult;
@@ -269,10 +261,11 @@ QString ScanItemModel::toString(XBinary::FORMATTYPE formatType) {
     return sResult;
 }
 
-ScanItem *ScanItemModel::rootItem() { return this->g_pRootItem; }
+ScanItem *ScanItemModel::rootItem() {
+    return this->g_pRootItem;
+}
 
-void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem,
-                           qint32 nLevel) {
+void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLevel) {
     if (pItem->childCount()) {
         pXml->writeStartElement(pItem->data(0).toString());
 
@@ -296,19 +289,15 @@ void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem,
     }
 }
 
-void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem,
-                            qint32 nLevel) {
+void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nLevel) {
     if (pItem->childCount()) {
         XBinary::SCANSTRUCT ss = pItem->scanStruct();
 
         QString sArrayName = "detects";
 
         if (ss.id.filePart != XBinary::FILEPART_UNKNOWN) {
-            pJsonObject->insert(
-                "parentfilepart",
-                XBinary::recordFilePartIdToString(ss.parentId.filePart));
-            pJsonObject->insert("filetype",
-                                XBinary::fileTypeIdToString(ss.id.fileType));
+            pJsonObject->insert("parentfilepart", XBinary::recordFilePartIdToString(ss.parentId.filePart));
+            pJsonObject->insert("filetype", XBinary::fileTypeIdToString(ss.id.fileType));
 
             sArrayName = "values";
         }
@@ -347,9 +336,7 @@ void ScanItemModel::_toCSV(QString *pString, ScanItem *pItem, qint32 nLevel) {
     } else {
         XBinary::SCANSTRUCT ss = pItem->scanStruct();
 
-        QString sResult = QString("%1;%2;%3;%4;%5\n")
-                              .arg(ss.sType, ss.sName, ss.sVersion, ss.sInfo,
-                                   pItem->data(0).toString());
+        QString sResult = QString("%1;%2;%3;%4;%5\n").arg(ss.sType, ss.sName, ss.sVersion, ss.sInfo, pItem->data(0).toString());
 
         pString->append(sResult);
     }
@@ -365,20 +352,16 @@ void ScanItemModel::_toTSV(QString *pString, ScanItem *pItem, qint32 nLevel) {
     } else {
         XBinary::SCANSTRUCT ss = pItem->scanStruct();
 
-        QString sResult = QString("%1\t%2\t%3\t%4\t%5\n")
-                              .arg(ss.sType, ss.sName, ss.sVersion, ss.sInfo,
-                                   pItem->data(0).toString());
+        QString sResult = QString("%1\t%2\t%3\t%4\t%5\n").arg(ss.sType, ss.sName, ss.sVersion, ss.sInfo, pItem->data(0).toString());
 
         pString->append(sResult);
     }
 }
 
-void ScanItemModel::_toFormattedString(QString *pString, ScanItem *pItem,
-                                       qint32 nLevel) {
+void ScanItemModel::_toFormattedString(QString *pString, ScanItem *pItem, qint32 nLevel) {
     if (nLevel) {
         QString sResult;
-        sResult =
-            sResult.leftJustified(4 * (nLevel - 1), ' ');  // TODO function !!!
+        sResult = sResult.leftJustified(4 * (nLevel - 1), ' ');  // TODO function !!!
         sResult.append(QString("%1\n").arg(pItem->data(0).toString()));
         pString->append(sResult);
     }
@@ -449,14 +432,11 @@ void ScanItemModel::_coloredItem(ScanItem *pItem) {
         } else if (pItem->scanStruct().globalColor == Qt::darkGreen) {
             wAttribute = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
         } else if (pItem->scanStruct().globalColor == Qt::darkYellow) {
-            wAttribute =
-                FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+            wAttribute = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
         } else if (pItem->scanStruct().globalColor == Qt::darkMagenta) {
-            wAttribute =
-                FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+            wAttribute = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
         } else if (pItem->scanStruct().globalColor == Qt::darkCyan) {
-            wAttribute =
-                FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+            wAttribute = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
         }
 
         if (wAttribute) {

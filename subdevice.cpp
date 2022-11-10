@@ -20,9 +20,7 @@
  */
 #include "subdevice.h"
 
-SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize,
-                     QObject *pParent)
-    : XIODevice(pParent) {
+SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize, QObject *pParent) : XIODevice(pParent) {
     if (nOffset > pDevice->size()) {
         nOffset = pDevice->size();
     }
@@ -67,7 +65,9 @@ bool SubDevice::seek(qint64 nPos) {
     return bResult;
 }
 
-bool SubDevice::reset() { return seek(0); }
+bool SubDevice::reset() {
+    return seek(0);
+}
 
 qint64 SubDevice::readData(char *pData, qint64 nMaxSize) {
     nMaxSize = qMin(nMaxSize, size() - pos());

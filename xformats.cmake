@@ -1,5 +1,5 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR})
-
+include_directories(${CMAKE_CURRENT_LIST_DIR}/images)
 # TODO
 
 set(XFORMATS_SOURCES
@@ -13,4 +13,9 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/xmach.cpp
     ${CMAKE_CURRENT_LIST_DIR}/subdevice.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xformats.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/images/xicon.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/images/xbmp.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/images/xgif.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/images/xpng.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/images/xjpeg.cpp
 )

@@ -71,6 +71,31 @@ contains(XCONFIG, use_archive) {
     }
 }
 
+!contains(XCONFIG, xicon) {
+    XCONFIG += xicon
+    include($$PWD/images/xicon.pri)
+}
+
+!contains(XCONFIG, xgif) {
+    XCONFIG += xgif
+    include($$PWD/images/xgif.pri)
+}
+
+!contains(XCONFIG, xbmp) {
+    XCONFIG += xbmp
+    include($$PWD/images/xbmp.pri)
+}
+
+!contains(XCONFIG, xpng) {
+    XCONFIG += xpng
+    include($$PWD/images/xpng.pri)
+}
+
+!contains(XCONFIG, xjpeg) {
+    XCONFIG += xjpeg
+    include($$PWD/images/xjpeg.pri)
+}
+
 DISTFILES += \
     $$PWD/LICENSE \
     $$PWD/README.md \

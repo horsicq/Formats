@@ -20,11 +20,10 @@
  */
 #include "xformats.h"
 
-XFormats::XFormats(QObject *pParent) : QObject(pParent) {}
+XFormats::XFormats(QObject *pParent) : QObject(pParent) {
+}
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,
-                                            QIODevice *pDevice, bool bIsImage,
-                                            XADDR nModuleAddress) {
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     XBinary::_MEMORY_MAP result = {};
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -81,8 +80,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType,
     return result;
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage,
-                                            XADDR nModuleAddress) {
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage, XADDR nModuleAddress) {
     XBinary::_MEMORY_MAP result = {};
 
     QFile file;
@@ -90,8 +88,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage,
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        result = getMemoryMap(XBinary::getPrefFileType(&file, true), &file,
-                              bIsImage, nModuleAddress);
+        result = getMemoryMap(XBinary::getPrefFileType(&file, true), &file, bIsImage, nModuleAddress);
 
         file.close();
     }
@@ -99,8 +96,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage,
     return result;
 }
 
-qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice,
-                                      bool bIsImage, XADDR nModuleAddress) {
+qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     // TODO pMemoryMap
     qint64 nResult = 0;  // FT_DEX, FT_ZIP
 
@@ -138,8 +134,7 @@ qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice,
     return nResult;
 }
 
-qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice,
-                                     bool bIsImage, XADDR nModuleAddress) {
+qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     qint64 nResult = 0;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -176,8 +171,7 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice,
     return nResult;
 }
 
-bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice,
-                           bool bIsImage, XADDR nModuleAddress) {
+bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     bool bResult = false;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -233,8 +227,7 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice,
     return bResult;
 }
 
-bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
-                        XADDR nModuleAddress) {
+bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     bool bResult = false;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -290,10 +283,7 @@ bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
     return bResult;
 }
 
-XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType,
-                                                QIODevice *pDevice,
-                                                bool bIsImage,
-                                                XADDR nModuleAddress) {
+XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     XBinary::OFFSETSIZE osResult = {};
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -354,8 +344,7 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(QString sFileName) {
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        result =
-            getSignOffsetSize(XBinary::getPrefFileType(&file, true), &file);
+        result = getSignOffsetSize(XBinary::getPrefFileType(&file, true), &file);
 
         file.close();
     }
@@ -379,9 +368,8 @@ bool XFormats::isSigned(QString sFileName) {
     return bResult;
 }
 
-QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(
-    XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
-    XADDR nModuleAddress, XBinary::SYMBOL_TYPE symBolType) {
+QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress,
+                                                         XBinary::SYMBOL_TYPE symBolType) {
     QList<XBinary::SYMBOL_RECORD> listResult;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -462,8 +450,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra) {
     return _getFileTypes(pDevice, bExtra, 0);
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset,
-                                         qint64 nSize, bool bExtra) {
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra) {
     QSet<XBinary::FT> result;
 
     if (nOffset >= 0) {
@@ -511,8 +498,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra) {
     return stResult;
 }
 
-XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice,
-                                    bool bIsImage, XADDR nModuleAddress) {
+XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     XBinary::OSINFO result = {};
 
     if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
@@ -544,8 +530,7 @@ XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice,
     return result;
 }
 
-bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
-                       XADDR nModuleAddress) {
+bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     bool bResult = false;
 
     if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
@@ -598,8 +583,7 @@ bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
     return bResult;
 }
 
-qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice,
-                                   bool bIsImage, XADDR nModuleAddress) {
+qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     qint64 nResult = 0;
 
     if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
@@ -652,8 +636,7 @@ qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice,
     return nResult;
 }
 
-QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice,
-                                      bool bIsImage, XADDR nModuleAddress) {
+QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     QString sResult;
 
     if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
@@ -706,8 +689,7 @@ QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice,
     return sResult;
 }
 
-QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice,
-                                   bool bIsImage, XADDR nModuleAddress) {
+QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     QString sResult;
 
     if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
@@ -760,9 +742,7 @@ QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice,
     return sResult;
 }
 #ifdef USE_ARCHIVE
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice,
-                                         XArchive::RECORD *pRecord,
-                                         bool bExtra) {
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra) {
     QSet<XBinary::FT> stResult;
 
     QByteArray baData = XArchives::decompress(pDevice, pRecord, true);
@@ -773,17 +753,14 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice,
 }
 #endif
 #ifdef USE_ARCHIVE
-QSet<XBinary::FT> XFormats::getFileTypesZIP(
-    QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, qint32 nLevel) {
+QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, qint32 nLevel) {
     QSet<XBinary::FT> stResult;
 
-    if (XArchive::isArchiveRecordPresent("META-INF/MANIFEST.MF",
-                                         pListRecords)) {
+    if (XArchive::isArchiveRecordPresent("META-INF/MANIFEST.MF", pListRecords)) {
         stResult.insert(XBinary::FT_JAR);
     }
 
-    if (XArchive::isArchiveRecordPresent("classes.dex", pListRecords) ||
-        XArchive::isArchiveRecordPresent("AndroidManifest.xml", pListRecords)) {
+    if (XArchive::isArchiveRecordPresent("classes.dex", pListRecords) || XArchive::isArchiveRecordPresent("AndroidManifest.xml", pListRecords)) {
         stResult.insert(XBinary::FT_APK);
     }
 
@@ -792,9 +769,7 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(
     }
 
     if (nLevel == 0) {
-        if ((!stResult.contains(XBinary::FT_JAR)) &&
-            (!stResult.contains(XBinary::FT_APK)) &&
-            (!stResult.contains(XBinary::FT_IPA))) {
+        if ((!stResult.contains(XBinary::FT_JAR)) && (!stResult.contains(XBinary::FT_APK)) && (!stResult.contains(XBinary::FT_IPA))) {
             qint32 nNumberOfRecords = pListRecords->count();
 
             bool bAPKS = false;
@@ -804,16 +779,13 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(
             }
 
             for (qint32 i = 0; i < nNumberOfRecords; i++) {
-                if (pListRecords->at(i).compressMethod ==
-                    XArchive::COMPRESS_METHOD_STORE) {
+                if (pListRecords->at(i).compressMethod == XArchive::COMPRESS_METHOD_STORE) {
                     XArchive::RECORD record = pListRecords->at(i);
 
-                    SubDevice subDevice(pDevice, record.nDataOffset,
-                                        record.nUncompressedSize);
+                    SubDevice subDevice(pDevice, record.nDataOffset, record.nUncompressedSize);
 
                     if (subDevice.open(QIODevice::ReadOnly)) {
-                        QSet<XBinary::FT> _stResult =
-                            _getFileTypes(&subDevice, true, nLevel + 1);
+                        QSet<XBinary::FT> _stResult = _getFileTypes(&subDevice, true, nLevel + 1);
 
                         if (!(_stResult.contains(XBinary::FT_APK))) {
                             bAPKS = false;
@@ -839,8 +811,7 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(
     return stResult;
 }
 #endif
-QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra,
-                                          qint32 nLevel) {
+QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, qint32 nLevel) {
 #ifndef USE_ARCHIVE
     Q_UNUSED(nLevel);
 #endif
@@ -853,8 +824,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra,
         if (xzip.isValid()) {
             XBinary::PDSTRUCT pdStruct = {};
 
-            QList<XArchive::RECORD> listArchiveRecords =
-                xzip.getRecords(-1, &pdStruct);
+            QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(-1, &pdStruct);
 
             stResult += getFileTypesZIP(pDevice, &listArchiveRecords, nLevel);
         }
@@ -865,9 +835,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra,
 }
 
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType,
-                                          QIODevice *pDevice,
-                                          QComboBox *pComboBox) {
+XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 3, 0)
     const QSignalBlocker block(pComboBox);
 #else
@@ -895,8 +863,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType,
 
     if (nNumberOfListTypes) {
         if (fileType == XBinary::FT_UNKNOWN) {
-            if (pComboBox->itemData(nNumberOfListTypes - 1).toUInt() !=
-                XBinary::FT_COM) {
+            if (pComboBox->itemData(nNumberOfListTypes - 1).toUInt() != XBinary::FT_COM) {
                 pComboBox->setCurrentIndex(nNumberOfListTypes - 1);
             }
         } else {
@@ -920,8 +887,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType,
 }
 #endif
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(QString sFileName,
-                                          QComboBox *pComboBox) {
+XBinary::FT XFormats::setFileTypeComboBox(QString sFileName, QComboBox *pComboBox) {
     XBinary::FT result = XBinary::FT_UNKNOWN;
 
     QFile file;

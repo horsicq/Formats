@@ -74,9 +74,9 @@ struct IMAGE_VXD_HEADER  // Windows VXD header
     quint32 e32_debuglen;      // The length of the debugging info. in bytes
     quint32 e32_instpreload;   // Number of instance pages in preload section of
                                // VXD file
-    quint32 e32_instdemand;  // Number of instance pages in demand load section
-                             // of VXD file
-    quint32 e32_heapsize;    // Size of heap - for 16-bit apps
+    quint32 e32_instdemand;    // Number of instance pages in demand load section
+                               // of VXD file
+    quint32 e32_heapsize;      // Size of heap - for 16-bit apps
     //    BYTE   e32_res3[12];              // Reserved words
     //    DWORD  e32_winresoff;
     //    DWORD  e32_winreslen;

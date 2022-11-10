@@ -26,19 +26,18 @@
 class SubDevice : public XIODevice {
     Q_OBJECT
 
-   public:
-    SubDevice(QIODevice *pDevice, qint64 nOffset = 0, qint64 nSize = -1,
-              QObject *pParent = nullptr);
+public:
+    SubDevice(QIODevice *pDevice, qint64 nOffset = 0, qint64 nSize = -1, QObject *pParent = nullptr);
     ~SubDevice();
 
     virtual bool seek(qint64 nPos);
     virtual bool reset();
 
-   protected:
+protected:
     virtual qint64 readData(char *pData, qint64 nMaxSize);
     virtual qint64 writeData(const char *pData, qint64 nMaxSize);
 
-   private:
+private:
     QIODevice *g_pDevice;
 };
 

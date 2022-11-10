@@ -39,22 +39,18 @@
 class ScanItemModel : public QAbstractItemModel {
     Q_OBJECT
 
-   public:
+public:
     enum UD { UD_FILETYPE = 0, UD_NAME, UD_INFO };
 
-    explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,
-                           int nNumberOfColumns = 1);
+    explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns = 1);
     ~ScanItemModel() override;
 
-    QVariant headerData(int nSection, Qt::Orientation orientation,
-                        int nRole = Qt::DisplayRole) const override;
-    QModelIndex index(int nRow, int nColumn,
-                      const QModelIndex &parent = QModelIndex()) const override;
+    QVariant headerData(int nSection, Qt::Orientation orientation, int nRole = Qt::DisplayRole) const override;
+    QModelIndex index(int nRow, int nColumn, const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index,
-                  int nRole = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex &index, int nRole = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     QString toXML();
     QString toJSON();
@@ -65,7 +61,7 @@ class ScanItemModel : public QAbstractItemModel {
     QString toString(XBinary::FORMATTYPE formatType);
     ScanItem *rootItem();
 
-   private:
+private:
     void _toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLevel);
     void _toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nLevel);
     void _toCSV(QString *pString, ScanItem *pItem, qint32 nLevel);
@@ -74,7 +70,7 @@ class ScanItemModel : public QAbstractItemModel {
     void _coloredOutput(ScanItem *pItem, qint32 nLevel);
     void _coloredItem(ScanItem *pItem);
 
-   private:
+private:
     ScanItem *g_pRootItem;
 };
 

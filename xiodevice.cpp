@@ -25,15 +25,25 @@ XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent) {
     g_nInitOffset = 0;
 }
 
-void XIODevice::setSize(quint64 nSize) { g_nSize = nSize; }
+void XIODevice::setSize(quint64 nSize) {
+    g_nSize = nSize;
+}
 
-void XIODevice::setInitOffset(quint64 nOffset) { g_nInitOffset = nOffset; }
+void XIODevice::setInitOffset(quint64 nOffset) {
+    g_nInitOffset = nOffset;
+}
 
-quint64 XIODevice::getInitOffset() { return g_nInitOffset; }
+quint64 XIODevice::getInitOffset() {
+    return g_nInitOffset;
+}
 
-qint64 XIODevice::size() const { return g_nSize; }
+qint64 XIODevice::size() const {
+    return g_nSize;
+}
 
-bool XIODevice::isSequential() const { return false; }
+bool XIODevice::isSequential() const {
+    return false;
+}
 
 bool XIODevice::seek(qint64 nPos) {
     bool bResult = false;
@@ -45,7 +55,9 @@ bool XIODevice::seek(qint64 nPos) {
     return bResult;
 }
 
-bool XIODevice::reset() { return seek(0); }
+bool XIODevice::reset() {
+    return seek(0);
+}
 
 bool XIODevice::open(OpenMode mode) {
     setOpenMode(mode);
@@ -53,11 +65,17 @@ bool XIODevice::open(OpenMode mode) {
     return true;
 }
 
-bool XIODevice::atEnd() const { return (bytesAvailable() == 0); }
+bool XIODevice::atEnd() const {
+    return (bytesAvailable() == 0);
+}
 
-void XIODevice::close() { setOpenMode(NotOpen); }
+void XIODevice::close() {
+    setOpenMode(NotOpen);
+}
 
-qint64 XIODevice::pos() const { return QIODevice::pos(); }
+qint64 XIODevice::pos() const {
+    return QIODevice::pos();
+}
 
 qint64 XIODevice::readData(char *pData, qint64 nMaxSize) {
     Q_UNUSED(pData)

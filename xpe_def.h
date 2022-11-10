@@ -35,61 +35,42 @@ const quint32 S_IMAGE_DIRECTORY_ENTRY_SECURITY = 4;   // Security Directory
 const quint32 S_IMAGE_DIRECTORY_ENTRY_BASERELOC = 5;  // Base Relocation Table
 const quint32 S_IMAGE_DIRECTORY_ENTRY_DEBUG = 6;      // Debug Directory
 //      XPE_DEF::IMAGE_DIRECTORY_ENTRY_COPYRIGHT       7   // (X86 usage)
-const quint32 S_IMAGE_DIRECTORY_ENTRY_ARCHITECTURE =
-    7;  // Architecture Specific Data
-const quint32 S_IMAGE_DIRECTORY_ENTRY_GLOBALPTR = 8;  // RVA of GP
-const quint32 S_IMAGE_DIRECTORY_ENTRY_TLS = 9;        // TLS Directory
-const quint32 S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG =
-    10;  // Load Configuration Directory
-const quint32 S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT =
-    11;  // Bound Import Directory in headers
-const quint32 S_IMAGE_DIRECTORY_ENTRY_IAT = 12;  // Import Address Table
-const quint32 S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT =
-    13;  // Delay Load Import Descriptors
-const quint32 S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR =
-    14;  // COM Runtime descriptor
+const quint32 S_IMAGE_DIRECTORY_ENTRY_ARCHITECTURE = 7;     // Architecture Specific Data
+const quint32 S_IMAGE_DIRECTORY_ENTRY_GLOBALPTR = 8;        // RVA of GP
+const quint32 S_IMAGE_DIRECTORY_ENTRY_TLS = 9;              // TLS Directory
+const quint32 S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG = 10;     // Load Configuration Directory
+const quint32 S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT = 11;    // Bound Import Directory in headers
+const quint32 S_IMAGE_DIRECTORY_ENTRY_IAT = 12;             // Import Address Table
+const quint32 S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT = 13;    // Delay Load Import Descriptors
+const quint32 S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR = 14;  // COM Runtime descriptor
 
 const quint32 S_IMAGE_SIZEOF_FILE_HEADER = 20;
 
-const quint32 S_IMAGE_FILE_RELOCS_STRIPPED =
-    0x0001;  // Relocation info stripped from file.
-const quint32 S_IMAGE_FILE_EXECUTABLE_IMAGE =
-    0x0002;  // File is executable  (i.e. no unresolved externel references).
-const quint32 S_IMAGE_FILE_LINE_NUMS_STRIPPED =
-    0x0004;  // Line nunbers stripped from file.
-const quint32 S_IMAGE_FILE_LOCAL_SYMS_STRIPPED =
-    0x0008;  // Local symbols stripped from file.
-const quint32 S_IMAGE_FILE_AGGRESIVE_WS_TRIM =
-    0x0010;  // Agressively trim working set
-const quint32 S_IMAGE_FILE_LARGE_ADDRESS_AWARE =
-    0x0020;  // App can handle >2gb addresses
-const quint32 S_IMAGE_FILE_BYTES_REVERSED_LO =
-    0x0080;  // Bytes of machine quint16 are reversed.
-const quint32 S_IMAGE_FILE_32BIT_MACHINE = 0x0100;  // 32 bit quint16 machine.
-const quint32 S_IMAGE_FILE_DEBUG_STRIPPED =
-    0x0200;  // Debugging info stripped from file in .DBG file
-const quint32 S_IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP =
-    0x0400;  // If Image is on removable media, copy and run from the swap file.
-const quint32 S_IMAGE_FILE_NET_RUN_FROM_SWAP =
-    0x0800;  // If Image is on Net, copy and run from the swap file.
-const quint32 S_IMAGE_FILE_SYSTEM = 0x1000;  // System File.
-const quint32 S_IMAGE_FILE_DLL = 0x2000;     // File is a DLL.
-const quint32 S_IMAGE_FILE_UP_SYSTEM_ONLY =
-    0x4000;  // File should only be run on a UP machine
-const quint32 S_IMAGE_FILE_BYTES_REVERSED_HI =
-    0x8000;  // Bytes of machine quint16 are reversed.
+const quint32 S_IMAGE_FILE_RELOCS_STRIPPED = 0x0001;          // Relocation info stripped from file.
+const quint32 S_IMAGE_FILE_EXECUTABLE_IMAGE = 0x0002;         // File is executable  (i.e. no unresolved externel references).
+const quint32 S_IMAGE_FILE_LINE_NUMS_STRIPPED = 0x0004;       // Line nunbers stripped from file.
+const quint32 S_IMAGE_FILE_LOCAL_SYMS_STRIPPED = 0x0008;      // Local symbols stripped from file.
+const quint32 S_IMAGE_FILE_AGGRESIVE_WS_TRIM = 0x0010;        // Agressively trim working set
+const quint32 S_IMAGE_FILE_LARGE_ADDRESS_AWARE = 0x0020;      // App can handle >2gb addresses
+const quint32 S_IMAGE_FILE_BYTES_REVERSED_LO = 0x0080;        // Bytes of machine quint16 are reversed.
+const quint32 S_IMAGE_FILE_32BIT_MACHINE = 0x0100;            // 32 bit quint16 machine.
+const quint32 S_IMAGE_FILE_DEBUG_STRIPPED = 0x0200;           // Debugging info stripped from file in .DBG file
+const quint32 S_IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP = 0x0400;  // If Image is on removable media, copy and run from the swap file.
+const quint32 S_IMAGE_FILE_NET_RUN_FROM_SWAP = 0x0800;        // If Image is on Net, copy and run from the swap file.
+const quint32 S_IMAGE_FILE_SYSTEM = 0x1000;                   // System File.
+const quint32 S_IMAGE_FILE_DLL = 0x2000;                      // File is a DLL.
+const quint32 S_IMAGE_FILE_UP_SYSTEM_ONLY = 0x4000;           // File should only be run on a UP machine
+const quint32 S_IMAGE_FILE_BYTES_REVERSED_HI = 0x8000;        // Bytes of machine quint16 are reversed.
 
 const quint32 S_IMAGE_FILE_MACHINE_UNKNOWN = 0;
 const quint32 S_IMAGE_FILE_MACHINE_I386 = 0x014C;  // Intel 386.
 const quint32 S_IMAGE_FILE_MACHINE_R3000_BE = 0x0160;
-const quint32 S_IMAGE_FILE_MACHINE_R3000 =
-    0x0162;  // MIPS little-endian, 0x160 big-endian
-const quint32 S_IMAGE_FILE_MACHINE_R4000 = 0x0166;   // MIPS little-endian
-const quint32 S_IMAGE_FILE_MACHINE_R10000 = 0x0168;  // MIPS little-endian
-const quint32 S_IMAGE_FILE_MACHINE_WCEMIPSV2 =
-    0x0169;                                         // MIPS little-endian WCE v2
-const quint32 S_IMAGE_FILE_MACHINE_ALPHA = 0x0184;  // Alpha_AXP
-const quint32 S_IMAGE_FILE_MACHINE_SH3 = 0x01A2;    // SH3 little-endian
+const quint32 S_IMAGE_FILE_MACHINE_R3000 = 0x0162;      // MIPS little-endian, 0x160 big-endian
+const quint32 S_IMAGE_FILE_MACHINE_R4000 = 0x0166;      // MIPS little-endian
+const quint32 S_IMAGE_FILE_MACHINE_R10000 = 0x0168;     // MIPS little-endian
+const quint32 S_IMAGE_FILE_MACHINE_WCEMIPSV2 = 0x0169;  // MIPS little-endian WCE v2
+const quint32 S_IMAGE_FILE_MACHINE_ALPHA = 0x0184;      // Alpha_AXP
+const quint32 S_IMAGE_FILE_MACHINE_SH3 = 0x01A2;        // SH3 little-endian
 const quint32 S_IMAGE_FILE_MACHINE_SH3DSP = 0x01A3;
 const quint32 S_IMAGE_FILE_MACHINE_SH3E = 0x01A4;  // SH3E little-endian
 const quint32 S_IMAGE_FILE_MACHINE_SH4 = 0x01A6;   // SH4 little-endian
@@ -97,8 +78,7 @@ const quint32 S_IMAGE_FILE_MACHINE_SH5 = 0x01A8;   // SH5
 const quint32 S_IMAGE_FILE_MACHINE_ARM = 0x01C0;   // ARM Little-Endian
 const quint32 S_IMAGE_FILE_MACHINE_THUMB = 0x01C2;
 const quint32 S_IMAGE_FILE_MACHINE_AM33 = 0x01D3;
-const quint32 S_IMAGE_FILE_MACHINE_POWERPC =
-    0x01F0;  // IBM PowerPC Little-Endian
+const quint32 S_IMAGE_FILE_MACHINE_POWERPC = 0x01F0;  // IBM PowerPC Little-Endian
 const quint32 S_IMAGE_FILE_MACHINE_POWERPCFP = 0x01F1;
 const quint32 S_IMAGE_FILE_MACHINE_POWERPCBE = 0x01F2;
 const quint32 S_IMAGE_FILE_MACHINE_IA64 = 0x0200;       // Intel 64
@@ -553,17 +533,16 @@ enum ReplacesCorHdrNumericDefines {
     IMAGE_COR_MIH_EHRVA = 0x02,
     IMAGE_COR_MIH_BASICBLOCK = 0x08,
     // V-table constants
-    COR_VTABLE_32BIT = 0x01,           // V-table slots are 32-bits in size.
-    COR_VTABLE_64BIT = 0x02,           // V-table slots are 64-bits in size.
-    COR_VTABLE_FROM_UNMANAGED = 0x04,  // If set, transition from unmanaged.
-    COR_VTABLE_FROM_UNMANAGED_RETAIN_APPDOMAIN =
-        0x08,  // If set, transition from unmanaged with keeping the current
-               // appdomain.
-    COR_VTABLE_CALL_MOST_DERIVED = 0x10,  // Call most derived method described
-                                          // by EATJ constants
-    IMAGE_COR_EATJ_THUNK_SIZE = 32,  // Size of a jump thunk reserved range.
-                                     // Max name lengths
-                                     //@todo: Change to unlimited name lengths.
+    COR_VTABLE_32BIT = 0x01,                            // V-table slots are 32-bits in size.
+    COR_VTABLE_64BIT = 0x02,                            // V-table slots are 64-bits in size.
+    COR_VTABLE_FROM_UNMANAGED = 0x04,                   // If set, transition from unmanaged.
+    COR_VTABLE_FROM_UNMANAGED_RETAIN_APPDOMAIN = 0x08,  // If set, transition from unmanaged with keeping the current
+                                                        // appdomain.
+    COR_VTABLE_CALL_MOST_DERIVED = 0x10,                // Call most derived method described
+                                                        // by EATJ constants
+    IMAGE_COR_EATJ_THUNK_SIZE = 32,                     // Size of a jump thunk reserved range.
+                                                        // Max name lengths
+                                                        //@todo: Change to unlimited name lengths.
     MAX_CLASS_NAME = 1024,
     MAX_PACKAGE_NAME = 1024
 };
@@ -767,9 +746,9 @@ struct S_IMAGE_DELAYLOAD_DESCRIPTOR {
             quint32 ReservedAttributes : 31;
         } DUMMYSTRUCTNAME;
     };
-    quint32 DllNameRVA;       // RVA to the name of the target library
-                              // (NULL-terminate ASCII string)
-    quint32 ModuleHandleRVA;  // RVA to the HMODULE caching location (PHMODULE)
+    quint32 DllNameRVA;                  // RVA to the name of the target library
+                                         // (NULL-terminate ASCII string)
+    quint32 ModuleHandleRVA;             // RVA to the HMODULE caching location (PHMODULE)
     quint32 ImportAddressTableRVA;       // RVA to the start of the IAT
                                          // (PIMAGE_THUNK_DATA)
     quint32 ImportNameTableRVA;          // RVA to the start of the name table
@@ -777,7 +756,7 @@ struct S_IMAGE_DELAYLOAD_DESCRIPTOR {
     quint32 BoundImportAddressTableRVA;  // RVA to an optional bound IAT
     quint32 UnloadInformationTableRVA;   // RVA to an optional unload info table
     quint32 TimeDateStamp;               // 0 if not bound,
-                            // Otherwise, date/time of the target DLL
+                                         // Otherwise, date/time of the target DLL
 };
 
 struct IMAGE_BOUND_IMPORT_DESCRIPTOR {

@@ -27,19 +27,8 @@
 class XELF : public XBinary {
     Q_OBJECT
 
-   public:
-    enum DS {
-        DS_UNKNOWN,
-        DS_INTERPRETER,
-        DS_LIBRARIES,
-        DS_RUNPATH,
-        DS_NOTES,
-        DS_DYNAMICTAGS,
-        DS_STRINGTABLE,
-        DS_SYMBOLTABLE,
-        DS_RELA,
-        DS_REL
-    };
+public:
+    enum DS { DS_UNKNOWN, DS_INTERPRETER, DS_LIBRARIES, DS_RUNPATH, DS_NOTES, DS_DYNAMICTAGS, DS_STRINGTABLE, DS_SYMBOLTABLE, DS_RELA, DS_REL };
 
     struct NOTE {
         qint64 nOffset;
@@ -63,24 +52,14 @@ class XELF : public XBinary {
         qint64 nFlags;
     };
 
-    enum TYPE {
-        TYPE_UNKNOWN = 0,
-        TYPE_REL,
-        TYPE_EXEC,
-        TYPE_DYN,
-        TYPE_CORE,
-        TYPE_NUM
-    };
+    enum TYPE { TYPE_UNKNOWN = 0, TYPE_REL, TYPE_EXEC, TYPE_DYN, TYPE_CORE, TYPE_NUM };
 
-    XELF(QIODevice *pDevice = nullptr, bool bIsImage = false,
-         XADDR nModuleAddress = -1);
+    XELF(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XELF();
 
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice, bool bIsImage = false,
-                        XADDR nModuleAddress = -1);
-    static MODE getMode(QIODevice *pDevice, bool bIsImage = false,
-                        XADDR nModuleAddress = -1);
+    static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
+    static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     bool isBigEndian();
 
     qint64 getEhdrOffset();
@@ -280,26 +259,16 @@ class XELF : public XBinary {
     void setElf64_Shdr_addralign(quint32 nIndex, quint64 nValue);
     void setElf64_Shdr_entsize(quint32 nIndex, quint64 nValue);
 
-    quint32 getElf_Shdr_name(quint32 nIndex,
-                             QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    quint32 getElf_Shdr_type(quint32 nIndex,
-                             QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    quint64 getElf_Shdr_flags(quint32 nIndex,
-                              QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    quint64 getElf_Shdr_addr(quint32 nIndex,
-                             QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    quint64 getElf_Shdr_offset(quint32 nIndex,
-                               QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    quint64 getElf_Shdr_size(quint32 nIndex,
-                             QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    quint32 getElf_Shdr_link(quint32 nIndex,
-                             QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    quint32 getElf_Shdr_info(quint32 nIndex,
-                             QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    quint64 getElf_Shdr_addralign(
-        quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    quint64 getElf_Shdr_entsize(quint32 nIndex,
-                                QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
+    quint32 getElf_Shdr_name(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
+    quint32 getElf_Shdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
+    quint64 getElf_Shdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
+    quint64 getElf_Shdr_addr(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
+    quint64 getElf_Shdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
+    quint64 getElf_Shdr_size(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
+    quint32 getElf_Shdr_link(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
+    quint32 getElf_Shdr_info(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
+    quint64 getElf_Shdr_addralign(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
+    quint64 getElf_Shdr_entsize(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
 
     qint64 getShdrOffset(quint32 nIndex);
     qint64 getShdrSize();
@@ -350,22 +319,14 @@ class XELF : public XBinary {
     void setElf64_Phdr_flags(quint32 nIndex, quint32 nValue);
     void setElf64_Phdr_align(quint32 nIndex, quint64 nValue);
 
-    quint32 getElf_Phdr_type(quint32 nIndex,
-                             QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    quint64 getElf_Phdr_offset(quint32 nIndex,
-                               QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    quint64 getElf_Phdr_vaddr(quint32 nIndex,
-                              QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    quint64 getElf_Phdr_paddr(quint32 nIndex,
-                              QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    quint64 getElf_Phdr_filesz(quint32 nIndex,
-                               QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    quint64 getElf_Phdr_memsz(quint32 nIndex,
-                              QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    quint32 getElf_Phdr_flags(quint32 nIndex,
-                              QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    quint64 getElf_Phdr_align(quint32 nIndex,
-                              QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    quint32 getElf_Phdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    quint64 getElf_Phdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    quint64 getElf_Phdr_vaddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    quint64 getElf_Phdr_paddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    quint64 getElf_Phdr_filesz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    quint64 getElf_Phdr_memsz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    quint32 getElf_Phdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    quint64 getElf_Phdr_align(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
 
     qint64 getPhdrOffset(quint32 nIndex);
     qint64 getPhdrSize();
@@ -374,10 +335,8 @@ class XELF : public XBinary {
     QByteArray getSectionByName(QString sSectionName);
 
     OS_STRING getProgramInterpreterName();
-    OS_STRING getProgramInterpreterName(
-        QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    OS_STRING getProgramInterpreterName(
-        QList<SECTION_RECORD> *pListSectionRecords);
+    OS_STRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    OS_STRING getProgramInterpreterName(QList<SECTION_RECORD> *pListSectionRecords);
 
     QList<QString> getCommentStrings();
     QList<QString> getCommentStrings(qint32 nSection);
@@ -397,19 +356,14 @@ class XELF : public XBinary {
     static NOTE getNote(QList<NOTE> *pListNotes, quint32 nType);
 
     bool isNotePresent(quint32 nType, QString sName);
-    static bool isNotePresent(QList<NOTE> *pListNotes, quint32 nType,
-                              QString sName);
+    static bool isNotePresent(QList<NOTE> *pListNotes, quint32 nType, QString sName);
     static NOTE getNote(QList<NOTE> *pListNotes, quint32 nType, QString sName);
 
     QList<TAG_STRUCT> getTagStructs();
-    QList<TAG_STRUCT> getTagStructs(
-        QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders,
-        _MEMORY_MAP *pMemoryMap);
-    QList<TAG_STRUCT> _getTagStructs(qint64 nOffset, qint64 nSize, bool bIs64,
-                                     bool bIsBigEndian);
+    QList<TAG_STRUCT> getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, _MEMORY_MAP *pMemoryMap);
+    QList<TAG_STRUCT> _getTagStructs(qint64 nOffset, qint64 nSize, bool bIs64, bool bIsBigEndian);
 
-    static QList<TAG_STRUCT> _getTagStructs(QList<TAG_STRUCT> *pListTagStructs,
-                                            qint64 nTag);
+    static QList<TAG_STRUCT> _getTagStructs(QList<TAG_STRUCT> *pListTagStructs, qint64 nTag);
 
     qint64 getDynamicArraySize();
 
@@ -420,31 +374,23 @@ class XELF : public XBinary {
     void setDynamicArrayValue(qint64 nOffset, qint64 nValue);
 
     OFFSETSIZE getStringTable();
-    OFFSETSIZE getStringTable(_MEMORY_MAP *pMemoryMap,
-                              QList<TAG_STRUCT> *pListTagStructs);
+    OFFSETSIZE getStringTable(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
     QList<QString> getLibraries();
-    QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap,
-                                QList<TAG_STRUCT> *pListTagStructs);
+    QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
     OS_STRING getRunPath();
-    OS_STRING getRunPath(_MEMORY_MAP *pMemoryMap,
-                         QList<TAG_STRUCT> *pListTagStructs);
+    OS_STRING getRunPath(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 
-    static QList<SECTION_RECORD> getSectionRecords(
-        QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, bool bIsImage,
-        QByteArray *pbaSectionTable);
+    static QList<SECTION_RECORD> getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, bool bIsImage, QByteArray *pbaSectionTable);
     bool isSectionNamePresent(QString sSectionName);
-    static bool isSectionNamePresent(
-        QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
+    static bool isSectionNamePresent(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
     qint32 getSectionNumber(QString sSectionName);
-    static qint32 getSectionNumber(QString sSectionName,
-                                   QList<SECTION_RECORD> *pListSectionRecords);
-    static SECTION_RECORD getSectionRecord(
-        QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
+    static qint32 getSectionNumber(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
+    static SECTION_RECORD getSectionRecord(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     virtual MODE getMode();
     virtual QString getArch();
@@ -453,19 +399,13 @@ class XELF : public XBinary {
     virtual OSINFO getOsInfo();
     virtual QString typeIdToString(qint32 nType);
 
-    QList<XELF_DEF::Elf_Phdr> _getPrograms(
-        QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType);
-    QList<XELF_DEF::Elf_Shdr> _getSections(
-        QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, quint32 nType);
-    QList<SECTION_RECORD> _getSectionRecords(
-        QList<SECTION_RECORD> *pListSectionRecords, QString sName);
+    QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType);
+    QList<XELF_DEF::Elf_Shdr> _getSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, quint32 nType);
+    QList<SECTION_RECORD> _getSectionRecords(QList<SECTION_RECORD> *pListSectionRecords, QString sName);
 
-    QList<DATASET> getDatasetsFromSections(
-        QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
-    QList<DATASET> getDatasetsFromPrograms(
-        QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
-    QList<DATASET> getDatasetsFromTagStructs(
-        _MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
+    QList<DATASET> getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
+    QList<DATASET> getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
+    QList<DATASET> getDatasetsFromTagStructs(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
     QList<XELF_DEF::Elf32_Sym> getElf32_SymList(qint64 nOffset, qint64 nSize);
     QList<XELF_DEF::Elf64_Sym> getElf64_SymList(qint64 nOffset, qint64 nSize);
@@ -474,27 +414,19 @@ class XELF : public XBinary {
     XELF_DEF::Elf32_Sym _readElf32_Sym(qint64 nOffset, bool bIsBigEndian);
     XELF_DEF::Elf64_Sym _readElf64_Sym(qint64 nOffset, bool bIsBigEndian);
 
-    void setElf32_Sym_st_name(qint64 nOffset, quint32 nValue,
-                              bool bIsBigEndian);
-    void setElf32_Sym_st_value(qint64 nOffset, quint32 nValue,
-                               bool bIsBigEndian);
-    void setElf32_Sym_st_size(qint64 nOffset, quint32 nValue,
-                              bool bIsBigEndian);
+    void setElf32_Sym_st_name(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
+    void setElf32_Sym_st_value(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
+    void setElf32_Sym_st_size(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
     void setElf32_Sym_st_info(qint64 nOffset, quint8 nValue);
     void setElf32_Sym_st_other(qint64 nOffset, quint8 nValue);
-    void setElf32_Sym_st_shndx(qint64 nOffset, quint16 nValue,
-                               bool bIsBigEndian);
+    void setElf32_Sym_st_shndx(qint64 nOffset, quint16 nValue, bool bIsBigEndian);
 
-    void setElf64_Sym_st_name(qint64 nOffset, quint32 nValue,
-                              bool bIsBigEndian);
+    void setElf64_Sym_st_name(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
     void setElf64_Sym_st_info(qint64 nOffset, quint8 nValue);
     void setElf64_Sym_st_other(qint64 nOffset, quint8 nValue);
-    void setElf64_Sym_st_shndx(qint64 nOffset, quint16 nValue,
-                               bool bIsBigEndian);
-    void setElf64_Sym_st_value(qint64 nOffset, quint64 nValue,
-                               bool bIsBigEndian);
-    void setElf64_Sym_st_size(qint64 nOffset, quint64 nValue,
-                              bool bIsBigEndian);
+    void setElf64_Sym_st_shndx(qint64 nOffset, quint16 nValue, bool bIsBigEndian);
+    void setElf64_Sym_st_value(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
+    void setElf64_Sym_st_size(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
 
     qint64 getSymSize();
 
@@ -511,27 +443,19 @@ class XELF : public XBinary {
     QList<XELF_DEF::Elf32_Rela> getElf32_RelaList(qint64 nOffset, qint64 nSize);
     QList<XELF_DEF::Elf64_Rela> getElf64_RelaList(qint64 nOffset, qint64 nSize);
 
-    void setElf32_Rel_r_offset(qint64 nOffset, quint32 nValue,
-                               bool bIsBigEndian);
+    void setElf32_Rel_r_offset(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
     void setElf32_Rel_r_info(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
 
-    void setElf64_Rel_r_offset(qint64 nOffset, quint64 nValue,
-                               bool bIsBigEndian);
+    void setElf64_Rel_r_offset(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
     void setElf64_Rel_r_info(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
 
-    void setElf32_Rela_r_offset(qint64 nOffset, quint32 nValue,
-                                bool bIsBigEndian);
-    void setElf32_Rela_r_info(qint64 nOffset, quint32 nValue,
-                              bool bIsBigEndian);
-    void setElf32_Rela_r_addend(qint64 nOffset, quint32 nValue,
-                                bool bIsBigEndian);
+    void setElf32_Rela_r_offset(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
+    void setElf32_Rela_r_info(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
+    void setElf32_Rela_r_addend(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
 
-    void setElf64_Rela_r_offset(qint64 nOffset, quint64 nValue,
-                                bool bIsBigEndian);
-    void setElf64_Rela_r_info(qint64 nOffset, quint64 nValue,
-                              bool bIsBigEndian);
-    void setElf64_Rela_r_addend(qint64 nOffset, quint64 nValue,
-                                bool bIsBigEndian);
+    void setElf64_Rela_r_offset(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
+    void setElf64_Rela_r_info(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
+    void setElf64_Rela_r_addend(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
 
     quint16 getNumberOfSections();
     quint16 getNumberOfPrograms();

@@ -20,8 +20,7 @@
  */
 #include "scanitem.h"
 
-ScanItem::ScanItem(const QString &sString, ScanItem *pItemParent,
-                   qint32 nNumberOfColumns, bool bIsParent) {
+ScanItem::ScanItem(const QString &sString, ScanItem *pItemParent, qint32 nNumberOfColumns, bool bIsParent) {
     g_pParentItem = pItemParent;
     g_sString = sString;
     g_nNumberOfColumns = nNumberOfColumns;
@@ -29,17 +28,25 @@ ScanItem::ScanItem(const QString &sString, ScanItem *pItemParent,
     g_scanStruct = {};
 }
 
-ScanItem::~ScanItem() { qDeleteAll(g_listChildItems); }
+ScanItem::~ScanItem() {
+    qDeleteAll(g_listChildItems);
+}
 
 void ScanItem::appendChild(ScanItem *pItemChild) {
     g_listChildItems.append(pItemChild);
 }
 
-ScanItem *ScanItem::child(int nRow) { return g_listChildItems.value(nRow); }
+ScanItem *ScanItem::child(int nRow) {
+    return g_listChildItems.value(nRow);
+}
 
-int ScanItem::childCount() const { return g_listChildItems.count(); }
+int ScanItem::childCount() const {
+    return g_listChildItems.count();
+}
 
-int ScanItem::columnCount() const { return g_nNumberOfColumns; }
+int ScanItem::columnCount() const {
+    return g_nNumberOfColumns;
+}
 
 QVariant ScanItem::data(int nColumn) const {
     QVariant result;
@@ -65,17 +72,20 @@ void ScanItem::setScanStruct(const XBinary::SCANSTRUCT &scanStruct) {
     this->g_scanStruct = scanStruct;
 }
 
-XBinary::SCANSTRUCT ScanItem::scanStruct() const { return g_scanStruct; }
+XBinary::SCANSTRUCT ScanItem::scanStruct() const {
+    return g_scanStruct;
+}
 
 int ScanItem::row() const {
     int nResult = 0;
 
     if (g_pParentItem) {
-        nResult = g_pParentItem->g_listChildItems.indexOf(
-            const_cast<ScanItem *>(this));
+        nResult = g_pParentItem->g_listChildItems.indexOf(const_cast<ScanItem *>(this));
     }
 
     return nResult;
 }
 
-ScanItem *ScanItem::getParentItem() { return g_pParentItem; }
+ScanItem *ScanItem::getParentItem() {
+    return g_pParentItem;
+}

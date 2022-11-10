@@ -27,7 +27,7 @@
 class XMACH : public XBinary {
     Q_OBJECT
 
-   public:
+public:
     struct COMMAND_RECORD {
         qint64 nStructOffset;
         quint32 nType;
@@ -139,17 +139,14 @@ class XMACH : public XBinary {
         TYPE_KEXT_BUNDLE
     };
 
-    XMACH(QIODevice *pDevice = nullptr, bool bIsImage = false,
-          XADDR nModuleAddress = -1);
+    XMACH(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XMACH();
 
     // TODO isSigned
     // TODO getSignOS
     bool isValid();
-    static bool isValid(QIODevice *pDevice, bool bIsImage = false,
-                        XADDR nModuleAddress = -1);
-    static MODE getMode(QIODevice *pDevice, bool bIsImage = false,
-                        XADDR nModuleAddress = -1);
+    static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
+    static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     bool isBigEndian();
 
     qint64 getHeaderOffset();
@@ -205,26 +202,19 @@ class XMACH : public XBinary {
     void _setCommand_cmdsize(qint64 nOffset, quint32 nValue);
 
     QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID = 0);
-    static QList<COMMAND_RECORD> getCommandRecords(
-        quint32 nCommandID, QList<COMMAND_RECORD> *pListCommandRecords);
+    static QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID, QList<COMMAND_RECORD> *pListCommandRecords);
 
     bool isCommandPresent(quint32 nCommandID, qint32 nIndex = 0);
-    bool isCommandPresent(quint32 nCommandID, qint32 nIndex,
-                          QList<COMMAND_RECORD> *pListCommandRecords);
-    bool isCommandPresent(quint32 nCommandID,
-                          QList<COMMAND_RECORD> *pListCommandRecords);
+    bool isCommandPresent(quint32 nCommandID, qint32 nIndex, QList<COMMAND_RECORD> *pListCommandRecords);
+    bool isCommandPresent(quint32 nCommandID, QList<COMMAND_RECORD> *pListCommandRecords);
 
     QByteArray getCommandData(quint32 nCommandID, qint32 nIndex = 0);
-    bool setCommandData(quint32 nCommandID, QByteArray baData,
-                        qint32 nIndex = 0);
-    QByteArray getCommandData(quint32 nCommandID, qint32 nIndex,
-                              QList<COMMAND_RECORD> *pListCommandRecords);
-    bool setCommandData(quint32 nCommandID, QByteArray baData, qint32 nIndex,
-                        QList<COMMAND_RECORD> *pListCommandRecords);
+    bool setCommandData(quint32 nCommandID, QByteArray baData, qint32 nIndex = 0);
+    QByteArray getCommandData(quint32 nCommandID, qint32 nIndex, QList<COMMAND_RECORD> *pListCommandRecords);
+    bool setCommandData(quint32 nCommandID, QByteArray baData, qint32 nIndex, QList<COMMAND_RECORD> *pListCommandRecords);
 
     qint64 getCommandRecordOffset(quint32 nCommandID, qint32 nIndex);
-    qint64 getCommandRecordOffset(quint32 nCommandID, int nIndex,
-                                  QList<COMMAND_RECORD> *pListCommandRecords);
+    qint64 getCommandRecordOffset(quint32 nCommandID, int nIndex, QList<COMMAND_RECORD> *pListCommandRecords);
 
     qint64 getCommandHeaderSize();
 
@@ -232,36 +222,25 @@ class XMACH : public XBinary {
 
     virtual _MEMORY_MAP getMemoryMap();
 
-    QList<LIBRARY_RECORD> getLibraryRecords(
-        qint32 nType = XMACH_DEF::S_LC_LOAD_DYLIB);
-    QList<LIBRARY_RECORD> getLibraryRecords(
-        QList<COMMAND_RECORD> *pListCommandRecords,
-        int nType = XMACH_DEF::S_LC_LOAD_DYLIB);
-    static LIBRARY_RECORD getLibraryRecordByName(
-        QString sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
+    QList<LIBRARY_RECORD> getLibraryRecords(qint32 nType = XMACH_DEF::S_LC_LOAD_DYLIB);
+    QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords, int nType = XMACH_DEF::S_LC_LOAD_DYLIB);
+    static LIBRARY_RECORD getLibraryRecordByName(QString sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
     bool isLibraryRecordNamePresent(QString sName);
-    static bool isLibraryRecordNamePresent(
-        QString sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
+    static bool isLibraryRecordNamePresent(QString sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
 
     LIBRARY_RECORD _readLibraryRecord(qint64 nOffset, bool bIsBigEndian);
 
-    QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(
-        qint32 nType = XMACH_DEF::S_LC_LOAD_DYLIB);
-    QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(
-        QList<COMMAND_RECORD> *pListCommandRecords,
-        int nType = XMACH_DEF::S_LC_LOADFVMLIB);
-    static FVM_LIBRARY_RECORD getFvmLibraryRecordByName(
-        QString sName, QList<FVM_LIBRARY_RECORD> *pListLibraryRecords);
+    QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(qint32 nType = XMACH_DEF::S_LC_LOAD_DYLIB);
+    QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords, int nType = XMACH_DEF::S_LC_LOADFVMLIB);
+    static FVM_LIBRARY_RECORD getFvmLibraryRecordByName(QString sName, QList<FVM_LIBRARY_RECORD> *pListLibraryRecords);
     bool isFvmLibraryRecordNamePresent(QString sName);
-    static bool isFvmLibraryRecordNamePresent(
-        QString sName, QList<FVM_LIBRARY_RECORD> *pListLibraryRecords);
+    static bool isFvmLibraryRecordNamePresent(QString sName, QList<FVM_LIBRARY_RECORD> *pListLibraryRecords);
 
     FVM_LIBRARY_RECORD _readFvmLibraryRecord(qint64 nOffset, bool bIsBigEndian);
 
     void _setLibraryRecord_timestamp(qint64 nOffset, quint32 nValue);
     void _setLibraryRecord_current_version(qint64 nOffset, quint32 nValue);
-    void _setLibraryRecord_compatibility_version(qint64 nOffset,
-                                                 quint32 nValue);
+    void _setLibraryRecord_compatibility_version(qint64 nOffset, quint32 nValue);
     void _setLibraryRecord_name(qint64 nOffset, QString sValue);
 
     void _setFvmLibraryRecord_minor_version(qint64 nOffset, quint32 nValue);
@@ -269,13 +248,10 @@ class XMACH : public XBinary {
     void _setFvmLibraryRecord_name(qint64 nOffset, QString sValue);
 
     QList<SEGMENT_RECORD> getSegmentRecords();
-    QList<SEGMENT_RECORD> getSegmentRecords(
-        QList<COMMAND_RECORD> *pListCommandRecords);
+    QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
-    XMACH_DEF::segment_command _read_segment_command(qint64 nOffset,
-                                                     bool bIsBigEndian);
-    XMACH_DEF::segment_command_64 _read_segment_command_64(qint64 nOffset,
-                                                           bool bIsBigEndian);
+    XMACH_DEF::segment_command _read_segment_command(qint64 nOffset, bool bIsBigEndian);
+    XMACH_DEF::segment_command_64 _read_segment_command_64(qint64 nOffset, bool bIsBigEndian);
 
     void _setSegment32_segname(qint64 nOffset, QString sValue);
     void _setSegment32_vmaddr(qint64 nOffset, quint32 nValue);
@@ -298,8 +274,7 @@ class XMACH : public XBinary {
     void _setSegment64_flags(qint64 nOffset, quint32 nValue);
 
     QList<SECTION_RECORD> getSectionRecords();
-    QList<SECTION_RECORD> getSectionRecords(
-        QList<COMMAND_RECORD> *pListCommandRecords);
+    QList<SECTION_RECORD> getSectionRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
     XMACH_DEF::section _read_section(qint64 nOffset, bool bIsBigEndian);
     XMACH_DEF::section_64 _read_section_64(qint64 nOffset, bool bIsBigEndian);
@@ -335,30 +310,23 @@ class XMACH : public XBinary {
     quint32 getNumberOfSections(QList<COMMAND_RECORD> *pListCommandRecords);
 
     bool isSectionNamePresent(QString sName);
-    static bool isSectionNamePresent(
-        QString sName, QList<SECTION_RECORD> *pListSectionRecords);
+    static bool isSectionNamePresent(QString sName, QList<SECTION_RECORD> *pListSectionRecords);
 
-    static qint32 getSectionNumber(QString sName,
-                                   QList<SECTION_RECORD> *pListSectionRecords);
+    static qint32 getSectionNumber(QString sName, QList<SECTION_RECORD> *pListSectionRecords);
     qint32 getSectionNumber(QString sName);
 
     qint64 getSectionHeaderSize();
 
-    static quint32 getSectionFileOffset(
-        quint32 nIndex, QList<SECTION_RECORD> *pListSectionRecords);
-    static quint32 getSectionFileSize(
-        quint32 nIndex, QList<SECTION_RECORD> *pListSectionRecords);
+    static quint32 getSectionFileOffset(quint32 nIndex, QList<SECTION_RECORD> *pListSectionRecords);
+    static quint32 getSectionFileSize(quint32 nIndex, QList<SECTION_RECORD> *pListSectionRecords);
 
     bool isSegmentNamePresent(QString sName);
-    static bool isSegmentNamePresent(
-        QString sName, QList<SEGMENT_RECORD> *pListSegmentRecords);
+    static bool isSegmentNamePresent(QString sName, QList<SEGMENT_RECORD> *pListSegmentRecords);
 
-    static qint32 getSegmentNumber(QString sName,
-                                   QList<SEGMENT_RECORD> *pListSegmentRecords);
+    static qint32 getSegmentNumber(QString sName, QList<SEGMENT_RECORD> *pListSegmentRecords);
     qint32 getSegmentNumber(QString sName);
 
-    static quint32 getLibraryCurrentVersion(
-        QString sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
+    static quint32 getLibraryCurrentVersion(QString sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
 
     XMACH_DEF::dyld_info_command get_dyld_info_command();
 
@@ -435,12 +403,9 @@ class XMACH : public XBinary {
 
     qint64 get_source_version_command_size();
 
-    void _set_encryption_info_command_64_cryptoff(qint64 nOffset,
-                                                  quint32 nValue);
-    void _set_encryption_info_command_64_cryptsize(qint64 nOffset,
-                                                   quint32 nValue);
-    void _set_encryption_info_command_64_cryptid(qint64 nOffset,
-                                                 quint32 nValue);
+    void _set_encryption_info_command_64_cryptoff(qint64 nOffset, quint32 nValue);
+    void _set_encryption_info_command_64_cryptsize(qint64 nOffset, quint32 nValue);
+    void _set_encryption_info_command_64_cryptid(qint64 nOffset, quint32 nValue);
     void _set_encryption_info_command_64_pad(qint64 nOffset, quint32 nValue);
 
     qint64 get_encryption_info_command_size();
@@ -506,8 +471,7 @@ class XMACH : public XBinary {
 
     void _set_ppc_thread_state32_t_srr0(qint64 nOffset, quint32 nValue);
     void _set_ppc_thread_state32_t_srr1(qint64 nOffset, quint32 nValue);
-    void _set_ppc_thread_state32_t_r(qint64 nOffset, quint32 nValue,
-                                     qint32 nIndex);
+    void _set_ppc_thread_state32_t_r(qint64 nOffset, quint32 nValue, qint32 nIndex);
     void _set_ppc_thread_state32_t_ct(qint64 nOffset, quint32 nValue);
     void _set_ppc_thread_state32_t_xer(qint64 nOffset, quint32 nValue);
     void _set_ppc_thread_state32_t_lr(qint64 nOffset, quint32 nValue);
@@ -517,8 +481,7 @@ class XMACH : public XBinary {
 
     qint64 get_ppc_thread_state32_t_size();
 
-    void _set_arm_thread_state32_t_r(qint64 nOffset, quint32 nValue,
-                                     qint32 nIndex);
+    void _set_arm_thread_state32_t_r(qint64 nOffset, quint32 nValue, qint32 nIndex);
     void _set_arm_thread_state32_t_sp(qint64 nOffset, quint32 nValue);
     void _set_arm_thread_state32_t_lr(qint64 nOffset, quint32 nValue);
     void _set_arm_thread_state32_t_pc(qint64 nOffset, quint32 nValue);
@@ -526,18 +489,15 @@ class XMACH : public XBinary {
 
     qint64 get_arm_thread_state32_t_size();
 
-    void _set_m68k_thread_state32_t_dreg(qint64 nOffset, quint32 nValue,
-                                         qint32 nIndex);
-    void _set_m68k_thread_state32_t_areg(qint64 nOffset, quint32 nValue,
-                                         qint32 nIndex);
+    void _set_m68k_thread_state32_t_dreg(qint64 nOffset, quint32 nValue, qint32 nIndex);
+    void _set_m68k_thread_state32_t_areg(qint64 nOffset, quint32 nValue, qint32 nIndex);
     void _set_m68k_thread_state32_t_pad0(qint64 nOffset, quint16 nValue);
     void _set_m68k_thread_state32_t_sr(qint64 nOffset, quint16 nValue);
     void _set_m68k_thread_state32_t_pc(qint64 nOffset, quint32 nValue);
 
     qint64 get_m68k_thread_state32_t_size();
 
-    void _set_arm_thread_state64_t_x(qint64 nOffset, quint64 nValue,
-                                     qint32 nIndex);
+    void _set_arm_thread_state64_t_x(qint64 nOffset, quint64 nValue, qint32 nIndex);
     void _set_arm_thread_state64_t_fp(qint64 nOffset, quint64 nValue);
     void _set_arm_thread_state64_t_lr(qint64 nOffset, quint64 nValue);
     void _set_arm_thread_state64_t_sp(qint64 nOffset, quint64 nValue);
@@ -582,10 +542,8 @@ class XMACH : public XBinary {
     void _set_dylib_module_nextrel(qint64 nOffset, quint32 nValue);
     void _set_dylib_module_iinit_iterm(qint64 nOffset, quint32 nValue);
     void _set_dylib_module_ninit_nterm(qint64 nOffset, quint32 nValue);
-    void _set_dylib_module_objc_module_info_addr(qint64 nOffset,
-                                                 quint32 nValue);
-    void _set_dylib_module_objc_module_info_size(qint64 nOffset,
-                                                 quint32 nValue);
+    void _set_dylib_module_objc_module_info_addr(qint64 nOffset, quint32 nValue);
+    void _set_dylib_module_objc_module_info_size(qint64 nOffset, quint32 nValue);
 
     qint64 get_dylib_module_size();
 
@@ -600,17 +558,13 @@ class XMACH : public XBinary {
     void _set_dylib_module_64_nextrel(qint64 nOffset, quint32 nValue);
     void _set_dylib_module_64_iinit_iterm(qint64 nOffset, quint32 nValue);
     void _set_dylib_module_64_ninit_nterm(qint64 nOffset, quint32 nValue);
-    void _set_dylib_module_64_objc_module_info_size(qint64 nOffset,
-                                                    quint32 nValue);
-    void _set_dylib_module_64_objc_module_info_addr(qint64 nOffset,
-                                                    quint32 nValue);
+    void _set_dylib_module_64_objc_module_info_size(qint64 nOffset, quint32 nValue);
+    void _set_dylib_module_64_objc_module_info_addr(qint64 nOffset, quint32 nValue);
 
     qint64 get_dylib_module_64_size();
 
-    void _set_dylib_table_of_contents_symbol_index(qint64 nOffset,
-                                                   quint32 nValue);
-    void _set_dylib_table_of_contents_module_index(qint64 nOffset,
-                                                   quint32 nValue);
+    void _set_dylib_table_of_contents_symbol_index(qint64 nOffset, quint32 nValue);
+    void _set_dylib_table_of_contents_module_index(qint64 nOffset, quint32 nValue);
 
     qint64 get_dylib_table_of_contents_size();
 
@@ -640,49 +594,38 @@ class XMACH : public XBinary {
     XMACH_DEF::symtab_command _read_symtab_command(qint64 nOffset);
     XMACH_DEF::dysymtab_command _read_dysymtab_command(qint64 nOffset);
     XMACH_DEF::version_min_command _read_version_min_command(qint64 nOffset);
-    XMACH_DEF::build_version_command _read_build_version_command(
-        qint64 nOffset);
+    XMACH_DEF::build_version_command _read_build_version_command(qint64 nOffset);
     XMACH_DEF::dylinker_command _read_dylinker_command(qint64 nOffset);
     XMACH_DEF::rpath_command _read_rpath_command(qint64 nOffset);
-    XMACH_DEF::source_version_command _read_source_version_command(
-        qint64 nOffset);
-    XMACH_DEF::encryption_info_command _read_encryption_info_command(
-        qint64 nOffset);
-    XMACH_DEF::encryption_info_command_64 _read_encryption_info_command_64(
-        qint64 nOffset);
+    XMACH_DEF::source_version_command _read_source_version_command(qint64 nOffset);
+    XMACH_DEF::encryption_info_command _read_encryption_info_command(qint64 nOffset);
+    XMACH_DEF::encryption_info_command_64 _read_encryption_info_command_64(qint64 nOffset);
     XMACH_DEF::entry_point_command _read_entry_point_command(qint64 nOffset);
     XMACH_DEF::x86_thread_state32_t _read_x86_thread_state32_t(qint64 nOffset);
     XMACH_DEF::x86_thread_state64_t _read_x86_thread_state64_t(qint64 nOffset);
     XMACH_DEF::ppc_thread_state32_t _read_ppc_thread_state32_t(qint64 nOffset);
     XMACH_DEF::arm_thread_state32_t _read_arm_thread_state32_t(qint64 nOffset);
     XMACH_DEF::arm_thread_state64_t _read_arm_thread_state64_t(qint64 nOffset);
-    XMACH_DEF::m68k_thread_state32_t _read_m68k_thread_state32_t(
-        qint64 nOffset);
+    XMACH_DEF::m68k_thread_state32_t _read_m68k_thread_state32_t(qint64 nOffset);
     XMACH_DEF::state_hdr_t _read_state_hdr_t(qint64 nOffset);
-    XMACH_DEF::linkedit_data_command _read_linkedit_data_command(
-        qint64 nOffset);
+    XMACH_DEF::linkedit_data_command _read_linkedit_data_command(qint64 nOffset);
     XMACH_DEF::unix_thread_command _read_unix_thread_command(qint64 nOffset);
     XMACH_DEF::nlist _read_nlist(qint64 nOffset);
     XMACH_DEF::nlist_64 _read_nlist_64(qint64 nOffset);
     XMACH_DEF::data_in_code_entry _read_data_in_code_entry(qint64 nOffset);
     XMACH_DEF::dylib_module _read_dylib_module(qint64 nOffset);
     XMACH_DEF::dylib_module_64 _read_dylib_module_64(qint64 nOffset);
-    XMACH_DEF::dylib_table_of_contents _read_dylib_table_of_contents(
-        qint64 nOffset);
-    XMACH_DEF::dylib_table_of_contents _read_dylib_table_of_contents(
-        qint64 nOffset, bool bIsBigEndian);
+    XMACH_DEF::dylib_table_of_contents _read_dylib_table_of_contents(qint64 nOffset);
+    XMACH_DEF::dylib_table_of_contents _read_dylib_table_of_contents(qint64 nOffset, bool bIsBigEndian);
     XMACH_DEF::relocation_info _read_relocation_info(qint64 nOffset);
     XMACH_DEF::dylib_reference _read_dylib_reference(qint64 nOffset);
     XMACH_DEF::__SC_SuperBlob _read_SC_SuperBlob(qint64 nOffset);
     XMACH_DEF::__BlobIndex _read_BlobIndex(qint64 nOffset);
 
     QList<NLIST_RECORD> getNlistRecords();
-    QList<NLIST_RECORD> getNlistRecords(
-        QList<COMMAND_RECORD> *pListCommandRecords);
+    QList<NLIST_RECORD> getNlistRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
-    static NLIST_RECORD searchNlistRecordByValue(QList<NLIST_RECORD> *pList,
-                                                 quint64 nValue,
-                                                 bool bValidName = false);
+    static NLIST_RECORD searchNlistRecordByValue(QList<NLIST_RECORD> *pList, quint64 nValue, bool bValidName = false);
 
     QList<TOC_RECORD> get_toc_list();
     QList<MODTAB_RECORD> get_modtab_list();
@@ -690,14 +633,11 @@ class XMACH : public XBinary {
     QList<VALUE32_RECORD> get_indirectsyms_list();
     QList<RELOC_RECORD> get_extrel_list();
     QList<RELOC_RECORD> get_locrel_list();
-    QList<RELOC_RECORD> getRelocRecords(qint64 nOffset,
-                                        qint32 nNumberOfRecords);
-    QList<VALUE32_RECORD> getValue32Records(qint64 nOffset,
-                                            qint32 nNumberOfRecords);
+    QList<RELOC_RECORD> getRelocRecords(qint64 nOffset, qint32 nNumberOfRecords);
+    QList<VALUE32_RECORD> getValue32Records(qint64 nOffset, qint32 nNumberOfRecords);
 
     OFFSETSIZE getStringTableOffsetSize();
-    OFFSETSIZE getStringTableOffsetSize(
-        QList<COMMAND_RECORD> *pListCommandRecords);
+    OFFSETSIZE getStringTableOffsetSize(QList<COMMAND_RECORD> *pListCommandRecords);
 
     XMACH_DEF::dyld_info_command get_dyld_info();
     XMACH_DEF::symtab_command get_symtab();
@@ -711,9 +651,7 @@ class XMACH : public XBinary {
     QList<DICE_RECORD> getDiceRecords(qint64 nOffset, qint64 nSize);
 
     QString getIndexSymbolName(quint32 nValue);
-    QString getIndexSymbolName(quint32 nValue, QList<NLIST_RECORD> *pNlistList,
-                               qint64 nStringTableOffset,
-                               qint64 nStringTableSize);
+    QString getIndexSymbolName(quint32 nValue, QList<NLIST_RECORD> *pNlistList, qint64 nStringTableOffset, qint64 nStringTableSize);
 
     virtual MODE getMode();
     virtual QString getArch();
@@ -722,28 +660,12 @@ class XMACH : public XBinary {
     virtual OSINFO getOsInfo();
     virtual QString typeIdToString(qint32 nType);
 
-    enum OPCODE_TYPE {
-        OPCODE_TYPE_UNKNOWN = 0,
-        OPCODE_TYPE_BIND,
-        OPCODE_TYPE_WEAK_BIND,
-        OPCODE_TYPE_LAZY_BIND,
-        OPCODE_TYPE_EXPORT,
-        OPCODE_TYPE_REBASE
-    };
+    enum OPCODE_TYPE { OPCODE_TYPE_UNKNOWN = 0, OPCODE_TYPE_BIND, OPCODE_TYPE_WEAK_BIND, OPCODE_TYPE_LAZY_BIND, OPCODE_TYPE_EXPORT, OPCODE_TYPE_REBASE };
 
-    virtual XADDR readOpcodes(quint32 nType, char *pData, XADDR nAddress,
-                              qint64 nSize, QList<OPCODE> *pListOpcodes,
-                              OPCODE_STATUS *pOpcodeStatus);
-    XADDR readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSize,
-                                      QList<OPCODE> *pListOpcodes,
-                                      OPCODE_STATUS *pOpcodeStatus);
-    XADDR readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize,
-                                    QList<OPCODE> *pListOpcodes,
-                                    OPCODE_STATUS *pOpcodeStatus,
-                                    bool bNullEnd);
-    XADDR readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSize,
-                                      QList<OPCODE> *pListOpcodes,
-                                      OPCODE_STATUS *pOpcodeStatus);
+    virtual XADDR readOpcodes(quint32 nType, char *pData, XADDR nAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);
+    XADDR readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);
+    XADDR readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus, bool bNullEnd);
+    XADDR readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);
 };
 
 #endif  // XMACH_H

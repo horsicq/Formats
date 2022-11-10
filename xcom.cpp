@@ -20,12 +20,12 @@
  */
 #include "xcom.h"
 
-XCOM::XCOM(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
-    : XBinary(pDevice, bIsImage, nModuleAddress) {
+XCOM::XCOM(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress) {
     XBinary::setBaseAddress(XCOM_DEF::ADDRESS_BEGIN);
 }
 
-XCOM::~XCOM() {}
+XCOM::~XCOM() {
+}
 
 bool XCOM::isValid() {
     bool bResult = false;
@@ -44,8 +44,7 @@ bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     return xcom.isValid();
 }
 
-XBinary::MODE XCOM::getMode(QIODevice *pDevice, bool bIsImage,
-                            XADDR nModuleAddress) {
+XBinary::MODE XCOM::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
     XCOM xcom(pDevice, bIsImage, nModuleAddress);
 
     return xcom.getMode();
@@ -66,8 +65,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap() {
     result.bIsBigEndian = isBigEndian();
     result.sType = getTypeAsString();
 
-    qint64 nCodeSize = qMin(
-        nTotalSize, (qint64)(XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN));
+    qint64 nCodeSize = qMin(nTotalSize, (qint64)(XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN));
 
     _MEMORY_RECORD record = {};
     record.nAddress = 0;
@@ -88,8 +86,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap() {
 
     result.listRecords.append(recordMain);
 
-    qint64 nVirtualSize =
-        (qint64)(XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN) - nTotalSize;
+    qint64 nVirtualSize = (qint64)(XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN) - nTotalSize;
 
     if (nVirtualSize > 0) {
         _MEMORY_RECORD record = {};
@@ -117,17 +114,29 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap() {
     return result;
 }
 
-QString XCOM::getArch() { return QString("8086"); }
+QString XCOM::getArch() {
+    return QString("8086");
+}
 
-XBinary::MODE XCOM::getMode() { return MODE_16; }
+XBinary::MODE XCOM::getMode() {
+    return MODE_16;
+}
 
-bool XCOM::isBigEndian() { return false; }
+bool XCOM::isBigEndian() {
+    return false;
+}
 
-qint64 XCOM::getImageSize() { return 0x10000; }
+qint64 XCOM::getImageSize() {
+    return 0x10000;
+}
 
-XBinary::FT XCOM::getFileType() { return FT_COM; }
+XBinary::FT XCOM::getFileType() {
+    return FT_COM;
+}
 
-qint32 XCOM::getType() { return TYPE_EXE; }
+qint32 XCOM::getType() {
+    return TYPE_EXECUTABLE;
+}
 
 XBinary::OSINFO XCOM::getOsInfo() {
     OSINFO result = {};
@@ -149,7 +158,7 @@ QString XCOM::typeIdToString(qint32 nType) {
         case TYPE_UNKNOWN:
             sResult = tr("Unknown");
             break;
-        case TYPE_EXE:
+        case TYPE_EXECUTABLE:
             sResult = QString("EXE");
             break;
     }

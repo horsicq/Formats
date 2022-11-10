@@ -180,80 +180,57 @@ struct section_64 /* for 64-bit architectures */
 };
 
 const quint32 S_LC_REQ_DYLD = 0x80000000;
-const quint32 S_LC_SEGMENT = 0x1; /* segment of this file to be mapped */
-const quint32 S_LC_SYMTAB = 0x2;  /* link-edit stab symbol table info */
-const quint32 S_LC_SYMSEG =
-    0x3; /* link-edit gdb symbol table info (obsolete) */
-const quint32 S_LC_THREAD = 0x4;     /* thread */
-const quint32 S_LC_UNIXTHREAD = 0x5; /* unix thread (includes a stack) */
-const quint32 S_LC_LOADFVMLIB =
-    0x6; /* load a specified fixed VM shared library */
-const quint32 S_LC_IDFVMLIB = 0x7; /* fixed VM shared library identification */
-const quint32 S_LC_IDENT = 0x8;    /* object identification info (obsolete) */
-const quint32 S_LC_FVMFILE = 0x9;  /* fixed VM file inclusion (internal use) */
-const quint32 S_LC_PREPAGE = 0xA;  /* prepage command (internal use) */
-const quint32 S_LC_DYSYMTAB = 0xB; /* dynamic link-edit symbol table info */
-const quint32 S_LC_LOAD_DYLIB =
-    0xC; /* load a dynamicly linked shared library */
-const quint32 S_LC_ID_DYLIB =
-    0xD; /* dynamicly linked shared lib identification */
-const quint32 S_LC_LOAD_DYLINKER = 0xE;   /* load a dynamic linker */
-const quint32 S_LC_ID_DYLINKER = 0xF;     /* dynamic linker identification */
-const quint32 S_LC_PREBOUND_DYLIB = 0x10; /* modules prebound for a dynamicly */
-const quint32 S_LC_ROUTINES = 0x11;       /* image routines */
-const quint32 S_LC_SUB_FRAMEWORK = 0x12;  /* sub framework */
-const quint32 S_LC_SUB_UMBRELLA = 0x13;   /* sub umbrella */
-const quint32 S_LC_SUB_CLIENT = 0x14;     /* sub client */
-const quint32 S_LC_SUB_LIBRARY = 0x15;    /* sub library */
-const quint32 S_LC_TWOLEVEL_HINTS = 0x16; /* two-level namespace lookup hints */
-const quint32 S_LC_PREBIND_CKSUM = 0x17;  /* prebind checksum */
-const quint32 S_LC_LOAD_WEAK_DYLIB =
-    (0x18 |
-     S_LC_REQ_DYLD); /* load a dynamically linked shared library that is allowed
-                        to be missing (all symbols are weak imported)*/
-const quint32 S_LC_SEGMENT_64 =
-    0x19; /* 64-bit segment of this file to bemapped */
-const quint32 S_LC_ROUTINES_64 = 0x1A;             /* 64-bit image routines */
-const quint32 S_LC_UUID = 0x1B;                    /* the uuid */
-const quint32 S_LC_RPATH = (0x1C | S_LC_REQ_DYLD); /* runpath additions */
-const quint32 S_LC_CODE_SIGNATURE = 0x1D;          /* local of code signature */
-const quint32 S_LC_LAZY_LOAD_DYLIB =
-    0x20; /* delay load of dylib until first use */
-const quint32 S_LC_ENCRYPTION_INFO = 0x21; /* encrypted segment information */
-const quint32 S_LC_DYLD_INFO = 0x22;       /* compressed dyld information */
-const quint32 S_LC_DYLD_INFO_ONLY =
-    (0x22 | S_LC_REQ_DYLD); /* compressed dyld information */
-const quint32 S_LC_LOAD_UPWARD_DYLIB =
-    (0x23 | S_LC_REQ_DYLD); /* load upward dylib */
-const quint32 S_LC_VERSION_MIN_MACOSX =
-    0x24; /* build for MacOSX min OS version */
-const quint32 S_LC_VERSION_MIN_IPHONEOS =
-    0x25; /* build for iPhoneOS min OS version */
-const quint32 S_LC_FUNCTION_STARTS =
-    0x26; /* compressed table of function start addresses */
-const quint32 S_LC_DYLD_ENVIRONMENT = 0x27;       /* string for dyld to treat */
-const quint32 S_LC_MAIN = (0x28 | S_LC_REQ_DYLD); /* main */
-const quint32 S_LC_DATA_IN_CODE =
-    0x29; /* table of non-instructions in __text */
-const quint32 S_LC_SOURCE_VERSION =
-    0x2A; /* source version used to build binary */
-const quint32 S_LC_ENCRYPTION_INFO_64 =
-    0x2C; /* 64-bit encrypted segment information */
-const quint32 S_LC_LINKER_OPTION = 0x2D; /* linker options in MH_OBJECT files */
-const quint32 S_LC_LINKER_OPTIMIZATION_HINT =
-    0x2E; /* optimization hints in MH_OBJECT files */
-const quint32 S_LC_VERSION_MIN_TVOS =
-    0x2F; /* build for AppleTV min OS version */
-const quint32 S_LC_VERSION_MIN_WATCHOS =
-    0x30; /* build for Watch min OS version */
-const quint32 S_LC_NOTE =
-    0x31; /* arbitrary data included within a Mach-O file */
-const quint32 S_LC_BUILD_VERSION = 0x32; /* build for platform min OS version */
-const quint32 S_LC_DYLD_EXPORTS_TRIE =
-    (0x33 |
-     S_LC_REQ_DYLD); /* used with linkedit_data_command, payload is trie */
-const quint32 S_LC_DYLD_CHAINED_FIXUPS =
-    (0x34 | S_LC_REQ_DYLD); /* used with linkedit_data_command */
+const quint32 S_LC_SEGMENT = 0x1;                                /* segment of this file to be mapped */
+const quint32 S_LC_SYMTAB = 0x2;                                 /* link-edit stab symbol table info */
+const quint32 S_LC_SYMSEG = 0x3;                                 /* link-edit gdb symbol table info (obsolete) */
+const quint32 S_LC_THREAD = 0x4;                                 /* thread */
+const quint32 S_LC_UNIXTHREAD = 0x5;                             /* unix thread (includes a stack) */
+const quint32 S_LC_LOADFVMLIB = 0x6;                             /* load a specified fixed VM shared library */
+const quint32 S_LC_IDFVMLIB = 0x7;                               /* fixed VM shared library identification */
+const quint32 S_LC_IDENT = 0x8;                                  /* object identification info (obsolete) */
+const quint32 S_LC_FVMFILE = 0x9;                                /* fixed VM file inclusion (internal use) */
+const quint32 S_LC_PREPAGE = 0xA;                                /* prepage command (internal use) */
+const quint32 S_LC_DYSYMTAB = 0xB;                               /* dynamic link-edit symbol table info */
+const quint32 S_LC_LOAD_DYLIB = 0xC;                             /* load a dynamicly linked shared library */
+const quint32 S_LC_ID_DYLIB = 0xD;                               /* dynamicly linked shared lib identification */
+const quint32 S_LC_LOAD_DYLINKER = 0xE;                          /* load a dynamic linker */
+const quint32 S_LC_ID_DYLINKER = 0xF;                            /* dynamic linker identification */
+const quint32 S_LC_PREBOUND_DYLIB = 0x10;                        /* modules prebound for a dynamicly */
+const quint32 S_LC_ROUTINES = 0x11;                              /* image routines */
+const quint32 S_LC_SUB_FRAMEWORK = 0x12;                         /* sub framework */
+const quint32 S_LC_SUB_UMBRELLA = 0x13;                          /* sub umbrella */
+const quint32 S_LC_SUB_CLIENT = 0x14;                            /* sub client */
+const quint32 S_LC_SUB_LIBRARY = 0x15;                           /* sub library */
+const quint32 S_LC_TWOLEVEL_HINTS = 0x16;                        /* two-level namespace lookup hints */
+const quint32 S_LC_PREBIND_CKSUM = 0x17;                         /* prebind checksum */
+const quint32 S_LC_LOAD_WEAK_DYLIB = (0x18 | S_LC_REQ_DYLD);     /* load a dynamically linked shared library that is allowed
+                                                                    to be missing (all symbols are weak imported)*/
+const quint32 S_LC_SEGMENT_64 = 0x19;                            /* 64-bit segment of this file to bemapped */
+const quint32 S_LC_ROUTINES_64 = 0x1A;                           /* 64-bit image routines */
+const quint32 S_LC_UUID = 0x1B;                                  /* the uuid */
+const quint32 S_LC_RPATH = (0x1C | S_LC_REQ_DYLD);               /* runpath additions */
+const quint32 S_LC_CODE_SIGNATURE = 0x1D;                        /* local of code signature */
+const quint32 S_LC_LAZY_LOAD_DYLIB = 0x20;                       /* delay load of dylib until first use */
+const quint32 S_LC_ENCRYPTION_INFO = 0x21;                       /* encrypted segment information */
+const quint32 S_LC_DYLD_INFO = 0x22;                             /* compressed dyld information */
+const quint32 S_LC_DYLD_INFO_ONLY = (0x22 | S_LC_REQ_DYLD);      /* compressed dyld information */
+const quint32 S_LC_LOAD_UPWARD_DYLIB = (0x23 | S_LC_REQ_DYLD);   /* load upward dylib */
+const quint32 S_LC_VERSION_MIN_MACOSX = 0x24;                    /* build for MacOSX min OS version */
+const quint32 S_LC_VERSION_MIN_IPHONEOS = 0x25;                  /* build for iPhoneOS min OS version */
+const quint32 S_LC_FUNCTION_STARTS = 0x26;                       /* compressed table of function start addresses */
+const quint32 S_LC_DYLD_ENVIRONMENT = 0x27;                      /* string for dyld to treat */
+const quint32 S_LC_MAIN = (0x28 | S_LC_REQ_DYLD);                /* main */
+const quint32 S_LC_DATA_IN_CODE = 0x29;                          /* table of non-instructions in __text */
+const quint32 S_LC_SOURCE_VERSION = 0x2A;                        /* source version used to build binary */
+const quint32 S_LC_ENCRYPTION_INFO_64 = 0x2C;                    /* 64-bit encrypted segment information */
+const quint32 S_LC_LINKER_OPTION = 0x2D;                         /* linker options in MH_OBJECT files */
+const quint32 S_LC_LINKER_OPTIMIZATION_HINT = 0x2E;              /* optimization hints in MH_OBJECT files */
+const quint32 S_LC_VERSION_MIN_TVOS = 0x2F;                      /* build for AppleTV min OS version */
+const quint32 S_LC_VERSION_MIN_WATCHOS = 0x30;                   /* build for Watch min OS version */
+const quint32 S_LC_NOTE = 0x31;                                  /* arbitrary data included within a Mach-O file */
+const quint32 S_LC_BUILD_VERSION = 0x32;                         /* build for platform min OS version */
+const quint32 S_LC_DYLD_EXPORTS_TRIE = (0x33 | S_LC_REQ_DYLD);   /* used with linkedit_data_command, payload is trie */
+const quint32 S_LC_DYLD_CHAINED_FIXUPS = (0x34 | S_LC_REQ_DYLD); /* used with linkedit_data_command */
 
 const quint32 S_MH_OBJECT = 0x1;   /* relocatable object file */
 const quint32 S_MH_EXECUTE = 0x2;  /* demand paged executable file */
@@ -273,10 +250,8 @@ const quint32 S_VM_PROT_WRITE = 0x02;   /* write permission */
 const quint32 S_VM_PROT_EXECUTE = 0x04; /* execute permission */
 
 const quint32 S_SECTION_TYPE = 0x000000ff;
-const quint32 S_SECTION_ATTRIBUTES_SYS =
-    0x00ffff00; /* system setable attributes */
-const quint32 S_SECTION_ATTRIBUTES_USR =
-    0xff000000; /* User setable attributes */
+const quint32 S_SECTION_ATTRIBUTES_SYS = 0x00ffff00; /* system setable attributes */
+const quint32 S_SECTION_ATTRIBUTES_USR = 0xff000000; /* User setable attributes */
 
 struct x86_thread_state32_t {
     quint32 eax;
@@ -901,8 +876,8 @@ struct relocation_info {
                                          section ordinal if r_extern == 0 */
             quint32 r_pcrel : 1;      /* was relocated pc relative already */
             quint32 r_length : 2;     /* 0=byte, 1=word, 2=long, 3=quad */
-            quint32 r_extern : 1; /* does not include value of sym referenced */
-            quint32 r_type : 4; /* if not 0, machine specific relocation type */
+            quint32 r_extern : 1;     /* does not include value of sym referenced */
+            quint32 r_type : 4;       /* if not 0, machine specific relocation type */
         } _value;
     } s;
 };
@@ -951,29 +926,29 @@ enum reloc_type_arm {
     ARM_RELOC_LOCAL_SECTDIFF, /* like ARM_RELOC_SECTDIFF, but the symbol
                                  referenced was local.  */
     ARM_RELOC_PB_LA_PTR,      /* prebound lazy pointer */
-    ARM_RELOC_BR24,       /* 24 bit branch displacement (to a word address) */
-    ARM_THUMB_RELOC_BR22, /* 22 bit branch displacement (to a half-word address)
-                           */
+    ARM_RELOC_BR24,           /* 24 bit branch displacement (to a word address) */
+    ARM_THUMB_RELOC_BR22,     /* 22 bit branch displacement (to a half-word address)
+                               */
 };
 
 enum reloc_type_ppc {
-    PPC_RELOC_VANILLA,  /* generic relocation as discribed above */
-    PPC_RELOC_PAIR,     /* the second relocation entry of a pair */
-    PPC_RELOC_BR14,     /* 14 bit branch displacement (to a word address) */
-    PPC_RELOC_BR24,     /* 24 bit branch displacement (to a word address) */
-    PPC_RELOC_HI16,     /* a PAIR follows with the low half */
-    PPC_RELOC_LO16,     /* a PAIR follows with the high half */
-    PPC_RELOC_HA16,     /* Same as the RELOC_HI16 except the low 16 bits and the
-                         * high 16 bits are added together with the low 16 bits
-                         * sign extened first.  This means if bit 15 of the low
-                         * 16 bits is set the high 16 bits stored in the
-                         * instruction will be adjusted.
-                         */
-    PPC_RELOC_LO14,     /* Same as the LO16 except that the low 2 bits are not
-                         * stored in the instruction and are always zero.  This
-                         * is used in double word load/store instructions.
-                         */
-    PPC_RELOC_SECTDIFF, /* a PAIR follows with subtract symbol value */
+    PPC_RELOC_VANILLA,       /* generic relocation as discribed above */
+    PPC_RELOC_PAIR,          /* the second relocation entry of a pair */
+    PPC_RELOC_BR14,          /* 14 bit branch displacement (to a word address) */
+    PPC_RELOC_BR24,          /* 24 bit branch displacement (to a word address) */
+    PPC_RELOC_HI16,          /* a PAIR follows with the low half */
+    PPC_RELOC_LO16,          /* a PAIR follows with the high half */
+    PPC_RELOC_HA16,          /* Same as the RELOC_HI16 except the low 16 bits and the
+                              * high 16 bits are added together with the low 16 bits
+                              * sign extened first.  This means if bit 15 of the low
+                              * 16 bits is set the high 16 bits stored in the
+                              * instruction will be adjusted.
+                              */
+    PPC_RELOC_LO14,          /* Same as the LO16 except that the low 2 bits are not
+                              * stored in the instruction and are always zero.  This
+                              * is used in double word load/store instructions.
+                              */
+    PPC_RELOC_SECTDIFF,      /* a PAIR follows with subtract symbol value */
     PPC_RELOC_PB_LA_PTR,     /* prebound lazy pointer */
     PPC_RELOC_HI16_SECTDIFF, /* section difference forms of above.  a PAIR */
     PPC_RELOC_LO16_SECTDIFF, /* follows these with subtract symbol value */
@@ -1047,19 +1022,14 @@ const quint32 S_EXPORT_SYMBOL_FLAGS_WEAK_DEFINITION = 0x04;
 const quint32 S_EXPORT_SYMBOL_FLAGS_REEXPORT = 0x08;
 const quint32 S_EXPORT_SYMBOL_FLAGS_STUB_AND_RESOLVER = 0x10;
 
-const quint32 S_CSMAGIC_REQUIREMENT = 0xfade0c00; /* single Requirement blob */
-const quint32 S_CSMAGIC_REQUIREMENTS =
-    0xfade0c01; /* Requirements vector (internal requirements) */
-const quint32 S_CSMAGIC_CODEDIRECTORY = 0xfade0c02; /* CodeDirectory blob */
-const quint32 S_CSMAGIC_EMBEDDED_SIGNATURE =
-    0xfade0cc0; /* embedded form of signature data */
+const quint32 S_CSMAGIC_REQUIREMENT = 0xfade0c00;            /* single Requirement blob */
+const quint32 S_CSMAGIC_REQUIREMENTS = 0xfade0c01;           /* Requirements vector (internal requirements) */
+const quint32 S_CSMAGIC_CODEDIRECTORY = 0xfade0c02;          /* CodeDirectory blob */
+const quint32 S_CSMAGIC_EMBEDDED_SIGNATURE = 0xfade0cc0;     /* embedded form of signature data */
 const quint32 S_CSMAGIC_EMBEDDED_SIGNATURE_OLD = 0xfade0b02; /* XXX */
-const quint32 S_CSMAGIC_EMBEDDED_ENTITLEMENTS =
-    0xfade7171; /* embedded entitlements */
-const quint32 S_CSMAGIC_DETACHED_SIGNATURE =
-    0xfade0cc1; /* multi-arch collection of embedded signatures */
-const quint32 S_CSMAGIC_BLOBWRAPPER =
-    0xfade0b01; /* CMS Signature, among other things */
+const quint32 S_CSMAGIC_EMBEDDED_ENTITLEMENTS = 0xfade7171;  /* embedded entitlements */
+const quint32 S_CSMAGIC_DETACHED_SIGNATURE = 0xfade0cc1;     /* multi-arch collection of embedded signatures */
+const quint32 S_CSMAGIC_BLOBWRAPPER = 0xfade0b01;            /* CMS Signature, among other things */
 
 struct __CodeDirectory {
     quint32 magic;         /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -1073,9 +1043,9 @@ struct __CodeDirectory {
     quint32 codeLimit;     /* limit to main image signature range */
     quint32 hashSize;      /* size of each hash in bytes */
     quint32 hashType;      /* type of hash (cdHashType* constants) */
-    quint32 platform; /* platform identifier; zero if not platform binary */
-    quint32 pageSize; /* log2(page size in bytes); 0 => infinite */
-    quint32 spare2;   /* unused (must be zero) */
+    quint32 platform;      /* platform identifier; zero if not platform binary */
+    quint32 pageSize;      /* log2(page size in bytes); 0 => infinite */
+    quint32 spare2;        /* unused (must be zero) */
     /* Version 0x20100 */
     quint32 scatterOffset; /* offset of optional scatter vector */
     /* Version 0x20200 */

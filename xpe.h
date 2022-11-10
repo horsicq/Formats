@@ -25,16 +25,16 @@
 #include "xpe_def.h"
 
 #if defined(_MSC_VER)  // For WinTrust TODO Check minGW
-#include <Softpub.h>
-#include <wincrypt.h>
+//#include <wincrypt.h>
 #include <windows.h>
-#include <wintrust.h>
+//#include <wintrust.h>
+#include <Softpub.h>
 #endif
 
 class XPE : public XMSDOS {
     Q_OBJECT
 
-   public:
+public:
     struct SECTION_RECORD {
         QString sName;
         qint64 nOffset;
@@ -307,13 +307,10 @@ class XPE : public XMSDOS {
         // TODO more from subsystems
     };
 
-    explicit XPE(QIODevice *pDevice = nullptr, bool bIsImage = false,
-                 XADDR nModuleAddress = -1);
+    explicit XPE(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice, bool bIsImage = false,
-                        XADDR nModuleAddress = -1);
-    static MODE getMode(QIODevice *pDevice, bool bIsImage = false,
-                        XADDR nModuleAddress = -1);
+    static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
+    static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
     virtual MODE getMode();
     virtual QString getArch();
@@ -363,18 +360,14 @@ class XPE : public XMSDOS {
     XPE_DEF::IMAGE_OPTIONAL_HEADER32 getOptionalHeader32();
     XPE_DEF::IMAGE_OPTIONAL_HEADER64 getOptionalHeader64();
 
-    void setOptionalHeader32(
-        XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pOptionalHeader32);
-    void setOptionalHeader64(
-        XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pOptionalHeader64);
+    void setOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pOptionalHeader32);
+    void setOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pOptionalHeader64);
 
     XPE_DEF::IMAGE_OPTIONAL_HEADER32S getOptionalHeader32S();
     XPE_DEF::IMAGE_OPTIONAL_HEADER64S getOptionalHeader64S();
 
-    void setOptionalHeader32S(
-        XPE_DEF::IMAGE_OPTIONAL_HEADER32S *pOptionalHeader32S);
-    void setOptionalHeader64S(
-        XPE_DEF::IMAGE_OPTIONAL_HEADER64S *pOptionalHeader64S);
+    void setOptionalHeader32S(XPE_DEF::IMAGE_OPTIONAL_HEADER32S *pOptionalHeader32S);
+    void setOptionalHeader64S(XPE_DEF::IMAGE_OPTIONAL_HEADER64S *pOptionalHeader64S);
 
     quint16 getOptionalHeader_Magic();
     quint8 getOptionalHeader_MajorLinkerVersion();
@@ -442,15 +435,11 @@ class XPE : public XMSDOS {
     void setOperatingSystemVersion(quint32 nValue);
 
     XPE_DEF::IMAGE_DATA_DIRECTORY read_IMAGE_DATA_DIRECTORY(qint64 nOffset);
-    void write_IMAGE_DATA_DIRECTORY(
-        qint64 nOffset, XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
+    void write_IMAGE_DATA_DIRECTORY(qint64 nOffset, XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
 
-    XPE_DEF::IMAGE_DATA_DIRECTORY getOptionalHeader_DataDirectory(
-        quint32 nNumber);
-    void setOptionalHeader_DataDirectory(
-        quint32 nNumber, XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
-    void setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber,
-                                                        quint32 nValue);
+    XPE_DEF::IMAGE_DATA_DIRECTORY getOptionalHeader_DataDirectory(quint32 nNumber);
+    void setOptionalHeader_DataDirectory(quint32 nNumber, XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
+    void setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber, quint32 nValue);
     void setOptionalHeader_DataDirectory_Size(quint32 nNumber, quint32 nValue);
 
     void clearOptionalHeader_DataDirectory(quint32 nNumber);
@@ -475,16 +464,12 @@ class XPE : public XMSDOS {
     bool isSectionsTablePresent();
 
     XPE_DEF::IMAGE_SECTION_HEADER getSectionHeader(quint32 nNumber);
-    void setSectionHeader(quint32 nNumber,
-                          XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader);
+    void setSectionHeader(quint32 nNumber, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader);
 
     QList<XPE_DEF::IMAGE_SECTION_HEADER> getSectionHeaders();
     // TODO with __getSectionOffsetAndSize TODO Check !!!
-    static QList<SECTION_RECORD> getSectionRecords(
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders,
-        bool bIsImage);
-    static QList<QString> getSectionNames(
-        QList<XPE::SECTION_RECORD> *pListSectionRecords);
+    static QList<SECTION_RECORD> getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders, bool bIsImage);
+    static QList<QString> getSectionNames(QList<XPE::SECTION_RECORD> *pListSectionRecords);
 
     QList<SECTIONRVA_RECORD> getSectionRVARecords();
 
@@ -510,57 +495,30 @@ class XPE : public XMSDOS {
     void setSection_NumberOfLinenumbers(quint32 nNumber, quint16 nValue);
     void setSection_Characteristics(quint32 nNumber, quint32 nValue);
 
-    QString getSection_NameAsString(quint32 nNumber,
-                                    QList<QString> *pListSectionNameStrings);
-    quint32 getSection_VirtualSize(
-        quint32 nNumber,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
-    quint32 getSection_VirtualAddress(
-        quint32 nNumber,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
-    quint32 getSection_SizeOfRawData(
-        quint32 nNumber,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
-    quint32 getSection_PointerToRawData(
-        quint32 nNumber,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
-    quint32 getSection_PointerToRelocations(
-        quint32 nNumber,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
-    quint32 getSection_PointerToLinenumbers(
-        quint32 nNumber,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
-    quint16 getSection_NumberOfRelocations(
-        quint32 nNumber,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
-    quint16 getSection_NumberOfLinenumbers(
-        quint32 nNumber,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
-    quint32 getSection_Characteristics(
-        quint32 nNumber,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    QString getSection_NameAsString(quint32 nNumber, QList<QString> *pListSectionNameStrings);
+    quint32 getSection_VirtualSize(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    quint32 getSection_VirtualAddress(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    quint32 getSection_SizeOfRawData(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    quint32 getSection_PointerToRawData(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    quint32 getSection_PointerToRelocations(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    quint32 getSection_PointerToLinenumbers(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    quint16 getSection_NumberOfRelocations(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    quint16 getSection_NumberOfLinenumbers(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    quint32 getSection_Characteristics(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
 
     bool isSectionNamePresent(QString sSectionName);
-    static bool isSectionNamePresent(
-        QString sSectionName,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
-    static XPE_DEF::IMAGE_SECTION_HEADER getSectionByName(
-        QString sSectionName,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    static bool isSectionNamePresent(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    static XPE_DEF::IMAGE_SECTION_HEADER getSectionByName(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
 
-    static SECTION_RECORD getSectionRecordByName(
-        QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
+    static SECTION_RECORD getSectionRecordByName(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     qint32 getSectionNumber(QString sSectionName);
-    static qint32 getSectionNumber(
-        QString sSectionName,
-        QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    static qint32 getSectionNumber(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
 
     bool isImportPresent();
 
     QList<IMPORT_RECORD> getImportRecords(PDSTRUCT *pPdStruct = nullptr);
-    QList<IMPORT_RECORD> getImportRecords(_MEMORY_MAP *pMemoryMap,
-                                          PDSTRUCT *pPdStruct = nullptr);
+    QList<IMPORT_RECORD> getImportRecords(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
     quint64 getImportHash64(QList<IMPORT_RECORD> *pListImportRecords);
     quint32 getImportHash32(QList<IMPORT_RECORD> *pListImportRecords);
@@ -569,118 +527,80 @@ class XPE : public XMSDOS {
     qint64 getImportDescriptorSize();
 
     QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> getImportDescriptors();
-    QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> getImportDescriptors(
-        _MEMORY_MAP *pMemoryMap);
+    QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> getImportDescriptors(_MEMORY_MAP *pMemoryMap);
     QList<IMAGE_IMPORT_DESCRIPTOR_EX> getImportDescriptorsEx();
-    QList<IMAGE_IMPORT_DESCRIPTOR_EX> getImportDescriptorsEx(
-        _MEMORY_MAP *pMemoryMap);
+    QList<IMAGE_IMPORT_DESCRIPTOR_EX> getImportDescriptorsEx(_MEMORY_MAP *pMemoryMap);
 
     XPE_DEF::IMAGE_IMPORT_DESCRIPTOR getImportDescriptor(quint32 nNumber);
-    void setImportDescriptor(
-        quint32 nNumber, XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *pImportDescriptor);
+    void setImportDescriptor(quint32 nNumber, XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *pImportDescriptor);
 
-    void setImportDescriptor_OriginalFirstThunk(quint32 nNumber,
-                                                quint32 nValue);
+    void setImportDescriptor_OriginalFirstThunk(quint32 nNumber, quint32 nValue);
     void setImportDescriptor_TimeDateStamp(quint32 nNumber, quint32 nValue);
     void setImportDescriptor_ForwarderChain(quint32 nNumber, quint32 nValue);
     void setImportDescriptor_Name(quint32 nNumber, quint32 nValue);
     void setImportDescriptor_FirstThunk(quint32 nNumber, quint32 nValue);
 
     QList<IMPORT_HEADER> getImports(PDSTRUCT *pPdStruct = nullptr);
-    QList<IMPORT_HEADER> getImports(_MEMORY_MAP *pMemoryMap,
-                                    PDSTRUCT *pPdStruct = nullptr);
+    QList<IMPORT_HEADER> getImports(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
-    QList<IMPORT_POSITION> _getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap,
-                                               qint64 nThunksRVA, qint64 nRVA,
-                                               PDSTRUCT *pPdStruct = nullptr);
-    QList<IMPORT_POSITION> getImportPositions(int nIndex,
-                                              PDSTRUCT *pPdStruct = nullptr);
+    QList<IMPORT_POSITION> _getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA, qint64 nRVA, PDSTRUCT *pPdStruct = nullptr);
+    QList<IMPORT_POSITION> getImportPositions(int nIndex, PDSTRUCT *pPdStruct = nullptr);
 
     QList<quint32> getImportPositionHashes(bool bLibraryName = false);
-    QList<quint32> getImportPositionHashes(QList<IMPORT_HEADER> *pListImport,
-                                           bool bLibraryName = false);
-    static bool isImportPositionHashPresent(QList<quint32> *pListImportHashes,
-                                            qint32 nIndex, quint32 nHash);
+    QList<quint32> getImportPositionHashes(QList<IMPORT_HEADER> *pListImport, bool bLibraryName = false);
+    static bool isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 nIndex, quint32 nHash);
 
     bool isImportLibraryPresent(QString sLibrary);
-    static bool isImportLibraryPresent(
-        QString sLibrary, QList<IMPORT_HEADER> *pListImportHeaders);
+    static bool isImportLibraryPresent(QString sLibrary, QList<IMPORT_HEADER> *pListImportHeaders);
 
     bool isImportLibraryPresentI(QString sLibrary);
-    static bool isImportLibraryPresentI(
-        QString sLibrary, QList<IMPORT_HEADER> *pListImportHeaders);
+    static bool isImportLibraryPresentI(QString sLibrary, QList<IMPORT_HEADER> *pListImportHeaders);
 
     bool isImportFunctionPresentI(QString sLibrary, QString sFunction);
-    static bool isImportFunctionPresentI(
-        QString sLibrary, QString sFunction,
-        QList<IMPORT_HEADER> *pListImportHeaders);
+    static bool isImportFunctionPresentI(QString sLibrary, QString sFunction, QList<IMPORT_HEADER> *pListImportHeaders);
 
     bool setImports(QList<IMPORT_HEADER> *pListImportHeaders);
-    bool setImports(QIODevice *pDevice, bool bIsImage,
-                    QList<IMPORT_HEADER> *pListImportHeaders);
-    bool setImports(QString sFileName, bool bIsImage,
-                    QList<IMPORT_HEADER> *pListImportHeaders);
+    bool setImports(QIODevice *pDevice, bool bIsImage, QList<IMPORT_HEADER> *pListImportHeaders);
+    bool setImports(QString sFileName, bool bIsImage, QList<IMPORT_HEADER> *pListImportHeaders);
 
-    QString getImportFunctionName(quint32 nImport, quint32 nFunctionNumber,
-                                  QList<IMPORT_HEADER> *pListImportHeaders);
+    QString getImportFunctionName(quint32 nImport, quint32 nFunctionNumber, QList<IMPORT_HEADER> *pListImportHeaders);
 
     RESOURCE_HEADER getResourceHeader();
     RESOURCE_HEADER getResourceHeader(_MEMORY_MAP *pMemoryMap);
     QList<RESOURCE_RECORD> getResources();
     QList<RESOURCE_RECORD> getResources(_MEMORY_MAP *pMemoryMap);
 
-    static RESOURCE_RECORD getResourceRecord(
-        quint32 nID1, quint32 nID2,
-        QList<RESOURCE_RECORD> *pListResourceRecords);
-    static RESOURCE_RECORD getResourceRecord(
-        quint32 nID1, QString sName2,
-        QList<RESOURCE_RECORD> *pListResourceRecords);
-    static RESOURCE_RECORD getResourceRecord(
-        QString sName1, quint32 nID2,
-        QList<RESOURCE_RECORD> *pListResourceRecords);
-    static RESOURCE_RECORD getResourceRecord(
-        QString sName1, QString sName2,
-        QList<RESOURCE_RECORD> *pListResourceRecords);
+    static RESOURCE_RECORD getResourceRecord(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
+    static RESOURCE_RECORD getResourceRecord(quint32 nID1, QString sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
+    static RESOURCE_RECORD getResourceRecord(QString sName1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
+    static RESOURCE_RECORD getResourceRecord(QString sName1, QString sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
 
-    static QList<RESOURCE_RECORD> getResourceRecords(
-        quint32 nID1, quint32 nID2,
-        QList<RESOURCE_RECORD> *pListResourceRecords);
+    static QList<RESOURCE_RECORD> getResourceRecords(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
 
-    static bool isResourcePresent(quint32 nID1, quint32 nID2,
-                                  QList<RESOURCE_RECORD> *pListResourceRecords);
-    static bool isResourcePresent(quint32 nID1, QString sName2,
-                                  QList<RESOURCE_RECORD> *pListResourceRecords);
-    static bool isResourcePresent(QString sName1, quint32 nID2,
-                                  QList<RESOURCE_RECORD> *pListResourceRecords);
-    static bool isResourcePresent(QString sName1, QString sName2,
-                                  QList<RESOURCE_RECORD> *pListResourceRecords);
+    static bool isResourcePresent(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
+    static bool isResourcePresent(quint32 nID1, QString sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
+    static bool isResourcePresent(QString sName1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
+    static bool isResourcePresent(QString sName1, QString sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
 
     bool isResourceStringTablePresent();
-    bool isResourceStringTablePresent(
-        QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    bool isResourceStringTablePresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     QList<XPE::RESOURCE_STRINGTABLE_RECORD> getResourceStringTableRecords();
-    QList<XPE::RESOURCE_STRINGTABLE_RECORD> getResourceStringTableRecords(
-        QList<XPE::RESOURCE_RECORD> *pListResourceRecords,
-        XBinary::_MEMORY_MAP *pMemoryMap);
+    QList<XPE::RESOURCE_STRINGTABLE_RECORD> getResourceStringTableRecords(QList<XPE::RESOURCE_RECORD> *pListResourceRecords, XBinary::_MEMORY_MAP *pMemoryMap);
 
     bool isResourceManifestPresent();
-    bool isResourceManifestPresent(
-        QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    bool isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     QString getResourceManifest();
-    QString getResourceManifest(
-        QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    QString getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     bool isResourceVersionPresent();
-    bool isResourceVersionPresent(
-        QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    bool isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     RESOURCES_VERSION getResourcesVersion();
     XPE_DEF::S_VS_VERSION_INFO readVS_VERSION_INFO(qint64 nOffset);
 
-    RESOURCES_VERSION getResourcesVersion(
-        QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    RESOURCES_VERSION getResourcesVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     QString getFileVersion();
     QString getFileVersion(RESOURCES_VERSION *pResourceVersion);
@@ -701,43 +621,31 @@ class XPE : public XMSDOS {
     void setFixedFileInfo_dwFileDateLS(quint32 nValue);
 
     QString getResourcesVersionValue(QString sKey);
-    static QString getResourcesVersionValue(
-        QString sKey, XPE::RESOURCES_VERSION *pResourcesVersion);
+    static QString getResourcesVersionValue(QString sKey, XPE::RESOURCES_VERSION *pResourcesVersion);
 
     quint32 getResourceIdByNumber(quint32 nNumber);
-    quint32 getResourceIdByNumber(
-        quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    quint32 getResourceIdByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     QString getResourceNameByNumber(quint32 nNumber);
-    QString getResourceNameByNumber(
-        quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    QString getResourceNameByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     qint64 getResourceOffsetByNumber(quint32 nNumber);
-    qint64 getResourceOffsetByNumber(
-        quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    qint64 getResourceOffsetByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     qint64 getResourceSizeByNumber(quint32 nNumber);
-    qint64 getResourceSizeByNumber(
-        quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    qint64 getResourceSizeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     quint32 getResourceTypeByNumber(quint32 nNumber);
-    quint32 getResourceTypeByNumber(
-        quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    quint32 getResourceTypeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     qint64 getResourceNameOffset(QString sName);
-    qint64 getResourceNameOffset(
-        QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    qint64 getResourceNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     qint64 getResourceGroupNameOffset(QString sName);
-    qint64 getResourceGroupNameOffset(
-        QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    qint64 getResourceGroupNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     qint64 getResourceGroupIdOffset(quint32 nID);
-    qint64 getResourceGroupIdOffset(
-        quint32 nID, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    qint64 getResourceGroupIdOffset(quint32 nID, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     bool isResourceNamePresent(QString sName);
-    bool isResourceNamePresent(
-        QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    bool isResourceNamePresent(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     bool isResourceGroupNamePresent(QString sName);
-    bool isResourceGroupNamePresent(
-        QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    bool isResourceGroupNamePresent(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     bool isResourceGroupIdPresent(quint32 nID);
-    bool isResourceGroupIdPresent(
-        quint32 nID, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    bool isResourceGroupIdPresent(quint32 nID, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
     qint64 getModuleAddress();
 
@@ -745,23 +653,17 @@ class XPE : public XMSDOS {
     virtual XADDR getBaseAddress();
     virtual void setBaseAddress(XADDR nBaseAddress);
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
-    XPE_DEF::IMAGE_IMPORT_DESCRIPTOR read_IMAGE_IMPORT_DESCRIPTOR(
-        qint64 nOffset);
-    void write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset,
-                                       XPE_DEF::IMAGE_IMPORT_DESCRIPTOR idd);
+    XPE_DEF::IMAGE_IMPORT_DESCRIPTOR read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset);
+    void write_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset, XPE_DEF::IMAGE_IMPORT_DESCRIPTOR idd);
 
-    XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR _read_IMAGE_DELAYLOAD_DESCRIPTOR(
-        qint64 nOffset);
+    XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR _read_IMAGE_DELAYLOAD_DESCRIPTOR(qint64 nOffset);
 
     bool isExportPresent();
 
-    EXPORT_HEADER getExport(bool bValidOnly = false,
-                            PDSTRUCT *pPdStruct = nullptr);
-    EXPORT_HEADER getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly = false,
-                            PDSTRUCT *pPdStruct = nullptr);
+    EXPORT_HEADER getExport(bool bValidOnly = false, PDSTRUCT *pPdStruct = nullptr);
+    EXPORT_HEADER getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly = false, PDSTRUCT *pPdStruct = nullptr);
     QList<QString> getExportFunctionsList(PDSTRUCT *pPdStruct = nullptr);
-    static QList<QString> getExportFunctionsList(EXPORT_HEADER *pExportHeader,
-                                                 PDSTRUCT *pPdStruct = nullptr);
+    static QList<QString> getExportFunctionsList(EXPORT_HEADER *pExportHeader, PDSTRUCT *pPdStruct = nullptr);
 
     XPE_DEF::IMAGE_EXPORT_DIRECTORY getExportDirectory();
     void setExportDirectory(XPE_DEF::IMAGE_EXPORT_DIRECTORY *pExportDirectory);
@@ -780,52 +682,36 @@ class XPE : public XMSDOS {
 
     QByteArray getHeaders();
 
-    OFFSETSIZE __getSectionOffsetAndSize(
-        quint32 nSection);  // TODO move to Xbinary
+    OFFSETSIZE __getSectionOffsetAndSize(quint32 nSection);  // TODO move to Xbinary
 
     QByteArray getSection(quint32 nSection);  // TODO move to Xbinary
 
-    QString getSectionHash(
-        HASH hash,
-        quint32 nSection);  // TODO move to Xbinary  // TODO ProcessData
-    double getSectionEntropy(
-        quint32 nSection);  // TODO move to Xbinary  // TODO ProcessData
+    QString getSectionHash(HASH hash,
+                           quint32 nSection);    // TODO move to Xbinary  // TODO ProcessData
+    double getSectionEntropy(quint32 nSection);  // TODO move to Xbinary  // TODO ProcessData
 
     bool addImportSection(QMap<qint64, QString> *pMapIAT);
-    bool addImportSection(QIODevice *pDevice, bool bIsImage,
-                          QMap<qint64, QString> *pMapIAT);
-    bool addImportSection(QString sFileName, bool bIsImage,
-                          QMap<qint64, QString> *pMapIAT);
+    bool addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QString> *pMapIAT);
+    bool addImportSection(QString sFileName, bool bIsImage, QMap<qint64, QString> *pMapIAT);
 
-    static QList<XPE::IMPORT_HEADER> mapIATToList(
-        QMap<qint64, QString> *pMapIAT, bool bIs64);
+    static QList<XPE::IMPORT_HEADER> mapIATToList(QMap<qint64, QString> *pMapIAT, bool bIs64);
 
     quint32 calculateCheckSum();
 
-    bool addSection(XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData,
-                    qint64 nDataSize);
-    bool addSection(QString sFileName, bool bIsImage,
-                    XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData,
-                    qint64 nDataSize);
-    bool addSection(QIODevice *pDevice, bool bIsImage,
-                    XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData,
-                    qint64 nDataSize);
+    bool addSection(XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
+    bool addSection(QString sFileName, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
+    bool addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
 
     bool removeLastSection();
     static bool removeLastSection(QIODevice *pDevice, bool bIsImage);
     static bool removeLastSection(QString sFileName, bool bIsImage);
     // TODO copy Overlay function -> XBinary
-    XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY read_IMAGE_RESOURCE_DIRECTORY_ENTRY(
-        qint64 nOffset);
-    XPE_DEF::IMAGE_RESOURCE_DIRECTORY read_IMAGE_RESOURCE_DIRECTORY(
-        qint64 nOffset);
-    XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY read_IMAGE_RESOURCE_DATA_ENTRY(
-        qint64 nOffset);
-    XPE::RESOURCES_ID_NAME getResourcesIDName(qint64 nResourceOffset,
-                                              quint32 nValue);
+    XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY read_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset);
+    XPE_DEF::IMAGE_RESOURCE_DIRECTORY read_IMAGE_RESOURCE_DIRECTORY(qint64 nOffset);
+    XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY read_IMAGE_RESOURCE_DATA_ENTRY(qint64 nOffset);
+    XPE::RESOURCES_ID_NAME getResourcesIDName(qint64 nResourceOffset, quint32 nValue);
 
-    static QString resourceIdNameToString(RESOURCES_ID_NAME resourceIdName,
-                                          qint32 nNumber);
+    static QString resourceIdNameToString(RESOURCES_ID_NAME resourceIdName, qint32 nNumber);
 
     QList<qint64> getRelocsAsRVAList();
 
@@ -840,12 +726,9 @@ class XPE : public XMSDOS {
     void setRelocsSizeOfBlock(qint64 nOffset, quint32 nValue);
 
     bool addRelocsSection(QList<XADDR> *pList);
-    bool addRelocsSection(QIODevice *pDevice, bool bIsImage,
-                          QList<XADDR> *pListRelocs);
-    bool addRelocsSection(QString sFileName, bool bIsImage,
-                          QList<XADDR> *pListRelocs);
-    static QByteArray relocsAsRVAListToByteArray(QList<XADDR> *pListRelocs,
-                                                 bool bIs64);
+    bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<XADDR> *pListRelocs);
+    bool addRelocsSection(QString sFileName, bool bIsImage, QList<XADDR> *pListRelocs);
+    static QByteArray relocsAsRVAListToByteArray(QList<XADDR> *pListRelocs, bool bIs64);
 
     bool isResourcesPresent();
     bool isRelocsPresent();
@@ -914,10 +797,8 @@ class XPE : public XMSDOS {
     static QMap<quint64, QString> getDebugTypes();
     static QMap<quint64, QString> getDebugTypesS();
 
-    static QMap<quint64, QString> getOperatingSystemVersions(
-        OSNAME osName = OSNAME_WINDOWS);
-    static QMap<quint64, QString> getOperatingSystemVersionsS(
-        OSNAME osName = OSNAME_WINDOWS);
+    static QMap<quint64, QString> getOperatingSystemVersions(OSNAME osName = OSNAME_WINDOWS);
+    static QMap<quint64, QString> getOperatingSystemVersionsS(OSNAME osName = OSNAME_WINDOWS);
 
     static QMap<quint64, QString> getResourcesFixedFileInfoSignatures();
     static QMap<quint64, QString> getResourcesFixedFileInfoSignaturesS();
@@ -932,8 +813,7 @@ class XPE : public XMSDOS {
     static QMap<quint64, QString> getResourcesFixedFileInfoFileTypesS();
 
     qint64 calculateHeadersSize();
-    qint64 _calculateHeadersSize(qint64 nSectionsTableOffset,
-                                 quint32 nNumberOfSections);
+    qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);
 
     bool isDll();
     static bool isDll(QString sFileName);
@@ -958,12 +838,10 @@ class XPE : public XMSDOS {
     void setMetadataHeader_Streams(quint16 nValue);
 
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
-    bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory,
-                              XBinary::_MEMORY_MAP *pMemoryMap);
+    bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap);
 
     bool isNetMetadataPresent();
-    bool isNetMetadataPresent(CLI_INFO *pCliInfo,
-                              XBinary::_MEMORY_MAP *pMemoryMap);
+    bool isNetMetadataPresent(CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pMemoryMap);
 
     bool isNETAnsiStringPresent(QString sString);
     static bool isNETAnsiStringPresent(QString sString, CLI_INFO *pCliInfo);
@@ -1009,15 +887,11 @@ class XPE : public XMSDOS {
     };
 
     bool rebuildDump(QString sResultFile, REBUILD_OPTIONS *pRebuildOptions);
-    static bool rebuildDump(QString sInputFile, QString sResultFile,
-                            REBUILD_OPTIONS *pRebuildOptions);
+    static bool rebuildDump(QString sInputFile, QString sResultFile, REBUILD_OPTIONS *pRebuildOptions);
     static bool fixCheckSum(QString sFileName, bool bIsImage);
     void fixCheckSum();
 
-    static QList<XPE_DEF::IMAGE_SECTION_HEADER> splitSection(
-        QByteArray *pbaData,
-        XPE_DEF::IMAGE_SECTION_HEADER sectionHeaderOriginal,
-        quint32 nBlockSize);
+    static QList<XPE_DEF::IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData, XPE_DEF::IMAGE_SECTION_HEADER sectionHeaderOriginal, quint32 nBlockSize);
 
     struct HEADER_OPTIONS  // TODO Check
     {
@@ -1038,10 +912,8 @@ class XPE : public XMSDOS {
 
     static QByteArray createHeaderStub(HEADER_OPTIONS *pHeaderOptions);
 
-    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32
-    getLoadConfigDirectory32();  // TODO check size
-    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64
-    getLoadConfigDirectory64();  // TODO check size
+    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 getLoadConfigDirectory32();  // TODO check size
+    XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 getLoadConfigDirectory64();  // TODO check size
 
     qint64 getLoadConfigDirectoryOffset();
     qint64 getLoadConfigDirectorySize();
@@ -1150,8 +1022,7 @@ class XPE : public XMSDOS {
     void setLoadConfig_CastGuardOsDeterminedFailureMode(quint64 nValue);
     void setLoadConfig_GuardMemcpyFunctionPointer(quint64 nValue);
 
-    XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY _read_IMAGE_RUNTIME_FUNCTION_ENTRY(
-        qint64 nOffset);
+    XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY _read_IMAGE_RUNTIME_FUNCTION_ENTRY(qint64 nOffset);
 
     XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY _getException(qint32 nNumber);
 
@@ -1163,15 +1034,12 @@ class XPE : public XMSDOS {
     qint64 getExceptionRecordSize();
 
     QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList();
-    QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList(
-        XBinary::_MEMORY_MAP *pMemoryMap);
+    QList<XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY> getExceptionsList(XBinary::_MEMORY_MAP *pMemoryMap);
 
-    XPE_DEF::S_IMAGE_DEBUG_DIRECTORY _read_IMAGE_DEBUG_DIRECTORY(
-        qint64 nOffset);
+    XPE_DEF::S_IMAGE_DEBUG_DIRECTORY _read_IMAGE_DEBUG_DIRECTORY(qint64 nOffset);
 
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList();
-    QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList(
-        XBinary::_MEMORY_MAP *pMemoryMap);
+    QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList(XBinary::_MEMORY_MAP *pMemoryMap);
 
     qint64 getDebugHeaderOffset(quint32 nNumber);
     qint64 getDebugHeaderSize();
@@ -1191,47 +1059,38 @@ class XPE : public XMSDOS {
     qint64 getDelayImportRecordSize();
 
     QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> getDelayImportsList();
-    QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> getDelayImportsList(
-        XBinary::_MEMORY_MAP *pMemoryMap);
+    QList<XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR> getDelayImportsList(XBinary::_MEMORY_MAP *pMemoryMap);
     // TODO Get
     void setDelayImport_AllAttributes(quint32 nNumber, quint32 nValue);
     void setDelayImport_DllNameRVA(quint32 nNumber, quint32 nValue);
     void setDelayImport_ModuleHandleRVA(quint32 nNumber, quint32 nValue);
     void setDelayImport_ImportAddressTableRVA(quint32 nNumber, quint32 nValue);
     void setDelayImport_ImportNameTableRVA(quint32 nNumber, quint32 nValue);
-    void setDelayImport_BoundImportAddressTableRVA(quint32 nNumber,
-                                                   quint32 nValue);
-    void setDelayImport_UnloadInformationTableRVA(quint32 nNumber,
-                                                  quint32 nValue);
+    void setDelayImport_BoundImportAddressTableRVA(quint32 nNumber, quint32 nValue);
+    void setDelayImport_UnloadInformationTableRVA(quint32 nNumber, quint32 nValue);
     void setDelayImport_TimeDateStamp(quint32 nNumber, quint32 nValue);
 
     QList<DELAYIMPORT_POSITION> getDelayImportPositions(int nIndex);
-    QList<DELAYIMPORT_POSITION> getDelayImportPositions(
-        XBinary::_MEMORY_MAP *pMemoryMap, int nIndex);
+    QList<DELAYIMPORT_POSITION> getDelayImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, int nIndex);
 
     QList<BOUND_IMPORT_POSITION> getBoundImportPositions();
-    QList<BOUND_IMPORT_POSITION> getBoundImportPositions(
-        XBinary::_MEMORY_MAP *pMemoryMap);
+    QList<BOUND_IMPORT_POSITION> getBoundImportPositions(XBinary::_MEMORY_MAP *pMemoryMap);
 
-    XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR _read_IMAGE_BOUND_IMPORT_DESCRIPTOR(
-        qint64 nOffset);
+    XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR _read_IMAGE_BOUND_IMPORT_DESCRIPTOR(qint64 nOffset);
 
     qint64 getBoundImportRecordOffset(qint32 nNumber);
     qint64 getBoundImportRecordSize();
 
     void setBoundImport_TimeDateStamp(quint32 nNumber, quint32 nValue);
     void setBoundImport_OffsetModuleName(quint32 nNumber, quint16 nValue);
-    void setBoundImport_NumberOfModuleForwarderRefs(quint32 nNumber,
-                                                    quint16 nValue);
+    void setBoundImport_NumberOfModuleForwarderRefs(quint32 nNumber, quint16 nValue);
 
     qint32 getNumberOfImports();
     QString getImportLibraryName(quint32 nNumber);
-    QString getImportLibraryName(quint32 nNumber,
-                                 QList<XPE::IMPORT_HEADER> *pListImport);
+    QString getImportLibraryName(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
 
     qint32 getNumberOfImportThunks(quint32 nNumber);
-    qint32 getNumberOfImportThunks(quint32 nNumber,
-                                   QList<XPE::IMPORT_HEADER> *pListImport);
+    qint32 getNumberOfImportThunks(quint32 nNumber, QList<XPE::IMPORT_HEADER> *pListImport);
 
     qint64 getNetHeaderOffset();
     qint64 getNetHeaderSize();
@@ -1280,15 +1139,12 @@ class XPE : public XMSDOS {
     void setNetHeader_ManagedNativeHeader_Address(quint32 nValue);
     void setNetHeader_ManagedNativeHeader_Size(quint32 nValue);
 
-    virtual QList<SYMBOL_RECORD> getSymbolRecords(
-        XBinary::_MEMORY_MAP *pMemoryMap,
-        SYMBOL_TYPE symbolType = SYMBOL_TYPE_ALL);
+    virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap, SYMBOL_TYPE symbolType = SYMBOL_TYPE_ALL);
 
     XPE_DEF::WIN_CERT_RECORD read_WIN_CERT_RECORD(qint64 nOffset);
     QList<CERT> getCertList();
     QList<CERT> getCertList(qint64 nOffset, qint64 nSize);
-    static QList<CERT> getCertList(QIODevice *pDevice, qint64 nOffset,
-                                   qint64 nSize);
+    static QList<CERT> getCertList(QIODevice *pDevice, qint64 nOffset, qint64 nSize);
 
     static QString certListToString(QList<CERT> *pCertList);
     static QString certRecordToString(CERT_RECORD certRecord, qint32 nLevel);
@@ -1304,8 +1160,7 @@ class XPE : public XMSDOS {
     QString read_ASN_AnsiString(qint64 nOffset,
                                 qint64 nSize);  // TODO move to XBinary;
 
-    void getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize,
-                       CERT_RECORD *pCertRecord);
+    void getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize, CERT_RECORD *pCertRecord);
 
     static QString certTagToString(quint32 nTag);
     static QString objectIdToString(QString sObjectID);
@@ -1336,22 +1191,16 @@ class XPE : public XMSDOS {
         CERTNAMESTRING_SUBJECT
     };
 
-    static QString getCertNameString(PCCERT_CONTEXT pCertContext,
-                                     CERTNAMESTRING certNameString);
+    static QString getCertNameString(PCCERT_CONTEXT pCertContext, CERTNAMESTRING certNameString);
 #endif
 
-   private:
+private:
     quint16 _checkSum(qint64 nStartValue, qint64 nDataSize);
-    RESOURCE_POSITION _getResourcePosition(_MEMORY_MAP *pMemoryMap,
-                                           qint64 nBaseAddress,
-                                           qint64 nResourceOffset,
-                                           qint64 nOffset, quint32 nLevel);
+    RESOURCE_POSITION _getResourcePosition(_MEMORY_MAP *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);
     qint64 _fixHeadersSize();
     qint64 _getMinSectionOffset();  // TODO move to XBinary
     void _fixFileOffsets(qint64 nDelta);
-    quint32 __getResourcesVersion(RESOURCES_VERSION *pResourcesVersionResult,
-                                  qint64 nOffset, qint64 nSize, QString sPrefix,
-                                  int nLevel);
+    quint32 __getResourcesVersion(RESOURCES_VERSION *pResourcesVersionResult, qint64 nOffset, qint64 nSize, QString sPrefix, int nLevel);
 };
 
 #endif  // XPE_H
