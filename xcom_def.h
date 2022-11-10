@@ -7,8 +7,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -23,10 +23,9 @@
 
 #include <QtGlobal>
 
-namespace XCOM_DEF
-{
-const quint32 ADDRESS_BEGIN                 =0x100;
-const quint32 IMAGESIZE                     =0x10000;
-}
+namespace XCOM_DEF {
+const quint32 ADDRESS_BEGIN = 0x100;
+const quint32 IMAGESIZE = 0x10000;
+}  // namespace XCOM_DEF
 
-#endif // XCOM_DEF_H
+#endif  // XCOM_DEF_H

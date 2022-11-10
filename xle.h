@@ -7,8 +7,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -21,25 +21,26 @@
 #ifndef XLE_H
 #define XLE_H
 
-#include "xmsdos.h"
 #include "xle_def.h"
+#include "xmsdos.h"
 
-class XLE : public XMSDOS
-{
+class XLE : public XMSDOS {
     Q_OBJECT
 
-public:
-    enum TYPE
-    {
-        TYPE_UNKNOWN=0,
+   public:
+    enum TYPE {
+        TYPE_UNKNOWN = 0,
         TYPE_EXE
         // TODO More
     };
 
-    explicit XLE(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
+    explicit XLE(QIODevice *pDevice = nullptr, bool bIsImage = false,
+                 XADDR nModuleAddress = -1);
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static bool isValid(QIODevice *pDevice, bool bIsImage = false,
+                        XADDR nModuleAddress = -1);
+    static MODE getMode(QIODevice *pDevice, bool bIsImage = false,
+                        XADDR nModuleAddress = -1);
 
     qint64 getImageVxdHeaderOffset();
     qint64 getImageVxdHeaderSize();
@@ -157,11 +158,11 @@ public:
     virtual QString typeIdToString(qint32 nType);
     virtual OSINFO getOsInfo();
 
-    static QMap<quint64,QString> getImageLEMagics();
-    static QMap<quint64,QString> getImageLEMagicsS();
-    static QMap<quint64,QString> getImageLECpusS();
-    static QMap<quint64,QString> getImageLEOssS();
-    static QMap<quint64,QString> getImageLEMflagsS();
+    static QMap<quint64, QString> getImageLEMagics();
+    static QMap<quint64, QString> getImageLEMagicsS();
+    static QMap<quint64, QString> getImageLECpusS();
+    static QMap<quint64, QString> getImageLEOssS();
+    static QMap<quint64, QString> getImageLEMflagsS();
 };
 
-#endif // XLE_H
+#endif  // XLE_H

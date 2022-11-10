@@ -7,8 +7,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -24,23 +24,24 @@
 #include "xbinary.h"
 #include "xcom_def.h"
 
-class XCOM : public XBinary
-{
+class XCOM : public XBinary {
     Q_OBJECT
 
-public:
-    enum TYPE
-    {
-        TYPE_UNKNOWN=0,
+   public:
+    enum TYPE {
+        TYPE_UNKNOWN = 0,
         TYPE_EXE
         // TODO more
     };
 
-    explicit XCOM(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
+    explicit XCOM(QIODevice *pDevice = nullptr, bool bIsImage = false,
+                  XADDR nModuleAddress = -1);
     ~XCOM();
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static bool isValid(QIODevice *pDevice, bool bIsImage = false,
+                        XADDR nModuleAddress = -1);
+    static MODE getMode(QIODevice *pDevice, bool bIsImage = false,
+                        XADDR nModuleAddress = -1);
 
     virtual _MEMORY_MAP getMemoryMap();
     virtual QString getArch();
@@ -53,4 +54,4 @@ public:
     virtual QString typeIdToString(qint32 nType);
 };
 
-#endif // XCOM_H
+#endif  // XCOM_H

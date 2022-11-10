@@ -7,8 +7,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -23,11 +23,10 @@
 
 #include <QIODevice>
 
-class XIODevice : public QIODevice
-{
+class XIODevice : public QIODevice {
     Q_OBJECT
 
-public:
+   public:
     XIODevice(QObject *pParent);
 
     void setSize(quint64 nSize);
@@ -43,14 +42,14 @@ public:
     virtual void close();
     virtual qint64 pos() const;
 
-protected:
-    virtual qint64 readData(char *pData,qint64 nMaxSize);
-    virtual qint64 writeData(const char *pData,qint64 nMaxSize);
+   protected:
+    virtual qint64 readData(char *pData, qint64 nMaxSize);
+    virtual qint64 writeData(const char *pData, qint64 nMaxSize);
     virtual void setErrorString(const QString &sString);
 
-private:
+   private:
     quint64 g_nSize;
     quint64 g_nInitOffset;
 };
 
-#endif // XIODEVICE_H
+#endif  // XIODEVICE_H

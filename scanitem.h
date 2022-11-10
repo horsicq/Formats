@@ -7,8 +7,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -23,10 +23,10 @@
 
 #include "xbinary.h"
 
-class ScanItem
-{
-public:
-    ScanItem(const QString &sString,ScanItem *pItemParent=nullptr,qint32 nNumberOfColumns=1,bool bIsParent=false);
+class ScanItem {
+   public:
+    ScanItem(const QString &sString, ScanItem *pItemParent = nullptr,
+             qint32 nNumberOfColumns = 1, bool bIsParent = false);
     ~ScanItem();
 
     void appendChild(ScanItem *pItemChild);
@@ -39,7 +39,7 @@ public:
     int row() const;
     ScanItem *getParentItem();
 
-private:
+   private:
     QList<ScanItem *> g_listChildItems;
     QString g_sString;
     ScanItem *g_pParentItem;
@@ -48,4 +48,4 @@ private:
     XBinary::SCANSTRUCT g_scanStruct;
 };
 
-#endif // SCANITEM_H
+#endif  // SCANITEM_H

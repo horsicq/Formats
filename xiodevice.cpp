@@ -7,8 +7,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -20,78 +20,46 @@
  */
 #include "xiodevice.h"
 
-XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent)
-{
-    g_nSize=0;
-    g_nInitOffset=0;
+XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent) {
+    g_nSize = 0;
+    g_nInitOffset = 0;
 }
 
-void XIODevice::setSize(quint64 nSize)
-{
-    g_nSize=nSize;
-}
+void XIODevice::setSize(quint64 nSize) { g_nSize = nSize; }
 
-void XIODevice::setInitOffset(quint64 nOffset)
-{
-    g_nInitOffset=nOffset;
-}
+void XIODevice::setInitOffset(quint64 nOffset) { g_nInitOffset = nOffset; }
 
-quint64 XIODevice::getInitOffset()
-{
-    return g_nInitOffset;
-}
+quint64 XIODevice::getInitOffset() { return g_nInitOffset; }
 
-qint64 XIODevice::size() const
-{
-    return g_nSize;
-}
+qint64 XIODevice::size() const { return g_nSize; }
 
-bool XIODevice::isSequential() const
-{
-    return false;
-}
+bool XIODevice::isSequential() const { return false; }
 
-bool XIODevice::seek(qint64 nPos)
-{
-    bool bResult=false;
+bool XIODevice::seek(qint64 nPos) {
+    bool bResult = false;
 
-    if((nPos<size())&&(nPos>=0))
-    {
-        bResult=QIODevice::seek(nPos);
+    if ((nPos < size()) && (nPos >= 0)) {
+        bResult = QIODevice::seek(nPos);
     }
 
     return bResult;
 }
 
-bool XIODevice::reset()
-{
-    return seek(0);
-}
+bool XIODevice::reset() { return seek(0); }
 
-bool XIODevice::open(OpenMode mode)
-{
+bool XIODevice::open(OpenMode mode) {
     setOpenMode(mode);
 
     return true;
 }
 
-bool XIODevice::atEnd() const
-{
-    return (bytesAvailable()==0);
-}
+bool XIODevice::atEnd() const { return (bytesAvailable() == 0); }
 
-void XIODevice::close()
-{
-    setOpenMode(NotOpen);
-}
+void XIODevice::close() { setOpenMode(NotOpen); }
 
-qint64 XIODevice::pos() const
-{
-    return QIODevice::pos();
-}
+qint64 XIODevice::pos() const { return QIODevice::pos(); }
 
-qint64 XIODevice::readData(char *pData,qint64 nMaxSize)
-{
+qint64 XIODevice::readData(char *pData, qint64 nMaxSize) {
     Q_UNUSED(pData)
     Q_UNUSED(nMaxSize)
 
@@ -102,8 +70,7 @@ qint64 XIODevice::readData(char *pData,qint64 nMaxSize)
     return 0;
 }
 
-qint64 XIODevice::writeData(const char *pData,qint64 nMaxSize)
-{
+qint64 XIODevice::writeData(const char *pData, qint64 nMaxSize) {
     Q_UNUSED(pData)
     Q_UNUSED(nMaxSize)
 
@@ -114,7 +81,6 @@ qint64 XIODevice::writeData(const char *pData,qint64 nMaxSize)
     return 0;
 }
 
-void XIODevice::setErrorString(const QString &sString)
-{
+void XIODevice::setErrorString(const QString &sString) {
     QIODevice::setErrorString(sString);
 }

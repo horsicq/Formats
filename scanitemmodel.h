@@ -7,8 +7,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -36,28 +36,25 @@
 #endif
 #include "scanitem.h"
 
-class ScanItemModel : public QAbstractItemModel
-{
+class ScanItemModel : public QAbstractItemModel {
     Q_OBJECT
 
-public:
+   public:
+    enum UD { UD_FILETYPE = 0, UD_NAME, UD_INFO };
 
-    enum UD
-    {
-        UD_FILETYPE=0,
-        UD_NAME,
-        UD_INFO
-    };
-
-    explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,int nNumberOfColumns=1);
+    explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs,
+                           int nNumberOfColumns = 1);
     ~ScanItemModel() override;
 
-    QVariant headerData(int nSection,Qt::Orientation orientation,int nRole=Qt::DisplayRole) const override;
-    QModelIndex index(int nRow,int nColumn,const QModelIndex &parent=QModelIndex()) const override;
+    QVariant headerData(int nSection, Qt::Orientation orientation,
+                        int nRole = Qt::DisplayRole) const override;
+    QModelIndex index(int nRow, int nColumn,
+                      const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &index) const override;
-    int rowCount(const QModelIndex &parent=QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent=QModelIndex()) const override;
-    QVariant data(const QModelIndex &index,int nRole=Qt::DisplayRole) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index,
+                  int nRole = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     QString toXML();
     QString toJSON();
@@ -68,17 +65,17 @@ public:
     QString toString(XBinary::FORMATTYPE formatType);
     ScanItem *rootItem();
 
-private:
-    void _toXML(QXmlStreamWriter *pXml,ScanItem *pItem,qint32 nLevel);
-    void _toJSON(QJsonObject *pJsonObject,ScanItem *pItem,qint32 nLevel);
-    void _toCSV(QString *pString,ScanItem *pItem,qint32 nLevel);
-    void _toTSV(QString *pString,ScanItem *pItem,qint32 nLevel);
-    void _toFormattedString(QString *pString,ScanItem *pItem,qint32 nLevel);
-    void _coloredOutput(ScanItem *pItem,qint32 nLevel);
+   private:
+    void _toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLevel);
+    void _toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nLevel);
+    void _toCSV(QString *pString, ScanItem *pItem, qint32 nLevel);
+    void _toTSV(QString *pString, ScanItem *pItem, qint32 nLevel);
+    void _toFormattedString(QString *pString, ScanItem *pItem, qint32 nLevel);
+    void _coloredOutput(ScanItem *pItem, qint32 nLevel);
     void _coloredItem(ScanItem *pItem);
 
-private:
+   private:
     ScanItem *g_pRootItem;
 };
 
-#endif // SCANITEMMODEL_H
+#endif  // SCANITEMMODEL_H

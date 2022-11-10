@@ -7,8 +7,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -23,15 +23,15 @@
 
 #include "xbinary.h"
 #include "xcom.h"
+#include "xelf.h"
+#include "xle.h"
+#include "xmach.h"
 #include "xmsdos.h"
 #include "xne.h"
-#include "xle.h"
 #include "xpe.h"
-#include "xelf.h"
-#include "xmach.h"
 #ifdef USE_DEX
-#include "xdex.h"
 #include "xandroidbinary.h"
+#include "xdex.h"
 #endif
 #ifdef USE_PDF
 #include "xpdf.h"
@@ -40,47 +40,85 @@
 #include "xarchives.h"
 #endif
 #ifdef QT_GUI_LIB
-#include <QComboBox> // TODO Check TESTLIB !!!
+#include <QComboBox>  // TODO Check TESTLIB !!!
 #endif
 
-class XFormats : public QObject
-{
+class XFormats : public QObject {
     Q_OBJECT
 
-public:
-    explicit XFormats(QObject *pParent=nullptr);
-    static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static XBinary::_MEMORY_MAP getMemoryMap(QString sFileName,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static qint64 getEntryPointAddress(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static qint64 getEntryPointOffset(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static bool isBigEndian(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static bool isSigned(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+   public:
+    explicit XFormats(QObject *pParent = nullptr);
+    static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType,
+                                             QIODevice *pDevice,
+                                             bool bIsImage = false,
+                                             XADDR nModuleAddress = -1);
+    static XBinary::_MEMORY_MAP getMemoryMap(QString sFileName,
+                                             bool bIsImage = false,
+                                             XADDR nModuleAddress = -1);
+    static qint64 getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice,
+                                       bool bIsImage = false,
+                                       XADDR nModuleAddress = -1);
+    static qint64 getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice,
+                                      bool bIsImage = false,
+                                      XADDR nModuleAddress = -1);
+    static bool isBigEndian(XBinary::FT fileType, QIODevice *pDevice,
+                            bool bIsImage = false, XADDR nModuleAddress = -1);
+    static bool isSigned(XBinary::FT fileType, QIODevice *pDevice,
+                         bool bIsImage = false, XADDR nModuleAddress = -1);
     static bool isSigned(QString sFileName);
-    static XBinary::OFFSETSIZE getSignOffsetSize(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static XBinary::OFFSETSIZE getSignOffsetSize(XBinary::FT fileType,
+                                                 QIODevice *pDevice,
+                                                 bool bIsImage = false,
+                                                 XADDR nModuleAddress = -1);
     static XBinary::OFFSETSIZE getSignOffsetSize(QString sFileName);
-    static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1,XBinary::SYMBOL_TYPE symBolType=XBinary::SYMBOL_TYPE_ALL);
-    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,bool bExtra=false);
-    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,qint64 nOffset,qint64 nSize,bool bExtra=false);
-    static QSet<XBinary::FT> getFileTypes(QString sFileName,bool bExtra=false);
-    static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData,bool bExtra=false);
-    static XBinary::OSINFO getOsInfo(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(
+        XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false,
+        XADDR nModuleAddress = -1,
+        XBinary::SYMBOL_TYPE symBolType = XBinary::SYMBOL_TYPE_ALL);
+    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,
+                                          bool bExtra = false);
+    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, qint64 nOffset,
+                                          qint64 nSize, bool bExtra = false);
+    static QSet<XBinary::FT> getFileTypes(QString sFileName,
+                                          bool bExtra = false);
+    static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData,
+                                          bool bExtra = false);
+    static XBinary::OSINFO getOsInfo(XBinary::FT fileType, QIODevice *pDevice,
+                                     bool bIsImage = false,
+                                     XADDR nModuleAddress = -1);
 
-    static bool isValid(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static qint64 getFileFormatSize(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static QString getFileFormatString(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static QString getFileFormatExt(XBinary::FT fileType,QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static bool isValid(XBinary::FT fileType, QIODevice *pDevice,
+                        bool bIsImage = false, XADDR nModuleAddress = -1);
+    static qint64 getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice,
+                                    bool bIsImage = false,
+                                    XADDR nModuleAddress = -1);
+    static QString getFileFormatString(XBinary::FT fileType, QIODevice *pDevice,
+                                       bool bIsImage = false,
+                                       XADDR nModuleAddress = -1);
+    static QString getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice,
+                                    bool bIsImage = false,
+                                    XADDR nModuleAddress = -1);
 #ifdef USE_ARCHIVE
-    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,XArchive::RECORD *pRecord,bool bExtra=false);
-    static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice,QList<XArchive::RECORD> *pListRecords,qint32 nLevel=0);
+    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice,
+                                          XArchive::RECORD *pRecord,
+                                          bool bExtra = false);
+    static QSet<XBinary::FT> getFileTypesZIP(
+        QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords,
+        qint32 nLevel = 0);
 #endif
 #ifdef QT_GUI_LIB
-    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType,QIODevice *pDevice,QComboBox *pComboBox);
-    static XBinary::FT setFileTypeComboBox(QString sFileName,QComboBox *pComboBox);
-    static bool setEndiannessComboBox(QComboBox *pComboBox,bool bIsBigEndian);
+    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType,
+                                           QIODevice *pDevice,
+                                           QComboBox *pComboBox);
+    static XBinary::FT setFileTypeComboBox(QString sFileName,
+                                           QComboBox *pComboBox);
+    static bool setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian);
 #endif
 
-private:
-    static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice,bool bExtra=false,qint32 nLevel=0);
+   private:
+    static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice,
+                                           bool bExtra = false,
+                                           qint32 nLevel = 0);
 };
 
-#endif // XFORMATS_H
+#endif  // XFORMATS_H

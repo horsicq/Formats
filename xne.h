@@ -7,8 +7,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -24,24 +24,25 @@
 #include "xmsdos.h"
 #include "xne_def.h"
 
-class XNE : public XMSDOS
-{
+class XNE : public XMSDOS {
     Q_OBJECT
 
-public:
-    enum TYPE
-    {
-        TYPE_UNKNOWN=0,
+   public:
+    enum TYPE {
+        TYPE_UNKNOWN = 0,
         TYPE_EXE,
         TYPE_DLL,
         TYPE_DRIVER
         // TODO Check More
     };
 
-    explicit XNE(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
+    explicit XNE(QIODevice *pDevice = nullptr, bool bIsImage = false,
+                 XADDR nModuleAddress = -1);
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static bool isValid(QIODevice *pDevice, bool bIsImage = false,
+                        XADDR nModuleAddress = -1);
+    static MODE getMode(QIODevice *pDevice, bool bIsImage = false,
+                        XADDR nModuleAddress = -1);
 
     qint64 getImageOS2HeaderOffset();
     qint64 getImageOS2HeaderSize();
@@ -123,12 +124,12 @@ public:
 
     XNE_DEF::NE_SEGMENT _read_NE_SEGMENT(qint64 nOffset);
 
-    static QMap<quint64,QString> getImageNEMagics();
-    static QMap<quint64,QString> getImageNEMagicsS();
-    static QMap<quint64,QString> getImageNEFlagsS();
-    static QMap<quint64,QString> getImageNEExetypesS();
-    static QMap<quint64,QString> getImageNEFlagsothersS();
-    static QMap<quint64,QString> getImageSegmentTypesS();
+    static QMap<quint64, QString> getImageNEMagics();
+    static QMap<quint64, QString> getImageNEMagicsS();
+    static QMap<quint64, QString> getImageNEFlagsS();
+    static QMap<quint64, QString> getImageNEExetypesS();
+    static QMap<quint64, QString> getImageNEFlagsothersS();
+    static QMap<quint64, QString> getImageSegmentTypesS();
 
     qint64 getModuleAddress();
 
@@ -142,4 +143,4 @@ public:
     virtual QString typeIdToString(qint32 nType);
 };
 
-#endif // XNE_H
+#endif  // XNE_H

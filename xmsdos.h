@@ -7,8 +7,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -24,29 +24,30 @@
 #include "xbinary.h"
 #include "xmsdos_def.h"
 
-class XMSDOS : public XBinary
-{
+class XMSDOS : public XBinary {
     Q_OBJECT
 
-public:
-    struct MS_RICH_RECORD // For PE and LE
+   public:
+    struct MS_RICH_RECORD  // For PE and LE
     {
         quint16 nId;
         quint16 nVersion;
         quint32 nCount;
     };
 
-    enum TYPE
-    {
-        TYPE_UNKNOWN=0,
+    enum TYPE {
+        TYPE_UNKNOWN = 0,
         TYPE_EXE
         // TODO EXTENDER?
     };
 
-    explicit XMSDOS(QIODevice *pDevice=nullptr,bool bIsImage=false,XADDR nModuleAddress=-1);
+    explicit XMSDOS(QIODevice *pDevice = nullptr, bool bIsImage = false,
+                    XADDR nModuleAddress = -1);
     virtual bool isValid();
-    static bool isValid(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
-    static MODE getMode(QIODevice *pDevice,bool bIsImage=false,XADDR nModuleAddress=-1);
+    static bool isValid(QIODevice *pDevice, bool bIsImage = false,
+                        XADDR nModuleAddress = -1);
+    static MODE getMode(QIODevice *pDevice, bool bIsImage = false,
+                        XADDR nModuleAddress = -1);
 
     quint16 get_magic();
     qint32 get_lfanew();
@@ -75,10 +76,10 @@ public:
     void set_e_cs(quint16 nValue);
     void set_e_lfarlc(quint16 nValue);
     void set_e_ovno(quint16 nValue);
-    void set_e_res(qint32 nPosition,quint16 nValue);
+    void set_e_res(qint32 nPosition, quint16 nValue);
     void set_e_oemid(quint16 nValue);
     void set_e_oeminfo(quint16 nValue);
-    void set_e_res2(qint32 nPosition,quint16 nValue);
+    void set_e_res2(qint32 nPosition, quint16 nValue);
     void set_e_lfanew(quint32 nValue);
 
     quint16 get_e_magic();
@@ -106,8 +107,8 @@ public:
     virtual qint64 getImageSize();
     qint64 getModuleAddress();
 
-    static QMap<quint64,QString> getImageMagics();
-    static QMap<quint64,QString> getImageMagicsS();
+    static QMap<quint64, QString> getImageMagics();
+    static QMap<quint64, QString> getImageMagicsS();
 
     bool isLE();
     bool isLX();
@@ -120,7 +121,8 @@ public:
     qint32 getNumberOfRichIDs();
     qint32 getNumberOfRichIDs(QList<MS_RICH_RECORD> *pListRichSignatureRecords);
     bool isRichVersionPresent(quint32 nVersion);
-    bool isRichVersionPresent(quint32 nVersion,QList<MS_RICH_RECORD> *pListRichSignatureRecords);
+    bool isRichVersionPresent(quint32 nVersion,
+                              QList<MS_RICH_RECORD> *pListRichSignatureRecords);
 
     // dos stub for LE, NE and PE
     qint64 getDosStubSize();
@@ -137,4 +139,4 @@ public:
     virtual QString typeIdToString(qint32 nType);
 };
 
-#endif // XMSDOS_H
+#endif  // XMSDOS_H
