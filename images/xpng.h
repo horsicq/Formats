@@ -26,12 +26,26 @@
 class XPNG : public XBinary {
     Q_OBJECT
 
+    struct CHUNK {
+        QString sName;
+        qint64 nDataOffset;
+        qint64 nDataSize;
+        quint32 nCRC;
+    };
+
 public:
     explicit XPNG(QIODevice *pDevice = nullptr);
     ~XPNG();
 
     virtual bool isValid();
     static bool isValid(QIODevice *pDevice);
+    virtual FT getFileType();
+    virtual QString getFileFormatString();
+    virtual QString getFileFormatExt();
+    virtual qint64 getFileFormatSize();
+
+private:
+    CHUNK _readChunk(qint64 nOffset);
 };
 
 #endif  // XPNG_H

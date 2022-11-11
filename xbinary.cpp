@@ -3787,7 +3787,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra) {
         } else if (compareSignature(&memoryMap, "'7z'BCAF271C", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_7Z);
-        } else if (compareSignature(&memoryMap, "89'PNG\r\n'1A0A........'IHDR'", 0)) {
+        } else if (compareSignature(&memoryMap, "89'PNG\r\n'1A0A", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_PNG);
         } else if (compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00", 0)) {

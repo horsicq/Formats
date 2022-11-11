@@ -526,6 +526,12 @@ XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bo
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         result = mach.getOsInfo();
     }
+#ifdef USE_DEX
+    else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
+        XDEX dex(pDevice);
+        result = dex.getOsInfo();
+    }
+#endif
 
     return result;
 }
@@ -557,6 +563,9 @@ bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, 
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         bResult = mach.isValid();
+    } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
+        XPNG png(pDevice);
+        bResult = png.isValid();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -575,8 +584,11 @@ bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, 
         XZip zip(pDevice);
         bResult = zip.isValid();
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
-        XSevenZip zip(pDevice);
-        bResult = zip.isValid();
+        XSevenZip sevenzip(pDevice);
+        bResult = sevenzip.isValid();
+    } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
+        XCab xcab(pDevice);
+        bResult = xcab.isValid();
     }
 #endif
 
@@ -610,6 +622,9 @@ qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, boo
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         nResult = mach.getFileFormatSize();
+    } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
+        XPNG png(pDevice);
+        nResult = png.getFileFormatSize();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -630,6 +645,9 @@ qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, boo
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
         XSevenZip zip(pDevice);
         nResult = zip.getFileFormatSize();
+    } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
+        XCab xcab(pDevice);
+        nResult = xcab.getFileFormatSize();
     }
 #endif
 
@@ -663,6 +681,9 @@ QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice, 
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         sResult = mach.getFileFormatString();
+    } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
+        XPNG png(pDevice);
+        sResult = png.getFileFormatString();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -683,6 +704,9 @@ QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice, 
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
         XSevenZip zip(pDevice);
         sResult = zip.getFileFormatString();
+    } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
+        XCab xcab(pDevice);
+        sResult = xcab.getFileFormatString();
     }
 #endif
 
@@ -716,6 +740,9 @@ QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice, boo
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         sResult = mach.getFileFormatExt();
+    } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
+        XPNG png(pDevice);
+        sResult = png.getFileFormatExt();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -736,6 +763,9 @@ QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice, boo
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
         XSevenZip zip(pDevice);
         sResult = zip.getFileFormatExt();
+    } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
+        XCab xcab(pDevice);
+        sResult = xcab.getFileFormatExt();
     }
 #endif
 

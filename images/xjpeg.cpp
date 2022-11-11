@@ -28,7 +28,13 @@ XJpeg::~XJpeg() {
 
 bool XJpeg::isValid()
 {
-    return false;
+    bool bIsValid = false;
+
+    if (getSize() >= 20) {
+        bIsValid = compareSignature("FFD8FFE0....'JFIF'00");
+    }
+
+    return bIsValid;
 }
 
 bool XJpeg::isValid(QIODevice *pDevice)
@@ -36,5 +42,37 @@ bool XJpeg::isValid(QIODevice *pDevice)
     XJpeg xjpeg(pDevice);
 
     return xjpeg.isValid();
+}
+
+XBinary::FT XJpeg::getFileType()
+{
+    return FT_JPEG;
+}
+
+QString XJpeg::getFileFormatString()
+{
+    QString sResult;
+
+    sResult = QString("JPEG");
+
+    return sResult;
+}
+
+QString XJpeg::getFileFormatExt()
+{
+    return "jpeg";
+}
+
+qint64 XJpeg::getFileFormatSize()
+{
+    return XBinary::getFileFormatSize();
+}
+
+XJpeg::CHUNK XJpeg::_readChunk(qint64 nOffset)
+{
+    CHUNK result = {};
+
+
+    return result;
 }
 

@@ -26,12 +26,25 @@
 class XJpeg : public XBinary {
     Q_OBJECT
 
+    struct CHUNK {
+        quint32 nId;
+        qint64 nDataOffset;
+        qint64 nDataSize;
+    };
+
 public:
     explicit XJpeg(QIODevice *pDevice = nullptr);
     ~XJpeg();
 
     virtual bool isValid();
     static bool isValid(QIODevice *pDevice);
+    virtual FT getFileType();
+    virtual QString getFileFormatString();
+    virtual QString getFileFormatExt();
+    virtual qint64 getFileFormatSize();
+
+private:
+    CHUNK _readChunk(qint64 nOffset);
 };
 
 #endif  // XJPEG_H
