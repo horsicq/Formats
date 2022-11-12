@@ -26,13 +26,11 @@ XIcon::XIcon(QIODevice *pDevice) : XBinary(pDevice) {
 XIcon::~XIcon() {
 }
 
-bool XIcon::isValid()
-{
+bool XIcon::isValid() {
     return false;
 }
 
-bool XIcon::isValid(QIODevice *pDevice)
-{
+bool XIcon::isValid(QIODevice *pDevice) {
     XIcon xicon(pDevice);
 
     return xicon.isValid();

@@ -137,7 +137,13 @@ public:
         //        ADDRESS_SEGMENT_DATA
     };
 
-    enum FILEPART { FILEPART_UNKNOWN = 0, FILEPART_ARCHIVERECORD, FILEPART_HEADER, FILEPART_OVERLAY, FILEPART_RESOURCE };
+    enum FILEPART {
+        FILEPART_UNKNOWN = 0,
+        FILEPART_ARCHIVERECORD,
+        FILEPART_HEADER,
+        FILEPART_OVERLAY,
+        FILEPART_RESOURCE
+    };
 
     enum MMT {
         MMT_UNKNOWN = 0,
@@ -160,7 +166,13 @@ public:
         bool bIsVirtual;
     };
 
-    enum FORMATTYPE { FORMATTYPE_TEXT = 0, FORMATTYPE_XML, FORMATTYPE_JSON, FORMATTYPE_CSV, FORMATTYPE_TSV };
+    enum FORMATTYPE {
+        FORMATTYPE_TEXT = 0,
+        FORMATTYPE_XML,
+        FORMATTYPE_JSON,
+        FORMATTYPE_CSV,
+        FORMATTYPE_TSV
+    };
 
     enum FT {
         FT_UNKNOWN = 0,
@@ -293,7 +305,13 @@ public:
         DM_BPF_BE
     };
 
-    enum SYNTAX { SYNTAX_DEFAULT = 0, SYNTAX_INTEL, SYNTAX_ATT, SYNTAX_MASM, SYNTAX_MOTOROLA };
+    enum SYNTAX {
+        SYNTAX_DEFAULT = 0,
+        SYNTAX_INTEL,
+        SYNTAX_ATT,
+        SYNTAX_MASM,
+        SYNTAX_MOTOROLA
+    };
 
     enum TYPE {
         TYPE_UNKNOWN = 0,
@@ -411,8 +429,8 @@ public:
         HASH_SHA256,
         HASH_SHA384,
         HASH_SHA512,
-    // TODO Check more
-    // TODO Check Qt versions!
+        // TODO Check more
+        // TODO Check Qt versions!
 //        HASH_KECCAK_224,
 //        HASH_KECCAK_256,
 //        HASH_KECCAK_384,
@@ -519,7 +537,13 @@ public:
     };
 
 private:
-    enum ST { ST_COMPAREBYTES = 0, ST_FINDBYTES, ST_RELOFFSETFIX, ST_RELOFFSET, ST_ADDRESS };
+    enum ST {
+        ST_COMPAREBYTES = 0,
+        ST_FINDBYTES,
+        ST_RELOFFSETFIX,
+        ST_RELOFFSET,
+        ST_ADDRESS
+    };
 
     struct SIGNATURE_RECORD {
         XADDR nBaseAddress;
@@ -1047,7 +1071,11 @@ public:
 
     static bool isPlainTextType(QIODevice *pDevice);
 
-    enum UNICODE_TYPE { UNICODE_TYPE_NONE = 0, UNICODE_TYPE_LE, UNICODE_TYPE_BE };
+    enum UNICODE_TYPE {
+        UNICODE_TYPE_NONE = 0,
+        UNICODE_TYPE_LE,
+        UNICODE_TYPE_BE
+    };
 
     UNICODE_TYPE getUnicodeType();
     UNICODE_TYPE getUnicodeType(QByteArray *pbaData);
@@ -1128,7 +1156,10 @@ public:
     static QDateTime valueToTime(quint64 nValue, DT_TYPE type);
     static QString valueToTimeString(quint64 nValue, DT_TYPE type);
 
-    enum VL_TYPE { VL_TYPE_LIST = 0, VL_TYPE_FLAGS };
+    enum VL_TYPE {
+        VL_TYPE_LIST = 0,
+        VL_TYPE_FLAGS
+    };
 
     static QString valueToFlagsString(quint64 nValue, QMap<quint64, QString> mapFlags, VL_TYPE vlType);
 
@@ -1177,7 +1208,10 @@ public:
 
     static QList<QString> getAllFilesFromDirectory(QString sDirectory, QString sExtension);
 
-    enum OPCODE_STATUS { OPCODE_STATUS_SUCCESS = 0, OPCODE_STATUS_END };
+    enum OPCODE_STATUS {
+        OPCODE_STATUS_SUCCESS = 0,
+        OPCODE_STATUS_END
+    };
 
     QList<OPCODE> getOpcodes(qint64 nOffset, XADDR nStartAddress, qint64 nSize, quint32 nType);
     virtual XADDR readOpcodes(quint32 nType, char *pData, XADDR nStartAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);

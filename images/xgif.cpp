@@ -26,15 +26,12 @@ XGif::XGif(QIODevice *pDevice) : XBinary(pDevice) {
 XGif::~XGif() {
 }
 
-bool XGif::isValid()
-{
+bool XGif::isValid() {
     return false;
 }
 
-bool XGif::isValid(QIODevice *pDevice)
-{
+bool XGif::isValid(QIODevice *pDevice) {
     XGif xgif(pDevice);
 
     return xgif.isValid();
 }
-

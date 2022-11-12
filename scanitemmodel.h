@@ -40,7 +40,11 @@ class ScanItemModel : public QAbstractItemModel {
     Q_OBJECT
 
 public:
-    enum UD { UD_FILETYPE = 0, UD_NAME, UD_INFO };
+    enum UD {
+        UD_FILETYPE = 0,
+        UD_NAME,
+        UD_INFO
+    };
 
     explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns = 1);
     ~ScanItemModel() override;

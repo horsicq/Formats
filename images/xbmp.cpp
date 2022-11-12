@@ -26,15 +26,12 @@ XBMP::XBMP(QIODevice *pDevice) : XBinary(pDevice) {
 XBMP::~XBMP() {
 }
 
-bool XBMP::isValid()
-{
+bool XBMP::isValid() {
     return false;
 }
 
-bool XBMP::isValid(QIODevice *pDevice)
-{
+bool XBMP::isValid(QIODevice *pDevice) {
     XBMP xbmp(pDevice);
 
     return xbmp.isValid();
 }
-

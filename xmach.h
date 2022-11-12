@@ -660,7 +660,14 @@ public:
     virtual OSINFO getOsInfo();
     virtual QString typeIdToString(qint32 nType);
 
-    enum OPCODE_TYPE { OPCODE_TYPE_UNKNOWN = 0, OPCODE_TYPE_BIND, OPCODE_TYPE_WEAK_BIND, OPCODE_TYPE_LAZY_BIND, OPCODE_TYPE_EXPORT, OPCODE_TYPE_REBASE };
+    enum OPCODE_TYPE {
+        OPCODE_TYPE_UNKNOWN = 0,
+        OPCODE_TYPE_BIND,
+        OPCODE_TYPE_WEAK_BIND,
+        OPCODE_TYPE_LAZY_BIND,
+        OPCODE_TYPE_EXPORT,
+        OPCODE_TYPE_REBASE
+    };
 
     virtual XADDR readOpcodes(quint32 nType, char *pData, XADDR nAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);
     XADDR readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);

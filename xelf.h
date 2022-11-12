@@ -28,7 +28,18 @@ class XELF : public XBinary {
     Q_OBJECT
 
 public:
-    enum DS { DS_UNKNOWN, DS_INTERPRETER, DS_LIBRARIES, DS_RUNPATH, DS_NOTES, DS_DYNAMICTAGS, DS_STRINGTABLE, DS_SYMBOLTABLE, DS_RELA, DS_REL };
+    enum DS {
+        DS_UNKNOWN,
+        DS_INTERPRETER,
+        DS_LIBRARIES,
+        DS_RUNPATH,
+        DS_NOTES,
+        DS_DYNAMICTAGS,
+        DS_STRINGTABLE,
+        DS_SYMBOLTABLE,
+        DS_RELA,
+        DS_REL
+    };
 
     struct NOTE {
         qint64 nOffset;
@@ -52,7 +63,14 @@ public:
         qint64 nFlags;
     };
 
-    enum TYPE { TYPE_UNKNOWN = 0, TYPE_REL, TYPE_EXEC, TYPE_DYN, TYPE_CORE, TYPE_NUM };
+    enum TYPE {
+        TYPE_UNKNOWN = 0,
+        TYPE_REL,
+        TYPE_EXEC,
+        TYPE_DYN,
+        TYPE_CORE,
+        TYPE_NUM
+    };
 
     XELF(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XELF();
