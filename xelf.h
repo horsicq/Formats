@@ -378,7 +378,6 @@ public:
     QList<TAG_STRUCT> getTagStructs();
     QList<TAG_STRUCT> getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, _MEMORY_MAP *pMemoryMap);
     QList<TAG_STRUCT> _getTagStructs(qint64 nOffset, qint64 nSize, bool bIs64, bool bIsBigEndian);
-
     static QList<TAG_STRUCT> _getTagStructs(QList<TAG_STRUCT> *pListTagStructs, qint64 nTag);
 
     qint64 getDynamicArraySize();
@@ -445,7 +444,6 @@ public:
     void setElf64_Sym_st_size(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
 
     qint64 getSymSize();
-
     qint64 getSymTableSize(qint64 nOffset);
 
     XELF_DEF::Elf32_Rel _readElf32_Rel(qint64 nOffset, bool bIsBigEndian);
