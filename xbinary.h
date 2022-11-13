@@ -602,7 +602,6 @@ public:
     virtual OSINFO getOsInfo();
 
     void setEndianness(bool bIsBigEndian);  // TODO enum
-
     static bool isPacked(double dEntropy);
 
     static quint8 random8();
