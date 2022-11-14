@@ -59,6 +59,7 @@ QString XJpeg::getFileFormatExt() {
 }
 
 qint64 XJpeg::getFileFormatSize() {
+    // TODO
     return XBinary::getFileFormatSize();
 }
 
