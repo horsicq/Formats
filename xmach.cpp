@@ -31,8 +31,7 @@ bool XMACH::isValid() {
 
     quint32 nMagic = read_uint32(0);
 
-    if ((nMagic == XMACH_DEF::S_MH_MAGIC) || (nMagic == XMACH_DEF::S_MH_CIGAM) || (nMagic == XMACH_DEF::S_MH_MAGIC_64) ||
-        (nMagic == XMACH_DEF::S_MH_CIGAM_64)) {
+    if ((nMagic == XMACH_DEF::S_MH_MAGIC) || (nMagic == XMACH_DEF::S_MH_CIGAM) || (nMagic == XMACH_DEF::S_MH_MAGIC_64) || (nMagic == XMACH_DEF::S_MH_CIGAM_64)) {
         bResult = true;
     }
 
@@ -4118,8 +4117,7 @@ XADDR XMACH::readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSi
     return nResult;
 }
 
-XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus,
-                                       bool bNullEnd) {
+XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus, bool bNullEnd) {
     XADDR nResult = 0;
 
     if (nSize > 0) {

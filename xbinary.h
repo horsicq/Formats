@@ -76,8 +76,7 @@
 // TODO Check 64
 // TODO mb Functions
 #define S_ALIGN_DOWN32(value, align) (((quint32)value) & ~((quint32)align - 1))
-#define S_ALIGN_UP32(value, align) \
-    ((((quint32)value) & ((quint32)align - 1)) ? (S_ALIGN_DOWN32((quint32)value, (quint32)align) + (quint32)align) : ((quint32)value))
+#define S_ALIGN_UP32(value, align) ((((quint32)value) & ((quint32)align - 1)) ? (S_ALIGN_DOWN32((quint32)value, (quint32)align) + (quint32)align) : ((quint32)value))
 
 #define S_ALIGN_DOWN(value, align) ((value) & ~(align - 1))
 #define S_ALIGN_UP(value, align) (((value) & (align - 1)) ? S_ALIGN_DOWN(value, align) + align : value)
@@ -748,8 +747,7 @@ public:
                               PDSTRUCT *pProcessData = nullptr);  // mb TODO endian
     qint64 find_utf8String(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData = nullptr);
     qint64 find_signature(qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize = 0, PDSTRUCT *pProcessData = nullptr);
-    qint64 find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize = nullptr,
-                          PDSTRUCT *pProcessData = nullptr);
+    qint64 find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize = nullptr, PDSTRUCT *pProcessData = nullptr);
     qint64 find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData = nullptr);
     qint64 find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString,
                                PDSTRUCT *pProcessData = nullptr);  // mb TODO endian
@@ -779,8 +777,7 @@ public:
     bool _addMultiSearchStringRecord(QList<MS_RECORD> *pList, MS_RECORD *pRecord, STRINGSEARCH_OPTIONS *pSsOptions);
 
     QList<MS_RECORD> multiSearch_allStrings(qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pProcessData = nullptr);
-    QList<MS_RECORD> multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo = "",
-                                           PDSTRUCT *pProcessData = nullptr);
+    QList<MS_RECORD> multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo = "", PDSTRUCT *pProcessData = nullptr);
     QList<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo = "",
                                            PDSTRUCT *pProcessData = nullptr);
 
@@ -809,8 +806,7 @@ public:
     static void _copyMemory(char *pDest, char *pSource, qint64 nSize);
     static void _zeroMemory(char *pDest, qint64 nSize);
     static bool _isMemoryZeroFilled(char *pDest, qint64 nSize);
-    static bool copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize,
-                                 quint32 nBufferSize = 0x1000);
+    static bool copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 0x1000);
     bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 1, bool bReverse = false);
     bool zeroFill(qint64 nOffset, qint64 nSize);
     static bool compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize);

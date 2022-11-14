@@ -60,9 +60,8 @@ XBinary::MODE XPE::getMode() {
 
     quint16 nMachine = getFileHeader_Machine();
 
-    if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_IA64) ||
-        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ALPHA64) ||
-        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_RISCV64)) {
+    if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_IA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64) ||
+        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ALPHA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_RISCV64)) {
         result = MODE_64;
     } else {
         result = MODE_32;
@@ -844,11 +843,11 @@ XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getOptionalHeader_DataDirectory(quint32 nNumb
     //    protectors with false NumberOfRvaAndSizes
     if (nNumber < 16) {
         if (is64()) {
-            result = read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) +
-                                               nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+            result =
+                read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
         } else {
-            result = read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) +
-                                               nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+            result =
+                read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
         }
     }
 
@@ -860,13 +859,11 @@ void XPE::setOptionalHeader_DataDirectory(quint32 nNumber, XPE_DEF::IMAGE_DATA_D
     if (nNumber < getOptionalHeader_NumberOfRvaAndSizes())  // TODO Check!!!
     {
         if (is64()) {
-            write_IMAGE_DATA_DIRECTORY(
-                getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),
-                pDataDirectory);
+            write_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),
+                                       pDataDirectory);
         } else {
-            write_IMAGE_DATA_DIRECTORY(
-                getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),
-                pDataDirectory);
+            write_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),
+                                       pDataDirectory);
         }
     }
 }
@@ -874,12 +871,12 @@ void XPE::setOptionalHeader_DataDirectory(quint32 nNumber, XPE_DEF::IMAGE_DATA_D
 void XPE::setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber, quint32 nValue) {
     if (nNumber < getOptionalHeader_NumberOfRvaAndSizes()) {
         if (is64()) {
-            write_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) +
-                             nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress),
+            write_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) +
+                             offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress),
                          nValue);
         } else {
-            write_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) +
-                             nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress),
+            write_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) +
+                             offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress),
                          nValue);
         }
     }
@@ -888,12 +885,12 @@ void XPE::setOptionalHeader_DataDirectory_VirtualAddress(quint32 nNumber, quint3
 void XPE::setOptionalHeader_DataDirectory_Size(quint32 nNumber, quint32 nValue) {
     if (nNumber < getOptionalHeader_NumberOfRvaAndSizes()) {
         if (is64()) {
-            write_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) +
-                             nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size),
+            write_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) +
+                             offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size),
                          nValue);
         } else {
-            write_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) +
-                             nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size),
+            write_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) +
+                             offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size),
                          nValue);
         }
     }
@@ -1165,8 +1162,7 @@ QString XPE::getSection_NameAsString(quint32 nNumber) {
     char cBuffer[9] = {0};
 
     if (nNumber < nNumberOfSections) {
-        XBinary::read_array(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Name), cBuffer,
-                            8);
+        XBinary::read_array(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Name), cBuffer, 8);
     }
 
     sResult.append(cBuffer);
@@ -1180,8 +1176,7 @@ quint32 XPE::getSection_VirtualSize(quint32 nNumber) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        nResult =
-            read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Misc.VirtualSize));
+        nResult = read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Misc.VirtualSize));
     }
 
     return nResult;
@@ -1193,8 +1188,7 @@ quint32 XPE::getSection_VirtualAddress(quint32 nNumber) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        nResult =
-            read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, VirtualAddress));
+        nResult = read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, VirtualAddress));
     }
 
     return nResult;
@@ -1206,8 +1200,7 @@ quint32 XPE::getSection_SizeOfRawData(quint32 nNumber) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        nResult =
-            read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData));
+        nResult = read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData));
     }
 
     return nResult;
@@ -1219,8 +1212,7 @@ quint32 XPE::getSection_PointerToRawData(quint32 nNumber) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        nResult =
-            read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRawData));
+        nResult = read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRawData));
     }
 
     return nResult;
@@ -1232,8 +1224,7 @@ quint32 XPE::getSection_PointerToRelocations(quint32 nNumber) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        nResult = read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) +
-                              offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRelocations));
+        nResult = read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRelocations));
     }
 
     return nResult;
@@ -1245,8 +1236,7 @@ quint32 XPE::getSection_PointerToLinenumbers(quint32 nNumber) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        nResult = read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) +
-                              offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToLinenumbers));
+        nResult = read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToLinenumbers));
     }
 
     return nResult;
@@ -1258,8 +1248,7 @@ quint16 XPE::getSection_NumberOfRelocations(quint32 nNumber) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        nResult = read_uint16(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) +
-                              offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfRelocations));
+        nResult = read_uint16(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfRelocations));
     }
 
     return nResult;
@@ -1271,8 +1260,7 @@ quint16 XPE::getSection_NumberOfLinenumbers(quint32 nNumber) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        nResult = read_uint16(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) +
-                              offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfLinenumbers));
+        nResult = read_uint16(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfLinenumbers));
     }
 
     return nResult;
@@ -1284,8 +1272,7 @@ quint32 XPE::getSection_Characteristics(quint32 nNumber) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        nResult =
-            read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Characteristics));
+        nResult = read_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Characteristics));
     }
 
     return nResult;
@@ -1295,8 +1282,7 @@ void XPE::setSection_NameAsString(quint32 nNumber, QString sName) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        write_ansiStringFix(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Name), 8,
-                            sName);
+        write_ansiStringFix(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Name), 8, sName);
     }
 }
 
@@ -1304,8 +1290,7 @@ void XPE::setSection_VirtualSize(quint32 nNumber, quint32 nValue) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Misc.VirtualSize),
-                     nValue);
+        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Misc.VirtualSize), nValue);
     }
 }
 
@@ -1313,8 +1298,7 @@ void XPE::setSection_VirtualAddress(quint32 nNumber, quint32 nValue) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, VirtualAddress),
-                     nValue);
+        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, VirtualAddress), nValue);
     }
 }
 
@@ -1322,8 +1306,7 @@ void XPE::setSection_SizeOfRawData(quint32 nNumber, quint32 nValue) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData),
-                     nValue);
+        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData), nValue);
     }
 }
 
@@ -1331,8 +1314,7 @@ void XPE::setSection_PointerToRawData(quint32 nNumber, quint32 nValue) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRawData),
-                     nValue);
+        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRawData), nValue);
     }
 }
 
@@ -1340,8 +1322,7 @@ void XPE::setSection_PointerToRelocations(quint32 nNumber, quint32 nValue) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRelocations),
-                     nValue);
+        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRelocations), nValue);
     }
 }
 
@@ -1349,8 +1330,7 @@ void XPE::setSection_PointerToLinenumbers(quint32 nNumber, quint32 nValue) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToLinenumbers),
-                     nValue);
+        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToLinenumbers), nValue);
     }
 }
 
@@ -1358,8 +1338,7 @@ void XPE::setSection_NumberOfRelocations(quint32 nNumber, quint16 nValue) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        write_uint16(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfRelocations),
-                     nValue);
+        write_uint16(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfRelocations), nValue);
     }
 }
 
@@ -1367,8 +1346,7 @@ void XPE::setSection_NumberOfLinenumbers(quint32 nNumber, quint16 nValue) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        write_uint16(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfLinenumbers),
-                     nValue);
+        write_uint16(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfLinenumbers), nValue);
     }
 }
 
@@ -1376,8 +1354,7 @@ void XPE::setSection_Characteristics(quint32 nNumber, quint32 nValue) {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
     if (nNumber < nNumberOfSections) {
-        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Characteristics),
-                     nValue);
+        write_uint32(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Characteristics), nValue);
     }
 }
 
@@ -2146,8 +2123,8 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap, PDST
 
     if (dataResources.VirtualAddress) {
         nImportOffset = addressToOffset(pMemoryMap, dataResources.VirtualAddress + nModuleAddress);
-        nImportOffsetTest = addressToOffset(
-            pMemoryMap, dataResources.VirtualAddress + nModuleAddress + sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR) - 2);  // Test for some (Win)Upack stubs
+        nImportOffsetTest =
+            addressToOffset(pMemoryMap, dataResources.VirtualAddress + nModuleAddress + sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR) - 2);  // Test for some (Win)Upack stubs
     }
 
     if (nImportOffset != -1) {
@@ -3102,18 +3079,12 @@ quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResu
                         pResourcesVersionResult->nFixedFileInfoOffset = nOffset + nDelta;
                         // TODO Check Signature?
                         pResourcesVersionResult->fileInfo.dwSignature = read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwSignature));
-                        pResourcesVersionResult->fileInfo.dwStrucVersion =
-                            read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwStrucVersion));
-                        pResourcesVersionResult->fileInfo.dwFileVersionMS =
-                            read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwFileVersionMS));
-                        pResourcesVersionResult->fileInfo.dwFileVersionLS =
-                            read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwFileVersionLS));
-                        pResourcesVersionResult->fileInfo.dwProductVersionMS =
-                            read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwProductVersionMS));
-                        pResourcesVersionResult->fileInfo.dwProductVersionLS =
-                            read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwProductVersionLS));
-                        pResourcesVersionResult->fileInfo.dwFileFlagsMask =
-                            read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwFileFlagsMask));
+                        pResourcesVersionResult->fileInfo.dwStrucVersion = read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwStrucVersion));
+                        pResourcesVersionResult->fileInfo.dwFileVersionMS = read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwFileVersionMS));
+                        pResourcesVersionResult->fileInfo.dwFileVersionLS = read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwFileVersionLS));
+                        pResourcesVersionResult->fileInfo.dwProductVersionMS = read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwProductVersionMS));
+                        pResourcesVersionResult->fileInfo.dwProductVersionLS = read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwProductVersionLS));
+                        pResourcesVersionResult->fileInfo.dwFileFlagsMask = read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwFileFlagsMask));
                         pResourcesVersionResult->fileInfo.dwFileFlags = read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwFileFlags));
                         pResourcesVersionResult->fileInfo.dwFileOS = read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwFileOS));
                         pResourcesVersionResult->fileInfo.dwFileType = read_uint32(nOffset + nDelta + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwFileType));
@@ -4186,8 +4157,7 @@ bool XPE::addSection(XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData,
     return addSection(getDevice(), isImage(), pSectionHeader, pData, nDataSize);
 }
 
-XPE::RESOURCE_POSITION XPE::_getResourcePosition(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset,
-                                                 quint32 nLevel) {
+XPE::RESOURCE_POSITION XPE::_getResourcePosition(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel) {
     RESOURCE_POSITION result = {};
 
     result.nOffset = nOffset;
@@ -4364,8 +4334,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32() {
         result.MinorVersion = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MinorVersion));
         result.GlobalFlagsClear = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GlobalFlagsClear));
         result.GlobalFlagsSet = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GlobalFlagsSet));
-        result.CriticalSectionDefaultTimeout =
-            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CriticalSectionDefaultTimeout));
+        result.CriticalSectionDefaultTimeout = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CriticalSectionDefaultTimeout));
         result.DeCommitFreeBlockThreshold = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DeCommitFreeBlockThreshold));
         result.DeCommitTotalFreeThreshold = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DeCommitTotalFreeThreshold));
         result.LockPrefixTable = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, LockPrefixTable));
@@ -4380,8 +4349,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32() {
         result.SEHandlerCount = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, SEHandlerCount));
         // Extra
         result.GuardCFCheckFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFCheckFunctionPointer));
-        result.GuardCFDispatchFunctionPointer =
-            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFDispatchFunctionPointer));
+        result.GuardCFDispatchFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFDispatchFunctionPointer));
         result.GuardCFFunctionTable = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFFunctionTable));
         result.GuardCFFunctionCount = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFFunctionCount));
         result.GuardFlags = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardFlags));
@@ -4389,20 +4357,16 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32() {
         result.CodeIntegrity.Catalog = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CodeIntegrity.Catalog));
         result.CodeIntegrity.CatalogOffset = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CodeIntegrity.CatalogOffset));
         result.CodeIntegrity.Reserved = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CodeIntegrity.Reserved));
-        result.GuardAddressTakenIatEntryTable =
-            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardAddressTakenIatEntryTable));
-        result.GuardAddressTakenIatEntryCount =
-            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardAddressTakenIatEntryCount));
+        result.GuardAddressTakenIatEntryTable = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardAddressTakenIatEntryTable));
+        result.GuardAddressTakenIatEntryCount = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardAddressTakenIatEntryCount));
         result.GuardLongJumpTargetTable = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardLongJumpTargetTable));
         result.GuardLongJumpTargetCount = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardLongJumpTargetCount));
         result.DynamicValueRelocTable = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DynamicValueRelocTable));
         result.CHPEMetadataPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CHPEMetadataPointer));
         result.GuardRFFailureRoutine = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardRFFailureRoutine));
-        result.GuardRFFailureRoutineFunctionPointer =
-            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardRFFailureRoutineFunctionPointer));
+        result.GuardRFFailureRoutineFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardRFFailureRoutineFunctionPointer));
         result.DynamicValueRelocTableOffset = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DynamicValueRelocTableOffset));
-        result.DynamicValueRelocTableSection =
-            read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DynamicValueRelocTableSection));
+        result.DynamicValueRelocTableSection = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DynamicValueRelocTableSection));
         result.Reserved2 = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, Reserved2));
         result.GuardRFVerifyStackPointerFunctionPointer =
             read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardRFVerifyStackPointerFunctionPointer));
@@ -4413,12 +4377,9 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32() {
         result.GuardEHContinuationTable = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardEHContinuationTable));
         result.GuardEHContinuationCount = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardEHContinuationCount));
         result.GuardXFGCheckFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardXFGCheckFunctionPointer));
-        result.GuardXFGDispatchFunctionPointer =
-            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardXFGDispatchFunctionPointer));
-        result.GuardXFGTableDispatchFunctionPointer =
-            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardXFGTableDispatchFunctionPointer));
-        result.CastGuardOsDeterminedFailureMode =
-            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CastGuardOsDeterminedFailureMode));
+        result.GuardXFGDispatchFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardXFGDispatchFunctionPointer));
+        result.GuardXFGTableDispatchFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardXFGTableDispatchFunctionPointer));
+        result.CastGuardOsDeterminedFailureMode = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CastGuardOsDeterminedFailureMode));
         result.GuardMemcpyFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardMemcpyFunctionPointer));
     }
 
@@ -4437,8 +4398,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64() {
         result.MinorVersion = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MinorVersion));
         result.GlobalFlagsClear = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GlobalFlagsClear));
         result.GlobalFlagsSet = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GlobalFlagsSet));
-        result.CriticalSectionDefaultTimeout =
-            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CriticalSectionDefaultTimeout));
+        result.CriticalSectionDefaultTimeout = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CriticalSectionDefaultTimeout));
         result.DeCommitFreeBlockThreshold = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DeCommitFreeBlockThreshold));
         result.DeCommitTotalFreeThreshold = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DeCommitTotalFreeThreshold));
         result.LockPrefixTable = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, LockPrefixTable));
@@ -4453,8 +4413,7 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64() {
         result.SEHandlerCount = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, SEHandlerCount));
         // Extra
         result.GuardCFCheckFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFCheckFunctionPointer));
-        result.GuardCFDispatchFunctionPointer =
-            read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFDispatchFunctionPointer));
+        result.GuardCFDispatchFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFDispatchFunctionPointer));
         result.GuardCFFunctionTable = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFFunctionTable));
         result.GuardCFFunctionCount = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFFunctionCount));
         result.GuardFlags = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardFlags));
@@ -4462,20 +4421,16 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64() {
         result.CodeIntegrity.Catalog = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CodeIntegrity.Catalog));
         result.CodeIntegrity.CatalogOffset = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CodeIntegrity.CatalogOffset));
         result.CodeIntegrity.Reserved = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CodeIntegrity.Reserved));
-        result.GuardAddressTakenIatEntryTable =
-            read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardAddressTakenIatEntryTable));
-        result.GuardAddressTakenIatEntryCount =
-            read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardAddressTakenIatEntryCount));
+        result.GuardAddressTakenIatEntryTable = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardAddressTakenIatEntryTable));
+        result.GuardAddressTakenIatEntryCount = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardAddressTakenIatEntryCount));
         result.GuardLongJumpTargetTable = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardLongJumpTargetTable));
         result.GuardLongJumpTargetCount = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardLongJumpTargetCount));
         result.DynamicValueRelocTable = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DynamicValueRelocTable));
         result.CHPEMetadataPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CHPEMetadataPointer));
         result.GuardRFFailureRoutine = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardRFFailureRoutine));
-        result.GuardRFFailureRoutineFunctionPointer =
-            read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardRFFailureRoutineFunctionPointer));
+        result.GuardRFFailureRoutineFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardRFFailureRoutineFunctionPointer));
         result.DynamicValueRelocTableOffset = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DynamicValueRelocTableOffset));
-        result.DynamicValueRelocTableSection =
-            read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DynamicValueRelocTableSection));
+        result.DynamicValueRelocTableSection = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DynamicValueRelocTableSection));
         result.Reserved2 = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, Reserved2));
         result.GuardRFVerifyStackPointerFunctionPointer =
             read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardRFVerifyStackPointerFunctionPointer));
@@ -4486,12 +4441,9 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64() {
         result.GuardEHContinuationTable = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardEHContinuationTable));
         result.GuardEHContinuationCount = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardEHContinuationCount));
         result.GuardXFGCheckFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardXFGCheckFunctionPointer));
-        result.GuardXFGDispatchFunctionPointer =
-            read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardXFGDispatchFunctionPointer));
-        result.GuardXFGTableDispatchFunctionPointer =
-            read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardXFGTableDispatchFunctionPointer));
-        result.CastGuardOsDeterminedFailureMode =
-            read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CastGuardOsDeterminedFailureMode));
+        result.GuardXFGDispatchFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardXFGDispatchFunctionPointer));
+        result.GuardXFGTableDispatchFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardXFGTableDispatchFunctionPointer));
+        result.CastGuardOsDeterminedFailureMode = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CastGuardOsDeterminedFailureMode));
         result.GuardMemcpyFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardMemcpyFunctionPointer));
     }
 
@@ -7674,8 +7626,8 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName) {
         DWORD dwFormatType = 0;
         DWORD dwSignerInfo = 0;
 
-        if (CryptQueryObject(CERT_QUERY_OBJECT_FILE, wszFilePath, CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY, 0, &dwEncoding,
-                             &dwContentType, &dwFormatType, &hStore, &hMsg, NULL)) {
+        if (CryptQueryObject(CERT_QUERY_OBJECT_FILE, wszFilePath, CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY, 0, &dwEncoding, &dwContentType,
+                             &dwFormatType, &hStore, &hMsg, NULL)) {
             if (CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfo)) {
                 char *_pSignerInfo = new char[dwSignerInfo];
 
@@ -7689,13 +7641,11 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName) {
                             if (QString(pSignerInfo->AuthAttrs.rgAttr[n].pszObjId) == QString(SPC_SP_OPUS_INFO_OBJID)) {
                                 DWORD dwOpusInfo = 0;
 
-                                if (CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, SPC_SP_OPUS_INFO_OBJID,
-                                                      pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].pbData, pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].cbData, 0,
-                                                      NULL, &dwOpusInfo)) {
+                                if (CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, SPC_SP_OPUS_INFO_OBJID, pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].pbData,
+                                                      pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].cbData, 0, NULL, &dwOpusInfo)) {
                                     char *_pOpusInfo = new char[dwOpusInfo];
 
-                                    if (CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, SPC_SP_OPUS_INFO_OBJID,
-                                                          pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].pbData,
+                                    if (CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, SPC_SP_OPUS_INFO_OBJID, pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].pbData,
                                                           pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].cbData, 0, (PVOID)_pOpusInfo, &dwOpusInfo)) {
                                         SPC_SP_OPUS_INFO *pOpusInfo = (SPC_SP_OPUS_INFO *)_pOpusInfo;
 
@@ -7723,14 +7673,13 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName) {
                                     CertInfo.Issuer = pSignerInfo->Issuer;
                                     CertInfo.SerialNumber = pSignerInfo->SerialNumber;
 
-                                    PCCERT_CONTEXT pCertContext = CertFindCertificateInStore(hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
-                                                                                             CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
+                                    PCCERT_CONTEXT pCertContext =
+                                        CertFindCertificateInStore(hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
 
                                     if (pCertContext) {
                                         DWORD dwData = pCertContext->pCertInfo->SerialNumber.cbData;
                                         for (DWORD n = 0; n < dwData; n++) {
-                                            result.sSerialNumber.append(
-                                                QString("%1 ").arg(XBinary::valueToHex(pCertContext->pCertInfo->SerialNumber.pbData[dwData - (n + 1)])));
+                                            result.sSerialNumber.append(QString("%1 ").arg(XBinary::valueToHex(pCertContext->pCertInfo->SerialNumber.pbData[dwData - (n + 1)])));
                                         }
 
                                         result.sIssuer = getCertNameString(pCertContext, CERTNAMESTRING_ISSUER);
@@ -7750,14 +7699,12 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName) {
                             {
                                 DWORD dwCounterSignerInfo = 0;
 
-                                if (CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, PKCS7_SIGNER_INFO,
-                                                      pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
+                                if (CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, PKCS7_SIGNER_INFO, pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
                                                       pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData, 0, NULL, &dwCounterSignerInfo)) {
                                     char *_pCounterSignerInfo = new char[dwCounterSignerInfo];
 
-                                    if (CryptDecodeObject(
-                                            X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, PKCS7_SIGNER_INFO, pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
-                                            pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData, 0, (PVOID)_pCounterSignerInfo, &dwCounterSignerInfo)) {
+                                    if (CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, PKCS7_SIGNER_INFO, pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
+                                                          pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData, 0, (PVOID)_pCounterSignerInfo, &dwCounterSignerInfo)) {
                                         CMSG_SIGNER_INFO *pCounterSignerInfo = (CMSG_SIGNER_INFO *)_pCounterSignerInfo;
 
                                         CERT_INFO CertInfo = {};
@@ -7765,8 +7712,8 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName) {
                                         CertInfo.Issuer = pCounterSignerInfo->Issuer;
                                         CertInfo.SerialNumber = pCounterSignerInfo->SerialNumber;
 
-                                        PCCERT_CONTEXT pCertContext = CertFindCertificateInStore(hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
-                                                                                                 CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
+                                        PCCERT_CONTEXT pCertContext =
+                                            CertFindCertificateInStore(hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
 
                                         if (pCertContext) {
                                             DWORD dwData = pCertContext->pCertInfo->SerialNumber.cbData;
@@ -8510,8 +8457,7 @@ int XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap) {
         quint32 nSectionCharacteristics = listSections.at(i).Characteristics;
         nSectionCharacteristics &= 0xFF0000FF;
 
-        if ((((sSectionName == "DATA") || sSectionName == ".data")) && (nSectionCharacteristics == 0xC0000040) && (listSections.at(i).SizeOfRawData) &&
-            (nImportSection != i)) {
+        if ((((sSectionName == "DATA") || sSectionName == ".data")) && (nSectionCharacteristics == 0xC0000040) && (listSections.at(i).SizeOfRawData) && (nImportSection != i)) {
             nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
             break;
         }

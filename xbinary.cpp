@@ -1312,11 +1312,10 @@ void XBinary::write_UUID_bytes(qint64 nOffset, QString sValue) {
 }
 
 QString XBinary::read_UUID(qint64 nOffset, bool bIsBigEndian) {
-    QString sResult =
-        QString("%1-%2-%3-%4-%5")
-            .arg(valueToHex(read_uint32(nOffset + 0, bIsBigEndian), bIsBigEndian), valueToHex(read_uint16(nOffset + 4, bIsBigEndian), bIsBigEndian),
-                 valueToHex(read_uint16(nOffset + 6, bIsBigEndian), bIsBigEndian), valueToHex(read_uint16(nOffset + 8, bIsBigEndian), bIsBigEndian),
-                 read_array(nOffset + 10, 6).toHex().data());
+    QString sResult = QString("%1-%2-%3-%4-%5")
+                          .arg(valueToHex(read_uint32(nOffset + 0, bIsBigEndian), bIsBigEndian), valueToHex(read_uint16(nOffset + 4, bIsBigEndian), bIsBigEndian),
+                               valueToHex(read_uint16(nOffset + 6, bIsBigEndian), bIsBigEndian), valueToHex(read_uint16(nOffset + 8, bIsBigEndian), bIsBigEndian),
+                               read_array(nOffset + 10, 6).toHex().data());
 
     return sResult;
 }
@@ -2521,15 +2520,14 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
     return listResult;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo,
-                                                         PDSTRUCT *pProcessData) {
+QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo, PDSTRUCT *pProcessData) {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
     return multiSearch_signature(&memoryMap, nOffset, nSize, nLimit, sSignature, sInfo, pProcessData);
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature,
-                                                         QString sInfo, PDSTRUCT *pProcessData) {
+QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo,
+                                                         PDSTRUCT *pProcessData) {
     PDSTRUCT processDataEmpty = {};
 
     if (!pProcessData) {
@@ -3027,8 +3025,7 @@ bool XBinary::isOffsetValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset) {
 
         for (qint32 i = 0; i < nNumberOfRecords; i++) {
             if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nOffset != -1)) {
-                if ((pMemoryMap->listRecords.at(i).nOffset <= nOffset) &&
-                    (nOffset < pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize)) {
+                if ((pMemoryMap->listRecords.at(i).nOffset <= nOffset) && (nOffset < pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize)) {
                     bResult = true;
                     break;
                 }
@@ -3072,8 +3069,7 @@ bool XBinary::isAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress) {
 
         for (qint32 i = 0; i < nNumberOfRecords; i++) {
             if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nAddress != (XADDR)-1)) {
-                if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) &&
-                    (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize)) {
+                if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) && (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize)) {
                     bResult = true;
                     break;
                 }
@@ -3149,8 +3145,7 @@ qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress
 
         for (qint32 i = 0; i < nNumberOfRecords; i++) {
             if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nAddress != -1) && (pMemoryMap->listRecords.at(i).nOffset != -1)) {
-                if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) &&
-                    (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize)) {
+                if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) && (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize)) {
                     nResult = (nAddress - pMemoryMap->listRecords.at(i).nAddress) + pMemoryMap->listRecords.at(i).nOffset;
                     break;
                 }
@@ -3219,8 +3214,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByAddress(XBinary::_MEMORY_MAP *
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nAddress != -1)) {
-            if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) &&
-                (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize)) {
+            if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) && (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize)) {
                 result = pMemoryMap->listRecords.at(i);
                 break;
             }
@@ -3753,8 +3747,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra) {
         if ((((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_MAGIC) || (((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_CIGAM)) {
             stResult.insert(FT_MACHO);
             stResult.insert(FT_MACHO32);
-        } else if ((((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_MAGIC_64) ||
-                   (((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_CIGAM_64)) {
+        } else if ((((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_MAGIC_64) || (((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_CIGAM_64)) {
             stResult.insert(FT_MACHO);
             stResult.insert(FT_MACHO64);
         }
@@ -6336,8 +6329,8 @@ bool XBinary::isX86asm(QString sArch) {
     sArch = sArch.toUpper();
 
     // TODO Check
-    if ((sArch == "8086") || (sArch == "80286") || (sArch == "80386") || (sArch == "80486") || (sArch == "80586") || (sArch == "386") || (sArch == "I386") ||
-        (sArch == "AMD64") || (sArch == "X86_64")) {
+    if ((sArch == "8086") || (sArch == "80286") || (sArch == "80386") || (sArch == "80486") || (sArch == "80586") || (sArch == "386") || (sArch == "I386") || (sArch == "AMD64") ||
+        (sArch == "X86_64")) {
         bResult = true;
     }
 
@@ -6732,8 +6725,7 @@ XBinary::DM XBinary::getDisasmMode(QString sArch, bool bIsBigEndian, MODE mode) 
     } else if (sArch == "8086")  // TODO
     {
         dmResult = DM_X86_16;
-    } else if ((sArch == "386") || (sArch == "80386") || (sArch == "80486") || (sArch == "80586") || (sArch == "I386") || (sArch == "486") ||
-               (sArch == "X86")) {
+    } else if ((sArch == "386") || (sArch == "80386") || (sArch == "80486") || (sArch == "80586") || (sArch == "I386") || (sArch == "486") || (sArch == "X86")) {
         dmResult = DM_X86_32;
     } else if ((sArch == "AMD64") || (sArch == "X86_64") || (sArch == "X64")) {
         dmResult = DM_X86_64;
@@ -6841,12 +6833,11 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes) {
     // TODO Check!
     // TODO optimize! new Types create remove function
-    if (pStFileTypes->contains(XBinary::FT_MSDOS) || pStFileTypes->contains(XBinary::FT_NE) || pStFileTypes->contains(XBinary::FT_LE) ||
-        pStFileTypes->contains(XBinary::FT_LX) || pStFileTypes->contains(XBinary::FT_PE) || pStFileTypes->contains(XBinary::FT_PE32) ||
-        pStFileTypes->contains(XBinary::FT_PE64) || pStFileTypes->contains(XBinary::FT_ELF) || pStFileTypes->contains(XBinary::FT_ELF32) ||
-        pStFileTypes->contains(XBinary::FT_ELF64) || pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) ||
-        pStFileTypes->contains(XBinary::FT_MACHO64) || pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) ||
-        pStFileTypes->contains(XBinary::FT_GZIP)) {
+    if (pStFileTypes->contains(XBinary::FT_MSDOS) || pStFileTypes->contains(XBinary::FT_NE) || pStFileTypes->contains(XBinary::FT_LE) || pStFileTypes->contains(XBinary::FT_LX) ||
+        pStFileTypes->contains(XBinary::FT_PE) || pStFileTypes->contains(XBinary::FT_PE32) || pStFileTypes->contains(XBinary::FT_PE64) || pStFileTypes->contains(XBinary::FT_ELF) ||
+        pStFileTypes->contains(XBinary::FT_ELF32) || pStFileTypes->contains(XBinary::FT_ELF64) || pStFileTypes->contains(XBinary::FT_MACHO) ||
+        pStFileTypes->contains(XBinary::FT_MACHO32) || pStFileTypes->contains(XBinary::FT_MACHO64) || pStFileTypes->contains(XBinary::FT_DEX) ||
+        pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP)) {
         pStFileTypes->remove(XBinary::FT_BINARY);
     } else {
         pStFileTypes->insert(XBinary::FT_COM);
@@ -7934,8 +7925,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
             } break;
 
             case XBinary::ST_FINDBYTES: {
-                qint64 nResult = find_byteArray(nOffset, pListSignatureRecords->at(i).nFindDelta + pListSignatureRecords->at(i).baData.size(),
-                                                pListSignatureRecords->at(i).baData);
+                qint64 nResult = find_byteArray(nOffset, pListSignatureRecords->at(i).nFindDelta + pListSignatureRecords->at(i).baData.size(), pListSignatureRecords->at(i).baData);
 
                 if (nResult == -1) {
                     return false;
