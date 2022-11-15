@@ -886,7 +886,6 @@ public:
     static XADDR positionToVirtualAddress(_MEMORY_MAP *pMemoryMap, qint64 nPosition);
 
     void setModuleAddress(XADDR nValue);
-
     XADDR getModuleAddress();
 
     bool isImage();
