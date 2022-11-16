@@ -32,10 +32,10 @@ public:
 
     virtual bool isValid();
     static bool isValid(QIODevice *pDevice);
-//    virtual FT getFileType();
-//    virtual QString getFileFormatString();
-//    virtual QString getFileFormatExt();
-//    virtual qint64 getFileFormatSize();
+    //    virtual FT getFileType();
+    //    virtual QString getFileFormatString();
+    //    virtual QString getFileFormatExt();
+    //    virtual qint64 getFileFormatSize();
 };
 
 #endif  // XICON_H

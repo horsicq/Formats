@@ -20,13 +20,16 @@
  */
 #include "xelf.h"
 
-XELF::XELF(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress) {
+XELF::XELF(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
+{
 }
 
-XELF::~XELF() {
+XELF::~XELF()
+{
 }
 
-bool XELF::isValid() {
+bool XELF::isValid()
+{
     bool bResult = false;
 
     if (getIdent_Magic() == XELF_DEF::ELFMAG) {
@@ -40,43 +43,52 @@ bool XELF::isValid() {
     return bResult;
 }
 
-bool XELF::isValid(QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress) {
+bool XELF::isValid(QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
+{
     XELF xelf(pDevice, bIsImage, nModuleAddress);
 
     return xelf.isValid();
 }
 
-XBinary::MODE XELF::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+XBinary::MODE XELF::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     XELF xelf(pDevice, bIsImage, nModuleAddress);
 
     return xelf.getMode();
 }
 
-bool XELF::isBigEndian() {
+bool XELF::isBigEndian()
+{
     return getIdent_data() == XELF_DEF::ELFDATA2MSB;
 }
 
-qint64 XELF::getEhdrOffset() {
+qint64 XELF::getEhdrOffset()
+{
     return 0;
 }
 
-qint64 XELF::getEhdr32Size() {
+qint64 XELF::getEhdr32Size()
+{
     return sizeof(XELF_DEF::Elf32_Ehdr);
 }
 
-qint64 XELF::getEhdr64Size() {
+qint64 XELF::getEhdr64Size()
+{
     return sizeof(XELF_DEF::Elf64_Ehdr);
 }
 
-quint32 XELF::getIdent_Magic() {
+quint32 XELF::getIdent_Magic()
+{
     return read_uint32(XELF_DEF::EI_MAG0);
 }
 
-void XELF::setIdent_Magic(quint32 nValue) {
+void XELF::setIdent_Magic(quint32 nValue)
+{
     write_uint32(XELF_DEF::EI_MAG0, nValue);
 }
 
-quint8 XELF::getIdent_mag(qint32 nMag) {
+quint8 XELF::getIdent_mag(qint32 nMag)
+{
     quint8 nValue = 0;
 
     if (nMag < 4) {
@@ -86,61 +98,75 @@ quint8 XELF::getIdent_mag(qint32 nMag) {
     return nValue;
 }
 
-void XELF::setIdent_mag(quint8 nValue, qint32 nMag) {
+void XELF::setIdent_mag(quint8 nValue, qint32 nMag)
+{
     if (nMag < 4) {
         write_uint8(nMag, nValue);
     }
 }
 
-quint32 XELF::getIdent_mag_LE() {
+quint32 XELF::getIdent_mag_LE()
+{
     return read_uint32(0, false);
 }
 
-void XELF::setIdent_mag_LE(quint32 nValue) {
+void XELF::setIdent_mag_LE(quint32 nValue)
+{
     write_uint32(0, nValue, false);
 }
 
-quint8 XELF::getIdent_class() {
+quint8 XELF::getIdent_class()
+{
     return read_uint8(XELF_DEF::EI_CLASS);
 }
 
-void XELF::setIdent_class(quint8 nValue) {
+void XELF::setIdent_class(quint8 nValue)
+{
     write_uint8(XELF_DEF::EI_CLASS, nValue);
 }
 
-quint8 XELF::getIdent_data() {
+quint8 XELF::getIdent_data()
+{
     return read_uint8(XELF_DEF::EI_DATA);
 }
 
-void XELF::setIdent_data(quint8 nValue) {
+void XELF::setIdent_data(quint8 nValue)
+{
     write_uint8(XELF_DEF::EI_DATA, nValue);
 }
 
-quint8 XELF::getIdent_version() {
+quint8 XELF::getIdent_version()
+{
     return read_uint8(XELF_DEF::EI_VERSION);
 }
 
-void XELF::setIdent_version(quint8 nValue) {
+void XELF::setIdent_version(quint8 nValue)
+{
     write_uint8(XELF_DEF::EI_VERSION, nValue);
 }
 
-quint8 XELF::getIdent_osabi() {
+quint8 XELF::getIdent_osabi()
+{
     return read_uint8(XELF_DEF::EI_OSABI);
 }
 
-void XELF::setIdent_osabi(quint8 nValue) {
+void XELF::setIdent_osabi(quint8 nValue)
+{
     write_uint8(XELF_DEF::EI_OSABI, nValue);
 }
 
-quint8 XELF::getIdent_abiversion() {
+quint8 XELF::getIdent_abiversion()
+{
     return read_uint8(XELF_DEF::EI_ABIVERSION);
 }
 
-void XELF::setIdent_abiversion(quint8 nValue) {
+void XELF::setIdent_abiversion(quint8 nValue)
+{
     write_uint8(XELF_DEF::EI_ABIVERSION, nValue);
 }
 
-quint8 XELF::getIdent_pad(qint32 nPad) {
+quint8 XELF::getIdent_pad(qint32 nPad)
+{
     quint8 nValue = 0;
 
     if (nPad < 7) {
@@ -150,221 +176,275 @@ quint8 XELF::getIdent_pad(qint32 nPad) {
     return nValue;
 }
 
-void XELF::setIdent_pad(quint8 nValue, qint32 nPad) {
+void XELF::setIdent_pad(quint8 nValue, qint32 nPad)
+{
     if (nPad < 7) {
         write_uint8(XELF_DEF::EI_ABIVERSION + 1 + nPad, nValue);
     }
 }
 
-quint16 XELF::getHdr32_type() {
+quint16 XELF::getHdr32_type()
+{
     return read_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_type), isBigEndian());
 }
 
-void XELF::setHdr32_type(quint16 nValue) {
+void XELF::setHdr32_type(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_type), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr32_machine() {
+quint16 XELF::getHdr32_machine()
+{
     return read_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_machine), isBigEndian());
 }
 
-void XELF::setHdr32_machine(quint16 nValue) {
+void XELF::setHdr32_machine(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_machine), nValue, isBigEndian());
 }
 
-quint32 XELF::getHdr32_version() {
+quint32 XELF::getHdr32_version()
+{
     return read_uint32(offsetof(XELF_DEF::Elf32_Ehdr, e_version), isBigEndian());
 }
 
-void XELF::setHdr32_version(quint32 nValue) {
+void XELF::setHdr32_version(quint32 nValue)
+{
     write_uint32(offsetof(XELF_DEF::Elf32_Ehdr, e_version), nValue, isBigEndian());
 }
 
-quint32 XELF::getHdr32_entry() {
+quint32 XELF::getHdr32_entry()
+{
     return read_uint32(offsetof(XELF_DEF::Elf32_Ehdr, e_entry), isBigEndian());
 }
 
-void XELF::setHdr32_entry(quint32 nValue) {
+void XELF::setHdr32_entry(quint32 nValue)
+{
     write_uint32(offsetof(XELF_DEF::Elf32_Ehdr, e_entry), nValue, isBigEndian());
 }
 
-quint32 XELF::getHdr32_phoff() {
+quint32 XELF::getHdr32_phoff()
+{
     return read_uint32(offsetof(XELF_DEF::Elf32_Ehdr, e_phoff), isBigEndian());
 }
 
-void XELF::setHdr32_phoff(quint32 nValue) {
+void XELF::setHdr32_phoff(quint32 nValue)
+{
     write_uint32(offsetof(XELF_DEF::Elf32_Ehdr, e_phoff), nValue, isBigEndian());
 }
 
-quint32 XELF::getHdr32_shoff() {
+quint32 XELF::getHdr32_shoff()
+{
     return read_uint32(offsetof(XELF_DEF::Elf32_Ehdr, e_shoff), isBigEndian());
 }
 
-void XELF::setHdr32_shoff(quint32 nValue) {
+void XELF::setHdr32_shoff(quint32 nValue)
+{
     write_uint32(offsetof(XELF_DEF::Elf32_Ehdr, e_shoff), nValue, isBigEndian());
 }
 
-quint32 XELF::getHdr32_flags() {
+quint32 XELF::getHdr32_flags()
+{
     return read_uint32(offsetof(XELF_DEF::Elf32_Ehdr, e_flags), isBigEndian());
 }
 
-void XELF::setHdr32_flags(quint32 nValue) {
+void XELF::setHdr32_flags(quint32 nValue)
+{
     write_uint32(offsetof(XELF_DEF::Elf32_Ehdr, e_flags), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr32_ehsize() {
+quint16 XELF::getHdr32_ehsize()
+{
     return read_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_ehsize), isBigEndian());
 }
 
-void XELF::setHdr32_ehsize(quint16 nValue) {
+void XELF::setHdr32_ehsize(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_ehsize), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr32_phentsize() {
+quint16 XELF::getHdr32_phentsize()
+{
     return read_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_phentsize), isBigEndian());
 }
 
-void XELF::setHdr32_phentsize(quint16 nValue) {
+void XELF::setHdr32_phentsize(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_phentsize), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr32_phnum() {
+quint16 XELF::getHdr32_phnum()
+{
     return read_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_phnum), isBigEndian());
 }
 
-void XELF::setHdr32_phnum(quint16 nValue) {
+void XELF::setHdr32_phnum(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_phnum), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr32_shentsize() {
+quint16 XELF::getHdr32_shentsize()
+{
     return read_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_shentsize), isBigEndian());
 }
 
-void XELF::setHdr32_shentsize(quint16 nValue) {
+void XELF::setHdr32_shentsize(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_shentsize), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr32_shnum() {
+quint16 XELF::getHdr32_shnum()
+{
     return read_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_shnum), isBigEndian());
 }
 
-void XELF::setHdr32_shnum(quint16 nValue) {
+void XELF::setHdr32_shnum(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_shnum), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr32_shstrndx() {
+quint16 XELF::getHdr32_shstrndx()
+{
     return read_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_shstrndx), isBigEndian());
 }
 
-void XELF::setHdr32_shstrndx(quint16 nValue) {
+void XELF::setHdr32_shstrndx(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf32_Ehdr, e_shstrndx), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr64_type() {
+quint16 XELF::getHdr64_type()
+{
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_type), isBigEndian());
 }
 
-void XELF::setHdr64_type(quint16 nValue) {
+void XELF::setHdr64_type(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_type), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr64_machine() {
+quint16 XELF::getHdr64_machine()
+{
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_machine), isBigEndian());
 }
 
-void XELF::setHdr64_machine(quint16 nValue) {
+void XELF::setHdr64_machine(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_machine), nValue, isBigEndian());
 }
 
-quint32 XELF::getHdr64_version() {
+quint32 XELF::getHdr64_version()
+{
     return read_uint32(offsetof(XELF_DEF::Elf64_Ehdr, e_version), isBigEndian());
 }
 
-void XELF::setHdr64_version(quint32 nValue) {
+void XELF::setHdr64_version(quint32 nValue)
+{
     write_uint32(offsetof(XELF_DEF::Elf64_Ehdr, e_version), nValue, isBigEndian());
 }
 
-quint64 XELF::getHdr64_entry() {
+quint64 XELF::getHdr64_entry()
+{
     return read_uint64(offsetof(XELF_DEF::Elf64_Ehdr, e_entry), isBigEndian());
 }
 
-void XELF::setHdr64_entry(quint64 nValue) {
+void XELF::setHdr64_entry(quint64 nValue)
+{
     write_uint64(offsetof(XELF_DEF::Elf64_Ehdr, e_entry), nValue, isBigEndian());
 }
 
-quint64 XELF::getHdr64_phoff() {
+quint64 XELF::getHdr64_phoff()
+{
     return read_uint64(offsetof(XELF_DEF::Elf64_Ehdr, e_phoff), isBigEndian());
 }
 
-void XELF::setHdr64_phoff(quint64 nValue) {
+void XELF::setHdr64_phoff(quint64 nValue)
+{
     write_uint64(offsetof(XELF_DEF::Elf64_Ehdr, e_phoff), nValue, isBigEndian());
 }
 
-quint64 XELF::getHdr64_shoff() {
+quint64 XELF::getHdr64_shoff()
+{
     return read_uint64(offsetof(XELF_DEF::Elf64_Ehdr, e_shoff), isBigEndian());
 }
 
-void XELF::setHdr64_shoff(quint64 nValue) {
+void XELF::setHdr64_shoff(quint64 nValue)
+{
     write_uint64(offsetof(XELF_DEF::Elf64_Ehdr, e_shoff), nValue, isBigEndian());
 }
 
-quint32 XELF::getHdr64_flags() {
+quint32 XELF::getHdr64_flags()
+{
     return read_uint32(offsetof(XELF_DEF::Elf64_Ehdr, e_flags), isBigEndian());
 }
 
-void XELF::setHdr64_flags(quint32 nValue) {
+void XELF::setHdr64_flags(quint32 nValue)
+{
     write_uint32(offsetof(XELF_DEF::Elf64_Ehdr, e_flags), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr64_ehsize() {
+quint16 XELF::getHdr64_ehsize()
+{
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_ehsize), isBigEndian());
 }
 
-void XELF::setHdr64_ehsize(quint16 nValue) {
+void XELF::setHdr64_ehsize(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_ehsize), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr64_phentsize() {
+quint16 XELF::getHdr64_phentsize()
+{
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_phentsize), isBigEndian());
 }
 
-void XELF::setHdr64_phentsize(quint16 nValue) {
+void XELF::setHdr64_phentsize(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_phentsize), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr64_phnum() {
+quint16 XELF::getHdr64_phnum()
+{
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_phnum), isBigEndian());
 }
 
-void XELF::setHdr64_phnum(quint16 nValue) {
+void XELF::setHdr64_phnum(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_phnum), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr64_shentsize() {
+quint16 XELF::getHdr64_shentsize()
+{
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_shentsize), isBigEndian());
 }
 
-void XELF::setHdr64_shentsize(quint16 nValue) {
+void XELF::setHdr64_shentsize(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_shentsize), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr64_shnum() {
+quint16 XELF::getHdr64_shnum()
+{
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_shnum), isBigEndian());
 }
 
-void XELF::setHdr64_shnum(quint16 nValue) {
+void XELF::setHdr64_shnum(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_shnum), nValue, isBigEndian());
 }
 
-quint16 XELF::getHdr64_shstrndx() {
+quint16 XELF::getHdr64_shstrndx()
+{
     return read_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_shstrndx), isBigEndian());
 }
 
-void XELF::setHdr64_shstrndx(quint16 nValue) {
+void XELF::setHdr64_shstrndx(quint16 nValue)
+{
     write_uint16(offsetof(XELF_DEF::Elf64_Ehdr, e_shstrndx), nValue, isBigEndian());
 }
 
-XELF_DEF::Elf_Ehdr XELF::getHdr() {
+XELF_DEF::Elf_Ehdr XELF::getHdr()
+{
     XELF_DEF::Elf_Ehdr result = {};
 
     bool bIsbigEndian = isBigEndian();
@@ -402,7 +482,8 @@ XELF_DEF::Elf_Ehdr XELF::getHdr() {
     return result;
 }
 
-QMap<quint64, QString> XELF::getTypes() {
+QMap<quint64, QString> XELF::getTypes()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "ET_NONE");
@@ -417,7 +498,8 @@ QMap<quint64, QString> XELF::getTypes() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getTypesS() {
+QMap<quint64, QString> XELF::getTypesS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "NONE");
@@ -432,7 +514,8 @@ QMap<quint64, QString> XELF::getTypesS() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getMachines() {
+QMap<quint64, QString> XELF::getMachines()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0,
@@ -556,7 +639,8 @@ QMap<quint64, QString> XELF::getMachines() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getMachinesS() {
+QMap<quint64, QString> XELF::getMachinesS()
+{
     QMap<quint64, QString> mapResult;
 
     // TODO
@@ -681,7 +765,8 @@ QMap<quint64, QString> XELF::getMachinesS() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getHeaderVersionList() {
+QMap<quint64, QString> XELF::getHeaderVersionList()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(1, "EV_CURRENT");
@@ -689,7 +774,8 @@ QMap<quint64, QString> XELF::getHeaderVersionList() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentMag() {
+QMap<quint64, QString> XELF::getIndentMag()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x464C457F, "ELFMAG");
@@ -697,7 +783,8 @@ QMap<quint64, QString> XELF::getIndentMag() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentMagS() {
+QMap<quint64, QString> XELF::getIndentMagS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x464C457F, "ELFMAG");
@@ -705,7 +792,8 @@ QMap<quint64, QString> XELF::getIndentMagS() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentClasses() {
+QMap<quint64, QString> XELF::getIndentClasses()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "ELFCLASSNONE");
@@ -715,7 +803,8 @@ QMap<quint64, QString> XELF::getIndentClasses() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentClassesS() {
+QMap<quint64, QString> XELF::getIndentClassesS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "NONE");
@@ -725,7 +814,8 @@ QMap<quint64, QString> XELF::getIndentClassesS() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentDatas() {
+QMap<quint64, QString> XELF::getIndentDatas()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "ELFDATANONE");
@@ -735,7 +825,8 @@ QMap<quint64, QString> XELF::getIndentDatas() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentDatasS() {
+QMap<quint64, QString> XELF::getIndentDatasS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "NONE");
@@ -745,7 +836,8 @@ QMap<quint64, QString> XELF::getIndentDatasS() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentVersions() {
+QMap<quint64, QString> XELF::getIndentVersions()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(1, "EV_CURRENT");
@@ -753,7 +845,8 @@ QMap<quint64, QString> XELF::getIndentVersions() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentVersionsS() {
+QMap<quint64, QString> XELF::getIndentVersionsS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(1, "CURRENT");
@@ -761,7 +854,8 @@ QMap<quint64, QString> XELF::getIndentVersionsS() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentOsabis() {
+QMap<quint64, QString> XELF::getIndentOsabis()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "ELFOSABI_SYSV");
@@ -790,7 +884,8 @@ QMap<quint64, QString> XELF::getIndentOsabis() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getIndentOsabisS() {
+QMap<quint64, QString> XELF::getIndentOsabisS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "SYSV");
@@ -819,7 +914,8 @@ QMap<quint64, QString> XELF::getIndentOsabisS() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionTypes() {
+QMap<quint64, QString> XELF::getSectionTypes()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "SHT_NULL");
@@ -894,7 +990,8 @@ QMap<quint64, QString> XELF::getSectionTypes() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionTypesS() {
+QMap<quint64, QString> XELF::getSectionTypesS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "NULL");
@@ -969,7 +1066,8 @@ QMap<quint64, QString> XELF::getSectionTypesS() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionFlags() {
+QMap<quint64, QString> XELF::getSectionFlags()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x00000001, "SHF_WRITE");
@@ -990,7 +1088,8 @@ QMap<quint64, QString> XELF::getSectionFlags() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionFlagsS() {
+QMap<quint64, QString> XELF::getSectionFlagsS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x00000001, "WRITE");
@@ -1011,7 +1110,8 @@ QMap<quint64, QString> XELF::getSectionFlagsS() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getProgramTypes() {
+QMap<quint64, QString> XELF::getProgramTypes()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "PT_NULL");
@@ -1042,7 +1142,8 @@ QMap<quint64, QString> XELF::getProgramTypes() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getProgramTypesS() {
+QMap<quint64, QString> XELF::getProgramTypesS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "NULL");
@@ -1073,7 +1174,8 @@ QMap<quint64, QString> XELF::getProgramTypesS() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getProgramFlags() {
+QMap<quint64, QString> XELF::getProgramFlags()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x00000001, "PF_X");
@@ -1085,7 +1187,8 @@ QMap<quint64, QString> XELF::getProgramFlags() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getProgramFlagsS() {
+QMap<quint64, QString> XELF::getProgramFlagsS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x00000001, "X");
@@ -1097,11 +1200,13 @@ QMap<quint64, QString> XELF::getProgramFlagsS() {
     return mapResult;
 }
 
-quint16 XELF::getSectionStringTable() {
+quint16 XELF::getSectionStringTable()
+{
     return getSectionStringTable(is64());
 }
 
-quint16 XELF::getSectionStringTable(bool bIs64) {
+quint16 XELF::getSectionStringTable(bool bIs64)
+{
     quint32 nResult = 0;
 
     if (bIs64) {
@@ -1113,7 +1218,8 @@ quint16 XELF::getSectionStringTable(bool bIs64) {
     return nResult;
 }
 
-XBinary::OFFSETSIZE XELF::getSectionOffsetSize(quint32 nSection) {
+XBinary::OFFSETSIZE XELF::getSectionOffsetSize(quint32 nSection)
+{
     OFFSETSIZE osResult = {};
 
     if (is64()) {
@@ -1129,7 +1235,8 @@ XBinary::OFFSETSIZE XELF::getSectionOffsetSize(quint32 nSection) {
     return osResult;
 }
 
-QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection) {
+QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
+{
     QMap<quint32, QString> mapResult;
 
     if (nSection != XELF_DEF::SHN_UNDEF) {
@@ -1141,7 +1248,8 @@ QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection) {
     return mapResult;
 }
 
-QMap<quint32, QString> XELF::getStringsFromSectionData(QByteArray *pbaData) {
+QMap<quint32, QString> XELF::getStringsFromSectionData(QByteArray *pbaData)
+{
     QMap<quint32, QString> mapResult;
 
     qint32 nSize = pbaData->size();
@@ -1162,7 +1270,8 @@ QMap<quint32, QString> XELF::getStringsFromSectionData(QByteArray *pbaData) {
     return mapResult;
 }
 
-QString XELF::getStringFromSection(quint32 nIndex, quint32 nSection) {
+QString XELF::getStringFromSection(quint32 nIndex, quint32 nSection)
+{
     QString sResult;
 
     XBinary::OFFSETSIZE osRegion = getSectionOffsetSize(nSection);
@@ -1172,19 +1281,22 @@ QString XELF::getStringFromSection(quint32 nIndex, quint32 nSection) {
     return sResult;
 }
 
-QMap<quint32, QString> XELF::getStringsFromMainSection() {
+QMap<quint32, QString> XELF::getStringsFromMainSection()
+{
     quint32 nSection = getSectionStringTable();
 
     return getStringsFromSection(nSection);
 }
 
-QString XELF::getStringFromMainSection(quint32 nIndex) {
+QString XELF::getStringFromMainSection(quint32 nIndex)
+{
     quint32 nSection = getSectionStringTable();
 
     return getStringFromSection(nIndex, nSection);  // TODO optimize
 }
 
-QByteArray XELF::getSection(quint32 nIndex) {
+QByteArray XELF::getSection(quint32 nIndex)
+{
     qint64 nOffset = 0;
     qint64 nSize = 0;
 
@@ -1201,13 +1313,15 @@ QByteArray XELF::getSection(quint32 nIndex) {
     return read_array(nOffset, nSize);
 }
 
-bool XELF::isSectionValid(quint32 nIndex) {
+bool XELF::isSectionValid(quint32 nIndex)
+{
     quint32 nNumberOfSections = getHdr32_shnum();
 
     return (nIndex < nNumberOfSections) && (nIndex != (quint32)-1);
 }
 
-QList<XELF_DEF::Elf32_Shdr> XELF::getElf32_ShdrList() {
+QList<XELF_DEF::Elf32_Shdr> XELF::getElf32_ShdrList()
+{
     QList<XELF_DEF::Elf32_Shdr> listResult;
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1227,7 +1341,8 @@ QList<XELF_DEF::Elf32_Shdr> XELF::getElf32_ShdrList() {
     return listResult;
 }
 
-QList<XELF_DEF::Elf64_Shdr> XELF::getElf64_ShdrList() {
+QList<XELF_DEF::Elf64_Shdr> XELF::getElf64_ShdrList()
+{
     QList<XELF_DEF::Elf64_Shdr> listResult;
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1247,7 +1362,8 @@ QList<XELF_DEF::Elf64_Shdr> XELF::getElf64_ShdrList() {
     return listResult;
 }
 
-QList<XELF_DEF::Elf_Shdr> XELF::getElf_ShdrList() {
+QList<XELF_DEF::Elf_Shdr> XELF::getElf_ShdrList()
+{
     QList<XELF_DEF::Elf_Shdr> listResult;
 
     bool bIs64 = is64();
@@ -1297,7 +1413,8 @@ QList<XELF_DEF::Elf_Shdr> XELF::getElf_ShdrList() {
     return listResult;
 }
 
-XELF_DEF::Elf32_Shdr XELF::getElf32_Shdr(quint32 nIndex) {
+XELF_DEF::Elf32_Shdr XELF::getElf32_Shdr(quint32 nIndex)
+{
     XELF_DEF::Elf32_Shdr result = {};
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1313,7 +1430,8 @@ XELF_DEF::Elf32_Shdr XELF::getElf32_Shdr(quint32 nIndex) {
     return result;
 }
 
-XELF_DEF::Elf64_Shdr XELF::getElf64_Shdr(quint32 nIndex) {
+XELF_DEF::Elf64_Shdr XELF::getElf64_Shdr(quint32 nIndex)
+{
     XELF_DEF::Elf64_Shdr result = {};
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1329,7 +1447,8 @@ XELF_DEF::Elf64_Shdr XELF::getElf64_Shdr(quint32 nIndex) {
     return result;
 }
 
-XELF_DEF::Elf32_Shdr XELF::_readElf32_Shdr(qint64 nOffset, bool bIsBigEndian) {
+XELF_DEF::Elf32_Shdr XELF::_readElf32_Shdr(qint64 nOffset, bool bIsBigEndian)
+{
     XELF_DEF::Elf32_Shdr result = {};
 
     result.sh_name = read_uint32(nOffset + offsetof(XELF_DEF::Elf32_Shdr, sh_name), bIsBigEndian);
@@ -1346,7 +1465,8 @@ XELF_DEF::Elf32_Shdr XELF::_readElf32_Shdr(qint64 nOffset, bool bIsBigEndian) {
     return result;
 }
 
-XELF_DEF::Elf64_Shdr XELF::_readElf64_Shdr(qint64 nOffset, bool bIsBigEndian) {
+XELF_DEF::Elf64_Shdr XELF::_readElf64_Shdr(qint64 nOffset, bool bIsBigEndian)
+{
     XELF_DEF::Elf64_Shdr result = {};
 
     result.sh_name = read_uint32(nOffset + offsetof(XELF_DEF::Elf64_Shdr, sh_name), bIsBigEndian);
@@ -1363,7 +1483,8 @@ XELF_DEF::Elf64_Shdr XELF::_readElf64_Shdr(qint64 nOffset, bool bIsBigEndian) {
     return result;
 }
 
-quint32 XELF::getElf32_Shdr_name(quint32 nIndex) {
+quint32 XELF::getElf32_Shdr_name(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1378,7 +1499,8 @@ quint32 XELF::getElf32_Shdr_name(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Shdr_type(quint32 nIndex) {
+quint32 XELF::getElf32_Shdr_type(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1393,7 +1515,8 @@ quint32 XELF::getElf32_Shdr_type(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Shdr_flags(quint32 nIndex) {
+quint32 XELF::getElf32_Shdr_flags(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1408,7 +1531,8 @@ quint32 XELF::getElf32_Shdr_flags(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Shdr_addr(quint32 nIndex) {
+quint32 XELF::getElf32_Shdr_addr(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1423,7 +1547,8 @@ quint32 XELF::getElf32_Shdr_addr(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Shdr_offset(quint32 nIndex) {
+quint32 XELF::getElf32_Shdr_offset(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1438,7 +1563,8 @@ quint32 XELF::getElf32_Shdr_offset(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Shdr_size(quint32 nIndex) {
+quint32 XELF::getElf32_Shdr_size(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1453,7 +1579,8 @@ quint32 XELF::getElf32_Shdr_size(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Shdr_link(quint32 nIndex) {
+quint32 XELF::getElf32_Shdr_link(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1468,7 +1595,8 @@ quint32 XELF::getElf32_Shdr_link(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Shdr_info(quint32 nIndex) {
+quint32 XELF::getElf32_Shdr_info(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1483,7 +1611,8 @@ quint32 XELF::getElf32_Shdr_info(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Shdr_addralign(quint32 nIndex) {
+quint32 XELF::getElf32_Shdr_addralign(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1498,7 +1627,8 @@ quint32 XELF::getElf32_Shdr_addralign(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Shdr_entsize(quint32 nIndex) {
+quint32 XELF::getElf32_Shdr_entsize(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr32_shnum();
@@ -1513,7 +1643,8 @@ quint32 XELF::getElf32_Shdr_entsize(quint32 nIndex) {
     return result;
 }
 
-void XELF::setElf32_Shdr_name(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Shdr_name(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr32_shnum();
     quint32 offset = getHdr32_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1524,7 +1655,8 @@ void XELF::setElf32_Shdr_name(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Shdr_type(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Shdr_type(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr32_shnum();
     quint32 offset = getHdr32_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1535,7 +1667,8 @@ void XELF::setElf32_Shdr_type(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Shdr_flags(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Shdr_flags(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr32_shnum();
     quint32 offset = getHdr32_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1546,7 +1679,8 @@ void XELF::setElf32_Shdr_flags(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Shdr_addr(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Shdr_addr(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr32_shnum();
     quint32 offset = getHdr32_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1557,7 +1691,8 @@ void XELF::setElf32_Shdr_addr(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Shdr_offset(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Shdr_offset(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr32_shnum();
     quint32 offset = getHdr32_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1568,7 +1703,8 @@ void XELF::setElf32_Shdr_offset(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Shdr_size(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Shdr_size(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr32_shnum();
     quint32 offset = getHdr32_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1579,7 +1715,8 @@ void XELF::setElf32_Shdr_size(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Shdr_link(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Shdr_link(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr32_shnum();
     quint32 offset = getHdr32_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1590,7 +1727,8 @@ void XELF::setElf32_Shdr_link(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Shdr_info(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Shdr_info(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr32_shnum();
     quint32 offset = getHdr32_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1601,7 +1739,8 @@ void XELF::setElf32_Shdr_info(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Shdr_addralign(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Shdr_addralign(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr32_shnum();
     quint32 offset = getHdr32_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1612,7 +1751,8 @@ void XELF::setElf32_Shdr_addralign(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Shdr_entsize(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Shdr_entsize(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr32_shnum();
     quint32 offset = getHdr32_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1623,7 +1763,8 @@ void XELF::setElf32_Shdr_entsize(quint32 nIndex, quint32 nValue) {
     }
 }
 
-quint32 XELF::getElf64_Shdr_name(quint32 nIndex) {
+quint32 XELF::getElf64_Shdr_name(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1638,7 +1779,8 @@ quint32 XELF::getElf64_Shdr_name(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf64_Shdr_type(quint32 nIndex) {
+quint32 XELF::getElf64_Shdr_type(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1653,7 +1795,8 @@ quint32 XELF::getElf64_Shdr_type(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Shdr_flags(quint32 nIndex) {
+quint64 XELF::getElf64_Shdr_flags(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1668,7 +1811,8 @@ quint64 XELF::getElf64_Shdr_flags(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Shdr_addr(quint32 nIndex) {
+quint64 XELF::getElf64_Shdr_addr(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1683,7 +1827,8 @@ quint64 XELF::getElf64_Shdr_addr(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Shdr_offset(quint32 nIndex) {
+quint64 XELF::getElf64_Shdr_offset(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1698,7 +1843,8 @@ quint64 XELF::getElf64_Shdr_offset(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Shdr_size(quint32 nIndex) {
+quint64 XELF::getElf64_Shdr_size(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1713,7 +1859,8 @@ quint64 XELF::getElf64_Shdr_size(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf64_Shdr_link(quint32 nIndex) {
+quint32 XELF::getElf64_Shdr_link(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1728,7 +1875,8 @@ quint32 XELF::getElf64_Shdr_link(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf64_Shdr_info(quint32 nIndex) {
+quint32 XELF::getElf64_Shdr_info(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1743,7 +1891,8 @@ quint32 XELF::getElf64_Shdr_info(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Shdr_addralign(quint32 nIndex) {
+quint64 XELF::getElf64_Shdr_addralign(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1758,7 +1907,8 @@ quint64 XELF::getElf64_Shdr_addralign(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Shdr_entsize(quint32 nIndex) {
+quint64 XELF::getElf64_Shdr_entsize(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfSections = getHdr64_shnum();
@@ -1773,7 +1923,8 @@ quint64 XELF::getElf64_Shdr_entsize(quint32 nIndex) {
     return result;
 }
 
-void XELF::setElf64_Shdr_name(quint32 nIndex, quint32 nValue) {
+void XELF::setElf64_Shdr_name(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr64_shnum();
     quint64 offset = getHdr64_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1784,7 +1935,8 @@ void XELF::setElf64_Shdr_name(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf64_Shdr_type(quint32 nIndex, quint32 nValue) {
+void XELF::setElf64_Shdr_type(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr64_shnum();
     quint64 offset = getHdr64_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1795,7 +1947,8 @@ void XELF::setElf64_Shdr_type(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf64_Shdr_flags(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Shdr_flags(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfSections = getHdr64_shnum();
     quint64 offset = getHdr64_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1806,7 +1959,8 @@ void XELF::setElf64_Shdr_flags(quint32 nIndex, quint64 nValue) {
     }
 }
 
-void XELF::setElf64_Shdr_addr(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Shdr_addr(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfSections = getHdr64_shnum();
     quint64 offset = getHdr64_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1817,7 +1971,8 @@ void XELF::setElf64_Shdr_addr(quint32 nIndex, quint64 nValue) {
     }
 }
 
-void XELF::setElf64_Shdr_offset(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Shdr_offset(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfSections = getHdr64_shnum();
     quint64 offset = getHdr64_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1828,7 +1983,8 @@ void XELF::setElf64_Shdr_offset(quint32 nIndex, quint64 nValue) {
     }
 }
 
-void XELF::setElf64_Shdr_size(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Shdr_size(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfSections = getHdr64_shnum();
     quint64 offset = getHdr64_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1839,7 +1995,8 @@ void XELF::setElf64_Shdr_size(quint32 nIndex, quint64 nValue) {
     }
 }
 
-void XELF::setElf64_Shdr_link(quint32 nIndex, quint32 nValue) {
+void XELF::setElf64_Shdr_link(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr64_shnum();
     quint64 offset = getHdr64_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1850,7 +2007,8 @@ void XELF::setElf64_Shdr_link(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf64_Shdr_info(quint32 nIndex, quint32 nValue) {
+void XELF::setElf64_Shdr_info(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfSections = getHdr64_shnum();
     quint64 offset = getHdr64_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1861,7 +2019,8 @@ void XELF::setElf64_Shdr_info(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf64_Shdr_addralign(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Shdr_addralign(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfSections = getHdr64_shnum();
     quint64 offset = getHdr64_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1872,7 +2031,8 @@ void XELF::setElf64_Shdr_addralign(quint32 nIndex, quint64 nValue) {
     }
 }
 
-void XELF::setElf64_Shdr_entsize(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Shdr_entsize(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfSections = getHdr64_shnum();
     quint64 offset = getHdr64_shoff();
     bool bIsBigEndian = isBigEndian();
@@ -1883,7 +2043,8 @@ void XELF::setElf64_Shdr_entsize(quint32 nIndex, quint64 nValue) {
     }
 }
 
-quint32 XELF::getElf_Shdr_name(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+quint32 XELF::getElf_Shdr_name(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     quint32 nResult = 0;
 
     if (nIndex < (quint32)pListSectionHeaders->count()) {
@@ -1893,7 +2054,8 @@ quint32 XELF::getElf_Shdr_name(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListS
     return nResult;
 }
 
-quint32 XELF::getElf_Shdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+quint32 XELF::getElf_Shdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     quint32 nResult = 0;
 
     if (nIndex < (quint32)pListSectionHeaders->count()) {
@@ -1903,7 +2065,8 @@ quint32 XELF::getElf_Shdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListS
     return nResult;
 }
 
-quint64 XELF::getElf_Shdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+quint64 XELF::getElf_Shdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     quint64 nResult = 0;
 
     if (nIndex < (quint32)pListSectionHeaders->count()) {
@@ -1913,7 +2076,8 @@ quint64 XELF::getElf_Shdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pList
     return nResult;
 }
 
-quint64 XELF::getElf_Shdr_addr(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+quint64 XELF::getElf_Shdr_addr(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     quint64 nResult = 0;
 
     if (nIndex < (quint32)pListSectionHeaders->count()) {
@@ -1923,7 +2087,8 @@ quint64 XELF::getElf_Shdr_addr(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListS
     return nResult;
 }
 
-quint64 XELF::getElf_Shdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+quint64 XELF::getElf_Shdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     quint64 nResult = 0;
 
     if (nIndex < (quint32)pListSectionHeaders->count()) {
@@ -1933,7 +2098,8 @@ quint64 XELF::getElf_Shdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pLis
     return nResult;
 }
 
-quint64 XELF::getElf_Shdr_size(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+quint64 XELF::getElf_Shdr_size(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     quint64 nResult = 0;
 
     if (nIndex < (quint32)pListSectionHeaders->count()) {
@@ -1943,7 +2109,8 @@ quint64 XELF::getElf_Shdr_size(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListS
     return nResult;
 }
 
-quint32 XELF::getElf_Shdr_link(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+quint32 XELF::getElf_Shdr_link(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     quint32 nResult = 0;
 
     if (nIndex < (quint32)pListSectionHeaders->count()) {
@@ -1953,7 +2120,8 @@ quint32 XELF::getElf_Shdr_link(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListS
     return nResult;
 }
 
-quint32 XELF::getElf_Shdr_info(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+quint32 XELF::getElf_Shdr_info(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     quint32 nResult = 0;
 
     if (nIndex < (quint32)pListSectionHeaders->count()) {
@@ -1963,7 +2131,8 @@ quint32 XELF::getElf_Shdr_info(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListS
     return nResult;
 }
 
-quint64 XELF::getElf_Shdr_addralign(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+quint64 XELF::getElf_Shdr_addralign(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     quint64 nResult = 0;
 
     if (nIndex < (quint32)pListSectionHeaders->count()) {
@@ -1973,7 +2142,8 @@ quint64 XELF::getElf_Shdr_addralign(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *p
     return nResult;
 }
 
-quint64 XELF::getElf_Shdr_entsize(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+quint64 XELF::getElf_Shdr_entsize(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     quint32 nResult = 0;
 
     if (nIndex < (quint32)pListSectionHeaders->count()) {
@@ -1983,7 +2153,8 @@ quint64 XELF::getElf_Shdr_entsize(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pLi
     return nResult;
 }
 
-qint64 XELF::getShdrOffset(quint32 nIndex) {
+qint64 XELF::getShdrOffset(quint32 nIndex)
+{
     quint64 nResult = -1;
 
     bool bIs64 = is64();
@@ -2006,7 +2177,8 @@ qint64 XELF::getShdrOffset(quint32 nIndex) {
     return nResult;
 }
 
-qint64 XELF::getShdrSize() {
+qint64 XELF::getShdrSize()
+{
     quint64 nResult = 0;
 
     bool bIs64 = is64();
@@ -2020,7 +2192,8 @@ qint64 XELF::getShdrSize() {
     return nResult;
 }
 
-QList<XELF_DEF::Elf32_Phdr> XELF::getElf32_PhdrList() {
+QList<XELF_DEF::Elf32_Phdr> XELF::getElf32_PhdrList()
+{
     QList<XELF_DEF::Elf32_Phdr> result;
 
     quint32 nNumberOfProgramms = getHdr32_phnum();
@@ -2039,7 +2212,8 @@ QList<XELF_DEF::Elf32_Phdr> XELF::getElf32_PhdrList() {
     return result;
 }
 
-QList<XELF_DEF::Elf64_Phdr> XELF::getElf64_PhdrList() {
+QList<XELF_DEF::Elf64_Phdr> XELF::getElf64_PhdrList()
+{
     QList<XELF_DEF::Elf64_Phdr> result;
 
     quint32 nNumberOfProgramms = getHdr64_phnum();
@@ -2058,7 +2232,8 @@ QList<XELF_DEF::Elf64_Phdr> XELF::getElf64_PhdrList() {
     return result;
 }
 
-QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList() {
+QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList()
+{
     QList<XELF_DEF::Elf_Phdr> listResult;
 
     bool bIs64 = is64();
@@ -2106,7 +2281,8 @@ QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList() {
     return listResult;
 }
 
-XELF_DEF::Elf32_Phdr XELF::getElf32_Phdr(quint32 nIndex) {
+XELF_DEF::Elf32_Phdr XELF::getElf32_Phdr(quint32 nIndex)
+{
     XELF_DEF::Elf32_Phdr result = {};
 
     quint32 nNumberOfPrograms = getHdr32_phnum();
@@ -2121,7 +2297,8 @@ XELF_DEF::Elf32_Phdr XELF::getElf32_Phdr(quint32 nIndex) {
     return result;
 }
 
-XELF_DEF::Elf64_Phdr XELF::getElf64_Phdr(quint32 nIndex) {
+XELF_DEF::Elf64_Phdr XELF::getElf64_Phdr(quint32 nIndex)
+{
     XELF_DEF::Elf64_Phdr result = {};
 
     quint32 nNumberOfPrograms = getHdr64_phnum();
@@ -2136,7 +2313,8 @@ XELF_DEF::Elf64_Phdr XELF::getElf64_Phdr(quint32 nIndex) {
     return result;
 }
 
-XELF_DEF::Elf32_Phdr XELF::_readElf32_Phdr(qint64 nOffset, bool bIsBigEndian) {
+XELF_DEF::Elf32_Phdr XELF::_readElf32_Phdr(qint64 nOffset, bool bIsBigEndian)
+{
     XELF_DEF::Elf32_Phdr result = {};
 
     result.p_type = read_uint32(nOffset + offsetof(XELF_DEF::Elf32_Phdr, p_type), bIsBigEndian);
@@ -2151,7 +2329,8 @@ XELF_DEF::Elf32_Phdr XELF::_readElf32_Phdr(qint64 nOffset, bool bIsBigEndian) {
     return result;
 }
 
-XELF_DEF::Elf64_Phdr XELF::_readElf64_Phdr(qint64 nOffset, bool bIsBigEndian) {
+XELF_DEF::Elf64_Phdr XELF::_readElf64_Phdr(qint64 nOffset, bool bIsBigEndian)
+{
     XELF_DEF::Elf64_Phdr result = {};
 
     result.p_type = read_uint32(nOffset + offsetof(XELF_DEF::Elf64_Phdr, p_type), bIsBigEndian);
@@ -2166,7 +2345,8 @@ XELF_DEF::Elf64_Phdr XELF::_readElf64_Phdr(qint64 nOffset, bool bIsBigEndian) {
     return result;
 }
 
-quint32 XELF::getElf32_Phdr_type(quint32 nIndex) {
+quint32 XELF::getElf32_Phdr_type(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfPrograms = getHdr32_phnum();
@@ -2181,7 +2361,8 @@ quint32 XELF::getElf32_Phdr_type(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Phdr_offset(quint32 nIndex) {
+quint32 XELF::getElf32_Phdr_offset(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfPrograms = getHdr32_phnum();
@@ -2196,7 +2377,8 @@ quint32 XELF::getElf32_Phdr_offset(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Phdr_vaddr(quint32 nIndex) {
+quint32 XELF::getElf32_Phdr_vaddr(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfPrograms = getHdr32_phnum();
@@ -2211,7 +2393,8 @@ quint32 XELF::getElf32_Phdr_vaddr(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Phdr_paddr(quint32 nIndex) {
+quint32 XELF::getElf32_Phdr_paddr(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfPrograms = getHdr32_phnum();
@@ -2226,7 +2409,8 @@ quint32 XELF::getElf32_Phdr_paddr(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Phdr_filesz(quint32 nIndex) {
+quint32 XELF::getElf32_Phdr_filesz(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfPrograms = getHdr32_phnum();
@@ -2241,7 +2425,8 @@ quint32 XELF::getElf32_Phdr_filesz(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Phdr_memsz(quint32 nIndex) {
+quint32 XELF::getElf32_Phdr_memsz(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfPrograms = getHdr32_phnum();
@@ -2256,7 +2441,8 @@ quint32 XELF::getElf32_Phdr_memsz(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Phdr_flags(quint32 nIndex) {
+quint32 XELF::getElf32_Phdr_flags(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfPrograms = getHdr32_phnum();
@@ -2271,7 +2457,8 @@ quint32 XELF::getElf32_Phdr_flags(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf32_Phdr_align(quint32 nIndex) {
+quint32 XELF::getElf32_Phdr_align(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfPrograms = getHdr32_phnum();
@@ -2286,7 +2473,8 @@ quint32 XELF::getElf32_Phdr_align(quint32 nIndex) {
     return result;
 }
 
-void XELF::setElf32_Phdr_type(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Phdr_type(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfPrograms = getHdr32_phnum();
     quint32 offset = getHdr32_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2297,7 +2485,8 @@ void XELF::setElf32_Phdr_type(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Phdr_offset(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Phdr_offset(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfPrograms = getHdr32_phnum();
     quint32 offset = getHdr32_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2308,7 +2497,8 @@ void XELF::setElf32_Phdr_offset(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Phdr_vaddr(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Phdr_vaddr(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfPrograms = getHdr32_phnum();
     quint32 offset = getHdr32_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2319,7 +2509,8 @@ void XELF::setElf32_Phdr_vaddr(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Phdr_paddr(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Phdr_paddr(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfPrograms = getHdr32_phnum();
     quint32 offset = getHdr32_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2330,7 +2521,8 @@ void XELF::setElf32_Phdr_paddr(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Phdr_filesz(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Phdr_filesz(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfPrograms = getHdr32_phnum();
     quint32 offset = getHdr32_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2341,7 +2533,8 @@ void XELF::setElf32_Phdr_filesz(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Phdr_memsz(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Phdr_memsz(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfPrograms = getHdr32_phnum();
     quint32 offset = getHdr32_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2352,7 +2545,8 @@ void XELF::setElf32_Phdr_memsz(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Phdr_flags(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Phdr_flags(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfPrograms = getHdr32_phnum();
     quint32 offset = getHdr32_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2363,7 +2557,8 @@ void XELF::setElf32_Phdr_flags(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf32_Phdr_align(quint32 nIndex, quint32 nValue) {
+void XELF::setElf32_Phdr_align(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfPrograms = getHdr32_phnum();
     quint32 offset = getHdr32_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2374,7 +2569,8 @@ void XELF::setElf32_Phdr_align(quint32 nIndex, quint32 nValue) {
     }
 }
 
-quint32 XELF::getElf64_Phdr_type(quint32 nIndex) {
+quint32 XELF::getElf64_Phdr_type(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfPrograms = getHdr64_phnum();
@@ -2389,7 +2585,8 @@ quint32 XELF::getElf64_Phdr_type(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Phdr_offset(quint32 nIndex) {
+quint64 XELF::getElf64_Phdr_offset(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfPrograms = getHdr64_phnum();
@@ -2404,7 +2601,8 @@ quint64 XELF::getElf64_Phdr_offset(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Phdr_vaddr(quint32 nIndex) {
+quint64 XELF::getElf64_Phdr_vaddr(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfPrograms = getHdr64_phnum();
@@ -2419,7 +2617,8 @@ quint64 XELF::getElf64_Phdr_vaddr(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Phdr_paddr(quint32 nIndex) {
+quint64 XELF::getElf64_Phdr_paddr(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfPrograms = getHdr64_phnum();
@@ -2434,7 +2633,8 @@ quint64 XELF::getElf64_Phdr_paddr(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Phdr_filesz(quint32 nIndex) {
+quint64 XELF::getElf64_Phdr_filesz(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfPrograms = getHdr64_phnum();
@@ -2449,7 +2649,8 @@ quint64 XELF::getElf64_Phdr_filesz(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Phdr_memsz(quint32 nIndex) {
+quint64 XELF::getElf64_Phdr_memsz(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfPrograms = getHdr64_phnum();
@@ -2464,7 +2665,8 @@ quint64 XELF::getElf64_Phdr_memsz(quint32 nIndex) {
     return result;
 }
 
-quint32 XELF::getElf64_Phdr_flags(quint32 nIndex) {
+quint32 XELF::getElf64_Phdr_flags(quint32 nIndex)
+{
     quint32 result = 0;
 
     quint32 nNumberOfPrograms = getHdr64_phnum();
@@ -2479,7 +2681,8 @@ quint32 XELF::getElf64_Phdr_flags(quint32 nIndex) {
     return result;
 }
 
-quint64 XELF::getElf64_Phdr_align(quint32 nIndex) {
+quint64 XELF::getElf64_Phdr_align(quint32 nIndex)
+{
     quint64 result = 0;
 
     quint32 nNumberOfPrograms = getHdr64_phnum();
@@ -2494,7 +2697,8 @@ quint64 XELF::getElf64_Phdr_align(quint32 nIndex) {
     return result;
 }
 
-void XELF::setElf64_Phdr_type(quint32 nIndex, quint32 nValue) {
+void XELF::setElf64_Phdr_type(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfPrograms = getHdr64_phnum();
     quint64 offset = getHdr64_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2505,7 +2709,8 @@ void XELF::setElf64_Phdr_type(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf64_Phdr_offset(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Phdr_offset(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfPrograms = getHdr64_phnum();
     quint64 offset = getHdr64_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2516,7 +2721,8 @@ void XELF::setElf64_Phdr_offset(quint32 nIndex, quint64 nValue) {
     }
 }
 
-void XELF::setElf64_Phdr_vaddr(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Phdr_vaddr(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfPrograms = getHdr64_phnum();
     quint64 offset = getHdr64_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2527,7 +2733,8 @@ void XELF::setElf64_Phdr_vaddr(quint32 nIndex, quint64 nValue) {
     }
 }
 
-void XELF::setElf64_Phdr_paddr(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Phdr_paddr(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfPrograms = getHdr64_phnum();
     quint64 offset = getHdr64_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2538,7 +2745,8 @@ void XELF::setElf64_Phdr_paddr(quint32 nIndex, quint64 nValue) {
     }
 }
 
-void XELF::setElf64_Phdr_filesz(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Phdr_filesz(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfPrograms = getHdr64_phnum();
     quint64 offset = getHdr64_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2549,7 +2757,8 @@ void XELF::setElf64_Phdr_filesz(quint32 nIndex, quint64 nValue) {
     }
 }
 
-void XELF::setElf64_Phdr_memsz(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Phdr_memsz(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfPrograms = getHdr64_phnum();
     quint64 offset = getHdr64_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2560,7 +2769,8 @@ void XELF::setElf64_Phdr_memsz(quint32 nIndex, quint64 nValue) {
     }
 }
 
-void XELF::setElf64_Phdr_flags(quint32 nIndex, quint32 nValue) {
+void XELF::setElf64_Phdr_flags(quint32 nIndex, quint32 nValue)
+{
     quint32 nNumberOfPrograms = getHdr64_phnum();
     quint64 offset = getHdr64_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2571,7 +2781,8 @@ void XELF::setElf64_Phdr_flags(quint32 nIndex, quint32 nValue) {
     }
 }
 
-void XELF::setElf64_Phdr_align(quint32 nIndex, quint64 nValue) {
+void XELF::setElf64_Phdr_align(quint32 nIndex, quint64 nValue)
+{
     quint32 nNumberOfPrograms = getHdr64_phnum();
     quint64 offset = getHdr64_phoff();
     bool bIsBigEndian = isBigEndian();
@@ -2582,7 +2793,8 @@ void XELF::setElf64_Phdr_align(quint32 nIndex, quint64 nValue) {
     }
 }
 
-quint32 XELF::getElf_Phdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders) {
+quint32 XELF::getElf_Phdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+{
     quint32 nResult = 0;
 
     if (nIndex < (quint32)pListProgramHeaders->count()) {
@@ -2592,7 +2804,8 @@ quint32 XELF::getElf_Phdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListP
     return nResult;
 }
 
-quint64 XELF::getElf_Phdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders) {
+quint64 XELF::getElf_Phdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+{
     quint64 nResult = 0;
 
     if (nIndex < (quint32)pListProgramHeaders->count()) {
@@ -2602,7 +2815,8 @@ quint64 XELF::getElf_Phdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pLis
     return nResult;
 }
 
-quint64 XELF::getElf_Phdr_vaddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders) {
+quint64 XELF::getElf_Phdr_vaddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+{
     quint64 nResult = 0;
 
     if (nIndex < (quint32)pListProgramHeaders->count()) {
@@ -2612,7 +2826,8 @@ quint64 XELF::getElf_Phdr_vaddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
     return nResult;
 }
 
-quint64 XELF::getElf_Phdr_paddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders) {
+quint64 XELF::getElf_Phdr_paddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+{
     quint64 nResult = 0;
 
     if (nIndex < (quint32)pListProgramHeaders->count()) {
@@ -2622,7 +2837,8 @@ quint64 XELF::getElf_Phdr_paddr(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
     return nResult;
 }
 
-quint64 XELF::getElf_Phdr_filesz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders) {
+quint64 XELF::getElf_Phdr_filesz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+{
     quint64 nResult = 0;
 
     if (nIndex < (quint32)pListProgramHeaders->count()) {
@@ -2632,7 +2848,8 @@ quint64 XELF::getElf_Phdr_filesz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pLis
     return nResult;
 }
 
-quint64 XELF::getElf_Phdr_memsz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders) {
+quint64 XELF::getElf_Phdr_memsz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+{
     quint64 nResult = 0;
 
     if (nIndex < (quint32)pListProgramHeaders->count()) {
@@ -2642,7 +2859,8 @@ quint64 XELF::getElf_Phdr_memsz(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
     return nResult;
 }
 
-quint32 XELF::getElf_Phdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders) {
+quint32 XELF::getElf_Phdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+{
     quint32 nResult = 0;
 
     if (nIndex < (quint32)pListProgramHeaders->count()) {
@@ -2652,7 +2870,8 @@ quint32 XELF::getElf_Phdr_flags(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
     return nResult;
 }
 
-quint64 XELF::getElf_Phdr_align(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders) {
+quint64 XELF::getElf_Phdr_align(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+{
     quint64 nResult = 0;
 
     if (nIndex < (quint32)pListProgramHeaders->count()) {
@@ -2662,7 +2881,8 @@ quint64 XELF::getElf_Phdr_align(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
     return nResult;
 }
 
-qint64 XELF::getPhdrOffset(quint32 nIndex) {
+qint64 XELF::getPhdrOffset(quint32 nIndex)
+{
     quint64 nResult = -1;
 
     bool bIs64 = is64();
@@ -2685,7 +2905,8 @@ qint64 XELF::getPhdrOffset(quint32 nIndex) {
     return nResult;
 }
 
-qint64 XELF::getPhdrSize() {
+qint64 XELF::getPhdrSize()
+{
     quint64 nResult = 0;
 
     bool bIs64 = is64();
@@ -2699,7 +2920,8 @@ qint64 XELF::getPhdrSize() {
     return nResult;
 }
 
-qint32 XELF::getSectionIndexByName(QString sSectionName) {
+qint32 XELF::getSectionIndexByName(QString sSectionName)
+{
     qint32 nResult = -1;
 
     if (is64()) {
@@ -2725,7 +2947,8 @@ qint32 XELF::getSectionIndexByName(QString sSectionName) {
     return nResult;
 }
 
-QByteArray XELF::getSectionByName(QString sSectionName) {
+QByteArray XELF::getSectionByName(QString sSectionName)
+{
     QByteArray baResult;
 
     quint32 nIndex = getSectionIndexByName(sSectionName);
@@ -2737,13 +2960,15 @@ QByteArray XELF::getSectionByName(QString sSectionName) {
     return baResult;
 }
 
-XBinary::OS_STRING XELF::getProgramInterpreterName() {
+XBinary::OS_STRING XELF::getProgramInterpreterName()
+{
     QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
 
     return getProgramInterpreterName(&listProgramHeaders);
 }
 
-XBinary::OS_STRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders) {
+XBinary::OS_STRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+{
     OS_STRING result = {};
 
     QList<XELF_DEF::Elf_Phdr> listInterps = _getPrograms(pListProgramHeaders, XELF_DEF::PT_INTERP);
@@ -2755,7 +2980,8 @@ XBinary::OS_STRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pL
     return result;
 }
 
-XBinary::OS_STRING XELF::getProgramInterpreterName(QList<SECTION_RECORD> *pListSectionRecords) {
+XBinary::OS_STRING XELF::getProgramInterpreterName(QList<SECTION_RECORD> *pListSectionRecords)
+{
     OS_STRING result = {};
 
     QList<SECTION_RECORD> listInterps = _getSectionRecords(pListSectionRecords, ".interp");
@@ -2767,16 +2993,19 @@ XBinary::OS_STRING XELF::getProgramInterpreterName(QList<SECTION_RECORD> *pListS
     return result;
 }
 
-QList<QString> XELF::getCommentStrings() {
+QList<QString> XELF::getCommentStrings()
+{
     // TODO Optimize
     return getCommentStrings(getSectionIndexByName(".comment"));
 }
 
-QList<QString> XELF::getCommentStrings(qint32 nSection) {
+QList<QString> XELF::getCommentStrings(qint32 nSection)
+{
     return getStringsFromSection(nSection).values();
 }
 
-QList<XELF::NOTE> XELF::getNotes() {
+QList<XELF::NOTE> XELF::getNotes()
+{
     QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
 
     return getNotes(&listProgramHeaders);
@@ -2807,7 +3036,8 @@ QList<XELF::NOTE> XELF::getNotes() {
 //    return sResult;
 //}
 
-QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders) {
+QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+{
     QList<NOTE> listResult;
 
     QList<XELF_DEF::Elf_Phdr> listNotes = _getPrograms(pListProgramHeaders, XELF_DEF::PT_NOTE);
@@ -2827,7 +3057,8 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
     return listResult;
 }
 
-QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     QList<NOTE> listResult;
 
     QList<XELF_DEF::Elf_Shdr> listNotes = _getSections(pListSectionHeaders, XELF_DEF::SHT_NOTE);
@@ -2847,7 +3078,8 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
     return listResult;
 }
 
-QList<XELF::NOTE> XELF::_getNotes(qint64 nOffset, qint64 nSize, bool bIsBigEndian) {
+QList<XELF::NOTE> XELF::_getNotes(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
+{
     QList<NOTE> listResult;
 
     qint32 nNumberOfRecords = 0;
@@ -2874,7 +3106,8 @@ QList<XELF::NOTE> XELF::_getNotes(qint64 nOffset, qint64 nSize, bool bIsBigEndia
     return listResult;
 }
 
-XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian) {
+XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
+{
     NOTE result = {};
 
     if (nSize >= 6) {
@@ -2901,13 +3134,15 @@ XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian) {
     return result;
 }
 
-bool XELF::isNotePresent(QString sName) {
+bool XELF::isNotePresent(QString sName)
+{
     QList<XELF::NOTE> listNotes = getNotes();
 
     return isNotePresent(&listNotes, sName);
 }
 
-bool XELF::isNotePresent(QList<NOTE> *pListNotes, QString sName) {
+bool XELF::isNotePresent(QList<NOTE> *pListNotes, QString sName)
+{
     bool bResult = false;
 
     qint32 nNumberOfNotes = pListNotes->count();
@@ -2922,7 +3157,8 @@ bool XELF::isNotePresent(QList<NOTE> *pListNotes, QString sName) {
     return bResult;
 }
 
-XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, QString sName) {
+XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, QString sName)
+{
     NOTE result = {};
 
     for (qint32 i = 0; i < pListNotes->count(); i++) {
@@ -2935,13 +3171,15 @@ XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, QString sName) {
     return result;
 }
 
-bool XELF::isNotePresent(quint32 nType) {
+bool XELF::isNotePresent(quint32 nType)
+{
     QList<XELF::NOTE> listNotes = getNotes();
 
     return isNotePresent(&listNotes, nType);
 }
 
-bool XELF::isNotePresent(QList<NOTE> *pListNotes, quint32 nType) {
+bool XELF::isNotePresent(QList<NOTE> *pListNotes, quint32 nType)
+{
     bool bResult = false;
 
     qint32 nNumberOfNotes = pListNotes->count();
@@ -2956,7 +3194,8 @@ bool XELF::isNotePresent(QList<NOTE> *pListNotes, quint32 nType) {
     return bResult;
 }
 
-XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType) {
+XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType)
+{
     NOTE result = {};
 
     for (qint32 i = 0; i < pListNotes->count(); i++) {
@@ -2969,13 +3208,15 @@ XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType) {
     return result;
 }
 
-bool XELF::isNotePresent(quint32 nType, QString sName) {
+bool XELF::isNotePresent(quint32 nType, QString sName)
+{
     QList<XELF::NOTE> listNotes = getNotes();
 
     return isNotePresent(&listNotes, nType, sName);
 }
 
-bool XELF::isNotePresent(QList<NOTE> *pListNotes, quint32 nType, QString sName) {
+bool XELF::isNotePresent(QList<NOTE> *pListNotes, quint32 nType, QString sName)
+{
     bool bResult = false;
 
     qint32 nNumberOfNotes = pListNotes->count();
@@ -2990,7 +3231,8 @@ bool XELF::isNotePresent(QList<NOTE> *pListNotes, quint32 nType, QString sName) 
     return bResult;
 }
 
-XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType, QString sName) {
+XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType, QString sName)
+{
     NOTE result = {};
 
     for (qint32 i = 0; i < pListNotes->count(); i++) {
@@ -3003,14 +3245,16 @@ XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType, QString sName) 
     return result;
 }
 
-QList<XELF::TAG_STRUCT> XELF::getTagStructs() {
+QList<XELF::TAG_STRUCT> XELF::getTagStructs()
+{
     _MEMORY_MAP memoryMap = getMemoryMap();
     QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
 
     return getTagStructs(&listProgramHeaders, &memoryMap);
 }
 
-QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, XBinary::_MEMORY_MAP *pMemoryMap) {
+QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, XBinary::_MEMORY_MAP *pMemoryMap)
+{
     QList<TAG_STRUCT> listResult;
 
     bool bIs64 = is64();
@@ -3032,7 +3276,8 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProg
     return listResult;
 }
 
-QList<XELF::TAG_STRUCT> XELF::_getTagStructs(qint64 nOffset, qint64 nSize, bool bIs64, bool bIsBigEndian) {
+QList<XELF::TAG_STRUCT> XELF::_getTagStructs(qint64 nOffset, qint64 nSize, bool bIs64, bool bIsBigEndian)
+{
     QList<TAG_STRUCT> listResult;
 
     while (nSize > 0) {
@@ -3061,7 +3306,8 @@ QList<XELF::TAG_STRUCT> XELF::_getTagStructs(qint64 nOffset, qint64 nSize, bool 
     return listResult;
 }
 
-QList<XELF::TAG_STRUCT> XELF::_getTagStructs(QList<XELF::TAG_STRUCT> *pListTagStructs, qint64 nTag) {
+QList<XELF::TAG_STRUCT> XELF::_getTagStructs(QList<XELF::TAG_STRUCT> *pListTagStructs, qint64 nTag)
+{
     QList<TAG_STRUCT> listResult;
 
     qint32 nNumberOfTags = pListTagStructs->count();
@@ -3075,7 +3321,8 @@ QList<XELF::TAG_STRUCT> XELF::_getTagStructs(QList<XELF::TAG_STRUCT> *pListTagSt
     return listResult;
 }
 
-qint64 XELF::getDynamicArraySize() {
+qint64 XELF::getDynamicArraySize()
+{
     quint64 nResult = 0;
 
     bool bIs64 = is64();
@@ -3089,7 +3336,8 @@ qint64 XELF::getDynamicArraySize() {
     return nResult;
 }
 
-qint64 XELF::getDynamicArrayTag(qint64 nOffset) {
+qint64 XELF::getDynamicArrayTag(qint64 nOffset)
+{
     qint64 nResult = 0;
 
     bool bIs64 = is64();
@@ -3104,7 +3352,8 @@ qint64 XELF::getDynamicArrayTag(qint64 nOffset) {
     return nResult;
 }
 
-qint64 XELF::getDynamicArrayValue(qint64 nOffset) {
+qint64 XELF::getDynamicArrayValue(qint64 nOffset)
+{
     qint64 nResult = 0;
 
     bool bIs64 = is64();
@@ -3119,7 +3368,8 @@ qint64 XELF::getDynamicArrayValue(qint64 nOffset) {
     return nResult;
 }
 
-void XELF::setDynamicArrayTag(qint64 nOffset, qint64 nValue) {
+void XELF::setDynamicArrayTag(qint64 nOffset, qint64 nValue)
+{
     bool bIs64 = is64();
     bool bIsBigEndian = isBigEndian();
 
@@ -3130,7 +3380,8 @@ void XELF::setDynamicArrayTag(qint64 nOffset, qint64 nValue) {
     }
 }
 
-void XELF::setDynamicArrayValue(qint64 nOffset, qint64 nValue) {
+void XELF::setDynamicArrayValue(qint64 nOffset, qint64 nValue)
+{
     bool bIs64 = is64();
     bool bIsBigEndian = isBigEndian();
 
@@ -3141,14 +3392,16 @@ void XELF::setDynamicArrayValue(qint64 nOffset, qint64 nValue) {
     }
 }
 
-XBinary::OFFSETSIZE XELF::getStringTable() {
+XBinary::OFFSETSIZE XELF::getStringTable()
+{
     _MEMORY_MAP memoryMap = getMemoryMap();
     QList<TAG_STRUCT> listStructs = getTagStructs();
 
     return getStringTable(&memoryMap, &listStructs);
 }
 
-XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs) {
+XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs)
+{
     OFFSETSIZE osResult = {};
 
     QList<TAG_STRUCT> listStrTab = _getTagStructs(pListTagStructs, XELF_DEF::DT_STRTAB);
@@ -3167,14 +3420,16 @@ XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList
     return osResult;
 }
 
-QList<QString> XELF::getLibraries() {
+QList<QString> XELF::getLibraries()
+{
     _MEMORY_MAP memoryMap = getMemoryMap();
     QList<TAG_STRUCT> listTagStructs = getTagStructs();
 
     return getLibraries(&memoryMap, &listTagStructs);
 }
 
-QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pList) {
+QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pList)
+{
     QList<QString> listResult;
 
     QList<TAG_STRUCT> listNeeded = _getTagStructs(pList, XELF_DEF::DT_NEEDED);
@@ -3204,14 +3459,16 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUC
     return listResult;
 }
 
-XBinary::OS_STRING XELF::getRunPath() {
+XBinary::OS_STRING XELF::getRunPath()
+{
     _MEMORY_MAP memoryMap = getMemoryMap();
     QList<TAG_STRUCT> listTagStructs = getTagStructs();
 
     return getRunPath(&memoryMap, &listTagStructs);
 }
 
-XBinary::OS_STRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs) {
+XBinary::OS_STRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs)
+{
     OS_STRING result = {};
 
     QList<TAG_STRUCT> listRunPath = _getTagStructs(pListTagStructs, XELF_DEF::DT_RUNPATH);
@@ -3233,7 +3490,8 @@ XBinary::OS_STRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF
     return result;
 }
 
-QMap<quint64, QString> XELF::getDynamicTags() {
+QMap<quint64, QString> XELF::getDynamicTags()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "DT_NULL");
@@ -3308,7 +3566,8 @@ QMap<quint64, QString> XELF::getDynamicTags() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getDynamicTagsS() {
+QMap<quint64, QString> XELF::getDynamicTagsS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "NULL");
@@ -3383,7 +3642,8 @@ QMap<quint64, QString> XELF::getDynamicTagsS() {
     return mapResult;
 }
 
-XBinary::_MEMORY_MAP XELF::getMemoryMap() {
+XBinary::_MEMORY_MAP XELF::getMemoryMap()
+{
     // TODO Check alignment!
     XBinary::_MEMORY_MAP result = {};
 
@@ -3550,11 +3810,13 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap() {
     return result;
 }
 
-qint64 XELF::getEntryPointOffset(_MEMORY_MAP *pMemoryMap) {
+qint64 XELF::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
+{
     return addressToOffset(pMemoryMap, pMemoryMap->nEntryPointAddress);
 }
 
-QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, bool bIsImage, QByteArray *pbaSectionTable) {
+QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, bool bIsImage, QByteArray *pbaSectionTable)
+{
     QList<SECTION_RECORD> listRecords;
 
     qint32 nNumberOfSections = pListSectionHeaders->count();
@@ -3582,7 +3844,8 @@ QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *p
     return listRecords;
 }
 
-bool XELF::isSectionNamePresent(QString sSectionName) {
+bool XELF::isSectionNamePresent(QString sSectionName)
+{
     bool bIs64 = is64();
     quint16 nStringTableSection = getSectionStringTable(bIs64);
     QByteArray baStringTable = getSection(nStringTableSection);
@@ -3593,7 +3856,8 @@ bool XELF::isSectionNamePresent(QString sSectionName) {
     return isSectionNamePresent(sSectionName, &listSectionRecords);
 }
 
-bool XELF::isSectionNamePresent(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords) {
+bool XELF::isSectionNamePresent(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
+{
     bool bResult = false;
 
     qint32 nNumberOfSections = pListSectionRecords->count();
@@ -3608,7 +3872,8 @@ bool XELF::isSectionNamePresent(QString sSectionName, QList<XELF::SECTION_RECORD
     return bResult;
 }
 
-qint32 XELF::getSectionNumber(QString sSectionName) {
+qint32 XELF::getSectionNumber(QString sSectionName)
+{
     bool bIs64 = is64();
     quint16 nStringTableSection = getSectionStringTable(bIs64);
     QByteArray baStringTable = getSection(nStringTableSection);
@@ -3619,7 +3884,8 @@ qint32 XELF::getSectionNumber(QString sSectionName) {
     return getSectionNumber(sSectionName, &listSectionRecords);
 }
 
-qint32 XELF::getSectionNumber(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords) {
+qint32 XELF::getSectionNumber(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
+{
     qint32 nResult = -1;
 
     qint32 nNumberOfSections = pListSectionRecords->count();
@@ -3634,7 +3900,8 @@ qint32 XELF::getSectionNumber(QString sSectionName, QList<XELF::SECTION_RECORD> 
     return nResult;
 }
 
-XELF::SECTION_RECORD XELF::getSectionRecord(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords) {
+XELF::SECTION_RECORD XELF::getSectionRecord(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
+{
     SECTION_RECORD result = {};
 
     qint32 nNumberOfSections = pListSectionRecords->count();
@@ -3649,7 +3916,8 @@ XELF::SECTION_RECORD XELF::getSectionRecord(QString sSectionName, QList<XELF::SE
     return result;
 }
 
-XBinary::MODE XELF::getMode() {
+XBinary::MODE XELF::getMode()
+{
     MODE result = MODE_32;
 
     quint8 ident = getIdent_class();
@@ -3663,11 +3931,13 @@ XBinary::MODE XELF::getMode() {
     return result;
 }
 
-QString XELF::getArch() {
+QString XELF::getArch()
+{
     return getMachinesS().value(getHdr32_machine(), tr("Unknown"));
 }
 
-qint32 XELF::getType() {
+qint32 XELF::getType()
+{
     qint32 nResult = TYPE_UNKNOWN;
 
     quint16 nType = 0;
@@ -3693,7 +3963,8 @@ qint32 XELF::getType() {
     return nResult;
 }
 
-XBinary::FT XELF::getFileType() {
+XBinary::FT XELF::getFileType()
+{
     FT result = FT_ELF32;
 
     MODE mode = getMode();
@@ -3707,7 +3978,8 @@ XBinary::FT XELF::getFileType() {
     return result;
 }
 
-XBinary::OSINFO XELF::getOsInfo() {
+XBinary::OSINFO XELF::getOsInfo()
+{
     OSINFO result = {};
 
     result.osName = OSNAME_UNIX;
@@ -3954,7 +4226,8 @@ XBinary::OSINFO XELF::getOsInfo() {
     return result;
 }
 
-QString XELF::typeIdToString(qint32 nType) {
+QString XELF::typeIdToString(qint32 nType)
+{
     QString sResult = tr("Unknown");
 
     switch (nType) {
@@ -3981,7 +4254,8 @@ QString XELF::typeIdToString(qint32 nType) {
     return sResult;
 }
 
-QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType) {
+QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType)
+{
     QList<XELF_DEF::Elf_Phdr> listResult;
 
     qint32 nNumberOfPrograms = pListProgramHeaders->count();
@@ -3995,7 +4269,8 @@ QList<XELF_DEF::Elf_Phdr> XELF::_getPrograms(QList<XELF_DEF::Elf_Phdr> *pListPro
     return listResult;
 }
 
-QList<XELF_DEF::Elf_Shdr> XELF::_getSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, quint32 nType) {
+QList<XELF_DEF::Elf_Shdr> XELF::_getSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, quint32 nType)
+{
     QList<XELF_DEF::Elf_Shdr> listResult;
 
     qint32 nNumberOfSections = pListSectionHeaders->count();
@@ -4009,7 +4284,8 @@ QList<XELF_DEF::Elf_Shdr> XELF::_getSections(QList<XELF_DEF::Elf_Shdr> *pListSec
     return listResult;
 }
 
-QList<XELF::SECTION_RECORD> XELF::_getSectionRecords(QList<SECTION_RECORD> *pListSectionRecords, QString sName) {
+QList<XELF::SECTION_RECORD> XELF::_getSectionRecords(QList<SECTION_RECORD> *pListSectionRecords, QString sName)
+{
     QList<SECTION_RECORD> listResult;
 
     qint32 nNumberOfSections = pListSectionRecords->count();
@@ -4023,7 +4299,8 @@ QList<XELF::SECTION_RECORD> XELF::_getSectionRecords(QList<SECTION_RECORD> *pLis
     return listResult;
 }
 
-QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders) {
+QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
+{
     QList<XBinary::DATASET> listResult;
 
     quint32 nMainStringSection = getSectionStringTable();
@@ -4147,7 +4424,8 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
     return listResult;
 }
 
-QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders) {
+QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
+{
     QList<XBinary::DATASET> listResult;
 
     qint32 nNumberOfPrograms = pListProgramHeaders->count();
@@ -4192,7 +4470,8 @@ QList<XBinary::DATASET> XELF::getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> 
     return listResult;
 }
 
-QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs) {
+QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUCT> *pListTagStructs)
+{
     QList<XBinary::DATASET> listResult;
 
     QList<TAG_STRUCT> listStrTab = _getTagStructs(pListTagStructs, XELF_DEF::DT_STRTAB);
@@ -4306,7 +4585,8 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
     return listResult;
 }
 
-QList<XELF_DEF::Elf32_Sym> XELF::getElf32_SymList(qint64 nOffset, qint64 nSize) {
+QList<XELF_DEF::Elf32_Sym> XELF::getElf32_SymList(qint64 nOffset, qint64 nSize)
+{
     QList<XELF_DEF::Elf32_Sym> listResult;
 
     bool bIsBigEndian = isBigEndian();
@@ -4323,7 +4603,8 @@ QList<XELF_DEF::Elf32_Sym> XELF::getElf32_SymList(qint64 nOffset, qint64 nSize) 
     return listResult;
 }
 
-QList<XELF_DEF::Elf64_Sym> XELF::getElf64_SymList(qint64 nOffset, qint64 nSize) {
+QList<XELF_DEF::Elf64_Sym> XELF::getElf64_SymList(qint64 nOffset, qint64 nSize)
+{
     QList<XELF_DEF::Elf64_Sym> listResult;
 
     bool bIsBigEndian = isBigEndian();
@@ -4340,7 +4621,8 @@ QList<XELF_DEF::Elf64_Sym> XELF::getElf64_SymList(qint64 nOffset, qint64 nSize) 
     return listResult;
 }
 
-QList<XELF_DEF::Elf_Sym> XELF::getElf_SymList(qint64 nOffset, qint64 nSize) {
+QList<XELF_DEF::Elf_Sym> XELF::getElf_SymList(qint64 nOffset, qint64 nSize)
+{
     QList<XELF_DEF::Elf_Sym> listResult;
 
     bool bIsBigEndian = isBigEndian();
@@ -4381,7 +4663,8 @@ QList<XELF_DEF::Elf_Sym> XELF::getElf_SymList(qint64 nOffset, qint64 nSize) {
     return listResult;
 }
 
-XELF_DEF::Elf32_Sym XELF::_readElf32_Sym(qint64 nOffset, bool bIsBigEndian) {
+XELF_DEF::Elf32_Sym XELF::_readElf32_Sym(qint64 nOffset, bool bIsBigEndian)
+{
     XELF_DEF::Elf32_Sym result = {};
 
     result.st_name = read_uint32(nOffset + offsetof(XELF_DEF::Elf32_Sym, st_name), bIsBigEndian);
@@ -4394,7 +4677,8 @@ XELF_DEF::Elf32_Sym XELF::_readElf32_Sym(qint64 nOffset, bool bIsBigEndian) {
     return result;
 }
 
-XELF_DEF::Elf64_Sym XELF::_readElf64_Sym(qint64 nOffset, bool bIsBigEndian) {
+XELF_DEF::Elf64_Sym XELF::_readElf64_Sym(qint64 nOffset, bool bIsBigEndian)
+{
     XELF_DEF::Elf64_Sym result = {};
 
     result.st_name = read_uint32(nOffset + offsetof(XELF_DEF::Elf64_Sym, st_name), bIsBigEndian);
@@ -4407,55 +4691,68 @@ XELF_DEF::Elf64_Sym XELF::_readElf64_Sym(qint64 nOffset, bool bIsBigEndian) {
     return result;
 }
 
-void XELF::setElf32_Sym_st_name(qint64 nOffset, quint32 nValue, bool bIsBigEndian) {
+void XELF::setElf32_Sym_st_name(qint64 nOffset, quint32 nValue, bool bIsBigEndian)
+{
     write_uint32(nOffset + offsetof(XELF_DEF::Elf32_Sym, st_name), nValue, bIsBigEndian);
 }
 
-void XELF::setElf32_Sym_st_value(qint64 nOffset, quint32 nValue, bool bIsBigEndian) {
+void XELF::setElf32_Sym_st_value(qint64 nOffset, quint32 nValue, bool bIsBigEndian)
+{
     write_uint32(nOffset + offsetof(XELF_DEF::Elf32_Sym, st_value), nValue, bIsBigEndian);
 }
 
-void XELF::setElf32_Sym_st_size(qint64 nOffset, quint32 nValue, bool bIsBigEndian) {
+void XELF::setElf32_Sym_st_size(qint64 nOffset, quint32 nValue, bool bIsBigEndian)
+{
     write_uint32(nOffset + offsetof(XELF_DEF::Elf32_Sym, st_size), nValue, bIsBigEndian);
 }
 
-void XELF::setElf32_Sym_st_info(qint64 nOffset, quint8 nValue) {
+void XELF::setElf32_Sym_st_info(qint64 nOffset, quint8 nValue)
+{
     write_uint8(nOffset + offsetof(XELF_DEF::Elf32_Sym, st_info), nValue);
 }
 
-void XELF::setElf32_Sym_st_other(qint64 nOffset, quint8 nValue) {
+void XELF::setElf32_Sym_st_other(qint64 nOffset, quint8 nValue)
+{
     write_uint8(nOffset + offsetof(XELF_DEF::Elf32_Sym, st_other), nValue);
 }
 
-void XELF::setElf32_Sym_st_shndx(qint64 nOffset, quint16 nValue, bool bIsBigEndian) {
+void XELF::setElf32_Sym_st_shndx(qint64 nOffset, quint16 nValue, bool bIsBigEndian)
+{
     write_uint16(nOffset + offsetof(XELF_DEF::Elf32_Sym, st_shndx), nValue, bIsBigEndian);
 }
 
-void XELF::setElf64_Sym_st_name(qint64 nOffset, quint32 nValue, bool bIsBigEndian) {
+void XELF::setElf64_Sym_st_name(qint64 nOffset, quint32 nValue, bool bIsBigEndian)
+{
     write_uint32(nOffset + offsetof(XELF_DEF::Elf64_Sym, st_name), nValue, bIsBigEndian);
 }
 
-void XELF::setElf64_Sym_st_info(qint64 nOffset, quint8 nValue) {
+void XELF::setElf64_Sym_st_info(qint64 nOffset, quint8 nValue)
+{
     write_uint8(nOffset + offsetof(XELF_DEF::Elf64_Sym, st_info), nValue);
 }
 
-void XELF::setElf64_Sym_st_other(qint64 nOffset, quint8 nValue) {
+void XELF::setElf64_Sym_st_other(qint64 nOffset, quint8 nValue)
+{
     write_uint8(nOffset + offsetof(XELF_DEF::Elf64_Sym, st_other), nValue);
 }
 
-void XELF::setElf64_Sym_st_shndx(qint64 nOffset, quint16 nValue, bool bIsBigEndian) {
+void XELF::setElf64_Sym_st_shndx(qint64 nOffset, quint16 nValue, bool bIsBigEndian)
+{
     write_uint16(nOffset + offsetof(XELF_DEF::Elf64_Sym, st_shndx), nValue, bIsBigEndian);
 }
 
-void XELF::setElf64_Sym_st_value(qint64 nOffset, quint64 nValue, bool bIsBigEndian) {
+void XELF::setElf64_Sym_st_value(qint64 nOffset, quint64 nValue, bool bIsBigEndian)
+{
     write_uint64(nOffset + offsetof(XELF_DEF::Elf64_Sym, st_value), nValue, bIsBigEndian);
 }
 
-void XELF::setElf64_Sym_st_size(qint64 nOffset, quint64 nValue, bool bIsBigEndian) {
+void XELF::setElf64_Sym_st_size(qint64 nOffset, quint64 nValue, bool bIsBigEndian)
+{
     write_uint64(nOffset + offsetof(XELF_DEF::Elf64_Sym, st_size), nValue, bIsBigEndian);
 }
 
-qint64 XELF::getSymSize() {
+qint64 XELF::getSymSize()
+{
     quint64 nResult = 0;
 
     bool bIs64 = is64();
@@ -4469,7 +4766,8 @@ qint64 XELF::getSymSize() {
     return nResult;
 }
 
-qint64 XELF::getSymTableSize(qint64 nOffset) {
+qint64 XELF::getSymTableSize(qint64 nOffset)
+{
     qint64 nResult = 0;
 
     bool bIsBigEndian = isBigEndian();
@@ -4508,7 +4806,8 @@ qint64 XELF::getSymTableSize(qint64 nOffset) {
     return nResult;
 }
 
-XELF_DEF::Elf32_Rel XELF::_readElf32_Rel(qint64 nOffset, bool bIsBigEndian) {
+XELF_DEF::Elf32_Rel XELF::_readElf32_Rel(qint64 nOffset, bool bIsBigEndian)
+{
     XELF_DEF::Elf32_Rel result = {};
 
     result.r_offset = read_uint32(nOffset + offsetof(XELF_DEF::Elf32_Rel, r_offset), bIsBigEndian);
@@ -4517,7 +4816,8 @@ XELF_DEF::Elf32_Rel XELF::_readElf32_Rel(qint64 nOffset, bool bIsBigEndian) {
     return result;
 }
 
-XELF_DEF::Elf64_Rel XELF::_readElf64_Rel(qint64 nOffset, bool bIsBigEndian) {
+XELF_DEF::Elf64_Rel XELF::_readElf64_Rel(qint64 nOffset, bool bIsBigEndian)
+{
     XELF_DEF::Elf64_Rel result = {};
 
     result.r_offset = read_uint64(nOffset + offsetof(XELF_DEF::Elf64_Rel, r_offset), bIsBigEndian);
@@ -4526,7 +4826,8 @@ XELF_DEF::Elf64_Rel XELF::_readElf64_Rel(qint64 nOffset, bool bIsBigEndian) {
     return result;
 }
 
-XELF_DEF::Elf32_Rela XELF::_readElf32_Rela(qint64 nOffset, bool bIsBigEndian) {
+XELF_DEF::Elf32_Rela XELF::_readElf32_Rela(qint64 nOffset, bool bIsBigEndian)
+{
     XELF_DEF::Elf32_Rela result = {};
 
     result.r_offset = read_uint32(nOffset + offsetof(XELF_DEF::Elf32_Rela, r_offset), bIsBigEndian);
@@ -4536,7 +4837,8 @@ XELF_DEF::Elf32_Rela XELF::_readElf32_Rela(qint64 nOffset, bool bIsBigEndian) {
     return result;
 }
 
-XELF_DEF::Elf64_Rela XELF::_readElf64_Rela(qint64 nOffset, bool bIsBigEndian) {
+XELF_DEF::Elf64_Rela XELF::_readElf64_Rela(qint64 nOffset, bool bIsBigEndian)
+{
     XELF_DEF::Elf64_Rela result = {};
 
     result.r_offset = read_uint64(nOffset + offsetof(XELF_DEF::Elf64_Rela, r_offset), bIsBigEndian);
@@ -4546,7 +4848,8 @@ XELF_DEF::Elf64_Rela XELF::_readElf64_Rela(qint64 nOffset, bool bIsBigEndian) {
     return result;
 }
 
-QList<XELF_DEF::Elf32_Rel> XELF::getElf32_RelList(qint64 nOffset, qint64 nSize) {
+QList<XELF_DEF::Elf32_Rel> XELF::getElf32_RelList(qint64 nOffset, qint64 nSize)
+{
     QList<XELF_DEF::Elf32_Rel> listResult;
 
     bool bIsBigEndian = isBigEndian();
@@ -4563,7 +4866,8 @@ QList<XELF_DEF::Elf32_Rel> XELF::getElf32_RelList(qint64 nOffset, qint64 nSize) 
     return listResult;
 }
 
-QList<XELF_DEF::Elf64_Rel> XELF::getElf64_RelList(qint64 nOffset, qint64 nSize) {
+QList<XELF_DEF::Elf64_Rel> XELF::getElf64_RelList(qint64 nOffset, qint64 nSize)
+{
     QList<XELF_DEF::Elf64_Rel> listResult;
 
     bool bIsBigEndian = isBigEndian();
@@ -4580,7 +4884,8 @@ QList<XELF_DEF::Elf64_Rel> XELF::getElf64_RelList(qint64 nOffset, qint64 nSize) 
     return listResult;
 }
 
-QList<XELF_DEF::Elf32_Rela> XELF::getElf32_RelaList(qint64 nOffset, qint64 nSize) {
+QList<XELF_DEF::Elf32_Rela> XELF::getElf32_RelaList(qint64 nOffset, qint64 nSize)
+{
     QList<XELF_DEF::Elf32_Rela> listResult;
 
     bool bIsBigEndian = isBigEndian();
@@ -4597,7 +4902,8 @@ QList<XELF_DEF::Elf32_Rela> XELF::getElf32_RelaList(qint64 nOffset, qint64 nSize
     return listResult;
 }
 
-QList<XELF_DEF::Elf64_Rela> XELF::getElf64_RelaList(qint64 nOffset, qint64 nSize) {
+QList<XELF_DEF::Elf64_Rela> XELF::getElf64_RelaList(qint64 nOffset, qint64 nSize)
+{
     QList<XELF_DEF::Elf64_Rela> listResult;
 
     bool bIsBigEndian = isBigEndian();
@@ -4614,47 +4920,58 @@ QList<XELF_DEF::Elf64_Rela> XELF::getElf64_RelaList(qint64 nOffset, qint64 nSize
     return listResult;
 }
 
-void XELF::setElf32_Rel_r_offset(qint64 nOffset, quint32 nValue, bool bIsBigEndian) {
+void XELF::setElf32_Rel_r_offset(qint64 nOffset, quint32 nValue, bool bIsBigEndian)
+{
     write_uint32(nOffset + offsetof(XELF_DEF::Elf32_Rel, r_offset), nValue, bIsBigEndian);
 }
 
-void XELF::setElf32_Rel_r_info(qint64 nOffset, quint32 nValue, bool bIsBigEndian) {
+void XELF::setElf32_Rel_r_info(qint64 nOffset, quint32 nValue, bool bIsBigEndian)
+{
     write_uint32(nOffset + offsetof(XELF_DEF::Elf32_Rel, r_info), nValue, bIsBigEndian);
 }
 
-void XELF::setElf64_Rel_r_offset(qint64 nOffset, quint64 nValue, bool bIsBigEndian) {
+void XELF::setElf64_Rel_r_offset(qint64 nOffset, quint64 nValue, bool bIsBigEndian)
+{
     write_uint64(nOffset + offsetof(XELF_DEF::Elf64_Rel, r_offset), nValue, bIsBigEndian);
 }
 
-void XELF::setElf64_Rel_r_info(qint64 nOffset, quint64 nValue, bool bIsBigEndian) {
+void XELF::setElf64_Rel_r_info(qint64 nOffset, quint64 nValue, bool bIsBigEndian)
+{
     write_uint64(nOffset + offsetof(XELF_DEF::Elf64_Rel, r_info), nValue, bIsBigEndian);
 }
 
-void XELF::setElf32_Rela_r_offset(qint64 nOffset, quint32 nValue, bool bIsBigEndian) {
+void XELF::setElf32_Rela_r_offset(qint64 nOffset, quint32 nValue, bool bIsBigEndian)
+{
     write_uint32(nOffset + offsetof(XELF_DEF::Elf32_Rela, r_offset), nValue, bIsBigEndian);
 }
 
-void XELF::setElf32_Rela_r_info(qint64 nOffset, quint32 nValue, bool bIsBigEndian) {
+void XELF::setElf32_Rela_r_info(qint64 nOffset, quint32 nValue, bool bIsBigEndian)
+{
     write_uint32(nOffset + offsetof(XELF_DEF::Elf32_Rela, r_info), nValue, bIsBigEndian);
 }
 
-void XELF::setElf32_Rela_r_addend(qint64 nOffset, quint32 nValue, bool bIsBigEndian) {
+void XELF::setElf32_Rela_r_addend(qint64 nOffset, quint32 nValue, bool bIsBigEndian)
+{
     write_uint32(nOffset + offsetof(XELF_DEF::Elf32_Rela, r_addend), nValue, bIsBigEndian);
 }
 
-void XELF::setElf64_Rela_r_offset(qint64 nOffset, quint64 nValue, bool bIsBigEndian) {
+void XELF::setElf64_Rela_r_offset(qint64 nOffset, quint64 nValue, bool bIsBigEndian)
+{
     write_uint64(nOffset + offsetof(XELF_DEF::Elf64_Rela, r_offset), nValue, bIsBigEndian);
 }
 
-void XELF::setElf64_Rela_r_info(qint64 nOffset, quint64 nValue, bool bIsBigEndian) {
+void XELF::setElf64_Rela_r_info(qint64 nOffset, quint64 nValue, bool bIsBigEndian)
+{
     write_uint64(nOffset + offsetof(XELF_DEF::Elf64_Rela, r_info), nValue, bIsBigEndian);
 }
 
-void XELF::setElf64_Rela_r_addend(qint64 nOffset, quint64 nValue, bool bIsBigEndian) {
+void XELF::setElf64_Rela_r_addend(qint64 nOffset, quint64 nValue, bool bIsBigEndian)
+{
     write_uint64(nOffset + offsetof(XELF_DEF::Elf64_Rela, r_addend), nValue, bIsBigEndian);
 }
 
-quint16 XELF::getNumberOfSections() {
+quint16 XELF::getNumberOfSections()
+{
     quint16 nResult = 0;
 
     if (is64()) {
@@ -4666,7 +4983,8 @@ quint16 XELF::getNumberOfSections() {
     return nResult;
 }
 
-quint16 XELF::getNumberOfPrograms() {
+quint16 XELF::getNumberOfPrograms()
+{
     quint16 nResult = 0;
 
     if (is64()) {
@@ -4678,15 +4996,18 @@ quint16 XELF::getNumberOfPrograms() {
     return nResult;
 }
 
-bool XELF::isSectionsTablePresent() {
+bool XELF::isSectionsTablePresent()
+{
     return (bool)getNumberOfSections();
 }
 
-bool XELF::isProgramsTablePresent() {
+bool XELF::isProgramsTablePresent()
+{
     return (bool)getNumberOfPrograms();
 }
 
-QMap<quint64, QString> XELF::getRelTypes_x86() {
+QMap<quint64, QString> XELF::getRelTypes_x86()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "R_386_NONE");
@@ -4710,7 +5031,8 @@ QMap<quint64, QString> XELF::getRelTypes_x86() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getRelTypesS_x86() {
+QMap<quint64, QString> XELF::getRelTypesS_x86()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "386_NONE");
@@ -4734,7 +5056,8 @@ QMap<quint64, QString> XELF::getRelTypesS_x86() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getRelTypes_x64() {
+QMap<quint64, QString> XELF::getRelTypes_x64()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "R_X86_64_NONE");
@@ -4758,7 +5081,8 @@ QMap<quint64, QString> XELF::getRelTypes_x64() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getRelTypesS_x64() {
+QMap<quint64, QString> XELF::getRelTypesS_x64()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "X86_64_NONE");
@@ -4782,7 +5106,8 @@ QMap<quint64, QString> XELF::getRelTypesS_x64() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getRelTypes_SPARC() {
+QMap<quint64, QString> XELF::getRelTypes_SPARC()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "R_SPARC_NONE");
@@ -4853,7 +5178,8 @@ QMap<quint64, QString> XELF::getRelTypes_SPARC() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getRelTypesS_SPARC() {
+QMap<quint64, QString> XELF::getRelTypesS_SPARC()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "SPARC_NONE");
@@ -4924,7 +5250,8 @@ QMap<quint64, QString> XELF::getRelTypesS_SPARC() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getStBinds() {
+QMap<quint64, QString> XELF::getStBinds()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "STB_LOCAL");
@@ -4938,7 +5265,8 @@ QMap<quint64, QString> XELF::getStBinds() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getStBindsS() {
+QMap<quint64, QString> XELF::getStBindsS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "LOCAL");
@@ -4952,7 +5280,8 @@ QMap<quint64, QString> XELF::getStBindsS() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getStTypes() {
+QMap<quint64, QString> XELF::getStTypes()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "STT_NOTYPE");
@@ -4969,7 +5298,8 @@ QMap<quint64, QString> XELF::getStTypes() {
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getStTypesS() {
+QMap<quint64, QString> XELF::getStTypesS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0, "NOTYPE");

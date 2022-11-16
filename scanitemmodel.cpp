@@ -20,7 +20,8 @@
  */
 #include "scanitemmodel.h"
 
-ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns) : QAbstractItemModel(0) {
+ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns) : QAbstractItemModel(0)
+{
     g_pRootItem = new ScanItem(tr("Result"), nullptr, nNumberOfColumns, true);
     XBinary::SCANSTRUCT emptySS = {};
     g_pRootItem->setScanStruct(emptySS);
@@ -64,11 +65,13 @@ ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int n
     }
 }
 
-ScanItemModel::~ScanItemModel() {
+ScanItemModel::~ScanItemModel()
+{
     delete g_pRootItem;
 }
 
-QVariant ScanItemModel::headerData(int nSection, Qt::Orientation orientation, int nRole) const {
+QVariant ScanItemModel::headerData(int nSection, Qt::Orientation orientation, int nRole) const
+{
     QVariant result;
 
     if ((orientation == Qt::Horizontal) && (nRole == Qt::DisplayRole)) {
@@ -78,7 +81,8 @@ QVariant ScanItemModel::headerData(int nSection, Qt::Orientation orientation, in
     return result;
 }
 
-QModelIndex ScanItemModel::index(int nRow, int nColumn, const QModelIndex &parent) const {
+QModelIndex ScanItemModel::index(int nRow, int nColumn, const QModelIndex &parent) const
+{
     QModelIndex result;
 
     if (hasIndex(nRow, nColumn, parent)) {
@@ -100,7 +104,8 @@ QModelIndex ScanItemModel::index(int nRow, int nColumn, const QModelIndex &paren
     return result;
 }
 
-QModelIndex ScanItemModel::parent(const QModelIndex &index) const {
+QModelIndex ScanItemModel::parent(const QModelIndex &index) const
+{
     QModelIndex result;
 
     if (index.isValid()) {
@@ -115,7 +120,8 @@ QModelIndex ScanItemModel::parent(const QModelIndex &index) const {
     return result;
 }
 
-int ScanItemModel::rowCount(const QModelIndex &parent) const {
+int ScanItemModel::rowCount(const QModelIndex &parent) const
+{
     int nResult = 0;
 
     if (parent.column() <= 0) {
@@ -133,7 +139,8 @@ int ScanItemModel::rowCount(const QModelIndex &parent) const {
     return nResult;
 }
 
-int ScanItemModel::columnCount(const QModelIndex &parent) const {
+int ScanItemModel::columnCount(const QModelIndex &parent) const
+{
     int nResult = 0;
 
     if (parent.isValid()) {
@@ -145,7 +152,8 @@ int ScanItemModel::columnCount(const QModelIndex &parent) const {
     return nResult;
 }
 
-QVariant ScanItemModel::data(const QModelIndex &index, int nRole) const {
+QVariant ScanItemModel::data(const QModelIndex &index, int nRole) const
+{
     QVariant result;
 
     if (index.isValid()) {
@@ -178,7 +186,8 @@ QVariant ScanItemModel::data(const QModelIndex &index, int nRole) const {
     return result;
 }
 
-Qt::ItemFlags ScanItemModel::flags(const QModelIndex &index) const {
+Qt::ItemFlags ScanItemModel::flags(const QModelIndex &index) const
+{
     Qt::ItemFlags result = Qt::NoItemFlags;
 
     if (index.isValid()) {
@@ -188,7 +197,8 @@ Qt::ItemFlags ScanItemModel::flags(const QModelIndex &index) const {
     return result;
 }
 
-QString ScanItemModel::toXML() {
+QString ScanItemModel::toXML()
+{
     QString sResult;
     QXmlStreamWriter xml(&sResult);
 
@@ -199,7 +209,8 @@ QString ScanItemModel::toXML() {
     return sResult;
 }
 
-QString ScanItemModel::toJSON() {
+QString ScanItemModel::toJSON()
+{
     QString sResult;
 
     QJsonObject jsonResult;
@@ -215,7 +226,8 @@ QString ScanItemModel::toJSON() {
     return sResult;
 }
 
-QString ScanItemModel::toCSV() {
+QString ScanItemModel::toCSV()
+{
     QString sResult;
 
     _toCSV(&sResult, g_pRootItem, 0);
@@ -223,7 +235,8 @@ QString ScanItemModel::toCSV() {
     return sResult;
 }
 
-QString ScanItemModel::toTSV() {
+QString ScanItemModel::toTSV()
+{
     QString sResult;
 
     _toTSV(&sResult, g_pRootItem, 0);
@@ -231,7 +244,8 @@ QString ScanItemModel::toTSV() {
     return sResult;
 }
 
-QString ScanItemModel::toFormattedString() {
+QString ScanItemModel::toFormattedString()
+{
     QString sResult;
 
     _toFormattedString(&sResult, g_pRootItem, 0);
@@ -239,11 +253,13 @@ QString ScanItemModel::toFormattedString() {
     return sResult;
 }
 
-void ScanItemModel::coloredOutput() {
+void ScanItemModel::coloredOutput()
+{
     _coloredOutput(g_pRootItem, 0);
 }
 
-QString ScanItemModel::toString(XBinary::FORMATTYPE formatType) {
+QString ScanItemModel::toString(XBinary::FORMATTYPE formatType)
+{
     QString sResult;
 
     if (formatType == XBinary::FORMATTYPE_XML) {
@@ -261,11 +277,13 @@ QString ScanItemModel::toString(XBinary::FORMATTYPE formatType) {
     return sResult;
 }
 
-ScanItem *ScanItemModel::rootItem() {
+ScanItem *ScanItemModel::rootItem()
+{
     return this->g_pRootItem;
 }
 
-void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLevel) {
+void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLevel)
+{
     if (pItem->childCount()) {
         pXml->writeStartElement(pItem->data(0).toString());
 
@@ -289,7 +307,8 @@ void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLeve
     }
 }
 
-void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nLevel) {
+void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nLevel)
+{
     if (pItem->childCount()) {
         XBinary::SCANSTRUCT ss = pItem->scanStruct();
 
@@ -326,7 +345,8 @@ void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nL
     }
 }
 
-void ScanItemModel::_toCSV(QString *pString, ScanItem *pItem, qint32 nLevel) {
+void ScanItemModel::_toCSV(QString *pString, ScanItem *pItem, qint32 nLevel)
+{
     if (pItem->childCount()) {
         qint32 nNumberOfChildren = pItem->childCount();
 
@@ -342,7 +362,8 @@ void ScanItemModel::_toCSV(QString *pString, ScanItem *pItem, qint32 nLevel) {
     }
 }
 
-void ScanItemModel::_toTSV(QString *pString, ScanItem *pItem, qint32 nLevel) {
+void ScanItemModel::_toTSV(QString *pString, ScanItem *pItem, qint32 nLevel)
+{
     if (pItem->childCount()) {
         qint32 nNumberOfChildren = pItem->childCount();
 
@@ -358,7 +379,8 @@ void ScanItemModel::_toTSV(QString *pString, ScanItem *pItem, qint32 nLevel) {
     }
 }
 
-void ScanItemModel::_toFormattedString(QString *pString, ScanItem *pItem, qint32 nLevel) {
+void ScanItemModel::_toFormattedString(QString *pString, ScanItem *pItem, qint32 nLevel)
+{
     if (nLevel) {
         QString sResult;
         sResult = sResult.leftJustified(4 * (nLevel - 1), ' ');  // TODO function !!!
@@ -373,7 +395,8 @@ void ScanItemModel::_toFormattedString(QString *pString, ScanItem *pItem, qint32
     }
 }
 
-void ScanItemModel::_coloredOutput(ScanItem *pItem, qint32 nLevel) {
+void ScanItemModel::_coloredOutput(ScanItem *pItem, qint32 nLevel)
+{
 #ifdef QT_GUI_LIB
     Q_UNUSED(pItem)
     Q_UNUSED(nLevel)
@@ -394,7 +417,8 @@ void ScanItemModel::_coloredOutput(ScanItem *pItem, qint32 nLevel) {
 #endif
 }
 
-void ScanItemModel::_coloredItem(ScanItem *pItem) {
+void ScanItemModel::_coloredItem(ScanItem *pItem)
+{
 #ifdef QT_GUI_LIB
     Q_UNUSED(pItem)
 #else

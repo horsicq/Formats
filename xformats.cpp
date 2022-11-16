@@ -20,10 +20,12 @@
  */
 #include "xformats.h"
 
-XFormats::XFormats(QObject *pParent) : QObject(pParent) {
+XFormats::XFormats(QObject *pParent) : QObject(pParent)
+{
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     XBinary::_MEMORY_MAP result = {};
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -80,7 +82,8 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDe
     return result;
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage, XADDR nModuleAddress) {
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage, XADDR nModuleAddress)
+{
     XBinary::_MEMORY_MAP result = {};
 
     QFile file;
@@ -96,7 +99,8 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage, XA
     return result;
 }
 
-qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     // TODO pMemoryMap
     qint64 nResult = 0;  // FT_DEX, FT_ZIP
 
@@ -134,7 +138,8 @@ qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, 
     return nResult;
 }
 
-qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     qint64 nResult = 0;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -171,7 +176,8 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
     return nResult;
 }
 
-bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     bool bResult = false;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -227,7 +233,8 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
     return bResult;
 }
 
-bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     bool bResult = false;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -283,7 +290,8 @@ bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
     return bResult;
 }
 
-XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     XBinary::OFFSETSIZE osResult = {};
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -336,7 +344,8 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice 
     return osResult;
 }
 
-XBinary::OFFSETSIZE XFormats::getSignOffsetSize(QString sFileName) {
+XBinary::OFFSETSIZE XFormats::getSignOffsetSize(QString sFileName)
+{
     XBinary::OFFSETSIZE result = {};
 
     QFile file;
@@ -352,7 +361,8 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(QString sFileName) {
     return result;
 }
 
-bool XFormats::isSigned(QString sFileName) {
+bool XFormats::isSigned(QString sFileName)
+{
     bool bResult = false;
 
     QFile file;
@@ -368,7 +378,8 @@ bool XFormats::isSigned(QString sFileName) {
     return bResult;
 }
 
-QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::SYMBOL_TYPE symBolType) {
+QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::SYMBOL_TYPE symBolType)
+{
     QList<XBinary::SYMBOL_RECORD> listResult;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
@@ -445,11 +456,13 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
     return listResult;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra) {
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra)
+{
     return _getFileTypes(pDevice, bExtra, 0);
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra) {
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
+{
     QSet<XBinary::FT> result;
 
     if (nOffset >= 0) {
@@ -465,7 +478,8 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qin
     return result;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QString sFileName, bool bExtra) {
+QSet<XBinary::FT> XFormats::getFileTypes(QString sFileName, bool bExtra)
+{
     QSet<XBinary::FT> stResult;
 
     QFile file;
@@ -481,7 +495,8 @@ QSet<XBinary::FT> XFormats::getFileTypes(QString sFileName, bool bExtra) {
     return stResult;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra) {
+QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
+{
     QSet<XBinary::FT> stResult;
 
     QBuffer buffer;
@@ -497,7 +512,8 @@ QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra) {
     return stResult;
 }
 
-XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     XBinary::OSINFO result = {};
 
     if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
@@ -535,7 +551,8 @@ XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bo
     return result;
 }
 
-bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     bool bResult = false;
 
     if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
@@ -594,7 +611,8 @@ bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, 
     return bResult;
 }
 
-qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     qint64 nResult = 0;
 
     if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
@@ -653,7 +671,8 @@ qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, boo
     return nResult;
 }
 
-QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     QString sResult;
 
     if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
@@ -712,7 +731,8 @@ QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice, 
     return sResult;
 }
 
-QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     QString sResult;
 
     if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
@@ -771,7 +791,8 @@ QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice, boo
     return sResult;
 }
 #ifdef USE_ARCHIVE
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra) {
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra)
+{
     QSet<XBinary::FT> stResult;
 
     QByteArray baData = XArchives::decompress(pDevice, pRecord, true);
@@ -782,7 +803,8 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *p
 }
 #endif
 #ifdef USE_ARCHIVE
-QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, qint32 nLevel) {
+QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, qint32 nLevel)
+{
     QSet<XBinary::FT> stResult;
 
     if (XArchive::isArchiveRecordPresent("META-INF/MANIFEST.MF", pListRecords)) {
@@ -840,7 +862,8 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::
     return stResult;
 }
 #endif
-QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, qint32 nLevel) {
+QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, qint32 nLevel)
+{
 #ifndef USE_ARCHIVE
     Q_UNUSED(nLevel);
 #endif
@@ -864,7 +887,8 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, qint3
 }
 
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox) {
+XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox)
+{
 #if QT_VERSION >= QT_VERSION_CHECK(5, 3, 0)
     const QSignalBlocker block(pComboBox);
 #else
@@ -916,7 +940,8 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
 }
 #endif
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(QString sFileName, QComboBox *pComboBox) {
+XBinary::FT XFormats::setFileTypeComboBox(QString sFileName, QComboBox *pComboBox)
+{
     XBinary::FT result = XBinary::FT_UNKNOWN;
 
     QFile file;
@@ -932,7 +957,8 @@ XBinary::FT XFormats::setFileTypeComboBox(QString sFileName, QComboBox *pComboBo
 }
 #endif
 #ifdef QT_GUI_LIB
-bool XFormats::setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian) {
+bool XFormats::setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian)
+{
 #if QT_VERSION >= QT_VERSION_CHECK(5, 3, 0)
     const QSignalBlocker blocker(pComboBox);
 #else

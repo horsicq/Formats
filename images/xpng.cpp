@@ -20,13 +20,16 @@
  */
 #include "xpng.h"
 
-XPNG::XPNG(QIODevice *pDevice) : XBinary(pDevice) {
+XPNG::XPNG(QIODevice *pDevice) : XBinary(pDevice)
+{
 }
 
-XPNG::~XPNG() {
+XPNG::~XPNG()
+{
 }
 
-bool XPNG::isValid() {
+bool XPNG::isValid()
+{
     bool bIsValid = false;
 
     if (getSize() >= 20) {
@@ -36,17 +39,20 @@ bool XPNG::isValid() {
     return bIsValid;
 }
 
-bool XPNG::isValid(QIODevice *pDevice) {
+bool XPNG::isValid(QIODevice *pDevice)
+{
     XPNG xpng(pDevice);
 
     return xpng.isValid();
 }
 
-XBinary::FT XPNG::getFileType() {
+XBinary::FT XPNG::getFileType()
+{
     return FT_PNG;
 }
 
-QString XPNG::getFileFormatString() {
+QString XPNG::getFileFormatString()
+{
     QString sResult;
 
     sResult = QString("PNG");
@@ -54,11 +60,13 @@ QString XPNG::getFileFormatString() {
     return sResult;
 }
 
-QString XPNG::getFileFormatExt() {
+QString XPNG::getFileFormatExt()
+{
     return "png";
 }
 
-qint64 XPNG::getFileFormatSize() {
+qint64 XPNG::getFileFormatSize()
+{
     qint64 nResult = 0;
 
     qint64 nOffset = 8;
@@ -82,7 +90,8 @@ qint64 XPNG::getFileFormatSize() {
     return nResult;
 }
 
-XPNG::CHUNK XPNG::_readChunk(qint64 nOffset) {
+XPNG::CHUNK XPNG::_readChunk(qint64 nOffset)
+{
     CHUNK result = {};
 
     result.nDataSize = read_uint32(nOffset, true);

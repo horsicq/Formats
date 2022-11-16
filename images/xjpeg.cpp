@@ -20,13 +20,16 @@
  */
 #include "xjpeg.h"
 
-XJpeg::XJpeg(QIODevice *pDevice) : XBinary(pDevice) {
+XJpeg::XJpeg(QIODevice *pDevice) : XBinary(pDevice)
+{
 }
 
-XJpeg::~XJpeg() {
+XJpeg::~XJpeg()
+{
 }
 
-bool XJpeg::isValid() {
+bool XJpeg::isValid()
+{
     bool bIsValid = false;
 
     if (getSize() >= 20) {
@@ -36,17 +39,20 @@ bool XJpeg::isValid() {
     return bIsValid;
 }
 
-bool XJpeg::isValid(QIODevice *pDevice) {
+bool XJpeg::isValid(QIODevice *pDevice)
+{
     XJpeg xjpeg(pDevice);
 
     return xjpeg.isValid();
 }
 
-XBinary::FT XJpeg::getFileType() {
+XBinary::FT XJpeg::getFileType()
+{
     return FT_JPEG;
 }
 
-QString XJpeg::getFileFormatString() {
+QString XJpeg::getFileFormatString()
+{
     QString sResult;
 
     sResult = QString("JPEG");
@@ -54,16 +60,19 @@ QString XJpeg::getFileFormatString() {
     return sResult;
 }
 
-QString XJpeg::getFileFormatExt() {
+QString XJpeg::getFileFormatExt()
+{
     return "jpeg";
 }
 
-qint64 XJpeg::getFileFormatSize() {
+qint64 XJpeg::getFileFormatSize()
+{
     // TODO
     return XBinary::getFileFormatSize();
 }
 
-XJpeg::CHUNK XJpeg::_readChunk(qint64 nOffset) {
+XJpeg::CHUNK XJpeg::_readChunk(qint64 nOffset)
+{
     CHUNK result = {};
 
     return result;

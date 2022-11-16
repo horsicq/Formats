@@ -20,14 +20,17 @@
  */
 #include "xcom.h"
 
-XCOM::XCOM(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress) {
+XCOM::XCOM(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
+{
     XBinary::setBaseAddress(XCOM_DEF::ADDRESS_BEGIN);
 }
 
-XCOM::~XCOM() {
+XCOM::~XCOM()
+{
 }
 
-bool XCOM::isValid() {
+bool XCOM::isValid()
+{
     bool bResult = false;
 
     // mb TODO mb
@@ -38,19 +41,22 @@ bool XCOM::isValid() {
     return bResult;
 }
 
-bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     XCOM xcom(pDevice, bIsImage, nModuleAddress);
 
     return xcom.isValid();
 }
 
-XBinary::MODE XCOM::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+XBinary::MODE XCOM::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     XCOM xcom(pDevice, bIsImage, nModuleAddress);
 
     return xcom.getMode();
 }
 
-XBinary::_MEMORY_MAP XCOM::getMemoryMap() {
+XBinary::_MEMORY_MAP XCOM::getMemoryMap()
+{
     _MEMORY_MAP result = {};
 
     qint64 nTotalSize = getSize();
@@ -114,31 +120,38 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap() {
     return result;
 }
 
-QString XCOM::getArch() {
+QString XCOM::getArch()
+{
     return QString("8086");
 }
 
-XBinary::MODE XCOM::getMode() {
+XBinary::MODE XCOM::getMode()
+{
     return MODE_16;
 }
 
-bool XCOM::isBigEndian() {
+bool XCOM::isBigEndian()
+{
     return false;
 }
 
-qint64 XCOM::getImageSize() {
+qint64 XCOM::getImageSize()
+{
     return 0x10000;
 }
 
-XBinary::FT XCOM::getFileType() {
+XBinary::FT XCOM::getFileType()
+{
     return FT_COM;
 }
 
-qint32 XCOM::getType() {
+qint32 XCOM::getType()
+{
     return TYPE_EXECUTABLE;
 }
 
-XBinary::OSINFO XCOM::getOsInfo() {
+XBinary::OSINFO XCOM::getOsInfo()
+{
     OSINFO result = {};
 
     result.osName = OSNAME_MSDOS;
@@ -151,7 +164,8 @@ XBinary::OSINFO XCOM::getOsInfo() {
     return result;
 }
 
-QString XCOM::typeIdToString(qint32 nType) {
+QString XCOM::typeIdToString(qint32 nType)
+{
     QString sResult = tr("Unknown");
 
     switch (nType) {

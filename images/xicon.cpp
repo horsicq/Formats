@@ -20,17 +20,21 @@
  */
 #include "xicon.h"
 
-XIcon::XIcon(QIODevice *pDevice) : XBinary(pDevice) {
+XIcon::XIcon(QIODevice *pDevice) : XBinary(pDevice)
+{
 }
 
-XIcon::~XIcon() {
+XIcon::~XIcon()
+{
 }
 
-bool XIcon::isValid() {
+bool XIcon::isValid()
+{
     return false;
 }
 
-bool XIcon::isValid(QIODevice *pDevice) {
+bool XIcon::isValid(QIODevice *pDevice)
+{
     XIcon xicon(pDevice);
 
     return xicon.isValid();

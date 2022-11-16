@@ -20,32 +20,39 @@
  */
 #include "xiodevice.h"
 
-XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent) {
+XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent)
+{
     g_nSize = 0;
     g_nInitOffset = 0;
 }
 
-void XIODevice::setSize(quint64 nSize) {
+void XIODevice::setSize(quint64 nSize)
+{
     g_nSize = nSize;
 }
 
-void XIODevice::setInitOffset(quint64 nOffset) {
+void XIODevice::setInitOffset(quint64 nOffset)
+{
     g_nInitOffset = nOffset;
 }
 
-quint64 XIODevice::getInitOffset() {
+quint64 XIODevice::getInitOffset()
+{
     return g_nInitOffset;
 }
 
-qint64 XIODevice::size() const {
+qint64 XIODevice::size() const
+{
     return g_nSize;
 }
 
-bool XIODevice::isSequential() const {
+bool XIODevice::isSequential() const
+{
     return false;
 }
 
-bool XIODevice::seek(qint64 nPos) {
+bool XIODevice::seek(qint64 nPos)
+{
     bool bResult = false;
 
     if ((nPos < size()) && (nPos >= 0)) {
@@ -55,29 +62,35 @@ bool XIODevice::seek(qint64 nPos) {
     return bResult;
 }
 
-bool XIODevice::reset() {
+bool XIODevice::reset()
+{
     return seek(0);
 }
 
-bool XIODevice::open(OpenMode mode) {
+bool XIODevice::open(OpenMode mode)
+{
     setOpenMode(mode);
 
     return true;
 }
 
-bool XIODevice::atEnd() const {
+bool XIODevice::atEnd() const
+{
     return (bytesAvailable() == 0);
 }
 
-void XIODevice::close() {
+void XIODevice::close()
+{
     setOpenMode(NotOpen);
 }
 
-qint64 XIODevice::pos() const {
+qint64 XIODevice::pos() const
+{
     return QIODevice::pos();
 }
 
-qint64 XIODevice::readData(char *pData, qint64 nMaxSize) {
+qint64 XIODevice::readData(char *pData, qint64 nMaxSize)
+{
     Q_UNUSED(pData)
     Q_UNUSED(nMaxSize)
 
@@ -88,7 +101,8 @@ qint64 XIODevice::readData(char *pData, qint64 nMaxSize) {
     return 0;
 }
 
-qint64 XIODevice::writeData(const char *pData, qint64 nMaxSize) {
+qint64 XIODevice::writeData(const char *pData, qint64 nMaxSize)
+{
     Q_UNUSED(pData)
     Q_UNUSED(nMaxSize)
 
@@ -99,6 +113,7 @@ qint64 XIODevice::writeData(const char *pData, qint64 nMaxSize) {
     return 0;
 }
 
-void XIODevice::setErrorString(const QString &sString) {
+void XIODevice::setErrorString(const QString &sString)
+{
     QIODevice::setErrorString(sString);
 }

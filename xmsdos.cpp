@@ -20,10 +20,12 @@
  */
 #include "xmsdos.h"
 
-XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress) {
+XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
+{
 }
 
-bool XMSDOS::isValid() {
+bool XMSDOS::isValid()
+{
     bool bResult = false;
 
     quint16 magic = get_magic();
@@ -35,43 +37,52 @@ bool XMSDOS::isValid() {
     return bResult;
 }
 
-bool XMSDOS::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+bool XMSDOS::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     XMSDOS xmsdos(pDevice, bIsImage, nModuleAddress);
 
     return xmsdos.isValid();
 }
 
-XBinary::MODE XMSDOS::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) {
+XBinary::MODE XMSDOS::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
     XMSDOS xmsdos(pDevice, bIsImage, nModuleAddress);
 
     return xmsdos.getMode();
 }
 
-quint16 XMSDOS::get_magic() {
+quint16 XMSDOS::get_magic()
+{
     return read_uint16((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_magic));
 }
 
-qint32 XMSDOS::get_lfanew() {
+qint32 XMSDOS::get_lfanew()
+{
     return read_int32(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
 }
 
-qint64 XMSDOS::getDosHeaderOffset() {
+qint64 XMSDOS::getDosHeaderOffset()
+{
     return 0;
 }
 
-qint64 XMSDOS::getDosHeaderSize() {
+qint64 XMSDOS::getDosHeaderSize()
+{
     return sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
 }
 
-qint64 XMSDOS::getDosHeaderExOffset() {
+qint64 XMSDOS::getDosHeaderExOffset()
+{
     return 0;
 }
 
-qint64 XMSDOS::getDosHeaderExSize() {
+qint64 XMSDOS::getDosHeaderExSize()
+{
     return sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);
 }
 
-XMSDOS_DEF::IMAGE_DOS_HEADER XMSDOS::getDosHeader() {
+XMSDOS_DEF::IMAGE_DOS_HEADER XMSDOS::getDosHeader()
+{
     XMSDOS_DEF::IMAGE_DOS_HEADER result = {};
     // TODO
     read_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_magic), (char *)&result, sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));
@@ -79,7 +90,8 @@ XMSDOS_DEF::IMAGE_DOS_HEADER XMSDOS::getDosHeader() {
     return result;
 }
 
-XMSDOS_DEF::IMAGE_DOS_HEADEREX XMSDOS::getDosHeaderEx() {
+XMSDOS_DEF::IMAGE_DOS_HEADEREX XMSDOS::getDosHeaderEx()
+{
     XMSDOS_DEF::IMAGE_DOS_HEADEREX result = {};
     // TODO
     read_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_magic), (char *)&result, sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX));
@@ -87,155 +99,191 @@ XMSDOS_DEF::IMAGE_DOS_HEADEREX XMSDOS::getDosHeaderEx() {
     return result;
 }
 
-void XMSDOS::setDosHeader(XMSDOS_DEF::IMAGE_DOS_HEADER *pDosHeader) {
+void XMSDOS::setDosHeader(XMSDOS_DEF::IMAGE_DOS_HEADER *pDosHeader)
+{
     // TODO
     write_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_magic), (char *)pDosHeader, sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));
 }
 
-void XMSDOS::setDosHeaderEx(XMSDOS_DEF::IMAGE_DOS_HEADEREX *pDosHeaderEx) {
+void XMSDOS::setDosHeaderEx(XMSDOS_DEF::IMAGE_DOS_HEADEREX *pDosHeaderEx)
+{
     // TODO
     write_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_magic), (char *)pDosHeaderEx, sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX));
 }
 
-void XMSDOS::set_e_magic(quint16 nValue) {
+void XMSDOS::set_e_magic(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_magic), nValue);
 }
 
-void XMSDOS::set_e_cblp(quint16 nValue) {
+void XMSDOS::set_e_cblp(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_cblp), nValue);
 }
 
-void XMSDOS::set_e_cp(quint16 nValue) {
+void XMSDOS::set_e_cp(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_cp), nValue);
 }
 
-void XMSDOS::set_e_crlc(quint16 nValue) {
+void XMSDOS::set_e_crlc(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_crlc), nValue);
 }
 
-void XMSDOS::set_e_cparhdr(quint16 nValue) {
+void XMSDOS::set_e_cparhdr(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_cparhdr), nValue);
 }
 
-void XMSDOS::set_e_minalloc(quint16 nValue) {
+void XMSDOS::set_e_minalloc(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_minalloc), nValue);
 }
 
-void XMSDOS::set_e_maxalloc(quint16 nValue) {
+void XMSDOS::set_e_maxalloc(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_maxalloc), nValue);
 }
 
-void XMSDOS::set_e_ss(quint16 nValue) {
+void XMSDOS::set_e_ss(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_ss), nValue);
 }
 
-void XMSDOS::set_e_sp(quint16 nValue) {
+void XMSDOS::set_e_sp(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_sp), nValue);
 }
 
-void XMSDOS::set_e_csum(quint16 nValue) {
+void XMSDOS::set_e_csum(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_csum), nValue);
 }
 
-void XMSDOS::set_e_ip(quint16 nValue) {
+void XMSDOS::set_e_ip(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_ip), nValue);
 }
 
-void XMSDOS::set_e_cs(quint16 nValue) {
+void XMSDOS::set_e_cs(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_cs), nValue);
 }
 
-void XMSDOS::set_e_lfarlc(quint16 nValue) {
+void XMSDOS::set_e_lfarlc(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfarlc), nValue);
 }
 
-void XMSDOS::set_e_ovno(quint16 nValue) {
+void XMSDOS::set_e_ovno(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_ovno), nValue);
 }
 
-void XMSDOS::set_e_res(qint32 nPosition, quint16 nValue) {
+void XMSDOS::set_e_res(qint32 nPosition, quint16 nValue)
+{
     if (nPosition < 4)  // TODO nPosition>=0
     {
         write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + sizeof(quint16) * nPosition, nValue);
     }
 }
 
-void XMSDOS::set_e_oemid(quint16 nValue) {
+void XMSDOS::set_e_oemid(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oemid), nValue);
 }
 
-void XMSDOS::set_e_oeminfo(quint16 nValue) {
+void XMSDOS::set_e_oeminfo(quint16 nValue)
+{
     write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oeminfo), nValue);
 }
 
-void XMSDOS::set_e_res2(qint32 nPosition, quint16 nValue) {
+void XMSDOS::set_e_res2(qint32 nPosition, quint16 nValue)
+{
     if (nPosition < 10)  // TODO nPosition>=0
     {
         write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res2) + sizeof(quint16) * nPosition, nValue);
     }
 }
 
-void XMSDOS::set_e_lfanew(quint32 nValue) {
+void XMSDOS::set_e_lfanew(quint32 nValue)
+{
     write_uint32(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew), nValue);
 }
 
-quint16 XMSDOS::get_e_magic() {
+quint16 XMSDOS::get_e_magic()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_magic));
 }
 
-quint16 XMSDOS::get_e_cblp() {
+quint16 XMSDOS::get_e_cblp()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_cblp));
 }
 
-quint16 XMSDOS::get_e_cp() {
+quint16 XMSDOS::get_e_cp()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_cp));
 }
 
-quint16 XMSDOS::get_e_crlc() {
+quint16 XMSDOS::get_e_crlc()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_crlc));
 }
 
-quint16 XMSDOS::get_e_cparhdr() {
+quint16 XMSDOS::get_e_cparhdr()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_cparhdr));
 }
 
-quint16 XMSDOS::get_e_minalloc() {
+quint16 XMSDOS::get_e_minalloc()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_minalloc));
 }
 
-quint16 XMSDOS::get_e_maxalloc() {
+quint16 XMSDOS::get_e_maxalloc()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_maxalloc));
 }
 
-quint16 XMSDOS::get_e_ss() {
+quint16 XMSDOS::get_e_ss()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_ss));
 }
 
-quint16 XMSDOS::get_e_sp() {
+quint16 XMSDOS::get_e_sp()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_sp));
 }
 
-quint16 XMSDOS::get_e_csum() {
+quint16 XMSDOS::get_e_csum()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_csum));
 }
 
-quint16 XMSDOS::get_e_ip() {
+quint16 XMSDOS::get_e_ip()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_ip));
 }
 
-quint16 XMSDOS::get_e_cs() {
+quint16 XMSDOS::get_e_cs()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_cs));
 }
 
-quint16 XMSDOS::get_e_lfarlc() {
+quint16 XMSDOS::get_e_lfarlc()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfarlc));
 }
 
-quint16 XMSDOS::get_e_ovno() {
+quint16 XMSDOS::get_e_ovno()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_ovno));
 }
 
-quint16 XMSDOS::get_e_res(qint32 nPosition) {
+quint16 XMSDOS::get_e_res(qint32 nPosition)
+{
     quint16 nResult = 0;
 
     if (nPosition < 10)  // TODO nPosition>=0
@@ -246,15 +294,18 @@ quint16 XMSDOS::get_e_res(qint32 nPosition) {
     return nResult;
 }
 
-quint16 XMSDOS::get_e_oemid() {
+quint16 XMSDOS::get_e_oemid()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oemid));
 }
 
-quint16 XMSDOS::get_e_oeminfo() {
+quint16 XMSDOS::get_e_oeminfo()
+{
     return read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oeminfo));
 }
 
-quint16 XMSDOS::get_e_res2(qint32 nPosition) {
+quint16 XMSDOS::get_e_res2(qint32 nPosition)
+{
     quint16 nResult = 0;
 
     if (nPosition < 10)  // TODO nPosition>=0
@@ -265,11 +316,13 @@ quint16 XMSDOS::get_e_res2(qint32 nPosition) {
     return nResult;
 }
 
-quint32 XMSDOS::get_e_lfanew() {
+quint32 XMSDOS::get_e_lfanew()
+{
     return read_uint32(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
 }
 
-XBinary::_MEMORY_MAP XMSDOS::getMemoryMap() {
+XBinary::_MEMORY_MAP XMSDOS::getMemoryMap()
+{
     _MEMORY_MAP result = {};
 
     qint32 nIndex = 0;
@@ -443,16 +496,19 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap() {
     return result;
 }
 
-qint64 XMSDOS::getImageSize() {
+qint64 XMSDOS::getImageSize()
+{
     return 0x1000;  // TODO Check
 }
 
-qint64 XMSDOS::getModuleAddress() {
+qint64 XMSDOS::getModuleAddress()
+{
     //    return 0x10000000; // TODO Check
     return 0x100000;
 }
 
-QMap<quint64, QString> XMSDOS::getImageMagics() {
+QMap<quint64, QString> XMSDOS::getImageMagics()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x5A4D, "IMAGE_DOS_SIGNATURE");
@@ -461,7 +517,8 @@ QMap<quint64, QString> XMSDOS::getImageMagics() {
     return mapResult;
 }
 
-QMap<quint64, QString> XMSDOS::getImageMagicsS() {
+QMap<quint64, QString> XMSDOS::getImageMagicsS()
+{
     QMap<quint64, QString> mapResult;
 
     mapResult.insert(0x5A4D, "DOS_SIGNATURE");
@@ -470,35 +527,40 @@ QMap<quint64, QString> XMSDOS::getImageMagicsS() {
     return mapResult;
 }
 
-bool XMSDOS::isLE() {
+bool XMSDOS::isLE()
+{
     quint32 nOffset = get_e_lfanew();
     quint16 nNew = read_uint16(nOffset);
 
     return (nNew == 0x454C);  // TODO const
 }
 
-bool XMSDOS::isLX() {
+bool XMSDOS::isLX()
+{
     quint32 nOffset = get_e_lfanew();
     quint16 nNew = read_uint16(nOffset);
 
     return (nNew == 0x584C);  // TODO const
 }
 
-bool XMSDOS::isNE() {
+bool XMSDOS::isNE()
+{
     quint32 nOffset = get_e_lfanew();
     quint16 nNew = read_uint16(nOffset);
 
     return (nNew == 0x454E);  // TODO const
 }
 
-bool XMSDOS::isPE() {
+bool XMSDOS::isPE()
+{
     quint32 nOffset = get_e_lfanew();
     quint16 nNew = read_uint16(nOffset);
 
     return (nNew == 0x4550);  // TODO const
 }
 
-bool XMSDOS::isRichSignaturePresent() {
+bool XMSDOS::isRichSignaturePresent()
+{
     bool bResult = false;
 
     qint32 nOffset = sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
@@ -513,7 +575,8 @@ bool XMSDOS::isRichSignaturePresent() {
     return bResult;
 }
 
-QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords() {
+QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords()
+{
     QList<MS_RICH_RECORD> listResult;
 
     qint64 nOffset = find_ansiString(getDosStubOffset(), getDosStubSize(), "Rich");
@@ -554,23 +617,27 @@ QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords() {
     return listResult;
 }
 
-qint32 XMSDOS::getNumberOfRichIDs() {
+qint32 XMSDOS::getNumberOfRichIDs()
+{
     QList<MS_RICH_RECORD> listRichSignatureRecords = getRichSignatureRecords();
 
     return getNumberOfRichIDs(&listRichSignatureRecords);
 }
 
-qint32 XMSDOS::getNumberOfRichIDs(QList<XMSDOS::MS_RICH_RECORD> *pListRichSignatureRecords) {
+qint32 XMSDOS::getNumberOfRichIDs(QList<XMSDOS::MS_RICH_RECORD> *pListRichSignatureRecords)
+{
     return pListRichSignatureRecords->count();
 }
 
-bool XMSDOS::isRichVersionPresent(quint32 nVersion) {
+bool XMSDOS::isRichVersionPresent(quint32 nVersion)
+{
     QList<MS_RICH_RECORD> listRichSignatureRecords = getRichSignatureRecords();
 
     return isRichVersionPresent(nVersion, &listRichSignatureRecords);
 }
 
-bool XMSDOS::isRichVersionPresent(quint32 nVersion, QList<XMSDOS::MS_RICH_RECORD> *pListRichSignatureRecords) {
+bool XMSDOS::isRichVersionPresent(quint32 nVersion, QList<XMSDOS::MS_RICH_RECORD> *pListRichSignatureRecords)
+{
     bool bResult = false;
 
     qint32 nNumberOfRichVersions = pListRichSignatureRecords->count();
@@ -586,7 +653,8 @@ bool XMSDOS::isRichVersionPresent(quint32 nVersion, QList<XMSDOS::MS_RICH_RECORD
     return bResult;
 }
 
-qint64 XMSDOS::getDosStubSize() {
+qint64 XMSDOS::getDosStubSize()
+{
     qint64 nSize = (qint64)get_lfanew() - sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);
 
     nSize = qMax(nSize, (qint64)0);
@@ -594,39 +662,48 @@ qint64 XMSDOS::getDosStubSize() {
     return nSize;
 }
 
-qint64 XMSDOS::getDosStubOffset() {
+qint64 XMSDOS::getDosStubOffset()
+{
     return sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);
 }
 
-QByteArray XMSDOS::getDosStub() {
+QByteArray XMSDOS::getDosStub()
+{
     return read_array(getDosStubOffset(), getDosStubSize());
 }
 
-bool XMSDOS::isDosStubPresent() {
+bool XMSDOS::isDosStubPresent()
+{
     return getDosStubSize() != 0;
 }
 
-XBinary::MODE XMSDOS::getMode() {
+XBinary::MODE XMSDOS::getMode()
+{
     return MODE_16;
 }
 
-QString XMSDOS::getArch() {
+QString XMSDOS::getArch()
+{
     return QString("8086");
 }
 
-bool XMSDOS::isBigEndian() {
+bool XMSDOS::isBigEndian()
+{
     return false;
 }
 
-XBinary::FT XMSDOS::getFileType() {
+XBinary::FT XMSDOS::getFileType()
+{
     return FT_MSDOS;
 }
 
-qint32 XMSDOS::getType() {
+qint32 XMSDOS::getType()
+{
     return TYPE_EXE;
 }
 
-XBinary::OSINFO XMSDOS::getOsInfo() {
+XBinary::OSINFO XMSDOS::getOsInfo()
+{
     OSINFO result = {};
 
     result.osName = OSNAME_MSDOS;
@@ -639,7 +716,8 @@ XBinary::OSINFO XMSDOS::getOsInfo() {
     return result;
 }
 
-QString XMSDOS::typeIdToString(qint32 nType) {
+QString XMSDOS::typeIdToString(qint32 nType)
+{
     QString sResult = tr("Unknown");
 
     switch (nType) {
