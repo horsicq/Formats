@@ -20,7 +20,8 @@
  */
 #include "xformats.h"
 
-XFormats::XFormats(QObject *pParent) : QObject(pParent)
+XFormats::XFormats(QObject *pParent)
+    : QObject(pParent)
 {
 }
 

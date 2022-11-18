@@ -20,7 +20,8 @@
  */
 #include "xjpeg.h"
 
-XJpeg::XJpeg(QIODevice *pDevice) : XBinary(pDevice)
+XJpeg::XJpeg(QIODevice *pDevice)
+    : XBinary(pDevice)
 {
 }
 

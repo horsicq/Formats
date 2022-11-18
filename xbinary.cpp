@@ -586,6 +586,12 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_GZIP:
             sResult = QString("GZIP");
             break;
+        case FT_ICO:
+            sResult = QString("ICO");
+            break;
+        case FT_CUR:
+            sResult = QString("CUR");
+            break;
     }
 
     return sResult;
@@ -3011,6 +3017,10 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
     // TODO optimize
     if (nBufferSize == 0) {
         return false;
+    }
+
+    if (nBufferSize >= 0x1000) {
+        nBufferSize = 0x1000;
     }
 
     if (nDestOffset == nSourceOffset) {

@@ -223,6 +223,8 @@ public:
         FT_UTF8,
         FT_ZIP,
         FT_GZIP,
+        FT_ICO,
+        FT_CUR
         // TODO more
     };
 

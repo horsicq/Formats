@@ -20,7 +20,8 @@
  */
 #include "xpe.h"
 
-XPE::XPE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevice, bIsImage, nModuleAddress)
+XPE::XPE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+    : XMSDOS(pDevice, bIsImage, nModuleAddress)
 {
 }
 

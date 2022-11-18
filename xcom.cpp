@@ -20,7 +20,8 @@
  */
 #include "xcom.h"
 
-XCOM::XCOM(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
+XCOM::XCOM(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+    : XBinary(pDevice, bIsImage, nModuleAddress)
 {
     XBinary::setBaseAddress(XCOM_DEF::ADDRESS_BEGIN);
 }

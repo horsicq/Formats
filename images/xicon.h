@@ -27,15 +27,36 @@ class XIcon : public XBinary {
     Q_OBJECT
 
 public:
+    struct ICONDIR {
+        quint16 reserved;
+        quint16 type;
+        quint16 count;
+    };
+
+    struct ICONDIRENTRY {
+        quint8 width;
+        quint8 height;
+        quint8 numcolors;
+        quint8 reserved;
+        quint16 cp;
+        quint16 bpp;
+        quint32 size;
+        quint32 offset;
+    };
+
     explicit XIcon(QIODevice *pDevice = nullptr);
     ~XIcon();
 
     virtual bool isValid();
     static bool isValid(QIODevice *pDevice);
-    //    virtual FT getFileType();
-    //    virtual QString getFileFormatString();
-    //    virtual QString getFileFormatExt();
-    //    virtual qint64 getFileFormatSize();
+    virtual FT getFileType();
+    virtual QString getFileFormatString();
+    virtual QString getFileFormatExt();
+    virtual qint64 getFileFormatSize();
+    virtual _MEMORY_MAP getMemoryMap();
+
+    ICONDIR readICONDIR();
+    ICONDIRENTRY readICONDIRENTRY(qint64 nOffset);
 };
 
 #endif  // XICON_H

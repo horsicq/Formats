@@ -20,7 +20,8 @@
  */
 #include "xle.h"
 
-XLE::XLE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevice, bIsImage, nModuleAddress)
+XLE::XLE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+    : XMSDOS(pDevice, bIsImage, nModuleAddress)
 {
 }
 
