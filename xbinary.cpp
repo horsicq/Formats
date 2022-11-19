@@ -6120,6 +6120,15 @@ bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE osRegion)
     return (bOffsetValid) && (bSizeValid);
 }
 
+bool XBinary::checkOffsetSize(qint64 nOffset, qint64 nSize)
+{
+    XBinary::OFFSETSIZE os = {};
+    os.nOffset = nOffset;
+    os.nSize = nSize;
+
+    return checkOffsetSize(os);
+}
+
 QString XBinary::get_uint32_full_version(quint32 nValue)
 {
     QString sResult = QString("%1.%2.%3").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue >> 8) & 0xFF), QString::number((nValue)&0xFF));
@@ -7248,6 +7257,8 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
     } else if ((fileTypeMain == FT_ELF) && ((fileTypeOptional == FT_ELF) || (fileTypeOptional == FT_ELF32) || (fileTypeOptional == FT_ELF64))) {
         bResult = true;
     } else if ((fileTypeMain == FT_MACHO) && ((fileTypeOptional == FT_MACHO) || (fileTypeOptional == FT_MACHO32) || (fileTypeOptional == FT_MACHO64))) {
+        bResult = true;
+    } else if ((fileTypeMain == FT_ICO) && ((fileTypeOptional == FT_ICO) || (fileTypeOptional == FT_CUR))) {
         bResult = true;
     } else if (fileTypeMain == fileTypeOptional) {
         bResult = true;

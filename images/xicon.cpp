@@ -31,13 +31,23 @@ XIcon::~XIcon()
 
 bool XIcon::isValid()
 {
-    bool bResult = true;
+    bool bResult = false;
     // TODO more checks !!!
-    if (getSize() > 4) {
-        quint32 nHeader = read_uint32(0);
+    if (getSize() > (sizeof(ICONDIR) + sizeof(ICONDIRENTRY))) {
+        ICONDIR iconDir = readICONDIR();
 
-        if ((nHeader == 0x00010000) || (nHeader == 0x00020000)) {
-            bResult = true;
+        if ((iconDir.idReserved == 0) && ((iconDir.idType == 1) || (iconDir.idType == 2)) && (iconDir.idCount > 0) && (iconDir.idCount<100)) {
+            ICONDIRENTRY iconDirectory = readICONDIRENTRY(sizeof(ICONDIR));
+
+            if ((iconDirectory.bReserved == 0) && (iconDirectory.dwBytesInRes > 0)) {
+                if (iconDir.idType == 1) {
+                    if ((iconDirectory.wPlanes == 0) || (iconDirectory.wPlanes == 1)) {
+                        bResult = true;
+                    }
+                } else if (iconDir.idType == 2) {
+                    bResult = true;
+                }
+            }
         }
     }
 
@@ -103,6 +113,55 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap()
 {
     _MEMORY_MAP result = {};
 
+    ICONDIR iconDir = readICONDIR();
+
+    qint64 nDataOffset = sizeof(ICONDIR) + (iconDir.idCount * sizeof(ICONDIRENTRY));
+
+    bool bError = false;
+
+    qint32 nNumberOfRecords = iconDir.idCount;
+
+    qint64 nOffset = sizeof(ICONDIR);
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        ICONDIRENTRY iconDirectory = readICONDIRENTRY(nOffset);
+
+        if((iconDirectory.dwBytesInRes == 0) || (iconDirectory.dwImageOffset < nDataOffset) || (iconDirectory.bReserved != 0)) {
+            bError = true;
+            break;
+        }
+
+        if(iconDir.idType == 1) {
+            if ((iconDirectory.wPlanes != 0) && (iconDirectory.wPlanes != 1)) {
+                bError = true;
+                break;
+            }
+        }
+
+        quint32 nHeader = read_uint32(iconDirectory.dwImageOffset);
+
+        if ((nHeader != 0x00000028) && nHeader != (0x474e5089)){ // PDF
+            bError = true;
+            break;
+        }
+
+        _MEMORY_RECORD record = {};
+
+        record.nIndex = i;
+        record.type = MMT_DATA;
+        record.nOffset = iconDirectory.dwImageOffset;
+        record.nSize = iconDirectory.dwBytesInRes;
+
+        result.listRecords.append(record);
+
+        nOffset += sizeof(ICONDIRENTRY);
+    }
+
+
+    if (bError) {
+        result.listRecords.clear();
+    }
+
     return result;
 }
 
@@ -110,9 +169,9 @@ XIcon::ICONDIR XIcon::readICONDIR()
 {
     ICONDIR result = {};
 
-    result.reserved = read_uint32(offsetof(ICONDIR, reserved));
-    result.type = read_uint32(offsetof(ICONDIR, type));
-    result.count = read_uint32(offsetof(ICONDIR, count));
+    result.idReserved = read_uint32(offsetof(ICONDIR, idReserved));
+    result.idType = read_uint32(offsetof(ICONDIR, idType));
+    result.idCount = read_uint32(offsetof(ICONDIR, idCount));
 
     return result;
 }
@@ -121,14 +180,39 @@ XIcon::ICONDIRENTRY XIcon::readICONDIRENTRY(qint64 nOffset)
 {
     ICONDIRENTRY result = {};
 
-    result.width = read_uint32(nOffset + offsetof(ICONDIRENTRY, width));
-    result.height = read_uint32(nOffset + offsetof(ICONDIRENTRY, height));
-    result.numcolors = read_uint32(nOffset + offsetof(ICONDIRENTRY, numcolors));
-    result.reserved = read_uint32(nOffset + offsetof(ICONDIRENTRY, reserved));
-    result.cp = read_uint32(nOffset + offsetof(ICONDIRENTRY, cp));
-    result.bpp = read_uint32(nOffset + offsetof(ICONDIRENTRY, bpp));
-    result.size = read_uint32(nOffset + offsetof(ICONDIRENTRY, size));
-    result.offset = read_uint32(nOffset + offsetof(ICONDIRENTRY, offset));
+    result.bWidth = read_uint32(nOffset + offsetof(ICONDIRENTRY, bWidth));
+    result.bHeight = read_uint32(nOffset + offsetof(ICONDIRENTRY, bHeight));
+    result.bColorCount = read_uint32(nOffset + offsetof(ICONDIRENTRY, bColorCount));
+    result.bReserved = read_uint32(nOffset + offsetof(ICONDIRENTRY, bReserved));
+    result.wPlanes = read_uint32(nOffset + offsetof(ICONDIRENTRY, wPlanes));
+    result.wBitCount = read_uint32(nOffset + offsetof(ICONDIRENTRY, wBitCount));
+    result.dwBytesInRes = read_uint32(nOffset + offsetof(ICONDIRENTRY, dwBytesInRes));
+    result.dwImageOffset = read_uint32(nOffset + offsetof(ICONDIRENTRY, dwImageOffset));
 
     return result;
+}
+
+QList<XIcon::ICONDIRENTRY> XIcon::getIconDirectories()
+{
+    QList<XIcon::ICONDIRENTRY> listResult;
+
+    ICONDIR iconDir = readICONDIR();
+
+    qint32 nNumberOfRecords = iconDir.idCount;
+
+    qint64 nOffset = sizeof(ICONDIR);
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        ICONDIRENTRY record = readICONDIRENTRY(nOffset);
+
+        if((record.dwBytesInRes ==0) || (record.dwImageOffset == 0)) {
+            break;
+        }
+
+        listResult.append(record);
+
+        nOffset += sizeof(ICONDIRENTRY);
+    }
+
+    return listResult;
 }

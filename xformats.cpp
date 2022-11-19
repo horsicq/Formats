@@ -583,6 +583,9 @@ bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, 
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
         bResult = png.isValid();
+    } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
+        XIcon xicon(pDevice);
+        bResult = xicon.isValid();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -643,6 +646,9 @@ qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, boo
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
         nResult = png.getFileFormatSize();
+    } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
+        XIcon xicon(pDevice);
+        nResult = xicon.getFileFormatSize();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -703,6 +709,9 @@ QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice, 
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
         sResult = png.getFileFormatString();
+    } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
+        XIcon xicon(pDevice);
+        sResult = xicon.getFileFormatString();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -763,6 +772,9 @@ QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice, boo
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
         sResult = png.getFileFormatExt();
+    } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
+        XIcon xicon(pDevice);
+        sResult = xicon.getFileFormatExt();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {

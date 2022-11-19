@@ -27,23 +27,36 @@ class XIcon : public XBinary {
     Q_OBJECT
 
 public:
+#pragma pack(push)
+#pragma pack(1)
     struct ICONDIR {
-        quint16 reserved;
-        quint16 type;
-        quint16 count;
+        quint16 idReserved;
+        quint16 idType;
+        quint16 idCount;
     };
 
     struct ICONDIRENTRY {
-        quint8 width;
-        quint8 height;
-        quint8 numcolors;
-        quint8 reserved;
-        quint16 cp;
-        quint16 bpp;
-        quint32 size;
-        quint32 offset;
+        quint8 bWidth;
+        quint8 bHeight;
+        quint8 bColorCount;
+        quint8 bReserved;
+        quint16 wPlanes;
+        quint16 wBitCount;
+        quint32 dwBytesInRes;
+        quint32 dwImageOffset;
     };
 
+    struct GRPICONDIRENTRY {
+        quint8 bWidth;
+        quint8 bHeight;
+        quint8 bColorCount;
+        quint8 bReserved;
+        quint16 wPlanes;
+        quint16 wBitCount;
+        quint32 dwBytesInRes;
+        quint16 nID;
+    };
+#pragma pack(pop)
     explicit XIcon(QIODevice *pDevice = nullptr);
     ~XIcon();
 
@@ -57,6 +70,8 @@ public:
 
     ICONDIR readICONDIR();
     ICONDIRENTRY readICONDIRENTRY(qint64 nOffset);
+
+    QList<ICONDIRENTRY> getIconDirectories();
 };
 
 #endif  // XICON_H

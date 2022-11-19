@@ -150,7 +150,8 @@ public:
         MMT_LOADSEGMENT,  // Section in PE; LoadProgram in ELF; Segments in MACH
         MMT_NOLOADABLE,   // For ELF
         MMT_FILESEGMENT,
-        MMT_OVERLAY
+        MMT_OVERLAY,
+        MMT_DATA
     };
 
     struct _MEMORY_RECORD {
@@ -1079,6 +1080,7 @@ public:
     static bool tryToOpen(QIODevice *pDevice);
 
     bool checkOffsetSize(OFFSETSIZE osRegion);
+    bool checkOffsetSize(qint64 nOffset, qint64 nSize);
 
     static QString get_uint32_full_version(quint32 nValue);
     static QString get_uint32_version(quint32 nValue);

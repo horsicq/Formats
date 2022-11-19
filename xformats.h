@@ -30,6 +30,7 @@
 #include "xne.h"
 #include "xpe.h"
 #include "xpng.h"
+#include "xicon.h"
 #ifdef USE_DEX
 #include "xandroidbinary.h"
 #include "xdex.h"
