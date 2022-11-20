@@ -3672,8 +3672,8 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 
     bool bImageAddressInit = false;
 
-    qint64 nMaxOffset = 0;
-    XADDR nMaxAddress = 0;
+    qint64 nMaxSegmentOffset = 0;
+    XADDR nMaxSegmentAddress = 0;
 
     for (qint32 i = 0; i < nNumberOfSegments; i++) {
         QString sName = QString("%1(%2)").arg(QString("PT_LOAD"), QString::number(i));
@@ -3778,13 +3778,13 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
             bImageAddressInit = true;
         }
 
-        nMaxOffset = qMax(nMaxOffset, nFileOffset + nFileSize);
+        nMaxSegmentOffset = qMax(nMaxSegmentOffset, nFileOffset + nFileSize);
 
         result.nModuleAddress = qMin(nVirtualAddress, result.nModuleAddress);
-        nMaxAddress = qMax(nVirtualAddress + nVirtualSize, nMaxAddress);
+        nMaxSegmentAddress = qMax(nVirtualAddress + nVirtualSize, nMaxSegmentAddress);
     }
 
-    result.nImageSize = nMaxAddress - result.nModuleAddress;
+    result.nImageSize = nMaxSegmentAddress - result.nModuleAddress;
 
     if (result.fileType == FT_ELF64) {
         result.nEntryPointAddress = getHdr64_entry() + _nModuleAddress;
@@ -3792,7 +3792,17 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
         result.nEntryPointAddress = getHdr32_entry() + _nModuleAddress;
     }
 
-    qint64 nNoLoadableSize = result.nRawSize - nMaxOffset;
+    qint64 nMaxSectionOffset = nMaxSegmentOffset;
+
+    QList<XELF_DEF::Elf_Shdr> listSectionHeaders = getElf_ShdrList();
+
+    qint32 nNumberOfSections = listSectionHeaders.count();
+
+    for (qint32 i = 0; i< nNumberOfSections; i++) {
+        nMaxSectionOffset = qMax(nMaxSectionOffset, (qint64)(listSectionHeaders.at(i).sh_offset + listSectionHeaders.at(i).sh_size));
+    }
+
+    qint64 nNoLoadableSize = result.nRawSize - nMaxSegmentOffset;
 
     if (nNoLoadableSize > 0) {
         XBinary::_MEMORY_RECORD record = {};
@@ -3802,7 +3812,23 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
         // TODO virtual sections!
         record.nAddress = -1;
         record.nSize = nNoLoadableSize;
-        record.nOffset = nMaxOffset;
+        record.nOffset = nMaxSegmentOffset;
+        record.nIndex = nIndex++;
+
+        result.listRecords.append(record);
+    }
+
+    qint64 nOverlaySize = result.nRawSize - nMaxSectionOffset;
+
+    if (nOverlaySize > 0) {
+        XBinary::_MEMORY_RECORD record = {};
+
+        record.type = MMT_OVERLAY;
+        // TODO Section number!
+        // TODO virtual sections!
+        record.nAddress = -1;
+        record.nSize = nOverlaySize;
+        record.nOffset = nMaxSectionOffset;
         record.nIndex = nIndex++;
 
         result.listRecords.append(record);

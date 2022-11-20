@@ -734,7 +734,7 @@ public:
     qint64 find_uint8(qint64 nOffset, qint64 nSize, quint8 nValue, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_int8(qint64 nOffset, qint64 nSize, qint8 nValue, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_uint16(qint64 nOffset, qint64 nSize, quint16 nValue, bool bIsBigEndian = false, PDSTRUCT *pPdStruct = nullptr);
-    qint64 find_int16(qint64 nOffset, qint64 nSize, qint16 nValue, bool bIsBigEndian = false, PDSTRUCT *pProcessData = nullptr);
+    qint64 find_int16(qint64 nOffset, qint64 nSize, qint16 nValue, bool bIsBigEndian = false, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_uint32(qint64 nOffset, qint64 nSize, quint32 nValue, bool bIsBigEndian = false, PDSTRUCT *pProcessData = nullptr);
     qint64 find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIsBigEndian = false, PDSTRUCT *pProcessData = nullptr);
     qint64 find_uint64(qint64 nOffset, qint64 nSize, quint64 nValue, bool bIsBigEndian = false, PDSTRUCT *pProcessData = nullptr);
