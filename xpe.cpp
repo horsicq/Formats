@@ -277,7 +277,7 @@ QString XPE::getFileFormatString()
 
 QString XPE::getFileFormatExt()
 {
-    QString sResult = "exe";
+    QString sResult;
 
     TYPE _type = (TYPE)getType();
 
@@ -285,6 +285,8 @@ QString XPE::getFileFormatExt()
         sResult = "dll";
     } else if ((_type == TYPE_DRIVER) || (_type == TYPE_BOOTSERVICEDRIVER) || (_type == TYPE_RUNTIMEDRIVER)) {
         sResult = "sys";
+    } else {
+        sResult = "exe";
     }
 
     return sResult;

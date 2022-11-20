@@ -476,6 +476,10 @@ public:
 
     bool isSectionsTablePresent();
     bool isProgramsTablePresent();
+
+    virtual QString getFileFormatString();
+    virtual QString getFileFormatExt();
+    virtual qint64 getFileFormatSize();
 };
 
 #endif  // XELF_H

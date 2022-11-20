@@ -5033,6 +5033,35 @@ bool XELF::isProgramsTablePresent()
     return (bool)getNumberOfPrograms();
 }
 
+QString XELF::getFileFormatString()
+{
+    QString sResult;
+
+    sResult = QString("ELF(%1)").arg(getArch());
+
+    return sResult;
+}
+
+QString XELF::getFileFormatExt()
+{
+    QString sResult;
+
+    TYPE _type = (TYPE)getType();
+
+    if (_type == TYPE_DYN) {
+        sResult = "so";
+    } else {
+        sResult = "elf";
+    }
+
+    return sResult;
+}
+
+qint64 XELF::getFileFormatSize()
+{
+    return _calculateRawSize();
+}
+
 QMap<quint64, QString> XELF::getRelTypes_x86()
 {
     QMap<quint64, QString> mapResult;
