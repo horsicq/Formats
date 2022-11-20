@@ -1777,7 +1777,7 @@ qint64 XBinary::find_int16(qint64 nOffset, qint64 nSize, qint16 nValue, bool bIs
     return find_array(nOffset, nSize, (char *)&_value, 2, pPdStruct);
 }
 
-qint64 XBinary::find_uint32(qint64 nOffset, qint64 nSize, quint32 nValue, bool bIsBigEndian, PDSTRUCT *pProcessData)
+qint64 XBinary::find_uint32(qint64 nOffset, qint64 nSize, quint32 nValue, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     if (bIsBigEndian) {
         nValue = qFromBigEndian(nValue);
@@ -1785,7 +1785,7 @@ qint64 XBinary::find_uint32(qint64 nOffset, qint64 nSize, quint32 nValue, bool b
         nValue = qFromLittleEndian(nValue);
     }
 
-    return find_array(nOffset, nSize, (char *)&nValue, 4, pProcessData);
+    return find_array(nOffset, nSize, (char *)&nValue, 4, pPdStruct);
 }
 
 qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIsBigEndian, PDSTRUCT *pProcessData)
