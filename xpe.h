@@ -21,8 +21,8 @@
 #ifndef XPE_H
 #define XPE_H
 
-#include "xmsdos.h"
 #include "xicon.h"
+#include "xmsdos.h"
 #include "xpe_def.h"
 
 #if defined(_MSC_VER)  // For WinTrust TODO Check minGW

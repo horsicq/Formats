@@ -24,13 +24,14 @@
 #include "xbinary.h"
 #include "xcom.h"
 #include "xelf.h"
+#include "xicon.h"
+#include "xjpeg.h"
 #include "xle.h"
 #include "xmach.h"
 #include "xmsdos.h"
 #include "xne.h"
 #include "xpe.h"
 #include "xpng.h"
-#include "xicon.h"
 #ifdef USE_DEX
 #include "xandroidbinary.h"
 #include "xdex.h"
@@ -73,7 +74,7 @@ public:
     static QString getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 #ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra = false);
-    static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, qint32 nLevel = 0);
+    static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords);
 #endif
 #ifdef QT_GUI_LIB
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox);
@@ -82,7 +83,7 @@ public:
 #endif
 
 private:
-    static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, bool bExtra = false, qint32 nLevel = 0);
+    static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, bool bExtra = false);
 };
 
 #endif  // XFORMATS_H

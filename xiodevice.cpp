@@ -20,8 +20,7 @@
  */
 #include "xiodevice.h"
 
-XIODevice::XIODevice(QObject *pParent)
-    : QIODevice(pParent)
+XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent)
 {
     g_nSize = 0;
     g_nInitOffset = 0;

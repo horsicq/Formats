@@ -20,8 +20,7 @@
  */
 #include "subdevice.h"
 
-SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize, QObject *pParent)
-    : XIODevice(pParent)
+SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize, QObject *pParent) : XIODevice(pParent)
 {
     if (nOffset > pDevice->size()) {
         nOffset = pDevice->size();

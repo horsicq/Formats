@@ -20,8 +20,7 @@
  */
 #include "xpng.h"
 
-XPNG::XPNG(QIODevice *pDevice)
-    : XBinary(pDevice)
+XPNG::XPNG(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
 

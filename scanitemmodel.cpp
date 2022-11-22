@@ -20,8 +20,7 @@
  */
 #include "scanitemmodel.h"
 
-ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns)
-    : QAbstractItemModel(0)
+ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns) : QAbstractItemModel(0)
 {
     g_pRootItem = new ScanItem(tr("Result"), nullptr, nNumberOfColumns, true);
     XBinary::SCANSTRUCT emptySS = {};

@@ -20,8 +20,7 @@
  */
 #include "xicon.h"
 
-XIcon::XIcon(QIODevice *pDevice)
-    : XBinary(pDevice)
+XIcon::XIcon(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
 
@@ -36,7 +35,7 @@ bool XIcon::isValid()
     if (getSize() > (sizeof(ICONDIR) + sizeof(ICONDIRENTRY))) {
         ICONDIR iconDir = readICONDIR();
 
-        if ((iconDir.idReserved == 0) && ((iconDir.idType == 1) || (iconDir.idType == 2)) && (iconDir.idCount > 0) && (iconDir.idCount<100)) {
+        if ((iconDir.idReserved == 0) && ((iconDir.idType == 1) || (iconDir.idType == 2)) && (iconDir.idCount > 0) && (iconDir.idCount < 100)) {
             ICONDIRENTRY iconDirectory = readICONDIRENTRY(sizeof(ICONDIR));
 
             if ((iconDirectory.bReserved == 0) && (iconDirectory.dwBytesInRes > 0)) {
@@ -126,12 +125,12 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap()
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         ICONDIRENTRY iconDirectory = readICONDIRENTRY(nOffset);
 
-        if((iconDirectory.dwBytesInRes == 0) || (iconDirectory.dwImageOffset < nDataOffset) || (iconDirectory.bReserved != 0)) {
+        if ((iconDirectory.dwBytesInRes == 0) || (iconDirectory.dwImageOffset < nDataOffset) || (iconDirectory.bReserved != 0)) {
             bError = true;
             break;
         }
 
-        if(iconDir.idType == 1) {
+        if (iconDir.idType == 1) {
             if ((iconDirectory.wPlanes != 0) && (iconDirectory.wPlanes != 1)) {
                 bError = true;
                 break;
@@ -140,7 +139,7 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap()
 
         quint32 nHeader = read_uint32(iconDirectory.dwImageOffset);
 
-        if ((nHeader != 0x00000028) && nHeader != (0x474e5089)){ // PDF
+        if ((nHeader != 0x00000028) && nHeader != (0x474e5089)) {  // PDF
             bError = true;
             break;
         }
@@ -156,7 +155,6 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap()
 
         nOffset += sizeof(ICONDIRENTRY);
     }
-
 
     if (bError) {
         result.listRecords.clear();
@@ -205,7 +203,7 @@ QList<XIcon::ICONDIRENTRY> XIcon::getIconDirectories()
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         ICONDIRENTRY record = readICONDIRENTRY(nOffset);
 
-        if((record.dwBytesInRes ==0) || (record.dwImageOffset == 0)) {
+        if ((record.dwBytesInRes == 0) || (record.dwImageOffset == 0)) {
             break;
         }
 

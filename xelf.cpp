@@ -20,8 +20,7 @@
  */
 #include "xelf.h"
 
-XELF::XELF(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
-    : XBinary(pDevice, bIsImage, nModuleAddress)
+XELF::XELF(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
 }
 
@@ -3798,7 +3797,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap()
 
     qint32 nNumberOfSections = listSectionHeaders.count();
 
-    for (qint32 i = 0; i< nNumberOfSections; i++) {
+    for (qint32 i = 0; i < nNumberOfSections; i++) {
         nMaxSectionOffset = qMax(nMaxSectionOffset, (qint64)(listSectionHeaders.at(i).sh_offset + listSectionHeaders.at(i).sh_size));
     }
 

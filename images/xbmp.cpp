@@ -20,8 +20,7 @@
  */
 #include "xbmp.h"
 
-XBMP::XBMP(QIODevice *pDevice)
-    : XBinary(pDevice)
+XBMP::XBMP(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
 

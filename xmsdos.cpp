@@ -20,8 +20,7 @@
  */
 #include "xmsdos.h"
 
-XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
-    : XBinary(pDevice, bIsImage, nModuleAddress)
+XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
 }
 

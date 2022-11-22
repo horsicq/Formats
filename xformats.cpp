@@ -20,8 +20,7 @@
  */
 #include "xformats.h"
 
-XFormats::XFormats(QObject *pParent)
-    : QObject(pParent)
+XFormats::XFormats(QObject *pParent) : QObject(pParent)
 {
 }
 
@@ -459,7 +458,7 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
 
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra)
 {
-    return _getFileTypes(pDevice, bExtra, 0);
+    return _getFileTypes(pDevice, bExtra);
 }
 
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
@@ -583,6 +582,9 @@ bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, 
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
         bResult = png.isValid();
+    } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
+        XJpeg jpeg(pDevice);
+        bResult = jpeg.isValid();
     } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
         XIcon xicon(pDevice);
         bResult = xicon.isValid();
@@ -646,6 +648,9 @@ qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, boo
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
         nResult = png.getFileFormatSize();
+    } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
+        XJpeg jpeg(pDevice);
+        nResult = jpeg.getFileFormatSize();
     } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
         XIcon xicon(pDevice);
         nResult = xicon.getFileFormatSize();
@@ -709,6 +714,9 @@ QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice, 
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
         sResult = png.getFileFormatString();
+    } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
+        XJpeg jpeg(pDevice);
+        sResult = jpeg.getFileFormatString();
     } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
         XIcon xicon(pDevice);
         sResult = xicon.getFileFormatString();
@@ -772,6 +780,9 @@ QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice, boo
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
         sResult = png.getFileFormatExt();
+    } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
+        XJpeg jpeg(pDevice);
+        sResult = jpeg.getFileFormatExt();
     } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
         XIcon xicon(pDevice);
         sResult = xicon.getFileFormatExt();
@@ -816,66 +827,25 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *p
 }
 #endif
 #ifdef USE_ARCHIVE
-QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, qint32 nLevel)
+QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords)
 {
     QSet<XBinary::FT> stResult;
 
-    if (XArchive::isArchiveRecordPresent("META-INF/MANIFEST.MF", pListRecords)) {
+    XBinary::FT fileType = XZip::getFileType(pDevice, pListRecords, true);
+
+    if (fileType == XBinary::FT_APK) {
         stResult.insert(XBinary::FT_JAR);
-    }
-
-    if (XArchive::isArchiveRecordPresent("classes.dex", pListRecords) || XArchive::isArchiveRecordPresent("AndroidManifest.xml", pListRecords)) {
         stResult.insert(XBinary::FT_APK);
-    }
-
-    if (XArchive::isArchiveRecordPresent("Payload/", pListRecords)) {
-        stResult.insert(XBinary::FT_IPA);
-    }
-
-    if (nLevel == 0) {
-        if ((!stResult.contains(XBinary::FT_JAR)) && (!stResult.contains(XBinary::FT_APK)) && (!stResult.contains(XBinary::FT_IPA))) {
-            qint32 nNumberOfRecords = pListRecords->count();
-
-            bool bAPKS = false;
-
-            if (nNumberOfRecords) {
-                bAPKS = true;
-            }
-
-            for (qint32 i = 0; i < nNumberOfRecords; i++) {
-                if (pListRecords->at(i).compressMethod == XArchive::COMPRESS_METHOD_STORE) {
-                    XArchive::RECORD record = pListRecords->at(i);
-
-                    SubDevice subDevice(pDevice, record.nDataOffset, record.nUncompressedSize);
-
-                    if (subDevice.open(QIODevice::ReadOnly)) {
-                        QSet<XBinary::FT> _stResult = _getFileTypes(&subDevice, true, nLevel + 1);
-
-                        if (!(_stResult.contains(XBinary::FT_APK))) {
-                            bAPKS = false;
-                        }
-
-                        subDevice.close();
-                    }
-                } else {
-                    bAPKS = false;
-                }
-
-                if (!bAPKS) {
-                    break;
-                }
-            }
-
-            if (bAPKS) {
-                stResult.insert(XBinary::FT_APKS);
-            }
-        }
+    } else if (fileType == XBinary::FT_JAR) {
+        stResult.insert(XBinary::FT_JAR);
+    } else if (fileType == XBinary::FT_APKS) {
+        stResult.insert(XBinary::FT_APKS);
     }
 
     return stResult;
 }
 #endif
-QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, qint32 nLevel)
+QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra)
 {
 #ifndef USE_ARCHIVE
     Q_UNUSED(nLevel);
@@ -891,7 +861,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, qint3
 
             QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(-1, &pdStruct);
 
-            stResult += getFileTypesZIP(pDevice, &listArchiveRecords, nLevel);
+            stResult += getFileTypesZIP(pDevice, &listArchiveRecords);
         }
     }
 #endif

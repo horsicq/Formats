@@ -20,8 +20,7 @@
  */
 #include "xgif.h"
 
-XGif::XGif(QIODevice *pDevice)
-    : XBinary(pDevice)
+XGif::XGif(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
 
