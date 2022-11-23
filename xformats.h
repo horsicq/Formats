@@ -51,6 +51,7 @@ class XFormats : public QObject {
 
 public:
     explicit XFormats(QObject *pParent = nullptr);
+
     static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static XBinary::_MEMORY_MAP getMemoryMap(QString sFileName, bool bIsImage = false, XADDR nModuleAddress = -1);
     static qint64 getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);

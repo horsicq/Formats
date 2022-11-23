@@ -147,6 +147,7 @@ public:
     enum MMT {
         MMT_UNKNOWN = 0,
         MMT_HEADER,
+        MMT_FOOTER,
         MMT_LOADSEGMENT,  // Section in PE; LoadProgram in ELF; Segments in MACH
         MMT_NOLOADABLE,   // For ELF
         MMT_FILESEGMENT,
@@ -613,6 +614,7 @@ public:
     static quint64 random(quint64 nLimit);
 
     static QString fileTypeIdToString(FT fileType);
+    static QString fileTypeIdToExts(FT fileType);
 
     static QString convertFileName(QString sFileName);
     static QString convertPathName(QString sPathName);

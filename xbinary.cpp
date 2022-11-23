@@ -597,6 +597,52 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
     return sResult;
 }
 
+QString XBinary::fileTypeIdToExts(FT fileType)
+{
+    QString sResult = tr("Unknown");
+
+    switch (fileType) {
+        case FT_PE:
+            sResult = QString("PE(exe,dll,sys)");
+            break;
+        case FT_ELF:
+            sResult = QString("ELF(elf,so)");
+            break;
+        case FT_ZIP:
+            sResult = QString("ZIP(zip,jar,apk,ipa,docx)");
+            break;
+        case FT_RAR:
+            sResult = QString("RAR");
+            break;
+        case FT_PDF:
+            sResult = QString("PDF");
+            break;
+        case FT_7Z:
+            sResult = QString("7-Zip");
+            break;
+        case FT_PNG:
+            sResult = QString("PNG");
+            break;
+        case FT_JPEG:
+            sResult = QString("JPEG");
+            break;
+        case FT_CAB:
+            sResult = QString("CAB");
+            break;
+        case FT_ICO:
+            sResult = QString("ICO(iso,cur)");
+            break;
+        case FT_DEX:
+            sResult = QString("DEX");
+            break;
+
+        default:
+            sResult = tr("Unknown");
+    }
+
+    return sResult;
+}
+
 QString XBinary::convertFileName(QString sFileName)  // TODO Check
 {
 #ifdef Q_OS_MAC  // Old Qt(4.X)
@@ -4039,6 +4085,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'MM'002A", 0) || compareSignature(&memoryMap, "'II'2A00", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_TIFF);
+        } else if (compareSignature(&memoryMap, "00000100", 0) || compareSignature(&memoryMap, "00000200", 0)) {
+            stResult.insert(FT_IMAGE);
+            stResult.insert(FT_ICO);
         } else if (compareSignature(&memoryMap, "'dex\n'......00")) {
             stResult.insert(FT_DEX);
         } else if (compareSignature(&memoryMap, "02000C00")) {
@@ -4174,6 +4223,14 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_ANDROIDXML;
     } else if (pStFileTypes->contains(FT_DEX)) {
         result = FT_DEX;
+    } else if (pStFileTypes->contains(FT_PNG)) {
+        result = FT_PNG;
+    } else if (pStFileTypes->contains(FT_ICO)) {
+        result = FT_ICO;
+    } else if (pStFileTypes->contains(FT_JPEG)) {
+        result = FT_JPEG;
+    } else if (pStFileTypes->contains(FT_PDF)) {
+        result = FT_PDF;
     } else if (pStFileTypes->contains(FT_BINARY)) {
         result = FT_BINARY;
     }
@@ -4238,6 +4295,9 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_IPA)) listResult.append(FT_IPA);
     if (stFileTypes.contains(FT_DEX)) listResult.append(FT_DEX);
     if (stFileTypes.contains(FT_PDF)) listResult.append(FT_PDF);
+    if (stFileTypes.contains(FT_PNG)) listResult.append(FT_PNG);
+    if (stFileTypes.contains(FT_ICO)) listResult.append(FT_ICO);
+    if (stFileTypes.contains(FT_JPEG)) listResult.append(FT_JPEG);
     if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
     if (stFileTypes.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
     if (stFileTypes.contains(FT_NE)) listResult.append(FT_NE);

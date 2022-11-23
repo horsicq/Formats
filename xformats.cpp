@@ -55,6 +55,15 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDe
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         result = mach.getMemoryMap();
+    } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
+        XPNG png(pDevice);
+        result = png.getMemoryMap();
+    } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
+        XJpeg jpeg(pDevice);
+        result = jpeg.getMemoryMap();
+    } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
+        XIcon xicon(pDevice);
+        result = xicon.getMemoryMap();
     }
 #ifdef USE_DEX  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -611,6 +620,9 @@ bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, 
     } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
         XCab xcab(pDevice);
         bResult = xcab.isValid();
+    } else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) {
+        XRar xrar(pDevice);
+        bResult = xrar.isValid();
     }
 #endif
 
@@ -677,6 +689,9 @@ qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, boo
     } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
         XCab xcab(pDevice);
         nResult = xcab.getFileFormatSize();
+    } else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) {
+        XRar xrar(pDevice);
+        nResult = xrar.getFileFormatSize();
     }
 #endif
 
@@ -743,6 +758,9 @@ QString XFormats::getFileFormatString(XBinary::FT fileType, QIODevice *pDevice, 
     } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
         XCab xcab(pDevice);
         sResult = xcab.getFileFormatString();
+    } else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) {
+        XRar xrar(pDevice);
+        sResult = xrar.getFileFormatString();
     }
 #endif
 
@@ -809,6 +827,9 @@ QString XFormats::getFileFormatExt(XBinary::FT fileType, QIODevice *pDevice, boo
     } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
         XCab xcab(pDevice);
         sResult = xcab.getFileFormatExt();
+    } else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) {
+        XRar xrar(pDevice);
+        sResult = xrar.getFileFormatExt();
     }
 #endif
 

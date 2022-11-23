@@ -29,6 +29,7 @@ class XJpeg : public XBinary {
 public:
     struct CHUNK {
         bool bValid;
+        bool bEntropyCodedData;
         quint8 nId;
         qint64 nDataOffset;
         qint64 nDataSize;

@@ -32,7 +32,7 @@ bool XIcon::isValid()
 {
     bool bResult = false;
     // TODO more checks !!!
-    if (getSize() > (sizeof(ICONDIR) + sizeof(ICONDIRENTRY))) {
+    if (getSize() > (qint64)(sizeof(ICONDIR) + sizeof(ICONDIRENTRY))) {
         ICONDIR iconDir = readICONDIR();
 
         if ((iconDir.idReserved == 0) && ((iconDir.idType == 1) || (iconDir.idType == 2)) && (iconDir.idCount > 0) && (iconDir.idCount < 100)) {
@@ -110,7 +110,22 @@ qint64 XIcon::getFileFormatSize()
 
 XBinary::_MEMORY_MAP XIcon::getMemoryMap()
 {
+    qint32 nIndex = 0;
+
     _MEMORY_MAP result = {};
+
+    {
+        _MEMORY_RECORD record = {};
+
+        record.nIndex = nIndex++;
+        record.type = MMT_HEADER;
+        record.nOffset = 0;
+        record.nSize = sizeof(ICONDIR);
+        record.nAddress = -1;
+        record.sName = tr("Header");
+
+        result.listRecords.append(record);
+    }
 
     ICONDIR iconDir = readICONDIR();
 
@@ -146,10 +161,11 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap()
 
         _MEMORY_RECORD record = {};
 
-        record.nIndex = i;
+        record.nIndex = nIndex++;
         record.type = MMT_DATA;
         record.nOffset = iconDirectory.dwImageOffset;
         record.nSize = iconDirectory.dwBytesInRes;
+        record.nAddress = -1;
 
         result.listRecords.append(record);
 

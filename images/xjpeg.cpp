@@ -110,6 +110,11 @@ QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
         nOffset = chunk.nDataOffset + chunk.nDataSize;
 
         if (chunk.nId == 0xDA) {
+            CHUNK chunkData = {};
+            chunkData.bValid = true;
+            chunkData.bEntropyCodedData = true;
+            chunkData.nDataOffset = nOffset;
+
             while (true) {
                 nOffset = find_uint8(nOffset, -1, 0xFF, pPdStruct);  // TODO PDStruct;
 
@@ -123,6 +128,10 @@ QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
                     nOffset++;
                 }
             }
+
+            chunkData.nDataSize = nOffset - chunkData.nDataOffset;
+
+            listResult.append(chunkData);
         }
 
         if (chunk.nId == 0xD9) {  // END of image
