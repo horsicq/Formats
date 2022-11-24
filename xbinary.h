@@ -783,7 +783,8 @@ public:
 
     QList<MS_RECORD> multiSearch_allStrings(qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pProcessData = nullptr);
     QList<MS_RECORD> multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo = "", PDSTRUCT *pProcessData = nullptr);
-    QList<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo = "", PDSTRUCT *pProcessData = nullptr);
+    QList<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo = "",
+                                           PDSTRUCT *pProcessData = nullptr);
 
     static QString msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId);
 
@@ -1119,6 +1120,7 @@ public:
     bool compareOverlay(_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset);
 
     bool addOverlay(char *pData, qint64 nDataSize);
+    bool addOverlay(QString sFileName);
     bool removeOverlay();
 
     bool isSignatureInLoadSegmentPresent(qint32 nLoadSegment, QString sSignature);

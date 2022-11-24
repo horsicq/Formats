@@ -101,8 +101,8 @@ XBinary::OSINFO XPE::getOsInfo()
 
     quint16 nSubsystem = getOptionalHeader_Subsystem();
 
-    if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_GUI) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS) ||
-        (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION)) {
+    if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_GUI) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI) ||
+        (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION)) {
         result.osName = OSNAME_WINDOWS;
     } else if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER) ||
                (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_ROM)) {
@@ -174,7 +174,8 @@ qint32 XPE::getType()
 
     if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS)) {
         result = TYPE_DRIVER;
-    } else if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI)) {
+    } else if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI) ||
+               (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI)) {
         result = TYPE_CONSOLE;
     } else if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_GUI) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)) {
         result = TYPE_GUI;
@@ -956,9 +957,11 @@ XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getOptionalHeader_DataDirectory(quint32 nNumb
     //    protectors with false NumberOfRvaAndSizes
     if (nNumber < 16) {
         if (is64()) {
-            result = read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+            result =
+                read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
         } else {
-            result = read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+            result =
+                read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
         }
     }
 
@@ -971,9 +974,11 @@ void XPE::setOptionalHeader_DataDirectory(quint32 nNumber, XPE_DEF::IMAGE_DATA_D
     if (nNumber < getOptionalHeader_NumberOfRvaAndSizes())  // TODO Check!!!
     {
         if (is64()) {
-            write_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY), pDataDirectory);
+            write_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),
+                                       pDataDirectory);
         } else {
-            write_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY), pDataDirectory);
+            write_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),
+                                       pDataDirectory);
         }
     }
 }
@@ -997,13 +1002,13 @@ void XPE::setOptionalHeader_DataDirectory_Size(quint32 nNumber, quint32 nValue)
 {
     if (nNumber < getOptionalHeader_NumberOfRvaAndSizes()) {
         if (is64()) {
-            write_uint32(
-                getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size),
-                nValue);
+            write_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) +
+                             offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size),
+                         nValue);
         } else {
-            write_uint32(
-                getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size),
-                nValue);
+            write_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) +
+                             offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size),
+                         nValue);
         }
     }
 }
@@ -2315,7 +2320,8 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap, PDST
 
     if (dataResources.VirtualAddress) {
         nImportOffset = addressToOffset(pMemoryMap, dataResources.VirtualAddress + nModuleAddress);
-        nImportOffsetTest = addressToOffset(pMemoryMap, dataResources.VirtualAddress + nModuleAddress + sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR) - 2);  // Test for some (Win)Upack stubs
+        nImportOffsetTest =
+            addressToOffset(pMemoryMap, dataResources.VirtualAddress + nModuleAddress + sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR) - 2);  // Test for some (Win)Upack stubs
     }
 
     if (nImportOffset != -1) {
@@ -4683,7 +4689,8 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32()
         result.DynamicValueRelocTableOffset = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DynamicValueRelocTableOffset));
         result.DynamicValueRelocTableSection = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DynamicValueRelocTableSection));
         result.Reserved2 = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, Reserved2));
-        result.GuardRFVerifyStackPointerFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardRFVerifyStackPointerFunctionPointer));
+        result.GuardRFVerifyStackPointerFunctionPointer =
+            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardRFVerifyStackPointerFunctionPointer));
         result.HotPatchTableOffset = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, HotPatchTableOffset));
         result.Reserved3 = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, Reserved3));
         result.EnclaveConfigurationPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, EnclaveConfigurationPointer));
@@ -4747,7 +4754,8 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64()
         result.DynamicValueRelocTableOffset = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DynamicValueRelocTableOffset));
         result.DynamicValueRelocTableSection = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DynamicValueRelocTableSection));
         result.Reserved2 = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, Reserved2));
-        result.GuardRFVerifyStackPointerFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardRFVerifyStackPointerFunctionPointer));
+        result.GuardRFVerifyStackPointerFunctionPointer =
+            read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardRFVerifyStackPointerFunctionPointer));
         result.HotPatchTableOffset = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, HotPatchTableOffset));
         result.Reserved3 = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, Reserved3));
         result.EnclaveConfigurationPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, EnclaveConfigurationPointer));
@@ -8154,8 +8162,8 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
         DWORD dwFormatType = 0;
         DWORD dwSignerInfo = 0;
 
-        if (CryptQueryObject(CERT_QUERY_OBJECT_FILE, wszFilePath, CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY, 0, &dwEncoding, &dwContentType, &dwFormatType, &hStore,
-                             &hMsg, NULL)) {
+        if (CryptQueryObject(CERT_QUERY_OBJECT_FILE, wszFilePath, CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY, 0, &dwEncoding, &dwContentType,
+                             &dwFormatType, &hStore, &hMsg, NULL)) {
             if (CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfo)) {
                 char *_pSignerInfo = new char[dwSignerInfo];
 
@@ -8201,7 +8209,8 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
                                     CertInfo.Issuer = pSignerInfo->Issuer;
                                     CertInfo.SerialNumber = pSignerInfo->SerialNumber;
 
-                                    PCCERT_CONTEXT pCertContext = CertFindCertificateInStore(hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
+                                    PCCERT_CONTEXT pCertContext =
+                                        CertFindCertificateInStore(hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
 
                                     if (pCertContext) {
                                         DWORD dwData = pCertContext->pCertInfo->SerialNumber.cbData;
@@ -8239,12 +8248,14 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
                                         CertInfo.Issuer = pCounterSignerInfo->Issuer;
                                         CertInfo.SerialNumber = pCounterSignerInfo->SerialNumber;
 
-                                        PCCERT_CONTEXT pCertContext = CertFindCertificateInStore(hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
+                                        PCCERT_CONTEXT pCertContext =
+                                            CertFindCertificateInStore(hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
 
                                         if (pCertContext) {
                                             DWORD dwData = pCertContext->pCertInfo->SerialNumber.cbData;
                                             for (DWORD n = 0; n < dwData; n++) {
-                                                result.sTSSerialNumber.append(QString("%1 ").arg(XBinary::valueToHex(pCertContext->pCertInfo->SerialNumber.pbData[dwData - (n + 1)])));
+                                                result.sTSSerialNumber.append(
+                                                    QString("%1 ").arg(XBinary::valueToHex(pCertContext->pCertInfo->SerialNumber.pbData[dwData - (n + 1)])));
                                             }
 
                                             result.sTSIssuer = getCertNameString(pCertContext, CERTNAMESTRING_ISSUER);
@@ -9034,7 +9045,8 @@ int XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
 
     if (nResult == -1) {
         for (qint32 i = 1; i < nNumberOfSections; i++) {
-            if (listSections.at(i).SizeOfRawData && (nImportSection != i) && (listSections.at(i).Characteristics != 0x60000020) && (listSections.at(i).Characteristics != 0x40000040)) {
+            if (listSections.at(i).SizeOfRawData && (nImportSection != i) && (listSections.at(i).Characteristics != 0x60000020) &&
+                (listSections.at(i).Characteristics != 0x40000040)) {
                 nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
                 break;
             }

@@ -125,6 +125,8 @@ public:
     qint64 getDosStubOffset();
     QByteArray getDosStub();
     bool isDosStubPresent();
+    bool removeDosStub();
+    bool addDosStub(QString sFileName);
 
     virtual MODE getMode();
     virtual QString getArch();

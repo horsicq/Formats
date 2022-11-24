@@ -1459,10 +1459,10 @@ void XBinary::write_UUID_bytes(qint64 nOffset, QString sValue)
 
 QString XBinary::read_UUID(qint64 nOffset, bool bIsBigEndian)
 {
-    QString sResult =
-        QString("%1-%2-%3-%4-%5")
-            .arg(valueToHex(read_uint32(nOffset + 0, bIsBigEndian), bIsBigEndian), valueToHex(read_uint16(nOffset + 4, bIsBigEndian), bIsBigEndian),
-                 valueToHex(read_uint16(nOffset + 6, bIsBigEndian), bIsBigEndian), valueToHex(read_uint16(nOffset + 8, bIsBigEndian), bIsBigEndian), read_array(nOffset + 10, 6).toHex().data());
+    QString sResult = QString("%1-%2-%3-%4-%5")
+                          .arg(valueToHex(read_uint32(nOffset + 0, bIsBigEndian), bIsBigEndian), valueToHex(read_uint16(nOffset + 4, bIsBigEndian), bIsBigEndian),
+                               valueToHex(read_uint16(nOffset + 6, bIsBigEndian), bIsBigEndian), valueToHex(read_uint16(nOffset + 8, bIsBigEndian), bIsBigEndian),
+                               read_array(nOffset + 10, 6).toHex().data());
 
     return sResult;
 }
@@ -2726,7 +2726,8 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 
     return multiSearch_signature(&memoryMap, nOffset, nSize, nLimit, sSignature, sInfo, pProcessData);
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo, PDSTRUCT *pProcessData)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo,
+                                                         PDSTRUCT *pProcessData)
 {
     PDSTRUCT processDataEmpty = {};
 
@@ -4006,7 +4007,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                     quint16 nMachine = ((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine;
 
                     // TODO more
-                    if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_IA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64)) {
+                    if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_IA64) ||
+                        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64)) {
                         stResult.insert(FT_PE64);
                     } else {
                         stResult.insert(FT_PE32);
@@ -4023,8 +4025,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     }
 
     if (nSize >= (int)sizeof(XELF_DEF::Elf32_Ehdr)) {
-        if ((((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[0] == 0x7f) && (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[1] == 'E') && (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[2] == 'L') &&
-            (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[3] == 'F')) {
+        if ((((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[0] == 0x7f) && (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[1] == 'E') &&
+            (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[2] == 'L') && (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[3] == 'F')) {
             stResult.insert(FT_ELF);
 
             if (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[4] == 1) {
@@ -6462,6 +6464,29 @@ bool XBinary::addOverlay(char *pData, qint64 nDataSize)
     return bResult;
 }
 
+bool XBinary::addOverlay(QString sFileName)
+{
+    bool bResult = false;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if (file.open(QIODevice::ReadOnly)) {
+        qint64 nRawSize = getOverlayOffset();
+        qint64 nDataSize = file.size();
+
+        if (resize(getDevice(), nRawSize + nDataSize)) {
+            if (nDataSize) {
+                bResult = copyDeviceMemory(&file, 0, getDevice(), nRawSize, nDataSize);
+            }
+        }
+
+        file.close();
+    }
+
+    return bResult;
+}
+
 bool XBinary::removeOverlay()
 {
     return addOverlay(0, 0);
@@ -7266,8 +7291,8 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
         result = DMFAMILY_XCORE;
     } else if ((disasmMode == DM_M68K) || (disasmMode == DM_M68K40)) {
         result = DMFAMILY_M68K;
-    } else if ((disasmMode == DM_M6800) || (disasmMode == DM_M6801) || (disasmMode == DM_M6805) || (disasmMode == DM_M6808) || (disasmMode == DM_M6809) || (disasmMode == DM_M6811) ||
-               (disasmMode == DM_CPU12) || (disasmMode == DM_HD6301) || (disasmMode == DM_HD6309) || (disasmMode == DM_HCS08)) {
+    } else if ((disasmMode == DM_M6800) || (disasmMode == DM_M6801) || (disasmMode == DM_M6805) || (disasmMode == DM_M6808) || (disasmMode == DM_M6809) ||
+               (disasmMode == DM_M6811) || (disasmMode == DM_CPU12) || (disasmMode == DM_HD6301) || (disasmMode == DM_HD6309) || (disasmMode == DM_HCS08)) {
         result = DMFAMILY_M68OK;
     } else if ((disasmMode == DM_RISKV32) || (disasmMode == DM_RISKV64) || (disasmMode == DM_RISKVC)) {
         result = DMFAMILY_RISCV;
@@ -7331,8 +7356,9 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
     // TODO optimize! new Types create remove function
     if (pStFileTypes->contains(XBinary::FT_MSDOS) || pStFileTypes->contains(XBinary::FT_NE) || pStFileTypes->contains(XBinary::FT_LE) || pStFileTypes->contains(XBinary::FT_LX) ||
         pStFileTypes->contains(XBinary::FT_PE) || pStFileTypes->contains(XBinary::FT_PE32) || pStFileTypes->contains(XBinary::FT_PE64) || pStFileTypes->contains(XBinary::FT_ELF) ||
-        pStFileTypes->contains(XBinary::FT_ELF32) || pStFileTypes->contains(XBinary::FT_ELF64) || pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) ||
-        pStFileTypes->contains(XBinary::FT_MACHO64) || pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP)) {
+        pStFileTypes->contains(XBinary::FT_ELF32) || pStFileTypes->contains(XBinary::FT_ELF64) || pStFileTypes->contains(XBinary::FT_MACHO) ||
+        pStFileTypes->contains(XBinary::FT_MACHO32) || pStFileTypes->contains(XBinary::FT_MACHO64) || pStFileTypes->contains(XBinary::FT_DEX) ||
+        pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP)) {
         pStFileTypes->remove(XBinary::FT_BINARY);
     } else {
         pStFileTypes->insert(XBinary::FT_COM);
