@@ -691,8 +691,12 @@ bool XMSDOS::removeDosStub()
     qint64 nSize = getDosStubSize();
 
     if (nSize) {
-        if (moveMemory(nOffset + nSize, nOffset, getSize() - nOffset)) {
+        if (moveMemory(nOffset + nSize, nOffset, getSize() - nOffset - nSize)) {
             bResult = resize(getDevice(), getSize() - nSize);
+
+            if (bResult) {
+                set_e_lfanew((quint32)nOffset);
+            }
         }
     }
 
@@ -718,6 +722,10 @@ bool XMSDOS::addDosStub(QString sFileName)
         if (nDelta) {
             if (resize(getDevice(), getSize() + nDelta)) {
                 bResult = moveMemory(nOffset + nOldSize, nOffset + nNewSize, getSize() - nOffset - nDelta);
+
+                if (bResult) {
+                    set_e_lfanew((quint32)nOffset);
+                }
             } else {
                 bResult = false;
             }
