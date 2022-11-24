@@ -39,3 +39,8 @@ bool XBMP::isValid(QIODevice *pDevice)
 
     return xbmp.isValid();
 }
+
+QString XBMP::getFileFormatExt()
+{
+    return "bmp";
+}

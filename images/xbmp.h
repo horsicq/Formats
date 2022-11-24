@@ -32,6 +32,8 @@ public:
 
     virtual bool isValid();
     static bool isValid(QIODevice *pDevice);
+
+    virtual QString getFileFormatExt();
 };
 
 #endif  // XBMP_H
