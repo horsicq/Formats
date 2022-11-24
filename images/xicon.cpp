@@ -110,9 +110,9 @@ qint64 XIcon::getFileFormatSize()
 
 XBinary::_MEMORY_MAP XIcon::getMemoryMap()
 {
-    qint32 nIndex = 0;
-
     _MEMORY_MAP result = {};
+
+    qint32 nIndex = 0;
 
     {
         _MEMORY_RECORD record = {};

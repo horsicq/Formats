@@ -1988,6 +1988,27 @@ quint32 XMACH::getSectionFileSize(quint32 nIndex, QList<SECTION_RECORD> *pListSe
     return nResult;
 }
 
+QList<QString> XMACH::getSectionNames(QList<SECTION_RECORD> *pListSectionRecords)
+{
+    QList<QString> listResult;
+
+    qint32 nNumberOfSections = pListSectionRecords->count();
+
+    for (qint32 i = 0; i < nNumberOfSections; i++) {
+        QString sString;
+
+        if (pListSectionRecords->at(i).bIs64) {
+            sString = pListSectionRecords->at(i).s.section64.sectname;
+        } else {
+            sString = pListSectionRecords->at(i).s.section32.sectname;
+        }
+
+        listResult.append(sString);
+    }
+
+    return listResult;
+}
+
 bool XMACH::isSegmentNamePresent(QString sName)
 {
     QList<SEGMENT_RECORD> listSegmentRecords = getSegmentRecords();

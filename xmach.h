@@ -320,6 +320,8 @@ public:
     static quint32 getSectionFileOffset(quint32 nIndex, QList<SECTION_RECORD> *pListSectionRecords);
     static quint32 getSectionFileSize(quint32 nIndex, QList<SECTION_RECORD> *pListSectionRecords);
 
+    static QList<QString> getSectionNames(QList<SECTION_RECORD> *pListSectionRecords);
+
     bool isSegmentNamePresent(QString sName);
     static bool isSegmentNamePresent(QString sName, QList<SEGMENT_RECORD> *pListSegmentRecords);
 

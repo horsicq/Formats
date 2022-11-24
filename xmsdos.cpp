@@ -575,18 +575,24 @@ bool XMSDOS::isRichSignaturePresent()
     return bResult;
 }
 
-QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords()
+QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = {};
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     QList<MS_RICH_RECORD> listResult;
 
-    qint64 nOffset = find_ansiString(getDosStubOffset(), getDosStubSize(), "Rich");
+    qint64 nOffset = find_ansiString(getDosStubOffset(), getDosStubSize(), "Rich", pPdStruct);
 
     if (nOffset != -1) {
         quint32 nXORkey = read_uint32(nOffset + 4);
 
         qint64 nCurrentOffset = nOffset - 4;
 
-        while (nCurrentOffset > getDosStubOffset())  // TODO optimize
+        while ((nCurrentOffset > getDosStubOffset())&&(!(pPdStruct->bIsStop)))  // TODO optimize
         {
             quint32 nTemp = read_uint32(nCurrentOffset) ^ nXORkey;
 
@@ -617,9 +623,9 @@ QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords()
     return listResult;
 }
 
-qint32 XMSDOS::getNumberOfRichIDs()
+qint32 XMSDOS::getNumberOfRichIDs(PDSTRUCT *pPdStruct)
 {
-    QList<MS_RICH_RECORD> listRichSignatureRecords = getRichSignatureRecords();
+    QList<MS_RICH_RECORD> listRichSignatureRecords = getRichSignatureRecords(pPdStruct);
 
     return getNumberOfRichIDs(&listRichSignatureRecords);
 }
@@ -629,9 +635,9 @@ qint32 XMSDOS::getNumberOfRichIDs(QList<XMSDOS::MS_RICH_RECORD> *pListRichSignat
     return pListRichSignatureRecords->count();
 }
 
-bool XMSDOS::isRichVersionPresent(quint32 nVersion)
+bool XMSDOS::isRichVersionPresent(quint32 nVersion, PDSTRUCT *pPdStruct)
 {
-    QList<MS_RICH_RECORD> listRichSignatureRecords = getRichSignatureRecords();
+    QList<MS_RICH_RECORD> listRichSignatureRecords = getRichSignatureRecords(pPdStruct);
 
     return isRichVersionPresent(nVersion, &listRichSignatureRecords);
 }
