@@ -3060,6 +3060,8 @@ bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, Q
 
 bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize, bool bReverse)
 {
+    bool bResult = false;
+
     // TODO optimize
     if (nBufferSize == 0) {
         return false;
@@ -3087,6 +3089,8 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
         nDestOffset += nSize;
     }
 
+    bResult = true;
+
     while (nSize > 0) {
         qint64 nTempSize = qMin(nSize, (qint64)nBufferSize);
 
@@ -3108,7 +3112,7 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
 
     delete[] pBuffer;
 
-    return false;
+    return bResult;
 }
 
 bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
@@ -4901,6 +4905,8 @@ bool XBinary::saveBackup(QIODevice *pDevice)
             } else {
                 bResult = XBinary::writeToFile(sBackupFileName, pDevice);
             }
+        } else {
+            bResult = true;
         }
     }
 

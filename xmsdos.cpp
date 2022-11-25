@@ -724,7 +724,7 @@ bool XMSDOS::addDosStub(QString sFileName)
                 bResult = moveMemory(nOffset + nOldSize, nOffset + nNewSize, getSize() - nOffset - nDelta);
 
                 if (bResult) {
-                    set_e_lfanew((quint32)nOffset);
+                    set_e_lfanew((quint32)(nOffset+nNewSize));
                 }
             } else {
                 bResult = false;
