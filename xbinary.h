@@ -152,7 +152,8 @@ public:
         MMT_NOLOADABLE,   // For ELF
         MMT_FILESEGMENT,
         MMT_OVERLAY,
-        MMT_DATA
+        MMT_DATA,
+        MMT_OBJECT
     };
 
     struct _MEMORY_RECORD {
@@ -165,6 +166,7 @@ public:
         QString sName;
         qint32 nIndex;
         bool bIsVirtual;
+        quint64 nID;
     };
 
     enum FORMATTYPE {
@@ -389,6 +391,14 @@ public:
         bool bIsBigEndian;
     };
 
+    struct FILEFORMATINFO {
+        bool bIsValid;
+        qint64 nSize;
+        FT fileType;
+        QString sString;
+        QString sExt;
+    };
+
     struct _MEMORY_MAP {
         XADDR nModuleAddress;
         qint64 nImageSize;
@@ -603,6 +613,7 @@ public:
     void setOsType(OSNAME osName);
     void setOsVersion(QString sOsVersion);
     virtual OSINFO getOsInfo();
+    virtual FILEFORMATINFO getFileFormatInfo();
 
     void setEndianness(bool bIsBigEndian);  // TODO enum
     static bool isPacked(double dEntropy);

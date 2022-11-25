@@ -369,6 +369,25 @@ XBinary::OSINFO XBinary::getOsInfo()
     return result;
 }
 
+XBinary::FILEFORMATINFO XBinary::getFileFormatInfo()
+{
+    FILEFORMATINFO result = {};
+
+    result.bIsValid = isValid();
+
+    if(result.bIsValid) {
+        result.nSize = getFileFormatSize();
+
+        if (result.nSize) {
+            result.fileType = getFileType();
+            result.sString = getFileFormatString();
+            result.sExt = getFileFormatExt();
+        }
+    }
+
+    return result;
+}
+
 void XBinary::setEndianness(bool bIsBigEndian)
 {
     g_bIsBigEndian = bIsBigEndian;
