@@ -81,6 +81,15 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDe
     else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) {
         XZip zip(pDevice);
         result = zip.getMemoryMap();
+    } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
+        XSevenZip sevenzip(pDevice);
+        result = sevenzip.getMemoryMap();
+    } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
+        XCab xcab(pDevice);
+        result = xcab.getMemoryMap();
+    } else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) {
+        XRar xrar(pDevice);
+        result = xrar.getMemoryMap();
     }
 #endif
     else {
