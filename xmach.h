@@ -662,6 +662,10 @@ public:
     virtual OSINFO getOsInfo();
     virtual QString typeIdToString(qint32 nType);
 
+    virtual QString getFileFormatString();
+    virtual QString getFileFormatExt();
+    virtual qint64 getFileFormatSize();
+
     enum OPCODE_TYPE {
         OPCODE_TYPE_UNKNOWN = 0,
         OPCODE_TYPE_BIND,

@@ -4437,6 +4437,39 @@ QString XMACH::typeIdToString(qint32 nType)
     return sResult;
 }
 
+QString XMACH::getFileFormatString()
+{
+    QString sResult;
+
+    sResult = QString("MACH-O(%1)").arg(getArch());
+
+    return sResult;
+}
+
+QString XMACH::getFileFormatExt()
+{
+    QString sResult;
+
+    TYPE _type = (TYPE)getType();
+
+    if (_type == TYPE_DYLIB) {
+        sResult = "dylib";
+    } else if (_type == TYPE_OBJECT) {
+        sResult = "o";
+    } else if (_type == TYPE_BUNDLE) {
+        sResult = "bundle";
+    } else {
+        sResult = "macho";
+    }
+
+    return sResult;
+}
+
+qint64 XMACH::getFileFormatSize()
+{
+    return _calculateRawSize();
+}
+
 XADDR XMACH::readOpcodes(quint32 nType, char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
     XADDR nResult = 0;
