@@ -32,6 +32,7 @@ public:
 
     virtual bool isValid();
     static bool isValid(QIODevice *pDevice);
+//    virtual FT getFileType();
 
     virtual QString getFileFormatExt();
 };

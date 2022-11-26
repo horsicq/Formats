@@ -30,6 +30,7 @@ XBMP::~XBMP()
 
 bool XBMP::isValid()
 {
+    // TODO
     return false;
 }
 
@@ -39,6 +40,11 @@ bool XBMP::isValid(QIODevice *pDevice)
 
     return xbmp.isValid();
 }
+
+//XBinary::FT XBMP::getFileType()
+//{
+//    return FT_BMP;
+//}
 
 QString XBMP::getFileFormatExt()
 {
