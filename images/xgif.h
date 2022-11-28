@@ -34,6 +34,10 @@ public:
     static bool isValid(QIODevice *pDevice);
 
     virtual QString getFileFormatString();
+    virtual QString getFileFormatExt();
+    virtual qint64 getFileFormatSize();
+    virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
+    virtual FT getFileType();
 };
 
 #endif  // XGIF_H

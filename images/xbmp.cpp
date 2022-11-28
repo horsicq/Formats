@@ -30,8 +30,28 @@ XBMP::~XBMP()
 
 bool XBMP::isValid()
 {
+    bool bResult = false;
+
+    _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
+
+    if (compareSignature(&memoryMap, "'BM'", 0)) {
+
+        quint32 nSize = read_uint32(2);
+
+        if (nSize <= getSize()) {
+            bResult = true;
+        }
+    }
+
     // TODO
-    return false;
+//    BM Windows 3.1x, 95, NT, ... etc.
+//    BA OS/2 struct bitmap array
+//    CI OS/2 struct color icon
+//    CP OS/2 const color pointer
+//    IC OS/2 struct icon
+//    PT OS/2 pointer
+
+    return bResult;
 }
 
 bool XBMP::isValid(QIODevice *pDevice)
@@ -41,12 +61,22 @@ bool XBMP::isValid(QIODevice *pDevice)
     return xbmp.isValid();
 }
 
-//XBinary::FT XBMP::getFileType()
-//{
-//    return FT_BMP;
-//}
+XBinary::FT XBMP::getFileType()
+{
+    return FT_BMP;
+}
 
 QString XBMP::getFileFormatExt()
 {
     return "bmp";
+}
+
+qint64 XBMP::getFileFormatSize()
+{
+    return XBinary::getFileFormatSize();
+}
+
+XBinary::_MEMORY_MAP XBMP::getMemoryMap(PDSTRUCT *pPdStruct)
+{
+    return XBinary::getMemoryMap(pPdStruct);
 }

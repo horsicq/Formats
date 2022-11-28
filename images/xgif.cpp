@@ -44,3 +44,23 @@ QString XGif::getFileFormatString()
 {
     return "GIF";
 }
+
+QString XGif::getFileFormatExt()
+{
+    return "gif";
+}
+
+qint64 XGif::getFileFormatSize()
+{
+    return XBinary::getFileFormatSize();
+}
+
+XBinary::_MEMORY_MAP XGif::getMemoryMap(PDSTRUCT *pPdStruct)
+{
+    return XBinary::getMemoryMap(pPdStruct);
+}
+
+XBinary::FT XGif::getFileType()
+{
+    return FT_GIF;
+}

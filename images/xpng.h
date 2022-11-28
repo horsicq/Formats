@@ -43,6 +43,7 @@ public:
     virtual QString getFileFormatString();
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize();
+    virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
 
 private:
     CHUNK _readChunk(qint64 nOffset);

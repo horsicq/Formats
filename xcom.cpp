@@ -55,7 +55,7 @@ XBinary::MODE XCOM::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddr
     return xcom.getMode();
 }
 
-XBinary::_MEMORY_MAP XCOM::getMemoryMap()
+XBinary::_MEMORY_MAP XCOM::getMemoryMap(PDSTRUCT *pPdStruct)
 {
     _MEMORY_MAP result = {};
 

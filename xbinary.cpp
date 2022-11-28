@@ -542,6 +542,9 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_ARCHIVE:
             sResult = tr("Archive");
             break;
+        case FT_BMP:
+            sResult = QString("BMP");
+            break;
         case FT_CAB:
             sResult = QString("CAB");
             break;
@@ -1853,7 +1856,7 @@ qint64 XBinary::find_uint32(qint64 nOffset, qint64 nSize, quint32 nValue, bool b
     return find_array(nOffset, nSize, (char *)&nValue, 4, pPdStruct);
 }
 
-qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIsBigEndian, PDSTRUCT *pProcessData)
+qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     quint32 _value = (quint32)nValue;
 
@@ -1863,7 +1866,7 @@ qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIs
         _value = qFromLittleEndian(_value);
     }
 
-    return find_array(nOffset, nSize, (char *)&_value, 4, pProcessData);
+    return find_array(nOffset, nSize, (char *)&_value, 4, pPdStruct);
 }
 
 qint64 XBinary::find_uint64(qint64 nOffset, qint64 nSize, quint64 nValue, bool bIsBigEndian, PDSTRUCT *pProcessData)
@@ -1961,7 +1964,7 @@ qint64 XBinary::find_utf8String(qint64 nOffset, qint64 nSize, QString sString, P
 
 qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize, PDSTRUCT *pProcessData)
 {
-    _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
+    _MEMORY_MAP memoryMap = XBinary::getMemoryMap(pProcessData);
 
     return find_signature(&memoryMap, nOffset, nSize, sSignature, pnResultSize, pProcessData);
 }
@@ -2740,7 +2743,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
 
 QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo, PDSTRUCT *pProcessData)
 {
-    _MEMORY_MAP memoryMap = getMemoryMap();
+    _MEMORY_MAP memoryMap = getMemoryMap(pProcessData);
 
     return multiSearch_signature(&memoryMap, nOffset, nSize, nLimit, sSignature, sInfo, pProcessData);
 }
@@ -3590,7 +3593,7 @@ QString XBinary::getMemoryRecordName(XBinary::_MEMORY_RECORD *pMemoryRecord)
     return sRecord;
 }
 
-XBinary::_MEMORY_MAP XBinary::getMemoryMap()
+XBinary::_MEMORY_MAP XBinary::getMemoryMap(PDSTRUCT *pPdStruct)
 {
     _MEMORY_MAP result = {};
 
@@ -4101,12 +4104,15 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "89'PNG\r\n'1A0A", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_PNG);
-        } else if (compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00", 0)) {
+        } else if (compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00", 0) || compareSignature(&memoryMap, "FFD8FFE1....'Exif'00", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_JPEG);
         } else if (compareSignature(&memoryMap, "'GIF8'", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_GIF);
+        } else if (compareSignature(&memoryMap, "'BM'", 0)) {
+            stResult.insert(FT_IMAGE);
+            stResult.insert(FT_BMP);
         } else if (compareSignature(&memoryMap, "'MM'002A", 0) || compareSignature(&memoryMap, "'II'2A00", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_TIFF);
@@ -4240,6 +4246,10 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_NE;
     } else if (pStFileTypes->contains(FT_MSDOS)) {
         result = FT_MSDOS;
+    } else if (pStFileTypes->contains(FT_CAB)) {
+        result = FT_CAB;
+    } else if (pStFileTypes->contains(FT_RAR)) {
+        result = FT_RAR;
     } else if (pStFileTypes->contains(FT_ZIP)) {
         result = FT_ZIP;
     } else if (pStFileTypes->contains(FT_GZIP)) {
@@ -4254,6 +4264,10 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_ICO;
     } else if (pStFileTypes->contains(FT_JPEG)) {
         result = FT_JPEG;
+    } else if (pStFileTypes->contains(FT_BMP)) {
+        result = FT_BMP;
+    } else if (pStFileTypes->contains(FT_GIF)) {
+        result = FT_GIF;
     } else if (pStFileTypes->contains(FT_PDF)) {
         result = FT_PDF;
     } else if (pStFileTypes->contains(FT_BINARY)) {
@@ -4315,6 +4329,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_BINARY64)) listResult.append(FT_BINARY64);
     if (stFileTypes.contains(FT_ZIP)) listResult.append(FT_ZIP);
     if (stFileTypes.contains(FT_GZIP)) listResult.append(FT_GZIP);
+    if (stFileTypes.contains(FT_RAR)) listResult.append(FT_RAR);
     if (stFileTypes.contains(FT_JAR)) listResult.append(FT_JAR);
     if (stFileTypes.contains(FT_APK)) listResult.append(FT_APK);
     if (stFileTypes.contains(FT_IPA)) listResult.append(FT_IPA);
@@ -4323,6 +4338,8 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_PNG)) listResult.append(FT_PNG);
     if (stFileTypes.contains(FT_ICO)) listResult.append(FT_ICO);
     if (stFileTypes.contains(FT_JPEG)) listResult.append(FT_JPEG);
+    if (stFileTypes.contains(FT_BMP)) listResult.append(FT_BMP);
+    if (stFileTypes.contains(FT_GIF)) listResult.append(FT_GIF);
     if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
     if (stFileTypes.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
     if (stFileTypes.contains(FT_NE)) listResult.append(FT_NE);

@@ -153,7 +153,7 @@ public:
         MMT_FILESEGMENT,
         MMT_OVERLAY,
         MMT_DATA,
-        MMT_OBJECT
+        MMT_OBJECT,
     };
 
     struct _MEMORY_RECORD {
@@ -210,6 +210,7 @@ public:
         FT_DEX,
         FT_DOCUMENT,
         FT_GIF,
+        FT_BMP,
         FT_IMAGE,
         FT_IPA,
         FT_JAR,
@@ -749,7 +750,7 @@ public:
     qint64 find_uint16(qint64 nOffset, qint64 nSize, quint16 nValue, bool bIsBigEndian = false, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_int16(qint64 nOffset, qint64 nSize, qint16 nValue, bool bIsBigEndian = false, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_uint32(qint64 nOffset, qint64 nSize, quint32 nValue, bool bIsBigEndian = false, PDSTRUCT *pPdStruct = nullptr);
-    qint64 find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIsBigEndian = false, PDSTRUCT *pProcessData = nullptr);
+    qint64 find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIsBigEndian = false, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_uint64(qint64 nOffset, qint64 nSize, quint64 nValue, bool bIsBigEndian = false, PDSTRUCT *pProcessData = nullptr);
     qint64 find_int64(qint64 nOffset, qint64 nSize, qint64 nValue, bool bIsBigEndian = false, PDSTRUCT *pProcessData = nullptr);
     qint64 find_float(qint64 nOffset, qint64 nSize, float fValue, bool bIsBigEndian = false, PDSTRUCT *pProcessData = nullptr);
@@ -878,7 +879,7 @@ public:
 
     static QString getMemoryRecordName(_MEMORY_RECORD *pMemoryRecord);
 
-    virtual _MEMORY_MAP getMemoryMap();
+    virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
 
     static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);
 

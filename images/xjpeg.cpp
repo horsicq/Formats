@@ -33,7 +33,8 @@ bool XJpeg::isValid()
     bool bIsValid = false;
 
     if (getSize() >= 20) {
-        bIsValid = compareSignature("FFD8FFE0....'JFIF'00");
+        _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
+        bIsValid = compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00") || compareSignature(&memoryMap, "FFD8FFE1....'Exif'00");
     }
 
     return bIsValid;
@@ -44,6 +45,45 @@ bool XJpeg::isValid(QIODevice *pDevice)
     XJpeg xjpeg(pDevice);
 
     return xjpeg.isValid();
+}
+
+XBinary::_MEMORY_MAP XJpeg::getMemoryMap(PDSTRUCT *pPdStruct)
+{
+    PDSTRUCT pdStructEmpty = {};
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    XBinary::_MEMORY_MAP result = {};
+
+    qint32 nIndex = 0;
+
+    QList<XJpeg::CHUNK> listChunks = getChunks(pPdStruct);
+
+    qint32 nNumberOfChunks = listChunks.count();
+
+    for (qint32 i = 0; (i < nNumberOfChunks) &&(!(pPdStruct->bIsStop)); i++) {
+         _MEMORY_RECORD record = {};
+
+         record.nIndex = nIndex++;
+
+         if (listChunks.at(i).bEntropyCodedData) {
+             record.type = MMT_DATA;
+             record.sName = tr("Data");
+         } else {
+             record.type = MMT_OBJECT;
+             record.sName = XBinary::valueToHex(listChunks.at(i).nId);
+         }
+
+         record.nOffset = listChunks.at(i).nDataOffset;
+         record.nSize = listChunks.at(i).nDataSize;
+         record.nAddress = -1;
+
+         result.listRecords.append(record);
+    }
+
+    return result;
 }
 
 XBinary::FT XJpeg::getFileType()
@@ -94,7 +134,7 @@ QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
 
     qint64 nOffset = 0;
 
-    while (true) {
+    while (!(pPdStruct->bIsStop)) {
         if (nOffset == -1) {
             break;
         }
@@ -152,16 +192,16 @@ XJpeg::CHUNK XJpeg::_readChunk(qint64 nOffset)
         result.bValid = true;
         result.nId = read_uint8(nOffset + 1);
 
-        result.nDataOffset = nOffset + 2;
+        result.nDataOffset = nOffset;
 
         if ((result.nId == 0xD8) || (result.nId == 0xD9)) {
-            result.nDataSize = 0;
+            result.nDataSize = 2;
         } else if (result.nId == 0xDD) {
-            result.nDataSize = 4;
+            result.nDataSize = 2 + 4;
         } else if ((result.nId >= 0xD0) && (result.nId <= 0xD7)) {
-            result.nDataSize = 0;
+            result.nDataSize = 2;
         } else if (result.nId != 0x00) {
-            result.nDataSize = read_uint16(nOffset + 2, true);
+            result.nDataSize = 2 + read_uint16(nOffset + 2, true);
         } else {
             result.bValid = false;
         }

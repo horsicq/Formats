@@ -33,7 +33,9 @@ bool XPNG::isValid()
     bool bIsValid = false;
 
     if (getSize() >= 20) {
-        bIsValid = compareSignature("89'PNG\r\n'1A0A");
+        _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
+
+        bIsValid = compareSignature(&memoryMap, "89'PNG\r\n'1A0A");
     }
 
     return bIsValid;
@@ -88,6 +90,63 @@ qint64 XPNG::getFileFormatSize()
     }
 
     return nResult;
+}
+
+XBinary::_MEMORY_MAP XPNG::getMemoryMap(PDSTRUCT *pPdStruct)
+{
+    PDSTRUCT pdStructEmpty = {};
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    XBinary::_MEMORY_MAP result = {};
+
+    qint32 nIndex = 0;
+
+    {
+        _MEMORY_RECORD record = {};
+
+        record.nIndex = nIndex++;
+        record.type = MMT_HEADER;
+        record.nOffset = 0;
+        record.nSize = 8;
+        record.nAddress = -1;
+        record.sName = tr("Header");
+
+        result.listRecords.append(record);
+    }
+
+    qint64 nOffset = 8;
+
+    while (!(pPdStruct->bIsStop)) {
+        CHUNK chunk = _readChunk(nOffset);
+
+        _MEMORY_RECORD record = {};
+
+        record.nIndex = nIndex++;
+
+        record.type = MMT_OBJECT;
+
+        record.nOffset = nOffset;
+        record.nSize = 12 + chunk.nDataSize;
+        record.nAddress = -1;
+        record.sName = chunk.sName;
+
+        result.listRecords.append(record);
+
+        nOffset += (12 + chunk.nDataSize);
+
+        if (chunk.sName == "IEND") {
+            break;
+        }
+
+        if (chunk.nCRC == 0) {  // mb TODO more checks mb ANSI names
+            break;
+        }
+    }
+
+    return result;
 }
 
 XPNG::CHUNK XPNG::_readChunk(qint64 nOffset)

@@ -24,75 +24,81 @@ XFormats::XFormats(QObject *pParent) : QObject(pParent)
 {
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
 {
     XBinary::_MEMORY_MAP result = {};
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
         XBinary binary(pDevice, bIsImage, nModuleAddress);
-        result = binary.getMemoryMap();
+        result = binary.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
         XCOM com(pDevice, bIsImage, nModuleAddress);
-        result = com.getMemoryMap();
+        result = com.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) {
         XMSDOS msdos(pDevice, bIsImage, nModuleAddress);
-        result = msdos.getMemoryMap();
+        result = msdos.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) {
         XNE ne(pDevice, bIsImage, nModuleAddress);
-        result = ne.getMemoryMap();
+        result = ne.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_LE, fileType)) {
         XLE le(pDevice, bIsImage, nModuleAddress);
-        result = le.getMemoryMap();
+        result = le.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_LX, fileType)) {
         XLE le(pDevice, bIsImage, nModuleAddress);
-        result = le.getMemoryMap();
+        result = le.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) {
         XPE pe(pDevice, bIsImage, nModuleAddress);
-        result = pe.getMemoryMap();
+        result = pe.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) {
         XELF elf(pDevice, bIsImage, nModuleAddress);
-        result = elf.getMemoryMap();
+        result = elf.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
-        result = mach.getMemoryMap();
+        result = mach.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
-        result = png.getMemoryMap();
+        result = png.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
         XJpeg jpeg(pDevice);
-        result = jpeg.getMemoryMap();
+        result = jpeg.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
         XIcon xicon(pDevice);
-        result = xicon.getMemoryMap();
+        result = xicon.getMemoryMap(pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_BMP, fileType)) {
+        XBMP xbmp(pDevice);
+        result = xbmp.getMemoryMap(pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) {
+        XGif xgif(pDevice);
+        result = xgif.getMemoryMap(pPdStruct);
     }
 #ifdef USE_DEX  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
         XDEX dex(pDevice);
-        result = dex.getMemoryMap();
+        result = dex.getMemoryMap(pPdStruct);
     }
 #endif
 #ifdef USE_PDF  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_PDF, fileType)) {
         XPDF pdf(pDevice);
-        result = pdf.getMemoryMap();
+        result = pdf.getMemoryMap(pPdStruct);
     }
 #endif
 #ifdef USE_ARCHIVE
     else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) {
         XZip zip(pDevice);
-        result = zip.getMemoryMap();
+        result = zip.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
         XSevenZip sevenzip(pDevice);
-        result = sevenzip.getMemoryMap();
+        result = sevenzip.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
         XCab xcab(pDevice);
-        result = xcab.getMemoryMap();
+        result = xcab.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) {
         XRar xrar(pDevice);
-        result = xrar.getMemoryMap();
+        result = xrar.getMemoryMap(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) {
         XMACHOFat xmachofat(pDevice);
-        result = xmachofat.getMemoryMap();
+        result = xmachofat.getMemoryMap(pPdStruct);
     }
 #endif
     else {
@@ -103,7 +109,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDe
     return result;
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage, XADDR nModuleAddress)
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
 {
     XBinary::_MEMORY_MAP result = {};
 
@@ -112,7 +118,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage, XA
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        result = getMemoryMap(XBinary::getPrefFileType(&file, true), &file, bIsImage, nModuleAddress);
+        result = getMemoryMap(XBinary::getPrefFileType(&file, true), &file, bIsImage, nModuleAddress,pPdStruct);
 
         file.close();
     }
@@ -609,6 +615,12 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
         XIcon xicon(pDevice);
         result = xicon.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_BMP, fileType)) {
+        XBMP xbmp(pDevice);
+        result = xbmp.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) {
+        XGif xgif(pDevice);
+        result = xgif.getFileFormatInfo();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {

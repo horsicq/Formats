@@ -32,9 +32,11 @@ public:
 
     virtual bool isValid();
     static bool isValid(QIODevice *pDevice);
-//    virtual FT getFileType();
+    virtual FT getFileType();
 
     virtual QString getFileFormatExt();
+    virtual qint64 getFileFormatSize();
+    virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
 };
 
 #endif  // XBMP_H

@@ -130,7 +130,7 @@ public:
 
     qint64 getModuleAddress();
 
-    virtual _MEMORY_MAP getMemoryMap();
+    virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
     virtual MODE getMode();
     virtual QString getArch();
     virtual bool isBigEndian();

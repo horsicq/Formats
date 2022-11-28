@@ -1117,7 +1117,7 @@ qint64 XMACH::getAddressOfEntryPoint(XBinary::_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-XBinary::_MEMORY_MAP XMACH::getMemoryMap()
+XBinary::_MEMORY_MAP XMACH::getMemoryMap(PDSTRUCT *pPdStruct)
 {
     _MEMORY_MAP result = {};
 
