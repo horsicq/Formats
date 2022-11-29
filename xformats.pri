@@ -96,6 +96,11 @@ contains(XCONFIG, use_archive) {
     include($$PWD/images/xjpeg.pri)
 }
 
+!contains(XCONFIG, xtiff) {
+    XCONFIG += xtiff
+    include($$PWD/images/xtiff.pri)
+}
+
 DISTFILES += \
     $$PWD/LICENSE \
     $$PWD/README.md \

@@ -30,7 +30,19 @@ XGif::~XGif()
 
 bool XGif::isValid()
 {
-    return false;
+    bool bResult = false;
+
+    if(getSize() > 0x320)
+    {
+        _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
+
+        if (compareSignature(&memoryMap, "'GIF87a'", 0) || compareSignature(&memoryMap, "'GIF89a'", 0)) {
+            // TODO more checks
+            bResult = true;
+        }
+    }
+
+    return bResult;
 }
 
 bool XGif::isValid(QIODevice *pDevice)
@@ -42,7 +54,11 @@ bool XGif::isValid(QIODevice *pDevice)
 
 QString XGif::getFileFormatString()
 {
-    return "GIF";
+    QString sResult;
+
+    sResult = "GIF";
+
+    return sResult;
 }
 
 QString XGif::getFileFormatExt()
@@ -52,7 +68,30 @@ QString XGif::getFileFormatExt()
 
 qint64 XGif::getFileFormatSize()
 {
-    return XBinary::getFileFormatSize();
+    qint64 nResult = 0;
+
+    qint64 nCurrentOffset = 0x320;
+
+    while (true) {
+        quint8 nBlockSize = read_uint8(nCurrentOffset);
+
+        if(nBlockSize) {
+            nCurrentOffset ++;
+            nCurrentOffset += nBlockSize;
+        } else {
+            break;
+        }
+    }
+
+    nCurrentOffset ++;
+
+    if (read_uint8(nCurrentOffset) == 0x3B) {
+        nCurrentOffset ++;
+
+        nResult = nCurrentOffset;
+    }
+
+    return nResult;
 }
 
 XBinary::_MEMORY_MAP XGif::getMemoryMap(PDSTRUCT *pPdStruct)

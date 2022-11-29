@@ -37,6 +37,7 @@ public:
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize();
     virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
+    virtual QString getFileFormatString();
 };
 
 #endif  // XBMP_H

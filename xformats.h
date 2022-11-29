@@ -34,6 +34,7 @@
 #include "xpng.h"
 #include "xbmp.h"
 #include "xgif.h"
+#include "xtiff.h"
 #ifdef USE_DEX
 #include "xandroidbinary.h"
 #include "xdex.h"

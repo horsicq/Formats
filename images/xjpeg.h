@@ -47,6 +47,9 @@ public:
     virtual qint64 getFileFormatSize();
 
     QList<CHUNK> getChunks(PDSTRUCT *pPdStruct = nullptr);
+    static QList<CHUNK> _getChunksById(QList<CHUNK> *pListChunks,quint8 nId);
+    QString getComment();
+    QString getDqtMD5();
 
 private:
     CHUNK _readChunk(qint64 nOffset);

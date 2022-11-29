@@ -56,6 +56,7 @@ XBinary::_MEMORY_MAP XJpeg::getMemoryMap(PDSTRUCT *pPdStruct)
     }
 
     XBinary::_MEMORY_MAP result = {};
+    result.nRawSize = getSize();
 
     qint32 nIndex = 0;
 
@@ -180,6 +181,69 @@ QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
     }
 
     return listResult;
+}
+
+QList<XJpeg::CHUNK> XJpeg::_getChunksById(QList<CHUNK> *pListChunks, quint8 nId)
+{
+    QList<XJpeg::CHUNK> listResult = {};
+
+    qint32 nNumberOfRecords = pListChunks->count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (pListChunks->at(i).nId == nId) {
+            listResult.append(pListChunks->at(i));
+        }
+    }
+
+    return listResult;
+}
+
+QString XJpeg::getComment()
+{
+    QString sResult;
+
+    QList<CHUNK> listChunks = getChunks();
+
+    QList<XJpeg::CHUNK> listComments = _getChunksById(&listChunks, 0xFE); // COMMENT
+
+    qint32 nNumberOfRecords = listComments.count();
+
+    for(qint32 i = 0; i < nNumberOfRecords; i++)
+    {
+        sResult += read_ansiString(listComments.at(i).nDataOffset+4,listComments.at(i).nDataSize - 4);
+    }
+
+    if (sResult.size() > 100) {
+        sResult.resize(100);
+    }
+
+    sResult = sResult.remove("\r").remove("\n");
+
+    return sResult;
+}
+
+QString XJpeg::getDqtMD5()
+{
+    QString sResult;
+
+    QList<CHUNK> listChunks = getChunks();
+
+    QList<XJpeg::CHUNK> listComments = _getChunksById(&listChunks, 0xDB); // DQT
+
+    qint32 nNumberOfRecords = listComments.count();
+
+    QCryptographicHash crypto(QCryptographicHash::Md5);
+
+    for(qint32 i = 0; i < nNumberOfRecords; i++)
+    {
+        QByteArray baData = read_array(listComments.at(i).nDataOffset+4,listComments.at(i).nDataSize - 4);
+
+        crypto.addData(baData);
+    }
+
+    sResult = crypto.result().toHex();
+
+    return sResult;
 }
 
 XJpeg::CHUNK XJpeg::_readChunk(qint64 nOffset)

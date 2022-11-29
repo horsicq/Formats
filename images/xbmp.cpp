@@ -34,7 +34,7 @@ bool XBMP::isValid()
 
     _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
 
-    if (compareSignature(&memoryMap, "'BM'", 0)) {
+    if (compareSignature(&memoryMap, "'BM'..................000000", 0)) {
 
         quint32 nSize = read_uint32(2);
 
@@ -73,10 +73,23 @@ QString XBMP::getFileFormatExt()
 
 qint64 XBMP::getFileFormatSize()
 {
-    return XBinary::getFileFormatSize();
+    qint64 nResult = 0;
+
+    nResult = read_uint32(2);
+
+    return nResult;
 }
 
 XBinary::_MEMORY_MAP XBMP::getMemoryMap(PDSTRUCT *pPdStruct)
 {
     return XBinary::getMemoryMap(pPdStruct);
+}
+
+QString XBMP::getFileFormatString()
+{
+    QString sResult;
+
+    sResult = "BMP";
+
+    return sResult;
 }

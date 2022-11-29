@@ -654,10 +654,24 @@ QString XBinary::fileTypeIdToExts(FT fileType)
         case FT_ICO:
             sResult = QString("ICO(iso,cur)");
             break;
+        case FT_TIFF:
+            sResult = QString("TIFF");
+            break;
         case FT_DEX:
             sResult = QString("DEX");
+            break;        
+        case FT_MACHOFAT:
+            sResult = QString("MACHOFAT");
             break;
-
+        case FT_MACHO:
+            sResult = QString("MACHO");
+            break;
+        case FT_BMP:
+            sResult = QString("BMP");
+            break;
+        case FT_GIF:
+            sResult = QString("GIF");
+            break;
         default:
             sResult = tr("Unknown");
     }
@@ -4107,10 +4121,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00", 0) || compareSignature(&memoryMap, "FFD8FFE1....'Exif'00", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_JPEG);
-        } else if (compareSignature(&memoryMap, "'GIF8'", 0)) {
+        } else if (compareSignature(&memoryMap, "'GIF87a'", 0) || compareSignature(&memoryMap, "'GIF89a'", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_GIF);
-        } else if (compareSignature(&memoryMap, "'BM'", 0)) {
+        } else if (compareSignature(&memoryMap, "'BM'..................000000", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_BMP);
         } else if (compareSignature(&memoryMap, "'MM'002A", 0) || compareSignature(&memoryMap, "'II'2A00", 0)) {
@@ -4268,6 +4282,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_BMP;
     } else if (pStFileTypes->contains(FT_GIF)) {
         result = FT_GIF;
+    } else if (pStFileTypes->contains(FT_TIFF)) {
+        result = FT_TIFF;
     } else if (pStFileTypes->contains(FT_PDF)) {
         result = FT_PDF;
     } else if (pStFileTypes->contains(FT_BINARY)) {
@@ -4340,6 +4356,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_JPEG)) listResult.append(FT_JPEG);
     if (stFileTypes.contains(FT_BMP)) listResult.append(FT_BMP);
     if (stFileTypes.contains(FT_GIF)) listResult.append(FT_GIF);
+    if (stFileTypes.contains(FT_TIFF)) listResult.append(FT_TIFF);
     if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
     if (stFileTypes.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
     if (stFileTypes.contains(FT_NE)) listResult.append(FT_NE);

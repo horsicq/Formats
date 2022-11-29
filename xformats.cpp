@@ -70,6 +70,9 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDe
     } else if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) {
         XGif xgif(pDevice);
         result = xgif.getMemoryMap(pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) {
+        XTiff xtiff(pDevice);
+        result = xtiff.getMemoryMap(pPdStruct);
     }
 #ifdef USE_DEX  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -621,6 +624,9 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     } else if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) {
         XGif xgif(pDevice);
         result = xgif.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) {
+        XTiff xtiff(pDevice);
+        result = xtiff.getFileFormatInfo();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
