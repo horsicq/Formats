@@ -35,7 +35,6 @@ bool XBMP::isValid()
     _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
 
     if (compareSignature(&memoryMap, "'BM'..................000000", 0)) {
-
         quint32 nSize = read_uint32(2);
 
         if (nSize <= getSize()) {
@@ -44,12 +43,12 @@ bool XBMP::isValid()
     }
 
     // TODO
-//    BM Windows 3.1x, 95, NT, ... etc.
-//    BA OS/2 struct bitmap array
-//    CI OS/2 struct color icon
-//    CP OS/2 const color pointer
-//    IC OS/2 struct icon
-//    PT OS/2 pointer
+    //    BM Windows 3.1x, 95, NT, ... etc.
+    //    BA OS/2 struct bitmap array
+    //    CI OS/2 struct color icon
+    //    CP OS/2 const color pointer
+    //    IC OS/2 struct icon
+    //    PT OS/2 pointer
 
     return bResult;
 }

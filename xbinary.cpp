@@ -375,7 +375,7 @@ XBinary::FILEFORMATINFO XBinary::getFileFormatInfo()
 
     result.bIsValid = isValid();
 
-    if(result.bIsValid) {
+    if (result.bIsValid) {
         result.nSize = getFileFormatSize();
 
         if (result.nSize) {
@@ -659,7 +659,7 @@ QString XBinary::fileTypeIdToExts(FT fileType)
             break;
         case FT_DEX:
             sResult = QString("DEX");
-            break;        
+            break;
         case FT_MACHOFAT:
             sResult = QString("MACHOFAT");
             break;
@@ -6895,8 +6895,8 @@ bool XBinary::isX86asm(QString sArch)
     sArch = sArch.toUpper();
 
     // TODO Check
-    if ((sArch == "8086") || (sArch == "80286") || (sArch == "80386") || (sArch == "80486") || (sArch == "80586") || (sArch == "386") || (sArch == "I386") || (sArch == "AMD64") ||
-        (sArch == "X86_64")) {
+    if ((sArch == "8086") || (sArch == "80286") || (sArch == "80386") || (sArch == "80486") || (sArch == "80586") || (sArch == "386") || (sArch == "I386") ||
+        (sArch == "AMD64") || (sArch == "X86_64")) {
         bResult = true;
     }
 
@@ -7413,11 +7413,12 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 {
     // TODO Check!
     // TODO optimize! new Types create remove function
-    if (pStFileTypes->contains(XBinary::FT_MSDOS) || pStFileTypes->contains(XBinary::FT_NE) || pStFileTypes->contains(XBinary::FT_LE) || pStFileTypes->contains(XBinary::FT_LX) ||
-        pStFileTypes->contains(XBinary::FT_PE) || pStFileTypes->contains(XBinary::FT_PE32) || pStFileTypes->contains(XBinary::FT_PE64) || pStFileTypes->contains(XBinary::FT_ELF) ||
-        pStFileTypes->contains(XBinary::FT_ELF32) || pStFileTypes->contains(XBinary::FT_ELF64) || pStFileTypes->contains(XBinary::FT_MACHO) ||
-        pStFileTypes->contains(XBinary::FT_MACHO32) || pStFileTypes->contains(XBinary::FT_MACHO64) || pStFileTypes->contains(XBinary::FT_DEX) ||
-        pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP)) {
+    if (pStFileTypes->contains(XBinary::FT_MSDOS) || pStFileTypes->contains(XBinary::FT_NE) || pStFileTypes->contains(XBinary::FT_LE) ||
+        pStFileTypes->contains(XBinary::FT_LX) || pStFileTypes->contains(XBinary::FT_PE) || pStFileTypes->contains(XBinary::FT_PE32) ||
+        pStFileTypes->contains(XBinary::FT_PE64) || pStFileTypes->contains(XBinary::FT_ELF) || pStFileTypes->contains(XBinary::FT_ELF32) ||
+        pStFileTypes->contains(XBinary::FT_ELF64) || pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) ||
+        pStFileTypes->contains(XBinary::FT_MACHO64) || pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) ||
+        pStFileTypes->contains(XBinary::FT_GZIP)) {
         pStFileTypes->remove(XBinary::FT_BINARY);
     } else {
         pStFileTypes->insert(XBinary::FT_COM);
@@ -8575,7 +8576,8 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
             } break;
 
             case XBinary::ST_FINDBYTES: {
-                qint64 nResult = find_byteArray(nOffset, pListSignatureRecords->at(i).nFindDelta + pListSignatureRecords->at(i).baData.size(), pListSignatureRecords->at(i).baData);
+                qint64 nResult =
+                    find_byteArray(nOffset, pListSignatureRecords->at(i).nFindDelta + pListSignatureRecords->at(i).baData.size(), pListSignatureRecords->at(i).baData);
 
                 if (nResult == -1) {
                     return false;

@@ -22,8 +22,10 @@
 #define XFORMATS_H
 
 #include "xbinary.h"
+#include "xbmp.h"
 #include "xcom.h"
 #include "xelf.h"
+#include "xgif.h"
 #include "xicon.h"
 #include "xjpeg.h"
 #include "xle.h"
@@ -32,8 +34,6 @@
 #include "xne.h"
 #include "xpe.h"
 #include "xpng.h"
-#include "xbmp.h"
-#include "xgif.h"
 #include "xtiff.h"
 #ifdef USE_DEX
 #include "xandroidbinary.h"
@@ -55,8 +55,9 @@ class XFormats : public QObject {
 public:
     explicit XFormats(QObject *pParent = nullptr);
 
-    static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,XBinary::PDSTRUCT *pPdStruct = nullptr);
-    static XBinary::_MEMORY_MAP getMemoryMap(QString sFileName, bool bIsImage = false, XADDR nModuleAddress = -1,XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
+                                             XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static XBinary::_MEMORY_MAP getMemoryMap(QString sFileName, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static qint64 getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static qint64 getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static bool isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);

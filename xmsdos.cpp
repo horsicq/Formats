@@ -592,7 +592,7 @@ QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords(PDSTRUCT *pPdStruc
 
         qint64 nCurrentOffset = nOffset - 4;
 
-        while ((nCurrentOffset > getDosStubOffset())&&(!(pPdStruct->bIsStop)))  // TODO optimize
+        while ((nCurrentOffset > getDosStubOffset()) && (!(pPdStruct->bIsStop)))  // TODO optimize
         {
             quint32 nTemp = read_uint32(nCurrentOffset) ^ nXORkey;
 
@@ -724,7 +724,7 @@ bool XMSDOS::addDosStub(QString sFileName)
                 bResult = moveMemory(nOffset + nOldSize, nOffset + nNewSize, getSize() - nOffset - nDelta);
 
                 if (bResult) {
-                    set_e_lfanew((quint32)(nOffset+nNewSize));
+                    set_e_lfanew((quint32)(nOffset + nNewSize));
                 }
             } else {
                 bResult = false;

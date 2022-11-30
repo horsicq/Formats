@@ -121,7 +121,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage, XA
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        result = getMemoryMap(XBinary::getPrefFileType(&file, true), &file, bIsImage, nModuleAddress,pPdStruct);
+        result = getMemoryMap(XBinary::getPrefFileType(&file, true), &file, bIsImage, nModuleAddress, pPdStruct);
 
         file.close();
     }

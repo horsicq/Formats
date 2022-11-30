@@ -957,11 +957,11 @@ XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getOptionalHeader_DataDirectory(quint32 nNumb
     //    protectors with false NumberOfRvaAndSizes
     if (nNumber < 16) {
         if (is64()) {
-            result =
-                read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+            result = read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) +
+                                               nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
         } else {
-            result =
-                read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+            result = read_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) +
+                                               nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
         }
     }
 
@@ -4685,7 +4685,8 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32()
         result.DynamicValueRelocTable = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DynamicValueRelocTable));
         result.CHPEMetadataPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CHPEMetadataPointer));
         result.GuardRFFailureRoutine = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardRFFailureRoutine));
-        result.GuardRFFailureRoutineFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardRFFailureRoutineFunctionPointer));
+        result.GuardRFFailureRoutineFunctionPointer =
+            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardRFFailureRoutineFunctionPointer));
         result.DynamicValueRelocTableOffset = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DynamicValueRelocTableOffset));
         result.DynamicValueRelocTableSection = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DynamicValueRelocTableSection));
         result.Reserved2 = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, Reserved2));
@@ -4699,7 +4700,8 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32 XPE::getLoadConfigDirectory32()
         result.GuardEHContinuationCount = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardEHContinuationCount));
         result.GuardXFGCheckFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardXFGCheckFunctionPointer));
         result.GuardXFGDispatchFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardXFGDispatchFunctionPointer));
-        result.GuardXFGTableDispatchFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardXFGTableDispatchFunctionPointer));
+        result.GuardXFGTableDispatchFunctionPointer =
+            read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardXFGTableDispatchFunctionPointer));
         result.CastGuardOsDeterminedFailureMode = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CastGuardOsDeterminedFailureMode));
         result.GuardMemcpyFunctionPointer = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardMemcpyFunctionPointer));
     }
@@ -4750,7 +4752,8 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64()
         result.DynamicValueRelocTable = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DynamicValueRelocTable));
         result.CHPEMetadataPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CHPEMetadataPointer));
         result.GuardRFFailureRoutine = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardRFFailureRoutine));
-        result.GuardRFFailureRoutineFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardRFFailureRoutineFunctionPointer));
+        result.GuardRFFailureRoutineFunctionPointer =
+            read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardRFFailureRoutineFunctionPointer));
         result.DynamicValueRelocTableOffset = read_uint32(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DynamicValueRelocTableOffset));
         result.DynamicValueRelocTableSection = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DynamicValueRelocTableSection));
         result.Reserved2 = read_uint16(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, Reserved2));
@@ -4764,7 +4767,8 @@ XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64 XPE::getLoadConfigDirectory64()
         result.GuardEHContinuationCount = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardEHContinuationCount));
         result.GuardXFGCheckFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardXFGCheckFunctionPointer));
         result.GuardXFGDispatchFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardXFGDispatchFunctionPointer));
-        result.GuardXFGTableDispatchFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardXFGTableDispatchFunctionPointer));
+        result.GuardXFGTableDispatchFunctionPointer =
+            read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardXFGTableDispatchFunctionPointer));
         result.CastGuardOsDeterminedFailureMode = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CastGuardOsDeterminedFailureMode));
         result.GuardMemcpyFunctionPointer = read_uint64(nLoadConfigOffset + offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardMemcpyFunctionPointer));
     }
@@ -8215,7 +8219,8 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
                                     if (pCertContext) {
                                         DWORD dwData = pCertContext->pCertInfo->SerialNumber.cbData;
                                         for (DWORD n = 0; n < dwData; n++) {
-                                            result.sSerialNumber.append(QString("%1 ").arg(XBinary::valueToHex(pCertContext->pCertInfo->SerialNumber.pbData[dwData - (n + 1)])));
+                                            result.sSerialNumber.append(
+                                                QString("%1 ").arg(XBinary::valueToHex(pCertContext->pCertInfo->SerialNumber.pbData[dwData - (n + 1)])));
                                         }
 
                                         result.sIssuer = getCertNameString(pCertContext, CERTNAMESTRING_ISSUER);
@@ -9037,7 +9042,8 @@ int XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
         quint32 nSectionCharacteristics = listSections.at(i).Characteristics;
         nSectionCharacteristics &= 0xFF0000FF;
 
-        if ((((sSectionName == "DATA") || sSectionName == ".data")) && (nSectionCharacteristics == 0xC0000040) && (listSections.at(i).SizeOfRawData) && (nImportSection != i)) {
+        if ((((sSectionName == "DATA") || sSectionName == ".data")) && (nSectionCharacteristics == 0xC0000040) && (listSections.at(i).SizeOfRawData) &&
+            (nImportSection != i)) {
             nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
             break;
         }

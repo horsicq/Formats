@@ -37,10 +37,9 @@ bool XTiff::isValid()
         if (compareSignature(&memoryMap, "'MM'002A") || compareSignature(&memoryMap, "'II'2A00")) {
             bool bIsBigEndian = isBigEndian();
 
-            quint32 nOffset = read_uint32(4,bIsBigEndian);
+            quint32 nOffset = read_uint32(4, bIsBigEndian);
 
-            if((nOffset > 0) && (nOffset < getSize()))
-            {
+            if ((nOffset > 0) && (nOffset < getSize())) {
                 bIsValid = true;
             }
         }
@@ -91,4 +90,3 @@ bool XTiff::isBigEndian()
 
     return (nEndian == 0x2A004D4D);
 }
-

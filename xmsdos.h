@@ -117,7 +117,7 @@ public:
     QList<XMSDOS::MS_RICH_RECORD> getRichSignatureRecords(PDSTRUCT *pPdStruct = nullptr);
     qint32 getNumberOfRichIDs(PDSTRUCT *pPdStruct = nullptr);
     qint32 getNumberOfRichIDs(QList<MS_RICH_RECORD> *pListRichSignatureRecords);
-    bool isRichVersionPresent(quint32 nVersion,PDSTRUCT *pPdStruct = nullptr);
+    bool isRichVersionPresent(quint32 nVersion, PDSTRUCT *pPdStruct = nullptr);
     bool isRichVersionPresent(quint32 nVersion, QList<MS_RICH_RECORD> *pListRichSignatureRecords);
 
     // dos stub for LE, NE and PE

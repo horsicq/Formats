@@ -64,24 +64,24 @@ XBinary::_MEMORY_MAP XJpeg::getMemoryMap(PDSTRUCT *pPdStruct)
 
     qint32 nNumberOfChunks = listChunks.count();
 
-    for (qint32 i = 0; (i < nNumberOfChunks) &&(!(pPdStruct->bIsStop)); i++) {
-         _MEMORY_RECORD record = {};
+    for (qint32 i = 0; (i < nNumberOfChunks) && (!(pPdStruct->bIsStop)); i++) {
+        _MEMORY_RECORD record = {};
 
-         record.nIndex = nIndex++;
+        record.nIndex = nIndex++;
 
-         if (listChunks.at(i).bEntropyCodedData) {
-             record.type = MMT_DATA;
-             record.sName = tr("Data");
-         } else {
-             record.type = MMT_OBJECT;
-             record.sName = XBinary::valueToHex(listChunks.at(i).nId);
-         }
+        if (listChunks.at(i).bEntropyCodedData) {
+            record.type = MMT_DATA;
+            record.sName = tr("Data");
+        } else {
+            record.type = MMT_OBJECT;
+            record.sName = XBinary::valueToHex(listChunks.at(i).nId);
+        }
 
-         record.nOffset = listChunks.at(i).nDataOffset;
-         record.nSize = listChunks.at(i).nDataSize;
-         record.nAddress = -1;
+        record.nOffset = listChunks.at(i).nDataOffset;
+        record.nSize = listChunks.at(i).nDataSize;
+        record.nAddress = -1;
 
-         result.listRecords.append(record);
+        result.listRecords.append(record);
     }
 
     return result;
@@ -204,13 +204,12 @@ QString XJpeg::getComment()
 
     QList<CHUNK> listChunks = getChunks();
 
-    QList<XJpeg::CHUNK> listComments = _getChunksById(&listChunks, 0xFE); // COMMENT
+    QList<XJpeg::CHUNK> listComments = _getChunksById(&listChunks, 0xFE);  // COMMENT
 
     qint32 nNumberOfRecords = listComments.count();
 
-    for(qint32 i = 0; i < nNumberOfRecords; i++)
-    {
-        sResult += read_ansiString(listComments.at(i).nDataOffset+4,listComments.at(i).nDataSize - 4);
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        sResult += read_ansiString(listComments.at(i).nDataOffset + 4, listComments.at(i).nDataSize - 4);
     }
 
     if (sResult.size() > 100) {
@@ -228,15 +227,14 @@ QString XJpeg::getDqtMD5()
 
     QList<CHUNK> listChunks = getChunks();
 
-    QList<XJpeg::CHUNK> listComments = _getChunksById(&listChunks, 0xDB); // DQT
+    QList<XJpeg::CHUNK> listComments = _getChunksById(&listChunks, 0xDB);  // DQT
 
     qint32 nNumberOfRecords = listComments.count();
 
     QCryptographicHash crypto(QCryptographicHash::Md5);
 
-    for(qint32 i = 0; i < nNumberOfRecords; i++)
-    {
-        QByteArray baData = read_array(listComments.at(i).nDataOffset+4,listComments.at(i).nDataSize - 4);
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        QByteArray baData = read_array(listComments.at(i).nDataOffset + 4, listComments.at(i).nDataSize - 4);
 
         crypto.addData(baData);
     }

@@ -32,8 +32,7 @@ bool XGif::isValid()
 {
     bool bResult = false;
 
-    if(getSize() > 0x320)
-    {
+    if (getSize() > 0x320) {
         _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
 
         if (compareSignature(&memoryMap, "'GIF87a'", 0) || compareSignature(&memoryMap, "'GIF89a'", 0)) {
@@ -75,18 +74,18 @@ qint64 XGif::getFileFormatSize()
     while (true) {
         quint8 nBlockSize = read_uint8(nCurrentOffset);
 
-        if(nBlockSize) {
-            nCurrentOffset ++;
+        if (nBlockSize) {
+            nCurrentOffset++;
             nCurrentOffset += nBlockSize;
         } else {
             break;
         }
     }
 
-    nCurrentOffset ++;
+    nCurrentOffset++;
 
     if (read_uint8(nCurrentOffset) == 0x3B) {
-        nCurrentOffset ++;
+        nCurrentOffset++;
 
         nResult = nCurrentOffset;
     }
