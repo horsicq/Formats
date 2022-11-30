@@ -1916,13 +1916,13 @@ qint64 XBinary::find_float(qint64 nOffset, qint64 nSize, float fValue, bool bIsB
     return find_array(nOffset, nSize, (char *)&_value, 4, pPdStruct);
 }
 
-qint64 XBinary::find_double(qint64 nOffset, qint64 nSize, double dValue, bool bIsBigEndian, PDSTRUCT *pProcessData)
+qint64 XBinary::find_double(qint64 nOffset, qint64 nSize, double dValue, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     double _value = dValue;
 
     endian_double(&_value, bIsBigEndian);
 
-    return find_array(nOffset, nSize, (char *)&_value, 8, pProcessData);
+    return find_array(nOffset, nSize, (char *)&_value, 8, pPdStruct);
 }
 
 void XBinary::endian_float(float *pValue, bool bIsBigEndian)
