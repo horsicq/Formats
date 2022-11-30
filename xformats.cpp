@@ -131,7 +131,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage, XA
 
 qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
-    // TODO pMemoryMap
+    // TODO pMemoryMap !!!
     qint64 nResult = 0;  // FT_DEX, FT_ZIP
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
