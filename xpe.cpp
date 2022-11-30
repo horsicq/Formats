@@ -974,11 +974,11 @@ void XPE::setOptionalHeader_DataDirectory(quint32 nNumber, XPE_DEF::IMAGE_DATA_D
     if (nNumber < getOptionalHeader_NumberOfRvaAndSizes())  // TODO Check!!!
     {
         if (is64()) {
-            write_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),
-                                       pDataDirectory);
+            write_IMAGE_DATA_DIRECTORY(
+                getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY), pDataDirectory);
         } else {
-            write_IMAGE_DATA_DIRECTORY(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY),
-                                       pDataDirectory);
+            write_IMAGE_DATA_DIRECTORY(
+                getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory) + nNumber * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY), pDataDirectory);
         }
     }
 }
@@ -8166,8 +8166,8 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
         DWORD dwFormatType = 0;
         DWORD dwSignerInfo = 0;
 
-        if (CryptQueryObject(CERT_QUERY_OBJECT_FILE, wszFilePath, CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY, 0, &dwEncoding, &dwContentType,
-                             &dwFormatType, &hStore, &hMsg, NULL)) {
+        if (CryptQueryObject(CERT_QUERY_OBJECT_FILE, wszFilePath, CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY, 0, &dwEncoding,
+                             &dwContentType, &dwFormatType, &hStore, &hMsg, NULL)) {
             if (CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfo)) {
                 char *_pSignerInfo = new char[dwSignerInfo];
 
@@ -8185,8 +8185,9 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
                                                       pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].cbData, 0, NULL, &dwOpusInfo)) {
                                     char *_pOpusInfo = new char[dwOpusInfo];
 
-                                    if (CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, SPC_SP_OPUS_INFO_OBJID, pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].pbData,
-                                                          pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].cbData, 0, (PVOID)_pOpusInfo, &dwOpusInfo)) {
+                                    if (CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, SPC_SP_OPUS_INFO_OBJID,
+                                                          pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].pbData, pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].cbData, 0,
+                                                          (PVOID)_pOpusInfo, &dwOpusInfo)) {
                                         SPC_SP_OPUS_INFO *pOpusInfo = (SPC_SP_OPUS_INFO *)_pOpusInfo;
 
                                         result.sProgramName = QString::fromWCharArray(pOpusInfo->pwszProgramName);
@@ -8244,8 +8245,9 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
                                                       pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData, 0, NULL, &dwCounterSignerInfo)) {
                                     char *_pCounterSignerInfo = new char[dwCounterSignerInfo];
 
-                                    if (CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, PKCS7_SIGNER_INFO, pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
-                                                          pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData, 0, (PVOID)_pCounterSignerInfo, &dwCounterSignerInfo)) {
+                                    if (CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, PKCS7_SIGNER_INFO,
+                                                          pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData, pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData, 0,
+                                                          (PVOID)_pCounterSignerInfo, &dwCounterSignerInfo)) {
                                         CMSG_SIGNER_INFO *pCounterSignerInfo = (CMSG_SIGNER_INFO *)_pCounterSignerInfo;
 
                                         CERT_INFO CertInfo = {};
@@ -8253,8 +8255,8 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
                                         CertInfo.Issuer = pCounterSignerInfo->Issuer;
                                         CertInfo.SerialNumber = pCounterSignerInfo->SerialNumber;
 
-                                        PCCERT_CONTEXT pCertContext =
-                                            CertFindCertificateInStore(hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
+                                        PCCERT_CONTEXT pCertContext = CertFindCertificateInStore(hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
+                                                                                                 CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
 
                                         if (pCertContext) {
                                             DWORD dwData = pCertContext->pCertInfo->SerialNumber.cbData;
