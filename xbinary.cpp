@@ -98,6 +98,8 @@ void XBinary::setDevice(QIODevice *pDevice)
     if (g_pDevice) {
         if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
+        // qDebug("%s",XBinary::valueToHex((quint64)g_pDevice).toLatin1().data());
+
         g_nSize = g_pDevice->size();
 
         if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
