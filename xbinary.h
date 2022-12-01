@@ -154,6 +154,7 @@ public:
         MMT_OVERLAY,
         MMT_DATA,
         MMT_OBJECT,
+        MMT_TABLE
     };
 
     struct _MEMORY_RECORD {

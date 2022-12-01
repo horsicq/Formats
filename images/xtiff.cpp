@@ -57,7 +57,152 @@ bool XTiff::isValid(QIODevice *pDevice)
 
 XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
 {
-    return XBinary::getMemoryMap(pPdStruct);
+    Q_UNUSED(pPdStruct) // TODO
+
+    qint32 nIndex = 0;
+
+    _MEMORY_MAP result = {};
+
+    qint64 nTotalSize = getSize();
+
+    result.nRawSize = nTotalSize;
+    result.bIsBigEndian = isBigEndian();
+
+    if(result.nRawSize > 8)
+    {
+        {
+            _MEMORY_RECORD record = {};
+
+            record.nIndex = nIndex++;
+            record.type = MMT_HEADER;
+            record.nOffset = 0;
+            record.nSize = 8;
+            record.nAddress = -1;
+            record.sName = tr("Header");
+
+            result.listRecords.append(record);
+        }
+
+        qint64 nTableOffset = read_uint32(4,result.bIsBigEndian);
+
+        while (nTableOffset) {
+            quint16 nTableCount = read_uint16(nTableOffset,result.bIsBigEndian);
+
+            {
+                _MEMORY_RECORD record = {};
+
+                record.nIndex = nIndex++;
+                record.type = MMT_TABLE;
+                record.nOffset = nTableOffset;
+                record.nSize = sizeof(quint16) + sizeof(IFD_ENTRY) * nTableCount;
+                record.nAddress = -1;
+                record.sName = tr("Table");
+
+                result.listRecords.append(record);
+            }
+
+            qint64 nCurrentOffset = nTableOffset + sizeof(quint16);
+
+            for (qint32 i = 0; i < nTableCount; i++) {
+
+                quint16 nTag = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nTag), result.bIsBigEndian);
+                quint16 nType = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nType), result.bIsBigEndian);
+                quint32 nCount = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nCount), result.bIsBigEndian);
+
+                //1 = BYTE 8-bit unsigned integer.
+                //2 = ASCII 8-bit byte that contains a 7-bit ASCII code; the last byte must be NUL (binary zero).
+                //3 = SHORT 16-bit (2-byte) unsigned integer.
+                //4 = LONG 32-bit (4-byte) unsigned integer.
+                //5 = RATIONAL Two LONGs: the first represents the numerator of a fraction; the second, the denominator
+                //6 = SBYTE An 8-bit signed (twos-complement) integer.
+                //7 = UNDEFINED An 8-bit byte that may contain anything, depending on the definition of the field.
+                //8 = SSHORT A 16-bit (2-byte) signed (twos-complement) integer.
+                //9 = SLONG A 32-bit (4-byte) signed (twos-complement) integer.
+                //10 = SRATIONAL Two SLONG’s: the first represents the numerator of a fraction, the second the denominator.
+                //11 = FLOAT Single precision (4-byte) IEEE format.
+                //12 = DOUBLE Double precision (8-byte) IEEE format.
+
+                qint32 nBaseTypeSize = 0;
+
+                // TODO a function
+                switch (nType) {
+                case 1:
+                    nBaseTypeSize = 1;
+                    break;
+                case 2:
+                    nBaseTypeSize = 1;
+                    break;
+                case 3:
+                    nBaseTypeSize = 2;
+                    break;
+                case 4:
+                    nBaseTypeSize = 4;
+                    break;
+                case 5:
+                    nBaseTypeSize = 8;
+                    break;
+                case 6:
+                    nBaseTypeSize = 1;
+                    break;
+                case 7:
+                    nBaseTypeSize = 1;
+                    break;
+                case 8:
+                    nBaseTypeSize = 2;
+                    break;
+                case 9:
+                    nBaseTypeSize = 4;
+                    break;
+                case 10:
+                    nBaseTypeSize = 8;
+                    break;
+                case 11:
+                    nBaseTypeSize = 4;
+                    break;
+                case 12:
+                    nBaseTypeSize = 8;
+                    break;
+                default:
+                    nBaseTypeSize = 0;
+                }
+
+                qint64 nDataSize = nBaseTypeSize * nCount;
+
+                if ( nDataSize > 4) {
+                    quint32 nOffset = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nOffset), result.bIsBigEndian);
+
+                    _MEMORY_RECORD record = {};
+
+                    record.nIndex = nIndex++;
+                    record.type = MMT_FILESEGMENT;
+                    record.nOffset = nOffset;
+                    record.nSize = nDataSize;
+                    record.nAddress = -1;
+                    record.sName = QString("%1-%2").arg(XBinary::valueToHex(nTag),XBinary::valueToHex(nType));
+
+                    result.listRecords.append(record);
+                }
+
+                nCurrentOffset += sizeof(IFD_ENTRY);
+            }
+
+            nTableOffset = read_uint32(nCurrentOffset,result.bIsBigEndian);
+
+            {
+                _MEMORY_RECORD record = {};
+
+                record.nIndex = nIndex++;
+                record.type = MMT_DATA;
+                record.nOffset = nCurrentOffset;
+                record.nSize = sizeof(quint32);
+                record.nAddress = -1;
+
+                result.listRecords.append(record);
+            }
+        }
+    }
+
+    return result;
 }
 
 XBinary::FT XTiff::getFileType()
@@ -81,7 +226,7 @@ QString XTiff::getFileFormatExt()
 
 qint64 XTiff::getFileFormatSize()
 {
-    return XBinary::getFileFormatSize();
+    return _calculateRawSize();
 }
 
 bool XTiff::isBigEndian()

@@ -26,6 +26,16 @@
 class XTiff : public XBinary {
     Q_OBJECT
 
+#pragma pack(push)
+#pragma pack(1)
+    struct IFD_ENTRY {
+        quint16 nTag;
+        quint16 nType;
+        quint32 nCount;
+        quint32 nOffset;
+    };
+#pragma pack(pop)
+
 public:
     explicit XTiff(QIODevice *pDevice = nullptr);
     ~XTiff();
