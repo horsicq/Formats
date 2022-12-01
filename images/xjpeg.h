@@ -48,8 +48,13 @@ public:
 
     QList<CHUNK> getChunks(PDSTRUCT *pPdStruct = nullptr);
     static QList<CHUNK> _getChunksById(QList<CHUNK> *pListChunks, quint8 nId);
+    QString getComment(QList<CHUNK> *pListChunks);
     QString getComment();
+
+    QString getDqtMD5(QList<CHUNK> *pListChunks);
     QString getDqtMD5();
+
+    bool isChunkPresent(QList<CHUNK> *pListChunks, quint8 nId);
 
 private:
     CHUNK _readChunk(qint64 nOffset);

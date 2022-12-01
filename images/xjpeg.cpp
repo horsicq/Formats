@@ -198,13 +198,11 @@ QList<XJpeg::CHUNK> XJpeg::_getChunksById(QList<CHUNK> *pListChunks, quint8 nId)
     return listResult;
 }
 
-QString XJpeg::getComment()
+QString XJpeg::getComment(QList<CHUNK> *pListChunks)
 {
     QString sResult;
 
-    QList<CHUNK> listChunks = getChunks();
-
-    QList<XJpeg::CHUNK> listComments = _getChunksById(&listChunks, 0xFE);  // COMMENT
+    QList<XJpeg::CHUNK> listComments = _getChunksById(pListChunks, 0xFE);  // COMMENT
 
     qint32 nNumberOfRecords = listComments.count();
 
@@ -221,13 +219,18 @@ QString XJpeg::getComment()
     return sResult;
 }
 
-QString XJpeg::getDqtMD5()
+QString XJpeg::getComment()
+{
+    QList<CHUNK> listChunks = getChunks();
+
+    return getComment(&listChunks);
+}
+
+QString XJpeg::getDqtMD5(QList<CHUNK> *pListChunks)
 {
     QString sResult;
 
-    QList<CHUNK> listChunks = getChunks();
-
-    QList<XJpeg::CHUNK> listComments = _getChunksById(&listChunks, 0xDB);  // DQT
+    QList<XJpeg::CHUNK> listComments = _getChunksById(pListChunks, 0xDB);  // DQT
 
     qint32 nNumberOfRecords = listComments.count();
 
@@ -242,6 +245,29 @@ QString XJpeg::getDqtMD5()
     sResult = crypto.result().toHex();
 
     return sResult;
+}
+
+QString XJpeg::getDqtMD5()
+{
+    QList<CHUNK> listChunks = getChunks();
+
+    return getDqtMD5(&listChunks);
+}
+
+bool XJpeg::isChunkPresent(QList<CHUNK> *pListChunks, quint8 nId)
+{
+    bool bResult = false;
+
+    qint32 nNumberOfRecords = pListChunks->count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (pListChunks->at(i).nId == nId) {
+            bResult = true;
+            break;
+        }
+    }
+
+    return bResult;
 }
 
 XJpeg::CHUNK XJpeg::_readChunk(qint64 nOffset)
