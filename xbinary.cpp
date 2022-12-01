@@ -1961,9 +1961,9 @@ void XBinary::endian_double(double *pValue, bool bIsBigEndian)
     }
 }
 
-qint64 XBinary::find_ansiString(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData)
+qint64 XBinary::find_ansiString(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct)
 {
-    return find_array(nOffset, nSize, sString.toLatin1().data(), sString.size(), pProcessData);
+    return find_array(nOffset, nSize, sString.toLatin1().data(), sString.size(), pPdStruct);
 }
 
 qint64 XBinary::find_unicodeString(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData)

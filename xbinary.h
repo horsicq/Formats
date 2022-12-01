@@ -760,7 +760,7 @@ public:
     static void endian_float(float *pValue, bool bIsBigEndian);
     static void endian_double(double *pValue, bool bIsBigEndian);
 
-    qint64 find_ansiString(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData = nullptr);
+    qint64 find_ansiString(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_unicodeString(qint64 nOffset, qint64 nSize, QString sString,
                               PDSTRUCT *pProcessData = nullptr);  // mb TODO endian
     qint64 find_utf8String(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData = nullptr);
