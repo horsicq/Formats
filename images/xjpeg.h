@@ -22,6 +22,7 @@
 #define XJPEG_H
 
 #include "xbinary.h"
+#include "xtiff.h"
 
 class XJpeg : public XBinary {
     Q_OBJECT
@@ -55,6 +56,12 @@ public:
     QString getDqtMD5();
 
     bool isChunkPresent(QList<CHUNK> *pListChunks, quint8 nId);
+
+    OFFSETSIZE getExif(QList<CHUNK> *pListChunks);
+    bool isExifPresent(OFFSETSIZE osExif);
+
+    QList<XTiff::CHUNK> getExifChunks(OFFSETSIZE osExif,PDSTRUCT *pPdStruct = nullptr);
+    QString getExifCameraName(OFFSETSIZE osExif,QList<XTiff::CHUNK> *pListExifChunks);
 
 private:
     CHUNK _readChunk(qint64 nOffset);

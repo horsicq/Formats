@@ -37,6 +37,12 @@ class XTiff : public XBinary {
 #pragma pack(pop)
 
 public:
+    struct CHUNK {
+        quint32 nTag;
+        qint64 nOffset;
+        qint64 nSize;
+    };
+
     explicit XTiff(QIODevice *pDevice = nullptr);
     ~XTiff();
 
@@ -48,6 +54,14 @@ public:
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize();
     virtual bool isBigEndian();
+
+    QList<CHUNK> getChunks(PDSTRUCT *pPdStruct = nullptr);
+    static QList<CHUNK> _getChunksByTag(QList<CHUNK> *pListChunks, quint16 nTag);
+
+    QString getCameraName(QList<CHUNK> *pListChunks);
+
+private:
+    qint32 getBaseTypeSize(quint16 nType);
 };
 
 #endif  // XTIFF_H
