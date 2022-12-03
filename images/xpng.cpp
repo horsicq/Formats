@@ -57,7 +57,9 @@ QString XPNG::getFileFormatString()
 {
     QString sResult;
 
-    sResult = QString("PNG");
+    QString sResolution = QString("%1x%2").arg(read_uint32(16, true)).arg(read_uint32(20, true));
+
+    sResult = QString("PNG(%1)").arg(sResolution);
 
     return sResult;
 }
