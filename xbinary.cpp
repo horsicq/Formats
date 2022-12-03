@@ -1966,9 +1966,9 @@ qint64 XBinary::find_ansiString(qint64 nOffset, qint64 nSize, QString sString, P
     return find_array(nOffset, nSize, sString.toLatin1().data(), sString.size(), pPdStruct);
 }
 
-qint64 XBinary::find_unicodeString(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData)
+qint64 XBinary::find_unicodeString(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct)
 {
-    return find_array(nOffset, nSize, (char *)sString.utf16(), sString.size() * 2, pProcessData);
+    return find_array(nOffset, nSize, (char *)sString.utf16(), sString.size() * 2, pPdStruct);
 }
 
 qint64 XBinary::find_utf8String(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData)
