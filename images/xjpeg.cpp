@@ -108,19 +108,7 @@ QString XJpeg::getFileFormatExt()
 
 qint64 XJpeg::getFileFormatSize()
 {
-    qint64 nResult = 0;
-
-    QList<CHUNK> listChunks = getChunks();
-
-    qint32 nNumberOfChunks = listChunks.count();
-
-    if (nNumberOfChunks > 0) {
-        if (listChunks.at(nNumberOfChunks - 1).nId == 0xD9) {
-            nResult = listChunks.at(nNumberOfChunks - 1).nDataOffset;
-        }
-    }
-
-    return nResult;
+    return _calculateRawSize();
 }
 
 QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
