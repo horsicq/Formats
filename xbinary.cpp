@@ -1971,11 +1971,11 @@ qint64 XBinary::find_unicodeString(qint64 nOffset, qint64 nSize, QString sString
     return find_array(nOffset, nSize, (char *)sString.utf16(), sString.size() * 2, pPdStruct);
 }
 
-qint64 XBinary::find_utf8String(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData)
+qint64 XBinary::find_utf8String(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct)
 {
     QByteArray baData = sString.toUtf8();
 
-    return find_array(nOffset, nSize, (char *)baData.data(), baData.size(), pProcessData);
+    return find_array(nOffset, nSize, (char *)baData.data(), baData.size(), pPdStruct);
 }
 
 qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize, PDSTRUCT *pProcessData)
