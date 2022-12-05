@@ -213,6 +213,8 @@ public:
         FT_GIF,
         FT_BMP,
         FT_IMAGE,
+        FT_VIDEO,
+        FT_AUDIO,
         FT_IPA,
         FT_JAR,
         FT_JPEG,
@@ -230,7 +232,9 @@ public:
         FT_ZIP,
         FT_GZIP,
         FT_ICO,
-        FT_CUR
+        FT_CUR,
+        FT_MP3,
+        FT_MP4
         // TODO more
     };
 

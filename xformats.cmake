@@ -19,4 +19,5 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/images/xpng.cpp
     ${CMAKE_CURRENT_LIST_DIR}/images/xjpeg.cpp
     ${CMAKE_CURRENT_LIST_DIR}/images/xtiff.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/video/xmp4.cpp
 )

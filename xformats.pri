@@ -101,6 +101,11 @@ contains(XCONFIG, use_archive) {
     include($$PWD/images/xtiff.pri)
 }
 
+!contains(XCONFIG, xmp4) {
+    XCONFIG += xmp4
+    include($$PWD/video/xmp4.pri)
+}
+
 DISTFILES += \
     $$PWD/LICENSE \
     $$PWD/README.md \

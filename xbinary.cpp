@@ -562,6 +562,12 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_IMAGE:
             sResult = tr("Image");
             break;
+        case FT_VIDEO:
+            sResult = tr("Video");
+            break;
+        case FT_AUDIO:
+            sResult = tr("Audio");
+            break;
         case FT_IPA:
             sResult = QString("IPA");
             break;
@@ -615,6 +621,12 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
             break;
         case FT_CUR:
             sResult = QString("CUR");
+            break;
+        case FT_MP3:
+            sResult = QString("MP3");
+            break;
+        case FT_MP4:
+            sResult = QString("MP4");
             break;
     }
 
@@ -673,6 +685,12 @@ QString XBinary::fileTypeIdToExts(FT fileType)
             break;
         case FT_GIF:
             sResult = QString("GIF");
+            break;
+        case FT_MP3:
+            sResult = QString("MP3");
+            break;
+        case FT_MP4:
+            sResult = QString("MP4");
             break;
         default:
             sResult = tr("Unknown");
@@ -1750,10 +1768,10 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qin
 {
     qint64 nResult = -1;
 
-    PDSTRUCT processDataEmpty = {};
+    PDSTRUCT ppStructEmpty = {};
 
     if (!pPdStruct) {
-        pPdStruct = &processDataEmpty;
+        pPdStruct = &ppStructEmpty;
     }
     // TODO CheckSize function
     // TODO Optimize
@@ -4133,9 +4151,15 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'MM'002A", 0) || compareSignature(&memoryMap, "'II'2A00", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_TIFF);
-        } else if (compareSignature(&memoryMap, "00000100", 0) || compareSignature(&memoryMap, "00000200", 0)) {
+        } else if (compareSignature(&memoryMap, "00000100", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_ICO);
+        } else if (compareSignature(&memoryMap, "00000200", 0)) {
+            stResult.insert(FT_IMAGE);
+            stResult.insert(FT_CUR);
+        } else if (compareSignature(&memoryMap, "000000..'ftyp'", 0)) {
+            stResult.insert(FT_VIDEO);
+            stResult.insert(FT_MP4);
         } else if (compareSignature(&memoryMap, "'dex\n'......00")) {
             stResult.insert(FT_DEX);
         } else if (compareSignature(&memoryMap, "02000C00")) {
@@ -4271,6 +4295,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_ZIP;
     } else if (pStFileTypes->contains(FT_GZIP)) {
         result = FT_GZIP;
+    } else if (pStFileTypes->contains(FT_7Z)) {
+        result = FT_7Z;
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
         result = FT_ANDROIDXML;
     } else if (pStFileTypes->contains(FT_DEX)) {
@@ -4287,6 +4313,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_GIF;
     } else if (pStFileTypes->contains(FT_TIFF)) {
         result = FT_TIFF;
+    } else if (pStFileTypes->contains(FT_MP4)) {
+        result = FT_MP4;
     } else if (pStFileTypes->contains(FT_PDF)) {
         result = FT_PDF;
     } else if (pStFileTypes->contains(FT_BINARY)) {
@@ -4352,6 +4380,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_JAR)) listResult.append(FT_JAR);
     if (stFileTypes.contains(FT_APK)) listResult.append(FT_APK);
     if (stFileTypes.contains(FT_IPA)) listResult.append(FT_IPA);
+    if (stFileTypes.contains(FT_7Z)) listResult.append(FT_7Z);
     if (stFileTypes.contains(FT_DEX)) listResult.append(FT_DEX);
     if (stFileTypes.contains(FT_PDF)) listResult.append(FT_PDF);
     if (stFileTypes.contains(FT_PNG)) listResult.append(FT_PNG);
@@ -4360,6 +4389,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_BMP)) listResult.append(FT_BMP);
     if (stFileTypes.contains(FT_GIF)) listResult.append(FT_GIF);
     if (stFileTypes.contains(FT_TIFF)) listResult.append(FT_TIFF);
+    if (stFileTypes.contains(FT_MP4)) listResult.append(FT_MP4);
     if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
     if (stFileTypes.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
     if (stFileTypes.contains(FT_NE)) listResult.append(FT_NE);
