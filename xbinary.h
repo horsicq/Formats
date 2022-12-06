@@ -234,7 +234,10 @@ public:
         FT_ICO,
         FT_CUR,
         FT_MP3,
-        FT_MP4
+        FT_MP4,
+        FT_RIFF,
+        FT_AVI,
+        FT_WEBP
         // TODO more
     };
 

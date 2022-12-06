@@ -106,6 +106,11 @@ contains(XCONFIG, use_archive) {
     include($$PWD/video/xmp4.pri)
 }
 
+!contains(XCONFIG, xriff) {
+    XCONFIG += xriff
+    include($$PWD/video/xriff.pri)
+}
+
 !contains(XCONFIG, xmp3) {
     XCONFIG += xmp3
     include($$PWD/audio/xmp3.pri)

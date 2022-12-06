@@ -628,6 +628,15 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_MP4:
             sResult = QString("MP4");
             break;
+        case FT_AVI:
+            sResult = QString("AVI");
+            break;
+        case FT_WEBP:
+            sResult = QString("WebP");
+            break;
+        case FT_RIFF:
+            sResult = QString("RIFF");
+            break;
     }
 
     return sResult;
@@ -691,6 +700,9 @@ QString XBinary::fileTypeIdToExts(FT fileType)
             break;
         case FT_MP4:
             sResult = QString("MP4");
+            break;
+        case FT_RIFF:
+            sResult = QString("RIFF(avi,webp)");
             break;
         default:
             sResult = tr("Unknown");
@@ -4157,6 +4169,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "00000200", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_CUR);
+        } else if (compareSignature(&memoryMap, "'ID3'..00", 0)) {
+            stResult.insert(FT_AUDIO);
+            stResult.insert(FT_MP3);
         } else if (compareSignature(&memoryMap, "000000..'ftyp'", 0)) {
             stResult.insert(FT_VIDEO);
             stResult.insert(FT_MP4);
@@ -4169,6 +4184,15 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'%PDF'", 0)) {
             stResult.insert(FT_DOCUMENT);
             stResult.insert(FT_PDF);
+        } else if (compareSignature(&memoryMap, "'RIFF'", 0) || compareSignature(&memoryMap, "'RIFT'", 0)) {
+            stResult.insert(FT_RIFF);
+            if (compareSignature(&memoryMap, "'RIFF'........'AVI '", 0)) {
+                stResult.insert(FT_VIDEO);
+                stResult.insert(FT_AVI);
+            } else if (compareSignature(&memoryMap, "'RIFF'........'WEBPVP8'", 0)) {
+                stResult.insert(FT_IMAGE);
+                stResult.insert(FT_WEBP);
+            }
         }
 
         if (isPlainTextType(&baHeader)) {
@@ -4313,8 +4337,16 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_GIF;
     } else if (pStFileTypes->contains(FT_TIFF)) {
         result = FT_TIFF;
+    } else if (pStFileTypes->contains(FT_MP3)) {
+        result = FT_MP3;
     } else if (pStFileTypes->contains(FT_MP4)) {
-        result = FT_MP4;
+        result = FT_MP4;   
+    } else if (pStFileTypes->contains(FT_AVI)) {
+        result = FT_AVI;
+    } else if (pStFileTypes->contains(FT_WEBP)) {
+        result = FT_WEBP;
+    } else if (pStFileTypes->contains(FT_RIFF)) {
+        result = FT_RIFF;
     } else if (pStFileTypes->contains(FT_PDF)) {
         result = FT_PDF;
     } else if (pStFileTypes->contains(FT_BINARY)) {
@@ -4389,7 +4421,11 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_BMP)) listResult.append(FT_BMP);
     if (stFileTypes.contains(FT_GIF)) listResult.append(FT_GIF);
     if (stFileTypes.contains(FT_TIFF)) listResult.append(FT_TIFF);
+    if (stFileTypes.contains(FT_MP3)) listResult.append(FT_MP3);
     if (stFileTypes.contains(FT_MP4)) listResult.append(FT_MP4);
+    if (stFileTypes.contains(FT_RIFF)) listResult.append(FT_RIFF);
+    if (stFileTypes.contains(FT_AVI)) listResult.append(FT_AVI);
+    if (stFileTypes.contains(FT_WEBP)) listResult.append(FT_WEBP);
     if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
     if (stFileTypes.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
     if (stFileTypes.contains(FT_NE)) listResult.append(FT_NE);
