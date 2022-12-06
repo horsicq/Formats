@@ -1,5 +1,7 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/images)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/video)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/audio)
 # TODO
 
 set(XFORMATS_SOURCES
@@ -20,4 +22,5 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/images/xjpeg.cpp
     ${CMAKE_CURRENT_LIST_DIR}/images/xtiff.cpp
     ${CMAKE_CURRENT_LIST_DIR}/video/xmp4.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xmp3.cpp
 )

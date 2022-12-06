@@ -136,7 +136,8 @@ bool XMP4::isTagValid(QString sTagName)
         (sTagName == "trak") ||
         (sTagName == "udta") ||
         (sTagName == "iods") ||
-        (sTagName == "uuid")) {
+        (sTagName == "uuid") ||
+        (sTagName == "free")) {
         bResult = true;
     } else {
 #ifdef QT_DEBUG

@@ -76,6 +76,9 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDe
     } else if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) {
         XMP4 xmp4(pDevice);
         result = xmp4.getMemoryMap(pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) {
+        XMP3 xmp3(pDevice);
+        result = xmp3.getMemoryMap(pPdStruct);
     }
 #ifdef USE_DEX  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -633,6 +636,9 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     } else if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) {
         XMP4 xmp4(pDevice);
         result = xmp4.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) {
+        XMP3 xmp3(pDevice);
+        result = xmp3.getFileFormatInfo();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
