@@ -35,7 +35,7 @@ bool XMP3::isValid()
     if (getSize() > 0x20) {
         _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
 
-        if (compareSignature(&memoryMap, "000000..'ftyp'", 0)) {
+        if (compareSignature(&memoryMap, "'ID3'0200", 0) || compareSignature(&memoryMap, "'ID3'0300", 0) || compareSignature(&memoryMap, "'ID3'0400", 0)) {
             // TODO more checks
             bResult = true;
         }
@@ -55,7 +55,7 @@ QString XMP3::getFileFormatString()
 {
     QString sResult;
 
-    sResult = "MP3";
+    sResult = QString("MP3(%1)").arg(getVersion());
 
     return sResult;
 }
@@ -84,30 +84,30 @@ XBinary::_MEMORY_MAP XMP3::getMemoryMap(PDSTRUCT *pPdStruct)
 
     qint32 nIndex = 0;
 
-    qint64 nOffset = 0;
+    _MEMORY_MAP _memoryMap = XBinary::getMemoryMap();
 
-    while (!(pPdStruct->bIsStop)) {
-        quint32 nChunkSize = read_uint32(nOffset,true);
-        QString sTag = read_ansiString(nOffset + 4,4);
+    if (compareSignature(&_memoryMap, "'ID3'..00", 0)) {
 
-        if (!isTagValid(sTag)) {
-            break;
-        }
+        quint32 nVar[4] = {};
+        nVar[0] = read_uint8(6);
+        nVar[1] = read_uint8(7);
+        nVar[2] = read_uint8(8);
+        nVar[3] = read_uint8(9);
+
+        qint64 nOffset = 10 + ((nVar[0]<<21)|(nVar[1]<<14)|(nVar[2]<<7)|(nVar[3]));
 
         {
             _MEMORY_RECORD record = {};
 
             record.nIndex = nIndex++;
-            record.type = MMT_FILESEGMENT;
-            record.nOffset = nOffset;
-            record.nSize = nChunkSize;
+            record.type = MMT_HEADER;
+            record.nOffset = 0;
+            record.nSize = nOffset;
             record.nAddress = -1;
-            record.sName = sTag;
+            record.sName = tr("Header");
 
             result.listRecords.append(record);
         }
-
-        nOffset += nChunkSize;
     }
 
     return result;
@@ -118,31 +118,21 @@ XBinary::FT XMP3::getFileType()
     return FT_MP4;
 }
 
-bool XMP3::isTagValid(QString sTagName)
+QString XMP3::getVersion()
 {
-    bool bResult = false;
+    QString sResult;
 
-    if ((sTagName == "ftyp") ||
-        (sTagName == "pdin") ||
-        (sTagName == "moov") ||
-        (sTagName == "moof") ||
-        (sTagName == "mfra") ||
-        (sTagName == "mdat") ||
-        (sTagName == "stts") ||
-        (sTagName == "stsc") ||
-        (sTagName == "stsz") ||
-        (sTagName == "meta") ||
-        (sTagName == "mvhd") ||
-        (sTagName == "trak") ||
-        (sTagName == "udta") ||
-        (sTagName == "iods") ||
-        (sTagName == "uuid")) {
-        bResult = true;
-    } else {
-#ifdef QT_DEBUG
-        qDebug("%s",sTagName.toLatin1().data());
-#endif
+    if (getSize() > 0x20) {
+        _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
+
+        if (compareSignature(&memoryMap, "'ID3'0200", 0)) {
+            sResult = "3.2";
+        } else if (compareSignature(&memoryMap, "'ID3'0300", 0)) {
+            sResult = "3.3";
+        } else if (compareSignature(&memoryMap, "'ID3'0400", 0)) {
+            sResult = "3.4";
+        }
     }
 
-    return bResult;
+    return sResult;
 }

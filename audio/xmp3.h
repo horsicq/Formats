@@ -38,9 +38,7 @@ public:
     virtual qint64 getFileFormatSize();
     virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
     virtual FT getFileType();
-
-private:
-    bool isTagValid(QString sTagName);
+    virtual QString getVersion();
 };
 
 #endif  // XMP3_H
