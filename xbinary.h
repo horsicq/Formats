@@ -875,6 +875,7 @@ public:
     static _MEMORY_RECORD getMemoryRecordByRelAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
 
     static qint32 addressToLoadSection(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
+    static bool isAddressInHeader(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
 
     static bool isSolidAddressRange(_MEMORY_MAP *pMemoryMap, XADDR nAddress, qint64 nSize);
 

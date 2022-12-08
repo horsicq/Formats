@@ -516,6 +516,8 @@ public:
     qint32 getSectionNumber(QString sSectionName);
     static qint32 getSectionNumber(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
 
+    static QString sectionCharacteristicToString(quint32 nValue);
+
     bool isImportPresent();
 
     QList<IMPORT_RECORD> getImportRecords(PDSTRUCT *pPdStruct = nullptr);
@@ -1150,7 +1152,8 @@ public:
 
     virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap, SYMBOL_TYPE symbolType = SYMBOL_TYPE_ALL);
 
-    bool virtual _setLFANEW(quint64 nNewOffset);
+    virtual bool removeDosStub();
+    virtual bool addDosStub(QString sFileName);
 
     XPE_DEF::WIN_CERT_RECORD read_WIN_CERT_RECORD(qint64 nOffset);
     QList<CERT> getCertList();

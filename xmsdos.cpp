@@ -687,67 +687,58 @@ bool XMSDOS::removeDosStub()
 {
     bool bResult = false;
 
-    qint64 nOffset = getDosStubOffset();
-    qint64 nSize = getDosStubSize();
+//    qint64 nOffset = getDosStubOffset();
+//    qint64 nSize = getDosStubSize();
 
-    if (nSize) {
-        if (moveMemory(nOffset + nSize, nOffset, getSize() - nOffset - nSize)) {
-            bResult = resize(getDevice(), getSize() - nSize);
+//    if (nSize) {
+//        if (moveMemory(nOffset + nSize, nOffset, getSize() - nOffset - nSize)) {
+//            bResult = resize(getDevice(), getSize() - nSize);
 
-            if (bResult) {
-                _setLFANEW(nOffset);
-            }
-        }
-    }
+//            if (bResult) {
+//                _setLFANEW(nOffset);
+//            }
+//        }
+//    }
 
     return bResult;
 }
 
 bool XMSDOS::addDosStub(QString sFileName)
 {
+    Q_UNUSED(sFileName)
+
     bool bResult = false;
 
-    QFile file;
-    file.setFileName(sFileName);
+//    QFile file;
+//    file.setFileName(sFileName);
 
-    if (file.open(QIODevice::ReadOnly)) {
-        qint64 nOffset = getDosStubOffset();
-        qint64 nOldSize = getDosStubSize();
-        qint64 nNewSize = file.size();
+//    if (file.open(QIODevice::ReadOnly)) {
+//        qint64 nOffset = getDosStubOffset();
+//        qint64 nOldSize = getDosStubSize();
+//        qint64 nNewSize = file.size();
 
-        qint64 nDelta = nNewSize - nOldSize;
+//        qint64 nDelta = nNewSize - nOldSize;
 
-        bResult = true;
+//        bResult = true;
 
-        if (nDelta) {
-            if (resize(getDevice(), getSize() + nDelta)) {
-                bResult = moveMemory(nOffset + nOldSize, nOffset + nNewSize, getSize() - nOffset - nDelta);
+//        if (nDelta) {
+//            if (resize(getDevice(), getSize() + nDelta)) {
+//                bResult = moveMemory(nOffset + nOldSize, nOffset + nNewSize, getSize() - nOffset - nDelta);
 
-                if (bResult) {
-                    _setLFANEW(nOffset + nNewSize);
-                }
-            } else {
-                bResult = false;
-            }
-        }
+//                if (bResult) {
+//                    _setLFANEW(nOffset + nNewSize);
+//                }
+//            } else {
+//                bResult = false;
+//            }
+//        }
 
-        if (bResult) {
-            copyDeviceMemory(&file, 0, getDevice(), nOffset, nNewSize);
-        }
+//        if (bResult) {
+//            copyDeviceMemory(&file, 0, getDevice(), nOffset, nNewSize);
+//        }
 
-        file.close();
-    }
-
-    return bResult;
-}
-
-bool XMSDOS::_setLFANEW(quint64 nNewOffset)
-{
-    bool bResult = true;
-#ifdef QT_DEBUG
-    qDebug("TODO XMSDOS::_fixLFNewOffset");
-#endif
-    set_e_lfanew((quint32)nNewOffset);
+//        file.close();
+//    }
 
     return bResult;
 }

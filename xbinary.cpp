@@ -3576,6 +3576,19 @@ qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
     return nResult;
 }
 
+bool XBinary::isAddressInHeader(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
+{
+    bool bResult = false;
+
+    _MEMORY_RECORD mm = getMemoryRecordByAddress(pMemoryMap, nAddress);
+
+    if (mm.type == MMT_HEADER) {
+        bResult = true;
+    }
+
+    return bResult;
+}
+
 bool XBinary::isSolidAddressRange(XBinary::_MEMORY_MAP *pMemoryMap, quint64 nAddress, qint64 nSize)
 {
     bool bResult = false;

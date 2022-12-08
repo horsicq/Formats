@@ -1714,6 +1714,25 @@ qint32 XPE::getSectionNumber(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_
     return nResult;
 }
 
+QString XPE::sectionCharacteristicToString(quint32 nValue)
+{
+    QString sResult;
+
+    if (nValue & XPE_DEF::S_IMAGE_SCN_MEM_READ) {
+        sResult += "R";
+    }
+
+    if (nValue & XPE_DEF::S_IMAGE_SCN_MEM_WRITE) {
+        sResult += "W";
+    }
+
+    if (nValue & XPE_DEF::S_IMAGE_SCN_MEM_EXECUTE) {
+        sResult += "E";
+    }
+
+    return sResult;
+}
+
 bool XPE::isImportPresent()
 {
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
@@ -7455,27 +7474,93 @@ QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemor
     return listResult;
 }
 
-bool XPE::_setLFANEW(quint64 nNewOffset)
+bool XPE::removeDosStub()
 {
     bool bResult = true;
 
-    qint64 nRawDelta = nNewOffset - get_e_lfanew();
+    qint64 nStubOffset = getDosStubOffset();
+    qint64 nStubSize= getDosStubSize();
+    qint64 nNewStubSize = 0;
 
-    if (nRawDelta) {
+    if (nStubSize) {
+
+        qint32 nRawDelta = nNewStubSize - nStubSize;
+
+        nRawDelta = S_ALIGN_UP(nRawDelta, 4);
+
         qint64 nSectionsTableOffset = getSectionsTableOffset();
         qint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
         qint64 nHeadersSize = _calculateHeadersSize(nSectionsTableOffset,nNumberOfSections);
         qint64 nNewHeadersSize = _calculateHeadersSize(nSectionsTableOffset+nRawDelta,nNumberOfSections);
 
-        set_e_lfanew((quint32)nNewOffset);
+        qint64 nAlignDelta = nNewHeadersSize - nHeadersSize;
 
-        _fixHeadersSize();
-        _fixFileOffsets(nNewHeadersSize - nHeadersSize);
+//        if(nAlignDelta)
+//        {
+//            if (moveMemory(nHeadersSize, nNewHeadersSize, getSize() - nHeadersSize)) {
+//                bResult = resize(getDevice(), getSize() + nAlignDelta);
+
+//            }
+//        }
+
+        qint64 nHeadersRawSize = nSectionsTableOffset + sizeof(XPE_DEF::IMAGE_SECTION_HEADER) * nNumberOfSections - getNetHeaderOffset();
+
+        if (nRawDelta > 0) {
+            bResult = resize(getDevice(), getSize() + nAlignDelta);
+        } else if (nRawDelta < 0) {
+            if (bResult) {
+                // Move headers
+                bResult = moveMemory(nStubOffset + nStubSize, nStubOffset + nNewStubSize, nHeadersRawSize);
+            }
+
+            if (nAlignDelta) {
+                if (bResult) {
+                    bResult = moveMemory(nHeadersSize, nNewHeadersSize, getSize() - nHeadersSize);
+                }
+
+                if (bResult) {
+                    bResult = resize(getDevice(), getSize() + nAlignDelta);
+                }
+            }
+        }
+
+        if (bResult) {
+            set_e_lfanew((quint32)(nStubOffset + nNewStubSize));
+            _fixFileOffsets(nAlignDelta);
+            _fixHeadersSize();
+        }
     }
 
     return bResult;
 }
+
+bool XPE::addDosStub(QString sFileName)
+{
+    return false;
+}
+
+//bool XPE::_setLFANEW(quint64 nNewOffset)
+//{
+//    bool bResult = true;
+
+//    qint64 nRawDelta = nNewOffset - get_e_lfanew();
+
+//    if (nRawDelta) {
+//        qint64 nSectionsTableOffset = getSectionsTableOffset();
+//        qint32 nNumberOfSections = getFileHeader_NumberOfSections();
+
+//        qint64 nHeadersSize = _calculateHeadersSize(nSectionsTableOffset,nNumberOfSections);
+//        qint64 nNewHeadersSize = _calculateHeadersSize(nSectionsTableOffset+nRawDelta,nNumberOfSections);
+
+//        set_e_lfanew((quint32)nNewOffset);
+
+//        _fixHeadersSize();
+//        _fixFileOffsets(nNewHeadersSize - nHeadersSize);
+//    }
+
+//    return bResult;
+//}
 
 XPE_DEF::WIN_CERT_RECORD XPE::read_WIN_CERT_RECORD(qint64 nOffset)
 {
@@ -9449,7 +9534,7 @@ qint64 XPE::_getMinSectionOffset()
 void XPE::_fixFileOffsets(qint64 nDelta)
 {
     if (nDelta) {
-        setOptionalHeader_SizeOfHeaders(getOptionalHeader_SizeOfHeaders() + nDelta);
+        setOptionalHeader_SizeOfHeaders(getOptionalHeader_SizeOfHeaders() + nDelta); // TODO mb calculate SizeOfHeaders
         quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
         for (quint32 i = 0; i < nNumberOfSections; i++) {
