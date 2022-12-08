@@ -85,6 +85,9 @@ public:
     static XBinary::FT setFileTypeComboBox(QString sFileName, QComboBox *pComboBox);
     static bool setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian);
 #endif
+    static bool saveAllPEIconsToDirectory(QIODevice *pDevice, QString sDirectoryName);
+    static bool saveAllPECursorsToDirectory(QIODevice *pDevice, QString sDirectoryName);
+    static bool savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> *pListResourceRecords, XPE::RESOURCE_RECORD resourceRecord, QString sFileName);
 
 private:
     static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, bool bExtra = false);

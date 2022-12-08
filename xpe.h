@@ -648,6 +648,14 @@ public:
     bool isResourceGroupIdPresent(quint32 nID);
     bool isResourceGroupIdPresent(quint32 nID, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
+    bool isResourceGroupIconsPresent();
+    bool isResourceGroupIconsPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+
+    bool isResourceGroupCursorsPresent();
+    bool isResourceGroupCursorsPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+
+    static QString resourceRecordToString(XPE::RESOURCE_RECORD resourceRecord);
+
     qint64 getModuleAddress();
 
     virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
@@ -1141,6 +1149,8 @@ public:
     void setNetHeader_ManagedNativeHeader_Size(quint32 nValue);
 
     virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap, SYMBOL_TYPE symbolType = SYMBOL_TYPE_ALL);
+
+    bool virtual _setLFANEW(quint64 nNewOffset);
 
     XPE_DEF::WIN_CERT_RECORD read_WIN_CERT_RECORD(qint64 nOffset);
     QList<CERT> getCertList();

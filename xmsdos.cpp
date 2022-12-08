@@ -695,7 +695,7 @@ bool XMSDOS::removeDosStub()
             bResult = resize(getDevice(), getSize() - nSize);
 
             if (bResult) {
-                set_e_lfanew((quint32)nOffset);
+                _setLFANEW(nOffset);
             }
         }
     }
@@ -724,7 +724,7 @@ bool XMSDOS::addDosStub(QString sFileName)
                 bResult = moveMemory(nOffset + nOldSize, nOffset + nNewSize, getSize() - nOffset - nDelta);
 
                 if (bResult) {
-                    set_e_lfanew((quint32)(nOffset + nNewSize));
+                    _setLFANEW(nOffset + nNewSize);
                 }
             } else {
                 bResult = false;
@@ -737,6 +737,17 @@ bool XMSDOS::addDosStub(QString sFileName)
 
         file.close();
     }
+
+    return bResult;
+}
+
+bool XMSDOS::_setLFANEW(quint64 nNewOffset)
+{
+    bool bResult = true;
+#ifdef QT_DEBUG
+    qDebug("TODO XMSDOS::_fixLFNewOffset");
+#endif
+    set_e_lfanew((quint32)nNewOffset);
 
     return bResult;
 }

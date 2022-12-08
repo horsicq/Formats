@@ -196,14 +196,30 @@ XIcon::ICONDIRENTRY XIcon::readICONDIRENTRY(qint64 nOffset)
 {
     ICONDIRENTRY result = {};
 
-    result.bWidth = read_uint32(nOffset + offsetof(ICONDIRENTRY, bWidth));
-    result.bHeight = read_uint32(nOffset + offsetof(ICONDIRENTRY, bHeight));
-    result.bColorCount = read_uint32(nOffset + offsetof(ICONDIRENTRY, bColorCount));
-    result.bReserved = read_uint32(nOffset + offsetof(ICONDIRENTRY, bReserved));
-    result.wPlanes = read_uint32(nOffset + offsetof(ICONDIRENTRY, wPlanes));
-    result.wBitCount = read_uint32(nOffset + offsetof(ICONDIRENTRY, wBitCount));
+    result.bWidth = read_uint8(nOffset + offsetof(ICONDIRENTRY, bWidth));
+    result.bHeight = read_uint8(nOffset + offsetof(ICONDIRENTRY, bHeight));
+    result.bColorCount = read_uint8(nOffset + offsetof(ICONDIRENTRY, bColorCount));
+    result.bReserved = read_uint8(nOffset + offsetof(ICONDIRENTRY, bReserved));
+    result.wPlanes = read_uint16(nOffset + offsetof(ICONDIRENTRY, wPlanes));
+    result.wBitCount = read_uint16(nOffset + offsetof(ICONDIRENTRY, wBitCount));
     result.dwBytesInRes = read_uint32(nOffset + offsetof(ICONDIRENTRY, dwBytesInRes));
     result.dwImageOffset = read_uint32(nOffset + offsetof(ICONDIRENTRY, dwImageOffset));
+
+    return result;
+}
+
+XIcon::GRPICONDIRENTRY XIcon::readGPRICONDIRENTRY(qint64 nOffset)
+{
+    GRPICONDIRENTRY result = {};
+
+    result.bWidth = read_uint8(nOffset + offsetof(GRPICONDIRENTRY, bWidth));
+    result.bHeight = read_uint8(nOffset + offsetof(GRPICONDIRENTRY, bHeight));
+    result.bColorCount = read_uint8(nOffset + offsetof(GRPICONDIRENTRY, bColorCount));
+    result.bReserved = read_uint8(nOffset + offsetof(GRPICONDIRENTRY, bReserved));
+    result.wPlanes = read_uint16(nOffset + offsetof(GRPICONDIRENTRY, wPlanes));
+    result.wBitCount = read_uint16(nOffset + offsetof(GRPICONDIRENTRY, wBitCount));
+    result.dwBytesInRes = read_uint32(nOffset + offsetof(GRPICONDIRENTRY, dwBytesInRes));
+    result.nID = read_uint32(nOffset + offsetof(GRPICONDIRENTRY, nID));
 
     return result;
 }
@@ -228,6 +244,31 @@ QList<XIcon::ICONDIRENTRY> XIcon::getIconDirectories()
         listResult.append(record);
 
         nOffset += sizeof(ICONDIRENTRY);
+    }
+
+    return listResult;
+}
+
+QList<XIcon::GRPICONDIRENTRY> XIcon::getIconGPRDirectories()
+{
+    QList<XIcon::GRPICONDIRENTRY> listResult;
+
+    ICONDIR iconDir = readICONDIR();
+
+    qint32 nNumberOfRecords = iconDir.idCount;
+
+    qint64 nOffset = sizeof(ICONDIR);
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        GRPICONDIRENTRY record = readGPRICONDIRENTRY(nOffset);
+
+        if ((record.dwBytesInRes == 0) || (record.nID == 0)) {
+            break;
+        }
+
+        listResult.append(record);
+
+        nOffset += sizeof(GRPICONDIRENTRY);
     }
 
     return listResult;

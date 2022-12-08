@@ -497,6 +497,137 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra)
     return _getFileTypes(pDevice, bExtra);
 }
 
+bool XFormats::saveAllPEIconsToDirectory(QIODevice *pDevice, QString sDirectoryName)
+{
+    bool bResult = false;
+
+    XPE pe(pDevice);
+
+    if (pe.isValid()) {
+        QList<XPE::RESOURCE_RECORD> listResources = pe.getResources();
+        QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_ICON,-1,&listResources);
+
+        qint32 nNumberOfRecords = listIcons.count();
+
+        for (qint32 i = 0; i < nNumberOfRecords; i++) {
+            XPE::RESOURCE_RECORD resourceRecord = listIcons.at(i);
+
+            QString sFileName = sDirectoryName + QDir::separator() + QString("%1.ico").arg(XBinary::convertFileNameSymbols(XPE::resourceRecordToString(resourceRecord)));
+
+            XFormats::savePE_ICOToFile(pDevice, &listResources, resourceRecord, sFileName);
+        }
+    }
+
+    return bResult;
+}
+
+bool XFormats::saveAllPECursorsToDirectory(QIODevice *pDevice, QString sDirectoryName)
+{
+    bool bResult = true;
+
+    XPE pe(pDevice);
+
+    if (pe.isValid()) {
+        QList<XPE::RESOURCE_RECORD> listResources = pe.getResources();
+        QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_CURSOR,-1,&listResources);
+
+        qint32 nNumberOfRecords = listIcons.count();
+
+        for (qint32 i = 0; i < nNumberOfRecords; i++) {
+            XPE::RESOURCE_RECORD resourceRecord = listIcons.at(i);
+
+            QString sFileName = sDirectoryName + QDir::separator() + QString("%1.cur").arg(XBinary::convertFileNameSymbols(XPE::resourceRecordToString(resourceRecord)));
+
+            if (!XFormats::savePE_ICOToFile(pDevice, &listResources, resourceRecord, sFileName)) {
+                bResult = false;
+            }
+        }
+    }
+
+    return bResult;
+}
+
+bool XFormats::savePE_ICOToFile(QIODevice *pDevice,QList<XPE::RESOURCE_RECORD> *pListResourceRecords,  XPE::RESOURCE_RECORD resourceRecord, QString sFileName)
+{
+    bool bResult = false;
+
+    qint32 nChunkType = XPE_DEF::S_RT_ICON;
+    qint32 idType = 1;
+
+    if (resourceRecord.irin[0].nID == XPE_DEF::S_RT_GROUP_CURSOR) {
+        nChunkType = XPE_DEF::S_RT_CURSOR;
+        idType = 2;
+    }
+
+    XPE xpe(pDevice);
+
+    if (xpe.isValid()) {
+        if (resourceRecord.nSize) {
+            SubDevice sd(pDevice, resourceRecord.nOffset, resourceRecord.nSize);
+
+            if (sd.open(QIODevice::ReadOnly)) {
+
+                XIcon icon(&sd);
+
+                if (icon.isValid()) {
+                    QList<XPE::RESOURCE_RECORD> listChunkRecords;
+                    qint64 nTotalDataSize = 0;
+
+                    QList<XIcon::GRPICONDIRENTRY> listDirectories = icon.getIconGPRDirectories();
+
+                    qint32 nNumberOfRecords = listDirectories.count();
+
+                    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+                        XPE::RESOURCE_RECORD _resourceRecord = xpe.getResourceRecord(nChunkType, listDirectories.at(i).nID,pListResourceRecords);
+
+                        listChunkRecords.append(_resourceRecord);
+
+                        nTotalDataSize += _resourceRecord.nSize;
+                    }
+
+                    QFile file;
+                    file.setFileName(sFileName);
+
+                    if (file.open(QIODevice::ReadWrite)) {
+                        file.resize(sizeof(XIcon::ICONDIR) + sizeof(XIcon::ICONDIRENTRY) * nNumberOfRecords + nTotalDataSize);
+
+                        XBinary binaryNew(&file);
+
+                        binaryNew.write_uint16(offsetof(XIcon::ICONDIR, idReserved), 0);
+                        binaryNew.write_uint16(offsetof(XIcon::ICONDIR, idType), idType);
+                        binaryNew.write_uint16(offsetof(XIcon::ICONDIR, idCount), nNumberOfRecords);
+
+                        qint64 nCurrentTableOffset = sizeof(XIcon::ICONDIR);
+                        qint64 nCurrentDataOffset = sizeof(XIcon::ICONDIR) + sizeof(XIcon::ICONDIRENTRY) * nNumberOfRecords;
+
+                        for (qint32 i = 0; i < nNumberOfRecords; i++) {
+                            binaryNew.write_uint8(nCurrentTableOffset + offsetof(XIcon::ICONDIRENTRY, bWidth), listDirectories.at(i).bWidth);
+                            binaryNew.write_uint8(nCurrentTableOffset + offsetof(XIcon::ICONDIRENTRY, bHeight), listDirectories.at(i).bHeight);
+                            binaryNew.write_uint8(nCurrentTableOffset + offsetof(XIcon::ICONDIRENTRY, bColorCount), listDirectories.at(i).bColorCount);
+                            binaryNew.write_uint8(nCurrentTableOffset + offsetof(XIcon::ICONDIRENTRY, bReserved), listDirectories.at(i).bReserved);
+                            binaryNew.write_uint16(nCurrentTableOffset + offsetof(XIcon::ICONDIRENTRY, wPlanes), listDirectories.at(i).wPlanes);
+                            binaryNew.write_uint16(nCurrentTableOffset + offsetof(XIcon::ICONDIRENTRY, wBitCount), listDirectories.at(i).wBitCount);
+                            binaryNew.write_uint32(nCurrentTableOffset + offsetof(XIcon::ICONDIRENTRY, dwBytesInRes), listDirectories.at(i).dwBytesInRes);
+                            binaryNew.write_uint32(nCurrentTableOffset + offsetof(XIcon::ICONDIRENTRY, dwImageOffset), nCurrentDataOffset);
+
+                            XBinary::copyDeviceMemory(pDevice,listChunkRecords.at(i).nOffset,&file,nCurrentDataOffset,listDirectories.at(i).dwBytesInRes);
+
+                            nCurrentTableOffset += sizeof(XIcon::ICONDIRENTRY);
+                            nCurrentDataOffset += listDirectories.at(i).dwBytesInRes;
+                        }
+
+                        file.close();
+                    }
+                }
+
+                sd.close();
+            }
+        }
+    }
+
+    return bResult;
+}
+
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
 {
     QSet<XBinary::FT> result;
@@ -690,15 +821,14 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::
 {
     QSet<XBinary::FT> stResult;
 
-    XBinary::FT fileType = XZip::getFileType(pDevice, pListRecords, true);
+    XBinary::FT fileType = XZip::getFileFormatInfo(pDevice, pListRecords, true).fileType;
 
-    if (fileType == XBinary::FT_APK) {
-        stResult.insert(XBinary::FT_JAR);
-        stResult.insert(XBinary::FT_APK);
-    } else if (fileType == XBinary::FT_JAR) {
-        stResult.insert(XBinary::FT_JAR);
-    } else if (fileType == XBinary::FT_APKS) {
-        stResult.insert(XBinary::FT_APKS);
+    if (fileType != XBinary::FT_ZIP) {
+        if (fileType == XBinary::FT_APK) {
+            stResult.insert(XBinary::FT_JAR);
+        }
+
+        stResult.insert(fileType);
     }
 
     return stResult;

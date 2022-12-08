@@ -127,6 +127,7 @@ public:
     bool isDosStubPresent();
     bool removeDosStub();
     bool addDosStub(QString sFileName);
+    bool virtual _setLFANEW(quint64 nNewOffset);
 
     virtual MODE getMode();
     virtual QString getArch();

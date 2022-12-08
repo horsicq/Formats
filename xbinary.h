@@ -406,6 +406,7 @@ public:
         FT fileType;
         QString sString;
         QString sExt;
+        QString sVersion;
     };
 
     struct _MEMORY_MAP {

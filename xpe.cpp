@@ -3756,6 +3756,43 @@ bool XPE::isResourceGroupIdPresent(quint32 nID, QList<XPE::RESOURCE_RECORD> *pLi
     return (getResourceGroupIdOffset(nID, pListResourceRecords) != -1);
 }
 
+bool XPE::isResourceGroupIconsPresent()
+{
+    QList<RESOURCE_RECORD> listResources = getResources();
+
+    return isResourceGroupIconsPresent(&listResources);
+}
+
+bool XPE::isResourceGroupIconsPresent(QList<RESOURCE_RECORD> *pListResourceRecords)
+{
+    return isResourcePresent(XPE_DEF::S_RT_GROUP_ICON, -1, pListResourceRecords);
+}
+
+bool XPE::isResourceGroupCursorsPresent()
+{
+    QList<RESOURCE_RECORD> listResources = getResources();
+
+    return isResourceGroupCursorsPresent(&listResources);
+}
+
+bool XPE::isResourceGroupCursorsPresent(QList<RESOURCE_RECORD> *pListResourceRecords)
+{
+    return isResourcePresent(XPE_DEF::S_RT_GROUP_CURSOR, -1, pListResourceRecords);
+}
+
+QString XPE::resourceRecordToString(RESOURCE_RECORD resourceRecord)
+{
+    QString sResult;
+
+    QString sResID1 = XPE::resourceIdNameToString(resourceRecord.irin[0], 0);
+    QString sResID2 = XPE::resourceIdNameToString(resourceRecord.irin[1], 1);
+    QString sResID3 = XPE::resourceIdNameToString(resourceRecord.irin[2], 2);
+
+    sResult = QString("%1_%2_%3.bin").arg(sResID1, sResID2, sResID3);
+
+    return sResult;
+}
+
 qint64 XPE::getModuleAddress()
 {
     // mb TODO
@@ -7418,6 +7455,28 @@ QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemor
     return listResult;
 }
 
+bool XPE::_setLFANEW(quint64 nNewOffset)
+{
+    bool bResult = true;
+
+    qint64 nRawDelta = nNewOffset - get_e_lfanew();
+
+    if (nRawDelta) {
+        qint64 nSectionsTableOffset = getSectionsTableOffset();
+        qint32 nNumberOfSections = getFileHeader_NumberOfSections();
+
+        qint64 nHeadersSize = _calculateHeadersSize(nSectionsTableOffset,nNumberOfSections);
+        qint64 nNewHeadersSize = _calculateHeadersSize(nSectionsTableOffset+nRawDelta,nNumberOfSections);
+
+        set_e_lfanew((quint32)nNewOffset);
+
+        _fixHeadersSize();
+        _fixFileOffsets(nNewHeadersSize - nHeadersSize);
+    }
+
+    return bResult;
+}
+
 XPE_DEF::WIN_CERT_RECORD XPE::read_WIN_CERT_RECORD(qint64 nOffset)
 {
     XPE_DEF::WIN_CERT_RECORD result = {};
@@ -9397,6 +9456,8 @@ void XPE::_fixFileOffsets(qint64 nDelta)
             quint32 nFileOffset = getSection_PointerToRawData(i);
             setSection_PointerToRawData(i, nFileOffset + nDelta);
         }
+
+        // TODO Offset to Cert
     }
 }
 
