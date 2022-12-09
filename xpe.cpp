@@ -7478,16 +7478,27 @@ bool XPE::removeDosStub()
 {
     bool bResult = true;
 
+    bResult = _resizeDosStubSize(0);
+
+    return bResult;
+}
+
+bool XPE::addDosStub(QString sFileName)
+{
+    return false;
+}
+
+bool XPE::_resizeDosStubSize(qint64 nNewStubSize)
+{
+    bool bResult = true;
+
     qint64 nStubOffset = getDosStubOffset();
     qint64 nStubSize= getDosStubSize();
-    qint64 nNewStubSize = 0;
 
-    if (nStubSize) {
+    qint32 nRawDelta = nNewStubSize - nStubSize;
+    nRawDelta = S_ALIGN_UP(nRawDelta, 4);
 
-        qint32 nRawDelta = nNewStubSize - nStubSize;
-
-        nRawDelta = S_ALIGN_UP(nRawDelta, 4);
-
+    if (nRawDelta) {
         qint64 nSectionsTableOffset = getSectionsTableOffset();
         qint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
@@ -7496,18 +7507,24 @@ bool XPE::removeDosStub()
 
         qint64 nAlignDelta = nNewHeadersSize - nHeadersSize;
 
-//        if(nAlignDelta)
-//        {
-//            if (moveMemory(nHeadersSize, nNewHeadersSize, getSize() - nHeadersSize)) {
-//                bResult = resize(getDevice(), getSize() + nAlignDelta);
-
-//            }
-//        }
-
         qint64 nHeadersRawSize = nSectionsTableOffset + sizeof(XPE_DEF::IMAGE_SECTION_HEADER) * nNumberOfSections - getNetHeaderOffset();
 
         if (nRawDelta > 0) {
-            bResult = resize(getDevice(), getSize() + nAlignDelta);
+            if (nAlignDelta) {
+                if (bResult) {
+                    bResult = resize(getDevice(), getSize() + nAlignDelta);
+                }
+
+                if (bResult) {
+                    bResult = moveMemory(nHeadersSize, nNewHeadersSize, getSize() - nHeadersSize);
+                }
+            }
+
+            if (bResult) {
+                // Move headers
+                bResult = moveMemory(nStubOffset + nStubSize, nStubOffset + nNewStubSize, nHeadersRawSize);
+            }
+
         } else if (nRawDelta < 0) {
             if (bResult) {
                 // Move headers
@@ -7533,11 +7550,6 @@ bool XPE::removeDosStub()
     }
 
     return bResult;
-}
-
-bool XPE::addDosStub(QString sFileName)
-{
-    return false;
 }
 
 //bool XPE::_setLFANEW(quint64 nNewOffset)

@@ -1154,6 +1154,7 @@ public:
 
     virtual bool removeDosStub();
     virtual bool addDosStub(QString sFileName);
+    bool _resizeDosStubSize(qint64 nNewStubSize);
 
     XPE_DEF::WIN_CERT_RECORD read_WIN_CERT_RECORD(qint64 nOffset);
     QList<CERT> getCertList();

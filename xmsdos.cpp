@@ -687,19 +687,6 @@ bool XMSDOS::removeDosStub()
 {
     bool bResult = false;
 
-//    qint64 nOffset = getDosStubOffset();
-//    qint64 nSize = getDosStubSize();
-
-//    if (nSize) {
-//        if (moveMemory(nOffset + nSize, nOffset, getSize() - nOffset - nSize)) {
-//            bResult = resize(getDevice(), getSize() - nSize);
-
-//            if (bResult) {
-//                _setLFANEW(nOffset);
-//            }
-//        }
-//    }
-
     return bResult;
 }
 
