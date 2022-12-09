@@ -7476,16 +7476,29 @@ QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemor
 
 bool XPE::removeDosStub()
 {
-    bool bResult = true;
-
-    bResult = _resizeDosStubSize(0);
-
-    return bResult;
+    return _resizeDosStubSize(0);
 }
 
 bool XPE::addDosStub(QString sFileName)
 {
-    return false;
+    bool bResult = false;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if (file.open(QIODevice::ReadOnly)) {
+        qint64 nNewSize = file.size();
+
+        bResult = _resizeDosStubSize(nNewSize);
+
+        if (bResult) {
+            bResult = copyDeviceMemory(&file, 0, getDevice(), getDosStubOffset(), nNewSize);
+        }
+
+        file.close();
+    }
+
+    return bResult;
 }
 
 bool XPE::_resizeDosStubSize(qint64 nNewStubSize)
@@ -7507,7 +7520,7 @@ bool XPE::_resizeDosStubSize(qint64 nNewStubSize)
 
         qint64 nAlignDelta = nNewHeadersSize - nHeadersSize;
 
-        qint64 nHeadersRawSize = nSectionsTableOffset + sizeof(XPE_DEF::IMAGE_SECTION_HEADER) * nNumberOfSections - getNetHeaderOffset();
+        qint64 nHeadersRawSize = nSectionsTableOffset + sizeof(XPE_DEF::IMAGE_SECTION_HEADER) * nNumberOfSections - getNtHeadersOffset();
 
         if (nRawDelta > 0) {
             if (nAlignDelta) {
@@ -7522,13 +7535,13 @@ bool XPE::_resizeDosStubSize(qint64 nNewStubSize)
 
             if (bResult) {
                 // Move headers
-                bResult = moveMemory(nStubOffset + nStubSize, nStubOffset + nNewStubSize, nHeadersRawSize);
+                bResult = moveMemory(nStubOffset + nStubSize, nStubOffset + nStubSize + nRawDelta, nHeadersRawSize);
             }
 
         } else if (nRawDelta < 0) {
             if (bResult) {
                 // Move headers
-                bResult = moveMemory(nStubOffset + nStubSize, nStubOffset + nNewStubSize, nHeadersRawSize);
+                bResult = moveMemory(nStubOffset + nStubSize, nStubOffset + nStubSize + nRawDelta, nHeadersRawSize);
             }
 
             if (nAlignDelta) {
@@ -7543,7 +7556,7 @@ bool XPE::_resizeDosStubSize(qint64 nNewStubSize)
         }
 
         if (bResult) {
-            set_e_lfanew((quint32)(nStubOffset + nNewStubSize));
+            set_e_lfanew((quint32)(nStubOffset + nStubSize + nRawDelta));
             _fixFileOffsets(nAlignDelta);
             _fixHeadersSize();
         }

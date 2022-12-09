@@ -696,37 +696,6 @@ bool XMSDOS::addDosStub(QString sFileName)
 
     bool bResult = false;
 
-//    QFile file;
-//    file.setFileName(sFileName);
-
-//    if (file.open(QIODevice::ReadOnly)) {
-//        qint64 nOffset = getDosStubOffset();
-//        qint64 nOldSize = getDosStubSize();
-//        qint64 nNewSize = file.size();
-
-//        qint64 nDelta = nNewSize - nOldSize;
-
-//        bResult = true;
-
-//        if (nDelta) {
-//            if (resize(getDevice(), getSize() + nDelta)) {
-//                bResult = moveMemory(nOffset + nOldSize, nOffset + nNewSize, getSize() - nOffset - nDelta);
-
-//                if (bResult) {
-//                    _setLFANEW(nOffset + nNewSize);
-//                }
-//            } else {
-//                bResult = false;
-//            }
-//        }
-
-//        if (bResult) {
-//            copyDeviceMemory(&file, 0, getDevice(), nOffset, nNewSize);
-//        }
-
-//        file.close();
-//    }
-
     return bResult;
 }
 

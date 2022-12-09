@@ -628,6 +628,121 @@ bool XFormats::savePE_ICOToFile(QIODevice *pDevice,QList<XPE::RESOURCE_RECORD> *
     return bResult;
 }
 
+Qt::GlobalColor XFormats::typeToColor(QString sType)
+{
+    Qt::GlobalColor result = Qt::transparent;
+
+    sType = sType.toLower();
+
+    // TODO more
+    if ((sType == "installer") || (sType == "sfx")) {
+        result = Qt::blue;
+    } else if ((sType == "protector") || (sType == "apk obfuscator") || (sType == "jar obfuscator") ||
+               (sType == ".net obfuscator") || (sType == ".net compressor") ||
+               (sType == "dongle protection") || (sType == "joiner") || (sType == "packer")) {
+        result = Qt::red;
+    } else if ((sType == "pe tool") || (sType == "apk tool")) {
+        result = Qt::green;
+    } else if ((sType == "operation system") || (sType == "virtual machine")) {
+        result = Qt::darkYellow;
+    } else if (sType == "sign tool") {
+        result = Qt::darkMagenta;
+    } else if (sType == "language") {
+        result = Qt::darkCyan;
+    } else {
+        result = Qt::transparent;
+    }
+
+    return result;
+}
+
+QString XFormats::translateType(QString sType)
+{
+    QString sResult;
+
+    sType = sType.toLower();
+
+    if (sType == "apk obfuscator") {
+        sResult = QString("APK %1").arg(tr("obfuscator"));
+    } else if (sType == "apk tool") {
+        sResult = QString("APK %1").arg(tr("Tool"));
+    } else if (sType == "archive") {
+        sResult = tr("Archive");
+    } else if (sType == "certificate") {
+        sResult = tr("Certificate");
+    } else if (sType == "compiler") {
+        sResult = tr("Compiler");
+    } else if (sType == "converter") {
+        sResult = tr("Converter");
+    } else if (sType == "cryptor") {
+        sResult = tr("Cryptor");
+    } else if (sType == "data") {
+        sResult = tr("Data");
+    } else if (sType == "database") {
+        sResult = tr("Database");
+    } else if (sType == "debug data") {
+        sResult = tr("Debug data");
+    } else if (sType == "dongle protection") {
+        sResult = QString("Dongle %1").arg(tr("protection"));
+    } else if (sType == "dos extender") {
+        sResult = QString("DOS %1").arg(tr("extender"));;
+    } else if (sType == "format") {
+        sResult = tr("Format");
+    } else if (sType == "generic") {
+        sResult = tr("Generic");
+    } else if (sType == "image") {
+        sResult = tr("Image");
+    } else if (sType == "installer") {
+        sResult = tr("Installer");
+    } else if (sType == "installer data") {
+        sResult = tr("Installer data");
+    } else if (sType == "jar obfuscator") {
+        sResult = QString("JAR %1").arg(tr("obfuscator"));
+    } else if (sType == "joiner") {
+        sResult = tr("Joiner");
+    } else if (sType == "language") {
+        sResult = tr("Language");
+    } else if (sType == "library") {
+        sResult = tr("Library");
+    } else if (sType == "linker") {
+        sResult = tr("Linker");
+    } else if (sType == ".net compressor") {
+        sResult = QString(".NET %1").arg(tr("compressor"));
+    } else if (sType == ".net obfuscator") {
+        sResult = QString(".NET %1").arg(tr("obfuscator"));
+    } else if (sType == "operation system") {
+        sResult = tr("Operation system");
+    } else if (sType == "overlay") {
+        sResult = tr("Overlay");
+    } else if (sType == "packer") {
+        sResult = tr("Packer");
+    } else if (sType == "pe tool") {
+        sResult = QString("PE %1").arg(tr("Tool"));
+    } else if (sType == "player") {
+        sResult = tr("Player");
+    } else if (sType == "protection") {
+        sResult = tr("Protection");
+    } else if (sType == "protector") {
+        sResult = tr("Protector");
+    } else if (sType == "protector data") {
+        sResult = tr("Protector data");
+    } else if (sType == "sfx data") {
+        sResult = QString("SFX %1").arg(tr("data"));
+    } else if (sType == "sign tool") {
+        sResult = tr("Sign tool");
+    } else if (sType == "source code") {
+        sResult = tr("Source code");
+    } else if (sType == "stub") {
+        sResult = tr("Stub");
+    } else if (sType == "tool") {
+        sResult = tr("Tool");
+    } else if (sType == "virtual machine") {
+        sResult = tr("Virtual machine");
+    }
+
+    return sResult;
+}
+
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
 {
     QSet<XBinary::FT> result;
