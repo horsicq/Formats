@@ -660,84 +660,86 @@ QString XFormats::translateType(QString sType)
 {
     QString sResult;
 
-    sType = sType.toLower();
+    QString _sType = sType.toLower();
 
-    if (sType == "apk obfuscator") {
+    if (_sType == "apk obfuscator") {
         sResult = QString("APK %1").arg(tr("obfuscator"));
-    } else if (sType == "apk tool") {
+    } else if (_sType == "apk tool") {
         sResult = QString("APK %1").arg(tr("Tool"));
-    } else if (sType == "archive") {
+    } else if (_sType == "archive") {
         sResult = tr("Archive");
-    } else if (sType == "certificate") {
+    } else if (_sType == "certificate") {
         sResult = tr("Certificate");
-    } else if (sType == "compiler") {
+    } else if (_sType == "compiler") {
         sResult = tr("Compiler");
-    } else if (sType == "converter") {
+    } else if (_sType == "converter") {
         sResult = tr("Converter");
-    } else if (sType == "cryptor") {
+    } else if (_sType == "cryptor") {
         sResult = tr("Cryptor");
-    } else if (sType == "data") {
+    } else if (_sType == "data") {
         sResult = tr("Data");
-    } else if (sType == "database") {
+    } else if (_sType == "database") {
         sResult = tr("Database");
-    } else if (sType == "debug data") {
+    } else if (_sType == "debug data") {
         sResult = tr("Debug data");
-    } else if (sType == "dongle protection") {
+    } else if (_sType == "dongle protection") {
         sResult = QString("Dongle %1").arg(tr("protection"));
-    } else if (sType == "dos extender") {
+    } else if (_sType == "dos extender") {
         sResult = QString("DOS %1").arg(tr("extender"));;
-    } else if (sType == "format") {
+    } else if (_sType == "format") {
         sResult = tr("Format");
-    } else if (sType == "generic") {
+    } else if (_sType == "generic") {
         sResult = tr("Generic");
-    } else if (sType == "image") {
+    } else if (_sType == "image") {
         sResult = tr("Image");
-    } else if (sType == "installer") {
+    } else if (_sType == "installer") {
         sResult = tr("Installer");
-    } else if (sType == "installer data") {
+    } else if (_sType == "installer data") {
         sResult = tr("Installer data");
-    } else if (sType == "jar obfuscator") {
+    } else if (_sType == "jar obfuscator") {
         sResult = QString("JAR %1").arg(tr("obfuscator"));
-    } else if (sType == "joiner") {
+    } else if (_sType == "joiner") {
         sResult = tr("Joiner");
-    } else if (sType == "language") {
+    } else if (_sType == "language") {
         sResult = tr("Language");
-    } else if (sType == "library") {
+    } else if (_sType == "library") {
         sResult = tr("Library");
-    } else if (sType == "linker") {
+    } else if (_sType == "linker") {
         sResult = tr("Linker");
-    } else if (sType == ".net compressor") {
+    } else if (_sType == ".net compressor") {
         sResult = QString(".NET %1").arg(tr("compressor"));
-    } else if (sType == ".net obfuscator") {
+    } else if (_sType == ".net obfuscator") {
         sResult = QString(".NET %1").arg(tr("obfuscator"));
-    } else if (sType == "operation system") {
+    } else if (_sType == "operation system") {
         sResult = tr("Operation system");
-    } else if (sType == "overlay") {
+    } else if (_sType == "overlay") {
         sResult = tr("Overlay");
-    } else if (sType == "packer") {
+    } else if (_sType == "packer") {
         sResult = tr("Packer");
-    } else if (sType == "pe tool") {
+    } else if (_sType == "pe tool") {
         sResult = QString("PE %1").arg(tr("Tool"));
-    } else if (sType == "player") {
+    } else if (_sType == "player") {
         sResult = tr("Player");
-    } else if (sType == "protection") {
+    } else if (_sType == "protection") {
         sResult = tr("Protection");
-    } else if (sType == "protector") {
+    } else if (_sType == "protector") {
         sResult = tr("Protector");
-    } else if (sType == "protector data") {
+    } else if (_sType == "protector data") {
         sResult = tr("Protector data");
-    } else if (sType == "sfx data") {
+    } else if (_sType == "sfx data") {
         sResult = QString("SFX %1").arg(tr("data"));
-    } else if (sType == "sign tool") {
+    } else if (_sType == "sign tool") {
         sResult = tr("Sign tool");
-    } else if (sType == "source code") {
+    } else if (_sType == "source code") {
         sResult = tr("Source code");
-    } else if (sType == "stub") {
+    } else if (_sType == "stub") {
         sResult = tr("Stub");
-    } else if (sType == "tool") {
+    } else if (_sType == "tool") {
         sResult = tr("Tool");
-    } else if (sType == "virtual machine") {
+    } else if (_sType == "virtual machine") {
         sResult = tr("Virtual machine");
+    } else {
+        sResult = sType;
     }
 
     return sResult;
