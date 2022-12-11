@@ -57,7 +57,7 @@ bool XTiff::isValid(QIODevice *pDevice)
 
 XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct) // TODO
+    Q_UNUSED(pPdStruct)  // TODO
 
     qint32 nIndex = 0;
 
@@ -68,8 +68,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
     result.nRawSize = nTotalSize;
     result.bIsBigEndian = isBigEndian();
 
-    if(result.nRawSize > 8)
-    {
+    if (result.nRawSize > 8) {
         {
             _MEMORY_RECORD record = {};
 
@@ -83,10 +82,10 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
             result.listRecords.append(record);
         }
 
-        qint64 nTableOffset = read_uint32(4,result.bIsBigEndian);
+        qint64 nTableOffset = read_uint32(4, result.bIsBigEndian);
 
         while (nTableOffset) {
-            quint16 nTableCount = read_uint16(nTableOffset,result.bIsBigEndian);
+            quint16 nTableCount = read_uint16(nTableOffset, result.bIsBigEndian);
 
             {
                 _MEMORY_RECORD record = {};
@@ -104,7 +103,6 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
             qint64 nCurrentOffset = nTableOffset + sizeof(quint16);
 
             for (qint32 i = 0; i < nTableCount; i++) {
-
                 quint16 nTag = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nTag), result.bIsBigEndian);
                 quint16 nType = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nType), result.bIsBigEndian);
                 quint32 nCount = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nCount), result.bIsBigEndian);
@@ -113,7 +111,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
 
                 qint64 nDataSize = nBaseTypeSize * nCount;
 
-                if ( nDataSize > 4) {
+                if (nDataSize > 4) {
                     quint32 nOffset = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nOffset), result.bIsBigEndian);
 
                     _MEMORY_RECORD record = {};
@@ -123,7 +121,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
                     record.nOffset = nOffset;
                     record.nSize = nDataSize;
                     record.nAddress = -1;
-                    record.sName = QString("%1-%2").arg(XBinary::valueToHex(nTag),XBinary::valueToHex(nType));
+                    record.sName = QString("%1-%2").arg(XBinary::valueToHex(nTag), XBinary::valueToHex(nType));
 
                     result.listRecords.append(record);
                 }
@@ -131,7 +129,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
                 nCurrentOffset += sizeof(IFD_ENTRY);
             }
 
-            nTableOffset = read_uint32(nCurrentOffset,result.bIsBigEndian);
+            nTableOffset = read_uint32(nCurrentOffset, result.bIsBigEndian);
 
             {
                 _MEMORY_RECORD record = {};
@@ -184,35 +182,35 @@ bool XTiff::isBigEndian()
 QList<XTiff::CHUNK> XTiff::getChunks(PDSTRUCT *pPdStruct)
 {
     // Image
-    //0fe NewSubfileType LONG 1
-    //100 ImageWidth SHORT or LONG
-    //101 ImageLength SHORT or LONG
-    //102 BitsPerSample  SHORT 4 or 8
-    //103 Compression  SHORT 1, 2 or 32773
-    //106 PhotometricInterpretation  SHORT 0 or 1
-    //111 StripOffsets SHORT or LONG
-    //115 SamplesPerPixel SHORT
-    //116 RowsPerStrip  SHORT or LONG
-    //117 StripByteCounts LONG or SHORT
-    //11a XResolution RATIONAL
-    //11b YResolution RATIONAL
-    //11c PlanarConfiguration SHORT
-    //128 ResolutionUnit  SHORT 1, 2 or 3
-    //13d Predictor SHORT
-    //152 ExtraSamples SHORT 1
+    // 0fe NewSubfileType LONG 1
+    // 100 ImageWidth SHORT or LONG
+    // 101 ImageLength SHORT or LONG
+    // 102 BitsPerSample  SHORT 4 or 8
+    // 103 Compression  SHORT 1, 2 or 32773
+    // 106 PhotometricInterpretation  SHORT 0 or 1
+    // 111 StripOffsets SHORT or LONG
+    // 115 SamplesPerPixel SHORT
+    // 116 RowsPerStrip  SHORT or LONG
+    // 117 StripByteCounts LONG or SHORT
+    // 11a XResolution RATIONAL
+    // 11b YResolution RATIONAL
+    // 11c PlanarConfiguration SHORT
+    // 128 ResolutionUnit  SHORT 1, 2 or 3
+    // 13d Predictor SHORT
+    // 152 ExtraSamples SHORT 1
 
     // Exif
-    //10f Make ASCII
-    //110 Model ASCII
-    //112 Orientation SHORT 1
-    //131 Software ASCII
-    //132 DateTime ASCII
-    //213 YCbCrPositioning 1
-    //8769
-    //8825
-    //201 JPEGInterchangeFormat LONG 1
-    //202 JPEGInterchangeFormatLngth LONG 1
-    //213 YCbCrPositioning 1
+    // 10f Make ASCII
+    // 110 Model ASCII
+    // 112 Orientation SHORT 1
+    // 131 Software ASCII
+    // 132 DateTime ASCII
+    // 213 YCbCrPositioning 1
+    // 8769
+    // 8825
+    // 201 JPEGInterchangeFormat LONG 1
+    // 202 JPEGInterchangeFormatLngth LONG 1
+    // 213 YCbCrPositioning 1
 
     PDSTRUCT pdStructEmpty = {};
 
@@ -224,10 +222,10 @@ QList<XTiff::CHUNK> XTiff::getChunks(PDSTRUCT *pPdStruct)
 
     bool bIsBigEndian = isBigEndian();
 
-    qint64 nTableOffset = read_uint32(4,bIsBigEndian);
+    qint64 nTableOffset = read_uint32(4, bIsBigEndian);
 
-    while ((nTableOffset)&&(!(pPdStruct->bIsStop))) {
-        quint16 nTableCount = read_uint16(nTableOffset,bIsBigEndian);
+    while ((nTableOffset) && (!(pPdStruct->bIsStop))) {
+        quint16 nTableCount = read_uint16(nTableOffset, bIsBigEndian);
 
         qint64 nCurrentOffset = nTableOffset + sizeof(quint16);
 
@@ -256,7 +254,7 @@ QList<XTiff::CHUNK> XTiff::getChunks(PDSTRUCT *pPdStruct)
             listResult.append(record);
         }
 
-        nTableOffset = read_uint32(nCurrentOffset,bIsBigEndian);
+        nTableOffset = read_uint32(nCurrentOffset, bIsBigEndian);
     }
 
     return listResult;
@@ -281,39 +279,39 @@ QString XTiff::getCameraName(QList<CHUNK> *pListChunks)
 {
     QString sResult;
 
-    QList<CHUNK> listMake = _getChunksByTag(pListChunks,0x10f);
-    QList<CHUNK> listModel = _getChunksByTag(pListChunks,0x110);
+    QList<CHUNK> listMake = _getChunksByTag(pListChunks, 0x10f);
+    QList<CHUNK> listModel = _getChunksByTag(pListChunks, 0x110);
 
     QString sMake;
     QString sModel;
 
     if (listMake.count()) {
-        sMake = read_ansiString(listMake.at(0).nOffset,listMake.at(0).nSize);
+        sMake = read_ansiString(listMake.at(0).nOffset, listMake.at(0).nSize);
     }
 
     if (listModel.count()) {
-        sModel = read_ansiString(listModel.at(0).nOffset,listModel.at(0).nSize);
+        sModel = read_ansiString(listModel.at(0).nOffset, listModel.at(0).nSize);
     }
 
-    sResult = QString("%1(%2)").arg(sMake,sModel);
+    sResult = QString("%1(%2)").arg(sMake, sModel);
 
     return sResult;
 }
 
 qint32 XTiff::getBaseTypeSize(quint16 nType)
 {
-    //1 = BYTE 8-bit unsigned integer.
-    //2 = ASCII 8-bit byte that contains a 7-bit ASCII code; the last byte must be NUL (binary zero).
-    //3 = SHORT 16-bit (2-byte) unsigned integer.
-    //4 = LONG 32-bit (4-byte) unsigned integer.
-    //5 = RATIONAL Two LONGs: the first represents the numerator of a fraction; the second, the denominator
-    //6 = SBYTE An 8-bit signed (twos-complement) integer.
-    //7 = UNDEFINED An 8-bit byte that may contain anything, depending on the definition of the field.
-    //8 = SSHORT A 16-bit (2-byte) signed (twos-complement) integer.
-    //9 = SLONG A 32-bit (4-byte) signed (twos-complement) integer.
-    //10 = SRATIONAL Two SLONG’s: the first represents the numerator of a fraction, the second the denominator.
-    //11 = FLOAT Single precision (4-byte) IEEE format.
-    //12 = DOUBLE Double precision (8-byte) IEEE format.
+    // 1 = BYTE 8-bit unsigned integer.
+    // 2 = ASCII 8-bit byte that contains a 7-bit ASCII code; the last byte must be NUL (binary zero).
+    // 3 = SHORT 16-bit (2-byte) unsigned integer.
+    // 4 = LONG 32-bit (4-byte) unsigned integer.
+    // 5 = RATIONAL Two LONGs: the first represents the numerator of a fraction; the second, the denominator
+    // 6 = SBYTE An 8-bit signed (twos-complement) integer.
+    // 7 = UNDEFINED An 8-bit byte that may contain anything, depending on the definition of the field.
+    // 8 = SSHORT A 16-bit (2-byte) signed (twos-complement) integer.
+    // 9 = SLONG A 32-bit (4-byte) signed (twos-complement) integer.
+    // 10 = SRATIONAL Two SLONG’s: the first represents the numerator of a fraction, the second the denominator.
+    // 11 = FLOAT Single precision (4-byte) IEEE format.
+    // 12 = DOUBLE Double precision (8-byte) IEEE format.
 
     qint32 nResult = 0;
 

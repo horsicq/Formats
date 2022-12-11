@@ -87,8 +87,8 @@ XBinary::_MEMORY_MAP XRiff::getMemoryMap(PDSTRUCT *pPdStruct)
     qint64 nOffset = 0;
 
     while (!(pPdStruct->bIsStop)) {
-        quint32 nChunkSize = read_uint32(nOffset,true);
-        QString sTag = read_ansiString(nOffset + 4,4);
+        quint32 nChunkSize = read_uint32(nOffset, true);
+        QString sTag = read_ansiString(nOffset + 4, 4);
 
         {
             _MEMORY_RECORD record = {};
@@ -113,4 +113,3 @@ XBinary::FT XRiff::getFileType()
 {
     return FT_AVI;
 }
-

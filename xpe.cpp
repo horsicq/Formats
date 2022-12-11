@@ -7506,7 +7506,7 @@ bool XPE::_resizeDosStubSize(qint64 nNewStubSize)
     bool bResult = true;
 
     qint64 nStubOffset = getDosStubOffset();
-    qint64 nStubSize= getDosStubSize();
+    qint64 nStubSize = getDosStubSize();
 
     qint32 nRawDelta = nNewStubSize - nStubSize;
     nRawDelta = S_ALIGN_UP(nRawDelta, 4);
@@ -7515,8 +7515,8 @@ bool XPE::_resizeDosStubSize(qint64 nNewStubSize)
         qint64 nSectionsTableOffset = getSectionsTableOffset();
         qint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
-        qint64 nHeadersSize = _calculateHeadersSize(nSectionsTableOffset,nNumberOfSections);
-        qint64 nNewHeadersSize = _calculateHeadersSize(nSectionsTableOffset+nRawDelta,nNumberOfSections);
+        qint64 nHeadersSize = _calculateHeadersSize(nSectionsTableOffset, nNumberOfSections);
+        qint64 nNewHeadersSize = _calculateHeadersSize(nSectionsTableOffset + nRawDelta, nNumberOfSections);
 
         qint64 nAlignDelta = nNewHeadersSize - nHeadersSize;
 
@@ -7565,9 +7565,9 @@ bool XPE::_resizeDosStubSize(qint64 nNewStubSize)
     return bResult;
 }
 
-//bool XPE::_setLFANEW(quint64 nNewOffset)
+// bool XPE::_setLFANEW(quint64 nNewOffset)
 //{
-//    bool bResult = true;
+//     bool bResult = true;
 
 //    qint64 nRawDelta = nNewOffset - get_e_lfanew();
 
@@ -9559,7 +9559,7 @@ qint64 XPE::_getMinSectionOffset()
 void XPE::_fixFileOffsets(qint64 nDelta)
 {
     if (nDelta) {
-        setOptionalHeader_SizeOfHeaders(getOptionalHeader_SizeOfHeaders() + nDelta); // TODO mb calculate SizeOfHeaders
+        setOptionalHeader_SizeOfHeaders(getOptionalHeader_SizeOfHeaders() + nDelta);  // TODO mb calculate SizeOfHeaders
         quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
         for (quint32 i = 0; i < nNumberOfSections; i++) {

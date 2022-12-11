@@ -87,8 +87,8 @@ XBinary::_MEMORY_MAP XMP4::getMemoryMap(PDSTRUCT *pPdStruct)
     qint64 nOffset = 0;
 
     while (!(pPdStruct->bIsStop)) {
-        quint32 nChunkSize = read_uint32(nOffset,true);
-        QString sTag = read_ansiString(nOffset + 4,4);
+        quint32 nChunkSize = read_uint32(nOffset, true);
+        QString sTag = read_ansiString(nOffset + 4, 4);
 
         if (!isTagValid(sTag)) {
             break;
@@ -122,29 +122,15 @@ bool XMP4::isTagValid(QString sTagName)
 {
     bool bResult = false;
 
-    if ((sTagName == "ftyp") ||
-        (sTagName == "pdin") ||
-        (sTagName == "moov") ||
-        (sTagName == "moof") ||
-        (sTagName == "mfra") ||
-        (sTagName == "mdat") ||
-        (sTagName == "stts") ||
-        (sTagName == "stsc") ||
-        (sTagName == "stsz") ||
-        (sTagName == "meta") ||
-        (sTagName == "mvhd") ||
-        (sTagName == "trak") ||
-        (sTagName == "udta") ||
-        (sTagName == "iods") ||
-        (sTagName == "uuid") ||
-        (sTagName == "free")) {
+    if ((sTagName == "ftyp") || (sTagName == "pdin") || (sTagName == "moov") || (sTagName == "moof") || (sTagName == "mfra") || (sTagName == "mdat") ||
+        (sTagName == "stts") || (sTagName == "stsc") || (sTagName == "stsz") || (sTagName == "meta") || (sTagName == "mvhd") || (sTagName == "trak") ||
+        (sTagName == "udta") || (sTagName == "iods") || (sTagName == "uuid") || (sTagName == "free")) {
         bResult = true;
     } else {
 #ifdef QT_DEBUG
-        qDebug("%s",sTagName.toLatin1().data());
+        qDebug("%s", sTagName.toLatin1().data());
 #endif
     }
-
 
     return bResult;
 }

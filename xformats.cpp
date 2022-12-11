@@ -505,7 +505,7 @@ bool XFormats::saveAllPEIconsToDirectory(QIODevice *pDevice, QString sDirectoryN
 
     if (pe.isValid()) {
         QList<XPE::RESOURCE_RECORD> listResources = pe.getResources();
-        QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_ICON,-1,&listResources);
+        QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_ICON, -1, &listResources);
 
         qint32 nNumberOfRecords = listIcons.count();
 
@@ -529,7 +529,7 @@ bool XFormats::saveAllPECursorsToDirectory(QIODevice *pDevice, QString sDirector
 
     if (pe.isValid()) {
         QList<XPE::RESOURCE_RECORD> listResources = pe.getResources();
-        QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_CURSOR,-1,&listResources);
+        QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_CURSOR, -1, &listResources);
 
         qint32 nNumberOfRecords = listIcons.count();
 
@@ -547,7 +547,7 @@ bool XFormats::saveAllPECursorsToDirectory(QIODevice *pDevice, QString sDirector
     return bResult;
 }
 
-bool XFormats::savePE_ICOToFile(QIODevice *pDevice,QList<XPE::RESOURCE_RECORD> *pListResourceRecords,  XPE::RESOURCE_RECORD resourceRecord, QString sFileName)
+bool XFormats::savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> *pListResourceRecords, XPE::RESOURCE_RECORD resourceRecord, QString sFileName)
 {
     bool bResult = false;
 
@@ -566,7 +566,6 @@ bool XFormats::savePE_ICOToFile(QIODevice *pDevice,QList<XPE::RESOURCE_RECORD> *
             SubDevice sd(pDevice, resourceRecord.nOffset, resourceRecord.nSize);
 
             if (sd.open(QIODevice::ReadOnly)) {
-
                 XIcon icon(&sd);
 
                 if (icon.isValid()) {
@@ -578,7 +577,7 @@ bool XFormats::savePE_ICOToFile(QIODevice *pDevice,QList<XPE::RESOURCE_RECORD> *
                     qint32 nNumberOfRecords = listDirectories.count();
 
                     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-                        XPE::RESOURCE_RECORD _resourceRecord = xpe.getResourceRecord(nChunkType, listDirectories.at(i).nID,pListResourceRecords);
+                        XPE::RESOURCE_RECORD _resourceRecord = xpe.getResourceRecord(nChunkType, listDirectories.at(i).nID, pListResourceRecords);
 
                         listChunkRecords.append(_resourceRecord);
 
@@ -610,7 +609,7 @@ bool XFormats::savePE_ICOToFile(QIODevice *pDevice,QList<XPE::RESOURCE_RECORD> *
                             binaryNew.write_uint32(nCurrentTableOffset + offsetof(XIcon::ICONDIRENTRY, dwBytesInRes), listDirectories.at(i).dwBytesInRes);
                             binaryNew.write_uint32(nCurrentTableOffset + offsetof(XIcon::ICONDIRENTRY, dwImageOffset), nCurrentDataOffset);
 
-                            XBinary::copyDeviceMemory(pDevice,listChunkRecords.at(i).nOffset,&file,nCurrentDataOffset,listDirectories.at(i).dwBytesInRes);
+                            XBinary::copyDeviceMemory(pDevice, listChunkRecords.at(i).nOffset, &file, nCurrentDataOffset, listDirectories.at(i).dwBytesInRes);
 
                             nCurrentTableOffset += sizeof(XIcon::ICONDIRENTRY);
                             nCurrentDataOffset += listDirectories.at(i).dwBytesInRes;
@@ -637,8 +636,7 @@ Qt::GlobalColor XFormats::typeToColor(QString sType)
     // TODO more
     if ((sType == "installer") || (sType == "sfx")) {
         result = Qt::blue;
-    } else if ((sType == "protector") || (sType == "apk obfuscator") || (sType == "jar obfuscator") ||
-               (sType == ".net obfuscator") || (sType == ".net compressor") ||
+    } else if ((sType == "protector") || (sType == "apk obfuscator") || (sType == "jar obfuscator") || (sType == ".net obfuscator") || (sType == ".net compressor") ||
                (sType == "dongle protection") || (sType == "joiner") || (sType == "packer")) {
         result = Qt::red;
     } else if ((sType == "pe tool") || (sType == "apk tool")) {
@@ -685,7 +683,8 @@ QString XFormats::translateType(QString sType)
     } else if (_sType == "dongle protection") {
         sResult = QString("Dongle %1").arg(tr("protection"));
     } else if (_sType == "dos extender") {
-        sResult = QString("DOS %1").arg(tr("extender"));;
+        sResult = QString("DOS %1").arg(tr("extender"));
+        ;
     } else if (_sType == "format") {
         sResult = tr("Format");
     } else if (_sType == "generic") {

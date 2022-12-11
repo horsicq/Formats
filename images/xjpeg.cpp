@@ -34,9 +34,8 @@ bool XJpeg::isValid()
 
     if (getSize() >= 20) {
         _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
-        bIsValid = compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00") ||
-                compareSignature(&memoryMap, "FFD8FFE1....'Exif'00") ||
-                compareSignature(&memoryMap, "FFD8FFDB");
+        bIsValid =
+            compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00") || compareSignature(&memoryMap, "FFD8FFE1....'Exif'00") || compareSignature(&memoryMap, "FFD8FFDB");
     }
 
     return bIsValid;
@@ -264,14 +263,14 @@ XBinary::OFFSETSIZE XJpeg::getExif(QList<CHUNK> *pListChunks)
 {
     OFFSETSIZE result = {};
 
-    QList<CHUNK> listExif = _getChunksById(pListChunks,0xE1);
+    QList<CHUNK> listExif = _getChunksById(pListChunks, 0xE1);
 
-    if (listExif.count()>0) {
+    if (listExif.count() > 0) {
         CHUNK chunkExif = listExif.at(0);
 
         if (chunkExif.nDataSize > 10) {
-            if (read_ansiString(chunkExif.nDataOffset+4) == "Exif") {
-                result.nOffset = chunkExif.nDataOffset+10;
+            if (read_ansiString(chunkExif.nDataOffset + 4) == "Exif") {
+                result.nOffset = chunkExif.nDataOffset + 10;
                 result.nSize = chunkExif.nDataSize - 10;
             }
         }
@@ -290,7 +289,7 @@ QList<XTiff::CHUNK> XJpeg::getExifChunks(OFFSETSIZE osExif, PDSTRUCT *pPdStruct)
     QList<XTiff::CHUNK> listResult;
 
     if (osExif.nSize) {
-        SubDevice sd(getDevice(),osExif.nOffset,osExif.nSize);
+        SubDevice sd(getDevice(), osExif.nOffset, osExif.nSize);
 
         if (sd.open(QIODevice::ReadOnly)) {
             XTiff tiff(&sd);
@@ -311,7 +310,7 @@ QString XJpeg::getExifCameraName(OFFSETSIZE osExif, QList<XTiff::CHUNK> *pListEx
     QString sResult;
 
     if (osExif.nSize) {
-        SubDevice sd(getDevice(),osExif.nOffset,osExif.nSize);
+        SubDevice sd(getDevice(), osExif.nOffset, osExif.nSize);
 
         if (sd.open(QIODevice::ReadOnly)) {
             XTiff tiff(&sd);

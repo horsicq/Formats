@@ -98,7 +98,7 @@ void XBinary::setDevice(QIODevice *pDevice)
     if (g_pDevice) {
         if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
-//        qDebug("%s",XBinary::valueToHex((quint64)g_pDevice).toLatin1().data());
+        //        qDebug("%s",XBinary::valueToHex((quint64)g_pDevice).toLatin1().data());
 
         g_nSize = g_pDevice->size();
 
@@ -4163,8 +4163,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "89'PNG\r\n'1A0A", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_PNG);
-        } else if (compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00", 0) || compareSignature(&memoryMap, "FFD8FFE1....'Exif'00", 0)
-                   || compareSignature(&memoryMap, "FFD8FFDB", 0) ) {
+        } else if (compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00", 0) || compareSignature(&memoryMap, "FFD8FFE1....'Exif'00", 0) ||
+                   compareSignature(&memoryMap, "FFD8FFDB", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_JPEG);
         } else if (compareSignature(&memoryMap, "'GIF87a'", 0) || compareSignature(&memoryMap, "'GIF89a'", 0)) {
@@ -4353,7 +4353,7 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
     } else if (pStFileTypes->contains(FT_MP3)) {
         result = FT_MP3;
     } else if (pStFileTypes->contains(FT_MP4)) {
-        result = FT_MP4;   
+        result = FT_MP4;
     } else if (pStFileTypes->contains(FT_AVI)) {
         result = FT_AVI;
     } else if (pStFileTypes->contains(FT_WEBP)) {

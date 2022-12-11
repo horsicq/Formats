@@ -87,14 +87,13 @@ XBinary::_MEMORY_MAP XMP3::getMemoryMap(PDSTRUCT *pPdStruct)
     _MEMORY_MAP _memoryMap = XBinary::getMemoryMap();
 
     if (compareSignature(&_memoryMap, "'ID3'..00", 0)) {
-
         quint32 nVar[4] = {};
         nVar[0] = read_uint8(6);
         nVar[1] = read_uint8(7);
         nVar[2] = read_uint8(8);
         nVar[3] = read_uint8(9);
 
-        qint64 nOffset = 10 + ((nVar[0]<<21)|(nVar[1]<<14)|(nVar[2]<<7)|(nVar[3]));
+        qint64 nOffset = 10 + ((nVar[0] << 21) | (nVar[1] << 14) | (nVar[2] << 7) | (nVar[3]));
 
         {
             _MEMORY_RECORD record = {};
