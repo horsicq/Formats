@@ -107,6 +107,8 @@ XBinary::_MEMORY_MAP XMP3::getMemoryMap(PDSTRUCT *pPdStruct)
 
             result.listRecords.append(record);
         }
+
+        // TODO
     }
 
     return result;

@@ -519,6 +519,7 @@ public:
     static QString sectionCharacteristicToString(quint32 nValue);
 
     bool isImportPresent();
+    bool isIATPresent();
 
     QList<IMPORT_RECORD> getImportRecords(PDSTRUCT *pPdStruct = nullptr);
     QList<IMPORT_RECORD> getImportRecords(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);

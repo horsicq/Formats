@@ -129,6 +129,11 @@ public:
         qint64 nSize;
     };
 
+    struct RELADDRESSSIZE {
+        qint64 nAddress;
+        qint64 nSize;
+    };
+
     enum ADDRESS_SEGMENT {
         ADDRESS_SEGMENT_UNKNOWN = -1,
         ADDRESS_SEGMENT_FLAT = 0,
@@ -875,7 +880,9 @@ public:
     static _MEMORY_RECORD getMemoryRecordByRelAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
 
     static qint32 addressToLoadSection(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
+    static qint32 relAddressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
     static bool isAddressInHeader(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
+    static bool isRelAddressInHeader(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
 
     static bool isSolidAddressRange(_MEMORY_MAP *pMemoryMap, XADDR nAddress, qint64 nSize);
 

@@ -3557,7 +3557,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByRelAddress(XBinary::_MEMORY_MA
     XADDR nAddress = relAddressToAddress(pMemoryMap, nRelAddress);
 
     if (nAddress != -1) {
-        getMemoryRecordByAddress(pMemoryMap, nAddress);
+        result = getMemoryRecordByAddress(pMemoryMap, nAddress);
     }
 
     return result;
@@ -3576,11 +3576,37 @@ qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
     return nResult;
 }
 
+qint32 XBinary::relAddressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
+{
+    qint32 nResult = -1;
+
+    _MEMORY_RECORD mm = getMemoryRecordByRelAddress(pMemoryMap, nRelAddress);
+
+    if (mm.type == MMT_LOADSEGMENT) {
+        nResult = mm.nLoadSection;
+    }
+
+    return nResult;
+}
+
 bool XBinary::isAddressInHeader(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
     bool bResult = false;
 
     _MEMORY_RECORD mm = getMemoryRecordByAddress(pMemoryMap, nAddress);
+
+    if (mm.type == MMT_HEADER) {
+        bResult = true;
+    }
+
+    return bResult;
+}
+
+bool XBinary::isRelAddressInHeader(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
+{
+    bool bResult = false;
+
+    _MEMORY_RECORD mm = getMemoryRecordByRelAddress(pMemoryMap, nRelAddress);
 
     if (mm.type == MMT_HEADER) {
         bResult = true;
