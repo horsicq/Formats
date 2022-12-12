@@ -2015,12 +2015,12 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature,
     return find_signature(&memoryMap, nOffset, nSize, sSignature, pnResultSize, pPdStruct);
 }
 
-qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize, PDSTRUCT *pProcessData)
+qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT processDataEmpty = {};
 
-    if (!pProcessData) {
-        pProcessData = &processDataEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &processDataEmpty;
     }
 
     //    bool bDisableSignals=true;
@@ -2063,22 +2063,22 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
     qint64 nResult = -1;
 
     if (sSignature.contains(".") || sSignature.contains("$") || sSignature.contains("#") || sSignature.contains("+")) {
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pProcessData);
+        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
         sSignature = convertSignature(sSignature);
 
         QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(sSignature);
 
         if (listSignatureRecords.count() && ((listSignatureRecords.at(0).st == ST_COMPAREBYTES) || (listSignatureRecords.at(0).st == ST_FINDBYTES))) {
-            XBinary::setPdStructInit(pProcessData, _nFreeIndex, nSize);
+            XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
             QByteArray baFirst = listSignatureRecords.at(0).baData;
 
             char *pData = baFirst.data();
             qint32 nDataSize = baFirst.size();
 
-            for (qint64 i = 0; (i < nSize) && (!(pProcessData->bIsStop));) {
-                qint64 nTempOffset = find_array(nOffset + i, nSize - 1, pData, nDataSize, pProcessData);
+            for (qint64 i = 0; (i < nSize) && (!(pPdStruct->bIsStop));) {
+                qint64 nTempOffset = find_array(nOffset + i, nSize - 1, pData, nDataSize, pPdStruct);
 
                 if (nTempOffset != -1) {
                     if (_compareSignature(pMemoryMap, &listSignatureRecords, nTempOffset)) {
@@ -2092,23 +2092,23 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
                 i = nTempOffset + nDataSize - nOffset;
 
-                XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, i);
+                XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, i);
             }
         } else {
-            for (qint64 i = 0; (i < nSize) && (!(pProcessData->bIsStop)); i++) {
+            for (qint64 i = 0; (i < nSize) && (!(pPdStruct->bIsStop)); i++) {
                 if (_compareSignature(pMemoryMap, &listSignatureRecords, nOffset + i)) {
                     nResult = nOffset + i;
                     break;
                 }
 
-                XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, i);
+                XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, i);
             }
         }
 
-        XBinary::setPdStructFinished(pProcessData, _nFreeIndex);
+        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
     } else {
         QByteArray baData = QByteArray::fromHex(QByteArray(sSignature.toLatin1().data()));
-        nResult = find_array(nOffset, nSize, baData.data(), baData.size(), pProcessData);
+        nResult = find_array(nOffset, nSize, baData.data(), baData.size(), pPdStruct);
     }
 
     return nResult;
