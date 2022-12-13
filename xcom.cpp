@@ -57,6 +57,12 @@ XBinary::MODE XCOM::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddr
 
 XBinary::_MEMORY_MAP XCOM::getMemoryMap(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT ppStructEmpty = {};
+
+    if (!pPdStruct) {
+        pPdStruct = &ppStructEmpty;
+    }
+
     _MEMORY_MAP result = {};
 
     qint64 nTotalSize = getSize();

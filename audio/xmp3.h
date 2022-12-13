@@ -39,6 +39,8 @@ public:
     virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
     virtual FT getFileType();
     virtual QString getVersion();
+
+    void decodeFrame(qint64 nOffset);
 };
 
 #endif  // XMP3_H

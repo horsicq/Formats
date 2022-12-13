@@ -57,7 +57,11 @@ bool XTiff::isValid(QIODevice *pDevice)
 
 XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)  // TODO
+    PDSTRUCT ppStructEmpty = {};
+
+    if (!pPdStruct) {
+        pPdStruct = &ppStructEmpty;
+    }
 
     qint32 nIndex = 0;
 

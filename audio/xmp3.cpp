@@ -107,8 +107,8 @@ XBinary::_MEMORY_MAP XMP3::getMemoryMap(PDSTRUCT *pPdStruct)
 
             result.listRecords.append(record);
         }
-
         // TODO
+        decodeFrame(nOffset);
     }
 
     return result;
@@ -136,4 +136,25 @@ QString XMP3::getVersion()
     }
 
     return sResult;
+}
+
+void XMP3::decodeFrame(qint64 nOffset)
+{
+    quint32 nHeader = read_uint32(nOffset, true);
+
+    if (nHeader & 0xFFFFFF00) {
+        quint8 nVersion = (nHeader >> 18) & 0x1;
+        quint8 nLayer = (nHeader >> 17) & 0x1;
+        quint8 nErrorProtection = (nHeader >> 16) & 0x1;
+        quint8 nBitRate = (nHeader >> 15) & 0xF;
+        quint8 nFrequency = (nHeader >> 11) & 0x3;
+        quint8 nPadBit = (nHeader >> 9) & 0x1;
+        quint8 nPrivBit = (nHeader >> 8) & 0x1;
+        quint8 nMode = (nHeader >> 7) & 0x3;
+        quint8 nIntensiveStereo = (nHeader >> 5) & 0x1;
+        quint8 nMSStereo = (nHeader >> 4) & 0x1;
+        quint8 nCopy = (nHeader >> 3) & 0x1;
+        quint8 nOriginal = (nHeader >> 2) & 0x1;
+        quint8 nEmphasis = (nHeader >> 0) & 0x3;
+    }
 }

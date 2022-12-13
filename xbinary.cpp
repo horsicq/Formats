@@ -3680,6 +3680,12 @@ QString XBinary::getMemoryRecordName(XBinary::_MEMORY_RECORD *pMemoryRecord)
 
 XBinary::_MEMORY_MAP XBinary::getMemoryMap(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT ppStructEmpty = {};
+
+    if (!pPdStruct) {
+        pPdStruct = &ppStructEmpty;
+    }
+
     _MEMORY_MAP result = {};
 
     qint64 nTotalSize = getSize();

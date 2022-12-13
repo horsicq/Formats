@@ -1238,6 +1238,12 @@ QList<XLE_DEF::o32_map> XLE::getMapsLX()
 
 XBinary::_MEMORY_MAP XLE::getMemoryMap(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT ppStructEmpty = {};
+
+    if (!pPdStruct) {
+        pPdStruct = &ppStructEmpty;
+    }
+
     XBinary::_MEMORY_MAP result = {};
 
     //    bool bIsLE=isLE();

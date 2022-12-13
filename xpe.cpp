@@ -1745,6 +1745,12 @@ bool XPE::isIATPresent()
 
 XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT ppStructEmpty = {};
+
+    if (!pPdStruct) {
+        pPdStruct = &ppStructEmpty;
+    }
+
     _MEMORY_MAP result = {};
 
     qint32 nIndex = 0;

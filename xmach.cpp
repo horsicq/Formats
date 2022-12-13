@@ -1119,6 +1119,12 @@ qint64 XMACH::getAddressOfEntryPoint(XBinary::_MEMORY_MAP *pMemoryMap)
 
 XBinary::_MEMORY_MAP XMACH::getMemoryMap(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT ppStructEmpty = {};
+
+    if (!pPdStruct) {
+        pPdStruct = &ppStructEmpty;
+    }
+
     _MEMORY_MAP result = {};
 
     qint32 nIndex = 0;

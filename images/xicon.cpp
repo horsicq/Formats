@@ -110,6 +110,12 @@ qint64 XIcon::getFileFormatSize()
 
 XBinary::_MEMORY_MAP XIcon::getMemoryMap(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT ppStructEmpty = {};
+
+    if (!pPdStruct) {
+        pPdStruct = &ppStructEmpty;
+    }
+
     _MEMORY_MAP result = {};
 
     result.nRawSize = getSize();
