@@ -471,7 +471,8 @@ public:
         MS_RECORD_TYPE_ANSI,
         MS_RECORD_TYPE_UTF8,
         MS_RECORD_TYPE_UNICODE,
-        MS_RECORD_TYPE_SIGNATURE
+        MS_RECORD_TYPE_SIGNATURE,
+        MS_RECORD_TYPE_VALUE
         // TODO more PASCAL(A/U)
     };
 
@@ -805,12 +806,58 @@ public:
         bool bLinks;
     };
 
+    enum VT {
+        VT_UNKNOWN = 0,
+        VT_ANSISTRING,
+        VT_ANSISTRING_I,
+        VT_UNICODESTRING,
+        VT_UNICODESTRING_I,
+        VT_UTF8STRING,
+        VT_UTF8STRING_I,
+        VT_SIGNATURE,
+        VT_CHAR,
+        VT_UCHAR,
+        VT_SHORT,
+        VT_USHORT,
+        VT_INT,
+        VT_UINT,
+        VT_INT64,
+        VT_UINT64,
+        VT_DOUBLE,
+        VT_FLOAT,
+        // TODO UTF8
+        // TODO pascal strings(A/U)
+    };
+
+    enum SF {
+        SF_BEGIN = 0,
+        SF_CURRENTOFFSET
+    };
+
+    struct SEARCHDATA {
+        qint64 nResultOffset;
+        qint64 nResultSize;
+        qint64 nCurrentOffset;
+        SF startFrom;
+        QVariant variant;
+        VT valueType;
+        bool bIsBigEndian;
+        bool bInit;
+    };
+
     bool _addMultiSearchStringRecord(QList<MS_RECORD> *pList, MS_RECORD *pRecord, STRINGSEARCH_OPTIONS *pSsOptions);
 
     QList<MS_RECORD> multiSearch_allStrings(qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pProcessData = nullptr);
     QList<MS_RECORD> multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo = "", PDSTRUCT *pProcessData = nullptr);
     QList<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo = "",
                                            PDSTRUCT *pProcessData = nullptr);
+    QList<MS_RECORD> multiSearch_value(qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian,
+                                           PDSTRUCT *pProcessData = nullptr);
+    QList<MS_RECORD> multiSearch_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian,
+                                           PDSTRUCT *pProcessData = nullptr);
+
+    qint64 find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize,QVariant varValue, VT valueType, bool bIsBigEndian, qint64 *pnResultSize,
+                                            PDSTRUCT *pProcessData = nullptr);
 
     static QString msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId);
 
