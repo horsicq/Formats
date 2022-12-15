@@ -2114,12 +2114,12 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
     return nResult;
 }
 
-qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData)
+qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT processDataEmpty = {};
 
-    if (!pProcessData) {
-        pProcessData = &processDataEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &processDataEmpty;
     }
 
     qint64 nResult = -1;
@@ -2132,9 +2132,9 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString, 
     }
 
     if ((nSize > 0) && (nOffset + nSize <= _nSize) && (nStringSize <= nSize)) {
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pProcessData);
+        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-        XBinary::setPdStructInit(pProcessData, _nFreeIndex, nSize);
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
         qint64 nTemp = 0;
 
@@ -2145,7 +2145,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString, 
 
         qint64 nStartOffset = nOffset;
 
-        while ((nSize > nStringSize - 1) && (!(pProcessData->bIsStop))) {
+        while ((nSize > nStringSize - 1) && (!(pPdStruct->bIsStop))) {
             nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + (nStringSize - 1)), nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
@@ -2169,10 +2169,10 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString, 
             nSize -= nTemp - (nStringSize - 1);
             nOffset += nTemp - (nStringSize - 1);
 
-            XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, nOffset - nStartOffset);
+            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset - nStartOffset);
         }
 
-        XBinary::setPdStructFinished(pProcessData, _nFreeIndex);
+        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
         delete[] pBuffer;
     }
