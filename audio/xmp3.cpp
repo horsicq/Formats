@@ -116,7 +116,7 @@ XBinary::_MEMORY_MAP XMP3::getMemoryMap(PDSTRUCT *pPdStruct)
 
 XBinary::FT XMP3::getFileType()
 {
-    return FT_MP4;
+    return FT_MP3;
 }
 
 QString XMP3::getVersion()
@@ -156,5 +156,13 @@ void XMP3::decodeFrame(qint64 nOffset)
         quint8 nCopy = (nHeader >> 3) & 0x1;
         quint8 nOriginal = (nHeader >> 2) & 0x1;
         quint8 nEmphasis = (nHeader >> 0) & 0x3;
+
+        if (nLayer == 1) {          // III
+
+        } else if (nLayer == 2) {   // II
+
+        } else if (nLayer == 3) {   // I
+
+        }
     }
 }

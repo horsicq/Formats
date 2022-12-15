@@ -1200,7 +1200,7 @@ public:
     bool removeOverlay();
 
     bool isSignatureInLoadSegmentPresent(qint32 nLoadSegment, QString sSignature);
-    bool isSignatureInLoadSegmentPresent(_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, QString sSignature, PDSTRUCT *pProcessData = nullptr);
+    bool isSignatureInLoadSegmentPresent(_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, QString sSignature, PDSTRUCT *pPdStruct = nullptr);
 
     static QString getStringCollision(QList<QString> *pListStrings, QString sString1, QString sString2);
 
