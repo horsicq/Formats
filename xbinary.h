@@ -775,14 +775,14 @@ public:
     static void endian_double(double *pValue, bool bIsBigEndian);
 
     qint64 find_ansiString(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct = nullptr);
-    qint64 find_unicodeString(qint64 nOffset, qint64 nSize, QString sString,
-                              PDSTRUCT *pPdStruct = nullptr);  // mb TODO endian
+    qint64 find_unicodeString(qint64 nOffset, qint64 nSize, QString sString, bool bIsBigEndian,
+                              PDSTRUCT *pPdStruct);
     qint64 find_utf8String(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_signature(qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize = 0, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize = nullptr, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct = nullptr);
-    qint64 find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString,
-                               PDSTRUCT *pProcessData = nullptr);  // mb TODO endian
+    qint64 find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString, bool bIsBigEndian,
+                               PDSTRUCT *pProcessData);
     qint64 find_utf8StringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData = nullptr);
     // TODO find_codePageString
     // TODO find_codePageStringI
@@ -815,6 +815,10 @@ public:
         VT_UTF8STRING,
         VT_UTF8STRING_I,
         VT_SIGNATURE,
+        VT_BYTE,
+        VT_WORD,
+        VT_DWORD,
+        VT_QWORD,
         VT_CHAR,
         VT_UCHAR,
         VT_SHORT,
@@ -839,7 +843,7 @@ public:
         qint64 nResultSize;
         qint64 nCurrentOffset;
         SF startFrom;
-        QVariant variant;
+        QVariant varValue;
         VT valueType;
         bool bIsBigEndian;
         bool bInit;
@@ -861,7 +865,10 @@ public:
 
     static QString msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId);
 
-    static QByteArray getUnicodeString(QString sString);  // TODO remove, use getStringData
+    static QString getValueString(QVariant varValue, VT valueType);
+    static qint32 getValueSize(QVariant varValue, VT valueType);
+
+    static QByteArray getUnicodeString(QString sString, bool bIsBigEndian);
     static QByteArray getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString, bool bAddNull);
 
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, PDSTRUCT *pProcessData = nullptr);
@@ -1021,6 +1028,10 @@ public:
 
     static QString thisToString(qint64 nDelta);
 
+    static bool checkString_byte(QString sValue);
+    static bool checkString_word(QString sValue);
+    static bool checkString_dword(QString sValue);
+    static bool checkString_qword(QString sValue);
     static bool checkString_uint8(QString sValue);
     static bool checkString_int8(QString sValue);
     static bool checkString_uint16(QString sValue);
