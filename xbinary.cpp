@@ -2183,14 +2183,14 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString, 
     return nResult;
 }
 
-qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString, bool bIsBigEndian, PDSTRUCT *pProcessData)
+qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = -1;
     // TODO optimize
     PDSTRUCT processDataEmpty = {};
 
-    if (!pProcessData) {
-        pProcessData = &processDataEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &processDataEmpty;
     }
     // TODO CheckSize function
     // TODO Optimize
@@ -2213,9 +2213,9 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
         return -1;
     }
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pProcessData);
+    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-    XBinary::setPdStructInit(pProcessData, _nFreeIndex, nSize);
+    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
     qint64 nTemp = 0;
 
@@ -2226,7 +2226,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
 
     qint64 nStartOffset = nOffset;
 
-    while ((nSize > 2 * (nStringSize - 1)) && (!(pProcessData->bIsStop))) {
+    while ((nSize > 2 * (nStringSize - 1)) && (!(pPdStruct->bIsStop))) {
         nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + 2 * (nStringSize - 1)), nSize);
 
         if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
@@ -2245,10 +2245,10 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
         nSize -= nTemp - 2 * (nStringSize - 1);
         nOffset += nTemp - 2 * (nStringSize - 1);
 
-        XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, nOffset - nStartOffset);
+        XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset - nStartOffset);
     }
 
-    XBinary::setPdStructFinished(pProcessData, _nFreeIndex);
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
     delete[] pBuffer;
 

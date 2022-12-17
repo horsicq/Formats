@@ -775,12 +775,12 @@ public:
     static void endian_double(double *pValue, bool bIsBigEndian);
 
     qint64 find_ansiString(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct = nullptr);
-    qint64 find_unicodeString(qint64 nOffset, qint64 nSize, QString sString, bool bIsBigEndian, PDSTRUCT *pPdStruct);
+    qint64 find_unicodeString(qint64 nOffset, qint64 nSize, QString sString, bool bIsBigEndian, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_utf8String(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_signature(qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize = 0, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize = nullptr, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct = nullptr);
-    qint64 find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString, bool bIsBigEndian, PDSTRUCT *pProcessData);
+    qint64 find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString, bool bIsBigEndian, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_utf8StringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData = nullptr);
     // TODO find_codePageString
     // TODO find_codePageStringI
