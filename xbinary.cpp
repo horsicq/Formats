@@ -2857,14 +2857,16 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
     return listResult;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_value(qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian, PDSTRUCT *pProcessData)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_value(qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian,
+                                                     PDSTRUCT *pProcessData)
 {
     _MEMORY_MAP memoryMap = getMemoryMap(pProcessData);
 
     return multiSearch_value(&memoryMap, nOffset, nSize, nLimit, varValue, valueType, bIsBigEndian, pProcessData);
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian, PDSTRUCT *pProcessData)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType,
+                                                     bool bIsBigEndian, PDSTRUCT *pProcessData)
 {
     PDSTRUCT processDataEmpty = {};
 
@@ -2891,7 +2893,6 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
     qint32 nCurrentRecords = 0;
 
     while ((_nSize > 0) && (!(pProcessData->bIsStop))) {
-
         qint64 nValOffset = find_value(pMemoryMap, _nOffset, _nSize, varValue, valueType, bIsBigEndian, &nValSize, pProcessData);
 
         if (nValOffset == -1) {
@@ -2904,13 +2905,13 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
         record.nSize = nValSize;
 
         if (valueType == VT_ANSISTRING_I) {
-            record.sString = sValue.section(":",0,0) + ": " + read_ansiString(nValOffset, nValSize);
+            record.sString = sValue.section(":", 0, 0) + ": " + read_ansiString(nValOffset, nValSize);
         } else if (valueType == VT_UNICODESTRING_I) {
-            record.sString = sValue.section(":",0,0) + ": " + read_unicodeString(nValOffset, nValSize, bIsBigEndian);
+            record.sString = sValue.section(":", 0, 0) + ": " + read_unicodeString(nValOffset, nValSize, bIsBigEndian);
         } else if (valueType == VT_UTF8STRING_I) {
-            record.sString = sValue.section(":",0,0) + ": " + read_unicodeString(nValOffset, nValSize, bIsBigEndian);
+            record.sString = sValue.section(":", 0, 0) + ": " + read_unicodeString(nValOffset, nValSize, bIsBigEndian);
         } else if (valueType == VT_SIGNATURE) {
-            record.sString = sValue.section(":",0,0) + ": " + getSignature(nValOffset, nValSize);
+            record.sString = sValue.section(":", 0, 0) + ": " + getSignature(nValOffset, nValSize);
         } else {
             record.sString = sValue;
         }
@@ -2936,8 +2937,8 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
     return listResult;
 }
 
-
-qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QVariant varValue, VT valueType, bool bIsBigEndian, qint64 *pnResultSize, PDSTRUCT *pProcessData)
+qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QVariant varValue, VT valueType, bool bIsBigEndian, qint64 *pnResultSize,
+                           PDSTRUCT *pProcessData)
 {
     qint64 nResult = -1;
 
@@ -3111,7 +3112,7 @@ QByteArray XBinary::getUnicodeString(QString sString, bool bIsBigEndian)
 {
     QByteArray baResult;
 
-    qint32 nSize = sString.size() *2;
+    qint32 nSize = sString.size() * 2;
 
     baResult.resize(nSize);
 
@@ -3122,9 +3123,8 @@ QByteArray XBinary::getUnicodeString(QString sString, bool bIsBigEndian)
     _copyMemory(pData, (char *)sString.utf16(), nSize);
 
     for (qint32 i = 0; i < nSize; i++) {
-        if((i % 2) == 0) {
-
-            quint16 nValue = *(quint16 *)(pData+i);
+        if ((i % 2) == 0) {
+            quint16 nValue = *(quint16 *)(pData + i);
 
             if (bIsBigEndian) {
                 nValue = qFromBigEndian(nValue);
@@ -3132,7 +3132,7 @@ QByteArray XBinary::getUnicodeString(QString sString, bool bIsBigEndian)
                 nValue = qFromLittleEndian(nValue);
             }
 
-            *(quint16 *)(pData+i) = nValue;
+            *(quint16 *)(pData + i) = nValue;
         }
     }
 
@@ -3158,7 +3158,7 @@ QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString
 
         baResult.fill(0);
 
-        QByteArray baString = getUnicodeString(sString, false); // mb TODO Endian
+        QByteArray baString = getUnicodeString(sString, false);  // mb TODO Endian
 
         _copyMemory(baResult.data(), baString.data(), baString.size());
 
@@ -4967,7 +4967,7 @@ bool XBinary::checkString_byte(QString sValue)
 
     // TODO Check
 
-    quint16 nValue = sValue.toUShort(&bResult,16);
+    quint16 nValue = sValue.toUShort(&bResult, 16);
 
     if (bResult) {
         bResult = (nValue <= 256);
@@ -4980,7 +4980,7 @@ bool XBinary::checkString_word(QString sValue)
 {
     bool bResult = false;
 
-    sValue.toUShort(&bResult,16);
+    sValue.toUShort(&bResult, 16);
 
     return bResult;
 }
@@ -4989,7 +4989,7 @@ bool XBinary::checkString_dword(QString sValue)
 {
     bool bResult = false;
 
-    sValue.toUInt(&bResult,16);
+    sValue.toUInt(&bResult, 16);
 
     return bResult;
 }
@@ -4998,7 +4998,7 @@ bool XBinary::checkString_qword(QString sValue)
 {
     bool bResult = false;
 
-    sValue.toULongLong(&bResult,16);
+    sValue.toULongLong(&bResult, 16);
 
     return bResult;
 }

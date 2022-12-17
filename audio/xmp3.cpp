@@ -157,12 +157,11 @@ void XMP3::decodeFrame(qint64 nOffset)
         quint8 nOriginal = (nHeader >> 2) & 0x1;
         quint8 nEmphasis = (nHeader >> 0) & 0x3;
 
-        if (nLayer == 1) {          // III
+        if (nLayer == 1) {  // III
 
-        } else if (nLayer == 2) {   // II
+        } else if (nLayer == 2) {  // II
 
-        } else if (nLayer == 3) {   // I
-
+        } else if (nLayer == 3) {  // I
         }
     }
 }
