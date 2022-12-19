@@ -2255,10 +2255,11 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     return nResult;
 }
 
-qint64 XBinary::find_utf8StringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pProcessData)
+qint64 XBinary::find_utf8StringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct)
 {
     // TODO !!!
-    return find_utf8String(nOffset, nSize, sString, pProcessData);
+    // Double
+    return find_utf8String(nOffset, nSize, sString, pPdStruct);
 }
 
 quint8 XBinary::getBits_uint8(quint8 nValue, qint32 nBitOffset, qint32 nBitSize)
