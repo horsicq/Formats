@@ -2066,52 +2066,58 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
     qint64 nResult = -1;
 
     if (sSignature.contains(".") || sSignature.contains("$") || sSignature.contains("#") || sSignature.contains("+")) {
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-        sSignature = convertSignature(sSignature);
+        bool bIsValid = true;
 
-        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(sSignature);
+        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(sSignature, &bIsValid);
 
-        if (listSignatureRecords.count() && ((listSignatureRecords.at(0).st == ST_COMPAREBYTES) || (listSignatureRecords.at(0).st == ST_FINDBYTES))) {
-            XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+        if (listSignatureRecords.count()) {
+            qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-            QByteArray baFirst = listSignatureRecords.at(0).baData;
+            if (listSignatureRecords.count() && ((listSignatureRecords.at(0).st == ST_COMPAREBYTES) || (listSignatureRecords.at(0).st == ST_FINDBYTES))) {
+                XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
-            char *pData = baFirst.data();
-            qint32 nDataSize = baFirst.size();
+                QByteArray baFirst = listSignatureRecords.at(0).baData;
 
-            for (qint64 i = 0; (i < nSize) && (!(pPdStruct->bIsStop));) {
-                qint64 nTempOffset = find_array(nOffset + i, nSize - 1, pData, nDataSize, pPdStruct);
+                char *pData = baFirst.data();
+                qint32 nDataSize = baFirst.size();
 
-                if (nTempOffset != -1) {
-                    if (_compareSignature(pMemoryMap, &listSignatureRecords, nTempOffset)) {
-                        nResult = nTempOffset;
+                for (qint64 i = 0; (i < nSize) && (!(pPdStruct->bIsStop));) {
+                    qint64 nTempOffset = find_array(nOffset + i, nSize - i, pData, nDataSize, pPdStruct);
 
+                    if (nTempOffset != -1) {
+                        if (_compareSignature(pMemoryMap, &listSignatureRecords, nTempOffset)) {
+                            nResult = nTempOffset;
+
+                            break;
+                        }
+                    } else {
                         break;
                     }
-                } else {
-                    break;
+
+                    i = nTempOffset + nDataSize - nOffset;
+
+                    XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, i);
                 }
+            } else {
+                for (qint64 i = 0; (i < nSize) && (!(pPdStruct->bIsStop)); i++) {
+                    if (_compareSignature(pMemoryMap, &listSignatureRecords, nOffset + i)) {
+                        nResult = nOffset + i;
+                        break;
+                    }
 
-                i = nTempOffset + nDataSize - nOffset;
-
-                XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, i);
-            }
-        } else {
-            for (qint64 i = 0; (i < nSize) && (!(pPdStruct->bIsStop)); i++) {
-                if (_compareSignature(pMemoryMap, &listSignatureRecords, nOffset + i)) {
-                    nResult = nOffset + i;
-                    break;
+                    XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, i);
                 }
-
-                XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, i);
             }
+
+            XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
         }
-
-        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
     } else {
         QByteArray baData = QByteArray::fromHex(QByteArray(sSignature.toLatin1().data()));
-        nResult = find_array(nOffset, nSize, baData.data(), baData.size(), pPdStruct);
+
+        if (baData.size()) {
+            nResult = find_array(nOffset, nSize, baData.data(), baData.size(), pPdStruct);
+        }
     }
 
     return nResult;
@@ -2879,6 +2885,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
         nSize = getSize() - nOffset;
     }
 
+    QString sValuePrefix = valueTypeToString(valueType);
     QString sValue = getValueString(varValue, valueType);
     qint64 nValSize = getValueSize(varValue, valueType);
 
@@ -2900,22 +2907,26 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
             break;
         }
 
+        QString _sValue;
+
         MS_RECORD record = {};
         record.recordType = MS_RECORD_TYPE_VALUE;
         record.nOffset = nValOffset;
         record.nSize = nValSize;
 
         if (valueType == VT_ANSISTRING_I) {
-            record.sString = sValue.section(":", 0, 0) + ": " + read_ansiString(nValOffset, nValSize);
+            _sValue = read_ansiString(nValOffset, nValSize);
         } else if (valueType == VT_UNICODESTRING_I) {
-            record.sString = sValue.section(":", 0, 0) + ": " + read_unicodeString(nValOffset, nValSize, bIsBigEndian);
+            _sValue = read_unicodeString(nValOffset, nValSize, bIsBigEndian);
         } else if (valueType == VT_UTF8STRING_I) {
-            record.sString = sValue.section(":", 0, 0) + ": " + read_unicodeString(nValOffset, nValSize, bIsBigEndian);
+            _sValue = read_unicodeString(nValOffset, nValSize, bIsBigEndian);
         } else if (valueType == VT_SIGNATURE) {
-            record.sString = sValue.section(":", 0, 0) + ": " + getSignature(nValOffset, nValSize);
+            _sValue = getSignature(nValOffset, nValSize);
         } else {
-            record.sString = sValue;
+            _sValue = sValue;
         }
+
+        record.sString = QString("%1: %2").arg(sValuePrefix, _sValue);
 
         listResult.append(record);
 
@@ -3006,53 +3017,97 @@ QString XBinary::msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId)
     return sResult;
 }
 
+QString XBinary::valueTypeToString(VT valueType)
+{
+    QString sResult;
+
+    if ((valueType == XBinary::VT_ANSISTRING) || (valueType == XBinary::VT_ANSISTRING_I)) {
+        sResult = QString("A");
+    } else if ((valueType == XBinary::VT_UNICODESTRING) || (valueType == XBinary::VT_UNICODESTRING_I)) {
+        sResult = QString("U");
+    } else if ((valueType == XBinary::VT_UTF8STRING) || (valueType == XBinary::VT_UTF8STRING_I)) {
+        sResult = QString("UTF8");
+    } else if (valueType == XBinary::VT_SIGNATURE) {
+        sResult = QString("S");
+    } else if (valueType == XBinary::VT_BYTE) {
+        sResult = QString("byte");
+    } else if (valueType == XBinary::VT_WORD) {
+        sResult = QString("word");
+    } else if (valueType == XBinary::VT_DWORD) {
+        sResult = QString("dword");
+    } else if (valueType == XBinary::VT_QWORD) {
+        sResult = QString("qword");
+    } else if (valueType == XBinary::VT_CHAR) {
+        sResult = QString("char");
+    } else if (valueType == XBinary::VT_UCHAR) {
+        sResult = QString("uchar");
+    } else if (valueType == XBinary::VT_SHORT) {
+        sResult = QString("short");
+    } else if (valueType == XBinary::VT_USHORT) {
+        sResult = QString("ushort");
+    } else if (valueType == XBinary::VT_INT) {
+        sResult = QString("int");
+    } else if (valueType == XBinary::VT_UINT) {
+        sResult = QString("uint");
+    } else if (valueType == XBinary::VT_INT64) {
+        sResult = QString("int64");
+    } else if (valueType == XBinary::VT_UINT64) {
+        sResult = QString("uint64");
+    } else if (valueType == XBinary::VT_FLOAT) {
+        sResult = QString("float");
+    } else if (valueType == XBinary::VT_DOUBLE) {
+        sResult = QString("double");
+    }
+
+    return sResult;
+}
+
 QString XBinary::getValueString(QVariant varValue, VT valueType)
 {
     QString sResult;
 
-    // TODO VT to string
     if (valueType == XBinary::VT_ANSISTRING) {
-        sResult = QString("A: %1").arg(varValue.toString());
+        sResult = varValue.toString();
     } else if (valueType == XBinary::VT_ANSISTRING_I) {
-        sResult = QString("A: %1").arg(varValue.toString());
+        sResult = varValue.toString();
     } else if (valueType == XBinary::VT_UNICODESTRING) {
-        sResult = QString("U: %1").arg(varValue.toString());
+        sResult = varValue.toString();
     } else if (valueType == XBinary::VT_UNICODESTRING_I) {
-        sResult = QString("U: %1").arg(varValue.toString());
+        sResult = varValue.toString();
     } else if (valueType == XBinary::VT_UTF8STRING) {
-        sResult = QString("UTF8: %1").arg(varValue.toString());
+        sResult = varValue.toString();
     } else if (valueType == XBinary::VT_UTF8STRING_I) {
-        sResult = QString("UTF8: %1").arg(varValue.toString());
+        sResult = varValue.toString();
     } else if (valueType == XBinary::VT_SIGNATURE) {
-        sResult = QString("S: %1").arg(varValue.toString());
+        sResult = varValue.toString();
     } else if (valueType == XBinary::VT_BYTE) {
-        sResult = QString("byte: %1").arg(valueToHex((quint8)(varValue.toULongLong())));
+        sResult = valueToHex((quint8)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_WORD) {
-        sResult = QString("word: %1").arg(valueToHex((quint16)(varValue.toULongLong())));
+        sResult = valueToHex((quint16)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_DWORD) {
-        sResult = QString("dword: %1").arg(valueToHex((quint32)(varValue.toULongLong())));
+        sResult = valueToHex((quint32)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_QWORD) {
-        sResult = QString("qword: %1").arg(valueToHex((quint64)(varValue.toULongLong())));
+        sResult = valueToHex((quint64)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_CHAR) {
-        sResult = QString("char: %1").arg((qint8)(varValue.toULongLong()));
+        sResult = QString("%1").arg((qint8)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_UCHAR) {
-        sResult = QString("uchar: %1").arg((quint8)(varValue.toULongLong()));
+        sResult = QString("%1").arg((quint8)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_SHORT) {
-        sResult = QString("short: %1").arg((qint16)(varValue.toULongLong()));
+        sResult = QString("%1").arg((qint16)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_USHORT) {
-        sResult = QString("ushort: %1").arg((quint16)(varValue.toULongLong()));
+        sResult = QString("%1").arg((quint16)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_INT) {
-        sResult = QString("int: %1").arg((qint32)(varValue.toULongLong()));
+        sResult = QString("%1").arg((qint32)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_UINT) {
-        sResult = QString("uint: %1").arg((quint32)(varValue.toULongLong()));
+        sResult = QString("%1").arg((quint32)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_INT64) {
-        sResult = QString("int64: %1").arg((qint64)(varValue.toULongLong()));
+        sResult = QString("%1").arg((qint64)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_UINT64) {
-        sResult = QString("uint64: %1").arg((quint64)(varValue.toULongLong()));
+        sResult = QString("%1").arg((quint64)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_FLOAT) {
-        sResult = QString("float: %1").arg(varValue.toFloat());
+        sResult = QString("%1").arg(varValue.toFloat());
     } else if (valueType == XBinary::VT_DOUBLE) {
-        sResult = QString("double: %1").arg(varValue.toDouble());
+        sResult = QString("%1").arg(varValue.toDouble());
     }
 
     return sResult;
@@ -3182,6 +3237,22 @@ bool XBinary::isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64
     qint64 nResultSize = 0;
 
     return (find_signature(pMemoryMap, nOffset, nSize, sSignature, &nResultSize, pProcessData) != -1);
+}
+
+bool XBinary::isSignatureValid(QString sSignature)
+{
+    bool bResult = false;
+
+    if (sSignature.size()) {
+
+        sSignature = convertSignature(sSignature);
+
+        bResult = true;
+
+        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(sSignature, &bResult);
+    }
+
+    return bResult;
 }
 
 bool XBinary::createFile(QString sFileName, qint64 nFileSize)
@@ -3635,6 +3706,15 @@ bool XBinary::isOffsetAndSizeValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOff
     return bResult;
 }
 
+bool XBinary::isOffsetAndSizeValid(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
+{
+    XBinary binary(pDevice);
+
+    _MEMORY_MAP memoryMap = binary.getMemoryMap();
+
+    return isOffsetAndSizeValid(&memoryMap, nOffset, nSize);
+}
+
 bool XBinary::isAddressValid(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
     bool bResult = false;
@@ -4028,7 +4108,9 @@ bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap, QString sSignature, qint
 
     sSignature = convertSignature(sSignature);
 
-    QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(sSignature);
+    bool bValid = true;
+
+    QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(sSignature, &bValid);
 
     if (listSignatureRecords.count()) {
         bResult = _compareSignature(pMemoryMap, &listSignatureRecords, nOffset);
@@ -8938,7 +9020,7 @@ qint32 XBinary::getPdStructProcent(PDSTRUCT *pPdStruct)
     return nResult;
 }
 
-QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature)
+QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature, bool *pbValid)
 {
     // TODO Error checks!
     QList<SIGNATURE_RECORD> listResult;
@@ -8949,14 +9031,13 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
         if (sSignature.at(i) == QChar('.')) {
             i += _getSignatureRelOffsetFix(&listResult, sSignature, i);
         } else if (sSignature.at(i) == QChar('+')) {
-            i += _getSignatureDelta(&listResult, sSignature, i);
+            i += _getSignatureDelta(&listResult, sSignature, i, pbValid);
         } else if (sSignature.at(i) == QChar('$')) {
             i += _getSignatureRelOffset(&listResult, sSignature, i);
-        } else if (sSignature.at(i) == QChar('#'))  // TODO Check []
-        {
+        } else if (sSignature.at(i) == QChar('#')) {   // TODO Check []
             i += _getSignatureAddress(&listResult, sSignature, i);
         } else {
-            qint32 nBytes = _getSignatureBytes(&listResult, sSignature, i);
+            qint32 nBytes = _getSignatureBytes(&listResult, sSignature, i, pbValid);
 
             if (nBytes) {
                 i += nBytes;
@@ -9102,7 +9183,7 @@ int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSi
     return nResult;
 }
 
-qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex)
+qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex, bool *pbValid)
 {
     // TODO Check!!!
     qint32 nResult = 0;
@@ -9118,7 +9199,8 @@ qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignat
 
     if (nResult) {
         QList<XBinary::SIGNATURE_RECORD> _listSignatureRecords;
-        qint32 nTemp = _getSignatureBytes(&_listSignatureRecords, sSignature, nStartIndex + nResult);
+
+        qint32 nTemp = _getSignatureBytes(&_listSignatureRecords, sSignature, nStartIndex + nResult, pbValid);
 
         if (_listSignatureRecords.count()) {
             SIGNATURE_RECORD record = {};
@@ -9205,7 +9287,7 @@ int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
     return nResult;
 }
 
-qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, qint32 nStartIndex)
+qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, qint32 nStartIndex, bool *pbValid)
 {
     int nResult = 0;
 
@@ -9216,9 +9298,10 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
         if (((sSignature.at(i) >= QChar('a')) && (sSignature.at(i) <= QChar('f'))) || ((sSignature.at(i) >= QChar('0')) && (sSignature.at(i) <= QChar('9')))) {
             nResult++;
             sBytes.append(sSignature.at(i));
+        } else if ((sSignature.at(i) == '.') || (sSignature.at(i) == '$') || (sSignature.at(i) == '#')){
+            break;
         } else {
-            // TODO: invalid symbols
-            // Check
+            *pbValid = false;
             break;
         }
     }
@@ -9233,6 +9316,12 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
 
         pListSignatureRecords->append(record);
     }
+
+#ifdef QT_DEBUG
+    if (!(*pbValid)) {
+        qDebug("Invalid signature: %s", sSignature.toLatin1().data());
+    }
+#endif
 
     return nResult;
 }
