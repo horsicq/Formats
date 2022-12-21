@@ -79,6 +79,9 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDe
     } else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) {
         XMP3 xmp3(pDevice);
         result = xmp3.getMemoryMap(pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) {
+        XRiff xriff(pDevice);
+        result = xriff.getMemoryMap(pPdStruct);
     }
 #ifdef USE_DEX  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -886,6 +889,9 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     } else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) {
         XMP3 xmp3(pDevice);
         result = xmp3.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) {
+        XRiff xriff(pDevice);
+        result = xriff.getFileFormatInfo();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {

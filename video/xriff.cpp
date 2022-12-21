@@ -33,11 +33,24 @@ bool XRiff::isValid()
     bool bResult = false;
 
     if (getSize() > 0x20) {
-        _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
+        QString sTag = read_ansiString(0, 4);
 
-        if (compareSignature(&memoryMap, "000000..'ftyp'", 0)) {
-            // TODO more checks
-            bResult = true;
+        bool bIsValid = false;
+        bool bIsBigEndian = false;
+
+        if (sTag == "RIFF") {
+            bIsValid = true;
+        } else if ((sTag == "RIFX") || (sTag == "AIFF")) {
+            bIsValid = true;
+            bIsBigEndian = true;
+        }
+
+        if (bIsValid) {
+            quint32 nSize = read_uint32(4, bIsBigEndian);
+
+            if (nSize<= getSize()) {
+                bResult = true;
+            }
         }
     }
 
@@ -54,15 +67,16 @@ bool XRiff::isValid(QIODevice *pDevice)
 QString XRiff::getFileFormatString()
 {
     QString sResult;
-
-    sResult = "AVI";
+    // TODO
+    sResult = read_ansiString(12, 4).trimmed();
 
     return sResult;
 }
 
 QString XRiff::getFileFormatExt()
 {
-    return "avi";
+    // TODO
+    return read_ansiString(12, 4).trimmed().toLower();
 }
 
 qint64 XRiff::getFileFormatSize()
@@ -81,29 +95,26 @@ XBinary::_MEMORY_MAP XRiff::getMemoryMap(PDSTRUCT *pPdStruct)
     XBinary::_MEMORY_MAP result = {};
 
     result.nRawSize = getSize();
+    result.bIsBigEndian = isBigEndian();
 
     qint32 nIndex = 0;
 
     qint64 nOffset = 0;
 
-    while (!(pPdStruct->bIsStop)) {
-        quint32 nChunkSize = read_uint32(nOffset, true);
-        QString sTag = read_ansiString(nOffset + 4, 4);
+    quint32 nChunkSize = read_uint32(nOffset + 4, result.bIsBigEndian);
+    QString sTag = read_ansiString(nOffset, 4);
 
-        {
-            _MEMORY_RECORD record = {};
+    {
+        _MEMORY_RECORD record = {};
 
-            record.nIndex = nIndex++;
-            record.type = MMT_FILESEGMENT;
-            record.nOffset = nOffset;
-            record.nSize = nChunkSize;
-            record.nAddress = -1;
-            record.sName = sTag;
+        record.nIndex = nIndex++;
+        record.type = MMT_FILESEGMENT;
+        record.nOffset = nOffset;
+        record.nSize = nChunkSize + 8;
+        record.nAddress = -1;
+        record.sName = sTag;
 
-            result.listRecords.append(record);
-        }
-
-        nOffset += nChunkSize;
+        result.listRecords.append(record);
     }
 
     return result;
@@ -111,5 +122,25 @@ XBinary::_MEMORY_MAP XRiff::getMemoryMap(PDSTRUCT *pPdStruct)
 
 XBinary::FT XRiff::getFileType()
 {
-    return FT_AVI;
+    FT result = FT_RIFF;
+
+    QString sTag = read_ansiString(0, 4);
+    QString sSubTag = read_ansiString(12, 4);
+
+    return result;
+}
+
+bool XRiff::isBigEndian()
+{
+    bool bResult = false;
+
+    QString sTag = read_ansiString(0, 4);
+
+    if (sTag == "RIFF") {
+        bResult = false;
+    } else if ((sTag == "RIFX") || (sTag == "AIFF")) {
+        bResult = true;
+    }
+
+    return bResult;
 }

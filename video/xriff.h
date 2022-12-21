@@ -38,6 +38,7 @@ public:
     virtual qint64 getFileFormatSize();
     virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
     virtual FT getFileType();
+    virtual bool isBigEndian();
 };
 
 #endif  // XRIFF_H

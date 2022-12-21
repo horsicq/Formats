@@ -2375,12 +2375,12 @@ bool XBinary::_addMultiSearchStringRecord(QList<MS_RECORD> *pList, MS_RECORD *pR
     return bResult;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pProcessData)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT processDataEmpty = {};
 
-    if (!pProcessData) {
-        pProcessData = &processDataEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &processDataEmpty;
     }
 
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
@@ -2446,13 +2446,13 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
     bool bIsStart = true;
     char cPrevSymbol = 0;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pProcessData);
+    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-    XBinary::setPdStructInit(pProcessData, _nFreeIndex, nSize);
+    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
     qint32 nCurrentRecords = 0;
 
-    while ((_nSize > 0) && (!(pProcessData->bIsStop))) {
+    while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
         qint64 nCurrentSize = _nSize;
 
         if (!g_pMemory) {
@@ -2770,7 +2770,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
         _nOffset += nCurrentSize;
         _nRawOffset += nCurrentSize;
 
-        XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, _nOffset - nOffset);
+        XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, _nOffset - nOffset);
 
         if (nCurrentRecords >= ssOptions.nLimit) {
             _errorMessage(QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords)));
@@ -2779,7 +2779,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
         }
     }
 
-    XBinary::setPdStructFinished(pProcessData, _nFreeIndex);
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
     if (bReadError) {
         _errorMessage(tr("Read error"));
@@ -4573,7 +4573,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'%PDF'", 0)) {
             stResult.insert(FT_DOCUMENT);
             stResult.insert(FT_PDF);
-        } else if (compareSignature(&memoryMap, "'RIFF'", 0) || compareSignature(&memoryMap, "'RIFT'", 0)) {
+        } else if (compareSignature(&memoryMap, "'RIFF'", 0) || compareSignature(&memoryMap, "'RIFX'", 0)) {
+            // TODO AIFF
             stResult.insert(FT_RIFF);
             if (compareSignature(&memoryMap, "'RIFF'........'AVI '", 0)) {
                 stResult.insert(FT_VIDEO);
@@ -4581,7 +4582,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             } else if (compareSignature(&memoryMap, "'RIFF'........'WEBPVP8'", 0)) {
                 stResult.insert(FT_IMAGE);
                 stResult.insert(FT_WEBP);
-            }
+            } /*else if (compareSignature(&memoryMap, "'RIFF'........'ACON'", 0)) {
+                stResult.insert(FT_IMAGE);
+                stResult.insert(FT_ANI);
+            }*/
         }
 
         if (isPlainTextType(&baHeader)) {
