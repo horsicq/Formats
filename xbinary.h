@@ -865,6 +865,7 @@ public:
     static QString valueTypeToString(VT valueType);
     static QString getValueString(QVariant varValue, VT valueType);
     static qint32 getValueSize(QVariant varValue, VT valueType);
+    static VT getValueType(quint64 nValue);
 
     static QByteArray getUnicodeString(QString sString, bool bIsBigEndian);
     static QByteArray getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString, bool bAddNull);
