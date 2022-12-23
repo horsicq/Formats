@@ -94,6 +94,7 @@ QString XBMP::getFileFormatString()
 {
     QString sResult;
 
+    // TODO
     sResult = "BMP";
 
     return sResult;

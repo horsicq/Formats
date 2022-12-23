@@ -40,7 +40,7 @@ public:
     virtual FT getFileType();
     virtual QString getVersion();
 
-    void decodeFrame(qint64 nOffset);
+    qint64 decodeFrame(qint64 nOffset);
 };
 
 #endif  // XMP3_H

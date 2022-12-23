@@ -138,16 +138,18 @@ QString XMP3::getVersion()
     return sResult;
 }
 
-void XMP3::decodeFrame(qint64 nOffset)
+qint64 XMP3::decodeFrame(qint64 nOffset)
 {
+    qint64 nResult = 0;
+
     quint32 nHeader = read_uint32(nOffset, true);
 
-    if (nHeader & 0xFFFFFF00) {
-        quint8 nVersion = (nHeader >> 18) & 0x1;
-        quint8 nLayer = (nHeader >> 17) & 0x1;
+    if (nHeader & 0xFFE00000) {
+        quint8 nVersion = (nHeader >> 19) & 0x3;
+        quint8 nLayer = (nHeader >> 17) & 0x3;
         quint8 nErrorProtection = (nHeader >> 16) & 0x1;
-        quint8 nBitRate = (nHeader >> 15) & 0xF;
-        quint8 nFrequency = (nHeader >> 11) & 0x3;
+        quint8 nBitRateIndex = (nHeader >> 12) & 0xF;
+        quint8 nFrequencyIndex = (nHeader >> 10) & 0x3;
         quint8 nPadBit = (nHeader >> 9) & 0x1;
         quint8 nPrivBit = (nHeader >> 8) & 0x1;
         quint8 nMode = (nHeader >> 7) & 0x3;
@@ -157,11 +159,108 @@ void XMP3::decodeFrame(qint64 nOffset)
         quint8 nOriginal = (nHeader >> 2) & 0x1;
         quint8 nEmphasis = (nHeader >> 0) & 0x3;
 
-        if (nLayer == 1) {  // III
+        quint32 nBitRate = 0;
 
-        } else if (nLayer == 2) {  // II
+        if (nVersion == 1) {
+            if (nLayer == 1) {  // III
+                if (nBitRateIndex == 1) {
+                    nBitRate = 32;
+                } else if (nBitRateIndex == 2) {
+                    nBitRate = 40;
+                } else if (nBitRateIndex == 3) {
+                    nBitRate = 48;
+                } else if (nBitRateIndex == 4) {
+                    nBitRate = 56;
+                } else if (nBitRateIndex == 5) {
+                    nBitRate = 64;
+                } else if (nBitRateIndex == 6) {
+                    nBitRate = 80;
+                } else if (nBitRateIndex == 7) {
+                    nBitRate = 96;
+                } else if (nBitRateIndex == 8) {
+                    nBitRate = 112;
+                } else if (nBitRateIndex == 9) {
+                    nBitRate = 128;
+                } else if (nBitRateIndex == 10) {
+                    nBitRate = 160;
+                } else if (nBitRateIndex == 11) {
+                    nBitRate = 192;
+                } else if (nBitRateIndex == 12) {
+                    nBitRate = 224;
+                } else if (nBitRateIndex == 13) {
+                    nBitRate = 256;
+                } else if (nBitRateIndex == 14) {
+                    nBitRate = 320;
+                }
+            } else if (nLayer == 2) {  // II
+                if (nBitRateIndex == 1) {
+                    nBitRate = 32;
+                } else if (nBitRateIndex == 2) {
+                    nBitRate = 48;
+                } else if (nBitRateIndex == 3) {
+                    nBitRate = 56;
+                } else if (nBitRateIndex == 4) {
+                    nBitRate = 64;
+                } else if (nBitRateIndex == 5) {
+                    nBitRate = 80;
+                } else if (nBitRateIndex == 6) {
+                    nBitRate = 96;
+                } else if (nBitRateIndex == 7) {
+                    nBitRate = 112;
+                } else if (nBitRateIndex == 8) {
+                    nBitRate = 128;
+                } else if (nBitRateIndex == 9) {
+                    nBitRate = 160;
+                } else if (nBitRateIndex == 10) {
+                    nBitRate = 192;
+                } else if (nBitRateIndex == 11) {
+                    nBitRate = 224;
+                } else if (nBitRateIndex == 12) {
+                    nBitRate = 256;
+                } else if (nBitRateIndex == 13) {
+                    nBitRate = 320;
+                } else if (nBitRateIndex == 14) {
+                    nBitRate = 384;
+                }
 
-        } else if (nLayer == 3) {  // I
+            } else if (nLayer == 3) {  // I
+                if (nBitRateIndex == 1) {
+                    nBitRate = 32;
+                } else if (nBitRateIndex == 2) {
+                    nBitRate = 64;
+                } else if (nBitRateIndex == 3) {
+                    nBitRate = 96;
+                } else if (nBitRateIndex == 4) {
+                    nBitRate = 128;
+                } else if (nBitRateIndex == 5) {
+                    nBitRate = 160;
+                } else if (nBitRateIndex == 6) {
+                    nBitRate = 192;
+                } else if (nBitRateIndex == 7) {
+                    nBitRate = 224;
+                } else if (nBitRateIndex == 8) {
+                    nBitRate = 256;
+                } else if (nBitRateIndex == 9) {
+                    nBitRate = 288;
+                } else if (nBitRateIndex == 10) {
+                    nBitRate = 320;
+                } else if (nBitRateIndex == 11) {
+                    nBitRate = 352;
+                } else if (nBitRateIndex == 12) {
+                    nBitRate = 384;
+                } else if (nBitRateIndex == 13) {
+                    nBitRate = 416;
+                } else if (nBitRateIndex == 14) {
+                    nBitRate = 448;
+                }
+            }
+        }
+
+
+        if (nBitRate == 0) {
+
         }
     }
+
+    return nResult;
 }
