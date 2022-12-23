@@ -108,7 +108,28 @@ XBinary::_MEMORY_MAP XMP3::getMemoryMap(PDSTRUCT *pPdStruct)
             result.listRecords.append(record);
         }
         // TODO
-        decodeFrame(nOffset);
+        quint32 nFrameSize = 0;
+
+        do {
+            nFrameSize = decodeFrame(nOffset);
+
+            if (nFrameSize) {
+                _MEMORY_RECORD record = {};
+
+                record.nIndex = nIndex++;
+                record.type = MMT_FILESEGMENT;
+                record.nOffset = nOffset;
+                record.nSize = nFrameSize;
+                record.nAddress = -1;
+                record.sName = QString("Frame"); // mb translate
+
+                result.listRecords.append(record);
+
+                nOffset += nFrameSize;
+            }
+        } while(nFrameSize);
+
+        // TODO TAG
     }
 
     return result;
@@ -160,8 +181,72 @@ qint64 XMP3::decodeFrame(qint64 nOffset)
         quint8 nEmphasis = (nHeader >> 0) & 0x3;
 
         quint32 nBitRate = 0;
+        quint32 nFrequency = 0;
+        double dTime = 0;
 
-        if (nVersion == 1) {
+        if ((nVersion == 1) || (nVersion == 2)) {
+            if ((nLayer == 1) || (nLayer == 2)) {  // III & II
+                if (nBitRateIndex == 1) {
+                    nBitRate = 8;
+                } else if (nBitRateIndex == 2) {
+                    nBitRate = 16;
+                } else if (nBitRateIndex == 3) {
+                    nBitRate = 24;
+                } else if (nBitRateIndex == 4) {
+                    nBitRate = 32;
+                } else if (nBitRateIndex == 5) {
+                    nBitRate = 40;
+                } else if (nBitRateIndex == 6) {
+                    nBitRate = 48;
+                } else if (nBitRateIndex == 7) {
+                    nBitRate = 56;
+                } else if (nBitRateIndex == 8) {
+                    nBitRate = 64;
+                } else if (nBitRateIndex == 9) {
+                    nBitRate = 80;
+                } else if (nBitRateIndex == 10) {
+                    nBitRate = 96;
+                } else if (nBitRateIndex == 11) {
+                    nBitRate = 112;
+                } else if (nBitRateIndex == 12) {
+                    nBitRate = 128;
+                } else if (nBitRateIndex == 13) {
+                    nBitRate = 144;
+                } else if (nBitRateIndex == 14) {
+                    nBitRate = 160;
+                }
+            } else if (nLayer == 3) {  // I
+                if (nBitRateIndex == 1) {
+                    nBitRate = 32;
+                } else if (nBitRateIndex == 2) {
+                    nBitRate = 48;
+                } else if (nBitRateIndex == 3) {
+                    nBitRate = 56;
+                } else if (nBitRateIndex == 4) {
+                    nBitRate = 64;
+                } else if (nBitRateIndex == 5) {
+                    nBitRate = 80;
+                } else if (nBitRateIndex == 6) {
+                    nBitRate = 96;
+                } else if (nBitRateIndex == 7) {
+                    nBitRate = 112;
+                } else if (nBitRateIndex == 8) {
+                    nBitRate = 128;
+                } else if (nBitRateIndex == 9) {
+                    nBitRate = 144;
+                } else if (nBitRateIndex == 10) {
+                    nBitRate = 160;
+                } else if (nBitRateIndex == 11) {
+                    nBitRate = 176;
+                } else if (nBitRateIndex == 12) {
+                    nBitRate = 192;
+                } else if (nBitRateIndex == 13) {
+                    nBitRate = 224;
+                } else if (nBitRateIndex == 14) {
+                    nBitRate = 256;
+                }
+            }
+        } else if (nVersion == 3) {
             if (nLayer == 1) {  // III
                 if (nBitRateIndex == 1) {
                     nBitRate = 32;
@@ -222,7 +307,6 @@ qint64 XMP3::decodeFrame(qint64 nOffset)
                 } else if (nBitRateIndex == 14) {
                     nBitRate = 384;
                 }
-
             } else if (nLayer == 3) {  // I
                 if (nBitRateIndex == 1) {
                     nBitRate = 32;
@@ -256,9 +340,47 @@ qint64 XMP3::decodeFrame(qint64 nOffset)
             }
         }
 
+        if (nVersion == 1) { // v2.5
+            if (nFrequencyIndex == 0) {
+                nFrequency = 11025;
+            } else if(nFrequencyIndex == 1) {
+                 nFrequency = 12000;
+            } else if(nFrequencyIndex == 2) {
+                 nFrequency = 8000;
+            }
+        } else if (nVersion == 2) { // v2
+            if (nFrequencyIndex == 0) {
+                nFrequency = 22050;
+            } else if(nFrequencyIndex == 1) {
+                 nFrequency = 24000;
+            } else if(nFrequencyIndex == 2) {
+                 nFrequency = 16000;
+            }
+        } else if (nVersion == 3) { // v1
+            if (nFrequencyIndex == 0) {
+                nFrequency = 44100;
+            } else if(nFrequencyIndex == 1) {
+                 nFrequency = 48000;
+            } else if(nFrequencyIndex == 2) {
+                 nFrequency = 32000;
+            }
+        }
 
-        if (nBitRate == 0) {
+        if (nFrequency) {
+            if( nLayer == 3 ) {
+                dTime=(double)384/nFrequency;
+            } else if((nLayer == 2) || (nVersion == 3)) {
+                dTime=(double)1152/nFrequency;
+            } else {
+                dTime=(double)576/nFrequency;
+            }
 
+            if(nLayer==3) {
+                nResult+=qFloor(12000*(double)nBitRate/nFrequency+nPadBit)*4;
+            } else {
+                // 125 = 1000/8 = kilobits to bytes
+                nResult+=qFloor(125*nBitRate*dTime+nPadBit);
+            }
         }
     }
 
