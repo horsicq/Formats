@@ -855,7 +855,7 @@ public:
                                            PDSTRUCT *pProcessData = nullptr);
     QList<MS_RECORD> multiSearch_value(qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian, PDSTRUCT *pPdStruct = nullptr);
     QList<MS_RECORD> multiSearch_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian,
-                                       PDSTRUCT *pProcessData = nullptr);
+                                       PDSTRUCT *pPdStruct = nullptr);
 
     qint64 find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QVariant varValue, VT valueType, bool bIsBigEndian, qint64 *pnResultSize,
                       PDSTRUCT *pProcessData = nullptr);

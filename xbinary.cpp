@@ -2876,12 +2876,12 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(qint64 nOffset, qint64 nSiz
 }
 
 QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType,
-                                                     bool bIsBigEndian, PDSTRUCT *pProcessData)
+                                                     bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT processDataEmpty = {};
 
-    if (!pProcessData) {
-        pProcessData = &processDataEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &processDataEmpty;
     }
 
     if (nSize == -1) {
@@ -2897,14 +2897,14 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
     qint64 _nSize = nSize;
     qint64 _nOffset = nOffset;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pProcessData);
+    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-    XBinary::setPdStructInit(pProcessData, _nFreeIndex, nSize);
+    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
     qint32 nCurrentRecords = 0;
 
-    while ((_nSize > 0) && (!(pProcessData->bIsStop))) {
-        qint64 nValOffset = find_value(pMemoryMap, _nOffset, _nSize, varValue, valueType, bIsBigEndian, &nValSize, pProcessData);
+    while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
+        qint64 nValOffset = find_value(pMemoryMap, _nOffset, _nSize, varValue, valueType, bIsBigEndian, &nValSize, pPdStruct);
 
         if (nValOffset == -1) {
             break;
@@ -2944,10 +2944,10 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
         _nOffset = nValOffset + nValSize;
         _nSize = nSize - (_nOffset - nOffset);
 
-        XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, _nOffset - nOffset);
+        XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, _nOffset - nOffset);
     }
 
-    XBinary::setPdStructFinished(pProcessData, _nFreeIndex);
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
     return listResult;
 }
