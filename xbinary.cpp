@@ -1363,6 +1363,8 @@ QString XBinary::read_codePageString(qint64 nOffset, qint64 nMaxByteSize, QStrin
     }
 #endif
 
+    sResult = QString::fromUtf8(sResult.toUtf8());
+
     return sResult;
 }
 
