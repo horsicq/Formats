@@ -858,7 +858,7 @@ public:
                                        PDSTRUCT *pPdStruct = nullptr);
 
     qint64 find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QVariant varValue, VT valueType, bool bIsBigEndian, qint64 *pnResultSize,
-                      PDSTRUCT *pProcessData = nullptr);
+                      PDSTRUCT *pPdStruct = nullptr);
 
     static QString msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId);
 

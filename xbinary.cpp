@@ -98,7 +98,7 @@ void XBinary::setDevice(QIODevice *pDevice)
     if (g_pDevice) {
         if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
-        //        qDebug("%s",XBinary::valueToHex((quint64)g_pDevice).toLatin1().data());
+        //qDebug("%s",XBinary::valueToHex((quint64)g_pDevice).toLatin1().data());
 
         g_nSize = g_pDevice->size();
 
@@ -2953,53 +2953,53 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
 }
 
 qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QVariant varValue, VT valueType, bool bIsBigEndian, qint64 *pnResultSize,
-                           PDSTRUCT *pProcessData)
+                           PDSTRUCT *pPdStruct)
 {
     qint64 nResult = -1;
 
     // TODO more mb pascal strings
     if (valueType == XBinary::VT_ANSISTRING) {
-        nResult = find_ansiString(nOffset, nSize, varValue.toString(), pProcessData);
+        nResult = find_ansiString(nOffset, nSize, varValue.toString(), pPdStruct);
     } else if (valueType == XBinary::VT_ANSISTRING_I) {
-        nResult = find_ansiStringI(nOffset, nSize, varValue.toString(), pProcessData);
+        nResult = find_ansiStringI(nOffset, nSize, varValue.toString(), pPdStruct);
     } else if (valueType == XBinary::VT_UNICODESTRING) {
-        nResult = find_unicodeString(nOffset, nSize, varValue.toString(), bIsBigEndian, pProcessData);
+        nResult = find_unicodeString(nOffset, nSize, varValue.toString(), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_UNICODESTRING_I) {
-        nResult = find_unicodeStringI(nOffset, nSize, varValue.toString(), bIsBigEndian, pProcessData);
+        nResult = find_unicodeStringI(nOffset, nSize, varValue.toString(), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_UTF8STRING) {
-        nResult = find_utf8String(nOffset, nSize, varValue.toString(), pProcessData);
+        nResult = find_utf8String(nOffset, nSize, varValue.toString(), pPdStruct);
     } else if (valueType == XBinary::VT_UTF8STRING_I) {
-        nResult = find_utf8StringI(nOffset, nSize, varValue.toString(), pProcessData);
+        nResult = find_utf8StringI(nOffset, nSize, varValue.toString(), pPdStruct);
     } else if (valueType == XBinary::VT_SIGNATURE) {
-        nResult = find_signature(pMemoryMap, nOffset, nSize, varValue.toString(), pnResultSize, pProcessData);
+        nResult = find_signature(pMemoryMap, nOffset, nSize, varValue.toString(), pnResultSize, pPdStruct);
     } else if (valueType == XBinary::VT_BYTE) {
-        nResult = find_uint8(nOffset, nSize, (quint8)(varValue.toULongLong()), pProcessData);
+        nResult = find_uint8(nOffset, nSize, (quint8)(varValue.toULongLong()), pPdStruct);
     } else if (valueType == XBinary::VT_WORD) {
-        nResult = find_uint16(nOffset, nSize, (qint16)(varValue.toULongLong()), pProcessData);
+        nResult = find_uint16(nOffset, nSize, (qint16)(varValue.toULongLong()), pPdStruct);
     } else if (valueType == XBinary::VT_DWORD) {
-        nResult = find_uint32(nOffset, nSize, (qint32)(varValue.toULongLong()), bIsBigEndian, pProcessData);
+        nResult = find_uint32(nOffset, nSize, (qint32)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_QWORD) {
-        nResult = find_uint64(nOffset, nSize, (qint64)(varValue.toULongLong()), bIsBigEndian, pProcessData);
+        nResult = find_uint64(nOffset, nSize, (qint64)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_CHAR) {
-        nResult = find_int8(nOffset, nSize, (qint8)(varValue.toULongLong()), pProcessData);
+        nResult = find_int8(nOffset, nSize, (qint8)(varValue.toULongLong()), pPdStruct);
     } else if (valueType == XBinary::VT_UCHAR) {
-        nResult = find_uint8(nOffset, nSize, (quint8)(varValue.toULongLong()), pProcessData);
+        nResult = find_uint8(nOffset, nSize, (quint8)(varValue.toULongLong()), pPdStruct);
     } else if (valueType == XBinary::VT_SHORT) {
-        nResult = find_int16(nOffset, nSize, (qint16)(varValue.toULongLong()), bIsBigEndian, pProcessData);
+        nResult = find_int16(nOffset, nSize, (qint16)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_USHORT) {
-        nResult = find_uint16(nOffset, nSize, (quint16)(varValue.toULongLong()), bIsBigEndian, pProcessData);
+        nResult = find_uint16(nOffset, nSize, (quint16)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_INT) {
-        nResult = find_int32(nOffset, nSize, (qint32)(varValue.toULongLong()), bIsBigEndian, pProcessData);
+        nResult = find_int32(nOffset, nSize, (qint32)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_UINT) {
-        nResult = find_uint32(nOffset, nSize, (quint32)(varValue.toULongLong()), bIsBigEndian, pProcessData);
+        nResult = find_uint32(nOffset, nSize, (quint32)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_INT64) {
-        nResult = find_int64(nOffset, nSize, (qint64)(varValue.toULongLong()), bIsBigEndian, pProcessData);
+        nResult = find_int64(nOffset, nSize, (qint64)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_UINT64) {
-        nResult = find_uint64(nOffset, nSize, (quint64)(varValue.toULongLong()), bIsBigEndian, pProcessData);
+        nResult = find_uint64(nOffset, nSize, (quint64)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_FLOAT) {
-        nResult = find_float(nOffset, nSize, (float)(varValue.toFloat()), bIsBigEndian, pProcessData);
+        nResult = find_float(nOffset, nSize, (float)(varValue.toFloat()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_DOUBLE) {
-        nResult = find_double(nOffset, nSize, (double)(varValue.toDouble()), bIsBigEndian, pProcessData);
+        nResult = find_double(nOffset, nSize, (double)(varValue.toDouble()), bIsBigEndian, pPdStruct);
     }
 
     return nResult;
