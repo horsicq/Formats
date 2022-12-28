@@ -3644,10 +3644,11 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
 
 XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT ppStructEmpty = {};
+    PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
-        pPdStruct = &ppStructEmpty;
+        XBinary::_pdStructInit(&pdStructEmpty);
+        pPdStruct = &pdStructEmpty;
     }
     // TODO Check alignment!
     XBinary::_MEMORY_MAP result = {};

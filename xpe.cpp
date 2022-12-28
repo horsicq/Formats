@@ -1745,10 +1745,11 @@ bool XPE::isIATPresent()
 
 XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT ppStructEmpty = {};
+    PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
-        pPdStruct = &ppStructEmpty;
+        XBinary::_pdStructInit(&pdStructEmpty);
+        pPdStruct = &pdStructEmpty;
     }
 
     _MEMORY_MAP result = {};
@@ -1981,6 +1982,7 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(PDSTRUCT *pPdStruct)
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -1994,6 +1996,7 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap, PDSTRUC
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -2324,6 +2327,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(PDSTRUCT *pPdStruct)
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -2337,6 +2341,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap, PDST
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -2416,6 +2421,7 @@ QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemo
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -2505,6 +2511,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex, PDSTRUCT *pPdStr
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -3874,6 +3881,7 @@ XPE::EXPORT_HEADER XPE::getExport(bool bValidOnly, PDSTRUCT *pPdStruct)
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -3887,6 +3895,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -3966,6 +3975,7 @@ QList<QString> XPE::getExportFunctionsList(PDSTRUCT *pPdStruct)
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -3979,6 +3989,7 @@ QList<QString> XPE::getExportFunctionsList(EXPORT_HEADER *pExportHeader, PDSTRUC
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 

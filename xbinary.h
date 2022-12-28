@@ -1371,6 +1371,7 @@ public:
 
     static MODE getModeOS();
 
+    static void _pdStructInit(PDSTRUCT *pPdStruct);
     static void setPdStructInit(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nTotal);
     static void setPdStructTotal(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue);
     static void setPdStructCurrent(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue);

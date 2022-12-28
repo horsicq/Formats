@@ -580,6 +580,7 @@ QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords(PDSTRUCT *pPdStruc
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 

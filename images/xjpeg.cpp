@@ -53,6 +53,7 @@ XBinary::_MEMORY_MAP XJpeg::getMemoryMap(PDSTRUCT *pPdStruct)
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -117,6 +118,7 @@ QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 

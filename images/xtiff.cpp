@@ -57,10 +57,11 @@ bool XTiff::isValid(QIODevice *pDevice)
 
 XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT ppStructEmpty = {};
+    PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
-        pPdStruct = &ppStructEmpty;
+        XBinary::_pdStructInit(&pdStructEmpty);
+        pPdStruct = &pdStructEmpty;
     }
 
     qint32 nIndex = 0;
@@ -219,6 +220,7 @@ QList<XTiff::CHUNK> XTiff::getChunks(PDSTRUCT *pPdStruct)
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 

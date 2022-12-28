@@ -99,6 +99,7 @@ XBinary::_MEMORY_MAP XPNG::getMemoryMap(PDSTRUCT *pPdStruct)
     PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 

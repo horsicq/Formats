@@ -965,6 +965,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra)
 
         if (xzip.isValid()) {
             XBinary::PDSTRUCT pdStruct = {};
+            XBinary::_pdStructInit(&pdStruct);
 
             QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(-1, &pdStruct);
 
