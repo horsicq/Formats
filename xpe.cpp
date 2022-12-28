@@ -9037,6 +9037,21 @@ bool XPE::isNETUnicodeStringPresent(QString sString, XPE::CLI_INFO *pCliInfo)
     return pCliInfo->metaData.listUnicodeStrings.contains(sString);
 }
 
+quint32 XPE::getNetId()
+{
+    quint32 nResult = 0;
+
+    if (isNETPresent()) {
+        quint32 nTimeDateStamp = getFileHeader_TimeDateStamp();
+
+        if (nTimeDateStamp & 0x80000000) {
+            nResult = nTimeDateStamp;
+        }
+    }
+
+    return nResult;
+}
+
 int XPE::getEntryPointSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();

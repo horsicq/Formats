@@ -861,6 +861,8 @@ public:
     bool isNETUnicodeStringPresent(QString sString);
     static bool isNETUnicodeStringPresent(QString sString, CLI_INFO *pCliInfo);
 
+    quint32 getNetId();
+
     int getEntryPointSection();
     qint32 getEntryPointSection(XBinary::_MEMORY_MAP *pMemoryMap);
     qint32 getImportSection();
