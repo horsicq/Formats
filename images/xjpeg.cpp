@@ -50,10 +50,9 @@ bool XJpeg::isValid(QIODevice *pDevice)
 
 XBinary::_MEMORY_MAP XJpeg::getMemoryMap(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -115,10 +114,9 @@ qint64 XJpeg::getFileFormatSize()
 
 QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 

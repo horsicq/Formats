@@ -95,10 +95,9 @@ qint64 XGif::getFileFormatSize()
 
 XBinary::_MEMORY_MAP XGif::getMemoryMap(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 

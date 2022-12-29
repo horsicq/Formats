@@ -57,10 +57,9 @@ XBinary::MODE XCOM::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddr
 
 XBinary::_MEMORY_MAP XCOM::getMemoryMap(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 

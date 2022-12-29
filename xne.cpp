@@ -849,10 +849,9 @@ XNE_DEF::NE_SEGMENT XNE::_read_NE_SEGMENT(qint64 nOffset)
 
 XBinary::_MEMORY_MAP XNE::getMemoryMap(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 

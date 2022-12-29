@@ -1783,10 +1783,9 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qin
 {
     qint64 nResult = -1;
 
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();;
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
     // TODO CheckSize function
@@ -2024,10 +2023,9 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature,
 
 qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -2130,10 +2128,9 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
 qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -2199,10 +2196,9 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
 {
     qint64 nResult = -1;
     // TODO optimize
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
     // TODO CheckSize function
@@ -2384,10 +2380,9 @@ bool XBinary::_addMultiSearchStringRecord(QList<MS_RECORD> *pList, MS_RECORD *pR
 
 QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -2813,13 +2808,12 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 
 }
 
 QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo,
-                                                         PDSTRUCT *pProcessData)
+                                                         PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    if (!pProcessData) {
-        XBinary::_pdStructInit(&pdStructEmpty);
-        pProcessData = &pdStructEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
     }
 
     if (nSize == -1) {
@@ -2831,15 +2825,15 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
     qint64 _nSize = nSize;
     qint64 _nOffset = nOffset;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pProcessData);
+    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-    XBinary::setPdStructInit(pProcessData, _nFreeIndex, nSize);
+    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
     qint32 nCurrentRecords = 0;
 
-    while ((_nSize > 0) && (!(pProcessData->bIsStop))) {
+    while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
         qint64 nSignatureSize = 0;
-        qint64 nSignatureOffset = find_signature(pMemoryMap, _nOffset, _nSize, sSignature, &nSignatureSize, pProcessData);
+        qint64 nSignatureOffset = find_signature(pMemoryMap, _nOffset, _nSize, sSignature, &nSignatureSize, pPdStruct);
 
         if (nSignatureOffset == -1) {
             break;
@@ -2865,10 +2859,10 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
         _nOffset = nSignatureOffset + nSignatureSize;
         _nSize = nSize - (_nOffset - nOffset);
 
-        XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, _nOffset - nOffset);
+        XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, _nOffset - nOffset);
     }
 
-    XBinary::setPdStructFinished(pProcessData, _nFreeIndex);
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
     return listResult;
 }
@@ -2884,10 +2878,9 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(qint64 nOffset, qint64 nSiz
 QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType,
                                                      bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -4047,10 +4040,9 @@ QString XBinary::getMemoryRecordName(XBinary::_MEMORY_RECORD *pMemoryRecord)
 
 XBinary::_MEMORY_MAP XBinary::getMemoryMap(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -4387,7 +4379,7 @@ bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize
 {
     bool bResult = false;
 
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pProcessData) {
         pProcessData = &pdStructEmpty;
@@ -5604,10 +5596,9 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pProce
 {
     QString sResult;
 
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pProcessData) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pProcessData = &pdStructEmpty;
     }
 
@@ -5882,7 +5873,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
     // TODO optimize!!!
     quint32 nResult = 0xFFFFFFFF;  // ~0
 
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pProcessData) {
         pProcessData = &pdStructEmpty;
@@ -5982,10 +5973,9 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
 {
     double dResult = 1.4426950408889634073599246810023;
 
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pProcessData) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pProcessData = &pdStructEmpty;
     }
 
@@ -6058,10 +6048,9 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRU
 {
     BYTE_COUNTS result = {0};
 
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pPdStruct = &pdStructEmpty;
     }
 
@@ -7215,10 +7204,9 @@ bool XBinary::clearFile(QString sFileName)
 
 qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pProcessData) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pProcessData = &pdStructEmpty;
     }
 
@@ -7239,10 +7227,9 @@ qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, QString sS
 
 qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData)
 {
-    PDSTRUCT pdStructEmpty = {};
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pProcessData) {
-        XBinary::_pdStructInit(&pdStructEmpty);
         pProcessData = &pdStructEmpty;
     }
 
@@ -8943,17 +8930,21 @@ XBinary::MODE XBinary::getModeOS()
     return modeResult;
 }
 
-void XBinary::_pdStructInit(PDSTRUCT *pPdStruct)
+XBinary::PDSTRUCT XBinary::createPdStruct()
 {
-    pPdStruct->bIsStop = false;
-    pPdStruct->nFinished = false;
+    PDSTRUCT result = {};
 
-    // TODO rewrite -> N_NUMBER_PDRECORDS
-    pPdStruct->_pdRecord[0].bIsValid = false;
-    pPdStruct->_pdRecord[1].bIsValid = false;
-    pPdStruct->_pdRecord[2].bIsValid = false;
-    pPdStruct->_pdRecord[3].bIsValid = false;
-    pPdStruct->_pdRecord[4].bIsValid = false;
+    result.bIsStop = false;
+    result.nFinished = false;
+
+    for (qint32 i = 0; i < N_NUMBER_PDRECORDS; i++) {
+        result._pdRecord[i].bIsValid = false;
+        result._pdRecord[i].nCurrent = 0;
+        result._pdRecord[i].nTotal = 0;
+        result._pdRecord[i].sStatus = "";
+    }
+
+    return result;
 }
 
 void XBinary::setPdStructInit(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nTotal)

@@ -852,7 +852,7 @@ public:
     QList<MS_RECORD> multiSearch_allStrings(qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct = nullptr);
     QList<MS_RECORD> multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo = "", PDSTRUCT *pPdStruct = nullptr);
     QList<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QString sSignature, QString sInfo = "",
-                                           PDSTRUCT *pProcessData = nullptr);
+                                           PDSTRUCT *pPdStruct = nullptr);
     QList<MS_RECORD> multiSearch_value(qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian, PDSTRUCT *pPdStruct = nullptr);
     QList<MS_RECORD> multiSearch_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian,
                                        PDSTRUCT *pPdStruct = nullptr);
@@ -1371,7 +1371,7 @@ public:
 
     static MODE getModeOS();
 
-    static void _pdStructInit(PDSTRUCT *pPdStruct);
+    static PDSTRUCT createPdStruct();
     static void setPdStructInit(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nTotal);
     static void setPdStructTotal(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue);
     static void setPdStructCurrent(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue);
