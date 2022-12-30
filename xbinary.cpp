@@ -7248,14 +7248,14 @@ qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, QString
     return nResult;
 }
 
-bool XBinary::isStringInListPresent(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData)
+bool XBinary::isStringInListPresent(QList<QString> *pListStrings, QString sString, PDSTRUCT *pPdStruct)
 {
-    return (getStringNumberFromList(pListStrings, sString, pProcessData) != -1);
+    return (getStringNumberFromList(pListStrings, sString, pPdStruct) != -1);
 }
 
-bool XBinary::isStringInListPresentExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData)
+bool XBinary::isStringInListPresentExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pPdStruct)
 {
-    return (getStringNumberFromListExp(pListStrings, sString, pProcessData) != -1);
+    return (getStringNumberFromListExp(pListStrings, sString, pPdStruct) != -1);
 }
 
 QString XBinary::getStringByIndex(QList<QString> *pListStrings, int nIndex, qint32 nNumberOfStrings)

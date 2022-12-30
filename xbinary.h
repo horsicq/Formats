@@ -1225,8 +1225,8 @@ public:
 
     static qint32 getStringNumberFromList(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
     static qint32 getStringNumberFromListExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
-    static bool isStringInListPresent(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
-    static bool isStringInListPresentExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
+    static bool isStringInListPresent(QList<QString> *pListStrings, QString sString, PDSTRUCT *pPdStruct = nullptr);
+    static bool isStringInListPresentExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pPdStruct = nullptr);
     static QString getStringByIndex(QList<QString> *pListStrings, int nIndex, qint32 nNumberOfStrings = -1);
 
     static bool isStringUnicode(QString sString, qint32 nMaxCheckSize = -1);
