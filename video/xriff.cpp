@@ -48,7 +48,7 @@ bool XRiff::isValid()
         if (bIsValid) {
             quint32 nSize = read_uint32(4, bIsBigEndian);
 
-            if (nSize<= getSize()) {
+            if ((nSize > 0) && (nSize<= getSize())) {
                 bResult = true;
             }
         }

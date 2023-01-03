@@ -37,8 +37,16 @@ bool XBMP::isValid()
     if (compareSignature(&memoryMap, "'BM'..................000000", 0)) {
         quint32 nSize = read_uint32(2);
 
-        if (nSize <= getSize()) {
-            bResult = true;
+        if ((nSize > 0) && (nSize <= getSize())) {
+            quint32 nDBISize = read_uint32(0x0E);
+
+            if (nDBISize == 40) {
+                bResult = true;
+            } else if (nDBISize == 108) {
+                bResult = true;
+            } else if (nDBISize == 124) {
+                bResult = true;
+            }
         }
     }
 

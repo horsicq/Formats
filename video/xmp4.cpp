@@ -88,6 +88,11 @@ XBinary::_MEMORY_MAP XMP4::getMemoryMap(PDSTRUCT *pPdStruct)
 
     while (!(pPdStruct->bIsStop)) {
         quint32 nChunkSize = read_uint32(nOffset, true);
+
+        if (nChunkSize == 0) {
+            break;
+        }
+
         QString sTag = read_ansiString(nOffset + 4, 4);
 
         if (!isTagValid(sTag)) {
