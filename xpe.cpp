@@ -1139,6 +1139,28 @@ QByteArray XPE::getDataDirectory(XBinary::_MEMORY_MAP *pMemoryMap, quint32 nNumb
     return baResult;
 }
 
+XBinary::OFFSETSIZE XPE::getStringTable()
+{
+    OFFSETSIZE result = {};
+
+    qint64 nOffset = getFileHeader_PointerToSymbolTable()+ getFileHeader_NumberOfSymbols() * 18;
+
+    if (nOffset > 0) {
+        qint64 nSize = getSize() - nOffset;
+
+        if (nSize >= 4) {
+            quint32 nStringTableSize = read_uint32(nOffset);
+
+            if ((nStringTableSize > 0) && (nStringTableSize <= nSize)) {
+                result.nOffset = nOffset;
+                result.nSize = nStringTableSize;
+            }
+        }
+    }
+
+    return result;
+}
+
 qint64 XPE::getSectionsTableOffset()
 {
     qint64 nResult = -1;
@@ -1228,9 +1250,12 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders()
     return listResult;
 }
 
-QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders, bool bIsImage)
+QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
 {
     QList<SECTION_RECORD> listResult;
+
+    bool bIsImage = isImage();
+    OFFSETSIZE osStringTable = getStringTable();
 
     qint32 nNumberOfSections = pListSectionHeaders->count();
 
@@ -1239,6 +1264,8 @@ QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_H
 
         record.sName = QString((char *)pListSectionHeaders->at(i).Name);
         record.sName.resize(qMin(record.sName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
+
+        record.sName = convertSectionName(record.sName, &osStringTable);
 
         if (bIsImage) {
             record.nOffset = pListSectionHeaders->at(i).VirtualAddress;
@@ -1289,6 +1316,22 @@ QList<XPE::SECTIONRVA_RECORD> XPE::getSectionRVARecords()
     }
 
     return listResult;
+}
+
+QString XPE::convertSectionName(QString sName, OFFSETSIZE *pOsStringTable)
+{
+    QString sResult = sName;
+
+    if(sName.size() > 1)
+    {
+        if (sName.at(0) == "/") {
+            qint32 nIndex = sName.section("/", 1, -1).toInt();
+
+            sResult = getStringFromIndex(pOsStringTable->nOffset, pOsStringTable->nSize, nIndex);
+        }
+    }
+
+    return sResult;
 }
 
 QString XPE::getSection_NameAsString(quint32 nNumber)
@@ -1628,47 +1671,25 @@ quint32 XPE::getSection_Characteristics(quint32 nNumber, QList<XPE_DEF::IMAGE_SE
 bool XPE::isSectionNamePresent(QString sSectionName)
 {
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSectionHeaders = getSectionHeaders();
+    QList<SECTION_RECORD> listSectionRecords = getSectionRecords(&listSectionHeaders);
 
-    return isSectionNamePresent(sSectionName, &listSectionHeaders);
+    return isSectionNamePresent(sSectionName, &listSectionRecords);
 }
 
-bool XPE::isSectionNamePresent(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+bool XPE::isSectionNamePresent(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords)
 {
     bool bResult = false;
 
-    qint32 nNumberOfSections = pListSectionHeaders->count();
+    qint32 nNumberOfSections = pListSectionRecords->count();
 
     for (qint32 i = 0; i < nNumberOfSections; i++) {
-        QString _sSectionName = QString((char *)pListSectionHeaders->at(i).Name);
-        _sSectionName.resize(qMin(_sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
-
-        if (_sSectionName == sSectionName) {
+        if (pListSectionRecords->at(i).sName == sSectionName) {
             bResult = true;
             break;
         }
     }
 
     return bResult;
-}
-
-XPE_DEF::IMAGE_SECTION_HEADER XPE::getSectionByName(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
-{
-    XPE_DEF::IMAGE_SECTION_HEADER result = {};
-
-    qint32 nNumberOfSections = pListSectionHeaders->count();
-
-    for (qint32 i = 0; i < nNumberOfSections; i++) {
-        QString _sSectionName = QString((char *)pListSectionHeaders->at(i).Name);
-        _sSectionName.resize(qMin(_sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
-
-        if (_sSectionName == sSectionName) {
-            result = pListSectionHeaders->at(i);
-
-            break;
-        }
-    }
-
-    return result;
 }
 
 XPE::SECTION_RECORD XPE::getSectionRecordByName(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords)
@@ -1691,21 +1712,19 @@ XPE::SECTION_RECORD XPE::getSectionRecordByName(QString sSectionName, QList<SECT
 qint32 XPE::getSectionNumber(QString sSectionName)
 {
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSectionHeaders = getSectionHeaders();
+    QList<SECTION_RECORD> listSectionRecords = getSectionRecords(&listSectionHeaders);
 
-    return getSectionNumber(sSectionName, &listSectionHeaders);
+    return getSectionNumber(sSectionName, &listSectionRecords);
 }
 
-qint32 XPE::getSectionNumber(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders)
+qint32 XPE::getSectionNumber(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords)
 {
     qint32 nResult = -1;
 
-    qint32 nNumberOfSections = pListSectionHeaders->count();
+    qint32 nNumberOfSections = pListSectionRecords->count();
 
     for (qint32 i = 0; i < nNumberOfSections; i++) {
-        QString _sSectionName = QString((char *)pListSectionHeaders->at(i).Name);
-        _sSectionName.resize(qMin(_sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
-
-        if (_sSectionName == sSectionName) {
+        if (pListSectionRecords->at(i).sName == sSectionName) {
             nResult = i;
             break;
         }
@@ -1771,6 +1790,8 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
     result.nRawSize = getSize();
     result.nImageSize = S_ALIGN_UP(getOptionalHeader_SizeOfImage(), 0x1000);
     result.nEntryPointAddress = result.nModuleAddress + getOptionalHeader_AddressOfEntryPoint();
+
+    OFFSETSIZE osStringTable = getStringTable();
 
     quint32 nNumberOfSections = qMin((int)getFileHeader_NumberOfSections(), 100);  // TODO const
     quint32 nFileAlignment = getOptionalHeader_FileAlignment();                    // TODO Check mb qint64
@@ -1885,9 +1906,9 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
 
             QString _sSectionName = QString((char *)section.Name);
 
-            if (_sSectionName.size() > 8) {
-                _sSectionName.resize(8);
-            }
+            _sSectionName.resize(qMin(_sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
+
+            _sSectionName = convertSectionName(_sSectionName, &osStringTable);
 
             QString sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i), _sSectionName);
 

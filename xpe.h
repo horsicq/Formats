@@ -458,6 +458,8 @@ public:
     QByteArray getDataDirectory(quint32 nNumber);
     QByteArray getDataDirectory(_MEMORY_MAP *pMemoryMap, quint32 nNumber);
 
+    OFFSETSIZE getStringTable();
+
     qint64 getSectionsTableOffset();
     qint64 getSectionHeaderOffset(quint32 nNumber);
     qint64 getSectionHeaderSize();
@@ -469,10 +471,12 @@ public:
 
     QList<XPE_DEF::IMAGE_SECTION_HEADER> getSectionHeaders();
     // TODO with __getSectionOffsetAndSize TODO Check !!!
-    static QList<SECTION_RECORD> getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders, bool bIsImage);
+    QList<SECTION_RECORD> getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
     static QList<QString> getSectionNames(QList<XPE::SECTION_RECORD> *pListSectionRecords);
 
     QList<SECTIONRVA_RECORD> getSectionRVARecords();
+
+    QString convertSectionName(QString sName, OFFSETSIZE *pOsStringTable);
 
     QString getSection_NameAsString(quint32 nNumber);
     quint32 getSection_VirtualSize(quint32 nNumber);
@@ -508,13 +512,12 @@ public:
     quint32 getSection_Characteristics(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
 
     bool isSectionNamePresent(QString sSectionName);
-    static bool isSectionNamePresent(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
-    static XPE_DEF::IMAGE_SECTION_HEADER getSectionByName(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    static bool isSectionNamePresent(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     static SECTION_RECORD getSectionRecordByName(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     qint32 getSectionNumber(QString sSectionName);
-    static qint32 getSectionNumber(QString sSectionName, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
+    static qint32 getSectionNumber(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     static QString sectionCharacteristicToString(quint32 nValue);
 

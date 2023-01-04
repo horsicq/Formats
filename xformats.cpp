@@ -111,6 +111,9 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDe
     } else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) {
         XMACHOFat xmachofat(pDevice);
         result = xmachofat.getMemoryMap(pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) {
+        XGzip xgzip(pDevice);
+        result = xgzip.getMemoryMap(pPdStruct);
     }
 #endif
     else {
@@ -921,6 +924,9 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     } else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) {
         XMACHOFat xmachofat(pDevice);
         result = xmachofat.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) {
+        XGzip xgzip(pDevice);
+        result = xgzip.getFileFormatInfo();
     }
 #endif
 
