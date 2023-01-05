@@ -616,6 +616,9 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_GZIP:
             sResult = QString("GZIP");
             break;
+        case FT_ZLIB:
+            sResult = QString("zlib");
+            break;
         case FT_ICO:
             sResult = QString("ICO");
             break;
@@ -4540,7 +4543,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "1F8B")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_GZIP);
-            // TODO DEB
+        } else if (compareSignature(&memoryMap, "7801") || compareSignature(&memoryMap, "785E") || compareSignature(&memoryMap, "789C") || compareSignature(&memoryMap, "78DA")) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_ZLIB);
         } else if (compareSignature(&memoryMap, "'!<arch>'0a")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_AR);
@@ -4730,6 +4735,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_ZIP;
     } else if (pStFileTypes->contains(FT_GZIP)) {
         result = FT_GZIP;
+    } else if (pStFileTypes->contains(FT_ZLIB)) {
+        result = FT_ZLIB;
     } else if (pStFileTypes->contains(FT_7Z)) {
         result = FT_7Z;
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
@@ -4819,6 +4826,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_BINARY64)) listResult.append(FT_BINARY64);
     if (stFileTypes.contains(FT_ZIP)) listResult.append(FT_ZIP);
     if (stFileTypes.contains(FT_GZIP)) listResult.append(FT_GZIP);
+    if (stFileTypes.contains(FT_ZLIB)) listResult.append(FT_ZLIB);
     if (stFileTypes.contains(FT_RAR)) listResult.append(FT_RAR);
     if (stFileTypes.contains(FT_JAR)) listResult.append(FT_JAR);
     if (stFileTypes.contains(FT_APK)) listResult.append(FT_APK);
@@ -5230,7 +5238,7 @@ QString XBinary::getSpaces(qint32 nNumberOfSpaces)
     return sResult;
 }
 
-QString XBinary::getUnpackedFileName(QIODevice *pDevice)
+QString XBinary::getUnpackedFileName(QIODevice *pDevice, bool bShort)
 {
     QString sResult = "unpacked";
 
@@ -5241,6 +5249,12 @@ QString XBinary::getUnpackedFileName(QIODevice *pDevice)
 
         if (sFileName != "") {
             sResult = getUnpackedFileName(sFileName);
+        }
+
+        if (bShort) {
+            QFileInfo fi(sResult);
+
+            sResult = fi.completeBaseName();
         }
     }
 
@@ -7940,7 +7954,7 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_PE64) || pStFileTypes->contains(XBinary::FT_ELF) || pStFileTypes->contains(XBinary::FT_ELF32) ||
         pStFileTypes->contains(XBinary::FT_ELF64) || pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) ||
         pStFileTypes->contains(XBinary::FT_MACHO64) || pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) ||
-        pStFileTypes->contains(XBinary::FT_GZIP)) {
+        pStFileTypes->contains(XBinary::FT_GZIP) || pStFileTypes->contains(XBinary::FT_ZLIB)) {
         pStFileTypes->remove(XBinary::FT_BINARY);
     } else {
         pStFileTypes->insert(XBinary::FT_COM);

@@ -236,6 +236,7 @@ public:
         FT_UTF8,
         FT_ZIP,
         FT_GZIP,
+        FT_ZLIB,
         FT_ICO,
         FT_CUR,
         FT_MP3,
@@ -1048,7 +1049,7 @@ public:
     static QString boolToString(bool bValue);
     static QString getSpaces(qint32 nNumberOfSpaces);
 
-    static QString getUnpackedFileName(QIODevice *pDevice);
+    static QString getUnpackedFileName(QIODevice *pDevice, bool bShort = false);
     static QString getUnpackedFileName(QString sFileName);
     static QString getDumpFileName(QIODevice *pDevice);
     static QString getDumpFileName(QString sFileName);
