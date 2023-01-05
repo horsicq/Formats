@@ -5254,7 +5254,7 @@ QString XBinary::getUnpackedFileName(QIODevice *pDevice, bool bShort)
         if (bShort) {
             QFileInfo fi(sResult);
 
-            sResult = fi.completeBaseName();
+            sResult = fi.completeBaseName() + "." + fi.suffix();
         }
     }
 
