@@ -117,6 +117,9 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDe
     } else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) {
         XZlib xzlib(pDevice);
         result = xzlib.getMemoryMap(pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) {
+        XLHA xlha(pDevice);
+        result = xlha.getMemoryMap(pPdStruct);
     }
 #endif
     else {
@@ -933,6 +936,9 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     } else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) {
         XZlib xzlib(pDevice);
         result = xzlib.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) {
+        XLHA xlha(pDevice);
+        result = xlha.getFileFormatInfo();
     }
 #endif
 

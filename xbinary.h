@@ -237,6 +237,7 @@ public:
         FT_ZIP,
         FT_GZIP,
         FT_ZLIB,
+        FT_LHA,
         FT_ICO,
         FT_CUR,
         FT_MP3,
@@ -758,6 +759,13 @@ public:
                               bool bIsBigEndian = false);  // TODO Check
 
     static void _write_value(MODE mode, char *pData, quint64 nValue, bool bIsBigEndian = false);
+
+    quint8 read_bcd_uint8(qint64 nOffset);
+    quint16 read_bcd_uint16(qint64 nOffset, bool bIsBigEndian = false);
+    quint16 read_bcd_uint32(qint64 nOffset, bool bIsBigEndian = false);
+    quint16 read_bcd_uint64(qint64 nOffset, bool bIsBigEndian = false);
+
+    quint8 _bcd_decimal(quint8 nValue);
 
     qint64 find_array(qint64 nOffset, qint64 nSize, const char *pArray, qint64 nArraySize, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_byteArray(qint64 nOffset, qint64 nSize, QByteArray baData, PDSTRUCT *pPdStruct = nullptr);

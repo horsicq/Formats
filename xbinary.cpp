@@ -619,6 +619,9 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_ZLIB:
             sResult = QString("zlib");
             break;
+        case FT_LHA:
+            sResult = QString("LHA");
+            break;
         case FT_ICO:
             sResult = QString("ICO");
             break;
@@ -1780,6 +1783,68 @@ void XBinary::_write_value(MODE mode, char *pData, quint64 nValue, bool bIsBigEn
     } else if (mode == MODE::MODE_64) {
         _write_uint64(pData, nValue, bIsBigEndian);
     }
+}
+
+quint8 XBinary::read_bcd_uint8(qint64 nOffset)
+{
+    quint8 nResult = 0;
+
+    nResult = _bcd_decimal(read_uint8(nOffset));
+
+    return nResult;
+}
+
+quint16 XBinary::read_bcd_uint16(qint64 nOffset, bool bIsBigEndian)
+{
+    quint16 nResult = 0;
+
+    quint16 nValue = read_uint16(nOffset, bIsBigEndian);
+
+    nResult = _bcd_decimal(0xFF & nValue) +
+            _bcd_decimal(0xFF & (nValue >> 8)) * 10;
+
+    return nResult;
+}
+
+quint16 XBinary::read_bcd_uint32(qint64 nOffset, bool bIsBigEndian)
+{
+    quint32 nResult = 0;
+
+    quint32 nValue = read_uint32(nOffset, bIsBigEndian);
+
+    nResult = _bcd_decimal(0xFF & nValue) +
+            _bcd_decimal(0xFF & (nValue >> 8)) * 10 +
+            _bcd_decimal(0xFF & (nValue >> 16)) * 100 +
+            _bcd_decimal(0xFF & (nValue >> 24)) * 1000;
+
+    return nResult;
+}
+
+quint16 XBinary::read_bcd_uint64(qint64 nOffset, bool bIsBigEndian)
+{
+    quint64 nResult = 0;
+
+    quint64 nValue = read_uint64(nOffset, bIsBigEndian);
+
+    nResult = _bcd_decimal(0xFF & nValue) +
+            _bcd_decimal(0xFF & (nValue >> 8)) * 10 +
+            _bcd_decimal(0xFF & (nValue >> 16)) * 100 +
+            _bcd_decimal(0xFF & (nValue >> 24)) * 1000 +
+            _bcd_decimal(0xFF & (nValue >> 32)) * 10000 +
+            _bcd_decimal(0xFF & (nValue >> 40)) * 100000 +
+            _bcd_decimal(0xFF & (nValue >> 48)) * 1000000 +
+            _bcd_decimal(0xFF & (nValue >> 56)) * 10000000;
+
+    return nResult;
+}
+
+quint8 XBinary::_bcd_decimal(quint8 nValue)
+{
+    quint8 nResult = 0;
+
+    nResult = ((nValue & 0xF0) >> 4) * 10 + (nValue & 0x0F);
+
+    return nResult;
 }
 
 qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qint64 nArraySize, PDSTRUCT *pPdStruct)
@@ -4546,6 +4611,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "7801") || compareSignature(&memoryMap, "785E") || compareSignature(&memoryMap, "789C") || compareSignature(&memoryMap, "78DA")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_ZLIB);
+        } else if (compareSignature(&memoryMap, "....'-lh'..2d") || compareSignature(&memoryMap, "....'-lz'..2d")) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_LHA);
         } else if (compareSignature(&memoryMap, "'!<arch>'0a")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_AR);
@@ -4737,6 +4805,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_GZIP;
     } else if (pStFileTypes->contains(FT_ZLIB)) {
         result = FT_ZLIB;
+    } else if (pStFileTypes->contains(FT_LHA)) {
+        result = FT_LHA;
     } else if (pStFileTypes->contains(FT_7Z)) {
         result = FT_7Z;
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
@@ -4827,6 +4897,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_ZIP)) listResult.append(FT_ZIP);
     if (stFileTypes.contains(FT_GZIP)) listResult.append(FT_GZIP);
     if (stFileTypes.contains(FT_ZLIB)) listResult.append(FT_ZLIB);
+    if (stFileTypes.contains(FT_LHA)) listResult.append(FT_LHA);
     if (stFileTypes.contains(FT_RAR)) listResult.append(FT_RAR);
     if (stFileTypes.contains(FT_JAR)) listResult.append(FT_JAR);
     if (stFileTypes.contains(FT_APK)) listResult.append(FT_APK);
@@ -7954,7 +8025,7 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_PE64) || pStFileTypes->contains(XBinary::FT_ELF) || pStFileTypes->contains(XBinary::FT_ELF32) ||
         pStFileTypes->contains(XBinary::FT_ELF64) || pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) ||
         pStFileTypes->contains(XBinary::FT_MACHO64) || pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) ||
-        pStFileTypes->contains(XBinary::FT_GZIP) || pStFileTypes->contains(XBinary::FT_ZLIB)) {
+        pStFileTypes->contains(XBinary::FT_GZIP) || pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA)) {
         pStFileTypes->remove(XBinary::FT_BINARY);
     } else {
         pStFileTypes->insert(XBinary::FT_COM);
