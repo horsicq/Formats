@@ -1143,7 +1143,7 @@ XBinary::OFFSETSIZE XPE::getStringTable()
 {
     OFFSETSIZE result = {};
 
-    qint64 nOffset = getFileHeader_PointerToSymbolTable()+ getFileHeader_NumberOfSymbols() * 18;
+    qint64 nOffset = getFileHeader_PointerToSymbolTable() + getFileHeader_NumberOfSymbols() * 18;
 
     if (nOffset > 0) {
         qint64 nSize = getSize() - nOffset;
@@ -1322,8 +1322,7 @@ QString XPE::convertSectionName(QString sName, OFFSETSIZE *pOsStringTable)
 {
     QString sResult = sName;
 
-    if(sName.size() > 1)
-    {
+    if (sName.size() > 1) {
         if (sName.at(0) == "/") {
             qint32 nIndex = sName.section("/", 1, -1).toInt();
 

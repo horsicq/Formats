@@ -98,7 +98,7 @@ void XBinary::setDevice(QIODevice *pDevice)
     if (g_pDevice) {
         if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
-        //qDebug("%s",XBinary::valueToHex((quint64)g_pDevice).toLatin1().data());
+        // qDebug("%s",XBinary::valueToHex((quint64)g_pDevice).toLatin1().data());
 
         g_nSize = g_pDevice->size();
 
@@ -1369,8 +1369,8 @@ QString XBinary::read_codePageString(qint64 nOffset, qint64 nMaxByteSize, QStrin
     }
 #endif
 
-    sResult = sResult.section(QChar(0xFFFD),0,0);
-    sResult = sResult.section(QChar(0),0,0);
+    sResult = sResult.section(QChar(0xFFFD), 0, 0);
+    sResult = sResult.section(QChar(0), 0, 0);
 
     return sResult;
 }
@@ -1800,8 +1800,7 @@ quint16 XBinary::read_bcd_uint16(qint64 nOffset, bool bIsBigEndian)
 
     quint16 nValue = read_uint16(nOffset, bIsBigEndian);
 
-    nResult = _bcd_decimal(0xFF & nValue) +
-            _bcd_decimal(0xFF & (nValue >> 8)) * 10;
+    nResult = _bcd_decimal(0xFF & nValue) + _bcd_decimal(0xFF & (nValue >> 8)) * 10;
 
     return nResult;
 }
@@ -1812,10 +1811,8 @@ quint16 XBinary::read_bcd_uint32(qint64 nOffset, bool bIsBigEndian)
 
     quint32 nValue = read_uint32(nOffset, bIsBigEndian);
 
-    nResult = _bcd_decimal(0xFF & nValue) +
-            _bcd_decimal(0xFF & (nValue >> 8)) * 10 +
-            _bcd_decimal(0xFF & (nValue >> 16)) * 100 +
-            _bcd_decimal(0xFF & (nValue >> 24)) * 1000;
+    nResult =
+        _bcd_decimal(0xFF & nValue) + _bcd_decimal(0xFF & (nValue >> 8)) * 10 + _bcd_decimal(0xFF & (nValue >> 16)) * 100 + _bcd_decimal(0xFF & (nValue >> 24)) * 1000;
 
     return nResult;
 }
@@ -1826,14 +1823,9 @@ quint16 XBinary::read_bcd_uint64(qint64 nOffset, bool bIsBigEndian)
 
     quint64 nValue = read_uint64(nOffset, bIsBigEndian);
 
-    nResult = _bcd_decimal(0xFF & nValue) +
-            _bcd_decimal(0xFF & (nValue >> 8)) * 10 +
-            _bcd_decimal(0xFF & (nValue >> 16)) * 100 +
-            _bcd_decimal(0xFF & (nValue >> 24)) * 1000 +
-            _bcd_decimal(0xFF & (nValue >> 32)) * 10000 +
-            _bcd_decimal(0xFF & (nValue >> 40)) * 100000 +
-            _bcd_decimal(0xFF & (nValue >> 48)) * 1000000 +
-            _bcd_decimal(0xFF & (nValue >> 56)) * 10000000;
+    nResult = _bcd_decimal(0xFF & nValue) + _bcd_decimal(0xFF & (nValue >> 8)) * 10 + _bcd_decimal(0xFF & (nValue >> 16)) * 100 +
+              _bcd_decimal(0xFF & (nValue >> 24)) * 1000 + _bcd_decimal(0xFF & (nValue >> 32)) * 10000 + _bcd_decimal(0xFF & (nValue >> 40)) * 100000 +
+              _bcd_decimal(0xFF & (nValue >> 48)) * 1000000 + _bcd_decimal(0xFF & (nValue >> 56)) * 10000000;
 
     return nResult;
 }
@@ -1851,7 +1843,8 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qin
 {
     qint64 nResult = -1;
 
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();;
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    ;
 
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
@@ -2137,7 +2130,6 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
     qint64 nResult = -1;
 
     if (sSignature.contains(".") || sSignature.contains("$") || sSignature.contains("#") || sSignature.contains("+")) {
-
         bool bIsValid = true;
 
         QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(sSignature, &bIsValid);
@@ -2935,8 +2927,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
     return listResult;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_value(qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian,
-                                                     PDSTRUCT *pPdStruct)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_value(qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
 
@@ -3330,7 +3321,6 @@ bool XBinary::isSignatureValid(QString sSignature)
     bool bResult = false;
 
     if (sSignature.size()) {
-
         sSignature = convertSignature(sSignature);
 
         bResult = true;
@@ -4608,7 +4598,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "1F8B")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_GZIP);
-        } else if (compareSignature(&memoryMap, "7801") || compareSignature(&memoryMap, "785E") || compareSignature(&memoryMap, "789C") || compareSignature(&memoryMap, "78DA")) {
+        } else if (compareSignature(&memoryMap, "7801") || compareSignature(&memoryMap, "785E") || compareSignature(&memoryMap, "789C") ||
+                   compareSignature(&memoryMap, "78DA")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_ZLIB);
         } else if (compareSignature(&memoryMap, "....'-lh'..2d") || compareSignature(&memoryMap, "....'-lz'..2d")) {
@@ -9158,7 +9149,7 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature
             i += _getSignatureDelta(&listResult, sSignature, i, pbValid);
         } else if (sSignature.at(i) == QChar('$')) {
             i += _getSignatureRelOffset(&listResult, sSignature, i);
-        } else if (sSignature.at(i) == QChar('#')) {   // TODO Check []
+        } else if (sSignature.at(i) == QChar('#')) {  // TODO Check []
             i += _getSignatureAddress(&listResult, sSignature, i);
         } else {
             qint32 nBytes = _getSignatureBytes(&listResult, sSignature, i, pbValid);
@@ -9422,7 +9413,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
         if (((sSignature.at(i) >= QChar('a')) && (sSignature.at(i) <= QChar('f'))) || ((sSignature.at(i) >= QChar('0')) && (sSignature.at(i) <= QChar('9')))) {
             nResult++;
             sBytes.append(sSignature.at(i));
-        } else if ((sSignature.at(i) == '.') || (sSignature.at(i) == '$') || (sSignature.at(i) == '#')){
+        } else if ((sSignature.at(i) == '.') || (sSignature.at(i) == '$') || (sSignature.at(i) == '#')) {
             break;
         } else {
             *pbValid = false;

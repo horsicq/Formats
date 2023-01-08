@@ -121,13 +121,13 @@ XBinary::_MEMORY_MAP XMP3::getMemoryMap(PDSTRUCT *pPdStruct)
                 record.nOffset = nOffset;
                 record.nSize = nFrameSize;
                 record.nAddress = -1;
-                record.sName = QString("Frame"); // mb translate
+                record.sName = QString("Frame");  // mb translate
 
                 result.listRecords.append(record);
 
                 nOffset += nFrameSize;
             }
-        } while(nFrameSize);
+        } while (nFrameSize);
 
         // TODO TAG
     }
@@ -340,46 +340,46 @@ qint64 XMP3::decodeFrame(qint64 nOffset)
             }
         }
 
-        if (nVersion == 1) { // v2.5
+        if (nVersion == 1) {  // v2.5
             if (nFrequencyIndex == 0) {
                 nFrequency = 11025;
-            } else if(nFrequencyIndex == 1) {
-                 nFrequency = 12000;
-            } else if(nFrequencyIndex == 2) {
-                 nFrequency = 8000;
+            } else if (nFrequencyIndex == 1) {
+                nFrequency = 12000;
+            } else if (nFrequencyIndex == 2) {
+                nFrequency = 8000;
             }
-        } else if (nVersion == 2) { // v2
+        } else if (nVersion == 2) {  // v2
             if (nFrequencyIndex == 0) {
                 nFrequency = 22050;
-            } else if(nFrequencyIndex == 1) {
-                 nFrequency = 24000;
-            } else if(nFrequencyIndex == 2) {
-                 nFrequency = 16000;
+            } else if (nFrequencyIndex == 1) {
+                nFrequency = 24000;
+            } else if (nFrequencyIndex == 2) {
+                nFrequency = 16000;
             }
-        } else if (nVersion == 3) { // v1
+        } else if (nVersion == 3) {  // v1
             if (nFrequencyIndex == 0) {
                 nFrequency = 44100;
-            } else if(nFrequencyIndex == 1) {
-                 nFrequency = 48000;
-            } else if(nFrequencyIndex == 2) {
-                 nFrequency = 32000;
+            } else if (nFrequencyIndex == 1) {
+                nFrequency = 48000;
+            } else if (nFrequencyIndex == 2) {
+                nFrequency = 32000;
             }
         }
 
         if (nFrequency) {
-            if( nLayer == 3 ) {
-                dTime=(double)384/nFrequency;
-            } else if((nLayer == 2) || (nVersion == 3)) {
-                dTime=(double)1152/nFrequency;
+            if (nLayer == 3) {
+                dTime = (double)384 / nFrequency;
+            } else if ((nLayer == 2) || (nVersion == 3)) {
+                dTime = (double)1152 / nFrequency;
             } else {
-                dTime=(double)576/nFrequency;
+                dTime = (double)576 / nFrequency;
             }
 
-            if(nLayer==3) {
-                nResult+=qFloor(12000*(double)nBitRate/nFrequency+nPadBit)*4;
+            if (nLayer == 3) {
+                nResult += qFloor(12000 * (double)nBitRate / nFrequency + nPadBit) * 4;
             } else {
                 // 125 = 1000/8 = kilobits to bytes
-                nResult+=qFloor(125*nBitRate*dTime+nPadBit);
+                nResult += qFloor(125 * nBitRate * dTime + nPadBit);
             }
         }
     }

@@ -403,7 +403,7 @@ public:
     static QList<SECTION_RECORD> getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, bool bIsImage, QByteArray *pbaSectionTable);
     bool isSectionNamePresent(QString sSectionName);
     static bool isSectionNamePresent(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
-    qint32 getSectionNumber(QString sSectionName); // TODO pdStruct
+    qint32 getSectionNumber(QString sSectionName);  // TODO pdStruct
     static qint32 getSectionNumber(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
     static SECTION_RECORD getSectionRecord(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
