@@ -3882,7 +3882,7 @@ bool XELF::isSectionNamePresent(QString sSectionName)
     QByteArray baStringTable = getSection(nStringTableSection);
     QList<XELF_DEF::Elf_Shdr> listSectionHeaders = getElf_ShdrList();
 
-    QList<SECTION_RECORD> listSectionRecords = getSectionRecords(&listSectionHeaders, bIs64, &baStringTable);
+    QList<SECTION_RECORD> listSectionRecords = getSectionRecords(&listSectionHeaders, isImage(), &baStringTable);
 
     return isSectionNamePresent(sSectionName, &listSectionRecords);
 }
@@ -3910,7 +3910,7 @@ qint32 XELF::getSectionNumber(QString sSectionName)
     QByteArray baStringTable = getSection(nStringTableSection);
     QList<XELF_DEF::Elf_Shdr> listSectionHeaders = getElf_ShdrList();
 
-    QList<SECTION_RECORD> listSectionRecords = getSectionRecords(&listSectionHeaders, bIs64, &baStringTable);
+    QList<SECTION_RECORD> listSectionRecords = getSectionRecords(&listSectionHeaders, isImage(), &baStringTable);
 
     return getSectionNumber(sSectionName, &listSectionRecords);
 }
