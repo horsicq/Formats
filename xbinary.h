@@ -1272,6 +1272,7 @@ public:
     DM getDisasmMode();
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
     static DM getDisasmMode(QString sArch, bool bIsBigEndian = false, MODE mode = MODE_UNKNOWN);
+    static DM getDisasmMode(OSINFO osInfo);
     static DMFAMILY getDisasmFamily(DM disasmMode);
     static DMFAMILY getDisasmFamily(_MEMORY_MAP *pMemoryMap);
     static QList<SYNTAX> getDisasmSyntax(DM disasmMode);

@@ -7945,6 +7945,11 @@ XBinary::DM XBinary::getDisasmMode(QString sArch, bool bIsBigEndian, MODE mode)
     return dmResult;
 }
 
+XBinary::DM XBinary::getDisasmMode(OSINFO osInfo)
+{
+    return getDisasmMode(osInfo.sArch, osInfo.bIsBigEndian, osInfo.mode);
+}
+
 XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
 {
     DMFAMILY result = DMFAMILY_UNKNOWN;
