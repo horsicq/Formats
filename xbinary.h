@@ -949,6 +949,8 @@ public:
     static bool isAddressInHeader(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
     static bool isRelAddressInHeader(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
 
+    static QString getLoadSectionNameByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
+
     static bool isSolidAddressRange(_MEMORY_MAP *pMemoryMap, XADDR nAddress, qint64 nSize);
 
     QString getMemoryRecordInfoByOffset(qint64 nOffset);
