@@ -8437,12 +8437,14 @@ bool XBinary::_isReplaced(qint64 nOffset, qint64 nSize, QList<XBinary::MEMORY_RE
 {
     bool bResult = false;
 
-    qint32 nNumberOfRecords = pListMemoryReplace->count();
+    if (nSize) {
+        qint32 nNumberOfRecords = pListMemoryReplace->count();
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (_isOffsetsCrossed(nOffset, nSize, pListMemoryReplace->at(i).nOffset, pListMemoryReplace->at(i).nSize)) {
-            bResult = true;
-            break;
+        for (qint32 i = 0; i < nNumberOfRecords; i++) {
+            if (_isOffsetsCrossed(nOffset, nSize, pListMemoryReplace->at(i).nOffset, pListMemoryReplace->at(i).nSize)) {
+                bResult = true;
+                break;
+            }
         }
     }
 
