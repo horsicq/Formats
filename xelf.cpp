@@ -3700,6 +3700,19 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
             nFileSize = nFileDelta + listSegments.at(i).p_filesz;
         }
 
+        if (nVirtualAddress - nMaxSegmentAddress) {
+            XBinary::_MEMORY_RECORD record = {};
+
+            record.type = MMT_LOADSEGMENT;
+            record.nAddress = nMaxSegmentAddress;
+            record.nSize = nVirtualAddress - nMaxSegmentAddress;
+            record.nOffset = -1;
+            record.nIndex = nIndex++;
+            record.bIsVirtual = true;
+
+            result.listRecords.append(record);
+        }
+
         {
             XBinary::_MEMORY_RECORD record = {};
 
