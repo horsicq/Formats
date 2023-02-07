@@ -9161,6 +9161,61 @@ qint32 XBinary::getPdStructProcent(PDSTRUCT *pPdStruct)
     return nResult;
 }
 
+XBinary::REGION_FILL XBinary::getRegionFill(qint64 nOffset, qint64 nSize, qint32 nAlignment)
+{
+    REGION_FILL result = {};
+    result.nByte = read_uint8(nOffset);
+
+    qint64 nMaxOffset = qMin(g_pDevice->size(), nOffset + nSize);
+    char *pData = new char[nAlignment];
+
+    bool bError = false;
+
+    for (qint64 nCurrentOffset = nOffset; nCurrentOffset < nMaxOffset;) {
+        qint64 nDataSize = qMin((qint64)nAlignment, nMaxOffset - nCurrentOffset);
+
+        if (nDataSize < nAlignment) {
+            break;
+        }
+
+        read_array(nCurrentOffset, pData, nDataSize);
+
+        for (qint32 i = 0; i < nDataSize; i++) {
+            if ((quint8)(pData[i]) != result.nByte) {
+                bError = true;
+                break;
+            }
+        }
+
+        if (bError) {
+            break;
+        }
+
+        result.nSize += nDataSize;
+
+        nCurrentOffset += nDataSize;
+    }
+
+    delete [] pData;
+
+    return result;
+}
+
+QString XBinary::getDataString(char *pData, qint32 nDataSize)
+{
+    QString sResult;
+
+    for (qint32 i = 0; i < nDataSize; i++) {
+        if (i > 0) {
+            sResult.append(", ");
+        }
+
+        sResult.append("0x" + valueToHex((quint8)(pData[i])));
+    }
+
+    return sResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature, bool *pbValid)
 {
     // TODO Error checks!

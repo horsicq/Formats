@@ -1395,6 +1395,14 @@ public:
     static bool isPdStructSuccess(PDSTRUCT *pPdStruct);
     static qint32 getPdStructProcent(PDSTRUCT *pPdStruct);  // 0-100
 
+    struct REGION_FILL {
+        quint64 nSize;
+        quint8 nByte;
+    };
+
+    REGION_FILL getRegionFill(qint64 nOffset, qint64 nSize, qint32 nAlignment);
+    static QString getDataString(char *pData, qint32 nDataSize);
+
 private:
     static const int READWRITE_BUFFER_SIZE = 0x1000;
     static QString convertSignature(QString sSignature);
