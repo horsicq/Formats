@@ -1323,7 +1323,7 @@ QString XPE::convertSectionName(QString sName, OFFSETSIZE *pOsStringTable)
     QString sResult = sName;
 
     if (sName.size() > 1) {
-        if (sName.at(0) == "/") {
+        if (sName.at(0) == QChar('/')) {
             qint32 nIndex = sName.section("/", 1, -1).toInt();
 
             sResult = getStringFromIndex(pOsStringTable->nOffset, pOsStringTable->nSize, nIndex);
