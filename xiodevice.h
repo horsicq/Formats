@@ -47,6 +47,10 @@ protected:
     virtual qint64 writeData(const char *pData, qint64 nMaxSize);
     virtual void setErrorString(const QString &sString);
 
+signals:
+    void readDataSignal(quint64 nOffset, char *pData, qint64 nSize);
+    void writeDataSignal(quint64 nOffset, const char *pData, qint64 nSize);
+
 private:
     quint64 g_nSize;
     quint64 g_nInitOffset;
