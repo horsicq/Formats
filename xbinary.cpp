@@ -75,6 +75,7 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     setType(TYPE_UNKNOWN);
     setOsType(OSNAME_UNKNOWN);
     setOsVersion("");
+    setMultiSearchCallbackState(false);
 
     if (pDevice) {
         //qDebug("%s",XBinary::valueToHex((quint64)pDevice).toLatin1().data());
@@ -2639,7 +2640,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
 
                         if (bAdd) {
                             MS_RECORD record = {};
-                            record.recordType = MS_RECORD_TYPE_ANSI;
+                            record.recordType = MS_RECORD_TYPE_STRING_ANSI;
                             record.nOffset = nCurrentAnsiOffset;
                             record.nSize = nCurrentAnsiSize;
                             record.sString = sString;
@@ -2688,7 +2689,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
 
                         if (bAdd) {
                             MS_RECORD record = {};
-                            record.recordType = MS_RECORD_TYPE_UTF8;
+                            record.recordType = MS_RECORD_TYPE_STRING_UTF8;
                             record.nOffset = nCurrentUTF8Offset;
                             record.nSize = nCurrentUTF8Size;
                             record.sString = sString;
@@ -2764,7 +2765,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
 
                             if (bAdd) {
                                 MS_RECORD record = {};
-                                record.recordType = MS_RECORD_TYPE_UNICODE;
+                                record.recordType = MS_RECORD_TYPE_STRING_UNICODE;
                                 record.nOffset = nCurrentUnicodeOffset[nParity];
                                 record.nSize = nCurrentUnicodeSize[nParity] * 2;
                                 record.sString = sString;
@@ -2802,7 +2803,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
 
                                 if (bAdd) {
                                     MS_RECORD record = {};
-                                    record.recordType = MS_RECORD_TYPE_UNICODE;
+                                    record.recordType = MS_RECORD_TYPE_STRING_UNICODE;
                                     record.nOffset = nCurrentUnicodeOffset[nO];
                                     record.nSize = nCurrentUnicodeSize[nO] * 2;
                                     record.sString = sString;
@@ -3069,11 +3070,11 @@ QString XBinary::msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId)
 {
     QString sResult;
 
-    if (msRecordTypeId == XBinary::MS_RECORD_TYPE_ANSI) {
+    if (msRecordTypeId == XBinary::MS_RECORD_TYPE_STRING_ANSI) {
         sResult = "A";
-    } else if (msRecordTypeId == XBinary::MS_RECORD_TYPE_UTF8) {
+    } else if (msRecordTypeId == XBinary::MS_RECORD_TYPE_STRING_UTF8) {
         sResult = "UTF8";
-    } else if (msRecordTypeId == XBinary::MS_RECORD_TYPE_UNICODE) {
+    } else if (msRecordTypeId == XBinary::MS_RECORD_TYPE_STRING_UNICODE) {
         sResult = "U";
     }
 
@@ -3281,13 +3282,13 @@ QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString
 
     char buffer[4] = {};
 
-    if (msRecordTypeId == MS_RECORD_TYPE_ANSI) {
+    if (msRecordTypeId == MS_RECORD_TYPE_STRING_ANSI) {
         baResult = sString.toLatin1();
 
         if (bAddNull) {
             baResult.append(buffer, 1);
         }
-    } else if (msRecordTypeId == MS_RECORD_TYPE_UNICODE) {
+    } else if (msRecordTypeId == MS_RECORD_TYPE_STRING_UNICODE) {
         baResult.resize(nSize * 2);
 
         baResult.fill(0);
@@ -3299,7 +3300,7 @@ QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString
         if (bAddNull) {
             baResult.append(buffer, 2);
         }
-    } else if (msRecordTypeId == MS_RECORD_TYPE_UTF8) {
+    } else if (msRecordTypeId == MS_RECORD_TYPE_STRING_UTF8) {
         baResult = sString.toUtf8();
 
         if (bAddNull) {
@@ -4197,6 +4198,11 @@ bool XBinary::isImage()
 void XBinary::setIsImage(bool bValue)
 {
     g_bIsImage = bValue;
+}
+
+void XBinary::setMultiSearchCallbackState(bool bState)
+{
+    g_bMultiSearchCallback = bState;
 }
 
 bool XBinary::compareSignature(QString sSignature, qint64 nOffset)

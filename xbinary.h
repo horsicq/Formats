@@ -470,9 +470,9 @@ public:
 
     enum MS_RECORD_TYPE {
         MS_RECORD_TYPE_UNKNOWN = 0,
-        MS_RECORD_TYPE_ANSI,
-        MS_RECORD_TYPE_UTF8,
-        MS_RECORD_TYPE_UNICODE,
+        MS_RECORD_TYPE_STRING_ANSI,
+        MS_RECORD_TYPE_STRING_UTF8,
+        MS_RECORD_TYPE_STRING_UNICODE,
         MS_RECORD_TYPE_SIGNATURE,
         MS_RECORD_TYPE_VALUE
         // TODO more PASCAL(A/U)
@@ -992,6 +992,8 @@ public:
     bool isImage();
     void setIsImage(bool bValue);
 
+    void setMultiSearchCallbackState(bool bState);
+
     static qint64 getPhysSize(char *pBuffer, qint64 nSize);  // TODO Check!
     static bool isEmptyData(char *pBuffer, qint64 nSize);
     bool compareSignature(QString sSignature, qint64 nOffset = 0);
@@ -1449,7 +1451,8 @@ private:
     QString g_sVersion;
     qint32 g_nType;
     FT g_fileType;
-    bool g_bLog;
+    bool g_bLog; // TODO remove
+    bool g_bMultiSearchCallback;
     qint64 g_nSize;
 };
 
