@@ -3706,14 +3706,42 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
             nFileSize = 0;
         }
 
+//        if (nVirtualAddress > nMaxSegmentAddress) {
+//            XBinary::_MEMORY_RECORD record = {};
+
+//            record.type = MMT_LOADSEGMENT;
+//            record.nAddress = nMaxSegmentAddress;
+//            record.nSize = nMaxSegmentAddress - nVirtualAddress;
+//            record.nOffset = -1;
+//            record.nIndex = nIndex++;
+//            record.bIsVirtual = true;
+//            //record.sName = sName;
+
+//            result.listRecords.append(record);
+//        }
+
         // Padding
         if (nVirtualDelta) {
-            if (nVirtualSize == nFileDelta) {
+            if (nVirtualDelta > nFileDelta) {
                 XBinary::_MEMORY_RECORD record = {};
 
                 record.type = MMT_LOADSEGMENT;
                 record.nAddress = nVirtualAddress;
-                record.nSize = nVirtualDelta;
+                record.nSize = nVirtualDelta - nFileDelta;
+                record.nOffset = -1;
+                record.nIndex = nIndex++;
+                record.bIsVirtual = true;
+                record.sName = sName;
+
+                result.listRecords.append(record);
+            }
+
+            if (nVirtualDelta >= nFileDelta) {
+                XBinary::_MEMORY_RECORD record = {};
+
+                record.type = MMT_LOADSEGMENT;
+                record.nAddress = nVirtualAddress + nVirtualDelta - nFileDelta;
+                record.nSize = nFileDelta;
                 record.nOffset = nFileOffset;
                 record.nIndex = nIndex++;
                 record.bIsVirtual = false;
