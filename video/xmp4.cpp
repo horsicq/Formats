@@ -83,7 +83,6 @@ XBinary::_MEMORY_MAP XMP4::getMemoryMap(PDSTRUCT *pPdStruct)
     result.nRawSize = getSize();
 
     qint32 nIndex = 0;
-
     qint64 nOffset = 0;
 
     while (!(pPdStruct->bIsStop)) {

@@ -7735,7 +7735,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
             sResult = QString("Windows CE");
             break;
         case OSNAME_MSDOS:
-            sResult = QString("MSDOS");
+            sResult = QString("MS-DOS");
             break;
         case OSNAME_UEFI:
             sResult = QString("UEFI");
