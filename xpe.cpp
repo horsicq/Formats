@@ -10296,14 +10296,20 @@ QList<XADDR> XPE::getTLS_CallbacksList()  // TODO limit
     return getTLS_CallbacksList(&memoryMap);
 }
 
-QList<XADDR> XPE::getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap)
+QList<XADDR> XPE::getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     QList<XADDR> listResult;
 
     qint64 nOffset = addressToOffset(pMemoryMap, getTLS_AddressOfCallBacks());
 
     if (nOffset != -1) {
-        for (qint32 i = 0; i < 100; i++)  // TODO const or parameter
+        for (qint32 i = 0; (i < 100)&&(!(pPdStruct->bIsStop)); i++)  // TODO const or parameter
         {
             XADDR nAddress = 0;
 

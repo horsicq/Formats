@@ -21,7 +21,7 @@
 #ifndef XPE_H
 #define XPE_H
 
-#include "xicon.h"
+//#include "xicon.h"
 #include "xmsdos.h"
 #include "xpe_def.h"
 
@@ -776,7 +776,7 @@ public:
     void setTLS_Characteristics(quint32 nValue);
 
     QList<XADDR> getTLS_CallbacksList();
-    QList<XADDR> getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap);
+    QList<XADDR> getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
     bool isTLSCallbacksPresent();
     bool isTLSCallbacksPresent(XBinary::_MEMORY_MAP *pMemoryMap);
