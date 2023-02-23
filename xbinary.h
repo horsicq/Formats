@@ -1451,7 +1451,7 @@ private:
     QString g_sVersion;
     qint32 g_nType;
     FT g_fileType;
-    bool g_bLog; // TODO remove
+    bool g_bLog;  // TODO remove
     bool g_bMultiSearchCallback;
     qint64 g_nSize;
 };

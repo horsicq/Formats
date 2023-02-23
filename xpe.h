@@ -21,14 +21,14 @@
 #ifndef XPE_H
 #define XPE_H
 
-//#include "xicon.h"
+// #include "xicon.h"
 #include "xmsdos.h"
 #include "xpe_def.h"
 
 #if defined(_MSC_VER)  // For WinTrust TODO Check minGW
-//#include <wincrypt.h>
+// #include <wincrypt.h>
 #include <windows.h>
-//#include <wintrust.h>
+// #include <wintrust.h>
 #include <Softpub.h>
 #endif
 

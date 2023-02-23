@@ -3674,7 +3674,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
     //    bool bIs64=is64();
     qint32 nNumberOfSegments = listSegments.count();
 
-    bool bImageAddressInit = false; // TODO remove
+    bool bImageAddressInit = false;  // TODO remove
 
     qint64 nMaxSegmentOffset = 0;
     XADDR nMaxSegmentAddress = 0;
@@ -3706,19 +3706,19 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
             nFileSize = 0;
         }
 
-//        if (nVirtualAddress > nMaxSegmentAddress) {
-//            XBinary::_MEMORY_RECORD record = {};
+        //        if (nVirtualAddress > nMaxSegmentAddress) {
+        //            XBinary::_MEMORY_RECORD record = {};
 
-//            record.type = MMT_LOADSEGMENT;
-//            record.nAddress = nMaxSegmentAddress;
-//            record.nSize = nMaxSegmentAddress - nVirtualAddress;
-//            record.nOffset = -1;
-//            record.nIndex = nIndex++;
-//            record.bIsVirtual = true;
-//            //record.sName = sName;
+        //            record.type = MMT_LOADSEGMENT;
+        //            record.nAddress = nMaxSegmentAddress;
+        //            record.nSize = nMaxSegmentAddress - nVirtualAddress;
+        //            record.nOffset = -1;
+        //            record.nIndex = nIndex++;
+        //            record.bIsVirtual = true;
+        //            //record.sName = sName;
 
-//            result.listRecords.append(record);
-//        }
+        //            result.listRecords.append(record);
+        //        }
 
         // Padding
         if (nVirtualDelta) {
@@ -3798,54 +3798,54 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
             result.listRecords.append(record);
         }
 
-//        if (i != (nNumberOfSegments - 1)) {
-//            nFileSize = S_ALIGN_UP(nFileDelta + listSegments.at(i).p_filesz, nFileAlign);
-//        } else {
-//            nFileSize = nFileDelta + listSegments.at(i).p_filesz;
-//        }
+        //        if (i != (nNumberOfSegments - 1)) {
+        //            nFileSize = S_ALIGN_UP(nFileDelta + listSegments.at(i).p_filesz, nFileAlign);
+        //        } else {
+        //            nFileSize = nFileDelta + listSegments.at(i).p_filesz;
+        //        }
 
-//        if (nVirtualAddress - nMaxSegmentAddress) {
-//            XBinary::_MEMORY_RECORD record = {};
+        //        if (nVirtualAddress - nMaxSegmentAddress) {
+        //            XBinary::_MEMORY_RECORD record = {};
 
-//            record.type = MMT_LOADSEGMENT;
-//            record.nAddress = nMaxSegmentAddress;
-//            record.nSize = nVirtualAddress - nMaxSegmentAddress;
-//            record.nOffset = -1;
-//            record.nIndex = nIndex++;
-//            record.bIsVirtual = true;
+        //            record.type = MMT_LOADSEGMENT;
+        //            record.nAddress = nMaxSegmentAddress;
+        //            record.nSize = nVirtualAddress - nMaxSegmentAddress;
+        //            record.nOffset = -1;
+        //            record.nIndex = nIndex++;
+        //            record.bIsVirtual = true;
 
-//            result.listRecords.append(record);
-//        }
+        //            result.listRecords.append(record);
+        //        }
 
-//        {
-//            XBinary::_MEMORY_RECORD record = {};
+        //        {
+        //            XBinary::_MEMORY_RECORD record = {};
 
-//            record.type = MMT_LOADSEGMENT;
-//            record.sName = sName;
-//            // TODO Section number!
-//            record.nAddress = nVirtualAddress;
-//            record.nSize = nFileSize;
-//            record.nOffset = nFileOffset;
-//            record.nIndex = nIndex++;
-//            record.bIsVirtual = false;
+        //            record.type = MMT_LOADSEGMENT;
+        //            record.sName = sName;
+        //            // TODO Section number!
+        //            record.nAddress = nVirtualAddress;
+        //            record.nSize = nFileSize;
+        //            record.nOffset = nFileOffset;
+        //            record.nIndex = nIndex++;
+        //            record.bIsVirtual = false;
 
-//            result.listRecords.append(record);
-//        }
+        //            result.listRecords.append(record);
+        //        }
 
-//        if (nVirtualSize > nFileSize) {
-//            XBinary::_MEMORY_RECORD record = {};
+        //        if (nVirtualSize > nFileSize) {
+        //            XBinary::_MEMORY_RECORD record = {};
 
-//            record.type = MMT_LOADSEGMENT;
-//            record.sName = sName;
-//            // TODO Section number!
-//            record.nAddress = nVirtualAddress + nFileSize;
-//            record.nSize = nVirtualSize - nFileSize;
-//            record.nOffset = -1;
-//            record.nIndex = nIndex++;
-//            record.bIsVirtual = true;
+        //            record.type = MMT_LOADSEGMENT;
+        //            record.sName = sName;
+        //            // TODO Section number!
+        //            record.nAddress = nVirtualAddress + nFileSize;
+        //            record.nSize = nVirtualSize - nFileSize;
+        //            record.nOffset = -1;
+        //            record.nIndex = nIndex++;
+        //            record.bIsVirtual = true;
 
-//            result.listRecords.append(record);
-//        }
+        //            result.listRecords.append(record);
+        //        }
 
         //        if(listSegments.at(i).p_vaddr>(quint64)nVirtualAddress)
         //        {
@@ -3939,21 +3939,21 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
         result.listRecords.append(record);
     }
 
-//    qint64 nOverlaySize = result.nRawSize - nMaxSectionOffset;
+    //    qint64 nOverlaySize = result.nRawSize - nMaxSectionOffset;
 
-//    if (nOverlaySize > 0) {
-//        XBinary::_MEMORY_RECORD record = {};
+    //    if (nOverlaySize > 0) {
+    //        XBinary::_MEMORY_RECORD record = {};
 
-//        record.type = MMT_OVERLAY;
-//        // TODO Section number!
-//        // TODO virtual sections!
-//        record.nAddress = -1;
-//        record.nSize = nOverlaySize;
-//        record.nOffset = nMaxSectionOffset;
-//        record.nIndex = nIndex++;
+    //        record.type = MMT_OVERLAY;
+    //        // TODO Section number!
+    //        // TODO virtual sections!
+    //        record.nAddress = -1;
+    //        record.nSize = nOverlaySize;
+    //        record.nOffset = nMaxSectionOffset;
+    //        record.nIndex = nIndex++;
 
-//        result.listRecords.append(record);
-//    }
+    //        result.listRecords.append(record);
+    //    }
 
     return result;
 }

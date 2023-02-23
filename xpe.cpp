@@ -10309,7 +10309,7 @@ QList<XADDR> XPE::getTLS_CallbacksList(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUC
     qint64 nOffset = addressToOffset(pMemoryMap, getTLS_AddressOfCallBacks());
 
     if (nOffset != -1) {
-        for (qint32 i = 0; (i < 100)&&(!(pPdStruct->bIsStop)); i++)  // TODO const or parameter
+        for (qint32 i = 0; (i < 100) && (!(pPdStruct->bIsStop)); i++)  // TODO const or parameter
         {
             XADDR nAddress = 0;
 

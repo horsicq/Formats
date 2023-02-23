@@ -78,7 +78,7 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     setMultiSearchCallbackState(false);
 
     if (pDevice) {
-        //qDebug("%s",XBinary::valueToHex((quint64)pDevice).toLatin1().data());
+        // qDebug("%s",XBinary::valueToHex((quint64)pDevice).toLatin1().data());
         setFileFormatSize(pDevice->size());
     }
 
@@ -3840,18 +3840,18 @@ XADDR XBinary::offsetToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
-//    for (qint32 i = 0; i < nNumberOfRecords; i++) {
-//        if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nOffset != -1) && (pMemoryMap->listRecords.at(i).nAddress != -1)) {
-//            if ((pMemoryMap->listRecords.at(i).nOffset <= nOffset) && (nOffset < pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize)) {
-//                nResult = (nOffset - pMemoryMap->listRecords.at(i).nOffset) + pMemoryMap->listRecords.at(i).nAddress;
-//                break;
-//            }
-//        }
-//    }
+    //    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+    //        if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nOffset != -1) && (pMemoryMap->listRecords.at(i).nAddress != -1)) {
+    //            if ((pMemoryMap->listRecords.at(i).nOffset <= nOffset) && (nOffset < pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize)) {
+    //                nResult = (nOffset - pMemoryMap->listRecords.at(i).nOffset) + pMemoryMap->listRecords.at(i).nAddress;
+    //                break;
+    //            }
+    //        }
+    //    }
 
     // From the last to the fist
 
-    for (qint32 i = nNumberOfRecords -1; i >= 0; i--) {
+    for (qint32 i = nNumberOfRecords - 1; i >= 0; i--) {
         if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nOffset != -1) && (pMemoryMap->listRecords.at(i).nAddress != -1)) {
             if ((pMemoryMap->listRecords.at(i).nOffset <= nOffset) && (nOffset < pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize)) {
                 nResult = (nOffset - pMemoryMap->listRecords.at(i).nOffset) + pMemoryMap->listRecords.at(i).nAddress;
@@ -9224,7 +9224,7 @@ XBinary::REGION_FILL XBinary::getRegionFill(qint64 nOffset, qint64 nSize, qint32
         nCurrentOffset += nDataSize;
     }
 
-    delete [] pData;
+    delete[] pData;
 
     return result;
 }
