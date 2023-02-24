@@ -140,6 +140,7 @@ XBinary::OSINFO XPE::getOsInfo()
             }
         }
 
+        //result.sOsVersion = QString("min req") + QString(": ") + mapOSVersion.value(nOSVersion);
         result.sOsVersion = mapOSVersion.value(nOSVersion);
     }
 
