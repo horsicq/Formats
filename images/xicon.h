@@ -71,7 +71,6 @@ public:
     ICONDIR readICONDIR();
     ICONDIRENTRY readICONDIRENTRY(qint64 nOffset);
     GRPICONDIRENTRY readGPRICONDIRENTRY(qint64 nOffset);
-
     QList<ICONDIRENTRY> getIconDirectories();
     QList<GRPICONDIRENTRY> getIconGPRDirectories();
 };
