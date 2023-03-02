@@ -55,7 +55,7 @@ QString XMP3::getFileFormatString()
 {
     QString sResult;
 
-    sResult = QString("MP3(%1)").arg(getVersion());
+    sResult = QString("MP3(%1)").arg(getVersion()); // TODO more
 
     return sResult;
 }

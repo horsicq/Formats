@@ -49,7 +49,7 @@ protected:
 
 signals:
     void readDataSignal(quint64 nOffset, char *pData, qint64 nSize);
-    void writeDataSignal(quint64 nOffset, const char *pData, qint64 nSize);
+    void writeDataSignal(quint64 nOffset, char *pData, qint64 nSize);
 
 private:
     quint64 g_nSize;
