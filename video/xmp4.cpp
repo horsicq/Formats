@@ -36,7 +36,7 @@ bool XMP4::isValid()
         _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
 
         if (compareSignature(&memoryMap, "000000..'ftyp'", 0)) {
-            // TODO more checks
+            // TODO more checks !!!
             bResult = true;
         }
     }
