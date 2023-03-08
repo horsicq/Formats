@@ -9231,6 +9231,7 @@ XBinary::REGION_FILL XBinary::getRegionFill(qint64 nOffset, qint64 nSize, qint32
 
 QString XBinary::getDataString(char *pData, qint32 nDataSize)
 {
+    // TODO optimize
     QString sResult;
 
     for (qint32 i = 0; i < nDataSize; i++) {
