@@ -960,7 +960,6 @@ public:
     static QString getMemoryRecordInfoByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
     static QString getMemoryRecordInfoByAddress(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
     static QString getMemoryRecordInfoByRelAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
-
     static QString getMemoryRecordName(_MEMORY_RECORD *pMemoryRecord);
 
     virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
