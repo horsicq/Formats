@@ -73,10 +73,12 @@
 #include "xne_def.h"
 #include "xpe_def.h"
 
-// TODO Check 64
 // TODO mb Functions
 #define S_ALIGN_DOWN32(value, align) (((quint32)value) & ~((quint32)align - 1))
 #define S_ALIGN_UP32(value, align) ((((quint32)value) & ((quint32)align - 1)) ? (S_ALIGN_DOWN32((quint32)value, (quint32)align) + (quint32)align) : ((quint32)value))
+
+#define S_ALIGN_DOWN64(value, align) (((quint64)value) & ~((quint64)align - 1))
+#define S_ALIGN_UP64(value, align) ((((quint64)value) & ((quint64)align - 1)) ? (S_ALIGN_DOWN64((quint64)value, (quint64)align) + (quint64)align) : ((quint64)value))
 
 #define S_ALIGN_DOWN(value, align) ((value) & ~(align - 1))
 #define S_ALIGN_UP(value, align) (((value) & (align - 1)) ? S_ALIGN_DOWN(value, align) + align : value)
@@ -1098,9 +1100,12 @@ public:
     quint32 getAdler32(qint64 nOffset = 0,
                        qint64 nSize = -1);  // TODO pProcessData Check
 
+    static void _createCRC32Table(quint32 *pCRCTable, quint32 nPoly);
     static quint32 _getCRC32(QString sFileName);
     static quint32 _getCRC32(QIODevice *pDevice);
+    static quint32 _getCRC32(char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable);
     quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
+    quint32 _getCRC32_2(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
 
     static double getEntropy(QString sFileName);  // TODO ProcessData
     static double getEntropy(QIODevice *pDevice, PDSTRUCT *pProcessData = nullptr);

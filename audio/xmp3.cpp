@@ -180,6 +180,15 @@ qint64 XMP3::decodeFrame(qint64 nOffset)
         quint8 nOriginal = (nHeader >> 2) & 0x1;
         quint8 nEmphasis = (nHeader >> 0) & 0x3;
 
+        Q_UNUSED(nPrivBit)
+        Q_UNUSED(nMode)
+        Q_UNUSED(nIntensiveStereo)
+        Q_UNUSED(nErrorProtection)
+        Q_UNUSED(nMSStereo)
+        Q_UNUSED(nCopy)
+        Q_UNUSED(nOriginal)
+        Q_UNUSED(nEmphasis)
+
         quint32 nBitRate = 0;
         quint32 nFrequency = 0;
         double dTime = 0;
