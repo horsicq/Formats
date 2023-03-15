@@ -246,7 +246,8 @@ public:
         FT_MP4,
         FT_RIFF,
         FT_AVI,
-        FT_WEBP
+        FT_WEBP,
+        FT_SIGNATURE
         // TODO more
     };
 
@@ -259,7 +260,8 @@ public:
         MODE_16SEG,
         MODE_32,
         MODE_64,
-        MODE_128
+        MODE_128,
+        MODE_256
         // TODO more
     };
 
@@ -518,6 +520,7 @@ public:
             quint32 v_uint32;
             quint64 v_uint64;
             XUINT128 v_uint128;
+            // mb TODO 256/512
         } var;
     };
 
@@ -1100,12 +1103,11 @@ public:
     quint32 getAdler32(qint64 nOffset = 0,
                        qint64 nSize = -1);  // TODO pProcessData Check
 
-    static void _createCRC32Table(quint32 *pCRCTable, quint32 nPoly);
+    static void _createCRC32Table(quint32 *pCRCTable, quint32 nPoly = 0xEDB88320);
     static quint32 _getCRC32(QString sFileName);
     static quint32 _getCRC32(QIODevice *pDevice);
     static quint32 _getCRC32(char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable);
     quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
-    quint32 _getCRC32_2(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
 
     static double getEntropy(QString sFileName);  // TODO ProcessData
     static double getEntropy(QIODevice *pDevice, PDSTRUCT *pProcessData = nullptr);

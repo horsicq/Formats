@@ -647,6 +647,9 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_RIFF:
             sResult = QString("RIFF");
             break;
+        case FT_SIGNATURE:
+            sResult = tr("Signature");
+            break;
     }
 
     return sResult;
@@ -713,6 +716,9 @@ QString XBinary::fileTypeIdToExts(FT fileType)
             break;
         case FT_RIFF:
             sResult = QString("RIFF(avi,webp)");
+            break;
+        case FT_SIGNATURE:
+            sResult = tr("Signatures");
             break;
         default:
             sResult = tr("Unknown");
@@ -4862,6 +4868,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_AVI;
     } else if (pStFileTypes->contains(FT_WEBP)) {
         result = FT_WEBP;
+    } else if (pStFileTypes->contains(FT_SIGNATURE)) {
+        result = FT_SIGNATURE;
     } else if (pStFileTypes->contains(FT_RIFF)) {
         result = FT_RIFF;
     } else if (pStFileTypes->contains(FT_PDF)) {
@@ -4945,6 +4953,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_RIFF)) listResult.append(FT_RIFF);
     if (stFileTypes.contains(FT_AVI)) listResult.append(FT_AVI);
     if (stFileTypes.contains(FT_WEBP)) listResult.append(FT_WEBP);
+    if (stFileTypes.contains(FT_SIGNATURE)) listResult.append(FT_SIGNATURE);
     if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
     if (stFileTypes.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
     if (stFileTypes.contains(FT_NE)) listResult.append(FT_NE);
@@ -5962,7 +5971,7 @@ void XBinary::_createCRC32Table(quint32 *pCRCTable, quint32 nPoly)
             crc = (crc & 1) ? ((crc >> 1) ^ nPoly) : (crc >> 1);
         }
 
-        *(pCRCTable + sizeof(quint32) * i) = crc;
+        *(pCRCTable + i) = crc;
     }
 }
 
@@ -5989,9 +5998,10 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice)
     XBinary binary(pDevice);
 
     nResult = binary._getCRC32(0, -1);
-    //quint32 nResult2 = binary._getCRC32_2(0, -1);
 
     pDevice->reset();
+
+//    quint32 nResult2 = binary._getCRC32_2(0, -1);
 
     return nResult;
 }
@@ -6001,7 +6011,8 @@ quint32 XBinary::_getCRC32(char *pData, qint32 nDataSize, quint32 nInit, quint32
     quint32 nResult = nInit;
 
     while (nDataSize > 0) {
-        nResult = (*(pCRCTable + sizeof(quint32) * ((nResult ^ ((quint8)(*pData))) & 0xFF))) ^ (nResult >> 8);
+        quint8 nIndex = (nResult ^ ((quint8)(*pData)) & 0xFF);
+        nResult = (*(pCRCTable + nIndex)) ^ (nResult >> 8);
 
         nDataSize--;
         pData++;
@@ -6011,77 +6022,6 @@ quint32 XBinary::_getCRC32(char *pData, qint32 nDataSize, quint32 nInit, quint32
 }
 
 quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
-{
-    // TODO optimize!!!
-    quint32 nResult = 0xFFFFFFFF;  // ~0
-
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pProcessData) {
-        pProcessData = &pdStructEmpty;
-    }
-
-    OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
-
-    nOffset = osRegion.nOffset;
-    nSize = osRegion.nSize;
-
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pProcessData);
-
-    if ((nOffset != -1) && (!(pProcessData->bIsStop))) {
-        XBinary::setPdStructInit(pProcessData, _nFreeIndex, nSize);
-
-        quint32 crc_table[256];
-
-        for (qint32 i = 0; i < 256; i++) {
-            quint32 crc = i;
-
-            for (qint32 j = 0; j < 8; j++) {
-                crc = (crc & 1) ? ((crc >> 1) ^ 0xEDB88320) : (crc >> 1);
-            }
-
-            crc_table[i] = crc;
-        }
-
-        qint64 nTemp = 0;
-        char *pBuffer = new char[READWRITE_BUFFER_SIZE];
-
-        while (nSize > 0) {
-            nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
-
-            if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-                _errorMessage(tr("Read error"));
-
-                nResult = 0;
-
-                break;
-            }
-
-            for (qint32 i = 0; i < nTemp; i++) {
-                nResult = crc_table[(nResult ^ ((quint8)pBuffer[i])) & 0xFF] ^ (nResult >> 8);
-            }
-
-            nSize -= nTemp;
-            nOffset += nTemp;
-
-            XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, nOffset);
-        }
-
-        delete[] pBuffer;
-    }
-
-    nResult ^= 0xFFFFFFFF;
-
-    XBinary::setPdStructFinished(pProcessData, _nFreeIndex);
-
-    if (pProcessData->bIsStop) {
-        nResult = 0;
-    }
-
-    return nResult;
-}
-
-quint32 XBinary::_getCRC32_2(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
 {
     // TODO optimize!!!
     quint32 nResult = 0xFFFFFFFF;  // ~0
