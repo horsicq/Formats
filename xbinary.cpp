@@ -6001,7 +6001,7 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice)
 
     pDevice->reset();
 
-//    quint32 nResult2 = binary._getCRC32_2(0, -1);
+    //    quint32 nResult2 = binary._getCRC32_2(0, -1);
 
     return nResult;
 }
