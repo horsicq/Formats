@@ -95,7 +95,7 @@ qint64 XIODevice::readData(char *pData, qint64 nMaxSize)
     Q_UNUSED(nMaxSize)
 
 #ifdef QT_DEBUG
-    qCritical("XIODevice::readData");
+    qCritical("TODO: XIODevice::readData");
 #endif
 
     return 0;
@@ -107,7 +107,7 @@ qint64 XIODevice::writeData(const char *pData, qint64 nMaxSize)
     Q_UNUSED(nMaxSize)
 
 #ifdef QT_DEBUG
-    qCritical("XIODevice::writeData");
+    qCritical("TODO: XIODevice::writeData");
 #endif
 
     return 0;
