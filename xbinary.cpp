@@ -5983,6 +5983,7 @@ quint32 XBinary::_getCRC32(QString sFileName)
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
+        qint64 nTmp = file.size();
         nResult = XBinary::_getCRC32(&file);
 
         file.close();
