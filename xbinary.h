@@ -156,7 +156,7 @@ public:
         MMT_HEADER,
         MMT_FOOTER,
         MMT_LOADSEGMENT,  // Section in PE; LoadProgram in ELF; Segments in MACH
-        MMT_NOLOADABLE,   // For ELF
+        MMT_NOLOADABLE,   // For ELF TODO Check
         MMT_FILESEGMENT,
         MMT_OVERLAY,
         MMT_DATA,
