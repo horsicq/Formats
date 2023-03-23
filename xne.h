@@ -118,7 +118,6 @@ public:
     qint64 getNotResindentNameTableOffset();
 
     QList<XNE_DEF::NE_SEGMENT> getSegmentList();
-
     XNE_DEF::NE_SEGMENT _read_NE_SEGMENT(qint64 nOffset);
 
     static QMap<quint64, QString> getImageNEMagics();
