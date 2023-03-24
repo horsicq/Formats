@@ -344,6 +344,7 @@ public:
     };
 
     // TODO reactOS
+    // TODO FreeDOS
     enum OSNAME {
         OSNAME_UNKNOWN = 0,
         OSNAME_AIX,
