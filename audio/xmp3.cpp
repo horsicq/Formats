@@ -127,7 +127,7 @@ XBinary::_MEMORY_MAP XMP3::getMemoryMap(PDSTRUCT *pPdStruct)
 
                 nOffset += nFrameSize;
             }
-        } while (nFrameSize);
+        } while (nFrameSize && (!(pPdStruct->bIsStop)));
 
         // TODO TAG
     }
