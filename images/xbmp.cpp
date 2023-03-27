@@ -89,6 +89,7 @@ qint64 XBMP::getFileFormatSize()
 
 XBinary::_MEMORY_MAP XBMP::getMemoryMap(PDSTRUCT *pPdStruct)
 {
+    // TODO
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
