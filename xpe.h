@@ -656,7 +656,6 @@ public:
 
     bool isResourceGroupIconsPresent();
     bool isResourceGroupIconsPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
-
     bool isResourceGroupCursorsPresent();
     bool isResourceGroupCursorsPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
