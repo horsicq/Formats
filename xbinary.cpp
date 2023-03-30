@@ -6152,10 +6152,10 @@ quint32 XBinary::_getCRC32ByDirectory(QString sDirectoryName, bool bRecursive, q
 
         if (fi.isDir() && bRecursive) {
             nResult = _getCRC32ByDirectory(fi.absoluteFilePath(), bRecursive, nResult);
-        } else if (fi.isFile()) {
-            QByteArray baFileName = fi.baseName().toUtf8();
-            nResult = _getCRC32(baFileName, nResult, _getCRC32Table_EDB88320());
         }
+
+        QByteArray baFileName = fi.baseName().toUtf8();
+        nResult = _getCRC32(baFileName, nResult, _getCRC32Table_EDB88320());
     }
 
     return nResult;
