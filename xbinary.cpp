@@ -6134,6 +6134,33 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
     return nResult;
 }
 
+quint32 XBinary::_getCRC32ByFileContent(QString sFileName)
+{
+    return _getCRC32(readFile(sFileName), 0xFFFFFFFF, _getCRC32Table_EDB88320());
+}
+
+quint32 XBinary::_getCRC32ByDirectory(QString sDirectoryName, bool bRecursive, quint32 nInit)
+{
+    quint32 nResult = nInit;
+
+    QDirIterator it(sDirectoryName);
+
+    while (it.hasNext()) {
+        QString sRecord = it.next();
+
+        QFileInfo fi(sRecord);
+
+        if (fi.isDir() && bRecursive) {
+            nResult = _getCRC32ByDirectory(fi.absoluteFilePath(), bRecursive, nResult);
+        } else if (fi.isFile()) {
+            QByteArray baFileName = fi.baseName().toUtf8();
+            nResult = _getCRC32(baFileName, nResult, _getCRC32Table_EDB88320());
+        }
+    }
+
+    return nResult;
+}
+
 double XBinary::getEntropy(QString sFileName)
 {
     double dResult = 0;

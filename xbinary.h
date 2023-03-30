@@ -26,6 +26,7 @@
 #include <QCryptographicHash>
 #include <QDataStream>
 #include <QDateTime>
+#include <QDirIterator>
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
@@ -1112,6 +1113,9 @@ public:
     static quint32 _getCRC32(char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable);
     static quint32 _getCRC32(QByteArray baData, quint32 nInit, quint32 *pCRCTable);
     quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
+
+    static quint32 _getCRC32ByFileContent(QString sFileName);
+    static quint32 _getCRC32ByDirectory(QString sDirectoryName, bool bRecursive, quint32 nInit = 0xFFFFFFFF); // TODO PDSTRUCT
 
     static double getEntropy(QString sFileName);  // TODO ProcessData
     static double getEntropy(QIODevice *pDevice, PDSTRUCT *pProcessData = nullptr);

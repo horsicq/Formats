@@ -727,7 +727,6 @@ public:
     static QString resourceIdNameToString(RESOURCES_ID_NAME resourceIdName, qint32 nNumber);
 
     QList<qint64> getRelocsAsRVAList();
-
     QList<RELOCS_HEADER> getRelocsHeaders();
     QList<RELOCS_POSITION> getRelocsPositions(qint64 nOffset);
 
