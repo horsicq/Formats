@@ -975,7 +975,6 @@ public:
 
     virtual XADDR getBaseAddress();
     virtual void setBaseAddress(XADDR nBaseAddress);
-
     virtual qint64 getImageSize();
 
     qint64 _getEntryPointOffset();
