@@ -23,7 +23,7 @@
 XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent)
 {
     g_nSize = 0;
-    g_nInitOffset = 0;
+    g_nInitLocation = 0;
 }
 
 void XIODevice::setSize(quint64 nSize)
@@ -31,14 +31,14 @@ void XIODevice::setSize(quint64 nSize)
     g_nSize = nSize;
 }
 
-void XIODevice::setInitOffset(quint64 nOffset)
+void XIODevice::setInitLocation(quint64 nLocation)
 {
-    g_nInitOffset = nOffset;
+    g_nInitLocation = nLocation;
 }
 
-quint64 XIODevice::getInitOffset()
+quint64 XIODevice::getInitLocation()
 {
-    return g_nInitOffset;
+    return g_nInitLocation;
 }
 
 qint64 XIODevice::size() const

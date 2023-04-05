@@ -41,7 +41,7 @@ SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize, QObject *
 
     this->g_pDevice = pDevice;
 
-    setInitOffset(nOffset);
+    setInitLocation(nOffset);
     setSize(nSize);
 
     //    reset();
@@ -60,7 +60,7 @@ bool SubDevice::seek(qint64 nPos)
     bool bResult = false;
 
     if ((nPos < size()) && (nPos >= 0)) {
-        if (g_pDevice->seek(getInitOffset() + nPos)) {
+        if (g_pDevice->seek(getInitLocation() + nPos)) {
             bResult = QIODevice::seek(nPos);
         }
     }

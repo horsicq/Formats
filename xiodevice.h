@@ -30,8 +30,8 @@ public:
     XIODevice(QObject *pParent);
 
     void setSize(quint64 nSize);
-    void setInitOffset(quint64 nOffset);
-    quint64 getInitOffset();
+    void setInitLocation(quint64 nLocation);
+    quint64 getInitLocation();
 
     virtual qint64 size() const;
     virtual bool isSequential() const;
@@ -53,7 +53,7 @@ signals:
 
 private:
     quint64 g_nSize;
-    quint64 g_nInitOffset;
+    quint64 g_nInitLocation;
 };
 
 #endif  // XIODEVICE_H
