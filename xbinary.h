@@ -1136,7 +1136,6 @@ public:
     bool is16();
     bool is32();
     bool is64();
-
     static bool isBigEndian(_MEMORY_MAP *pMemoryMap);
     static bool is16(_MEMORY_MAP *pMemoryMap);
     static bool is32(_MEMORY_MAP *pMemoryMap);
