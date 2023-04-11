@@ -1242,7 +1242,6 @@ public:
 
     static bool writeToFile(QString sFileName, QByteArray baData);
     static bool writeToFile(QString sFileName, QIODevice *pDevice);
-
     static bool appendToFile(QString sFileName, QString sString);
     static bool clearFile(QString sFileName);
 
@@ -1350,7 +1349,6 @@ public:
     static QString generateUUID();
 
     static QString appendText(QString sResult, QString sString, QString sSeparate);
-
     static QString bytesCountToString(quint64 nValue, quint64 nBase = 1024);
     static QString numberToString(quint64 nValue);
     static QString fullVersionDwordToString(quint32 nValue);
@@ -1415,6 +1413,16 @@ public:
 
     REGION_FILL getRegionFill(qint64 nOffset, qint64 nSize, qint32 nAlignment);
     static QString getDataString(char *pData, qint32 nDataSize);
+
+    struct HREGION {
+        XADDR nAddress;
+        qint64 nOffset;
+        qint64 nSize;
+        QString sName;
+    };
+
+    QList<HREGION> getHRegions(PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<HREGION> getHighlights(PDSTRUCT *pPdStruct = nullptr);
 
 private:
     static const int READWRITE_BUFFER_SIZE = 0x1000;

@@ -1876,7 +1876,6 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qin
     qint64 nResult = -1;
 
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-    ;
 
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
@@ -9329,6 +9328,42 @@ QString XBinary::getDataString(char *pData, qint32 nDataSize)
     }
 
     return sResult;
+}
+
+QList<XBinary::HREGION> XBinary::getHRegions(PDSTRUCT *pPdStruct)
+{
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    QList<XBinary::HREGION> listResult;
+
+    _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
+
+    qint32 nNumberOfRecords = memoryMap.listRecords.count();
+
+    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+        HREGION region = {};
+        region.nAddress = memoryMap.listRecords.at(i).nAddress;
+        region.nOffset = memoryMap.listRecords.at(i).nOffset;
+        region.nSize = memoryMap.listRecords.at(i).nAddress;
+        region.sName = memoryMap.listRecords.at(i).sName;
+
+        listResult.append(region);
+    }
+
+    return listResult;
+}
+
+QList<XBinary::HREGION> XBinary::getHighlights(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QList<XBinary::HREGION> listResult;
+
+    return listResult;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature, bool *pbValid)
