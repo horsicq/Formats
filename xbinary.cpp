@@ -9348,7 +9348,7 @@ QList<XBinary::HREGION> XBinary::getHRegions(PDSTRUCT *pPdStruct)
         HREGION region = {};
         region.nAddress = memoryMap.listRecords.at(i).nAddress;
         region.nOffset = memoryMap.listRecords.at(i).nOffset;
-        region.nSize = memoryMap.listRecords.at(i).nAddress;
+        region.nSize = memoryMap.listRecords.at(i).nSize;
         region.sName = memoryMap.listRecords.at(i).sName;
 
         listResult.append(region);
@@ -9364,6 +9364,36 @@ QList<XBinary::HREGION> XBinary::getHighlights(PDSTRUCT *pPdStruct)
     QList<XBinary::HREGION> listResult;
 
     return listResult;
+}
+
+qint64 XBinary::align_up(qint64 nValue, qint64 nAlignment)
+{
+    qint64 nResult = nValue;
+
+    if (nAlignment) {
+        qint64 r = nValue % nAlignment;
+
+        if (r) {
+            nValue += (nAlignment - r);
+        }
+    }
+
+    return nResult;
+}
+
+qint64 XBinary::align_down(qint64 nValue, qint64 nAlignment)
+{
+    qint64 nResult = nValue;
+
+    if (nAlignment) {
+        qint64 r = nValue % nAlignment;
+
+        if (r) {
+            nValue -= r;
+        }
+    }
+
+    return nResult;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature, bool *pbValid)

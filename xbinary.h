@@ -1424,6 +1424,9 @@ public:
     QList<HREGION> getHRegions(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<HREGION> getHighlights(PDSTRUCT *pPdStruct = nullptr);
 
+    static qint64 align_up(qint64 nValue, qint64 nAlignment);
+    static qint64 align_down(qint64 nValue, qint64 nAlignment);
+
 private:
     static const int READWRITE_BUFFER_SIZE = 0x1000;
     static QString convertSignature(QString sSignature);
