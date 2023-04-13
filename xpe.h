@@ -808,19 +808,14 @@ public:
     static QMap<quint64, QString> getComImageFlagsS();
     static QMap<quint64, QString> getDebugTypes();
     static QMap<quint64, QString> getDebugTypesS();
-
     static QMap<quint64, QString> getOperatingSystemVersions(OSNAME osName = OSNAME_WINDOWS);
     static QMap<quint64, QString> getOperatingSystemVersionsS(OSNAME osName = OSNAME_WINDOWS);
-
     static QMap<quint64, QString> getResourcesFixedFileInfoSignatures();
     static QMap<quint64, QString> getResourcesFixedFileInfoSignaturesS();
-
     static QMap<quint64, QString> getResourcesFixedFileInfoFileFlags();
     static QMap<quint64, QString> getResourcesFixedFileInfoFileFlagsS();
-
     static QMap<quint64, QString> getResourcesFixedFileInfoFileOses();
     static QMap<quint64, QString> getResourcesFixedFileInfoFileOsesS();
-
     static QMap<quint64, QString> getResourcesFixedFileInfoFileTypes();
     static QMap<quint64, QString> getResourcesFixedFileInfoFileTypesS();
 
