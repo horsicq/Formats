@@ -9374,7 +9374,7 @@ qint64 XBinary::align_up(qint64 nValue, qint64 nAlignment)
         qint64 r = nValue % nAlignment;
 
         if (r) {
-            nValue += (nAlignment - r);
+            nResult += (nAlignment - r);
         }
     }
 
@@ -9389,7 +9389,7 @@ qint64 XBinary::align_down(qint64 nValue, qint64 nAlignment)
         qint64 r = nValue % nAlignment;
 
         if (r) {
-            nValue -= r;
+            nResult -= r;
         }
     }
 
