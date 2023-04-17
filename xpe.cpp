@@ -8495,6 +8495,25 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
 
     return result;
 }
+
+QList<XBinary::HREGION> XPE::getHighlights(PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::HREGION> listResult;
+
+    _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
+
+    {
+        HREGION region = {};
+        region.nAddress = memoryMap.nEntryPointAddress;
+        region.nOffset = addressToOffset(&memoryMap, memoryMap.nEntryPointAddress);
+        region.nSize = 1;
+        region.sName = tr("Entry point");
+
+        listResult.append(region);
+    }
+
+    return listResult;
+}
 #if defined(_MSC_VER)
 QString XPE::getCertNameString(PCCERT_CONTEXT pCertContext, CERTNAMESTRING certNameString)
 {

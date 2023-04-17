@@ -1197,6 +1197,8 @@ public:
 
     static XCERT_INFO getCertInfo(QString sFileName);
 
+    virtual QList<HREGION> getHighlights(PDSTRUCT *pPdStruct = nullptr);
+
 #if defined(_MSC_VER)
     enum CERTNAMESTRING {
         CERTNAMESTRING_UNKNOWN = 0,

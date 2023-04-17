@@ -1385,7 +1385,6 @@ public:
     static quint32 getDwordFromQword(quint64 nValue, qint32 nIndex);
     static quint16 getWordFromQword(quint64 nValue, qint32 nIndex);
     static quint8 getByteFromQword(quint64 nValue, qint32 nIndex);
-
     static quint64 setDwordToQword(quint64 nInit, quint32 nValue, qint32 nIndex);
     static quint64 setWordToQword(quint64 nInit, quint16 nValue, qint32 nIndex);
     static quint64 setByteToQword(quint64 nInit, quint8 nValue, qint32 nIndex);
