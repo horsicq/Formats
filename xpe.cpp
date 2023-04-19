@@ -8579,7 +8579,7 @@ QList<XBinary::HREGION> XPE::getHighlights(PDSTRUCT *pPdStruct)
     {
         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY);
 
-        if (isOffsetValid(&memoryMap, dataDirectory.VirtualAddress)) {
+        if (dataDirectory.VirtualAddress && isOffsetValid(&memoryMap, dataDirectory.VirtualAddress)) {
             HREGION region = {};
             region.nAddress = -1;
             region.nOffset = dataDirectory.VirtualAddress;
