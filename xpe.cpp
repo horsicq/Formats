@@ -8542,6 +8542,19 @@ QList<XBinary::HREGION> XPE::getHighlights(PDSTRUCT *pPdStruct)
         }
     }
     {
+        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
+
+        if(isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+            HREGION region = {};
+            region.nAddress = dataDirectory.VirtualAddress;
+            region.nOffset = relAddressToOffset(&memoryMap, region.nAddress);
+            region.nSize = dataDirectory.Size;
+            region.sName = tr("Relocs");
+
+            listResult.append(region);
+        }
+    }
+    {
         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 
         if(isDataDirectoryValid(&dataDirectory, &memoryMap)) {
