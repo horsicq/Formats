@@ -293,6 +293,9 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
         case MODE_128:
             sResult = tr("128-bit");
             break;
+        case MODE_256:
+            sResult = tr("256-bit");
+            break;
     }
 
     return sResult;
@@ -7963,6 +7966,8 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_XBOX:
             sResult = QString("XBOX");
             break;
+        default:
+            sResult = tr("Unknown");
     }
 
     return sResult;
