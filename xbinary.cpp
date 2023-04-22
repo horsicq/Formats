@@ -6246,7 +6246,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
 
 XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
-    BYTE_COUNTS result = {0};
+    BYTE_COUNTS result = {};
 
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
