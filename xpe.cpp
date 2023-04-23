@@ -8518,7 +8518,7 @@ QList<XBinary::HREGION> XPE::getHighlights(PDSTRUCT *pPdStruct)
     {
         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
-        if(isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
             region.nAddress = dataDirectory.VirtualAddress;
             region.nOffset = relAddressToOffset(&memoryMap, region.nAddress);
@@ -8531,7 +8531,7 @@ QList<XBinary::HREGION> XPE::getHighlights(PDSTRUCT *pPdStruct)
     {
         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 
-        if(isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
             region.nAddress = dataDirectory.VirtualAddress;
             region.nOffset = relAddressToOffset(&memoryMap, region.nAddress);
@@ -8544,7 +8544,7 @@ QList<XBinary::HREGION> XPE::getHighlights(PDSTRUCT *pPdStruct)
     {
         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
 
-        if(isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
             region.nAddress = dataDirectory.VirtualAddress;
             region.nOffset = relAddressToOffset(&memoryMap, region.nAddress);
@@ -8557,7 +8557,7 @@ QList<XBinary::HREGION> XPE::getHighlights(PDSTRUCT *pPdStruct)
     {
         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 
-        if(isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
             region.nAddress = dataDirectory.VirtualAddress;
             region.nOffset = relAddressToOffset(&memoryMap, region.nAddress);
@@ -8570,7 +8570,7 @@ QList<XBinary::HREGION> XPE::getHighlights(PDSTRUCT *pPdStruct)
     {
         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
 
-        if(isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
             region.nAddress = dataDirectory.VirtualAddress;
             region.nOffset = relAddressToOffset(&memoryMap, region.nAddress);
@@ -8583,7 +8583,7 @@ QList<XBinary::HREGION> XPE::getHighlights(PDSTRUCT *pPdStruct)
     {
         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
-        if(isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
             region.nAddress = dataDirectory.VirtualAddress;
             region.nOffset = relAddressToOffset(&memoryMap, region.nAddress);
