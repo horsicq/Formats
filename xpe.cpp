@@ -9896,7 +9896,7 @@ QList<XPE::RELOCS_HEADER> XPE::getRelocsHeaders()
 
     if (nRelocsOffset != -1) {
         while (true) {
-            RELOCS_HEADER record = {0};
+            RELOCS_HEADER record = {};
 
             record.nOffset = nRelocsOffset;
 
