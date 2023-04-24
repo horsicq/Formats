@@ -3884,7 +3884,7 @@ XADDR XBinary::offsetToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
     // From the last to the fist
 
     for (qint32 i = nNumberOfRecords - 1; i >= 0; i--) {
-        if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nOffset != -1) && (pMemoryMap->listRecords.at(i).nAddress != -1)) {
+        if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nOffset != -1) && (pMemoryMap->listRecords.at(i).nAddress != (XADDR)-1)) {
             if ((pMemoryMap->listRecords.at(i).nOffset <= nOffset) && (nOffset < pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize)) {
                 nResult = (nOffset - pMemoryMap->listRecords.at(i).nOffset) + pMemoryMap->listRecords.at(i).nAddress;
                 break;
