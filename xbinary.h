@@ -962,7 +962,6 @@ public:
     QString getMemoryRecordInfoByOffset(qint64 nOffset);
     QString getMemoryRecordInfoByAddress(XADDR nAddress);
     QString getMemoryRecordInfoByRelAddress(qint64 nRelAddress);
-
     static QString getMemoryRecordInfoByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
     static QString getMemoryRecordInfoByAddress(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
     static QString getMemoryRecordInfoByRelAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
