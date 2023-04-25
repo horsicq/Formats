@@ -9335,7 +9335,7 @@ QString XBinary::getDataString(char *pData, qint32 nDataSize)
     return sResult;
 }
 
-QList<XBinary::HREGION> XBinary::getHRegions(PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XBinary::getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -9345,16 +9345,14 @@ QList<XBinary::HREGION> XBinary::getHRegions(PDSTRUCT *pPdStruct)
 
     QList<XBinary::HREGION> listResult;
 
-    _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
-
-    qint32 nNumberOfRecords = memoryMap.listRecords.count();
+    qint32 nNumberOfRecords = pMemoryMap -> listRecords.count();
 
     for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
         HREGION region = {};
-        region.nAddress = memoryMap.listRecords.at(i).nAddress;
-        region.nOffset = memoryMap.listRecords.at(i).nOffset;
-        region.nSize = memoryMap.listRecords.at(i).nSize;
-        region.sName = memoryMap.listRecords.at(i).sName;
+        region.nAddress = pMemoryMap -> listRecords.at(i).nAddress;
+        region.nOffset = pMemoryMap -> listRecords.at(i).nOffset;
+        region.nSize = pMemoryMap -> listRecords.at(i).nSize;
+        region.sName = pMemoryMap -> listRecords.at(i).sName;
 
         listResult.append(region);
     }
@@ -9362,7 +9360,7 @@ QList<XBinary::HREGION> XBinary::getHRegions(PDSTRUCT *pPdStruct)
     return listResult;
 }
 
-QList<XBinary::HREGION> XBinary::getHighlights(PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XBinary::getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 

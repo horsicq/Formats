@@ -5183,6 +5183,13 @@ qint64 XELF::getFileFormatSize()
     return _calculateRawSize();
 }
 
+QList<XBinary::HREGION> XELF::getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::HREGION> listResult;
+
+    return listResult;
+}
+
 QMap<quint64, QString> XELF::getRelTypes_x86()
 {
     QMap<quint64, QString> mapResult;
