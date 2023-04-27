@@ -334,7 +334,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(PDSTRUCT *pPdStruct)
 
     result.fileType = FT_MSDOS;
     result.mode = getMode();
-    result.nRawSize = getSize();
+    result.nBinarySize = getSize();
     result.nImageSize = getImageSize();
     result.nModuleAddress = getModuleAddress();
 

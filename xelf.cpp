@@ -3666,7 +3666,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
     result.sType = getTypeAsString();
     XADDR _nModuleAddress = getModuleAddress();
 
-    result.nRawSize = getSize();
+    result.nBinarySize = getSize();
 
     QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
     QList<XELF_DEF::Elf_Phdr> listSegments = _getPrograms(&listProgramHeaders, XELF_DEF::PT_LOAD);
@@ -3698,8 +3698,8 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
         qint64 nVirtualSize = S_ALIGN_UP(nVirtualDelta + listSegments.at(i).p_memsz, nVirtualAlign);
         qint64 nFileSize = S_ALIGN_UP(nFileDelta + listSegments.at(i).p_filesz, nFileAlign);
 
-        if (nFileOffset + nFileSize > result.nRawSize) {
-            nFileSize = result.nRawSize - nFileOffset;
+        if (nFileOffset + nFileSize > result.nBinarySize) {
+            nFileSize = result.nBinarySize - nFileOffset;
         }
 
         if (nFileSize < 0) {
@@ -3923,7 +3923,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
         nMaxSectionOffset = qMax(nMaxSectionOffset, (qint64)(listSectionHeaders.at(i).sh_offset + listSectionHeaders.at(i).sh_size));
     }
 
-    qint64 nNoLoadableSize = result.nRawSize - nMaxSegmentOffset;
+    qint64 nNoLoadableSize = result.nBinarySize - nMaxSegmentOffset;
 
     if (nNoLoadableSize > 0) {
         XBinary::_MEMORY_RECORD record = {};

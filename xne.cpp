@@ -864,7 +864,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap(PDSTRUCT *pPdStruct)
 
     result.fileType = FT_NE;
     result.mode = MODE_16SEG;
-    result.nRawSize = getSize();
+    result.nBinarySize = getSize();
 
     quint16 nShift = getImageOS2Header_align();
     QList<XNE_DEF::NE_SEGMENT> listSegments = getSegmentList();

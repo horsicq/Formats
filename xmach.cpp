@@ -1141,7 +1141,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(PDSTRUCT *pPdStruct)
     result.bIsBigEndian = isBigEndian();
     result.sType = getTypeAsString();
 
-    result.nRawSize = getSize();
+    result.nBinarySize = getSize();
 
     QList<COMMAND_RECORD> listCommandRecords = getCommandRecords();
 

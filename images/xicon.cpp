@@ -118,7 +118,7 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(PDSTRUCT *pPdStruct)
 
     _MEMORY_MAP result = {};
 
-    result.nRawSize = getSize();
+    result.nBinarySize = getSize();
 
     qint32 nIndex = 0;
 

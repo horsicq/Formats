@@ -57,7 +57,7 @@ XBinary::_MEMORY_MAP XJpeg::getMemoryMap(PDSTRUCT *pPdStruct)
     }
 
     XBinary::_MEMORY_MAP result = {};
-    result.nRawSize = getSize();
+    result.nBinarySize = getSize();
 
     qint32 nIndex = 0;
 

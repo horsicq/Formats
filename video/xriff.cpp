@@ -94,7 +94,7 @@ XBinary::_MEMORY_MAP XRiff::getMemoryMap(PDSTRUCT *pPdStruct)
 
     XBinary::_MEMORY_MAP result = {};
 
-    result.nRawSize = getSize();
+    result.nBinarySize = getSize();
     result.bIsBigEndian = isBigEndian();
 
     qint32 nIndex = 0;

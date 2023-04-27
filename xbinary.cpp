@@ -3772,8 +3772,8 @@ bool XBinary::isOffsetValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
     bool bResult = false;
 
-    if (pMemoryMap->nRawSize) {
-        bResult = ((nOffset >= 0) && (nOffset < pMemoryMap->nRawSize));
+    if (pMemoryMap->nBinarySize) {
+        bResult = ((nOffset >= 0) && (nOffset < pMemoryMap->nBinarySize));
     } else {
         qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
@@ -3920,7 +3920,7 @@ qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress
 
         nResult = _nResult + pMemoryMap->nSegmentBase;
 
-        if (nResult > pMemoryMap->nRawSize) {
+        if (nResult > pMemoryMap->nBinarySize) {
             nResult = -1;
         }
     } else {
@@ -4172,7 +4172,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap(PDSTRUCT *pPdStruct)
     qint64 nTotalSize = getSize();
 
     result.nModuleAddress = getModuleAddress();
-    result.nRawSize = nTotalSize;
+    result.nBinarySize = nTotalSize;
     result.nImageSize = nTotalSize;
     result.fileType = getFileType();
     result.mode = getMode();
@@ -4201,6 +4201,36 @@ qint32 XBinary::getNumberOfPhysicalRecords(XBinary::_MEMORY_MAP *pMemoryMap)
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         if (!pMemoryMap->listRecords.at(i).bIsVirtual) {
             nResult++;
+        }
+    }
+
+    return nResult;
+}
+
+qint32 XBinary::getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap)
+{
+    qint32 nResult = 0;
+
+    qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (pMemoryMap->listRecords.at(i).bIsVirtual) {
+            nResult++;
+        }
+    }
+
+    return nResult;
+}
+
+qint64 XBinary::getRecordsTotalRowSize(_MEMORY_MAP *pMemoryMap)
+{
+    qint64 nResult = 0;
+
+    qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (!pMemoryMap->listRecords.at(i).bIsVirtual) {
+            nResult += pMemoryMap->listRecords.at(i).nSize;
         }
     }
 
@@ -7166,7 +7196,7 @@ qint64 XBinary::getOverlaySize()
 
 qint64 XBinary::getOverlaySize(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    qint64 nSize = getSize();
+    qint64 nSize = pMemoryMap->nBinarySize;
     qint64 nOverlayOffset = getOverlayOffset(pMemoryMap);
     qint64 nDelta = 0;
 
@@ -8284,7 +8314,7 @@ XBinary::MODE XBinary::getWidthModeFromMemoryMap(XBinary::_MEMORY_MAP *pMemoryMa
 {
     MODE result = MODE_32;
 
-    qint64 nMax = qMax(pMemoryMap->nModuleAddress + pMemoryMap->nImageSize, (XADDR)(pMemoryMap->nRawSize));
+    qint64 nMax = qMax(pMemoryMap->nModuleAddress + pMemoryMap->nImageSize, (XADDR)(pMemoryMap->nBinarySize));
 
     result = getWidthModeFromSize(nMax);
 

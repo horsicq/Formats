@@ -1787,7 +1787,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
     result.sType = getTypeAsString();
 
     result.nModuleAddress = getModuleAddress();
-    result.nRawSize = getSize();
+    result.nBinarySize = getSize();
     result.nImageSize = S_ALIGN_UP(getOptionalHeader_SizeOfImage(), 0x1000);
     result.nEntryPointAddress = result.nModuleAddress + getOptionalHeader_AddressOfEntryPoint();
 
@@ -1875,14 +1875,14 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
         for (quint32 i = 0; i < nNumberOfSections; i++) {
             XPE_DEF::IMAGE_SECTION_HEADER section = getSectionHeader(i);
 
-            if (section.PointerToRawData > result.nRawSize) {
+            if (section.PointerToRawData > result.nBinarySize) {
                 section.PointerToRawData = 0;
             }
 
             // TODO for corrupted files
-            if (section.SizeOfRawData > result.nRawSize) {
+            if (section.SizeOfRawData > result.nBinarySize) {
                 // Corrupted files
-                section.SizeOfRawData = result.nRawSize - section.PointerToRawData;
+                section.SizeOfRawData = result.nBinarySize - section.PointerToRawData;
             }
 
             qint64 nFileOffset = section.PointerToRawData;

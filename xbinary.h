@@ -427,7 +427,7 @@ public:
     struct _MEMORY_MAP {
         XADDR nModuleAddress;
         qint64 nImageSize;
-        qint64 nRawSize;
+        qint64 nBinarySize;
         XADDR nEntryPointAddress;
         qint64 nSegmentBase;  // For MSDOS
         FT fileType;
@@ -970,6 +970,8 @@ public:
     virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
 
     static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);
+    static qint32 getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap);
+    static qint64 getRecordsTotalRowSize(_MEMORY_MAP *pMemoryMap);
 
     virtual XADDR getBaseAddress();
     virtual void setBaseAddress(XADDR nBaseAddress);
@@ -1222,11 +1224,11 @@ public:
     static QList<QString> getListFromFile(QString sFileName);
 
     qint64 getOverlaySize();
-    qint64 getOverlaySize(_MEMORY_MAP *pMemoryMap);
+    static qint64 getOverlaySize(_MEMORY_MAP *pMemoryMap);
     qint64 getOverlayOffset();
-    qint64 getOverlayOffset(_MEMORY_MAP *pMemoryMap);
+    static qint64 getOverlayOffset(_MEMORY_MAP *pMemoryMap);
     bool isOverlayPresent();
-    bool isOverlayPresent(_MEMORY_MAP *pMemoryMap);
+    static bool isOverlayPresent(_MEMORY_MAP *pMemoryMap);
 
     bool compareOverlay(QString sSignature, qint64 nOffset);
     bool compareOverlay(_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset);
@@ -1445,7 +1447,7 @@ protected:
     void _errorMessage(QString sErrorMessage);
     void _infoMessage(QString sInfoMessage);
     qint64 _calculateRawSize();
-    qint64 _calculateRawSize(_MEMORY_MAP *pMemoryMap);
+    static qint64 _calculateRawSize(_MEMORY_MAP *pMemoryMap);
 
 signals:
     void errorMessage(QString sErrorMessage);

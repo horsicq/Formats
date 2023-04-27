@@ -69,7 +69,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap(PDSTRUCT *pPdStruct)
 
     result.nModuleAddress = getModuleAddress();
     result.nEntryPointAddress = result.nModuleAddress;
-    result.nRawSize = nTotalSize;
+    result.nBinarySize = nTotalSize;
     result.nImageSize = getImageSize();
     result.fileType = getFileType();
     result.mode = getMode();

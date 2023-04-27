@@ -69,10 +69,10 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
 
     qint64 nTotalSize = getSize();
 
-    result.nRawSize = nTotalSize;
+    result.nBinarySize = nTotalSize;
     result.bIsBigEndian = isBigEndian();
 
-    if (result.nRawSize > 8) {
+    if (result.nBinarySize > 8) {
         {
             _MEMORY_RECORD record = {};
 

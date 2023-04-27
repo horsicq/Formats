@@ -1255,7 +1255,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap(PDSTRUCT *pPdStruct)
     result.sType = getTypeAsString();
     result.fileType = getFileType();
 
-    result.nRawSize = getSize();
+    result.nBinarySize = getSize();
 
     quint32 nStartObj = getImageVxdHeader_startobj();
     quint32 nEIP = getImageVxdHeader_eip();
@@ -1319,7 +1319,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap(PDSTRUCT *pPdStruct)
         result.listRecords.append(memoryRecord);
     }
 
-    qint64 nOverlaySize = result.nRawSize - (nDataPageOffset + nLoaderSize);
+    qint64 nOverlaySize = result.nBinarySize - (nDataPageOffset + nLoaderSize);
 
     if (nOverlaySize > 0) {
         _MEMORY_RECORD memoryRecord = {};
