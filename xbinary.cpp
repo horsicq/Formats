@@ -9376,14 +9376,14 @@ QList<XBinary::HREGION> XBinary::getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *
 
     QList<XBinary::HREGION> listResult;
 
-    qint32 nNumberOfRecords = pMemoryMap -> listRecords.count();
+    qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
         HREGION region = {};
-        region.nAddress = pMemoryMap -> listRecords.at(i).nAddress;
-        region.nOffset = pMemoryMap -> listRecords.at(i).nOffset;
-        region.nSize = pMemoryMap -> listRecords.at(i).nSize;
-        region.sName = pMemoryMap -> listRecords.at(i).sName;
+        region.nAddress = pMemoryMap->listRecords.at(i).nAddress;
+        region.nOffset = pMemoryMap->listRecords.at(i).nOffset;
+        region.nSize = pMemoryMap->listRecords.at(i).nSize;
+        region.sName = pMemoryMap->listRecords.at(i).sName;
 
         listResult.append(region);
     }
