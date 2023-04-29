@@ -6328,7 +6328,7 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRU
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
     if ((pPdStruct->bIsStop) || (bReadError)) {
-        result = {0};
+        result = {};
     }
 
     return result;
