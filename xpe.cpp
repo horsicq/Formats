@@ -1340,7 +1340,7 @@ QString XPE::getSection_NameAsString(quint32 nNumber)
 
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
-    char cBuffer[9] = {0};
+    char cBuffer[9] = {};
 
     if (nNumber < nNumberOfSections) {
         XBinary::read_array(getSectionsTableOffset() + nNumber * sizeof(XPE_DEF::IMAGE_SECTION_HEADER) + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Name), cBuffer, 8);
@@ -9935,7 +9935,7 @@ QList<XPE::RELOCS_POSITION> XPE::getRelocsPositions(qint64 nOffset)
         nCount &= 0xFFFF;
 
         for (qint32 i = 0; i < nCount; i++) {
-            RELOCS_POSITION record = {0};
+            RELOCS_POSITION record = {};
 
             quint16 nRecord = read_uint16(nOffset);
 
