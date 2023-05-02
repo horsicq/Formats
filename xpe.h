@@ -834,7 +834,6 @@ public:
     OFFSETSIZE getNet_MetadataOffsetSize();
 
     CLI_METADATA_HEADER _read_MetadataHeader(qint64 nOffset);
-
     void setMetadataHeader_Signature(quint32 nValue);
     void setMetadataHeader_MajorVersion(quint16 nValue);
     void setMetadataHeader_MinorVersion(quint16 nValue);
