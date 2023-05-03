@@ -3011,7 +3011,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
         RESOURCES_ID_NAME irin[3] = {};
 #else
-        RESOURCES_ID_NAME irin[3] = {0};  // MinGW 4.9 bug?
+        RESOURCES_ID_NAME irin[3] = {0};  // MinGW 4.9 bug? // TODO Check
 #endif
 
         nOffsetLevel[0] = nResourceOffset;
