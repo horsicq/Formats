@@ -40,7 +40,7 @@ public:
     virtual FT getFileType();
 
 private:
-    bool isTagValid(QString sTagName);
+    bool isTagValid(const QString &sTagName);
 };
 
 #endif  // XMP4_H

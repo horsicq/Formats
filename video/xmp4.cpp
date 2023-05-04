@@ -122,7 +122,7 @@ XBinary::FT XMP4::getFileType()
     return FT_MP4;
 }
 
-bool XMP4::isTagValid(QString sTagName)
+bool XMP4::isTagValid(const QString &sTagName)
 {
     bool bResult = false;
 
