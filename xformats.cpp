@@ -623,7 +623,7 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(QString sFileName)
     return result;
 }
 
-bool XFormats::isSigned(QString sFileName)
+bool XFormats::isSigned(const QString &sFileName)
 {
     bool bResult = false;
 

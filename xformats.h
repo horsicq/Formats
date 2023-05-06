@@ -69,7 +69,7 @@ public:
     static QList<XBinary::HREGION> getHighlights(XBinary::FT fileType, QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, bool bIsImage = false,
                                                  XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static bool isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
-    static bool isSigned(QString sFileName);
+    static bool isSigned(const QString &sFileName);
     static XBinary::OFFSETSIZE getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static XBinary::OFFSETSIZE getSignOffsetSize(QString sFileName);
     static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
