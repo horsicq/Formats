@@ -596,7 +596,7 @@ private:
 public:
     explicit XBinary(QIODevice *pDevice = nullptr, bool bIsImage = false,
                      XADDR nModuleAddress = -1);  // mb TODO parent for signals/slot
-    XBinary(QString sFileName);
+    XBinary(const QString &sFileName);
     ~XBinary();
 
     void setData(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -1248,8 +1248,8 @@ public:
     static bool clearFile(QString sFileName);
     static qint32 getStringNumberFromList(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
     static qint32 getStringNumberFromListExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
-    static bool isStringInListPresent(QList<QString> *pListStrings, QString sString, PDSTRUCT *pPdStruct = nullptr);
-    static bool isStringInListPresentExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pPdStruct = nullptr);
+    static bool isStringInListPresent(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
+    static bool isStringInListPresentExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
     static QString getStringByIndex(QList<QString> *pListStrings, int nIndex, qint32 nNumberOfStrings = -1);
 
     static bool isStringUnicode(QString sString, qint32 nMaxCheckSize = -1);
