@@ -197,7 +197,7 @@ qint64 XBinary::getSize(QIODevice *pDevice)
     return binary.getSize();
 }
 
-qint64 XBinary::getSize(QString sFileName)
+qint64 XBinary::getSize(const QString &sFileName)
 {
     qint64 nResult = 0;
 

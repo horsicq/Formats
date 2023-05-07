@@ -606,7 +606,7 @@ public:
     qint64 safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen);
     qint64 getSize();
     static qint64 getSize(QIODevice *pDevice);
-    static qint64 getSize(QString sFileName);
+    static qint64 getSize(const QString &sFileName);
 
     void setMode(MODE mode);
     virtual MODE getMode();
