@@ -314,7 +314,7 @@ QString XBinary::endiannessToString(bool bIsBigEndian)
     return sResult;
 }
 
-void XBinary::setArch(QString sArch)
+void XBinary::setArch(const QString &sArch)
 {
     g_sArch = sArch;
 }

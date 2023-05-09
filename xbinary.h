@@ -622,7 +622,7 @@ public:
     static QString modeIdToString(MODE mode);
     static QString endiannessToString(bool bIsBigEndian);
 
-    void setArch(QString sArch);
+    void setArch(const QString &sArch);
     virtual QString getArch();
 
     void setFileFormatName(QString sFileFormatString);
