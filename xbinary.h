@@ -625,7 +625,7 @@ public:
     void setArch(const QString &sArch);
     virtual QString getArch();
 
-    void setFileFormatName(QString sFileFormatString);
+    void setFileFormatName(const QString &sFileFormatString);
     virtual QString getFileFormatString();
 
     void setFileFormatExt(QString sFileFormatExt);
@@ -1288,6 +1288,7 @@ public:
     static DMFAMILY getDisasmFamily(DM disasmMode);
     static DMFAMILY getDisasmFamily(_MEMORY_MAP *pMemoryMap);
     static QList<SYNTAX> getDisasmSyntax(DM disasmMode);
+    static MODE getModeFromDisasmMode(DM disasmMode);
 
     static bool checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOptional);
 

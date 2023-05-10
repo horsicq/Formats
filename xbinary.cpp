@@ -324,7 +324,7 @@ QString XBinary::getArch()
     return g_sArch;
 }
 
-void XBinary::setFileFormatName(QString sFileFormatString)
+void XBinary::setFileFormatName(const QString &sFileFormatString)
 {
     g_sFileFormatString = sFileFormatString;
 }
@@ -8148,6 +8148,29 @@ QList<XBinary::SYNTAX> XBinary::getDisasmSyntax(DM disasmMode)
     // TODO Motorola
 
     return listResult;
+}
+
+XBinary::MODE XBinary::getModeFromDisasmMode(DM disasmMode)
+{
+    MODE result = MODE_32;
+
+    if (disasmMode == DM_X86_16){
+        result = MODE_16;
+    } else if (disasmMode == DM_X86_32) {
+        result = MODE_32;
+    } else if (disasmMode == DM_X86_64) {
+        result = MODE_64;
+    } else if ((disasmMode == DM_ARM_BE) || (disasmMode == DM_ARM_LE)) {
+        result = MODE_32;
+    } else if ((disasmMode == DM_ARM64_BE) || (disasmMode == DM_ARM64_LE)) {
+        result = MODE_64;
+    } else if ((disasmMode == DM_MIPS_BE) || (disasmMode == DM_MIPS_LE)) {
+        result = MODE_32;
+    } else if ((disasmMode == DM_MIPS64_BE) || (disasmMode == DM_MIPS64_LE)) {
+        result = MODE_64;
+    }
+
+    return result;
 }
 
 bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOptional)
