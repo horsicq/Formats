@@ -337,7 +337,7 @@ QString XBinary::getFileFormatString()
     return g_sFileFormatString;
 }
 
-void XBinary::setFileFormatExt(QString sFileFormatExt)
+void XBinary::setFileFormatExt(const QString &sFileFormatExt)
 {
     g_sFileFormatExt = sFileFormatExt;
 }

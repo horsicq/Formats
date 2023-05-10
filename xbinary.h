@@ -628,7 +628,7 @@ public:
     void setFileFormatName(const QString &sFileFormatString);
     virtual QString getFileFormatString();
 
-    void setFileFormatExt(QString sFileFormatExt);
+    void setFileFormatExt(const QString &sFileFormatExt);
     virtual QString getFileFormatExt();
 
     void setFileFormatSize(qint64 nFileFormatSize);
