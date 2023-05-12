@@ -638,7 +638,7 @@ public:
     virtual OFFSETSIZE getSignOffsetSize();  // TODO rename
 
     void setOsType(OSNAME osName);
-    void setOsVersion(QString sOsVersion);
+    void setOsVersion(const QString &sOsVersion);
     virtual OSINFO getOsInfo();
     virtual FILEFORMATINFO getFileFormatInfo();
 

@@ -381,7 +381,7 @@ void XBinary::setOsType(OSNAME osName)
     g_osName = osName;
 }
 
-void XBinary::setOsVersion(QString sOsVersion)
+void XBinary::setOsVersion(const QString &sOsVersion)
 {
     g_sOsVersion = sOsVersion;
 }
