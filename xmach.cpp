@@ -1255,7 +1255,7 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECOR
     return listResult;
 }
 
-XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(QString sName, QList<XMACH::LIBRARY_RECORD> *pListLibraryRecords)
+XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(const QString &sName, QList<XMACH::LIBRARY_RECORD> *pListLibraryRecords)
 {
     LIBRARY_RECORD result = {};
 

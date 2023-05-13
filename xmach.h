@@ -224,7 +224,7 @@ public:
 
     QList<LIBRARY_RECORD> getLibraryRecords(qint32 nType = XMACH_DEF::S_LC_LOAD_DYLIB);
     QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords, int nType = XMACH_DEF::S_LC_LOAD_DYLIB);
-    static LIBRARY_RECORD getLibraryRecordByName(QString sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
+    static LIBRARY_RECORD getLibraryRecordByName(const QString &sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
     bool isLibraryRecordNamePresent(QString sName);
     static bool isLibraryRecordNamePresent(QString sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
 
