@@ -8154,7 +8154,7 @@ XBinary::MODE XBinary::getModeFromDisasmMode(DM disasmMode)
 {
     MODE result = MODE_32;
 
-    if (disasmMode == DM_X86_16){
+    if (disasmMode == DM_X86_16) {
         result = MODE_16;
     } else if (disasmMode == DM_X86_32) {
         result = MODE_32;
