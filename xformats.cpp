@@ -130,7 +130,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, QIODevice *pDe
     return result;
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(QString sFileName, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(const QString &sFileName, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
 {
     XBinary::_MEMORY_MAP result = {};
 
