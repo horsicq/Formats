@@ -752,8 +752,9 @@ QString XBinary::fileTypeIdToExts(FT fileType)
     return sResult;
 }
 
-QString XBinary::convertFileName(QString sFileName)  // TODO Check
+QString XBinary::convertFileName(const QString &sFileName)  // TODO Check
 {
+    QString sResult;
 #ifdef Q_OS_MAC  // Old Qt(4.X)
     //    if(sFileName.startsWith("/.file/id="))
     //    {
@@ -800,10 +801,10 @@ QString XBinary::convertFileName(QString sFileName)  // TODO Check
     QFileInfo fiLink(sFileName);
 
     if (fiLink.isSymLink()) {
-        sFileName = fiLink.symLinkTarget();
+        sResult = fiLink.symLinkTarget();
     }
 
-    return sFileName;
+    return sResult;
 }
 
 QString XBinary::convertPathName(QString sPathName)

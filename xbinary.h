@@ -654,7 +654,7 @@ public:
     static QString fileTypeIdToString(FT fileType);
     static QString fileTypeIdToExts(FT fileType);
 
-    static QString convertFileName(QString sFileName);
+    static QString convertFileName(const QString &sFileName);
     static QString convertPathName(QString sPathName);
 
     OS_STRING getOsAnsiString(qint64 nOffset, qint64 nSize);

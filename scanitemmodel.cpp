@@ -32,24 +32,24 @@ ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int n
 
     for (qint32 i = 0; i < nNumberOfDetects; i++) {
         if (!mapParents.contains(pListScanStructs->at(i).id.sUuid)) {
-            ScanItem *_itemParent = nullptr;
+            ScanItem *_pItemParent = nullptr;
 
             if (pListScanStructs->at(i).parentId.sUuid == "") {
-                _itemParent = g_pRootItem;
+                _pItemParent = g_pRootItem;
             } else {
-                _itemParent = mapParents.value(pListScanStructs->at(i).parentId.sUuid);
+                _pItemParent = mapParents.value(pListScanStructs->at(i).parentId.sUuid);
             }
 
-            if (_itemParent == nullptr) {
-                _itemParent = g_pRootItem;
+            if (_pItemParent == nullptr) {
+                _pItemParent = g_pRootItem;
             }
 
             QString sParent = XBinary::createTypeString(&pListScanStructs->at(i));
 
-            ScanItem *pItemParent = new ScanItem(sParent, _itemParent, nNumberOfColumns, true);
+            ScanItem *pItemParent = new ScanItem(sParent, _pItemParent, nNumberOfColumns, true);
             XBinary::SCANSTRUCT ss = XBinary::createHeaderScanStruct(&pListScanStructs->at(i));
             pItemParent->setScanStruct(ss);
-            _itemParent->appendChild(pItemParent);
+            _pItemParent->appendChild(pItemParent);
 
             mapParents.insert(pListScanStructs->at(i).id.sUuid, pItemParent);
         }
