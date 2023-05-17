@@ -807,7 +807,7 @@ QString XBinary::convertFileName(const QString &sFileName)  // TODO Check
     return sResult;
 }
 
-QString XBinary::convertPathName(QString sPathName)
+QString XBinary::convertPathName(const QString &sPathName)
 {
     QString sResult = sPathName;
 
