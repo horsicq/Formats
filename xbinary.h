@@ -887,7 +887,7 @@ public:
     static QByteArray getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString, bool bAddNull);
 
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, PDSTRUCT *pProcessData = nullptr);
-    static bool isSignatureValid(QString sSignature);
+    static bool isSignatureValid(const QString &sSignature);
 
     static bool createFile(QString sFileName, qint64 nFileSize = 0);
     static bool isFileExists(QString sFileName, bool bTryToOpen = false);

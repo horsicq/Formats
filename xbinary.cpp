@@ -3351,16 +3351,16 @@ bool XBinary::isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64
     return (find_signature(pMemoryMap, nOffset, nSize, sSignature, &nResultSize, pProcessData) != -1);
 }
 
-bool XBinary::isSignatureValid(QString sSignature)
+bool XBinary::isSignatureValid(const QString &sSignature)
 {
     bool bResult = false;
 
     if (sSignature.size()) {
-        sSignature = convertSignature(sSignature);
+        QString _sSignature = convertSignature(sSignature);
 
         bResult = true;
 
-        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(sSignature, &bResult);
+        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bResult);
     }
 
     return bResult;
