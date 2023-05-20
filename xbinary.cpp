@@ -868,7 +868,7 @@ void XBinary::findFiles(const QString &sDirectoryName, XBinary::FFOPTIONS *pFFOp
     }
 }
 
-void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames)
+void XBinary::findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames)
 {
     QFileInfo fi(sDirectoryName);
 
