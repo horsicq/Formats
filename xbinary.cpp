@@ -754,7 +754,7 @@ QString XBinary::fileTypeIdToExts(FT fileType)
 
 QString XBinary::convertFileName(const QString &sFileName)  // TODO Check
 {
-    QString sResult;
+    QString sResult = sFileName;
 #ifdef Q_OS_MAC  // Old Qt(4.X)
     //    if(sFileName.startsWith("/.file/id="))
     //    {
@@ -1225,7 +1225,7 @@ qint32 XBinary::read_int24(qint64 nOffset, bool bIsBigEndian)
     return (qint32)(read_uint24(nOffset, bIsBigEndian));
 }
 
-qint64 XBinary::write_ansiString(qint64 nOffset, QString sString)
+qint64 XBinary::write_ansiString(qint64 nOffset, const QString &sString)
 {
     return write_array(nOffset, sString.toLatin1().data(), sString.length() + 1);
 }
