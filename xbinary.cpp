@@ -1560,12 +1560,13 @@ QString XBinary::read_UUID_bytes(qint64 nOffset)
     return sResult;
 }
 
-void XBinary::write_UUID_bytes(qint64 nOffset, QString sValue)
+void XBinary::write_UUID_bytes(qint64 nOffset, const QString &sValue)
 {
+    QString _sValue = sValue;
     // TODO Check
-    sValue = sValue.remove("-");
+    _sValue = _sValue.remove("-");
 
-    QByteArray baUUID = QByteArray::fromHex(sValue.toLatin1().data());
+    QByteArray baUUID = QByteArray::fromHex(_sValue.toLatin1().data());
 
     write_array(nOffset, baUUID.data(), 16);
 }
