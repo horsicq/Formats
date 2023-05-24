@@ -897,7 +897,7 @@ public:
     static bool moveFileToDirectory(QString sSrcFileName, QString sDestDirectory);
     static QString convertFileNameSymbols(QString sFileName);
     static QString getBaseFileName(QString sFileName);
-    static bool createDirectory(QString sDirectoryName);
+    static bool createDirectory(const QString &sDirectoryName);
     static bool isDirectoryExists(QString sDirectoryName);
     static bool removeDirectory(QString sDirectoryName);
     static bool isDirectoryEmpty(QString sDirectoryName);

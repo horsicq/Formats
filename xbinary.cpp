@@ -3464,7 +3464,7 @@ QString XBinary::getBaseFileName(QString sFileName)
     return fi.baseName();
 }
 
-bool XBinary::createDirectory(QString sDirectoryName)
+bool XBinary::createDirectory(const QString &sDirectoryName)
 {
     return QDir().mkpath(sDirectoryName);
 }
