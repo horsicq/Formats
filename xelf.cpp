@@ -2920,7 +2920,7 @@ qint64 XELF::getPhdrSize()
     return nResult;
 }
 
-qint32 XELF::getSectionIndexByName(QString sSectionName)
+qint32 XELF::getSectionIndexByName(const QString &sSectionName)
 {
     qint32 nResult = -1;
 

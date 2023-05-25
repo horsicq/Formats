@@ -347,7 +347,7 @@ public:
     qint64 getPhdrOffset(quint32 nIndex);
     qint64 getPhdrSize();
 
-    qint32 getSectionIndexByName(QString sSectionName);
+    qint32 getSectionIndexByName(const QString &sSectionName); // mb move to XBinary
     QByteArray getSectionByName(QString sSectionName);
 
     OS_STRING getProgramInterpreterName();
