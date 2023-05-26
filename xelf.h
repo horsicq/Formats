@@ -348,7 +348,7 @@ public:
     qint64 getPhdrSize();
 
     qint32 getSectionIndexByName(const QString &sSectionName); // mb move to XBinary
-    QByteArray getSectionByName(QString sSectionName);
+    QByteArray getSectionByName(const QString &sSectionName); // mb move to XBinary
 
     OS_STRING getProgramInterpreterName();
     OS_STRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);

@@ -2947,7 +2947,7 @@ qint32 XELF::getSectionIndexByName(const QString &sSectionName)
     return nResult;
 }
 
-QByteArray XELF::getSectionByName(QString sSectionName)
+QByteArray XELF::getSectionByName(const QString &sSectionName)
 {
     QByteArray baResult;
 
