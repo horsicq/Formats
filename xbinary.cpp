@@ -3407,7 +3407,7 @@ bool XBinary::isFileExists(QString sFileName, bool bTryToOpen)
     return bResult;
 }
 
-bool XBinary::removeFile(QString sFileName)
+bool XBinary::removeFile(const QString &sFileName)
 {
     return QFile::remove(sFileName);
 }
