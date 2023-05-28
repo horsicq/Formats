@@ -889,7 +889,7 @@ public:
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, PDSTRUCT *pProcessData = nullptr);
     static bool isSignatureValid(const QString &sSignature);
 
-    static bool createFile(QString sFileName, qint64 nFileSize = 0);
+    static bool createFile(const QString &sFileName, qint64 nFileSize = 0);
     static bool isFileExists(QString sFileName, bool bTryToOpen = false);
     static bool removeFile(const QString &sFileName);
     static bool copyFile(QString sSrcFileName, QString sDestFileName);

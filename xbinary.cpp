@@ -3367,7 +3367,7 @@ bool XBinary::isSignatureValid(const QString &sSignature)
     return bResult;
 }
 
-bool XBinary::createFile(QString sFileName, qint64 nFileSize)
+bool XBinary::createFile(const QString &sFileName, qint64 nFileSize)
 {
     bool bResult = false;
 
