@@ -4269,7 +4269,7 @@ void XBinary::setMultiSearchCallbackState(bool bState)
     g_bMultiSearchCallback = bState;
 }
 
-bool XBinary::compareSignature(QString sSignature, qint64 nOffset)
+bool XBinary::compareSignature(const QString &sSignature, qint64 nOffset)
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
