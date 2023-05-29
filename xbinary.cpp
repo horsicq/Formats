@@ -3412,7 +3412,7 @@ bool XBinary::removeFile(const QString &sFileName)
     return QFile::remove(sFileName);
 }
 
-bool XBinary::copyFile(QString sSrcFileName, QString sDestFileName)
+bool XBinary::copyFile(const QString &sSrcFileName, QString sDestFileName)
 {
     // mb TODO remove first
     return QFile::copy(sSrcFileName, sDestFileName);
