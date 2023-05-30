@@ -8960,7 +8960,7 @@ QString XBinary::createResultString2(const SCANSTRUCT *pScanStruct)
     return sResult;
 }
 
-bool XBinary::checkVersionString(QString sVersion)
+bool XBinary::checkVersionString(const QString &sVersion)
 {
     bool bResult = false;
 

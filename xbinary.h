@@ -1372,7 +1372,7 @@ public:
     static SCANSTRUCT createHeaderScanStruct(const SCANSTRUCT *pScanStruct);
     static QString createResultString2(const SCANSTRUCT *pScanStruct);
 
-    static bool checkVersionString(QString sVersion);
+    static bool checkVersionString(const QString &sVersion);
 
     static XVARIANT getXVariant(bool bValue);
     static XVARIANT getXVariant(quint8 nValue);
