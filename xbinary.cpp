@@ -6586,7 +6586,7 @@ bool XBinary::compareSignatureStrings(QString sBaseSignature, QString sOptSignat
     return bResult;
 }
 
-void XBinary::_errorMessage(QString sErrorMessage)
+void XBinary::_errorMessage(const QString &sErrorMessage)
 {
 #ifdef QT_DEBUG
     qDebug("Error: %s", sErrorMessage.toLatin1().data());
