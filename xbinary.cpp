@@ -5452,7 +5452,7 @@ QString XBinary::getDumpFileName(QIODevice *pDevice)
     return sResult;
 }
 
-QString XBinary::getDumpFileName(QString sFileName)
+QString XBinary::getDumpFileName(const QString &sFileName)
 {
     QFileInfo fileInfo(sFileName);
     QString sResult = fileInfo.absolutePath() + QDir::separator() + fileInfo.completeBaseName() + ".dump." + fileInfo.suffix();

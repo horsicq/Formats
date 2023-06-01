@@ -1069,7 +1069,7 @@ public:
     static QString getUnpackedFileName(QIODevice *pDevice, bool bShort = false);
     static QString getUnpackedFileName(QString sFileName);
     static QString getDumpFileName(QIODevice *pDevice);
-    static QString getDumpFileName(QString sFileName);
+    static QString getDumpFileName(const QString &sFileName);
     static QString getBackupFileName(QIODevice *pDevice);
     static QString getBackupFileName(QString sFileName);
     static QString getResultFileName(QIODevice *pDevice, QString sAppendix);
