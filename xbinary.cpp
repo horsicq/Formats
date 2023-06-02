@@ -5372,7 +5372,7 @@ bool XBinary::checkString_float(QString sValue)
     return bResult;
 }
 
-bool XBinary::checkString_double(QString sValue)
+bool XBinary::checkString_double(const QString &sValue)
 {
     bool bResult = false;
 

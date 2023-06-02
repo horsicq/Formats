@@ -1061,7 +1061,7 @@ public:
     static bool checkString_uint64(QString sValue);
     static bool checkString_int64(QString sValue);
     static bool checkString_float(QString sValue);
-    static bool checkString_double(QString sValue);
+    static bool checkString_double(const QString &sValue);
 
     static QString boolToString(bool bValue);
     static QString getSpaces(qint32 nNumberOfSpaces);
