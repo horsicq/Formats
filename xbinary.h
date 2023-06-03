@@ -730,7 +730,7 @@ public:
     void write_double(qint64 nOffset, double dValue,
                       bool bIsBigEndian = false);  // TODO Check
 
-    QString read_UUID_bytes(qint64 nOffset);                // uuid [16]
+    QString read_UUID_bytes(qint64 nOffset);                       // uuid [16]
     void write_UUID_bytes(qint64 nOffset, const QString &sValue);  // uuid [16]
 
     QString read_UUID(qint64 nOffset, bool bIsBigEndian = false);
