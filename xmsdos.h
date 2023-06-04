@@ -126,7 +126,7 @@ public:
     QByteArray getDosStub();
     bool isDosStubPresent();
     virtual bool removeDosStub();
-    virtual bool addDosStub(QString sFileName);
+    virtual bool addDosStub(const QString &sFileName);
 
     virtual MODE getMode();
     virtual QString getArch();

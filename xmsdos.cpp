@@ -692,7 +692,7 @@ bool XMSDOS::removeDosStub()
     return bResult;
 }
 
-bool XMSDOS::addDosStub(QString sFileName)
+bool XMSDOS::addDosStub(const QString &sFileName)
 {
     Q_UNUSED(sFileName)
 
