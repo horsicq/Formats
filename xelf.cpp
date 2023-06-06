@@ -3134,7 +3134,7 @@ XELF::NOTE XELF::_readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian)
     return result;
 }
 
-bool XELF::isNotePresent(QString sName)
+bool XELF::isNotePresent(const QString &sName)
 {
     QList<XELF::NOTE> listNotes = getNotes();
 
