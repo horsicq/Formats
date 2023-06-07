@@ -3388,7 +3388,7 @@ bool XBinary::createFile(const QString &sFileName, qint64 nFileSize)
     return bResult;
 }
 
-bool XBinary::isFileExists(QString sFileName, bool bTryToOpen)
+bool XBinary::isFileExists(const QString &sFileName, bool bTryToOpen)
 {
     bool bResult = false;
 

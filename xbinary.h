@@ -890,7 +890,7 @@ public:
     static bool isSignatureValid(const QString &sSignature);
 
     static bool createFile(const QString &sFileName, qint64 nFileSize = 0);
-    static bool isFileExists(QString sFileName, bool bTryToOpen = false);
+    static bool isFileExists(const QString &sFileName, bool bTryToOpen = false);
     static bool removeFile(const QString &sFileName);
     static bool copyFile(const QString &sSrcFileName, QString sDestFileName);
     static bool moveFile(QString sSrcFileName, QString sDestFileName);
