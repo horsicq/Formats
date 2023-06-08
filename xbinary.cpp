@@ -4297,7 +4297,7 @@ bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap, QString sSignature, qint
     return bResult;
 }
 
-bool XBinary::_compareByteArrayWithSignature(QByteArray baData, QString sSignature)
+bool XBinary::_compareByteArrayWithSignature(QByteArray baData, const QString &sSignature)
 {
     bool bResult = false;
 

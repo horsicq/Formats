@@ -1003,7 +1003,7 @@ public:
     static bool isEmptyData(char *pBuffer, qint64 nSize);
     bool compareSignature(const QString &sSignature, qint64 nOffset = 0);
     bool compareSignature(_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset = 0);
-    static bool _compareByteArrayWithSignature(QByteArray baData, QString sSignature);
+    static bool _compareByteArrayWithSignature(QByteArray baData, const QString &sSignature);
     static QString _createSignature(QString sSignature1, QString sSignature2);
 
     bool compareSignatureOnAddress(QString sSignature, XADDR nAddress);
