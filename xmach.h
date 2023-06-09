@@ -245,7 +245,7 @@ public:
 
     void _setFvmLibraryRecord_minor_version(qint64 nOffset, quint32 nValue);
     void _setFvmLibraryRecord_header_addr(qint64 nOffset, quint32 nValue);
-    void _setFvmLibraryRecord_name(qint64 nOffset, QString sValue);
+    void _setFvmLibraryRecord_name(qint64 nOffset, const QString &sValue);
 
     QList<SEGMENT_RECORD> getSegmentRecords();
     QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pListCommandRecords);

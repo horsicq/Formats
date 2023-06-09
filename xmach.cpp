@@ -1441,7 +1441,7 @@ void XMACH::_setFvmLibraryRecord_header_addr(qint64 nOffset, quint32 nValue)
     write_uint32(nOffset + sizeof(XMACH_DEF::load_command) + offsetof(XMACH_DEF::fvmlib, header_addr), nValue, isBigEndian());
 }
 
-void XMACH::_setFvmLibraryRecord_name(qint64 nOffset, QString sValue)
+void XMACH::_setFvmLibraryRecord_name(qint64 nOffset, const QString &sValue)
 {
     bool bIsBigEndian = isBigEndian();
     FVM_LIBRARY_RECORD libraryRecord = _readFvmLibraryRecord(nOffset, bIsBigEndian);
