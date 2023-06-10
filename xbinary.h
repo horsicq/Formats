@@ -1156,7 +1156,7 @@ public:
                                            qint64 nSize);  // TODO rename
 
     static bool compareSignatureStrings(QString sBaseSignature, QString sOptSignature);
-    static QString stringToHex(QString sString);
+    static QString stringToHex(const QString &sString);
     static QString hexToString(QString sHex);
     static QString floatToString(float fValue, int nPrec = 2);
     static QString doubleToString(double dValue, int nPrec = 2);

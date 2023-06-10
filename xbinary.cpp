@@ -6677,7 +6677,7 @@ QString XBinary::qcharToHex(QChar cSymbol)
     return QString("%1").arg((quint8)(cSymbol.toLatin1()), 2, 16, QChar('0'));
 }
 
-QString XBinary::stringToHex(QString sString)
+QString XBinary::stringToHex(const QString &sString)
 {
     return QString::fromLatin1(sString.toLatin1().toHex());
 }
