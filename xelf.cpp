@@ -3992,7 +3992,7 @@ QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *p
     return listRecords;
 }
 
-bool XELF::isSectionNamePresent(QString sSectionName)
+bool XELF::isSectionNamePresent(const QString &sSectionName)
 {
     bool bIs64 = is64();
     quint16 nStringTableSection = getSectionStringTable(bIs64);
