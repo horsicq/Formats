@@ -364,7 +364,7 @@ public:
     NOTE _readNote(qint64 nOffset, qint64 nSize, bool bIsBigEndian);
 
     bool isNotePresent(const QString &sName);
-    static bool isNotePresent(QList<NOTE> *pListNotes, QString sName);
+    static bool isNotePresent(QList<NOTE> *pListNotes, const QString &sName);
     static NOTE getNote(QList<NOTE> *pListNotes, QString sName);
 
     bool isNotePresent(quint32 nType);
