@@ -1421,7 +1421,7 @@ void XMACH::_setLibraryRecord_compatibility_version(qint64 nOffset, quint32 nVal
     write_uint32(nOffset + sizeof(XMACH_DEF::load_command) + offsetof(XMACH_DEF::dylib, compatibility_version), nValue, isBigEndian());
 }
 
-void XMACH::_setLibraryRecord_name(qint64 nOffset, QString sValue)
+void XMACH::_setLibraryRecord_name(qint64 nOffset, const QString &sValue)
 {
     bool bIsBigEndian = isBigEndian();
     LIBRARY_RECORD libraryRecord = _readLibraryRecord(nOffset, bIsBigEndian);

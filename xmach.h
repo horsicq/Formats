@@ -241,7 +241,7 @@ public:
     void _setLibraryRecord_timestamp(qint64 nOffset, quint32 nValue);
     void _setLibraryRecord_current_version(qint64 nOffset, quint32 nValue);
     void _setLibraryRecord_compatibility_version(qint64 nOffset, quint32 nValue);
-    void _setLibraryRecord_name(qint64 nOffset, QString sValue);
+    void _setLibraryRecord_name(qint64 nOffset, const QString &sValue);
 
     void _setFvmLibraryRecord_minor_version(qint64 nOffset, quint32 nValue);
     void _setFvmLibraryRecord_header_addr(qint64 nOffset, quint32 nValue);
