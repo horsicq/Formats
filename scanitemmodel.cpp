@@ -167,6 +167,10 @@ QVariant ScanItemModel::data(const QModelIndex &index, int nRole) const
             result = pItem->scanStruct().sName;
         } else if (nRole == Qt::UserRole + UD_INFO) {
             result = pItem->scanStruct().varInfo;
+        } else if (nRole == Qt::UserRole + UD_INFO2) {
+            result = pItem->scanStruct().varInfo2;
+        } else if (nRole == Qt::UserRole + UD_UUID) {
+            result = pItem->scanStruct().id.sUuid;
         }
 #ifdef QT_GUI_LIB
         else if (nRole == Qt::ForegroundRole) {

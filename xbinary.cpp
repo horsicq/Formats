@@ -3476,7 +3476,7 @@ bool XBinary::isDirectoryExists(QString sDirectoryName)
     return (fi.exists() && fi.isDir());
 }
 
-bool XBinary::removeDirectory(QString sDirectoryName)
+bool XBinary::removeDirectory(const QString &sDirectoryName)
 {
     QDir dir(sDirectoryName);
 
@@ -8934,6 +8934,8 @@ XBinary::SCANSTRUCT XBinary::createHeaderScanStruct(const SCANSTRUCT *pScanStruc
     result.sName = "";
     result.sVersion = "";
     result.sInfo = "";
+    result.varInfo.clear();
+    result.varInfo2.clear();
     result.globalColor = Qt::transparent;
 
     return result;

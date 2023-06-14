@@ -43,7 +43,9 @@ public:
     enum UD {
         UD_FILETYPE = 0,
         UD_NAME,
-        UD_INFO
+        UD_INFO,
+        UD_INFO2,
+        UD_UUID
     };
 
     explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns = 1);

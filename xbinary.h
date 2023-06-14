@@ -552,6 +552,7 @@ public:
         QString sVersion;
         QString sInfo;
         QString varInfo;  // Signature in die scripts
+        QString varInfo2;  // Signature File in die scripts
         Qt::GlobalColor globalColor;
     };
 
@@ -899,7 +900,7 @@ public:
     static QString getBaseFileName(QString sFileName);
     static bool createDirectory(const QString &sDirectoryName);
     static bool isDirectoryExists(QString sDirectoryName);
-    static bool removeDirectory(QString sDirectoryName);
+    static bool removeDirectory(const QString &sDirectoryName);
     static bool isDirectoryEmpty(QString sDirectoryName);
 
     static QByteArray readFile(QString sFileName);
