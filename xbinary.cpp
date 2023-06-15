@@ -2360,7 +2360,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sStrin
     return nResult;
 }
 
-qint64 XBinary::find_utf8StringI(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct)
+qint64 XBinary::find_utf8StringI(qint64 nOffset, qint64 nSize, const QString &sString, PDSTRUCT *pPdStruct)
 {
     // TODO !!!
     // Double
