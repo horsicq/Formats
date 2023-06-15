@@ -1319,7 +1319,7 @@ QList<XPE::SECTIONRVA_RECORD> XPE::getSectionRVARecords()
     return listResult;
 }
 
-QString XPE::convertSectionName(QString sName, OFFSETSIZE *pOsStringTable)
+QString XPE::convertSectionName(const QString &sName, OFFSETSIZE *pOsStringTable)
 {
     QString sResult = sName;
 

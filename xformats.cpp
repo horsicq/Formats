@@ -1261,7 +1261,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
 }
 #endif
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(QString sFileName, QComboBox *pComboBox)
+XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QString sFileName, QComboBox *pComboBox)
 {
     XBinary::FT result = XBinary::FT_UNKNOWN;
 
@@ -1269,7 +1269,7 @@ XBinary::FT XFormats::setFileTypeComboBox(QString sFileName, QComboBox *pComboBo
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        result = setFileTypeComboBox(XBinary::FT_UNKNOWN, &file, pComboBox);
+        result = setFileTypeComboBox(fileType, &file, pComboBox);
 
         file.close();
     }

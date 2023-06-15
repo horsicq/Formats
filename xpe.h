@@ -475,7 +475,7 @@ public:
 
     QList<SECTIONRVA_RECORD> getSectionRVARecords();
 
-    QString convertSectionName(QString sName, OFFSETSIZE *pOsStringTable);
+    QString convertSectionName(const QString &sName, OFFSETSIZE *pOsStringTable);
 
     QString getSection_NameAsString(quint32 nNumber);
     quint32 getSection_VirtualSize(quint32 nNumber);

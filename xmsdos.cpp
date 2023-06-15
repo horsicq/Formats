@@ -661,6 +661,30 @@ bool XMSDOS::isRichVersionPresent(quint32 nVersion, QList<XMSDOS::MS_RICH_RECORD
     return bResult;
 }
 
+quint32 XMSDOS::getRichVersion(QList<MS_RICH_RECORD> *pListRichSignatureRecords, qint32 nPosition)
+{
+    quint32 nResult = 0;
+    qint32 nNumberOfRichVersions = pListRichSignatureRecords->count();
+
+    if ((nPosition < nNumberOfRichVersions) && (nPosition >= 0)) {
+        nResult = pListRichSignatureRecords->at(nPosition).nVersion;
+    }
+
+    return nResult;
+}
+
+quint32 XMSDOS::getRichID(QList<MS_RICH_RECORD> *pListRichSignatureRecords, qint32 nPosition)
+{
+    quint32 nResult = 0;
+    qint32 nNumberOfRichVersions = pListRichSignatureRecords->count();
+
+    if ((nPosition < nNumberOfRichVersions) && (nPosition >= 0)) {
+        nResult = pListRichSignatureRecords->at(nPosition).nId;
+    }
+
+    return nResult;
+}
+
 qint64 XMSDOS::getDosStubSize()
 {
     qint64 nSize = (qint64)get_lfanew() - sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);

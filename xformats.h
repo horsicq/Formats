@@ -87,7 +87,7 @@ public:
 #endif
 #ifdef QT_GUI_LIB
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox);
-    static XBinary::FT setFileTypeComboBox(QString sFileName, QComboBox *pComboBox);
+    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QString sFileName, QComboBox *pComboBox);
     static bool setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian);
 #endif
     static bool saveAllPEIconsToDirectory(QIODevice *pDevice, QString sDirectoryName);
