@@ -551,7 +551,7 @@ public:
         QString sName;
         QString sVersion;
         QString sInfo;
-        QString varInfo;  // Signature in die scripts
+        QString varInfo;   // Signature in die scripts
         QString varInfo2;  // Signature File in die scripts
         Qt::GlobalColor globalColor;
     };
