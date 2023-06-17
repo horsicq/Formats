@@ -1010,7 +1010,7 @@ public:
     bool compareSignatureOnAddress(QString sSignature, XADDR nAddress);
     bool compareSignatureOnAddress(_MEMORY_MAP *pMemoryMap, QString sSignature, XADDR nAddress);
 
-    bool compareEntryPoint(QString sSignature, qint64 nOffset = 0);
+    bool compareEntryPoint(const QString &sSignature, qint64 nOffset = 0);
     bool compareEntryPoint(_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset = 0);
 
     bool moveMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize);

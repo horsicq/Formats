@@ -4473,7 +4473,7 @@ XADDR XBinary::getModuleAddress()
     return nResult;
 }
 
-bool XBinary::compareEntryPoint(QString sSignature, qint64 nOffset)
+bool XBinary::compareEntryPoint(const QString &sSignature, qint64 nOffset)
 {
     XBinary::_MEMORY_MAP memoryMap = getMemoryMap();
 
