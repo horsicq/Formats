@@ -5512,7 +5512,7 @@ QString XBinary::getResultFileName(QIODevice *pDevice, QString sAppendix)
     return sResult;
 }
 
-QString XBinary::getResultFileName(QString sFileName, QString sAppendix)
+QString XBinary::getResultFileName(const QString &sFileName, QString sAppendix)
 {
     QString sResult;
     // mb TODO if file exists write other .1 .2 ...
