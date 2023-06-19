@@ -365,7 +365,7 @@ public:
 
     bool isNotePresent(const QString &sName);
     static bool isNotePresent(QList<NOTE> *pListNotes, const QString &sName);
-    static NOTE getNote(QList<NOTE> *pListNotes, QString sName);
+    static NOTE getNote(QList<NOTE> *pListNotes, const QString &sName);
 
     bool isNotePresent(quint32 nType);
     static bool isNotePresent(QList<NOTE> *pListNotes, quint32 nType);

@@ -121,6 +121,7 @@ public:
     bool isRichVersionPresent(quint32 nVersion, QList<MS_RICH_RECORD> *pListRichSignatureRecords);
     quint32 getRichVersion(QList<MS_RICH_RECORD> *pListRichSignatureRecords, qint32 nPosition);
     quint32 getRichID(QList<MS_RICH_RECORD> *pListRichSignatureRecords, qint32 nPosition);
+    quint32 getRichCount(QList<MS_RICH_RECORD> *pListRichSignatureRecords, qint32 nPosition);
 
     // dos stub for LE, NE and PE
     qint64 getDosStubSize();
