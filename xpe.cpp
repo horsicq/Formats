@@ -2795,7 +2795,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                 listPatches.append((char *)pIID - pDataOffset + offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, OriginalFirstThunk));
 
                 //                strcpy_s(pAnsiData,pListImportHeaders->at(i).sName.size(),pListImportHeaders->at(i).sName.toLatin1().data());
-                strcpy(pAnsiData, pListImportHeaders->at(i).sName.toLatin1().data());
+                strCopy(pAnsiData, pListImportHeaders->at(i).sName.toLatin1().data());
                 pAnsiData += pListImportHeaders->at(i).sName.length() + 3;
 
                 qint32 nNumberOfPositions = pListImportHeaders->at(i).listPositions.count();
@@ -2812,7 +2812,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                         pAnsiData += 2;
 
                         //                        strcpy_s(pAnsiData,pListImportHeaders->at(i).listPositions.at(j).sName.size(),pListImportHeaders->at(i).listPositions.at(j).sName.toLatin1().data());
-                        strcpy(pAnsiData, pListImportHeaders->at(i).listPositions.at(j).sName.toLatin1().data());
+                        strCopy(pAnsiData, pListImportHeaders->at(i).listPositions.at(j).sName.toLatin1().data());
 
                         pAnsiData += pListImportHeaders->at(i).listPositions.at(j).sName.length() + 1;
                     } else {
@@ -8502,6 +8502,8 @@ XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
 
 QList<XBinary::HREGION> XPE::getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     QList<XBinary::HREGION> listResult;
 
     {
@@ -9146,7 +9148,7 @@ bool XPE::isNetMetadataPresent(XPE::CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pM
     return isDataDirectoryValid(&(pCliInfo->header.MetaData), pMemoryMap);
 }
 
-bool XPE::isNETAnsiStringPresent(QString sString)
+bool XPE::isNETAnsiStringPresent(const QString &sString)
 {
     CLI_INFO cliInfo = getCliInfo(true);
 

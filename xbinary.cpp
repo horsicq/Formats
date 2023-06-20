@@ -6072,7 +6072,7 @@ quint32 XBinary::_getCRC32(char *pData, qint32 nDataSize, quint32 nInit, quint32
     quint32 nResult = nInit;
 
     while (nDataSize > 0) {
-        quint8 nIndex = (nResult ^ ((quint8)(*pData)) & 0xFF);
+        quint8 nIndex = (nResult ^ (((quint8)(*pData)) & 0xFF));
         nResult = (*(pCRCTable + nIndex)) ^ (nResult >> 8);
 
         nDataSize--;
@@ -7788,6 +7788,8 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_BPF_BE:
             sResult = QString("BPF BE");
             break;
+        default:
+            sResult = tr("Unknown");
     }
 
     return sResult;
@@ -9455,6 +9457,11 @@ qint64 XBinary::align_down(qint64 nValue, qint64 nAlignment)
     }
 
     return nResult;
+}
+
+char *XBinary::strCopy(char *pszDest, char *pszSource)
+{
+    return strcpy(pszDest, pszSource);
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature, bool *pbValid)

@@ -1429,6 +1429,8 @@ public:
     static qint64 align_up(qint64 nValue, qint64 nAlignment);
     static qint64 align_down(qint64 nValue, qint64 nAlignment);
 
+    static char *strCopy(char *pszDest, char *pszSource);
+
 private:
     static const int READWRITE_BUFFER_SIZE = 0x1000;
     static QString convertSignature(QString sSignature);
