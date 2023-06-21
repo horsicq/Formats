@@ -4020,7 +4020,7 @@ bool XELF::isSectionNamePresent(QString sSectionName, QList<XELF::SECTION_RECORD
     return bResult;
 }
 
-qint32 XELF::getSectionNumber(QString sSectionName)
+qint32 XELF::getSectionNumber(const QString &sSectionName)
 {
     bool bIs64 = is64();
     quint16 nStringTableSection = getSectionStringTable(bIs64);
