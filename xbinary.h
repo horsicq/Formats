@@ -1049,7 +1049,7 @@ public:
 
     static QString thisToString(qint64 nDelta);
 
-    static bool checkString_byte(QString sValue);
+    static bool checkString_byte(const QString &sValue);
     static bool checkString_word(QString sValue);
     static bool checkString_dword(QString sValue);
     static bool checkString_qword(QString sValue);

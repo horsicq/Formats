@@ -5239,7 +5239,7 @@ QString XBinary::thisToString(qint64 nDelta)
     return sResult;
 }
 
-bool XBinary::checkString_byte(QString sValue)
+bool XBinary::checkString_byte(const QString &sValue)
 {
     bool bResult = false;
 
