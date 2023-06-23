@@ -3208,7 +3208,7 @@ XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType)
     return result;
 }
 
-bool XELF::isNotePresent(quint32 nType, QString sName)
+bool XELF::isNotePresent(quint32 nType, const QString &sName)
 {
     QList<XELF::NOTE> listNotes = getNotes();
 
