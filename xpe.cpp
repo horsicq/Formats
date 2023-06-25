@@ -204,30 +204,14 @@ QString XPE::typeIdToString(qint32 nType)
     QString sResult = tr("Unknown");
 
     switch (nType) {
-        case TYPE_UNKNOWN:
-            sResult = tr("Unknown");
-            break;
-        case TYPE_APPLICATION:
-            sResult = tr("Application");
-            break;
-        case TYPE_GUI:
-            sResult = QString("GUI");
-            break;
-        case TYPE_CONSOLE:
-            sResult = tr("Console");
-            break;
-        case TYPE_DLL:
-            sResult = QString("DLL");
-            break;
-        case TYPE_DRIVER:
-            sResult = tr("Driver");
-            break;
-        case TYPE_BOOTAPPLICATION:
-            sResult = tr("Boot application");
-            break;
-        case TYPE_RUNTIMEDRIVER:
-            sResult = tr("Runtime driver");
-            break;
+        case TYPE_UNKNOWN: sResult = tr("Unknown"); break;
+        case TYPE_APPLICATION: sResult = tr("Application"); break;
+        case TYPE_GUI: sResult = QString("GUI"); break;
+        case TYPE_CONSOLE: sResult = tr("Console"); break;
+        case TYPE_DLL: sResult = QString("DLL"); break;
+        case TYPE_DRIVER: sResult = tr("Driver"); break;
+        case TYPE_BOOTAPPLICATION: sResult = tr("Boot application"); break;
+        case TYPE_RUNTIMEDRIVER: sResult = tr("Runtime driver"); break;
         case TYPE_BOOTSERVICEDRIVER:
             sResult = tr("Boot service driver");
             break;

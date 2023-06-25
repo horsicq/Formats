@@ -1087,18 +1087,10 @@ QString XNE::typeIdToString(qint32 nType)
     QString sResult = tr("Unknown");
 
     switch (nType) {
-        case TYPE_UNKNOWN:
-            sResult = tr("Unknown");
-            break;
-        case TYPE_EXE:
-            sResult = QString("EXE");
-            break;
-        case TYPE_DLL:
-            sResult = QString("DLL");
-            break;
-        case TYPE_DRIVER:
-            sResult = QString("Driver");
-            break;
+        case TYPE_UNKNOWN: sResult = tr("Unknown"); break;
+        case TYPE_EXE: sResult = QString("EXE"); break;
+        case TYPE_DLL: sResult = QString("DLL"); break;
+        case TYPE_DRIVER: sResult = QString("Driver"); break;
     }
 
     return sResult;

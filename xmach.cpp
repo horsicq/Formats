@@ -4402,42 +4402,18 @@ QString XMACH::typeIdToString(qint32 nType)
     QString sResult = tr("Unknown");
 
     switch (nType) {
-        case TYPE_UNKNOWN:
-            sResult = tr("Unknown");
-            break;
-        case TYPE_OBJECT:
-            sResult = QString("OBJECT");
-            break;
-        case TYPE_EXECUTE:
-            sResult = QString("EXECUTE");
-            break;
-        case TYPE_FVMLIB:
-            sResult = QString("FVMLIB");
-            break;
-        case TYPE_CORE:
-            sResult = QString("CORE");
-            break;
-        case TYPE_PRELOAD:
-            sResult = QString("PRELOAD");
-            break;
-        case TYPE_DYLIB:
-            sResult = QString("DYLIB");
-            break;
-        case TYPE_DYLINKER:
-            sResult = QString("DYLINKER");
-            break;
-        case TYPE_BUNDLE:
-            sResult = QString("BUNDLE");
-            break;
-        case TYPE_DYLIB_STUB:
-            sResult = QString("DYLIB_STUB");
-            break;
-        case TYPE_DSYM:
-            sResult = QString("DSYM");
-            break;
-        case TYPE_KEXT_BUNDLE:
-            sResult = QString("KEXT_BUNDLE");
-            break;
+        case TYPE_UNKNOWN: sResult = tr("Unknown"); break;
+        case TYPE_OBJECT: sResult = QString("OBJECT"); break;
+        case TYPE_EXECUTE: sResult = QString("EXECUTE"); break;
+        case TYPE_FVMLIB: sResult = QString("FVMLIB"); break;
+        case TYPE_CORE: sResult = QString("CORE"); break;
+        case TYPE_PRELOAD: sResult = QString("PRELOAD"); break;
+        case TYPE_DYLIB: sResult = QString("DYLIB"); break;
+        case TYPE_DYLINKER: sResult = QString("DYLINKER"); break;
+        case TYPE_BUNDLE: sResult = QString("BUNDLE"); break;
+        case TYPE_DYLIB_STUB: sResult = QString("DYLIB_STUB"); break;
+        case TYPE_DSYM: sResult = QString("DSYM"); break;
+        case TYPE_KEXT_BUNDLE: sResult = QString("KEXT_BUNDLE"); break;
     }
 
     return sResult;
@@ -4546,8 +4522,7 @@ XADDR XMACH::readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSi
                 bUleb1 = true;
                 bUleb2 = true;
                 break;
-            default:
-                *pOpcodeStatus = OPCODE_STATUS_END;
+            default: *pOpcodeStatus = OPCODE_STATUS_END;
         }
 
         if (nByte == XMACH_DEF::S_REBASE_OPCODE_DONE) {
@@ -4640,9 +4615,7 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
                 opcodeMain.sName = QString("BIND_OPCODE_ADD_ADDR_ULEB");
                 bUleb1 = true;
                 break;
-            case XMACH_DEF::S_BIND_OPCODE_DO_BIND:
-                opcodeMain.sName = QString("BIND_OPCODE_DO_BIND");
-                break;
+            case XMACH_DEF::S_BIND_OPCODE_DO_BIND: opcodeMain.sName = QString("BIND_OPCODE_DO_BIND"); break;
             case XMACH_DEF::S_BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB:
                 opcodeMain.sName = QString("BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB");
                 bUleb1 = true;
@@ -4660,8 +4633,7 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
                 opcodeMain.sName = QString("BIND_OPCODE_THREADED");
                 bImm = true;
                 break;
-            default:
-                *pOpcodeStatus = OPCODE_STATUS_END;
+            default: *pOpcodeStatus = OPCODE_STATUS_END;
         }
 
         if (nByte == XMACH_DEF::S_BIND_OPCODE_DONE) {

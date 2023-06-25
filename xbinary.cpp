@@ -239,8 +239,7 @@ QString XBinary::typeIdToString(qint32 nType)
     QString sResult = tr("Unknown");
 
     switch (nType) {
-        case TYPE_UNKNOWN:
-            sResult = tr("Unknown");
+        case TYPE_UNKNOWN: sResult = tr("Unknown");
     }
 
     return sResult;
@@ -266,36 +265,16 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
     QString sResult = tr("Unknown");
 
     switch (mode) {
-        case MODE_UNKNOWN:
-            sResult = tr("Unknown");
-            break;
-        case MODE_DATA:
-            sResult = QString("Data");
-            break;  // mb TODO translate
-        case MODE_BIT:
-            sResult = QString("BIT");
-            break;  // mb TODO translate
-        case MODE_8:
-            sResult = tr("8-bit");
-            break;
-        case MODE_16:
-            sResult = tr("16-bit");
-            break;
-        case MODE_16SEG:
-            sResult = QString("16SEG");
-            break;
-        case MODE_32:
-            sResult = tr("32-bit");
-            break;
-        case MODE_64:
-            sResult = tr("64-bit");
-            break;
-        case MODE_128:
-            sResult = tr("128-bit");
-            break;
-        case MODE_256:
-            sResult = tr("256-bit");
-            break;
+        case MODE_UNKNOWN: sResult = tr("Unknown"); break;
+        case MODE_DATA: sResult = QString("Data"); break;  // mb TODO translate
+        case MODE_BIT: sResult = QString("BIT"); break;    // mb TODO translate
+        case MODE_8: sResult = tr("8-bit"); break;
+        case MODE_16: sResult = tr("16-bit"); break;
+        case MODE_16SEG: sResult = QString("16SEG"); break;
+        case MODE_32: sResult = tr("32-bit"); break;
+        case MODE_64: sResult = tr("64-bit"); break;
+        case MODE_128: sResult = tr("128-bit"); break;
+        case MODE_256: sResult = tr("256-bit"); break;
     }
 
     return sResult;
@@ -491,190 +470,68 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
     QString sResult = tr("Unknown");
 
     switch (fileType) {
-        case FT_UNKNOWN:
-            sResult = tr("Unknown");
-            break;
-        case FT_REGION:
-            sResult = tr("Region");
-            break;
-        case FT_BINARY:
-            sResult = QString("Binary");
-            break;
-        case FT_BINARY16:
-            sResult = QString("Binary16");
-            break;
-        case FT_BINARY32:
-            sResult = QString("Binary32");
-            break;
-        case FT_BINARY64:
-            sResult = QString("Binary64");
-            break;
-        case FT_COM:
-            sResult = QString("COM");
-            break;
-        case FT_MSDOS:
-            sResult = QString("MSDOS");
-            break;
-        case FT_NE:
-            sResult = QString("NE");
-            break;
-        case FT_LE:
-            sResult = QString("LE");
-            break;
-        case FT_LX:
-            sResult = QString("LX");
-            break;
-        case FT_PE:
-            sResult = QString("PE");
-            break;
-        case FT_PE32:
-            sResult = QString("PE32");
-            break;
-        case FT_PE64:
-            sResult = QString("PE64");
-            break;
-        case FT_ELF:
-            sResult = QString("ELF");
-            break;
-        case FT_ELF32:
-            sResult = QString("ELF32");
-            break;
-        case FT_ELF64:
-            sResult = QString("ELF64");
-            break;
-        case FT_MACHO:
-            sResult = QString("Mach-O");
-            break;
-        case FT_MACHO32:
-            sResult = QString("Mach-O32");
-            break;
-        case FT_MACHO64:
-            sResult = QString("Mach-O64");
-            break;
+        case FT_UNKNOWN: sResult = tr("Unknown"); break;
+        case FT_REGION: sResult = tr("Region"); break;
+        case FT_BINARY: sResult = QString("Binary"); break;
+        case FT_BINARY16: sResult = QString("Binary16"); break;
+        case FT_BINARY32: sResult = QString("Binary32"); break;
+        case FT_BINARY64: sResult = QString("Binary64"); break;
+        case FT_COM: sResult = QString("COM"); break;
+        case FT_MSDOS: sResult = QString("MSDOS"); break;
+        case FT_NE: sResult = QString("NE"); break;
+        case FT_LE: sResult = QString("LE"); break;
+        case FT_LX: sResult = QString("LX"); break;
+        case FT_PE: sResult = QString("PE"); break;
+        case FT_PE32: sResult = QString("PE32"); break;
+        case FT_PE64: sResult = QString("PE64"); break;
+        case FT_ELF: sResult = QString("ELF"); break;
+        case FT_ELF32: sResult = QString("ELF32"); break;
+        case FT_ELF64: sResult = QString("ELF64"); break;
+        case FT_MACHO: sResult = QString("Mach-O"); break;
+        case FT_MACHO32: sResult = QString("Mach-O32"); break;
+        case FT_MACHO64: sResult = QString("Mach-O64"); break;
         // Extra
-        case FT_7Z:
-            sResult = QString("7-Zip");
-            break;
-        case FT_ANDROIDASRC:
-            sResult = QString("Android ASRC");
-            break;
-        case FT_ANDROIDXML:
-            sResult = QString("Android XML");
-            break;
-        case FT_APK:
-            sResult = QString("APK");
-            break;
-        case FT_APKS:
-            sResult = QString("APKS");
-            break;
-        case FT_AR:
-            sResult = QString("ar");
-            break;  // TODO DEB
-        case FT_ARCHIVE:
-            sResult = tr("Archive");
-            break;
-        case FT_BMP:
-            sResult = QString("BMP");
-            break;
-        case FT_CAB:
-            sResult = QString("CAB");
-            break;
-        case FT_DEX:
-            sResult = QString("DEX");
-            break;
-        case FT_DOCUMENT:
-            sResult = tr("Document");
-            break;
-        case FT_GIF:
-            sResult = QString("GIF");
-            break;
-        case FT_IMAGE:
-            sResult = tr("Image");
-            break;
-        case FT_VIDEO:
-            sResult = tr("Video");
-            break;
-        case FT_AUDIO:
-            sResult = tr("Audio");
-            break;
-        case FT_IPA:
-            sResult = QString("IPA");
-            break;
-        case FT_JAR:
-            sResult = QString("JAR");
-            break;
-        case FT_JPEG:
-            sResult = QString("JPEG");
-            break;
-        case FT_MACHOFAT:
-            sResult = QString("Mach-O FAT");
-            break;
-        case FT_PDF:
-            sResult = QString("PDF");
-            break;
-        case FT_PLAINTEXT:
-            sResult = QString("Plain Text");
-            break;  // mb TODO translate
-        case FT_PNG:
-            sResult = QString("PNG");
-            break;
-        case FT_RAR:
-            sResult = QString("RAR");
-            break;
-        case FT_TEXT:
-            sResult = tr("Text");
-            break;
-        case FT_TIFF:
-            sResult = QString("TIFF");
-            break;
-        case FT_UNICODE:
-            sResult = QString("Unicode");
-            break;
-        case FT_UNICODE_BE:
-            sResult = QString("Unicode BE");
-            break;
-        case FT_UNICODE_LE:
-            sResult = QString("Unicode LE");
-            break;
-        case FT_UTF8:
-            sResult = QString("UTF8");
-            break;
-        case FT_ZIP:
-            sResult = QString("ZIP");
-            break;
-        case FT_GZIP:
-            sResult = QString("GZIP");
-            break;
-        case FT_ZLIB:
-            sResult = QString("zlib");
-            break;
-        case FT_LHA:
-            sResult = QString("LHA");
-            break;
-        case FT_ICO:
-            sResult = QString("ICO");
-            break;
-        case FT_CUR:
-            sResult = QString("CUR");
-            break;
-        case FT_MP3:
-            sResult = QString("MP3");
-            break;
-        case FT_MP4:
-            sResult = QString("MP4");
-            break;
-        case FT_AVI:
-            sResult = QString("AVI");
-            break;
-        case FT_WEBP:
-            sResult = QString("WebP");
-            break;
-        case FT_RIFF:
-            sResult = QString("RIFF");
-            break;
-        case FT_SIGNATURE:
-            sResult = tr("Signature");
-            break;
+        case FT_7Z: sResult = QString("7-Zip"); break;
+        case FT_ANDROIDASRC: sResult = QString("Android ASRC"); break;
+        case FT_ANDROIDXML: sResult = QString("Android XML"); break;
+        case FT_APK: sResult = QString("APK"); break;
+        case FT_APKS: sResult = QString("APKS"); break;
+        case FT_AR: sResult = QString("ar"); break;  // TODO DEB
+        case FT_ARCHIVE: sResult = tr("Archive"); break;
+        case FT_BMP: sResult = QString("BMP"); break;
+        case FT_CAB: sResult = QString("CAB"); break;
+        case FT_DEX: sResult = QString("DEX"); break;
+        case FT_DOCUMENT: sResult = tr("Document"); break;
+        case FT_GIF: sResult = QString("GIF"); break;
+        case FT_IMAGE: sResult = tr("Image"); break;
+        case FT_VIDEO: sResult = tr("Video"); break;
+        case FT_AUDIO: sResult = tr("Audio"); break;
+        case FT_IPA: sResult = QString("IPA"); break;
+        case FT_JAR: sResult = QString("JAR"); break;
+        case FT_JPEG: sResult = QString("JPEG"); break;
+        case FT_MACHOFAT: sResult = QString("Mach-O FAT"); break;
+        case FT_PDF: sResult = QString("PDF"); break;
+        case FT_PLAINTEXT: sResult = QString("Plain Text"); break;  // mb TODO translate
+        case FT_PNG: sResult = QString("PNG"); break;
+        case FT_RAR: sResult = QString("RAR"); break;
+        case FT_TEXT: sResult = tr("Text"); break;
+        case FT_TIFF: sResult = QString("TIFF"); break;
+        case FT_UNICODE: sResult = QString("Unicode"); break;
+        case FT_UNICODE_BE: sResult = QString("Unicode BE"); break;
+        case FT_UNICODE_LE: sResult = QString("Unicode LE"); break;
+        case FT_UTF8: sResult = QString("UTF8"); break;
+        case FT_ZIP: sResult = QString("ZIP"); break;
+        case FT_GZIP: sResult = QString("GZIP"); break;
+        case FT_ZLIB: sResult = QString("zlib"); break;
+        case FT_LHA: sResult = QString("LHA"); break;
+        case FT_ICO: sResult = QString("ICO"); break;
+        case FT_CUR: sResult = QString("CUR"); break;
+        case FT_MP3: sResult = QString("MP3"); break;
+        case FT_MP4: sResult = QString("MP4"); break;
+        case FT_AVI: sResult = QString("AVI"); break;
+        case FT_WEBP: sResult = QString("WebP"); break;
+        case FT_RIFF: sResult = QString("RIFF"); break;
+        case FT_SIGNATURE: sResult = tr("Signature"); break;
     }
 
     return sResult;
@@ -685,68 +542,27 @@ QString XBinary::fileTypeIdToExts(FT fileType)
     QString sResult = tr("Unknown");
 
     switch (fileType) {
-        case FT_PE:
-            sResult = QString("PE(exe,dll,sys)");
-            break;
-        case FT_ELF:
-            sResult = QString("ELF(elf,so)");
-            break;
-        case FT_ZIP:
-            sResult = QString("ZIP(zip,jar,apk,ipa,docx)");
-            break;
-        case FT_RAR:
-            sResult = QString("RAR");
-            break;
-        case FT_PDF:
-            sResult = QString("PDF");
-            break;
-        case FT_7Z:
-            sResult = QString("7-Zip");
-            break;
-        case FT_PNG:
-            sResult = QString("PNG");
-            break;
-        case FT_JPEG:
-            sResult = QString("JPEG");
-            break;
-        case FT_CAB:
-            sResult = QString("CAB");
-            break;
-        case FT_ICO:
-            sResult = QString("ICO(iso,cur)");
-            break;
-        case FT_TIFF:
-            sResult = QString("TIFF");
-            break;
-        case FT_DEX:
-            sResult = QString("DEX");
-            break;
-        case FT_MACHOFAT:
-            sResult = QString("MACHOFAT");
-            break;
-        case FT_MACHO:
-            sResult = QString("MACHO");
-            break;
-        case FT_BMP:
-            sResult = QString("BMP");
-            break;
-        case FT_GIF:
-            sResult = QString("GIF");
-            break;
-        case FT_MP3:
-            sResult = QString("MP3");
-            break;
-        case FT_MP4:
-            sResult = QString("MP4");
-            break;
-        case FT_RIFF:
-            sResult = QString("RIFF(avi,webp)");
-            break;
-        case FT_SIGNATURE:
-            sResult = tr("Signatures");
-            break;
-        default:
-            sResult = tr("Unknown");
+        case FT_PE: sResult = QString("PE(exe,dll,sys)"); break;
+        case FT_ELF: sResult = QString("ELF(elf,so)"); break;
+        case FT_ZIP: sResult = QString("ZIP(zip,jar,apk,ipa,docx)"); break;
+        case FT_RAR: sResult = QString("RAR"); break;
+        case FT_PDF: sResult = QString("PDF"); break;
+        case FT_7Z: sResult = QString("7-Zip"); break;
+        case FT_PNG: sResult = QString("PNG"); break;
+        case FT_JPEG: sResult = QString("JPEG"); break;
+        case FT_CAB: sResult = QString("CAB"); break;
+        case FT_ICO: sResult = QString("ICO(iso,cur)"); break;
+        case FT_TIFF: sResult = QString("TIFF"); break;
+        case FT_DEX: sResult = QString("DEX"); break;
+        case FT_MACHOFAT: sResult = QString("MACHOFAT"); break;
+        case FT_MACHO: sResult = QString("MACHO"); break;
+        case FT_BMP: sResult = QString("BMP"); break;
+        case FT_GIF: sResult = QString("GIF"); break;
+        case FT_MP3: sResult = QString("MP3"); break;
+        case FT_MP4: sResult = QString("MP4"); break;
+        case FT_RIFF: sResult = QString("RIFF(avi,webp)"); break;
+        case FT_SIGNATURE: sResult = tr("Signatures"); break;
+        default: sResult = tr("Unknown");
     }
 
     return sResult;
@@ -5788,28 +5604,14 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pProce
 
     switch (hash)  // TODO Check new versions of Qt
     {
-        case HASH_MD4:
-            algorithm = QCryptographicHash::Md4;
-            break;
-        case HASH_MD5:
-            algorithm = QCryptographicHash::Md5;
-            break;
-        case HASH_SHA1:
-            algorithm = QCryptographicHash::Sha1;
-            break;
+        case HASH_MD4: algorithm = QCryptographicHash::Md4; break;
+        case HASH_MD5: algorithm = QCryptographicHash::Md5; break;
+        case HASH_SHA1: algorithm = QCryptographicHash::Sha1; break;
 #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
-        case HASH_SHA224:
-            algorithm = QCryptographicHash::Sha224;
-            break;  // Keccak_224 ?
-        case HASH_SHA256:
-            algorithm = QCryptographicHash::Sha256;
-            break;
-        case HASH_SHA384:
-            algorithm = QCryptographicHash::Sha384;
-            break;
-        case HASH_SHA512:
-            algorithm = QCryptographicHash::Sha512;
-            break;
+        case HASH_SHA224: algorithm = QCryptographicHash::Sha224; break;  // Keccak_224 ?
+        case HASH_SHA256: algorithm = QCryptographicHash::Sha256; break;
+        case HASH_SHA384: algorithm = QCryptographicHash::Sha384; break;
+        case HASH_SHA512: algorithm = QCryptographicHash::Sha512; break;
 #endif
     }
 
@@ -5904,28 +5706,14 @@ QString XBinary::hashIdToString(XBinary::HASH hash)
     QString sResult = tr("Unknown");
 
     switch (hash) {
-        case HASH_MD4:
-            sResult = QString("MD4");
-            break;
-        case HASH_MD5:
-            sResult = QString("MD5");
-            break;
-        case HASH_SHA1:
-            sResult = QString("SHA1");
-            break;
+        case HASH_MD4: sResult = QString("MD4"); break;
+        case HASH_MD5: sResult = QString("MD5"); break;
+        case HASH_SHA1: sResult = QString("SHA1"); break;
 #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
-        case HASH_SHA224:
-            sResult = QString("SHA224");
-            break;
-        case HASH_SHA256:
-            sResult = QString("SHA256");
-            break;
-        case HASH_SHA384:
-            sResult = QString("SHA384");
-            break;
-        case HASH_SHA512:
-            sResult = QString("SHA512");
-            break;
+        case HASH_SHA224: sResult = QString("SHA224"); break;
+        case HASH_SHA256: sResult = QString("SHA256"); break;
+        case HASH_SHA384: sResult = QString("SHA384"); break;
+        case HASH_SHA512: sResult = QString("SHA512"); break;
 #endif
     }
 
@@ -7662,134 +7450,49 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
     QString sResult = tr("Unknown");
 
     switch (disasmMode) {
-        case DM_X86_16:
-            sResult = QString("X86-16");
-            break;
-        case DM_X86_32:
-            sResult = QString("X86-32");
-            break;
-        case DM_X86_64:
-            sResult = QString("X86-64");
-            break;
-        case DM_ARM_LE:
-            sResult = QString("ARM");
-            break;
-        case DM_ARM_BE:
-            sResult = QString("ARM BE");
-            break;
-        case DM_ARM64_LE:
-            sResult = QString("ARM64");
-            break;
-        case DM_ARM64_BE:
-            sResult = QString("ARM64 BE");
-            break;
-        case DM_CORTEXM:
-            sResult = QString("CORTEXM");
-            break;
-        case DM_THUMB_LE:
-            sResult = QString("THUMB");
-            break;
-        case DM_THUMB_BE:
-            sResult = QString("THUMB BE");
-            break;
-        case DM_MIPS_LE:
-            sResult = QString("MIPS");
-            break;
-        case DM_MIPS_BE:
-            sResult = QString("MIPS BE");
-            break;
-        case DM_MIPS64_LE:
-            sResult = QString("MIPS64");
-            break;
-        case DM_MIPS64_BE:
-            sResult = QString("MIPS64 BE");
-            break;
-        case DM_PPC_LE:
-            sResult = QString("PPC");
-            break;
-        case DM_PPC_BE:
-            sResult = QString("PPC BE");
-            break;
-        case DM_PPC64_LE:
-            sResult = QString("PPC64");
-            break;
-        case DM_PPC64_BE:
-            sResult = QString("PPC64 BE");
-            break;
-        case DM_SPARC:
-            sResult = QString("SPARC");
-            break;
-        case DM_S390X:
-            sResult = QString("S390X");
-            break;
-        case DM_XCORE:
-            sResult = QString("XCORE");
-            break;
-        case DM_M68K:
-            sResult = QString("M68K");
-            break;
-        case DM_M68K40:
-            sResult = QString("M68K40");
-            break;
-        case DM_TMS320C64X:
-            sResult = QString("TMS320C64X");
-            break;
-        case DM_M6800:
-            sResult = QString("M6800");
-            break;
-        case DM_M6801:
-            sResult = QString("M6801");
-            break;
-        case DM_M6805:
-            sResult = QString("M6805");
-            break;
-        case DM_M6808:
-            sResult = QString("M6808");
-            break;
-        case DM_M6809:
-            sResult = QString("M6809");
-            break;
-        case DM_M6811:
-            sResult = QString("M6811");
-            break;
-        case DM_CPU12:
-            sResult = QString("CPU12");
-            break;
-        case DM_HD6301:
-            sResult = QString("HD6301");
-            break;
-        case DM_HD6309:
-            sResult = QString("HD6309");
-            break;
-        case DM_HCS08:
-            sResult = QString("HCS08");
-            break;
-        case DM_EVM:
-            sResult = QString("EVM");
-            break;
-        case DM_RISKV32:
-            sResult = QString("RISKV32");
-            break;
-        case DM_RISKV64:
-            sResult = QString("RISKV64");
-            break;
-        case DM_RISKVC:
-            sResult = QString("RISKVC");
-            break;
-        case DM_MOS65XX:
-            sResult = QString("MOS65XX");
-            break;
-        case DM_WASM:
-            sResult = QString("WASM");
-            break;
-        case DM_BPF_LE:
-            sResult = QString("BPF LE");
-            break;
-        case DM_BPF_BE:
-            sResult = QString("BPF BE");
-            break;
-        default:
-            sResult = tr("Unknown");
+        case DM_X86_16: sResult = QString("X86-16"); break;
+        case DM_X86_32: sResult = QString("X86-32"); break;
+        case DM_X86_64: sResult = QString("X86-64"); break;
+        case DM_ARM_LE: sResult = QString("ARM"); break;
+        case DM_ARM_BE: sResult = QString("ARM BE"); break;
+        case DM_ARM64_LE: sResult = QString("ARM64"); break;
+        case DM_ARM64_BE: sResult = QString("ARM64 BE"); break;
+        case DM_CORTEXM: sResult = QString("CORTEXM"); break;
+        case DM_THUMB_LE: sResult = QString("THUMB"); break;
+        case DM_THUMB_BE: sResult = QString("THUMB BE"); break;
+        case DM_MIPS_LE: sResult = QString("MIPS"); break;
+        case DM_MIPS_BE: sResult = QString("MIPS BE"); break;
+        case DM_MIPS64_LE: sResult = QString("MIPS64"); break;
+        case DM_MIPS64_BE: sResult = QString("MIPS64 BE"); break;
+        case DM_PPC_LE: sResult = QString("PPC"); break;
+        case DM_PPC_BE: sResult = QString("PPC BE"); break;
+        case DM_PPC64_LE: sResult = QString("PPC64"); break;
+        case DM_PPC64_BE: sResult = QString("PPC64 BE"); break;
+        case DM_SPARC: sResult = QString("SPARC"); break;
+        case DM_S390X: sResult = QString("S390X"); break;
+        case DM_XCORE: sResult = QString("XCORE"); break;
+        case DM_M68K: sResult = QString("M68K"); break;
+        case DM_M68K40: sResult = QString("M68K40"); break;
+        case DM_TMS320C64X: sResult = QString("TMS320C64X"); break;
+        case DM_M6800: sResult = QString("M6800"); break;
+        case DM_M6801: sResult = QString("M6801"); break;
+        case DM_M6805: sResult = QString("M6805"); break;
+        case DM_M6808: sResult = QString("M6808"); break;
+        case DM_M6809: sResult = QString("M6809"); break;
+        case DM_M6811: sResult = QString("M6811"); break;
+        case DM_CPU12: sResult = QString("CPU12"); break;
+        case DM_HD6301: sResult = QString("HD6301"); break;
+        case DM_HD6309: sResult = QString("HD6309"); break;
+        case DM_HCS08: sResult = QString("HCS08"); break;
+        case DM_EVM: sResult = QString("EVM"); break;
+        case DM_RISKV32: sResult = QString("RISKV32"); break;
+        case DM_RISKV64: sResult = QString("RISKV64"); break;
+        case DM_RISKVC: sResult = QString("RISKVC"); break;
+        case DM_MOS65XX: sResult = QString("MOS65XX"); break;
+        case DM_WASM: sResult = QString("WASM"); break;
+        case DM_BPF_LE: sResult = QString("BPF LE"); break;
+        case DM_BPF_BE: sResult = QString("BPF BE"); break;
+        default: sResult = tr("Unknown");
     }
 
     return sResult;
@@ -7800,21 +7503,11 @@ QString XBinary::syntaxIdToString(SYNTAX syntax)
     QString sResult = tr("Unknown");
 
     switch (syntax) {
-        case SYNTAX_DEFAULT:
-            sResult = tr("Default");
-            break;
-        case SYNTAX_ATT:
-            sResult = QString("ATT");
-            break;
-        case SYNTAX_INTEL:
-            sResult = QString("INTEL");
-            break;
-        case SYNTAX_MASM:
-            sResult = QString("MASM");
-            break;
-        case SYNTAX_MOTOROLA:
-            sResult = QString("MOTOROLA");
-            break;
+        case SYNTAX_DEFAULT: sResult = tr("Default"); break;
+        case SYNTAX_ATT: sResult = QString("ATT"); break;
+        case SYNTAX_INTEL: sResult = QString("INTEL"); break;
+        case SYNTAX_MASM: sResult = QString("MASM"); break;
+        case SYNTAX_MOTOROLA: sResult = QString("MOTOROLA"); break;
     }
 
     return sResult;
@@ -7841,167 +7534,60 @@ QString XBinary::osNameIdToString(OSNAME osName)
     QString sResult = tr("Unknown");
 
     switch (osName) {
-        case OSNAME_AIX:
-            sResult = QString("AIX");
-            break;
-        case OSNAME_ALPINELINUX:
-            sResult = QString("Alpine Linux");
-            break;
-        case OSNAME_ANDROID:
-            sResult = QString("Android");
-            break;
-        case OSNAME_AROS:
-            sResult = QString("Amiga Research OS");
-            break;
-        case OSNAME_ASPLINUX:
-            sResult = QString("ASPLinux");
-            break;
-        case OSNAME_BORLANDOSSERVICES:
-            sResult = QString("Borland OS Services");
-            break;
-        case OSNAME_BRIDGEOS:
-            sResult = QString("bridgeOS");
-            break;
-        case OSNAME_DEBIANLINUX:
-            sResult = QString("Debian Linux");
-            break;
-        case OSNAME_FENIXOS:
-            sResult = QString("FenixOS");
-            break;
-        case OSNAME_FREEBSD:
-            sResult = QString("FreeBSD");
-            break;
-        case OSNAME_GENTOOLINUX:
-            sResult = QString("Gentoo Linux");
-            break;
-        case OSNAME_HANCOMLINUX:
-            sResult = QString("Hancom Linux");
-            break;
-        case OSNAME_HPUX:
-            sResult = QString("Hewlett-Packard HP-UX");
-            break;
-        case OSNAME_IOS:
-            sResult = QString("iOS");
-            break;
-        case OSNAME_IPADOS:
-            sResult = QString("iPadOS");
-            break;
-        case OSNAME_IPHONEOS:
-            sResult = QString("iPhone OS");
-            break;
-        case OSNAME_IRIX:
-            sResult = QString("IRIX");
-            break;
-        case OSNAME_LINUX:
-            sResult = QString("Linux");
-            break;
-        case OSNAME_MACOS:
-            sResult = QString("macOS");
-            break;
-        case OSNAME_MAC_OS:
-            sResult = QString("Mac OS");
-            break;
-        case OSNAME_MAC_OS_X:
-            sResult = QString("Mac OS X");
-            break;
-        case OSNAME_MANDRAKELINUX:
-            sResult = QString("Mandrake Linux");
-            break;
-        case OSNAME_MCLINUX:
-            sResult = QString("mClinux");
-            break;
-        case OSNAME_MINIX:
-            sResult = QString("Minix");
-            break;
-        case OSNAME_MODESTO:
-            sResult = QString("Novell Modesto");
-            break;
-        case OSNAME_MSDOS:
-            sResult = QString("MS-DOS");
-            break;
-        case OSNAME_NETBSD:
-            sResult = QString("NetBSD");
-            break;
-        case OSNAME_NSK:
-            sResult = QString("Hewlett-Packard Non-Stop Kernel");
-            break;
-        case OSNAME_OPENBSD:
-            sResult = QString("OpenBSD");
-            break;
-        case OSNAME_OPENVMS:
-            sResult = QString("Open VMS");
-            break;
-        case OSNAME_OPENVOS:
-            sResult = QString("Open VOS");
-            break;
-        case OSNAME_OS2:
-            sResult = QString("OS/2");
-            break;
-        case OSNAME_OS_X:
-            sResult = QString("OS X");
-            break;
-        case OSNAME_POSIX:
-            sResult = QString("Posix");
-            break;
-        case OSNAME_QNX:
-            sResult = QString("QNX");
-            break;
-        case OSNAME_REDHATLINUX:
-            sResult = QString("Red Hat Linux");
-            break;
-        case OSNAME_SOLARIS:
-            sResult = QString("Sun Solaris");
-            break;
-        case OSNAME_STARTOSLINUX:
-            sResult = QString("StartOS Linux");
-            break;
-        case OSNAME_SUNOS:
-            sResult = QString("SunOS");
-            break;
-        case OSNAME_SUSELINUX:
-            sResult = QString("SUSE Linux");
-            break;
-        case OSNAME_SYLLABLE:
-            sResult = QString("Syllable");
-            break;
-        case OSNAME_TRU64:
-            sResult = QString("Compaq TRU64 UNIX");
-            break;
-        case OSNAME_TURBOLINUX:
-            sResult = QString("Turbolinux");
-            break;
-        case OSNAME_TVOS:
-            sResult = QString("tvOS");
-            break;
-        case OSNAME_UBUNTULINUX:
-            sResult = QString("Ubuntu Linux");
-            break;
-        case OSNAME_UEFI:
-            sResult = QString("UEFI");
-            break;
-        case OSNAME_UNIX:
-            sResult = QString("Unix");
-            break;
-        case OSNAME_VINELINUX:
-            sResult = QString("Vine Linux");
-            break;
-        case OSNAME_WATCHOS:
-            sResult = QString("watchOS");
-            break;
-        case OSNAME_WINDOWS:
-            sResult = QString("Windows");
-            break;
-        case OSNAME_WINDOWSCE:
-            sResult = QString("Windows CE");
-            break;
-        case OSNAME_WINDRIVERLINUX:
-            sResult = QString("Wind River Linux");
-            break;
-        case OSNAME_XBOX:
-            sResult = QString("XBOX");
-            break;
-        default:
-            sResult = tr("Unknown");
+        case OSNAME_AIX: sResult = QString("AIX"); break;
+        case OSNAME_ALPINELINUX: sResult = QString("Alpine Linux"); break;
+        case OSNAME_ANDROID: sResult = QString("Android"); break;
+        case OSNAME_AROS: sResult = QString("Amiga Research OS"); break;
+        case OSNAME_ASPLINUX: sResult = QString("ASPLinux"); break;
+        case OSNAME_BORLANDOSSERVICES: sResult = QString("Borland OS Services"); break;
+        case OSNAME_BRIDGEOS: sResult = QString("bridgeOS"); break;
+        case OSNAME_DEBIANLINUX: sResult = QString("Debian Linux"); break;
+        case OSNAME_FENIXOS: sResult = QString("FenixOS"); break;
+        case OSNAME_FREEBSD: sResult = QString("FreeBSD"); break;
+        case OSNAME_GENTOOLINUX: sResult = QString("Gentoo Linux"); break;
+        case OSNAME_HANCOMLINUX: sResult = QString("Hancom Linux"); break;
+        case OSNAME_HPUX: sResult = QString("Hewlett-Packard HP-UX"); break;
+        case OSNAME_IOS: sResult = QString("iOS"); break;
+        case OSNAME_IPADOS: sResult = QString("iPadOS"); break;
+        case OSNAME_IPHONEOS: sResult = QString("iPhone OS"); break;
+        case OSNAME_IRIX: sResult = QString("IRIX"); break;
+        case OSNAME_LINUX: sResult = QString("Linux"); break;
+        case OSNAME_MACOS: sResult = QString("macOS"); break;
+        case OSNAME_MAC_OS: sResult = QString("Mac OS"); break;
+        case OSNAME_MAC_OS_X: sResult = QString("Mac OS X"); break;
+        case OSNAME_MANDRAKELINUX: sResult = QString("Mandrake Linux"); break;
+        case OSNAME_MCLINUX: sResult = QString("mClinux"); break;
+        case OSNAME_MINIX: sResult = QString("Minix"); break;
+        case OSNAME_MODESTO: sResult = QString("Novell Modesto"); break;
+        case OSNAME_MSDOS: sResult = QString("MS-DOS"); break;
+        case OSNAME_NETBSD: sResult = QString("NetBSD"); break;
+        case OSNAME_NSK: sResult = QString("Hewlett-Packard Non-Stop Kernel"); break;
+        case OSNAME_OPENBSD: sResult = QString("OpenBSD"); break;
+        case OSNAME_OPENVMS: sResult = QString("Open VMS"); break;
+        case OSNAME_OPENVOS: sResult = QString("Open VOS"); break;
+        case OSNAME_OS2: sResult = QString("OS/2"); break;
+        case OSNAME_OS_X: sResult = QString("OS X"); break;
+        case OSNAME_POSIX: sResult = QString("Posix"); break;
+        case OSNAME_QNX: sResult = QString("QNX"); break;
+        case OSNAME_REDHATLINUX: sResult = QString("Red Hat Linux"); break;
+        case OSNAME_SOLARIS: sResult = QString("Sun Solaris"); break;
+        case OSNAME_STARTOSLINUX: sResult = QString("StartOS Linux"); break;
+        case OSNAME_SUNOS: sResult = QString("SunOS"); break;
+        case OSNAME_SUSELINUX: sResult = QString("SUSE Linux"); break;
+        case OSNAME_SYLLABLE: sResult = QString("Syllable"); break;
+        case OSNAME_TRU64: sResult = QString("Compaq TRU64 UNIX"); break;
+        case OSNAME_TURBOLINUX: sResult = QString("Turbolinux"); break;
+        case OSNAME_TVOS: sResult = QString("tvOS"); break;
+        case OSNAME_UBUNTULINUX: sResult = QString("Ubuntu Linux"); break;
+        case OSNAME_UEFI: sResult = QString("UEFI"); break;
+        case OSNAME_UNIX: sResult = QString("Unix"); break;
+        case OSNAME_VINELINUX: sResult = QString("Vine Linux"); break;
+        case OSNAME_WATCHOS: sResult = QString("watchOS"); break;
+        case OSNAME_WINDOWS: sResult = QString("Windows"); break;
+        case OSNAME_WINDOWSCE: sResult = QString("Windows CE"); break;
+        case OSNAME_WINDRIVERLINUX: sResult = QString("Wind River Linux"); break;
+        case OSNAME_XBOX: sResult = QString("XBOX"); break;
+        default: sResult = tr("Unknown");
     }
 
     return sResult;
@@ -8884,21 +8470,11 @@ QString XBinary::recordFilePartIdToString(FILEPART id)
 
     switch (id) {
         // TODO more
-        case FILEPART_UNKNOWN:
-            sResult = tr("Unknown");
-            break;
-        case FILEPART_HEADER:
-            sResult = tr("Header");
-            break;
-        case FILEPART_OVERLAY:
-            sResult = tr("Overlay");
-            break;
-        case FILEPART_ARCHIVERECORD:
-            sResult = tr("Archive record");
-            break;
-        case FILEPART_RESOURCE:
-            sResult = tr("Resource");
-            break;
+        case FILEPART_UNKNOWN: sResult = tr("Unknown"); break;
+        case FILEPART_HEADER: sResult = tr("Header"); break;
+        case FILEPART_OVERLAY: sResult = tr("Overlay"); break;
+        case FILEPART_ARCHIVERECORD: sResult = tr("Archive record"); break;
+        case FILEPART_RESOURCE: sResult = tr("Resource"); break;
     }
 
     return sResult;
@@ -9538,9 +9114,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 _nAddress = offsetToAddress(pMemoryMap, nOffset);
 
                 switch (pListSignatureRecords->at(i).nSizeOfAddr) {
-                    case 1:
-                        _nAddress += 1 + read_int8(nOffset);
-                        break;
+                    case 1: _nAddress += 1 + read_int8(nOffset); break;
 
                     case 2:
                         if (pMemoryMap->fileType == FT_COM) {
@@ -9566,9 +9140,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
 
             case XBinary::ST_ADDRESS:
                 switch (pListSignatureRecords->at(i).nSizeOfAddr) {
-                    case 1:
-                        _nAddress = read_uint8(nOffset);
-                        break;
+                    case 1: _nAddress = read_uint8(nOffset); break;
 
                     case 2:
                         _nAddress = read_uint16(nOffset);  // TODO mb BE<->LE

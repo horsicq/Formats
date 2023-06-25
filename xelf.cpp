@@ -4379,24 +4379,12 @@ QString XELF::typeIdToString(qint32 nType)
     QString sResult = tr("Unknown");
 
     switch (nType) {
-        case TYPE_UNKNOWN:
-            sResult = tr("Unknown");
-            break;
-        case TYPE_REL:
-            sResult = QString("REL");
-            break;
-        case TYPE_EXEC:
-            sResult = QString("EXEC");
-            break;
-        case TYPE_DYN:
-            sResult = QString("DYN");
-            break;
-        case TYPE_CORE:
-            sResult = QString("CORE");
-            break;
-        case TYPE_NUM:
-            sResult = QString("NUM");
-            break;
+        case TYPE_UNKNOWN: sResult = tr("Unknown"); break;
+        case TYPE_REL: sResult = QString("REL"); break;
+        case TYPE_EXEC: sResult = QString("EXEC"); break;
+        case TYPE_DYN: sResult = QString("DYN"); break;
+        case TYPE_CORE: sResult = QString("CORE"); break;
+        case TYPE_NUM: sResult = QString("NUM"); break;
     }
 
     return sResult;

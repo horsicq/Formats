@@ -1387,12 +1387,8 @@ QString XLE::typeIdToString(qint32 nType)
     QString sResult = tr("Unknown");
 
     switch (nType) {
-        case TYPE_UNKNOWN:
-            sResult = tr("Unknown");
-            break;
-        case TYPE_EXE:
-            sResult = QString("EXE");
-            break;
+        case TYPE_UNKNOWN: sResult = tr("Unknown"); break;
+        case TYPE_EXE: sResult = QString("EXE"); break;
     }
 
     return sResult;

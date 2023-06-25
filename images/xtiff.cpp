@@ -320,44 +320,19 @@ qint32 XTiff::getBaseTypeSize(quint16 nType)
     qint32 nResult = 0;
 
     switch (nType) {
-        case 1:
-            nResult = 1;
-            break;
-        case 2:
-            nResult = 1;
-            break;
-        case 3:
-            nResult = 2;
-            break;
-        case 4:
-            nResult = 4;
-            break;
-        case 5:
-            nResult = 8;
-            break;
-        case 6:
-            nResult = 1;
-            break;
-        case 7:
-            nResult = 1;
-            break;
-        case 8:
-            nResult = 2;
-            break;
-        case 9:
-            nResult = 4;
-            break;
-        case 10:
-            nResult = 8;
-            break;
-        case 11:
-            nResult = 4;
-            break;
-        case 12:
-            nResult = 8;
-            break;
-        default:
-            nResult = 0;
+        case 1: nResult = 1; break;
+        case 2: nResult = 1; break;
+        case 3: nResult = 2; break;
+        case 4: nResult = 4; break;
+        case 5: nResult = 8; break;
+        case 6: nResult = 1; break;
+        case 7: nResult = 1; break;
+        case 8: nResult = 2; break;
+        case 9: nResult = 4; break;
+        case 10: nResult = 8; break;
+        case 11: nResult = 4; break;
+        case 12: nResult = 8; break;
+        default: nResult = 0;
     }
 
     return nResult;

@@ -175,12 +175,8 @@ QString XCOM::typeIdToString(qint32 nType)
     QString sResult = tr("Unknown");
 
     switch (nType) {
-        case TYPE_UNKNOWN:
-            sResult = tr("Unknown");
-            break;
-        case TYPE_EXECUTABLE:
-            sResult = QString("EXE");
-            break;
+        case TYPE_UNKNOWN: sResult = tr("Unknown"); break;
+        case TYPE_EXECUTABLE: sResult = QString("EXE"); break;
     }
 
     return sResult;
