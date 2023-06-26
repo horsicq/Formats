@@ -1361,7 +1361,7 @@ XMACH::FVM_LIBRARY_RECORD XMACH::getFvmLibraryRecordByName(QString sName, QList<
     return result;
 }
 
-bool XMACH::isFvmLibraryRecordNamePresent(QString sName)
+bool XMACH::isFvmLibraryRecordNamePresent(const QString &sName)
 {
     QList<FVM_LIBRARY_RECORD> listLibraryRecords = getFvmLibraryRecords();
 
