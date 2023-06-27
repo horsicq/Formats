@@ -903,7 +903,7 @@ public:
     static bool removeDirectory(const QString &sDirectoryName);
     static bool isDirectoryEmpty(QString sDirectoryName);
 
-    static QByteArray readFile(QString sFileName);
+    static QByteArray readFile(const QString &sFileName);
 
     static void _copyMemory(char *pDest, char *pSource, qint64 nSize);
     static void _zeroMemory(char *pDest, qint64 nSize);

@@ -3304,7 +3304,7 @@ bool XBinary::isDirectoryEmpty(QString sDirectoryName)
     return (QDir(sDirectoryName).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() == 0);
 }
 
-QByteArray XBinary::readFile(QString sFileName)
+QByteArray XBinary::readFile(const QString &sFileName)
 {
     QByteArray baResult;
 
