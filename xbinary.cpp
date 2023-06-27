@@ -7517,14 +7517,10 @@ XBinary::SYNTAX XBinary::stringToSyntaxId(QString sString)
 {
     SYNTAX result = SYNTAX_DEFAULT;
 
-    if (sString == "ATT")
-        result = SYNTAX_ATT;
-    else if (sString == "INTEL")
-        result = SYNTAX_INTEL;
-    else if (sString == "MASM")
-        result = SYNTAX_MASM;
-    else if (sString == "MOTOROLA")
-        result = SYNTAX_MOTOROLA;
+    if (sString == "ATT") result = SYNTAX_ATT;
+    else if (sString == "INTEL") result = SYNTAX_INTEL;
+    else if (sString == "MASM") result = SYNTAX_MASM;
+    else if (sString == "MOTOROLA") result = SYNTAX_MOTOROLA;
 
     return result;
 }
@@ -8358,31 +8354,23 @@ QString XBinary::bytesCountToString(quint64 nValue, quint64 nBase)
     } else if (nValue < (nBase * nBase)) {
         sValue = QString::number((double)nValue / nBase, 'f', 2);
 
-        if (nBase == 1024)
-            sUnit = tr("KiB");
-        else
-            tr("kB");
+        if (nBase == 1024) sUnit = tr("KiB");
+        else tr("kB");
     } else if (nValue < (nBase * nBase * nBase)) {
         sValue = QString::number((double)nValue / (nBase * nBase), 'f', 2);
 
-        if (nBase == 1024)
-            sUnit = tr("MiB");
-        else
-            tr("MB");
+        if (nBase == 1024) sUnit = tr("MiB");
+        else tr("MB");
     } else if (nValue < (nBase * nBase * nBase * nBase)) {
         sValue = QString::number((double)nValue / (nBase * nBase * nBase), 'f', 2);
 
-        if (nBase == 1024)
-            sUnit = tr("GiB");
-        else
-            tr("GB");
+        if (nBase == 1024) sUnit = tr("GiB");
+        else tr("GB");
     } else {
         sValue = QString::number((double)nValue / (nBase * nBase * nBase * nBase), 'f', 2);
 
-        if (nBase == 1024)
-            sUnit = tr("TiB");
-        else
-            tr("TB");
+        if (nBase == 1024) sUnit = tr("TiB");
+        else tr("TB");
     }
 
     sResult = QString("%1 %2").arg(sValue, sUnit);
@@ -8645,14 +8633,10 @@ quint64 XBinary::xVariantToQword(XVARIANT xvariant)
 {
     quint64 nResult = 0;
 
-    if (xvariant.mode == MODE_8)
-        nResult = xvariant.var.v_uint8;
-    else if (xvariant.mode == MODE_16)
-        nResult = xvariant.var.v_uint16;
-    else if (xvariant.mode == MODE_32)
-        nResult = xvariant.var.v_uint32;
-    else if (xvariant.mode == MODE_64)
-        nResult = xvariant.var.v_uint64;
+    if (xvariant.mode == MODE_8) nResult = xvariant.var.v_uint8;
+    else if (xvariant.mode == MODE_16) nResult = xvariant.var.v_uint16;
+    else if (xvariant.mode == MODE_32) nResult = xvariant.var.v_uint32;
+    else if (xvariant.mode == MODE_64) nResult = xvariant.var.v_uint64;
 
     return nResult;
 }
@@ -8755,16 +8739,11 @@ bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
     bool bResult = false;
 
     if ((value1.mode == value2.mode) && (value1.bIsBigEndian == value2.bIsBigEndian)) {
-        if (value1.mode == MODE_BIT)
-            bResult = (value1.var.v_bool == value2.var.v_bool);
-        else if (value1.mode == MODE_8)
-            bResult = (value1.var.v_uint8 == value2.var.v_uint8);
-        else if (value1.mode == MODE_16)
-            bResult = (value1.var.v_uint16 == value2.var.v_uint16);
-        else if (value1.mode == MODE_32)
-            bResult = (value1.var.v_uint32 == value2.var.v_uint32);
-        else if (value1.mode == MODE_64)
-            bResult = (value1.var.v_uint64 == value2.var.v_uint64);
+        if (value1.mode == MODE_BIT) bResult = (value1.var.v_bool == value2.var.v_bool);
+        else if (value1.mode == MODE_8) bResult = (value1.var.v_uint8 == value2.var.v_uint8);
+        else if (value1.mode == MODE_16) bResult = (value1.var.v_uint16 == value2.var.v_uint16);
+        else if (value1.mode == MODE_32) bResult = (value1.var.v_uint32 == value2.var.v_uint32);
+        else if (value1.mode == MODE_64) bResult = (value1.var.v_uint64 == value2.var.v_uint64);
         else if (value1.mode == MODE_128) {
             bResult = (value1.var.v_uint128.high == value2.var.v_uint128.high) && (value1.var.v_uint128.low == value2.var.v_uint128.low);
         }

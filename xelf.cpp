@@ -4134,36 +4134,21 @@ XBinary::OSINFO XELF::getOsInfo()
 
     quint8 osabi = getIdent_osabi();
 
-    if (osabi == XELF_DEF::ELFOSABI_HPUX)
-        result.osName = OSNAME_HPUX;
-    else if (osabi == XELF_DEF::ELFOSABI_NETBSD)
-        result.osName = OSNAME_NETBSD;
-    else if (osabi == XELF_DEF::ELFOSABI_LINUX)
-        result.osName = OSNAME_LINUX;
-    else if (osabi == XELF_DEF::ELFOSABI_SOLARIS)
-        result.osName = OSNAME_SOLARIS;
-    else if (osabi == XELF_DEF::ELFOSABI_AIX)
-        result.osName = OSNAME_AIX;
-    else if (osabi == XELF_DEF::ELFOSABI_IRIX)
-        result.osName = OSNAME_IRIX;
-    else if (osabi == XELF_DEF::ELFOSABI_FREEBSD)
-        result.osName = OSNAME_FREEBSD;
-    else if (osabi == XELF_DEF::ELFOSABI_TRU64)
-        result.osName = OSNAME_TRU64;
-    else if (osabi == XELF_DEF::ELFOSABI_MODESTO)
-        result.osName = OSNAME_MODESTO;
-    else if (osabi == XELF_DEF::ELFOSABI_OPENBSD)
-        result.osName = OSNAME_OPENBSD;
-    else if (osabi == XELF_DEF::ELFOSABI_OPENVMS)
-        result.osName = OSNAME_OPENVMS;
-    else if (osabi == XELF_DEF::ELFOSABI_NSK)
-        result.osName = OSNAME_NSK;
-    else if (osabi == XELF_DEF::ELFOSABI_AROS)
-        result.osName = OSNAME_AROS;
-    else if (osabi == XELF_DEF::ELFOSABI_FENIXOS)
-        result.osName = OSNAME_FENIXOS;
-    else if (osabi == XELF_DEF::ELFOSABI_OPENVOS)
-        result.osName = OSNAME_OPENVOS;
+    if (osabi == XELF_DEF::ELFOSABI_HPUX) result.osName = OSNAME_HPUX;
+    else if (osabi == XELF_DEF::ELFOSABI_NETBSD) result.osName = OSNAME_NETBSD;
+    else if (osabi == XELF_DEF::ELFOSABI_LINUX) result.osName = OSNAME_LINUX;
+    else if (osabi == XELF_DEF::ELFOSABI_SOLARIS) result.osName = OSNAME_SOLARIS;
+    else if (osabi == XELF_DEF::ELFOSABI_AIX) result.osName = OSNAME_AIX;
+    else if (osabi == XELF_DEF::ELFOSABI_IRIX) result.osName = OSNAME_IRIX;
+    else if (osabi == XELF_DEF::ELFOSABI_FREEBSD) result.osName = OSNAME_FREEBSD;
+    else if (osabi == XELF_DEF::ELFOSABI_TRU64) result.osName = OSNAME_TRU64;
+    else if (osabi == XELF_DEF::ELFOSABI_MODESTO) result.osName = OSNAME_MODESTO;
+    else if (osabi == XELF_DEF::ELFOSABI_OPENBSD) result.osName = OSNAME_OPENBSD;
+    else if (osabi == XELF_DEF::ELFOSABI_OPENVMS) result.osName = OSNAME_OPENVMS;
+    else if (osabi == XELF_DEF::ELFOSABI_NSK) result.osName = OSNAME_NSK;
+    else if (osabi == XELF_DEF::ELFOSABI_AROS) result.osName = OSNAME_AROS;
+    else if (osabi == XELF_DEF::ELFOSABI_FENIXOS) result.osName = OSNAME_FENIXOS;
+    else if (osabi == XELF_DEF::ELFOSABI_OPENVOS) result.osName = OSNAME_OPENVOS;
 
     QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
     QList<XELF_DEF::Elf_Shdr> listSectionHeaders = getElf_ShdrList();
@@ -4336,14 +4321,10 @@ XBinary::OSINFO XELF::getOsInfo()
         if (result.osName == OSNAME_UNIX) {
             if (nOS == 0) result.osName = OSNAME_LINUX;
             //            else if (nOS==1)  result.osName=OSNAME_GNU;
-            else if (nOS == 2)
-                result.osName = OSNAME_SOLARIS;
-            else if (nOS == 3)
-                result.osName = OSNAME_FREEBSD;
-            else if (nOS == 4)
-                result.osName = OSNAME_NETBSD;
-            else if (nOS == 5)
-                result.osName = OSNAME_SYLLABLE;
+            else if (nOS == 2) result.osName = OSNAME_SOLARIS;
+            else if (nOS == 3) result.osName = OSNAME_FREEBSD;
+            else if (nOS == 4) result.osName = OSNAME_NETBSD;
+            else if (nOS == 5) result.osName = OSNAME_SYLLABLE;
         }
 
         QString sABI = QString("ABI: %1.%2.%3").arg(QString::number(nMajor), QString::number(nMinor), QString::number(nSubMinor));
@@ -4352,14 +4333,10 @@ XBinary::OSINFO XELF::getOsInfo()
     }
 
     if (result.osName == OSNAME_UNIX) {
-        if (isSectionNamePresent(".note.android.ident", &listSectionRecords))
-            result.osName = OSNAME_ANDROID;
-        else if (isSectionNamePresent(".note.minix.ident", &listSectionRecords))
-            result.osName = OSNAME_MINIX;
-        else if (isSectionNamePresent(".note.netbsd.ident", &listSectionRecords))
-            result.osName = OSNAME_NETBSD;
-        else if (isSectionNamePresent(".note.openbsd.ident", &listSectionRecords))
-            result.osName = OSNAME_OPENBSD;
+        if (isSectionNamePresent(".note.android.ident", &listSectionRecords)) result.osName = OSNAME_ANDROID;
+        else if (isSectionNamePresent(".note.minix.ident", &listSectionRecords)) result.osName = OSNAME_MINIX;
+        else if (isSectionNamePresent(".note.netbsd.ident", &listSectionRecords)) result.osName = OSNAME_NETBSD;
+        else if (isSectionNamePresent(".note.openbsd.ident", &listSectionRecords)) result.osName = OSNAME_OPENBSD;
     }
 
     if (result.osName == OSNAME_UNIX) {
