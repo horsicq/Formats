@@ -4397,7 +4397,7 @@ QList<XELF_DEF::Elf_Shdr> XELF::_getSections(QList<XELF_DEF::Elf_Shdr> *pListSec
     return listResult;
 }
 
-QList<XELF::SECTION_RECORD> XELF::_getSectionRecords(QList<SECTION_RECORD> *pListSectionRecords, QString sName)
+QList<XELF::SECTION_RECORD> XELF::_getSectionRecords(QList<SECTION_RECORD> *pListSectionRecords, const QString &sName)
 {
     QList<SECTION_RECORD> listResult;
 

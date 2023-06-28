@@ -416,7 +416,7 @@ public:
 
     QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType);
     QList<XELF_DEF::Elf_Shdr> _getSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, quint32 nType);
-    QList<SECTION_RECORD> _getSectionRecords(QList<SECTION_RECORD> *pListSectionRecords, QString sName);
+    QList<SECTION_RECORD> _getSectionRecords(QList<SECTION_RECORD> *pListSectionRecords, const QString &sName);
 
     QList<DATASET> getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
     QList<DATASET> getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
