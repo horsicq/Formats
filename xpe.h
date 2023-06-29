@@ -1150,7 +1150,7 @@ public:
     virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap, SYMBOL_TYPE symbolType = SYMBOL_TYPE_ALL);
 
     virtual bool removeDosStub();
-    virtual bool addDosStub(QString sFileName);
+    virtual bool addDosStub(const QString &sFileName);
     bool _resizeDosStubSize(qint64 nNewStubSize);
 
     XPE_DEF::WIN_CERT_RECORD read_WIN_CERT_RECORD(qint64 nOffset);

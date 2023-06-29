@@ -1015,7 +1015,7 @@ public:
 
     bool moveMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize);
 
-    static bool dumpToFile(QString sFileName, const char *pData, qint64 nDataSize);
+    static bool dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize);
     bool dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pProcessData = nullptr);
 
     QSet<FT> getFileTypes(bool bExtra = false);

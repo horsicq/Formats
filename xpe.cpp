@@ -7495,7 +7495,7 @@ bool XPE::removeDosStub()
     return _resizeDosStubSize(0);
 }
 
-bool XPE::addDosStub(QString sFileName)
+bool XPE::addDosStub(const QString &sFileName)
 {
     bool bResult = false;
 

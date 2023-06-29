@@ -4330,7 +4330,7 @@ bool XBinary::moveMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize)
     return bResult;
 }
 
-bool XBinary::dumpToFile(QString sFileName, const char *pData, qint64 nDataSize)
+bool XBinary::dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize)
 {
     bool bResult = false;
 
