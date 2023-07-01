@@ -373,7 +373,7 @@ public:
 
     bool isNotePresent(quint32 nType, const QString &sName);
     static bool isNotePresent(QList<NOTE> *pListNotes, quint32 nType, QString sName);
-    static NOTE getNote(QList<NOTE> *pListNotes, quint32 nType, QString sName);
+    static NOTE getNote(QList<NOTE> *pListNotes, quint32 nType, const QString &sName);
 
     QList<TAG_STRUCT> getTagStructs();
     QList<TAG_STRUCT> getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, _MEMORY_MAP *pMemoryMap);

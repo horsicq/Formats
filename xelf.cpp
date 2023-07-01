@@ -3231,7 +3231,7 @@ bool XELF::isNotePresent(QList<NOTE> *pListNotes, quint32 nType, QString sName)
     return bResult;
 }
 
-XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType, QString sName)
+XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType, const QString &sName)
 {
     NOTE result = {};
 
