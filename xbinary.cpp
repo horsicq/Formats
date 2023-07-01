@@ -3745,7 +3745,7 @@ qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress
         qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
         for (qint32 i = 0; i < nNumberOfRecords; i++) {
-            if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nAddress != -1) && (pMemoryMap->listRecords.at(i).nOffset != -1)) {
+            if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nAddress != (XADDR)-1) && (pMemoryMap->listRecords.at(i).nOffset != -1)) {
                 if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) && (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize)) {
                     nResult = (nAddress - pMemoryMap->listRecords.at(i).nAddress) + pMemoryMap->listRecords.at(i).nOffset;
                     break;
@@ -3820,7 +3820,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByAddress(XBinary::_MEMORY_MAP *
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nAddress != -1)) {
+        if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nAddress != (XADDR)-1)) {
             if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) && (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize)) {
                 result = pMemoryMap->listRecords.at(i);
                 break;
@@ -3837,7 +3837,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByRelAddress(XBinary::_MEMORY_MA
 
     XADDR nAddress = relAddressToAddress(pMemoryMap, nRelAddress);
 
-    if (nAddress != -1) {
+    if (nAddress != (XADDR)-1) {
         result = getMemoryRecordByAddress(pMemoryMap, nAddress);
     }
 
@@ -3903,7 +3903,7 @@ QString XBinary::getLoadSectionNameByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOff
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nOffset != -1) && (pMemoryMap->listRecords.at(i).nAddress != -1)) {
+        if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nOffset != -1) && (pMemoryMap->listRecords.at(i).nAddress != (XADDR)-1)) {
             if ((pMemoryMap->listRecords.at(i).nOffset <= nOffset) && (nOffset < pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize)) {
                 sResult = pMemoryMap->listRecords.at(i).sName;
                 break;
@@ -4224,8 +4224,8 @@ XADDR XBinary::getLowestAddress(XBinary::_MEMORY_MAP *pMemoryMap)
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (pMemoryMap->listRecords.at(i).nAddress != -1) {
-            if (nResult == -1) {
+        if (pMemoryMap->listRecords.at(i).nAddress != (XADDR)-1) {
+            if (nResult == (XADDR)-1) {
                 nResult = pMemoryMap->listRecords.at(i).nAddress;
             }
 
@@ -8977,6 +8977,7 @@ QList<XBinary::HREGION> XBinary::getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *
 
 QList<XBinary::HREGION> XBinary::getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pMemoryMap)
     Q_UNUSED(pPdStruct)
 
     QList<XBinary::HREGION> listResult;

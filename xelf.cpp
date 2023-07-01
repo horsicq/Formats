@@ -5150,6 +5150,9 @@ qint64 XELF::getFileFormatSize()
 
 QList<XBinary::HREGION> XELF::getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pMemoryMap)
+    Q_UNUSED(pPdStruct)
+
     QList<XBinary::HREGION> listResult;
 
     return listResult;
