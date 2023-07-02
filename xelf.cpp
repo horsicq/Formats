@@ -3215,7 +3215,7 @@ bool XELF::isNotePresent(quint32 nType, const QString &sName)
     return isNotePresent(&listNotes, nType, sName);
 }
 
-bool XELF::isNotePresent(QList<NOTE> *pListNotes, quint32 nType, QString sName)
+bool XELF::isNotePresent(QList<NOTE> *pListNotes, quint32 nType, const QString &sName)
 {
     bool bResult = false;
 
