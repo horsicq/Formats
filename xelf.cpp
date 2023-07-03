@@ -4032,7 +4032,7 @@ qint32 XELF::getSectionNumber(const QString &sSectionName)
     return getSectionNumber(sSectionName, &listSectionRecords);
 }
 
-qint32 XELF::getSectionNumber(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
+qint32 XELF::getSectionNumber(const QString &sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
 {
     qint32 nResult = -1;
 

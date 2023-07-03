@@ -404,7 +404,7 @@ public:
     bool isSectionNamePresent(const QString &sSectionName);
     static bool isSectionNamePresent(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
     qint32 getSectionNumber(const QString &sSectionName);  // TODO pdStruct
-    static qint32 getSectionNumber(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
+    static qint32 getSectionNumber(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
     static SECTION_RECORD getSectionRecord(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     virtual MODE getMode();
