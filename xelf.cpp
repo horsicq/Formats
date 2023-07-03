@@ -4004,7 +4004,7 @@ bool XELF::isSectionNamePresent(const QString &sSectionName)
     return isSectionNamePresent(sSectionName, &listSectionRecords);
 }
 
-bool XELF::isSectionNamePresent(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
+bool XELF::isSectionNamePresent(const QString &sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
 {
     bool bResult = false;
 
