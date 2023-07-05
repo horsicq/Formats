@@ -488,7 +488,7 @@ public:
     quint16 getSection_NumberOfLinenumbers(quint32 nNumber);
     quint32 getSection_Characteristics(quint32 nNumber);
 
-    void setSection_NameAsString(quint32 nNumber, QString sName);
+    void setSection_NameAsString(quint32 nNumber, const QString &sName);
     void setSection_VirtualSize(quint32 nNumber, quint32 nValue);
     void setSection_VirtualAddress(quint32 nNumber, quint32 nValue);
     void setSection_SizeOfRawData(quint32 nNumber, quint32 nValue);
