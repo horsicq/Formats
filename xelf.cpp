@@ -4048,7 +4048,7 @@ qint32 XELF::getSectionNumber(const QString &sSectionName, QList<XELF::SECTION_R
     return nResult;
 }
 
-XELF::SECTION_RECORD XELF::getSectionRecord(QString sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
+XELF::SECTION_RECORD XELF::getSectionRecord(const QString &sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
 {
     SECTION_RECORD result = {};
 
