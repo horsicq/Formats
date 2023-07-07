@@ -71,7 +71,7 @@ public:
     static bool isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static bool isSigned(const QString &sFileName);
     static XBinary::OFFSETSIZE getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
-    static XBinary::OFFSETSIZE getSignOffsetSize(QString sFileName);
+    static XBinary::OFFSETSIZE getSignOffsetSize(const QString &sFileName);
     static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                           XBinary::SYMBOL_TYPE symBolType = XBinary::SYMBOL_TYPE_ALL);
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, bool bExtra = false);

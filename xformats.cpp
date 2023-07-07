@@ -606,7 +606,7 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice 
     return osResult;
 }
 
-XBinary::OFFSETSIZE XFormats::getSignOffsetSize(QString sFileName)
+XBinary::OFFSETSIZE XFormats::getSignOffsetSize(const QString &sFileName)
 {
     XBinary::OFFSETSIZE result = {};
 
