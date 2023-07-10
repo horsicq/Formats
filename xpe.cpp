@@ -2630,7 +2630,7 @@ bool XPE::isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 
     return bResult;
 }
 
-bool XPE::isImportLibraryPresent(QString sLibrary)
+bool XPE::isImportLibraryPresent(const QString &sLibrary)
 {
     QList<IMPORT_HEADER> listImportHeaders = getImports();
 
