@@ -352,7 +352,7 @@ public:
     void setLoadDylinker(QString sValue);
 
     QString getRPath();
-    void setRPath(QString sValue);
+    void setRPath(const QString &sValue);
 
     XMACH_DEF::symtab_command get_symtab_command();
 

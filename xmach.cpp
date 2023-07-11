@@ -2215,7 +2215,7 @@ QString XMACH::getRPath()
     return sResult;
 }
 
-void XMACH::setRPath(QString sValue)
+void XMACH::setRPath(const QString &sValue)
 {
     qint64 nOffset = getCommandRecordOffset(XMACH_DEF::S_LC_RPATH, 0);
 
