@@ -3256,21 +3256,23 @@ bool XBinary::moveFileToDirectory(QString sSrcFileName, QString sDestDirectory)
     return moveFile(sSrcFileName, sDestDirectory + QDir::separator() + fi.fileName());
 }
 
-QString XBinary::convertFileNameSymbols(QString sFileName)
+QString XBinary::convertFileNameSymbols(const QString &sFileName)
 {
-    sFileName = sFileName.replace("/", "_");
-    sFileName = sFileName.replace("\\", "_");
-    sFileName = sFileName.replace("?", "_");
-    sFileName = sFileName.replace("*", "_");
-    sFileName = sFileName.replace("\"", "_");
-    sFileName = sFileName.replace("<", "_");
-    sFileName = sFileName.replace(">", "_");
-    sFileName = sFileName.replace("|", "_");
-    sFileName = sFileName.replace(":", "_");
-    sFileName = sFileName.replace("\n", "_");
-    sFileName = sFileName.replace("\r", "_");
+    QString sResult = sFileName;
 
-    return sFileName;
+    sResult = sResult.replace("/", "_");
+    sResult = sResult.replace("\\", "_");
+    sResult = sResult.replace("?", "_");
+    sResult = sResult.replace("*", "_");
+    sResult = sResult.replace("\"", "_");
+    sResult = sResult.replace("<", "_");
+    sResult = sResult.replace(">", "_");
+    sResult = sResult.replace("|", "_");
+    sResult = sResult.replace(":", "_");
+    sResult = sResult.replace("\n", "_");
+    sResult = sResult.replace("\r", "_");
+
+    return sResult;
 }
 
 QString XBinary::getBaseFileName(QString sFileName)

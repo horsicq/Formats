@@ -896,7 +896,7 @@ public:
     static bool copyFile(const QString &sSrcFileName, QString sDestFileName);
     static bool moveFile(const QString &sSrcFileName, QString sDestFileName);
     static bool moveFileToDirectory(QString sSrcFileName, QString sDestDirectory);
-    static QString convertFileNameSymbols(QString sFileName);
+    static QString convertFileNameSymbols(const QString &sFileName);
     static QString getBaseFileName(QString sFileName);
     static bool createDirectory(const QString &sDirectoryName);
     static bool isDirectoryExists(QString sDirectoryName);
