@@ -880,7 +880,7 @@ Qt::GlobalColor XFormats::typeToColor(QString sType)
     return result;
 }
 
-QString XFormats::translateType(QString sType)
+QString XFormats::translateType(const QString &sType)
 {
     QString sResult;
 

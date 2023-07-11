@@ -95,7 +95,7 @@ public:
     static bool savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> *pListResourceRecords, XPE::RESOURCE_RECORD resourceRecord, QString sFileName);
 
     static Qt::GlobalColor typeToColor(QString sType);
-    static QString translateType(QString sType);
+    static QString translateType(const QString &sType);
 
 private:
     static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, bool bExtra = false);
