@@ -3755,7 +3755,7 @@ qint64 XPE::getResourceGroupIdOffset(quint32 nID, QList<XPE::RESOURCE_RECORD> *p
     return nResult;
 }
 
-bool XPE::isResourceNamePresent(QString sName)
+bool XPE::isResourceNamePresent(const QString &sName)
 {
     QList<RESOURCE_RECORD> listResources = getResources();
 
