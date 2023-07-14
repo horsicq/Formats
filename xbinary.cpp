@@ -5826,7 +5826,7 @@ quint32 *XBinary::_getCRC32Table_EDB88320()
     return (quint32 *)_crc32_EDB88320_tab;
 }
 
-quint32 XBinary::_getCRC32(QString sFileName)
+quint32 XBinary::_getCRC32(const QString &sFileName)
 {
     quint32 nResult = 0;
 

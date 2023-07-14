@@ -1108,7 +1108,7 @@ public:
     static void _createCRC32Table(quint32 *pCRCTable, quint32 nPoly = 0xEDB88320);
     static quint32 *_getCRC32Table_EDB88320();
 
-    static quint32 _getCRC32(QString sFileName);
+    static quint32 _getCRC32(const QString &sFileName);
     static quint32 _getCRC32(QIODevice *pDevice);
     static quint32 _getCRC32(char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable);
     static quint32 _getCRC32(QByteArray baData, quint32 nInit, quint32 *pCRCTable);
