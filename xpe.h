@@ -559,7 +559,7 @@ public:
     bool isImportLibraryPresent(const QString &sLibrary);
     static bool isImportLibraryPresent(const QString &sLibrary, QList<IMPORT_HEADER> *pListImportHeaders);
 
-    bool isImportLibraryPresentI(QString sLibrary);
+    bool isImportLibraryPresentI(const QString &sLibrary);
     static bool isImportLibraryPresentI(QString sLibrary, QList<IMPORT_HEADER> *pListImportHeaders);
 
     bool isImportFunctionPresentI(QString sLibrary, QString sFunction);
