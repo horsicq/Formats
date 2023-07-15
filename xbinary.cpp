@@ -8708,6 +8708,19 @@ quint8 XBinary::getByteFromDword(quint32 nValue, qint32 nIndex)
     return nResult;
 }
 
+quint8 XBinary::getByteFromWord(quint16 nValue, qint32 nIndex)
+{
+    quint8 nResult = 0;
+
+    if (nIndex < 2) {
+        nValue = nValue >> (nIndex * 8);
+
+        nResult = nValue & 0xFF;
+    }
+
+    return nResult;
+}
+
 quint64 XBinary::setDwordToQword(quint64 nInit, quint32 nValue, qint32 nIndex)
 {
     quint64 nResult = nInit;
@@ -8785,6 +8798,24 @@ quint32 XBinary::setByteToDword(quint32 nInit, quint8 nValue, qint32 nIndex)
     quint32 nResult = nInit;
 
     if (nIndex < 4) {
+        quint64 nFF = 0xFF;
+        quint64 _nValue = nValue;
+
+        nFF = nFF << (nIndex * 8);
+        _nValue = _nValue << (nIndex * 8);
+
+        nResult = nResult & (~nFF);
+        nResult = nResult | _nValue;
+    }
+
+    return nResult;
+}
+
+quint32 XBinary::setByteToWord(quint16 nInit, quint8 nValue, qint32 nIndex)
+{
+    quint32 nResult = nInit;
+
+    if (nIndex < 2) {
         quint64 nFF = 0xFF;
         quint64 _nValue = nValue;
 

@@ -1390,12 +1390,14 @@ public:
     static quint8 getByteFromQword(quint64 nValue, qint32 nIndex);
     static quint16 getWordFromDword(quint32 nValue, qint32 nIndex);
     static quint8 getByteFromDword(quint32 nValue, qint32 nIndex);
+    static quint8 getByteFromWord(quint16 nValue, qint32 nIndex);
 
     static quint64 setDwordToQword(quint64 nInit, quint32 nValue, qint32 nIndex);
     static quint64 setWordToQword(quint64 nInit, quint16 nValue, qint32 nIndex);
     static quint64 setByteToQword(quint64 nInit, quint8 nValue, qint32 nIndex);
     static quint32 setWordToDword(quint32 nInit, quint16 nValue, qint32 nIndex);
     static quint32 setByteToDword(quint32 nInit, quint8 nValue, qint32 nIndex);
+    static quint32 setByteToWord(quint16 nInit, quint8 nValue, qint32 nIndex);
 
     static bool isXVariantEqual(XVARIANT value1, XVARIANT value2);
 

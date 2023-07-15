@@ -853,25 +853,26 @@ bool XFormats::savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> 
     return bResult;
 }
 
-Qt::GlobalColor XFormats::typeToColor(QString sType)
+Qt::GlobalColor XFormats::typeToColor(const QString &sType)
 {
+    QString _sType = sType;
     Qt::GlobalColor result = Qt::transparent;
 
-    sType = sType.toLower();
+    _sType = _sType.toLower();
 
     // TODO more
-    if ((sType == "installer") || (sType == "sfx")) {
+    if ((_sType == "installer") || (_sType == "sfx")) {
         result = Qt::blue;
-    } else if ((sType == "protector") || (sType == "apk obfuscator") || (sType == "jar obfuscator") || (sType == ".net obfuscator") || (sType == ".net compressor") ||
-               (sType == "dongle protection") || (sType == "joiner") || (sType == "packer")) {
+    } else if ((_sType == "protector") || (_sType == "apk obfuscator") || (_sType == "jar obfuscator") || (_sType == ".net obfuscator") || (_sType == ".net compressor") ||
+               (_sType == "dongle protection") || (_sType == "joiner") || (_sType == "packer")) {
         result = Qt::red;
-    } else if ((sType == "pe tool") || (sType == "apk tool")) {
+    } else if ((_sType == "pe tool") || (_sType == "apk tool")) {
         result = Qt::green;
-    } else if ((sType == "operation system") || (sType == "virtual machine")) {
+    } else if ((_sType == "operation system") || (_sType == "virtual machine")) {
         result = Qt::darkYellow;
-    } else if (sType == "sign tool") {
+    } else if (_sType == "sign tool") {
         result = Qt::darkMagenta;
-    } else if (sType == "language") {
+    } else if (_sType == "language") {
         result = Qt::darkCyan;
     } else {
         result = Qt::transparent;

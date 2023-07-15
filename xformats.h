@@ -94,7 +94,7 @@ public:
     static bool saveAllPECursorsToDirectory(QIODevice *pDevice, QString sDirectoryName);
     static bool savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> *pListResourceRecords, XPE::RESOURCE_RECORD resourceRecord, QString sFileName);
 
-    static Qt::GlobalColor typeToColor(QString sType);
+    static Qt::GlobalColor typeToColor(const QString &sType);
     static QString translateType(const QString &sType);
 
 private:
