@@ -76,7 +76,7 @@ public:
                                                           XBinary::SYMBOL_TYPE symBolType = XBinary::SYMBOL_TYPE_ALL);
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, bool bExtra = false);
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra = false);
-    static QSet<XBinary::FT> getFileTypes(QString sFileName, bool bExtra = false);
+    static QSet<XBinary::FT> getFileTypes(const QString &sFileName, bool bExtra = false);
     static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData, bool bExtra = false);
     static XBinary::OSINFO getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static XBinary::FILEFORMATINFO getFileFormatInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
