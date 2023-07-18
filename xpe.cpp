@@ -1652,7 +1652,7 @@ quint32 XPE::getSection_Characteristics(quint32 nNumber, QList<XPE_DEF::IMAGE_SE
     return nResult;
 }
 
-bool XPE::isSectionNamePresent(QString sSectionName)
+bool XPE::isSectionNamePresent(const QString &sSectionName)
 {
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSectionHeaders = getSectionHeaders();
     QList<SECTION_RECORD> listSectionRecords = getSectionRecords(&listSectionHeaders);

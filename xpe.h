@@ -510,7 +510,7 @@ public:
     quint16 getSection_NumberOfLinenumbers(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
     quint32 getSection_Characteristics(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
 
-    bool isSectionNamePresent(QString sSectionName);
+    bool isSectionNamePresent(const QString &sSectionName);
     static bool isSectionNamePresent(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     static SECTION_RECORD getSectionRecordByName(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
