@@ -747,7 +747,7 @@ bool XFormats::saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDir
     return bResult;
 }
 
-bool XFormats::saveAllPECursorsToDirectory(QIODevice *pDevice, QString sDirectoryName)
+bool XFormats::saveAllPECursorsToDirectory(QIODevice *pDevice, const QString &sDirectoryName)
 {
     bool bResult = true;
 
