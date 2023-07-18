@@ -2660,7 +2660,7 @@ bool XPE::isImportLibraryPresentI(const QString &sLibrary)
     return isImportLibraryPresentI(sLibrary, &listImportHeaders);
 }
 
-bool XPE::isImportLibraryPresentI(QString sLibrary, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
+bool XPE::isImportLibraryPresentI(const QString &sLibrary, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
 {
     bool bResult = false;
 
