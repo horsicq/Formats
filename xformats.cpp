@@ -723,7 +723,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra)
     return _getFileTypes(pDevice, bExtra);
 }
 
-bool XFormats::saveAllPEIconsToDirectory(QIODevice *pDevice, QString sDirectoryName)
+bool XFormats::saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDirectoryName)
 {
     bool bResult = false;
 
