@@ -3093,7 +3093,7 @@ XBinary::VT XBinary::getValueType(quint64 nValue)
     return result;
 }
 
-QByteArray XBinary::getUnicodeString(QString sString, bool bIsBigEndian)
+QByteArray XBinary::getUnicodeString(const QString &sString, bool bIsBigEndian)
 {
     QByteArray baResult;
 
