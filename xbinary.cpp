@@ -8721,6 +8721,50 @@ quint8 XBinary::getByteFromWord(quint16 nValue, qint32 nIndex)
     return nResult;
 }
 
+bool XBinary::getBitFromByte(quint8 nValue, qint32 nIndex)
+{
+    bool bResult = false;
+
+    if (nIndex < 8) {
+        bResult = (nValue >> nIndex) & 0x1;
+    }
+
+    return bResult;
+}
+
+bool XBinary::getBitFromWord(quint16 nValue, qint32 nIndex)
+{
+    bool bResult = false;
+
+    if (nIndex < 16) {
+        bResult = (nValue >> nIndex) & 0x1;
+    }
+
+    return bResult;
+}
+
+bool XBinary::getBitFromDword(quint32 nValue, qint32 nIndex)
+{
+    bool bResult = false;
+
+    if (nIndex < 32) {
+        bResult = (nValue >> nIndex) & 0x1;
+    }
+
+    return bResult;
+}
+
+bool XBinary::getBitFromQWord(quint64 nValue, qint32 nIndex)
+{
+    bool bResult = false;
+
+    if (nIndex < 64) {
+        bResult = (nValue >> nIndex) & 0x1;
+    }
+
+    return bResult;
+}
+
 quint64 XBinary::setDwordToQword(quint64 nInit, quint32 nValue, qint32 nIndex)
 {
     quint64 nResult = nInit;
@@ -8780,8 +8824,8 @@ quint32 XBinary::setWordToDword(quint32 nInit, quint16 nValue, qint32 nIndex)
     quint32 nResult = nInit;
 
     if (nIndex < 2) {
-        quint64 nFF = 0xFFFF;
-        quint64 _nValue = nValue;
+        quint32 nFF = 0xFFFF;
+        quint32 _nValue = nValue;
 
         nFF = nFF << (nIndex * 16);
         _nValue = _nValue << (nIndex * 16);
@@ -8798,8 +8842,8 @@ quint32 XBinary::setByteToDword(quint32 nInit, quint8 nValue, qint32 nIndex)
     quint32 nResult = nInit;
 
     if (nIndex < 4) {
-        quint64 nFF = 0xFF;
-        quint64 _nValue = nValue;
+        quint32 nFF = 0xFF;
+        quint32 _nValue = nValue;
 
         nFF = nFF << (nIndex * 8);
         _nValue = _nValue << (nIndex * 8);
@@ -8811,16 +8855,88 @@ quint32 XBinary::setByteToDword(quint32 nInit, quint8 nValue, qint32 nIndex)
     return nResult;
 }
 
-quint32 XBinary::setByteToWord(quint16 nInit, quint8 nValue, qint32 nIndex)
+quint16 XBinary::setByteToWord(quint16 nInit, quint8 nValue, qint32 nIndex)
 {
-    quint32 nResult = nInit;
+    quint16 nResult = nInit;
 
     if (nIndex < 2) {
-        quint64 nFF = 0xFF;
-        quint64 _nValue = nValue;
+        quint16 nFF = 0xFF;
+        quint16 _nValue = nValue;
 
         nFF = nFF << (nIndex * 8);
         _nValue = _nValue << (nIndex * 8);
+
+        nResult = nResult & (~nFF);
+        nResult = nResult | _nValue;
+    }
+
+    return nResult;
+}
+
+quint8 XBinary::setBitToByte(quint8 nInit, bool bValue, qint32 nIndex)
+{
+    quint8 nResult = nInit;
+
+    if (nIndex < 8) {
+        quint8 nFF = 0x01;
+        quint8 _nValue = (quint8)bValue;
+
+        nFF = nFF << nIndex;
+        _nValue = _nValue << nIndex;
+
+        nResult = nResult & (~nFF);
+        nResult = nResult | _nValue;
+    }
+
+    return nResult;
+}
+
+quint16 XBinary::setBitToWord(quint16 nInit, bool bValue, qint32 nIndex)
+{
+    quint16 nResult = nInit;
+
+    if (nIndex < 16) {
+        quint16 nFF = 0x01;
+        quint16 _nValue = (quint16)bValue;
+
+        nFF = nFF << nIndex;
+        _nValue = _nValue << nIndex;
+
+        nResult = nResult & (~nFF);
+        nResult = nResult | _nValue;
+    }
+
+    return nResult;
+}
+
+quint32 XBinary::setBitToDword(quint32 nInit, bool bValue, qint32 nIndex)
+{
+    quint32 nResult = nInit;
+
+    if (nIndex < 32) {
+        quint32 nFF = 0x01;
+        quint32 _nValue = (quint32)bValue;
+
+        nFF = nFF << nIndex;
+        _nValue = _nValue << nIndex;
+
+        nResult = nResult & (~nFF);
+        nResult = nResult | _nValue;
+    }
+
+    return nResult;
+}
+
+quint64 XBinary::setBitToQword(quint64 nInit, bool bValue, qint32 nIndex)
+{
+    quint64 nResult = nInit;
+
+    if (nIndex < 64) {
+        quint64 nFF = 0x01;
+        quint64 _nValue = (quint64)bValue;
+
+        nFF = nFF << nIndex;
+        _nValue = _nValue << nIndex;
 
         nResult = nResult & (~nFF);
         nResult = nResult | _nValue;

@@ -3568,7 +3568,7 @@ void XPE::setFixedFileInfo_dwFileDateLS(quint32 nValue)
     }
 }
 
-QString XPE::getResourcesVersionValue(QString sKey)
+QString XPE::getResourcesVersionValue(const QString &sKey)
 {
     QList<RESOURCE_RECORD> listResourceRecords = getResources();
     RESOURCES_VERSION resVersion = getResourcesVersion(&listResourceRecords);
