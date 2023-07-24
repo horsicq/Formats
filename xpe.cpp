@@ -2676,7 +2676,7 @@ bool XPE::isImportLibraryPresentI(const QString &sLibrary, QList<XPE::IMPORT_HEA
     return bResult;
 }
 
-bool XPE::isImportFunctionPresentI(QString sLibrary, QString sFunction)
+bool XPE::isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction)
 {
     QList<IMPORT_HEADER> listImportHeaders = getImports();
 
