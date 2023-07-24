@@ -705,7 +705,7 @@ public:
 
     bool addImportSection(QMap<qint64, QString> *pMapIAT);
     bool addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QString> *pMapIAT);
-    bool addImportSection(QString sFileName, bool bIsImage, QMap<qint64, QString> *pMapIAT);
+    bool addImportSection(const QString &sFileName, bool bIsImage, QMap<qint64, QString> *pMapIAT);
 
     static QList<XPE::IMPORT_HEADER> mapIATToList(QMap<qint64, QString> *pMapIAT, bool bIs64);
 

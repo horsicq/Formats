@@ -4263,7 +4263,7 @@ bool XPE::addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QStri
     return bResult;
 }
 
-bool XPE::addImportSection(QString sFileName, bool bIsImage, QMap<qint64, QString> *pMapIAT)
+bool XPE::addImportSection(const QString &sFileName, bool bIsImage, QMap<qint64, QString> *pMapIAT)
 {
     bool bResult = false;
 

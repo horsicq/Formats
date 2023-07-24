@@ -279,7 +279,7 @@ public:
     XMACH_DEF::section _read_section(qint64 nOffset, bool bIsBigEndian);
     XMACH_DEF::section_64 _read_section_64(qint64 nOffset, bool bIsBigEndian);
 
-    void _setSection32_sectname(qint64 nOffset, QString sValue);
+    void _setSection32_sectname(qint64 nOffset, const QString &sValue);
     void _setSection32_segname(qint64 nOffset, QString sValue);
     void _setSection32_addr(qint64 nOffset, quint32 nValue);
     void _setSection32_size(qint64 nOffset, quint32 nValue);
