@@ -516,7 +516,7 @@ public:
     static SECTION_RECORD getSectionRecordByName(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     qint32 getSectionNumber(QString sSectionName);
-    static qint32 getSectionNumber(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
+    static qint32 getSectionNumber(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     static QString sectionCharacteristicToString(quint32 nValue);
 

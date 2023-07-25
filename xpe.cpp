@@ -1701,7 +1701,7 @@ qint32 XPE::getSectionNumber(QString sSectionName)
     return getSectionNumber(sSectionName, &listSectionRecords);
 }
 
-qint32 XPE::getSectionNumber(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords)
+qint32 XPE::getSectionNumber(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords)
 {
     qint32 nResult = -1;
 
