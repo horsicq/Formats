@@ -627,7 +627,7 @@ public:
     void setFixedFileInfo_dwFileDateLS(quint32 nValue);
 
     QString getResourcesVersionValue(const QString &sKey);
-    static QString getResourcesVersionValue(QString sKey, XPE::RESOURCES_VERSION *pResourcesVersion);
+    static QString getResourcesVersionValue(const QString &sKey, XPE::RESOURCES_VERSION *pResourcesVersion);
 
     quint32 getResourceIdByNumber(quint32 nNumber);
     quint32 getResourceIdByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);

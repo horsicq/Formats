@@ -3576,7 +3576,7 @@ QString XPE::getResourcesVersionValue(const QString &sKey)
     return getResourcesVersionValue(sKey, &resVersion);
 }
 
-QString XPE::getResourcesVersionValue(QString sKey, XPE::RESOURCES_VERSION *pResourcesVersion)
+QString XPE::getResourcesVersionValue(const QString &sKey, XPE::RESOURCES_VERSION *pResourcesVersion)
 {
     QString sResult;
 
