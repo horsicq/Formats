@@ -263,7 +263,8 @@ public:
         MODE_32,
         MODE_64,
         MODE_128,
-        MODE_256
+        MODE_256,
+        MODE_FREG
         // TODO more
     };
 
@@ -508,10 +509,10 @@ public:
         QByteArray baOriginal;
     };
 
-    struct XUINT128 {
-        quint64 low;
-        quint64 high;
-    };
+//    struct XUINT128 {
+//        quint64 low;
+//        quint64 high;
+//    };
 
     struct XVARIANT {
         MODE mode;
@@ -522,7 +523,8 @@ public:
             quint16 v_uint16;
             quint32 v_uint32;
             quint64 v_uint64;
-            XUINT128 v_uint128;
+            quint64 v_uint128[2];
+            quint8 v_freg[10];
             // mb TODO 256/512
         } var;
     };
@@ -752,6 +754,7 @@ public:
                                bool bIsBigEndian = false);  // TODO Check
 
     static quint64 _read_value(MODE mode, char *pData, bool bIsBigEndian = false);
+    // TODO read uin64, freg
 
     static void _write_uint8(char *pData, quint8 nValue);
     static void _write_int8(char *pData, qint8 nValue);
@@ -767,6 +770,7 @@ public:
                               bool bIsBigEndian = false);  // TODO Check
 
     static void _write_value(MODE mode, char *pData, quint64 nValue, bool bIsBigEndian = false);
+    // TODO write uin64, freg
 
     quint8 read_bcd_uint8(qint64 nOffset);
     quint16 read_bcd_uint16(qint64 nOffset, bool bIsBigEndian = false);
@@ -1380,8 +1384,9 @@ public:
     static XVARIANT getXVariant(quint16 nValue, bool bIsBigEndian = false);
     static XVARIANT getXVariant(quint32 nValue, bool bIsBigEndian = false);
     static XVARIANT getXVariant(quint64 nValue, bool bIsBigEndian = false);
-    static XVARIANT getXVariant(XUINT128 value, bool bIsBigEndian = false);
+    static XVARIANT getXVariant(quint64 nValue[2], bool bIsBigEndian = false);
     static XVARIANT getXVariant(quint64 nLow, quint64 nHigh, bool bIsBigEndian = false);
+    static XVARIANT getXVariant(quint8 nValue[10], bool bIsBigEndian = false);
 
     static quint64 xVariantToQword(XVARIANT xvariant);
 

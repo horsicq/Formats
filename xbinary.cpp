@@ -275,6 +275,7 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
         case MODE_64: sResult = tr("64-bit"); break;
         case MODE_128: sResult = tr("128-bit"); break;
         case MODE_256: sResult = tr("256-bit"); break;
+        case MODE_FREG: sResult = QString("freg"); break;
     }
 
     return sResult;
@@ -5029,13 +5030,17 @@ QString XBinary::xVariantToHex(XVARIANT value)
     } else if (value.mode == MODE_64) {
         sResult = valueToHex(value.var.v_uint64, value.bIsBigEndian);
     } else if (value.mode == MODE_128) {
-        QString sLow = valueToHex(value.var.v_uint128.low, value.bIsBigEndian);
-        QString sHigh = valueToHex(value.var.v_uint128.high, value.bIsBigEndian);
+        QString sLow = valueToHex(value.var.v_uint128[0], value.bIsBigEndian);
+        QString sHigh = valueToHex(value.var.v_uint128[1], value.bIsBigEndian);
 
         if (value.bIsBigEndian) {
             sResult = sLow + sHigh;
         } else {
             sResult = sHigh + sLow;
+        }
+    } else if (value.mode == MODE_FREG) {
+        for (int i = 0; i < 10; i++) {
+            sResult += valueToHex(value.var.v_freg[i]);
         }
     }
 
@@ -8608,13 +8613,14 @@ XBinary::XVARIANT XBinary::getXVariant(quint64 nValue, bool bIsBigEndian)
     return result;
 }
 
-XBinary::XVARIANT XBinary::getXVariant(XUINT128 value, bool bIsBigEndian)
+XBinary::XVARIANT XBinary::getXVariant(quint64 nValue[2], bool bIsBigEndian)
 {
     XVARIANT result = {};
 
     result.bIsBigEndian = bIsBigEndian;
     result.mode = MODE_128;
-    result.var.v_uint128 = value;
+    result.var.v_uint128[0] = nValue[0];
+    result.var.v_uint128[1] = nValue[1];
 
     return result;
 }
@@ -8625,8 +8631,22 @@ XBinary::XVARIANT XBinary::getXVariant(quint64 nLow, quint64 nHigh, bool bIsBigE
 
     result.bIsBigEndian = bIsBigEndian;
     result.mode = MODE_128;
-    result.var.v_uint128.high = nHigh;
-    result.var.v_uint128.low = nLow;
+    result.var.v_uint128[0] = nLow;
+    result.var.v_uint128[1] = nHigh;
+
+    return result;
+}
+
+XBinary::XVARIANT XBinary::getXVariant(quint8 nValue[10], bool bIsBigEndian)
+{
+    XVARIANT result = {};
+
+    result.bIsBigEndian = bIsBigEndian;
+    result.mode = MODE_FREG;
+
+    for (qint32 i = 0; i < 10; i++) {
+        result.var.v_freg[i] = nValue[i];
+    }
 
     return result;
 }
@@ -8956,7 +8976,16 @@ bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
         else if (value1.mode == MODE_32) bResult = (value1.var.v_uint32 == value2.var.v_uint32);
         else if (value1.mode == MODE_64) bResult = (value1.var.v_uint64 == value2.var.v_uint64);
         else if (value1.mode == MODE_128) {
-            bResult = (value1.var.v_uint128.high == value2.var.v_uint128.high) && (value1.var.v_uint128.low == value2.var.v_uint128.low);
+            bResult = (value1.var.v_uint128[0] == value2.var.v_uint128[0]) && (value1.var.v_uint128[1] == value2.var.v_uint128[1]);
+        } else if (value1.mode == MODE_FREG) {
+            bResult = true;
+
+            for (int i = 0; i < 10; i++) {
+                if (value1.var.v_freg[i] != value2.var.v_freg[i]) {
+                    bResult = false;
+                    break;
+                }
+            }
         }
     }
 

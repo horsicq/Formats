@@ -8189,7 +8189,7 @@ QString XPE::certTagToString(quint32 nTag)
     return sResult;
 }
 
-QString XPE::objectIdToString(QString sObjectID)
+QString XPE::objectIdToString(const QString &sObjectID)
 {
     QString sResult;
 

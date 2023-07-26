@@ -1175,7 +1175,7 @@ public:
     void getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize, CERT_RECORD *pCertRecord);
 
     static QString certTagToString(quint32 nTag);
-    static QString objectIdToString(QString sObjectID);
+    static QString objectIdToString(const QString &sObjectID);
 
     QString getCertHash(HASH hash);
 
