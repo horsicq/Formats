@@ -3302,7 +3302,7 @@ bool XBinary::removeDirectory(const QString &sDirectoryName)
     return dir.removeRecursively();
 }
 
-bool XBinary::isDirectoryEmpty(QString sDirectoryName)
+bool XBinary::isDirectoryEmpty(const QString &sDirectoryName)
 {
     return (QDir(sDirectoryName).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() == 0);
 }
