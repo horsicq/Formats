@@ -92,7 +92,7 @@ public:
 #endif
     static bool saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDirectoryName);
     static bool saveAllPECursorsToDirectory(QIODevice *pDevice, const QString &sDirectoryName);
-    static bool savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> *pListResourceRecords, XPE::RESOURCE_RECORD resourceRecord, QString sFileName);
+    static bool savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> *pListResourceRecords, XPE::RESOURCE_RECORD resourceRecord, const QString &sFileName);
 
     static Qt::GlobalColor typeToColor(const QString &sType);
     static QString translateType(const QString &sType);

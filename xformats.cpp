@@ -773,7 +773,7 @@ bool XFormats::saveAllPECursorsToDirectory(QIODevice *pDevice, const QString &sD
     return bResult;
 }
 
-bool XFormats::savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> *pListResourceRecords, XPE::RESOURCE_RECORD resourceRecord, QString sFileName)
+bool XFormats::savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> *pListResourceRecords, XPE::RESOURCE_RECORD resourceRecord, const QString &sFileName)
 {
     bool bResult = false;
 
