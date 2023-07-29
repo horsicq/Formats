@@ -202,7 +202,6 @@ qint64 XBinary::getSize(const QString &sFileName)
     qint64 nResult = 0;
 
     QFile file;
-
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
@@ -3189,7 +3188,6 @@ bool XBinary::createFile(const QString &sFileName, qint64 nFileSize)
     bool bResult = false;
 
     QFile file;
-
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadWrite)) {
@@ -5971,7 +5969,6 @@ double XBinary::getEntropy(QString sFileName)
     double dResult = 0;
 
     QFile file;
-
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {

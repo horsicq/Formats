@@ -135,7 +135,6 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(const QString &sFileName, bool bIsIm
     XBinary::_MEMORY_MAP result = {};
 
     QFile file;
-
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
@@ -611,7 +610,6 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(const QString &sFileName)
     XBinary::OFFSETSIZE result = {};
 
     QFile file;
-
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
@@ -992,7 +990,6 @@ QSet<XBinary::FT> XFormats::getFileTypes(const QString &sFileName, bool bExtra)
     QSet<XBinary::FT> stResult;
 
     QFile file;
-
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
@@ -1262,7 +1259,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
 }
 #endif
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QString sFileName, QComboBox *pComboBox)
+XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox)
 {
     XBinary::FT result = XBinary::FT_UNKNOWN;
 
