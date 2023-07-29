@@ -509,10 +509,10 @@ public:
         QByteArray baOriginal;
     };
 
-//    struct XUINT128 {
-//        quint64 low;
-//        quint64 high;
-//    };
+    //    struct XUINT128 {
+    //        quint64 low;
+    //        quint64 high;
+    //    };
 
     struct XVARIANT {
         MODE mode;
