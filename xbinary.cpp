@@ -4341,10 +4341,8 @@ bool XBinary::dumpToFile(const QString &sFileName, const char *pData, qint64 nDa
 
     if (file.open(QIODevice::ReadWrite)) {
         file.write(pData, nDataSize);
-
-        bResult = true;
-
         file.close();
+        bResult = true;
     }
 
     return bResult;
@@ -7163,9 +7161,7 @@ bool XBinary::writeToFile(QString sFileName, QByteArray baData)
 
     if (file.open(QIODevice::ReadWrite)) {
         file.resize(0);
-
         file.write(baData.data(), baData.size());
-
         file.close();
         bResult = true;
     }
@@ -7183,7 +7179,6 @@ bool XBinary::writeToFile(QString sFileName, QIODevice *pDevice)
 
         if (file.open(QIODevice::ReadWrite)) {
             bResult = copyDeviceMemory(pDevice, 0, &file, 0, pDevice->size(), READWRITE_BUFFER_SIZE);
-
             file.close();
         }
     }
@@ -7201,7 +7196,6 @@ bool XBinary::appendToFile(QString sFileName, QString sString)
     if (file.open(QIODevice::ReadWrite | QIODevice::Append)) {
         sString += "\r\n";  // TODO Linux
         file.write(sString.toUtf8());
-
         file.close();
         bResult = true;
     }
@@ -7218,7 +7212,6 @@ bool XBinary::clearFile(QString sFileName)
 
     if (file.open(QIODevice::ReadWrite)) {
         file.resize(0);
-
         file.close();
         bResult = true;
     }

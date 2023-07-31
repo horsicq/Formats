@@ -1909,7 +1909,7 @@ quint32 XMACH::getNumberOfSections(QList<XMACH::COMMAND_RECORD> *pListCommandRec
     return nResult;
 }
 
-bool XMACH::isSectionNamePresent(QString sName)
+bool XMACH::isSectionNamePresent(const QString &sName)
 {
     QList<SECTION_RECORD> listSections = getSectionRecords();
 

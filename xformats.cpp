@@ -626,7 +626,6 @@ bool XFormats::isSigned(const QString &sFileName)
     bool bResult = false;
 
     QFile file;
-
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
