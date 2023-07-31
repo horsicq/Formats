@@ -1272,7 +1272,7 @@ XMACH::LIBRARY_RECORD XMACH::getLibraryRecordByName(const QString &sName, QList<
     return result;
 }
 
-bool XMACH::isLibraryRecordNamePresent(QString sName)
+bool XMACH::isLibraryRecordNamePresent(const QString &sName)
 {
     QList<LIBRARY_RECORD> listLibraryRecords = getLibraryRecords();
 
