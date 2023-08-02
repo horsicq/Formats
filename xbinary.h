@@ -703,7 +703,7 @@ public:
     qint32 read_int24(qint64 nOffset, bool bIsBigEndian = false);
 
     qint64 write_ansiString(qint64 nOffset, const QString &sString);
-    void write_ansiStringFix(qint64 nOffset, qint64 nSize, QString sString);
+    void write_ansiStringFix(qint64 nOffset, qint64 nSize, const QString &sString);
     // TODO write unicodestring
 
     QString read_ansiString(qint64 nOffset, qint64 nMaxSize = 256);

@@ -1207,11 +1207,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra)
 #ifdef QT_GUI_LIB
 XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 3, 0)
-    const QSignalBlocker block(pComboBox);
-#else
     const bool bBlocked1 = pComboBox->blockSignals(true);
-#endif
 
     QList<XBinary::FT> listFileTypes;
 
@@ -1250,9 +1246,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
         }
     }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 3, 0)
     pComboBox->blockSignals(bBlocked1);
-#endif
 
     return (XBinary::FT)(pComboBox->currentData().toUInt());
 }
@@ -1277,11 +1271,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, const QString &s
 #ifdef QT_GUI_LIB
 bool XFormats::setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 3, 0)
-    const QSignalBlocker blocker(pComboBox);
-#else
     const bool bBlocked1 = pComboBox->blockSignals(true);
-#endif
 
     bool bResult = bIsBigEndian;
 
@@ -1294,9 +1284,7 @@ bool XFormats::setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian)
         pComboBox->setCurrentIndex(1);
     }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 3, 0)
     pComboBox->blockSignals(bBlocked1);
-#endif
 
     return bResult;
 }

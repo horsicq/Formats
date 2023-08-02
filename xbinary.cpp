@@ -1046,17 +1046,18 @@ qint64 XBinary::write_ansiString(qint64 nOffset, const QString &sString)
     return write_array(nOffset, sString.toLatin1().data(), sString.length() + 1);
 }
 
-void XBinary::write_ansiStringFix(qint64 nOffset, qint64 nSize, QString sString)
+void XBinary::write_ansiStringFix(qint64 nOffset, qint64 nSize, const QString &sString)
 {
+    QString _sString = sString;
     char *pBuffer = new char[nSize + 1];  // mb TODO Check
 
     _zeroMemory(pBuffer, nSize + 1);
 
-    if (sString.size() > nSize) {
-        sString.resize(nSize);
+    if (_sString.size() > nSize) {
+        _sString.resize(nSize);
     }
 
-    _copyMemory(pBuffer, sString.toLatin1().data(), sString.size());
+    _copyMemory(pBuffer, _sString.toLatin1().data(), _sString.size());
 
     XBinary::write_array(nOffset, pBuffer, nSize);
 
