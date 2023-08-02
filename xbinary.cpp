@@ -767,7 +767,7 @@ QString XBinary::regExp(QString sRegExp, QString sString, qint32 nIndex)
     return sResult;
 }
 
-bool XBinary::isRegExpPresent(QString sRegExp, QString sString)
+bool XBinary::isRegExpPresent(const QString &sRegExp, QString sString)
 {
     return (regExp(sRegExp, sString, 0) != "");
 }
