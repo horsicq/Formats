@@ -640,7 +640,7 @@ public:
     quint32 getResourceTypeByNumber(quint32 nNumber);
     quint32 getResourceTypeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
-    qint64 getResourceNameOffset(QString sName);
+    qint64 getResourceNameOffset(const QString &sName);
     qint64 getResourceNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     qint64 getResourceGroupNameOffset(QString sName);
     qint64 getResourceGroupNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);

@@ -3686,7 +3686,7 @@ quint32 XPE::getResourceTypeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD
     return nResult;
 }
 
-qint64 XPE::getResourceNameOffset(QString sName)
+qint64 XPE::getResourceNameOffset(const QString &sName)
 {
     QList<RESOURCE_RECORD> listResources = getResources();
 

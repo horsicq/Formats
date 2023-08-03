@@ -1473,8 +1473,8 @@ protected:
     static qint64 _calculateRawSize(_MEMORY_MAP *pMemoryMap);
 
 signals:
-    void errorMessage(QString sErrorMessage);
-    void infoMessage(QString sInfoMessage);
+    void errorMessage(const QString &sErrorMessage);
+    void infoMessage(const QString &sInfoMessage);
 
 private:
     QIODevice *g_pDevice;
