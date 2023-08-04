@@ -322,7 +322,7 @@ public:
 
     static QList<QString> getSectionNames(QList<SECTION_RECORD> *pListSectionRecords);
 
-    bool isSegmentNamePresent(QString sName);
+    bool isSegmentNamePresent(const QString &sName);
     static bool isSegmentNamePresent(QString sName, QList<SEGMENT_RECORD> *pListSegmentRecords);
 
     static qint32 getSegmentNumber(QString sName, QList<SEGMENT_RECORD> *pListSegmentRecords);

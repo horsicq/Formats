@@ -2015,7 +2015,7 @@ QList<QString> XMACH::getSectionNames(QList<SECTION_RECORD> *pListSectionRecords
     return listResult;
 }
 
-bool XMACH::isSegmentNamePresent(QString sName)
+bool XMACH::isSegmentNamePresent(const QString &sName)
 {
     QList<SEGMENT_RECORD> listSegmentRecords = getSegmentRecords();
 
