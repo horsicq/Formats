@@ -3110,7 +3110,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, QString sName2, QList<
     return result;
 }
 
-XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+XPE::RESOURCE_RECORD XPE::getResourceRecord(const QString &sName1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     RESOURCE_RECORD result = {};
 
@@ -3131,7 +3131,7 @@ XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, quint32 nID2, QList<
     return result;
 }
 
-XPE::RESOURCE_RECORD XPE::getResourceRecord(QString sName1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+XPE::RESOURCE_RECORD XPE::getResourceRecord(const QString &sName1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     RESOURCE_RECORD result = {};
 

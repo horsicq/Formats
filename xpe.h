@@ -578,8 +578,8 @@ public:
 
     static RESOURCE_RECORD getResourceRecord(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
     static RESOURCE_RECORD getResourceRecord(quint32 nID1, QString sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
-    static RESOURCE_RECORD getResourceRecord(QString sName1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
-    static RESOURCE_RECORD getResourceRecord(QString sName1, QString sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
+    static RESOURCE_RECORD getResourceRecord(const QString &sName1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
+    static RESOURCE_RECORD getResourceRecord(const QString &sName1, QString sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
 
     static QList<RESOURCE_RECORD> getResourceRecords(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
 
