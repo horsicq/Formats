@@ -1660,7 +1660,7 @@ bool XPE::isSectionNamePresent(const QString &sSectionName)
     return isSectionNamePresent(sSectionName, &listSectionRecords);
 }
 
-bool XPE::isSectionNamePresent(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords)
+bool XPE::isSectionNamePresent(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords)
 {
     bool bResult = false;
 

@@ -511,7 +511,7 @@ public:
     quint32 getSection_Characteristics(quint32 nNumber, QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
 
     bool isSectionNamePresent(const QString &sSectionName);
-    static bool isSectionNamePresent(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
+    static bool isSectionNamePresent(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     static SECTION_RECORD getSectionRecordByName(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
