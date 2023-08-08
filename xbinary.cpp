@@ -472,6 +472,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
     switch (fileType) {
         case FT_UNKNOWN: sResult = tr("Unknown"); break;
         case FT_REGION: sResult = tr("Region"); break;
+        case FT_PROCESS: sResult = tr("Process"); break;
         case FT_BINARY: sResult = QString("Binary"); break;
         case FT_BINARY16: sResult = QString("Binary16"); break;
         case FT_BINARY32: sResult = QString("Binary32"); break;
@@ -743,7 +744,7 @@ void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames, 
     }
 }
 
-QString XBinary::regExp(QString sRegExp, QString sString, qint32 nIndex)
+QString XBinary::regExp(const QString &sRegExp, const QString &sString, qint32 nIndex)
 {
     QString sResult;
 #if (QT_VERSION_MAJOR < 5)

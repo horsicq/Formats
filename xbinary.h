@@ -190,6 +190,7 @@ public:
     enum FT {
         FT_UNKNOWN = 0,
         FT_REGION,  // For Memory regions
+        FT_PROCESS,
         FT_BINARY,
         FT_BINARY16,
         FT_BINARY32,
@@ -674,7 +675,7 @@ public:
     static void findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames);
     static void findFiles(QString sDirectoryName, QList<QString> *pListFileNames, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct = nullptr);
 
-    static QString regExp(QString sRegExp, QString sString, qint32 nIndex);
+    static QString regExp(const QString &sRegExp, const QString &sString, qint32 nIndex);
     static bool isRegExpPresent(const QString &sRegExp, const QString &sString);
     qint64 read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize);
     QByteArray read_array(qint64 nOffset, qint64 nSize);
