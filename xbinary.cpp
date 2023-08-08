@@ -708,7 +708,7 @@ void XBinary::findFiles(const QString &sDirectoryName, QList<QString> *pListFile
     }
 }
 
-void XBinary::findFiles(QString sDirectoryName, QList<QString> *pListFileNames, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct)
+void XBinary::findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct)
 {
     qint32 _nFreeIndex = 0;
 

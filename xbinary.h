@@ -673,7 +673,7 @@ public:
 
     static void findFiles(const QString &sDirectoryName, FFOPTIONS *pFFOption, qint32 nLevel = 0);
     static void findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames);
-    static void findFiles(QString sDirectoryName, QList<QString> *pListFileNames, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct = nullptr);
+    static void findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct = nullptr);
 
     static QString regExp(const QString &sRegExp, const QString &sString, qint32 nIndex);
     static bool isRegExpPresent(const QString &sRegExp, const QString &sString);
