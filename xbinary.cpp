@@ -2106,7 +2106,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, QString sString, 
     return nResult;
 }
 
-qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, QString sString, bool bIsBigEndian, PDSTRUCT *pPdStruct)
+qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, const QString &sString, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = -1;
     // TODO optimize
