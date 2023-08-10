@@ -22,9 +22,9 @@
 #define XFORMATS_H
 
 #include "xbinary.h"
-#include "xbmp.h"
 #include "xcom.h"
 #include "xelf.h"
+#include "xbmp.h"
 #include "xgif.h"
 #include "xicon.h"
 #include "xjpeg.h"

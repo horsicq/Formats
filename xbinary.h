@@ -715,7 +715,7 @@ public:
     QString _read_utf8String(char *pData, qint64 nMaxSize);
     QString _read_utf8String(qint64 nOffset, char *pData, qint32 nDataSize, qint32 nDataOffset);
 
-    QString read_codePageString(qint64 nOffset, qint64 nMaxByteSize = 256, QString sCodePage = "System");
+    QString read_codePageString(qint64 nOffset, qint64 nMaxByteSize = 256, const QString &sCodePage = "System");
 
     bool isUnicodeStringLatin(qint64 nOffset, qint64 nMaxSize = 256, bool bIsBigEndian = false);
 
