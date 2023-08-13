@@ -898,7 +898,7 @@ public:
     static bool createFile(const QString &sFileName, qint64 nFileSize = 0);
     static bool isFileExists(const QString &sFileName, bool bTryToOpen = false);
     static bool removeFile(const QString &sFileName);
-    static bool copyFile(const QString &sSrcFileName, QString sDestFileName);
+    static bool copyFile(const QString &sSrcFileName, const QString &sDestFileName);
     static bool moveFile(const QString &sSrcFileName, QString sDestFileName);
     static bool moveFileToDirectory(QString sSrcFileName, QString sDestDirectory);
     static QString convertFileNameSymbols(const QString &sFileName);
