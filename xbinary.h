@@ -904,7 +904,7 @@ public:
     static QString convertFileNameSymbols(const QString &sFileName);
     static QString getBaseFileName(const QString &sFileName);
     static bool createDirectory(const QString &sDirectoryName);
-    static bool isDirectoryExists(QString sDirectoryName);
+    static bool isDirectoryExists(const QString &sDirectoryName);
     static bool removeDirectory(const QString &sDirectoryName);
     static bool isDirectoryEmpty(const QString &sDirectoryName);
 

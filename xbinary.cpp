@@ -3288,7 +3288,7 @@ bool XBinary::createDirectory(const QString &sDirectoryName)
     return QDir().mkpath(sDirectoryName);
 }
 
-bool XBinary::isDirectoryExists(QString sDirectoryName)
+bool XBinary::isDirectoryExists(const QString &sDirectoryName)
 {
     QFileInfo fi(sDirectoryName);
 
