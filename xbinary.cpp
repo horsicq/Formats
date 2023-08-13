@@ -3276,7 +3276,7 @@ QString XBinary::convertFileNameSymbols(const QString &sFileName)
     return sResult;
 }
 
-QString XBinary::getBaseFileName(QString sFileName)
+QString XBinary::getBaseFileName(const QString &sFileName)
 {
     QFileInfo fi(sFileName);
 
