@@ -3235,7 +3235,7 @@ bool XBinary::copyFile(const QString &sSrcFileName, const QString &sDestFileName
     return QFile::copy(sSrcFileName, sDestFileName);
 }
 
-bool XBinary::moveFile(const QString &sSrcFileName, QString sDestFileName)
+bool XBinary::moveFile(const QString &sSrcFileName, const QString &sDestFileName)
 {
     bool bResult = false;
 
