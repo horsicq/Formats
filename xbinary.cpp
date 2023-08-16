@@ -5084,7 +5084,7 @@ bool XBinary::checkString_word(const QString &sValue)
     return bResult;
 }
 
-bool XBinary::checkString_dword(QString sValue)
+bool XBinary::checkString_dword(const QString &sValue)
 {
     bool bResult = false;
 

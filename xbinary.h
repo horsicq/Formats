@@ -1056,7 +1056,7 @@ public:
 
     static bool checkString_byte(const QString &sValue);
     static bool checkString_word(const QString &sValue);
-    static bool checkString_dword(QString sValue);
+    static bool checkString_dword(const QString &sValue);
     static bool checkString_qword(QString sValue);
     static bool checkString_uint8(QString sValue);
     static bool checkString_int8(QString sValue);
