@@ -5075,7 +5075,7 @@ bool XBinary::checkString_byte(const QString &sValue)
     return bResult;
 }
 
-bool XBinary::checkString_word(QString sValue)
+bool XBinary::checkString_word(const QString &sValue)
 {
     bool bResult = false;
 
