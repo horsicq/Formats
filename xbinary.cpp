@@ -4140,7 +4140,7 @@ bool XBinary::_compareByteArrayWithSignature(QByteArray baData, const QString &s
     return bResult;
 }
 
-QString XBinary::_createSignature(QString sSignature1, QString sSignature2)
+QString XBinary::_createSignature(const QString &sSignature1, QString sSignature2)
 {
     QString sResult;
 
