@@ -4640,7 +4640,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(QIODevice *pDevice, bool bExtra)
     return _binary.getFileTypes(bExtra);
 }
 
-QSet<XBinary::FT> XBinary::getFileTypes(QString sFileName, bool bExtra)
+QSet<XBinary::FT> XBinary::getFileTypes(const QString &sFileName, bool bExtra)
 {
     QSet<XBinary::FT> result;
 
