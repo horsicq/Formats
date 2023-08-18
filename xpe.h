@@ -513,7 +513,7 @@ public:
     bool isSectionNamePresent(const QString &sSectionName);
     static bool isSectionNamePresent(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
-    static SECTION_RECORD getSectionRecordByName(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
+    static SECTION_RECORD getSectionRecordByName(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     qint32 getSectionNumber(QString sSectionName);
     static qint32 getSectionNumber(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);

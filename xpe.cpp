@@ -1676,7 +1676,7 @@ bool XPE::isSectionNamePresent(const QString &sSectionName, QList<SECTION_RECORD
     return bResult;
 }
 
-XPE::SECTION_RECORD XPE::getSectionRecordByName(QString sSectionName, QList<SECTION_RECORD> *pListSectionRecords)
+XPE::SECTION_RECORD XPE::getSectionRecordByName(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords)
 {
     SECTION_RECORD result = {};
 
