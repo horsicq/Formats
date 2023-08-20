@@ -2683,7 +2683,7 @@ bool XPE::isImportFunctionPresentI(const QString &sLibrary, const QString &sFunc
     return isImportFunctionPresentI(sLibrary, sFunction, &listImportHeaders);
 }
 
-bool XPE::isImportFunctionPresentI(const QString &sLibrary, QString sFunction, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
+bool XPE::isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
 {
     bool bResult = false;
 
