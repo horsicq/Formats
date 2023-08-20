@@ -3177,12 +3177,12 @@ bool XPE::isResourcePresent(quint32 nID1, const QString &sName2, QList<XPE::RESO
     return (getResourceRecord(nID1, sName2, pListResourceRecords).nSize);
 }
 
-bool XPE::isResourcePresent(QString sName1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+bool XPE::isResourcePresent(const QString &sName1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     return (getResourceRecord(sName1, nID2, pListResourceRecords).nSize);
 }
 
-bool XPE::isResourcePresent(QString sName1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+bool XPE::isResourcePresent(const QString &sName1, const QString &sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     return (getResourceRecord(sName1, sName2, pListResourceRecords).nSize);
 }
