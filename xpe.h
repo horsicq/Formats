@@ -584,7 +584,7 @@ public:
     static QList<RESOURCE_RECORD> getResourceRecords(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
 
     static bool isResourcePresent(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
-    static bool isResourcePresent(quint32 nID1, QString sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
+    static bool isResourcePresent(quint32 nID1, const QString &sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
     static bool isResourcePresent(QString sName1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
     static bool isResourcePresent(QString sName1, QString sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
 

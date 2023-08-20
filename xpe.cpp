@@ -3172,7 +3172,7 @@ bool XPE::isResourcePresent(quint32 nID1, quint32 nID2, QList<XPE::RESOURCE_RECO
     return (getResourceRecord(nID1, nID2, pListResourceRecords).nSize);
 }
 
-bool XPE::isResourcePresent(quint32 nID1, QString sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+bool XPE::isResourcePresent(quint32 nID1, const QString &sName2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     return (getResourceRecord(nID1, sName2, pListResourceRecords).nSize);
 }
