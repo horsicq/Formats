@@ -1149,7 +1149,7 @@ public:
     static bool is32(_MEMORY_MAP *pMemoryMap);
     static bool is64(_MEMORY_MAP *pMemoryMap);
 
-    void setVersion(QString sVersion);
+    void setVersion(const QString &sVersion);
     virtual QString getVersion();
     virtual bool isEncrypted();
 

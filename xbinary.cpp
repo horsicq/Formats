@@ -6279,7 +6279,7 @@ bool XBinary::is64(XBinary::_MEMORY_MAP *pMemoryMap)
     return (pMemoryMap->mode == MODE_64);
 }
 
-void XBinary::setVersion(QString sVersion)
+void XBinary::setVersion(const QString &sVersion)
 {
     g_sVersion = sVersion;
 }
