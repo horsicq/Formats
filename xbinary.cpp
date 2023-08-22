@@ -4159,7 +4159,7 @@ QString XBinary::_createSignature(const QString &sSignature1, QString sSignature
     return sResult;
 }
 
-bool XBinary::compareSignatureOnAddress(QString sSignature, XADDR nAddress)
+bool XBinary::compareSignatureOnAddress(const QString &sSignature, XADDR nAddress)
 {
     XBinary::_MEMORY_MAP memoryMap = getMemoryMap();
 

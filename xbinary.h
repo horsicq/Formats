@@ -1012,7 +1012,7 @@ public:
     static bool _compareByteArrayWithSignature(QByteArray baData, const QString &sSignature);
     static QString _createSignature(const QString &sSignature1, QString sSignature2);
 
-    bool compareSignatureOnAddress(QString sSignature, XADDR nAddress);
+    bool compareSignatureOnAddress(const QString &sSignature, XADDR nAddress);
     bool compareSignatureOnAddress(_MEMORY_MAP *pMemoryMap, QString sSignature, XADDR nAddress);
 
     bool compareEntryPoint(const QString &sSignature, qint64 nOffset = 0);
