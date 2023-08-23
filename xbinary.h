@@ -1073,7 +1073,7 @@ public:
     static QString getSpaces(qint32 nNumberOfSpaces);
 
     static QString getUnpackedFileName(QIODevice *pDevice, bool bShort = false);
-    static QString getUnpackedFileName(QString sFileName);
+    static QString getUnpackedFileName(const QString &sFileName);
     static QString getDumpFileName(QIODevice *pDevice);
     static QString getDumpFileName(const QString &sFileName);
     static QString getBackupFileName(QIODevice *pDevice);
