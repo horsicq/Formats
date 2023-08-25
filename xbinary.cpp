@@ -5186,7 +5186,7 @@ bool XBinary::checkString_int64(QString sValue)
     return bResult;
 }
 
-bool XBinary::checkString_float(QString sValue)
+bool XBinary::checkString_float(const QString &sValue)
 {
     bool bResult = false;
 
