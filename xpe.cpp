@@ -1693,7 +1693,7 @@ XPE::SECTION_RECORD XPE::getSectionRecordByName(const QString &sSectionName, QLi
     return result;
 }
 
-qint32 XPE::getSectionNumber(QString sSectionName)
+qint32 XPE::getSectionNumber(const QString &sSectionName)
 {
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSectionHeaders = getSectionHeaders();
     QList<SECTION_RECORD> listSectionRecords = getSectionRecords(&listSectionHeaders);
