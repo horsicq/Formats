@@ -642,7 +642,7 @@ public:
 
     qint64 getResourceNameOffset(const QString &sName);
     qint64 getResourceNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
-    qint64 getResourceGroupNameOffset(QString sName);
+    qint64 getResourceGroupNameOffset(const QString &sName);
     qint64 getResourceGroupNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     qint64 getResourceGroupIdOffset(quint32 nID);
     qint64 getResourceGroupIdOffset(quint32 nID, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);

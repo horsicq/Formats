@@ -3709,7 +3709,7 @@ qint64 XPE::getResourceNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pL
     return nResult;
 }
 
-qint64 XPE::getResourceGroupNameOffset(QString sName)
+qint64 XPE::getResourceGroupNameOffset(const QString &sName)
 {
     QList<RESOURCE_RECORD> listResources = getResources();
 
