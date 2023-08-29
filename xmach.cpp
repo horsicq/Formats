@@ -1279,7 +1279,7 @@ bool XMACH::isLibraryRecordNamePresent(const QString &sName)
     return isLibraryRecordNamePresent(sName, &listLibraryRecords);
 }
 
-bool XMACH::isLibraryRecordNamePresent(QString sName, QList<XMACH::LIBRARY_RECORD> *pListLibraryRecords)
+bool XMACH::isLibraryRecordNamePresent(const QString &sName, QList<XMACH::LIBRARY_RECORD> *pListLibraryRecords)
 {
     bool bResult = false;
 

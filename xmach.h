@@ -226,7 +226,7 @@ public:
     QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords, int nType = XMACH_DEF::S_LC_LOAD_DYLIB);
     static LIBRARY_RECORD getLibraryRecordByName(const QString &sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
     bool isLibraryRecordNamePresent(const QString &sName);
-    static bool isLibraryRecordNamePresent(QString sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
+    static bool isLibraryRecordNamePresent(const QString &sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
 
     LIBRARY_RECORD _readLibraryRecord(qint64 nOffset, bool bIsBigEndian);
 
