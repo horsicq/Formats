@@ -1127,9 +1127,31 @@ QString XBinary::read_ucsdString(qint64 nOffset)
 {
     QString sResult;
 
-    quint8 nSize = read_uint8(nOffset);
+    qint32 nSize = read_uint8(nOffset);
 
-    sResult = read_ansiString(nOffset + 1, nSize);
+    if (nSize > 0x10000) {
+        nSize = 0x10000;
+    }
+
+    if (nSize > 0) {
+        quint8 *pBuffer = new quint8[nSize + 1];
+
+        for (qint32 i = 0; i < nSize; i++) {
+            pBuffer[i] = read_uint8(nOffset + i);
+
+            if (pBuffer[i] == 0) {
+                pBuffer[i] = 0x20; // Space
+            }
+
+            if (i == nSize - 1) {
+                pBuffer[nSize] = 0;
+            }
+        }
+
+        sResult.append((char *)pBuffer);
+
+        delete[] pBuffer;
+    }
 
     return sResult;
 }
@@ -2294,7 +2316,7 @@ bool XBinary::_addMultiSearchStringRecord(QList<MS_RECORD> *pList, MS_RECORD *pR
     return bResult;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -2498,6 +2520,8 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
                             record.nOffset = nCurrentAnsiOffset;
                             record.nSize = nCurrentAnsiSize;
                             record.sString = sString;
+                            record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
+                            record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
 
                             if (_addMultiSearchStringRecord(&listResult, &record, &ssOptions)) {
                                 nCurrentRecords++;
@@ -2547,6 +2571,8 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
                             record.nOffset = nCurrentUTF8Offset;
                             record.nSize = nCurrentUTF8Size;
                             record.sString = sString;
+                            record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
+                            record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
 
                             if (_addMultiSearchStringRecord(&listResult, &record, &ssOptions)) {
                                 nCurrentRecords++;
@@ -2623,6 +2649,8 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
                                 record.nOffset = nCurrentUnicodeOffset[nParity];
                                 record.nSize = nCurrentUnicodeSize[nParity] * 2;
                                 record.sString = sString;
+                                record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
+                                record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
 
                                 if (_addMultiSearchStringRecord(&listResult, &record, &ssOptions)) {
                                     nCurrentRecords++;
@@ -2661,6 +2689,8 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(qint64 nOffset, qint64
                                     record.nOffset = nCurrentUnicodeOffset[nO];
                                     record.nSize = nCurrentUnicodeSize[nO] * 2;
                                     record.sString = sString;
+                                    record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
+                                    record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
 
                                     if (_addMultiSearchStringRecord(&listResult, &record, &ssOptions)) {
                                         nCurrentRecords++;
@@ -2761,6 +2791,8 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
         record.nSize = nSignatureSize;
         record.sString = sSignature;
         record.sInfo = sInfo;
+        record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
+        record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
 
         listResult.append(record);
 
@@ -2831,6 +2863,8 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
         record.recordType = MS_RECORD_TYPE_VALUE;
         record.nOffset = nValOffset;
         record.nSize = nValSize;
+        record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
+        record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
 
         if (valueType == VT_ANSISTRING_I) {
             _sValue = read_ansiString(nValOffset, nValSize);
