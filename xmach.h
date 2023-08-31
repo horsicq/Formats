@@ -232,7 +232,7 @@ public:
 
     QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(qint32 nType = XMACH_DEF::S_LC_LOAD_DYLIB);
     QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords, int nType = XMACH_DEF::S_LC_LOADFVMLIB);
-    static FVM_LIBRARY_RECORD getFvmLibraryRecordByName(QString sName, QList<FVM_LIBRARY_RECORD> *pListLibraryRecords);
+    static FVM_LIBRARY_RECORD getFvmLibraryRecordByName(const QString &sName, QList<FVM_LIBRARY_RECORD> *pListLibraryRecords);
     bool isFvmLibraryRecordNamePresent(const QString &sName);
     static bool isFvmLibraryRecordNamePresent(QString sName, QList<FVM_LIBRARY_RECORD> *pListLibraryRecords);
 

@@ -1134,6 +1134,7 @@ QString XBinary::read_ucsdString(qint64 nOffset)
     }
 
     if (nSize > 0) {
+        nOffset++;
         quint8 *pBuffer = new quint8[nSize + 1];
 
         for (qint32 i = 0; i < nSize; i++) {
