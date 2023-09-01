@@ -5497,6 +5497,13 @@ QString XBinary::getDeviceFileSuffix(QIODevice *pDevice)
     return sResult;
 }
 
+QString XBinary::getFileDirectory(const QString &sFileName)
+{
+    QFileInfo fi(sFileName);
+
+    return fi.absolutePath();
+}
+
 bool XBinary::isBackupPresent(QIODevice *pDevice)
 {
     return XBinary::isFileExists(XBinary::getBackupFileName(pDevice));
@@ -5974,7 +5981,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
     return nResult;
 }
 
-quint32 XBinary::_getCRC32ByFileContent(QString sFileName)
+quint32 XBinary::_getCRC32ByFileContent(const QString &sFileName)
 {
     return _getCRC32(readFile(sFileName), 0xFFFFFFFF, _getCRC32Table_EDB88320());
 }

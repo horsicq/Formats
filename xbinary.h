@@ -1088,6 +1088,7 @@ public:
     static QString getDeviceFileBaseName(QIODevice *pDevice);
     static QString getDeviceFileCompleteSuffix(QIODevice *pDevice);
     static QString getDeviceFileSuffix(QIODevice *pDevice);
+    static QString getFileDirectory(const QString &sFileName);
 
     static bool isBackupPresent(QIODevice *pDevice);
     static bool saveBackup(QIODevice *pDevice);
@@ -1121,7 +1122,7 @@ public:
     static quint32 _getCRC32(QByteArray baData, quint32 nInit, quint32 *pCRCTable);
     quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
 
-    static quint32 _getCRC32ByFileContent(QString sFileName);
+    static quint32 _getCRC32ByFileContent(const QString &sFileName);
     static quint32 _getCRC32ByDirectory(QString sDirectoryName, bool bRecursive, quint32 nInit = 0xFFFFFFFF);  // TODO PDSTRUCT
 
     static double getEntropy(QString sFileName);  // TODO ProcessData
