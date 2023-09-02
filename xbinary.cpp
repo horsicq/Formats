@@ -1141,7 +1141,7 @@ QString XBinary::read_ucsdString(qint64 nOffset)
             pBuffer[i] = read_uint8(nOffset + i);
 
             if (pBuffer[i] == 0) {
-                pBuffer[i] = 0x20; // Space
+                pBuffer[i] = 0x20;  // Space
             }
 
             if (i == nSize - 1) {
