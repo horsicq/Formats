@@ -1010,7 +1010,7 @@ public:
     static qint64 getPhysSize(char *pBuffer, qint64 nSize);  // TODO Check!
     static bool isEmptyData(char *pBuffer, qint64 nSize);
     bool compareSignature(const QString &sSignature, qint64 nOffset = 0);
-    bool compareSignature(_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset = 0);
+    bool compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset = 0);
     static bool _compareByteArrayWithSignature(QByteArray baData, const QString &sSignature);
     static QString _createSignature(const QString &sSignature1, QString sSignature2);
 

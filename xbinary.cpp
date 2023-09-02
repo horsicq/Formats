@@ -4132,17 +4132,17 @@ bool XBinary::compareSignature(const QString &sSignature, qint64 nOffset)
     return compareSignature(&memoryMap, sSignature, nOffset);
 }
 
-bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset)
+bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset)
 {
     bool bResult = false;
 
     QString sOrigin = sSignature;
 
-    sSignature = convertSignature(sSignature);
+    QString _sSignature = convertSignature(sSignature);
 
     bool bValid = true;
 
-    QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(sSignature, &bValid);
+    QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bValid);
 
     if (listSignatureRecords.count()) {
         bResult = _compareSignature(pMemoryMap, &listSignatureRecords, nOffset);
