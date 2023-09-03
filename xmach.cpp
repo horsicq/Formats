@@ -1942,7 +1942,7 @@ qint32 XMACH::getSectionNumber(QString sName, QList<XMACH::SECTION_RECORD> *pLis
     return nResult;
 }
 
-qint32 XMACH::getSectionNumber(QString sName)
+qint32 XMACH::getSectionNumber(const QString &sName)
 {
     QList<SECTION_RECORD> listSectionRecords = getSectionRecords();
 

@@ -313,7 +313,7 @@ public:
     static bool isSectionNamePresent(QString sName, QList<SECTION_RECORD> *pListSectionRecords);
 
     static qint32 getSectionNumber(QString sName, QList<SECTION_RECORD> *pListSectionRecords);
-    qint32 getSectionNumber(QString sName);
+    qint32 getSectionNumber(const QString &sName);
 
     qint64 getSectionHeaderSize();
 
