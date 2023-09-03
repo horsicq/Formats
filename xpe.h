@@ -1194,7 +1194,7 @@ public:
         QString sTSSubject;
     };
 
-    static XCERT_INFO getCertInfo(QString sFileName);
+    static XCERT_INFO getCertInfo(const QString &sFileName);
 
     virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 

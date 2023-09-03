@@ -8257,7 +8257,7 @@ QString XPE::getCertHash(XBinary::HASH hash)
     return sResult;
 }
 
-XPE::XCERT_INFO XPE::getCertInfo(QString sFileName)
+XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
 {
 #ifndef _MSC_VER
     Q_UNUSED(sFileName)
