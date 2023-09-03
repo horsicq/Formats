@@ -3767,7 +3767,7 @@ bool XPE::isResourceNamePresent(const QString &sName, QList<XPE::RESOURCE_RECORD
     return (getResourceNameOffset(sName, pListResourceRecords) != -1);
 }
 
-bool XPE::isResourceGroupNamePresent(QString sName)
+bool XPE::isResourceGroupNamePresent(const QString &sName)
 {
     QList<RESOURCE_RECORD> listResources = getResources();
 

@@ -648,7 +648,7 @@ public:
     qint64 getResourceGroupIdOffset(quint32 nID, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     bool isResourceNamePresent(const QString &sName);
     bool isResourceNamePresent(const QString &sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
-    bool isResourceGroupNamePresent(QString sName);
+    bool isResourceGroupNamePresent(const QString &sName);
     bool isResourceGroupNamePresent(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
     bool isResourceGroupIdPresent(quint32 nID);
     bool isResourceGroupIdPresent(quint32 nID, QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
