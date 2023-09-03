@@ -3716,7 +3716,7 @@ qint64 XPE::getResourceGroupNameOffset(const QString &sName)
     return getResourceGroupNameOffset(sName, &listResources);
 }
 
-qint64 XPE::getResourceGroupNameOffset(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+qint64 XPE::getResourceGroupNameOffset(const QString &sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     qint64 nResult = -1;
 
@@ -3774,7 +3774,7 @@ bool XPE::isResourceGroupNamePresent(const QString &sName)
     return isResourceGroupNamePresent(sName, &listResources);
 }
 
-bool XPE::isResourceGroupNamePresent(QString sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+bool XPE::isResourceGroupNamePresent(const QString &sName, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
     return (getResourceGroupNameOffset(sName, pListResourceRecords) != -1);
 }
