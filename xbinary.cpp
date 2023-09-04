@@ -5074,7 +5074,7 @@ QString XBinary::xVariantToHex(XVARIANT value)
             sResult = sHigh + sLow;
         }
     } else if (value.mode == MODE_FREG) {
-        for (int i = 0; i < 10; i++) {
+        for (qint32 i = 0; i < 10; i++) {
             sResult += valueToHex(value.var.v_freg[i]);
         }
     }
@@ -9016,7 +9016,7 @@ bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
         } else if (value1.mode == MODE_FREG) {
             bResult = true;
 
-            for (int i = 0; i < 10; i++) {
+            for (qint32 i = 0; i < 10; i++) {
                 if (value1.var.v_freg[i] != value2.var.v_freg[i]) {
                     bResult = false;
                     break;
