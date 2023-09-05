@@ -349,7 +349,7 @@ public:
     void setModuleUUID(QString sValue);
 
     QString getLoadDylinker();
-    void setLoadDylinker(QString sValue);
+    void setLoadDylinker(const QString &sValue);
 
     QString getRPath();
     void setRPath(const QString &sValue);

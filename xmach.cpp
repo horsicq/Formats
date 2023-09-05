@@ -2187,7 +2187,7 @@ QString XMACH::getLoadDylinker()
     return sResult;
 }
 
-void XMACH::setLoadDylinker(QString sValue)
+void XMACH::setLoadDylinker(const QString &sValue)
 {
     qint64 nOffset = getCommandRecordOffset(XMACH_DEF::S_LC_LOAD_DYLINKER, 0);
 
