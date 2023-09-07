@@ -8626,6 +8626,26 @@ bool XPE::isConsole()
     return (getType() == TYPE_CONSOLE);
 }
 
+bool XPE::isConsole(const QString &sFileName)
+{
+    bool bResult = false;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if (file.open(QIODevice::ReadOnly)) {
+        XPE pe(&file);
+
+        if (pe.isValid()) {
+            bResult = pe.isConsole();
+        }
+
+        file.close();
+    }
+
+    return bResult;
+}
+
 bool XPE::isDriver()
 {
     return (getType() == TYPE_DRIVER);

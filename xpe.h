@@ -825,6 +825,7 @@ public:
     bool isDll();
     static bool isDll(QString sFileName);
     bool isConsole();
+    static bool isConsole(const QString &sFileName);
     bool isDriver();
     bool isNETPresent();
 

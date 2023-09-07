@@ -2163,7 +2163,7 @@ QString XMACH::getModuleUUID()
     return sResult;
 }
 
-void XMACH::setModuleUUID(QString sValue)
+void XMACH::setModuleUUID(const QString &sValue)
 {
     qint64 nOffset = getCommandRecordOffset(XMACH_DEF::S_LC_UUID, 0);
 

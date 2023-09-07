@@ -346,7 +346,7 @@ public:
     void _set_dyld_info_command_export_size(qint64 nOffset, quint32 nValue);
 
     QString getModuleUUID();
-    void setModuleUUID(QString sValue);
+    void setModuleUUID(const QString &sValue);
 
     QString getLoadDylinker();
     void setLoadDylinker(const QString &sValue);
