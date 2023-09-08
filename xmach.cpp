@@ -2048,14 +2048,14 @@ qint32 XMACH::getSegmentNumber(QString sName, QList<XMACH::SEGMENT_RECORD> *pLis
     return nResult;
 }
 
-qint32 XMACH::getSegmentNumber(QString sName)
+qint32 XMACH::getSegmentNumber(const QString &sName)
 {
     QList<SEGMENT_RECORD> listSegmentRecords = getSegmentRecords();
 
     return getSegmentNumber(sName, &listSegmentRecords);
 }
 
-quint32 XMACH::getLibraryCurrentVersion(QString sName, QList<XMACH::LIBRARY_RECORD> *pListLibraryRecords)
+quint32 XMACH::getLibraryCurrentVersion(const QString &sName, QList<XMACH::LIBRARY_RECORD> *pListLibraryRecords)
 {
     return getLibraryRecordByName(sName, pListLibraryRecords).current_version;
 }

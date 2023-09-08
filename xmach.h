@@ -326,9 +326,9 @@ public:
     static bool isSegmentNamePresent(QString sName, QList<SEGMENT_RECORD> *pListSegmentRecords);
 
     static qint32 getSegmentNumber(QString sName, QList<SEGMENT_RECORD> *pListSegmentRecords);
-    qint32 getSegmentNumber(QString sName);
+    qint32 getSegmentNumber(const QString &sName);
 
-    static quint32 getLibraryCurrentVersion(QString sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
+    static quint32 getLibraryCurrentVersion(const QString &sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
 
     XMACH_DEF::dyld_info_command get_dyld_info_command();
 
