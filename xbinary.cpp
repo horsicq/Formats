@@ -9028,6 +9028,23 @@ bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
     return bResult;
 }
 
+void XBinary::clearXVariant(XVARIANT *pVar)
+{
+    if (pVar->mode == MODE_BIT) pVar->var.v_bool = false;
+    else if (pVar->mode == MODE_8) pVar->var.v_uint8 = 0;
+    else if (pVar->mode == MODE_16) pVar->var.v_uint16 = 0;
+    else if (pVar->mode == MODE_32) pVar->var.v_uint32 = 0;
+    else if (pVar->mode == MODE_64) pVar->var.v_uint64 = 0;
+    else if (pVar->mode == MODE_128) {
+        pVar->var.v_uint128[0] = 0;
+        pVar->var.v_uint128[1] = 0;
+    } else if (pVar->mode == MODE_FREG) {
+        for (qint32 i = 0; i < 10; i++) {
+            pVar->var.v_freg[i] = 0;
+        }
+    }
+}
+
 XBinary::MODE XBinary::getModeOS()
 {
     XBinary::MODE modeResult = XBinary::MODE_UNKNOWN;

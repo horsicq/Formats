@@ -1417,6 +1417,7 @@ public:
     static quint64 setBitToQword(quint64 nInit, bool bValue, qint32 nIndex);
 
     static bool isXVariantEqual(XVARIANT value1, XVARIANT value2);
+    static void clearXVariant(XVARIANT *pVar);
 
     static MODE getModeOS();
 
