@@ -1288,7 +1288,7 @@ public:
     static bool isX86asm(QString sArch);  // TODO remove use getDisasmMode
     static QString disasmIdToString(DM disasmMode);
     static QString syntaxIdToString(SYNTAX syntax);
-    static SYNTAX stringToSyntaxId(QString sString);
+    static SYNTAX stringToSyntaxId(const QString &sString);
     static QString osNameIdToString(OSNAME osName);
     DM getDisasmMode();
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);

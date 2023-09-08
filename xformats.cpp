@@ -861,7 +861,7 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
     if ((_sType == "installer") || (_sType == "sfx")) {
         result = Qt::blue;
     } else if ((_sType == "protector") || (_sType == "apk obfuscator") || (_sType == "jar obfuscator") || (_sType == ".net obfuscator") ||
-               (_sType == ".net compressor") || (_sType == "dongle protection") || (_sType == "joiner") || (_sType == "packer")) {
+               (_sType == ".net compressor") || (_sType == "dongle protection") || (_sType == "joiner") || (_sType == "packer") || (_sType == "protection") || (_sType == "crypter")) {
         result = Qt::red;
     } else if ((_sType == "pe tool") || (_sType == "apk tool")) {
         result = Qt::green;
@@ -896,8 +896,8 @@ QString XFormats::translateType(const QString &sType)
         sResult = tr("Compiler");
     } else if (_sType == "converter") {
         sResult = tr("Converter");
-    } else if (_sType == "cryptor") {
-        sResult = tr("Cryptor");
+    } else if (_sType == "crypter") {
+        sResult = tr("Crypter");
     } else if (_sType == "data") {
         sResult = tr("Data");
     } else if (_sType == "database") {

@@ -7556,7 +7556,7 @@ QString XBinary::syntaxIdToString(SYNTAX syntax)
     return sResult;
 }
 
-XBinary::SYNTAX XBinary::stringToSyntaxId(QString sString)
+XBinary::SYNTAX XBinary::stringToSyntaxId(const QString &sString)
 {
     SYNTAX result = SYNTAX_DEFAULT;
 
