@@ -9129,7 +9129,7 @@ bool XPE::isNETUnicodeStringPresent(QString sString)
     return isNETUnicodeStringPresent(sString, &cliInfo);
 }
 
-bool XPE::isNETUnicodeStringPresent(QString sString, XPE::CLI_INFO *pCliInfo)
+bool XPE::isNETUnicodeStringPresent(const QString &sString, XPE::CLI_INFO *pCliInfo)
 {
     return pCliInfo->metaData.listUnicodeStrings.contains(sString);
 }

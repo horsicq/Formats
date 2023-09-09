@@ -854,7 +854,7 @@ public:
     static bool isNETAnsiStringPresent(QString sString, CLI_INFO *pCliInfo);
 
     bool isNETUnicodeStringPresent(QString sString);
-    static bool isNETUnicodeStringPresent(QString sString, CLI_INFO *pCliInfo);
+    static bool isNETUnicodeStringPresent(const QString &sString, CLI_INFO *pCliInfo);
 
     quint32 getNetId();
 
