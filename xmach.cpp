@@ -2027,7 +2027,7 @@ bool XMACH::isSegmentNamePresent(QString sName, QList<XMACH::SEGMENT_RECORD> *pL
     return (getSegmentNumber(sName, pListSegmentRecords) != -1);
 }
 
-qint32 XMACH::getSegmentNumber(QString sName, QList<XMACH::SEGMENT_RECORD> *pListSegmentRecords)
+qint32 XMACH::getSegmentNumber(const QString &sName, QList<XMACH::SEGMENT_RECORD> *pListSegmentRecords)
 {
     qint32 nResult = -1;
 
