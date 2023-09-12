@@ -2022,7 +2022,7 @@ bool XMACH::isSegmentNamePresent(const QString &sName)
     return isSegmentNamePresent(sName, &listSegmentRecords);
 }
 
-bool XMACH::isSegmentNamePresent(QString sName, QList<XMACH::SEGMENT_RECORD> *pListSegmentRecords)
+bool XMACH::isSegmentNamePresent(const QString &sName, QList<XMACH::SEGMENT_RECORD> *pListSegmentRecords)
 {
     return (getSegmentNumber(sName, pListSegmentRecords) != -1);
 }
