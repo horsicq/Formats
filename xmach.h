@@ -253,7 +253,7 @@ public:
     XMACH_DEF::segment_command _read_segment_command(qint64 nOffset, bool bIsBigEndian);
     XMACH_DEF::segment_command_64 _read_segment_command_64(qint64 nOffset, bool bIsBigEndian);
 
-    void _setSegment32_segname(qint64 nOffset, QString sValue);
+    void _setSegment32_segname(qint64 nOffset, const QString &sValue);
     void _setSegment32_vmaddr(qint64 nOffset, quint32 nValue);
     void _setSegment32_vmsize(qint64 nOffset, quint32 nValue);
     void _setSegment32_fileoff(qint64 nOffset, quint32 nValue);

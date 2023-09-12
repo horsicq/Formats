@@ -1536,7 +1536,7 @@ XMACH_DEF::segment_command_64 XMACH::_read_segment_command_64(qint64 nOffset, bo
     return result;
 }
 
-void XMACH::_setSegment32_segname(qint64 nOffset, QString sValue)
+void XMACH::_setSegment32_segname(qint64 nOffset, const QString &sValue)
 {
     write_ansiStringFix(nOffset + offsetof(XMACH_DEF::segment_command, segname), 16, sValue);
 }
