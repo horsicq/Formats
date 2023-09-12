@@ -1921,7 +1921,7 @@ bool XMACH::isSectionNamePresent(const QString &sName, QList<XMACH::SECTION_RECO
     return (getSectionNumber(sName, pListSectionRecords) != -1);
 }
 
-qint32 XMACH::getSectionNumber(QString sName, QList<XMACH::SECTION_RECORD> *pListSectionRecords)
+qint32 XMACH::getSectionNumber(const QString &sName, QList<XMACH::SECTION_RECORD> *pListSectionRecords)
 {
     qint32 nResult = -1;
 
