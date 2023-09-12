@@ -3325,8 +3325,9 @@ XPE_DEF::S_VS_VERSION_INFO XPE::readVS_VERSION_INFO(qint64 nOffset)
     return result;
 }
 
-quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResult, qint64 nOffset, qint64 nSize, QString sPrefix, int nLevel)
+quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResult, qint64 nOffset, qint64 nSize, const QString &sPrefix, int nLevel)
 {
+    QString _sPrefix = sPrefix;
     quint32 nResult = 0;
 
     if ((quint32)nSize >= sizeof(XPE_DEF::S_VS_VERSION_INFO)) {
@@ -3340,13 +3341,13 @@ quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResu
                 nDelta += (sTitle.length() + 1) * sizeof(quint16);
                 nDelta = S_ALIGN_UP(nDelta, 4);
 
-                if (sPrefix != "") {
-                    sPrefix += ".";
+                if (_sPrefix != "") {
+                    _sPrefix += ".";
                 }
 
-                sPrefix += sTitle;
+                _sPrefix += sTitle;
 
-                if (sPrefix == "VS_VERSION_INFO") {
+                if (_sPrefix == "VS_VERSION_INFO") {
                     if (vi.wValueLength >= sizeof(XPE_DEF::tagVS_FIXEDFILEINFO)) {
                         pResourcesVersionResult->nFixedFileInfoOffset = nOffset + nDelta;
                         // TODO Check Signature?
@@ -3368,18 +3369,18 @@ quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResu
 
                 if (nLevel == 3) {
                     QString sValue = read_unicodeString(nOffset + nDelta);
-                    sPrefix += QString(":%1").arg(sValue);
+                    _sPrefix += QString(":%1").arg(sValue);
 
-                    pResourcesVersionResult->listRecords.append(sPrefix);
+                    pResourcesVersionResult->listRecords.append(_sPrefix);
                 }
 
-                if (sPrefix == "VS_VERSION_INFO.VarFileInfo.Translation") {
+                if (_sPrefix == "VS_VERSION_INFO.VarFileInfo.Translation") {
                     if (vi.wValueLength == 4) {
                         quint32 nValue = read_uint32(nOffset + nDelta);
                         QString sValue = XBinary::valueToHex(nValue);
-                        sPrefix += QString(":%1").arg(sValue);
+                        _sPrefix += QString(":%1").arg(sValue);
 
-                        pResourcesVersionResult->listRecords.append(sPrefix);
+                        pResourcesVersionResult->listRecords.append(_sPrefix);
                     }
                 }
 
@@ -3389,7 +3390,7 @@ quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResu
 
                 if (nLevel < 3) {
                     while (_nSize > 0) {
-                        qint32 _nDelta = __getResourcesVersion(pResourcesVersionResult, nOffset + nDelta, vi.wLength - nDelta, sPrefix, nLevel + 1);
+                        qint32 _nDelta = __getResourcesVersion(pResourcesVersionResult, nOffset + nDelta, vi.wLength - nDelta, _sPrefix, nLevel + 1);
 
                         if (_nDelta == 0) {
                             break;
