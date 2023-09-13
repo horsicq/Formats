@@ -5073,6 +5073,17 @@ QString XBinary::xVariantToHex(XVARIANT value)
         } else {
             sResult = sHigh + sLow;
         }
+    } else if (value.mode == MODE_256) {
+        QString s0 = valueToHex(value.var.v_uint256[0], value.bIsBigEndian);
+        QString s1 = valueToHex(value.var.v_uint256[1], value.bIsBigEndian);
+        QString s2 = valueToHex(value.var.v_uint256[2], value.bIsBigEndian);
+        QString s3 = valueToHex(value.var.v_uint256[3], value.bIsBigEndian);
+
+        if (value.bIsBigEndian) {
+            sResult = s0 + s1 + s2 + s3;
+        } else {
+            sResult = s3 + s2 + s1 + s0;
+        }
     } else if (value.mode == MODE_FREG) {
         for (qint32 i = 0; i < 10; i++) {
             sResult += valueToHex(value.var.v_freg[i]);
@@ -8810,7 +8821,7 @@ bool XBinary::getBitFromDword(quint32 nValue, qint32 nIndex)
     return bResult;
 }
 
-bool XBinary::getBitFromQWord(quint64 nValue, qint32 nIndex)
+bool XBinary::getBitFromQword(quint64 nValue, qint32 nIndex)
 {
     bool bResult = false;
 
@@ -9013,6 +9024,15 @@ bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
         else if (value1.mode == MODE_64) bResult = (value1.var.v_uint64 == value2.var.v_uint64);
         else if (value1.mode == MODE_128) {
             bResult = (value1.var.v_uint128[0] == value2.var.v_uint128[0]) && (value1.var.v_uint128[1] == value2.var.v_uint128[1]);
+        } else if (value1.mode == MODE_256) {
+            bResult = true;
+
+            for (qint32 i = 0; i < 4; i++) {
+                if (value1.var.v_uint256[i] != value2.var.v_uint256[i]) {
+                    bResult = false;
+                    break;
+                }
+            }
         } else if (value1.mode == MODE_FREG) {
             bResult = true;
 

@@ -527,6 +527,7 @@ public:
             quint32 v_uint32;
             quint64 v_uint64;
             quint64 v_uint128[2];
+            quint64 v_uint256[4];
             quint8 v_freg[10];
             // mb TODO 256/512
         } var;
@@ -1403,7 +1404,7 @@ public:
     static bool getBitFromByte(quint8 nValue, qint32 nIndex);
     static bool getBitFromWord(quint16 nValue, qint32 nIndex);
     static bool getBitFromDword(quint32 nValue, qint32 nIndex);
-    static bool getBitFromQWord(quint64 nValue, qint32 nIndex);
+    static bool getBitFromQword(quint64 nValue, qint32 nIndex);
 
     static quint64 setDwordToQword(quint64 nInit, quint32 nValue, qint32 nIndex);
     static quint64 setWordToQword(quint64 nInit, quint16 nValue, qint32 nIndex);
