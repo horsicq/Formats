@@ -7425,7 +7425,7 @@ qint64 XBinary::getVersionIntValue(QString sString)
     return nResult;
 }
 
-bool XBinary::checkStringNumber(QString sString, quint32 nMin, quint32 nMax)
+bool XBinary::checkStringNumber(const QString &sString, quint32 nMin, quint32 nMax)
 {
     bool bResult = false;
 
