@@ -7410,7 +7410,7 @@ QString XBinary::getVersionString(QString sString)
     return sResult;
 }
 
-qint64 XBinary::getVersionIntValue(QString sString)
+qint64 XBinary::getVersionIntValue(const QString &sString)
 {
     qint64 nResult = 0;
 
