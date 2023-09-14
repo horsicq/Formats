@@ -823,7 +823,7 @@ public:
     qint64 _calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections);
 
     bool isDll();
-    static bool isDll(QString sFileName);
+    static bool isDll(const QString &sFileName);
     bool isConsole();
     static bool isConsole(const QString &sFileName);
     bool isDriver();

@@ -8602,7 +8602,7 @@ bool XPE::isDll()
     return (getType() == TYPE_DLL);
 }
 
-bool XPE::isDll(QString sFileName)
+bool XPE::isDll(const QString &sFileName)
 {
     bool bResult = false;
 
