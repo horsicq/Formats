@@ -5791,7 +5791,7 @@ bool XBinary::isFileHashValid(XBinary::HASH hash, QString sFileName, QString sHa
     return bResult;
 }
 
-quint32 XBinary::getAdler32(QString sFileName)
+quint32 XBinary::getAdler32(const QString &sFileName)
 {
     quint32 nResult = 0;
 
