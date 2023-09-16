@@ -4527,7 +4527,7 @@ bool XPE::removeLastSection(QIODevice *pDevice, bool bIsImage)
     return bResult;
 }
 
-bool XPE::removeLastSection(QString sFileName, bool bIsImage)
+bool XPE::removeLastSection(const QString &sFileName, bool bIsImage)
 {
     bool bResult = false;
 

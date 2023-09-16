@@ -717,7 +717,7 @@ public:
 
     bool removeLastSection();
     static bool removeLastSection(QIODevice *pDevice, bool bIsImage);
-    static bool removeLastSection(QString sFileName, bool bIsImage);
+    static bool removeLastSection(const QString &sFileName, bool bIsImage);
     // TODO copy Overlay function -> XBinary
     XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY read_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset);
     XPE_DEF::IMAGE_RESOURCE_DIRECTORY read_IMAGE_RESOURCE_DIRECTORY(qint64 nOffset);
