@@ -1798,7 +1798,7 @@ void XMACH::_setSection64_sectname(qint64 nOffset, QString sValue)
     write_ansiStringFix(nOffset + offsetof(XMACH_DEF::section_64, sectname), 16, sValue);
 }
 
-void XMACH::_setSection64_segname(qint64 nOffset, QString sValue)
+void XMACH::_setSection64_segname(qint64 nOffset, const QString &sValue)
 {
     write_ansiStringFix(nOffset + offsetof(XMACH_DEF::section_64, segname), 16, sValue);
 }
