@@ -739,7 +739,7 @@ public:
 
     bool addRelocsSection(QList<XADDR> *pList);
     bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<XADDR> *pListRelocs);
-    bool addRelocsSection(QString sFileName, bool bIsImage, QList<XADDR> *pListRelocs);
+    bool addRelocsSection(const QString &sFileName, bool bIsImage, QList<XADDR> *pListRelocs);
     static QByteArray relocsAsRVAListToByteArray(QList<XADDR> *pListRelocs, bool bIs64);
 
     bool isResourcesPresent();

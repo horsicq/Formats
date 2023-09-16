@@ -9999,7 +9999,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<XADDR> *pLis
     return bResult;
 }
 
-bool XPE::addRelocsSection(QString sFileName, bool bIsImage, QList<XADDR> *pListRelocs)
+bool XPE::addRelocsSection(const QString &sFileName, bool bIsImage, QList<XADDR> *pListRelocs)
 {
     bool bResult = false;
 
