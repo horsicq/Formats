@@ -1793,7 +1793,7 @@ void XMACH::_setSection32_reserved2(qint64 nOffset, quint32 nValue)
     write_uint32(nOffset + offsetof(XMACH_DEF::section, reserved2), nValue, isBigEndian());
 }
 
-void XMACH::_setSection64_sectname(qint64 nOffset, QString sValue)
+void XMACH::_setSection64_sectname(qint64 nOffset, const QString &sValue)
 {
     write_ansiStringFix(nOffset + offsetof(XMACH_DEF::section_64, sectname), 16, sValue);
 }

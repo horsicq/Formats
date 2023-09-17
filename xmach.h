@@ -291,7 +291,7 @@ public:
     void _setSection32_reserved1(qint64 nOffset, quint32 nValue);
     void _setSection32_reserved2(qint64 nOffset, quint32 nValue);
 
-    void _setSection64_sectname(qint64 nOffset, QString sValue);
+    void _setSection64_sectname(qint64 nOffset, const QString &sValue);
     void _setSection64_segname(qint64 nOffset, const QString &sValue);
     void _setSection64_addr(qint64 nOffset, quint64 nValue);
     void _setSection64_size(qint64 nOffset, quint64 nValue);
