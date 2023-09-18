@@ -1368,7 +1368,7 @@ bool XMACH::isFvmLibraryRecordNamePresent(const QString &sName)
     return isFvmLibraryRecordNamePresent(sName, &listLibraryRecords);
 }
 
-bool XMACH::isFvmLibraryRecordNamePresent(QString sName, QList<XMACH::FVM_LIBRARY_RECORD> *pListLibraryRecords)
+bool XMACH::isFvmLibraryRecordNamePresent(const QString &sName, QList<XMACH::FVM_LIBRARY_RECORD> *pListLibraryRecords)
 {
     bool bResult = false;
 
