@@ -862,7 +862,7 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
         result = Qt::blue;
     } else if ((_sType == "protector") || (_sType == "apk obfuscator") || (_sType == "jar obfuscator") || (_sType == ".net obfuscator") ||
                (_sType == ".net compressor") || (_sType == "dongle protection") || (_sType == "joiner") || (_sType == "packer") || (_sType == "protection") ||
-               (_sType == "crypter")) {
+               (_sType == "crypter") || (_sType == "cryptor")) {
         result = Qt::red;
     } else if ((_sType == "pe tool") || (_sType == "apk tool")) {
         result = Qt::green;
@@ -872,6 +872,8 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
         result = Qt::darkMagenta;
     } else if (_sType == "language") {
         result = Qt::darkCyan;
+    } else if ((_sType == "virus") || (_sType == "trojan") || (_sType == "malware")) {
+        result = Qt::darkRed;
     } else {
         result = Qt::transparent;
     }
@@ -899,6 +901,8 @@ QString XFormats::translateType(const QString &sType)
         sResult = tr("Converter");
     } else if (_sType == "crypter") {
         sResult = tr("Crypter");
+    } else if (_sType == "cryptor") {
+        sResult = tr("Cryptor");
     } else if (_sType == "data") {
         sResult = tr("Data");
     } else if (_sType == "database") {
@@ -961,6 +965,12 @@ QString XFormats::translateType(const QString &sType)
         sResult = tr("Tool");
     } else if (_sType == "virtual machine") {
         sResult = tr("Virtual machine");
+    } else if (_sType == "virus") {
+        sResult = tr("Virus");
+    } else if (_sType == "trojan") {
+        sResult = tr("Trojan");
+    } else if (_sType == "malware") {
+        sResult = tr("Malware");
     } else {
         sResult = sType;
     }
