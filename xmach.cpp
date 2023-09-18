@@ -1581,7 +1581,7 @@ void XMACH::_setSegment32_flags(qint64 nOffset, quint32 nValue)
     write_uint32(nOffset + offsetof(XMACH_DEF::segment_command, flags), nValue, isBigEndian());
 }
 
-void XMACH::_setSegment64_segname(qint64 nOffset, QString sValue)
+void XMACH::_setSegment64_segname(qint64 nOffset, const QString &sValue)
 {
     write_ansiStringFix(nOffset + offsetof(XMACH_DEF::segment_command_64, segname), 16, sValue);
 }
