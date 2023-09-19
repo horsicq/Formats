@@ -9390,7 +9390,7 @@ int XPE::getConstDataSection(_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-bool XPE::rebuildDump(QString sResultFile, REBUILD_OPTIONS *pRebuildOptions)
+bool XPE::rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions)
 {
     // TODO rework!
 #ifdef QT_DEBUG

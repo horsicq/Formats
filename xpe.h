@@ -895,7 +895,7 @@ public:
         bool bFixChecksum;
     };
 
-    bool rebuildDump(QString sResultFile, REBUILD_OPTIONS *pRebuildOptions);
+    bool rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions);
     static bool rebuildDump(QString sInputFile, QString sResultFile, REBUILD_OPTIONS *pRebuildOptions);
     static bool fixCheckSum(const QString &sFileName, bool bIsImage);
     void fixCheckSum();
