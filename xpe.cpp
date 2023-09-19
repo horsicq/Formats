@@ -9626,7 +9626,7 @@ bool XPE::rebuildDump(QString sInputFile, QString sResultFile, REBUILD_OPTIONS *
     return bResult;
 }
 
-bool XPE::fixCheckSum(QString sFileName, bool bIsImage)
+bool XPE::fixCheckSum(const QString &sFileName, bool bIsImage)
 {
     bool bResult = false;
 

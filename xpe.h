@@ -897,7 +897,7 @@ public:
 
     bool rebuildDump(QString sResultFile, REBUILD_OPTIONS *pRebuildOptions);
     static bool rebuildDump(QString sInputFile, QString sResultFile, REBUILD_OPTIONS *pRebuildOptions);
-    static bool fixCheckSum(QString sFileName, bool bIsImage);
+    static bool fixCheckSum(const QString &sFileName, bool bIsImage);
     void fixCheckSum();
 
     static QList<XPE_DEF::IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData, XPE_DEF::IMAGE_SECTION_HEADER sectionHeaderOriginal, quint32 nBlockSize);
