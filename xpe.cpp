@@ -9119,7 +9119,7 @@ bool XPE::isNETAnsiStringPresent(const QString &sString)
     return isNETAnsiStringPresent(sString, &cliInfo);
 }
 
-bool XPE::isNETAnsiStringPresent(QString sString, XPE::CLI_INFO *pCliInfo)
+bool XPE::isNETAnsiStringPresent(const QString &sString, XPE::CLI_INFO *pCliInfo)
 {
     return pCliInfo->metaData.listAnsiStrings.contains(sString);
 }

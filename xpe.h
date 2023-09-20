@@ -851,7 +851,7 @@ public:
     bool isNetMetadataPresent(CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pMemoryMap);
 
     bool isNETAnsiStringPresent(const QString &sString);
-    static bool isNETAnsiStringPresent(QString sString, CLI_INFO *pCliInfo);
+    static bool isNETAnsiStringPresent(const QString &sString, CLI_INFO *pCliInfo);
 
     bool isNETUnicodeStringPresent(QString sString);
     static bool isNETUnicodeStringPresent(const QString &sString, CLI_INFO *pCliInfo);
