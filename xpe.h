@@ -840,7 +840,7 @@ public:
     void setMetadataHeader_MinorVersion(quint16 nValue);
     void setMetadataHeader_Reserved(quint32 nValue);
     void setMetadataHeader_VersionStringLength(quint32 nValue);
-    void setMetadataHeader_Version(QString sValue);
+    void setMetadataHeader_Version(const QString &sValue);
     void setMetadataHeader_Flags(quint16 nValue);
     void setMetadataHeader_Streams(quint16 nValue);
 

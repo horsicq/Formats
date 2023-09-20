@@ -9043,7 +9043,7 @@ void XPE::setMetadataHeader_VersionStringLength(quint32 nValue)
     }
 }
 
-void XPE::setMetadataHeader_Version(QString sValue)
+void XPE::setMetadataHeader_Version(const QString &sValue)
 {
     qint64 nOffset = getNet_MetadataOffsetSize().nOffset;
 
