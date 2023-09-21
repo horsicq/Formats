@@ -4387,7 +4387,7 @@ bool XBinary::dumpToFile(const QString &sFileName, const char *pData, qint64 nDa
     return bResult;
 }
 
-bool XBinary::dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pProcessData)
+bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pProcessData)
 {
     bool bResult = false;
 
@@ -4813,7 +4813,7 @@ XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice, bool bExtra)
     return _getPrefFileType(&stFileTypes);
 }
 
-XBinary::FT XBinary::getPrefFileType(QString sFileName, bool bExtra)
+XBinary::FT XBinary::getPrefFileType(const QString &sFileName, bool bExtra)
 {
     XBinary::FT result = XBinary::FT_UNKNOWN;
 

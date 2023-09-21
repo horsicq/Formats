@@ -1024,7 +1024,7 @@ public:
     bool moveMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize);
 
     static bool dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize);
-    bool dumpToFile(QString sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pProcessData = nullptr);
+    bool dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pProcessData = nullptr);
 
     QSet<FT> getFileTypes(bool bExtra = false);
     static QSet<FT> getFileTypes(QIODevice *pDevice,
@@ -1035,7 +1035,7 @@ public:
 
     static FT _getPrefFileType(QSet<XBinary::FT> *pStFileTypes);
     static FT getPrefFileType(QIODevice *pDevice, bool bExtra = false);
-    static FT getPrefFileType(QString sFileName, bool bExtra = false);
+    static FT getPrefFileType(const QString &sFileName, bool bExtra = false);
 
     static QList<FT> _getFileTypeListFromSet(QSet<FT> stFileTypes);
 
