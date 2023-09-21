@@ -577,7 +577,7 @@ public:
     QList<RESOURCE_RECORD> getResources(_MEMORY_MAP *pMemoryMap);
 
     static RESOURCE_RECORD getResourceRecord(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
-    static RESOURCE_RECORD getResourceRecord(quint32 nID1, QString sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
+    static RESOURCE_RECORD getResourceRecord(quint32 nID1, , QList<RESOURCE_RECORD> *pListResourceRecords);
     static RESOURCE_RECORD getResourceRecord(const QString &sName1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
     static RESOURCE_RECORD getResourceRecord(const QString &sName1, QString sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
 
