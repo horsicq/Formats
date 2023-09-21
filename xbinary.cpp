@@ -5346,7 +5346,7 @@ QString XBinary::getBackupFileName(QIODevice *pDevice)
     return sResult;
 }
 
-QString XBinary::getBackupFileName(QString sFileName)
+QString XBinary::getBackupFileName(const QString &sFileName)
 {
     QFileInfo fi(sFileName);
     QString sResult;

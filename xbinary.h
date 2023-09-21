@@ -1080,7 +1080,7 @@ public:
     static QString getDumpFileName(QIODevice *pDevice);
     static QString getDumpFileName(const QString &sFileName);
     static QString getBackupFileName(QIODevice *pDevice);
-    static QString getBackupFileName(QString sFileName);
+    static QString getBackupFileName(const QString &sFileName);
     static QString getResultFileName(QIODevice *pDevice, QString sAppendix);
     static QString getResultFileName(const QString &sFileName, QString sAppendix);
     static QString getDeviceFileName(QIODevice *pDevice);
