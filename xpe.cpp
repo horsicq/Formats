@@ -4362,7 +4362,7 @@ quint32 XPE::calculateCheckSum()
     return nCalcSum;
 }
 
-bool XPE::addSection(QString sFileName, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize)
+bool XPE::addSection(const QString &sFileName, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize)
 {
     bool bResult = false;
 
