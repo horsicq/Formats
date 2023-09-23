@@ -9124,7 +9124,7 @@ bool XPE::isNETAnsiStringPresent(const QString &sString, XPE::CLI_INFO *pCliInfo
     return pCliInfo->metaData.listAnsiStrings.contains(sString);
 }
 
-bool XPE::isNETUnicodeStringPresent(QString sString)
+bool XPE::isNETUnicodeStringPresent(const QString &sString)
 {
     CLI_INFO cliInfo = getCliInfo(true);
 
