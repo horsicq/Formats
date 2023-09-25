@@ -1286,7 +1286,7 @@ public:
 
     static QString valueToFlagsString(quint64 nValue, QMap<quint64, QString> mapFlags, VL_TYPE vlType);
 
-    static bool isX86asm(QString sArch);  // TODO remove use getDisasmMode
+    static bool isX86asm(const QString &sArch);  // TODO remove use getDisasmMode
     static QString disasmIdToString(DM disasmMode);
     static QString syntaxIdToString(SYNTAX syntax);
     static SYNTAX stringToSyntaxId(const QString &sString);

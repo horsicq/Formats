@@ -7483,16 +7483,16 @@ QString XBinary::valueToFlagsString(quint64 nValue, QMap<quint64, QString> mapFl
     return sResult;
 }
 
-bool XBinary::isX86asm(QString sArch)
+bool XBinary::isX86asm(const QString &sArch)
 {
     // TODO remove, use getDisasmMode
     bool bResult = false;
 
-    sArch = sArch.toUpper();
+    QString _sArch = sArch.toUpper();
 
     // TODO Check
-    if ((sArch == "8086") || (sArch == "80286") || (sArch == "80386") || (sArch == "80486") || (sArch == "80586") || (sArch == "386") || (sArch == "I386") ||
-        (sArch == "AMD64") || (sArch == "X86_64")) {
+    if ((_sArch == "8086") || (_sArch == "80286") || (_sArch == "80386") || (_sArch == "80486") || (_sArch == "80586") || (_sArch == "386") || (_sArch == "I386") ||
+        (_sArch == "AMD64") || (_sArch == "X86_64")) {
         bResult = true;
     }
 
