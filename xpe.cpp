@@ -9606,7 +9606,7 @@ bool XPE::rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptio
     return bResult;
 }
 
-bool XPE::rebuildDump(const QString &sInputFile, QString sResultFile, REBUILD_OPTIONS *pRebuildOptions)
+bool XPE::rebuildDump(const QString &sInputFile, const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions)
 {
     // TODO rework!
     bool bResult = false;
