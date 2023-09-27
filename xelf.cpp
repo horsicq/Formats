@@ -3448,7 +3448,7 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUC
         for (qint32 i = 0; i < nNumberOfNeededs; i++) {
             qint64 nValue = listNeeded.at(i).nValue;
 
-            if (nValue >= 0 & nValue < nSectionTableSize) {
+            if ((nValue >= 0) & (nValue < nSectionTableSize)) {
                 QString sLibrary = baSection.data() + nValue;
 
                 listResult.append(sLibrary);
@@ -3480,7 +3480,7 @@ XBinary::OS_STRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF
         qint64 nSize = listStrSize.at(0).nValue;
         qint64 nRunPath = listRunPath.at(0).nValue;
 
-        if (nRunPath < nSize) {
+        if ((nRunPath >= 0) & (nRunPath < nSize)) {
             result.nOffset = nOffset + nRunPath;
             result.sString = read_ansiString(result.nOffset);
             result.nSize = result.sString.length();

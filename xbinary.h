@@ -1109,8 +1109,8 @@ public:
 
     static bool isFileHashValid(HASH hash, QString sFileName, QString sHash);
 
-    static quint32 getAdler32(const QString &sFileName);
-    static quint32 getAdler32(QIODevice *pDevice);
+    static quint32 getAdler32(const QString &sFileName);  // TODO ProcessData
+    static quint32 getAdler32(QIODevice *pDevice);  // TODO ProcessData
     quint32 getAdler32(qint64 nOffset = 0,
                        qint64 nSize = -1);  // TODO pProcessData Check
 
@@ -1126,7 +1126,7 @@ public:
     static quint32 _getCRC32ByFileContent(const QString &sFileName);
     static quint32 _getCRC32ByDirectory(QString sDirectoryName, bool bRecursive, quint32 nInit = 0xFFFFFFFF);  // TODO PDSTRUCT
 
-    static double getEntropy(QString sFileName);  // TODO ProcessData
+    static double getEntropy(const QString &sFileName);  // TODO ProcessData
     static double getEntropy(QIODevice *pDevice, PDSTRUCT *pProcessData = nullptr);
     double getEntropy(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
 

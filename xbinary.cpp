@@ -6019,7 +6019,7 @@ quint32 XBinary::_getCRC32ByDirectory(QString sDirectoryName, bool bRecursive, q
     return nResult;
 }
 
-double XBinary::getEntropy(QString sFileName)
+double XBinary::getEntropy(const QString &sFileName)
 {
     double dResult = 0;
 
