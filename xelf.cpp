@@ -3448,7 +3448,7 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUC
         for (qint32 i = 0; i < nNumberOfNeededs; i++) {
             qint64 nValue = listNeeded.at(i).nValue;
 
-            if (nValue < nSectionTableSize) {
+            if (nValue >= 0 & nValue < nSectionTableSize) {
                 QString sLibrary = baSection.data() + nValue;
 
                 listResult.append(sLibrary);
