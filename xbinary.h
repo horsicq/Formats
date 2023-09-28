@@ -1082,7 +1082,7 @@ public:
     static QString getBackupFileName(QIODevice *pDevice);
     static QString getBackupFileName(const QString &sFileName);
     static QString getResultFileName(QIODevice *pDevice, const QString &sAppendix);
-    static QString getResultFileName(const QString &sFileName, QString sAppendix);
+    static QString getResultFileName(const QString &sFileName, const QString &sAppendix);
     static QString getDeviceFileName(QIODevice *pDevice);
     static QString getDeviceFilePath(QIODevice *pDevice);
     static QString getDeviceDirectory(QIODevice *pDevice);
