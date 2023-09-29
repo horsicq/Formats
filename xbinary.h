@@ -1110,7 +1110,7 @@ public:
     static bool isFileHashValid(HASH hash, QString sFileName, QString sHash);
 
     static quint32 getAdler32(const QString &sFileName);  // TODO ProcessData
-    static quint32 getAdler32(QIODevice *pDevice);  // TODO ProcessData
+    static quint32 getAdler32(QIODevice *pDevice);        // TODO ProcessData
     quint32 getAdler32(qint64 nOffset = 0,
                        qint64 nSize = -1);  // TODO pProcessData Check
 

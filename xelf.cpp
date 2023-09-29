@@ -4312,8 +4312,7 @@ XBinary::OSINFO XELF::getOsInfo()
                 quint32 nSDKVersion = read_uint32(note.nDataOffset);
                 result.sOsVersion = XBinary::getAndroidVersionFromApi(nSDKVersion);
             }
-        } else if ((XBinary::isStringInListPresent(&listLibraries, "liblog.so")) ||
-                   ((sInterpteter == "system/bin/linker") || (sInterpteter == "system/bin/linker64"))) {
+        } else if ((XBinary::isStringInListPresent(&listLibraries, "liblog.so")) || ((sInterpteter == "system/bin/linker") || (sInterpteter == "system/bin/linker64"))) {
             result.osName = OSNAME_ANDROID;
         }
     }
