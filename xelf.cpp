@@ -32,10 +32,10 @@ bool XELF::isValid()
 {
     bool bResult = false;
 
-    if (getIdent_Magic() == XELF_DEF::ELFMAG) {
+    if (getIdent_Magic() == XELF_DEF::S_ELFMAG) {
         quint8 nClass = getIdent_class();
 
-        if ((nClass == XELF_DEF::ELFCLASS32) || (nClass == XELF_DEF::ELFCLASS64)) {
+        if ((nClass == XELF_DEF::S_ELFCLASS32) || (nClass == XELF_DEF::S_ELFCLASS64)) {
             bResult = true;
         }
     }
@@ -59,7 +59,7 @@ XBinary::MODE XELF::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddr
 
 bool XELF::isBigEndian()
 {
-    return getIdent_data() == XELF_DEF::ELFDATA2MSB;
+    return getIdent_data() == XELF_DEF::S_ELFDATA2MSB;
 }
 
 qint64 XELF::getEhdrOffset()
@@ -79,12 +79,12 @@ qint64 XELF::getEhdr64Size()
 
 quint32 XELF::getIdent_Magic()
 {
-    return read_uint32(XELF_DEF::EI_MAG0);
+    return read_uint32(XELF_DEF::S_EI_MAG0);
 }
 
 void XELF::setIdent_Magic(quint32 nValue)
 {
-    write_uint32(XELF_DEF::EI_MAG0, nValue);
+    write_uint32(XELF_DEF::S_EI_MAG0, nValue);
 }
 
 quint8 XELF::getIdent_mag(qint32 nMag)
@@ -117,52 +117,52 @@ void XELF::setIdent_mag_LE(quint32 nValue)
 
 quint8 XELF::getIdent_class()
 {
-    return read_uint8(XELF_DEF::EI_CLASS);
+    return read_uint8(XELF_DEF::S_EI_CLASS);
 }
 
 void XELF::setIdent_class(quint8 nValue)
 {
-    write_uint8(XELF_DEF::EI_CLASS, nValue);
+    write_uint8(XELF_DEF::S_EI_CLASS, nValue);
 }
 
 quint8 XELF::getIdent_data()
 {
-    return read_uint8(XELF_DEF::EI_DATA);
+    return read_uint8(XELF_DEF::S_EI_DATA);
 }
 
 void XELF::setIdent_data(quint8 nValue)
 {
-    write_uint8(XELF_DEF::EI_DATA, nValue);
+    write_uint8(XELF_DEF::S_EI_DATA, nValue);
 }
 
 quint8 XELF::getIdent_version()
 {
-    return read_uint8(XELF_DEF::EI_VERSION);
+    return read_uint8(XELF_DEF::S_EI_VERSION);
 }
 
 void XELF::setIdent_version(quint8 nValue)
 {
-    write_uint8(XELF_DEF::EI_VERSION, nValue);
+    write_uint8(XELF_DEF::S_EI_VERSION, nValue);
 }
 
 quint8 XELF::getIdent_osabi()
 {
-    return read_uint8(XELF_DEF::EI_OSABI);
+    return read_uint8(XELF_DEF::S_EI_OSABI);
 }
 
 void XELF::setIdent_osabi(quint8 nValue)
 {
-    write_uint8(XELF_DEF::EI_OSABI, nValue);
+    write_uint8(XELF_DEF::S_EI_OSABI, nValue);
 }
 
 quint8 XELF::getIdent_abiversion()
 {
-    return read_uint8(XELF_DEF::EI_ABIVERSION);
+    return read_uint8(XELF_DEF::S_EI_ABIVERSION);
 }
 
 void XELF::setIdent_abiversion(quint8 nValue)
 {
-    write_uint8(XELF_DEF::EI_ABIVERSION, nValue);
+    write_uint8(XELF_DEF::S_EI_ABIVERSION, nValue);
 }
 
 quint8 XELF::getIdent_pad(qint32 nPad)
@@ -170,7 +170,7 @@ quint8 XELF::getIdent_pad(qint32 nPad)
     quint8 nValue = 0;
 
     if (nPad < 7) {
-        nValue = read_uint8(XELF_DEF::EI_ABIVERSION + 1 + nPad);
+        nValue = read_uint8(XELF_DEF::S_EI_ABIVERSION + 1 + nPad);
     }
 
     return nValue;
@@ -179,7 +179,7 @@ quint8 XELF::getIdent_pad(qint32 nPad)
 void XELF::setIdent_pad(quint8 nValue, qint32 nPad)
 {
     if (nPad < 7) {
-        write_uint8(XELF_DEF::EI_ABIVERSION + 1 + nPad, nValue);
+        write_uint8(XELF_DEF::S_EI_ABIVERSION + 1 + nPad, nValue);
     }
 }
 
@@ -1239,7 +1239,7 @@ QMap<quint32, QString> XELF::getStringsFromSection(quint32 nSection)
 {
     QMap<quint32, QString> mapResult;
 
-    if (nSection != XELF_DEF::SHN_UNDEF) {
+    if (nSection != XELF_DEF::S_SHN_UNDEF) {
         QByteArray baSection = getSection(nSection);
 
         mapResult = getStringsFromSectionData(&baSection);
@@ -2971,7 +2971,7 @@ XBinary::OS_STRING XELF::getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pL
 {
     OS_STRING result = {};
 
-    QList<XELF_DEF::Elf_Phdr> listInterps = _getPrograms(pListProgramHeaders, XELF_DEF::PT_INTERP);
+    QList<XELF_DEF::Elf_Phdr> listInterps = _getPrograms(pListProgramHeaders, XELF_DEF::S_PT_INTERP);
 
     if (listInterps.count()) {
         result = getOsAnsiString(listInterps.at(0).p_offset, listInterps.at(0).p_filesz);
@@ -3040,7 +3040,7 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
 {
     QList<NOTE> listResult;
 
-    QList<XELF_DEF::Elf_Phdr> listNotes = _getPrograms(pListProgramHeaders, XELF_DEF::PT_NOTE);
+    QList<XELF_DEF::Elf_Phdr> listNotes = _getPrograms(pListProgramHeaders, XELF_DEF::S_PT_NOTE);
 
     bool bIsBigEndian = isBigEndian();
 
@@ -3051,7 +3051,7 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders)
         qint64 nOffset = listNotes.at(i).p_offset;
         qint64 nSize = listNotes.at(i).p_filesz;
 
-        listResult = _getNotes(nOffset, nSize, bIsBigEndian);
+        listResult.append(_getNotes(nOffset, nSize, bIsBigEndian));
     }
 
     return listResult;
@@ -3061,7 +3061,7 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
 {
     QList<NOTE> listResult;
 
-    QList<XELF_DEF::Elf_Shdr> listNotes = _getSections(pListSectionHeaders, XELF_DEF::SHT_NOTE);
+    QList<XELF_DEF::Elf_Shdr> listNotes = _getSections(pListSectionHeaders, XELF_DEF::S_SHT_NOTE);
 
     bool bIsBigEndian = isBigEndian();
 
@@ -3072,7 +3072,7 @@ QList<XELF::NOTE> XELF::getNotes(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders)
         qint64 nOffset = listNotes.at(i).sh_offset;
         qint64 nSize = listNotes.at(i).sh_size;
 
-        listResult = _getNotes(nOffset, nSize, bIsBigEndian);
+        listResult.append(_getNotes(nOffset, nSize, bIsBigEndian));
     }
 
     return listResult;
@@ -3260,7 +3260,7 @@ QList<XELF::TAG_STRUCT> XELF::getTagStructs(QList<XELF_DEF::Elf_Phdr> *pListProg
     bool bIs64 = is64();
     bool bIsBigEndian = isBigEndian();
 
-    QList<XELF_DEF::Elf_Phdr> listTags = _getPrograms(pListProgramHeaders, XELF_DEF::PT_DYNAMIC);
+    QList<XELF_DEF::Elf_Phdr> listTags = _getPrograms(pListProgramHeaders, XELF_DEF::S_PT_DYNAMIC);
 
     qint32 nNumberOfTags = listTags.count();
 
@@ -3404,8 +3404,8 @@ XBinary::OFFSETSIZE XELF::getStringTable(XBinary::_MEMORY_MAP *pMemoryMap, QList
 {
     OFFSETSIZE osResult = {};
 
-    QList<TAG_STRUCT> listStrTab = _getTagStructs(pListTagStructs, XELF_DEF::DT_STRTAB);
-    QList<TAG_STRUCT> listStrSize = _getTagStructs(pListTagStructs, XELF_DEF::DT_STRSZ);
+    QList<TAG_STRUCT> listStrTab = _getTagStructs(pListTagStructs, XELF_DEF::S_DT_STRTAB);
+    QList<TAG_STRUCT> listStrSize = _getTagStructs(pListTagStructs, XELF_DEF::S_DT_STRSZ);
 
     if (listStrTab.count() && listStrSize.count()) {
         qint64 nOffset = addressToOffset(pMemoryMap, listStrTab.at(0).nValue);
@@ -3432,7 +3432,7 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUC
 {
     QList<QString> listResult;
 
-    QList<TAG_STRUCT> listNeeded = _getTagStructs(pList, XELF_DEF::DT_NEEDED);
+    QList<TAG_STRUCT> listNeeded = _getTagStructs(pList, XELF_DEF::S_DT_NEEDED);
 
     OFFSETSIZE osStringTable = getStringTable(pMemoryMap, pList);
 
@@ -3471,9 +3471,9 @@ XBinary::OS_STRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF
 {
     OS_STRING result = {};
 
-    QList<TAG_STRUCT> listRunPath = _getTagStructs(pListTagStructs, XELF_DEF::DT_RUNPATH);
-    QList<TAG_STRUCT> listStrTab = _getTagStructs(pListTagStructs, XELF_DEF::DT_STRTAB);
-    QList<TAG_STRUCT> listStrSize = _getTagStructs(pListTagStructs, XELF_DEF::DT_STRSZ);
+    QList<TAG_STRUCT> listRunPath = _getTagStructs(pListTagStructs, XELF_DEF::S_DT_RUNPATH);
+    QList<TAG_STRUCT> listStrTab = _getTagStructs(pListTagStructs, XELF_DEF::S_DT_STRTAB);
+    QList<TAG_STRUCT> listStrSize = _getTagStructs(pListTagStructs, XELF_DEF::S_DT_STRSZ);
 
     if (listStrTab.count() && listStrSize.count() && listRunPath.count()) {
         qint64 nOffset = addressToOffset(pMemoryMap, listStrTab.at(0).nValue);
@@ -3669,7 +3669,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
     result.nBinarySize = getSize();
 
     QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
-    QList<XELF_DEF::Elf_Phdr> listSegments = _getPrograms(&listProgramHeaders, XELF_DEF::PT_LOAD);
+    QList<XELF_DEF::Elf_Phdr> listSegments = _getPrograms(&listProgramHeaders, XELF_DEF::S_PT_LOAD);
 
     //    bool bIs64=is64();
     qint32 nNumberOfSegments = listSegments.count();
@@ -4070,9 +4070,9 @@ XBinary::MODE XELF::getMode()
 
     quint8 ident = getIdent_class();
 
-    if (ident == XELF_DEF::ELFCLASS32) {
+    if (ident == XELF_DEF::S_ELFCLASS32) {
         result = MODE_32;
-    } else if (ident == XELF_DEF::ELFCLASS64) {
+    } else if (ident == XELF_DEF::S_ELFCLASS64) {
         result = MODE_64;
     }
 
@@ -4096,15 +4096,15 @@ qint32 XELF::getType()
         nType = getHdr32_type();
     }
 
-    if (nType == XELF_DEF::ET_REL) {
+    if (nType == XELF_DEF::S_ET_REL) {
         nResult = TYPE_REL;
-    } else if (nType == XELF_DEF::ET_EXEC) {
+    } else if (nType == XELF_DEF::S_ET_EXEC) {
         nResult = TYPE_EXEC;
-    } else if (nType == XELF_DEF::ET_DYN) {
+    } else if (nType == XELF_DEF::S_ET_DYN) {
         nResult = TYPE_DYN;
-    } else if (nType == XELF_DEF::ET_CORE) {
+    } else if (nType == XELF_DEF::S_ET_CORE) {
         nResult = TYPE_CORE;
-    } else if (nType == XELF_DEF::ET_NUM) {
+    } else if (nType == XELF_DEF::S_ET_NUM) {
         nResult = TYPE_NUM;
     }
 
@@ -4134,21 +4134,21 @@ XBinary::OSINFO XELF::getOsInfo()
 
     quint8 osabi = getIdent_osabi();
 
-    if (osabi == XELF_DEF::ELFOSABI_HPUX) result.osName = OSNAME_HPUX;
-    else if (osabi == XELF_DEF::ELFOSABI_NETBSD) result.osName = OSNAME_NETBSD;
-    else if (osabi == XELF_DEF::ELFOSABI_LINUX) result.osName = OSNAME_LINUX;
-    else if (osabi == XELF_DEF::ELFOSABI_SOLARIS) result.osName = OSNAME_SOLARIS;
-    else if (osabi == XELF_DEF::ELFOSABI_AIX) result.osName = OSNAME_AIX;
-    else if (osabi == XELF_DEF::ELFOSABI_IRIX) result.osName = OSNAME_IRIX;
-    else if (osabi == XELF_DEF::ELFOSABI_FREEBSD) result.osName = OSNAME_FREEBSD;
-    else if (osabi == XELF_DEF::ELFOSABI_TRU64) result.osName = OSNAME_TRU64;
-    else if (osabi == XELF_DEF::ELFOSABI_MODESTO) result.osName = OSNAME_MODESTO;
-    else if (osabi == XELF_DEF::ELFOSABI_OPENBSD) result.osName = OSNAME_OPENBSD;
-    else if (osabi == XELF_DEF::ELFOSABI_OPENVMS) result.osName = OSNAME_OPENVMS;
-    else if (osabi == XELF_DEF::ELFOSABI_NSK) result.osName = OSNAME_NSK;
-    else if (osabi == XELF_DEF::ELFOSABI_AROS) result.osName = OSNAME_AROS;
-    else if (osabi == XELF_DEF::ELFOSABI_FENIXOS) result.osName = OSNAME_FENIXOS;
-    else if (osabi == XELF_DEF::ELFOSABI_OPENVOS) result.osName = OSNAME_OPENVOS;
+    if (osabi == XELF_DEF::S_ELFOSABI_HPUX) result.osName = OSNAME_HPUX;
+    else if (osabi == XELF_DEF::S_ELFOSABI_NETBSD) result.osName = OSNAME_NETBSD;
+    else if (osabi == XELF_DEF::S_ELFOSABI_LINUX) result.osName = OSNAME_LINUX;
+    else if (osabi == XELF_DEF::S_ELFOSABI_SOLARIS) result.osName = OSNAME_SOLARIS;
+    else if (osabi == XELF_DEF::S_ELFOSABI_AIX) result.osName = OSNAME_AIX;
+    else if (osabi == XELF_DEF::S_ELFOSABI_IRIX) result.osName = OSNAME_IRIX;
+    else if (osabi == XELF_DEF::S_ELFOSABI_FREEBSD) result.osName = OSNAME_FREEBSD;
+    else if (osabi == XELF_DEF::S_ELFOSABI_TRU64) result.osName = OSNAME_TRU64;
+    else if (osabi == XELF_DEF::S_ELFOSABI_MODESTO) result.osName = OSNAME_MODESTO;
+    else if (osabi == XELF_DEF::S_ELFOSABI_OPENBSD) result.osName = OSNAME_OPENBSD;
+    else if (osabi == XELF_DEF::S_ELFOSABI_OPENVMS) result.osName = OSNAME_OPENVMS;
+    else if (osabi == XELF_DEF::S_ELFOSABI_NSK) result.osName = OSNAME_NSK;
+    else if (osabi == XELF_DEF::S_ELFOSABI_AROS) result.osName = OSNAME_AROS;
+    else if (osabi == XELF_DEF::S_ELFOSABI_FENIXOS) result.osName = OSNAME_FENIXOS;
+    else if (osabi == XELF_DEF::S_ELFOSABI_OPENVOS) result.osName = OSNAME_OPENVOS;
 
     QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
     QList<XELF_DEF::Elf_Shdr> listSectionHeaders = getElf_ShdrList();
@@ -4304,8 +4304,16 @@ XBinary::OSINFO XELF::getOsInfo()
     }
 
     if (result.osName == OSNAME_UNIX) {
-        if (isNotePresent(&listNotes, "Android") || (XBinary::isStringInListPresent(&listLibraries, "liblog.so")) ||
-            ((sInterpteter == "system/bin/linker") || (sInterpteter == "system/bin/linker64"))) {
+        if (isNotePresent(&listNotes, "Android")) {
+            result.osName = OSNAME_ANDROID;
+            NOTE note = getNote(&listNotes, "Android");
+
+            if (note.nSize >= 4) {
+                quint32 nSDKVersion = read_uint32(note.nDataOffset);
+                result.sOsVersion = XBinary::getAndroidVersionFromApi(nSDKVersion);
+            }
+        } else if ((XBinary::isStringInListPresent(&listLibraries, "liblog.so")) ||
+                   ((sInterpteter == "system/bin/linker") || (sInterpteter == "system/bin/linker64"))) {
             result.osName = OSNAME_ANDROID;
         }
     }
@@ -4587,13 +4595,13 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
 {
     QList<XBinary::DATASET> listResult;
 
-    QList<TAG_STRUCT> listStrTab = _getTagStructs(pListTagStructs, XELF_DEF::DT_STRTAB);
-    QList<TAG_STRUCT> listStrSize = _getTagStructs(pListTagStructs, XELF_DEF::DT_STRSZ);
-    QList<TAG_STRUCT> listStrNeeded = _getTagStructs(pListTagStructs, XELF_DEF::DT_NEEDED);
+    QList<TAG_STRUCT> listStrTab = _getTagStructs(pListTagStructs, XELF_DEF::S_DT_STRTAB);
+    QList<TAG_STRUCT> listStrSize = _getTagStructs(pListTagStructs, XELF_DEF::S_DT_STRSZ);
+    QList<TAG_STRUCT> listStrNeeded = _getTagStructs(pListTagStructs, XELF_DEF::S_DT_NEEDED);
     QList<TAG_STRUCT> listRunPath = _getTagStructs(pListTagStructs, 0x1d);  // TODO const
-    QList<TAG_STRUCT> listSymbols = _getTagStructs(pListTagStructs, XELF_DEF::DT_SYMTAB);
-    QList<TAG_STRUCT> listRelaTab = _getTagStructs(pListTagStructs, XELF_DEF::DT_RELA);
-    QList<TAG_STRUCT> listRelaSize = _getTagStructs(pListTagStructs, XELF_DEF::DT_RELASZ);
+    QList<TAG_STRUCT> listSymbols = _getTagStructs(pListTagStructs, XELF_DEF::S_DT_SYMTAB);
+    QList<TAG_STRUCT> listRelaTab = _getTagStructs(pListTagStructs, XELF_DEF::S_DT_RELA);
+    QList<TAG_STRUCT> listRelaSize = _getTagStructs(pListTagStructs, XELF_DEF::S_DT_RELASZ);
     QList<TAG_STRUCT> listRelTab = _getTagStructs(pListTagStructs, 17);   // TODO const
     QList<TAG_STRUCT> listRelSize = _getTagStructs(pListTagStructs, 18);  // TODO const
 

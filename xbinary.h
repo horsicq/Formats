@@ -1013,7 +1013,7 @@ public:
     bool compareSignature(const QString &sSignature, qint64 nOffset = 0);
     bool compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset = 0);
     static bool _compareByteArrayWithSignature(QByteArray baData, const QString &sSignature);
-    static QString _createSignature(const QString &sSignature1, QString sSignature2);
+    static QString _createSignature(const QString &sSignature1, const QString &sSignature2);
 
     bool compareSignatureOnAddress(const QString &sSignature, XADDR nAddress);
     bool compareSignatureOnAddress(_MEMORY_MAP *pMemoryMap, QString sSignature, XADDR nAddress);
@@ -1456,6 +1456,7 @@ public:
     static qint64 align_down(qint64 nValue, qint64 nAlignment);
 
     static char *strCopy(char *pszDest, char *pszSource);
+    static QString getAndroidVersionFromApi(quint32 nAPI);
 
 private:
     static const int READWRITE_BUFFER_SIZE = 0x1000;

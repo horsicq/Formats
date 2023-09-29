@@ -58,89 +58,89 @@ namespace XELF_DEF {
 // typedef uint64_t       Elf64_Lword;
 // typedef uint64_t       Elf64_Xword;
 
-const quint8 EI_NIDENT = 16;
-const quint8 EI_MAG0 = 0;
-const quint8 ELFMAG0 = 0x7F;
-const quint8 EI_MAG1 = 1;
-const quint8 ELFMAG1 = 'E';
-const quint8 EI_MAG2 = 2;
-const quint8 ELFMAG2 = 'L';
-const quint8 EI_MAG3 = 3;
-const quint8 ELFMAG3 = 'F';
+const quint8 S_EI_NIDENT = 16;
+const quint8 S_EI_MAG0 = 0;
+const quint8 S_ELFMAG0 = 0x7F;
+const quint8 S_EI_MAG1 = 1;
+const quint8 S_ELFMAG1 = 'E';
+const quint8 S_EI_MAG2 = 2;
+const quint8 S_ELFMAG2 = 'L';
+const quint8 S_EI_MAG3 = 3;
+const quint8 S_ELFMAG3 = 'F';
 // const quint8 ELFMAG          "\177ELF"
-const quint32 ELFMAG = 0x464C457F;
-const quint8 SELFMAG = 4;
-const quint8 EI_CLASS = 4;      /* File class byte index */
-const quint8 ELFCLASSNONE = 0;  /* Invalid class */
-const quint8 ELFCLASS32 = 1;    /* 32-bit objects */
-const quint8 ELFCLASS64 = 2;    /* 64-bit objects */
-const quint8 EI_DATA = 5;       /* Data encodeing byte index */
-const quint8 ELFDATANONE = 0;   /* Invalid data encoding */
-const quint8 ELFDATA2LSB = 1;   /* 2's complement little endian */
-const quint8 ELFDATA2MSB = 2;   /* 2's complement big endian */
-const quint8 EI_VERSION = 6;    /* File version byte index */
-const quint8 EV_NONE = 0;       /* Invalid ELF Version */
-const quint8 EV_CURRENT = 1;    /* Current version */
-const quint8 EI_OSABI = 7;      /* Operating system/ABI identification */
-const quint8 EI_ABIVERSION = 8; /* ABI version */
-const quint8 SHN_UNDEF = 0;
+const quint32 S_ELFMAG = 0x464C457F;
+const quint8 S_SELFMAG = 4;
+const quint8 S_EI_CLASS = 4;      /* File class byte index */
+const quint8 S_ELFCLASSNONE = 0;  /* Invalid class */
+const quint8 S_ELFCLASS32 = 1;    /* 32-bit objects */
+const quint8 S_ELFCLASS64 = 2;    /* 64-bit objects */
+const quint8 S_EI_DATA = 5;       /* Data encodeing byte index */
+const quint8 S_ELFDATANONE = 0;   /* Invalid data encoding */
+const quint8 S_ELFDATA2LSB = 1;   /* 2's complement little endian */
+const quint8 S_ELFDATA2MSB = 2;   /* 2's complement big endian */
+const quint8 S_EI_VERSION = 6;    /* File version byte index */
+const quint8 S_EV_NONE = 0;       /* Invalid ELF Version */
+const quint8 S_EV_CURRENT = 1;    /* Current version */
+const quint8 S_EI_OSABI = 7;      /* Operating system/ABI identification */
+const quint8 S_EI_ABIVERSION = 8; /* ABI version */
+const quint8 S_SHN_UNDEF = 0;
 
-const quint16 ET_NONE = 0;
-const quint16 ET_REL = 1;
-const quint16 ET_EXEC = 2;
-const quint16 ET_DYN = 3;
-const quint16 ET_CORE = 4;
-const quint16 ET_NUM = 5;
-const quint16 ET_LOPROC = 0xFF00;
-const quint16 ET_HIPROC = 0xFFFF;
+const quint16 S_ET_NONE = 0;
+const quint16 S_ET_REL = 1;
+const quint16 S_ET_EXEC = 2;
+const quint16 S_ET_DYN = 3;
+const quint16 S_ET_CORE = 4;
+const quint16 S_ET_NUM = 5;
+const quint16 S_ET_LOPROC = 0xFF00;
+const quint16 S_ET_HIPROC = 0xFFFF;
 
-const quint32 DT_NULL = 0;      /* Marks end of dynamic section */
-const quint32 DT_NEEDED = 1;    /* Name of needed library */
-const quint32 DT_PLTRELSZ = 2;  /* Size in bytes of PLT relocs */
-const quint32 DT_PLTGOT = 3;    /* Processor defined value */
-const quint32 DT_HASH = 4;      /* Address of symbol hash table */
-const quint32 DT_STRTAB = 5;    /* Address of string table */
-const quint32 DT_SYMTAB = 6;    /* Address of symbol table */
-const quint32 DT_RELA = 7;      /* Address of Rela relocs */
-const quint32 DT_RELASZ = 8;    /* Total size of Rela relocs */
-const quint32 DT_RELAENT = 9;   /* Size of one Rela reloc */
-const quint32 DT_STRSZ = 10;    /* Size of string table */
-const quint32 DT_RUNPATH = 29;  // Run path
+const quint32 S_DT_NULL = 0;      /* Marks end of dynamic section */
+const quint32 S_DT_NEEDED = 1;    /* Name of needed library */
+const quint32 S_DT_PLTRELSZ = 2;  /* Size in bytes of PLT relocs */
+const quint32 S_DT_PLTGOT = 3;    /* Processor defined value */
+const quint32 S_DT_HASH = 4;      /* Address of symbol hash table */
+const quint32 S_DT_STRTAB = 5;    /* Address of string table */
+const quint32 S_DT_SYMTAB = 6;    /* Address of symbol table */
+const quint32 S_DT_RELA = 7;      /* Address of Rela relocs */
+const quint32 S_DT_RELASZ = 8;    /* Total size of Rela relocs */
+const quint32 S_DT_RELAENT = 9;   /* Size of one Rela reloc */
+const quint32 S_DT_STRSZ = 10;    /* Size of string table */
+const quint32 S_DT_RUNPATH = 29;  // Run path
 
-const quint32 PT_LOAD = 1;
-const quint32 PT_DYNAMIC = 2;
-const quint32 PT_INTERP = 3;
-const quint32 PT_NOTE = 4;
+const quint32 S_PT_LOAD = 1;
+const quint32 S_PT_DYNAMIC = 2;
+const quint32 S_PT_INTERP = 3;
+const quint32 S_PT_NOTE = 4;
 
-const quint32 SHT_NOTE = 7;
+const quint32 S_SHT_NOTE = 7;
 
-const quint32 ELFOSABI_HPUX = 1;
-const quint32 ELFOSABI_NETBSD = 2;
-const quint32 ELFOSABI_LINUX = 3;
-const quint32 ELFOSABI_HURD = 4;
-const quint32 ELFOSABI_86OPEN = 5;
-const quint32 ELFOSABI_SOLARIS = 6;
-const quint32 ELFOSABI_AIX = 7;
-const quint32 ELFOSABI_IRIX = 8;
-const quint32 ELFOSABI_FREEBSD = 9;
-const quint32 ELFOSABI_TRU64 = 10;
-const quint32 ELFOSABI_MODESTO = 11;
-const quint32 ELFOSABI_OPENBSD = 12;
-const quint32 ELFOSABI_OPENVMS = 13;
-const quint32 ELFOSABI_NSK = 14;
-const quint32 ELFOSABI_AROS = 15;
-const quint32 ELFOSABI_FENIXOS = 16;
-const quint32 ELFOSABI_OPENVOS = 18;
+const quint32 S_ELFOSABI_HPUX = 1;
+const quint32 S_ELFOSABI_NETBSD = 2;
+const quint32 S_ELFOSABI_LINUX = 3;
+const quint32 S_ELFOSABI_HURD = 4;
+const quint32 S_ELFOSABI_86OPEN = 5;
+const quint32 S_ELFOSABI_SOLARIS = 6;
+const quint32 S_ELFOSABI_AIX = 7;
+const quint32 S_ELFOSABI_IRIX = 8;
+const quint32 S_ELFOSABI_FREEBSD = 9;
+const quint32 S_ELFOSABI_TRU64 = 10;
+const quint32 S_ELFOSABI_MODESTO = 11;
+const quint32 S_ELFOSABI_OPENBSD = 12;
+const quint32 S_ELFOSABI_OPENVMS = 13;
+const quint32 S_ELFOSABI_NSK = 14;
+const quint32 S_ELFOSABI_AROS = 15;
+const quint32 S_ELFOSABI_FENIXOS = 16;
+const quint32 S_ELFOSABI_OPENVOS = 18;
 
-const quint32 ELF_NOTE_OS_LINUX = 0;
-const quint32 ELF_NOTE_OS_GNU = 1;
-const quint32 ELF_NOTE_OS_SOLARIS2 = 2;
-const quint32 ELF_NOTE_OS_FREEBSD = 3;
-const quint32 ELF_NOTE_OS_NETBSD = 4;
-const quint32 ELF_NOTE_OS_SYLLABLE = 5;
+const quint32 S_ELF_NOTE_OS_LINUX = 0;
+const quint32 S_ELF_NOTE_OS_GNU = 1;
+const quint32 S_ELF_NOTE_OS_SOLARIS2 = 2;
+const quint32 S_ELF_NOTE_OS_FREEBSD = 3;
+const quint32 S_ELF_NOTE_OS_NETBSD = 4;
+const quint32 S_ELF_NOTE_OS_SYLLABLE = 5;
 
 struct Elf32_Ehdr {
-    quint8 e_ident[EI_NIDENT]; /* ident bytes */
+    quint8 e_ident[S_EI_NIDENT]; /* ident bytes */
     quint16 e_type;            /* file type */
     quint16 e_machine;         /* target machine */
     quint32 e_version;         /* file version */
@@ -157,7 +157,7 @@ struct Elf32_Ehdr {
 };
 
 struct Elf64_Ehdr {
-    quint8 e_ident[EI_NIDENT]; /* ident bytes */
+    quint8 e_ident[S_EI_NIDENT]; /* ident bytes */
     quint16 e_type;            /* file type */
     quint16 e_machine;         /* target machine */
     quint32 e_version;         /* file version */
@@ -174,7 +174,7 @@ struct Elf64_Ehdr {
 };
 
 struct Elf_Ehdr {
-    quint8 e_ident[EI_NIDENT]; /* ident bytes */
+    quint8 e_ident[S_EI_NIDENT]; /* ident bytes */
     quint16 e_type;            /* file type */
     quint16 e_machine;         /* target machine */
     quint32 e_version;         /* file version */
