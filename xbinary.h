@@ -1475,7 +1475,7 @@ private:
 protected:
     bool _isOffsetValid(qint64 nOffset);
     void _errorMessage(const QString &sErrorMessage);
-    void _infoMessage(QString sInfoMessage);
+    void _infoMessage(const QString &sInfoMessage);
     qint64 _calculateRawSize();
     static qint64 _calculateRawSize(_MEMORY_MAP *pMemoryMap);
 

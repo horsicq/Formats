@@ -6441,7 +6441,7 @@ void XBinary::_errorMessage(const QString &sErrorMessage)
     emit errorMessage(sErrorMessage);
 }
 
-void XBinary::_infoMessage(QString sInfoMessage)
+void XBinary::_infoMessage(const QString &sInfoMessage)
 {
 #ifdef QT_DEBUG
     qDebug("Info: %s", sInfoMessage.toLatin1().data());
