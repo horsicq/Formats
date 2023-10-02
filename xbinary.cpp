@@ -9565,7 +9565,7 @@ qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignat
     return nResult;
 }
 
-int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex)
+int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex)
 {
     int nResult = 0;
 

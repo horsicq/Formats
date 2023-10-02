@@ -1468,7 +1468,7 @@ private:
 
     static int _getSignatureRelOffsetFix(QList<SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, qint32 nStartIndex);
     static qint32 _getSignatureDelta(QList<SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex, bool *pbValid);
-    static int _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords, QString sSignature, int nStartIndex);
+    static int _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex);
     static int _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex);
     static qint32 _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid);
 
