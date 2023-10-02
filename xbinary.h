@@ -1460,7 +1460,7 @@ public:
 
 private:
     static const int READWRITE_BUFFER_SIZE = 0x1000;
-    static QString convertSignature(QString sSignature);
+    static QString convertSignature(const QString &sSignature);
     static QString qcharToHex(QChar cSymbol);
 
     static QList<SIGNATURE_RECORD> getSignatureRecords(QString sSignature, bool *pbValid);

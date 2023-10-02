@@ -6481,17 +6481,18 @@ qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-QString XBinary::convertSignature(QString sSignature)
+QString XBinary::convertSignature(const QString &sSignature)
 {
+    QString _sSignature = sSignature;
     // 'AnsiString'
     // TODO more defs
-    if (sSignature.contains(QChar(39))) {
+    if (_sSignature.contains(QChar(39))) {
         QString sTemp;
-        qint32 nStringSize = sSignature.size();
+        qint32 nStringSize = _sSignature.size();
         bool bAnsiString = false;
 
         for (qint32 i = 0; i < nStringSize; i++) {
-            QChar c = sSignature.at(i);
+            QChar c = _sSignature.at(i);
 
             if (c == QChar(39)) {
                 bAnsiString = !bAnsiString;
@@ -6502,20 +6503,20 @@ QString XBinary::convertSignature(QString sSignature)
             }
         }
 
-        sSignature = sTemp;
+        _sSignature = sTemp;
     }
 
-    if (sSignature.contains(QChar(' '))) {
-        sSignature = sSignature.remove(QChar(' '));
+    if (_sSignature.contains(QChar(' '))) {
+        _sSignature = _sSignature.remove(QChar(' '));
     }
 
-    if (sSignature.contains(QChar('?'))) {
-        sSignature = sSignature.replace(QChar('?'), QChar('.'));
+    if (_sSignature.contains(QChar('?'))) {
+        _sSignature = _sSignature.replace(QChar('?'), QChar('.'));
     }
 
-    sSignature = sSignature.toLower();
+    _sSignature = _sSignature.toLower();
 
-    return sSignature;
+    return _sSignature;
 }
 
 QString XBinary::qcharToHex(QChar cSymbol)
