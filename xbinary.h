@@ -1365,7 +1365,7 @@ public:
     static QString numberToString(quint64 nValue);
     static QString fullVersionDwordToString(quint32 nValue);
     static QString versionDwordToString(quint32 nValue);
-    static QString formatXML(QString sXML);
+    static QString formatXML(const QString &sXML);
 
     struct XDWORD {
         quint16 nValue1;

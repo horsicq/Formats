@@ -8460,7 +8460,7 @@ QString XBinary::versionDwordToString(quint32 nValue)
     return sResult;
 }
 
-QString XBinary::formatXML(QString sXML)
+QString XBinary::formatXML(const QString &sXML)
 {
     QString sResult;
 
