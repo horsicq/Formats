@@ -221,9 +221,9 @@ public:
     QByteArray getSection(quint32 nIndex);
     bool isSectionValid(quint32 nIndex);
 
-    QList<XELF_DEF::Elf32_Shdr> getElf32_ShdrList();
-    QList<XELF_DEF::Elf64_Shdr> getElf64_ShdrList();
-    QList<XELF_DEF::Elf_Shdr> getElf_ShdrList();
+    QList<XELF_DEF::Elf32_Shdr> getElf32_ShdrList(qint32 nLimit);
+    QList<XELF_DEF::Elf64_Shdr> getElf64_ShdrList(qint32 nLimit);
+    QList<XELF_DEF::Elf_Shdr> getElf_ShdrList(qint32 nLimit);
 
     XELF_DEF::Elf32_Shdr getElf32_Shdr(quint32 nIndex);
     XELF_DEF::Elf64_Shdr getElf64_Shdr(quint32 nIndex);
@@ -348,13 +348,14 @@ public:
     qint64 getPhdrSize();
 
     qint32 getSectionIndexByName(const QString &sSectionName);  // mb move to XBinary
+    qint32 getSectionIndexByName(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
     QByteArray getSectionByName(const QString &sSectionName);   // mb move to XBinary
 
     OS_STRING getProgramInterpreterName();
     OS_STRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
     OS_STRING getProgramInterpreterName(QList<SECTION_RECORD> *pListSectionRecords);
 
-    QList<QString> getCommentStrings();
+    QList<QString> getCommentStrings(QList<SECTION_RECORD> *pListSectionRecords);
     QList<QString> getCommentStrings(qint32 nSection);
 
     QList<NOTE> getNotes();
@@ -471,7 +472,7 @@ public:
     void setElf64_Rela_r_info(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
     void setElf64_Rela_r_addend(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
 
-    quint16 getNumberOfSections();
+    quint32 getNumberOfSections();
     quint16 getNumberOfPrograms();
 
     bool isSectionsTablePresent();
