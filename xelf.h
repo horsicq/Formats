@@ -208,8 +208,8 @@ public:
     static QMap<quint64, QString> getStTypes();
     static QMap<quint64, QString> getStTypesS();
 
-    quint16 getSectionStringTable();
-    quint16 getSectionStringTable(bool bIs64);
+    quint32 getSectionStringTable();
+    quint32 getSectionStringTable(bool bIs64);
 
     OFFSETSIZE getSectionOffsetSize(quint32 nSection);
 

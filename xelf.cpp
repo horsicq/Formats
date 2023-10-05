@@ -1200,12 +1200,12 @@ QMap<quint64, QString> XELF::getProgramFlagsS()
     return mapResult;
 }
 
-quint16 XELF::getSectionStringTable()
+quint32 XELF::getSectionStringTable()
 {
     return getSectionStringTable(is64());
 }
 
-quint16 XELF::getSectionStringTable(bool bIs64)
+quint32 XELF::getSectionStringTable(bool bIs64)
 {
     quint32 nResult = 0;
 
@@ -1213,6 +1213,28 @@ quint16 XELF::getSectionStringTable(bool bIs64)
         nResult = getHdr64_shstrndx();
     } else {
         nResult = getHdr32_shstrndx();
+    }
+
+    if (nResult == 0) {
+        quint64 nOffset = 0;
+
+        if (bIs64) {
+            nOffset = getHdr64_shoff();
+        } else {
+            nOffset = getHdr32_shoff();
+        }
+
+        if (nOffset) {
+            bool bIsBigEndian = isBigEndian();
+
+            if (bIs64) {
+                XELF_DEF::Elf64_Shdr record = _readElf64_Shdr(nOffset, bIsBigEndian);
+                nResult = record.sh_link;
+            } else {
+                XELF_DEF::Elf32_Shdr record = _readElf32_Shdr(nOffset, bIsBigEndian);
+                nResult = record.sh_link;
+            }
+        }
     }
 
     return nResult;
