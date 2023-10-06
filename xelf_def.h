@@ -131,6 +131,8 @@ const quint32 S_ELFOSABI_NSK = 14;
 const quint32 S_ELFOSABI_AROS = 15;
 const quint32 S_ELFOSABI_FENIXOS = 16;
 const quint32 S_ELFOSABI_OPENVOS = 18;
+const quint32 S_ELFOSABI_ARM_AEABI = 64;
+const quint32 S_ELFOSABI_ARM = 97;
 
 const quint32 S_ELF_NOTE_OS_LINUX = 0;
 const quint32 S_ELF_NOTE_OS_GNU = 1;
