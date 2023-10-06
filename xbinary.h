@@ -1391,6 +1391,7 @@ public:
     static XVARIANT getXVariant(quint64 nValue, bool bIsBigEndian = false);
     static XVARIANT getXVariant(quint64 nValue[2], bool bIsBigEndian = false);
     static XVARIANT getXVariant(quint64 nLow, quint64 nHigh, bool bIsBigEndian = false);
+    static XVARIANT getXVariant(quint64 nLow1, quint64 nLow2, quint64 nHigh1, quint64 nHigh2, bool bIsBigEndian = false);
     static XVARIANT getXVariant(quint8 nValue[10], bool bIsBigEndian = false);
 
     static quint64 xVariantToQword(XVARIANT xvariant);
@@ -1463,7 +1464,7 @@ private:
     static QString convertSignature(const QString &sSignature);
     static QString qcharToHex(QChar cSymbol);
 
-    static QList<SIGNATURE_RECORD> getSignatureRecords(QString sSignature, bool *pbValid);
+    static QList<SIGNATURE_RECORD> getSignatureRecords(const QString &sSignature, bool *pbValid);
     bool _compareSignature(_MEMORY_MAP *pMemoryMap, QList<SIGNATURE_RECORD> *pListSignatureRecords, qint64 nOffset);
 
     static int _getSignatureRelOffsetFix(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);

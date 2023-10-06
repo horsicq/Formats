@@ -8685,6 +8685,20 @@ XBinary::XVARIANT XBinary::getXVariant(quint64 nLow, quint64 nHigh, bool bIsBigE
     return result;
 }
 
+XBinary::XVARIANT XBinary::getXVariant(quint64 nLow1, quint64 nLow2, quint64 nHigh1, quint64 nHigh2, bool bIsBigEndian)
+{
+    XVARIANT result = {};
+
+    result.bIsBigEndian = bIsBigEndian;
+    result.mode = MODE_256;
+    result.var.v_uint256[0] = nLow1;
+    result.var.v_uint256[1] = nLow2;
+    result.var.v_uint256[2] = nHigh1;
+    result.var.v_uint256[3] = nHigh2;
+
+    return result;
+}
+
 XBinary::XVARIANT XBinary::getXVariant(quint8 nValue[10], bool bIsBigEndian)
 {
     XVARIANT result = {};
@@ -9370,7 +9384,7 @@ QString XBinary::getAndroidVersionFromApi(quint32 nAPI)
     return sResult;
 }
 
-QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(QString sSignature, bool *pbValid)
+QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSignature, bool *pbValid)
 {
     // TODO Error checks!
     QList<SIGNATURE_RECORD> listResult;
