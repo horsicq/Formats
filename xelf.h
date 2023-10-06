@@ -349,7 +349,7 @@ public:
 
     qint32 getSectionIndexByName(const QString &sSectionName);  // mb move to XBinary
     qint32 getSectionIndexByName(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
-    QByteArray getSectionByName(const QString &sSectionName);   // mb move to XBinary
+    QByteArray getSectionByName(const QString &sSectionName);  // mb move to XBinary
 
     OS_STRING getProgramInterpreterName();
     OS_STRING getProgramInterpreterName(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
