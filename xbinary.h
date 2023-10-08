@@ -1360,7 +1360,7 @@ public:
 
     static QString generateUUID();
 
-    static QString appendText(QString sResult, QString sString, QString sSeparate);
+    static QString appendText(QString sResult, QString sString, const QString &sSeparate);
     static QString bytesCountToString(quint64 nValue, quint64 nBase = 1024);
     static QString numberToString(quint64 nValue);
     static QString fullVersionDwordToString(quint32 nValue);
