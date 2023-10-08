@@ -1428,7 +1428,7 @@ public:
     static void setPdStructTotal(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue);
     static void setPdStructCurrent(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue);
     static void setPdStructCurrentIncrement(PDSTRUCT *pPdStruct, qint32 nIndex);
-    static void setPdStructStatus(PDSTRUCT *pPdStruct, qint32 nIndex, QString sStatus);
+    static void setPdStructStatus(PDSTRUCT *pPdStruct, qint32 nIndex, const QString &sStatus);
     static void setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex);
     static qint32 getFreeIndex(PDSTRUCT *pPdStruct);
     static bool isPdStructFinished(PDSTRUCT *pPdStruct);

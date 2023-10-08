@@ -9141,7 +9141,7 @@ void XBinary::setPdStructCurrentIncrement(PDSTRUCT *pPdStruct, qint32 nIndex)
     }
 }
 
-void XBinary::setPdStructStatus(PDSTRUCT *pPdStruct, qint32 nIndex, QString sStatus)
+void XBinary::setPdStructStatus(PDSTRUCT *pPdStruct, qint32 nIndex, const QString &sStatus)
 {
     if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
         pPdStruct->_pdRecord[nIndex].sStatus = sStatus;
