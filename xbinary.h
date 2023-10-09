@@ -1244,7 +1244,7 @@ public:
     bool compareOverlay(_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset);
 
     bool addOverlay(char *pData, qint64 nDataSize);
-    bool addOverlay(QString sFileName);
+    bool addOverlay(const QString &sFileName);
     bool removeOverlay();
 
     bool isSignatureInLoadSegmentPresent(qint32 nLoadSegment, QString sSignature);

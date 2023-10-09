@@ -7125,7 +7125,7 @@ bool XBinary::addOverlay(char *pData, qint64 nDataSize)
     return bResult;
 }
 
-bool XBinary::addOverlay(QString sFileName)
+bool XBinary::addOverlay(const QString &sFileName)
 {
     bool bResult = false;
 
