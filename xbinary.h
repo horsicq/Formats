@@ -1253,7 +1253,7 @@ public:
     static QString getStringCollision(QList<QString> *pListStrings, QString sString1, QString sString2);
 
     static bool writeToFile(QString sFileName, QByteArray baData);
-    static bool writeToFile(QString sFileName, QIODevice *pDevice);
+    static bool writeToFile(const QString &sFileName, QIODevice *pDevice);
     static bool appendToFile(QString sFileName, QString sString);
     static bool clearFile(QString sFileName);
     static qint32 getStringNumberFromList(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
