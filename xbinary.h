@@ -1331,7 +1331,7 @@ public:
     static bool isUnicodeSymbol(quint16 nCode, bool bExtra = false);
     QString getStringFromIndex(qint64 nOffset, qint64 nSize, qint32 nIndex);
 
-    static QList<QString> getAllFilesFromDirectory(QString sDirectory, QString sExtension);
+    static QList<QString> getAllFilesFromDirectory(QString sDirectory, const QString &sExtension);
 
     enum OPCODE_STATUS {
         OPCODE_STATUS_SUCCESS = 0,
