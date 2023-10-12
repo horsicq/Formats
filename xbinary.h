@@ -1231,7 +1231,7 @@ public:
 
     PACKED get_packedNumber(qint64 nOffset);
 
-    static QList<QString> getListFromFile(QString sFileName);
+    static QList<QString> getListFromFile(const QString &sFileName);
 
     qint64 getOverlaySize();
     static qint64 getOverlaySize(_MEMORY_MAP *pMemoryMap);

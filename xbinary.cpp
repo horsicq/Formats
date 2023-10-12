@@ -7015,7 +7015,7 @@ XBinary::PACKED XBinary::get_packedNumber(qint64 nOffset)
     return result;
 }
 
-QList<QString> XBinary::getListFromFile(QString sFileName)
+QList<QString> XBinary::getListFromFile(const QString &sFileName)
 {
     QList<QString> listResult;
 
