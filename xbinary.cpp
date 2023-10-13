@@ -7656,7 +7656,7 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
     return getDisasmMode(pMemoryMap->sArch, pMemoryMap->bIsBigEndian, pMemoryMap->mode);
 }
 
-XBinary::DM XBinary::getDisasmMode(QString sArch, bool bIsBigEndian, MODE mode)
+XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE mode)
 {
     XBinary::DM dmResult = DM_X86_16;
 
