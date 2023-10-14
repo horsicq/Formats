@@ -1240,7 +1240,7 @@ public:
     bool isOverlayPresent();
     static bool isOverlayPresent(_MEMORY_MAP *pMemoryMap);
 
-    bool compareOverlay(QString sSignature, qint64 nOffset);
+    bool compareOverlay(const QString &sSignature, qint64 nOffset);
     bool compareOverlay(_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset);
 
     bool addOverlay(char *pData, qint64 nDataSize);

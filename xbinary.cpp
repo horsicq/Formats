@@ -7088,7 +7088,7 @@ bool XBinary::isOverlayPresent(XBinary::_MEMORY_MAP *pMemoryMap)
     return (getOverlaySize(pMemoryMap) != 0);
 }
 
-bool XBinary::compareOverlay(QString sSignature, qint64 nOffset)
+bool XBinary::compareOverlay(const QString &sSignature, qint64 nOffset)
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
