@@ -1266,7 +1266,7 @@ public:
 
     static quint32 elfHash(const quint8 *pData);
 
-    static QString getVersionString(QString sString);
+    static QString getVersionString(const QString &sString);
     static qint64 getVersionIntValue(const QString &sString);
     static bool checkStringNumber(const QString &sString, quint32 nMin, quint32 nMax);
 

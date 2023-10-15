@@ -7392,7 +7392,7 @@ quint32 XBinary::elfHash(const quint8 *pData)
     return nResult;
 }
 
-QString XBinary::getVersionString(QString sString)
+QString XBinary::getVersionString(const QString &sString)
 {
     QString sResult;
 
