@@ -6530,7 +6530,7 @@ QString XBinary::stringToHex(const QString &sString)
     return QString::fromLatin1(sString.toLatin1().toHex());
 }
 
-QString XBinary::hexToString(QString sHex)
+QString XBinary::hexToString(const QString &sHex)
 {
     QString sResult;
 
