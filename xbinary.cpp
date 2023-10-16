@@ -7261,7 +7261,7 @@ bool XBinary::appendToFile(QString sFileName, QString sString)
     return bResult;
 }
 
-bool XBinary::clearFile(QString sFileName)
+bool XBinary::clearFile(const QString &sFileName)
 {
     bool bResult = false;
 
