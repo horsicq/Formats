@@ -6236,7 +6236,7 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
 //     return (nValue<<nShift)|(nValue>>((-nShift)&31));
 // }
 
-quint32 XBinary::getStringCustomCRC32(QString sString)
+quint32 XBinary::getStringCustomCRC32(const QString &sString)
 {
     quint32 nResult = 0;  // not ~0 !!! if ~0 (0xFFFFFFFF) it will be a CRC32C
 

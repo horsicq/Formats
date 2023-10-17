@@ -1136,7 +1136,7 @@ public:
 
     //    static quint32 _ror32(quint32 nValue,quint32 nShift);
     //    static quint32 _rol32(quint32 nValue,quint32 nShift);
-    static quint32 getStringCustomCRC32(QString sString);
+    static quint32 getStringCustomCRC32(const QString &sString);
 
     QIODevice *getDevice();
 

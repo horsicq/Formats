@@ -1778,10 +1778,10 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
     OFFSETSIZE osStringTable = getStringTable();
 
     quint32 nNumberOfSections = qMin((int)getFileHeader_NumberOfSections(), 100);  // TODO const
-    quint32 nFileAlignment = getOptionalHeader_FileAlignment();                    // TODO Check mb qint64
-    quint32 nSectionAlignment = getOptionalHeader_SectionAlignment();              // TODO Check mb qint64
+    qint64 nFileAlignment = getOptionalHeader_FileAlignment();
+    qint64 nSectionAlignment = getOptionalHeader_SectionAlignment();
     // qint64 nBaseAddress=getOptionalHeader_ImageBase();
-    quint32 nHeadersSize = getOptionalHeader_SizeOfHeaders();  // mb TODO calc for UPX
+    qint64 nHeadersSize = getOptionalHeader_SizeOfHeaders();  // mb TODO calc for UPX
 
     if (nFileAlignment > 0x10000)  // Invalid file
     {
@@ -1793,8 +1793,8 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
         nSectionAlignment = 0x1000;
     }
 
-    if (nHeadersSize > (quint64)getSize()) {
-        nHeadersSize = (quint32)getSize();
+    if (nHeadersSize > getSize()) {
+        nHeadersSize = getSize();
     }
 
     //    if(nFileAlignment==nSectionAlignment)
@@ -1802,7 +1802,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
     //        nFileAlignment=1;
     //    }
 
-    quint32 nVirtualSizeofHeaders = S_ALIGN_UP(nHeadersSize, nSectionAlignment);
+    qint64 nVirtualSizeofHeaders = S_ALIGN_UP64(nHeadersSize, nSectionAlignment);
     qint64 nMaxOffset = 0;
 
     // Check Format
@@ -1871,7 +1871,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
 
             qint64 nFileOffset = section.PointerToRawData;
             //
-            nFileOffset = S_ALIGN_DOWN(nFileOffset, nFileAlignment);
+            nFileOffset = S_ALIGN_DOWN64(nFileOffset, nFileAlignment);
             //        qint64
             //        nFileSize=__ALIGN_UP(section.SizeOfRawData,nFileAlignment);
             qint64 nFileSize = section.SizeOfRawData + (section.PointerToRawData - nFileOffset);
@@ -4146,8 +4146,8 @@ XBinary::OFFSETSIZE XPE::__getSectionOffsetAndSize(quint32 nSection)
     OFFSETSIZE osResult = {};
 
     XPE_DEF::IMAGE_SECTION_HEADER sectionHeader = getSectionHeader(nSection);
-    quint32 nSectionAlignment = getOptionalHeader_SectionAlignment();
-    quint32 nFileAlignment = getOptionalHeader_FileAlignment();
+    qint64 nSectionAlignment = getOptionalHeader_SectionAlignment();
+    qint64 nFileAlignment = getOptionalHeader_FileAlignment();
 
     if (nFileAlignment == nSectionAlignment) {
         nFileAlignment = 1;
@@ -4167,7 +4167,7 @@ XBinary::OFFSETSIZE XPE::__getSectionOffsetAndSize(quint32 nSection)
 
         if (!isImage()) {
             nSectionOffset = sectionHeader.PointerToRawData;
-            nSectionOffset = S_ALIGN_DOWN(nSectionOffset, nFileAlignment);
+            nSectionOffset = S_ALIGN_DOWN64(nSectionOffset, nFileAlignment);
             nSectionSize = sectionHeader.SizeOfRawData + (sectionHeader.PointerToRawData - nSectionOffset);
         } else {
             nSectionOffset = sectionHeader.VirtualAddress;
@@ -4389,23 +4389,23 @@ bool XPE::addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_H
         if (pe.isValid()) {
             qint64 nHeadersSize = pe._fixHeadersSize();
             qint64 nNewHeadersSize = pe._calculateHeadersSize(pe.getSectionsTableOffset(), pe.getFileHeader_NumberOfSections() + 1);
-            quint32 nFileAlignment = pe.getOptionalHeader_FileAlignment();
-            quint32 nSectionAlignment = pe.getOptionalHeader_SectionAlignment();
+            qint64 nFileAlignment = pe.getOptionalHeader_FileAlignment();
+            qint64 nSectionAlignment = pe.getOptionalHeader_SectionAlignment();
 
             if (pSectionHeader->PointerToRawData == 0) {
                 pSectionHeader->PointerToRawData = pe._calculateRawSize();
             }
 
             if (pSectionHeader->SizeOfRawData == 0) {
-                pSectionHeader->SizeOfRawData = S_ALIGN_UP(nDataSize, nFileAlignment);
+                pSectionHeader->SizeOfRawData = S_ALIGN_UP64(nDataSize, nFileAlignment);
             }
 
             if (pSectionHeader->VirtualAddress == 0) {
-                pSectionHeader->VirtualAddress = S_ALIGN_UP(pe.getOptionalHeader_SizeOfImage(), nSectionAlignment);
+                pSectionHeader->VirtualAddress = S_ALIGN_UP64(pe.getOptionalHeader_SizeOfImage(), nSectionAlignment);
             }
 
             if (pSectionHeader->Misc.VirtualSize == 0) {
-                pSectionHeader->Misc.VirtualSize = S_ALIGN_UP(nDataSize, nSectionAlignment);
+                pSectionHeader->Misc.VirtualSize = S_ALIGN_UP64(nDataSize, nSectionAlignment);
             }
 
             qint64 nDelta = nNewHeadersSize - nHeadersSize;
@@ -8591,8 +8591,8 @@ qint64 XPE::calculateHeadersSize()
 qint64 XPE::_calculateHeadersSize(qint64 nSectionsTableOffset, quint32 nNumberOfSections)
 {
     qint64 nHeadersSize = nSectionsTableOffset + sizeof(XPE_DEF::IMAGE_SECTION_HEADER) * nNumberOfSections;
-    quint32 nFileAlignment = getOptionalHeader_FileAlignment();
-    nHeadersSize = S_ALIGN_UP(nHeadersSize, nFileAlignment);
+    qint64 nFileAlignment = getOptionalHeader_FileAlignment();
+    nHeadersSize = S_ALIGN_UP64(nHeadersSize, nFileAlignment);
 
     return nHeadersSize;
 }
