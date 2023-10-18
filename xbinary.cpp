@@ -6671,7 +6671,7 @@ qint64 XBinary::hexToInt64(QString sHex, bool bIsBigEndian)
     return nResult;
 }
 
-QString XBinary::invertHexByteString(QString sHex)
+QString XBinary::invertHexByteString(const QString &sHex)
 {
     QString sResult;
 

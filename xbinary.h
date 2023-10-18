@@ -1180,7 +1180,7 @@ public:
     static quint64 hexToUint64(QString sHex, bool bIsBigEndian = false);
     static qint64 hexToInt64(QString sHex, bool bIsBigEndian = false);
 
-    static QString invertHexByteString(QString sHex);
+    static QString invertHexByteString(const QString &sHex);
 
     static void _swapBytes(char *pSource, qint32 nSize);
     static quint16 swapBytes(quint16 nValue);
