@@ -8382,14 +8382,16 @@ QString XBinary::generateUUID()
     return QUuid::createUuid().toString().remove("{").remove("}");
 }
 
-QString XBinary::appendText(QString sResult, QString sString, const QString &sSeparate)
+QString XBinary::appendText(const QString &sResult, QString sString, const QString &sSeparate)
 {
+    QString _sResult = sResult;
+
     if (sString != "") {
-        if (sResult != "") sResult += sSeparate;
-        sResult += sString;
+        if (_sResult != "") _sResult += sSeparate;
+        _sResult += sString;
     }
 
-    return sResult;
+    return _sResult;
 }
 
 QString XBinary::bytesCountToString(quint64 nValue, quint64 nBase)
