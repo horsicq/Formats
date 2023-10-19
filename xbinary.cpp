@@ -8343,7 +8343,7 @@ XBinary::SYMBOL_RECORD XBinary::findSymbolByAddress(QList<SYMBOL_RECORD> *pListS
     return result;
 }
 
-XBinary::SYMBOL_RECORD XBinary::findSymbolByName(QList<SYMBOL_RECORD> *pListSymbolRecords, QString sName)
+XBinary::SYMBOL_RECORD XBinary::findSymbolByName(QList<SYMBOL_RECORD> *pListSymbolRecords, const QString &sName)
 {
     SYMBOL_RECORD result = {};
 
