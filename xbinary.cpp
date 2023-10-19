@@ -6549,14 +6549,15 @@ QString XBinary::doubleToString(double dValue, int nPrec)
     return QString("%1").arg(dValue, 0, 'f', nPrec);
 }
 
-quint8 XBinary::hexToUint8(QString sHex)
+quint8 XBinary::hexToUint8(const QString &sHex)
 {
+    QString _sHex = sHex;
     quint8 nResult = 0;
 
-    if ((quint32)sHex.length() >= sizeof(quint8)) {
-        sHex = sHex.mid(0, 2 * sizeof(quint8));
+    if ((quint32)_sHex.length() >= sizeof(quint8)) {
+        _sHex = _sHex.mid(0, 2 * sizeof(quint8));
         bool bStatus = false;
-        nResult = (quint8)(sHex.toInt(&bStatus, 16));
+        nResult = (quint8)(_sHex.toInt(&bStatus, 16));
     }
 
     return nResult;

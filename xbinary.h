@@ -1171,7 +1171,7 @@ public:
     static QString floatToString(float fValue, int nPrec = 2);
     static QString doubleToString(double dValue, int nPrec = 2);
 
-    static quint8 hexToUint8(QString sHex);
+    static quint8 hexToUint8(const QString &sHex);
     static qint8 hexToInt8(QString sHex);
     static quint16 hexToUint16(QString sHex, bool bIsBigEndian = false);
     static qint16 hexToInt16(QString sHex, bool bIsBigEndian = false);
