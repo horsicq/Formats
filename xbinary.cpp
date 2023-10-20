@@ -5165,7 +5165,7 @@ bool XBinary::checkString_uint8(const QString &sValue)
     return bResult;
 }
 
-bool XBinary::checkString_int8(QString sValue)
+bool XBinary::checkString_int8(const QString &sValue)
 {
     bool bResult = false;
 
