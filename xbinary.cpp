@@ -6569,7 +6569,7 @@ qint8 XBinary::hexToInt8(const QString &sHex)
     quint8 nResult = 0;
 
     if ((quint32)_sHex.length() >= sizeof(qint8)) {
-        _sHex = sHex.mid(0, 2 * sizeof(qint8));
+        _sHex = _sHex.mid(0, 2 * sizeof(qint8));
         bool bStatus = false;
         nResult = (qint8)(_sHex.toInt(&bStatus, 16));
     }
@@ -6577,17 +6577,18 @@ qint8 XBinary::hexToInt8(const QString &sHex)
     return nResult;
 }
 
-quint16 XBinary::hexToUint16(QString sHex, bool bIsBigEndian)
+quint16 XBinary::hexToUint16(const QString &sHex, bool bIsBigEndian)
 {
+    QString _sHex = sHex;
     quint16 nResult = 0;
 
-    if ((quint32)sHex.length() >= sizeof(quint16)) {
+    if ((quint32)_sHex.length() >= sizeof(quint16)) {
         if (!bIsBigEndian) {
-            sHex = invertHexByteString(sHex.mid(0, 2 * sizeof(quint16)));
+            _sHex = invertHexByteString(_sHex.mid(0, 2 * sizeof(quint16)));
         }
 
         bool bStatus = false;
-        nResult = sHex.toUShort(&bStatus, 16);
+        nResult = _sHex.toUShort(&bStatus, 16);
     }
 
     return nResult;

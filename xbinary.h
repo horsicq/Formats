@@ -1173,7 +1173,7 @@ public:
 
     static quint8 hexToUint8(const QString &sHex);
     static qint8 hexToInt8(const QString &sHex);
-    static quint16 hexToUint16(QString sHex, bool bIsBigEndian = false);
+    static quint16 hexToUint16(const QString &sHex, bool bIsBigEndian = false);
     static qint16 hexToInt16(QString sHex, bool bIsBigEndian = false);
     static quint32 hexToUint32(QString sHex, bool bIsBigEndian = false);
     static qint32 hexToInt32(QString sHex, bool bIsBigEndian = false);
