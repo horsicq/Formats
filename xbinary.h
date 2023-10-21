@@ -1172,7 +1172,7 @@ public:
     static QString doubleToString(double dValue, int nPrec = 2);
 
     static quint8 hexToUint8(const QString &sHex);
-    static qint8 hexToInt8(QString sHex);
+    static qint8 hexToInt8(const QString &sHex);
     static quint16 hexToUint16(QString sHex, bool bIsBigEndian = false);
     static qint16 hexToInt16(QString sHex, bool bIsBigEndian = false);
     static quint32 hexToUint32(QString sHex, bool bIsBigEndian = false);
@@ -1354,9 +1354,9 @@ public:
     static bool _updateReplaces(qint64 nDataOffset, char *pData, qint64 nDataSize, QList<MEMORY_REPLACE> *pListMemoryReplace);
 
     virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap, SYMBOL_TYPE symbolType = SYMBOL_TYPE_ALL);
-    static SYMBOL_RECORD findSymbolByAddress(QList<SYMBOL_RECORD> *pListSymbolRecords, XADDR nAddress); // Check InfoDB
-    static SYMBOL_RECORD findSymbolByName(QList<SYMBOL_RECORD> *pListSymbolRecords, const QString &sName); // Check InfoDB
-    static SYMBOL_RECORD findSymbolByOrdinal(QList<SYMBOL_RECORD> *pListSymbolRecords, qint32 nOrdinal); // Check InfoDB
+    static SYMBOL_RECORD findSymbolByAddress(QList<SYMBOL_RECORD> *pListSymbolRecords, XADDR nAddress);     // Check InfoDB
+    static SYMBOL_RECORD findSymbolByName(QList<SYMBOL_RECORD> *pListSymbolRecords, const QString &sName);  // Check InfoDB
+    static SYMBOL_RECORD findSymbolByOrdinal(QList<SYMBOL_RECORD> *pListSymbolRecords, qint32 nOrdinal);    // Check InfoDB
 
     static QString generateUUID();
 

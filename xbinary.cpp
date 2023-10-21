@@ -6563,14 +6563,15 @@ quint8 XBinary::hexToUint8(const QString &sHex)
     return nResult;
 }
 
-qint8 XBinary::hexToInt8(QString sHex)
+qint8 XBinary::hexToInt8(const QString &sHex)
 {
+    QString _sHex = sHex;
     quint8 nResult = 0;
 
-    if ((quint32)sHex.length() >= sizeof(qint8)) {
-        sHex = sHex.mid(0, 2 * sizeof(qint8));
+    if ((quint32)_sHex.length() >= sizeof(qint8)) {
+        _sHex = sHex.mid(0, 2 * sizeof(qint8));
         bool bStatus = false;
-        nResult = (qint8)(sHex.toInt(&bStatus, 16));
+        nResult = (qint8)(_sHex.toInt(&bStatus, 16));
     }
 
     return nResult;
