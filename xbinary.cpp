@@ -4458,6 +4458,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     stResult.insert(FT_BINARY);
 
     QByteArray baHeader;
+    QByteArray baNewHeader;
     baHeader = read_array(0, qMin(getSize(), (qint64)0x200));  // TODO const
     char *pOffset = baHeader.data();
     quint32 nSize = getSize();
@@ -4469,7 +4470,6 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             // TODO rewrite for NE, LE
             quint32 nLfanew = ((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_lfanew;
             quint32 nHeaderSize = baHeader.size() - sizeof(XPE_DEF::IMAGE_NT_HEADERS32);
-            QByteArray baNewHeader;
 
             bool bIsNewHeaderValid = false;
 
