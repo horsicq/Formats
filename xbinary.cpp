@@ -1520,7 +1520,7 @@ QString XBinary::_read_ansiString(char *pData, qint32 nMaxSize)
     return sResult;
 }
 
-QByteArray XBinary::_read_byteArray(char *pData, int nSize)
+QByteArray XBinary::_read_byteArray(char *pData, qint32 nSize)
 {
     return QByteArray(pData, nSize);
 }
