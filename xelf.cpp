@@ -3715,7 +3715,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
     result.sArch = getArch();
     result.bIsBigEndian = isBigEndian();
     result.sType = getTypeAsString();
-    XADDR _nModuleAddress = getModuleAddress();
+    //XADDR _nModuleAddress = getModuleAddress();
 
     result.nBinarySize = getSize();
 
@@ -3740,14 +3740,14 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
         }
         //        quint64 nFileAlign=0x1; // TODO Check!!!
         quint64 nFileAlign = nVirtualAlign;
-        XADDR nVirtualAddress = S_ALIGN_DOWN(listSegments.at(i).p_vaddr, nVirtualAlign) + _nModuleAddress;
-        qint64 nFileOffset = S_ALIGN_DOWN(listSegments.at(i).p_offset, nFileAlign);
+        XADDR nVirtualAddress = S_ALIGN_DOWN64(listSegments.at(i).p_vaddr, nVirtualAlign);
+        qint64 nFileOffset = S_ALIGN_DOWN64(listSegments.at(i).p_offset, nFileAlign);
 
         qint64 nVirtualDelta = listSegments.at(i).p_vaddr - nVirtualAddress;
         qint64 nFileDelta = listSegments.at(i).p_offset - nFileOffset;
 
-        qint64 nVirtualSize = S_ALIGN_UP(nVirtualDelta + listSegments.at(i).p_memsz, nVirtualAlign);
-        qint64 nFileSize = S_ALIGN_UP(nFileDelta + listSegments.at(i).p_filesz, nFileAlign);
+        qint64 nVirtualSize = S_ALIGN_UP64(nVirtualDelta + listSegments.at(i).p_memsz, nVirtualAlign);
+        qint64 nFileSize = S_ALIGN_UP64(nFileDelta + listSegments.at(i).p_filesz, nFileAlign);
 
         if (nFileOffset + nFileSize > result.nBinarySize) {
             nFileSize = result.nBinarySize - nFileOffset;
@@ -3958,10 +3958,20 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
 
     result.nImageSize = nMaxSegmentAddress - result.nModuleAddress;
 
+    qint64 nFixAddressDelta = getModuleAddress() - result.nModuleAddress;
+
     if (result.fileType == FT_ELF64) {
-        result.nEntryPointAddress = getHdr64_entry() + _nModuleAddress;
+        result.nEntryPointAddress = getHdr64_entry() + nFixAddressDelta;
     } else {
-        result.nEntryPointAddress = getHdr32_entry() + _nModuleAddress;
+        result.nEntryPointAddress = getHdr32_entry() + nFixAddressDelta;
+    }
+
+    result.nModuleAddress = getModuleAddress();
+
+    qint32 _nNumberOfRecords = result.listRecords.count();
+
+    for (qint32 i = 0; i < _nNumberOfRecords; i++) {
+        result.listRecords[i].nAddress += nFixAddressDelta;
     }
 
     qint64 nMaxSectionOffset = nMaxSegmentOffset;

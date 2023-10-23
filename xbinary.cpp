@@ -6539,7 +6539,7 @@ QString XBinary::hexToString(const QString &sHex)
     return sResult;
 }
 
-QString XBinary::floatToString(float fValue, int nPrec)
+QString XBinary::floatToString(float fValue, qint32 nPrec)
 {
     return QString("%1").arg(fValue, 0, 'f', nPrec);
 }
