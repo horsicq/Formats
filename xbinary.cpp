@@ -6403,22 +6403,22 @@ XBinary::OFFSETSIZE XBinary::convertOffsetAndSize(QIODevice *pDevice, qint64 nOf
     return binary.convertOffsetAndSize(nOffset, nSize);
 }
 
-bool XBinary::compareSignatureStrings(QString sBaseSignature, QString sOptSignature)
+bool XBinary::compareSignatureStrings(const QString &sBaseSignature, const QString &sOptSignature)
 {
     bool bResult = false;
     // TODO optimize
     // TODO check
-    sBaseSignature = convertSignature(sBaseSignature);
-    sOptSignature = convertSignature(sOptSignature);
+    QString _sBaseSignature = convertSignature(sBaseSignature);
+    QString _sOptSignature = convertSignature(sOptSignature);
 
-    qint32 nSize = qMin(sBaseSignature.size(), sOptSignature.size());
+    qint32 nSize = qMin(_sBaseSignature.size(), _sOptSignature.size());
 
-    if ((nSize) && (sBaseSignature.size() >= sOptSignature.size())) {
+    if ((nSize) && (_sBaseSignature.size() >= _sOptSignature.size())) {
         bResult = true;
 
         for (qint32 i = 0; i < nSize; i++) {
-            QChar _qchar1 = sBaseSignature.at(i);
-            QChar _qchar2 = sOptSignature.at(i);
+            QChar _qchar1 = _sBaseSignature.at(i);
+            QChar _qchar2 = _sOptSignature.at(i);
 
             if ((_qchar1 != QChar('.')) && (_qchar2 != QChar('.'))) {
                 if (_qchar1 != _qchar2) {
