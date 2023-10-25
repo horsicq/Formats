@@ -7098,7 +7098,7 @@ bool XBinary::compareOverlay(const QString &sSignature, qint64 nOffset)
     return compareOverlay(&memoryMap, sSignature, nOffset);
 }
 
-bool XBinary::compareOverlay(XBinary::_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset)
+bool XBinary::compareOverlay(XBinary::_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset)
 {
     bool bResult = false;
 

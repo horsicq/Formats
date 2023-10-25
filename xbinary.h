@@ -1241,7 +1241,7 @@ public:
     static bool isOverlayPresent(_MEMORY_MAP *pMemoryMap);
 
     bool compareOverlay(const QString &sSignature, qint64 nOffset);
-    bool compareOverlay(_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset);
+    bool compareOverlay(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset);
 
     bool addOverlay(char *pData, qint64 nDataSize);
     bool addOverlay(const QString &sFileName);
