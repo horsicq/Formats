@@ -7213,7 +7213,7 @@ QString XBinary::getStringCollision(QList<QString> *pListStrings, QString sStrin
     return sResult;
 }
 
-bool XBinary::writeToFile(QString sFileName, QByteArray baData)
+bool XBinary::writeToFile(const QString &sFileName, QByteArray baData)
 {
     bool bResult = false;
 
