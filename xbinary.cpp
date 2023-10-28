@@ -5780,7 +5780,7 @@ QString XBinary::hashIdToString(XBinary::HASH hash)
     return sResult;
 }
 
-bool XBinary::isFileHashValid(XBinary::HASH hash, QString sFileName, QString sHash)
+bool XBinary::isFileHashValid(XBinary::HASH hash, const QString &sFileName, QString sHash)
 {
     bool bResult = false;
 
