@@ -3715,7 +3715,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(PDSTRUCT *pPdStruct)
     result.sArch = getArch();
     result.bIsBigEndian = isBigEndian();
     result.sType = getTypeAsString();
-    //XADDR _nModuleAddress = getModuleAddress();
+    // XADDR _nModuleAddress = getModuleAddress();
 
     result.nBinarySize = getSize();
 
