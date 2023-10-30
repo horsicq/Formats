@@ -8386,7 +8386,7 @@ QString XBinary::generateUUID()
     return QUuid::createUuid().toString().remove("{").remove("}");
 }
 
-QString XBinary::appendText(const QString &sResult, QString sString, const QString &sSeparate)
+QString XBinary::appendText(const QString &sResult, const QString &sString, const QString &sSeparate)
 {
     QString _sResult = sResult;
 
