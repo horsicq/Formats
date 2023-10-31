@@ -1262,7 +1262,7 @@ public:
     static bool isStringInListPresentExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
     static QString getStringByIndex(QList<QString> *pListStrings, int nIndex, qint32 nNumberOfStrings = -1);
 
-    static bool isStringUnicode(QString sString, qint32 nMaxCheckSize = -1);
+    static bool isStringUnicode(const QString &sString, qint32 nMaxCheckSize = -1);
 
     static quint32 elfHash(const quint8 *pData);
 

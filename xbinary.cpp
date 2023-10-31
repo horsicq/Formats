@@ -7352,7 +7352,7 @@ QString XBinary::getStringByIndex(QList<QString> *pListStrings, int nIndex, qint
     return sResult;
 }
 
-bool XBinary::isStringUnicode(QString sString, qint32 nMaxCheckSize)
+bool XBinary::isStringUnicode(const QString &sString, qint32 nMaxCheckSize)
 {
     // TODO Optimize
     // TODO Check
