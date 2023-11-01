@@ -1119,8 +1119,8 @@ public:
 
     static quint32 _getCRC32(const QString &sFileName);
     static quint32 _getCRC32(QIODevice *pDevice);
-    static quint32 _getCRC32(char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable);
-    static quint32 _getCRC32(QByteArray baData, quint32 nInit, quint32 *pCRCTable);
+    static quint32 _getCRC32(const char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable);
+    static quint32 _getCRC32(const QByteArray &baData, quint32 nInit, quint32 *pCRCTable);
     quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
 
     static quint32 _getCRC32ByFileContent(const QString &sFileName);

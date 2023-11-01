@@ -5915,7 +5915,7 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice)
     return nResult;
 }
 
-quint32 XBinary::_getCRC32(char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable)
+quint32 XBinary::_getCRC32(const char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable)
 {
     quint32 nResult = nInit;
 
@@ -5930,7 +5930,7 @@ quint32 XBinary::_getCRC32(char *pData, qint32 nDataSize, quint32 nInit, quint32
     return nResult;
 }
 
-quint32 XBinary::_getCRC32(QByteArray baData, quint32 nInit, quint32 *pCRCTable)
+quint32 XBinary::_getCRC32(const QByteArray &baData, quint32 nInit, quint32 *pCRCTable)
 {
     return _getCRC32(baData.data(), baData.size(), nInit, pCRCTable);
 }
