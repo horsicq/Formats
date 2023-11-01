@@ -5602,7 +5602,7 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
     return listResult;
 }
 
-QString XBinary::getHash(XBinary::HASH hash, QString sFileName, PDSTRUCT *pProcessData)
+QString XBinary::getHash(XBinary::HASH hash, const QString &sFileName, PDSTRUCT *pProcessData)
 {
     QString sResult;
 
