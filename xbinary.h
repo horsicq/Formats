@@ -1107,7 +1107,7 @@ public:
     static QList<HASH> getHashMethodsAsList();
     static QString hashIdToString(HASH hash);
 
-    static bool isFileHashValid(HASH hash, const QString &sFileName, QString sHash);
+    static bool isFileHashValid(HASH hash, const QString &sFileName, const QString &sHash);
 
     static quint32 getAdler32(const QString &sFileName);  // TODO ProcessData
     static quint32 getAdler32(QIODevice *pDevice);        // TODO ProcessData
