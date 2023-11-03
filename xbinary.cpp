@@ -9160,7 +9160,7 @@ void XBinary::setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex)
         pPdStruct->_pdRecord[nIndex].bIsValid = false;
         pPdStruct->_pdRecord[nIndex].nCurrent = 0;
         pPdStruct->_pdRecord[nIndex].nTotal = 0;
-        pPdStruct->_pdRecord[nIndex].sStatus = "";
+        pPdStruct->_pdRecord[nIndex].sStatus.clear();
 
         pPdStruct->nFinished++;
     }

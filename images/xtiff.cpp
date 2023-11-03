@@ -259,7 +259,7 @@ QList<XTiff::CHUNK> XTiff::getChunks(PDSTRUCT *pPdStruct)
         }
 
         qint64 nTempTableOffset = read_uint32(nCurrentOffset, bIsBigEndian);
-        if (nTempTableOffset < nTableOffset + sizeof(quint16) + nTableCount * sizeof(IFD_ENTRY) + sizeof(quint64)) {
+        if (nTempTableOffset < (qint64)(nTableOffset + sizeof(quint16) + nTableCount * sizeof(IFD_ENTRY) + sizeof(quint64))) {
             break;
         } else {
             nTableOffset = nTempTableOffset;
