@@ -8082,7 +8082,7 @@ QString XBinary::getStringFromIndex(qint64 nOffset, qint64 nSize, qint32 nIndex)
     return sResult;
 }
 
-QList<QString> XBinary::getAllFilesFromDirectory(QString sDirectory, const QString &sExtension)
+QList<QString> XBinary::getAllFilesFromDirectory(const QString &sDirectory, const QString &sExtension)
 {
     QDir directory(sDirectory);
 

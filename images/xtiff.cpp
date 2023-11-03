@@ -302,7 +302,9 @@ QString XTiff::getCameraName(QList<CHUNK> *pListChunks)
         sModel = read_ansiString(listModel.at(0).nOffset, listModel.at(0).nSize);
     }
 
-    sResult = QString("%1(%2)").arg(sMake, sModel);
+    if ((sMake != "") || (sModel != "")) {
+        sResult = QString("%1(%2)").arg(sMake, sModel);
+    }
 
     return sResult;
 }
