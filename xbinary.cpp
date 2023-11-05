@@ -7248,7 +7248,7 @@ bool XBinary::writeToFile(const QString &sFileName, QIODevice *pDevice)
     return bResult;
 }
 
-bool XBinary::appendToFile(QString sFileName, QString sString)
+bool XBinary::appendToFile(const QString &sFileName, QString sString)
 {
     bool bResult = false;
 
