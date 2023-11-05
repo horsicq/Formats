@@ -4336,7 +4336,7 @@ bool XBinary::compareEntryPoint(const QString &sSignature, qint64 nOffset)
     return compareEntryPoint(&memoryMap, sSignature, nOffset);
 }
 
-bool XBinary::compareEntryPoint(XBinary::_MEMORY_MAP *pMemoryMap, QString sSignature, qint64 nOffset)
+bool XBinary::compareEntryPoint(XBinary::_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset)
 {
     qint64 nEPOffset = getEntryPointOffset(pMemoryMap) + nOffset;
 
