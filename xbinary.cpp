@@ -8154,7 +8154,7 @@ XADDR XBinary::readOpcodes(quint32 nType, char *pData, XADDR nStartAddress, qint
     return false;
 }
 
-bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, QString sPrefix)
+bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, const QString &sPrefix)
 {
     bool bResult = false;
 
