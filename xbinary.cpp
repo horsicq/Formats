@@ -7248,16 +7248,17 @@ bool XBinary::writeToFile(const QString &sFileName, QIODevice *pDevice)
     return bResult;
 }
 
-bool XBinary::appendToFile(const QString &sFileName, QString sString)
+bool XBinary::appendToFile(const QString &sFileName, const QString &sString)
 {
+    QString _sString = sString;
     bool bResult = false;
 
     QFile file;
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadWrite | QIODevice::Append)) {
-        sString += "\r\n";  // TODO Linux
-        file.write(sString.toUtf8());
+        _sString += "\r\n";  // TODO Linux
+        file.write(_sString.toUtf8());
         file.close();
         bResult = true;
     }
@@ -8242,6 +8243,12 @@ bool XBinary::_isOffsetsCrossed(qint64 nOffset1, qint64 nSize1, qint64 nOffset2,
 bool XBinary::_isAddressCrossed(XADDR nAddress1, qint64 nSize1, XADDR nAddress2, qint64 nSize2)
 {
     bool bResult = false;
+
+#ifdef QT_DEBUG
+    if (nAddress1 == 0x771F8164) {
+        bResult = false;
+    }
+#endif
 
     if (((nAddress2 >= nAddress1) && ((nAddress1 + nSize1) > nAddress2)) || ((nAddress1 >= nAddress2) && ((nAddress2 + nSize2) > nAddress1))) {
         bResult = true;

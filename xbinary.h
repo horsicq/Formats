@@ -1254,7 +1254,7 @@ public:
 
     static bool writeToFile(const QString &sFileName, QByteArray baData);
     static bool writeToFile(const QString &sFileName, QIODevice *pDevice);
-    static bool appendToFile(const QString &sFileName, QString sString);
+    static bool appendToFile(const QString &sFileName, const QString &sString); // TODO rename
     static bool clearFile(const QString &sFileName);
     static qint32 getStringNumberFromList(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
     static qint32 getStringNumberFromListExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
