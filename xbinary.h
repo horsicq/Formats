@@ -1342,7 +1342,7 @@ public:
     virtual XADDR readOpcodes(quint32 nType, char *pData, XADDR nStartAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);
 
     bool _read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, const QString &sPrefix);
-    bool _read_opcode_ansiString(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, QString sPrefix);
+    bool _read_opcode_ansiString(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, const QString &sPrefix);
 
     QList<quint32> get_uint32_list(qint64 nOffset, qint32 nNumberOfRecords, bool bIsBigEndian = false);
     QList<quint64> get_uint64_list(qint64 nOffset, qint32 nNumberOfRecords, bool bIsBigEndian = false);
