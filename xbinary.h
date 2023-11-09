@@ -1247,7 +1247,7 @@ public:
     bool addOverlay(const QString &sFileName);
     bool removeOverlay();
 
-    bool isSignatureInLoadSegmentPresent(qint32 nLoadSegment, QString sSignature);
+    bool isSignatureInLoadSegmentPresent(qint32 nLoadSegment, const QString &sSignature);
     bool isSignatureInLoadSegmentPresent(_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, QString sSignature, PDSTRUCT *pPdStruct = nullptr);
 
     static QString getStringCollision(QList<QString> *pListStrings, QString sString1, QString sString2);

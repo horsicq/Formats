@@ -7157,7 +7157,7 @@ bool XBinary::removeOverlay()
     return addOverlay(0, 0);
 }
 
-bool XBinary::isSignatureInLoadSegmentPresent(qint32 nLoadSegment, QString sSignature)
+bool XBinary::isSignatureInLoadSegmentPresent(qint32 nLoadSegment, const QString &sSignature)
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
