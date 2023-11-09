@@ -1022,6 +1022,7 @@ public:
     bool compareEntryPoint(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset = 0);
 
     bool moveMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize);
+    static bool moveMemory(QIODevice *pDevice,qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize);
 
     static bool dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize);
     bool dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pProcessData = nullptr);
@@ -1063,7 +1064,7 @@ public:
     static bool checkString_qword(const QString &sValue);
     static bool checkString_uint8(const QString &sValue);
     static bool checkString_int8(const QString &sValue);
-    static bool checkString_uint16(QString sValue);
+    static bool checkString_uint16(const QString &sValue);
     static bool checkString_int16(QString sValue);
     static bool checkString_uint32(QString sValue);
     static bool checkString_int32(QString sValue);

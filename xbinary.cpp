@@ -4370,6 +4370,13 @@ bool XBinary::moveMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize)
     return bResult;
 }
 
+bool XBinary::moveMemory(QIODevice *pDevice, qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize)
+{
+    XBinary binary(pDevice);
+
+    return binary.moveMemory(nSourceOffset, nDestOffset, nSize);
+}
+
 bool XBinary::dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize)
 {
     bool bResult = false;
@@ -5178,7 +5185,7 @@ bool XBinary::checkString_int8(const QString &sValue)
     return bResult;
 }
 
-bool XBinary::checkString_uint16(QString sValue)
+bool XBinary::checkString_uint16(const QString &sValue)
 {
     bool bResult = false;
 
