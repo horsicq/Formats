@@ -5194,7 +5194,7 @@ bool XBinary::checkString_uint16(const QString &sValue)
     return bResult;
 }
 
-bool XBinary::checkString_int16(QString sValue)
+bool XBinary::checkString_int16(const QString &sValue)
 {
     bool bResult = false;
 
