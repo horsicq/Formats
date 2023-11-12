@@ -1022,7 +1022,7 @@ public:
     bool compareEntryPoint(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset = 0);
 
     bool moveMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize);
-    static bool moveMemory(QIODevice *pDevice,qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize);
+    static bool moveMemory(QIODevice *pDevice, qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize);
 
     static bool dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize);
     bool dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pProcessData = nullptr);
@@ -1255,7 +1255,7 @@ public:
 
     static bool writeToFile(const QString &sFileName, QByteArray baData);
     static bool writeToFile(const QString &sFileName, QIODevice *pDevice);
-    static bool appendToFile(const QString &sFileName, const QString &sString); // TODO rename
+    static bool appendToFile(const QString &sFileName, const QString &sString);  // TODO rename
     static bool clearFile(const QString &sFileName);
     static qint32 getStringNumberFromList(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
     static qint32 getStringNumberFromListExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
