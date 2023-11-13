@@ -7290,7 +7290,7 @@ bool XBinary::clearFile(const QString &sFileName)
     return bResult;
 }
 
-qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData)
+qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pProcessData)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
