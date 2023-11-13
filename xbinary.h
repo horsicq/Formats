@@ -1177,7 +1177,7 @@ public:
     static quint16 hexToUint16(const QString &sHex, bool bIsBigEndian = false);
     static qint16 hexToInt16(const QString &sHex, bool bIsBigEndian = false);
     static quint32 hexToUint32(const QString &sHex, bool bIsBigEndian = false);
-    static qint32 hexToInt32(QString sHex, bool bIsBigEndian = false);
+    static qint32 hexToInt32(const QString &sHex, bool bIsBigEndian = false);
     static quint64 hexToUint64(QString sHex, bool bIsBigEndian = false);
     static qint64 hexToInt64(QString sHex, bool bIsBigEndian = false);
 
@@ -1257,7 +1257,7 @@ public:
     static bool writeToFile(const QString &sFileName, QIODevice *pDevice);
     static bool appendToFile(const QString &sFileName, const QString &sString);  // TODO rename
     static bool clearFile(const QString &sFileName);
-    static qint32 getStringNumberFromList(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
+    static qint32 getStringNumberFromList(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pProcessData = nullptr);
     static qint32 getStringNumberFromListExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
     static bool isStringInListPresent(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
     static bool isStringInListPresentExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);

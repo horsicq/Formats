@@ -6635,17 +6635,18 @@ quint32 XBinary::hexToUint32(const QString &sHex, bool bIsBigEndian)
     return nResult;
 }
 
-qint32 XBinary::hexToInt32(QString sHex, bool bIsBigEndian)
+qint32 XBinary::hexToInt32(const QString &sHex, bool bIsBigEndian)
 {
+    QString _sHex = sHex;
     qint32 nResult = 0;
 
-    if ((quint32)sHex.length() >= sizeof(qint32)) {
+    if ((quint32)_sHex.length() >= sizeof(qint32)) {
         if (!bIsBigEndian) {
-            sHex = invertHexByteString(sHex.mid(0, 2 * sizeof(qint32)));
+            _sHex = invertHexByteString(_sHex.mid(0, 2 * sizeof(qint32)));
         }
 
         bool bStatus = false;
-        nResult = sHex.toInt(&bStatus, 16);
+        nResult = _sHex.toInt(&bStatus, 16);
     }
 
     return nResult;
