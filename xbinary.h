@@ -1178,7 +1178,7 @@ public:
     static qint16 hexToInt16(const QString &sHex, bool bIsBigEndian = false);
     static quint32 hexToUint32(const QString &sHex, bool bIsBigEndian = false);
     static qint32 hexToInt32(const QString &sHex, bool bIsBigEndian = false);
-    static quint64 hexToUint64(QString sHex, bool bIsBigEndian = false);
+    static quint64 hexToUint64(const QString &sHex, bool bIsBigEndian = false);
     static qint64 hexToInt64(QString sHex, bool bIsBigEndian = false);
 
     static QString invertHexByteString(const QString &sHex);
