@@ -7347,7 +7347,7 @@ bool XBinary::isStringInListPresentExp(QList<QString> *pListStrings, const QStri
     return (getStringNumberFromListExp(pListStrings, sString, pPdStruct) != -1);
 }
 
-QString XBinary::getStringByIndex(QList<QString> *pListStrings, int nIndex, qint32 nNumberOfStrings)
+QString XBinary::getStringByIndex(QList<QString> *pListStrings, qint32 nIndex, qint32 nNumberOfStrings)
 {
     QString sResult;
 
