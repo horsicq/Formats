@@ -1068,7 +1068,7 @@ public:
     static bool checkString_int16(const QString &sValue);
     static bool checkString_uint32(const QString &sValue);
     static bool checkString_int32(const QString &sValue);
-    static bool checkString_uint64(QString sValue);
+    static bool checkString_uint64(const QString &sValue);
     static bool checkString_int64(QString sValue);
     static bool checkString_float(const QString &sValue);
     static bool checkString_double(const QString &sValue);

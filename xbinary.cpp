@@ -5221,7 +5221,7 @@ bool XBinary::checkString_int32(const QString &sValue)
     return bResult;
 }
 
-bool XBinary::checkString_uint64(QString sValue)
+bool XBinary::checkString_uint64(const QString &sValue)
 {
     bool bResult = false;
 
