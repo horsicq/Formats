@@ -903,7 +903,7 @@ public:
     static bool removeFile(const QString &sFileName);
     static bool copyFile(const QString &sSrcFileName, const QString &sDestFileName);
     static bool moveFile(const QString &sSrcFileName, const QString &sDestFileName);
-    static bool moveFileToDirectory(const QString &sSrcFileName, QString sDestDirectory);
+    static bool moveFileToDirectory(const QString &sSrcFileName, const QString &sDestDirectory);
     static QString convertFileNameSymbols(const QString &sFileName);
     static QString getBaseFileName(const QString &sFileName);
     static bool createDirectory(const QString &sDirectoryName);

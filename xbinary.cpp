@@ -3287,7 +3287,7 @@ bool XBinary::moveFile(const QString &sSrcFileName, const QString &sDestFileName
     return bResult;
 }
 
-bool XBinary::moveFileToDirectory(const QString &sSrcFileName, QString sDestDirectory)
+bool XBinary::moveFileToDirectory(const QString &sSrcFileName, const QString &sDestDirectory)
 {
     QFileInfo fi(sSrcFileName);
 
