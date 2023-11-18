@@ -6004,7 +6004,7 @@ quint32 XBinary::_getCRC32ByFileContent(const QString &sFileName)
     return _getCRC32(readFile(sFileName), 0xFFFFFFFF, _getCRC32Table_EDB88320());
 }
 
-quint32 XBinary::_getCRC32ByDirectory(QString sDirectoryName, bool bRecursive, quint32 nInit)
+quint32 XBinary::_getCRC32ByDirectory(const QString &sDirectoryName, bool bRecursive, quint32 nInit)
 {
     quint32 nResult = nInit;
 

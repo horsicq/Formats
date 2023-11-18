@@ -1125,7 +1125,7 @@ public:
     quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
 
     static quint32 _getCRC32ByFileContent(const QString &sFileName);
-    static quint32 _getCRC32ByDirectory(QString sDirectoryName, bool bRecursive, quint32 nInit = 0xFFFFFFFF);  // TODO PDSTRUCT
+    static quint32 _getCRC32ByDirectory(const QString &sDirectoryName, bool bRecursive, quint32 nInit = 0xFFFFFFFF);  // TODO PDSTRUCT
 
     static double getEntropy(const QString &sFileName);  // TODO ProcessData
     static double getEntropy(QIODevice *pDevice, PDSTRUCT *pProcessData = nullptr);
