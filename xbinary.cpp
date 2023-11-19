@@ -1947,7 +1947,7 @@ qint64 XBinary::find_unicodeString(qint64 nOffset, qint64 nSize, QString sString
     return find_array(nOffset, nSize, (char *)baString.data(), baString.size() * 2, pPdStruct);
 }
 
-qint64 XBinary::find_utf8String(qint64 nOffset, qint64 nSize, QString sString, PDSTRUCT *pPdStruct)
+qint64 XBinary::find_utf8String(qint64 nOffset, qint64 nSize, const QString &sString, PDSTRUCT *pPdStruct)
 {
     QByteArray baData = sString.toUtf8();
 
