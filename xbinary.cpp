@@ -1961,7 +1961,7 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, QString sSignature,
     return find_signature(&memoryMap, nOffset, nSize, sSignature, pnResultSize, pPdStruct);
 }
 
-qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, qint64 *pnResultSize, PDSTRUCT *pPdStruct)
+qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, qint64 *pnResultSize, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -1998,20 +1998,20 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
         return -1;
     }
 
-    sSignature = convertSignature(sSignature);
+    QString _sSignature = convertSignature(sSignature);
 
-    if (sSignature.contains("$") || sSignature.contains("#") || sSignature.contains("+")) {
+    if (_sSignature.contains("$") || _sSignature.contains("#") || _sSignature.contains("+")) {
         *pnResultSize = 1;
     } else {
-        *pnResultSize = sSignature.size() / 2;
+        *pnResultSize = _sSignature.size() / 2;
     }
 
     qint64 nResult = -1;
 
-    if (sSignature.contains(".") || sSignature.contains("$") || sSignature.contains("#") || sSignature.contains("+")) {
+    if (_sSignature.contains(".") || _sSignature.contains("$") || _sSignature.contains("#") || _sSignature.contains("+")) {
         bool bIsValid = true;
 
-        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(sSignature, &bIsValid);
+        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bIsValid);
 
         if (listSignatureRecords.count()) {
             qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
@@ -2055,7 +2055,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
             XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
         }
     } else {
-        QByteArray baData = QByteArray::fromHex(QByteArray(sSignature.toLatin1().data()));
+        QByteArray baData = QByteArray::fromHex(QByteArray(_sSignature.toLatin1().data()));
 
         if (baData.size()) {
             nResult = find_array(nOffset, nSize, baData.data(), baData.size(), pPdStruct);
