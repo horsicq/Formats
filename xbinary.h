@@ -895,7 +895,7 @@ public:
     static QByteArray getUnicodeString(const QString &sString, bool bIsBigEndian);
     static QByteArray getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString, bool bAddNull);
 
-    bool isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QString sSignature, PDSTRUCT *pProcessData = nullptr);
+    bool isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, PDSTRUCT *pProcessData = nullptr);
     static bool isSignatureValid(const QString &sSignature);
 
     static bool createFile(const QString &sFileName, qint64 nFileSize = 0);
