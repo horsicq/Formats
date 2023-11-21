@@ -7316,7 +7316,7 @@ qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, const QStr
     return nResult;
 }
 
-qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData)
+qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pProcessData)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 

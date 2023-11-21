@@ -1258,7 +1258,7 @@ public:
     static bool appendToFile(const QString &sFileName, const QString &sString);  // TODO rename
     static bool clearFile(const QString &sFileName);
     static qint32 getStringNumberFromList(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pProcessData = nullptr);
-    static qint32 getStringNumberFromListExp(QList<QString> *pListStrings, QString sString, PDSTRUCT *pProcessData = nullptr);
+    static qint32 getStringNumberFromListExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pProcessData = nullptr);
     static bool isStringInListPresent(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
     static bool isStringInListPresentExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
     static QString getStringByIndex(QList<QString> *pListStrings, qint32 nIndex, qint32 nNumberOfStrings = -1);
