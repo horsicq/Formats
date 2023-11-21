@@ -7175,7 +7175,7 @@ bool XBinary::isSignatureInLoadSegmentPresent(qint32 nLoadSegment, const QString
     return isSignatureInLoadSegmentPresent(&memoryMap, nLoadSegment, sSignature);
 }
 
-bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, QString sSignature, PDSTRUCT *pPdStruct)
+bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, const QString &sSignature, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
@@ -8255,11 +8255,11 @@ bool XBinary::_isAddressCrossed(XADDR nAddress1, qint64 nSize1, XADDR nAddress2,
 {
     bool bResult = false;
 
-#ifdef QT_DEBUG
-    if (nAddress1 == 0x771F8164) {
-        bResult = false;
-    }
-#endif
+//#ifdef QT_DEBUG
+//    if (nAddress1 == 0x771F8164) {
+//        bResult = false;
+//    }
+//#endif
 
     if (((nAddress2 >= nAddress1) && ((nAddress1 + nSize1) > nAddress2)) || ((nAddress1 >= nAddress2) && ((nAddress2 + nSize2) > nAddress1))) {
         bResult = true;
