@@ -4203,7 +4203,7 @@ bool XBinary::compareSignatureOnAddress(const QString &sSignature, XADDR nAddres
     return compareSignatureOnAddress(&memoryMap, sSignature, nAddress);
 }
 
-bool XBinary::compareSignatureOnAddress(XBinary::_MEMORY_MAP *pMemoryMap, QString sSignature, XADDR nAddress)
+bool XBinary::compareSignatureOnAddress(XBinary::_MEMORY_MAP *pMemoryMap, const QString &sSignature, XADDR nAddress)
 {
     bool bResult = false;
 
@@ -5262,9 +5262,9 @@ QString XBinary::boolToString(bool bValue)
     QString sResult;
 
     if (bValue) {
-        sResult = "true";
+        sResult = tr("true");
     } else {
-        sResult = "false";
+        sResult = tr("false");
     }
 
     return sResult;
