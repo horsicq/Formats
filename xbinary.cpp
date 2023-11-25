@@ -2747,7 +2747,8 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
     return listResult;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, const QString &sInfo, PDSTRUCT *pPdStruct)
+QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, const QString &sInfo,
+                                                         PDSTRUCT *pPdStruct)
 {
     _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
 
@@ -8255,11 +8256,11 @@ bool XBinary::_isAddressCrossed(XADDR nAddress1, qint64 nSize1, XADDR nAddress2,
 {
     bool bResult = false;
 
-//#ifdef QT_DEBUG
-//    if (nAddress1 == 0x771F8164) {
-//        bResult = false;
-//    }
-//#endif
+    // #ifdef QT_DEBUG
+    //     if (nAddress1 == 0x771F8164) {
+    //         bResult = false;
+    //     }
+    // #endif
 
     if (((nAddress2 >= nAddress1) && ((nAddress1 + nSize1) > nAddress2)) || ((nAddress1 >= nAddress2) && ((nAddress2 + nSize2) > nAddress1))) {
         bResult = true;
