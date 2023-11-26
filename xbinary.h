@@ -895,7 +895,7 @@ public:
     static VT getValueType(quint64 nValue);
 
     static QByteArray getUnicodeString(const QString &sString, bool bIsBigEndian);
-    static QByteArray getStringData(MS_RECORD_TYPE msRecordTypeId, QString sString, bool bAddNull);
+    static QByteArray getStringData(MS_RECORD_TYPE msRecordTypeId, const QString &sString, bool bAddNull);
 
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, PDSTRUCT *pProcessData = nullptr);
     static bool isSignatureValid(const QString &sSignature);
