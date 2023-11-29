@@ -7195,7 +7195,7 @@ bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, 
     return bResult;
 }
 
-QString XBinary::getStringCollision(QList<QString> *pListStrings, QString sString1, QString sString2)
+QString XBinary::getStringCollision(QList<QString> *pListStrings, const QString &sString1, QString sString2)
 {
     // TODO Check&optimize
     QString sResult;

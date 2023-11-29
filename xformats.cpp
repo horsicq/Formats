@@ -858,7 +858,7 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
     _sType = _sType.toLower();
 
     // TODO more
-    if ((_sType == "installer") || (_sType == "sfx")) {
+    if ((_sType == "installer") || (_sType == "sfx") || (_sType == "archive")) {
         result = Qt::blue;
     } else if ((_sType == "protector") || (_sType == "apk obfuscator") || (_sType == "jar obfuscator") || (_sType == ".net obfuscator") ||
                (_sType == ".net compressor") || (_sType == "dongle protection") || (_sType == "joiner") || (_sType == "packer") || (_sType == "protection") ||

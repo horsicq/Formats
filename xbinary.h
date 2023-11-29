@@ -1253,7 +1253,7 @@ public:
     bool isSignatureInLoadSegmentPresent(qint32 nLoadSegment, const QString &sSignature);
     bool isSignatureInLoadSegmentPresent(_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
 
-    static QString getStringCollision(QList<QString> *pListStrings, QString sString1, QString sString2);
+    static QString getStringCollision(QList<QString> *pListStrings, const QString &sString1, QString sString2);
 
     static bool writeToFile(const QString &sFileName, QByteArray baData);
     static bool writeToFile(const QString &sFileName, QIODevice *pDevice);
