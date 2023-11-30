@@ -773,12 +773,36 @@ bool XBinary::isRegExpPresent(const QString &sRegExp, const QString &sString)
     return (regExp(sRegExp, sString, 0) != "");
 }
 
+qint32 XBinary::getRegExpCount(const QString &sRegExp, const QString &sString)
+{
+    quint32 nResult = 0;
+#if (QT_VERSION_MAJOR < 5)
+    QRegExp rxString(sRegExp);
+    rxString.indexIn(sString);
+    nResult = rxString.capturedTexts().count();
+#else
+    QRegularExpression rxString(sRegExp);
+    QRegularExpressionMatch matchString = rxString.match(sString);
+    nResult = matchString.capturedTexts().count();
+#endif
+
+    return nResult;
+}
+
+QString XBinary::getRegExpSection(const QString &sRegExp, const QString &sString, qint32 nStart, qint32 nEnd)
+{
+#if (QT_VERSION_MAJOR < 5)
+    return sString.section(QRegExp(sRegExp), nStart, nEnd);
+#else
+    return sString.section(QRegularExpression(sRegExp), nStart, nEnd);
+#endif
+}
+
 qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
 {
     qint64 nResult = 0;
 
-    nResult = safeReadData(g_pDevice, nOffset, pBuffer,
-                           nMaxSize);  // Check for read large files
+    nResult = safeReadData(g_pDevice, nOffset, pBuffer, nMaxSize);  // Check for read large files
 
     return nResult;
 }
@@ -2011,7 +2035,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
     if (_sSignature.contains(".") || _sSignature.contains("$") || _sSignature.contains("#") || _sSignature.contains("+")) {
         bool bIsValid = true;
 
-        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bIsValid);
+        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bIsValid, pPdStruct);
 
         if (listSignatureRecords.count()) {
             qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
@@ -2060,6 +2084,11 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
         if (baData.size()) {
             nResult = find_array(nOffset, nSize, baData.data(), baData.size(), pPdStruct);
         }
+    }
+
+    if (pPdStruct->sErrorString != "") {
+        _errorMessage(pPdStruct->sErrorString);
+        pPdStruct->sErrorString = "";
     }
 
     return nResult;
@@ -3201,14 +3230,14 @@ QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, const QString &
     return baResult;
 }
 
-bool XBinary::isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, PDSTRUCT *pProcessData)
+bool XBinary::isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, PDSTRUCT *pPdStruct)
 {
     qint64 nResultSize = 0;
 
-    return (find_signature(pMemoryMap, nOffset, nSize, sSignature, &nResultSize, pProcessData) != -1);
+    return (find_signature(pMemoryMap, nOffset, nSize, sSignature, &nResultSize, pPdStruct) != -1);
 }
 
-bool XBinary::isSignatureValid(const QString &sSignature)
+bool XBinary::isSignatureValid(const QString &sSignature, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
@@ -3217,7 +3246,7 @@ bool XBinary::isSignatureValid(const QString &sSignature)
 
         bResult = true;
 
-        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bResult);
+        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bResult, pPdStruct);
     }
 
     return bResult;
@@ -4133,8 +4162,14 @@ bool XBinary::compareSignature(const QString &sSignature, qint64 nOffset)
     return compareSignature(&memoryMap, sSignature, nOffset);
 }
 
-bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset)
+bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     bool bResult = false;
 
     QString sOrigin = sSignature;
@@ -4143,12 +4178,12 @@ bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignatur
 
     bool bValid = true;
 
-    QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bValid);
+    QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bValid, pPdStruct);
 
     if (listSignatureRecords.count()) {
         bResult = _compareSignature(pMemoryMap, &listSignatureRecords, nOffset);
     } else {
-        emit errorMessage(QString("%1: %2").arg(tr("Invalid signature"), sOrigin));
+        _errorMessage(QString("%1: %2").arg(tr("Invalid signature"), sOrigin));
     }
 
     return bResult;
@@ -7195,7 +7230,7 @@ bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, 
     return bResult;
 }
 
-QString XBinary::getStringCollision(QList<QString> *pListStrings, const QString &sString1, QString sString2)
+QString XBinary::getStringCollision(QList<QString> *pListStrings, const QString &sString1, const QString &sString2)
 {
     // TODO Check&optimize
     QString sResult;
@@ -9409,9 +9444,14 @@ QString XBinary::getAndroidVersionFromApi(quint32 nAPI)
     return sResult;
 }
 
-QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSignature, bool *pbValid)
+QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSignature, bool *pbValid, PDSTRUCT *pPdStruct)
 {
-    // TODO Error checks!
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     QList<SIGNATURE_RECORD> listResult;
 
     qint32 nSignatureSize = sSignature.size();
@@ -9420,13 +9460,13 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSi
         if (sSignature.at(i) == QChar('.')) {
             i += _getSignatureRelOffsetFix(&listResult, sSignature, i);
         } else if (sSignature.at(i) == QChar('+')) {
-            i += _getSignatureDelta(&listResult, sSignature, i, pbValid);
+            i += _getSignatureDelta(&listResult, sSignature, i, pbValid, pPdStruct);
         } else if (sSignature.at(i) == QChar('$')) {
             i += _getSignatureRelOffset(&listResult, sSignature, i);
         } else if (sSignature.at(i) == QChar('#')) {  // TODO Check []
             i += _getSignatureAddress(&listResult, sSignature, i);
         } else {
-            qint32 nBytes = _getSignatureBytes(&listResult, sSignature, i, pbValid);
+            qint32 nBytes = _getSignatureBytes(&listResult, sSignature, i, pbValid, pPdStruct);
 
             if (nBytes) {
                 i += nBytes;
@@ -9568,8 +9608,13 @@ int XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSi
     return nResult;
 }
 
-qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex, bool *pbValid)
+qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex, bool *pbValid, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
     // TODO Check!!!
     qint32 nResult = 0;
     qint32 nSignatureSize = sSignature.size();
@@ -9585,7 +9630,7 @@ qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignat
     if (nResult) {
         QList<XBinary::SIGNATURE_RECORD> _listSignatureRecords;
 
-        qint32 nTemp = _getSignatureBytes(&_listSignatureRecords, sSignature, nStartIndex + nResult, pbValid);
+        qint32 nTemp = _getSignatureBytes(&_listSignatureRecords, sSignature, nStartIndex + nResult, pbValid, pPdStruct);
 
         if (_listSignatureRecords.count()) {
             SIGNATURE_RECORD record = {};
@@ -9672,8 +9717,14 @@ int XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
     return nResult;
 }
 
-qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid)
+qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     int nResult = 0;
 
     qint32 nSignatureSize = sSignature.size();
@@ -9704,7 +9755,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
 
 #ifdef QT_DEBUG
     if (!(*pbValid)) {
-        qDebug("Invalid signature: %s", sSignature.toLatin1().data());
+        pPdStruct->sErrorString = QString("%1: %2").arg(tr("Invalid signature"), sSignature);
     }
 #endif
 

@@ -581,6 +581,7 @@ public:
         //        QString sStatus;
         //        bool bErrors;
         //        bool bSuccess; // TODO important
+        QString sErrorString;
     };
 
 private:
@@ -680,6 +681,8 @@ public:
 
     static QString regExp(const QString &sRegExp, const QString &sString, qint32 nIndex);
     static bool isRegExpPresent(const QString &sRegExp, const QString &sString);
+    static qint32 getRegExpCount(const QString &sRegExp, const QString &sString);
+    static QString getRegExpSection(const QString &sRegExp, const QString &sString, qint32 nStart, qint32 nEnd);
     qint64 read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize);
     QByteArray read_array(qint64 nOffset, qint64 nSize);
     qint64 write_array(qint64 nOffset, char *pBuffer, qint64 nSize);
@@ -897,8 +900,8 @@ public:
     static QByteArray getUnicodeString(const QString &sString, bool bIsBigEndian);
     static QByteArray getStringData(MS_RECORD_TYPE msRecordTypeId, const QString &sString, bool bAddNull);
 
-    bool isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, PDSTRUCT *pProcessData = nullptr);
-    static bool isSignatureValid(const QString &sSignature);
+    bool isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
+    static bool isSignatureValid(const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
 
     static bool createFile(const QString &sFileName, qint64 nFileSize = 0);
     static bool isFileExists(const QString &sFileName, bool bTryToOpen = false);
@@ -1013,7 +1016,7 @@ public:
     static qint64 getPhysSize(char *pBuffer, qint64 nSize);  // TODO Check!
     static bool isEmptyData(char *pBuffer, qint64 nSize);
     bool compareSignature(const QString &sSignature, qint64 nOffset = 0);
-    bool compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset = 0);
+    bool compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset = 0, PDSTRUCT *pPdStruct = nullptr);
     static bool _compareByteArrayWithSignature(QByteArray baData, const QString &sSignature);
     static QString _createSignature(const QString &sSignature1, const QString &sSignature2);
 
@@ -1253,7 +1256,7 @@ public:
     bool isSignatureInLoadSegmentPresent(qint32 nLoadSegment, const QString &sSignature);
     bool isSignatureInLoadSegmentPresent(_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
 
-    static QString getStringCollision(QList<QString> *pListStrings, const QString &sString1, QString sString2);
+    static QString getStringCollision(QList<QString> *pListStrings, const QString &sString1, const QString &sString2);
 
     static bool writeToFile(const QString &sFileName, QByteArray baData);
     static bool writeToFile(const QString &sFileName, QIODevice *pDevice);
@@ -1467,14 +1470,14 @@ private:
     static QString convertSignature(const QString &sSignature);
     static QString qcharToHex(QChar cSymbol);
 
-    static QList<SIGNATURE_RECORD> getSignatureRecords(const QString &sSignature, bool *pbValid);
+    static QList<SIGNATURE_RECORD> getSignatureRecords(const QString &sSignature, bool *pbValid, PDSTRUCT *pPdStruct);
     bool _compareSignature(_MEMORY_MAP *pMemoryMap, QList<SIGNATURE_RECORD> *pListSignatureRecords, qint64 nOffset);
 
     static int _getSignatureRelOffsetFix(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
-    static qint32 _getSignatureDelta(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex, bool *pbValid);
+    static qint32 _getSignatureDelta(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex, bool *pbValid, PDSTRUCT *pPdStruct);
     static int _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex);
     static int _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex);
-    static qint32 _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid);
+    static qint32 _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid, PDSTRUCT *pPdStruct);
 
 protected:
     bool _isOffsetValid(qint64 nOffset);
