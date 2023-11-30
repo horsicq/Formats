@@ -6587,7 +6587,7 @@ QString XBinary::floatToString(float fValue, qint32 nPrec)
     return QString("%1").arg(fValue, 0, 'f', nPrec);
 }
 
-QString XBinary::doubleToString(double dValue, int nPrec)
+QString XBinary::doubleToString(double dValue, qint32 nPrec)
 {
     return QString("%1").arg(dValue, 0, 'f', nPrec);
 }

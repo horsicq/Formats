@@ -1175,7 +1175,7 @@ public:
     static QString stringToHex(const QString &sString);
     static QString hexToString(const QString &sHex);
     static QString floatToString(float fValue, qint32 nPrec = 2);
-    static QString doubleToString(double dValue, int nPrec = 2);
+    static QString doubleToString(double dValue, qint32 nPrec = 2);
 
     static quint8 hexToUint8(const QString &sHex);
     static qint8 hexToInt8(const QString &sHex);
