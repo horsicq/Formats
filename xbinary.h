@@ -1466,7 +1466,7 @@ public:
     static QString getAndroidVersionFromApi(quint32 nAPI);
 
 private:
-    static const int READWRITE_BUFFER_SIZE = 0x1000;
+    static const qint32 READWRITE_BUFFER_SIZE = 0x1000;
     static QString convertSignature(const QString &sSignature);
     static QString qcharToHex(QChar cSymbol);
 
