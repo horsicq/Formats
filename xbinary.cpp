@@ -4440,7 +4440,10 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
         pProcessData = &pdStructEmpty;
     }
 
-    // TODO convert -1 to fileSize
+    if (nDataSize == -1) {
+        qint64 _nSize = getSize();
+        nDataSize = _nSize - nDataOffset;
+    }
 
     QFile file;
     file.setFileName(sFileName);
@@ -9608,7 +9611,7 @@ qint32 XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pLis
     return nResult;
 }
 
-qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex, bool *pbValid,
+qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid,
                                    PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
