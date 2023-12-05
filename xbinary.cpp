@@ -6920,6 +6920,7 @@ QString XBinary::get_uint32_version(quint32 nValue)
 
 bool XBinary::isResizeEnable(QIODevice *pDevice)
 {
+    // mb TODO casr
     bool bResult = false;
 
     QString sClassName = pDevice->metaObject()->className();
@@ -6927,6 +6928,8 @@ bool XBinary::isResizeEnable(QIODevice *pDevice)
     if (sClassName == "QFile") {
         bResult = true;
     } else if (sClassName == "QBuffer") {
+        bResult = true;
+    } else if (sClassName == "QTemporaryFile") {
         bResult = true;
     }
 
@@ -6944,6 +6947,8 @@ bool XBinary::resize(QIODevice *pDevice, qint64 nSize)
     } else if (sClassName == "QBuffer") {
         ((QBuffer *)pDevice)->buffer().resize((qint32)nSize);
         bResult = true;
+    } else if (sClassName == "QTemporaryFile") {
+        bResult = ((QTemporaryFile *)pDevice)->resize(nSize);
     }
 
     return bResult;
@@ -9654,7 +9659,7 @@ qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignat
     return nResult;
 }
 
-int XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex)
+qint32 XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex)
 {
     int nResult = 0;
 
