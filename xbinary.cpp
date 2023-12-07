@@ -1995,7 +1995,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
     //    bool bDisableSignals=true;
 
-    //    if(pProcessData->bIsDisable) // If we call find_signature in another
+    //    if(pPdStruct->bIsDisable) // If we call find_signature in another
     //    search function
     //    {
     //        bDisableSignals=false; // TODO Check !!!
@@ -4430,14 +4430,14 @@ bool XBinary::dumpToFile(const QString &sFileName, const char *pData, qint64 nDa
     return bResult;
 }
 
-bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pProcessData)
+bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    if (!pProcessData) {
-        pProcessData = &pdStructEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
     }
 
     if (nDataSize == -1) {
@@ -4456,13 +4456,13 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
         qint64 nSourceOffset = nDataOffset;
         qint64 nDestOffset = 0;
 
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pProcessData);
+        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-        XBinary::setPdStructInit(pProcessData, _nFreeIndex, nDataSize);
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nDataSize);
 
         bResult = true;
 
-        while ((nDataSize > 0) && (!(pProcessData->bIsStop))) {
+        while ((nDataSize > 0) && (!(pPdStruct->bIsStop))) {
             qint64 nTempSize = qMin(nDataSize, (qint64)0x1000);  // TODO const
 
             if (safeReadData(g_pDevice, nSourceOffset, pBuffer, nTempSize) != nTempSize) {
@@ -4482,10 +4482,10 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
 
             nDataSize -= nTempSize;
 
-            XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, nDestOffset);
+            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nDestOffset);
         }
 
-        XBinary::setPdStructFinished(pProcessData, _nFreeIndex);
+        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
         delete[] pBuffer;
 
@@ -5648,7 +5648,7 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
     return listResult;
 }
 
-QString XBinary::getHash(XBinary::HASH hash, const QString &sFileName, PDSTRUCT *pProcessData)
+QString XBinary::getHash(XBinary::HASH hash, const QString &sFileName, PDSTRUCT *pPdStruct)
 {
     QString sResult;
 
@@ -5656,7 +5656,7 @@ QString XBinary::getHash(XBinary::HASH hash, const QString &sFileName, PDSTRUCT 
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        sResult = XBinary::getHash(hash, &file, pProcessData);
+        sResult = XBinary::getHash(hash, &file, pPdStruct);
 
         file.close();
     }
@@ -5664,20 +5664,20 @@ QString XBinary::getHash(XBinary::HASH hash, const QString &sFileName, PDSTRUCT 
     return sResult;
 }
 
-QString XBinary::getHash(XBinary::HASH hash, QIODevice *pDevice, PDSTRUCT *pProcessData)
+QString XBinary::getHash(XBinary::HASH hash, QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     QString sResult;
 
     XBinary binary(pDevice);
 
-    sResult = binary.getHash(hash, 0, -1, pProcessData);
+    sResult = binary.getHash(hash, 0, -1, pPdStruct);
 
     pDevice->reset();
 
     return sResult;
 }
 
-QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
+QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     QString sResult;
 
@@ -5687,20 +5687,20 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize, PDSTR
         QList<OFFSETSIZE> listOS;
         listOS.append(osRegion);
 
-        sResult = getHash(hash, &listOS, pProcessData);
+        sResult = getHash(hash, &listOS, pPdStruct);
     }
 
     return sResult;
 }
 
-QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pProcessData)
+QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pPdStruct)
 {
     QString sResult;
 
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    if (!pProcessData) {
-        pProcessData = &pdStructEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
     }
 
     qint64 nTemp = 0;
@@ -5727,17 +5727,17 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pProce
 
     qint64 nCurrentSize = 0;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pProcessData);
+    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
     bool bReadError = false;
 
-    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pProcessData->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
         qint64 nOffset = pListOS->at(i).nOffset;
         qint64 nSize = pListOS->at(i).nSize;
 
-        XBinary::setPdStructInit(pProcessData, _nFreeIndex, nSize);
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
-        while ((nSize > 0) && (!(pProcessData->bIsStop))) {
+        while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
             nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
@@ -5754,11 +5754,11 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pProce
             nOffset += nTemp;
             nCurrentSize += nTemp;
 
-            XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, nCurrentSize);
+            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nCurrentSize);
         }
     }
 
-    XBinary::setPdStructFinished(pProcessData, _nFreeIndex);
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
     delete[] pBuffer;
 
@@ -5766,7 +5766,7 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pProce
         sResult = crypto.result().toHex();
     }
 
-    if (pProcessData->bIsStop) {
+    if (pPdStruct->bIsStop) {
         sResult = "";
     }
 
@@ -5981,15 +5981,15 @@ quint32 XBinary::_getCRC32(const QByteArray &baData, quint32 nInit, quint32 *pCR
     return _getCRC32(baData.data(), baData.size(), nInit, pCRCTable);
 }
 
-quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
+quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     // TODO optimize!!!
     quint32 nResult = 0xFFFFFFFF;  // ~0
 
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    if (!pProcessData) {
-        pProcessData = &pdStructEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
     }
 
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
@@ -5997,10 +5997,10 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pProcessData);
+    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-    if ((nOffset != -1) && (!(pProcessData->bIsStop))) {
-        XBinary::setPdStructInit(pProcessData, _nFreeIndex, nSize);
+    if ((nOffset != -1) && (!(pPdStruct->bIsStop))) {
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
         qint64 nTemp = 0;
         char *pBuffer = new char[READWRITE_BUFFER_SIZE];
@@ -6021,7 +6021,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
             nSize -= nTemp;
             nOffset += nTemp;
 
-            XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, nOffset);
+            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset);
         }
 
         delete[] pBuffer;
@@ -6029,9 +6029,9 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
 
     nResult ^= 0xFFFFFFFF;
 
-    XBinary::setPdStructFinished(pProcessData, _nFreeIndex);
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
-    if (pProcessData->bIsStop) {
+    if (pPdStruct->bIsStop) {
         nResult = 0;
     }
 
@@ -6081,27 +6081,27 @@ double XBinary::getEntropy(const QString &sFileName)
     return dResult;
 }
 
-double XBinary::getEntropy(QIODevice *pDevice, PDSTRUCT *pProcessData)
+double XBinary::getEntropy(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     double dResult = 0;
 
     XBinary binary(pDevice);
 
-    dResult = binary.getEntropy(0, -1, pProcessData);
+    dResult = binary.getEntropy(0, -1, pPdStruct);
 
     pDevice->reset();
 
     return dResult;
 }
 
-double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
+double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     double dResult = 1.4426950408889634073599246810023;
 
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    if (!pProcessData) {
-        pProcessData = &pdStructEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
     }
 
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
@@ -6115,17 +6115,17 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
 
     bool bReadError = false;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pProcessData);
+    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-    if ((nOffset != -1) && (!(pProcessData->bIsStop))) {
-        XBinary::setPdStructInit(pProcessData, _nFreeIndex, nSize);
+    if ((nOffset != -1) && (!(pPdStruct->bIsStop))) {
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
         double bytes[256] = {0.0};
 
         qint64 nTemp = 0;
         char *pBuffer = new char[READWRITE_BUFFER_SIZE];
 
-        while ((nSize > 0) && (!(pProcessData->bIsStop))) {
+        while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
             nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
@@ -6142,12 +6142,12 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
             nSize -= nTemp;
             nOffset += nTemp;
 
-            XBinary::setPdStructCurrent(pProcessData, _nFreeIndex, nOffset - osRegion.nOffset);
+            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset - osRegion.nOffset);
         }
 
         delete[] pBuffer;
 
-        if ((!(pProcessData->bIsStop)) && (!bReadError)) {
+        if ((!(pPdStruct->bIsStop)) && (!bReadError)) {
             for (qint32 j = 0; j < 256; j++) {
                 double dTemp = bytes[j] / (double)osRegion.nSize;
 
@@ -6160,9 +6160,9 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pProcessData)
         }
     }
 
-    XBinary::setPdStructFinished(pProcessData, _nFreeIndex);
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
-    if (pProcessData->bIsStop) {
+    if (pPdStruct->bIsStop) {
         dResult = 0;
     }
 
@@ -7337,19 +7337,19 @@ bool XBinary::clearFile(const QString &sFileName)
     return bResult;
 }
 
-qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pProcessData)
+qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    if (!pProcessData) {
-        pProcessData = &pdStructEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
     }
 
     qint32 nResult = -1;
 
     qint32 nNumberOfRecords = pListStrings->count();
 
-    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pProcessData->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
         if (pListStrings->at(i) == sString) {
             nResult = i;
 
@@ -7360,19 +7360,19 @@ qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, const QStr
     return nResult;
 }
 
-qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pProcessData)
+qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    if (!pProcessData) {
-        pProcessData = &pdStructEmpty;
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
     }
 
     qint32 nResult = -1;
 
     qint32 nNumberOfRecords = pListStrings->count();
 
-    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pProcessData->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
         if (isRegExpPresent(sString, pListStrings->at(i))) {
             nResult = i;
 
@@ -9659,7 +9659,7 @@ qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignat
     return nResult;
 }
 
-qint32 XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex)
+qint32 XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
 {
     int nResult = 0;
 

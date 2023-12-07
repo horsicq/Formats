@@ -2673,6 +2673,19 @@ bool XPE::isImportLibraryPresentI(const QString &sLibrary, QList<XPE::IMPORT_HEA
         }
     }
 
+    if (!bResult) {
+        if (sLibrary.contains(".")) {
+            QString sShortName = sLibrary.section(".", 0, 0).toUpper();
+
+            for (qint32 i = 0; i < nNumberOfImports; i++) {
+                if (pListImportHeaders->at(i).sName.toUpper().section(".", 0, 0) == sShortName) {
+                    bResult = true;
+                    break;
+                }
+            }
+        }
+    }
+
     return bResult;
 }
 

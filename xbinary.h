@@ -1030,7 +1030,7 @@ public:
     static bool moveMemory(QIODevice *pDevice, qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize);
 
     static bool dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize);
-    bool dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pProcessData = nullptr);
+    bool dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);
 
     QSet<FT> getFileTypes(bool bExtra = false);
     static QSet<FT> getFileTypes(QIODevice *pDevice,
@@ -1104,10 +1104,10 @@ public:
 
     static QList<qint64> getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta);
 
-    static QString getHash(HASH hash, const QString &sFileName, PDSTRUCT *pProcessData = nullptr);
-    static QString getHash(HASH hash, QIODevice *pDevice, PDSTRUCT *pProcessData = nullptr);
-    QString getHash(HASH hash, qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
-    QString getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pProcessData = nullptr);
+    static QString getHash(HASH hash, const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
+    static QString getHash(HASH hash, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
+    QString getHash(HASH hash, qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
+    QString getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pPdStruct = nullptr);
 
     static QSet<HASH> getHashMethods();
     static QList<HASH> getHashMethodsAsList();
@@ -1127,14 +1127,14 @@ public:
     static quint32 _getCRC32(QIODevice *pDevice);
     static quint32 _getCRC32(const char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable);
     static quint32 _getCRC32(const QByteArray &baData, quint32 nInit, quint32 *pCRCTable);
-    quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
+    quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
     static quint32 _getCRC32ByFileContent(const QString &sFileName);
     static quint32 _getCRC32ByDirectory(const QString &sDirectoryName, bool bRecursive, quint32 nInit = 0xFFFFFFFF);  // TODO PDSTRUCT
 
     static double getEntropy(const QString &sFileName);  // TODO ProcessData
-    static double getEntropy(QIODevice *pDevice, PDSTRUCT *pProcessData = nullptr);
-    double getEntropy(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pProcessData = nullptr);
+    static double getEntropy(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
+    double getEntropy(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
     BYTE_COUNTS getByteCounts(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
@@ -1262,8 +1262,8 @@ public:
     static bool writeToFile(const QString &sFileName, QIODevice *pDevice);
     static bool appendToFile(const QString &sFileName, const QString &sString);  // TODO rename
     static bool clearFile(const QString &sFileName);
-    static qint32 getStringNumberFromList(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pProcessData = nullptr);
-    static qint32 getStringNumberFromListExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pProcessData = nullptr);
+    static qint32 getStringNumberFromList(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
+    static qint32 getStringNumberFromListExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
     static bool isStringInListPresent(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
     static bool isStringInListPresentExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
     static QString getStringByIndex(QList<QString> *pListStrings, qint32 nIndex, qint32 nNumberOfStrings = -1);
@@ -1475,7 +1475,7 @@ private:
 
     static qint32 _getSignatureRelOffsetFix(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
     static qint32 _getSignatureDelta(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid, PDSTRUCT *pPdStruct);
-    static qint32 _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex);
+    static qint32 _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
     static qint32 _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, int nStartIndex);
     static qint32 _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid, PDSTRUCT *pPdStruct);
 
