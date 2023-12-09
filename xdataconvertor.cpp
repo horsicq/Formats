@@ -25,7 +25,7 @@ XDataConvertor::XDataConvertor(QObject *pParent) : QObject(pParent)
     g_options = {};
 }
 
-void XDataConvertor::setData(QIODevice *pDeviceIn, QIODevice *pDeviceOut, METHOD method, const OPTIONS &options, XBinary::PDSTRUCT *pPdStruct)
+void XDataConvertor::setData(QIODevice *pDeviceIn, QIODevice *pDeviceOut, CMETHOD method, const OPTIONS &options, XBinary::PDSTRUCT *pPdStruct)
 {
     this->g_pDeviceIn = pDeviceIn;
     this->g_pDeviceOut = pDeviceOut;
@@ -49,6 +49,52 @@ void XDataConvertor::process()
     qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
     XBinary::setPdStructInit(pPdStruct, _nFreeIndex, 0);
 
+    qint64 nOutSize = 0;
+    qint64 nBufferSize = 0;
+    qint64 nInSize = g_pDeviceIn->size();
+
+    if (g_method == CMETHOD_XOR_BYTE) {
+        nOutSize = nInSize;
+        nBufferSize = 0x1000;
+    }
+
+    char *pBuffer = new char[nBufferSize];
+
+    if(XBinary::resize(g_pDeviceOut, nOutSize)) {
+        for (qint32 i = 0; i < nInSize; ) {
+            qint64 _nBufferSize = qMin(nBufferSize, nInSize - i);
+
+            g_pDeviceIn->seek(i);
+            g_pDeviceOut->seek(i);
+
+            if (g_pDeviceIn->read(pBuffer, _nBufferSize) != _nBufferSize) {
+                pPdStruct->sErrorString = tr("Read error");
+                break;
+            }
+
+            if (g_method == CMETHOD_XOR_BYTE) {
+                for (qint32 j = 0; j < _nBufferSize; j++) {
+                    pBuffer[j] = pBuffer[j] ^ (quint8)g_options.varKey.toUInt();
+                }
+            }
+
+            if (g_pDeviceOut->write(pBuffer, _nBufferSize) != _nBufferSize) {
+                pPdStruct->sErrorString = tr("Write error");
+                break;
+            }
+
+            i +=  _nBufferSize;
+
+            if (_nBufferSize == 0) {
+                pPdStruct->sErrorString = tr("Read error");
+                break;
+            }
+        }
+    } else {
+        pPdStruct->sErrorString = tr("Cannot resize");
+    }
+
+    delete [] pBuffer;
     // TODO
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);

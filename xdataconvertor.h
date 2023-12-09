@@ -27,12 +27,12 @@ class XDataConvertor : public QObject {
     Q_OBJECT
 
 public:
-    enum METHOD {
-        METHOD_UNKNOWN = 0,
-        METHOD_XOR_BYTE,
-        METHOD_XOR_WORD,
-        METHOD_XOR_DWORD,
-        METHOD_XOR_QWORD
+    enum CMETHOD {
+        CMETHOD_UNKNOWN = 0,
+        CMETHOD_XOR_BYTE,
+        CMETHOD_XOR_WORD,
+        CMETHOD_XOR_DWORD,
+        CMETHOD_XOR_QWORD
     };
 
     struct OPTIONS{
@@ -40,7 +40,7 @@ public:
     };
 
     explicit XDataConvertor(QObject *pParent = nullptr);
-    void setData(QIODevice *pDeviceIn, QIODevice *pDeviceOut, METHOD method, const OPTIONS &options, XBinary::PDSTRUCT *pPdStruct);
+    void setData(QIODevice *pDeviceIn, QIODevice *pDeviceOut, CMETHOD method, const OPTIONS &options, XBinary::PDSTRUCT *pPdStruct);
 
 public slots:
     void process();
@@ -52,7 +52,7 @@ signals:
 private:
     QIODevice *g_pDeviceIn;
     QIODevice *g_pDeviceOut;
-    METHOD g_method;
+    CMETHOD g_method;
     OPTIONS g_options;
     XBinary::PDSTRUCT *g_pPdStruct;
 };
