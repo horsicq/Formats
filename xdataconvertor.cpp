@@ -60,8 +60,8 @@ void XDataConvertor::process()
 
     char *pBuffer = new char[nBufferSize];
 
-    if(XBinary::resize(g_pDeviceOut, nOutSize)) {
-        for (qint32 i = 0; i < nInSize; ) {
+    if (XBinary::resize(g_pDeviceOut, nOutSize)) {
+        for (qint32 i = 0; i < nInSize;) {
             qint64 _nBufferSize = qMin(nBufferSize, nInSize - i);
 
             g_pDeviceIn->seek(i);
@@ -83,7 +83,7 @@ void XDataConvertor::process()
                 break;
             }
 
-            i +=  _nBufferSize;
+            i += _nBufferSize;
 
             if (_nBufferSize == 0) {
                 pPdStruct->sErrorString = tr("Read error");
@@ -94,7 +94,7 @@ void XDataConvertor::process()
         pPdStruct->sErrorString = tr("Cannot resize");
     }
 
-    delete [] pBuffer;
+    delete[] pBuffer;
     // TODO
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);

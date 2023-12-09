@@ -2900,7 +2900,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
         if (valueType == VT_ANSISTRING_I) {
             _sValue = read_ansiString(nValOffset, nValSize);
         } else if (valueType == VT_UNICODESTRING_I) {
-            _sValue = read_unicodeString(nValOffset, nValSize/2, bIsBigEndian);
+            _sValue = read_unicodeString(nValOffset, nValSize / 2, bIsBigEndian);
         } else if (valueType == VT_UTF8STRING_I) {
             _sValue = read_unicodeString(nValOffset, nValSize, bIsBigEndian);
         } else if (valueType == VT_SIGNATURE) {

@@ -35,7 +35,7 @@ public:
         CMETHOD_XOR_QWORD
     };
 
-    struct OPTIONS{
+    struct OPTIONS {
         QVariant varKey;
     };
 

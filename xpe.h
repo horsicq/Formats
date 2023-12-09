@@ -554,7 +554,7 @@ public:
 
     QList<quint32> getImportPositionHashes(bool bLibraryName = false);
     QList<quint32> getImportPositionHashes(QList<IMPORT_HEADER> *pListImport, bool bLibraryName = false);
-    static bool isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 nIndex, quint32 nHash); // TODO PDSTRUCT
+    static bool isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 nIndex, quint32 nHash);  // TODO PDSTRUCT
 
     bool isImportLibraryPresent(const QString &sLibrary);
     static bool isImportLibraryPresent(const QString &sLibrary, QList<IMPORT_HEADER> *pListImportHeaders);
