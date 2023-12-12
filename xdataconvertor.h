@@ -32,7 +32,15 @@ public:
         CMETHOD_XOR_BYTE,
         CMETHOD_XOR_WORD,
         CMETHOD_XOR_DWORD,
-        CMETHOD_XOR_QWORD
+        CMETHOD_XOR_QWORD,
+        CMETHOD_ADD_BYTE,
+        CMETHOD_ADD_WORD,
+        CMETHOD_ADD_DWORD,
+        CMETHOD_ADD_QWORD,
+        CMETHOD_SUB_BYTE,
+        CMETHOD_SUB_WORD,
+        CMETHOD_SUB_DWORD,
+        CMETHOD_SUB_QWORD,
     };
 
     struct OPTIONS {

@@ -54,19 +54,19 @@ void XDataConvertor::process()
     qint64 nInSize = g_pDeviceIn->size();
     quint64 nKey = 0;
 
-    if (g_method == CMETHOD_XOR_BYTE) {
+    if ((g_method == CMETHOD_XOR_BYTE) || (g_method == CMETHOD_ADD_BYTE) || (g_method == CMETHOD_SUB_BYTE)) {
         nOutSize = nInSize;
         nBufferSize = 0x1000;
         nKey = (quint8)g_options.varKey.toULongLong();
-    } else if (g_method == CMETHOD_XOR_WORD) {
+    } else if ((g_method == CMETHOD_XOR_WORD) || (g_method == CMETHOD_ADD_WORD) || (g_method == CMETHOD_SUB_WORD)) {
         nOutSize = S_ALIGN_DOWN64(nInSize, 2);
         nBufferSize = 0x1000;
         nKey = (quint16)g_options.varKey.toULongLong();
-    } else if (g_method == CMETHOD_XOR_DWORD) {
+    } else if ((g_method == CMETHOD_XOR_DWORD) || (g_method == CMETHOD_ADD_DWORD) || (g_method == CMETHOD_SUB_DWORD)) {
         nOutSize = S_ALIGN_DOWN64(nInSize, 4);
         nBufferSize = 0x1000;
         nKey = (quint32)g_options.varKey.toULongLong();
-    } else if (g_method == CMETHOD_XOR_QWORD) {
+    } else if ((g_method == CMETHOD_XOR_QWORD) || (g_method == CMETHOD_ADD_QWORD) || (g_method == CMETHOD_SUB_QWORD)) {
         nOutSize = S_ALIGN_DOWN64(nInSize, 8);
         nBufferSize = 0x1000;
         nKey = (quint64)g_options.varKey.toULongLong();
@@ -101,6 +101,38 @@ void XDataConvertor::process()
             } else if (g_method == CMETHOD_XOR_QWORD) {
                 for (qint32 j = 0; j < _nBufferSize/8; j++) {
                     ((quint64 *)pBuffer)[j] = ((quint64 *)pBuffer)[j] ^ (quint64)nKey;
+                }
+            } else if (g_method == CMETHOD_ADD_BYTE) {
+                for (qint32 j = 0; j < _nBufferSize; j++) {
+                    pBuffer[j] = pBuffer[j] + (quint8)nKey;
+                }
+            } else if (g_method == CMETHOD_ADD_WORD) {
+                for (qint32 j = 0; j < _nBufferSize/2; j++) {
+                    ((quint16 *)pBuffer)[j] = ((quint16 *)pBuffer)[j] + (quint16)nKey;
+                }
+            } else if (g_method == CMETHOD_ADD_DWORD) {
+                for (qint32 j = 0; j < _nBufferSize/4; j++) {
+                    ((quint32 *)pBuffer)[j] = ((quint32 *)pBuffer)[j] + (quint32)nKey;
+                }
+            } else if (g_method == CMETHOD_ADD_QWORD) {
+                for (qint32 j = 0; j < _nBufferSize/8; j++) {
+                    ((quint64 *)pBuffer)[j] = ((quint64 *)pBuffer)[j] + (quint64)nKey;
+                }
+            } else if (g_method == CMETHOD_SUB_BYTE) {
+                for (qint32 j = 0; j < _nBufferSize; j++) {
+                    pBuffer[j] = pBuffer[j] - (quint8)nKey;
+                }
+            } else if (g_method == CMETHOD_SUB_WORD) {
+                for (qint32 j = 0; j < _nBufferSize/2; j++) {
+                    ((quint16 *)pBuffer)[j] = ((quint16 *)pBuffer)[j] - (quint16)nKey;
+                }
+            } else if (g_method == CMETHOD_SUB_DWORD) {
+                for (qint32 j = 0; j < _nBufferSize/4; j++) {
+                    ((quint32 *)pBuffer)[j] = ((quint32 *)pBuffer)[j] - (quint32)nKey;
+                }
+            } else if (g_method == CMETHOD_SUB_QWORD) {
+                for (qint32 j = 0; j < _nBufferSize/8; j++) {
+                    ((quint64 *)pBuffer)[j] = ((quint64 *)pBuffer)[j] - (quint64)nKey;
                 }
             }
 
