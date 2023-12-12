@@ -406,7 +406,6 @@ public:
     static bool isSectionNamePresent(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
     qint32 getSectionNumber(const QString &sSectionName);  // TODO pdStruct
     static qint32 getSectionNumber(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
-    static SECTION_RECORD getSectionRecord(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     virtual MODE getMode();
     virtual QString getArch();
@@ -417,7 +416,7 @@ public:
 
     QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType);
     QList<XELF_DEF::Elf_Shdr> _getSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, quint32 nType);
-    QList<SECTION_RECORD> _getSectionRecords(QList<SECTION_RECORD> *pListSectionRecords, const QString &sName);
+    static QList<SECTION_RECORD> _getSectionRecords(QList<SECTION_RECORD> *pListSectionRecords, const QString &sName);
 
     QList<DATASET> getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
     QList<DATASET> getDatasetsFromPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);

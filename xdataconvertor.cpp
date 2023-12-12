@@ -36,6 +36,8 @@ void XDataConvertor::setData(QIODevice *pDeviceIn, QIODevice *pDeviceOut, CMETHO
 
 void XDataConvertor::process()
 {
+    // mb TODO set selected processed
+
     XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
     XBinary::PDSTRUCT *pPdStruct = g_pPdStruct;
 
@@ -77,83 +79,111 @@ void XDataConvertor::process()
     if (XBinary::resize(g_pDeviceOut, nOutSize)) {
         for (qint32 i = 0; i < nInSize;) {
             qint64 _nBufferSize = qMin(nBufferSize, nInSize - i);
+            qint64 nProcessedSize = 0;
+
+            bool bInvalidSize = false;
+
+            if ((g_method == CMETHOD_XOR_WORD) || (g_method == CMETHOD_ADD_WORD) || (g_method == CMETHOD_SUB_WORD)) {
+                if (_nBufferSize % 2) {
+                    bInvalidSize = true;
+                }
+            } else if ((g_method == CMETHOD_XOR_DWORD) || (g_method == CMETHOD_ADD_DWORD) || (g_method == CMETHOD_SUB_DWORD)) {
+                if (_nBufferSize % 4) {
+                    bInvalidSize = true;
+                }
+            } else if ((g_method == CMETHOD_XOR_QWORD) || (g_method == CMETHOD_ADD_QWORD) || (g_method == CMETHOD_SUB_QWORD)) {
+                if (_nBufferSize % 8) {
+                    bInvalidSize = true;
+                }
+            }
 
             g_pDeviceIn->seek(i);
             g_pDeviceOut->seek(i);
 
-            if (g_pDeviceIn->read(pBuffer, _nBufferSize) != _nBufferSize) {
-                pPdStruct->sErrorString = tr("Read error");
+            if ((g_pDeviceIn->read(pBuffer, _nBufferSize) != _nBufferSize) || (_nBufferSize == 0)) {
+                pPdStruct->sInfoString = tr("Read error");
                 break;
             }
 
             if (g_method == CMETHOD_XOR_BYTE) {
                 for (qint32 j = 0; j < _nBufferSize; j++) {
                     pBuffer[j] = pBuffer[j] ^ (quint8)nKey;
+                    nProcessedSize++;
                 }
             } else if (g_method == CMETHOD_XOR_WORD) {
                 for (qint32 j = 0; j < _nBufferSize/2; j++) {
                     ((quint16 *)pBuffer)[j] = ((quint16 *)pBuffer)[j] ^ (quint16)nKey;
+                    nProcessedSize += 2;
                 }
             } else if (g_method == CMETHOD_XOR_DWORD) {
                 for (qint32 j = 0; j < _nBufferSize/4; j++) {
                     ((quint32 *)pBuffer)[j] = ((quint32 *)pBuffer)[j] ^ (quint32)nKey;
+                    nProcessedSize += 4;
                 }
             } else if (g_method == CMETHOD_XOR_QWORD) {
                 for (qint32 j = 0; j < _nBufferSize/8; j++) {
                     ((quint64 *)pBuffer)[j] = ((quint64 *)pBuffer)[j] ^ (quint64)nKey;
+                    nProcessedSize += 8;
                 }
             } else if (g_method == CMETHOD_ADD_BYTE) {
                 for (qint32 j = 0; j < _nBufferSize; j++) {
                     pBuffer[j] = pBuffer[j] + (quint8)nKey;
+                    nProcessedSize++;
                 }
             } else if (g_method == CMETHOD_ADD_WORD) {
                 for (qint32 j = 0; j < _nBufferSize/2; j++) {
                     ((quint16 *)pBuffer)[j] = ((quint16 *)pBuffer)[j] + (quint16)nKey;
+                    nProcessedSize += 2;
                 }
             } else if (g_method == CMETHOD_ADD_DWORD) {
                 for (qint32 j = 0; j < _nBufferSize/4; j++) {
                     ((quint32 *)pBuffer)[j] = ((quint32 *)pBuffer)[j] + (quint32)nKey;
+                    nProcessedSize += 4;
                 }
             } else if (g_method == CMETHOD_ADD_QWORD) {
                 for (qint32 j = 0; j < _nBufferSize/8; j++) {
                     ((quint64 *)pBuffer)[j] = ((quint64 *)pBuffer)[j] + (quint64)nKey;
+                    nProcessedSize += 8;
                 }
             } else if (g_method == CMETHOD_SUB_BYTE) {
                 for (qint32 j = 0; j < _nBufferSize; j++) {
                     pBuffer[j] = pBuffer[j] - (quint8)nKey;
+                    nProcessedSize++;
                 }
             } else if (g_method == CMETHOD_SUB_WORD) {
                 for (qint32 j = 0; j < _nBufferSize/2; j++) {
                     ((quint16 *)pBuffer)[j] = ((quint16 *)pBuffer)[j] - (quint16)nKey;
+                    nProcessedSize += 2;
                 }
             } else if (g_method == CMETHOD_SUB_DWORD) {
                 for (qint32 j = 0; j < _nBufferSize/4; j++) {
                     ((quint32 *)pBuffer)[j] = ((quint32 *)pBuffer)[j] - (quint32)nKey;
+                    nProcessedSize += 4;
                 }
             } else if (g_method == CMETHOD_SUB_QWORD) {
                 for (qint32 j = 0; j < _nBufferSize/8; j++) {
                     ((quint64 *)pBuffer)[j] = ((quint64 *)pBuffer)[j] - (quint64)nKey;
+                    nProcessedSize += 8;
                 }
             }
 
-            if (g_pDeviceOut->write(pBuffer, _nBufferSize) != _nBufferSize) {
-                pPdStruct->sErrorString = tr("Write error");
+            if (g_pDeviceOut->write(pBuffer, nProcessedSize) != nProcessedSize) {
+                pPdStruct->sInfoString = tr("Write error");
+                break;
+            }
+
+            if (bInvalidSize) {
+                pPdStruct->sInfoString = tr("Invalid size");
                 break;
             }
 
             i += _nBufferSize;
-
-            if (_nBufferSize == 0) {
-                pPdStruct->sErrorString = tr("Read error");
-                break;
-            }
         }
     } else {
-        pPdStruct->sErrorString = tr("Cannot resize");
+        pPdStruct->sInfoString = tr("Cannot resize");
     }
 
     delete[] pBuffer;
-    // TODO
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 

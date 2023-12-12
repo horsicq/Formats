@@ -4109,22 +4109,6 @@ qint32 XELF::getSectionNumber(const QString &sSectionName, QList<XELF::SECTION_R
     return nResult;
 }
 
-XELF::SECTION_RECORD XELF::getSectionRecord(const QString &sSectionName, QList<XELF::SECTION_RECORD> *pListSectionRecords)
-{
-    SECTION_RECORD result = {};
-
-    qint32 nNumberOfSections = pListSectionRecords->count();
-
-    for (qint32 i = 0; i < nNumberOfSections; i++) {
-        if (pListSectionRecords->at(i).sName == sSectionName) {
-            result = pListSectionRecords->at(i);
-            break;
-        }
-    }
-
-    return result;
-}
-
 XBinary::MODE XELF::getMode()
 {
     MODE result = MODE_32;

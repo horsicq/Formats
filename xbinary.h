@@ -581,7 +581,8 @@ public:
         //        QString sStatus;
         //        bool bErrors;
         //        bool bSuccess; // TODO important
-        QString sErrorString;
+        QString sInfoString;
+        bool bCriticalError; // TODO !!!
     };
 
 private:
@@ -1118,7 +1119,7 @@ public:
     static quint32 getAdler32(const QString &sFileName);  // TODO ProcessData
     static quint32 getAdler32(QIODevice *pDevice);        // TODO ProcessData
     quint32 getAdler32(qint64 nOffset = 0,
-                       qint64 nSize = -1);  // TODO pProcessData Check
+                       qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
     static void _createCRC32Table(quint32 *pCRCTable, quint32 nPoly = 0xEDB88320);
     static quint32 *_getCRC32Table_EDB88320();
@@ -1344,7 +1345,7 @@ public:
         OPCODE_STATUS_END
     };
 
-    QList<OPCODE> getOpcodes(qint64 nOffset, XADDR nStartAddress, qint64 nSize, quint32 nType);
+    QList<OPCODE> getOpcodes(qint64 nOffset, XADDR nStartAddress, qint64 nSize, quint32 nType, PDSTRUCT *pPdStruct = nullptr);
     virtual XADDR readOpcodes(quint32 nType, char *pData, XADDR nStartAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);
 
     bool _read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, const QString &sPrefix);

@@ -41,6 +41,8 @@ public:
         CMETHOD_SUB_WORD,
         CMETHOD_SUB_DWORD,
         CMETHOD_SUB_QWORD,
+        CMETHOD_BASE64_ENCODE,
+        CMETHOD_BASE64_DECODE
     };
 
     struct OPTIONS {

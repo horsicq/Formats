@@ -1787,7 +1787,7 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qin
         nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + (nArraySize - 1)), nSize);
 
         if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-            _errorMessage(tr("Read error"));
+            pPdStruct->sInfoString = tr("Read error");
 
             break;
         }
@@ -2086,9 +2086,9 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
         }
     }
 
-    if (pPdStruct->sErrorString != "") {
-        _errorMessage(pPdStruct->sErrorString);
-        pPdStruct->sErrorString = "";
+    if (pPdStruct->sInfoString != "") {
+        _errorMessage(pPdStruct->sInfoString);
+        pPdStruct->sInfoString = "";
     }
 
     return nResult;
@@ -2129,7 +2129,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
             nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + (nStringSize - 1)), nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-                _errorMessage(tr("Read error"));
+                pPdStruct->sInfoString = tr("Read error");
 
                 break;
             }
@@ -2207,7 +2207,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, const QString 
         nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + 2 * (nStringSize - 1)), nSize);
 
         if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-            _errorMessage(tr("Read error"));
+            pPdStruct->sInfoString = tr("Read error");
             break;
         }
 
@@ -2752,7 +2752,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
         XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, _nOffset - nOffset);
 
         if (nCurrentRecords >= ssOptions.nLimit) {
-            _errorMessage(QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords)));
+            pPdStruct->sInfoString = QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords));
 
             break;
         }
@@ -2761,7 +2761,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
     if (bReadError) {
-        _errorMessage(tr("Read error"));
+        pPdStruct->sInfoString = tr("Read error");
     }
 
     if (!g_pMemory) {
@@ -2830,7 +2830,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
         nCurrentRecords++;
 
         if (nCurrentRecords >= nLimit) {
-            _errorMessage(QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords)));
+            pPdStruct->sInfoString = QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords));
 
             break;
         }
@@ -2916,7 +2916,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
         nCurrentRecords++;
 
         if (nCurrentRecords >= nLimit) {
-            _errorMessage(QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords)));
+            pPdStruct->sInfoString = QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords));
 
             break;
         }
@@ -4466,13 +4466,13 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
             qint64 nTempSize = qMin(nDataSize, (qint64)0x1000);  // TODO const
 
             if (safeReadData(g_pDevice, nSourceOffset, pBuffer, nTempSize) != nTempSize) {
-                _errorMessage(QObject::tr("Read error"));
+                pPdStruct->sInfoString = tr("Read error");
                 bResult = false;
                 break;
             }
 
             if (!((file.seek(nDestOffset)) && (file.write(pBuffer, nTempSize) == nTempSize))) {
-                _errorMessage(QObject::tr("Write error"));
+                pPdStruct->sInfoString = tr("Write error");
                 bResult = false;
                 break;
             }
@@ -5741,7 +5741,7 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pPdStr
             nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-                _errorMessage(tr("Read error"));
+                pPdStruct->sInfoString = tr("Read error");
 
                 bReadError = true;
 
@@ -5866,8 +5866,13 @@ quint32 XBinary::getAdler32(QIODevice *pDevice)
     return nResult;
 }
 
-quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize)
+quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
     // TODO Check crash
     // TODO optimize!!!
     quint32 nResult = 0;
@@ -5886,11 +5891,11 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize)
         quint32 a = 1;
         quint32 b = 0;
 
-        while (nSize > 0) {
+        while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
             nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-                _errorMessage(tr("Read error"));
+                pPdStruct->sInfoString = tr("Read error");
                 delete[] pBuffer;
                 return 0;
             }
@@ -6009,7 +6014,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
             nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-                _errorMessage(tr("Read error"));
+                pPdStruct->sInfoString = tr("Read error");
 
                 nResult = 0;
 
@@ -6129,7 +6134,7 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
             nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-                _errorMessage(tr("Read error"));
+                pPdStruct->sInfoString = tr("Read error");
                 bReadError = true;
 
                 break;
@@ -8145,8 +8150,14 @@ QList<QString> XBinary::getAllFilesFromDirectory(const QString &sDirectory, cons
     return directory.entryList(QStringList() << sExtension, QDir::Files);
 }
 
-QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, XADDR nStartAddress, qint64 nSize, quint32 nType)
+QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, XADDR nStartAddress, qint64 nSize, quint32 nType, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     QList<OPCODE> listResult;
 
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
@@ -8157,11 +8168,11 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, XADDR nStartAddress, 
     if (nOffset != -1) {
         char *pBuffer = new char[READWRITE_BUFFER_SIZE];
 
-        while (nSize > 0) {
+        while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
             qint64 nTempSize = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
 
             if (read_array(nOffset, pBuffer, nTempSize) != nTempSize) {
-                _errorMessage(tr("Read error"));
+                pPdStruct->sInfoString = tr("Read error");
 
                 break;
             }
@@ -9272,6 +9283,10 @@ bool XBinary::isPdStructSuccess(PDSTRUCT *pPdStruct)
         }
     }
 
+    if (pPdStruct->bCriticalError) {
+        bResult = false;
+    }
+
     return bResult;
 }
 
@@ -9765,7 +9780,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
 
 #ifdef QT_DEBUG
     if (!(*pbValid)) {
-        pPdStruct->sErrorString = QString("%1: %2").arg(tr("Invalid signature"), sSignature);
+        pPdStruct->sInfoString = QString("%1: %2").arg(tr("Invalid signature"), sSignature);
     }
 #endif
 
