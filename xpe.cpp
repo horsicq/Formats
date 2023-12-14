@@ -1312,6 +1312,10 @@ QString XPE::convertSectionName(const QString &sName, OFFSETSIZE *pOsStringTable
             qint32 nIndex = sName.section("/", 1, -1).toInt();
 
             sResult = getStringFromIndex(pOsStringTable->nOffset, pOsStringTable->nSize, nIndex);
+
+            if (sResult == "") {
+                sResult = sName;
+            }
         }
     }
 

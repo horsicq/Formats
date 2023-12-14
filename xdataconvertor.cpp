@@ -56,6 +56,7 @@ void XDataConvertor::process()
     qint64 nInSize = g_pDeviceIn->size();
     quint64 nKey = 0;
 
+    // mb TODO adjust
     if ((g_method == CMETHOD_XOR_BYTE) || (g_method == CMETHOD_ADD_BYTE) || (g_method == CMETHOD_SUB_BYTE)) {
         nOutSize = nInSize;
         nBufferSize = 0x1000;
@@ -72,6 +73,12 @@ void XDataConvertor::process()
         nOutSize = S_ALIGN_DOWN64(nInSize, 8);
         nBufferSize = 0x1000;
         nKey = (quint64)g_options.varKey.toULongLong();
+    } else if (g_method == CMETHOD_BASE64_ENCODE) {
+        nOutSize = (nInSize/3) * 4;
+        if (nInSize % 3) {
+            nOutSize += 4;
+        }
+        nBufferSize = 0x1000;
     }
 
     char *pBuffer = new char[nBufferSize];
