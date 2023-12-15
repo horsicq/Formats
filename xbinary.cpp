@@ -3293,6 +3293,14 @@ bool XBinary::isFileExists(const QString &sFileName, bool bTryToOpen)
 
 bool XBinary::removeFile(const QString &sFileName)
 {
+#ifdef Q_OS_WIN32
+    QFile::Permissions perm = QFile::permissions(sFileName);
+
+    if (!(perm & QFile::WriteOther)) {
+        QFile::setPermissions(sFileName, (QFile::Permissions)0x6666);
+    }
+#endif
+
     return QFile::remove(sFileName);
 }
 
@@ -6487,6 +6495,12 @@ bool XBinary::compareSignatureStrings(const QString &sBaseSignature, const QStri
 void XBinary::_errorMessage(const QString &sErrorMessage)
 {
 #ifdef QT_DEBUG
+    QFile *pFile = dynamic_cast<QFile *>(g_pDevice);
+
+    if (pFile) {
+        qDebug("Filename: %s", pFile->fileName().toUtf8().data());
+    }
+
     qDebug("Error: %s", sErrorMessage.toLatin1().data());
 #endif
     emit errorMessage(sErrorMessage);
