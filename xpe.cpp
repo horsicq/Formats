@@ -2524,7 +2524,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex, PDSTRUCT *pPdStr
     if (nImportOffset != -1) {
         _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
 
-        int _nIndex = 0;
+        qint32 _nIndex = 0;
 
         while (!(pPdStruct->bIsStop)) {
             IMPORT_HEADER importHeader = {};

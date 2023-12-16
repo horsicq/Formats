@@ -782,8 +782,13 @@ qint32 XBinary::getRegExpCount(const QString &sRegExp, const QString &sString)
     nResult = rxString.capturedTexts().count();
 #else
     QRegularExpression rxString(sRegExp);
-    QRegularExpressionMatch matchString = rxString.match(sString);
-    nResult = matchString.capturedTexts().count();
+    QRegularExpressionMatchIterator i = rxString.globalMatch(sString);
+    while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        if (match.hasMatch()) {
+             nResult++;
+        }
+    }
 #endif
 
     return nResult;

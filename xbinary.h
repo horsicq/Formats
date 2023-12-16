@@ -682,7 +682,7 @@ public:
 
     static QString regExp(const QString &sRegExp, const QString &sString, qint32 nIndex);
     static bool isRegExpPresent(const QString &sRegExp, const QString &sString);
-    static qint32 getRegExpCount(const QString &sRegExp, const QString &sString);
+    static qint32 getRegExpCount(const QString &sRegExp, const QString &sString); // TODO Check!
     static QString getRegExpSection(const QString &sRegExp, const QString &sString, qint32 nStart, qint32 nEnd);
     qint64 read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize);
     QByteArray read_array(qint64 nOffset, qint64 nSize);
