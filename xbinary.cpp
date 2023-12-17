@@ -786,7 +786,7 @@ qint32 XBinary::getRegExpCount(const QString &sRegExp, const QString &sString)
     while (i.hasNext()) {
         QRegularExpressionMatch match = i.next();
         if (match.hasMatch()) {
-             nResult++;
+            nResult++;
         }
     }
 #endif

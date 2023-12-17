@@ -582,7 +582,7 @@ public:
         //        bool bErrors;
         //        bool bSuccess; // TODO important
         QString sInfoString;
-        bool bCriticalError; // TODO !!!
+        bool bCriticalError;  // TODO !!!
     };
 
 private:
@@ -682,7 +682,7 @@ public:
 
     static QString regExp(const QString &sRegExp, const QString &sString, qint32 nIndex);
     static bool isRegExpPresent(const QString &sRegExp, const QString &sString);
-    static qint32 getRegExpCount(const QString &sRegExp, const QString &sString); // TODO Check!
+    static qint32 getRegExpCount(const QString &sRegExp, const QString &sString);  // TODO Check!
     static QString getRegExpSection(const QString &sRegExp, const QString &sString, qint32 nStart, qint32 nEnd);
     qint64 read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize);
     QByteArray read_array(qint64 nOffset, qint64 nSize);
@@ -1118,8 +1118,7 @@ public:
 
     static quint32 getAdler32(const QString &sFileName);  // TODO ProcessData
     static quint32 getAdler32(QIODevice *pDevice);        // TODO ProcessData
-    quint32 getAdler32(qint64 nOffset = 0,
-                       qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
+    quint32 getAdler32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
     static void _createCRC32Table(quint32 *pCRCTable, quint32 nPoly = 0xEDB88320);
     static quint32 *_getCRC32Table_EDB88320();
