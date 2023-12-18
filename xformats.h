@@ -58,9 +58,11 @@ class XFormats : public QObject {
 public:
     explicit XFormats(QObject *pParent = nullptr);
 
-    static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
+    static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType, XBinary::MAPMODE mapMode, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
                                              XBinary::PDSTRUCT *pPdStruct = nullptr);
-    static XBinary::_MEMORY_MAP getMemoryMap(const QString &sFileName, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static XBinary::_MEMORY_MAP getMemoryMap(const QString &sFileName, XBinary::MAPMODE mapMode, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static QList<XBinary::MAPMODE> getMapModesList(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
+                                             XBinary::PDSTRUCT *pPdStruct = nullptr);
     static qint64 getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static qint64 getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static bool isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -87,8 +89,9 @@ public:
 #endif
 #ifdef QT_GUI_LIB
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox);
-    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox);
+    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName,QComboBox *pComboBox);
     static bool setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian);
+    static XBinary::MAPMODE setMapModeComboBox(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, QComboBox *pComboBox);
 #endif
     static bool saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDirectoryName);
     static bool saveAllPECursorsToDirectory(QIODevice *pDevice, const QString &sDirectoryName);

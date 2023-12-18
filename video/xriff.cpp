@@ -84,7 +84,7 @@ qint64 XRiff::getFileFormatSize()
     return _calculateRawSize();
 }
 
-XBinary::_MEMORY_MAP XRiff::getMemoryMap(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XRiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 

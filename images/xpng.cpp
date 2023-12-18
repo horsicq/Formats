@@ -94,7 +94,7 @@ qint64 XPNG::getFileFormatSize()
     return nResult;
 }
 
-XBinary::_MEMORY_MAP XPNG::getMemoryMap(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XPNG::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 

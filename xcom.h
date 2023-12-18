@@ -41,7 +41,7 @@ public:
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
-    virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
+    virtual _MEMORY_MAP getMemoryMap(XBinary::MAPMODE mapMode = XBinary::MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual QString getArch();
     virtual MODE getMode();
     virtual bool isBigEndian();

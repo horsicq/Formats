@@ -1236,7 +1236,7 @@ QList<XLE_DEF::o32_map> XLE::getMapsLX()
     return listResult;
 }
 
-XBinary::_MEMORY_MAP XLE::getMemoryMap(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 

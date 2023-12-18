@@ -87,7 +87,7 @@ qint64 XBMP::getFileFormatSize()
     return nResult;
 }
 
-XBinary::_MEMORY_MAP XBMP::getMemoryMap(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     // TODO
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
@@ -96,7 +96,7 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(PDSTRUCT *pPdStruct)
         pPdStruct = &pdStructEmpty;
     }
 
-    return XBinary::getMemoryMap(pPdStruct);
+    return XBinary::getMemoryMap(mapMode, pPdStruct);
 }
 
 QString XBMP::getFileFormatString()

@@ -70,7 +70,7 @@ qint64 XMP4::getFileFormatSize()
     return _calculateRawSize();
 }
 
-XBinary::_MEMORY_MAP XMP4::getMemoryMap(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XMP4::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 

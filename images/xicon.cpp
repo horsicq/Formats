@@ -108,7 +108,7 @@ qint64 XIcon::getFileFormatSize()
     return _calculateRawSize();
 }
 
-XBinary::_MEMORY_MAP XIcon::getMemoryMap(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 

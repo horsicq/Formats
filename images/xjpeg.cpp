@@ -48,7 +48,7 @@ bool XJpeg::isValid(QIODevice *pDevice)
     return xjpeg.isValid();
 }
 
-XBinary::_MEMORY_MAP XJpeg::getMemoryMap(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XJpeg::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 

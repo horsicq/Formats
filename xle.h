@@ -146,7 +146,7 @@ public:
     QList<XLE_DEF::o16_map> getMapsLE();
     QList<XLE_DEF::o32_map> getMapsLX();
 
-    virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual MODE getMode();
     virtual QString getArch();
     virtual bool isBigEndian();

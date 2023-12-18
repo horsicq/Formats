@@ -172,7 +172,7 @@ public:
         ADDRESS_SEGMENT segment;
         qint64 nSize;
         MMT type;
-        qint32 nLoadSection;
+        qint32 nLoadSectionNumber;
         QString sName;
         qint32 nIndex;
         bool bIsVirtual;
@@ -982,7 +982,17 @@ public:
     static QString getMemoryRecordInfoByRelAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
     static QString getMemoryRecordName(_MEMORY_RECORD *pMemoryRecord);
 
-    virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
+    enum MAPMODE {
+        MAPMODE_UNKNOWN = 0,
+        MAPMODE_REGIONS,
+        MAPMODE_SEGMENTS,
+        MAPMODE_SECTIONS
+    };
+
+    static QString mapModeToString(MAPMODE mapMode);
+
+    virtual QList<MAPMODE> getMapModesList(PDSTRUCT *pPdStruct = nullptr);
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
     static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);
     static qint32 getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap);

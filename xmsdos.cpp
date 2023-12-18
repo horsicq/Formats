@@ -321,7 +321,7 @@ quint32 XMSDOS::get_e_lfanew()
     return read_uint32(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
 }
 
-XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 

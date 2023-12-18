@@ -55,7 +55,7 @@ bool XTiff::isValid(QIODevice *pDevice)
     return xtiff.isValid();
 }
 
-XBinary::_MEMORY_MAP XTiff::getMemoryMap(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 

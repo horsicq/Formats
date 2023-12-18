@@ -1797,7 +1797,7 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qin
             break;
         }
 
-        for (unsigned int i = 0; i < nTemp - (nArraySize - 1); i++) {
+        for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
             if (compareMemory(pBuffer + i, pArray, nArraySize)) {
                 nResult = nOffset + i;
 
@@ -1985,7 +1985,7 @@ qint64 XBinary::find_utf8String(qint64 nOffset, qint64 nSize, const QString &sSt
 
 qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, const QString &sSignature, qint64 *pnResultSize, PDSTRUCT *pPdStruct)
 {
-    _MEMORY_MAP memoryMap = XBinary::getMemoryMap(pPdStruct);
+    _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
     return find_signature(&memoryMap, nOffset, nSize, sSignature, pnResultSize, pPdStruct);
 }
@@ -2784,7 +2784,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
 QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, const QString &sInfo,
                                                          PDSTRUCT *pPdStruct)
 {
-    _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
     return multiSearch_signature(&memoryMap, nOffset, nSize, nLimit, sSignature, sInfo, pPdStruct);
 }
@@ -2853,7 +2853,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
 
 QList<XBinary::MS_RECORD> XBinary::multiSearch_value(qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
-    _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
     return multiSearch_value(&memoryMap, nOffset, nSize, nLimit, varValue, valueType, bIsBigEndian, pPdStruct);
 }
@@ -3934,7 +3934,7 @@ qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
     _MEMORY_RECORD mm = getMemoryRecordByAddress(pMemoryMap, nAddress);
 
     if (mm.type == MMT_LOADSEGMENT) {
-        nResult = mm.nLoadSection;
+        nResult = mm.nLoadSectionNumber;
     }
 
     return nResult;
@@ -3947,7 +3947,7 @@ qint32 XBinary::relAddressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nRelAddr
     _MEMORY_RECORD mm = getMemoryRecordByRelAddress(pMemoryMap, nRelAddress);
 
     if (mm.type == MMT_LOADSEGMENT) {
-        nResult = mm.nLoadSection;
+        nResult = mm.nLoadSectionNumber;
     }
 
     return nResult;
@@ -4060,7 +4060,32 @@ QString XBinary::getMemoryRecordName(XBinary::_MEMORY_RECORD *pMemoryRecord)
     return sRecord;
 }
 
-XBinary::_MEMORY_MAP XBinary::getMemoryMap(PDSTRUCT *pPdStruct)
+QString XBinary::mapModeToString(MAPMODE mapMode)
+{
+    QString sResult = tr("Unknown");
+
+    switch (mapMode) {
+        case MAPMODE_UNKNOWN: sResult = tr("Unknown"); break;
+        case MAPMODE_REGIONS: sResult = tr("Regions"); break;
+        case MAPMODE_SEGMENTS: sResult = tr("Segments"); break;
+        case MAPMODE_SECTIONS: sResult = tr("Sections"); break;
+    }
+
+    return sResult;
+}
+
+QList<XBinary::MAPMODE> XBinary::getMapModesList(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QList<MAPMODE> listResult;
+
+    listResult.append(MAPMODE_REGIONS);
+
+    return listResult;
+}
+
+XBinary::_MEMORY_MAP XBinary::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -7250,7 +7275,7 @@ bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; (i < nNumberOfRecords) && (!pPdStruct->bIsStop); i++) {
-        if ((pMemoryMap->listRecords.at(i).type == MMT_LOADSEGMENT) && (pMemoryMap->listRecords.at(i).nLoadSection == nLoadSegment)) {
+        if ((pMemoryMap->listRecords.at(i).type == MMT_LOADSEGMENT) && (pMemoryMap->listRecords.at(i).nLoadSectionNumber == nLoadSegment)) {
             if (pMemoryMap->listRecords.at(i).nOffset != -1) {
                 bResult = isSignaturePresent(pMemoryMap, pMemoryMap->listRecords.at(i).nOffset, pMemoryMap->listRecords.at(i).nSize, sSignature, pPdStruct);
 

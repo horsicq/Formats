@@ -1750,7 +1750,7 @@ bool XPE::isIATPresent()
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IAT);
 }
 
-XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -1905,7 +1905,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
                     _MEMORY_RECORD record = {};
 
                     record.type = MMT_LOADSEGMENT;
-                    record.nLoadSection = i;
+                    record.nLoadSectionNumber = i;
                     record.segment = ADDRESS_SEGMENT_FLAT;
                     record.nAddress = nVirtualAddress;
                     record.nOffset = nFileOffset;
@@ -1921,7 +1921,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
                     record.bIsVirtual = true;
 
                     record.type = MMT_LOADSEGMENT;
-                    record.nLoadSection = i;
+                    record.nLoadSectionNumber = i;
                     record.segment = ADDRESS_SEGMENT_FLAT;
                     record.nAddress = nVirtualAddress + nFileSize;
                     record.nOffset = -1;
@@ -1935,7 +1935,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(PDSTRUCT *pPdStruct)
                 _MEMORY_RECORD record = {};
 
                 record.type = MMT_LOADSEGMENT;
-                record.nLoadSection = i;
+                record.nLoadSectionNumber = i;
                 record.segment = ADDRESS_SEGMENT_FLAT;
                 record.nAddress = nVirtualAddress;
                 record.nOffset = nVirtualAddress - result.nModuleAddress;
@@ -1993,7 +1993,7 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(PDSTRUCT *pPdStruct)
         pPdStruct = &pdStructEmpty;
     }
 
-    _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
     return getImportRecords(&memoryMap, pPdStruct);
 }
@@ -2336,7 +2336,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(PDSTRUCT *pPdStruct)
         pPdStruct = &pdStructEmpty;
     }
 
-    _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
     return getImports(&memoryMap, pPdStruct);
 }
@@ -2522,7 +2522,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(int nIndex, PDSTRUCT *pPdStr
     qint64 nImportOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 
     if (nImportOffset != -1) {
-        _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
+        _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
         qint32 _nIndex = 0;
 
@@ -3900,7 +3900,7 @@ XPE::EXPORT_HEADER XPE::getExport(bool bValidOnly, PDSTRUCT *pPdStruct)
         pPdStruct = &pdStructEmpty;
     }
 
-    _MEMORY_MAP memoryMap = getMemoryMap(pPdStruct);
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
     return getExport(&memoryMap, bValidOnly, pPdStruct);
 }

@@ -662,7 +662,7 @@ public:
 
     qint64 getModuleAddress();
 
-    virtual _MEMORY_MAP getMemoryMap(PDSTRUCT *pPdStruct = nullptr);
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual XADDR getBaseAddress();
     virtual void setBaseAddress(XADDR nBaseAddress);
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);

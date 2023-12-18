@@ -93,7 +93,7 @@ qint64 XGif::getFileFormatSize()
     return nResult;
 }
 
-XBinary::_MEMORY_MAP XGif::getMemoryMap(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XGif::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -101,7 +101,7 @@ XBinary::_MEMORY_MAP XGif::getMemoryMap(PDSTRUCT *pPdStruct)
         pPdStruct = &pdStructEmpty;
     }
 
-    return XBinary::getMemoryMap(pPdStruct);
+    return XBinary::getMemoryMap(mapMode, pPdStruct);
 }
 
 XBinary::FT XGif::getFileType()
