@@ -2225,12 +2225,16 @@ qint64 XELF::getShdrSize()
     return nResult;
 }
 
-QList<XELF_DEF::Elf32_Phdr> XELF::getElf32_PhdrList()
+QList<XELF_DEF::Elf32_Phdr> XELF::getElf32_PhdrList(qint32 nLimit)
 {
     QList<XELF_DEF::Elf32_Phdr> result;
 
     quint32 nNumberOfProgramms = getHdr32_phnum();
-    nNumberOfProgramms = qMin((quint32)1000, nNumberOfProgramms);
+
+    if (nLimit != -1) {
+        nNumberOfProgramms = qMin((quint32)nLimit, nNumberOfProgramms);
+    }
+
     quint32 nOffset = getHdr32_phoff();
     bool bIsBigEndian = isBigEndian();
 
@@ -2245,12 +2249,16 @@ QList<XELF_DEF::Elf32_Phdr> XELF::getElf32_PhdrList()
     return result;
 }
 
-QList<XELF_DEF::Elf64_Phdr> XELF::getElf64_PhdrList()
+QList<XELF_DEF::Elf64_Phdr> XELF::getElf64_PhdrList(qint32 nLimit)
 {
     QList<XELF_DEF::Elf64_Phdr> result;
 
     quint32 nNumberOfProgramms = getHdr64_phnum();
-    nNumberOfProgramms = qMin((quint32)1000, nNumberOfProgramms);
+
+    if (nLimit != -1) {
+        nNumberOfProgramms = qMin((quint32)nLimit, nNumberOfProgramms);
+    }
+
     quint64 nOffset = getHdr64_phoff();
     bool bIsBigEndian = isBigEndian();
 
@@ -2265,14 +2273,14 @@ QList<XELF_DEF::Elf64_Phdr> XELF::getElf64_PhdrList()
     return result;
 }
 
-QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList()
+QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList(qint32 nLimit)
 {
     QList<XELF_DEF::Elf_Phdr> listResult;
 
     bool bIs64 = is64();
 
     if (bIs64) {
-        QList<XELF_DEF::Elf64_Phdr> listProgramHeaders = getElf64_PhdrList();
+        QList<XELF_DEF::Elf64_Phdr> listProgramHeaders = getElf64_PhdrList(nLimit);
 
         qint32 nNumberOfPrograms = listProgramHeaders.count();
 
@@ -2291,7 +2299,7 @@ QList<XELF_DEF::Elf_Phdr> XELF::getElf_PhdrList()
             listResult.append(record);
         }
     } else {
-        QList<XELF_DEF::Elf32_Phdr> listProgramHeaders = getElf32_PhdrList();
+        QList<XELF_DEF::Elf32_Phdr> listProgramHeaders = getElf32_PhdrList(nLimit);
 
         qint32 nNumberOfPrograms = listProgramHeaders.count();
 
@@ -3013,7 +3021,7 @@ QByteArray XELF::getSectionByName(const QString &sSectionName)
 
 XBinary::OS_STRING XELF::getProgramInterpreterName()
 {
-    QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList(1000);
 
     return getProgramInterpreterName(&listProgramHeaders);
 }
@@ -3057,7 +3065,7 @@ QList<QString> XELF::getCommentStrings(qint32 nSection)
 
 QList<XELF::NOTE> XELF::getNotes()
 {
-    QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList(1000);
 
     return getNotes(&listProgramHeaders);
 }
@@ -3299,7 +3307,7 @@ XELF::NOTE XELF::getNote(QList<NOTE> *pListNotes, quint32 nType, const QString &
 QList<XELF::TAG_STRUCT> XELF::getTagStructs()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
-    QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList(1000);
 
     return getTagStructs(&listProgramHeaders, &memoryMap);
 }
@@ -3541,6 +3549,18 @@ XBinary::OS_STRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF
     return result;
 }
 
+QList<XBinary::MAPMODE> XELF::getMapModesList(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QList<MAPMODE> listResult;
+
+    listResult.append(MAPMODE_SEGMENTS);
+    listResult.append(MAPMODE_SECTIONS);
+
+    return listResult;
+}
+
 QMap<quint64, QString> XELF::getDynamicTags()
 {
     QMap<quint64, QString> mapResult;
@@ -3716,69 +3736,121 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     result.bIsBigEndian = isBigEndian();
     result.sType = getTypeAsString();
     // XADDR _nModuleAddress = getModuleAddress();
-
+    result.nModuleAddress = getModuleAddress();
     result.nBinarySize = getSize();
 
-    QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
-    QList<XELF_DEF::Elf_Phdr> listSegments = _getPrograms(&listProgramHeaders, XELF_DEF::S_PT_LOAD);
+    qint64 nMaxUsedOffset = 0;
+    XADDR nMinUsedAddress = 0;
+    XADDR nMaxUsedAddress = 0;
 
-    //    bool bIs64=is64();
-    qint32 nNumberOfSegments = listSegments.count();
+    if ((mapMode == MAPMODE_UNKNOWN) || (mapMode == MAPMODE_SEGMENTS)) {
+        QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList(1000);
+        QList<XELF_DEF::Elf_Phdr> listSegments = _getPrograms(&listProgramHeaders, XELF_DEF::S_PT_LOAD);
 
-    bool bImageAddressInit = false;  // TODO remove
+        //    bool bIs64=is64();
+        qint32 nNumberOfSegments = listSegments.count();
 
-    qint64 nMaxSegmentOffset = 0;
-    XADDR nMaxSegmentAddress = 0;
-
-    for (qint32 i = 0; i < nNumberOfSegments; i++) {
-        QString sName = QString("%1(%2)").arg(QString("PT_LOAD"), QString::number(i));
-
-        quint64 nVirtualAlign = listSegments.at(i).p_align;  // TODO Check!
-
-        if (nVirtualAlign <= 1) {
-            nVirtualAlign = 1;
-        }
-        //        quint64 nFileAlign=0x1; // TODO Check!!!
-        quint64 nFileAlign = nVirtualAlign;
-        XADDR nVirtualAddress = S_ALIGN_DOWN64(listSegments.at(i).p_vaddr, nVirtualAlign);
-        qint64 nFileOffset = S_ALIGN_DOWN64(listSegments.at(i).p_offset, nFileAlign);
-
-        qint64 nVirtualDelta = listSegments.at(i).p_vaddr - nVirtualAddress;
-        qint64 nFileDelta = listSegments.at(i).p_offset - nFileOffset;
-
-        qint64 nVirtualSize = S_ALIGN_UP64(nVirtualDelta + listSegments.at(i).p_memsz, nVirtualAlign);
-        qint64 nFileSize = S_ALIGN_UP64(nFileDelta + listSegments.at(i).p_filesz, nFileAlign);
-
-        if (nFileOffset + nFileSize > result.nBinarySize) {
-            nFileSize = result.nBinarySize - nFileOffset;
+        if (nNumberOfSegments) {
+            nMinUsedAddress = listSegments.at(0).p_vaddr;
         }
 
-        if (nFileSize < 0) {
-            nFileSize = 0;
-        }
+        for (qint32 i = 0; i < nNumberOfSegments; i++) {
+            QString sName = QString("%1(%2)").arg(QString("PT_LOAD"), QString::number(i));
 
-        //        if (nVirtualAddress > nMaxSegmentAddress) {
-        //            XBinary::_MEMORY_RECORD record = {};
+            quint64 nVirtualAlign = listSegments.at(i).p_align;  // TODO Check!
 
-        //            record.type = MMT_LOADSEGMENT;
-        //            record.nAddress = nMaxSegmentAddress;
-        //            record.nSize = nMaxSegmentAddress - nVirtualAddress;
-        //            record.nOffset = -1;
-        //            record.nIndex = nIndex++;
-        //            record.bIsVirtual = true;
-        //            //record.sName = sName;
+            if (nVirtualAlign <= 1) {
+                nVirtualAlign = 1;
+            }
+            //        quint64 nFileAlign=0x1; // TODO Check!!!
+            quint64 nFileAlign = nVirtualAlign;
+            XADDR nVirtualAddress = S_ALIGN_DOWN64(listSegments.at(i).p_vaddr, nVirtualAlign);
+            qint64 nFileOffset = S_ALIGN_DOWN64(listSegments.at(i).p_offset, nFileAlign);
 
-        //            result.listRecords.append(record);
-        //        }
+            qint64 nVirtualDelta = listSegments.at(i).p_vaddr - nVirtualAddress;
+            qint64 nFileDelta = listSegments.at(i).p_offset - nFileOffset;
 
-        // Padding
-        if (nVirtualDelta) {
-            if (nVirtualDelta > nFileDelta) {
+            qint64 nVirtualSize = S_ALIGN_UP64(nVirtualDelta + listSegments.at(i).p_memsz, nVirtualAlign);
+            qint64 nFileSize = S_ALIGN_UP64(nFileDelta + listSegments.at(i).p_filesz, nFileAlign);
+
+            if (nFileOffset + nFileSize > result.nBinarySize) {
+                nFileSize = result.nBinarySize - nFileOffset;
+            }
+
+            if (nFileSize < 0) {
+                nFileSize = 0;
+            }
+
+            // Padding
+            if (nVirtualDelta) {
+                if (nVirtualDelta > nFileDelta) {
+                    XBinary::_MEMORY_RECORD record = {};
+
+                    record.type = MMT_LOADSEGMENT;
+                    record.nAddress = nVirtualAddress;
+                    record.nSize = nVirtualDelta - nFileDelta;
+                    record.nOffset = -1;
+                    record.nIndex = nIndex++;
+                    record.bIsVirtual = true;
+                    record.sName = sName;
+
+                    result.listRecords.append(record);
+                }
+
+                if (nVirtualDelta >= nFileDelta) {
+                    XBinary::_MEMORY_RECORD record = {};
+
+                    record.type = MMT_LOADSEGMENT;
+                    record.nAddress = nVirtualAddress + nVirtualDelta - nFileDelta;
+                    record.nSize = nFileDelta;
+                    record.nOffset = nFileOffset;
+                    record.nIndex = nIndex++;
+                    record.bIsVirtual = false;
+                    record.sName = sName;
+
+                    result.listRecords.append(record);
+                }
+            }
+
+            // Main
+            {
                 XBinary::_MEMORY_RECORD record = {};
 
                 record.type = MMT_LOADSEGMENT;
-                record.nAddress = nVirtualAddress;
-                record.nSize = nVirtualDelta - nFileDelta;
+                record.nAddress = listSegments.at(i).p_vaddr;
+                record.nSize = listSegments.at(i).p_filesz;
+                record.nOffset = listSegments.at(i).p_offset;
+                record.nIndex = nIndex++;
+                record.bIsVirtual = false;
+                record.sName = sName;
+
+                result.listRecords.append(record);
+            }
+
+            // padding
+            if ((nFileOffset + nFileSize) - (listSegments.at(i).p_offset + listSegments.at(i).p_filesz) > 0) {
+                XBinary::_MEMORY_RECORD record = {};
+
+                record.type = MMT_LOADSEGMENT;
+                record.nSize = (nFileOffset + nFileSize) - (listSegments.at(i).p_offset + listSegments.at(i).p_filesz);
+                record.nAddress = listSegments.at(i).p_vaddr + listSegments.at(i).p_filesz;
+
+                record.nOffset = listSegments.at(i).p_offset + listSegments.at(i).p_filesz;
+                record.nIndex = nIndex++;
+                record.bIsVirtual = false;
+                record.sName = sName;
+
+                result.listRecords.append(record);
+            }
+
+            // padding
+            if (nVirtualSize - nFileSize > 0) {
+                XBinary::_MEMORY_RECORD record = {};
+
+                record.type = MMT_LOADSEGMENT;
+                record.nSize = nVirtualSize - nFileSize;
+                record.nAddress = (nVirtualAddress + nVirtualSize) - record.nSize;
+
                 record.nOffset = -1;
                 record.nIndex = nIndex++;
                 record.bIsVirtual = true;
@@ -3787,178 +3859,59 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 result.listRecords.append(record);
             }
 
-            if (nVirtualDelta >= nFileDelta) {
-                XBinary::_MEMORY_RECORD record = {};
+            nMaxUsedOffset = qMax(nMaxUsedOffset, nFileOffset + nFileSize);
+            nMinUsedAddress = qMin(nVirtualAddress, nMinUsedAddress);
+            nMaxUsedAddress = qMax(nVirtualAddress + nVirtualSize, nMaxUsedAddress);
+        }
+    } else if (mapMode == MAPMODE_SECTIONS) {
+        bool bIs64 = (result.mode == MODE_64);
 
-                record.type = MMT_LOADSEGMENT;
-                record.nAddress = nVirtualAddress + nVirtualDelta - nFileDelta;
-                record.nSize = nFileDelta;
-                record.nOffset = nFileOffset;
-                record.nIndex = nIndex++;
-                record.bIsVirtual = false;
-                record.sName = sName;
+        qint32 nStringTableSection = getSectionStringTable(bIs64);
+        QByteArray baStringTable = getSection(nStringTableSection);
+        QList<XELF_DEF::Elf_Shdr> listSections = getElf_ShdrList(1000);
+        QList<SECTION_RECORD> listSectionRecords = getSectionRecords(&listSections, bIs64, &baStringTable);
 
-                result.listRecords.append(record);
+        qint32 nNumberOfSections = listSectionRecords.count();
+
+        if (nNumberOfSections) {
+            nMinUsedAddress = listSectionRecords.at(0).nAddress;
+        }
+
+        for (qint32 i = 0; i < nNumberOfSections; i++) {
+            QString sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i), listSectionRecords.at(i).sName);
+
+            XBinary::_MEMORY_RECORD record = {};
+
+            record.type = MMT_FILESEGMENT;
+            record.nSize = listSectionRecords.at(i).nSize;
+
+            if (record.nSize != 0) {
+                record.nOffset = listSectionRecords.at(i).nOffset;
+            } else {
+                record.nOffset = -1;
+                record.bIsVirtual = true;
             }
-        }
 
-        // Main
-        {
-            XBinary::_MEMORY_RECORD record = {};
+            if (listSectionRecords.at(i).nAddress != 0) {
+                record.nAddress = listSectionRecords.at(i).nAddress;
+            } else {
+                record.nAddress = -1;
+            }
 
-            record.type = MMT_LOADSEGMENT;
-            record.nAddress = listSegments.at(i).p_vaddr;
-            record.nSize = listSegments.at(i).p_filesz;
-            record.nOffset = listSegments.at(i).p_offset;
             record.nIndex = nIndex++;
-            record.bIsVirtual = false;
-            record.sName = sName;
+            record.sName = sSectionName;
 
             result.listRecords.append(record);
+
+            nMaxUsedOffset = qMax(nMaxUsedOffset, listSectionRecords.at(i).nOffset + listSectionRecords.at(i).nSize);
+            nMinUsedAddress = qMin(listSectionRecords.at(i).nAddress, nMinUsedAddress);
+            nMaxUsedAddress = qMax(listSectionRecords.at(i).nAddress + listSectionRecords.at(i).nSize, nMaxUsedAddress);
         }
-
-        // padding
-        if ((nFileOffset + nFileSize) - (listSegments.at(i).p_offset + listSegments.at(i).p_filesz) > 0) {
-            XBinary::_MEMORY_RECORD record = {};
-
-            record.type = MMT_LOADSEGMENT;
-            record.nSize = (nFileOffset + nFileSize) - (listSegments.at(i).p_offset + listSegments.at(i).p_filesz);
-            record.nAddress = listSegments.at(i).p_vaddr + listSegments.at(i).p_filesz;
-
-            record.nOffset = listSegments.at(i).p_offset + listSegments.at(i).p_filesz;
-            record.nIndex = nIndex++;
-            record.bIsVirtual = false;
-            record.sName = sName;
-
-            result.listRecords.append(record);
-        }
-
-        // padding
-        if (nVirtualSize - nFileSize > 0) {
-            XBinary::_MEMORY_RECORD record = {};
-
-            record.type = MMT_LOADSEGMENT;
-            record.nSize = nVirtualSize - nFileSize;
-            record.nAddress = (nVirtualAddress + nVirtualSize) - record.nSize;
-
-            record.nOffset = -1;
-            record.nIndex = nIndex++;
-            record.bIsVirtual = true;
-            record.sName = sName;
-
-            result.listRecords.append(record);
-        }
-
-        //        if (i != (nNumberOfSegments - 1)) {
-        //            nFileSize = S_ALIGN_UP(nFileDelta + listSegments.at(i).p_filesz, nFileAlign);
-        //        } else {
-        //            nFileSize = nFileDelta + listSegments.at(i).p_filesz;
-        //        }
-
-        //        if (nVirtualAddress - nMaxSegmentAddress) {
-        //            XBinary::_MEMORY_RECORD record = {};
-
-        //            record.type = MMT_LOADSEGMENT;
-        //            record.nAddress = nMaxSegmentAddress;
-        //            record.nSize = nVirtualAddress - nMaxSegmentAddress;
-        //            record.nOffset = -1;
-        //            record.nIndex = nIndex++;
-        //            record.bIsVirtual = true;
-
-        //            result.listRecords.append(record);
-        //        }
-
-        //        {
-        //            XBinary::_MEMORY_RECORD record = {};
-
-        //            record.type = MMT_LOADSEGMENT;
-        //            record.sName = sName;
-        //            // TODO Section number!
-        //            record.nAddress = nVirtualAddress;
-        //            record.nSize = nFileSize;
-        //            record.nOffset = nFileOffset;
-        //            record.nIndex = nIndex++;
-        //            record.bIsVirtual = false;
-
-        //            result.listRecords.append(record);
-        //        }
-
-        //        if (nVirtualSize > nFileSize) {
-        //            XBinary::_MEMORY_RECORD record = {};
-
-        //            record.type = MMT_LOADSEGMENT;
-        //            record.sName = sName;
-        //            // TODO Section number!
-        //            record.nAddress = nVirtualAddress + nFileSize;
-        //            record.nSize = nVirtualSize - nFileSize;
-        //            record.nOffset = -1;
-        //            record.nIndex = nIndex++;
-        //            record.bIsVirtual = true;
-
-        //            result.listRecords.append(record);
-        //        }
-
-        //        if(listSegments.at(i).p_vaddr>(quint64)nVirtualAddress)
-        //        {
-        //            XBinary::_MEMORY_RECORD record={};
-
-        //            record.type=MMT_LOADSEGMENT;
-        //            record.sName=sName;
-        //            // TODO Section number!
-        //            record.nAddress=nVirtualAddress;
-        //            record.nSize=listSegments.at(i).p_vaddr-nVirtualAddress;
-        //            record.nOffset=-1;
-        //            record.nIndex=nIndex++;
-        //            record.bIsVirtual=true;
-
-        //            result.listRecords.append(record);
-        //        }
-
-        //        if(nFileSize)
-        //        {
-        //            XBinary::_MEMORY_RECORD record={};
-
-        //            record.type=MMT_LOADSEGMENT;
-        //            record.sName=sName;
-        //            // TODO Section number!
-        //            record.nAddress=listSegments.at(i).p_vaddr+_nModuleAddress;
-        //            record.nSize=nFileSize;
-        //            record.nOffset=nFileOffset;
-        //            record.nIndex=nIndex++;
-
-        //            result.listRecords.append(record);
-        //        }
-
-        //        if((quint64)nVirtualSize>(nFileSize+((qint64)listSegments.at(i).p_vaddr-nVirtualAddress)))
-        //        {
-        //            XBinary::_MEMORY_RECORD record={};
-
-        //            record.type=MMT_LOADSEGMENT;
-        //            record.sName=sName;
-        //            // TODO Section number!
-        //            record.nAddress=listSegments.at(i).p_vaddr+nFileSize+_nModuleAddress;
-        //            record.nSize=nVirtualSize-nFileSize-(listSegments.at(i).p_vaddr-nVirtualAddress);
-        //            record.nOffset=-1;
-        //            record.nIndex=nIndex++;
-        //            record.bIsVirtual=true;
-
-        //            result.listRecords.append(record);
-        //        }
-
-        if (!bImageAddressInit) {
-            result.nModuleAddress = nVirtualAddress;
-            bImageAddressInit = true;
-        }
-
-        nMaxSegmentOffset = qMax(nMaxSegmentOffset, nFileOffset + nFileSize);
-
-        result.nModuleAddress = qMin(nVirtualAddress, result.nModuleAddress);
-        nMaxSegmentAddress = qMax(nVirtualAddress + nVirtualSize, nMaxSegmentAddress);
     }
 
-    result.nImageSize = nMaxSegmentAddress - result.nModuleAddress;
+    result.nImageSize = nMaxUsedAddress - nMinUsedAddress;
 
-    qint64 nFixAddressDelta = getModuleAddress() - result.nModuleAddress;
+    qint64 nFixAddressDelta = getModuleAddress() - nMinUsedAddress;
 
     if (result.fileType == FT_ELF64) {
         result.nEntryPointAddress = getHdr64_entry() + nFixAddressDelta;
@@ -3966,15 +3919,13 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         result.nEntryPointAddress = getHdr32_entry() + nFixAddressDelta;
     }
 
-    result.nModuleAddress = getModuleAddress();
-
     qint32 _nNumberOfRecords = result.listRecords.count();
 
     for (qint32 i = 0; i < _nNumberOfRecords; i++) {
         result.listRecords[i].nAddress += nFixAddressDelta;
     }
 
-    qint64 nMaxSectionOffset = nMaxSegmentOffset;
+    qint64 nMaxSectionOffset = nMaxUsedOffset;
 
     QList<XELF_DEF::Elf_Shdr> listSectionHeaders = getElf_ShdrList(100);
 
@@ -3984,7 +3935,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         nMaxSectionOffset = qMax(nMaxSectionOffset, (qint64)(listSectionHeaders.at(i).sh_offset + listSectionHeaders.at(i).sh_size));
     }
 
-    qint64 nNoLoadableSize = result.nBinarySize - nMaxSegmentOffset;
+    qint64 nNoLoadableSize = result.nBinarySize - nMaxUsedOffset;
 
     if (nNoLoadableSize > 0) {
         XBinary::_MEMORY_RECORD record = {};
@@ -3994,27 +3945,11 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         // TODO virtual sections!
         record.nAddress = -1;
         record.nSize = nNoLoadableSize;
-        record.nOffset = nMaxSegmentOffset;
+        record.nOffset = nMaxUsedOffset;
         record.nIndex = nIndex++;
 
         result.listRecords.append(record);
     }
-
-    //    qint64 nOverlaySize = result.nRawSize - nMaxSectionOffset;
-
-    //    if (nOverlaySize > 0) {
-    //        XBinary::_MEMORY_RECORD record = {};
-
-    //        record.type = MMT_OVERLAY;
-    //        // TODO Section number!
-    //        // TODO virtual sections!
-    //        record.nAddress = -1;
-    //        record.nSize = nOverlaySize;
-    //        record.nOffset = nMaxSectionOffset;
-    //        record.nIndex = nIndex++;
-
-    //        result.listRecords.append(record);
-    //    }
 
     return result;
 }
@@ -4036,6 +3971,7 @@ QList<XELF::SECTION_RECORD> XELF::getSectionRecords(QList<XELF_DEF::Elf_Shdr> *p
 
         record.nSize = pListSectionHeaders->at(i).sh_size;
         record.nFlags = pListSectionHeaders->at(i).sh_flags;
+        record.nAddress = pListSectionHeaders->at(i).sh_addr;
 
         if (bIsImage) {
             record.nOffset = pListSectionHeaders->at(i).sh_addr;
@@ -4195,7 +4131,7 @@ XBinary::OSINFO XELF::getOsInfo()
     else if (osabi == XELF_DEF::S_ELFOSABI_FENIXOS) result.osName = OSNAME_FENIXOS;
     else if (osabi == XELF_DEF::S_ELFOSABI_OPENVOS) result.osName = OSNAME_OPENVOS;
 
-    QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList();
+    QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList(100);
     QList<XELF_DEF::Elf_Shdr> listSectionHeaders = getElf_ShdrList(100);
 
     qint32 nStringTableSection = getSectionStringTable();

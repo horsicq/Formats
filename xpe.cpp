@@ -1752,6 +1752,8 @@ bool XPE::isIATPresent()
 
 XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(mapMode)
+
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
@@ -3850,6 +3852,17 @@ qint64 XPE::getModuleAddress()
 {
     // mb TODO
     return XBinary::getModuleAddress();
+}
+
+QList<XBinary::MAPMODE> XPE::getMapModesList(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QList<MAPMODE> listResult;
+
+    listResult.append(MAPMODE_SECTIONS);
+
+    return listResult;
 }
 
 XPE_DEF::IMAGE_IMPORT_DESCRIPTOR XPE::read_IMAGE_IMPORT_DESCRIPTOR(qint64 nOffset)

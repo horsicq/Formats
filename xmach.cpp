@@ -1131,6 +1131,8 @@ QList<XBinary::MAPMODE> XMACH::getMapModesList(PDSTRUCT *pPdStruct)
 
 XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(mapMode)
+
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {

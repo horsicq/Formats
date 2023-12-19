@@ -58,6 +58,7 @@ public:
 
     struct SECTION_RECORD {
         QString sName;
+        XADDR nAddress;
         qint64 nOffset;
         qint64 nSize;
         qint64 nFlags;
@@ -289,9 +290,9 @@ public:
     qint64 getShdrOffset(quint32 nIndex);
     qint64 getShdrSize();
 
-    QList<XELF_DEF::Elf32_Phdr> getElf32_PhdrList();
-    QList<XELF_DEF::Elf64_Phdr> getElf64_PhdrList();
-    QList<XELF_DEF::Elf_Phdr> getElf_PhdrList();
+    QList<XELF_DEF::Elf32_Phdr> getElf32_PhdrList(qint32 nLimit);
+    QList<XELF_DEF::Elf64_Phdr> getElf64_PhdrList(qint32 nLimit);
+    QList<XELF_DEF::Elf_Phdr> getElf_PhdrList(qint32 nLimit);
 
     XELF_DEF::Elf32_Phdr getElf32_Phdr(quint32 nIndex);
     XELF_DEF::Elf64_Phdr getElf64_Phdr(quint32 nIndex);
@@ -398,6 +399,7 @@ public:
     OS_STRING getRunPath();
     OS_STRING getRunPath(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
+    QList<MAPMODE> getMapModesList(PDSTRUCT *pPdStruct);
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual qint64 getEntryPointOffset(_MEMORY_MAP *pMemoryMap);
 

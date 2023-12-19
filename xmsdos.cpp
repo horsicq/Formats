@@ -323,6 +323,7 @@ quint32 XMSDOS::get_e_lfanew()
 
 XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(mapMode)
     Q_UNUSED(pPdStruct)
 
     _MEMORY_MAP result = {};
