@@ -1156,7 +1156,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     result.sType = getTypeAsString();
 
     result.nBinarySize = getSize();
-    result.nModuleAddress = getBaseAddress();
+    result.nModuleAddress = getModuleAddress();
 
     QList<COMMAND_RECORD> listCommandRecords = getCommandRecords();
 
