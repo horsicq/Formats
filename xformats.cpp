@@ -1413,6 +1413,8 @@ XBinary::MAPMODE XFormats::setMapModeComboBox(XBinary::FT fileType, QIODevice *p
 
     const bool bBlocked1 = pComboBox->blockSignals(true);
 
+    pComboBox->clear();
+
     QList<XBinary::MAPMODE> listMapModes = getMapModesList(fileType, pDevice, bIsImage, nModuleAddress);
 
     qint32 nNumberOfRecords = listMapModes.count();

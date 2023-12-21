@@ -1154,17 +1154,10 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     result.sArch = getArch();
     result.bIsBigEndian = isBigEndian();
     result.sType = getTypeAsString();
-
     result.nBinarySize = getSize();
     result.nModuleAddress = getModuleAddress();
 
     QList<COMMAND_RECORD> listCommandRecords = getCommandRecords();
-
-    QList<SEGMENT_RECORD> listSegmentRecords = getSegmentRecords(&listCommandRecords);
-
-    qint32 nNumberOfSegments = listSegmentRecords.count();
-
-    bool bImageAddressInit = false;
 
     qint64 nMaxOffset = 0;
     XADDR nMinAddress = 0;
@@ -1173,6 +1166,9 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     bool bIs64 = is64();
 
     if ((mapMode == MAPMODE_UNKNOWN) || (mapMode == MAPMODE_SEGMENTS)) {
+        QList<SEGMENT_RECORD> listSegmentRecords = getSegmentRecords(&listCommandRecords);
+        qint32 nNumberOfSegments = listSegmentRecords.count();
+
         if (nNumberOfSegments) {
             if (bIs64) {
                 nMinAddress = listSegmentRecords.at(0).s.segment64.vmaddr;
@@ -1236,10 +1232,58 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     result.listRecords.append(record);
                 }
 
-                if (!bImageAddressInit) {
-                    result.nModuleAddress = nVirtualAddress;
-                    bImageAddressInit = true;
+                nMaxOffset = qMax(nMaxOffset, nFileOffset + nFileSize);
+                nMinAddress = qMin(nVirtualAddress, nMinAddress);
+                nMaxAddress = qMax(nVirtualAddress + nVirtualSize, nMaxAddress);
+            }
+        }
+    } else if (mapMode == MAPMODE_SECTIONS) {
+        QList<SECTION_RECORD> listSections = getSectionRecords(&listCommandRecords);
+        qint32 nNumberOfSections = listSections.count();
+
+        if (nNumberOfSections) {
+            if (bIs64) {
+                nMinAddress = listSections.at(0).s.section64.addr;
+            } else {
+                nMinAddress = listSections.at(0).s.section32.addr;
+            }
+
+            for (qint32 i = 0; i < nNumberOfSections; i++) {
+                QString sSectionName;
+                qint64 nFileOffset = 0;
+                XADDR nVirtualAddress = 0;
+                qint64 nFileSize = 0;
+                qint64 nVirtualSize = 0;
+
+                if (bIs64) {
+                    QString _sSectiontName = QString(listSections.at(i).s.section64.sectname);  // TODO Limit
+
+                    sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i), _sSectiontName);
+                    nFileOffset = listSections.at(i).s.section64.offset;
+                    nVirtualAddress = listSections.at(i).s.section64.addr;
+                    nFileSize = listSections.at(i).s.section64.size;
+                    nVirtualSize = listSections.at(i).s.section64.size;
+                } else {
+                    QString _sSectiontName = QString(listSections.at(i).s.section32.sectname);  // TODO Limit
+
+                    sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i), _sSectiontName);
+                    nFileOffset = listSections.at(i).s.section32.offset;
+                    nVirtualAddress = listSections.at(i).s.section32.addr;
+                    nFileSize = listSections.at(i).s.section32.size;
+                    nVirtualSize = listSections.at(i).s.section32.size;
                 }
+
+                XBinary::_MEMORY_RECORD record = {};
+
+                record.type = MMT_LOADSEGMENT;
+
+                record.sName = sSectionName;
+                record.nAddress = nVirtualAddress;
+                record.nSize = nFileSize;
+                record.nOffset = nFileOffset;
+                record.nIndex = nIndex++;
+
+                result.listRecords.append(record);
 
                 nMaxOffset = qMax(nMaxOffset, nFileOffset + nFileSize);
                 nMinAddress = qMin(nVirtualAddress, nMinAddress);

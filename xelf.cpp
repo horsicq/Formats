@@ -3869,7 +3869,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         qint32 nStringTableSection = getSectionStringTable(bIs64);
         QByteArray baStringTable = getSection(nStringTableSection);
         QList<XELF_DEF::Elf_Shdr> listSections = getElf_ShdrList(1000);
-        QList<SECTION_RECORD> listSectionRecords = getSectionRecords(&listSections, bIs64, &baStringTable);
+        QList<SECTION_RECORD> listSectionRecords = getSectionRecords(&listSections, isImage(), &baStringTable);
 
         qint32 nNumberOfSections = listSectionRecords.count();
 
