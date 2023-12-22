@@ -321,6 +321,17 @@ quint32 XMSDOS::get_e_lfanew()
     return read_uint32(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
 }
 
+QList<XBinary::MAPMODE> XMSDOS::getMapModesList(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QList<MAPMODE> listResult;
+
+    listResult.append(MAPMODE_SEGMENTS);
+
+    return listResult;
+}
+
 XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)

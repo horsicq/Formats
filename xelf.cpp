@@ -1128,6 +1128,7 @@ QMap<quint64, QString> XELF::getProgramTypes()
     mapResult.insert(0x6474e550, "PT_GNU_EH_FRAME");  // PT_SUNW_EH_FRAME
     mapResult.insert(0x6474e551, "PT_GNU_STACK");
     mapResult.insert(0x6474e552, "PT_GNU_RELRO");
+    mapResult.insert(0x6474e553, "PT_GNU_PROPERTY");
     mapResult.insert(0x65041580, "PT_PAX_FLAGS");
     mapResult.insert(0x6ffffffa, "PT_LOSUNW");
     mapResult.insert(0x6ffffffa, "PT_SUNWBSS");
@@ -1160,6 +1161,7 @@ QMap<quint64, QString> XELF::getProgramTypesS()
     mapResult.insert(0x6474e550, "GNU_EH_FRAME");  // SUNW_EH_FRAME
     mapResult.insert(0x6474e551, "GNU_STACK");
     mapResult.insert(0x6474e552, "GNU_RELRO");
+    mapResult.insert(0x6474e553, "GNU_PROPERTY");
     mapResult.insert(0x65041580, "PAX_FLAGS");
     mapResult.insert(0x6ffffffa, "LOSUNW");
     mapResult.insert(0x6ffffffa, "SUNWBSS");
