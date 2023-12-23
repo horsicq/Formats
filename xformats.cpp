@@ -20,7 +20,8 @@
  */
 #include "xformats.h"
 
-bool _sortItems(const XBinary::SCANSTRUCT &v1, const XBinary::SCANSTRUCT &v2) {
+bool _sortItems(const XBinary::SCANSTRUCT &v1, const XBinary::SCANSTRUCT &v2)
+{
     bool bResult = false;
 
     if (v1.parentId.sUuid == v2.parentId.sUuid) {
@@ -36,7 +37,8 @@ XFormats::XFormats(QObject *pParent) : QObject(pParent)
 {
 }
 
-XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMODE mapMode, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMODE mapMode, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress,
+                                            XBinary::PDSTRUCT *pPdStruct)
 {
     XBinary::_MEMORY_MAP result = {};
 
@@ -1009,14 +1011,14 @@ qint32 XFormats::typeToPrio(const QString &sType)
     else if (_sType == "compiler") nResult = 30;
     else if (_sType == "language") nResult = 40;
     else if (_sType == "library") nResult = 50;
-    else if ((_sType == "tool") || (_sType == "pe tool") || (_sType == "sign tool") || (_sType == "apk tool"))  nResult = 60;
-    else if ((_sType == "protector") || (_sType == "cryptor") || (_sType == "crypter"))  nResult = 70;
-    else if ((_sType == ".net obfuscator") || (_sType == "apk obfuscator") || (_sType == "jar obfuscator"))  nResult = 80;
-    else if ((_sType == "dongle protection") || (_sType == "protection"))  nResult = 90;
-    else if ((_sType == "packer") || (_sType == ".net compressor"))  nResult = 100;
+    else if ((_sType == "tool") || (_sType == "pe tool") || (_sType == "sign tool") || (_sType == "apk tool")) nResult = 60;
+    else if ((_sType == "protector") || (_sType == "cryptor") || (_sType == "crypter")) nResult = 70;
+    else if ((_sType == ".net obfuscator") || (_sType == "apk obfuscator") || (_sType == "jar obfuscator")) nResult = 80;
+    else if ((_sType == "dongle protection") || (_sType == "protection")) nResult = 90;
+    else if ((_sType == "packer") || (_sType == ".net compressor")) nResult = 100;
     else if (_sType == "joiner") nResult = 110;
-    else if ((_sType == "sfx") || (_sType == "installer"))  nResult = 120;
-    else if ((_sType == "virus") || (_sType == "malware") || (_sType == "trojan"))  nResult = 70;
+    else if ((_sType == "sfx") || (_sType == "installer")) nResult = 120;
+    else if ((_sType == "virus") || (_sType == "malware") || (_sType == "trojan")) nResult = 70;
     else nResult = 1000;
 
     return nResult;
@@ -1362,7 +1364,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra)
 }
 
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice,QComboBox *pComboBox)
+XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox)
 {
     const bool bBlocked1 = pComboBox->blockSignals(true);
 

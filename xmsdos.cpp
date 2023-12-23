@@ -580,7 +580,7 @@ bool XMSDOS::isRichSignaturePresent()
     qint32 nOffset = sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
     qint32 nSize = get_lfanew() - sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
 
-    if ((nSize > 0) && (nSize <= 0x200)) {
+    if ((nSize > 0) && (nSize <= 0x400)) {
         QByteArray baStub = read_array(nOffset, nSize);
 
         bResult = baStub.contains("Rich");
