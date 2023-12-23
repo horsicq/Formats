@@ -560,6 +560,7 @@ public:
         QString varInfo;   // Signature in die scripts
         QString varInfo2;  // Signature File in die scripts
         Qt::GlobalColor globalColor;
+        qint32 nPrio;
     };
 
     struct PDRECORD {

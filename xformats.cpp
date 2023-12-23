@@ -20,6 +20,18 @@
  */
 #include "xformats.h"
 
+bool _sortItems(const XBinary::SCANSTRUCT &v1, const XBinary::SCANSTRUCT &v2) {
+    bool bResult = false;
+
+    if (v1.parentId.sUuid == v2.parentId.sUuid) {
+        bResult = (v1.nPrio < v2.nPrio);
+    } else {
+        bResult = (v1.parentId.sUuid < v2.parentId.sUuid);
+    }
+
+    return bResult;
+}
+
 XFormats::XFormats(QObject *pParent) : QObject(pParent)
 {
 }
@@ -974,7 +986,7 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
         result = Qt::green;
     } else if ((_sType == "operation system") || (_sType == "virtual machine")) {
         result = Qt::darkYellow;
-    } else if (_sType == "sign tool") {
+    } else if ((_sType == "sign tool") || (_sType == "certificate")) {
         result = Qt::darkMagenta;
     } else if (_sType == "language") {
         result = Qt::darkCyan;
@@ -985,6 +997,29 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
     }
 
     return result;
+}
+
+qint32 XFormats::typeToPrio(const QString &sType)
+{
+    qint32 nResult = 0;
+    QString _sType = sType.toLower();
+
+    if ((_sType == "operation system") || (_sType == "virtual machine")) nResult = 10;
+    else if (_sType == "linker") nResult = 20;
+    else if (_sType == "compiler") nResult = 30;
+    else if (_sType == "language") nResult = 40;
+    else if (_sType == "library") nResult = 50;
+    else if ((_sType == "tool") || (_sType == "pe tool") || (_sType == "sign tool") || (_sType == "apk tool"))  nResult = 60;
+    else if ((_sType == "protector") || (_sType == "cryptor") || (_sType == "crypter"))  nResult = 70;
+    else if ((_sType == ".net obfuscator") || (_sType == "apk obfuscator") || (_sType == "jar obfuscator"))  nResult = 80;
+    else if ((_sType == "dongle protection") || (_sType == "protection"))  nResult = 90;
+    else if ((_sType == "packer") || (_sType == ".net compressor"))  nResult = 100;
+    else if (_sType == "joiner") nResult = 110;
+    else if ((_sType == "sfx") || (_sType == "installer"))  nResult = 120;
+    else if ((_sType == "virus") || (_sType == "malware") || (_sType == "trojan"))  nResult = 70;
+    else nResult = 1000;
+
+    return nResult;
 }
 
 QString XFormats::translateType(const QString &sType)
@@ -1082,6 +1117,11 @@ QString XFormats::translateType(const QString &sType)
     }
 
     return sResult;
+}
+
+void XFormats::sortRecords(QList<XBinary::SCANSTRUCT> *pListRecords)
+{
+    std::sort(pListRecords->begin(), pListRecords->end(), _sortItems);
 }
 
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
