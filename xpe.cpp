@@ -9181,7 +9181,7 @@ quint32 XPE::getNetId()
     return nResult;
 }
 
-int XPE::getEntryPointSection()
+qint32 XPE::getEntryPointSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 

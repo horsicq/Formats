@@ -859,7 +859,7 @@ public:
 
     quint32 getNetId();
 
-    int getEntryPointSection();
+    qint32 getEntryPointSection();
     qint32 getEntryPointSection(XBinary::_MEMORY_MAP *pMemoryMap);
     qint32 getImportSection();
     qint32 getImportSection(XBinary::_MEMORY_MAP *pMemoryMap);
