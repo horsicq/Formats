@@ -2139,7 +2139,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
                 break;
             }
 
-            for (unsigned int i = 0; i < nTemp - (nStringSize - 1); i++) {
+            for (quint32 i = 0; i < nTemp - (nStringSize - 1); i++) {
                 if (compareMemoryByteI((quint8 *)(pBuffer + i), (quint8 *)baUpper.data(), (quint8 *)baLower.data(), nStringSize)) {
                     nResult = nOffset + i;
 
