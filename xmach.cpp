@@ -1305,7 +1305,7 @@ QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(qint32 nType)
     return getLibraryRecords(&listCommandRecords, nType);
 }
 
-QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords, int nType)
+QList<XMACH::LIBRARY_RECORD> XMACH::getLibraryRecords(QList<XMACH::COMMAND_RECORD> *pListCommandRecords, qint32 nType)
 {
     QList<LIBRARY_RECORD> listResult;
 

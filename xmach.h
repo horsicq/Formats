@@ -224,7 +224,7 @@ public:
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
     QList<LIBRARY_RECORD> getLibraryRecords(qint32 nType = XMACH_DEF::S_LC_LOAD_DYLIB);
-    QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords, int nType = XMACH_DEF::S_LC_LOAD_DYLIB);
+    QList<LIBRARY_RECORD> getLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords, qint32 nType = XMACH_DEF::S_LC_LOAD_DYLIB);
     static LIBRARY_RECORD getLibraryRecordByName(const QString &sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
     bool isLibraryRecordNamePresent(const QString &sName);
     static bool isLibraryRecordNamePresent(const QString &sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
