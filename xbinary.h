@@ -589,8 +589,9 @@ public:
 private:
     enum ST {
         ST_COMPAREBYTES = 0,
+        ST_NOTNULL,
         ST_FINDBYTES,
-        ST_RELOFFSETFIX,
+        ST_SKIP,
         ST_RELOFFSET,
         ST_ADDRESS
     };
@@ -601,6 +602,7 @@ private:
         QByteArray baData;
         quint32 nSizeOfAddr;
         qint64 nFindDelta;
+        qint32 nSize;
     };
 
 public:
@@ -1484,7 +1486,8 @@ private:
     static QList<SIGNATURE_RECORD> getSignatureRecords(const QString &sSignature, bool *pbValid, PDSTRUCT *pPdStruct);
     bool _compareSignature(_MEMORY_MAP *pMemoryMap, QList<SIGNATURE_RECORD> *pListSignatureRecords, qint64 nOffset);
 
-    static qint32 _getSignatureRelOffsetFix(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
+    static qint32 _getSignatureSkip(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
+    static qint32 _getSignatureNotNull(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
     static qint32 _getSignatureDelta(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid, PDSTRUCT *pPdStruct);
     static qint32 _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
     static qint32 _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);

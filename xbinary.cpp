@@ -2032,12 +2032,13 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
     if (_sSignature.contains("$") || _sSignature.contains("#") || _sSignature.contains("+")) {
         *pnResultSize = 1;
     } else {
+        // Fix size
         *pnResultSize = _sSignature.size() / 2;
     }
 
     qint64 nResult = -1;
 
-    if (_sSignature.contains(".") || _sSignature.contains("$") || _sSignature.contains("#") || _sSignature.contains("+")) {
+    if (_sSignature.contains(".") || _sSignature.contains("$") || _sSignature.contains("#") || _sSignature.contains("+") || _sSignature.contains("*")) {
         bool bIsValid = true;
 
         QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bIsValid, pPdStruct);
@@ -9527,7 +9528,9 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSi
 
     for (qint32 i = 0; i < nSignatureSize;) {
         if (sSignature.at(i) == QChar('.')) {
-            i += _getSignatureRelOffsetFix(&listResult, sSignature, i);
+            i += _getSignatureSkip(&listResult, sSignature, i);
+        } else if (sSignature.at(i) == QChar('*')) {
+            i += _getSignatureNotNull(&listResult, sSignature, i);
         } else if (sSignature.at(i) == QChar('+')) {
             i += _getSignatureDelta(&listResult, sSignature, i, pbValid, pPdStruct);
         } else if (sSignature.at(i) == QChar('$')) {
@@ -9572,6 +9575,20 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 nOffset += baData.size();
             } break;
 
+            case XBinary::ST_NOTNULL: {
+                QByteArray baData = read_array(nOffset, pListSignatureRecords->at(i).nSize);
+
+                if (baData.size() != pListSignatureRecords->at(i).nSize) {
+                    return false;
+                }
+
+                if (_isMemoryZeroFilled(baData.data(), baData.size())) {
+                    return false;
+                }
+
+                nOffset += baData.size();
+            } break;
+
             case XBinary::ST_FINDBYTES: {
                 qint64 nResult =
                     find_byteArray(nOffset, pListSignatureRecords->at(i).nFindDelta + pListSignatureRecords->at(i).baData.size(), pListSignatureRecords->at(i).baData);
@@ -9583,9 +9600,9 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 nOffset = nResult + pListSignatureRecords->at(i).baData.size();
             } break;
 
-            case XBinary::ST_RELOFFSETFIX:
+            case XBinary::ST_SKIP:
                 // TODO Check
-                nOffset += pListSignatureRecords->at(i).nBaseAddress;
+                nOffset += pListSignatureRecords->at(i).nSize;
                 break;
 
             case XBinary::ST_RELOFFSET:
@@ -9651,7 +9668,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
     return true;
 }
 
-qint32 XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
+qint32 XBinary::_getSignatureSkip(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
 {
     int nResult = 0;
     qint32 nSignatureSize = sSignature.size();
@@ -9667,9 +9684,35 @@ qint32 XBinary::_getSignatureRelOffsetFix(QList<XBinary::SIGNATURE_RECORD> *pLis
     if (nResult) {
         SIGNATURE_RECORD record = {};
 
-        record.st = XBinary::ST_RELOFFSETFIX;
+        record.st = XBinary::ST_SKIP;
         record.nSizeOfAddr = 0;
-        record.nBaseAddress = nResult / 2;
+        record.nSize = nResult / 2;
+
+        pListSignatureRecords->append(record);
+    }
+
+    return nResult;
+}
+
+qint32 XBinary::_getSignatureNotNull(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
+{
+    int nResult = 0;
+    qint32 nSignatureSize = sSignature.size();
+
+    for (qint32 i = nStartIndex; i < nSignatureSize; i++) {
+        if (sSignature.at(i) == QChar('*')) {
+            nResult++;
+        } else {
+            break;
+        }
+    }
+
+    if (nResult) {
+        SIGNATURE_RECORD record = {};
+
+        record.st = XBinary::ST_NOTNULL;
+        record.nSizeOfAddr = 0;
+        record.nSize = nResult / 2;
 
         pListSignatureRecords->append(record);
     }
@@ -9707,7 +9750,7 @@ qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignat
 
             record.st = XBinary::ST_FINDBYTES;
             record.nSizeOfAddr = 0;
-            record.nBaseAddress = 0;
+            record.nSize = 0;
             record.baData = _listSignatureRecords.at(0).baData;
             record.nFindDelta = 32 * nResult;
 
@@ -9739,7 +9782,7 @@ qint32 XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSi
 
         record.st = XBinary::ST_RELOFFSET;
         record.nSizeOfAddr = nResult / 2;
-        record.nBaseAddress = 0;
+        record.nSize = 0;
 
         pListSignatureRecords->append(record);
     }
@@ -9805,7 +9848,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
         if (((sSignature.at(i) >= QChar('a')) && (sSignature.at(i) <= QChar('f'))) || ((sSignature.at(i) >= QChar('0')) && (sSignature.at(i) <= QChar('9')))) {
             nResult++;
             sBytes.append(sSignature.at(i));
-        } else if ((sSignature.at(i) == '.') || (sSignature.at(i) == '$') || (sSignature.at(i) == '#')) {
+        } else if ((sSignature.at(i) == '.') || (sSignature.at(i) == '$') || (sSignature.at(i) == '#') || (sSignature.at(i) == '*')) {
             break;
         } else {
             *pbValid = false;
@@ -9818,8 +9861,8 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
 
         record.st = XBinary::ST_COMPAREBYTES;
         record.nSizeOfAddr = 0;
-        record.nBaseAddress = 0;
         record.baData = QByteArray::fromHex(sBytes.toUtf8());  // TODO Check
+        record.nSize = record.baData.size();
 
         pListSignatureRecords->append(record);
     }
