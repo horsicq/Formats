@@ -9179,6 +9179,18 @@ quint32 XPE::getNetId()
     return nResult;
 }
 
+qint64 XPE::findSignatureInBlob_NET(const QString &sSignature, _MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+{
+    XPE::CLI_INFO clinfo = getCliInfo(true, pMemoryMap);
+
+    return find_signature(pMemoryMap, clinfo.metaData.nBlobOffset, clinfo.metaData.nBlobSize, sSignature, nullptr, pPdStruct);
+}
+
+bool XPE::isSignatureInBlob_NETPresent(const QString &sSignature, _MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+{
+    return (findSignatureInBlob_NET(sSignature, pMemoryMap, pPdStruct) != -1);
+}
+
 qint32 XPE::getEntryPointSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
