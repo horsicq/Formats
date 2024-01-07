@@ -860,7 +860,7 @@ public:
     quint32 getNetId();
 
     qint64 findSignatureInBlob_NET(const QString &sSignature, _MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
-    bool isSignatureInBlob_NETPresent(const QString &sSignature, _MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
+    bool isSignatureInBlobPresent_NET(const QString &sSignature, _MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
     qint32 getEntryPointSection();
     qint32 getEntryPointSection(XBinary::_MEMORY_MAP *pMemoryMap);

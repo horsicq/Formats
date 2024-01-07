@@ -9186,7 +9186,7 @@ qint64 XPE::findSignatureInBlob_NET(const QString &sSignature, _MEMORY_MAP *pMem
     return find_signature(pMemoryMap, clinfo.metaData.nBlobOffset, clinfo.metaData.nBlobSize, sSignature, nullptr, pPdStruct);
 }
 
-bool XPE::isSignatureInBlob_NETPresent(const QString &sSignature, _MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+bool XPE::isSignatureInBlobPresent_NET(const QString &sSignature, _MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
     return (findSignatureInBlob_NET(sSignature, pMemoryMap, pPdStruct) != -1);
 }
