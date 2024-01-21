@@ -22,9 +22,11 @@
 #define SCANITEMMODEL_H
 
 #include <QAbstractItemModel>
+#if (QT_VERSION_MAJOR > 4)
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#endif
 #include <QXmlStreamWriter>
 #ifdef Q_OS_WIN
 #include <Windows.h>
@@ -49,7 +51,7 @@ public:
     };
 
     explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns = 1);
-    ~ScanItemModel() override;
+    ~ScanItemModel();
 
     QVariant headerData(int nSection, Qt::Orientation orientation, int nRole = Qt::DisplayRole) const override;
     QModelIndex index(int nRow, int nColumn, const QModelIndex &parent = QModelIndex()) const override;
@@ -69,7 +71,9 @@ public:
 
 private:
     void _toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLevel);
+#if (QT_VERSION_MAJOR > 4)
     void _toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nLevel);
+#endif
     void _toCSV(QString *pString, ScanItem *pItem, qint32 nLevel);
     void _toTSV(QString *pString, ScanItem *pItem, qint32 nLevel);
     void _toFormattedString(QString *pString, ScanItem *pItem, qint32 nLevel);

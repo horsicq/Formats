@@ -216,7 +216,7 @@ QString ScanItemModel::toXML()
 QString ScanItemModel::toJSON()
 {
     QString sResult;
-
+#if (QT_VERSION_MAJOR > 4)
     QJsonObject jsonResult;
 
     _toJSON(&jsonResult, g_pRootItem, 0);
@@ -226,6 +226,7 @@ QString ScanItemModel::toJSON()
     QByteArray baData = saveFormat.toJson(QJsonDocument::Indented);
 
     sResult = baData.data();
+#endif
 
     return sResult;
 }
@@ -310,7 +311,7 @@ void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLeve
         pXml->writeEndElement();
     }
 }
-
+#if (QT_VERSION_MAJOR > 4)
 void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nLevel)
 {
     if (pItem->childCount()) {
@@ -348,7 +349,7 @@ void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nL
         pJsonObject->insert("string", pItem->data(0).toString());
     }
 }
-
+#endif
 void ScanItemModel::_toCSV(QString *pString, ScanItem *pItem, qint32 nLevel)
 {
     if (pItem->childCount()) {

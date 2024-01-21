@@ -22,7 +22,6 @@
 #define XMP3_H
 
 #include "xbinary.h"
-#include <QtMath>
 
 class XMP3 : public XBinary {
     Q_OBJECT

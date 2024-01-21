@@ -176,7 +176,7 @@ QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
 
 QList<XJpeg::CHUNK> XJpeg::_getChunksById(QList<CHUNK> *pListChunks, quint8 nId)
 {
-    QList<XJpeg::CHUNK> listResult = {};
+    QList<XJpeg::CHUNK> listResult;
 
     qint32 nNumberOfRecords = pListChunks->count();
 

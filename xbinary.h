@@ -465,10 +465,12 @@ public:
         HASH_MD5,
         HASH_SHA1,
 #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
+#if (QT_VERSION_MAJOR > 4)
         HASH_SHA224,
         HASH_SHA256,
         HASH_SHA384,
         HASH_SHA512,
+#endif
         // TODO Check more
         // TODO Check Qt versions!
 //        HASH_KECCAK_224,
@@ -1506,7 +1508,6 @@ signals:
 
 private:
     QIODevice *g_pDevice;
-    char *g_pMemory;
     QString g_sFileName;
     QMutex *g_pReadWriteMutex;
     bool g_bIsImage;

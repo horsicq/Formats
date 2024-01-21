@@ -62,14 +62,6 @@ XBinary::XBinary(const QString &sFileName)
 
 XBinary::~XBinary()
 {
-    if (g_pMemory) {
-        QFileDevice *pFileDevice = dynamic_cast<QFileDevice *>(g_pDevice);
-
-        if (pFileDevice) {
-            pFileDevice->unmap((unsigned char *)g_pMemory);
-        }
-    }
-
     if (g_sFileName != "") {
         QFile *pFile = dynamic_cast<QFile *>(g_pDevice);
 
@@ -82,7 +74,6 @@ XBinary::~XBinary()
 void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     g_pReadWriteMutex = nullptr;
-    g_pMemory = nullptr;
     g_nSize = 0;
     g_nFileFormatSize = 0;
 
@@ -107,14 +98,6 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     }
 
     g_bLog = false;
-
-#ifdef X_USE_MAP
-    QFileDevice *pFileDevice = dynamic_cast<QFileDevice *>(pDevice);
-
-    if (pFileDevice) {
-        g_pMemory = (char *)pFileDevice->map(0, pFileDevice->size());
-    }
-#endif
 }
 
 void XBinary::setDevice(QIODevice *pDevice)
@@ -143,17 +126,8 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 
     if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
-    if (g_pMemory) {
-        nMaxLen = qMin(getSize() - nPos, nMaxLen);
-        nMaxLen = qMax(nMaxLen, (qint64)0);
-
-        _copyMemory(pData, g_pMemory + nPos, nMaxLen);
-
-        nResult = nMaxLen;
-    } else {
-        if (pDevice->seek(nPos)) {
-            nResult = pDevice->read(pData, nMaxLen);
-        }
+    if (pDevice->seek(nPos)) {
+        nResult = pDevice->read(pData, nMaxLen);
     }
 
     if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
@@ -167,17 +141,8 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
 
     if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
-    if (g_pMemory) {
-        nLen = qMin(getSize() - nPos, nLen);
-        nLen = qMax(nLen, (qint64)0);
-
-        _copyMemory(g_pMemory + nPos, (char *)pData, nLen);
-
-        nResult = nLen;
-    } else {
-        if (pDevice->seek(nPos)) {
-            nResult = pDevice->write(pData, nLen);
-        }
+    if (pDevice->seek(nPos)) {
+        nResult = pDevice->write(pData, nLen);
     }
 
     if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
@@ -2395,13 +2360,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
 
     bool bReadError = false;
 
-    char *pBuffer = nullptr;
-
-    if (!g_pMemory) {
-        pBuffer = new char[READWRITE_BUFFER_SIZE];
-    } else {
-        pBuffer = g_pMemory + nOffset;
-    }
+    char *pBuffer = new char[READWRITE_BUFFER_SIZE];
 
     char *pAnsiBuffer = new char[ssOptions.nMaxLenght + 1];
     char *pUTF8Buffer = new char[ssOptions.nMaxLenght * 4 + 1];
@@ -2432,13 +2391,11 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
     while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
         qint64 nCurrentSize = _nSize;
 
-        if (!g_pMemory) {
-            nCurrentSize = qMin((qint64)READWRITE_BUFFER_SIZE, nCurrentSize);
+        nCurrentSize = qMin((qint64)READWRITE_BUFFER_SIZE, nCurrentSize);
 
-            if (safeReadData(g_pDevice, _nOffset, pBuffer, nCurrentSize) != nCurrentSize) {
-                bReadError = true;
-                break;
-            }
+        if (safeReadData(g_pDevice, _nOffset, pBuffer, nCurrentSize) != nCurrentSize) {
+            bReadError = true;
+            break;
         }
 
         for (qint64 i = 0; i < nCurrentSize; i++) {
@@ -2770,10 +2727,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
         pPdStruct->sInfoString = tr("Read error");
     }
 
-    if (!g_pMemory) {
-        delete[] pBuffer;
-    }
-
+    delete[] pBuffer;
     delete[] pAnsiBuffer;
     delete[] pUTF8Buffer;
     delete[] pUnicodeBuffer[0];
@@ -3378,9 +3332,17 @@ bool XBinary::isDirectoryExists(const QString &sDirectoryName)
 
 bool XBinary::removeDirectory(const QString &sDirectoryName)
 {
+    bool bResult = false;
+
     QDir dir(sDirectoryName);
 
-    return dir.removeRecursively();
+#if (QT_VERSION_MAJOR > 4)
+    bResult = dir.removeRecursively();
+#else
+    bResult = dir.remove(sDirectoryName);
+#endif
+
+    return bResult;
 }
 
 bool XBinary::isDirectoryEmpty(const QString &sDirectoryName)
@@ -5754,11 +5716,13 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pPdStr
         case HASH_MD4: algorithm = QCryptographicHash::Md4; break;
         case HASH_MD5: algorithm = QCryptographicHash::Md5; break;
         case HASH_SHA1: algorithm = QCryptographicHash::Sha1; break;
-#ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
+#ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA
+#if (QT_VERSION_MAJOR > 4)
         case HASH_SHA224: algorithm = QCryptographicHash::Sha224; break;  // Keccak_224 ?
         case HASH_SHA256: algorithm = QCryptographicHash::Sha256; break;
         case HASH_SHA384: algorithm = QCryptographicHash::Sha384; break;
         case HASH_SHA512: algorithm = QCryptographicHash::Sha512; break;
+#endif
 #endif
     }
 
@@ -5822,10 +5786,12 @@ QSet<XBinary::HASH> XBinary::getHashMethods()
     stResult.insert(HASH_MD5);
     stResult.insert(HASH_SHA1);
 #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
+#if (QT_VERSION_MAJOR > 4)
     stResult.insert(HASH_SHA224);
     stResult.insert(HASH_SHA256);
     stResult.insert(HASH_SHA384);
     stResult.insert(HASH_SHA512);
+#endif
 #endif
 
     return stResult;
@@ -5839,10 +5805,12 @@ QList<XBinary::HASH> XBinary::getHashMethodsAsList()
     listResult.append(HASH_MD5);
     listResult.append(HASH_SHA1);
 #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
+#if (QT_VERSION_MAJOR > 4)
     listResult.append(HASH_SHA224);
     listResult.append(HASH_SHA256);
     listResult.append(HASH_SHA384);
     listResult.append(HASH_SHA512);
+#endif
 #endif
 
     return listResult;
@@ -5857,10 +5825,12 @@ QString XBinary::hashIdToString(XBinary::HASH hash)
         case HASH_MD5: sResult = QString("MD5"); break;
         case HASH_SHA1: sResult = QString("SHA1"); break;
 #ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
+#if (QT_VERSION_MAJOR > 4)
         case HASH_SHA224: sResult = QString("SHA224"); break;
         case HASH_SHA256: sResult = QString("SHA256"); break;
         case HASH_SHA384: sResult = QString("SHA384"); break;
         case HASH_SHA512: sResult = QString("SHA512"); break;
+#endif
 #endif
     }
 
@@ -6269,7 +6239,7 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRU
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
     if ((pPdStruct->bIsStop) || (bReadError)) {
-        result = {};
+        result = BYTE_COUNTS();
     }
 
     return result;

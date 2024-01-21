@@ -387,10 +387,10 @@ qint64 XMP3::decodeFrame(qint64 nOffset)
             }
 
             if (nLayer == 3) {
-                nResult += qFloor(12000 * (double)nBitRate / nFrequency + nPadBit) * 4;
+                nResult += std::floor(12000 * (double)nBitRate / nFrequency + nPadBit) * 4;
             } else {
                 // 125 = 1000/8 = kilobits to bytes
-                nResult += qFloor(125 * nBitRate * dTime + nPadBit);
+                nResult += std::floor(125 * nBitRate * dTime + nPadBit);
             }
         }
     }

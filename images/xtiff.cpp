@@ -273,7 +273,7 @@ QList<XTiff::CHUNK> XTiff::getChunks(PDSTRUCT *pPdStruct)
 
 QList<XTiff::CHUNK> XTiff::_getChunksByTag(QList<CHUNK> *pListChunks, quint16 nTag)
 {
-    QList<XTiff::CHUNK> listResult = {};
+    QList<XTiff::CHUNK> listResult;
 
     qint32 nNumberOfRecords = pListChunks->count();
 

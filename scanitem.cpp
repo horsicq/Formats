@@ -26,7 +26,7 @@ ScanItem::ScanItem(const QString &sString, ScanItem *pItemParent, qint32 nNumber
     g_sString = sString;
     g_nNumberOfColumns = nNumberOfColumns;
     g_bIsParent = bIsParent;
-    g_scanStruct = {};
+    g_scanStruct = XBinary::SCANSTRUCT();
 }
 
 ScanItem::~ScanItem()

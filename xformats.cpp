@@ -403,7 +403,7 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
 QList<XBinary::HREGION> XFormats::getHRegions(XBinary::FT fileType, QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, bool bIsImage, XADDR nModuleAddress,
                                               XBinary::PDSTRUCT *pPdStruct)
 {
-    QList<XBinary::HREGION> listResult = {};
+    QList<XBinary::HREGION> listResult;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
         XBinary binary(pDevice, bIsImage, nModuleAddress);
@@ -510,7 +510,7 @@ QList<XBinary::HREGION> XFormats::getHRegions(XBinary::FT fileType, QIODevice *p
 QList<XBinary::HREGION> XFormats::getHighlights(XBinary::FT fileType, QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, bool bIsImage, XADDR nModuleAddress,
                                                 XBinary::PDSTRUCT *pPdStruct)
 {
-    QList<XBinary::HREGION> listResult = {};
+    QList<XBinary::HREGION> listResult;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
         XBinary binary(pDevice, bIsImage, nModuleAddress);
