@@ -927,6 +927,7 @@ public:
     static void _copyMemory(char *pDest, char *pSource, qint64 nSize);
     static void _zeroMemory(char *pDest, qint64 nSize);
     static bool _isMemoryZeroFilled(char *pDest, qint64 nSize);
+    static bool _isMemoryNotNull(char *pDest, qint64 nSize);
     static bool copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 0x1000);
     bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 1, bool bReverse = false);
     bool zeroFill(qint64 nOffset, qint64 nSize);

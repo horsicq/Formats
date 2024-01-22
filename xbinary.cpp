@@ -3405,6 +3405,24 @@ bool XBinary::_isMemoryZeroFilled(char *pDest, qint64 nSize)
     return bResult;
 }
 
+bool XBinary::_isMemoryNotNull(char *pDest, qint64 nSize)
+{
+    bool bResult = true;
+    // TODO optimize
+    while (nSize) {
+        if ((*pDest) == 0) {
+            bResult = false;
+
+            break;
+        }
+
+        pDest++;
+        nSize--;
+    }
+
+    return bResult;
+}
+
 bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize)
 {
     // TODO optimize
@@ -9552,7 +9570,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                     return false;
                 }
 
-                if (_isMemoryZeroFilled(baData.data(), baData.size())) {
+                if (!_isMemoryNotNull(baData.data(), baData.size())) {
                     return false;
                 }
 
