@@ -937,6 +937,7 @@ QMap<quint64, QString> XELF::getSectionTypes()
     mapResult.insert(18, "SHT_SYMTAB_SHNDX");
     mapResult.insert(19, "SHT_NUM");
     mapResult.insert(0x60000000, "SHT_LOOS");
+    mapResult.insert(0x6ffffff5, "SHT_GNU_ATTRIBUTES");
     mapResult.insert(0x6ffffff6, "SHT_GNU_HASH");
     mapResult.insert(0x6ffffffa, "SHT_SUNW_move");
     mapResult.insert(0x6ffffffc, "SHT_SUNW_syminfo");
@@ -1013,6 +1014,7 @@ QMap<quint64, QString> XELF::getSectionTypesS()
     mapResult.insert(18, "SYMTAB_SHNDX");
     mapResult.insert(19, "NUM");
     mapResult.insert(0x60000000, "LOOS");
+    mapResult.insert(0x6ffffff5, "GNU_ATTRIBUTES");
     mapResult.insert(0x6ffffff6, "GNU_HASH");
     mapResult.insert(0x6ffffffa, "SUNW_move");
     mapResult.insert(0x6ffffffc, "SUNW_syminfo");
