@@ -592,6 +592,9 @@ private:
     enum ST {
         ST_COMPAREBYTES = 0,
         ST_NOTNULL,
+        ST_ANSI,
+        ST_NOTANSI,
+        ST_NOTANSIANDNULL,
         ST_FINDBYTES,
         ST_SKIP,
         ST_RELOFFSET,
@@ -926,8 +929,11 @@ public:
 
     static void _copyMemory(char *pDest, char *pSource, qint64 nSize);
     static void _zeroMemory(char *pDest, qint64 nSize);
-    static bool _isMemoryZeroFilled(char *pDest, qint64 nSize);
-    static bool _isMemoryNotNull(char *pDest, qint64 nSize);
+    static bool _isMemoryZeroFilled(char *pSource, qint64 nSize);
+    static bool _isMemoryNotNull(char *pSource, qint64 nSize);
+    static bool _isMemoryAnsi(char *pSource, qint64 nSize);
+    static bool _isMemoryNotAnsi(char *pSource, qint64 nSize);
+    static bool _isMemoryNotAnsiAndNull(char *pSource, qint64 nSize);
     static bool copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 0x1000);
     bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 1, bool bReverse = false);
     bool zeroFill(qint64 nOffset, qint64 nSize);
@@ -1491,6 +1497,9 @@ private:
 
     static qint32 _getSignatureSkip(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
     static qint32 _getSignatureNotNull(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
+    static qint32 _getSignatureANSI(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
+    static qint32 _getSignatureNotANSI(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
+    static qint32 _getSignatureNotANSIAndNull(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
     static qint32 _getSignatureDelta(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid, PDSTRUCT *pPdStruct);
     static qint32 _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
     static qint32 _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
