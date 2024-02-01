@@ -1287,6 +1287,15 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) {
         XZip zip(pDevice);
         result = zip.getFileFormatInfo();
+    // } else if (XBinary::checkFileType(XBinary::FT_JAR, fileType)) {
+    //     XJAR jar(pDevice);
+    //     result = jar.getFileFormatInfo();
+    // } else if (XBinary::checkFileType(XBinary::FT_APK, fileType)) {
+    //     XAPK apk(pDevice);
+    //     result = apk.getFileFormatInfo();
+    // } else if (XBinary::checkFileType(XBinary::FT_IPA, fileType)) {
+    //     XIPA ipa(pDevice);
+    //     result = ipa.getFileFormatInfo();
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
         XSevenZip sevenzip(pDevice);
         result = sevenzip.getFileFormatInfo();
@@ -1330,7 +1339,7 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::
 {
     QSet<XBinary::FT> stResult;
 
-    XBinary::FT fileType = XZip::getFileFormatInfo(pDevice, pListRecords, true).fileType;
+    XBinary::FT fileType = XZip::_getFileType(pDevice, pListRecords, true);
 
     if (fileType != XBinary::FT_ZIP) {
         if (fileType == XBinary::FT_APK) {
