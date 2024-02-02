@@ -6403,8 +6403,10 @@ QIODevice *XBinary::getDevice()
     return g_pDevice;
 }
 
-bool XBinary::isValid()
+bool XBinary::isValid(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     return true;
 }
 

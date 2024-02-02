@@ -28,7 +28,7 @@ XTiff::~XTiff()
 {
 }
 
-bool XTiff::isValid()
+bool XTiff::isValid(PDSTRUCT *pPdStruct)
 {
     bool bIsValid = false;
 

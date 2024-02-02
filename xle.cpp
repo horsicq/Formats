@@ -24,7 +24,7 @@ XLE::XLE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevi
 {
 }
 
-bool XLE::isValid()
+bool XLE::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 

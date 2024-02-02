@@ -1287,15 +1287,18 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) {
         XZip zip(pDevice);
         result = zip.getFileFormatInfo();
-    // } else if (XBinary::checkFileType(XBinary::FT_JAR, fileType)) {
-    //     XJAR jar(pDevice);
-    //     result = jar.getFileFormatInfo();
-    // } else if (XBinary::checkFileType(XBinary::FT_APK, fileType)) {
-    //     XAPK apk(pDevice);
-    //     result = apk.getFileFormatInfo();
-    // } else if (XBinary::checkFileType(XBinary::FT_IPA, fileType)) {
-    //     XIPA ipa(pDevice);
-    //     result = ipa.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_JAR, fileType)) {
+        XJAR jar(pDevice);
+        result = jar.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_APK, fileType)) {
+        XAPK apk(pDevice);
+        result = apk.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_IPA, fileType)) {
+        XIPA ipa(pDevice);
+        result = ipa.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_APKS, fileType)) {
+        XAPKS apks(pDevice);
+        result = apks.getFileFormatInfo();
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
         XSevenZip sevenzip(pDevice);
         result = sevenzip.getFileFormatInfo();
@@ -1359,10 +1362,10 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra)
     if (stResult.contains(XBinary::FT_ZIP)) {
         XZip xzip(pDevice);
 
-        if (xzip.isValid()) {
-            XBinary::PDSTRUCT pdStruct = XBinary::createPdStruct();
+        XBinary::PDSTRUCT pdStruct = XBinary::createPdStruct();
 
-            QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(-1, &pdStruct);
+        if (xzip.isValid(&pdStruct)) {
+            QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(20000, &pdStruct);
 
             stResult += getFileTypesZIP(pDevice, &listArchiveRecords);
         }

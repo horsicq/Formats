@@ -60,7 +60,7 @@ public:
     explicit XIcon(QIODevice *pDevice = nullptr);
     ~XIcon();
 
-    virtual bool isValid();
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     static bool isValid(QIODevice *pDevice);
     virtual FT getFileType();
     virtual QString getFileFormatString();

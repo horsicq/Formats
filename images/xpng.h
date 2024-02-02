@@ -37,7 +37,7 @@ public:
     explicit XPNG(QIODevice *pDevice = nullptr);
     ~XPNG();
 
-    virtual bool isValid();
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     static bool isValid(QIODevice *pDevice);
     virtual FT getFileType();
     virtual QString getFileFormatString();

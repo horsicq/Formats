@@ -30,7 +30,7 @@ public:
     explicit XGif(QIODevice *pDevice = nullptr);
     ~XGif();
 
-    virtual bool isValid();
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     static bool isValid(QIODevice *pDevice);
 
     virtual QString getFileFormatString();

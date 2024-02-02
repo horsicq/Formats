@@ -28,7 +28,7 @@ XELF::~XELF()
 {
 }
 
-bool XELF::isValid()
+bool XELF::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 

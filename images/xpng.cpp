@@ -28,7 +28,7 @@ XPNG::~XPNG()
 {
 }
 
-bool XPNG::isValid()
+bool XPNG::isValid(PDSTRUCT *pPdStruct)
 {
     bool bIsValid = false;
 

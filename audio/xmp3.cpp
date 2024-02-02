@@ -28,7 +28,7 @@ XMP3::~XMP3()
 {
 }
 
-bool XMP3::isValid()
+bool XMP3::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 

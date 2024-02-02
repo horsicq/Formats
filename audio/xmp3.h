@@ -30,7 +30,7 @@ public:
     explicit XMP3(QIODevice *pDevice = nullptr);
     ~XMP3();
 
-    virtual bool isValid();
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     static bool isValid(QIODevice *pDevice);
 
     virtual QString getFileFormatString();

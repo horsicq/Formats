@@ -1168,7 +1168,7 @@ public:
 
     QIODevice *getDevice();
 
-    virtual bool isValid();
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 

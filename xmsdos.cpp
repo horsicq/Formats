@@ -24,7 +24,7 @@ XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinar
 {
 }
 
-bool XMSDOS::isValid()
+bool XMSDOS::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 

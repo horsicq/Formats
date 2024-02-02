@@ -29,8 +29,10 @@ XCOM::~XCOM()
 {
 }
 
-bool XCOM::isValid()
+bool XCOM::isValid(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     bool bResult = false;
 
     // mb TODO mb

@@ -28,7 +28,7 @@ XBMP::~XBMP()
 {
 }
 
-bool XBMP::isValid()
+bool XBMP::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 

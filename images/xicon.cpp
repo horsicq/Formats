@@ -28,7 +28,7 @@ XIcon::~XIcon()
 {
 }
 
-bool XIcon::isValid()
+bool XIcon::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
     // TODO more checks !!!

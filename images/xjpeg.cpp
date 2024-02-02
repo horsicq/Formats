@@ -28,7 +28,7 @@ XJpeg::~XJpeg()
 {
 }
 
-bool XJpeg::isValid()
+bool XJpeg::isValid(PDSTRUCT *pPdStruct)
 {
     bool bIsValid = false;
 

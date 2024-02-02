@@ -28,7 +28,7 @@ XMACH::~XMACH()
 {
 }
 
-bool XMACH::isValid()
+bool XMACH::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 

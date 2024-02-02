@@ -28,7 +28,7 @@ XGif::~XGif()
 {
 }
 
-bool XGif::isValid()
+bool XGif::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 

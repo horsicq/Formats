@@ -30,7 +30,7 @@ public:
     explicit XMP4(QIODevice *pDevice = nullptr);
     ~XMP4();
 
-    virtual bool isValid();
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     static bool isValid(QIODevice *pDevice);
 
     virtual QString getFileFormatString();

@@ -28,7 +28,7 @@ XRiff::~XRiff()
 {
 }
 
-bool XRiff::isValid()
+bool XRiff::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 

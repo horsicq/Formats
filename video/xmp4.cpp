@@ -28,7 +28,7 @@ XMP4::~XMP4()
 {
 }
 
-bool XMP4::isValid()
+bool XMP4::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 

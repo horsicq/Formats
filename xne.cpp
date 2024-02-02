@@ -24,7 +24,7 @@ XNE::XNE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevi
 {
 }
 
-bool XNE::isValid()
+bool XNE::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
