@@ -53,7 +53,7 @@ public:
     virtual QString getFileFormatString();
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize();
-    virtual bool isBigEndian();
+    virtual bool isBigEndian(); // TODO!!!
 
     QList<CHUNK> getChunks(PDSTRUCT *pPdStruct = nullptr);
     static QList<CHUNK> _getChunksByTag(QList<CHUNK> *pListChunks, quint16 nTag);

@@ -404,7 +404,14 @@ public:
         OSNAME_WINDOWSCE,
         OSNAME_WINDRIVERLINUX,
         OSNAME_XBOX,
+        OSNAME_JVM,
         // TODO more
+    };
+
+    enum ENDIAN {
+        ENDIAN_UNKNOWN = 0,
+        ENDIAN_LITTLE,
+        ENDIAN_BIG
     };
 
     struct OSINFO {
@@ -414,7 +421,8 @@ public:
         QString sArch;
         MODE mode;
         QString sType;
-        bool bIsBigEndian;
+        ENDIAN endian;
+        bool bIsVM;
     };
 
     struct FILEFORMATINFO {
@@ -434,7 +442,7 @@ public:
         qint64 nSegmentBase;  // For MSDOS
         FT fileType;
         MODE mode;
-        bool bIsBigEndian;
+        ENDIAN endian;
         QString sArch;
         QString sType;
         QList<_MEMORY_RECORD> listRecords;
@@ -545,7 +553,7 @@ public:
         QString sInfo;
 
         XBinary::MODE mode;
-        bool bIsBigEndian;
+        XBinary::ENDIAN endian;
         QString sType;
         qint64 nSize;
         qint64 nOffset;
@@ -586,7 +594,7 @@ public:
         //        bool bSuccess; // TODO important
         QString sInfoString;
         bool bCriticalError;  // TODO !!!
-    };
+    };  
 
 private:
     enum ST {
@@ -637,7 +645,7 @@ public:
     virtual FT getFileType();
 
     static QString modeIdToString(MODE mode);
-    static QString endiannessToString(bool bIsBigEndian);
+    static QString endiannessToString(ENDIAN endian);
 
     void setArch(const QString &sArch);
     virtual QString getArch();
@@ -659,7 +667,9 @@ public:
     virtual OSINFO getOsInfo();
     virtual FILEFORMATINFO getFileFormatInfo();
 
-    void setEndianness(bool bIsBigEndian);  // TODO enum
+    void setEndian(ENDIAN endian);
+    virtual ENDIAN getEndian();
+
     static bool isPacked(double dEntropy);
 
     static quint8 random8();
@@ -1172,7 +1182,7 @@ public:
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
-    virtual bool isBigEndian();
+    bool isBigEndian();
     bool is16();
     bool is32();
     bool is64();
@@ -1524,13 +1534,13 @@ private:
     XADDR g_nBaseAddress;
     qint64 g_nEntryPointOffset;
     XADDR g_nModuleAddress;
-    bool g_bIsBigEndian;  // TODO enum
     QString g_sArch;
     QString g_sFileFormatString;
     QString g_sFileFormatExt;
     qint64 g_nFileFormatSize;
     OSNAME g_osName;
     QString g_sOsVersion;
+    ENDIAN g_endian;
     MODE g_mode;
     QString g_sVersion;
     qint32 g_nType;

@@ -134,7 +134,7 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
-    virtual bool isBigEndian();
+    virtual ENDIAN getEndian();
     virtual FT getFileType();
     virtual qint32 getType();
     virtual OSINFO getOsInfo();

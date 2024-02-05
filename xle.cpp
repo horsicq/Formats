@@ -1253,7 +1253,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
     result.sArch = getArch();
     result.mode = getMode();
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
     result.sType = getTypeAsString();
     result.fileType = getFileType();
 
@@ -1420,7 +1420,7 @@ XBinary::OSINFO XLE::getOsInfo()
     result.sArch = getArch();
     result.mode = getMode();
     result.sType = typeIdToString(getType());
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
 
     return result;
 }

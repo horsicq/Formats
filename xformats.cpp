@@ -113,6 +113,18 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMO
     else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) {
         XZip zip(pDevice);
         result = zip.getMemoryMap(mapMode, pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_JAR, fileType)) {
+        XJAR jar(pDevice);
+        result = jar.getMemoryMap(mapMode, pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_APK, fileType)) {
+        XAPK apk(pDevice);
+        result = apk.getMemoryMap(mapMode, pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_IPA, fileType)) {
+        XIPA ipa(pDevice);
+        result = ipa.getMemoryMap(mapMode, pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_APKS, fileType)) {
+        XAPKS apks(pDevice);
+        result = apks.getMemoryMap(mapMode, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
         XSevenZip sevenzip(pDevice);
         result = sevenzip.getMemoryMap(mapMode, pPdStruct);
@@ -1342,14 +1354,16 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::
 {
     QSet<XBinary::FT> stResult;
 
-    XBinary::FT fileType = XZip::_getFileType(pDevice, pListRecords, true);
+    // XBinary::FT fileType = XZip::_getFileType(pDevice, pListRecords, true);
+    stResult.insert(XBinary::FT_ZIP);
 
-    if (fileType != XBinary::FT_ZIP) {
-        if (fileType == XBinary::FT_APK) {
-            stResult.insert(XBinary::FT_JAR);
-        }
-
-        stResult.insert(fileType);
+    if (XAPK::isValid(pListRecords)) {
+        stResult.insert(XBinary::FT_APK);
+        stResult.insert(XBinary::FT_JAR);
+    } else if (XIPA::isValid(pListRecords)) {
+        stResult.insert(XBinary::FT_IPA);
+    } else if (XJAR::isValid(pListRecords)) {
+        stResult.insert(XBinary::FT_JAR);
     }
 
     return stResult;

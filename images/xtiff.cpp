@@ -72,7 +72,9 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     qint64 nTotalSize = getSize();
 
     result.nBinarySize = nTotalSize;
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
+
+    bool bIsBigEndian = (result.endian == ENDIAN_BIG);
 
     if (result.nBinarySize > 8) {
         {
@@ -88,10 +90,10 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             result.listRecords.append(record);
         }
 
-        qint64 nTableOffset = read_uint32(4, result.bIsBigEndian);
+        qint64 nTableOffset = read_uint32(4, bIsBigEndian);
 
         while (nTableOffset) {
-            quint16 nTableCount = read_uint16(nTableOffset, result.bIsBigEndian);
+            quint16 nTableCount = read_uint16(nTableOffset, bIsBigEndian);
 
             {
                 _MEMORY_RECORD record = {};
@@ -109,16 +111,16 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             qint64 nCurrentOffset = nTableOffset + sizeof(quint16);
 
             for (qint32 i = 0; i < nTableCount; i++) {
-                quint16 nTag = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nTag), result.bIsBigEndian);
-                quint16 nType = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nType), result.bIsBigEndian);
-                quint32 nCount = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nCount), result.bIsBigEndian);
+                quint16 nTag = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nTag), bIsBigEndian);
+                quint16 nType = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nType), bIsBigEndian);
+                quint32 nCount = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nCount), bIsBigEndian);
 
                 qint32 nBaseTypeSize = getBaseTypeSize(nType);
 
                 qint64 nDataSize = nBaseTypeSize * nCount;
 
                 if (nDataSize > 4) {
-                    quint32 nOffset = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nOffset), result.bIsBigEndian);
+                    quint32 nOffset = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nOffset), bIsBigEndian);
 
                     _MEMORY_RECORD record = {};
 
@@ -135,7 +137,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 nCurrentOffset += sizeof(IFD_ENTRY);
             }
 
-            nTableOffset = read_uint32(nCurrentOffset, result.bIsBigEndian);
+            nTableOffset = read_uint32(nCurrentOffset, bIsBigEndian);
 
             {
                 _MEMORY_RECORD record = {};

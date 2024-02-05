@@ -57,9 +57,19 @@ XBinary::MODE XELF::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddr
     return xelf.getMode();
 }
 
-bool XELF::isBigEndian()
+XBinary::ENDIAN XELF::getEndian()
 {
-    return getIdent_data() == XELF_DEF::S_ELFDATA2MSB;
+    ENDIAN result = ENDIAN_UNKNOWN;
+
+    quint8 nData = getIdent_data();
+
+    if (nData == XELF_DEF::S_ELFDATA2LSB) {
+        result = ENDIAN_LITTLE;
+    } else if (nData == XELF_DEF::S_ELFDATA2MSB) {
+        result = ENDIAN_BIG;
+    }
+
+    return result;
 }
 
 qint64 XELF::getEhdrOffset()
@@ -3737,7 +3747,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     }
 
     result.sArch = getArch();
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
     result.sType = getTypeAsString();
     // XADDR _nModuleAddress = getModuleAddress();
     result.nModuleAddress = getModuleAddress();
@@ -4338,7 +4348,7 @@ XBinary::OSINFO XELF::getOsInfo()
     result.sArch = getArch();
     result.mode = getMode();
     result.sType = typeIdToString(getType());
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
 
     return result;
 }

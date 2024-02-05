@@ -1152,7 +1152,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     }
 
     result.sArch = getArch();
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
     result.sType = getTypeAsString();
     result.nBinarySize = getSize();
     result.nModuleAddress = getModuleAddress();
@@ -4292,7 +4292,7 @@ XBinary::OSINFO XMACH::getOsInfo()
     result.sArch = getArch();
     result.mode = getMode();
     result.sType = typeIdToString(getType());
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
 
     quint32 nCPUType = getHeader_cputype();
     quint32 nCpuSubType = getHeader_cpusubtype();

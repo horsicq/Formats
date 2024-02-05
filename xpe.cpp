@@ -80,17 +80,17 @@ QString XPE::getArch()
     return getImageFileHeaderMachinesS().value(getFileHeader_Machine(), tr("Unknown"));
 }
 
-bool XPE::isBigEndian()
+XBinary::ENDIAN XPE::getEndian()
 {
-    bool bResult = false;
+    ENDIAN result = ENDIAN_LITTLE;
 
-    quint16 nMachine = getFileHeader_Machine();
+    quint8 nData = getFileHeader_Machine();
 
-    if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_R3000_BE) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_POWERPCBE)) {
-        bResult = true;
+    if ((nData == XPE_DEF::S_IMAGE_FILE_MACHINE_R3000_BE) || (nData == XPE_DEF::S_IMAGE_FILE_MACHINE_POWERPCBE)) {
+        result = ENDIAN_BIG;
     }
 
-    return bResult;
+    return result;
 }
 
 XBinary::OSINFO XPE::getOsInfo()
@@ -147,7 +147,7 @@ XBinary::OSINFO XPE::getOsInfo()
     result.sArch = getArch();
     result.mode = getMode();
     result.sType = typeIdToString(getType());
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
 
     return result;
 }
@@ -1773,7 +1773,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     }
 
     result.sArch = getArch();
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
     result.sType = getTypeAsString();
 
     result.nModuleAddress = getModuleAddress();
@@ -4456,7 +4456,7 @@ bool XPE::addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_H
                 nFileSize = nHeadersSize;
             }
 
-            // TODO!!!
+            // TODO
             resize(pDevice, nFileSize + pSectionHeader->SizeOfRawData);
 
             quint32 nNumberOfSections = pe.getFileHeader_NumberOfSections();

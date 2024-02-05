@@ -81,7 +81,7 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     setIsImage(bIsImage);
     XBinary::setBaseAddress(0);
     setModuleAddress(nModuleAddress);
-    setEndianness(false);  // LE
+    setEndian(ENDIAN_UNKNOWN);
     XBinary::setEntryPointOffset(0);
     setMode(MODE_UNKNOWN);
     setFileType(FT_BINARY);
@@ -245,13 +245,15 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
     return sResult;
 }
 
-QString XBinary::endiannessToString(bool bIsBigEndian)
+QString XBinary::endiannessToString(ENDIAN endian)
 {
     QString sResult;
 
-    if (bIsBigEndian) {
+    if (endian == ENDIAN_UNKNOWN) {
+        tr("Unknown");
+    }else if (endian == ENDIAN_BIG) {
         sResult = "BE";
-    } else {
+    } else if (endian == ENDIAN_LITTLE) {
         sResult = "LE";
     }
 
@@ -339,7 +341,7 @@ XBinary::OSINFO XBinary::getOsInfo()
     result.sArch = getArch();
     result.mode = getMode();
     result.sType = typeIdToString(getType());
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
 
     return result;
 }
@@ -363,9 +365,14 @@ XBinary::FILEFORMATINFO XBinary::getFileFormatInfo()
     return result;
 }
 
-void XBinary::setEndianness(bool bIsBigEndian)
+void XBinary::setEndian(ENDIAN endian)
 {
-    g_bIsBigEndian = bIsBigEndian;
+    g_endian = endian;
+}
+
+XBinary::ENDIAN XBinary::getEndian()
+{
+    return g_endian;
 }
 
 bool XBinary::isPacked(double dEntropy)
@@ -4140,7 +4147,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     result.fileType = getFileType();
     result.mode = getMode();
     result.sArch = getArch();
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
     result.sType = getTypeAsString();
 
     _MEMORY_RECORD record = {};
@@ -4865,6 +4872,14 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_CAB;
     } else if (pStFileTypes->contains(FT_RAR)) {
         result = FT_RAR;
+    } else if (pStFileTypes->contains(FT_APKS)) {
+        result = FT_APKS;
+    } else if (pStFileTypes->contains(FT_APK)) {
+        result = FT_APK;
+    } else if (pStFileTypes->contains(FT_IPA)) {
+        result = FT_IPA;
+    } else if (pStFileTypes->contains(FT_JAR)) {
+        result = FT_JAR;
     } else if (pStFileTypes->contains(FT_ZIP)) {
         result = FT_ZIP;
     } else if (pStFileTypes->contains(FT_GZIP)) {
@@ -6426,7 +6441,7 @@ XBinary::MODE XBinary::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
 bool XBinary::isBigEndian()
 {
-    return g_bIsBigEndian;
+    return (g_endian == ENDIAN_BIG);
 }
 
 bool XBinary::is16()
@@ -6452,7 +6467,7 @@ bool XBinary::is64()
 
 bool XBinary::isBigEndian(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    return pMemoryMap->bIsBigEndian;
+    return (pMemoryMap->endian == ENDIAN_BIG);
 }
 
 bool XBinary::is16(XBinary::_MEMORY_MAP *pMemoryMap)
@@ -7794,6 +7809,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_WINDOWSCE: sResult = QString("Windows CE"); break;
         case OSNAME_WINDRIVERLINUX: sResult = QString("Wind River Linux"); break;
         case OSNAME_XBOX: sResult = QString("XBOX"); break;
+        case OSNAME_JVM: sResult = QString("JVM"); break;
         default: sResult = tr("Unknown");
     }
 
@@ -7809,7 +7825,7 @@ XBinary::DM XBinary::getDisasmMode()
 
 XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    return getDisasmMode(pMemoryMap->sArch, pMemoryMap->bIsBigEndian, pMemoryMap->mode);
+    return getDisasmMode(pMemoryMap->sArch, (pMemoryMap->endian == ENDIAN_BIG), pMemoryMap->mode);
 }
 
 XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE mode)
@@ -7882,7 +7898,7 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
 
 XBinary::DM XBinary::getDisasmMode(OSINFO osInfo)
 {
-    return getDisasmMode(osInfo.sArch, osInfo.bIsBigEndian, osInfo.mode);
+    return getDisasmMode(osInfo.sArch, (osInfo.endian == ENDIAN_BIG), osInfo.mode);
 }
 
 XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)

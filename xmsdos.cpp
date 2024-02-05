@@ -759,9 +759,9 @@ QString XMSDOS::getArch()
     return QString("8086");
 }
 
-bool XMSDOS::isBigEndian()
+XBinary::ENDIAN XMSDOS::getEndian()
 {
-    return false;
+    return ENDIAN_LITTLE;
 }
 
 XBinary::FT XMSDOS::getFileType()
@@ -783,7 +783,7 @@ XBinary::OSINFO XMSDOS::getOsInfo()
     result.sArch = getArch();
     result.mode = getMode();
     result.sType = typeIdToString(getType());
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
 
     return result;
 }

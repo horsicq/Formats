@@ -78,7 +78,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdS
     result.fileType = getFileType();
     result.mode = getMode();
     result.sArch = getArch();
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
     result.sType = getTypeAsString();
 
     qint64 nCodeSize = qMin(nTotalSize, (qint64)(XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN));
@@ -169,7 +169,7 @@ XBinary::OSINFO XCOM::getOsInfo()
     result.sArch = getArch();
     result.mode = getMode();
     result.sType = typeIdToString(getType());
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
 
     return result;
 }

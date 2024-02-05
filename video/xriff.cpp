@@ -97,13 +97,13 @@ XBinary::_MEMORY_MAP XRiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     XBinary::_MEMORY_MAP result = {};
 
     result.nBinarySize = getSize();
-    result.bIsBigEndian = isBigEndian();
+    result.endian = getEndian();
 
     qint32 nIndex = 0;
 
     qint64 nOffset = 0;
 
-    quint32 nChunkSize = read_uint32(nOffset + 4, result.bIsBigEndian);
+    quint32 nChunkSize = read_uint32(nOffset + 4, result.endian == ENDIAN_BIG);
     QString sTag = read_ansiString(nOffset, 4);
 
     {

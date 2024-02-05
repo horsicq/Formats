@@ -315,7 +315,7 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
-    virtual bool isBigEndian();
+    virtual ENDIAN getEndian();
 
     virtual OSINFO getOsInfo();
 
