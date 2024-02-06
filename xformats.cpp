@@ -847,9 +847,15 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
     return listResult;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra)
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
 {
-    return _getFileTypes(pDevice, bExtra);
+    XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    return _getFileTypes(pDevice, bExtra, pPdStruct);
 }
 
 bool XFormats::saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDirectoryName)
@@ -1350,38 +1356,39 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *p
 }
 #endif
 #ifdef USE_ARCHIVE
-QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords)
+QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pDevice) // TODO
+
     QSet<XBinary::FT> stResult;
 
     // XBinary::FT fileType = XZip::_getFileType(pDevice, pListRecords, true);
     stResult.insert(XBinary::FT_ZIP);
 
-    if (XAPK::isValid(pListRecords)) {
+    if (XAPK::isValid(pListRecords, pPdStruct)) {
         stResult.insert(XBinary::FT_APK);
         stResult.insert(XBinary::FT_JAR);
-    } else if (XIPA::isValid(pListRecords)) {
+    } else if (XIPA::isValid(pListRecords, pPdStruct)) {
         stResult.insert(XBinary::FT_IPA);
-    } else if (XJAR::isValid(pListRecords)) {
+    } else if (XJAR::isValid(pListRecords, pPdStruct)) {
         stResult.insert(XBinary::FT_JAR);
     }
+    // TODO APKS
 
     return stResult;
 }
 #endif
-QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra)
+QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
 {
     QSet<XBinary::FT> stResult = XBinary::getFileTypes(pDevice, bExtra);
 #ifdef USE_ARCHIVE
     if (stResult.contains(XBinary::FT_ZIP)) {
         XZip xzip(pDevice);
 
-        XBinary::PDSTRUCT pdStruct = XBinary::createPdStruct();
+        if (xzip.isValid(pPdStruct)) {
+            QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(20000, pPdStruct);
 
-        if (xzip.isValid(&pdStruct)) {
-            QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(20000, &pdStruct);
-
-            stResult += getFileTypesZIP(pDevice, &listArchiveRecords);
+            stResult += getFileTypesZIP(pDevice, &listArchiveRecords, pPdStruct);
         }
     }
 #endif
@@ -1499,5 +1506,24 @@ XBinary::MAPMODE XFormats::setMapModeComboBox(XBinary::FT fileType, QIODevice *p
     pComboBox->blockSignals(bBlocked1);
 
     return result;
+}
+#endif
+#ifdef QT_GUI_LIB
+void XFormats::setProgressBar(QProgressBar *pProgressBar, XBinary::PDRECORD pdRecord)
+{
+    if ((pdRecord.nTotal) || (pdRecord.sStatus != "")) {
+        pProgressBar->show();
+
+        if (pdRecord.nTotal) {
+            pProgressBar->setMaximum(pdRecord.nTotal);
+            pProgressBar->setValue(pdRecord.nCurrent);
+        }
+
+        if (pdRecord.sStatus != "") {
+            pProgressBar->setFormat(pdRecord.sStatus);
+        }
+    } else {
+        pProgressBar->hide();
+    }
 }
 #endif

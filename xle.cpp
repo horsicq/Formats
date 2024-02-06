@@ -1361,9 +1361,9 @@ QString XLE::getArch()
     return getImageLECpusS().value(getImageVxdHeader_cpu(), tr("Unknown"));
 }
 
-bool XLE::isBigEndian()
+XBinary::ENDIAN XLE::getEndian()
 {
-    return false;
+    return ENDIAN_LITTLE;
 }
 
 XBinary::FT XLE::getFileType()

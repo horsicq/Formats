@@ -245,12 +245,12 @@ QString XBinary::modeIdToString(XBinary::MODE mode)
     return sResult;
 }
 
-QString XBinary::endiannessToString(ENDIAN endian)
+QString XBinary::endianToString(ENDIAN endian)
 {
     QString sResult;
 
     if (endian == ENDIAN_UNKNOWN) {
-        tr("Unknown");
+        sResult = tr("Unknown");
     }else if (endian == ENDIAN_BIG) {
         sResult = "BE";
     } else if (endian == ENDIAN_LITTLE) {

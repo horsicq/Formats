@@ -147,7 +147,7 @@ public:
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
-    bool isBigEndian(); // TODO!!!
+    ENDIAN getEndian();
 
     qint64 getHeaderOffset();
     qint64 getHeader32Size();

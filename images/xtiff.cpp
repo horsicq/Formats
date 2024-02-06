@@ -180,11 +180,19 @@ qint64 XTiff::getFileFormatSize()
     return _calculateRawSize();
 }
 
-bool XTiff::isBigEndian()
+XBinary::ENDIAN XTiff::getEndian()
 {
-    quint32 nEndian = read_uint32(0);
+    ENDIAN result = ENDIAN_UNKNOWN;
 
-    return (nEndian == 0x2A004D4D);
+    quint32 nData = read_uint32(0);
+
+    if (nData == 0x4D4D002A) {
+        result = ENDIAN_LITTLE;
+    } else if (nData == 0x2A004D4D) {
+        result = ENDIAN_BIG;
+    }
+
+    return result;
 }
 
 QList<XTiff::CHUNK> XTiff::getChunks(PDSTRUCT *pPdStruct)

@@ -140,9 +140,9 @@ XBinary::MODE XCOM::getMode()
     return MODE_16;
 }
 
-bool XCOM::isBigEndian()
+XBinary::ENDIAN XCOM::getEndian()
 {
-    return false;
+    return ENDIAN_LITTLE;
 }
 
 qint64 XCOM::getImageSize()

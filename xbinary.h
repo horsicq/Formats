@@ -645,7 +645,7 @@ public:
     virtual FT getFileType();
 
     static QString modeIdToString(MODE mode);
-    static QString endiannessToString(ENDIAN endian);
+    static QString endianToString(ENDIAN endian);
 
     void setArch(const QString &sArch);
     virtual QString getArch();

@@ -44,7 +44,7 @@ public:
     virtual _MEMORY_MAP getMemoryMap(XBinary::MAPMODE mapMode = XBinary::MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual QString getArch();
     virtual MODE getMode();
-    virtual bool isBigEndian(); // TODO!!!
+    virtual ENDIAN getEndian();
     virtual qint64 getImageSize();
     virtual FT getFileType();
     virtual qint32 getType();

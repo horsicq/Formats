@@ -1037,9 +1037,9 @@ QString XNE::getArch()
     return sResult;
 }
 
-bool XNE::isBigEndian()
+XBinary::ENDIAN XNE::getEndian()
 {
-    return false;
+    return ENDIAN_LITTLE;
 }
 
 XBinary::FT XNE::getFileType()

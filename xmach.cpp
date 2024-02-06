@@ -55,17 +55,19 @@ XBinary::MODE XMACH::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAdd
     return xmach.getMode();
 }
 
-bool XMACH::isBigEndian()
+XBinary::ENDIAN XMACH::getEndian()
 {
-    bool bResult = false;
+    ENDIAN result = ENDIAN_UNKNOWN;
 
-    quint32 nMagic = read_uint32(0);
+    quint32 nData = read_uint32(0);
 
-    if ((nMagic == XMACH_DEF::S_MH_CIGAM) || (nMagic == XMACH_DEF::S_MH_CIGAM_64)) {
-        bResult = true;
+    if ((nData == XMACH_DEF::S_MH_MAGIC) || (nData == XMACH_DEF::S_MH_MAGIC_64)) {
+        result = ENDIAN_LITTLE;
+    } else if ((nData == XMACH_DEF::S_MH_CIGAM) || (nData == XMACH_DEF::S_MH_CIGAM_64)) {
+        result = ENDIAN_BIG;
     }
 
-    return bResult;
+    return result;
 }
 
 qint64 XMACH::getHeaderOffset()

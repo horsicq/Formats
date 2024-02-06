@@ -132,17 +132,17 @@ XBinary::FT XRiff::getFileType()
     return result;
 }
 
-bool XRiff::isBigEndian()
+XBinary::ENDIAN XRiff::getEndian()
 {
-    bool bResult = false;
+    ENDIAN result = ENDIAN_UNKNOWN;
 
     QString sTag = read_ansiString(0, 4);
 
     if (sTag == "RIFF") {
-        bResult = false;
+        result = ENDIAN_LITTLE;
     } else if ((sTag == "RIFX") || (sTag == "AIFF")) {
-        bResult = true;
+        result = ENDIAN_BIG;
     }
 
-    return bResult;
+    return result;
 }

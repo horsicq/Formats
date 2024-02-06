@@ -84,7 +84,7 @@ XBinary::ENDIAN XPE::getEndian()
 {
     ENDIAN result = ENDIAN_LITTLE;
 
-    quint8 nData = getFileHeader_Machine();
+    quint16 nData = getFileHeader_Machine();
 
     if ((nData == XPE_DEF::S_IMAGE_FILE_MACHINE_R3000_BE) || (nData == XPE_DEF::S_IMAGE_FILE_MACHINE_POWERPCBE)) {
         result = ENDIAN_BIG;

@@ -50,6 +50,7 @@
 #endif
 #ifdef QT_GUI_LIB
 #include <QComboBox>  // TODO Check TESTLIB !!!
+#include <QProgressBar>
 #endif
 
 class XFormats : public QObject {
@@ -77,7 +78,7 @@ public:
     static XBinary::OFFSETSIZE getSignOffsetSize(const QString &sFileName);
     static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                           XBinary::SYMBOL_TYPE symBolType = XBinary::SYMBOL_TYPE_ALL);
-    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, bool bExtra = false);
+    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra = false);
     static QSet<XBinary::FT> getFileTypes(const QString &sFileName, bool bExtra = false);
     static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData, bool bExtra = false);
@@ -86,13 +87,14 @@ public:
 
 #ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra = false);
-    static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords);
+    static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
 #endif
 #ifdef QT_GUI_LIB
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox);
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox);
     static bool setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian);
     static XBinary::MAPMODE setMapModeComboBox(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, QComboBox *pComboBox);
+    static void setProgressBar(QProgressBar *pProgressBar, XBinary::PDRECORD pdRecord);
 #endif
     static bool saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDirectoryName);
     static bool saveAllPECursorsToDirectory(QIODevice *pDevice, const QString &sDirectoryName);
@@ -104,7 +106,7 @@ public:
     static void sortRecords(QList<XBinary::SCANSTRUCT> *pListRecords);
 
 private:
-    static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, bool bExtra = false);
+    static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct);
 };
 
 #endif  // XFORMATS_H
