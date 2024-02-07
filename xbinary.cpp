@@ -9542,6 +9542,7 @@ QString XBinary::getAndroidVersionFromApi(quint32 nAPI)
 {
     QString sResult = tr("Unknown");
 
+    // https://developer.android.com/tools/releases/platforms
     if (nAPI == 3) sResult = QString("1.5");
     if (nAPI == 4) sResult = QString("1.6");
     if (nAPI == 5) sResult = QString("2.0");
@@ -9570,6 +9571,11 @@ QString XBinary::getAndroidVersionFromApi(quint32 nAPI)
     if (nAPI == 28) sResult = QString("9.0");
     if (nAPI == 29) sResult = QString("10.0");
     if (nAPI == 30) sResult = QString("11.0");
+    if (nAPI == 31) sResult = QString("12.0");
+    if (nAPI == 32) sResult = QString("12.1");
+    if (nAPI == 33) sResult = QString("13.0");
+    if (nAPI == 34) sResult = QString("14.0");
+    if (nAPI == 35) sResult = QString("15.0");
 
     return sResult;
 }
