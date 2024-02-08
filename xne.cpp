@@ -26,6 +26,8 @@ XNE::XNE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevi
 
 bool XNE::isValid(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     bool bResult = false;
 
     quint16 magic = get_magic();

@@ -30,6 +30,8 @@ XMACH::~XMACH()
 
 bool XMACH::isValid(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     bool bResult = false;
 
     quint32 nMagic = read_uint32(0);
