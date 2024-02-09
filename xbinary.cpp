@@ -6441,7 +6441,7 @@ XBinary::MODE XBinary::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
 bool XBinary::isBigEndian()
 {
-    return (g_endian == ENDIAN_BIG);
+    return (getEndian() == ENDIAN_BIG);
 }
 
 bool XBinary::is16()

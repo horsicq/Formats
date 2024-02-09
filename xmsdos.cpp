@@ -26,6 +26,7 @@ XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinar
 
 bool XMSDOS::isValid(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     bool bResult = false;
 
     quint16 magic = get_magic();
