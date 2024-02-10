@@ -594,7 +594,7 @@ public:
         //        bool bSuccess; // TODO important
         QString sInfoString;
         bool bCriticalError;  // TODO !!!
-    };  
+    };
 
 private:
     enum ST {

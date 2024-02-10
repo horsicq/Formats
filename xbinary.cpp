@@ -251,7 +251,7 @@ QString XBinary::endianToString(ENDIAN endian)
 
     if (endian == ENDIAN_UNKNOWN) {
         sResult = tr("Unknown");
-    }else if (endian == ENDIAN_BIG) {
+    } else if (endian == ENDIAN_BIG) {
         sResult = "BE";
     } else if (endian == ENDIAN_LITTLE) {
         sResult = "LE";
@@ -2010,7 +2010,8 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
     qint64 nResult = -1;
 
-    if (_sSignature.contains(QChar('.')) || _sSignature.contains(QChar('$')) || _sSignature.contains(QChar('#')) || _sSignature.contains(QChar('+')) || _sSignature.contains(QChar('*')) || _sSignature.contains(QChar('%')) || _sSignature.contains(QChar('!')) || _sSignature.contains(QChar('_'))) {
+    if (_sSignature.contains(QChar('.')) || _sSignature.contains(QChar('$')) || _sSignature.contains(QChar('#')) || _sSignature.contains(QChar('+')) ||
+        _sSignature.contains(QChar('*')) || _sSignature.contains(QChar('%')) || _sSignature.contains(QChar('!')) || _sSignature.contains(QChar('_'))) {
         bool bIsValid = true;
 
         QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bIsValid, pPdStruct);
@@ -9659,7 +9660,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
             case XBinary::ST_NOTNULL:
             case XBinary::ST_ANSI:
             case XBinary::ST_NOTANSI:
-            case XBinary::ST_NOTANSIANDNULL:{
+            case XBinary::ST_NOTANSIANDNULL: {
                 QByteArray baData = read_array(nOffset, pListSignatureRecords->at(i).nSize);
 
                 if (baData.size() != pListSignatureRecords->at(i).nSize) {
@@ -9678,7 +9679,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                     if (!_isMemoryNotAnsi(baData.data(), baData.size())) {
                         return false;
                     }
-                }  else if (pListSignatureRecords->at(i).st == XBinary::ST_NOTANSIANDNULL) {
+                } else if (pListSignatureRecords->at(i).st == XBinary::ST_NOTANSIANDNULL) {
                     if (!_isMemoryNotAnsiAndNull(baData.data(), baData.size())) {
                         return false;
                     }
@@ -9823,9 +9824,9 @@ qint32 XBinary::_getSignatureANSI(QList<SIGNATURE_RECORD> *pListSignatureRecords
     int nResult = 0;
     qint32 nSignatureSize = sSignature.size();
 
-    for (qint32 i = nStartIndex; i < nSignatureSize; i+=2) {
+    for (qint32 i = nStartIndex; i < nSignatureSize; i += 2) {
         if (sSignature.mid(i, 2) == "%%") {
-            nResult+=2;
+            nResult += 2;
         } else {
             break;
         }
@@ -9849,9 +9850,9 @@ qint32 XBinary::_getSignatureNotANSI(QList<SIGNATURE_RECORD> *pListSignatureReco
     int nResult = 0;
     qint32 nSignatureSize = sSignature.size();
 
-    for (qint32 i = nStartIndex; i < nSignatureSize; i+=2) {
+    for (qint32 i = nStartIndex; i < nSignatureSize; i += 2) {
         if (sSignature.mid(i, 2) == "!%") {
-            nResult+=2;
+            nResult += 2;
         } else {
             break;
         }
@@ -9875,9 +9876,9 @@ qint32 XBinary::_getSignatureNotANSIAndNull(QList<SIGNATURE_RECORD> *pListSignat
     int nResult = 0;
     qint32 nSignatureSize = sSignature.size();
 
-    for (qint32 i = nStartIndex; i < nSignatureSize; i+=2) {
+    for (qint32 i = nStartIndex; i < nSignatureSize; i += 2) {
         if (sSignature.mid(i, 2) == "_%") {
-            nResult+=2;
+            nResult += 2;
         } else {
             break;
         }
@@ -10024,7 +10025,8 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
         if (((sSignature.at(i) >= QChar('a')) && (sSignature.at(i) <= QChar('f'))) || ((sSignature.at(i) >= QChar('0')) && (sSignature.at(i) <= QChar('9')))) {
             nResult++;
             sBytes.append(sSignature.at(i));
-        } else if ((sSignature.at(i) == '.') || (sSignature.at(i) == '$') || (sSignature.at(i) == '#') || (sSignature.at(i) == '*') || (sSignature.at(i) == '!') || (sSignature.at(i) == '_') || (sSignature.at(i) == '%')) {
+        } else if ((sSignature.at(i) == '.') || (sSignature.at(i) == '$') || (sSignature.at(i) == '#') || (sSignature.at(i) == '*') || (sSignature.at(i) == '!') ||
+                   (sSignature.at(i) == '_') || (sSignature.at(i) == '%')) {
             break;
         } else {
             *pbValid = false;
