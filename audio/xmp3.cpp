@@ -33,9 +33,9 @@ bool XMP3::isValid(PDSTRUCT *pPdStruct)
     bool bResult = false;
 
     if (getSize() > 0x20) {
-        _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
+        _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
-        if (compareSignature(&memoryMap, "'ID3'0200", 0) || compareSignature(&memoryMap, "'ID3'0300", 0) || compareSignature(&memoryMap, "'ID3'0400", 0)) {
+        if (compareSignature(&memoryMap, "'ID3'0200", 0, pPdStruct) || compareSignature(&memoryMap, "'ID3'0300", 0, pPdStruct) || compareSignature(&memoryMap, "'ID3'0400", 0, pPdStruct)) {
             // TODO more checks
             bResult = true;
         }
