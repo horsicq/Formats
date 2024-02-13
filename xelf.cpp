@@ -30,6 +30,8 @@ XELF::~XELF()
 
 bool XELF::isValid(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     bool bResult = false;
 
     if (getIdent_Magic() == XELF_DEF::S_ELFMAG) {
