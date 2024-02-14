@@ -3261,7 +3261,7 @@ bool XBinary::isFileExists(const QString &sFileName, bool bTryToOpen)
 
 bool XBinary::removeFile(const QString &sFileName)
 {
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
     QFile::Permissions perm = QFile::permissions(sFileName);
 
     if (!(perm & QFile::WriteOther)) {
