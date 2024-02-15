@@ -998,9 +998,7 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
     // TODO more
     if ((_sType == "installer") || (_sType == "sfx") || (_sType == "archive")) {
         result = Qt::blue;
-    } else if ((_sType == "protector") || (_sType == "apk obfuscator") || (_sType == "jar obfuscator") || (_sType == ".net obfuscator") ||
-               (_sType == ".net compressor") || (_sType == "dongle protection") || (_sType == "joiner") || (_sType == "packer") || (_sType == "protection") ||
-               (_sType == "crypter") || (_sType == "cryptor")) {
+    } else if (isProtection(_sType)) {
         result = Qt::red;
     } else if ((_sType == "pe tool") || (_sType == "apk tool")) {
         result = Qt::green;
@@ -1142,6 +1140,39 @@ QString XFormats::translateType(const QString &sType)
 void XFormats::sortRecords(QList<XBinary::SCANSTRUCT> *pListRecords)
 {
     std::sort(pListRecords->begin(), pListRecords->end(), _sortItems);
+}
+
+QString XFormats::getProtection(QList<XBinary::SCANSTRUCT> *pListRecords)
+{
+    QString sResult;
+
+    qint32 nNumberOfRecords = pListRecords->count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (pListRecords->at(i).bIsProtection) {
+            XBinary::SCANSTRUCT scanStruct = pListRecords->at(i);
+            sResult = XBinary::createResultString2(&scanStruct);
+            break;
+        }
+    }
+
+    return sResult;
+}
+
+bool XFormats::isProtection(const QString &sType)
+{
+    bool bResult = false;
+
+    QString _sType = sType;
+    _sType = _sType.toLower();
+
+    if ((_sType == "protector") || (_sType == "apk obfuscator") || (_sType == "jar obfuscator") || (_sType == ".net obfuscator") ||
+       (_sType == ".net compressor") || (_sType == "dongle protection") || (_sType == "joiner") || (_sType == "packer") || (_sType == "protection") ||
+       (_sType == "crypter") || (_sType == "cryptor")) {
+        bResult = true;
+    }
+
+    return bResult;
 }
 
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)

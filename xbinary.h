@@ -571,6 +571,7 @@ public:
         QString varInfo2;  // Signature File in die scripts
         Qt::GlobalColor globalColor;
         qint32 nPrio;
+        bool bIsProtection;
     };
 
     struct PDRECORD {

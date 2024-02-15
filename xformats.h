@@ -104,6 +104,8 @@ public:
     static qint32 typeToPrio(const QString &sType);
     static QString translateType(const QString &sType);
     static void sortRecords(QList<XBinary::SCANSTRUCT> *pListRecords);
+    static QString getProtection(QList<XBinary::SCANSTRUCT> *pListRecords);
+    static bool isProtection(const QString &sType);
 
 private:
     static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct);
