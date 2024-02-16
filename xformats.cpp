@@ -1166,9 +1166,8 @@ bool XFormats::isProtection(const QString &sType)
     QString _sType = sType;
     _sType = _sType.toLower();
 
-    if ((_sType == "protector") || (_sType == "apk obfuscator") || (_sType == "jar obfuscator") || (_sType == ".net obfuscator") ||
-       (_sType == ".net compressor") || (_sType == "dongle protection") || (_sType == "joiner") || (_sType == "packer") || (_sType == "protection") ||
-       (_sType == "crypter") || (_sType == "cryptor")) {
+    if ((_sType == "protector") || (_sType == "apk obfuscator") || (_sType == "jar obfuscator") || (_sType == ".net obfuscator") || (_sType == ".net compressor") ||
+        (_sType == "dongle protection") || (_sType == "joiner") || (_sType == "packer") || (_sType == "protection") || (_sType == "crypter") || (_sType == "cryptor")) {
         bResult = true;
     }
 
