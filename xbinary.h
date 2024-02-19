@@ -1066,6 +1066,8 @@ public:
     static bool dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize);
     bool dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);
 
+    bool patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);
+
     QSet<FT> getFileTypes(bool bExtra = false);
     static QSet<FT> getFileTypes(QIODevice *pDevice,
                                  bool bExtra = false);  // mb TODO isImage
@@ -1156,8 +1158,8 @@ public:
     static void _createCRC32Table(quint32 *pCRCTable, quint32 nPoly = 0xEDB88320);
     static quint32 *_getCRC32Table_EDB88320();
 
-    static quint32 _getCRC32(const QString &sFileName);
-    static quint32 _getCRC32(QIODevice *pDevice);
+    static quint32 _getCRC32(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
+    static quint32 _getCRC32(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     static quint32 _getCRC32(const char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable);
     static quint32 _getCRC32(const QByteArray &baData, quint32 nInit, quint32 *pCRCTable);
     quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);

@@ -4580,6 +4580,71 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
     return bResult;
 }
 
+bool XBinary::patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    if (nDataSize == -1) {
+        qint64 _nSize = getSize();
+        nDataSize = _nSize - nDataOffset;
+    }
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if (file.open(QIODevice::ReadOnly)) {
+        char *pBuffer = new char[0x1000];  // TODO const
+
+        qint64 nSourceOffset = nDataOffset;
+        qint64 nDestOffset = 0;
+
+        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nDataSize);
+
+        bResult = true;
+
+        while ((nDataSize > 0) && (!(pPdStruct->bIsStop))) {
+            qint64 nTempSize = qMin(nDataSize, (qint64)0x1000);  // TODO const
+
+            if (safeReadData(&file, nSourceOffset, pBuffer, nTempSize) != nTempSize) {
+                pPdStruct->sInfoString = tr("Read error");
+                bResult = false;
+                break;
+            }
+
+            if (safeWriteData(g_pDevice, nDestOffset, pBuffer, nTempSize) != nTempSize) {
+                pPdStruct->sInfoString = tr("Write error");
+                bResult = false;
+                break;
+            }
+
+            nSourceOffset += nTempSize;
+            nDestOffset += nTempSize;
+
+            nDataSize -= nTempSize;
+
+            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nDestOffset);
+        }
+
+        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+        delete[] pBuffer;
+
+        file.close();
+    } else {
+        _errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file"), sFileName));
+    }
+
+    return bResult;
+}
+
 QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
 {
     QSet<XBinary::FT> stResult;
@@ -6034,7 +6099,7 @@ quint32 *XBinary::_getCRC32Table_EDB88320()
     return (quint32 *)_crc32_EDB88320_tab;
 }
 
-quint32 XBinary::_getCRC32(const QString &sFileName)
+quint32 XBinary::_getCRC32(const QString &sFileName, PDSTRUCT *pPdStruct)
 {
     quint32 nResult = 0;
 
@@ -6042,7 +6107,7 @@ quint32 XBinary::_getCRC32(const QString &sFileName)
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        nResult = XBinary::_getCRC32(&file);
+        nResult = XBinary::_getCRC32(&file, pPdStruct);
 
         file.close();
     }
@@ -6050,13 +6115,13 @@ quint32 XBinary::_getCRC32(const QString &sFileName)
     return nResult;
 }
 
-quint32 XBinary::_getCRC32(QIODevice *pDevice)
+quint32 XBinary::_getCRC32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     quint32 nResult = 0;
 
     XBinary binary(pDevice);
 
-    nResult = binary._getCRC32(0, -1);
+    nResult = binary._getCRC32(0, -1, pPdStruct);
 
     pDevice->reset();
 
