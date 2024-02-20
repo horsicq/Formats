@@ -4601,8 +4601,8 @@ bool XBinary::patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64
     if (file.open(QIODevice::ReadOnly)) {
         char *pBuffer = new char[0x1000];  // TODO const
 
-        qint64 nSourceOffset = nDataOffset;
-        qint64 nDestOffset = 0;
+        qint64 nSourceOffset = 0;
+        qint64 nDestOffset = nDataOffset;
 
         qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
