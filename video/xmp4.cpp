@@ -33,9 +33,9 @@ bool XMP4::isValid(PDSTRUCT *pPdStruct)
     bool bResult = false;
 
     if (getSize() > 0x20) {
-        _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
+        _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
-        if (compareSignature(&memoryMap, "000000..'ftyp'", 0)) {
+        if (compareSignature(&memoryMap, "000000..'ftyp'", 0, pPdStruct)) {
             // TODO more checks !!!
             bResult = true;
         }

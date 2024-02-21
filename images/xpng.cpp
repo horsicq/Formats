@@ -33,9 +33,9 @@ bool XPNG::isValid(PDSTRUCT *pPdStruct)
     bool bIsValid = false;
 
     if (getSize() >= 20) {
-        _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
+        _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
-        bIsValid = compareSignature(&memoryMap, "89'PNG\r\n'1A0A");
+        bIsValid = compareSignature(&memoryMap, "89'PNG\r\n'1A0A", 0, pPdStruct);
     }
 
     return bIsValid;
