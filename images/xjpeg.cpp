@@ -34,8 +34,8 @@ bool XJpeg::isValid(PDSTRUCT *pPdStruct)
 
     if (getSize() >= 20) {
         _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
-        bIsValid =
-            compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00", 0, pPdStruct) || compareSignature(&memoryMap, "FFD8FFE1....'Exif'00", 0, pPdStruct) || compareSignature(&memoryMap, "FFD8FFDB", 0, pPdStruct);
+        bIsValid = compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00", 0, pPdStruct) || compareSignature(&memoryMap, "FFD8FFE1....'Exif'00", 0, pPdStruct) ||
+                   compareSignature(&memoryMap, "FFD8FFDB", 0, pPdStruct);
     }
 
     return bIsValid;
