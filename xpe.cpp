@@ -9690,6 +9690,15 @@ bool XPE::fixCheckSum(const QString &sFileName, bool bIsImage)
     return bResult;
 }
 
+bool XPE::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    // TODO
+
+    return bResult;
+}
+
 qint64 XPE::_fixHeadersSize()
 {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();

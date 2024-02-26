@@ -897,11 +897,23 @@ public:
         bool bRenameSections;
         QString sSectionName;
         bool bFixChecksum;
+    }; // Obsolete TODO remove
+
+    bool rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions); // Obsolete TODO remove
+    static bool rebuildDump(const QString &sInputFile, const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions); // Obsolete TODO remove
+
+    static bool fixCheckSum(const QString &sFileName, bool bIsImage);
+
+    struct FIXDUMP_OPTIONS {
+        bool bSizeOptimize;
+        bool bSetFileAlignment;
+        quint32 nFileAlignment;
+        bool bSetImageAlignment;
+        quint32 nImageAlignment;
     };
 
-    bool rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions);
-    static bool rebuildDump(const QString &sInputFile, const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions);
-    static bool fixCheckSum(const QString &sFileName, bool bIsImage);
+    bool fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct = nullptr);
+
     void fixCheckSum();
 
     static QList<XPE_DEF::IMAGE_SECTION_HEADER> splitSection(QByteArray *pbaData, XPE_DEF::IMAGE_SECTION_HEADER sectionHeaderOriginal, quint32 nBlockSize);
