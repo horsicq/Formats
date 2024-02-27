@@ -176,6 +176,7 @@ public:
         qint32 nCount;
     };
 
+    // TIDI remove obsolete
     struct DUMP_OPTIONS {
         quint32 nImageBase;
         quint32 nAddressOfEntryPoint;
