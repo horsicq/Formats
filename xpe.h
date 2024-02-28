@@ -176,7 +176,7 @@ public:
         qint32 nCount;
     };
 
-    // TIDI remove obsolete
+    // TODO remove obsolete
     struct DUMP_OPTIONS {
         quint32 nImageBase;
         quint32 nAddressOfEntryPoint;
@@ -906,10 +906,10 @@ public:
     static bool fixCheckSum(const QString &sFileName, bool bIsImage);
 
     struct FIXDUMP_OPTIONS {
-        bool bSizeOptimize;
-        bool bSetFileAlignment;
+        bool bOptimizeSize;
+        bool bClearHeader;
+        bool bSetAlignment;
         quint32 nFileAlignment;
-        bool bSetImageAlignment;
         quint32 nImageAlignment;
     };
 
