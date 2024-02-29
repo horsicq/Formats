@@ -898,22 +898,29 @@ public:
         bool bRenameSections;
         QString sSectionName;
         bool bFixChecksum;
-    };  // Obsolete TODO remove
+    }; // Obsolete TODO remove
 
-    bool rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions);                                    // Obsolete TODO remove
-    static bool rebuildDump(const QString &sInputFile, const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions);  // Obsolete TODO remove
+    bool rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions); // Obsolete TODO remove
+    static bool rebuildDump(const QString &sInputFile, const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions); // Obsolete TODO remove
 
     static bool fixCheckSum(const QString &sFileName, bool bIsImage);
 
     struct FIXDUMP_OPTIONS {
         bool bOptimizeSize;
-        bool bClearHeader;
-        bool bSetAlignment;
+        bool bCleanHeader;
+        bool bFixSizeOfSections;
+        bool bSetFileAlignment;
         quint32 nFileAlignment;
-        quint32 nImageAlignment;
+        bool bSetSectionAlignment;
+        quint32 nSectionAlignment;
+        bool bSetEntryPoint;
+        XADDR nEntryPoint;
+        bool bSetImageBase;
+        XADDR nImageBase;
     };
 
     bool fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct = nullptr);
+    FIXDUMP_OPTIONS getFixDumpOptions();
 
     void fixCheckSum();
 

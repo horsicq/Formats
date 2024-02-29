@@ -9699,6 +9699,25 @@ bool XPE::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOpti
     return bResult;
 }
 
+XPE::FIXDUMP_OPTIONS XPE::getFixDumpOptions()
+{
+    FIXDUMP_OPTIONS result = {};
+
+    result.bOptimizeSize = true;
+    result.bCleanHeader = false;
+    result.bFixSizeOfSections = true;
+    result.bSetFileAlignment = false;
+    result.nFileAlignment = getOptionalHeader_FileAlignment();
+    result.bSetSectionAlignment = false;
+    result.nSectionAlignment = getOptionalHeader_SectionAlignment();
+    result.bSetEntryPoint = false;
+    result.nEntryPoint = getOptionalHeader_AddressOfEntryPoint();
+    result.bSetImageBase = false;
+    result.nImageBase = getOptionalHeader_ImageBase();
+
+    return result;
+}
+
 qint64 XPE::_fixHeadersSize()
 {
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
