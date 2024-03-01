@@ -917,6 +917,9 @@ public:
         XADDR nEntryPoint;
         bool bSetImageBase;
         XADDR nImageBase;
+        bool bAddImportSection;
+        QString sImportSectionName;
+        // TODO functions
     };
 
     bool fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct = nullptr);
