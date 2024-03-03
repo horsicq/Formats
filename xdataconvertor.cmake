@@ -3,4 +3,5 @@ include_directories(${CMAKE_CURRENT_LIST_DIR})
 
 set(XDATACONVERTOR_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/xdataconvertor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/xdataconvertor.h
 )
