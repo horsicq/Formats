@@ -898,10 +898,10 @@ public:
         bool bRenameSections;
         QString sSectionName;
         bool bFixChecksum;
-    }; // Obsolete TODO remove
+    };  // Obsolete TODO remove
 
-    bool rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions); // Obsolete TODO remove
-    static bool rebuildDump(const QString &sInputFile, const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions); // Obsolete TODO remove
+    bool rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions);                                    // Obsolete TODO remove
+    static bool rebuildDump(const QString &sInputFile, const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions);  // Obsolete TODO remove
 
     static bool fixCheckSum(const QString &sFileName, bool bIsImage);
 
