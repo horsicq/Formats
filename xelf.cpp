@@ -5186,6 +5186,26 @@ QList<XBinary::HREGION> XELF::getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *p
     return listResult;
 }
 
+bool XELF::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct)
+{
+    // TODO
+    return false;
+}
+
+XELF::FIXDUMP_OPTIONS XELF::getFixDumpOptions(PDSTRUCT *pPdStruct)
+{
+    XELF::FIXDUMP_OPTIONS result = {};
+
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+
+    result.bOptimizeSize = true;
+    result.bFixSegments = true;
+    result.bSetEntryPoint = false;
+    result.nEntryPoint = getEntryPointAddress(&memoryMap);
+
+    return result;
+}
+
 QMap<quint64, QString> XELF::getRelTypes_x86()
 {
     QMap<quint64, QString> mapResult;

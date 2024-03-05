@@ -9749,7 +9749,7 @@ XPE::FIXDUMP_OPTIONS XPE::getFixDumpOptions(PDSTRUCT *pPdStruct)
 
     result.bOptimizeSize = true;
     result.bCleanHeader = false;
-    result.bFixSizeOfSections = true;
+    result.bFixSections = true;
     result.bSetFileAlignment = false;
     result.nFileAlignment = getOptionalHeader_FileAlignment();
     result.bSetSectionAlignment = false;

@@ -484,6 +484,16 @@ public:
     virtual qint64 getFileFormatSize();
 
     virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
+
+    struct FIXDUMP_OPTIONS {
+        bool bOptimizeSize;
+        bool bFixSegments;
+        bool bSetEntryPoint;
+        XADDR nEntryPoint;
+    };
+
+    bool fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct = nullptr);
+    FIXDUMP_OPTIONS getFixDumpOptions(PDSTRUCT *pPdStruct = nullptr);
 };
 
 #endif  // XELF_H

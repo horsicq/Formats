@@ -909,7 +909,7 @@ public:
     struct FIXDUMP_OPTIONS {
         bool bOptimizeSize;
         bool bCleanHeader;
-        bool bFixSizeOfSections;
+        bool bFixSections;
         bool bSetFileAlignment;
         quint32 nFileAlignment;
         bool bSetSectionAlignment;
