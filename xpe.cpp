@@ -2424,6 +2424,42 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap, PDST
     return listResult;
 }
 
+XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getIAT(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+{
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    XPE_DEF::IMAGE_DATA_DIRECTORY result = {};
+
+    QList<XPE::IMPORT_RECORD> listImportRecords = getImportRecords(pMemoryMap, pPdStruct);
+
+    qint32 nNumberOfRecords = listImportRecords.count();
+
+    if (nNumberOfRecords) {
+        qint64 nMin = pMemoryMap->nImageSize;
+        qint64 nMax = 0;
+
+        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+            nMin = qMin(listImportRecords.at(i).nRVA, nMin);
+            nMax = qMax(listImportRecords.at(i).nRVA, nMax);
+        }
+
+        result.VirtualAddress = nMin;
+        result.Size = nMax - nMin;
+
+        if (pMemoryMap->mode == MODE_32) {
+            result.Size += 4;
+        } else if (pMemoryMap->mode == MODE_64) {
+            result.Size += 8;
+        }
+    }
+
+    return result;
+}
+
 QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA, qint64 nRVA, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
@@ -9699,8 +9735,16 @@ bool XPE::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOpti
     return bResult;
 }
 
-XPE::FIXDUMP_OPTIONS XPE::getFixDumpOptions()
+XPE::FIXDUMP_OPTIONS XPE::getFixDumpOptions(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+
     FIXDUMP_OPTIONS result = {};
 
     result.bOptimizeSize = true;
@@ -9714,6 +9758,7 @@ XPE::FIXDUMP_OPTIONS XPE::getFixDumpOptions()
     result.nEntryPoint = getOptionalHeader_AddressOfEntryPoint();
     result.bSetImageBase = false;
     result.nImageBase = getOptionalHeader_ImageBase();
+    result.ddIAT = getIAT(&memoryMap, pPdStruct);
 
     return result;
 }

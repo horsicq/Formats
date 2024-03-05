@@ -549,6 +549,7 @@ public:
 
     QList<IMPORT_HEADER> getImports(PDSTRUCT *pPdStruct = nullptr);
     QList<IMPORT_HEADER> getImports(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
+    XPE_DEF::IMAGE_DATA_DIRECTORY getIAT(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
     QList<IMPORT_POSITION> _getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA, qint64 nRVA, PDSTRUCT *pPdStruct = nullptr);
     QList<IMPORT_POSITION> getImportPositions(qint32 nIndex, PDSTRUCT *pPdStruct = nullptr);
@@ -919,11 +920,12 @@ public:
         XADDR nImageBase;
         bool bAddImportSection;
         QString sImportSectionName;
+        XPE_DEF::IMAGE_DATA_DIRECTORY ddIAT;
         // TODO functions
     };
 
     bool fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct = nullptr);
-    FIXDUMP_OPTIONS getFixDumpOptions();
+    FIXDUMP_OPTIONS getFixDumpOptions(PDSTRUCT *pPdStruct = nullptr);
 
     void fixCheckSum();
 
