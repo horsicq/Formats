@@ -5188,8 +5188,59 @@ QList<XBinary::HREGION> XELF::getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *p
 
 bool XELF::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct)
 {
-    // TODO
-    return false;
+    bool bResult = true;
+
+    QFile file;
+    file.setFileName(sResultFile);
+
+    if (fixDumpOptions.bOptimizeSize) {
+        if (file.open(QIODevice::ReadWrite)) {
+            QByteArray baHeaders = getHeaders();
+
+            file.write(baHeaders);
+
+            // TODO
+
+            file.close();
+        }
+    } else {
+        QString sSrcFile = getDeviceFileName(getDevice());
+        XBinary::copyFile(sSrcFile, sResultFile);
+    }
+
+    if (fixDumpOptions.bSetEntryPoint) {
+        if (file.open(QIODevice::ReadWrite)) {
+            XELF elf(&file);
+
+            if (elf.isValid(pPdStruct)) {
+                if ((fixDumpOptions.bFixSegments) && (!(fixDumpOptions.bOptimizeSize))) {
+                    if (elf.is64()) {
+                        qint32 nNumberOfSegments = getHdr64_phnum();
+                        for (qint32 i = 0; i < nNumberOfSegments; i++) {
+                            // TODO
+                        }
+                    } else {
+                        qint32 nNumberOfSegments = getHdr32_phnum();
+                        for (qint32 i = 0; i < nNumberOfSegments; i++) {
+                            // TODO
+                        }
+                    }
+                }
+
+                if (fixDumpOptions.bSetEntryPoint) {
+                    if (elf.is64()) {
+                        elf.setHdr64_entry((quint64)fixDumpOptions.nEntryPoint);
+                    } else {
+                        elf.setHdr32_entry((quint32)fixDumpOptions.nEntryPoint);
+                    }
+                }
+            }
+
+            file.close();
+        }
+    }
+
+    return bResult;
 }
 
 XELF::FIXDUMP_OPTIONS XELF::getFixDumpOptions(PDSTRUCT *pPdStruct)
@@ -5204,6 +5255,19 @@ XELF::FIXDUMP_OPTIONS XELF::getFixDumpOptions(PDSTRUCT *pPdStruct)
     result.nEntryPoint = getEntryPointAddress(&memoryMap);
 
     return result;
+}
+
+QByteArray XELF::getHeaders()
+{
+    qint64 nSize = 0;
+
+    if (is64()) {
+        nSize = getHdr64_phoff() + getHdr64_phentsize() * getHdr64_phnum();
+    } else {
+        nSize = getHdr32_phoff() + getHdr32_phentsize() * getHdr32_phnum();
+    }
+
+    return read_array(0, nSize);
 }
 
 QMap<quint64, QString> XELF::getRelTypes_x86()

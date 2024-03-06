@@ -494,6 +494,8 @@ public:
 
     bool fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct = nullptr);
     FIXDUMP_OPTIONS getFixDumpOptions(PDSTRUCT *pPdStruct = nullptr);
+
+    QByteArray getHeaders();
 };
 
 #endif  // XELF_H
