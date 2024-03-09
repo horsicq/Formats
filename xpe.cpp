@@ -3981,6 +3981,10 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
 
         if ((result.directory.NumberOfFunctions < 0xFFFF) && (result.directory.NumberOfNames < 0xFFFF)) {
             if ((nAddressOfFunctionsOffset != -1) && (nAddressOfNamesOffset != -1) && (nAddressOfNameOrdinalsOffset != -1)) {
+
+                qint32 _nFreeIndexScan = XBinary::getFreeIndex(pPdStruct);
+                XBinary::setPdStructInit(pPdStruct, _nFreeIndexScan, (result.directory.NumberOfNames + result.directory.NumberOfFunctions));
+
                 QMap<quint16, EXPORT_POSITION> mapNames;
 
                 for (qint32 i = 0; (i < (int)result.directory.NumberOfNames) && (!(pPdStruct->bIsStop)); i++) {
@@ -3999,6 +4003,9 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
                     }
 
                     mapNames.insert(position.nOrdinal, position);
+
+                    XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndexScan);
+                    XBinary::setPdStructStatus(pPdStruct, _nFreeIndexScan, position.sFunctionName);
                 }
 
                 for (qint32 i = 0; (i < (int)result.directory.NumberOfFunctions) && (!(pPdStruct->bIsStop)); i++) {
@@ -4025,7 +4032,11 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
                     if (bInsert) {
                         result.listPositions.append(position);
                     }
+
+                    XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndexScan);
                 }
+
+                XBinary::setPdStructFinished(pPdStruct, _nFreeIndexScan);
             }
         }
     }
