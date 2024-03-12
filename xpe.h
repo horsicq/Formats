@@ -60,7 +60,7 @@ public:
     struct IMPORT_POSITION {
         qint64 nThunkRVA;
         qint64 nThunkOffset;
-        quint64 nThunkValue;
+        XADDR nThunkValue;
         QString sName;
         quint16 nHint;
         qint64 nOrdinal;
@@ -680,6 +680,8 @@ public:
     EXPORT_HEADER getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly = false, PDSTRUCT *pPdStruct = nullptr);
     QList<QString> getExportFunctionsList(PDSTRUCT *pPdStruct = nullptr);
     static QList<QString> getExportFunctionsList(EXPORT_HEADER *pExportHeader, PDSTRUCT *pPdStruct = nullptr);
+    QList<XADDR> getExportFunctionAddressesList(PDSTRUCT *pPdStruct = nullptr);
+    QList<XADDR> getExportFunctionAddressesList(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
     XPE_DEF::IMAGE_EXPORT_DIRECTORY getExportDirectory();
     void setExportDirectory(XPE_DEF::IMAGE_EXPORT_DIRECTORY *pExportDirectory);
