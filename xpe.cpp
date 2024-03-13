@@ -4100,11 +4100,12 @@ QList<XADDR> XPE::getExportFunctionAddressesList(PDSTRUCT *pPdStruct)
     }
 
     _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+    XPE_DEF::IMAGE_EXPORT_DIRECTORY ied = getExportDirectory();
 
-    return getExportFunctionAddressesList(&memoryMap, pPdStruct);
+    return getExportFunctionAddressesList(&memoryMap, &ied, pPdStruct);
 }
 
-QList<XADDR> XPE::getExportFunctionAddressesList(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+QList<XADDR> XPE::getExportFunctionAddressesList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -4114,11 +4115,65 @@ QList<XADDR> XPE::getExportFunctionAddressesList(_MEMORY_MAP *pMemoryMap, PDSTRU
 
     QList<XADDR> listResult;
 
-    XPE_DEF::IMAGE_EXPORT_DIRECTORY ied = getExportDirectory();
+    qint32 nSize = pIED->NumberOfFunctions * 4;
 
-    qint32 nSize = ied.NumberOfFunctions * 4;
+    qint64 nOffset = XBinary::addressToOffset(pMemoryMap, pIED->AddressOfFunctions + pMemoryMap->nModuleAddress);
 
-    qint64 nOffset = XBinary::addressToOffset(pMemoryMap, ied.AddressOfFunctions + pMemoryMap->nModuleAddress);
+    QByteArray baData = read_array(nOffset, nSize);
+
+    char *_pData = baData.data();
+    qint32 _nSize = baData.size();
+
+    for (qint32 i = 0; (i < _nSize) && (!(pPdStruct->bIsStop)); i += 4) {
+        quint32 nAddress = _read_uint32(_pData + i);
+
+        listResult.append(nAddress  + pMemoryMap->nModuleAddress);
+    }
+
+    return listResult;
+}
+
+QList<quint16> XPE::getExportNameOrdinalsList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED,  PDSTRUCT *pPdStruct)
+{
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    QList<quint16> listResult;
+
+    qint32 nSize = pIED->NumberOfNames * 2;
+
+    qint64 nOffset = XBinary::addressToOffset(pMemoryMap, pIED->AddressOfNameOrdinals + pMemoryMap->nModuleAddress);
+
+    QByteArray baData = read_array(nOffset, nSize);
+
+    char *_pData = baData.data();
+    qint32 _nSize = baData.size();
+
+    for (qint32 i = 0; (i < _nSize) && (!(pPdStruct->bIsStop)); i += 2) {
+        quint16 nOrdinal = _read_uint16(_pData + i);
+
+        listResult.append(nOrdinal);
+    }
+
+    return listResult;
+}
+
+QList<XADDR> XPE::getExportNamesList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED, PDSTRUCT *pPdStruct)
+{
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    QList<XADDR> listResult;
+
+    qint32 nSize = pIED->NumberOfNames * 4;
+
+    qint64 nOffset = XBinary::addressToOffset(pMemoryMap, pIED->AddressOfNames + pMemoryMap->nModuleAddress);
 
     QByteArray baData = read_array(nOffset, nSize);
 
