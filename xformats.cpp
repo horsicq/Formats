@@ -1378,7 +1378,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *p
 {
     QSet<XBinary::FT> stResult;
 
-    QByteArray baData = XArchives::decompress(pDevice, pRecord, true);
+    QByteArray baData = XArchives::decompress(pDevice, pRecord, 0, 0, 0x200);
 
     stResult = XFormats::getFileTypes(&baData, bExtra);
 
