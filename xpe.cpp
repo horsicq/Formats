@@ -3997,7 +3997,6 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
 
         if ((result.directory.NumberOfFunctions < 0xFFFF) && (result.directory.NumberOfNames < 0xFFFF)) {
             if ((nAddressOfFunctionsOffset != -1) && (nAddressOfNamesOffset != -1) && (nAddressOfNameOrdinalsOffset != -1)) {
-
                 qint32 _nFreeIndexScan = XBinary::getFreeIndex(pPdStruct);
                 XBinary::setPdStructInit(pPdStruct, _nFreeIndexScan, result.directory.NumberOfFunctions);
 
@@ -4127,13 +4126,13 @@ QList<XADDR> XPE::getExportFunctionAddressesList(_MEMORY_MAP *pMemoryMap, XPE_DE
     for (qint32 i = 0; (i < _nSize) && (!(pPdStruct->bIsStop)); i += 4) {
         quint32 nAddress = _read_uint32(_pData + i);
 
-        listResult.append(nAddress  + pMemoryMap->nModuleAddress);
+        listResult.append(nAddress + pMemoryMap->nModuleAddress);
     }
 
     return listResult;
 }
 
-QList<quint16> XPE::getExportNameOrdinalsList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED,  PDSTRUCT *pPdStruct)
+QList<quint16> XPE::getExportNameOrdinalsList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -4183,7 +4182,7 @@ QList<XADDR> XPE::getExportNamesList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXP
     for (qint32 i = 0; (i < _nSize) && (!(pPdStruct->bIsStop)); i += 4) {
         quint32 nAddress = _read_uint32(_pData + i);
 
-        listResult.append(nAddress  + pMemoryMap->nModuleAddress);
+        listResult.append(nAddress + pMemoryMap->nModuleAddress);
     }
 
     return listResult;

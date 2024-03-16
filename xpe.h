@@ -682,8 +682,8 @@ public:
     static QList<QString> getExportFunctionsList(EXPORT_HEADER *pExportHeader, PDSTRUCT *pPdStruct = nullptr);
     QList<XADDR> getExportFunctionAddressesList(PDSTRUCT *pPdStruct = nullptr);
     QList<XADDR> getExportFunctionAddressesList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED, PDSTRUCT *pPdStruct = nullptr);
-    QList<quint16> getExportNameOrdinalsList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED,  PDSTRUCT *pPdStruct = nullptr);
-    QList<XADDR> getExportNamesList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED,  PDSTRUCT *pPdStruct = nullptr);
+    QList<quint16> getExportNameOrdinalsList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED, PDSTRUCT *pPdStruct = nullptr);
+    QList<XADDR> getExportNamesList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED, PDSTRUCT *pPdStruct = nullptr);
 
     XPE_DEF::IMAGE_EXPORT_DIRECTORY getExportDirectory();
     void setExportDirectory(XPE_DEF::IMAGE_EXPORT_DIRECTORY *pExportDirectory);
