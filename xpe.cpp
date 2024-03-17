@@ -8458,7 +8458,7 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
 #if defined(_MSC_VER)
     wchar_t wszFilePath[512] = {};
 
-    if (sFileName.toWCharArray(wszFilePath)) {
+    if (XBinary::_toWCharArray(sFileName, wszFilePath)) {
         WINTRUST_FILE_INFO wintrustFileInfo = {};
         wintrustFileInfo.cbStruct = sizeof(WINTRUST_FILE_INFO);
         wintrustFileInfo.pcwszFilePath = wszFilePath;
@@ -8527,21 +8527,21 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
                                                           (PVOID)_pOpusInfo, &dwOpusInfo)) {
                                         SPC_SP_OPUS_INFO *pOpusInfo = (SPC_SP_OPUS_INFO *)_pOpusInfo;
 
-                                        result.sProgramName = QString::fromWCharArray(pOpusInfo->pwszProgramName);
+                                        result.sProgramName = XBinary::_fromWCharArray(pOpusInfo->pwszProgramName);
 
                                         if (pOpusInfo->pPublisherInfo) {
                                             if (pOpusInfo->pPublisherInfo->dwLinkChoice == SPC_URL_LINK_CHOICE) {
-                                                result.sPublisher = QString::fromWCharArray(pOpusInfo->pPublisherInfo->pwszUrl);
+                                                result.sPublisher = XBinary::_fromWCharArray(pOpusInfo->pPublisherInfo->pwszUrl);
                                             } else if (pOpusInfo->pPublisherInfo->dwLinkChoice == SPC_FILE_LINK_CHOICE) {
-                                                result.sPublisher = QString::fromWCharArray(pOpusInfo->pPublisherInfo->pwszFile);
+                                                result.sPublisher = XBinary::_fromWCharArray(pOpusInfo->pPublisherInfo->pwszFile);
                                             }
                                         }
 
                                         if (pOpusInfo->pMoreInfo) {
                                             if (pOpusInfo->pMoreInfo->dwLinkChoice == SPC_URL_LINK_CHOICE) {
-                                                result.sMoreInfo = QString::fromWCharArray(pOpusInfo->pMoreInfo->pwszUrl);
+                                                result.sMoreInfo = XBinary::_fromWCharArray(pOpusInfo->pMoreInfo->pwszUrl);
                                             } else if (pOpusInfo->pMoreInfo->dwLinkChoice == SPC_FILE_LINK_CHOICE) {
-                                                result.sMoreInfo = QString::fromWCharArray(pOpusInfo->pMoreInfo->pwszFile);
+                                                result.sMoreInfo = XBinary::_fromWCharArray(pOpusInfo->pMoreInfo->pwszFile);
                                             }
                                         }
                                     }
@@ -8763,7 +8763,7 @@ QString XPE::getCertNameString(PCCERT_CONTEXT pCertContext, CERTNAMESTRING certN
         char *_pBuffer = new char[dwData * sizeof(TCHAR)];
 
         if (CertGetNameStringW(pCertContext, dwType, dwFlags, NULL, (LPWSTR)_pBuffer, dwData)) {
-            sResult = QString::fromWCharArray((wchar_t *)_pBuffer);
+            sResult = XBinary::_fromWCharArray((wchar_t *)_pBuffer);
         }
 
         delete[] _pBuffer;

@@ -9646,6 +9646,32 @@ QString XBinary::getAndroidVersionFromApi(quint32 nAPI)
     return sResult;
 }
 
+QString XBinary::_fromWCharArray(const wchar_t *pWString, qint32 size)
+{
+    QString sResult;
+
+#if (QT_VERSION_MAJOR < 5)  // TODO Check
+    sResult = QString::fromUtf16((ushort *)pWString, size);
+#else
+    sResult = QString::fromWCharArray(pWString, size);
+#endif
+
+    return sResult;
+}
+
+qint32 XBinary::_toWCharArray(const QString &sString, wchar_t *pWString)
+{
+    qint32 nResult = 0;
+
+#if (QT_VERSION_MAJOR < 5)  // TODO Check
+    nResult = sString.toWCharArray(pWString);// TODO
+#else
+    nResult = sString.toWCharArray(pWString);
+#endif
+
+    return nResult;
+}
+
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSignature, bool *pbValid, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
