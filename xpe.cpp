@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2023 hors<horsicq@gmail.com>
+/* Copyright (c) 2017-2024 hors<horsicq@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -2690,15 +2690,27 @@ bool XPE::isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 
     return bResult;
 }
 
-bool XPE::isImportLibraryPresent(const QString &sLibrary)
+bool XPE::isImportLibraryPresent(const QString &sLibrary, PDSTRUCT *pPdStruct)
 {
-    QList<IMPORT_HEADER> listImportHeaders = getImports();
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    return isImportLibraryPresent(sLibrary, &listImportHeaders);
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    QList<IMPORT_HEADER> listImportHeaders = getImports(pPdStruct);
+
+    return isImportLibraryPresent(sLibrary, &listImportHeaders, pPdStruct);
 }
 
-bool XPE::isImportLibraryPresent(const QString &sLibrary, QList<IMPORT_HEADER> *pListImportHeaders)
+bool XPE::isImportLibraryPresent(const QString &sLibrary, QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     bool bResult = false;
 
     qint32 nNumberOfImports = pListImportHeaders->count();
@@ -2713,15 +2725,21 @@ bool XPE::isImportLibraryPresent(const QString &sLibrary, QList<IMPORT_HEADER> *
     return bResult;
 }
 
-bool XPE::isImportLibraryPresentI(const QString &sLibrary)
+bool XPE::isImportLibraryPresentI(const QString &sLibrary, PDSTRUCT *pPdStruct)
 {
-    QList<IMPORT_HEADER> listImportHeaders = getImports();
+    QList<IMPORT_HEADER> listImportHeaders = getImports(pPdStruct);
 
-    return isImportLibraryPresentI(sLibrary, &listImportHeaders);
+    return isImportLibraryPresentI(sLibrary, &listImportHeaders, pPdStruct);
 }
 
-bool XPE::isImportLibraryPresentI(const QString &sLibrary, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
+bool XPE::isImportLibraryPresentI(const QString &sLibrary, QList<XPE::IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     bool bResult = false;
 
     qint32 nNumberOfImports = pListImportHeaders->count();
@@ -2747,14 +2765,20 @@ bool XPE::isImportLibraryPresentI(const QString &sLibrary, QList<XPE::IMPORT_HEA
     return bResult;
 }
 
-bool XPE::isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction)
+bool XPE::isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction, PDSTRUCT *pPdStruct)
 {
-    QList<IMPORT_HEADER> listImportHeaders = getImports();
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    return isImportFunctionPresentI(sLibrary, sFunction, &listImportHeaders);
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    QList<IMPORT_HEADER> listImportHeaders = getImports(pPdStruct);
+
+    return isImportFunctionPresentI(sLibrary, sFunction, &listImportHeaders, pPdStruct);
 }
 
-bool XPE::isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction, QList<XPE::IMPORT_HEADER> *pListImportHeaders)
+bool XPE::isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction, QList<XPE::IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
@@ -2762,15 +2786,37 @@ bool XPE::isImportFunctionPresentI(const QString &sLibrary, const QString &sFunc
 
     qint32 nNumberOfImports = pListImportHeaders->count();
 
-    for (qint32 i = 0; i < nNumberOfImports; i++) {
+    for (qint32 i = 0; (i < nNumberOfImports) && (!(pPdStruct->bIsStop)); i++) {
         if (pListImportHeaders->at(i).sName.toUpper() == sLibrary.toUpper()) {
             qint32 nNumberOfPositions = pListImportHeaders->at(i).listPositions.count();
 
-            for (qint32 j = 0; j < nNumberOfPositions; j++) {
+            for (qint32 j = 0; (j < nNumberOfPositions) && (!(pPdStruct->bIsStop)); j++) {
                 if (pListImportHeaders->at(i).listPositions.at(j).sFunction == sFunction) {
                     bResult = true;
                     break;
                 }
+            }
+        }
+    }
+
+    return bResult;
+}
+
+bool XPE::isFunctionPresent(const QString &sFunction, QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    // TODO Optimize!
+
+    qint32 nNumberOfImports = pListImportHeaders->count();
+
+    for (qint32 i = 0; (i < nNumberOfImports) && (!(pPdStruct->bIsStop)); i++) {
+        qint32 nNumberOfPositions = pListImportHeaders->at(i).listPositions.count();
+
+        for (qint32 j = 0; (j < nNumberOfPositions) && (!(pPdStruct->bIsStop)); j++) {
+            if (pListImportHeaders->at(i).listPositions.at(j).sFunction == sFunction) {
+                bResult = true;
+                break;
             }
         }
     }

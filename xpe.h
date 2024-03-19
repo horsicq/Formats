@@ -558,14 +558,15 @@ public:
     QList<quint32> getImportPositionHashes(QList<IMPORT_HEADER> *pListImport, bool bLibraryName = false);
     static bool isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 nIndex, quint32 nHash);  // TODO PDSTRUCT
 
-    bool isImportLibraryPresent(const QString &sLibrary);
-    static bool isImportLibraryPresent(const QString &sLibrary, QList<IMPORT_HEADER> *pListImportHeaders);
+    bool isImportLibraryPresent(const QString &sLibrary, PDSTRUCT *pPdStruct = nullptr);
+    static bool isImportLibraryPresent(const QString &sLibrary, QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct = nullptr);
 
-    bool isImportLibraryPresentI(const QString &sLibrary);
-    static bool isImportLibraryPresentI(const QString &sLibrary, QList<IMPORT_HEADER> *pListImportHeaders);
+    bool isImportLibraryPresentI(const QString &sLibrary, PDSTRUCT *pPdStruct = nullptr);
+    static bool isImportLibraryPresentI(const QString &sLibrary, QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct = nullptr);
 
-    bool isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction);
-    static bool isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction, QList<IMPORT_HEADER> *pListImportHeaders);
+    bool isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction, PDSTRUCT *pPdStruct = nullptr);
+    static bool isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction, QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct = nullptr);
+    static bool isFunctionPresent(const QString &sFunction, QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct = nullptr);
 
     bool setImports(QList<IMPORT_HEADER> *pListImportHeaders);
     bool setImports(QIODevice *pDevice, bool bIsImage, QList<IMPORT_HEADER> *pListImportHeaders);

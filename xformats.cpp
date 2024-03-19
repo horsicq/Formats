@@ -1420,6 +1420,22 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 
             stResult += getFileTypesZIP(pDevice, &listArchiveRecords, pPdStruct);
         }
+    } else if (stResult.contains(XBinary::FT_GZIP)) {
+        XGzip xgzip(pDevice);
+
+        if (xgzip.isValid(pPdStruct)) {
+            QList<XArchive::RECORD> listArchiveRecords = xgzip.getRecords(1, pPdStruct);
+
+            if (listArchiveRecords.count()) {
+                XArchive::RECORD record = listArchiveRecords.at(0);
+                QByteArray baData = XArchives::decompress(pDevice, &record, pPdStruct, 0, 0x200);
+                QSet<XBinary::FT> _ft = getFileTypes(&baData, true);
+
+                if (_ft.contains(XBinary::FT_TAR)) {
+                    stResult += XBinary::FT_TARGZ;
+                }
+            }
+        }
     }
 #endif
 

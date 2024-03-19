@@ -216,6 +216,8 @@ public:
         FT_APK,
         FT_APKS,
         FT_AR,
+        FT_TAR,
+        FT_TARGZ,
         FT_ARCHIVE,
         FT_CAB,
         FT_DEX,

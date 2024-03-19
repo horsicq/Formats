@@ -487,6 +487,8 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_PLAINTEXT: sResult = QString("Plain Text"); break;  // mb TODO translate
         case FT_PNG: sResult = QString("PNG"); break;
         case FT_RAR: sResult = QString("RAR"); break;
+        case FT_TAR: sResult = tr("tar"); break;
+        case FT_TARGZ: sResult = tr("tar.gz"); break;
         case FT_TEXT: sResult = tr("Text"); break;
         case FT_TIFF: sResult = QString("TIFF"); break;
         case FT_UNICODE: sResult = QString("Unicode"); break;
@@ -4757,6 +4759,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_AR);
             // TODO DEB
+        } else if (compareSignature(&memoryMap, "'007573746172", 0x100)) {  // "00'ustar'"
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_TAR);
         } else if (compareSignature(&memoryMap, "'RE~^'") || compareSignature(&memoryMap, "'Rar!'1A07")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_RAR);
