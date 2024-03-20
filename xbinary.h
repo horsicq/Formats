@@ -252,7 +252,8 @@ public:
         FT_RIFF,
         FT_AVI,
         FT_WEBP,
-        FT_SIGNATURE
+        FT_SIGNATURE,
+        FT_NPM
         // TODO more
     };
 
@@ -1295,7 +1296,7 @@ public:
 
     static QString getStringCollision(QList<QString> *pListStrings, const QString &sString1, const QString &sString2);
 
-    static bool writeToFile(const QString &sFileName, QByteArray baData);
+    static bool writeToFile(const QString &sFileName, const QByteArray &baData);
     static bool writeToFile(const QString &sFileName, QIODevice *pDevice);
     static bool appendToFile(const QString &sFileName, const QString &sString);  // TODO rename
     static bool clearFile(const QString &sFileName);

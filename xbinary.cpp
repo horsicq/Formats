@@ -507,6 +507,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_WEBP: sResult = QString("WebP"); break;
         case FT_RIFF: sResult = QString("RIFF"); break;
         case FT_SIGNATURE: sResult = tr("Signature"); break;
+        case FT_NPM: sResult = QString("NPM"); break;
     }
 
     return sResult;
@@ -517,7 +518,7 @@ QString XBinary::fileTypeIdToExts(FT fileType)
     QString sResult = tr("Unknown");
 
     switch (fileType) {
-        case FT_PE: sResult = QString("PE(exe,dll,sys)"); break;
+        case FT_PE: sResult = QString("PE(exe,dll,sys)"); break; // TODO Check, add more
         case FT_ELF: sResult = QString("ELF(elf,so)"); break;
         case FT_ZIP: sResult = QString("ZIP(zip,jar,apk,ipa,docx)"); break;
         case FT_RAR: sResult = QString("RAR"); break;
@@ -4759,9 +4760,13 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_AR);
             // TODO DEB
-        } else if (compareSignature(&memoryMap, "'007573746172", 0x100)) {  // "00'ustar'"
+        } else if ((memoryMap.nBinarySize >= 0x200) && compareSignature(&memoryMap, "00'ustar'", 0x100)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_TAR);
+
+            if (compareSignature(&memoryMap, "'package/package.json'", 0)) {
+                stResult.insert(FT_NPM);
+            }
         } else if (compareSignature(&memoryMap, "'RE~^'") || compareSignature(&memoryMap, "'Rar!'1A07")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_RAR);
@@ -4953,6 +4958,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_JAR;
     } else if (pStFileTypes->contains(FT_ZIP)) {
         result = FT_ZIP;
+    } else if (pStFileTypes->contains(FT_NPM)) {
+        result = FT_NPM;
     } else if (pStFileTypes->contains(FT_GZIP)) {
         result = FT_GZIP;
     } else if (pStFileTypes->contains(FT_ZLIB)) {
@@ -5071,6 +5078,8 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_AVI)) listResult.append(FT_AVI);
     if (stFileTypes.contains(FT_WEBP)) listResult.append(FT_WEBP);
     if (stFileTypes.contains(FT_SIGNATURE)) listResult.append(FT_SIGNATURE);
+    if (stFileTypes.contains(FT_TARGZ)) listResult.append(FT_TARGZ);
+    if (stFileTypes.contains(FT_NPM)) listResult.append(FT_NPM);
     if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
     if (stFileTypes.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
     if (stFileTypes.contains(FT_NE)) listResult.append(FT_NE);
@@ -7451,7 +7460,7 @@ QString XBinary::getStringCollision(QList<QString> *pListStrings, const QString 
     return sResult;
 }
 
-bool XBinary::writeToFile(const QString &sFileName, QByteArray baData)
+bool XBinary::writeToFile(const QString &sFileName, const QByteArray &baData)
 {
     bool bResult = false;
 

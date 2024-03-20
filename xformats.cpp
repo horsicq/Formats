@@ -1429,10 +1429,17 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             if (listArchiveRecords.count()) {
                 XArchive::RECORD record = listArchiveRecords.at(0);
                 QByteArray baData = XArchives::decompress(pDevice, &record, pPdStruct, 0, 0x200);
+
+                XBinary::writeToFile("C:\\tmp\\tmp_ba.bin", baData);
+
                 QSet<XBinary::FT> _ft = getFileTypes(&baData, true);
 
                 if (_ft.contains(XBinary::FT_TAR)) {
                     stResult += XBinary::FT_TARGZ;
+
+                    if (_ft.contains(XBinary::FT_NPM)) {
+                        stResult += XBinary::FT_NPM;
+                    }
                 }
             }
         }
