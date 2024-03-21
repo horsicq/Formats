@@ -50,7 +50,7 @@ public:
         UD_UUID
     };
 
-    explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns = 1);
+    explicit ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns, bool bIsColoredOutput);
     ~ScanItemModel();
 
     QVariant headerData(int nSection, Qt::Orientation orientation, int nRole = Qt::DisplayRole) const override;
@@ -82,6 +82,7 @@ private:
 
 private:
     ScanItem *g_pRootItem;
+    bool g_bIsColoredOutput;
 };
 
 #endif  // SCANITEMMODEL_H

@@ -20,8 +20,9 @@
  */
 #include "scanitemmodel.h"
 
-ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns) : QAbstractItemModel(0)
+ScanItemModel::ScanItemModel(QList<XBinary::SCANSTRUCT> *pListScanStructs, int nNumberOfColumns, bool bIsColoredOutput) : QAbstractItemModel(0)
 {
+    g_bIsColoredOutput = bIsColoredOutput;
     g_pRootItem = new ScanItem(tr("Result"), nullptr, nNumberOfColumns, true);
     XBinary::SCANSTRUCT emptySS = {};
     g_pRootItem->setScanStruct(emptySS);
@@ -173,7 +174,7 @@ QVariant ScanItemModel::data(const QModelIndex &index, int nRole) const
             result = pItem->scanStruct().id.sUuid;
         }
 #ifdef QT_GUI_LIB
-        else if (nRole == Qt::ForegroundRole) {
+        else if ((nRole == Qt::ForegroundRole) && (g_bIsColoredOutput)) {
             QColor colText;
 
             if (pItem->scanStruct().globalColor == Qt::transparent) {
@@ -431,89 +432,93 @@ void ScanItemModel::_coloredItem(ScanItem *pItem)
     HANDLE hConsole = 0;
     WORD wOldAttribute = 0;
 
-    if (pItem->scanStruct().globalColor != Qt::transparent) {
-        hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (g_bIsColoredOutput) {
+        if (pItem->scanStruct().globalColor != Qt::transparent) {
+            hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-        CONSOLE_SCREEN_BUFFER_INFO csbi = {};
+            CONSOLE_SCREEN_BUFFER_INFO csbi = {};
 
-        if (GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-            wOldAttribute = csbi.wAttributes;
+            if (GetConsoleScreenBufferInfo(hConsole, &csbi)) {
+                wOldAttribute = csbi.wAttributes;
+            }
+
+            WORD wAttribute = 0;
+
+            if (pItem->scanStruct().globalColor == Qt::blue) {
+                wAttribute = FOREGROUND_BLUE;
+            } else if (pItem->scanStruct().globalColor == Qt::red) {
+                wAttribute = FOREGROUND_RED;
+            } else if (pItem->scanStruct().globalColor == Qt::green) {
+                wAttribute = FOREGROUND_GREEN;
+            } else if (pItem->scanStruct().globalColor == Qt::yellow) {
+                wAttribute = FOREGROUND_RED | FOREGROUND_GREEN;
+            } else if (pItem->scanStruct().globalColor == Qt::magenta) {
+                wAttribute = FOREGROUND_RED | FOREGROUND_BLUE;
+            } else if (pItem->scanStruct().globalColor == Qt::cyan) {
+                wAttribute = FOREGROUND_GREEN | FOREGROUND_BLUE;
+            } else if (pItem->scanStruct().globalColor == Qt::darkBlue) {
+                wAttribute = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+            } else if (pItem->scanStruct().globalColor == Qt::darkRed) {
+                wAttribute = FOREGROUND_RED | FOREGROUND_INTENSITY;
+            } else if (pItem->scanStruct().globalColor == Qt::darkGreen) {
+                wAttribute = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+            } else if (pItem->scanStruct().globalColor == Qt::darkYellow) {
+                wAttribute = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+            } else if (pItem->scanStruct().globalColor == Qt::darkMagenta) {
+                wAttribute = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+            } else if (pItem->scanStruct().globalColor == Qt::darkCyan) {
+                wAttribute = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+            }
+
+            if (wAttribute) {
+                SetConsoleTextAttribute(hConsole, wAttribute);
+            }
         }
-
-        WORD wAttribute = 0;
-
-        if (pItem->scanStruct().globalColor == Qt::blue) {
-            wAttribute = FOREGROUND_BLUE;
-        } else if (pItem->scanStruct().globalColor == Qt::red) {
-            wAttribute = FOREGROUND_RED;
-        } else if (pItem->scanStruct().globalColor == Qt::green) {
-            wAttribute = FOREGROUND_GREEN;
-        } else if (pItem->scanStruct().globalColor == Qt::yellow) {
-            wAttribute = FOREGROUND_RED | FOREGROUND_GREEN;
-        } else if (pItem->scanStruct().globalColor == Qt::magenta) {
-            wAttribute = FOREGROUND_RED | FOREGROUND_BLUE;
-        } else if (pItem->scanStruct().globalColor == Qt::cyan) {
-            wAttribute = FOREGROUND_GREEN | FOREGROUND_BLUE;
-        } else if (pItem->scanStruct().globalColor == Qt::darkBlue) {
-            wAttribute = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-        } else if (pItem->scanStruct().globalColor == Qt::darkRed) {
-            wAttribute = FOREGROUND_RED | FOREGROUND_INTENSITY;
-        } else if (pItem->scanStruct().globalColor == Qt::darkGreen) {
-            wAttribute = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-        } else if (pItem->scanStruct().globalColor == Qt::darkYellow) {
-            wAttribute = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-        } else if (pItem->scanStruct().globalColor == Qt::darkMagenta) {
-            wAttribute = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-        } else if (pItem->scanStruct().globalColor == Qt::darkCyan) {
-            wAttribute = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+    #else
+        if (pItem->scanStruct().globalColor != Qt::transparent) {
+            if (pItem->scanStruct().globalColor == Qt::blue) {
+                printf("\033[0;34m");
+            } else if (pItem->scanStruct().globalColor == Qt::red) {
+                printf("\033[0;31m");
+            } else if (pItem->scanStruct().globalColor == Qt::green) {
+                printf("\033[0;32m");
+            } else if (pItem->scanStruct().globalColor == Qt::yellow) {
+                printf("\033[0;33m");
+            } else if (pItem->scanStruct().globalColor == Qt::magenta) {
+                printf("\033[0;35m");
+            } else if (pItem->scanStruct().globalColor == Qt::cyan) {
+                printf("\033[0;36m");
+            } else if (pItem->scanStruct().globalColor == Qt::darkBlue) {
+                printf("\033[1;34m");
+            } else if (pItem->scanStruct().globalColor == Qt::darkRed) {
+                printf("\033[1;31m");
+            } else if (pItem->scanStruct().globalColor == Qt::darkGreen) {
+                printf("\033[1;32m");
+            } else if (pItem->scanStruct().globalColor == Qt::darkYellow) {
+                printf("\033[1;33m");
+            } else if (pItem->scanStruct().globalColor == Qt::darkMagenta) {
+                printf("\033[1;35m");
+            } else if (pItem->scanStruct().globalColor == Qt::darkCyan) {
+                printf("\033[1;36m");
+            }
         }
-
-        if (wAttribute) {
-            SetConsoleTextAttribute(hConsole, wAttribute);
-        }
+    #endif
     }
-#else
-    if (pItem->scanStruct().globalColor != Qt::transparent) {
-        if (pItem->scanStruct().globalColor == Qt::blue) {
-            printf("\033[0;34m");
-        } else if (pItem->scanStruct().globalColor == Qt::red) {
-            printf("\033[0;31m");
-        } else if (pItem->scanStruct().globalColor == Qt::green) {
-            printf("\033[0;32m");
-        } else if (pItem->scanStruct().globalColor == Qt::yellow) {
-            printf("\033[0;33m");
-        } else if (pItem->scanStruct().globalColor == Qt::magenta) {
-            printf("\033[0;35m");
-        } else if (pItem->scanStruct().globalColor == Qt::cyan) {
-            printf("\033[0;36m");
-        } else if (pItem->scanStruct().globalColor == Qt::darkBlue) {
-            printf("\033[1;34m");
-        } else if (pItem->scanStruct().globalColor == Qt::darkRed) {
-            printf("\033[1;31m");
-        } else if (pItem->scanStruct().globalColor == Qt::darkGreen) {
-            printf("\033[1;32m");
-        } else if (pItem->scanStruct().globalColor == Qt::darkYellow) {
-            printf("\033[1;33m");
-        } else if (pItem->scanStruct().globalColor == Qt::darkMagenta) {
-            printf("\033[1;35m");
-        } else if (pItem->scanStruct().globalColor == Qt::darkCyan) {
-            printf("\033[1;36m");
-        }
-    }
-#endif
 
     printf("%s", pItem->data(0).toString().toUtf8().data());
 
-#ifdef Q_OS_WIN
-    if (pItem->scanStruct().globalColor != Qt::transparent) {
-        if (wOldAttribute) {
-            SetConsoleTextAttribute(hConsole, wOldAttribute);
+    if (g_bIsColoredOutput) {
+    #ifdef Q_OS_WIN
+        if (pItem->scanStruct().globalColor != Qt::transparent) {
+            if (wOldAttribute) {
+                SetConsoleTextAttribute(hConsole, wOldAttribute);
+            }
         }
+    #else
+        if (pItem->scanStruct().globalColor != Qt::transparent) {
+            printf("\033[0m");
+        }
+    #endif
     }
-#else
-    if (pItem->scanStruct().globalColor != Qt::transparent) {
-        printf("\033[0m");
-    }
-#endif
 #endif
 }

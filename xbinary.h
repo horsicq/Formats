@@ -181,6 +181,7 @@ public:
 
     enum FORMATTYPE {
         FORMATTYPE_TEXT = 0,
+        FORMATTYPE_PLAINTEXT,
         FORMATTYPE_XML,
         FORMATTYPE_JSON,
         FORMATTYPE_CSV,
