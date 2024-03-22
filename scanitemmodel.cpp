@@ -474,7 +474,9 @@ void ScanItemModel::_coloredItem(ScanItem *pItem)
                 SetConsoleTextAttribute(hConsole, wAttribute);
             }
         }
+    }
     #else
+    if (g_bIsColoredOutput) {
         if (pItem->scanStruct().globalColor != Qt::transparent) {
             if (pItem->scanStruct().globalColor == Qt::blue) {
                 printf("\033[0;34m");
@@ -502,23 +504,25 @@ void ScanItemModel::_coloredItem(ScanItem *pItem)
                 printf("\033[1;36m");
             }
         }
-    #endif
     }
+    #endif
 
     printf("%s", pItem->data(0).toString().toUtf8().data());
 
-    if (g_bIsColoredOutput) {
     #ifdef Q_OS_WIN
+    if (g_bIsColoredOutput) {
         if (pItem->scanStruct().globalColor != Qt::transparent) {
             if (wOldAttribute) {
                 SetConsoleTextAttribute(hConsole, wOldAttribute);
             }
         }
+    }
     #else
+    if (g_bIsColoredOutput) {
         if (pItem->scanStruct().globalColor != Qt::transparent) {
             printf("\033[0m");
         }
-    #endif
     }
+    #endif
 #endif
 }
