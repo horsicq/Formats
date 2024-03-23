@@ -475,7 +475,7 @@ void ScanItemModel::_coloredItem(ScanItem *pItem)
             }
         }
     }
-    #else
+#else
     if (g_bIsColoredOutput) {
         if (pItem->scanStruct().globalColor != Qt::transparent) {
             if (pItem->scanStruct().globalColor == Qt::blue) {
@@ -505,11 +505,11 @@ void ScanItemModel::_coloredItem(ScanItem *pItem)
             }
         }
     }
-    #endif
+#endif
 
     printf("%s", pItem->data(0).toString().toUtf8().data());
 
-    #ifdef Q_OS_WIN
+#ifdef Q_OS_WIN
     if (g_bIsColoredOutput) {
         if (pItem->scanStruct().globalColor != Qt::transparent) {
             if (wOldAttribute) {
@@ -517,12 +517,12 @@ void ScanItemModel::_coloredItem(ScanItem *pItem)
             }
         }
     }
-    #else
+#else
     if (g_bIsColoredOutput) {
         if (pItem->scanStruct().globalColor != Qt::transparent) {
             printf("\033[0m");
         }
     }
-    #endif
+#endif
 #endif
 }
