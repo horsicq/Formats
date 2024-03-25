@@ -9985,7 +9985,7 @@ quint16 XPE::_checkSum(qint64 nStartValue, qint64 nDataSize)
     // TODO Check
     // TODO Optimize
     const int BUFFER_SIZE = 0x1000;
-    int nSum = (int)nStartValue;
+    qint32 nSum = (qint32)nStartValue;
     unsigned int nTemp = 0;
     char *pBuffer = new char[BUFFER_SIZE];
     char *pOffset;
