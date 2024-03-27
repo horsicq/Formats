@@ -7855,6 +7855,7 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
     QString sResult = tr("Unknown");
 
     switch (disasmMode) {
+        case DM_DATA: sResult = tr("Data"); break;
         case DM_X86_16: sResult = QString("X86-16"); break;
         case DM_X86_32: sResult = QString("X86-32"); break;
         case DM_X86_64: sResult = QString("X86-64"); break;
@@ -9764,7 +9765,11 @@ QString XBinary::_fromWCharArray(const wchar_t *pWString, qint32 size)
     QString sResult;
 
 #if (QT_VERSION_MAJOR < 5)  // TODO Check
-    sResult = QString::fromUtf16((ushort *)pWString, size);
+    sResult =  QString::fromWCharArray(pWString, size);
+    // set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /Zc:wchar_t-")
 #else
     sResult = QString::fromWCharArray(pWString, size);
 #endif
@@ -9778,6 +9783,10 @@ qint32 XBinary::_toWCharArray(const QString &sString, wchar_t *pWString)
 
 #if (QT_VERSION_MAJOR < 5)                     // TODO Check
     nResult = sString.toWCharArray(pWString);  // TODO
+    // set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /Zc:wchar_t-")
 #else
     nResult = sString.toWCharArray(pWString);
 #endif

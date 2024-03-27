@@ -294,6 +294,7 @@ public:
 
     enum DM {
         DM_UNKNOWN = 0,
+        DM_DATA,
         DM_X86_16,
         DM_X86_32,
         DM_X86_64,
