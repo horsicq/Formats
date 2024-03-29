@@ -24,11 +24,7 @@ bool _sortItems(const XBinary::SCANSTRUCT &v1, const XBinary::SCANSTRUCT &v2)
 {
     bool bResult = false;
 
-    if (v1.parentId.sUuid == v2.parentId.sUuid) {
-        bResult = (v1.nPrio < v2.nPrio);
-    } else {
-        bResult = (v1.parentId.sUuid < v2.parentId.sUuid);
-    }
+    bResult = (v1.nPrio < v2.nPrio);
 
     return bResult;
 }
