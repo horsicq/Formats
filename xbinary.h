@@ -574,6 +574,7 @@ public:
         QString sInfo;
         QString varInfo;   // Signature in die scripts
         QString varInfo2;  // Signature File in die scripts
+        QString sResult; // TODO Check
         Qt::GlobalColor globalColor;
         qint32 nPrio;
         bool bIsProtection;
