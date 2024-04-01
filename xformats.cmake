@@ -2,9 +2,16 @@ include_directories(${CMAKE_CURRENT_LIST_DIR})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/images)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/video)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/audio)
+
+include(${CMAKE_CURRENT_LIST_DIR}/../XDEX/xdex.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../XPDF/xpdf.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../XArchive/xarchives.cmake)
 # TODO
 
 set(XFORMATS_SOURCES
+    ${XDEX_SOURCES}
+    ${XPDF_SOURCES}
+    ${XARCHIVES_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/audio/xmp3.cpp
     ${CMAKE_CURRENT_LIST_DIR}/audio/xmp3.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xbmp.cpp
