@@ -6155,7 +6155,7 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 
     XBinary binary(pDevice);
 
-    nResult = binary._getCRC32(0, -1, pPdStruct);
+    nResult = binary._getCRC32(0, -1, 0xFFFFFFFF, pPdStruct);
 
     pDevice->reset();
 
@@ -6204,10 +6204,10 @@ quint16 XBinary::_getCRC16(const QByteArray &baData, quint16 nInit, quint16 *pCR
     return _getCRC16(baData.data(), baData.size(), nInit, pCRCTable);
 }
 
-quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
+quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, PDSTRUCT *pPdStruct)
 {
     // TODO optimize!!!
-    quint32 nResult = 0xFFFFFFFF;  // ~0 // TODO make nInit arg
+    quint32 nResult = nInit;  // ~0 // TODO make nInit arg
 
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 

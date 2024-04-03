@@ -1171,7 +1171,7 @@ public:
     static quint16 _getCRC16(const char *pData, qint32 nDataSize, quint16 nInit, quint16 *pCRCTable);
     static quint32 _getCRC32(const QByteArray &baData, quint32 nInit, quint32 *pCRCTable);
     static quint16 _getCRC16(const QByteArray &baData, quint16 nInit, quint16 *pCRCTable);
-    quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
+    quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, quint32 nInit = 0xFFFFFFFF, PDSTRUCT *pPdStruct = nullptr);
     quint16 _getCRC16(qint64 nOffset = 0, qint64 nSize = -1, quint16 nInit = 0, PDSTRUCT *pPdStruct = nullptr);
 
     static quint32 _getCRC32ByFileContent(const QString &sFileName);
