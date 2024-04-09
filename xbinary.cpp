@@ -9629,17 +9629,38 @@ XBinary::REGION_FILL XBinary::getRegionFill(qint64 nOffset, qint64 nSize, qint32
     return result;
 }
 
-QString XBinary::getDataString(char *pData, qint32 nDataSize)
+QString XBinary::getDataString(char *pData, qint32 nDataSize, QString sBaseType, bool bIsBigEndian)
 {
     // TODO optimize
     QString sResult;
 
-    for (qint32 i = 0; i < nDataSize; i++) {
-        if (i > 0) {
-            sResult.append(", ");
-        }
+    if ((sBaseType == "db") || (sBaseType == "dw") || (sBaseType == "dd") || (sBaseType == "dq")) {
+        for (qint32 i = 0; i < nDataSize;) {
+            if (i > 0) {
+                sResult.append(", ");
+            }
 
-        sResult.append("0x" + valueToHex((quint8)(pData[i])));
+            QString sString;
+            qint32 _nSize = 1;
+
+            if (sBaseType == "db") {
+                sString = valueToHex(*(quint8 *)(pData));
+                _nSize = 1;
+            } else if (sBaseType == "dw") {
+                sString = valueToHex(*(quint16 *)(pData), bIsBigEndian);
+                _nSize = 2;
+            } else if (sBaseType == "dd") {
+                sString = valueToHex(*(quint32 *)(pData), bIsBigEndian);
+                _nSize = 4;
+            } else if (sBaseType == "dq") {
+                sString = valueToHex(*(quint64 *)(pData), bIsBigEndian);
+                _nSize = 8;
+            }
+
+            sResult.append("0x" + sString);
+            pData += _nSize;
+            i += _nSize;
+        }
     }
 
     return sResult;

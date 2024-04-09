@@ -1492,7 +1492,7 @@ public:
     };
 
     REGION_FILL getRegionFill(qint64 nOffset, qint64 nSize, qint32 nAlignment);
-    static QString getDataString(char *pData, qint32 nDataSize);
+    static QString getDataString(char *pData, qint32 nDataSize, QString sBaseType, bool bIsBigEndian);
 
     struct HREGION {
         XADDR nAddress;
