@@ -29,6 +29,7 @@ class XDataConvertor : public QObject {
 public:
     enum CMETHOD {
         CMETHOD_UNKNOWN = 0,
+        CMETHOD_NONE,
         CMETHOD_XOR_BYTE,
         CMETHOD_XOR_WORD,
         CMETHOD_XOR_DWORD,
@@ -45,12 +46,18 @@ public:
         CMETHOD_BASE64_DECODE
     };
 
+    struct DATA {
+        bool bValid;
+        QTemporaryFile *pTmpFile;
+        double dEntropy;
+    };
+
     struct OPTIONS {
         QVariant varKey;
     };
 
     explicit XDataConvertor(QObject *pParent = nullptr);
-    void setData(QIODevice *pDeviceIn, QIODevice *pDeviceOut, CMETHOD method, const OPTIONS &options, XBinary::PDSTRUCT *pPdStruct);
+    void setData(QIODevice *pDeviceIn, DATA *pData, CMETHOD method, const OPTIONS &options, XBinary::PDSTRUCT *pPdStruct);
 
 public slots:
     void process();
@@ -61,7 +68,7 @@ signals:
 
 private:
     QIODevice *g_pDeviceIn;
-    QIODevice *g_pDeviceOut;
+    DATA *g_pData;
     CMETHOD g_method;
     OPTIONS g_options;
     XBinary::PDSTRUCT *g_pPdStruct;
