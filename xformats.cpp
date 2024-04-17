@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2023 hors<horsicq@gmail.com>
+/* Copyright (c) 2020-2024 hors<horsicq@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -1425,8 +1425,6 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             if (listArchiveRecords.count()) {
                 XArchive::RECORD record = listArchiveRecords.at(0);
                 QByteArray baData = XArchives::decompress(pDevice, &record, pPdStruct, 0, 0x200);
-
-                XBinary::writeToFile("C:\\tmp\\tmp_ba.bin", baData);
 
                 QSet<XBinary::FT> _ft = getFileTypes(&baData, true);
 

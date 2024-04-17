@@ -1063,8 +1063,9 @@ qint32 XBinary::read_int24(qint64 nOffset, bool bIsBigEndian)
 
 qint64 XBinary::write_ansiString(qint64 nOffset, const QString &sString, qint64 nMaxSize)
 {
-    if (nMaxSize == -1) {
-        nMaxSize = sString.length() + 1;
+    qint64 _nMaxSize = sString.length() + 1;
+    if ((nMaxSize == -1) || (nMaxSize > _nMaxSize)) {
+        nMaxSize = _nMaxSize;
     }
 
     return write_array(nOffset, sString.toLatin1().data(), nMaxSize);
