@@ -1358,6 +1358,15 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     } else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) {
         XGzip xgzip(pDevice);
         result = xgzip.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_TAR, fileType)) {
+        XTAR xtar(pDevice);
+        result = xtar.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_TARGZ, fileType)) {
+        XTGZ xtgz(pDevice);
+        result = xtgz.getFileFormatInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_NPM, fileType)) {
+        XNPM xnpm(pDevice);
+        result = xnpm.getFileFormatInfo();
     } else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) {
         XZlib xzlib(pDevice);
         result = xzlib.getFileFormatInfo();
@@ -1431,7 +1440,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
                 if (_ft.contains(XBinary::FT_TAR)) {
                     stResult += XBinary::FT_TARGZ;
 
-                    if (_ft.contains(XBinary::FT_NPM)) {
+                    if (_ft.contains(XBinary::FT_TAR_NPM)) {
                         stResult += XBinary::FT_NPM;
                     }
                 }
