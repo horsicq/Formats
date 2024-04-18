@@ -1187,7 +1187,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qin
     return result;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(const QString &sFileName, bool bExtra)
+QSet<XBinary::FT> XFormats::getFileTypes(const QString &sFileName, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
 {
     QSet<XBinary::FT> stResult;
 
@@ -1195,7 +1195,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(const QString &sFileName, bool bExtra)
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        stResult = getFileTypes(&file, bExtra);
+        stResult = getFileTypes(&file, bExtra, pPdStruct);
 
         file.close();
     }
@@ -1517,18 +1517,18 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, const QString &s
 }
 #endif
 #ifdef QT_GUI_LIB
-bool XFormats::setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian)
+bool XFormats::setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian)
 {
     const bool bBlocked1 = pComboBox->blockSignals(true);
 
-    bool bResult = bIsBigEndian;
+    bool bResult = endian;
 
     pComboBox->clear();
 
-    pComboBox->addItem("LE", false);
-    pComboBox->addItem("BE", true);
+    pComboBox->addItem(XBinary::endianToString(XBinary::ENDIAN_LITTLE), XBinary::ENDIAN_LITTLE);
+    pComboBox->addItem(XBinary::endianToString(XBinary::ENDIAN_BIG), XBinary::ENDIAN_BIG);
 
-    if (bIsBigEndian) {
+    if (endian == XBinary::ENDIAN_BIG) {
         pComboBox->setCurrentIndex(1);
     }
 

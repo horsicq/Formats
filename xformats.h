@@ -80,7 +80,7 @@ public:
                                                           XBinary::SYMBOL_TYPE symBolType = XBinary::SYMBOL_TYPE_ALL);
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra = false);
-    static QSet<XBinary::FT> getFileTypes(const QString &sFileName, bool bExtra = false);
+    static QSet<XBinary::FT> getFileTypes(const QString &sFileName, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData, bool bExtra = false);
     static XBinary::OSINFO getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static XBinary::FILEFORMATINFO getFileFormatInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -92,7 +92,7 @@ public:
 #ifdef QT_GUI_LIB
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox);
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox);
-    static bool setEndiannessComboBox(QComboBox *pComboBox, bool bIsBigEndian);
+    static bool setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian);
     static XBinary::MAPMODE setMapModeComboBox(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, QComboBox *pComboBox);
     static void setProgressBar(QProgressBar *pProgressBar, XBinary::PDRECORD pdRecord);
 #endif

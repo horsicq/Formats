@@ -899,7 +899,7 @@ public:
         SF startFrom;
         QVariant varValue;
         VT valueType;
-        bool bIsBigEndian;
+        ENDIAN endian;
         bool bInit;
     };
 
