@@ -34,6 +34,7 @@ public:
         TYPE_DLL,
         TYPE_DRIVER
         // TODO Check More
+        // mb FONT
     };
 
     explicit XNE(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
