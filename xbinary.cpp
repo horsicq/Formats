@@ -4981,6 +4981,10 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_ZIP;
     } else if (pStFileTypes->contains(FT_NPM)) {
         result = FT_NPM;
+    } else if (pStFileTypes->contains(FT_TAR)) {
+        result = FT_TAR;
+    } else if (pStFileTypes->contains(FT_TARGZ)) {
+        result = FT_TARGZ;
     } else if (pStFileTypes->contains(FT_GZIP)) {
         result = FT_GZIP;
     } else if (pStFileTypes->contains(FT_ZLIB)) {
@@ -5099,6 +5103,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileType
     if (stFileTypes.contains(FT_AVI)) listResult.append(FT_AVI);
     if (stFileTypes.contains(FT_WEBP)) listResult.append(FT_WEBP);
     if (stFileTypes.contains(FT_SIGNATURE)) listResult.append(FT_SIGNATURE);
+    if (stFileTypes.contains(FT_TAR)) listResult.append(FT_TAR);
     if (stFileTypes.contains(FT_TARGZ)) listResult.append(FT_TARGZ);
     if (stFileTypes.contains(FT_NPM)) listResult.append(FT_NPM);
     if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
