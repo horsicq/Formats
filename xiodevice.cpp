@@ -26,7 +26,7 @@ XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent)
     g_nInitLocation = 0;
 }
 
-void XIODevice::setSize(quint64 nSize)
+void XIODevice::setSize(qint64 nSize)
 {
     g_nSize = nSize;
 }

@@ -29,7 +29,7 @@ class XIODevice : public QIODevice {
 public:
     XIODevice(QObject *pParent);
 
-    void setSize(quint64 nSize);
+    void setSize(qint64 nSize);
     void setInitLocation(quint64 nLocation);
     quint64 getInitLocation();
 
@@ -52,7 +52,7 @@ signals:
     void writeDataSignal(quint64 nOffset, char *pData, qint64 nSize);
 
 private:
-    quint64 g_nSize;
+    qint64 g_nSize;
     quint64 g_nInitLocation;
 };
 
