@@ -3382,8 +3382,16 @@ bool XBinary::isDirectoryEmpty(const QString &sDirectoryName)
     return (QDir(sDirectoryName).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() == 0);
 }
 
-QByteArray XBinary::readFile(const QString &sFileName)
+QByteArray XBinary::readFile(const QString &sFileName, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    // TODO PDSTRUCT
+
     QByteArray baResult;
 
     QFile file;
