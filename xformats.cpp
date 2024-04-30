@@ -133,6 +133,12 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMO
     } else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) {
         XMACHOFat xmachofat(pDevice);
         result = xmachofat.getMemoryMap(mapMode, pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_NPM, fileType)) {
+        XNPM xnpm(pDevice);
+        result = xnpm.getMemoryMap(mapMode, pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_TARGZ, fileType)) {
+        XTGZ xtgz(pDevice);
+        result = xtgz.getMemoryMap(mapMode, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) {
         XGzip xgzip(pDevice);
         result = xgzip.getMemoryMap(mapMode, pPdStruct);

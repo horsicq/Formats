@@ -1090,6 +1090,25 @@ void XBinary::write_ansiStringFix(qint64 nOffset, qint64 nSize, const QString &s
     delete[] pBuffer;
 }
 
+qint64 XBinary::write_unicodeString(qint64 nOffset, const QString &sString, qint64 nMaxSize, bool bIsBigEndian)
+{
+    qint64 nResult = 0;
+
+    if ((nMaxSize > 0) && (nMaxSize < 0x10000)) {
+
+        qint64 nSize = qMin((qint64)sString.size(), nMaxSize);
+
+        quint16 *pUtf16 = (quint16 *)sString.utf16();
+
+        for (qint32 i = 0; i < nSize; i++) {
+            write_uint16(nOffset + 2 * i, *(pUtf16 + i), bIsBigEndian);
+            nResult++;
+        }
+    }
+
+    return nResult;
+}
+
 QString XBinary::read_ansiString(qint64 nOffset, qint64 nMaxSize)
 {
     QString sResult;
@@ -7952,6 +7971,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
     QString sResult = tr("Unknown");
 
     switch (osName) {
+        case OSNAME_MULTIPLATFORM: sResult = tr("Multiplatform"); break;
         case OSNAME_AIX: sResult = QString("AIX"); break;
         case OSNAME_ALPINELINUX: sResult = QString("Alpine Linux"); break;
         case OSNAME_ANDROID: sResult = QString("Android"); break;

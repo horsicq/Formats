@@ -357,6 +357,7 @@ public:
     // TODO FreeDOS
     enum OSNAME {
         OSNAME_UNKNOWN = 0,
+        OSNAME_MULTIPLATFORM,
         OSNAME_AIX,
         OSNAME_ALPINELINUX,
         OSNAME_ANDROID,
@@ -738,6 +739,8 @@ public:
 
     qint64 write_ansiString(qint64 nOffset, const QString &sString, qint64 nMaxSize = -1);
     void write_ansiStringFix(qint64 nOffset, qint64 nSize, const QString &sString);
+
+    qint64 write_unicodeString(qint64 nOffset, const QString &sString, qint64 nMaxSize = -1, bool bIsBigEndian = false);
     // TODO write unicodestring
 
     QString read_ansiString(qint64 nOffset, qint64 nMaxSize = 256);
