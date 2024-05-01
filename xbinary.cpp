@@ -1095,7 +1095,6 @@ qint64 XBinary::write_unicodeString(qint64 nOffset, const QString &sString, qint
     qint64 nResult = 0;
 
     if ((nMaxSize > 0) && (nMaxSize < 0x10000)) {
-
         qint64 nSize = qMin((qint64)sString.size(), nMaxSize);
 
         quint16 *pUtf16 = (quint16 *)sString.utf16();
