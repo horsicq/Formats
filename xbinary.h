@@ -254,7 +254,6 @@ public:
         FT_AVI,
         FT_WEBP,
         FT_SIGNATURE,
-        FT_TAR_NPM,
         FT_NPM
         // TODO more
     };

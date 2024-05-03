@@ -1419,6 +1419,23 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::
     return stResult;
 }
 #endif
+#ifdef USE_ARCHIVE
+QSet<XBinary::FT> XFormats::getFileTypesTGZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pDevice)  // TODO
+
+    QSet<XBinary::FT> stResult;
+
+    stResult.insert(XBinary::FT_TARGZ);
+
+    if (XNPM::isValid(pListRecords, pPdStruct)) {
+        stResult.insert(XBinary::FT_NPM);
+    }
+
+    return stResult;
+}
+
+#endif
 QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
 {
     QSet<XBinary::FT> stResult = XBinary::getFileTypes(pDevice, bExtra);
@@ -1444,11 +1461,10 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
                 QSet<XBinary::FT> _ft = getFileTypes(&baData, true);
 
                 if (_ft.contains(XBinary::FT_TAR)) {
-                    stResult += XBinary::FT_TARGZ;
+                    XTGZ xtgz(pDevice);
+                    QList<XArchive::RECORD> listArchiveRecords = xtgz.getRecords(20000, pPdStruct);
 
-                    if (_ft.contains(XBinary::FT_TAR_NPM)) {
-                        stResult += XBinary::FT_NPM;
-                    }
+                    stResult += getFileTypesTGZ(pDevice, &listArchiveRecords, pPdStruct);
                 }
             }
         }

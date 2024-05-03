@@ -522,7 +522,6 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_WEBP: sResult = QString("WebP"); break;
         case FT_RIFF: sResult = QString("RIFF"); break;
         case FT_SIGNATURE: sResult = tr("Signature"); break;
-        case FT_TAR_NPM: sResult = QString("TAR_NPM"); break;
         case FT_NPM: sResult = QString("NPM"); break;
     }
 
@@ -4810,10 +4809,6 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if ((memoryMap.nBinarySize >= 0x200) && compareSignature(&memoryMap, "00'ustar'", 0x100)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_TAR);
-
-            if (compareSignature(&memoryMap, "'package/package.json'", 0)) {
-                stResult.insert(FT_TAR_NPM);
-            }
         } else if (compareSignature(&memoryMap, "'RE~^'") || compareSignature(&memoryMap, "'Rar!'1A07")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_RAR);
