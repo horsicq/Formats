@@ -1047,6 +1047,14 @@ QString XFormats::translateType(const QString &sType)
     QString sResult;
 
     QString _sType = sType.toLower();
+    bool bHeur = false;
+
+    if (_sType.size()>0) {
+        if (_sType[0] == QChar('~')) {
+            bHeur = true;
+            _sType.remove(0, 1);
+        }
+    }
 
     if (_sType == "apk obfuscator") {
         sResult = QString("APK %1").arg(tr("obfuscator"));
@@ -1134,6 +1142,10 @@ QString XFormats::translateType(const QString &sType)
         sResult = tr("Malware");
     } else {
         sResult = sType;
+    }
+
+    if (bHeur) {
+        sResult = QString("(Heur)%1").arg(sResult);
     }
 
     return sResult;
