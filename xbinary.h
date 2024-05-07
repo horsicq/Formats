@@ -814,6 +814,7 @@ public:
 
     quint8 _bcd_decimal(quint8 nValue);
 
+    qint64 _find_array(ST st, qint64 nOffset, qint64 nSize, const char *pArray, qint64 nArraySize, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_array(qint64 nOffset, qint64 nSize, const char *pArray, qint64 nArraySize, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_byteArray(qint64 nOffset, qint64 nSize, QByteArray baData, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_uint8(qint64 nOffset, qint64 nSize, quint8 nValue, PDSTRUCT *pPdStruct = nullptr);
@@ -1516,7 +1517,7 @@ public:
     static qint32 _toWCharArray(const QString &sString, wchar_t *pWString);
 
 private:
-    static const qint32 READWRITE_BUFFER_SIZE = 0x1000;
+    static const qint32 READWRITE_BUFFER_SIZE = 0x8000;
     static QString convertSignature(const QString &sSignature);
     static QString qcharToHex(QChar cSymbol);
 

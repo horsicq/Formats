@@ -1759,7 +1759,7 @@ quint8 XBinary::_bcd_decimal(quint8 nValue)
     return nResult;
 }
 
-qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qint64 nArraySize, PDSTRUCT *pPdStruct)
+qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pArray, qint64 nArraySize, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = -1;
 
@@ -1810,11 +1810,45 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qin
             break;
         }
 
-        for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
-            if (compareMemory(pBuffer + i, pArray, nArraySize)) {
-                nResult = nOffset + i;
+        if (st == ST_COMPAREBYTES) {
+            for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
+                if (compareMemory(pBuffer + i, pArray, nArraySize)) {
+                    nResult = nOffset + i;
 
-                break;
+                    break;
+                }
+            }
+        } else if (st == ST_NOTNULL) {
+            for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
+                if (_isMemoryNotNull(pBuffer + i, nArraySize)) {
+                    nResult = nOffset + i;
+
+                    break;
+                }
+            }
+        } else if (st == ST_ANSI) {
+            for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
+                if (_isMemoryAnsi(pBuffer + i, nArraySize)) {
+                    nResult = nOffset + i;
+
+                    break;
+                }
+            }
+        } else if (st == ST_NOTANSI) {
+            for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
+                if (_isMemoryNotAnsi(pBuffer + i, nArraySize)) {
+                    nResult = nOffset + i;
+
+                    break;
+                }
+            }
+        } else if (st == ST_NOTANSIANDNULL) {
+            for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
+                if (_isMemoryNotAnsiAndNull(pBuffer + i, nArraySize)) {
+                    nResult = nOffset + i;
+
+                    break;
+                }
             }
         }
 
@@ -1833,6 +1867,11 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qin
     setPdStructFinished(pPdStruct, _nFreeIndex);
 
     return nResult;
+}
+
+qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qint64 nArraySize, PDSTRUCT *pPdStruct)
+{
+    return _find_array(ST_COMPAREBYTES, nOffset, nSize, pArray, nArraySize, pPdStruct);
 }
 
 qint64 XBinary::find_byteArray(qint64 nOffset, qint64 nSize, QByteArray baData, PDSTRUCT *pPdStruct)
@@ -2060,16 +2099,76 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
         if (listSignatureRecords.count()) {
             qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-            if (listSignatureRecords.count() && ((listSignatureRecords.at(0).st == ST_COMPAREBYTES) || (listSignatureRecords.at(0).st == ST_FINDBYTES))) {
+            qint32 nSearchFirstIndex = 0;
+            qint64 nDelta = 0;
+
+            if (!_sSignature.contains(QChar('+'))) {
+                qint32 nNumberOfRecords = listSignatureRecords.count();
+                qint64 nMaxSize = 0;
+                qint64 nCurrentDelta = 0;
+
+                for (qint32 i = 0; i < nNumberOfRecords; i++) {
+                    if ((listSignatureRecords.at(i).st == ST_ADDRESS) || (listSignatureRecords.at(i).st == ST_RELOFFSET)) {
+                        break;
+                    } else if ((listSignatureRecords.at(i).nSize > nMaxSize) && (listSignatureRecords.at(i).st == ST_COMPAREBYTES)) {
+                        nMaxSize = listSignatureRecords.at(i).nSize;
+                        nDelta = nCurrentDelta;
+                        nSearchFirstIndex = i;
+                    }
+                    nCurrentDelta += listSignatureRecords.at(i).nSize;
+                }
+            }
+
+            if (nSearchFirstIndex > 0) {
+                qint64 nTmpOffset = nOffset + nDelta;
+                qint64 nTmpSize = nSize - nDelta;
+
+                XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nTmpSize);
+
+                QByteArray baData = listSignatureRecords.at(nSearchFirstIndex).baData;
+
+                char *pData = baData.data();
+                qint32 nDataSize = baData.size();
+
+                for (qint64 i = 0; (i < nTmpSize) && (!(pPdStruct->bIsStop));) {
+                    qint64 nCurrentOffset = _find_array(ST_COMPAREBYTES, nTmpOffset + i, nTmpSize - i, pData, nDataSize, pPdStruct);
+
+                    if (nCurrentOffset != -1) {
+                        if (_compareSignature(pMemoryMap, &listSignatureRecords, nCurrentOffset - nDelta)) {
+                            nResult = nCurrentOffset - nDelta;
+
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+
+                    i = nCurrentOffset + nDataSize - nTmpOffset;
+
+                    XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, i);
+                }
+
+            } else if ( (listSignatureRecords.at(0).st == ST_COMPAREBYTES) ||
+                        (listSignatureRecords.at(0).st == ST_FINDBYTES) ||
+                        (listSignatureRecords.at(0).st == ST_NOTNULL) ||
+                        (listSignatureRecords.at(0).st == ST_ANSI) ||
+                        (listSignatureRecords.at(0).st == ST_NOTANSI) ||
+                        (listSignatureRecords.at(0).st == ST_NOTANSIANDNULL)) {
+                ST _st = listSignatureRecords.at(0).st;
+
+                if (listSignatureRecords.at(0).st == ST_FINDBYTES) {
+                    _st = ST_COMPAREBYTES;
+                }
+
                 XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
                 QByteArray baFirst = listSignatureRecords.at(0).baData;
 
                 char *pData = baFirst.data();
-                qint32 nDataSize = baFirst.size();
+                qint32 nDataSize = listSignatureRecords.at(0).nSize;
 
                 for (qint64 i = 0; (i < nSize) && (!(pPdStruct->bIsStop));) {
-                    qint64 nTempOffset = find_array(nOffset + i, nSize - i, pData, nDataSize, pPdStruct);
+                    qint64 nTempOffset = _find_array(_st, nOffset + i, nSize - i, pData, nDataSize, pPdStruct);
 
                     if (nTempOffset != -1) {
                         if (_compareSignature(pMemoryMap, &listSignatureRecords, nTempOffset)) {
