@@ -6579,6 +6579,75 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
     return dResult;
 }
 
+double XBinary::getZeroStatus(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
+{
+    double dResult = 0;
+
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
+
+    nOffset = osRegion.nOffset;
+    nSize = osRegion.nSize;
+
+    if (nSize == 0) {
+        dResult = 0;
+    }
+
+    qint64 nZeroCount = 0;
+
+    bool bReadError = false;
+
+    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+
+    if ((nOffset != -1) && (!(pPdStruct->bIsStop))) {
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+
+        qint64 nTemp = 0;
+        char *pBuffer = new char[READWRITE_BUFFER_SIZE];
+
+        while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
+            nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
+
+            if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
+                pPdStruct->sInfoString = tr("Read error");
+                bReadError = true;
+
+                break;
+            }
+
+            for (qint64 i = 0; i < nTemp; i++) {
+                if (pBuffer[i]) {
+                    nZeroCount++;
+                }
+            }
+
+            nSize -= nTemp;
+            nOffset += nTemp;
+
+            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset - osRegion.nOffset);
+        }
+
+        delete[] pBuffer;
+
+
+    }
+
+    dResult = (double)nZeroCount/(double)nSize;
+
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+    if (pPdStruct->bIsStop) {
+        dResult = 0;
+    }
+
+    return dResult;
+}
+
 XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     BYTE_COUNTS result = {};

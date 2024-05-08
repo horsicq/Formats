@@ -1183,6 +1183,7 @@ public:
     static double getEntropy(const QString &sFileName);  // TODO ProcessData
     static double getEntropy(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     double getEntropy(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
+    double getZeroStatus(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
     BYTE_COUNTS getByteCounts(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
