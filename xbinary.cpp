@@ -6637,7 +6637,7 @@ double XBinary::getZeroStatus(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 
     }
 
-    dResult = (double)nZeroCount/(double)nSize;
+    dResult = (double)nZeroCount/(double)(osRegion.nSize);
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
@@ -6708,10 +6708,16 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRU
     return result;
 }
 
-void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
+void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     // TODO Optimize
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
+
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
 
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
@@ -6721,7 +6727,7 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize)
             qint64 nTemp = 0;
             char *pBuffer = new char[READWRITE_BUFFER_SIZE];
 
-            while (nSize > 0) {
+            while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
                 nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
 
                 if (read_array(nOffset, pBuffer, nTemp) != nTemp) {

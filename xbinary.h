@@ -1187,7 +1187,7 @@ public:
 
     BYTE_COUNTS getByteCounts(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
-    void _xor(quint8 nXorValue, qint64 nOffset = 0, qint64 nSize = -1);
+    void _xor(quint8 nXorValue, qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
     //    static quint32 _ror32(quint32 nValue,quint32 nShift);
     //    static quint32 _rol32(quint32 nValue,quint32 nShift);
