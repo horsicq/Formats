@@ -2148,12 +2148,9 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                     XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, i);
                 }
 
-            } else if ( (listSignatureRecords.at(0).st == ST_COMPAREBYTES) ||
-                        (listSignatureRecords.at(0).st == ST_FINDBYTES) ||
-                        (listSignatureRecords.at(0).st == ST_NOTNULL) ||
-                        (listSignatureRecords.at(0).st == ST_ANSI) ||
-                        (listSignatureRecords.at(0).st == ST_NOTANSI) ||
-                        (listSignatureRecords.at(0).st == ST_NOTANSIANDNULL)) {
+            } else if ((listSignatureRecords.at(0).st == ST_COMPAREBYTES) || (listSignatureRecords.at(0).st == ST_FINDBYTES) ||
+                       (listSignatureRecords.at(0).st == ST_NOTNULL) || (listSignatureRecords.at(0).st == ST_ANSI) || (listSignatureRecords.at(0).st == ST_NOTANSI) ||
+                       (listSignatureRecords.at(0).st == ST_NOTANSIANDNULL)) {
                 ST _st = listSignatureRecords.at(0).st;
 
                 if (listSignatureRecords.at(0).st == ST_FINDBYTES) {
@@ -6633,11 +6630,9 @@ double XBinary::getZeroStatus(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
         }
 
         delete[] pBuffer;
-
-
     }
 
-    dResult = (double)nZeroCount/(double)(osRegion.nSize);
+    dResult = (double)nZeroCount / (double)(osRegion.nSize);
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 

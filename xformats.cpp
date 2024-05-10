@@ -1049,7 +1049,7 @@ QString XFormats::translateType(const QString &sType)
     QString _sType = sType.toLower();
     bool bHeur = false;
 
-    if (_sType.size()>0) {
+    if (_sType.size() > 0) {
         if (_sType[0] == QChar('~')) {
             bHeur = true;
             _sType.remove(0, 1);
