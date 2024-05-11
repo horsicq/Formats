@@ -4800,9 +4800,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     QByteArray baNewHeader;
     baHeader = read_array(0, qMin(getSize(), (qint64)0x200));  // TODO const
     char *pOffset = baHeader.data();
-    quint32 nSize = getSize();
+    qint64 nSize = getSize();
 
-    if (nSize >= (int)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)) {
+    if (nSize >= (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)) {
         if ((((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ) ||
             (((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM)) {
             stResult.insert(FT_MSDOS);
@@ -4854,7 +4854,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         }
     }
 
-    if (nSize >= (int)sizeof(XELF_DEF::Elf32_Ehdr)) {
+    if (nSize >= (qint64)sizeof(XELF_DEF::Elf32_Ehdr)) {
         if ((((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[0] == 0x7f) && (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[1] == 'E') &&
             (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[2] == 'L') && (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[3] == 'F')) {
             stResult.insert(FT_ELF);
@@ -4868,7 +4868,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         }
     }
 
-    if (nSize >= (int)sizeof(XMACH_DEF::mach_header)) {
+    if (nSize >= (qint64)sizeof(XMACH_DEF::mach_header)) {
         if ((((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_MAGIC) || (((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_CIGAM)) {
             stResult.insert(FT_MACHO);
             stResult.insert(FT_MACHO32);
@@ -4981,7 +4981,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             } else {
                 stResult.insert(FT_UNICODE_BE);
             }
-        } else if (nSize >= (int)sizeof(XMACH_DEF::fat_header) + (int)sizeof(XMACH_DEF::fat_arch)) {
+        } else if (nSize >= (qint64)sizeof(XMACH_DEF::fat_header) + (qint64)sizeof(XMACH_DEF::fat_arch)) {
             if (read_uint32(0, true) == XMACH_DEF::S_FAT_MAGIC) {
                 if (read_uint32(4, true) < 10) {
                     stResult.insert(FT_ARCHIVE);
