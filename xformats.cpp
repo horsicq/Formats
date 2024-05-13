@@ -1046,7 +1046,7 @@ QString XFormats::translateType(const QString &sType)
 {
     QString sResult;
 
-    QString _sType = sType.toLower();
+    QString _sType = sType;
     bool bHeur = false;
 
     if (_sType.size() > 0) {
@@ -1056,96 +1056,123 @@ QString XFormats::translateType(const QString &sType)
         }
     }
 
-    if (_sType == "apk obfuscator") {
-        sResult = QString("APK %1").arg(tr("obfuscator"));
-    } else if (_sType == "apk tool") {
-        sResult = QString("APK %1").arg(tr("Tool"));
-    } else if (_sType == "archive") {
-        sResult = tr("Archive");
-    } else if (_sType == "certificate") {
-        sResult = tr("Certificate");
-    } else if (_sType == "compiler") {
-        sResult = tr("Compiler");
-    } else if (_sType == "converter") {
-        sResult = tr("Converter");
-    } else if (_sType == "crypter") {
-        sResult = tr("Crypter");
-    } else if (_sType == "cryptor") {
-        sResult = tr("Cryptor");
-    } else if (_sType == "data") {
-        sResult = tr("Data");
-    } else if (_sType == "database") {
-        sResult = tr("Database");
-    } else if (_sType == "debug data") {
-        sResult = tr("Debug data");
-    } else if (_sType == "dongle protection") {
-        sResult = QString("Dongle %1").arg(tr("protection"));
-    } else if (_sType == "dos extender") {
-        sResult = QString("DOS %1").arg(tr("extender"));
-    } else if (_sType == "format") {
-        sResult = tr("Format");
-    } else if (_sType == "generic") {
-        sResult = tr("Generic");
-    } else if (_sType == "image") {
-        sResult = tr("Image");
-    } else if (_sType == "installer") {
-        sResult = tr("Installer");
-    } else if (_sType == "installer data") {
-        sResult = tr("Installer data");
-    } else if (_sType == "jar obfuscator") {
-        sResult = QString("JAR %1").arg(tr("obfuscator"));
-    } else if (_sType == "joiner") {
-        sResult = tr("Joiner");
-    } else if (_sType == "language") {
-        sResult = tr("Language");
-    } else if (_sType == "library") {
-        sResult = tr("Library");
-    } else if (_sType == "linker") {
-        sResult = tr("Linker");
-    } else if (_sType == ".net compressor") {
-        sResult = QString(".NET %1").arg(tr("compressor"));
-    } else if (_sType == ".net obfuscator") {
-        sResult = QString(".NET %1").arg(tr("obfuscator"));
-    } else if (_sType == "operation system") {
-        sResult = tr("Operation system");
-    } else if (_sType == "overlay") {
-        sResult = tr("Overlay");
-    } else if (_sType == "packer") {
-        sResult = tr("Packer");
-    } else if (_sType == "pe tool") {
-        sResult = QString("PE %1").arg(tr("Tool"));
-    } else if (_sType == "player") {
-        sResult = tr("Player");
-    } else if (_sType == "protection") {
-        sResult = tr("Protection");
-    } else if (_sType == "protector") {
-        sResult = tr("Protector");
-    } else if (_sType == "protector data") {
-        sResult = tr("Protector data");
-    } else if (_sType == "sfx data") {
-        sResult = QString("SFX %1").arg(tr("data"));
-    } else if (_sType == "sign tool") {
-        sResult = tr("Sign tool");
-    } else if (_sType == "source code") {
-        sResult = tr("Source code");
-    } else if (_sType == "stub") {
-        sResult = tr("Stub");
-    } else if (_sType == "tool") {
-        sResult = tr("Tool");
-    } else if (_sType == "virtual machine") {
-        sResult = tr("Virtual machine");
-    } else if (_sType == "virus") {
-        sResult = tr("Virus");
-    } else if (_sType == "trojan") {
-        sResult = tr("Trojan");
-    } else if (_sType == "malware") {
-        sResult = tr("Malware");
-    } else {
-        sResult = sType;
+    sResult = _translate(_sType);
+
+    if (sResult.size()) {
+        sResult[0] = sResult.at(0).toUpper();
     }
 
     if (bHeur) {
         sResult = QString("(Heur)%1").arg(sResult);
+    }
+
+    return sResult;
+}
+
+QString XFormats::_translate(const QString &sString)
+{
+    QString sResult;
+
+    if (sString != "") {
+        bool bIsUpper = false;
+        sString.at(0).isUpper();
+        QString _sString = sString.toLower();
+
+        if (_sString == "apk obfuscator") {
+            sResult = QString("APK %1").arg(tr("obfuscator"));
+        } else if (_sString == "apk tool") {
+            sResult = QString("APK %1").arg(tr("Tool"));
+        } else if (_sString == "archive") {
+            sResult = tr("Archive");
+        } else if (_sString == "certificate") {
+            sResult = tr("Certificate");
+        } else if (_sString == "compiler") {
+            sResult = tr("Compiler");
+        } else if (_sString == "converter") {
+            sResult = tr("Converter");
+        } else if (_sString == "crypter") {
+            sResult = tr("Crypter");
+        } else if (_sString == "cryptor") {
+            sResult = tr("Cryptor");
+        } else if (_sString == "data") {
+            sResult = tr("Data");
+        } else if (_sString == "database") {
+            sResult = tr("Database");
+        } else if (_sString == "debug data") {
+            sResult = tr("Debug data");
+        } else if (_sString == "dongle protection") {
+            sResult = QString("Dongle %1").arg(tr("protection"));
+        } else if (_sString == "dos extender") {
+            sResult = QString("DOS %1").arg(tr("extender"));
+        } else if (_sString == "format") {
+            sResult = tr("Format");
+        } else if (_sString == "generic") {
+            sResult = tr("Generic");
+        } else if (_sString == "image") {
+            sResult = tr("Image");
+        } else if (_sString == "installer") {
+            sResult = tr("Installer");
+        } else if (_sString == "installer data") {
+            sResult = tr("Installer data");
+        } else if (_sString == "jar obfuscator") {
+            sResult = QString("JAR %1").arg(tr("obfuscator"));
+        } else if (_sString == "joiner") {
+            sResult = tr("Joiner");
+        } else if (_sString == "language") {
+            sResult = tr("Language");
+        } else if (_sString == "library") {
+            sResult = tr("Library");
+        } else if (_sString == "linker") {
+            sResult = tr("Linker");
+        } else if (_sString == ".net compressor") {
+            sResult = QString(".NET %1").arg(tr("compressor"));
+        } else if (_sString == ".net obfuscator") {
+            sResult = QString(".NET %1").arg(tr("obfuscator"));
+        } else if (_sString == "operation system") {
+            sResult = tr("Operation system");
+        } else if (_sString == "overlay") {
+            sResult = tr("Overlay");
+        } else if (_sString == "packer") {
+            sResult = tr("Packer");
+        } else if (_sString == "pe tool") {
+            sResult = QString("PE %1").arg(tr("Tool"));
+        } else if (_sString == "player") {
+            sResult = tr("Player");
+        } else if (_sString == "protection") {
+            sResult = tr("Protection");
+        } else if (_sString == "protector") {
+            sResult = tr("Protector");
+        } else if (_sString == "protector data") {
+            sResult = tr("Protector data");
+        } else if (_sString == "sfx data") {
+            sResult = QString("SFX %1").arg(tr("data"));
+        } else if (_sString == "sign tool") {
+            sResult = tr("Sign tool");
+        } else if (_sString == "source code") {
+            sResult = tr("Source code");
+        } else if (_sString == "stub") {
+            sResult = tr("Stub");
+        } else if (_sString == "tool") {
+            sResult = tr("Tool");
+        } else if (_sString == "virtual machine") {
+            sResult = tr("Virtual machine");
+        } else if (_sString == "virus") {
+            sResult = tr("Virus");
+        } else if (_sString == "trojan") {
+            sResult = tr("Trojan");
+        } else if (_sString == "malware") {
+            sResult = tr("Malware");
+        } else if (_sString == "package") {
+            sResult = tr("Package");
+        } else {
+            sResult = _sString;
+        }
+
+        if (bIsUpper) {
+            sResult[0] = sResult.at(0).toUpper();
+        } else {
+            sResult[0] = sResult.at(0).toLower();
+        }
     }
 
     return sResult;
@@ -1393,6 +1420,10 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
         result = xlha.getFileFormatInfo();
     }
 #endif
+    else {
+        XBinary binary(pDevice);
+        result = binary.getFileFormatInfo();
+    }
 
     return result;
 }

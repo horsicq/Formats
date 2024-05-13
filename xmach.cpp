@@ -635,6 +635,8 @@ QMap<quint64, QString> XMACH::getLoadCommandTypes()
     mapResult.insert(0x32, "LC_BUILD_VERSION");
     mapResult.insert(0x33 | 0x80000000, "LC_DYLD_EXPORTS_TRIE");
     mapResult.insert(0x34 | 0x80000000, "LC_DYLD_CHAINED_FIXUPS");
+    mapResult.insert(0x35 | 0x80000000, "LC_FILESET_ENTRY");
+    mapResult.insert(0x36, "LC_ATOM_INFO");
 
     return mapResult;
 }
@@ -696,6 +698,8 @@ QMap<quint64, QString> XMACH::getLoadCommandTypesS()
     mapResult.insert(0x32, "BUILD_VERSION");
     mapResult.insert(0x33 | 0x80000000, "DYLD_EXPORTS_TRIE");
     mapResult.insert(0x34 | 0x80000000, "DYLD_CHAINED_FIXUPS");
+    mapResult.insert(0x35 | 0x80000000, "FILESET_ENTRY");
+    mapResult.insert(0x36, "ATOM_INFO");
 
     return mapResult;
 }

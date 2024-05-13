@@ -231,6 +231,8 @@ const quint32 S_LC_NOTE = 0x31;                                  /* arbitrary da
 const quint32 S_LC_BUILD_VERSION = 0x32;                         /* build for platform min OS version */
 const quint32 S_LC_DYLD_EXPORTS_TRIE = (0x33 | S_LC_REQ_DYLD);   /* used with linkedit_data_command, payload is trie */
 const quint32 S_LC_DYLD_CHAINED_FIXUPS = (0x34 | S_LC_REQ_DYLD); /* used with linkedit_data_command */
+const quint32 S_LC_FILESET_ENTRY = (0x35 | S_LC_REQ_DYLD);       /* used with fileset_entry_command */
+const quint32 S_LC_ATOM_INFO = 0x36;                             /* used with linkedit_data_command */
 
 const quint32 S_MH_OBJECT = 0x1;   /* relocatable object file */
 const quint32 S_MH_EXECUTE = 0x2;  /* demand paged executable file */

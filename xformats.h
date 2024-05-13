@@ -104,6 +104,7 @@ public:
     static Qt::GlobalColor typeToColor(const QString &sType);
     static qint32 typeToPrio(const QString &sType);
     static QString translateType(const QString &sType);
+    static QString _translate(const QString &sString);
     static void sortRecords(QList<XBinary::SCANSTRUCT> *pListRecords);
     static QString getProtection(QList<XBinary::SCANSTRUCT> *pListRecords);
     static bool isProtection(const QString &sType);
