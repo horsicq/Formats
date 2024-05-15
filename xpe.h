@@ -1242,6 +1242,10 @@ public:
     static QString getCertNameString(PCCERT_CONTEXT pCertContext, CERTNAMESTRING certNameString);
 #endif
 
+    quint64 getImageFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pHeader, QString sString);
+    quint64 getImageOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pHeader, QString sString);
+    quint64 getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader, QString sString);
+
 private:
     quint16 _checkSum(qint64 nStartValue, qint64 nDataSize);
     RESOURCE_POSITION _getResourcePosition(_MEMORY_MAP *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);

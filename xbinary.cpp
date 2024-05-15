@@ -68,21 +68,25 @@ XBinary::XBinary(const QString &sFileName)
 {
     g_sFileName = sFileName;
 
-    QFile *pFile = new QFile(sFileName);
+    if (g_pFile) {
+        g_pFile->close();
 
-    tryToOpen(pFile);
+        delete g_pFile;
+    }
 
-    setData(pFile);
+    g_pFile = new QFile(sFileName);
+
+    tryToOpen(g_pFile);
+
+    setData(g_pFile);
 }
 
 XBinary::~XBinary()
 {
-    if (g_sFileName != "") {
-        QFile *pFile = dynamic_cast<QFile *>(g_pDevice);
+    if (g_pFile) {
+        g_pFile->close();
 
-        if (pFile) {
-            pFile->close();
-        }
+        delete g_pFile;
     }
 }
 
@@ -91,6 +95,7 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     g_pReadWriteMutex = nullptr;
     g_nSize = 0;
     g_nFileFormatSize = 0;
+    g_pFile = nullptr;
 
     setDevice(pDevice);
     setIsImage(bIsImage);
@@ -133,6 +138,11 @@ void XBinary::setDevice(QIODevice *pDevice)
 void XBinary::setReadWriteMutex(QMutex *pReadWriteMutex)
 {
     g_pReadWriteMutex = pReadWriteMutex;
+}
+
+void XBinary::setFileName(const QString &sFileName)
+{
+    g_sFileName = sFileName;
 }
 
 qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen)
@@ -5187,54 +5197,66 @@ XBinary::FT XBinary::getPrefFileType(const QString &sFileName, bool bExtra)
     return result;
 }
 
-QList<XBinary::FT> XBinary::_getFileTypeListFromSet(QSet<XBinary::FT> stFileTypes)
+QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes, TL_OPTION tlOption)
 {
     QList<XBinary::FT> listResult;
 
     // TODO optimize !
-    if (stFileTypes.contains(FT_REGION)) listResult.append(FT_REGION);
-    if (stFileTypes.contains(FT_BINARY)) listResult.append(FT_BINARY);
-    if (stFileTypes.contains(FT_BINARY16)) listResult.append(FT_BINARY16);
-    if (stFileTypes.contains(FT_BINARY32)) listResult.append(FT_BINARY32);
-    if (stFileTypes.contains(FT_BINARY64)) listResult.append(FT_BINARY64);
-    if (stFileTypes.contains(FT_ZIP)) listResult.append(FT_ZIP);
-    if (stFileTypes.contains(FT_GZIP)) listResult.append(FT_GZIP);
-    if (stFileTypes.contains(FT_ZLIB)) listResult.append(FT_ZLIB);
-    if (stFileTypes.contains(FT_LHA)) listResult.append(FT_LHA);
-    if (stFileTypes.contains(FT_RAR)) listResult.append(FT_RAR);
-    if (stFileTypes.contains(FT_JAR)) listResult.append(FT_JAR);
-    if (stFileTypes.contains(FT_APK)) listResult.append(FT_APK);
-    if (stFileTypes.contains(FT_IPA)) listResult.append(FT_IPA);
-    if (stFileTypes.contains(FT_7Z)) listResult.append(FT_7Z);
-    if (stFileTypes.contains(FT_DEX)) listResult.append(FT_DEX);
-    if (stFileTypes.contains(FT_PDF)) listResult.append(FT_PDF);
-    if (stFileTypes.contains(FT_PNG)) listResult.append(FT_PNG);
-    if (stFileTypes.contains(FT_ICO)) listResult.append(FT_ICO);
-    if (stFileTypes.contains(FT_JPEG)) listResult.append(FT_JPEG);
-    if (stFileTypes.contains(FT_BMP)) listResult.append(FT_BMP);
-    if (stFileTypes.contains(FT_GIF)) listResult.append(FT_GIF);
-    if (stFileTypes.contains(FT_TIFF)) listResult.append(FT_TIFF);
-    if (stFileTypes.contains(FT_MP3)) listResult.append(FT_MP3);
-    if (stFileTypes.contains(FT_MP4)) listResult.append(FT_MP4);
-    if (stFileTypes.contains(FT_RIFF)) listResult.append(FT_RIFF);
-    if (stFileTypes.contains(FT_AVI)) listResult.append(FT_AVI);
-    if (stFileTypes.contains(FT_WEBP)) listResult.append(FT_WEBP);
-    if (stFileTypes.contains(FT_SIGNATURE)) listResult.append(FT_SIGNATURE);
-    if (stFileTypes.contains(FT_TAR)) listResult.append(FT_TAR);
-    if (stFileTypes.contains(FT_TARGZ)) listResult.append(FT_TARGZ);
-    if (stFileTypes.contains(FT_NPM)) listResult.append(FT_NPM);
-    if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
-    if (stFileTypes.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
-    if (stFileTypes.contains(FT_NE)) listResult.append(FT_NE);
-    if (stFileTypes.contains(FT_LE)) listResult.append(FT_LE);
-    if (stFileTypes.contains(FT_LX)) listResult.append(FT_LX);
-    if (stFileTypes.contains(FT_PE32)) listResult.append(FT_PE32);
-    if (stFileTypes.contains(FT_PE64)) listResult.append(FT_PE64);
-    if (stFileTypes.contains(FT_ELF32)) listResult.append(FT_ELF32);
-    if (stFileTypes.contains(FT_ELF64)) listResult.append(FT_ELF64);
-    if (stFileTypes.contains(FT_MACHO32)) listResult.append(FT_MACHO32);
-    if (stFileTypes.contains(FT_MACHO64)) listResult.append(FT_MACHO64);
-    if (stFileTypes.contains(FT_MACHOFAT)) listResult.append(FT_MACHOFAT);
+    if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
+        if (stFileTypes.contains(FT_REGION)) listResult.append(FT_REGION);
+        if (stFileTypes.contains(FT_BINARY)) listResult.append(FT_BINARY);
+        if (stFileTypes.contains(FT_BINARY16)) listResult.append(FT_BINARY16);
+        if (stFileTypes.contains(FT_BINARY32)) listResult.append(FT_BINARY32);
+        if (stFileTypes.contains(FT_BINARY64)) listResult.append(FT_BINARY64);
+    }
+
+    if (tlOption == TL_OPTION_ALL) {
+        if (stFileTypes.contains(FT_ARCHIVE)) listResult.append(FT_ARCHIVE);
+    }
+
+    if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_ALL)) {
+        if (stFileTypes.contains(FT_ZIP)) listResult.append(FT_ZIP);
+        if (stFileTypes.contains(FT_GZIP)) listResult.append(FT_GZIP);
+        if (stFileTypes.contains(FT_ZLIB)) listResult.append(FT_ZLIB);
+        if (stFileTypes.contains(FT_LHA)) listResult.append(FT_LHA);
+        if (stFileTypes.contains(FT_RAR)) listResult.append(FT_RAR);
+        if (stFileTypes.contains(FT_JAR)) listResult.append(FT_JAR);
+        if (stFileTypes.contains(FT_APK)) listResult.append(FT_APK);
+        if (stFileTypes.contains(FT_IPA)) listResult.append(FT_IPA);
+        if (stFileTypes.contains(FT_7Z)) listResult.append(FT_7Z);
+        if (stFileTypes.contains(FT_DEX)) listResult.append(FT_DEX);
+        if (stFileTypes.contains(FT_PDF)) listResult.append(FT_PDF);
+        if (stFileTypes.contains(FT_PNG)) listResult.append(FT_PNG);
+        if (stFileTypes.contains(FT_ICO)) listResult.append(FT_ICO);
+        if (stFileTypes.contains(FT_JPEG)) listResult.append(FT_JPEG);
+        if (stFileTypes.contains(FT_BMP)) listResult.append(FT_BMP);
+        if (stFileTypes.contains(FT_GIF)) listResult.append(FT_GIF);
+        if (stFileTypes.contains(FT_TIFF)) listResult.append(FT_TIFF);
+        if (stFileTypes.contains(FT_MP3)) listResult.append(FT_MP3);
+        if (stFileTypes.contains(FT_MP4)) listResult.append(FT_MP4);
+        if (stFileTypes.contains(FT_RIFF)) listResult.append(FT_RIFF);
+        if (stFileTypes.contains(FT_AVI)) listResult.append(FT_AVI);
+        if (stFileTypes.contains(FT_WEBP)) listResult.append(FT_WEBP);
+        if (stFileTypes.contains(FT_SIGNATURE)) listResult.append(FT_SIGNATURE);
+        if (stFileTypes.contains(FT_TAR)) listResult.append(FT_TAR);
+        if (stFileTypes.contains(FT_TARGZ)) listResult.append(FT_TARGZ);
+        if (stFileTypes.contains(FT_NPM)) listResult.append(FT_NPM);
+        if (stFileTypes.contains(FT_MACHOFAT)) listResult.append(FT_MACHOFAT);
+    }
+
+    if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
+        if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
+        if (stFileTypes.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
+        if (stFileTypes.contains(FT_NE)) listResult.append(FT_NE);
+        if (stFileTypes.contains(FT_LE)) listResult.append(FT_LE);
+        if (stFileTypes.contains(FT_LX)) listResult.append(FT_LX);
+        if (stFileTypes.contains(FT_PE32)) listResult.append(FT_PE32);
+        if (stFileTypes.contains(FT_PE64)) listResult.append(FT_PE64);
+        if (stFileTypes.contains(FT_ELF32)) listResult.append(FT_ELF32);
+        if (stFileTypes.contains(FT_ELF64)) listResult.append(FT_ELF64);
+        if (stFileTypes.contains(FT_MACHO32)) listResult.append(FT_MACHO32);
+        if (stFileTypes.contains(FT_MACHO64)) listResult.append(FT_MACHO64);
+    }
 
     return listResult;
 }
@@ -8235,7 +8257,7 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
         } else {
             dmResult = DM_ARM_LE;
         }
-    } else if ((sArch == "AARCH64") || (sArch == "ARM64")) {
+    } else if ((sArch == "AARCH64") || (sArch == "ARM64") || (sArch == "ARM64E")) {
         if (bIsBigEndian) {
             dmResult = DM_ARM64_BE;
         } else {

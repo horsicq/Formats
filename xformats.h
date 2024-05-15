@@ -91,8 +91,8 @@ public:
     static QSet<XBinary::FT> getFileTypesTGZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
 #endif
 #ifdef QT_GUI_LIB
-    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox);
-    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox);
+    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox, XBinary::TL_OPTION tlOption = XBinary::TL_OPTION_DEFAULT);
+    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox, XBinary::TL_OPTION tlOption = XBinary::TL_OPTION_DEFAULT);
     static bool setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian);
     static XBinary::MAPMODE setMapModeComboBox(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, QComboBox *pComboBox);
     static void setProgressBar(QProgressBar *pProgressBar, XBinary::PDRECORD pdRecord);

@@ -1518,7 +1518,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 }
 
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox)
+XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox, XBinary::TL_OPTION tlOption)
 {
     const bool bBlocked1 = pComboBox->blockSignals(true);
 
@@ -1527,7 +1527,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
     if (fileType != XBinary::FT_REGION) {
         QSet<XBinary::FT> stFileType = XFormats::getFileTypes(pDevice, true);
 
-        listFileTypes = XBinary::_getFileTypeListFromSet(stFileType);
+        listFileTypes = XBinary::_getFileTypeListFromSet(stFileType, tlOption);
     } else {
         listFileTypes.append(XBinary::FT_REGION);
     }
@@ -1565,7 +1565,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
 }
 #endif
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox)
+XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox, XBinary::TL_OPTION tlOption)
 {
     XBinary::FT result = XBinary::FT_UNKNOWN;
 
@@ -1573,7 +1573,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, const QString &s
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        result = setFileTypeComboBox(fileType, &file, pComboBox);
+        result = setFileTypeComboBox(fileType, &file, pComboBox, tlOption);
 
         file.close();
     }

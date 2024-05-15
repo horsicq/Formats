@@ -635,6 +635,9 @@ public:
     void setData(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     void setDevice(QIODevice *pDevice);
     void setReadWriteMutex(QMutex *pReadWriteMutex);
+
+    void setFileName(const QString &sFileName);
+
     qint64 safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen);
     qint64 safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen);
     qint64 getSize();
@@ -1088,7 +1091,13 @@ public:
     static FT getPrefFileType(QIODevice *pDevice, bool bExtra = false);
     static FT getPrefFileType(const QString &sFileName, bool bExtra = false);
 
-    static QList<FT> _getFileTypeListFromSet(QSet<FT> stFileTypes);
+    enum TL_OPTION {
+        TL_OPTION_DEFAULT = 0,
+        TL_OPTION_ALL,
+        TL_OPTION_EXECUTABLE
+    };
+
+    static QList<FT> _getFileTypeListFromSet(const QSet<FT> &stFileTypes, TL_OPTION tlOption);
 
     static QString valueToHex(quint8 nValue);
     static QString valueToHex(qint8 nValue);
@@ -1549,6 +1558,7 @@ signals:
 private:
     QIODevice *g_pDevice;
     QString g_sFileName;
+    QFile *g_pFile;
     QMutex *g_pReadWriteMutex;
     bool g_bIsImage;
     XADDR g_nBaseAddress;
