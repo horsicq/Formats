@@ -987,7 +987,7 @@ quint32 XMACH::getCommandId(qint32 nIndex, QList<COMMAND_RECORD> *pListCommandRe
 
     qint32 nNumberOfCommands = pListCommandRecords->count();
 
-    if ((nIndex >= 0) && (nIndex <nNumberOfCommands)) {
+    if ((nIndex >= 0) && (nIndex < nNumberOfCommands)) {
         nResult = pListCommandRecords->at(nIndex).nId;
     }
 

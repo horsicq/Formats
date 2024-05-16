@@ -8821,14 +8821,14 @@ quint64 XPE::getImageFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pHeader, QString sSt
 {
     quint64 nResult = 0;
 
-    if (sString == "Machine")  nResult = pHeader->Machine;
-    else if (sString == "Machine")  nResult = pHeader->Machine;
-    else if (sString == "NumberOfSections")  nResult = pHeader->NumberOfSections;
-    else if (sString == "TimeDateStamp")  nResult = pHeader->TimeDateStamp;
-    else if (sString == "PointerToSymbolTable")  nResult = pHeader->PointerToSymbolTable;
-    else if (sString == "NumberOfSymbols")  nResult = pHeader->NumberOfSymbols;
-    else if (sString == "SizeOfOptionalHeader")  nResult = pHeader->SizeOfOptionalHeader;
-    else if (sString == "Characteristics")  nResult = pHeader->Characteristics;
+    if (sString == "Machine") nResult = pHeader->Machine;
+    else if (sString == "Machine") nResult = pHeader->Machine;
+    else if (sString == "NumberOfSections") nResult = pHeader->NumberOfSections;
+    else if (sString == "TimeDateStamp") nResult = pHeader->TimeDateStamp;
+    else if (sString == "PointerToSymbolTable") nResult = pHeader->PointerToSymbolTable;
+    else if (sString == "NumberOfSymbols") nResult = pHeader->NumberOfSymbols;
+    else if (sString == "SizeOfOptionalHeader") nResult = pHeader->SizeOfOptionalHeader;
+    else if (sString == "Characteristics") nResult = pHeader->Characteristics;
     else {
         emit errorMessage(QString("%1: %2").arg(tr("Invalid"), sString));
     }
@@ -8840,36 +8840,36 @@ quint64 XPE::getImageOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pHeader,
 {
     quint64 nResult = 0;
 
-    if (sString == "Magic")  nResult = pHeader->Magic;
-    else if (sString == "MajorLinkerVersion")  nResult = pHeader->MajorLinkerVersion;
-    else if (sString == "MinorLinkerVersion")  nResult = pHeader->MinorLinkerVersion;
-    else if (sString == "SizeOfCode")  nResult = pHeader->SizeOfCode;
-    else if (sString == "SizeOfInitializedData")  nResult = pHeader->SizeOfInitializedData;
-    else if (sString == "SizeOfUninitializedData")  nResult = pHeader->SizeOfUninitializedData;
-    else if (sString == "AddressOfEntryPoint")  nResult = pHeader->AddressOfEntryPoint;
-    else if (sString == "BaseOfCode")  nResult = pHeader->BaseOfCode;
-    else if (sString == "BaseOfData")  nResult = pHeader->BaseOfData;
-    else if (sString == "ImageBase")  nResult = pHeader->ImageBase;
-    else if (sString == "SectionAlignment")  nResult = pHeader->SectionAlignment;
-    else if (sString == "FileAlignment")  nResult = pHeader->FileAlignment;
-    else if (sString == "MajorOperatingSystemVersion")  nResult = pHeader->MajorOperatingSystemVersion;
-    else if (sString == "MinorOperatingSystemVersion")  nResult = pHeader->MinorOperatingSystemVersion;
-    else if (sString == "MajorImageVersion")  nResult = pHeader->MajorImageVersion;
-    else if (sString == "MinorImageVersion")  nResult = pHeader->MinorImageVersion;
-    else if (sString == "MajorSubsystemVersion")  nResult = pHeader->MajorSubsystemVersion;
-    else if (sString == "MinorSubsystemVersion")  nResult = pHeader->MinorSubsystemVersion;
-    else if (sString == "Win32VersionValue")  nResult = pHeader->Win32VersionValue;
-    else if (sString == "SizeOfImage")  nResult = pHeader->SizeOfImage;
-    else if (sString == "SizeOfHeaders")  nResult = pHeader->SizeOfHeaders;
-    else if (sString == "CheckSum")  nResult = pHeader->CheckSum;
-    else if (sString == "Subsystem")  nResult = pHeader->Subsystem;
-    else if (sString == "DllCharacteristics")  nResult = pHeader->DllCharacteristics;
-    else if (sString == "SizeOfStackReserve")  nResult = pHeader->SizeOfStackReserve;
-    else if (sString == "SizeOfStackCommit")  nResult = pHeader->SizeOfStackCommit;
-    else if (sString == "SizeOfHeapReserve")  nResult = pHeader->SizeOfHeapReserve;
-    else if (sString == "SizeOfHeapCommit")  nResult = pHeader->SizeOfHeapCommit;
-    else if (sString == "LoaderFlags")  nResult = pHeader->LoaderFlags;
-    else if (sString == "NumberOfRvaAndSizes")  nResult = pHeader->NumberOfRvaAndSizes;
+    if (sString == "Magic") nResult = pHeader->Magic;
+    else if (sString == "MajorLinkerVersion") nResult = pHeader->MajorLinkerVersion;
+    else if (sString == "MinorLinkerVersion") nResult = pHeader->MinorLinkerVersion;
+    else if (sString == "SizeOfCode") nResult = pHeader->SizeOfCode;
+    else if (sString == "SizeOfInitializedData") nResult = pHeader->SizeOfInitializedData;
+    else if (sString == "SizeOfUninitializedData") nResult = pHeader->SizeOfUninitializedData;
+    else if (sString == "AddressOfEntryPoint") nResult = pHeader->AddressOfEntryPoint;
+    else if (sString == "BaseOfCode") nResult = pHeader->BaseOfCode;
+    else if (sString == "BaseOfData") nResult = pHeader->BaseOfData;
+    else if (sString == "ImageBase") nResult = pHeader->ImageBase;
+    else if (sString == "SectionAlignment") nResult = pHeader->SectionAlignment;
+    else if (sString == "FileAlignment") nResult = pHeader->FileAlignment;
+    else if (sString == "MajorOperatingSystemVersion") nResult = pHeader->MajorOperatingSystemVersion;
+    else if (sString == "MinorOperatingSystemVersion") nResult = pHeader->MinorOperatingSystemVersion;
+    else if (sString == "MajorImageVersion") nResult = pHeader->MajorImageVersion;
+    else if (sString == "MinorImageVersion") nResult = pHeader->MinorImageVersion;
+    else if (sString == "MajorSubsystemVersion") nResult = pHeader->MajorSubsystemVersion;
+    else if (sString == "MinorSubsystemVersion") nResult = pHeader->MinorSubsystemVersion;
+    else if (sString == "Win32VersionValue") nResult = pHeader->Win32VersionValue;
+    else if (sString == "SizeOfImage") nResult = pHeader->SizeOfImage;
+    else if (sString == "SizeOfHeaders") nResult = pHeader->SizeOfHeaders;
+    else if (sString == "CheckSum") nResult = pHeader->CheckSum;
+    else if (sString == "Subsystem") nResult = pHeader->Subsystem;
+    else if (sString == "DllCharacteristics") nResult = pHeader->DllCharacteristics;
+    else if (sString == "SizeOfStackReserve") nResult = pHeader->SizeOfStackReserve;
+    else if (sString == "SizeOfStackCommit") nResult = pHeader->SizeOfStackCommit;
+    else if (sString == "SizeOfHeapReserve") nResult = pHeader->SizeOfHeapReserve;
+    else if (sString == "SizeOfHeapCommit") nResult = pHeader->SizeOfHeapCommit;
+    else if (sString == "LoaderFlags") nResult = pHeader->LoaderFlags;
+    else if (sString == "NumberOfRvaAndSizes") nResult = pHeader->NumberOfRvaAndSizes;
     else {
         emit errorMessage(QString("%1: %2").arg(tr("Invalid"), sString));
     }
@@ -8881,36 +8881,36 @@ quint64 XPE::getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader,
 {
     quint64 nResult = 0;
 
-    if (sString == "Magic")  nResult = pHeader->Magic;
-    else if (sString == "MajorLinkerVersion")  nResult = pHeader->MajorLinkerVersion;
-    else if (sString == "MinorLinkerVersion")  nResult = pHeader->MinorLinkerVersion;
-    else if (sString == "SizeOfCode")  nResult = pHeader->SizeOfCode;
-    else if (sString == "SizeOfInitializedData")  nResult = pHeader->SizeOfInitializedData;
-    else if (sString == "SizeOfUninitializedData")  nResult = pHeader->SizeOfUninitializedData;
-    else if (sString == "AddressOfEntryPoint")  nResult = pHeader->AddressOfEntryPoint;
-    else if (sString == "BaseOfCode")  nResult = pHeader->BaseOfCode;
-    else if (sString == "BaseOfData")  nResult = 0;
-    else if (sString == "ImageBase")  nResult = pHeader->ImageBase;
-    else if (sString == "SectionAlignment")  nResult = pHeader->SectionAlignment;
-    else if (sString == "FileAlignment")  nResult = pHeader->FileAlignment;
-    else if (sString == "MajorOperatingSystemVersion")  nResult = pHeader->MajorOperatingSystemVersion;
-    else if (sString == "MinorOperatingSystemVersion")  nResult = pHeader->MinorOperatingSystemVersion;
-    else if (sString == "MajorImageVersion")  nResult = pHeader->MajorImageVersion;
-    else if (sString == "MinorImageVersion")  nResult = pHeader->MinorImageVersion;
-    else if (sString == "MajorSubsystemVersion")  nResult = pHeader->MajorSubsystemVersion;
-    else if (sString == "MinorSubsystemVersion")  nResult = pHeader->MinorSubsystemVersion;
-    else if (sString == "Win32VersionValue")  nResult = pHeader->Win32VersionValue;
-    else if (sString == "SizeOfImage")  nResult = pHeader->SizeOfImage;
-    else if (sString == "SizeOfHeaders")  nResult = pHeader->SizeOfHeaders;
-    else if (sString == "CheckSum")  nResult = pHeader->CheckSum;
-    else if (sString == "Subsystem")  nResult = pHeader->Subsystem;
-    else if (sString == "DllCharacteristics")  nResult = pHeader->DllCharacteristics;
-    else if (sString == "SizeOfStackReserve")  nResult = pHeader->SizeOfStackReserve;
-    else if (sString == "SizeOfStackCommit")  nResult = pHeader->SizeOfStackCommit;
-    else if (sString == "SizeOfHeapReserve")  nResult = pHeader->SizeOfHeapReserve;
-    else if (sString == "SizeOfHeapCommit")  nResult = pHeader->SizeOfHeapCommit;
-    else if (sString == "LoaderFlags")  nResult = pHeader->LoaderFlags;
-    else if (sString == "NumberOfRvaAndSizes")  nResult = pHeader->NumberOfRvaAndSizes;
+    if (sString == "Magic") nResult = pHeader->Magic;
+    else if (sString == "MajorLinkerVersion") nResult = pHeader->MajorLinkerVersion;
+    else if (sString == "MinorLinkerVersion") nResult = pHeader->MinorLinkerVersion;
+    else if (sString == "SizeOfCode") nResult = pHeader->SizeOfCode;
+    else if (sString == "SizeOfInitializedData") nResult = pHeader->SizeOfInitializedData;
+    else if (sString == "SizeOfUninitializedData") nResult = pHeader->SizeOfUninitializedData;
+    else if (sString == "AddressOfEntryPoint") nResult = pHeader->AddressOfEntryPoint;
+    else if (sString == "BaseOfCode") nResult = pHeader->BaseOfCode;
+    else if (sString == "BaseOfData") nResult = 0;
+    else if (sString == "ImageBase") nResult = pHeader->ImageBase;
+    else if (sString == "SectionAlignment") nResult = pHeader->SectionAlignment;
+    else if (sString == "FileAlignment") nResult = pHeader->FileAlignment;
+    else if (sString == "MajorOperatingSystemVersion") nResult = pHeader->MajorOperatingSystemVersion;
+    else if (sString == "MinorOperatingSystemVersion") nResult = pHeader->MinorOperatingSystemVersion;
+    else if (sString == "MajorImageVersion") nResult = pHeader->MajorImageVersion;
+    else if (sString == "MinorImageVersion") nResult = pHeader->MinorImageVersion;
+    else if (sString == "MajorSubsystemVersion") nResult = pHeader->MajorSubsystemVersion;
+    else if (sString == "MinorSubsystemVersion") nResult = pHeader->MinorSubsystemVersion;
+    else if (sString == "Win32VersionValue") nResult = pHeader->Win32VersionValue;
+    else if (sString == "SizeOfImage") nResult = pHeader->SizeOfImage;
+    else if (sString == "SizeOfHeaders") nResult = pHeader->SizeOfHeaders;
+    else if (sString == "CheckSum") nResult = pHeader->CheckSum;
+    else if (sString == "Subsystem") nResult = pHeader->Subsystem;
+    else if (sString == "DllCharacteristics") nResult = pHeader->DllCharacteristics;
+    else if (sString == "SizeOfStackReserve") nResult = pHeader->SizeOfStackReserve;
+    else if (sString == "SizeOfStackCommit") nResult = pHeader->SizeOfStackCommit;
+    else if (sString == "SizeOfHeapReserve") nResult = pHeader->SizeOfHeapReserve;
+    else if (sString == "SizeOfHeapCommit") nResult = pHeader->SizeOfHeapCommit;
+    else if (sString == "LoaderFlags") nResult = pHeader->LoaderFlags;
+    else if (sString == "NumberOfRvaAndSizes") nResult = pHeader->NumberOfRvaAndSizes;
     else {
         emit errorMessage(QString("%1: %2").arg(tr("Invalid"), sString));
     }
