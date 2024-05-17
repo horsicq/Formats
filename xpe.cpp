@@ -180,14 +180,18 @@ qint32 XPE::getType()
     } else if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI) ||
                (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI)) {
         result = TYPE_CONSOLE;
-    } else if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_GUI) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)) {
+    } else if (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_GUI) {
         result = TYPE_GUI;
-    } else if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION)) {
-        result = TYPE_APPLICATION;
+    } else if (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI) {
+        result = TYPE_CE_GUI;
+    } else if (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_XBOX) {
+        result = TYPE_XBOX_APPLICATION;
+    } else if (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_APPLICATION) {
+        result = TYPE_EFI_APPLICATION;
     } else if (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER) {
-        result = TYPE_BOOTSERVICEDRIVER;
+        result = TYPE_EFI_BOOTSERVICEDRIVER;
     } else if (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER) {
-        result = TYPE_RUNTIMEDRIVER;
+        result = TYPE_EFI_RUNTIMEDRIVER;
     }
 
     // TODO from Resource/Version
@@ -208,15 +212,16 @@ QString XPE::typeIdToString(qint32 nType)
     switch (nType) {
         case TYPE_UNKNOWN: sResult = tr("Unknown"); break;
         case TYPE_APPLICATION: sResult = tr("Application"); break;
+        case TYPE_XBOX_APPLICATION: sResult = QString("XBOX %1").arg(tr("Application")); break;
+        case TYPE_EFI_APPLICATION: sResult = QString("EFI %1").arg(tr("Application")); break;
         case TYPE_GUI: sResult = QString("GUI"); break;
+        case TYPE_CE_GUI: sResult = QString("CE GUI"); break;
         case TYPE_CONSOLE: sResult = tr("Console"); break;
         case TYPE_DLL: sResult = QString("DLL"); break;
         case TYPE_DRIVER: sResult = tr("Driver"); break;
         case TYPE_BOOTAPPLICATION: sResult = tr("Boot application"); break;
-        case TYPE_RUNTIMEDRIVER: sResult = tr("Runtime driver"); break;
-        case TYPE_BOOTSERVICEDRIVER:
-            sResult = tr("Boot service driver");
-            break;
+        case TYPE_EFI_RUNTIMEDRIVER: sResult = QString("EFI %1").arg(tr("Runtime driver")); break;
+        case TYPE_EFI_BOOTSERVICEDRIVER: sResult = QString("EFI %1").arg(tr("Boot service driver")); break;
             //        case TYPE_EFIBOOT:          sResult=QString("EFI Boot");
             //        break; case TYPE_EFI:              sResult=QString("EFI");
             //        break; case TYPE_EFIRUNTIMEDRIVER: sResult=QString("EFI
@@ -269,7 +274,9 @@ QString XPE::getFileFormatExt()
 
     if (_type == TYPE_DLL) {
         sResult = "dll";
-    } else if ((_type == TYPE_DRIVER) || (_type == TYPE_BOOTSERVICEDRIVER) || (_type == TYPE_RUNTIMEDRIVER)) {
+    } else if ((_type == TYPE_EFI_APPLICATION) || (_type == TYPE_EFI_BOOTSERVICEDRIVER) || (_type == TYPE_EFI_RUNTIMEDRIVER)) {
+        sResult = "efi";
+    } else if (_type == TYPE_DRIVER) {
         sResult = "sys";
     } else {
         sResult = "exe";

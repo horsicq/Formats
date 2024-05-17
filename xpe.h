@@ -294,14 +294,17 @@ public:
         // mb TODO CEDLL
         TYPE_UNKNOWN = 0,
         TYPE_APPLICATION,
+        TYPE_XBOX_APPLICATION,
+        TYPE_EFI_APPLICATION,
         TYPE_GUI,
+        TYPE_CE_GUI,
         TYPE_CONSOLE,
         TYPE_DLL,
         TYPE_DRIVER,
         TYPE_BOOTAPPLICATION,
         //        TYPE_SERVICEDRIVER,
-        TYPE_RUNTIMEDRIVER,
-        TYPE_BOOTSERVICEDRIVER
+        TYPE_EFI_RUNTIMEDRIVER,
+        TYPE_EFI_BOOTSERVICEDRIVER
         //        TYPE_XBOX,
         //        TYPE_OS2,
         //        TYPE_POSIX,

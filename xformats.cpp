@@ -995,7 +995,7 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
     QString _sType = sType;
     Qt::GlobalColor result = Qt::transparent;
 
-    _sType = _sType.toLower();
+    _sType = _sType.toLower().remove("~");
 
     // TODO more
     if ((_sType == "installer") || (_sType == "sfx") || (_sType == "archive")) {
@@ -1022,7 +1022,7 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
 qint32 XFormats::typeToPrio(const QString &sType)
 {
     qint32 nResult = 0;
-    QString _sType = sType.toLower();
+    QString _sType = sType.toLower().remove("~");
 
     if ((_sType == "operation system") || (_sType == "virtual machine")) nResult = 10;
     else if (_sType == "linker") nResult = 20;
