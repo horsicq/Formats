@@ -148,7 +148,7 @@ QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
             chunkData.nDataOffset = nOffset;
 
             while (true) {
-                nOffset = find_uint8(nOffset, -1, 0xFF, pPdStruct);  // TODO PDStruct;
+                nOffset = find_uint8(nOffset, -1, 0xFF, pPdStruct);
 
                 if (nOffset == -1) {
                     break;
