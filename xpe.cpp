@@ -221,7 +221,9 @@ QString XPE::typeIdToString(qint32 nType)
         case TYPE_DRIVER: sResult = tr("Driver"); break;
         case TYPE_BOOTAPPLICATION: sResult = tr("Boot application"); break;
         case TYPE_EFI_RUNTIMEDRIVER: sResult = QString("EFI %1").arg(tr("Runtime driver")); break;
-        case TYPE_EFI_BOOTSERVICEDRIVER: sResult = QString("EFI %1").arg(tr("Boot service driver")); break;
+        case TYPE_EFI_BOOTSERVICEDRIVER:
+            sResult = QString("EFI %1").arg(tr("Boot service driver"));
+            break;
             //        case TYPE_EFIBOOT:          sResult=QString("EFI Boot");
             //        break; case TYPE_EFI:              sResult=QString("EFI");
             //        break; case TYPE_EFIRUNTIMEDRIVER: sResult=QString("EFI
