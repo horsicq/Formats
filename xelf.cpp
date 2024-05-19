@@ -3577,7 +3577,7 @@ QList<XBinary::MAPMODE> XELF::getMapModesList(PDSTRUCT *pPdStruct)
     return listResult;
 }
 
-QMap<quint64, QString> XELF::getDynamicTags()
+QMap<quint64, QString> XELF::getDynamicTags(QString sArch)
 {
     QMap<quint64, QString> mapResult;
 
@@ -3645,7 +3645,57 @@ QMap<quint64, QString> XELF::getDynamicTags()
     mapResult.insert(0x6ffffffe, "DT_VERNEED");
     mapResult.insert(0x6fffffff, "DT_VERNEEDNUM");
     mapResult.insert(0x70000000, "DT_LOPROC");
-    mapResult.insert(0x70000001, "DT_SPARC_REGISTER");
+
+    if (sArch == "MIPS") {
+        mapResult.insert(0x70000001, "DT_MIPS_RLD_VERSION");
+        mapResult.insert(0x70000002, "DT_MIPS_TIME_STAMP");
+        mapResult.insert(0x70000003, "DT_MIPS_ICHECKSUM");
+        mapResult.insert(0x70000004, "DT_MIPS_IVERSION");
+        mapResult.insert(0x70000005, "DT_MIPS_FLAGS");
+        mapResult.insert(0x70000006, "DT_MIPS_BASE_ADDRESS");
+        mapResult.insert(0x70000008, "DT_MIPS_CONFLICT");
+        mapResult.insert(0x70000009, "DT_MIPS_LIBLIST");
+        mapResult.insert(0x7000000a, "DT_MIPS_LOCAL_GOTNO");
+        mapResult.insert(0x7000000b, "DT_MIPS_CONFLICTNO");
+        mapResult.insert(0x70000010, "DT_MIPS_LIBLISTNO");
+        mapResult.insert(0x70000011, "DT_MIPS_SYMTABNO");
+        mapResult.insert(0x70000012, "DT_MIPS_UNREFEXTNO");
+        mapResult.insert(0x70000013, "DT_MIPS_GOTSYM");
+        mapResult.insert(0x70000014, "DT_MIPS_HIPAGENO");
+        mapResult.insert(0x70000016, "DT_MIPS_RLD_MAP");
+        mapResult.insert(0x70000017, "DT_MIPS_DELTA_CLASS");
+        mapResult.insert(0x70000018, "DT_MIPS_DELTA_CLASS_NO");
+        mapResult.insert(0x70000019, "DT_MIPS_DELTA_INSTANCE");
+        mapResult.insert(0x7000001A, "DT_MIPS_DELTA_INSTANCE_NO");
+        mapResult.insert(0x7000001B, "DT_MIPS_DELTA_RELOC");
+        mapResult.insert(0x7000001C, "DT_MIPS_DELTA_RELOC_NO");
+        mapResult.insert(0x7000001D, "DT_MIPS_DELTA_SYM");
+        mapResult.insert(0x7000001E, "DT_MIPS_DELTA_SYM_NO");
+        mapResult.insert(0x70000020, "DT_MIPS_DELTA_CLASSSYM");
+        mapResult.insert(0x70000021, "DT_MIPS_DELTA_CLASSSYM_NO");
+        mapResult.insert(0x70000022, "DT_MIPS_CXX_FLAGS");
+        mapResult.insert(0x70000023, "DT_MIPS_PIXIE_INIT");
+        mapResult.insert(0x70000024, "DT_MIPS_SYMBOL_LIB");
+        mapResult.insert(0x70000025, "DT_MIPS_LOCALPAGE_GOTIDX");
+        mapResult.insert(0x70000026, "DT_MIPS_LOCAL_GOTIDX");
+        mapResult.insert(0x70000027, "DT_MIPS_HIDDEN_GOTIDX");
+        mapResult.insert(0x70000028, "DT_MIPS_PROTECTED_GOTIDX");
+        mapResult.insert(0x70000029, "DT_MIPS_OPTIONS");
+        mapResult.insert(0x7000002A, "DT_MIPS_INTERFACE");
+        mapResult.insert(0x7000002B, "DT_MIPS_DYNSTR_ALIGN");
+        mapResult.insert(0x7000002C, "DT_MIPS_INTERFACE_SIZE");
+        mapResult.insert(0x7000002D, "DT_MIPS_RLD_TEXT_RESOLVE_ADDR");
+        mapResult.insert(0x7000002E, "DT_MIPS_PERF_SUFFIX");
+        mapResult.insert(0x7000002F, "DT_MIPS_COMPACT_SIZE");
+        mapResult.insert(0x70000030, "DT_MIPS_GP_VALUE");
+        mapResult.insert(0x70000031, "DT_MIPS_AUX_DYNAMIC");
+        mapResult.insert(0x70000032, "DT_MIPS_PLTGOT");
+        mapResult.insert(0x70000033, "DT_MIPS_RLD_OBJ_UPDATE");
+        mapResult.insert(0x70000034, "DT_MIPS_RWPLT");
+    } else {
+        mapResult.insert(0x70000001, "DT_SPARC_REGISTER");
+    }
+
     mapResult.insert(0x7ffffffd, "DT_AUXILIARY");
     mapResult.insert(0x7ffffffe, "DT_USED");
     mapResult.insert(0x7fffffff, "DT_HIPROC");  // DT_FILTER
@@ -3653,7 +3703,7 @@ QMap<quint64, QString> XELF::getDynamicTags()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getDynamicTagsS()
+QMap<quint64, QString> XELF::getDynamicTagsS(QString sArch)
 {
     QMap<quint64, QString> mapResult;
 
@@ -3721,7 +3771,57 @@ QMap<quint64, QString> XELF::getDynamicTagsS()
     mapResult.insert(0x6ffffffe, "VERNEED");
     mapResult.insert(0x6fffffff, "VERNEEDNUM");
     mapResult.insert(0x70000000, "LOPROC");
-    mapResult.insert(0x70000001, "SPARC_REGISTER");
+
+    if (sArch == "MIPS") {
+        mapResult.insert(0x70000001, "MIPS_RLD_VERSION");
+        mapResult.insert(0x70000002, "MIPS_TIME_STAMP");
+        mapResult.insert(0x70000003, "MIPS_ICHECKSUM");
+        mapResult.insert(0x70000004, "MIPS_IVERSION");
+        mapResult.insert(0x70000005, "MIPS_FLAGS");
+        mapResult.insert(0x70000006, "MIPS_BASE_ADDRESS");
+        mapResult.insert(0x70000008, "MIPS_CONFLICT");
+        mapResult.insert(0x70000009, "MIPS_LIBLIST");
+        mapResult.insert(0x7000000a, "MIPS_LOCAL_GOTNO");
+        mapResult.insert(0x7000000b, "MIPS_CONFLICTNO");
+        mapResult.insert(0x70000010, "MIPS_LIBLISTNO");
+        mapResult.insert(0x70000011, "MIPS_SYMTABNO");
+        mapResult.insert(0x70000012, "MIPS_UNREFEXTNO");
+        mapResult.insert(0x70000013, "MIPS_GOTSYM");
+        mapResult.insert(0x70000014, "MIPS_HIPAGENO");
+        mapResult.insert(0x70000016, "MIPS_RLD_MAP");
+        mapResult.insert(0x70000017, "MIPS_DELTA_CLASS");
+        mapResult.insert(0x70000018, "MIPS_DELTA_CLASS_NO");
+        mapResult.insert(0x70000019, "MIPS_DELTA_INSTANCE");
+        mapResult.insert(0x7000001A, "MIPS_DELTA_INSTANCE_NO");
+        mapResult.insert(0x7000001B, "MIPS_DELTA_RELOC");
+        mapResult.insert(0x7000001C, "MIPS_DELTA_RELOC_NO");
+        mapResult.insert(0x7000001D, "MIPS_DELTA_SYM");
+        mapResult.insert(0x7000001E, "MIPS_DELTA_SYM_NO");
+        mapResult.insert(0x70000020, "MIPS_DELTA_CLASSSYM");
+        mapResult.insert(0x70000021, "MIPS_DELTA_CLASSSYM_NO");
+        mapResult.insert(0x70000022, "MIPS_CXX_FLAGS");
+        mapResult.insert(0x70000023, "MIPS_PIXIE_INIT");
+        mapResult.insert(0x70000024, "MIPS_SYMBOL_LIB");
+        mapResult.insert(0x70000025, "MIPS_LOCALPAGE_GOTIDX");
+        mapResult.insert(0x70000026, "MIPS_LOCAL_GOTIDX");
+        mapResult.insert(0x70000027, "MIPS_HIDDEN_GOTIDX");
+        mapResult.insert(0x70000028, "MIPS_PROTECTED_GOTIDX");
+        mapResult.insert(0x70000029, "MIPS_OPTIONS");
+        mapResult.insert(0x7000002A, "MIPS_INTERFACE");
+        mapResult.insert(0x7000002B, "MIPS_DYNSTR_ALIGN");
+        mapResult.insert(0x7000002C, "MIPS_INTERFACE_SIZE");
+        mapResult.insert(0x7000002D, "MIPS_RLD_TEXT_RESOLVE_ADDR");
+        mapResult.insert(0x7000002E, "MIPS_PERF_SUFFIX");
+        mapResult.insert(0x7000002F, "MIPS_COMPACT_SIZE");
+        mapResult.insert(0x70000030, "MIPS_GP_VALUE");
+        mapResult.insert(0x70000031, "MIPS_AUX_DYNAMIC");
+        mapResult.insert(0x70000032, "MIPS_PLTGOT");
+        mapResult.insert(0x70000033, "MIPS_RLD_OBJ_UPDATE");
+        mapResult.insert(0x70000034, "MIPS_RWPLT");
+    } else {
+        mapResult.insert(0x70000001, "SPARC_REGISTER");
+    }
+
     mapResult.insert(0x7ffffffd, "AUXILIARY");
     mapResult.insert(0x7ffffffe, "USED");
     mapResult.insert(0x7fffffff, "HIPROC");  // FILTER
