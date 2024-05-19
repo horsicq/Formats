@@ -34,7 +34,7 @@ bool XBMP::isValid(PDSTRUCT *pPdStruct)
 
     _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
 
-    if (compareSignature(&memoryMap, "'BM'..................000000", 0)) {
+    if (compareSignature(&memoryMap, "'BM'..................000000", 0, pPdStruct)) {
         quint32 nSize = read_uint32(2);
 
         if ((nSize > 0) && (nSize <= getSize())) {
