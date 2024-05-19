@@ -33,8 +33,8 @@ bool XTiff::isValid(PDSTRUCT *pPdStruct)
     bool bIsValid = false;
 
     if (getSize() >= 8) {
-        _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
-        if (compareSignature(&memoryMap, "'MM'002A") || compareSignature(&memoryMap, "'II'2A00")) {
+        _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+        if (compareSignature(&memoryMap, "'MM'002A", 0, pPdStruct) || compareSignature(&memoryMap, "'II'2A00", 0, pPdStruct)) {
             bool bIsBigEndian = isBigEndian();
 
             quint32 nOffset = read_uint32(4, bIsBigEndian);
