@@ -926,7 +926,7 @@ QMap<quint64, QString> XELF::getIndentOsabisS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionTypes()
+QMap<quint64, QString> XELF::getSectionTypes(QString sArch)
 {
     QMap<quint64, QString> mapResult;
 
@@ -962,40 +962,44 @@ QMap<quint64, QString> XELF::getSectionTypes()
     mapResult.insert(0x70000003, "SHT_ARM_ATTRIBUTES");
     mapResult.insert(0x70000004, "SHT_ARM_DEBUGOVERLAY");
     mapResult.insert(0x70000005, "SHT_ARM_OVERLAYSECTION");
-    mapResult.insert(0x70000006, "SHT_MIPS_REGINFO");
-    mapResult.insert(0x70000007, "SHT_MIPS_PACKAGE");
-    mapResult.insert(0x70000008, "SHT_MIPS_PACKSYM");
-    mapResult.insert(0x70000009, "SHT_MIPS_RELD");
-    mapResult.insert(0x7000000b, "SHT_MIPS_IFACE");
-    mapResult.insert(0x7000000c, "SHT_MIPS_CONTENT");
-    mapResult.insert(0x7000000d, "SHT_MIPS_OPTIONS");
-    mapResult.insert(0x70000010, "SHT_MIPS_SHDR");
-    mapResult.insert(0x70000011, "SHT_MIPS_FDESC");
-    mapResult.insert(0x70000012, "SHT_MIPS_EXTSYM");
-    mapResult.insert(0x70000013, "SHT_MIPS_DENSE");
-    mapResult.insert(0x70000014, "SHT_MIPS_PDESC");
-    mapResult.insert(0x70000015, "SHT_MIPS_LOCSYM");
-    mapResult.insert(0x70000016, "SHT_MIPS_AUXSYM");
-    mapResult.insert(0x70000017, "SHT_MIPS_OPTSYM");
-    mapResult.insert(0x70000018, "SHT_MIPS_LOCSTR");
-    mapResult.insert(0x70000019, "SHT_MIPS_LINE");
-    mapResult.insert(0x7000001a, "SHT_MIPS_RFDESC");
-    mapResult.insert(0x7000001b, "SHT_MIPS_DELTASYM");
-    mapResult.insert(0x7000001c, "SHT_MIPS_DELTAINST");
-    mapResult.insert(0x7000001d, "SHT_MIPS_DELTACLASS");
-    mapResult.insert(0x7000001e, "SHT_MIPS_DWARF");
-    mapResult.insert(0x7000001f, "SHT_MIPS_DELTADECL");
-    mapResult.insert(0x70000020, "SHT_MIPS_SYMBOL_LIB");
-    mapResult.insert(0x70000021, "SHT_MIPS_EVENTS");
-    mapResult.insert(0x70000022, "SHT_MIPS_TRANSLATE");
-    mapResult.insert(0x70000023, "SHT_MIPS_PIXIE");
-    mapResult.insert(0x70000024, "SHT_MIPS_XLATE");
-    mapResult.insert(0x70000025, "SHT_MIPS_XLATE_DEBUG");
-    mapResult.insert(0x70000026, "SHT_MIPS_WHIRL");
-    mapResult.insert(0x70000027, "SHT_MIPS_EH_REGION");
-    mapResult.insert(0x70000028, "SHT_MIPS_XLATE_OLD");
-    mapResult.insert(0x70000029, "SHT_MIPS_PDR_EXCEPTION");
-    mapResult.insert(0x7000002a, "SHT_MIPS_ABIFLAGS");
+
+    if (sArch == "MIPS") {
+        mapResult.insert(0x70000006, "SHT_MIPS_REGINFO");
+        mapResult.insert(0x70000007, "SHT_MIPS_PACKAGE");
+        mapResult.insert(0x70000008, "SHT_MIPS_PACKSYM");
+        mapResult.insert(0x70000009, "SHT_MIPS_RELD");
+        mapResult.insert(0x7000000b, "SHT_MIPS_IFACE");
+        mapResult.insert(0x7000000c, "SHT_MIPS_CONTENT");
+        mapResult.insert(0x7000000d, "SHT_MIPS_OPTIONS");
+        mapResult.insert(0x70000010, "SHT_MIPS_SHDR");
+        mapResult.insert(0x70000011, "SHT_MIPS_FDESC");
+        mapResult.insert(0x70000012, "SHT_MIPS_EXTSYM");
+        mapResult.insert(0x70000013, "SHT_MIPS_DENSE");
+        mapResult.insert(0x70000014, "SHT_MIPS_PDESC");
+        mapResult.insert(0x70000015, "SHT_MIPS_LOCSYM");
+        mapResult.insert(0x70000016, "SHT_MIPS_AUXSYM");
+        mapResult.insert(0x70000017, "SHT_MIPS_OPTSYM");
+        mapResult.insert(0x70000018, "SHT_MIPS_LOCSTR");
+        mapResult.insert(0x70000019, "SHT_MIPS_LINE");
+        mapResult.insert(0x7000001a, "SHT_MIPS_RFDESC");
+        mapResult.insert(0x7000001b, "SHT_MIPS_DELTASYM");
+        mapResult.insert(0x7000001c, "SHT_MIPS_DELTAINST");
+        mapResult.insert(0x7000001d, "SHT_MIPS_DELTACLASS");
+        mapResult.insert(0x7000001e, "SHT_MIPS_DWARF");
+        mapResult.insert(0x7000001f, "SHT_MIPS_DELTADECL");
+        mapResult.insert(0x70000020, "SHT_MIPS_SYMBOL_LIB");
+        mapResult.insert(0x70000021, "SHT_MIPS_EVENTS");
+        mapResult.insert(0x70000022, "SHT_MIPS_TRANSLATE");
+        mapResult.insert(0x70000023, "SHT_MIPS_PIXIE");
+        mapResult.insert(0x70000024, "SHT_MIPS_XLATE");
+        mapResult.insert(0x70000025, "SHT_MIPS_XLATE_DEBUG");
+        mapResult.insert(0x70000026, "SHT_MIPS_WHIRL");
+        mapResult.insert(0x70000027, "SHT_MIPS_EH_REGION");
+        mapResult.insert(0x70000028, "SHT_MIPS_XLATE_OLD");
+        mapResult.insert(0x70000029, "SHT_MIPS_PDR_EXCEPTION");
+        mapResult.insert(0x7000002a, "SHT_MIPS_ABIFLAGS");
+    }
+
     mapResult.insert(0x7fffffff, "SHT_HIPROC");
     mapResult.insert(0x80000000, "SHT_LOUSER");
     mapResult.insert(0xffffffff, "SHT_HIUSER");
@@ -1003,7 +1007,7 @@ QMap<quint64, QString> XELF::getSectionTypes()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionTypesS()
+QMap<quint64, QString> XELF::getSectionTypesS(QString sArch)
 {
     QMap<quint64, QString> mapResult;
 
@@ -1039,40 +1043,44 @@ QMap<quint64, QString> XELF::getSectionTypesS()
     mapResult.insert(0x70000003, "ARM_ATTRIBUTES");
     mapResult.insert(0x70000004, "ARM_DEBUGOVERLAY");
     mapResult.insert(0x70000005, "ARM_OVERLAYSECTION");
-    mapResult.insert(0x70000006, "MIPS_REGINFO");
-    mapResult.insert(0x70000007, "MIPS_PACKAGE");
-    mapResult.insert(0x70000008, "MIPS_PACKSYM");
-    mapResult.insert(0x70000009, "MIPS_RELD");
-    mapResult.insert(0x7000000b, "MIPS_IFACE");
-    mapResult.insert(0x7000000c, "MIPS_CONTENT");
-    mapResult.insert(0x7000000d, "MIPS_OPTIONS");
-    mapResult.insert(0x70000010, "MIPS_SHDR");
-    mapResult.insert(0x70000011, "MIPS_FDESC");
-    mapResult.insert(0x70000012, "MIPS_EXTSYM");
-    mapResult.insert(0x70000013, "MIPS_DENSE");
-    mapResult.insert(0x70000014, "MIPS_PDESC");
-    mapResult.insert(0x70000015, "MIPS_LOCSYM");
-    mapResult.insert(0x70000016, "MIPS_AUXSYM");
-    mapResult.insert(0x70000017, "MIPS_OPTSYM");
-    mapResult.insert(0x70000018, "MIPS_LOCSTR");
-    mapResult.insert(0x70000019, "MIPS_LINE");
-    mapResult.insert(0x7000001a, "MIPS_RFDESC");
-    mapResult.insert(0x7000001b, "MIPS_DELTASYM");
-    mapResult.insert(0x7000001c, "MIPS_DELTAINST");
-    mapResult.insert(0x7000001d, "MIPS_DELTACLASS");
-    mapResult.insert(0x7000001e, "MIPS_DWARF");
-    mapResult.insert(0x7000001f, "MIPS_DELTADECL");
-    mapResult.insert(0x70000020, "MIPS_SYMBOL_LIB");
-    mapResult.insert(0x70000021, "MIPS_EVENTS");
-    mapResult.insert(0x70000022, "MIPS_TRANSLATE");
-    mapResult.insert(0x70000023, "MIPS_PIXIE");
-    mapResult.insert(0x70000024, "MIPS_XLATE");
-    mapResult.insert(0x70000025, "MIPS_XLATE_DEBUG");
-    mapResult.insert(0x70000026, "MIPS_WHIRL");
-    mapResult.insert(0x70000027, "MIPS_EH_REGION");
-    mapResult.insert(0x70000028, "MIPS_XLATE_OLD");
-    mapResult.insert(0x70000029, "MIPS_PDR_EXCEPTION");
-    mapResult.insert(0x7000002a, "MIPS_ABIFLAGS");
+
+    if (sArch == "MIPS") {
+        mapResult.insert(0x70000006, "MIPS_REGINFO");
+        mapResult.insert(0x70000007, "MIPS_PACKAGE");
+        mapResult.insert(0x70000008, "MIPS_PACKSYM");
+        mapResult.insert(0x70000009, "MIPS_RELD");
+        mapResult.insert(0x7000000b, "MIPS_IFACE");
+        mapResult.insert(0x7000000c, "MIPS_CONTENT");
+        mapResult.insert(0x7000000d, "MIPS_OPTIONS");
+        mapResult.insert(0x70000010, "MIPS_SHDR");
+        mapResult.insert(0x70000011, "MIPS_FDESC");
+        mapResult.insert(0x70000012, "MIPS_EXTSYM");
+        mapResult.insert(0x70000013, "MIPS_DENSE");
+        mapResult.insert(0x70000014, "MIPS_PDESC");
+        mapResult.insert(0x70000015, "MIPS_LOCSYM");
+        mapResult.insert(0x70000016, "MIPS_AUXSYM");
+        mapResult.insert(0x70000017, "MIPS_OPTSYM");
+        mapResult.insert(0x70000018, "MIPS_LOCSTR");
+        mapResult.insert(0x70000019, "MIPS_LINE");
+        mapResult.insert(0x7000001a, "MIPS_RFDESC");
+        mapResult.insert(0x7000001b, "MIPS_DELTASYM");
+        mapResult.insert(0x7000001c, "MIPS_DELTAINST");
+        mapResult.insert(0x7000001d, "MIPS_DELTACLASS");
+        mapResult.insert(0x7000001e, "MIPS_DWARF");
+        mapResult.insert(0x7000001f, "MIPS_DELTADECL");
+        mapResult.insert(0x70000020, "MIPS_SYMBOL_LIB");
+        mapResult.insert(0x70000021, "MIPS_EVENTS");
+        mapResult.insert(0x70000022, "MIPS_TRANSLATE");
+        mapResult.insert(0x70000023, "MIPS_PIXIE");
+        mapResult.insert(0x70000024, "MIPS_XLATE");
+        mapResult.insert(0x70000025, "MIPS_XLATE_DEBUG");
+        mapResult.insert(0x70000026, "MIPS_WHIRL");
+        mapResult.insert(0x70000027, "MIPS_EH_REGION");
+        mapResult.insert(0x70000028, "MIPS_XLATE_OLD");
+        mapResult.insert(0x70000029, "MIPS_PDR_EXCEPTION");
+        mapResult.insert(0x7000002a, "MIPS_ABIFLAGS");
+    }
+
     mapResult.insert(0x7fffffff, "HIPROC");
     mapResult.insert(0x80000000, "LOUSER");
     mapResult.insert(0xffffffff, "HIUSER");
