@@ -371,11 +371,11 @@ XBinary::OSINFO XBinary::getOsInfo()
     return result;
 }
 
-XBinary::FILEFORMATINFO XBinary::getFileFormatInfo()
+XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
 {
     FILEFORMATINFO result = {};
 
-    result.bIsValid = isValid();
+    result.bIsValid = isValid(pPdStruct);
 
     if (result.bIsValid) {
         result.nSize = getFileFormatSize();
@@ -384,6 +384,7 @@ XBinary::FILEFORMATINFO XBinary::getFileFormatInfo()
             result.fileType = getFileType();
             result.sString = getFileFormatString();
             result.sExt = getFileFormatExt();
+            result.sVersion = getVersion();
         }
     }
 
@@ -509,7 +510,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_JPEG: sResult = QString("JPEG"); break;
         case FT_MACHOFAT: sResult = QString("Mach-O FAT"); break;
         case FT_PDF: sResult = QString("PDF"); break;
-        case FT_PLAINTEXT: sResult = QString("Plain Text"); break;  // mb TODO translate
+        case FT_PLAINTEXT: sResult = tr("Plain Text"); break;
         case FT_PNG: sResult = QString("PNG"); break;
         case FT_RAR: sResult = QString("RAR"); break;
         case FT_TAR: sResult = tr("tar"); break;
@@ -10034,6 +10035,19 @@ qint32 XBinary::_toWCharArray(const QString &sString, wchar_t *pWString)
 #endif
 
     return nResult;
+}
+
+QString XBinary::dataToString(const QByteArray &baData)
+{
+    QString sResult;
+
+    qint32 nSize = baData.size();
+
+    for (qint32 i = 0; i < nSize; i++) {
+        sResult += QChar(baData.at(i));
+    }
+
+    return sResult;
 }
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSignature, bool *pbValid, PDSTRUCT *pPdStruct)

@@ -241,6 +241,9 @@ public:
         qint64 nEntryPointSize;
         QList<QString> listAnsiStrings;
         QList<QString> listUnicodeStrings;
+        qint32 nStringIndexSize = 2;
+        qint32 nGUIDIndexSize = 2;
+        qint32 nBLOBIndexSize = 2;
     };
 
     struct CLI_INFO {

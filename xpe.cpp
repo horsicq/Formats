@@ -9011,6 +9011,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden)
 
 XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap)
 {
+    // https://www.codeproject.com/Articles/12585/The-NET-File-Format
     CLI_INFO result = {};
 
     if (isNETPresent() || bFindHidden) {
@@ -9070,6 +9071,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 char *_pOffset = baStrings.data();
                                 qint32 _nSize = baStrings.size();
 
+                                // TODO UTF8
                                 for (qint32 i = 1; i < _nSize; i++) {
                                     _pOffset++;
                                     QString sTemp = _pOffset;
@@ -9151,13 +9153,15 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 if (result.metaData.nTables_Valid & ((unsigned long long)1 << i)) {
                                     result.metaData.Tables_TablesNumberOfIndexes[i] = read_uint32(nOffset);
                                     nOffset += 4;
+                                } else {
+                                    result.metaData.Tables_TablesNumberOfIndexes[i] = 0;
                                 }
                             }
 
                             quint32 nSize = 0;
-                            qint32 nStringIndexSize = 2;
-                            qint32 nGUIDIndexSize = 2;
-                            qint32 nBLOBIndexSize = 2;
+                            result.metaData.nStringIndexSize = 2;
+                            result.metaData.nGUIDIndexSize = 2;
+                            result.metaData.nBLOBIndexSize = 2;
                             qint32 nResolutionScope = 2;
                             qint32 nTypeDefOrRef = 2;
                             qint32 nField = 2;
@@ -9167,15 +9171,15 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             quint8 cHeapOffsetSizes = result.metaData.cTables_HeapOffsetSizes;
 
                             if (cHeapOffsetSizes & 0x01) {
-                                nStringIndexSize = 4;
+                                result.metaData.nStringIndexSize = 4;
                             }
 
                             if (cHeapOffsetSizes & 0x02) {
-                                nGUIDIndexSize = 4;
+                                result.metaData.nGUIDIndexSize = 4;
                             }
 
                             if (cHeapOffsetSizes & 0x04) {
-                                nBLOBIndexSize = 4;
+                                result.metaData.nBLOBIndexSize = 4;
                             }
 
                             // TODO !!!
@@ -9221,20 +9225,20 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                             nSize = 0;
                             nSize += 2;
-                            nSize += nStringIndexSize;
-                            nSize += nGUIDIndexSize;
-                            nSize += nGUIDIndexSize;
-                            nSize += nGUIDIndexSize;
+                            nSize += result.metaData.nStringIndexSize;
+                            nSize += result.metaData.nGUIDIndexSize;
+                            nSize += result.metaData.nGUIDIndexSize;
+                            nSize += result.metaData.nGUIDIndexSize;
                             result.metaData.Tables_TablesSizes[0] = nSize;
                             nSize = 0;
                             nSize += nResolutionScope;
-                            nSize += nStringIndexSize;
-                            nSize += nStringIndexSize;
+                            nSize += result.metaData.nStringIndexSize;
+                            nSize += result.metaData.nStringIndexSize;
                             result.metaData.Tables_TablesSizes[1] = nSize;
                             nSize = 0;
                             nSize += 4;
-                            nSize += nStringIndexSize;
-                            nSize += nStringIndexSize;
+                            nSize += result.metaData.nStringIndexSize;
+                            nSize += result.metaData.nStringIndexSize;
                             nSize += nTypeDefOrRef;
                             nSize += nField;
                             nSize += nMethodDef;
@@ -9243,8 +9247,8 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             result.metaData.Tables_TablesSizes[3] = nSize;
                             nSize = 0;
                             nSize += 2;
-                            nSize += nStringIndexSize;
-                            nSize += nBLOBIndexSize;
+                            nSize += result.metaData.nStringIndexSize;
+                            nSize += result.metaData.nBLOBIndexSize;
                             result.metaData.Tables_TablesSizes[4] = nSize;
                             nSize = 0;
                             result.metaData.Tables_TablesSizes[5] = nSize;
@@ -9252,8 +9256,8 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             nSize += 4;
                             nSize += 2;
                             nSize += 2;
-                            nSize += nStringIndexSize;
-                            nSize += nBLOBIndexSize;
+                            nSize += result.metaData.nStringIndexSize;
+                            nSize += result.metaData.nBLOBIndexSize;
                             nSize += nParamList;
                             result.metaData.Tables_TablesSizes[6] = nSize;
 

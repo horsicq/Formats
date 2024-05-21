@@ -188,8 +188,8 @@ public:
     static QMap<quint64, QString> getSectionFlags();
     static QMap<quint64, QString> getSectionFlagsS();
 
-    static QMap<quint64, QString> getProgramTypes();
-    static QMap<quint64, QString> getProgramTypesS();
+    static QMap<quint64, QString> getProgramTypes(qint32 nIndent);
+    static QMap<quint64, QString> getProgramTypesS(qint32 nIndent);
     static QMap<quint64, QString> getProgramFlags();
     static QMap<quint64, QString> getProgramFlagsS();
 

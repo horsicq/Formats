@@ -676,7 +676,7 @@ public:
     void setOsType(OSNAME osName);
     void setOsVersion(const QString &sOsVersion);
     virtual OSINFO getOsInfo();
-    virtual FILEFORMATINFO getFileFormatInfo();
+    virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
 
     void setEndian(ENDIAN endian);
     virtual ENDIAN getEndian();
@@ -1525,6 +1525,8 @@ public:
 
     static QString _fromWCharArray(const wchar_t *pWString, qint32 size = -1);
     static qint32 _toWCharArray(const QString &sString, wchar_t *pWString);
+
+    static QString dataToString(const QByteArray &baData);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;
