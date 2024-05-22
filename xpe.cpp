@@ -4444,32 +4444,6 @@ QByteArray XPE::getSection(quint32 nSection)
     return baResult;
 }
 
-QString XPE::getSectionHash(HASH hash, quint32 nSection, PDSTRUCT *pPdStruct)
-{
-    QString sResult;
-
-    OFFSETSIZE osRegion = __getSectionOffsetAndSize(nSection);
-
-    if (osRegion.nOffset != -1) {
-        sResult = getHash(hash, osRegion.nOffset, osRegion.nSize, pPdStruct);
-    }
-
-    return sResult;
-}
-
-double XPE::getSectionEntropy(quint32 nSection)
-{
-    double dResult = 0;
-
-    OFFSETSIZE osRegion = __getSectionOffsetAndSize(nSection);
-
-    if (osRegion.nOffset != -1) {
-        dResult = getEntropy(osRegion.nOffset, osRegion.nSize);
-    }
-
-    return dResult;
-}
-
 bool XPE::addImportSection(QMap<qint64, QString> *pMapIAT)
 {
     return addImportSection(getDevice(), isImage(), pMapIAT);

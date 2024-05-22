@@ -1191,8 +1191,15 @@ public:
 
     static double getEntropy(const QString &sFileName);  // TODO ProcessData
     static double getEntropy(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
-    double getEntropy(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
-    double getZeroStatus(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
+
+    enum BSTATUS {
+        BSTATUS_ENTROPY = 0,
+        BSTATUS_ZERO,
+        BSTATUS_GRADIENT,
+        BSTATUS_TEXT
+    };
+
+    double getBinaryStatus(BSTATUS bstatus, qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
     BYTE_COUNTS getByteCounts(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
@@ -1447,6 +1454,7 @@ public:
     static QString createResultString2(const SCANSTRUCT *pScanStruct);
 
     static bool checkVersionString(const QString &sVersion);
+    static QString cleanString(const QString &sString);
 
     static XVARIANT getXVariant(bool bValue);
     static XVARIANT getXVariant(quint8 nValue);

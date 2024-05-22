@@ -4313,6 +4313,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     record.nOffset = 0;
     record.nSize = nTotalSize;
     record.nIndex = 0;
+    record.sName = tr("Data");
 
     result.listRecords.append(record);
 
@@ -6517,16 +6518,20 @@ double XBinary::getEntropy(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 
     XBinary binary(pDevice);
 
-    dResult = binary.getEntropy(0, -1, pPdStruct);
+    dResult = binary.getBinaryStatus(BSTATUS_ENTROPY, 0, -1, pPdStruct);
 
     pDevice->reset();
 
     return dResult;
 }
 
-double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
+double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
-    double dResult = 1.4426950408889634073599246810023;
+    double dResult = 0;
+
+    if (bstatus == BSTATUS_ENTROPY) {
+        dResult = 1.4426950408889634073599246810023;
+    }
 
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -6551,6 +6556,8 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
         XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
         double bytes[256] = {0.0};
+        qint64 nSymbolCount = 0;
+        quint64 nSum = 0;
 
         qint64 nTemp = 0;
         char *pBuffer = new char[READWRITE_BUFFER_SIZE];
@@ -6565,8 +6572,28 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
                 break;
             }
 
-            for (qint64 i = 0; i < nTemp; i++) {
-                bytes[(unsigned char)pBuffer[i]] += 1;
+            if (bstatus == BSTATUS_ENTROPY) {
+                for (qint64 i = 0; i < nTemp; i++) {
+                    bytes[(unsigned char)pBuffer[i]] += 1;
+                }
+            } else if (bstatus == BSTATUS_ZERO) {
+                for (qint64 i = 0; i < nTemp; i++) {
+                    if (pBuffer[i] == 0) {
+                        nSymbolCount++;
+                    }
+                }
+            } else if (bstatus == BSTATUS_GRADIENT) {
+                for (qint64 i = 0; i < nTemp; i++) {
+                    nSum += (quint8)pBuffer[i];
+                }
+            } else if (bstatus == BSTATUS_TEXT) {
+                for (qint64 i = 0; i < nTemp; i++) {
+                    char _bchar = pBuffer[i];
+                    QChar _char(_bchar);
+                    if (_char.isPrint() || (_bchar == 8) || (_bchar == 10) || (_bchar == 13)) {
+                        nSymbolCount++;
+                    }
+                }
             }
 
             nSize -= nTemp;
@@ -6578,84 +6605,26 @@ double XBinary::getEntropy(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
         delete[] pBuffer;
 
         if ((!(pPdStruct->bIsStop)) && (!bReadError)) {
-            for (qint32 j = 0; j < 256; j++) {
-                double dTemp = bytes[j] / (double)osRegion.nSize;
 
-                if (dTemp) {
-                    dResult += (-log(dTemp) / log((double)2)) * bytes[j];
+            if (bstatus == BSTATUS_ENTROPY) {
+                for (qint32 j = 0; j < 256; j++) {
+                    double dTemp = bytes[j] / (double)osRegion.nSize;
+
+                    if (dTemp) {
+                        dResult += (-log(dTemp) / log((double)2)) * bytes[j];
+                    }
                 }
-            }
 
-            dResult = dResult / (double)osRegion.nSize;
+                dResult = dResult / (double)osRegion.nSize;
+            } else if (bstatus == BSTATUS_ZERO) {
+                dResult = (double)nSymbolCount / (double)(osRegion.nSize);
+            } else if (bstatus == BSTATUS_GRADIENT) {
+                dResult = (double)nSum / ((double)(osRegion.nSize) * (double)0xFF);
+            } else if (bstatus == BSTATUS_TEXT) {
+                dResult = (double)nSymbolCount / (double)(osRegion.nSize);
+            }
         }
     }
-
-    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
-
-    if (pPdStruct->bIsStop) {
-        dResult = 0;
-    }
-
-    return dResult;
-}
-
-double XBinary::getZeroStatus(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
-{
-    double dResult = 0;
-
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
-    OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
-
-    nOffset = osRegion.nOffset;
-    nSize = osRegion.nSize;
-
-    if (nSize == 0) {
-        dResult = 0;
-    }
-
-    qint64 nZeroCount = 0;
-
-    bool bReadError = false;
-
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-
-    if ((nOffset != -1) && (!(pPdStruct->bIsStop))) {
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
-
-        qint64 nTemp = 0;
-        char *pBuffer = new char[READWRITE_BUFFER_SIZE];
-
-        while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
-            nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
-
-            if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-                pPdStruct->sInfoString = tr("Read error");
-                bReadError = true;
-
-                break;
-            }
-
-            for (qint64 i = 0; i < nTemp; i++) {
-                if (pBuffer[i]) {
-                    nZeroCount++;
-                }
-            }
-
-            nSize -= nTemp;
-            nOffset += nTemp;
-
-            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset - osRegion.nOffset);
-        }
-
-        delete[] pBuffer;
-    }
-
-    dResult = (double)nZeroCount / (double)(osRegion.nSize);
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
@@ -9194,6 +9163,29 @@ bool XBinary::checkVersionString(const QString &sVersion)
     }
 
     return bResult;
+}
+
+QString XBinary::cleanString(const QString &sString)
+{
+    QString sResult;
+
+    qint32 nNumberOfChars = sString.count();
+
+    for (qint32 i = 0; i < nNumberOfChars; i++) {
+        QChar _char = sString.at(i);
+
+        bool bAdd = false;
+
+        if (_char.isSymbol()) {
+            bAdd = true;
+        }
+
+        if (bAdd) {
+            sResult.append(_char);
+        }
+    }
+
+    return sResult;
 }
 
 XBinary::XVARIANT XBinary::getXVariant(bool bValue)
