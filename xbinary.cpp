@@ -544,16 +544,16 @@ QString XBinary::fileTypeIdToExts(FT fileType)
     QString sResult = tr("Unknown");
 
     switch (fileType) {
-        case FT_PE: sResult = QString("PE(exe,dll,sys)"); break;  // TODO Check, add more
-        case FT_ELF: sResult = QString("ELF(elf,so)"); break;
-        case FT_ZIP: sResult = QString("ZIP(zip,jar,apk,ipa,docx)"); break;
+        case FT_PE: sResult = QString("PE(exe, dll, sys)"); break;  // TODO Check, add more
+        case FT_ELF: sResult = QString("ELF(elf, so)"); break;
+        case FT_ZIP: sResult = QString("ZIP(zip, jar, apk, ipa, docx)"); break;
         case FT_RAR: sResult = QString("RAR"); break;
         case FT_PDF: sResult = QString("PDF"); break;
         case FT_7Z: sResult = QString("7-Zip"); break;
         case FT_PNG: sResult = QString("PNG"); break;
         case FT_JPEG: sResult = QString("JPEG"); break;
         case FT_CAB: sResult = QString("CAB"); break;
-        case FT_ICO: sResult = QString("ICO(iso,cur)"); break;
+        case FT_ICO: sResult = QString("ICO(iso, cur)"); break;
         case FT_TIFF: sResult = QString("TIFF"); break;
         case FT_DEX: sResult = QString("DEX"); break;
         case FT_MACHOFAT: sResult = QString("MACHOFAT"); break;
@@ -562,7 +562,9 @@ QString XBinary::fileTypeIdToExts(FT fileType)
         case FT_GIF: sResult = QString("GIF"); break;
         case FT_MP3: sResult = QString("MP3"); break;
         case FT_MP4: sResult = QString("MP4"); break;
-        case FT_RIFF: sResult = QString("RIFF(avi,webp)"); break;
+        case FT_RIFF: sResult = QString("RIFF(avi, webp)"); break;
+        case FT_ZLIB: sResult = QString("zlib"); break;
+        case FT_GZIP: sResult = QString("GZIP(gz, tgz, tar.gz)"); break;
         case FT_SIGNATURE: sResult = tr("Signatures"); break;
         default: sResult = tr("Unknown");
     }
@@ -9075,6 +9077,7 @@ QString XBinary::recordFilePartIdToString(FILEPART id)
         case FILEPART_OVERLAY: sResult = tr("Overlay"); break;
         case FILEPART_ARCHIVERECORD: sResult = tr("Archive record"); break;
         case FILEPART_RESOURCE: sResult = tr("Resource"); break;
+        case FILEPART_REGION: sResult = tr("Region"); break;
     }
 
     return sResult;

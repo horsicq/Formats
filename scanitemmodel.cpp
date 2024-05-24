@@ -293,6 +293,8 @@ void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLeve
     if (pItem->childCount()) {
         pXml->writeStartElement(pItem->data(0).toString());
 
+        // mb TODO offset & Size
+
         qint32 nNumberOfChildren = pItem->childCount();
 
         for (qint32 i = 0; i < nNumberOfChildren; i++) {
@@ -326,6 +328,7 @@ void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nL
 
             sArrayName = "values";
         }
+        // mb TODO offset & Size
 
         QJsonArray jsArray;
 

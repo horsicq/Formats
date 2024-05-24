@@ -147,6 +147,7 @@ public:
 
     enum FILEPART {
         FILEPART_UNKNOWN = 0,
+        FILEPART_REGION,
         FILEPART_ARCHIVERECORD,
         FILEPART_HEADER,
         FILEPART_OVERLAY,

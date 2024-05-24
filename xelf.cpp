@@ -3620,6 +3620,7 @@ QList<XBinary::MAPMODE> XELF::getMapModesList(PDSTRUCT *pPdStruct)
 QMap<quint64, QString> XELF::getDynamicTags(QString sArch)
 {
     QMap<quint64, QString> mapResult;
+    // https://github.com/ziglang/zig/blob/master/lib/std/elf.zig
 
     mapResult.insert(0, "DT_NULL");
     mapResult.insert(1, "DT_NEEDED");
@@ -3654,6 +3655,7 @@ QMap<quint64, QString> XELF::getDynamicTags(QString sArch)
     mapResult.insert(30, "DT_FLAGS");
     mapResult.insert(32, "DT_PREINIT_ARRAY");  // DT_ENCODING
     mapResult.insert(33, "DT_PREINIT_ARRAYSZ");
+    mapResult.insert(34, "DT_NUM");
     mapResult.insert(0x6000000d, "DT_LOOS");
     mapResult.insert(0x6000000e, "DT_SUNW_RTLDINF");
     mapResult.insert(0x6ffff000, "DT_HIOS");
@@ -3732,6 +3734,8 @@ QMap<quint64, QString> XELF::getDynamicTags(QString sArch)
         mapResult.insert(0x70000032, "DT_MIPS_PLTGOT");
         mapResult.insert(0x70000033, "DT_MIPS_RLD_OBJ_UPDATE");
         mapResult.insert(0x70000034, "DT_MIPS_RWPLT");
+        mapResult.insert(0x70000035, "DT_MIPS_RLD_VERSION");
+        mapResult.insert(0x36, "DT_MIPS_NUM");
     } else {
         mapResult.insert(0x70000001, "DT_SPARC_REGISTER");
     }
@@ -3780,6 +3784,7 @@ QMap<quint64, QString> XELF::getDynamicTagsS(QString sArch)
     mapResult.insert(30, "FLAGS");
     mapResult.insert(32, "PREINIT_ARRAY");  // ENCODING
     mapResult.insert(33, "PREINIT_ARRAYSZ");
+    mapResult.insert(34, "NUM");
     mapResult.insert(0x6000000d, "LOOS");
     mapResult.insert(0x6000000e, "SUNW_RTLDINF");
     mapResult.insert(0x6ffff000, "HIOS");
@@ -3858,6 +3863,8 @@ QMap<quint64, QString> XELF::getDynamicTagsS(QString sArch)
         mapResult.insert(0x70000032, "MIPS_PLTGOT");
         mapResult.insert(0x70000033, "MIPS_RLD_OBJ_UPDATE");
         mapResult.insert(0x70000034, "MIPS_RWPLT");
+        mapResult.insert(0x70000035, "MIPS_RLD_VERSION");
+        mapResult.insert(0x36, "MIPS_NUM");
     } else {
         mapResult.insert(0x70000001, "SPARC_REGISTER");
     }
