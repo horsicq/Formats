@@ -1167,6 +1167,10 @@ QMap<quint64, QString> XELF::getProgramTypes(qint32 nIndent)
 
     if (nIndent == XELF_DEF::S_ELFOSABI_SOLARIS) {
         mapResult.insert(0x6464e550, "SUNW_UNWIND");
+        mapResult.insert(0x6ffffffa, "PT_SUNWBSS");
+        mapResult.insert(0x6ffffffb, "PT_SUNWSTACK");
+        mapResult.insert(0x6ffffffc, "PT_SUNWDTRACE");
+        mapResult.insert(0x6ffffffd, "PT_SUNWCAP");
     } else {
         mapResult.insert(0x6474e550, "GNU_EH_FRAME");
     }
@@ -1176,14 +1180,6 @@ QMap<quint64, QString> XELF::getProgramTypes(qint32 nIndent)
     mapResult.insert(0x6474e553, "PT_GNU_PROPERTY");
     mapResult.insert(0x65041580, "PT_PAX_FLAGS");
     mapResult.insert(0x6ffffffa, "PT_LOSUNW");
-
-    if (nIndent == XELF_DEF::S_ELFOSABI_SOLARIS) {
-        mapResult.insert(0x6ffffffa, "PT_SUNWBSS");
-        mapResult.insert(0x6ffffffb, "PT_SUNWSTACK");
-        mapResult.insert(0x6ffffffc, "PT_SUNWDTRACE");
-        mapResult.insert(0x6ffffffd, "PT_SUNWCAP");
-    }
-
     mapResult.insert(0x6fffffff, "PT_HIOS");  // PT_HISUNW
     mapResult.insert(0x70000000, "PT_LOPROC");
     mapResult.insert(0x7fffffff, "PT_HIPROC");
@@ -1209,6 +1205,10 @@ QMap<quint64, QString> XELF::getProgramTypesS(qint32 nIndent)
 
     if (nIndent == XELF_DEF::S_ELFOSABI_SOLARIS) {
         mapResult.insert(0x6464e550, "SUNW_UNWIND");
+        mapResult.insert(0x6ffffffa, "SUNWBSS");
+        mapResult.insert(0x6ffffffb, "SUNWSTACK");
+        mapResult.insert(0x6ffffffc, "SUNWDTRACE");
+        mapResult.insert(0x6ffffffd, "SUNWCAP");
     } else {
         mapResult.insert(0x6474e550, "GNU_EH_FRAME");
     }
@@ -1218,14 +1218,6 @@ QMap<quint64, QString> XELF::getProgramTypesS(qint32 nIndent)
     mapResult.insert(0x6474e553, "GNU_PROPERTY");
     mapResult.insert(0x65041580, "PAX_FLAGS");
     mapResult.insert(0x6ffffffa, "LOSUNW");
-
-    if (nIndent == XELF_DEF::S_ELFOSABI_SOLARIS) {
-        mapResult.insert(0x6ffffffa, "SUNWBSS");
-        mapResult.insert(0x6ffffffb, "SUNWSTACK");
-        mapResult.insert(0x6ffffffc, "SUNWDTRACE");
-        mapResult.insert(0x6ffffffd, "SUNWCAP");
-    }
-
     mapResult.insert(0x6fffffff, "HIOS");  // HISUNW
     mapResult.insert(0x70000000, "LOPROC");
     mapResult.insert(0x7fffffff, "HIPROC");
