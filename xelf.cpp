@@ -1005,6 +1005,7 @@ QMap<quint64, QString> XELF::getSectionTypes(QString sArch)
         mapResult.insert(0x70000028, "SHT_MIPS_XLATE_OLD");
         mapResult.insert(0x70000029, "SHT_MIPS_PDR_EXCEPTION");
         mapResult.insert(0x7000002a, "SHT_MIPS_ABIFLAGS");
+        mapResult.insert(0x7000002b, "SHT_MIPS_XHASH");
     }
 
     mapResult.insert(0x7fffffff, "SHT_HIPROC");
@@ -1093,6 +1094,7 @@ QMap<quint64, QString> XELF::getSectionTypesS(QString sArch)
         mapResult.insert(0x70000028, "MIPS_XLATE_OLD");
         mapResult.insert(0x70000029, "MIPS_PDR_EXCEPTION");
         mapResult.insert(0x7000002a, "MIPS_ABIFLAGS");
+        mapResult.insert(0x7000002b, "MIPS_XHASH");
     }
 
     mapResult.insert(0x7fffffff, "HIPROC");
