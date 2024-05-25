@@ -957,7 +957,6 @@ QMap<quint64, QString> XELF::getSectionTypes(QString sArch)
     mapResult.insert(0x6ffffffe, "SHT_GNU_verneed");
     mapResult.insert(0x6fffffff, "SHT_GNU_versym");
     mapResult.insert(0x70000000, "SHT_LOPROC");
-    mapResult.insert(0x70000001, "SHT_AMD64_UNWIND");
 
     if (sArch == "ARM") {
         mapResult.insert(0x70000001, "SHT_ARM_EXIDX");
@@ -1006,6 +1005,8 @@ QMap<quint64, QString> XELF::getSectionTypes(QString sArch)
         mapResult.insert(0x70000029, "SHT_MIPS_PDR_EXCEPTION");
         mapResult.insert(0x7000002a, "SHT_MIPS_ABIFLAGS");
         mapResult.insert(0x7000002b, "SHT_MIPS_XHASH");
+    } else if (sArch == "AMD64") {
+        mapResult.insert(0x70000001, "SHT_AMD64_UNWIND");
     }
 
     mapResult.insert(0x7fffffff, "SHT_HIPROC");
@@ -1046,7 +1047,6 @@ QMap<quint64, QString> XELF::getSectionTypesS(QString sArch)
     mapResult.insert(0x6ffffffe, "GNU_verneed");
     mapResult.insert(0x6fffffff, "GNU_versym");
     mapResult.insert(0x70000000, "LOPROC");
-    mapResult.insert(0x70000001, "AMD64_UNWIND");
 
     if (sArch == "ARM") {
         mapResult.insert(0x70000001, "ARM_EXIDX");
@@ -1095,6 +1095,8 @@ QMap<quint64, QString> XELF::getSectionTypesS(QString sArch)
         mapResult.insert(0x70000029, "MIPS_PDR_EXCEPTION");
         mapResult.insert(0x7000002a, "MIPS_ABIFLAGS");
         mapResult.insert(0x7000002b, "MIPS_XHASH");
+    } else if (sArch == "AMD64") {
+        mapResult.insert(0x70000001, "AMD64_UNWIND");
     }
 
     mapResult.insert(0x7fffffff, "HIPROC");
