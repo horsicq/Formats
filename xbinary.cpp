@@ -6607,7 +6607,6 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
         delete[] pBuffer;
 
         if ((!(pPdStruct->bIsStop)) && (!bReadError)) {
-
             if (bstatus == BSTATUS_ENTROPY) {
                 for (qint32 j = 0; j < 256; j++) {
                     double dTemp = bytes[j] / (double)osRegion.nSize;
