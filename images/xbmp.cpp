@@ -108,3 +108,20 @@ QString XBMP::getFileFormatString()
 
     return sResult;
 }
+
+QString XBMP::getVersion()
+{
+    QString sResult;
+
+    quint32 nDBISize = read_uint32(0x0E);
+
+    if (nDBISize == 40) {
+        sResult = "Windows NT, 3.1x";
+    } else if (nDBISize == 108) {
+        sResult = "Windows NT 4.0, 95";
+    } else if (nDBISize == 124) {
+        sResult = "Windows NT 5.0, 98";
+    }
+
+    return sResult;
+}

@@ -38,6 +38,7 @@ public:
     virtual qint64 getFileFormatSize();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual QString getFileFormatString();
+    virtual QString getVersion();
 };
 
 #endif  // XBMP_H
