@@ -1190,7 +1190,7 @@ public:
     static quint32 _getCRC32ByFileContent(const QString &sFileName);
     static quint32 _getCRC32ByDirectory(const QString &sDirectoryName, bool bRecursive, quint32 nInit = 0xFFFFFFFF);  // TODO PDSTRUCT
 
-    static double getEntropy(const QString &sFileName);  // TODO ProcessData
+    static double getEntropy(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     static double getEntropy(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
 
     enum BSTATUS {

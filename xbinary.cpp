@@ -6498,15 +6498,21 @@ quint32 XBinary::_getCRC32ByDirectory(const QString &sDirectoryName, bool bRecur
     return nResult;
 }
 
-double XBinary::getEntropy(const QString &sFileName)
+double XBinary::getEntropy(const QString &sFileName, PDSTRUCT *pPdStruct)
 {
     double dResult = 0;
+
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
 
     QFile file;
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        dResult = XBinary::getEntropy(&file);
+        dResult = XBinary::getEntropy(&file, pPdStruct);
 
         file.close();
     }

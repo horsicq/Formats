@@ -84,7 +84,7 @@ public:
     static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData, bool bExtra = false);
     static XBinary::OSINFO getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static XBinary::FILEFORMATINFO getFileFormatInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
-                                                     XBinary::PDSTRUCT *pPdStruct = nullptr);
+                                                     XBinary::PDSTRUCT *pPdStruct = nullptr, qint64 nOffset = 0, qint64 nSize = -1);
 
 #ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra = false);

@@ -1304,125 +1304,141 @@ XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bo
     return result;
 }
 
-XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct, qint64 nOffset, qint64 nSize)
 {
     XBinary::FILEFORMATINFO result = {};
 
+    QIODevice *_pDevice = nullptr;
+    SubDevice *pSubDevice = nullptr;
+
+    if (nOffset != 0) {
+        pSubDevice = new SubDevice(pDevice, nOffset, nSize);
+        pSubDevice->open(QIODevice::ReadOnly);
+        _pDevice = pSubDevice;
+    } else {
+        _pDevice = pDevice;
+    }
+
     if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
-        XCOM com(pDevice, bIsImage, nModuleAddress);
+        XCOM com(_pDevice, bIsImage, nModuleAddress);
         result = com.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) {
-        XMSDOS msdos(pDevice, bIsImage, nModuleAddress);
+        XMSDOS msdos(_pDevice, bIsImage, nModuleAddress);
         result = msdos.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) {
-        XNE ne(pDevice, bIsImage, nModuleAddress);
+        XNE ne(_pDevice, bIsImage, nModuleAddress);
         result = ne.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_LE, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
+        XLE le(_pDevice, bIsImage, nModuleAddress);
         result = le.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_LX, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
+        XLE le(_pDevice, bIsImage, nModuleAddress);
         result = le.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) {
-        XPE pe(pDevice, bIsImage, nModuleAddress);
+        XPE pe(_pDevice, bIsImage, nModuleAddress);
         result = pe.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) {
-        XELF elf(pDevice, bIsImage, nModuleAddress);
+        XELF elf(_pDevice, bIsImage, nModuleAddress);
         result = elf.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
-        XMACH mach(pDevice, bIsImage, nModuleAddress);
+        XMACH mach(_pDevice, bIsImage, nModuleAddress);
         result = mach.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
-        XPNG png(pDevice);
+        XPNG png(_pDevice);
         result = png.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
-        XJpeg jpeg(pDevice);
+        XJpeg jpeg(_pDevice);
         result = jpeg.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
-        XIcon xicon(pDevice);
+        XIcon xicon(_pDevice);
         result = xicon.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_BMP, fileType)) {
-        XBMP xbmp(pDevice);
+        XBMP xbmp(_pDevice);
         result = xbmp.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) {
-        XGif xgif(pDevice);
+        XGif xgif(_pDevice);
         result = xgif.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) {
-        XTiff xtiff(pDevice);
+        XTiff xtiff(_pDevice);
         result = xtiff.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) {
-        XMP4 xmp4(pDevice);
+        XMP4 xmp4(_pDevice);
         result = xmp4.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) {
-        XMP3 xmp3(pDevice);
+        XMP3 xmp3(_pDevice);
         result = xmp3.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) {
-        XRiff xriff(pDevice);
+        XRiff xriff(_pDevice);
         result = xriff.getFileFormatInfo(pPdStruct);
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
-        XDEX dex(pDevice);
+        XDEX dex(_pDevice);
         result = dex.getFileFormatInfo(pPdStruct);
     }
 #endif
 #ifdef USE_PDF
     else if (XBinary::checkFileType(XBinary::FT_PDF, fileType)) {
-        XPDF pdf(pDevice);
+        XPDF pdf(_pDevice);
         result = pdf.getFileFormatInfo(pPdStruct);
     }
 #endif
 #ifdef USE_ARCHIVE
     else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) {
-        XZip zip(pDevice);
+        XZip zip(_pDevice);
         result = zip.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_JAR, fileType)) {
-        XJAR jar(pDevice);
+        XJAR jar(_pDevice);
         result = jar.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_APK, fileType)) {
-        XAPK apk(pDevice);
+        XAPK apk(_pDevice);
         result = apk.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_IPA, fileType)) {
-        XIPA ipa(pDevice);
+        XIPA ipa(_pDevice);
         result = ipa.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_APKS, fileType)) {
-        XAPKS apks(pDevice);
+        XAPKS apks(_pDevice);
         result = apks.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
-        XSevenZip sevenzip(pDevice);
+        XSevenZip sevenzip(_pDevice);
         result = sevenzip.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
-        XCab xcab(pDevice);
+        XCab xcab(_pDevice);
         result = xcab.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) {
-        XRar xrar(pDevice);
+        XRar xrar(_pDevice);
         result = xrar.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) {
-        XMACHOFat xmachofat(pDevice);
+        XMACHOFat xmachofat(_pDevice);
         result = xmachofat.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) {
-        XGzip xgzip(pDevice);
+        XGzip xgzip(_pDevice);
         result = xgzip.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_TAR, fileType)) {
-        XTAR xtar(pDevice);
+        XTAR xtar(_pDevice);
         result = xtar.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_TARGZ, fileType)) {
-        XTGZ xtgz(pDevice);
+        XTGZ xtgz(_pDevice);
         result = xtgz.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_NPM, fileType)) {
-        XNPM xnpm(pDevice);
+        XNPM xnpm(_pDevice);
         result = xnpm.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) {
-        XZlib xzlib(pDevice);
+        XZlib xzlib(_pDevice);
         result = xzlib.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) {
-        XLHA xlha(pDevice);
+        XLHA xlha(_pDevice);
         result = xlha.getFileFormatInfo(pPdStruct);
     }
 #endif
     else {
-        XBinary binary(pDevice);
+        XBinary binary(_pDevice);
         result = binary.getFileFormatInfo(pPdStruct);
+    }
+
+    if (pSubDevice) {
+        pSubDevice->close();
+        delete pSubDevice;
     }
 
     return result;
