@@ -1195,7 +1195,7 @@ public:
 
     enum BSTATUS {
         BSTATUS_ENTROPY = 0,
-        BSTATUS_ZERO,
+        BSTATUS_ZEROS,
         BSTATUS_GRADIENT,
         BSTATUS_TEXT
     };

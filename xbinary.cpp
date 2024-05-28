@@ -6584,7 +6584,7 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
                 for (qint64 i = 0; i < nTemp; i++) {
                     bytes[(unsigned char)pBuffer[i]] += 1;
                 }
-            } else if (bstatus == BSTATUS_ZERO) {
+            } else if (bstatus == BSTATUS_ZEROS) {
                 for (qint64 i = 0; i < nTemp; i++) {
                     if (pBuffer[i] == 0) {
                         nSymbolCount++;
@@ -6623,7 +6623,7 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
                 }
 
                 dResult = dResult / (double)osRegion.nSize;
-            } else if (bstatus == BSTATUS_ZERO) {
+            } else if (bstatus == BSTATUS_ZEROS) {
                 dResult = (double)nSymbolCount / (double)(osRegion.nSize);
             } else if (bstatus == BSTATUS_GRADIENT) {
                 dResult = (double)nSum / ((double)(osRegion.nSize) * (double)0xFF);
