@@ -1179,6 +1179,13 @@ QMap<quint64, QString> XELF::getProgramTypes(qint32 nIndent)
     mapResult.insert(0x6474e552, "PT_GNU_RELRO");
     mapResult.insert(0x6474e553, "PT_GNU_PROPERTY");
     mapResult.insert(0x65041580, "PT_PAX_FLAGS");
+
+    if (nIndent == XELF_DEF::S_ELFOSABI_OPENBSD) {
+        mapResult.insert(0x65A3DBE6, "PT_OPENBSD_RANDOMIZE");
+        mapResult.insert(0x65A3DBE7, "PT_OPENBSD_WXNEEDED");
+        mapResult.insert(0x65A41BE6, "PT_OPENBSD_BOOTDATA");
+    }
+
     mapResult.insert(0x6ffffffa, "PT_LOSUNW");
     mapResult.insert(0x6fffffff, "PT_HIOS");  // PT_HISUNW
     mapResult.insert(0x70000000, "PT_LOPROC");
@@ -1217,6 +1224,13 @@ QMap<quint64, QString> XELF::getProgramTypesS(qint32 nIndent)
     mapResult.insert(0x6474e552, "GNU_RELRO");
     mapResult.insert(0x6474e553, "GNU_PROPERTY");
     mapResult.insert(0x65041580, "PAX_FLAGS");
+
+    if (nIndent == XELF_DEF::S_ELFOSABI_OPENBSD) {
+        mapResult.insert(0x65A3DBE6, "OPENBSD_RANDOMIZE");
+        mapResult.insert(0x65A3DBE7, "OPENBSD_WXNEEDED");
+        mapResult.insert(0x65A41BE6, "OPENBSD_BOOTDATA");
+    }
+
     mapResult.insert(0x6ffffffa, "LOSUNW");
     mapResult.insert(0x6fffffff, "HIOS");  // HISUNW
     mapResult.insert(0x70000000, "LOPROC");
