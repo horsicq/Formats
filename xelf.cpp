@@ -1150,7 +1150,7 @@ QMap<quint64, QString> XELF::getSectionFlagsS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getProgramTypes(qint32 nIndent)
+QMap<quint64, QString> XELF::getProgramTypes(qint32 nIndent, QString sArch)
 {
     QMap<quint64, QString> mapResult;
 
@@ -1166,19 +1166,19 @@ QMap<quint64, QString> XELF::getProgramTypes(qint32 nIndent)
     mapResult.insert(0x60000000, "PT_LOOS");
 
     if (nIndent == XELF_DEF::S_ELFOSABI_SOLARIS) {
-        mapResult.insert(0x6464e550, "SUNW_UNWIND");
+        mapResult.insert(0x6464e550, "PT_SUNW_UNWIND");
+        mapResult.insert(0x6474e550, "PT_SUNW_EH_FRAME");
         mapResult.insert(0x6ffffffa, "PT_SUNWBSS");
         mapResult.insert(0x6ffffffb, "PT_SUNWSTACK");
         mapResult.insert(0x6ffffffc, "PT_SUNWDTRACE");
         mapResult.insert(0x6ffffffd, "PT_SUNWCAP");
     } else {
         mapResult.insert(0x6474e550, "GNU_EH_FRAME");
+        mapResult.insert(0x6474e551, "PT_GNU_STACK");
+        mapResult.insert(0x6474e552, "PT_GNU_RELRO");
+        mapResult.insert(0x6474e553, "PT_GNU_PROPERTY");
+        mapResult.insert(0x65041580, "PT_PAX_FLAGS");
     }
-
-    mapResult.insert(0x6474e551, "PT_GNU_STACK");
-    mapResult.insert(0x6474e552, "PT_GNU_RELRO");
-    mapResult.insert(0x6474e553, "PT_GNU_PROPERTY");
-    mapResult.insert(0x65041580, "PT_PAX_FLAGS");
 
     if (nIndent == XELF_DEF::S_ELFOSABI_OPENBSD) {
         mapResult.insert(0x65A3DBE6, "PT_OPENBSD_RANDOMIZE");
@@ -1188,14 +1188,32 @@ QMap<quint64, QString> XELF::getProgramTypes(qint32 nIndent)
 
     mapResult.insert(0x6ffffffa, "PT_LOSUNW");
     mapResult.insert(0x6fffffff, "PT_HIOS");  // PT_HISUNW
-    mapResult.insert(0x70000000, "PT_LOPROC");
-    mapResult.insert(0x7fffffff, "PT_HIPROC");
-    //    mapResult.insert(0x70000000,"PT_MIPXELF_DEF::REGINFO");
+
+    if (sArch == "ARM") {
+        mapResult.insert(0x70000001, "PT_ARM_EXIDX");
+        mapResult.insert(0x70000002, "PT_ARM_PREEMPTMAP");
+        mapResult.insert(0x70000003, "PT_ARM_ATTRIBUTES");
+        mapResult.insert(0x70000004, "PT_ARM_DEBUGOVERLAY");
+        mapResult.insert(0x70000005, "PT_ARM_OVERLAYSECTION");
+    } else if (sArch == "MIPS") {
+        mapResult.insert(0x70000000, "PT_MIPS_REGINFO");
+        mapResult.insert(0x70000001, "PT_MIPS_RTPROC");
+        mapResult.insert(0x70000002, "PT_MIPS_OPTIONS");
+        mapResult.insert(0x70000003, "PT_MIPS_ABIFLAGS");
+    } else if (sArch == "AARCH64") {
+        mapResult.insert(0x70000000, "PT_AARCH64_ARCHEXT");
+        mapResult.insert(0x70000001, "PT_AARCH64_UNWIND");
+    } else if (sArch == "S390") {
+        mapResult.insert(0x70000000, "PT_S390_PGSTE");
+    } else {
+        mapResult.insert(0x70000000, "PT_LOPROC");
+        mapResult.insert(0x7fffffff, "PT_HIPROC");
+    }
 
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getProgramTypesS(qint32 nIndent)
+QMap<quint64, QString> XELF::getProgramTypesS(qint32 nIndent, QString sArch)
 {
     QMap<quint64, QString> mapResult;
 
@@ -1212,18 +1230,18 @@ QMap<quint64, QString> XELF::getProgramTypesS(qint32 nIndent)
 
     if (nIndent == XELF_DEF::S_ELFOSABI_SOLARIS) {
         mapResult.insert(0x6464e550, "SUNW_UNWIND");
+        mapResult.insert(0x6474e550, "SUNW_EH_FRAME");
         mapResult.insert(0x6ffffffa, "SUNWBSS");
         mapResult.insert(0x6ffffffb, "SUNWSTACK");
         mapResult.insert(0x6ffffffc, "SUNWDTRACE");
         mapResult.insert(0x6ffffffd, "SUNWCAP");
     } else {
         mapResult.insert(0x6474e550, "GNU_EH_FRAME");
+        mapResult.insert(0x6474e551, "GNU_STACK");
+        mapResult.insert(0x6474e552, "GNU_RELRO");
+        mapResult.insert(0x6474e553, "GNU_PROPERTY");
+        mapResult.insert(0x65041580, "PAX_FLAGS");
     }
-
-    mapResult.insert(0x6474e551, "GNU_STACK");
-    mapResult.insert(0x6474e552, "GNU_RELRO");
-    mapResult.insert(0x6474e553, "GNU_PROPERTY");
-    mapResult.insert(0x65041580, "PAX_FLAGS");
 
     if (nIndent == XELF_DEF::S_ELFOSABI_OPENBSD) {
         mapResult.insert(0x65A3DBE6, "OPENBSD_RANDOMIZE");
@@ -1233,10 +1251,27 @@ QMap<quint64, QString> XELF::getProgramTypesS(qint32 nIndent)
 
     mapResult.insert(0x6ffffffa, "LOSUNW");
     mapResult.insert(0x6fffffff, "HIOS");  // HISUNW
-    mapResult.insert(0x70000000, "LOPROC");
-    mapResult.insert(0x7fffffff, "HIPROC");
-    //    mapResult.insert(0x70000000,"MIPXELF_DEF::REGINFO");
 
+    if (sArch == "ARM") {
+        mapResult.insert(0x70000001, "ARM_EXIDX");
+        mapResult.insert(0x70000002, "ARM_PREEMPTMAP");
+        mapResult.insert(0x70000003, "ARM_ATTRIBUTES");
+        mapResult.insert(0x70000004, "ARM_DEBUGOVERLAY");
+        mapResult.insert(0x70000005, "ARM_OVERLAYSECTION");
+    } else if (sArch == "MIPS") {
+        mapResult.insert(0x70000000, "MIPS_REGINFO");
+        mapResult.insert(0x70000001, "MIPS_RTPROC");
+        mapResult.insert(0x70000002, "MIPS_OPTIONS");
+        mapResult.insert(0x70000003, "MIPS_ABIFLAGS");
+    } else if (sArch == "AARCH64") {
+        mapResult.insert(0x70000000, "AARCH64_ARCHEXT");
+        mapResult.insert(0x70000001, "AARCH64_UNWIND");
+    } else if (sArch == "S390") {
+        mapResult.insert(0x70000000, "S390_PGSTE");
+    } else {
+        mapResult.insert(0x70000000, "LOPROC");
+        mapResult.insert(0x7fffffff, "HIPROC");
+    }
     return mapResult;
 }
 

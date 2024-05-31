@@ -55,6 +55,11 @@ SubDevice::~SubDevice()
     }
 }
 
+QIODevice *SubDevice::getOrigDevice()
+{
+    return g_pDevice;
+}
+
 bool SubDevice::seek(qint64 nPos)
 {
     bool bResult = false;

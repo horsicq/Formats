@@ -30,6 +30,8 @@ public:
     SubDevice(QIODevice *pDevice, qint64 nOffset = 0, qint64 nSize = -1, QObject *pParent = nullptr);
     ~SubDevice();
 
+    QIODevice *getOrigDevice();
+
     virtual bool seek(qint64 nPos);
     virtual bool reset();
 
