@@ -10875,6 +10875,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachines()
     mapResult.insert(0x0168, "IMAGE_FILE_MACHINE_R10000");
     mapResult.insert(0x0169, "IMAGE_FILE_MACHINE_WCEMIPSV2");
     mapResult.insert(0x0184, "IMAGE_FILE_MACHINE_ALPHA");
+    mapResult.insert(0x01F0, "IMAGE_FILE_MACHINE_POWERPC");
     mapResult.insert(0x01a2, "IMAGE_FILE_MACHINE_SH3");
     mapResult.insert(0x01a3, "IMAGE_FILE_MACHINE_SH3DSP");
     mapResult.insert(0x01a4, "IMAGE_FILE_MACHINE_SH3E");
@@ -10884,7 +10885,6 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachines()
     mapResult.insert(0x01c2, "IMAGE_FILE_MACHINE_THUMB");
     mapResult.insert(0x01c4, "IMAGE_FILE_MACHINE_ARMNT");
     mapResult.insert(0x01d3, "IMAGE_FILE_MACHINE_AM33");
-    mapResult.insert(0x01F0, "IMAGE_FILE_MACHINE_POWERPC");
     mapResult.insert(0x01f1, "IMAGE_FILE_MACHINE_POWERPCFP");
     mapResult.insert(0x01f2, "IMAGE_FILE_MACHINE_POWERPCBE");
     mapResult.insert(0x0200, "IMAGE_FILE_MACHINE_IA64");
@@ -10895,13 +10895,15 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachines()
     mapResult.insert(0x0520, "IMAGE_FILE_MACHINE_TRICORE");
     mapResult.insert(0x0CEF, "IMAGE_FILE_MACHINE_CEF");
     mapResult.insert(0x0EBC, "IMAGE_FILE_MACHINE_EBC");
-    mapResult.insert(0x8664, "IMAGE_FILE_MACHINE_AMD64");
-    mapResult.insert(0x9041, "IMAGE_FILE_MACHINE_M32R");
-    mapResult.insert(0xC0EE, "IMAGE_FILE_MACHINE_CEE");
-    mapResult.insert(0xAA64, "IMAGE_FILE_MACHINE_ARM64");
     mapResult.insert(0x5032, "IMAGE_FILE_MACHINE_RISCV32");
     mapResult.insert(0x5064, "IMAGE_FILE_MACHINE_RISCV64");
     mapResult.insert(0x5128, "IMAGE_FILE_MACHINE_RISCV128");
+    mapResult.insert(0x6232, "IMAGE_FILE_MACHINE_LOONGARCH32");
+    mapResult.insert(0x6264, "IMAGE_FILE_MACHINE_LOONGARCH64");
+    mapResult.insert(0x8664, "IMAGE_FILE_MACHINE_AMD64");
+    mapResult.insert(0x9041, "IMAGE_FILE_MACHINE_M32R");
+    mapResult.insert(0xAA64, "IMAGE_FILE_MACHINE_ARM64");
+    mapResult.insert(0xC0EE, "IMAGE_FILE_MACHINE_CEE");
 
     return mapResult;
 }
@@ -10920,6 +10922,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
     mapResult.insert(0x0168, "R10000");
     mapResult.insert(0x0169, "WCEMIPSV2");
     mapResult.insert(0x0184, "ALPHA");
+    mapResult.insert(0x01F0, "POWERPC");
     mapResult.insert(0x01a2, "SH3");
     mapResult.insert(0x01a3, "SH3DSP");
     mapResult.insert(0x01a4, "SH3E");
@@ -10929,7 +10932,6 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
     mapResult.insert(0x01c2, "THUMB");
     mapResult.insert(0x01c4, "ARMNT");
     mapResult.insert(0x01d3, "AM33");
-    mapResult.insert(0x01F0, "POWERPC");
     mapResult.insert(0x01f1, "POWERPCFP");
     mapResult.insert(0x01f2, "POWERPCBE");
     mapResult.insert(0x0200, "IA64");
@@ -10940,13 +10942,15 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
     mapResult.insert(0x0520, "TRICORE");
     mapResult.insert(0x0CEF, "CEF");
     mapResult.insert(0x0EBC, "EBC");
-    mapResult.insert(0x8664, "AMD64");
-    mapResult.insert(0x9041, "M32R");
-    mapResult.insert(0xC0EE, "CEE");
-    mapResult.insert(0xAA64, "ARM64");
     mapResult.insert(0x5032, "RISCV32");
     mapResult.insert(0x5064, "RISCV64");
     mapResult.insert(0x5128, "RISCV128");
+    mapResult.insert(0x6232, "LOONGARCH32");
+    mapResult.insert(0x6264, "LOONGARCH64");
+    mapResult.insert(0x8664, "AMD64");
+    mapResult.insert(0x9041, "M32R");
+    mapResult.insert(0xAA64, "ARM64");
+    mapResult.insert(0xC0EE, "CEE");
 
     return mapResult;
 }
