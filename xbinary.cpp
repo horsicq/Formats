@@ -553,7 +553,8 @@ QString XBinary::fileTypeIdToExts(FT fileType)
         case FT_PNG: sResult = QString("PNG"); break;
         case FT_JPEG: sResult = QString("JPEG"); break;
         case FT_CAB: sResult = QString("CAB"); break;
-        case FT_ICO: sResult = QString("ICO(iso, cur)"); break;
+        case FT_ICO: sResult = QString("ICO"); break;
+        case FT_CUR: sResult = QString("CUR"); break;
         case FT_TIFF: sResult = QString("TIFF"); break;
         case FT_DEX: sResult = QString("DEX"); break;
         case FT_MACHOFAT: sResult = QString("MACHOFAT"); break;
@@ -5132,6 +5133,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_PNG;
     } else if (pStFileTypes->contains(FT_ICO)) {
         result = FT_ICO;
+    } else if (pStFileTypes->contains(FT_CUR)) {
+        result = FT_CUR;
     } else if (pStFileTypes->contains(FT_JPEG)) {
         result = FT_JPEG;
     } else if (pStFileTypes->contains(FT_BMP)) {
