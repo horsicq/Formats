@@ -497,22 +497,31 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_APKS: sResult = QString("APKS"); break;
         case FT_AR: sResult = QString("ar"); break;  // TODO DEB
         case FT_ARCHIVE: sResult = tr("Archive"); break;
+        case FT_AUDIO: sResult = tr("Audio"); break;
+        case FT_AVI: sResult = QString("AVI"); break;
         case FT_BMP: sResult = QString("BMP"); break;
         case FT_CAB: sResult = QString("CAB"); break;
+        case FT_CUR: sResult = QString("CUR"); break;
         case FT_DEX: sResult = QString("DEX"); break;
         case FT_DOCUMENT: sResult = tr("Document"); break;
         case FT_GIF: sResult = QString("GIF"); break;
+        case FT_GZIP: sResult = QString("GZIP"); break;
+        case FT_ICO: sResult = QString("ICO"); break;
         case FT_IMAGE: sResult = tr("Image"); break;
-        case FT_VIDEO: sResult = tr("Video"); break;
-        case FT_AUDIO: sResult = tr("Audio"); break;
         case FT_IPA: sResult = QString("IPA"); break;
         case FT_JAR: sResult = QString("JAR"); break;
         case FT_JPEG: sResult = QString("JPEG"); break;
+        case FT_LHA: sResult = QString("LHA"); break;
         case FT_MACHOFAT: sResult = QString("Mach-O FAT"); break;
+        case FT_MP3: sResult = QString("MP3"); break;
+        case FT_MP4: sResult = QString("MP4"); break;
+        case FT_NPM: sResult = QString("NPM"); break;
         case FT_PDF: sResult = QString("PDF"); break;
         case FT_PLAINTEXT: sResult = tr("Plain Text"); break;
         case FT_PNG: sResult = QString("PNG"); break;
         case FT_RAR: sResult = QString("RAR"); break;
+        case FT_RIFF: sResult = QString("RIFF"); break;
+        case FT_SIGNATURE: sResult = tr("Signature"); break;
         case FT_TAR: sResult = tr("tar"); break;
         case FT_TARGZ: sResult = tr("tar.gz"); break;
         case FT_TEXT: sResult = tr("Text"); break;
@@ -521,19 +530,10 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_UNICODE_BE: sResult = QString("Unicode BE"); break;
         case FT_UNICODE_LE: sResult = QString("Unicode LE"); break;
         case FT_UTF8: sResult = QString("UTF8"); break;
-        case FT_ZIP: sResult = QString("ZIP"); break;
-        case FT_GZIP: sResult = QString("GZIP"); break;
-        case FT_ZLIB: sResult = QString("zlib"); break;
-        case FT_LHA: sResult = QString("LHA"); break;
-        case FT_ICO: sResult = QString("ICO"); break;
-        case FT_CUR: sResult = QString("CUR"); break;
-        case FT_MP3: sResult = QString("MP3"); break;
-        case FT_MP4: sResult = QString("MP4"); break;
-        case FT_AVI: sResult = QString("AVI"); break;
+        case FT_VIDEO: sResult = tr("Video"); break;
         case FT_WEBP: sResult = QString("WebP"); break;
-        case FT_RIFF: sResult = QString("RIFF"); break;
-        case FT_SIGNATURE: sResult = tr("Signature"); break;
-        case FT_NPM: sResult = QString("NPM"); break;
+        case FT_ZIP: sResult = QString("ZIP"); break;
+        case FT_ZLIB: sResult = QString("zlib"); break;
     }
 
     return sResult;
@@ -5125,6 +5125,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_LHA;
     } else if (pStFileTypes->contains(FT_7Z)) {
         result = FT_7Z;
+    } else if (pStFileTypes->contains(FT_AR)) {
+        result = FT_AR;
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
         result = FT_ANDROIDXML;
     } else if (pStFileTypes->contains(FT_DEX)) {
@@ -5249,6 +5251,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_TARGZ)) listResult.append(FT_TARGZ);
         if (stFileTypes.contains(FT_NPM)) listResult.append(FT_NPM);
         if (stFileTypes.contains(FT_MACHOFAT)) listResult.append(FT_MACHOFAT);
+        if (stFileTypes.contains(FT_AR)) listResult.append(FT_AR);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
