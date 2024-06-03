@@ -6930,7 +6930,7 @@ void XPE::setDelayImport_TimeDateStamp(quint32 nNumber, quint32 nValue)
     write_uint32(nOffset + offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, TimeDateStamp), nValue);
 }
 
-QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(int nIndex)
+QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(qint32 nIndex)
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
