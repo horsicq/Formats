@@ -9190,7 +9190,7 @@ QString XBinary::cleanString(const QString &sString)
 
         bool bAdd = false;
 
-        if (_char.isSymbol()) {
+        if (_char.isLetterOrNumber() || _char.isPunct()) {
             bAdd = true;
         }
 
