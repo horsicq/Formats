@@ -1400,6 +1400,9 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     } else if (XBinary::checkFileType(XBinary::FT_APKS, fileType)) {
         XAPKS apks(_pDevice);
         result = apks.getFileFormatInfo(pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_AR, fileType)) {
+        X_Ar xar(_pDevice);
+        result = xar.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
         XSevenZip sevenzip(_pDevice);
         result = sevenzip.getFileFormatInfo(pPdStruct);
