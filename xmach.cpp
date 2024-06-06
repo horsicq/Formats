@@ -1138,10 +1138,8 @@ qint64 XMACH::getAddressOfEntryPoint(XBinary::_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-QList<XBinary::MAPMODE> XMACH::getMapModesList(PDSTRUCT *pPdStruct)
+QList<XBinary::MAPMODE> XMACH::getMapModesList()
 {
-    Q_UNUSED(pPdStruct)
-
     QList<MAPMODE> listResult;
 
     listResult.append(MAPMODE_SEGMENTS);

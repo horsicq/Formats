@@ -63,8 +63,7 @@ public:
                                              XBinary::PDSTRUCT *pPdStruct = nullptr);
     static XBinary::_MEMORY_MAP getMemoryMap(const QString &sFileName, XBinary::MAPMODE mapMode, bool bIsImage = false, XADDR nModuleAddress = -1,
                                              XBinary::PDSTRUCT *pPdStruct = nullptr);
-    static QList<XBinary::MAPMODE> getMapModesList(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
-                                                   XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static QList<XBinary::MAPMODE> getMapModesList(XBinary::FT fileType);
     static qint64 getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static qint64 getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static bool isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -96,7 +95,7 @@ public:
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox,
                                            XBinary::TL_OPTION tlOption = XBinary::TL_OPTION_DEFAULT);
     static bool setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian);
-    static XBinary::MAPMODE setMapModeComboBox(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, QComboBox *pComboBox);
+    static XBinary::MAPMODE getMapModesList(XBinary::FT fileType, QComboBox *pComboBox);
     static void setProgressBar(QProgressBar *pProgressBar, XBinary::PDRECORD pdRecord);
 #endif
     static bool saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDirectoryName);

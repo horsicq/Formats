@@ -1027,7 +1027,7 @@ public:
 
     static QString mapModeToString(MAPMODE mapMode);
 
-    virtual QList<MAPMODE> getMapModesList(PDSTRUCT *pPdStruct = nullptr);
+    static QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
     static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);

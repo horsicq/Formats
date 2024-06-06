@@ -4276,10 +4276,8 @@ QString XBinary::mapModeToString(MAPMODE mapMode)
     return sResult;
 }
 
-QList<XBinary::MAPMODE> XBinary::getMapModesList(PDSTRUCT *pPdStruct)
+QList<XBinary::MAPMODE> XBinary::getMapModesList()
 {
-    Q_UNUSED(pPdStruct)
-
     QList<MAPMODE> listResult;
 
     listResult.append(MAPMODE_REGIONS);

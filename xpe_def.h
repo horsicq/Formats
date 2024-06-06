@@ -547,6 +547,55 @@ enum ReplacesCorHdrNumericDefines {
     MAX_PACKAGE_NAME = 1024
 };
 
+enum MetadataTable {
+    metadata_Module = 0x00,
+    metadata_TypeRef = 0x01,
+    metadata_TypeDef = 0x02,
+    metadata_Field = 0x04,
+    metadata_MethodDef = 0x06,
+    metadata_Param = 0x08,
+    metadata_InterfaceImpl = 0x09,
+    metadata_MemberRef = 0x0A,
+    metadata_Constant = 0x0B,
+    metadata_CustomAttribute = 0x0C,
+    metadata_FieldMarshal = 0x0D,
+    metadata_DeclSecurity = 0x0E,
+    metadata_ClassLayout = 0x0F,
+    metadata_FieldLayout = 0x10,
+    metadata_StandAloneSig = 0x11,
+    metadata_EventMap = 0x12,
+    metadata_Event = 0x14,
+    metadata_PropertyMap = 0x15,
+    metadata_Property = 0x17,
+    metadata_MethodSemantics = 0x18,
+    metadata_MethodImpl = 0x19,
+    metadata_ModuleRef = 0x1A,
+    metadata_TypeSpec = 0x1B,
+    metadata_ImplMap = 0x1C,
+    metadata_FieldRVA = 0x1D,
+    metadata_Assembly = 0x20,
+    metadata_AssemblyProcessor = 0x21,
+    metadata_AssemblyOS = 0x22,
+    metadata_AssemblyRef = 0x23,
+    metadata_AssemblyRefProcessor = 0x24,
+    metadata_AssemblyRefOS = 0x25,
+    metadata_File = 0x26,
+    metadata_ExportedType = 0x27,
+    metadata_ManifestResource = 0x28,
+    metadata_NestedClass = 0x29,
+    metadata_GenericParam = 0x2A,
+    metadata_MethodSpec = 0x2B,
+    metadata_GenericParamConstraint = 0x2C,
+    metadata_Document = 0x2D,
+    metadata_MethodDebugInformation = 0x2E,
+    metadata_LocalScope = 0x2F,
+    metadata_LocalVariable = 0x30,
+    metadata_LocalConstant = 0x31,
+    metadata_ImportScope = 0x32,
+    metadata_StateMachineMethod = 0x33,
+    metadata_CustomDebugInformation = 0x34
+};
+
 struct S_VS_VERSION_INFO {
     quint16 wLength;      /* Length of the version resource */
     quint16 wValueLength; /* Length of the value field for this block */

@@ -216,8 +216,7 @@ public:
     struct CLI_METADATA {
         CLI_METADATA_HEADER header;
         QList<CLI_METADATA_STREAM> listStreams;
-        qint64 nTablesHeaderOffset;
-        qint64 nTablesSize;
+        OFFSETSIZE osTables;
         quint32 nTables_Reserved1;
         quint8 cTables_MajorVersion;
         quint8 cTables_MinorVersion;
@@ -225,25 +224,24 @@ public:
         quint8 cTables_Reserved2;
         quint64 nTables_Valid;
         quint64 nTables_Sorted;
-        quint32 nTables_Valid_NumberOfRows;
+        quint32 nTables_Valid_NumberOfRows; // TODO remove
         quint32 Tables_TablesNumberOfIndexes[64];  // TODO const
         qint64 Tables_TablesOffsets[64];           // TODO const
-        qint64 Tables_TablesSizes[64];             // TODO const
-        qint64 nStringsOffset;
-        qint64 nStringsSize;
-        qint64 nUSOffset;
-        qint64 nUSSize;
-        qint64 nBlobOffset;
-        qint64 nBlobSize;
-        qint64 nGUIDOffset;
-        qint64 nGUIDSize;
+        qint64 Tables_TableElementSizes[64];             // TODO const
+        OFFSETSIZE osStrings;
+        OFFSETSIZE osUS;
+        OFFSETSIZE osBlob;
+        OFFSETSIZE osGUID;
         qint64 nEntryPoint;
         qint64 nEntryPointSize;
         QList<QString> listAnsiStrings;
         QList<QString> listUnicodeStrings;
-        qint32 nStringIndexSize = 2;
-        qint32 nGUIDIndexSize = 2;
-        qint32 nBLOBIndexSize = 2;
+        QList<QString> listGUIDs;
+        qint32 nStringIndexSize;
+        qint32 nGUIDIndexSize;
+        qint32 nBLOBIndexSize;
+        qint32 nResolutionScopeSize;
+        qint32 nTypeDefOrRefSize;
     };
 
     struct CLI_INFO {
@@ -671,7 +669,7 @@ public:
 
     qint64 getModuleAddress();
 
-    virtual QList<MAPMODE> getMapModesList(PDSTRUCT *pPdStruct = nullptr);
+    static QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual XADDR getBaseAddress();
     virtual void setBaseAddress(XADDR nBaseAddress);
@@ -839,8 +837,10 @@ public:
     bool isDriver();
     bool isNETPresent();
 
-    CLI_INFO getCliInfo(bool bFindHidden);
-    CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap);
+    CLI_INFO getCliInfo(bool bFindHidden); // TODO pdstruct
+    CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap); // TODO pdstruct
+
+    QString mdtIdToString(quint32 nID);
 
     OFFSETSIZE getNet_MetadataOffsetSize();
 
@@ -1183,6 +1183,17 @@ public:
     void setNetHeader_ExportAddressTableJumps_Size(quint32 nValue);
     void setNetHeader_ManagedNativeHeader_Address(quint32 nValue);
     void setNetHeader_ManagedNativeHeader_Size(quint32 nValue);
+
+    struct CLI_METADATA_RECORD {
+        quint32 nNumber;
+        QString sId;
+        quint32 nCount;
+        bool bIsSorted;
+        qint64 nTableOffset;
+        qint64 nTableSize;
+    };
+
+    QList<CLI_METADATA_RECORD> getCliMetadataRecords(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap, SYMBOL_TYPE symbolType = SYMBOL_TYPE_ALL);
 

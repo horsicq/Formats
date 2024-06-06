@@ -3652,10 +3652,8 @@ XBinary::OS_STRING XELF::getRunPath(XBinary::_MEMORY_MAP *pMemoryMap, QList<XELF
     return result;
 }
 
-QList<XBinary::MAPMODE> XELF::getMapModesList(PDSTRUCT *pPdStruct)
+QList<XBinary::MAPMODE> XELF::getMapModesList()
 {
-    Q_UNUSED(pPdStruct)
-
     QList<MAPMODE> listResult;
 
     listResult.append(MAPMODE_SEGMENTS);

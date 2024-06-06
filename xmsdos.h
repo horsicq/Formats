@@ -99,7 +99,7 @@ public:
     quint16 get_e_res2(qint32 nPosition);
     quint32 get_e_lfanew();
 
-    virtual QList<MAPMODE> getMapModesList(PDSTRUCT *pPdStruct = nullptr);
+    static QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(XBinary::MAPMODE mapMode = XBinary::MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
     virtual qint64 getImageSize();

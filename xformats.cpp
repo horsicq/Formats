@@ -174,107 +174,78 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(const QString &sFileName, XBinary::M
     return result;
 }
 
-QList<XBinary::MAPMODE> XFormats::getMapModesList(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+QList<XBinary::MAPMODE> XFormats::getMapModesList(XBinary::FT fileType)
 {
     QList<XBinary::MAPMODE> listResult;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
-        XBinary binary(pDevice, bIsImage, nModuleAddress);
-        listResult = binary.getMapModesList(pPdStruct);
+        listResult = XBinary::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
-        XCOM com(pDevice, bIsImage, nModuleAddress);
-        listResult = com.getMapModesList(pPdStruct);
+        listResult = XCOM::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) {
-        XMSDOS msdos(pDevice, bIsImage, nModuleAddress);
-        listResult = msdos.getMapModesList(pPdStruct);
+        listResult = XMSDOS::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) {
-        XNE ne(pDevice, bIsImage, nModuleAddress);
-        listResult = ne.getMapModesList(pPdStruct);
+        listResult = XNE::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_LE, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
-        listResult = le.getMapModesList(pPdStruct);
+        listResult = XLE::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_LX, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
-        listResult = le.getMapModesList(pPdStruct);
+        listResult = XLE::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) {
-        XPE pe(pDevice, bIsImage, nModuleAddress);
-        listResult = pe.getMapModesList(pPdStruct);
+        listResult = XPE::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) {
-        XELF elf(pDevice, bIsImage, nModuleAddress);
-        listResult = elf.getMapModesList(pPdStruct);
+        listResult = XELF::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
-        XMACH mach(pDevice, bIsImage, nModuleAddress);
-        listResult = mach.getMapModesList(pPdStruct);
+        listResult = XMACH::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
-        XPNG png(pDevice);
-        listResult = png.getMapModesList(pPdStruct);
+        listResult = XPNG::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
-        XJpeg jpeg(pDevice);
-        listResult = jpeg.getMapModesList(pPdStruct);
+        listResult = XJpeg::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
-        XIcon xicon(pDevice);
-        listResult = xicon.getMapModesList(pPdStruct);
+        listResult = XIcon::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_BMP, fileType)) {
-        XBMP xbmp(pDevice);
-        listResult = xbmp.getMapModesList(pPdStruct);
+        listResult = XBMP::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) {
-        XGif xgif(pDevice);
-        listResult = xgif.getMapModesList(pPdStruct);
+        listResult = XGif::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) {
-        XTiff xtiff(pDevice);
-        listResult = xtiff.getMapModesList(pPdStruct);
+        listResult = XTiff::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) {
-        XMP4 xmp4(pDevice);
-        listResult = xmp4.getMapModesList(pPdStruct);
+        listResult = XMP4::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) {
-        XMP3 xmp3(pDevice);
-        listResult = xmp3.getMapModesList(pPdStruct);
+        listResult = XMP3::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) {
-        XRiff xriff(pDevice);
-        listResult = xriff.getMapModesList(pPdStruct);
+        listResult = XRiff::getMapModesList();
     }
 #ifdef USE_DEX  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
-        XDEX dex(pDevice);
-        listResult = dex.getMapModesList(pPdStruct);
+        listResult = XDEX::getMapModesList();
     }
 #endif
 #ifdef USE_PDF  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_PDF, fileType)) {
-        XPDF pdf(pDevice);
-        listResult = pdf.getMapModesList(pPdStruct);
+        listResult = XPDF::getMapModesList();
     }
 #endif
 #ifdef USE_ARCHIVE
     else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) {
-        XZip zip(pDevice);
-        listResult = zip.getMapModesList(pPdStruct);
+        listResult = XZip::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
-        XSevenZip sevenzip(pDevice);
-        listResult = sevenzip.getMapModesList(pPdStruct);
+        listResult = XSevenZip::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
-        XCab xcab(pDevice);
-        listResult = xcab.getMapModesList(pPdStruct);
+        listResult = XCab::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) {
-        XRar xrar(pDevice);
-        listResult = xrar.getMapModesList(pPdStruct);
+        listResult = XRar::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) {
-        XMACHOFat xmachofat(pDevice);
-        listResult = xmachofat.getMapModesList(pPdStruct);
+        listResult = XMACHOFat::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) {
-        XGzip xgzip(pDevice);
-        listResult = xgzip.getMapModesList(pPdStruct);
+        listResult = XGzip::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) {
-        XZlib xzlib(pDevice);
-        listResult = xzlib.getMapModesList(pPdStruct);
+        listResult = XZlib::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) {
-        XLHA xlha(pDevice);
-        listResult = xlha.getMapModesList(pPdStruct);
+        listResult = XLHA::getMapModesList();
     }
 #endif
     else {
-        XBinary binary(pDevice, bIsImage, nModuleAddress);
-        listResult = binary.getMapModesList(pPdStruct);
+        listResult = XBinary::getMapModesList();
     }
 
     return listResult;
@@ -1623,7 +1594,7 @@ bool XFormats::setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endia
 }
 #endif
 #ifdef QT_GUI_LIB
-XBinary::MAPMODE XFormats::setMapModeComboBox(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, QComboBox *pComboBox)
+XBinary::MAPMODE XFormats::getMapModesList(XBinary::FT fileType, QComboBox *pComboBox)
 {
     XBinary::MAPMODE result = XBinary::MAPMODE_UNKNOWN;
 
@@ -1631,7 +1602,7 @@ XBinary::MAPMODE XFormats::setMapModeComboBox(XBinary::FT fileType, QIODevice *p
 
     pComboBox->clear();
 
-    QList<XBinary::MAPMODE> listMapModes = getMapModesList(fileType, pDevice, bIsImage, nModuleAddress);
+    QList<XBinary::MAPMODE> listMapModes = getMapModesList(fileType);
 
     qint32 nNumberOfRecords = listMapModes.count();
 
