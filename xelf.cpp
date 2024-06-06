@@ -1120,6 +1120,7 @@ QMap<quint64, QString> XELF::getSectionFlags()
     mapResult.insert(0x00000100, "SHF_OS_NONCONFORMING");
     mapResult.insert(0x00000200, "SHF_GROUP");
     mapResult.insert(0x00000400, "SHF_TLS");
+    mapResult.insert(0x00000800, "SHF_COMPRESSED");
     mapResult.insert(0x0ff00000, "SHF_MASKOS");
     mapResult.insert(0xf0000000, "SHF_MASKPROC");
     mapResult.insert(0x40000000, "SHF_ORDERED");
@@ -1142,6 +1143,7 @@ QMap<quint64, QString> XELF::getSectionFlagsS()
     mapResult.insert(0x00000100, "OS_NONCONFORMING");
     mapResult.insert(0x00000200, "GROUP");
     mapResult.insert(0x00000400, "TLS");
+    mapResult.insert(0x00000800, "COMPRESSED");
     mapResult.insert(0x0ff00000, "MASKOS");
     mapResult.insert(0xf0000000, "MASKPROC");
     mapResult.insert(0x40000000, "ORDERED");
