@@ -534,6 +534,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_WEBP: sResult = QString("WebP"); break;
         case FT_ZIP: sResult = QString("ZIP"); break;
         case FT_ZLIB: sResult = QString("zlib"); break;
+        case FT_DEB: sResult = QString("deb"); break;
     }
 
     return sResult;
@@ -5123,6 +5124,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_LHA;
     } else if (pStFileTypes->contains(FT_7Z)) {
         result = FT_7Z;
+    } else if (pStFileTypes->contains(FT_DEB)) {
+        result = FT_DEB;
     } else if (pStFileTypes->contains(FT_AR)) {
         result = FT_AR;
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
@@ -5249,6 +5252,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_TARGZ)) listResult.append(FT_TARGZ);
         if (stFileTypes.contains(FT_NPM)) listResult.append(FT_NPM);
         if (stFileTypes.contains(FT_MACHOFAT)) listResult.append(FT_MACHOFAT);
+        if (stFileTypes.contains(FT_DEB)) listResult.append(FT_DEB);
         if (stFileTypes.contains(FT_AR)) listResult.append(FT_AR);
     }
 
