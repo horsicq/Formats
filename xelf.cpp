@@ -1209,8 +1209,9 @@ QMap<quint64, QString> XELF::getProgramTypes(qint32 nIndent, QString sArch)
         mapResult.insert(0x70000000, "PT_S390_PGSTE");
     } else {
         mapResult.insert(0x70000000, "PT_LOPROC");
-        mapResult.insert(0x7fffffff, "PT_HIPROC");
     }
+
+    mapResult.insert(0x7fffffff, "PT_HIPROC");
 
     return mapResult;
 }
@@ -1272,8 +1273,10 @@ QMap<quint64, QString> XELF::getProgramTypesS(qint32 nIndent, QString sArch)
         mapResult.insert(0x70000000, "S390_PGSTE");
     } else {
         mapResult.insert(0x70000000, "LOPROC");
-        mapResult.insert(0x7fffffff, "HIPROC");
     }
+
+    mapResult.insert(0x7fffffff, "HIPROC");
+
     return mapResult;
 }
 
