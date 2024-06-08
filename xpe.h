@@ -224,10 +224,10 @@ public:
         quint8 cTables_Reserved2;
         quint64 nTables_Valid;
         quint64 nTables_Sorted;
-        quint32 nTables_Valid_NumberOfRows; // TODO remove
+        quint32 nTables_Valid_NumberOfRows;        // TODO remove
         quint32 Tables_TablesNumberOfIndexes[64];  // TODO const
         qint64 Tables_TablesOffsets[64];           // TODO const
-        qint64 Tables_TableElementSizes[64];             // TODO const
+        qint64 Tables_TableElementSizes[64];       // TODO const
         OFFSETSIZE osStrings;
         OFFSETSIZE osUS;
         OFFSETSIZE osBlob;
@@ -837,8 +837,8 @@ public:
     bool isDriver();
     bool isNETPresent();
 
-    CLI_INFO getCliInfo(bool bFindHidden); // TODO pdstruct
-    CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap); // TODO pdstruct
+    CLI_INFO getCliInfo(bool bFindHidden);                                    // TODO pdstruct
+    CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap);  // TODO pdstruct
 
     QString mdtIdToString(quint32 nID);
 

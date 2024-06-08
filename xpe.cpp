@@ -9261,7 +9261,6 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 }
                             }
 
-
                             // nSize = 0;
                             // nSize += 4;
                             // nSize += result.metaData.nStringIndexSize;
@@ -9322,8 +9321,6 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
     return result;
 }
 
-
-
 XBinary::OFFSETSIZE XPE::getNet_MetadataOffsetSize()
 {
     OFFSETSIZE osResult = {};
@@ -9355,7 +9352,8 @@ XBinary::OFFSETSIZE XPE::getNet_MetadataOffsetSize()
     return osResult;
 }
 
-QString XPE::mdtIdToString(quint32 nID) {
+QString XPE::mdtIdToString(quint32 nID)
+{
     QString sResult;
 
     switch (nID) {
@@ -9410,7 +9408,6 @@ QString XPE::mdtIdToString(quint32 nID) {
 
     return sResult;
 }
-
 
 XPE::CLI_METADATA_HEADER XPE::_read_MetadataHeader(qint64 nOffset)
 {
