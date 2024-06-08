@@ -10197,7 +10197,7 @@ quint16 XPE::_checkSum(qint64 nStartValue, qint64 nDataSize)
 
         pOffset = pBuffer;
 
-        for (unsigned int i = 0; i < (nTemp + 1) / 2; i++) {
+        for (quint32 i = 0; i < (nTemp + 1) / 2; i++) {
             nSum += *((unsigned short *)pOffset);
 
             if (S_HIWORD(nSum) != 0) {
