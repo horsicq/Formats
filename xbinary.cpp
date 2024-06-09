@@ -116,8 +116,6 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
         // qDebug("%s",XBinary::valueToHex((quint64)pDevice).toLatin1().data());
         setFileFormatSize(pDevice->size());
     }
-
-    g_bLog = false;
 }
 
 void XBinary::setDevice(QIODevice *pDevice)
