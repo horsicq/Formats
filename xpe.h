@@ -243,6 +243,11 @@ public:
         qint32 nResolutionScopeSize;
         qint32 nTypeDefOrRefSize;
         qint32 nMemberRefParentSize;
+        qint32 nHasConstantSize;
+        qint32 nHasCustomAttributeSize;
+        qint32 nCustomAttributeTypeSize;
+        qint32 nHasFieldMarshallSize;
+        qint32 nHasDeclSecuritySize;
         quint32 indexSize[64];
     };
 

@@ -926,7 +926,7 @@ QMap<quint64, QString> XELF::getIndentOsabisS()
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionTypes(QString sArch)
+QMap<quint64, QString> XELF::getSectionTypes(const QString &sArch)
 {
     QMap<quint64, QString> mapResult;
 

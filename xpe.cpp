@@ -9164,6 +9164,11 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             result.metaData.nResolutionScopeSize = 2;
                             result.metaData.nTypeDefOrRefSize = 2;
                             result.metaData.nMemberRefParentSize = 2;
+                            result.metaData.nHasConstantSize = 2;
+                            result.metaData.nHasCustomAttributeSize = 2;
+                            result.metaData.nCustomAttributeTypeSize = 2;
+                            result.metaData.nHasFieldMarshallSize = 2;
+                            result.metaData.nHasDeclSecuritySize = 2;
 
                             quint8 cHeapOffsetSizes = result.metaData.cTables_HeapOffsetSizes;
 
@@ -9181,56 +9186,57 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                             // TODO !!!
 
-                            {
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Module] > 0x3FFF) {
-                                    result.metaData.nResolutionScopeSize = 4;
-                                }
-
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x3FFF) {
-                                    result.metaData.nResolutionScopeSize = 4;
-                                }
-
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_AssemblyRef] > 0x3FFF) {
-                                    result.metaData.nResolutionScopeSize = 4;
-                                }
-
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef] > 0x3FFF) {
-                                    result.metaData.nResolutionScopeSize = 4;
-                                }
+                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Module] > 0x3FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x3FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_AssemblyRef] > 0x3FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef] > 0x3FFF) {
+                                result.metaData.nResolutionScopeSize = 4;
                             }
-                            {
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x3FFF) {
-                                    result.metaData.nTypeDefOrRefSize = 4;
-                                }
-
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x3FFF) {
-                                    result.metaData.nTypeDefOrRefSize = 4;
-                                }
-
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeSpec] > 0x3FFF) {
-                                    result.metaData.nTypeDefOrRefSize = 4;
-                                }
+                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x3FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x3FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeSpec] > 0x3FFF) {
+                                result.metaData.nTypeDefOrRefSize = 4;
                             }
-                            {
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x1FFF) {
-                                    result.metaData.nMemberRefParentSize = 4;
-                                }
-
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef] > 0x1FFF) {
-                                    result.metaData.nMemberRefParentSize = 4;
-                                }
-
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x1FFF) {
-                                    result.metaData.nMemberRefParentSize = 4;
-                                }
-
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x1FFF) {
-                                    result.metaData.nMemberRefParentSize = 4;
-                                }
-
-                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeSpec] > 0x1FFF) {
-                                    result.metaData.nMemberRefParentSize = 4;
-                                }
+                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x1FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef] > 0x1FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x1FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x1FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeSpec] > 0x1FFF) {
+                                result.metaData.nMemberRefParentSize = 4;
+                            }
+                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field] > 0x3FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Param] > 0x3FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Property] > 0x3FFF) {
+                                result.metaData.nHasConstantSize = 4;
+                            }
+                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Param] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_InterfaceImpl] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Module] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Property] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Event] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_StandAloneSig] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeSpec] > 0x7FF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Assembly] > 0x7FF) {
+                                result.metaData.nHasCustomAttributeSize = 4;
+                            }
+                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x1FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef] > 0x1FFF ) {
+                                result.metaData.nTypeDefOrRefSize = 4;
+                            }
+                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field] > 0x7FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Param] > 0x7FFF ) {
+                                result.metaData.nHasFieldMarshallSize = 4;
+                            }
+                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x3FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x3FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Assembly] > 0x3FFF) {
+                                result.metaData.nHasDeclSecuritySize = 4;
                             }
 
                             for (int i = 0; i < 64; i++) {
@@ -9304,7 +9310,33 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 nSize += result.metaData.nBLOBIndexSize;
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MemberRef] = nSize;
                             }
-
+                            {
+                                qint32 nSize = 0;
+                                nSize += 1;
+                                nSize += result.metaData.nHasConstantSize;
+                                nSize += result.metaData.nBLOBIndexSize;
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Constant] = nSize;
+                            }
+                            {
+                                qint32 nSize = 0;
+                                nSize += result.metaData.nHasCustomAttributeSize;
+                                nSize += result.metaData.nCustomAttributeTypeSize;
+                                nSize += result.metaData.nBLOBIndexSize;
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_CustomAttribute] = nSize;
+                            }
+                            {
+                                qint32 nSize = 0;
+                                nSize += result.metaData.nHasFieldMarshallSize;
+                                nSize += result.metaData.nBLOBIndexSize;
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_FieldMarshal] = nSize;
+                            }
+                            {
+                                qint32 nSize = 0;
+                                nSize += 2;
+                                nSize += result.metaData.nHasDeclSecuritySize;
+                                nSize += result.metaData.nBLOBIndexSize;
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_DeclSecurity] = nSize;
+                            }
 
                             // TODO
 
@@ -9315,55 +9347,6 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 }
                             }
 
-                            // nSize = 0;
-                            // nSize += 4;
-                            // nSize += result.metaData.nStringIndexSize;
-                            // nSize += result.metaData.nStringIndexSize;
-                            // nSize += nTypeDefOrRef;
-                            // nSize += nField;
-                            // nSize += nMethodDef;
-                            // result.metaData.Tables_TableElementSizes[2] = nSize;
-                            // nSize = 0;
-                            // result.metaData.Tables_TableElementSizes[3] = nSize;
-                            // nSize = 0;
-                            // nSize += 2;
-                            // nSize += result.metaData.nStringIndexSize;
-                            // nSize += result.metaData.nBLOBIndexSize;
-                            // result.metaData.Tables_TableElementSizes[4] = nSize;
-                            // nSize = 0;
-                            // result.metaData.Tables_TableElementSizes[5] = nSize;
-                            // nSize = 0;
-                            // nSize += 4;
-                            // nSize += 2;
-                            // nSize += 2;
-                            // nSize += result.metaData.nStringIndexSize;
-                            // nSize += result.metaData.nBLOBIndexSize;
-                            // nSize += nParamList;
-                            // result.metaData.Tables_TableElementSizes[6] = nSize;
-
-                            // for (qint32 i = 0; i < 64; i++) {
-                            //     if (result.metaData.Tables_TablesNumberOfIndexes[i]) {
-                            //         result.metaData.Tables_TablesOffsets[i] = nOffset;
-                            //         nOffset += result.metaData.Tables_TableElementSizes[i] * result.metaData.Tables_TablesNumberOfIndexes[i];
-                            //     }
-                            // }
-
-                            // if (!(result.header.Flags & XPE_DEF::COMIMAGE_FLAGS_NATIVE_ENTRYPOINT)) {
-                            //     if (((result.metaData.nEntryPoint & 0xFF000000) >> 24) == 6) {
-                            //         unsigned int nIndex = result.metaData.nEntryPoint & 0xFFFFFF;
-
-                            //         if (nIndex <= result.metaData.Tables_TablesNumberOfIndexes[6]) {
-                            //             nOffset = result.metaData.Tables_TablesOffsets[6];
-                            //             nOffset += result.metaData.Tables_TableElementSizes[6] * (nIndex - 1);
-
-                            //             result.metaData.nEntryPoint = read_uint32(nOffset);
-                            //         } else {
-                            //             result.metaData.nEntryPoint = 0;
-                            //         }
-                            //     } else {
-                            //         result.metaData.nEntryPoint = 0;
-                            //     }
-                            // }
                         }
                     }
                 }

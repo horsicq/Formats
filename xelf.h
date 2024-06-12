@@ -183,7 +183,7 @@ public:
     static QMap<quint64, QString> getMachines();
     static QMap<quint64, QString> getMachinesS();
 
-    static QMap<quint64, QString> getSectionTypes(QString sArch);
+    static QMap<quint64, QString> getSectionTypes(const QString &sArch);
     static QMap<quint64, QString> getSectionTypesS(QString sArch);
     static QMap<quint64, QString> getSectionFlags();
     static QMap<quint64, QString> getSectionFlagsS();
