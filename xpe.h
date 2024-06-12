@@ -242,6 +242,8 @@ public:
         qint32 nBLOBIndexSize;
         qint32 nResolutionScopeSize;
         qint32 nTypeDefOrRefSize;
+        qint32 nMemberRefParentSize;
+        quint32 indexSize[64];
     };
 
     struct CLI_INFO {

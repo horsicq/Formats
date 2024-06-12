@@ -101,6 +101,12 @@ class XBinary : public QObject {
     static const double D_ENTROPY_THRESHOLD;  // 6.5 TODO set get
 
 public:
+    enum LT {
+        LT_UNKNOWN = 0,
+        LT_OFFSET,
+        LT_ADDRESS
+    };
+
     struct DATASET {
         qint64 nOffset;
         XADDR nAddress;

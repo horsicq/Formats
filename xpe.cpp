@@ -9163,9 +9163,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             result.metaData.nBLOBIndexSize = 2;
                             result.metaData.nResolutionScopeSize = 2;
                             result.metaData.nTypeDefOrRefSize = 2;
-                            qint32 nField = 2;
-                            qint32 nMethodDef = 2;
-                            qint32 nParamList = 2;
+                            result.metaData.nMemberRefParentSize = 2;
 
                             quint8 cHeapOffsetSizes = result.metaData.cTables_HeapOffsetSizes;
 
@@ -9213,17 +9211,34 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                     result.metaData.nTypeDefOrRefSize = 4;
                                 }
                             }
+                            {
+                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x1FFF) {
+                                    result.metaData.nMemberRefParentSize = 4;
+                                }
 
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field] > 0xFFFF) {
-                                nField = 4;
+                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef] > 0x1FFF) {
+                                    result.metaData.nMemberRefParentSize = 4;
+                                }
+
+                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x1FFF) {
+                                    result.metaData.nMemberRefParentSize = 4;
+                                }
+
+                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x1FFF) {
+                                    result.metaData.nMemberRefParentSize = 4;
+                                }
+
+                                if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeSpec] > 0x1FFF) {
+                                    result.metaData.nMemberRefParentSize = 4;
+                                }
                             }
 
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0xFFFF) {
-                                nMethodDef = 4;
-                            }
-
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Param] > 0xFFFF) {
-                                nParamList = 4;
+                            for (int i = 0; i < 64; i++) {
+                                if (result.metaData.Tables_TablesNumberOfIndexes[i] > 0xFFFF) {
+                                    result.metaData.indexSize[i] = 4;
+                                } else {
+                                    result.metaData.indexSize[i] = 2;
+                                }
                             }
 
                             {
@@ -9248,9 +9263,48 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 nSize += result.metaData.nStringIndexSize;
                                 nSize += result.metaData.nStringIndexSize;
                                 nSize += result.metaData.nTypeDefOrRefSize;
-                                nField = 4;
+                                nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field];
+                                nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef];
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeDef] = nSize;
                             }
+                            {
+                                qint32 nSize = 0;
+                                nSize += 2;
+                                nSize += result.metaData.nStringIndexSize;
+                                nSize += result.metaData.nBLOBIndexSize;
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Field] = nSize;
+                            }
+                            {
+                                qint32 nSize = 0;
+                                nSize += 4;
+                                nSize += 2;
+                                nSize += 2;
+                                nSize += result.metaData.nStringIndexSize;
+                                nSize += result.metaData.nBLOBIndexSize;
+                                nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Param];
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodDef] = nSize;
+                            }
+                            {
+                                qint32 nSize = 0;
+                                nSize += 2;
+                                nSize += 2;
+                                nSize += result.metaData.nStringIndexSize;
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Param] = nSize;
+                            }
+                            {
+                                qint32 nSize = 0;
+                                nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
+                                nSize += result.metaData.nTypeDefOrRefSize;
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_InterfaceImpl] = nSize;
+                            }
+                            {
+                                qint32 nSize = 0;
+                                nSize += result.metaData.nMemberRefParentSize;
+                                nSize += result.metaData.nStringIndexSize;
+                                nSize += result.metaData.nBLOBIndexSize;
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MemberRef] = nSize;
+                            }
+
 
                             // TODO
 
