@@ -46,6 +46,7 @@ public:
     virtual QString getFileFormatString();
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize();
+    virtual QString getVersion();
 
     QList<CHUNK> getChunks(PDSTRUCT *pPdStruct = nullptr);
     static QList<CHUNK> _getChunksById(QList<CHUNK> *pListChunks, quint8 nId);

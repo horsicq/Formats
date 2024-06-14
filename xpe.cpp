@@ -9239,7 +9239,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 result.metaData.nHasDeclSecuritySize = 4;
                             }
 
-                            for (int i = 0; i < 64; i++) {
+                            for (qint32 i = 0; i < 64; i++) {
                                 if (result.metaData.Tables_TablesNumberOfIndexes[i] > 0xFFFF) {
                                     result.metaData.indexSize[i] = 4;
                                 } else {

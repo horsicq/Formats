@@ -101,6 +101,12 @@ QString XJpeg::getFileFormatString()
 
     sResult = QString("JPEG");
 
+    QString sVersion = getVersion();
+
+    if (sVersion != "") {
+        sResult += QString("(%1)").arg(sVersion);
+    }
+
     return sResult;
 }
 
@@ -112,6 +118,22 @@ QString XJpeg::getFileFormatExt()
 qint64 XJpeg::getFileFormatSize()
 {
     return _calculateRawSize();
+}
+
+QString XJpeg::getVersion()
+{
+    QString sResult;
+
+    QString sIdent = read_ansiString(6, 5);
+
+    if (sIdent == "JFIF") {
+        quint8 nMajor = read_uint8(0x0B);
+        quint8 nMinor = read_uint8(0x0C);
+
+        sResult = QString("%1.%2").arg(QString::number(nMajor), QString::number(nMinor));
+    }
+
+    return sResult;
 }
 
 QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
