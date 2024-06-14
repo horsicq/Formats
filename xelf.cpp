@@ -1016,7 +1016,7 @@ QMap<quint64, QString> XELF::getSectionTypes(const QString &sArch)
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getSectionTypesS(QString sArch)
+QMap<quint64, QString> XELF::getSectionTypesS(const QString &sArch)
 {
     QMap<quint64, QString> mapResult;
 

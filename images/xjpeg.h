@@ -50,7 +50,7 @@ public:
 
     QList<CHUNK> getChunks(PDSTRUCT *pPdStruct = nullptr);
     static QList<CHUNK> _getChunksById(QList<CHUNK> *pListChunks, quint8 nId);
-    QString getComment(QList<CHUNK> *pListChunks); // TODO pdstruct
+    QString getComment(QList<CHUNK> *pListChunks);  // TODO pdstruct
     QString getComment();
 
     QString getDqtMD5(QList<CHUNK> *pListChunks);

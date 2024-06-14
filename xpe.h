@@ -242,12 +242,15 @@ public:
         qint32 nBLOBIndexSize;
         qint32 nResolutionScopeSize;
         qint32 nTypeDefOrRefSize;
+        qint32 nMethodDefOrRefSize;
         qint32 nMemberRefParentSize;
         qint32 nHasConstantSize;
         qint32 nHasCustomAttributeSize;
         qint32 nCustomAttributeTypeSize;
         qint32 nHasFieldMarshallSize;
         qint32 nHasDeclSecuritySize;
+        qint32 nHasSemanticsSize;
+        qint32 nMemberForwardedSize;
         quint32 indexSize[64];
     };
 
