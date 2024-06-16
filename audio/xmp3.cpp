@@ -66,8 +66,9 @@ QString XMP3::getFileFormatExt()
     return "mp3";
 }
 
-qint64 XMP3::getFileFormatSize()
+qint64 XMP3::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     return _calculateRawSize();
 }
 

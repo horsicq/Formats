@@ -69,8 +69,9 @@ QString XPNG::getFileFormatExt()
     return "png";
 }
 
-qint64 XPNG::getFileFormatSize()
+qint64 XPNG::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     qint64 nResult = 0;
 
     qint64 nOffset = 8;

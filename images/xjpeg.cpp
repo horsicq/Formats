@@ -115,8 +115,9 @@ QString XJpeg::getFileFormatExt()
     return "jpeg";
 }
 
-qint64 XJpeg::getFileFormatSize()
+qint64 XJpeg::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     return _calculateRawSize();
 }
 

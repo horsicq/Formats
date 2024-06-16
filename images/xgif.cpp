@@ -65,8 +65,10 @@ QString XGif::getFileFormatExt()
     return "gif";
 }
 
-qint64 XGif::getFileFormatSize()
+qint64 XGif::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     qint64 nResult = 0;
 
     qint64 nCurrentOffset = 0x320;

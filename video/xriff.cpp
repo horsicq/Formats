@@ -79,8 +79,9 @@ QString XRiff::getFileFormatExt()
     return read_ansiString(12, 4).trimmed().toLower();
 }
 
-qint64 XRiff::getFileFormatSize()
+qint64 XRiff::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     return _calculateRawSize();
 }
 

@@ -342,7 +342,7 @@ public:
     virtual OFFSETSIZE getSignOffsetSize();
     virtual QString getFileFormatString();
     virtual QString getFileFormatExt();
-    virtual qint64 getFileFormatSize();
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
     qint64 getNtHeadersOffset();
     quint32 getNtHeaders_Signature();

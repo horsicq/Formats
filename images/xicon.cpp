@@ -103,8 +103,9 @@ QString XIcon::getFileFormatExt()
     return sResult;
 }
 
-qint64 XIcon::getFileFormatSize()
+qint64 XIcon::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     return _calculateRawSize();
 }
 

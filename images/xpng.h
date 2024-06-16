@@ -42,7 +42,7 @@ public:
     virtual FT getFileType();
     virtual QString getFileFormatString();
     virtual QString getFileFormatExt();
-    virtual qint64 getFileFormatSize();
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
 private:

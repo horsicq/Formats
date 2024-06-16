@@ -52,7 +52,7 @@ public:
     virtual FT getFileType();
     virtual QString getFileFormatString();
     virtual QString getFileFormatExt();
-    virtual qint64 getFileFormatSize();
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
     virtual ENDIAN getEndian();
 
     QList<CHUNK> getChunks(PDSTRUCT *pPdStruct = nullptr);

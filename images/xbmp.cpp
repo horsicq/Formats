@@ -78,8 +78,10 @@ QString XBMP::getFileFormatExt()
     return "bmp";
 }
 
-qint64 XBMP::getFileFormatSize()
+qint64 XBMP::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     qint64 nResult = 0;
 
     nResult = read_uint32(2);

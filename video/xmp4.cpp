@@ -65,8 +65,9 @@ QString XMP4::getFileFormatExt()
     return "mp4";
 }
 
-qint64 XMP4::getFileFormatSize()
+qint64 XMP4::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     return _calculateRawSize();
 }
 

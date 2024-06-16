@@ -287,8 +287,9 @@ QString XPE::getFileFormatExt()
     return sResult;
 }
 
-qint64 XPE::getFileFormatSize()
+qint64 XPE::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     return _calculateRawSize();
 }
 

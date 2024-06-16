@@ -5366,8 +5366,9 @@ QString XELF::getFileFormatExt()
     return sResult;
 }
 
-qint64 XELF::getFileFormatSize()
+qint64 XELF::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     return _calculateRawSize();
 }
 

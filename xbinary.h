@@ -676,7 +676,7 @@ public:
     virtual QString getFileFormatExt();
 
     void setFileFormatSize(qint64 nFileFormatSize);
-    virtual qint64 getFileFormatSize();
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
     virtual bool isSigned();
     virtual OFFSETSIZE getSignOffsetSize();  // TODO rename

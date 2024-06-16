@@ -324,11 +324,9 @@ void XBinary::setFileFormatSize(qint64 nFileFormatSize)
     g_nFileFormatSize = nFileFormatSize;
 }
 
-qint64 XBinary::getFileFormatSize()
+qint64 XBinary::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-#ifdef QT_DEBUG
-    qDebug("TODO: XBinary::setFileFormatSize()");
-#endif
+    Q_UNUSED(pPdStruct)
 
     return g_nFileFormatSize;
 }
@@ -376,13 +374,15 @@ XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
     result.bIsValid = isValid(pPdStruct);
 
     if (result.bIsValid) {
-        result.nSize = getFileFormatSize();
+        result.nSize = getFileFormatSize(pPdStruct);
 
-        if (result.nSize) {
+        if (result.nSize > 0) {
             result.fileType = getFileType();
             result.sString = getFileFormatString();
             result.sExt = getFileFormatExt();
             result.sVersion = getVersion();
+        } else {
+            result.bIsValid = false;
         }
     }
 
@@ -6245,6 +6245,10 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
         quint32 a = 1;
         quint32 b = 0;
 
+        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+
         while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
             nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
 
@@ -6261,7 +6265,11 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 
             nSize -= nTemp;
             nOffset += nTemp;
+
+            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset);
         }
+
+        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
         delete[] pBuffer;
 

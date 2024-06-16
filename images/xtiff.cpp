@@ -175,8 +175,9 @@ QString XTiff::getFileFormatExt()
     return "tiff";
 }
 
-qint64 XTiff::getFileFormatSize()
+qint64 XTiff::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     return _calculateRawSize();
 }
 

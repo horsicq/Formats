@@ -481,7 +481,7 @@ public:
 
     virtual QString getFileFormatString();
     virtual QString getFileFormatExt();
-    virtual qint64 getFileFormatSize();
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
     virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 

@@ -4489,8 +4489,9 @@ QString XMACH::getFileFormatExt()
     return sResult;
 }
 
-qint64 XMACH::getFileFormatSize()
+qint64 XMACH::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     return _calculateRawSize();
 }
 

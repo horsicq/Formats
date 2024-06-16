@@ -667,7 +667,7 @@ public:
 
     virtual QString getFileFormatString();
     virtual QString getFileFormatExt();
-    virtual qint64 getFileFormatSize();
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
     enum OPCODE_TYPE {
         OPCODE_TYPE_UNKNOWN = 0,
