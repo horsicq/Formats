@@ -1178,7 +1178,7 @@ public:
     static bool isFileHashValid(HASH hash, const QString &sFileName, const QString &sHash);
 
     static quint32 getAdler32(const QString &sFileName);  // TODO ProcessData
-    static quint32 getAdler32(QIODevice *pDevice);        // TODO ProcessData
+    static quint32 getAdler32(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     quint32 getAdler32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
     static void _createCRC32Table(quint32 *pCRCTable, quint32 nPoly = 0xEDB88320);

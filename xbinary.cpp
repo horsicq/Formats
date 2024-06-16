@@ -6206,13 +6206,13 @@ quint32 XBinary::getAdler32(const QString &sFileName)
     return nResult;
 }
 
-quint32 XBinary::getAdler32(QIODevice *pDevice)
+quint32 XBinary::getAdler32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     quint32 nResult = 0;
 
     XBinary binary(pDevice);
 
-    nResult = binary.getAdler32(0, -1);
+    nResult = binary.getAdler32(0, -1, pPdStruct);
 
     pDevice->reset();
 
@@ -6228,6 +6228,7 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
     }
     // TODO Check crash
     // TODO optimize!!!
+    // TODO Progress bar
     quint32 nResult = 0;
 
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
