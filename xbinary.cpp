@@ -3532,6 +3532,49 @@ QByteArray XBinary::readFile(const QString &sFileName, PDSTRUCT *pPdStruct)
     return baResult;
 }
 
+bool XBinary::readFile(const QString &sFileName, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if (file.open(QIODevice::ReadOnly)) {
+        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+        qint64 nOffset = 0;
+
+        bResult = true;
+
+        while ((nSize > 0) && !(pPdStruct->bIsStop)) {
+            qint64 nCurrentSize = qMin(nSize, (qint64)READWRITE_BUFFER_SIZE);
+
+            if (nCurrentSize != file.read(pBuffer, nCurrentSize)) {
+                bResult = false;
+                break;
+            }
+
+            nSize -= nCurrentSize;
+            pBuffer += nCurrentSize;
+            nOffset += nCurrentSize;
+
+            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset);
+        }
+
+        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+        file.close();
+    }
+
+    return bResult;
+}
+
 void XBinary::_copyMemory(char *pDest, char *pSource, qint64 nSize)
 {
     // TODO optimize
@@ -6997,14 +7040,14 @@ void XBinary::_infoMessage(const QString &sInfoMessage)
     emit infoMessage(sInfoMessage);
 }
 
-qint64 XBinary::_calculateRawSize()
+qint64 XBinary::_calculateRawSize(PDSTRUCT *pPdStruct)
 {
-    _MEMORY_MAP memoryMap = getMemoryMap();
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
-    return _calculateRawSize(&memoryMap);
+    return _calculateRawSize(&memoryMap, pPdStruct);
 }
 
-qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap)
+qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = 0;
 
@@ -7012,7 +7055,7 @@ qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap)
 
     qint64 _nOverlayOffset = -1;
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
         if ((pMemoryMap->listRecords.at(i).nOffset != -1) && (pMemoryMap->listRecords.at(i).type != MMT_OVERLAY)) {
             nResult = qMax(nResult, (qint64)(pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize));
         }
@@ -7598,17 +7641,23 @@ QList<QString> XBinary::getListFromFile(const QString &sFileName)
     return listResult;
 }
 
-qint64 XBinary::getOverlaySize()
+qint64 XBinary::getOverlaySize(PDSTRUCT *pPdStruct)
 {
-    _MEMORY_MAP memoryMap = getMemoryMap();
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    return getOverlaySize(&memoryMap);
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+
+    return getOverlaySize(&memoryMap, pPdStruct);
 }
 
-qint64 XBinary::getOverlaySize(XBinary::_MEMORY_MAP *pMemoryMap)
+qint64 XBinary::getOverlaySize(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
     qint64 nSize = pMemoryMap->nBinarySize;
-    qint64 nOverlayOffset = getOverlayOffset(pMemoryMap);
+    qint64 nOverlayOffset = getOverlayOffset(pMemoryMap, pPdStruct);
     qint64 nDelta = 0;
 
     if (nOverlayOffset > 0) {
@@ -7618,17 +7667,23 @@ qint64 XBinary::getOverlaySize(XBinary::_MEMORY_MAP *pMemoryMap)
     return qMax(nDelta, (qint64)0);
 }
 
-qint64 XBinary::getOverlayOffset()
+qint64 XBinary::getOverlayOffset(PDSTRUCT *pPdStruct)
 {
-    _MEMORY_MAP memoryMap = getMemoryMap();
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    return getOverlayOffset(&memoryMap);
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+
+    return getOverlayOffset(&memoryMap, pPdStruct);
 }
 
-qint64 XBinary::getOverlayOffset(XBinary::_MEMORY_MAP *pMemoryMap)
+qint64 XBinary::getOverlayOffset(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = -1;
-    qint64 nRawSize = _calculateRawSize(pMemoryMap);
+    qint64 nRawSize = _calculateRawSize(pMemoryMap, pPdStruct);
 
     if (nRawSize) {
         nResult = nRawSize;
@@ -7637,43 +7692,49 @@ qint64 XBinary::getOverlayOffset(XBinary::_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-bool XBinary::isOverlayPresent()
+bool XBinary::isOverlayPresent(PDSTRUCT *pPdStruct)
 {
-    _MEMORY_MAP memoryMap = getMemoryMap();
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    return isOverlayPresent(&memoryMap);
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+
+    return isOverlayPresent(&memoryMap, pPdStruct);
 }
 
-bool XBinary::isOverlayPresent(XBinary::_MEMORY_MAP *pMemoryMap)
+bool XBinary::isOverlayPresent(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
-    return (getOverlaySize(pMemoryMap) != 0);
+    return (getOverlaySize(pMemoryMap, pPdStruct) != 0);
 }
 
-bool XBinary::compareOverlay(const QString &sSignature, qint64 nOffset)
+bool XBinary::compareOverlay(const QString &sSignature, qint64 nOffset, PDSTRUCT *pPdStruct)
 {
-    _MEMORY_MAP memoryMap = getMemoryMap();
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
-    return compareOverlay(&memoryMap, sSignature, nOffset);
+    return compareOverlay(&memoryMap, sSignature, nOffset, pPdStruct);
 }
 
-bool XBinary::compareOverlay(XBinary::_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset)
+bool XBinary::compareOverlay(XBinary::_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
-    if (isOverlayPresent(pMemoryMap)) {
-        qint64 nOverlayOffset = getOverlayOffset(pMemoryMap) + nOffset;
+    if (isOverlayPresent(pMemoryMap, pPdStruct)) {
+        qint64 nOverlayOffset = getOverlayOffset(pMemoryMap, pPdStruct) + nOffset;
 
-        bResult = compareSignature(pMemoryMap, sSignature, nOverlayOffset);
+        bResult = compareSignature(pMemoryMap, sSignature, nOverlayOffset, pPdStruct);
     }
 
     return bResult;
 }
 
-bool XBinary::addOverlay(char *pData, qint64 nDataSize)
+bool XBinary::addOverlay(char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
-    qint64 nRawSize = getOverlayOffset();
+    qint64 nRawSize = getOverlayOffset(pPdStruct);
 
     if (resize(getDevice(), nRawSize + nDataSize)) {
         if (nDataSize) {
@@ -7686,15 +7747,21 @@ bool XBinary::addOverlay(char *pData, qint64 nDataSize)
     return bResult;
 }
 
-bool XBinary::addOverlay(const QString &sFileName)
+bool XBinary::addOverlay(const QString &sFileName, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     bool bResult = false;
 
     QFile file;
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        qint64 nRawSize = getOverlayOffset();
+        qint64 nRawSize = getOverlayOffset(pPdStruct);
         qint64 nDataSize = file.size();
 
         if (resize(getDevice(), nRawSize + nDataSize)) {

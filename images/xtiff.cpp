@@ -177,8 +177,7 @@ QString XTiff::getFileFormatExt()
 
 qint64 XTiff::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-    return _calculateRawSize();
+    return _calculateRawSize(pPdStruct);
 }
 
 XBinary::ENDIAN XTiff::getEndian()

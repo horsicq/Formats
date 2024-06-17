@@ -68,8 +68,7 @@ QString XMP3::getFileFormatExt()
 
 qint64 XMP3::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-    return _calculateRawSize();
+    return _calculateRawSize(pPdStruct);
 }
 
 XBinary::_MEMORY_MAP XMP3::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)

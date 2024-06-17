@@ -290,10 +290,17 @@ ScanItem *ScanItemModel::rootItem()
 
 void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLevel)
 {
+    XBinary::SCANSTRUCT ss = pItem->scanStruct();
+
     if (pItem->childCount()) {
         pXml->writeStartElement(pItem->data(0).toString());
 
-        // mb TODO offset & Size
+        if (ss.id.filePart != XBinary::FILEPART_UNKNOWN) {
+            pXml->writeAttribute("parentfilepart", XBinary::recordFilePartIdToString(ss.parentId.filePart));
+            pXml->writeAttribute("filetype", XBinary::fileTypeIdToString(ss.id.fileType));
+            pXml->writeAttribute("offset", QString::number(ss.id.nOffset));
+            pXml->writeAttribute("size", QString::number(ss.id.nSize));
+        }
 
         qint32 nNumberOfChildren = pItem->childCount();
 
@@ -302,9 +309,7 @@ void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLeve
         }
 
         pXml->writeEndElement();
-    } else {
-        XBinary::SCANSTRUCT ss = pItem->scanStruct();
-
+    } else { 
         pXml->writeStartElement("detect");
         pXml->writeAttribute("type", ss.sType);
         pXml->writeAttribute("name", ss.sName);
@@ -317,18 +322,19 @@ void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLeve
 #if (QT_VERSION_MAJOR > 4)
 void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nLevel)
 {
-    if (pItem->childCount()) {
-        XBinary::SCANSTRUCT ss = pItem->scanStruct();
+    XBinary::SCANSTRUCT ss = pItem->scanStruct();
 
+    if (pItem->childCount()) {
         QString sArrayName = "detects";
 
         if (ss.id.filePart != XBinary::FILEPART_UNKNOWN) {
             pJsonObject->insert("parentfilepart", XBinary::recordFilePartIdToString(ss.parentId.filePart));
             pJsonObject->insert("filetype", XBinary::fileTypeIdToString(ss.id.fileType));
+            pJsonObject->insert("offset", QString::number(ss.id.nOffset));
+            pJsonObject->insert("size", QString::number(ss.id.nSize));
 
             sArrayName = "values";
         }
-        // mb TODO offset & Size
 
         QJsonArray jsArray;
 
@@ -344,8 +350,6 @@ void ScanItemModel::_toJSON(QJsonObject *pJsonObject, ScanItem *pItem, qint32 nL
 
         pJsonObject->insert(sArrayName, jsArray);
     } else {
-        XBinary::SCANSTRUCT ss = pItem->scanStruct();
-
         pJsonObject->insert("type", ss.sType);
         pJsonObject->insert("name", ss.sName);
         pJsonObject->insert("version", ss.sVersion);

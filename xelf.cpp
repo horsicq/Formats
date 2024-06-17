@@ -4151,7 +4151,8 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     if (nNoLoadableSize > 0) {
         XBinary::_MEMORY_RECORD record = {};
 
-        record.type = MMT_NOLOADABLE;
+        record.type = MMT_OVERLAY;
+        record.sName = tr("Overlay");
         // TODO Section number!
         // TODO virtual sections!
         record.nAddress = -1;
@@ -5368,8 +5369,7 @@ QString XELF::getFileFormatExt()
 
 qint64 XELF::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-    return _calculateRawSize();
+    return _calculateRawSize(pPdStruct);
 }
 
 QList<XBinary::HREGION> XELF::getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)

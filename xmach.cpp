@@ -4491,8 +4491,7 @@ QString XMACH::getFileFormatExt()
 
 qint64 XMACH::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-    return _calculateRawSize();
+    return _calculateRawSize(pPdStruct);
 }
 
 XADDR XMACH::readOpcodes(quint32 nType, char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)

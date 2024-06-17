@@ -582,9 +582,9 @@ public:
     static bool isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction, QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct = nullptr);
     static bool isFunctionPresent(const QString &sFunction, QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct = nullptr);
 
-    bool setImports(QList<IMPORT_HEADER> *pListImportHeaders);
-    bool setImports(QIODevice *pDevice, bool bIsImage, QList<IMPORT_HEADER> *pListImportHeaders);
-    bool setImports(const QString &sFileName, bool bIsImage, QList<IMPORT_HEADER> *pListImportHeaders);
+    bool setImports(QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct);
+    bool setImports(QIODevice *pDevice, bool bIsImage, QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct);
+    bool setImports(const QString &sFileName, bool bIsImage, QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct);
 
     QString getImportFunctionName(quint32 nImport, quint32 nFunctionNumber, QList<IMPORT_HEADER> *pListImportHeaders);
 
@@ -721,21 +721,21 @@ public:
 
     QByteArray getSection(quint32 nSection);  // TODO move to Xbinary
 
-    bool addImportSection(QMap<qint64, QString> *pMapIAT);
-    bool addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QString> *pMapIAT);
-    bool addImportSection(const QString &sFileName, bool bIsImage, QMap<qint64, QString> *pMapIAT);
+    bool addImportSection(QMap<qint64, QString> *pMapIAT, PDSTRUCT *pPdStruct);
+    bool addImportSection(QIODevice *pDevice, bool bIsImage, QMap<qint64, QString> *pMapIAT, PDSTRUCT *pPdStruct);
+    bool addImportSection(const QString &sFileName, bool bIsImage, QMap<qint64, QString> *pMapIAT, PDSTRUCT *pPdStruct);
 
     static QList<XPE::IMPORT_HEADER> mapIATToList(QMap<qint64, QString> *pMapIAT, bool bIs64);
 
     quint32 calculateCheckSum();
 
-    bool addSection(XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
-    bool addSection(const QString &sFileName, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
-    bool addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize);
+    bool addSection(XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct);
+    bool addSection(const QString &sFileName, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct);
+    bool addSection(QIODevice *pDevice, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct);
 
-    bool removeLastSection();
-    static bool removeLastSection(QIODevice *pDevice, bool bIsImage);
-    static bool removeLastSection(const QString &sFileName, bool bIsImage);
+    bool removeLastSection(PDSTRUCT *pPdStruct);
+    static bool removeLastSection(QIODevice *pDevice, bool bIsImage, PDSTRUCT *pPdStruct);
+    static bool removeLastSection(const QString &sFileName, bool bIsImage, PDSTRUCT *pPdStruct);
     // TODO copy Overlay function -> XBinary
     XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY read_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset);
     XPE_DEF::IMAGE_RESOURCE_DIRECTORY read_IMAGE_RESOURCE_DIRECTORY(qint64 nOffset);
@@ -755,9 +755,9 @@ public:
     void setRelocsVirtualAddress(qint64 nOffset, quint32 nValue);
     void setRelocsSizeOfBlock(qint64 nOffset, quint32 nValue);
 
-    bool addRelocsSection(QList<XADDR> *pList);
-    bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<XADDR> *pListRelocs);
-    bool addRelocsSection(const QString &sFileName, bool bIsImage, QList<XADDR> *pListRelocs);
+    bool addRelocsSection(QList<XADDR> *pList, PDSTRUCT *pPdStruct);
+    bool addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<XADDR> *pListRelocs, PDSTRUCT *pPdStruct);
+    bool addRelocsSection(const QString &sFileName, bool bIsImage, QList<XADDR> *pListRelocs, PDSTRUCT *pPdStruct);
     static QByteArray relocsAsRVAListToByteArray(QList<XADDR> *pListRelocs, bool bIs64);
 
     bool isResourcesPresent();
@@ -918,8 +918,8 @@ public:
         bool bFixChecksum;
     };  // Obsolete TODO remove
 
-    bool rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions);                                    // Obsolete TODO remove
-    static bool rebuildDump(const QString &sInputFile, const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions);  // Obsolete TODO remove
+    bool rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions, PDSTRUCT *pPdStruct);                                    // Obsolete TODO remove
+    static bool rebuildDump(const QString &sInputFile, const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptions, PDSTRUCT *pPdStruct);  // Obsolete TODO remove
 
     static bool fixCheckSum(const QString &sFileName, bool bIsImage);
 

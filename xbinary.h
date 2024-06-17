@@ -957,6 +957,7 @@ public:
     static bool isDirectoryEmpty(const QString &sDirectoryName);
 
     static QByteArray readFile(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
+    static bool readFile(const QString &sFileName, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
 
     static void _copyMemory(char *pDest, char *pSource, qint64 nSize);
     static void _zeroMemory(char *pDest, qint64 nSize);
@@ -1244,7 +1245,7 @@ public:
     static OFFSETSIZE convertOffsetAndSize(QIODevice *pDevice, qint64 nOffset,
                                            qint64 nSize);  // TODO rename
 
-    static bool compareSignatureStrings(const QString &sBaseSignature, const QString &sOptSignature);
+    static bool compareSignatureStrings(const QString &sBaseSignature, const QString &sOptSignature); // TODO pdstruct
     static QString stringToHex(const QString &sString);
     static QString hexToString(const QString &sHex);
     static QString floatToString(float fValue, qint32 nPrec = 2);
@@ -1312,18 +1313,18 @@ public:
 
     static QList<QString> getListFromFile(const QString &sFileName);
 
-    qint64 getOverlaySize();
-    static qint64 getOverlaySize(_MEMORY_MAP *pMemoryMap);
-    qint64 getOverlayOffset();
-    static qint64 getOverlayOffset(_MEMORY_MAP *pMemoryMap);
-    bool isOverlayPresent();
-    static bool isOverlayPresent(_MEMORY_MAP *pMemoryMap);
+    qint64 getOverlaySize(PDSTRUCT *pPdStruct = nullptr);
+    static qint64 getOverlaySize(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);
+    qint64 getOverlayOffset(PDSTRUCT *pPdStruct = nullptr);
+    static qint64 getOverlayOffset(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);
+    bool isOverlayPresent(PDSTRUCT *pPdStruct = nullptr);
+    static bool isOverlayPresent(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);
 
-    bool compareOverlay(const QString &sSignature, qint64 nOffset);
-    bool compareOverlay(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset);
+    bool compareOverlay(const QString &sSignature, qint64 nOffset, PDSTRUCT *pPdStruct);
+    bool compareOverlay(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset, PDSTRUCT *pPdStruct);
 
-    bool addOverlay(char *pData, qint64 nDataSize);
-    bool addOverlay(const QString &sFileName);
+    bool addOverlay(char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct);
+    bool addOverlay(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     bool removeOverlay();
 
     bool isSignatureInLoadSegmentPresent(qint32 nLoadSegment, const QString &sSignature);
@@ -1566,8 +1567,8 @@ protected:
     bool _isOffsetValid(qint64 nOffset);
     void _errorMessage(const QString &sErrorMessage);
     void _infoMessage(const QString &sInfoMessage);
-    qint64 _calculateRawSize();
-    static qint64 _calculateRawSize(_MEMORY_MAP *pMemoryMap);
+    qint64 _calculateRawSize(PDSTRUCT *pPdStruct);
+    static qint64 _calculateRawSize(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);
 
 signals:
     void errorMessage(const QString &sErrorMessage);

@@ -67,8 +67,7 @@ QString XMP4::getFileFormatExt()
 
 qint64 XMP4::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-    return _calculateRawSize();
+    return _calculateRawSize(pPdStruct);
 }
 
 XBinary::_MEMORY_MAP XMP4::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
