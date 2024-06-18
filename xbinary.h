@@ -646,8 +646,8 @@ public:
 
     void setFileName(const QString &sFileName);
 
-    qint64 safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen);
-    qint64 safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen);
+    qint64 safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen, PDSTRUCT *pPdStruct = nullptr);
+    qint64 safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen, PDSTRUCT *pPdStruct = nullptr);
     qint64 getSize();
     static qint64 getSize(QIODevice *pDevice);
     static qint64 getSize(const QString &sFileName);
@@ -721,15 +721,15 @@ public:
     static bool isRegExpPresent(const QString &sRegExp, const QString &sString);
     static qint32 getRegExpCount(const QString &sRegExp, const QString &sString);  // TODO Check!
     static QString getRegExpSection(const QString &sRegExp, const QString &sString, qint32 nStart, qint32 nEnd);
-    qint64 read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize);
-    QByteArray read_array(qint64 nOffset, qint64 nSize);
-    qint64 write_array(qint64 nOffset, char *pBuffer, qint64 nSize);
-    qint64 write_array(qint64 nOffset, QByteArray baData);
+    qint64 read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTRUCT *pPdStruct = nullptr);
+    QByteArray read_array(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    qint64 write_array(qint64 nOffset, const char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    qint64 write_array(qint64 nOffset, const QByteArray &baData, PDSTRUCT *pPdStruct = nullptr);
 
-    static QByteArray read_array(QIODevice *pDevice, qint64 nOffset, qint64 nSize);
-    static qint64 read_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize);
-    static qint64 write_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize);
-    static qint64 write_array(QIODevice *pDevice, qint64 nOffset, QByteArray baData);
+    static QByteArray read_array(QIODevice *pDevice, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    static qint64 read_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    static qint64 write_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    static qint64 write_array(QIODevice *pDevice, qint64 nOffset, const QByteArray &baData, PDSTRUCT *pPdStruct = nullptr);
 
     quint8 read_uint8(qint64 nOffset);
     qint8 read_int8(qint64 nOffset);
@@ -827,7 +827,7 @@ public:
 
     qint64 _find_array(ST st, qint64 nOffset, qint64 nSize, const char *pArray, qint64 nArraySize, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_array(qint64 nOffset, qint64 nSize, const char *pArray, qint64 nArraySize, PDSTRUCT *pPdStruct = nullptr);
-    qint64 find_byteArray(qint64 nOffset, qint64 nSize, QByteArray baData, PDSTRUCT *pPdStruct = nullptr);
+    qint64 find_byteArray(qint64 nOffset, qint64 nSize, const QByteArray &baData, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_uint8(qint64 nOffset, qint64 nSize, quint8 nValue, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_int8(qint64 nOffset, qint64 nSize, qint8 nValue, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_uint16(qint64 nOffset, qint64 nSize, quint16 nValue, bool bIsBigEndian = false, PDSTRUCT *pPdStruct = nullptr);
@@ -959,7 +959,7 @@ public:
     static QByteArray readFile(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     static bool readFile(const QString &sFileName, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
 
-    static void _copyMemory(char *pDest, char *pSource, qint64 nSize);
+    static void _copyMemory(char *pDest, const char *pSource, qint64 nSize);
     static void _zeroMemory(char *pDest, qint64 nSize);
     static bool _isMemoryZeroFilled(char *pSource, qint64 nSize);
     static bool _isMemoryNotNull(char *pSource, qint64 nSize);
@@ -1072,7 +1072,7 @@ public:
     static bool isEmptyData(char *pBuffer, qint64 nSize);
     bool compareSignature(const QString &sSignature, qint64 nOffset = 0);
     bool compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset = 0, PDSTRUCT *pPdStruct = nullptr);
-    static bool _compareByteArrayWithSignature(QByteArray baData, const QString &sSignature);
+    static bool _compareByteArrayWithSignature(const QByteArray &baData, const QString &sSignature);
     static QString _createSignature(const QString &sSignature1, const QString &sSignature2);
 
     bool compareSignatureOnAddress(const QString &sSignature, XADDR nAddress);
@@ -1576,6 +1576,7 @@ signals:
 
 private:
     QIODevice *g_pDevice;
+    const char *g_pConstMemory;
     QString g_sFileName;
     QFile *g_pFile;
     QMutex *g_pReadWriteMutex;

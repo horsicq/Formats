@@ -96,6 +96,7 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     g_nSize = 0;
     g_nFileFormatSize = 0;
     g_pFile = nullptr;
+    g_pConstMemory = nullptr;
 
     setDevice(pDevice);
     setIsImage(bIsImage);
@@ -123,6 +124,14 @@ void XBinary::setDevice(QIODevice *pDevice)
     g_pDevice = pDevice;
 
     if (g_pDevice) {
+        QBuffer *pBuffer = dynamic_cast<QBuffer *>(pDevice);
+
+        if (pBuffer) {
+            g_pConstMemory = pBuffer->data().data();
+        } else {
+            g_pConstMemory = nullptr;
+        }
+
         if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
         // qDebug("%s",XBinary::valueToHex((quint64)g_pDevice).toLatin1().data());
@@ -143,14 +152,32 @@ void XBinary::setFileName(const QString &sFileName)
     g_sFileName = sFileName;
 }
 
-qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen)
+qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     qint64 nResult = 0;
 
     if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
     if (pDevice->seek(nPos)) {
-        nResult = pDevice->read(pData, nMaxLen);
+        while ((nMaxLen > 0) && (!(pPdStruct->bIsStop))) {
+            qint64 nCurrentSize = qMin(nMaxLen, (qint64)READWRITE_BUFFER_SIZE);
+
+            nCurrentSize = pDevice->read(pData, nCurrentSize);
+
+            if (nCurrentSize == 0) {
+                break;
+            }
+
+            nMaxLen -= nCurrentSize;
+            pData += nCurrentSize;
+            nResult += nCurrentSize;
+        }
     }
 
     if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
@@ -158,14 +185,32 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
     return nResult;
 }
 
-qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen)
+qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     qint64 nResult = 0;
 
     if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
     if (pDevice->seek(nPos)) {
-        nResult = pDevice->write(pData, nLen);
+        while ((nLen > 0) && (!(pPdStruct->bIsStop))) {
+            qint64 nCurrentSize = qMin(nLen, (qint64)READWRITE_BUFFER_SIZE);
+
+            nCurrentSize = pDevice->write(pData, nCurrentSize);
+
+            if (nCurrentSize == 0) {
+                break;
+            }
+
+            nLen -= nCurrentSize;
+            pData += nCurrentSize;
+            nResult += nCurrentSize;
+        }
     }
 
     if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
@@ -806,16 +851,16 @@ QString XBinary::getRegExpSection(const QString &sRegExp, const QString &sString
 #endif
 }
 
-qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
+qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = 0;
 
-    nResult = safeReadData(g_pDevice, nOffset, pBuffer, nMaxSize);  // Check for read large files
+    nResult = safeReadData(g_pDevice, nOffset, pBuffer, nMaxSize, pPdStruct);  // Check for read large files
 
     return nResult;
 }
 
-QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize)
+QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     QByteArray baResult;
 
@@ -824,7 +869,7 @@ QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize)
     if (osRegion.nOffset != -1) {
         baResult.resize((qint32)osRegion.nSize);
 
-        qint64 nBytes = read_array(osRegion.nOffset, baResult.data(), osRegion.nSize);
+        qint64 nBytes = read_array(osRegion.nOffset, baResult.data(), osRegion.nSize, pPdStruct);
 
         if (osRegion.nSize != nBytes) {
             baResult.resize((qint32)nBytes);
@@ -834,50 +879,50 @@ QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize)
     return baResult;
 }
 
-qint64 XBinary::write_array(qint64 nOffset, char *pBuffer, qint64 nSize)
+qint64 XBinary::write_array(qint64 nOffset, const char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = 0;
 
     qint64 _nTotalSize = getSize();
 
     if ((nSize <= (_nTotalSize - nOffset)) && (nOffset >= 0)) {
-        nResult = safeWriteData(g_pDevice, nOffset, pBuffer, nSize);
+        nResult = safeWriteData(g_pDevice, nOffset, pBuffer, nSize, pPdStruct);
     }
 
     return nResult;
 }
 
-qint64 XBinary::write_array(qint64 nOffset, QByteArray baData)
+qint64 XBinary::write_array(qint64 nOffset, const QByteArray &baData, PDSTRUCT *pPdStruct)
 {
-    return write_array(nOffset, baData.data(), baData.size());
+    return write_array(nOffset, baData.data(), baData.size(), pPdStruct);
 }
 
-QByteArray XBinary::read_array(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
+QByteArray XBinary::read_array(QIODevice *pDevice, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     XBinary binary(pDevice);
 
-    return binary.read_array(nOffset, nSize);
+    return binary.read_array(nOffset, nSize, pPdStruct);
 }
 
-qint64 XBinary::read_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize)
+qint64 XBinary::read_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     XBinary binary(pDevice);
 
-    return binary.read_array(nOffset, pBuffer, nSize);
+    return binary.read_array(nOffset, pBuffer, nSize, pPdStruct);
 }
 
-qint64 XBinary::write_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize)
+qint64 XBinary::write_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     XBinary binary(pDevice);
 
-    return binary.write_array(nOffset, pBuffer, nSize);
+    return binary.write_array(nOffset, pBuffer, nSize, pPdStruct);
 }
 
-qint64 XBinary::write_array(QIODevice *pDevice, qint64 nOffset, QByteArray baData)
+qint64 XBinary::write_array(QIODevice *pDevice, qint64 nOffset, const QByteArray &baData, PDSTRUCT *pPdStruct)
 {
     XBinary binary(pDevice);
 
-    return binary.write_array(nOffset, baData);
+    return binary.write_array(nOffset, baData, pPdStruct);
 }
 
 quint8 XBinary::read_uint8(qint64 nOffset)
@@ -1812,15 +1857,23 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
 
     qint64 nStartOffset = nOffset;
 
-    char *pBuffer = new char[READWRITE_BUFFER_SIZE + (nArraySize - 1)];
+    char *pBuffer = nullptr;
+
+    if (!g_pConstMemory) {
+        pBuffer = new char[READWRITE_BUFFER_SIZE + (nArraySize - 1)];
+    }
 
     while ((nSize > nArraySize - 1) && (!(pPdStruct->bIsStop))) {
         nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + (nArraySize - 1)), nSize);
 
-        if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-            pPdStruct->sInfoString = tr("Read error");
+        if (g_pConstMemory) {
+            pBuffer = (char *)g_pConstMemory + nOffset;
+        } else {
+            if (read_array(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
+                pPdStruct->sInfoString = tr("Read error");
 
-            break;
+                break;
+            }
         }
 
         if (st == ST_COMPAREBYTES) {
@@ -1875,7 +1928,9 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset - nStartOffset);
     }
 
-    delete[] pBuffer;
+    if (!g_pConstMemory) {
+        delete[] pBuffer;
+    }
 
     setPdStructFinished(pPdStruct, _nFreeIndex);
 
@@ -1887,7 +1942,7 @@ qint64 XBinary::find_array(qint64 nOffset, qint64 nSize, const char *pArray, qin
     return _find_array(ST_COMPAREBYTES, nOffset, nSize, pArray, nArraySize, pPdStruct);
 }
 
-qint64 XBinary::find_byteArray(qint64 nOffset, qint64 nSize, QByteArray baData, PDSTRUCT *pPdStruct)
+qint64 XBinary::find_byteArray(qint64 nOffset, qint64 nSize, const QByteArray &baData, PDSTRUCT *pPdStruct)
 {
     return find_array(nOffset, nSize, baData.data(), baData.size(), pPdStruct);
 }
@@ -2551,7 +2606,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
 
         nCurrentSize = qMin((qint64)READWRITE_BUFFER_SIZE, nCurrentSize);
 
-        if (safeReadData(g_pDevice, _nOffset, pBuffer, nCurrentSize) != nCurrentSize) {
+        if (read_array(_nOffset, pBuffer, nCurrentSize, pPdStruct) != nCurrentSize) {
             bReadError = true;
             break;
         }
@@ -3575,14 +3630,30 @@ bool XBinary::readFile(const QString &sFileName, char *pBuffer, qint64 nSize, PD
     return bResult;
 }
 
-void XBinary::_copyMemory(char *pDest, char *pSource, qint64 nSize)
+void XBinary::_copyMemory(char *pDest, const char *pSource, qint64 nSize)
 {
-    // TODO optimize
-    while (nSize) {
-        *pDest = *pSource;
-        pDest++;
-        pSource++;
-        nSize--;
+    while (nSize > 0) {
+        if (nSize >= 8) {
+            *((quint64 *)pDest) = *((quint64 *)pSource);
+            pDest += 8;
+            pSource += 8;
+            nSize -= 8;
+        } else if (nSize >= 4) {
+            *((quint32 *)pDest) = *((quint32 *)pSource);
+            pDest += 4;
+            pSource += 4;
+            nSize -= 4;
+        } else if (nSize >= 2) {
+            *((quint16 *)pDest) = *((quint16 *)pSource);
+            pDest += 2;
+            pSource += 2;
+            nSize -= 2;
+        } else {
+            *(pDest) = *(pSource);
+            pDest++;
+            pSource++;
+            nSize--;
+        }
     }
 }
 
@@ -3788,7 +3859,7 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
 
     // TODO optimize with dwords
     for (qint32 i = 0; i < nSize; i++) {
-        safeWriteData(g_pDevice, nOffset, (char *)&cZero, 1);
+        write_array(nOffset, (char *)&cZero, 1);
     }
 
     return true;
@@ -4472,7 +4543,7 @@ bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignatur
     return bResult;
 }
 
-bool XBinary::_compareByteArrayWithSignature(QByteArray baData, const QString &sSignature)
+bool XBinary::_compareByteArrayWithSignature(const QByteArray &baData, const QString &sSignature)
 {
     bool bResult = false;
 
@@ -4748,7 +4819,7 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
         while ((nDataSize > 0) && (!(pPdStruct->bIsStop))) {
             qint64 nTempSize = qMin(nDataSize, (qint64)0x1000);  // TODO const
 
-            if (safeReadData(g_pDevice, nSourceOffset, pBuffer, nTempSize) != nTempSize) {
+            if (read_array(nSourceOffset, pBuffer, nTempSize, pPdStruct) != nTempSize) {
                 pPdStruct->sInfoString = tr("Read error");
                 bResult = false;
                 break;
