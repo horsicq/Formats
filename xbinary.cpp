@@ -851,6 +851,17 @@ QString XBinary::getRegExpSection(const QString &sRegExp, const QString &sString
 #endif
 }
 
+bool XBinary::isRegExpValid(const QString &sRegExp)
+{
+#if (QT_VERSION_MAJOR < 5)
+    QRegExp rxString(sRegExp);
+    return rxString.isValid();
+#else
+    QRegularExpression rxString(sRegExp);
+    return rxString.isValid();
+#endif
+}
+
 qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = 0;
@@ -2521,6 +2532,10 @@ bool XBinary::_addMultiSearchStringRecord(QList<MS_RECORD> *pList, MS_RECORD *pR
         }
     }
 
+    if (pSsOptions->sMask != "") {
+        bAdd = isRegExpPresent(pSsOptions->sMask, pRecord->sString);
+    }
+
     if (bAdd) {
         pList->append(*pRecord);
 
@@ -2544,8 +2559,6 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
     nSize = osRegion.nSize;
 
     QList<XBinary::MS_RECORD> listResult;
-
-    bool bFilter = (ssOptions.sExpFilter != "");
 
     if (ssOptions.nMinLenght == 0) {
         ssOptions.nMinLenght = 1;
@@ -2711,12 +2724,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
 
                         bool bAdd = true;
 
-                        if (bFilter) {
-                            bAdd = isRegExpPresent(ssOptions.sExpFilter, sString);
-                            //                            bAdd=sString.contains(ssOptions.sExpFilter,Qt::CaseInsensitive);
-                        }
-
-                        if (ssOptions.bCStrings && cSymbol && (!bLongString)) {
+                        if (ssOptions.bNullTerminated && cSymbol && (!bLongString)) {
                             bAdd = false;
                         }
 
@@ -2754,12 +2762,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
 
                         bool bAdd = true;
 
-                        if (bFilter) {
-                            bAdd = isRegExpPresent(ssOptions.sExpFilter, sString);
-                            //                            bAdd=sString.contains(ssOptions.sExpFilter,Qt::CaseInsensitive);
-                        }
-
-                        if (ssOptions.bCStrings && cSymbol && (!bLongString)) {
+                        if (ssOptions.bNullTerminated && cSymbol && (!bLongString)) {
                             bAdd = false;
                         }
 
@@ -2840,12 +2843,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
 
                             bool bAdd = true;
 
-                            if (bFilter) {
-                                bAdd = isRegExpPresent(ssOptions.sExpFilter, sString);
-                                //                                bAdd=sString.contains(ssOptions.sExpFilter,Qt::CaseInsensitive);
-                            }
-
-                            if (ssOptions.bCStrings && nCode && (!bLongString)) {
+                            if (ssOptions.bNullTerminated && nCode && (!bLongString)) {
                                 bAdd = false;
                             }
 
@@ -2883,11 +2881,6 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
                                 QString sString = QString::fromUtf16(pUnicodeBuffer[nO]);
 
                                 bool bAdd = true;
-
-                                if (bFilter) {
-                                    bAdd = isRegExpPresent(ssOptions.sExpFilter, sString);
-                                    //                                    bAdd=sString.contains(ssOptions.sExpFilter,Qt::CaseInsensitive);
-                                }
 
                                 if (bAdd) {
                                     MS_RECORD record = {};
@@ -7491,12 +7484,24 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType(QByteArray *pbaData)
 bool XBinary::tryToOpen(QIODevice *pDevice)
 {
     bool bResult = false;
+    bool bCheck = false;
 
-    bResult = pDevice->open(QIODevice::ReadWrite);
+    QFile *pFile = dynamic_cast<QFile *>(pDevice);
 
-    if (!bResult) {
-        bResult = pDevice->open(QIODevice::ReadOnly);
+    if (pFile) {
+        bCheck = (pFile->fileName() != "");
+    } else {
+        bCheck = true;
     }
+
+    if (bCheck) {
+        bResult = pDevice->open(QIODevice::ReadWrite);
+
+        if (!bResult) {
+            bResult = pDevice->open(QIODevice::ReadOnly);
+        }
+    }
+
 
     return bResult;
 }

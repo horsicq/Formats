@@ -721,6 +721,7 @@ public:
     static bool isRegExpPresent(const QString &sRegExp, const QString &sString);
     static qint32 getRegExpCount(const QString &sRegExp, const QString &sString);  // TODO Check!
     static QString getRegExpSection(const QString &sRegExp, const QString &sString, qint32 nStart, qint32 nEnd);
+    static bool isRegExpValid(const QString &sRegExp);
     qint64 read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTRUCT *pPdStruct = nullptr);
     QByteArray read_array(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
     qint64 write_array(qint64 nOffset, const char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
@@ -867,8 +868,8 @@ public:
         bool bAnsi;
         bool bUTF8;
         bool bUnicode;
-        bool bCStrings;
-        QString sExpFilter;
+        bool bNullTerminated;
+        QString sMask;
         QString sANSICodec;
         bool bLinks;
     };
