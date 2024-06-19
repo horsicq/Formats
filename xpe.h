@@ -332,6 +332,8 @@ public:
     virtual QString getArch();
     virtual ENDIAN getEndian();
 
+    quint16 _getMachine(quint16 nMachine);
+
     virtual OSINFO getOsInfo();
 
     virtual FT getFileType();

@@ -66,6 +66,7 @@ XBinary::MODE XPE::getMode()
     MODE result = MODE_32;
 
     quint16 nMachine = getFileHeader_Machine();
+    nMachine = _getMachine(nMachine);
 
     if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_IA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64) ||
         (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ALPHA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_RISCV64)) {
@@ -79,20 +80,35 @@ XBinary::MODE XPE::getMode()
 
 QString XPE::getArch()
 {
-    return getImageFileHeaderMachinesS().value(getFileHeader_Machine(), tr("Unknown"));
+    quint16 nMachine = getFileHeader_Machine();
+    nMachine = _getMachine(nMachine);
+
+    return getImageFileHeaderMachinesS().value(nMachine, tr("Unknown"));
 }
 
 XBinary::ENDIAN XPE::getEndian()
 {
     ENDIAN result = ENDIAN_LITTLE;
 
-    quint16 nData = getFileHeader_Machine();
+    quint16 nMachine = getFileHeader_Machine();
+    nMachine = _getMachine(nMachine);
 
-    if ((nData == XPE_DEF::S_IMAGE_FILE_MACHINE_R3000_BE) || (nData == XPE_DEF::S_IMAGE_FILE_MACHINE_POWERPCBE)) {
+    if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_R3000_BE) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_POWERPCBE)) {
         result = ENDIAN_BIG;
     }
 
     return result;
+}
+
+quint16 XPE::_getMachine(quint16 nMachine)
+{
+    quint16 nResult = nMachine;
+
+    if (nResult == (XPE_DEF::S_IMAGE_FILE_MACHINE_NATIVE_OS_OVERRIDE_LINUX ^ XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)) {
+        nResult = XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64;
+    }
+
+    return nResult;
 }
 
 XBinary::OSINFO XPE::getOsInfo()
@@ -102,6 +118,7 @@ XBinary::OSINFO XPE::getOsInfo()
     result.osName = OSNAME_WINDOWS;
 
     quint16 nSubsystem = getOptionalHeader_Subsystem();
+    quint16 nMachine = getFileHeader_Machine();
 
     if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_GUI) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI) ||
         (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION)) {
@@ -117,6 +134,10 @@ XBinary::OSINFO XPE::getOsInfo()
         result.osName = OSNAME_POSIX;
     } else if (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI) {
         result.osName = OSNAME_WINDOWSCE;
+    }
+
+    if (nMachine == (XPE_DEF::S_IMAGE_FILE_MACHINE_NATIVE_OS_OVERRIDE_LINUX ^ XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64)) {
+        result.osName = OSNAME_LINUX;
     }
 
     if (result.osName == OSNAME_WINDOWS) {
@@ -263,7 +284,7 @@ QString XPE::getFileFormatString()
 {
     QString sResult;
 
-    sResult = QString("PE(%1)").arg(getArch());
+    sResult = QString("PE(%1)").arg(getImageFileHeaderMachinesS().value(getFileHeader_Machine(), tr("Unknown")));
 
     return sResult;
 }
@@ -11193,6 +11214,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachines()
     mapResult.insert(0x9041, "IMAGE_FILE_MACHINE_M32R");
     mapResult.insert(0xAA64, "IMAGE_FILE_MACHINE_ARM64");
     mapResult.insert(0xC0EE, "IMAGE_FILE_MACHINE_CEE");
+    mapResult.insert(0xfd1d, "IMAGE_FILE_MACHINE_AMD64_LINUX_NI"); // 0x7b79 ^ 0x8664
 
     return mapResult;
 }
@@ -11240,6 +11262,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
     mapResult.insert(0x9041, "M32R");
     mapResult.insert(0xAA64, "ARM64");
     mapResult.insert(0xC0EE, "CEE");
+    mapResult.insert(0xfd1d, "AMD64_LINUX_NI"); // 0x7b79 ^ 0x8664
 
     return mapResult;
 }
