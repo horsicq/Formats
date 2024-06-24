@@ -154,66 +154,62 @@ void XBinary::setFileName(const QString &sFileName)
 
 qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
     qint64 nResult = 0;
 
-    if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
+    if (pDevice->size() > nPos) {
+        if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
-    if (pDevice->seek(nPos)) {
-        while ((nMaxLen > 0) && (!(pPdStruct->bIsStop))) {
-            qint64 nCurrentSize = qMin(nMaxLen, (qint64)READWRITE_BUFFER_SIZE);
+        if (pDevice->seek(nPos)) {
+            while ((nMaxLen > 0) && (!(pPdStruct->bIsStop))) {
+                qint64 nCurrentSize = qMin(nMaxLen, (qint64)READWRITE_BUFFER_SIZE);
 
-            nCurrentSize = pDevice->read(pData, nCurrentSize);
+                nCurrentSize = pDevice->read(pData, nCurrentSize);
 
-            if (nCurrentSize == 0) {
-                break;
+                if (nCurrentSize == 0) {
+                    break;
+                }
+
+                nMaxLen -= nCurrentSize;
+                pData += nCurrentSize;
+                nResult += nCurrentSize;
             }
-
-            nMaxLen -= nCurrentSize;
-            pData += nCurrentSize;
-            nResult += nCurrentSize;
+        } else {
+    #ifdef QT_DEBUG
+            qDebug("Cannot seek");
+    #endif QT_DEBUG
         }
-    }
 
-    if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+        if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+    }
 
     return nResult;
 }
 
 qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
     qint64 nResult = 0;
 
-    if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
+    if (pDevice->size() > nPos) {
+        if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
-    if (pDevice->seek(nPos)) {
-        while ((nLen > 0) && (!(pPdStruct->bIsStop))) {
-            qint64 nCurrentSize = qMin(nLen, (qint64)READWRITE_BUFFER_SIZE);
+        if (pDevice->seek(nPos)) {
+            while ((nLen > 0) && (!(pPdStruct->bIsStop))) {
+                qint64 nCurrentSize = qMin(nLen, (qint64)READWRITE_BUFFER_SIZE);
 
-            nCurrentSize = pDevice->write(pData, nCurrentSize);
+                nCurrentSize = pDevice->write(pData, nCurrentSize);
 
-            if (nCurrentSize == 0) {
-                break;
+                if (nCurrentSize == 0) {
+                    break;
+                }
+
+                nLen -= nCurrentSize;
+                pData += nCurrentSize;
+                nResult += nCurrentSize;
             }
-
-            nLen -= nCurrentSize;
-            pData += nCurrentSize;
-            nResult += nCurrentSize;
         }
-    }
 
-    if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+        if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+    }
 
     return nResult;
 }
@@ -864,6 +860,12 @@ bool XBinary::isRegExpValid(const QString &sRegExp)
 
 qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     qint64 nResult = 0;
 
     nResult = safeReadData(g_pDevice, nOffset, pBuffer, nMaxSize, pPdStruct);  // Check for read large files
@@ -892,6 +894,12 @@ QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct
 
 qint64 XBinary::write_array(qint64 nOffset, const char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     qint64 nResult = 0;
 
     qint64 _nTotalSize = getSize();
@@ -4877,13 +4885,13 @@ bool XBinary::patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64
         while ((nDataSize > 0) && (!(pPdStruct->bIsStop))) {
             qint64 nTempSize = qMin(nDataSize, (qint64)0x1000);  // TODO const
 
-            if (safeReadData(&file, nSourceOffset, pBuffer, nTempSize) != nTempSize) {
+            if (safeReadData(&file, nSourceOffset, pBuffer, nTempSize, pPdStruct) != nTempSize) {
                 pPdStruct->sInfoString = tr("Read error");
                 bResult = false;
                 break;
             }
 
-            if (safeWriteData(g_pDevice, nDestOffset, pBuffer, nTempSize) != nTempSize) {
+            if (safeWriteData(g_pDevice, nDestOffset, pBuffer, nTempSize, pPdStruct) != nTempSize) {
                 pPdStruct->sInfoString = tr("Write error");
                 bResult = false;
                 break;

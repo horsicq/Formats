@@ -646,8 +646,8 @@ public:
 
     void setFileName(const QString &sFileName);
 
-    qint64 safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen, PDSTRUCT *pPdStruct = nullptr);
-    qint64 safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen, PDSTRUCT *pPdStruct = nullptr);
+    qint64 safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen, PDSTRUCT *pPdStruct);
+    qint64 safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen, PDSTRUCT *pPdStruct);
     qint64 getSize();
     static qint64 getSize(QIODevice *pDevice);
     static qint64 getSize(const QString &sFileName);
