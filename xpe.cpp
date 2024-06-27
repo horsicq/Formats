@@ -9085,7 +9085,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 result.metaData.osTables.nSize = result.metaData.listStreams.at(i).nSize;
                             } else if (result.metaData.listStreams.at(i).sName == "#Strings") {
                                 result.metaData.osStrings.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                result.metaData.osStrings.nOffset = result.metaData.listStreams.at(i).nSize;
+                                result.metaData.osStrings.nSize = result.metaData.listStreams.at(i).nSize;
 
                                 QByteArray baStrings = read_array(result.metaData.osStrings.nOffset, result.metaData.osStrings.nSize);
 
