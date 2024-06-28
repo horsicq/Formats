@@ -975,7 +975,7 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
         result = Qt::red;
     } else if ((_sType == "pe tool") || (_sType == "apk tool")) {
         result = Qt::green;
-    } else if ((_sType == "operation system") || (_sType == "virtual machine")) {
+    } else if ((_sType == "operation system") || (_sType == "virtual machine") || (_sType == "platform")) {
         result = Qt::darkYellow;
     } else if ((_sType == "sign tool") || (_sType == "certificate")) {
         result = Qt::darkMagenta;
@@ -996,6 +996,7 @@ qint32 XFormats::typeToPrio(const QString &sType)
     QString _sType = sType.toLower().remove("~");
 
     if ((_sType == "operation system") || (_sType == "virtual machine")) nResult = 10;
+    else if (_sType == "platform") nResult = 14;
     else if (_sType == "linker") nResult = 20;
     else if (_sType == "compiler") nResult = 30;
     else if (_sType == "language") nResult = 40;
@@ -1107,6 +1108,8 @@ QString XFormats::_translate(const QString &sString)
             sResult = tr("Packer");
         } else if (_sString == "pe tool") {
             sResult = QString("PE %1").arg(tr("Tool"));
+        } else if (_sString == "platform") {
+            sResult = tr("Platform");
         } else if (_sString == "player") {
             sResult = tr("Player");
         } else if (_sString == "protection") {
