@@ -309,7 +309,7 @@ void ScanItemModel::_toXML(QXmlStreamWriter *pXml, ScanItem *pItem, qint32 nLeve
         }
 
         pXml->writeEndElement();
-    } else { 
+    } else {
         pXml->writeStartElement("detect");
         pXml->writeAttribute("type", ss.sType);
         pXml->writeAttribute("name", ss.sName);

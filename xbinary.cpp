@@ -174,9 +174,9 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
                 nResult += nCurrentSize;
             }
         } else {
-    #ifdef QT_DEBUG
+#ifdef QT_DEBUG
             qDebug("Cannot seek");
-    #endif QT_DEBUG
+#endif QT_DEBUG
         }
 
         if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
@@ -7509,7 +7509,6 @@ bool XBinary::tryToOpen(QIODevice *pDevice)
             bResult = pDevice->open(QIODevice::ReadOnly);
         }
     }
-
 
     return bResult;
 }

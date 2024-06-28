@@ -1246,7 +1246,7 @@ public:
     static OFFSETSIZE convertOffsetAndSize(QIODevice *pDevice, qint64 nOffset,
                                            qint64 nSize);  // TODO rename
 
-    static bool compareSignatureStrings(const QString &sBaseSignature, const QString &sOptSignature); // TODO pdstruct
+    static bool compareSignatureStrings(const QString &sBaseSignature, const QString &sOptSignature);  // TODO pdstruct
     static QString stringToHex(const QString &sString);
     static QString hexToString(const QString &sHex);
     static QString floatToString(float fValue, qint32 nPrec = 2);

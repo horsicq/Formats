@@ -9461,19 +9461,19 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 nSize += result.metaData.nBLOBIndexSize;
                                 nSize += result.metaData.nStringIndexSize;
                                 nSize += result.metaData.nStringIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Assembly] = nSize; // Checked
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Assembly] = nSize;  // Checked
                             }
                             {
                                 qint32 nSize = 0;
                                 nSize += 4;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyProcessor] = nSize; // Checked
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyProcessor] = nSize;  // Checked
                             }
                             {
                                 qint32 nSize = 0;
                                 nSize += 4;
                                 nSize += 4;
                                 nSize += 4;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyOS] = nSize; // Checked
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyOS] = nSize;  // Checked
                             }
                             {
                                 qint32 nSize = 0;
@@ -9486,13 +9486,13 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 nSize += result.metaData.nStringIndexSize;
                                 nSize += result.metaData.nStringIndexSize;
                                 nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyRef] = nSize; // Checked
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyRef] = nSize;  // Checked
                             }
                             {
                                 qint32 nSize = 0;
                                 nSize += 4;
                                 nSize += result.metaData.indexSize[XPE_DEF::metadata_AssemblyRef];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyRefProcessor] = nSize; // Checked
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyRefProcessor] = nSize;  // Checked
                             }
                             {
                                 qint32 nSize = 0;
@@ -9500,14 +9500,14 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 nSize += 4;
                                 nSize += 4;
                                 nSize += result.metaData.indexSize[XPE_DEF::metadata_AssemblyRef];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyRefOS] = nSize; // Checked
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyRefOS] = nSize;  // Checked
                             }
                             {
                                 int nSize = 0;
                                 nSize += 4;
                                 nSize += result.metaData.nStringIndexSize;
                                 nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_File] = nSize; // Checked
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_File] = nSize;  // Checked
                             }
                             {
                                 int nSize = 0;
@@ -9538,7 +9538,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 nSize += 2;
                                 nSize += result.metaData.nTypeDefOrRefSize;
                                 nSize += result.metaData.nStringIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_GenericParam] = nSize; // Checked
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_GenericParam] = nSize;  // Checked
                             }
                             {
                                 int nSize = 0;
@@ -11314,7 +11314,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachines()
     mapResult.insert(0x9041, "IMAGE_FILE_MACHINE_M32R");
     mapResult.insert(0xAA64, "IMAGE_FILE_MACHINE_ARM64");
     mapResult.insert(0xC0EE, "IMAGE_FILE_MACHINE_CEE");
-    mapResult.insert(0xfd1d, "IMAGE_FILE_MACHINE_AMD64_LINUX_NI"); // 0x7b79 ^ 0x8664
+    mapResult.insert(0xfd1d, "IMAGE_FILE_MACHINE_AMD64_LINUX_NI");  // 0x7b79 ^ 0x8664
 
     return mapResult;
 }
@@ -11362,7 +11362,7 @@ QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
     mapResult.insert(0x9041, "M32R");
     mapResult.insert(0xAA64, "ARM64");
     mapResult.insert(0xC0EE, "CEE");
-    mapResult.insert(0xfd1d, "AMD64_LINUX_NI"); // 0x7b79 ^ 0x8664
+    mapResult.insert(0xfd1d, "AMD64_LINUX_NI");  // 0x7b79 ^ 0x8664
 
     return mapResult;
 }

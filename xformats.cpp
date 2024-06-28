@@ -1478,7 +1478,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
     QSet<XBinary::FT> stResult = XBinary::getFileTypes(pDevice, bExtra);
 #ifdef USE_ARCHIVE
     if (stResult.contains(XBinary::FT_ZIP)) {
-             XZip xzip(pDevice);
+        XZip xzip(pDevice);
 
         if (xzip.isValid(pPdStruct)) {
             QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(20000, pPdStruct);
