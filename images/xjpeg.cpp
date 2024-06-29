@@ -211,15 +211,21 @@ QList<XJpeg::CHUNK> XJpeg::_getChunksById(QList<CHUNK> *pListChunks, quint8 nId)
     return listResult;
 }
 
-QString XJpeg::getComment(QList<CHUNK> *pListChunks)
+QString XJpeg::getComment(QList<CHUNK> *pListChunks, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     QString sResult;
 
     QList<XJpeg::CHUNK> listComments = _getChunksById(pListChunks, 0xFE);  // COMMENT
 
     qint32 nNumberOfRecords = listComments.count();
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && ( !(pPdStruct->bIsStop)); i++) {
         sResult += read_ansiString(listComments.at(i).nDataOffset + 4, listComments.at(i).nDataSize - 4);
     }
 
