@@ -225,7 +225,7 @@ QString XJpeg::getComment(QList<CHUNK> *pListChunks, PDSTRUCT *pPdStruct)
 
     qint32 nNumberOfRecords = listComments.count();
 
-    for (qint32 i = 0; (i < nNumberOfRecords) && ( !(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
         sResult += read_ansiString(listComments.at(i).nDataOffset + 4, listComments.at(i).nDataSize - 4);
     }
 
