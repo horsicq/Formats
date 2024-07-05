@@ -606,6 +606,8 @@ QString XBinary::fileTypeIdToExts(FT fileType)
         case FT_RIFF: sResult = QString("RIFF(avi, webp)"); break;
         case FT_ZLIB: sResult = QString("zlib"); break;
         case FT_GZIP: sResult = QString("GZIP(gz, tgz, tar.gz)"); break;
+        case FT_LE: sResult = QString("LE(le, lx)"); break;
+        case FT_NE: sResult = QString("NE"); break;
         case FT_SIGNATURE: sResult = tr("Signatures"); break;
         default: sResult = tr("Unknown");
     }

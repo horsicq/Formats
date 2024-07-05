@@ -983,6 +983,8 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
         result = Qt::darkCyan;
     } else if ((_sType == "virus") || (_sType == "trojan") || (_sType == "malware")) {
         result = Qt::darkRed;
+    } else if ((_sType == "debug") || (_sType == "debug data")) {
+         result = Qt::darkBlue;
     } else {
         result = Qt::transparent;
     }
@@ -1009,6 +1011,7 @@ qint32 XFormats::typeToPrio(const QString &sType)
     else if (_sType == "joiner") nResult = 110;
     else if ((_sType == "sfx") || (_sType == "installer")) nResult = 120;
     else if ((_sType == "virus") || (_sType == "malware") || (_sType == "trojan")) nResult = 70;
+    else if ((_sType == "debug data") || (_sType == "installer")) nResult = 200;
     else nResult = 1000;
 
     return nResult;
