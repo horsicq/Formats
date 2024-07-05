@@ -984,7 +984,7 @@ Qt::GlobalColor XFormats::typeToColor(const QString &sType)
     } else if ((_sType == "virus") || (_sType == "trojan") || (_sType == "malware")) {
         result = Qt::darkRed;
     } else if ((_sType == "debug") || (_sType == "debug data")) {
-         result = Qt::darkBlue;
+        result = Qt::darkBlue;
     } else {
         result = Qt::transparent;
     }
