@@ -348,6 +348,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     result.nBinarySize = getSize();
     result.nImageSize = getImageSize();
     result.nModuleAddress = getModuleAddress();
+    result.endian = ENDIAN_LITTLE;
 
     qint64 nMaxOffset = (get_e_cp() - 1) * 512 + get_e_cblp();  // TODO Check if get_e_cp()=0
 
