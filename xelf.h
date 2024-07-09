@@ -447,6 +447,7 @@ public:
 
     qint64 getSymSize();
     qint64 getSymTableSize(qint64 nOffset);
+    qint32 getNumberOfSymbols(qint64 nOffset);
 
     XELF_DEF::Elf32_Rel _readElf32_Rel(qint64 nOffset, bool bIsBigEndian);
     XELF_DEF::Elf64_Rel _readElf64_Rel(qint64 nOffset, bool bIsBigEndian);

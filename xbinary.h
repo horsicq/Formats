@@ -205,6 +205,8 @@ public:
         FT_BINARY64,
         FT_COM,
         FT_MSDOS,
+        FT_DOS16M,
+        FT_DOS4G,
         FT_NE,
         FT_LE,
         FT_LX,
@@ -577,16 +579,72 @@ public:
         bool bIsHeuristic;
         XBinary::SCANID id;
         XBinary::SCANID parentId;
+        quint32 nType;
+        quint32 nName;
         QString sType;
         QString sName;
         QString sVersion;
         QString sInfo;
         QString varInfo;   // Signature in die scripts
         QString varInfo2;  // Signature File in die scripts
-        QString sResult;   // TODO Check
+        // QString sResult;   // TODO Check
         Qt::GlobalColor globalColor;
         qint32 nPrio;
         bool bIsProtection;
+    };
+
+    struct ERROR_RECORD {
+        QString sScript;
+        QString sErrorString;
+    };
+
+    struct DEBUG_RECORD {
+        QString sScript;
+        QString sType;
+        QString sName;
+        QString sValue;
+        qint64 nElapsedTime;
+    };
+
+    struct SCAN_RESULT {
+        qint64 nScanTime;
+        QString sFileName;
+        qint64 nSize;
+        QList<SCANSTRUCT> listRecords;
+        QList<ERROR_RECORD> listErrors;
+        QList<DEBUG_RECORD> listDebugRecords;
+    };
+
+    struct SCAN_OPTIONS {
+        //        bool bEmulate; // TODO Check
+        bool bIsDeepScan;
+        bool bIsHeuristicScan;
+        bool bIsVerbose;
+        bool bIsRecursiveScan;
+        qint64 nBufferSize;
+        bool bAllTypesScan;
+        bool bShowDetects;
+        bool bResultAsXML;
+        bool bResultAsJSON;
+        bool bResultAsCSV;
+        bool bResultAsTSV;
+        bool bResultAsPlainText;
+        bool bSubdirectories;
+        bool bIsImage;
+        bool bIsTest;
+        bool bHandleInfo;
+        XBinary::FT fileType;            // Optional
+        XBinary::FILEPART initFilePart;  // Optional
+        QVariant varInfo;                // Optional
+        bool bIsProfiling;
+        bool bShowScanTime;
+        bool bShowType;
+        bool bShowVersion;
+        bool bShowOptions;
+        bool bShowEntropy;
+        bool bShowExtraInfo;
+        QString sSpecial;        // Special info
+        QString sSignatureName;  // Optional
     };
 
     struct PDRECORD {

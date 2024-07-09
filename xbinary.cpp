@@ -516,6 +516,8 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_BINARY64: sResult = QString("Binary64"); break;
         case FT_COM: sResult = QString("COM"); break;
         case FT_MSDOS: sResult = QString("MSDOS"); break;
+        case FT_DOS16M: sResult = QString("DOS/16M"); break;
+        case FT_DOS4G: sResult = QString("DOS/4G"); break;
         case FT_NE: sResult = QString("NE"); break;
         case FT_LE: sResult = QString("LE"); break;
         case FT_LX: sResult = QString("LX"); break;
@@ -4930,6 +4932,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     baHeader = read_array(0, qMin(getSize(), (qint64)0x200));  // TODO const
     char *pOffset = baHeader.data();
     qint64 nSize = getSize();
+    bool bAllFound = false;
 
     if (nSize >= (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)) {
         if ((((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ) ||
@@ -4960,6 +4963,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             }
 
             if (bIsNewHeaderValid) {
+                bIsNewHeaderValid = false;
+
                 if ((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature == XPE_DEF::S_IMAGE_NT_SIGNATURE) {
                     stResult.insert(FT_PE);
 
@@ -4972,18 +4977,41 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                     } else {
                         stResult.insert(FT_PE32);
                     }
+                    bIsNewHeaderValid = true;
                 } else if ((((XNE_DEF::IMAGE_OS2_HEADER *)pOffset))->ne_magic == XNE_DEF::S_IMAGE_OS2_SIGNATURE) {
                     stResult.insert(FT_NE);
+                    bIsNewHeaderValid = true;
                 } else if ((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature == XLE_DEF::S_IMAGE_VXD_SIGNATURE) {
                     stResult.insert(FT_LE);
+                    bIsNewHeaderValid = true;
                 } else if ((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
                     stResult.insert(FT_LX);
-                }
+                    bIsNewHeaderValid = true;
+                } 
             }
+
+            // if (!bIsNewHeaderValid) {
+            //     quint16 e_cp = ((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_cp;
+            //     quint16 e_cblp = ((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_cblp;
+
+            //     if (e_cp > 0) {
+            //         qint64 nMaxOffset = (e_cp - 1) * 512 + e_cblp;
+            //         if (nSize - nMaxOffset) {
+            //             quint16 nSignature = read_uint16(nMaxOffset);
+
+            //             if (nSignature == 0x5742) {
+            //                 stResult.insert(FT_DOS4G);
+            //                 bIsNewHeaderValid = true;
+            //             }
+            //         }
+            //     }
+            // }
+
+            bAllFound = true;
         }
     }
 
-    if (nSize >= (qint64)sizeof(XELF_DEF::Elf32_Ehdr)) {
+    if ((!bAllFound) && (nSize >= (qint64)sizeof(XELF_DEF::Elf32_Ehdr))) {
         if ((((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[0] == 0x7f) && (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[1] == 'E') &&
             (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[2] == 'L') && (((XELF_DEF::Elf32_Ehdr *)pOffset)->e_ident[3] == 'F')) {
             stResult.insert(FT_ELF);
@@ -4997,7 +5025,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         }
     }
 
-    if (nSize >= (qint64)sizeof(XMACH_DEF::mach_header)) {
+    if ((!bAllFound) && (nSize >= (qint64)sizeof(XMACH_DEF::mach_header))) {
         if ((((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_MAGIC) || (((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_CIGAM)) {
             stResult.insert(FT_MACHO);
             stResult.insert(FT_MACHO32);
@@ -5007,7 +5035,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         }
     }
 
-    if (bExtra) {
+    if ((!bAllFound) && bExtra) {
         _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
         UNICODE_TYPE unicodeType = getUnicodeType(&baHeader);
 
@@ -5209,6 +5237,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_LX;
     } else if (pStFileTypes->contains(FT_NE)) {
         result = FT_NE;
+    } else if (pStFileTypes->contains(FT_DOS4G)) {
+        result = FT_DOS4G;
     } else if (pStFileTypes->contains(FT_MSDOS)) {
         result = FT_MSDOS;
     } else if (pStFileTypes->contains(FT_CAB)) {
@@ -5383,6 +5413,11 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_ELF64)) listResult.append(FT_ELF64);
         if (stFileTypes.contains(FT_MACHO32)) listResult.append(FT_MACHO32);
         if (stFileTypes.contains(FT_MACHO64)) listResult.append(FT_MACHO64);
+    }
+
+    if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_ALL)) {
+        if (stFileTypes.contains(FT_DOS16M)) listResult.append(FT_DOS16M);
+        if (stFileTypes.contains(FT_DOS4G)) listResult.append(FT_DOS4G);
     }
 
     return listResult;
@@ -8554,7 +8589,7 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 {
     // TODO Check!
     // TODO optimize! new Types create remove function
-    if (pStFileTypes->contains(XBinary::FT_MSDOS) || pStFileTypes->contains(XBinary::FT_NE) || pStFileTypes->contains(XBinary::FT_LE) ||
+    if (pStFileTypes->contains(XBinary::FT_MSDOS) || pStFileTypes->contains(XBinary::FT_DOS16M) || pStFileTypes->contains(XBinary::FT_DOS4G) || pStFileTypes->contains(XBinary::FT_NE) || pStFileTypes->contains(XBinary::FT_LE) ||
         pStFileTypes->contains(XBinary::FT_LX) || pStFileTypes->contains(XBinary::FT_PE) || pStFileTypes->contains(XBinary::FT_PE32) ||
         pStFileTypes->contains(XBinary::FT_PE64) || pStFileTypes->contains(XBinary::FT_ELF) || pStFileTypes->contains(XBinary::FT_ELF32) ||
         pStFileTypes->contains(XBinary::FT_ELF64) || pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) ||

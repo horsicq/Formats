@@ -33,6 +33,8 @@ public:
     void setInitLocation(quint64 nLocation);
     quint64 getInitLocation();
 
+    static quint64 getInitLocation(QIODevice *pDevice);
+
     virtual qint64 size() const;
     virtual bool isSequential() const;
     virtual bool seek(qint64 nPos);

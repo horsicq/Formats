@@ -350,7 +350,8 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     result.nModuleAddress = getModuleAddress();
     result.endian = ENDIAN_LITTLE;
 
-    qint64 nMaxOffset = (get_e_cp() - 1) * 512 + get_e_cblp();  // TODO Check if get_e_cp()=0
+    //qint64 nMaxOffset = (get_e_cp() - 1) * 512 + get_e_cblp();  // TODO Check if get_e_cp()=0
+    qint64 nMaxOffset = (quint32)get_e_cp() * 0x200 - ((-get_e_cblp()) & 0x1ff );
 
     qint64 nHeaderOffset = 0;
     qint64 nHeaderSize = (quint16)(get_e_cparhdr() * 16);

@@ -1479,6 +1479,18 @@ QSet<XBinary::FT> XFormats::getFileTypesTGZ(QIODevice *pDevice, QList<XArchive::
 QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
 {
     QSet<XBinary::FT> stResult = XBinary::getFileTypes(pDevice, bExtra);
+
+    if (stResult.contains(XBinary::FT_MSDOS)) {
+        XMSDOS msdos(pDevice);
+
+        if (msdos.isValid(pPdStruct)) {
+            XBinary::FT _ft = msdos.getFileType();
+
+            if (_ft != XBinary::FT_MSDOS) {
+                stResult.insert(_ft);
+            }
+        }
+    }
 #ifdef USE_ARCHIVE
     if (stResult.contains(XBinary::FT_ZIP)) {
         XZip xzip(pDevice);

@@ -5119,6 +5119,46 @@ qint64 XELF::getSymTableSize(qint64 nOffset)
     return nResult;
 }
 
+qint32 XELF::getNumberOfSymbols(qint64 nOffset)
+{
+    qint32 nResult = 0;
+
+    bool bIsBigEndian = isBigEndian();
+    bool bIs64 = is64();
+
+    if (bIs64) {
+        nResult += sizeof(XELF_DEF::Elf64_Sym);
+        nOffset += sizeof(XELF_DEF::Elf64_Sym);
+
+        while (true) {
+            XELF_DEF::Elf64_Sym record = _readElf64_Sym(nOffset, bIsBigEndian);
+
+            if ((!record.st_info) || (record.st_other)) {
+                break;
+            }
+
+            nResult ++;
+            nOffset += sizeof(XELF_DEF::Elf64_Sym);
+        }
+    } else {
+        nResult += sizeof(XELF_DEF::Elf32_Sym);
+        nOffset += sizeof(XELF_DEF::Elf32_Sym);
+
+        while (true) {
+            XELF_DEF::Elf32_Sym record = _readElf32_Sym(nOffset, bIsBigEndian);
+
+            if ((!record.st_info) || (record.st_other)) {
+                break;
+            }
+
+            nResult ++;
+            nOffset += sizeof(XELF_DEF::Elf32_Sym);
+        }
+    }
+
+    return nResult;
+}
+
 XELF_DEF::Elf32_Rel XELF::_readElf32_Rel(qint64 nOffset, bool bIsBigEndian)
 {
     XELF_DEF::Elf32_Rel result = {};

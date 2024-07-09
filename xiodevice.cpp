@@ -41,6 +41,19 @@ quint64 XIODevice::getInitLocation()
     return g_nInitLocation;
 }
 
+quint64 XIODevice::getInitLocation(QIODevice *pDevice)
+{
+    quint64 nResult = 0;
+
+    XIODevice *pSubDevice = dynamic_cast<XIODevice *>(pDevice);
+
+    if (pSubDevice) {
+        nResult = pSubDevice->getInitLocation();
+    }
+
+    return nResult;
+}
+
 qint64 XIODevice::size() const
 {
     return g_nSize;
