@@ -559,94 +559,6 @@ public:
         } var;
     };
 
-    struct SCANID {
-        bool bVirtual;
-        QString sUuid;
-        XBinary::FT fileType;
-        XBinary::FILEPART filePart;
-        QString sArch;
-        QString sVersion;
-        QString sInfo;
-
-        XBinary::MODE mode;
-        XBinary::ENDIAN endian;
-        QString sType;
-        qint64 nSize;
-        qint64 nOffset;
-    };
-
-    struct SCANSTRUCT {
-        bool bIsHeuristic;
-        XBinary::SCANID id;
-        XBinary::SCANID parentId;
-        quint32 nType;
-        quint32 nName;
-        QString sType;
-        QString sName;
-        QString sVersion;
-        QString sInfo;
-        QString varInfo;   // Signature in die scripts
-        QString varInfo2;  // Signature File in die scripts
-        // QString sResult;   // TODO Check
-        Qt::GlobalColor globalColor;
-        qint32 nPrio;
-        bool bIsProtection;
-    };
-
-    struct ERROR_RECORD {
-        QString sScript;
-        QString sErrorString;
-    };
-
-    struct DEBUG_RECORD {
-        QString sScript;
-        QString sType;
-        QString sName;
-        QString sValue;
-        qint64 nElapsedTime;
-    };
-
-    struct SCAN_RESULT {
-        qint64 nScanTime;
-        QString sFileName;
-        qint64 nSize;
-        QList<SCANSTRUCT> listRecords;
-        QList<ERROR_RECORD> listErrors;
-        QList<DEBUG_RECORD> listDebugRecords;
-    };
-
-    struct SCAN_OPTIONS {
-        //        bool bEmulate; // TODO Check
-        bool bIsDeepScan;
-        bool bIsHeuristicScan;
-        bool bIsVerbose;
-        bool bIsRecursiveScan;
-        qint64 nBufferSize;
-        bool bAllTypesScan;
-        bool bShowDetects;
-        bool bResultAsXML;
-        bool bResultAsJSON;
-        bool bResultAsCSV;
-        bool bResultAsTSV;
-        bool bResultAsPlainText;
-        bool bSubdirectories;
-        bool bIsImage;
-        bool bIsTest;
-        bool bHandleInfo;
-        XBinary::FT fileType;            // Optional
-        XBinary::FILEPART initFilePart;  // Optional
-        QVariant varInfo;                // Optional
-        bool bIsProfiling;
-        bool bShowScanTime;
-        bool bShowType;
-        bool bShowVersion;
-        bool bShowOptions;
-        bool bShowEntropy;
-        bool bShowExtraInfo;
-        QString sSpecial;        // Special info
-        QString sSignatureName;  // Optional
-    };
-
     struct PDRECORD {
         qint64 nCurrent;
         qint64 nTotal;
@@ -1516,10 +1428,6 @@ public:
     static XDWORD make_xdword(quint32 nValue);
 
     static QString recordFilePartIdToString(FILEPART id);
-
-    static QString createTypeString(const SCANSTRUCT *pScanStruct);
-    static SCANSTRUCT createHeaderScanStruct(const SCANSTRUCT *pScanStruct);
-    static QString createResultString2(const SCANSTRUCT *pScanStruct);
 
     static bool checkVersionString(const QString &sVersion);
     static QString cleanString(const QString &sString);

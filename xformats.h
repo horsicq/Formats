@@ -102,14 +102,6 @@ public:
     static bool saveAllPECursorsToDirectory(QIODevice *pDevice, const QString &sDirectoryName);
     static bool savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> *pListResourceRecords, XPE::RESOURCE_RECORD resourceRecord, const QString &sFileName);
 
-    static Qt::GlobalColor typeToColor(const QString &sType);
-    static qint32 typeToPrio(const QString &sType);
-    static QString translateType(const QString &sType);
-    static QString _translate(const QString &sString);
-    static void sortRecords(QList<XBinary::SCANSTRUCT> *pListRecords);
-    static QString getProtection(QList<XBinary::SCANSTRUCT> *pListRecords);
-    static bool isProtection(const QString &sType);
-
 private:
     static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct);
 };

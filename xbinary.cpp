@@ -9290,66 +9290,6 @@ QString XBinary::recordFilePartIdToString(FILEPART id)
     return sResult;
 }
 
-QString XBinary::createTypeString(const SCANSTRUCT *pScanStruct)
-{
-    QString sResult;
-
-    if (pScanStruct->parentId.filePart != XBinary::FILEPART_HEADER) {
-        sResult += XBinary::recordFilePartIdToString(pScanStruct->parentId.filePart);
-
-        if (pScanStruct->parentId.sVersion != "") {
-            sResult += QString("(%1)").arg(pScanStruct->parentId.sVersion);
-        }
-
-        if (pScanStruct->parentId.sInfo != "") {
-            sResult += QString("[%1]").arg(pScanStruct->parentId.sInfo);
-        }
-
-        sResult += ": ";
-    }
-
-    sResult += XBinary::fileTypeIdToString(pScanStruct->id.fileType);
-
-    return sResult;
-}
-
-XBinary::SCANSTRUCT XBinary::createHeaderScanStruct(const SCANSTRUCT *pScanStruct)
-{
-    SCANSTRUCT result = *pScanStruct;
-
-    result.id.sUuid = XBinary::generateUUID();
-    result.sType = "";
-    result.sName = "";
-    result.sVersion = "";
-    result.sInfo = "";
-    result.varInfo.clear();
-    result.varInfo2.clear();
-    result.globalColor = Qt::transparent;
-
-    return result;
-}
-
-QString XBinary::createResultString2(const SCANSTRUCT *pScanStruct)
-{
-    QString sResult;
-
-    if (pScanStruct->bIsHeuristic) {
-        sResult += "(Heuristic)";
-    }
-
-    sResult += QString("%1: %2").arg(pScanStruct->sType, pScanStruct->sName);
-
-    if (pScanStruct->sVersion != "") {
-        sResult += QString("(%1)").arg(pScanStruct->sVersion);
-    }
-
-    if (pScanStruct->sInfo != "") {
-        sResult += QString("[%1]").arg(pScanStruct->sInfo);
-    }
-
-    return sResult;
-}
-
 bool XBinary::checkVersionString(const QString &sVersion)
 {
     bool bResult = false;
