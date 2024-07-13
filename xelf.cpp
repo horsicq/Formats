@@ -5137,7 +5137,7 @@ qint32 XELF::getNumberOfSymbols(qint64 nOffset)
                 break;
             }
 
-            nResult ++;
+            nResult++;
             nOffset += sizeof(XELF_DEF::Elf64_Sym);
         }
     } else {
@@ -5151,7 +5151,7 @@ qint32 XELF::getNumberOfSymbols(qint64 nOffset)
                 break;
             }
 
-            nResult ++;
+            nResult++;
             nOffset += sizeof(XELF_DEF::Elf32_Sym);
         }
     }

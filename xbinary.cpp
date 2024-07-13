@@ -4987,7 +4987,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 } else if ((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
                     stResult.insert(FT_LX);
                     bIsNewHeaderValid = true;
-                } 
+                }
             }
 
             // if (!bIsNewHeaderValid) {
@@ -8589,12 +8589,13 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 {
     // TODO Check!
     // TODO optimize! new Types create remove function
-    if (pStFileTypes->contains(XBinary::FT_MSDOS) || pStFileTypes->contains(XBinary::FT_DOS16M) || pStFileTypes->contains(XBinary::FT_DOS4G) || pStFileTypes->contains(XBinary::FT_NE) || pStFileTypes->contains(XBinary::FT_LE) ||
-        pStFileTypes->contains(XBinary::FT_LX) || pStFileTypes->contains(XBinary::FT_PE) || pStFileTypes->contains(XBinary::FT_PE32) ||
-        pStFileTypes->contains(XBinary::FT_PE64) || pStFileTypes->contains(XBinary::FT_ELF) || pStFileTypes->contains(XBinary::FT_ELF32) ||
-        pStFileTypes->contains(XBinary::FT_ELF64) || pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) ||
-        pStFileTypes->contains(XBinary::FT_MACHO64) || pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) ||
-        pStFileTypes->contains(XBinary::FT_GZIP) || pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA)) {
+    if (pStFileTypes->contains(XBinary::FT_MSDOS) || pStFileTypes->contains(XBinary::FT_DOS16M) || pStFileTypes->contains(XBinary::FT_DOS4G) ||
+        pStFileTypes->contains(XBinary::FT_NE) || pStFileTypes->contains(XBinary::FT_LE) || pStFileTypes->contains(XBinary::FT_LX) ||
+        pStFileTypes->contains(XBinary::FT_PE) || pStFileTypes->contains(XBinary::FT_PE32) || pStFileTypes->contains(XBinary::FT_PE64) ||
+        pStFileTypes->contains(XBinary::FT_ELF) || pStFileTypes->contains(XBinary::FT_ELF32) || pStFileTypes->contains(XBinary::FT_ELF64) ||
+        pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) || pStFileTypes->contains(XBinary::FT_MACHO64) ||
+        pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP) ||
+        pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA)) {
         pStFileTypes->remove(XBinary::FT_BINARY);
     } else {
         pStFileTypes->insert(XBinary::FT_COM);
