@@ -563,8 +563,8 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_RAR: sResult = QString("RAR"); break;
         case FT_RIFF: sResult = QString("RIFF"); break;
         case FT_SIGNATURE: sResult = tr("Signature"); break;
-        case FT_TAR: sResult = tr("tar"); break;
-        case FT_TARGZ: sResult = tr("tar.gz"); break;
+        case FT_TAR: sResult = QString("tar"); break;
+        case FT_TARGZ: sResult = QString("tar.gz"); break;
         case FT_TEXT: sResult = tr("Text"); break;
         case FT_TIFF: sResult = QString("TIFF"); break;
         case FT_UNICODE: sResult = QString("Unicode"); break;
