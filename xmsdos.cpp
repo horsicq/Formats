@@ -340,11 +340,11 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
 
     qint32 nIndex = 0;
 
-    result.sArch = getArch();
-    result.sType = getTypeAsString();
-
     result.fileType = FT_MSDOS;
-    result.mode = getMode();
+
+    result.sArch = QString("8086");;
+    result.sType = TYPE_EXE;
+    result.mode = MODE_16;
     result.nBinarySize = getSize();
     result.nImageSize = getImageSize();
     result.nModuleAddress = getModuleAddress();
@@ -355,13 +355,8 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
 
     qint64 nHeaderOffset = 0;
     qint64 nHeaderSize = (quint16)(get_e_cparhdr() * 16);
-    //    qint64 nDataOffset=nHeaderOffset+nHeaderSize;
-    //    qint64 nDataSize=get_e_cs()*16;
-    //    qint64
-    //    nCodeOffset=(quint16)((quint16)(get_e_cparhdr()*16)+(quint16)(get_e_cs()*16));
     qint64 nCodeOffset = (get_e_cparhdr() * 16) + (get_e_cs() * 16);
 
-    //    XADDR nCodeAddress=get_e_cs()*0x10000+0x10000000;
     XADDR nCodeAddress = get_e_cs() * 0x10000;
 
     if (nCodeAddress == 0) {
@@ -390,8 +385,6 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     } else {
         nCodeSize = getSize() - nCodeOffset;
     }
-
-    //    XADDR nBaseAddress=_getBaseAddress();
 
     {
         _MEMORY_RECORD record = {};
@@ -424,47 +417,6 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
             result.listRecords.append(record);
         }
     }
-
-    // TODO ADDRESS_SEGMENT_DATA
-    //    if(nCodeOffset<0) // Virtual
-    //    {
-    //        qint64 nDelta=nCodeOffset-nHeaderSize;
-
-    //        _MEMORY_RECORD record={};
-
-    //        record.bIsVirtual=true;
-    //        record.nSize=qAbs(nDelta);
-    //        record.nOffset=-1;
-    //        record.nAddress=0;
-
-    //        record.segment=ADDRESS_SEGMENT_CODE; // CODE
-    //        record.type=MMT_LOADSEGMENT;
-    //        record.nIndex=nIndex++;
-
-    //        result.listRecords.append(record);
-
-    //        nCodeSize-=qAbs(nDelta);
-    //        nCodeOffset=nHeaderSize;
-    //        nCodeAddress+=qAbs(nDelta);
-    //    }
-    //    else
-    //    {
-    //        qint64 nDelta=nCodeOffset-nHeaderSize;
-
-    //        _MEMORY_RECORD record={};
-
-    //        record.bIsVirtual=false;
-    //        record.nSize=qAbs(nDelta);
-    //        record.nOffset=nHeaderSize;
-    //        record.nAddress=0x10000000;
-
-    //        record.segment=ADDRESS_SEGMENT_CODE; // CODE
-    //        record.type=MMT_LOADSEGMENT;
-    //        record.nIndex=nIndex++;
-
-    //        result.listRecords.append(record);
-    //    }
-
     {
         _MEMORY_RECORD record = {};
 
@@ -478,21 +430,6 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
 
         result.listRecords.append(record);
     }
-
-    //    {
-    //        _MEMORY_RECORD record={};
-
-    //        record.bIsVirtual=true;
-    //        record.nSize=0xFFFF-nCodeSize;
-    //        record.nOffset=-1;
-    //        record.nAddress=nCodeAddress+nCodeSize;
-
-    //        record.segment=ADDRESS_SEGMENT_CODE; // CODE
-    //        record.type=MMT_LOADSEGMENT;
-    //        record.nIndex=nIndex++;
-
-    //        result.listRecords.append(record);
-    //    }
 
     if (nOverlaySize) {
         _MEMORY_RECORD record = {};
@@ -772,7 +709,15 @@ XBinary::FT XMSDOS::getFileType()
 
 qint32 XMSDOS::getType()
 {
-    return TYPE_EXE;
+    qint32 nResult = TYPE_EXE;
+
+    FT fileType = getFileType();
+
+    if (fileType == FT_MSDOS) {
+        nResult = TYPE_EXE;
+    }
+
+    return nResult;
 }
 
 XBinary::OSINFO XMSDOS::getOsInfo()
@@ -781,10 +726,10 @@ XBinary::OSINFO XMSDOS::getOsInfo()
 
     result.osName = OSNAME_MSDOS;
     result.sOsVersion = "";  // TODO
-    result.sArch = getArch();
-    result.mode = getMode();
-    result.sType = typeIdToString(getType());
-    result.endian = getEndian();
+    result.sArch = "8086";
+    result.mode = MODE_16;
+    result.sType = typeIdToString(TYPE_EXE);
+    result.endian = ENDIAN_LITTLE;
 
     return result;
 }

@@ -139,6 +139,9 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMO
     } else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) {
         XLHA xlha(pDevice);
         result = xlha.getMemoryMap(mapMode, pPdStruct);
+    } else if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType)) {
+        XDOS16 xdos16(pDevice);
+        result = xdos16.getMemoryMap(mapMode, pPdStruct);
     }
 #endif
     else {
@@ -233,6 +236,8 @@ QList<XBinary::MAPMODE> XFormats::getMapModesList(XBinary::FT fileType)
         listResult = XZlib::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) {
         listResult = XLHA::getMapModesList();
+    } else if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType)) {
+        listResult = XDOS16::getMapModesList();
     }
 #endif
     else {
@@ -473,6 +478,9 @@ QList<XBinary::HREGION> XFormats::getHRegions(XBinary::FT fileType, QIODevice *p
     } else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) {
         XLHA xlha(pDevice);
         listResult = xlha.getHRegions(pMemoryMap, pPdStruct);
+    } else if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType)) {
+        XDOS16 xdos16(pDevice);
+        listResult = xdos16.getHRegions(pMemoryMap, pPdStruct);
     }
 #endif
     else {
@@ -580,6 +588,9 @@ QList<XBinary::HREGION> XFormats::getHighlights(XBinary::FT fileType, QIODevice 
     } else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) {
         XLHA xlha(pDevice);
         listResult = xlha.getHighlights(pMemoryMap, pPdStruct);
+    } else if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType)) {
+        XDOS16 xdos16(pDevice);
+        listResult = xdos16.getHighlights(pMemoryMap, pPdStruct);
     }
 #endif
     else {
@@ -1170,6 +1181,9 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     } else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) {
         XLHA xlha(_pDevice);
         result = xlha.getFileFormatInfo(pPdStruct);
+    } else if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType)) {
+        XDOS16 xdos16(pDevice);
+        result = xdos16.getFileFormatInfo(pPdStruct);
     }
 #endif
     else {
@@ -1240,17 +1254,6 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 {
     QSet<XBinary::FT> stResult = XBinary::getFileTypes(pDevice, bExtra);
 
-    if (stResult.contains(XBinary::FT_MSDOS)) {
-        XMSDOS msdos(pDevice);
-
-        if (msdos.isValid(pPdStruct)) {
-            XBinary::FT _ft = msdos.getFileType();
-
-            if (_ft != XBinary::FT_MSDOS) {
-                stResult.insert(_ft);
-            }
-        }
-    }
 #ifdef USE_ARCHIVE
     if (stResult.contains(XBinary::FT_ZIP)) {
         XZip xzip(pDevice);

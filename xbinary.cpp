@@ -4990,22 +4990,46 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 }
             }
 
-            // if (!bIsNewHeaderValid) {
-            //     quint16 e_cp = ((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_cp;
-            //     quint16 e_cblp = ((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_cblp;
+            if (!bIsNewHeaderValid) {
+                quint16 nCP = read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cp));
+                quint16 nCblp = read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cblp));
 
-            //     if (e_cp > 0) {
-            //         qint64 nMaxOffset = (e_cp - 1) * 512 + e_cblp;
-            //         if (nSize - nMaxOffset) {
-            //             quint16 nSignature = read_uint16(nMaxOffset);
+                if (nCP > 0) {
+                    qint64 nSignatureOffset = (nCP - 1) * 512 + nCblp;
+                    if (nSize - nSignatureOffset) {
+                        bool b16M = false;
+                        bool b4G = false;
+                        while (true) {
+                            quint16 nSignature = read_uint16(nSignatureOffset);
 
-            //             if (nSignature == 0x5742) {
-            //                 stResult.insert(FT_DOS4G);
-            //                 bIsNewHeaderValid = true;
-            //             }
-            //         }
-            //     }
-            // }
+                            if (nSignature == 0x5742) {     // BW
+                                b16M = true;
+                                nSignatureOffset = read_uint32(nSignatureOffset + offsetof(XMSDOS_DEF::dos16m_exe_header, next_header_pos));
+                            } else if (nSignature == 0x5A4D) { // MZ
+                                qint64 nSignatureOffsetOpt = read_uint32(nSignatureOffset + offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
+                                quint16 nSignatureOpt = read_uint16(nSignatureOffsetOpt + nSignatureOffset);
+
+                                if (nSignatureOpt == 0x454E) { // NE
+                                    b16M = true;
+                                } else if (nSignatureOpt == 0x454C) { // LE
+                                    b4G = true;
+                                } else if (nSignatureOpt == 0x584C) { // LX
+                                    b4G = true;
+                                }
+                                break;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        if (b4G) {
+                            stResult.insert(FT_DOS4G);
+                        } else if (b16M) {
+                            stResult.insert(FT_DOS16M);
+                        }
+                    }
+                }
+            }
 
             bAllFound = true;
         }

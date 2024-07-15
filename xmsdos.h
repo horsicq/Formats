@@ -38,7 +38,6 @@ public:
     enum TYPE {
         TYPE_UNKNOWN = 0,
         TYPE_EXE
-        // TODO EXTENDER?
     };
 
     explicit XMSDOS(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
