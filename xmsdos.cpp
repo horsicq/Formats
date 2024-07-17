@@ -360,18 +360,18 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     XADDR nCodeAddress = get_e_cs() * 0x10000;
 
     if (nCodeAddress == 0) {
-        nCodeAddress = 0x100000;
+        nCodeAddress = 0x10000000;
     }
 
     result.nEntryPointAddress = nCodeAddress + get_e_ip();
 
-    if (get_e_cs() * 16 + get_e_ip() >= 0x100000) {
-        nCodeAddress = 0x100000;
-        result.nEntryPointAddress = get_e_cs() * 0x10000 + get_e_ip();
-        nCodeOffset = get_e_cparhdr() * 16;  // TODO Check
-    }
+    // if (get_e_cs() * 16 + get_e_ip() >= 0x100000) {
+    //     nCodeAddress = 0x100000;
+    //     result.nEntryPointAddress = get_e_cs() * 0x10000 + get_e_ip();
+    //     nCodeOffset = get_e_cparhdr() * 16;  // TODO Check
+    // }
 
-    result.nSegmentBase = ((qint16)get_e_cparhdr() * 16);
+    result.nCodeBase = nCodeAddress;
 
     qint64 nCodeSize = 0;
     qint64 nOverlayOffset = 0;
@@ -450,13 +450,13 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
 
 qint64 XMSDOS::getImageSize()
 {
-    return 0x1000;  // TODO Check
+    return 0x10000;  // TODO Check
 }
 
 qint64 XMSDOS::getModuleAddress()
 {
-    //    return 0x10000000; // TODO Check
-    return 0x100000;
+    return 0x10000000; // TODO Check
+    // return 0x100000;
 }
 
 QMap<quint64, QString> XMSDOS::getImageMagics()
