@@ -5409,7 +5409,21 @@ QString XELF::getFileFormatExt()
 
 qint64 XELF::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    return _calculateRawSize(pPdStruct);
+    qint64 nResult = 0;
+
+    {
+        _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_SEGMENTS, pPdStruct);
+
+        nResult = _calculateRawSize(&memoryMap, pPdStruct);
+    }
+
+    if (nResult == 0) {
+        _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_SECTIONS, pPdStruct);
+
+        nResult = _calculateRawSize(&memoryMap, pPdStruct);
+    }
+
+    return nResult;
 }
 
 QList<XBinary::HREGION> XELF::getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)

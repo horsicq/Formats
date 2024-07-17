@@ -889,7 +889,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             nFileSize = 0x10000;
         }
 
-        nFileSize = S_ALIGN_UP(nFileSize, 0x200);  // TODO const
+        // nFileSize = S_ALIGN_UP(nFileSize, 0x200);  // TODO const
 
         if (nFileOffset)  // if offset = 0 no data
         {

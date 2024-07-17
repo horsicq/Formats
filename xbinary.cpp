@@ -576,6 +576,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_ZIP: sResult = QString("ZIP"); break;
         case FT_ZLIB: sResult = QString("zlib"); break;
         case FT_DEB: sResult = QString("deb"); break;
+        case FT_BWDOS16M: sResult = QString("BW DOS16M"); break;
     }
 
     return sResult;
@@ -5145,6 +5146,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 stResult.insert(FT_IMAGE);
                 stResult.insert(FT_ANI);
             }*/
+        } else if (compareSignature(&memoryMap, "'BW'........00000000", 0)) {
+            stResult.insert(FT_BWDOS16M);
         }
 
         if (isPlainTextType(&baHeader)) {
@@ -5329,6 +5332,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_RIFF;
     } else if (pStFileTypes->contains(FT_PDF)) {
         result = FT_PDF;
+    } else if (pStFileTypes->contains(FT_BWDOS16M)) {
+        result = FT_BWDOS16M;
     } else if (pStFileTypes->contains(FT_BINARY)) {
         result = FT_BINARY;
     }
@@ -5437,6 +5442,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_ELF64)) listResult.append(FT_ELF64);
         if (stFileTypes.contains(FT_MACHO32)) listResult.append(FT_MACHO32);
         if (stFileTypes.contains(FT_MACHO64)) listResult.append(FT_MACHO64);
+        if (stFileTypes.contains(FT_BWDOS16M)) listResult.append(FT_BWDOS16M);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_ALL)) {

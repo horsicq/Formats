@@ -264,7 +264,8 @@ public:
         FT_WEBP,
         FT_SIGNATURE,
         FT_NPM,
-        FT_DEB
+        FT_DEB,
+        FT_BWDOS16M
         // TODO more
     };
 
@@ -1511,10 +1512,11 @@ public:
     static qint32 _toWCharArray(const QString &sString, wchar_t *pWString);
 
     static QString dataToString(const QByteArray &baData);
+    static QString convertSignature(const QString &sSignature);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;
-    static QString convertSignature(const QString &sSignature);
+
     static QString qcharToHex(QChar cSymbol);
 
     static QList<SIGNATURE_RECORD> getSignatureRecords(const QString &sSignature, bool *pbValid, PDSTRUCT *pPdStruct);
