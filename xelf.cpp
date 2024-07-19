@@ -4807,7 +4807,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
         dataset.nOffset = addressToOffset(pMemoryMap, dataset.nAddress);
         dataset.nSize = listStrSize.at(0).nValue;
         dataset.nType = DS_STRINGTABLE;
-        dataset.sName = "String table";  // TODO mb translate
+        dataset.sName = tr("String table");
 
         if (isOffsetAndSizeValid(pMemoryMap, dataset.nOffset, dataset.nSize)) {
             listResult.append(dataset);
@@ -4824,7 +4824,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
         dataset.nOffset = addressToOffset(pMemoryMap, dataset.nAddress);
         dataset.nSize = listRelaSize.at(0).nValue;
         dataset.nType = DS_RELA;
-        dataset.sName = "RELA";  // TODO mb translate
+        dataset.sName = "RELA";
         dataset.nStringTableOffset = nStringTableOffset;
         dataset.nStringTableSize = nStringTableSize;
 
@@ -4838,7 +4838,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
         dataset.nOffset = addressToOffset(pMemoryMap, dataset.nAddress);
         dataset.nSize = listRelSize.at(0).nValue;
         dataset.nType = DS_REL;
-        dataset.sName = "REL";  // TODO mb translate
+        dataset.sName = "REL";
         dataset.nStringTableOffset = nStringTableOffset;
         dataset.nStringTableSize = nStringTableSize;
 
@@ -4852,7 +4852,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
         dataset.nOffset = 0;
         dataset.nSize = 0;
         dataset.nType = DS_LIBRARIES;
-        dataset.sName = "Libraries";  // TODO mb translate
+        dataset.sName = tr("Libraries");
         dataset.nStringTableOffset = nStringTableOffset;
         dataset.nStringTableSize = nStringTableSize;
 
@@ -4873,7 +4873,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
             QString sAnsiString = read_ansiString(dataset.nOffset);
             dataset.nSize = sAnsiString.length();
             dataset.nType = DS_RUNPATH;
-            dataset.sName = "Run path";  // TODO mb translate
+            dataset.sName = tr("Run path");
             dataset.nStringTableOffset = nStringTableOffset;
             dataset.nStringTableSize = nStringTableSize;
 
@@ -4888,7 +4888,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromTagStructs(XBinary::_MEMORY_MAP *pM
         dataset.nOffset = addressToOffset(pMemoryMap, dataset.nAddress);
         dataset.nSize = getSymTableSize(dataset.nOffset);
         dataset.nType = DS_SYMBOLTABLE;
-        dataset.sName = "Symbol table";  // TODO mb translate
+        dataset.sName = tr("Symbol table");
         dataset.nStringTableOffset = nStringTableOffset;
         dataset.nStringTableSize = nStringTableSize;
 
