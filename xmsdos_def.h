@@ -69,40 +69,40 @@ struct IMAGE_DOS_HEADEREX {
 };
 
 struct dos16m_exe_header {
-    quint16 signature;          /* BW signature to mark valid file  */
-    quint16 last_page_bytes;    /* length of image mod 512          */
-    quint16 pages_in_file;      /* number of 512 byte pages         */
+    quint16 signature;       /* BW signature to mark valid file  */
+    quint16 last_page_bytes; /* length of image mod 512          */
+    quint16 pages_in_file;   /* number of 512 byte pages         */
     quint16 reserved1;
     quint16 reserved2;
-    quint16 min_alloc;          /* required memory, in KB           */
-    quint16 max_alloc;          /* max KB (private allocation)      */
-    quint16 stack_seg;          /* segment of stack                 */
-    quint16 stack_ptr;          /* initial SP value                 */
-    quint16 first_reloc_sel;    /* huge reloc list selector         */
-    quint16 init_ip;            /* initial IP value                 */
-    quint16 code_seg;           /* segment of code                  */
-    quint16 runtime_gdt_size;   /* runtime GDT size in bytes        */
-    quint16 MAKEPM_version;     /* ver * 100, GLU = (ver+10)*100    */
+    quint16 min_alloc;        /* required memory, in KB           */
+    quint16 max_alloc;        /* max KB (private allocation)      */
+    quint16 stack_seg;        /* segment of stack                 */
+    quint16 stack_ptr;        /* initial SP value                 */
+    quint16 first_reloc_sel;  /* huge reloc list selector         */
+    quint16 init_ip;          /* initial IP value                 */
+    quint16 code_seg;         /* segment of code                  */
+    quint16 runtime_gdt_size; /* runtime GDT size in bytes        */
+    quint16 MAKEPM_version;   /* ver * 100, GLU = (ver+10)*100    */
     /* end of DOS style EXE header */
-    quint32 next_header_pos;    /* file pos of next spliced .EXP    */
-    quint32 cv_info_offset;     /* offset to start of debug info    */
-    quint16 last_sel_used;      /* last selector value used         */
-    quint16 pmem_alloc;         /* private xm amount KB if nonzero  */
-    quint16 alloc_incr;         /* auto ExtReserve amount, in KB    */
-    quint8  reserved4[6];
+    quint32 next_header_pos; /* file pos of next spliced .EXP    */
+    quint32 cv_info_offset;  /* offset to start of debug info    */
+    quint16 last_sel_used;   /* last selector value used         */
+    quint16 pmem_alloc;      /* private xm amount KB if nonzero  */
+    quint16 alloc_incr;      /* auto ExtReserve amount, in KB    */
+    quint8 reserved4[6];
     /* the following used to be referenced as gdtimage[0..1] */
-    quint16 options;            /* runtime options                  */
-    quint16 trans_stack_sel;    /* sel of transparent stack         */
-    quint16 exp_flags;          /* see ef_ constants below          */
-    quint16 program_size;       /* size of program in paras         */
-    quint16 gdtimage_size;      /* size of gdt in file (bytes)      */
-    quint16 first_selector;     /* gdt[first_sel] = gdtimage[0], 0 => 0x80 */
-    quint8  default_mem_strategy;
-    quint8  reserved5;
-    quint16 transfer_buffer_size;   /* default in bytes, 0 => 8KB   */
+    quint16 options;         /* runtime options                  */
+    quint16 trans_stack_sel; /* sel of transparent stack         */
+    quint16 exp_flags;       /* see ef_ constants below          */
+    quint16 program_size;    /* size of program in paras         */
+    quint16 gdtimage_size;   /* size of gdt in file (bytes)      */
+    quint16 first_selector;  /* gdt[first_sel] = gdtimage[0], 0 => 0x80 */
+    quint8 default_mem_strategy;
+    quint8 reserved5;
+    quint16 transfer_buffer_size; /* default in bytes, 0 => 8KB   */
     /* the following used to be referenced as gdtimage[2..15] */
-    quint8  reserved6[48];
-    char        EXP_path[64];       /* original .EXP file name  */
+    quint8 reserved6[48];
+    char EXP_path[64]; /* original .EXP file name  */
     /* gdtimage[16..gdtimage_size] follows immediately, then program image follows */
 };
 }  // namespace XMSDOS_DEF

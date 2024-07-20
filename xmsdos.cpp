@@ -342,7 +342,8 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
 
     result.fileType = FT_MSDOS;
 
-    result.sArch = QString("8086");;
+    result.sArch = QString("8086");
+    ;
     result.sType = TYPE_EXE;
     result.mode = MODE_16;
     result.nBinarySize = getSize();
@@ -455,7 +456,7 @@ qint64 XMSDOS::getImageSize()
 
 qint64 XMSDOS::getModuleAddress()
 {
-    return 0x10000000; // TODO Check
+    return 0x10000000;  // TODO Check
     // return 0x100000;
 }
 

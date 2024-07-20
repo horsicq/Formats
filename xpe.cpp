@@ -6752,8 +6752,7 @@ QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList(XBinary::_MEMORY_MAP *
         while (true) {
             XPE_DEF::S_IMAGE_DEBUG_DIRECTORY record = _read_IMAGE_DEBUG_DIRECTORY(nDebugOffset);
 
-            if (record.PointerToRawData &&
-                isOffsetValid(pMemoryMap, record.PointerToRawData)) {
+            if (record.PointerToRawData && isOffsetValid(pMemoryMap, record.PointerToRawData)) {
                 listResult.append(record);
             } else {
                 break;

@@ -4150,7 +4150,8 @@ qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress
 
     //     for (qint32 i = 0; i < nNumberOfRecords; i++) {
     //         if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nAddress != (XADDR)-1) && (pMemoryMap->listRecords.at(i).nOffset != -1)) {
-    //             if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) && (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize)) {
+    //             if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) && (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize))
+    //             {
     //                 nResult = (nAddress - pMemoryMap->listRecords.at(i).nAddress) + pMemoryMap->listRecords.at(i).nOffset;
     //                 break;
     //             }
@@ -5014,18 +5015,18 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                         while (true) {
                             quint16 nSignature = read_uint16(nSignatureOffset);
 
-                            if (nSignature == 0x5742) {     // BW
+                            if (nSignature == 0x5742) {  // BW
                                 b16M = true;
                                 nSignatureOffset = read_uint32(nSignatureOffset + offsetof(XMSDOS_DEF::dos16m_exe_header, next_header_pos));
-                            } else if (nSignature == 0x5A4D) { // MZ
+                            } else if (nSignature == 0x5A4D) {  // MZ
                                 qint64 nSignatureOffsetOpt = read_uint32(nSignatureOffset + offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
                                 quint16 nSignatureOpt = read_uint16(nSignatureOffsetOpt + nSignatureOffset);
 
-                                if (nSignatureOpt == 0x454E) { // NE
+                                if (nSignatureOpt == 0x454E) {  // NE
                                     b16M = true;
-                                } else if (nSignatureOpt == 0x454C) { // LE
+                                } else if (nSignatureOpt == 0x454C) {  // LE
                                     b4G = true;
-                                } else if (nSignatureOpt == 0x584C) { // LX
+                                } else if (nSignatureOpt == 0x584C) {  // LX
                                     b4G = true;
                                 }
                                 break;
@@ -10355,70 +10356,53 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 nOffset += pListSignatureRecords->at(i).nSize;
                 break;
 
-            case XBinary::ST_RELOFFSET:
-                {
-                    qint64 nValue = 0;
+            case XBinary::ST_RELOFFSET: {
+                qint64 nValue = 0;
 
-                    switch (pListSignatureRecords->at(i).nSizeOfAddr) {
-                        case 1:
-                            nValue = 1 + read_int8(nOffset);
-                            break;
+                switch (pListSignatureRecords->at(i).nSizeOfAddr) {
+                    case 1: nValue = 1 + read_int8(nOffset); break;
 
-                        case 2:
-                            nValue = 2 + read_int16(nOffset, isBigEndian(pMemoryMap));
-                            break;
+                    case 2: nValue = 2 + read_int16(nOffset, isBigEndian(pMemoryMap)); break;
 
-                        case 4:
-                            nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap));
-                            break;
+                    case 4: nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap)); break;
 
-                        case 8:
-                            nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap));
-                            break;
-                    }
-
-                    if ((pMemoryMap->fileType == FT_COM) || (pMemoryMap->fileType == FT_MSDOS)) {
-                        nOffset += nValue;
-                    } else {
-                        XADDR _nAddress = offsetToAddress(pMemoryMap, nOffset);
-                        _nAddress += nValue;
-                        nOffset = addressToOffset(pMemoryMap, _nAddress);
-                    }
+                    case 8: nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap)); break;
                 }
 
-                break;
-
-            case XBinary::ST_ADDRESS:
-                {
-                    XADDR _nAddress = 0;
-                    switch (pListSignatureRecords->at(i).nSizeOfAddr) {
-                        case 1: _nAddress = read_uint8(nOffset); break;
-
-                        case 2:
-                            _nAddress = read_uint16(nOffset, isBigEndian(pMemoryMap));
-                            break;
-
-                        case 4:
-                            _nAddress = read_uint32(nOffset, isBigEndian(pMemoryMap));
-                            break;
-
-                        case 8:
-                            _nAddress = read_uint64(nOffset, isBigEndian(pMemoryMap));
-                            break;
-                    }
-
-                    if (pMemoryMap->fileType == FT_MSDOS) {
-                        _nAddress += pMemoryMap->nCodeBase;
-                    }
-
-                    nOffset = addressToOffset(pMemoryMap, _nAddress);  // TODO!
-
+                if ((pMemoryMap->fileType == FT_COM) || (pMemoryMap->fileType == FT_MSDOS)) {
+                    nOffset += nValue;
+                } else {
+                    XADDR _nAddress = offsetToAddress(pMemoryMap, nOffset);
+                    _nAddress += nValue;
+                    nOffset = addressToOffset(pMemoryMap, _nAddress);
                 }
-                break;
-
-            if (!isOffsetValid(pMemoryMap, nOffset)) {
-                return false;
             }
+
+            break;
+
+            case XBinary::ST_ADDRESS: {
+                XADDR _nAddress = 0;
+                switch (pListSignatureRecords->at(i).nSizeOfAddr) {
+                    case 1: _nAddress = read_uint8(nOffset); break;
+
+                    case 2: _nAddress = read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
+
+                    case 4: _nAddress = read_uint32(nOffset, isBigEndian(pMemoryMap)); break;
+
+                    case 8: _nAddress = read_uint64(nOffset, isBigEndian(pMemoryMap)); break;
+                }
+
+                if (pMemoryMap->fileType == FT_MSDOS) {
+                    _nAddress += pMemoryMap->nCodeBase;
+                }
+
+                nOffset = addressToOffset(pMemoryMap, _nAddress);  // TODO!
+
+            } break;
+
+                if (!isOffsetValid(pMemoryMap, nOffset)) {
+                    return false;
+                }
         }
     }
     //    CompareBytes,
