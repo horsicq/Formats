@@ -405,7 +405,7 @@ public:
 
     static QList<SECTION_RECORD> getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, bool bIsImage, QByteArray *pbaSectionTable);
     bool isSectionNamePresent(const QString &sSectionName);
-    static bool isSectionNamePresent(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
+    static bool isSectionNamePresent(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);  // TODO pdStruct
     qint32 getSectionNumber(const QString &sSectionName);  // TODO pdStruct
     static qint32 getSectionNumber(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
@@ -447,7 +447,8 @@ public:
 
     qint64 getSymSize();
     qint64 getSymTableSize(qint64 nOffset);
-    qint32 getNumberOfSymbols(qint64 nOffset);
+    qint32 getNumberOfSymbols(qint64 nOffset, PDSTRUCT *pPdStruct = nullptr);
+    qint32 getNumberOfSymbols(qint64 nOffset, bool bIsBigEndian, bool bIs64, PDSTRUCT *pPdStruct);
 
     XELF_DEF::Elf32_Rel _readElf32_Rel(qint64 nOffset, bool bIsBigEndian);
     XELF_DEF::Elf64_Rel _readElf64_Rel(qint64 nOffset, bool bIsBigEndian);

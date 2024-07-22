@@ -5119,18 +5119,29 @@ qint64 XELF::getSymTableSize(qint64 nOffset)
     return nResult;
 }
 
-qint32 XELF::getNumberOfSymbols(qint64 nOffset)
+qint32 XELF::getNumberOfSymbols(qint64 nOffset, PDSTRUCT *pPdStruct)
 {
-    qint32 nResult = 0;
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
 
     bool bIsBigEndian = isBigEndian();
     bool bIs64 = is64();
+
+    return getNumberOfSymbols(nOffset, bIsBigEndian, bIs64, pPdStruct);
+}
+
+qint32 XELF::getNumberOfSymbols(qint64 nOffset, bool bIsBigEndian, bool bIs64, PDSTRUCT *pPdStruct)
+{
+    qint32 nResult = 0;
 
     if (bIs64) {
         nResult += sizeof(XELF_DEF::Elf64_Sym);
         nOffset += sizeof(XELF_DEF::Elf64_Sym);
 
-        while (true) {
+        while (!(pPdStruct->bIsStop)) {
             XELF_DEF::Elf64_Sym record = _readElf64_Sym(nOffset, bIsBigEndian);
 
             if ((!record.st_info) || (record.st_other)) {
@@ -5144,7 +5155,7 @@ qint32 XELF::getNumberOfSymbols(qint64 nOffset)
         nResult += sizeof(XELF_DEF::Elf32_Sym);
         nOffset += sizeof(XELF_DEF::Elf32_Sym);
 
-        while (true) {
+        while (!(pPdStruct->bIsStop)) {
             XELF_DEF::Elf32_Sym record = _readElf32_Sym(nOffset, bIsBigEndian);
 
             if ((!record.st_info) || (record.st_other)) {

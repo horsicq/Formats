@@ -1002,7 +1002,9 @@ public:
         MAPMODE_UNKNOWN = 0,
         MAPMODE_REGIONS,
         MAPMODE_SEGMENTS,
-        MAPMODE_SECTIONS
+        MAPMODE_SECTIONS,
+        MAPMODE_OBJECTS,
+        MAPMODE_MAPS,
     };
 
     static QString mapModeToString(MAPMODE mapMode);

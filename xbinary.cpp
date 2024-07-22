@@ -4402,6 +4402,8 @@ QString XBinary::mapModeToString(MAPMODE mapMode)
         case MAPMODE_REGIONS: sResult = tr("Regions"); break;
         case MAPMODE_SEGMENTS: sResult = tr("Segments"); break;
         case MAPMODE_SECTIONS: sResult = tr("Sections"); break;
+        case MAPMODE_OBJECTS: sResult = tr("Objects"); break;
+        case MAPMODE_MAPS: sResult = tr("Maps"); break;
     }
 
     return sResult;
@@ -8484,11 +8486,14 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
         } else {
             dmResult = DM_ARM64_LE;
         }
-    } else if (sArch == "8086")  // TODO
-    {
+    } else if (sArch == "8086"){
         dmResult = DM_X86_16;
     } else if ((sArch == "386") || (sArch == "80386") || (sArch == "80486") || (sArch == "80586") || (sArch == "I386") || (sArch == "486") || (sArch == "X86")) {
-        dmResult = DM_X86_32;
+        if ((mode == MODE_16) || (mode == MODE_16SEG)) {
+            dmResult = DM_X86_16;
+        } else {
+            dmResult = DM_X86_32;
+        }
     } else if ((sArch == "AMD64") || (sArch == "X86_64") || (sArch == "X64")) {
         dmResult = DM_X86_64;
     } else if ((sArch == "68K") || (sArch == "MC680x0") || (sArch == "MC68030")) {

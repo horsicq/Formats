@@ -106,9 +106,9 @@ struct o16_map {
 };
 
 struct o32_map {
-    quint16 o32_pagedataoffset;
-    quint8 o32_pagesize;
-    quint8 o32_pageflags;
+    quint32 o32_pagedataoffset;
+    quint16 o32_pagesize;
+    quint16 o32_pageflags;
 };
 }  // namespace XLE_DEF
 #endif  // XLE_DEF_H

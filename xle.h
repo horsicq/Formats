@@ -154,6 +154,8 @@ public:
     virtual qint32 getType();
     virtual QString typeIdToString(qint32 nType);
     virtual OSINFO getOsInfo();
+    static QList<MAPMODE> getMapModesList();
+    qint64 getModuleAddress();
 
     static QMap<quint64, QString> getImageLEMagics();
     static QMap<quint64, QString> getImageLEMagicsS();

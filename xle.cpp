@@ -1177,9 +1177,9 @@ XLE_DEF::o32_map XLE::_read_o32_map(qint64 nOffset)
 {
     XLE_DEF::o32_map result = {};
 
-    result.o32_pagedataoffset = read_uint16(nOffset + offsetof(XLE_DEF::o32_map, o32_pagedataoffset));
-    result.o32_pagesize = read_uint8(nOffset + offsetof(XLE_DEF::o32_map, o32_pagesize));
-    result.o32_pageflags = read_uint8(nOffset + offsetof(XLE_DEF::o32_map, o32_pageflags));
+    result.o32_pagedataoffset = read_uint32(nOffset + offsetof(XLE_DEF::o32_map, o32_pagedataoffset));
+    result.o32_pagesize = read_uint16(nOffset + offsetof(XLE_DEF::o32_map, o32_pagesize));
+    result.o32_pageflags = read_uint16(nOffset + offsetof(XLE_DEF::o32_map, o32_pageflags));
 
     return result;
 }
@@ -1278,11 +1278,13 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     quint32 nLastPageSize = getImageVxdHeader_lastpagesize();
     quint32 nPageSize = getImageVxdHeader_pagesize();
     qint64 nDataPageOffset = getImageVxdHeader_datapage();
+    qint64 nMapOffset = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
+    // quint32 nNumberOfMaps = getImageVxdHeader_mpages();
 
     if (nDataPageOffset > 0) {
         _MEMORY_RECORD memoryRecord = {};
 
-        memoryRecord.nAddress = -1;
+        memoryRecord.nAddress = 0;
         memoryRecord.nOffset = 0;
         memoryRecord.nSize = nDataPageOffset;
         memoryRecord.sName = tr("Header");
@@ -1291,45 +1293,103 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         result.listRecords.append(memoryRecord);
     }
 
-    qint32 nLoaderSize = 0;
+    qint64 nLoaderSize = 0;
 
     if (nNumberOfPages > 0) {
-        nLoaderSize = (nNumberOfPages - 1) * nPageSize + nLastPageSize;
+        nLoaderSize = nDataPageOffset + (nNumberOfPages - 1) * nPageSize + nLastPageSize;
     }
-
-    //    if(bIsLE)
-    //    {
-    ////        QList<XLE_DEF::o16_map> listMaps=XLE::getMapsLE();
-    //    }
-    //    else if(bIsLX)
-    //    {
-    //        QList<XLE_DEF::o32_map> listMaps=XLE::getMapsLX();
-    //    }
 
     qint32 nNumberOfObjects = listObjects.count();
 
+    qint32 nIndex = 0;
+    qint64 nMaxOffset = 0;
+    XADDR nMinAddress = -1;
+    XADDR nMaxAddress = 0;
+
     for (qint32 i = 0; i < nNumberOfObjects; i++) {
-        _MEMORY_RECORD memoryRecord = {};
+        qint64 nObjectMinOffset = -1;
+        qint64 nObjectMaxOffset = 0;
+        XADDR nObjectCurrentAddress = listObjects.at(i).o32_base;
 
-        memoryRecord.nIndex = i;
-        memoryRecord.nAddress = listObjects.at(i).o32_base;
-        memoryRecord.nOffset = nDataPageOffset + nPageSize * (listObjects.at(i).o32_pagemap - 1);  // TODO Check
-        memoryRecord.nSize = nPageSize * listObjects.at(i).o32_mapsize;
-        memoryRecord.sName = QString("%1(%2)").arg(tr("Object"), QString::number(i));
-        memoryRecord.type = MMT_LOADSEGMENT;
+        for (qint32 j = 0; j < (qint32)listObjects.at(i).o32_mapsize; j++) {
+            _MEMORY_RECORD memoryRecord = {};
 
-        memoryRecord.nSize = qMin(memoryRecord.nSize, (nDataPageOffset + nLoaderSize) - memoryRecord.nOffset);
+            if (result.fileType == FT_LE) {
+                XLE_DEF::o16_map record = _read_o16_map(nMapOffset + (listObjects.at(i).o32_pagemap - 1 + j) * sizeof(XLE_DEF::o16_map));
 
-        result.listRecords.append(memoryRecord);
+                qint64 nCurrentOffset = 0;
+
+                quint32 nOfs = record.o16_pagenum[2] + (record.o16_pagenum[1] << 8) + ((quint32)record.o16_pagenum[0] << 16);
+
+                if (nOfs) {
+                    nCurrentOffset = ((nOfs - 1) * nPageSize) + nDataPageOffset;
+                }
+
+                memoryRecord.nOffset = nCurrentOffset;
+                memoryRecord.nSize = qMin((qint64)nPageSize, nLoaderSize - nCurrentOffset);
+            } else if (result.fileType == FT_LX) {
+                XLE_DEF::o32_map record = _read_o32_map(nMapOffset + (listObjects.at(i).o32_pagemap - 1 + j) * sizeof(XLE_DEF::o32_map));
+
+                memoryRecord.nOffset = nDataPageOffset + record.o32_pagedataoffset;
+                memoryRecord.nSize = record.o32_pagesize;
+            }
+
+            if (nObjectMinOffset == -1) {
+                nObjectMinOffset = memoryRecord.nOffset;
+            }
+
+            nObjectMinOffset = qMin(nObjectMinOffset, memoryRecord.nOffset);
+            nObjectMaxOffset = qMax(nObjectMaxOffset, memoryRecord.nOffset + memoryRecord.nSize);
+
+            memoryRecord.nAddress = nObjectCurrentAddress;
+            nObjectCurrentAddress += memoryRecord.nSize;
+
+            if (mapMode == MAPMODE_MAPS) {
+                memoryRecord.nIndex = nIndex;
+                memoryRecord.sName = QString("%1(%2)").arg(tr("Map"), QString::number(listObjects.at(i).o32_pagemap + j));
+                memoryRecord.type = MMT_LOADSEGMENT;
+
+                result.listRecords.append(memoryRecord);
+
+                nIndex++;
+            }
+        }
+
+        if ((mapMode == MAPMODE_OBJECTS) || (mapMode == MAPMODE_UNKNOWN)) {
+            _MEMORY_RECORD memoryRecord = {};
+
+            memoryRecord.nIndex = nIndex;
+            memoryRecord.nAddress = listObjects.at(i).o32_base;
+            memoryRecord.nOffset = nObjectMinOffset;
+            memoryRecord.nSize = nObjectMaxOffset - nObjectMinOffset;
+            memoryRecord.sName = QString("%1(%2)").arg(tr("Object"), QString::number(i + 1));
+            memoryRecord.type = MMT_LOADSEGMENT;
+
+            result.listRecords.append(memoryRecord);
+
+            nIndex++;
+        }
+
+        nMaxOffset = qMax(nMaxOffset, nObjectMaxOffset);
+
+        if (nMinAddress == -1) {
+            nMinAddress = listObjects.at(i).o32_base;
+        }
+
+        nMinAddress = qMin(nMinAddress, (XADDR)listObjects.at(i).o32_base);
+        nMaxAddress = qMax(nMaxAddress, (XADDR)nObjectCurrentAddress);
     }
 
-    qint64 nOverlaySize = result.nBinarySize - (nDataPageOffset + nLoaderSize);
+    result.nModuleAddress = getModuleAddress();
+    result.nImageSize = nMaxAddress;
+
+    qint64 nOverlaySize = result.nBinarySize - nMaxOffset;
 
     if (nOverlaySize > 0) {
         _MEMORY_RECORD memoryRecord = {};
 
         memoryRecord.nAddress = -1;
-        memoryRecord.nOffset = nDataPageOffset + nLoaderSize;
+        memoryRecord.nOffset = nMaxOffset;
         memoryRecord.nSize = nOverlaySize;
         memoryRecord.sName = tr("Overlay");
         memoryRecord.type = MMT_OVERLAY;
@@ -1349,8 +1409,8 @@ XBinary::MODE XLE::getMode()
     quint16 signature = read_uint16(lfanew);
 
     if (signature == XLE_DEF::S_IMAGE_VXD_SIGNATURE) {
-        //        result=MODE_16SEG;
-        result = MODE_32;
+        result=MODE_16SEG;
+        // result = MODE_32;
     } else if (signature == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
         result = MODE_32;
     }
@@ -1425,6 +1485,21 @@ XBinary::OSINFO XLE::getOsInfo()
     result.endian = getEndian();
 
     return result;
+}
+
+QList<XBinary::MAPMODE> XLE::getMapModesList()
+{
+    QList<MAPMODE> listResult;
+
+    listResult.append(MAPMODE_OBJECTS);
+    listResult.append(MAPMODE_MAPS);
+
+    return listResult;
+}
+
+qint64 XLE::getModuleAddress()
+{
+    return 0; // TODO Check
 }
 
 QMap<quint64, QString> XLE::getImageLEMagics()
