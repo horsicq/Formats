@@ -660,7 +660,7 @@ public:
     void setEndian(ENDIAN endian);
     virtual ENDIAN getEndian();
 
-    static bool isPacked(double dEntropy);
+    bool isPacked(double dEntropy);
 
     static quint8 random8();
     static quint16 random16();

@@ -442,7 +442,7 @@ XBinary::ENDIAN XBinary::getEndian()
 
 bool XBinary::isPacked(double dEntropy)
 {
-    return (dEntropy >= D_ENTROPY_THRESHOLD);
+    return (dEntropy >= D_ENTROPY_THRESHOLD); // TODO Check
 }
 
 quint8 XBinary::random8()
