@@ -176,7 +176,7 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
         } else {
 #ifdef QT_DEBUG
             qDebug("Cannot seek");
-#endif QT_DEBUG
+#endif
         }
 
         if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
