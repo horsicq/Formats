@@ -406,7 +406,7 @@ public:
     static QList<SECTION_RECORD> getSectionRecords(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, bool bIsImage, QByteArray *pbaSectionTable);
     bool isSectionNamePresent(const QString &sSectionName);
     static bool isSectionNamePresent(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);  // TODO pdStruct
-    qint32 getSectionNumber(const QString &sSectionName);  // TODO pdStruct
+    qint32 getSectionNumber(const QString &sSectionName);                                                       // TODO pdStruct
     static qint32 getSectionNumber(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
     virtual MODE getMode();

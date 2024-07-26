@@ -442,7 +442,7 @@ XBinary::ENDIAN XBinary::getEndian()
 
 bool XBinary::isPacked(double dEntropy)
 {
-    return (dEntropy >= D_ENTROPY_THRESHOLD); // TODO Check
+    return (dEntropy >= D_ENTROPY_THRESHOLD);  // TODO Check
 }
 
 quint8 XBinary::random8()
@@ -8486,7 +8486,7 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
         } else {
             dmResult = DM_ARM64_LE;
         }
-    } else if (sArch == "8086"){
+    } else if (sArch == "8086") {
         dmResult = DM_X86_16;
     } else if ((sArch == "386") || (sArch == "80386") || (sArch == "80486") || (sArch == "80586") || (sArch == "I386") || (sArch == "486") || (sArch == "X86")) {
         if ((mode == MODE_16) || (mode == MODE_16SEG)) {

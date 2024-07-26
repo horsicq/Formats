@@ -1409,7 +1409,7 @@ XBinary::MODE XLE::getMode()
     quint16 signature = read_uint16(lfanew);
 
     if (signature == XLE_DEF::S_IMAGE_VXD_SIGNATURE) {
-        result=MODE_16SEG;
+        result = MODE_16SEG;
         // result = MODE_32;
     } else if (signature == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
         result = MODE_32;
@@ -1499,7 +1499,7 @@ QList<XBinary::MAPMODE> XLE::getMapModesList()
 
 qint64 XLE::getModuleAddress()
 {
-    return 0; // TODO Check
+    return 0;  // TODO Check
 }
 
 QMap<quint64, QString> XLE::getImageLEMagics()
