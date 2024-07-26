@@ -9333,6 +9333,7 @@ QString XBinary::recordFilePartIdToString(FILEPART id)
         case FILEPART_ARCHIVERECORD: sResult = tr("Archive record"); break;
         case FILEPART_RESOURCE: sResult = tr("Resource"); break;
         case FILEPART_REGION: sResult = tr("Region"); break;
+        case FILEPART_DEBUGDATA: sResult = tr("Debug data"); break;
     }
 
     return sResult;

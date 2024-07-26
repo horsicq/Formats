@@ -2867,7 +2867,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
         XPE pe(pDevice, bIsImage);
 
         if (pe.isValid()) {
-            int nAddressSize = 4;
+            qint32 nAddressSize = 4;
 
             if (pe.is64()) {
                 nAddressSize = 8;

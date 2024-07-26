@@ -157,7 +157,8 @@ public:
         FILEPART_ARCHIVERECORD,
         FILEPART_HEADER,
         FILEPART_OVERLAY,
-        FILEPART_RESOURCE
+        FILEPART_RESOURCE,
+        FILEPART_DEBUGDATA
     };
 
     enum MMT {
