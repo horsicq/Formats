@@ -4079,7 +4079,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
                 for (qint32 i = 0; (i < (int)result.directory.NumberOfNames) && (!(pPdStruct->bIsStop)); i++) {
                     EXPORT_POSITION position = {};
 
-                    int nIndex = read_uint16(nAddressOfNameOrdinalsOffset + 2 * i);
+                    qint32 nIndex = read_uint16(nAddressOfNameOrdinalsOffset + 2 * i);
                     position.nOrdinal = nIndex + result.directory.Base;
                     position.nRVA = read_uint32(nAddressOfFunctionsOffset + 4 * nIndex);
                     position.nAddress = position.nRVA + pMemoryMap->nModuleAddress;
