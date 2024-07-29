@@ -899,8 +899,8 @@ public:
     int getNormalCodeSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getNormalDataSection();
     int getNormalDataSection(XBinary::_MEMORY_MAP *pMemoryMap);
-    int getConstDataSection();
-    int getConstDataSection(XBinary::_MEMORY_MAP *pMemoryMap);
+    qint32 getConstDataSection();
+    qint32 getConstDataSection(XBinary::_MEMORY_MAP *pMemoryMap);
 
     // TODO .INIT section Check
 

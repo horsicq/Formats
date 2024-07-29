@@ -10101,14 +10101,14 @@ int XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-int XPE::getConstDataSection()
+qint32 XPE::getConstDataSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
     return getConstDataSection(&memoryMap);
 }
 
-int XPE::getConstDataSection(_MEMORY_MAP *pMemoryMap)
+qint32 XPE::getConstDataSection(_MEMORY_MAP *pMemoryMap)
 {
     int nResult = -1;
     // TODO opimize
