@@ -9934,7 +9934,7 @@ qint32 XPE::getImportSection(_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-int XPE::getExportSection()
+qint32 XPE::getExportSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
