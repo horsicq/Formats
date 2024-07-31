@@ -9941,9 +9941,9 @@ qint32 XPE::getExportSection()
     return getExportSection(&memoryMap);
 }
 
-int XPE::getExportSection(_MEMORY_MAP *pMemoryMap)
+qint32 XPE::getExportSection(_MEMORY_MAP *pMemoryMap)
 {
-    int nResult = -1;
+    qint32 nResult = -1;
 
     XADDR nAddressOfExport = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT).VirtualAddress;
 
