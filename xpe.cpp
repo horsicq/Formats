@@ -9961,9 +9961,9 @@ qint32 XPE::getTLSSection()
     return getTLSSection(&memoryMap);
 }
 
-int XPE::getTLSSection(_MEMORY_MAP *pMemoryMap)
+qint32 XPE::getTLSSection(_MEMORY_MAP *pMemoryMap)
 {
-    int nResult = -1;
+    qint32 nResult = -1;
 
     XADDR nAddressOfTLS = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS).VirtualAddress;
 

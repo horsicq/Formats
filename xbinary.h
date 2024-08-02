@@ -450,6 +450,7 @@ public:
         QString sString;
         QString sExt;
         QString sVersion;
+        QString sOptions;
     };
 
     struct _MEMORY_MAP {
@@ -1209,7 +1210,10 @@ public:
     static bool is64(_MEMORY_MAP *pMemoryMap);
 
     void setVersion(const QString &sVersion);
+    void setOptions(const QString &sOptions);
     virtual QString getVersion();
+    virtual QString getOptions();
+
     virtual bool isEncrypted();
 
     static QString getSignature(QIODevice *pDevice, qint64 nOffset, qint64 nSize);
@@ -1565,6 +1569,7 @@ private:
     ENDIAN g_endian;
     MODE g_mode;
     QString g_sVersion;
+    QString g_sOptions;
     qint32 g_nType;
     FT g_fileType;
     bool g_bMultiSearchCallback;

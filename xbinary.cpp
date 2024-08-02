@@ -422,6 +422,7 @@ XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
             result.sString = getFileFormatString();
             result.sExt = getFileFormatExt();
             result.sVersion = getVersion();
+            result.sOptions = getOptions();
         } else {
             result.bIsValid = false;
         }
@@ -7077,9 +7078,19 @@ void XBinary::setVersion(const QString &sVersion)
     g_sVersion = sVersion;
 }
 
+void XBinary::setOptions(const QString &sOptions)
+{
+    g_sOptions = sOptions;
+}
+
 QString XBinary::getVersion()
 {
     return g_sVersion;
+}
+
+QString XBinary::getOptions()
+{
+    return g_sOptions;
 }
 
 bool XBinary::isEncrypted()

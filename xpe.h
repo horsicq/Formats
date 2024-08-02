@@ -890,7 +890,7 @@ public:
     qint32 getExportSection();
     qint32 getExportSection(XBinary::_MEMORY_MAP *pMemoryMap);
     qint32 getTLSSection();
-    int getTLSSection(XBinary::_MEMORY_MAP *pMemoryMap);
+    qint32 getTLSSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getResourcesSection();
     int getResourcesSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getRelocsSection();
