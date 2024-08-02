@@ -1372,7 +1372,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
         nMaxOffset = qMax(nMaxOffset, nObjectMaxOffset);
 
-        if (nMinAddress == -1) {
+        if (nMinAddress == (XADDR)-1) {
             nMinAddress = listObjects.at(i).o32_base;
         }
 

@@ -30,6 +30,8 @@ XRiff::~XRiff()
 
 bool XRiff::isValid(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     bool bResult = false;
 
     if (getSize() > 0x20) {
