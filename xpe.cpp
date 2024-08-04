@@ -9974,7 +9974,7 @@ qint32 XPE::getTLSSection(_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-int XPE::getResourcesSection()
+qint32 XPE::getResourcesSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
