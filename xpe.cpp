@@ -10393,6 +10393,10 @@ bool XPE::fixCheckSum(const QString &sFileName, bool bIsImage)
 
 bool XPE::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(sResultFile)
+    Q_UNUSED(fixDumpOptions)
+    Q_UNUSED(sResultFile)
+
     bool bResult = false;
 
     // TODO
