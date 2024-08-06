@@ -890,15 +890,12 @@ public:
     qint32 getEntryPointSection();
     qint32 getEntryPointSection(XBinary::_MEMORY_MAP *pMemoryMap);
     qint32 getImportSection();
-    qint32 getImportSection(XBinary::_MEMORY_MAP *pMemoryMap);
     qint32 getExportSection();
-    qint32 getExportSection(XBinary::_MEMORY_MAP *pMemoryMap);
     qint32 getTLSSection();
-    qint32 getTLSSection(XBinary::_MEMORY_MAP *pMemoryMap);
+    qint32 getIATSection();
     qint32 getResourcesSection();
-    qint32 getResourcesSection(XBinary::_MEMORY_MAP *pMemoryMap);
-    int getRelocsSection();
-    int getRelocsSection(XBinary::_MEMORY_MAP *pMemoryMap);
+    qint32 getRelocsSection();
+    qint32 getImageDirectoryEntrySection(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nImageDirectoryEntry);
     int getNormalCodeSection();
     int getNormalCodeSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getNormalDataSection();

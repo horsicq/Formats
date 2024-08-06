@@ -9937,7 +9937,7 @@ qint32 XPE::getEntryPointSection()
 
 qint32 XPE::getEntryPointSection(_MEMORY_MAP *pMemoryMap)
 {
-    int nResult = -1;
+    qint32 nResult = -1;
 
     XADDR nAddressOfEntryPoint = getOptionalHeader_AddressOfEntryPoint();
 
@@ -9952,97 +9952,52 @@ qint32 XPE::getImportSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
-    return getImportSection(&memoryMap);
-}
-
-qint32 XPE::getImportSection(_MEMORY_MAP *pMemoryMap)
-{
-    qint32 nResult = -1;
-
-    XADDR nAddressOfImport = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT).VirtualAddress;
-
-    if (nAddressOfImport) {
-        nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + nAddressOfImport);
-    }
-
-    return nResult;
+    return getImageDirectoryEntrySection(&memoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 }
 
 qint32 XPE::getExportSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
-    return getExportSection(&memoryMap);
-}
-
-qint32 XPE::getExportSection(_MEMORY_MAP *pMemoryMap)
-{
-    qint32 nResult = -1;
-
-    XADDR nAddressOfExport = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT).VirtualAddress;
-
-    if (nAddressOfExport) {
-        nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + nAddressOfExport);
-    }
-
-    return nResult;
+    return getImageDirectoryEntrySection(&memoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 }
 
 qint32 XPE::getTLSSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
-    return getTLSSection(&memoryMap);
+    return getImageDirectoryEntrySection(&memoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
 }
 
-qint32 XPE::getTLSSection(_MEMORY_MAP *pMemoryMap)
+qint32 XPE::getIATSection()
 {
-    qint32 nResult = -1;
+    _MEMORY_MAP memoryMap = getMemoryMap();
 
-    XADDR nAddressOfTLS = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS).VirtualAddress;
-
-    if (nAddressOfTLS) {
-        nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + nAddressOfTLS);
-    }
-
-    return nResult;
+    return getImageDirectoryEntrySection(&memoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IAT);
 }
 
 qint32 XPE::getResourcesSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
-    return getResourcesSection(&memoryMap);
+    return getImageDirectoryEntrySection(&memoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 }
 
-qint32 XPE::getResourcesSection(_MEMORY_MAP *pMemoryMap)
-{
-    qint32 nResult = -1;
-
-    XADDR nAddressOfResources = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE).VirtualAddress;
-
-    if (nAddressOfResources) {
-        nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + nAddressOfResources);
-    }
-
-    return nResult;
-}
-
-int XPE::getRelocsSection()
+qint32 XPE::getRelocsSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
-    return getRelocsSection(&memoryMap);
+    return getImageDirectoryEntrySection(&memoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 }
 
-int XPE::getRelocsSection(_MEMORY_MAP *pMemoryMap)
+qint32 XPE::getImageDirectoryEntrySection(_MEMORY_MAP *pMemoryMap, qint32 nImageDirectoryEntry)
 {
-    int nResult = -1;
+    qint32 nResult = -1;
 
-    XADDR nAddressOfRelocs = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC).VirtualAddress;
+    XADDR nAddressOfRecord = getOptionalHeader_DataDirectory(nImageDirectoryEntry).VirtualAddress;
 
-    if (nAddressOfRelocs) {
-        nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + nAddressOfRelocs);
+    if (nAddressOfRecord) {
+        nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + nAddressOfRecord);
     }
 
     return nResult;
@@ -10104,7 +10059,7 @@ int XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSections = getSectionHeaders();
     int nNumberOfSections = listSections.count();
 
-    int nImportSection = getImportSection(pMemoryMap);
+    int nImportSection = getImageDirectoryEntrySection(pMemoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 
     for (qint32 i = 1; i < nNumberOfSections; i++) {
         // 0xc0700040 MinGW
