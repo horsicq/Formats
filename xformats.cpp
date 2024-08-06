@@ -963,7 +963,7 @@ bool XFormats::savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> 
     return bResult;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
 {
     QSet<XBinary::FT> result;
 
@@ -971,7 +971,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qin
         SubDevice sd(pDevice, nOffset, nSize);
 
         if (sd.open(QIODevice::ReadOnly)) {
-            result = getFileTypes(&sd, bExtra);
+            result = getFileTypes(&sd, bExtra, pPdStruct);
 
             sd.close();
         }

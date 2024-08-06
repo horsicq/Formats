@@ -702,7 +702,11 @@ public:
     QList<quint16> getExportNameOrdinalsList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED, PDSTRUCT *pPdStruct = nullptr);
     QList<XADDR> getExportNamesList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED, PDSTRUCT *pPdStruct = nullptr);
 
+    XPE_DEF::IMAGE_EXPORT_DIRECTORY read_IMAGE_EXPORT_DIRECTORY(qint64 nOffset);
+    void write_IMAGE_EXPORT_DIRECTORY(qint64 nOffset, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED);
+
     XPE_DEF::IMAGE_EXPORT_DIRECTORY getExportDirectory();
+
     void setExportDirectory(XPE_DEF::IMAGE_EXPORT_DIRECTORY *pExportDirectory);
 
     void setExportDirectory_Characteristics(quint32 nValue);
@@ -892,7 +896,7 @@ public:
     qint32 getTLSSection();
     qint32 getTLSSection(XBinary::_MEMORY_MAP *pMemoryMap);
     qint32 getResourcesSection();
-    int getResourcesSection(XBinary::_MEMORY_MAP *pMemoryMap);
+    qint32 getResourcesSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getRelocsSection();
     int getRelocsSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getNormalCodeSection();

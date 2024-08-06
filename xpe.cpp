@@ -4262,6 +4262,40 @@ QList<XADDR> XPE::getExportNamesList(_MEMORY_MAP *pMemoryMap, XPE_DEF::IMAGE_EXP
     return listResult;
 }
 
+XPE_DEF::IMAGE_EXPORT_DIRECTORY XPE::read_IMAGE_EXPORT_DIRECTORY(qint64 nOffset)
+{
+    XPE_DEF::IMAGE_EXPORT_DIRECTORY result = {};
+
+    result.Characteristics = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Characteristics));
+    result.TimeDateStamp = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, TimeDateStamp));
+    result.MajorVersion = read_uint16(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MajorVersion));
+    result.MinorVersion = read_uint16(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MinorVersion));
+    result.Name = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Name));
+    result.Base = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Base));
+    result.NumberOfFunctions = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfFunctions));
+    result.NumberOfNames = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfNames));
+    result.AddressOfFunctions = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfFunctions));
+    result.AddressOfNames = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNames));
+    result.AddressOfNameOrdinals = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals));
+
+    return result;
+}
+
+void XPE::write_IMAGE_EXPORT_DIRECTORY(qint64 nOffset, XPE_DEF::IMAGE_EXPORT_DIRECTORY *pIED)
+{
+    write_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Characteristics), pIED->Characteristics);
+    write_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, TimeDateStamp), pIED->TimeDateStamp);
+    write_uint16(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MajorVersion), pIED->MajorVersion);
+    write_uint16(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MinorVersion), pIED->MinorVersion);
+    write_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Name), pIED->Name);
+    write_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Base), pIED->Base);
+    write_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfFunctions), pIED->NumberOfFunctions);
+    write_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfNames), pIED->NumberOfNames);
+    write_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfFunctions), pIED->AddressOfFunctions);
+    write_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNames), pIED->AddressOfNames);
+    write_uint32(nOffset + offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals), pIED->AddressOfNameOrdinals);
+}
+
 XPE_DEF::IMAGE_EXPORT_DIRECTORY XPE::getExportDirectory()
 {
     XPE_DEF::IMAGE_EXPORT_DIRECTORY result = {};
@@ -4269,7 +4303,7 @@ XPE_DEF::IMAGE_EXPORT_DIRECTORY XPE::getExportDirectory()
     qint64 nExportOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if (nExportOffset != -1) {
-        read_array(nExportOffset, (char *)&result, sizeof(XPE_DEF::IMAGE_EXPORT_DIRECTORY));
+        result = read_IMAGE_EXPORT_DIRECTORY(nExportOffset);
     }
 
     return result;
@@ -4280,7 +4314,7 @@ void XPE::setExportDirectory(XPE_DEF::IMAGE_EXPORT_DIRECTORY *pExportDirectory)
     qint64 nExportOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
     if (nExportOffset != -1) {
-        write_array(nExportOffset, (char *)pExportDirectory, sizeof(XPE_DEF::IMAGE_EXPORT_DIRECTORY));
+        write_IMAGE_EXPORT_DIRECTORY(nExportOffset, pExportDirectory);
     }
 }
 
@@ -9981,9 +10015,9 @@ qint32 XPE::getResourcesSection()
     return getResourcesSection(&memoryMap);
 }
 
-int XPE::getResourcesSection(_MEMORY_MAP *pMemoryMap)
+qint32 XPE::getResourcesSection(_MEMORY_MAP *pMemoryMap)
 {
-    int nResult = -1;
+    qint32 nResult = -1;
 
     XADDR nAddressOfResources = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE).VirtualAddress;
 
