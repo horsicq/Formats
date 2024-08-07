@@ -10003,7 +10003,7 @@ qint32 XPE::getImageDirectoryEntrySection(_MEMORY_MAP *pMemoryMap, qint32 nImage
     return nResult;
 }
 
-int XPE::getNormalCodeSection()
+qint32 XPE::getNormalCodeSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
