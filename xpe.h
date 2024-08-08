@@ -897,7 +897,7 @@ public:
     qint32 getRelocsSection();
     qint32 getImageDirectoryEntrySection(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nImageDirectoryEntry);
     qint32 getNormalCodeSection();
-    int getNormalCodeSection(XBinary::_MEMORY_MAP *pMemoryMap);
+    qint32 getNormalCodeSection(XBinary::_MEMORY_MAP *pMemoryMap);
     int getNormalDataSection();
     int getNormalDataSection(XBinary::_MEMORY_MAP *pMemoryMap);
     qint32 getConstDataSection();
