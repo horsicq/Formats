@@ -8880,7 +8880,7 @@ QString XPE::getCertNameString(PCCERT_CONTEXT pCertContext, CERTNAMESTRING certN
     return sResult;
 }
 #endif
-quint64 XPE::getImageFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pHeader, QString sString)
+quint64 XPE::getImageFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pHeader, const QString &sString)
 {
     quint64 nResult = 0;
 
