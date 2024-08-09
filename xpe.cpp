@@ -8885,7 +8885,6 @@ quint64 XPE::getImageFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pHeader, const QStri
     quint64 nResult = 0;
 
     if (sString == "Machine") nResult = pHeader->Machine;
-    else if (sString == "Machine") nResult = pHeader->Machine;
     else if (sString == "NumberOfSections") nResult = pHeader->NumberOfSections;
     else if (sString == "TimeDateStamp") nResult = pHeader->TimeDateStamp;
     else if (sString == "PointerToSymbolTable") nResult = pHeader->PointerToSymbolTable;
@@ -10044,22 +10043,22 @@ qint32 XPE::getNormalCodeSection(_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-int XPE::getNormalDataSection()
+qint32 XPE::getNormalDataSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
     return getNormalDataSection(&memoryMap);
 }
 
-int XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
+qint32 XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
 {
-    int nResult = -1;
+    qint32 nResult = -1;
     // TODO opimize
 
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSections = getSectionHeaders();
-    int nNumberOfSections = listSections.count();
+    qint32 nNumberOfSections = listSections.count();
 
-    int nImportSection = getImageDirectoryEntrySection(pMemoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
+    qint32 nImportSection = getImageDirectoryEntrySection(pMemoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 
     for (qint32 i = 1; i < nNumberOfSections; i++) {
         // 0xc0700040 MinGW
@@ -10384,7 +10383,7 @@ bool XPE::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOpti
 {
     Q_UNUSED(sResultFile)
     Q_UNUSED(fixDumpOptions)
-    Q_UNUSED(sResultFile)
+    Q_UNUSED(pPdStruct)
 
     bool bResult = false;
 

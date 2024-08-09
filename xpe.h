@@ -898,8 +898,8 @@ public:
     qint32 getImageDirectoryEntrySection(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nImageDirectoryEntry);
     qint32 getNormalCodeSection();
     qint32 getNormalCodeSection(XBinary::_MEMORY_MAP *pMemoryMap);
-    int getNormalDataSection();
-    int getNormalDataSection(XBinary::_MEMORY_MAP *pMemoryMap);
+    qint32 getNormalDataSection();
+    qint32 getNormalDataSection(XBinary::_MEMORY_MAP *pMemoryMap);
     qint32 getConstDataSection();
     qint32 getConstDataSection(XBinary::_MEMORY_MAP *pMemoryMap);
 
@@ -1269,7 +1269,7 @@ public:
     static QString getCertNameString(PCCERT_CONTEXT pCertContext, CERTNAMESTRING certNameString);
 #endif
 
-    quint64 getImageFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pHeader, QString sString);
+    quint64 getImageFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pHeader, const QString &sString);
     quint64 getImageOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pHeader, QString sString);
     quint64 getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader, QString sString);
 
