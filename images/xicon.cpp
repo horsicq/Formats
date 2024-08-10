@@ -30,6 +30,7 @@ XIcon::~XIcon()
 
 bool XIcon::isValid(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     bool bResult = false;
     // TODO more checks !!!
     if (getSize() > (qint64)(sizeof(ICONDIR) + sizeof(ICONDIRENTRY))) {

@@ -446,6 +446,15 @@ bool XBinary::isPacked(double dEntropy)
     return (dEntropy >= D_ENTROPY_THRESHOLD);  // TODO Check
 }
 
+bool XBinary::checkFileFormat(quint64 nFlags, QList<CHECKRECORD> *pListCheckRecords, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nFlags)
+    Q_UNUSED(pListCheckRecords)
+    Q_UNUSED(pPdStruct)
+
+    return true;
+}
+
 quint8 XBinary::random8()
 {
     return (quint8)random16();
