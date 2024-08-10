@@ -664,6 +664,20 @@ public:
 
     bool isPacked(double dEntropy);
 
+    enum CRT {
+        CRT_UNKNOWN = 0,
+        CRT_ERROR,
+        CRT_WARNING,
+        CRT_INFO
+    };
+
+    struct CHECKRECORD {
+        CRT crt;
+        QString sText;
+    };
+
+    virtual bool checkFileFormat(quint64 nFlags, QList<CHECKRECORD> *pListCheckRecords, PDSTRUCT *pPdStruct);
+
     static quint8 random8();
     static quint16 random16();
     static quint32 random32();
