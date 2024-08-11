@@ -6989,7 +6989,7 @@ QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(qint32 nIndex)
     return getDelayImportPositions(&memoryMap, nIndex);
 }
 
-QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, int nIndex)
+QList<XPE::DELAYIMPORT_POSITION> XPE::getDelayImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nIndex)
 {
     QList<DELAYIMPORT_POSITION> listResult;
 

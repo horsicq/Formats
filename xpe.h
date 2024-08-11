@@ -1129,7 +1129,7 @@ public:
     void setDelayImport_TimeDateStamp(quint32 nNumber, quint32 nValue);
 
     QList<DELAYIMPORT_POSITION> getDelayImportPositions(qint32 nIndex);
-    QList<DELAYIMPORT_POSITION> getDelayImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, int nIndex);
+    QList<DELAYIMPORT_POSITION> getDelayImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nIndex);
 
     QList<BOUND_IMPORT_POSITION> getBoundImportPositions();
     QList<BOUND_IMPORT_POSITION> getBoundImportPositions(XBinary::_MEMORY_MAP *pMemoryMap);
