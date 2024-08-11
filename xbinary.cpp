@@ -10065,7 +10065,7 @@ XBinary::REGION_FILL XBinary::getRegionFill(qint64 nOffset, qint64 nSize, qint32
     return result;
 }
 
-QString XBinary::getDataString(char *pData, qint32 nDataSize, QString sBaseType, bool bIsBigEndian)
+QString XBinary::getDataString(char *pData, qint32 nDataSize, const QString &sBaseType, bool bIsBigEndian)
 {
     // TODO optimize
     QString sResult;
