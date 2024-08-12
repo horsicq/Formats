@@ -313,6 +313,39 @@ qint64 XPE::getFileFormatSize(PDSTRUCT *pPdStruct)
     return _calculateRawSize(pPdStruct);
 }
 
+bool XPE::checkFileFormat(quint64 nFlags, QList<CHECKRECORD> *pListCheckRecords, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    bool bResult = true;
+
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_SECTIONS, pPdStruct);
+
+    if (nFlags | CFF_ENTRYPOINT) {
+        bool bSuccess = true;
+        qint64 nOffset = addressToOffset(&memoryMap, memoryMap.nEntryPointAddress);
+
+        if ((memoryMap.nEntryPointAddress == (XADDR)-1) || (nOffset == -1)) {
+            bSuccess = false;
+        }
+
+        if (!bSuccess) {
+            bResult = false;
+
+            if (pListCheckRecords) {
+                CHECKRECORD cr;
+                cr.nOffset = nOffset;
+                cr.nSize = 0;
+                cr.nAddress = memoryMap.nEntryPointAddress;
+                cr.sText = tr("Invalid address of entry point");
+                pListCheckRecords->append(cr);
+            }
+        }
+    }
+
+    return bResult;
+}
+
 qint64 XPE::getNtHeadersOffset()
 {
     qint64 result = get_lfanew();
@@ -8898,7 +8931,7 @@ quint64 XPE::getImageFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pHeader, const QStri
     return nResult;
 }
 
-quint64 XPE::getImageOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pHeader, QString sString)
+quint64 XPE::getImageOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pHeader, const QString &sString)
 {
     quint64 nResult = 0;
 

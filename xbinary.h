@@ -673,6 +673,9 @@ public:
 
     struct CHECKRECORD {
         CRT crt;
+        qint64 nOffset;
+        qint64 nSize;
+        XADDR nAddress;
         QString sText;
     };
 

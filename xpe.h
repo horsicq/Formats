@@ -346,6 +346,13 @@ public:
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
+    enum CFF {
+        CFF_UNKNOWN = 0,
+        CFF_ENTRYPOINT = 1
+    };
+
+    virtual bool checkFileFormat(quint64 nFlags, QList<CHECKRECORD> *pListCheckRecords, PDSTRUCT *pPdStruct);
+
     qint64 getNtHeadersOffset();
     quint32 getNtHeaders_Signature();
     void setNtHeaders_Signature(quint32 nValue);
@@ -1270,7 +1277,7 @@ public:
 #endif
 
     quint64 getImageFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pHeader, const QString &sString);
-    quint64 getImageOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pHeader, QString sString);
+    quint64 getImageOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pHeader, const QString &sString);
     quint64 getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader, QString sString);
 
 private:
