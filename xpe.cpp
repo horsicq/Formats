@@ -3022,7 +3022,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                 pe.setOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IAT, &iddIAT);
                 pe.setOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT, &iddImportTable);
 
-                int nNumberOfPatches = listPatches.count();
+                qint32 nNumberOfPatches = listPatches.count();
 
                 for (qint32 i = 0; i < nNumberOfPatches; i++) {
                     // TODO 64
@@ -3518,7 +3518,7 @@ quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResu
                 QString sTitle = read_unicodeString(nOffset + sizeof(XPE_DEF::S_VS_VERSION_INFO));
 
                 qint32 nDelta = sizeof(XPE_DEF::S_VS_VERSION_INFO);
-                nDelta += (sTitle.length() + 1) * sizeof(quint16);
+                nDelta += (sTitle.length() + 1) * (qint32)sizeof(quint16);
                 nDelta = S_ALIGN_UP(nDelta, 4);
 
                 if (_sPrefix != "") {

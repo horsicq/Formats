@@ -1249,7 +1249,7 @@ QString XBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize, bool bIsBig
             }
         }
 
-        sResult = QString::fromUtf16(pBuffer);
+        sResult = QString::fromUtf16(pBuffer); // TODO Check Qt6
 
         delete[] pBuffer;
     }
@@ -2862,7 +2862,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
                         }
 
                         if (ssOptions.bUnicode) {
-                            QString sString = QString::fromUtf16(pUnicodeBuffer[nParity]);
+                            QString sString = QString::fromUtf16(pUnicodeBuffer[nParity]); // TODO Check Qt6
 
                             bool bAdd = true;
 
@@ -2901,7 +2901,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
                             }
 
                             if (ssOptions.bUnicode) {
-                                QString sString = QString::fromUtf16(pUnicodeBuffer[nO]);
+                                QString sString = QString::fromUtf16(pUnicodeBuffer[nO]); // TODO Check Qt6
 
                                 bool bAdd = true;
 
