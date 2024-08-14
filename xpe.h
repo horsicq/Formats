@@ -1286,7 +1286,7 @@ private:
     qint64 _fixHeadersSize();
     qint64 _getMinSectionOffset();  // TODO move to XBinary
     void _fixFileOffsets(qint64 nDelta);
-    quint32 __getResourcesVersion(RESOURCES_VERSION *pResourcesVersionResult, qint64 nOffset, qint64 nSize, const QString &sPrefix, int nLevel);
+    quint32 __getResourcesVersion(RESOURCES_VERSION *pResourcesVersionResult, qint64 nOffset, qint64 nSize, const QString &sPrefix, qint32 nLevel);
 };
 
 #endif  // XPE_H

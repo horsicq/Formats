@@ -344,7 +344,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
 
     result.sArch = QString("8086");
     ;
-    result.sType = TYPE_EXE;
+    result.sType = getTypeAsString();
     result.mode = MODE_16;
     result.nBinarySize = getSize();
     result.nImageSize = getImageSize();
