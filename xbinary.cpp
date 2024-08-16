@@ -7222,6 +7222,12 @@ qint64 XBinary::_calculateRawSize(PDSTRUCT *pPdStruct)
 
 qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     qint64 nResult = 0;
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
