@@ -9568,14 +9568,14 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyRefOS] = nSize;  // Checked
                             }
                             {
-                                int nSize = 0;
+                                qint32 nSize = 0;
                                 nSize += 4;
                                 nSize += result.metaData.nStringIndexSize;
                                 nSize += result.metaData.nBLOBIndexSize;
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_File] = nSize;  // Checked
                             }
                             {
-                                int nSize = 0;
+                                qint32 nSize = 0;
                                 nSize += 4;
                                 nSize += 4;
                                 nSize += result.metaData.nStringIndexSize;
@@ -9584,7 +9584,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ExportedType] = nSize;
                             }
                             {
-                                int nSize = 0;
+                                qint32 nSize = 0;
                                 nSize += 4;
                                 nSize += 4;
                                 nSize += result.metaData.nStringIndexSize;
@@ -9592,13 +9592,13 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ManifestResource] = nSize;
                             }
                             {
-                                int nSize = 0;
+                                qint32 nSize = 0;
                                 nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
                                 nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_NestedClass] = nSize;
                             }
                             {
-                                int nSize = 0;
+                                qint32 nSize = 0;
                                 nSize += 2;
                                 nSize += 2;
                                 nSize += result.metaData.nTypeDefOrRefSize;
@@ -9606,13 +9606,13 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_GenericParam] = nSize;  // Checked
                             }
                             {
-                                int nSize = 0;
+                                qint32 nSize = 0;
                                 nSize += result.metaData.nMethodDefOrRefSize;
                                 nSize += result.metaData.nBLOBIndexSize;
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodSpec] = nSize;
                             }
                             {
-                                int nSize = 0;
+                                qint32 nSize = 0;
                                 nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_GenericParam];
                                 nSize += result.metaData.nTypeDefOrRefSize;
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_GenericParamConstraint] = nSize;
