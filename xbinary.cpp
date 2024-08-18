@@ -10447,7 +10447,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
 
 qint32 XBinary::_getSignatureSkip(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
 {
-    int nResult = 0;
+    qint32 nResult = 0;
     qint32 nSignatureSize = sSignature.size();
 
     for (qint32 i = nStartIndex; i < nSignatureSize; i++) {
@@ -10473,7 +10473,7 @@ qint32 XBinary::_getSignatureSkip(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
 
 qint32 XBinary::_getSignatureNotNull(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
 {
-    int nResult = 0;
+    qint32 nResult = 0;
     qint32 nSignatureSize = sSignature.size();
 
     for (qint32 i = nStartIndex; i < nSignatureSize; i++) {
