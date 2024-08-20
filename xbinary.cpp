@@ -10183,39 +10183,41 @@ QString XBinary::getAndroidVersionFromApi(quint32 nAPI)
     QString sResult = tr("Unknown");
 
     // https://developer.android.com/tools/releases/platforms
-    if (nAPI == 3) sResult = QString("1.5");
-    if (nAPI == 4) sResult = QString("1.6");
-    if (nAPI == 5) sResult = QString("2.0");
-    if (nAPI == 6) sResult = QString("2.0.1");
-    if (nAPI == 7) sResult = QString("2.1");
-    if (nAPI == 8) sResult = QString("2.2.X");
-    if (nAPI == 9) sResult = QString("2.3-2.3.2");
-    if (nAPI == 10) sResult = QString("2.3.3-2.3.7");
-    if (nAPI == 11) sResult = QString("3.0");
-    if (nAPI == 12) sResult = QString("3.1");
-    if (nAPI == 13) sResult = QString("3.2.X");
-    if (nAPI == 14) sResult = QString("4.0.1-4.0.2");
-    if (nAPI == 15) sResult = QString("4.0.3-4.0.4");
-    if (nAPI == 16) sResult = QString("4.1.X");
-    if (nAPI == 17) sResult = QString("4.2.X");
-    if (nAPI == 18) sResult = QString("4.3.X");
-    if (nAPI == 19) sResult = QString("4.4-4.4.4");
-    if (nAPI == 20) sResult = QString("4.4W");
-    if (nAPI == 21) sResult = QString("5.0");
-    if (nAPI == 22) sResult = QString("5.1");
-    if (nAPI == 23) sResult = QString("6.0");
-    if (nAPI == 24) sResult = QString("7.0");
-    if (nAPI == 25) sResult = QString("7.1");
-    if (nAPI == 26) sResult = QString("8.0");
-    if (nAPI == 27) sResult = QString("8.1");
-    if (nAPI == 28) sResult = QString("9.0");
-    if (nAPI == 29) sResult = QString("10.0");
-    if (nAPI == 30) sResult = QString("11.0");
-    if (nAPI == 31) sResult = QString("12.0");
-    if (nAPI == 32) sResult = QString("12.1");
-    if (nAPI == 33) sResult = QString("13.0");
-    if (nAPI == 34) sResult = QString("14.0");
-    if (nAPI == 35) sResult = QString("15.0");
+    if (nAPI == 1) sResult = QString("1.0");
+    else if (nAPI == 2) sResult = QString("1.1");
+    else if (nAPI == 3) sResult = QString("1.5");
+    else if (nAPI == 4) sResult = QString("1.6");
+    else if (nAPI == 5) sResult = QString("2.0");
+    else if (nAPI == 6) sResult = QString("2.0.1");
+    else if (nAPI == 7) sResult = QString("2.1");
+    else if (nAPI == 8) sResult = QString("2.2.X");
+    else if (nAPI == 9) sResult = QString("2.3-2.3.2");
+    else if (nAPI == 10) sResult = QString("2.3.3-2.3.7");
+    else if (nAPI == 11) sResult = QString("3.0");
+    else if (nAPI == 12) sResult = QString("3.1");
+    else if (nAPI == 13) sResult = QString("3.2.X");
+    else if (nAPI == 14) sResult = QString("4.0.1-4.0.2");
+    else if (nAPI == 15) sResult = QString("4.0.3-4.0.4");
+    else if (nAPI == 16) sResult = QString("4.1.X");
+    else if (nAPI == 17) sResult = QString("4.2.X");
+    else if (nAPI == 18) sResult = QString("4.3.X");
+    else if (nAPI == 19) sResult = QString("4.4-4.4.4");
+    else if (nAPI == 20) sResult = QString("4.4W");
+    else if (nAPI == 21) sResult = QString("5.0");
+    else if (nAPI == 22) sResult = QString("5.1");
+    else if (nAPI == 23) sResult = QString("6.0");
+    else if (nAPI == 24) sResult = QString("7.0");
+    else if (nAPI == 25) sResult = QString("7.1");
+    else if (nAPI == 26) sResult = QString("8.0");
+    else if (nAPI == 27) sResult = QString("8.1");
+    else if (nAPI == 28) sResult = QString("9.0");
+    else if (nAPI == 29) sResult = QString("10.0");
+    else if (nAPI == 30) sResult = QString("11.0");
+    else if (nAPI == 31) sResult = QString("12.0");
+    else if (nAPI == 32) sResult = QString("12.1");
+    else if (nAPI == 33) sResult = QString("13.0");
+    else if (nAPI == 34) sResult = QString("14.0");
+    else if (nAPI == 35) sResult = QString("15.0");
 
     return sResult;
 }
@@ -10499,7 +10501,7 @@ qint32 XBinary::_getSignatureNotNull(QList<SIGNATURE_RECORD> *pListSignatureReco
 
 qint32 XBinary::_getSignatureANSI(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
 {
-    int nResult = 0;
+    qint32 nResult = 0;
     qint32 nSignatureSize = sSignature.size();
 
     for (qint32 i = nStartIndex; i < nSignatureSize; i += 2) {
@@ -10525,7 +10527,7 @@ qint32 XBinary::_getSignatureANSI(QList<SIGNATURE_RECORD> *pListSignatureRecords
 
 qint32 XBinary::_getSignatureNotANSI(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
 {
-    int nResult = 0;
+    qint32 nResult = 0;
     qint32 nSignatureSize = sSignature.size();
 
     for (qint32 i = nStartIndex; i < nSignatureSize; i += 2) {
