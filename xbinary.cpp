@@ -10553,7 +10553,7 @@ qint32 XBinary::_getSignatureNotANSI(QList<SIGNATURE_RECORD> *pListSignatureReco
 
 qint32 XBinary::_getSignatureNotANSIAndNull(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
 {
-    int nResult = 0;
+    qint32 nResult = 0;
     qint32 nSignatureSize = sSignature.size();
 
     for (qint32 i = nStartIndex; i < nSignatureSize; i += 2) {
