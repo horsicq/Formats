@@ -4133,7 +4133,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
                 for (qint32 i = 0; (i < (int)result.directory.NumberOfFunctions) && (!(pPdStruct->bIsStop)); i++) {
                     EXPORT_POSITION position = {};
 
-                    int nIndex = i;
+                    qint32 nIndex = i;
                     position.nOrdinal = nIndex + result.directory.Base;
 
                     if (mapNames.contains(position.nOrdinal)) {
@@ -9195,7 +9195,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                         break;
                                     }
 
-                                    QString sTemp = QString::fromUtf16((ushort *)pStringCurrentOffsetOffset, nStringSize / 2);
+                                    QString sTemp = QString::fromUtf16((quint16 *)pStringCurrentOffsetOffset, nStringSize / 2);
 
                                     result.metaData.listUnicodeStrings.append(sTemp);
 
@@ -9257,6 +9257,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             result.metaData.nHasDeclSecuritySize = 2;
                             result.metaData.nHasSemanticsSize = 2;
                             result.metaData.nMethodDefOrRefSize = 2;
+                            result.metaData.nMemberForwardedSize = 2;
 
                             quint8 cHeapOffsetSizes = result.metaData.cTables_HeapOffsetSizes;
 
@@ -9408,7 +9409,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             }
                             {
                                 qint32 nSize = 0;
-                                nSize += 1;
+                                nSize += 2;
                                 nSize += result.metaData.nHasConstantSize;
                                 nSize += result.metaData.nBLOBIndexSize;
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Constant] = nSize;
@@ -9593,8 +9594,8 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             }
                             {
                                 qint32 nSize = 0;
-                                nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
-                                nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
+                                nSize += result.metaData.indexSize[XPE_DEF::metadata_TypeDef];
+                                nSize += result.metaData.indexSize[XPE_DEF::metadata_TypeDef];
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_NestedClass] = nSize;
                             }
                             {
@@ -10048,7 +10049,7 @@ qint32 XPE::getNormalCodeSection(_MEMORY_MAP *pMemoryMap)
     // TODO opimize
 
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSections = getSectionHeaders();
-    int nNumberOfSections = listSections.count();
+    qint32 nNumberOfSections = listSections.count();
     nNumberOfSections = qMin(nNumberOfSections, 2);
 
     for (qint32 i = 0; i < nNumberOfSections; i++) {
@@ -10523,7 +10524,7 @@ quint16 XPE::_checkSum(qint64 nStartValue, qint64 nDataSize)
         pOffset = pBuffer;
 
         for (quint32 i = 0; i < (nTemp + 1) / 2; i++) {
-            nSum += *((unsigned short *)pOffset);
+            nSum += *((quint16 *)pOffset);
 
             if (S_HIWORD(nSum) != 0) {
                 nSum = S_LOWORD(nSum) + S_HIWORD(nSum);
