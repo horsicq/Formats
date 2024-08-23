@@ -10622,7 +10622,7 @@ qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignat
 
 qint32 XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
 {
-    int nResult = 0;
+    qint32 nResult = 0;
 
     qint32 nSignatureSize = sSignature.size();
 
@@ -10649,12 +10649,12 @@ qint32 XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSi
 
 qint32 XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
 {
-    int nResult = 0;
+    qint32 nResult = 0;
 
     qint32 nSignatureSize = sSignature.size();
     QString sBaseAddress;
     bool bIsBaseAddress = false;
-    int nSizeOfAddress = 0;
+    qint32 nSizeOfAddress = 0;
 
     for (qint32 i = nStartIndex; i < nSignatureSize; i++) {
         if (sSignature.at(i) == QChar('#')) {
@@ -10696,7 +10696,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
         pPdStruct = &pdStructEmpty;
     }
 
-    int nResult = 0;
+    qint32 nResult = 0;
 
     qint32 nSignatureSize = sSignature.size();
     QString sBytes;
