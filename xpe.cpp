@@ -9174,7 +9174,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                                 char *pStringOffset = baStrings.data();
                                 char *pStringCurrentOffsetOffset = pStringOffset;
-                                int _nSize = baStrings.size();
+                                qint32 _nSize = baStrings.size();
 
                                 pStringCurrentOffsetOffset++;
 
@@ -10132,7 +10132,7 @@ qint32 XPE::getConstDataSection()
 
 qint32 XPE::getConstDataSection(_MEMORY_MAP *pMemoryMap)
 {
-    int nResult = -1;
+    qint32 nResult = -1;
     // TODO opimize
 
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSections = getSectionHeaders();
