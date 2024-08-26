@@ -10178,7 +10178,7 @@ bool XPE::rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptio
 
         if (pRebuildOptions->bOptimize) {
             QByteArray baHeader = getHeaders();
-            int nNumberOfSections = getFileHeader_NumberOfSections();
+            qint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
             //            if(pRebuildOptions->bClearHeader)
             //            {
@@ -10230,7 +10230,7 @@ bool XPE::rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptio
 #ifdef QT_DEBUG
             qDebug("XPE::rebuildDump:copy: %lld msec", timer.elapsed());
 #endif
-            int nNumberOfSections = getFileHeader_NumberOfSections();
+            qint32 nNumberOfSections = getFileHeader_NumberOfSections();
 
             for (qint32 i = 0; i < nNumberOfSections; i++) {
                 if (pRebuildOptions->bOptimize) {
