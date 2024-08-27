@@ -156,7 +156,7 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 {
     qint64 nResult = 0;
 
-    if (pDevice->size() > nPos) {
+    if ((pDevice->size() > nPos) && (nPos >= 0)) {
         if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
         if (pDevice->seek(nPos)) {
@@ -342,7 +342,7 @@ void XBinary::setFileFormatName(const QString &sFileFormatString)
 QString XBinary::getFileFormatString()
 {
 #ifdef QT_DEBUG
-    qDebug("TODO: XBinary::getFileFormatString()");
+    // qDebug("TODO: XBinary::getFileFormatString()");
 #endif
     return g_sFileFormatString;
 }
@@ -355,7 +355,7 @@ void XBinary::setFileFormatExt(const QString &sFileFormatExt)
 QString XBinary::getFileFormatExt()
 {
 #ifdef QT_DEBUG
-    qDebug("TODO: XBinary::getFileFormatExt()");
+    // qDebug("TODO: XBinary::getFileFormatExt()");
 #endif
     return g_sFileFormatExt;
 }
