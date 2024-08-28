@@ -9688,6 +9688,48 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
     return result;
 }
 
+bool XPE::isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef];
+        qint32 nStringsSize = pCliInfo->metaData.osStrings.nSize;
+
+        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+            XPE_DEF::S_METADATA_MEMBERREF memberRef = getMetadataMemberRef(pCliInfo, i);
+
+            if (memberRef.nName < nStringsSize) {
+                QString sName = "Test";
+                qDebug("%s", sName.toLatin1().data());
+            }
+        }
+    }
+
+    return bResult;
+}
+
+XPE_DEF::S_METADATA_MEMBERREF XPE::getMetadataMemberRef(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    XPE_DEF::S_METADATA_MEMBERREF result = {};
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef];
+
+        if (nNumber < nNumberOfRecords) {
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MemberRef] + pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MemberRef] * nNumber;
+
+            result.nClass = pCliInfo->metaData.nMemberRefParentSize == 4 ? read_uint32(nOffset) : read_uint16(nOffset);
+            nOffset += pCliInfo->metaData.nMemberRefParentSize;
+            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? read_uint32(nOffset) : read_uint16(nOffset);
+            nOffset += pCliInfo->metaData.nStringIndexSize;
+            result.nSignature = pCliInfo->metaData.nBLOBIndexSize == 4 ? read_uint32(nOffset) : read_uint16(nOffset);
+        }
+    }
+
+    return result;
+}
+
 XBinary::OFFSETSIZE XPE::getNet_MetadataOffsetSize()
 {
     OFFSETSIZE osResult = {};

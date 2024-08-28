@@ -606,6 +606,12 @@ enum MetadataTable {
     metadata_CustomDebugInformation = 0x34
 };
 
+struct S_METADATA_MEMBERREF {
+    qint32 nClass;
+    qint32 nName;
+    qint32 nSignature;
+};
+
 struct S_VS_VERSION_INFO {
     quint16 wLength;      /* Length of the version resource */
     quint16 wValueLength; /* Length of the value field for this block */

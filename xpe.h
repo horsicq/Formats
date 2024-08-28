@@ -862,6 +862,8 @@ public:
 
     CLI_INFO getCliInfo(bool bFindHidden);                                    // TODO pdstruct
     CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap);  // TODO pdstruct
+    bool isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
+    XPE_DEF::S_METADATA_MEMBERREF getMetadataMemberRef(CLI_INFO *pCliInfo, qint32 nNumber);
 
     QString mdtIdToString(quint32 nID);
 
