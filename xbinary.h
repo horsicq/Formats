@@ -793,6 +793,12 @@ public:
     static quint64 _read_value(MODE mode, char *pData, bool bIsBigEndian = false);
     // TODO read uin64, freg
 
+    static quint8 _read_uint8_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset);
+    static quint16 _read_uint16_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, bool bIsBigEndian = false);
+    static quint32 _read_uint32_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, bool bIsBigEndian = false);
+    static quint64 _read_uint64_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, bool bIsBigEndian = false);
+    static QString _read_ansiString_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, qint32 nMaxSize = 50);
+
     static void _write_uint8(char *pData, quint8 nValue);
     static void _write_int8(char *pData, qint8 nValue);
     static void _write_uint16(char *pData, quint16 nValue, bool bIsBigEndian = false);

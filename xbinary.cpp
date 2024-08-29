@@ -1694,6 +1694,61 @@ quint64 XBinary::_read_value(MODE mode, char *pData, bool bIsBigEndian)
     return nResult;
 }
 
+quint8 XBinary::_read_uint8_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset)
+{
+    quint8 result = 0;
+
+    if ((nOffset >= 0) && (nOffset < nBufferSize)) {
+        result = _read_uint8(pBuffer + nOffset);
+    }
+
+    return result;
+}
+
+quint16 XBinary::_read_uint16_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, bool bIsBigEndian)
+{
+    quint16 result = 0;
+
+    if ((nOffset >= 0) && (nOffset + 1 < nBufferSize)) {
+        result = _read_uint16(pBuffer + nOffset, bIsBigEndian);
+    }
+
+    return result;
+}
+
+quint32 XBinary::_read_uint32_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, bool bIsBigEndian)
+{
+    quint32 result = 0;
+
+    if ((nOffset >= 0) && (nOffset + 3 < nBufferSize)) {
+        result = _read_uint32(pBuffer + nOffset, bIsBigEndian);
+    }
+
+    return result;
+}
+
+quint64 XBinary::_read_uint64_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, bool bIsBigEndian)
+{
+    quint64 result = 0;
+
+    if ((nOffset >= 0) && (nOffset + 7 < nBufferSize)) {
+        result = _read_uint64(pBuffer + nOffset, bIsBigEndian);
+    }
+
+    return result;
+}
+
+QString XBinary::_read_ansiString_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, qint32 nMaxSize)
+{
+    QString sResult;
+
+    if ((nOffset >= 0) && (nOffset < nBufferSize)) {
+        sResult = _read_ansiString(pBuffer + nOffset, nMaxSize);
+    }
+
+    return sResult;
+}
+
 void XBinary::_write_uint8(char *pData, quint8 nValue)
 {
     *(quint8 *)pData = nValue;

@@ -216,7 +216,7 @@ public:
     struct CLI_METADATA {
         CLI_METADATA_HEADER header;
         QList<CLI_METADATA_STREAM> listStreams;
-        OFFSETSIZE osTables;
+        OFFSETSIZE osMetadata;
         quint32 nTables_Reserved1;
         quint8 cTables_MajorVersion;
         quint8 cTables_MinorVersion;
@@ -232,6 +232,11 @@ public:
         OFFSETSIZE osUS;
         OFFSETSIZE osBlob;
         OFFSETSIZE osGUID;
+        QByteArray baMetadata;
+        QByteArray baStrings;
+        QByteArray baUS;
+        QByteArray baBlob;
+        QByteArray baGUID;
         qint64 nEntryPoint;
         qint64 nEntryPointSize;
         QList<QString> listAnsiStrings;
@@ -864,6 +869,12 @@ public:
     CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap);  // TODO pdstruct
     bool isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
     XPE_DEF::S_METADATA_MEMBERREF getMetadataMemberRef(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_TYPEDEF getMetadataTypeDef(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_TYPEREF getMetadataTypeRef(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_MODULEREF getMetadataModuleRef(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_METHODDEF getMetadataMethodDef(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_TYPESPEC getMetadataTypeSpec(CLI_INFO *pCliInfo, qint32 nNumber);
+    QString getMetadataMemberRefParentName(CLI_INFO *pCliInfo, const XPE_DEF::S_METADATA_MEMBERREF &memberRef);
 
     QString mdtIdToString(quint32 nID);
 

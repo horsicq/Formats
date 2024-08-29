@@ -607,9 +607,41 @@ enum MetadataTable {
 };
 
 struct S_METADATA_MEMBERREF {
-    qint32 nClass;
-    qint32 nName;
-    qint32 nSignature;
+    quint32 nClass;
+    quint32 nName;
+    quint32 nSignature;
+};
+
+struct S_METADATA_TYPEDEF {
+    quint32 nFlags;
+    quint32 nTypeName;
+    quint32 nTypeNamespace;
+    quint32 nExtends;
+    quint32 nFieldList;
+    quint32 nMethodList;
+};
+
+struct S_METADATA_METHODDEF {
+    quint32 nRVA;
+    quint32 nImplFlags;
+    quint32 nFlags;
+    quint32 nName;
+    quint32 nSignature;
+    quint32 nParamList;
+};
+
+struct S_METADATA_TYPEREF {
+    quint32 nResolutionScope;
+    quint32 nTypeName;
+    quint32 nTypeNamespace;
+};
+
+struct S_METADATA_TYPESPEC {
+    quint32 nSignature;
+};
+
+struct S_METADATA_MODULEREF {
+    quint32 nName;
 };
 
 struct S_VS_VERSION_INFO {
