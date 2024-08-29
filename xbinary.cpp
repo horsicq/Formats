@@ -165,7 +165,7 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 
                 nCurrentSize = pDevice->read(pData, nCurrentSize);
 
-                if (nCurrentSize == 0) {
+                if (nCurrentSize <= 0) {
                     break;
                 }
 
