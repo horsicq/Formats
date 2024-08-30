@@ -9712,10 +9712,9 @@ bool XPE::isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
             QString sName = _read_ansiString_safe(pBuffer, nBufferSize, memberRef.nName);
 
             if (sName == ".cctor") {
-
             }
 
-            qDebug("%s %s",getMetadataMemberRefParentName(pCliInfo, memberRef).toLatin1().data(), sName.toLatin1().data());
+            qDebug("%s %s", getMetadataMemberRefParentName(pCliInfo, memberRef).toLatin1().data(), sName.toLatin1().data());
         }
     }
 
@@ -9732,13 +9731,16 @@ XPE_DEF::S_METADATA_MEMBERREF XPE::getMetadataMemberRef(CLI_INFO *pCliInfo, qint
         qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
 
         if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MemberRef] + pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MemberRef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MemberRef] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MemberRef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
 
-            result.nClass = pCliInfo->metaData.nMemberRefParentSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nClass =
+                pCliInfo->metaData.nMemberRefParentSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nMemberRefParentSize;
             result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nSignature = pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nSignature =
+                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 
@@ -9755,19 +9757,25 @@ XPE_DEF::S_METADATA_TYPEDEF XPE::getMetadataTypeDef(CLI_INFO *pCliInfo, qint32 n
         qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
 
         if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_TypeDef] + pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeDef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_TypeDef] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeDef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
 
             result.nFlags = _read_uint32_safe(pBuffer, nBufferSize, nOffset);
             nOffset += 4;
-            result.nTypeName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nTypeName =
+                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nTypeNamespace = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nTypeNamespace =
+                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nExtends = pCliInfo->metaData.nTypeDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nExtends =
+                pCliInfo->metaData.nTypeDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nTypeDefOrRefSize;
-            result.nFieldList = pCliInfo->metaData.indexSize[XPE_DEF::metadata_Field] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nFieldList = pCliInfo->metaData.indexSize[XPE_DEF::metadata_Field] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
+                                                                                           : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.indexSize[XPE_DEF::metadata_Field];
-            result.nMethodList = pCliInfo->metaData.indexSize[XPE_DEF::metadata_MethodDef] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nMethodList = pCliInfo->metaData.indexSize[XPE_DEF::metadata_MethodDef] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
+                                                                                                : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 
@@ -9784,13 +9792,17 @@ XPE_DEF::S_METADATA_TYPEREF XPE::getMetadataTypeRef(CLI_INFO *pCliInfo, qint32 n
         qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
 
         if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_TypeRef] + pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeRef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_TypeRef] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeRef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
 
-            result.nResolutionScope = pCliInfo->metaData.nResolutionScopeSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nResolutionScope =
+                pCliInfo->metaData.nResolutionScopeSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nResolutionScopeSize;
-            result.nTypeName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nTypeName =
+                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nTypeNamespace = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nTypeNamespace =
+                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 
@@ -9807,7 +9819,8 @@ XPE_DEF::S_METADATA_MODULEREF XPE::getMetadataModuleRef(CLI_INFO *pCliInfo, qint
         qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
 
         if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_ModuleRef] + pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_ModuleRef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_ModuleRef] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_ModuleRef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
 
             result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
@@ -9826,7 +9839,8 @@ XPE_DEF::S_METADATA_METHODDEF XPE::getMetadataMethodDef(CLI_INFO *pCliInfo, qint
         qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
 
         if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MethodDef] + pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodDef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MethodDef] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodDef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
 
             result.nRVA = _read_uint32_safe(pBuffer, nBufferSize, nOffset);
             nOffset += 4;
@@ -9836,9 +9850,11 @@ XPE_DEF::S_METADATA_METHODDEF XPE::getMetadataMethodDef(CLI_INFO *pCliInfo, qint
             nOffset += 2;
             result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nSignature = pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nSignature =
+                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nBLOBIndexSize;
-            result.nParamList = pCliInfo->metaData.indexSize[XPE_DEF::metadata_Param] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nParamList = pCliInfo->metaData.indexSize[XPE_DEF::metadata_Param] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
+                                                                                           : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 
@@ -9855,9 +9871,11 @@ XPE_DEF::S_METADATA_TYPESPEC XPE::getMetadataTypeSpec(CLI_INFO *pCliInfo, qint32
         qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
 
         if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_TypeSpec] + pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeSpec] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_TypeSpec] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeSpec] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
 
-            result.nSignature = pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nSignature =
+                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 
