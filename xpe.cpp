@@ -9711,11 +9711,11 @@ bool XPE::isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
 
             QString sName = _read_ansiString_safe(pBuffer, nBufferSize, memberRef.nName);
 
-            // if (sName == ".cctor") {
-            //     bResult = true;
-            //     break;
-            // }
-            // qDebug("%s %s",getMetadataMemberRefParentName(pCliInfo, memberRef).toLatin1().data(), sName.toLatin1().data());
+            if (sName == ".cctor") {
+
+            }
+
+            qDebug("%s %s",getMetadataMemberRefParentName(pCliInfo, memberRef).toLatin1().data(), sName.toLatin1().data());
         }
     }
 

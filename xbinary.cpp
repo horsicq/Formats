@@ -518,6 +518,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
 
     switch (fileType) {
         case FT_UNKNOWN: sResult = tr("Unknown"); break;
+        case FT_DATA: sResult = tr("Data"); break;
         case FT_REGION: sResult = tr("Region"); break;
         case FT_PROCESS: sResult = tr("Process"); break;
         case FT_BINARY: sResult = QString("Binary"); break;
@@ -5268,7 +5269,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
 
     if (bExtra) {
         if (stResult.count() <= 1) {
-            stResult.insert(FT_COM);
+            if ((nSize >= 0) && (nSize <= (0x10000 - 0x100))) {
+                stResult.insert(FT_DATA);
+                stResult.insert(FT_COM);
+            }
         }
     }
 
@@ -5467,6 +5471,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
     // TODO optimize !
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
         if (stFileTypes.contains(FT_REGION)) listResult.append(FT_REGION);
+        if (stFileTypes.contains(FT_DATA)) listResult.append(FT_DATA);
         if (stFileTypes.contains(FT_BINARY)) listResult.append(FT_BINARY);
         if (stFileTypes.contains(FT_BINARY16)) listResult.append(FT_BINARY16);
         if (stFileTypes.contains(FT_BINARY32)) listResult.append(FT_BINARY32);
@@ -10482,7 +10487,13 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 }
 
                 if (pMemoryMap->fileType == FT_MSDOS) {
-                    _nAddress += pMemoryMap->nCodeBase;
+                    if (pListSignatureRecords->at(i).nSizeOfAddr == 2) {
+                        _nAddress += pMemoryMap->nCodeBase;
+                    } else if (pListSignatureRecords->at(i).nSizeOfAddr == 4) {
+                        quint16 nLow = (quint16)_nAddress;
+                        quint16 nHigh = (quint16)(_nAddress >> 16);
+                        _nAddress = pMemoryMap->nCodeBase + nLow * 0x10000 + nHigh;
+                    }
                 }
 
                 nOffset = addressToOffset(pMemoryMap, _nAddress);  // TODO!

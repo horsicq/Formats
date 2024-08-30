@@ -36,7 +36,7 @@ bool XCOM::isValid(PDSTRUCT *pPdStruct)
     bool bResult = false;
 
     // mb TODO mb
-    if (getSize() < XCOM_DEF::IMAGESIZE) {
+    if (getSize() <= (XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN)) {
         bResult = true;
     }
 

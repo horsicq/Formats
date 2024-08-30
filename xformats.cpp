@@ -1354,6 +1354,25 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, const QString &s
 }
 #endif
 #ifdef QT_GUI_LIB
+void XFormats::setCurrentFileTypeComboBox(QComboBox *pComboBox, XBinary::FT fileType)
+{
+    const bool bBlocked1 = pComboBox->blockSignals(true);
+
+    qint32 nNumberOfItems = pComboBox->count();
+
+    for (qint32 i = 0; i < nNumberOfItems; i++) {
+        if (pComboBox->itemData(i).toUInt() == fileType) {
+            pComboBox->setCurrentIndex(i);
+
+            break;
+        }
+    }
+
+    pComboBox->blockSignals(bBlocked1);
+}
+
+#endif
+#ifdef QT_GUI_LIB
 bool XFormats::setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian)
 {
     const bool bBlocked1 = pComboBox->blockSignals(true);

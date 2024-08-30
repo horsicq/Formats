@@ -198,6 +198,7 @@ public:
 
     enum FT {
         FT_UNKNOWN = 0,
+        FT_DATA,
         FT_REGION,  // For Memory regions
         FT_PROCESS,
         FT_BINARY,
