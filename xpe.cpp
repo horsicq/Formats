@@ -10710,7 +10710,7 @@ qint64 XPE::_getMinSectionOffset()
 
     _MEMORY_MAP memoryMap = getMemoryMap();
 
-    int nNumberOfRecords = memoryMap.listRecords.count();
+    qint32 nNumberOfRecords = memoryMap.listRecords.count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         if (memoryMap.listRecords.at(i).type == MMT_LOADSEGMENT) {
@@ -10744,7 +10744,7 @@ quint16 XPE::_checkSum(qint64 nStartValue, qint64 nDataSize)
 {
     // TODO Check
     // TODO Optimize
-    const int BUFFER_SIZE = 0x1000;
+    const qint32 BUFFER_SIZE = 0x1000;
     qint32 nSum = (qint32)nStartValue;
     unsigned int nTemp = 0;
     char *pBuffer = new char[BUFFER_SIZE];
