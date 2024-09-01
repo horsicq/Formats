@@ -10569,7 +10569,7 @@ bool XPE::rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptio
                 qDebug("XPE::rebuildDump:addimportsection: %lld msec", timer.elapsed());
 #endif
                 if (pRebuildOptions->bRenameSections) {
-                    int nNumberOfSections = _pe.getFileHeader_NumberOfSections();
+                    qint32 nNumberOfSections = _pe.getFileHeader_NumberOfSections();
 
                     for (qint32 i = 0; i < nNumberOfSections; i++) {
                         QString sSection = _pe.getSection_NameAsString(i);
@@ -10746,7 +10746,7 @@ quint16 XPE::_checkSum(qint64 nStartValue, qint64 nDataSize)
     // TODO Optimize
     const qint32 BUFFER_SIZE = 0x1000;
     qint32 nSum = (qint32)nStartValue;
-    unsigned int nTemp = 0;
+    quint32 nTemp = 0;
     char *pBuffer = new char[BUFFER_SIZE];
     char *pOffset;
 
