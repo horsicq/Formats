@@ -373,6 +373,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     // }
 
     result.nCodeBase = nCodeAddress;
+    result.nStartLoadOffset = (get_e_cparhdr() * 16);
 
     qint64 nCodeSize = 0;
     qint64 nOverlayOffset = 0;

@@ -10489,15 +10489,15 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 if (pMemoryMap->fileType == FT_MSDOS) {
                     if (pListSignatureRecords->at(i).nSizeOfAddr == 2) {
                         _nAddress += pMemoryMap->nCodeBase;
+                        nOffset = addressToOffset(pMemoryMap, _nAddress);  // TODO!
                     } else if (pListSignatureRecords->at(i).nSizeOfAddr == 4) {
                         quint16 nLow = (quint16)_nAddress;
                         quint16 nHigh = (quint16)(_nAddress >> 16);
-                        _nAddress = pMemoryMap->nCodeBase + nLow * 0x10000 + nHigh;
+                        nOffset = pMemoryMap->nStartLoadOffset + nHigh * 16 + nLow;
                     }
+                } else {
+                    nOffset = addressToOffset(pMemoryMap, _nAddress);  // TODO!
                 }
-
-                nOffset = addressToOffset(pMemoryMap, _nAddress);  // TODO!
-
             } break;
 
                 if (!isOffsetValid(pMemoryMap, nOffset)) {
