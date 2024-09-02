@@ -1394,14 +1394,14 @@ public:
     struct PERCENTAGE {
         qint64 nCurrentValue;
         qint64 nMaxValue;
-        qint32 nCurrentProcent;
-        qint32 nMaxProcent;
+        qint32 nCurrentPercentage;
+        qint32 nMaxPercentage;
         bool bTimer;
         QElapsedTimer timer;
     };
 
-    static PERCENTAGE procentInit(qint64 nMaxValue, bool bTimer = false);
-    static bool procentSetCurrentValue(PERCENTAGE *pProcent, qint64 nCurrentValue);
+    static PERCENTAGE percentageInit(qint64 nMaxValue, bool bTimer = false);
+    static bool percentageSetCurrentValue(PERCENTAGE *pPercentage, qint64 nCurrentValue);
 
     static qint64 getTotalOSSize(QList<OFFSETSIZE> *pListOffsetSize);
 
@@ -1514,7 +1514,7 @@ public:
     static qint32 getFreeIndex(PDSTRUCT *pPdStruct);
     static bool isPdStructFinished(PDSTRUCT *pPdStruct);
     static bool isPdStructSuccess(PDSTRUCT *pPdStruct);
-    static qint32 getPdStructProcent(PDSTRUCT *pPdStruct);  // 0-100
+    static qint32 getPdStructPercentage(PDSTRUCT *pPdStruct);  // 0-100
 
     struct REGION_FILL {
         quint64 nSize;

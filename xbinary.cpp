@@ -8782,7 +8782,7 @@ bool XBinary::isFileTypePresent(QSet<XBinary::FT> *pStFileTypes, QSet<XBinary::F
     return bResult;
 }
 
-XBinary::PERCENTAGE XBinary::procentInit(qint64 nMaxValue, bool bTimer)
+XBinary::PERCENTAGE XBinary::percentageInit(qint64 nMaxValue, bool bTimer)
 {
     PERCENTAGE result = {};
     result.bTimer = bTimer;
@@ -8790,42 +8790,42 @@ XBinary::PERCENTAGE XBinary::procentInit(qint64 nMaxValue, bool bTimer)
     result.nMaxValue = nMaxValue;
 
     if (!(result.bTimer)) {
-        result.nMaxProcent = 1;
+        result.nMaxPercentage = 1;
 
         if (result.nMaxValue > 0x100000000) {
-            result.nMaxProcent = 100;
+            result.nMaxPercentage = 100;
         } else if (result.nMaxValue > 0x100000) {
-            result.nMaxProcent = 10;
+            result.nMaxPercentage = 10;
         } else if (result.nMaxValue > 0x1000) {
-            result.nMaxProcent = 5;
+            result.nMaxPercentage = 5;
         }
     } else {
         result.timer.start();
-        result.nMaxProcent = 100;
+        result.nMaxPercentage = 100;
     }
 
     return result;
 }
 
-bool XBinary::procentSetCurrentValue(XBinary::PERCENTAGE *pProcent, qint64 nCurrentValue)
+bool XBinary::percentageSetCurrentValue(XBinary::PERCENTAGE *pPercentage, qint64 nCurrentValue)
 {
     bool bResult = false;
 
-    pProcent->nCurrentValue = nCurrentValue;
+    pPercentage->nCurrentValue = nCurrentValue;
 
-    if (!(pProcent->bTimer)) {
-        if (pProcent->nCurrentValue > ((pProcent->nCurrentProcent + 1) * (pProcent->nMaxValue / pProcent->nMaxProcent))) {
-            pProcent->nCurrentProcent++;
+    if (!(pPercentage->bTimer)) {
+        if (pPercentage->nCurrentValue > ((pPercentage->nCurrentPercentage + 1) * (pPercentage->nMaxValue / pPercentage->nMaxPercentage))) {
+            pPercentage->nCurrentPercentage++;
             bResult = true;
         }
     } else {
-        if (pProcent->timer.elapsed() >= 1000)  // TODO Check speed
+        if (pPercentage->timer.elapsed() >= 1000)  // TODO Check speed
         {
-            pProcent->timer.restart();
+            pPercentage->timer.restart();
 
-            qint32 _nCurrent = (pProcent->nCurrentValue * 100) / (pProcent->nMaxValue);
+            qint32 _nCurrent = (pPercentage->nCurrentValue * 100) / (pPercentage->nMaxValue);
 
-            pProcent->nCurrentProcent = _nCurrent;
+            pPercentage->nCurrentPercentage = _nCurrent;
             bResult = true;
         }
     }
@@ -10078,7 +10078,7 @@ bool XBinary::isPdStructSuccess(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-qint32 XBinary::getPdStructProcent(PDSTRUCT *pPdStruct)
+qint32 XBinary::getPdStructPercentage(PDSTRUCT *pPdStruct)
 {
     qint32 nResult = 0;
 
