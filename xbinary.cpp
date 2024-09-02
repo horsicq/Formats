@@ -5268,7 +5268,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     }
 
     if (bExtra) {
-        if (stResult.count() <= 1) {
+        if ((stResult.count() <= 1) || (stResult.contains(FT_PLAINTEXT))) {
             if ((nSize >= 0) && (nSize <= (0x10000 - 0x100))) {
                 stResult.insert(FT_DATA);
                 stResult.insert(FT_COM);
@@ -5417,6 +5417,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_PDF;
     } else if (pStFileTypes->contains(FT_BWDOS16M)) {
         result = FT_BWDOS16M;
+    } else if (pStFileTypes->contains(FT_DATA)) {
+        result = FT_DATA;
     } else if (pStFileTypes->contains(FT_BINARY)) {
         result = FT_BINARY;
     }
@@ -8780,9 +8782,9 @@ bool XBinary::isFileTypePresent(QSet<XBinary::FT> *pStFileTypes, QSet<XBinary::F
     return bResult;
 }
 
-XBinary::PROCENT XBinary::procentInit(qint64 nMaxValue, bool bTimer)
+XBinary::PERCENTAGE XBinary::procentInit(qint64 nMaxValue, bool bTimer)
 {
-    PROCENT result = {};
+    PERCENTAGE result = {};
     result.bTimer = bTimer;
 
     result.nMaxValue = nMaxValue;
@@ -8805,7 +8807,7 @@ XBinary::PROCENT XBinary::procentInit(qint64 nMaxValue, bool bTimer)
     return result;
 }
 
-bool XBinary::procentSetCurrentValue(XBinary::PROCENT *pProcent, qint64 nCurrentValue)
+bool XBinary::procentSetCurrentValue(XBinary::PERCENTAGE *pProcent, qint64 nCurrentValue)
 {
     bool bResult = false;
 

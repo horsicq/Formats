@@ -1391,7 +1391,7 @@ public:
 
     static bool isFileTypePresent(QSet<XBinary::FT> *pStFileTypes, QSet<XBinary::FT> *pStAvailableFileTypes);
 
-    struct PROCENT {
+    struct PERCENTAGE {
         qint64 nCurrentValue;
         qint64 nMaxValue;
         qint32 nCurrentProcent;
@@ -1400,8 +1400,8 @@ public:
         QElapsedTimer timer;
     };
 
-    static PROCENT procentInit(qint64 nMaxValue, bool bTimer = false);
-    static bool procentSetCurrentValue(PROCENT *pProcent, qint64 nCurrentValue);
+    static PERCENTAGE procentInit(qint64 nMaxValue, bool bTimer = false);
+    static bool procentSetCurrentValue(PERCENTAGE *pProcent, qint64 nCurrentValue);
 
     static qint64 getTotalOSSize(QList<OFFSETSIZE> *pListOffsetSize);
 
