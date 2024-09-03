@@ -10940,7 +10940,7 @@ QList<XPE::RELOCS_POSITION> XPE::getRelocsPositions(qint64 nOffset)
     if ((ibr.VirtualAddress) && (ibr.SizeOfBlock)) {
         nOffset += sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
 
-        int nCount = (ibr.SizeOfBlock - sizeof(XPE_DEF::IMAGE_BASE_RELOCATION)) / sizeof(quint16);
+        qint32 nCount = (ibr.SizeOfBlock - sizeof(XPE_DEF::IMAGE_BASE_RELOCATION)) / sizeof(quint16);
 
         nCount &= 0xFFFF;
 
@@ -11010,7 +11010,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<XADDR> *pLis
 
             QList<XADDR> listRVAs;
 
-            int nNumberOfRelocs = pListRelocs->count();
+            qint32 nNumberOfRelocs = pListRelocs->count();
 
             for (qint32 i = 0; i < nNumberOfRelocs; i++) {
                 if (pe.isAddressValid(&memoryMap, pListRelocs->at(i) + memoryMap.nModuleAddress)) {
