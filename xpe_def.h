@@ -640,8 +640,32 @@ struct S_METADATA_TYPESPEC {
     quint32 nSignature;
 };
 
+struct S_METADATA_FIELD {
+    quint32 nFlags;
+    quint32 nName;
+    quint32 nSignature;
+};
+
+struct S_METADATA_METHODIMPL {
+    quint32 nClass;
+    quint32 nMethodBody;
+    quint32 nMethodDeclaration;
+};
+
 struct S_METADATA_MODULEREF {
     quint32 nName;
+};
+
+const quint32 S_METADATA_METHODDEFORREF_METHODDEF = 0;
+const quint32 S_METADATA_METHODDEFORREF_MEMBERREF = 1;
+
+struct S_METADATA_METHODDEFORREF {
+    quint32 nTag;
+    quint32 nIndex;
+    union {
+        S_METADATA_METHODDEF methoddef;
+        S_METADATA_MEMBERREF memberref;
+    } record;
 };
 
 struct S_VS_VERSION_INFO {

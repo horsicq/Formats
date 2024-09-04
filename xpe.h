@@ -874,6 +874,11 @@ public:
     XPE_DEF::S_METADATA_MODULEREF getMetadataModuleRef(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_METHODDEF getMetadataMethodDef(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_TYPESPEC getMetadataTypeSpec(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_FIELD getMetadataField(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_METHODIMPL getMetadataMethodImpl(CLI_INFO *pCliInfo, qint32 nNumber);
+
+    XPE_DEF::S_METADATA_METHODDEFORREF getMetadataMethodDefOrRef(CLI_INFO *pCliInfo, quint32 nValue);
+
     QString getMetadataMemberRefParentName(CLI_INFO *pCliInfo, const XPE_DEF::S_METADATA_MEMBERREF &memberRef);
 
     QString mdtIdToString(quint32 nID);

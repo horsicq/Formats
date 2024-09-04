@@ -9701,20 +9701,111 @@ bool XPE::isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
     bool bResult = false;
 
     if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef];
-
         char *pBuffer = pCliInfo->metaData.baStrings.data();
         qint32 nBufferSize = pCliInfo->metaData.baStrings.size();
 
-        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-            XPE_DEF::S_METADATA_MEMBERREF memberRef = getMetadataMemberRef(pCliInfo, i);
+        {
+            qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef];
 
-            QString sName = _read_ansiString_safe(pBuffer, nBufferSize, memberRef.nName);
+            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+                XPE_DEF::S_METADATA_TYPEREF record = getMetadataTypeRef(pCliInfo, i);
 
-            if (sName == ".cctor") {
+                QString sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
+                QString sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
+
+                if (sTypeName == ".cctor") {
+                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                }
+
+                if (sTypeNamespace == ".cctor") {
+                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                }
+
+                // qDebug("%s %s", sTypeName.toLatin1().data(), sTypeNamespace.toLatin1().data());
             }
+        }
 
-            qDebug("%s %s", getMetadataMemberRefParentName(pCliInfo, memberRef).toLatin1().data(), sName.toLatin1().data());
+        {
+            qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
+
+            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+                XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
+
+                QString sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
+                QString sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
+
+                if (sTypeName == ".cctor") {
+                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                }
+
+                if (sTypeNamespace == ".cctor") {
+                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                }
+
+                // qDebug("%s %s", sTypeName.toLatin1().data(), sTypeNamespace.toLatin1().data());
+            }
+        }
+
+        {
+            qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field];
+
+            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+                XPE_DEF::S_METADATA_FIELD record = getMetadataField(pCliInfo, i);
+
+                QString sName = _read_ansiString_safe(pBuffer, nBufferSize, record.nName);
+
+                if (sName == ".cctor") {
+                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                }
+
+                // qDebug("%ss", sName.toLatin1().data());
+            }
+        }
+
+        {
+            qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef];
+
+            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+                XPE_DEF::S_METADATA_MEMBERREF record = getMetadataMemberRef(pCliInfo, i);
+
+                QString sName = _read_ansiString_safe(pBuffer, nBufferSize, record.nName);
+
+                if (sName == ".cctor") {
+                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                }
+
+                // qDebug("%s %s", getMetadataMemberRefParentName(pCliInfo, record).toLatin1().data(), sName.toLatin1().data());
+            }
+        }
+
+        {
+            qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodImpl];
+
+            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+                XPE_DEF::S_METADATA_METHODIMPL record = getMetadataMethodImpl(pCliInfo, i);
+
+                XPE_DEF::S_METADATA_TYPEDEF tdClass = getMetadataTypeDef(pCliInfo, record.nClass);
+                XPE_DEF::S_METADATA_METHODDEFORREF body = getMetadataMethodDefOrRef(pCliInfo, record.nMethodBody);
+                XPE_DEF::S_METADATA_METHODDEFORREF declaration = getMetadataMethodDefOrRef(pCliInfo, record.nMethodDeclaration);
+
+                QString sClass = _read_ansiString_safe(pBuffer, nBufferSize, tdClass.nTypeName);
+                QString sTag;
+                QString sDeclaration;
+
+                if (body.nTag == XPE_DEF::S_METADATA_METHODDEFORREF_METHODDEF) {
+                    sTag = _read_ansiString_safe(pBuffer, nBufferSize, body.record.methoddef.nName);
+                }
+
+                if (declaration.nTag == XPE_DEF::S_METADATA_METHODDEFORREF_METHODDEF) {
+                    sDeclaration = _read_ansiString_safe(pBuffer, nBufferSize, declaration.record.methoddef.nName);
+                }
+
+                if (sTag == ".cctor") {
+                    qDebug("%s %s %s", sClass.toLatin1().data(), sTag.toLatin1().data(), sDeclaration.toLatin1().data());
+                }
+
+                // qDebug("%s %s", getMetadataMemberRefParentName(pCliInfo, record).toLatin1().data(), sName.toLatin1().data());
+            }
         }
     }
 
@@ -9876,6 +9967,75 @@ XPE_DEF::S_METADATA_TYPESPEC XPE::getMetadataTypeSpec(CLI_INFO *pCliInfo, qint32
 
             result.nSignature =
                 pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+        }
+    }
+
+    return result;
+}
+
+XPE_DEF::S_METADATA_FIELD XPE::getMetadataField(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    XPE_DEF::S_METADATA_FIELD result = {};
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field];
+        char *pBuffer = pCliInfo->metaData.baMetadata.data();
+        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
+
+        if (nNumber < nNumberOfRecords) {
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_Field] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_Field] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+
+            result.nFlags = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 2;
+            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nStringIndexSize;
+            result.nSignature =
+                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+        }
+    }
+
+    return result;
+}
+
+XPE_DEF::S_METADATA_METHODIMPL XPE::getMetadataMethodImpl(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    XPE_DEF::S_METADATA_METHODIMPL result = {};
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodImpl];
+        char *pBuffer = pCliInfo->metaData.baMetadata.data();
+        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
+
+        if (nNumber < nNumberOfRecords) {
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MethodImpl] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodImpl] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+
+            result.nClass = pCliInfo->metaData.nTypeDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nTypeDefOrRefSize;
+            result.nMethodBody = pCliInfo->metaData.nMethodDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
+                                                                             : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nMethodDefOrRefSize;
+            result.nMethodDeclaration = pCliInfo->metaData.nMethodDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
+                                                                                     : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+        }
+    }
+
+    return result;
+}
+
+XPE_DEF::S_METADATA_METHODDEFORREF XPE::getMetadataMethodDefOrRef(CLI_INFO *pCliInfo, quint32 nValue)
+{
+    XPE_DEF::S_METADATA_METHODDEFORREF result = {};
+
+    if (pCliInfo->bValid) {
+        result.nTag = nValue & 0x1;
+        result.nIndex = nValue >> 1;
+
+        if (result.nTag == XPE_DEF::S_METADATA_METHODDEFORREF_METHODDEF) {
+            result.record.methoddef = getMetadataMethodDef(pCliInfo, result.nIndex);
+        } else if (result.nTag == XPE_DEF::S_METADATA_METHODDEFORREF_MEMBERREF) {
+            result.record.memberref = getMetadataMemberRef(pCliInfo, result.nIndex);
         }
     }
 
