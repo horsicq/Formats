@@ -9698,114 +9698,93 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
 bool XPE::isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
 {
+    return isNetMethodPresent(pCliInfo, "", "<Module>", ".cctor", pPdStruct);
+}
+
+bool XPE::isNetTypePresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, PDSTRUCT *pPdStruct)
+{
     bool bResult = false;
 
     if (pCliInfo->bValid) {
         char *pBuffer = pCliInfo->metaData.baStrings.data();
         qint32 nBufferSize = pCliInfo->metaData.baStrings.size();
 
-        {
-            qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef];
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
 
-            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-                XPE_DEF::S_METADATA_TYPEREF record = getMetadataTypeRef(pCliInfo, i);
+        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+            XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
 
-                QString sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
-                QString sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
+            QString _sTypeName;
+            QString _sTypeNamespace;
 
-                if (sTypeName == ".cctor") {
-                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                }
+            if (sTypeName != "") {
+                _sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
+            }
 
-                if (sTypeNamespace == ".cctor") {
-                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                }
+            if (sTypeNamespace != "") {
+                _sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
+            }
 
-                // qDebug("%s %s", sTypeName.toLatin1().data(), sTypeNamespace.toLatin1().data());
+            if ((sTypeNamespace == _sTypeNamespace) && (sTypeName == _sTypeName)) {
+                bResult = true;
+                break;
             }
         }
+    }
 
-        {
-            qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
+    return bResult;
+}
 
-            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-                XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
+bool XPE::isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sMethodName, PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
 
-                QString sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
-                QString sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
+    if (pCliInfo->bValid) {
+        char *pBuffer = pCliInfo->metaData.baStrings.data();
+        qint32 nBufferSize = pCliInfo->metaData.baStrings.size();
 
-                if (sTypeName == ".cctor") {
-                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                }
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
 
-                if (sTypeNamespace == ".cctor") {
-                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                }
+        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+            XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
 
-                // qDebug("%s %s", sTypeName.toLatin1().data(), sTypeNamespace.toLatin1().data());
+            QString _sTypeName;
+            QString _sTypeNamespace;
+
+            if (sTypeName != "") {
+                _sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
             }
-        }
 
-        {
-            qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field];
-
-            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-                XPE_DEF::S_METADATA_FIELD record = getMetadataField(pCliInfo, i);
-
-                QString sName = _read_ansiString_safe(pBuffer, nBufferSize, record.nName);
-
-                if (sName == ".cctor") {
-                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                }
-
-                // qDebug("%ss", sName.toLatin1().data());
+            if (sTypeNamespace != "") {
+                _sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
             }
-        }
 
-        {
-            qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef];
-
-            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-                XPE_DEF::S_METADATA_MEMBERREF record = getMetadataMemberRef(pCliInfo, i);
-
-                QString sName = _read_ansiString_safe(pBuffer, nBufferSize, record.nName);
-
-                if (sName == ".cctor") {
-                    qDebug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            if ((sTypeNamespace == _sTypeNamespace) && (sTypeName == _sTypeName)) {
+                qint32 nNumberOfMethodsRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef];
+                qint32 nMethodsCount = 0;
+                if (i < (nNumberOfRecords - 1)) {
+                    XPE_DEF::S_METADATA_TYPEDEF recordNext = getMetadataTypeDef(pCliInfo, i + 1);
+                    nMethodsCount = recordNext.nMethodList - record.nMethodList;
+                } else {
+                    nMethodsCount = nNumberOfMethodsRecords - record.nMethodList;
                 }
 
-                // qDebug("%s %s", getMetadataMemberRefParentName(pCliInfo, record).toLatin1().data(), sName.toLatin1().data());
+                for (qint32 j = 0; (j < nMethodsCount) && (!(pPdStruct->bIsStop)); j++) {
+                    if (record.nMethodList) {
+                        XPE_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(pCliInfo, record.nMethodList + j - 1);
+
+                        QString _sMethodName = _read_ansiString_safe(pBuffer, nBufferSize, methodDef.nName);
+
+                        if (sMethodName == _sMethodName) {
+                            bResult = true;
+                        }
+                    }
+                }
+
+                break;
             }
-        }
 
-        {
-            qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodImpl];
-
-            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-                XPE_DEF::S_METADATA_METHODIMPL record = getMetadataMethodImpl(pCliInfo, i);
-
-                XPE_DEF::S_METADATA_TYPEDEF tdClass = getMetadataTypeDef(pCliInfo, record.nClass);
-                XPE_DEF::S_METADATA_METHODDEFORREF body = getMetadataMethodDefOrRef(pCliInfo, record.nMethodBody);
-                XPE_DEF::S_METADATA_METHODDEFORREF declaration = getMetadataMethodDefOrRef(pCliInfo, record.nMethodDeclaration);
-
-                QString sClass = _read_ansiString_safe(pBuffer, nBufferSize, tdClass.nTypeName);
-                QString sTag;
-                QString sDeclaration;
-
-                if (body.nTag == XPE_DEF::S_METADATA_METHODDEFORREF_METHODDEF) {
-                    sTag = _read_ansiString_safe(pBuffer, nBufferSize, body.record.methoddef.nName);
-                }
-
-                if (declaration.nTag == XPE_DEF::S_METADATA_METHODDEFORREF_METHODDEF) {
-                    sDeclaration = _read_ansiString_safe(pBuffer, nBufferSize, declaration.record.methoddef.nName);
-                }
-
-                if (sTag == ".cctor") {
-                    qDebug("%s %s %s", sClass.toLatin1().data(), sTag.toLatin1().data(), sDeclaration.toLatin1().data());
-                }
-
-                // qDebug("%s %s", getMetadataMemberRefParentName(pCliInfo, record).toLatin1().data(), sName.toLatin1().data());
-            }
+            // qDebug("%s %s", sTypeName.toLatin1().data(), sTypeNamespace.toLatin1().data());
         }
     }
 
@@ -9946,6 +9925,30 @@ XPE_DEF::S_METADATA_METHODDEF XPE::getMetadataMethodDef(CLI_INFO *pCliInfo, qint
             nOffset += pCliInfo->metaData.nBLOBIndexSize;
             result.nParamList = pCliInfo->metaData.indexSize[XPE_DEF::metadata_Param] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
                                                                                            : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+        }
+    }
+
+    return result;
+}
+
+XPE_DEF::S_METADATA_PARAM XPE::getMetadataParam(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    XPE_DEF::S_METADATA_PARAM result = {};
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Param];
+        char *pBuffer = pCliInfo->metaData.baMetadata.data();
+        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
+
+        if (nNumber < nNumberOfRecords) {
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_Param] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_Param] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+
+            result.nFlags = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 2;
+            result.nSequence = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 2;
+            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 
@@ -11228,7 +11231,7 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<XADDR> *pListRelocs, bool bIs64
     XADDR nBaseAddress = -1;
     quint32 nSize = 0;
 
-    int nNumberOfRelocs = pListRelocs->count();
+    qint32 nNumberOfRelocs = pListRelocs->count();
 
     for (qint32 i = 0; i < nNumberOfRelocs; i++) {
         XADDR _nBaseAddress = S_ALIGN_DOWN(pListRelocs->at(i), 0x1000);

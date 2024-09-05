@@ -612,6 +612,12 @@ struct S_METADATA_MEMBERREF {
     quint32 nSignature;
 };
 
+struct S_METADATA_TYPEREF {
+    quint32 nResolutionScope;
+    quint32 nTypeName;
+    quint32 nTypeNamespace;
+};
+
 struct S_METADATA_TYPEDEF {
     quint32 nFlags;
     quint32 nTypeName;
@@ -619,6 +625,16 @@ struct S_METADATA_TYPEDEF {
     quint32 nExtends;
     quint32 nFieldList;
     quint32 nMethodList;
+};
+
+struct S_METADATA_TYPESPEC {
+    quint32 nSignature;
+};
+
+struct S_METADATA_FIELD {
+    quint32 nFlags;
+    quint32 nName;
+    quint32 nSignature;
 };
 
 struct S_METADATA_METHODDEF {
@@ -630,20 +646,10 @@ struct S_METADATA_METHODDEF {
     quint32 nParamList;
 };
 
-struct S_METADATA_TYPEREF {
-    quint32 nResolutionScope;
-    quint32 nTypeName;
-    quint32 nTypeNamespace;
-};
-
-struct S_METADATA_TYPESPEC {
-    quint32 nSignature;
-};
-
-struct S_METADATA_FIELD {
+struct S_METADATA_PARAM {
     quint32 nFlags;
+    quint32 nSequence;
     quint32 nName;
-    quint32 nSignature;
 };
 
 struct S_METADATA_METHODIMPL {
