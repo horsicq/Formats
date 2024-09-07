@@ -9791,6 +9791,60 @@ bool XPE::isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString
     return bResult;
 }
 
+bool XPE::isNetFieldPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sFieldName, PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    if (pCliInfo->bValid) {
+        char *pBuffer = pCliInfo->metaData.baStrings.data();
+        qint32 nBufferSize = pCliInfo->metaData.baStrings.size();
+
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
+
+        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+            XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
+
+            QString _sTypeName;
+            QString _sTypeNamespace;
+
+            if (sTypeName != "") {
+                _sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
+            }
+
+            if (sTypeNamespace != "") {
+                _sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
+            }
+
+            if ((sTypeNamespace == _sTypeNamespace) && (sTypeName == _sTypeName)) {
+                qint32 nNumberOfFieldsRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field];
+                qint32 nFieldsCount = 0;
+                if (i < (nNumberOfRecords - 1)) {
+                    XPE_DEF::S_METADATA_TYPEDEF recordNext = getMetadataTypeDef(pCliInfo, i + 1);
+                    nFieldsCount = recordNext.nFieldList - record.nFieldList;
+                } else {
+                    nFieldsCount = nNumberOfFieldsRecords - record.nFieldList;
+                }
+
+                for (qint32 j = 0; (j < nFieldsCount) && (!(pPdStruct->bIsStop)); j++) {
+                    XPE_DEF::S_METADATA_FIELD field = getMetadataField(pCliInfo, record.nFieldList + j - 1);
+
+                    QString _sFieldName = _read_ansiString_safe(pBuffer, nBufferSize, field.nName);
+
+                    if (sFieldName == _sFieldName) {
+                        bResult = true;
+                    }
+                }
+
+                break;
+            }
+
+            // qDebug("%s %s", sTypeName.toLatin1().data(), sTypeNamespace.toLatin1().data());
+        }
+    }
+
+    return bResult;
+}
+
 XPE_DEF::S_METADATA_MEMBERREF XPE::getMetadataMemberRef(CLI_INFO *pCliInfo, qint32 nNumber)
 {
     XPE_DEF::S_METADATA_MEMBERREF result = {};
