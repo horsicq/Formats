@@ -1948,6 +1948,10 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             XADDR nVirtualAddress = result.nModuleAddress + section.VirtualAddress;
             qint64 nVirtualSize = S_ALIGN_UP(section.Misc.VirtualSize, nSectionAlignment);
 
+            if (nVirtualSize < nFileSize) {
+                nVirtualSize = nFileSize;
+            }
+
             if (!isImage()) {
                 if (nFileSize) {
                     nMaxOffset = qMax(nMaxOffset, (qint64)(nFileOffset + nFileSize));
@@ -1982,7 +1986,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     result.listRecords.append(record);
                 }
 
-                if (nVirtualSize - nFileSize) {
+                if (nVirtualSize - nFileSize > 0) {
                     _MEMORY_RECORD record = {};
                     record.bIsVirtual = true;
 
