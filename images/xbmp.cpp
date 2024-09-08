@@ -110,7 +110,7 @@ QString XBMP::getFileFormatString()
     QString sVersion = getVersion();
 
     if (sVersion != "") {
-        sResult+=QString("(%1)").arg(sVersion);
+        sResult += QString("(%1)").arg(sVersion);
     }
 
     return sResult;

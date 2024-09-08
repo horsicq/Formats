@@ -358,7 +358,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     qint64 nHeaderSize = (quint16)(get_e_cparhdr() * 16);
     qint64 nCodeOffset = (get_e_cparhdr() * 16) + (get_e_cs() * 16);
 
-    //result.nEntryPointAddress = ((get_e_cs() << 16) + get_e_ip()) & 0xFFFFFFFF;
+    // result.nEntryPointAddress = ((get_e_cs() << 16) + get_e_ip()) & 0xFFFFFFFF;
     result.nEntryPointAddress = result.nModuleAddress + getSegmentAddress(get_e_cs(), get_e_ip());
 
     // if (get_e_cs() * 16 + get_e_ip() >= 0x100000) {

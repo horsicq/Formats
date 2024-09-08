@@ -10072,13 +10072,14 @@ XPE_DEF::S_METADATA_METHODIMPL XPE::getMetadataMethodImpl(CLI_INFO *pCliInfo, qi
             qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MethodImpl] +
                              pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodImpl] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
 
-            result.nClass = pCliInfo->metaData.nTypeDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nClass =
+                pCliInfo->metaData.nTypeDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nTypeDefOrRefSize;
-            result.nMethodBody = pCliInfo->metaData.nMethodDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
-                                                                             : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nMethodBody =
+                pCliInfo->metaData.nMethodDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nMethodDefOrRefSize;
-            result.nMethodDeclaration = pCliInfo->metaData.nMethodDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
-                                                                                     : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nMethodDeclaration =
+                pCliInfo->metaData.nMethodDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 

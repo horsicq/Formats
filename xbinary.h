@@ -459,8 +459,8 @@ public:
         qint64 nImageSize;
         qint64 nBinarySize;
         XADDR nEntryPointAddress;
-        qint64 nCodeBase;  // For MSDOS
-        qint64 nStartLoadOffset; // For MSDOS
+        qint64 nCodeBase;         // For MSDOS
+        qint64 nStartLoadOffset;  // For MSDOS
         FT fileType;
         MODE mode;
         ENDIAN endian;
