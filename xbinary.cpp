@@ -4225,23 +4225,13 @@ qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress
     //     }
     // }
 
-    if ((pMemoryMap->fileType == FT_MSDOS) && (nAddress < 0x10000000)) {
-        quint16 nLow = (quint16)nAddress & 0xFFFF;
-        quint16 nHigh = (quint16)(nAddress >> 16) & 0xFFFF;
-        nResult = pMemoryMap->nStartLoadOffset + nHigh * 16 + nLow;
+    qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
-        if (nResult >= 0x100000) {
-            nResult -= 0x100000;
-        }
-    } else {
-        qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
-
-        for (qint32 i = 0; i < nNumberOfRecords; i++) {
-            if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nAddress != (XADDR)-1) && (pMemoryMap->listRecords.at(i).nOffset != -1)) {
-                if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) && (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize)) {
-                    nResult = (nAddress - pMemoryMap->listRecords.at(i).nAddress) + pMemoryMap->listRecords.at(i).nOffset;
-                    break;
-                }
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nAddress != (XADDR)-1) && (pMemoryMap->listRecords.at(i).nOffset != -1)) {
+            if ((pMemoryMap->listRecords.at(i).nAddress <= nAddress) && (nAddress < pMemoryMap->listRecords.at(i).nAddress + pMemoryMap->listRecords.at(i).nSize)) {
+                nResult = (nAddress - pMemoryMap->listRecords.at(i).nAddress) + pMemoryMap->listRecords.at(i).nOffset;
+                break;
             }
         }
     }
@@ -4282,6 +4272,17 @@ qint64 XBinary::addressToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAdd
 
     if (isAddressValid(pMemoryMap, nAddress)) {
         nResult = nAddress -= pMemoryMap->nModuleAddress;
+    }
+
+    return nResult;
+}
+
+qint64 XBinary::getSegmentAddress(qint16 nSegment, qint16 nAddress)
+{
+    qint64 nResult = nSegment * 16 + nAddress;
+
+    if (nResult >= 0x100000) {
+        nResult -= 0x100000;
     }
 
     return nResult;
@@ -10498,7 +10499,18 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                     case 8: _nAddress = read_uint64(nOffset, isBigEndian(pMemoryMap)); break;
                 }
 
-                nOffset = addressToOffset(pMemoryMap, _nAddress);  // TODO!
+                if (pMemoryMap->fileType == FT_MSDOS) {
+                    if (pListSignatureRecords->at(i).nSizeOfAddr == 2) {
+                        _nAddress += pMemoryMap->nCodeBase;
+                        nOffset = addressToOffset(pMemoryMap, _nAddress);  // TODO!
+                    } else if (pListSignatureRecords->at(i).nSizeOfAddr == 4) {
+                        quint16 nLow = (quint16)_nAddress;
+                        quint16 nHigh = (quint16)(_nAddress >> 16);
+                        nOffset = pMemoryMap->nStartLoadOffset + getSegmentAddress(nHigh, nLow);
+                    }
+                } else {
+                    nOffset = addressToOffset(pMemoryMap, _nAddress);  // TODO!
+                }
             } break;
 
                 if (!isOffsetValid(pMemoryMap, nOffset)) {
