@@ -358,13 +358,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     qint64 nHeaderSize = (quint16)(get_e_cparhdr() * 16);
     qint64 nCodeOffset = (get_e_cparhdr() * 16) + (get_e_cs() * 16);
 
-    XADDR nCodeAddress = get_e_cs() * 0x10000;
-
-    if (nCodeAddress == 0) {
-        nCodeAddress = 0x10000000;
-    }
-
-    result.nEntryPointAddress = nCodeAddress + get_e_ip();
+    result.nEntryPointAddress = ((get_e_cs() << 16) + get_e_ip()) & 0xFFFFFFFF;
 
     // if (get_e_cs() * 16 + get_e_ip() >= 0x100000) {
     //     nCodeAddress = 0x100000;
@@ -372,7 +366,6 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     //     nCodeOffset = get_e_cparhdr() * 16;  // TODO Check
     // }
 
-    result.nCodeBase = nCodeAddress;
     result.nStartLoadOffset = (get_e_cparhdr() * 16);
 
     qint64 nCodeSize = 0;
@@ -385,7 +378,9 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
         nOverlayOffset = nMaxOffset;
         nOverlaySize = qMax(getSize() - nMaxOffset, (qint64)0);
     } else {
-        nCodeSize = getSize() - nCodeOffset;
+        if (getSize() > nCodeOffset) {
+            nCodeSize = getSize() - nCodeOffset;
+        }
     }
 
     {
@@ -401,36 +396,43 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
         result.listRecords.append(record);
     }
 
-    {
-        qint64 nDelta = nCodeOffset - nHeaderSize;
+    qint32 nSegmentIndex = 1;
 
-        if (nDelta) {
-            _MEMORY_RECORD record = {};
+    qint64 nDelta = nCodeOffset - nHeaderSize;
 
-            record.bIsVirtual = false;
-            record.nSize = qAbs(nDelta);
-            record.nOffset = nHeaderSize;
-            record.nAddress = 0x10000000;
-
-            record.segment = ADDRESS_SEGMENT_CODE;  // CODE
-            record.type = MMT_LOADSEGMENT;
-            record.nIndex = nIndex++;
-
-            result.listRecords.append(record);
-        }
-    }
-    {
+    if (nDelta) {
         _MEMORY_RECORD record = {};
 
-        record.nSize = nCodeSize;
-        record.nOffset = nCodeOffset;
-        record.nAddress = nCodeAddress;
+        record.bIsVirtual = false;
+        record.nSize = qAbs(nDelta);
+        record.nOffset = nHeaderSize;
+        record.nAddress = nSegmentIndex * 0x10000000;
 
         record.segment = ADDRESS_SEGMENT_CODE;  // CODE
         record.type = MMT_LOADSEGMENT;
         record.nIndex = nIndex++;
 
         result.listRecords.append(record);
+
+        nSegmentIndex++;
+    }
+
+    if (nCodeSize > 0) {
+        _MEMORY_RECORD record = {};
+
+        record.nSize = nCodeSize;
+        record.nOffset = nCodeOffset;
+        record.nAddress = nSegmentIndex * 0x10000000;
+
+        record.segment = ADDRESS_SEGMENT_CODE;  // CODE
+        record.type = MMT_LOADSEGMENT;
+        record.nIndex = nIndex++;
+
+        result.nCodeBase = record.nAddress;
+
+        result.listRecords.append(record);
+
+        nSegmentIndex++;
     }
 
     if (nOverlaySize) {
