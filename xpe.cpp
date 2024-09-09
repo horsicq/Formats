@@ -9140,80 +9140,108 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                         // result.bInit=true;
                         qint64 nOffset = result.nMetaDataOffset + 20 + result.metaData.header.nVersionStringLength;
 
+                        bool bInitMetaData = false;
+                        bool bInitStrings= false;
+                        bool bInitUS = false;
+                        bool bInitBlob = false;
+                        bool bInitGUID = false;
+
                         for (qint32 i = 0; i < result.metaData.header.nStreams; i++) {
                             CLI_METADATA_STREAM stream = {};
 
-                            stream.nOffset = read_uint32(nOffset + 0) + result.nMetaDataOffset;
+                            stream.nOffset = read_uint32(nOffset + 0);
                             stream.nSize = read_uint32(nOffset + 4);
                             stream.sName = read_ansiString(nOffset + 8);
 
+                            stream.nOffset += result.nMetaDataOffset;
+
                             result.metaData.listStreams.append(stream);
 
-                            if (result.metaData.listStreams.at(i).sName == "#~") {
-                                result.metaData.osMetadata.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                result.metaData.osMetadata.nSize = result.metaData.listStreams.at(i).nSize;
+                            if ((result.metaData.listStreams.at(i).sName == "#~") || (result.metaData.listStreams.at(i).sName == "#-")) {
+                                if (!bInitMetaData) {
+                                    result.metaData.osMetadata.nOffset = result.metaData.listStreams.at(i).nOffset;
+                                    result.metaData.osMetadata.nSize = result.metaData.listStreams.at(i).nSize;
 
-                                result.metaData.baMetadata = read_array(result.metaData.osMetadata.nOffset, result.metaData.osMetadata.nSize);
+                                    result.metaData.baMetadata = read_array(result.metaData.osMetadata.nOffset, result.metaData.osMetadata.nSize);
+
+                                    bInitMetaData = true;
+                                }
                             } else if (result.metaData.listStreams.at(i).sName == "#Strings") {
-                                result.metaData.osStrings.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                result.metaData.osStrings.nSize = result.metaData.listStreams.at(i).nSize;
+                                if (!bInitStrings) {
+                                    result.metaData.osStrings.nOffset = result.metaData.listStreams.at(i).nOffset;
+                                    result.metaData.osStrings.nSize = result.metaData.listStreams.at(i).nSize;
 
-                                result.metaData.baStrings = read_array(result.metaData.osStrings.nOffset, result.metaData.osStrings.nSize);
+                                    result.metaData.baStrings = read_array(result.metaData.osStrings.nOffset, result.metaData.osStrings.nSize);
 
-                                char *_pOffset = result.metaData.baStrings.data();
-                                qint32 _nSize = result.metaData.baStrings.size();
+                                    char *_pOffset = result.metaData.baStrings.data();
+                                    qint32 _nSize = result.metaData.baStrings.size();
 
-                                // TODO UTF8
-                                for (qint32 i = 1; i < _nSize; i++) {
-                                    _pOffset++;
-                                    QString sTemp = _pOffset;
-                                    result.metaData.listAnsiStrings.append(sTemp);
+                                    // TODO UTF8
+                                    for (qint32 i = 1; i < _nSize; i++) {
+                                        _pOffset++;
+                                        QString sTemp = _pOffset;
+                                        result.metaData.listAnsiStrings.append(sTemp);
 
-                                    _pOffset += sTemp.size();
-                                    i += sTemp.size();
+                                        _pOffset += sTemp.size();
+                                        i += sTemp.size();
+                                    }
+
+                                    bInitStrings = true;
                                 }
                             } else if (result.metaData.listStreams.at(i).sName == "#US") {
-                                result.metaData.osUS.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                result.metaData.osUS.nSize = result.metaData.listStreams.at(i).nSize;
+                                if (!bInitUS) {
+                                    result.metaData.osUS.nOffset = result.metaData.listStreams.at(i).nOffset;
+                                    result.metaData.osUS.nSize = result.metaData.listStreams.at(i).nSize;
 
-                                result.metaData.baUS = read_array(result.metaData.osUS.nOffset, result.metaData.osUS.nSize);
+                                    result.metaData.baUS = read_array(result.metaData.osUS.nOffset, result.metaData.osUS.nSize);
 
-                                char *pStringOffset = result.metaData.baUS.data();
-                                char *pStringCurrentOffsetOffset = pStringOffset;
-                                qint32 _nSize = result.metaData.baUS.size();
-
-                                pStringCurrentOffsetOffset++;
-
-                                for (qint32 i = 1; i < _nSize; i++) {
-                                    int nStringSize = (*((unsigned char *)pStringCurrentOffsetOffset));
-
-                                    if (nStringSize == 0x80) {
-                                        nStringSize = 0;
-                                    }
-
-                                    if (nStringSize > _nSize - i) {
-                                        break;
-                                    }
+                                    char *pStringOffset = result.metaData.baUS.data();
+                                    char *pStringCurrentOffsetOffset = pStringOffset;
+                                    qint32 _nSize = result.metaData.baUS.size();
 
                                     pStringCurrentOffsetOffset++;
 
-                                    if (pStringCurrentOffsetOffset > pStringOffset + _nSize) {
-                                        break;
+                                    for (qint32 i = 1; i < _nSize; i++) {
+                                        int nStringSize = (*((unsigned char *)pStringCurrentOffsetOffset));
+
+                                        if (nStringSize == 0x80) {
+                                            nStringSize = 0;
+                                        }
+
+                                        if (nStringSize > _nSize - i) {
+                                            break;
+                                        }
+
+                                        pStringCurrentOffsetOffset++;
+
+                                        if (pStringCurrentOffsetOffset > pStringOffset + _nSize) {
+                                            break;
+                                        }
+
+                                        QString sTemp = QString::fromUtf16((quint16 *)pStringCurrentOffsetOffset, nStringSize / 2);
+
+                                        result.metaData.listUnicodeStrings.append(sTemp);
+
+                                        pStringCurrentOffsetOffset += nStringSize;
+                                        i += nStringSize;
                                     }
 
-                                    QString sTemp = QString::fromUtf16((quint16 *)pStringCurrentOffsetOffset, nStringSize / 2);
-
-                                    result.metaData.listUnicodeStrings.append(sTemp);
-
-                                    pStringCurrentOffsetOffset += nStringSize;
-                                    i += nStringSize;
+                                    bInitUS = true;
                                 }
                             } else if (result.metaData.listStreams.at(i).sName == "#Blob") {
-                                result.metaData.osBlob.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                result.metaData.osBlob.nSize = result.metaData.listStreams.at(i).nSize;
+                                if (!bInitBlob) {
+                                    result.metaData.osBlob.nOffset = result.metaData.listStreams.at(i).nOffset;
+                                    result.metaData.osBlob.nSize = result.metaData.listStreams.at(i).nSize;
+
+                                    bInitBlob = true;
+                                }
                             } else if (result.metaData.listStreams.at(i).sName == "#GUID") {
-                                result.metaData.osGUID.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                result.metaData.osGUID.nSize = result.metaData.listStreams.at(i).nSize;
+                                if (!bInitGUID) {
+                                    result.metaData.osGUID.nOffset = result.metaData.listStreams.at(i).nOffset;
+                                    result.metaData.osGUID.nSize = result.metaData.listStreams.at(i).nSize;
+
+                                    bInitGUID = true;
+                                }
                             }
 
                             nOffset += 8;
@@ -9388,6 +9416,11 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 nSize += result.metaData.nStringIndexSize;
                                 nSize += result.metaData.nBLOBIndexSize;
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Field] = nSize;
+                            }
+                            {
+                                qint32 nSize = 0;
+                                nSize += result.metaData.indexSize[XPE_DEF::metadata_MethodDef];
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodPtr] = nSize;
                             }
                             {
                                 qint32 nSize = 0;
@@ -9682,6 +9715,10 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             // }
 
                             // TODO
+
+                            if (result.metaData.cTables_HeapOffsetSizes & 0x40) {
+                                nOffset += 4;
+                            }
 
                             for (qint32 i = 0; i < 64; i++) {
                                 if (result.metaData.Tables_TablesNumberOfIndexes[i]) {
@@ -10188,7 +10225,9 @@ QString XPE::mdtIdToString(quint32 nID)
         case 0x01: sResult = "TypeRef"; break;
         case 0x02: sResult = "TypeDef"; break;
         case 0x04: sResult = "Field"; break;
+        case 0x05: sResult = "MethodPtr"; break;
         case 0x06: sResult = "MethodDef"; break;
+        case 0x07: sResult = "ParamPtr"; break;
         case 0x08: sResult = "Param"; break;
         case 0x09: sResult = "InterfaceImpl"; break;
         case 0x0A: sResult = "MemberRef"; break;
@@ -10200,8 +10239,10 @@ QString XPE::mdtIdToString(quint32 nID)
         case 0x10: sResult = "FieldLayout"; break;
         case 0x11: sResult = "StandAloneSig"; break;
         case 0x12: sResult = "EventMap"; break;
+        case 0x13: sResult = "EventPtr"; break;
         case 0x14: sResult = "Event"; break;
         case 0x15: sResult = "PropertyMap"; break;
+        case 0x16: sResult = "PropertyPtr"; break;
         case 0x17: sResult = "Property"; break;
         case 0x18: sResult = "MethodSemantics"; break;
         case 0x19: sResult = "MethodImpl"; break;
@@ -10209,6 +10250,8 @@ QString XPE::mdtIdToString(quint32 nID)
         case 0x1B: sResult = "TypeSpec"; break;
         case 0x1C: sResult = "ImplMap"; break;
         case 0x1D: sResult = "FieldRVA"; break;
+        case 0x1E: sResult = "ENCLog"; break;
+        case 0x1F: sResult = "ENCMap"; break;
         case 0x20: sResult = "Assembly"; break;
         case 0x21: sResult = "AssemblyProcessor"; break;
         case 0x22: sResult = "AssemblyOS"; break;
@@ -10230,6 +10273,15 @@ QString XPE::mdtIdToString(quint32 nID)
         case 0x32: sResult = "ImportScope"; break;
         case 0x33: sResult = "StateMachineMethod"; break;
         case 0x34: sResult = "CustomDebugInformation"; break;
+        case 0x38: sResult = "Reserved 38"; break;
+        case 0x39: sResult = "Reserved 39"; break;
+        case 0x3A: sResult = "Reserved 3A"; break;
+        case 0x3B: sResult = "Reserved 3B"; break;
+        case 0x3C: sResult = "Reserved 3C"; break;
+        case 0x3D: sResult = "Reserved 3D"; break;
+        case 0x3E: sResult = "Reserved 3E"; break;
+        case 0x3F: sResult = "Reserved 3F"; break;
+
         default: sResult = tr("Unknown"); break;
     }
 

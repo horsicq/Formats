@@ -562,7 +562,9 @@ enum MetadataTable {
     metadata_TypeRef = 0x01,
     metadata_TypeDef = 0x02,
     metadata_Field = 0x04,
+    metadata_MethodPtr = 0x05,
     metadata_MethodDef = 0x06,
+    metadata_ParamPtr = 0x07,
     metadata_Param = 0x08,
     metadata_InterfaceImpl = 0x09,
     metadata_MemberRef = 0x0A,
@@ -574,8 +576,10 @@ enum MetadataTable {
     metadata_FieldLayout = 0x10,
     metadata_StandAloneSig = 0x11,
     metadata_EventMap = 0x12,
+    metadata_EventPtr = 0x13,
     metadata_Event = 0x14,
     metadata_PropertyMap = 0x15,
+    metadata_PropertyPtr = 0x16,
     metadata_Property = 0x17,
     metadata_MethodSemantics = 0x18,
     metadata_MethodImpl = 0x19,
@@ -583,6 +587,8 @@ enum MetadataTable {
     metadata_TypeSpec = 0x1B,
     metadata_ImplMap = 0x1C,
     metadata_FieldRVA = 0x1D,
+    metadata_ENCLog = 0x1E,
+    metadata_ENCMap = 0x1F,
     metadata_Assembly = 0x20,
     metadata_AssemblyProcessor = 0x21,
     metadata_AssemblyOS = 0x22,
@@ -603,7 +609,15 @@ enum MetadataTable {
     metadata_LocalConstant = 0x31,
     metadata_ImportScope = 0x32,
     metadata_StateMachineMethod = 0x33,
-    metadata_CustomDebugInformation = 0x34
+    metadata_CustomDebugInformation = 0x34,
+    metadata_Reserved_38 = 0x38,
+    metadata_Reserved_39 = 0x39,
+    metadata_Reserved_3A = 0x3A,
+    metadata_Reserved_3B = 0x3B,
+    metadata_Reserved_3C = 0x3C,
+    metadata_Reserved_3D = 0x3D,
+    metadata_Reserved_3E = 0x3E,
+    metadata_Reserved_3F = 0x3F
 };
 
 struct S_METADATA_MEMBERREF {
