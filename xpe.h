@@ -865,8 +865,8 @@ public:
     bool isDriver();
     bool isNETPresent();
 
-    CLI_INFO getCliInfo(bool bFindHidden);                                    // TODO pdstruct
-    CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap);  // TODO pdstruct
+    CLI_INFO getCliInfo(bool bFindHidden, PDSTRUCT *pPdStruct = nullptr);
+    CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);
     bool isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
     bool isNetTypePresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, PDSTRUCT *pPdStruct = nullptr);
     bool isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sMethodName, PDSTRUCT *pPdStruct = nullptr);
@@ -903,7 +903,7 @@ public:
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap);
 
-    bool isNetMetadataPresent();
+    bool isNetMetadataPresent(PDSTRUCT *pPdStruct);
     bool isNetMetadataPresent(CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pMemoryMap);
 
     bool isNETAnsiStringPresent(const QString &sString);
