@@ -604,8 +604,8 @@ public:
 
     RESOURCE_HEADER getResourceHeader();
     RESOURCE_HEADER getResourceHeader(_MEMORY_MAP *pMemoryMap);
-    QList<RESOURCE_RECORD> getResources();
-    QList<RESOURCE_RECORD> getResources(_MEMORY_MAP *pMemoryMap);
+    QList<RESOURCE_RECORD> getResources(qint32 nLimit, PDSTRUCT *pPdStruct = nullptr);
+    QList<RESOURCE_RECORD> getResources(_MEMORY_MAP *pMemoryMap, qint32 nLimit = 10000, PDSTRUCT *pPdStruct = nullptr);
 
     static RESOURCE_RECORD getResourceRecord(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
     static RESOURCE_RECORD getResourceRecord(quint32 nID1, const QString &sName2, QList<RESOURCE_RECORD> *pListResourceRecords);

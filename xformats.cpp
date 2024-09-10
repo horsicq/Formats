@@ -840,7 +840,7 @@ bool XFormats::saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDir
     XPE pe(pDevice);
 
     if (pe.isValid()) {
-        QList<XPE::RESOURCE_RECORD> listResources = pe.getResources();
+        QList<XPE::RESOURCE_RECORD> listResources = pe.getResources(10000);
         QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_ICON, -1, &listResources);
 
         qint32 nNumberOfRecords = listIcons.count();
@@ -864,7 +864,7 @@ bool XFormats::saveAllPECursorsToDirectory(QIODevice *pDevice, const QString &sD
     XPE pe(pDevice);
 
     if (pe.isValid()) {
-        QList<XPE::RESOURCE_RECORD> listResources = pe.getResources();
+        QList<XPE::RESOURCE_RECORD> listResources = pe.getResources(10000);
         QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_CURSOR, -1, &listResources);
 
         qint32 nNumberOfRecords = listIcons.count();

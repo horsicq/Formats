@@ -3154,17 +3154,29 @@ XPE::RESOURCE_HEADER XPE::getResourceHeader(_MEMORY_MAP *pMemoryMap)
     return result;
 }
 
-QList<XPE::RESOURCE_RECORD> XPE::getResources()
+QList<XPE::RESOURCE_RECORD> XPE::getResources(qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    _MEMORY_MAP memoryMap = getMemoryMap();
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    return getResources(&memoryMap);
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+
+    return getResources(&memoryMap, nLimit, pPdStruct);
 }
 
-QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
+QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+    qint32 nCount = 0;
     // TODO BE LE
-    QList<RESOURCE_RECORD> listResources;
+    QList<RESOURCE_RECORD> listResult;
 
     qint64 nResourceOffset = getDataDirectoryOffset(pMemoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 
@@ -3191,6 +3203,10 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
 
             for (qint32 i = 0; i < rd[0].NumberOfIdEntries + rd[0].NumberOfNamedEntries; i++) {
                 rde[0] = read_IMAGE_RESOURCE_DIRECTORY_ENTRY(nOffsetLevel[0]);
+
+                if (rde[0].OffsetToDirectory == 0) {
+                    break;
+                }
 
                 irin[0] = getResourcesIDName(nResourceOffset, rde[0].Name);
                 record.irin[0] = irin[0];
@@ -3236,14 +3252,31 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
                                 record.nOffset = addressToOffset(pMemoryMap, record.nAddress);
                                 record.nSize = irde.Size;
 
-                                listResources.append(record);
+                                listResult.append(record);
+
+                                nCount++;
+
+                                if((nLimit != -1)&&(nCount >= nLimit))
+                                {
+                                    break;
+                                }
 
                                 nOffsetLevel[2] += sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
                             }
                         }
 
+                        if((nLimit != -1)&&(nCount >= nLimit))
+                        {
+                            break;
+                        }
+
                         nOffsetLevel[1] += sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
                     }
+                }
+
+                if((nLimit != -1)&&(nCount >= nLimit))
+                {
+                    break;
                 }
 
                 nOffsetLevel[0] += sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
@@ -3251,7 +3284,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap)
         }
     }
 
-    return listResources;
+    return listResult;
 }
 
 XPE::RESOURCE_RECORD XPE::getResourceRecord(quint32 nID1, quint32 nID2, QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
@@ -3373,7 +3406,7 @@ bool XPE::isResourcePresent(const QString &sName1, const QString &sName2, QList<
 
 bool XPE::isResourceStringTablePresent()
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return isResourceStringTablePresent(&listResources);
 }
@@ -3385,7 +3418,7 @@ bool XPE::isResourceStringTablePresent(QList<RESOURCE_RECORD> *pListResourceReco
 
 QList<XPE::RESOURCE_STRINGTABLE_RECORD> XPE::getResourceStringTableRecords()
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
     _MEMORY_MAP memoryMap = getMemoryMap();
 
     return getResourceStringTableRecords(&listResources, &memoryMap);
@@ -3453,7 +3486,7 @@ QList<XPE::RESOURCE_STRINGTABLE_RECORD> XPE::getResourceStringTableRecords(QList
 
 bool XPE::isResourceManifestPresent()
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return isResourceManifestPresent(&listResources);
 }
@@ -3465,7 +3498,7 @@ bool XPE::isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRe
 
 QString XPE::getResourceManifest()
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return getResourceManifest(&listResources);
 }
@@ -3486,7 +3519,7 @@ QString XPE::getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListResourceRecor
 
 bool XPE::isResourceVersionPresent()
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return isResourceVersionPresent(&listResources);
 }
@@ -3597,7 +3630,7 @@ quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResu
 
 XPE::RESOURCES_VERSION XPE::getResourcesVersion()
 {
-    QList<RESOURCE_RECORD> listResourceRecords = getResources();
+    QList<RESOURCE_RECORD> listResourceRecords = getResources(10000);
 
     return getResourcesVersion(&listResourceRecords);
 }
@@ -3755,7 +3788,7 @@ void XPE::setFixedFileInfo_dwFileDateLS(quint32 nValue)
 
 QString XPE::getResourcesVersionValue(const QString &sKey)
 {
-    QList<RESOURCE_RECORD> listResourceRecords = getResources();
+    QList<RESOURCE_RECORD> listResourceRecords = getResources(10000);
     RESOURCES_VERSION resVersion = getResourcesVersion(&listResourceRecords);
 
     return getResourcesVersionValue(sKey, &resVersion);
@@ -3783,7 +3816,7 @@ QString XPE::getResourcesVersionValue(const QString &sKey, XPE::RESOURCES_VERSIO
 
 quint32 XPE::getResourceIdByNumber(quint32 nNumber)
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return getResourceIdByNumber(nNumber, &listResources);
 }
@@ -3801,7 +3834,7 @@ quint32 XPE::getResourceIdByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD> 
 
 QString XPE::getResourceNameByNumber(quint32 nNumber)
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return getResourceNameByNumber(nNumber, &listResources);
 }
@@ -3819,7 +3852,7 @@ QString XPE::getResourceNameByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD
 
 qint64 XPE::getResourceOffsetByNumber(quint32 nNumber)
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return getResourceOffsetByNumber(nNumber, &listResources);
 }
@@ -3837,7 +3870,7 @@ qint64 XPE::getResourceOffsetByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECOR
 
 qint64 XPE::getResourceSizeByNumber(quint32 nNumber)
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return getResourceSizeByNumber(nNumber, &listResources);
 }
@@ -3855,7 +3888,7 @@ qint64 XPE::getResourceSizeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD>
 
 quint32 XPE::getResourceTypeByNumber(quint32 nNumber)
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return getResourceTypeByNumber(nNumber, &listResources);
 }
@@ -3873,7 +3906,7 @@ quint32 XPE::getResourceTypeByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD
 
 qint64 XPE::getResourceNameOffset(const QString &sName)
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return getResourceNameOffset(sName, &listResources);
 }
@@ -3896,7 +3929,7 @@ qint64 XPE::getResourceNameOffset(const QString &sName, QList<XPE::RESOURCE_RECO
 
 qint64 XPE::getResourceGroupNameOffset(const QString &sName)
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return getResourceGroupNameOffset(sName, &listResources);
 }
@@ -3919,7 +3952,7 @@ qint64 XPE::getResourceGroupNameOffset(const QString &sName, QList<XPE::RESOURCE
 
 qint64 XPE::getResourceGroupIdOffset(quint32 nID)
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return getResourceGroupIdOffset(nID, &listResources);
 }
@@ -3942,7 +3975,7 @@ qint64 XPE::getResourceGroupIdOffset(quint32 nID, QList<XPE::RESOURCE_RECORD> *p
 
 bool XPE::isResourceNamePresent(const QString &sName)
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return isResourceNamePresent(sName, &listResources);
 }
@@ -3954,7 +3987,7 @@ bool XPE::isResourceNamePresent(const QString &sName, QList<XPE::RESOURCE_RECORD
 
 bool XPE::isResourceGroupNamePresent(const QString &sName)
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return isResourceGroupNamePresent(sName, &listResources);
 }
@@ -3966,7 +3999,7 @@ bool XPE::isResourceGroupNamePresent(const QString &sName, QList<XPE::RESOURCE_R
 
 bool XPE::isResourceGroupIdPresent(quint32 nID)
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return isResourceGroupIdPresent(nID, &listResources);
 }
@@ -3978,7 +4011,7 @@ bool XPE::isResourceGroupIdPresent(quint32 nID, QList<XPE::RESOURCE_RECORD> *pLi
 
 bool XPE::isResourceGroupIconsPresent()
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return isResourceGroupIconsPresent(&listResources);
 }
@@ -3990,7 +4023,7 @@ bool XPE::isResourceGroupIconsPresent(QList<RESOURCE_RECORD> *pListResourceRecor
 
 bool XPE::isResourceGroupCursorsPresent()
 {
-    QList<RESOURCE_RECORD> listResources = getResources();
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
 
     return isResourceGroupCursorsPresent(&listResources);
 }
