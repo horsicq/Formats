@@ -11116,7 +11116,7 @@ quint16 XPE::_checkSum(qint64 nStartValue, qint64 nDataSize)
 
     delete[] pBuffer;
 
-    return (unsigned short)(S_LOWORD(nSum) + S_HIWORD(nSum));
+    return (quint16)(S_LOWORD(nSum) + S_HIWORD(nSum));
 }
 
 XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY XPE::read_IMAGE_RESOURCE_DIRECTORY_ENTRY(qint64 nOffset)

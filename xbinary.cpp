@@ -5358,6 +5358,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_LX;
     } else if (pStFileTypes->contains(FT_NE)) {
         result = FT_NE;
+    } else if (pStFileTypes->contains(FT_DOS16M)) {
+        result = FT_DOS16M;
     } else if (pStFileTypes->contains(FT_DOS4G)) {
         result = FT_DOS4G;
     } else if (pStFileTypes->contains(FT_MSDOS)) {
