@@ -6850,19 +6850,25 @@ QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList(XBinary::_MEMORY_MAP *
 {
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> listResult;
 
-    qint64 nDebugOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DEBUG);
+    XPE_DEF::IMAGE_DATA_DIRECTORY dataResources = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DEBUG);
 
-    if (nDebugOffset != -1) {
-        while (true) {
-            XPE_DEF::S_IMAGE_DEBUG_DIRECTORY record = _read_IMAGE_DEBUG_DIRECTORY(nDebugOffset);
+    if (dataResources.VirtualAddress) {
+        qint64 nDebugOffset = addressToOffset(pMemoryMap, dataResources.VirtualAddress + pMemoryMap->nModuleAddress);
+        qint64 nCurrent = 0;
 
-            if (record.PointerToRawData && isOffsetValid(pMemoryMap, record.PointerToRawData)) {
-                listResult.append(record);
-            } else {
-                break;
+        if (nDebugOffset != -1) {
+            while (nCurrent < dataResources.Size) {
+                XPE_DEF::S_IMAGE_DEBUG_DIRECTORY record = _read_IMAGE_DEBUG_DIRECTORY(nDebugOffset);
+
+                if (record.PointerToRawData && isOffsetValid(pMemoryMap, record.PointerToRawData)) {
+                    listResult.append(record);
+                } else {
+                    break;
+                }
+
+                nDebugOffset += sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY);
+                nCurrent += sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY);
             }
-
-            nDebugOffset += sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY);
         }
     }
 

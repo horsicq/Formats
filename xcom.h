@@ -31,7 +31,6 @@ public:
     enum TYPE {
         TYPE_UNKNOWN = 0,
         TYPE_EXECUTABLE
-        // TODO more
     };
 
     explicit XCOM(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
