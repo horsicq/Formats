@@ -8351,6 +8351,31 @@ QString XBinary::valueToTimeString(quint64 nValue, XBinary::DT_TYPE type)
     return sResult;
 }
 
+QString XBinary::msecToDate(quint64 nValue)
+{
+    QString sResult;
+
+    quint64 _nTmp = nValue / 1000;
+
+    quint64 nSec = _nTmp % 60;
+    _nTmp /= 60;
+    quint64 nMin = _nTmp % 60;
+    _nTmp /= 60;
+    quint64 nHour = _nTmp % 24;
+    _nTmp /= 24;
+    quint64 nDay = _nTmp;
+
+    if (nDay > 0) {
+        sResult += QString("%1:").arg(nDay, 2, 10, QChar('0'));
+    }
+
+    sResult += QString("%1:").arg(nHour, 2, 10, QChar('0'));
+    sResult += QString("%1:").arg(nMin, 2, 10, QChar('0'));
+    sResult += QString("%1").arg(nSec, 2, 10, QChar('0'));
+
+    return sResult;
+}
+
 QString XBinary::valueToFlagsString(quint64 nValue, QMap<quint64, QString> mapFlags, VL_TYPE vlType)
 {
     QString sResult;

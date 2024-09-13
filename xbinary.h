@@ -1364,6 +1364,7 @@ public:
 
     static QDateTime valueToTime(quint64 nValue, DT_TYPE type);
     static QString valueToTimeString(quint64 nValue, DT_TYPE type);
+    static QString msecToDate(quint64 nValue);
 
     enum VL_TYPE {
         VL_TYPE_LIST = 0,
