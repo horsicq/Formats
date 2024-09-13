@@ -1127,7 +1127,7 @@ public:
     XPE_DEF::S_IMAGE_DEBUG_DIRECTORY _read_IMAGE_DEBUG_DIRECTORY(qint64 nOffset);
 
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList();
-    QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList(XBinary::_MEMORY_MAP *pMemoryMap); // TODO pdstruct
+    QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> getDebugList(XBinary::_MEMORY_MAP *pMemoryMap);  // TODO pdstruct
 
     qint64 getDebugHeaderOffset(quint32 nNumber);
     qint64 getDebugHeaderSize();

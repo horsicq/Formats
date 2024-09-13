@@ -3256,8 +3256,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap, 
 
                                 nCount++;
 
-                                if((nLimit != -1)&&(nCount >= nLimit))
-                                {
+                                if ((nLimit != -1) && (nCount >= nLimit)) {
                                     break;
                                 }
 
@@ -3265,8 +3264,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap, 
                             }
                         }
 
-                        if((nLimit != -1)&&(nCount >= nLimit))
-                        {
+                        if ((nLimit != -1) && (nCount >= nLimit)) {
                             break;
                         }
 
@@ -3274,8 +3272,7 @@ QList<XPE::RESOURCE_RECORD> XPE::getResources(XBinary::_MEMORY_MAP *pMemoryMap, 
                     }
                 }
 
-                if((nLimit != -1)&&(nCount >= nLimit))
-                {
+                if ((nLimit != -1) && (nCount >= nLimit)) {
                     break;
                 }
 
@@ -9192,7 +9189,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                         qint64 nOffset = result.nMetaDataOffset + 20 + result.metaData.header.nVersionStringLength;
 
                         bool bInitMetaData = false;
-                        bool bInitStrings= false;
+                        bool bInitStrings = false;
                         bool bInitUS = false;
                         bool bInitBlob = false;
                         bool bInitGUID = false;
