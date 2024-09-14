@@ -2734,14 +2734,20 @@ QList<quint32> XPE::getImportPositionHashes(QList<IMPORT_HEADER> *pListImport, b
     return listResult;
 }
 
-bool XPE::isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 nIndex, quint32 nHash)
+bool XPE::isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 nIndex, quint32 nHash, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     bool bResult = false;
 
     if (nIndex == -1) {
         qint32 nNumberOfImports = pListImportHashes->count();
 
-        for (qint32 i = 0; i < nNumberOfImports; i++) {
+        for (qint32 i = 0; (i < nNumberOfImports) && (!(pPdStruct->bIsStop)); i++) {
             if (pListImportHashes->at(i) == nHash) {
                 bResult = true;
 
@@ -2782,7 +2788,7 @@ bool XPE::isImportLibraryPresent(const QString &sLibrary, QList<IMPORT_HEADER> *
 
     qint32 nNumberOfImports = pListImportHeaders->count();
 
-    for (qint32 i = 0; i < nNumberOfImports; i++) {
+    for (qint32 i = 0; (i < nNumberOfImports) && (!(pPdStruct->bIsStop)); i++) {
         if (pListImportHeaders->at(i).sName == sLibrary) {
             bResult = true;
             break;
