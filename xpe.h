@@ -497,7 +497,7 @@ public:
     XPE_DEF::IMAGE_SECTION_HEADER getSectionHeader(quint32 nNumber);
     void setSectionHeader(quint32 nNumber, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader);
 
-    QList<XPE_DEF::IMAGE_SECTION_HEADER> getSectionHeaders();
+    QList<XPE_DEF::IMAGE_SECTION_HEADER> getSectionHeaders(PDSTRUCT *pPdStruct = nullptr);
     // TODO with __getSectionOffsetAndSize TODO Check !!!
     QList<SECTION_RECORD> getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders);
     static QList<QString> getSectionNames(QList<XPE::SECTION_RECORD> *pListSectionRecords);

@@ -1276,8 +1276,14 @@ void XPE::setSectionHeader(quint32 nNumber, XPE_DEF::IMAGE_SECTION_HEADER *pSect
     }
 }
 
-QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders()
+QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listResult;
 
     quint32 nNumberOfSections = getFileHeader_NumberOfSections();
@@ -1289,7 +1295,7 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders()
         nNumberOfSections = 100;
     }
 
-    for (qint32 i = 0; i < (int)nNumberOfSections; i++) {
+    for (qint32 i = 0; (i < (int)nNumberOfSections) && (!(pPdStruct->bIsStop)); i++) {
         XPE_DEF::IMAGE_SECTION_HEADER record = {};
 
         read_array(nSectionOffset + i * sizeof(XPE_DEF::IMAGE_SECTION_HEADER), (char *)&record, sizeof(XPE_DEF::IMAGE_SECTION_HEADER));
