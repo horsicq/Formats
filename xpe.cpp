@@ -1345,13 +1345,19 @@ QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_H
     return listResult;
 }
 
-QList<QString> XPE::getSectionNames(QList<XPE::SECTION_RECORD> *pListSectionRecords)
+QList<QString> XPE::getSectionNames(QList<XPE::SECTION_RECORD> *pListSectionRecords, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     QList<QString> listResult;
 
     qint32 nNumberOfSections = pListSectionRecords->count();
 
-    for (qint32 i = 0; i < nNumberOfSections; i++) {
+    for (qint32 i = 0; (i < nNumberOfSections) && (!(pPdStruct->bIsStop)); i++) {
         listResult.append(pListSectionRecords->at(i).sName);
     }
 

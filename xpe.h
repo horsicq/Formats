@@ -500,7 +500,7 @@ public:
     QList<XPE_DEF::IMAGE_SECTION_HEADER> getSectionHeaders(PDSTRUCT *pPdStruct = nullptr);
     // TODO with __getSectionOffsetAndSize TODO Check !!!
     QList<SECTION_RECORD> getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_HEADER> *pListSectionHeaders, PDSTRUCT *pPdStruct = nullptr);
-    static QList<QString> getSectionNames(QList<XPE::SECTION_RECORD> *pListSectionRecords);
+    static QList<QString> getSectionNames(QList<XPE::SECTION_RECORD> *pListSectionRecords, PDSTRUCT *pPdStruct = nullptr);
 
     QList<SECTIONRVA_RECORD> getSectionRVARecords();
 
