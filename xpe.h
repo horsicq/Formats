@@ -555,7 +555,7 @@ public:
     QList<IMPORT_RECORD> getImportRecords(PDSTRUCT *pPdStruct = nullptr);
     QList<IMPORT_RECORD> getImportRecords(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
-    quint64 getImportHash64(QList<IMPORT_RECORD> *pListImportRecords);
+    quint64 getImportHash64(QList<IMPORT_RECORD> *pListImportRecords, PDSTRUCT *pPdStruct = nullptr);
     quint32 getImportHash32(QList<IMPORT_RECORD> *pListImportRecords);
 
     qint64 getImportDescriptorOffset(quint32 nNumber);
@@ -607,10 +607,10 @@ public:
     QList<RESOURCE_RECORD> getResources(qint32 nLimit, PDSTRUCT *pPdStruct = nullptr);
     QList<RESOURCE_RECORD> getResources(_MEMORY_MAP *pMemoryMap, qint32 nLimit = 10000, PDSTRUCT *pPdStruct = nullptr);
 
-    static RESOURCE_RECORD getResourceRecord(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
-    static RESOURCE_RECORD getResourceRecord(quint32 nID1, const QString &sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
-    static RESOURCE_RECORD getResourceRecord(const QString &sName1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
-    static RESOURCE_RECORD getResourceRecord(const QString &sName1, const QString &sName2, QList<RESOURCE_RECORD> *pListResourceRecords);
+    static RESOURCE_RECORD getResourceRecord(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords); // TODO pdstruct
+    static RESOURCE_RECORD getResourceRecord(quint32 nID1, const QString &sName2, QList<RESOURCE_RECORD> *pListResourceRecords); // TODO pdstruct
+    static RESOURCE_RECORD getResourceRecord(const QString &sName1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords); // TODO pdstruct
+    static RESOURCE_RECORD getResourceRecord(const QString &sName1, const QString &sName2, QList<RESOURCE_RECORD> *pListResourceRecords); // TODO pdstruct
 
     static QList<RESOURCE_RECORD> getResourceRecords(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
 
@@ -637,7 +637,7 @@ public:
     RESOURCES_VERSION getResourcesVersion();
     XPE_DEF::S_VS_VERSION_INFO readVS_VERSION_INFO(qint64 nOffset);
 
-    RESOURCES_VERSION getResourcesVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
+    RESOURCES_VERSION getResourcesVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords, PDSTRUCT *pPdStruct = nullptr);
 
     QString getFileVersion();
     QString getFileVersion(RESOURCES_VERSION *pResourceVersion);
@@ -763,7 +763,7 @@ public:
     static QString resourceIdNameToString(RESOURCES_ID_NAME resourceIdName, qint32 nNumber);
 
     QList<qint64> getRelocsAsRVAList();
-    QList<RELOCS_HEADER> getRelocsHeaders();
+    QList<RELOCS_HEADER> getRelocsHeaders(PDSTRUCT *pPdStruct = nullptr);
     QList<RELOCS_POSITION> getRelocsPositions(qint64 nOffset);
 
     XPE_DEF::IMAGE_BASE_RELOCATION _readIMAGE_BASE_RELOCATION(qint64 nOffset);

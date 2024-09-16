@@ -2230,13 +2230,19 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap, PDSTRUC
     return listResult;
 }
 
-quint64 XPE::getImportHash64(QList<IMPORT_RECORD> *pListImportRecords)
+quint64 XPE::getImportHash64(QList<IMPORT_RECORD> *pListImportRecords, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     quint64 nResult = 0;
 
     qint32 nNumberOfImports = pListImportRecords->count();
 
-    for (qint32 i = 0; i < nNumberOfImports; i++) {
+    for (qint32 i = 0; (i < nNumberOfImports) && (!(pPdStruct->bIsStop)); i++) {
         QString sRecord = pListImportRecords->at(i).sLibrary + " " + pListImportRecords->at(i).sFunction;
 
         nResult += getStringCustomCRC32(sRecord);
@@ -2871,6 +2877,12 @@ bool XPE::isImportFunctionPresentI(const QString &sLibrary, const QString &sFunc
 
 bool XPE::isImportFunctionPresentI(const QString &sLibrary, const QString &sFunction, QList<XPE::IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     bool bResult = false;
 
     // TODO Optimize!
@@ -3656,12 +3668,18 @@ XPE::RESOURCES_VERSION XPE::getResourcesVersion()
     return getResourcesVersion(&listResourceRecords);
 }
 
-XPE::RESOURCES_VERSION XPE::getResourcesVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
+XPE::RESOURCES_VERSION XPE::getResourcesVersion(QList<XPE::RESOURCE_RECORD> *pListResourceRecords, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     RESOURCES_VERSION result = {};
     result.nFixedFileInfoOffset = -1;
 
-    RESOURCE_RECORD resourceRecord = getResourceRecord(XPE_DEF::S_RT_VERSION, -1, pListResourceRecords);
+    RESOURCE_RECORD resourceRecord = getResourceRecord(XPE_DEF::S_RT_VERSION, -1, pListResourceRecords);  // TODO pdstruct
 
     if (resourceRecord.nOffset != -1) {
         __getResourcesVersion(&result, resourceRecord.nOffset, resourceRecord.nSize, "", 0);
@@ -11295,14 +11313,20 @@ QList<qint64> XPE::getRelocsAsRVAList()
     return stResult.values();
 }
 
-QList<XPE::RELOCS_HEADER> XPE::getRelocsHeaders()
+QList<XPE::RELOCS_HEADER> XPE::getRelocsHeaders(PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     QList<RELOCS_HEADER> listResult;
 
     qint64 nRelocsOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
 
     if (nRelocsOffset != -1) {
-        while (true) {
+        while (!(pPdStruct->bIsStop)) {
             RELOCS_HEADER record = {};
 
             record.nOffset = nRelocsOffset;
