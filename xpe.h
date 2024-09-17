@@ -556,7 +556,7 @@ public:
     QList<IMPORT_RECORD> getImportRecords(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
     quint64 getImportHash64(QList<IMPORT_RECORD> *pListImportRecords, PDSTRUCT *pPdStruct = nullptr);
-    quint32 getImportHash32(QList<IMPORT_RECORD> *pListImportRecords);
+    quint32 getImportHash32(QList<IMPORT_RECORD> *pListImportRecords, PDSTRUCT *pPdStruct = nullptr);
 
     qint64 getImportDescriptorOffset(quint32 nNumber);
     qint64 getImportDescriptorSize();
