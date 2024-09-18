@@ -474,7 +474,7 @@ public:
     void clearOptionalHeader_DataDirectory(quint32 nNumber);
     bool isOptionalHeader_DataDirectoryPresent(quint32 nNumber);
 
-    QList<XPE_DEF::IMAGE_DATA_DIRECTORY> getDirectories();
+    QList<XPE_DEF::IMAGE_DATA_DIRECTORY> getDirectories(); // TODO pdStruct
     void setDirectories(QList<XPE_DEF::IMAGE_DATA_DIRECTORY> *pListDirectories);
 
     qint64 getDataDirectoryOffset(quint32 nNumber);
