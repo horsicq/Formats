@@ -4974,7 +4974,7 @@ void XPE::fixCheckSum()
 QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::splitSection(QByteArray *pbaData, XPE_DEF::IMAGE_SECTION_HEADER sectionHeaderOriginal, quint32 nBlockSize)
 {
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listResult;
-    //    int nBlockSize=0x1000;
+    //    qint32 nBlockSize=0x1000;
     qint32 nSize = pbaData->size();
     char *pOffset = pbaData->data();
     char *pOffsetStart = pOffset;
@@ -9807,7 +9807,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_GenericParamConstraint] = nSize;
                             }
                             // {
-                            //     int nSize = 0;
+                            //     qint32 nSize = 0;
                             //     nSize += result.metaData.nStringIndexSize;
                             //     nSize += result.metaData.nGUIDIndexSize;
                             //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Document] = nSize;
