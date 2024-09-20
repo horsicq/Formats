@@ -9813,13 +9813,13 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Document] = nSize;
                             // }
                             // {
-                            //     int nSize = 0;
+                            //     qint32 nSize = 0;
                             //     nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Document];
                             //     nSize += 4; // Offset
                             //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodDebugInformation] = nSize;
                             // }
                             // {
-                            //     int nSize = 0;
+                            //     qint32 nSize = 0;
                             //     nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ImportScope];
                             //     nSize += result.metaData.nMethodDefOrRefSize;
                             //     nSize += 4; // Offset
