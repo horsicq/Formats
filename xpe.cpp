@@ -9851,7 +9851,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_StateMachineMethod] = nSize;
                             // }
                             // {
-                            //     int nSize = 0;
+                            //     qint32 nSize = 0;
                             //     nSize += result.metaData.nHasCustomDebugInformationSize;
                             //     nSize += result.metaData.nBLOBIndexSize;
                             //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_CustomDebugInformation] = nSize;
