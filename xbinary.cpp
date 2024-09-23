@@ -1090,7 +1090,7 @@ float XBinary::read_float16(qint64 nOffset, bool bIsBigEndian)
             // can be represented as ordinary value in float32
             // 2 ** -14 * 0.0101
             // => 2 ** -16 * 1.0100
-            // int int_exponent = -14;
+            // qint32 int_exponent = -14;
             exponent = 127 - 14;
             while ((fraction & (1 << 10)) == 0) {
                 // int_exponent--;
