@@ -912,7 +912,7 @@ public:
         QVariant varValue;
         VT valueType;
         ENDIAN endian;
-        bool bInit;
+        bool bIsInit;
     };
 
     bool _addMultiSearchStringRecord(QList<MS_RECORD> *pList, MS_RECORD *pRecord, STRINGSEARCH_OPTIONS *pSsOptions);
