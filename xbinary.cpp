@@ -2647,17 +2647,17 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
         ssOptions.nMaxLenght = 128;  // TODO Check
     }
 
-    bool bANSICodec = false;
+    // bool bANSICodec = false;
 
     // TODO Check Qt6
-#if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
-    QTextCodec *pCodec = nullptr;
+// #if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
+//     QTextCodec *pCodec = nullptr;
 
-    if (ssOptions.sANSICodec != "") {
-        bANSICodec = true;
-        pCodec = QTextCodec::codecForName(ssOptions.sANSICodec.toLatin1().data());
-    }
-#endif
+//     if (ssOptions.sANSICodec != "") {
+//         bANSICodec = true;
+//         pCodec = QTextCodec::codecForName(ssOptions.sANSICodec.toLatin1().data());
+//     }
+// #endif
 
     qint64 _nSize = nSize;
     qint64 _nOffset = nOffset;
@@ -2679,10 +2679,10 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
     qint64 nCurrentAnsiSize = 0;
     qint64 nCurrentAnsiOffset = 0;
 
-    qint64 nCurrentUTF8Size = 0;
-    qint64 nCurrentUTF8Offset = 0;
-    qint32 nLastUTF8Width = 0;
-    qint64 nLastUTF8Offset = -1;
+    // qint64 nCurrentUTF8Size = 0;
+    // qint64 nCurrentUTF8Offset = 0;
+    // qint32 nLastUTF8Width = 0;
+    // qint64 nLastUTF8Offset = -1;
 
     bool bIsStart = true;
     char cPrevSymbol = 0;
@@ -2710,42 +2710,43 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
             char cSymbol = *(pBuffer + i);
 
             bool bIsAnsiSymbol = false;
-            bool bIsUTF8Symbol = false;
+            // bool bIsUTF8Symbol = false;
 
-            bool bNewUTF8String = false;
+            // bool bNewUTF8String = false;
             bool bLongString = false;
 
             if (ssOptions.bAnsi) {
-                bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol, bANSICodec);
+                // bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol, bANSICodec);
+                bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol);
             }
 
-            if (ssOptions.bUTF8) {
-                qint32 nUTF8SymbolWidth = 0;
+            // if (ssOptions.bUTF8) {
+            //     qint32 nUTF8SymbolWidth = 0;
 
-                bIsUTF8Symbol = isUTF8Symbol((quint8)cSymbol, &nUTF8SymbolWidth);
+            //     bIsUTF8Symbol = isUTF8Symbol((quint8)cSymbol, &nUTF8SymbolWidth);
 
-                if (bIsUTF8Symbol) {
-                    if (nLastUTF8Offset == -1) {
-                        if (nUTF8SymbolWidth == 0)  // Cannot start with rest
-                        {
-                            bIsUTF8Symbol = false;
-                        } else {
-                            nLastUTF8Offset = _nOffset + i;
-                            nLastUTF8Width = nUTF8SymbolWidth;
-                        }
-                    } else {
-                        if (nUTF8SymbolWidth) {
-                            if (((_nOffset + i) - nLastUTF8Offset) < nLastUTF8Width) {
-                                bIsUTF8Symbol = false;
-                                bNewUTF8String = true;
-                            }
+            //     if (bIsUTF8Symbol) {
+            //         if (nLastUTF8Offset == -1) {
+            //             if (nUTF8SymbolWidth == 0)  // Cannot start with rest
+            //             {
+            //                 bIsUTF8Symbol = false;
+            //             } else {
+            //                 nLastUTF8Offset = _nOffset + i;
+            //                 nLastUTF8Width = nUTF8SymbolWidth;
+            //             }
+            //         } else {
+            //             if (nUTF8SymbolWidth) {
+            //                 if (((_nOffset + i) - nLastUTF8Offset) < nLastUTF8Width) {
+            //                     bIsUTF8Symbol = false;
+            //                     bNewUTF8String = true;
+            //                 }
 
-                            nLastUTF8Offset = _nOffset + i;
-                            nLastUTF8Width = nUTF8SymbolWidth;
-                        }
-                    }
-                }
-            }
+            //                 nLastUTF8Offset = _nOffset + i;
+            //                 nLastUTF8Width = nUTF8SymbolWidth;
+            //             }
+            //         }
+            //     }
+            // }
 
             if (bIsAnsiSymbol) {
                 if (nCurrentAnsiSize == 0) {
@@ -2762,21 +2763,21 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
                 nCurrentAnsiSize++;
             }
 
-            if (bIsUTF8Symbol) {
-                if (nCurrentUTF8Size == 0) {
-                    nCurrentUTF8Offset = _nOffset + i;
-                }
+            // if (bIsUTF8Symbol) {
+            //     if (nCurrentUTF8Size == 0) {
+            //         nCurrentUTF8Offset = _nOffset + i;
+            //     }
 
-                if (nCurrentUTF8Size < ssOptions.nMaxLenght) {
-                    *(pUTF8Buffer + nCurrentUTF8Size) = cSymbol;
-                } else {
-                    bIsUTF8Symbol = false;
-                    bNewUTF8String = true;
-                    bLongString = true;
-                }
+            //     if (nCurrentUTF8Size < ssOptions.nMaxLenght) {
+            //         *(pUTF8Buffer + nCurrentUTF8Size) = cSymbol;
+            //     } else {
+            //         bIsUTF8Symbol = false;
+            //         bNewUTF8String = true;
+            //         bLongString = true;
+            //     }
 
-                nCurrentUTF8Size++;
-            }
+            //     nCurrentUTF8Size++;
+            // }
 
             if ((!bIsAnsiSymbol) || (bIsEnd)) {
                 if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
@@ -2789,17 +2790,19 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
                     if (ssOptions.bAnsi) {
                         QString sString;
 
-                        if (!bANSICodec) {
-                            sString = pAnsiBuffer;
-                        } else {
-                            // TODO Check Qt6
-                            QByteArray baString = QByteArray(pAnsiBuffer, nCurrentAnsiSize);
-#if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
-                            sString = pCodec->toUnicode(baString);
-#else
-                            sString = QString::fromLatin1(baString);  // TODO
-#endif
-                        }
+//                         if (!bANSICodec) {
+//                             sString = pAnsiBuffer;
+//                         } else {
+//                             // TODO Check Qt6
+//                             QByteArray baString = QByteArray(pAnsiBuffer, nCurrentAnsiSize);
+// #if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
+//                             sString = pCodec->toUnicode(baString);
+// #else
+//                             sString = QString::fromLatin1(baString);  // TODO
+// #endif
+//                         }
+
+                        sString = pAnsiBuffer;
 
                         bool bAdd = true;
 
@@ -2830,58 +2833,58 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
                 nCurrentAnsiSize = 0;
             }
 
-            if ((!bIsUTF8Symbol) || (bIsEnd)) {
-                if (nCurrentUTF8Size >= ssOptions.nMinLenght) {
-                    pUTF8Buffer[nCurrentUTF8Size] = 0;
+            // if ((!bIsUTF8Symbol) || (bIsEnd)) {
+            //     if (nCurrentUTF8Size >= ssOptions.nMinLenght) {
+            //         pUTF8Buffer[nCurrentUTF8Size] = 0;
 
-                    if (ssOptions.bUTF8) {
-                        QString sString = QString::fromUtf8(pUTF8Buffer, -1);
+            //         if (ssOptions.bUTF8) {
+            //             QString sString = QString::fromUtf8(pUTF8Buffer, -1);
 
-                        qint32 nStringSize = sString.size();
+            //             qint32 nStringSize = sString.size();
 
-                        bool bAdd = true;
+            //             bool bAdd = true;
 
-                        if (ssOptions.bNullTerminated && cSymbol && (!bLongString)) {
-                            bAdd = false;
-                        }
+            //             if (ssOptions.bNullTerminated && cSymbol && (!bLongString)) {
+            //                 bAdd = false;
+            //             }
 
-                        if (nStringSize < ssOptions.nMinLenght) {
-                            bAdd = false;
-                        }
+            //             if (nStringSize < ssOptions.nMinLenght) {
+            //                 bAdd = false;
+            //             }
 
-                        if ((nStringSize == nCurrentUTF8Size) && (ssOptions.bAnsi)) {
-                            bAdd = false;
-                        }
+            //             if ((nStringSize == nCurrentUTF8Size) && (ssOptions.bAnsi)) {
+            //                 bAdd = false;
+            //             }
 
-                        if (bAdd) {
-                            MS_RECORD record = {};
-                            record.recordType = MS_RECORD_TYPE_STRING_UTF8;
-                            record.nOffset = nCurrentUTF8Offset;
-                            record.nSize = nCurrentUTF8Size;
-                            record.sString = sString;
-                            record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-                            record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
+            //             if (bAdd) {
+            //                 MS_RECORD record = {};
+            //                 record.recordType = MS_RECORD_TYPE_STRING_UTF8;
+            //                 record.nOffset = nCurrentUTF8Offset;
+            //                 record.nSize = nCurrentUTF8Size;
+            //                 record.sString = sString;
+            //                 record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
+            //                 record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
 
-                            if (_addMultiSearchStringRecord(&listResult, &record, &ssOptions)) {
-                                nCurrentRecords++;
-                            }
+            //                 if (_addMultiSearchStringRecord(&listResult, &record, &ssOptions)) {
+            //                     nCurrentRecords++;
+            //                 }
 
-                            if (nCurrentRecords >= ssOptions.nLimit) {
-                                break;
-                            }
-                        }
-                    }
-                }
+            //                 if (nCurrentRecords >= ssOptions.nLimit) {
+            //                     break;
+            //                 }
+            //             }
+            //         }
+            //     }
 
-                if (bNewUTF8String) {
-                    *(pUTF8Buffer) = cSymbol;
-                    nCurrentUTF8Offset = _nOffset + i;
-                    nCurrentUTF8Size = 1;
-                } else {
-                    nCurrentUTF8Size = 0;
-                    nLastUTF8Offset = -1;
-                }
-            }
+            //     if (bNewUTF8String) {
+            //         *(pUTF8Buffer) = cSymbol;
+            //         nCurrentUTF8Offset = _nOffset + i;
+            //         nCurrentUTF8Size = 1;
+            //     } else {
+            //         nCurrentUTF8Size = 0;
+            //         nLastUTF8Offset = -1;
+            //     }
+            // }
 
             if (!bIsStart) {
                 quint16 nCode = cPrevSymbol + (cSymbol << 8);  // TODO BE/LE

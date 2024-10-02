@@ -864,11 +864,11 @@ public:
         qint64 nMinLenght;
         qint64 nMaxLenght;
         bool bAnsi;
-        bool bUTF8;
+        // bool bUTF8;
         bool bUnicode;
         bool bNullTerminated;
         QString sMask;
-        QString sANSICodec;
+        // QString sANSICodec;
         bool bLinks;
     };
 
