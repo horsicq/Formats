@@ -474,7 +474,7 @@ public:
     void clearOptionalHeader_DataDirectory(quint32 nNumber);
     bool isOptionalHeader_DataDirectoryPresent(quint32 nNumber);
 
-    QList<XPE_DEF::IMAGE_DATA_DIRECTORY> getDirectories(); // TODO pdStruct
+    QList<XPE_DEF::IMAGE_DATA_DIRECTORY> getDirectories();  // TODO pdStruct
     void setDirectories(QList<XPE_DEF::IMAGE_DATA_DIRECTORY> *pListDirectories);
 
     qint64 getDataDirectoryOffset(quint32 nNumber);
@@ -607,10 +607,10 @@ public:
     QList<RESOURCE_RECORD> getResources(qint32 nLimit, PDSTRUCT *pPdStruct = nullptr);
     QList<RESOURCE_RECORD> getResources(_MEMORY_MAP *pMemoryMap, qint32 nLimit = 10000, PDSTRUCT *pPdStruct = nullptr);
 
-    static RESOURCE_RECORD getResourceRecord(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords); // TODO pdstruct
-    static RESOURCE_RECORD getResourceRecord(quint32 nID1, const QString &sName2, QList<RESOURCE_RECORD> *pListResourceRecords); // TODO pdstruct
-    static RESOURCE_RECORD getResourceRecord(const QString &sName1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords); // TODO pdstruct
-    static RESOURCE_RECORD getResourceRecord(const QString &sName1, const QString &sName2, QList<RESOURCE_RECORD> *pListResourceRecords); // TODO pdstruct
+    static RESOURCE_RECORD getResourceRecord(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);                    // TODO pdstruct
+    static RESOURCE_RECORD getResourceRecord(quint32 nID1, const QString &sName2, QList<RESOURCE_RECORD> *pListResourceRecords);           // TODO pdstruct
+    static RESOURCE_RECORD getResourceRecord(const QString &sName1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);           // TODO pdstruct
+    static RESOURCE_RECORD getResourceRecord(const QString &sName1, const QString &sName2, QList<RESOURCE_RECORD> *pListResourceRecords);  // TODO pdstruct
 
     static QList<RESOURCE_RECORD> getResourceRecords(quint32 nID1, quint32 nID2, QList<RESOURCE_RECORD> *pListResourceRecords);
 

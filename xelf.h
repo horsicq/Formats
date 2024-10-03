@@ -222,9 +222,9 @@ public:
     QByteArray getSection(quint32 nIndex);
     bool isSectionValid(quint32 nIndex);
 
-    QList<XELF_DEF::Elf32_Shdr> getElf32_ShdrList(qint32 nLimit); // TODO pdStruct
-    QList<XELF_DEF::Elf64_Shdr> getElf64_ShdrList(qint32 nLimit); // TODO pdStruct
-    QList<XELF_DEF::Elf_Shdr> getElf_ShdrList(qint32 nLimit); // TODO pdStruct
+    QList<XELF_DEF::Elf32_Shdr> getElf32_ShdrList(qint32 nLimit);  // TODO pdStruct
+    QList<XELF_DEF::Elf64_Shdr> getElf64_ShdrList(qint32 nLimit);  // TODO pdStruct
+    QList<XELF_DEF::Elf_Shdr> getElf_ShdrList(qint32 nLimit);      // TODO pdStruct
 
     XELF_DEF::Elf32_Shdr getElf32_Shdr(quint32 nIndex);
     XELF_DEF::Elf64_Shdr getElf64_Shdr(quint32 nIndex);

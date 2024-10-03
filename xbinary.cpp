@@ -2650,14 +2650,14 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
     // bool bANSICodec = false;
 
     // TODO Check Qt6
-// #if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
-//     QTextCodec *pCodec = nullptr;
+    // #if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
+    //     QTextCodec *pCodec = nullptr;
 
-//     if (ssOptions.sANSICodec != "") {
-//         bANSICodec = true;
-//         pCodec = QTextCodec::codecForName(ssOptions.sANSICodec.toLatin1().data());
-//     }
-// #endif
+    //     if (ssOptions.sANSICodec != "") {
+    //         bANSICodec = true;
+    //         pCodec = QTextCodec::codecForName(ssOptions.sANSICodec.toLatin1().data());
+    //     }
+    // #endif
 
     qint64 _nSize = nSize;
     qint64 _nOffset = nOffset;
@@ -2790,17 +2790,17 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
                     if (ssOptions.bAnsi) {
                         QString sString;
 
-//                         if (!bANSICodec) {
-//                             sString = pAnsiBuffer;
-//                         } else {
-//                             // TODO Check Qt6
-//                             QByteArray baString = QByteArray(pAnsiBuffer, nCurrentAnsiSize);
-// #if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
-//                             sString = pCodec->toUnicode(baString);
-// #else
-//                             sString = QString::fromLatin1(baString);  // TODO
-// #endif
-//                         }
+                        //                         if (!bANSICodec) {
+                        //                             sString = pAnsiBuffer;
+                        //                         } else {
+                        //                             // TODO Check Qt6
+                        //                             QByteArray baString = QByteArray(pAnsiBuffer, nCurrentAnsiSize);
+                        // #if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
+                        //                             sString = pCodec->toUnicode(baString);
+                        // #else
+                        //                             sString = QString::fromLatin1(baString);  // TODO
+                        // #endif
+                        //                         }
 
                         sString = pAnsiBuffer;
 
