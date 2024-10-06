@@ -103,6 +103,7 @@ XBinary::_MEMORY_MAP XGif::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         pdStructEmpty = XBinary::createPdStruct();
         pPdStruct = &pdStructEmpty;
     }
+
     return XBinary::getMemoryMap(mapMode, pPdStruct);
 }
 
