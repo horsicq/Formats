@@ -69,7 +69,8 @@ XBinary::MODE XPE::getMode()
     nMachine = _getMachine(nMachine);
 
     if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_IA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64) ||
-        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ALPHA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_RISCV64)|| (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_LOONGARCH64)) {
+        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ALPHA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_RISCV64) ||
+        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_LOONGARCH64)) {
         result = MODE_64;
     } else {
         result = MODE_32;
