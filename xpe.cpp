@@ -2254,6 +2254,12 @@ quint64 XPE::getImportHash64(QList<IMPORT_RECORD> *pListImportRecords, PDSTRUCT 
 
 quint32 XPE::getImportHash32(QList<IMPORT_RECORD> *pListImportRecords, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     quint64 nResult = 0;
 
     qint32 nNumberOfImports = pListImportRecords->count();
