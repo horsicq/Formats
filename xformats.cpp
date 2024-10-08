@@ -56,6 +56,9 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMO
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         result = mach.getMemoryMap(mapMode, pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
+        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
+        result = amigaHunk.getMemoryMap(mapMode, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
         result = png.getMemoryMap(mapMode, pPdStruct);
@@ -190,6 +193,8 @@ QList<XBinary::MAPMODE> XFormats::getMapModesList(XBinary::FT fileType)
         listResult = XELF::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         listResult = XMACH::getMapModesList();
+    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
+        listResult = XAmigaHunk::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         listResult = XPNG::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
@@ -279,6 +284,9 @@ qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, 
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         nResult = mach.getEntryPointAddress();
+    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
+        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
+        nResult = amigaHunk.getEntryPointAddress();
     } else {
         nResult = 0;
     }
@@ -317,6 +325,9 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         nResult = mach._getEntryPointOffset();
+    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
+        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
+        nResult = amigaHunk._getEntryPointOffset();
     } else {
         nResult = 0;
     }
@@ -355,6 +366,9 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         bResult = mach.isBigEndian();
+    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
+        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
+        bResult = amigaHunk.isBigEndian();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -413,6 +427,9 @@ QList<XBinary::HREGION> XFormats::getHRegions(XBinary::FT fileType, QIODevice *p
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         listResult = mach.getHRegions(pMemoryMap, pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
+        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
+        listResult = amigaHunk.getHRegions(pMemoryMap, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
         listResult = png.getHRegions(pMemoryMap, pPdStruct);
@@ -523,6 +540,9 @@ QList<XBinary::HREGION> XFormats::getHighlights(XBinary::FT fileType, QIODevice 
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         listResult = mach.getHighlights(pMemoryMap, pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
+        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
+        listResult = amigaHunk.getHighlights(pMemoryMap, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
         listResult = png.getHighlights(pMemoryMap, pPdStruct);
@@ -793,6 +813,11 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
 
         XBinary::_MEMORY_MAP memoryMap = mach.getMemoryMap();
         listResult = mach.getSymbolRecords(&memoryMap, symBolType);
+    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
+        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
+
+        XBinary::_MEMORY_MAP memoryMap = amigaHunk.getMemoryMap();
+        listResult = amigaHunk.getSymbolRecords(&memoryMap, symBolType);
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -1041,6 +1066,9 @@ XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bo
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         result = mach.getOsInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
+        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
+        result = amigaHunk.getOsInfo();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -1092,6 +1120,9 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(_pDevice, bIsImage, nModuleAddress);
         result = mach.getFileFormatInfo(pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
+        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
+        result = amigaHunk.getFileFormatInfo(pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(_pDevice);
         result = png.getFileFormatInfo(pPdStruct);

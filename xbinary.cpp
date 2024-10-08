@@ -541,6 +541,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_MACHO: sResult = QString("Mach-O"); break;
         case FT_MACHO32: sResult = QString("Mach-O32"); break;
         case FT_MACHO64: sResult = QString("Mach-O64"); break;
+        case FT_AMIGAHUNK: sResult = QString("Amiga Hunk"); break;
         // Extra
         case FT_7Z: sResult = QString("7-Zip"); break;
         case FT_ANDROIDASRC: sResult = QString("Android ASRC"); break;
@@ -5030,11 +5031,11 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     bool bAllFound = false;
 
     if (nSize >= (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)) {
-        if ((((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ) ||
-            (((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_magic == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM)) {
+        if ((_read_uint16(pOffset) == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ) ||
+            (_read_uint16(pOffset) == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM)) {
             stResult.insert(FT_MSDOS);
             // TODO rewrite for NE, LE
-            quint32 nLfanew = ((XMSDOS_DEF::IMAGE_DOS_HEADEREX *)pOffset)->e_lfanew;
+            quint32 nLfanew = _read_uint32(pOffset + offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
             quint32 nHeaderSize = (quint32)baHeader.size() - sizeof(XPE_DEF::IMAGE_NT_HEADERS32);
 
             bool bIsNewHeaderValid = false;
@@ -5060,26 +5061,27 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             if (bIsNewHeaderValid) {
                 bIsNewHeaderValid = false;
 
-                if ((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature == XPE_DEF::S_IMAGE_NT_SIGNATURE) {
+                if (_read_uint32(pOffset) == XPE_DEF::S_IMAGE_NT_SIGNATURE) {
                     stResult.insert(FT_PE);
 
-                    quint16 nMachine = ((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset)->FileHeader.Machine;
+                    quint16 nMachine = _read_uint32(pOffset + 4 + offsetof(XPE_DEF::IMAGE_FILE_HEADER, Machine));
 
                     // TODO more
-                    if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_IA64) ||
-                        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64)) {
+                    if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_IA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64) ||
+                        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ALPHA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_RISCV64) ||
+                        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_LOONGARCH64)) {
                         stResult.insert(FT_PE64);
                     } else {
                         stResult.insert(FT_PE32);
                     }
                     bIsNewHeaderValid = true;
-                } else if ((((XNE_DEF::IMAGE_OS2_HEADER *)pOffset))->ne_magic == XNE_DEF::S_IMAGE_OS2_SIGNATURE) {
+                } else if (_read_uint32(pOffset) == XNE_DEF::S_IMAGE_OS2_SIGNATURE) {
                     stResult.insert(FT_NE);
                     bIsNewHeaderValid = true;
-                } else if ((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature == XLE_DEF::S_IMAGE_VXD_SIGNATURE) {
+                } else if (_read_uint32(pOffset) == XLE_DEF::S_IMAGE_VXD_SIGNATURE) {
                     stResult.insert(FT_LE);
                     bIsNewHeaderValid = true;
-                } else if ((((XPE_DEF::IMAGE_NT_HEADERS32 *)pOffset))->Signature == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
+                } else if (_read_uint32(pOffset) == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
                     stResult.insert(FT_LX);
                     bIsNewHeaderValid = true;
                 }
@@ -5141,16 +5143,29 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 stResult.insert(FT_ELF64);
             }
             // mb TODO another e_ident[4]
+            bAllFound = true;
         }
     }
 
     if ((!bAllFound) && (nSize >= (qint64)sizeof(XMACH_DEF::mach_header))) {
-        if ((((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_MAGIC) || (((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_CIGAM)) {
+        if ((_read_uint32(pOffset) == XMACH_DEF::S_MH_MAGIC) || (_read_uint32(pOffset) == XMACH_DEF::S_MH_CIGAM)) {
             stResult.insert(FT_MACHO);
             stResult.insert(FT_MACHO32);
-        } else if ((((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_MAGIC_64) || (((XMACH_DEF::mach_header *)pOffset)->magic == XMACH_DEF::S_MH_CIGAM_64)) {
+
+            bAllFound = true;
+        } else if ((_read_uint32(pOffset) == XMACH_DEF::S_MH_MAGIC_64) || (_read_uint32(pOffset) == XMACH_DEF::S_MH_CIGAM_64)) {
             stResult.insert(FT_MACHO);
             stResult.insert(FT_MACHO64);
+
+            bAllFound = true;
+        }
+    }
+
+    if ((!bAllFound) && (nSize >= 8)) {
+        if (_read_uint32(pOffset) == 0xf3030000) {
+            stResult.insert(FT_AMIGAHUNK);
+
+            bAllFound = true;
         }
     }
 
@@ -5361,6 +5376,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_LX;
     } else if (pStFileTypes->contains(FT_NE)) {
         result = FT_NE;
+    } else if (pStFileTypes->contains(FT_AMIGAHUNK)) {
+        result = FT_AMIGAHUNK;
     } else if (pStFileTypes->contains(FT_DOS16M)) {
         result = FT_DOS16M;
     } else if (pStFileTypes->contains(FT_DOS4G)) {
@@ -5545,6 +5562,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_MACHO32)) listResult.append(FT_MACHO32);
         if (stFileTypes.contains(FT_MACHO64)) listResult.append(FT_MACHO64);
         if (stFileTypes.contains(FT_BWDOS16M)) listResult.append(FT_BWDOS16M);
+        if (stFileTypes.contains(FT_AMIGAHUNK)) listResult.append(FT_AMIGAHUNK);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_ALL)) {
@@ -8771,7 +8789,7 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_ELF) || pStFileTypes->contains(XBinary::FT_ELF32) || pStFileTypes->contains(XBinary::FT_ELF64) ||
         pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) || pStFileTypes->contains(XBinary::FT_MACHO64) ||
         pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP) ||
-        pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA)) {
+        pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA) || pStFileTypes->contains(XBinary::FT_AMIGAHUNK)) {
         pStFileTypes->remove(XBinary::FT_BINARY);
     } else {
         pStFileTypes->insert(XBinary::FT_COM);

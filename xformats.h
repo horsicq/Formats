@@ -21,6 +21,7 @@
 #ifndef XFORMATS_H
 #define XFORMATS_H
 
+#include "xamigahunk.h"
 #include "xbinary.h"
 #include "xcom.h"
 #include "xelf.h"
@@ -76,7 +77,7 @@ public:
     static XBinary::OFFSETSIZE getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static XBinary::OFFSETSIZE getSignOffsetSize(const QString &sFileName);
     static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
-                                                          XBinary::SYMBOL_TYPE symBolType = XBinary::SYMBOL_TYPE_ALL);
+                                                          XBinary::SYMBOL_TYPE symBolType = XBinary::SYMBOL_TYPE_ALL); // TODO pdStruct
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QSet<XBinary::FT> getFileTypes(const QString &sFileName, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);

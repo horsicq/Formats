@@ -14,37 +14,42 @@ SOURCES += \
 
 !contains(XCONFIG, xcom) {
     XCONFIG += xcom
-    include($$PWD/xcom.pri)
+    include($$PWD/exec/xcom.pri)
 }
 
 !contains(XCONFIG, xmsdos) {
     XCONFIG += xmsdos
-    include($$PWD/xmsdos.pri)
+    include($$PWD/exec/xmsdos.pri)
 }
 
 !contains(XCONFIG, xne) {
     XCONFIG += xne
-    include($$PWD/xne.pri)
+    include($$PWD/exec/xne.pri)
 }
 
 !contains(XCONFIG, xle) {
     XCONFIG += xle
-    include($$PWD/xle.pri)
+    include($$PWD/exec/xle.pri)
 }
 
 !contains(XCONFIG, xpe) {
     XCONFIG += xpe
-    include($$PWD/xpe.pri)
+    include($$PWD/exec/xpe.pri)
 }
 
 !contains(XCONFIG, xmach) {
     XCONFIG += xmach
-    include($$PWD/xmach.pri)
+    include($$PWD/exec/xmach.pri)
 }
 
 !contains(XCONFIG, xelf) {
     XCONFIG += xelf
-    include($$PWD/xelf.pri)
+    include($$PWD/exec/xelf.pri)
+}
+
+!contains(XCONFIG, xamigahunk) {
+    XCONFIG += xamigahunk
+    include($$PWD/exec/xamigahunk.pri)
 }
 
 contains(XCONFIG, use_dex) {

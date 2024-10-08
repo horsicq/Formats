@@ -221,6 +221,7 @@ public:
         FT_MACHO,
         FT_MACHO32,
         FT_MACHO64,
+        FT_AMIGAHUNK,
         // Extra
         FT_7Z,
         FT_ANDROIDASRC,
@@ -1534,8 +1535,8 @@ public:
         QString sName;
     };
 
-    QList<HREGION> getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
-    virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
+    QList<HREGION> getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr); // TODO use 1 function
+    virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr); // TODO use 1 function
 
     static qint64 align_up(qint64 nValue, qint64 nAlignment);
     static qint64 align_down(qint64 nValue, qint64 nAlignment);
