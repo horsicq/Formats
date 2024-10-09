@@ -27,3 +27,46 @@ XAmigaHunk::XAmigaHunk(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) 
 XAmigaHunk::~XAmigaHunk()
 {
 }
+
+bool XAmigaHunk::isValid(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    bool bResult = false;
+
+    if (getSize() > 8) {
+        quint32 nMagic = read_uint32(0);
+
+        if ((nMagic == 0xf3030000) || (nMagic == 0xe7030000)) {
+            bResult = true;
+        }
+    }
+
+    return bResult;
+}
+
+QList<XBinary::MAPMODE> XAmigaHunk::getMapModesList()
+{
+    QList<XBinary::MAPMODE> listResult;
+
+    listResult.append(XBinary::MAPMODE_UNKNOWN);
+    listResult.append(XBinary::MAPMODE_REGIONS);
+
+    return listResult;
+}
+
+XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(mapMode)
+    Q_UNUSED(pPdStruct)
+
+    XBinary::_MEMORY_MAP result={};
+
+    quint32 nMagic = read_uint32(0);
+
+    if (nMagic == 0xf3030000) {
+
+    }
+
+    return result;
+}

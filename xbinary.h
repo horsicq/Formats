@@ -1186,6 +1186,7 @@ public:
     static quint32 getAdler32(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     quint32 getAdler32(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 
+    // https://reveng.sourceforge.io/crc-catalogue/ TODO
     static void _createCRC32Table(quint32 *pCRCTable, quint32 nPoly = 0xEDB88320);
     static quint32 *_getCRC32Table_EDB88320();
     static quint16 *_getCRC16Table();

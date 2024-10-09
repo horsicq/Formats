@@ -5162,7 +5162,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     }
 
     if ((!bAllFound) && (nSize >= 8)) {
-        if (_read_uint32(pOffset) == 0xf3030000) {
+        quint32 nMagic = _read_uint32(pOffset);
+        if ((nMagic == 0xf3030000) || (nMagic == 0xe7030000)) {
             stResult.insert(FT_AMIGAHUNK);
 
             bAllFound = true;
@@ -6777,7 +6778,7 @@ quint16 XBinary::_getCRC16(qint64 nOffset, qint64 nSize, quint16 nInit, PDSTRUCT
         delete[] pBuffer;
     }
 
-    nResult ^= 0xFFFFFFFF;
+    nResult ^= 0xFFFF;
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
