@@ -5031,8 +5031,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     bool bAllFound = false;
 
     if (nSize >= (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)) {
-        if ((_read_uint16(pOffset) == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ) ||
-            (_read_uint16(pOffset) == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM)) {
+        if ((_read_uint16(pOffset) == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ) || (_read_uint16(pOffset) == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM)) {
             stResult.insert(FT_MSDOS);
             // TODO rewrite for NE, LE
             quint32 nLfanew = _read_uint32(pOffset + offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
@@ -5067,9 +5066,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                     quint16 nMachine = _read_uint32(pOffset + 4 + offsetof(XPE_DEF::IMAGE_FILE_HEADER, Machine));
 
                     // TODO more
-                    if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_IA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64) ||
-                        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ALPHA64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_RISCV64) ||
-                        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_LOONGARCH64)) {
+                    if ((nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_IA64) ||
+                        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ARM64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_ALPHA64) ||
+                        (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_RISCV64) || (nMachine == XPE_DEF::S_IMAGE_FILE_MACHINE_LOONGARCH64)) {
                         stResult.insert(FT_PE64);
                     } else {
                         stResult.insert(FT_PE32);

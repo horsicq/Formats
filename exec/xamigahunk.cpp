@@ -60,12 +60,11 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
     Q_UNUSED(mapMode)
     Q_UNUSED(pPdStruct)
 
-    XBinary::_MEMORY_MAP result={};
+    XBinary::_MEMORY_MAP result = {};
 
     quint32 nMagic = read_uint32(0);
 
     if (nMagic == 0xf3030000) {
-
     }
 
     return result;
