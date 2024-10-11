@@ -6139,6 +6139,8 @@ QString XBinary::getDeviceDirectory(QIODevice *pDevice)
 
             sResult = fi.absolutePath();
         }
+    } else {
+        sResult = pDevice->property("DeviceDirectory").toString();
     }
 
     return sResult;
@@ -6158,6 +6160,8 @@ QString XBinary::getDeviceFileBaseName(QIODevice *pDevice)
 
             sResult = fi.baseName();
         }
+    } else {
+        sResult = pDevice->property("DeviceFileBaseName").toString();
     }
 
     return sResult;
@@ -6177,6 +6181,8 @@ QString XBinary::getDeviceFileCompleteSuffix(QIODevice *pDevice)
 
             sResult = fi.completeSuffix();
         }
+    } else {
+        sResult = pDevice->property("DeviceFileCompleteSuffix").toString();
     }
 
     return sResult;
@@ -6196,6 +6202,8 @@ QString XBinary::getDeviceFileSuffix(QIODevice *pDevice)
 
             sResult = fi.suffix();
         }
+    } else {
+        sResult = pDevice->property("DeviceFileSuffix").toString();
     }
 
     return sResult;
