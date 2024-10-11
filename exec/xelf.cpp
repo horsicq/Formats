@@ -5124,9 +5124,10 @@ qint64 XELF::getSymTableSize(qint64 nOffset)
 
 qint32 XELF::getNumberOfSymbols(qint64 nOffset, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    XBinary::PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        pdStructEmpty = XBinary::createPdStruct();
         pPdStruct = &pdStructEmpty;
     }
 
