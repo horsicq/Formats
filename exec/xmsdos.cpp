@@ -534,9 +534,10 @@ bool XMSDOS::isRichSignaturePresent()
 
 QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    XBinary::PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        pdStructEmpty = XBinary::createPdStruct();
         pPdStruct = &pdStructEmpty;
     }
 
