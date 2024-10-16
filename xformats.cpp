@@ -395,227 +395,114 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
     return bResult;
 }
 
-QList<XBinary::HREGION> XFormats::getHRegions(XBinary::FT fileType, QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, bool bIsImage, XADDR nModuleAddress,
-                                              XBinary::PDSTRUCT *pPdStruct)
-{
-    QList<XBinary::HREGION> listResult;
-
-    if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
-        XBinary binary(pDevice, bIsImage, nModuleAddress);
-        listResult = binary.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
-        XCOM com(pDevice, bIsImage, nModuleAddress);
-        listResult = com.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) {
-        XMSDOS msdos(pDevice, bIsImage, nModuleAddress);
-        listResult = msdos.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) {
-        XNE ne(pDevice, bIsImage, nModuleAddress);
-        listResult = ne.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_LE, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
-        listResult = le.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_LX, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
-        listResult = le.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) {
-        XPE pe(pDevice, bIsImage, nModuleAddress);
-        listResult = pe.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) {
-        XELF elf(pDevice, bIsImage, nModuleAddress);
-        listResult = elf.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
-        XMACH mach(pDevice, bIsImage, nModuleAddress);
-        listResult = mach.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
-        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
-        listResult = amigaHunk.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
-        XPNG png(pDevice);
-        listResult = png.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
-        XJpeg jpeg(pDevice);
-        listResult = jpeg.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
-        XIcon xicon(pDevice);
-        listResult = xicon.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_BMP, fileType)) {
-        XBMP xbmp(pDevice);
-        listResult = xbmp.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) {
-        XGif xgif(pDevice);
-        listResult = xgif.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) {
-        XTiff xtiff(pDevice);
-        listResult = xtiff.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) {
-        XMP4 xmp4(pDevice);
-        listResult = xmp4.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) {
-        XMP3 xmp3(pDevice);
-        listResult = xmp3.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) {
-        XRiff xriff(pDevice);
-        listResult = xriff.getHRegions(pMemoryMap, pPdStruct);
-    }
-#ifdef USE_DEX  // TODO Check !!!
-    else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
-        XDEX dex(pDevice);
-        listResult = dex.getHRegions(pMemoryMap, pPdStruct);
-    }
-#endif
-#ifdef USE_PDF  // TODO Check !!!
-    else if (XBinary::checkFileType(XBinary::FT_PDF, fileType)) {
-        XPDF pdf(pDevice);
-        listResult = pdf.getHRegions(pMemoryMap, pPdStruct);
-    }
-#endif
-#ifdef USE_ARCHIVE
-    else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) {
-        XZip zip(pDevice);
-        listResult = zip.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
-        XSevenZip sevenzip(pDevice);
-        listResult = sevenzip.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
-        XCab xcab(pDevice);
-        listResult = xcab.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) {
-        XRar xrar(pDevice);
-        listResult = xrar.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) {
-        XMACHOFat xmachofat(pDevice);
-        listResult = xmachofat.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) {
-        XGzip xgzip(pDevice);
-        listResult = xgzip.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) {
-        XZlib xzlib(pDevice);
-        listResult = xzlib.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) {
-        XLHA xlha(pDevice);
-        listResult = xlha.getHRegions(pMemoryMap, pPdStruct);
-    } else if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType)) {
-        XDOS16 xdos16(pDevice);
-        listResult = xdos16.getHRegions(pMemoryMap, pPdStruct);
-    }
-#endif
-    else {
-        XBinary binary(pDevice, bIsImage, nModuleAddress);
-        listResult = binary.getHRegions(pMemoryMap, pPdStruct);
-    }
-
-    return listResult;
-}
-
-QList<XBinary::HREGION> XFormats::getHighlights(XBinary::FT fileType, QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, bool bIsImage, XADDR nModuleAddress,
+QList<XBinary::HREGION> XFormats::getHighlights(XBinary::FT fileType, QIODevice *pDevice, XBinary::_MEMORY_MAP *pMemoryMap, const XBinary::HLOPTIONS &hlOptions, bool bIsImage, XADDR nModuleAddress,
                                                 XBinary::PDSTRUCT *pPdStruct)
 {
     QList<XBinary::HREGION> listResult;
 
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
         XBinary binary(pDevice, bIsImage, nModuleAddress);
-        listResult = binary.getHighlights(pMemoryMap, pPdStruct);
+        listResult = binary.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
         XCOM com(pDevice, bIsImage, nModuleAddress);
-        listResult = com.getHighlights(pMemoryMap, pPdStruct);
+        listResult = com.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) {
         XMSDOS msdos(pDevice, bIsImage, nModuleAddress);
-        listResult = msdos.getHighlights(pMemoryMap, pPdStruct);
+        listResult = msdos.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) {
         XNE ne(pDevice, bIsImage, nModuleAddress);
-        listResult = ne.getHighlights(pMemoryMap, pPdStruct);
+        listResult = ne.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_LE, fileType)) {
         XLE le(pDevice, bIsImage, nModuleAddress);
-        listResult = le.getHighlights(pMemoryMap, pPdStruct);
+        listResult = le.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_LX, fileType)) {
         XLE le(pDevice, bIsImage, nModuleAddress);
-        listResult = le.getHighlights(pMemoryMap, pPdStruct);
+        listResult = le.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) {
         XPE pe(pDevice, bIsImage, nModuleAddress);
-        listResult = pe.getHighlights(pMemoryMap, pPdStruct);
+        listResult = pe.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) {
         XELF elf(pDevice, bIsImage, nModuleAddress);
-        listResult = elf.getHighlights(pMemoryMap, pPdStruct);
+        listResult = elf.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
-        listResult = mach.getHighlights(pMemoryMap, pPdStruct);
+        listResult = mach.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
         XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
-        listResult = amigaHunk.getHighlights(pMemoryMap, pPdStruct);
+        listResult = amigaHunk.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         XPNG png(pDevice);
-        listResult = png.getHighlights(pMemoryMap, pPdStruct);
+        listResult = png.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
         XJpeg jpeg(pDevice);
-        listResult = jpeg.getHighlights(pMemoryMap, pPdStruct);
+        listResult = jpeg.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) {
         XIcon xicon(pDevice);
-        listResult = xicon.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xicon.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_BMP, fileType)) {
         XBMP xbmp(pDevice);
-        listResult = xbmp.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xbmp.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) {
         XGif xgif(pDevice);
-        listResult = xgif.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xgif.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) {
         XTiff xtiff(pDevice);
-        listResult = xtiff.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xtiff.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) {
         XMP4 xmp4(pDevice);
-        listResult = xmp4.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xmp4.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) {
         XMP3 xmp3(pDevice);
-        listResult = xmp3.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xmp3.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) {
         XRiff xriff(pDevice);
-        listResult = xriff.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xriff.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     }
 #ifdef USE_DEX  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
         XDEX dex(pDevice);
-        listResult = dex.getHighlights(pMemoryMap, pPdStruct);
+        listResult = dex.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     }
 #endif
 #ifdef USE_PDF  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_PDF, fileType)) {
         XPDF pdf(pDevice);
-        listResult = pdf.getHighlights(pMemoryMap, pPdStruct);
+        listResult = pdf.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     }
 #endif
 #ifdef USE_ARCHIVE
     else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) {
         XZip zip(pDevice);
-        listResult = zip.getHighlights(pMemoryMap, pPdStruct);
+        listResult = zip.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) {
         XSevenZip sevenzip(pDevice);
-        listResult = sevenzip.getHighlights(pMemoryMap, pPdStruct);
+        listResult = sevenzip.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) {
         XCab xcab(pDevice);
-        listResult = xcab.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xcab.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) {
         XRar xrar(pDevice);
-        listResult = xrar.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xrar.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) {
         XMACHOFat xmachofat(pDevice);
-        listResult = xmachofat.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xmachofat.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) {
         XGzip xgzip(pDevice);
-        listResult = xgzip.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xgzip.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) {
         XZlib xzlib(pDevice);
-        listResult = xzlib.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xzlib.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) {
         XLHA xlha(pDevice);
-        listResult = xlha.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xlha.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     } else if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType)) {
         XDOS16 xdos16(pDevice);
-        listResult = xdos16.getHighlights(pMemoryMap, pPdStruct);
+        listResult = xdos16.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     }
 #endif
     else {
         XBinary binary(pDevice, bIsImage, nModuleAddress);
-        listResult = binary.getHighlights(pMemoryMap, pPdStruct);
+        listResult = binary.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     }
 
     return listResult;

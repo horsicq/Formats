@@ -1529,6 +1529,11 @@ public:
     REGION_FILL getRegionFill(qint64 nOffset, qint64 nSize, qint32 nAlignment);
     static QString getDataString(char *pData, qint32 nDataSize, const QString &sBaseType, bool bIsBigEndian);
 
+    struct HLOPTIONS {
+        bool bRegions;
+        bool bHighlights;
+    };
+
     struct HREGION {
         XADDR nAddress;
         qint64 nOffset;
@@ -1536,8 +1541,8 @@ public:
         QString sName;
     };
 
-    QList<HREGION> getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);            // TODO use 1 function
-    virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);  // TODO use 1 function
+    QList<HREGION> _getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);            // TODO use 1 function
+    virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTIONS &hlOptions, PDSTRUCT *pPdStruct = nullptr);  // TODO use 1 function
 
     static qint64 align_up(qint64 nValue, qint64 nAlignment);
     static qint64 align_down(qint64 nValue, qint64 nAlignment);

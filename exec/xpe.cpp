@@ -1279,9 +1279,10 @@ void XPE::setSectionHeader(quint32 nNumber, XPE_DEF::IMAGE_SECTION_HEADER *pSect
 
 QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    XBinary::PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        pdStructEmpty = XBinary::createPdStruct();
         pPdStruct = &pdStructEmpty;
     }
 
@@ -8862,110 +8863,113 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
     return result;
 }
 
-QList<XBinary::HREGION> XPE::getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XPE::getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTIONS &hlOptions, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-
     QList<XBinary::HREGION> listResult;
 
+    if (hlOptions.bRegions)
     {
-        HREGION region = {};
-        region.nAddress = pMemoryMap->nEntryPointAddress;
-        region.nOffset = addressToOffset(pMemoryMap, region.nAddress);
-        region.nSize = 1;
-        region.sName = tr("Entry point");
-
-        listResult.append(region);
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
-
-        if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
+        listResult.append(_getHRegions(pMemoryMap, pPdStruct));
+    } else if (hlOptions.bHighlights) {
+        {
             HREGION region = {};
-            region.nAddress = dataDirectory.VirtualAddress;
-            region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
-            region.nSize = dataDirectory.Size;
-            region.sName = tr("Export");
+            region.nAddress = pMemoryMap->nEntryPointAddress;
+            region.nOffset = addressToOffset(pMemoryMap, region.nAddress);
+            region.nSize = 1;
+            region.sName = tr("Entry point");
 
             listResult.append(region);
         }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
+        {
+            XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
-        if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
-            HREGION region = {};
-            region.nAddress = dataDirectory.VirtualAddress;
-            region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
-            region.nSize = dataDirectory.Size;
-            region.sName = tr("Import");
+            if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
+                HREGION region = {};
+                region.nAddress = dataDirectory.VirtualAddress;
+                region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
+                region.nSize = dataDirectory.Size;
+                region.sName = tr("Export");
 
-            listResult.append(region);
+                listResult.append(region);
+            }
         }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
+        {
+            XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 
-        if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
-            HREGION region = {};
-            region.nAddress = dataDirectory.VirtualAddress;
-            region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
-            region.nSize = dataDirectory.Size;
-            region.sName = tr("Relocs");
+            if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
+                HREGION region = {};
+                region.nAddress = dataDirectory.VirtualAddress;
+                region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
+                region.nSize = dataDirectory.Size;
+                region.sName = tr("Import");
 
-            listResult.append(region);
+                listResult.append(region);
+            }
         }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
+        {
+            XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
 
-        if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
-            HREGION region = {};
-            region.nAddress = dataDirectory.VirtualAddress;
-            region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
-            region.nSize = dataDirectory.Size;
-            region.sName = tr("Resources");
+            if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
+                HREGION region = {};
+                region.nAddress = dataDirectory.VirtualAddress;
+                region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
+                region.nSize = dataDirectory.Size;
+                region.sName = tr("Relocs");
 
-            listResult.append(region);
+                listResult.append(region);
+            }
         }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+        {
+            XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 
-        if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
-            HREGION region = {};
-            region.nAddress = dataDirectory.VirtualAddress;
-            region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
-            region.nSize = dataDirectory.Size;
-            region.sName = QString("TLS");
+            if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
+                HREGION region = {};
+                region.nAddress = dataDirectory.VirtualAddress;
+                region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
+                region.nSize = dataDirectory.Size;
+                region.sName = tr("Resources");
 
-            listResult.append(region);
+                listResult.append(region);
+            }
         }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+        {
+            XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
 
-        if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
-            HREGION region = {};
-            region.nAddress = dataDirectory.VirtualAddress;
-            region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
-            region.nSize = dataDirectory.Size;
-            region.sName = QString(".NET");
+            if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
+                HREGION region = {};
+                region.nAddress = dataDirectory.VirtualAddress;
+                region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
+                region.nSize = dataDirectory.Size;
+                region.sName = QString("TLS");
 
-            listResult.append(region);
+                listResult.append(region);
+            }
         }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY);
+        {
+            XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
-        if (dataDirectory.VirtualAddress && isOffsetValid(pMemoryMap, dataDirectory.VirtualAddress)) {
-            HREGION region = {};
-            region.nAddress = -1;
-            region.nOffset = dataDirectory.VirtualAddress;
-            region.nSize = dataDirectory.Size;
-            region.sName = tr("Certificate");
+            if (isDataDirectoryValid(&dataDirectory, pMemoryMap)) {
+                HREGION region = {};
+                region.nAddress = dataDirectory.VirtualAddress;
+                region.nOffset = relAddressToOffset(pMemoryMap, region.nAddress);
+                region.nSize = dataDirectory.Size;
+                region.sName = QString(".NET");
 
-            listResult.append(region);
+                listResult.append(region);
+            }
+        }
+        {
+            XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY);
+
+            if (dataDirectory.VirtualAddress && isOffsetValid(pMemoryMap, dataDirectory.VirtualAddress)) {
+                HREGION region = {};
+                region.nAddress = -1;
+                region.nOffset = dataDirectory.VirtualAddress;
+                region.nSize = dataDirectory.Size;
+                region.sName = tr("Certificate");
+
+                listResult.append(region);
+            }
         }
     }
 

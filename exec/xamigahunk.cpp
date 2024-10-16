@@ -65,6 +65,27 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
     quint32 nMagic = read_uint32(0);
 
     if (nMagic == 0xf3030000) {
+        qint64 nCurrentOffset = 4;
+        quint32 nEndOfList = read_uint32(nCurrentOffset);
+
+        if (nEndOfList) {
+            // Resident library names
+            // QString sName = read_ansiString(nCurrentOffset);
+        } else {
+            nCurrentOffset += 4;
+        }
+        quint32 nTableSize = read_uint32(nCurrentOffset + 0);
+        // quint32 nFirstLoaded = read_uint32(nCurrentOffset + 4);
+        // quint32 nLastLoaded = read_uint32(nCurrentOffset + 8);
+
+        nCurrentOffset += 12;
+
+        // QList<qint64> listSizes;
+
+        // for (qint32 i = 0; i < nTableSize; i ++) {
+        //     listSizes.append(read_uint32(nCurrentOffset));
+        //     nCurrentOffset += 4;
+        // }
     }
 
     return result;

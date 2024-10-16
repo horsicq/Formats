@@ -5255,7 +5255,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 stResult.insert(FT_IMAGE);
                 stResult.insert(FT_ANI);
             }*/
-        } else if (compareSignature(&memoryMap, "'BW'........00000000", 0)) {
+        } else if (compareSignature(&memoryMap, "'BW'....00..00000000", 0)) {
             stResult.insert(FT_BWDOS16M);
         }
 
@@ -10237,7 +10237,7 @@ QString XBinary::getDataString(char *pData, qint32 nDataSize, const QString &sBa
     return sResult;
 }
 
-QList<XBinary::HREGION> XBinary::getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XBinary::_getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -10262,12 +10262,13 @@ QList<XBinary::HREGION> XBinary::getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *
     return listResult;
 }
 
-QList<XBinary::HREGION> XBinary::getHighlights(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XBinary::getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTIONS &hlOptions, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pMemoryMap)
-    Q_UNUSED(pPdStruct)
-
     QList<XBinary::HREGION> listResult;
+
+    if (hlOptions.bRegions) {
+        listResult.append(_getHRegions(pMemoryMap, pPdStruct));
+    }
 
     return listResult;
 }
