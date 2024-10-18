@@ -1350,9 +1350,10 @@ QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_H
 
 QList<QString> XPE::getSectionNames(QList<XPE::SECTION_RECORD> *pListSectionRecords, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    XBinary::PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        pdStructEmpty = XBinary::createPdStruct();
         pPdStruct = &pdStructEmpty;
     }
 
