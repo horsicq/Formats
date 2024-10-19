@@ -8870,8 +8870,7 @@ QList<XBinary::HREGION> XPE::getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTI
 {
     QList<XBinary::HREGION> listResult;
 
-    if (hlOptions.bRegions)
-    {
+    if (hlOptions.bRegions) {
         listResult.append(_getHRegions(pMemoryMap, pPdStruct));
     } else if (hlOptions.bHighlights) {
         {

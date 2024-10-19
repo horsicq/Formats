@@ -1541,7 +1541,7 @@ public:
         QString sName;
     };
 
-    QList<HREGION> _getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);            // TODO use 1 function
+    QList<HREGION> _getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);                                       // TODO use 1 function
     virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTIONS &hlOptions, PDSTRUCT *pPdStruct = nullptr);  // TODO use 1 function
 
     static qint64 align_up(qint64 nValue, qint64 nAlignment);
