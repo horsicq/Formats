@@ -9957,23 +9957,38 @@ bool XPE::isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString
             }
 
             if ((sTypeNamespace == _sTypeNamespace) && (sTypeName == _sTypeName)) {
-                qint32 nNumberOfMethodsRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef];
+                qint32 nNumberOfMethodsPtrRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodPtr];
+                qint32 nNumberOfMethodsDefRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef];
+
                 qint32 nMethodsCount = 0;
                 if (i < (nNumberOfRecords - 1)) {
                     XPE_DEF::S_METADATA_TYPEDEF recordNext = getMetadataTypeDef(pCliInfo, i + 1);
                     nMethodsCount = recordNext.nMethodList - record.nMethodList;
                 } else {
-                    nMethodsCount = nNumberOfMethodsRecords - record.nMethodList;
+                    nMethodsCount = nNumberOfMethodsPtrRecords - record.nMethodList;
                 }
 
                 for (qint32 j = 0; (j < nMethodsCount) && (!(pPdStruct->bIsStop)); j++) {
                     if (record.nMethodList) {
-                        XPE_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(pCliInfo, record.nMethodList + j - 1);
+                        QString _sMethodName;
 
-                        QString _sMethodName = _read_ansiString_safe(pBuffer, nBufferSize, methodDef.nName);
+                        if (nNumberOfMethodsPtrRecords) {
+                            XPE_DEF::S_METADATA_METHODPTR methodPtr = getMetadataMethodPtr(pCliInfo, record.nMethodList + j - 1);
+
+                            if (methodPtr.nMethod) {
+                                if (methodPtr.nMethod <= (quint32)nNumberOfMethodsDefRecords) {
+                                    XPE_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(pCliInfo, methodPtr.nMethod - 1);
+                                    _sMethodName = _read_ansiString_safe(pBuffer, nBufferSize, methodDef.nName);
+                                }
+                            }
+                        } else {
+                            XPE_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(pCliInfo, record.nMethodList + j - 1);
+                            _sMethodName = _read_ansiString_safe(pBuffer, nBufferSize, methodDef.nName);
+                        }
 
                         if (sMethodName == _sMethodName) {
                             bResult = true;
+                            break;
                         }
                     }
                 }
@@ -10176,6 +10191,25 @@ XPE_DEF::S_METADATA_METHODDEF XPE::getMetadataMethodDef(CLI_INFO *pCliInfo, qint
             nOffset += pCliInfo->metaData.nBLOBIndexSize;
             result.nParamList = pCliInfo->metaData.indexSize[XPE_DEF::metadata_Param] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
                                                                                            : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+        }
+    }
+
+    return result;
+}
+
+XPE_DEF::S_METADATA_METHODPTR XPE::getMetadataMethodPtr(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    XPE_DEF::S_METADATA_METHODPTR result = {};
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodPtr];
+        char *pBuffer = pCliInfo->metaData.baMetadata.data();
+        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
+
+        if (nNumber < nNumberOfRecords) {
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MethodPtr] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodPtr] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+            result.nMethod = pCliInfo->metaData.indexSize[XPE_DEF::metadata_MethodDef] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 

@@ -662,6 +662,10 @@ struct S_METADATA_METHODDEF {
     quint32 nParamList;
 };
 
+struct S_METADATA_METHODPTR {
+    quint32 nMethod;
+};
+
 struct S_METADATA_PARAM {
     quint32 nFlags;
     quint32 nSequence;

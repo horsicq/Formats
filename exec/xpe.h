@@ -877,6 +877,7 @@ public:
     XPE_DEF::S_METADATA_TYPEREF getMetadataTypeRef(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_MODULEREF getMetadataModuleRef(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_METHODDEF getMetadataMethodDef(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_METHODPTR getMetadataMethodPtr(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_PARAM getMetadataParam(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_TYPESPEC getMetadataTypeSpec(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_FIELD getMetadataField(CLI_INFO *pCliInfo, qint32 nNumber);
