@@ -10209,7 +10209,8 @@ XPE_DEF::S_METADATA_METHODPTR XPE::getMetadataMethodPtr(CLI_INFO *pCliInfo, qint
         if (nNumber < nNumberOfRecords) {
             qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MethodPtr] +
                              pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodPtr] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-            result.nMethod = pCliInfo->metaData.indexSize[XPE_DEF::metadata_MethodDef] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nMethod = pCliInfo->metaData.indexSize[XPE_DEF::metadata_MethodDef] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
+                                                                                            : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 
