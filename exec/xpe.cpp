@@ -2456,9 +2456,10 @@ void XPE::setImportDescriptor_FirstThunk(quint32 nNumber, quint32 nValue)
 
 QList<XPE::IMPORT_HEADER> XPE::getImports(PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    XBinary::PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        pdStructEmpty = XBinary::createPdStruct();
         pPdStruct = &pdStructEmpty;
     }
 
