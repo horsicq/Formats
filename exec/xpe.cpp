@@ -2780,9 +2780,10 @@ QList<quint32> XPE::getImportPositionHashes(QList<IMPORT_HEADER> *pListImport, b
 
 bool XPE::isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 nIndex, quint32 nHash, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    XBinary::PDSTRUCT pdStructEmpty = {};
 
     if (!pPdStruct) {
+        pdStructEmpty = XBinary::createPdStruct();
         pPdStruct = &pdStructEmpty;
     }
 
