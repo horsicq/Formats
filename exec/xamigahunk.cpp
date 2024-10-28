@@ -35,9 +35,9 @@ bool XAmigaHunk::isValid(PDSTRUCT *pPdStruct)
     bool bResult = false;
 
     if (getSize() > 8) {
-        quint32 nMagic = read_uint32(0);
+        quint32 nMagic = read_uint32(0, true);
 
-        if ((nMagic == 0xf3030000) || (nMagic == 0xe7030000)) {
+        if ((nMagic == 0x03f3) || (nMagic == 0x03e7)) {
             bResult = true;
         }
     }
@@ -61,31 +61,55 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
     Q_UNUSED(pPdStruct)
 
     XBinary::_MEMORY_MAP result = {};
+    result.nBinarySize = getSize();
 
-    quint32 nMagic = read_uint32(0);
+    qint64 nCurrentOffset = 0;
+    qint32 nIndex = 0;
 
-    if (nMagic == 0xf3030000) {
-        qint64 nCurrentOffset = 4;
-        quint32 nEndOfList = read_uint32(nCurrentOffset);
+    while (true) {
+        qint32 nRegionStart = nCurrentOffset;
+        quint32 nMagic = read_uint32(nCurrentOffset, true);
 
-        if (nEndOfList) {
-            // Resident library names
-            // QString sName = read_ansiString(nCurrentOffset);
-        } else {
+        if (nMagic == 0x03f3) {
             nCurrentOffset += 4;
+            quint32 nEndOfList = read_uint32(nCurrentOffset, true);
+
+            if (nEndOfList) {
+                // Resident library names
+                // QString sName = read_ansiString(nCurrentOffset);
+            } else {
+                nCurrentOffset += 4;
+            }
+            quint32 nTableSize = read_uint32(nCurrentOffset + 0, true);
+            // quint32 nFirstLoaded = read_uint32(nCurrentOffset + 4, true);
+            // quint32 nLastLoaded = read_uint32(nCurrentOffset + 8, true);
+
+            nCurrentOffset += 12;
+
+            QList<qint64> listSizes;
+
+            nTableSize = qMin(nTableSize, (quint32)100);
+
+            for (quint32 i = 0; i < nTableSize; i ++) {
+                listSizes.append(read_uint32(nCurrentOffset, true));
+                nCurrentOffset += 4;
+            }
+
+            {
+                _MEMORY_RECORD record = {};
+
+                record.nIndex = nIndex++;
+                record.type = MMT_HEADER;
+                record.nOffset = nRegionStart;
+                record.nSize =  nCurrentOffset - nRegionStart;
+                record.nAddress = 0;
+                record.sName = tr("Header");
+
+                result.listRecords.append(record);
+            }
+        } else {
+            break;
         }
-        quint32 nTableSize = read_uint32(nCurrentOffset + 0);
-        // quint32 nFirstLoaded = read_uint32(nCurrentOffset + 4);
-        // quint32 nLastLoaded = read_uint32(nCurrentOffset + 8);
-
-        nCurrentOffset += 12;
-
-        // QList<qint64> listSizes;
-
-        // for (qint32 i = 0; i < nTableSize; i ++) {
-        //     listSizes.append(read_uint32(nCurrentOffset));
-        //     nCurrentOffset += 4;
-        // }
     }
 
     return result;

@@ -25,6 +25,7 @@
 // https://github.com/robcowell/Atari_ST_Sources/blob/6f0b3c85c64fb8b0a2e03be8d4efe07c97fd7aee/Docs/92GUIDE/doc/amiga.txt#L225
 // http://amiga-dev.wikidot.com/file-format:hunk
 // https://github.com/corkami/pics/blob/master/binary/hunk.png
+// https://github.com/yuduo/IDA/blob/936973010a27a22b6ee04e2d3a1a908a89b0c581/idasdk66/ldr/amiga/amiga.cpp#L44
 class XAmigaHunk : public XBinary {
     Q_OBJECT
 
