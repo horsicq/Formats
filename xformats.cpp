@@ -954,6 +954,9 @@ XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bo
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         result = mach.getOsInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) {
+        XMACHOFat machofat(pDevice);
+        result = machofat.getOsInfo();
     } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
         XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
         result = amigaHunk.getOsInfo();

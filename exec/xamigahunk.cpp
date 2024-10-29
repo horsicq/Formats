@@ -49,7 +49,6 @@ QList<XBinary::MAPMODE> XAmigaHunk::getMapModesList()
 {
     QList<XBinary::MAPMODE> listResult;
 
-    listResult.append(XBinary::MAPMODE_UNKNOWN);
     listResult.append(XBinary::MAPMODE_REGIONS);
 
     return listResult;
@@ -69,9 +68,10 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
     while (true) {
         qint32 nRegionStart = nCurrentOffset;
         quint32 nMagic = read_uint32(nCurrentOffset, true);
+        nCurrentOffset += 4;
 
         if (nMagic == 0x03f3) {
-            nCurrentOffset += 4;
+
             quint32 nEndOfList = read_uint32(nCurrentOffset, true);
 
             if (nEndOfList) {
@@ -104,6 +104,50 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
                 record.nSize =  nCurrentOffset - nRegionStart;
                 record.nAddress = 0;
                 record.sName = tr("Header");
+
+                result.listRecords.append(record);
+            }
+        } else if (nMagic == 0x03E9) {
+            // CODE
+            quint32 nCodeSize = read_uint32(nCurrentOffset, true);
+            nCurrentOffset += 4;
+            nCurrentOffset += (nCodeSize * 4);
+            {
+                _MEMORY_RECORD record = {};
+
+                record.nIndex = nIndex++;
+                record.type = MMT_LOADSEGMENT;
+                record.nOffset = nRegionStart;
+                record.nSize =  nCurrentOffset - nRegionStart;
+                record.nAddress = nRegionStart;
+                record.sName = tr("Code");
+
+                result.listRecords.append(record);
+            }
+        } else if (nMagic == 0x03EC) {
+            // RELOC32
+            while (true) {
+                quint32 nRelocSize = read_uint32(nCurrentOffset, true);
+                nCurrentOffset += 4;
+
+                if (nRelocSize == 0) {
+                    break;
+                }
+
+                // quint32 nHunk = read_uint32(nCurrentOffset + 4, true);
+                nCurrentOffset += 4;
+                nCurrentOffset += (nRelocSize * 4);
+            }
+
+            {
+                _MEMORY_RECORD record = {};
+
+                record.nIndex = nIndex++;
+                record.type = MMT_TABLE;
+                record.nOffset = nRegionStart;
+                record.nSize =  nCurrentOffset - nRegionStart;
+                record.nAddress = nRegionStart;
+                record.sName = "Reloc32";
 
                 result.listRecords.append(record);
             }
