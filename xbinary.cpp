@@ -8537,6 +8537,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_MULTIPLATFORM: sResult = tr("Multiplatform"); break;
         case OSNAME_AIX: sResult = QString("AIX"); break;
         case OSNAME_ALPINELINUX: sResult = QString("Alpine Linux"); break;
+        case OSNAME_AMIGA: sResult = QString("Amiga"); break;
         case OSNAME_ANDROID: sResult = QString("Android"); break;
         case OSNAME_AROS: sResult = QString("Amiga Research OS"); break;
         case OSNAME_ASPLINUX: sResult = QString("ASPLinux"); break;

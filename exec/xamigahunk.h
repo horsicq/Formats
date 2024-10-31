@@ -22,6 +22,7 @@
 #define XAMIGAHUNK_H
 
 #include "xbinary.h"
+#include "xamigahunk_def.h"
 // https://github.com/robcowell/Atari_ST_Sources/blob/6f0b3c85c64fb8b0a2e03be8d4efe07c97fd7aee/Docs/92GUIDE/doc/amiga.txt#L225
 // http://amiga-dev.wikidot.com/file-format:hunk
 // https://github.com/corkami/pics/blob/master/binary/hunk.png
@@ -30,12 +31,46 @@ class XAmigaHunk : public XBinary {
     Q_OBJECT
 
 public:
+    struct HUNK {
+        quint32 nHunkType;
+        qint64 nOffset;
+        qint64 nSize;
+    };
+
+    enum TYPE {
+        TYPE_UNKNOWN = 0,
+        TYPE_EXECUTABLE,
+        TYPE_OBJECT,
+        // TODO More
+        // TODO Library
+    };
+
     explicit XAmigaHunk(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XAmigaHunk();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     static QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
+    virtual ENDIAN getEndian();
+    virtual QString getArch();
+    QString getArch(QList<HUNK> *pListHunks);
+    virtual MODE getMode();
+    MODE getMode(QList<HUNK> *pListHunks);
+
+    QList<HUNK> getHunks(PDSTRUCT *pPdStruct = nullptr);
+    static QString hunkTypeToString(quint32 nHunkType);
+
+    bool isHunkPresent(QList<HUNK> *pListHunks, quint32 nHunkType);
+    static QList<HUNK> _getHunksByType(QList<HUNK> *pListHunks, quint32 nHunkType);
+
+    virtual FT getFileType();
+    virtual OSINFO getOsInfo();
+    virtual QString getFileFormatExt();
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
+    virtual QString getFileFormatString();
+
+    virtual qint32 getType();
+    QString typeIdToString(qint32 nType);
 };
 
 #endif  // XAMIGAHUNK_H

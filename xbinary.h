@@ -373,6 +373,7 @@ public:
         OSNAME_MULTIPLATFORM,
         OSNAME_AIX,
         OSNAME_ALPINELINUX,
+        OSNAME_AMIGA,
         OSNAME_ANDROID,
         OSNAME_AROS,
         OSNAME_ASPLINUX,
