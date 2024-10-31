@@ -623,6 +623,7 @@ QString XBinary::fileTypeIdToExts(FT fileType)
         case FT_GZIP: sResult = QString("GZIP(gz, tgz, tar.gz)"); break;
         case FT_LE: sResult = QString("LE(le, lx)"); break;
         case FT_NE: sResult = QString("NE"); break;
+        case FT_AMIGAHUNK: sResult = QString("AmigaHunk"); break;
         case FT_SIGNATURE: sResult = tr("Signatures"); break;
         default: sResult = tr("Unknown");
     }

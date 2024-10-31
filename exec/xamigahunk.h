@@ -32,7 +32,7 @@ class XAmigaHunk : public XBinary {
 
 public:
     struct HUNK {
-        quint32 nHunkType;
+        quint32 nId;
         qint64 nOffset;
         qint64 nSize;
     };
@@ -68,6 +68,7 @@ public:
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
     virtual QString getFileFormatString();
+    virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
 
     virtual qint32 getType();
     QString typeIdToString(qint32 nType);
