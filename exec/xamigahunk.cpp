@@ -112,7 +112,8 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
         for (qint32 i = 0; (i < nNumberOfHunks) && (!(pPdStruct->bIsStop)); i++) {
             HUNK hunk = listHunks.at(i);
 
-            if ((hunk.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_DATA) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_BSS)) {
+            if ((hunk.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_DATA) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE) ||
+                (hunk.nId == XAMIGAHUNK_DEF::HUNK_BSS)) {
                 {
                     _MEMORY_RECORD record = {};
                     record.nIndex = nIndex++;
@@ -254,7 +255,7 @@ QList<XAmigaHunk::HUNK> XAmigaHunk::getHunks(PDSTRUCT *pPdStruct)
 
             nTableSize = qMin(nTableSize, (quint32)100);
 
-            for (quint32 i = 0; i < nTableSize; i ++) {
+            for (quint32 i = 0; i < nTableSize; i++) {
                 listSizes.append(read_uint32(nCurrentOffset, true));
                 nCurrentOffset += 4;
             }
@@ -391,12 +392,12 @@ XBinary::FT XAmigaHunk::getFileType()
 
 XBinary::OSINFO XAmigaHunk::getOsInfo()
 {
-    OSINFO result={};
+    OSINFO result = {};
 
     QList<HUNK> listHunks = getHunks();
 
     result.osName = OSNAME_AMIGA;
-    //result.sOsVersion = "";
+    // result.sOsVersion = "";
     result.sArch = getArch(&listHunks);
     result.mode = getMode(&listHunks);
     result.sType = getTypeAsString();
