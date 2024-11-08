@@ -4276,15 +4276,15 @@ qint64 XBinary::addressToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAdd
     qint64 nResult = -1;
 
     if (isAddressValid(pMemoryMap, nAddress)) {
-        nResult = nAddress -= pMemoryMap->nModuleAddress;
+        nResult = nAddress - pMemoryMap->nModuleAddress;
     }
 
     return nResult;
 }
 
-qint64 XBinary::getSegmentAddress(qint16 nSegment, qint16 nAddress)
+XADDR XBinary::getSegmentAddress(quint16 nSegment, quint16 nAddress)
 {
-    qint64 nResult = nSegment * 16 + nAddress;
+    XADDR nResult = nSegment * 16 + nAddress;
 
     if (nResult >= 0x100000) {
         nResult -= 0x100000;

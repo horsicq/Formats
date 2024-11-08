@@ -1006,7 +1006,7 @@ public:
     static qint64 relAddressToAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
     static qint64 addressToRelAddress(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
 
-    static qint64 getSegmentAddress(qint16 nSegment, qint16 nAddress);
+    static XADDR getSegmentAddress(quint16 nSegment, quint16 nAddress);
 
     static _MEMORY_RECORD getMemoryRecordByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
     static _MEMORY_RECORD getMemoryRecordByAddress(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
