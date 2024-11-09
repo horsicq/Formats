@@ -5075,13 +5075,13 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                         stResult.insert(FT_PE32);
                     }
                     bIsNewHeaderValid = true;
-                } else if (_read_uint32(pOffset) == XNE_DEF::S_IMAGE_OS2_SIGNATURE) {
+                } else if (_read_uint16(pOffset) == XNE_DEF::S_IMAGE_OS2_SIGNATURE) {
                     stResult.insert(FT_NE);
                     bIsNewHeaderValid = true;
-                } else if (_read_uint32(pOffset) == XLE_DEF::S_IMAGE_VXD_SIGNATURE) {
+                } else if (_read_uint16(pOffset) == XLE_DEF::S_IMAGE_VXD_SIGNATURE) {
                     stResult.insert(FT_LE);
                     bIsNewHeaderValid = true;
-                } else if (_read_uint32(pOffset) == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
+                } else if (_read_uint16(pOffset) == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
                     stResult.insert(FT_LX);
                     bIsNewHeaderValid = true;
                 }
@@ -5094,14 +5094,18 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 if (nCP > 0) {
                     qint64 nSignatureOffset = (nCP - 1) * 512 + nCblp;
                     if (nSize - nSignatureOffset) {
+                        bool bBW = false;
                         bool b16M = false;
                         bool b4G = false;
                         while (true) {
                             quint16 nSignature = read_uint16(nSignatureOffset);
 
                             if (nSignature == 0x5742) {  // BW
+                                bBW = true;
                                 b16M = true;
                                 nSignatureOffset = read_uint32(nSignatureOffset + offsetof(XMSDOS_DEF::dos16m_exe_header, next_header_pos));
+                            } else if (nSignature == 0x464D) {  // MF - find info
+                                nSignatureOffset += read_uint32(nSignatureOffset + 2);
                             } else if (nSignature == 0x5A4D) {  // MZ
                                 qint64 nSignatureOffsetOpt = read_uint32(nSignatureOffset + offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
                                 quint16 nSignatureOpt = read_uint16(nSignatureOffsetOpt + nSignatureOffset);
@@ -5119,9 +5123,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                             }
                         }
 
-                        if (b4G) {
+                        if (bBW && b4G) {
                             stResult.insert(FT_DOS4G);
-                        } else if (b16M) {
+                        } else if (bBW && b16M) {
                             stResult.insert(FT_DOS16M);
                         }
                     }
