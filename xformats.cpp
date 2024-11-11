@@ -1177,32 +1177,63 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
     QSet<XBinary::FT> stResult = XBinary::getFileTypes(pDevice, bExtra);
 
 #ifdef USE_ARCHIVE
-    if (stResult.contains(XBinary::FT_ZIP)) {
-        XZip xzip(pDevice);
+    if (pDevice->property(XBinary::fileTypeIdToFtString(XBinary::FT_ARCHIVE).toLatin1().data()).toBool()) {
+        // Cache
+        QList<QByteArray> listProperties = pDevice->dynamicPropertyNames();
 
-        if (xzip.isValid(pPdStruct)) {
-            QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(20000, pPdStruct);
+        qint32 nNumberOfProperties = listProperties.count();
 
-            stResult += getFileTypesZIP(pDevice, &listArchiveRecords, pPdStruct);
+        for (qint32 i = 0; i < nNumberOfProperties; i++) {
+            QByteArray baProperty = listProperties.at(i);
+            XBinary::FT fileType = XBinary::ftStringToFileTypeId(baProperty);
+
+            if (fileType != XBinary::FT_UNKNOWN) {
+                stResult.insert(fileType);
+            }
         }
-    } else if (stResult.contains(XBinary::FT_GZIP)) {
-        XGzip xgzip(pDevice);
 
-        if (xgzip.isValid(pPdStruct)) {
-            QList<XArchive::RECORD> listArchiveRecords = xgzip.getRecords(1, pPdStruct);
+    } else {
+        if (stResult.contains(XBinary::FT_ZIP)) {
+            XZip xzip(pDevice);
 
-            if (listArchiveRecords.count()) {
-                XArchive::RECORD record = listArchiveRecords.at(0);
-                QByteArray baData = XArchives::decompress(pDevice, &record, pPdStruct, 0, 0x200);
+            if (xzip.isValid(pPdStruct)) {
+                QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(20000, pPdStruct);
 
-                QSet<XBinary::FT> _ft = getFileTypes(&baData, true);
+                stResult += getFileTypesZIP(pDevice, &listArchiveRecords, pPdStruct);
+            }
+        } else if (stResult.contains(XBinary::FT_GZIP)) {
+            if (pDevice->size() < 100000000) {
+                XGzip xgzip(pDevice);
 
-                if (_ft.contains(XBinary::FT_TAR)) {
-                    XTGZ xtgz(pDevice);
-                    QList<XArchive::RECORD> listArchiveRecords = xtgz.getRecords(20000, pPdStruct);
+                if (xgzip.isValid(pPdStruct)) {
+                    QList<XArchive::RECORD> listArchiveRecords = xgzip.getRecords(1, pPdStruct);
 
-                    stResult += getFileTypesTGZ(pDevice, &listArchiveRecords, pPdStruct);
+                    if (listArchiveRecords.count()) {
+                        XArchive::RECORD record = listArchiveRecords.at(0);
+                        QByteArray baData = XArchives::decompress(pDevice, &record, pPdStruct, 0, 0x200);
+
+                        QSet<XBinary::FT> _ft = getFileTypes(&baData, true);
+
+                        if (_ft.contains(XBinary::FT_TAR)) {
+                            XTGZ xtgz(pDevice);
+                            QList<XArchive::RECORD> listArchiveRecords = xtgz.getRecords(20000, pPdStruct);
+
+                            stResult += getFileTypesTGZ(pDevice, &listArchiveRecords, pPdStruct);
+                        }
+                    }
                 }
+            }
+        }
+
+        if (stResult.contains(XBinary::FT_ARCHIVE)) {
+            QList<XBinary::FT> listFT = stResult.toList();
+
+            qint32 nNumberOfFT = listFT.count();
+
+            for (qint32 i = 0; i < nNumberOfFT; i++) {
+                XBinary::FT ft = listFT.at(i);
+
+                pDevice->setProperty(XBinary::fileTypeIdToFtString(ft).toLatin1().data(), true);
             }
         }
     }

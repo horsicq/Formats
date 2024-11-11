@@ -631,6 +631,165 @@ QString XBinary::fileTypeIdToExts(FT fileType)
     return sResult;
 }
 
+XBinary::FT XBinary::ftStringToFileTypeId(QString sFileType)
+{
+    FT result = FT_UNKNOWN;
+
+    if (sFileType == "DATA") result = FT_DATA;
+    else if (sFileType == "REGION") result = FT_REGION;
+    else if (sFileType == "PROCESS") result = FT_PROCESS;
+    else if (sFileType == "BINARY") result = FT_BINARY;
+    else if (sFileType == "BINARY16") result = FT_BINARY16;
+    else if (sFileType == "BINARY32") result = FT_BINARY32;
+    else if (sFileType == "BINARY64") result = FT_BINARY64;
+    else if (sFileType == "COM") result = FT_COM;
+    else if (sFileType == "MSDOS") result = FT_MSDOS;
+    else if (sFileType == "DOS16M") result = FT_DOS16M;
+    else if (sFileType == "DOS4G") result = FT_DOS4G;
+    else if (sFileType == "NE") result = FT_NE;
+    else if (sFileType == "LE") result = FT_LE;
+    else if (sFileType == "LX") result = FT_LX;
+    else if (sFileType == "PE") result = FT_PE;
+    else if (sFileType == "PE32") result = FT_PE32;
+    else if (sFileType == "PE64") result = FT_PE64;
+    else if (sFileType == "ELF") result = FT_ELF;
+    else if (sFileType == "ELF32") result = FT_ELF32;
+    else if (sFileType == "ELF64") result = FT_ELF64;
+    else if (sFileType == "MACHO") result = FT_MACHO;
+    else if (sFileType == "MACHO32") result = FT_MACHO32;
+    else if (sFileType == "MACHO64") result = FT_MACHO64;
+    else if (sFileType == "AMIGAHUNK") result = FT_AMIGAHUNK;
+    else if (sFileType == "7Z") result = FT_7Z;
+    else if (sFileType == "ANDROIDASRC") result = FT_ANDROIDASRC;
+    else if (sFileType == "ANDROIDXML") result = FT_ANDROIDXML;
+    else if (sFileType == "APK") result = FT_APK;
+    else if (sFileType == "APKS") result = FT_APKS;
+    else if (sFileType == "AR") result = FT_AR;
+    else if (sFileType == "TAR") result = FT_TAR;
+    else if (sFileType == "TARGZ") result = FT_TARGZ;
+    else if (sFileType == "ARCHIVE") result = FT_ARCHIVE;
+    else if (sFileType == "CAB") result = FT_CAB;
+    else if (sFileType == "DEX") result = FT_DEX;
+    else if (sFileType == "DOCUMENT") result = FT_DOCUMENT;
+    else if (sFileType == "GIF") result = FT_GIF;
+    else if (sFileType == "BMP") result = FT_BMP;
+    else if (sFileType == "IMAGE") result = FT_IMAGE;
+    else if (sFileType == "VIDEO") result = FT_VIDEO;
+    else if (sFileType == "AUDIO") result = FT_AUDIO;
+    else if (sFileType == "IPA") result = FT_IPA;
+    else if (sFileType == "JAR") result = FT_JAR;
+    else if (sFileType == "JPEG") result = FT_JPEG;
+    else if (sFileType == "MACHOFAT") result = FT_MACHOFAT;
+    else if (sFileType == "PDF") result = FT_PDF;
+    else if (sFileType == "PLAINTEXT") result = FT_PLAINTEXT;
+    else if (sFileType == "PNG") result = FT_PNG;
+    else if (sFileType == "RAR") result = FT_RAR;
+    else if (sFileType == "TEXT") result = FT_TEXT;
+    else if (sFileType == "TIFF") result = FT_TIFF;
+    else if (sFileType == "UNICODE") result = FT_UNICODE;
+    else if (sFileType == "UNICODE_BE") result = FT_UNICODE_BE;
+    else if (sFileType == "UNICODE_LE") result = FT_UNICODE_LE;
+    else if (sFileType == "UTF8") result = FT_UTF8;
+    else if (sFileType == "ZIP") result = FT_ZIP;
+    else if (sFileType == "GZIP") result = FT_GZIP;
+    else if (sFileType == "ZLIB") result = FT_ZLIB;
+    else if (sFileType == "LHA") result = FT_LHA;
+    else if (sFileType == "ICO") result = FT_ICO;
+    else if (sFileType == "CUR") result = FT_CUR;
+    else if (sFileType == "MP3") result = FT_MP3;
+    else if (sFileType == "MP4") result = FT_MP4;
+    else if (sFileType == "RIFF") result = FT_RIFF;
+    else if (sFileType == "AVI") result = FT_AVI;
+    else if (sFileType == "WEBP") result = FT_WEBP;
+    else if (sFileType == "SIGNATURE") result = FT_SIGNATURE;
+    else if (sFileType == "NPM") result = FT_NPM;
+    else if (sFileType == "DEB") result = FT_DEB;
+    else if (sFileType == "BWDOS16M") result = FT_BWDOS16M;
+
+    return result;
+}
+
+QString XBinary::fileTypeIdToFtString(FT fileType)
+{
+    QString sResult = "";
+
+    switch (fileType) {
+        case FT_UNKNOWN: sResult = "UNKNOWN"; break;
+        case FT_DATA: sResult = "DATA"; break;
+        case FT_REGION: sResult = "REGION"; break;
+        case FT_PROCESS: sResult = "PROCESS"; break;
+        case FT_BINARY: sResult = "BINARY"; break;
+        case FT_BINARY16: sResult = "BINARY16"; break;
+        case FT_BINARY32: sResult = "BINARY32"; break;
+        case FT_BINARY64: sResult = "BINARY64"; break;
+        case FT_COM: sResult = "COM"; break;
+        case FT_MSDOS: sResult = "MSDOS"; break;
+        case FT_DOS16M: sResult = "DOS16M"; break;
+        case FT_DOS4G: sResult = "DOS4G"; break;
+        case FT_NE: sResult = "NE"; break;
+        case FT_LE: sResult = "LE"; break;
+        case FT_LX: sResult = "LX"; break;
+        case FT_PE: sResult = "PE"; break;
+        case FT_PE32: sResult = "PE32"; break;
+        case FT_PE64: sResult = "PE64"; break;
+        case FT_ELF: sResult = "ELF"; break;
+        case FT_ELF32: sResult = "ELF32"; break;
+        case FT_ELF64: sResult = "ELF64"; break;
+        case FT_MACHO: sResult = "MACHO"; break;
+        case FT_MACHO32: sResult = "MACHO32"; break;
+        case FT_MACHO64: sResult = "MACHO64"; break;
+        case FT_AMIGAHUNK: sResult = "AMIGAHUNK"; break;
+        case FT_7Z: sResult = "7Z"; break;
+        case FT_ANDROIDASRC: sResult = "ANDROIDASRC"; break;
+        case FT_ANDROIDXML: sResult = "ANDROIDXML"; break;
+        case FT_APK: sResult = "APK"; break;
+        case FT_APKS: sResult = "APKS"; break;
+        case FT_AR: sResult = "AR"; break;
+        case FT_ARCHIVE: sResult = "ARCHIVE"; break;
+        case FT_AUDIO: sResult = "AUDIO"; break;
+        case FT_AVI: sResult = "AVI"; break;
+        case FT_BMP: sResult = "BMP"; break;
+        case FT_CAB: sResult = "CAB"; break;
+        case FT_CUR: sResult = "CUR"; break;
+        case FT_DEX: sResult = "DEX"; break;
+        case FT_DOCUMENT: sResult = "DOCUMENT"; break;
+        case FT_GIF: sResult = "GIF"; break;
+        case FT_GZIP: sResult = "GZIP"; break;
+        case FT_ICO: sResult = "ICO"; break;
+        case FT_IMAGE: sResult = "IMAGE"; break;
+        case FT_IPA: sResult = "IPA"; break;
+        case FT_JAR: sResult = "JAR"; break;
+        case FT_JPEG: sResult = "JPEG"; break;
+        case FT_LHA: sResult = "LHA"; break;
+        case FT_MACHOFAT: sResult = "MACHOFAT"; break;
+        case FT_MP3: sResult = "MP3"; break;
+        case FT_MP4: sResult = "MP4"; break;
+        case FT_NPM: sResult = "NPM"; break;
+        case FT_PDF: sResult = "PDF"; break;
+        case FT_PLAINTEXT: sResult = "PLAINTEXT"; break;
+        case FT_PNG: sResult = "PNG"; break;
+        case FT_RAR: sResult = "RAR"; break;
+        case FT_RIFF: sResult = "RIFF"; break;
+        case FT_SIGNATURE: sResult = "SIGNATURE"; break;
+        case FT_TAR: sResult = "TAR"; break;
+        case FT_TARGZ: sResult = "TARGZ"; break;
+        case FT_TEXT: sResult = "TEXT"; break;
+        case FT_TIFF: sResult = "TIFF"; break;
+        case FT_UNICODE: sResult = "UNICODE"; break;
+        case FT_UNICODE_BE: sResult = "UNICODE_BE"; break;
+        case FT_UNICODE_LE: sResult = "UNICODE_LE"; break;
+        case FT_UTF8: sResult = "UTF8"; break;
+        case FT_VIDEO: sResult = "VIDEO"; break;
+        case FT_WEBP: sResult = "WEBP"; break;
+        case FT_ZIP: sResult = "ZIP"; break;
+        case FT_ZLIB: sResult = "ZLIB"; break;
+        case FT_DEB: sResult = "DEB"; break;
+        case FT_BWDOS16M: sResult = "BWDOS16M"; break;
+    }
+
+    return sResult;
+}
+
 QString XBinary::convertFileName(const QString &sFileName)  // TODO Check
 {
     QString sResult = sFileName;
@@ -10392,14 +10551,24 @@ qint32 XBinary::_toWCharArray(const QString &sString, wchar_t *pWString)
     return nResult;
 }
 
-QString XBinary::dataToString(const QByteArray &baData)
+QString XBinary::dataToString(const QByteArray &baData, DSMODE dsmode)
 {
     QString sResult;
 
     qint32 nSize = baData.size();
+    sResult.reserve(nSize);
 
     for (qint32 i = 0; i < nSize; i++) {
-        sResult += QChar(baData.at(i));
+        QChar _char = QChar(baData.at(i));
+        if (dsmode == DSMODE_NONE) {
+            sResult += _char;
+        } else if (dsmode == DSMODE_NOPRINT_TO_DOT) {
+            if (_char.isPrint()) {
+                sResult += _char;
+            } else {
+                sResult += QChar('.');
+            }
+        }
     }
 
     return sResult;

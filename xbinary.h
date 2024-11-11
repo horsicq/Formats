@@ -693,6 +693,8 @@ public:
 
     static QString fileTypeIdToString(FT fileType);
     static QString fileTypeIdToExts(FT fileType);
+    static FT ftStringToFileTypeId(QString sFileType);
+    static QString fileTypeIdToFtString(FT fileType);
 
     static QString convertFileName(const QString &sFileName);
     static QString convertPathName(const QString &sPathName);
@@ -1554,7 +1556,12 @@ public:
     static QString _fromWCharArray(const wchar_t *pWString, qint32 size = -1);
     static qint32 _toWCharArray(const QString &sString, wchar_t *pWString);
 
-    static QString dataToString(const QByteArray &baData);
+    enum DSMODE {
+        DSMODE_NONE = 0,
+        DSMODE_NOPRINT_TO_DOT
+    };
+
+    static QString dataToString(const QByteArray &baData, DSMODE dsmode);
     static QString convertSignature(const QString &sSignature);
 
 private:
