@@ -512,6 +512,18 @@ quint64 XBinary::random(quint64 nLimit)
     return nResult;
 }
 
+QString XBinary::randomString(qint32 nSize)
+{
+    QString sResult;
+    sResult.reserve(nSize);
+
+    for (int i = 0; i < nSize; i++) {
+        sResult += QChar('A' + (char)random(26 * 2));
+    }
+
+    return sResult;
+}
+
 QString XBinary::fileTypeIdToString(XBinary::FT fileType)
 {
     QString sResult = tr("Unknown");

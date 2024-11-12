@@ -690,6 +690,7 @@ public:
     static quint32 random32();
     static quint64 random64();
     static quint64 random(quint64 nLimit);
+    static QString randomString(qint32 nSize);
 
     static QString fileTypeIdToString(FT fileType);
     static QString fileTypeIdToExts(FT fileType);

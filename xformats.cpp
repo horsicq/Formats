@@ -1226,7 +1226,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
         }
 
         if (stResult.contains(XBinary::FT_ARCHIVE)) {
-            QList<XBinary::FT> listFT = stResult.toList();
+            QList<XBinary::FT> listFT = stResult.values();
 
             qint32 nNumberOfFT = listFT.count();
 
