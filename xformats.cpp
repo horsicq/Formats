@@ -1272,15 +1272,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
                 pComboBox->setCurrentIndex(nNumberOfListTypes - 1);
             }
         } else {
-            qint32 nNumberOfItems = pComboBox->count();
-
-            for (qint32 i = 0; i < nNumberOfItems; i++) {
-                if (pComboBox->itemData(i).toUInt() == fileType) {
-                    pComboBox->setCurrentIndex(i);
-
-                    break;
-                }
-            }
+            setComboBoxCurrent(pComboBox, fileType);
         }
     }
 
@@ -1307,43 +1299,62 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, const QString &s
 }
 #endif
 #ifdef QT_GUI_LIB
-void XFormats::setCurrentFileTypeComboBox(QComboBox *pComboBox, XBinary::FT fileType)
+QVariant XFormats::setComboBoxCurrent(QComboBox *pComboBox, QVariant varValue)
 {
+    QVariant varResult;
+
     const bool bBlocked1 = pComboBox->blockSignals(true);
 
     qint32 nNumberOfItems = pComboBox->count();
 
     for (qint32 i = 0; i < nNumberOfItems; i++) {
-        if (pComboBox->itemData(i).toUInt() == fileType) {
+        if (pComboBox->itemData(i) == varValue) {
             pComboBox->setCurrentIndex(i);
+
+            varResult = varValue;
 
             break;
         }
     }
 
     pComboBox->blockSignals(bBlocked1);
+
+    return varResult;
 }
 
 #endif
 #ifdef QT_GUI_LIB
-bool XFormats::setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian)
+XBinary::ENDIAN XFormats::setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian)
 {
     const bool bBlocked1 = pComboBox->blockSignals(true);
-
-    bool bResult = endian;
 
     pComboBox->clear();
 
     pComboBox->addItem(XBinary::endianToString(XBinary::ENDIAN_LITTLE), XBinary::ENDIAN_LITTLE);
     pComboBox->addItem(XBinary::endianToString(XBinary::ENDIAN_BIG), XBinary::ENDIAN_BIG);
 
-    if (endian == XBinary::ENDIAN_BIG) {
-        pComboBox->setCurrentIndex(1);
-    }
+    XBinary::ENDIAN result = (XBinary::ENDIAN)setComboBoxCurrent(pComboBox, endian).toUInt();
 
     pComboBox->blockSignals(bBlocked1);
 
-    return bResult;
+    return result;
+}
+#endif
+#ifdef QT_GUI_LIB
+qint32 XFormats::setBaseComboBox(QComboBox *pComboBox, qint32 nBase)
+{
+    const bool bBlocked1 = pComboBox->blockSignals(true);
+
+    pComboBox->clear();
+
+    pComboBox->addItem(QString("10"), 10);
+    pComboBox->addItem(QString("16"), 16);
+
+    qint32 nResult = setComboBoxCurrent(pComboBox, nBase).toInt();
+
+    pComboBox->blockSignals(bBlocked1);
+
+    return nResult;
 }
 #endif
 #ifdef QT_GUI_LIB

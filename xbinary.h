@@ -1132,7 +1132,7 @@ public:
     static QString valueToHexColon(MODE mode, quint64 nValue, bool bIsBigEndian = false);
     static QString xVariantToHex(XVARIANT value);
 
-    static QString thisToString(qint64 nDelta);
+    static QString thisToString(qint64 nDelta, qint32 nBase = 16);
 
     static bool checkString_byte(const QString &sValue);
     static bool checkString_word(const QString &sValue);

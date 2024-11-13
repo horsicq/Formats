@@ -5962,16 +5962,16 @@ QString XBinary::xVariantToHex(XVARIANT value)
     return sResult;
 }
 
-QString XBinary::thisToString(qint64 nDelta)
+QString XBinary::thisToString(qint64 nDelta, qint32 nBase)
 {
     QString sResult;
 
     if (nDelta == 0) {
         sResult = "$ ==>";
     } else if (nDelta > 0) {
-        sResult = QString("$+%1").arg(nDelta, 0, 16);
+        sResult = QString("$+%1").arg(nDelta, 0, nBase);
     } else if (nDelta < 0) {
-        sResult = QString("$-%1").arg(-nDelta, 0, 16);
+        sResult = QString("$-%1").arg(-nDelta, 0, nBase);
     }
 
     return sResult;

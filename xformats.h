@@ -93,8 +93,9 @@ public:
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox, XBinary::TL_OPTION tlOption = XBinary::TL_OPTION_DEFAULT);
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox,
                                            XBinary::TL_OPTION tlOption = XBinary::TL_OPTION_DEFAULT);
-    static void setCurrentFileTypeComboBox(QComboBox *pComboBox, XBinary::FT fileType);
-    static bool setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian);
+    static QVariant setComboBoxCurrent(QComboBox *pComboBox, QVariant varValue);
+    static XBinary::ENDIAN setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian);
+    static qint32 setBaseComboBox(QComboBox *pComboBox, qint32 nBase);
     static XBinary::MAPMODE getMapModesList(XBinary::FT fileType, QComboBox *pComboBox);
     static void setProgressBar(QProgressBar *pProgressBar, XBinary::PDRECORD pdRecord);
 #endif
