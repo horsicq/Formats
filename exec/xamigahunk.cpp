@@ -37,7 +37,7 @@ bool XAmigaHunk::isValid(PDSTRUCT *pPdStruct)
     if (getSize() > 8) {
         quint32 nMagic = read_uint32(0, true);
 
-        if ((nMagic == 0x03f3) || (nMagic == 0x03e7)) {
+        if ((nMagic == XAMIGAHUNK_DEF::HUNK_HEADER) || (nMagic == XAMIGAHUNK_DEF::HUNK_UNIT)) {
             bResult = true;
         }
     }
