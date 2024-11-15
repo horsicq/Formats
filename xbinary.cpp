@@ -7772,7 +7772,7 @@ quint64 XBinary::swapBytes(quint64 nValue)
 
 bool XBinary::isPlainTextType()
 {
-    QByteArray baData = read_array(0, qMin(getSize(), (qint64)0x100));
+    QByteArray baData = read_array(0, qMin(getSize(), (qint64)0x2000));
 
     return isPlainTextType(&baData);
 }
