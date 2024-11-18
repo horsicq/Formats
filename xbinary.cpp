@@ -6392,6 +6392,19 @@ QString XBinary::getFileDirectory(const QString &sFileName)
     return fi.absolutePath();
 }
 
+QIODevice *XBinary::getBackupDevice(QIODevice *pDevice)
+{
+    QIODevice *pResult = nullptr;
+
+    pResult = (QIODevice *)pDevice->property("BACKUPDEVICE").toULongLong();
+
+    if (!pResult) {
+        pResult = pDevice;
+    }
+
+    return pResult;
+}
+
 bool XBinary::isBackupPresent(QIODevice *pDevice)
 {
     return XBinary::isFileExists(XBinary::getBackupFileName(pDevice));

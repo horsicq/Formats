@@ -21,6 +21,8 @@
 #ifndef SUBDEVICE_H
 #define SUBDEVICE_H
 
+#include <QVariant>
+
 #include "xiodevice.h"
 
 class SubDevice : public XIODevice {

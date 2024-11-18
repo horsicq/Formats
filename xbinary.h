@@ -1168,6 +1168,7 @@ public:
     static QString getDeviceFileSuffix(QIODevice *pDevice);
     static QString getFileDirectory(const QString &sFileName);
 
+    static QIODevice *getBackupDevice(QIODevice *pDevice);
     static bool isBackupPresent(QIODevice *pDevice);
     static bool saveBackup(QIODevice *pDevice);
 

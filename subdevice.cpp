@@ -46,6 +46,10 @@ SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize, QObject *
 
     //    reset();
     pDevice->seek(nOffset);
+
+    QVariant varBackupDevice = (quint64)pDevice;
+
+    setProperty("BACKUPDEVICE", varBackupDevice);
 }
 
 SubDevice::~SubDevice()
