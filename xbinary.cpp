@@ -6200,7 +6200,7 @@ QString XBinary::getDumpFileName(const QString &sFileName)
 
 QString XBinary::getBackupFileName(QIODevice *pDevice)
 {
-    QString sResult = QString("Backup.%1.BAK").arg(getCurrentBackupDate());
+    QString sResult = QString("Backup_%1.BAK").arg(getCurrentBackupDate());
 
     QFile *pFile = dynamic_cast<QFile *>(pDevice);
 
@@ -6228,7 +6228,7 @@ QString XBinary::getBackupFileName(const QString &sFileName)
         sResult += "." + sSuffix;
     }
 
-    sResult += QString(".%1.BAK").arg(getCurrentBackupDate());
+    sResult += QString("_%1.BAK").arg(getCurrentBackupDate());
 
     return sResult;
 }
