@@ -887,8 +887,15 @@ void XMACH::_setCommand_cmdsize(qint64 nOffset, quint32 nValue)
     write_uint32(nOffset + offsetof(XMACH_DEF::load_command, cmdsize), nValue, isBigEndian());
 }
 
-QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID)
+QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, PDSTRUCT *pPdStruct)
 {
+    XBinary::PDSTRUCT pdStructEmpty = {};
+
+    if (!pPdStruct) {
+        pdStructEmpty = XBinary::createPdStruct();
+        pPdStruct = &pdStructEmpty;
+    }
+
     QList<COMMAND_RECORD> listResult;
 
     quint32 nNumberOfCommands = getHeader_ncmds();
@@ -903,10 +910,34 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID)
     bool bIsBigEndian = isBigEndian();
     bool bIs64 = is64();
 
+    listResult = _getCommandRecords(nOffset,nSizeOfCommands,nNumberOfCommands,bIs64,bIsBigEndian,nCommandID,pPdStruct);
+
+    return listResult;
+}
+
+QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+{
+    QList<COMMAND_RECORD> listResult;
+
+    qint32 nNumberOfCommands = pListCommandRecords->count();
+
+    for (qint32 i = 0; i < nNumberOfCommands; i++) {
+        if (pListCommandRecords->at(i).nId == nCommandID) {
+            listResult.append(pListCommandRecords->at(i));
+        }
+    }
+
+    return listResult;
+}
+
+QList<XMACH::COMMAND_RECORD> XMACH::_getCommandRecords(qint64 nDataOffset, qint64 nDataSize, qint32 nLimit, bool bIs64, bool bIsBigEndian, quint32 nCommandID, PDSTRUCT *pPdStruct)
+{
+    QList<COMMAND_RECORD> listResult;
+
     qint64 nSize = 0;
 
-    for (quint32 i = 0; i < nNumberOfCommands; i++) {
-        COMMAND_RECORD record = _readLoadCommand(nOffset, bIsBigEndian);
+    for (qint32 i = 0; (i < nLimit) && (!(pPdStruct->bIsStop)); i++) {
+        COMMAND_RECORD record = _readLoadCommand(nDataOffset, bIsBigEndian);
 
         if ((nCommandID == 0) || (record.nId == nCommandID)) {
             listResult.append(record);
@@ -921,25 +952,10 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID)
         }
 
         nSize += _nSize;
-        nOffset += _nSize;
+        nDataOffset += _nSize;
 
-        if (nSize > nSizeOfCommands) {
+        if (nSize > nDataSize) {
             break;
-        }
-    }
-
-    return listResult;
-}
-
-QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
-{
-    QList<COMMAND_RECORD> listResult;
-
-    qint32 nNumberOfCommands = pListCommandRecords->count();
-
-    for (qint32 i = 0; i < nNumberOfCommands; i++) {
-        if (pListCommandRecords->at(i).nId == nCommandID) {
-            listResult.append(pListCommandRecords->at(i));
         }
     }
 
