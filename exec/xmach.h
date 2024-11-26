@@ -203,7 +203,7 @@ public:
 
     QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID = 0, PDSTRUCT *pPdStruct = nullptr);
     QList<COMMAND_RECORD> _getCommandRecords(qint64 nDataOffset, qint64 nDataSize, qint32 nLimit, bool bIs64, bool bIsBigEndian, quint32 nCommandID = 0, PDSTRUCT *pPdStruct = nullptr);
-    static QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID, QList<COMMAND_RECORD> *pListCommandRecords);
+    static QList<COMMAND_RECORD> getCommandRecords(quint32 nCommandID, QList<COMMAND_RECORD> *pListCommandRecords, PDSTRUCT *pPdStruct = nullptr);
 
     bool isCommandPresent(quint32 nCommandID, qint32 nIndex = 0);
     bool isCommandPresent(quint32 nCommandID, qint32 nIndex, QList<COMMAND_RECORD> *pListCommandRecords);

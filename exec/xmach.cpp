@@ -915,13 +915,20 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, PDSTRU
     return listResult;
 }
 
-QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *pListCommandRecords, PDSTRUCT *pPdStruct)
 {
     QList<COMMAND_RECORD> listResult;
 
+    XBinary::PDSTRUCT pdStructEmpty = {};
+
+    if (!pPdStruct) {
+        pdStructEmpty = XBinary::createPdStruct();
+        pPdStruct = &pdStructEmpty;
+    }
+
     qint32 nNumberOfCommands = pListCommandRecords->count();
 
-    for (qint32 i = 0; i < nNumberOfCommands; i++) {
+    for (qint32 i = 0; (i < nNumberOfCommands) && (!(pPdStruct->bIsStop)); i++) {
         if (pListCommandRecords->at(i).nId == nCommandID) {
             listResult.append(pListCommandRecords->at(i));
         }
