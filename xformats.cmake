@@ -12,8 +12,11 @@ if (NOT DEFINED XPDF_SOURCES)
     include(${CMAKE_CURRENT_LIST_DIR}/../XPDF/xpdf.cmake)
     set(XFORMATS_SOURCES ${XFORMATS_SOURCES} ${XPDF_SOURCES})
 endif()
+if (NOT DEFINED XARCHIVES_SOURCES)
+    include(${CMAKE_CURRENT_LIST_DIR}/../XArchive/xarchives.cmake)
+    set(XFORMATS_SOURCES ${XFORMATS_SOURCES} ${XARCHIVES_SOURCES})
+endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/../XArchive/xarchives.cmake)
 # TODO
 
 set(XFORMATS_SOURCES

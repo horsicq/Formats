@@ -231,7 +231,7 @@ QList<XAmigaHunk::HUNK> XAmigaHunk::getHunks(PDSTRUCT *pPdStruct)
 
     while (!(pPdStruct->bIsStop)) {
         HUNK record = {};
-        record.nId = read_uint32(nCurrentOffset, true);
+        record.nId = read_uint32(nCurrentOffset, true) & 0x3FFFFFFF;
         record.nOffset = nCurrentOffset;
 
         nCurrentOffset += 4;
