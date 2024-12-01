@@ -29,21 +29,21 @@ const quint16 S_IMAGE_DOS_SIGNATURE_MZ = 0x5A4D;  // MZ
 const quint16 S_IMAGE_DOS_SIGNATURE_ZM = 0x4D5A;  // ZM
 
 struct EXE_file {
-    quint16 exe_signature;       // must contain 4D5A  (yay zibo!)
-    quint16 exe_len_mod_512;     // low 9 bits of length
-    quint16 exe_pages;           // number of 512b pages in file
-    quint16 exe_rle_count;       // count of reloc entries
-    quint16 exe_par_dir;         // number of paragraphs before image
-    quint16 exe_min_BSS;         // minimum number of para of BSS
-    quint16 exe_max_BSS;         // max number of para of BSS
-    quint16 exe_SS;              // stack of image
-    quint16 exe_SP;              // SP of image
-    quint16 exe_chksum;          // checksum  of file (ignored)
-    quint16 exe_IP;              // IP of entry
-    quint16 exe_CS;              // CS of entry
-    quint16 exe_rle_table;       // byte offset of reloc table
-    quint16 exe_iov;             // overlay number (0 for root)
-    quint32 exe_sym_tab;         // offset of symbol table in file
+    quint16 exe_signature;    // must contain 4D5A  (yay zibo!)
+    quint16 exe_len_mod_512;  // low 9 bits of length
+    quint16 exe_pages;        // number of 512b pages in file
+    quint16 exe_rle_count;    // count of reloc entries
+    quint16 exe_par_dir;      // number of paragraphs before image
+    quint16 exe_min_BSS;      // minimum number of para of BSS
+    quint16 exe_max_BSS;      // max number of para of BSS
+    quint16 exe_SS;           // stack of image
+    quint16 exe_SP;           // SP of image
+    quint16 exe_chksum;       // checksum  of file (ignored)
+    quint16 exe_IP;           // IP of entry
+    quint16 exe_CS;           // CS of entry
+    quint16 exe_rle_table;    // byte offset of reloc table
+    quint16 exe_iov;          // overlay number (0 for root)
+    quint32 exe_sym_tab;      // offset of symbol table in file
 };
 
 struct IMAGE_DOS_HEADER {
