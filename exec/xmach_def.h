@@ -853,6 +853,15 @@ struct build_tool_version {
     quint32 version; /* version number of the tool */
 };
 
+struct fileset_entry_command {
+    quint32     cmd;        /* LC_FILESET_ENTRY */
+    quint32     cmdsize;    /* includes entry_id string */
+    quint64     vmaddr;     /* memory address of the entry */
+    quint64     fileoff;    /* file offset of the entry */
+    quint32  entry_id;   /* contained entry id */
+    quint32     reserved;   /* reserved */
+};
+
 /* Known values for the platform field above. */
 const quint32 S_PLATFORM_MACOS = 1;
 const quint32 S_PLATFORM_IOS = 2;

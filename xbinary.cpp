@@ -8799,7 +8799,7 @@ XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
 
 XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE mode)
 {
-    XBinary::DM dmResult = DM_X86_16;
+    XBinary::DM dmResult = DM_UNKNOWN;
 
     if (sArch == "PPC") {
         if (bIsBigEndian) {
