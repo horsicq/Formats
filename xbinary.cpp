@@ -7582,6 +7582,32 @@ QString XBinary::convertSignature(const QString &sSignature)
     return _sSignature;
 }
 
+QList<XBinary::STRINGTABLE_RECORD> XBinary::getStringTable_ANSI(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::STRINGTABLE_RECORD> listResult;
+
+    QByteArray baStringTable = read_array(nOffset, nSize, pPdStruct);
+
+    char *_pOffset = baStringTable.data();
+    qint32 _nSize = baStringTable.size();
+
+    // TODO UTF8
+    for (qint32 i = 0; i < _nSize; i++) {
+        XBinary::STRINGTABLE_RECORD record = {};
+
+        record.nOffsetFromStart = i;
+        record.sString = _pOffset; // TODO
+        record.nSizeInBytes = record.sString.size();
+
+        listResult.append(record);
+
+        _pOffset += (record.nSizeInBytes + 1);
+        i += record.nSizeInBytes;
+    }
+
+    return listResult;
+}
+
 QString XBinary::qcharToHex(QChar cSymbol)
 {
     // TODO mb
@@ -8746,7 +8772,10 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_MACOS: sResult = QString("macOS"); break;
         case OSNAME_MAC_OS: sResult = QString("Mac OS"); break;
         case OSNAME_MAC_OS_X: sResult = QString("Mac OS X"); break;
+        case OSNAME_MACCATALYST: sResult = QString("Mac Catalyst"); break;
         case OSNAME_MANDRAKELINUX: sResult = QString("Mandrake Linux"); break;
+        case OSNAME_MACDRIVERKIT: sResult = QString("Mac DriverKit"); break;
+        case OSNAME_MACFIRMWARE: sResult = QString("Mac Firmware"); break;
         case OSNAME_MCLINUX: sResult = QString("mClinux"); break;
         case OSNAME_MINIX: sResult = QString("Minix"); break;
         case OSNAME_MODESTO: sResult = QString("Novell Modesto"); break;
@@ -8761,6 +8790,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_POSIX: sResult = QString("Posix"); break;
         case OSNAME_QNX: sResult = QString("QNX"); break;
         case OSNAME_REDHATLINUX: sResult = QString("Red Hat Linux"); break;
+        case OSNAME_SEPOS: sResult = QString("sepOS"); break;
         case OSNAME_SOLARIS: sResult = QString("Sun Solaris"); break;
         case OSNAME_STARTOSLINUX: sResult = QString("StartOS Linux"); break;
         case OSNAME_SUNOS: sResult = QString("SunOS"); break;
@@ -8779,6 +8809,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_WINDRIVERLINUX: sResult = QString("Wind River Linux"); break;
         case OSNAME_XBOX: sResult = QString("XBOX"); break;
         case OSNAME_JVM: sResult = QString("JVM"); break;
+
         default: sResult = tr("Unknown");
     }
 

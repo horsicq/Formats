@@ -49,8 +49,9 @@ bool XRiff::isValid(PDSTRUCT *pPdStruct)
 
         if (bIsValid) {
             quint32 nSize = read_uint32(4, bIsBigEndian);
+            qint64 _nSize = getSize();
 
-            if ((nSize > 0) && (nSize <= getSize())) {
+            if ((nSize > 0) && (nSize <= _nSize)) {
                 bResult = true;
             }
         }

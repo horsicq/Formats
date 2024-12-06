@@ -195,6 +195,8 @@ public:
     static QMap<quint64, QString> getSectionAttributesSysS();
     static QMap<quint64, QString> getDICEKinds();
     static QMap<quint64, QString> getDICEKindsS();
+    static QMap<quint64, QString> getPlatform();
+    static QMap<quint64, QString> getPlatformS();
 
     COMMAND_RECORD _readLoadCommand(qint64 nOffset, bool bIsBigEndian);
 

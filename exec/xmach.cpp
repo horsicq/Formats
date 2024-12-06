@@ -208,6 +208,7 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypes()
 {
     QMap<quint64, QString> mapResult;
     // https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h
+    // https://github.com/apple-oss-distributions
     mapResult.insert(1, "CPU_TYPE_VAX");
     mapResult.insert(2, "CPU_TYPE_ROMP");
     mapResult.insert(4, "CPU_TYPE_NS32032");
@@ -862,6 +863,54 @@ QMap<quint64, QString> XMACH::getDICEKindsS()
     mapResult.insert(0x00000003, "JUMP_TABLE16");
     mapResult.insert(0x00000004, "JUMP_TABLE32");
     mapResult.insert(0x00000005, "ABS_JUMP_TABLE32");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getPlatform()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0, "PLATFORM_UNKNOWN");
+    mapResult.insert(0xFFFFFFFF, "PLATFORM_ANY");
+    mapResult.insert(1, "PLATFORM_MACOS");
+    mapResult.insert(2, "PLATFORM_IOS");
+    mapResult.insert(3, "PLATFORM_TVOS");
+    mapResult.insert(4, "PLATFORM_WATCHOS");
+    mapResult.insert(5, "PLATFORM_BRIDGEOS");
+    mapResult.insert(6, "PLATFORM_MACCATALYST");
+    mapResult.insert(7, "PLATFORM_IOSSIMULATOR");
+    mapResult.insert(8, "PLATFORM_TVOSSIMULATOR");
+    mapResult.insert(9, "PLATFORM_WATCHOSSIMULATOR");
+    mapResult.insert(10, "PLATFORM_DRIVERKIT");
+    mapResult.insert(11, "PLATFORM_VISIONOS");
+    mapResult.insert(12, "PLATFORM_VISIONOSSIMULATOR");
+    mapResult.insert(13, "PLATFORM_FIRMWARE");
+    mapResult.insert(14, "PLATFORM_SEPOS");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getPlatformS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0, "UNKNOWN");
+    mapResult.insert(0xFFFFFFFF, "ANY");
+    mapResult.insert(1, "MACOS");
+    mapResult.insert(2, "IOS");
+    mapResult.insert(3, "TVOS");
+    mapResult.insert(4, "WATCHOS");
+    mapResult.insert(5, "BRIDGEOS");
+    mapResult.insert(6, "MACCATALYST");
+    mapResult.insert(7, "IOSSIMULATOR");
+    mapResult.insert(8, "TVOSSIMULATOR");
+    mapResult.insert(9, "WATCHOSSIMULATOR");
+    mapResult.insert(10, "DRIVERKIT");
+    mapResult.insert(11, "VISIONOS");
+    mapResult.insert(12, "VISIONOSSIMULATOR");
+    mapResult.insert(13, "FIRMWARE");
+    mapResult.insert(14, "SEPOS");
 
     return mapResult;
 }
@@ -4367,7 +4416,7 @@ XBinary::OSINFO XMACH::getOsInfo()
             result.sOsVersion = "3.0-10.3.4";  // TODO Check
         } else if (nCPUType == XMACH_DEF::S_CPU_TYPE_ARM64) {
             result.osName = OSNAME_IOS;
-            result.sOsVersion = "7.0-15.0";  // TODO Check
+            result.sOsVersion = "7.0-16.0";  // TODO Check
         }
     }
 
@@ -4396,10 +4445,14 @@ XBinary::OSINFO XMACH::getOsInfo()
         XMACH_DEF::build_version_command build_version = _read_build_version_command(nBuildVersionOffset);
 
         if (build_version.platform == XMACH_DEF::S_PLATFORM_MACOS) result.osName = OSNAME_MACOS;
+        else if ((build_version.platform == XMACH_DEF::S_PLATFORM_IOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_IOSSIMULATOR)) result.osName = OSNAME_IOS;  // TODO iPadOS
+        else if ((build_version.platform == XMACH_DEF::S_PLATFORM_TVOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_TVOSSIMULATOR)) result.osName = OSNAME_TVOS;
+        else if ((build_version.platform == XMACH_DEF::S_PLATFORM_WATCHOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_WATCHOSSIMULATOR)) result.osName = OSNAME_WATCHOS;
         else if (build_version.platform == XMACH_DEF::S_PLATFORM_BRIDGEOS) result.osName = OSNAME_BRIDGEOS;
-        else if (build_version.platform == XMACH_DEF::S_PLATFORM_IOS) result.osName = OSNAME_IOS;  // TODO iPadOS
-        else if (build_version.platform == XMACH_DEF::S_PLATFORM_TVOS) result.osName = OSNAME_TVOS;
-        else if (build_version.platform == XMACH_DEF::S_PLATFORM_WATCHOS) result.osName = OSNAME_WATCHOS;
+        else if (build_version.platform == XMACH_DEF::S_PLATFORM_MACCATALYST) result.osName = OSNAME_MACCATALYST;
+        else if (build_version.platform == XMACH_DEF::S_PLATFORM_DRIVERKIT) result.osName = OSNAME_MACDRIVERKIT;
+        else if (build_version.platform == XMACH_DEF::S_PLATFORM_FIRMWARE) result.osName = OSNAME_MACFIRMWARE;
+        else if (build_version.platform == XMACH_DEF::S_PLATFORM_SEPOS) result.osName = OSNAME_SEPOS;
 
         if (build_version.minos) {
             result.sOsVersion = XBinary::get_uint32_full_version(build_version.minos);

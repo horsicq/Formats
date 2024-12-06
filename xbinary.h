@@ -426,6 +426,10 @@ public:
         OSNAME_WINDRIVERLINUX,
         OSNAME_XBOX,
         OSNAME_JVM,
+        OSNAME_MACCATALYST,
+        OSNAME_MACDRIVERKIT,
+        OSNAME_MACFIRMWARE,
+        OSNAME_SEPOS
         // TODO more
     };
 
@@ -1565,6 +1569,14 @@ public:
 
     static QString dataToString(const QByteArray &baData, DSMODE dsmode);
     static QString convertSignature(const QString &sSignature);
+
+    struct STRINGTABLE_RECORD {
+        qint64 nOffsetFromStart;
+        QString sString;
+        qint32 nSizeInBytes;
+    };
+
+    QList<STRINGTABLE_RECORD> getStringTable_ANSI(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

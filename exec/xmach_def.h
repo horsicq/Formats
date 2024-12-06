@@ -858,7 +858,7 @@ struct fileset_entry_command {
     quint32     cmdsize;    /* includes entry_id string */
     quint64     vmaddr;     /* memory address of the entry */
     quint64     fileoff;    /* file offset of the entry */
-    quint32  entry_id;   /* contained entry id */
+    quint32     entry_id;   /* contained entry id */
     quint32     reserved;   /* reserved */
 };
 
@@ -868,6 +868,15 @@ const quint32 S_PLATFORM_IOS = 2;
 const quint32 S_PLATFORM_TVOS = 3;
 const quint32 S_PLATFORM_WATCHOS = 4;
 const quint32 S_PLATFORM_BRIDGEOS = 5;
+const quint32 S_PLATFORM_MACCATALYST = 6;
+const quint32 S_PLATFORM_IOSSIMULATOR = 7;
+const quint32 S_PLATFORM_TVOSSIMULATOR = 8;
+const quint32 S_PLATFORM_WATCHOSSIMULATOR = 9;
+const quint32 S_PLATFORM_DRIVERKIT = 10;
+const quint32 S_PLATFORM_VISIONOS = 11;
+const quint32 S_PLATFORM_VISIONOSSIMULATOR = 12;
+const quint32 S_PLATFORM_FIRMWARE = 13;
+const quint32 S_PLATFORM_SEPOS = 14;
 
 /* Known values for the tool field above. */
 const quint32 S_TOOL_CLANG = 1;
@@ -1083,6 +1092,18 @@ struct __SC_SuperBlob {
     //	CS_BlobIndex index[];           /* (count) entries */
     /* followed by Blobs in no particular order as indicated by offsets in index
      */
+};
+
+// header of the LC_DYLD_CHAINED_FIXUPS payload
+struct dyld_chained_fixups_header
+{
+    quint32    fixups_version;    // 0
+    quint32    starts_offset;     // offset of dyld_chained_starts_in_image in chain_data
+    quint32    imports_offset;    // offset of imports table in chain_data
+    quint32    symbols_offset;    // offset of symbol strings in chain_data
+    quint32    imports_count;     // number of imported symbol names
+    quint32    imports_format;    // DYLD_CHAINED_IMPORT*
+    quint32    symbols_format;    // 0 => uncompressed, 1 => zlib compressed
 };
 
 }  // namespace XMACH_DEF
