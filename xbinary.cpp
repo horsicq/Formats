@@ -7596,7 +7596,7 @@ QList<XBinary::STRINGTABLE_RECORD> XBinary::getStringTable_ANSI(qint64 nOffset, 
         XBinary::STRINGTABLE_RECORD record = {};
 
         record.nOffsetFromStart = i;
-        record.sString = _pOffset; // TODO
+        record.sString = _pOffset;  // TODO
         record.nSizeInBytes = record.sString.size();
 
         listResult.append(record);
