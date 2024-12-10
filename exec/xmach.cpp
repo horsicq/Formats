@@ -948,11 +948,6 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, PDSTRU
     QList<COMMAND_RECORD> listResult;
 
     quint32 nNumberOfCommands = getHeader_ncmds();
-
-    if (nNumberOfCommands & 0xFFFF0000) {
-        nNumberOfCommands = 0;
-    }
-
     quint32 nSizeOfCommands = getHeader_sizeofcmds();
 
     qint64 nOffset = getHeaderSize();
@@ -989,9 +984,20 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<
 QList<XMACH::COMMAND_RECORD> XMACH::_getCommandRecords(qint64 nDataOffset, qint64 nDataSize, qint32 nLimit, bool bIs64, bool bIsBigEndian, quint32 nCommandID,
                                                        PDSTRUCT *pPdStruct)
 {
+    XBinary::PDSTRUCT pdStructEmpty = {};
+
+    if (!pPdStruct) {
+        pdStructEmpty = XBinary::createPdStruct();
+        pPdStruct = &pdStructEmpty;
+    }
+
     QList<COMMAND_RECORD> listResult;
 
     qint64 nSize = 0;
+
+    if (nLimit & 0xFFFF0000) {
+        nLimit = 0;
+    }
 
     for (qint32 i = 0; (i < nLimit) && (!(pPdStruct->bIsStop)); i++) {
         COMMAND_RECORD record = _readLoadCommand(nDataOffset, bIsBigEndian);
