@@ -257,6 +257,8 @@ public:
     QList<SEGMENT_RECORD> getSegmentRecords();
     QList<SEGMENT_RECORD> getSegmentRecords(QList<COMMAND_RECORD> *pListCommandRecords);
 
+    XMACH_DEF::segment_command _read_segment_command(qint64 nOffset);
+    XMACH_DEF::segment_command_64 _read_segment_command_64(qint64 nOffset);
     XMACH_DEF::segment_command _read_segment_command(qint64 nOffset, bool bIsBigEndian);
     XMACH_DEF::segment_command_64 _read_segment_command_64(qint64 nOffset, bool bIsBigEndian);
 

@@ -1619,6 +1619,16 @@ void XMACH::_setFvmLibraryRecord_name(qint64 nOffset, const QString &sValue)
     }
 }
 
+XMACH_DEF::segment_command XMACH::_read_segment_command(qint64 nOffset)
+{
+    return _read_segment_command(nOffset, isBigEndian());
+}
+
+XMACH_DEF::segment_command_64 XMACH::_read_segment_command_64(qint64 nOffset)
+{
+    return _read_segment_command_64(nOffset, isBigEndian());
+}
+
 QList<XMACH::SEGMENT_RECORD> XMACH::getSegmentRecords()
 {
     QList<COMMAND_RECORD> listCommandRecords = getCommandRecords();
@@ -1674,6 +1684,8 @@ XMACH_DEF::segment_command XMACH::_read_segment_command(qint64 nOffset, bool bIs
 {
     XMACH_DEF::segment_command result = {};
 
+    result.cmd = read_uint32(nOffset + offsetof(XMACH_DEF::segment_command, cmd), bIsBigEndian);
+    result.cmdsize = read_uint32(nOffset + offsetof(XMACH_DEF::segment_command, cmdsize), bIsBigEndian);
     read_array(nOffset + offsetof(XMACH_DEF::segment_command, segname), result.segname, sizeof(result.segname));
     result.vmaddr = read_uint32(nOffset + offsetof(XMACH_DEF::segment_command, vmaddr), bIsBigEndian);
     result.vmsize = read_uint32(nOffset + offsetof(XMACH_DEF::segment_command, vmsize), bIsBigEndian);
@@ -1691,6 +1703,8 @@ XMACH_DEF::segment_command_64 XMACH::_read_segment_command_64(qint64 nOffset, bo
 {
     XMACH_DEF::segment_command_64 result = {};
 
+    result.cmd = read_uint32(nOffset + offsetof(XMACH_DEF::segment_command_64, cmd), bIsBigEndian);
+    result.cmdsize = read_uint32(nOffset + offsetof(XMACH_DEF::segment_command_64, cmdsize), bIsBigEndian);
     read_array(nOffset + offsetof(XMACH_DEF::segment_command_64, segname), result.segname, sizeof(result.segname));
     result.vmaddr = read_uint64(nOffset + offsetof(XMACH_DEF::segment_command_64, vmaddr), bIsBigEndian);
     result.vmsize = read_uint64(nOffset + offsetof(XMACH_DEF::segment_command_64, vmsize), bIsBigEndian);
