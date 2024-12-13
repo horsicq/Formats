@@ -39,6 +39,7 @@
 #include "xmp3.h"
 #include "xmp4.h"
 #include "xriff.h"
+#include "xjavaclass.h"
 #ifdef USE_DEX
 #include "xandroidbinary.h"
 #include "xdex.h"

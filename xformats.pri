@@ -121,6 +121,11 @@ contains(XCONFIG, use_archive) {
     include($$PWD/audio/xmp3.pri)
 }
 
+!contains(XCONFIG, xjavaclass) {
+    XCONFIG += xjavaclass
+    include($$PWD/formats/xjavaclass.pri)
+}
+
 DISTFILES += \
     $$PWD/LICENSE \
     $$PWD/README.md \

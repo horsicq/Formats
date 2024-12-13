@@ -3,6 +3,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/images)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/video)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/audio)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/exec)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/formats)
 
 if (NOT DEFINED XDEX_SOURCES)
     include(${CMAKE_CURRENT_LIST_DIR}/../XDEX/xdex.cmake)
@@ -73,4 +74,7 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/exec/xpe.cpp
     ${CMAKE_CURRENT_LIST_DIR}/exec/xpe.h
     ${CMAKE_CURRENT_LIST_DIR}/exec/xpe_def.h
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xjavaclass.h
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xjavaclass.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xjavaclass.h
 )
