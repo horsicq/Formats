@@ -631,7 +631,8 @@ public:
     XMACH_DEF::relocation_info _read_relocation_info(qint64 nOffset);
     XMACH_DEF::dylib_reference _read_dylib_reference(qint64 nOffset);
     XMACH_DEF::__SC_SuperBlob _read_SC_SuperBlob(qint64 nOffset);
-    XMACH_DEF::__BlobIndex _read_BlobIndex(qint64 nOffset);
+    XMACH_DEF::CS_BlobIndex _read_CS_BlobIndex(qint64 nOffset);
+    XMACH_DEF::CS_CodeDirectory _read_CS_CodeDirectory(qint64 nOffset);
 
     QList<NLIST_RECORD> getNlistRecords();
     QList<NLIST_RECORD> getNlistRecords(QList<COMMAND_RECORD> *pListCommandRecords);

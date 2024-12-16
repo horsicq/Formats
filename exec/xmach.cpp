@@ -3442,17 +3442,17 @@ qint64 XMACH::get_SC_SuperBlob_size()
 
 void XMACH::_set_BlobIndex_type(qint64 nOffset, quint32 nValue)
 {
-    write_uint32(nOffset + offsetof(XMACH_DEF::__BlobIndex, type), nValue, true);
+    write_uint32(nOffset + offsetof(XMACH_DEF::CS_BlobIndex, type), nValue, true);
 }
 
 void XMACH::_set_BlobIndex_offset(qint64 nOffset, quint32 nValue)
 {
-    write_uint32(nOffset + offsetof(XMACH_DEF::__BlobIndex, offset), nValue, true);
+    write_uint32(nOffset + offsetof(XMACH_DEF::CS_BlobIndex, offset), nValue, true);
 }
 
 qint64 XMACH::get_BlobIndex_size()
 {
-    return sizeof(XMACH_DEF::__BlobIndex);
+    return sizeof(XMACH_DEF::CS_BlobIndex);
 }
 
 XMACH_DEF::dylinker_command XMACH::_read_dylinker_command(qint64 nOffset)
@@ -3874,14 +3874,52 @@ XMACH_DEF::__SC_SuperBlob XMACH::_read_SC_SuperBlob(qint64 nOffset)
     return result;
 }
 
-XMACH_DEF::__BlobIndex XMACH::_read_BlobIndex(qint64 nOffset)
+XMACH_DEF::CS_BlobIndex XMACH::_read_CS_BlobIndex(qint64 nOffset)
 {
-    XMACH_DEF::__BlobIndex result = {};
+    XMACH_DEF::CS_BlobIndex result = {};
 
     bool bIsBigEndian = true;
 
-    result.type = read_uint32(nOffset + offsetof(XMACH_DEF::__BlobIndex, type), bIsBigEndian);
-    result.offset = read_uint32(nOffset + offsetof(XMACH_DEF::__BlobIndex, offset), bIsBigEndian);
+    result.type = read_uint32(nOffset + offsetof(XMACH_DEF::CS_BlobIndex, type), bIsBigEndian);
+    result.offset = read_uint32(nOffset + offsetof(XMACH_DEF::CS_BlobIndex, offset), bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::CS_CodeDirectory XMACH::_read_CS_CodeDirectory(qint64 nOffset)
+{
+    XMACH_DEF::CS_CodeDirectory result = {};
+
+    bool bIsBigEndian = true;
+
+    result.magic = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, magic), bIsBigEndian);
+    result.length = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, length), bIsBigEndian);
+    result.version = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, version), bIsBigEndian);
+    result.flags = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, flags), bIsBigEndian);
+    result.hashOffset = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, hashOffset), bIsBigEndian);
+    result.identOffset = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, identOffset), bIsBigEndian);
+    result.nSpecialSlots = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, nSpecialSlots), bIsBigEndian);
+    result.nCodeSlots = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, nCodeSlots), bIsBigEndian);
+    result.codeLimit = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, codeLimit), bIsBigEndian);
+    result.hashSize = read_uint8(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, hashSize));
+    result.hashType = read_uint8(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, hashType));
+    result.platform = read_uint8(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, platform));
+    result.pageSize = read_uint8(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, pageSize));
+    result.spare2 = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, spare2), bIsBigEndian);
+    result.scatterOffset = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, scatterOffset), bIsBigEndian);
+    result.teamOffset = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, teamOffset), bIsBigEndian);
+    result.spare3 = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, spare3), bIsBigEndian);
+    result.codeLimit64 = read_uint64(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, codeLimit64), bIsBigEndian);
+    result.execSegBase = read_uint64(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, execSegBase), bIsBigEndian);
+    result.execSegLimit = read_uint64(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, execSegLimit), bIsBigEndian);
+    result.execSegFlags = read_uint64(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, execSegFlags), bIsBigEndian);
+    result.runtime = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, runtime), bIsBigEndian);
+    result.preEncryptOffset = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, preEncryptOffset), bIsBigEndian);
+    result.linkageHashType = read_uint8(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, linkageHashType));
+    result.linkageTruncated = read_uint8(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, linkageTruncated));
+    result.spare4 = read_uint16(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, spare4), bIsBigEndian);
+    result.linkageOffset = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, linkageOffset), bIsBigEndian);
+    result.linkageSize = read_uint32(nOffset + offsetof(XMACH_DEF::CS_CodeDirectory, linkageSize), bIsBigEndian);
 
     return result;
 }

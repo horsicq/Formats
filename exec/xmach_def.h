@@ -1080,7 +1080,7 @@ struct __CodeDirectory {
  * Structure of an embedded-signature SuperBlob
  */
 
-struct __BlobIndex {
+struct CS_BlobIndex {
     quint32 type;   /* type of entry */
     quint32 offset; /* offset of entry */
 };
@@ -1092,6 +1092,51 @@ struct __SC_SuperBlob {
     //	CS_BlobIndex index[];           /* (count) entries */
     /* followed by Blobs in no particular order as indicated by offsets in index
      */
+};
+
+const quint32 S_CSSLOT_CODEDIRECTORY = 0;
+const quint32 S_CSSLOT_INFOSLOT = 1;
+const quint32 S_CSSLOT_REQUIREMENTS = 2;
+const quint32 S_CSSLOT_RESOURCEDIR = 3;
+const quint32 S_CSSLOT_APPLICATION = 4;
+const quint32 S_CSSLOT_ENTITLEMENTS = 5;
+// https://github.com/apple/darwin-xnu/blob/2ff845c2e033bd0ff64b5b6aa6063a1f8f65aa32/osfmk/kern/cs_blobs.h#L92
+struct CS_CodeDirectory {
+    quint32 magic;                         /* magic number (CSMAGIC_CODEDIRECTORY) */
+    quint32 length;                        /* total length of CodeDirectory blob */
+    quint32 version;                       /* compatibility version */
+    quint32 flags;                         /* setup and mode flags */
+    quint32 hashOffset;                    /* offset of hash slot element at index zero */
+    quint32 identOffset;                   /* offset of identifier string */
+    quint32 nSpecialSlots;                 /* number of special hash slots */
+    quint32 nCodeSlots;                    /* number of ordinary (code) hash slots */
+    quint32 codeLimit;                     /* limit to main image signature range */
+    quint8 hashSize;                       /* size of each hash in bytes */
+    quint8 hashType;                       /* type of hash (cdHashType* constants) */
+    quint8 platform;                       /* platform identifier; zero if not platform binary */
+    quint8 pageSize;                       /* log2(page size in bytes); 0 => infinite */
+    quint32 spare2;                        /* unused (must be zero) */
+    /* followed by dynamic content as located by offset fields above */
+    /* Version 0x20100 */
+    quint32 scatterOffset;                 /* offset of optional scatter vector */
+    /* Version 0x20200 */
+    quint32 teamOffset;                    /* offset of optional team identifier */
+    /* Version 0x20300 */
+    quint32 spare3;                                /* unused (must be zero) */
+    quint64 codeLimit64;                   /* limit to main image signature range, 64 bits */
+    /* Version 0x20400 */
+    quint64 execSegBase;                   /* offset of executable segment */
+    quint64 execSegLimit;                  /* limit of executable segment */
+    quint64 execSegFlags;                  /* executable segment flags */
+    /* Version 0x20500 */
+    quint32 runtime;
+    quint32 preEncryptOffset;
+    /* Version 0x20600 */
+    quint8 linkageHashType;
+    quint8 linkageTruncated;
+    quint16 spare4;
+    quint32 linkageOffset;
+    quint32 linkageSize;
 };
 
 // header of the LC_DYLD_CHAINED_FIXUPS payload
