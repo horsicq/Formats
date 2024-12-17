@@ -3924,6 +3924,23 @@ XMACH_DEF::CS_CodeDirectory XMACH::_read_CS_CodeDirectory(qint64 nOffset)
     return result;
 }
 
+XMACH_DEF::dyld_chained_fixups_header XMACH::_read_dyld_chained_fixups_header(qint64 nOffset)
+{
+    XMACH_DEF::dyld_chained_fixups_header result = {};
+
+    bool bIsBigEndian = isBigEndian();
+
+    result.fixups_version = read_uint32(nOffset + offsetof(XMACH_DEF::dyld_chained_fixups_header, fixups_version), bIsBigEndian);
+    result.starts_offset = read_uint32(nOffset + offsetof(XMACH_DEF::dyld_chained_fixups_header, starts_offset), bIsBigEndian);
+    result.imports_offset = read_uint32(nOffset + offsetof(XMACH_DEF::dyld_chained_fixups_header, imports_offset), bIsBigEndian);
+    result.symbols_offset = read_uint32(nOffset + offsetof(XMACH_DEF::dyld_chained_fixups_header, symbols_offset), bIsBigEndian);
+    result.imports_count = read_uint32(nOffset + offsetof(XMACH_DEF::dyld_chained_fixups_header, imports_count), bIsBigEndian);
+    result.imports_format = read_uint32(nOffset + offsetof(XMACH_DEF::dyld_chained_fixups_header, imports_format), bIsBigEndian);
+    result.symbols_format = read_uint32(nOffset + offsetof(XMACH_DEF::dyld_chained_fixups_header, symbols_format), bIsBigEndian);
+
+    return result;
+}
+
 QList<XMACH::NLIST_RECORD> XMACH::getNlistRecords()
 {
     QList<COMMAND_RECORD> listCommandRecords = getCommandRecords(XMACH_DEF::S_LC_SYMTAB);

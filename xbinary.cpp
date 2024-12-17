@@ -5355,7 +5355,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_ZIP);
             // TODO Check APK, JAR
             // TODO basic ZIP
-        } else if (compareSignature(&memoryMap, "1F8B")) {
+        } else if (compareSignature(&memoryMap, "1F8B08")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_GZIP);
         } else if (compareSignature(&memoryMap, "7801") || compareSignature(&memoryMap, "785E") || compareSignature(&memoryMap, "789C") ||

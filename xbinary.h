@@ -188,7 +188,8 @@ public:
     };
 
     enum FORMATTYPE {
-        FORMATTYPE_TEXT = 0,
+        FORMATTYPE_UNKNOWN = 0,
+        FORMATTYPE_TEXT,
         FORMATTYPE_PLAINTEXT,
         FORMATTYPE_XML,
         FORMATTYPE_JSON,
