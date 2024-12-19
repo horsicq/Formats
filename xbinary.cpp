@@ -9641,6 +9641,18 @@ QString XBinary::fullVersionDwordToString(quint32 nValue)
     return sResult;
 }
 
+QString XBinary::fullVersionQwordToString(quint64 nValue)
+{
+    QString sResult;
+
+    quint32 nValue1 = (nValue >> 32) & 0xFFFFFFFF;
+    quint32 nValue2 = nValue & 0xFFFFFFFF;
+
+    sResult = QString("\"%1.%2\"").arg(get_uint32_full_version(nValue1), get_uint32_full_version(nValue2));
+
+    return sResult;
+}
+
 QString XBinary::versionDwordToString(quint32 nValue)
 {
     QString sResult;

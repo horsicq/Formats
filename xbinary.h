@@ -1463,6 +1463,7 @@ public:
     static QString bytesCountToString(quint64 nValue, quint64 nBase = 1024);
     static QString numberToString(quint64 nValue);
     static QString fullVersionDwordToString(quint32 nValue);
+    static QString fullVersionQwordToString(quint64 nValue);
     static QString versionDwordToString(quint32 nValue);
     static QString formatXML(const QString &sXML);
 
