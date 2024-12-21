@@ -668,6 +668,7 @@ public:
 
     virtual MODE getMode();
     virtual QString getArch();
+    static QString _getArch(quint32 nCpuType, quint32 nCpuSubType);
     virtual FT getFileType();
     virtual qint32 getType();
     virtual OSINFO getOsInfo();
