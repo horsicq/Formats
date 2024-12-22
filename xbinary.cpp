@@ -8669,13 +8669,13 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
 
     switch (disasmMode) {
         case DM_DATA: sResult = tr("Data"); break;
-        case DM_X86_16: sResult = QString("X86-16"); break;
-        case DM_X86_32: sResult = QString("X86-32"); break;
-        case DM_X86_64: sResult = QString("X86-64"); break;
+        case DM_X86_16: sResult = QString("x86 16-bit mode"); break;
+        case DM_X86_32: sResult = QString("x86 32-bit mode"); break;
+        case DM_X86_64: sResult = QString("x86 64-bit mode"); break;
         case DM_ARM_LE: sResult = QString("ARM"); break;
-        case DM_ARM_BE: sResult = QString("ARM BE"); break;
-        case DM_ARM64_LE: sResult = QString("ARM64"); break;
-        case DM_ARM64_BE: sResult = QString("ARM64 BE"); break;
+        case DM_ARM_BE: sResult = QString("ARM, big endian"); break;
+        case DM_AARCH64_LE: sResult = QString("AArch64"); break;
+        case DM_AARCH64_BE: sResult = QString("AArch64, big endian"); break;
         case DM_CORTEXM: sResult = QString("CORTEXM"); break;
         case DM_THUMB_LE: sResult = QString("THUMB"); break;
         case DM_THUMB_BE: sResult = QString("THUMB BE"); break;
@@ -8687,7 +8687,8 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_PPC_BE: sResult = QString("PPC BE"); break;
         case DM_PPC64_LE: sResult = QString("PPC64"); break;
         case DM_PPC64_BE: sResult = QString("PPC64 BE"); break;
-        case DM_SPARC: sResult = QString("SPARC"); break;
+        case DM_SPARC: sResult = QString("Sparc"); break;
+        case DM_SPARCV9: sResult = QString("Sparc V9"); break;
         case DM_S390X: sResult = QString("S390X"); break;
         case DM_XCORE: sResult = QString("XCORE"); break;
         case DM_M68K: sResult = QString("M68K"); break;
@@ -8858,9 +8859,9 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
         }
     } else if ((sArch == "AARCH64") || (sArch == "ARM64") || (sArch == "ARM64E")) {
         if (bIsBigEndian) {
-            dmResult = DM_ARM64_BE;
+            dmResult = DM_AARCH64_BE;
         } else {
-            dmResult = DM_ARM64_LE;
+            dmResult = DM_AARCH64_LE;
         }
     } else if (sArch == "8086") {
         dmResult = DM_X86_16;
@@ -8912,7 +8913,7 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
         result = DMFAMILY_X86;
     } else if ((disasmMode == DM_ARM_BE) || (disasmMode == DM_ARM_LE)) {
         result = DMFAMILY_ARM;
-    } else if ((disasmMode == DM_ARM64_BE) || (disasmMode == DM_ARM64_LE)) {
+    } else if ((disasmMode == DM_AARCH64_BE) || (disasmMode == DM_AARCH64_LE)) {
         result = DMFAMILY_ARM64;
     } else if ((disasmMode == DM_MIPS64_BE) || (disasmMode == DM_MIPS64_LE) || (disasmMode == DM_MIPS_BE) || (disasmMode == DM_MIPS_LE)) {
         result = DMFAMILY_MIPS;
@@ -8978,7 +8979,7 @@ XBinary::MODE XBinary::getModeFromDisasmMode(DM disasmMode)
         result = MODE_64;
     } else if ((disasmMode == DM_ARM_BE) || (disasmMode == DM_ARM_LE)) {
         result = MODE_32;
-    } else if ((disasmMode == DM_ARM64_BE) || (disasmMode == DM_ARM64_LE)) {
+    } else if ((disasmMode == DM_AARCH64_BE) || (disasmMode == DM_AARCH64_LE)) {
         result = MODE_64;
     } else if ((disasmMode == DM_MIPS_BE) || (disasmMode == DM_MIPS_LE)) {
         result = MODE_32;
