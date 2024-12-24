@@ -8692,7 +8692,12 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_S390X: sResult = QString("S390X"); break;
         case DM_XCORE: sResult = QString("XCORE"); break;
         case DM_M68K: sResult = QString("M68K"); break;
+        case DM_M68K00: sResult = QString("M68K00"); break;
+        case DM_M68K10: sResult = QString("M68K10"); break;
+        case DM_M68K20: sResult = QString("M68K20"); break;
+        case DM_M68K30: sResult = QString("M68K30"); break;
         case DM_M68K40: sResult = QString("M68K40"); break;
+        case DM_M68K60: sResult = QString("M68K60"); break;
         case DM_TMS320C64X: sResult = QString("TMS320C64X"); break;
         case DM_M6800: sResult = QString("M6800"); break;
         case DM_M6801: sResult = QString("M6801"); break;
@@ -8873,8 +8878,10 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
         }
     } else if ((sArch == "AMD64") || (sArch == "X86_64") || (sArch == "X64")) {
         dmResult = DM_X86_64;
-    } else if ((sArch == "68K") || (sArch == "MC680x0") || (sArch == "MC68030")) {
+    } else if ((sArch == "68K") || (sArch == "MC680x0")) {
         dmResult = DM_M68K;
+    } else if ((sArch == "MC68030") || (sArch == "MC68030_ONLY")) {
+        dmResult = DM_M68K30;
     } else if (sArch == "MC68040") {
         dmResult = DM_M68K40;
     } else if (sArch == "POWERPC") {
@@ -8925,7 +8932,8 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
         result = DMFAMILY_SYSZ;
     } else if (disasmMode == DM_XCORE) {
         result = DMFAMILY_XCORE;
-    } else if ((disasmMode == DM_M68K) || (disasmMode == DM_M68K40)) {
+    } else if ((disasmMode == DM_M68K) || (disasmMode == DM_M68K00) || (disasmMode == DM_M68K10) || (disasmMode == DM_M68K20) || (disasmMode == DM_M68K30) ||
+               (disasmMode == DM_M68K40) || (disasmMode == DM_M68K60)) {
         result = DMFAMILY_M68K;
     } else if ((disasmMode == DM_M6800) || (disasmMode == DM_M6801) || (disasmMode == DM_M6805) || (disasmMode == DM_M6808) || (disasmMode == DM_M6809) ||
                (disasmMode == DM_M6811) || (disasmMode == DM_CPU12) || (disasmMode == DM_HD6301) || (disasmMode == DM_HD6309) || (disasmMode == DM_HCS08)) {
