@@ -93,11 +93,7 @@ XMSDOS_DEF::IMAGE_DOS_HEADER XMSDOS::getDosHeader()
 
 XMSDOS_DEF::IMAGE_DOS_HEADEREX XMSDOS::getDosHeaderEx()
 {
-    XMSDOS_DEF::IMAGE_DOS_HEADEREX result = {};
-    // TODO
-    read_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_magic), (char *)&result, sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX));
-
-    return result;
+    return _read_IMAGE_DOS_HEADEREX(0);
 }
 
 void XMSDOS::setDosHeader(XMSDOS_DEF::IMAGE_DOS_HEADER *pDosHeader)
@@ -110,6 +106,15 @@ void XMSDOS::setDosHeaderEx(XMSDOS_DEF::IMAGE_DOS_HEADEREX *pDosHeaderEx)
 {
     // TODO
     write_array((qint64)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_magic), (char *)pDosHeaderEx, sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX));
+}
+
+XMSDOS_DEF::IMAGE_DOS_HEADEREX XMSDOS::_read_IMAGE_DOS_HEADEREX(qint64 nOffset)
+{
+    XMSDOS_DEF::IMAGE_DOS_HEADEREX result = {};
+
+    read_array(nOffset, (char *)&result, sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX));
+
+    return result;
 }
 
 void XMSDOS::set_e_magic(quint16 nValue)

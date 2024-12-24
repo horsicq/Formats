@@ -58,6 +58,8 @@ public:
     void setDosHeader(XMSDOS_DEF::IMAGE_DOS_HEADER *pDosHeader);
     void setDosHeaderEx(XMSDOS_DEF::IMAGE_DOS_HEADEREX *pDosHeaderEx);
 
+    XMSDOS_DEF::IMAGE_DOS_HEADEREX _read_IMAGE_DOS_HEADEREX(qint64 nOffset);
+
     void set_e_magic(quint16 nValue);
     void set_e_cblp(quint16 nValue);
     void set_e_cp(quint16 nValue);
