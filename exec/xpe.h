@@ -367,6 +367,8 @@ public:
     XPE_DEF::IMAGE_FILE_HEADER getFileHeader();
     void setFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pFileHeader);
 
+    XPE_DEF::IMAGE_FILE_HEADER _read_IMAGE_FILE_HEADER(qint64 nOffset);
+
     quint16 getFileHeader_Machine();
     quint16 getFileHeader_NumberOfSections();
     quint32 getFileHeader_TimeDateStamp();

@@ -393,13 +393,7 @@ XPE_DEF::IMAGE_FILE_HEADER XPE::getFileHeader()
     qint64 nFileHeaderOffset = getFileHeaderOffset();
 
     if (nFileHeaderOffset != -1) {
-        result.Machine = read_uint16(nFileHeaderOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, Machine));
-        result.NumberOfSections = read_uint16(nFileHeaderOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSections));
-        result.TimeDateStamp = read_uint32(nFileHeaderOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, TimeDateStamp));
-        result.PointerToSymbolTable = read_uint32(nFileHeaderOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, PointerToSymbolTable));
-        result.NumberOfSymbols = read_uint32(nFileHeaderOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSymbols));
-        result.SizeOfOptionalHeader = read_uint16(nFileHeaderOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, SizeOfOptionalHeader));
-        result.Characteristics = read_uint16(nFileHeaderOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, Characteristics));
+        result = _read_IMAGE_FILE_HEADER(nFileHeaderOffset);
     }
 
     return result;
@@ -418,6 +412,21 @@ void XPE::setFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pFileHeader)
         write_uint16(nFileHeaderOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, SizeOfOptionalHeader), pFileHeader->SizeOfOptionalHeader);
         write_uint16(nFileHeaderOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, Characteristics), pFileHeader->Characteristics);
     }
+}
+
+XPE_DEF::IMAGE_FILE_HEADER XPE::_read_IMAGE_FILE_HEADER(qint64 nOffset)
+{
+    XPE_DEF::IMAGE_FILE_HEADER result = {};
+
+    result.Machine = read_uint16(nOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, Machine));
+    result.NumberOfSections = read_uint16(nOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSections));
+    result.TimeDateStamp = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, TimeDateStamp));
+    result.PointerToSymbolTable = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, PointerToSymbolTable));
+    result.NumberOfSymbols = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSymbols));
+    result.SizeOfOptionalHeader = read_uint16(nOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, SizeOfOptionalHeader));
+    result.Characteristics = read_uint16(nOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, Characteristics));
+
+    return result;
 }
 
 quint16 XPE::getFileHeader_Machine()
