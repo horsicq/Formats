@@ -848,6 +848,11 @@ public:
     static QMap<quint64, QString> getDebugTypesS();
     static QMap<quint64, QString> getOperatingSystemVersions(OSNAME osName = OSNAME_WINDOWS);
     static QMap<quint64, QString> getOperatingSystemVersionsS(OSNAME osName = OSNAME_WINDOWS);
+    static QMap<quint64, QString> getMajorOperatingSystemVersion();
+    static QMap<quint64, QString> getMajorOperatingSystemVersionS();
+    static QMap<quint64, QString> getMinorOperatingSystemVersion(quint16 nMajorOperatingSystemVersion);
+    static QMap<quint64, QString> getMinorOperatingSystemVersionS(quint16 nMajorOperatingSystemVersion);
+
     static QMap<quint64, QString> getResourcesFixedFileInfoSignatures();
     static QMap<quint64, QString> getResourcesFixedFileInfoSignaturesS();
     static QMap<quint64, QString> getResourcesFixedFileInfoFileFlags();

@@ -12604,6 +12604,7 @@ QMap<quint64, QString> XPE::getOperatingSystemVersions(OSNAME osName)
 
     mapResult.insert(0x00000000, tr("Unknown"));
 
+    // https://learn.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version?redirectedfrom=MSDN
     if (osName == OSNAME_WINDOWS) {
         mapResult.insert(0x0003000A, QString("Windows NT 3.1"));
         mapResult.insert(0x00030032, QString("Windows NT 3.5"));
@@ -12645,6 +12646,88 @@ QMap<quint64, QString> XPE::getOperatingSystemVersionsS(OSNAME osName)
         mapResult.insert(0x00060002, QString("8"));
         mapResult.insert(0x00060003, QString("8.1"));
         mapResult.insert(0x000A0000, QString("10"));
+    }
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getMajorOperatingSystemVersion()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x0003, QString("Windows 3.X"));
+    mapResult.insert(0x0004, QString("Windows 4.X"));
+    mapResult.insert(0x0005, QString("Windows 5.X"));
+    mapResult.insert(0x0006, QString("Windows 6.X"));
+    mapResult.insert(0x000A, QString("Windows 10.X"));
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getMajorOperatingSystemVersionS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x0003, QString("3.X"));
+    mapResult.insert(0x0004, QString("4.X"));
+    mapResult.insert(0x0005, QString("5.X"));
+    mapResult.insert(0x0006, QString("6.X"));
+    mapResult.insert(0x000A, QString("10.X"));
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getMinorOperatingSystemVersion(quint16 nMajorOperatingSystemVersion)
+{
+    QMap<quint64, QString> mapResult;
+
+    if (nMajorOperatingSystemVersion == 3) {
+        mapResult.insert(0x000A, QString("Windows NT 3.1"));
+        mapResult.insert(0x0032, QString("Windows NT 3.5"));
+        mapResult.insert(0x0033, QString("Windows NT 3.51"));
+    } else if (nMajorOperatingSystemVersion == 4) {
+        mapResult.insert(0x0000, QString("Windows 95"));
+        mapResult.insert(0x0001, QString("Windows 98"));
+        mapResult.insert(0x0009, QString("Windows Millenium"));
+    } else if (nMajorOperatingSystemVersion == 5) {
+        mapResult.insert(0x0000, QString("Windows 2000"));
+        mapResult.insert(0x0001, QString("Windows XP"));
+        mapResult.insert(0x0002, QString("Windows Server 2003"));
+    } else if (nMajorOperatingSystemVersion == 6) {
+        mapResult.insert(0x0000, QString("Windows Vista"));
+        mapResult.insert(0x0001, QString("Windows 7"));
+        mapResult.insert(0x0002, QString("Windows 8"));
+        mapResult.insert(0x0003, QString("Windows 8.1"));
+    } else if (nMajorOperatingSystemVersion == 10) {
+        mapResult.insert(0x0000, QString("Windows 10"));
+    }
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XPE::getMinorOperatingSystemVersionS(quint16 nMajorOperatingSystemVersion)
+{
+    QMap<quint64, QString> mapResult;
+
+    if (nMajorOperatingSystemVersion == 3) {
+        mapResult.insert(0x000A, QString("NT 3.1"));
+        mapResult.insert(0x0032, QString("NT 3.5"));
+        mapResult.insert(0x0033, QString("NT 3.51"));
+    } else if (nMajorOperatingSystemVersion == 4) {
+        mapResult.insert(0x0000, QString("95"));
+        mapResult.insert(0x0001, QString("98"));
+        mapResult.insert(0x0009, QString("Millenium"));
+    } else if (nMajorOperatingSystemVersion == 5) {
+        mapResult.insert(0x0000, QString("2000"));
+        mapResult.insert(0x0001, QString("XP"));
+        mapResult.insert(0x0002, QString("Server 2003"));
+    } else if (nMajorOperatingSystemVersion == 6) {
+        mapResult.insert(0x0000, QString("Vista"));
+        mapResult.insert(0x0001, QString("7"));
+        mapResult.insert(0x0002, QString("8"));
+        mapResult.insert(0x0003, QString("8.1"));
+    } else if (nMajorOperatingSystemVersion == 10) {
+        mapResult.insert(0x0000, QString("10"));
     }
 
     return mapResult;
