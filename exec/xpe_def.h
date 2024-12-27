@@ -133,9 +133,9 @@ const quint32 S_IMAGE_SCN_MEM_READ = 0x40000000;
 const quint32 S_IMAGE_SCN_MEM_WRITE = 0x80000000;
 const quint32 S_IMAGE_SCN_ALIGN_MASK = 0x00F00000;
 
-const quint32 S_IMAGE_NT_OPTIONAL_HDR32_MAGIC = 0x10b; // 32 bit"
-const quint32 S_IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20b; // 64 bit"
-const quint32 S_IMAGE_ROM_OPTIONAL_HDR_MAGIC = 0x107;  // ROM image"
+const quint32 S_IMAGE_NT_OPTIONAL_HDR32_MAGIC = 0x10b;  // 32 bit"
+const quint32 S_IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20b;  // 64 bit"
+const quint32 S_IMAGE_ROM_OPTIONAL_HDR_MAGIC = 0x107;   // ROM image"
 
 /* Predefined resource types */
 const quint32 S_RT_NEWRESOURCE = 0x2000;

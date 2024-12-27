@@ -486,45 +486,45 @@ struct ppc_thread_state32_t {
 };
 
 struct ppc_thread_state64_t {
-    quint64	srr0;  //Machine state register (PC)
-    quint64	srr1;
-    quint64	r0; //Stack pointer
-    quint64	r1;
-    quint64	r2;
-    quint64	r3;
-    quint64	r4;
-    quint64	r5;
-    quint64	r6;
-    quint64	r7;
-    quint64	r8;
-    quint64	r9;
-    quint64	r10;
-    quint64	r11;
-    quint64	r12;
-    quint64	r13;
-    quint64	r14;
-    quint64	r15;
-    quint64	r16;
-    quint64	r17;
-    quint64	r18;
-    quint64	r19;
-    quint64	r20;
-    quint64	r21;
-    quint64	r22;
-    quint64	r23;
-    quint64	r24;
-    quint64	r25;
-    quint64	r26;
-    quint64	r27;
-    quint64	r28;
-    quint64	r29;
-    quint64	r30;
-    quint64	r31;
-    quint32	cr;     // Condition register
-    quint64	xer;    // User's integer exception register
-    quint64	lr;     // Link register
-    quint64	ctr;    // Count register
-    quint32	vrsave; // Vector Save Register
+    quint64 srr0;  // Machine state register (PC)
+    quint64 srr1;
+    quint64 r0;  // Stack pointer
+    quint64 r1;
+    quint64 r2;
+    quint64 r3;
+    quint64 r4;
+    quint64 r5;
+    quint64 r6;
+    quint64 r7;
+    quint64 r8;
+    quint64 r9;
+    quint64 r10;
+    quint64 r11;
+    quint64 r12;
+    quint64 r13;
+    quint64 r14;
+    quint64 r15;
+    quint64 r16;
+    quint64 r17;
+    quint64 r18;
+    quint64 r19;
+    quint64 r20;
+    quint64 r21;
+    quint64 r22;
+    quint64 r23;
+    quint64 r24;
+    quint64 r25;
+    quint64 r26;
+    quint64 r27;
+    quint64 r28;
+    quint64 r29;
+    quint64 r30;
+    quint64 r31;
+    quint32 cr;      // Condition register
+    quint64 xer;     // User's integer exception register
+    quint64 lr;      // Link register
+    quint64 ctr;     // Count register
+    quint32 vrsave;  // Vector Save Register
 };
 
 struct ppc_state_hdr_t {
