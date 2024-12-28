@@ -22,9 +22,6 @@ endif()
 
 set(XFORMATS_SOURCES
     ${XFORMATS_SOURCES}
-    ${XDEX_SOURCES}
-    ${XPDF_SOURCES}
-    ${XARCHIVES_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/xbinary.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xbinary.h
     ${CMAKE_CURRENT_LIST_DIR}/xbinary_def.h
