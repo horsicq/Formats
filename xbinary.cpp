@@ -2474,11 +2474,10 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                         break;
                     }
 
-                    i = nCurrentOffset + nDataSize - nTmpOffset;
+                    i = nCurrentOffset + 1 - nTmpOffset;
 
                     XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, i);
                 }
-
             } else if ((listSignatureRecords.at(0).st == ST_COMPAREBYTES) || (listSignatureRecords.at(0).st == ST_FINDBYTES) ||
                        (listSignatureRecords.at(0).st == ST_NOTNULL) || (listSignatureRecords.at(0).st == ST_ANSI) || (listSignatureRecords.at(0).st == ST_NOTANSI) ||
                        (listSignatureRecords.at(0).st == ST_NOTANSIANDNULL)) {
@@ -2508,7 +2507,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                         break;
                     }
 
-                    i = nTempOffset + nDataSize - nOffset;
+                    i = nTempOffset + 1 - nOffset;
 
                     XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, i);
                 }
@@ -3534,7 +3533,8 @@ qint32 XBinary::getValueSize(QVariant varValue, VT valueType)
     } else if (valueType == XBinary::VT_UTF8STRING_I) {
         nResult = varValue.toString().toUtf8().size();
     } else if (valueType == XBinary::VT_SIGNATURE) {
-        nResult = varValue.toString().size();
+        QString sSignature = convertSignature(varValue.toString());
+        nResult = sSignature.size() / 2;
     } else if (valueType == XBinary::VT_BYTE) {
         nResult = 1;
     } else if (valueType == XBinary::VT_WORD) {
@@ -7958,18 +7958,24 @@ bool XBinary::checkOffsetSize(qint64 nOffset, qint64 nSize)
     return checkOffsetSize(os);
 }
 
+QString XBinary::get_uint8_full_version(quint8 nValue)
+{
+    return QString("%1").arg(QString::number((nValue)&0xFF));
+}
+
+QString XBinary::get_uint16_full_version(quint16 nValue)
+{
+    return QString("%1.%2").arg(QString::number((nValue >> 8) & 0xFF), QString::number((nValue)&0xFF));
+}
+
 QString XBinary::get_uint32_full_version(quint32 nValue)
 {
-    QString sResult = QString("%1.%2.%3").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue >> 8) & 0xFF), QString::number((nValue)&0xFF));
-
-    return sResult;
+    return QString("%1.%2.%3").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue >> 8) & 0xFF), QString::number((nValue)&0xFF));
 }
 
 QString XBinary::get_uint32_version(quint32 nValue)
 {
-    QString sResult = QString("%1.%2").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue)&0xFFFF));
-
-    return sResult;
+    return QString("%1.%2").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue)&0xFFFF));
 }
 
 bool XBinary::isResizeEnable(QIODevice *pDevice)
@@ -9641,13 +9647,19 @@ QString XBinary::numberToString(quint64 nValue)
     return sResult;
 }
 
+QString XBinary::fullVersionByteToString(quint8 nValue)
+{
+    return QString("\"%1\"").arg(get_uint8_full_version(nValue));
+}
+
+QString XBinary::fullVersionWordToString(quint16 nValue)
+{
+    return QString("\"%1\"").arg(get_uint16_full_version(nValue));
+}
+
 QString XBinary::fullVersionDwordToString(quint32 nValue)
 {
-    QString sResult;
-
-    sResult = QString("\"%1\"").arg(get_uint32_full_version(nValue));
-
-    return sResult;
+    return QString("\"%1\"").arg(get_uint32_full_version(nValue));
 }
 
 QString XBinary::fullVersionQwordToString(quint64 nValue)

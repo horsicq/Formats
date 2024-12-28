@@ -1312,6 +1312,8 @@ public:
     bool checkOffsetSize(OFFSETSIZE osRegion);
     bool checkOffsetSize(qint64 nOffset, qint64 nSize);
 
+    static QString get_uint8_full_version(quint8 nValue);
+    static QString get_uint16_full_version(quint16 nValue);
     static QString get_uint32_full_version(quint32 nValue);
     static QString get_uint32_version(quint32 nValue);
     static bool isResizeEnable(QIODevice *pDevice);
@@ -1468,6 +1470,8 @@ public:
     static QString appendText(const QString &sResult, const QString &sString, const QString &sSeparate);
     static QString bytesCountToString(quint64 nValue, quint64 nBase = 1024);
     static QString numberToString(quint64 nValue);
+    static QString fullVersionByteToString(quint8 nValue);
+    static QString fullVersionWordToString(quint16 nValue);
     static QString fullVersionDwordToString(quint32 nValue);
     static QString fullVersionQwordToString(quint64 nValue);
     static QString versionDwordToString(quint32 nValue);
