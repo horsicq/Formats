@@ -518,7 +518,8 @@ QString XBinary::randomString(qint32 nSize)
     sResult.reserve(nSize);
 
     for (int i = 0; i < nSize; i++) {
-        sResult += QChar('A' + (char)random(26 * 2));
+        // sResult += QChar('A' + (char)random(26 * 2));
+        sResult += QChar('A' + (char)random(26));
     }
 
     return sResult;
