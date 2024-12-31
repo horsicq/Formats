@@ -104,7 +104,8 @@ public:
     enum LT {
         LT_UNKNOWN = 0,
         LT_OFFSET,
-        LT_ADDRESS
+        LT_ADDRESS,
+        LT_RELADDRESS,
     };
 
     struct DATASET {
