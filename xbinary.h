@@ -1591,6 +1591,26 @@ public:
 
     QList<STRINGTABLE_RECORD> getStringTable_ANSI(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct);
 
+    virtual bool isDebugBuild();
+    virtual bool isReleaseBuild();
+
+    enum FMT_MSG_TYPE {
+        FMT_MSG_TYPE_UNKNOWN = 0,
+        FMT_MSG_TYPE_ERROR,
+        FMT_MSG_TYPE_WARNING
+    };
+
+    struct FMT_MSG {
+        FMT_MSG_TYPE type;
+        quint32 nCode;
+        QString sString;
+    };
+
+    virtual QList<FMT_MSG> checkFormat();
+
+    static QList<QString> getErrorMessages(const QList<FMT_MSG> *pListFmtMsg);
+    static QList<QString> getWarningMessages(const QList<FMT_MSG> *pListFmtMsg);
+
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;
 

@@ -7583,6 +7583,57 @@ QString XBinary::convertSignature(const QString &sSignature)
     return _sSignature;
 }
 
+bool XBinary::isDebugBuild()
+{
+    return false;
+}
+
+bool XBinary::isReleaseBuild()
+{
+    return true;
+}
+
+QList<QString> XBinary::getErrorMessages(const QList<FMT_MSG> *pListFmtMsg)
+{
+    QList<QString> listResult;
+
+    if (pListFmtMsg) {
+        qint32 nNumberOfRecords = pListFmtMsg->count();
+
+        for (qint32 i = 0; i < nNumberOfRecords; i++) {
+            if (pListFmtMsg->at(i).type == FMT_MSG_TYPE_ERROR) {
+                listResult.append(pListFmtMsg->at(i).sString);
+            }
+        }
+    }
+
+    return listResult;
+}
+
+QList<QString> XBinary::getWarningMessages(const QList<FMT_MSG> *pListFmtMsg)
+{
+    QList<QString> listResult;
+
+    if (pListFmtMsg) {
+        qint32 nNumberOfRecords = pListFmtMsg->count();
+
+        for (qint32 i = 0; i < nNumberOfRecords; i++) {
+            if (pListFmtMsg->at(i).type == FMT_MSG_TYPE_WARNING) {
+                listResult.append(pListFmtMsg->at(i).sString);
+            }
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::FMT_MSG> XBinary::checkFormat()
+{
+    QList <XBinary::FMT_MSG> listResult;
+
+    return listResult;
+}
+
 QList<XBinary::STRINGTABLE_RECORD> XBinary::getStringTable_ANSI(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::STRINGTABLE_RECORD> listResult;
