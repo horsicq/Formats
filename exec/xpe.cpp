@@ -314,39 +314,6 @@ qint64 XPE::getFileFormatSize(PDSTRUCT *pPdStruct)
     return _calculateRawSize(pPdStruct);
 }
 
-bool XPE::checkFileFormat(quint64 nFlags, QList<CHECKRECORD> *pListCheckRecords, PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(pPdStruct)
-
-    bool bResult = true;
-
-    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_SECTIONS, pPdStruct);
-
-    if (nFlags | CFF_ENTRYPOINT) {
-        bool bSuccess = true;
-        qint64 nOffset = addressToOffset(&memoryMap, memoryMap.nEntryPointAddress);
-
-        if ((memoryMap.nEntryPointAddress == (XADDR)-1) || (nOffset == -1)) {
-            bSuccess = false;
-        }
-
-        if (!bSuccess) {
-            bResult = false;
-
-            if (pListCheckRecords) {
-                CHECKRECORD cr;
-                cr.nOffset = nOffset;
-                cr.nSize = 0;
-                cr.nAddress = memoryMap.nEntryPointAddress;
-                cr.sText = tr("Invalid address of entry point");
-                pListCheckRecords->append(cr);
-            }
-        }
-    }
-
-    return bResult;
-}
-
 qint64 XPE::getNtHeadersOffset()
 {
     qint64 result = get_lfanew();
@@ -8698,6 +8665,34 @@ QString XPE::getCertHash(XBinary::HASH hash)
     // TODO
 
     return sResult;
+}
+
+QList<XBinary::FMT_MSG> XPE::checkFileFormat(PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::FMT_MSG> listResult;
+
+    bool bSuccess = true;
+
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_SECTIONS, pPdStruct);
+
+    if (bSuccess) {
+        quint32 nRelEP = getOptionalHeader_AddressOfEntryPoint();
+        qint64 nOffset = relAddressToOffset(&memoryMap, nRelEP);
+
+        if (nOffset == -1) {
+            bSuccess = false;
+        }
+
+        FMT_MSG record = {};
+        record.type = FMT_MSG_TYPE_ERROR;
+        record.nCode = 0;
+        record.sString = QString("%1: %2").arg(tr("Invalid address of entry point"), XBinary::valueToHex(nRelEP));
+        record.value = nRelEP;
+
+        listResult.append(record);
+    }
+
+    return listResult;
 }
 
 XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)

@@ -446,15 +446,6 @@ bool XBinary::isPacked(double dEntropy)
     return (dEntropy >= D_ENTROPY_THRESHOLD);  // TODO Check
 }
 
-bool XBinary::checkFileFormat(quint64 nFlags, QList<CHECKRECORD> *pListCheckRecords, PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(nFlags)
-    Q_UNUSED(pListCheckRecords)
-    Q_UNUSED(pPdStruct)
-
-    return true;
-}
-
 quint8 XBinary::random8()
 {
     return (quint8)random16();
@@ -7593,7 +7584,7 @@ bool XBinary::isReleaseBuild()
     return true;
 }
 
-QList<QString> XBinary::getErrorMessages(const QList<FMT_MSG> *pListFmtMsg)
+QList<QString> XBinary::getFileFormatErrorMessages(const QList<FMT_MSG> *pListFmtMsg)
 {
     QList<QString> listResult;
 
@@ -7610,7 +7601,7 @@ QList<QString> XBinary::getErrorMessages(const QList<FMT_MSG> *pListFmtMsg)
     return listResult;
 }
 
-QList<QString> XBinary::getWarningMessages(const QList<FMT_MSG> *pListFmtMsg)
+QList<QString> XBinary::getFileFormatWarningMessages(const QList<FMT_MSG> *pListFmtMsg)
 {
     QList<QString> listResult;
 
@@ -7627,8 +7618,10 @@ QList<QString> XBinary::getWarningMessages(const QList<FMT_MSG> *pListFmtMsg)
     return listResult;
 }
 
-QList<XBinary::FMT_MSG> XBinary::checkFormat()
+QList<XBinary::FMT_MSG> XBinary::checkFileFormat(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     QList <XBinary::FMT_MSG> listResult;
 
     return listResult;
@@ -8775,6 +8768,7 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_WASM: sResult = QString("WASM"); break;
         case DM_BPF_LE: sResult = QString("BPF LE"); break;
         case DM_BPF_BE: sResult = QString("BPF BE"); break;
+        case DM_CUSTOM_MACH_REBASE: sResult = QString("MACH REBASE"); break;
         default: sResult = tr("Unknown");
     }
 
@@ -8896,68 +8890,72 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
 {
     XBinary::DM dmResult = DM_UNKNOWN;
 
-    if (sArch == "PPC") {
+    QString _sArch = sArch.toUpper();
+
+    if (_sArch == "PPC") {
         if (bIsBigEndian) {
             dmResult = DM_PPC_BE;
         } else {
             dmResult = DM_PPC_LE;
         }
-    } else if (sArch == "PPC64") {
+    } else if (_sArch == "PPC64") {
         if (bIsBigEndian) {
             dmResult = DM_PPC64_BE;
         } else {
             dmResult = DM_PPC64_LE;
         }
-    } else if ((sArch == "MIPS") || (sArch == "R3000") || (sArch == "R4000") || (sArch == "R10000") || (sArch == "WCEMIPSV2")) {
+    } else if ((_sArch == "MIPS") || (_sArch == "R3000") || (_sArch == "R4000") || (_sArch == "R10000") || (_sArch == "WCEMIPSV2")) {
         if (bIsBigEndian) {
             dmResult = DM_MIPS_BE;
         } else {
             dmResult = DM_MIPS_LE;
         }
-    } else if ((sArch == "ARM") || (sArch == "ARM_V6") || (sArch == "ARM_V7")) {
+    } else if ((_sArch == "ARM") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7")) {
         if (bIsBigEndian) {
             dmResult = DM_ARM_BE;
         } else {
             dmResult = DM_ARM_LE;
         }
-    } else if ((sArch == "AARCH64") || (sArch == "ARM64") || (sArch == "ARM64E")) {
+    } else if ((_sArch == "AARCH64") || (_sArch == "ARM64") || (_sArch == "ARM64E")) {
         if (bIsBigEndian) {
             dmResult = DM_AARCH64_BE;
         } else {
             dmResult = DM_AARCH64_LE;
         }
-    } else if (sArch == "8086") {
+    } else if ((_sArch == "8086") || (_sArch == "286")) {
         dmResult = DM_X86_16;
-    } else if ((sArch == "386") || (sArch == "80386") || (sArch == "80486") || (sArch == "80586") || (sArch == "I386") || (sArch == "486") || (sArch == "X86")) {
+    } else if ((_sArch == "386") || (_sArch == "80386") || (_sArch == "80486") || (_sArch == "80586") || (_sArch == "I386") || (_sArch == "486") || (_sArch == "X86")) {
         if ((mode == MODE_16) || (mode == MODE_16SEG)) {
             dmResult = DM_X86_16;
         } else {
             dmResult = DM_X86_32;
         }
-    } else if ((sArch == "AMD64") || (sArch == "X86_64") || (sArch == "X64")) {
+    } else if ((_sArch == "AMD64") || (_sArch == "X86_64") || (_sArch == "X64")) {
         dmResult = DM_X86_64;
-    } else if ((sArch == "68K") || (sArch == "MC680x0")) {
+    } else if ((_sArch == "68K") || (_sArch == "MC680x0")) {
         dmResult = DM_M68K;
-    } else if ((sArch == "MC68030") || (sArch == "MC68030_ONLY")) {
+    } else if ((_sArch == "MC68030") || (_sArch == "MC68030_ONLY")) {
         dmResult = DM_M68K30;
-    } else if (sArch == "MC68040") {
+    } else if (_sArch == "MC68040") {
         dmResult = DM_M68K40;
-    } else if (sArch == "POWERPC") {
+    } else if (_sArch == "POWERPC") {
         if (bIsBigEndian) {
             dmResult = DM_PPC_BE;
         } else {
             dmResult = DM_PPC_LE;
         }
-    } else if (sArch == "POWERPC_BE") {
+    } else if (_sArch == "POWERPC_BE") {
         dmResult = DM_PPC_BE;
-    } else if (sArch == "SPARC") {
+    } else if (_sArch == "SPARC") {
         dmResult = DM_SPARC;
-    } else if ((sArch == "RISC_V") || (sArch == "RISCV32") || (sArch == "RISCV64")) {
+    } else if ((_sArch == "RISC_V") || (_sArch == "RISCV32") || (_sArch == "RISCV64")) {
         if (mode == MODE_64) {
             dmResult = DM_RISKV64;
         } else {
             dmResult = DM_RISKV32;
         }
+    } else if (_sArch == "MACH_REBASE") {
+        dmResult = DM_CUSTOM_MACH_REBASE;
     }
     // TODO SH
     // TODO more
@@ -9006,6 +9004,8 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
         result = DMFAMILY_WASM;
     } else if ((disasmMode == DM_BPF_LE) || (disasmMode == DM_BPF_BE)) {
         result = DMFAMILY_BPF;
+    } else if (disasmMode == DM_CUSTOM_MACH_REBASE) {
+        result = DMFAMILY_CUSTOM_MACH_REBASE;
     }
 
     return result;

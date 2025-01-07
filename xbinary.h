@@ -293,7 +293,7 @@ public:
         DMFAMILY_UNKNOWN,
         DMFAMILY_X86,
         DMFAMILY_ARM,
-        DMFAMILY_ARM64,
+        DMFAMILY_ARM64, // TODO rename
         DMFAMILY_MIPS,
         DMFAMILY_PPC,
         DMFAMILY_SPARC,
@@ -305,7 +305,9 @@ public:
         DMFAMILY_EVM,
         DMFAMILY_MOS65XX,
         DMFAMILY_WASM,
-        DMFAMILY_BPF
+        DMFAMILY_BPF,
+        DMFAMILY_CUSTOM,
+        DMFAMILY_CUSTOM_MACH_REBASE,
     };
 
     enum DM {
@@ -358,7 +360,10 @@ public:
         DM_MOS65XX,
         DM_WASM,
         DM_BPF_LE,
-        DM_BPF_BE
+        DM_BPF_BE,
+        DM_CUSTOM,
+        DM_CUSTOM_MACH_REBASE,
+        DM_ALL
     };
 
     enum SYNTAX {
@@ -679,23 +684,6 @@ public:
     virtual ENDIAN getEndian();
 
     bool isPacked(double dEntropy);
-
-    enum CRT {
-        CRT_UNKNOWN = 0,
-        CRT_ERROR,
-        CRT_WARNING,
-        CRT_INFO
-    };
-
-    struct CHECKRECORD {
-        CRT crt;
-        qint64 nOffset;
-        qint64 nSize;
-        XADDR nAddress;
-        QString sText;
-    };
-
-    virtual bool checkFileFormat(quint64 nFlags, QList<CHECKRECORD> *pListCheckRecords, PDSTRUCT *pPdStruct);
 
     static quint8 random8();
     static quint16 random16();
@@ -1603,13 +1591,14 @@ public:
     struct FMT_MSG {
         FMT_MSG_TYPE type;
         quint32 nCode;
+        QVariant value;
         QString sString;
     };
 
-    virtual QList<FMT_MSG> checkFormat();
+    virtual QList<FMT_MSG> checkFileFormat(PDSTRUCT *pPdStruct);
 
-    static QList<QString> getErrorMessages(const QList<FMT_MSG> *pListFmtMsg);
-    static QList<QString> getWarningMessages(const QList<FMT_MSG> *pListFmtMsg);
+    static QList<QString> getFileFormatErrorMessages(const QList<FMT_MSG> *pListFmtMsg);
+    static QList<QString> getFileFormatWarningMessages(const QList<FMT_MSG> *pListFmtMsg);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

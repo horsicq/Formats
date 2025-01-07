@@ -351,13 +351,6 @@ public:
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
-    enum CFF {
-        CFF_UNKNOWN = 0,
-        CFF_ENTRYPOINT = 1
-    };
-
-    virtual bool checkFileFormat(quint64 nFlags, QList<CHECKRECORD> *pListCheckRecords, PDSTRUCT *pPdStruct);
-
     qint64 getNtHeadersOffset();
     quint32 getNtHeaders_Signature();
     void setNtHeaders_Signature(quint32 nValue);
@@ -1296,6 +1289,8 @@ public:
     static XCERT_INFO getCertInfo(const QString &sFileName);
 
     virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTIONS &hlOptions, PDSTRUCT *pPdStruct = nullptr);
+
+    virtual QList<FMT_MSG> checkFileFormat(PDSTRUCT *pPdStruct);
 
 #if defined(_MSC_VER)
     enum CERTNAMESTRING {
