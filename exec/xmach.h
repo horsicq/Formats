@@ -136,7 +136,10 @@ public:
         TYPE_BUNDLE,
         TYPE_DYLIB_STUB,
         TYPE_DSYM,
-        TYPE_KEXT_BUNDLE
+        TYPE_KEXT_BUNDLE,
+        TYPE_FILESET,
+        TYPE_GPU_EXECUTE,
+        TYPE_GPU_DYLIB,
     };
 
     XMACH(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);

@@ -8910,13 +8910,13 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
         } else {
             dmResult = DM_MIPS_LE;
         }
-    } else if ((_sArch == "ARM") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7")) {
+    } else if ((_sArch == "ARM") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7")  || (_sArch == "ARM_V7S")) {
         if (bIsBigEndian) {
             dmResult = DM_ARM_BE;
         } else {
             dmResult = DM_ARM_LE;
         }
-    } else if ((_sArch == "AARCH64") || (_sArch == "ARM64") || (_sArch == "ARM64E")) {
+    } else if ((_sArch == "AARCH64") || (_sArch == "ARM64") || (_sArch == "ARM64E") || (_sArch == "ARM_A500")) {
         if (bIsBigEndian) {
             dmResult = DM_AARCH64_BE;
         } else {

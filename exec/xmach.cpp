@@ -221,6 +221,7 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypes()
     mapResult.insert(0xB, "CPU_TYPE_HPPA");
     mapResult.insert(0xC, "CPU_TYPE_ARM");
     mapResult.insert(0x100000C, "CPU_TYPE_ARM64");
+    mapResult.insert(0x200000C, "CPU_TYPE_ARM64_32");
     mapResult.insert(0xD, "CPU_TYPE_MC88000");
     mapResult.insert(0xE, "CPU_TYPE_SPARC");
     mapResult.insert(0xF, "CPU_TYPE_I860");
@@ -249,6 +250,7 @@ QMap<quint64, QString> XMACH::getHeaderCpuTypesS()
     mapResult.insert(0xB, "HPPA");
     mapResult.insert(0xC, "ARM");
     mapResult.insert(0x100000C, "ARM64");
+    mapResult.insert(0x200000C, "ARM64_32");
     mapResult.insert(0xD, "MC88000");
     mapResult.insert(0xE, "SPARC");
     mapResult.insert(0xF, "I860");
@@ -484,6 +486,9 @@ QMap<quint64, QString> XMACH::getHeaderFileTypes()
     mapResult.insert(0x9, "MH_DYLIB_STUB");
     mapResult.insert(0xa, "MH_DSYM");
     mapResult.insert(0xb, "MH_KEXT_BUNDLE");
+    mapResult.insert(0xc, "MH_FILESET");
+    mapResult.insert(0xd, "MH_GPU_EXECUTE");
+    mapResult.insert(0xe, "MH_GPU_DYLIB");
 
     return mapResult;
 }
@@ -503,6 +508,9 @@ QMap<quint64, QString> XMACH::getHeaderFileTypesS()
     mapResult.insert(0x9, "DYLIB_STUB");
     mapResult.insert(0xa, "DSYM");
     mapResult.insert(0xb, "KEXT_BUNDLE");
+    mapResult.insert(0xc, "FILESET");
+    mapResult.insert(0xd, "GPU_EXECUTE");
+    mapResult.insert(0xe, "GPU_DYLIB");
 
     return mapResult;
 }
@@ -4452,6 +4460,9 @@ qint32 XMACH::getType()
     else if (nFileType == XMACH_DEF::S_MH_DYLIB_STUB) nResult = TYPE_DYLIB_STUB;
     else if (nFileType == XMACH_DEF::S_MH_DSYM) nResult = TYPE_DSYM;
     else if (nFileType == XMACH_DEF::S_MH_KEXT_BUNDLE) nResult = TYPE_KEXT_BUNDLE;
+    else if (nFileType == XMACH_DEF::S_MH_FILESET) nResult = TYPE_FILESET;
+    else if (nFileType == XMACH_DEF::S_MH_GPU_EXECUTE) nResult = TYPE_GPU_EXECUTE;
+    else if (nFileType == XMACH_DEF::S_MH_GPU_DYLIB) nResult = TYPE_GPU_DYLIB;
 
     return nResult;
 }
@@ -4616,6 +4627,9 @@ QString XMACH::typeIdToString(qint32 nType)
         case TYPE_DYLIB_STUB: sResult = QString("DYLIB_STUB"); break;
         case TYPE_DSYM: sResult = QString("DSYM"); break;
         case TYPE_KEXT_BUNDLE: sResult = QString("KEXT_BUNDLE"); break;
+        case TYPE_FILESET: sResult = QString("FILESET"); break;
+        case TYPE_GPU_EXECUTE: sResult = QString("GPU_EXECUTE"); break;
+        case TYPE_GPU_DYLIB: sResult = QString("GPU_DYLIB"); break;
     }
 
     return sResult;
