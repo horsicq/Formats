@@ -7622,7 +7622,7 @@ QList<XBinary::FMT_MSG> XBinary::checkFileFormat(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
-    QList <XBinary::FMT_MSG> listResult;
+    QList<XBinary::FMT_MSG> listResult;
 
     return listResult;
 }
@@ -8910,7 +8910,7 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
         } else {
             dmResult = DM_MIPS_LE;
         }
-    } else if ((_sArch == "ARM") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7")  || (_sArch == "ARM_V7S")) {
+    } else if ((_sArch == "ARM") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7") || (_sArch == "ARM_V7S")) {
         if (bIsBigEndian) {
             dmResult = DM_ARM_BE;
         } else {
