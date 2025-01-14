@@ -8768,7 +8768,7 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_WASM: sResult = QString("WASM"); break;
         case DM_BPF_LE: sResult = QString("BPF LE"); break;
         case DM_BPF_BE: sResult = QString("BPF BE"); break;
-        case DM_CUSTOM_MACH_REBASE: sResult = QString("MACH REBASE"); break;
+        // case DM_CUSTOM_MACH_REBASE: sResult = QString("MACH REBASE"); break;
         default: sResult = tr("Unknown");
     }
 
@@ -8910,7 +8910,7 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
         } else {
             dmResult = DM_MIPS_LE;
         }
-    } else if ((_sArch == "ARM") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7") || (_sArch == "ARM_V7S")) {
+    } else if ((_sArch == "ARM") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7") || (_sArch == "ARM_V7S") || (_sArch == "ARM64_32")) {
         if (bIsBigEndian) {
             dmResult = DM_ARM_BE;
         } else {
@@ -8954,9 +8954,10 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
         } else {
             dmResult = DM_RISKV32;
         }
-    } else if (_sArch == "MACH_REBASE") {
-        dmResult = DM_CUSTOM_MACH_REBASE;
     }
+    // else if (_sArch == "MACH_REBASE") {
+    //     dmResult = DM_CUSTOM_MACH_REBASE;
+    // }
     // TODO SH
     // TODO more
 
@@ -9004,9 +9005,10 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
         result = DMFAMILY_WASM;
     } else if ((disasmMode == DM_BPF_LE) || (disasmMode == DM_BPF_BE)) {
         result = DMFAMILY_BPF;
-    } else if (disasmMode == DM_CUSTOM_MACH_REBASE) {
-        result = DMFAMILY_CUSTOM_MACH_REBASE;
     }
+    // else if (disasmMode == DM_CUSTOM_MACH_REBASE) {
+    //     result = DMFAMILY_CUSTOM_MACH_REBASE;
+    // }
 
     return result;
 }
