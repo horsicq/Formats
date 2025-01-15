@@ -306,8 +306,9 @@ public:
         DMFAMILY_MOS65XX,
         DMFAMILY_WASM,
         DMFAMILY_BPF,
-        // DMFAMILY_CUSTOM,
-        // DMFAMILY_CUSTOM_MACH_REBASE,
+        DMFAMILY_CUSTOM,
+        DMFAMILY_CUSTOM_MACH_REBASE,
+        DMFAMILY_CUSTOM_7ZIP,
     };
 
     enum DM {
@@ -361,8 +362,9 @@ public:
         DM_WASM,
         DM_BPF_LE,
         DM_BPF_BE,
-        // DM_CUSTOM,
-        // DM_CUSTOM_MACH_REBASE,
+        DM_CUSTOM,
+        DM_CUSTOM_MACH_REBASE,
+        DM_CUSTOM_7ZIP_PROPERTIES,
         DM_ALL
     };
 

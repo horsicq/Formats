@@ -8768,7 +8768,8 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_WASM: sResult = QString("WASM"); break;
         case DM_BPF_LE: sResult = QString("BPF LE"); break;
         case DM_BPF_BE: sResult = QString("BPF BE"); break;
-        // case DM_CUSTOM_MACH_REBASE: sResult = QString("MACH REBASE"); break;
+        case DM_CUSTOM_MACH_REBASE: sResult = QString("MACH REBASE"); break;
+        case DM_CUSTOM_7ZIP_PROPERTIES: sResult = QString("7ZIP PROPERTIES"); break;
         default: sResult = tr("Unknown");
     }
 
@@ -9005,10 +9006,11 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
         result = DMFAMILY_WASM;
     } else if ((disasmMode == DM_BPF_LE) || (disasmMode == DM_BPF_BE)) {
         result = DMFAMILY_BPF;
+    } else if (disasmMode == DM_CUSTOM_MACH_REBASE) {
+        result = DMFAMILY_CUSTOM_MACH_REBASE;
+    } else if (disasmMode == DM_CUSTOM_7ZIP_PROPERTIES) {
+        result = DMFAMILY_CUSTOM_7ZIP;
     }
-    // else if (disasmMode == DM_CUSTOM_MACH_REBASE) {
-    //     result = DMFAMILY_CUSTOM_MACH_REBASE;
-    // }
 
     return result;
 }
