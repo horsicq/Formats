@@ -1310,23 +1310,18 @@ public:
     static bool isResizeEnable(QIODevice *pDevice);
     static bool resize(QIODevice *pDevice, qint64 nSize);
 
-    struct PACKED_INT {
+    struct PACKED_UINT {
         bool bIsValid;
         quint64 nValue;
-        quint32 nByteSize;
+        qint32 nByteSize;
     };
 
-    PACKED_INT read_uleb128(qint64 nOffset, qint64 nSize);
-    PACKED_INT _read_uleb128(char *pData, qint64 nSize);
+    PACKED_UINT read_uleb128(qint64 nOffset, qint64 nSize);
+    PACKED_UINT _read_uleb128(char *pData, qint64 nSize);
 
-    PACKED_INT read_acn1_integer(qint64 nOffset, qint64 nSize);
+    PACKED_UINT read_acn1_integer(qint64 nOffset, qint64 nSize);
 
-    struct PACKED {
-        quint64 nValue;
-        quint32 nByteSize;
-    };
-
-    PACKED get_packedNumber(qint64 nOffset);
+    PACKED_UINT _read_packedNumber(char *pData, qint64 nSize);
 
     static QList<QString> getListFromFile(const QString &sFileName);
 

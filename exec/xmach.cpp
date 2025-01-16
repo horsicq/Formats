@@ -4319,7 +4319,7 @@ QList<XMACH::FUNCTION_RECORD> XMACH::getFunctionRecords(qint64 nOffset, qint64 n
     qint32 nRawOffset = 0;
 
     for (qint64 nCurrentOffset = nOffset; nCurrentOffset < (nOffset + nSize);) {
-        PACKED_INT uleb128 = read_uleb128(nCurrentOffset, (nOffset + nSize) - nCurrentOffset);
+        PACKED_UINT uleb128 = read_uleb128(nCurrentOffset, (nOffset + nSize) - nCurrentOffset);
 
         if ((uleb128.nValue == 0) && (nCurrentOffset != nOffset)) {
             break;
@@ -4918,7 +4918,7 @@ XADDR XMACH::readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSi
         bool bFlags = false;
         bool bSymbolOffset = false;
 
-        PACKED_INT uTerminalSize = _read_uleb128(pData, nSize);
+        PACKED_UINT uTerminalSize = _read_uleb128(pData, nSize);
 
         if ((qint64)uTerminalSize.nValue < nSize) {
             bSuccess = _read_opcode_uleb128(&opcodeTerminalSize, &pData, &nSize, &nAddress, &nResult, "Terminal size");
@@ -4937,7 +4937,7 @@ XADDR XMACH::readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSi
             bSuccess = _read_opcode_uleb128(&opcodeSymbolOffset, &pData, &nSize, &nAddress, &nResult, "Symbol offset");
         }
 
-        PACKED_INT uChildCount = _read_uleb128(pData, nSize);
+        PACKED_UINT uChildCount = _read_uleb128(pData, nSize);
 
         if (bSuccess) {
             bSuccess = _read_opcode_uleb128(&opcodeChildCount, &pData, &nSize, &nAddress, &nResult, "Child count");

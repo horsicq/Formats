@@ -1496,7 +1496,7 @@ QString XBinary::_read_utf8String(qint64 nOffset, qint64 nMaxSize)
 {
     QString sResult;
 
-    PACKED_INT ulebSize = read_uleb128(nOffset, nMaxSize);
+    PACKED_UINT ulebSize = read_uleb128(nOffset, nMaxSize);
 
     sResult = read_utf8String(nOffset + ulebSize.nByteSize,
                               ulebSize.nValue);  // TODO mutf8
@@ -1508,7 +1508,7 @@ QString XBinary::_read_utf8String(char *pData, qint64 nMaxSize)
 {
     QString sResult;
 
-    PACKED_INT ulebSize = _read_uleb128(pData, nMaxSize);
+    PACKED_UINT ulebSize = _read_uleb128(pData, nMaxSize);
 
     qint32 nStringSize = qMin((qint64)ulebSize.nValue, nMaxSize - ulebSize.nByteSize);
 
@@ -8059,9 +8059,9 @@ bool XBinary::resize(QIODevice *pDevice, qint64 nSize)
     return bResult;
 }
 
-XBinary::PACKED_INT XBinary::read_uleb128(qint64 nOffset, qint64 nSize)
+XBinary::PACKED_UINT XBinary::read_uleb128(qint64 nOffset, qint64 nSize)
 {
-    PACKED_INT result = {};
+    PACKED_UINT result = {};
 
     quint32 nShift = 0;
 
@@ -8080,9 +8080,9 @@ XBinary::PACKED_INT XBinary::read_uleb128(qint64 nOffset, qint64 nSize)
     return result;
 }
 
-XBinary::PACKED_INT XBinary::_read_uleb128(char *pData, qint64 nSize)
+XBinary::PACKED_UINT XBinary::_read_uleb128(char *pData, qint64 nSize)
 {
-    PACKED_INT result = {};
+    PACKED_UINT result = {};
 
     quint32 nShift = 0;
 
@@ -8101,9 +8101,9 @@ XBinary::PACKED_INT XBinary::_read_uleb128(char *pData, qint64 nSize)
     return result;
 }
 
-XBinary::PACKED_INT XBinary::read_acn1_integer(qint64 nOffset, qint64 nSize)
+XBinary::PACKED_UINT XBinary::read_acn1_integer(qint64 nOffset, qint64 nSize)
 {
-    PACKED_INT result = {};
+    PACKED_UINT result = {};
 
     if (nSize > 0) {
         quint8 nByte = read_uint8(nOffset);
@@ -8130,51 +8130,51 @@ XBinary::PACKED_INT XBinary::read_acn1_integer(qint64 nOffset, qint64 nSize)
     return result;
 }
 
-XBinary::PACKED XBinary::get_packedNumber(qint64 nOffset)
+XBinary::PACKED_UINT XBinary::_read_packedNumber(char *pData, qint64 nSize)
 {
-    PACKED result = {};
+    PACKED_UINT result = {};
 
-    quint8 nFirstByte = 0;
-    quint8 nSecondByte = 0;
-    quint8 nMask = 0;
-    qint64 _nStartOffset = nOffset;
+    quint8 nFirstByte = (quint8)(*(pData));
 
-    for (qint32 i = 0; i < 8; i++) {
-        if (i == 0) {
-            nFirstByte = read_uint8(nOffset);
-            nOffset++;
-            if ((nFirstByte & 0x80) == 0) {
-                result.nValue = nFirstByte;
-                break;
-            }
-        }
-        if (i == 1) {
-            nSecondByte = read_uint8(nOffset);
-            nOffset++;
-            if ((nFirstByte & 0x40) == 0) {
-                result.nValue = (((quint32)nFirstByte & 0x3F) << 8) | nSecondByte;
-                break;
-            }
-            nMask = read_uint8(nOffset);
-            nOffset++;
-            result.nValue = nSecondByte | ((quint32)nMask << 8);
-            nMask = 0x20;
-        }
-        if (i == 2) {
-            if ((nFirstByte & nMask) == 0) {
-                quint64 nHighPart = nFirstByte & (nMask - 1);
-                result.nValue |= (nHighPart << (8 * i));
-                break;
-            }
+    result.nByteSize = 0;
 
-            quint8 nByte = read_uint8(nOffset);
-            nOffset++;
-            result.nValue |= ((quint64)nByte) << (8 * i);
-            nMask >>= 1;
-        }
+    if ((nFirstByte & 0x80) == 0) { // 0xxxxxxx
+        result.nValue = nFirstByte & 0x7F;
+        result.nByteSize = 1;
+    } else if ((nFirstByte & 0xC0) == 0x80) { // 10xxxxxx
+        result.nValue = nFirstByte & 0x3F;
+        result.nByteSize = 2;
+    } else if ((nFirstByte & 0xE0) == 0xC0) { // 110xxxxx
+        result.nValue = nFirstByte & 0x1F;
+        result.nByteSize = 3;
+    } else if ((nFirstByte & 0xF0) == 0xE0) { // 1110xxxx
+        result.nValue = nFirstByte & 0x0F;
+        result.nByteSize = 4;
+    } else if ((nFirstByte & 0xF8) == 0xF0) { // 11110xxx
+        result.nValue = nFirstByte & 0x07;
+        result.nByteSize = 5;
+    } else if ((nFirstByte & 0xFC) == 0xF8) { // 111110xx
+        result.nValue = nFirstByte & 0x03;
+        result.nByteSize = 6;
+    } else if ((nFirstByte & 0xFE) == 0xFC) { // 1111110x
+        result.nValue = nFirstByte & 0x01;
+        result.nByteSize = 7;
+    } else if (nFirstByte == 0xFE) { // 11111110
+        result.nValue = 0;
+        result.nByteSize = 8;
+    } else if (nFirstByte == 0xFF) { // 11111111
+        result.nValue = 0;
+        result.nByteSize = 9;
     }
 
-    result.nByteSize = nOffset - _nStartOffset;
+    if (result.nByteSize <= nSize) {
+        result.bIsValid = true;
+
+        for (qint32 i = 1; i < result.nByteSize; ++i) {
+            quint8 _nByte = (quint8)(*(pData + i));
+            result.nValue |= static_cast<quint32>(_nByte) << (8 * (i - 1));
+        }
+    }
 
     return result;
 }
@@ -9407,7 +9407,7 @@ bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSiz
     bool bResult = false;
 
     if (*pnSize > 0) {
-        PACKED_INT uleb128 = _read_uleb128(*ppData, *pnSize);
+        PACKED_UINT uleb128 = _read_uleb128(*ppData, *pnSize);
 
         if (uleb128.bIsValid) {
             pOpcode->nAddress = *pnAddress;

@@ -8435,7 +8435,7 @@ XPE::CERT_TAG XPE::read_CertTag(qint64 nOffset, quint32 nTag)
     }
 
     if (result.bIsValid) {
-        PACKED_INT packedInt = read_acn1_integer(nOffset + 1, 4);
+        PACKED_UINT packedInt = read_acn1_integer(nOffset + 1, 4);
         result.bIsValid = packedInt.bIsValid;
         result.nSize = packedInt.nValue;
         result.nHeaderSize = packedInt.nByteSize + 1;
@@ -8481,7 +8481,7 @@ qint64 XPE::read_ASN_Integer(qint64 nOffset, qint64 nSize)
 {
     qint64 nResult = 0;
 
-    PACKED_INT packedInt = read_acn1_integer(nOffset, nSize);
+    PACKED_UINT packedInt = read_acn1_integer(nOffset, nSize);
 
     if (packedInt.bIsValid) {
         nResult = packedInt.nValue;
