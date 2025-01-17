@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2024 hors<horsicq@gmail.com>
+/* Copyright (c) 2017-2025 hors<horsicq@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -491,6 +491,8 @@ public:
 
     XPE_DEF::IMAGE_SECTION_HEADER getSectionHeader(quint32 nNumber);
     void setSectionHeader(quint32 nNumber, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader);
+
+    XPE_DEF::IMAGE_SECTION_HEADER read_IMAGE_SECTION_HEADER(qint64 nOffset);
 
     QList<XPE_DEF::IMAGE_SECTION_HEADER> getSectionHeaders(PDSTRUCT *pPdStruct = nullptr);
     // TODO with __getSectionOffsetAndSize TODO Check !!!

@@ -1253,6 +1253,24 @@ void XPE::setSectionHeader(quint32 nNumber, XPE_DEF::IMAGE_SECTION_HEADER *pSect
     }
 }
 
+XPE_DEF::IMAGE_SECTION_HEADER XPE::read_IMAGE_SECTION_HEADER(qint64 nOffset)
+{
+    XPE_DEF::IMAGE_SECTION_HEADER result = {};
+
+    read_array(nOffset, (char *)(result.Name), sizeof(XPE_DEF::IMAGE_SECTION_HEADER));
+    result.Misc.VirtualSize = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Misc.VirtualSize));
+    result.VirtualAddress = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, VirtualAddress));
+    result.SizeOfRawData = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData));
+    result.PointerToRawData = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRawData));
+    result.PointerToRelocations = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRelocations));
+    result.PointerToLinenumbers = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToLinenumbers));
+    result.NumberOfRelocations = read_uint16(nOffset + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfRelocations));
+    result.NumberOfLinenumbers = read_uint16(nOffset + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfLinenumbers));
+    result.Characteristics = read_uint32(nOffset + offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Characteristics));
+
+    return result;
+}
+
 QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders(PDSTRUCT *pPdStruct)
 {
     XBinary::PDSTRUCT pdStructEmpty = {};

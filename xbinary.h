@@ -1317,11 +1317,11 @@ public:
     };
 
     PACKED_UINT read_uleb128(qint64 nOffset, qint64 nSize);
-    PACKED_UINT _read_uleb128(char *pData, qint64 nSize);
+    static PACKED_UINT _read_uleb128(char *pData, qint64 nSize);
 
     PACKED_UINT read_acn1_integer(qint64 nOffset, qint64 nSize);
 
-    PACKED_UINT _read_packedNumber(char *pData, qint64 nSize);
+    static PACKED_UINT _read_packedNumber(char *pData, qint64 nSize);
 
     static QList<QString> getListFromFile(const QString &sFileName);
 
