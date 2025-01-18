@@ -8138,31 +8138,31 @@ XBinary::PACKED_UINT XBinary::_read_packedNumber(char *pData, qint64 nSize)
 
     result.nByteSize = 0;
 
-    if ((nFirstByte & 0x80) == 0) { // 0xxxxxxx
+    if ((nFirstByte & 0x80) == 0) {  // 0xxxxxxx
         result.nValue = nFirstByte & 0x7F;
         result.nByteSize = 1;
-    } else if ((nFirstByte & 0xC0) == 0x80) { // 10xxxxxx
+    } else if ((nFirstByte & 0xC0) == 0x80) {  // 10xxxxxx
         result.nValue = nFirstByte & 0x3F;
         result.nByteSize = 2;
-    } else if ((nFirstByte & 0xE0) == 0xC0) { // 110xxxxx
+    } else if ((nFirstByte & 0xE0) == 0xC0) {  // 110xxxxx
         result.nValue = nFirstByte & 0x1F;
         result.nByteSize = 3;
-    } else if ((nFirstByte & 0xF0) == 0xE0) { // 1110xxxx
+    } else if ((nFirstByte & 0xF0) == 0xE0) {  // 1110xxxx
         result.nValue = nFirstByte & 0x0F;
         result.nByteSize = 4;
-    } else if ((nFirstByte & 0xF8) == 0xF0) { // 11110xxx
+    } else if ((nFirstByte & 0xF8) == 0xF0) {  // 11110xxx
         result.nValue = nFirstByte & 0x07;
         result.nByteSize = 5;
-    } else if ((nFirstByte & 0xFC) == 0xF8) { // 111110xx
+    } else if ((nFirstByte & 0xFC) == 0xF8) {  // 111110xx
         result.nValue = nFirstByte & 0x03;
         result.nByteSize = 6;
-    } else if ((nFirstByte & 0xFE) == 0xFC) { // 1111110x
+    } else if ((nFirstByte & 0xFE) == 0xFC) {  // 1111110x
         result.nValue = nFirstByte & 0x01;
         result.nByteSize = 7;
-    } else if (nFirstByte == 0xFE) { // 11111110
+    } else if (nFirstByte == 0xFE) {  // 11111110
         result.nValue = 0;
         result.nByteSize = 8;
-    } else if (nFirstByte == 0xFF) { // 11111111
+    } else if (nFirstByte == 0xFF) {  // 11111111
         result.nValue = 0;
         result.nByteSize = 9;
     }
