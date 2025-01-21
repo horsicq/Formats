@@ -308,6 +308,8 @@ public:
         DMFAMILY_BPF,
         DMFAMILY_CUSTOM,
         DMFAMILY_CUSTOM_MACH_REBASE,
+        DMFAMILY_CUSTOM_MACH_BIND,
+        DMFAMILY_CUSTOM_MACH_EXPORT,
         DMFAMILY_CUSTOM_7ZIP,
     };
 
@@ -364,6 +366,8 @@ public:
         DM_BPF_BE,
         DM_CUSTOM,
         DM_CUSTOM_MACH_REBASE,
+        DM_CUSTOM_MACH_BIND,
+        DM_CUSTOM_MACH_EXPORT,
         DM_CUSTOM_7ZIP_PROPERTIES,
         DM_ALL
     };
@@ -1431,11 +1435,11 @@ public:
         OPCODE_STATUS_END
     };
 
-    QList<OPCODE> getOpcodes(qint64 nOffset, XADDR nStartAddress, qint64 nSize, quint32 nType, PDSTRUCT *pPdStruct = nullptr);
-    virtual XADDR readOpcodes(quint32 nType, char *pData, XADDR nStartAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);
+    QList<OPCODE> getOpcodes(qint64 nOffset, XADDR nStartAddress, qint64 nSize, quint32 nType, PDSTRUCT *pPdStruct = nullptr); // TODO remove
+    virtual XADDR readOpcodes(quint32 nType, char *pData, XADDR nStartAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus); // TODO remove
 
-    bool _read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, const QString &sPrefix);
-    bool _read_opcode_ansiString(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, const QString &sPrefix);
+    bool _read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, const QString &sPrefix); // TODO remove
+    bool _read_opcode_ansiString(OPCODE *pOpcode, char **ppData, qint64 *pnSize, XADDR *pnAddress, XADDR *pnResult, const QString &sPrefix); // TODO remove
 
     QList<quint32> get_uint32_list(qint64 nOffset, qint32 nNumberOfRecords, bool bIsBigEndian = false);
     QList<quint64> get_uint64_list(qint64 nOffset, qint32 nNumberOfRecords, bool bIsBigEndian = false);
@@ -1585,17 +1589,32 @@ public:
         FMT_MSG_TYPE_WARNING
     };
 
+    enum FMT_MSG_CODE {
+        FMT_MSG_CODE_UNKNOWN = 0,
+        FMT_MSG_CODE_INVALID_ENTRYPOINT,
+        FMT_MSG_CODE_INVALID_CHECKSUM,
+        FMT_MSG_CODE_INVALID_HEADER,
+        FMT_MSG_CODE_INVALID_SECTIONALIGNMENT,
+        FMT_MSG_CODE_INVALID_FILEALIGNMENT,
+        FMT_MSG_CODE_INVALID_RELOCSTABLE,
+        FMT_MSG_CODE_INVALID_IMPORTTABLE,
+        FMT_MSG_CODE_INVALID_EXPORTTABLE,
+        FMT_MSG_CODE_INVALID_RESOURCESTABLE,
+        FMT_MSG_CODE_INVALID_SECTIONSTABLE,
+    };
+
     struct FMT_MSG {
         FMT_MSG_TYPE type;
-        quint32 nCode;
+        FMT_MSG_CODE code;
         QVariant value;
         QString sString;
     };
 
     virtual QList<FMT_MSG> checkFileFormat(PDSTRUCT *pPdStruct);
 
-    static QList<QString> getFileFormatErrorMessages(const QList<FMT_MSG> *pListFmtMsg);
-    static QList<QString> getFileFormatWarningMessages(const QList<FMT_MSG> *pListFmtMsg);
+    static QList<QString> getFileFormatMessages(const QList<FMT_MSG> *pListFmtMsg);
+
+    static bool isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CODE code, PDSTRUCT *pPdStruct);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

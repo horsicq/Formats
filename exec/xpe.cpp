@@ -8703,7 +8703,7 @@ QList<XBinary::FMT_MSG> XPE::checkFileFormat(PDSTRUCT *pPdStruct)
 
         FMT_MSG record = {};
         record.type = FMT_MSG_TYPE_ERROR;
-        record.nCode = 0;
+        record.code = FMT_MSG_CODE_INVALID_ENTRYPOINT;
         record.sString = QString("%1: %2").arg(tr("Invalid address of entry point"), XBinary::valueToHex(nRelEP));
         record.value = nRelEP;
 

@@ -1294,6 +1294,7 @@ public:
 
     virtual QList<FMT_MSG> checkFileFormat(PDSTRUCT *pPdStruct);
 
+
 #if defined(_MSC_VER)
     enum CERTNAMESTRING {
         CERTNAMESTRING_UNKNOWN = 0,

@@ -7584,7 +7584,7 @@ bool XBinary::isReleaseBuild()
     return true;
 }
 
-QList<QString> XBinary::getFileFormatErrorMessages(const QList<FMT_MSG> *pListFmtMsg)
+QList<QString> XBinary::getFileFormatMessages(const QList<FMT_MSG> *pListFmtMsg)
 {
     QList<QString> listResult;
 
@@ -7592,30 +7592,29 @@ QList<QString> XBinary::getFileFormatErrorMessages(const QList<FMT_MSG> *pListFm
         qint32 nNumberOfRecords = pListFmtMsg->count();
 
         for (qint32 i = 0; i < nNumberOfRecords; i++) {
-            if (pListFmtMsg->at(i).type == FMT_MSG_TYPE_ERROR) {
-                listResult.append(pListFmtMsg->at(i).sString);
-            }
+            listResult.append(pListFmtMsg->at(i).sString);
         }
     }
 
     return listResult;
 }
 
-QList<QString> XBinary::getFileFormatWarningMessages(const QList<FMT_MSG> *pListFmtMsg)
+bool XBinary::isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CODE code, PDSTRUCT *pPdStruct)
 {
-    QList<QString> listResult;
+    bool bResult = false;
 
-    if (pListFmtMsg) {
-        qint32 nNumberOfRecords = pListFmtMsg->count();
+    if (pListFmtMsgs) {
+        qint32 nNumberOfRecords = pListFmtMsgs->count();
 
-        for (qint32 i = 0; i < nNumberOfRecords; i++) {
-            if (pListFmtMsg->at(i).type == FMT_MSG_TYPE_WARNING) {
-                listResult.append(pListFmtMsg->at(i).sString);
+        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+            if (pListFmtMsgs->at(i).code == code) {
+                bResult = true;
+                break;
             }
         }
     }
 
-    return listResult;
+    return bResult;
 }
 
 QList<XBinary::FMT_MSG> XBinary::checkFileFormat(PDSTRUCT *pPdStruct)
@@ -9008,6 +9007,10 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
         result = DMFAMILY_BPF;
     } else if (disasmMode == DM_CUSTOM_MACH_REBASE) {
         result = DMFAMILY_CUSTOM_MACH_REBASE;
+    } else if (disasmMode == DM_CUSTOM_MACH_BIND) {
+        result = DMFAMILY_CUSTOM_MACH_BIND;
+    } else if (disasmMode == DM_CUSTOM_MACH_EXPORT) {
+        result = DMFAMILY_CUSTOM_MACH_EXPORT;
     } else if (disasmMode == DM_CUSTOM_7ZIP_PROPERTIES) {
         result = DMFAMILY_CUSTOM_7ZIP;
     }
