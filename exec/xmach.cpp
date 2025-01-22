@@ -1345,6 +1345,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             }
         }
     } else if (mapMode == MAPMODE_SECTIONS) {
+        // Started from 1
         QList<SECTION_RECORD> listSections = getSectionRecords(&listCommandRecords);
         qint32 nNumberOfSections = listSections.count();
 
@@ -1365,7 +1366,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 if (bIs64) {
                     QString _sSectiontName = QString(listSections.at(i).s.section64.sectname);  // TODO Limit
 
-                    sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i), _sSectiontName);
+                    sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i + 1), _sSectiontName);
                     nFileOffset = listSections.at(i).s.section64.offset;
                     nVirtualAddress = listSections.at(i).s.section64.addr;
                     nFileSize = listSections.at(i).s.section64.size;
@@ -1373,7 +1374,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 } else {
                     QString _sSectiontName = QString(listSections.at(i).s.section32.sectname);  // TODO Limit
 
-                    sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i), _sSectiontName);
+                    sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i + 1), _sSectiontName);
                     nFileOffset = listSections.at(i).s.section32.offset;
                     nVirtualAddress = listSections.at(i).s.section32.addr;
                     nFileSize = listSections.at(i).s.section32.size;
@@ -3945,6 +3946,20 @@ XMACH_DEF::dyld_chained_fixups_header XMACH::_read_dyld_chained_fixups_header(qi
     result.imports_count = read_uint32(nOffset + offsetof(XMACH_DEF::dyld_chained_fixups_header, imports_count), bIsBigEndian);
     result.imports_format = read_uint32(nOffset + offsetof(XMACH_DEF::dyld_chained_fixups_header, imports_format), bIsBigEndian);
     result.symbols_format = read_uint32(nOffset + offsetof(XMACH_DEF::dyld_chained_fixups_header, symbols_format), bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::twolevel_hints_command XMACH::_read_twolevel_hints_command(qint64 nOffset)
+{
+    XMACH_DEF::twolevel_hints_command result = {};
+
+    bool bIsBigEndian = isBigEndian();
+
+    result.cmd = read_uint32(nOffset + offsetof(XMACH_DEF::twolevel_hints_command, cmd), bIsBigEndian);
+    result.cmdsize = read_uint32(nOffset + offsetof(XMACH_DEF::twolevel_hints_command, cmdsize), bIsBigEndian);
+    result.offset = read_uint32(nOffset + offsetof(XMACH_DEF::twolevel_hints_command, offset), bIsBigEndian);
+    result.nhints = read_uint32(nOffset + offsetof(XMACH_DEF::twolevel_hints_command, nhints), bIsBigEndian);
 
     return result;
 }

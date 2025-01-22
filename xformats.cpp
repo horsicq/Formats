@@ -86,6 +86,9 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMO
     } else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) {
         XRiff xriff(pDevice);
         result = xriff.getMemoryMap(mapMode, pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) {
+        XJavaClass xjc(pDevice);
+        result = xjc.getMemoryMap(mapMode, pPdStruct);
     }
 #ifdef USE_DEX  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -213,6 +216,8 @@ QList<XBinary::MAPMODE> XFormats::getMapModesList(XBinary::FT fileType)
         listResult = XMP3::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) {
         listResult = XRiff::getMapModesList();
+    } else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) {
+        listResult = XJavaClass::getMapModesList();
     }
 #ifdef USE_DEX  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -369,6 +374,9 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
     } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
         XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
         bResult = amigaHunk.isBigEndian();
+    } else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) {
+        XJavaClass xjc(pDevice);
+        bResult = xjc.isBigEndian();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -457,6 +465,9 @@ QList<XBinary::HREGION> XFormats::getHighlights(XBinary::FT fileType, QIODevice 
     } else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) {
         XRiff xriff(pDevice);
         listResult = xriff.getHighlights(pMemoryMap, hlOptions, pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) {
+        XJavaClass xjc(pDevice);
+        listResult = xjc.getHighlights(pMemoryMap, hlOptions, pPdStruct);
     }
 #ifdef USE_DEX  // TODO Check !!!
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -539,6 +550,9 @@ bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         bResult = mach.isSigned();
+    } else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) {
+        XJavaClass xjc(pDevice);
+        bResult = xjc.isSigned();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -596,6 +610,9 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice 
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         XMACH mach(pDevice, bIsImage, nModuleAddress);
         osResult = mach.getSignOffsetSize();
+    } else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) {
+        XJavaClass xjc(pDevice);
+        osResult = xjc.getSignOffsetSize();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -705,6 +722,11 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
 
         XBinary::_MEMORY_MAP memoryMap = amigaHunk.getMemoryMap();
         listResult = amigaHunk.getSymbolRecords(&memoryMap, symBolType);
+    } else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) {
+        XJavaClass xjc(pDevice);
+
+        XBinary::_MEMORY_MAP memoryMap = xjc.getMemoryMap();
+        listResult = xjc.getSymbolRecords(&memoryMap, symBolType);
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -960,6 +982,9 @@ XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bo
     } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
         XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
         result = amigaHunk.getOsInfo();
+    } else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) {
+        XJavaClass xjc(pDevice);
+        result = xjc.getOsInfo();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -1041,6 +1066,9 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     } else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) {
         XRiff xriff(_pDevice);
         result = xriff.getFileFormatInfo(pPdStruct);
+    } else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) {
+        XJavaClass xjc(pDevice);
+        result = xjc.getFileFormatInfo(pPdStruct);
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {

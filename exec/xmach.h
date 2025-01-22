@@ -637,6 +637,7 @@ public:
     XMACH_DEF::CS_BlobIndex _read_CS_BlobIndex(qint64 nOffset);
     XMACH_DEF::CS_CodeDirectory _read_CS_CodeDirectory(qint64 nOffset);
     XMACH_DEF::dyld_chained_fixups_header _read_dyld_chained_fixups_header(qint64 nOffset);
+    XMACH_DEF::twolevel_hints_command _read_twolevel_hints_command(qint64 nOffset);
 
     QList<NLIST_RECORD> getNlistRecords();
     QList<NLIST_RECORD> getNlistRecords(QList<COMMAND_RECORD> *pListCommandRecords);

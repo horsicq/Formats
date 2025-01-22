@@ -593,6 +593,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_ZLIB: sResult = QString("zlib"); break;
         case FT_DEB: sResult = QString("deb"); break;
         case FT_BWDOS16M: sResult = QString("BW DOS16M"); break;
+        case FT_JAVACLASS: sResult = QString("Java Class"); break;
     }
 
     return sResult;
@@ -709,6 +710,7 @@ XBinary::FT XBinary::ftStringToFileTypeId(QString sFileType)
     else if (sFileType == "NPM") result = FT_NPM;
     else if (sFileType == "DEB") result = FT_DEB;
     else if (sFileType == "BWDOS16M") result = FT_BWDOS16M;
+    else if (sFileType == "JAVACLASS") result = FT_JAVACLASS;
 
     return result;
 }
@@ -789,6 +791,7 @@ QString XBinary::fileTypeIdToFtString(FT fileType)
         case FT_ZLIB: sResult = "ZLIB"; break;
         case FT_DEB: sResult = "DEB"; break;
         case FT_BWDOS16M: sResult = "BWDOS16M"; break;
+        case FT_JAVACLASS: sResult = "JAVACLASS"; break;
     }
 
     return sResult;
@@ -5341,6 +5344,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
         UNICODE_TYPE unicodeType = getUnicodeType(&baHeader);
 
+        bAllFound = true;
+
         if (compareSignature(&memoryMap, "'PK'0304", 0) || compareSignature(&memoryMap, "'PK'0506", 0))  // TODO baHeader
         {
             stResult.insert(FT_ARCHIVE);
@@ -5425,6 +5430,37 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             }*/
         } else if (compareSignature(&memoryMap, "'BW'....00..00000000", 0)) {
             stResult.insert(FT_BWDOS16M);
+        } else {
+            bAllFound = false;
+        }
+
+        if (!bAllFound) {
+            if (nSize >= (qint64)sizeof(XMACH_DEF::fat_header) + (qint64)sizeof(XMACH_DEF::fat_arch)) {
+                if (read_uint32(0, true) == XMACH_DEF::S_FAT_MAGIC) {
+                    if (read_uint32(4, true) < 10) {
+                        stResult.insert(FT_ARCHIVE);
+                        stResult.insert(FT_MACHOFAT);
+                        bAllFound = true;
+                    }
+                } else if (read_uint32(0, false) == XMACH_DEF::S_FAT_MAGIC) {
+                    if (read_uint32(4, false) < 10) {
+                        stResult.insert(FT_ARCHIVE);
+                        stResult.insert(FT_MACHOFAT);
+                        bAllFound = true;
+                    }
+                }
+            }
+        }
+
+        if (!bAllFound) {
+            if (nSize > 8) {
+                if (read_uint32(0, true) == 0xCAFEBABE) {
+                    if (read_uint32(4, true) > 10) {
+                        stResult.insert(FT_JAVACLASS);
+                        bAllFound = true;
+                    }
+                }
+            }
         }
 
         if (isPlainTextType(&baHeader)) {
@@ -5441,18 +5477,6 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 stResult.insert(FT_UNICODE_LE);
             } else {
                 stResult.insert(FT_UNICODE_BE);
-            }
-        } else if (nSize >= (qint64)sizeof(XMACH_DEF::fat_header) + (qint64)sizeof(XMACH_DEF::fat_arch)) {
-            if (read_uint32(0, true) == XMACH_DEF::S_FAT_MAGIC) {
-                if (read_uint32(4, true) < 10) {
-                    stResult.insert(FT_ARCHIVE);
-                    stResult.insert(FT_MACHOFAT);
-                }
-            } else if (read_uint32(0, false) == XMACH_DEF::S_FAT_MAGIC) {
-                if (read_uint32(4, false) < 10) {
-                    stResult.insert(FT_ARCHIVE);
-                    stResult.insert(FT_MACHOFAT);
-                }
             }
         }
         // TODO more
@@ -5618,6 +5642,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_PDF;
     } else if (pStFileTypes->contains(FT_BWDOS16M)) {
         result = FT_BWDOS16M;
+    } else if (pStFileTypes->contains(FT_JAVACLASS)) {
+        result = FT_JAVACLASS;
     } else if (pStFileTypes->contains(FT_DATA)) {
         result = FT_DATA;
     } else if (pStFileTypes->contains(FT_BINARY)) {
@@ -5715,6 +5741,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_MACHOFAT)) listResult.append(FT_MACHOFAT);
         if (stFileTypes.contains(FT_DEB)) listResult.append(FT_DEB);
         if (stFileTypes.contains(FT_AR)) listResult.append(FT_AR);
+        if (stFileTypes.contains(FT_JAVACLASS)) listResult.append(FT_JAVACLASS);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
@@ -7592,7 +7619,16 @@ QList<QString> XBinary::getFileFormatMessages(const QList<FMT_MSG> *pListFmtMsg)
         qint32 nNumberOfRecords = pListFmtMsg->count();
 
         for (qint32 i = 0; i < nNumberOfRecords; i++) {
-            listResult.append(pListFmtMsg->at(i).sString);
+            QString sRecord;
+
+            if (pListFmtMsg->at(i).type == FMT_MSG_TYPE_INFO) sRecord += QString("[%1]").arg(tr("Info"));
+            else if (pListFmtMsg->at(i).type == FMT_MSG_TYPE_WARNING) sRecord += QString("[%1]").arg(tr("Warning"));
+            else if (pListFmtMsg->at(i).type == FMT_MSG_TYPE_ERROR) sRecord += QString("[%1]").arg(tr("Error"));
+
+            sRecord += QString("(%1) ").arg(pListFmtMsg->at(i).code, 4, 16, QChar('0'));
+
+            sRecord += pListFmtMsg->at(i).sString;
+            listResult.append(sRecord);
         }
     }
 

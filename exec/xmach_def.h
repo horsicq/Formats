@@ -907,6 +907,10 @@ struct fileset_entry_command {
     quint32 reserved; /* reserved */
 };
 
+struct twolevel_hint {
+   quint32 isub_image : 8, itoc : 24;
+};
+
 /* Known values for the platform field above. */
 const quint32 S_PLATFORM_MACOS = 1;
 const quint32 S_PLATFORM_IOS = 2;

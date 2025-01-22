@@ -270,7 +270,8 @@ public:
         FT_SIGNATURE,
         FT_NPM,
         FT_DEB,
-        FT_BWDOS16M
+        FT_BWDOS16M,
+        FT_JAVACLASS
         // TODO more
     };
 
@@ -1585,6 +1586,7 @@ public:
 
     enum FMT_MSG_TYPE {
         FMT_MSG_TYPE_UNKNOWN = 0,
+        FMT_MSG_TYPE_INFO,
         FMT_MSG_TYPE_ERROR,
         FMT_MSG_TYPE_WARNING
     };

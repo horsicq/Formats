@@ -742,7 +742,7 @@ public:
 
     static QList<XPE::IMPORT_HEADER> mapIATToList(QMap<qint64, QString> *pMapIAT, bool bIs64);
 
-    quint32 calculateCheckSum();
+    quint32 calculateCheckSum(PDSTRUCT *pPdStruct = nullptr);
 
     bool addSection(XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct);
     bool addSection(const QString &sFileName, bool bIsImage, XPE_DEF::IMAGE_SECTION_HEADER *pSectionHeader, char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct);
@@ -1310,7 +1310,7 @@ public:
     quint64 getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader, QString sString);
 
 private:
-    quint16 _checkSum(qint64 nStartValue, qint64 nDataSize);
+    quint16 _checkSum(qint64 nStartValue, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);
     RESOURCE_POSITION _getResourcePosition(_MEMORY_MAP *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);
     qint64 _fixHeadersSize();
     qint64 _getMinSectionOffset();  // TODO move to XBinary

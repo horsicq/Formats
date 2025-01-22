@@ -1943,6 +1943,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
         nMaxOffset = recordHeaderRaw.nSize;
 
+        // Started from 1!
         for (quint32 i = 0; i < nNumberOfSections; i++) {
             XPE_DEF::IMAGE_SECTION_HEADER section = getSectionHeader(i);
 
@@ -1985,7 +1986,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
             _sSectionName = convertSectionName(_sSectionName, &osStringTable);
 
-            QString sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i), _sSectionName);
+            QString sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i + 1), _sSectionName);
 
             if (!isImage()) {
                 if (nFileSize) {
@@ -4733,9 +4734,9 @@ QList<XPE::IMPORT_HEADER> XPE::mapIATToList(QMap<qint64, QString> *pMapIAT, bool
     return listResult;
 }
 
-quint32 XPE::calculateCheckSum()
+quint32 XPE::calculateCheckSum(PDSTRUCT *pPdStruct)
 {
-    quint32 nCalcSum = _checkSum(0, getSize());
+    quint32 nCalcSum = _checkSum(0, getSize(), pPdStruct);
     quint32 nHdrSum = getOptionalHeader_CheckSum();
 
     if (S_LOWORD(nCalcSum) >= S_LOWORD(nHdrSum)) {
@@ -8698,16 +8699,31 @@ QList<XBinary::FMT_MSG> XPE::checkFileFormat(PDSTRUCT *pPdStruct)
         qint64 nOffset = relAddressToOffset(&memoryMap, nRelEP);
 
         if (nOffset == -1) {
+            FMT_MSG record = {};
+            record.type = FMT_MSG_TYPE_ERROR;
+            record.code = FMT_MSG_CODE_INVALID_ENTRYPOINT;
+            record.sString = QString("%1: %2").arg(tr("Invalid address of entry point"), XBinary::valueToHex(nRelEP));
+            record.value = nRelEP;
+
+            listResult.append(record);
+
             bSuccess = false;
         }
+    }
+    if (bSuccess) {
+        quint32 nCheckSumOrig = getOptionalHeader_CheckSum();
+        quint32 nCheckSumCalc = calculateCheckSum();
 
-        FMT_MSG record = {};
-        record.type = FMT_MSG_TYPE_ERROR;
-        record.code = FMT_MSG_CODE_INVALID_ENTRYPOINT;
-        record.sString = QString("%1: %2").arg(tr("Invalid address of entry point"), XBinary::valueToHex(nRelEP));
-        record.value = nRelEP;
+        if (nCheckSumOrig != nCheckSumCalc) {
+            FMT_MSG record = {};
+            record.type = FMT_MSG_TYPE_WARNING;
+            record.code = FMT_MSG_CODE_INVALID_CHECKSUM;
+            record.sString += QString("%1: %2. ").arg(tr("Invalid checksum"), XBinary::valueToHex(nCheckSumOrig));
+            record.sString += QString("%1: %2").arg(tr("Should be"), XBinary::valueToHex(nCheckSumCalc));
+            record.value = nCheckSumOrig;
 
-        listResult.append(record);
+            listResult.append(record);
+        }
     }
 
     return listResult;
@@ -11237,8 +11253,13 @@ void XPE::_fixFileOffsets(qint64 nDelta)
     }
 }
 
-quint16 XPE::_checkSum(qint64 nStartValue, qint64 nDataSize)
+quint16 XPE::_checkSum(qint64 nStartValue, qint64 nDataSize, PDSTRUCT *pPdStruct)
 {
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
     // TODO Check
     // TODO Optimize
     const qint32 BUFFER_SIZE = 0x1000;
@@ -11247,7 +11268,7 @@ quint16 XPE::_checkSum(qint64 nStartValue, qint64 nDataSize)
     char *pBuffer = new char[BUFFER_SIZE];
     char *pOffset;
 
-    while (nDataSize > 0) {
+    while ((nDataSize > 0) && (!(pPdStruct->bIsStop))) {
         nTemp = qMin((qint64)BUFFER_SIZE, nDataSize);
 
         if (!read_array(nStartValue, pBuffer, nTemp)) {
