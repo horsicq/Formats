@@ -27,3 +27,23 @@ XJavaClass::XJavaClass(QIODevice *pDevice) : XBinary(pDevice)
 XJavaClass::~XJavaClass()
 {
 }
+
+QString XJavaClass::getArch()
+{
+    return "JVM";
+}
+
+XBinary::FT XJavaClass::getFileType()
+{
+    return FT_JAVACLASS;
+}
+
+XBinary::ENDIAN XJavaClass::getEndian()
+{
+    return ENDIAN_BIG;
+}
+
+XBinary::MODE XJavaClass::getMode()
+{
+    return MODE_32;
+}

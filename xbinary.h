@@ -1616,7 +1616,7 @@ public:
 
     static QList<QString> getFileFormatMessages(const QList<FMT_MSG> *pListFmtMsg);
 
-    static bool isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CODE code, PDSTRUCT *pPdStruct);
+    static bool isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CODE code, FMT_MSG_TYPE type, PDSTRUCT *pPdStruct);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

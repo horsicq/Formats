@@ -29,6 +29,11 @@ class XJavaClass : public XBinary {
 public:
     explicit XJavaClass(QIODevice *pDevice = nullptr);
     ~XJavaClass();
+
+    virtual QString getArch();
+    virtual MODE getMode();
+    virtual ENDIAN getEndian();
+    virtual FT getFileType();
 };
 
 #endif  // XJAVACLASS_H

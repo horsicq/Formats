@@ -7635,7 +7635,7 @@ QList<QString> XBinary::getFileFormatMessages(const QList<FMT_MSG> *pListFmtMsg)
     return listResult;
 }
 
-bool XBinary::isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CODE code, PDSTRUCT *pPdStruct)
+bool XBinary::isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CODE code, FMT_MSG_TYPE type, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
@@ -7643,7 +7643,7 @@ bool XBinary::isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CO
         qint32 nNumberOfRecords = pListFmtMsgs->count();
 
         for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-            if (pListFmtMsgs->at(i).code == code) {
+            if ((pListFmtMsgs->at(i).code == code) && (pListFmtMsgs->at(i).type == type)) {
                 bResult = true;
                 break;
             }
