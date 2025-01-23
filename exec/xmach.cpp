@@ -4343,7 +4343,9 @@ QList<XMACH::FUNCTION_RECORD> XMACH::getFunctionRecords(qint64 nOffset, qint64 n
         nRawOffset += uleb128.nValue;
 
         FUNCTION_RECORD record = {};
+        record.nValue = uleb128.nValue;
         record.nDataOffset = nCurrentOffset;
+        record.nDataSize = uleb128.nByteSize;
         record.nFunctionOffset = nRawOffset;
         record.nFunctionAddress = offsetToAddress(&memoryMap, nRawOffset);
 

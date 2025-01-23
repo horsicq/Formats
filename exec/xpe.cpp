@@ -8699,60 +8699,25 @@ QList<XBinary::FMT_MSG> XPE::checkFileFormat(PDSTRUCT *pPdStruct)
 
     if (bSuccess) {
         quint32 nRelEP = getOptionalHeader_AddressOfEntryPoint();
-        qint64 nOffset = relAddressToOffset(&memoryMap, nRelEP);
-
-        if (nOffset == -1) {
-            FMT_MSG record = {};
-            record.type = FMT_MSG_TYPE_ERROR;
-            record.code = FMT_MSG_CODE_INVALID_ENTRYPOINT;
-            record.sString += QString("%1: %2").arg(tr("Corrupted data"), "OptionalHeader.AddressOfEntryPoint");
-            record.value = nRelEP;
-
-            listResult.append(record);
-
-            bSuccess = false;
-        }
-
-        // TODO more
+        _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_ENTRYPOINT, FMT_MSG_TYPE_ERROR, "OptionalHeader.AddressOfEntryPoint", nRelEP, XBinary::valueToHex(nRelEP), !isRelAddressValid(&memoryMap, nRelEP));
     }
+
+
     if (bSuccess) {
         quint32 nCheckSumOrig = getOptionalHeader_CheckSum();
         quint32 nCheckSumCalc = calculateCheckSum();
 
-        if (nCheckSumOrig != nCheckSumCalc) {
-            FMT_MSG record = {};
-            record.type = FMT_MSG_TYPE_WARNING;
-            record.code = FMT_MSG_CODE_INVALID_CHECKSUM;
-            record.sString += QString("%1: %2 ").arg(tr("Corrupted data"), "OptionalHeader.CheckSum");
-            record.sString += QString("%1: %2").arg(tr("Should be"), XBinary::valueToHex(nCheckSumCalc));
-            record.value = nCheckSumOrig;
-
-            listResult.append(record);
-        }
+        _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_CHECKSUM, FMT_MSG_TYPE_WARNING, "OptionalHeader.CheckSum", nCheckSumOrig, XBinary::valueToHex(nCheckSumOrig), nCheckSumOrig != nCheckSumCalc);
     }
 
     if (bSuccess) {
-        if (nFileAlignment & (nFileAlignment - 1)) {
-            FMT_MSG record = {};
-            record.type = FMT_MSG_TYPE_ERROR;
-            record.code = FMT_MSG_CODE_INVALID_FILEALIGNMENT;
-            record.sString += QString("%1: %2").arg(tr("Corrupted data"), "OptionalHeader.FileAlignment");
-            record.value = nFileAlignment;
-
-            listResult.append(record);
-        }
+        _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_ERROR, "OptionalHeader.FileAlignment", nFileAlignment, XBinary::valueToHex(nFileAlignment), nFileAlignment & (nFileAlignment - 1));
+        _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_ERROR, "OptionalHeader.FileAlignment", nFileAlignment, XBinary::valueToHex(nFileAlignment), nFileAlignment < 0x200);
     }
 
     if (bSuccess) {
-        if (nSectionAlignment & (nSectionAlignment - 1)) {
-            FMT_MSG record = {};
-            record.type = FMT_MSG_TYPE_ERROR;
-            record.code = FMT_MSG_CODE_INVALID_SECTIONALIGNMENT;
-            record.sString += QString("%1: %2").arg(tr("Corrupted data"), "OptionalHeader.nSectionAlignment");
-            record.value = nSectionAlignment;
-
-            listResult.append(record);
-        }
+        _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_ERROR, "OptionalHeader.SectionAlignment", nSectionAlignment, XBinary::valueToHex(nSectionAlignment), nSectionAlignment & (nSectionAlignment - 1));
+        _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_ERROR, "OptionalHeader.SectionAlignment", nSectionAlignment, XBinary::valueToHex(nSectionAlignment), nSectionAlignment < 0x1000);
     }
 
     if (bSuccess) {
@@ -8760,93 +8725,64 @@ QList<XBinary::FMT_MSG> XPE::checkFileFormat(PDSTRUCT *pPdStruct)
 
         qint32 nNumberOfSections = list.count();
 
-        for (qint32 i = 0; i < nNumberOfSections; i++) {
+        for (qint32 i = 0; (i < nNumberOfSections) && bSuccess && (!(pPdStruct->bIsStop)); i++) {
             XPE_DEF::IMAGE_SECTION_HEADER sectionHeader = list.at(i);
 
-            qint32 nSizeOfRawData_aligned = align_up(sectionHeader.SizeOfRawData, nFileAlignment);
-            qint32 nVirtualSize_aligned = align_up(sectionHeader.Misc.VirtualSize, nSectionAlignment);
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_SECTION_HEADER[%1].PointerToRawData").arg(i + 1), sectionHeader.PointerToRawData, XBinary::valueToHex(sectionHeader.PointerToRawData), sectionHeader.PointerToRawData > memoryMap.nBinarySize);
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_WARNING, QString("IMAGE_SECTION_HEADER[%1].PointerToRawData").arg(i + 1), sectionHeader.PointerToRawData, XBinary::valueToHex(sectionHeader.PointerToRawData), sectionHeader.PointerToRawData % nFileAlignment);
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_SECTION_HEADER[%1].VirtualAddress").arg(i + 1), sectionHeader.VirtualAddress, XBinary::valueToHex(sectionHeader.VirtualAddress), sectionHeader.VirtualAddress > memoryMap.nImageSize);
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_WARNING, QString("IMAGE_SECTION_HEADER[%1].VirtualAddress").arg(i + 1), sectionHeader.VirtualAddress, XBinary::valueToHex(sectionHeader.VirtualAddress), sectionHeader.VirtualAddress % nSectionAlignment);
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_SECTION_HEADER[%1].SizeOfRawData").arg(i + 1), sectionHeader.SizeOfRawData, XBinary::valueToHex(sectionHeader.SizeOfRawData), (sectionHeader.PointerToRawData + sectionHeader.SizeOfRawData) > memoryMap.nBinarySize);
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_SECTION_HEADER[%1].SizeOfRawData").arg(i + 1), sectionHeader.SizeOfRawData, XBinary::valueToHex(sectionHeader.SizeOfRawData), align_up(sectionHeader.SizeOfRawData, nFileAlignment) > align_up(sectionHeader.Misc.VirtualSize, nSectionAlignment));
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_WARNING, QString("IMAGE_SECTION_HEADER[%1].SizeOfRawData").arg(i + 1), sectionHeader.SizeOfRawData, XBinary::valueToHex(sectionHeader.SizeOfRawData), sectionHeader.SizeOfRawData % nFileAlignment);
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_SECTION_HEADER[%1].VirtualSize").arg(i + 1), sectionHeader.Misc.VirtualSize, XBinary::valueToHex(sectionHeader.Misc.VirtualSize), (sectionHeader.VirtualAddress + sectionHeader.Misc.VirtualSize) > memoryMap.nImageSize);
+        }
+    }
 
-            if (nSizeOfRawData_aligned > nVirtualSize_aligned) {
-                FMT_MSG record = {};
-                record.type = FMT_MSG_TYPE_WARNING;
-                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
-                record.sString = QString("%1(%2) %3").arg(tr("Section"), QString::number(i + 1), "SizeOfRawData > VirtualSize");
-                record.value = sectionHeader.SizeOfRawData;
+    if (bSuccess) {
+        QList<XPE_DEF::IMAGE_IMPORT_DESCRIPTOR> list = getImportDescriptors(&memoryMap);
 
-                listResult.append(record);
-            }
+        qint32 nNumberOfImports = list.count();
 
-            if (sectionHeader.PointerToRawData > memoryMap.nBinarySize) {
-                FMT_MSG record = {};
-                record.type = FMT_MSG_TYPE_ERROR;
-                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
-                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "PointerToRawData");
-                record.value = sectionHeader.PointerToRawData;
+        for (qint32 i = 0; (i < nNumberOfImports) && bSuccess && (!(pPdStruct->bIsStop)); i++) {
+            XPE_DEF::IMAGE_IMPORT_DESCRIPTOR importDescriptor = list.at(i);
 
-                listResult.append(record);
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_IMPORTTABLE, FMT_MSG_TYPE_WARNING, QString("IMAGE_IMPORT_DESCRIPTOR[%1].OriginalFirstThunk").arg(i), importDescriptor.OriginalFirstThunk, XBinary::valueToHex(importDescriptor.OriginalFirstThunk), !(importDescriptor.OriginalFirstThunk) || !isRelAddressValid(&memoryMap, importDescriptor.OriginalFirstThunk));
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_IMPORTTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_IMPORT_DESCRIPTOR[%1].FirstThunk").arg(i), importDescriptor.FirstThunk, XBinary::valueToHex(importDescriptor.FirstThunk), !(importDescriptor.FirstThunk) || !isRelAddressValid(&memoryMap, importDescriptor.FirstThunk));
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_IMPORTTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_IMPORT_DESCRIPTOR[%1].FirstThunk").arg(i), importDescriptor.Name, XBinary::valueToHex(importDescriptor.Name), !(importDescriptor.Name) || !isRelAddressValid(&memoryMap, importDescriptor.Name));
+        }
+    }
 
-                bSuccess = false;
-            }
+    if (bSuccess) {
+        if (isExportPresent()) {
+            XPE_DEF::IMAGE_EXPORT_DIRECTORY ied = getExportDirectory();
 
-            if (sectionHeader.PointerToRawData + sectionHeader.SizeOfRawData > memoryMap.nBinarySize) {
-                FMT_MSG record = {};
-                record.type = FMT_MSG_TYPE_ERROR;
-                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
-                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "SizeOfRawData");
-                record.value = sectionHeader.SizeOfRawData;
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_EXPORT_DIRECTORY.OriginalFirstThunk"), ied.AddressOfFunctions, XBinary::valueToHex(ied.AddressOfFunctions), !(ied.AddressOfFunctions) || !isRelAddressValid(&memoryMap, ied.AddressOfFunctions));
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_EXPORT_DIRECTORY.AddressOfNames"), ied.AddressOfNames, XBinary::valueToHex(ied.AddressOfNames), !(ied.AddressOfNames) || !isRelAddressValid(&memoryMap, ied.AddressOfNames));
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_EXPORT_DIRECTORY.AddressOfNameOrdinals"), ied.AddressOfNameOrdinals, XBinary::valueToHex(ied.AddressOfNameOrdinals), !(ied.AddressOfNameOrdinals) || !isRelAddressValid(&memoryMap, ied.AddressOfNameOrdinals));
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_EXPORT_DIRECTORY.Name"), ied.Name, XBinary::valueToHex(ied.Name), !(ied.Name) || !isRelAddressValid(&memoryMap, ied.Name));
+        }
+    }
 
-                listResult.append(record);
+    if (bSuccess) {
+        if (isResourcesPresent()) {
+            XPE::RESOURCE_HEADER rh = getResourceHeader(&memoryMap);
 
-                bSuccess = false;
-            }
+            // _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_RESOURCESTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_RESOURCE_DIRECTORY.OriginalFirstThunk"), rh.directory., XBinary::valueToHex(ied.AddressOfFunctions), !(ied.AddressOfFunctions) || !isRelAddressValid(&memoryMap, ied.AddressOfFunctions));
+        }
+    }
 
-            if (sectionHeader.VirtualAddress > memoryMap.nImageSize) {
-                FMT_MSG record = {};
-                record.type = FMT_MSG_TYPE_ERROR;
-                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
-                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "VirtualAddress");
-                record.value = sectionHeader.VirtualAddress;
+    if (bSuccess) {
+        if (isRelocsPresent()) {
+            // QList<XPE_DEF::IMAGE_BASE_RELOCATION> list = getReloc(&memoryMap);
 
-                listResult.append(record);
+            // qint32 nNumberOfRelocs = list.count();
 
-                bSuccess = false;
-            }
+            // for (qint32 i = 0; (i < nNumberOfRelocs) && bSuccess && (!(pPdStruct->bIsStop)); i++) {
+            //     XPE_DEF::IMAGE_BASE_RELOCATION reloc = list.at(i);
 
-            if (sectionHeader.VirtualAddress + sectionHeader.Misc.VirtualSize > memoryMap.nImageSize) {
-                FMT_MSG record = {};
-                record.type = FMT_MSG_TYPE_ERROR;
-                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
-                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "VirtualSize");
-                record.value = sectionHeader.Misc.VirtualSize;
-
-                listResult.append(record);
-
-                bSuccess = false;
-            }
-
-            if (sectionHeader.PointerToRawData % nFileAlignment) {
-                FMT_MSG record = {};
-                record.type = FMT_MSG_TYPE_WARNING;
-                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
-                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "PointerToRawData");
-                record.value = sectionHeader.PointerToRawData;
-
-                listResult.append(record);
-            }
-
-            if (sectionHeader.SizeOfRawData % nFileAlignment) {
-                FMT_MSG record = {};
-                record.type = FMT_MSG_TYPE_WARNING;
-                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
-                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "SizeOfRawData");
-                record.value = sectionHeader.PointerToRawData;
-
-                listResult.append(record);
-            }
-
-            if (!bSuccess) {
-                break;
-            }
+            //     _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_RELOCSTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_BASE_RELOCATION[%1].VirtualAddress").arg(i), reloc.VirtualAddress, XBinary::valueToHex(reloc.VirtualAddress), !isRelAddressValid(&memoryMap, reloc.VirtualAddress));
+            // }
         }
     }
 

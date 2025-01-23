@@ -119,7 +119,9 @@ public:
     };
 
     struct FUNCTION_RECORD {
+        quint64 nValue;
         qint64 nDataOffset;
+        qint64 nDataSize;
         qint64 nFunctionOffset;
         qint64 nFunctionAddress;
     };

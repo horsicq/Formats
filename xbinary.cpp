@@ -7653,6 +7653,29 @@ bool XBinary::isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CO
     return bResult;
 }
 
+bool XBinary::_addCheckFormatTest(QList<FMT_MSG> *pListFmtMsgs, bool *pbContinue, FMT_MSG_CODE code, FMT_MSG_TYPE type, const QString &sString, QVariant value, QString sInfo, bool bFailCase)
+{
+    bool bResult = !bFailCase;
+
+    if (*pbContinue)  {
+        if (bFailCase) {
+            FMT_MSG record = {};
+            record.type = type;
+            record.code = code;
+            record.sString += QString("%1: %2: %3").arg(sString, tr("Corrupted data"), sInfo);
+            record.value = value;
+
+            pListFmtMsgs->append(record);
+
+            if (type == FMT_MSG_TYPE_ERROR) {
+                *pbContinue = false;
+            }
+        }
+    }
+
+    return bResult;
+}
+
 QList<XBinary::FMT_MSG> XBinary::checkFileFormat(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
