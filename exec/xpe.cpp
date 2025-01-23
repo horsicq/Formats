@@ -1286,9 +1286,9 @@ QList<XPE_DEF::IMAGE_SECTION_HEADER> XPE::getSectionHeaders(PDSTRUCT *pPdStruct)
     qint64 nSectionOffset = getSectionsTableOffset();
 
     // Fix
-    if (nNumberOfSections > 100)  // TODO const
+    if (nNumberOfSections > XPE_DEF::S_MAX_SECTIONCOUNT)  // TODO const
     {
-        nNumberOfSections = 100;
+        nNumberOfSections = XPE_DEF::S_MAX_SECTIONCOUNT;
     }
 
     for (qint32 i = 0; (i < (int)nNumberOfSections) && (!(pPdStruct->bIsStop)); i++) {
@@ -1865,7 +1865,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
     OFFSETSIZE osStringTable = getStringTable();
 
-    quint32 nNumberOfSections = qMin((int)getFileHeader_NumberOfSections(), 100);  // TODO const
+    qint32 nNumberOfSections = qMin((qint32)getFileHeader_NumberOfSections(), XPE_DEF::S_MAX_SECTIONCOUNT);
     qint64 nFileAlignment = getOptionalHeader_FileAlignment();
     qint64 nSectionAlignment = getOptionalHeader_SectionAlignment();
     // qint64 nBaseAddress=getOptionalHeader_ImageBase();
@@ -1944,7 +1944,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         nMaxOffset = recordHeaderRaw.nSize;
 
         // Started from 1!
-        for (quint32 i = 0; i < nNumberOfSections; i++) {
+        for (qint32 i = 0; i < nNumberOfSections; i++) {
             XPE_DEF::IMAGE_SECTION_HEADER section = getSectionHeader(i);
 
             if (section.PointerToRawData > result.nBinarySize) {
@@ -8694,6 +8694,9 @@ QList<XBinary::FMT_MSG> XPE::checkFileFormat(PDSTRUCT *pPdStruct)
 
     _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_SECTIONS, pPdStruct);
 
+    quint32 nFileAlignment = getOptionalHeader_FileAlignment();
+    quint32 nSectionAlignment = getOptionalHeader_SectionAlignment();
+
     if (bSuccess) {
         quint32 nRelEP = getOptionalHeader_AddressOfEntryPoint();
         qint64 nOffset = relAddressToOffset(&memoryMap, nRelEP);
@@ -8702,13 +8705,15 @@ QList<XBinary::FMT_MSG> XPE::checkFileFormat(PDSTRUCT *pPdStruct)
             FMT_MSG record = {};
             record.type = FMT_MSG_TYPE_ERROR;
             record.code = FMT_MSG_CODE_INVALID_ENTRYPOINT;
-            record.sString = QString("%1: %2").arg(tr("Invalid address of entry point"), XBinary::valueToHex(nRelEP));
+            record.sString += QString("%1: %2").arg(tr("Corrupted data"), "OptionalHeader.AddressOfEntryPoint");
             record.value = nRelEP;
 
             listResult.append(record);
 
             bSuccess = false;
         }
+
+        // TODO more
     }
     if (bSuccess) {
         quint32 nCheckSumOrig = getOptionalHeader_CheckSum();
@@ -8718,11 +8723,130 @@ QList<XBinary::FMT_MSG> XPE::checkFileFormat(PDSTRUCT *pPdStruct)
             FMT_MSG record = {};
             record.type = FMT_MSG_TYPE_WARNING;
             record.code = FMT_MSG_CODE_INVALID_CHECKSUM;
-            record.sString += QString("%1: %2. ").arg(tr("Invalid checksum"), XBinary::valueToHex(nCheckSumOrig));
+            record.sString += QString("%1: %2 ").arg(tr("Corrupted data"), "OptionalHeader.CheckSum");
             record.sString += QString("%1: %2").arg(tr("Should be"), XBinary::valueToHex(nCheckSumCalc));
             record.value = nCheckSumOrig;
 
             listResult.append(record);
+        }
+    }
+
+    if (bSuccess) {
+        if (nFileAlignment & (nFileAlignment - 1)) {
+            FMT_MSG record = {};
+            record.type = FMT_MSG_TYPE_ERROR;
+            record.code = FMT_MSG_CODE_INVALID_FILEALIGNMENT;
+            record.sString += QString("%1: %2").arg(tr("Corrupted data"), "OptionalHeader.FileAlignment");
+            record.value = nFileAlignment;
+
+            listResult.append(record);
+        }
+    }
+
+    if (bSuccess) {
+        if (nSectionAlignment & (nSectionAlignment - 1)) {
+            FMT_MSG record = {};
+            record.type = FMT_MSG_TYPE_ERROR;
+            record.code = FMT_MSG_CODE_INVALID_SECTIONALIGNMENT;
+            record.sString += QString("%1: %2").arg(tr("Corrupted data"), "OptionalHeader.nSectionAlignment");
+            record.value = nSectionAlignment;
+
+            listResult.append(record);
+        }
+    }
+
+    if (bSuccess) {
+        QList<XPE_DEF::IMAGE_SECTION_HEADER> list = getSectionHeaders(pPdStruct);
+
+        qint32 nNumberOfSections = list.count();
+
+        for (qint32 i = 0; i < nNumberOfSections; i++) {
+            XPE_DEF::IMAGE_SECTION_HEADER sectionHeader = list.at(i);
+
+            qint32 nSizeOfRawData_aligned = align_up(sectionHeader.SizeOfRawData, nFileAlignment);
+            qint32 nVirtualSize_aligned = align_up(sectionHeader.Misc.VirtualSize, nSectionAlignment);
+
+            if (nSizeOfRawData_aligned > nVirtualSize_aligned) {
+                FMT_MSG record = {};
+                record.type = FMT_MSG_TYPE_WARNING;
+                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
+                record.sString = QString("%1(%2) %3").arg(tr("Section"), QString::number(i + 1), "SizeOfRawData > VirtualSize");
+                record.value = sectionHeader.SizeOfRawData;
+
+                listResult.append(record);
+            }
+
+            if (sectionHeader.PointerToRawData > memoryMap.nBinarySize) {
+                FMT_MSG record = {};
+                record.type = FMT_MSG_TYPE_ERROR;
+                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
+                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "PointerToRawData");
+                record.value = sectionHeader.PointerToRawData;
+
+                listResult.append(record);
+
+                bSuccess = false;
+            }
+
+            if (sectionHeader.PointerToRawData + sectionHeader.SizeOfRawData > memoryMap.nBinarySize) {
+                FMT_MSG record = {};
+                record.type = FMT_MSG_TYPE_ERROR;
+                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
+                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "SizeOfRawData");
+                record.value = sectionHeader.SizeOfRawData;
+
+                listResult.append(record);
+
+                bSuccess = false;
+            }
+
+            if (sectionHeader.VirtualAddress > memoryMap.nImageSize) {
+                FMT_MSG record = {};
+                record.type = FMT_MSG_TYPE_ERROR;
+                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
+                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "VirtualAddress");
+                record.value = sectionHeader.VirtualAddress;
+
+                listResult.append(record);
+
+                bSuccess = false;
+            }
+
+            if (sectionHeader.VirtualAddress + sectionHeader.Misc.VirtualSize > memoryMap.nImageSize) {
+                FMT_MSG record = {};
+                record.type = FMT_MSG_TYPE_ERROR;
+                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
+                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "VirtualSize");
+                record.value = sectionHeader.Misc.VirtualSize;
+
+                listResult.append(record);
+
+                bSuccess = false;
+            }
+
+            if (sectionHeader.PointerToRawData % nFileAlignment) {
+                FMT_MSG record = {};
+                record.type = FMT_MSG_TYPE_WARNING;
+                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
+                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "PointerToRawData");
+                record.value = sectionHeader.PointerToRawData;
+
+                listResult.append(record);
+            }
+
+            if (sectionHeader.SizeOfRawData % nFileAlignment) {
+                FMT_MSG record = {};
+                record.type = FMT_MSG_TYPE_WARNING;
+                record.code = FMT_MSG_CODE_INVALID_SECTIONSTABLE;
+                record.sString = QString("%1(%2) %3: %4").arg(tr("Section"), QString::number(i + 1), tr("Corrupted data"), "SizeOfRawData");
+                record.value = sectionHeader.PointerToRawData;
+
+                listResult.append(record);
+            }
+
+            if (!bSuccess) {
+                break;
+            }
         }
     }
 
