@@ -908,7 +908,7 @@ struct fileset_entry_command {
 };
 
 struct twolevel_hint {
-   quint32 isub_image : 8, itoc : 24;
+    quint32 isub_image : 8, itoc : 24;
 };
 
 /* Known values for the platform field above. */

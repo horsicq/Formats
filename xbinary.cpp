@@ -7653,11 +7653,12 @@ bool XBinary::isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CO
     return bResult;
 }
 
-bool XBinary::_addCheckFormatTest(QList<FMT_MSG> *pListFmtMsgs, bool *pbContinue, FMT_MSG_CODE code, FMT_MSG_TYPE type, const QString &sString, QVariant value, QString sInfo, bool bFailCase)
+bool XBinary::_addCheckFormatTest(QList<FMT_MSG> *pListFmtMsgs, bool *pbContinue, FMT_MSG_CODE code, FMT_MSG_TYPE type, const QString &sString, QVariant value,
+                                  QString sInfo, bool bFailCase)
 {
     bool bResult = !bFailCase;
 
-    if (*pbContinue)  {
+    if (*pbContinue) {
         if (bFailCase) {
             FMT_MSG record = {};
             record.type = type;
