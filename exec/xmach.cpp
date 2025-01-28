@@ -3832,9 +3832,7 @@ XMACH_DEF::dylib_module_64 XMACH::_read_dylib_module_64(qint64 nOffset)
 
 XMACH_DEF::dylib_table_of_contents XMACH::_read_dylib_table_of_contents(qint64 nOffset)
 {
-    bool bIsBigEndian = isBigEndian();
-
-    return _read_dylib_table_of_contents(nOffset, bIsBigEndian);
+    return _read_dylib_table_of_contents(nOffset, isBigEndian());
 }
 
 XMACH_DEF::dylib_table_of_contents XMACH::_read_dylib_table_of_contents(qint64 nOffset, bool bIsBigEndian)
@@ -3960,6 +3958,21 @@ XMACH_DEF::twolevel_hints_command XMACH::_read_twolevel_hints_command(qint64 nOf
     result.cmdsize = read_uint32(nOffset + offsetof(XMACH_DEF::twolevel_hints_command, cmdsize), bIsBigEndian);
     result.offset = read_uint32(nOffset + offsetof(XMACH_DEF::twolevel_hints_command, offset), bIsBigEndian);
     result.nhints = read_uint32(nOffset + offsetof(XMACH_DEF::twolevel_hints_command, nhints), bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::build_tool_version XMACH::_read_build_tool_version(qint64 nOffset)
+{
+    return _read_build_tool_version(nOffset, isBigEndian());
+}
+
+XMACH_DEF::build_tool_version XMACH::_read_build_tool_version(qint64 nOffset, bool bIsBigEndian)
+{
+    XMACH_DEF::build_tool_version result = {};
+
+    result.tool = read_uint32(nOffset + offsetof(XMACH_DEF::build_tool_version, tool), bIsBigEndian);
+    result.version = read_uint32(nOffset + offsetof(XMACH_DEF::build_tool_version, version), bIsBigEndian);
 
     return result;
 }
