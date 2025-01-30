@@ -1311,6 +1311,8 @@ public:
     static QString get_uint8_full_version(quint8 nValue);
     static QString get_uint16_full_version(quint16 nValue);
     static QString get_uint32_full_version(quint32 nValue);
+    static QString get_uint64_full_version(quint64 nValue);
+    static QString get_uint16_version(quint16 nValue);
     static QString get_uint32_version(quint32 nValue);
     static bool isResizeEnable(QIODevice *pDevice);
     static bool resize(QIODevice *pDevice, qint64 nSize);
@@ -1465,6 +1467,7 @@ public:
     static QString fullVersionWordToString(quint16 nValue);
     static QString fullVersionDwordToString(quint32 nValue);
     static QString fullVersionQwordToString(quint64 nValue);
+    static QString versionWordToString(quint16 nValue);
     static QString versionDwordToString(quint32 nValue);
     static QString formatXML(const QString &sXML);
 
@@ -1612,7 +1615,8 @@ public:
         QString sString;
     };
 
-    virtual QList<FMT_MSG> checkFileFormat(PDSTRUCT *pPdStruct);
+    virtual QList<FMT_MSG> checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct);
+    bool isFileFormatValid(bool bDeep, PDSTRUCT *pPdStruct);
 
     static QList<QString> getFileFormatMessages(const QList<FMT_MSG> *pListFmtMsg);
 

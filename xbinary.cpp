@@ -7677,13 +7677,32 @@ bool XBinary::_addCheckFormatTest(QList<FMT_MSG> *pListFmtMsgs, bool *pbContinue
     return bResult;
 }
 
-QList<XBinary::FMT_MSG> XBinary::checkFileFormat(PDSTRUCT *pPdStruct)
+QList<XBinary::FMT_MSG> XBinary::checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(bDeep)
     Q_UNUSED(pPdStruct)
 
     QList<XBinary::FMT_MSG> listResult;
 
     return listResult;
+}
+
+bool XBinary::isFileFormatValid(bool bDeep, PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    QList<FMT_MSG> list = checkFileFormat(bDeep, pPdStruct);
+
+    qint32 nNumberOfRecords = list.count();
+
+    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+        if (list.at(i).type == FMT_MSG_TYPE_ERROR) {
+            bResult = false;
+            break;
+        }
+    }
+
+    return bResult;
 }
 
 QList<XBinary::STRINGTABLE_RECORD> XBinary::getStringTable_ANSI(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
@@ -8075,6 +8094,23 @@ QString XBinary::get_uint16_full_version(quint16 nValue)
 QString XBinary::get_uint32_full_version(quint32 nValue)
 {
     return QString("%1.%2.%3").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue >> 8) & 0xFF), QString::number((nValue)&0xFF));
+}
+
+QString XBinary::get_uint64_full_version(quint64 nValue)
+{
+    QString sResult;
+
+    quint32 nValue1 = (nValue >> 32) & 0xFFFFFFFF;
+    quint32 nValue2 = nValue & 0xFFFFFFFF;
+
+    sResult = QString("%1.%2").arg(get_uint32_full_version(nValue1), get_uint32_full_version(nValue2));
+
+    return sResult;
+}
+
+QString XBinary::get_uint16_version(quint16 nValue)
+{
+    return QString("%1").arg(QString::number((nValue)&0xFFFF));
 }
 
 QString XBinary::get_uint32_version(quint32 nValue)
@@ -9783,23 +9819,17 @@ QString XBinary::fullVersionDwordToString(quint32 nValue)
 
 QString XBinary::fullVersionQwordToString(quint64 nValue)
 {
-    QString sResult;
+    return QString("\"%1\"").arg(get_uint64_full_version(nValue));
+}
 
-    quint32 nValue1 = (nValue >> 32) & 0xFFFFFFFF;
-    quint32 nValue2 = nValue & 0xFFFFFFFF;
-
-    sResult = QString("\"%1.%2\"").arg(get_uint32_full_version(nValue1), get_uint32_full_version(nValue2));
-
-    return sResult;
+QString XBinary::versionWordToString(quint16 nValue)
+{
+    return QString("\"%1\"").arg(get_uint16_version(nValue));
 }
 
 QString XBinary::versionDwordToString(quint32 nValue)
 {
-    QString sResult;
-
-    sResult = QString("\"%1\"").arg(get_uint32_version(nValue));
-
-    return sResult;
+    return QString("\"%1\"").arg(get_uint32_version(nValue));
 }
 
 QString XBinary::formatXML(const QString &sXML)

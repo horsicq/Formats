@@ -8686,7 +8686,7 @@ QString XPE::getCertHash(XBinary::HASH hash)
     return sResult;
 }
 
-QList<XBinary::FMT_MSG> XPE::checkFileFormat(PDSTRUCT *pPdStruct)
+QList<XBinary::FMT_MSG> XPE::checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::FMT_MSG> listResult;
 
@@ -8703,7 +8703,7 @@ QList<XBinary::FMT_MSG> XPE::checkFileFormat(PDSTRUCT *pPdStruct)
                             XBinary::valueToHex(nRelEP), !isRelAddressValid(&memoryMap, nRelEP));
     }
 
-    if (bSuccess) {
+    if (bSuccess && bDeep) {
         quint32 nCheckSumOrig = getOptionalHeader_CheckSum();
         quint32 nCheckSumCalc = calculateCheckSum();
 
@@ -8787,15 +8787,15 @@ QList<XBinary::FMT_MSG> XPE::checkFileFormat(PDSTRUCT *pPdStruct)
         if (isExportPresent()) {
             XPE_DEF::IMAGE_EXPORT_DIRECTORY ied = getExportDirectory();
 
-            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_EXPORT_DIRECTORY.OriginalFirstThunk"),
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_EXPORT_DIRECTORY.AddressOfFunctions"),
                                 ied.AddressOfFunctions, XBinary::valueToHex(ied.AddressOfFunctions),
                                 !(ied.AddressOfFunctions) || !isRelAddressValid(&memoryMap, ied.AddressOfFunctions));
-            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_EXPORT_DIRECTORY.AddressOfNames"),
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_WARNING, QString("IMAGE_EXPORT_DIRECTORY.AddressOfNames"),
                                 ied.AddressOfNames, XBinary::valueToHex(ied.AddressOfNames), !(ied.AddressOfNames) || !isRelAddressValid(&memoryMap, ied.AddressOfNames));
-            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_EXPORT_DIRECTORY.AddressOfNameOrdinals"),
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_WARNING, QString("IMAGE_EXPORT_DIRECTORY.AddressOfNameOrdinals"),
                                 ied.AddressOfNameOrdinals, XBinary::valueToHex(ied.AddressOfNameOrdinals),
                                 !(ied.AddressOfNameOrdinals) || !isRelAddressValid(&memoryMap, ied.AddressOfNameOrdinals));
-            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_ERROR, QString("IMAGE_EXPORT_DIRECTORY.Name"), ied.Name,
+            _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_EXPORTTABLE, FMT_MSG_TYPE_WARNING, QString("IMAGE_EXPORT_DIRECTORY.Name"), ied.Name,
                                 XBinary::valueToHex(ied.Name), !(ied.Name) || !isRelAddressValid(&memoryMap, ied.Name));
         }
     }

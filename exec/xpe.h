@@ -1292,7 +1292,7 @@ public:
 
     virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTIONS &hlOptions, PDSTRUCT *pPdStruct = nullptr);
 
-    virtual QList<FMT_MSG> checkFileFormat(PDSTRUCT *pPdStruct);
+    virtual QList<FMT_MSG> checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct);
 
 #if defined(_MSC_VER)
     enum CERTNAMESTRING {
