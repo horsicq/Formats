@@ -2764,7 +2764,7 @@ quint64 XBinary::getBits_uint64(quint64 nValue, qint32 nBitOffset, qint32 nBitSi
     return nResult;
 }
 
-bool XBinary::_addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, STRINGSEARCH_OPTIONS *pSsOptions)
+bool XBinary::_addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, QString sString, STRINGSEARCH_OPTIONS *pSsOptions)
 {
     bool bResult = false;
 
@@ -2773,13 +2773,13 @@ bool XBinary::_addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *
     if (pSsOptions->bLinks) {
         bAdd = false;
 
-        if (pRecord->sString.contains("http:") || pRecord->sString.contains("www.") || pRecord->sString.contains("mailto:")) {
+        if (sString.contains("http:") || sString.contains("www.") || sString.contains("mailto:")) {
             bAdd = true;
         }
     }
 
     if (pSsOptions->sMask != "") {
-        bAdd = isRegExpPresent(pSsOptions->sMask, pRecord->sString);
+        bAdd = isRegExpPresent(pSsOptions->sMask, sString);
     }
 
     if (bAdd) {
@@ -2982,11 +2982,10 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
                             record.recordType = MS_RECORD_TYPE_STRING_ANSI;
                             record.nOffset = nCurrentAnsiOffset;
                             record.nSize = nCurrentAnsiSize;
-                            record.sString = sString;
                             record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-                            record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
+                            record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
 
-                            if (_addMultiSearchStringRecord(&listResult, &record, &ssOptions)) {
+                            if (_addMultiSearchStringRecord(&listResult, &record, sString, &ssOptions)) {
                                 nCurrentRecords++;
                             }
 
@@ -3101,11 +3100,11 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
                                 record.recordType = MS_RECORD_TYPE_STRING_UNICODE;
                                 record.nOffset = nCurrentUnicodeOffset[nParity];
                                 record.nSize = nCurrentUnicodeSize[nParity] * 2;
-                                record.sString = sString;
+                                // record.sString = sString;
                                 record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-                                record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
+                                record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
 
-                                if (_addMultiSearchStringRecord(&listResult, &record, &ssOptions)) {
+                                if (_addMultiSearchStringRecord(&listResult, &record, sString, &ssOptions)) {
                                     nCurrentRecords++;
                                 }
 
@@ -3136,11 +3135,11 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
                                     record.recordType = MS_RECORD_TYPE_STRING_UNICODE;
                                     record.nOffset = nCurrentUnicodeOffset[nO];
                                     record.nSize = nCurrentUnicodeSize[nO] * 2;
-                                    record.sString = sString;
+                                    // record.sString = sString;
                                     record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-                                    record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
+                                    record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
 
-                                    if (_addMultiSearchStringRecord(&listResult, &record, &ssOptions)) {
+                                    if (_addMultiSearchStringRecord(&listResult, &record, sString, &ssOptions)) {
                                         nCurrentRecords++;
                                     }
 
@@ -3235,10 +3234,10 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryM
         record.recordType = MS_RECORD_TYPE_SIGNATURE;
         record.nOffset = nSignatureOffset;
         record.nSize = nSignatureSize;
-        record.sString = sSignature;
-        record.sInfo = sInfo;
+        // record.sString = sSignature;
+        // record.sInfo = sInfo;
         record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-        record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
+        record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
 
         listResult.append(record);
 
@@ -3310,7 +3309,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, 
         record.nOffset = nValOffset;
         record.nSize = nValSize;
         record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-        record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
+        record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
 
         if (valueType == VT_ANSISTRING_I) {
             _sValue = read_ansiString(nValOffset, nValSize);
@@ -3324,7 +3323,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, 
             _sValue = sValue;
         }
 
-        record.sString = QString("%1: %2").arg(sValuePrefix, _sValue);
+        // record.sString = QString("%1: %2").arg(sValuePrefix, _sValue);
 
         listResult.append(record);
 
@@ -3410,6 +3409,27 @@ QString XBinary::msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId)
         sResult = "UTF8";
     } else if (msRecordTypeId == XBinary::MS_RECORD_TYPE_STRING_UNICODE) {
         sResult = "U";
+    } else if (msRecordTypeId == XBinary::MS_RECORD_TYPE_SIGNATURE) {
+        sResult = "S";
+    } else if (msRecordTypeId == XBinary::MS_RECORD_TYPE_VALUE) {
+        sResult = "V";
+    }
+
+    return sResult;
+}
+
+QString XBinary::read_msRecordValue(const MS_RECORD_TYPE &msRecordType, qint64 nOffset, qint64 nSize)
+{
+    QString sResult;
+
+    nSize = qMin(nSize, qint64(128));
+
+    if (msRecordType == XBinary::MS_RECORD_TYPE_STRING_ANSI) {
+        sResult = read_ansiString(nOffset, nSize);
+    } else if (msRecordType == XBinary::MS_RECORD_TYPE_STRING_UTF8) {
+        sResult = read_utf8String(nOffset, nSize);
+    } else if (msRecordType == XBinary::MS_RECORD_TYPE_STRING_UNICODE) {
+        sResult = read_unicodeString(nOffset, nSize);
     }
 
     return sResult;
@@ -4454,6 +4474,24 @@ XADDR XBinary::getSegmentAddress(quint16 nSegment, quint16 nAddress)
 
     if (nResult >= 0x100000) {
         nResult -= 0x100000;
+    }
+
+    return nResult;
+}
+
+qint32 XBinary::getMemoryIndexByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset)
+{
+    qint32 nResult = -1;
+
+    qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (pMemoryMap->listRecords.at(i).nSize && (pMemoryMap->listRecords.at(i).nOffset != -1)) {
+            if ((pMemoryMap->listRecords.at(i).nOffset <= nOffset) && (nOffset < pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize)) {
+                nResult = i;
+                break;
+            }
+        }
     }
 
     return nResult;
@@ -9299,6 +9337,20 @@ qint64 XBinary::getTotalOSSize(QList<OFFSETSIZE> *pListOffsetSize)
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         nResult += pListOffsetSize->at(i).nSize;
+    }
+
+    return nResult;
+}
+
+quint32 XBinary::getByteSizeFromWidthMode(MODE mode)
+{
+    quint32 nResult = 0;
+
+    switch (mode) {
+        case MODE_8: nResult = 1; break;
+        case MODE_16: nResult = 2; break;
+        case MODE_32: nResult = 4; break;
+        case MODE_64: nResult = 8; break;
     }
 
     return nResult;

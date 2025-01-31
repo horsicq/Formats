@@ -537,6 +537,7 @@ public:
 
     enum MS_RECORD_TYPE {
         MS_RECORD_TYPE_UNKNOWN = 0,
+        MS_RECORD_TYPE_STRING,
         MS_RECORD_TYPE_STRING_ANSI,
         MS_RECORD_TYPE_STRING_UTF8,
         MS_RECORD_TYPE_STRING_UNICODE,
@@ -548,11 +549,12 @@ public:
     struct MS_RECORD {
         qint64 nOffset;
         XADDR nAddress;
-        QString sRegion;
+        // QString sRegion;
+        quint32 nRegionIndex;
         qint64 nSize;
         MS_RECORD_TYPE recordType;
-        QString sString;
-        QString sInfo;
+        // QString sString;
+        // QString sInfo;
     };
 
     struct OPCODE {
@@ -927,7 +929,7 @@ public:
         bool bIsInit;
     };
 
-    bool _addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, STRINGSEARCH_OPTIONS *pSsOptions);
+    bool _addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, QString sString, STRINGSEARCH_OPTIONS *pSsOptions);
 
     QVector<MS_RECORD> multiSearch_allStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct = nullptr);
     QVector<MS_RECORD> multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, const QString &sInfo = "",
@@ -942,6 +944,7 @@ public:
                       PDSTRUCT *pPdStruct = nullptr);
 
     static QString msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId);
+    QString read_msRecordValue(const MS_RECORD_TYPE &msRecordType, qint64 nOffset, qint64 nSize);
 
     static QString valueTypeToString(VT valueType);
     static QString getValueString(QVariant varValue, VT valueType);
@@ -1021,6 +1024,8 @@ public:
     static _MEMORY_RECORD getMemoryRecordByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
     static _MEMORY_RECORD getMemoryRecordByAddress(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
     static _MEMORY_RECORD getMemoryRecordByRelAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
+
+    static qint32 getMemoryIndexByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
 
     static qint32 addressToLoadSection(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
     static qint32 relAddressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
@@ -1425,6 +1430,7 @@ public:
     static MODE getWidthModeFromMemoryMap(_MEMORY_MAP *pMemoryMap);
 
     static MODE getWidthModeFromByteSize(quint32 nByteSize);
+    static quint32 getByteSizeFromWidthMode(MODE mode);
 
     static bool isAnsiSymbol(quint8 cCode, bool bExtra = false);
     static bool isUTF8Symbol(quint8 cCode, qint32 *pnWidth);
