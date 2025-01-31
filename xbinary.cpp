@@ -2764,7 +2764,7 @@ quint64 XBinary::getBits_uint64(quint64 nValue, qint32 nBitOffset, qint32 nBitSi
     return nResult;
 }
 
-bool XBinary::_addMultiSearchStringRecord(QList<MS_RECORD> *pList, MS_RECORD *pRecord, STRINGSEARCH_OPTIONS *pSsOptions)
+bool XBinary::_addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, STRINGSEARCH_OPTIONS *pSsOptions)
 {
     bool bResult = false;
 
@@ -2791,7 +2791,7 @@ bool XBinary::_addMultiSearchStringRecord(QList<MS_RECORD> *pList, MS_RECORD *pR
     return bResult;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -2804,7 +2804,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
 
-    QList<XBinary::MS_RECORD> listResult;
+    QVector<XBinary::MS_RECORD> listResult;
 
     if (ssOptions.nMinLenght == 0) {
         ssOptions.nMinLenght = 1;
@@ -3176,8 +3176,6 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
         }
     }
 
-    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
-
     if (bReadError) {
         pPdStruct->sInfoString = tr("Read error");
     }
@@ -3188,10 +3186,12 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMa
     delete[] pUnicodeBuffer[0];
     delete[] pUnicodeBuffer[1];
 
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
     return listResult;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, const QString &sInfo,
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, const QString &sInfo,
                                                          PDSTRUCT *pPdStruct)
 {
     _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
@@ -3199,7 +3199,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 
     return multiSearch_signature(&memoryMap, nOffset, nSize, nLimit, sSignature, sInfo, pPdStruct);
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature,
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature,
                                                          const QString &sInfo, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
@@ -3212,7 +3212,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
         nSize = getSize() - nOffset;
     }
 
-    QList<XBinary::MS_RECORD> listResult;
+    QVector<XBinary::MS_RECORD> listResult;
 
     qint64 _nSize = nSize;
     qint64 _nOffset = nOffset;
@@ -3261,14 +3261,14 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap
     return listResult;
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_value(qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian, PDSTRUCT *pPdStruct)
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_value(qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
     return multiSearch_value(&memoryMap, nOffset, nSize, nLimit, varValue, valueType, bIsBigEndian, pPdStruct);
 }
 
-QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType,
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType,
                                                      bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
@@ -3285,7 +3285,7 @@ QList<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, qi
     QString sValue = getValueString(varValue, valueType);
     qint64 nValSize = getValueSize(varValue, valueType);
 
-    QList<XBinary::MS_RECORD> listResult;
+    QVector<XBinary::MS_RECORD> listResult;
 
     qint64 _nSize = nSize;
     qint64 _nOffset = nOffset;
