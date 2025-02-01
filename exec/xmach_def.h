@@ -1207,8 +1207,7 @@ struct dyld_chained_starts_in_image {
 
 // This struct is embedded in dyld_chain_starts_in_image
 // and passed down to the kernel for page-in linking
-struct dyld_chained_starts_in_segment
-{
+struct dyld_chained_starts_in_segment {
     quint32 size;               // size of this (amount kernel needs to copy)
     quint16 page_size;          // 0x1000 or 0x4000
     quint16 pointer_format;     // DYLD_CHAINED_PTR_*
@@ -1216,11 +1215,11 @@ struct dyld_chained_starts_in_segment
     quint32 max_valid_pointer;  // for 32-bit OS, any value beyond this is not a pointer
     quint16 page_count;         // how many pages are in array
     quint16 page_start[1];      // each entry is offset in each page of first element in chain
-                                    // or DYLD_CHAINED_PTR_START_NONE if no fixups on page
- // uint16_t    chain_starts[1];    // some 32-bit formats may require multiple starts per page.
-                                    // for those, if high bit is set in page_starts[], then it
-                                    // is index into chain_starts[] which is a list of starts
-                                    // the last of which has the high bit set
+                                // or DYLD_CHAINED_PTR_START_NONE if no fixups on page
+                                // uint16_t    chain_starts[1];    // some 32-bit formats may require multiple starts per page.
+                                // for those, if high bit is set in page_starts[], then it
+                                // is index into chain_starts[] which is a list of starts
+                                // the last of which has the high bit set
 };
 
 }  // namespace XMACH_DEF
