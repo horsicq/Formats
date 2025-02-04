@@ -156,9 +156,9 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 {
     qint64 nResult = 0;
 
-    if ((pDevice->size() > nPos) && (nPos >= 0)) {
-        if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
+    if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
+    if ((pDevice->size() > nPos) && (nPos >= 0)) {
         if (pDevice->seek(nPos)) {
             while ((nMaxLen > 0) && (!(pPdStruct->bIsStop))) {
                 qint64 nCurrentSize = qMin(nMaxLen, (qint64)READWRITE_BUFFER_SIZE);
@@ -179,8 +179,13 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 #endif
         }
 
-        if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+    } else {
+#ifdef QT_DEBUG
+        qDebug("Invalid pos: %X", nPos);
+#endif
     }
+
+    if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
 
     return nResult;
 }
@@ -189,9 +194,9 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
 {
     qint64 nResult = 0;
 
-    if (pDevice->size() > nPos) {
-        if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
+    if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
 
+    if (pDevice->size() > nPos) {
         if (pDevice->seek(nPos)) {
             while ((nLen > 0) && (!(pPdStruct->bIsStop))) {
                 qint64 nCurrentSize = qMin(nLen, (qint64)READWRITE_BUFFER_SIZE);
@@ -206,10 +211,10 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
                 pData += nCurrentSize;
                 nResult += nCurrentSize;
             }
-        }
-
-        if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+        } 
     }
+
+    if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
 
     return nResult;
 }
@@ -2979,7 +2984,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                         if (bAdd) {
                             MS_RECORD record = {};
-                            record.recordType = MS_RECORD_TYPE_STRING_ANSI;
+                            record.valueType = VT_ANSISTRING;
                             record.nOffset = nCurrentAnsiOffset;
                             record.nSize = nCurrentAnsiSize;
                             record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
@@ -3097,7 +3102,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                             if (bAdd) {
                                 MS_RECORD record = {};
-                                record.recordType = MS_RECORD_TYPE_STRING_UNICODE;
+                                record.valueType = VT_UNICODESTRING;
                                 record.nOffset = nCurrentUnicodeOffset[nParity];
                                 record.nSize = nCurrentUnicodeSize[nParity] * 2;
                                 // record.sString = sString;
@@ -3132,7 +3137,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                                 if (bAdd) {
                                     MS_RECORD record = {};
-                                    record.recordType = MS_RECORD_TYPE_STRING_UNICODE;
+                                    record.valueType = VT_UNICODESTRING;
                                     record.nOffset = nCurrentUnicodeOffset[nO];
                                     record.nSize = nCurrentUnicodeSize[nO] * 2;
                                     // record.sString = sString;
@@ -3190,16 +3195,16 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
     return listResult;
 }
 
-QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, const QString &sInfo,
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, quint32 nInfo,
                                                            PDSTRUCT *pPdStruct)
 {
     _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
-    return multiSearch_signature(&memoryMap, nOffset, nSize, nLimit, sSignature, sInfo, pPdStruct);
+    return multiSearch_signature(&memoryMap, nOffset, nSize, nLimit, sSignature, nInfo, pPdStruct);
 }
 
 QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature,
-                                                           const QString &sInfo, PDSTRUCT *pPdStruct)
+                                                           quint32 nInfo, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -3231,11 +3236,11 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryM
         }
 
         MS_RECORD record = {};
-        record.recordType = MS_RECORD_TYPE_SIGNATURE;
+        record.valueType = VT_SIGNATURE;
         record.nOffset = nSignatureOffset;
         record.nSize = nSignatureSize;
         // record.sString = sSignature;
-        // record.sInfo = sInfo;
+        record.nInfo = nInfo;
         record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
         record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
 
@@ -3281,8 +3286,8 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, 
         nSize = getSize() - nOffset;
     }
 
-    QString sValuePrefix = valueTypeToString(valueType);
-    QString sValue = getValueString(varValue, valueType);
+    // QString sValuePrefix = valueTypeToString(valueType);
+    // QString sValue = getValueString(varValue, valueType);
     qint64 nValSize = getValueSize(varValue, valueType);
 
     QVector<XBinary::MS_RECORD> listResult;
@@ -3303,26 +3308,26 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, 
             break;
         }
 
-        QString _sValue;
+        // QString _sValue;
 
         MS_RECORD record = {};
-        record.recordType = MS_RECORD_TYPE_VALUE;
+        record.valueType = valueType;
         record.nOffset = nValOffset;
         record.nSize = nValSize;
         record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
         record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
 
-        if (valueType == VT_ANSISTRING_I) {
-            _sValue = read_ansiString(nValOffset, nValSize);
-        } else if (valueType == VT_UNICODESTRING_I) {
-            _sValue = read_unicodeString(nValOffset, nValSize / 2, bIsBigEndian);
-        } else if (valueType == VT_UTF8STRING_I) {
-            _sValue = read_unicodeString(nValOffset, nValSize, bIsBigEndian);
-        } else if (valueType == VT_SIGNATURE) {
-            _sValue = getSignature(nValOffset, nValSize);
-        } else {
-            _sValue = sValue;
-        }
+        // if (valueType == VT_ANSISTRING_I) {
+        //     _sValue = read_ansiString(nValOffset, nValSize);
+        // } else if (valueType == VT_UNICODESTRING_I) {
+        //     _sValue = read_unicodeString(nValOffset, nValSize / 2, bIsBigEndian);
+        // } else if (valueType == VT_UTF8STRING_I) {
+        //     _sValue = read_unicodeString(nValOffset, nValSize, bIsBigEndian);
+        // } else if (valueType == VT_SIGNATURE) {
+        //     _sValue = getSignature(nValOffset, nValSize);
+        // } else {
+        //     _sValue = sValue;
+        // }
 
         // record.sString = QString("%1: %2").arg(sValuePrefix, _sValue);
 
@@ -3400,37 +3405,19 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
     return nResult;
 }
 
-QString XBinary::msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId)
-{
-    QString sResult;
 
-    if (msRecordTypeId == XBinary::MS_RECORD_TYPE_STRING_ANSI) {
-        sResult = "A";
-    } else if (msRecordTypeId == XBinary::MS_RECORD_TYPE_STRING_UTF8) {
-        sResult = "UTF8";
-    } else if (msRecordTypeId == XBinary::MS_RECORD_TYPE_STRING_UNICODE) {
-        sResult = "U";
-    } else if (msRecordTypeId == XBinary::MS_RECORD_TYPE_SIGNATURE) {
-        sResult = "S";
-    } else if (msRecordTypeId == XBinary::MS_RECORD_TYPE_VALUE) {
-        sResult = "V";
-    }
-
-    return sResult;
-}
-
-QString XBinary::read_msRecordValue(const MS_RECORD_TYPE &msRecordType, qint64 nOffset, qint64 nSize)
+QString XBinary::read_valueString(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian)
 {
     QString sResult;
 
     nSize = qMin(nSize, qint64(128));
 
-    if (msRecordType == XBinary::MS_RECORD_TYPE_STRING_ANSI) {
+    if ((valueType == XBinary::VT_ANSISTRING) || (valueType == XBinary::VT_ANSISTRING_I)) {
         sResult = read_ansiString(nOffset, nSize);
-    } else if (msRecordType == XBinary::MS_RECORD_TYPE_STRING_UTF8) {
+    } else if ((valueType == XBinary::VT_UTF8STRING) || (valueType == XBinary::VT_UTF8STRING_I)) {
         sResult = read_utf8String(nOffset, nSize);
-    } else if (msRecordType == XBinary::MS_RECORD_TYPE_STRING_UNICODE) {
-        sResult = read_unicodeString(nOffset, nSize);
+    } else if ((valueType == XBinary::VT_UNICODESTRING) || (valueType == XBinary::VT_UNICODESTRING_I)) {
+        sResult = read_unicodeString(nOffset, nSize, bIsBigEndian);
     }
 
     return sResult;
@@ -3630,7 +3617,7 @@ QByteArray XBinary::getUnicodeString(const QString &sString, bool bIsBigEndian)
     return baResult;
 }
 
-QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, const QString &sString, bool bAddNull)
+QByteArray XBinary::getStringData(VT valueType, const QString &sString, bool bAddNull)
 {
     QByteArray baResult;
 
@@ -3638,13 +3625,13 @@ QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, const QString &
 
     char buffer[4] = {};
 
-    if (msRecordTypeId == MS_RECORD_TYPE_STRING_ANSI) {
+    if (valueType == VT_ANSISTRING) {
         baResult = sString.toLatin1();
 
         if (bAddNull) {
             baResult.append(buffer, 1);
         }
-    } else if (msRecordTypeId == MS_RECORD_TYPE_STRING_UNICODE) {
+    } else if (valueType == VT_UNICODESTRING) {
         baResult.resize(nSize * 2);
 
         baResult.fill(0);
@@ -3656,7 +3643,7 @@ QByteArray XBinary::getStringData(MS_RECORD_TYPE msRecordTypeId, const QString &
         if (bAddNull) {
             baResult.append(buffer, 2);
         }
-    } else if (msRecordTypeId == MS_RECORD_TYPE_STRING_UTF8) {
+    } else if (valueType == VT_UTF8STRING) {
         baResult = sString.toUtf8();
 
         if (bAddNull) {
@@ -11308,7 +11295,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
             nResult++;
             sBytes.append(sSignature.at(i));
         } else if ((sSignature.at(i) == '.') || (sSignature.at(i) == '$') || (sSignature.at(i) == '#') || (sSignature.at(i) == '*') || (sSignature.at(i) == '!') ||
-                   (sSignature.at(i) == '_') || (sSignature.at(i) == '%')) {
+                   (sSignature.at(i) == '_') || (sSignature.at(i) == '%') || (sSignature.at(i) == '+')) {
             break;
         } else {
             *pbValid = false;

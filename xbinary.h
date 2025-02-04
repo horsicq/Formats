@@ -535,15 +535,33 @@ public:
 #endif
     };
 
-    enum MS_RECORD_TYPE {
-        MS_RECORD_TYPE_UNKNOWN = 0,
-        MS_RECORD_TYPE_STRING,
-        MS_RECORD_TYPE_STRING_ANSI,
-        MS_RECORD_TYPE_STRING_UTF8,
-        MS_RECORD_TYPE_STRING_UNICODE,
-        MS_RECORD_TYPE_SIGNATURE,
-        MS_RECORD_TYPE_VALUE
-        // TODO more PASCAL(A/U)
+    enum VT {
+        VT_UNKNOWN = 0,
+        VT_STRING,
+        VT_ANSISTRING,
+        VT_ANSISTRING_I,
+        VT_UNICODESTRING,
+        VT_UNICODESTRING_I,
+        VT_UTF8STRING,
+        VT_UTF8STRING_I,
+        VT_SIGNATURE,
+        VT_VALUE,
+        VT_BYTE,
+        VT_WORD,
+        VT_DWORD,
+        VT_QWORD,
+        VT_CHAR,
+        VT_UCHAR,
+        VT_SHORT,
+        VT_USHORT,
+        VT_INT,
+        VT_UINT,
+        VT_INT64,
+        VT_UINT64,
+        VT_DOUBLE,
+        VT_FLOAT,
+        // TODO UTF8
+        // TODO pascal strings(A/U)
     };
 
     struct MS_RECORD {
@@ -552,7 +570,8 @@ public:
         // QString sRegion;
         quint32 nRegionIndex;
         qint64 nSize;
-        MS_RECORD_TYPE recordType;
+        VT valueType;
+        quint32 nInfo;
         // QString sString;
         // QString sInfo;
     };
@@ -886,31 +905,11 @@ public:
         bool bLinks;
     };
 
-    enum VT {
-        VT_UNKNOWN = 0,
-        VT_ANSISTRING,
-        VT_ANSISTRING_I,
-        VT_UNICODESTRING,
-        VT_UNICODESTRING_I,
-        VT_UTF8STRING,
-        VT_UTF8STRING_I,
-        VT_SIGNATURE,
-        VT_BYTE,
-        VT_WORD,
-        VT_DWORD,
-        VT_QWORD,
-        VT_CHAR,
-        VT_UCHAR,
-        VT_SHORT,
-        VT_USHORT,
-        VT_INT,
-        VT_UINT,
-        VT_INT64,
-        VT_UINT64,
-        VT_DOUBLE,
-        VT_FLOAT,
-        // TODO UTF8
-        // TODO pascal strings(A/U)
+    struct SIGNATUREDB_RECORD {
+        qint32 nNumber;
+        QString sName;
+        ENDIAN endian;
+        QString sSignature;
     };
 
     enum SF {
@@ -932,9 +931,9 @@ public:
     bool _addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, QString sString, STRINGSEARCH_OPTIONS *pSsOptions);
 
     QVector<MS_RECORD> multiSearch_allStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct = nullptr);
-    QVector<MS_RECORD> multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, const QString &sInfo = "",
+    QVector<MS_RECORD> multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, quint32 nInfo,
                                              PDSTRUCT *pPdStruct = nullptr);
-    QVector<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, const QString &sInfo = "",
+    QVector<MS_RECORD> multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, quint32 nInfo,
                                              PDSTRUCT *pPdStruct = nullptr);
     QVector<MS_RECORD> multiSearch_value(qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian, PDSTRUCT *pPdStruct = nullptr);
     QVector<MS_RECORD> multiSearch_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, QVariant varValue, VT valueType, bool bIsBigEndian,
@@ -943,8 +942,7 @@ public:
     qint64 find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QVariant varValue, VT valueType, bool bIsBigEndian, qint64 *pnResultSize,
                       PDSTRUCT *pPdStruct = nullptr);
 
-    static QString msRecordTypeIdToString(MS_RECORD_TYPE msRecordTypeId);
-    QString read_msRecordValue(const MS_RECORD_TYPE &msRecordType, qint64 nOffset, qint64 nSize);
+    QString read_valueString(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian = false);
 
     static QString valueTypeToString(VT valueType);
     static QString getValueString(QVariant varValue, VT valueType);
@@ -952,7 +950,7 @@ public:
     static VT getValueType(quint64 nValue);
 
     static QByteArray getUnicodeString(const QString &sString, bool bIsBigEndian);
-    static QByteArray getStringData(MS_RECORD_TYPE msRecordTypeId, const QString &sString, bool bAddNull);
+    static QByteArray getStringData(VT valueType, const QString &sString, bool bAddNull);
 
     bool isSignaturePresent(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
     static bool isSignatureValid(const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);

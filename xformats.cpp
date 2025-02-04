@@ -1219,7 +1219,6 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
                 stResult.insert(fileType);
             }
         }
-
     } else {
         if (stResult.contains(XBinary::FT_ZIP)) {
             XZip xzip(pDevice);
