@@ -9129,7 +9129,7 @@ XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
         result = DMFAMILY_BPF;
     } else if (disasmMode == DM_CUSTOM_MACH_REBASE) {
         result = DMFAMILY_CUSTOM_MACH_REBASE;
-    } else if (disasmMode == DM_CUSTOM_MACH_BIND) {
+    } else if ((disasmMode == DM_CUSTOM_MACH_BIND) || (disasmMode == DM_CUSTOM_MACH_WEAK)) {
         result = DMFAMILY_CUSTOM_MACH_BIND;
     } else if (disasmMode == DM_CUSTOM_MACH_EXPORT) {
         result = DMFAMILY_CUSTOM_MACH_EXPORT;

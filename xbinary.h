@@ -368,6 +368,7 @@ public:
         DM_CUSTOM,
         DM_CUSTOM_MACH_REBASE,
         DM_CUSTOM_MACH_BIND,
+        DM_CUSTOM_MACH_WEAK,
         DM_CUSTOM_MACH_EXPORT,
         DM_CUSTOM_7ZIP_PROPERTIES,
         DM_ALL
