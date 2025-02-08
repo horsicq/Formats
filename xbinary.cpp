@@ -211,7 +211,7 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
                 pData += nCurrentSize;
                 nResult += nCurrentSize;
             }
-        } 
+        }
     }
 
     if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
@@ -3195,16 +3195,15 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
     return listResult;
 }
 
-QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, quint32 nInfo,
-                                                           PDSTRUCT *pPdStruct)
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, quint32 nInfo, PDSTRUCT *pPdStruct)
 {
     _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
     return multiSearch_signature(&memoryMap, nOffset, nSize, nLimit, sSignature, nInfo, pPdStruct);
 }
 
-QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature,
-                                                           quint32 nInfo, PDSTRUCT *pPdStruct)
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, qint32 nLimit, const QString &sSignature, quint32 nInfo,
+                                                           PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -3404,7 +3403,6 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
 
     return nResult;
 }
-
 
 QString XBinary::read_valueString(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian)
 {

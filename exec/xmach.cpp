@@ -1212,12 +1212,11 @@ qint64 XMACH::getAddressOfEntryPoint(XBinary::_MEMORY_MAP *pMemoryMap)
             nResult = read_uint32(nOffset + offsetof(XMACH_DEF::arm_thread_state32_t, pc), bIsBigEndian);
         } else if (nMachine == XMACH_DEF::S_CPU_TYPE_ARM64) {
             nResult = read_uint64(nOffset + offsetof(XMACH_DEF::arm_thread_state64_t, pc), bIsBigEndian);
-        } else if(nMachine==XMACH_DEF::S_CPU_TYPE_POWERPC) {
-           nResult=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state32_t,srr0),bIsBigEndian);
-        } else if(nMachine==XMACH_DEF::S_CPU_TYPE_POWERPC64) {
-           nResult=read_uint32(nOffset+offsetof(XMACH_DEF::ppc_thread_state64_t,srr0),bIsBigEndian);
-        }
-        else if (nMachine == XMACH_DEF::S_CPU_TYPE_MC680x0) {
+        } else if (nMachine == XMACH_DEF::S_CPU_TYPE_POWERPC) {
+            nResult = read_uint32(nOffset + offsetof(XMACH_DEF::ppc_thread_state32_t, srr0), bIsBigEndian);
+        } else if (nMachine == XMACH_DEF::S_CPU_TYPE_POWERPC64) {
+            nResult = read_uint32(nOffset + offsetof(XMACH_DEF::ppc_thread_state64_t, srr0), bIsBigEndian);
+        } else if (nMachine == XMACH_DEF::S_CPU_TYPE_MC680x0) {
             nResult = read_uint32(nOffset + offsetof(XMACH_DEF::m68k_thread_state32_t, pc), bIsBigEndian);
         }
     }
