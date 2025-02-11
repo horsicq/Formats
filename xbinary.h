@@ -1012,10 +1012,11 @@ public:
 
     static XADDR offsetToAddress(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
     static qint64 addressToOffset(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
-    static qint64 offsetToRelAddress(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
+    static XADDR offsetToRelAddress(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
     static qint64 relAddressToOffset(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
-    static qint64 relAddressToAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
+    static XADDR relAddressToAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
     static qint64 addressToRelAddress(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
+    static XADDR segmentRelOffsetToAddress(_MEMORY_MAP *pMemoryMap, quint16 nSegment, XADDR nRelOffset);
 
     static XADDR getSegmentAddress(quint16 nSegment, quint16 nAddress);
 

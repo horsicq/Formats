@@ -4416,9 +4416,9 @@ qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress
     return nResult;
 }
 
-qint64 XBinary::offsetToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
+XADDR XBinary::offsetToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
-    qint64 nResult = offsetToAddress(pMemoryMap, nOffset);
+    XADDR nResult = offsetToAddress(pMemoryMap, nOffset);
 
     if (nResult != -1) {
         nResult -= pMemoryMap->nModuleAddress;
@@ -4432,9 +4432,9 @@ qint64 XBinary::relAddressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRel
     return addressToOffset(pMemoryMap, nRelAddress + pMemoryMap->nModuleAddress);
 }
 
-qint64 XBinary::relAddressToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
+XADDR XBinary::relAddressToAddress(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
 {
-    qint64 nResult = -1;
+    XADDR nResult = -1;
 
     if (isRelAddressValid(pMemoryMap, nRelAddress)) {
         nResult = nRelAddress + pMemoryMap->nModuleAddress;
@@ -4449,6 +4449,17 @@ qint64 XBinary::addressToRelAddress(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAdd
 
     if (isAddressValid(pMemoryMap, nAddress)) {
         nResult = nAddress - pMemoryMap->nModuleAddress;
+    }
+
+    return nResult;
+}
+
+XADDR XBinary::segmentRelOffsetToAddress(_MEMORY_MAP *pMemoryMap, quint16 nSegment, XADDR nRelOffset)
+{
+    XADDR nResult = -1;
+
+    if (nSegment < pMemoryMap->listRecords.count()) {
+        nResult = pMemoryMap->listRecords.at(nSegment).nAddress + nRelOffset;
     }
 
     return nResult;
