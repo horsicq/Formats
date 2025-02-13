@@ -185,6 +185,7 @@ public:
         QString sName;
         qint32 nIndex;
         bool bIsVirtual;
+        bool bIsInvisible;
         quint64 nID;
     };
 

@@ -1276,10 +1276,20 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         qint32 nNumberOfSegments = listSegmentRecords.count();
 
         if (nNumberOfSegments) {
-            if (bIs64) {
-                nMinAddress = listSegmentRecords.at(0).s.segment64.vmaddr;
-            } else {
-                nMinAddress = listSegmentRecords.at(0).s.segment32.vmaddr;
+            if (nNumberOfSegments > 1) {
+                if (bIs64) {
+                    if (listSegmentRecords.at(0).s.segment64.flags) {
+                        nMinAddress = listSegmentRecords.at(0).s.segment64.vmaddr;
+                    } else {
+                        nMinAddress = listSegmentRecords.at(1).s.segment64.vmaddr;
+                    }
+                } else {
+                    if (listSegmentRecords.at(0).s.segment32.flags) {
+                        nMinAddress = listSegmentRecords.at(0).s.segment32.vmaddr;
+                    } else {
+                        nMinAddress = listSegmentRecords.at(1).s.segment32.vmaddr;
+                    }
+                }
             }
 
             for (qint32 i = 0; i < nNumberOfSegments; i++) {
@@ -1290,6 +1300,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 XADDR nVirtualAddress = 0;
                 qint64 nFileSize = 0;
                 qint64 nVirtualSize = 0;
+                quint32 nFlags = 0;
 
                 if (bIs64) {
                     QString _sSegmentName = QString(listSegmentRecords.at(i).s.segment64.segname);  // TODO Limit
@@ -1299,6 +1310,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     nVirtualAddress = listSegmentRecords.at(i).s.segment64.vmaddr;
                     nFileSize = listSegmentRecords.at(i).s.segment64.filesize;
                     nVirtualSize = listSegmentRecords.at(i).s.segment64.vmsize;
+                    nFlags = listSegmentRecords.at(i).s.segment64.flags;
                 } else {
                     QString _sSegmentName = QString(listSegmentRecords.at(i).s.segment32.segname);  // TODO Limit
 
@@ -1307,6 +1319,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     nVirtualAddress = listSegmentRecords.at(i).s.segment32.vmaddr;
                     nFileSize = listSegmentRecords.at(i).s.segment32.filesize;
                     nVirtualSize = listSegmentRecords.at(i).s.segment32.vmsize;
+                    nFlags = listSegmentRecords.at(i).s.segment32.flags;
                 }
 
                 if (nFileSize) {
@@ -1334,6 +1347,10 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     record.nSize = nVirtualSize - nFileSize;
                     record.nOffset = -1;
                     record.nIndex = nIndex++;
+
+                    if ((i == 0) && (nFlags == 0)) {
+                        record.bIsInvisible = true;
+                    }
 
                     result.listRecords.append(record);
                 }

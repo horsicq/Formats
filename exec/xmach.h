@@ -24,6 +24,8 @@
 #include "xbinary.h"
 #include "xmach_def.h"
 
+// https://github.com/phracker/MacOSX-SDKs
+// https://github.com/joseluisq/macosx-sdks
 class XMACH : public XBinary {
     Q_OBJECT
 

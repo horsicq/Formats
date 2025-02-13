@@ -154,6 +154,7 @@ void XBinary::setFileName(const QString &sFileName)
 
 qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen, PDSTRUCT *pPdStruct)
 {
+    // qDebug("%X %X pos: %X maxlen: %X", this, pDevice, nPos, nMaxLen);
     qint64 nResult = 0;
 
     if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
