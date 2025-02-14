@@ -567,15 +567,11 @@ public:
     };
 
     struct MS_RECORD {
-        qint64 nOffset;
-        XADDR nAddress;
-        // QString sRegion;
-        quint32 nRegionIndex;
-        qint64 nSize;
-        VT valueType;
-        quint32 nInfo;
-        // QString sString;
-        // QString sInfo;
+        XADDR nRelOffset;
+        qint16 nRegionIndex;
+        quint16 nValueType;
+        quint16 nSize;
+        quint16 nInfo;
     };
 
     struct OPCODE {

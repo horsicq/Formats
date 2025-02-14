@@ -1224,6 +1224,27 @@ qint64 XMACH::getAddressOfEntryPoint(XBinary::_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
+XADDR XMACH::getBaseAddress()
+{
+    XADDR nResult = 0;
+
+    QList<XMACH::SEGMENT_RECORD> list =  getSegmentRecords();
+
+    if (list.count() > 0) {
+        if (list.at(0).bIs64) {
+            if (list.at(0).s.segment64.flags == 0) {
+                nResult = list.at(0).s.segment64.vmsize;
+            }
+        } else {
+            if (list.at(0).s.segment32.flags == 0) {
+                nResult = list.at(0).s.segment32.vmsize;
+            }
+        }
+    }
+
+    return nResult;
+}
+
 QList<XBinary::MAPMODE> XMACH::getMapModesList()
 {
     QList<MAPMODE> listResult;

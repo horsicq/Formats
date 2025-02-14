@@ -2985,11 +2985,15 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                         if (bAdd) {
                             MS_RECORD record = {};
-                            record.valueType = VT_ANSISTRING;
-                            record.nOffset = nCurrentAnsiOffset;
+                            record.nValueType = VT_ANSISTRING;
                             record.nSize = nCurrentAnsiSize;
-                            record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-                            record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
+                            record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
+
+                            if (record.nRegionIndex != -1) {
+                                record.nRelOffset = nCurrentAnsiOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+                            } else {
+                                record.nRelOffset = nCurrentAnsiOffset;
+                            }
 
                             if (_addMultiSearchStringRecord(&listResult, &record, sString, &ssOptions)) {
                                 nCurrentRecords++;
@@ -3103,12 +3107,15 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                             if (bAdd) {
                                 MS_RECORD record = {};
-                                record.valueType = VT_UNICODESTRING;
-                                record.nOffset = nCurrentUnicodeOffset[nParity];
+                                record.nValueType = VT_UNICODESTRING;
                                 record.nSize = nCurrentUnicodeSize[nParity] * 2;
-                                // record.sString = sString;
-                                record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-                                record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
+                                record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentUnicodeOffset[nParity]);
+
+                                if (record.nRegionIndex != -1) {
+                                    record.nRelOffset = nCurrentUnicodeOffset[nParity] - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+                                } else {
+                                    record.nRelOffset = nCurrentUnicodeOffset[nParity];
+                                }
 
                                 if (_addMultiSearchStringRecord(&listResult, &record, sString, &ssOptions)) {
                                     nCurrentRecords++;
@@ -3117,6 +3124,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
                                 if (nCurrentRecords >= ssOptions.nLimit) {
                                     break;
                                 }
+
                             }
                         }
                     }
@@ -3138,12 +3146,16 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                                 if (bAdd) {
                                     MS_RECORD record = {};
-                                    record.valueType = VT_UNICODESTRING;
-                                    record.nOffset = nCurrentUnicodeOffset[nO];
+                                    record.nValueType = VT_UNICODESTRING;
                                     record.nSize = nCurrentUnicodeSize[nO] * 2;
+                                    record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentUnicodeOffset[nO]);
                                     // record.sString = sString;
-                                    record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-                                    record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
+
+                                    if (record.nRegionIndex != -1) {
+                                        record.nRelOffset = nCurrentUnicodeOffset[nO] - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+                                    } else {
+                                        record.nRelOffset = nCurrentUnicodeOffset[nO];
+                                    }
 
                                     if (_addMultiSearchStringRecord(&listResult, &record, sString, &ssOptions)) {
                                         nCurrentRecords++;
@@ -3236,13 +3248,16 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryM
         }
 
         MS_RECORD record = {};
-        record.valueType = VT_SIGNATURE;
-        record.nOffset = nSignatureOffset;
+        record.nValueType = VT_SIGNATURE;
         record.nSize = nSignatureSize;
-        // record.sString = sSignature;
         record.nInfo = nInfo;
-        record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-        record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
+        record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nSignatureOffset);
+
+        if (record.nRegionIndex != -1) {
+            record.nRelOffset = nSignatureOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+        } else {
+            record.nRelOffset = nSignatureOffset;
+        }
 
         listResult.append(record);
 
@@ -3311,11 +3326,15 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, 
         // QString _sValue;
 
         MS_RECORD record = {};
-        record.valueType = valueType;
-        record.nOffset = nValOffset;
+        record.nValueType = valueType;
         record.nSize = nValSize;
-        record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-        record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, record.nOffset);
+        record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nValOffset);
+
+        if (record.nRegionIndex != -1) {
+            record.nRelOffset = nValOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+        } else {
+            record.nRelOffset = nValOffset;
+        }
 
         // if (valueType == VT_ANSISTRING_I) {
         //     _sValue = read_ansiString(nValOffset, nValSize);
