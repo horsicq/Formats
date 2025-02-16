@@ -3124,7 +3124,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
                                 if (nCurrentRecords >= ssOptions.nLimit) {
                                     break;
                                 }
-
                             }
                         }
                     }

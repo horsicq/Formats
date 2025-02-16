@@ -1228,7 +1228,7 @@ XADDR XMACH::getBaseAddress()
 {
     XADDR nResult = 0;
 
-    QList<XMACH::SEGMENT_RECORD> list =  getSegmentRecords();
+    QList<XMACH::SEGMENT_RECORD> list = getSegmentRecords();
 
     if (list.count() > 0) {
         if (list.at(0).bIs64) {
