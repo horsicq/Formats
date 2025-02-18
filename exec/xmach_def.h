@@ -979,6 +979,7 @@ struct dylib_reference {
 // https://github.com/aidansteele/osx-abi-macho-file-format-reference
 // https://code.woboq.org/llvm/lld/lib/ReaderWriter/MachO/MachONormalizedFile.h.html
 // https://stuff.mit.edu/afs/sipb/project/gnu/share/gcc-lib/m68k-next-mach31/2.5.4/include/mach/m68k/thread_status.h
+// https://github.com/qyang-nj/llios/blob/main/dynamic_linking/chained_fixups.md
 enum reloc_type_x86_64 {
     X86_64_RELOC_UNSIGNED,    // for absolute addresses
     X86_64_RELOC_SIGNED,      // for signed 32-bit displacement
