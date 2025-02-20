@@ -1020,6 +1020,7 @@ public:
     static _MEMORY_RECORD getMemoryRecordByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
     static _MEMORY_RECORD getMemoryRecordByAddress(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
     static _MEMORY_RECORD getMemoryRecordByRelAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
+    static _MEMORY_RECORD getMemoryRecordByIndex(_MEMORY_MAP *pMemoryMap, qint32 nIndex);
 
     static qint32 getMemoryIndexByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
 

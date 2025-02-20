@@ -923,6 +923,28 @@ QMap<quint64, QString> XMACH::getPlatformS()
     return mapResult;
 }
 
+QMap<quint64, QString> XMACH::getBuildTool()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(1, "TOOL_CLANG");
+    mapResult.insert(2, "TOOL_SWIFT");
+    mapResult.insert(3, "TOOL_LD");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XMACH::getBuildToolS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(1, "CLANG");
+    mapResult.insert(2, "SWIFT");
+    mapResult.insert(3, "LD");
+
+    return mapResult;
+}
+
 XMACH::COMMAND_RECORD XMACH::_readLoadCommand(qint64 nOffset, bool bIsBigEndian)
 {
     COMMAND_RECORD result = {};

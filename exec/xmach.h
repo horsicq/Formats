@@ -204,6 +204,8 @@ public:
     static QMap<quint64, QString> getDICEKindsS();
     static QMap<quint64, QString> getPlatform();
     static QMap<quint64, QString> getPlatformS();
+    static QMap<quint64, QString> getBuildTool();
+    static QMap<quint64, QString> getBuildToolS();
 
     COMMAND_RECORD _readLoadCommand(qint64 nOffset, bool bIsBigEndian);
 

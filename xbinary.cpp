@@ -4495,6 +4495,17 @@ XADDR XBinary::getSegmentAddress(quint16 nSegment, quint16 nAddress)
     return nResult;
 }
 
+XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByIndex(_MEMORY_MAP *pMemoryMap, qint32 nIndex)
+{
+    _MEMORY_RECORD result = {};
+
+    if ((nIndex >= 0) && (nIndex < pMemoryMap->listRecords.count())) {
+        result = pMemoryMap->listRecords.at(nIndex);
+    }
+
+    return result;
+}
+
 qint32 XBinary::getMemoryIndexByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
     qint32 nResult = -1;
