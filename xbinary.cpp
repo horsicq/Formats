@@ -1917,6 +1917,10 @@ QString XBinary::_read_ansiString_safe(char *pBuffer, qint32 nBufferSize, qint32
 {
     QString sResult;
 
+    if (nOffset + nMaxSize > nBufferSize) {
+        nMaxSize = nBufferSize - nOffset;
+    }
+
     if ((nOffset >= 0) && (nOffset < nBufferSize)) {
         sResult = _read_ansiString(pBuffer + nOffset, nMaxSize);
     }

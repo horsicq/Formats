@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2024 hors<horsicq@gmail.com>
+/* Copyright (c) 2017-2025 hors<horsicq@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -672,7 +672,7 @@ public:
     XMACH_DEF::encryption_info_command_64 get_encryption_info_64();
     XMACH_DEF::linkedit_data_command get_linkedit_data(quint32 nCommandID);
 
-    QList<FUNCTION_RECORD> getFunctionRecords(qint64 nOffset, qint64 nSize);
+    QList<FUNCTION_RECORD> getFunctionRecords(qint64 nOffset, qint64 nSize); // TODO pdStruct
 
     QList<DICE_RECORD> getDiceRecords(qint64 nOffset, qint64 nSize);
 
