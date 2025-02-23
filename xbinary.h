@@ -1423,7 +1423,7 @@ public:
 
     static qint64 getTotalOSSize(QList<OFFSETSIZE> *pListOffsetSize);
 
-    static MODE getWidthModeFromSize(quint64 nSize);  // TODO rename
+    static MODE getWidthModeFromSize(quint64 nSize);  // TODO rename check
     static MODE getWidthModeFromMemoryMap(_MEMORY_MAP *pMemoryMap);
 
     static MODE getWidthModeFromByteSize(quint32 nByteSize);
