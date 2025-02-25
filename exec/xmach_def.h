@@ -1189,6 +1189,10 @@ struct CS_CodeDirectory {
     quint32 linkageSize;
 };
 
+const quint32 S_DYLD_CHAINED_IMPORT = 0;
+const quint32 S_DYLD_CHAINED_IMPORT_ADDEND = 1;
+const quint32 S_DYLD_CHAINED_IMPORT_ADDEND64 = 2;
+
 // header of the LC_DYLD_CHAINED_FIXUPS payload
 struct dyld_chained_fixups_header {
     quint32 fixups_version;  // 0
