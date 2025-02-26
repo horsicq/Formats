@@ -206,6 +206,8 @@ public:
     static QMap<quint64, QString> getPlatformS();
     static QMap<quint64, QString> getBuildTool();
     static QMap<quint64, QString> getBuildToolS();
+    static QMap<quint64, QString> getDyldChainedImport();
+    static QMap<quint64, QString> getDyldChainedImportS();
 
     COMMAND_RECORD _readLoadCommand(qint64 nOffset, bool bIsBigEndian);
 
