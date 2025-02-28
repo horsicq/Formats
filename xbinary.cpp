@@ -8940,6 +8940,66 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
     return sResult;
 }
 
+QString XBinary::disasmIdToArch(DM disasmMode)
+{
+    QString sResult = QString("data");
+
+        switch (disasmMode) {
+            case DM_DATA: sResult = QString("data"); break;
+            case DM_X86_16:
+            case DM_X86_32:
+            case DM_X86_64: sResult = QString("x86"); break;
+            case DM_ARM_LE:
+            case DM_ARM_BE:
+            case DM_CORTEXM:
+            case DM_THUMB_LE:
+            case DM_THUMB_BE: sResult = QString("ARM"); break;
+            case DM_AARCH64_LE:
+            case DM_AARCH64_BE: sResult = QString("AArch64"); break;
+            case DM_MIPS_LE:
+            case DM_MIPS_BE:
+            case DM_MIPS64_LE:
+            case DM_MIPS64_BE: sResult = QString("MIPS"); break;
+            case DM_PPC_LE:
+            case DM_PPC_BE:
+            case DM_PPC64_LE:
+            case DM_PPC64_BE: sResult = QString("PowerPC"); break;
+            case DM_SPARC:
+            case DM_SPARCV9: sResult = QString("Sparc"); break;
+            case DM_S390X: sResult = QString("S390X"); break;
+            case DM_XCORE: sResult = QString("XCORE"); break;
+            case DM_M68K:
+            case DM_M68K00:
+            case DM_M68K10:
+            case DM_M68K20:
+            case DM_M68K30:
+            case DM_M68K40:
+            case DM_M68K60: sResult = QString("M68K"); break;
+            case DM_TMS320C64X: sResult = QString("TMS320C64X"); break;
+            case DM_M6800:
+            case DM_M6801:
+            case DM_M6805:
+            case DM_M6808:
+            case DM_M6809:
+            case DM_M6811:
+            case DM_CPU12:
+            case DM_HD6301:
+            case DM_HD6309:
+            case DM_HCS08: sResult = QString("Motorola"); break;
+            case DM_EVM: sResult = QString("EVM"); break;
+            case DM_RISKV32:
+            case DM_RISKV64:
+            case DM_RISKVC: sResult = QString("RISC-V"); break;
+            case DM_MOS65XX: sResult = QString("MOS"); break;
+            case DM_WASM: sResult = QString("WebAssembly"); break;
+            case DM_BPF_LE:
+            case DM_BPF_BE: sResult = QString("BPF"); break;
+            default: sResult = tr("Unknown");
+        }
+
+        return sResult;
+}
+
 QString XBinary::syntaxIdToString(SYNTAX syntax)
 {
     QString sResult = tr("Unknown");
@@ -9510,8 +9570,16 @@ QString XBinary::getStringFromIndex(qint64 nOffset, qint64 nSize, qint32 nIndex)
 QList<QString> XBinary::getAllFilesFromDirectory(const QString &sDirectory, const QString &sExtension)
 {
     QDir directory(sDirectory);
+    QStringList fileList = directory.entryList(QStringList() << sExtension, QDir::Files);
+    QList<QString> listFileNames;
 
-    return directory.entryList(QStringList() << sExtension, QDir::Files);
+    qint32 nNumberOfFiles = fileList.size();
+
+    for (int i = 0; i < nNumberOfFiles; ++i) {
+        listFileNames.append(directory.absoluteFilePath(fileList.at(i)));
+    }
+
+    return listFileNames;
 }
 
 QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, XADDR nStartAddress, qint64 nSize, quint32 nType, PDSTRUCT *pPdStruct)

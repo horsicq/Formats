@@ -908,6 +908,7 @@ public:
         QString sName;
         ENDIAN endian;
         QString sSignature;
+        QString sPatch;
     };
 
     enum SF {
@@ -1390,6 +1391,7 @@ public:
 
     static bool isX86asm(const QString &sArch);  // TODO remove use getDisasmMode
     static QString disasmIdToString(DM disasmMode);
+    static QString disasmIdToArch(DM disasmMode);
     static QString syntaxIdToString(SYNTAX syntax);
     static SYNTAX stringToSyntaxId(const QString &sString);
     static QString osNameIdToString(OSNAME osName);

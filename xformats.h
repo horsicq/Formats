@@ -99,6 +99,7 @@ public:
     static qint32 setBaseComboBox(QComboBox *pComboBox, qint32 nBase);
     static XBinary::MAPMODE getMapModesList(XBinary::FT fileType, QComboBox *pComboBox);
     static void setProgressBar(QProgressBar *pProgressBar, XBinary::PDRECORD pdRecord);
+    static XBinary::DM setDisasmModeComboBox(XBinary::DM disasmMode, QComboBox *pComboBox);
 #endif
     static bool saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDirectoryName);
     static bool saveAllPECursorsToDirectory(QIODevice *pDevice, const QString &sDirectoryName);
