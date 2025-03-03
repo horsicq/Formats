@@ -781,7 +781,7 @@ public:
     QString read_ucsdString(qint64 nOffset);
     QString read_utf8String(qint64 nOffset, qint64 nMaxSize = 256);
     QString _read_utf8String(qint64 nOffset, qint64 nMaxSize = 256);
-    QString _read_utf8String(char *pData, qint64 nMaxSize);
+    static QString _read_utf8String(char *pData, qint64 nMaxSize);
     QString _read_utf8String(qint64 nOffset, char *pData, qint32 nDataSize, qint32 nDataOffset);
 
     QString read_codePageString(qint64 nOffset, qint64 nMaxByteSize = 256, const QString &sCodePage = "System");

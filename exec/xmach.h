@@ -146,6 +146,12 @@ public:
         TYPE_GPU_DYLIB,
     };
 
+    struct EXPORT_RECORD {
+        QString sName;
+        qint64 nOffset;
+        quint32 nFlags;
+    };
+
     XMACH(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XMACH();
 
@@ -706,6 +712,8 @@ public:
     XADDR readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);
     XADDR readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus, bool bNullEnd);
     XADDR readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);
+
+    bool handleImport(qint64 nOffset, qint64 nRelOffset, qint64 nSize, QList<EXPORT_RECORD> *pListExportRecords, QString sCurrentName, PDSTRUCT *pPdStruct);
 };
 
 #endif  // XMACH_H

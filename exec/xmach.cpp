@@ -4779,6 +4779,73 @@ qint64 XMACH::getFileFormatSize(PDSTRUCT *pPdStruct)
     return _calculateRawSize(pPdStruct);
 }
 
+bool XMACH::handleImport(qint64 nOffset, qint64 nRelOffset, qint64 nSize, QList<EXPORT_RECORD> *pListExportRecords, QString sCurrentName, PDSTRUCT *pPdStruct)
+{
+    if (nRelOffset >= nSize) {
+        return false;
+    }
+
+    PACKED_UINT terminal_size = read_uleb128(nOffset + nRelOffset, nSize);
+
+    if (!terminal_size.bIsValid) {
+        return false;
+    }
+
+    nRelOffset += terminal_size.nByteSize;
+
+    if (terminal_size.nValue > 0) {
+        EXPORT_RECORD exportRecord = {};
+        exportRecord.sName = sCurrentName;
+
+        PACKED_UINT flags = read_uleb128(nOffset + nRelOffset, nSize);
+
+        if (!flags.bIsValid) {
+            return false;
+        }
+
+        nRelOffset += terminal_size.nByteSize;
+
+        exportRecord.nFlags = flags.nValue;
+
+        PACKED_UINT address = read_uleb128(nOffset + nRelOffset, nSize);
+
+        if (!address.bIsValid) {
+            return false;
+        }
+
+        nRelOffset += address.nByteSize;
+
+        exportRecord.nOffset = address.nValue;
+
+        pListExportRecords->append(exportRecord);
+    }
+
+    PACKED_UINT childCount = read_uleb128(nOffset + nRelOffset, nSize);
+
+    if (!childCount.bIsValid) {
+        return false;
+    }
+
+    nRelOffset += childCount.nByteSize;
+
+    for (quint64 i = 0; i < childCount.nValue; i++) {
+        QString sString = read_ansiString(nOffset + nRelOffset, 500);
+        nRelOffset += sString.length() + 1;
+
+        PACKED_UINT nodeOffset = read_uleb128(nOffset + nRelOffset, nSize);
+
+        if (!nodeOffset.bIsValid) {
+            return false;
+        }
+
+        nRelOffset += nodeOffset.nByteSize;
+
+        handleImport(nOffset, nodeOffset.nValue, nSize, pListExportRecords, sCurrentName + sString, pPdStruct);
+    }
+
+    return true;
+}
+
 XADDR XMACH::readOpcodes(quint32 nType, char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
     XADDR nResult = 0;
