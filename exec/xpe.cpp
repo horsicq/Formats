@@ -10134,6 +10134,8 @@ bool XPE::isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString
                             _sMethodName = _read_ansiString_safe(pBuffer, nBufferSize, methodDef.nName);
                         }
 
+                        // qDebug("_sMethodName: %s", _sMethodName.toLatin1().data());
+
                         if (sMethodName == _sMethodName) {
                             bResult = true;
                             break;
