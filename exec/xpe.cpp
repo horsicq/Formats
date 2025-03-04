@@ -9020,7 +9020,9 @@ QList<XBinary::HREGION> XPE::getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTI
 
     if (hlOptions.bRegions) {
         listResult.append(_getHRegions(pMemoryMap, pPdStruct));
-    } else if (hlOptions.bHighlights) {
+    }
+
+    if (hlOptions.bHighlights) {
         {
             HREGION region = {};
             region.nAddress = pMemoryMap->nEntryPointAddress;
@@ -9121,6 +9123,8 @@ QList<XBinary::HREGION> XPE::getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTI
                 listResult.append(region);
             }
         }
+
+        // TODO sort
     }
 
     return listResult;

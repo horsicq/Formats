@@ -1056,6 +1056,17 @@ public:
     static QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
+    struct NREGION {
+        qint64 nOffset;
+        XADDR nAddress;
+        qint64 nFileSize;
+        qint64 nVirtualSize;
+        // flags
+    };
+
+    virtual QList<NREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<NREGION> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);
+
     static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);
     static qint32 getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap);
     static qint64 getRecordsTotalRowSize(_MEMORY_MAP *pMemoryMap);
@@ -1551,6 +1562,8 @@ public:
 
     struct HLOPTIONS {
         bool bRegions;
+        bool bNativeRegions;
+        bool bNativeSubRegions;
         bool bHighlights;
     };
 

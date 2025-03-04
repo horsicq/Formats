@@ -1189,9 +1189,9 @@ struct CS_CodeDirectory {
     quint32 linkageSize;
 };
 
-const quint32 S_DYLD_CHAINED_IMPORT = 0;
-const quint32 S_DYLD_CHAINED_IMPORT_ADDEND = 1;
-const quint32 S_DYLD_CHAINED_IMPORT_ADDEND64 = 2;
+const quint32 S_DYLD_CHAINED_IMPORT = 1;
+const quint32 S_DYLD_CHAINED_IMPORT_ADDEND = 2;
+const quint32 S_DYLD_CHAINED_IMPORT_ADDEND64 = 3;
 
 // header of the LC_DYLD_CHAINED_FIXUPS payload
 struct dyld_chained_fixups_header {
@@ -1225,6 +1225,33 @@ struct dyld_chained_starts_in_segment {
                                 // for those, if high bit is set in page_starts[], then it
                                 // is index into chain_starts[] which is a list of starts
                                 // the last of which has the high bit set
+};
+
+// DYLD_CHAINED_IMPORT
+struct dyld_chained_import
+{
+    quint32    lib_ordinal :  8,
+                weak_import :  1,
+                name_offset : 23;
+};
+
+// DYLD_CHAINED_IMPORT_ADDEND
+struct dyld_chained_import_addend
+{
+    quint32    lib_ordinal :  8,
+                weak_import :  1,
+                name_offset : 23;
+    qint32     addend;
+};
+
+// DYLD_CHAINED_IMPORT_ADDEND64
+struct dyld_chained_import_addend64
+{
+    quint64    lib_ordinal : 16,
+                weak_import :  1,
+                reserved    : 15,
+                name_offset : 32;
+    quint64    addend;
 };
 
 }  // namespace XMACH_DEF

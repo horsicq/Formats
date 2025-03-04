@@ -949,9 +949,9 @@ QMap<quint64, QString> XMACH::getDyldChainedImport()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0, "DYLD_CHAINED_IMPORT");
-    mapResult.insert(1, "DYLD_CHAINED_IMPORT_ADDEND");
-    mapResult.insert(2, "DYLD_CHAINED_IMPORT_ADDEND64");
+    mapResult.insert(1, "DYLD_CHAINED_IMPORT");
+    mapResult.insert(2, "DYLD_CHAINED_IMPORT_ADDEND");
+    mapResult.insert(3, "DYLD_CHAINED_IMPORT_ADDEND64");
 
     return mapResult;
 }
@@ -960,9 +960,9 @@ QMap<quint64, QString> XMACH::getDyldChainedImportS()
 {
     QMap<quint64, QString> mapResult;
 
-    mapResult.insert(0, "IMPORT");
-    mapResult.insert(1, "IMPORT_ADDEND");
-    mapResult.insert(2, "IMPORT_ADDEND64");
+    mapResult.insert(1, "IMPORT");
+    mapResult.insert(2, "IMPORT_ADDEND");
+    mapResult.insert(3, "IMPORT_ADDEND64");
 
     return mapResult;
 }

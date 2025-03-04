@@ -4726,6 +4726,33 @@ QString XBinary::mapModeToString(MAPMODE mapMode)
     return sResult;
 }
 
+QList<XBinary::NREGION> XBinary::getNativeRegions(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct);
+
+    QList<XBinary::NREGION> listResult;
+
+    NREGION region = {};
+
+    region.nAddress = 0;
+    region.nOffset = 0;
+    region.nFileSize = g_nSize;
+    region.nVirtualSize = g_nSize;
+
+    listResult.append(region);
+
+    return listResult;
+}
+
+QList<XBinary::NREGION> XBinary::getNativeSubRegions(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct);
+
+    QList<XBinary::NREGION> listResult;
+
+    return listResult;
+}
+
 QList<XBinary::MAPMODE> XBinary::getMapModesList()
 {
     QList<MAPMODE> listResult;
