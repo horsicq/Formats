@@ -699,6 +699,9 @@ public:
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
+    virtual QList<NREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<NREGION> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);
+
     enum OPCODE_TYPE {
         OPCODE_TYPE_UNKNOWN = 0,
         OPCODE_TYPE_BIND,

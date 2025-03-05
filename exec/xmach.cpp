@@ -4779,6 +4779,16 @@ qint64 XMACH::getFileFormatSize(PDSTRUCT *pPdStruct)
     return _calculateRawSize(pPdStruct);
 }
 
+QList<XBinary::NREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
+{
+    return XBinary::getNativeRegions(pPdStruct);
+}
+
+QList<XBinary::NREGION> XMACH::getNativeSubRegions(PDSTRUCT *pPdStruct)
+{
+    return XBinary::getNativeSubRegions(pPdStruct);
+}
+
 bool XMACH::handleImport(qint64 nOffset, qint64 nRelOffset, qint64 nSize, QList<EXPORT_RECORD> *pListExportRecords, QString sCurrentName, PDSTRUCT *pPdStruct)
 {
     if (nRelOffset >= nSize) {
