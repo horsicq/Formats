@@ -9014,15 +9014,13 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
     return result;
 }
 
-QList<XBinary::HREGION> XPE::getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTIONS &hlOptions, PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XPE::getHighlights(_MEMORY_MAP *pMemoryMap, HLTYPE hlType, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::HREGION> listResult;
 
-    if (hlOptions.bRegions) {
+    if (hlType == HLTYPE_REGIONS) {
         listResult.append(_getHRegions(pMemoryMap, pPdStruct));
-    }
-
-    if (hlOptions.bHighlights) {
+    } else if (hlType == HLTYPE_DATA) {
         {
             HREGION region = {};
             region.nAddress = pMemoryMap->nEntryPointAddress;

@@ -485,7 +485,7 @@ public:
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
-    virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTIONS &hlOptions, PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, HLTYPE hlType, PDSTRUCT *pPdStruct = nullptr); // TODO remove
 
     struct FIXDUMP_OPTIONS {
         bool bOptimizeSize;

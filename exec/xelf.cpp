@@ -5441,9 +5441,9 @@ qint64 XELF::getFileFormatSize(PDSTRUCT *pPdStruct)
     return nResult;
 }
 
-QList<XBinary::HREGION> XELF::getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTIONS &hlOptions, PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XELF::getHighlights(_MEMORY_MAP *pMemoryMap, HLTYPE hlType, PDSTRUCT *pPdStruct)
 {
-    return XBinary::getHighlights(pMemoryMap, hlOptions, pPdStruct);
+    return XBinary::getHighlights(pMemoryMap, hlType, pPdStruct);
 }
 
 bool XELF::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct)

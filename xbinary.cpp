@@ -4735,7 +4735,7 @@ QList<XBinary::NREGION> XBinary::getNativeRegions(PDSTRUCT *pPdStruct)
     NREGION region = {};
 
     region.nAddress = 0;
-    region.nOffset = 0;
+    region.nFileOffset = 0;
     region.nFileSize = g_nSize;
     region.nVirtualSize = g_nSize;
 
@@ -10843,12 +10843,12 @@ QList<XBinary::HREGION> XBinary::_getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT 
     return listResult;
 }
 
-QList<XBinary::HREGION> XBinary::getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTIONS &hlOptions, PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XBinary::getHighlights(_MEMORY_MAP *pMemoryMap, HLTYPE hlType, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::HREGION> listResult;
 
-    if (hlOptions.bRegions) {
-        listResult.append(_getHRegions(pMemoryMap, pPdStruct));
+    if (hlType == HLTYPE_REGIONS) {
+        listResult = _getHRegions(pMemoryMap, pPdStruct);
     }
 
     return listResult;

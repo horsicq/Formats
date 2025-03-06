@@ -1056,11 +1056,20 @@ public:
     static QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
+    enum NREGION_TYPE {
+        NREGION_TYPE_UNKNOWN = 0,
+        NREGION_TYPE_HEADER,
+        NREGION_TYPE_SEGMENT,
+        NREGION_TYPE_SECTION,
+    };
+
     struct NREGION {
-        qint64 nOffset;
+        QString sName;
+        qint64 nFileOffset;
         XADDR nAddress;
         qint64 nFileSize;
         qint64 nVirtualSize;
+        NREGION_TYPE type;
         // flags
     };
 
@@ -1560,11 +1569,12 @@ public:
     REGION_FILL getRegionFill(qint64 nOffset, qint64 nSize, qint32 nAlignment);
     static QString getDataString(char *pData, qint32 nDataSize, const QString &sBaseType, bool bIsBigEndian);
 
-    struct HLOPTIONS {
-        bool bRegions;
-        bool bNativeRegions;
-        bool bNativeSubRegions;
-        bool bHighlights;
+    enum HLTYPE {
+        HLTYPE_UNKNOWN = 0,
+        HLTYPE_REGIONS,
+        HLTYPE_NATIVEREGIONS,
+        HLTYPE_NATIVESUBREGIONS,
+        HLTYPE_DATA
     };
 
     struct HREGION {
@@ -1575,7 +1585,7 @@ public:
     };
 
     QList<HREGION> _getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);                                       // TODO use 1 function
-    virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, const HLOPTIONS &hlOptions, PDSTRUCT *pPdStruct = nullptr);  // TODO use 1 function
+    virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, HLTYPE hlType, PDSTRUCT *pPdStruct = nullptr);  // TODO use 1 function
 
     static qint64 align_up(qint64 nValue, qint64 nAlignment);
     static qint64 align_down(qint64 nValue, qint64 nAlignment);
