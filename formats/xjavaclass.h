@@ -30,10 +30,14 @@ public:
     explicit XJavaClass(QIODevice *pDevice = nullptr);
     ~XJavaClass();
 
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
+    static bool isValid(QIODevice *pDevice);
+
     virtual QString getArch();
     virtual MODE getMode();
     virtual ENDIAN getEndian();
     virtual FT getFileType();
+    virtual QString getVersion();
 };
 
 #endif  // XJAVACLASS_H

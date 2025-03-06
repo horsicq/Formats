@@ -28,9 +28,38 @@ XJavaClass::~XJavaClass()
 {
 }
 
+bool XJavaClass::isValid(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    bool bResult=false;
+
+    if (getSize() > 8) {
+        if (read_uint32(0, true) == 0xCAFEBABE) {
+            if (read_uint32(4, true) > 10) {
+                bResult = true;
+            }
+        }
+    }
+
+    return bResult;
+}
+
+bool XJavaClass::isValid(QIODevice *pDevice)
+{
+    XJavaClass xjavaclass(pDevice);
+
+    return xjavaclass.isValid();
+}
+
 QString XJavaClass::getArch()
 {
     return "JVM";
+}
+
+QString XJavaClass::getVersion()
+{
+    return "1.0";
 }
 
 XBinary::FT XJavaClass::getFileType()
