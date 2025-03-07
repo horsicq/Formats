@@ -59,7 +59,54 @@ QString XJavaClass::getArch()
 
 QString XJavaClass::getVersion()
 {
-    return "1.0";
+    QString sResult;
+
+    quint16 nMinor = read_uint16(4, true);
+    quint16 nMajor = read_uint16(6, true);
+
+    if (nMajor) {
+        sResult = _getJDKVersion(nMajor, nMinor);
+    }
+
+    return sResult;
+}
+
+QString XJavaClass::_getJDKVersion(quint16 nMajor, quint16 nMinor)
+{
+    QString sResult;
+
+    switch (nMajor) {
+        case 0x2D: sResult = "JDK 1.1"; break;
+        case 0x2E: sResult = "JDK 1.2"; break;
+        case 0x2F: sResult = "JDK 1.3"; break;
+        case 0x30: sResult = "JDK 1.4"; break;
+        case 0x31: sResult = "Java SE 5.0"; break;
+        case 0x32: sResult = "Java SE 6"; break;
+        case 0x33: sResult = "Java SE 7"; break;
+        case 0x34: sResult = "Java SE 8"; break;
+        case 0x35: sResult = "Java SE 9"; break;
+        case 0x36: sResult = "Java SE 10"; break;
+        case 0x37: sResult = "Java SE 11"; break;
+        case 0x38: sResult = "Java SE 12"; break;
+        case 0x39: sResult = "Java SE 13"; break;
+        case 0x3A: sResult = "Java SE 14"; break;
+        case 0x3B: sResult = "Java SE 15"; break;
+        case 0x3C: sResult = "Java SE 16"; break;
+        case 0x3D: sResult = "Java SE 17"; break;
+        case 0x3E: sResult = "Java SE 18"; break;
+        case 0x3F: sResult = "Java SE 19"; break;
+        case 0x40: sResult = "Java SE 20"; break;
+        case 0x41: sResult = "Java SE 21"; break;
+        case 0x42: sResult = "Java SE 22"; break;
+        case 0x43: sResult = "Java SE 23"; break;
+        case 0x44: sResult = "Java SE 24"; break;
+    }
+
+    if ((sResult != "") && (nMinor)) {
+        sResult += QString(".%1").arg(nMinor);
+    }
+
+    return sResult;
 }
 
 XBinary::FT XJavaClass::getFileType()

@@ -38,6 +38,8 @@ public:
     virtual ENDIAN getEndian();
     virtual FT getFileType();
     virtual QString getVersion();
+
+    static QString _getJDKVersion(quint16 nMajor, quint16 nMinor);
 };
 
 #endif  // XJAVACLASS_H
