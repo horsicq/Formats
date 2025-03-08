@@ -32,7 +32,7 @@ bool XJavaClass::isValid(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
-    bool bResult=false;
+    bool bResult = false;
 
     if (getSize() > 8) {
         if (read_uint32(0, true) == 0xCAFEBABE) {
@@ -69,6 +69,10 @@ QString XJavaClass::getVersion()
     }
 
     return sResult;
+}
+
+QString XJavaClass::getFileFormatExt()
+{
 }
 
 QString XJavaClass::_getJDKVersion(quint16 nMajor, quint16 nMinor)

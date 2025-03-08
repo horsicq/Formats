@@ -1290,7 +1290,7 @@ public:
 
     static XCERT_INFO getCertInfo(const QString &sFileName);
 
-    virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, HLTYPE hlType, PDSTRUCT *pPdStruct = nullptr); // TODO remove
+    virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, HLTYPE hlType, PDSTRUCT *pPdStruct = nullptr);  // TODO remove
 
     virtual QList<FMT_MSG> checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct);
 

@@ -4812,7 +4812,6 @@ QList<XBinary::NREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
         listRegions.append(region);
     }
 
-
     return listRegions;
 }
 

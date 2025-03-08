@@ -1228,30 +1228,20 @@ struct dyld_chained_starts_in_segment {
 };
 
 // DYLD_CHAINED_IMPORT
-struct dyld_chained_import
-{
-    quint32    lib_ordinal :  8,
-                weak_import :  1,
-                name_offset : 23;
+struct dyld_chained_import {
+    quint32 lib_ordinal : 8, weak_import : 1, name_offset : 23;
 };
 
 // DYLD_CHAINED_IMPORT_ADDEND
-struct dyld_chained_import_addend
-{
-    quint32    lib_ordinal :  8,
-                weak_import :  1,
-                name_offset : 23;
-    qint32     addend;
+struct dyld_chained_import_addend {
+    quint32 lib_ordinal : 8, weak_import : 1, name_offset : 23;
+    qint32 addend;
 };
 
 // DYLD_CHAINED_IMPORT_ADDEND64
-struct dyld_chained_import_addend64
-{
-    quint64    lib_ordinal : 16,
-                weak_import :  1,
-                reserved    : 15,
-                name_offset : 32;
-    quint64    addend;
+struct dyld_chained_import_addend64 {
+    quint64 lib_ordinal : 16, weak_import : 1, reserved : 15, name_offset : 32;
+    quint64 addend;
 };
 
 }  // namespace XMACH_DEF
