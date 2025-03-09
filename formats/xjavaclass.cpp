@@ -73,6 +73,7 @@ QString XJavaClass::getVersion()
 
 QString XJavaClass::getFileFormatExt()
 {
+    return "class";
 }
 
 QString XJavaClass::_getJDKVersion(quint16 nMajor, quint16 nMinor)

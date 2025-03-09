@@ -38,6 +38,7 @@ public:
     virtual ENDIAN getEndian();
     virtual FT getFileType();
     virtual QString getVersion();
+    virtual QString getFileFormatExt();
 
     static QString _getJDKVersion(quint16 nMajor, quint16 nMinor);
 };
