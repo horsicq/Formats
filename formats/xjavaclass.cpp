@@ -34,7 +34,7 @@ bool XJavaClass::isValid(PDSTRUCT *pPdStruct)
 
     bool bResult = false;
 
-    if (getSize() > 8) {
+    if (getSize() >= 24) {
         if (read_uint32(0, true) == 0xCAFEBABE) {
             if (read_uint32(4, true) > 10) {
                 bResult = true;
@@ -76,6 +76,153 @@ QString XJavaClass::getFileFormatExt()
     return "class";
 }
 
+XJavaClass::INFO XJavaClass::getInfo()
+{
+    INFO result = {};
+
+    result.nMinorVersion = read_uint16(4, true);
+    result.nMajorVersion = read_uint16(6, true);
+    result.nConstantPoolCount = read_uint16(8, true);
+
+    qint64 nOffset = 10;
+
+    for (int i = 1; i < result.nConstantPoolCount; i++) {
+        quint8 nTag = read_uint8(nOffset);
+
+        cp_info cpInfo = {};
+        cpInfo.nOffset = nOffset;
+        cpInfo.nTag = nTag;
+
+        // handle tags
+        switch (nTag) {
+            case CONSTANT_Utf8: {
+                quint16 nLength = read_uint16(nOffset + 1, true);
+                QByteArray baData = read_array(nOffset + 3, nLength);
+                cpInfo.varInfo = QString(baData);
+                nOffset += 3 + nLength;
+            }
+            break;
+            case CONSTANT_Integer: {
+                cpInfo.varInfo = read_uint32(nOffset + 1, true);
+                nOffset += 5;
+            }
+            break;
+            case CONSTANT_Float: {
+                cpInfo.varInfo = read_float(nOffset + 1, true);
+                nOffset += 5;
+            }
+            break;
+            case CONSTANT_Long: {
+                cpInfo.varInfo = read_uint64(nOffset + 1, true);
+                nOffset += 9;
+            }
+            break;
+            case CONSTANT_Double: {
+                cpInfo.varInfo = read_double(nOffset + 1, true);
+                nOffset += 9;
+            }
+            break;
+            case CONSTANT_Class: {
+                cpInfo.varInfo = read_uint16(nOffset + 1, true);
+                nOffset += 3;
+            }
+            break;
+            case CONSTANT_String: {
+                cpInfo.varInfo = read_uint16(nOffset + 1, true);
+                nOffset += 3;
+            }
+            break;
+            case CONSTANT_Fieldref: {
+                cpInfo.varInfo = read_uint16(nOffset + 1, true);
+                nOffset += 5;
+            }
+            break;
+            case CONSTANT_Methodref: {
+                cpInfo.varInfo = read_uint16(nOffset + 1, true);
+                nOffset += 5;
+            }
+            break;
+            case CONSTANT_InterfaceMethodref: {
+                cpInfo.varInfo = read_uint16(nOffset + 1, true);
+                nOffset += 5;
+            }
+            break;
+            case CONSTANT_NameAndType: {
+                cpInfo.varInfo = read_uint16(nOffset + 1, true); // TODO two indexes
+                nOffset += 5;
+            }
+            break;
+            case CONSTANT_MethodHandle: {
+                cpInfo.varInfo = read_uint8(nOffset + 1); // TODO
+                nOffset += 4;
+            }
+            break;
+            case CONSTANT_MethodType: {
+                cpInfo.varInfo = read_uint16(nOffset + 1, true);
+                nOffset += 3;
+            }
+            break;
+            case CONSTANT_InvokeDynamic: {
+                cpInfo.varInfo = read_uint16(nOffset + 1, true);
+                nOffset += 5;
+            }
+            break;
+            case CONSTANT_Module: {
+                cpInfo.varInfo = read_uint16(nOffset + 1, true);
+                nOffset += 3;
+            }
+            break;
+            case CONSTANT_Package: {
+                cpInfo.varInfo = read_uint16(nOffset + 1, true);
+                nOffset += 3;
+            }
+            break;
+            default: {
+#ifdef QT_DEBUG
+                qDebug("Unknown tag: %02X", nTag);
+#endif
+                break;
+            }
+        }
+
+        // Print offset, tag, value
+        qDebug("%08X %02X %s", cpInfo.nOffset, cpInfo.nTag, cpInfo.varInfo.toString().toLatin1().data());
+
+        // add to list
+        result.listCP.append(cpInfo);
+
+        if (nTag == CONSTANT_Long || nTag == CONSTANT_Double) {
+            i++;
+        }
+
+        if (nOffset >= getSize()) {
+            break;
+        }
+    }
+
+    result.nAccessFlags = read_uint16(nOffset, true);
+    result.nThisClass = read_uint16(nOffset + 2, true);
+    result.nSuperClass = read_uint16(nOffset + 4, true);
+    result.nInterfacesCount = read_uint16(nOffset + 6, true);
+
+    nOffset += 8;
+
+    for (int i = 0; i < result.nInterfacesCount; i++) {
+        result.listInterfaces.append(read_uint16(nOffset + i * 2, true));
+    }
+
+    nOffset += result.nInterfacesCount * 2;
+
+    result.nFieldsCount = read_uint16(nOffset, true);
+
+
+
+    result.nMethodsCount = read_uint16(nOffset + 2, true);
+    result.nAttributesCount = read_uint16(nOffset + 4, true);
+
+    return result;
+}
+
 QString XJavaClass::_getJDKVersion(quint16 nMajor, quint16 nMinor)
 {
     QString sResult;
@@ -112,6 +259,21 @@ QString XJavaClass::_getJDKVersion(quint16 nMajor, quint16 nMinor)
     }
 
     return sResult;
+}
+
+XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(mapMode)
+
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    getInfo();
+
+    return XBinary::getMemoryMap(mapMode,pPdStruct);
 }
 
 XBinary::FT XJavaClass::getFileType()

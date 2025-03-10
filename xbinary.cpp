@@ -5549,7 +5549,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         }
 
         if (!bAllFound) {
-            if (nSize > 8) {
+            if (nSize >= 24) {
                 if (read_uint32(0, true) == 0xCAFEBABE) {
                     if (read_uint32(4, true) > 10) {
                         stResult.insert(FT_JAVACLASS);

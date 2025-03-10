@@ -27,6 +27,71 @@ class XJavaClass : public XBinary {
     Q_OBJECT
 
 public:
+    struct cp_info {
+        qint64 nOffset;
+        quint8 nTag;
+        QVariant varInfo;
+    };
+
+    struct attribute_info {
+        quint16 nAttributeNameIndex;
+        quint32 nAttributeLength;
+        QByteArray baInfo;
+    };
+
+    struct field_info {
+        quint16 nAccessFlags;
+        quint16 nNameIndex;
+        quint16 nDescriptorIndex;
+        quint16 nAttributesCount;
+        QList<attribute_info> listAttributes;
+    };
+
+    struct method_info {
+        quint16 nAccessFlags;
+        quint16 nNameIndex;
+        quint16 nDescriptorIndex;
+        quint16 nAttributesCount;
+        QList<attribute_info> listAttributes;
+    };
+
+    enum CONSTANT {
+        CONSTANT_Utf8 = 1,
+        CONSTANT_Integer = 3,
+        CONSTANT_Float = 4,
+        CONSTANT_Long = 5,
+        CONSTANT_Double = 6,
+        CONSTANT_Class = 7,
+        CONSTANT_String = 8,
+        CONSTANT_Fieldref = 9,
+        CONSTANT_Methodref = 10,
+        CONSTANT_InterfaceMethodref = 11,
+        CONSTANT_NameAndType = 12,
+        CONSTANT_MethodHandle = 15,
+        CONSTANT_MethodType = 16,
+        CONSTANT_InvokeDynamic = 18,
+        CONSTANT_Module = 19,
+        CONSTANT_Package = 20
+    };
+
+    struct INFO {
+        quint16 nMinorVersion;
+        quint16 nMajorVersion;
+        quint16 nConstantPoolCount;
+        QList<cp_info> listCP;
+        quint16 nAccessFlags;
+        quint16 nThisClass;
+        quint16 nSuperClass;
+        quint16 nInterfacesCount;
+        QList<quint16> listInterfaces;
+        quint16 nFieldsCount;
+        QList<cp_info> listFields;
+        quint16 nMethodsCount;
+        QList<method_info> listMethods;
+        quint16 nAttributesCount;
+        QList<attribute_info> listAttributes;
+    };
+
     explicit XJavaClass(QIODevice *pDevice = nullptr);
     ~XJavaClass();
 
@@ -40,7 +105,11 @@ public:
     virtual QString getVersion();
     virtual QString getFileFormatExt();
 
+    INFO getInfo();
+
     static QString _getJDKVersion(quint16 nMajor, quint16 nMinor);
+
+    _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 };
 
 #endif  // XJAVACLASS_H
