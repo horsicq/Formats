@@ -32,10 +32,12 @@ bool XPE::isValid(PDSTRUCT *pPdStruct)
 
     quint16 magic = get_magic();
 
+    qint64 nSize = getSize();
+
     if ((magic == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ) || (magic == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_ZM)) {
         qint32 lfanew = get_lfanew();
 
-        if (lfanew > 0) {
+        if ((lfanew > 0) && (lfanew < (nSize & 0xFFFFFFFF))) {
             quint32 signature = read_uint32(lfanew);
 
             if (signature == XPE_DEF::S_IMAGE_NT_SIGNATURE) {

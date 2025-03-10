@@ -34,8 +34,9 @@ bool XLE::isValid(PDSTRUCT *pPdStruct)
 
     if (magic == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ) {
         qint32 lfanew = get_lfanew();
+        qint64 nSize = getSize();
 
-        if (lfanew > 0) {
+        if ((lfanew > 0) && (lfanew < (nSize & 0xFFFFFFFF))) {
             quint16 signature = read_uint16(lfanew);
 
             if ((signature == XLE_DEF::S_IMAGE_VXD_SIGNATURE) || (signature == XLE_DEF::S_IMAGE_LX_SIGNATURE)) {

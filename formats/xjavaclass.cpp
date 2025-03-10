@@ -186,7 +186,7 @@ XJavaClass::INFO XJavaClass::getInfo()
         }
 
         // Print offset, tag, value
-        qDebug("%08X %02X %s", cpInfo.nOffset, cpInfo.nTag, cpInfo.varInfo.toString().toLatin1().data());
+        //qDebug("%08X %02X %s", cpInfo.nOffset, cpInfo.nTag, cpInfo.varInfo.toString().toLatin1().data());
 
         // add to list
         result.listCP.append(cpInfo);
@@ -201,24 +201,53 @@ XJavaClass::INFO XJavaClass::getInfo()
     }
 
     result.nAccessFlags = read_uint16(nOffset, true);
-    result.nThisClass = read_uint16(nOffset + 2, true);
-    result.nSuperClass = read_uint16(nOffset + 4, true);
-    result.nInterfacesCount = read_uint16(nOffset + 6, true);
-
-    nOffset += 8;
+    nOffset += 2;
+    result.nThisClass = read_uint16(nOffset, true);
+    nOffset += 2;
+    result.nSuperClass = read_uint16(nOffset, true);
+    nOffset += 2;
+    result.nInterfacesCount = read_uint16(nOffset, true);
+    nOffset += 2;
 
     for (int i = 0; i < result.nInterfacesCount; i++) {
-        result.listInterfaces.append(read_uint16(nOffset + i * 2, true));
+        result.listInterfaces.append(read_uint16(nOffset, true));
+        nOffset += 2;
     }
 
-    nOffset += result.nInterfacesCount * 2;
-
     result.nFieldsCount = read_uint16(nOffset, true);
+    nOffset += 2;
 
+    for (int i = 0; i < result.nFieldsCount; i++) {
+        record_info fieldInfo = {};
 
+        nOffset += _read_record_info(nOffset, &fieldInfo);
 
-    result.nMethodsCount = read_uint16(nOffset + 2, true);
-    result.nAttributesCount = read_uint16(nOffset + 4, true);
+        result.listFields.append(fieldInfo);
+    }
+
+    result.nMethodsCount = read_uint16(nOffset, true);
+    nOffset += 2;
+
+    for (int i = 0; i < result.nMethodsCount; i++) {
+        record_info methodInfo = {};
+
+        nOffset += _read_record_info(nOffset, &methodInfo);
+
+        result.listMethods.append(methodInfo);
+    }
+
+    result.nAttributesCount = read_uint16(nOffset, true);
+    nOffset += 2;
+
+    for (int i = 0; i < result.nAttributesCount; i++) {
+        attribute_info attributeInfo = {};
+
+        nOffset += _read_attribute_info(nOffset, &attributeInfo);
+
+        result.listAttributes.append(attributeInfo);
+    }
+
+    result.nSize = nOffset;
 
     return result;
 }
@@ -261,6 +290,44 @@ QString XJavaClass::_getJDKVersion(quint16 nMajor, quint16 nMinor)
     return sResult;
 }
 
+qint32 XJavaClass::_read_attribute_info(qint64 nOffset, attribute_info *pAttributeInfo)
+{
+    qint32 nResult = 0;
+
+    pAttributeInfo->nAttributeNameIndex = read_uint16(nOffset, true);
+    pAttributeInfo->nAttributeLength = read_uint32(nOffset + 2, true);
+    pAttributeInfo->baInfo = read_array(nOffset + 6, pAttributeInfo->nAttributeLength);
+
+    nResult = 6 + pAttributeInfo->nAttributeLength;
+
+    return nResult;
+}
+
+qint32 XJavaClass::_read_record_info(qint64 nOffset, record_info *pRecordInfo)
+{
+    qint32 nResult = 0;
+    qint64 nOriginalOffset = nOffset;
+
+    pRecordInfo->nAccessFlags = read_uint16(nOffset, true);
+    pRecordInfo->nNameIndex = read_uint16(nOffset + 2, true);
+    pRecordInfo->nDescriptorIndex = read_uint16(nOffset + 4, true);
+    pRecordInfo->nAttributesCount = read_uint16(nOffset + 6, true);
+
+    nOffset += 8;
+
+    for (int i = 0; i < pRecordInfo->nAttributesCount; i++) {
+        attribute_info attributeInfo = {};
+
+        nOffset += _read_attribute_info(nOffset, &attributeInfo);
+
+        pRecordInfo->listAttributes.append(attributeInfo);
+    }
+
+    nResult = nOffset - nOriginalOffset;
+
+    return nResult;
+}
+
 XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
@@ -271,9 +338,46 @@ XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
         pPdStruct = &pdStructEmpty;
     }
 
-    getInfo();
+    qint64 nTotalSize = getSize();
 
-    return XBinary::getMemoryMap(mapMode,pPdStruct);
+    _MEMORY_MAP result = {};
+
+    INFO info = getInfo();
+
+    result.nBinarySize = nTotalSize;
+    result.fileType = getFileType();
+    result.mode = getMode();
+    result.sArch = getArch();
+    result.endian = getEndian();
+    result.sType = getTypeAsString();
+
+    qint32 nIndex = 0;
+
+    _MEMORY_RECORD record = {};
+    record.nAddress = -1;
+    record.nOffset = 0;
+    record.nSize = info.nSize;
+    record.nIndex = 0;
+    record.sName = tr("Data");
+    record.nIndex = nIndex++;
+    record.type = MMT_DATA;
+
+    result.listRecords.append(record);
+
+    if (nTotalSize > info.nSize) {
+        record.nAddress = -1;
+        record.nOffset = info.nSize;
+        record.nSize = nTotalSize - info.nSize;
+        record.nIndex = 1;
+        record.sName = tr("Overlay");
+        record.nIndex = nIndex++;
+        record.type = MMT_OVERLAY;
+
+        result.listRecords.append(record);
+    }
+
+
+    return result;
 }
 
 XBinary::FT XJavaClass::getFileType()

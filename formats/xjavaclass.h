@@ -39,15 +39,7 @@ public:
         QByteArray baInfo;
     };
 
-    struct field_info {
-        quint16 nAccessFlags;
-        quint16 nNameIndex;
-        quint16 nDescriptorIndex;
-        quint16 nAttributesCount;
-        QList<attribute_info> listAttributes;
-    };
-
-    struct method_info {
+    struct record_info {
         quint16 nAccessFlags;
         quint16 nNameIndex;
         quint16 nDescriptorIndex;
@@ -75,6 +67,7 @@ public:
     };
 
     struct INFO {
+        quint64 nSize;
         quint16 nMinorVersion;
         quint16 nMajorVersion;
         quint16 nConstantPoolCount;
@@ -85,9 +78,9 @@ public:
         quint16 nInterfacesCount;
         QList<quint16> listInterfaces;
         quint16 nFieldsCount;
-        QList<cp_info> listFields;
+        QList<record_info> listFields;
         quint16 nMethodsCount;
-        QList<method_info> listMethods;
+        QList<record_info> listMethods;
         quint16 nAttributesCount;
         QList<attribute_info> listAttributes;
     };
@@ -110,6 +103,10 @@ public:
     static QString _getJDKVersion(quint16 nMajor, quint16 nMinor);
 
     _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
+
+private:
+    qint32 _read_attribute_info(qint64 nOffset, attribute_info *pAttributeInfo);
+    qint32 _read_record_info(qint64 nOffset, record_info *pRecordInfo);
 };
 
 #endif  // XJAVACLASS_H
