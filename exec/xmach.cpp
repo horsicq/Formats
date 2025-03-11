@@ -1003,10 +1003,13 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, PDSTRU
     quint32 nSizeOfCommands = getHeader_sizeofcmds();
 
     qint64 nOffset = getHeaderSize();
-    bool bIsBigEndian = isBigEndian();
-    bool bIs64 = is64();
 
-    listResult = _getCommandRecords(nOffset, nSizeOfCommands, nNumberOfCommands, bIs64, bIsBigEndian, nCommandID, pPdStruct);
+    if (nOffset + nSizeOfCommands < getSize()) {
+        bool bIsBigEndian = isBigEndian();
+        bool bIs64 = is64();
+
+        listResult = _getCommandRecords(nOffset, nSizeOfCommands, nNumberOfCommands, bIs64, bIsBigEndian, nCommandID, pPdStruct);
+    }
 
     return listResult;
 }

@@ -182,7 +182,7 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 
     } else {
 #ifdef QT_DEBUG
-        qDebug("Invalid pos: %X", nPos);
+        qDebug("Invalid pos: %llX Size: %llX", nPos, getSize());
 #endif
     }
 
@@ -635,6 +635,7 @@ QString XBinary::fileTypeIdToExts(FT fileType)
         case FT_LE: sResult = QString("LE(le, lx)"); break;
         case FT_NE: sResult = QString("NE"); break;
         case FT_AMIGAHUNK: sResult = QString("AmigaHunk"); break;
+        case FT_JAVACLASS: sResult = QString("Java Class"); break;
         case FT_SIGNATURE: sResult = tr("Signatures"); break;
         default: sResult = tr("Unknown");
     }

@@ -868,7 +868,7 @@ public:
     bool isNETPresent();
 
     CLI_INFO getCliInfo(bool bFindHidden, PDSTRUCT *pPdStruct = nullptr);
-    CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);
+    CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
     bool isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
     bool isNetTypePresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, PDSTRUCT *pPdStruct = nullptr);
     bool isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sMethodName, PDSTRUCT *pPdStruct = nullptr);
