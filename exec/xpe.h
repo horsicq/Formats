@@ -889,7 +889,7 @@ public:
 
     QString getMetadataMemberRefParentName(CLI_INFO *pCliInfo, const XPE_DEF::S_METADATA_MEMBERREF &memberRef);
 
-    QString mdtIdToString(quint32 nID);
+    static QString mdtIdToString(quint32 nID);
 
     OFFSETSIZE getNet_MetadataOffsetSize();
 
