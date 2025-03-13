@@ -100,83 +100,67 @@ XJavaClass::INFO XJavaClass::getInfo()
                 QByteArray baData = read_array(nOffset + 3, nLength);
                 cpInfo.varInfo = QString(baData);
                 nOffset += 3 + nLength;
-            }
-            break;
+            } break;
             case CONSTANT_Integer: {
                 cpInfo.varInfo = read_uint32(nOffset + 1, true);
                 nOffset += 5;
-            }
-            break;
+            } break;
             case CONSTANT_Float: {
                 cpInfo.varInfo = read_float(nOffset + 1, true);
                 nOffset += 5;
-            }
-            break;
+            } break;
             case CONSTANT_Long: {
                 cpInfo.varInfo = read_uint64(nOffset + 1, true);
                 nOffset += 9;
-            }
-            break;
+            } break;
             case CONSTANT_Double: {
                 cpInfo.varInfo = read_double(nOffset + 1, true);
                 nOffset += 9;
-            }
-            break;
+            } break;
             case CONSTANT_Class: {
                 cpInfo.varInfo = read_uint16(nOffset + 1, true);
                 nOffset += 3;
-            }
-            break;
+            } break;
             case CONSTANT_String: {
                 cpInfo.varInfo = read_uint16(nOffset + 1, true);
                 nOffset += 3;
-            }
-            break;
+            } break;
             case CONSTANT_Fieldref: {
                 cpInfo.varInfo = read_uint16(nOffset + 1, true);
                 nOffset += 5;
-            }
-            break;
+            } break;
             case CONSTANT_Methodref: {
                 cpInfo.varInfo = read_uint16(nOffset + 1, true);
                 nOffset += 5;
-            }
-            break;
+            } break;
             case CONSTANT_InterfaceMethodref: {
                 cpInfo.varInfo = read_uint16(nOffset + 1, true);
                 nOffset += 5;
-            }
-            break;
+            } break;
             case CONSTANT_NameAndType: {
-                cpInfo.varInfo = read_uint16(nOffset + 1, true); // TODO two indexes
+                cpInfo.varInfo = read_uint16(nOffset + 1, true);  // TODO two indexes
                 nOffset += 5;
-            }
-            break;
+            } break;
             case CONSTANT_MethodHandle: {
-                cpInfo.varInfo = read_uint8(nOffset + 1); // TODO
+                cpInfo.varInfo = read_uint8(nOffset + 1);  // TODO
                 nOffset += 4;
-            }
-            break;
+            } break;
             case CONSTANT_MethodType: {
                 cpInfo.varInfo = read_uint16(nOffset + 1, true);
                 nOffset += 3;
-            }
-            break;
+            } break;
             case CONSTANT_InvokeDynamic: {
                 cpInfo.varInfo = read_uint16(nOffset + 1, true);
                 nOffset += 5;
-            }
-            break;
+            } break;
             case CONSTANT_Module: {
                 cpInfo.varInfo = read_uint16(nOffset + 1, true);
                 nOffset += 3;
-            }
-            break;
+            } break;
             case CONSTANT_Package: {
                 cpInfo.varInfo = read_uint16(nOffset + 1, true);
                 nOffset += 3;
-            }
-            break;
+            } break;
             default: {
 #ifdef QT_DEBUG
                 qDebug("Unknown tag: %02X", nTag);
@@ -186,7 +170,7 @@ XJavaClass::INFO XJavaClass::getInfo()
         }
 
         // Print offset, tag, value
-        //qDebug("%08X %02X %s", cpInfo.nOffset, cpInfo.nTag, cpInfo.varInfo.toString().toLatin1().data());
+        // qDebug("%08X %02X %s", cpInfo.nOffset, cpInfo.nTag, cpInfo.varInfo.toString().toLatin1().data());
 
         // add to list
         result.listCP.append(cpInfo);
@@ -375,7 +359,6 @@ XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
 
         result.listRecords.append(record);
     }
-
 
     return result;
 }
