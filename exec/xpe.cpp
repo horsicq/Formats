@@ -9428,6 +9428,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                                     result.metaData.baStrings = read_array(result.metaData.osStrings.nOffset, result.metaData.osStrings.nSize);
 
+                                    // TODO new function
                                     char *_pOffset = result.metaData.baStrings.data();
                                     qint32 _nSize = result.metaData.baStrings.size();
 
@@ -9450,6 +9451,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
 
                                     result.metaData.baUS = read_array(result.metaData.osUS.nOffset, result.metaData.osUS.nSize);
 
+                                    // TODO new function
                                     char *pStringOffset = result.metaData.baUS.data();
                                     char *pStringCurrentOffsetOffset = pStringOffset;
                                     qint32 _nSize = result.metaData.baUS.size();

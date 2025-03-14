@@ -5469,7 +5469,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'RE~^'") || compareSignature(&memoryMap, "'Rar!'1A07")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_RAR);
-        } else if (compareSignature(&memoryMap, "'MSCF'", 0)) {
+        } else if (compareSignature(&memoryMap, "'MSCF'00000000", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_CAB);
         } else if (compareSignature(&memoryMap, "'7z'BCAF271C", 0)) {

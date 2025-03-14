@@ -265,6 +265,12 @@ QString XJavaClass::_getJDKVersion(quint16 nMajor, quint16 nMinor)
         case 0x42: sResult = "Java SE 22"; break;
         case 0x43: sResult = "Java SE 23"; break;
         case 0x44: sResult = "Java SE 24"; break;
+        case 0x45: sResult = "Java SE 25"; break;
+        case 0x46: sResult = "Java SE 26"; break;
+        case 0x47: sResult = "Java SE 27"; break;
+        case 0x48: sResult = "Java SE 28"; break;
+        case 0x49: sResult = "Java SE 29"; break;
+        case 0x4A: sResult = "Java SE 30"; break;
     }
 
     if ((sResult != "") && (nMinor)) {
