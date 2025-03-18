@@ -239,9 +239,9 @@ public:
         QByteArray baGUID;
         qint64 nEntryPoint;
         qint64 nEntryPointSize;
-        QList<QString> listAnsiStrings;
-        QList<QString> listUnicodeStrings;
-        QList<QString> listGUIDs;
+        // QList<QString> listAnsiStrings;
+        // QList<QString> listUnicodeStrings;
+        // QList<QString> listGUIDs;
         qint32 nStringIndexSize;
         qint32 nGUIDIndexSize;
         qint32 nBLOBIndexSize;
@@ -869,6 +869,10 @@ public:
 
     CLI_INFO getCliInfo(bool bFindHidden, PDSTRUCT *pPdStruct = nullptr);
     CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
+
+    QList<QString> getAnsiStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
+    QList<QString> getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
+
     bool isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
     bool isNetTypePresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, PDSTRUCT *pPdStruct = nullptr);
     bool isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sMethodName, PDSTRUCT *pPdStruct = nullptr);
@@ -908,12 +912,6 @@ public:
 
     bool isNetMetadataPresent(PDSTRUCT *pPdStruct);
     bool isNetMetadataPresent(CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pMemoryMap);
-
-    bool isNETAnsiStringPresent(const QString &sString);
-    static bool isNETAnsiStringPresent(const QString &sString, CLI_INFO *pCliInfo);
-
-    bool isNETUnicodeStringPresent(const QString &sString);
-    static bool isNETUnicodeStringPresent(const QString &sString, CLI_INFO *pCliInfo);
 
     quint32 getNetId();
 

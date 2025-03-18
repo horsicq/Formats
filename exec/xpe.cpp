@@ -9335,6 +9335,64 @@ bool XPE::isNETPresent()
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 }
 
+QList<QString> XPE::getAnsiStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
+{
+    QList<QString> listResult;
+
+    char *_pOffset = pCliInfo->metaData.baStrings.data();
+    qint32 _nSize = pCliInfo->metaData.baStrings.size();
+
+    // TODO UTF8
+    for (qint32 i = 1; (i < _nSize) && (!(pPdStruct->bIsStop)); i++) {
+        _pOffset++;
+        QString sTemp = _pOffset;
+        listResult.append(sTemp);
+
+        _pOffset += sTemp.size();
+        i += sTemp.size();
+    }
+
+    return listResult;
+}
+
+QList<QString> XPE::getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
+{
+    QList<QString> listResult;
+
+    char *pStringOffset = pCliInfo->metaData.baUS.data();
+    char *pStringCurrentOffsetOffset = pStringOffset;
+    qint32 _nSize = pCliInfo->metaData.baUS.size();
+
+    pStringCurrentOffsetOffset++;
+
+    for (qint32 i = 1; (i < _nSize) && (!(pPdStruct->bIsStop)); i++) {
+        qint32 nStringSize = (*((unsigned char *)pStringCurrentOffsetOffset));
+
+        if (nStringSize == 0x80) {
+            nStringSize = 0;
+        }
+
+        if (nStringSize > _nSize - i) {
+            break;
+        }
+
+        pStringCurrentOffsetOffset++;
+
+        if (pStringCurrentOffsetOffset > pStringOffset + _nSize) {
+            break;
+        }
+
+        QString sTemp = QString::fromUtf16((quint16 *)pStringCurrentOffsetOffset, nStringSize / 2);
+
+        listResult.append(sTemp);
+
+        pStringCurrentOffsetOffset += nStringSize;
+        i += nStringSize;
+    }
+
+    return listResult;
+}
+
 XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
@@ -9395,12 +9453,6 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                         // result.bInit=true;
                         qint64 nOffset = result.nMetaDataOffset + 20 + result.metaData.header.nVersionStringLength;
 
-                        bool bInitMetaData = false;
-                        bool bInitStrings = false;
-                        bool bInitUS = false;
-                        bool bInitBlob = false;
-                        bool bInitGUID = false;
-
                         for (qint32 i = 0; i < result.metaData.header.nStreams; i++) {
                             CLI_METADATA_STREAM stream = {};
 
@@ -9413,92 +9465,27 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             result.metaData.listStreams.append(stream);
 
                             if ((result.metaData.listStreams.at(i).sName == "#~") || (result.metaData.listStreams.at(i).sName == "#-")) {
-                                if (!bInitMetaData) {
-                                    result.metaData.osMetadata.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                    result.metaData.osMetadata.nSize = result.metaData.listStreams.at(i).nSize;
+                                result.metaData.osMetadata.nOffset = result.metaData.listStreams.at(i).nOffset;
+                                result.metaData.osMetadata.nSize = result.metaData.listStreams.at(i).nSize;
 
-                                    result.metaData.baMetadata = read_array(result.metaData.osMetadata.nOffset, result.metaData.osMetadata.nSize);
-
-                                    bInitMetaData = true;
-                                }
+                                result.metaData.baMetadata = read_array(result.metaData.osMetadata.nOffset, result.metaData.osMetadata.nSize);
                             } else if (result.metaData.listStreams.at(i).sName == "#Strings") {
-                                if (!bInitStrings) {
-                                    result.metaData.osStrings.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                    result.metaData.osStrings.nSize = result.metaData.listStreams.at(i).nSize;
+                                result.metaData.osStrings.nOffset = result.metaData.listStreams.at(i).nOffset;
+                                result.metaData.osStrings.nSize = result.metaData.listStreams.at(i).nSize;
 
-                                    result.metaData.baStrings = read_array(result.metaData.osStrings.nOffset, result.metaData.osStrings.nSize);
-
-                                    // TODO new function
-                                    char *_pOffset = result.metaData.baStrings.data();
-                                    qint32 _nSize = result.metaData.baStrings.size();
-
-                                    // TODO UTF8
-                                    for (qint32 i = 1; i < _nSize; i++) {
-                                        _pOffset++;
-                                        QString sTemp = _pOffset;
-                                        result.metaData.listAnsiStrings.append(sTemp);
-
-                                        _pOffset += sTemp.size();
-                                        i += sTemp.size();
-                                    }
-
-                                    bInitStrings = true;
-                                }
+                                result.metaData.baStrings = read_array(result.metaData.osStrings.nOffset, result.metaData.osStrings.nSize);
                             } else if (result.metaData.listStreams.at(i).sName == "#US") {
-                                if (!bInitUS) {
-                                    result.metaData.osUS.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                    result.metaData.osUS.nSize = result.metaData.listStreams.at(i).nSize;
+                                result.metaData.osUS.nOffset = result.metaData.listStreams.at(i).nOffset;
+                                result.metaData.osUS.nSize = result.metaData.listStreams.at(i).nSize;
 
-                                    result.metaData.baUS = read_array(result.metaData.osUS.nOffset, result.metaData.osUS.nSize);
-
-                                    // TODO new function
-                                    char *pStringOffset = result.metaData.baUS.data();
-                                    char *pStringCurrentOffsetOffset = pStringOffset;
-                                    qint32 _nSize = result.metaData.baUS.size();
-
-                                    pStringCurrentOffsetOffset++;
-
-                                    for (qint32 i = 1; i < _nSize; i++) {
-                                        qint32 nStringSize = (*((unsigned char *)pStringCurrentOffsetOffset));
-
-                                        if (nStringSize == 0x80) {
-                                            nStringSize = 0;
-                                        }
-
-                                        if (nStringSize > _nSize - i) {
-                                            break;
-                                        }
-
-                                        pStringCurrentOffsetOffset++;
-
-                                        if (pStringCurrentOffsetOffset > pStringOffset + _nSize) {
-                                            break;
-                                        }
-
-                                        QString sTemp = QString::fromUtf16((quint16 *)pStringCurrentOffsetOffset, nStringSize / 2);
-
-                                        result.metaData.listUnicodeStrings.append(sTemp);
-
-                                        pStringCurrentOffsetOffset += nStringSize;
-                                        i += nStringSize;
-                                    }
-
-                                    bInitUS = true;
-                                }
+                                result.metaData.baUS = read_array(result.metaData.osUS.nOffset, result.metaData.osUS.nSize);
                             } else if (result.metaData.listStreams.at(i).sName == "#Blob") {
-                                if (!bInitBlob) {
-                                    result.metaData.osBlob.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                    result.metaData.osBlob.nSize = result.metaData.listStreams.at(i).nSize;
+                                result.metaData.osBlob.nOffset = result.metaData.listStreams.at(i).nOffset;
+                                result.metaData.osBlob.nSize = result.metaData.listStreams.at(i).nSize;
 
-                                    bInitBlob = true;
-                                }
                             } else if (result.metaData.listStreams.at(i).sName == "#GUID") {
-                                if (!bInitGUID) {
-                                    result.metaData.osGUID.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                    result.metaData.osGUID.nSize = result.metaData.listStreams.at(i).nSize;
-
-                                    bInitGUID = true;
-                                }
+                                result.metaData.osGUID.nOffset = result.metaData.listStreams.at(i).nOffset;
+                                result.metaData.osGUID.nSize = result.metaData.listStreams.at(i).nSize;
                             }
 
                             nOffset += 8;
@@ -10767,30 +10754,6 @@ bool XPE::isNetMetadataPresent(PDSTRUCT *pPdStruct)
 bool XPE::isNetMetadataPresent(XPE::CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pMemoryMap)
 {
     return isDataDirectoryValid(&(pCliInfo->header.MetaData), pMemoryMap);
-}
-
-bool XPE::isNETAnsiStringPresent(const QString &sString)
-{
-    CLI_INFO cliInfo = getCliInfo(true);
-
-    return isNETAnsiStringPresent(sString, &cliInfo);
-}
-
-bool XPE::isNETAnsiStringPresent(const QString &sString, XPE::CLI_INFO *pCliInfo)
-{
-    return pCliInfo->metaData.listAnsiStrings.contains(sString);
-}
-
-bool XPE::isNETUnicodeStringPresent(const QString &sString)
-{
-    CLI_INFO cliInfo = getCliInfo(true);
-
-    return isNETUnicodeStringPresent(sString, &cliInfo);
-}
-
-bool XPE::isNETUnicodeStringPresent(const QString &sString, XPE::CLI_INFO *pCliInfo)
-{
-    return pCliInfo->metaData.listUnicodeStrings.contains(sString);
 }
 
 quint32 XPE::getNetId()
