@@ -1218,7 +1218,7 @@ QMap<quint64, QString> XELF::getProgramTypes(qint32 nIndent, const QString &sArc
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getProgramTypesS(qint32 nIndent, QString sArch)
+QMap<quint64, QString> XELF::getProgramTypesS(qint32 nIndent, const QString &sArch)
 {
     QMap<quint64, QString> mapResult;
 
