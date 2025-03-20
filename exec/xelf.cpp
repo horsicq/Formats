@@ -3667,7 +3667,7 @@ QList<XBinary::MAPMODE> XELF::getMapModesList()
     return listResult;
 }
 
-QMap<quint64, QString> XELF::getDynamicTags(QString sArch)
+QMap<quint64, QString> XELF::getDynamicTags(const QString &sArch)
 {
     QMap<quint64, QString> mapResult;
     // https://github.com/ziglang/zig/blob/master/lib/std/elf.zig
