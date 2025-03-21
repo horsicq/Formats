@@ -1056,34 +1056,40 @@ qint32 XNE::getType()
     return TYPE_EXE;  // TODO
 }
 
-XBinary::OSINFO XNE::getOsInfo()
+QString XNE::getOsVersion()
 {
-    OSINFO result = {};
+    QString sResult = "";
 
-    result.osName = OSNAME_UNKNOWN;
-    result.sOsVersion = "";
+    quint16 nOS = getImageOS2Header_exetyp();
+
+    if (nOS == 3) {
+        sResult = "4.x";
+    } else if (nOS == 4) {
+        sResult = "386";
+    } else if (nOS == 5) {
+        sResult = "386";
+    }
+
+    return sResult;
+}
+
+XBinary::OSNAME XNE::getOsName()
+{
+    OSNAME result = OSNAME_UNKNOWN;
 
     quint16 nOS = getImageOS2Header_exetyp();
 
     if (nOS == 1) {
-        result.osName = OSNAME_OS2;
+        result = OSNAME_OS2;
     } else if (nOS == 2) {
-        result.osName = OSNAME_WINDOWS;
+        result = OSNAME_WINDOWS;
     } else if (nOS == 3) {
-        result.osName = OSNAME_MSDOS;
-        result.sOsVersion = "4.X";
+        result = OSNAME_MSDOS;
     } else if (nOS == 4) {
-        result.osName = OSNAME_WINDOWS;
-        result.sOsVersion = "386";
-    } else if (nOS == 4) {
-        result.osName = OSNAME_BORLANDOSSERVICES;
-        result.sOsVersion = "386";
+        result = OSNAME_WINDOWS;
+    } else if (nOS == 5) {
+        result = OSNAME_BORLANDOSSERVICES;
     }
-
-    result.sArch = getArch();
-    result.mode = getMode();
-    result.sType = typeIdToString(getType());
-    result.endian = getEndian();
 
     return result;
 }

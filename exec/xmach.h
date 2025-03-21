@@ -692,12 +692,12 @@ public:
     static QString _getArch(quint32 nCpuType, quint32 nCpuSubType);
     virtual FT getFileType();
     virtual qint32 getType();
-    virtual OSINFO getOsInfo();
     virtual QString typeIdToString(qint32 nType);
 
-    virtual QString getFileFormatString();
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
+
+    virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
 
     virtual QList<NREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<NREGION> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);

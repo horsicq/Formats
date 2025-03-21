@@ -96,21 +96,6 @@ XBinary::FT XJpeg::getFileType()
     return FT_JPEG;
 }
 
-QString XJpeg::getFileFormatString()
-{
-    QString sResult;
-
-    sResult = QString("JPEG");
-
-    QString sVersion = getVersion();
-
-    if (sVersion != "") {
-        sResult += QString("(%1)").arg(sVersion);
-    }
-
-    return sResult;
-}
-
 QString XJpeg::getFileFormatExt()
 {
     return "jpeg";

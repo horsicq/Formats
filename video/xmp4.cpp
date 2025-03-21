@@ -51,15 +51,6 @@ bool XMP4::isValid(QIODevice *pDevice)
     return mp4.isValid();
 }
 
-QString XMP4::getFileFormatString()
-{
-    QString sResult;
-
-    sResult = "MP4";
-
-    return sResult;
-}
-
 QString XMP4::getFileFormatExt()
 {
     return "mp4";

@@ -47,7 +47,7 @@ public:
     virtual qint64 getImageSize();
     virtual FT getFileType();
     virtual qint32 getType();
-    virtual OSINFO getOsInfo();
+    virtual OSNAME getOsName();
     virtual QString typeIdToString(qint32 nType);
 };
 

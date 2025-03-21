@@ -390,22 +390,6 @@ XBinary::FT XAmigaHunk::getFileType()
     return FT_AMIGAHUNK;
 }
 
-XBinary::OSINFO XAmigaHunk::getOsInfo()
-{
-    OSINFO result = {};
-
-    QList<HUNK> listHunks = getHunks();
-
-    result.osName = OSNAME_AMIGA;
-    // result.sOsVersion = "";
-    result.sArch = getArch(&listHunks);
-    result.mode = getMode(&listHunks);
-    result.sType = getTypeAsString();
-    result.endian = getEndian();
-
-    return result;
-}
-
 QString XAmigaHunk::getFileFormatExt()
 {
     return "";
@@ -427,15 +411,6 @@ qint64 XAmigaHunk::getFileFormatSize(PDSTRUCT *pPdStruct)
     return nResult;
 }
 
-QString XAmigaHunk::getFileFormatString()
-{
-    QString sResult;
-
-    sResult = QString("Amiga Hunk(%1)").arg(getArch());
-
-    return sResult;
-}
-
 XBinary::FILEFORMATINFO XAmigaHunk::getFileFormatInfo(PDSTRUCT *pPdStruct)
 {
     FILEFORMATINFO result = {};
@@ -447,10 +422,18 @@ XBinary::FILEFORMATINFO XAmigaHunk::getFileFormatInfo(PDSTRUCT *pPdStruct)
 
         if (result.nSize > 0) {
             result.fileType = getFileType();
-            result.sString = getFileFormatString();
             result.sExt = getFileFormatExt();
             result.sVersion = getVersion();
             result.sOptions = getOptions();
+
+            QList<HUNK> listHunks = getHunks();
+
+            result.osName = OSNAME_AMIGA;
+            // result.sOsVersion = "";
+            result.sArch = getArch(&listHunks);
+            result.mode = getMode(&listHunks);
+            result.sType = getTypeAsString();
+            result.endian = getEndian();
         } else {
             result.bIsValid = false;
         }

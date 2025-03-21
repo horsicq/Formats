@@ -52,15 +52,6 @@ bool XMP3::isValid(QIODevice *pDevice)
     return mp3.isValid();
 }
 
-QString XMP3::getFileFormatString()
-{
-    QString sResult;
-
-    sResult = QString("MP3(%1)").arg(getVersion());  // TODO more
-
-    return sResult;
-}
-
 QString XMP3::getFileFormatExt()
 {
     return "mp3";

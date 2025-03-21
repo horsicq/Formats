@@ -64,10 +64,8 @@ public:
     static QList<HUNK> _getHunksByType(QList<HUNK> *pListHunks, quint32 nHunkType);
 
     virtual FT getFileType();
-    virtual OSINFO getOsInfo();
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
-    virtual QString getFileFormatString();
     virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
 
     virtual qint32 getType();

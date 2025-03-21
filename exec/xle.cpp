@@ -1448,6 +1448,40 @@ qint32 XLE::getType()
     return TYPE_EXE;  // TODO
 }
 
+QString XLE::getOsVersion()
+{
+    QString sResult = "";
+
+    quint16 nOS = getImageVxdHeader_os();
+
+    if (nOS == 3) {
+        sResult = "4.X";
+    } else if (nOS == 4) {
+        sResult = "386";
+    }
+
+    return sResult;
+}
+
+XBinary::OSNAME XLE::getOsName()
+{
+    OSNAME result = OSNAME_UNKNOWN;
+
+    quint16 nOS = getImageVxdHeader_os();
+
+    if (nOS == 1) {
+        result = OSNAME_OS2;
+    } else if (nOS == 2) {
+        result = OSNAME_WINDOWS;
+    } else if (nOS == 3) {
+        result = OSNAME_MSDOS;
+    } else if (nOS == 4) {
+        result = OSNAME_WINDOWS;
+    }
+
+    return result;
+}
+
 QString XLE::typeIdToString(qint32 nType)
 {
     QString sResult = tr("Unknown");
@@ -1458,35 +1492,6 @@ QString XLE::typeIdToString(qint32 nType)
     }
 
     return sResult;
-}
-
-XBinary::OSINFO XLE::getOsInfo()
-{
-    OSINFO result = {};
-
-    result.osName = OSNAME_UNKNOWN;
-    result.sOsVersion = "";
-
-    quint16 nOS = getImageVxdHeader_os();
-
-    if (nOS == 1) {
-        result.osName = OSNAME_OS2;
-    } else if (nOS == 2) {
-        result.osName = OSNAME_WINDOWS;
-    } else if (nOS == 3) {
-        result.osName = OSNAME_MSDOS;
-        result.sOsVersion = "4.X";
-    } else if (nOS == 4) {
-        result.osName = OSNAME_WINDOWS;
-        result.sOsVersion = "386";
-    }
-
-    result.sArch = getArch();
-    result.mode = getMode();
-    result.sType = typeIdToString(getType());
-    result.endian = getEndian();
-
-    return result;
 }
 
 QList<XBinary::MAPMODE> XLE::getMapModesList()

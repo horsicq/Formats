@@ -731,18 +731,9 @@ qint32 XMSDOS::getType()
     return nResult;
 }
 
-XBinary::OSINFO XMSDOS::getOsInfo()
+XBinary::OSNAME XMSDOS::getOsName()
 {
-    OSINFO result = {};
-
-    result.osName = OSNAME_MSDOS;
-    result.sOsVersion = "";  // TODO
-    result.sArch = "8086";
-    result.mode = MODE_16;
-    result.sType = typeIdToString(TYPE_EXE);
-    result.endian = ENDIAN_LITTLE;
-
-    return result;
+    return OSNAME_MSDOS;
 }
 
 QString XMSDOS::typeIdToString(qint32 nType)

@@ -4581,149 +4581,6 @@ qint32 XMACH::getType()
     return nResult;
 }
 
-XBinary::OSINFO XMACH::getOsInfo()
-{
-    OSINFO result = {};
-
-    result.osName = OSNAME_MAC_OS;
-
-    result.sArch = getArch();
-    result.mode = getMode();
-    result.sType = typeIdToString(getType());
-    result.endian = getEndian();
-
-    quint32 nCPUType = getHeader_cputype();
-    quint32 nCpuSubType = getHeader_cpusubtype();
-
-    if (nCPUType == XMACH_DEF::S_CPU_TYPE_MC680x0) {
-        result.osName = OSNAME_MAC_OS;
-        result.sOsVersion = "1.0-8.1";
-    } else if (nCPUType == XMACH_DEF::S_CPU_TYPE_POWERPC) {
-        result.osName = OSNAME_MAC_OS;
-        result.sOsVersion = "7.1.2-9.22";
-    } else if (nCPUType == XMACH_DEF::S_CPU_TYPE_POWERPC64) {
-        result.osName = OSNAME_MAC_OS_X;
-        result.sOsVersion = "10.4-10.6";
-    } else if (nCPUType == XMACH_DEF::S_CPU_TYPE_I386) {
-        result.osName = OSNAME_MAC_OS_X;
-        result.sOsVersion = "10.4-10.14";
-    } else if (nCPUType == XMACH_DEF::S_CPU_TYPE_X86_64) {
-        result.osName = OSNAME_MAC_OS_X;
-        result.sOsVersion = "10.4-10.14";
-    } else if ((nCPUType == XMACH_DEF::S_CPU_TYPE_ARM) || (nCPUType == XMACH_DEF::S_CPU_TYPE_ARM64)) {
-        result.osName = OSNAME_IOS;
-
-        if (nCpuSubType == XMACH_DEF::S_CPU_SUBTYPE_ARM_V6) {
-            result.osName = OSNAME_IPHONEOS;
-            result.sOsVersion = "1.0-4.2.1";  // TODO Check
-        } else if (nCpuSubType == XMACH_DEF::S_CPU_SUBTYPE_ARM_V7) {
-            result.osName = OSNAME_IPHONEOS;
-            result.sOsVersion = "3.0-10.3.4";  // TODO Check
-        } else if (nCPUType == XMACH_DEF::S_CPU_TYPE_ARM64) {
-            result.osName = OSNAME_IOS;
-            result.sOsVersion = "7.0-16.0";  // TODO Check
-        }
-    }
-
-    qint64 nVersionMinOffset = -1;
-    qint64 nBuildVersionOffset = -1;
-
-    QList<XMACH::COMMAND_RECORD> listCommandRecords = getCommandRecords();
-
-    if (isCommandPresent(XMACH_DEF::S_LC_BUILD_VERSION, &listCommandRecords)) {
-        nBuildVersionOffset = getCommandRecordOffset(XMACH_DEF::S_LC_BUILD_VERSION, 0, &listCommandRecords);
-    } else if (isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_IPHONEOS, &listCommandRecords)) {
-        nVersionMinOffset = getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_IPHONEOS, 0, &listCommandRecords);
-        result.osName = OSNAME_IOS;
-    } else if (isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_MACOSX, &listCommandRecords)) {
-        nVersionMinOffset = getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_MACOSX, 0, &listCommandRecords);
-        result.osName = OSNAME_MACOS;
-    } else if (isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_TVOS, &listCommandRecords)) {
-        nVersionMinOffset = getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_TVOS, 0, &listCommandRecords);
-        result.osName = OSNAME_TVOS;
-    } else if (isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_WATCHOS, &listCommandRecords)) {
-        nVersionMinOffset = getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_WATCHOS, 0, &listCommandRecords);
-        result.osName = OSNAME_WATCHOS;
-    }
-
-    if (nBuildVersionOffset != -1) {
-        XMACH_DEF::build_version_command build_version = _read_build_version_command(nBuildVersionOffset);
-
-        if (build_version.platform == XMACH_DEF::S_PLATFORM_MACOS) result.osName = OSNAME_MACOS;
-        else if ((build_version.platform == XMACH_DEF::S_PLATFORM_IOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_IOSSIMULATOR))
-            result.osName = OSNAME_IOS;  // TODO iPadOS
-        else if ((build_version.platform == XMACH_DEF::S_PLATFORM_TVOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_TVOSSIMULATOR)) result.osName = OSNAME_TVOS;
-        else if ((build_version.platform == XMACH_DEF::S_PLATFORM_WATCHOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_WATCHOSSIMULATOR))
-            result.osName = OSNAME_WATCHOS;
-        else if (build_version.platform == XMACH_DEF::S_PLATFORM_BRIDGEOS) result.osName = OSNAME_BRIDGEOS;
-        else if (build_version.platform == XMACH_DEF::S_PLATFORM_MACCATALYST) result.osName = OSNAME_MACCATALYST;
-        else if (build_version.platform == XMACH_DEF::S_PLATFORM_DRIVERKIT) result.osName = OSNAME_MACDRIVERKIT;
-        else if (build_version.platform == XMACH_DEF::S_PLATFORM_FIRMWARE) result.osName = OSNAME_MACFIRMWARE;
-        else if (build_version.platform == XMACH_DEF::S_PLATFORM_SEPOS) result.osName = OSNAME_SEPOS;
-
-        if (build_version.minos) {
-            result.sOsVersion = XBinary::get_uint32_full_version(build_version.minos);
-        }
-    } else if (nVersionMinOffset != -1) {
-        XMACH_DEF::version_min_command version_min = _read_version_min_command(nVersionMinOffset);
-
-        result.sOsVersion = XBinary::get_uint32_full_version(version_min.version);
-    } else {
-        QList<XMACH::LIBRARY_RECORD> listLibraryRecords = getLibraryRecords(XMACH_DEF::S_LC_LOAD_DYLIB);
-
-        if (XMACH::isLibraryRecordNamePresent("Foundation", &listLibraryRecords)) {
-            quint32 nVersion = XMACH::getLibraryCurrentVersion("Foundation", &listLibraryRecords);
-
-            if ((result.osName == OSNAME_MAC_OS_X) || (result.osName == OSNAME_OS_X) || (result.osName == OSNAME_MACOS)) {
-                if ((nVersion >= S_FULL_VERSION(397, 40, 0)) && (nVersion < S_FULL_VERSION(425, 0, 0))) result.sOsVersion = "10.0.0";
-                else if (nVersion < S_FULL_VERSION(567, 0, 0)) result.sOsVersion = "10.3.0";
-                else if (nVersion < S_FULL_VERSION(677, 0, 0)) result.sOsVersion = "10.4.0";
-                else if (nVersion < S_FULL_VERSION(677, 24, 0)) result.sOsVersion = "10.5.0";
-                else if (nVersion < S_FULL_VERSION(751, 0, 0)) result.sOsVersion = "10.5.7";
-                else if (nVersion < S_FULL_VERSION(833, 10, 0)) result.sOsVersion = "10.6.0";
-                else if (nVersion < S_FULL_VERSION(833, 25, 0)) result.sOsVersion = "10.7.0";
-                else if (nVersion < S_FULL_VERSION(945, 18, 0)) result.sOsVersion = "10.7.4";
-                else if (nVersion < S_FULL_VERSION(1151, 16, 0)) result.sOsVersion = "10.8.4";
-                else if (nVersion < S_FULL_VERSION(1200, 0, 0)) result.sOsVersion = "10.10.0";  // TODO Check
-
-                if (nVersion < S_FULL_VERSION(833, 10, 0)) {
-                    result.osName = OSNAME_MAC_OS_X;
-                }
-                // TODO !
-            } else if ((result.osName == OSNAME_IPHONEOS) || (result.osName == OSNAME_IOS) || (result.osName == OSNAME_IPADOS)) {
-                if (nVersion < S_FULL_VERSION(678, 24, 0)) result.sOsVersion = "1.0.0";
-                else if (nVersion < S_FULL_VERSION(678, 26, 0)) result.sOsVersion = "2.0.0";
-                else if (nVersion < S_FULL_VERSION(678, 29, 0)) result.sOsVersion = "2.1.0";
-                else if (nVersion < S_FULL_VERSION(678, 47, 0)) result.sOsVersion = "2.2.0";
-                else if (nVersion < S_FULL_VERSION(678, 51, 0)) result.sOsVersion = "3.0.0";
-                else if (nVersion < S_FULL_VERSION(678, 60, 0)) result.sOsVersion = "3.1.0";
-                else if (nVersion < S_FULL_VERSION(751, 32, 0)) result.sOsVersion = "3.2.0";
-                else if (nVersion < S_FULL_VERSION(751, 37, 0)) result.sOsVersion = "4.0.0";
-                else if (nVersion < S_FULL_VERSION(751, 49, 0)) result.sOsVersion = "4.1.0";
-                else if (nVersion < S_FULL_VERSION(881, 0, 0)) result.sOsVersion = "4.2.0";
-                else if (nVersion < S_FULL_VERSION(890, 10, 0)) result.sOsVersion = "5.0.0";
-                else if (nVersion < S_FULL_VERSION(992, 0, 0)) result.sOsVersion = "5.1.0";
-                else if (nVersion < S_FULL_VERSION(993, 0, 0)) result.sOsVersion = "6.0.0";
-                else if (nVersion < S_FULL_VERSION(1047, 20, 0)) result.sOsVersion = "6.1.0";
-                else if (nVersion < S_FULL_VERSION(1047, 25, 0)) result.sOsVersion = "7.0.0";
-                else if (nVersion < S_FULL_VERSION(1140, 11, 0)) result.sOsVersion = "7.1.0";
-                else if (nVersion < S_FULL_VERSION(1141, 1, 0)) result.sOsVersion = "8.0.0";
-                else if (nVersion < S_FULL_VERSION(1142, 14, 0)) result.sOsVersion = "8.1.0";
-                else if (nVersion < S_FULL_VERSION(1144, 17, 0)) result.sOsVersion = "8.2.0";
-                else if (nVersion < S_FULL_VERSION(1200, 0, 0)) result.sOsVersion = "8.3.0";  // TODO Check
-
-                if (nVersion < S_FULL_VERSION(751, 32, 0)) {
-                    result.osName = OSNAME_IPHONEOS;
-                } else {
-                    result.osName = OSNAME_IOS;
-                }
-            }
-        }
-    }
-
-    return result;
-}
-
 QString XMACH::typeIdToString(qint32 nType)
 {
     QString sResult = tr("Unknown");
@@ -4745,15 +4602,6 @@ QString XMACH::typeIdToString(qint32 nType)
         case TYPE_GPU_EXECUTE: sResult = QString("GPU_EXECUTE"); break;
         case TYPE_GPU_DYLIB: sResult = QString("GPU_DYLIB"); break;
     }
-
-    return sResult;
-}
-
-QString XMACH::getFileFormatString()
-{
-    QString sResult;
-
-    sResult = QString("MACH-O(%1)").arg(getArch());
 
     return sResult;
 }
@@ -4780,6 +4628,165 @@ QString XMACH::getFileFormatExt()
 qint64 XMACH::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     return _calculateRawSize(pPdStruct);
+}
+
+XBinary::FILEFORMATINFO XMACH::getFileFormatInfo(PDSTRUCT *pPdStruct)
+{
+    FILEFORMATINFO result = {};
+
+    result.bIsValid = isValid(pPdStruct);
+
+    if (result.bIsValid) {
+        result.nSize = getFileFormatSize(pPdStruct);
+
+        if (result.nSize > 0) {
+            result.fileType = getFileType();
+            result.sExt = getFileFormatExt();
+            result.sVersion = getVersion();
+            result.sOptions = getOptions();
+            result.osName = getOsName();
+            result.sOsVersion = getOsVersion();
+            result.sArch = getArch();
+            result.mode = getMode();
+            result.sType = typeIdToString(getType());
+            result.endian = getEndian();
+
+            result.osName = OSNAME_MAC_OS;
+
+            quint32 nCPUType = getHeader_cputype();
+            quint32 nCpuSubType = getHeader_cpusubtype();
+
+            if (nCPUType == XMACH_DEF::S_CPU_TYPE_MC680x0) {
+                result.osName = OSNAME_MAC_OS;
+                result.sOsVersion = "1.0-8.1";
+            } else if (nCPUType == XMACH_DEF::S_CPU_TYPE_POWERPC) {
+                result.osName = OSNAME_MAC_OS;
+                result.sOsVersion = "7.1.2-9.22";
+            } else if (nCPUType == XMACH_DEF::S_CPU_TYPE_POWERPC64) {
+                result.osName = OSNAME_MAC_OS_X;
+                result.sOsVersion = "10.4-10.6";
+            } else if (nCPUType == XMACH_DEF::S_CPU_TYPE_I386) {
+                result.osName = OSNAME_MAC_OS_X;
+                result.sOsVersion = "10.4-10.14";
+            } else if (nCPUType == XMACH_DEF::S_CPU_TYPE_X86_64) {
+                result.osName = OSNAME_MAC_OS_X;
+                result.sOsVersion = "10.4-10.14";
+            } else if ((nCPUType == XMACH_DEF::S_CPU_TYPE_ARM) || (nCPUType == XMACH_DEF::S_CPU_TYPE_ARM64)) {
+                result.osName = OSNAME_IOS;
+
+                if (nCpuSubType == XMACH_DEF::S_CPU_SUBTYPE_ARM_V6) {
+                    result.osName = OSNAME_IPHONEOS;
+                    result.sOsVersion = "1.0-4.2.1";  // TODO Check
+                } else if (nCpuSubType == XMACH_DEF::S_CPU_SUBTYPE_ARM_V7) {
+                    result.osName = OSNAME_IPHONEOS;
+                    result.sOsVersion = "3.0-10.3.4";  // TODO Check
+                } else if (nCPUType == XMACH_DEF::S_CPU_TYPE_ARM64) {
+                    result.osName = OSNAME_IOS;
+                    result.sOsVersion = "7.0-16.0";  // TODO Check
+                }
+            }
+
+            qint64 nVersionMinOffset = -1;
+            qint64 nBuildVersionOffset = -1;
+
+            QList<XMACH::COMMAND_RECORD> listCommandRecords = getCommandRecords();
+
+            if (isCommandPresent(XMACH_DEF::S_LC_BUILD_VERSION, &listCommandRecords)) {
+                nBuildVersionOffset = getCommandRecordOffset(XMACH_DEF::S_LC_BUILD_VERSION, 0, &listCommandRecords);
+            } else if (isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_IPHONEOS, &listCommandRecords)) {
+                nVersionMinOffset = getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_IPHONEOS, 0, &listCommandRecords);
+                result.osName = OSNAME_IOS;
+            } else if (isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_MACOSX, &listCommandRecords)) {
+                nVersionMinOffset = getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_MACOSX, 0, &listCommandRecords);
+                result.osName = OSNAME_MACOS;
+            } else if (isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_TVOS, &listCommandRecords)) {
+                nVersionMinOffset = getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_TVOS, 0, &listCommandRecords);
+                result.osName = OSNAME_TVOS;
+            } else if (isCommandPresent(XMACH_DEF::S_LC_VERSION_MIN_WATCHOS, &listCommandRecords)) {
+                nVersionMinOffset = getCommandRecordOffset(XMACH_DEF::S_LC_VERSION_MIN_WATCHOS, 0, &listCommandRecords);
+                result.osName = OSNAME_WATCHOS;
+            }
+
+            if (nBuildVersionOffset != -1) {
+                XMACH_DEF::build_version_command build_version = _read_build_version_command(nBuildVersionOffset);
+
+                if (build_version.platform == XMACH_DEF::S_PLATFORM_MACOS) result.osName = OSNAME_MACOS;
+                else if ((build_version.platform == XMACH_DEF::S_PLATFORM_IOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_IOSSIMULATOR))
+                    result.osName = OSNAME_IOS;  // TODO iPadOS
+                else if ((build_version.platform == XMACH_DEF::S_PLATFORM_TVOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_TVOSSIMULATOR)) result.osName = OSNAME_TVOS;
+                else if ((build_version.platform == XMACH_DEF::S_PLATFORM_WATCHOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_WATCHOSSIMULATOR))
+                    result.osName = OSNAME_WATCHOS;
+                else if (build_version.platform == XMACH_DEF::S_PLATFORM_BRIDGEOS) result.osName = OSNAME_BRIDGEOS;
+                else if (build_version.platform == XMACH_DEF::S_PLATFORM_MACCATALYST) result.osName = OSNAME_MACCATALYST;
+                else if (build_version.platform == XMACH_DEF::S_PLATFORM_DRIVERKIT) result.osName = OSNAME_MACDRIVERKIT;
+                else if (build_version.platform == XMACH_DEF::S_PLATFORM_FIRMWARE) result.osName = OSNAME_MACFIRMWARE;
+                else if (build_version.platform == XMACH_DEF::S_PLATFORM_SEPOS) result.osName = OSNAME_SEPOS;
+
+                if (build_version.minos) {
+                    result.sOsVersion = XBinary::get_uint32_full_version(build_version.minos);
+                }
+            } else if (nVersionMinOffset != -1) {
+                XMACH_DEF::version_min_command version_min = _read_version_min_command(nVersionMinOffset);
+
+                result.sOsVersion = XBinary::get_uint32_full_version(version_min.version);
+            } else {
+                QList<XMACH::LIBRARY_RECORD> listLibraryRecords = getLibraryRecords(XMACH_DEF::S_LC_LOAD_DYLIB);
+
+                if (XMACH::isLibraryRecordNamePresent("Foundation", &listLibraryRecords)) {
+                    quint32 nVersion = XMACH::getLibraryCurrentVersion("Foundation", &listLibraryRecords);
+
+                    if ((result.osName == OSNAME_MAC_OS_X) || (result.osName == OSNAME_OS_X) || (result.osName == OSNAME_MACOS)) {
+                        if ((nVersion >= S_FULL_VERSION(397, 40, 0)) && (nVersion < S_FULL_VERSION(425, 0, 0))) result.sOsVersion = "10.0.0";
+                        else if (nVersion < S_FULL_VERSION(567, 0, 0)) result.sOsVersion = "10.3.0";
+                        else if (nVersion < S_FULL_VERSION(677, 0, 0)) result.sOsVersion = "10.4.0";
+                        else if (nVersion < S_FULL_VERSION(677, 24, 0)) result.sOsVersion = "10.5.0";
+                        else if (nVersion < S_FULL_VERSION(751, 0, 0)) result.sOsVersion = "10.5.7";
+                        else if (nVersion < S_FULL_VERSION(833, 10, 0)) result.sOsVersion = "10.6.0";
+                        else if (nVersion < S_FULL_VERSION(833, 25, 0)) result.sOsVersion = "10.7.0";
+                        else if (nVersion < S_FULL_VERSION(945, 18, 0)) result.sOsVersion = "10.7.4";
+                        else if (nVersion < S_FULL_VERSION(1151, 16, 0)) result.sOsVersion = "10.8.4";
+                        else if (nVersion < S_FULL_VERSION(1200, 0, 0)) result.sOsVersion = "10.10.0";  // TODO Check
+
+                        if (nVersion < S_FULL_VERSION(833, 10, 0)) {
+                            result.osName = OSNAME_MAC_OS_X;
+                        }
+                        // TODO !
+                    } else if ((result.osName == OSNAME_IPHONEOS) || (result.osName == OSNAME_IOS) || (result.osName == OSNAME_IPADOS)) {
+                        if (nVersion < S_FULL_VERSION(678, 24, 0)) result.sOsVersion = "1.0.0";
+                        else if (nVersion < S_FULL_VERSION(678, 26, 0)) result.sOsVersion = "2.0.0";
+                        else if (nVersion < S_FULL_VERSION(678, 29, 0)) result.sOsVersion = "2.1.0";
+                        else if (nVersion < S_FULL_VERSION(678, 47, 0)) result.sOsVersion = "2.2.0";
+                        else if (nVersion < S_FULL_VERSION(678, 51, 0)) result.sOsVersion = "3.0.0";
+                        else if (nVersion < S_FULL_VERSION(678, 60, 0)) result.sOsVersion = "3.1.0";
+                        else if (nVersion < S_FULL_VERSION(751, 32, 0)) result.sOsVersion = "3.2.0";
+                        else if (nVersion < S_FULL_VERSION(751, 37, 0)) result.sOsVersion = "4.0.0";
+                        else if (nVersion < S_FULL_VERSION(751, 49, 0)) result.sOsVersion = "4.1.0";
+                        else if (nVersion < S_FULL_VERSION(881, 0, 0)) result.sOsVersion = "4.2.0";
+                        else if (nVersion < S_FULL_VERSION(890, 10, 0)) result.sOsVersion = "5.0.0";
+                        else if (nVersion < S_FULL_VERSION(992, 0, 0)) result.sOsVersion = "5.1.0";
+                        else if (nVersion < S_FULL_VERSION(993, 0, 0)) result.sOsVersion = "6.0.0";
+                        else if (nVersion < S_FULL_VERSION(1047, 20, 0)) result.sOsVersion = "6.1.0";
+                        else if (nVersion < S_FULL_VERSION(1047, 25, 0)) result.sOsVersion = "7.0.0";
+                        else if (nVersion < S_FULL_VERSION(1140, 11, 0)) result.sOsVersion = "7.1.0";
+                        else if (nVersion < S_FULL_VERSION(1141, 1, 0)) result.sOsVersion = "8.0.0";
+                        else if (nVersion < S_FULL_VERSION(1142, 14, 0)) result.sOsVersion = "8.1.0";
+                        else if (nVersion < S_FULL_VERSION(1144, 17, 0)) result.sOsVersion = "8.2.0";
+                        else if (nVersion < S_FULL_VERSION(1200, 0, 0)) result.sOsVersion = "8.3.0";  // TODO Check
+
+                        if (nVersion < S_FULL_VERSION(751, 32, 0)) {
+                            result.osName = OSNAME_IPHONEOS;
+                        } else {
+                            result.osName = OSNAME_IOS;
+                        }
+                    }
+                }
+            }
+        } else {
+            result.bIsValid = false;
+        }
+    }
+
+    return result;
 }
 
 QList<XBinary::NREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)

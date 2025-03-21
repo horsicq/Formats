@@ -948,54 +948,6 @@ QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
     return stResult;
 }
 
-XBinary::OSINFO XFormats::getOsInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
-{
-    XBinary::OSINFO result = {};
-
-    if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
-        XCOM com(pDevice, bIsImage, nModuleAddress);
-        result = com.getOsInfo();
-    } else if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) {
-        XMSDOS msdos(pDevice, bIsImage, nModuleAddress);
-        result = msdos.getOsInfo();
-    } else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) {
-        XNE ne(pDevice, bIsImage, nModuleAddress);
-        result = ne.getOsInfo();
-    } else if (XBinary::checkFileType(XBinary::FT_LE, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
-        result = le.getOsInfo();
-    } else if (XBinary::checkFileType(XBinary::FT_LX, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
-        result = le.getOsInfo();
-    } else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) {
-        XPE pe(pDevice, bIsImage, nModuleAddress);
-        result = pe.getOsInfo();
-    } else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) {
-        XELF elf(pDevice, bIsImage, nModuleAddress);
-        result = elf.getOsInfo();
-    } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
-        XMACH mach(pDevice, bIsImage, nModuleAddress);
-        result = mach.getOsInfo();
-    } else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) {
-        XMACHOFat machofat(pDevice);
-        result = machofat.getOsInfo();
-    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
-        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
-        result = amigaHunk.getOsInfo();
-    } else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) {
-        XJavaClass xjc(pDevice);
-        result = xjc.getOsInfo();
-    }
-#ifdef USE_DEX
-    else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
-        XDEX dex(pDevice);
-        result = dex.getOsInfo();
-    }
-#endif
-
-    return result;
-}
-
 XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct,
                                                     qint64 nOffset, qint64 nSize)
 {

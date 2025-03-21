@@ -67,15 +67,6 @@ bool XRiff::isValid(QIODevice *pDevice)
     return xriff.isValid();
 }
 
-QString XRiff::getFileFormatString()
-{
-    QString sResult;
-    // TODO
-    sResult = read_ansiString(12, 4).trimmed();
-
-    return sResult;
-}
-
 QString XRiff::getFileFormatExt()
 {
     // TODO
@@ -132,6 +123,8 @@ XBinary::FT XRiff::getFileType()
 
     QString sTag = read_ansiString(0, 4);
     QString sSubTag = read_ansiString(12, 4);
+
+    // TODO
 
     return result;
 }

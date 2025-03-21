@@ -51,15 +51,6 @@ bool XGif::isValid(QIODevice *pDevice)
     return xgif.isValid();
 }
 
-QString XGif::getFileFormatString()
-{
-    QString sResult;
-
-    sResult = "GIF";
-
-    return sResult;
-}
-
 QString XGif::getFileFormatExt()
 {
     return "gif";

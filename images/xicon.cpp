@@ -76,21 +76,6 @@ XBinary::FT XIcon::getFileType()
     return result;
 }
 
-QString XIcon::getFileFormatString()
-{
-    QString sResult;
-
-    if (getFileType() == FT_CUR) {
-        sResult = QString("CUR");
-    } else {
-        sResult = QString("ICO");
-    }
-
-    // TODO more info
-
-    return sResult;
-}
-
 QString XIcon::getFileFormatExt()
 {
     QString sResult;

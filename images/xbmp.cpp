@@ -102,21 +102,6 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     return XBinary::getMemoryMap(mapMode, pPdStruct);
 }
 
-QString XBMP::getFileFormatString()
-{
-    QString sResult;
-
-    // TODO
-    sResult = "BMP";
-    QString sVersion = getVersion();
-
-    if (sVersion != "") {
-        sResult += QString("(%1)").arg(sVersion);
-    }
-
-    return sResult;
-}
-
 QString XBMP::getVersion()
 {
     QString sResult;

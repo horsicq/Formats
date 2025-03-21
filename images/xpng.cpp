@@ -53,16 +53,16 @@ XBinary::FT XPNG::getFileType()
     return FT_PNG;
 }
 
-QString XPNG::getFileFormatString()
-{
-    QString sResult;
+// QString XPNG::getFileFormatString()
+// {
+//     QString sResult;
 
-    QString sResolution = QString("%1x%2").arg(read_uint32(16, true)).arg(read_uint32(20, true));
+//     QString sResolution = QString("%1x%2").arg(read_uint32(16, true)).arg(read_uint32(20, true));
 
-    sResult = QString("PNG(%1)").arg(sResolution);
+//     sResult = QString("PNG(%1)").arg(sResolution);
 
-    return sResult;
-}
+//     return sResult;
+// }
 
 QString XPNG::getFileFormatExt()
 {

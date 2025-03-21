@@ -413,8 +413,9 @@ public:
     virtual QString getArch();
     virtual qint32 getType();
     virtual FT getFileType();
-    virtual OSINFO getOsInfo();
     virtual QString typeIdToString(qint32 nType);
+
+    virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
 
     QList<XELF_DEF::Elf_Phdr> _getPrograms(QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders, quint32 nType);
     QList<XELF_DEF::Elf_Shdr> _getSections(QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders, quint32 nType);
@@ -481,7 +482,6 @@ public:
     bool isSectionsTablePresent();
     bool isProgramsTablePresent();
 
-    virtual QString getFileFormatString();
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 

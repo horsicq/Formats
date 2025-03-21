@@ -461,29 +461,28 @@ public:
         ENDIAN_BIG
     };
 
-    struct OSINFO {
-        OSNAME osName;
-        QString sOsVersion;
-        QString sBuild;
-        QString sArch;
-        MODE mode;
-        QString sType;
-        ENDIAN endian;
-        bool bIsVM;
-    };
-
     struct FILEFORMATINFO {
         bool bIsValid;
         qint64 nSize;
         FT fileType;
-        QString sString;
         QString sExt;
         QString sVersion;
         QString sOptions;
+        QString sType;
+        ENDIAN endian;
+        MODE mode;
+        QString sArch;
+        OSNAME osName;
+        QString sOsVersion;
+        QString sOsBuild;
+        bool bIsVM;
+        // For archives
+        qint32 nNumberOfRecords;
     };
 
     struct _MEMORY_MAP {
         XADDR nModuleAddress;
+        bool bIsImage; // TODO fill
         qint64 nImageSize;
         qint64 nBinarySize;
         XADDR nEntryPointAddress;
@@ -689,8 +688,8 @@ public:
     void setArch(const QString &sArch);
     virtual QString getArch();
 
-    void setFileFormatName(const QString &sFileFormatString);
-    virtual QString getFileFormatString();
+    static QString getFileFormatString(FILEFORMATINFO *pFileFormatInfo);
+    static OSNAME getOsName(FILEFORMATINFO *pFileFormatInfo);
 
     void setFileFormatExt(const QString &sFileFormatExt);
     virtual QString getFileFormatExt();
@@ -702,8 +701,9 @@ public:
     virtual OFFSETSIZE getSignOffsetSize();  // TODO rename
 
     void setOsType(OSNAME osName);
+    OSNAME getOsName();
     void setOsVersion(const QString &sOsVersion);
-    virtual OSINFO getOsInfo();
+    QString getOsVersion();
     virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
 
     void setEndian(ENDIAN endian);
@@ -1418,7 +1418,7 @@ public:
     DM getDisasmMode();
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
     static DM getDisasmMode(const QString &sArch, bool bIsBigEndian = false, MODE mode = MODE_UNKNOWN);
-    static DM getDisasmMode(OSINFO osInfo);
+    static DM getDisasmMode(FILEFORMATINFO *pFileFormatInfo);
     static DMFAMILY getDisasmFamily(DM disasmMode);
     static DMFAMILY getDisasmFamily(_MEMORY_MAP *pMemoryMap);
     static QList<SYNTAX> getDisasmSyntax(DM disasmMode);
@@ -1692,7 +1692,6 @@ private:
     qint64 g_nEntryPointOffset;
     XADDR g_nModuleAddress;
     QString g_sArch;
-    QString g_sFileFormatString;
     QString g_sFileFormatExt;
     qint64 g_nFileFormatSize;
     OSNAME g_osName;

@@ -161,18 +161,9 @@ qint32 XCOM::getType()
     return TYPE_EXECUTABLE;
 }
 
-XBinary::OSINFO XCOM::getOsInfo()
+XBinary::OSNAME XCOM::getOsName()
 {
-    OSINFO result = {};
-
-    result.osName = OSNAME_MSDOS;
-    result.sOsVersion = "";  // TODO
-    result.sArch = getArch();
-    result.mode = getMode();
-    result.sType = typeIdToString(getType());
-    result.endian = getEndian();
-
-    return result;
+    return OSNAME_MSDOS;
 }
 
 QString XCOM::typeIdToString(qint32 nType)

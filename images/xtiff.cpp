@@ -162,15 +162,6 @@ XBinary::FT XTiff::getFileType()
     return FT_TIFF;
 }
 
-QString XTiff::getFileFormatString()
-{
-    QString sResult;
-
-    sResult = QString("TIFF");
-
-    return sResult;
-}
-
 QString XTiff::getFileFormatExt()
 {
     return "tiff";

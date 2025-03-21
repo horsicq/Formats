@@ -339,17 +339,16 @@ public:
 
     quint16 _getMachine(quint16 nMachine);
 
-    virtual OSINFO getOsInfo();
-
     virtual FT getFileType();
     virtual qint32 getType();
     virtual QString typeIdToString(qint32 nType);
 
     virtual bool isSigned();
     virtual OFFSETSIZE getSignOffsetSize();
-    virtual QString getFileFormatString();
     virtual QString getFileFormatExt();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
+
+    virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
 
     qint64 getNtHeadersOffset();
     quint32 getNtHeaders_Signature();

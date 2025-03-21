@@ -340,17 +340,15 @@ QString XBinary::getArch()
     return g_sArch;
 }
 
-void XBinary::setFileFormatName(const QString &sFileFormatString)
+QString XBinary::getFileFormatString(FILEFORMATINFO *pFileFormatInfo)
 {
-    g_sFileFormatString = sFileFormatString;
+    // TODO
+    return "";
 }
 
-QString XBinary::getFileFormatString()
+XBinary::OSNAME XBinary::getOsName(FILEFORMATINFO *pFileFormatInfo)
 {
-#ifdef QT_DEBUG
-    // qDebug("TODO: XBinary::getFileFormatString()");
-#endif
-    return g_sFileFormatString;
+    return pFileFormatInfo->osName;
 }
 
 void XBinary::setFileFormatExt(const QString &sFileFormatExt)
@@ -395,23 +393,19 @@ void XBinary::setOsType(OSNAME osName)
     g_osName = osName;
 }
 
+XBinary::OSNAME XBinary::getOsName()
+{
+    return g_osName;
+}
+
 void XBinary::setOsVersion(const QString &sOsVersion)
 {
     g_sOsVersion = sOsVersion;
 }
 
-XBinary::OSINFO XBinary::getOsInfo()
+QString XBinary::getOsVersion()
 {
-    OSINFO result = {};
-
-    result.osName = g_osName;
-    result.sOsVersion = g_sOsVersion;
-    result.sArch = getArch();
-    result.mode = getMode();
-    result.sType = typeIdToString(getType());
-    result.endian = getEndian();
-
-    return result;
+    return g_sOsVersion;
 }
 
 XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
@@ -425,10 +419,15 @@ XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
 
         if (result.nSize > 0) {
             result.fileType = getFileType();
-            result.sString = getFileFormatString();
             result.sExt = getFileFormatExt();
             result.sVersion = getVersion();
             result.sOptions = getOptions();
+            result.osName = getOsName();
+            result.sOsVersion = getOsVersion();
+            result.sArch = getArch();
+            result.mode = getMode();
+            result.sType = typeIdToString(getType());
+            result.endian = getEndian();
         } else {
             result.bIsValid = false;
         }
@@ -9217,9 +9216,9 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
     return dmResult;
 }
 
-XBinary::DM XBinary::getDisasmMode(OSINFO osInfo)
+XBinary::DM XBinary::getDisasmMode(FILEFORMATINFO *pFileFormatInfo)
 {
-    return getDisasmMode(osInfo.sArch, (osInfo.endian == ENDIAN_BIG), osInfo.mode);
+    return getDisasmMode(pFileFormatInfo->sArch, (pFileFormatInfo->endian == ENDIAN_BIG), pFileFormatInfo->mode);
 }
 
 XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)

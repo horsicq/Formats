@@ -152,8 +152,9 @@ public:
     virtual ENDIAN getEndian();
     virtual FT getFileType();
     virtual qint32 getType();
+    virtual OSNAME getOsName();
+    virtual QString getOsVersion();
     virtual QString typeIdToString(qint32 nType);
-    virtual OSINFO getOsInfo();
     static QList<MAPMODE> getMapModesList();
     qint64 getModuleAddress();
 
