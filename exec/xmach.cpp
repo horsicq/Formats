@@ -4713,7 +4713,8 @@ XBinary::FILEFORMATINFO XMACH::getFileFormatInfo(PDSTRUCT *pPdStruct)
                 if (build_version.platform == XMACH_DEF::S_PLATFORM_MACOS) result.osName = OSNAME_MACOS;
                 else if ((build_version.platform == XMACH_DEF::S_PLATFORM_IOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_IOSSIMULATOR))
                     result.osName = OSNAME_IOS;  // TODO iPadOS
-                else if ((build_version.platform == XMACH_DEF::S_PLATFORM_TVOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_TVOSSIMULATOR)) result.osName = OSNAME_TVOS;
+                else if ((build_version.platform == XMACH_DEF::S_PLATFORM_TVOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_TVOSSIMULATOR))
+                    result.osName = OSNAME_TVOS;
                 else if ((build_version.platform == XMACH_DEF::S_PLATFORM_WATCHOS) || (build_version.platform == XMACH_DEF::S_PLATFORM_WATCHOSSIMULATOR))
                     result.osName = OSNAME_WATCHOS;
                 else if (build_version.platform == XMACH_DEF::S_PLATFORM_BRIDGEOS) result.osName = OSNAME_BRIDGEOS;

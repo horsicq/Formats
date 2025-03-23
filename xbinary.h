@@ -482,7 +482,7 @@ public:
 
     struct _MEMORY_MAP {
         XADDR nModuleAddress;
-        bool bIsImage; // TODO fill
+        bool bIsImage;  // TODO fill
         qint64 nImageSize;
         qint64 nBinarySize;
         XADDR nEntryPointAddress;
