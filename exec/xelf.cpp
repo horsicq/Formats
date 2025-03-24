@@ -4548,10 +4548,10 @@ XBinary::FILEFORMATINFO XELF::getFileFormatInfo(PDSTRUCT *pPdStruct)
             if (isNotePresent(&listNotes, 1, "GNU")) {
                 NOTE note = getNote(&listNotes, 1, "GNU");
 
-                quint32 nOS = read_uint32(note.nDataOffset);
-                quint32 nMajor = read_uint32(note.nDataOffset + 4);
-                quint32 nMinor = read_uint32(note.nDataOffset + 8);
-                quint32 nSubMinor = read_uint32(note.nDataOffset + 12);
+                quint32 nOS = read_uint32(note.nDataOffset, result.endian == ENDIAN_BIG);
+                quint32 nMajor = read_uint32(note.nDataOffset + 4, result.endian == ENDIAN_BIG);
+                quint32 nMinor = read_uint32(note.nDataOffset + 8, result.endian == ENDIAN_BIG);
+                quint32 nSubMinor = read_uint32(note.nDataOffset + 12, result.endian == ENDIAN_BIG);
 
                 if (result.osName == OSNAME_UNIX) {
                     if (nOS == 0) result.osName = OSNAME_LINUX;

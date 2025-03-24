@@ -9157,10 +9157,18 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
             dmResult = DM_PPC64_LE;
         }
     } else if ((_sArch == "MIPS") || (_sArch == "R3000") || (_sArch == "R4000") || (_sArch == "R10000") || (_sArch == "WCEMIPSV2")) {
-        if (bIsBigEndian) {
-            dmResult = DM_MIPS_BE;
+        if (mode == MODE_64) {
+            if (bIsBigEndian) {
+                dmResult = DM_MIPS64_BE;
+            } else {
+                dmResult = DM_MIPS64_LE;
+            }
         } else {
-            dmResult = DM_MIPS_LE;
+            if (bIsBigEndian) {
+                dmResult = DM_MIPS_BE;
+            } else {
+                dmResult = DM_MIPS_LE;
+            }
         }
     } else if ((_sArch == "ARM") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7") || (_sArch == "ARM_V7S") || (_sArch == "ARM64_32")) {
         if (bIsBigEndian) {
@@ -9200,6 +9208,10 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
         dmResult = DM_PPC_BE;
     } else if (_sArch == "SPARC") {
         dmResult = DM_SPARC;
+    } else if (_sArch == "SPARCV9") {
+        dmResult = DM_SPARCV9;
+    } else if (_sArch == "S390") {
+        dmResult = DM_S390X;
     } else if ((_sArch == "RISC_V") || (_sArch == "RISCV32") || (_sArch == "RISCV64")) {
         if (mode == MODE_64) {
             dmResult = DM_RISKV64;
