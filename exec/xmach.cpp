@@ -4799,7 +4799,9 @@ QList<XBinary::NREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
 
     bool bIs64 = is64();
 
-    for (int i = 0; i < listSegmentRecords.count(); i++) {
+    qint32 nNumberOfRecords = listSegmentRecords.count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
         SEGMENT_RECORD segmentRecord = listSegmentRecords.at(i);
 
         XBinary::NREGION region = {};
@@ -5061,7 +5063,9 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
                 opcodeMain.sName = QString("BIND_OPCODE_ADD_ADDR_ULEB");
                 bUleb1 = true;
                 break;
-            case XMACH_DEF::S_BIND_OPCODE_DO_BIND: opcodeMain.sName = QString("BIND_OPCODE_DO_BIND"); break;
+            case XMACH_DEF::S_BIND_OPCODE_DO_BIND:
+                opcodeMain.sName = QString("BIND_OPCODE_DO_BIND");
+                break;
             case XMACH_DEF::S_BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB:
                 opcodeMain.sName = QString("BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB");
                 bUleb1 = true;
