@@ -5797,10 +5797,6 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
         if (stFileTypes.contains(FT_REGION)) listResult.append(FT_REGION);
         if (stFileTypes.contains(FT_DATA)) listResult.append(FT_DATA);
-        if (stFileTypes.contains(FT_BINARY)) listResult.append(FT_BINARY);
-        if (stFileTypes.contains(FT_BINARY16)) listResult.append(FT_BINARY16);
-        if (stFileTypes.contains(FT_BINARY32)) listResult.append(FT_BINARY32);
-        if (stFileTypes.contains(FT_BINARY64)) listResult.append(FT_BINARY64);
     }
 
     if (tlOption == TL_OPTION_ALL) {
@@ -5808,6 +5804,10 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_ALL)) {
+        if (stFileTypes.contains(FT_BINARY)) listResult.append(FT_BINARY);
+        if (stFileTypes.contains(FT_BINARY16)) listResult.append(FT_BINARY16);
+        if (stFileTypes.contains(FT_BINARY32)) listResult.append(FT_BINARY32);
+        if (stFileTypes.contains(FT_BINARY64)) listResult.append(FT_BINARY64);
         if (stFileTypes.contains(FT_ZIP)) listResult.append(FT_ZIP);
         if (stFileTypes.contains(FT_GZIP)) listResult.append(FT_GZIP);
         if (stFileTypes.contains(FT_ZLIB)) listResult.append(FT_ZLIB);
@@ -5859,6 +5859,10 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_ALL)) {
         if (stFileTypes.contains(FT_DOS16M)) listResult.append(FT_DOS16M);
         if (stFileTypes.contains(FT_DOS4G)) listResult.append(FT_DOS4G);
+    }
+
+    if ((listResult.count() == 0) && (tlOption == TL_OPTION_EXECUTABLE)) {
+        listResult.append(FT_BINARY);
     }
 
     return listResult;
