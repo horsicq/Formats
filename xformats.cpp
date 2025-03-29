@@ -197,7 +197,7 @@ QList<XBinary::MAPMODE> XFormats::getMapModesList(XBinary::FT fileType)
     } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
         listResult = XMACH::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
-        listResult = XAmigaHunk::getMapModesList();
+        listResult = XPDF::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) {
         listResult = XPNG::getMapModesList();
     } else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) {
