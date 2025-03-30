@@ -5063,9 +5063,7 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
                 opcodeMain.sName = QString("BIND_OPCODE_ADD_ADDR_ULEB");
                 bUleb1 = true;
                 break;
-            case XMACH_DEF::S_BIND_OPCODE_DO_BIND:
-                opcodeMain.sName = QString("BIND_OPCODE_DO_BIND");
-                break;
+            case XMACH_DEF::S_BIND_OPCODE_DO_BIND: opcodeMain.sName = QString("BIND_OPCODE_DO_BIND"); break;
             case XMACH_DEF::S_BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB:
                 opcodeMain.sName = QString("BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB");
                 bUleb1 = true;
