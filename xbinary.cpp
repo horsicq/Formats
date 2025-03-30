@@ -416,19 +416,18 @@ XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
 
     if (result.bIsValid) {
         result.nSize = getFileFormatSize(pPdStruct);
+        result.fileType = getFileType();
+        result.sExt = getFileFormatExt();
+        result.sVersion = getVersion();
+        result.sOptions = getOptions();
+        result.osName = getOsName();
+        result.sOsVersion = getOsVersion();
+        result.sArch = getArch();
+        result.mode = getMode();
+        result.sType = typeIdToString(getType());
+        result.endian = getEndian();
 
-        if (result.nSize > 0) {
-            result.fileType = getFileType();
-            result.sExt = getFileFormatExt();
-            result.sVersion = getVersion();
-            result.sOptions = getOptions();
-            result.osName = getOsName();
-            result.sOsVersion = getOsVersion();
-            result.sArch = getArch();
-            result.mode = getMode();
-            result.sType = typeIdToString(getType());
-            result.endian = getEndian();
-        } else {
+        if (result.nSize == 0) {
             result.bIsValid = false;
         }
     }

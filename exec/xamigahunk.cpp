@@ -419,22 +419,21 @@ XBinary::FILEFORMATINFO XAmigaHunk::getFileFormatInfo(PDSTRUCT *pPdStruct)
 
     if (result.bIsValid) {
         result.nSize = getFileFormatSize(pPdStruct);
+        result.fileType = getFileType();
+        result.sExt = getFileFormatExt();
+        result.sVersion = getVersion();
+        result.sOptions = getOptions();
 
-        if (result.nSize > 0) {
-            result.fileType = getFileType();
-            result.sExt = getFileFormatExt();
-            result.sVersion = getVersion();
-            result.sOptions = getOptions();
+        QList<HUNK> listHunks = getHunks();
 
-            QList<HUNK> listHunks = getHunks();
+        result.osName = OSNAME_AMIGA;
+        // result.sOsVersion = "";
+        result.sArch = getArch(&listHunks);
+        result.mode = getMode(&listHunks);
+        result.sType = getTypeAsString();
+        result.endian = getEndian();
 
-            result.osName = OSNAME_AMIGA;
-            // result.sOsVersion = "";
-            result.sArch = getArch(&listHunks);
-            result.mode = getMode(&listHunks);
-            result.sType = getTypeAsString();
-            result.endian = getEndian();
-        } else {
+        if (result.nSize == 0) {
             result.bIsValid = false;
         }
     }

@@ -4346,243 +4346,242 @@ XBinary::FILEFORMATINFO XELF::getFileFormatInfo(PDSTRUCT *pPdStruct)
 
     if (result.bIsValid) {
         result.nSize = getFileFormatSize(pPdStruct);
+        result.fileType = getFileType();
+        result.sExt = getFileFormatExt();
+        result.sVersion = getVersion();
+        result.sOptions = getOptions();
+        result.sArch = getArch();
+        result.mode = getMode();
+        result.sType = typeIdToString(getType());
+        result.endian = getEndian();
 
-        if (result.nSize > 0) {
-            result.fileType = getFileType();
-            result.sExt = getFileFormatExt();
-            result.sVersion = getVersion();
-            result.sOptions = getOptions();
-            result.sArch = getArch();
-            result.mode = getMode();
-            result.sType = typeIdToString(getType());
-            result.endian = getEndian();
+        result.osName = OSNAME_UNIX;
 
-            result.osName = OSNAME_UNIX;
+        quint8 osabi = getIdent_osabi();
 
-            quint8 osabi = getIdent_osabi();
+        if (osabi == XELF_DEF::S_ELFOSABI_HPUX) result.osName = OSNAME_HPUX;
+        else if (osabi == XELF_DEF::S_ELFOSABI_NETBSD) result.osName = OSNAME_NETBSD;
+        else if (osabi == XELF_DEF::S_ELFOSABI_LINUX) result.osName = OSNAME_LINUX;
+        else if (osabi == XELF_DEF::S_ELFOSABI_SOLARIS) result.osName = OSNAME_SOLARIS;
+        else if (osabi == XELF_DEF::S_ELFOSABI_AIX) result.osName = OSNAME_AIX;
+        else if (osabi == XELF_DEF::S_ELFOSABI_IRIX) result.osName = OSNAME_IRIX;
+        else if (osabi == XELF_DEF::S_ELFOSABI_FREEBSD) result.osName = OSNAME_FREEBSD;
+        else if (osabi == XELF_DEF::S_ELFOSABI_TRU64) result.osName = OSNAME_TRU64;
+        else if (osabi == XELF_DEF::S_ELFOSABI_MODESTO) result.osName = OSNAME_MODESTO;
+        else if (osabi == XELF_DEF::S_ELFOSABI_OPENBSD) result.osName = OSNAME_OPENBSD;
+        else if (osabi == XELF_DEF::S_ELFOSABI_OPENVMS) result.osName = OSNAME_OPENVMS;
+        else if (osabi == XELF_DEF::S_ELFOSABI_NSK) result.osName = OSNAME_NSK;
+        else if (osabi == XELF_DEF::S_ELFOSABI_AROS) result.osName = OSNAME_AROS;
+        else if (osabi == XELF_DEF::S_ELFOSABI_FENIXOS) result.osName = OSNAME_FENIXOS;
+        else if (osabi == XELF_DEF::S_ELFOSABI_OPENVOS) result.osName = OSNAME_OPENVOS;
 
-            if (osabi == XELF_DEF::S_ELFOSABI_HPUX) result.osName = OSNAME_HPUX;
-            else if (osabi == XELF_DEF::S_ELFOSABI_NETBSD) result.osName = OSNAME_NETBSD;
-            else if (osabi == XELF_DEF::S_ELFOSABI_LINUX) result.osName = OSNAME_LINUX;
-            else if (osabi == XELF_DEF::S_ELFOSABI_SOLARIS) result.osName = OSNAME_SOLARIS;
-            else if (osabi == XELF_DEF::S_ELFOSABI_AIX) result.osName = OSNAME_AIX;
-            else if (osabi == XELF_DEF::S_ELFOSABI_IRIX) result.osName = OSNAME_IRIX;
-            else if (osabi == XELF_DEF::S_ELFOSABI_FREEBSD) result.osName = OSNAME_FREEBSD;
-            else if (osabi == XELF_DEF::S_ELFOSABI_TRU64) result.osName = OSNAME_TRU64;
-            else if (osabi == XELF_DEF::S_ELFOSABI_MODESTO) result.osName = OSNAME_MODESTO;
-            else if (osabi == XELF_DEF::S_ELFOSABI_OPENBSD) result.osName = OSNAME_OPENBSD;
-            else if (osabi == XELF_DEF::S_ELFOSABI_OPENVMS) result.osName = OSNAME_OPENVMS;
-            else if (osabi == XELF_DEF::S_ELFOSABI_NSK) result.osName = OSNAME_NSK;
-            else if (osabi == XELF_DEF::S_ELFOSABI_AROS) result.osName = OSNAME_AROS;
-            else if (osabi == XELF_DEF::S_ELFOSABI_FENIXOS) result.osName = OSNAME_FENIXOS;
-            else if (osabi == XELF_DEF::S_ELFOSABI_OPENVOS) result.osName = OSNAME_OPENVOS;
+        QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList(100);
+        QList<XELF_DEF::Elf_Shdr> listSectionHeaders = getElf_ShdrList(100);
 
-            QList<XELF_DEF::Elf_Phdr> listProgramHeaders = getElf_PhdrList(100);
-            QList<XELF_DEF::Elf_Shdr> listSectionHeaders = getElf_ShdrList(100);
+        qint32 nStringTableSection = getSectionStringTable();
+        QByteArray baStringTable = getSection(nStringTableSection);
 
-            qint32 nStringTableSection = getSectionStringTable();
-            QByteArray baStringTable = getSection(nStringTableSection);
+        QList<SECTION_RECORD> listSectionRecords = XELF::getSectionRecords(&listSectionHeaders, isImage(), &baStringTable);
 
-            QList<SECTION_RECORD> listSectionRecords = XELF::getSectionRecords(&listSectionHeaders, isImage(), &baStringTable);
+        QList<QString> listComments = getCommentStrings(&listSectionRecords);
 
-            QList<QString> listComments = getCommentStrings(&listSectionRecords);
+        QList<NOTE> listNotes = getNotes(&listProgramHeaders);
 
-            QList<NOTE> listNotes = getNotes(&listProgramHeaders);
+        if (listNotes.count() == 0) {
+            listNotes = getNotes(&listSectionHeaders);
+        }
 
-            if (listNotes.count() == 0) {
-                listNotes = getNotes(&listSectionHeaders);
+        QString sInterpteter = getProgramInterpreterName(&listProgramHeaders).sString;
+
+        if (sInterpteter == "") {
+            sInterpteter = getProgramInterpreterName(&listSectionRecords).sString;
+        }
+
+        XBinary::_MEMORY_MAP memoryMap = getMemoryMap();
+        QList<TAG_STRUCT> listTagStructs = getTagStructs(&listProgramHeaders, &memoryMap);
+
+        QList<QString> listLibraries = getLibraries(&memoryMap, &listTagStructs);
+
+        if (result.osName == OSNAME_UNIX) {
+            if (sInterpteter.contains("ld-elf.so")) {
+                result.osName = OSNAME_FREEBSD;
             }
+        }
 
-            QString sInterpteter = getProgramInterpreterName(&listProgramHeaders).sString;
-
-            if (sInterpteter == "") {
-                sInterpteter = getProgramInterpreterName(&listSectionRecords).sString;
+        if (result.osName == OSNAME_UNIX) {
+            if (sInterpteter.contains("linux")) {
+                result.osName = OSNAME_LINUX;
             }
+        }
 
-            XBinary::_MEMORY_MAP memoryMap = getMemoryMap();
-            QList<TAG_STRUCT> listTagStructs = getTagStructs(&listProgramHeaders, &memoryMap);
+        if (result.osName == OSNAME_UNIX) {
+            if (sInterpteter.contains("ldqnx")) {
+                result.osName = OSNAME_QNX;
+            }
+        }
 
-            QList<QString> listLibraries = getLibraries(&memoryMap, &listTagStructs);
+        if (result.osName == OSNAME_UNIX) {
+            if (sInterpteter.contains("uClibc")) {
+                result.osName = OSNAME_MCLINUX;
+            }
+        }
 
-            if (result.osName == OSNAME_UNIX) {
-                if (sInterpteter.contains("ld-elf.so")) {
-                    result.osName = OSNAME_FREEBSD;
+        if ((result.osName == OSNAME_UNIX) || (result.osName == OSNAME_LINUX)) {
+            qint32 nNumberOfComments = listComments.count();
+
+            for (qint32 i = 0; i < nNumberOfComments; i++) {
+                bool bFound = false;
+
+                QString sComment = listComments.at(i);
+
+                if (sComment.contains("Ubuntu") || sComment.contains("ubuntu")) {
+                    result.osName = OSNAME_UBUNTULINUX;
+
+                    if (sComment.contains("ubuntu1~")) {
+                        result.sOsVersion = sComment.section("ubuntu1~", 1, -1).section(")", 0, 0);
+                    }
+
+                    bFound = true;
+                } else if (sComment.contains("Debian") || sComment.contains("debian")) {
+                    result.osName = OSNAME_DEBIANLINUX;
+
+                    bFound = true;
+                } else if (sComment.contains("StartOS")) {
+                    result.osName = OSNAME_STARTOSLINUX;
+
+                    bFound = true;
+                } else if (sComment.contains("Gentoo")) {
+                    result.osName = OSNAME_GENTOOLINUX;
+
+                    bFound = true;
+                } else if (sComment.contains("Alpine")) {
+                    result.osName = OSNAME_ALPINELINUX;
+
+                    bFound = true;
+                } else if (sComment.contains("Wind River Linux")) {
+                    result.osName = OSNAME_WINDRIVERLINUX;
+
+                    bFound = true;
+                } else if (sComment.contains("SuSE") || sComment.contains("SUSE Linux")) {
+                    result.osName = OSNAME_SUSELINUX;
+
+                    bFound = true;
+                } else if (sComment.contains("Mandrakelinux") || sComment.contains("Linux-Mandrake") || sComment.contains("Mandrake Linux")) {
+                    result.osName = OSNAME_MANDRAKELINUX;
+
+                    bFound = true;
+                } else if (sComment.contains("ASPLinux")) {
+                    result.osName = OSNAME_ASPLINUX;
+
+                    bFound = true;
+                } else if (sComment.contains("Red Hat")) {
+                    result.osName = OSNAME_REDHATLINUX;
+
+                    bFound = true;
+                } else if (sComment.contains("Hancom Linux")) {
+                    result.osName = OSNAME_HANCOMLINUX;
+
+                    bFound = true;
+                } else if (sComment.contains("TurboLinux")) {
+                    result.osName = OSNAME_TURBOLINUX;
+
+                    bFound = true;
+                } else if (sComment.contains("Vine Linux")) {
+                    result.osName = OSNAME_VINELINUX;
+
+                    bFound = true;
                 }
-            }
 
-            if (result.osName == OSNAME_UNIX) {
-                if (sInterpteter.contains("linux")) {
-                    result.osName = OSNAME_LINUX;
-                }
-            }
+                if (result.osName != OSNAME_LINUX) {
+                    if (sComment.contains("SunOS")) {
+                        result.osName = OSNAME_SUNOS;
 
-            if (result.osName == OSNAME_UNIX) {
-                if (sInterpteter.contains("ldqnx")) {
-                    result.osName = OSNAME_QNX;
-                }
-            }
-
-            if (result.osName == OSNAME_UNIX) {
-                if (sInterpteter.contains("uClibc")) {
-                    result.osName = OSNAME_MCLINUX;
-                }
-            }
-
-            if ((result.osName == OSNAME_UNIX) || (result.osName == OSNAME_LINUX)) {
-                qint32 nNumberOfComments = listComments.count();
-
-                for (qint32 i = 0; i < nNumberOfComments; i++) {
-                    bool bFound = false;
-
-                    QString sComment = listComments.at(i);
-
-                    if (sComment.contains("Ubuntu") || sComment.contains("ubuntu")) {
-                        result.osName = OSNAME_UBUNTULINUX;
-
-                        if (sComment.contains("ubuntu1~")) {
-                            result.sOsVersion = sComment.section("ubuntu1~", 1, -1).section(")", 0, 0);
+                        if (sComment.contains("@(#)SunOS ")) {
+                            result.sOsVersion = sComment.section("@(#)SunOS ", 1, -1);
                         }
 
                         bFound = true;
-                    } else if (sComment.contains("Debian") || sComment.contains("debian")) {
-                        result.osName = OSNAME_DEBIANLINUX;
-
-                        bFound = true;
-                    } else if (sComment.contains("StartOS")) {
-                        result.osName = OSNAME_STARTOSLINUX;
-
-                        bFound = true;
-                    } else if (sComment.contains("Gentoo")) {
-                        result.osName = OSNAME_GENTOOLINUX;
-
-                        bFound = true;
-                    } else if (sComment.contains("Alpine")) {
-                        result.osName = OSNAME_ALPINELINUX;
-
-                        bFound = true;
-                    } else if (sComment.contains("Wind River Linux")) {
-                        result.osName = OSNAME_WINDRIVERLINUX;
-
-                        bFound = true;
-                    } else if (sComment.contains("SuSE") || sComment.contains("SUSE Linux")) {
-                        result.osName = OSNAME_SUSELINUX;
-
-                        bFound = true;
-                    } else if (sComment.contains("Mandrakelinux") || sComment.contains("Linux-Mandrake") || sComment.contains("Mandrake Linux")) {
-                        result.osName = OSNAME_MANDRAKELINUX;
-
-                        bFound = true;
-                    } else if (sComment.contains("ASPLinux")) {
-                        result.osName = OSNAME_ASPLINUX;
-
-                        bFound = true;
-                    } else if (sComment.contains("Red Hat")) {
-                        result.osName = OSNAME_REDHATLINUX;
-
-                        bFound = true;
-                    } else if (sComment.contains("Hancom Linux")) {
-                        result.osName = OSNAME_HANCOMLINUX;
-
-                        bFound = true;
-                    } else if (sComment.contains("TurboLinux")) {
-                        result.osName = OSNAME_TURBOLINUX;
-
-                        bFound = true;
-                    } else if (sComment.contains("Vine Linux")) {
-                        result.osName = OSNAME_VINELINUX;
-
-                        bFound = true;
-                    }
-
-                    if (result.osName != OSNAME_LINUX) {
-                        if (sComment.contains("SunOS")) {
-                            result.osName = OSNAME_SUNOS;
-
-                            if (sComment.contains("@(#)SunOS ")) {
-                                result.sOsVersion = sComment.section("@(#)SunOS ", 1, -1);
-                            }
-
-                            bFound = true;
-                        }
-                    }
-
-                    if (bFound) {
-                        break;
                     }
                 }
-            }
 
-            if (result.osName == OSNAME_FREEBSD) {
-                qint32 nNumberOfComments = listComments.count();
-
-                for (qint32 i = 0; i < nNumberOfComments; i++) {
-                    bool bFound = false;
-
-                    QString sComment = listComments.at(i);
-
-                    if (sComment.contains("FreeBSD: release/")) {
-                        result.sOsVersion = sComment.section("FreeBSD: release/", 1, -1).section("/", 0, 0);
-                    }
-
-                    if (bFound) {
-                        break;
-                    }
+                if (bFound) {
+                    break;
                 }
             }
+        }
+
+        if (result.osName == OSNAME_FREEBSD) {
+            qint32 nNumberOfComments = listComments.count();
+
+            for (qint32 i = 0; i < nNumberOfComments; i++) {
+                bool bFound = false;
+
+                QString sComment = listComments.at(i);
+
+                if (sComment.contains("FreeBSD: release/")) {
+                    result.sOsVersion = sComment.section("FreeBSD: release/", 1, -1).section("/", 0, 0);
+                }
+
+                if (bFound) {
+                    break;
+                }
+            }
+        }
+
+        if (result.osName == OSNAME_UNIX) {
+            if (isNotePresent(&listNotes, "Android")) {
+                result.osName = OSNAME_ANDROID;
+                NOTE note = getNote(&listNotes, "Android");
+
+                if (note.nSize >= 4) {
+                    quint32 nSDKVersion = read_uint32(note.nDataOffset);
+                    result.sOsVersion = XBinary::getAndroidVersionFromApi(nSDKVersion);
+                }
+            } else if ((XBinary::isStringInListPresent(&listLibraries, "liblog.so")) ||
+                       ((sInterpteter == "system/bin/linker") || (sInterpteter == "system/bin/linker64"))) {
+                result.osName = OSNAME_ANDROID;
+            }
+        }
+
+        if (isNotePresent(&listNotes, 1, "GNU")) {
+            NOTE note = getNote(&listNotes, 1, "GNU");
+
+            quint32 nOS = read_uint32(note.nDataOffset, result.endian == ENDIAN_BIG);
+            quint32 nMajor = read_uint32(note.nDataOffset + 4, result.endian == ENDIAN_BIG);
+            quint32 nMinor = read_uint32(note.nDataOffset + 8, result.endian == ENDIAN_BIG);
+            quint32 nSubMinor = read_uint32(note.nDataOffset + 12, result.endian == ENDIAN_BIG);
 
             if (result.osName == OSNAME_UNIX) {
-                if (isNotePresent(&listNotes, "Android")) {
-                    result.osName = OSNAME_ANDROID;
-                    NOTE note = getNote(&listNotes, "Android");
-
-                    if (note.nSize >= 4) {
-                        quint32 nSDKVersion = read_uint32(note.nDataOffset);
-                        result.sOsVersion = XBinary::getAndroidVersionFromApi(nSDKVersion);
-                    }
-                } else if ((XBinary::isStringInListPresent(&listLibraries, "liblog.so")) ||
-                           ((sInterpteter == "system/bin/linker") || (sInterpteter == "system/bin/linker64"))) {
-                    result.osName = OSNAME_ANDROID;
-                }
+                if (nOS == 0) result.osName = OSNAME_LINUX;
+                //            else if (nOS==1)  result.osName=OSNAME_GNU;
+                else if (nOS == 2) result.osName = OSNAME_SOLARIS;
+                else if (nOS == 3) result.osName = OSNAME_FREEBSD;
+                else if (nOS == 4) result.osName = OSNAME_NETBSD;
+                else if (nOS == 5) result.osName = OSNAME_SYLLABLE;
             }
 
-            if (isNotePresent(&listNotes, 1, "GNU")) {
-                NOTE note = getNote(&listNotes, 1, "GNU");
+            QString sABI = QString("ABI: %1.%2.%3").arg(QString::number(nMajor), QString::number(nMinor), QString::number(nSubMinor));
 
-                quint32 nOS = read_uint32(note.nDataOffset, result.endian == ENDIAN_BIG);
-                quint32 nMajor = read_uint32(note.nDataOffset + 4, result.endian == ENDIAN_BIG);
-                quint32 nMinor = read_uint32(note.nDataOffset + 8, result.endian == ENDIAN_BIG);
-                quint32 nSubMinor = read_uint32(note.nDataOffset + 12, result.endian == ENDIAN_BIG);
+            result.sOsVersion = appendText(result.sOsVersion, sABI, ",");
+        }
 
-                if (result.osName == OSNAME_UNIX) {
-                    if (nOS == 0) result.osName = OSNAME_LINUX;
-                    //            else if (nOS==1)  result.osName=OSNAME_GNU;
-                    else if (nOS == 2) result.osName = OSNAME_SOLARIS;
-                    else if (nOS == 3) result.osName = OSNAME_FREEBSD;
-                    else if (nOS == 4) result.osName = OSNAME_NETBSD;
-                    else if (nOS == 5) result.osName = OSNAME_SYLLABLE;
-                }
+        if (result.osName == OSNAME_UNIX) {
+            if (isSectionNamePresent(".note.android.ident", &listSectionRecords)) result.osName = OSNAME_ANDROID;
+            else if (isSectionNamePresent(".note.minix.ident", &listSectionRecords)) result.osName = OSNAME_MINIX;
+            else if (isSectionNamePresent(".note.netbsd.ident", &listSectionRecords)) result.osName = OSNAME_NETBSD;
+            else if (isSectionNamePresent(".note.openbsd.ident", &listSectionRecords)) result.osName = OSNAME_OPENBSD;
+        }
 
-                QString sABI = QString("ABI: %1.%2.%3").arg(QString::number(nMajor), QString::number(nMinor), QString::number(nSubMinor));
+        if (result.osName == OSNAME_UNIX) {
+            result.sOsVersion = QString("%1").arg(osabi);
+        }
 
-                result.sOsVersion = appendText(result.sOsVersion, sABI, ",");
-            }
+        result.sArch = getArch();
+        result.mode = getMode();
+        result.sType = typeIdToString(getType());
+        result.endian = getEndian();
 
-            if (result.osName == OSNAME_UNIX) {
-                if (isSectionNamePresent(".note.android.ident", &listSectionRecords)) result.osName = OSNAME_ANDROID;
-                else if (isSectionNamePresent(".note.minix.ident", &listSectionRecords)) result.osName = OSNAME_MINIX;
-                else if (isSectionNamePresent(".note.netbsd.ident", &listSectionRecords)) result.osName = OSNAME_NETBSD;
-                else if (isSectionNamePresent(".note.openbsd.ident", &listSectionRecords)) result.osName = OSNAME_OPENBSD;
-            }
-
-            if (result.osName == OSNAME_UNIX) {
-                result.sOsVersion = QString("%1").arg(osabi);
-            }
-
-            result.sArch = getArch();
-            result.mode = getMode();
-            result.sType = typeIdToString(getType());
-            result.endian = getEndian();
-        } else {
+        if (result.nSize ==  0) {
             result.bIsValid = false;
         }
     }
