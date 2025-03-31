@@ -5586,7 +5586,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     if (bExtra) {
         if ((stResult.count() <= 1) || (stResult.contains(FT_PLAINTEXT))) {
             if ((nSize >= 0) && (nSize <= (0x10000 - 0x100))) {
-                stResult.insert(FT_DATA);
+                // stResult.insert(FT_DATA);
                 stResult.insert(FT_COM);
             }
         }
@@ -5862,6 +5862,13 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
 
     if ((listResult.count() == 0) && (tlOption == TL_OPTION_EXECUTABLE)) {
         listResult.append(FT_BINARY);
+    }
+
+    if (tlOption == TL_OPTION_SYMBOLS) {
+        if (stFileTypes.contains(FT_PE32)) listResult.append(FT_PE32);
+        if (stFileTypes.contains(FT_PE64)) listResult.append(FT_PE64);
+        if (stFileTypes.contains(FT_MACHO32)) listResult.append(FT_MACHO32);
+        if (stFileTypes.contains(FT_MACHO64)) listResult.append(FT_MACHO64);
     }
 
     return listResult;

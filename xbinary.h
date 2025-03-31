@@ -1141,7 +1141,8 @@ public:
     enum TL_OPTION {
         TL_OPTION_DEFAULT = 0,
         TL_OPTION_ALL,
-        TL_OPTION_EXECUTABLE
+        TL_OPTION_EXECUTABLE,
+        TL_OPTION_SYMBOLS
     };
 
     static QList<FT> _getFileTypeListFromSet(const QSet<FT> &stFileTypes, TL_OPTION tlOption);
