@@ -10126,7 +10126,7 @@ QString XBinary::cleanString(const QString &sString)
 {
     QString sResult;
 
-    qint32 nNumberOfChars = sString.count();
+    qint32 nNumberOfChars = sString.size();
 
     for (qint32 i = 0; i < nNumberOfChars; i++) {
         QChar _char = sString.at(i);
