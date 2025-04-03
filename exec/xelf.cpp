@@ -4581,7 +4581,7 @@ XBinary::FILEFORMATINFO XELF::getFileFormatInfo(PDSTRUCT *pPdStruct)
         result.sType = typeIdToString(getType());
         result.endian = getEndian();
 
-        if (result.nSize ==  0) {
+        if (result.nSize == 0) {
             result.bIsValid = false;
         }
     }
