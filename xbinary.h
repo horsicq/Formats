@@ -1559,6 +1559,7 @@ public:
     static void setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex);
     static qint32 getFreeIndex(PDSTRUCT *pPdStruct);
     static bool isPdStructFinished(PDSTRUCT *pPdStruct);
+    static bool isPdStructNotCanceled(PDSTRUCT *pPdStruct);
     static bool isPdStructSuccess(PDSTRUCT *pPdStruct);
     static qint32 getPdStructPercentage(PDSTRUCT *pPdStruct);  // 0-100
 

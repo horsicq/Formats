@@ -10731,6 +10731,19 @@ bool XBinary::isPdStructFinished(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
+bool XBinary::isPdStructNotCanceled(PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    if (pPdStruct) {
+        if (pPdStruct->bIsStop) {
+            bResult = false;
+        }
+    }
+
+    return bResult;
+}
+
 bool XBinary::isPdStructSuccess(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
