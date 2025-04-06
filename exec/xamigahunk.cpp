@@ -360,7 +360,7 @@ bool XAmigaHunk::isHunkPresent(QList<HUNK> *pListHunks, quint32 nHunkType)
 
     qint32 nNumberOfHunks = pListHunks->count();
 
-    for (int i = 0; i < nNumberOfHunks; i++) {
+    for (qint32 i = 0; i < nNumberOfHunks; i++) {
         if (pListHunks->at(i).nId == nHunkType) {
             bResult = true;
             break;
@@ -376,7 +376,7 @@ QList<XAmigaHunk::HUNK> XAmigaHunk::_getHunksByType(QList<HUNK> *pListHunks, qui
 
     qint32 nNumberOfHunks = pListHunks->count();
 
-    for (int i = 0; i < nNumberOfHunks; i++) {
+    for (qint32 i = 0; i < nNumberOfHunks; i++) {
         if (pListHunks->at(i).nId == nHunkType) {
             listResult.append(pListHunks->at(i));
         }
