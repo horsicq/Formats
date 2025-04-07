@@ -4790,9 +4790,9 @@ XBinary::FILEFORMATINFO XMACH::getFileFormatInfo(PDSTRUCT *pPdStruct)
     return result;
 }
 
-QList<XBinary::NREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
 {
-    QList<XBinary::NREGION> listRegions;
+    QList<XBinary::HREGION> listRegions;
 
     QList<COMMAND_RECORD> listCommandRecords = getCommandRecords(0, pPdStruct);
     QList<SEGMENT_RECORD> listSegmentRecords = getSegmentRecords(&listCommandRecords);
@@ -4804,16 +4804,16 @@ QList<XBinary::NREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         SEGMENT_RECORD segmentRecord = listSegmentRecords.at(i);
 
-        XBinary::NREGION region = {};
+        XBinary::HREGION region = {};
 
         if (bIs64) {
-            region.nAddress = segmentRecord.s.segment64.vmaddr;
+            region.nVirtualAddress = segmentRecord.s.segment64.vmaddr;
             region.nVirtualSize = segmentRecord.s.segment64.vmsize;
             region.nFileOffset = segmentRecord.s.segment64.fileoff;
             region.nFileSize = segmentRecord.s.segment64.filesize;
             region.sName = segmentRecord.s.segment64.segname;
         } else {
-            region.nAddress = segmentRecord.s.segment32.vmaddr;
+            region.nVirtualAddress = segmentRecord.s.segment32.vmaddr;
             region.nVirtualSize = segmentRecord.s.segment32.vmsize;
             region.nFileOffset = segmentRecord.s.segment32.fileoff;
             region.nFileSize = segmentRecord.s.segment32.filesize;
@@ -4828,7 +4828,7 @@ QList<XBinary::NREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
     return listRegions;
 }
 
-QList<XBinary::NREGION> XMACH::getNativeSubRegions(PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XMACH::getNativeSubRegions(PDSTRUCT *pPdStruct)
 {
     return XBinary::getNativeSubRegions(pPdStruct);
 }

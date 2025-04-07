@@ -608,6 +608,22 @@ public:
         } var;
     };
 
+    enum HLTYPE {
+        HLTYPE_UNKNOWN = 0,
+        HLTYPE_FILEREGIONS,
+        HLTYPE_NATIVEREGIONS,
+        HLTYPE_NATIVESUBREGIONS,
+        HLTYPE_DATA
+    };
+
+    struct HREGION {
+        XADDR nVirtualAddress;
+        qint64 nVirtualSize;
+        qint64 nFileOffset;
+        qint64 nFileSize;
+        QString sName;
+    };
+
     struct PDRECORD {
         qint64 nCurrent;
         qint64 nTotal;
@@ -688,8 +704,9 @@ public:
     void setArch(const QString &sArch);
     virtual QString getArch();
 
-    static QString getFileFormatString(FILEFORMATINFO *pFileFormatInfo);
-    static OSNAME getOsName(FILEFORMATINFO *pFileFormatInfo);
+    static QString getFileFormatString(const FILEFORMATINFO *pFileFormatInfo);
+    static QString getFileFormatInfoString(const FILEFORMATINFO *pFileFormatInfo);
+    static OSNAME getOsName(const FILEFORMATINFO *pFileFormatInfo);
 
     void setFileFormatExt(const QString &sFileFormatExt);
     virtual QString getFileFormatExt();
@@ -1056,25 +1073,9 @@ public:
     static QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
-    enum NREGION_TYPE {
-        NREGION_TYPE_UNKNOWN = 0,
-        NREGION_TYPE_HEADER,
-        NREGION_TYPE_SEGMENT,
-        NREGION_TYPE_SECTION,
-    };
-
-    struct NREGION {
-        QString sName;
-        qint64 nFileOffset;
-        XADDR nAddress;
-        qint64 nFileSize;
-        qint64 nVirtualSize;
-        NREGION_TYPE type;
-        // flags
-    };
-
-    virtual QList<NREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
-    virtual QList<NREGION> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<HREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<HREGION> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<HREGION> getHData(PDSTRUCT *pPdStruct = nullptr);
 
     static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);
     static qint32 getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap);
@@ -1571,23 +1572,8 @@ public:
     REGION_FILL getRegionFill(qint64 nOffset, qint64 nSize, qint32 nAlignment);
     static QString getDataString(char *pData, qint32 nDataSize, const QString &sBaseType, bool bIsBigEndian);
 
-    enum HLTYPE {
-        HLTYPE_UNKNOWN = 0,
-        HLTYPE_REGIONS,
-        HLTYPE_NATIVEREGIONS,
-        HLTYPE_NATIVESUBREGIONS,
-        HLTYPE_DATA
-    };
-
-    struct HREGION {
-        XADDR nAddress;
-        qint64 nOffset;
-        qint64 nSize;
-        QString sName;
-    };
-
-    QList<HREGION> _getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);                          // TODO use 1 function
-    virtual QList<HREGION> getHighlights(_MEMORY_MAP *pMemoryMap, HLTYPE hlType, PDSTRUCT *pPdStruct = nullptr);  // TODO use 1 function
+    QList<HREGION> getFileRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<HREGION> getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruct = nullptr);
 
     static qint64 align_up(qint64 nValue, qint64 nAlignment);
     static qint64 align_down(qint64 nValue, qint64 nAlignment);

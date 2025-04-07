@@ -340,13 +340,33 @@ QString XBinary::getArch()
     return g_sArch;
 }
 
-QString XBinary::getFileFormatString(FILEFORMATINFO *pFileFormatInfo)
+QString XBinary::getFileFormatString(const FILEFORMATINFO *pFileFormatInfo)
 {
-    // TODO
-    return "";
+    QString sResult = fileTypeIdToString(pFileFormatInfo->fileType);
+
+    if (pFileFormatInfo->sVersion != "") {
+        sResult += QString("(%1)").arg(pFileFormatInfo->sVersion);
+    }
+
+    QString sInfo = getFileFormatInfoString(pFileFormatInfo);
+
+    if (sInfo != "") {
+        sResult += QString("[%1]").arg(sInfo);
+    }
+
+    return sResult;
 }
 
-XBinary::OSNAME XBinary::getOsName(FILEFORMATINFO *pFileFormatInfo)
+QString XBinary::getFileFormatInfoString(const FILEFORMATINFO *pFileFormatInfo)
+{
+    QString sResult;
+
+    // TODO
+
+    return sResult;
+}
+
+XBinary::OSNAME XBinary::getOsName(const FILEFORMATINFO *pFileFormatInfo)
 {
     return pFileFormatInfo->osName;
 }
@@ -4725,15 +4745,24 @@ QString XBinary::mapModeToString(MAPMODE mapMode)
     return sResult;
 }
 
-QList<XBinary::NREGION> XBinary::getNativeRegions(PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XBinary::getHData(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct);
 
-    QList<XBinary::NREGION> listResult;
+    QList<XBinary::HREGION> listResult;
 
-    NREGION region = {};
+    return listResult;
+}
 
-    region.nAddress = 0;
+QList<XBinary::HREGION> XBinary::getNativeRegions(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct);
+
+    QList<XBinary::HREGION> listResult;
+
+    HREGION region = {};
+
+    region.nVirtualAddress = 0;
     region.nFileOffset = 0;
     region.nFileSize = g_nSize;
     region.nVirtualSize = g_nSize;
@@ -4743,11 +4772,11 @@ QList<XBinary::NREGION> XBinary::getNativeRegions(PDSTRUCT *pPdStruct)
     return listResult;
 }
 
-QList<XBinary::NREGION> XBinary::getNativeSubRegions(PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XBinary::getNativeSubRegions(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct);
 
-    QList<XBinary::NREGION> listResult;
+    QList<XBinary::HREGION> listResult;
 
     return listResult;
 }
@@ -10853,7 +10882,7 @@ QString XBinary::getDataString(char *pData, qint32 nDataSize, const QString &sBa
     return sResult;
 }
 
-QList<XBinary::HREGION> XBinary::_getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XBinary::getFileRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -10866,24 +10895,33 @@ QList<XBinary::HREGION> XBinary::_getHRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-        HREGION region = {};
-        region.nAddress = pMemoryMap->listRecords.at(i).nAddress;
-        region.nOffset = pMemoryMap->listRecords.at(i).nOffset;
-        region.nSize = pMemoryMap->listRecords.at(i).nSize;
-        region.sName = pMemoryMap->listRecords.at(i).sName;
+        if (pMemoryMap->listRecords.at(i).nOffset != -1) {
+            HREGION region = {};
+            region.nVirtualAddress = pMemoryMap->listRecords.at(i).nAddress;
+            region.nFileOffset = pMemoryMap->listRecords.at(i).nOffset;
+            region.nFileSize = pMemoryMap->listRecords.at(i).nSize;
+            region.sName = pMemoryMap->listRecords.at(i).sName;
 
-        listResult.append(region);
+            listResult.append(region);
+        }
     }
 
     return listResult;
 }
 
-QList<XBinary::HREGION> XBinary::getHighlights(_MEMORY_MAP *pMemoryMap, HLTYPE hlType, PDSTRUCT *pPdStruct)
+QList<XBinary::HREGION> XBinary::getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::HREGION> listResult;
 
-    if (hlType == HLTYPE_REGIONS) {
-        listResult = _getHRegions(pMemoryMap, pPdStruct);
+    if (hlType == HLTYPE_FILEREGIONS) {
+        _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+        listResult = getFileRegions(&memoryMap, pPdStruct);
+    } else if (hlType == HLTYPE_DATA) {
+        listResult = getHData(pPdStruct);
+    } else if (hlType == HLTYPE_NATIVEREGIONS) {
+        listResult = getNativeRegions(pPdStruct);
+    } else if (hlType == HLTYPE_NATIVESUBREGIONS) {
+        listResult = getNativeSubRegions(pPdStruct);
     }
 
     return listResult;

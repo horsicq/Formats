@@ -32,17 +32,7 @@ bool XCFBF::isValid(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
-    bool bResult = false;
-
-    if (getSize() >= 24) {
-        if (read_uint32(0, true) == 0xCAFEBABE) {
-            if (read_uint32(4, true) > 10) {
-                bResult = true;
-            }
-        }
-    }
-
-    return bResult;
+    return false;
 }
 
 bool XCFBF::isValid(QIODevice *pDevice)
@@ -54,7 +44,7 @@ bool XCFBF::isValid(QIODevice *pDevice)
 
 QString XCFBF::getArch()
 {
-    return "JVM";
+    return ""; // TODO
 }
 
 QString XCFBF::getVersion()
@@ -71,58 +61,12 @@ QString XCFBF::getFileFormatExt()
 
 XBinary::_MEMORY_MAP XCFBF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(mapMode)
-
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
-    qint64 nTotalSize = getSize();
-
-    _MEMORY_MAP result = {};
-
-    INFO info = getInfo();
-
-    result.nBinarySize = nTotalSize;
-    result.fileType = getFileType();
-    result.mode = getMode();
-    result.sArch = getArch();
-    result.endian = getEndian();
-    result.sType = getTypeAsString();
-
-    qint32 nIndex = 0;
-
-    _MEMORY_RECORD record = {};
-    record.nAddress = -1;
-    record.nOffset = 0;
-    record.nSize = info.nSize;
-    record.nIndex = 0;
-    record.sName = tr("Data");
-    record.nIndex = nIndex++;
-    record.type = MMT_DATA;
-
-    result.listRecords.append(record);
-
-    if (nTotalSize > info.nSize) {
-        record.nAddress = -1;
-        record.nOffset = info.nSize;
-        record.nSize = nTotalSize - info.nSize;
-        record.nIndex = 1;
-        record.sName = tr("Overlay");
-        record.nIndex = nIndex++;
-        record.type = MMT_OVERLAY;
-
-        result.listRecords.append(record);
-    }
-
-    return result;
+    return XBinary::getMemoryMap(mapMode, pPdStruct);
 }
 
 XBinary::FT XCFBF::getFileType()
 {
-    return FT_XCFBF;
+    return FT_BINARY; // TODO
 }
 
 XBinary::ENDIAN XCFBF::getEndian()
