@@ -618,6 +618,7 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
         case FT_DEB: sResult = QString("deb"); break;
         case FT_BWDOS16M: sResult = QString("BW DOS16M"); break;
         case FT_JAVACLASS: sResult = QString("Java Class"); break;
+        case FT_CFBF: sResult = QString("CFBF"); break;
     }
 
     return sResult;
@@ -654,6 +655,7 @@ QString XBinary::fileTypeIdToExts(FT fileType)
         case FT_NE: sResult = QString("NE"); break;
         case FT_AMIGAHUNK: sResult = QString("AmigaHunk"); break;
         case FT_JAVACLASS: sResult = QString("Java Class"); break;
+        case FT_CFBF: sResult = QString("CFBF"); break;
         case FT_SIGNATURE: sResult = tr("Signatures"); break;
         default: sResult = tr("Unknown");
     }
@@ -736,6 +738,7 @@ XBinary::FT XBinary::ftStringToFileTypeId(QString sFileType)
     else if (sFileType == "DEB") result = FT_DEB;
     else if (sFileType == "BWDOS16M") result = FT_BWDOS16M;
     else if (sFileType == "JAVACLASS") result = FT_JAVACLASS;
+    else if (sFileType == "CFBF") result = FT_CFBF;
 
     return result;
 }
@@ -817,6 +820,7 @@ QString XBinary::fileTypeIdToFtString(FT fileType)
         case FT_DEB: sResult = "DEB"; break;
         case FT_BWDOS16M: sResult = "BWDOS16M"; break;
         case FT_JAVACLASS: sResult = "JAVACLASS"; break;
+        case FT_CFBF: sResult = "CFBF"; break;
     }
 
     return sResult;
@@ -5554,6 +5558,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             }*/
         } else if (compareSignature(&memoryMap, "'BW'....00..00000000", 0)) {
             stResult.insert(FT_BWDOS16M);
+        } else if (compareSignature(&memoryMap, "D0CF11E0A1B11AE1" , 0)) {
+            stResult.insert(FT_CFBF);
         } else {
             bAllFound = false;
         }
@@ -5768,6 +5774,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_BWDOS16M;
     } else if (pStFileTypes->contains(FT_JAVACLASS)) {
         result = FT_JAVACLASS;
+    } else if (pStFileTypes->contains(FT_CFBF)) {
+        result = FT_CFBF;
     } else if (pStFileTypes->contains(FT_DATA)) {
         result = FT_DATA;
     } else if (pStFileTypes->contains(FT_BINARY)) {
@@ -5866,6 +5874,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_DEB)) listResult.append(FT_DEB);
         if (stFileTypes.contains(FT_AR)) listResult.append(FT_AR);
         if (stFileTypes.contains(FT_JAVACLASS)) listResult.append(FT_JAVACLASS);
+        if (stFileTypes.contains(FT_CFBF)) listResult.append(FT_CFBF);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {

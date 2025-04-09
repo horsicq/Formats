@@ -272,7 +272,8 @@ public:
         FT_NPM,
         FT_DEB,
         FT_BWDOS16M,
-        FT_JAVACLASS
+        FT_JAVACLASS,
+        FT_CFBF
         // TODO more
     };
 

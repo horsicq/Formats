@@ -32,7 +32,17 @@ bool XCFBF::isValid(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
-    return false;
+    bool bResult = false;
+
+    if (getSize() >= 8) {
+        _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+
+        if (compareSignature(&memoryMap, "D0CF11E0A1B11AE1", 0, pPdStruct)) {
+            bResult = true;
+        }
+    }
+
+    return bResult;
 }
 
 bool XCFBF::isValid(QIODevice *pDevice)
@@ -66,7 +76,7 @@ XBinary::_MEMORY_MAP XCFBF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
 XBinary::FT XCFBF::getFileType()
 {
-    return FT_BINARY; // TODO
+    return FT_CFBF; // TODO
 }
 
 XBinary::ENDIAN XCFBF::getEndian()
