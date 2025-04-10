@@ -76,7 +76,7 @@ XBinary::_MEMORY_MAP XCFBF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
 XBinary::FT XCFBF::getFileType()
 {
-    return FT_CFBF; // TODO
+    return FT_CFBF;
 }
 
 XBinary::ENDIAN XCFBF::getEndian()
