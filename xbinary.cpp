@@ -9529,6 +9529,7 @@ quint32 XBinary::getByteSizeFromWidthMode(MODE mode)
         case MODE_16: nResult = 2; break;
         case MODE_32: nResult = 4; break;
         case MODE_64: nResult = 8; break;
+        default: nResult = 0;
     }
 
     return nResult;
