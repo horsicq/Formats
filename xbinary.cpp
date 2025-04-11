@@ -5558,7 +5558,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             }*/
         } else if (compareSignature(&memoryMap, "'BW'....00..00000000", 0)) {
             stResult.insert(FT_BWDOS16M);
-        } else if (compareSignature(&memoryMap, "D0CF11E0A1B11AE1" , 0)) {
+        } else if (compareSignature(&memoryMap, "D0CF11E0A1B11AE1", 0)) {
             stResult.insert(FT_CFBF);
         } else {
             bAllFound = false;

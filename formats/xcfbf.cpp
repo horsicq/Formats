@@ -54,7 +54,7 @@ bool XCFBF::isValid(QIODevice *pDevice)
 
 QString XCFBF::getArch()
 {
-    return ""; // TODO
+    return "";  // TODO
 }
 
 QString XCFBF::getVersion()
