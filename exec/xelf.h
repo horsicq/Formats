@@ -194,7 +194,7 @@ public:
     static QMap<quint64, QString> getProgramFlagsS();
 
     static QMap<quint64, QString> getDynamicTags(const QString &sArch);
-    static QMap<quint64, QString> getDynamicTagsS(QString sArch);
+    static QMap<quint64, QString> getDynamicTagsS(const QString &sArch);
 
     // TODO more
     static QMap<quint64, QString> getRelTypes_x86();

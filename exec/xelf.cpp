@@ -3797,7 +3797,7 @@ QMap<quint64, QString> XELF::getDynamicTags(const QString &sArch)
     return mapResult;
 }
 
-QMap<quint64, QString> XELF::getDynamicTagsS(QString sArch)
+QMap<quint64, QString> XELF::getDynamicTagsS(const QString &sArch)
 {
     QMap<quint64, QString> mapResult;
 
