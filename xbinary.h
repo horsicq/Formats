@@ -1695,4 +1695,6 @@ private:
     qint64 g_nSize;
 };
 
+bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b);
+
 #endif  // XBINARY_H
