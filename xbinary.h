@@ -477,7 +477,7 @@ public:
         QString sOsVersion;
         QString sOsBuild;
         bool bIsVM;
-        // For archives
+        // For archives and PDF
         qint32 nNumberOfRecords;
     };
 
@@ -1080,6 +1080,7 @@ public:
 
     static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);
     static qint32 getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap);
+    static qint32 getNumberOfMemoryMapTypeRecords(_MEMORY_MAP *pMemoryMap, MMT type);
     static qint64 getRecordsTotalRowSize(_MEMORY_MAP *pMemoryMap);
 
     virtual XADDR getBaseAddress();

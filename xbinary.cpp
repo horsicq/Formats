@@ -370,6 +370,10 @@ QString XBinary::getFileFormatInfoString(const FILEFORMATINFO *pFileFormatInfo)
 {
     QString sResult;
 
+    if (pFileFormatInfo->fileType == FT_PDF) {
+        sResult = QString("%1 objects").arg(pFileFormatInfo->nNumberOfRecords);
+    }
+
     // TODO
 
     return sResult;
@@ -4862,6 +4866,21 @@ qint32 XBinary::getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap)
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         if (pMemoryMap->listRecords.at(i).bIsVirtual) {
+            nResult++;
+        }
+    }
+
+    return nResult;
+}
+
+qint32 XBinary::getNumberOfMemoryMapTypeRecords(_MEMORY_MAP *pMemoryMap, MMT type)
+{
+    qint32 nResult = 0;
+
+    qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (pMemoryMap->listRecords.at(i).type == type) {
             nResult++;
         }
     }
