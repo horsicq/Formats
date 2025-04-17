@@ -10716,51 +10716,63 @@ XBinary::PDSTRUCT XBinary::createPdStruct()
 
 void XBinary::setPdStructInit(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nTotal)
 {
-    if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
-        pPdStruct->_pdRecord[nIndex].bIsValid = true;
-        pPdStruct->_pdRecord[nIndex].nCurrent = 0;
-        pPdStruct->_pdRecord[nIndex].nTotal = nTotal;
-        pPdStruct->_pdRecord[nIndex].sStatus = "";
+    if (pPdStruct) {
+        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+            pPdStruct->_pdRecord[nIndex].bIsValid = true;
+            pPdStruct->_pdRecord[nIndex].nCurrent = 0;
+            pPdStruct->_pdRecord[nIndex].nTotal = nTotal;
+            pPdStruct->_pdRecord[nIndex].sStatus = "";
+        }
     }
 }
 
 void XBinary::setPdStructTotal(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue)
 {
-    if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
-        pPdStruct->_pdRecord[nIndex].nTotal = nValue;
+    if (pPdStruct) {
+        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+            pPdStruct->_pdRecord[nIndex].nTotal = nValue;
+        }
     }
 }
 
 void XBinary::setPdStructCurrent(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue)
 {
-    if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
-        pPdStruct->_pdRecord[nIndex].nCurrent = nValue;
+    if (pPdStruct) {
+        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+            pPdStruct->_pdRecord[nIndex].nCurrent = nValue;
+        }
     }
 }
 
 void XBinary::setPdStructCurrentIncrement(PDSTRUCT *pPdStruct, qint32 nIndex)
 {
-    if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
-        pPdStruct->_pdRecord[nIndex].nCurrent++;
+    if (pPdStruct) {
+        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+            pPdStruct->_pdRecord[nIndex].nCurrent++;
+        }
     }
 }
 
 void XBinary::setPdStructStatus(PDSTRUCT *pPdStruct, qint32 nIndex, const QString &sStatus)
 {
-    if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
-        pPdStruct->_pdRecord[nIndex].sStatus = sStatus;
+    if (pPdStruct) {
+        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+            pPdStruct->_pdRecord[nIndex].sStatus = sStatus;
+        }
     }
 }
 
 void XBinary::setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex)
 {
-    if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
-        pPdStruct->_pdRecord[nIndex].bIsValid = false;
-        pPdStruct->_pdRecord[nIndex].nCurrent = 0;
-        pPdStruct->_pdRecord[nIndex].nTotal = 0;
-        pPdStruct->_pdRecord[nIndex].sStatus.clear();
+    if (pPdStruct) {
+        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+            pPdStruct->_pdRecord[nIndex].bIsValid = false;
+            pPdStruct->_pdRecord[nIndex].nCurrent = 0;
+            pPdStruct->_pdRecord[nIndex].nTotal = 0;
+            pPdStruct->_pdRecord[nIndex].sStatus.clear();
 
-        pPdStruct->nFinished++;
+            pPdStruct->nFinished++;
+        }
     }
 }
 
@@ -10768,11 +10780,13 @@ qint32 XBinary::getFreeIndex(PDSTRUCT *pPdStruct)
 {
     qint32 nResult = -1;
 
-    for (qint32 i = 0; i < N_NUMBER_PDRECORDS; i++) {
-        if (!pPdStruct->_pdRecord[i].bIsValid) {
-            nResult = i;
+    if (pPdStruct) {
+        for (qint32 i = 0; i < N_NUMBER_PDRECORDS; i++) {
+            if (!pPdStruct->_pdRecord[i].bIsValid) {
+                nResult = i;
 
-            break;
+                break;
+            }
         }
     }
 
