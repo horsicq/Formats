@@ -61,6 +61,11 @@ QString XCFBF::getVersion()
 {
     QString sResult;
 
+    quint16 uMinorVersion = read_uint16(0x18);
+    quint16 uDllVersion = read_uint16(0x1A);
+
+    sResult = QString("%1.%2").arg(uDllVersion).arg(uMinorVersion);
+
     return sResult;
 }
 

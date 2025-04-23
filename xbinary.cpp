@@ -5863,12 +5863,15 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_DATA)) listResult.append(FT_DATA);
     }
 
+    if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_ALL)) {
+        if (stFileTypes.contains(FT_BINARY)) listResult.append(FT_BINARY);
+    }
+
     if (tlOption == TL_OPTION_ALL) {
         if (stFileTypes.contains(FT_ARCHIVE)) listResult.append(FT_ARCHIVE);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_ALL)) {
-        if (stFileTypes.contains(FT_BINARY)) listResult.append(FT_BINARY);
         if (stFileTypes.contains(FT_BINARY16)) listResult.append(FT_BINARY16);
         if (stFileTypes.contains(FT_BINARY32)) listResult.append(FT_BINARY32);
         if (stFileTypes.contains(FT_BINARY64)) listResult.append(FT_BINARY64);
@@ -5899,8 +5902,8 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_TARGZ)) listResult.append(FT_TARGZ);
         if (stFileTypes.contains(FT_NPM)) listResult.append(FT_NPM);
         if (stFileTypes.contains(FT_MACHOFAT)) listResult.append(FT_MACHOFAT);
-        if (stFileTypes.contains(FT_DEB)) listResult.append(FT_DEB);
         if (stFileTypes.contains(FT_AR)) listResult.append(FT_AR);
+        if (stFileTypes.contains(FT_DEB)) listResult.append(FT_DEB);
         if (stFileTypes.contains(FT_JAVACLASS)) listResult.append(FT_JAVACLASS);
         if (stFileTypes.contains(FT_CFBF)) listResult.append(FT_CFBF);
     }
