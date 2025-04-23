@@ -34,7 +34,7 @@ bool XCFBF::isValid(PDSTRUCT *pPdStruct)
 
     bool bResult = false;
 
-    if (getSize() >= 8) {
+    if (getSize() >= 512) {
         _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
         if (compareSignature(&memoryMap, "D0CF11E0A1B11AE1", 0, pPdStruct)) {
@@ -67,6 +67,15 @@ QString XCFBF::getVersion()
 QString XCFBF::getFileFormatExt()
 {
     return "";
+}
+
+XCFBF::StructuredStorageHeader XCFBF::read_StructuredStorageHeader(qint64 nOffset, PDSTRUCT *pPdStruct)
+{
+    StructuredStorageHeader header = {};
+
+    read_array(nOffset, (char *)&header, sizeof(header), pPdStruct);
+
+    return header;
 }
 
 XBinary::_MEMORY_MAP XCFBF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
