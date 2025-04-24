@@ -76,7 +76,7 @@ QString XJavaClass::getFileFormatExt()
     return "class";
 }
 
-XJavaClass::INFO XJavaClass::getInfo()
+XJavaClass::INFO XJavaClass::getInfo(PDSTRUCT *pPdStruct)
 {
     INFO result = {};
 
@@ -86,7 +86,7 @@ XJavaClass::INFO XJavaClass::getInfo()
 
     qint64 nOffset = 10;
 
-    for (int i = 1; i < result.nConstantPoolCount; i++) {
+    for (int i = 1; (i < result.nConstantPoolCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         quint8 nTag = read_uint8(nOffset);
 
         cp_info cpInfo = {};
@@ -193,7 +193,7 @@ XJavaClass::INFO XJavaClass::getInfo()
     result.nInterfacesCount = read_uint16(nOffset, true);
     nOffset += 2;
 
-    for (int i = 0; i < result.nInterfacesCount; i++) {
+    for (int i = 0; (i < result.nInterfacesCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         result.listInterfaces.append(read_uint16(nOffset, true));
         nOffset += 2;
     }
@@ -201,7 +201,7 @@ XJavaClass::INFO XJavaClass::getInfo()
     result.nFieldsCount = read_uint16(nOffset, true);
     nOffset += 2;
 
-    for (int i = 0; i < result.nFieldsCount; i++) {
+    for (int i = 0; (i < result.nFieldsCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         record_info fieldInfo = {};
 
         nOffset += _read_record_info(nOffset, &fieldInfo);
@@ -212,7 +212,7 @@ XJavaClass::INFO XJavaClass::getInfo()
     result.nMethodsCount = read_uint16(nOffset, true);
     nOffset += 2;
 
-    for (int i = 0; i < result.nMethodsCount; i++) {
+    for (int i = 0; (i < result.nMethodsCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         record_info methodInfo = {};
 
         nOffset += _read_record_info(nOffset, &methodInfo);
@@ -223,7 +223,7 @@ XJavaClass::INFO XJavaClass::getInfo()
     result.nAttributesCount = read_uint16(nOffset, true);
     nOffset += 2;
 
-    for (int i = 0; i < result.nAttributesCount; i++) {
+    for (int i = 0; (i < result.nAttributesCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         attribute_info attributeInfo = {};
 
         nOffset += _read_attribute_info(nOffset, &attributeInfo);
@@ -322,17 +322,11 @@ XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
 {
     Q_UNUSED(mapMode)
 
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
     qint64 nTotalSize = getSize();
 
     _MEMORY_MAP result = {};
 
-    INFO info = getInfo();
+    INFO info = getInfo(pPdStruct);
 
     result.nBinarySize = nTotalSize;
     result.fileType = getFileType();

@@ -611,10 +611,17 @@ public:
 
     enum HLTYPE {
         HLTYPE_UNKNOWN = 0,
+        HLTYPE_TOTAL,
         HLTYPE_FILEREGIONS,
         HLTYPE_NATIVEREGIONS,
         HLTYPE_NATIVESUBREGIONS,
         HLTYPE_DATA
+    };
+
+    struct RFLAGS {
+        bool bRead;
+        bool bWrite;
+        bool bExecute;
     };
 
     struct HREGION {
@@ -623,6 +630,7 @@ public:
         qint64 nFileOffset;
         qint64 nFileSize;
         QString sName;
+        RFLAGS rflags;
     };
 
     struct PDRECORD {

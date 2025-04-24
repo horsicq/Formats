@@ -126,11 +126,6 @@ contains(XCONFIG, use_archive) {
     include($$PWD/formats/xjavaclass.pri)
 }
 
-!contains(XCONFIG, xcfbf) {
-    XCONFIG += xcfbf
-    include($$PWD/formats/xcfbf.pri)
-}
-
 DISTFILES += \
     $$PWD/LICENSE \
     $$PWD/README.md \

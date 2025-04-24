@@ -40,7 +40,6 @@
 #include "xmp4.h"
 #include "xriff.h"
 #include "xjavaclass.h"
-#include "xcfbf.h"
 #ifdef USE_DEX
 #include "xandroidbinary.h"
 #include "xdex.h"

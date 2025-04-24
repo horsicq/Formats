@@ -69,7 +69,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMO
 
     if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return XJavaClass(pDevice).getMemoryMap(mapMode, pPdStruct);
 
-    if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return XCFBF(pDevice).getMemoryMap(mapMode, pPdStruct);
+
 
 #ifdef USE_DEX
     if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) return XDEX(pDevice).getMemoryMap(mapMode, pPdStruct);
@@ -108,6 +108,8 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMO
     if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) return XZlib(pDevice).getMemoryMap(mapMode, pPdStruct);
 
     if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) return XLHA(pDevice).getMemoryMap(mapMode, pPdStruct);
+
+    if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return XCFBF(pDevice).getMemoryMap(mapMode, pPdStruct);
 
     if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType))
         return XDOS16(pDevice).getMemoryMap(mapMode, pPdStruct);
@@ -176,8 +178,6 @@ QList<XBinary::MAPMODE> XFormats::getMapModesList(XBinary::FT fileType)
 
     if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return XJavaClass::getMapModesList();
 
-    if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return XCFBF::getMapModesList();
-
 #ifdef USE_DEX
     if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) return XDEX::getMapModesList();
 #endif
@@ -203,6 +203,8 @@ QList<XBinary::MAPMODE> XFormats::getMapModesList(XBinary::FT fileType)
     if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) return XZlib::getMapModesList();
 
     if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) return XLHA::getMapModesList();
+
+    if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return XCFBF::getMapModesList();
 
     if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType)) return XDOS16::getMapModesList();
 #endif
@@ -331,9 +333,6 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
     } else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) {
         XJavaClass xjc(pDevice);
         bResult = xjc.isBigEndian();
-    } else if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) {
-        XCFBF xjc(pDevice);
-        bResult = xjc.isBigEndian();
     }
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) {
@@ -348,7 +347,10 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
     }
 #endif
 #ifdef USE_ARCHIVE
-    else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) {
+    else if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) {
+        XCFBF xjc(pDevice);
+        bResult = xjc.isBigEndian();
+    } else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) {
         XZip zip(pDevice);
         bResult = zip.isBigEndian();
     }
@@ -406,8 +408,6 @@ QList<XBinary::HREGION> XFormats::getHighlights(XBinary::FT fileType, QIODevice 
     // Document formats
     if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return XJavaClass(pDevice).getHighlights(hlType, pPdStruct);
 
-    if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return XCFBF(pDevice).getHighlights(hlType, pPdStruct);
-
 #ifdef USE_DEX
     if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) return XDEX(pDevice).getHighlights(hlType, pPdStruct);
 #endif
@@ -433,6 +433,8 @@ QList<XBinary::HREGION> XFormats::getHighlights(XBinary::FT fileType, QIODevice 
     if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) return XZlib(pDevice).getHighlights(hlType, pPdStruct);
 
     if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) return XLHA(pDevice).getHighlights(hlType, pPdStruct);
+
+    if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return XCFBF(pDevice).getHighlights(hlType, pPdStruct);
 
     if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType))
         return XDOS16(pDevice).getHighlights(hlType, pPdStruct);
@@ -929,8 +931,6 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     // Document formats
     else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) result = XJavaClass(_pDevice).getFileFormatInfo(pPdStruct);
 
-    else if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) result = XCFBF(_pDevice).getFileFormatInfo(pPdStruct);
-
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) result = XDEX(_pDevice).getFileFormatInfo(pPdStruct);
 #endif
@@ -974,6 +974,8 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) result = XZlib(_pDevice).getFileFormatInfo(pPdStruct);
 
     else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) result = XLHA(_pDevice).getFileFormatInfo(pPdStruct);
+
+    else if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) result = XCFBF(_pDevice).getFileFormatInfo(pPdStruct);
 
     else if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType))
         result = XDOS16(_pDevice).getFileFormatInfo(pPdStruct);

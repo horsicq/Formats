@@ -10968,7 +10968,15 @@ QList<XBinary::HREGION> XBinary::getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruc
 {
     QList<XBinary::HREGION> listResult;
 
-    if (hlType == HLTYPE_FILEREGIONS) {
+    if (hlType == HLTYPE_TOTAL) {
+        HREGION region = {};
+        region.sName = tr("Total");
+        region.nVirtualAddress = getBaseAddress();
+        region.nVirtualSize = getImageSize();
+        region.nFileOffset = 0;
+        region.nFileSize = g_pDevice->size();
+        listResult.append(region);
+    } else if (hlType == HLTYPE_FILEREGIONS) {
         _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
         listResult = getFileRegions(&memoryMap, pPdStruct);
     } else if (hlType == HLTYPE_DATA) {
