@@ -629,8 +629,8 @@ public:
         qint64 nVirtualSize;
         qint64 nFileOffset;
         qint64 nFileSize;
-        QString sName;
         RFLAGS rflags;
+        QString sName;
     };
 
     struct PDRECORD {
