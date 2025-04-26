@@ -69,8 +69,6 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMO
 
     if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return XJavaClass(pDevice).getMemoryMap(mapMode, pPdStruct);
 
-
-
 #ifdef USE_DEX
     if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) return XDEX(pDevice).getMemoryMap(mapMode, pPdStruct);
 #endif
@@ -1061,7 +1059,7 @@ QSet<XBinary::FT> XFormats::getFileTypesAR(QIODevice *pDevice, QList<XArchive::R
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypesGZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
 {
-     QSet<XBinary::FT> stResult;
+    QSet<XBinary::FT> stResult;
 
     if (pListRecords->count()) {
         const XArchive::RECORD &record = pListRecords->at(0);
