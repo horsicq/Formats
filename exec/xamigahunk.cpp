@@ -57,13 +57,6 @@ QList<XBinary::MAPMODE> XAmigaHunk::getMapModesList()
 
 XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     if (mapMode == MAPMODE_UNKNOWN) {
         mapMode = MAPMODE_SEGMENTS;
     }
@@ -87,7 +80,7 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
     qint32 nNumberOfHunks = listHunks.count();
 
     if (mapMode == XBinary::MAPMODE_REGIONS) {
-        for (qint32 i = 0; (i < nNumberOfHunks) && (!(pPdStruct->bIsStop)); i++) {
+        for (qint32 i = 0; (i < nNumberOfHunks) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
             HUNK hunk = listHunks.at(i);
             _MEMORY_RECORD record = {};
             record.nIndex = nIndex++;
@@ -109,7 +102,7 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
         result.nModuleAddress = XAMIGAHUNK_DEF::IMAGE_BASE;
         XADDR nCurrentAddress = result.nModuleAddress;
 
-        for (qint32 i = 0; (i < nNumberOfHunks) && (!(pPdStruct->bIsStop)); i++) {
+        for (qint32 i = 0; (i < nNumberOfHunks) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
             HUNK hunk = listHunks.at(i);
 
             if ((hunk.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_DATA) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE) ||
