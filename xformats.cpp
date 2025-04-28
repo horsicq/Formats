@@ -1025,6 +1025,35 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::
 }
 #endif
 #ifdef USE_ARCHIVE
+QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pDevice)  // TODO
+
+    QSet<XBinary::FT> stResult;
+
+    XZip xzip(pDevice);
+
+    if (xzip.isValid(pPdStruct)) {
+        stResult.insert(XBinary::FT_ZIP);
+
+        qint64 nECDOffset = xzip.findECDOffset(pPdStruct);
+
+        if (xzip.isAPK(nECDOffset, pPdStruct)) {
+            stResult.insert(XBinary::FT_APK);
+            stResult.insert(XBinary::FT_JAR);
+        } else if (xzip.isIPA(nECDOffset, pPdStruct)) {
+            stResult.insert(XBinary::FT_IPA);
+        } else if (xzip.isJAR(nECDOffset, pPdStruct)) {
+            stResult.insert(XBinary::FT_JAR);
+        }
+        // TODO APKS
+    }
+
+    // XBinary::FT fileType = XZip::_getFileType(pDevice, pListRecords, true);
+    return stResult;
+}
+#endif
+#ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypesTGZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pDevice)  // TODO
@@ -1080,6 +1109,12 @@ QSet<XBinary::FT> XFormats::getFileTypesGZIP(QIODevice *pDevice, QList<XArchive:
 #endif
 QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
 {
+#ifdef QT_DEBUG
+    qDebug("XFormats::_getFileTypes");
+    QElapsedTimer timer;
+    timer.start();
+#endif
+
     QSet<XBinary::FT> stResult = XBinary::getFileTypes(pDevice, bExtra);
 
 #ifdef USE_ARCHIVE
@@ -1102,9 +1137,10 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             XZip xzip(pDevice);
 
             if (xzip.isValid(pPdStruct)) {
-                QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(20000, pPdStruct);
+                // QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(20000, pPdStruct);
 
-                stResult += getFileTypesZIP(pDevice, &listArchiveRecords, pPdStruct);
+                // stResult += getFileTypesZIP(pDevice, &listArchiveRecords, pPdStruct);
+                stResult += getFileTypesZIP(pDevice, pPdStruct);
             }
         } else if (stResult.contains(XBinary::FT_AR)) {
             X_Ar xar(pDevice);
@@ -1139,6 +1175,11 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             }
         }
     }
+#endif
+
+#ifdef QT_DEBUG
+    qint64 nElapsed = timer.elapsed();
+    qDebug("XFormats::_getFileTypes time=%lld", nElapsed);
 #endif
 
     return stResult;

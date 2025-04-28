@@ -4973,15 +4973,17 @@ XPE::RESOURCE_POSITION XPE::_getResourcePosition(XBinary::_MEMORY_MAP *pMemoryMa
         {
             result.bIsValid = true;
 
-            for (qint32 i = 0; i < result.directory.NumberOfIdEntries + result.directory.NumberOfNamedEntries; i++) {
-                RESOURCE_POSITION rp = _getResourcePosition(pMemoryMap, nBaseAddress, nResourceOffset, nDirectoryOffset, nLevel + 1);
+            if (nLevel < 3) {
+                for (qint32 i = 0; i < result.directory.NumberOfIdEntries + result.directory.NumberOfNamedEntries; i++) {
+                    RESOURCE_POSITION rp = _getResourcePosition(pMemoryMap, nBaseAddress, nResourceOffset, nDirectoryOffset, nLevel + 1);
 
-                if (!rp.bIsValid) {
-                    break;
+                    if (!rp.bIsValid) {
+                        break;
+                    }
+
+                    result.listPositions.append(rp);
+                    nDirectoryOffset += sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
                 }
-
-                result.listPositions.append(rp);
-                nDirectoryOffset += sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
             }
         }
     } else {
