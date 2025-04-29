@@ -66,7 +66,149 @@ const quint16 _crc16_tab[] = {
     0x9901, 0x59c0, 0x5880, 0x9841, 0x8801, 0x48c0, 0x4980, 0x8941, 0x4b00, 0x8bc1, 0x8a81, 0x4a40, 0x4e00, 0x8ec1, 0x8f81, 0x4f40, 0x8d01, 0x4dc0, 0x4c80, 0x8c41,
     0x4400, 0x84c1, 0x8581, 0x4540, 0x8701, 0x47c0, 0x4680, 0x8641, 0x8201, 0x42c0, 0x4380, 0x8341, 0x4100, 0x81c1, 0x8081, 0x4040};
 
+XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
+    {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
+    {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},
+    {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
+    {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},
+    {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},
+    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")},
+};
+
+XBinary::XCONVERT _TABLE_XBinary_FT[] = {
+    {XBinary::FT_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XBinary::FT_DATA, "Data", QObject::tr("Data")},
+    {XBinary::FT_REGION, "Region", QObject::tr("Region")},
+    {XBinary::FT_PROCESS, "Process", QObject::tr("Process")},
+    {XBinary::FT_BINARY, "Binary", QString("Binary")},
+    {XBinary::FT_BINARY16, "Binary16", QString("Binary16")},
+    {XBinary::FT_BINARY32, "Binary32", QString("Binary32")},
+    {XBinary::FT_BINARY64, "Binary64", QString("Binary64")},
+    {XBinary::FT_COM, "COM", QString("COM")},
+    {XBinary::FT_MSDOS, "MSDOS", QString("MSDOS")},
+    {XBinary::FT_DOS16M, "DOS16M", QString("DOS/16M")},
+    {XBinary::FT_DOS4G, "DOS4G", QString("DOS/4G")},
+    {XBinary::FT_NE, "NE", QString("NE")},
+    {XBinary::FT_LE, "LE", QString("LE")},
+    {XBinary::FT_LX, "LX", QString("LX")},
+    {XBinary::FT_PE, "PE", QString("PE")},
+    {XBinary::FT_PE32, "PE32", QString("PE32")},
+    {XBinary::FT_PE64, "PE64", QString("PE64")},
+    {XBinary::FT_ELF, "ELF", QString("ELF")},
+    {XBinary::FT_ELF32, "ELF32", QString("ELF32")},
+    {XBinary::FT_ELF64, "ELF64", QString("ELF64")},
+    {XBinary::FT_MACHO, "Mach-O", QString("Mach-O")},
+    {XBinary::FT_MACHO32, "Mach-O32", QString("Mach-O32")},
+    {XBinary::FT_MACHO64, "Mach-O64", QString("Mach-O64")},
+    {XBinary::FT_AMIGAHUNK, "Amiga Hunk", QString("Amiga Hunk")},
+    // Extra
+    {XBinary::FT_7Z, "7-Zip", QString("7-Zip")},
+    {XBinary::FT_ANDROIDASRC, "AndroidASRC", QString("Android ASRC")},
+    {XBinary::FT_ANDROIDXML, "AndroidXML", QString("Android XML")},
+    {XBinary::FT_APK, "APK", QString("APK")},
+    {XBinary::FT_APKS, "APKS", QString("APKS")},
+    {XBinary::FT_AR, "ar", QString("ar")},  // TODO DEB
+    {XBinary::FT_ARCHIVE, "Archive", QObject::tr("Archive")},
+    {XBinary::FT_AUDIO, "Audio", QObject::tr("Audio")},
+    {XBinary::FT_AVI, "AVI", QString("AVI")},
+    {XBinary::FT_BMP, "BMP", QString("BMP")},
+    {XBinary::FT_CAB, "CAB", QString("CAB")},
+    {XBinary::FT_CUR, "CUR", QString("CUR")},
+    {XBinary::FT_DEX, "DEX", QString("DEX")},
+    {XBinary::FT_DOCUMENT, "Document", QObject::tr("Document")},
+    {XBinary::FT_GIF, "GIF", QString("GIF")},
+    {XBinary::FT_GZIP, "GZIP", QString("GZIP")},
+    {XBinary::FT_ICO, "ICO", QString("ICO")},
+    {XBinary::FT_IMAGE, "Image", QObject::tr("Image")},
+    {XBinary::FT_IPA, "IPA", QString("IPA")},
+    {XBinary::FT_JAR, "JAR", QString("JAR")},
+    {XBinary::FT_JPEG, "JPEG", QString("JPEG")},
+    {XBinary::FT_LHA, "LHA", QString("LHA")},
+    {XBinary::FT_MACHOFAT, "Mach-O FAT", QString("Mach-O FAT")},
+    {XBinary::FT_MP3, "MP3", QString("MP3")},
+    {XBinary::FT_MP4, "MP4", QString("MP4")},
+    {XBinary::FT_NPM, "NPM", QString("NPM")},
+    {XBinary::FT_PDF, "PDF", QString("PDF")},
+    {XBinary::FT_PLAINTEXT, "PlainText", QObject::tr("Plain Text")},
+    {XBinary::FT_PNG, "PNG", QString("PNG")},
+    {XBinary::FT_RAR, "RAR", QString("RAR")},
+    {XBinary::FT_RIFF, "RIFF", QString("RIFF")},
+    {XBinary::FT_SIGNATURE, "Signature", QObject::tr("Signature")},
+    {XBinary::FT_TAR, "tar", QString("tar")},
+    {XBinary::FT_TARGZ, "tar.gz", QString("tar.gz")},
+    {XBinary::FT_TEXT, "Text", QObject::tr("Text")},
+    {XBinary::FT_TIFF, "TIFF", QString("TIFF")},
+    {XBinary::FT_UNICODE, "Unicode", QString("Unicode")},
+    {XBinary::FT_UNICODE_BE, "Unicode BE", QString("Unicode BE")},
+    {XBinary::FT_UNICODE_LE, "Unicode LE", QString("Unicode LE")},
+    {XBinary::FT_UTF8, "UTF8", QString("UTF8")},
+    {XBinary::FT_VIDEO, "Video", QObject::tr("Video")},
+    {XBinary::FT_WEBP, "WebP", QString("WebP")},
+    {XBinary::FT_ZIP, "ZIP", QString("ZIP")},
+    {XBinary::FT_ZLIB, "zlib", QString("zlib")},
+    {XBinary::FT_DEB, "deb", QString("deb")},
+    {XBinary::FT_BWDOS16M, "BW DOS16M", QString("BW DOS16M")},
+    {XBinary::FT_JAVACLASS, "Java Class", QString("Java Class")},
+    {XBinary::FT_CFBF, "CFBF", QString("CFBF")},
+};
+
 const double XBinary::D_ENTROPY_THRESHOLD = 6.5;
+
+QString XBinary::XCONVERT_idToTransString(quint32 nID, XCONVERT *pRecords, qint32 nRecordsSize)
+{
+    QString sResult;
+
+    for (qint32 i = 0; i < nRecordsSize; i++) {
+        if (pRecords[i].nID == nID) {
+            sResult = pRecords[i].sTransString;
+            break;
+        }
+    }
+
+    if (sResult == "") {
+        sResult = tr("Unknown");
+    }
+
+    return sResult;
+}
+
+QString XBinary::XCONVERT_idToSetString(quint32 nID, XCONVERT *pRecords, qint32 nRecordsSize)
+{
+    QString sResult;
+
+    for (qint32 i = 0; i < nRecordsSize; i++) {
+        if (pRecords[i].nID == nID) {
+            sResult = pRecords[i].sSetString;
+            break;
+        }
+    }
+
+    if (sResult == "") {
+        sResult = "Unknown";
+    }
+
+    return sResult;
+}
+
+QString XBinary::XCONVERT_idToFtString(quint32 nID, XCONVERT *pRecords, qint32 nRecordsSize)
+{
+    return XCONVERT_idToSetString(nID, pRecords, nRecordsSize).toUpper().remove(" ").remove("-");
+}
+
+quint32 XBinary::XCONVERT_ftStringToId(const QString &sString, XCONVERT *pRecords, qint32 nRecordsSize)
+{
+    quint32 nResult = XBinary::FT_UNKNOWN;
+
+    for (qint32 i = 0; i < nRecordsSize; i++) {
+        if (pRecords[i].sSetString.toUpper().remove(" ").remove("-") == sString.toUpper()) {
+            nResult = pRecords[i].nID;
+            break;
+        }
+    }
+
+    return nResult;
+}
 
 XBinary::XBinary(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
@@ -555,86 +697,7 @@ QString XBinary::randomString(qint32 nSize)
 
 QString XBinary::fileTypeIdToString(XBinary::FT fileType)
 {
-    QString sResult = tr("Unknown");
-
-    switch (fileType) {
-        case FT_UNKNOWN: sResult = tr("Unknown"); break;
-        case FT_DATA: sResult = tr("Data"); break;
-        case FT_REGION: sResult = tr("Region"); break;
-        case FT_PROCESS: sResult = tr("Process"); break;
-        case FT_BINARY: sResult = QString("Binary"); break;
-        case FT_BINARY16: sResult = QString("Binary16"); break;
-        case FT_BINARY32: sResult = QString("Binary32"); break;
-        case FT_BINARY64: sResult = QString("Binary64"); break;
-        case FT_COM: sResult = QString("COM"); break;
-        case FT_MSDOS: sResult = QString("MSDOS"); break;
-        case FT_DOS16M: sResult = QString("DOS/16M"); break;
-        case FT_DOS4G: sResult = QString("DOS/4G"); break;
-        case FT_NE: sResult = QString("NE"); break;
-        case FT_LE: sResult = QString("LE"); break;
-        case FT_LX: sResult = QString("LX"); break;
-        case FT_PE: sResult = QString("PE"); break;
-        case FT_PE32: sResult = QString("PE32"); break;
-        case FT_PE64: sResult = QString("PE64"); break;
-        case FT_ELF: sResult = QString("ELF"); break;
-        case FT_ELF32: sResult = QString("ELF32"); break;
-        case FT_ELF64: sResult = QString("ELF64"); break;
-        case FT_MACHO: sResult = QString("Mach-O"); break;
-        case FT_MACHO32: sResult = QString("Mach-O32"); break;
-        case FT_MACHO64: sResult = QString("Mach-O64"); break;
-        case FT_AMIGAHUNK: sResult = QString("Amiga Hunk"); break;
-        // Extra
-        case FT_7Z: sResult = QString("7-Zip"); break;
-        case FT_ANDROIDASRC: sResult = QString("Android ASRC"); break;
-        case FT_ANDROIDXML: sResult = QString("Android XML"); break;
-        case FT_APK: sResult = QString("APK"); break;
-        case FT_APKS: sResult = QString("APKS"); break;
-        case FT_AR: sResult = QString("ar"); break;  // TODO DEB
-        case FT_ARCHIVE: sResult = tr("Archive"); break;
-        case FT_AUDIO: sResult = tr("Audio"); break;
-        case FT_AVI: sResult = QString("AVI"); break;
-        case FT_BMP: sResult = QString("BMP"); break;
-        case FT_CAB: sResult = QString("CAB"); break;
-        case FT_CUR: sResult = QString("CUR"); break;
-        case FT_DEX: sResult = QString("DEX"); break;
-        case FT_DOCUMENT: sResult = tr("Document"); break;
-        case FT_GIF: sResult = QString("GIF"); break;
-        case FT_GZIP: sResult = QString("GZIP"); break;
-        case FT_ICO: sResult = QString("ICO"); break;
-        case FT_IMAGE: sResult = tr("Image"); break;
-        case FT_IPA: sResult = QString("IPA"); break;
-        case FT_JAR: sResult = QString("JAR"); break;
-        case FT_JPEG: sResult = QString("JPEG"); break;
-        case FT_LHA: sResult = QString("LHA"); break;
-        case FT_MACHOFAT: sResult = QString("Mach-O FAT"); break;
-        case FT_MP3: sResult = QString("MP3"); break;
-        case FT_MP4: sResult = QString("MP4"); break;
-        case FT_NPM: sResult = QString("NPM"); break;
-        case FT_PDF: sResult = QString("PDF"); break;
-        case FT_PLAINTEXT: sResult = tr("Plain Text"); break;
-        case FT_PNG: sResult = QString("PNG"); break;
-        case FT_RAR: sResult = QString("RAR"); break;
-        case FT_RIFF: sResult = QString("RIFF"); break;
-        case FT_SIGNATURE: sResult = tr("Signature"); break;
-        case FT_TAR: sResult = QString("tar"); break;
-        case FT_TARGZ: sResult = QString("tar.gz"); break;
-        case FT_TEXT: sResult = tr("Text"); break;
-        case FT_TIFF: sResult = QString("TIFF"); break;
-        case FT_UNICODE: sResult = QString("Unicode"); break;
-        case FT_UNICODE_BE: sResult = QString("Unicode BE"); break;
-        case FT_UNICODE_LE: sResult = QString("Unicode LE"); break;
-        case FT_UTF8: sResult = QString("UTF8"); break;
-        case FT_VIDEO: sResult = tr("Video"); break;
-        case FT_WEBP: sResult = QString("WebP"); break;
-        case FT_ZIP: sResult = QString("ZIP"); break;
-        case FT_ZLIB: sResult = QString("zlib"); break;
-        case FT_DEB: sResult = QString("deb"); break;
-        case FT_BWDOS16M: sResult = QString("BW DOS16M"); break;
-        case FT_JAVACLASS: sResult = QString("Java Class"); break;
-        case FT_CFBF: sResult = QString("CFBF"); break;
-    }
-
-    return sResult;
+    return XCONVERT_idToTransString(fileType, _TABLE_XBinary_FT, sizeof(_TABLE_XBinary_FT) / sizeof(XBinary::XCONVERT));
 }
 
 QString XBinary::fileTypeIdToExts(FT fileType)
@@ -678,165 +741,12 @@ QString XBinary::fileTypeIdToExts(FT fileType)
 
 XBinary::FT XBinary::ftStringToFileTypeId(QString sFileType)
 {
-    FT result = FT_UNKNOWN;
-
-    if (sFileType == "DATA") result = FT_DATA;
-    else if (sFileType == "REGION") result = FT_REGION;
-    else if (sFileType == "PROCESS") result = FT_PROCESS;
-    else if (sFileType == "BINARY") result = FT_BINARY;
-    else if (sFileType == "BINARY16") result = FT_BINARY16;
-    else if (sFileType == "BINARY32") result = FT_BINARY32;
-    else if (sFileType == "BINARY64") result = FT_BINARY64;
-    else if (sFileType == "COM") result = FT_COM;
-    else if (sFileType == "MSDOS") result = FT_MSDOS;
-    else if (sFileType == "DOS16M") result = FT_DOS16M;
-    else if (sFileType == "DOS4G") result = FT_DOS4G;
-    else if (sFileType == "NE") result = FT_NE;
-    else if (sFileType == "LE") result = FT_LE;
-    else if (sFileType == "LX") result = FT_LX;
-    else if (sFileType == "PE") result = FT_PE;
-    else if (sFileType == "PE32") result = FT_PE32;
-    else if (sFileType == "PE64") result = FT_PE64;
-    else if (sFileType == "ELF") result = FT_ELF;
-    else if (sFileType == "ELF32") result = FT_ELF32;
-    else if (sFileType == "ELF64") result = FT_ELF64;
-    else if (sFileType == "MACHO") result = FT_MACHO;
-    else if (sFileType == "MACHO32") result = FT_MACHO32;
-    else if (sFileType == "MACHO64") result = FT_MACHO64;
-    else if (sFileType == "AMIGAHUNK") result = FT_AMIGAHUNK;
-    else if (sFileType == "7Z") result = FT_7Z;
-    else if (sFileType == "ANDROIDASRC") result = FT_ANDROIDASRC;
-    else if (sFileType == "ANDROIDXML") result = FT_ANDROIDXML;
-    else if (sFileType == "APK") result = FT_APK;
-    else if (sFileType == "APKS") result = FT_APKS;
-    else if (sFileType == "AR") result = FT_AR;
-    else if (sFileType == "TAR") result = FT_TAR;
-    else if (sFileType == "TARGZ") result = FT_TARGZ;
-    else if (sFileType == "ARCHIVE") result = FT_ARCHIVE;
-    else if (sFileType == "CAB") result = FT_CAB;
-    else if (sFileType == "DEX") result = FT_DEX;
-    else if (sFileType == "DOCUMENT") result = FT_DOCUMENT;
-    else if (sFileType == "GIF") result = FT_GIF;
-    else if (sFileType == "BMP") result = FT_BMP;
-    else if (sFileType == "IMAGE") result = FT_IMAGE;
-    else if (sFileType == "VIDEO") result = FT_VIDEO;
-    else if (sFileType == "AUDIO") result = FT_AUDIO;
-    else if (sFileType == "IPA") result = FT_IPA;
-    else if (sFileType == "JAR") result = FT_JAR;
-    else if (sFileType == "JPEG") result = FT_JPEG;
-    else if (sFileType == "MACHOFAT") result = FT_MACHOFAT;
-    else if (sFileType == "PDF") result = FT_PDF;
-    else if (sFileType == "PLAINTEXT") result = FT_PLAINTEXT;
-    else if (sFileType == "PNG") result = FT_PNG;
-    else if (sFileType == "RAR") result = FT_RAR;
-    else if (sFileType == "TEXT") result = FT_TEXT;
-    else if (sFileType == "TIFF") result = FT_TIFF;
-    else if (sFileType == "UNICODE") result = FT_UNICODE;
-    else if (sFileType == "UNICODE_BE") result = FT_UNICODE_BE;
-    else if (sFileType == "UNICODE_LE") result = FT_UNICODE_LE;
-    else if (sFileType == "UTF8") result = FT_UTF8;
-    else if (sFileType == "ZIP") result = FT_ZIP;
-    else if (sFileType == "GZIP") result = FT_GZIP;
-    else if (sFileType == "ZLIB") result = FT_ZLIB;
-    else if (sFileType == "LHA") result = FT_LHA;
-    else if (sFileType == "ICO") result = FT_ICO;
-    else if (sFileType == "CUR") result = FT_CUR;
-    else if (sFileType == "MP3") result = FT_MP3;
-    else if (sFileType == "MP4") result = FT_MP4;
-    else if (sFileType == "RIFF") result = FT_RIFF;
-    else if (sFileType == "AVI") result = FT_AVI;
-    else if (sFileType == "WEBP") result = FT_WEBP;
-    else if (sFileType == "SIGNATURE") result = FT_SIGNATURE;
-    else if (sFileType == "NPM") result = FT_NPM;
-    else if (sFileType == "DEB") result = FT_DEB;
-    else if (sFileType == "BWDOS16M") result = FT_BWDOS16M;
-    else if (sFileType == "JAVACLASS") result = FT_JAVACLASS;
-    else if (sFileType == "CFBF") result = FT_CFBF;
-
-    return result;
+    return (XBinary::FT)XCONVERT_ftStringToId(sFileType, _TABLE_XBinary_FT, sizeof(_TABLE_XBinary_FT) / sizeof(XBinary::XCONVERT));
 }
 
 QString XBinary::fileTypeIdToFtString(FT fileType)
 {
-    QString sResult = "";
-
-    switch (fileType) {
-        case FT_UNKNOWN: sResult = "UNKNOWN"; break;
-        case FT_DATA: sResult = "DATA"; break;
-        case FT_REGION: sResult = "REGION"; break;
-        case FT_PROCESS: sResult = "PROCESS"; break;
-        case FT_BINARY: sResult = "BINARY"; break;
-        case FT_BINARY16: sResult = "BINARY16"; break;
-        case FT_BINARY32: sResult = "BINARY32"; break;
-        case FT_BINARY64: sResult = "BINARY64"; break;
-        case FT_COM: sResult = "COM"; break;
-        case FT_MSDOS: sResult = "MSDOS"; break;
-        case FT_DOS16M: sResult = "DOS16M"; break;
-        case FT_DOS4G: sResult = "DOS4G"; break;
-        case FT_NE: sResult = "NE"; break;
-        case FT_LE: sResult = "LE"; break;
-        case FT_LX: sResult = "LX"; break;
-        case FT_PE: sResult = "PE"; break;
-        case FT_PE32: sResult = "PE32"; break;
-        case FT_PE64: sResult = "PE64"; break;
-        case FT_ELF: sResult = "ELF"; break;
-        case FT_ELF32: sResult = "ELF32"; break;
-        case FT_ELF64: sResult = "ELF64"; break;
-        case FT_MACHO: sResult = "MACHO"; break;
-        case FT_MACHO32: sResult = "MACHO32"; break;
-        case FT_MACHO64: sResult = "MACHO64"; break;
-        case FT_AMIGAHUNK: sResult = "AMIGAHUNK"; break;
-        case FT_7Z: sResult = "7Z"; break;
-        case FT_ANDROIDASRC: sResult = "ANDROIDASRC"; break;
-        case FT_ANDROIDXML: sResult = "ANDROIDXML"; break;
-        case FT_APK: sResult = "APK"; break;
-        case FT_APKS: sResult = "APKS"; break;
-        case FT_AR: sResult = "AR"; break;
-        case FT_ARCHIVE: sResult = "ARCHIVE"; break;
-        case FT_AUDIO: sResult = "AUDIO"; break;
-        case FT_AVI: sResult = "AVI"; break;
-        case FT_BMP: sResult = "BMP"; break;
-        case FT_CAB: sResult = "CAB"; break;
-        case FT_CUR: sResult = "CUR"; break;
-        case FT_DEX: sResult = "DEX"; break;
-        case FT_DOCUMENT: sResult = "DOCUMENT"; break;
-        case FT_GIF: sResult = "GIF"; break;
-        case FT_GZIP: sResult = "GZIP"; break;
-        case FT_ICO: sResult = "ICO"; break;
-        case FT_IMAGE: sResult = "IMAGE"; break;
-        case FT_IPA: sResult = "IPA"; break;
-        case FT_JAR: sResult = "JAR"; break;
-        case FT_JPEG: sResult = "JPEG"; break;
-        case FT_LHA: sResult = "LHA"; break;
-        case FT_MACHOFAT: sResult = "MACHOFAT"; break;
-        case FT_MP3: sResult = "MP3"; break;
-        case FT_MP4: sResult = "MP4"; break;
-        case FT_NPM: sResult = "NPM"; break;
-        case FT_PDF: sResult = "PDF"; break;
-        case FT_PLAINTEXT: sResult = "PLAINTEXT"; break;
-        case FT_PNG: sResult = "PNG"; break;
-        case FT_RAR: sResult = "RAR"; break;
-        case FT_RIFF: sResult = "RIFF"; break;
-        case FT_SIGNATURE: sResult = "SIGNATURE"; break;
-        case FT_TAR: sResult = "TAR"; break;
-        case FT_TARGZ: sResult = "TARGZ"; break;
-        case FT_TEXT: sResult = "TEXT"; break;
-        case FT_TIFF: sResult = "TIFF"; break;
-        case FT_UNICODE: sResult = "UNICODE"; break;
-        case FT_UNICODE_BE: sResult = "UNICODE_BE"; break;
-        case FT_UNICODE_LE: sResult = "UNICODE_LE"; break;
-        case FT_UTF8: sResult = "UTF8"; break;
-        case FT_VIDEO: sResult = "VIDEO"; break;
-        case FT_WEBP: sResult = "WEBP"; break;
-        case FT_ZIP: sResult = "ZIP"; break;
-        case FT_ZLIB: sResult = "ZLIB"; break;
-        case FT_DEB: sResult = "DEB"; break;
-        case FT_BWDOS16M: sResult = "BWDOS16M"; break;
-        case FT_JAVACLASS: sResult = "JAVACLASS"; break;
-        case FT_CFBF: sResult = "CFBF"; break;
-    }
-
-    return sResult;
+    return XCONVERT_idToFtString(fileType, _TABLE_XBinary_FT, sizeof(_TABLE_XBinary_FT) / sizeof(XBinary::XCONVERT));
 }
 
 QString XBinary::convertFileName(const QString &sFileName)  // TODO Check
@@ -10151,20 +10061,7 @@ XBinary::XDWORD XBinary::make_xdword(quint32 nValue)
 
 QString XBinary::recordFilePartIdToString(FILEPART id)
 {
-    QString sResult = tr("Unknown");
-
-    switch (id) {
-        // TODO more
-        case FILEPART_UNKNOWN: sResult = tr("Unknown"); break;
-        case FILEPART_HEADER: sResult = tr("Header"); break;
-        case FILEPART_OVERLAY: sResult = tr("Overlay"); break;
-        case FILEPART_ARCHIVERECORD: sResult = tr("Archive record"); break;
-        case FILEPART_RESOURCE: sResult = tr("Resource"); break;
-        case FILEPART_REGION: sResult = tr("Region"); break;
-        case FILEPART_DEBUGDATA: sResult = tr("Debug data"); break;
-    }
-
-    return sResult;
+    return XCONVERT_idToTransString(id, _TABLE_XBinary_FILEPART, sizeof(_TABLE_XBinary_FILEPART) / sizeof(XBinary::XCONVERT));
 }
 
 bool XBinary::checkVersionString(const QString &sVersion)

@@ -101,6 +101,17 @@ class XBinary : public QObject {
     static const double D_ENTROPY_THRESHOLD;  // 6.5 TODO set get
 
 public:
+    struct XCONVERT {
+        quint32 nID;
+        QString sSetString;
+        QString sTransString;
+    };
+
+    static QString XCONVERT_idToTransString(quint32 nID, XBinary::XCONVERT *pRecords, qint32 nRecordsSize);
+    static QString XCONVERT_idToSetString(quint32 nID, XBinary::XCONVERT *pRecords, qint32 nRecordsSize);
+    static QString XCONVERT_idToFtString(quint32 nID, XBinary::XCONVERT *pRecords, qint32 nRecordsSize);
+    static quint32 XCONVERT_ftStringToId(const QString &sString, XBinary::XCONVERT *pRecords, qint32 nRecordsSize);
+
     enum LT {
         LT_UNKNOWN = 0,
         LT_OFFSET,
@@ -745,7 +756,7 @@ public:
     static QString randomString(qint32 nSize);
 
     static QString fileTypeIdToString(FT fileType);
-    static QString fileTypeIdToExts(FT fileType);
+    static QString fileTypeIdToExts(FT fileType); // TODO move to classes
     static FT ftStringToFileTypeId(QString sFileType);
     static QString fileTypeIdToFtString(FT fileType);
 
