@@ -10099,64 +10099,73 @@ bool XPE::isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString
 
         qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
 
-        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-            XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
+        bool bProcess = true;
 
-            QString _sTypeName;
-            QString _sTypeNamespace;
+        if (nNumberOfRecords > 0xFFFF) {
+            bProcess = false;
+        }
 
-            if (sTypeName != "") {
-                _sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
-            }
+        if (bProcess) {
+            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+                XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
 
-            if (sTypeNamespace != "") {
-                _sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
-            }
+                QString _sTypeName;
+                QString _sTypeNamespace;
 
-            if ((sTypeNamespace == _sTypeNamespace) && (sTypeName == _sTypeName)) {
-                qint32 nNumberOfMethodsPtrRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodPtr];
-                qint32 nNumberOfMethodsDefRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef];
-
-                qint32 nMethodsCount = 0;
-                if (i < (nNumberOfRecords - 1)) {
-                    XPE_DEF::S_METADATA_TYPEDEF recordNext = getMetadataTypeDef(pCliInfo, i + 1);
-                    nMethodsCount = recordNext.nMethodList - record.nMethodList;
-                } else {
-                    nMethodsCount = nNumberOfMethodsPtrRecords - record.nMethodList;
+                if (sTypeName != "") {
+                    _sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
                 }
 
-                for (qint32 j = 0; (j < nMethodsCount) && (!(pPdStruct->bIsStop)); j++) {
-                    if (record.nMethodList) {
-                        QString _sMethodName;
+                if (sTypeNamespace != "") {
+                    _sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
+                }
 
-                        if (nNumberOfMethodsPtrRecords) {
-                            XPE_DEF::S_METADATA_METHODPTR methodPtr = getMetadataMethodPtr(pCliInfo, record.nMethodList + j - 1);
+                if ((sTypeNamespace == _sTypeNamespace) && (sTypeName == _sTypeName)) {
+                    qint32 nNumberOfMethodsPtrRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodPtr];
+                    qint32 nNumberOfMethodsDefRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef];
 
-                            if (methodPtr.nMethod) {
-                                if (methodPtr.nMethod <= (quint32)nNumberOfMethodsDefRecords) {
-                                    XPE_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(pCliInfo, methodPtr.nMethod - 1);
-                                    _sMethodName = _read_ansiString_safe(pBuffer, nBufferSize, methodDef.nName);
+                    qint32 nMethodsCount = 0;
+                    if (i < (nNumberOfRecords - 1)) {
+                        XPE_DEF::S_METADATA_TYPEDEF recordNext = getMetadataTypeDef(pCliInfo, i + 1);
+                        nMethodsCount = recordNext.nMethodList - record.nMethodList;
+                    } else {
+                        nMethodsCount = nNumberOfMethodsPtrRecords - record.nMethodList;
+                    }
+
+                    for (qint32 j = 0; (j < nMethodsCount) && (!(pPdStruct->bIsStop)); j++) {
+                        if (record.nMethodList) {
+                            QString _sMethodName;
+
+                            if (nNumberOfMethodsPtrRecords) {
+                                XPE_DEF::S_METADATA_METHODPTR methodPtr = getMetadataMethodPtr(pCliInfo, record.nMethodList + j - 1);
+
+                                if (methodPtr.nMethod) {
+                                    if (methodPtr.nMethod <= (quint32)nNumberOfMethodsDefRecords) {
+                                        XPE_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(pCliInfo, methodPtr.nMethod - 1);
+                                        _sMethodName = _read_ansiString_safe(pBuffer, nBufferSize, methodDef.nName);
+                                    }
                                 }
+                            } else {
+                                XPE_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(pCliInfo, record.nMethodList + j - 1);
+                                _sMethodName = _read_ansiString_safe(pBuffer, nBufferSize, methodDef.nName);
                             }
-                        } else {
-                            XPE_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(pCliInfo, record.nMethodList + j - 1);
-                            _sMethodName = _read_ansiString_safe(pBuffer, nBufferSize, methodDef.nName);
-                        }
 
-                        // qDebug("_sMethodName: %s", _sMethodName.toLatin1().data());
+                            // qDebug("_sMethodName: %s", _sMethodName.toLatin1().data());
 
-                        if (sMethodName == _sMethodName) {
-                            bResult = true;
-                            break;
+                            if (sMethodName == _sMethodName) {
+                                bResult = true;
+                                break;
+                            }
                         }
                     }
+
+                    break;
                 }
 
-                break;
+                // qDebug("%s %s", sTypeName.toLatin1().data(), sTypeNamespace.toLatin1().data());
             }
-
-            // qDebug("%s %s", sTypeName.toLatin1().data(), sTypeNamespace.toLatin1().data());
         }
+
     }
 
     return bResult;

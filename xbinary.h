@@ -111,6 +111,7 @@ public:
     static QString XCONVERT_idToSetString(quint32 nID, XBinary::XCONVERT *pRecords, qint32 nRecordsSize);
     static QString XCONVERT_idToFtString(quint32 nID, XBinary::XCONVERT *pRecords, qint32 nRecordsSize);
     static quint32 XCONVERT_ftStringToId(const QString &sString, XBinary::XCONVERT *pRecords, qint32 nRecordsSize);
+    static QString XCONVERT_translate(const QString &sString, XBinary::XCONVERT *pRecords, qint32 nRecordsSize);
 
     enum LT {
         LT_UNKNOWN = 0,
