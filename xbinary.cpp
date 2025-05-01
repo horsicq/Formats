@@ -214,24 +214,25 @@ QString XBinary::XCONVERT_translate(const QString &sString, XCONVERT *pRecords, 
 {
     QString sResult;
 
-    bool bIsUpper = sString.at(0).isUpper();
-    QString _sString = sString.toLower();
+    if (sString != "") {
+        QString _sString = sString.toLower();
 
-    for (qint32 i = 0; i < nRecordsSize; i++) {
-        if (pRecords[i].sSetString.toLower() == _sString) {
-            sResult = pRecords[i].sTransString;
-            break;
+        for (qint32 i = 0; i < nRecordsSize; i++) {
+            if (pRecords[i].sSetString.toLower() == _sString) {
+                sResult = pRecords[i].sTransString;
+                break;
+            }
         }
-    }
 
-    if (sResult == "") {
-        sResult = tr("Unknown");
-    }
-
-    if (bIsUpper) {
-        sResult[0] = sResult.at(0).toUpper();
-    } else {
-        sResult[0] = sResult.at(0).toLower();
+        if (sResult == "") {
+            sResult = sString;
+        } else {
+            if (sString.at(0).isUpper()) {
+                sResult[0] = sResult.at(0).toUpper();
+            } else {
+                sResult[0] = sResult.at(0).toLower();
+            }
+        }
     }
 
     return sResult;
