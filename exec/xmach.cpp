@@ -5207,3 +5207,41 @@ XADDR XMACH::readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSi
 
     return nResult;
 }
+
+QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(LT locType, XADDR nLocation, quint32 nID, bool bChildren, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::DATA_HEADER> listResult;
+
+    if (nID == STRUCTID_UNKNOWN) {
+        if (is64()) {
+            nID = STRUCTID_mach_header_64;
+        } else {
+            nID = STRUCTID_mach_header;
+        }
+    }
+
+    if (nID == STRUCTID_mach_header) {
+
+    } else if (nID == STRUCTID_mach_header_64) {
+
+    }
+
+    return listResult;
+}
+
+qint32 XMACH::getDataRecords(LT locType, XADDR nLocation, quint32 nID, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
+{
+    qint32 nResult = 0;
+
+    if (nID == STRUCTID_mach_header) {
+        nResult = sizeof(XMACH_DEF::mach_header);
+    } else if (nID == STRUCTID_mach_header_64) {
+        nResult = sizeof(XMACH_DEF::mach_header_64);
+    }
+
+    if (pListRecords) {
+        // TODO
+    }
+
+    return nResult;
+}

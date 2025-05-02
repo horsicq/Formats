@@ -668,6 +668,33 @@ public:
         bool bCriticalError;  // TODO !!!
     };
 
+    struct DSID {
+        FT fileType;
+        quint32 nID;
+    };
+
+    struct DATA_HEADER {
+        QString sGUID;
+        DSID dsID;
+        DSID dsID_parent;
+        QString sName;
+        LT locType;
+        XADDR nLocation;
+        qint64 nSize;
+    };
+
+    struct DATA_RECORD {
+        qint32 nRelOffset;
+        qint32 nSize;
+        QString sName;
+        QString sType;
+        VT valType;
+        quint32 nFlags;
+    };
+
+    virtual QList<DATA_HEADER> getDataHeaders(LT locType, XADDR nLocation, quint32 nID, bool bChildren, PDSTRUCT *pPdStruct);
+    virtual qint32 getDataRecords(LT locType, XADDR nLocation, quint32 nID, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct);
+
 private:
     enum ST {
         ST_COMPAREBYTES = 0,

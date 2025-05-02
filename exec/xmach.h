@@ -152,6 +152,12 @@ public:
         quint32 nFlags;
     };
 
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_mach_header,
+        STRUCTID_mach_header_64,
+    };
+
     XMACH(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XMACH();
 
@@ -717,6 +723,9 @@ public:
     XADDR readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSize, QList<OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus);
 
     bool handleImport(qint64 nOffset, qint64 nRelOffset, qint64 nSize, QList<EXPORT_RECORD> *pListExportRecords, const QString &sCurrentName, PDSTRUCT *pPdStruct);
+
+    virtual QList<DATA_HEADER> getDataHeaders(LT locType, XADDR nLocation, quint32 nID, bool bChildren, PDSTRUCT *pPdStruct);
+    virtual qint32 getDataRecords(LT locType, XADDR nLocation, quint32 nID, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct);
 };
 
 #endif  // XMACH_H

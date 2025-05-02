@@ -238,6 +238,20 @@ QString XBinary::XCONVERT_translate(const QString &sString, XCONVERT *pRecords, 
     return sResult;
 }
 
+qint32 XBinary::getDataRecords(LT locType, XADDR nLocation, quint32 nID, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
+{
+    qint32 nResult = 0;
+
+    return nResult;
+}
+
+QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(LT locType, XADDR nLocation, quint32 nID, bool bChildren, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::DATA_HEADER> listResult;
+
+    return listResult;
+}
+
 XBinary::XBinary(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     setData(pDevice, bIsImage, nModuleAddress);
