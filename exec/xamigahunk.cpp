@@ -209,20 +209,13 @@ XBinary::MODE XAmigaHunk::getMode(QList<HUNK> *pListHunks)
 
 QList<XAmigaHunk::HUNK> XAmigaHunk::getHunks(PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     QList<HUNK> listResult;
 
     qint64 nCurrentOffset = 0;
     qint64 nTotalSize = getSize();
     bool bStop = false;
 
-    while (!(pPdStruct->bIsStop)) {
+    while (XBinary::isPdStructNotCanceled(pPdStruct)) {
         HUNK record = {};
         record.nId = read_uint32(nCurrentOffset, true) & 0x3FFFFFFF;
         record.nOffset = nCurrentOffset;
@@ -257,7 +250,7 @@ QList<XAmigaHunk::HUNK> XAmigaHunk::getHunks(PDSTRUCT *pPdStruct)
             nCurrentOffset += 4;
             nCurrentOffset += (nCodeSize * 4);
         } else if (record.nId == XAMIGAHUNK_DEF::HUNK_RELOC32) {
-            while (!(pPdStruct->bIsStop)) {
+            while (XBinary::isPdStructNotCanceled(pPdStruct)) {
                 quint32 nRelocSize = read_uint32(nCurrentOffset, true);
                 nCurrentOffset += 4;
 
@@ -276,7 +269,7 @@ QList<XAmigaHunk::HUNK> XAmigaHunk::getHunks(PDSTRUCT *pPdStruct)
             nCurrentOffset += 4;
             nCurrentOffset += (nDebugSize * 4);
         } else if (record.nId == XAMIGAHUNK_DEF::HUNK_SYMBOL) {
-            while (!(pPdStruct->bIsStop)) {
+            while (XBinary::isPdStructNotCanceled(pPdStruct)) {
                 quint32 nSymbolSize = read_uint32(nCurrentOffset, true);
                 nCurrentOffset += 4;
 
