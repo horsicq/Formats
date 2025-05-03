@@ -784,7 +784,7 @@ public:
     static QString randomString(qint32 nSize);
 
     static QString fileTypeIdToString(FT fileType);
-    static QString fileTypeIdToExts(FT fileType); // TODO move to classes
+    static QString fileTypeIdToExts(FT fileType);  // TODO move to classes
     static FT ftStringToFileTypeId(QString sFileType);
     static QString fileTypeIdToFtString(FT fileType);
 

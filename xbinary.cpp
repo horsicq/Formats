@@ -67,12 +67,9 @@ const quint16 _crc16_tab[] = {
     0x4400, 0x84c1, 0x8581, 0x4540, 0x8701, 0x47c0, 0x4680, 0x8641, 0x8201, 0x42c0, 0x4380, 0x8341, 0x4100, 0x81c1, 0x8081, 0x4040};
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
-    {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
-    {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},
-    {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
-    {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},
-    {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},
+    {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},        {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
+    {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},        {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
+    {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},     {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},
     {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")},
 };
 

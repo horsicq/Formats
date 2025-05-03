@@ -5221,9 +5221,7 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(LT locType, XADDR nLocation, q
     }
 
     if (nID == STRUCTID_mach_header) {
-
     } else if (nID == STRUCTID_mach_header_64) {
-
     }
 
     return listResult;

@@ -10165,7 +10165,6 @@ bool XPE::isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString
                 // qDebug("%s %s", sTypeName.toLatin1().data(), sTypeNamespace.toLatin1().data());
             }
         }
-
     }
 
     return bResult;
