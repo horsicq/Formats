@@ -8573,7 +8573,7 @@ bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, 
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
-    for (qint32 i = 0; (i < nNumberOfRecords) && (!pPdStruct->bIsStop); i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         if ((pMemoryMap->listRecords.at(i).type == MMT_LOADSEGMENT) && (pMemoryMap->listRecords.at(i).nLoadSectionNumber == nLoadSegment)) {
             if (pMemoryMap->listRecords.at(i).nOffset != -1) {
                 bResult = isSignaturePresent(pMemoryMap, pMemoryMap->listRecords.at(i).nOffset, pMemoryMap->listRecords.at(i).nSize, sSignature, pPdStruct);

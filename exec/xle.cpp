@@ -1308,7 +1308,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     XADDR nMinAddress = -1;
     XADDR nMaxAddress = 0;
 
-    for (qint32 i = 0; (i < nNumberOfObjects) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfObjects) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         qint64 nObjectMinOffset = -1;
         qint64 nObjectMaxOffset = 0;
         XADDR nObjectCurrentAddress = listObjects.at(i).o32_base;

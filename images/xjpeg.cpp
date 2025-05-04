@@ -68,7 +68,7 @@ XBinary::_MEMORY_MAP XJpeg::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
     qint32 nNumberOfChunks = listChunks.count();
 
-    for (qint32 i = 0; (i < nNumberOfChunks) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfChunks) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         _MEMORY_RECORD record = {};
 
         record.nIndex = nIndex++;
@@ -135,7 +135,7 @@ QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
 
     qint64 nOffset = 0;
 
-    while (!(pPdStruct->bIsStop)) {
+    while (XBinary::isPdStructNotCanceled(pPdStruct)) {
         if (nOffset == -1) {
             break;
         }
@@ -213,7 +213,7 @@ QString XJpeg::getComment(QList<CHUNK> *pListChunks, PDSTRUCT *pPdStruct)
 
     qint32 nNumberOfRecords = listComments.count();
 
-    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         sResult += read_ansiString(listComments.at(i).nDataOffset + 4, listComments.at(i).nDataSize - 4);
     }
 
