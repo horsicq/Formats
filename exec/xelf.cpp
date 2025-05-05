@@ -5164,7 +5164,7 @@ qint32 XELF::getNumberOfSymbols(qint64 nOffset, bool bIsBigEndian, bool bIs64, P
         nResult += sizeof(XELF_DEF::Elf64_Sym);
         nOffset += sizeof(XELF_DEF::Elf64_Sym);
 
-        while (!(pPdStruct->bIsStop)) {
+        while (XBinary::isPdStructNotCanceled(pPdStruct)) {
             XELF_DEF::Elf64_Sym record = _readElf64_Sym(nOffset, bIsBigEndian);
 
             if ((!record.st_info) || (record.st_other)) {
