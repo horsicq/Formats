@@ -20,6 +20,12 @@
  */
 #include "xmach.h"
 
+XBinary::XIDSTRING _TABLE_XMACH_STRUCTID[] = {
+    {XMACH::STRUCTID_UNKNOWN, "Unknown"},
+    {XMACH::STRUCTID_mach_header, "mach_header"},
+    {XMACH::STRUCTID_mach_header_64, "mach_header_64"},
+    };
+
 XMACH::XMACH(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
 }
@@ -5208,26 +5214,24 @@ XADDR XMACH::readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSi
     return nResult;
 }
 
-QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(LT locType, XADDR nLocation, quint32 nID, bool bChildren, PDSTRUCT *pPdStruct)
+QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::DATA_HEADER> listResult;
 
     if (nID == STRUCTID_UNKNOWN) {
-        if (is64()) {
-            nID = STRUCTID_mach_header_64;
+        if (pMemoryMap->mode == MODE_64) {
+            listResult = getDataHeaders(pMemoryMap, STRUCTID_mach_header_64, locType, nLocation, bChildren, pPdStruct);
         } else {
-            nID = STRUCTID_mach_header;
+            listResult = getDataHeaders(pMemoryMap, STRUCTID_mach_header, locType, nLocation, bChildren, pPdStruct);
         }
-    }
-
-    if (nID == STRUCTID_mach_header) {
+    } else if (nID == STRUCTID_mach_header) {
     } else if (nID == STRUCTID_mach_header_64) {
     }
 
     return listResult;
 }
 
-qint32 XMACH::getDataRecords(LT locType, XADDR nLocation, quint32 nID, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
+qint32 XMACH::getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
 {
     qint32 nResult = 0;
 

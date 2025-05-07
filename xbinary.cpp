@@ -150,6 +150,34 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_CFBF, "CFBF", QString("CFBF")},
 };
 
+XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
+    {XBinary::VT_UNKNOWN, "Unknown"},
+    {XBinary::VT_STRING, "String"},
+    {XBinary::VT_A, "A"},
+    {XBinary::VT_A_I, "A"},
+    {XBinary::VT_U, "U"},
+    {XBinary::VT_U_I, "U"},
+    {XBinary::VT_UTF8, "UTF8"},
+    {XBinary::VT_UTF8_I, "UTF"},
+    {XBinary::VT_SIGNATURE, "Signature"},
+    {XBinary::VT_VALUE, "Value"},
+    {XBinary::VT_BYTE, "byte"},
+    {XBinary::VT_WORD, "word"},
+    {XBinary::VT_DWORD, "dword"},
+    {XBinary::VT_QWORD, "qword"},
+    {XBinary::VT_CHAR, "char"},
+    {XBinary::VT_UCHAR, "uchar"},
+    {XBinary::VT_SHORT, "short"},
+    {XBinary::VT_USHORT, "ushort"},
+    {XBinary::VT_INT, "int"},
+    {XBinary::VT_UINT, "uint"},
+    {XBinary::VT_INT64, "int64"},
+    {XBinary::VT_UINT32, "uint32"},
+    {XBinary::VT_UINT64, "uint64"},
+    {XBinary::VT_DOUBLE, "double"},
+    {XBinary::VT_FLOAT, "float"},
+};
+
 const double XBinary::D_ENTROPY_THRESHOLD = 6.5;
 
 QString XBinary::XCONVERT_idToTransString(quint32 nID, XCONVERT *pRecords, qint32 nRecordsSize)
@@ -235,14 +263,32 @@ QString XBinary::XCONVERT_translate(const QString &sString, XCONVERT *pRecords, 
     return sResult;
 }
 
-qint32 XBinary::getDataRecords(LT locType, XADDR nLocation, quint32 nID, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
+QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 nRecordsSize)
+{
+    QString sResult;
+
+    for (qint32 i = 0; i < nRecordsSize; i++) {
+        if (pRecords[i].nID == nID) {
+            sResult = pRecords[i].sString;
+            break;
+        }
+    }
+
+    if (sResult == "") {
+        sResult = "Unknown";
+    }
+
+    return sResult;
+}
+
+qint32 XBinary::getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
 {
     qint32 nResult = 0;
 
     return nResult;
 }
 
-QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(LT locType, XADDR nLocation, quint32 nID, bool bChildren, PDSTRUCT *pPdStruct)
+QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::DATA_HEADER> listResult;
 
@@ -2974,7 +3020,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                         if (bAdd) {
                             MS_RECORD record = {};
-                            record.nValueType = VT_ANSISTRING;
+                            record.nValueType = VT_A;
                             record.nSize = nCurrentAnsiSize;
                             record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
 
@@ -3096,7 +3142,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                             if (bAdd) {
                                 MS_RECORD record = {};
-                                record.nValueType = VT_UNICODESTRING;
+                                record.nValueType = VT_U;
                                 record.nSize = nCurrentUnicodeSize[nParity] * 2;
                                 record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentUnicodeOffset[nParity]);
 
@@ -3134,7 +3180,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                                 if (bAdd) {
                                     MS_RECORD record = {};
-                                    record.nValueType = VT_UNICODESTRING;
+                                    record.nValueType = VT_U;
                                     record.nSize = nCurrentUnicodeSize[nO] * 2;
                                     record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentUnicodeOffset[nO]);
                                     // record.sString = sString;
@@ -3365,17 +3411,17 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
     qint64 nResult = -1;
 
     // TODO more mb pascal strings
-    if (valueType == XBinary::VT_ANSISTRING) {
+    if (valueType == XBinary::VT_A) {
         nResult = find_ansiString(nOffset, nSize, varValue.toString(), pPdStruct);
-    } else if (valueType == XBinary::VT_ANSISTRING_I) {
+    } else if (valueType == XBinary::VT_A_I) {
         nResult = find_ansiStringI(nOffset, nSize, varValue.toString(), pPdStruct);
-    } else if (valueType == XBinary::VT_UNICODESTRING) {
+    } else if (valueType == XBinary::VT_U) {
         nResult = find_unicodeString(nOffset, nSize, varValue.toString(), bIsBigEndian, pPdStruct);
-    } else if (valueType == XBinary::VT_UNICODESTRING_I) {
+    } else if (valueType == XBinary::VT_U_I) {
         nResult = find_unicodeStringI(nOffset, nSize, varValue.toString(), bIsBigEndian, pPdStruct);
-    } else if (valueType == XBinary::VT_UTF8STRING) {
+    } else if (valueType == XBinary::VT_UTF8) {
         nResult = find_utf8String(nOffset, nSize, varValue.toString(), pPdStruct);
-    } else if (valueType == XBinary::VT_UTF8STRING_I) {
+    } else if (valueType == XBinary::VT_UTF8_I) {
         nResult = find_utf8StringI(nOffset, nSize, varValue.toString(), pPdStruct);
     } else if (valueType == XBinary::VT_SIGNATURE) {
         nResult = find_signature(pMemoryMap, nOffset, nSize, varValue.toString(), pnResultSize, pPdStruct);
@@ -3397,7 +3443,7 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
         nResult = find_uint16(nOffset, nSize, (quint16)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_INT) {
         nResult = find_int32(nOffset, nSize, (qint32)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
-    } else if (valueType == XBinary::VT_UINT) {
+    } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32)) {
         nResult = find_uint32(nOffset, nSize, (quint32)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_INT64) {
         nResult = find_int64(nOffset, nSize, (qint64)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
@@ -3418,11 +3464,11 @@ QString XBinary::read_valueString(VT valueType, qint64 nOffset, qint64 nSize, bo
 
     nSize = qMin(nSize, qint64(128));
 
-    if ((valueType == XBinary::VT_ANSISTRING) || (valueType == XBinary::VT_ANSISTRING_I)) {
+    if ((valueType == XBinary::VT_A) || (valueType == XBinary::VT_A_I)) {
         sResult = read_ansiString(nOffset, nSize);
-    } else if ((valueType == XBinary::VT_UTF8STRING) || (valueType == XBinary::VT_UTF8STRING_I)) {
+    } else if ((valueType == XBinary::VT_UTF8) || (valueType == XBinary::VT_UTF8_I)) {
         sResult = read_utf8String(nOffset, nSize);
-    } else if ((valueType == XBinary::VT_UNICODESTRING) || (valueType == XBinary::VT_UNICODESTRING_I)) {
+    } else if ((valueType == XBinary::VT_U) || (valueType == XBinary::VT_U_I)) {
         sResult = read_unicodeString(nOffset, nSize, bIsBigEndian);
     }
 
@@ -3431,64 +3477,24 @@ QString XBinary::read_valueString(VT valueType, qint64 nOffset, qint64 nSize, bo
 
 QString XBinary::valueTypeToString(VT valueType)
 {
-    QString sResult;
-
-    if ((valueType == XBinary::VT_ANSISTRING) || (valueType == XBinary::VT_ANSISTRING_I)) {
-        sResult = QString("A");
-    } else if ((valueType == XBinary::VT_UNICODESTRING) || (valueType == XBinary::VT_UNICODESTRING_I)) {
-        sResult = QString("U");
-    } else if ((valueType == XBinary::VT_UTF8STRING) || (valueType == XBinary::VT_UTF8STRING_I)) {
-        sResult = QString("UTF8");
-    } else if (valueType == XBinary::VT_SIGNATURE) {
-        sResult = QString("S");
-    } else if (valueType == XBinary::VT_BYTE) {
-        sResult = QString("byte");
-    } else if (valueType == XBinary::VT_WORD) {
-        sResult = QString("word");
-    } else if (valueType == XBinary::VT_DWORD) {
-        sResult = QString("dword");
-    } else if (valueType == XBinary::VT_QWORD) {
-        sResult = QString("qword");
-    } else if (valueType == XBinary::VT_CHAR) {
-        sResult = QString("char");
-    } else if (valueType == XBinary::VT_UCHAR) {
-        sResult = QString("uchar");
-    } else if (valueType == XBinary::VT_SHORT) {
-        sResult = QString("short");
-    } else if (valueType == XBinary::VT_USHORT) {
-        sResult = QString("ushort");
-    } else if (valueType == XBinary::VT_INT) {
-        sResult = QString("int");
-    } else if (valueType == XBinary::VT_UINT) {
-        sResult = QString("uint");
-    } else if (valueType == XBinary::VT_INT64) {
-        sResult = QString("int64");
-    } else if (valueType == XBinary::VT_UINT64) {
-        sResult = QString("uint64");
-    } else if (valueType == XBinary::VT_FLOAT) {
-        sResult = QString("float");
-    } else if (valueType == XBinary::VT_DOUBLE) {
-        sResult = QString("double");
-    }
-
-    return sResult;
+    return XIDSTRING_idToString((quint32)valueType, _TABLE_XBinary_VT, sizeof(_TABLE_XBinary_VT) / sizeof(XBinary::XIDSTRING));
 }
 
 QString XBinary::getValueString(QVariant varValue, VT valueType)
 {
     QString sResult;
 
-    if (valueType == XBinary::VT_ANSISTRING) {
+    if (valueType == XBinary::VT_A) {
         sResult = varValue.toString();
-    } else if (valueType == XBinary::VT_ANSISTRING_I) {
+    } else if (valueType == XBinary::VT_A_I) {
         sResult = varValue.toString();
-    } else if (valueType == XBinary::VT_UNICODESTRING) {
+    } else if (valueType == XBinary::VT_U) {
         sResult = varValue.toString();
-    } else if (valueType == XBinary::VT_UNICODESTRING_I) {
+    } else if (valueType == XBinary::VT_U_I) {
         sResult = varValue.toString();
-    } else if (valueType == XBinary::VT_UTF8STRING) {
+    } else if (valueType == XBinary::VT_UTF8) {
         sResult = varValue.toString();
-    } else if (valueType == XBinary::VT_UTF8STRING_I) {
+    } else if (valueType == XBinary::VT_UTF8_I) {
         sResult = varValue.toString();
     } else if (valueType == XBinary::VT_SIGNATURE) {
         sResult = varValue.toString();
@@ -3510,7 +3516,7 @@ QString XBinary::getValueString(QVariant varValue, VT valueType)
         sResult = QString("%1").arg((quint16)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_INT) {
         sResult = QString("%1").arg((qint32)(varValue.toULongLong()));
-    } else if (valueType == XBinary::VT_UINT) {
+    } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32)){
         sResult = QString("%1").arg((quint32)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_INT64) {
         sResult = QString("%1").arg((qint64)(varValue.toULongLong()));
@@ -3529,17 +3535,17 @@ qint32 XBinary::getValueSize(QVariant varValue, VT valueType)
 {
     qint32 nResult = 1;
 
-    if (valueType == XBinary::VT_ANSISTRING) {
+    if (valueType == XBinary::VT_A) {
         nResult = varValue.toString().size();
-    } else if (valueType == XBinary::VT_ANSISTRING_I) {
+    } else if (valueType == XBinary::VT_A_I) {
         nResult = varValue.toString().size();
-    } else if (valueType == XBinary::VT_UNICODESTRING) {
+    } else if (valueType == XBinary::VT_U) {
         nResult = varValue.toString().size() * 2;
-    } else if (valueType == XBinary::VT_UNICODESTRING_I) {
+    } else if (valueType == XBinary::VT_U_I) {
         nResult = varValue.toString().size() * 2;
-    } else if (valueType == XBinary::VT_UTF8STRING) {
+    } else if (valueType == XBinary::VT_UTF8) {
         nResult = varValue.toString().toUtf8().size();
-    } else if (valueType == XBinary::VT_UTF8STRING_I) {
+    } else if (valueType == XBinary::VT_UTF8_I) {
         nResult = varValue.toString().toUtf8().size();
     } else if (valueType == XBinary::VT_SIGNATURE) {
         QString sSignature = convertSignature(varValue.toString());
@@ -3562,7 +3568,7 @@ qint32 XBinary::getValueSize(QVariant varValue, VT valueType)
         nResult = 2;
     } else if (valueType == XBinary::VT_INT) {
         nResult = 4;
-    } else if (valueType == XBinary::VT_UINT) {
+    } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32))  {
         nResult = 4;
     } else if (valueType == XBinary::VT_INT64) {
         nResult = 8;
@@ -3631,13 +3637,13 @@ QByteArray XBinary::getStringData(VT valueType, const QString &sString, bool bAd
 
     char buffer[4] = {};
 
-    if (valueType == VT_ANSISTRING) {
+    if (valueType == VT_A) {
         baResult = sString.toLatin1();
 
         if (bAddNull) {
             baResult.append(buffer, 1);
         }
-    } else if (valueType == VT_UNICODESTRING) {
+    } else if (valueType == VT_U) {
         baResult.resize(nSize * 2);
 
         baResult.fill(0);
@@ -3649,7 +3655,7 @@ QByteArray XBinary::getStringData(VT valueType, const QString &sString, bool bAd
         if (bAddNull) {
             baResult.append(buffer, 2);
         }
-    } else if (valueType == VT_UTF8STRING) {
+    } else if (valueType == VT_UTF8) {
         baResult = sString.toUtf8();
 
         if (bAddNull) {

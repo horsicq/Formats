@@ -113,6 +113,13 @@ public:
     static quint32 XCONVERT_ftStringToId(const QString &sString, XBinary::XCONVERT *pRecords, qint32 nRecordsSize);
     static QString XCONVERT_translate(const QString &sString, XBinary::XCONVERT *pRecords, qint32 nRecordsSize);
 
+    struct XIDSTRING {
+        quint32 nID;
+        QString sString;
+    };
+
+    static QString XIDSTRING_idToString(quint32 nID, XBinary::XIDSTRING *pRecords, qint32 nRecordsSize);
+
     enum LT {
         LT_UNKNOWN = 0,
         LT_OFFSET,
@@ -552,12 +559,12 @@ public:
     enum VT {
         VT_UNKNOWN = 0,
         VT_STRING,
-        VT_ANSISTRING,
-        VT_ANSISTRING_I,
-        VT_UNICODESTRING,
-        VT_UNICODESTRING_I,
-        VT_UTF8STRING,
-        VT_UTF8STRING_I,
+        VT_A,
+        VT_A_I,
+        VT_U,
+        VT_U_I,
+        VT_UTF8,
+        VT_UTF8_I,
         VT_SIGNATURE,
         VT_VALUE,
         VT_BYTE,
@@ -571,10 +578,10 @@ public:
         VT_INT,
         VT_UINT,
         VT_INT64,
+        VT_UINT32,
         VT_UINT64,
         VT_DOUBLE,
         VT_FLOAT,
-        // TODO UTF8
         // TODO pascal strings(A/U)
     };
 
@@ -668,13 +675,20 @@ public:
         bool bCriticalError;  // TODO !!!
     };
 
+    enum DHT {
+        DHT_UNKNOWN = 0,
+        DHT_HEADER,
+        DHT_TABLE,
+        DHT_DATA
+    };
+
     struct DSID {
         FT fileType;
         quint32 nID;
+        QString sGUID;
     };
 
     struct DATA_HEADER {
-        QString sGUID;
         DSID dsID;
         DSID dsID_parent;
         QString sName;
@@ -687,13 +701,12 @@ public:
         qint32 nRelOffset;
         qint32 nSize;
         QString sName;
-        QString sType;
         VT valType;
         quint32 nFlags;
     };
 
-    virtual QList<DATA_HEADER> getDataHeaders(LT locType, XADDR nLocation, quint32 nID, bool bChildren, PDSTRUCT *pPdStruct);
-    virtual qint32 getDataRecords(LT locType, XADDR nLocation, quint32 nID, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct);
+    virtual QList<DATA_HEADER> getDataHeaders(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct);
+    virtual qint32 getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct);
 
 private:
     enum ST {
