@@ -5220,12 +5220,31 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(_MEMORY_MAP *pMemoryMap, quint
 
     if (nID == STRUCTID_UNKNOWN) {
         if (pMemoryMap->mode == MODE_64) {
-            listResult = getDataHeaders(pMemoryMap, STRUCTID_mach_header_64, locType, nLocation, bChildren, pPdStruct);
+            nID = STRUCTID_mach_header_64;
         } else {
-            listResult = getDataHeaders(pMemoryMap, STRUCTID_mach_header, locType, nLocation, bChildren, pPdStruct);
+            nID = STRUCTID_mach_header;
         }
-    } else if (nID == STRUCTID_mach_header) {
-    } else if (nID == STRUCTID_mach_header_64) {
+    }
+
+    qint64 nOffset = locationToOffset(pMemoryMap, locType, nLocation);
+
+    if (nOffset != -1) {
+        XBinary::DATA_HEADER dataHeader = {};
+        dataHeader.dsID.sGUID = generateUUID();
+        dataHeader.dsID.fileType = pMemoryMap->fileType;
+        dataHeader.dsID.nID = nID;
+        dataHeader.locType = locType;
+        dataHeader.nLocation = nLocation;
+
+        if (nID == STRUCTID_mach_header) {
+            dataHeader.nSize = sizeof(XMACH_DEF::mach_header);
+        } else if (nID == STRUCTID_mach_header_64) {
+            dataHeader.nSize = sizeof(XMACH_DEF::mach_header_64);
+        }
+
+        if (dataHeader.nSize ) {
+            listResult.append(dataHeader);
+        }
     }
 
     return listResult;
@@ -5242,7 +5261,24 @@ qint32 XMACH::getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, X
     }
 
     if (pListRecords) {
-        // TODO
+        if (nID == STRUCTID_mach_header) {
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, magic), 4, "magic", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, cputype), 4, "cputype", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, cpusubtype), 4, "cpusubtype", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, filetype), 4, "filetype", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, ncmds), 4, "ncmds", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, sizeofcmds), 4, "sizeofcmds", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, flags), 4, "flags", VT_UINT32});
+        } else if (nID == STRUCTID_mach_header_64) {
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, magic), 4, "magic", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, cputype), 4, "cputype", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, cpusubtype), 4, "cpusubtype", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, filetype), 4, "filetype", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, ncmds), 4, "ncmds", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, sizeofcmds), 4, "sizeofcmds", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, flags), 4, "flags", VT_UINT32});
+            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, reserved), 4, "reserved", VT_UINT32});
+        }
     }
 
     return nResult;

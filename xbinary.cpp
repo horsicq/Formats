@@ -4479,6 +4479,21 @@ XADDR XBinary::segmentRelOffsetToAddress(_MEMORY_MAP *pMemoryMap, quint16 nSegme
     return nResult;
 }
 
+qint64 XBinary::locationToOffset(_MEMORY_MAP *pMemoryMap, LT locType, XADDR nLocation)
+{
+    qint64 nResult = -1;
+
+    if (locType == LT_ADDRESS) {
+        nResult = addressToOffset(pMemoryMap, nLocation);
+    } else if (locType == LT_RELADDRESS) {
+        nResult = relAddressToOffset(pMemoryMap, nLocation);
+    } else if (locType == LT_OFFSET) {
+        nResult = nLocation;
+    }
+
+    return nResult;
+}
+
 XADDR XBinary::getSegmentAddress(quint16 nSegment, quint16 nAddress)
 {
     XADDR nResult = nSegment * 16 + nAddress;

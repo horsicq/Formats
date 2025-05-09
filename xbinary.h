@@ -702,7 +702,6 @@ public:
         qint32 nSize;
         QString sName;
         VT valType;
-        quint32 nFlags;
     };
 
     virtual QList<DATA_HEADER> getDataHeaders(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct);
@@ -1093,6 +1092,7 @@ public:
     static XADDR relAddressToAddress(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
     static qint64 addressToRelAddress(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
     static XADDR segmentRelOffsetToAddress(_MEMORY_MAP *pMemoryMap, quint16 nSegment, XADDR nRelOffset);
+    static qint64 locationToOffset(_MEMORY_MAP *pMemoryMap, LT locType, XADDR nLocation);
 
     static XADDR getSegmentAddress(quint16 nSegment, quint16 nAddress);
 
