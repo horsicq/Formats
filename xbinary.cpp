@@ -288,6 +288,13 @@ qint32 XBinary::getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType,
     return nResult;
 }
 
+QList<XBinary::DATAVALUES> XBinary::getDataValues(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, qint32 nRelOffset)
+{
+    QList<XBinary::DATAVALUES> listResult;
+
+    return listResult;
+}
+
 QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::DATA_HEADER> listResult;

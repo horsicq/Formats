@@ -697,15 +697,29 @@ public:
         qint64 nSize;
     };
 
+    enum DRF {
+        DRF_UNKNOWN = 0,
+        DRF_DATASET = 0x00000001,
+        DRF_COUNT = 0x00000002,
+    };
+
     struct DATA_RECORD {
         qint32 nRelOffset;
         qint32 nSize;
         QString sName;
         VT valType;
+        quint32 nFlags;
+    };
+
+    struct DATAVALUES {
+        quint64 nMask;
+        bool bFlags;
+        QMap<quint64, QString> mapValues;
     };
 
     virtual QList<DATA_HEADER> getDataHeaders(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct);
     virtual qint32 getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct);
+    virtual QList<DATAVALUES> getDataValues(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, qint32 nRelOffset);
 
 private:
     enum ST {
