@@ -4906,6 +4906,11 @@ bool XMACH::handleImport(qint64 nOffset, qint64 nRelOffset, qint64 nSize, QList<
     return true;
 }
 
+QString XMACH::structIDToString(quint32 nID)
+{
+    return XBinary::XIDSTRING_idToString(nID,  _TABLE_XMACH_STRUCTID, sizeof(_TABLE_XMACH_STRUCTID) / sizeof(XBinary::XIDSTRING));
+}
+
 XADDR XMACH::readOpcodes(quint32 nType, char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
     XADDR nResult = 0;
@@ -5260,24 +5265,28 @@ qint32 XMACH::getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, X
         nResult = sizeof(XMACH_DEF::mach_header_64);
     }
 
-    if (pListRecords) {
-        if (nID == STRUCTID_mach_header) {
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, ncmds), 4, "ncmds", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN});
-        } else if (nID == STRUCTID_mach_header_64) {
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, ncmds), 4, "ncmds", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN});
-            pListRecords->append(DATA_RECORD{offsetof(XMACH_DEF::mach_header_64, reserved), 4, "reserved", VT_UINT32, DRF_UNKNOWN});
+    qint64 nStartOffset = locationToOffset(pMemoryMap, locType, nLocation);
+
+    if (nStartOffset != -1) {
+        if (pListRecords) {
+            if (nID == STRUCTID_mach_header) {
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header, ncmds), 4, "ncmds", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+            } else if (nID == STRUCTID_mach_header_64) {
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header_64, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header_64, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header_64, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header_64, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header_64, ncmds), 4, "ncmds", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header_64, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header_64, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+                pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header_64, reserved), 4, "reserved", VT_UINT32, DRF_UNKNOWN, pMemoryMap->endian));
+            }
         }
     }
 

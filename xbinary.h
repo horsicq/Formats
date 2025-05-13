@@ -709,6 +709,7 @@ public:
         QString sName;
         VT valType;
         quint32 nFlags;
+        QVariant varValue;
     };
 
     struct DATAVALUES {
@@ -717,6 +718,9 @@ public:
         QMap<quint64, QString> mapValues;
     };
 
+    DATA_RECORD getDataRecord(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian);
+
+    virtual QString structIDToString(quint32 nID);
     virtual QList<DATA_HEADER> getDataHeaders(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct);
     virtual qint32 getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct);
     virtual QList<DATAVALUES> getDataValues(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, qint32 nRelOffset);
@@ -1031,7 +1035,7 @@ public:
     qint64 find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QVariant varValue, VT valueType, bool bIsBigEndian, qint64 *pnResultSize,
                       PDSTRUCT *pPdStruct = nullptr);
 
-    QString read_valueString(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian = false);
+    QVariant read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian = false);
 
     static QString valueTypeToString(VT valueType);
     static QString getValueString(QVariant varValue, VT valueType);

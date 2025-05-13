@@ -281,6 +281,25 @@ QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 n
     return sResult;
 }
 
+QString XBinary::structIDToString(quint32 nID)
+{
+    return "";
+}
+
+XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian)
+{
+    XBinary::DATA_RECORD dataRecord;
+
+    dataRecord.nRelOffset = nRelOffset;
+    dataRecord.nSize = nSize;
+    dataRecord.sName = sName;
+    dataRecord.valType = valType;
+    dataRecord.nFlags = nFlags;
+    dataRecord.varValue = read_value(valType, nStartOffset + nRelOffset, nSize, endian == ENDIAN_BIG);
+
+    return dataRecord;
+}
+
 qint32 XBinary::getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
 {
     qint32 nResult = 0;
@@ -3465,21 +3484,23 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
     return nResult;
 }
 
-QString XBinary::read_valueString(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian)
+QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian)
 {
-    QString sResult;
+    QVariant varResult;
 
     nSize = qMin(nSize, qint64(128));
 
-    if ((valueType == XBinary::VT_A) || (valueType == XBinary::VT_A_I)) {
-        sResult = read_ansiString(nOffset, nSize);
+    if (valueType == XBinary::VT_UINT32) {
+        varResult = read_uint32(nOffset, bIsBigEndian);
+    } else if ((valueType == XBinary::VT_A) || (valueType == XBinary::VT_A_I)) {
+        varResult = read_ansiString(nOffset, nSize);
     } else if ((valueType == XBinary::VT_UTF8) || (valueType == XBinary::VT_UTF8_I)) {
-        sResult = read_utf8String(nOffset, nSize);
+        varResult = read_utf8String(nOffset, nSize);
     } else if ((valueType == XBinary::VT_U) || (valueType == XBinary::VT_U_I)) {
-        sResult = read_unicodeString(nOffset, nSize, bIsBigEndian);
+        varResult = read_unicodeString(nOffset, nSize, bIsBigEndian);
     }
 
-    return sResult;
+    return varResult;
 }
 
 QString XBinary::valueTypeToString(VT valueType)

@@ -724,6 +724,7 @@ public:
 
     bool handleImport(qint64 nOffset, qint64 nRelOffset, qint64 nSize, QList<EXPORT_RECORD> *pListExportRecords, const QString &sCurrentName, PDSTRUCT *pPdStruct);
 
+    virtual QString structIDToString(quint32 nID);
     virtual QList<DATA_HEADER> getDataHeaders(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct);
     virtual qint32 getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct);
     virtual QList<DATAVALUES> getDataValues(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, qint32 nRelOffset);
