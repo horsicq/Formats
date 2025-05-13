@@ -703,6 +703,12 @@ public:
         DRF_COUNT = 0x00000002,
     };
 
+    struct DATAVALUES {
+        quint64 nMask;
+        bool bFlags;
+        QMap<quint64, QString> mapValues;
+    };
+
     struct DATA_RECORD {
         qint32 nRelOffset;
         qint32 nSize;
@@ -710,20 +716,23 @@ public:
         VT valType;
         quint32 nFlags;
         QVariant varValue;
-    };
-
-    struct DATAVALUES {
-        quint64 nMask;
-        bool bFlags;
-        QMap<quint64, QString> mapValues;
+        QList<DATAVALUES> listDataValues;
     };
 
     DATA_RECORD getDataRecord(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian);
+    DATA_RECORD getDataRecordDV(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian, QMap<quint64, QString> mapValues, bool bFlags);
 
     virtual QString structIDToString(quint32 nID);
-    virtual QList<DATA_HEADER> getDataHeaders(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct);
-    virtual qint32 getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct);
-    virtual QList<DATAVALUES> getDataValues(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, qint32 nRelOffset);
+    virtual QList<DATA_HEADER> getDataHeaders(_MEMORY_MAP *pMemoryMap, const DSID &dsID_parent, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct);
+
+    struct DATA_RECORDS_OPTIONS {
+        _MEMORY_MAP *pMemoryMap;
+        quint32 nID;
+        LT locType;
+        XADDR nLocation;
+    };
+
+    virtual qint32 getDataRecords(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct);
 
 private:
     enum ST {
@@ -1038,7 +1047,7 @@ public:
     QVariant read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian = false);
 
     static QString valueTypeToString(VT valueType);
-    static QString getValueString(QVariant varValue, VT valueType);
+    static QString getValueString(QVariant varValue, VT valueType, bool bTypesAsHex = false);
     static qint32 getValueSize(QVariant varValue, VT valueType);
     static VT getValueType(quint64 nValue);
 
@@ -1642,6 +1651,8 @@ public:
     static bool isPdStructFinished(PDSTRUCT *pPdStruct);
     static bool isPdStructNotCanceled(PDSTRUCT *pPdStruct);
     static bool isPdStructSuccess(PDSTRUCT *pPdStruct);
+    static bool isPdStructStopped(PDSTRUCT *pPdStruct);
+    static void setPdStructStopped(PDSTRUCT *pPdStruct);
     static qint32 getPdStructPercentage(PDSTRUCT *pPdStruct);  // 0-100
 
     struct REGION_FILL {

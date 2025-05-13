@@ -281,9 +281,28 @@ QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 n
     return sResult;
 }
 
+XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian, QMap<quint64, QString> mapValues, bool bFlags)
+{
+    XBinary::DATA_RECORD result = getDataRecord(nStartOffset, nRelOffset, nSize, sName, valType, nFlags, endian);
+
+    DATAVALUES dataValues;
+    dataValues.mapValues = mapValues;
+    dataValues.bFlags = bFlags;
+    dataValues.nMask = 0xFFFFFFFFFFFFFFFF;
+
+    result.listDataValues.append(dataValues);
+
+    return result;
+}
+
 QString XBinary::structIDToString(quint32 nID)
 {
     return "";
+}
+
+qint32 XBinary::getDataRecords(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
+{
+    return 0;
 }
 
 XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian)
@@ -300,21 +319,7 @@ XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nStartOffset, qint64 nRelOffs
     return dataRecord;
 }
 
-qint32 XBinary::getDataRecords(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
-{
-    qint32 nResult = 0;
-
-    return nResult;
-}
-
-QList<XBinary::DATAVALUES> XBinary::getDataValues(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, qint32 nRelOffset)
-{
-    QList<XBinary::DATAVALUES> listResult;
-
-    return listResult;
-}
-
-QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(_MEMORY_MAP *pMemoryMap, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct)
+QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(_MEMORY_MAP *pMemoryMap, const DSID &dsID_parent, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::DATA_HEADER> listResult;
 
@@ -3508,7 +3513,7 @@ QString XBinary::valueTypeToString(VT valueType)
     return XIDSTRING_idToString((quint32)valueType, _TABLE_XBinary_VT, sizeof(_TABLE_XBinary_VT) / sizeof(XBinary::XIDSTRING));
 }
 
-QString XBinary::getValueString(QVariant varValue, VT valueType)
+QString XBinary::getValueString(QVariant varValue, VT valueType, bool bTypesAsHex)
 {
     QString sResult;
 
@@ -3545,7 +3550,11 @@ QString XBinary::getValueString(QVariant varValue, VT valueType)
     } else if (valueType == XBinary::VT_INT) {
         sResult = QString("%1").arg((qint32)(varValue.toULongLong()));
     } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32)){
-        sResult = QString("%1").arg((quint32)(varValue.toULongLong()));
+        if (bTypesAsHex) {
+            sResult = valueToHex((quint32)(varValue.toULongLong()));
+        } else {
+            sResult = QString("%1").arg((quint32)(varValue.toULongLong()));
+        }
     } else if (valueType == XBinary::VT_INT64) {
         sResult = QString("%1").arg((qint64)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_UINT64) {
@@ -10828,6 +10837,26 @@ bool XBinary::isPdStructSuccess(PDSTRUCT *pPdStruct)
     }
 
     return bResult;
+}
+
+bool XBinary::isPdStructStopped(PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    if (pPdStruct) {
+        if (pPdStruct->bIsStop) {
+            bResult = true;
+        }
+    }
+
+    return bResult;
+}
+
+void XBinary::setPdStructStopped(PDSTRUCT *pPdStruct)
+{
+    if (pPdStruct) {
+        pPdStruct->bIsStop = true;
+    }
 }
 
 qint32 XBinary::getPdStructPercentage(PDSTRUCT *pPdStruct)
