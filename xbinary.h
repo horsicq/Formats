@@ -644,6 +644,7 @@ public:
     };
 
     struct HREGION {
+        QString sGUID;
         XADDR nVirtualAddress;
         qint64 nVirtualSize;
         qint64 nFileOffset;
@@ -723,7 +724,17 @@ public:
     DATA_RECORD getDataRecordDV(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian, QMap<quint64, QString> mapValues, bool bFlags);
 
     virtual QString structIDToString(quint32 nID);
-    virtual QList<DATA_HEADER> getDataHeaders(_MEMORY_MAP *pMemoryMap, const DSID &dsID_parent, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct);
+
+    struct DATA_HEADERS_OPTIONS {
+        _MEMORY_MAP *pMemoryMap;
+        const DSID dsID_parent;
+        quint32 nID;
+        LT locType;
+        XADDR nLocation;
+        bool bChildren;
+    };
+
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
 
     struct DATA_RECORDS_OPTIONS {
         _MEMORY_MAP *pMemoryMap;

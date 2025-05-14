@@ -319,7 +319,7 @@ XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nStartOffset, qint64 nRelOffs
     return dataRecord;
 }
 
-QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(_MEMORY_MAP *pMemoryMap, const DSID &dsID_parent, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct)
+QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::DATA_HEADER> listResult;
 
@@ -10966,6 +10966,7 @@ QList<XBinary::HREGION> XBinary::getFileRegions(_MEMORY_MAP *pMemoryMap, PDSTRUC
     for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
         if (pMemoryMap->listRecords.at(i).nOffset != -1) {
             HREGION region = {};
+            region.sGUID = generateUUID();
             region.nVirtualAddress = pMemoryMap->listRecords.at(i).nAddress;
             region.nFileOffset = pMemoryMap->listRecords.at(i).nOffset;
             region.nFileSize = pMemoryMap->listRecords.at(i).nSize;
@@ -10984,6 +10985,7 @@ QList<XBinary::HREGION> XBinary::getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruc
 
     if (hlType == HLTYPE_TOTAL) {
         HREGION region = {};
+        region.sGUID = generateUUID();
         region.sName = tr("Total");
         region.nVirtualAddress = getBaseAddress();
         region.nVirtualSize = getImageSize();

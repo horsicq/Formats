@@ -9036,6 +9036,7 @@ QList<XBinary::HREGION> XPE::getHData(PDSTRUCT *pPdStruct)
 
     {
         HREGION region = {};
+        region.sGUID = generateUUID();
         region.nVirtualAddress = memoryMap.nEntryPointAddress;
         region.nFileOffset = addressToOffset(&memoryMap, region.nVirtualAddress);
         region.nFileSize = 1;
@@ -9049,6 +9050,7 @@ QList<XBinary::HREGION> XPE::getHData(PDSTRUCT *pPdStruct)
 
         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
+            region.sGUID = generateUUID();
             region.nVirtualAddress = dataDirectory.VirtualAddress;
             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
             region.nFileSize = dataDirectory.Size;
@@ -9063,6 +9065,7 @@ QList<XBinary::HREGION> XPE::getHData(PDSTRUCT *pPdStruct)
 
         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
+            region.sGUID = generateUUID();
             region.nVirtualAddress = dataDirectory.VirtualAddress;
             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
             region.nFileSize = dataDirectory.Size;
@@ -9077,6 +9080,7 @@ QList<XBinary::HREGION> XPE::getHData(PDSTRUCT *pPdStruct)
 
         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
+            region.sGUID = generateUUID();
             region.nVirtualAddress = dataDirectory.VirtualAddress;
             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
             region.nFileSize = dataDirectory.Size;
@@ -9091,6 +9095,7 @@ QList<XBinary::HREGION> XPE::getHData(PDSTRUCT *pPdStruct)
 
         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
+            region.sGUID = generateUUID();
             region.nVirtualAddress = dataDirectory.VirtualAddress;
             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
             region.nFileSize = dataDirectory.Size;
@@ -9105,6 +9110,7 @@ QList<XBinary::HREGION> XPE::getHData(PDSTRUCT *pPdStruct)
 
         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
+            region.sGUID = generateUUID();
             region.nVirtualAddress = dataDirectory.VirtualAddress;
             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
             region.nFileSize = dataDirectory.Size;
@@ -9119,6 +9125,7 @@ QList<XBinary::HREGION> XPE::getHData(PDSTRUCT *pPdStruct)
 
         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
             HREGION region = {};
+            region.sGUID = generateUUID();
             region.nVirtualAddress = dataDirectory.VirtualAddress;
             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
             region.nFileSize = dataDirectory.Size;
@@ -9133,6 +9140,7 @@ QList<XBinary::HREGION> XPE::getHData(PDSTRUCT *pPdStruct)
 
         if (dataDirectory.VirtualAddress && isOffsetValid(&memoryMap, dataDirectory.VirtualAddress)) {
             HREGION region = {};
+            region.sGUID = generateUUID();
             region.nVirtualAddress = -1;
             region.nFileOffset = dataDirectory.VirtualAddress;
             region.nFileSize = dataDirectory.Size;

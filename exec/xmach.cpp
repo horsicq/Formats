@@ -4811,6 +4811,7 @@ QList<XBinary::HREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
         SEGMENT_RECORD segmentRecord = listSegmentRecords.at(i);
 
         XBinary::HREGION region = {};
+        region.sGUID = generateUUID();
 
         if (bIs64) {
             region.nVirtualAddress = segmentRecord.s.segment64.vmaddr;
@@ -5219,31 +5220,36 @@ XADDR XMACH::readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSi
     return nResult;
 }
 
-QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(_MEMORY_MAP *pMemoryMap, const DSID &dsID_parent, quint32 nID, LT locType, XADDR nLocation, bool bChildren, PDSTRUCT *pPdStruct)
+QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::DATA_HEADER> listResult;
 
-    if (nID == STRUCTID_UNKNOWN) {
-        if (pMemoryMap->mode == MODE_64) {
-            listResult.append(getDataHeaders(pMemoryMap, dsID_parent, STRUCTID_mach_header_64, locType, nLocation, true, pPdStruct));
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+
+        if (dataHeadersOptions.pMemoryMap->mode == MODE_64) {
+            _dataHeadersOptions.nID = STRUCTID_mach_header_64;
+            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
         } else {
-            listResult.append(getDataHeaders(pMemoryMap, dsID_parent, STRUCTID_mach_header, locType, nLocation, true, pPdStruct));
+            _dataHeadersOptions.nID = STRUCTID_mach_header;
+            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
         }
     } else {
-        qint64 nOffset = locationToOffset(pMemoryMap, locType, nLocation);
+        qint64 nOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
         if (nOffset != -1) {
             XBinary::DATA_HEADER dataHeader = {};
-            dataHeader.dsID_parent = dsID_parent;
+            dataHeader.dsID_parent = dataHeadersOptions.dsID_parent;
             dataHeader.dsID.sGUID = generateUUID();
-            dataHeader.dsID.fileType = pMemoryMap->fileType;
-            dataHeader.dsID.nID = nID;
-            dataHeader.locType = locType;
-            dataHeader.nLocation = nLocation;
+            dataHeader.dsID.fileType = dataHeadersOptions.pMemoryMap->fileType;
+            dataHeader.dsID.nID = dataHeadersOptions.nID;
+            dataHeader.locType = dataHeadersOptions.locType;
+            dataHeader.nLocation = dataHeadersOptions.nLocation;
 
-            if (nID == STRUCTID_mach_header) {
+            if (dataHeadersOptions.nID == STRUCTID_mach_header) {
                 dataHeader.nSize = sizeof(XMACH_DEF::mach_header);
-            } else if (nID == STRUCTID_mach_header_64) {
+            } else if (dataHeadersOptions.nID == STRUCTID_mach_header_64) {
                 dataHeader.nSize = sizeof(XMACH_DEF::mach_header_64);
             }
 
