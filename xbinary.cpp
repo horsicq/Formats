@@ -3820,6 +3820,8 @@ QString XBinary::convertFileNameSymbols(const QString &sFileName)
     sResult = sResult.replace(":", "_");
     sResult = sResult.replace("\n", "_");
     sResult = sResult.replace("\r", "_");
+    sResult = sResult.replace("{", "_");
+    sResult = sResult.replace("}", "_");
 
     return sResult;
 }
