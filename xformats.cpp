@@ -28,91 +28,50 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMO
                                             XBinary::PDSTRUCT *pPdStruct)
 {
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) return XBinary(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_COM, fileType)) return XCOM(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) return XMSDOS(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_NE, fileType)) return XNE(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
-
-    // Combine LE and LX cases since they use the same handler
-    if (XBinary::checkFileType(XBinary::FT_LE, fileType) || XBinary::checkFileType(XBinary::FT_LX, fileType))
-        return XLE(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_PE, fileType)) return XPE(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) return XELF(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) return XMACH(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) return XAmigaHunk(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
-
-    // Image formats
-    if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) return XPNG(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) return XJpeg(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) return XIcon(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_BMP, fileType)) return XBMP(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) return XGif(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) return XTiff(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    // Audio/video formats
-    if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) return XMP4(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) return XMP3(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) return XRiff(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return XJavaClass(pDevice).getMemoryMap(mapMode, pPdStruct);
-
+    else if (XBinary::checkFileType(XBinary::FT_COM, fileType)) return XCOM(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) return XMSDOS(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) return XNE(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_LE, fileType) || XBinary::checkFileType(XBinary::FT_LX, fileType))
+            return XLE(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) return XPE(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) return XELF(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) return XMACH(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) return XAmigaHunk(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) return XPNG(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) return XJpeg(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) return XIcon(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_BMP, fileType)) return XBMP(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) return XGif(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) return XTiff(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) return XMP4(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) return XMP3(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) return XRiff(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return XJavaClass(pDevice).getMemoryMap(mapMode, pPdStruct);
 #ifdef USE_DEX
-    if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) return XDEX(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) return XDEX(pDevice).getMemoryMap(mapMode, pPdStruct);
 #endif
-
 #ifdef USE_PDF
-    if (XBinary::checkFileType(XBinary::FT_PDF, fileType)) return XPDF(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_PDF, fileType)) return XPDF(pDevice).getMemoryMap(mapMode, pPdStruct);
 #endif
-
 #ifdef USE_ARCHIVE
-    // Archive formats
-    if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) return XZip(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_JAR, fileType)) return XJAR(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_APK, fileType)) return XAPK(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_IPA, fileType)) return XIPA(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_APKS, fileType)) return XAPKS(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) return XSevenZip(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) return XCab(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) return XRar(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) return XMACHOFat(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_NPM, fileType)) return XNPM(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_TARGZ, fileType)) return XTGZ(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) return XGzip(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) return XZlib(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) return XLHA(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return XCFBF(pDevice).getMemoryMap(mapMode, pPdStruct);
-
-    if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType))
-        return XDOS16(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) return XZip(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_JAR, fileType)) return XJAR(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_APK, fileType)) return XAPK(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_IPA, fileType)) return XIPA(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_APKS, fileType)) return XAPKS(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) return XSevenZip(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) return XCab(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) return XRar(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) return XMACHOFat(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_NPM, fileType)) return XNPM(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_TARGZ, fileType)) return XTGZ(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) return XGzip(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) return XZlib(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) return XLHA(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return XCFBF(pDevice).getMemoryMap(mapMode, pPdStruct);
+    else if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType))
+            return XDOS16(pDevice).getMemoryMap(mapMode, pPdStruct);
 #endif
-
     // Default fallback
     return XBinary(pDevice, bIsImage, nModuleAddress).getMemoryMap(mapMode, pPdStruct);
 }
@@ -988,6 +947,57 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     }
 
     return result;
+}
+
+QList<XBinary::DATA_HEADER> XFormats::getDataHeaders(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_HEADERS_OPTIONS &dataHeadersOptions, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+{
+    if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) return XBinary(pDevice, bIsImage, nModuleAddress).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_COM, fileType)) return XCOM(pDevice, bIsImage, nModuleAddress).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) return XMSDOS(pDevice, bIsImage, nModuleAddress).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) return XNE(pDevice, bIsImage, nModuleAddress).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_LE, fileType) || XBinary::checkFileType(XBinary::FT_LX, fileType))
+        return XLE(pDevice, bIsImage, nModuleAddress).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) return XPE(pDevice, bIsImage, nModuleAddress).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) return XELF(pDevice, bIsImage, nModuleAddress).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) return XMACH(pDevice, bIsImage, nModuleAddress).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) return XAmigaHunk(pDevice, bIsImage, nModuleAddress).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) return XPNG(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) return XJpeg(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) return XIcon(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_BMP, fileType)) return XBMP(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) return XGif(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) return XTiff(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) return XMP4(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) return XMP3(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) return XRiff(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return XJavaClass(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+#ifdef USE_DEX
+    else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) return XDEX(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+#endif
+#ifdef USE_PDF
+    else if (XBinary::checkFileType(XBinary::FT_PDF, fileType)) return XPDF(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+#endif
+#ifdef USE_ARCHIVE
+    else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) return XZip(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_JAR, fileType)) return XJAR(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_APK, fileType)) return XAPK(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_IPA, fileType)) return XIPA(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_APKS, fileType)) return XAPKS(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) return XSevenZip(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) return XCab(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) return XRar(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) return XMACHOFat(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_NPM, fileType)) return XNPM(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_TARGZ, fileType)) return XTGZ(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) return XGzip(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) return XZlib(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) return XLHA(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return XCFBF(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+    else if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType))
+        return XDOS16(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
+#endif
+    // Default fallback
+    return XBinary(pDevice, bIsImage, nModuleAddress).getDataHeaders(dataHeadersOptions, pPdStruct);
 }
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra)
