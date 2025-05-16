@@ -4803,17 +4803,15 @@ QList<XBinary::HREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
     QList<COMMAND_RECORD> listCommandRecords = getCommandRecords(0, pPdStruct);
     QList<SEGMENT_RECORD> listSegmentRecords = getSegmentRecords(&listCommandRecords);
 
-    bool bIs64 = is64();
-
     qint32 nNumberOfRecords = listSegmentRecords.count();
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         SEGMENT_RECORD segmentRecord = listSegmentRecords.at(i);
 
         XBinary::HREGION region = {};
         region.sGUID = generateUUID();
 
-        if (bIs64) {
+        if (segmentRecord.bIs64) {
             region.nVirtualAddress = segmentRecord.s.segment64.vmaddr;
             region.nVirtualSize = segmentRecord.s.segment64.vmsize;
             region.nFileOffset = segmentRecord.s.segment64.fileoff;
@@ -4837,7 +4835,39 @@ QList<XBinary::HREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
 
 QList<XBinary::HREGION> XMACH::getNativeSubRegions(PDSTRUCT *pPdStruct)
 {
-    return XBinary::getNativeSubRegions(pPdStruct);
+    QList<XBinary::HREGION> listRegions;
+
+    QList<COMMAND_RECORD> listCommandRecords = getCommandRecords(0, pPdStruct);
+
+    QList<SECTION_RECORD> listSections = getSectionRecords(&listCommandRecords);
+    qint32 nNumberOfSections = listSections.count();
+
+    for (qint32 i = 0; (i < nNumberOfSections) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+        SECTION_RECORD sectionRecord = listSections.at(i);
+
+        XBinary::HREGION region = {};
+        region.sGUID = generateUUID();
+
+        if (sectionRecord.bIs64) {
+            region.nVirtualAddress = sectionRecord.s.section64.addr;
+            region.nVirtualSize = sectionRecord.s.section64.size;
+            region.nFileOffset = sectionRecord.s.section64.offset;
+            region.nFileSize = sectionRecord.s.section64.size;
+            region.sName = sectionRecord.s.section64.sectname;
+        } else {
+            region.nVirtualAddress = sectionRecord.s.section32.addr;
+            region.nVirtualSize = sectionRecord.s.section32.size;
+            region.nFileOffset = sectionRecord.s.section32.offset;
+            region.nFileSize = sectionRecord.s.section32.size;
+            region.sName = sectionRecord.s.section32.sectname;
+        }
+
+        // TODO flags
+
+        listRegions.append(region);
+    }
+
+    return listRegions;
 }
 
 bool XMACH::handleImport(qint64 nOffset, qint64 nRelOffset, qint64 nSize, QList<EXPORT_RECORD> *pListExportRecords, const QString &sCurrentName, PDSTRUCT *pPdStruct)

@@ -653,6 +653,8 @@ public:
         QString sName;
     };
 
+    static HREGION findParentHRegion(const QList<HREGION> &listHRegions, const HREGION &hRegion);
+
     struct PDRECORD {
         qint64 nCurrent;
         qint64 nTotal;

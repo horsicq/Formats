@@ -124,13 +124,6 @@ QString XJpeg::getVersion()
 
 QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     QList<CHUNK> listResult;
 
     qint64 nOffset = 0;

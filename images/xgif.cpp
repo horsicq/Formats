@@ -64,7 +64,7 @@ qint64 XGif::getFileFormatSize(PDSTRUCT *pPdStruct)
 
     qint64 nCurrentOffset = 0x320;
 
-    while (true) {
+    while (XBinary::isPdStructNotCanceled(pPdStruct)) {
         quint8 nBlockSize = read_uint8(nCurrentOffset);
 
         if (nBlockSize) {

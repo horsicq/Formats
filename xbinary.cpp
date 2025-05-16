@@ -281,6 +281,23 @@ QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 n
     return sResult;
 }
 
+XBinary::HREGION XBinary::findParentHRegion(const QList<HREGION> &listHRegions, const HREGION &hRegion)
+{
+    HREGION result = {};
+
+    qint32 nNumberOfRegions = listHRegions.size();
+
+    for (qint32 i = 0; i < nNumberOfRegions; i++) {
+        // if hRegion inside parent hRegion
+        if ((listHRegions[i].nVirtualAddress <= hRegion.nVirtualAddress) && (listHRegions[i].nVirtualAddress + listHRegions[i].nVirtualSize >= hRegion.nVirtualAddress + hRegion.nVirtualSize)) {
+            result = listHRegions[i];
+            break;
+        }
+    }
+
+    return result;
+}
+
 XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian, QMap<quint64, QString> mapValues, bool bFlags)
 {
     XBinary::DATA_RECORD result = getDataRecord(nStartOffset, nRelOffset, nSize, sName, valType, nFlags, endian);
