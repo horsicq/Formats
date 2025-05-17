@@ -5592,7 +5592,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_DEX);
         } else if (compareSignature(&memoryMap, "02000C00")) {
             stResult.insert(FT_ANDROIDASRC);
-        } else if (compareSignature(&memoryMap, "03000800")) {
+        } else if (compareSignature(&memoryMap, "00000800") || compareSignature(&memoryMap, "03000800")) {
             stResult.insert(FT_ANDROIDXML);
         } else if (compareSignature(&memoryMap, "'%PDF'", 0)) {
             stResult.insert(FT_DOCUMENT);
