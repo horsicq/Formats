@@ -151,30 +151,14 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
-    {XBinary::VT_UNKNOWN, "Unknown"},
-    {XBinary::VT_STRING, "String"},
-    {XBinary::VT_A, "A"},
-    {XBinary::VT_A_I, "A"},
-    {XBinary::VT_U, "U"},
-    {XBinary::VT_U_I, "U"},
-    {XBinary::VT_UTF8, "UTF8"},
-    {XBinary::VT_UTF8_I, "UTF"},
-    {XBinary::VT_SIGNATURE, "Signature"},
-    {XBinary::VT_VALUE, "Value"},
-    {XBinary::VT_BYTE, "byte"},
-    {XBinary::VT_WORD, "word"},
-    {XBinary::VT_DWORD, "dword"},
-    {XBinary::VT_QWORD, "qword"},
-    {XBinary::VT_CHAR, "char"},
-    {XBinary::VT_UCHAR, "uchar"},
-    {XBinary::VT_SHORT, "short"},
-    {XBinary::VT_USHORT, "ushort"},
-    {XBinary::VT_INT, "int"},
-    {XBinary::VT_UINT, "uint"},
-    {XBinary::VT_INT64, "int64"},
-    {XBinary::VT_UINT32, "uint32"},
-    {XBinary::VT_UINT64, "uint64"},
-    {XBinary::VT_DOUBLE, "double"},
+    {XBinary::VT_UNKNOWN, "Unknown"}, {XBinary::VT_STRING, "String"}, {XBinary::VT_A, "A"},
+    {XBinary::VT_A_I, "A"},           {XBinary::VT_U, "U"},           {XBinary::VT_U_I, "U"},
+    {XBinary::VT_UTF8, "UTF8"},       {XBinary::VT_UTF8_I, "UTF"},    {XBinary::VT_SIGNATURE, "Signature"},
+    {XBinary::VT_VALUE, "Value"},     {XBinary::VT_BYTE, "byte"},     {XBinary::VT_WORD, "word"},
+    {XBinary::VT_DWORD, "dword"},     {XBinary::VT_QWORD, "qword"},   {XBinary::VT_CHAR, "char"},
+    {XBinary::VT_UCHAR, "uchar"},     {XBinary::VT_SHORT, "short"},   {XBinary::VT_USHORT, "ushort"},
+    {XBinary::VT_INT, "int"},         {XBinary::VT_UINT, "uint"},     {XBinary::VT_INT64, "int64"},
+    {XBinary::VT_UINT32, "uint32"},   {XBinary::VT_UINT64, "uint64"}, {XBinary::VT_DOUBLE, "double"},
     {XBinary::VT_FLOAT, "float"},
 };
 
@@ -289,7 +273,8 @@ XBinary::HREGION XBinary::findParentHRegion(const QList<HREGION> &listHRegions, 
 
     for (qint32 i = 0; i < nNumberOfRegions; i++) {
         // if hRegion inside parent hRegion
-        if ((listHRegions[i].nVirtualAddress <= hRegion.nVirtualAddress) && (listHRegions[i].nVirtualAddress + listHRegions[i].nVirtualSize >= hRegion.nVirtualAddress + hRegion.nVirtualSize)) {
+        if ((listHRegions[i].nVirtualAddress <= hRegion.nVirtualAddress) &&
+            (listHRegions[i].nVirtualAddress + listHRegions[i].nVirtualSize >= hRegion.nVirtualAddress + hRegion.nVirtualSize)) {
             result = listHRegions[i];
             break;
         }
@@ -298,7 +283,8 @@ XBinary::HREGION XBinary::findParentHRegion(const QList<HREGION> &listHRegions, 
     return result;
 }
 
-XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian, QMap<quint64, QString> mapValues, bool bFlags)
+XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian,
+                                              QMap<quint64, QString> mapValues, bool bFlags)
 {
     XBinary::DATA_RECORD result = getDataRecord(nStartOffset, nRelOffset, nSize, sName, valType, nFlags, endian);
 
@@ -3566,7 +3552,7 @@ QString XBinary::getValueString(QVariant varValue, VT valueType, bool bTypesAsHe
         sResult = QString("%1").arg((quint16)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_INT) {
         sResult = QString("%1").arg((qint32)(varValue.toULongLong()));
-    } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32)){
+    } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32)) {
         if (bTypesAsHex) {
             sResult = valueToHex((quint32)(varValue.toULongLong()));
         } else {
@@ -3622,7 +3608,7 @@ qint32 XBinary::getValueSize(QVariant varValue, VT valueType)
         nResult = 2;
     } else if (valueType == XBinary::VT_INT) {
         nResult = 4;
-    } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32))  {
+    } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32)) {
         nResult = 4;
     } else if (valueType == XBinary::VT_INT64) {
         nResult = 8;

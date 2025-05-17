@@ -723,7 +723,8 @@ public:
     };
 
     DATA_RECORD getDataRecord(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian);
-    DATA_RECORD getDataRecordDV(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian, QMap<quint64, QString> mapValues, bool bFlags);
+    DATA_RECORD getDataRecordDV(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian,
+                                QMap<quint64, QString> mapValues, bool bFlags);
 
     virtual QString structIDToString(quint32 nID);
 
