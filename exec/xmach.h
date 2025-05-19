@@ -708,6 +708,8 @@ public:
     virtual QList<HREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<HREGION> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);
 
+    virtual QList<HREGION> getHData(PDSTRUCT *pPdStruct = nullptr);
+
     enum OPCODE_TYPE {
         OPCODE_TYPE_UNKNOWN = 0,
         OPCODE_TYPE_BIND,

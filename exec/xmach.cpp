@@ -4636,6 +4636,27 @@ qint64 XMACH::getFileFormatSize(PDSTRUCT *pPdStruct)
     return _calculateRawSize(pPdStruct);
 }
 
+QList<XBinary::HREGION> XMACH::getHData(PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::HREGION> listResult;
+
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+
+    {
+        HREGION region = {};
+        region.sGUID = generateUUID();
+        region.nVirtualAddress = memoryMap.nEntryPointAddress;
+        region.nFileOffset = addressToOffset(&memoryMap, region.nVirtualAddress);
+        region.nFileSize = 1;
+        region.nVirtualSize = region.nFileSize;
+        region.sName = tr("Entry point");
+
+        listResult.append(region);
+    }
+
+    return listResult;
+}
+
 XBinary::FILEFORMATINFO XMACH::getFileFormatInfo(PDSTRUCT *pPdStruct)
 {
     FILEFORMATINFO result = {};
@@ -5257,6 +5278,7 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
         _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
 
         if (dataHeadersOptions.pMemoryMap->mode == MODE_64) {
             _dataHeadersOptions.nID = STRUCTID_mach_header_64;
@@ -5276,6 +5298,7 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
             dataHeader.dsID.nID = dataHeadersOptions.nID;
             dataHeader.locType = dataHeadersOptions.locType;
             dataHeader.nLocation = dataHeadersOptions.nLocation;
+            dataHeader.sName = structIDToString(dataHeadersOptions.nID);
 
             if (dataHeadersOptions.nID == STRUCTID_mach_header) {
                 dataHeader.nSize = sizeof(XMACH_DEF::mach_header);

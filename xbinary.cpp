@@ -66,6 +66,12 @@ const quint16 _crc16_tab[] = {
     0x9901, 0x59c0, 0x5880, 0x9841, 0x8801, 0x48c0, 0x4980, 0x8941, 0x4b00, 0x8bc1, 0x8a81, 0x4a40, 0x4e00, 0x8ec1, 0x8f81, 0x4f40, 0x8d01, 0x4dc0, 0x4c80, 0x8c41,
     0x4400, 0x84c1, 0x8581, 0x4540, 0x8701, 0x47c0, 0x4680, 0x8641, 0x8201, 0x42c0, 0x4380, 0x8341, 0x4100, 0x81c1, 0x8081, 0x4040};
 
+
+XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
+    {XBinary::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XBinary::STRUCTID_NFD, "nfd", QString("Nauz File Detector")},
+};
+
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
     {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},        {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
     {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},        {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
@@ -151,11 +157,23 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
-    {XBinary::VT_UNKNOWN, "Unknown"}, {XBinary::VT_STRING, "String"}, {XBinary::VT_A, "A"},
+    {XBinary::VT_UNKNOWN, "Unknown"},
+    {XBinary::VT_STRING, "String"},
+    {XBinary::VT_HEX, "Hex"},
+    {XBinary::VT_DATETIME, "DateTime"},
+
+    {XBinary::VT_A, "A"},
     {XBinary::VT_A_I, "A"},           {XBinary::VT_U, "U"},           {XBinary::VT_U_I, "U"},
     {XBinary::VT_UTF8, "UTF8"},       {XBinary::VT_UTF8_I, "UTF"},    {XBinary::VT_SIGNATURE, "Signature"},
-    {XBinary::VT_VALUE, "Value"},     {XBinary::VT_BYTE, "byte"},     {XBinary::VT_WORD, "word"},
-    {XBinary::VT_DWORD, "dword"},     {XBinary::VT_QWORD, "qword"},   {XBinary::VT_CHAR, "char"},
+    {XBinary::VT_VALUE, "Value"},
+    {XBinary::VT_BIT, "bit"},
+    {XBinary::VT_BYTE, "byte"},     {XBinary::VT_WORD, "word"},
+    {XBinary::VT_DWORD, "dword"},     {XBinary::VT_QWORD, "qword"},
+    {XBinary::VT_128, "U128"},
+    {XBinary::VT_256, "U256"},
+    {XBinary::VT_FPEG, "FPEG"},
+
+    {XBinary::VT_CHAR, "char"},
     {XBinary::VT_UCHAR, "uchar"},     {XBinary::VT_SHORT, "short"},   {XBinary::VT_USHORT, "ushort"},
     {XBinary::VT_INT, "int"},         {XBinary::VT_UINT, "uint"},     {XBinary::VT_INT64, "int64"},
     {XBinary::VT_UINT32, "uint32"},   {XBinary::VT_UINT64, "uint64"}, {XBinary::VT_DOUBLE, "double"},
@@ -300,7 +318,40 @@ XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nStartOffset, qint64 nRelOf
 
 QString XBinary::structIDToString(quint32 nID)
 {
-    return "";
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XBINARY_STRUCTID, sizeof(_TABLE_XBINARY_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct)
+{
+    DATA_HEADER dhInfo = {};
+    dhInfo.dsID_parent.fileType = FT_UNKNOWN;
+    dhInfo.dsID_parent.nID = 0;
+    dhInfo.dsID_parent.sGUID = generateUUID();
+    dhInfo.dsID.fileType = getFileType();
+    dhInfo.dsID.nID = 0;
+    dhInfo.dsID.sGUID = generateUUID();
+    dhInfo.sName = QObject::tr("Info");
+    dhInfo.locType = LT_UNKNOWN;
+    dhInfo.nLocation = 0;
+    dhInfo.nSize = -1;
+
+    pListHeaders->append(dhInfo);
+
+    {
+        DATA_HEADER dhNFD = {};
+        dhNFD.dsID_parent = dhInfo.dsID;
+        dhNFD.dsID.fileType = FT_BINARY;
+        dhNFD.dsID.nID = STRUCTID_NFD;
+        dhNFD.dsID.sGUID = generateUUID();
+        dhNFD.sName = XBinary::structIDToString(dhNFD.dsID.nID);
+        dhNFD.locType = LT_UNKNOWN;
+        dhNFD.nLocation = 0;
+        dhNFD.nSize = -1;
+
+        pListHeaders->append(dhNFD);
+    }
+
+    return dhInfo.dsID;
 }
 
 qint32 XBinary::getDataRecords(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
@@ -325,6 +376,10 @@ XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nStartOffset, qint64 nRelOffs
 QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == 0) {
+        _addDefaultHeaders(&listResult, pPdStruct);
+    }
 
     return listResult;
 }
@@ -6125,44 +6180,44 @@ QString XBinary::xVariantToHex(XVARIANT value)
 {
     QString sResult;
 
-    if (value.mode == MODE_BIT) {
-        if (value.var.v_bool) {
+    if (value.varType == VT_BIT) {
+        if (value.var.toBool()) {
             sResult = "1";
         } else {
             sResult = "0";
         }
-    } else if (value.mode == MODE_8) {
-        sResult = valueToHex(value.var.v_uint8);
-    } else if (value.mode == MODE_16) {
-        sResult = valueToHex(value.var.v_uint16, value.bIsBigEndian);
-    } else if (value.mode == MODE_32) {
-        sResult = valueToHex(value.var.v_uint32, value.bIsBigEndian);
-    } else if (value.mode == MODE_64) {
-        sResult = valueToHex(value.var.v_uint64, value.bIsBigEndian);
-    } else if (value.mode == MODE_128) {
-        QString sLow = valueToHex(value.var.v_uint128[0], value.bIsBigEndian);
-        QString sHigh = valueToHex(value.var.v_uint128[1], value.bIsBigEndian);
+    } else if (value.varType == VT_BYTE) {
+        sResult = valueToHex((quint8)value.var.toULongLong());
+    } else if (value.varType == VT_WORD) {
+        sResult = valueToHex((quint16)value.var.toULongLong(), value.bIsBigEndian);
+    } else if (value.varType == VT_DWORD) {
+        sResult = valueToHex((quint32)value.var.toULongLong(), value.bIsBigEndian);
+    } else if (value.varType == VT_QWORD) {
+        sResult = valueToHex((quint64)value.var.toULongLong(), value.bIsBigEndian);
+    } else if (value.varType == VT_128) {
+        // QString sLow = valueToHex(value.var.v_uint128[0], value.bIsBigEndian);
+        // QString sHigh = valueToHex(value.var.v_uint128[1], value.bIsBigEndian);
 
-        if (value.bIsBigEndian) {
-            sResult = sLow + sHigh;
-        } else {
-            sResult = sHigh + sLow;
-        }
-    } else if (value.mode == MODE_256) {
-        QString s0 = valueToHex(value.var.v_uint256[0], value.bIsBigEndian);
-        QString s1 = valueToHex(value.var.v_uint256[1], value.bIsBigEndian);
-        QString s2 = valueToHex(value.var.v_uint256[2], value.bIsBigEndian);
-        QString s3 = valueToHex(value.var.v_uint256[3], value.bIsBigEndian);
+        // if (value.bIsBigEndian) {
+        //     sResult = sLow + sHigh;
+        // } else {
+        //     sResult = sHigh + sLow;
+        // }
+    } else if (value.varType == VT_256) {
+        // QString s0 = valueToHex(value.var.v_uint256[0], value.bIsBigEndian);
+        // QString s1 = valueToHex(value.var.v_uint256[1], value.bIsBigEndian);
+        // QString s2 = valueToHex(value.var.v_uint256[2], value.bIsBigEndian);
+        // QString s3 = valueToHex(value.var.v_uint256[3], value.bIsBigEndian);
 
-        if (value.bIsBigEndian) {
-            sResult = s0 + s1 + s2 + s3;
-        } else {
-            sResult = s3 + s2 + s1 + s0;
-        }
-    } else if (value.mode == MODE_FREG) {
-        for (qint32 i = 0; i < 10; i++) {
-            sResult += valueToHex(value.var.v_freg[i]);
-        }
+        // if (value.bIsBigEndian) {
+        //     sResult = s0 + s1 + s2 + s3;
+        // } else {
+        //     sResult = s3 + s2 + s1 + s0;
+        // }
+    } else if (value.varType == VT_FPEG) {
+        // for (qint32 i = 0; i < 10; i++) {
+        //     sResult += valueToHex(value.var.v_freg[i]);
+        // }
     }
 
     return sResult;
@@ -7862,6 +7917,89 @@ bool XBinary::_addCheckFormatTest(QList<FMT_MSG> *pListFmtMsgs, bool *pbContinue
     }
 
     return bResult;
+}
+
+void XBinary::dumpMemoryMap()
+{
+#ifdef QT_DEBUG
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN);
+
+    qDebug("%s", memoryMap.bIsImage ? "Image" : "File");
+    qDebug("Binary Size: %lld", memoryMap.nBinarySize);
+    qDebug("Image Size: %lld", memoryMap.nImageSize);
+    qDebug("Module Address: %lld", memoryMap.nModuleAddress);
+    qDebug("EntryPoint Address: %lld", memoryMap.nEntryPointAddress);
+    qDebug("File Type: %s", fileTypeIdToString(memoryMap.fileType).toLatin1().data());
+    qDebug("Mode: %s", modeIdToString(memoryMap.mode).toLatin1().data());
+    qDebug("Endian: %s", endianToString(memoryMap.endian).toLatin1().data());
+    qDebug("Arch: %s", memoryMap.sArch.toLatin1().data());
+    qDebug("Type: %s", memoryMap.sType.toLatin1().data());
+
+    qint32 nNumberOfRecords = memoryMap.listRecords.count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        qDebug("--------------------------------------------------");
+        qDebug("Record: %d", i);
+        qDebug("Index: %d", memoryMap.listRecords.at(i).nIndex);
+        qDebug("Offset: %lld", memoryMap.listRecords.at(i).nOffset);
+        qDebug("Address: %lld", memoryMap.listRecords.at(i).nAddress);
+        // qDebug("Segment: %s", addressSegmentToString(memoryMap.listRecords.at(i).segment).toLatin1().data());
+        qDebug("Size: %lld", memoryMap.listRecords.at(i).nSize);
+        // qDebug("Type: %s", mmtToString(memoryMap.listRecords.at(i).type).toLatin1().data());
+        qDebug("LoadSectionNumber: %d", memoryMap.listRecords.at(i).nLoadSectionNumber);
+        qDebug("Name: %s", memoryMap.listRecords.at(i).sName.toLatin1().data());
+        qDebug("IsVirtual: %s", memoryMap.listRecords.at(i).bIsVirtual ? "true" : "false");
+        qDebug("IsInvisible: %s", memoryMap.listRecords.at(i).bIsInvisible ? "true" : "false");
+        qDebug("ID: %lld", memoryMap.listRecords.at(i).nID);
+        qDebug("--------------------------------------------------");
+    }
+
+#endif
+}
+
+void XBinary::dumpHeaders()
+{
+#ifdef QT_DEBUG
+    XBinary::_MEMORY_MAP memoryMap = getMemoryMap();
+
+    XBinary::DATA_HEADERS_OPTIONS dataHeaderOptions = {};
+    dataHeaderOptions.locType = XBinary::LT_OFFSET;
+    dataHeaderOptions.nLocation = 0;
+    dataHeaderOptions.pMemoryMap = &memoryMap;
+    dataHeaderOptions.nID = 0;
+
+    QList<XBinary::DATA_HEADER> listHeaders = getDataHeaders(dataHeaderOptions, nullptr);
+
+    qint32 nNumberOfHeaders = listHeaders.count();
+
+    for (qint32 i = 0; i < nNumberOfHeaders; i++) {
+        XBinary::DATA_HEADER dataHeader = listHeaders.at(i);
+
+        if (dataHeader.dsID.fileType == getFileType()) {
+            qDebug("%s: %X", structIDToString(dataHeader.dsID.nID).toLatin1().data(), locationToOffset(&memoryMap, dataHeader.locType, dataHeader.nLocation));
+
+            QList<XBinary::DATA_RECORD> listDataRecords;
+
+            XBinary::DATA_RECORDS_OPTIONS dataRecordsOptions = {};
+            dataRecordsOptions.pMemoryMap = &memoryMap;
+            dataRecordsOptions.nID = dataHeader.dsID.nID;
+            dataRecordsOptions.locType = dataHeader.locType;
+            dataRecordsOptions.nLocation = dataHeader.nLocation;
+
+            getDataRecords(dataRecordsOptions, &listDataRecords, nullptr);
+
+            qint32 nNumberOfRecords = listDataRecords.count();
+
+            for (qint32 j = 0; j < nNumberOfRecords; j++) {
+                XBinary::DATA_RECORD dataRecord = listDataRecords.at(j);
+
+                qDebug("%X: %X %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType).toLatin1().data(), dataRecord.sName.toLatin1().data(), XBinary::getValueString(dataRecord.varValue, dataRecord.valType, true).toLatin1().data());
+            }
+        } else if (dataHeader.dsID.fileType == FT_BINARY) {
+            qDebug("%s: %X", XBinary::structIDToString(dataHeader.dsID.nID).toLatin1().data(), 0);
+        }
+    }
+#endif
 }
 
 QList<XBinary::FMT_MSG> XBinary::checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct)
@@ -10218,8 +10356,8 @@ XBinary::XVARIANT XBinary::getXVariant(bool bValue)
 {
     XVARIANT result = {};
 
-    result.mode = MODE_BIT;
-    result.var.v_bool = bValue;
+    result.varType = VT_BIT;
+    result.var = bValue;
 
     return result;
 }
@@ -10228,8 +10366,8 @@ XBinary::XVARIANT XBinary::getXVariant(quint8 nValue)
 {
     XVARIANT result = {};
 
-    result.mode = MODE_8;
-    result.var.v_uint8 = nValue;
+    result.varType = VT_BYTE;
+    result.var = nValue;
 
     return result;
 }
@@ -10239,8 +10377,8 @@ XBinary::XVARIANT XBinary::getXVariant(quint16 nValue, bool bIsBigEndian)
     XVARIANT result = {};
 
     result.bIsBigEndian = bIsBigEndian;
-    result.mode = MODE_16;
-    result.var.v_uint16 = nValue;
+    result.varType = VT_WORD;
+    result.var = nValue;
 
     return result;
 }
@@ -10250,8 +10388,8 @@ XBinary::XVARIANT XBinary::getXVariant(quint32 nValue, bool bIsBigEndian)
     XVARIANT result = {};
 
     result.bIsBigEndian = bIsBigEndian;
-    result.mode = MODE_32;
-    result.var.v_uint32 = nValue;
+    result.varType = VT_DWORD;
+    result.var = nValue;
 
     return result;
 }
@@ -10261,8 +10399,8 @@ XBinary::XVARIANT XBinary::getXVariant(quint64 nValue, bool bIsBigEndian)
     XVARIANT result = {};
 
     result.bIsBigEndian = bIsBigEndian;
-    result.mode = MODE_64;
-    result.var.v_uint64 = nValue;
+    result.varType = VT_QWORD;
+    result.var = nValue;
 
     return result;
 }
@@ -10272,9 +10410,9 @@ XBinary::XVARIANT XBinary::getXVariant(quint64 nValue[2], bool bIsBigEndian)
     XVARIANT result = {};
 
     result.bIsBigEndian = bIsBigEndian;
-    result.mode = MODE_128;
-    result.var.v_uint128[0] = nValue[0];
-    result.var.v_uint128[1] = nValue[1];
+    result.varType = VT_128;
+    // result.var.v_uint128[0] = nValue[0];
+    // result.var.v_uint128[1] = nValue[1];
 
     return result;
 }
@@ -10284,9 +10422,9 @@ XBinary::XVARIANT XBinary::getXVariant(quint64 nLow, quint64 nHigh, bool bIsBigE
     XVARIANT result = {};
 
     result.bIsBigEndian = bIsBigEndian;
-    result.mode = MODE_128;
-    result.var.v_uint128[0] = nLow;
-    result.var.v_uint128[1] = nHigh;
+    result.varType = VT_128;
+    // result.var.v_uint128[0] = nLow;
+    // result.var.v_uint128[1] = nHigh;
 
     return result;
 }
@@ -10296,11 +10434,11 @@ XBinary::XVARIANT XBinary::getXVariant(quint64 nLow1, quint64 nLow2, quint64 nHi
     XVARIANT result = {};
 
     result.bIsBigEndian = bIsBigEndian;
-    result.mode = MODE_256;
-    result.var.v_uint256[0] = nLow1;
-    result.var.v_uint256[1] = nLow2;
-    result.var.v_uint256[2] = nHigh1;
-    result.var.v_uint256[3] = nHigh2;
+    result.varType = VT_256;
+    // result.var.v_uint256[0] = nLow1;
+    // result.var.v_uint256[1] = nLow2;
+    // result.var.v_uint256[2] = nHigh1;
+    // result.var.v_uint256[3] = nHigh2;
 
     return result;
 }
@@ -10310,23 +10448,22 @@ XBinary::XVARIANT XBinary::getXVariant(quint8 nValue[10], bool bIsBigEndian)
     XVARIANT result = {};
 
     result.bIsBigEndian = bIsBigEndian;
-    result.mode = MODE_FREG;
+    result.varType = VT_FPEG;
 
-    for (qint32 i = 0; i < 10; i++) {
-        result.var.v_freg[i] = nValue[i];
-    }
+    // for (qint32 i = 0; i < 10; i++) {
+    //     result.var.v_freg[i] = nValue[i];
+    // }
 
     return result;
 }
 
-quint64 XBinary::xVariantToQword(XVARIANT xvariant)
+quint64 XBinary::xVariantToQword(const XVARIANT &xvariant)
 {
     quint64 nResult = 0;
 
-    if (xvariant.mode == MODE_8) nResult = xvariant.var.v_uint8;
-    else if (xvariant.mode == MODE_16) nResult = xvariant.var.v_uint16;
-    else if (xvariant.mode == MODE_32) nResult = xvariant.var.v_uint32;
-    else if (xvariant.mode == MODE_64) nResult = xvariant.var.v_uint64;
+    if ((xvariant.varType == VT_BYTE) || (xvariant.varType == VT_WORD) || (xvariant.varType == VT_DWORD) || (xvariant.varType == VT_QWORD)) {
+        nResult = xvariant.var.toULongLong();
+    }
 
     return nResult;
 }
@@ -10637,53 +10774,41 @@ bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
 {
     bool bResult = false;
 
-    if ((value1.mode == value2.mode) && (value1.bIsBigEndian == value2.bIsBigEndian)) {
-        if (value1.mode == MODE_BIT) bResult = (value1.var.v_bool == value2.var.v_bool);
-        else if (value1.mode == MODE_8) bResult = (value1.var.v_uint8 == value2.var.v_uint8);
-        else if (value1.mode == MODE_16) bResult = (value1.var.v_uint16 == value2.var.v_uint16);
-        else if (value1.mode == MODE_32) bResult = (value1.var.v_uint32 == value2.var.v_uint32);
-        else if (value1.mode == MODE_64) bResult = (value1.var.v_uint64 == value2.var.v_uint64);
-        else if (value1.mode == MODE_128) {
-            bResult = (value1.var.v_uint128[0] == value2.var.v_uint128[0]) && (value1.var.v_uint128[1] == value2.var.v_uint128[1]);
-        } else if (value1.mode == MODE_256) {
-            bResult = true;
+    // if ((value1.mode == value2.mode) && (value1.bIsBigEndian == value2.bIsBigEndian)) {
+    //     if (value1.mode == MODE_BIT) bResult = (value1.var.v_bool == value2.var.v_bool);
+    //     else if (value1.mode == MODE_8) bResult = (value1.var.v_uint8 == value2.var.v_uint8);
+    //     else if (value1.mode == MODE_16) bResult = (value1.var.v_uint16 == value2.var.v_uint16);
+    //     else if (value1.mode == MODE_32) bResult = (value1.var.v_uint32 == value2.var.v_uint32);
+    //     else if (value1.mode == MODE_64) bResult = (value1.var.v_uint64 == value2.var.v_uint64);
+    //     else if (value1.mode == MODE_128) {
+    //         bResult = (value1.var.v_uint128[0] == value2.var.v_uint128[0]) && (value1.var.v_uint128[1] == value2.var.v_uint128[1]);
+    //     } else if (value1.mode == MODE_256) {
+    //         bResult = true;
 
-            for (qint32 i = 0; i < 4; i++) {
-                if (value1.var.v_uint256[i] != value2.var.v_uint256[i]) {
-                    bResult = false;
-                    break;
-                }
-            }
-        } else if (value1.mode == MODE_FREG) {
-            bResult = true;
+    //         for (qint32 i = 0; i < 4; i++) {
+    //             if (value1.var.v_uint256[i] != value2.var.v_uint256[i]) {
+    //                 bResult = false;
+    //                 break;
+    //             }
+    //         }
+    //     } else if (value1.mode == MODE_FREG) {
+    //         bResult = true;
 
-            for (qint32 i = 0; i < 10; i++) {
-                if (value1.var.v_freg[i] != value2.var.v_freg[i]) {
-                    bResult = false;
-                    break;
-                }
-            }
-        }
-    }
+    //         for (qint32 i = 0; i < 10; i++) {
+    //             if (value1.var.v_freg[i] != value2.var.v_freg[i]) {
+    //                 bResult = false;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
 
     return bResult;
 }
 
 void XBinary::clearXVariant(XVARIANT *pVar)
 {
-    if (pVar->mode == MODE_BIT) pVar->var.v_bool = false;
-    else if (pVar->mode == MODE_8) pVar->var.v_uint8 = 0;
-    else if (pVar->mode == MODE_16) pVar->var.v_uint16 = 0;
-    else if (pVar->mode == MODE_32) pVar->var.v_uint32 = 0;
-    else if (pVar->mode == MODE_64) pVar->var.v_uint64 = 0;
-    else if (pVar->mode == MODE_128) {
-        pVar->var.v_uint128[0] = 0;
-        pVar->var.v_uint128[1] = 0;
-    } else if (pVar->mode == MODE_FREG) {
-        for (qint32 i = 0; i < 10; i++) {
-            pVar->var.v_freg[i] = 0;
-        }
-    }
+    pVar->var = 0;
 }
 
 XBinary::MODE XBinary::getModeOS()

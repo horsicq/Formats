@@ -348,7 +348,7 @@ XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
 
     result.listRecords.append(record);
 
-    if (nTotalSize > info.nSize) {
+    if ((quint64)nTotalSize > info.nSize) {
         record.nAddress = -1;
         record.nOffset = info.nSize;
         record.nSize = nTotalSize - info.nSize;

@@ -127,6 +127,11 @@ public:
         LT_RELADDRESS,
     };
 
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_NFD
+    };
+
     struct DATASET {
         qint64 nOffset;
         XADDR nAddress;
@@ -559,6 +564,8 @@ public:
     enum VT {
         VT_UNKNOWN = 0,
         VT_STRING,
+        VT_HEX,
+        VT_DATETIME,
         VT_A,
         VT_A_I,
         VT_U,
@@ -567,10 +574,14 @@ public:
         VT_UTF8_I,
         VT_SIGNATURE,
         VT_VALUE,
+        VT_BIT,
         VT_BYTE,
         VT_WORD,
         VT_DWORD,
         VT_QWORD,
+        VT_128,
+        VT_256,
+        VT_FPEG,
         VT_CHAR,
         VT_UCHAR,
         VT_SHORT,
@@ -613,19 +624,9 @@ public:
     //    };
 
     struct XVARIANT {
-        MODE mode;
+        VT varType;
         bool bIsBigEndian;
-        union DUMMYUNION {
-            bool v_bool;
-            quint8 v_uint8;
-            quint16 v_uint16;
-            quint32 v_uint32;
-            quint64 v_uint64;
-            quint64 v_uint128[2];
-            quint64 v_uint256[4];
-            quint8 v_freg[10];
-            // mb TODO 256/512
-        } var;
+        QVariant var;
     };
 
     enum HLTYPE {
@@ -730,12 +731,14 @@ public:
 
     struct DATA_HEADERS_OPTIONS {
         _MEMORY_MAP *pMemoryMap;
-        const DSID dsID_parent;
+        DSID dsID_parent;
         quint32 nID;
         LT locType;
         XADDR nLocation;
         bool bChildren;
     };
+
+    DSID _addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct);
 
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
 
@@ -1625,7 +1628,7 @@ public:
     static XVARIANT getXVariant(quint64 nLow1, quint64 nLow2, quint64 nHigh1, quint64 nHigh2, bool bIsBigEndian = false);
     static XVARIANT getXVariant(quint8 nValue[10], bool bIsBigEndian = false);
 
-    static quint64 xVariantToQword(XVARIANT xvariant);
+    static quint64 xVariantToQword(const XVARIANT &xvariant);
 
     static quint32 getDwordFromQword(quint64 nValue, qint32 nIndex);
     static quint16 getWordFromQword(quint64 nValue, qint32 nIndex);
@@ -1744,6 +1747,9 @@ public:
     static bool isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CODE code, FMT_MSG_TYPE type, PDSTRUCT *pPdStruct);
     static bool _addCheckFormatTest(QList<FMT_MSG> *pListFmtMsgs, bool *pbContinue, FMT_MSG_CODE code, FMT_MSG_TYPE type, const QString &sString, QVariant value,
                                     QString sInfo, bool bFailCase);
+
+    void dumpMemoryMap();
+    void dumpHeaders();
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

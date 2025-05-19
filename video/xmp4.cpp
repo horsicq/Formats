@@ -65,13 +65,6 @@ XBinary::_MEMORY_MAP XMP4::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
 
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     XBinary::_MEMORY_MAP result = {};
 
     result.nBinarySize = getSize();
@@ -79,7 +72,7 @@ XBinary::_MEMORY_MAP XMP4::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     qint32 nIndex = 0;
     qint64 nOffset = 0;
 
-    while (!(pPdStruct->bIsStop)) {
+    while (XBinary::isPdStructNotCanceled(pPdStruct)) {
         quint32 nChunkSize = read_uint32(nOffset, true);
 
         if (nChunkSize == 0) {
