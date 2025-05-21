@@ -707,6 +707,12 @@ public:
         QString sGUID;
     };
 
+    enum DHMODE {
+        DHMODE_UNKNOWN = 0,
+        DHMODE_HEADER,
+        DHMODE_TABLE,
+    };
+
     struct DATA_HEADER {
         DSID dsID;
         DSID dsID_parent;
@@ -714,6 +720,7 @@ public:
         LT locType;
         XADDR nLocation;
         qint64 nSize;
+        DHMODE dhMode;
     };
 
     static DATA_HEADER _searchDataHeaderByGuid(const QString &sGUID, const QList<DATA_HEADER> &listDataHeaders);
@@ -753,6 +760,7 @@ public:
         LT locType;
         XADDR nLocation;
         bool bChildren;
+        DHMODE dhMode;
     };
 
     DSID _addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct);
