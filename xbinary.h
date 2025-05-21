@@ -129,7 +129,22 @@ public:
 
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
-        STRUCTID_NFD
+        STRUCTID_NFDSCAN,
+        STRUCTID_DIESCAN,
+        STRUCTID_YARASCAN,
+        STRUCTID_VIRUSTOTALSCAN,
+        STRUCTID_VISUALIZATION,
+        STRUCTID_HEX,
+        STRUCTID_DISASM,
+        STRUCTID_HASH,
+        STRUCTID_STRINGS,
+        STRUCTID_SIGNATURES,
+        STRUCTID_REGIONS,
+        STRUCTID_MEMORYMAP,
+        STRUCTID_SYMBOLS,
+        STRUCTID_ENTROPY,
+        STRUCTID_EXTRACTOR,
+        STRUCTID_SEARCH
     };
 
     struct DATASET {
@@ -700,6 +715,8 @@ public:
         XADDR nLocation;
         qint64 nSize;
     };
+
+    static DATA_HEADER _searchDataHeaderByGuid(const QString &sGUID, const QList<DATA_HEADER> &listDataHeaders);
 
     enum DRF {
         DRF_UNKNOWN = 0,

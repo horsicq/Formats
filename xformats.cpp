@@ -1216,8 +1216,8 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
     qint32 nNumberOfListTypes = listFileTypes.count();
 
     for (qint32 i = 0; i < nNumberOfListTypes; i++) {
-        XBinary::FT fileType = listFileTypes.at(i);
-        pComboBox->addItem(XBinary::fileTypeIdToString(fileType), fileType);
+        XBinary::FT _fileType = listFileTypes.at(i);
+        pComboBox->addItem(XBinary::fileTypeIdToString(_fileType), _fileType);
     }
 
     if (nNumberOfListTypes) {

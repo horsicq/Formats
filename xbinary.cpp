@@ -69,7 +69,22 @@ const quint16 _crc16_tab[] = {
 
 XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    {XBinary::STRUCTID_NFD, "nfd", QString("Nauz File Detector")},
+    {XBinary::STRUCTID_NFDSCAN, "nfd", QString("Nauz File Detector")},
+    {XBinary::STRUCTID_DIESCAN, "die", QString("Detect It Easy")},
+    {XBinary::STRUCTID_YARASCAN, "yara", QString("Yara")},
+    {XBinary::STRUCTID_VIRUSTOTALSCAN, "virustotal", QString("VirusTotal")},
+    {XBinary::STRUCTID_VISUALIZATION, "visualization", QObject::tr("Visualization")},
+    {XBinary::STRUCTID_HEX, "hex", QObject::tr("Hex")},
+    {XBinary::STRUCTID_DISASM, "disasm", QObject::tr("Disasm")},
+    {XBinary::STRUCTID_HASH, "hash", QObject::tr("Hash")},
+    {XBinary::STRUCTID_STRINGS, "strings", QObject::tr("Strings")},
+    {XBinary::STRUCTID_SIGNATURES, "signatures", QObject::tr("Signatures")},
+    {XBinary::STRUCTID_REGIONS, "regions", QObject::tr("Regions")},
+    {XBinary::STRUCTID_MEMORYMAP, "memorymap", QObject::tr("Memory map")},
+    {XBinary::STRUCTID_SYMBOLS, "symbols", QObject::tr("Symbols")},
+    {XBinary::STRUCTID_ENTROPY, "entropy", QObject::tr("Entropy")},
+    {XBinary::STRUCTID_EXTRACTOR, "extractor", QObject::tr("Extractor")},
+    {XBinary::STRUCTID_SEARCH, "search", QObject::tr("Search")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -283,6 +298,22 @@ QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 n
     return sResult;
 }
 
+XBinary::DATA_HEADER XBinary::_searchDataHeaderByGuid(const QString &sGUID, const QList<DATA_HEADER> &listDataHeaders)
+{
+    XBinary::DATA_HEADER result = {};
+
+    qint32 nNumberOfRecords = listDataHeaders.count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (listDataHeaders.at(i).dsID.sGUID == sGUID) {
+            result = listDataHeaders.at(i);
+            break;
+        }
+    }
+
+    return result;
+}
+
 XBinary::HREGION XBinary::findParentHRegion(const QList<HREGION> &listHRegions, const HREGION &hRegion)
 {
     HREGION result = {};
@@ -337,18 +368,110 @@ XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDST
 
     pListHeaders->append(dhInfo);
 
-    {
-        DATA_HEADER dhNFD = {};
-        dhNFD.dsID_parent = dhInfo.dsID;
-        dhNFD.dsID.fileType = FT_BINARY;
-        dhNFD.dsID.nID = STRUCTID_NFD;
-        dhNFD.dsID.sGUID = generateUUID();
-        dhNFD.sName = XBinary::structIDToString(dhNFD.dsID.nID);
-        dhNFD.locType = LT_UNKNOWN;
-        dhNFD.nLocation = 0;
-        dhNFD.nSize = -1;
+    if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+        DATA_HEADER dhGeneric = {};
+        dhGeneric.dsID_parent = dhInfo.dsID;
+        dhGeneric.dsID.fileType = FT_BINARY;
+        dhGeneric.locType = LT_UNKNOWN;
+        dhGeneric.nLocation = 0;
+        dhGeneric.nSize = -1;
 
-        pListHeaders->append(dhNFD);
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_NFDSCAN;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_DIESCAN;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_YARASCAN;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_VIRUSTOTALSCAN;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_VISUALIZATION;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_HEX;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_DISASM;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_HASH;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_STRINGS;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_SIGNATURES;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_REGIONS;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_MEMORYMAP;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_SYMBOLS;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_ENTROPY;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_EXTRACTOR;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_SEARCH;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
     }
 
     return dhInfo.dsID;
@@ -4878,12 +5001,6 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
 
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
     _MEMORY_MAP result = {};
 
     qint64 nTotalSize = getSize();
@@ -5934,6 +6051,10 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_BINARY)) listResult.append(FT_BINARY);
     }
 
+    if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
+        if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
+    }
+
     if (tlOption == TL_OPTION_ALL) {
         if (stFileTypes.contains(FT_ARCHIVE)) listResult.append(FT_ARCHIVE);
     }
@@ -5976,7 +6097,6 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
-        if (stFileTypes.contains(FT_COM)) listResult.append(FT_COM);
         if (stFileTypes.contains(FT_MSDOS)) listResult.append(FT_MSDOS);
         if (stFileTypes.contains(FT_NE)) listResult.append(FT_NE);
         if (stFileTypes.contains(FT_LE)) listResult.append(FT_LE);
