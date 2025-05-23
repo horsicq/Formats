@@ -298,6 +298,22 @@ QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 n
     return sResult;
 }
 
+XBinary::DATA_HEADER XBinary::_searchDataHeaderById(FT fileType, quint32 nID, const QList<DATA_HEADER> &listDataHeaders)
+{
+    XBinary::DATA_HEADER result = {};
+
+    qint32 nNumberOfRecords = listDataHeaders.count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if ((listDataHeaders.at(i).dsID.fileType == fileType) && (listDataHeaders.at(i).dsID.nID == nID)) {
+            result = listDataHeaders.at(i);
+            break;
+        }
+    }
+
+    return result;
+}
+
 XBinary::DATA_HEADER XBinary::_searchDataHeaderByGuid(const QString &sGUID, const QList<DATA_HEADER> &listDataHeaders)
 {
     XBinary::DATA_HEADER result = {};

@@ -99,13 +99,6 @@ XBinary::_MEMORY_MAP XPNG::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
 
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     XBinary::_MEMORY_MAP result = {};
 
     qint32 nIndex = 0;
@@ -125,7 +118,7 @@ XBinary::_MEMORY_MAP XPNG::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
     qint64 nOffset = 8;
 
-    while (!(pPdStruct->bIsStop)) {
+    while (XBinary::isPdStructNotCanceled(pPdStruct)) {
         CHUNK chunk = _readChunk(nOffset);
 
         _MEMORY_RECORD record = {};

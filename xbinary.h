@@ -724,6 +724,7 @@ public:
     };
 
     static DATA_HEADER _searchDataHeaderByGuid(const QString &sGUID, const QList<DATA_HEADER> &listDataHeaders);
+    static DATA_HEADER _searchDataHeaderById(FT fileType, quint32 nID, const QList<DATA_HEADER> &listDataHeaders);
 
     enum DRF {
         DRF_UNKNOWN = 0,
