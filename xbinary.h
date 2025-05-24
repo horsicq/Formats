@@ -770,9 +770,7 @@ public:
 
     struct DATA_RECORDS_OPTIONS {
         _MEMORY_MAP *pMemoryMap;
-        quint32 nID;
-        LT locType;
-        XADDR nLocation;
+        DATA_HEADER dataHeader;
     };
 
     virtual qint32 getDataRecords(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct);

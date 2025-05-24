@@ -3928,12 +3928,6 @@ QMap<quint64, QString> XELF::getDynamicTagsS(const QString &sArch)
 
 XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
     // TODO Check alignment!
     XBinary::_MEMORY_MAP result = {};
 
@@ -5143,13 +5137,6 @@ qint64 XELF::getSymTableSize(qint64 nOffset)
 
 qint32 XELF::getNumberOfSymbols(qint64 nOffset, PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     bool bIsBigEndian = isBigEndian();
     bool bIs64 = is64();
 
@@ -5178,7 +5165,7 @@ qint32 XELF::getNumberOfSymbols(qint64 nOffset, bool bIsBigEndian, bool bIs64, P
         nResult += sizeof(XELF_DEF::Elf32_Sym);
         nOffset += sizeof(XELF_DEF::Elf32_Sym);
 
-        while (!(pPdStruct->bIsStop)) {
+        while (XBinary::isPdStructNotCanceled(pPdStruct)) {
             XELF_DEF::Elf32_Sym record = _readElf32_Sym(nOffset, bIsBigEndian);
 
             if ((!record.st_info) || (record.st_other)) {

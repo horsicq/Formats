@@ -8118,9 +8118,7 @@ void XBinary::dumpHeaders()
 
             XBinary::DATA_RECORDS_OPTIONS dataRecordsOptions = {};
             dataRecordsOptions.pMemoryMap = &memoryMap;
-            dataRecordsOptions.nID = dataHeader.dsID.nID;
-            dataRecordsOptions.locType = dataHeader.locType;
-            dataRecordsOptions.nLocation = dataHeader.nLocation;
+            dataRecordsOptions.dataHeader = dataHeader;
 
             getDataRecords(dataRecordsOptions, &listDataRecords, nullptr);
 

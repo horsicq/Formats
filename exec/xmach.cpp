@@ -5321,17 +5321,17 @@ qint32 XMACH::getDataRecords(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QLi
 {
     qint32 nResult = 0;
 
-    if (dataRecordsOptions.nID == STRUCTID_mach_header) {
+    if (dataRecordsOptions.dataHeader.dsID.nID == STRUCTID_mach_header) {
         nResult = sizeof(XMACH_DEF::mach_header);
-    } else if (dataRecordsOptions.nID == STRUCTID_mach_header_64) {
+    } else if (dataRecordsOptions.dataHeader.dsID.nID == STRUCTID_mach_header_64) {
         nResult = sizeof(XMACH_DEF::mach_header_64);
     }
 
-    qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, dataRecordsOptions.locType, dataRecordsOptions.nLocation);
+    qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, dataRecordsOptions.dataHeader.locType, dataRecordsOptions.dataHeader.nLocation);
 
     if (nStartOffset != -1) {
         if (pListRecords) {
-            if (dataRecordsOptions.nID == STRUCTID_mach_header) {
+            if (dataRecordsOptions.dataHeader.dsID.nID == STRUCTID_mach_header) {
                 pListRecords->append(getDataRecordDV(nStartOffset, offsetof(XMACH_DEF::mach_header, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN,
                                                      dataRecordsOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), false));
                 pListRecords->append(
@@ -5346,7 +5346,7 @@ qint32 XMACH::getDataRecords(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QLi
                                                    dataRecordsOptions.pMemoryMap->endian));
                 pListRecords->append(getDataRecordDV(nStartOffset, offsetof(XMACH_DEF::mach_header, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN,
                                                      dataRecordsOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), true));
-            } else if (dataRecordsOptions.nID == STRUCTID_mach_header_64) {
+            } else if (dataRecordsOptions.dataHeader.dsID.nID == STRUCTID_mach_header_64) {
                 pListRecords->append(getDataRecordDV(nStartOffset, offsetof(XMACH_DEF::mach_header_64, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN,
                                                      dataRecordsOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), false));
                 pListRecords->append(getDataRecord(nStartOffset, offsetof(XMACH_DEF::mach_header_64, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN,
