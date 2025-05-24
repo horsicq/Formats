@@ -495,6 +495,10 @@ XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDST
 
 qint32 XBinary::getDataRecords(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(dataRecordsOptions);
+    Q_UNUSED(pListRecords);
+    Q_UNUSED(pPdStruct);
+
     return 0;
 }
 
