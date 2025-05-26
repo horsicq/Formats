@@ -2941,10 +2941,10 @@ bool XPE::isFunctionPresent(const QString &sFunction, QList<IMPORT_HEADER> *pLis
 
     qint32 nNumberOfImports = pListImportHeaders->count();
 
-    for (qint32 i = 0; (i < nNumberOfImports) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfImports) && isPdStructNotCanceled(pPdStruct); i++) {
         qint32 nNumberOfPositions = pListImportHeaders->at(i).listPositions.count();
 
-        for (qint32 j = 0; (j < nNumberOfPositions) && (!(pPdStruct->bIsStop)); j++) {
+        for (qint32 j = 0; (j < nNumberOfPositions) && isPdStructNotCanceled(pPdStruct); j++) {
             if (pListImportHeaders->at(i).listPositions.at(j).sFunction == sFunction) {
                 bResult = true;
                 break;
@@ -8744,7 +8744,7 @@ QList<XBinary::FMT_MSG> XPE::checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct)
 
         qint32 nNumberOfSections = list.count();
 
-        for (qint32 i = 0; (i < nNumberOfSections) && bSuccess && (!(pPdStruct->bIsStop)); i++) {
+        for (qint32 i = 0; (i < nNumberOfSections) && bSuccess && isPdStructNotCanceled(pPdStruct); i++) {
             XPE_DEF::IMAGE_SECTION_HEADER sectionHeader = list.at(i);
 
             _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_SECTIONSTABLE, FMT_MSG_TYPE_ERROR,
@@ -8781,7 +8781,7 @@ QList<XBinary::FMT_MSG> XPE::checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct)
 
         qint32 nNumberOfImports = list.count();
 
-        for (qint32 i = 0; (i < nNumberOfImports) && bSuccess && (!(pPdStruct->bIsStop)); i++) {
+        for (qint32 i = 0; (i < nNumberOfImports) && bSuccess && isPdStructNotCanceled(pPdStruct); i++) {
             XPE_DEF::IMAGE_IMPORT_DESCRIPTOR importDescriptor = list.at(i);
 
             _addCheckFormatTest(&listResult, &bSuccess, FMT_MSG_CODE_INVALID_IMPORTTABLE, FMT_MSG_TYPE_WARNING,
@@ -9282,6 +9282,84 @@ quint64 XPE::getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader,
     }
 
     return nResult;
+}
+
+QList<XBinary::FPART> XPE::getFileParts(PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::FPART> listResult;
+
+    XBinary::_MEMORY_MAP memoryMap = getMemoryMap(XBinary::MAPMODE_SECTIONS, pPdStruct);
+
+    if (isResourcesPresent()) {
+        QList<XPE::RESOURCE_RECORD> listResources = getResources(&memoryMap, 10000, pPdStruct);
+
+        qint32 nNumberOfRecords = listResources.count();
+
+        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
+
+        for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+            qint64 nResourceOffset = listResources.at(i).nOffset;
+            qint64 nResourceSize = listResources.at(i).nSize;
+
+            if (checkOffsetSize(nResourceOffset, nResourceSize)) {
+                FPART record = {};
+                record.filePart = XBinary::FILEPART_RESOURCE;
+                record.nOffset = nResourceOffset;
+                record.nSize = nResourceSize;
+                record.sName = QString("%1 %2").arg(tr("Resource"), QString::number(i + 1));
+
+                listResult.append(record);
+            }
+
+            XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
+        }
+
+        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+    }
+
+    if (isDebugPresent()) {
+        QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> listDebug = getDebugList(&memoryMap);
+
+        qint32 nNumberOfRecords = listDebug.count();
+
+        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
+
+        for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+            qint64 nRecordOffset = listDebug.at(i).PointerToRawData;
+            qint64 nRecordSize = listDebug.at(i).SizeOfData;
+            quint32 nRecordType = listDebug.at(i).Type;
+
+            if ((nRecordType == 0) || (nRecordType == 2)) {
+                if (checkOffsetSize(nRecordOffset, nRecordSize)) {
+                    FPART record = {};
+                    record.filePart = XBinary::FILEPART_DEBUGDATA;
+                    record.nOffset = nRecordOffset;
+                    record.nSize = nRecordSize;
+                    record.sName = QString("%1 %2").arg(tr("Debug data"), nRecordType);
+
+                    listResult.append(record);
+                }
+            }
+
+            XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
+        }
+
+        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+    }
+
+    if (isOverlayPresent(&memoryMap, pPdStruct)) {
+        FPART record = {};
+        record.filePart = XBinary::FILEPART_OVERLAY;
+        record.nOffset = getOverlayOffset(&memoryMap, pPdStruct);
+        record.nSize = getOverlaySize(&memoryMap, pPdStruct);
+        record.sName = QString("%1").arg(tr("Overlay"));
+
+        listResult.append(record);
+    }
+
+    return listResult;
 }
 
 qint64 XPE::calculateHeadersSize()

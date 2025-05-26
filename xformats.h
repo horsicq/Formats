@@ -61,6 +61,8 @@ class XFormats : public QObject {
 public:
     explicit XFormats(QObject *pParent = nullptr);
 
+    static XBinary *getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
+
     static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType, XBinary::MAPMODE mapMode, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
                                              XBinary::PDSTRUCT *pPdStruct = nullptr);
     static XBinary::_MEMORY_MAP getMemoryMap(const QString &sFileName, XBinary::MAPMODE mapMode, bool bIsImage = false, XADDR nModuleAddress = -1,
@@ -89,6 +91,9 @@ public:
 
     static qint32 getDataRecords(QIODevice *pDevice, const XBinary::DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<XBinary::DATA_RECORD> *pListRecords,
                                                        XBinary::PDSTRUCT *pPdStruct = nullptr);
+
+    static QList<XBinary::FPART> getFileParts(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
+                                             XBinary::PDSTRUCT *pPdStruct = nullptr);
 
 #ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra = false);

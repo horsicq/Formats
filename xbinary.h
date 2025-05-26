@@ -608,6 +608,7 @@ public:
         VT_UINT64,
         VT_DOUBLE,
         VT_FLOAT,
+        VT_BYTEARRAY
         // TODO pascal strings(A/U)
     };
 
@@ -1774,6 +1775,15 @@ public:
 
     void dumpMemoryMap();
     void dumpHeaders();
+
+    struct FPART {
+        qint64 nOffset;
+        qint64 nSize;
+        QString sName;
+        FILEPART filePart;
+    };
+
+    virtual QList<FPART> getFileParts(PDSTRUCT *pPdStruct = nullptr);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

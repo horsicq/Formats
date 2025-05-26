@@ -543,7 +543,7 @@ public:
     qint32 getSectionNumber(const QString &sSectionName);
     static qint32 getSectionNumber(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
-    static QString sectionCharacteristicToString(quint32 nValue);
+    static QString sectionCharacteristicToString(quint32 nValue); // TODO remove
 
     bool isImportPresent();
     bool isIATPresent();
@@ -1303,6 +1303,8 @@ public:
     quint64 getImageFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pHeader, const QString &sString);
     quint64 getImageOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pHeader, const QString &sString);
     quint64 getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader, QString sString);
+
+    virtual QList<FPART> getFileParts(PDSTRUCT *pPdStruct = nullptr);
 
 private:
     quint16 _checkSum(qint64 nStartValue, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);

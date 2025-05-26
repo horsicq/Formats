@@ -5650,8 +5650,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                         }
 
                         if (bBW && b4G) {
+                            stResult.insert(FT_ARCHIVE);
                             stResult.insert(FT_DOS4G);
                         } else if (bBW && b16M) {
+                            stResult.insert(FT_ARCHIVE);
                             stResult.insert(FT_DOS16M);
                         }
                     }
@@ -5850,10 +5852,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         }
     }
 
-    if (bExtra) {
-        if ((stResult.count() <= 1) || (stResult.contains(FT_PLAINTEXT))) {
-            if ((nSize >= 0) && (nSize <= (0x10000 - 0x100))) {
-                // stResult.insert(FT_DATA);
+    if ((stResult.count() <= 1) || (stResult.contains(FT_PLAINTEXT))) {
+        if ((nSize >= 0) && (nSize <= (0x10000 - 0x100))) {
+            if (getDeviceFileSuffix(getDevice()).toUpper() == "COM") {
                 stResult.insert(FT_COM);
             }
         }
@@ -8140,6 +8141,15 @@ void XBinary::dumpHeaders()
 #endif
 }
 
+QList<XBinary::FPART> XBinary::getFileParts(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QList<XBinary::FPART> listResult;
+
+    return listResult;
+}
+
 QList<XBinary::FMT_MSG> XBinary::checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(bDeep)
@@ -9725,8 +9735,6 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP) ||
         pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA) || pStFileTypes->contains(XBinary::FT_AMIGAHUNK)) {
         pStFileTypes->remove(XBinary::FT_BINARY);
-    } else {
-        pStFileTypes->insert(XBinary::FT_COM);
     }
 }
 
