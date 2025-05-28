@@ -708,6 +708,28 @@ public:
         QString sGUID;
     };
 
+    enum DRF {
+        DRF_UNKNOWN = 0,
+        DRF_DATASET = 0x00000001,
+        DRF_COUNT = 0x00000002,
+    };
+
+    struct DATAVALUESET {
+        quint64 nMask;
+        bool bFlags;
+        QMap<quint64, QString> mapValues;
+    };
+
+    struct DATA_RECORD {
+        qint32 nRelOffset;
+        qint32 nSize;
+        QString sName;
+        VT valType;
+        ENDIAN endian;
+        quint32 nFlags;
+        QList<DATAVALUESET> listDataValueSets;
+    };
+
     enum DHMODE {
         DHMODE_UNKNOWN = 0,
         DHMODE_HEADER,
@@ -721,36 +743,16 @@ public:
         LT locType;
         XADDR nLocation;
         qint64 nSize;
+        qint32 nCount;
         DHMODE dhMode;
+        QList<DATA_RECORD> listRecords;
     };
 
     static DATA_HEADER _searchDataHeaderByGuid(const QString &sGUID, const QList<DATA_HEADER> &listDataHeaders);
     static DATA_HEADER _searchDataHeaderById(FT fileType, quint32 nID, const QList<DATA_HEADER> &listDataHeaders);
 
-    enum DRF {
-        DRF_UNKNOWN = 0,
-        DRF_DATASET = 0x00000001,
-        DRF_COUNT = 0x00000002,
-    };
-
-    struct DATAVALUES {
-        quint64 nMask;
-        bool bFlags;
-        QMap<quint64, QString> mapValues;
-    };
-
-    struct DATA_RECORD {
-        qint32 nRelOffset;
-        qint32 nSize;
-        QString sName;
-        VT valType;
-        quint32 nFlags;
-        QVariant varValue;
-        QList<DATAVALUES> listDataValues;
-    };
-
-    DATA_RECORD getDataRecord(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian);
-    DATA_RECORD getDataRecordDV(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian,
+    DATA_RECORD getDataRecord(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian);
+    DATA_RECORD getDataRecordDV(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian,
                                 QMap<quint64, QString> mapValues, bool bFlags);
 
     virtual QString structIDToString(quint32 nID);
@@ -763,6 +765,8 @@ public:
         XADDR nLocation;
         bool bChildren;
         DHMODE dhMode;
+        qint64 nSize;
+        qint32 nCount;
     };
 
     DSID _addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct);
@@ -774,7 +778,7 @@ public:
         DATA_HEADER dataHeader;
     };
 
-    virtual qint32 getDataRecords(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct);
+    qint32 getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
 
 private:
     enum ST {

@@ -89,9 +89,6 @@ public:
     static QList<XBinary::DATA_HEADER> getDataHeaders(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_HEADERS_OPTIONS &dataHeadersOptions,
                                                       XBinary::PDSTRUCT *pPdStruct = nullptr);
 
-    static qint32 getDataRecords(QIODevice *pDevice, const XBinary::DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<XBinary::DATA_RECORD> *pListRecords,
-                                                       XBinary::PDSTRUCT *pPdStruct = nullptr);
-
     static QList<XBinary::FPART> getFileParts(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
                                              XBinary::PDSTRUCT *pPdStruct = nullptr);
 

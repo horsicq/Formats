@@ -348,17 +348,17 @@ XBinary::HREGION XBinary::findParentHRegion(const QList<HREGION> &listHRegions, 
     return result;
 }
 
-XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian,
+XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian,
                                               QMap<quint64, QString> mapValues, bool bFlags)
 {
-    XBinary::DATA_RECORD result = getDataRecord(nStartOffset, nRelOffset, nSize, sName, valType, nFlags, endian);
+    XBinary::DATA_RECORD result = getDataRecord(nRelOffset, nSize, sName, valType, nFlags, endian);
 
-    DATAVALUES dataValues;
-    dataValues.mapValues = mapValues;
-    dataValues.bFlags = bFlags;
-    dataValues.nMask = 0xFFFFFFFFFFFFFFFF;
+    DATAVALUESET dataValueSet;
+    dataValueSet.mapValues = mapValues;
+    dataValueSet.bFlags = bFlags;
+    dataValueSet.nMask = 0xFFFFFFFFFFFFFFFF;
 
-    result.listDataValues.append(dataValues);
+    result.listDataValueSets.append(dataValueSet);
 
     return result;
 }
@@ -493,16 +493,34 @@ XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDST
     return dhInfo.dsID;
 }
 
-qint32 XBinary::getDataRecords(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD> *pListRecords, PDSTRUCT *pPdStruct)
+qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(dataRecordsOptions);
-    Q_UNUSED(pListRecords);
-    Q_UNUSED(pPdStruct);
+    qint32 nCount = dataRecordsOptions.dataHeader.nCount;
+
+    if (nCount == 0) {
+        nCount = 1;
+    }
+
+    qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, dataRecordsOptions.dataHeader.locType, dataRecordsOptions.dataHeader.nLocation);
+
+    for (qint32 i = 0; (i < nCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+        qint32 nNumberOfRecords = dataRecordsOptions.dataHeader.listRecords.count();
+
+        for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
+            DATA_RECORD dataRecord = dataRecordsOptions.dataHeader.listRecords.at(j);
+
+            QVariant variant = read_value(dataRecord.valType, nStartOffset + dataRecord.nRelOffset, dataRecord.nSize, dataRecord.endian);
+
+            pListValues->append(variant);
+        }
+
+        nStartOffset += dataRecordsOptions.dataHeader.nSize;
+    }
 
     return 0;
 }
 
-XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nStartOffset, qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian)
+XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian)
 {
     XBinary::DATA_RECORD dataRecord;
 
@@ -511,7 +529,7 @@ XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nStartOffset, qint64 nRelOffs
     dataRecord.sName = sName;
     dataRecord.valType = valType;
     dataRecord.nFlags = nFlags;
-    dataRecord.varValue = read_value(valType, nStartOffset + nRelOffset, nSize, endian == ENDIAN_BIG);
+    dataRecord.endian = endian;
 
     return dataRecord;
 }
@@ -8119,20 +8137,20 @@ void XBinary::dumpHeaders()
         if (dataHeader.dsID.fileType == getFileType()) {
             qDebug("%s: %X", structIDToString(dataHeader.dsID.nID).toLatin1().data(), locationToOffset(&memoryMap, dataHeader.locType, dataHeader.nLocation));
 
-            QList<XBinary::DATA_RECORD> listDataRecords;
+            QList<QVariant> listValues;
 
             XBinary::DATA_RECORDS_OPTIONS dataRecordsOptions = {};
             dataRecordsOptions.pMemoryMap = &memoryMap;
             dataRecordsOptions.dataHeader = dataHeader;
 
-            getDataRecords(dataRecordsOptions, &listDataRecords, nullptr);
+            getDataRecordValues(dataRecordsOptions, &listValues, nullptr);
 
-            qint32 nNumberOfRecords = listDataRecords.count();
+            qint32 nNumberOfRecords = dataHeader.listRecords.count();
 
             for (qint32 j = 0; j < nNumberOfRecords; j++) {
-                XBinary::DATA_RECORD dataRecord = listDataRecords.at(j);
+                XBinary::DATA_RECORD dataRecord = dataHeader.listRecords.at(j);
 
-                qDebug("%X: %X %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType).toLatin1().data(), dataRecord.sName.toLatin1().data(), XBinary::getValueString(dataRecord.varValue, dataRecord.valType, true).toLatin1().data());
+                qDebug("%X: %X %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType).toLatin1().data(), dataRecord.sName.toLatin1().data(), XBinary::getValueString(listValues.at(j), dataRecord.valType, true).toLatin1().data());
             }
         } else if (dataHeader.dsID.fileType == FT_BINARY) {
             qDebug("%s: %X", XBinary::structIDToString(dataHeader.dsID.nID).toLatin1().data(), 0);
