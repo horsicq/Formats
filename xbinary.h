@@ -1200,7 +1200,7 @@ public:
 
     static QString mapModeToString(MAPMODE mapMode);
 
-    static QList<MAPMODE> getMapModesList();
+    virtual QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QList<HREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);

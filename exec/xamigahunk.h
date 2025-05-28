@@ -49,7 +49,7 @@ public:
     ~XAmigaHunk();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
-    static QList<MAPMODE> getMapModesList();
+    virtual QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual ENDIAN getEndian();
     virtual QString getArch();

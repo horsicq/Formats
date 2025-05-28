@@ -249,7 +249,7 @@ public:
 
     qint64 getAddressOfEntryPoint(_MEMORY_MAP *pMemoryMap);
 
-    static QList<MAPMODE> getMapModesList();
+    virtual QList<MAPMODE> getMapModesList();
     virtual XADDR getBaseAddress();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 

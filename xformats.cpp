@@ -109,120 +109,23 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(const QString &sFileName, XBinary::M
 
 QList<XBinary::MAPMODE> XFormats::getMapModesList(XBinary::FT fileType)
 {
-    if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) return XBinary::getMapModesList();
+    QList<XBinary::MAPMODE> listResult = {};
 
-    if (XBinary::checkFileType(XBinary::FT_COM, fileType)) return XCOM::getMapModesList();
+    XBinary *pBinary = XFormats::getClass(fileType, nullptr);
+    listResult = pBinary->getMapModesList();
+    delete pBinary;
 
-    if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) return XMSDOS::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_NE, fileType)) return XNE::getMapModesList();
-
-    // Combine LE and LX cases
-    if (XBinary::checkFileType(XBinary::FT_LE, fileType) || XBinary::checkFileType(XBinary::FT_LX, fileType)) return XLE::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_PE, fileType)) return XPE::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) return XELF::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) return XMACH::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) return XPDF::getMapModesList();
-
-    // Image formats
-    if (XBinary::checkFileType(XBinary::FT_PNG, fileType)) return XPNG::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_JPEG, fileType)) return XJpeg::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) return XIcon::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_BMP, fileType)) return XBMP::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) return XGif::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) return XTiff::getMapModesList();
-
-    // Media formats
-    if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) return XMP4::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) return XMP3::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) return XRiff::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return XJavaClass::getMapModesList();
-
-#ifdef USE_DEX
-    if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) return XDEX::getMapModesList();
-#endif
-
-#ifdef USE_PDF
-    if (XBinary::checkFileType(XBinary::FT_PDF, fileType)) return XPDF::getMapModesList();
-#endif
-
-#ifdef USE_ARCHIVE
-    // Archive formats
-    if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) return XZip::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) return XSevenZip::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) return XCab::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) return XRar::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) return XMACHOFat::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) return XGzip::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) return XZlib::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) return XLHA::getMapModesList();
-
-    if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return XCFBF::getMapModesList();
-
-    if (XBinary::checkFileType(XArchive::FT_DOS4G, fileType) || XBinary::checkFileType(XArchive::FT_DOS16M, fileType)) return XDOS16::getMapModesList();
-#endif
-
-    // Default
-    return XBinary::getMapModesList();
+    return listResult;
 }
 
-qint64 XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+XADDR XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     // TODO pMemoryMap !!!
-    qint64 nResult = 0;  // FT_DEX, FT_ZIP
+    XADDR nResult = 0;
 
-    if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
-        XBinary binary(pDevice, bIsImage, nModuleAddress);
-        nResult = binary.getEntryPointAddress();
-    } else if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
-        XCOM com(pDevice, bIsImage, nModuleAddress);
-        nResult = com.getEntryPointAddress();
-    } else if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) {
-        XMSDOS msdos(pDevice, bIsImage, nModuleAddress);
-        nResult = msdos.getEntryPointAddress();
-    } else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) {
-        XNE ne(pDevice, bIsImage, nModuleAddress);
-        nResult = ne.getEntryPointAddress();
-    } else if (XBinary::checkFileType(XBinary::FT_LE, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
-        nResult = le.getEntryPointAddress();
-    } else if (XBinary::checkFileType(XBinary::FT_LX, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
-        nResult = le.getEntryPointAddress();
-    } else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) {
-        XPE pe(pDevice, bIsImage, nModuleAddress);
-        nResult = pe.getEntryPointAddress();
-    } else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) {
-        XELF elf(pDevice, bIsImage, nModuleAddress);
-        nResult = elf.getEntryPointAddress();
-    } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
-        XMACH mach(pDevice, bIsImage, nModuleAddress);
-        nResult = mach.getEntryPointAddress();
-    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
-        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
-        nResult = amigaHunk.getEntryPointAddress();
-    } else {
-        nResult = 0;
-    }
+    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    nResult = pBinary->getEntryPointAddress();
+    delete pBinary;
 
     return nResult;
 }
@@ -231,39 +134,9 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
 {
     qint64 nResult = 0;
 
-    if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) {
-        XBinary binary(pDevice, bIsImage, nModuleAddress);
-        nResult = binary._getEntryPointOffset();
-    } else if (XBinary::checkFileType(XBinary::FT_COM, fileType)) {
-        XCOM com(pDevice, bIsImage, nModuleAddress);
-        nResult = com._getEntryPointOffset();
-    } else if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) {
-        XMSDOS msdos(pDevice, bIsImage, nModuleAddress);
-        nResult = msdos._getEntryPointOffset();
-    } else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) {
-        XNE ne(pDevice, bIsImage, nModuleAddress);
-        nResult = ne._getEntryPointOffset();
-    } else if (XBinary::checkFileType(XBinary::FT_LE, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
-        nResult = le._getEntryPointOffset();
-    } else if (XBinary::checkFileType(XBinary::FT_LX, fileType)) {
-        XLE le(pDevice, bIsImage, nModuleAddress);
-        nResult = le._getEntryPointOffset();
-    } else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) {
-        XPE pe(pDevice, bIsImage, nModuleAddress);
-        nResult = pe._getEntryPointOffset();
-    } else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) {
-        XELF elf(pDevice, bIsImage, nModuleAddress);
-        nResult = elf._getEntryPointOffset();
-    } else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) {
-        XMACH mach(pDevice, bIsImage, nModuleAddress);
-        nResult = mach._getEntryPointOffset();
-    } else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) {
-        XAmigaHunk amigaHunk(pDevice, bIsImage, nModuleAddress);
-        nResult = amigaHunk._getEntryPointOffset();
-    } else {
-        nResult = 0;
-    }
+    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    nResult = pBinary->_getEntryPointOffset();
+    delete pBinary;
 
     return nResult;
 }
