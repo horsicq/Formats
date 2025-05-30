@@ -1693,6 +1693,7 @@ public:
     static void setPdStructCurrentIncrement(PDSTRUCT *pPdStruct, qint32 nIndex);
     static void setPdStructStatus(PDSTRUCT *pPdStruct, qint32 nIndex, const QString &sStatus);
     static void setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex);
+    static void setPdStructInfoString(PDSTRUCT *pPdStruct, const QString &sInfoString);
     static qint32 getFreeIndex(PDSTRUCT *pPdStruct);
     static bool isPdStructFinished(PDSTRUCT *pPdStruct);
     static bool isPdStructNotCanceled(PDSTRUCT *pPdStruct);

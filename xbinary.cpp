@@ -5038,6 +5038,7 @@ QList<XBinary::MAPMODE> XBinary::getMapModesList()
 XBinary::_MEMORY_MAP XBinary::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
+    Q_UNUSED(pPdStruct)
 
     _MEMORY_MAP result = {};
 
@@ -5164,12 +5165,6 @@ bool XBinary::compareSignature(const QString &sSignature, qint64 nOffset)
 
 bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
     bool bResult = false;
 
     QString sOrigin = sSignature;
@@ -11067,6 +11062,13 @@ void XBinary::setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex)
     }
 }
 
+void XBinary::setPdStructInfoString(PDSTRUCT *pPdStruct, const QString &sInfoString)
+{
+    if (pPdStruct) {
+        pPdStruct->sInfoString = sInfoString;
+    }
+}
+
 qint32 XBinary::getFreeIndex(PDSTRUCT *pPdStruct)
 {
     qint32 nResult = -1;
@@ -11438,12 +11440,6 @@ QString XBinary::dataToString(const QByteArray &baData, DSMODE dsmode)
 
 QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSignature, bool *pbValid, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
     QList<SIGNATURE_RECORD> listResult;
 
     qint32 nSignatureSize = sSignature.size();
@@ -11753,11 +11749,6 @@ qint32 XBinary::_getSignatureNotANSIAndNull(QList<SIGNATURE_RECORD> *pListSignat
 qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid,
                                    PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
     // TODO Check!!!
     qint32 nResult = 0;
     qint32 nSignatureSize = sSignature.size();
@@ -11863,12 +11854,6 @@ qint32 XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSign
 qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid,
                                    PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
     qint32 nResult = 0;
 
     qint32 nSignatureSize = sSignature.size();
@@ -11900,7 +11885,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
 
 #ifdef QT_DEBUG
     if (!(*pbValid)) {
-        pPdStruct->sInfoString = QString("%1: %2").arg(tr("Invalid signature"), sSignature);
+        setPdStructInfoString(pPdStruct, QString("%1: %2").arg(tr("Invalid signature"), sSignature));
     }
 #endif
 

@@ -1024,16 +1024,9 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<
 {
     QList<COMMAND_RECORD> listResult;
 
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     qint32 nNumberOfCommands = pListCommandRecords->count();
 
-    for (qint32 i = 0; (i < nNumberOfCommands) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfCommands) && isPdStructNotCanceled(pPdStruct); i++) {
         if (pListCommandRecords->at(i).nId == nCommandID) {
             listResult.append(pListCommandRecords->at(i));
         }
@@ -1045,13 +1038,6 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, QList<
 QList<XMACH::COMMAND_RECORD> XMACH::_getCommandRecords(qint64 nDataOffset, qint64 nDataSize, qint32 nLimit, bool bIs64, bool bIsBigEndian, quint32 nCommandID,
                                                        PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     QList<COMMAND_RECORD> listResult;
 
     qint64 nSize = 0;
@@ -1060,7 +1046,7 @@ QList<XMACH::COMMAND_RECORD> XMACH::_getCommandRecords(qint64 nDataOffset, qint6
         nLimit = 0;
     }
 
-    for (qint32 i = 0; (i < nLimit) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nLimit) && isPdStructNotCanceled(pPdStruct); i++) {
         COMMAND_RECORD record = _readLoadCommand(nDataOffset, bIsBigEndian);
 
         if ((nCommandID == 0) || (record.nId == nCommandID)) {
@@ -5345,6 +5331,8 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
             if (dataHeader.nSize) {
                 listResult.append(dataHeader);
             }
+
+            
         }
     }
 
