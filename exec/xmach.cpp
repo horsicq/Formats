@@ -5294,45 +5294,43 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
                 dataHeader.nSize = sizeof(XMACH_DEF::mach_header);
 
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN,
-                                                    dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), false));
+                                                              dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), false));
                 dataHeader.listRecords.append(
                     getDataRecord(offsetof(XMACH_DEF::mach_header, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::mach_header, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN,
-                                                  dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::mach_header, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN,
-                                                  dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XMACH_DEF::mach_header, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XMACH_DEF::mach_header, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(
                     getDataRecord(offsetof(XMACH_DEF::mach_header, ncmds), 4, "ncmds", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::mach_header, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_UNKNOWN,
-                                                  dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XMACH_DEF::mach_header, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN,
-                                                    dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), true));
+                                                              dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), true));
             } else if (dataHeadersOptions.nID == STRUCTID_mach_header_64) {
                 dataHeader.nSize = sizeof(XMACH_DEF::mach_header_64);
 
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN,
-                                                    dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), false));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::mach_header_64, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN,
-                                                  dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::mach_header_64, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN,
-                                                  dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::mach_header_64, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN,
-                                                  dataHeadersOptions.pMemoryMap->endian));
+                                                              dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), false));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XMACH_DEF::mach_header_64, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XMACH_DEF::mach_header_64, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XMACH_DEF::mach_header_64, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(
                     getDataRecord(offsetof(XMACH_DEF::mach_header_64, ncmds), 4, "ncmds", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::mach_header_64, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_UNKNOWN,
-                                                  dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XMACH_DEF::mach_header_64, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN,
-                                                    dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), true));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::mach_header_64, reserved), 4, "reserved", VT_UINT32, DRF_UNKNOWN,
-                                                  dataHeadersOptions.pMemoryMap->endian));
+                                                              dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), true));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XMACH_DEF::mach_header_64, reserved), 4, "reserved", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
             }
 
             if (dataHeader.nSize) {
                 listResult.append(dataHeader);
             }
-
-            
         }
     }
 

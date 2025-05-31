@@ -66,7 +66,6 @@ const quint16 _crc16_tab[] = {
     0x9901, 0x59c0, 0x5880, 0x9841, 0x8801, 0x48c0, 0x4980, 0x8941, 0x4b00, 0x8bc1, 0x8a81, 0x4a40, 0x4e00, 0x8ec1, 0x8f81, 0x4f40, 0x8d01, 0x4dc0, 0x4c80, 0x8c41,
     0x4400, 0x84c1, 0x8581, 0x4540, 0x8701, 0x47c0, 0x4680, 0x8641, 0x8201, 0x42c0, 0x4380, 0x8341, 0x4100, 0x81c1, 0x8081, 0x4040};
 
-
 XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XBinary::STRUCTID_NFDSCAN, "nfd", QString("Nauz File Detector")},
@@ -178,20 +177,32 @@ XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
     {XBinary::VT_DATETIME, "DateTime"},
 
     {XBinary::VT_A, "A"},
-    {XBinary::VT_A_I, "A"},           {XBinary::VT_U, "U"},           {XBinary::VT_U_I, "U"},
-    {XBinary::VT_UTF8, "UTF8"},       {XBinary::VT_UTF8_I, "UTF"},    {XBinary::VT_SIGNATURE, "Signature"},
+    {XBinary::VT_A_I, "A"},
+    {XBinary::VT_U, "U"},
+    {XBinary::VT_U_I, "U"},
+    {XBinary::VT_UTF8, "UTF8"},
+    {XBinary::VT_UTF8_I, "UTF"},
+    {XBinary::VT_SIGNATURE, "Signature"},
     {XBinary::VT_VALUE, "Value"},
     {XBinary::VT_BIT, "bit"},
-    {XBinary::VT_BYTE, "byte"},     {XBinary::VT_WORD, "word"},
-    {XBinary::VT_DWORD, "dword"},     {XBinary::VT_QWORD, "qword"},
+    {XBinary::VT_BYTE, "byte"},
+    {XBinary::VT_WORD, "word"},
+    {XBinary::VT_DWORD, "dword"},
+    {XBinary::VT_QWORD, "qword"},
     {XBinary::VT_128, "U128"},
     {XBinary::VT_256, "U256"},
     {XBinary::VT_FPEG, "FPEG"},
 
     {XBinary::VT_CHAR, "char"},
-    {XBinary::VT_UCHAR, "uchar"},     {XBinary::VT_SHORT, "short"},   {XBinary::VT_USHORT, "ushort"},
-    {XBinary::VT_INT, "int"},         {XBinary::VT_UINT, "uint"},     {XBinary::VT_INT64, "int64"},
-    {XBinary::VT_UINT32, "uint32"},   {XBinary::VT_UINT64, "uint64"}, {XBinary::VT_DOUBLE, "double"},
+    {XBinary::VT_UCHAR, "uchar"},
+    {XBinary::VT_SHORT, "short"},
+    {XBinary::VT_USHORT, "ushort"},
+    {XBinary::VT_INT, "int"},
+    {XBinary::VT_UINT, "uint"},
+    {XBinary::VT_INT64, "int64"},
+    {XBinary::VT_UINT32, "uint32"},
+    {XBinary::VT_UINT64, "uint64"},
+    {XBinary::VT_DOUBLE, "double"},
     {XBinary::VT_FLOAT, "float"},
 };
 
@@ -8145,7 +8156,8 @@ void XBinary::dumpHeaders()
             for (qint32 j = 0; j < nNumberOfRecords; j++) {
                 XBinary::DATA_RECORD dataRecord = dataHeader.listRecords.at(j);
 
-                qDebug("%X: %X %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType).toLatin1().data(), dataRecord.sName.toLatin1().data(), XBinary::getValueString(listValues.at(j), dataRecord.valType, true).toLatin1().data());
+                qDebug("%X: %X %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType).toLatin1().data(),
+                       dataRecord.sName.toLatin1().data(), XBinary::getValueString(listValues.at(j), dataRecord.valType, true).toLatin1().data());
             }
         } else if (dataHeader.dsID.fileType == FT_BINARY) {
             qDebug("%s: %X", XBinary::structIDToString(dataHeader.dsID.nID).toLatin1().data(), 0);

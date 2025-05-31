@@ -543,7 +543,7 @@ public:
     qint32 getSectionNumber(const QString &sSectionName);
     static qint32 getSectionNumber(const QString &sSectionName, QList<SECTION_RECORD> *pListSectionRecords);
 
-    static QString sectionCharacteristicToString(quint32 nValue); // TODO remove
+    static QString sectionCharacteristicToString(quint32 nValue);  // TODO remove
 
     bool isImportPresent();
     bool isIATPresent();

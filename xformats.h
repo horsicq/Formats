@@ -90,7 +90,7 @@ public:
                                                       XBinary::PDSTRUCT *pPdStruct = nullptr);
 
     static QList<XBinary::FPART> getFileParts(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
-                                             XBinary::PDSTRUCT *pPdStruct = nullptr);
+                                              XBinary::PDSTRUCT *pPdStruct = nullptr);
 
 #ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra = false);

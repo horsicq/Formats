@@ -30,8 +30,7 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_COM, fileType)) return new XCOM(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_MSDOS, fileType)) return new XMSDOS(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) return new XNE(pDevice, bIsImage, nModuleAddress);
-    else if (XBinary::checkFileType(XBinary::FT_LE, fileType) || XBinary::checkFileType(XBinary::FT_LX, fileType))
-        return new XLE(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_LE, fileType) || XBinary::checkFileType(XBinary::FT_LX, fileType)) return new XLE(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) return new XPE(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) return new XELF(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) return new XMACH(pDevice, bIsImage, nModuleAddress);
@@ -68,8 +67,7 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) return new XZlib(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) return new XLHA(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return new XCFBF(pDevice);
-    else if (XBinary::checkFileType(XBinary::FT_DOS4G, fileType) || XBinary::checkFileType(XBinary::FT_DOS16M, fileType))
-        return new XDOS16(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_DOS4G, fileType) || XBinary::checkFileType(XBinary::FT_DOS16M, fileType)) return new XDOS16(pDevice);
 #endif
     else {
 #ifdef QT_DEBUG
@@ -767,7 +765,8 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     return result;
 }
 
-QList<XBinary::DATA_HEADER> XFormats::getDataHeaders(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_HEADERS_OPTIONS &dataHeadersOptions, XBinary::PDSTRUCT *pPdStruct)
+QList<XBinary::DATA_HEADER> XFormats::getDataHeaders(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_HEADERS_OPTIONS &dataHeadersOptions,
+                                                     XBinary::PDSTRUCT *pPdStruct)
 {
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) return XBinary(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
     else if (XBinary::checkFileType(XBinary::FT_COM, fileType)) return XCOM(pDevice).getDataHeaders(dataHeadersOptions, pPdStruct);
