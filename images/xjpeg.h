@@ -60,9 +60,6 @@ public:
     OFFSETSIZE getExif(QList<CHUNK> *pListChunks);
     bool isExifPresent(OFFSETSIZE osExif);
 
-    QList<XTiff::CHUNK> getExifChunks(OFFSETSIZE osExif, PDSTRUCT *pPdStruct = nullptr);
-    QString getExifCameraName(OFFSETSIZE osExif, QList<XTiff::CHUNK> *pListExifChunks);
-
 private:
     CHUNK _readChunk(qint64 nOffset);
 };

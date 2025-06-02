@@ -295,48 +295,6 @@ bool XJpeg::isExifPresent(OFFSETSIZE osExif)
     return osExif.nSize;
 }
 
-QList<XTiff::CHUNK> XJpeg::getExifChunks(OFFSETSIZE osExif, PDSTRUCT *pPdStruct)
-{
-    QList<XTiff::CHUNK> listResult;
-
-    if (osExif.nSize) {
-        SubDevice sd(getDevice(), osExif.nOffset, osExif.nSize);
-
-        if (sd.open(QIODevice::ReadOnly)) {
-            XTiff tiff(&sd);
-
-            if (tiff.isValid()) {
-                listResult = tiff.getChunks(pPdStruct);
-            }
-
-            sd.close();
-        }
-    }
-
-    return listResult;
-}
-
-QString XJpeg::getExifCameraName(OFFSETSIZE osExif, QList<XTiff::CHUNK> *pListExifChunks)
-{
-    QString sResult;
-
-    if (osExif.nSize) {
-        SubDevice sd(getDevice(), osExif.nOffset, osExif.nSize);
-
-        if (sd.open(QIODevice::ReadOnly)) {
-            XTiff tiff(&sd);
-
-            if (tiff.isValid()) {
-                sResult = tiff.getCameraName(pListExifChunks);
-            }
-
-            sd.close();
-        }
-    }
-
-    return sResult;
-}
-
 XJpeg::CHUNK XJpeg::_readChunk(qint64 nOffset)
 {
     CHUNK result = {};

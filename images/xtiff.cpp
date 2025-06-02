@@ -289,29 +289,60 @@ QList<XTiff::CHUNK> XTiff::_getChunksByTag(QList<CHUNK> *pListChunks, quint16 nT
     return listResult;
 }
 
-QString XTiff::getCameraName(QList<CHUNK> *pListChunks)
+QString XTiff::getExifCameraName(QIODevice *pDevice, OFFSETSIZE osExif, QList<CHUNK> *pListChunks)
 {
     QString sResult;
 
-    QList<CHUNK> listMake = _getChunksByTag(pListChunks, 0x10f);
-    QList<CHUNK> listModel = _getChunksByTag(pListChunks, 0x110);
+    if (osExif.nSize) {
+        SubDevice sd(pDevice, osExif.nOffset, osExif.nSize);
 
-    QString sMake;
-    QString sModel;
+        if (sd.open(QIODevice::ReadOnly)) {
+            XTiff tiff(&sd);
 
-    if (listMake.count()) {
-        sMake = read_ansiString(listMake.at(0).nOffset, listMake.at(0).nSize);
-    }
+            if (tiff.isValid()) {
+                QList<CHUNK> listMake = XTiff::_getChunksByTag(pListChunks, 0x10f);
+                QList<CHUNK> listModel = XTiff::_getChunksByTag(pListChunks, 0x110);
 
-    if (listModel.count()) {
-        sModel = read_ansiString(listModel.at(0).nOffset, listModel.at(0).nSize);
-    }
+                QString sMake;
+                QString sModel;
 
-    if ((sMake != "") || (sModel != "")) {
-        sResult = QString("%1(%2)").arg(sMake, sModel);
+                if (listMake.count()) {
+                    sMake = tiff.read_ansiString(listMake.at(0).nOffset, listMake.at(0).nSize);
+                }
+
+                if (listModel.count()) {
+                    sModel = tiff.read_ansiString(listModel.at(0).nOffset, listModel.at(0).nSize);
+                }
+
+                if ((sMake != "") || (sModel != "")) {
+                    sResult = QString("%1(%2)").arg(sMake, sModel);
+                }
+            }
+        }
     }
 
     return sResult;
+}
+
+QList<XTiff::CHUNK> XTiff::getExifChunks(QIODevice *pDevice, OFFSETSIZE osExif, PDSTRUCT *pPdStruct)
+{
+    QList<XTiff::CHUNK> listResult;
+
+    if (osExif.nSize) {
+        SubDevice sd(pDevice, osExif.nOffset, osExif.nSize);
+
+        if (sd.open(QIODevice::ReadOnly)) {
+            XTiff tiff(&sd);
+
+            if (tiff.isValid()) {
+                listResult = tiff.getChunks(pPdStruct);
+            }
+
+            sd.close();
+        }
+    }
+
+    return listResult;
 }
 
 qint32 XTiff::getBaseTypeSize(quint16 nType)

@@ -57,7 +57,9 @@ public:
     QList<CHUNK> getChunks(PDSTRUCT *pPdStruct = nullptr);
     static QList<CHUNK> _getChunksByTag(QList<CHUNK> *pListChunks, quint16 nTag);
 
-    QString getCameraName(QList<CHUNK> *pListChunks);
+    static QString getExifCameraName(QIODevice *pDevice, OFFSETSIZE osExif, QList<CHUNK> *pListChunks);
+
+    static QList<XTiff::CHUNK> getExifChunks(QIODevice *pDevice, OFFSETSIZE osExif, PDSTRUCT *pPdStruct = nullptr);
 
 private:
     qint32 getBaseTypeSize(quint16 nType);

@@ -539,13 +539,6 @@ bool XMSDOS::isRichSignaturePresent()
 
 QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords(PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     QList<MS_RICH_RECORD> listResult;
 
     qint64 nOffset = find_ansiString(getDosStubOffset(), getDosStubSize(), "Rich", pPdStruct);
@@ -555,7 +548,7 @@ QList<XMSDOS::MS_RICH_RECORD> XMSDOS::getRichSignatureRecords(PDSTRUCT *pPdStruc
 
         qint64 nCurrentOffset = nOffset - 4;
 
-        while ((nCurrentOffset > getDosStubOffset()) && (!(pPdStruct->bIsStop)))  // TODO optimize
+        while ((nCurrentOffset > getDosStubOffset()) && isPdStructNotCanceled(pPdStruct))  // TODO optimize
         {
             quint32 nTemp = read_uint32(nCurrentOffset) ^ nXORkey;
 
