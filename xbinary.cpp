@@ -506,29 +506,49 @@ XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDST
 
 qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct)
 {
-    qint32 nCount = dataRecordsOptions.dataHeader.nCount;
-
-    if (nCount == 0) {
-        nCount = 1;
-    }
-
     qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, dataRecordsOptions.dataHeader.locType, dataRecordsOptions.dataHeader.nLocation);
 
-    for (qint32 i = 0; (i < nCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-        qint32 nNumberOfRecords = dataRecordsOptions.dataHeader.listRecords.count();
+    qint32 nNumberOfRecords = dataRecordsOptions.dataHeader.listRecords.count();
 
-        for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
-            DATA_RECORD dataRecord = dataRecordsOptions.dataHeader.listRecords.at(j);
+    for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
+        DATA_RECORD dataRecord = dataRecordsOptions.dataHeader.listRecords.at(j);
 
-            QVariant variant = read_value(dataRecord.valType, nStartOffset + dataRecord.nRelOffset, dataRecord.nSize, dataRecord.endian);
+        QVariant variant = read_value(dataRecord.valType, nStartOffset + dataRecord.nRelOffset, dataRecord.nSize, dataRecord.endian == XBinary::ENDIAN_BIG);
 
-            pListValues->append(variant);
-        }
-
-        nStartOffset += dataRecordsOptions.dataHeader.nSize;
+        pListValues->append(variant);
     }
 
-    return 0;
+    return dataRecordsOptions.dataHeader.nSize;
+}
+
+QList<QString> XBinary::getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions)
+{
+    QList<QString> listTitles;
+
+    listTitles.append(QString("#"));
+
+    qint32 nNumberOfRecords = dataRecordsOptions.dataHeader.listRecords.count();
+
+    for (qint32 j = 0; j < nNumberOfRecords; j++) {
+        DATA_RECORD dataRecord = dataRecordsOptions.dataHeader.listRecords.at(j);
+
+        listTitles.append(dataRecord.sName);
+    }
+
+    return listTitles;
+}
+
+qint32 XBinary::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct)
+{
+    pListValues->append(nRow);
+
+    DATA_RECORDS_OPTIONS _dataRecordsOptions = dataRecordsOptions;
+    _dataRecordsOptions.dataHeader.locType = locType;
+    _dataRecordsOptions.dataHeader.nLocation = nLocation;
+
+    qint32 nResult = getDataRecordValues(_dataRecordsOptions, pListValues, pPdStruct);
+
+    return nResult;
 }
 
 XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian)
@@ -11569,13 +11589,17 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 qint64 nValue = 0;
 
                 switch (pListSignatureRecords->at(i).nSizeOfAddr) {
-                    case 1: nValue = 1 + read_int8(nOffset); break;
-
-                    case 2: nValue = 2 + read_int16(nOffset, isBigEndian(pMemoryMap)); break;
-
-                    case 4: nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap)); break;
-
-                    case 8: nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap)); break;
+                    case 1:
+                        nValue = 1 + read_int8(nOffset);
+                        break;
+                    case 2:
+                        nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap));
+                        break;
+                    case 4:
+                        nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap));
+                        break;
+                    case 8: nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap));
+                        break;
                 }
 
                 if ((pMemoryMap->fileType == FT_COM) || (pMemoryMap->fileType == FT_MSDOS)) {

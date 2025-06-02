@@ -156,6 +156,7 @@ public:
         STRUCTID_UNKNOWN = 0,
         STRUCTID_mach_header,
         STRUCTID_mach_header_64,
+        STRUCTID_load_command,
     };
 
     XMACH(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -191,6 +192,9 @@ public:
     void setHeader_reserved(quint32 nValue);
 
     qint64 getHeaderSize();
+
+    XMACH_DEF::mach_header _read_mach_header(qint64 nOffset);
+    XMACH_DEF::mach_header_64 _read_mach_header_64(qint64 nOffset);
 
     static QMap<quint64, QString> getHeaderMagics();
     static QMap<quint64, QString> getHeaderMagicsS();

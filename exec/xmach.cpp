@@ -24,6 +24,7 @@ XBinary::XCONVERT _TABLE_XMACH_STRUCTID[] = {
     {XMACH::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XMACH::STRUCTID_mach_header, "mach_header", QString("mach_header")},
     {XMACH::STRUCTID_mach_header_64, "mach_header_64", QString("mach_header_64")},
+    {XMACH::STRUCTID_load_command, "load_command", QString("load_command")},
 };
 
 XMACH::XMACH(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
@@ -184,6 +185,51 @@ qint64 XMACH::getHeaderSize()
     }
 
     return nResult;
+}
+
+XMACH_DEF::mach_header XMACH::_read_mach_header(qint64 nOffset)
+{
+    XMACH_DEF::mach_header result = {};
+
+    result.magic = read_uint32(nOffset);
+
+    bool bIsBigEndian = false;
+
+    if (result.magic == XMACH_DEF::S_MH_CIGAM) {
+        bIsBigEndian = true;
+    }
+
+    result.cputype = read_int32(nOffset + offsetof(XMACH_DEF::mach_header, cputype), bIsBigEndian);
+    result.cpusubtype = read_int32(nOffset + offsetof(XMACH_DEF::mach_header, cpusubtype), bIsBigEndian);
+    result.filetype = read_uint32(nOffset + offsetof(XMACH_DEF::mach_header, filetype), bIsBigEndian);
+    result.ncmds = read_uint32(nOffset + offsetof(XMACH_DEF::mach_header, ncmds), bIsBigEndian);
+    result.sizeofcmds = read_uint32(nOffset + offsetof(XMACH_DEF::mach_header, sizeofcmds), bIsBigEndian);
+    result.flags = read_uint32(nOffset + offsetof(XMACH_DEF::mach_header, flags), bIsBigEndian);
+
+    return result;
+}
+
+XMACH_DEF::mach_header_64 XMACH::_read_mach_header_64(qint64 nOffset)
+{
+    XMACH_DEF::mach_header_64 result = {};
+
+    result.magic = read_uint32(nOffset);
+
+    bool bIsBigEndian = false;
+
+    if (result.magic == XMACH_DEF::S_MH_CIGAM_64) {
+        bIsBigEndian = true;
+    }
+
+    result.cputype = read_int32(nOffset + offsetof(XMACH_DEF::mach_header_64, cputype), bIsBigEndian);
+    result.cpusubtype = read_int32(nOffset + offsetof(XMACH_DEF::mach_header_64, cpusubtype), bIsBigEndian);
+    result.filetype = read_uint32(nOffset + offsetof(XMACH_DEF::mach_header_64, filetype), bIsBigEndian);
+    result.ncmds = read_uint32(nOffset + offsetof(XMACH_DEF::mach_header_64, ncmds), bIsBigEndian);
+    result.sizeofcmds = read_uint32(nOffset + offsetof(XMACH_DEF::mach_header_64, sizeofcmds), bIsBigEndian);
+    result.flags = read_uint32(nOffset + offsetof(XMACH_DEF::mach_header_64, flags), bIsBigEndian);
+    result.reserved = read_uint32(nOffset + offsetof(XMACH_DEF::mach_header_64, reserved), bIsBigEndian);
+
+    return result;
 }
 
 QMap<quint64, QString> XMACH::getHeaderMagics()
@@ -5326,10 +5372,55 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
                                                               dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), true));
                 dataHeader.listRecords.append(
                     getDataRecord(offsetof(XMACH_DEF::mach_header_64, reserved), 4, "reserved", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+            } else if (dataHeadersOptions.nID == STRUCTID_load_command) {
+                dataHeader.nSize = sizeof(XMACH_DEF::load_command);
+
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::load_command, cmd), 4, "cmd", VT_UINT32, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::load_command, cmdsize), 4, "cmdsize", VT_UINT32, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
             }
 
             if (dataHeader.nSize) {
                 listResult.append(dataHeader);
+            }
+
+            if (dataHeadersOptions.bChildren) {
+                if ((dataHeadersOptions.nID == STRUCTID_mach_header) || (dataHeadersOptions.nID == STRUCTID_mach_header_64)) {
+                    qint64 nCommandsOffset = 0;
+                    qint64 nCommandsSize = 0;
+                    qint32 nCommandCount = 0;
+
+                    if (dataHeadersOptions.nID == STRUCTID_mach_header) {
+                        nCommandsOffset = sizeof(XMACH_DEF::mach_header);
+
+                        XMACH_DEF::mach_header mh = _read_mach_header(nStartOffset);
+
+                        nCommandCount = mh.ncmds;
+                        nCommandsSize = mh.sizeofcmds;
+                    } else if (dataHeadersOptions.nID == STRUCTID_mach_header_64) {
+                        nCommandsOffset = sizeof(XMACH_DEF::mach_header_64);
+
+                        XMACH_DEF::mach_header_64 mh = _read_mach_header_64(nStartOffset);
+
+                        nCommandCount = mh.ncmds;
+                        nCommandsSize = mh.sizeofcmds;
+                    }
+
+                    if (nCommandsSize) {
+                        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                        _dataHeadersOptions.bChildren = true;
+                        _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                        _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+                        _dataHeadersOptions.nID = STRUCTID_load_command;
+                        _dataHeadersOptions.nLocation = dataHeader.nLocation + nCommandsOffset;
+                        _dataHeadersOptions.locType = dataHeader.locType;
+                        _dataHeadersOptions.nCount = nCommandCount;
+                        _dataHeadersOptions.nSize = nCommandsSize;
+
+                        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                    }
+                }
             }
         }
     }

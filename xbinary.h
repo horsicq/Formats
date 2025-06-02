@@ -779,6 +779,8 @@ public:
     };
 
     qint32 getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
+    virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions);
+    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
 
 private:
     enum ST {
@@ -1711,7 +1713,7 @@ public:
     static QString getDataString(char *pData, qint32 nDataSize, const QString &sBaseType, bool bIsBigEndian);
 
     QList<HREGION> getFileRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
-    virtual QList<HREGION> getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruct = nullptr);
+    QList<HREGION> getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruct = nullptr);
 
     static qint64 align_up(qint64 nValue, qint64 nAlignment);
     static qint64 align_down(qint64 nValue, qint64 nAlignment);
