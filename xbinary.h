@@ -604,6 +604,7 @@ public:
         VT_INT,
         VT_UINT,
         VT_INT64,
+        VT_UINT16,
         VT_UINT32,
         VT_UINT64,
         VT_DOUBLE,

@@ -200,6 +200,7 @@ XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
     {XBinary::VT_INT, "int"},
     {XBinary::VT_UINT, "uint"},
     {XBinary::VT_INT64, "int64"},
+    {XBinary::VT_UINT16, "uint16"},
     {XBinary::VT_UINT32, "uint32"},
     {XBinary::VT_UINT64, "uint64"},
     {XBinary::VT_DOUBLE, "double"},
@@ -678,7 +679,7 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 
     if ((pDevice->size() > nPos) && (nPos >= 0)) {
         if (pDevice->seek(nPos)) {
-            while ((nMaxLen > 0) && (!(pPdStruct->bIsStop))) {
+            while ((nMaxLen > 0) && isPdStructNotCanceled(pPdStruct)) {
                 qint64 nCurrentSize = qMin(nMaxLen, (qint64)READWRITE_BUFFER_SIZE);
 
                 nCurrentSize = pDevice->read(pData, nCurrentSize);
@@ -716,7 +717,7 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
 
     if (pDevice->size() > nPos) {
         if (pDevice->seek(nPos)) {
-            while ((nLen > 0) && (!(pPdStruct->bIsStop))) {
+            while ((nLen > 0) && isPdStructNotCanceled(pPdStruct)) {
                 qint64 nCurrentSize = qMin(nLen, (qint64)READWRITE_BUFFER_SIZE);
 
                 nCurrentSize = pDevice->write(pData, nCurrentSize);
@@ -1362,12 +1363,6 @@ bool XBinary::isRegExpValid(const QString &sRegExp)
 
 qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
     qint64 nResult = 0;
 
     nResult = safeReadData(g_pDevice, nOffset, pBuffer, nMaxSize, pPdStruct);  // Check for read large files
@@ -3720,7 +3715,7 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
         nResult = find_uint8(nOffset, nSize, (quint8)(varValue.toULongLong()), pPdStruct);
     } else if (valueType == XBinary::VT_SHORT) {
         nResult = find_int16(nOffset, nSize, (qint16)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
-    } else if (valueType == XBinary::VT_USHORT) {
+    } else if ((valueType == XBinary::VT_USHORT) || (valueType == XBinary::VT_UINT16)) {
         nResult = find_uint16(nOffset, nSize, (quint16)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_INT) {
         nResult = find_int32(nOffset, nSize, (qint32)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
