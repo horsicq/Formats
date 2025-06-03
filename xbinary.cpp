@@ -6050,6 +6050,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_CFBF;
     } else if (pStFileTypes->contains(FT_DATA)) {
         result = FT_DATA;
+    } else if (pStFileTypes->contains(FT_COM)) {
+        result = FT_COM;
     } else if (pStFileTypes->contains(FT_BINARY)) {
         result = FT_BINARY;
     }
