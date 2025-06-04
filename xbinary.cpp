@@ -168,6 +168,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_DEB, "deb", QString("deb")},
     {XBinary::FT_BWDOS16M, "BW DOS16M", QString("BW DOS16M")},
     {XBinary::FT_JAVACLASS, "Java Class", QString("Java Class")},
+    {XBinary::FT_TTF, "TTF", QString("TTF")},
     {XBinary::FT_CFBF, "CFBF", QString("CFBF")},
 };
 
@@ -1106,8 +1107,9 @@ QString XBinary::fileTypeIdToExts(FT fileType)
         case FT_LE: sResult = QString("LE(le, lx)"); break;
         case FT_NE: sResult = QString("NE"); break;
         case FT_AMIGAHUNK: sResult = QString("AmigaHunk"); break;
-        case FT_JAVACLASS: sResult = QString("Java Class"); break;
+        case FT_JAVACLASS: sResult = QString("class"); break;
         case FT_CFBF: sResult = QString("CFBF"); break;
+        case FT_TTF: sResult = QString("TTF"); break;
         case FT_SIGNATURE: sResult = tr("Signatures"); break;
         default: sResult = tr("Unknown");
     }
@@ -5842,6 +5844,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_BWDOS16M);
         } else if (compareSignature(&memoryMap, "D0CF11E0A1B11AE1", 0)) {
             stResult.insert(FT_CFBF);
+        } else if (compareSignature(&memoryMap, "'OTTO'00", 0) || compareSignature(&memoryMap, "0001000000", 0)) {
+            stResult.insert(FT_TTF);
         } else {
             bAllFound = false;
         }
@@ -6057,6 +6061,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_JAVACLASS;
     } else if (pStFileTypes->contains(FT_CFBF)) {
         result = FT_CFBF;
+    } else if (pStFileTypes->contains(FT_TTF)) {
+        result = FT_TTF;
     } else if (pStFileTypes->contains(FT_DATA)) {
         result = FT_DATA;
     } else if (pStFileTypes->contains(FT_COM)) {
@@ -6164,6 +6170,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_AR)) listResult.append(FT_AR);
         if (stFileTypes.contains(FT_DEB)) listResult.append(FT_DEB);
         if (stFileTypes.contains(FT_JAVACLASS)) listResult.append(FT_JAVACLASS);
+        if (stFileTypes.contains(FT_TTF)) listResult.append(FT_TTF);
         if (stFileTypes.contains(FT_CFBF)) listResult.append(FT_CFBF);
     }
 

@@ -313,7 +313,8 @@ public:
         FT_DEB,
         FT_BWDOS16M,
         FT_JAVACLASS,
-        FT_CFBF
+        FT_CFBF,
+        FT_TTF,
         // TODO more
     };
 
