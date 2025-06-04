@@ -184,11 +184,28 @@ QList<XBinary::HREGION> XTTF::getHData(PDSTRUCT *pPdStruct)
     return getNativeRegions(pPdStruct);
 }
 
-QList<XBinary::DATA_HEADER> XTTF::getDataHeaders(const DATA_HEADERS_OPTIONS & /*dataHeadersOptions*/, PDSTRUCT * /*pPdStruct*/)
+QList<XBinary::DATA_HEADER> XTTF::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 {
-    QList<DATA_HEADER> list;
-    // TODO: Add headers for TTF main header, and for each table
-    return list;
+    QList<XBinary::DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+
+        _dataHeadersOptions.nID = -1;
+
+        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    } else {
+        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+
+        if (nStartOffset != -1) {
+            // TODO
+        }
+    }
+
+    return listResult;
 }
 
 QList<QString> XTTF::getTableTitles(const DATA_RECORDS_OPTIONS & /*dataRecordsOptions*/)

@@ -151,13 +151,26 @@ qint32 EXAMPLE_CLASS::readTableRow(qint32 nRow, LT locType, XADDR nLocation, con
 
 QList<XBinary::DATA_HEADER> EXAMPLE_CLASS::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 {
-    // Return a list of data headers based on the provided options
-    QList<DATA_HEADER> listDataHeaders;
+    QList<XBinary::DATA_HEADER> listResult;
 
-    // Populate the list with data headers as needed
-    // ...
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
 
-    return listDataHeaders;  // Replace with actual implementation
+        _dataHeadersOptions.nID = -1;
+
+        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    } else {
+        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+
+        if (nStartOffset != -1) {
+            // TODO
+        }
+    }
+
+    return listResult;
 }
 
 QList<XBinary::HREGION> EXAMPLE_CLASS::getHData(PDSTRUCT *pPdStruct)
