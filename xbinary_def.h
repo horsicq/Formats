@@ -24,7 +24,7 @@
 #include <QtGlobal>
 
 namespace XBINARY_DEF {
-struct S_GUID  // size is 16
+struct XGUID  // size is 16
 {
     quint32 Data1;
     quint16 Data2;

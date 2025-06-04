@@ -936,7 +936,7 @@ struct NB10I  // NB10 debug info
 struct RSDSI  // RSDS debug info
 {
     quint32 dwSig;  // RSDS
-    XBINARY_DEF::S_GUID guidSig;
+    XBINARY_DEF::XGUID guidSig;
     quint32 age;
     char szPdb[260 * 3];  // TODO const
 };

@@ -4696,18 +4696,19 @@ XBinary::FILEFORMATINFO XMACH::getFileFormatInfo(PDSTRUCT *pPdStruct)
     result.bIsValid = isValid(pPdStruct);
 
     if (result.bIsValid) {
-        result.nSize = getFileFormatSize(pPdStruct);
+        result.nSize = getSize();
 
         result.fileType = getFileType();
         result.sExt = getFileFormatExt();
         result.sVersion = getVersion();
-        result.sOptions = getOptions();
+        result.sInfo = getInfo();
         result.osName = getOsName();
         result.sOsVersion = getOsVersion();
         result.sArch = getArch();
         result.mode = getMode();
         result.sType = typeIdToString(getType());
         result.endian = getEndian();
+        result.sMIME = getMIMEString();
 
         result.osName = OSNAME_MAC_OS;
 

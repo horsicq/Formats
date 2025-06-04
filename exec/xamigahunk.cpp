@@ -404,11 +404,11 @@ XBinary::FILEFORMATINFO XAmigaHunk::getFileFormatInfo(PDSTRUCT *pPdStruct)
     result.bIsValid = isValid(pPdStruct);
 
     if (result.bIsValid) {
-        result.nSize = getFileFormatSize(pPdStruct);
+        result.nSize = getSize();
         result.fileType = getFileType();
         result.sExt = getFileFormatExt();
         result.sVersion = getVersion();
-        result.sOptions = getOptions();
+        result.sInfo = getInfo();
 
         QList<HUNK> listHunks = getHunks();
 
@@ -418,6 +418,7 @@ XBinary::FILEFORMATINFO XAmigaHunk::getFileFormatInfo(PDSTRUCT *pPdStruct)
         result.mode = getMode(&listHunks);
         result.sType = getTypeAsString();
         result.endian = getEndian();
+        result.sMIME = getMIMEString();
 
         if (result.nSize == 0) {
             result.bIsValid = false;

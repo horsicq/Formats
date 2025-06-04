@@ -91,6 +91,7 @@ XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
     {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},        {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
     {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},     {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},
     {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")},
+    {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")}
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FT[] = {
@@ -520,6 +521,13 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
     }
 
     return dataRecordsOptions.dataHeader.nSize;
+}
+
+qint32 XBinary::getDataRecordValues(QIODevice *pDevice, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct)
+{
+    XBinary binary(pDevice);
+
+    return binary.getDataRecordValues(dataRecordsOptions, pListValues, pPdStruct);
 }
 
 QList<QString> XBinary::getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions)
@@ -957,17 +965,18 @@ XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
     result.bIsValid = isValid(pPdStruct);
 
     if (result.bIsValid) {
-        result.nSize = getFileFormatSize(pPdStruct);
+        result.nSize = getSize();
         result.fileType = getFileType();
         result.sExt = getFileFormatExt();
         result.sVersion = getVersion();
-        result.sOptions = getOptions();
+        result.sInfo = getInfo();
         result.osName = getOsName();
         result.sOsVersion = getOsVersion();
         result.sArch = getArch();
         result.mode = getMode();
         result.sType = typeIdToString(getType());
         result.endian = getEndian();
+        result.sMIME = getMIMEString();
 
         if (result.nSize == 0) {
             result.bIsValid = false;
@@ -7833,7 +7842,7 @@ QString XBinary::getVersion()
     return g_sVersion;
 }
 
-QString XBinary::getOptions()
+QString XBinary::getInfo()
 {
     return g_sOptions;
 }
@@ -8181,6 +8190,11 @@ void XBinary::dumpHeaders()
         }
     }
 #endif
+}
+
+QString XBinary::getMIMEString()
+{
+    return "application/octet-stream";
 }
 
 QList<XBinary::FPART> XBinary::getFileParts(PDSTRUCT *pPdStruct)

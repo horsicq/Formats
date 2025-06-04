@@ -198,7 +198,8 @@ public:
         FILEPART_HEADER,
         FILEPART_OVERLAY,
         FILEPART_RESOURCE,
-        FILEPART_DEBUGDATA
+        FILEPART_DEBUGDATA,
+        FILEPART_STREAM,
     };
 
     enum MMT {
@@ -507,9 +508,10 @@ public:
         FT fileType;
         QString sExt;
         QString sVersion;
-        QString sOptions;
+        QString sInfo;
         QString sType;
         ENDIAN endian;
+        QString sMIME;
         MODE mode;
         QString sArch;
         OSNAME osName;
@@ -780,6 +782,8 @@ public:
     };
 
     qint32 getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
+    static qint32 getDataRecordValues(QIODevice *pDevice, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
+
     virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions);
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
 
@@ -824,43 +828,47 @@ public:
     static qint64 getSize(const QString &sFileName);
 
     void setMode(MODE mode);
-    virtual MODE getMode();
 
     void setType(qint32 nType);
-    virtual qint32 getType();
-    virtual QString typeIdToString(qint32 nType);
+
     QString getTypeAsString();
 
     void setFileType(FT fileType);
-    virtual FT getFileType();
 
     static QString modeIdToString(MODE mode);
     static QString endianToString(ENDIAN endian);
 
     void setArch(const QString &sArch);
-    virtual QString getArch();
 
     static QString getFileFormatString(const FILEFORMATINFO *pFileFormatInfo);
     static QString getFileFormatInfoString(const FILEFORMATINFO *pFileFormatInfo);
     static OSNAME getOsName(const FILEFORMATINFO *pFileFormatInfo);
 
     void setFileFormatExt(const QString &sFileFormatExt);
-    virtual QString getFileFormatExt();
 
     void setFileFormatSize(qint64 nFileFormatSize);
-    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
-    virtual bool isSigned();
     virtual OFFSETSIZE getSignOffsetSize();  // TODO rename
 
     void setOsType(OSNAME osName);
-    virtual OSNAME getOsName();
+
     void setOsVersion(const QString &sOsVersion);
-    QString getOsVersion();
+    virtual QString getOsVersion();
     virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
 
     void setEndian(ENDIAN endian);
+
+    virtual FT getFileType();
+    virtual MODE getMode();
+    virtual QString getMIMEString();
+    virtual qint32 getType();
+    virtual QString typeIdToString(qint32 nType);
     virtual ENDIAN getEndian();
+    virtual QString getArch();
+    virtual QString getFileFormatExt();
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
+    virtual bool isSigned();
+    virtual OSNAME getOsName();
 
     bool isPacked(double dEntropy);
 
@@ -1416,7 +1424,7 @@ public:
     void setVersion(const QString &sVersion);
     void setOptions(const QString &sOptions);
     virtual QString getVersion();
-    virtual QString getOptions();
+    virtual QString getInfo();
 
     virtual bool isEncrypted();
 
