@@ -1800,7 +1800,7 @@ public:
         FILEPART filePart;
     };
 
-    virtual QList<FPART> getFileParts(PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<FPART> getFileParts(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

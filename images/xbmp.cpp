@@ -68,6 +68,26 @@ bool XBMP::isValid(QIODevice *pDevice)
     return xbmp.isValid();
 }
 
+QString XBMP::getMIMEString()
+{
+    return "image/bmp";
+}
+
+QString XBMP::getArch()
+{
+    return "";
+}
+
+XBinary::ENDIAN XBMP::getEndian()
+{
+    return XBinary::ENDIAN_LITTLE;
+}
+
+XBinary::MODE XBMP::getMode()
+{
+    return XBinary::MODE_DATA;
+}
+
 XBinary::FT XBMP::getFileType()
 {
     return FT_BMP;
@@ -78,28 +98,68 @@ QString XBMP::getFileFormatExt()
     return "bmp";
 }
 
-qint64 XBMP::getFileFormatSize(PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
-    qint64 nResult = 0;
+    _MEMORY_MAP memoryMap = {};
+    memoryMap.fileType = getFileType();
+    memoryMap.mode = getMode();
+    memoryMap.sArch = getArch();
+    memoryMap.endian = getEndian();
+    memoryMap.sType = typeIdToString(getType());
+    memoryMap.nBinarySize = getSize();
+    memoryMap.nImageSize = getSize();
+    memoryMap.nModuleAddress = getModuleAddress();
+    memoryMap.bIsImage = false;
 
-    nResult = read_uint32(2);
+    BMPFILEHEADER fileHeader = getFileHeader();
+    BMPINFOHEADER infoHeader = getInfoHeader();
 
-    return nResult;
-}
+    // Add Header
+    _MEMORY_RECORD headerRecord = {};
+    headerRecord.nOffset = 0;
+    headerRecord.nAddress = -1;
+    headerRecord.segment = ADDRESS_SEGMENT_FLAT;
+    headerRecord.nSize = 14 + infoHeader.biSize;
+    headerRecord.type = MMT_HEADER;
+    headerRecord.sName = "Header";
+    headerRecord.nIndex = 0;
+    headerRecord.bIsVirtual = false;
+    headerRecord.bIsInvisible = false;
+    headerRecord.nID = 0;
+    memoryMap.listRecords.append(headerRecord);
 
-XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
-{
-    // TODO
-    XBinary::PDSTRUCT pdStructEmpty = {};
+    // Add Bitmap Data (Object)
+    _MEMORY_RECORD objectRecord = {};
+    objectRecord.nOffset = fileHeader.bfOffBits;
+    objectRecord.nAddress = -1;
+    objectRecord.segment = ADDRESS_SEGMENT_FLAT;
+    objectRecord.nSize = fileHeader.bfSize - fileHeader.bfOffBits;
+    objectRecord.type = MMT_DATA;
+    objectRecord.sName = "Bitmap Data";
+    objectRecord.nIndex = 1;
+    objectRecord.bIsVirtual = false;
+    objectRecord.bIsInvisible = false;
+    memoryMap.listRecords.append(objectRecord);
 
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
+    // Add Overlay if present
+    if (fileHeader.bfSize < getSize()) {
+        _MEMORY_RECORD overlayRecord = {};
+        overlayRecord.nOffset = fileHeader.bfSize;
+        overlayRecord.nAddress = -1;
+        overlayRecord.segment = ADDRESS_SEGMENT_FLAT;
+        overlayRecord.nSize = getSize() - fileHeader.bfSize;;
+        overlayRecord.type = MMT_OVERLAY;
+        overlayRecord.nLoadSectionNumber = -1;
+        overlayRecord.sName = "Overlay";
+        overlayRecord.nIndex = 2;
+        overlayRecord.bIsVirtual = false;
+        overlayRecord.bIsInvisible = false;
+        memoryMap.listRecords.append(overlayRecord);
     }
 
-    return XBinary::getMemoryMap(mapMode, pPdStruct);
+    return memoryMap;
 }
 
 QString XBMP::getVersion()
@@ -117,4 +177,32 @@ QString XBMP::getVersion()
     }
 
     return sResult;
+}
+
+XBMP::BMPINFOHEADER XBMP::getInfoHeader()
+{
+    BMPINFOHEADER info = {};
+    info.biSize = read_uint32(14, false);
+    info.biWidth = read_int32(18, false);
+    info.biHeight = read_int32(22, false);
+    info.biPlanes = read_uint16(26, false);
+    info.biBitCount = read_uint16(28, false);
+    info.biCompression = read_uint32(30, false);
+    info.biSizeImage = read_uint32(34, false);
+    info.biXPelsPerMeter = read_int32(38, false);
+    info.biYPelsPerMeter = read_int32(42, false);
+    info.biClrUsed = read_uint32(46, false);
+    info.biClrImportant = read_uint32(50, false);
+    return info;
+}
+
+XBMP::BMPFILEHEADER XBMP::getFileHeader()
+{
+    BMPFILEHEADER header = {};
+    header.bfType = read_uint16(0, false);
+    header.bfSize = read_uint32(2, false);
+    header.bfReserved1 = read_uint16(6, false);
+    header.bfReserved2 = read_uint16(8, false);
+    header.bfOffBits = read_uint32(10, false);
+    return header;
 }

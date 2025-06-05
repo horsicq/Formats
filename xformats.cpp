@@ -670,7 +670,8 @@ QList<XBinary::FPART> XFormats::getFileParts(XBinary::FT fileType, QIODevice *pD
     QList<XBinary::FPART> listResult;
 
     XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
-    listResult = pBinary->getFileParts(pPdStruct);
+    XBinary::_MEMORY_MAP memoryMap = pBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
+    listResult = pBinary->getFileParts(&memoryMap, pPdStruct);
     delete pBinary;
 
     return listResult;

@@ -21,10 +21,8 @@
 #include "xttf.h"
 
 XTTF::XTTF(QIODevice *pDevice)
-    : XBinary(pDevice), m_sfntVersion(0), m_numTables(0)
+    : XBinary(pDevice)
 {
-    _readHeader();
-    _readTableDirectory();
 }
 
 XTTF::~XTTF()
@@ -102,7 +100,36 @@ QString XTTF::getOsVersion()
 
 QString XTTF::getVersion()
 {
-    return QString();
+    QList<TTF_TABLE_RECORD> listTables = getTableDirectory(readHeader().numTables);
+
+    return getVersion(&listTables, nullptr);
+}
+
+QString XTTF::getVersion(QList<TTF_TABLE_RECORD> *pListTables, PDSTRUCT *pPdStruct)
+{
+    QString sResult;
+
+    qint32 nNumberOfTables = pListTables->count();
+    qint64 nHeadOffset = -1;
+
+    for (qint32 i = 0; (i < nNumberOfTables) && isPdStructNotCanceled(pPdStruct); i++) {
+        if (pListTables->at(i).tag == 0x68656164) { // 'head'
+            nHeadOffset = pListTables->at(i).offset;
+            break;
+        }
+    }
+
+    if ((nHeadOffset != -1) && isOffsetValid(nHeadOffset + 8)) {
+        quint32 nVersionFixed = read_uint32(nHeadOffset, true);
+        quint32 nRevisionFixed = read_uint32(nHeadOffset + 4, true);
+
+        QString sVersion = XBinary::get_uint32_version(nVersionFixed);
+        QString sRevision = XBinary::get_uint32_version(nRevisionFixed);
+
+        sResult = QString("%1 rev %2").arg(sVersion, sRevision);
+    }
+
+    return sResult;
 }
 
 QString XTTF::getInfo()
@@ -124,33 +151,63 @@ QList<XBinary::MAPMODE> XTTF::getMapModesList()
 
 XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT * pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
     _MEMORY_MAP memoryMap = {};
     memoryMap.fileType = getFileType();
     memoryMap.mode = getMode();
     memoryMap.sArch = getArch();
     memoryMap.endian = getEndian();
     memoryMap.sType = typeIdToString(getType());
-    memoryMap.nBinarySize = getSize();
     memoryMap.nImageSize = getSize();
+    memoryMap.nBinarySize = getSize();
+    memoryMap.nModuleAddress = getModuleAddress();
 
-    if (mapMode == MAPMODE_OBJECTS) {
-        QList<TTF_TABLE_RECORD> tables = getTableDirectory();
-        qint32 nNumberOfTables = tables.size();
-        for (qint32 i = 0; (i < nNumberOfTables) && isPdStructNotCanceled(pPdStruct); i++) {
-            _MEMORY_RECORD rec = {};
-            rec.nOffset = tables.at(i).offset;
-            rec.nAddress = -1; // TTF tables do not have a virtual address;
-            rec.segment = ADDRESS_SEGMENT_FLAT;
-            rec.nSize = tables.at(i).length;
-            rec.type = MMT_OBJECT;
-            rec.nLoadSectionNumber = i;
-            rec.sName = tagToString(tables.at(i).tag);
-            rec.nIndex = i;
-            rec.bIsVirtual = false;
-            rec.bIsInvisible = false;
-            rec.nID = i;
-            memoryMap.listRecords.append(rec);
-        }
+    // TTF Header
+    TTF_HEADER header = readHeader();
+
+    // Table Directory
+    QList<TTF_TABLE_RECORD> tableRecords = getTableDirectory(header.numTables);
+
+    qint64 nHeaderOffset = 0;
+    qint64 nHeaderSize = 12 + header.numTables * 16;
+
+    _MEMORY_RECORD memHeader = {};
+    memHeader.nOffset = nHeaderOffset;
+    memHeader.nAddress = -1; // TTF header does not have a specific address in memory
+    memHeader.nSize = nHeaderSize;
+    memHeader.type = MMT_HEADER;
+    memHeader.sName = "Header";
+    memoryMap.listRecords.append(memHeader);
+
+    // Add Table Objects
+    for (qint32 i = 0, nNumberOfTables = tableRecords.size(); (i < nNumberOfTables) && isPdStructNotCanceled(pPdStruct); i++) {
+        _MEMORY_RECORD rec = {};
+        rec.nOffset = tableRecords.at(i).offset;
+        rec.nSize = tableRecords.at(i).length;
+        rec.type = MMT_OBJECT;
+        rec.sName = tagToString(tableRecords.at(i).tag);
+        rec.nIndex = i;
+        rec.nAddress = -1; // TTF tables do not have a specific address in memory
+        memoryMap.listRecords.append(rec);
+    }
+
+    // Add Overlay if present
+    qint64 nTablesEnd = nHeaderOffset + nHeaderSize;
+    qint64 nFileSize = getSize();
+
+    for (qint32 i = 0, nNumberOfTables = tableRecords.size(); i < nNumberOfTables; i++) {
+        qint64 nEnd = tableRecords.at(i).offset + tableRecords.at(i).length;
+        if (nEnd > nTablesEnd)
+            nTablesEnd = nEnd;
+    }
+    if (nTablesEnd < nFileSize) {
+        _MEMORY_RECORD overlay = {};
+        overlay.nOffset = nTablesEnd;
+        overlay.nAddress = -1;
+        overlay.nSize = nFileSize - nTablesEnd;
+        overlay.type = MMT_OVERLAY;
+        overlay.sName = "Overlay";
+        memoryMap.listRecords.append(overlay);
     }
 
     return memoryMap;
@@ -160,8 +217,10 @@ QList<XBinary::HREGION> XTTF::getNativeRegions(PDSTRUCT * /*pPdStruct*/)
 {
     QList<HREGION> list;
     // Each table is a region
-    QList<TTF_TABLE_RECORD> tables = getTableDirectory();
+    XTTF::TTF_HEADER header = readHeader();
+    QList<TTF_TABLE_RECORD> tables = getTableDirectory(header.numTables);
     qint32 nNumberOfTables = tables.size();
+
     for (qint32 i = 0; i < nNumberOfTables; i++) {
         HREGION reg = {};
         reg.nVirtualAddress = 0;
@@ -217,32 +276,19 @@ QList<QString> XTTF::getTableTitles(const DATA_RECORDS_OPTIONS & /*dataRecordsOp
 
 qint32 XTTF::readTableRow(qint32 nRow, LT /*locType*/, XADDR /*nLocation*/, const DATA_RECORDS_OPTIONS & /*dataRecordsOptions*/, QList<QVariant> *pListValues, PDSTRUCT * /*pPdStruct*/)
 {
-    QList<TTF_TABLE_RECORD> tables = getTableDirectory();
-    qint32 nNumberOfTables = tables.size();
-    if ((nRow >= 0) && (nRow < nNumberOfTables)) {
-        if (pListValues) {
-            pListValues->clear();
-            pListValues->append(tagToString(tables.at(nRow).tag));
-            pListValues->append(QString("0x%1").arg(tables.at(nRow).checkSum, 8, 16, QChar('0')));
-            pListValues->append(QString("0x%1").arg(tables.at(nRow).offset, 8, 16, QChar('0')));
-            pListValues->append(QString("0x%1").arg(tables.at(nRow).length, 8, 16, QChar('0')));
-        }
-        return 4;
-    }
+    // QList<TTF_TABLE_RECORD> tables = getTableDirectory();
+    // qint32 nNumberOfTables = tables.size();
+    // if ((nRow >= 0) && (nRow < nNumberOfTables)) {
+    //     if (pListValues) {
+    //         pListValues->clear();
+    //         pListValues->append(tagToString(tables.at(nRow).tag));
+    //         pListValues->append(QString("0x%1").arg(tables.at(nRow).checkSum, 8, 16, QChar('0')));
+    //         pListValues->append(QString("0x%1").arg(tables.at(nRow).offset, 8, 16, QChar('0')));
+    //         pListValues->append(QString("0x%1").arg(tables.at(nRow).length, 8, 16, QChar('0')));
+    //     }
+    //     return 4;
+    // }
     return 0;
-}
-
-quint16 XTTF::getNumTables()
-{
-    return m_numTables;
-}
-
-QList<XTTF::TTF_TABLE_RECORD> XTTF::getTableDirectory()
-{
-    if (m_tableDirectory.isEmpty()) {
-        _readTableDirectory();
-    }
-    return m_tableDirectory;
 }
 
 QString XTTF::tagToString(quint32 tag)
@@ -255,30 +301,30 @@ QString XTTF::tagToString(quint32 tag)
     return QString::fromLatin1(arr);
 }
 
-bool XTTF::_readHeader()
+QList<XTTF::TTF_TABLE_RECORD> XTTF::getTableDirectory(quint16 numTables)
 {
-    if (getSize() < 12)
-        return false;
-    m_sfntVersion = read_uint32(0, true); // Big-endian
-    m_numTables = read_uint16(4, true);
-    return true;
+    QList<TTF_TABLE_RECORD> list;
+    qint64 nOffset = 12;
+    for (qint32 i = 0, nNumberOfTables = numTables; i < nNumberOfTables; i++) {
+        TTF_TABLE_RECORD rec = {};
+        rec.tag = read_uint32(nOffset, true);
+        rec.checkSum = read_uint32(nOffset + 4, true);
+        rec.offset = read_uint32(nOffset + 8, true);
+        rec.length = read_uint32(nOffset + 12, true);
+        list.append(rec);
+        nOffset += 16;
+    }
+    return list;
 }
 
-void XTTF::_readTableDirectory()
+XTTF::TTF_HEADER XTTF::readHeader()
 {
-    m_tableDirectory.clear();
-    if (!_readHeader())
-        return;
-    qint32 nNumberOfTables = m_numTables;
-    for (qint32 i = 0; i < nNumberOfTables; i++) {
-        qint64 nEntryOffset = 12 + (i * 16);
-        if ((nEntryOffset + 16) > getSize())
-            break;
-        TTF_TABLE_RECORD rec;
-        rec.tag = read_uint32(nEntryOffset, true);
-        rec.checkSum = read_uint32(nEntryOffset + 4, true);
-        rec.offset = read_uint32(nEntryOffset + 8, true);
-        rec.length = read_uint32(nEntryOffset + 12, true);
-        m_tableDirectory.append(rec);
-    }
+    TTF_HEADER header = {};
+    header.sfntVersion = read_uint32(0, true);
+    header.numTables = read_uint16(4, true);
+    header.searchRange = read_uint16(6, true);
+    header.entrySelector = read_uint16(8, true);
+    header.rangeShift = read_uint16(10, true);
+    return header;
 }
+

@@ -35,6 +35,15 @@ public:
         quint32 length;
     };
 
+    struct TTF_HEADER
+    {
+        quint32 sfntVersion;
+        quint16 numTables;
+        quint16 searchRange;
+        quint16 entrySelector;
+        quint16 rangeShift;
+    };
+
     explicit XTTF(QIODevice *pDevice = nullptr);
     virtual ~XTTF();
 
@@ -53,6 +62,7 @@ public:
     virtual OSNAME getOsName() override;
     virtual QString getOsVersion() override;
     virtual QString getVersion() override;
+    QString getVersion(QList<TTF_TABLE_RECORD> *pListTables, PDSTRUCT *pPdStruct);
     virtual QString getInfo() override;
     virtual bool isEncrypted() override;
     virtual QList<MAPMODE> getMapModesList() override;
@@ -67,19 +77,11 @@ public:
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct) override;
 
     // TTF-specific
-    quint16 getNumTables();
-    QList<TTF_TABLE_RECORD> getTableDirectory();
     static QString tagToString(quint32 tag);
 
-protected:
-    bool _readHeader();
-    void _readTableDirectory();
+    TTF_HEADER readHeader();
+    QList<TTF_TABLE_RECORD> getTableDirectory(quint16 numTables);
 
-    // TTF header fields
-    quint32 m_sfntVersion;
-    quint16 m_numTables;
-
-    QList<TTF_TABLE_RECORD> m_tableDirectory;
 };
 
 #endif // XTTF_H

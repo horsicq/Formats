@@ -8204,11 +8204,19 @@ QString XBinary::getMIMEString()
     return "application/octet-stream";
 }
 
-QList<XBinary::FPART> XBinary::getFileParts(PDSTRUCT *pPdStruct)
+QList<XBinary::FPART> XBinary::getFileParts(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-
     QList<XBinary::FPART> listResult;
+
+    if (isOverlayPresent(pMemoryMap, pPdStruct)) {
+        XBinary::FPART fpart = {};
+        fpart.nOffset = getOverlayOffset(pMemoryMap, pPdStruct);
+        fpart.nSize = getOverlaySize(pMemoryMap, pPdStruct);
+        fpart.sName = tr("Overlay");
+        fpart.filePart = FILEPART_OVERLAY;
+
+        listResult.append(fpart);
+    }
 
     return listResult;
 }

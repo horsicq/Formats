@@ -33,11 +33,39 @@ public:
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     static bool isValid(QIODevice *pDevice);
     virtual FT getFileType();
+    virtual QString getMIMEString();
+    virtual QString getArch();
+    virtual MODE getMode();
+    virtual ENDIAN getEndian();
 
     virtual QString getFileFormatExt();
-    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual QString getVersion();
+
+    struct BMPFILEHEADER {
+        quint16 bfType;
+        quint32 bfSize;
+        quint16 bfReserved1;
+        quint16 bfReserved2;
+        quint32 bfOffBits;
+    };
+
+    struct BMPINFOHEADER {
+        quint32 biSize;
+        qint32  biWidth;
+        qint32  biHeight;
+        quint16 biPlanes;
+        quint16 biBitCount;
+        quint32 biCompression;
+        quint32 biSizeImage;
+        qint32  biXPelsPerMeter;
+        qint32  biYPelsPerMeter;
+        quint32 biClrUsed;
+        quint32 biClrImportant;
+    };
+
+    BMPFILEHEADER getFileHeader();
+    BMPINFOHEADER getInfoHeader();
 };
 
 #endif  // XBMP_H

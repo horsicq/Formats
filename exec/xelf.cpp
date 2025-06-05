@@ -4530,7 +4530,7 @@ XBinary::FILEFORMATINFO XELF::getFileFormatInfo(PDSTRUCT *pPdStruct)
 
                 if (note.nSize >= 4) {
                     quint32 nSDKVersion = read_uint32(note.nDataOffset);
-                    result.sOsVersion = XBinary::getAndroidVersionFromApi(nSDKVersion);
+                    result.sOsVersion = XBinary::getAndroidVersionFromApi(nSDKVersion); // TODO
                 }
             } else if ((XBinary::isStringInListPresent(&listLibraries, "liblog.so")) ||
                        ((sInterpteter == "system/bin/linker") || (sInterpteter == "system/bin/linker64"))) {
