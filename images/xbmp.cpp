@@ -149,7 +149,8 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         overlayRecord.nOffset = fileHeader.bfSize;
         overlayRecord.nAddress = -1;
         overlayRecord.segment = ADDRESS_SEGMENT_FLAT;
-        overlayRecord.nSize = getSize() - fileHeader.bfSize;;
+        overlayRecord.nSize = getSize() - fileHeader.bfSize;
+        ;
         overlayRecord.type = MMT_OVERLAY;
         overlayRecord.nLoadSectionNumber = -1;
         overlayRecord.sName = "Overlay";

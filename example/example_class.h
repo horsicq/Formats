@@ -24,8 +24,7 @@
 #include <QObject>
 #include <xbinary.h>
 
-class EXAMPLE_CLASS : public XBinary
-{
+class EXAMPLE_CLASS : public XBinary {
     Q_OBJECT
 public:
     enum STRUCTID {
@@ -36,20 +35,17 @@ public:
         // Add more structure IDs as needed
     };
 
-    struct ORIGINALHEADERNAME
-    {
+    struct ORIGINALHEADERNAME {
         qint64 field1;
         qint32 field2;
     };
 
-    struct DATA_STRUCT1
-    {
+    struct DATA_STRUCT1 {
         qint32 fieldA;
         qint32 fieldB;
     };
 
-    struct DATA_STRUCT2
-    {
+    struct DATA_STRUCT2 {
         qint8 nFieldX;
         qint32 nFieldY;
         qint64 nFieldZ;
@@ -85,12 +81,12 @@ public:
 
     virtual QString structIDToString(quint32 nID);
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
-    virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions);
-    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
+    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues,
+                                PDSTRUCT *pPdStruct);
 
     ORIGINALHEADERNAME _read_ORIGINALHEADERNAME(qint64 nOffset);
     DATA_STRUCT1 _read_DATA_STRUCT1(qint64 nOffset);
     DATA_STRUCT2 _read_DATA_STRUCT2(qint64 nOffset);
 };
 
-#endif // EXAMPLE_CLASS_H
+#endif  // EXAMPLE_CLASS_H

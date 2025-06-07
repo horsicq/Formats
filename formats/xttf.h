@@ -23,20 +23,17 @@
 
 #include "xbinary.h"
 
-class XTTF : public XBinary
-{
+class XTTF : public XBinary {
     Q_OBJECT
 public:
-    struct TTF_TABLE_RECORD
-    {
-        quint32 tag;         // Table name/tag (e.g. 'name', 'cmap', etc.)
+    struct TTF_TABLE_RECORD {
+        quint32 tag;  // Table name/tag (e.g. 'name', 'cmap', etc.)
         quint32 checkSum;
         quint32 offset;
         quint32 length;
     };
 
-    struct TTF_HEADER
-    {
+    struct TTF_HEADER {
         quint32 sfntVersion;
         quint16 numTables;
         quint16 searchRange;
@@ -74,14 +71,14 @@ public:
 
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
     virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions) override;
-    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct) override;
+    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues,
+                                PDSTRUCT *pPdStruct) override;
 
     // TTF-specific
     static QString tagToString(quint32 tag);
 
     TTF_HEADER readHeader();
     QList<TTF_TABLE_RECORD> getTableDirectory(quint16 numTables);
-
 };
 
-#endif // XTTF_H
+#endif  // XTTF_H

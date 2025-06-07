@@ -31,6 +31,8 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/xformats.h
     ${CMAKE_CURRENT_LIST_DIR}/audio/xmp3.cpp
     ${CMAKE_CURRENT_LIST_DIR}/audio/xmp3.h
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xxm.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xxm.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xbmp.cpp
     ${CMAKE_CURRENT_LIST_DIR}/images/xbmp.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xgif.cpp

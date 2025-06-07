@@ -90,9 +90,7 @@ XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
     {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},        {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
     {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},        {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
     {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},     {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},
-    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")},
-    {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")}
-};
+    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")}, {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")}};
 
 XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -146,6 +144,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_MACHOFAT, "Mach-O FAT", QString("Mach-O FAT")},
     {XBinary::FT_MP3, "MP3", QString("MP3")},
     {XBinary::FT_MP4, "MP4", QString("MP4")},
+    {XBinary::FT_XM, "XM", QString("XM")},
     {XBinary::FT_NPM, "NPM", QString("NPM")},
     {XBinary::FT_PDF, "PDF", QString("PDF")},
     {XBinary::FT_PLAINTEXT, "PlainText", QObject::tr("Plain Text")},
@@ -1101,6 +1100,7 @@ QString XBinary::fileTypeIdToExts(FT fileType)
         case FT_GIF: sResult = QString("GIF"); break;
         case FT_MP3: sResult = QString("MP3"); break;
         case FT_MP4: sResult = QString("MP4"); break;
+        case FT_XM: sResult = QString("XM"); break;
         case FT_RIFF: sResult = QString("RIFF(avi, webp)"); break;
         case FT_ZLIB: sResult = QString("zlib"); break;
         case FT_GZIP: sResult = QString("GZIP(gz, tgz, tar.gz)"); break;
@@ -3751,8 +3751,14 @@ QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bI
 
     nSize = qMin(nSize, qint64(128));
 
-    if (valueType == XBinary::VT_UINT32) {
+    if ((valueType == XBinary::VT_UINT8) || (valueType == XBinary::VT_BYTE)) {
+        varResult = read_uint8(nOffset);
+    } else if ((valueType == XBinary::VT_UINT16) || (valueType == XBinary::VT_WORD)) {
+        varResult = read_uint16(nOffset, bIsBigEndian);
+    } else if ((valueType == XBinary::VT_UINT32) || (valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_DWORD)) {
         varResult = read_uint32(nOffset, bIsBigEndian);
+    } else if ((valueType == XBinary::VT_UINT64) || (valueType == XBinary::VT_QWORD)) {
+        varResult = read_uint64(nOffset, bIsBigEndian);
     } else if ((valueType == XBinary::VT_A) || (valueType == XBinary::VT_A_I)) {
         varResult = read_ansiString(nOffset, nSize);
     } else if ((valueType == XBinary::VT_UTF8) || (valueType == XBinary::VT_UTF8_I)) {
@@ -3764,9 +3770,31 @@ QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bI
     return varResult;
 }
 
-QString XBinary::valueTypeToString(VT valueType)
+QString XBinary::valueTypeToString(VT valueType, qint32 nSize)
 {
-    return XIDSTRING_idToString((quint32)valueType, _TABLE_XBinary_VT, sizeof(_TABLE_XBinary_VT) / sizeof(XBinary::XIDSTRING));
+    QString sResult;
+    VT _valueType = valueType;
+    bool bArray = false;
+
+    if ((valueType == VT_CHAR_ARRAY) || (valueType == VT_BYTE_ARRAY)) {
+        bArray = true;
+
+        if (valueType == VT_CHAR_ARRAY) {
+            _valueType = VT_CHAR;
+        } else if (valueType == VT_BYTE_ARRAY) {
+            _valueType = VT_BYTE;
+        }
+    }
+
+    sResult = XIDSTRING_idToString((quint32)_valueType, _TABLE_XBinary_VT, sizeof(_TABLE_XBinary_VT) / sizeof(XBinary::XIDSTRING));
+
+    if (bArray) {
+        qint32 nCount = nSize / getBaseValueSize(_valueType);
+
+        sResult += QString("[%1]").arg(nCount);
+    }
+
+    return sResult;
 }
 
 QString XBinary::getValueString(QVariant varValue, VT valueType, bool bTypesAsHex)
@@ -3843,7 +3871,18 @@ qint32 XBinary::getValueSize(QVariant varValue, VT valueType)
     } else if (valueType == XBinary::VT_SIGNATURE) {
         QString sSignature = convertSignature(varValue.toString());
         nResult = sSignature.size() / 2;
-    } else if (valueType == XBinary::VT_BYTE) {
+    } else {
+        nResult = getBaseValueSize(valueType);
+    }
+
+    return nResult;
+}
+
+qint32 XBinary::getBaseValueSize(VT valueType)
+{
+    qint32 nResult = 1;
+
+    if (valueType == XBinary::VT_BYTE) {
         nResult = 1;
     } else if (valueType == XBinary::VT_WORD) {
         nResult = 2;
@@ -5818,6 +5857,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "000000..'ftyp'", 0)) {
             stResult.insert(FT_VIDEO);
             stResult.insert(FT_MP4);
+        } else if (compareSignature(&memoryMap, "'Extended Module'", 0)) {
+            stResult.insert(FT_AUDIO);
+            stResult.insert(FT_XM);
         } else if (compareSignature(&memoryMap, "'dex\n'......00")) {
             stResult.insert(FT_DEX);
         } else if (compareSignature(&memoryMap, "02000C00")) {
@@ -6045,6 +6087,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_MP3;
     } else if (pStFileTypes->contains(FT_MP4)) {
         result = FT_MP4;
+    } else if (pStFileTypes->contains(FT_XM)) {
+        result = FT_XM;
     } else if (pStFileTypes->contains(FT_AVI)) {
         result = FT_AVI;
     } else if (pStFileTypes->contains(FT_WEBP)) {
@@ -6159,6 +6203,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_TIFF)) listResult.append(FT_TIFF);
         if (stFileTypes.contains(FT_MP3)) listResult.append(FT_MP3);
         if (stFileTypes.contains(FT_MP4)) listResult.append(FT_MP4);
+        if (stFileTypes.contains(FT_XM)) listResult.append(FT_XM);
         if (stFileTypes.contains(FT_RIFF)) listResult.append(FT_RIFF);
         if (stFileTypes.contains(FT_AVI)) listResult.append(FT_AVI);
         if (stFileTypes.contains(FT_WEBP)) listResult.append(FT_WEBP);
@@ -8189,7 +8234,7 @@ void XBinary::dumpHeaders()
             for (qint32 j = 0; j < nNumberOfRecords; j++) {
                 XBinary::DATA_RECORD dataRecord = dataHeader.listRecords.at(j);
 
-                qDebug("%X: %X %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType).toLatin1().data(),
+                qDebug("%X: %X %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType, dataRecord.nSize).toLatin1().data(),
                        dataRecord.sName.toLatin1().data(), XBinary::getValueString(listValues.at(j), dataRecord.valType, true).toLatin1().data());
             }
         } else if (dataHeader.dsID.fileType == FT_BINARY) {
@@ -11615,17 +11660,10 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 qint64 nValue = 0;
 
                 switch (pListSignatureRecords->at(i).nSizeOfAddr) {
-                    case 1:
-                        nValue = 1 + read_int8(nOffset);
-                        break;
-                    case 2:
-                        nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap));
-                        break;
-                    case 4:
-                        nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap));
-                        break;
-                    case 8: nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap));
-                        break;
+                    case 1: nValue = 1 + read_int8(nOffset); break;
+                    case 2: nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
+                    case 4: nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap)); break;
+                    case 8: nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap)); break;
                 }
 
                 if ((pMemoryMap->fileType == FT_COM) || (pMemoryMap->fileType == FT_MSDOS)) {

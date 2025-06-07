@@ -20,12 +20,10 @@
  */
 #include "example_class.h"
 
-XBinary::XCONVERT _TABLE_EXAMPLE_CLASS_STRUCTID[] = {
-    {EXAMPLE_CLASS::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    {EXAMPLE_CLASS::STRUCTID_ORIGINALHEADERNAME, "ORIGINALHEADERNAME", QString("ORIGINALHEADERNAME")},
-    {EXAMPLE_CLASS::STRUCTID_DATA_STRUCT1, "DATA_STRUCT1", QString("DATA_STRUCT1")},
-    {EXAMPLE_CLASS::STRUCTID_DATA_STRUCT2, "DATA_STRUCT2", QString("DATA_STRUCT2")}
-};
+XBinary::XCONVERT _TABLE_EXAMPLE_CLASS_STRUCTID[] = {{EXAMPLE_CLASS::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+                                                     {EXAMPLE_CLASS::STRUCTID_ORIGINALHEADERNAME, "ORIGINALHEADERNAME", QString("ORIGINALHEADERNAME")},
+                                                     {EXAMPLE_CLASS::STRUCTID_DATA_STRUCT1, "DATA_STRUCT1", QString("DATA_STRUCT1")},
+                                                     {EXAMPLE_CLASS::STRUCTID_DATA_STRUCT2, "DATA_STRUCT2", QString("DATA_STRUCT2")}};
 
 EXAMPLE_CLASS::EXAMPLE_CLASS(QIODevice *pDevice = nullptr) : XBinary(pDevice)
 {
@@ -139,18 +137,8 @@ QString EXAMPLE_CLASS::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_EXAMPLE_CLASS_STRUCTID, sizeof(_TABLE_EXAMPLE_CLASS_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
-QList<QString> EXAMPLE_CLASS::getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions)
-{
-    // Return a list of table titles based on the provided options
-    QList<QString> listTitles;
-
-    // Populate the list with titles as needed
-    // ...
-
-    return listTitles;  // Replace with actual implementation
-}
-
-qint32 EXAMPLE_CLASS::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct)
+qint32 EXAMPLE_CLASS::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues,
+                                   PDSTRUCT *pPdStruct)
 {
     // Read a row from the table based on the provided parameters
     qint32 nResult = 0;
@@ -224,8 +212,10 @@ QList<XBinary::DATA_HEADER> EXAMPLE_CLASS::getDataHeaders(const DATA_HEADERS_OPT
             if (dataHeadersOptions.nID == STRUCTID_ORIGINALHEADERNAME) {
                 dataHeader.nSize = sizeof(ORIGINALHEADERNAME);
 
-                dataHeader.listRecords.append(getDataRecord(offsetof(ORIGINALHEADERNAME, field1), 4, "field1", VT_UINT64, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(ORIGINALHEADERNAME, field2), 4, "field2", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(ORIGINALHEADERNAME, field1), 4, "field1", VT_UINT64, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(ORIGINALHEADERNAME, field2), 4, "field2", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
             } else if (dataHeadersOptions.nID == STRUCTID_DATA_STRUCT1) {
                 dataHeader.nSize = sizeof(DATA_STRUCT1);
 

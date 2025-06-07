@@ -305,6 +305,7 @@ public:
         FT_CUR,
         FT_MP3,
         FT_MP4,
+        FT_XM,
         FT_RIFF,
         FT_AVI,
         FT_WEBP,
@@ -610,12 +611,15 @@ public:
         VT_INT16,
         VT_INT32,
         VT_INT64,
+        VT_UINT8,
         VT_UINT16,
         VT_UINT32,
         VT_UINT64,
         VT_DOUBLE,
         VT_FLOAT,
-        VT_BYTEARRAY
+        VT_ANSI,
+        VT_CHAR_ARRAY,
+        VT_BYTE_ARRAY
         // TODO pascal strings(A/U)
     };
 
@@ -789,7 +793,8 @@ public:
     static qint32 getDataRecordValues(QIODevice *pDevice, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
 
     virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions);
-    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
+    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues,
+                                PDSTRUCT *pPdStruct);
 
 private:
     enum ST {
@@ -1107,10 +1112,11 @@ public:
 
     QVariant read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian = false);
 
-    static QString valueTypeToString(VT valueType);
+    static QString valueTypeToString(VT valueType, qint32 nSize);
     static QString getValueString(QVariant varValue, VT valueType, bool bTypesAsHex = false);
     static qint32 getValueSize(QVariant varValue, VT valueType);
     static VT getValueType(quint64 nValue);
+    static qint32 getBaseValueSize(VT valueType);
 
     static QByteArray getUnicodeString(const QString &sString, bool bIsBigEndian);
     static QByteArray getStringData(VT valueType, const QString &sString, bool bAddNull);

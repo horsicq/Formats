@@ -52,14 +52,14 @@ public:
 
     struct BMPINFOHEADER {
         quint32 biSize;
-        qint32  biWidth;
-        qint32  biHeight;
+        qint32 biWidth;
+        qint32 biHeight;
         quint16 biPlanes;
         quint16 biBitCount;
         quint32 biCompression;
         quint32 biSizeImage;
-        qint32  biXPelsPerMeter;
-        qint32  biYPelsPerMeter;
+        qint32 biXPelsPerMeter;
+        qint32 biYPelsPerMeter;
         quint32 biClrUsed;
         quint32 biClrImportant;
     };

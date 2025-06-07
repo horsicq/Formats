@@ -5376,10 +5376,10 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
             } else if (dataHeadersOptions.nID == STRUCTID_load_command) {
                 dataHeader.nSize = sizeof(XMACH_DEF::load_command);
 
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::load_command, cmd), 4, "cmd", VT_UINT32, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMACH_DEF::load_command, cmdsize), 4, "cmdsize", VT_UINT32, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XMACH_DEF::load_command, cmd), 4, "cmd", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XMACH_DEF::load_command, cmdsize), 4, "cmdsize", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
             }
 
             if (dataHeader.nSize) {

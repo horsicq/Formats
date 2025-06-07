@@ -20,8 +20,7 @@
  */
 #include "xttf.h"
 
-XTTF::XTTF(QIODevice *pDevice)
-    : XBinary(pDevice)
+XTTF::XTTF(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
 
@@ -32,10 +31,9 @@ XTTF::~XTTF()
 bool XTTF::isValid(PDSTRUCT *pPdStruct)
 {
     // TTF starts with: 0x00010000 or 'OTTO' (for CFF, OpenType)
-    if (getSize() < 12)
-        return false;
-    quint32 version = read_uint32(0, true); // Big-endian
-    return (version == 0x00010000) || (version == 0x4F54544F); // 'OTTO'
+    if (getSize() < 12) return false;
+    quint32 version = read_uint32(0, true);                     // Big-endian
+    return (version == 0x00010000) || (version == 0x4F54544F);  // 'OTTO'
 }
 
 XBinary::FT XTTF::getFileType()
@@ -113,7 +111,7 @@ QString XTTF::getVersion(QList<TTF_TABLE_RECORD> *pListTables, PDSTRUCT *pPdStru
     qint64 nHeadOffset = -1;
 
     for (qint32 i = 0; (i < nNumberOfTables) && isPdStructNotCanceled(pPdStruct); i++) {
-        if (pListTables->at(i).tag == 0x68656164) { // 'head'
+        if (pListTables->at(i).tag == 0x68656164) {  // 'head'
             nHeadOffset = pListTables->at(i).offset;
             break;
         }
@@ -149,7 +147,7 @@ QList<XBinary::MAPMODE> XTTF::getMapModesList()
     return list;
 }
 
-XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT * pPdStruct)
+XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
     _MEMORY_MAP memoryMap = {};
@@ -173,7 +171,7 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT * pPdStruct)
 
     _MEMORY_RECORD memHeader = {};
     memHeader.nOffset = nHeaderOffset;
-    memHeader.nAddress = -1; // TTF header does not have a specific address in memory
+    memHeader.nAddress = -1;  // TTF header does not have a specific address in memory
     memHeader.nSize = nHeaderSize;
     memHeader.type = MMT_HEADER;
     memHeader.sName = "Header";
@@ -187,7 +185,7 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT * pPdStruct)
         rec.type = MMT_OBJECT;
         rec.sName = tagToString(tableRecords.at(i).tag);
         rec.nIndex = i;
-        rec.nAddress = -1; // TTF tables do not have a specific address in memory
+        rec.nAddress = -1;  // TTF tables do not have a specific address in memory
         memoryMap.listRecords.append(rec);
     }
 
@@ -197,8 +195,7 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT * pPdStruct)
 
     for (qint32 i = 0, nNumberOfTables = tableRecords.size(); i < nNumberOfTables; i++) {
         qint64 nEnd = tableRecords.at(i).offset + tableRecords.at(i).length;
-        if (nEnd > nTablesEnd)
-            nTablesEnd = nEnd;
+        if (nEnd > nTablesEnd) nTablesEnd = nEnd;
     }
     if (nTablesEnd < nFileSize) {
         _MEMORY_RECORD overlay = {};
@@ -270,11 +267,15 @@ QList<XBinary::DATA_HEADER> XTTF::getDataHeaders(const DATA_HEADERS_OPTIONS &dat
 QList<QString> XTTF::getTableTitles(const DATA_RECORDS_OPTIONS & /*dataRecordsOptions*/)
 {
     QList<QString> list;
-    list << "Tag" << "Checksum" << "Offset" << "Length";
+    list << "Tag"
+         << "Checksum"
+         << "Offset"
+         << "Length";
     return list;
 }
 
-qint32 XTTF::readTableRow(qint32 nRow, LT /*locType*/, XADDR /*nLocation*/, const DATA_RECORDS_OPTIONS & /*dataRecordsOptions*/, QList<QVariant> *pListValues, PDSTRUCT * /*pPdStruct*/)
+qint32 XTTF::readTableRow(qint32 nRow, LT /*locType*/, XADDR /*nLocation*/, const DATA_RECORDS_OPTIONS & /*dataRecordsOptions*/, QList<QVariant> *pListValues,
+                          PDSTRUCT * /*pPdStruct*/)
 {
     // QList<TTF_TABLE_RECORD> tables = getTableDirectory();
     // qint32 nNumberOfTables = tables.size();
@@ -327,4 +328,3 @@ XTTF::TTF_HEADER XTTF::readHeader()
     header.rangeShift = read_uint16(10, true);
     return header;
 }
-
