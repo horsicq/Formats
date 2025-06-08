@@ -316,6 +316,7 @@ public:
         FT_JAVACLASS,
         FT_CFBF,
         FT_TTF,
+        FT_SZDD,
         // TODO more
     };
 

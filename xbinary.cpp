@@ -169,6 +169,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_JAVACLASS, "Java Class", QString("Java Class")},
     {XBinary::FT_TTF, "TTF", QString("TTF")},
     {XBinary::FT_CFBF, "CFBF", QString("CFBF")},
+    {XBinary::FT_SZDD, "SZDD", QString("SZDD")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -916,7 +917,7 @@ QString XBinary::getFileFormatExt()
 
 QString XBinary::getFileFormatExtsString()
 {
-    return tr("Unknown");
+    return getFileFormatExt().toUpper();
 }
 
 void XBinary::setFileFormatSize(qint64 nFileFormatSize)
@@ -5905,6 +5906,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_CFBF);
         } else if (compareSignature(&memoryMap, "'OTTO'00", 0) || compareSignature(&memoryMap, "0001000000", 0)) {
             stResult.insert(FT_TTF);
+        } else if (compareSignature(&memoryMap, "'SZDD'88F027'3A'", 0)) {
+            stResult.insert(FT_SZDD);
         } else {
             bAllFound = false;
         }
@@ -6122,6 +6125,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_JAVACLASS;
     } else if (pStFileTypes->contains(FT_CFBF)) {
         result = FT_CFBF;
+    } else if (pStFileTypes->contains(FT_SZDD)) {
+        result = FT_SZDD;
     } else if (pStFileTypes->contains(FT_TTF)) {
         result = FT_TTF;
     } else if (pStFileTypes->contains(FT_DATA)) {
@@ -6234,6 +6239,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_JAVACLASS)) listResult.append(FT_JAVACLASS);
         if (stFileTypes.contains(FT_TTF)) listResult.append(FT_TTF);
         if (stFileTypes.contains(FT_CFBF)) listResult.append(FT_CFBF);
+        if (stFileTypes.contains(FT_SZDD)) listResult.append(FT_SZDD);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
