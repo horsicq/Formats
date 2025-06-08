@@ -917,7 +917,7 @@ QString XBinary::getFileFormatExt()
 
 QString XBinary::getFileFormatExtsString()
 {
-    return getFileFormatExt().toUpper();
+    return tr("Unknown");
 }
 
 void XBinary::setFileFormatSize(qint64 nFileFormatSize)
