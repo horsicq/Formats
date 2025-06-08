@@ -1411,7 +1411,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 if (bIs64) {
                     QString _sSegmentName = QString(listSegmentRecords.at(i).s.segment64.segname);  // TODO Limit
 
-                    sSegmentName = QString("%1(%2)['%3']").arg(tr("Segment"), QString::number(i), _sSegmentName);
+                    sSegmentName = _sSegmentName;
                     nFileOffset = listSegmentRecords.at(i).s.segment64.fileoff;
                     nVirtualAddress = listSegmentRecords.at(i).s.segment64.vmaddr;
                     nFileSize = listSegmentRecords.at(i).s.segment64.filesize;
@@ -1420,7 +1420,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 } else {
                     QString _sSegmentName = QString(listSegmentRecords.at(i).s.segment32.segname);  // TODO Limit
 
-                    sSegmentName = QString("%1(%2)['%3']").arg(tr("Segment"), QString::number(i), _sSegmentName);
+                    sSegmentName = _sSegmentName;
                     nFileOffset = listSegmentRecords.at(i).s.segment32.fileoff;
                     nVirtualAddress = listSegmentRecords.at(i).s.segment32.vmaddr;
                     nFileSize = listSegmentRecords.at(i).s.segment32.filesize;
@@ -1488,7 +1488,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 if (bIs64) {
                     QString _sSectiontName = QString(listSections.at(i).s.section64.sectname);  // TODO Limit
 
-                    sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i + 1), _sSectiontName);
+                    sSectionName = _sSectiontName;
                     nFileOffset = listSections.at(i).s.section64.offset;
                     nVirtualAddress = listSections.at(i).s.section64.addr;
                     nFileSize = listSections.at(i).s.section64.size;
@@ -1496,7 +1496,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 } else {
                     QString _sSectiontName = QString(listSections.at(i).s.section32.sectname);  // TODO Limit
 
-                    sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i + 1), _sSectiontName);
+                    sSectionName = _sSectiontName;
                     nFileOffset = listSections.at(i).s.section32.offset;
                     nVirtualAddress = listSections.at(i).s.section32.addr;
                     nFileSize = listSections.at(i).s.section32.size;
@@ -4852,76 +4852,12 @@ XBinary::FILEFORMATINFO XMACH::getFileFormatInfo(PDSTRUCT *pPdStruct)
 
 QList<XBinary::HREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
 {
-    QList<XBinary::HREGION> listRegions;
-
-    QList<COMMAND_RECORD> listCommandRecords = getCommandRecords(0, pPdStruct);
-    QList<SEGMENT_RECORD> listSegmentRecords = getSegmentRecords(&listCommandRecords);
-
-    qint32 nNumberOfRecords = listSegmentRecords.count();
-
-    for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-        SEGMENT_RECORD segmentRecord = listSegmentRecords.at(i);
-
-        XBinary::HREGION region = {};
-        region.sGUID = generateUUID();
-
-        if (segmentRecord.bIs64) {
-            region.nVirtualAddress = segmentRecord.s.segment64.vmaddr;
-            region.nVirtualSize = segmentRecord.s.segment64.vmsize;
-            region.nFileOffset = segmentRecord.s.segment64.fileoff;
-            region.nFileSize = segmentRecord.s.segment64.filesize;
-            region.sName = segmentRecord.s.segment64.segname;
-        } else {
-            region.nVirtualAddress = segmentRecord.s.segment32.vmaddr;
-            region.nVirtualSize = segmentRecord.s.segment32.vmsize;
-            region.nFileOffset = segmentRecord.s.segment32.fileoff;
-            region.nFileSize = segmentRecord.s.segment32.filesize;
-            region.sName = segmentRecord.s.segment32.segname;
-        }
-
-        // TODO flags
-
-        listRegions.append(region);
-    }
-
-    return listRegions;
+    return _getPhysRegions(MAPMODE_SEGMENTS, pPdStruct);
 }
 
 QList<XBinary::HREGION> XMACH::getNativeSubRegions(PDSTRUCT *pPdStruct)
 {
-    QList<XBinary::HREGION> listRegions;
-
-    QList<COMMAND_RECORD> listCommandRecords = getCommandRecords(0, pPdStruct);
-
-    QList<SECTION_RECORD> listSections = getSectionRecords(&listCommandRecords);
-    qint32 nNumberOfSections = listSections.count();
-
-    for (qint32 i = 0; (i < nNumberOfSections) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-        SECTION_RECORD sectionRecord = listSections.at(i);
-
-        XBinary::HREGION region = {};
-        region.sGUID = generateUUID();
-
-        if (sectionRecord.bIs64) {
-            region.nVirtualAddress = sectionRecord.s.section64.addr;
-            region.nVirtualSize = sectionRecord.s.section64.size;
-            region.nFileOffset = sectionRecord.s.section64.offset;
-            region.nFileSize = sectionRecord.s.section64.size;
-            region.sName = sectionRecord.s.section64.sectname;
-        } else {
-            region.nVirtualAddress = sectionRecord.s.section32.addr;
-            region.nVirtualSize = sectionRecord.s.section32.size;
-            region.nFileOffset = sectionRecord.s.section32.offset;
-            region.nFileSize = sectionRecord.s.section32.size;
-            region.sName = sectionRecord.s.section32.sectname;
-        }
-
-        // TODO flags
-
-        listRegions.append(region);
-    }
-
-    return listRegions;
+    return _getPhysRegions(MAPMODE_SECTIONS, pPdStruct);
 }
 
 bool XMACH::handleImport(qint64 nOffset, qint64 nRelOffset, qint64 nSize, QList<EXPORT_RECORD> *pListExportRecords, const QString &sCurrentName, PDSTRUCT *pPdStruct)

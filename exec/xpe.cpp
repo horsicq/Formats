@@ -1915,7 +1915,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     if (bValid) {
         _MEMORY_RECORD recordHeaderRaw = {};
 
-        QString sHeaderName = QString("PE %1").arg(tr("Header"));
+        QString sHeaderName = tr("Header");
 
         if (!isImage()) {
             recordHeaderRaw.type = MMT_HEADER;
@@ -1999,7 +1999,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
             _sSectionName = convertSectionName(_sSectionName, &osStringTable);
 
-            QString sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i + 1), _sSectionName);
+            QString sSectionName = _sSectionName;
 
             if (!isImage()) {
                 if (nFileSize) {

@@ -914,6 +914,11 @@ QString XBinary::getFileFormatExt()
     return g_sFileFormatExt;
 }
 
+QString XBinary::getFileFormatExtsString()
+{
+    return tr("Unknown");
+}
+
 void XBinary::setFileFormatSize(qint64 nFileFormatSize)
 {
     g_nFileFormatSize = nFileFormatSize;
@@ -1076,46 +1081,46 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
     return XCONVERT_idToTransString(fileType, _TABLE_XBinary_FT, sizeof(_TABLE_XBinary_FT) / sizeof(XBinary::XCONVERT));
 }
 
-QString XBinary::fileTypeIdToExts(FT fileType)
-{
-    QString sResult = tr("Unknown");
+// QString XBinary::fileTypeIdToExts(FT fileType)
+// {
+//     QString sResult = tr("Unknown");
 
-    switch (fileType) {
-        case FT_PE: sResult = QString("PE(exe, dll, sys)"); break;  // TODO Check, add more
-        case FT_ELF: sResult = QString("ELF(elf, so)"); break;
-        case FT_ZIP: sResult = QString("ZIP(zip, jar, apk, ipa, docx)"); break;
-        case FT_RAR: sResult = QString("RAR"); break;
-        case FT_PDF: sResult = QString("PDF"); break;
-        case FT_7Z: sResult = QString("7-Zip"); break;
-        case FT_PNG: sResult = QString("PNG"); break;
-        case FT_JPEG: sResult = QString("JPEG"); break;
-        case FT_CAB: sResult = QString("CAB"); break;
-        case FT_ICO: sResult = QString("ICO"); break;
-        case FT_CUR: sResult = QString("CUR"); break;
-        case FT_TIFF: sResult = QString("TIFF"); break;
-        case FT_DEX: sResult = QString("DEX"); break;
-        case FT_MACHOFAT: sResult = QString("MACHOFAT"); break;
-        case FT_MACHO: sResult = QString("MACHO"); break;
-        case FT_BMP: sResult = QString("BMP"); break;
-        case FT_GIF: sResult = QString("GIF"); break;
-        case FT_MP3: sResult = QString("MP3"); break;
-        case FT_MP4: sResult = QString("MP4"); break;
-        case FT_XM: sResult = QString("XM"); break;
-        case FT_RIFF: sResult = QString("RIFF(avi, webp)"); break;
-        case FT_ZLIB: sResult = QString("zlib"); break;
-        case FT_GZIP: sResult = QString("GZIP(gz, tgz, tar.gz)"); break;
-        case FT_LE: sResult = QString("LE(le, lx)"); break;
-        case FT_NE: sResult = QString("NE"); break;
-        case FT_AMIGAHUNK: sResult = QString("AmigaHunk"); break;
-        case FT_JAVACLASS: sResult = QString("class"); break;
-        case FT_CFBF: sResult = QString("CFBF"); break;
-        case FT_TTF: sResult = QString("TTF"); break;
-        case FT_SIGNATURE: sResult = tr("Signatures"); break;
-        default: sResult = tr("Unknown");
-    }
+//     switch (fileType) {
+//         case FT_PE: sResult = QString("PE(exe, dll, sys)"); break;  // TODO Check, add more
+//         case FT_ELF: sResult = QString("ELF(elf, so)"); break;
+//         case FT_ZIP: sResult = QString("ZIP(zip, jar, apk, ipa, docx)"); break;
+//         case FT_RAR: sResult = QString("RAR"); break;
+//         case FT_PDF: sResult = QString("PDF"); break;
+//         case FT_7Z: sResult = QString("7-Zip"); break;
+//         case FT_PNG: sResult = QString("PNG"); break;
+//         case FT_JPEG: sResult = QString("JPEG"); break;
+//         case FT_CAB: sResult = QString("CAB"); break;
+//         case FT_ICO: sResult = QString("ICO"); break;
+//         case FT_CUR: sResult = QString("CUR"); break;
+//         case FT_TIFF: sResult = QString("TIFF"); break;
+//         case FT_DEX: sResult = QString("DEX"); break;
+//         case FT_MACHOFAT: sResult = QString("MACHOFAT"); break;
+//         case FT_MACHO: sResult = QString("MACHO"); break;
+//         case FT_BMP: sResult = QString("BMP"); break;
+//         case FT_GIF: sResult = QString("GIF"); break;
+//         case FT_MP3: sResult = QString("MP3"); break;
+//         case FT_MP4: sResult = QString("MP4"); break;
+//         case FT_XM: sResult = QString("XM"); break;
+//         case FT_RIFF: sResult = QString("RIFF(avi, webp)"); break;
+//         case FT_ZLIB: sResult = QString("zlib"); break;
+//         case FT_GZIP: sResult = QString("GZIP(gz, tgz, tar.gz)"); break;
+//         case FT_LE: sResult = QString("LE(le, lx)"); break;
+//         case FT_NE: sResult = QString("NE"); break;
+//         case FT_AMIGAHUNK: sResult = QString("AmigaHunk"); break;
+//         case FT_JAVACLASS: sResult = QString("class"); break;
+//         case FT_CFBF: sResult = QString("CFBF"); break;
+//         case FT_TTF: sResult = QString("TTF"); break;
+//         case FT_SIGNATURE: sResult = tr("Signatures"); break;
+//         default: sResult = tr("Unknown");
+//     }
 
-    return sResult;
-}
+//     return sResult;
+// }
 
 XBinary::FT XBinary::ftStringToFileTypeId(QString sFileType)
 {
@@ -5066,6 +5071,31 @@ QString XBinary::mapModeToString(MAPMODE mapMode)
     return sResult;
 }
 
+QList<XBinary::HREGION> XBinary::_getPhysRegions(MAPMODE mapMode, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::HREGION> listResult;
+
+    _MEMORY_MAP memoryMap = getMemoryMap(mapMode, pPdStruct);
+
+    qint32 nNumberOfRecords = memoryMap.listRecords.count();
+
+    for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
+        if (!memoryMap.listRecords.at(i).bIsVirtual) {
+            XBinary::HREGION region = {};
+            region.nVirtualAddress = memoryMap.listRecords.at(i).nAddress;
+            region.nFileOffset = memoryMap.listRecords.at(i).nOffset;
+            region.nFileSize = memoryMap.listRecords.at(i).nSize;
+            region.nVirtualSize = memoryMap.listRecords.at(i).nSize;
+            region.sName = memoryMap.listRecords.at(i).sName;
+            region.sGUID = generateUUID();
+
+            listResult.append(region);
+        }
+    }
+
+    return listResult;
+}
+
 QList<XBinary::HREGION> XBinary::getHData(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct);
@@ -5077,20 +5107,7 @@ QList<XBinary::HREGION> XBinary::getHData(PDSTRUCT *pPdStruct)
 
 QList<XBinary::HREGION> XBinary::getNativeRegions(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct);
-
-    QList<XBinary::HREGION> listResult;
-
-    HREGION region = {};
-
-    region.nVirtualAddress = 0;
-    region.nFileOffset = 0;
-    region.nFileSize = g_nSize;
-    region.nVirtualSize = g_nSize;
-
-    listResult.append(region);
-
-    return listResult;
+    return _getPhysRegions(MAPMODE_UNKNOWN, pPdStruct);
 }
 
 QList<XBinary::HREGION> XBinary::getNativeSubRegions(PDSTRUCT *pPdStruct)

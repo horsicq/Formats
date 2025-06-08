@@ -96,6 +96,12 @@ QString EXAMPLE_CLASS::getFileFormatExt()
     return QString();  // Replace with actual implementation
 }
 
+QString EXAMPLE_CLASS::getFileFormatExtsString()
+{
+    // Return the file format extension
+    return QString();  // Replace with actual implementation
+}
+
 qint64 EXAMPLE_CLASS::getFileFormatSize(XBinary::PDSTRUCT *pPdStruct)
 {
     // Return the file format size
@@ -235,26 +241,6 @@ QList<XBinary::DATA_HEADER> EXAMPLE_CLASS::getDataHeaders(const DATA_HEADERS_OPT
     }
 
     return listResult;
-}
-
-QList<XBinary::HREGION> EXAMPLE_CLASS::getHData(PDSTRUCT *pPdStruct)
-{
-    // Return a list of HData regions
-    QList<HREGION> listHData;
-    // Populate the list with HData as needed
-    // ...
-
-    return listHData;  // Replace with actual implementation
-}
-
-QList<XBinary::HREGION> EXAMPLE_CLASS::getNativeSubRegions(PDSTRUCT *pPdStruct)
-{
-    // Return a list of native sub-regions
-    QList<HREGION> listSubRegions;
-    // Populate the list with sub-regions as needed
-    // ...
-
-    return listSubRegions;  // Replace with actual implementation
 }
 
 QList<XBinary::HREGION> EXAMPLE_CLASS::getNativeRegions(PDSTRUCT *pPdStruct)

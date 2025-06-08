@@ -210,24 +210,9 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     return memoryMap;
 }
 
-QList<XBinary::HREGION> XTTF::getNativeRegions(PDSTRUCT * /*pPdStruct*/)
+QList<XBinary::HREGION> XTTF::getNativeRegions(PDSTRUCT *pPdStruct)
 {
-    QList<HREGION> list;
-    // Each table is a region
-    XTTF::TTF_HEADER header = readHeader();
-    QList<TTF_TABLE_RECORD> tables = getTableDirectory(header.numTables);
-    qint32 nNumberOfTables = tables.size();
-
-    for (qint32 i = 0; i < nNumberOfTables; i++) {
-        HREGION reg = {};
-        reg.nVirtualAddress = 0;
-        reg.nVirtualSize = tables.at(i).length;
-        reg.nFileOffset = tables.at(i).offset;
-        reg.nFileSize = tables.at(i).length;
-        reg.sName = tagToString(tables.at(i).tag);
-        list.append(reg);
-    }
-    return list;
+    return _getPhysRegions(MAPMODE_UNKNOWN, pPdStruct);
 }
 
 QList<XBinary::HREGION> XTTF::getNativeSubRegions(PDSTRUCT * /*pPdStruct*/)

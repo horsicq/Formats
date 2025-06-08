@@ -65,6 +65,7 @@ public:
     virtual ENDIAN getEndian();
     virtual QString getArch();
     virtual QString getFileFormatExt();
+    virtual QString getFileFormatExtsString();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
     virtual bool isSigned();
     virtual OSNAME getOsName();
@@ -75,8 +76,6 @@ public:
     virtual QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
-    virtual QList<HREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
-    virtual QList<HREGION> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<HREGION> getHData(PDSTRUCT *pPdStruct = nullptr);
 
     virtual QString structIDToString(quint32 nID);

@@ -4086,7 +4086,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         }
 
         for (qint32 i = 0; i < nNumberOfSections; i++) {
-            QString sSectionName = QString("%1(%2)['%3']").arg(tr("Section"), QString::number(i), listSectionRecords.at(i).sName);
+            QString sSectionName = listSectionRecords.at(i).sName;
 
             XBinary::_MEMORY_RECORD record = {};
 

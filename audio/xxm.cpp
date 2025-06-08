@@ -300,8 +300,7 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
 QList<XXM::HREGION> XXM::getNativeRegions(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-    return QList<HREGION>();
+    return _getPhysRegions(MAPMODE_UNKNOWN, pPdStruct);
 }
 
 QList<XXM::HREGION> XXM::getNativeSubRegions(PDSTRUCT *pPdStruct)

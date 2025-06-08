@@ -875,6 +875,7 @@ public:
     virtual ENDIAN getEndian();
     virtual QString getArch();
     virtual QString getFileFormatExt();
+    virtual QString getFileFormatExtsString();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
     virtual bool isSigned();
     virtual OSNAME getOsName();
@@ -889,7 +890,7 @@ public:
     static QString randomString(qint32 nSize);
 
     static QString fileTypeIdToString(FT fileType);
-    static QString fileTypeIdToExts(FT fileType);  // TODO move to classes
+    // static QString fileTypeIdToExts(FT fileType);  // TODO move to classes
     static FT ftStringToFileTypeId(QString sFileType);
     static QString fileTypeIdToFtString(FT fileType);
 
@@ -1231,6 +1232,7 @@ public:
     virtual QList<HREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<HREGION> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<HREGION> getHData(PDSTRUCT *pPdStruct = nullptr);
+    QList<HREGION> _getPhysRegions(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
     static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);
     static qint32 getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap);

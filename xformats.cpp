@@ -501,6 +501,17 @@ QList<XBinary::FPART> XFormats::getFileParts(XBinary::FT fileType, QIODevice *pD
 
     return listResult;
 }
+
+QString XFormats::getFileFormatExtsString(XBinary::FT fileType)
+{
+    QString sResult;
+
+    XBinary *pBinary = XFormats::getClass(fileType, nullptr);
+    sResult = pBinary->getFileFormatExtsString();
+    delete pBinary;
+
+    return sResult;
+}
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra)
 {
