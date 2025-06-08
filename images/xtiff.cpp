@@ -220,20 +220,13 @@ QList<XTiff::CHUNK> XTiff::getChunks(PDSTRUCT *pPdStruct)
     // 202 JPEGInterchangeFormatLngth LONG 1
     // 213 YCbCrPositioning 1
 
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     QList<XTiff::CHUNK> listResult;
 
     bool bIsBigEndian = isBigEndian();
 
     qint64 nTableOffset = read_uint32(4, bIsBigEndian);
 
-    while ((nTableOffset) && (!(pPdStruct->bIsStop))) {
+    while ((nTableOffset) && isPdStructNotCanceled(pPdStruct)) {
         quint16 nTableCount = read_uint16(nTableOffset, bIsBigEndian);
 
         qint64 nCurrentOffset = nTableOffset + sizeof(quint16);
