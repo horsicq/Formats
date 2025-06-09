@@ -5907,6 +5907,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'OTTO'00", 0) || compareSignature(&memoryMap, "0001000000", 0)) {
             stResult.insert(FT_TTF);
         } else if (compareSignature(&memoryMap, "'SZDD'88F027'3A'", 0)) {
+            stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_SZDD);
         } else {
             bAllFound = false;
