@@ -483,6 +483,7 @@ public:
     bool isProgramsTablePresent();
 
     virtual QString getFileFormatExt();
+    virtual QString getFileFormatExtsString();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
     struct FIXDUMP_OPTIONS {

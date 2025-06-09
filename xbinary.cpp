@@ -1087,8 +1087,6 @@ QString XBinary::fileTypeIdToString(XBinary::FT fileType)
 //     QString sResult = tr("Unknown");
 
 //     switch (fileType) {
-//         case FT_PE: sResult = QString("PE(exe, dll, sys)"); break;  // TODO Check, add more
-//         case FT_ELF: sResult = QString("ELF(elf, so)"); break;
 //         case FT_ZIP: sResult = QString("ZIP(zip, jar, apk, ipa, docx)"); break;
 //         case FT_RAR: sResult = QString("RAR"); break;
 //         case FT_PDF: sResult = QString("PDF"); break;

@@ -5420,6 +5420,11 @@ QString XELF::getFileFormatExt()
     return sResult;
 }
 
+QString XELF::getFileFormatExtsString()
+{
+    return QString("ELF(elf, so)");
+}
+
 qint64 XELF::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     qint64 nResult = 0;

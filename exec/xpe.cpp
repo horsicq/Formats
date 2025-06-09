@@ -238,6 +238,11 @@ QString XPE::getFileFormatExt()
     return sResult;
 }
 
+QString XPE::getFileFormatExtsString()
+{
+    return QString("PE(exe, dll, sys)");
+}
+
 qint64 XPE::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     return _calculateRawSize(pPdStruct);

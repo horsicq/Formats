@@ -346,6 +346,7 @@ public:
     virtual bool isSigned();
     virtual OFFSETSIZE getSignOffsetSize();
     virtual QString getFileFormatExt();
+    virtual QString getFileFormatExtsString();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
     virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
