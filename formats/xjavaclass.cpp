@@ -76,6 +76,11 @@ QString XJavaClass::getFileFormatExt()
     return "class";
 }
 
+QString XJavaClass::getFileFormatExtsString()
+{
+    return "Java Class (*.class)";
+}
+
 XJavaClass::INFO XJavaClass::getInfo(PDSTRUCT *pPdStruct)
 {
     INFO result = {};
@@ -348,17 +353,7 @@ XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
 
     result.listRecords.append(record);
 
-    if ((quint64)nTotalSize > info.nSize) {
-        record.nAddress = -1;
-        record.nOffset = info.nSize;
-        record.nSize = nTotalSize - info.nSize;
-        record.nIndex = 1;
-        record.sName = tr("Overlay");
-        record.nIndex = nIndex++;
-        record.type = MMT_OVERLAY;
-
-        result.listRecords.append(record);
-    }
+    _handleOverlay(&result);
 
     return result;
 }

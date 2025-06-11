@@ -1120,6 +1120,8 @@ public:
     static VT getValueType(quint64 nValue);
     static qint32 getBaseValueSize(VT valueType);
 
+    static bool isIntegerType(VT valueType);
+
     static QByteArray getUnicodeString(const QString &sString, bool bIsBigEndian);
     static QByteArray getStringData(VT valueType, const QString &sString, bool bAddNull);
 
@@ -1515,6 +1517,8 @@ public:
     static PACKED_UINT _read_packedNumber(char *pData, qint64 nSize);
 
     static QList<QString> getListFromFile(const QString &sFileName);
+
+    bool _handleOverlay(_MEMORY_MAP *pMemoryMap);
 
     qint64 getOverlaySize(PDSTRUCT *pPdStruct = nullptr);
     static qint64 getOverlaySize(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);

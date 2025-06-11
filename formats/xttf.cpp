@@ -150,15 +150,15 @@ QList<XBinary::MAPMODE> XTTF::getMapModesList()
 XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
-    _MEMORY_MAP memoryMap = {};
-    memoryMap.fileType = getFileType();
-    memoryMap.mode = getMode();
-    memoryMap.sArch = getArch();
-    memoryMap.endian = getEndian();
-    memoryMap.sType = typeIdToString(getType());
-    memoryMap.nImageSize = getSize();
-    memoryMap.nBinarySize = getSize();
-    memoryMap.nModuleAddress = getModuleAddress();
+    _MEMORY_MAP result = {};
+    result.fileType = getFileType();
+    result.mode = getMode();
+    result.sArch = getArch();
+    result.endian = getEndian();
+    result.sType = typeIdToString(getType());
+    result.nImageSize = getSize();
+    result.nBinarySize = getSize();
+    result.nModuleAddress = getModuleAddress();
 
     // TTF Header
     TTF_HEADER header = readHeader();
@@ -175,7 +175,7 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     memHeader.nSize = nHeaderSize;
     memHeader.type = MMT_HEADER;
     memHeader.sName = "Header";
-    memoryMap.listRecords.append(memHeader);
+    result.listRecords.append(memHeader);
 
     // Add Table Objects
     for (qint32 i = 0, nNumberOfTables = tableRecords.size(); (i < nNumberOfTables) && isPdStructNotCanceled(pPdStruct); i++) {
@@ -186,28 +186,12 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         rec.sName = tagToString(tableRecords.at(i).tag);
         rec.nIndex = i;
         rec.nAddress = -1;  // TTF tables do not have a specific address in memory
-        memoryMap.listRecords.append(rec);
+        result.listRecords.append(rec);
     }
 
-    // Add Overlay if present
-    qint64 nTablesEnd = nHeaderOffset + nHeaderSize;
-    qint64 nFileSize = getSize();
+    _handleOverlay(&result);
 
-    for (qint32 i = 0, nNumberOfTables = tableRecords.size(); i < nNumberOfTables; i++) {
-        qint64 nEnd = tableRecords.at(i).offset + tableRecords.at(i).length;
-        if (nEnd > nTablesEnd) nTablesEnd = nEnd;
-    }
-    if (nTablesEnd < nFileSize) {
-        _MEMORY_RECORD overlay = {};
-        overlay.nOffset = nTablesEnd;
-        overlay.nAddress = -1;
-        overlay.nSize = nFileSize - nTablesEnd;
-        overlay.type = MMT_OVERLAY;
-        overlay.sName = "Overlay";
-        memoryMap.listRecords.append(overlay);
-    }
-
-    return memoryMap;
+    return result;
 }
 
 QList<XBinary::HREGION> XTTF::getNativeRegions(PDSTRUCT *pPdStruct)

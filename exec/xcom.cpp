@@ -117,16 +117,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdS
         result.listRecords.append(record);
     }
 
-    if (nTotalSize > nCodeSize) {
-        _MEMORY_RECORD recordOverlay = {};
-        recordOverlay.nAddress = -1;
-        recordOverlay.nOffset = nCodeSize;
-        recordOverlay.nSize = nTotalSize - nCodeSize;
-        recordOverlay.nIndex++;
-        recordOverlay.type = MMT_OVERLAY;
-
-        result.listRecords.append(recordOverlay);
-    }
+    _handleOverlay(&result);
 
     return result;
 }

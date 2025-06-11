@@ -441,19 +441,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     //     nSegmentIndex++;
     // }
 
-    if (nOverlaySize) {
-        _MEMORY_RECORD record = {};
-        record.nSize = nOverlaySize;
-        record.nOffset = nOverlayOffset;
-        record.nAddress = -1;
-        record.sName = tr("Overlay");
-
-        record.segment = ADDRESS_SEGMENT_UNKNOWN;
-        record.type = MMT_OVERLAY;
-        record.nIndex = nIndex++;
-
-        result.listRecords.append(record);
-    }
+    _handleOverlay(&result);
 
     return result;
 }

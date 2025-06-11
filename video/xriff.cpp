@@ -73,6 +73,11 @@ QString XRiff::getFileFormatExt()
     return read_ansiString(12, 4).trimmed().toLower();
 }
 
+QString XRiff::getFileFormatExtsString()
+{
+    return "RIFF (*.riff *.wav *.avi *.aiff *.aifc *.aif *.aifx *.rmi *.rmf *.rmv)";  // TODO
+}
+
 qint64 XRiff::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     return _calculateRawSize(pPdStruct);
@@ -113,6 +118,8 @@ XBinary::_MEMORY_MAP XRiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
         result.listRecords.append(record);
     }
+
+    _handleOverlay(&result);
 
     return result;
 }

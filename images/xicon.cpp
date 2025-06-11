@@ -89,6 +89,11 @@ QString XIcon::getFileFormatExt()
     return sResult;
 }
 
+QString XIcon::getFileFormatExtsString()
+{
+    return QString("Icons, cursors (*.ico *.cur)");
+}
+
 qint64 XIcon::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     return _calculateRawSize(pPdStruct);
@@ -165,6 +170,8 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     if (bError) {
         result.listRecords.clear();
     }
+
+    _handleOverlay(&result);
 
     return result;
 }

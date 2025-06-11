@@ -163,6 +163,8 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
         result.nImageSize = nCurrentAddress - result.nModuleAddress;
     }
 
+    _handleOverlay(&result);
+
     return result;
 }
 
@@ -379,6 +381,11 @@ XBinary::FT XAmigaHunk::getFileType()
 QString XAmigaHunk::getFileFormatExt()
 {
     return "";
+}
+
+QString XAmigaHunk::getFileFormatExtsString()
+{
+    return "Amiga Hunk Files (*.hunk *.o *.library *.a)";
 }
 
 qint64 XAmigaHunk::getFileFormatSize(PDSTRUCT *pPdStruct)

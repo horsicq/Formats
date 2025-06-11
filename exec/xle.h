@@ -163,6 +163,8 @@ public:
     static QMap<quint64, QString> getImageLECpusS();
     static QMap<quint64, QString> getImageLEOssS();
     static QMap<quint64, QString> getImageLEMflagsS();
+
+    virtual QString getFileFormatExtsString();
 };
 
 #endif  // XLE_H

@@ -1385,19 +1385,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     result.nModuleAddress = getModuleAddress();
     result.nImageSize = nMaxAddress;
 
-    qint64 nOverlaySize = result.nBinarySize - nMaxOffset;
-
-    if (nOverlaySize > 0) {
-        _MEMORY_RECORD memoryRecord = {};
-
-        memoryRecord.nAddress = -1;
-        memoryRecord.nOffset = nMaxOffset;
-        memoryRecord.nSize = nOverlaySize;
-        memoryRecord.sName = tr("Overlay");
-        memoryRecord.type = MMT_OVERLAY;
-
-        result.listRecords.append(memoryRecord);
-    }
+    _handleOverlay(&result);
 
     return result;
 }
@@ -1566,4 +1554,9 @@ QMap<quint64, QString> XLE::getImageLEMflagsS()
     // TODO
 
     return mapResult;
+}
+
+QString XLE::getFileFormatExtsString()
+{
+    return "LE(vxd lx)";
 }

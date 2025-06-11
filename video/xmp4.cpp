@@ -56,6 +56,11 @@ QString XMP4::getFileFormatExt()
     return "mp4";
 }
 
+QString XMP4::getFileFormatExtsString()
+{
+    return "MP4";
+}
+
 qint64 XMP4::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     return _calculateRawSize(pPdStruct);
@@ -100,6 +105,8 @@ XBinary::_MEMORY_MAP XMP4::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
         nOffset += nChunkSize;
     }
+
+    _handleOverlay(&result);
 
     return result;
 }

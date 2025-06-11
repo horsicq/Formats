@@ -139,6 +139,8 @@ public:
     virtual OSNAME getOsName();
     virtual QString getOsVersion();
     virtual QString typeIdToString(qint32 nType);
+
+    virtual QString getFileFormatExtsString();
 };
 
 #endif  // XNE_H

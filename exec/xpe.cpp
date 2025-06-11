@@ -2053,41 +2053,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             }
         }
 
-        if (!isImage()) {
-            // Overlay;
-            _MEMORY_RECORD record = {};
-
-            record.type = MMT_OVERLAY;
-
-            record.nAddress = -1;
-            record.segment = ADDRESS_SEGMENT_UNKNOWN;
-            record.nOffset = nMaxOffset;
-
-            record.nSize = qMax(getSize() - nMaxOffset, (qint64)0);
-            record.sName = tr("Overlay");
-            record.nIndex = nIndex++;
-
-            if (record.nSize) {
-                result.listRecords.append(record);
-            }
-        } else {
-            // Overlay;
-            _MEMORY_RECORD record = {};
-
-            record.type = MMT_OVERLAY;
-
-            record.nAddress = result.nImageSize + result.nModuleAddress;
-            record.segment = ADDRESS_SEGMENT_FLAT;
-            record.nOffset = result.nImageSize;
-
-            record.nSize = qMax(getSize() - record.nOffset, (qint64)0);
-            record.sName = tr("Overlay");
-            record.nIndex = nIndex++;
-
-            if (record.nSize) {
-                result.listRecords.append(record);
-            }
-        }
+        _handleOverlay(&result);
     }
 
     return result;

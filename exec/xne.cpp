@@ -941,6 +941,8 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     //        result.listRecords.append(record);
     //    }
 
+    _handleOverlay(&result);
+
     return result;
 }
 
@@ -1106,4 +1108,9 @@ QString XNE::typeIdToString(qint32 nType)
     }
 
     return sResult;
+}
+
+QString XNE::getFileFormatExtsString()
+{
+    return QString("ne");
 }

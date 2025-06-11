@@ -1525,6 +1525,8 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     result.nImageSize = nMaxAddress - nMinAddress;
     result.nEntryPointAddress = getAddressOfEntryPoint(&result);
 
+    _handleOverlay(&result);
+
     return result;
 }
 
@@ -4661,6 +4663,11 @@ QString XMACH::getFileFormatExt()
     }
 
     return sResult;
+}
+
+QString XMACH::getFileFormatExtsString()
+{
+    return "macho, dylib, o, bundle";
 }
 
 qint64 XMACH::getFileFormatSize(PDSTRUCT *pPdStruct)

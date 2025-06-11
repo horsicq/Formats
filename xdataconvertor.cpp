@@ -20,7 +20,7 @@
  */
 #include "xdataconvertor.h"
 
-XDataConvertor::XDataConvertor(QObject *pParent) : QObject(pParent)
+XDataConvertor::XDataConvertor(QObject *pParent) : XThreadObject(pParent)
 {
     g_options = {};
 }

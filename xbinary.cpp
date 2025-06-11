@@ -202,6 +202,7 @@ XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
     {XBinary::VT_INT, "int"},
     {XBinary::VT_UINT, "uint"},
     {XBinary::VT_INT64, "int64"},
+    {XBinary::VT_UINT8, "uint8"},
     {XBinary::VT_UINT16, "uint16"},
     {XBinary::VT_UINT32, "uint32"},
     {XBinary::VT_UINT64, "uint64"},
@@ -917,6 +918,10 @@ QString XBinary::getFileFormatExt()
 
 QString XBinary::getFileFormatExtsString()
 {
+#ifdef QT_DEBUG
+    qDebug("TODO: XBinary::getFileFormatExtsString()");
+#endif
+
     return tr("Unknown");
 }
 
@@ -3829,7 +3834,7 @@ QString XBinary::getValueString(QVariant varValue, VT valueType, bool bTypesAsHe
         sResult = valueToHex((quint64)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_CHAR) {
         sResult = QString("%1").arg((qint8)(varValue.toULongLong()));
-    } else if (valueType == XBinary::VT_UCHAR) {
+    } else if ((valueType == XBinary::VT_UCHAR) || (valueType == XBinary::VT_UINT8)) {
         sResult = QString("%1").arg((quint8)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_SHORT) {
         sResult = QString("%1").arg((qint16)(varValue.toULongLong()));
@@ -3886,7 +3891,7 @@ qint32 XBinary::getBaseValueSize(VT valueType)
 {
     qint32 nResult = 1;
 
-    if (valueType == XBinary::VT_BYTE) {
+    if ((valueType == XBinary::VT_BYTE) || (valueType == XBinary::VT_UINT8)) {
         nResult = 1;
     } else if (valueType == XBinary::VT_WORD) {
         nResult = 2;
@@ -3917,6 +3922,21 @@ qint32 XBinary::getBaseValueSize(VT valueType)
     }
 
     return nResult;
+}
+
+bool XBinary::isIntegerType(VT valueType)
+{
+    bool bResult = false;
+
+    if ((valueType == XBinary::VT_BYTE) || (valueType == XBinary::VT_UINT8) || (valueType == XBinary::VT_WORD) ||
+        (valueType == XBinary::VT_DWORD) || (valueType == XBinary::VT_QWORD) || (valueType == XBinary::VT_CHAR) ||
+        (valueType == XBinary::VT_UCHAR) || (valueType == XBinary::VT_SHORT) || (valueType == XBinary::VT_USHORT) ||
+        (valueType == XBinary::VT_INT) || (valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32) ||
+        (valueType == XBinary::VT_INT64) || (valueType == XBinary::VT_UINT64)) {
+        bResult = true;
+    }
+
+    return bResult;
 }
 
 XBinary::VT XBinary::getValueType(quint64 nValue)
@@ -8905,6 +8925,46 @@ QList<QString> XBinary::getListFromFile(const QString &sFileName)
     }
 
     return listResult;
+}
+
+bool XBinary::_handleOverlay(_MEMORY_MAP *pMemoryMap)
+{
+    bool bResult = false;
+
+    qint64 nTotalSize = pMemoryMap->nBinarySize;
+
+    // get maxmimal offset
+    qint64 nMaxOffset = 0;
+    qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize > nMaxOffset) {
+            nMaxOffset = pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize;
+        }
+    }
+
+    if (nTotalSize - nMaxOffset > 0) {
+        // overlay present
+        qint64 nOverlayOffset = nMaxOffset;
+        qint64 nOverlaySize = nTotalSize - nOverlayOffset;
+
+        _MEMORY_RECORD record = {};
+        record.nOffset = nOverlayOffset;
+        record.nSize = nOverlaySize;
+        record.sName = tr("Overlay");
+        record.type = MMT_OVERLAY;
+        record.nAddress = -1;  // TODO
+        record.nID = 0;  // TODO
+        record.bIsVirtual = false;
+        record.bIsInvisible = false;
+        record.nIndex = pMemoryMap->listRecords.count();
+
+        pMemoryMap->listRecords.append(record);
+
+        bResult = true;
+    }
+
+    return bResult;
 }
 
 qint64 XBinary::getOverlaySize(PDSTRUCT *pPdStruct)

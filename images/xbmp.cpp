@@ -98,20 +98,25 @@ QString XBMP::getFileFormatExt()
     return "bmp";
 }
 
+QString XBMP::getFileFormatExtsString()
+{
+    return "BMP (*.bmp)";
+}
+
 XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
-    _MEMORY_MAP memoryMap = {};
-    memoryMap.fileType = getFileType();
-    memoryMap.mode = getMode();
-    memoryMap.sArch = getArch();
-    memoryMap.endian = getEndian();
-    memoryMap.sType = typeIdToString(getType());
-    memoryMap.nBinarySize = getSize();
-    memoryMap.nImageSize = getSize();
-    memoryMap.nModuleAddress = getModuleAddress();
-    memoryMap.bIsImage = false;
+    _MEMORY_MAP result = {};
+    result.fileType = getFileType();
+    result.mode = getMode();
+    result.sArch = getArch();
+    result.endian = getEndian();
+    result.sType = typeIdToString(getType());
+    result.nBinarySize = getSize();
+    result.nImageSize = getSize();
+    result.nModuleAddress = getModuleAddress();
+    result.bIsImage = false;
 
     BMPFILEHEADER fileHeader = getFileHeader();
     BMPINFOHEADER infoHeader = getInfoHeader();
@@ -128,7 +133,7 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     headerRecord.bIsVirtual = false;
     headerRecord.bIsInvisible = false;
     headerRecord.nID = 0;
-    memoryMap.listRecords.append(headerRecord);
+    result.listRecords.append(headerRecord);
 
     // Add Bitmap Data (Object)
     _MEMORY_RECORD objectRecord = {};
@@ -141,26 +146,11 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     objectRecord.nIndex = 1;
     objectRecord.bIsVirtual = false;
     objectRecord.bIsInvisible = false;
-    memoryMap.listRecords.append(objectRecord);
+    result.listRecords.append(objectRecord);
 
-    // Add Overlay if present
-    if (fileHeader.bfSize < getSize()) {
-        _MEMORY_RECORD overlayRecord = {};
-        overlayRecord.nOffset = fileHeader.bfSize;
-        overlayRecord.nAddress = -1;
-        overlayRecord.segment = ADDRESS_SEGMENT_FLAT;
-        overlayRecord.nSize = getSize() - fileHeader.bfSize;
-        ;
-        overlayRecord.type = MMT_OVERLAY;
-        overlayRecord.nLoadSectionNumber = -1;
-        overlayRecord.sName = "Overlay";
-        overlayRecord.nIndex = 2;
-        overlayRecord.bIsVirtual = false;
-        overlayRecord.bIsInvisible = false;
-        memoryMap.listRecords.append(overlayRecord);
-    }
+    _handleOverlay(&result);
 
-    return memoryMap;
+    return result;
 }
 
 QString XBMP::getVersion()

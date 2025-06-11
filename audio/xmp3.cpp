@@ -57,6 +57,11 @@ QString XMP3::getFileFormatExt()
     return "mp3";
 }
 
+QString XMP3::getFileFormatExtsString()
+{
+    return "MP3";
+}
+
 qint64 XMP3::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     return _calculateRawSize(pPdStruct);
@@ -119,6 +124,8 @@ XBinary::_MEMORY_MAP XMP3::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
         // TODO TAG
     }
+
+    _handleOverlay(&result);
 
     return result;
 }

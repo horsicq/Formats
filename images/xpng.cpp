@@ -69,6 +69,11 @@ QString XPNG::getFileFormatExt()
     return "png";
 }
 
+QString XPNG::getFileFormatExtsString()
+{
+    return "PNG (*.png)";
+}
+
 qint64 XPNG::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
@@ -144,6 +149,8 @@ XBinary::_MEMORY_MAP XPNG::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             break;
         }
     }
+
+    _handleOverlay(&result);
 
     return result;
 }

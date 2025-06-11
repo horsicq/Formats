@@ -56,6 +56,11 @@ QString XGif::getFileFormatExt()
     return "gif";
 }
 
+QString XGif::getFileFormatExtsString()
+{
+    return "gif";
+}
+
 qint64 XGif::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)

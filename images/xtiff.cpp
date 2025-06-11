@@ -154,6 +154,8 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         }
     }
 
+    _handleOverlay(&result);
+
     return result;
 }
 
@@ -165,6 +167,11 @@ XBinary::FT XTiff::getFileType()
 QString XTiff::getFileFormatExt()
 {
     return "tiff";
+}
+
+QString XTiff::getFileFormatExtsString()
+{
+    return "TIFF (*.tiff *.tif)";
 }
 
 qint64 XTiff::getFileFormatSize(PDSTRUCT *pPdStruct)

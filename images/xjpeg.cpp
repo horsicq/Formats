@@ -88,6 +88,8 @@ XBinary::_MEMORY_MAP XJpeg::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         result.listRecords.append(record);
     }
 
+    _handleOverlay(&result);
+
     return result;
 }
 
@@ -99,6 +101,11 @@ XBinary::FT XJpeg::getFileType()
 QString XJpeg::getFileFormatExt()
 {
     return "jpeg";
+}
+
+QString XJpeg::getFileFormatExtsString()
+{
+    return "JPEG (*.jpeg *.jpg)";
 }
 
 qint64 XJpeg::getFileFormatSize(PDSTRUCT *pPdStruct)

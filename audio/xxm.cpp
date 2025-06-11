@@ -276,24 +276,11 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         }
     }
 
-    // Overlay (if present)
-    qint64 nMaxOffset = nOffset;
-    if (nMaxOffset < getSize()) {
-        _MEMORY_RECORD rec = {};
-        rec.nAddress = -1;
-        rec.segment = ADDRESS_SEGMENT_FLAT;
-        rec.nOffset = nMaxOffset;
-        rec.nSize = getSize() - nMaxOffset;
-        rec.type = MMT_OVERLAY;
-        rec.nIndex = nIndex++;
-        rec.sName = tr("Overlay");
-        memoryMap.listRecords.append(rec);
-    }
-
     memoryMap.nBinarySize = getSize();
-    memoryMap.nImageSize = getSize();
-    memoryMap.nModuleAddress = -1;
-    memoryMap.nEntryPointAddress = -1;
+    memoryMap.nModuleAddress = 0;
+    memoryMap.nEntryPointAddress = 0;
+
+    _handleOverlay(&memoryMap);
 
     return memoryMap;
 }

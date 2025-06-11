@@ -97,6 +97,7 @@ public:
     virtual FT getFileType();
     virtual QString getVersion();
     virtual QString getFileFormatExt();
+    virtual QString getFileFormatExtsString();
 
     INFO getInfo(PDSTRUCT *pPdStruct = nullptr);
 

@@ -22,8 +22,9 @@
 #define XDATACONVERTOR_H
 
 #include "xbinary.h"
+#include "xthreadobject.h"
 
-class XDataConvertor : public QObject {
+class XDataConvertor : public XThreadObject {
     Q_OBJECT
 
 public:
@@ -58,13 +59,7 @@ public:
 
     explicit XDataConvertor(QObject *pParent = nullptr);
     void setData(QIODevice *pDeviceIn, DATA *pData, CMETHOD method, const OPTIONS &options, XBinary::PDSTRUCT *pPdStruct);
-
-public slots:
     void process();
-
-signals:
-    void errorMessage(const QString &sText);
-    void completed(qint64 nElapsed);
 
 private:
     QIODevice *g_pDeviceIn;
