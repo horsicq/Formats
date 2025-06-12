@@ -84,6 +84,7 @@ XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_ENTROPY, "entropy", QObject::tr("Entropy")},
     {XBinary::STRUCTID_EXTRACTOR, "extractor", QObject::tr("Extractor")},
     {XBinary::STRUCTID_SEARCH, "search", QObject::tr("Search")},
+    {XBinary::STRUCTID_OVERLAY, "overlay", QObject::tr("Overlay")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -443,7 +444,7 @@ XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDST
             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
             pListHeaders->append(dhGeneric);
         }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+        if (isExecutable() && XBinary::isPdStructNotCanceled(pPdStruct)) {
             dhGeneric.dsID.nID = STRUCTID_DISASM;
             dhGeneric.dsID.sGUID = generateUUID();
             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
@@ -499,6 +500,12 @@ XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDST
         }
         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
             dhGeneric.dsID.nID = STRUCTID_SEARCH;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (isOverlayPresent()) {
+            dhGeneric.dsID.nID = STRUCTID_OVERLAY;
             dhGeneric.dsID.sGUID = generateUUID();
             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
             pListHeaders->append(dhGeneric);
@@ -640,6 +647,7 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     setOsType(OSNAME_UNKNOWN);
     setOsVersion("");
     setMultiSearchCallbackState(false);
+    setIsExecutable(false);
 
     if (pDevice) {
         // qDebug("%s",XBinary::valueToHex((quint64)pDevice).toLatin1().data());
@@ -1002,6 +1010,11 @@ void XBinary::setEndian(ENDIAN endian)
     g_endian = endian;
 }
 
+bool XBinary::setIsExecutable(bool bIsExecutable)
+{
+    return g_bIsExecutable;
+}
+
 XBinary::ENDIAN XBinary::getEndian()
 {
     return g_endian;
@@ -1010,6 +1023,11 @@ XBinary::ENDIAN XBinary::getEndian()
 bool XBinary::isPacked(double dEntropy)
 {
     return (dEntropy >= D_ENTROPY_THRESHOLD);  // TODO Check
+}
+
+bool XBinary::isExecutable()
+{
+    return g_bIsExecutable;
 }
 
 quint8 XBinary::random8()
@@ -3891,7 +3909,7 @@ qint32 XBinary::getBaseValueSize(VT valueType)
 {
     qint32 nResult = 1;
 
-    if ((valueType == XBinary::VT_BYTE) || (valueType == XBinary::VT_UINT8)) {
+    if ((valueType == XBinary::VT_BYTE) || (valueType == XBinary::VT_INT8) || (valueType == XBinary::VT_UINT8)) {
         nResult = 1;
     } else if (valueType == XBinary::VT_WORD) {
         nResult = 2;
@@ -3907,13 +3925,13 @@ qint32 XBinary::getBaseValueSize(VT valueType)
         nResult = 2;
     } else if (valueType == XBinary::VT_USHORT) {
         nResult = 2;
+    } else if ((valueType == XBinary::VT_INT16) || (valueType == XBinary::VT_UINT16)) {
+        nResult = 2;
     } else if (valueType == XBinary::VT_INT) {
         nResult = 4;
     } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32)) {
         nResult = 4;
-    } else if (valueType == XBinary::VT_INT64) {
-        nResult = 8;
-    } else if (valueType == XBinary::VT_UINT64) {
+    } else if ((valueType == XBinary::VT_INT64) || (valueType == XBinary::VT_UINT64)) {
         nResult = 8;
     } else if (valueType == XBinary::VT_FLOAT) {
         nResult = 4;
@@ -3928,11 +3946,24 @@ bool XBinary::isIntegerType(VT valueType)
 {
     bool bResult = false;
 
-    if ((valueType == XBinary::VT_BYTE) || (valueType == XBinary::VT_UINT8) || (valueType == XBinary::VT_WORD) ||
-        (valueType == XBinary::VT_DWORD) || (valueType == XBinary::VT_QWORD) || (valueType == XBinary::VT_CHAR) ||
-        (valueType == XBinary::VT_UCHAR) || (valueType == XBinary::VT_SHORT) || (valueType == XBinary::VT_USHORT) ||
-        (valueType == XBinary::VT_INT) || (valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32) ||
-        (valueType == XBinary::VT_INT64) || (valueType == XBinary::VT_UINT64)) {
+    if (    (valueType == XBinary::VT_BYTE) ||
+            (valueType == XBinary::VT_WORD) ||
+            (valueType == XBinary::VT_DWORD) ||
+            (valueType == XBinary::VT_QWORD) ||
+            (valueType == XBinary::VT_CHAR) ||
+            (valueType == XBinary::VT_SHORT) ||
+            (valueType == XBinary::VT_UCHAR) ||
+            (valueType == XBinary::VT_USHORT) ||
+            (valueType == XBinary::VT_INT) ||
+            (valueType == XBinary::VT_INT8) ||
+            (valueType == XBinary::VT_INT16) ||
+            (valueType == XBinary::VT_INT32) ||
+            (valueType == XBinary::VT_INT64) ||
+            (valueType == XBinary::VT_UINT) ||
+            (valueType == XBinary::VT_UINT8) ||
+            (valueType == XBinary::VT_UINT16) ||
+            (valueType == XBinary::VT_UINT32) ||
+            (valueType == XBinary::VT_UINT64)) {
         bResult = true;
     }
 
@@ -5805,16 +5836,37 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     }
 
     if ((!bAllFound) && (nSize >= (qint64)sizeof(XMACH_DEF::mach_header))) {
-        if ((_read_uint32(pOffset) == XMACH_DEF::S_MH_MAGIC) || (_read_uint32(pOffset) == XMACH_DEF::S_MH_CIGAM)) {
-            stResult.insert(FT_MACHO);
-            stResult.insert(FT_MACHO32);
+        bool bMach = false;
+        bool bBE = false;
+        bool b64 = false;
+        if (_read_uint32(pOffset) == XMACH_DEF::S_MH_MAGIC) {
+            bMach = true;
+            bBE = false;
+            b64 = false;
+        } else if (_read_uint32(pOffset) == XMACH_DEF::S_MH_CIGAM) {
+            bMach = true;
+            bBE = true;
+            b64 = false;
+        } else if (_read_uint32(pOffset) == XMACH_DEF::S_MH_MAGIC_64) {
+            bMach = true;
+            bBE = false;
+            b64 = true;
+        } else if (_read_uint32(pOffset) == XMACH_DEF::S_MH_CIGAM_64) {
+            bMach = true;
+            bBE = true;
+            b64 = true;
+        }
 
-            bAllFound = true;
-        } else if ((_read_uint32(pOffset) == XMACH_DEF::S_MH_MAGIC_64) || (_read_uint32(pOffset) == XMACH_DEF::S_MH_CIGAM_64)) {
-            stResult.insert(FT_MACHO);
-            stResult.insert(FT_MACHO64);
-
-            bAllFound = true;
+        if (bMach) {
+            if (_read_uint32(pOffset + 0x0C, bBE) < 20) {
+                stResult.insert(FT_MACHO);
+                if (b64) {
+                    stResult.insert(FT_MACHO64);
+                } else {
+                    stResult.insert(FT_MACHO32);
+                }
+                bAllFound = true;
+            }
         }
     }
 
@@ -6230,6 +6282,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_ZLIB)) listResult.append(FT_ZLIB);
         if (stFileTypes.contains(FT_LHA)) listResult.append(FT_LHA);
         if (stFileTypes.contains(FT_RAR)) listResult.append(FT_RAR);
+        if (stFileTypes.contains(FT_CAB)) listResult.append(FT_CAB);
         if (stFileTypes.contains(FT_JAR)) listResult.append(FT_JAR);
         if (stFileTypes.contains(FT_APK)) listResult.append(FT_APK);
         if (stFileTypes.contains(FT_IPA)) listResult.append(FT_IPA);

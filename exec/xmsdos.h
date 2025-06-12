@@ -45,6 +45,8 @@ public:
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
+    virtual bool isExecutable();
+
     quint16 get_magic();
     qint32 get_lfanew();
 

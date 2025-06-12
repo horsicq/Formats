@@ -45,6 +45,11 @@ bool XELF::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
+bool XELF::isExecutable()
+{
+    return true;
+}
+
 bool XELF::isValid(QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
 {
     XELF xelf(pDevice, bIsImage, nModuleAddress);

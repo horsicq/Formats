@@ -50,6 +50,11 @@ bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     return xcom.isValid();
 }
 
+bool XCOM::isExecutable()
+{
+    return true;
+}
+
 XBinary::MODE XCOM::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     XCOM xcom(pDevice, bIsImage, nModuleAddress);

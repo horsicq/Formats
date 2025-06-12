@@ -144,7 +144,8 @@ public:
         STRUCTID_SYMBOLS,
         STRUCTID_ENTROPY,
         STRUCTID_EXTRACTOR,
-        STRUCTID_SEARCH
+        STRUCTID_SEARCH,
+        STRUCTID_OVERLAY
     };
 
     struct DATASET {
@@ -867,6 +868,7 @@ public:
     virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
 
     void setEndian(ENDIAN endian);
+    bool setIsExecutable(bool bIsExecutable);
 
     virtual FT getFileType();
     virtual MODE getMode();
@@ -882,6 +884,7 @@ public:
     virtual OSNAME getOsName();
 
     bool isPacked(double dEntropy);
+    virtual bool isExecutable();
 
     static quint8 random8();
     static quint16 random16();
@@ -1086,6 +1089,12 @@ public:
     enum SF {
         SF_BEGIN = 0,
         SF_CURRENTOFFSET
+    };
+
+    enum SEARCHMODE {
+        SEARCHMODE_STRING = 0,
+        SEARCHMODE_SIGNATURE,
+        SEARCHMODE_VALUE
     };
 
     struct SEARCHDATA {
@@ -1870,6 +1879,7 @@ private:
     FT g_fileType;
     bool g_bMultiSearchCallback;
     qint64 g_nSize;
+    bool g_bIsExecutable;
 };
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b);

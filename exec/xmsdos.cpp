@@ -45,6 +45,11 @@ bool XMSDOS::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     return xmsdos.isValid();
 }
 
+bool XMSDOS::isExecutable()
+{
+    return true;
+}
+
 XBinary::MODE XMSDOS::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     XMSDOS xmsdos(pDevice, bIsImage, nModuleAddress);

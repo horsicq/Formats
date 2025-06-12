@@ -256,12 +256,13 @@ QList<XBinary::HREGION> EXAMPLE_CLASS::getNativeRegions(PDSTRUCT *pPdStruct)
 XBinary::_MEMORY_MAP EXAMPLE_CLASS::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     // Return the memory map based on the specified mode
-    _MEMORY_MAP memoryMap = {};
-    memoryMap.fileType = getFileType();
-    memoryMap.mode = getMode();
-    memoryMap.sArch = getArch();
-    memoryMap.endian = getEndian();
-    memoryMap.sType = typeIdToString(getType());
+    _MEMORY_MAP result = {};
+    result.fileType = getFileType();
+    result.nBinarySize = getSize();
+    result.mode = getMode();
+    result.sArch = getArch();
+    result.endian = getEndian();
+    result.sType = typeIdToString(getType());
 
     qint32 nIndex = 0;
 
@@ -274,11 +275,11 @@ XBinary::_MEMORY_MAP EXAMPLE_CLASS::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdS
     recordHeader.type = MMT_HEADER;
     recordHeader.sName = tr("Header");
 
-    memoryMap.listRecords.append(recordHeader);
+    result.listRecords.append(recordHeader);
     // Populate other fields as needed
     // ...
 
-    return memoryMap;  // Replace with actual implementation
+    return result;  // Replace with actual implementation
 }
 
 XBinary::OSNAME EXAMPLE_CLASS::getOsName()

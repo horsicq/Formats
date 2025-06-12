@@ -81,6 +81,8 @@ public:
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     virtual ENDIAN getEndian();
 
+    virtual bool isExecutable();
+
     qint64 getEhdrOffset();
     qint64 getEhdr32Size();
     qint64 getEhdr64Size();
