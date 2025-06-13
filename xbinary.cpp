@@ -648,6 +648,7 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     setOsVersion("");
     setMultiSearchCallbackState(false);
     setIsExecutable(false);
+    setIsArchive(false);
 
     if (pDevice) {
         // qDebug("%s",XBinary::valueToHex((quint64)pDevice).toLatin1().data());
@@ -1010,9 +1011,14 @@ void XBinary::setEndian(ENDIAN endian)
     g_endian = endian;
 }
 
-bool XBinary::setIsExecutable(bool bIsExecutable)
+void XBinary::setIsExecutable(bool bIsExecutable)
 {
-    return g_bIsExecutable;
+    g_bIsExecutable = bIsExecutable;
+}
+
+void XBinary::setIsArchive(bool bIsArchive)
+{
+    g_bIsArchive = bIsArchive;
 }
 
 XBinary::ENDIAN XBinary::getEndian()
@@ -1028,6 +1034,11 @@ bool XBinary::isPacked(double dEntropy)
 bool XBinary::isExecutable()
 {
     return g_bIsExecutable;
+}
+
+bool XBinary::isArchive()
+{
+    return g_bIsArchive;
 }
 
 quint8 XBinary::random8()
@@ -5898,7 +5909,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                    compareSignature(&memoryMap, "78DA")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_ZLIB);
-        } else if (compareSignature(&memoryMap, "....'-lh'..2d") || compareSignature(&memoryMap, "....'-lz'..2d")) {
+        } else if (compareSignature(&memoryMap, "....'-lh'..2d") || compareSignature(&memoryMap, "....'-lz'..2d") || compareSignature(&memoryMap, "....'-pm'..2d")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_LHA);
         } else if (compareSignature(&memoryMap, "'!<arch>'0a")) {

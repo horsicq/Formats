@@ -868,7 +868,8 @@ public:
     virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
 
     void setEndian(ENDIAN endian);
-    bool setIsExecutable(bool bIsExecutable);
+    void setIsExecutable(bool bIsExecutable);
+    void setIsArchive(bool bIsArchive);
 
     virtual FT getFileType();
     virtual MODE getMode();
@@ -885,6 +886,7 @@ public:
 
     bool isPacked(double dEntropy);
     virtual bool isExecutable();
+    virtual bool isArchive();
 
     static quint8 random8();
     static quint16 random16();
@@ -1880,6 +1882,7 @@ private:
     bool g_bMultiSearchCallback;
     qint64 g_nSize;
     bool g_bIsExecutable;
+    bool g_bIsArchive;
 };
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b);

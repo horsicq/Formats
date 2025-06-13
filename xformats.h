@@ -97,6 +97,8 @@ public:
                                               XBinary::PDSTRUCT *pPdStruct = nullptr);
 
     static QString getFileFormatExtsString(XBinary::FT fileType);
+    static bool isArchive(XBinary::FT fileType);
+    static bool isExecutable(XBinary::FT fileType);
 
 #ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra = false);

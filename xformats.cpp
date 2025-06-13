@@ -515,6 +515,28 @@ QString XFormats::getFileFormatExtsString(XBinary::FT fileType)
 
     return sResult;
 }
+
+bool XFormats::isArchive(XBinary::FT fileType)
+{
+    bool bResult = false;
+
+    XBinary *pBinary = XFormats::getClass(fileType, nullptr);
+    bResult = pBinary->isArchive();
+    delete pBinary;
+
+    return bResult;
+}
+
+bool XFormats::isExecutable(XBinary::FT fileType)
+{
+    bool bResult = false;
+
+    XBinary *pBinary = XFormats::getClass(fileType, nullptr);
+    bResult = pBinary->isExecutable();
+    delete pBinary;
+
+    return bResult;
+}
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra)
 {
