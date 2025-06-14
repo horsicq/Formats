@@ -171,6 +171,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_TTF, "TTF", QString("TTF")},
     {XBinary::FT_CFBF, "CFBF", QString("CFBF")},
     {XBinary::FT_SZDD, "SZDD", QString("SZDD")},
+    {XBinary::FT_BZIP2, "BZip2", QString("BZip2")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -5990,6 +5991,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'SZDD'88F027'3A'", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_SZDD);
+        } else if (compareSignature(&memoryMap, "'BZh'..314159265359", 0) || compareSignature(&memoryMap, "'BZh'..17724538509000000000")) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_BZIP2);
         } else {
             bAllFound = false;
         }
@@ -6209,6 +6213,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_CFBF;
     } else if (pStFileTypes->contains(FT_SZDD)) {
         result = FT_SZDD;
+    } else if (pStFileTypes->contains(FT_BZIP2)) {
+        result = FT_BZIP2;
     } else if (pStFileTypes->contains(FT_TTF)) {
         result = FT_TTF;
     } else if (pStFileTypes->contains(FT_DATA)) {
@@ -6323,6 +6329,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_TTF)) listResult.append(FT_TTF);
         if (stFileTypes.contains(FT_CFBF)) listResult.append(FT_CFBF);
         if (stFileTypes.contains(FT_SZDD)) listResult.append(FT_SZDD);
+        if (stFileTypes.contains(FT_BZIP2)) listResult.append(FT_BZIP2);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
@@ -11807,7 +11814,10 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
 
                 switch (pListSignatureRecords->at(i).nSizeOfAddr) {
                     case 1: nValue = 1 + read_int8(nOffset); break;
-                    case 2: nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
+                    case 2:
+                        nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap));
+                        nValue &= 0xFFFF;
+                        break;
                     case 4: nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap)); break;
                     case 8: nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap)); break;
                 }

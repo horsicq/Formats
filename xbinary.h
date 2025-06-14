@@ -318,6 +318,7 @@ public:
         FT_CFBF,
         FT_TTF,
         FT_SZDD,
+        FT_BZIP2
         // TODO more
     };
 
