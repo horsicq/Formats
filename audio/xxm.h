@@ -24,8 +24,7 @@
 #include <QObject>
 #include "xbinary.h"
 
-class XXM : public XBinary
-{
+class XXM : public XBinary {
     Q_OBJECT
 public:
     enum STRUCTID {
@@ -41,8 +40,7 @@ public:
     };
 
 #pragma pack(push, 1)
-    struct HEADER
-    {
+    struct HEADER {
         char id_text[17];           // 'Extended Module: '
         char module_name[20];       // Module name, zero padded
         quint8 ctrl_byte_1a;        // Always $1A
@@ -60,26 +58,23 @@ public:
         quint8 pattern_order[256];  // Pattern order table
     };
 
-    struct PATTERN_HEADER
-    {
+    struct PATTERN_HEADER {
         quint32 header_length;
-        quint8 packing_type;    // always 0
-        quint16 num_rows;       // 1..256
+        quint8 packing_type;  // always 0
+        quint16 num_rows;     // 1..256
         quint16 packed_data_size;
         // ... pattern data follows
     };
 
-    struct INSTRUMENT_HEADER
-    {
+    struct INSTRUMENT_HEADER {
         quint32 instrument_header_size;
         char instrument_name[22];
-        quint8 instrument_type;    // always 0, but may be random
+        quint8 instrument_type;  // always 0, but may be random
         quint16 num_samples;
         // If num_samples > 0, extra header follows
     };
 
-    struct INSTRUMENT_EXTRA_HEADER
-    {
+    struct INSTRUMENT_EXTRA_HEADER {
         quint32 sample_header_size;
         quint8 sample_number_for_notes[96];
         quint8 volume_envelope_points[48];
@@ -102,14 +97,13 @@ public:
         quint16 reserved;
     };
 
-    struct SAMPLE_HEADER
-    {
+    struct SAMPLE_HEADER {
         quint32 sample_length;
         quint32 loop_start;
         quint32 loop_length;
         quint8 volume;
         qint8 finetune;
-        quint8 type; // bits: 0-1 loop type, 4 = 16bit sample data
+        quint8 type;  // bits: 0-1 loop type, 4 = 16bit sample data
         quint8 panning;
         qint8 relative_note_number;
         quint8 reserved;
@@ -145,7 +139,8 @@ public:
 
     virtual QString structIDToString(quint32 nID);
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
-    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
+    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues,
+                                PDSTRUCT *pPdStruct);
 
     HEADER _read_HEADER(qint64 nOffset);
     PATTERN_HEADER _read_PATTERN_HEADER(qint64 nOffset);
@@ -156,4 +151,4 @@ public:
     // Add more as needed
 };
 
-#endif // XXM_H
+#endif  // XXM_H

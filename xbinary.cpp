@@ -3958,24 +3958,11 @@ bool XBinary::isIntegerType(VT valueType)
 {
     bool bResult = false;
 
-    if (    (valueType == XBinary::VT_BYTE) ||
-            (valueType == XBinary::VT_WORD) ||
-            (valueType == XBinary::VT_DWORD) ||
-            (valueType == XBinary::VT_QWORD) ||
-            (valueType == XBinary::VT_CHAR) ||
-            (valueType == XBinary::VT_SHORT) ||
-            (valueType == XBinary::VT_UCHAR) ||
-            (valueType == XBinary::VT_USHORT) ||
-            (valueType == XBinary::VT_INT) ||
-            (valueType == XBinary::VT_INT8) ||
-            (valueType == XBinary::VT_INT16) ||
-            (valueType == XBinary::VT_INT32) ||
-            (valueType == XBinary::VT_INT64) ||
-            (valueType == XBinary::VT_UINT) ||
-            (valueType == XBinary::VT_UINT8) ||
-            (valueType == XBinary::VT_UINT16) ||
-            (valueType == XBinary::VT_UINT32) ||
-            (valueType == XBinary::VT_UINT64)) {
+    if ((valueType == XBinary::VT_BYTE) || (valueType == XBinary::VT_WORD) || (valueType == XBinary::VT_DWORD) || (valueType == XBinary::VT_QWORD) ||
+        (valueType == XBinary::VT_CHAR) || (valueType == XBinary::VT_SHORT) || (valueType == XBinary::VT_UCHAR) || (valueType == XBinary::VT_USHORT) ||
+        (valueType == XBinary::VT_INT) || (valueType == XBinary::VT_INT8) || (valueType == XBinary::VT_INT16) || (valueType == XBinary::VT_INT32) ||
+        (valueType == XBinary::VT_INT64) || (valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT8) || (valueType == XBinary::VT_UINT16) ||
+        (valueType == XBinary::VT_UINT32) || (valueType == XBinary::VT_UINT64)) {
         bResult = true;
     }
 
@@ -9025,7 +9012,7 @@ bool XBinary::_handleOverlay(_MEMORY_MAP *pMemoryMap)
         record.sName = tr("Overlay");
         record.type = MMT_OVERLAY;
         record.nAddress = -1;  // TODO
-        record.nID = 0;  // TODO
+        record.nID = 0;        // TODO
         record.bIsVirtual = false;
         record.bIsInvisible = false;
         record.nIndex = pMemoryMap->listRecords.count();

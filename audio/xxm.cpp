@@ -370,66 +370,112 @@ QList<XXM::DATA_HEADER> XXM::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHead
             if (dataHeadersOptions.nID == STRUCTID_HEADER) {
                 dataHeader.nSize = sizeof(HEADER);
                 dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, id_text), 17, "id_text", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, module_name), 20, "module_name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, ctrl_byte_1a), 1, "ctrl_byte_1a", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, tracker_name), 20, "tracker_name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(HEADER, module_name), 20, "module_name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(HEADER, ctrl_byte_1a), 1, "ctrl_byte_1a", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(HEADER, tracker_name), 20, "tracker_name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, version), 2, "version", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, header_size), 4, "header_size", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, song_length), 2, "song_length", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, song_restart), 2, "song_restart", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(HEADER, header_size), 4, "header_size", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(HEADER, song_length), 2, "song_length", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(HEADER, song_restart), 2, "song_restart", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, channels), 2, "channels", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, num_patterns), 2, "num_patterns", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, num_instruments), 2, "num_instruments", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(HEADER, num_patterns), 2, "num_patterns", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(HEADER, num_instruments), 2, "num_instruments", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, flags), 2, "flags", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, default_tempo), 2, "default_tempo", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, default_bpm), 2, "default_bpm", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, pattern_order), 256, "pattern_order", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(HEADER, default_tempo), 2, "default_tempo", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(HEADER, default_bpm), 2, "default_bpm", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(HEADER, pattern_order), 256, "pattern_order", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
             } else if (dataHeadersOptions.nID == STRUCTID_PATTERN_HEADER) {
                 dataHeader.nSize = sizeof(PATTERN_HEADER);
-                dataHeader.listRecords.append(getDataRecord(offsetof(PATTERN_HEADER, header_length), 4, "header_length", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(PATTERN_HEADER, packing_type), 1, "packing_type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(PATTERN_HEADER, num_rows), 2, "num_rows", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(PATTERN_HEADER, packed_data_size), 2, "packed_data_size", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(PATTERN_HEADER, header_length), 4, "header_length", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(PATTERN_HEADER, packing_type), 1, "packing_type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(PATTERN_HEADER, num_rows), 2, "num_rows", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(PATTERN_HEADER, packed_data_size), 2, "packed_data_size", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
             } else if (dataHeadersOptions.nID == STRUCTID_INSTRUMENT_HEADER) {
                 dataHeader.nSize = sizeof(INSTRUMENT_HEADER);
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_HEADER, instrument_header_size), 4, "instrument_header_size", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_HEADER, instrument_name), 22, "instrument_name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_HEADER, instrument_type), 1, "instrument_type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_HEADER, num_samples), 2, "num_samples", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_HEADER, instrument_header_size), 4, "instrument_header_size", VT_DWORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_HEADER, instrument_name), 22, "instrument_name", VT_CHAR_ARRAY, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(INSTRUMENT_HEADER, instrument_type), 1, "instrument_type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(INSTRUMENT_HEADER, num_samples), 2, "num_samples", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
             } else if (dataHeadersOptions.nID == STRUCTID_INSTRUMENT_EXTRA_HEADER) {
                 dataHeader.nSize = sizeof(INSTRUMENT_EXTRA_HEADER);
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, sample_header_size), 4, "sample_header_size", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, sample_number_for_notes), 96, "sample_number_for_notes", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_envelope_points), 48, "volume_envelope_points", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_envelope_points), 48, "panning_envelope_points", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, num_volume_points), 1, "num_volume_points", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, num_panning_points), 1, "num_panning_points", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_sustain_point), 1, "volume_sustain_point", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_loop_start_point), 1, "volume_loop_start_point", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_loop_end_point), 1, "volume_loop_end_point", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_sustain_point), 1, "panning_sustain_point", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_loop_start_point), 1, "panning_loop_start_point", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_loop_end_point), 1, "panning_loop_end_point", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_type), 1, "volume_type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_type), 1, "panning_type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_type), 1, "vibrato_type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_sweep), 1, "vibrato_sweep", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_depth), 1, "vibrato_depth", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_rate), 1, "vibrato_rate", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_fadeout), 2, "volume_fadeout", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, reserved), 2, "reserved", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, sample_header_size), 4, "sample_header_size", VT_DWORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, sample_number_for_notes), 96, "sample_number_for_notes", VT_BYTE_ARRAY,
+                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_envelope_points), 48, "volume_envelope_points", VT_BYTE_ARRAY,
+                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_envelope_points), 48, "panning_envelope_points", VT_BYTE_ARRAY,
+                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, num_volume_points), 1, "num_volume_points", VT_BYTE, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, num_panning_points), 1, "num_panning_points", VT_BYTE, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_sustain_point), 1, "volume_sustain_point", VT_BYTE, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_loop_start_point), 1, "volume_loop_start_point", VT_BYTE,
+                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_loop_end_point), 1, "volume_loop_end_point", VT_BYTE, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_sustain_point), 1, "panning_sustain_point", VT_BYTE, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_loop_start_point), 1, "panning_loop_start_point", VT_BYTE,
+                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_loop_end_point), 1, "panning_loop_end_point", VT_BYTE, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_type), 1, "volume_type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_type), 1, "panning_type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_type), 1, "vibrato_type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_sweep), 1, "vibrato_sweep", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_depth), 1, "vibrato_depth", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_rate), 1, "vibrato_rate", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_fadeout), 2, "volume_fadeout", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, reserved), 2, "reserved", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
             } else if (dataHeadersOptions.nID == STRUCTID_SAMPLE_HEADER) {
                 dataHeader.nSize = sizeof(SAMPLE_HEADER);
-                dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, sample_length), 4, "sample_length", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, loop_start), 4, "loop_start", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, loop_length), 4, "loop_length", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(SAMPLE_HEADER, sample_length), 4, "sample_length", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(SAMPLE_HEADER, loop_start), 4, "loop_start", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(SAMPLE_HEADER, loop_length), 4, "loop_length", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, volume), 1, "volume", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, finetune), 1, "finetune", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(SAMPLE_HEADER, finetune), 1, "finetune", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, type), 1, "type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, panning), 1, "panning", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, relative_note_number), 1, "relative_note_number", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, reserved), 1, "reserved", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, sample_name), 22, "sample_name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(SAMPLE_HEADER, relative_note_number), 1, "relative_note_number", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(SAMPLE_HEADER, reserved), 1, "reserved", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(SAMPLE_HEADER, sample_name), 22, "sample_name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
             }
 
             listResult.append(dataHeader);
