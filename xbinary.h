@@ -318,7 +318,8 @@ public:
         FT_CFBF,
         FT_TTF,
         FT_SZDD,
-        FT_BZIP2
+        FT_BZIP2,
+        FT_XZ
         // TODO more
     };
 
@@ -724,7 +725,7 @@ public:
 
     enum DRF {
         DRF_UNKNOWN = 0,
-        DRF_DATASET = 0x00000001,
+        DRF_SIZE = 0x00000001,
         DRF_COUNT = 0x00000002,
     };
 

@@ -172,6 +172,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_CFBF, "CFBF", QString("CFBF")},
     {XBinary::FT_SZDD, "SZDD", QString("SZDD")},
     {XBinary::FT_BZIP2, "BZip2", QString("BZip2")},
+    {XBinary::FT_XZ, "XZ", QString("XZ")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -2933,7 +2934,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
 
         qint64 nStartOffset = nOffset;
 
-        while ((nSize > nStringSize - 1) && (!(pPdStruct->bIsStop))) {
+        while ((nSize > nStringSize - 1) && isPdStructNotCanceled(pPdStruct)) {
             nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + (nStringSize - 1)), nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
@@ -5981,6 +5982,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'BZh'..314159265359", 0) || compareSignature(&memoryMap, "'BZh'..17724538509000000000")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_BZIP2);
+        } else if (compareSignature(&memoryMap, "FD'7zXZ'00", 0)) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_XZ);
         } else {
             bAllFound = false;
         }
@@ -6202,6 +6206,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_SZDD;
     } else if (pStFileTypes->contains(FT_BZIP2)) {
         result = FT_BZIP2;
+    } else if (pStFileTypes->contains(FT_XZ)) {
+        result = FT_XZ;
     } else if (pStFileTypes->contains(FT_TTF)) {
         result = FT_TTF;
     } else if (pStFileTypes->contains(FT_DATA)) {
@@ -6317,6 +6323,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_CFBF)) listResult.append(FT_CFBF);
         if (stFileTypes.contains(FT_SZDD)) listResult.append(FT_SZDD);
         if (stFileTypes.contains(FT_BZIP2)) listResult.append(FT_BZIP2);
+        if (stFileTypes.contains(FT_XZ)) listResult.append(FT_XZ);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
