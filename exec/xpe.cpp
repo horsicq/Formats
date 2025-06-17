@@ -1348,18 +1348,11 @@ QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_H
 
 QList<QString> XPE::getSectionNames(QList<XPE::SECTION_RECORD> *pListSectionRecords, PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     QList<QString> listResult;
 
     qint32 nNumberOfSections = pListSectionRecords->count();
 
-    for (qint32 i = 0; (i < nNumberOfSections) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfSections) && isPdStructNotCanceled(pPdStruct); i++) {
         listResult.append(pListSectionRecords->at(i).sName);
     }
 
@@ -2515,13 +2508,6 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap, PDST
 
 XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getIAT(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     XPE_DEF::IMAGE_DATA_DIRECTORY result = {};
 
     QList<XPE::IMPORT_RECORD> listImportRecords = getImportRecords(pMemoryMap, pPdStruct);
@@ -2532,7 +2518,7 @@ XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getIAT(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPd
         qint64 nMin = pMemoryMap->nImageSize;
         qint64 nMax = 0;
 
-        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+        for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
             nMin = qMin(listImportRecords.at(i).nRVA, nMin);
             nMax = qMax(listImportRecords.at(i).nRVA, nMax);
         }

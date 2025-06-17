@@ -205,19 +205,19 @@ void XDataConvertor::process()
                     }
 
                     if (g_pData->pTmpFile->write(baOut.data(), nProcessedSize) != nProcessedSize) {
-                        pPdStruct->sInfoString = tr("Write error");
+                        XBinary::setPdStructInfoString(pPdStruct, tr("Write error"));
                         break;
                     }
 
                     if (bInvalidSize) {
-                        pPdStruct->sInfoString = tr("Invalid size");
+                        XBinary::setPdStructInfoString(pPdStruct, tr("Invalid size"));
                         break;
                     }
 
                     i += _nBufferSize;
                 }
             } else {
-                pPdStruct->sInfoString = tr("Cannot resize");
+                XBinary::setPdStructInfoString(pPdStruct, tr("Cannot resize"));
             }
 
             delete[] pBuffer;
