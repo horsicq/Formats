@@ -2197,18 +2197,11 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap, PDSTRUC
 
 quint64 XPE::getImportHash64(QList<IMPORT_RECORD> *pListImportRecords, PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     quint64 nResult = 0;
 
     qint32 nNumberOfImports = pListImportRecords->count();
 
-    for (qint32 i = 0; (i < nNumberOfImports) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfImports) && isPdStructNotCanceled(pPdStruct); i++) {
         QString sRecord = pListImportRecords->at(i).sLibrary + " " + pListImportRecords->at(i).sFunction;
 
         nResult += getStringCustomCRC32(sRecord);

@@ -117,7 +117,7 @@ void XDataConvertor::process()
                     g_pData->pTmpFile->seek(i);
 
                     if ((g_pDeviceIn->read(pBuffer, _nBufferSize) != _nBufferSize) || (_nBufferSize == 0)) {
-                        pPdStruct->sInfoString = tr("Read error");
+                        XBinary::setPdStructInfoString(pPdStruct, ("Read error"));
                         break;
                     }
 
