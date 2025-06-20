@@ -3863,15 +3863,15 @@ QString XBinary::getValueString(QVariant varValue, VT valueType, bool bTypesAsHe
         sResult = valueToHex((quint32)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_QWORD) {
         sResult = valueToHex((quint64)(varValue.toULongLong()));
-    } else if (valueType == XBinary::VT_CHAR) {
+    } else if ((valueType == XBinary::VT_CHAR) || (valueType == XBinary::VT_INT8)) {
         sResult = QString("%1").arg((qint8)(varValue.toULongLong()));
     } else if ((valueType == XBinary::VT_UCHAR) || (valueType == XBinary::VT_UINT8)) {
         sResult = QString("%1").arg((quint8)(varValue.toULongLong()));
-    } else if (valueType == XBinary::VT_SHORT) {
+    } else if ((valueType == XBinary::VT_SHORT) || (valueType == XBinary::VT_INT16)) {
         sResult = QString("%1").arg((qint16)(varValue.toULongLong()));
-    } else if (valueType == XBinary::VT_USHORT) {
+    } else if ((valueType == XBinary::VT_USHORT) || (valueType == XBinary::VT_UINT16)) {
         sResult = QString("%1").arg((quint16)(varValue.toULongLong()));
-    } else if (valueType == XBinary::VT_INT) {
+    } else if ((valueType == XBinary::VT_INT) || (valueType == XBinary::VT_INT32)) {
         sResult = QString("%1").arg((qint32)(varValue.toULongLong()));
     } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32)) {
         if (bTypesAsHex) {
