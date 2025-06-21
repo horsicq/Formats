@@ -22,7 +22,7 @@
 
 XBinary::XCONVERT _TABLE_XMSDOS_STRUCTID[] = {
     {XMSDOS::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    {XMSDOS::STRUCTID_EXE_file, "EXE_file", QString("EXE_file")},
+    {XMSDOS::STRUCTID_IMAGE_DOS_HEADER, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
     };
 
 XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
@@ -753,7 +753,7 @@ QList<XBinary::DATA_HEADER> XMSDOS::getDataHeaders(const DATA_HEADERS_OPTIONS &d
         _dataHeadersOptions.bChildren = true;
         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.nID = STRUCTID_EXE_file;
+        _dataHeadersOptions.nID = STRUCTID_IMAGE_DOS_HEADER;
 
         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
     } else {
@@ -772,38 +772,53 @@ QList<XBinary::DATA_HEADER> XMSDOS::getDataHeaders(const DATA_HEADERS_OPTIONS &d
             dataHeader.nSize = dataHeadersOptions.nSize;
             dataHeader.nCount = dataHeadersOptions.nCount;
 
-            if (dataHeadersOptions.nID == STRUCTID_EXE_file) {
-                dataHeader.nSize = sizeof(XMSDOS_DEF::EXE_file);
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XMSDOS_DEF::EXE_file, exe_signature), 2, "exe_signature", VT_UINT16, DRF_UNKNOWN,
+            // struct IMAGE_DOS_HEADER {
+            //     quint16 e_magic;    /* 00: MZ Header signature */
+            //     quint16 e_cblp;     /* 02: Bytes on last page of file */
+            //     quint16 e_cp;       /* 04: Pages in file */
+            //     quint16 e_crlc;     /* 06: Relocations */
+            //     quint16 e_cparhdr;  /* 08: Size of header in paragraphs */
+            //     quint16 e_minalloc; /* 0a: Minimum extra paragraphs needed */
+            //     quint16 e_maxalloc; /* 0c: Maximum extra paragraphs needed */
+            //     quint16 e_ss;       /* 0e: Initial (relative) SS value */
+            //     quint16 e_sp;       /* 10: Initial SP value */
+            //     quint16 e_csum;     /* 12: Checksum */
+            //     quint16 e_ip;       /* 14: Initial IP value */
+            //     quint16 e_cs;       /* 16: Initial (relative) CS value */
+            //     quint16 e_lfarlc;   /* 18: File address of relocation table */
+            //     quint16 e_ovno;     /* 1a: Overlay number */
+            // };
+
+            if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADER) {
+                dataHeader.nSize = sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
+                dataHeader.listRecords.append(getDataRecordDV(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_magic), 2, "e_magic", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian, XMSDOS::getImageMagicsS(), false));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_len_mod_512), 2, "exe_len_mod_512", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cblp), 2, "e_cblp", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_pages), 2, "exe_pages", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cp), 2, "e_cp", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_rle_count), 2, "exe_rle_count", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_crlc), 2, "e_crlc", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_par_dir), 2, "exe_par_dir", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cparhdr), 2, "e_cparhdr", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_min_BSS), 2, "exe_min_BSS", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_minalloc), 2, "e_minalloc", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_max_BSS), 2, "exe_max_BSS", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_maxalloc), 2, "e_maxalloc", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_SS), 2, "exe_SS", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ss), 2, "e_ss", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_SP), 2, "exe_SP", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_sp), 2, "e_sp", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_chksum), 2, "exe_chksum", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_csum), 2, "e_csum", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_IP), 2, "exe_IP", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ip), 2, "e_ip", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_CS), 2, "exe_CS", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cs), 2, "e_cs", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_rle_table), 2, "exe_rle_table", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_lfarlc), 2, "e_lfarlc", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_iov), 2, "exe_iov", VT_UINT16, DRF_UNKNOWN,
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ovno), 2, "e_ovno", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_sym_tab), 4, "exe_sym_tab", VT_UINT32, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
             }
 
             if (dataHeader.nSize) {
