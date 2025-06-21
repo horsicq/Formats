@@ -11810,14 +11810,17 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                     case 1: nValue = 1 + read_int8(nOffset); break;
                     case 2:
                         nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap));
-                        nValue &= 0xFFFF;
+                        // nValue &= 0xFFFF;
                         break;
                     case 4: nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap)); break;
                     case 8: nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap)); break;
                 }
 
                 if ((pMemoryMap->fileType == FT_COM) || (pMemoryMap->fileType == FT_MSDOS)) {
-                    nOffset += nValue;
+                    // nOffset += nValue;
+                    qint64 _nOffset = nOffset & 0xFFFF0000;
+                    qint64 _nDelta = nOffset & 0xFFFF;
+                    nOffset = _nOffset + ((_nDelta + nValue) & 0xFFFF);
                 } else {
                     XADDR _nAddress = offsetToAddress(pMemoryMap, nOffset);
                     _nAddress += nValue;

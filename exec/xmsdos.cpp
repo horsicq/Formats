@@ -20,6 +20,11 @@
  */
 #include "xmsdos.h"
 
+XBinary::XCONVERT _TABLE_XMSDOS_STRUCTID[] = {
+    {XMSDOS::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XMSDOS::STRUCTID_EXE_file, "EXE_file", QString("EXE_file")},
+    };
+
 XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
 }
@@ -732,4 +737,84 @@ QString XMSDOS::typeIdToString(qint32 nType)
     }
 
     return sResult;
+}
+
+QString XMSDOS::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XMSDOS_STRUCTID, sizeof(_TABLE_XMSDOS_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::DATA_HEADER> XMSDOS::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+        _dataHeadersOptions.nID = STRUCTID_EXE_file;
+
+        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    } else {
+        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+
+        if (nStartOffset != -1) {
+            XBinary::DATA_HEADER dataHeader = {};
+            dataHeader.dsID_parent = dataHeadersOptions.dsID_parent;
+            dataHeader.dsID.sGUID = generateUUID();
+            dataHeader.dsID.fileType = dataHeadersOptions.pMemoryMap->fileType;
+            dataHeader.dsID.nID = dataHeadersOptions.nID;
+            dataHeader.locType = dataHeadersOptions.locType;
+            dataHeader.nLocation = dataHeadersOptions.nLocation;
+            dataHeader.sName = structIDToString(dataHeadersOptions.nID);
+            dataHeader.dhMode = dataHeadersOptions.dhMode;
+            dataHeader.nSize = dataHeadersOptions.nSize;
+            dataHeader.nCount = dataHeadersOptions.nCount;
+
+            if (dataHeadersOptions.nID == STRUCTID_EXE_file) {
+                dataHeader.nSize = sizeof(XMSDOS_DEF::EXE_file);
+                dataHeader.listRecords.append(getDataRecordDV(offsetof(XMSDOS_DEF::EXE_file, exe_signature), 2, "exe_signature", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian, XMSDOS::getImageMagicsS(), false));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_len_mod_512), 2, "exe_len_mod_512", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_pages), 2, "exe_pages", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_rle_count), 2, "exe_rle_count", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_par_dir), 2, "exe_par_dir", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_min_BSS), 2, "exe_min_BSS", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_max_BSS), 2, "exe_max_BSS", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_SS), 2, "exe_SS", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_SP), 2, "exe_SP", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_chksum), 2, "exe_chksum", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_IP), 2, "exe_IP", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_CS), 2, "exe_CS", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_rle_table), 2, "exe_rle_table", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_iov), 2, "exe_iov", VT_UINT16, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::EXE_file, exe_sym_tab), 4, "exe_sym_tab", VT_UINT32, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+            }
+
+            if (dataHeader.nSize) {
+                listResult.append(dataHeader);
+            }
+
+            if (dataHeadersOptions.bChildren) {
+
+            }
+        }
+    }
+
+    return listResult;
 }

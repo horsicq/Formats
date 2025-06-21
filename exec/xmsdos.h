@@ -40,6 +40,11 @@ public:
         TYPE_EXE
     };
 
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_EXE_file,
+    };
+
     explicit XMSDOS(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -142,6 +147,9 @@ public:
     virtual qint32 getType();
     virtual OSNAME getOsName();
     virtual QString typeIdToString(qint32 nType);
+
+    virtual QString structIDToString(quint32 nID);
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
 };
 
 #endif  // XMSDOS_H
