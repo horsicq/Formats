@@ -1036,9 +1036,20 @@ XBinary::MODE XNE::getMode()
 
 QString XNE::getArch()
 {
-    QString sResult = QString("8086");
+    QString sResult = QString("286");
 
-    // TODO
+    quint16 nOS = getImageOS2Header_exetyp();
+
+   if (nOS == 4) {
+        sResult = "386";
+    } else if (nOS == 5) {
+        sResult = "386";
+    } else if (nOS == 0x81) {
+        sResult = "286";
+    } else if (nOS == 0x82) {
+        sResult = "286";
+    }
+
 
     return sResult;
 }
@@ -1066,10 +1077,10 @@ QString XNE::getOsVersion()
 
     if (nOS == 3) {
         sResult = "4.x";
-    } else if (nOS == 4) {
-        sResult = "386";
-    } else if (nOS == 5) {
-        sResult = "386";
+    } else if (nOS == 0x81) {
+        sResult = "PharLap Dos Extender";
+    } else if (nOS == 0x82) {
+        sResult = "PharLap Dos Extender";
     }
 
     return sResult;
@@ -1091,6 +1102,10 @@ XBinary::OSNAME XNE::getOsName()
         result = OSNAME_WINDOWS;
     } else if (nOS == 5) {
         result = OSNAME_BORLANDOSSERVICES;
+    } else if (nOS == 0x81) {
+        result = OSNAME_OS2;
+    } else if (nOS == 0x82) {
+        result = OSNAME_WINDOWS;
     }
 
     return result;

@@ -24,6 +24,7 @@
 #include "xmsdos.h"
 #include "xne_def.h"
 
+// https://fd.lod.bz/rbil/interrup/dos_kernel/214b.html#table-01596
 class XNE : public XMSDOS {
     Q_OBJECT
 

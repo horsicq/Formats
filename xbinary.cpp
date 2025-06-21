@@ -5760,10 +5760,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 } else if (_read_uint16(pOffset) == XNE_DEF::S_IMAGE_OS2_SIGNATURE) {
                     stResult.insert(FT_NE);
                     bIsNewHeaderValid = true;
-                } else if (_read_uint16(pOffset) == XLE_DEF::S_IMAGE_VXD_SIGNATURE) {
+                } else if (_read_uint32(pOffset) == XLE_DEF::S_IMAGE_VXD_SIGNATURE) {
                     stResult.insert(FT_LE);
                     bIsNewHeaderValid = true;
-                } else if (_read_uint16(pOffset) == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
+                } else if (_read_uint32(pOffset) == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
                     stResult.insert(FT_LX);
                     bIsNewHeaderValid = true;
                 }

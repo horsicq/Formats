@@ -37,7 +37,7 @@ bool XLE::isValid(PDSTRUCT *pPdStruct)
         qint64 nSize = getSize();
 
         if ((lfanew > 0) && (lfanew < (nSize & 0xFFFFFFFF))) {
-            quint16 signature = read_uint16(lfanew);
+            quint32 signature = read_uint32(lfanew);
 
             if ((signature == XLE_DEF::S_IMAGE_VXD_SIGNATURE) || (signature == XLE_DEF::S_IMAGE_LX_SIGNATURE)) {
                 bResult = true;
@@ -1191,6 +1191,8 @@ QList<XLE_DEF::o32_obj> XLE::getObjects()
 
     qint64 nObjOffset = getImageVxdHeaderOffset() + getImageVxdHeader_objtab();
     quint32 nNumberOfObjects = getImageVxdHeader_objcnt();
+
+    nNumberOfObjects = qMin(nNumberOfObjects, (quint32)100);
 
     for (quint32 i = 0; i < nNumberOfObjects; i++) {
         XLE_DEF::o32_obj record = _read_o32_obj(nObjOffset);
