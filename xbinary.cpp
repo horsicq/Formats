@@ -386,6 +386,24 @@ QString XBinary::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XBINARY_STRUCTID, sizeof(_TABLE_XBINARY_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+XBinary::DATA_HEADER XBinary::_initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName)
+{
+    DATA_HEADER result = {};
+
+    result.dsID_parent = dataHeadersOptions.dsID_parent;
+    result.dsID.sGUID = generateUUID();
+    result.dsID.fileType = dataHeadersOptions.fileType;
+    result.dsID.nID = dataHeadersOptions.nID;
+    result.locType = dataHeadersOptions.locType;
+    result.nLocation = dataHeadersOptions.nLocation;
+    result.sName = sName;
+    result.dhMode = dataHeadersOptions.dhMode;
+    result.nSize = dataHeadersOptions.nSize;
+    result.nCount = dataHeadersOptions.nCount;
+
+    return result;
+}
+
 XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct)
 {
     DATA_HEADER dhInfo = {};

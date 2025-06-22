@@ -775,6 +775,7 @@ public:
     struct DATA_HEADERS_OPTIONS {
         _MEMORY_MAP *pMemoryMap;
         DSID dsID_parent;
+        FT fileType;
         quint32 nID;
         LT locType;
         XADDR nLocation;
@@ -787,6 +788,8 @@ public:
     DSID _addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct);
 
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+
+    DATA_HEADER _initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName);
 
     struct DATA_RECORDS_OPTIONS {
         _MEMORY_MAP *pMemoryMap;

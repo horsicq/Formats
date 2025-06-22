@@ -43,6 +43,7 @@ public:
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_IMAGE_DOS_HEADER,
+        STRUCTID_IMAGE_DOS_HEADEREX,
     };
 
     explicit XMSDOS(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);

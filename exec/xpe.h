@@ -36,6 +36,11 @@ class XPE : public XMSDOS {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_IMAGE_DOS_HEADEREX,
+    };
+
     struct SECTION_RECORD {
         QString sName;
         qint64 nOffset;
@@ -1306,6 +1311,9 @@ public:
     quint64 getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader, QString sString);
 
     virtual QList<FPART> getFileParts(PDSTRUCT *pPdStruct = nullptr);
+
+    virtual QString structIDToString(quint32 nID);
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
 
 private:
     quint16 _checkSum(qint64 nStartValue, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);

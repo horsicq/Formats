@@ -20,6 +20,11 @@
  */
 #include "xpe.h"
 
+XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
+    {XPE::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XPE::STRUCTID_IMAGE_DOS_HEADER, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
+    };
+
 XPE::XPE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevice, bIsImage, nModuleAddress)
 {
 }
@@ -9219,6 +9224,64 @@ quint64 XPE::getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader,
     }
 
     return nResult;
+}
+
+QString XPE::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XPE_STRUCTID, sizeof(_TABLE_XPE_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+        _dataHeadersOptions.nID = STRUCTID_IMAGE_DOS_HEADEREX;
+
+        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    } else {
+        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+
+        if (nStartOffset != -1) {
+            if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADER) {
+                {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.bChildren = false;
+                    _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+                    _dataHeadersOptions.fileType = FT_MSDOS;
+                    _dataHeadersOptions.nID = XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX;
+
+                    listResult.append(XMSDOS::getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+                {
+                    // DOS Stub
+                }
+                {
+                    // Rich
+                }
+                {
+                    // DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    // _dataHeadersOptions.bChildren = true;
+                    // _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+                    // _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+                    // _dataHeadersOptions.nID = STRUCTID_IMAGE_DOS_HEADER;
+
+                    // listResult.append(XMSDOS::getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            }
+
+            if (dataHeadersOptions.bChildren) {
+
+            }
+        }
+    }
+
+    return listResult;
 }
 
 QList<XBinary::FPART> XPE::getFileParts(PDSTRUCT *pPdStruct)

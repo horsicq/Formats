@@ -5261,6 +5261,7 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
         _dataHeadersOptions.bChildren = true;
         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
 
         if (dataHeadersOptions.pMemoryMap->mode == MODE_64) {
             _dataHeadersOptions.nID = STRUCTID_mach_header_64;
@@ -5273,17 +5274,7 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
         if (nStartOffset != -1) {
-            XBinary::DATA_HEADER dataHeader = {};
-            dataHeader.dsID_parent = dataHeadersOptions.dsID_parent;
-            dataHeader.dsID.sGUID = generateUUID();
-            dataHeader.dsID.fileType = dataHeadersOptions.pMemoryMap->fileType;
-            dataHeader.dsID.nID = dataHeadersOptions.nID;
-            dataHeader.locType = dataHeadersOptions.locType;
-            dataHeader.nLocation = dataHeadersOptions.nLocation;
-            dataHeader.sName = structIDToString(dataHeadersOptions.nID);
-            dataHeader.dhMode = dataHeadersOptions.dhMode;
-            dataHeader.nSize = dataHeadersOptions.nSize;
-            dataHeader.nCount = dataHeadersOptions.nCount;
+            XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMACH::structIDToString(dataHeadersOptions.nID));
 
             switch (dataHeadersOptions.nID) {
                 case STRUCTID_mach_header: {
