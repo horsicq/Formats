@@ -23,6 +23,11 @@
 XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
     {XPE::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XPE::STRUCTID_IMAGE_DOS_HEADER, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
+    {XPE::STRUCTID_IMAGE_NT_HEADERS32, "IMAGE_NT_HEADERS32", QString("IMAGE_NT_HEADERS32")},
+    {XPE::STRUCTID_IMAGE_NT_HEADERS64, "IMAGE_NT_HEADERS64", QString("IMAGE_NT_HEADERS64")},
+    {XPE::STRUCTID_IMAGE_FILE_HEADER, "IMAGE_FILE_HEADER", QString("IMAGE_FILE_HEADER")},
+    {XPE::STRUCTID_IMAGE_OPTIONAL_HEADER32, "IMAGE_OPTIONAL_HEADER32", QString("IMAGE_OPTIONAL_HEADER32")},
+    {XPE::STRUCTID_IMAGE_OPTIONAL_HEADER64, "IMAGE_OPTIONAL_HEADER64", QString("IMAGE_OPTIONAL_HEADER64")},
     };
 
 XPE::XPE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevice, bIsImage, nModuleAddress)
@@ -9241,7 +9246,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
-        _dataHeadersOptions.nID = STRUCTID_IMAGE_DOS_HEADEREX;
+        _dataHeadersOptions.nID = STRUCTID_IMAGE_DOS_HEADER;
 
         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
     } else {
@@ -9258,25 +9263,61 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
 
                     listResult.append(XMSDOS::getDataHeaders(_dataHeadersOptions, pPdStruct));
                 }
-                {
-                    // DOS Stub
-                }
-                {
-                    // Rich
-                }
-                {
-                    // DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                    // _dataHeadersOptions.bChildren = true;
-                    // _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                    // _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
-                    // _dataHeadersOptions.nID = STRUCTID_IMAGE_DOS_HEADER;
 
-                    // listResult.append(XMSDOS::getDataHeaders(_dataHeadersOptions, pPdStruct));
+                if (dataHeadersOptions.bChildren) {
+                    {
+                        // DOS Stub
+                    }
+                    {
+                        // Rich
+                    }
+
+                    {
+                        quint32 nLNew = read_uint32(nStartOffset + offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
+
+                        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                        _dataHeadersOptions.nLocation += nLNew;
+                        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+
+                        if (dataHeadersOptions.fileType == FT_PE32) {
+                            _dataHeadersOptions.nID = STRUCTID_IMAGE_NT_HEADERS32;
+                        } else {
+                            _dataHeadersOptions.nID = STRUCTID_IMAGE_NT_HEADERS64;
+                        }
+
+                        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                    }
                 }
-            }
+            } else if ((dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS32) || (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS64)) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
 
-            if (dataHeadersOptions.bChildren) {
+                if (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS32) {
+                    dataHeader.nSize = sizeof(XPE_DEF::IMAGE_NT_HEADERS32);
+                } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS64) {
+                    dataHeader.nSize = sizeof(XPE_DEF::IMAGE_NT_HEADERS64);
+                }
 
+                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_NT_HEADERS32, Signature), 4, "Signature", VT_DWORD, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageNtHeadersSignaturesS(), false));
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nLocation += 4;
+                    _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                    _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+                    _dataHeadersOptions.nID = STRUCTID_IMAGE_FILE_HEADER;
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_FILE_HEADER) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_FILE_HEADER);
+
+                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_FILE_HEADER, Machine), 2, "Machine", VT_WORD, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderMachinesS(), false));
+
+                listResult.append(dataHeader);
             }
         }
     }

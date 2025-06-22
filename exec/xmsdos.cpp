@@ -23,7 +23,7 @@
 XBinary::XCONVERT _TABLE_XMSDOS_STRUCTID[] = {
     {XMSDOS::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XMSDOS::STRUCTID_IMAGE_DOS_HEADER, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
-    {XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX, "IMAGE_DOS_HEADEREX", QString("IMAGE_DOS_HEADEREX")},
+    {XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
     };
 
 XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
@@ -762,9 +762,9 @@ QList<XBinary::DATA_HEADER> XMSDOS::getDataHeaders(const DATA_HEADERS_OPTIONS &d
         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
         if (nStartOffset != -1) {
-            XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMSDOS::structIDToString(dataHeadersOptions.nID));
-
             if ((dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADER) || (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADEREX)) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMSDOS::structIDToString(dataHeadersOptions.nID));
+
                 if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADER) {
                     dataHeader.nSize = sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
                 } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADEREX) {
@@ -818,9 +818,7 @@ QList<XBinary::DATA_HEADER> XMSDOS::getDataHeaders(const DATA_HEADERS_OPTIONS &d
                     dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew), 4, "e_lfanew", VT_DWORD, DRF_UNKNOWN,
                                                                 dataHeadersOptions.pMemoryMap->endian));
                 }
-            }
 
-            if (dataHeader.nSize) {
                 listResult.append(dataHeader);
             }
 
