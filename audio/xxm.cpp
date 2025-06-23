@@ -357,15 +357,7 @@ QList<XXM::DATA_HEADER> XXM::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHead
         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
         if (nStartOffset != -1) {
-            DATA_HEADER dataHeader = {};
-            dataHeader.dsID_parent = dataHeadersOptions.dsID_parent;
-            dataHeader.dsID.sGUID = generateUUID();
-            dataHeader.dsID.fileType = dataHeadersOptions.pMemoryMap->fileType;
-            dataHeader.dsID.nID = dataHeadersOptions.nID;
-            dataHeader.locType = dataHeadersOptions.locType;
-            dataHeader.nLocation = dataHeadersOptions.nLocation;
-            dataHeader.sName = structIDToString(dataHeadersOptions.nID);
-            dataHeader.dhMode = dataHeadersOptions.dhMode;
+            DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XXM::structIDToString(dataHeadersOptions.nID));
 
             if (dataHeadersOptions.nID == STRUCTID_HEADER) {
                 dataHeader.nSize = sizeof(HEADER);
