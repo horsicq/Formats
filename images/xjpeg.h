@@ -61,6 +61,8 @@ public:
     OFFSETSIZE getExif(QList<CHUNK> *pListChunks);
     bool isExifPresent(OFFSETSIZE osExif);
 
+    virtual QString getMIMEString();
+
 private:
     CHUNK _readChunk(qint64 nOffset);
 };

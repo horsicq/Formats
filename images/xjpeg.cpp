@@ -302,6 +302,11 @@ bool XJpeg::isExifPresent(OFFSETSIZE osExif)
     return osExif.nSize;
 }
 
+QString XJpeg::getMIMEString()
+{
+    return "image/jpeg";
+}
+
 XJpeg::CHUNK XJpeg::_readChunk(qint64 nOffset)
 {
     CHUNK result = {};
