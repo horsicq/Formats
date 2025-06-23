@@ -9316,7 +9316,18 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
 
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_FILE_HEADER, Machine), 2, "Machine", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderMachinesS(), false));
-
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSections), 2, "NumberOfSections", VT_WORD, DRF_COUNT,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, PointerToSymbolTable), 4, "PointerToSymbolTable", VT_DWORD, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSymbols), 4, "NumberOfSymbols", VT_DWORD, DRF_COUNT,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, SizeOfOptionalHeader), 2, "SizeOfOptionalHeader", VT_WORD, DRF_SIZE,
+                                                              dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_FILE_HEADER, Characteristics), 2, "Characteristics", VT_WORD, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderCharacteristicsS(), true));
                 listResult.append(dataHeader);
             }
         }
