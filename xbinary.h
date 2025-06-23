@@ -729,6 +729,7 @@ public:
         DRF_UNKNOWN = 0,
         DRF_SIZE = 0x00000001,
         DRF_COUNT = 0x00000002,
+        DRF_ADDRESS = 0x00000004,
     };
 
     struct DATAVALUESET {
