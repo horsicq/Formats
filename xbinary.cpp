@@ -211,6 +211,8 @@ XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
     {XBinary::VT_UINT64, "uint64"},
     {XBinary::VT_DOUBLE, "double"},
     {XBinary::VT_FLOAT, "float"},
+
+    {XBinary::VT_PACKEDNUMBER, "PackedNumber"},
 };
 
 const double XBinary::D_ENTROPY_THRESHOLD = 6.5;
@@ -400,6 +402,10 @@ XBinary::DATA_HEADER XBinary::_initDataHeader(const DATA_HEADERS_OPTIONS &dataHe
     result.dhMode = dataHeadersOptions.dhMode;
     result.nSize = dataHeadersOptions.nSize;
     result.nCount = dataHeadersOptions.nCount;
+
+    if (result.dsID.fileType == FT_UNKNOWN) {
+        result.dsID.fileType = dataHeadersOptions.pMemoryMap->fileType;
+    }
 
     return result;
 }
@@ -1702,6 +1708,15 @@ quint32 XBinary::read_uint24(qint64 nOffset, bool bIsBigEndian)
 qint32 XBinary::read_int24(qint64 nOffset, bool bIsBigEndian)
 {
     return (qint32)(read_uint24(nOffset, bIsBigEndian));
+}
+
+XBinary::PACKED_UINT XBinary::read_packedNumber(qint64 nOffset, qint64 nSize)
+{
+    nSize = qMin((qint64)9, nSize);
+
+    QByteArray baData = read_array(nOffset, nSize);
+
+    return XBinary::_read_packedNumber(baData.data(), nSize);
 }
 
 qint64 XBinary::write_ansiString(qint64 nOffset, const QString &sString, qint64 nMaxSize)
@@ -3798,6 +3813,10 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
         nResult = find_float(nOffset, nSize, (float)(varValue.toFloat()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_DOUBLE) {
         nResult = find_double(nOffset, nSize, (double)(varValue.toDouble()), bIsBigEndian, pPdStruct);
+    } else {
+#ifdef QT_DEBUG
+        qDebug() << "Unknown valueType" << valueTypeToString(valueType, 1);
+#endif
     }
 
     return nResult;
@@ -3823,6 +3842,12 @@ QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bI
         varResult = read_utf8String(nOffset, nSize);
     } else if ((valueType == XBinary::VT_U) || (valueType == XBinary::VT_U_I)) {
         varResult = read_unicodeString(nOffset, nSize, bIsBigEndian);
+    } else if (valueType == XBinary::VT_PACKEDNUMBER) {
+        varResult = read_packedNumber(nOffset, nSize).nValue;
+    } else {
+#ifdef QT_DEBUG
+        qDebug() << "Unknown valueType" << valueTypeToString(valueType, nSize);
+#endif
     }
 
     return varResult;
@@ -3882,15 +3907,15 @@ QString XBinary::getValueString(QVariant varValue, VT valueType, bool bTypesAsHe
     } else if (valueType == XBinary::VT_QWORD) {
         sResult = valueToHex((quint64)(varValue.toULongLong()));
     } else if ((valueType == XBinary::VT_CHAR) || (valueType == XBinary::VT_INT8)) {
-        sResult = QString("%1").arg((qint8)(varValue.toULongLong()));
+        sResult = QString("%1").arg((qint8)(varValue.toLongLong()));
     } else if ((valueType == XBinary::VT_UCHAR) || (valueType == XBinary::VT_UINT8)) {
         sResult = QString("%1").arg((quint8)(varValue.toULongLong()));
     } else if ((valueType == XBinary::VT_SHORT) || (valueType == XBinary::VT_INT16)) {
-        sResult = QString("%1").arg((qint16)(varValue.toULongLong()));
+        sResult = QString("%1").arg((qint16)(varValue.toLongLong()));
     } else if ((valueType == XBinary::VT_USHORT) || (valueType == XBinary::VT_UINT16)) {
         sResult = QString("%1").arg((quint16)(varValue.toULongLong()));
     } else if ((valueType == XBinary::VT_INT) || (valueType == XBinary::VT_INT32)) {
-        sResult = QString("%1").arg((qint32)(varValue.toULongLong()));
+        sResult = QString("%1").arg((qint32)(varValue.toLongLong()));
     } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32)) {
         if (bTypesAsHex) {
             sResult = valueToHex((quint32)(varValue.toULongLong()));
@@ -3898,8 +3923,10 @@ QString XBinary::getValueString(QVariant varValue, VT valueType, bool bTypesAsHe
             sResult = QString("%1").arg((quint32)(varValue.toULongLong()));
         }
     } else if (valueType == XBinary::VT_INT64) {
-        sResult = QString("%1").arg((qint64)(varValue.toULongLong()));
+        sResult = QString("%1").arg((qint64)(varValue.toLongLong()));
     } else if (valueType == XBinary::VT_UINT64) {
+        sResult = QString("%1").arg((quint64)(varValue.toULongLong()));
+    } else if (valueType == XBinary::VT_PACKEDNUMBER) {
         sResult = QString("%1").arg((quint64)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_FLOAT) {
         sResult = QString("%1").arg(varValue.toFloat());
@@ -5150,6 +5177,7 @@ QList<XBinary::HREGION> XBinary::_getPhysRegions(MAPMODE mapMode, PDSTRUCT *pPdS
     for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
         if (!memoryMap.listRecords.at(i).bIsVirtual) {
             XBinary::HREGION region = {};
+            region.sPrefix = QString::number(i);
             region.nVirtualAddress = memoryMap.listRecords.at(i).nAddress;
             region.nFileOffset = memoryMap.listRecords.at(i).nOffset;
             region.nFileSize = memoryMap.listRecords.at(i).nSize;
@@ -11528,9 +11556,10 @@ QList<XBinary::HREGION> XBinary::getFileRegions(_MEMORY_MAP *pMemoryMap, PDSTRUC
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-        if (pMemoryMap->listRecords.at(i).nOffset != -1) {
+        if (pMemoryMap->listRecords.at(i).nOffset > 0) {
             HREGION region = {};
             region.sGUID = generateUUID();
+            region.sPrefix = QString::number(i);
             region.nVirtualAddress = pMemoryMap->listRecords.at(i).nAddress;
             region.nFileOffset = pMemoryMap->listRecords.at(i).nOffset;
             region.nFileSize = pMemoryMap->listRecords.at(i).nSize;

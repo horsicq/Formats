@@ -623,7 +623,8 @@ public:
         VT_FLOAT,
         VT_ANSI,
         VT_CHAR_ARRAY,
-        VT_BYTE_ARRAY
+        VT_BYTE_ARRAY,
+        VT_PACKEDNUMBER
         // TODO pascal strings(A/U)
     };
 
@@ -677,6 +678,7 @@ public:
 
     struct HREGION {
         QString sGUID;
+        QString sPrefix;
         XADDR nVirtualAddress;
         qint64 nVirtualSize;
         qint64 nFileOffset;
@@ -952,6 +954,8 @@ public:
     quint32 read_uint24(qint64 nOffset,
                         bool bIsBigEndian = false);  // Uses UPX in header
     qint32 read_int24(qint64 nOffset, bool bIsBigEndian = false);
+
+
 
     qint64 write_ansiString(qint64 nOffset, const QString &sString, qint64 nMaxSize = -1);
     void write_ansiStringFix(qint64 nOffset, qint64 nSize, const QString &sString);
@@ -1531,6 +1535,7 @@ public:
     PACKED_UINT read_acn1_integer(qint64 nOffset, qint64 nSize);
 
     static PACKED_UINT _read_packedNumber(char *pData, qint64 nSize);
+    PACKED_UINT read_packedNumber(qint64 nOffset, qint64 nSize);
 
     static QList<QString> getListFromFile(const QString &sFileName);
 

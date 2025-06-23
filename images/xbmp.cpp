@@ -130,8 +130,6 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     headerRecord.type = MMT_HEADER;
     headerRecord.sName = "Header";
     headerRecord.nIndex = 0;
-    headerRecord.bIsVirtual = false;
-    headerRecord.bIsInvisible = false;
     headerRecord.nID = 0;
     result.listRecords.append(headerRecord);
 
@@ -144,8 +142,6 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     objectRecord.type = MMT_DATA;
     objectRecord.sName = "Bitmap Data";
     objectRecord.nIndex = 1;
-    objectRecord.bIsVirtual = false;
-    objectRecord.bIsInvisible = false;
     result.listRecords.append(objectRecord);
 
     _handleOverlay(&result);

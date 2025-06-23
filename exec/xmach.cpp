@@ -1471,6 +1471,8 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 nMaxAddress = qMax(nVirtualAddress + nVirtualSize, nMaxAddress);
             }
         }
+
+        _handleOverlay(&result);
     } else if (mapMode == MAPMODE_SECTIONS) {
         // Started from 1
         QList<SECTION_RECORD> listSections = getSectionRecords(&listCommandRecords);
@@ -1529,8 +1531,6 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
     result.nImageSize = nMaxAddress - nMinAddress;
     result.nEntryPointAddress = getAddressOfEntryPoint(&result);
-
-    _handleOverlay(&result);
 
     return result;
 }
