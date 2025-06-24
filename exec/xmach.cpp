@@ -5274,10 +5274,10 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
         if (nStartOffset != -1) {
-            XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMACH::structIDToString(dataHeadersOptions.nID));
+            if ((dataHeadersOptions.nID == STRUCTID_mach_header) || (dataHeadersOptions.nID == STRUCTID_mach_header_64)) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMACH::structIDToString(dataHeadersOptions.nID));
 
-            switch (dataHeadersOptions.nID) {
-                case STRUCTID_mach_header: {
+                if (dataHeadersOptions.nID == STRUCTID_mach_header) {
                     dataHeader.nSize = sizeof(XMACH_DEF::mach_header);
                     quint32 cputype = read_uint32(nStartOffset + offsetof(XMACH_DEF::mach_header, cputype));
 
@@ -5295,9 +5295,7 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
                         getDataRecord(offsetof(XMACH_DEF::mach_header, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN,
                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), true));
-                    break;
-                }
-                case STRUCTID_mach_header_64: {
+                } else if (dataHeadersOptions.nID == STRUCTID_mach_header_64) {
                     dataHeader.nSize = sizeof(XMACH_DEF::mach_header_64);
                     quint32 cputype = read_uint32(nStartOffset + offsetof(XMACH_DEF::mach_header_64, cputype));
 
@@ -5317,26 +5315,11 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), true));
                     dataHeader.listRecords.append(
                         getDataRecord(offsetof(XMACH_DEF::mach_header_64, reserved), 4, "reserved", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                    break;
                 }
-                case STRUCTID_load_command: {
-                    dataHeader.nSize = sizeof(XMACH_DEF::load_command);
 
-                    dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::load_command, cmd), 4, "cmd", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getLoadCommandTypesS(), false));
-                    dataHeader.listRecords.append(
-                        getDataRecord(offsetof(XMACH_DEF::load_command, cmdsize), 4, "cmdsize", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                    break;
-                }
-                default: break;
-            }
-
-            if (dataHeader.nSize) {
                 listResult.append(dataHeader);
-            }
 
-            if (dataHeadersOptions.bChildren) {
-                if ((dataHeadersOptions.nID == STRUCTID_mach_header) || (dataHeadersOptions.nID == STRUCTID_mach_header_64)) {
+                if (dataHeadersOptions.bChildren) {
                     qint64 nCommandsOffset = 0;
                     qint64 nCommandsSize = 0;
                     qint32 nCommandCount = 0;
@@ -5371,6 +5354,18 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
                         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
                     }
                 }
+
+            } else if (dataHeadersOptions.nID == STRUCTID_load_command) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMACH::structIDToString(dataHeadersOptions.nID));
+
+                dataHeader.nSize = sizeof(XMACH_DEF::load_command);
+
+                dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::load_command, cmd), 4, "cmd", VT_UINT32, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian, XMACH::getLoadCommandTypesS(), false));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XMACH_DEF::load_command, cmdsize), 4, "cmdsize", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+
+                listResult.append(dataHeader);
             }
         }
     }
