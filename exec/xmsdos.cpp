@@ -740,6 +740,11 @@ QString XMSDOS::typeIdToString(qint32 nType)
     return sResult;
 }
 
+QString XMSDOS::getMIMEString()
+{
+
+}
+
 QString XMSDOS::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XMSDOS_STRUCTID, sizeof(_TABLE_XMSDOS_STRUCTID) / sizeof(XBinary::XCONVERT));
