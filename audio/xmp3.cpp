@@ -154,6 +154,11 @@ QString XMP3::getVersion()
     return sResult;
 }
 
+QString XMP3::getMIMEString()
+{
+    return "audio/mpeg";
+}
+
 qint64 XMP3::decodeFrame(qint64 nOffset)
 {
     qint64 nResult = 0;
