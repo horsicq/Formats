@@ -39,6 +39,7 @@ public:
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual FT getFileType();
     virtual QString getVersion();
+    virtual QString getMIMEString();
 
     qint64 decodeFrame(qint64 nOffset);
 };

@@ -148,6 +148,7 @@ public:
     virtual qint32 getType();
     virtual OSNAME getOsName();
     virtual QString typeIdToString(qint32 nType);
+    virtual QString getMIMEString();
 
     virtual QString structIDToString(quint32 nID);
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);

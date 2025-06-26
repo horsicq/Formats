@@ -742,7 +742,7 @@ QString XMSDOS::typeIdToString(qint32 nType)
 
 QString XMSDOS::getMIMEString()
 {
-
+    return "application/x-msdos-program";
 }
 
 QString XMSDOS::structIDToString(quint32 nID)
