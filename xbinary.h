@@ -957,8 +957,6 @@ public:
                         bool bIsBigEndian = false);  // Uses UPX in header
     qint32 read_int24(qint64 nOffset, bool bIsBigEndian = false);
 
-
-
     qint64 write_ansiString(qint64 nOffset, const QString &sString, qint64 nMaxSize = -1);
     void write_ansiStringFix(qint64 nOffset, qint64 nSize, const QString &sString);
 

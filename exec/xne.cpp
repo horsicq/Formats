@@ -1040,7 +1040,7 @@ QString XNE::getArch()
 
     quint16 nOS = getImageOS2Header_exetyp();
 
-   if (nOS == 4) {
+    if (nOS == 4) {
         sResult = "386";
     } else if (nOS == 5) {
         sResult = "386";
@@ -1049,7 +1049,6 @@ QString XNE::getArch()
     } else if (nOS == 0x82) {
         sResult = "286";
     }
-
 
     return sResult;
 }
