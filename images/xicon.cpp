@@ -99,6 +99,11 @@ qint64 XIcon::getFileFormatSize(PDSTRUCT *pPdStruct)
     return _calculateRawSize(pPdStruct);
 }
 
+QString XIcon::getMIMEString()
+{
+    return QString("image/x-icon");
+}
+
 XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)

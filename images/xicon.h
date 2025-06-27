@@ -73,6 +73,7 @@ public:
     GRPICONDIRENTRY readGPRICONDIRENTRY(qint64 nOffset);
     QList<ICONDIRENTRY> getIconDirectories();
     QList<GRPICONDIRENTRY> getIconGPRDirectories();
+    virtual QString getMIMEString();
 };
 
 #endif  // XICON_H
