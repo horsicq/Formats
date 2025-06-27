@@ -66,6 +66,11 @@ qint64 XMP4::getFileFormatSize(PDSTRUCT *pPdStruct)
     return _calculateRawSize(pPdStruct);
 }
 
+QString XMP4::getMIMEString()
+{
+    return "video/mp4";
+}
+
 XBinary::_MEMORY_MAP XMP4::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)

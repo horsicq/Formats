@@ -38,6 +38,7 @@ public:
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual FT getFileType();
+    virtual QString getMIMEString();
 
 private:
     bool isTagValid(const QString &sTagName);
