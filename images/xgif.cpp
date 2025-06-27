@@ -91,6 +91,11 @@ qint64 XGif::getFileFormatSize(PDSTRUCT *pPdStruct)
     return nResult;
 }
 
+QString XGif::getMIMEString()
+{
+    return "image/gif";
+}
+
 XBinary::_MEMORY_MAP XGif::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     XBinary::PDSTRUCT pdStructEmpty = {};

@@ -550,7 +550,7 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
     for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
         DATA_RECORD dataRecord = dataRecordsOptions.dataHeader.listRecords.at(j);
 
-        QVariant variant = read_value(dataRecord.valType, nStartOffset + dataRecord.nRelOffset, dataRecord.nSize, dataRecord.endian == XBinary::ENDIAN_BIG);
+        QVariant variant = read_value(dataRecord.valType, nStartOffset + dataRecord.nRelOffset, dataRecord.nSize, dataRecord.endian == XBinary::ENDIAN_BIG, pPdStruct);
 
         pListValues->append(variant);
     }
@@ -3822,7 +3822,7 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
     return nResult;
 }
 
-QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian)
+QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     QVariant varResult;
 
@@ -3844,6 +3844,10 @@ QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bI
         varResult = read_unicodeString(nOffset, nSize, bIsBigEndian);
     } else if (valueType == XBinary::VT_PACKEDNUMBER) {
         varResult = read_packedNumber(nOffset, nSize).nValue;
+    } else if (valueType == XBinary::VT_BYTE_ARRAY) {
+        if (nSize < 32) {
+            varResult = read_array(nOffset, nSize, pPdStruct);
+        }
     } else {
 #ifdef QT_DEBUG
         qDebug() << "Unknown valueType" << valueTypeToString(valueType, nSize);

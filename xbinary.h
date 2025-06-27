@@ -1134,7 +1134,7 @@ public:
     qint64 find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, QVariant varValue, VT valueType, bool bIsBigEndian, qint64 *pnResultSize,
                       PDSTRUCT *pPdStruct = nullptr);
 
-    QVariant read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian = false);
+    QVariant read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bIsBigEndian = false, PDSTRUCT *pPdStruct = nullptr);
 
     static QString valueTypeToString(VT valueType, qint32 nSize);
     static QString getValueString(QVariant varValue, VT valueType, bool bTypesAsHex = false);
