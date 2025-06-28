@@ -488,6 +488,8 @@ public:
     virtual QString getFileFormatExtsString();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
+    virtual QString getMIMEString();
+
     struct FIXDUMP_OPTIONS {
         bool bOptimizeSize;
         bool bFixSegments;

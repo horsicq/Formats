@@ -5449,6 +5449,11 @@ qint64 XELF::getFileFormatSize(PDSTRUCT *pPdStruct)
     return nResult;
 }
 
+QString XELF::getMIMEString()
+{
+    return "application/x-elf";
+}
+
 bool XELF::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct)
 {
     bool bResult = true;

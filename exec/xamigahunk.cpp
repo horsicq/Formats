@@ -463,3 +463,4 @@ QString XAmigaHunk::typeIdToString(qint32 nType)
 
     return sResult;
 }
+
