@@ -61,6 +61,7 @@ public:
     static QString getExifCameraName(QIODevice *pDevice, OFFSETSIZE osExif, QList<CHUNK> *pListChunks);
 
     static QList<XTiff::CHUNK> getExifChunks(QIODevice *pDevice, OFFSETSIZE osExif, PDSTRUCT *pPdStruct = nullptr);
+    virtual QString getMIMEString();
 
 private:
     qint32 getBaseTypeSize(quint16 nType);

@@ -345,6 +345,11 @@ QList<XTiff::CHUNK> XTiff::getExifChunks(QIODevice *pDevice, OFFSETSIZE osExif, 
     return listResult;
 }
 
+QString XTiff::getMIMEString()
+{
+    return "image/tiff-exif";
+}
+
 qint32 XTiff::getBaseTypeSize(quint16 nType)
 {
     // 1 = BYTE 8-bit unsigned integer.
