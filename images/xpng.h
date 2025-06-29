@@ -44,6 +44,7 @@ public:
     virtual QString getFileFormatExtsString();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
+    virtual QString getMIMEString();
 
 private:
     CHUNK _readChunk(qint64 nOffset);

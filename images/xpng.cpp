@@ -100,6 +100,11 @@ qint64 XPNG::getFileFormatSize(PDSTRUCT *pPdStruct)
     return nResult;
 }
 
+QString XPNG::getMIMEString()
+{
+    return "image/png";
+}
+
 XBinary::_MEMORY_MAP XPNG::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
