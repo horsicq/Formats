@@ -169,6 +169,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_BWDOS16M, "BW DOS16M", QString("BW DOS16M")},
     {XBinary::FT_JAVACLASS, "Java Class", QString("Java Class")},
     {XBinary::FT_TTF, "TTF", QString("TTF")},
+    {XBinary::FT_DJVU, "DjVu", QString("DjVu")},
     {XBinary::FT_CFBF, "CFBF", QString("CFBF")},
     {XBinary::FT_SZDD, "SZDD", QString("SZDD")},
     {XBinary::FT_BZIP2, "BZip2", QString("BZip2")},
@@ -6026,6 +6027,8 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_CFBF);
         } else if (compareSignature(&memoryMap, "'OTTO'00", 0) || compareSignature(&memoryMap, "0001000000", 0)) {
             stResult.insert(FT_TTF);
+        } else if (compareSignature(&memoryMap, "'AT&TFORM'", 0) || compareSignature(&memoryMap, "'SDJVFORM'", 0)) {
+            stResult.insert(FT_DJVU);
         } else if (compareSignature(&memoryMap, "'SZDD'88F027'3A'", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_SZDD);
@@ -6260,6 +6263,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_XZ;
     } else if (pStFileTypes->contains(FT_TTF)) {
         result = FT_TTF;
+    } else if (pStFileTypes->contains(FT_DJVU)) {
+        result = FT_DJVU;
     } else if (pStFileTypes->contains(FT_DATA)) {
         result = FT_DATA;
     } else if (pStFileTypes->contains(FT_COM)) {
@@ -6370,6 +6375,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_DEB)) listResult.append(FT_DEB);
         if (stFileTypes.contains(FT_JAVACLASS)) listResult.append(FT_JAVACLASS);
         if (stFileTypes.contains(FT_TTF)) listResult.append(FT_TTF);
+        if (stFileTypes.contains(FT_DJVU)) listResult.append(FT_DJVU);
         if (stFileTypes.contains(FT_CFBF)) listResult.append(FT_CFBF);
         if (stFileTypes.contains(FT_SZDD)) listResult.append(FT_SZDD);
         if (stFileTypes.contains(FT_BZIP2)) listResult.append(FT_BZIP2);

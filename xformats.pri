@@ -136,6 +136,11 @@ contains(XCONFIG, use_archive) {
     include($$PWD/formats/xttf.pri)
 }
 
+!contains(XCONFIG, xdjvu) {
+    XCONFIG += xdjvu
+    include($$PWD/formats/xdjvu.pri)
+}
+
 DISTFILES += \
     $$PWD/LICENSE \
     $$PWD/README.md \

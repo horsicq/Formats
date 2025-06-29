@@ -317,6 +317,7 @@ public:
         FT_JAVACLASS,
         FT_CFBF,
         FT_TTF,
+        FT_DJVU,
         FT_SZDD,
         FT_BZIP2,
         FT_XZ

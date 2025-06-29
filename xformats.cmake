@@ -77,4 +77,6 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/formats/xjavaclass.cpp
     ${CMAKE_CURRENT_LIST_DIR}/formats/xttf.h
     ${CMAKE_CURRENT_LIST_DIR}/formats/xttf.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xdjvu.h
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xdjvu.cpp
 )

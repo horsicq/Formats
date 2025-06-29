@@ -25,6 +25,7 @@
 
 class XTTF : public XBinary {
     Q_OBJECT
+
 public:
     struct TTF_TABLE_RECORD {
         quint32 tag;  // Table name/tag (e.g. 'name', 'cmap', etc.)

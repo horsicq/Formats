@@ -42,6 +42,7 @@
 #include "xriff.h"
 #include "xjavaclass.h"
 #include "xttf.h"
+#include "xdjvu.h"
 #ifdef USE_DEX
 #include "xandroidbinary.h"
 #include "xdex.h"
