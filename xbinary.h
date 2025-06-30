@@ -625,6 +625,8 @@ public:
         VT_ANSI,
         VT_CHAR_ARRAY,
         VT_BYTE_ARRAY,
+        VT_WORD_ARRAY,
+        VT_DWORD_ARRAY,
         VT_PACKEDNUMBER
         // TODO pascal strings(A/U)
     };
@@ -754,6 +756,7 @@ public:
         DHMODE_UNKNOWN = 0,
         DHMODE_HEADER,
         DHMODE_TABLE,
+        DHMODE_HEX
     };
 
     struct DATA_HEADER {

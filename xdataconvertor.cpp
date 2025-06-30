@@ -45,9 +45,6 @@ void XDataConvertor::process()
         pPdStruct = &pdStructEmpty;
     }
 
-    QElapsedTimer scanTimer;
-    scanTimer.start();
-
     qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
     XBinary::setPdStructInit(pPdStruct, _nFreeIndex, 0);
 
@@ -229,6 +226,4 @@ void XDataConvertor::process()
     g_pData->bValid = (!pPdStruct->bIsStop);
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
-
-    emit completed(scanTimer.elapsed());
 }

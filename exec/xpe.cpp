@@ -28,6 +28,7 @@ XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
     {XPE::STRUCTID_IMAGE_FILE_HEADER, "IMAGE_FILE_HEADER", QString("IMAGE_FILE_HEADER")},
     {XPE::STRUCTID_IMAGE_OPTIONAL_HEADER32, "IMAGE_OPTIONAL_HEADER32", QString("IMAGE_OPTIONAL_HEADER32")},
     {XPE::STRUCTID_IMAGE_OPTIONAL_HEADER64, "IMAGE_OPTIONAL_HEADER64", QString("IMAGE_OPTIONAL_HEADER64")},
+    {XPE::STRUCTID_IMAGE_SECTION_HEADER, "IMAGE_SECTION_HEADER", QString("IMAGE_SECTION_HEADER")},
 };
 
 XPE::XPE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevice, bIsImage, nModuleAddress)
@@ -9344,6 +9345,19 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_FILE_HEADER, Characteristics), 2, "Characteristics", VT_WORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderCharacteristicsS(), true));
                 listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    quint32 SizeOfOptionalHeader = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, SizeOfOptionalHeader));
+                    quint32 NumberOfSections = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSections));
+
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nLocation += 4 + sizeof(XPE_DEF::IMAGE_FILE_HEADER) + SizeOfOptionalHeader;
+                    _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+                    _dataHeadersOptions.nCount = NumberOfSections;
+                    _dataHeadersOptions.nID = STRUCTID_IMAGE_SECTION_HEADER;
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_OPTIONAL_HEADER32) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER32);

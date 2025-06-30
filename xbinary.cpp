@@ -3846,8 +3846,16 @@ QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bI
     } else if (valueType == XBinary::VT_PACKEDNUMBER) {
         varResult = read_packedNumber(nOffset, nSize).nValue;
     } else if (valueType == XBinary::VT_BYTE_ARRAY) {
-        if (nSize < 32) {
+        if (nSize <= 32) {
             varResult = read_array(nOffset, nSize, pPdStruct);
+        }
+    } else if (valueType == XBinary::VT_WORD_ARRAY) {
+        if (nSize <= 32) {
+            varResult = read_array(nOffset, nSize, pPdStruct);
+        }
+    } else if (valueType == XBinary::VT_DWORD_ARRAY) {
+        if (nSize <= 32) {
+            varResult = read_array(nOffset, nSize, pPdStruct); // TODO
         }
     } else {
 #ifdef QT_DEBUG
@@ -3864,13 +3872,17 @@ QString XBinary::valueTypeToString(VT valueType, qint32 nSize)
     VT _valueType = valueType;
     bool bArray = false;
 
-    if ((valueType == VT_CHAR_ARRAY) || (valueType == VT_BYTE_ARRAY)) {
+    if ((valueType == VT_CHAR_ARRAY) || (valueType == VT_BYTE_ARRAY) || (valueType == VT_WORD_ARRAY) || (valueType == VT_DWORD_ARRAY)) {
         bArray = true;
 
         if (valueType == VT_CHAR_ARRAY) {
             _valueType = VT_CHAR;
         } else if (valueType == VT_BYTE_ARRAY) {
             _valueType = VT_BYTE;
+        } else if (valueType == VT_WORD_ARRAY) {
+            _valueType = VT_WORD;
+        } else if (valueType == VT_DWORD_ARRAY) {
+            _valueType = VT_DWORD;
         }
     }
 
