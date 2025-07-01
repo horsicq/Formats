@@ -496,13 +496,12 @@ QList<XBinary::DATA_HEADER> XFormats::getDataHeaders(XBinary::FT fileType, QIODe
     return listResult;
 }
 
-QList<XBinary::FPART> XFormats::getFileParts(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+QList<XBinary::FPART> XFormats::getFileParts(XBinary::FT fileType, QIODevice *pDevice, quint32 nFileParts, qint32 nLimit, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
 {
     QList<XBinary::FPART> listResult;
 
     XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
-    XBinary::_MEMORY_MAP memoryMap = pBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
-    listResult = pBinary->getFileParts(&memoryMap, pPdStruct);
+    listResult = pBinary->getFileParts(nFileParts, nLimit, pPdStruct);
     delete pBinary;
 
     return listResult;

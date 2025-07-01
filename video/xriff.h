@@ -39,6 +39,7 @@ public:
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual FT getFileType();
     virtual ENDIAN getEndian();
+    virtual QString getMIMEString();
 };
 
 #endif  // XRIFF_H

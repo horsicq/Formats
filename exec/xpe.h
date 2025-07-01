@@ -1316,7 +1316,7 @@ public:
     quint64 getImageOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pHeader, const QString &sString);
     quint64 getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader, QString sString);
 
-    virtual QList<FPART> getFileParts(PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QString structIDToString(quint32 nID);
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);

@@ -88,10 +88,16 @@ XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
-    {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},        {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
-    {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},        {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
-    {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},     {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},
-    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")}, {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")}};
+    {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
+    {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},
+    {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
+    {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},
+    {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},
+    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")},
+    {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")},
+    {XBinary::FILEPART_SIGNATURE, "Signature", QObject::tr("Signature")},
+};
 
 XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -8419,26 +8425,24 @@ void XBinary::dumpHeaders()
 #endif
 }
 
-QString XBinary::getMIMEString()
-{
-    return "application/octet-stream";
-}
-
-QList<XBinary::FPART> XBinary::getFileParts(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+QList<XBinary::FPART> XBinary::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::FPART> listResult;
 
-    if (isOverlayPresent(pMemoryMap, pPdStruct)) {
-        XBinary::FPART fpart = {};
-        fpart.nOffset = getOverlayOffset(pMemoryMap, pPdStruct);
-        fpart.nSize = getOverlaySize(pMemoryMap, pPdStruct);
-        fpart.sName = tr("Overlay");
-        fpart.filePart = FILEPART_OVERLAY;
+    XBinary::FPART fpart = {};
+    fpart.nFileOffset = 0;
+    fpart.nFileSize = getSize();
+    fpart.sOriginalName = tr("Data");
+    fpart.filePart = FILEPART_REGION;
 
-        listResult.append(fpart);
-    }
+    listResult.append(fpart);
 
     return listResult;
+}
+
+QString XBinary::getMIMEString()
+{
+    return "application/octet-stream";
 }
 
 QList<XBinary::FMT_MSG> XBinary::checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct)

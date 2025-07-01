@@ -94,7 +94,7 @@ public:
     static QList<XBinary::DATA_HEADER> getDataHeaders(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_HEADERS_OPTIONS &dataHeadersOptions,
                                                       bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
 
-    static QList<XBinary::FPART> getFileParts(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
+    static QList<XBinary::FPART> getFileParts(XBinary::FT fileType, QIODevice *pDevice, quint32 nFileParts, qint32 nLimit = -1, bool bIsImage = false, XADDR nModuleAddress = -1,
                                               XBinary::PDSTRUCT *pPdStruct = nullptr);
 
     static QString getFileFormatExtsString(XBinary::FT fileType);

@@ -9501,7 +9501,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
     return listResult;
 }
 
-QList<XBinary::FPART> XPE::getFileParts(PDSTRUCT *pPdStruct)
+QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::FPART> listResult;
 
@@ -9522,9 +9522,9 @@ QList<XBinary::FPART> XPE::getFileParts(PDSTRUCT *pPdStruct)
             if (checkOffsetSize(nResourceOffset, nResourceSize)) {
                 FPART record = {};
                 record.filePart = XBinary::FILEPART_RESOURCE;
-                record.nOffset = nResourceOffset;
-                record.nSize = nResourceSize;
-                record.sName = QString("%1 %2").arg(tr("Resource"), QString::number(i + 1));
+                record.nFileOffset = nResourceOffset;
+                record.nFileSize = nResourceSize;
+                record.sOriginalName = QString("%1 %2").arg(tr("Resource"), QString::number(i + 1));
 
                 listResult.append(record);
             }
@@ -9552,9 +9552,9 @@ QList<XBinary::FPART> XPE::getFileParts(PDSTRUCT *pPdStruct)
                 if (checkOffsetSize(nRecordOffset, nRecordSize)) {
                     FPART record = {};
                     record.filePart = XBinary::FILEPART_DEBUGDATA;
-                    record.nOffset = nRecordOffset;
-                    record.nSize = nRecordSize;
-                    record.sName = QString("%1 %2").arg(tr("Debug data"), nRecordType);
+                    record.nFileOffset = nRecordOffset;
+                    record.nFileSize = nRecordSize;
+                    record.sOriginalName = QString("%1 %2").arg(tr("Debug data"), nRecordType);
 
                     listResult.append(record);
                 }
@@ -9569,9 +9569,9 @@ QList<XBinary::FPART> XPE::getFileParts(PDSTRUCT *pPdStruct)
     if (isOverlayPresent(&memoryMap, pPdStruct)) {
         FPART record = {};
         record.filePart = XBinary::FILEPART_OVERLAY;
-        record.nOffset = getOverlayOffset(&memoryMap, pPdStruct);
-        record.nSize = getOverlaySize(&memoryMap, pPdStruct);
-        record.sName = QString("%1").arg(tr("Overlay"));
+        record.nFileOffset = getOverlayOffset(&memoryMap, pPdStruct);
+        record.nFileSize = getOverlaySize(&memoryMap, pPdStruct);
+        record.sOriginalName = QString("%1").arg(tr("Overlay"));
 
         listResult.append(record);
     }

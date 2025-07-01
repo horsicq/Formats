@@ -194,13 +194,18 @@ public:
 
     enum FILEPART {
         FILEPART_UNKNOWN = 0,
-        FILEPART_REGION,
-        FILEPART_ARCHIVERECORD,
-        FILEPART_HEADER,
-        FILEPART_OVERLAY,
-        FILEPART_RESOURCE,
-        FILEPART_DEBUGDATA,
-        FILEPART_STREAM,
+        FILEPART_REGION = 1 << 0,
+        FILEPART_SECTION = 1 << 1,
+        FILEPART_SEGMENT = 1 << 2,
+        FILEPART_ARCHIVERECORD = 1 << 3,
+        FILEPART_HEADER = 1 << 4,
+        FILEPART_OVERLAY = 1 << 5,
+        FILEPART_RESOURCE = 1 << 6,
+        FILEPART_DEBUGDATA = 1 << 7,
+        FILEPART_STREAM = 1 << 8,
+        FILEPART_SIGNATURE = 1 << 9,
+        FILEPART_FOOTER = 1 << 10,
+        FILEPART_ALL = 0xFFFFFFFF,
     };
 
     enum MMT {
@@ -221,12 +226,12 @@ public:
         XADDR nAddress;
         ADDRESS_SEGMENT segment;
         qint64 nSize;
-        MMT type;
+        MMT type; // TODO Use File_Part
         qint32 nLoadSectionNumber;
         QString sName;
         qint32 nIndex;
         bool bIsVirtual;
-        bool bIsInvisible;
+        bool bIsInvisible; // TODO
         quint64 nID;
     };
 
@@ -1835,13 +1840,15 @@ public:
     void dumpHeaders();
 
     struct FPART {
-        qint64 nOffset;
-        qint64 nSize;
-        QString sName;
+        qint64 nFileOffset;
+        qint64 nFileSize;
+        XADDR nVirtualAddress;
+        qint64 nVirtualSize;
+        QString sOriginalName;
         FILEPART filePart;
     };
 
-    virtual QList<FPART> getFileParts(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

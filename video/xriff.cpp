@@ -83,6 +83,23 @@ qint64 XRiff::getFileFormatSize(PDSTRUCT *pPdStruct)
     return _calculateRawSize(pPdStruct);
 }
 
+QString XRiff::getMIMEString()
+{
+    QString sResult;
+
+    QString sTag = read_ansiString(0, 4);
+
+    if (sTag == "RIFF") {
+        sResult = "audio/x-wav";
+    } else if (sTag == "RIFX") {
+        sResult = "audio/x-aiff";
+    } else if (sTag == "AIFF") {
+        sResult = "audio/x-aiff";
+    }
+
+    return sResult;
+}
+
 XBinary::_MEMORY_MAP XRiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
