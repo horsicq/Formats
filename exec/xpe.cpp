@@ -9662,7 +9662,7 @@ QList<QString> XPE::getAnsiStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
     qint32 _nSize = pCliInfo->metaData.baStrings.size();
 
     // TODO UTF8
-    for (qint32 i = 1; (i < _nSize) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 1; (i < _nSize) && (pPdStruct && !(pPdStruct->bIsStop)); i++) {
         _pOffset++;
         QString sTemp = _pOffset;
         listResult.append(sTemp);
@@ -9684,7 +9684,7 @@ QList<QString> XPE::getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
 
     pStringCurrentOffsetOffset++;
 
-    for (qint32 i = 1; (i < _nSize) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 1; (i < _nSize) && (pPdStruct && !(pPdStruct->bIsStop)); i++) {
         qint32 nStringSize = (*((unsigned char *)pStringCurrentOffsetOffset));
 
         if (nStringSize == 0x80) {
@@ -10409,7 +10409,7 @@ bool XPE::isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString
         }
 
         if (bProcess) {
-            for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+            for (qint32 i = 0; (i < nNumberOfRecords) && (pPdStruct && !(pPdStruct->bIsStop)); i++) {
                 XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
 
                 QString _sTypeName;
