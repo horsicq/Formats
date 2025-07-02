@@ -899,8 +899,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             record.nSize = nFileSize;
             record.nOffset = nFileOffset;
             record.nAddress = (i + 1) * 0x10000;  // TODO const
-            record.segment = ADDRESS_SEGMENT_UNKNOWN;
-            record.type = MMT_LOADSEGMENT;
+            record.filePart = FILEPART_SEGMENT;
             record.nIndex = nIndex++;
 
             result.listRecords.append(record);
@@ -911,8 +910,7 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             record.nSize = 0x10000 - nFileSize;
             record.nOffset = -1;
             record.nAddress = (i + 1) * 0x10000 + nFileSize;  // TODO const
-            record.segment = ADDRESS_SEGMENT_UNKNOWN;
-            record.type = MMT_LOADSEGMENT;
+            record.filePart = FILEPART_SEGMENT;
             record.nIndex = nIndex++;
             record.bIsVirtual = true;
 

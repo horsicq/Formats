@@ -127,7 +127,7 @@ XBinary::_MEMORY_MAP XRiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         _MEMORY_RECORD record = {};
 
         record.nIndex = nIndex++;
-        record.type = MMT_FILESEGMENT;
+        record.filePart = FILEPART_REGION;
         record.nOffset = nOffset;
         record.nSize = nChunkSize + 8;
         record.nAddress = -1;

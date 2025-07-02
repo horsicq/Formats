@@ -406,8 +406,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
         record.nSize = nHeaderSize;
         record.nOffset = nHeaderOffset;
         record.nAddress = -1;
-        record.segment = ADDRESS_SEGMENT_UNKNOWN;
-        record.type = MMT_HEADER;
+        record.filePart = FILEPART_HEADER;
         record.nIndex = nIndex++;
 
         result.listRecords.append(record);
@@ -425,8 +424,8 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
         record.nOffset = nHeaderSize;
         record.nAddress = nSegmentIndex * 0x10000000;
 
-        record.segment = ADDRESS_SEGMENT_CODE;  // CODE
-        record.type = MMT_LOADSEGMENT;
+        // record.segment = ADDRESS_SEGMENT_CODE;  // CODE
+        record.filePart = FILEPART_SEGMENT;
         record.nIndex = nIndex++;
 
         result.listRecords.append(record);
@@ -442,7 +441,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     //     record.nAddress = nSegmentIndex * 0x10000000;
 
     //     record.segment = ADDRESS_SEGMENT_CODE;  // CODE
-    //     record.type = MMT_LOADSEGMENT;
+    //     record.filePart= FILEPART_SEGMENT;
     //     record.nIndex = nIndex++;
 
     //     result.nCodeBase = record.nAddress;

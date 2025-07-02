@@ -162,10 +162,10 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     {
         _MEMORY_RECORD record = {};
         record.nAddress = -1;
-        record.segment = ADDRESS_SEGMENT_FLAT;
+        
         record.nOffset = 0;
         record.nSize = nHeaderSize;
-        record.type = MMT_HEADER;
+        record.filePart = FILEPART_HEADER;
         record.nIndex = nIndex++;
         record.sName = tr("Header");
         memoryMap.listRecords.append(record);
@@ -178,10 +178,9 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         {
             _MEMORY_RECORD rec = {};
             rec.nAddress = -1;
-            rec.segment = ADDRESS_SEGMENT_FLAT;
             rec.nOffset = nOffset;
             rec.nSize = patternHeaderSize;
-            rec.type = MMT_TABLE;
+            rec.filePart = FILEPART_TABLE;
             rec.nIndex = nIndex++;
             rec.sName = QString("Pattern %1 header").arg(i);
             memoryMap.listRecords.append(rec);
@@ -191,10 +190,9 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         if (patternHeader.packed_data_size > 0) {
             _MEMORY_RECORD rec = {};
             rec.nAddress = -1;
-            rec.segment = ADDRESS_SEGMENT_FLAT;
             rec.nOffset = nOffset;
             rec.nSize = patternHeader.packed_data_size;
-            rec.type = MMT_DATA;
+            rec.filePart =FILEPART_DATA;
             rec.nIndex = nIndex++;
             rec.sName = QString("Pattern %1 data").arg(i);
             memoryMap.listRecords.append(rec);
@@ -212,10 +210,9 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         {
             _MEMORY_RECORD rec = {};
             rec.nAddress = -1;
-            rec.segment = ADDRESS_SEGMENT_FLAT;
             rec.nOffset = nOffset;
             rec.nSize = instrumentHeaderSize;
-            rec.type = MMT_TABLE;
+            rec.filePart = FILEPART_TABLE;
             rec.nIndex = nIndex++;
             rec.sName = QString("Instrument %1 header").arg(i);
             memoryMap.listRecords.append(rec);
@@ -229,10 +226,9 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             {
                 _MEMORY_RECORD rec = {};
                 rec.nAddress = -1;
-                rec.segment = ADDRESS_SEGMENT_FLAT;
                 rec.nOffset = nExtraOffset;
                 rec.nSize = sizeof(INSTRUMENT_EXTRA_HEADER);
-                rec.type = MMT_TABLE;
+                rec.filePart = FILEPART_TABLE;
                 rec.nIndex = nIndex++;
                 rec.sName = QString("Instrument %1 extra header").arg(i);
                 memoryMap.listRecords.append(rec);
@@ -243,10 +239,9 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 SAMPLE_HEADER sampleHeader = _read_SAMPLE_HEADER(nSampleHeadersOffset + j * sizeof(SAMPLE_HEADER));
                 _MEMORY_RECORD rec = {};
                 rec.nAddress = -1;
-                rec.segment = ADDRESS_SEGMENT_FLAT;
                 rec.nOffset = nSampleHeadersOffset + j * sizeof(SAMPLE_HEADER);
                 rec.nSize = sizeof(SAMPLE_HEADER);
-                rec.type = MMT_TABLE;
+                rec.filePart = FILEPART_TABLE;
                 rec.nIndex = nIndex++;
                 rec.sName = QString("Instrument %1 Sample header %2").arg(i).arg(j);
                 memoryMap.listRecords.append(rec);
@@ -260,10 +255,9 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 if (sampleHeader.sample_length > 0) {
                     _MEMORY_RECORD rec = {};
                     rec.nAddress = -1;
-                    rec.segment = ADDRESS_SEGMENT_FLAT;
                     rec.nOffset = nSampleDataOffset;
                     rec.nSize = sampleHeader.sample_length;
-                    rec.type = MMT_DATA;
+                    rec.filePart =FILEPART_DATA;
                     rec.nIndex = nIndex++;
                     rec.sName = QString("Instrument %1 Sample data %2").arg(i).arg(j);
                     memoryMap.listRecords.append(rec);

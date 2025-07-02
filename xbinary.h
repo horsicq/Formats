@@ -185,12 +185,12 @@ public:
         qint64 nSize;
     };
 
-    enum ADDRESS_SEGMENT {
-        ADDRESS_SEGMENT_UNKNOWN = -1,
-        ADDRESS_SEGMENT_FLAT = 0,
-        ADDRESS_SEGMENT_CODE,
-        //        ADDRESS_SEGMENT_DATA
-    };
+    // enum ADDRESS_SEGMENT {
+    //     ADDRESS_SEGMENT_UNKNOWN = -1,
+    //     ADDRESS_SEGMENT_FLAT = 0,
+    //     ADDRESS_SEGMENT_CODE,
+    //     //        ADDRESS_SEGMENT_DATA
+    // };
 
     enum FILEPART {
         FILEPART_UNKNOWN = 0,
@@ -205,34 +205,38 @@ public:
         FILEPART_STREAM = 1 << 8,
         FILEPART_SIGNATURE = 1 << 9,
         FILEPART_FOOTER = 1 << 10,
+        FILEPART_DATA = 1 << 12,
+        FILEPART_OBJECT = 1 << 13,
+        FILEPART_TABLE = 1 << 14,
         FILEPART_ALL = 0xFFFFFFFF,
     };
 
-    enum MMT {
-        MMT_UNKNOWN = 0,
-        MMT_HEADER,
-        MMT_FOOTER,
-        MMT_LOADSEGMENT,  // Section in PE; LoadProgram in ELF; Segments in MACH
-        MMT_NOLOADABLE,   // For ELF TODO Check
-        MMT_FILESEGMENT,
-        MMT_OVERLAY,
-        MMT_DATA,
-        MMT_OBJECT,
-        MMT_TABLE
-    };
+    // enum MMT {
+    //     MMT_UNKNOWN = 0,
+    //     MMT_HEADER,
+    //     MMT_FOOTER,
+    //     MMT_LOADSEGMENT,  // Section in PE; LoadProgram in ELF; Segments in MACH
+    //     MMT_NOLOADABLE,   // For ELF TODO Check
+    //     MMT_FILESEGMENT,
+    //     MMT_OVERLAY,
+    //     MMT_DATA,
+    //     MMT_OBJECT,
+    //     MMT_TABLE
+    // };
 
     struct _MEMORY_RECORD {
         qint64 nOffset;
         XADDR nAddress;
-        ADDRESS_SEGMENT segment;
+        // ADDRESS_SEGMENT segment;
         qint64 nSize;
-        MMT type; // TODO Use File_Part
-        qint32 nLoadSectionNumber;
+        // MMT type; // TODO Use File_Part
+        FILEPART filePart;  // File_Part
+        qint32 filePartNumber;
         QString sName;
         qint32 nIndex;
         bool bIsVirtual;
         bool bIsInvisible; // TODO
-        quint64 nID;
+        // quint64 nID;
     };
 
     enum FORMATTYPE {
@@ -531,7 +535,7 @@ public:
         QString sOsBuild;
         bool bIsVM;
         // For archives and PDF
-        qint32 nNumberOfRecords;
+        qint32 nNumberOfRecords; // TODO move
     };
 
     struct _MEMORY_MAP {
@@ -1230,8 +1234,8 @@ public:
 
     static qint32 getMemoryIndexByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
 
-    static qint32 addressToLoadSection(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
-    static qint32 relAddressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
+    static qint32 addressToFileTypeNumber(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
+    static qint32 relAddressToFileTypeNumber(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
     static bool isAddressInHeader(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
     static bool isRelAddressInHeader(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress);
 
@@ -1253,13 +1257,16 @@ public:
         MAPMODE_SEGMENTS,
         MAPMODE_SECTIONS,
         MAPMODE_OBJECTS,
+        MAPMODE_STREAMS,
         MAPMODE_MAPS,
+        MAPMODE_DATA
     };
 
     static QString mapModeToString(MAPMODE mapMode);
 
     virtual QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
+    _MEMORY_MAP _getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QList<HREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<HREGION> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);
@@ -1268,7 +1275,7 @@ public:
 
     static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);
     static qint32 getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap);
-    static qint32 getNumberOfMemoryMapTypeRecords(_MEMORY_MAP *pMemoryMap, MMT type);
+    static qint32 getNumberOfMemoryMapFileParts(_MEMORY_MAP *pMemoryMap, FILEPART filePart);
     static qint64 getRecordsTotalRowSize(_MEMORY_MAP *pMemoryMap);
 
     virtual XADDR getBaseAddress();

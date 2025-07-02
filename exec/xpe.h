@@ -1325,7 +1325,7 @@ private:
     quint16 _checkSum(qint64 nStartValue, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);
     RESOURCE_POSITION _getResourcePosition(_MEMORY_MAP *pMemoryMap, qint64 nBaseAddress, qint64 nResourceOffset, qint64 nOffset, quint32 nLevel);
     qint64 _fixHeadersSize();
-    qint64 _getMinSectionOffset();  // TODO move to XBinary
+    // qint64 _getMinSectionOffset();  // TODO move to XBinary
     void _fixFileOffsets(qint64 nDelta);
     quint32 __getResourcesVersion(RESOURCES_VERSION *pResourcesVersionResult, qint64 nOffset, qint64 nSize, const QString &sPrefix, qint32 nLevel);
 };

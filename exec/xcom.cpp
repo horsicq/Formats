@@ -91,7 +91,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdS
 
     _MEMORY_RECORD record = {};
     record.nAddress = 0;
-    record.segment = ADDRESS_SEGMENT_FLAT;
+
     record.nOffset = -1;
     record.nSize = XCOM_DEF::ADDRESS_BEGIN;
     record.nIndex++;
@@ -101,7 +101,6 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdS
 
     _MEMORY_RECORD recordMain = {};
     recordMain.nAddress = XCOM_DEF::ADDRESS_BEGIN;
-    recordMain.segment = ADDRESS_SEGMENT_FLAT;
     recordMain.nOffset = 0;
     recordMain.nSize = nCodeSize;
     recordMain.nIndex++;
@@ -113,7 +112,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdS
     if (nVirtualSize > 0) {
         _MEMORY_RECORD record = {};
         record.nAddress = XCOM_DEF::ADDRESS_BEGIN + nCodeSize;
-        record.segment = ADDRESS_SEGMENT_FLAT;
+
         record.nOffset = -1;
         record.nSize = nVirtualSize;
         record.nIndex++;

@@ -1913,9 +1913,8 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         QString sHeaderName = tr("Header");
 
         if (!isImage()) {
-            recordHeaderRaw.type = MMT_HEADER;
+            recordHeaderRaw.filePart = FILEPART_HEADER;
             recordHeaderRaw.nAddress = result.nModuleAddress;
-            recordHeaderRaw.segment = ADDRESS_SEGMENT_FLAT;
             recordHeaderRaw.nOffset = 0;
             recordHeaderRaw.nSize = nHeadersSize;
             recordHeaderRaw.sName = sHeaderName;
@@ -1925,11 +1924,10 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
             if (nVirtualSizeofHeaders - nHeadersSize) {
                 _MEMORY_RECORD record = {};
-                record.type = MMT_HEADER;
+                record.filePart = FILEPART_HEADER;
                 record.bIsVirtual = true;
 
                 record.nAddress = result.nModuleAddress + nHeadersSize;
-                recordHeaderRaw.segment = ADDRESS_SEGMENT_FLAT;
                 record.nOffset = -1;
                 record.nSize = nVirtualSizeofHeaders - nHeadersSize;
                 record.sName = sHeaderName;
@@ -1938,9 +1936,8 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 result.listRecords.append(record);
             }
         } else {
-            recordHeaderRaw.type = MMT_HEADER;
+            recordHeaderRaw.filePart = FILEPART_HEADER;
             recordHeaderRaw.nAddress = result.nModuleAddress;
-            recordHeaderRaw.segment = ADDRESS_SEGMENT_FLAT;
             recordHeaderRaw.nOffset = 0;
             recordHeaderRaw.nSize = nVirtualSizeofHeaders;
             recordHeaderRaw.sName = sHeaderName;
@@ -2000,9 +1997,9 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 if (nFileSize) {
                     _MEMORY_RECORD record = {};
 
-                    record.type = MMT_LOADSEGMENT;
-                    record.nLoadSectionNumber = i;
-                    record.segment = ADDRESS_SEGMENT_FLAT;
+                    record.filePart = FILEPART_SECTION;
+                    record.filePartNumber = i;
+
                     record.nAddress = nVirtualAddress;
                     record.nOffset = nFileOffset;
                     record.nSize = nFileSize;
@@ -2016,9 +2013,9 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     _MEMORY_RECORD record = {};
                     record.bIsVirtual = true;
 
-                    record.type = MMT_LOADSEGMENT;
-                    record.nLoadSectionNumber = i;
-                    record.segment = ADDRESS_SEGMENT_FLAT;
+                    record.filePart = FILEPART_SECTION;
+                    record.filePartNumber = i;
+
                     record.nAddress = nVirtualAddress + nFileSize;
                     record.nOffset = -1;
                     record.nSize = nVirtualSize - nFileSize;
@@ -2030,9 +2027,9 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             } else {
                 _MEMORY_RECORD record = {};
 
-                record.type = MMT_LOADSEGMENT;
-                record.nLoadSectionNumber = i;
-                record.segment = ADDRESS_SEGMENT_FLAT;
+                record.filePart = FILEPART_SECTION;
+                record.filePartNumber = i;
+
                 record.nAddress = nVirtualAddress;
                 record.nOffset = nVirtualAddress - result.nModuleAddress;
                 record.nSize = nVirtualSize;
@@ -9662,7 +9659,7 @@ QList<QString> XPE::getAnsiStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
     qint32 _nSize = pCliInfo->metaData.baStrings.size();
 
     // TODO UTF8
-    for (qint32 i = 1; (i < _nSize) && (pPdStruct && !(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 1; (i < _nSize) && isPdStructNotCanceled(pPdStruct); i++) {
         _pOffset++;
         QString sTemp = _pOffset;
         listResult.append(sTemp);
@@ -9684,7 +9681,7 @@ QList<QString> XPE::getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
 
     pStringCurrentOffsetOffset++;
 
-    for (qint32 i = 1; (i < _nSize) && (pPdStruct && !(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 1; (i < _nSize) && isPdStructNotCanceled(pPdStruct); i++) {
         qint32 nStringSize = (*((unsigned char *)pStringCurrentOffsetOffset));
 
         if (nStringSize == 0x80) {
@@ -10409,7 +10406,7 @@ bool XPE::isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString
         }
 
         if (bProcess) {
-            for (qint32 i = 0; (i < nNumberOfRecords) && (pPdStruct && !(pPdStruct->bIsStop)); i++) {
+            for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
                 XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
 
                 QString _sTypeName;
@@ -10435,7 +10432,7 @@ bool XPE::isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString
                         nMethodsCount = nNumberOfMethodsPtrRecords - record.nMethodList;
                     }
 
-                    for (qint32 j = 0; (j < nMethodsCount) && (!(pPdStruct->bIsStop)); j++) {
+                    for (qint32 j = 0; (j < nMethodsCount) && isPdStructNotCanceled(pPdStruct); j++) {
                         if (record.nMethodList) {
                             QString _sMethodName;
 
@@ -11124,7 +11121,7 @@ qint32 XPE::getEntryPointSection(_MEMORY_MAP *pMemoryMap)
     XADDR nAddressOfEntryPoint = getOptionalHeader_AddressOfEntryPoint();
 
     if (nAddressOfEntryPoint) {
-        nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + nAddressOfEntryPoint);
+        nResult = addressToFileTypeNumber(pMemoryMap, getModuleAddress() + nAddressOfEntryPoint);
     }
 
     return nResult;
@@ -11179,7 +11176,7 @@ qint32 XPE::getImageDirectoryEntrySection(_MEMORY_MAP *pMemoryMap, qint32 nImage
     XADDR nAddressOfRecord = getOptionalHeader_DataDirectory(nImageDirectoryEntry).VirtualAddress;
 
     if (nAddressOfRecord) {
-        nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + nAddressOfRecord);
+        nResult = addressToFileTypeNumber(pMemoryMap, getModuleAddress() + nAddressOfRecord);
     }
 
     return nResult;
@@ -11210,7 +11207,7 @@ qint32 XPE::getNormalCodeSection(_MEMORY_MAP *pMemoryMap)
         // .textbss
         // 0x60500060 mingw
         if ((((sSectionName == "CODE") || sSectionName == ".text")) && (nSectionCharacteristics == 0x60000020) && (listSections.at(i).SizeOfRawData)) {
-            nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
+            nResult = addressToFileTypeNumber(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
             break;
         }
     }
@@ -11218,7 +11215,7 @@ qint32 XPE::getNormalCodeSection(_MEMORY_MAP *pMemoryMap)
     if (nResult == -1) {
         if (nNumberOfSections > 0) {
             if (listSections.at(0).SizeOfRawData) {
-                nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + listSections.at(0).VirtualAddress);
+                nResult = addressToFileTypeNumber(pMemoryMap, getModuleAddress() + listSections.at(0).VirtualAddress);
             }
         }
     }
@@ -11254,7 +11251,7 @@ qint32 XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
 
         if ((((sSectionName == "DATA") || sSectionName == ".data")) && (nSectionCharacteristics == 0xC0000040) && (listSections.at(i).SizeOfRawData) &&
             (nImportSection != i)) {
-            nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
+            nResult = addressToFileTypeNumber(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
             break;
         }
     }
@@ -11263,7 +11260,7 @@ qint32 XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
         for (qint32 i = 1; i < nNumberOfSections; i++) {
             if (listSections.at(i).SizeOfRawData && (nImportSection != i) && (listSections.at(i).Characteristics != 0x60000020) &&
                 (listSections.at(i).Characteristics != 0x40000040)) {
-                nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
+                nResult = addressToFileTypeNumber(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
                 break;
             }
         }
@@ -11297,7 +11294,7 @@ qint32 XPE::getConstDataSection(_MEMORY_MAP *pMemoryMap)
         nSectionCharacteristics &= 0xFF0000FF;
 
         if ((sSectionName == ".rdata") && (nSectionCharacteristics == 0x40000040) && (listSections.at(i).SizeOfRawData)) {
-            nResult = addressToLoadSection(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
+            nResult = addressToFileTypeNumber(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
             break;
         }
     }
@@ -11615,26 +11612,26 @@ qint64 XPE::_fixHeadersSize()
     return nHeadersSize;
 }
 
-qint64 XPE::_getMinSectionOffset()
-{
-    qint64 nResult = -1;
+// qint64 XPE::_getMinSectionOffset()
+// {
+//     qint64 nResult = -1;
 
-    _MEMORY_MAP memoryMap = getMemoryMap();
+//     _MEMORY_MAP memoryMap = getMemoryMap();
 
-    qint32 nNumberOfRecords = memoryMap.listRecords.count();
+//     qint32 nNumberOfRecords = memoryMap.listRecords.count();
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (memoryMap.listRecords.at(i).type == MMT_LOADSEGMENT) {
-            if (nResult == -1) {
-                nResult = memoryMap.listRecords.at(i).nOffset;
-            } else {
-                nResult = qMin(nResult, memoryMap.listRecords.at(i).nOffset);
-            }
-        }
-    }
+//     for (qint32 i = 0; i < nNumberOfRecords; i++) {
+//         if (memoryMap.listRecords.at(i).type == MMT_LOADSEGMENT) {
+//             if (nResult == -1) {
+//                 nResult = memoryMap.listRecords.at(i).nOffset;
+//             } else {
+//                 nResult = qMin(nResult, memoryMap.listRecords.at(i).nOffset);
+//             }
+//         }
+//     }
 
-    return nResult;
-}
+//     return nResult;
+// }
 
 void XPE::_fixFileOffsets(qint64 nDelta)
 {

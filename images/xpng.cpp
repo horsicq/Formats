@@ -117,7 +117,7 @@ XBinary::_MEMORY_MAP XPNG::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         _MEMORY_RECORD record = {};
 
         record.nIndex = nIndex++;
-        record.type = MMT_HEADER;
+        record.filePart = FILEPART_HEADER;
         record.nOffset = 0;
         record.nSize = 8;
         record.nAddress = -1;
@@ -135,7 +135,7 @@ XBinary::_MEMORY_MAP XPNG::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
         record.nIndex = nIndex++;
 
-        record.type = MMT_OBJECT;
+        record.filePart = FILEPART_OBJECT;
 
         record.nOffset = nOffset;
         record.nSize = 12 + chunk.nDataSize;

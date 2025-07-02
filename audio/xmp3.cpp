@@ -92,7 +92,7 @@ XBinary::_MEMORY_MAP XMP3::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             _MEMORY_RECORD record = {};
 
             record.nIndex = nIndex++;
-            record.type = MMT_HEADER;
+            record.filePart = FILEPART_HEADER;
             record.nOffset = 0;
             record.nSize = nOffset;
             record.nAddress = -1;
@@ -110,7 +110,7 @@ XBinary::_MEMORY_MAP XMP3::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 _MEMORY_RECORD record = {};
 
                 record.nIndex = nIndex++;
-                record.type = MMT_FILESEGMENT;
+                record.filePart = FILEPART_REGION;
                 record.nOffset = nOffset;
                 record.nSize = nFrameSize;
                 record.nAddress = -1;

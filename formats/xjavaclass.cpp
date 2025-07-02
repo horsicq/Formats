@@ -349,7 +349,7 @@ XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
     record.nIndex = 0;
     record.sName = tr("Data");
     record.nIndex = nIndex++;
-    record.type = MMT_DATA;
+    record.filePart =FILEPART_DATA;
 
     result.listRecords.append(record);
 

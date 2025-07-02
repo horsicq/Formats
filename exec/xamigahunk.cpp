@@ -84,7 +84,7 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
             HUNK hunk = listHunks.at(i);
             _MEMORY_RECORD record = {};
             record.nIndex = nIndex++;
-            record.type = MMT_FILESEGMENT;
+            record.filePart = FILEPART_REGION;
             record.nOffset = hunk.nOffset;
             record.nSize = hunk.nSize;
             record.nAddress = hunk.nOffset;
@@ -110,7 +110,7 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
                 {
                     _MEMORY_RECORD record = {};
                     record.nIndex = nIndex++;
-                    record.type = MMT_NOLOADABLE;
+                    record.filePart = FILEPART_REGION;
                     record.nOffset = hunk.nOffset;
                     record.nSize = 8;
                     record.nAddress = -1;
@@ -121,7 +121,7 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
                 {
                     _MEMORY_RECORD record = {};
                     record.nIndex = nIndex++;
-                    record.type = MMT_LOADSEGMENT;
+                    record.filePart = FILEPART_REGION;
                     record.nSize = hunk.nSize - 8;
                     record.nAddress = nCurrentAddress;
 
@@ -150,7 +150,7 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
             } else {
                 _MEMORY_RECORD record = {};
                 record.nIndex = nIndex++;
-                record.type = MMT_FILESEGMENT;
+                record.filePart = FILEPART_REGION;
                 record.nOffset = hunk.nOffset;
                 record.nSize = hunk.nSize;
                 record.nAddress = -1;

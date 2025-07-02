@@ -125,21 +125,18 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     _MEMORY_RECORD headerRecord = {};
     headerRecord.nOffset = 0;
     headerRecord.nAddress = -1;
-    headerRecord.segment = ADDRESS_SEGMENT_FLAT;
     headerRecord.nSize = 14 + infoHeader.biSize;
-    headerRecord.type = MMT_HEADER;
+    headerRecord.filePart = FILEPART_HEADER;
     headerRecord.sName = "Header";
     headerRecord.nIndex = 0;
-    headerRecord.nID = 0;
     result.listRecords.append(headerRecord);
 
     // Add Bitmap Data (Object)
     _MEMORY_RECORD objectRecord = {};
     objectRecord.nOffset = fileHeader.bfOffBits;
     objectRecord.nAddress = -1;
-    objectRecord.segment = ADDRESS_SEGMENT_FLAT;
     objectRecord.nSize = fileHeader.bfSize - fileHeader.bfOffBits;
-    objectRecord.type = MMT_DATA;
+    objectRecord.filePart =FILEPART_DATA;
     objectRecord.sName = "Bitmap Data";
     objectRecord.nIndex = 1;
     result.listRecords.append(objectRecord);

@@ -29,6 +29,15 @@ bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_ME
     }
 }
 
+bool compareFileParts(const XBinary::FPART &a, const XBinary::FPART &b)
+{
+    if ((a.nVirtualAddress != -1) && (b.nVirtualAddress != -1)) {
+        return a.nVirtualAddress < b.nVirtualAddress;
+    } else {
+        return a.nFileOffset < b.nFileOffset;
+    }
+}
+
 const quint32 _crc32_EDB88320_tab[] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b,
     0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7, 0x136c9856, 0x646ba8c0,
@@ -5040,30 +5049,18 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByRelAddress(XBinary::_MEMORY_MA
     return result;
 }
 
-qint32 XBinary::addressToLoadSection(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
+qint32 XBinary::addressToFileTypeNumber(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
-    qint32 nResult = -1;
-
     _MEMORY_RECORD mm = getMemoryRecordByAddress(pMemoryMap, nAddress);
 
-    if (mm.type == MMT_LOADSEGMENT) {
-        nResult = mm.nLoadSectionNumber;
-    }
-
-    return nResult;
+    return mm.filePartNumber;;
 }
 
-qint32 XBinary::relAddressToLoadSection(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
+qint32 XBinary::relAddressToFileTypeNumber(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
 {
-    qint32 nResult = -1;
-
     _MEMORY_RECORD mm = getMemoryRecordByRelAddress(pMemoryMap, nRelAddress);
 
-    if (mm.type == MMT_LOADSEGMENT) {
-        nResult = mm.nLoadSectionNumber;
-    }
-
-    return nResult;
+    return mm.filePartNumber;
 }
 
 bool XBinary::isAddressInHeader(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
@@ -5072,7 +5069,7 @@ bool XBinary::isAddressInHeader(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 
     _MEMORY_RECORD mm = getMemoryRecordByAddress(pMemoryMap, nAddress);
 
-    if (mm.type == MMT_HEADER) {
+    if (mm.filePart == FILEPART_HEADER) {
         bResult = true;
     }
 
@@ -5085,7 +5082,7 @@ bool XBinary::isRelAddressInHeader(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
 
     _MEMORY_RECORD mm = getMemoryRecordByRelAddress(pMemoryMap, nRelAddress);
 
-    if (mm.type == MMT_HEADER) {
+    if (mm.filePart == FILEPART_HEADER) {
         bResult = true;
     }
 
@@ -5184,9 +5181,78 @@ QString XBinary::mapModeToString(MAPMODE mapMode)
         case MAPMODE_SECTIONS: sResult = tr("Sections"); break;
         case MAPMODE_OBJECTS: sResult = tr("Objects"); break;
         case MAPMODE_MAPS: sResult = tr("Maps"); break;
+        case MAPMODE_DATA: sResult = tr("Data"); break;
+        case MAPMODE_STREAMS: sResult = tr("Streams"); break;
     }
 
     return sResult;
+}
+
+XBinary::_MEMORY_MAP XBinary::_getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    _MEMORY_MAP result = {};
+
+    qint64 nTotalSize = getSize();
+
+    result.nModuleAddress = -1;
+    result.bIsImage = isImage();
+    result.nBinarySize = nTotalSize;
+    result.nImageSize = nTotalSize;
+    result.fileType = getFileType();
+    result.mode = getMode();
+    result.sArch = getArch();
+    result.endian = getEndian();
+    result.sType = getTypeAsString();
+
+    QList<FPART> listParts = getFileParts(nFileParts, 1000, pPdStruct);
+
+    std::sort(listParts.begin(), listParts.end(), compareFileParts);
+
+    qint32 nNumberOfParts = listParts.count();
+    qint32 nIndex = 0;
+
+    for (qint32 i = 0; i < nNumberOfParts && isPdStructNotCanceled(pPdStruct); i++) {
+        FPART fpart = listParts.at(i);
+
+        _MEMORY_RECORD record = {};
+        record.nAddress = fpart.nVirtualAddress;
+        record.nOffset = fpart.nFileOffset;
+        record.nSize = fpart.nFileSize;
+        record.nIndex = nIndex++;
+        record.sName = fpart.sOriginalName;
+        record.bIsVirtual = false;
+        record.filePart = fpart.filePart;
+        record.filePartNumber = i;
+
+        result.listRecords.append(record);
+
+        if (fpart.nVirtualSize > fpart.nFileSize) {
+            // Add virtual size
+            _MEMORY_RECORD virtualRecord = {};
+            virtualRecord.nAddress = fpart.nVirtualAddress + fpart.nFileSize;
+            virtualRecord.nOffset = -1;
+            virtualRecord.nSize = fpart.nVirtualSize - fpart.nFileSize;
+            virtualRecord.nIndex = nIndex++;
+            virtualRecord.sName = fpart.sOriginalName + " (virtual)";
+            virtualRecord.bIsVirtual = true;
+            virtualRecord.filePart = fpart.filePart;
+            virtualRecord.filePartNumber = i;
+
+            result.listRecords.append(virtualRecord);
+        }
+
+        if (result.nModuleAddress == -1) {
+            result.nModuleAddress = fpart.nVirtualAddress;
+        } else {
+            result.nModuleAddress = qMin(result.nModuleAddress, fpart.nVirtualAddress);
+        }
+
+        result.nImageSize = qMax(result.nImageSize, (qint64)(fpart.nVirtualAddress + fpart.nVirtualSize));
+    }
+
+    return result;
 }
 
 QList<XBinary::HREGION> XBinary::_getPhysRegions(MAPMODE mapMode, PDSTRUCT *pPdStruct)
@@ -5267,7 +5333,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
     _MEMORY_RECORD record = {};
     record.nAddress = result.nModuleAddress;
-    record.segment = ADDRESS_SEGMENT_FLAT;
+
     record.nOffset = 0;
     record.nSize = nTotalSize;
     record.nIndex = 0;
@@ -5308,14 +5374,14 @@ qint32 XBinary::getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap)
     return nResult;
 }
 
-qint32 XBinary::getNumberOfMemoryMapTypeRecords(_MEMORY_MAP *pMemoryMap, MMT type)
+qint32 XBinary::getNumberOfMemoryMapFileParts(_MEMORY_MAP *pMemoryMap, FILEPART filePart)
 {
     qint32 nResult = 0;
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (pMemoryMap->listRecords.at(i).type == type) {
+        if ((pMemoryMap->listRecords.at(i).filePart == filePart) && (!pMemoryMap->listRecords.at(i).bIsVirtual)) {
             nResult++;
         }
     }
@@ -5526,7 +5592,7 @@ qint64 XBinary::getTotalVirtualSize(XBinary::_MEMORY_MAP *pMemoryMap)
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (pMemoryMap->listRecords.at(i).type != MMT_OVERLAY)  // TODO Check ELF, MachO -1
+        if (pMemoryMap->listRecords.at(i).filePart != FILEPART_OVERLAY)  // TODO Check ELF, MachO -1
         {
             nResult += pMemoryMap->listRecords.at(i).nSize;
         }
@@ -8213,11 +8279,11 @@ qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pP
     qint64 _nOverlayOffset = -1;
 
     for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-        if ((pMemoryMap->listRecords.at(i).nOffset != -1) && (pMemoryMap->listRecords.at(i).type != MMT_OVERLAY)) {
+        if ((pMemoryMap->listRecords.at(i).nOffset != -1) && (pMemoryMap->listRecords.at(i).filePart != FILEPART_OVERLAY)) {
             nResult = qMax(nResult, (qint64)(pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize));
         }
 
-        if (pMemoryMap->listRecords.at(i).type == MMT_OVERLAY) {
+        if (pMemoryMap->listRecords.at(i).filePart == FILEPART_OVERLAY) {
             _nOverlayOffset = pMemoryMap->listRecords.at(i).nOffset;
         }
     }
@@ -8370,11 +8436,11 @@ void XBinary::dumpMemoryMap()
         // qDebug("Segment: %s", addressSegmentToString(memoryMap.listRecords.at(i).segment).toLatin1().data());
         qDebug("Size: %lld", memoryMap.listRecords.at(i).nSize);
         // qDebug("Type: %s", mmtToString(memoryMap.listRecords.at(i).type).toLatin1().data());
-        qDebug("LoadSectionNumber: %d", memoryMap.listRecords.at(i).nLoadSectionNumber);
+        qDebug("LoadSectionNumber: %d", memoryMap.listRecords.at(i).filePartNumber);
         qDebug("Name: %s", memoryMap.listRecords.at(i).sName.toLatin1().data());
         qDebug("IsVirtual: %s", memoryMap.listRecords.at(i).bIsVirtual ? "true" : "false");
         qDebug("IsInvisible: %s", memoryMap.listRecords.at(i).bIsInvisible ? "true" : "false");
-        qDebug("ID: %lld", memoryMap.listRecords.at(i).nID);
+        // qDebug("ID: %lld", memoryMap.listRecords.at(i).nID);
         qDebug("--------------------------------------------------");
     }
 
@@ -9089,9 +9155,9 @@ bool XBinary::_handleOverlay(_MEMORY_MAP *pMemoryMap)
         record.nOffset = nOverlayOffset;
         record.nSize = nOverlaySize;
         record.sName = tr("Overlay");
-        record.type = MMT_OVERLAY;
+        record.filePart = FILEPART_OVERLAY;
         record.nAddress = -1;  // TODO
-        record.nID = 0;        // TODO
+        // record.nID = 0;        // TODO
         record.bIsVirtual = false;
         record.bIsInvisible = false;
         record.nIndex = pMemoryMap->listRecords.count();
@@ -9258,7 +9324,7 @@ bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-        if ((pMemoryMap->listRecords.at(i).type == MMT_LOADSEGMENT) && (pMemoryMap->listRecords.at(i).nLoadSectionNumber == nLoadSegment)) {
+        if (pMemoryMap->listRecords.at(i).filePartNumber == nLoadSegment) {
             if (pMemoryMap->listRecords.at(i).nOffset != -1) {
                 bResult = isSignaturePresent(pMemoryMap, pMemoryMap->listRecords.at(i).nOffset, pMemoryMap->listRecords.at(i).nSize, sSignature, pPdStruct);
 

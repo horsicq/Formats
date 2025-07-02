@@ -175,7 +175,7 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     memHeader.nOffset = nHeaderOffset;
     memHeader.nAddress = -1;  // TTF header does not have a specific address in memory
     memHeader.nSize = nHeaderSize;
-    memHeader.type = MMT_HEADER;
+    memHeader.filePart = FILEPART_HEADER;
     memHeader.sName = "Header";
     result.listRecords.append(memHeader);
 
@@ -184,7 +184,7 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         _MEMORY_RECORD rec = {};
         rec.nOffset = tableRecords.at(i).offset;
         rec.nSize = tableRecords.at(i).length;
-        rec.type = MMT_OBJECT;
+        rec.filePart = FILEPART_OBJECT;
         rec.sName = tagToString(tableRecords.at(i).tag);
         rec.nIndex = i;
         rec.nAddress = -1;  // TTF tables do not have a specific address in memory

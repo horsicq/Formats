@@ -118,7 +118,7 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         _MEMORY_RECORD record = {};
 
         record.nIndex = nIndex++;
-        record.type = MMT_HEADER;
+        record.filePart = FILEPART_HEADER;
         record.nOffset = 0;
         record.nSize = sizeof(ICONDIR);
         record.nAddress = -1;
@@ -162,7 +162,7 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         _MEMORY_RECORD record = {};
 
         record.nIndex = nIndex++;
-        record.type = MMT_DATA;
+        record.filePart =FILEPART_DATA;
         record.nOffset = iconDirectory.dwImageOffset;
         record.nSize = iconDirectory.dwBytesInRes;
         record.nAddress = -1;

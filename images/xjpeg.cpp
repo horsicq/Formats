@@ -74,10 +74,10 @@ XBinary::_MEMORY_MAP XJpeg::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         record.nIndex = nIndex++;
 
         if (listChunks.at(i).bEntropyCodedData) {
-            record.type = MMT_DATA;
+            record.filePart =FILEPART_DATA;
             record.sName = tr("Data");
         } else {
-            record.type = MMT_OBJECT;
+            record.filePart = FILEPART_OBJECT;
             record.sName = XBinary::valueToHex(listChunks.at(i).nId);
         }
 

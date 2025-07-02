@@ -82,7 +82,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             _MEMORY_RECORD record = {};
 
             record.nIndex = nIndex++;
-            record.type = MMT_HEADER;
+            record.filePart = FILEPART_HEADER;
             record.nOffset = 0;
             record.nSize = 8;
             record.nAddress = -1;
@@ -100,7 +100,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 _MEMORY_RECORD record = {};
 
                 record.nIndex = nIndex++;
-                record.type = MMT_TABLE;
+                record.filePart = FILEPART_TABLE;
                 record.nOffset = nTableOffset;
                 record.nSize = sizeof(quint16) + sizeof(IFD_ENTRY) * nTableCount;
                 record.nAddress = -1;
@@ -126,7 +126,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     _MEMORY_RECORD record = {};
 
                     record.nIndex = nIndex++;
-                    record.type = MMT_FILESEGMENT;
+                    record.filePart = FILEPART_REGION;
                     record.nOffset = nOffset;
                     record.nSize = nDataSize;
                     record.nAddress = -1;
@@ -144,7 +144,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 _MEMORY_RECORD record = {};
 
                 record.nIndex = nIndex++;
-                record.type = MMT_DATA;
+                record.filePart =FILEPART_DATA;
                 record.nOffset = nCurrentOffset;
                 record.nSize = sizeof(quint32);
                 record.nAddress = -1;
