@@ -235,7 +235,7 @@ public:
         QString sName;
         qint32 nIndex;
         bool bIsVirtual;
-        bool bIsInvisible; // TODO
+        bool bIsInvisible;  // TODO
         // quint64 nID;
     };
 
@@ -535,7 +535,7 @@ public:
         QString sOsBuild;
         bool bIsVM;
         // For archives and PDF
-        qint32 nNumberOfRecords; // TODO move
+        qint32 nNumberOfRecords;  // TODO move
     };
 
     struct _MEMORY_MAP {

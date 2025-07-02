@@ -162,7 +162,7 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         _MEMORY_RECORD record = {};
 
         record.nIndex = nIndex++;
-        record.filePart =FILEPART_DATA;
+        record.filePart = FILEPART_DATA;
         record.nOffset = iconDirectory.dwImageOffset;
         record.nSize = iconDirectory.dwBytesInRes;
         record.nAddress = -1;

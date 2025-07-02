@@ -79,11 +79,11 @@ public:
 
     bool isSecure();
     quint32 getDocumentSize();
-    
+
     INFO_RECORD getInfoRecord(qint64 nOffset, PDSTRUCT *pPdStruct = nullptr);
-    
+
     QString getDocumentInfo(PDSTRUCT *pPdStruct = nullptr);
-    
+
     static QMap<quint64, QString> getImageTypes();
     static QMap<quint64, QString> getImageTypesS();
 
@@ -92,9 +92,9 @@ private:
     QList<CHUNK_RECORD> _getChunkRecords(PDSTRUCT *pPdStruct);
     INFO_RECORD _getInfoRecord(qint64 nOffset, PDSTRUCT *pPdStruct);
     bool _isChunkValid(const QString &sChunkName);
-    
+
 private:
     HEADER g_header;
 };
 
-#endif // XDJVU_H
+#endif  // XDJVU_H

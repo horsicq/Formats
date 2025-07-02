@@ -1436,7 +1436,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 if (nFileSize) {
                     XBinary::_MEMORY_RECORD record = {};
 
-                    record.filePart= FILEPART_SEGMENT;
+                    record.filePart = FILEPART_SEGMENT;
 
                     record.sName = sSegmentName;
                     record.nAddress = nVirtualAddress;
@@ -1450,7 +1450,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 if (nVirtualSize > nFileSize) {
                     XBinary::_MEMORY_RECORD record = {};
 
-                    record.filePart= FILEPART_SEGMENT;
+                    record.filePart = FILEPART_SEGMENT;
                     record.bIsVirtual = true;
 
                     record.sName = sSegmentName;
@@ -1512,7 +1512,7 @@ XBinary::_MEMORY_MAP XMACH::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
                 XBinary::_MEMORY_RECORD record = {};
 
-                record.filePart= FILEPART_SEGMENT;
+                record.filePart = FILEPART_SEGMENT;
 
                 record.sName = sSectionName;
                 record.nAddress = nVirtualAddress;

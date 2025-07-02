@@ -1351,7 +1351,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             if (mapMode == MAPMODE_MAPS) {
                 memoryRecord.nIndex = nIndex;
                 memoryRecord.sName = QString("%1(%2)").arg(tr("Map"), QString::number(listObjects.at(i).o32_pagemap + j));
-                memoryRecord.filePart= FILEPART_SEGMENT;
+                memoryRecord.filePart = FILEPART_SEGMENT;
 
                 result.listRecords.append(memoryRecord);
 
@@ -1367,7 +1367,7 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             memoryRecord.nOffset = nObjectMinOffset;
             memoryRecord.nSize = nObjectMaxOffset - nObjectMinOffset;
             memoryRecord.sName = QString("%1(%2)").arg(tr("Object"), QString::number(i + 1));
-            memoryRecord.filePart= FILEPART_SEGMENT;
+            memoryRecord.filePart = FILEPART_SEGMENT;
 
             result.listRecords.append(memoryRecord);
 

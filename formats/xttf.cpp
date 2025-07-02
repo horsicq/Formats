@@ -76,7 +76,7 @@ QString XTTF::getFileFormatExt()
     return "ttf";
 }
 
-qint64 XTTF::getFileFormatSize(PDSTRUCT * pPdStruct)
+qint64 XTTF::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 

@@ -162,7 +162,7 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     {
         _MEMORY_RECORD record = {};
         record.nAddress = -1;
-        
+
         record.nOffset = 0;
         record.nSize = nHeaderSize;
         record.filePart = FILEPART_HEADER;
@@ -192,7 +192,7 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             rec.nAddress = -1;
             rec.nOffset = nOffset;
             rec.nSize = patternHeader.packed_data_size;
-            rec.filePart =FILEPART_DATA;
+            rec.filePart = FILEPART_DATA;
             rec.nIndex = nIndex++;
             rec.sName = QString("Pattern %1 data").arg(i);
             memoryMap.listRecords.append(rec);
@@ -257,7 +257,7 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     rec.nAddress = -1;
                     rec.nOffset = nSampleDataOffset;
                     rec.nSize = sampleHeader.sample_length;
-                    rec.filePart =FILEPART_DATA;
+                    rec.filePart = FILEPART_DATA;
                     rec.nIndex = nIndex++;
                     rec.sName = QString("Instrument %1 Sample data %2").arg(i).arg(j);
                     memoryMap.listRecords.append(rec);

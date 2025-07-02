@@ -144,7 +144,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 _MEMORY_RECORD record = {};
 
                 record.nIndex = nIndex++;
-                record.filePart =FILEPART_DATA;
+                record.filePart = FILEPART_DATA;
                 record.nOffset = nCurrentOffset;
                 record.nSize = sizeof(quint32);
                 record.nAddress = -1;

@@ -35,10 +35,10 @@ bool XDJVU::isValid(PDSTRUCT *pPdStruct)
 
     if (nSize >= 12) {
         QString sSignature = read_ansiString(0, 8);
-        
+
         if ((sSignature == "AT&TFORM") || (sSignature == "SDJVFORM")) {
             QString sType = read_ansiString(12, 4);
-            
+
             if ((sType == "DJVU") || (sType == "DJVM") || (sType == "DJVI") || (sType.startsWith("THUM"))) {
                 bResult = true;
             }
@@ -155,13 +155,13 @@ XDJVU::HEADER XDJVU::_getHeader()
 
     if (nSize >= 12) {
         result.sSignature = read_ansiString(0, 8);
-        
+
         if (result.sSignature == "AT&TFORM") {
             result.bIsSecure = false;
-            result.nSize = read_uint32(8, true); // Big endian
-            
+            result.nSize = read_uint32(8, true);  // Big endian
+
             QString sType = read_ansiString(12, 4);
-            
+
             if (sType == "DJVU") {
                 result.type = TYPE_SINGLE_PAGE;
                 result.bIsValid = true;
@@ -178,7 +178,7 @@ XDJVU::HEADER XDJVU::_getHeader()
         } else if (result.sSignature == "SDJVFORM") {
             result.bIsSecure = true;
             result.type = TYPE_SECURE;
-            result.nSize = read_uint32(8, true); // Big endian
+            result.nSize = read_uint32(8, true);  // Big endian
             result.bIsValid = true;
         }
     }
@@ -193,7 +193,7 @@ QList<XDJVU::CHUNK_RECORD> XDJVU::_getChunkRecords(PDSTRUCT *pPdStruct)
     HEADER header = getHeader();
 
     if (header.bIsValid && !header.bIsSecure) {
-        qint64 nOffset = 16; // Start after main header
+        qint64 nOffset = 16;  // Start after main header
         qint64 nEndOffset = qMin((qint64)(header.nSize + 8), getSize());
 
         while (nOffset < nEndOffset) {
@@ -202,7 +202,7 @@ QList<XDJVU::CHUNK_RECORD> XDJVU::_getChunkRecords(PDSTRUCT *pPdStruct)
             CHUNK_RECORD record = {};
             record.nOffset = nOffset;
             record.sName = read_ansiString(nOffset, 4);
-            record.nSize = read_uint32(nOffset + 4, true); // Big endian
+            record.nSize = read_uint32(nOffset + 4, true);  // Big endian
             record.nDataOffset = nOffset + 8;
             record.nDataSize = record.nSize;
             record.nHeaderSize = 8;
@@ -218,7 +218,7 @@ QList<XDJVU::CHUNK_RECORD> XDJVU::_getChunkRecords(PDSTRUCT *pPdStruct)
             listResult.append(record);
 
             nOffset = record.nDataOffset + record.nDataSize;
-            
+
             // Chunks are aligned on even boundaries
             if (nOffset & 1) {
                 nOffset++;
@@ -242,14 +242,14 @@ XDJVU::INFO_RECORD XDJVU::_getInfoRecord(qint64 nOffset, PDSTRUCT *pPdStruct)
     INFO_RECORD result = {};
 
     if (nOffset + 10 <= getSize()) {
-        result.nWidth = read_uint16(nOffset, true); // Big endian
-        result.nHeight = read_uint16(nOffset + 2, true); // Big endian
+        result.nWidth = read_uint16(nOffset, true);       // Big endian
+        result.nHeight = read_uint16(nOffset + 2, true);  // Big endian
         result.nMinorVersion = read_uint8(nOffset + 4);
         result.nMajorVersion = read_uint8(nOffset + 5);
-        result.nDPI = read_uint16(nOffset + 6, false); // Little endian (yes, it's mixed!)
+        result.nDPI = read_uint16(nOffset + 6, false);  // Little endian (yes, it's mixed!)
         result.nGamma = read_uint8(nOffset + 8);
         result.nFlags = read_uint8(nOffset + 9);
-        
+
         if (nOffset + 12 <= getSize()) {
             result.nRotation = read_uint8(nOffset + 10);
             result.nReserved = read_uint8(nOffset + 11);
@@ -262,11 +262,8 @@ XDJVU::INFO_RECORD XDJVU::_getInfoRecord(qint64 nOffset, PDSTRUCT *pPdStruct)
 bool XDJVU::_isChunkValid(const QString &sChunkName)
 {
     // List of known DjVu chunk names
-    QStringList listValidChunks = {
-        "INFO", "Sjbz", "FG44", "BG44", "FGbz", "BGjp", "BGbz",
-        "TXTa", "TXTz", "ANTa", "ANTz", "DJBZ", "FORM", "DIRM",
-        "NAVM", "Smmr", "INCL", "CIDa", "LTAn", "KTAn"
-    };
+    QStringList listValidChunks = {"INFO", "Sjbz", "FG44", "BG44", "FGbz", "BGjp", "BGbz", "TXTa", "TXTz", "ANTa",
+                                   "ANTz", "DJBZ", "FORM", "DIRM", "NAVM", "Smmr", "INCL", "CIDa", "LTAn", "KTAn"};
 
     return listValidChunks.contains(sChunkName);
 }

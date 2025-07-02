@@ -136,7 +136,7 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     objectRecord.nOffset = fileHeader.bfOffBits;
     objectRecord.nAddress = -1;
     objectRecord.nSize = fileHeader.bfSize - fileHeader.bfOffBits;
-    objectRecord.filePart =FILEPART_DATA;
+    objectRecord.filePart = FILEPART_DATA;
     objectRecord.sName = "Bitmap Data";
     objectRecord.nIndex = 1;
     result.listRecords.append(objectRecord);

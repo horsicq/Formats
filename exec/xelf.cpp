@@ -3999,7 +3999,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 if (nVirtualDelta > nFileDelta) {
                     XBinary::_MEMORY_RECORD record = {};
 
-                    record.filePart= FILEPART_SEGMENT;
+                    record.filePart = FILEPART_SEGMENT;
                     record.nAddress = nVirtualAddress;
                     record.nSize = nVirtualDelta - nFileDelta;
                     record.nOffset = -1;
@@ -4013,7 +4013,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 if (nVirtualDelta >= nFileDelta) {
                     XBinary::_MEMORY_RECORD record = {};
 
-                    record.filePart= FILEPART_SEGMENT;
+                    record.filePart = FILEPART_SEGMENT;
                     record.nAddress = nVirtualAddress + nVirtualDelta - nFileDelta;
                     record.nSize = nFileDelta;
                     record.nOffset = nFileOffset;
@@ -4029,7 +4029,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             {
                 XBinary::_MEMORY_RECORD record = {};
 
-                record.filePart= FILEPART_SEGMENT;
+                record.filePart = FILEPART_SEGMENT;
                 record.nAddress = listSegments.at(i).p_vaddr;
                 record.nSize = listSegments.at(i).p_filesz;
                 record.nOffset = listSegments.at(i).p_offset;
@@ -4044,7 +4044,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             if ((nFileOffset + nFileSize) - (listSegments.at(i).p_offset + listSegments.at(i).p_filesz) > 0) {
                 XBinary::_MEMORY_RECORD record = {};
 
-                record.filePart= FILEPART_SEGMENT;
+                record.filePart = FILEPART_SEGMENT;
                 record.nSize = (nFileOffset + nFileSize) - (listSegments.at(i).p_offset + listSegments.at(i).p_filesz);
                 record.nAddress = listSegments.at(i).p_vaddr + listSegments.at(i).p_filesz;
 
@@ -4060,7 +4060,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             if (nVirtualSize - nFileSize > 0) {
                 XBinary::_MEMORY_RECORD record = {};
 
-                record.filePart= FILEPART_SEGMENT;
+                record.filePart = FILEPART_SEGMENT;
                 record.nSize = nVirtualSize - nFileSize;
                 record.nAddress = (nVirtualAddress + nVirtualSize) - record.nSize;
 

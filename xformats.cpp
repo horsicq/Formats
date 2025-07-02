@@ -496,7 +496,8 @@ QList<XBinary::DATA_HEADER> XFormats::getDataHeaders(XBinary::FT fileType, QIODe
     return listResult;
 }
 
-QList<XBinary::FPART> XFormats::getFileParts(XBinary::FT fileType, QIODevice *pDevice, quint32 nFileParts, qint32 nLimit, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+QList<XBinary::FPART> XFormats::getFileParts(XBinary::FT fileType, QIODevice *pDevice, quint32 nFileParts, qint32 nLimit, bool bIsImage, XADDR nModuleAddress,
+                                             XBinary::PDSTRUCT *pPdStruct)
 {
     QList<XBinary::FPART> listResult;
 

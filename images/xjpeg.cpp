@@ -74,7 +74,7 @@ XBinary::_MEMORY_MAP XJpeg::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         record.nIndex = nIndex++;
 
         if (listChunks.at(i).bEntropyCodedData) {
-            record.filePart =FILEPART_DATA;
+            record.filePart = FILEPART_DATA;
             record.sName = tr("Data");
         } else {
             record.filePart = FILEPART_OBJECT;

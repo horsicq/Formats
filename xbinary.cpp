@@ -97,14 +97,10 @@ XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
-    {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
-    {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},
-    {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
-    {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},
-    {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},
-    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")},
-    {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")},
+    {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},        {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
+    {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},        {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
+    {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},     {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},
+    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")}, {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")},
     {XBinary::FILEPART_SIGNATURE, "Signature", QObject::tr("Signature")},
 };
 
@@ -3870,7 +3866,7 @@ QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bI
         }
     } else if (valueType == XBinary::VT_DWORD_ARRAY) {
         if (nSize <= 32) {
-            varResult = read_array(nOffset, nSize, pPdStruct); // TODO
+            varResult = read_array(nOffset, nSize, pPdStruct);  // TODO
         }
     } else {
 #ifdef QT_DEBUG
@@ -5053,7 +5049,8 @@ qint32 XBinary::addressToFileTypeNumber(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
     _MEMORY_RECORD mm = getMemoryRecordByAddress(pMemoryMap, nAddress);
 
-    return mm.filePartNumber;;
+    return mm.filePartNumber;
+    ;
 }
 
 qint32 XBinary::relAddressToFileTypeNumber(_MEMORY_MAP *pMemoryMap, qint64 nRelAddress)
