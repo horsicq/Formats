@@ -9295,7 +9295,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 }
 
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_NT_HEADERS32, Signature), 4, "Signature", VT_DWORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageNtHeadersSignaturesS(), false));
+                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageNtHeadersSignaturesS(), VL_TYPE_LIST));
 
                 listResult.append(dataHeader);
 
@@ -9328,7 +9328,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_FILE_HEADER);
 
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_FILE_HEADER, Machine), 2, "Machine", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderMachinesS(), false));
+                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderMachinesS(), VL_TYPE_LIST));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSections), 2, "NumberOfSections", VT_WORD, DRF_COUNT,
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(
@@ -9340,7 +9340,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, SizeOfOptionalHeader), 2, "SizeOfOptionalHeader", VT_WORD, DRF_SIZE,
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_FILE_HEADER, Characteristics), 2, "Characteristics", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderCharacteristicsS(), true));
+                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderCharacteristicsS(), VL_TYPE_FLAGS));
                 listResult.append(dataHeader);
 
                 if (dataHeadersOptions.bChildren) {
@@ -9360,7 +9360,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER32);
 
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, Magic), 2, "Magic", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderMagicS(), false));
+                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderMagicS(), VL_TYPE_LIST));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorLinkerVersion), 1, "MajorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorLinkerVersion), 1, "MinorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
@@ -9404,10 +9404,10 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.listRecords.append(
                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, CheckSum), 4, "CheckSum", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, Subsystem), 2, "Subsystem", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderSubsystemS(), false));
+                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderSubsystemS(), VL_TYPE_LIST));
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DllCharacteristics), 2, "DllCharacteristics", VT_WORD,
                                                               DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderDllCharacteristicsS(),
-                                                              true));
+                                                              VL_TYPE_FLAGS));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfStackReserve), 4, "SizeOfStackReserve", VT_DWORD, DRF_SIZE,
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfStackCommit), 4, "SizeOfStackCommit", VT_DWORD, DRF_SIZE,
@@ -9429,7 +9429,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER64);
 
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, Magic), 2, "Magic", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderMagicS(), false));
+                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderMagicS(), VL_TYPE_LIST));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorLinkerVersion), 1, "MajorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorLinkerVersion), 1, "MinorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
@@ -9471,10 +9471,10 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.listRecords.append(
                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, CheckSum), 4, "CheckSum", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, Subsystem), 2, "Subsystem", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderSubsystemS(), false));
+                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderSubsystemS(), VL_TYPE_LIST));
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DllCharacteristics), 2, "DllCharacteristics", VT_WORD,
                                                               DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderDllCharacteristicsS(),
-                                                              true));
+                                                              VL_TYPE_FLAGS));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfStackReserve), 8, "SizeOfStackReserve", VT_QWORD, DRF_SIZE,
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfStackCommit), 8, "SizeOfStackCommit", VT_QWORD, DRF_SIZE,

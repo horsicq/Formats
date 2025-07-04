@@ -388,13 +388,13 @@ XBinary::HREGION XBinary::findParentHRegion(const QList<HREGION> &listHRegions, 
 }
 
 XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian,
-                                              QMap<quint64, QString> mapValues, bool bFlags)
+                                              QMap<quint64, QString> mapValues, VL_TYPE vlType)
 {
     XBinary::DATA_RECORD result = getDataRecord(nRelOffset, nSize, sName, valType, nFlags, endian);
 
     DATAVALUESET dataValueSet;
     dataValueSet.mapValues = mapValues;
-    dataValueSet.bFlags = bFlags;
+    dataValueSet.vlType = vlType;
     dataValueSet.nMask = 0xFFFFFFFFFFFFFFFF;
 
     result.listDataValueSets.append(dataValueSet);
@@ -592,6 +592,40 @@ qint32 XBinary::getDataRecordValues(QIODevice *pDevice, const DATA_RECORDS_OPTIO
     XBinary binary(pDevice);
 
     return binary.getDataRecordValues(dataRecordsOptions, pListValues, pPdStruct);
+}
+
+QList<QString> XBinary::getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct)
+{
+    QList<QString> listComments;
+
+    qint32 nNumberOfRecords = dataRecordsOptions.dataHeader.listRecords.count();
+
+    for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
+        DATA_RECORD dataRecord = dataRecordsOptions.dataHeader.listRecords.at(j);
+
+        QString sComment;
+
+        if (dataRecord.nFlags & DRF_SIZE) {
+            sComment = bytesCountToString(pListValues->at(j).toULongLong(), 1024);
+        }
+
+        QString sFlags;
+        if (dataRecord.listDataValueSets.count()) {
+            qint32 nNumberOfDataValueSets = dataRecord.listDataValueSets.count();
+
+            for (qint32 k = 0; k < nNumberOfDataValueSets; k++) {
+                DATAVALUESET dataValueSet = dataRecord.listDataValueSets.at(k);
+
+                sFlags = appendText(sFlags, valueToFlagsString(pListValues->at(j).toULongLong() & dataValueSet.nMask, dataValueSet.mapValues, dataValueSet.vlType), "|");
+            }
+
+            sComment = appendText(sComment, sFlags, ", ");
+        }
+
+        listComments.append(sComment);
+    }
+
+    return listComments;
 }
 
 QList<QString> XBinary::getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions)
@@ -7184,7 +7218,9 @@ QString XBinary::getDeviceFileSuffix(QIODevice *pDevice)
             sResult = fi.suffix();
         }
     } else {
-        sResult = pDevice->property("DeviceFileSuffix").toString();
+        if (pDevice) {
+            sResult = pDevice->property("DeviceFileSuffix").toString();
+        }
     }
 
     return sResult;
@@ -8529,14 +8565,20 @@ void XBinary::dumpHeaders()
             dataRecordsOptions.dataHeader = dataHeader;
 
             getDataRecordValues(dataRecordsOptions, &listValues, nullptr);
+            QList<QString> listComments = getDataRecordComments(dataRecordsOptions, &listValues, nullptr);
 
             qint32 nNumberOfRecords = dataHeader.listRecords.count();
 
             for (qint32 j = 0; j < nNumberOfRecords; j++) {
                 XBinary::DATA_RECORD dataRecord = dataHeader.listRecords.at(j);
 
-                qDebug("%X: %X %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType, dataRecord.nSize).toLatin1().data(),
-                       dataRecord.sName.toLatin1().data(), XBinary::getValueString(listValues.at(j), dataRecord.valType, true).toLatin1().data());
+                qDebug("%X: %X %s %s %s %s",
+                       dataRecord.nRelOffset,
+                       dataRecord.nSize,
+                       XBinary::valueTypeToString(dataRecord.valType, dataRecord.nSize).toLatin1().data(),
+                       dataRecord.sName.toLatin1().data(),
+                       XBinary::getValueString(listValues.at(j), dataRecord.valType, true).toLatin1().data(),
+                       listComments.at(j).toLatin1().data());
             }
         } else if (dataHeader.dsID.fileType == FT_BINARY) {
             qDebug("%s: %X", XBinary::structIDToString(dataHeader.dsID.nID).toLatin1().data(), 0);
@@ -9694,7 +9736,7 @@ QString XBinary::msecToDate(quint64 nValue)
     return sResult;
 }
 
-QString XBinary::valueToFlagsString(quint64 nValue, QMap<quint64, QString> mapFlags, VL_TYPE vlType)
+QString XBinary::valueToFlagsString(quint64 nValue, const QMap<quint64, QString> &mapFlags, VL_TYPE vlType)
 {
     QString sResult;
 

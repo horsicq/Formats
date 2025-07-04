@@ -5282,37 +5282,37 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
                     quint32 cputype = read_uint32(nStartOffset + offsetof(XMACH_DEF::mach_header, cputype));
 
                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), false));
+                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), VL_TYPE_LIST));
                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuTypesS(), false));
+                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuTypesS(), VL_TYPE_LIST));
                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuSubTypesS(cputype), false));
+                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuSubTypesS(cputype), VL_TYPE_LIST));
                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFileTypesS(), false));
+                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFileTypesS(), VL_TYPE_LIST));
                     dataHeader.listRecords.append(
                         getDataRecord(offsetof(XMACH_DEF::mach_header, ncmds), 4, "ncmds", VT_UINT32, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
                     dataHeader.listRecords.append(
                         getDataRecord(offsetof(XMACH_DEF::mach_header, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), true));
+                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), VL_TYPE_FLAGS));
                 } else if (dataHeadersOptions.nID == STRUCTID_mach_header_64) {
                     dataHeader.nSize = sizeof(XMACH_DEF::mach_header_64);
                     quint32 cputype = read_uint32(nStartOffset + offsetof(XMACH_DEF::mach_header_64, cputype));
 
                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), false));
+                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), VL_TYPE_LIST));
                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuTypesS(), false));
+                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuTypesS(), VL_TYPE_LIST));
                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuSubTypesS(cputype), false));
+                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuSubTypesS(cputype), VL_TYPE_LIST));
                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFileTypesS(), false));
+                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFileTypesS(), VL_TYPE_LIST));
                     dataHeader.listRecords.append(
                         getDataRecord(offsetof(XMACH_DEF::mach_header_64, ncmds), 4, "ncmds", VT_UINT32, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
                     dataHeader.listRecords.append(
                         getDataRecord(offsetof(XMACH_DEF::mach_header_64, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), true));
+                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), VL_TYPE_FLAGS));
                     dataHeader.listRecords.append(
                         getDataRecord(offsetof(XMACH_DEF::mach_header_64, reserved), 4, "reserved", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 }
@@ -5361,7 +5361,7 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
                 dataHeader.nSize = sizeof(XMACH_DEF::load_command);
 
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::load_command, cmd), 4, "cmd", VT_UINT32, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XMACH::getLoadCommandTypesS(), false));
+                                                              dataHeadersOptions.pMemoryMap->endian, XMACH::getLoadCommandTypesS(), VL_TYPE_LIST));
                 dataHeader.listRecords.append(
                     getDataRecord(offsetof(XMACH_DEF::load_command, cmdsize), 4, "cmdsize", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
 

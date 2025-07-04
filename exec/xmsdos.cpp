@@ -776,7 +776,7 @@ QList<XBinary::DATA_HEADER> XMSDOS::getDataHeaders(const DATA_HEADERS_OPTIONS &d
                 }
 
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_magic), 2, "e_magic", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XMSDOS::getImageMagicsS(), false));
+                                                              dataHeadersOptions.pMemoryMap->endian, XMSDOS::getImageMagicsS(), VL_TYPE_LIST));
                 dataHeader.listRecords.append(
                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cblp), 2, "e_cblp", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(

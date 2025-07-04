@@ -751,9 +751,15 @@ public:
         DRF_OFFSET = 0x00000008,
     };
 
+    enum VL_TYPE {
+        VL_TYPE_UNKNOWN = 0,
+        VL_TYPE_LIST,
+        VL_TYPE_FLAGS
+    };
+
     struct DATAVALUESET {
         quint64 nMask;
-        bool bFlags;
+        VL_TYPE vlType;
         QMap<quint64, QString> mapValues;
     };
 
@@ -791,7 +797,7 @@ public:
 
     DATA_RECORD getDataRecord(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian);
     DATA_RECORD getDataRecordDV(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian, QMap<quint64, QString> mapValues,
-                                bool bFlags);
+                                VL_TYPE vlType);
 
     virtual QString structIDToString(quint32 nID);
 
@@ -824,6 +830,8 @@ public:
 
     qint32 getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
     static qint32 getDataRecordValues(QIODevice *pDevice, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
+
+    static QList<QString> getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
 
     virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions);
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues,
@@ -1615,12 +1623,7 @@ public:
     static QString valueToTimeString(quint64 nValue, DT_TYPE type);
     static QString msecToDate(quint64 nValue);
 
-    enum VL_TYPE {
-        VL_TYPE_LIST = 0,
-        VL_TYPE_FLAGS
-    };
-
-    static QString valueToFlagsString(quint64 nValue, QMap<quint64, QString> mapFlags, VL_TYPE vlType);
+    static QString valueToFlagsString(quint64 nValue, const QMap<quint64, QString> &mapFlags, VL_TYPE vlType);
 
     static bool isX86asm(const QString &sArch);  // TODO remove use getDisasmMode
     static QString disasmIdToString(DM disasmMode);
