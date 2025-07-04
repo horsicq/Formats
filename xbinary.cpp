@@ -1456,7 +1456,7 @@ qint32 XBinary::getNumberOfFiles(const QString &sDirectoryName, bool bSubDirecto
                 QString sFN = eil.at(i).fileName();
 
                 if ((sFN != ".") && (sFN != "..")) {
-                    nResult += getNumberOfFiles(eil.at(i).absoluteFilePath(),  bSubDirectories, nLevel + 1, pPdStruct);
+                    nResult += getNumberOfFiles(eil.at(i).absoluteFilePath(), bSubDirectories, nLevel + 1, pPdStruct);
                 }
             }
         }
@@ -8572,12 +8572,8 @@ void XBinary::dumpHeaders()
             for (qint32 j = 0; j < nNumberOfRecords; j++) {
                 XBinary::DATA_RECORD dataRecord = dataHeader.listRecords.at(j);
 
-                qDebug("%X: %X %s %s %s %s",
-                       dataRecord.nRelOffset,
-                       dataRecord.nSize,
-                       XBinary::valueTypeToString(dataRecord.valType, dataRecord.nSize).toLatin1().data(),
-                       dataRecord.sName.toLatin1().data(),
-                       XBinary::getValueString(listValues.at(j), dataRecord.valType, true).toLatin1().data(),
+                qDebug("%X: %X %s %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType, dataRecord.nSize).toLatin1().data(),
+                       dataRecord.sName.toLatin1().data(), XBinary::getValueString(listValues.at(j), dataRecord.valType, true).toLatin1().data(),
                        listComments.at(j).toLatin1().data());
             }
         } else if (dataHeader.dsID.fileType == FT_BINARY) {
