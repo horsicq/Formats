@@ -4562,7 +4562,7 @@ XBinary::FILEFORMATINFO XELF::getFileFormatInfo(PDSTRUCT *pPdStruct)
 
             QString sABI = QString("ABI: %1.%2.%3").arg(QString::number(nMajor), QString::number(nMinor), QString::number(nSubMinor));
 
-            result.sOsVersion = appendText(result.sOsVersion, sABI, ",");
+            result.sOsVersion = appendText(result.sOsVersion, sABI, ", ");
         }
 
         if (result.osName == OSNAME_UNIX) {

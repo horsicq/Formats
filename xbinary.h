@@ -127,6 +127,13 @@ public:
         LT_RELADDRESS,
     };
 
+    enum EMODE {
+        EMODE_UNKNOWN = 0,
+        EMODE_RAW,
+        EMODE_FORMAT,
+        EMODE_HEURISTIC
+    };
+
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_NFDSCAN,
@@ -534,8 +541,7 @@ public:
         QString sOsVersion;
         QString sOsBuild;
         bool bIsVM;
-        // For archives and PDF
-        qint32 nNumberOfRecords;  // TODO move
+        bool bIsCrypted;
     };
 
     struct _MEMORY_MAP {
@@ -789,6 +795,9 @@ public:
 
     virtual QString structIDToString(quint32 nID);
 
+    static QString extractorModeToString(XBinary::EMODE mode);
+    static XBinary::EMODE ftStringToExtractorMode(QString sString);
+
     struct DATA_HEADERS_OPTIONS {
         _MEMORY_MAP *pMemoryMap;
         DSID dsID_parent;
@@ -938,6 +947,8 @@ public:
     static void findFiles(const QString &sDirectoryName, FFOPTIONS *pFFOption, qint32 nLevel = 0);
     static void findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames);
     static void findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct = nullptr);
+
+    static qint32 getNumberOfFiles(const QString &sDirectoryName, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct = nullptr);
 
     static QString regExp(const QString &sRegExp, const QString &sString, qint32 nIndex);
     static bool isRegExpPresent(const QString &sRegExp, const QString &sString);

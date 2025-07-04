@@ -75,6 +75,13 @@ const quint16 _crc16_tab[] = {
     0x9901, 0x59c0, 0x5880, 0x9841, 0x8801, 0x48c0, 0x4980, 0x8941, 0x4b00, 0x8bc1, 0x8a81, 0x4a40, 0x4e00, 0x8ec1, 0x8f81, 0x4f40, 0x8d01, 0x4dc0, 0x4c80, 0x8c41,
     0x4400, 0x84c1, 0x8581, 0x4540, 0x8701, 0x47c0, 0x4680, 0x8641, 0x8201, 0x42c0, 0x4380, 0x8341, 0x4100, 0x81c1, 0x8081, 0x4040};
 
+XBinary::XCONVERT _TABLE_XBINARY_EMODE[] = {
+    {XBinary::EMODE_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XBinary::EMODE_RAW, "Raw", QObject::tr("Raw")},
+    {XBinary::EMODE_FORMAT, "Format", QObject::tr("Format")},
+    {XBinary::EMODE_HEURISTIC, "Heuristic", QObject::tr("Heuristic")},
+};
+
 XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XBinary::STRUCTID_NFDSCAN, "nfd", QString("Nauz File Detector")},
@@ -272,7 +279,7 @@ QString XBinary::XCONVERT_idToFtString(quint32 nID, XCONVERT *pRecords, qint32 n
 
 quint32 XBinary::XCONVERT_ftStringToId(const QString &sString, XCONVERT *pRecords, qint32 nRecordsSize)
 {
-    quint32 nResult = XBinary::FT_UNKNOWN;
+    quint32 nResult = 0;
 
     for (qint32 i = 0; i < nRecordsSize; i++) {
         if (pRecords[i].sSetString.toUpper().remove(" ").remove("-") == sString.toUpper()) {
@@ -398,6 +405,16 @@ XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nRelOffset, qint64 nSize, c
 QString XBinary::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XBINARY_STRUCTID, sizeof(_TABLE_XBINARY_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QString XBinary::extractorModeToString(EMODE mode)
+{
+    return XBinary::XCONVERT_idToTransString(mode, _TABLE_XBINARY_EMODE, sizeof(_TABLE_XBINARY_EMODE) / sizeof(XBinary::XCONVERT));
+}
+
+XBinary::EMODE XBinary::ftStringToExtractorMode(QString sString)
+{
+    return (XBinary::EMODE)XBinary::XCONVERT_ftStringToId(sString, _TABLE_XBINARY_EMODE, sizeof(_TABLE_XBINARY_EMODE) / sizeof(XBinary::XCONVERT));
 }
 
 XBinary::DATA_HEADER XBinary::_initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName)
@@ -936,8 +953,8 @@ QString XBinary::getFileFormatInfoString(const FILEFORMATINFO *pFileFormatInfo)
 {
     QString sResult;
 
-    if (pFileFormatInfo->fileType == FT_PDF) {
-        sResult = QString("%1 objects").arg(pFileFormatInfo->nNumberOfRecords);
+    if (pFileFormatInfo->bIsCrypted) {
+        sResult = appendText(sResult, QObject::tr("Crypted"), ", ");
     }
 
     // TODO
@@ -1376,6 +1393,46 @@ void XBinary::findFiles(const QString &sDirectoryName, QList<QString> *pListFile
     if (nLevel == 0) {
         XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
     }
+}
+
+qint32 XBinary::getNumberOfFiles(const QString &sDirectoryName, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct)
+{
+    qint32 nResult = 0;
+
+    qint32 _nFreeIndex = 0;
+
+    if (nLevel == 0) {
+        _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, 0);
+    }
+
+    if (isPdStructNotCanceled(pPdStruct)) {
+        QFileInfo fi(sDirectoryName);
+
+        if (fi.isFile()) {
+            _nFreeIndex++;
+        } else if (fi.isDir() && ((bSubDirectories) || (nLevel == 0))) {
+            QDir dir(sDirectoryName);
+
+            QFileInfoList eil = dir.entryInfoList();
+
+            qint32 nNumberOfFiles = eil.count();
+
+            for (qint32 i = 0; (i < nNumberOfFiles) && isPdStructNotCanceled(pPdStruct); i++) {
+                QString sFN = eil.at(i).fileName();
+
+                if ((sFN != ".") && (sFN != "..")) {
+                    nResult += getNumberOfFiles(eil.at(i).absoluteFilePath(),  bSubDirectories, nLevel + 1, pPdStruct);
+                }
+            }
+        }
+    }
+
+    if (nLevel == 0) {
+        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+    }
+
+    return nResult;
 }
 
 QString XBinary::regExp(const QString &sRegExp, const QString &sString, qint32 nIndex)
