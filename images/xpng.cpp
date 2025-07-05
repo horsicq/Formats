@@ -105,6 +105,11 @@ QString XPNG::getMIMEString()
     return "image/png";
 }
 
+XBinary::ENDIAN XPNG::getEndian()
+{
+    return ENDIAN_BIG;  // PNG is always big-endian
+}
+
 XBinary::_MEMORY_MAP XPNG::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
