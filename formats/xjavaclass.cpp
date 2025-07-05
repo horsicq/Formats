@@ -285,6 +285,11 @@ QString XJavaClass::_getJDKVersion(quint16 nMajor, quint16 nMinor)
     return sResult;
 }
 
+QString XJavaClass::getMIMEString()
+{
+    return "application/java-vm";
+}
+
 qint32 XJavaClass::_read_attribute_info(qint64 nOffset, attribute_info *pAttributeInfo)
 {
     qint32 nResult = 0;

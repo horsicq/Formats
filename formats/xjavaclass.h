@@ -104,6 +104,7 @@ public:
     static QString _getJDKVersion(quint16 nMajor, quint16 nMinor);
 
     _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
+    virtual QString getMIMEString();
 
 private:
     qint32 _read_attribute_info(qint64 nOffset, attribute_info *pAttributeInfo);
