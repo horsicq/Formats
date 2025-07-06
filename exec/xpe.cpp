@@ -2220,20 +2220,13 @@ quint64 XPE::getImportHash64(QList<IMPORT_RECORD> *pListImportRecords, PDSTRUCT 
 
 quint32 XPE::getImportHash32(QList<IMPORT_RECORD> *pListImportRecords, PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     quint64 nResult = 0;
 
     qint32 nNumberOfImports = pListImportRecords->count();
 
     QString sRecord;
 
-    for (qint32 i = 0; (i < nNumberOfImports) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfImports) && isPdStructNotCanceled(pPdStruct); i++) {
         sRecord += pListImportRecords->at(i).sLibrary + pListImportRecords->at(i).sFunction;
     }
 
@@ -10355,7 +10348,7 @@ bool XPE::isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
     return isNetMethodPresent(pCliInfo, "", "<Module>", ".cctor", pPdStruct);
 }
 
-bool XPE::isNetTypePresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, PDSTRUCT *pPdStruct)
+bool XPE::isNetTypePresent(CLI_INFO *pCliInfo, const QString &sTypeNamespace, const QString &sTypeName, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 

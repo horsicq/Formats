@@ -885,7 +885,7 @@ public:
     QList<QString> getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
 
     bool isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
-    bool isNetTypePresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, PDSTRUCT *pPdStruct = nullptr);
+    bool isNetTypePresent(CLI_INFO *pCliInfo, const QString &sTypeNamespace, const QString &sTypeName, PDSTRUCT *pPdStruct = nullptr);
     bool isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sMethodName, PDSTRUCT *pPdStruct = nullptr);
     bool isNetFieldPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sFieldName, PDSTRUCT *pPdStruct = nullptr);
 
