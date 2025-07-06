@@ -606,7 +606,11 @@ QList<QString> XBinary::getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRe
         QString sComment;
 
         if (dataRecord.nFlags & DRF_SIZE) {
-            sComment = bytesCountToString(pListValues->at(j).toULongLong(), 1024);
+            sComment = appendText(bytesCountToString(pListValues->at(j).toULongLong(), 1024), sComment, ", ");
+        }
+
+        if (dataRecord.nFlags & DRF_COUNT) {
+            sComment = appendText(QString::number(pListValues->at(j).toULongLong()), sComment, ", ");
         }
 
         QString sFlags;
