@@ -4944,6 +4944,11 @@ QString XMACH::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XMACH_STRUCTID, sizeof(_TABLE_XMACH_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QString XMACH::getMIMEString()
+{
+    return "application/x-mach-o";
+}
+
 XADDR XMACH::readOpcodes(quint32 nType, char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
     XADDR nResult = 0;

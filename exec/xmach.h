@@ -735,6 +735,8 @@ public:
 
     virtual QString structIDToString(quint32 nID);
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+
+    virtual QString getMIMEString();
 };
 
 #endif  // XMACH_H
