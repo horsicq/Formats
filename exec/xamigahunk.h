@@ -71,6 +71,8 @@ public:
 
     virtual qint32 getType();
     QString typeIdToString(qint32 nType);
+
+    virtual QString getMIMEString();
 };
 
 #endif  // XAMIGAHUNK_H

@@ -463,3 +463,8 @@ QString XAmigaHunk::typeIdToString(qint32 nType)
 
     return sResult;
 }
+
+QString XAmigaHunk::getMIMEString()
+{
+    return "application/x-amiga-hunk";
+}
