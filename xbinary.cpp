@@ -10344,6 +10344,17 @@ qint64 XBinary::getTotalOSSize(QList<OFFSETSIZE> *pListOffsetSize)
     return nResult;
 }
 
+XBinary::MODE XBinary::getWidthModeFromSize_32_64(quint64 nSize)
+{
+    MODE result = MODE_32;
+
+    if (((quint64)nSize) >= 0xFFFFFFFF) {
+        result = MODE_64;
+    }
+
+    return result;
+}
+
 quint32 XBinary::getByteSizeFromWidthMode(MODE mode)
 {
     quint32 nResult = 0;
