@@ -749,6 +749,7 @@ public:
         DRF_COUNT = 0x00000002,
         DRF_ADDRESS = 0x00000004,
         DRF_OFFSET = 0x00000008,
+        DRF_VERSION = 0x00000010,
     };
 
     enum VL_TYPE {
