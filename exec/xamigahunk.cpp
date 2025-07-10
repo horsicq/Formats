@@ -20,6 +20,38 @@
  */
 #include "xamigahunk.h"
 
+XBinary::XCONVERT _TABLE_XAmigaHunk_STRUCTID[] = {
+    {XAmigaHunk::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XAmigaHunk::STRUCTID_HUNK, "HUNK", QString("HUNK")},
+    {XAmigaHunk::STRUCTID_HUNK_UNIT, "HUNK_UNIT", QString("HUNK_UNIT")},
+    {XAmigaHunk::STRUCTID_HUNK_NAME, "HUNK_NAME", QString("HUNK_NAME")},
+    {XAmigaHunk::STRUCTID_HUNK_CODE, "HUNK_CODE", QString("HUNK_CODE")},
+    {XAmigaHunk::STRUCTID_HUNK_DATA, "HUNK_DATA", QString("HUNK_DATA")},
+    {XAmigaHunk::STRUCTID_HUNK_BSS, "HUNK_BSS", QString("HUNK_BSS")},
+    {XAmigaHunk::STRUCTID_HUNK_RELOC32, "HUNK_RELOC32", QString("HUNK_RELOC32")},
+    {XAmigaHunk::STRUCTID_HUNK_RELOC16, "HUNK_RELOC16", QString("HUNK_RELOC16")},
+    {XAmigaHunk::STRUCTID_HUNK_RELOC8, "HUNK_RELOC8", QString("HUNK_RELOC8")},
+    {XAmigaHunk::STRUCTID_HUNK_EXT, "HUNK_EXT", QString("HUNK_EXT")},
+    {XAmigaHunk::STRUCTID_HUNK_SYMBOL, "HUNK_SYMBOL", QString("HUNK_SYMBOL")},
+    {XAmigaHunk::STRUCTID_HUNK_DEBUG, "HUNK_DEBUG", QString("HUNK_DEBUG")},
+    {XAmigaHunk::STRUCTID_HUNK_END, "HUNK_END", QString("HUNK_END")},
+    {XAmigaHunk::STRUCTID_HUNK_HEADER, "HUNK_HEADER", QString("HUNK_HEADER")},
+    {XAmigaHunk::STRUCTID_HUNK_OVERLAY, "HUNK_OVERLAY", QString("HUNK_OVERLAY")},
+    {XAmigaHunk::STRUCTID_HUNK_BREAK, "HUNK_BREAK", QString("HUNK_BREAK")},
+    {XAmigaHunk::STRUCTID_HUNK_DREL32, "HUNK_DREL32", QString("HUNK_DREL32")},
+    {XAmigaHunk::STRUCTID_HUNK_DREL16, "HUNK_DREL16", QString("HUNK_DREL16")},
+    {XAmigaHunk::STRUCTID_HUNK_DREL8, "HUNK_DREL8", QString("HUNK_DREL8")},
+    {XAmigaHunk::STRUCTID_HUNK_LIB, "HUNK_LIB", QString("HUNK_LIB")},
+    {XAmigaHunk::STRUCTID_HUNK_INDEX, "HUNK_INDEX", QString("HUNK_INDEX")},
+    {XAmigaHunk::STRUCTID_HUNK_RELOC32SHORT, "HUNK_RELOC32SHORT", QString("HUNK_RELOC32SHORT")},
+    {XAmigaHunk::STRUCTID_HUNK_RELRELOC32, "HUNK_RELRELOC32", QString("HUNK_RELRELOC32")},
+    {XAmigaHunk::STRUCTID_HUNK_ABSRELOC16, "HUNK_ABSRELOC16", QString("HUNK_ABSRELOC16")},
+    {XAmigaHunk::STRUCTID_HUNK_DREL32EXE, "HUNK_DREL32EXE", QString("HUNK_DREL32EXE")},
+    {XAmigaHunk::STRUCTID_HUNK_PPC_CODE, "HUNK_PPC_CODE", QString("HUNK_PPC_CODE")},
+    {XAmigaHunk::STRUCTID_HUNK_RELRELOC26, "HUNK_RELRELOC26", QString("HUNK_RELRELOC26")},
+};
+
+
 XAmigaHunk::XAmigaHunk(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
 }
@@ -87,7 +119,7 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
             record.filePart = FILEPART_REGION;
             record.nOffset = hunk.nOffset;
             record.nSize = hunk.nSize;
-            record.nAddress = hunk.nOffset;
+            record.nAddress = hunk.nOffset; // TODO Check
             record.sName = hunkTypeToString(hunk.nId);
 
             result.listRecords.append(record);
@@ -467,4 +499,50 @@ QString XAmigaHunk::typeIdToString(qint32 nType)
 QString XAmigaHunk::getMIMEString()
 {
     return "application/x-amiga-hunk";
+}
+
+QString XAmigaHunk::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XAmigaHunk_STRUCTID, sizeof(_TABLE_XAmigaHunk_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::DATA_HEADER> XAmigaHunk::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+        _dataHeadersOptions.nID = STRUCTID_HUNK;
+        _dataHeadersOptions.nLocation = 0;
+        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+
+        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    } else {
+        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+
+        if (nStartOffset != -1) {
+            if (dataHeadersOptions.nID == STRUCTID_HUNK) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XAmigaHunk::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 4;
+                dataHeader.listRecords.append(getDataRecord(0, 4, "hunk_id", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+
+                listResult.append(dataHeader);
+            }
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::FPART> listResult;
+
+    // TODO
+
+    return listResult;
 }

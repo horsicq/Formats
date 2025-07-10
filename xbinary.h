@@ -1872,6 +1872,7 @@ public:
     };
 
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
+    static FPART getFPART(FILEPART filePart, const QString &sOriginalName, qint64 nFileOffset, qint64 nFileSize, XADDR nVirtualAddress, qint64 nVirtualSize);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

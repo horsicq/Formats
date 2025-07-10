@@ -8587,6 +8587,20 @@ void XBinary::dumpHeaders()
 #endif
 }
 
+XBinary::FPART XBinary::getFPART(FILEPART filePart, const QString &sOriginalName, qint64 nFileOffset, qint64 nFileSize, XADDR nVirtualAddress, qint64 nVirtualSize)
+{
+    XBinary::FPART fpart = {};
+
+    fpart.filePart = filePart;
+    fpart.sOriginalName = sOriginalName;
+    fpart.nFileOffset = nFileOffset;
+    fpart.nFileSize = nFileSize;
+    fpart.nVirtualAddress = nVirtualAddress;
+    fpart.nVirtualSize = nVirtualSize;
+
+    return fpart;
+}
+
 QList<XBinary::FPART> XBinary::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::FPART> listResult;

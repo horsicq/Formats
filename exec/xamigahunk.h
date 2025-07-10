@@ -45,6 +45,37 @@ public:
         // TODO Library
     };
 
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_HUNK,
+        STRUCTID_HUNK_UNIT,
+        STRUCTID_HUNK_NAME,
+        STRUCTID_HUNK_CODE,
+        STRUCTID_HUNK_DATA,
+        STRUCTID_HUNK_BSS,
+        STRUCTID_HUNK_RELOC32,
+        STRUCTID_HUNK_RELOC16,
+        STRUCTID_HUNK_RELOC8,
+        STRUCTID_HUNK_EXT,
+        STRUCTID_HUNK_SYMBOL,
+        STRUCTID_HUNK_DEBUG,
+        STRUCTID_HUNK_END,
+        STRUCTID_HUNK_HEADER,
+        STRUCTID_HUNK_OVERLAY,
+        STRUCTID_HUNK_BREAK,
+        STRUCTID_HUNK_DREL32,
+        STRUCTID_HUNK_DREL16,
+        STRUCTID_HUNK_DREL8,
+        STRUCTID_HUNK_LIB,
+        STRUCTID_HUNK_INDEX,
+        STRUCTID_HUNK_RELOC32SHORT,
+        STRUCTID_HUNK_RELRELOC32,
+        STRUCTID_HUNK_ABSRELOC16,
+        STRUCTID_HUNK_DREL32EXE,
+        STRUCTID_HUNK_PPC_CODE,
+        STRUCTID_HUNK_RELRELOC26,
+    };
+
     explicit XAmigaHunk(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XAmigaHunk();
 
@@ -73,6 +104,11 @@ public:
     QString typeIdToString(qint32 nType);
 
     virtual QString getMIMEString();
+
+    virtual QString structIDToString(quint32 nID);
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
 };
 
 #endif  // XAMIGAHUNK_H
