@@ -127,13 +127,6 @@ public:
         LT_RELADDRESS,
     };
 
-    enum EMODE {
-        EMODE_UNKNOWN = 0,
-        EMODE_RAW,
-        EMODE_FORMAT,
-        EMODE_HEURISTIC
-    };
-
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_NFDSCAN,
@@ -259,6 +252,7 @@ public:
     enum FT {
         FT_UNKNOWN = 0,
         FT_DATA,
+        FT_OTHER,
         FT_REGION,  // For Memory regions
         FT_PROCESS,
         FT_BINARY,
@@ -801,9 +795,6 @@ public:
                                 VL_TYPE vlType);
 
     virtual QString structIDToString(quint32 nID);
-
-    static QString extractorModeToString(XBinary::EMODE mode);
-    static XBinary::EMODE ftStringToExtractorMode(QString sString);
 
     struct DATA_HEADERS_OPTIONS {
         _MEMORY_MAP *pMemoryMap;

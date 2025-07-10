@@ -102,8 +102,8 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
     result.nBinarySize = nTotalSize;
 
     result.fileType = getFileType();
-    result.mode = getMode(&listHunks);
-    result.sArch = getArch(&listHunks);
+    result.mode = getMode(&listHunks, pPdStruct);
+    result.sArch = getArch(&listHunks, pPdStruct);
     result.endian = getEndian();
     result.sType = getTypeAsString();
 
@@ -209,14 +209,14 @@ QString XAmigaHunk::getArch()
 {
     QList<HUNK> listHunks = getHunks();
 
-    return getArch(&listHunks);
+    return getArch(&listHunks, nullptr);
 }
 
-QString XAmigaHunk::getArch(QList<HUNK> *pListHunks)
+QString XAmigaHunk::getArch(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct)
 {
     QString sResult = "68K";
 
-    if (isHunkPresent(pListHunks, XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
+    if (isHunkPresent(pListHunks, XAMIGAHUNK_DEF::HUNK_PPC_CODE, pPdStruct)) {
         sResult = "PPC";
     }
 
@@ -227,14 +227,14 @@ XBinary::MODE XAmigaHunk::getMode()
 {
     QList<HUNK> listHunks = getHunks();
 
-    return getMode(&listHunks);
+    return getMode(&listHunks, nullptr);
 }
 
-XBinary::MODE XAmigaHunk::getMode(QList<HUNK> *pListHunks)
+XBinary::MODE XAmigaHunk::getMode(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct)
 {
     XBinary::MODE result = MODE_16;
 
-    if (isHunkPresent(pListHunks, XAMIGAHUNK_DEF::HUNK_RELOC32)) {
+    if (isHunkPresent(pListHunks, XAMIGAHUNK_DEF::HUNK_RELOC32, pPdStruct)) {
         result = MODE_32;
     }
 
@@ -374,13 +374,13 @@ QString XAmigaHunk::hunkTypeToString(quint32 nHunkType)
     return sResult;
 }
 
-bool XAmigaHunk::isHunkPresent(QList<HUNK> *pListHunks, quint32 nHunkType)
+bool XAmigaHunk::isHunkPresent(QList<HUNK> *pListHunks, quint32 nHunkType, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
     qint32 nNumberOfHunks = pListHunks->count();
 
-    for (qint32 i = 0; i < nNumberOfHunks; i++) {
+    for (qint32 i = 0; (i < nNumberOfHunks) && isPdStructNotCanceled(pPdStruct); i++) {
         if (pListHunks->at(i).nId == nHunkType) {
             bResult = true;
             break;
@@ -390,13 +390,26 @@ bool XAmigaHunk::isHunkPresent(QList<HUNK> *pListHunks, quint32 nHunkType)
     return bResult;
 }
 
-QList<XAmigaHunk::HUNK> XAmigaHunk::_getHunksByType(QList<HUNK> *pListHunks, quint32 nHunkType)
+qint64 XAmigaHunk::getHunksSize(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct)
+{
+    qint64 nResult = 0;
+
+    qint32 nNumberOfHunks = pListHunks->count();
+
+    for (qint32 i = 0; (i < nNumberOfHunks) && isPdStructNotCanceled(pPdStruct); i++) {
+        nResult = qMax(nResult, pListHunks->at(i).nOffset + pListHunks->at(i).nSize);
+    }
+
+    return nResult;
+}
+
+QList<XAmigaHunk::HUNK> XAmigaHunk::_getHunksByType(QList<HUNK> *pListHunks, quint32 nHunkType, PDSTRUCT *pPdStruct)
 {
     QList<HUNK> listResult;
 
     qint32 nNumberOfHunks = pListHunks->count();
 
-    for (qint32 i = 0; i < nNumberOfHunks; i++) {
+    for (qint32 i = 0; (i < nNumberOfHunks) && isPdStructNotCanceled(pPdStruct); i++) {
         if (pListHunks->at(i).nId == nHunkType) {
             listResult.append(pListHunks->at(i));
         }
@@ -425,11 +438,11 @@ qint64 XAmigaHunk::getFileFormatSize(PDSTRUCT *pPdStruct)
     qint64 nResult = 0;
     QList<HUNK> listHunks = getHunks(pPdStruct);
 
-    QList<HUNK> listEndHunks = _getHunksByType(&listHunks, XAMIGAHUNK_DEF::HUNK_END);
+    QList<HUNK> listEndHunks = _getHunksByType(&listHunks, XAMIGAHUNK_DEF::HUNK_END, pPdStruct);
 
     qint32 nNumberOfHunks = listEndHunks.count();
 
-    for (qint32 i = 0; i < nNumberOfHunks; i++) {
+    for (qint32 i = 0; (i < nNumberOfHunks) && isPdStructNotCanceled(pPdStruct); i++) {
         nResult = qMax(nResult, listEndHunks.at(i).nOffset + listEndHunks.at(i).nSize);
     }
 
@@ -453,8 +466,8 @@ XBinary::FILEFORMATINFO XAmigaHunk::getFileFormatInfo(PDSTRUCT *pPdStruct)
 
         result.osName = OSNAME_AMIGA;
         // result.sOsVersion = "";
-        result.sArch = getArch(&listHunks);
-        result.mode = getMode(&listHunks);
+        result.sArch = getArch(&listHunks, pPdStruct);
+        result.mode = getMode(&listHunks, pPdStruct);
         result.sType = getTypeAsString();
         result.endian = getEndian();
         result.sMIME = getMIMEString();

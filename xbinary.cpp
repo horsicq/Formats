@@ -75,13 +75,6 @@ const quint16 _crc16_tab[] = {
     0x9901, 0x59c0, 0x5880, 0x9841, 0x8801, 0x48c0, 0x4980, 0x8941, 0x4b00, 0x8bc1, 0x8a81, 0x4a40, 0x4e00, 0x8ec1, 0x8f81, 0x4f40, 0x8d01, 0x4dc0, 0x4c80, 0x8c41,
     0x4400, 0x84c1, 0x8581, 0x4540, 0x8701, 0x47c0, 0x4680, 0x8641, 0x8201, 0x42c0, 0x4380, 0x8341, 0x4100, 0x81c1, 0x8081, 0x4040};
 
-XBinary::XCONVERT _TABLE_XBINARY_EMODE[] = {
-    {XBinary::EMODE_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    {XBinary::EMODE_RAW, "Raw", QObject::tr("Raw")},
-    {XBinary::EMODE_FORMAT, "Format", QObject::tr("Format")},
-    {XBinary::EMODE_HEURISTIC, "Heuristic", QObject::tr("Heuristic")},
-};
-
 XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XBinary::STRUCTID_NFDSCAN, "nfd", QString("Nauz File Detector")},
@@ -114,6 +107,7 @@ XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
 XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XBinary::FT_DATA, "Data", QObject::tr("Data")},
+    {XBinary::FT_OTHER, "Other", QObject::tr("Other")},
     {XBinary::FT_REGION, "Region", QObject::tr("Region")},
     {XBinary::FT_PROCESS, "Process", QObject::tr("Process")},
     {XBinary::FT_BINARY, "Binary", QString("Binary")},
@@ -405,16 +399,6 @@ XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nRelOffset, qint64 nSize, c
 QString XBinary::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XBINARY_STRUCTID, sizeof(_TABLE_XBINARY_STRUCTID) / sizeof(XBinary::XCONVERT));
-}
-
-QString XBinary::extractorModeToString(EMODE mode)
-{
-    return XBinary::XCONVERT_idToTransString(mode, _TABLE_XBINARY_EMODE, sizeof(_TABLE_XBINARY_EMODE) / sizeof(XBinary::XCONVERT));
-}
-
-XBinary::EMODE XBinary::ftStringToExtractorMode(QString sString)
-{
-    return (XBinary::EMODE)XBinary::XCONVERT_ftStringToId(sString, _TABLE_XBINARY_EMODE, sizeof(_TABLE_XBINARY_EMODE) / sizeof(XBinary::XCONVERT));
 }
 
 XBinary::DATA_HEADER XBinary::_initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName)

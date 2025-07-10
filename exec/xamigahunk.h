@@ -84,15 +84,16 @@ public:
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual ENDIAN getEndian();
     virtual QString getArch();
-    QString getArch(QList<HUNK> *pListHunks);
+    QString getArch(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
     virtual MODE getMode();
-    MODE getMode(QList<HUNK> *pListHunks);
+    MODE getMode(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
 
     QList<HUNK> getHunks(PDSTRUCT *pPdStruct = nullptr);
     static QString hunkTypeToString(quint32 nHunkType);
 
-    bool isHunkPresent(QList<HUNK> *pListHunks, quint32 nHunkType);
-    static QList<HUNK> _getHunksByType(QList<HUNK> *pListHunks, quint32 nHunkType);
+    bool isHunkPresent(QList<HUNK> *pListHunks, quint32 nHunkType, PDSTRUCT *pPdStruct);
+    static QList<HUNK> _getHunksByType(QList<HUNK> *pListHunks, quint32 nHunkType, PDSTRUCT *pPdStruct);
+    static qint64 getHunksSize(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
 
     virtual FT getFileType();
     virtual QString getFileFormatExt();
