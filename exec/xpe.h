@@ -889,6 +889,7 @@ public:
     bool isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sMethodName, PDSTRUCT *pPdStruct = nullptr);
     bool isNetFieldPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sFieldName, PDSTRUCT *pPdStruct = nullptr);
 
+    XPE_DEF::S_METADATA_MODULE getMetadataModule(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_MEMBERREF getMetadataMemberRef(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_TYPEDEF getMetadataTypeDef(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_TYPEREF getMetadataTypeRef(CLI_INFO *pCliInfo, qint32 nNumber);
@@ -899,6 +900,10 @@ public:
     XPE_DEF::S_METADATA_TYPESPEC getMetadataTypeSpec(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_FIELD getMetadataField(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_METHODIMPL getMetadataMethodImpl(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_ASSEMBLY getMetadataAssembly(CLI_INFO *pCliInfo, qint32 nNumber);
+
+    QString getMetadataModuleName(CLI_INFO *pCliInfo, qint32 nNumber);
+    QString getMetadataAssemblyName(CLI_INFO *pCliInfo, qint32 nNumber);
 
     XPE_DEF::S_METADATA_METHODDEFORREF getMetadataMethodDefOrRef(CLI_INFO *pCliInfo, quint32 nValue);
 

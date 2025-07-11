@@ -10185,6 +10185,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             // AssemblyRef
                             {
                                 qint32 nSize = 0;
+                                nSize += 4;
                                 nSize += 2;
                                 nSize += 2;
                                 nSize += 2;
@@ -10193,7 +10194,6 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 nSize += result.metaData.nBLOBIndexSize;
                                 nSize += result.metaData.nStringIndexSize;
                                 nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nBLOBIndexSize;
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyRef] = nSize;  // Checked
                             }
                             // AssemblyRefProcessor
@@ -10517,6 +10517,38 @@ bool XPE::isNetFieldPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString 
     return bResult;
 }
 
+XPE_DEF::S_METADATA_MODULE XPE::getMetadataModule(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    XPE_DEF::S_METADATA_MODULE result = {};
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Module];
+        char *pBuffer = pCliInfo->metaData.baMetadata.data();
+        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
+
+        if (nNumber < nNumberOfRecords) {
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_Module] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_Module] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+
+            result.nGeneration = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 2;
+            result.nName =
+                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nStringIndexSize;
+            result.nMvid =
+                pCliInfo->metaData.nGUIDIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nGUIDIndexSize;
+            result.nEncId =
+                pCliInfo->metaData.nGUIDIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nGUIDIndexSize;
+            result.nEncBaseId =
+                pCliInfo->metaData.nGUIDIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+        }
+    }
+
+    return result;
+}
+
 XPE_DEF::S_METADATA_MEMBERREF XPE::getMetadataMemberRef(CLI_INFO *pCliInfo, qint32 nNumber)
 {
     XPE_DEF::S_METADATA_MEMBERREF result = {};
@@ -10772,6 +10804,55 @@ XPE_DEF::S_METADATA_METHODIMPL XPE::getMetadataMethodImpl(CLI_INFO *pCliInfo, qi
     }
 
     return result;
+}
+
+XPE_DEF::S_METADATA_ASSEMBLY XPE::getMetadataAssembly(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    XPE_DEF::S_METADATA_ASSEMBLY result = {};
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Assembly];
+        char *pBuffer = pCliInfo->metaData.baMetadata.data();
+        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
+
+        if (nNumber < nNumberOfRecords) {
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_Assembly] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_Assembly] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+
+            result.nHashAlgId = _read_uint32_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 4;
+            result.nMajorVersion = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 2;
+            result.nMinorVersion = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 2;
+            result.nBuildNumber = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 2;
+            result.nRevisionNumber = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 2;
+            result.nFlags = _read_uint32_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 4;
+            result.nPublicKeyOrToken =
+                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nBLOBIndexSize;
+            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
+                                                                    : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nStringIndexSize;
+            result.nCulture =
+                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+        }
+    }
+
+    return result;
+}
+
+QString XPE::getMetadataModuleName(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    return _read_ansiString_safe(pCliInfo->metaData.baStrings.data(), pCliInfo->metaData.baStrings.size(), getMetadataModule(pCliInfo, nNumber).nName);
+}
+
+QString XPE::getMetadataAssemblyName(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    return _read_ansiString_safe(pCliInfo->metaData.baStrings.data(), pCliInfo->metaData.baStrings.size(), getMetadataAssembly(pCliInfo, nNumber).nName);
 }
 
 XPE_DEF::S_METADATA_METHODDEFORREF XPE::getMetadataMethodDefOrRef(CLI_INFO *pCliInfo, quint32 nValue)

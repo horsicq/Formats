@@ -627,6 +627,13 @@ enum MetadataTable {
     metadata_Reserved_3F = 0x3F
 };
 
+struct S_METADATA_MODULE {
+    quint32 nGeneration;
+    quint32 nName;
+    quint32 nMvid;
+    quint32 nEncId;
+    quint32 nEncBaseId;
+};
 struct S_METADATA_MEMBERREF {
     quint32 nClass;
     quint32 nName;
@@ -685,6 +692,18 @@ struct S_METADATA_METHODIMPL {
 
 struct S_METADATA_MODULEREF {
     quint32 nName;
+};
+
+struct S_METADATA_ASSEMBLY {
+    quint32 nHashAlgId;
+    quint16 nMajorVersion;
+    quint16 nMinorVersion;
+    quint16 nBuildNumber;
+    quint16 nRevisionNumber;
+    quint32 nFlags;
+    quint32 nPublicKeyOrToken;
+    quint32 nName;
+    quint32 nCulture;
 };
 
 const quint32 S_METADATA_METHODDEFORREF_METHODDEF = 0;
