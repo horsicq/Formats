@@ -51,7 +51,6 @@ XBinary::XCONVERT _TABLE_XAmigaHunk_STRUCTID[] = {
     {XAmigaHunk::STRUCTID_HUNK_RELRELOC26, "HUNK_RELRELOC26", QString("HUNK_RELRELOC26")},
 };
 
-
 XAmigaHunk::XAmigaHunk(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
 }
@@ -119,7 +118,7 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
             record.filePart = FILEPART_REGION;
             record.nOffset = hunk.nOffset;
             record.nSize = hunk.nSize;
-            record.nAddress = hunk.nOffset; // TODO Check
+            record.nAddress = hunk.nOffset;  // TODO Check
             record.sName = hunkTypeToString(hunk.nId);
 
             result.listRecords.append(record);
