@@ -20,6 +20,12 @@
  */
 #include "xbmp.h"
 
+XBinary::XCONVERT _TABLE_XBMP_STRUCTID[] = {
+    {XBMP::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XBMP::STRUCTID_BMPFILEHEADER, "BMPFILEHEADER", QString("BMP File Header")},
+    {XBMP::STRUCTID_BMPINFOHEADER, "BMPINFOHEADER", QString("BMP Info Header")},
+};
+
 XBMP::XBMP(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -161,6 +167,11 @@ QString XBMP::getVersion()
     }
 
     return sResult;
+}
+
+QString XBMP::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XBMP_STRUCTID, sizeof(_TABLE_XBMP_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
 XBMP::BMPINFOHEADER XBMP::getInfoHeader()

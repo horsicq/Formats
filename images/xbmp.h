@@ -27,6 +27,12 @@ class XBMP : public XBinary {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_BMPFILEHEADER,
+        STRUCTID_BMPINFOHEADER
+    };
+
     explicit XBMP(QIODevice *pDevice = nullptr);
     ~XBMP();
 
@@ -67,6 +73,8 @@ public:
 
     BMPFILEHEADER getFileHeader();
     BMPINFOHEADER getInfoHeader();
+
+    virtual QString structIDToString(quint32 nID);
 };
 
 #endif  // XBMP_H
