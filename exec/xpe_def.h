@@ -634,11 +634,6 @@ struct S_METADATA_MODULE {
     quint32 nEncId;
     quint32 nEncBaseId;
 };
-struct S_METADATA_MEMBERREF {
-    quint32 nClass;
-    quint32 nName;
-    quint32 nSignature;
-};
 
 struct S_METADATA_TYPEREF {
     quint32 nResolutionScope;
@@ -682,6 +677,12 @@ struct S_METADATA_PARAM {
     quint32 nFlags;
     quint32 nSequence;
     quint32 nName;
+};
+
+struct S_METADATA_MEMBERREF {
+    quint32 nClass;
+    quint32 nName;
+    quint32 nSignature;
 };
 
 struct S_METADATA_METHODIMPL {
