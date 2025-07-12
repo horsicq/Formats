@@ -685,6 +685,15 @@ struct S_METADATA_MEMBERREF {
     quint32 nSignature;
 };
 
+struct S_METADATA_CONSTANT {
+    quint32 nType;
+    quint32 nParent;
+    union {
+        quint32 nValue;  // For primitive types
+        quint64 nValue64;  // For 64-bit types
+    };
+};
+
 struct S_METADATA_METHODIMPL {
     quint32 nClass;
     quint32 nMethodBody;
