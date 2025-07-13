@@ -1998,14 +1998,13 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     _MEMORY_RECORD record = {};
 
                     record.filePart = FILEPART_SECTION;
-                    record.nFilePartNumber = i;
+                    record.nFilePartNumber = i + 1;
 
                     record.nAddress = nVirtualAddress;
                     record.nOffset = nFileOffset;
                     record.nSize = nFileSize;
                     record.sName = sSectionName;
                     record.nIndex = nIndex++;
-                    record.nFilePartNumber = i;
 
                     result.listRecords.append(record);
                 }
@@ -2015,14 +2014,13 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     record.bIsVirtual = true;
 
                     record.filePart = FILEPART_SECTION;
-                    record.nFilePartNumber = i;
+                    record.nFilePartNumber = i + 1;
 
                     record.nAddress = nVirtualAddress + nFileSize;
                     record.nOffset = -1;
                     record.nSize = nVirtualSize - nFileSize;
                     record.sName = sSectionName;
                     record.nIndex = nIndex++;
-                    record.nFilePartNumber = i;
 
                     result.listRecords.append(record);
                 }
@@ -2030,14 +2028,13 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 _MEMORY_RECORD record = {};
 
                 record.filePart = FILEPART_SECTION;
-                record.nFilePartNumber = i;
+                record.nFilePartNumber = i + 1;
 
                 record.nAddress = nVirtualAddress;
                 record.nOffset = nVirtualAddress - result.nModuleAddress;
                 record.nSize = nVirtualSize;
                 record.sName = sSectionName;
                 record.nIndex = nIndex++;
-                record.nFilePartNumber = i;
 
                 result.listRecords.append(record);
             }
