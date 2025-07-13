@@ -20,6 +20,10 @@
  */
 #include "xmp3.h"
 
+XBinary::XCONVERT _TABLE_XMP3_STRUCTID[] = {
+    {XMP3::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    };
+
 XMP3::XMP3(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -394,4 +398,9 @@ qint64 XMP3::decodeFrame(qint64 nOffset)
     }
 
     return nResult;
+}
+
+QString XMP3::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XMP3_STRUCTID, sizeof(_TABLE_XMP3_STRUCTID) / sizeof(XBinary::XCONVERT));
 }

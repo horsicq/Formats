@@ -27,6 +27,10 @@ class XMP3 : public XBinary {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+    };
+
     explicit XMP3(QIODevice *pDevice = nullptr);
     ~XMP3();
 
@@ -42,6 +46,8 @@ public:
     virtual QString getMIMEString();
 
     qint64 decodeFrame(qint64 nOffset);
+
+    virtual QString structIDToString(quint32 nID);
 };
 
 #endif  // XMP3_H
