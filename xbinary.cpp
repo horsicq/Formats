@@ -9404,21 +9404,21 @@ bool XBinary::removeOverlay()
     return addOverlay(0, 0);
 }
 
-bool XBinary::isSignatureInFilePartPresent(qint32 nLoadSegment, const QString &sSignature)
+bool XBinary::isSignatureInFilePartPresent(qint32 nFilePartNumber, const QString &sSignature)
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
-    return isSignatureInFilePartPresent(&memoryMap, nLoadSegment, sSignature);
+    return isSignatureInFilePartPresent(&memoryMap, nFilePartNumber, sSignature);
 }
 
-bool XBinary::isSignatureInFilePartPresent(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, const QString &sSignature, PDSTRUCT *pPdStruct)
+bool XBinary::isSignatureInFilePartPresent(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nFilePartNumber, const QString &sSignature, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-        if (pMemoryMap->listRecords.at(i).nFilePartNumber == nLoadSegment) {
+        if (pMemoryMap->listRecords.at(i).nFilePartNumber == nFilePartNumber) {
             if (pMemoryMap->listRecords.at(i).nOffset != -1) {
                 bResult = isSignaturePresent(pMemoryMap, pMemoryMap->listRecords.at(i).nOffset, pMemoryMap->listRecords.at(i).nSize, sSignature, pPdStruct);
 

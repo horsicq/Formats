@@ -2005,6 +2005,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     record.nSize = nFileSize;
                     record.sName = sSectionName;
                     record.nIndex = nIndex++;
+                    record.nFilePartNumber = i;
 
                     result.listRecords.append(record);
                 }
@@ -2021,6 +2022,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     record.nSize = nVirtualSize - nFileSize;
                     record.sName = sSectionName;
                     record.nIndex = nIndex++;
+                    record.nFilePartNumber = i;
 
                     result.listRecords.append(record);
                 }
@@ -2035,6 +2037,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 record.nSize = nVirtualSize;
                 record.sName = sSectionName;
                 record.nIndex = nIndex++;
+                record.nFilePartNumber = i;
 
                 result.listRecords.append(record);
             }

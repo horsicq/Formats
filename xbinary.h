@@ -1582,8 +1582,8 @@ public:
     bool addOverlay(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     bool removeOverlay();
 
-    bool isSignatureInFilePartPresent(qint32 nLoadSegment, const QString &sSignature);
-    bool isSignatureInFilePartPresent(_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
+    bool isSignatureInFilePartPresent(qint32 nFilePartNumber, const QString &sSignature);
+    bool isSignatureInFilePartPresent(_MEMORY_MAP *pMemoryMap, qint32 nFilePartNumber, const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
 
     static QString getStringCollision(QList<QString> *pListStrings, const QString &sString1, const QString &sString2);
 
