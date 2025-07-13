@@ -1998,7 +1998,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     _MEMORY_RECORD record = {};
 
                     record.filePart = FILEPART_SECTION;
-                    record.filePartNumber = i;
+                    record.nFilePartNumber = i;
 
                     record.nAddress = nVirtualAddress;
                     record.nOffset = nFileOffset;
@@ -2014,7 +2014,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     record.bIsVirtual = true;
 
                     record.filePart = FILEPART_SECTION;
-                    record.filePartNumber = i;
+                    record.nFilePartNumber = i;
 
                     record.nAddress = nVirtualAddress + nFileSize;
                     record.nOffset = -1;
@@ -2028,7 +2028,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 _MEMORY_RECORD record = {};
 
                 record.filePart = FILEPART_SECTION;
-                record.filePartNumber = i;
+                record.nFilePartNumber = i;
 
                 record.nAddress = nVirtualAddress;
                 record.nOffset = nVirtualAddress - result.nModuleAddress;

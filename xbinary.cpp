@@ -5128,7 +5128,7 @@ qint32 XBinary::addressToFileTypeNumber(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
 {
     _MEMORY_RECORD mm = getMemoryRecordByAddress(pMemoryMap, nAddress);
 
-    return mm.filePartNumber;
+    return mm.nFilePartNumber;
     ;
 }
 
@@ -5136,7 +5136,7 @@ qint32 XBinary::relAddressToFileTypeNumber(_MEMORY_MAP *pMemoryMap, qint64 nRelA
 {
     _MEMORY_RECORD mm = getMemoryRecordByRelAddress(pMemoryMap, nRelAddress);
 
-    return mm.filePartNumber;
+    return mm.nFilePartNumber;
 }
 
 bool XBinary::isAddressInHeader(_MEMORY_MAP *pMemoryMap, XADDR nAddress)
@@ -5300,7 +5300,7 @@ XBinary::_MEMORY_MAP XBinary::_getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStr
         record.sName = fpart.sOriginalName;
         record.bIsVirtual = false;
         record.filePart = fpart.filePart;
-        record.filePartNumber = i;
+        record.nFilePartNumber = i;
 
         result.listRecords.append(record);
 
@@ -5314,7 +5314,7 @@ XBinary::_MEMORY_MAP XBinary::_getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStr
             virtualRecord.sName = fpart.sOriginalName + " (virtual)";
             virtualRecord.bIsVirtual = true;
             virtualRecord.filePart = fpart.filePart;
-            virtualRecord.filePartNumber = i;
+            virtualRecord.nFilePartNumber = i;
 
             result.listRecords.append(virtualRecord);
         }
@@ -8514,7 +8514,7 @@ void XBinary::dumpMemoryMap()
         // qDebug("Segment: %s", addressSegmentToString(memoryMap.listRecords.at(i).segment).toLatin1().data());
         qDebug("Size: %lld", memoryMap.listRecords.at(i).nSize);
         // qDebug("Type: %s", mmtToString(memoryMap.listRecords.at(i).type).toLatin1().data());
-        qDebug("LoadSectionNumber: %d", memoryMap.listRecords.at(i).filePartNumber);
+        qDebug("LoadSectionNumber: %d", memoryMap.listRecords.at(i).nFilePartNumber);
         qDebug("Name: %s", memoryMap.listRecords.at(i).sName.toLatin1().data());
         qDebug("IsVirtual: %s", memoryMap.listRecords.at(i).bIsVirtual ? "true" : "false");
         qDebug("IsInvisible: %s", memoryMap.listRecords.at(i).bIsInvisible ? "true" : "false");
@@ -9404,21 +9404,21 @@ bool XBinary::removeOverlay()
     return addOverlay(0, 0);
 }
 
-bool XBinary::isSignatureInLoadSegmentPresent(qint32 nLoadSegment, const QString &sSignature)
+bool XBinary::isSignatureInFilePartPresent(qint32 nLoadSegment, const QString &sSignature)
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
-    return isSignatureInLoadSegmentPresent(&memoryMap, nLoadSegment, sSignature);
+    return isSignatureInFilePartPresent(&memoryMap, nLoadSegment, sSignature);
 }
 
-bool XBinary::isSignatureInLoadSegmentPresent(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, const QString &sSignature, PDSTRUCT *pPdStruct)
+bool XBinary::isSignatureInFilePartPresent(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, const QString &sSignature, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-        if (pMemoryMap->listRecords.at(i).filePartNumber == nLoadSegment) {
+        if (pMemoryMap->listRecords.at(i).nFilePartNumber == nLoadSegment) {
             if (pMemoryMap->listRecords.at(i).nOffset != -1) {
                 bResult = isSignaturePresent(pMemoryMap, pMemoryMap->listRecords.at(i).nOffset, pMemoryMap->listRecords.at(i).nSize, sSignature, pPdStruct);
 

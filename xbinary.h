@@ -231,7 +231,7 @@ public:
         qint64 nSize;
         // MMT type; // TODO Use File_Part
         FILEPART filePart;  // File_Part
-        qint32 filePartNumber;
+        qint32 nFilePartNumber;
         QString sName;
         qint32 nIndex;
         bool bIsVirtual;
@@ -1582,8 +1582,8 @@ public:
     bool addOverlay(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     bool removeOverlay();
 
-    bool isSignatureInLoadSegmentPresent(qint32 nLoadSegment, const QString &sSignature);
-    bool isSignatureInLoadSegmentPresent(_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
+    bool isSignatureInFilePartPresent(qint32 nLoadSegment, const QString &sSignature);
+    bool isSignatureInFilePartPresent(_MEMORY_MAP *pMemoryMap, qint32 nLoadSegment, const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
 
     static QString getStringCollision(QList<QString> *pListStrings, const QString &sString1, const QString &sString2);
 
