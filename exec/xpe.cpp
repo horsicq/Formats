@@ -9846,7 +9846,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             result.metaData.nHasConstantSize = 2;
                             result.metaData.nHasCustomAttributeSize = 2;
                             result.metaData.nCustomAttributeTypeSize = 2;
-                            result.metaData.nHasFieldMarshallSize = 2;
+                            result.metaData.nHasFieldMarshalSize = 2;
                             result.metaData.nHasDeclSecuritySize = 2;
                             result.metaData.nHasSemanticsSize = 2;
                             result.metaData.nMethodDefOrRefSize = 2;
@@ -9907,13 +9907,19 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Assembly] > 0x7FF) {
                                 result.metaData.nHasCustomAttributeSize = 4;
                             }
+
                             if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x1FFF ||
                                 result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef] > 0x1FFF) {
+                                result.metaData.nCustomAttributeTypeSize = 4;
+                            }
+
+                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x7FFF ||
+                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef] > 0x7FFF) {
                                 result.metaData.nMethodDefOrRefSize = 4;
                             }
                             if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field] > 0x7FFF ||
                                 result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Param] > 0x7FFF) {
-                                result.metaData.nHasFieldMarshallSize = 4;
+                                result.metaData.nHasFieldMarshalSize = 4;
                             }
                             if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x3FFF ||
                                 result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x3FFF ||
@@ -10033,7 +10039,7 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                             // FieldMarshal
                             {
                                 qint32 nSize = 0;
-                                nSize += result.metaData.nHasFieldMarshallSize;
+                                nSize += result.metaData.nHasFieldMarshalSize;
                                 nSize += result.metaData.nBLOBIndexSize;
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_FieldMarshal] = nSize;
                             }
@@ -10839,6 +10845,109 @@ XPE_DEF::S_METADATA_ASSEMBLY XPE::getMetadataAssembly(CLI_INFO *pCliInfo, qint32
             nOffset += pCliInfo->metaData.nStringIndexSize;
             result.nCulture =
                 pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+        }
+    }
+
+    return result;
+}
+
+XPE_DEF::S_METADATA_CONSTANT XPE::getMetadataConstant(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    XPE_DEF::S_METADATA_CONSTANT result = {};
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Constant];
+        char *pBuffer = pCliInfo->metaData.baMetadata.data();
+        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
+
+        if (nNumber < nNumberOfRecords) {
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_Constant] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_Constant] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+
+            result.nType = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 2;
+            result.nParent =
+                pCliInfo->metaData.nHasConstantSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nHasConstantSize;
+            result.nValue =
+                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+        }
+    }
+
+    return result;
+}
+
+XPE_DEF::S_METADATA_CUSTOMATTRIBUTE XPE::getMetadataCustomAttribute(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    XPE_DEF::S_METADATA_CUSTOMATTRIBUTE result = {};
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_CustomAttribute];
+        char *pBuffer = pCliInfo->metaData.baMetadata.data();
+        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
+
+        if (nNumber < nNumberOfRecords) {
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_CustomAttribute] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_CustomAttribute] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+
+            result.nParent =
+                pCliInfo->metaData.nHasCustomAttributeSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nHasCustomAttributeSize;
+            result.nType =
+                pCliInfo->metaData.nCustomAttributeTypeSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nCustomAttributeTypeSize;
+            result.nValue =
+                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+        }
+    }
+
+    return result;
+}
+
+XPE_DEF::S_METADATA_FIELDMARSHAL XPE::getMetadataFieldMarshal(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    XPE_DEF::S_METADATA_FIELDMARSHAL result = {};
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_FieldMarshal];
+        char *pBuffer = pCliInfo->metaData.baMetadata.data();
+        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
+
+        if (nNumber < nNumberOfRecords) {
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_FieldMarshal] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_FieldMarshal] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+
+            result.nParent =
+                pCliInfo->metaData.nHasFieldMarshalSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nHasFieldMarshalSize;
+            result.nNativeType =
+                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+        }
+    }
+
+    return result;
+}
+
+XPE_DEF::S_METADATA_DECLSECURITY XPE::getMetadataDeclSecurity(CLI_INFO *pCliInfo, qint32 nNumber)
+{
+    XPE_DEF::S_METADATA_DECLSECURITY result = {};
+
+    if (pCliInfo->bValid) {
+        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_DeclSecurity];
+        char *pBuffer = pCliInfo->metaData.baMetadata.data();
+        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
+
+        if (nNumber < nNumberOfRecords) {
+            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_DeclSecurity] +
+                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_DeclSecurity] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
+
+            result.nAction = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += 2;
+            result.nParent =
+                pCliInfo->metaData.nHasDeclSecuritySize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            nOffset += pCliInfo->metaData.nHasDeclSecuritySize;
+            result.nPermissionSet =
+                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 

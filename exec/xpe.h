@@ -263,7 +263,7 @@ public:
         qint32 nHasConstantSize;
         qint32 nHasCustomAttributeSize;
         qint32 nCustomAttributeTypeSize;
-        qint32 nHasFieldMarshallSize;
+        qint32 nHasFieldMarshalSize;
         qint32 nHasDeclSecuritySize;
         qint32 nHasSemanticsSize;
         qint32 nMemberForwardedSize;
@@ -901,6 +901,10 @@ public:
     XPE_DEF::S_METADATA_FIELD getMetadataField(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_METHODIMPL getMetadataMethodImpl(CLI_INFO *pCliInfo, qint32 nNumber);
     XPE_DEF::S_METADATA_ASSEMBLY getMetadataAssembly(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_CONSTANT getMetadataConstant(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_CUSTOMATTRIBUTE getMetadataCustomAttribute(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_FIELDMARSHAL getMetadataFieldMarshal(CLI_INFO *pCliInfo, qint32 nNumber);
+    XPE_DEF::S_METADATA_DECLSECURITY getMetadataDeclSecurity(CLI_INFO *pCliInfo, qint32 nNumber);
 
     QString getMetadataModuleName(CLI_INFO *pCliInfo, qint32 nNumber);
     QString getMetadataAssemblyName(CLI_INFO *pCliInfo, qint32 nNumber);

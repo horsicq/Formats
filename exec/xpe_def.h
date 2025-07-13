@@ -688,10 +688,24 @@ struct S_METADATA_MEMBERREF {
 struct S_METADATA_CONSTANT {
     quint32 nType;
     quint32 nParent;
-    union {
-        quint32 nValue;  // For primitive types
-        quint64 nValue64;  // For 64-bit types
-    };
+    quint32 nValue;
+};
+
+struct S_METADATA_CUSTOMATTRIBUTE {
+    quint32 nParent;
+    quint32 nType;
+    quint32 nValue;
+};
+
+struct S_METADATA_FIELDMARSHAL {
+    quint32 nParent;
+    quint32 nNativeType;
+};
+
+struct S_METADATA_DECLSECURITY {
+    quint16 nAction;
+    quint32 nParent;
+    quint32 nPermissionSet;
 };
 
 struct S_METADATA_METHODIMPL {
