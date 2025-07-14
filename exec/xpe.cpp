@@ -11307,6 +11307,10 @@ qint32 XPE::getEntryPointSection(_MEMORY_MAP *pMemoryMap)
         nResult = addressToFileTypeNumber(pMemoryMap, getModuleAddress() + nAddressOfEntryPoint);
     }
 
+    if (nResult > 0) {
+        nResult--;
+    }
+
     return nResult;
 }
 
@@ -11362,6 +11366,10 @@ qint32 XPE::getImageDirectoryEntrySection(_MEMORY_MAP *pMemoryMap, qint32 nImage
         nResult = addressToFileTypeNumber(pMemoryMap, getModuleAddress() + nAddressOfRecord);
     }
 
+    if (nResult > 0) {
+        nResult--;
+    }
+
     return nResult;
 }
 
@@ -11401,6 +11409,10 @@ qint32 XPE::getNormalCodeSection(_MEMORY_MAP *pMemoryMap)
                 nResult = addressToFileTypeNumber(pMemoryMap, getModuleAddress() + listSections.at(0).VirtualAddress);
             }
         }
+    }
+
+    if (nResult > 0) {
+        nResult--;
     }
 
     return nResult;
@@ -11449,6 +11461,10 @@ qint32 XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
         }
     }
 
+    if (nResult > 0) {
+        nResult--;
+    }
+
     return nResult;
 }
 
@@ -11480,6 +11496,10 @@ qint32 XPE::getConstDataSection(_MEMORY_MAP *pMemoryMap)
             nResult = addressToFileTypeNumber(pMemoryMap, getModuleAddress() + listSections.at(i).VirtualAddress);
             break;
         }
+    }
+
+    if (nResult > 0) {
+        nResult--;
     }
 
     return nResult;
