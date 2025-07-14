@@ -9997,6 +9997,12 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 nSize += result.metaData.indexSize[XPE_DEF::metadata_Param];
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodDef] = nSize;
                             }
+                            // ParamPtr
+                            {
+                                qint32 nSize = 0;
+                                nSize += result.metaData.indexSize[XPE_DEF::metadata_Param];
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ParamPtr] = nSize;
+                            }
                             // Param
                             {
                                 qint32 nSize = 0;
