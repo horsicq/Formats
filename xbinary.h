@@ -806,7 +806,7 @@ public:
         bool bChildren;
         DHMODE dhMode;
         qint64 nSize;
-        qint32 nCount;
+        qint32 nCount; 
     };
 
     DSID _addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct);
@@ -820,8 +820,8 @@ public:
         DATA_HEADER dataHeader;
     };
 
-    qint32 getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
-    static qint32 getDataRecordValues(QIODevice *pDevice, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
+    qint32 getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, QList<QString> *pListTitles, PDSTRUCT *pPdStruct);
+    static qint32 getDataRecordValues(QIODevice *pDevice, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, QList<QString> *pListTitles, PDSTRUCT *pPdStruct);
 
     static QList<QString> getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, PDSTRUCT *pPdStruct);
 
@@ -1040,7 +1040,7 @@ public:
     static quint16 _read_uint16_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, bool bIsBigEndian = false);
     static quint32 _read_uint32_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, bool bIsBigEndian = false);
     static quint64 _read_uint64_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, bool bIsBigEndian = false);
-    static QString _read_ansiString_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, qint32 nMaxSize = 50);
+    static QString _read_ansiString_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, qint32 nMaxSize = 512);
 
     static void _write_uint8(char *pData, quint8 nValue);
     static void _write_int8(char *pData, qint8 nValue);

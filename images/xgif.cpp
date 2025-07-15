@@ -96,6 +96,13 @@ QString XGif::getMIMEString()
     return "image/gif";
 }
 
+QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::FPART> listResult;
+
+    return listResult;
+}
+
 XBinary::_MEMORY_MAP XGif::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     XBinary::PDSTRUCT pdStructEmpty = {};

@@ -9345,6 +9345,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                     _dataHeadersOptions.dsID_parent = dataHeader.dsID;
                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
                     _dataHeadersOptions.nCount = NumberOfSections;
+                    _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_SECTION_HEADER) * NumberOfSections;
                     _dataHeadersOptions.nID = STRUCTID_IMAGE_SECTION_HEADER;
                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
                 }
@@ -9482,6 +9483,32 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                                             DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
 
                 // TODO
+
+                listResult.append(dataHeader);
+            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_SECTION_HEADER) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_SECTION_HEADER);
+
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Name), 8, "Name", VT_STRING, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData), 4, "SizeOfRawData", VT_DWORD, DRF_SIZE,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRawData), 4, "PointerToRawData", VT_DWORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRelocations), 4, "PointerToRelocations", VT_DWORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToLinenumbers), 4, "PointerToLinenumbers", VT_DWORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfRelocations), 2, "NumberOfRelocations", VT_WORD, DRF_COUNT,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+
+
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfLinenumbers), 2, "NumberOfLinenumbers", VT_WORD, DRF_COUNT,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
+                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageSectionHeaderFlags(), VL_TYPE_FLAGS));
 
                 listResult.append(dataHeader);
             }
@@ -9762,6 +9789,9 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                         // result.bInit=true;
                         qint64 nOffset = result.nMetaDataOffset + 20 + result.metaData.header.nVersionStringLength;
 
+                        bool bStrings = false;
+                        bool bUS = false;
+
                         for (qint32 i = 0; i < result.metaData.header.nStreams; i++) {
                             CLI_METADATA_STREAM stream = {};
 
@@ -9778,20 +9808,21 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 result.metaData.osMetadata.nSize = result.metaData.listStreams.at(i).nSize;
 
                                 result.metaData.baMetadata = read_array(result.metaData.osMetadata.nOffset, result.metaData.osMetadata.nSize);
-                            } else if (result.metaData.listStreams.at(i).sName == "#Strings") {
+                            } else if ((result.metaData.listStreams.at(i).sName == "#Strings") && (!bStrings)) {
                                 result.metaData.osStrings.nOffset = result.metaData.listStreams.at(i).nOffset;
                                 result.metaData.osStrings.nSize = result.metaData.listStreams.at(i).nSize;
 
                                 result.metaData.baStrings = read_array(result.metaData.osStrings.nOffset, result.metaData.osStrings.nSize);
-                            } else if (result.metaData.listStreams.at(i).sName == "#US") {
+                                bStrings = true;
+                            } else if ((result.metaData.listStreams.at(i).sName == "#US") && (!bUS)) {
                                 result.metaData.osUS.nOffset = result.metaData.listStreams.at(i).nOffset;
                                 result.metaData.osUS.nSize = result.metaData.listStreams.at(i).nSize;
 
                                 result.metaData.baUS = read_array(result.metaData.osUS.nOffset, result.metaData.osUS.nSize);
+                                bUS = true;
                             } else if (result.metaData.listStreams.at(i).sName == "#Blob") {
                                 result.metaData.osBlob.nOffset = result.metaData.listStreams.at(i).nOffset;
                                 result.metaData.osBlob.nSize = result.metaData.listStreams.at(i).nSize;
-
                             } else if (result.metaData.listStreams.at(i).sName == "#GUID") {
                                 result.metaData.osGUID.nOffset = result.metaData.listStreams.at(i).nOffset;
                                 result.metaData.osGUID.nSize = result.metaData.listStreams.at(i).nSize;
