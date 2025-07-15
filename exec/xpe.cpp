@@ -10166,6 +10166,21 @@ XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap
                                 nSize += result.metaData.indexSize[XPE_DEF::metadata_Field];
                                 result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_FieldRVA] = nSize;
                             }
+                            // EncLog
+                            {
+                                qint32 nSize = 0;
+                                nSize += 4;
+                                nSize += result.metaData.indexSize[XPE_DEF::metadata_MethodDef];
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ENCLog] = nSize;
+                            }
+                            // EncMap
+                            {
+                                qint32 nSize = 0;
+                                nSize += 4;
+                                nSize += result.metaData.indexSize[XPE_DEF::metadata_MethodDef];
+                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ENCMap] = nSize;
+                            }
+
                             // Assembly
                             {
                                 qint32 nSize = 0;
