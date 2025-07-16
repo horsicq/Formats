@@ -96,6 +96,47 @@ XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_OVERLAY, "overlay", QObject::tr("Overlay")},
 };
 
+// enum COMPRESS_METHOD {
+//     COMPRESS_METHOD_UNKNOWN = 0,
+//     COMPRESS_METHOD_STORE,
+//     COMPRESS_METHOD_FILE,  // TODO Check
+//     COMPRESS_METHOD_DEFLATE,
+//     COMPRESS_METHOD_DEFLATE64,
+//     COMPRESS_METHOD_BZIP2,
+//     COMPRESS_METHOD_LZMA_ZIP,
+//     COMPRESS_METHOD_PPMD,
+//     COMPRESS_METHOD_LZH5,
+//     COMPRESS_METHOD_LZH6,
+//     COMPRESS_METHOD_LZH7,
+//     COMPRESS_METHOD_RAR_15,
+//     COMPRESS_METHOD_RAR_20,
+//     COMPRESS_METHOD_RAR_29,
+//     COMPRESS_METHOD_RAR_50,
+//     COMPRESS_METHOD_RAR_70,
+//     COMPRESS_METHOD_LZSS_SZDD
+//     // TODO check more methods
+// };
+
+XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
+    {XBinary::COMPRESS_METHOD_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XBinary::COMPRESS_METHOD_STORE, "Store", QString("Store")},
+    {XBinary::COMPRESS_METHOD_FILE, "File", QObject::tr("File")},  // TODO Check
+    {XBinary::COMPRESS_METHOD_DEFLATE, "Deflate", QString("Deflate")},
+    {XBinary::COMPRESS_METHOD_DEFLATE64, "Deflate64", QString("Deflate64")},
+    {XBinary::COMPRESS_METHOD_BZIP2, "Bzip2", QString("Bzip2")},
+    {XBinary::COMPRESS_METHOD_LZMA_ZIP, "LZMA_ZIP", QString("LZMA(ZIP)")},
+    {XBinary::COMPRESS_METHOD_PPMD, "PPMD", QString("PPMD")},  // TODO
+    {XBinary::COMPRESS_METHOD_LZH5, "LZH5", QString("LZH5")},
+    {XBinary::COMPRESS_METHOD_LZH6, "LZH6", QString("LZH6")},
+    {XBinary::COMPRESS_METHOD_LZH7, "LZH7", QString("LZH7")},
+    {XBinary::COMPRESS_METHOD_RAR_15, "RAR_15", QString("RAR 1.5")},
+    {XBinary::COMPRESS_METHOD_RAR_20, "RAR_20", QString("RAR 2.0")},
+    {XBinary::COMPRESS_METHOD_RAR_29, "RAR_29", QString("RAR 2.9")},
+    {XBinary::COMPRESS_METHOD_RAR_50, "RAR_50", QString("RAR 5.0")},
+    {XBinary::COMPRESS_METHOD_RAR_70, "RAR_70", QString("RAR 7.0")},
+    {XBinary::COMPRESS_METHOD_LZSS_SZDD, "LZSS_SZDD", QString("LZSS SZDD")},
+};
+
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
     {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},        {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
     {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},        {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
@@ -563,10 +604,11 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
         pListTitles->clear();
     }
 
-    qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, dataRecordsOptions.dataHeader.locType, dataRecordsOptions.dataHeader.nLocation);
-
     if (dataRecordsOptions.dataHeader.dhMode == DHMODE_HEADER) {
+        qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, dataRecordsOptions.dataHeader.locType, dataRecordsOptions.dataHeader.nLocation);
         qint32 nNumberOfRecords = dataRecordsOptions.dataHeader.listRecords.count();
+
+        qint32 nMax = 0;
 
         for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
             DATA_RECORD dataRecord = dataRecordsOptions.dataHeader.listRecords.at(j);
@@ -578,9 +620,13 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
             if (pListTitles) {
                 pListTitles->append(dataRecord.sName);
             }
+
+            if (dataRecord.nRelOffset + dataRecord.nSize > nMax) {
+                nMax = dataRecord.nRelOffset + dataRecord.nSize;
+            }
         }
 
-        nResult = dataRecordsOptions.dataHeader.nSize;
+        nResult = nMax;
     } else if (dataRecordsOptions.dataHeader.dhMode == DHMODE_TABLE) {
         qint32 nCount = dataRecordsOptions.dataHeader.nCount;
         XADDR nLocation = dataRecordsOptions.dataHeader.nLocation;
@@ -680,6 +726,11 @@ qint32 XBinary::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DAT
     qint32 nResult = getDataRecordValues(_dataRecordsOptions, pListValues, nullptr, pPdStruct);
 
     return nResult;
+}
+
+QString XBinary::compressMethidToString(COMPRESS_METHOD compressMethod)
+{
+    return XBinary::XCONVERT_idToTransString(compressMethod, _TABLE_XBINARY_COMPRESS_METHOD, sizeof(_TABLE_XBINARY_COMPRESS_METHOD) / sizeof(XBinary::XCONVERT));
 }
 
 XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian)
@@ -9629,7 +9680,7 @@ QString XBinary::getStringByIndex(QList<QString> *pListStrings, qint32 nIndex, q
         nNumberOfStrings = pListStrings->count();
     }
 
-    if ((nIndex > 0) && (nIndex < nNumberOfStrings)) {
+    if ((nIndex >= 0) && (nIndex < nNumberOfStrings)) {
         sResult = pListStrings->at(nIndex);
     }
 

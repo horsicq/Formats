@@ -159,6 +159,27 @@ public:
         qint64 nStringTableSize;
     };
 
+    enum COMPRESS_METHOD {
+        COMPRESS_METHOD_UNKNOWN = 0,
+        COMPRESS_METHOD_STORE,
+        COMPRESS_METHOD_FILE,  // TODO Check
+        COMPRESS_METHOD_DEFLATE,
+        COMPRESS_METHOD_DEFLATE64,
+        COMPRESS_METHOD_BZIP2,
+        COMPRESS_METHOD_LZMA_ZIP,
+        COMPRESS_METHOD_PPMD,
+        COMPRESS_METHOD_LZH5,
+        COMPRESS_METHOD_LZH6,
+        COMPRESS_METHOD_LZH7,
+        COMPRESS_METHOD_RAR_15,
+        COMPRESS_METHOD_RAR_20,
+        COMPRESS_METHOD_RAR_29,
+        COMPRESS_METHOD_RAR_50,
+        COMPRESS_METHOD_RAR_70,
+        COMPRESS_METHOD_LZSS_SZDD
+        // TODO check more methods
+    };
+
     struct BYTE_COUNTS {
         qint64 nSize;
         qint64 nCount[256];  // TODO const
@@ -828,6 +849,8 @@ public:
     virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions);
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues,
                                 PDSTRUCT *pPdStruct);
+
+    QString compressMethidToString(COMPRESS_METHOD compressMethod);
 
 private:
     enum ST {
