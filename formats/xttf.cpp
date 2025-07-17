@@ -245,24 +245,6 @@ QList<QString> XTTF::getTableTitles(const DATA_RECORDS_OPTIONS & /*dataRecordsOp
     return list;
 }
 
-qint32 XTTF::readTableRow(qint32 nRow, LT /*locType*/, XADDR /*nLocation*/, const DATA_RECORDS_OPTIONS & /*dataRecordsOptions*/, QList<QVariant> *pListValues,
-                          PDSTRUCT * /*pPdStruct*/)
-{
-    // QList<TTF_TABLE_RECORD> tables = getTableDirectory();
-    // qint32 nNumberOfTables = tables.size();
-    // if ((nRow >= 0) && (nRow < nNumberOfTables)) {
-    //     if (pListValues) {
-    //         pListValues->clear();
-    //         pListValues->append(tagToString(tables.at(nRow).tag));
-    //         pListValues->append(QString("0x%1").arg(tables.at(nRow).checkSum, 8, 16, QChar('0')));
-    //         pListValues->append(QString("0x%1").arg(tables.at(nRow).offset, 8, 16, QChar('0')));
-    //         pListValues->append(QString("0x%1").arg(tables.at(nRow).length, 8, 16, QChar('0')));
-    //     }
-    //     return 4;
-    // }
-    return 0;
-}
-
 QString XTTF::tagToString(quint32 tag)
 {
     QByteArray arr;
