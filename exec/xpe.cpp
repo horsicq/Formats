@@ -9341,7 +9341,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                     quint32 NumberOfSections = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSections));
 
                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                    _dataHeadersOptions.nLocation += 4 + sizeof(XPE_DEF::IMAGE_FILE_HEADER) + SizeOfOptionalHeader;
+                    _dataHeadersOptions.nLocation += sizeof(XPE_DEF::IMAGE_FILE_HEADER) + SizeOfOptionalHeader;
                     _dataHeadersOptions.dsID_parent = dataHeader.dsID;
                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
                     _dataHeadersOptions.nCount = NumberOfSections;
@@ -9415,9 +9415,21 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, NumberOfRvaAndSizes), 4, "NumberOfRvaAndSizes", VT_DWORD,
                                                             DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
 
-                // TODO
-
                 listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    quint32 NumberOfRvaAndSizes = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, NumberOfRvaAndSizes));
+
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nLocation += offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory);
+                    _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+                    _dataHeadersOptions.nCount = NumberOfRvaAndSizes;
+                    _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) * NumberOfRvaAndSizes;
+                    _dataHeadersOptions.nID = STRUCTID_IMAGE_DATA_DIRECTORY;
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_OPTIONAL_HEADER64) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER64);
@@ -9481,10 +9493,20 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, NumberOfRvaAndSizes), 4, "NumberOfRvaAndSizes", VT_DWORD,
                                                             DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
-
-                // TODO
-
                 listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    quint32 NumberOfRvaAndSizes = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, NumberOfRvaAndSizes));
+
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nLocation += offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory);
+                    _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+                    _dataHeadersOptions.nCount = NumberOfRvaAndSizes;
+                    _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) * NumberOfRvaAndSizes;
+                    _dataHeadersOptions.nID = STRUCTID_IMAGE_DATA_DIRECTORY;
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_SECTION_HEADER) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_SECTION_HEADER);
@@ -9511,6 +9533,20 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageSectionHeaderFlags(), VL_TYPE_FLAGS));
 
                 listResult.append(dataHeader);
+            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_DATA_DIRECTORY) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY);
+
+                // TODO OFFSET for cert
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, "Size", VT_DWORD, DRF_SIZE,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    // TODO
+                }
             }
         }
     }

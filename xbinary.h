@@ -1883,6 +1883,11 @@ public:
     void dumpMemoryMap();
     void dumpHeaders();
 
+    enum FPART_PROP {
+        FPART_PROP_UNKNOWN = 0,
+        FPART_PROP_COMPRESSMETHOD,
+    };
+
     struct FPART {
         qint64 nFileOffset;
         qint64 nFileSize;
@@ -1890,6 +1895,7 @@ public:
         qint64 nVirtualSize;
         QString sOriginalName;
         FILEPART filePart;
+        QMap<FPART_PROP, QVariant> mapProperties;
     };
 
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);

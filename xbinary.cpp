@@ -690,7 +690,7 @@ QList<QString> XBinary::getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRe
         if (dataRecord.listDataValueSets.count()) {
             qint32 nNumberOfDataValueSets = dataRecord.listDataValueSets.count();
 
-            for (qint32 k = 0; k < nNumberOfDataValueSets; k++) {
+            for (qint32 k = 0; (k < nNumberOfDataValueSets) && XBinary::isPdStructNotCanceled(pPdStruct); k++) {
                 DATAVALUESET dataValueSet = dataRecord.listDataValueSets.at(k);
 
                 sFlags = appendText(sFlags, valueToFlagsString(dataRecordRow.listValues.at(j).toULongLong() & dataValueSet.nMask, dataValueSet.mapValues, dataValueSet.vlType), "|");
@@ -4038,11 +4038,19 @@ QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bI
         if (nSize <= 32) {
             varResult = read_array(nOffset, nSize, pPdStruct);  // TODO
         }
+    } else if (valueType == XBinary::VT_CHAR_ARRAY) {
+        if (nSize <= 32) {
+            varResult = read_ansiString(nOffset, nSize);
+        }
     } else {
 #ifdef QT_DEBUG
         qDebug() << "Unknown valueType" << valueTypeToString(valueType, nSize);
 #endif
     }
+
+// #ifdef QT_DEBUG
+//         qDebug() << "varResult" << varResult.toString();
+// #endif
 
     return varResult;
 }
@@ -4111,7 +4119,11 @@ QString XBinary::getValueString(QVariant varValue, VT valueType, bool bTypesAsHe
     } else if ((valueType == XBinary::VT_SHORT) || (valueType == XBinary::VT_INT16)) {
         sResult = QString("%1").arg((qint16)(varValue.toLongLong()));
     } else if ((valueType == XBinary::VT_USHORT) || (valueType == XBinary::VT_UINT16)) {
-        sResult = QString("%1").arg((quint16)(varValue.toULongLong()));
+        if (bTypesAsHex) {
+            sResult = valueToHex((quint16)(varValue.toULongLong()));
+        } else {
+            sResult = QString("%1").arg((quint16)(varValue.toULongLong()));
+        }
     } else if ((valueType == XBinary::VT_INT) || (valueType == XBinary::VT_INT32)) {
         sResult = QString("%1").arg((qint32)(varValue.toLongLong()));
     } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32)) {
@@ -4130,6 +4142,8 @@ QString XBinary::getValueString(QVariant varValue, VT valueType, bool bTypesAsHe
         sResult = QString("%1").arg(varValue.toFloat());
     } else if (valueType == XBinary::VT_DOUBLE) {
         sResult = QString("%1").arg(varValue.toDouble());
+    } else if (valueType == XBinary::VT_CHAR_ARRAY) {
+        sResult = varValue.toString();
     }
 
     return sResult;
