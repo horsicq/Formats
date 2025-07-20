@@ -457,7 +457,6 @@ XBinary::DATA_HEADER XBinary::_initDataHeader(const DATA_HEADERS_OPTIONS &dataHe
     result.nSize = dataHeadersOptions.nSize;
     result.nCount = dataHeadersOptions.nCount;
 
-
     if (result.dsID.fileType == FT_UNKNOWN) {
         result.dsID.fileType = dataHeadersOptions.pMemoryMap->fileType;
     }
@@ -596,7 +595,8 @@ XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDST
     return dhInfo.dsID;
 }
 
-qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles, PDSTRUCT *pPdStruct)
+qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles,
+                                    PDSTRUCT *pPdStruct)
 {
     qint32 nResult = 0;
 
@@ -617,7 +617,8 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
         for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
             DATA_RECORD dataRecord = dataRecordsOptions.dataHeader.listRecords.at(j);
 
-            QVariant variant = read_value(dataRecord.valType, nStartOffset + dataRecord.nRelOffset, dataRecord.nSize, dataRecord.endian == XBinary::ENDIAN_BIG, pPdStruct);
+            QVariant variant =
+                read_value(dataRecord.valType, nStartOffset + dataRecord.nRelOffset, dataRecord.nSize, dataRecord.endian == XBinary::ENDIAN_BIG, pPdStruct);
 
             dataRecordRow.listValues.append(variant);
 
@@ -660,7 +661,8 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
     return nResult;
 }
 
-qint32 XBinary::getDataRecordValues(QIODevice *pDevice, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles, PDSTRUCT *pPdStruct)
+qint32 XBinary::getDataRecordValues(QIODevice *pDevice, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+                                    QList<QString> *pListTitles, PDSTRUCT *pPdStruct)
 {
     XBinary binary(pDevice);
 
@@ -693,7 +695,8 @@ QList<QString> XBinary::getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRe
             for (qint32 k = 0; (k < nNumberOfDataValueSets) && XBinary::isPdStructNotCanceled(pPdStruct); k++) {
                 DATAVALUESET dataValueSet = dataRecord.listDataValueSets.at(k);
 
-                sFlags = appendText(sFlags, valueToFlagsString(dataRecordRow.listValues.at(j).toULongLong() & dataValueSet.nMask, dataValueSet.mapValues, dataValueSet.vlType), "|");
+                sFlags = appendText(
+                    sFlags, valueToFlagsString(dataRecordRow.listValues.at(j).toULongLong() & dataValueSet.nMask, dataValueSet.mapValues, dataValueSet.vlType), "|");
             }
 
             sComment = appendText(sComment, sFlags, ", ");
@@ -720,7 +723,8 @@ QList<QString> XBinary::getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOp
     return listTitles;
 }
 
-qint32 XBinary::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, PDSTRUCT *pPdStruct)
+qint32 XBinary::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+                             PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(nRow)
 
@@ -4048,9 +4052,9 @@ QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bI
 #endif
     }
 
-// #ifdef QT_DEBUG
-//         qDebug() << "varResult" << varResult.toString();
-// #endif
+    // #ifdef QT_DEBUG
+    //         qDebug() << "varResult" << varResult.toString();
+    // #endif
 
     return varResult;
 }
@@ -8662,7 +8666,7 @@ void XBinary::dumpHeaders()
 
             if (listDataRecordsRow.count() > 0) {
                 XBinary::DATA_RECORD_ROW dataRecordRow = listDataRecordsRow.at(0);
-                listComments= getDataRecordComments(dataRecordsOptions, dataRecordRow, nullptr);
+                listComments = getDataRecordComments(dataRecordsOptions, dataRecordRow, nullptr);
             }
 
             qint32 nNumberOfRecords = dataHeader.listRecords.count();

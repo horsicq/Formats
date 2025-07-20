@@ -9511,21 +9511,21 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_SECTION_HEADER);
 
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Name), 8, "Name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Name), 8, "Name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
                                                             dataHeadersOptions.pMemoryMap->endian));
 
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData), 4, "SizeOfRawData", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData), 4, "SizeOfRawData", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRawData), 4, "PointerToRawData", VT_DWORD, DRF_OFFSET,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRelocations), 4, "PointerToRelocations", VT_DWORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToLinenumbers), 4, "PointerToLinenumbers", VT_DWORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRelocations), 4, "PointerToRelocations", VT_DWORD,
+                                                            DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToLinenumbers), 4, "PointerToLinenumbers", VT_DWORD,
+                                                            DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfRelocations), 2, "NumberOfRelocations", VT_WORD, DRF_COUNT,
                                                             dataHeadersOptions.pMemoryMap->endian));
-
 
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfLinenumbers), 2, "NumberOfLinenumbers", VT_WORD, DRF_COUNT,
                                                             dataHeadersOptions.pMemoryMap->endian));
@@ -9540,8 +9540,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 // TODO OFFSET for cert
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, "Size", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
                 listResult.append(dataHeader);
 
                 if (dataHeadersOptions.bChildren) {
@@ -10626,14 +10626,11 @@ XPE_DEF::S_METADATA_MODULE XPE::getMetadataModule(CLI_INFO *pCliInfo, qint32 nNu
 
             result.nGeneration = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += 2;
-            result.nName =
-                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nMvid =
-                pCliInfo->metaData.nGUIDIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nMvid = pCliInfo->metaData.nGUIDIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nGUIDIndexSize;
-            result.nEncId =
-                pCliInfo->metaData.nGUIDIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nEncId = pCliInfo->metaData.nGUIDIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nGUIDIndexSize;
             result.nEncBaseId =
                 pCliInfo->metaData.nGUIDIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
@@ -10928,8 +10925,7 @@ XPE_DEF::S_METADATA_ASSEMBLY XPE::getMetadataAssembly(CLI_INFO *pCliInfo, qint32
             result.nPublicKeyOrToken =
                 pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nBLOBIndexSize;
-            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
-                                                                    : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nStringIndexSize;
             result.nCulture =
                 pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
@@ -10957,8 +10953,7 @@ XPE_DEF::S_METADATA_CONSTANT XPE::getMetadataConstant(CLI_INFO *pCliInfo, qint32
             result.nParent =
                 pCliInfo->metaData.nHasConstantSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nHasConstantSize;
-            result.nValue =
-                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nValue = pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 
@@ -10984,8 +10979,7 @@ XPE_DEF::S_METADATA_CUSTOMATTRIBUTE XPE::getMetadataCustomAttribute(CLI_INFO *pC
             result.nType =
                 pCliInfo->metaData.nCustomAttributeTypeSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nCustomAttributeTypeSize;
-            result.nValue =
-                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+            result.nValue = pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 

@@ -22,7 +22,7 @@
 
 XBinary::XCONVERT _TABLE_XMP3_STRUCTID[] = {
     {XMP3::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    };
+};
 
 XMP3::XMP3(QIODevice *pDevice) : XBinary(pDevice)
 {
