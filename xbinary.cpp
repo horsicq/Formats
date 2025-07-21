@@ -4031,19 +4031,19 @@ QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bI
     } else if (valueType == XBinary::VT_PACKEDNUMBER) {
         varResult = read_packedNumber(nOffset, nSize).nValue;
     } else if (valueType == XBinary::VT_BYTE_ARRAY) {
-        if (nSize <= 32) {
+        if (nSize <= 256) {
             varResult = read_array(nOffset, nSize, pPdStruct);
         }
     } else if (valueType == XBinary::VT_WORD_ARRAY) {
-        if (nSize <= 32) {
+        if (nSize <= 256) {
             varResult = read_array(nOffset, nSize, pPdStruct);
         }
     } else if (valueType == XBinary::VT_DWORD_ARRAY) {
-        if (nSize <= 32) {
+        if (nSize <= 256) {
             varResult = read_array(nOffset, nSize, pPdStruct);  // TODO
         }
     } else if (valueType == XBinary::VT_CHAR_ARRAY) {
-        if (nSize <= 32) {
+        if (nSize <= 256) {
             varResult = read_ansiString(nOffset, nSize);
         }
     } else {
@@ -4148,6 +4148,12 @@ QString XBinary::getValueString(QVariant varValue, VT valueType, bool bTypesAsHe
         sResult = QString("%1").arg(varValue.toDouble());
     } else if (valueType == XBinary::VT_CHAR_ARRAY) {
         sResult = varValue.toString();
+    } else if (valueType == XBinary::VT_BYTE_ARRAY) {
+        sResult = varValue.toByteArray().toHex();
+    } else {
+#ifdef QT_DEBUG
+        qDebug() << "Unknown valueType" << valueTypeToString(valueType, 1);
+#endif
     }
 
     return sResult;
@@ -5373,68 +5379,77 @@ QString XBinary::mapModeToString(MAPMODE mapMode)
     return sResult;
 }
 
+bool XBinary::_initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    qint64 nTotalSize = getSize();
+
+    pMemoryMap->nModuleAddress = getModuleAddress();
+    pMemoryMap->bIsImage = isImage();
+    pMemoryMap->nBinarySize = nTotalSize;
+    pMemoryMap->nImageSize = nTotalSize;
+    pMemoryMap->fileType = getFileType();
+    pMemoryMap->mode = getMode();
+    pMemoryMap->sArch = getArch();
+    pMemoryMap->endian = getEndian();
+    pMemoryMap->sType = getTypeAsString();
+
+    return true;
+}
+
 XBinary::_MEMORY_MAP XBinary::_getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
     _MEMORY_MAP result = {};
 
-    qint64 nTotalSize = getSize();
+    if (_initMemoryMap(&result, pPdStruct)) {
+        QList<FPART> listParts = getFileParts(nFileParts, 1000, pPdStruct);
 
-    result.nModuleAddress = -1;
-    result.bIsImage = isImage();
-    result.nBinarySize = nTotalSize;
-    result.nImageSize = nTotalSize;
-    result.fileType = getFileType();
-    result.mode = getMode();
-    result.sArch = getArch();
-    result.endian = getEndian();
-    result.sType = getTypeAsString();
+        std::sort(listParts.begin(), listParts.end(), compareFileParts);
 
-    QList<FPART> listParts = getFileParts(nFileParts, 1000, pPdStruct);
+        qint32 nNumberOfParts = listParts.count();
+        qint32 nIndex = 0;
 
-    std::sort(listParts.begin(), listParts.end(), compareFileParts);
+        for (qint32 i = 0; i < nNumberOfParts && isPdStructNotCanceled(pPdStruct); i++) {
+            FPART fpart = listParts.at(i);
 
-    qint32 nNumberOfParts = listParts.count();
-    qint32 nIndex = 0;
+            _MEMORY_RECORD record = {};
+            record.nAddress = fpart.nVirtualAddress;
+            record.nOffset = fpart.nFileOffset;
+            record.nSize = fpart.nFileSize;
+            record.nIndex = nIndex++;
+            record.sName = fpart.sOriginalName;
+            record.bIsVirtual = false;
+            record.filePart = fpart.filePart;
+            record.nFilePartNumber = i;
 
-    for (qint32 i = 0; i < nNumberOfParts && isPdStructNotCanceled(pPdStruct); i++) {
-        FPART fpart = listParts.at(i);
+            result.listRecords.append(record);
 
-        _MEMORY_RECORD record = {};
-        record.nAddress = fpart.nVirtualAddress;
-        record.nOffset = fpart.nFileOffset;
-        record.nSize = fpart.nFileSize;
-        record.nIndex = nIndex++;
-        record.sName = fpart.sOriginalName;
-        record.bIsVirtual = false;
-        record.filePart = fpart.filePart;
-        record.nFilePartNumber = i;
+            if (fpart.nVirtualSize > fpart.nFileSize) {
+                // Add virtual size
+                _MEMORY_RECORD virtualRecord = {};
+                virtualRecord.nAddress = fpart.nVirtualAddress + fpart.nFileSize;
+                virtualRecord.nOffset = -1;
+                virtualRecord.nSize = fpart.nVirtualSize - fpart.nFileSize;
+                virtualRecord.nIndex = nIndex++;
+                virtualRecord.sName = fpart.sOriginalName + " (virtual)";
+                virtualRecord.bIsVirtual = true;
+                virtualRecord.filePart = fpart.filePart;
+                virtualRecord.nFilePartNumber = i;
 
-        result.listRecords.append(record);
+                result.listRecords.append(virtualRecord);
+            }
 
-        if (fpart.nVirtualSize > fpart.nFileSize) {
-            // Add virtual size
-            _MEMORY_RECORD virtualRecord = {};
-            virtualRecord.nAddress = fpart.nVirtualAddress + fpart.nFileSize;
-            virtualRecord.nOffset = -1;
-            virtualRecord.nSize = fpart.nVirtualSize - fpart.nFileSize;
-            virtualRecord.nIndex = nIndex++;
-            virtualRecord.sName = fpart.sOriginalName + " (virtual)";
-            virtualRecord.bIsVirtual = true;
-            virtualRecord.filePart = fpart.filePart;
-            virtualRecord.nFilePartNumber = i;
+            if (result.nModuleAddress == -1) {
+                result.nModuleAddress = fpart.nVirtualAddress;
+            } else {
+                result.nModuleAddress = qMin(result.nModuleAddress, fpart.nVirtualAddress);
+            }
 
-            result.listRecords.append(virtualRecord);
+            result.nImageSize = qMax(result.nImageSize, (qint64)(fpart.nVirtualAddress + fpart.nVirtualSize));
         }
-
-        if (result.nModuleAddress == -1) {
-            result.nModuleAddress = fpart.nVirtualAddress;
-        } else {
-            result.nModuleAddress = qMin(result.nModuleAddress, fpart.nVirtualAddress);
-        }
-
-        result.nImageSize = qMax(result.nImageSize, (qint64)(fpart.nVirtualAddress + fpart.nVirtualSize));
     }
 
     return result;

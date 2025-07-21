@@ -76,6 +76,26 @@ bool XAmigaHunk::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
+bool XAmigaHunk::_initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+{
+    qint64 nTotalSize = getSize();
+
+    QList<HUNK> listHunks = getHunks(pPdStruct);
+
+    pMemoryMap->nModuleAddress = getModuleAddress();
+    pMemoryMap->nBinarySize = nTotalSize;
+    pMemoryMap->nImageSize = nTotalSize;  // TODO Check
+
+    pMemoryMap->fileType = getFileType();
+    pMemoryMap->mode = getMode(&listHunks, pPdStruct);
+    pMemoryMap->sArch = getArch(&listHunks, pPdStruct);
+    pMemoryMap->endian = getEndian();
+    pMemoryMap->sType = getTypeAsString();
+    pMemoryMap->nEntryPointAddress = getEntryPointAddress(&listHunks, pPdStruct);
+
+    return true;
+}
+
 QList<XBinary::MAPMODE> XAmigaHunk::getMapModesList()
 {
     QList<XBinary::MAPMODE> listResult;
@@ -92,19 +112,11 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
         mapMode = MAPMODE_SEGMENTS;
     }
 
-    QList<HUNK> listHunks = getHunks(pPdStruct);
-
     XBinary::_MEMORY_MAP result = {};
-    qint64 nTotalSize = getSize();
 
-    result.nModuleAddress = getModuleAddress();
-    result.nBinarySize = nTotalSize;
+    _initMemoryMap(&result, pPdStruct);
 
-    result.fileType = getFileType();
-    result.mode = getMode(&listHunks, pPdStruct);
-    result.sArch = getArch(&listHunks, pPdStruct);
-    result.endian = getEndian();
-    result.sType = getTypeAsString();
+    QList<HUNK> listHunks = getHunks(pPdStruct);
 
     qint32 nIndex = 0;
 
@@ -119,16 +131,10 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
             record.nOffset = hunk.nOffset;
             record.nSize = hunk.nSize;
             record.nAddress = hunk.nOffset;  // TODO Check
-            record.sName = hunkTypeToString(hunk.nId);
+            record.sName = structIDToString(hunkTypeToStructId(hunk.nId));
 
             result.listRecords.append(record);
-
-            if ((hunk.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
-                result.nEntryPointAddress = record.nAddress + 8;
-            }
         }
-
-        result.nImageSize = nTotalSize;
     } else if (mapMode == XBinary::MAPMODE_SEGMENTS) {
         result.nModuleAddress = XAMIGAHUNK_DEF::IMAGE_BASE;
         XADDR nCurrentAddress = result.nModuleAddress;
@@ -145,7 +151,7 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
                     record.nOffset = hunk.nOffset;
                     record.nSize = 8;
                     record.nAddress = -1;
-                    record.sName = hunkTypeToString(hunk.nId);
+                    record.sName = structIDToString(hunkTypeToStructId(hunk.nId));
 
                     result.listRecords.append(record);
                 }
@@ -168,13 +174,9 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
                         }
                     }
 
-                    record.sName = hunkTypeToString(hunk.nId);
+                    record.sName = structIDToString(hunkTypeToStructId(hunk.nId));
 
                     result.listRecords.append(record);
-
-                    if ((hunk.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
-                        result.nEntryPointAddress = record.nAddress;
-                    }
 
                     nCurrentAddress += record.nSize;
                 }
@@ -185,13 +187,13 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
                 record.nOffset = hunk.nOffset;
                 record.nSize = hunk.nSize;
                 record.nAddress = -1;
-                record.sName = hunkTypeToString(hunk.nId);
+                record.sName = structIDToString(hunkTypeToStructId(hunk.nId));
 
                 result.listRecords.append(record);
             }
         }
 
-        result.nImageSize = nCurrentAddress - result.nModuleAddress;
+        // result.nImageSize = nCurrentAddress - result.nModuleAddress;
     }
 
     _handleOverlay(&result);
@@ -220,6 +222,22 @@ QString XAmigaHunk::getArch(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct)
     }
 
     return sResult;
+}
+
+XADDR XAmigaHunk::getEntryPointAddress(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct)
+{
+    XADDR nResult = 0;
+
+    qint32 nNumberOfHunks = pListHunks->count();
+
+    for (qint32 i = 0; (i < nNumberOfHunks) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+        if ((pListHunks->at(i).nId == XAMIGAHUNK_DEF::HUNK_CODE) || (pListHunks->at(i).nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
+            nResult = pListHunks->at(i).nOffset + 8 + XAMIGAHUNK_DEF::IMAGE_BASE;
+            break;
+        }
+    }
+
+    return nResult;
 }
 
 XBinary::MODE XAmigaHunk::getMode()
@@ -336,41 +354,41 @@ QList<XAmigaHunk::HUNK> XAmigaHunk::getHunks(PDSTRUCT *pPdStruct)
     return listResult;
 }
 
-QString XAmigaHunk::hunkTypeToString(quint32 nHunkType)
+XAmigaHunk::STRUCTID XAmigaHunk::hunkTypeToStructId(quint32 nHunkType)
 {
-    QString sResult;
+    STRUCTID result = STRUCTID_UNKNOWN;
 
     switch (nHunkType) {
-        case XAMIGAHUNK_DEF::HUNK_UNIT: sResult = "HUNK_UNIT"; break;
-        case XAMIGAHUNK_DEF::HUNK_NAME: sResult = "HUNK_NAME"; break;
-        case XAMIGAHUNK_DEF::HUNK_CODE: sResult = "HUNK_CODE"; break;
-        case XAMIGAHUNK_DEF::HUNK_DATA: sResult = "HUNK_DATA"; break;
-        case XAMIGAHUNK_DEF::HUNK_BSS: sResult = "HUNK_BSS"; break;
-        case XAMIGAHUNK_DEF::HUNK_RELOC32: sResult = "HUNK_RELOC32"; break;
-        case XAMIGAHUNK_DEF::HUNK_RELOC16: sResult = "HUNK_RELOC16"; break;
-        case XAMIGAHUNK_DEF::HUNK_RELOC8: sResult = "HUNK_RELOC8"; break;
-        case XAMIGAHUNK_DEF::HUNK_EXT: sResult = "HUNK_EXT"; break;
-        case XAMIGAHUNK_DEF::HUNK_SYMBOL: sResult = "HUNK_SYMBOL"; break;
-        case XAMIGAHUNK_DEF::HUNK_DEBUG: sResult = "HUNK_DEBUG"; break;
-        case XAMIGAHUNK_DEF::HUNK_END: sResult = "HUNK_END"; break;
-        case XAMIGAHUNK_DEF::HUNK_HEADER: sResult = "HUNK_HEADER"; break;
-        case XAMIGAHUNK_DEF::HUNK_OVERLAY: sResult = "HUNK_OVERLAY"; break;
-        case XAMIGAHUNK_DEF::HUNK_BREAK: sResult = "HUNK_BREAK"; break;
-        case XAMIGAHUNK_DEF::HUNK_DREL32: sResult = "HUNK_DREL32"; break;
-        case XAMIGAHUNK_DEF::HUNK_DREL16: sResult = "HUNK_DREL16"; break;
-        case XAMIGAHUNK_DEF::HUNK_DREL8: sResult = "HUNK_DREL8"; break;
-        case XAMIGAHUNK_DEF::HUNK_LIB: sResult = "HUNK_LIB"; break;
-        case XAMIGAHUNK_DEF::HUNK_INDEX: sResult = "HUNK_INDEX"; break;
-        case XAMIGAHUNK_DEF::HUNK_RELOC32SHORT: sResult = "HUNK_RELOC32SHORT"; break;
-        case XAMIGAHUNK_DEF::HUNK_RELRELOC32: sResult = "HUNK_RELRELOC32"; break;
-        case XAMIGAHUNK_DEF::HUNK_ABSRELOC16: sResult = "HUNK_ABSRELOC16"; break;
-        case XAMIGAHUNK_DEF::HUNK_DREL32EXE: sResult = "HUNK_DREL32EXE"; break;
-        case XAMIGAHUNK_DEF::HUNK_PPC_CODE: sResult = "HUNK_PPC_CODE"; break;
-        case XAMIGAHUNK_DEF::HUNK_RELRELOC26: sResult = "HUNK_RELRELOC26"; break;
-        default: sResult = QString("HUNK_%1").arg(nHunkType, 0, 16); break;
+        case XAMIGAHUNK_DEF::HUNK_UNIT: result = STRUCTID_HUNK_UNIT; break;
+        case XAMIGAHUNK_DEF::HUNK_NAME: result = STRUCTID_HUNK_NAME; break;
+        case XAMIGAHUNK_DEF::HUNK_CODE: result = STRUCTID_HUNK_CODE; break;
+        case XAMIGAHUNK_DEF::HUNK_DATA: result = STRUCTID_HUNK_DATA; break;
+        case XAMIGAHUNK_DEF::HUNK_BSS: result = STRUCTID_HUNK_BSS; break;
+        case XAMIGAHUNK_DEF::HUNK_RELOC32: result = STRUCTID_HUNK_RELOC32; break;
+        case XAMIGAHUNK_DEF::HUNK_RELOC16: result = STRUCTID_HUNK_RELOC16; break;
+        case XAMIGAHUNK_DEF::HUNK_RELOC8: result = STRUCTID_HUNK_RELOC8; break;
+        case XAMIGAHUNK_DEF::HUNK_EXT: result = STRUCTID_HUNK_EXT; break;
+        case XAMIGAHUNK_DEF::HUNK_SYMBOL: result = STRUCTID_HUNK_SYMBOL; break;
+        case XAMIGAHUNK_DEF::HUNK_DEBUG: result = STRUCTID_HUNK_DEBUG; break;
+        case XAMIGAHUNK_DEF::HUNK_END: result = STRUCTID_HUNK_END; break;
+        case XAMIGAHUNK_DEF::HUNK_HEADER: result = STRUCTID_HUNK_HEADER; break;
+        case XAMIGAHUNK_DEF::HUNK_OVERLAY: result = STRUCTID_HUNK_OVERLAY; break;
+        case XAMIGAHUNK_DEF::HUNK_BREAK: result = STRUCTID_HUNK_BREAK; break;
+        case XAMIGAHUNK_DEF::HUNK_DREL32: result = STRUCTID_HUNK_DREL32; break;
+        case XAMIGAHUNK_DEF::HUNK_DREL16: result = STRUCTID_HUNK_DREL16; break;
+        case XAMIGAHUNK_DEF::HUNK_DREL8: result = STRUCTID_HUNK_DREL8; break;
+        case XAMIGAHUNK_DEF::HUNK_LIB: result = STRUCTID_HUNK_LIB; break;
+        case XAMIGAHUNK_DEF::HUNK_INDEX: result = STRUCTID_HUNK_INDEX; break;
+        case XAMIGAHUNK_DEF::HUNK_RELOC32SHORT: result = STRUCTID_HUNK_RELOC32SHORT; break;
+        case XAMIGAHUNK_DEF::HUNK_RELRELOC32: result = STRUCTID_HUNK_RELRELOC32; break;
+        case XAMIGAHUNK_DEF::HUNK_ABSRELOC16: result = STRUCTID_HUNK_ABSRELOC16; break;
+        case XAMIGAHUNK_DEF::HUNK_DREL32EXE: result = STRUCTID_HUNK_DREL32EXE; break;
+        case XAMIGAHUNK_DEF::HUNK_PPC_CODE: result = STRUCTID_HUNK_PPC_CODE; break;
+        case XAMIGAHUNK_DEF::HUNK_RELRELOC26: result = STRUCTID_HUNK_RELRELOC26; break;
+        default: result = STRUCTID_UNKNOWN;
     }
 
-    return sResult;
+    return result;
 }
 
 bool XAmigaHunk::isHunkPresent(QList<HUNK> *pListHunks, quint32 nHunkType, PDSTRUCT *pPdStruct)
@@ -531,6 +549,10 @@ QList<XBinary::DATA_HEADER> XAmigaHunk::getDataHeaders(const DATA_HEADERS_OPTION
         _dataHeadersOptions.nID = STRUCTID_HUNK;
         _dataHeadersOptions.nLocation = 0;
         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+
+        QList<XAmigaHunk::HUNK> listHunks = getHunks(pPdStruct);
+
+        _dataHeadersOptions.nCount = listHunks.count();
 
         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
     } else {

@@ -1308,6 +1308,9 @@ public:
     static QString mapModeToString(MAPMODE mapMode);
 
     virtual QList<MAPMODE> getMapModesList();
+
+    virtual bool _initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);
+
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     _MEMORY_MAP _getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct = nullptr);
 

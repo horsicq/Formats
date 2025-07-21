@@ -81,6 +81,9 @@ public:
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<MAPMODE> getMapModesList();
+
+    virtual bool _initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);
+
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual ENDIAN getEndian();
     virtual QString getArch();
@@ -88,8 +91,10 @@ public:
     virtual MODE getMode();
     MODE getMode(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
 
+    XADDR getEntryPointAddress(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
+
     QList<HUNK> getHunks(PDSTRUCT *pPdStruct = nullptr);
-    static QString hunkTypeToString(quint32 nHunkType);
+    static STRUCTID hunkTypeToStructId(quint32 nHunkType);
 
     bool isHunkPresent(QList<HUNK> *pListHunks, quint32 nHunkType, PDSTRUCT *pPdStruct);
     static QList<HUNK> _getHunksByType(QList<HUNK> *pListHunks, quint32 nHunkType, PDSTRUCT *pPdStruct);
