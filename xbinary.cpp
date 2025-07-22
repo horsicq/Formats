@@ -4222,6 +4222,26 @@ qint32 XBinary::getBaseValueSize(VT valueType)
     return nResult;
 }
 
+qint32 XBinary::getValueSymbolSize(VT valueType)
+{
+    qint32 nResult = 1;
+
+    if ((valueType == XBinary::VT_BYTE) || (valueType == XBinary::VT_INT8) || (valueType == XBinary::VT_UINT8) || (valueType == XBinary::VT_CHAR) ||
+        (valueType == XBinary::VT_UCHAR)) {
+        nResult = 2;
+    } else if ((valueType == XBinary::VT_WORD) || (valueType == XBinary::VT_INT16) || (valueType == XBinary::VT_UINT16) || (valueType == XBinary::VT_SHORT) ||
+               (valueType == XBinary::VT_USHORT)) {
+        nResult = 4;
+    } else if ((valueType == XBinary::VT_DWORD) || (valueType == XBinary::VT_INT32) || (valueType == XBinary::VT_UINT32) || (valueType == XBinary::VT_INT) ||
+               (valueType == XBinary::VT_UINT)) {
+        nResult = 8;
+    } else if ((valueType == XBinary::VT_QWORD) || (valueType == XBinary::VT_INT64) || (valueType == XBinary::VT_UINT64)) {
+        nResult = 16;
+    }
+
+    return nResult;
+}
+
 bool XBinary::isIntegerType(VT valueType)
 {
     bool bResult = false;

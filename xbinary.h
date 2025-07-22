@@ -1196,6 +1196,7 @@ public:
     static VT getValueType(quint64 nValue);
     static qint32 getBaseValueSize(VT valueType);
 
+    static qint32 getValueSymbolSize(VT valueType);
     static bool isIntegerType(VT valueType);
 
     static QByteArray getUnicodeString(const QString &sString, bool bIsBigEndian);

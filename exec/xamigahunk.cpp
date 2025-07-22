@@ -232,7 +232,7 @@ XADDR XAmigaHunk::getEntryPointAddress(QList<HUNK> *pListHunks, PDSTRUCT *pPdStr
 
     for (qint32 i = 0; (i < nNumberOfHunks) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         if ((pListHunks->at(i).nId == XAMIGAHUNK_DEF::HUNK_CODE) || (pListHunks->at(i).nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
-            nResult = pListHunks->at(i).nOffset + 8 + XAMIGAHUNK_DEF::IMAGE_BASE;
+            nResult = XAMIGAHUNK_DEF::IMAGE_BASE;
             break;
         }
     }
@@ -534,6 +534,11 @@ QString XAmigaHunk::getMIMEString()
 QString XAmigaHunk::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XAmigaHunk_STRUCTID, sizeof(_TABLE_XAmigaHunk_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+bool XAmigaHunk::isExecutable()
+{
+    return true;
 }
 
 QList<XBinary::DATA_HEADER> XAmigaHunk::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
