@@ -95,6 +95,7 @@ public:
 
     QList<HUNK> getHunks(PDSTRUCT *pPdStruct = nullptr);
     static STRUCTID hunkTypeToStructId(quint32 nHunkType);
+    qint64 _getHunkSize(qint64 nOffset, PDSTRUCT *pPdStruct);
 
     bool isHunkPresent(QList<HUNK> *pListHunks, quint32 nHunkType, PDSTRUCT *pPdStruct);
     static QList<HUNK> _getHunksByType(QList<HUNK> *pListHunks, quint32 nHunkType, PDSTRUCT *pPdStruct);
@@ -117,6 +118,9 @@ public:
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
 
     virtual bool isExecutable();
+
+    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+                                PDSTRUCT *pPdStruct);
 };
 
 #endif  // XAMIGAHUNK_H

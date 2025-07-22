@@ -240,6 +240,90 @@ XADDR XAmigaHunk::getEntryPointAddress(QList<HUNK> *pListHunks, PDSTRUCT *pPdStr
     return nResult;
 }
 
+qint64 XAmigaHunk::_getHunkSize(qint64 nOffset, PDSTRUCT *pPdStruct)
+{
+    qint64 nResult = 0;
+    bool bStop = false;
+    qint64 nCurrentOffset = nOffset;
+
+    quint32 nId = read_uint32(nCurrentOffset, true) & 0x3FFFFFFF;
+
+    nCurrentOffset += 4;
+
+    if (nId == XAMIGAHUNK_DEF::HUNK_HEADER) {
+        quint32 nEndOfList = read_uint32(nCurrentOffset, true);
+
+        if (nEndOfList) {
+            // Resident library names
+            // QString sName = read_ansiString(nCurrentOffset);
+        } else {
+            nCurrentOffset += 4;
+        }
+        quint32 nTableSize = read_uint32(nCurrentOffset + 0, true);
+        // quint32 nFirstLoaded = read_uint32(nCurrentOffset + 4, true);
+        // quint32 nLastLoaded = read_uint32(nCurrentOffset + 8, true);
+
+        nCurrentOffset += 12;
+
+        QList<qint64> listSizes;
+
+        nTableSize = qMin(nTableSize, (quint32)100);
+
+        for (quint32 i = 0; i < nTableSize; i++) {
+            listSizes.append(read_uint32(nCurrentOffset, true));
+            nCurrentOffset += 4;
+        }
+    } else if ((nId == XAMIGAHUNK_DEF::HUNK_CODE) || (nId == XAMIGAHUNK_DEF::HUNK_DATA) || (nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
+        quint32 nCodeSize = read_uint32(nCurrentOffset, true);
+        nCurrentOffset += 4;
+        nCurrentOffset += (nCodeSize * 4);
+    } else if (nId == XAMIGAHUNK_DEF::HUNK_RELOC32) {
+        while (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            quint32 nRelocSize = read_uint32(nCurrentOffset, true);
+            nCurrentOffset += 4;
+
+            if (nRelocSize == 0) {
+                break;
+            }
+
+            // quint32 nHunk = read_uint32(nCurrentOffset + 4, true);
+            nCurrentOffset += 4;
+            nCurrentOffset += (nRelocSize * 4);
+        }
+    } else if (nId == XAMIGAHUNK_DEF::HUNK_BSS) {
+        nCurrentOffset += 4;
+    } else if (nId == XAMIGAHUNK_DEF::HUNK_DEBUG) {
+        quint32 nDebugSize = read_uint32(nCurrentOffset, true);
+        nCurrentOffset += 4;
+        nCurrentOffset += (nDebugSize * 4);
+    } else if (nId == XAMIGAHUNK_DEF::HUNK_SYMBOL) {
+        while (XBinary::isPdStructNotCanceled(pPdStruct)) {
+            quint32 nSymbolSize = read_uint32(nCurrentOffset, true);
+            nCurrentOffset += 4;
+
+            if (nSymbolSize == 0) {
+                break;
+            }
+
+            // QString sName = read_ansiString(nCurrentOffset);
+            nCurrentOffset += nSymbolSize * 4;
+            // quint32 nSymbolOffset = read_uint32(nCurrentOffset, true);
+            nCurrentOffset += 4;
+        }
+    } else if (nId == XAMIGAHUNK_DEF::HUNK_END) {
+    } else {
+        bStop = true;
+    }
+
+    nResult = nCurrentOffset - nOffset;
+
+    if (bStop) {
+        nResult = false;
+    }
+
+    return nResult;
+}
+
 XBinary::MODE XAmigaHunk::getMode()
 {
     QList<HUNK> listHunks = getHunks();
@@ -264,87 +348,20 @@ QList<XAmigaHunk::HUNK> XAmigaHunk::getHunks(PDSTRUCT *pPdStruct)
 
     qint64 nCurrentOffset = 0;
     qint64 nTotalSize = getSize();
-    bool bStop = false;
 
     while (XBinary::isPdStructNotCanceled(pPdStruct)) {
         HUNK record = {};
         record.nId = read_uint32(nCurrentOffset, true) & 0x3FFFFFFF;
         record.nOffset = nCurrentOffset;
+        record.nSize = _getHunkSize(nCurrentOffset, pPdStruct);
 
-        nCurrentOffset += 4;
-
-        if (record.nId == XAMIGAHUNK_DEF::HUNK_HEADER) {
-            quint32 nEndOfList = read_uint32(nCurrentOffset, true);
-
-            if (nEndOfList) {
-                // Resident library names
-                // QString sName = read_ansiString(nCurrentOffset);
-            } else {
-                nCurrentOffset += 4;
-            }
-            quint32 nTableSize = read_uint32(nCurrentOffset + 0, true);
-            // quint32 nFirstLoaded = read_uint32(nCurrentOffset + 4, true);
-            // quint32 nLastLoaded = read_uint32(nCurrentOffset + 8, true);
-
-            nCurrentOffset += 12;
-
-            QList<qint64> listSizes;
-
-            nTableSize = qMin(nTableSize, (quint32)100);
-
-            for (quint32 i = 0; i < nTableSize; i++) {
-                listSizes.append(read_uint32(nCurrentOffset, true));
-                nCurrentOffset += 4;
-            }
-        } else if ((record.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (record.nId == XAMIGAHUNK_DEF::HUNK_DATA) || (record.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
-            quint32 nCodeSize = read_uint32(nCurrentOffset, true);
-            nCurrentOffset += 4;
-            nCurrentOffset += (nCodeSize * 4);
-        } else if (record.nId == XAMIGAHUNK_DEF::HUNK_RELOC32) {
-            while (XBinary::isPdStructNotCanceled(pPdStruct)) {
-                quint32 nRelocSize = read_uint32(nCurrentOffset, true);
-                nCurrentOffset += 4;
-
-                if (nRelocSize == 0) {
-                    break;
-                }
-
-                // quint32 nHunk = read_uint32(nCurrentOffset + 4, true);
-                nCurrentOffset += 4;
-                nCurrentOffset += (nRelocSize * 4);
-            }
-        } else if (record.nId == XAMIGAHUNK_DEF::HUNK_BSS) {
-            nCurrentOffset += 4;
-        } else if (record.nId == XAMIGAHUNK_DEF::HUNK_DEBUG) {
-            quint32 nDebugSize = read_uint32(nCurrentOffset, true);
-            nCurrentOffset += 4;
-            nCurrentOffset += (nDebugSize * 4);
-        } else if (record.nId == XAMIGAHUNK_DEF::HUNK_SYMBOL) {
-            while (XBinary::isPdStructNotCanceled(pPdStruct)) {
-                quint32 nSymbolSize = read_uint32(nCurrentOffset, true);
-                nCurrentOffset += 4;
-
-                if (nSymbolSize == 0) {
-                    break;
-                }
-
-                // QString sName = read_ansiString(nCurrentOffset);
-                nCurrentOffset += nSymbolSize * 4;
-                // quint32 nSymbolOffset = read_uint32(nCurrentOffset, true);
-                nCurrentOffset += 4;
-            }
-        } else if (record.nId == XAMIGAHUNK_DEF::HUNK_END) {
-        } else {
-            bStop = true;
+        if (record.nSize == 0) {
+            break;
         }
-
-        record.nSize = nCurrentOffset - record.nOffset;
 
         listResult.append(record);
 
-        if (bStop) {
-            break;
-        }
+        nCurrentOffset += record.nSize;
 
         if (nCurrentOffset >= nTotalSize) {
             break;
@@ -539,6 +556,27 @@ QString XAmigaHunk::structIDToString(quint32 nID)
 bool XAmigaHunk::isExecutable()
 {
     return true;
+}
+
+qint32 XAmigaHunk::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, PDSTRUCT *pPdStruct)
+{
+    qint32 nResult = 0;
+
+    if (dataRecordsOptions.dataHeader.dsID.nID == STRUCTID_HUNK) {
+        nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pPdStruct);
+
+        qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, locType, nLocation);
+
+        qint64 nHunkSize = _getHunkSize(nStartOffset, pPdStruct);
+
+        if (nHunkSize > 0) {
+            nResult = (qint32)nHunkSize;
+        }
+    } else {
+        nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pPdStruct);
+    }
+
+    return nResult;
 }
 
 QList<XBinary::DATA_HEADER> XAmigaHunk::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)

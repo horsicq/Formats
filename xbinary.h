@@ -850,8 +850,6 @@ public:
 
     qint32 getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles,
                                PDSTRUCT *pPdStruct);
-    static qint32 getDataRecordValues(QIODevice *pDevice, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
-                                      QList<QString> *pListTitles, PDSTRUCT *pPdStruct);
 
     static QList<QString> getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRecordsOptions, const DATA_RECORD_ROW &dataRecordRow, PDSTRUCT *pPdStruct);
 
@@ -859,7 +857,7 @@ public:
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
                                 PDSTRUCT *pPdStruct);
 
-    QString compressMethidToString(COMPRESS_METHOD compressMethod);
+    static QString compressMethodToString(COMPRESS_METHOD compressMethod);
 
 private:
     enum ST {

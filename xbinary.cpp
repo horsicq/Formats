@@ -661,14 +661,6 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
     return nResult;
 }
 
-qint32 XBinary::getDataRecordValues(QIODevice *pDevice, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
-                                    QList<QString> *pListTitles, PDSTRUCT *pPdStruct)
-{
-    XBinary binary(pDevice);
-
-    return binary.getDataRecordValues(dataRecordsOptions, pListDataRecords, pListTitles, pPdStruct);
-}
-
 QList<QString> XBinary::getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRecordsOptions, const DATA_RECORD_ROW &dataRecordRow, PDSTRUCT *pPdStruct)
 {
     QList<QString> listComments;
@@ -736,7 +728,7 @@ qint32 XBinary::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DAT
     return getDataRecordValues(_dataRecordsOptions, pListDataRecords, nullptr, pPdStruct);
 }
 
-QString XBinary::compressMethidToString(COMPRESS_METHOD compressMethod)
+QString XBinary::compressMethodToString(COMPRESS_METHOD compressMethod)
 {
     return XBinary::XCONVERT_idToTransString(compressMethod, _TABLE_XBINARY_COMPRESS_METHOD, sizeof(_TABLE_XBINARY_COMPRESS_METHOD) / sizeof(XBinary::XCONVERT));
 }

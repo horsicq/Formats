@@ -508,6 +508,17 @@ QList<XBinary::FPART> XFormats::getFileParts(XBinary::FT fileType, QIODevice *pD
     return listResult;
 }
 
+qint32 XFormats::getDataRecordValues(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<XBinary::DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+{
+    qint32 nResult = 0;
+
+    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    nResult = pBinary->getDataRecordValues(dataRecordsOptions, pListDataRecords, pListTitles, pPdStruct);
+    delete pBinary;
+
+    return nResult;
+}
+
 QString XFormats::getFileFormatExtsString(XBinary::FT fileType)
 {
     QString sResult;
