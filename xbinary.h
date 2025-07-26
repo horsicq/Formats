@@ -166,7 +166,7 @@ public:
         COMPRESS_METHOD_DEFLATE,
         COMPRESS_METHOD_DEFLATE64,
         COMPRESS_METHOD_BZIP2,
-        COMPRESS_METHOD_LZMA_ZIP,
+        COMPRESS_METHOD_LZMA,
         COMPRESS_METHOD_PPMD,
         COMPRESS_METHOD_LZH5,
         COMPRESS_METHOD_LZH6,
@@ -1476,7 +1476,7 @@ public:
     static quint16 _getCRC16(const char *pData, qint32 nDataSize, quint16 nInit, quint16 *pCRCTable);
     static quint32 _getCRC32(const QByteArray &baData, quint32 nInit, quint32 *pCRCTable);
     static quint16 _getCRC16(const QByteArray &baData, quint16 nInit, quint16 *pCRCTable);
-    quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, quint32 nInit = 0xFFFFFFFF, PDSTRUCT *pPdStruct = nullptr);
+    quint32 _getCRC32(qint64 nOffset = 0, qint64 nSize = -1, quint32 nInit = 0xFFFFFFFF, quint32 *pCRCTable = _getCRC32Table_EDB88320(), PDSTRUCT *pPdStruct = nullptr);
     quint16 _getCRC16(qint64 nOffset = 0, qint64 nSize = -1, quint16 nInit = 0, PDSTRUCT *pPdStruct = nullptr);
 
     static quint32 _getCRC32ByFileContent(const QString &sFileName);
@@ -1887,12 +1887,18 @@ public:
     void dumpMemoryMap();
     void dumpHeaders();
 
+    enum CRC_TYPE {
+        CRC_TYPE_UNKNOWN = 0,
+        CRC_TYPE_ZIP,
+    };
+
     enum FPART_PROP {
         FPART_PROP_UNKNOWN = 0,
         FPART_PROP_COMPRESSMETHOD,
         FPART_PROP_COMPRESSEDSIZE,
         FPART_PROP_UNCOMPRESSEDSIZE,
-        FPART_PROP_CRC,
+        FPART_PROP_CRC_TYPE,
+        FPART_PROP_CRC_VALUE,
         FPART_PROP_DATETIME,
     };
 

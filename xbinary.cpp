@@ -103,7 +103,7 @@ XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
 //     COMPRESS_METHOD_DEFLATE,
 //     COMPRESS_METHOD_DEFLATE64,
 //     COMPRESS_METHOD_BZIP2,
-//     COMPRESS_METHOD_LZMA_ZIP,
+//     COMPRESS_METHOD_LZMA,
 //     COMPRESS_METHOD_PPMD,
 //     COMPRESS_METHOD_LZH5,
 //     COMPRESS_METHOD_LZH6,
@@ -124,7 +124,7 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
     {XBinary::COMPRESS_METHOD_DEFLATE, "Deflate", QString("Deflate")},
     {XBinary::COMPRESS_METHOD_DEFLATE64, "Deflate64", QString("Deflate64")},
     {XBinary::COMPRESS_METHOD_BZIP2, "Bzip2", QString("Bzip2")},
-    {XBinary::COMPRESS_METHOD_LZMA_ZIP, "LZMA_ZIP", QString("LZMA(ZIP)")},
+    {XBinary::COMPRESS_METHOD_LZMA, "LZMA", QString("LZMA")},
     {XBinary::COMPRESS_METHOD_PPMD, "PPMD", QString("PPMD")},  // TODO
     {XBinary::COMPRESS_METHOD_LZH5, "LZH5", QString("LZH5")},
     {XBinary::COMPRESS_METHOD_LZH6, "LZH6", QString("LZH6")},
@@ -7788,7 +7788,7 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 
     XBinary binary(pDevice);
 
-    nResult = binary._getCRC32(0, -1, 0xFFFFFFFF, pPdStruct);
+    nResult = binary._getCRC32(0, -1, 0xFFFFFFFF, _getCRC32Table_EDB88320(), pPdStruct);
 
     pDevice->reset();
 
@@ -7837,10 +7837,10 @@ quint16 XBinary::_getCRC16(const QByteArray &baData, quint16 nInit, quint16 *pCR
     return _getCRC16(baData.data(), baData.size(), nInit, pCRCTable);
 }
 
-quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, PDSTRUCT *pPdStruct)
+quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, quint32 *pCRCTable, PDSTRUCT *pPdStruct)
 {
     // TODO optimize!!!
-    quint32 nResult = nInit;  // ~0 // TODO make nInit arg
+    quint32 nResult = nInit;
 
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -7872,7 +7872,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, PDSTRUCT
                 break;
             }
 
-            nResult = _getCRC32(pBuffer, nTemp, nResult, XBinary::_getCRC32Table_EDB88320());
+            nResult = _getCRC32(pBuffer, nTemp, nResult, pCRCTable);
 
             nSize -= nTemp;
             nOffset += nTemp;
