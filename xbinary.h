@@ -940,6 +940,7 @@ public:
     virtual ENDIAN getEndian();
     virtual QString getArch();
     virtual QString getFileFormatExt();
+    void setFileFormatExtsString(const QString &sFileFormatExts);
     virtual QString getFileFormatExtsString();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
     virtual bool isSigned();
@@ -1969,6 +1970,7 @@ private:
     qint64 g_nSize;
     bool g_bIsExecutable;
     bool g_bIsArchive;
+    QString g_sFileFormatExts;
 };
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b);

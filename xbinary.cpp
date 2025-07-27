@@ -1089,13 +1089,20 @@ QString XBinary::getFileFormatExt()
     return g_sFileFormatExt;
 }
 
+void XBinary::setFileFormatExtsString(const QString &sFileFormatExts)
+{
+    g_sFileFormatExts = sFileFormatExts;
+}
+
 QString XBinary::getFileFormatExtsString()
 {
+    if (g_sFileFormatExts == "") {
 #ifdef QT_DEBUG
     qDebug("TODO: XBinary::getFileFormatExtsString()");
 #endif
+    }
 
-    return tr("Unknown");
+    return g_sFileFormatExts;
 }
 
 void XBinary::setFileFormatSize(qint64 nFileFormatSize)

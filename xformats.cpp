@@ -81,7 +81,13 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
 #ifdef QT_DEBUG
         qDebug() << "XFormats::getClass: Unknown file type" << XBinary::fileTypeIdToString(fileType);
 #endif
-        return new XBinary(pDevice, bIsImage, nModuleAddress);
+        XBinary *pBinary = new XBinary(pDevice, bIsImage, nModuleAddress);
+
+        if (XBinary::checkFileType(XBinary::FT_OTHER, fileType)) {
+            pBinary->setFileFormatExtsString("*, *.*");
+        }
+
+        return pBinary;
     }
 }
 
