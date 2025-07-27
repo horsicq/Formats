@@ -91,7 +91,7 @@ bool XAmigaHunk::_initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
     pMemoryMap->sArch = getArch(&listHunks, pPdStruct);
     pMemoryMap->endian = getEndian();
     pMemoryMap->sType = getTypeAsString();
-    pMemoryMap->nEntryPointAddress = getEntryPointAddress(&listHunks, pPdStruct);
+    pMemoryMap->nEntryPointAddress = _getEntryPointAddress(&listHunks, pPdStruct);
 
     return true;
 }
@@ -224,7 +224,7 @@ QString XAmigaHunk::getArch(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct)
     return sResult;
 }
 
-XADDR XAmigaHunk::getEntryPointAddress(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct)
+XADDR XAmigaHunk::_getEntryPointAddress(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct)
 {
     XADDR nResult = 0;
 

@@ -91,7 +91,7 @@ public:
     virtual MODE getMode();
     MODE getMode(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
 
-    XADDR getEntryPointAddress(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
+    XADDR _getEntryPointAddress(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
 
     QList<HUNK> getHunks(PDSTRUCT *pPdStruct = nullptr);
     static STRUCTID hunkTypeToStructId(quint32 nHunkType);
