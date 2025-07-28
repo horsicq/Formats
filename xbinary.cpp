@@ -398,7 +398,7 @@ qint32 XBinary::_writeDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE
         nRealSize = nBufferSize;
         nSkip = 0;
     } else if (pState->nDecompressedOffset > 0) {
-        nSkip = pState->nDecompressedOffset; // TODO fix
+        nSkip = pState->nDecompressedOffset;  // TODO fix
         nRealSize = nBufferSize - nSkip;
 
         if (nRealSize < 0) {
@@ -1163,7 +1163,7 @@ QString XBinary::getFileFormatExtsString()
 {
     if (g_sFileFormatExts == "") {
 #ifdef QT_DEBUG
-    qDebug("TODO: XBinary::getFileFormatExtsString()");
+        qDebug("TODO: XBinary::getFileFormatExtsString()");
 #endif
     }
 
