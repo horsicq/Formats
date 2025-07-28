@@ -176,9 +176,30 @@ public:
         COMPRESS_METHOD_RAR_29,
         COMPRESS_METHOD_RAR_50,
         COMPRESS_METHOD_RAR_70,
-        COMPRESS_METHOD_LZSS_SZDD
+        COMPRESS_METHOD_LZSS_SZDD,
+        COMPRESS_METHOD_IT214_8,
+        COMPRESS_METHOD_IT214_16,
+        COMPRESS_METHOD_IT215_8,
+        COMPRESS_METHOD_IT215_16,
         // TODO check more methods
     };
+
+    struct DECOMPRESS_STATE {
+        QIODevice *pDeviceInput;
+        QIODevice *pDeviceOutput;
+        qint64 nInputOffset;
+        qint64 nInputLimit;
+        qint64 nDecompressedOffset;
+        qint64 nDecompressedLimit;
+        COMPRESS_METHOD compressMethod;
+        bool bReadError;
+        bool bWriteError;
+        qint64 nCountInput;
+        qint64 nCountOutput;
+    };
+
+    static qint32 _readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
+    static qint32 _writeDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
 
     struct BYTE_COUNTS {
         qint64 nSize;
@@ -858,6 +879,8 @@ public:
                                 PDSTRUCT *pPdStruct);
 
     static QString compressMethodToString(COMPRESS_METHOD compressMethod);
+    static QString compressMethodToFtString(COMPRESS_METHOD compressMethod);
+    static COMPRESS_METHOD ftStringToCompressMethod(const QString &sString);
 
 private:
     enum ST {

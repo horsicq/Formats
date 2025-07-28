@@ -135,6 +135,10 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
     {XBinary::COMPRESS_METHOD_RAR_50, "RAR_50", QString("RAR 5.0")},
     {XBinary::COMPRESS_METHOD_RAR_70, "RAR_70", QString("RAR 7.0")},
     {XBinary::COMPRESS_METHOD_LZSS_SZDD, "LZSS_SZDD", QString("LZSS SZDD")},
+    {XBinary::COMPRESS_METHOD_IT214_8, "IT214_8", QString("IT214 8-bit")},
+    {XBinary::COMPRESS_METHOD_IT214_16, "IT214_16", QString("IT214 16-bit")},
+    {XBinary::COMPRESS_METHOD_IT215_8, "IT215_8", QString("IT215 8-bit")},
+    {XBinary::COMPRESS_METHOD_IT215_16, "IT215_16", QString("IT215 16-bit")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -370,6 +374,57 @@ QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 n
     }
 
     return sResult;
+}
+
+qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState)
+{
+    qint32 nRead = pState->pDeviceInput->read(pBuffer, nBufferSize);
+
+    pState->nCountInput += nRead;
+
+    if (nRead != nBufferSize) {
+        pState->bReadError = true;
+    }
+
+    return nRead;
+}
+
+qint32 XBinary::_writeDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState)
+{
+    qint64 nRealSize = 0;
+    qint64 nSkip = 0;
+
+    if (pState->nDecompressedOffset == 0 && (pState->nDecompressedLimit == -1)) {
+        nRealSize = nBufferSize;
+        nSkip = 0;
+    } else if (pState->nDecompressedOffset > 0) {
+        nSkip = pState->nDecompressedOffset; // TODO fix
+        nRealSize = nBufferSize - nSkip;
+
+        if (nRealSize < 0) {
+            nRealSize = 0;
+        }
+
+        if (pState->nDecompressedLimit != -1) {
+            if ((pState->nDecompressedOffset + nRealSize) > pState->nDecompressedLimit) {
+                nRealSize = pState->nDecompressedLimit - pState->nDecompressedOffset;
+            }
+        }
+    } else {
+        nRealSize = nBufferSize;
+    }
+
+    if ((nRealSize > 0) && (pState->pDeviceOutput)) {
+        qint64 nWritten = pState->pDeviceOutput->write(pBuffer + nSkip, nRealSize);
+
+        if (nWritten != nRealSize) {
+            pState->bWriteError = true;
+        }
+    }
+
+    pState->nCountOutput += nBufferSize;
+
+    return nBufferSize;
 }
 
 XBinary::DATA_HEADER XBinary::_searchDataHeaderById(FT fileType, quint32 nID, const QList<DATA_HEADER> &listDataHeaders)
@@ -731,6 +786,16 @@ qint32 XBinary::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DAT
 QString XBinary::compressMethodToString(COMPRESS_METHOD compressMethod)
 {
     return XBinary::XCONVERT_idToTransString(compressMethod, _TABLE_XBINARY_COMPRESS_METHOD, sizeof(_TABLE_XBINARY_COMPRESS_METHOD) / sizeof(XBinary::XCONVERT));
+}
+
+QString XBinary::compressMethodToFtString(COMPRESS_METHOD compressMethod)
+{
+    return XBinary::XCONVERT_idToFtString(compressMethod, _TABLE_XBINARY_COMPRESS_METHOD, sizeof(_TABLE_XBINARY_COMPRESS_METHOD) / sizeof(XBinary::XCONVERT));
+}
+
+XBinary::COMPRESS_METHOD XBinary::ftStringToCompressMethod(const QString &sString)
+{
+    return (COMPRESS_METHOD)XBinary::XCONVERT_ftStringToId(sString, _TABLE_XBINARY_COMPRESS_METHOD, sizeof(_TABLE_XBINARY_COMPRESS_METHOD) / sizeof(XBinary::XCONVERT));
 }
 
 XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian)
