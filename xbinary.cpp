@@ -389,6 +389,15 @@ qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE 
     return nRead;
 }
 
+qint32 XBinary::_readDevice(DECOMPRESS_STATE *pState)
+{
+    qint32 nRead = pState->pDeviceInput->read(pState->pInputBuffer, pState->nInputBufferSize);
+
+    pState->nCountInput += nRead;
+
+    return nRead;
+}
+
 qint32 XBinary::_writeDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState)
 {
     qint64 nRealSize = 0;
@@ -659,18 +668,40 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
         pListTitles->clear();
     }
 
-    if (dataRecordsOptions.dataHeader.dhMode == DHMODE_HEADER) {
+    if (dataRecordsOptions.dataHeaderFirst.dhMode == DHMODE_HEADER) {
         DATA_RECORD_ROW dataRecordRow = {};
-        dataRecordRow.locType = dataRecordsOptions.dataHeader.locType;
-        dataRecordRow.nLocation = dataRecordsOptions.dataHeader.nLocation;
+        dataRecordRow.locType = dataRecordsOptions.dataHeaderFirst.locType;
+        dataRecordRow.nLocation = dataRecordsOptions.dataHeaderFirst.nLocation;
 
-        qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, dataRecordsOptions.dataHeader.locType, dataRecordsOptions.dataHeader.nLocation);
-        qint32 nNumberOfRecords = dataRecordsOptions.dataHeader.listRecords.count();
+        DATA_HEADER dataHeader = {};
+
+        if (_isFlagPresentInRecords(&(dataRecordsOptions.dataHeaderFirst.listRecords), DRF_VOLATILE)) {
+            DATA_HEADERS_OPTIONS dataHeadersOptions = {};
+            dataHeadersOptions.pMemoryMap = dataRecordsOptions.pMemoryMap;
+            dataHeadersOptions.dsID_parent = dataRecordsOptions.dataHeaderFirst.dsID_parent;
+            dataHeadersOptions.fileType = dataRecordsOptions.dataHeaderFirst.dsID.fileType;
+            dataHeadersOptions.nID = dataRecordsOptions.dataHeaderFirst.dsID.nID;
+            dataHeadersOptions.locType = dataRecordsOptions.dataHeaderFirst.locType;
+            dataHeadersOptions.nLocation = dataRecordsOptions.dataHeaderFirst.nLocation;
+            dataHeadersOptions.bChildren = false;
+            dataHeadersOptions.dhMode = DHMODE_HEADER;
+
+            QList<DATA_HEADER> listDataHeaders = getDataHeaders(dataHeadersOptions, pPdStruct);
+
+            if (listDataHeaders.count()) {
+                dataHeader = listDataHeaders.at(0);
+            }
+        } else {
+            dataHeader = dataRecordsOptions.dataHeaderFirst;
+        }
+
+        qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, dataHeader.locType, dataHeader.nLocation);
+        qint32 nNumberOfRecords = dataHeader.listRecords.count();
 
         qint32 nMax = 0;
 
         for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
-            DATA_RECORD dataRecord = dataRecordsOptions.dataHeader.listRecords.at(j);
+            DATA_RECORD dataRecord = dataHeader.listRecords.at(j);
 
             QVariant variant =
                 read_value(dataRecord.valType, nStartOffset + dataRecord.nRelOffset, dataRecord.nSize, dataRecord.endian == XBinary::ENDIAN_BIG, pPdStruct);
@@ -691,9 +722,9 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
         pListDataRecords->append(dataRecordRow);
 
         nResult = nMax;
-    } else if (dataRecordsOptions.dataHeader.dhMode == DHMODE_TABLE) {
-        qint32 nCount = dataRecordsOptions.dataHeader.nCount;
-        XADDR nLocation = dataRecordsOptions.dataHeader.nLocation;
+    } else if (dataRecordsOptions.dataHeaderFirst.dhMode == DHMODE_TABLE) {
+        qint32 nCount = dataRecordsOptions.dataHeaderFirst.nCount;
+        XADDR nLocation = dataRecordsOptions.dataHeaderFirst.nLocation;
 
         if (pListTitles) {
             pListTitles->clear();
@@ -703,14 +734,14 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
         for (qint32 i = 0; (i < nCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
             QList<DATA_RECORD_ROW> listDataRecordRows;
 
-            qint32 nResultRead = readTableRow(i, dataRecordsOptions.dataHeader.locType, nLocation, dataRecordsOptions, &listDataRecordRows, pPdStruct);
+            qint32 nResultRead = readTableRow(i, dataRecordsOptions.dataHeaderFirst.locType, nLocation, dataRecordsOptions, &listDataRecordRows, pPdStruct);
 
             pListDataRecords->append(listDataRecordRows);
 
             nLocation += nResultRead;
         }
 
-        nResult = nLocation - dataRecordsOptions.dataHeader.nLocation;
+        nResult = nLocation - dataRecordsOptions.dataHeaderFirst.nLocation;
     }
 
     return nResult;
@@ -720,10 +751,10 @@ QList<QString> XBinary::getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRe
 {
     QList<QString> listComments;
 
-    qint32 nNumberOfRecords = dataRecordsOptions.dataHeader.listRecords.count();
+    qint32 nNumberOfRecords = dataRecordsOptions.dataHeaderFirst.listRecords.count();
 
     for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
-        DATA_RECORD dataRecord = dataRecordsOptions.dataHeader.listRecords.at(j);
+        DATA_RECORD dataRecord = dataRecordsOptions.dataHeaderFirst.listRecords.at(j);
 
         QString sComment;
 
@@ -759,10 +790,10 @@ QList<QString> XBinary::getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOp
 {
     QList<QString> listTitles;
 
-    qint32 nNumberOfRecords = dataRecordsOptions.dataHeader.listRecords.count();
+    qint32 nNumberOfRecords = dataRecordsOptions.dataHeaderFirst.listRecords.count();
 
     for (qint32 j = 0; j < nNumberOfRecords; j++) {
-        DATA_RECORD dataRecord = dataRecordsOptions.dataHeader.listRecords.at(j);
+        DATA_RECORD dataRecord = dataRecordsOptions.dataHeaderFirst.listRecords.at(j);
 
         listTitles.append(dataRecord.sName);
     }
@@ -776,11 +807,27 @@ qint32 XBinary::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DAT
     Q_UNUSED(nRow)
 
     DATA_RECORDS_OPTIONS _dataRecordsOptions = dataRecordsOptions;
-    _dataRecordsOptions.dataHeader.locType = locType;
-    _dataRecordsOptions.dataHeader.nLocation = nLocation;
-    _dataRecordsOptions.dataHeader.dhMode = DHMODE_HEADER;
+    _dataRecordsOptions.dataHeaderFirst.locType = locType;
+    _dataRecordsOptions.dataHeaderFirst.nLocation = nLocation;
+    _dataRecordsOptions.dataHeaderFirst.dhMode = DHMODE_HEADER;
 
     return getDataRecordValues(_dataRecordsOptions, pListDataRecords, nullptr, pPdStruct);
+}
+
+bool XBinary::_isFlagPresentInRecords(const QList<DATA_RECORD> *pListRecords, quint32 nFlag)
+{
+    bool bResult = false;
+
+    qint32 nNumberOfRecords = pListRecords->count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (pListRecords->at(i).nFlags & nFlag) {
+            bResult = true;
+            break;
+        }
+    }
+
+    return bResult;
 }
 
 QString XBinary::compressMethodToString(COMPRESS_METHOD compressMethod)
@@ -791,6 +838,16 @@ QString XBinary::compressMethodToString(COMPRESS_METHOD compressMethod)
 QString XBinary::compressMethodToFtString(COMPRESS_METHOD compressMethod)
 {
     return XBinary::XCONVERT_idToFtString(compressMethod, _TABLE_XBINARY_COMPRESS_METHOD, sizeof(_TABLE_XBINARY_COMPRESS_METHOD) / sizeof(XBinary::XCONVERT));
+}
+
+QString XBinary::getCompressMethodAsString()
+{
+    return compressMethodToString(getCompressMethod());
+}
+
+XBinary::COMPRESS_METHOD XBinary::getCompressMethod()
+{
+    return COMPRESS_METHOD_STORE;  // Default value
 }
 
 XBinary::COMPRESS_METHOD XBinary::ftStringToCompressMethod(const QString &sString)
@@ -8758,7 +8815,7 @@ void XBinary::dumpHeaders()
 
             XBinary::DATA_RECORDS_OPTIONS dataRecordsOptions = {};
             dataRecordsOptions.pMemoryMap = &memoryMap;
-            dataRecordsOptions.dataHeader = dataHeader;
+            dataRecordsOptions.dataHeaderFirst = dataHeader;
 
             getDataRecordValues(dataRecordsOptions, &listDataRecordsRow, nullptr, nullptr);
             QList<QString> listComments;

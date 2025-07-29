@@ -196,9 +196,14 @@ public:
         bool bWriteError;
         qint64 nCountInput;
         qint64 nCountOutput;
+        char *pInputBuffer; // Opt
+        qint32 nInputBufferSize; // Opt
+        char *pOutputBuffer; // Opt
+        qint32 nOutputBufferSize; // Opt
     };
 
     static qint32 _readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
+    static qint32 _readDevice(DECOMPRESS_STATE *pState);
     static qint32 _writeDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
 
     struct BYTE_COUNTS {
@@ -786,6 +791,7 @@ public:
         DRF_ADDRESS = 0x00000004,
         DRF_OFFSET = 0x00000008,
         DRF_VERSION = 0x00000010,
+        DRF_VOLATILE = 0x00000020,
     };
 
     enum VL_TYPE {
@@ -859,7 +865,7 @@ public:
 
     struct DATA_RECORDS_OPTIONS {
         _MEMORY_MAP *pMemoryMap;
-        DATA_HEADER dataHeader;
+        DATA_HEADER dataHeaderFirst;
     };
 
     struct DATA_RECORD_ROW {
@@ -878,9 +884,14 @@ public:
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
                                 PDSTRUCT *pPdStruct);
 
+    bool _isFlagPresentInRecords(const QList<DATA_RECORD> *pListRecords, quint32 nFlag);
+
     static QString compressMethodToString(COMPRESS_METHOD compressMethod);
     static QString compressMethodToFtString(COMPRESS_METHOD compressMethod);
     static COMPRESS_METHOD ftStringToCompressMethod(const QString &sString);
+
+    virtual COMPRESS_METHOD getCompressMethod();
+    QString getCompressMethodAsString();
 
 private:
     enum ST {

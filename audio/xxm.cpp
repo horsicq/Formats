@@ -306,7 +306,7 @@ qint32 XXM::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RE
     Q_UNUSED(pPdStruct)
 
     qint32 nResult = 0;
-    if (dataRecordsOptions.dataHeader.dsID.nID == STRUCTID_HEADER) {
+    if (dataRecordsOptions.dataHeaderFirst.dsID.nID == STRUCTID_HEADER) {
         HEADER header = _read_HEADER(locationToOffset(dataRecordsOptions.pMemoryMap, locType, nLocation));
         if (nRow == 0) {
             pListValues->append(QByteArray(header.id_text, 17));

@@ -563,7 +563,7 @@ qint32 XAmigaHunk::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const 
 {
     qint32 nResult = 0;
 
-    if (dataRecordsOptions.dataHeader.dsID.nID == STRUCTID_HUNK) {
+    if (dataRecordsOptions.dataHeaderFirst.dsID.nID == STRUCTID_HUNK) {
         nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pPdStruct);
 
         qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, locType, nLocation);
