@@ -244,7 +244,6 @@ public:
         FILEPART_REGION = 1 << 0,
         FILEPART_SECTION = 1 << 1,
         FILEPART_SEGMENT = 1 << 2,
-        FILEPART_ARCHIVERECORD = 1 << 3,
         FILEPART_HEADER = 1 << 4,
         FILEPART_OVERLAY = 1 << 5,
         FILEPART_RESOURCE = 1 << 6,
@@ -582,7 +581,8 @@ public:
         QString sOsVersion;
         QString sOsBuild;
         bool bIsVM;
-        bool bIsCrypted;
+        bool bIsEncrypted;
+        QString sCompresionMethod;
     };
 
     struct _MEMORY_MAP {
@@ -890,8 +890,7 @@ public:
     static QString compressMethodToFtString(COMPRESS_METHOD compressMethod);
     static COMPRESS_METHOD ftStringToCompressMethod(const QString &sString);
 
-    virtual COMPRESS_METHOD getCompressMethod();
-    QString getCompressMethodAsString();
+    virtual QString getCompressMethodString();
 
 private:
     enum ST {

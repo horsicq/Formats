@@ -143,7 +143,7 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
     {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},        {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
-    {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},        {XBinary::FILEPART_ARCHIVERECORD, "ArchiveRecord", QObject::tr("Archive record")},
+    {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},
     {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},     {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},
     {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")}, {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")},
     {XBinary::FILEPART_SIGNATURE, "Signature", QObject::tr("Signature")},
@@ -840,14 +840,9 @@ QString XBinary::compressMethodToFtString(COMPRESS_METHOD compressMethod)
     return XBinary::XCONVERT_idToFtString(compressMethod, _TABLE_XBINARY_COMPRESS_METHOD, sizeof(_TABLE_XBINARY_COMPRESS_METHOD) / sizeof(XBinary::XCONVERT));
 }
 
-QString XBinary::getCompressMethodAsString()
+QString XBinary::getCompressMethodString()
 {
-    return compressMethodToString(getCompressMethod());
-}
-
-XBinary::COMPRESS_METHOD XBinary::getCompressMethod()
-{
-    return COMPRESS_METHOD_STORE;  // Default value
+    return "";
 }
 
 XBinary::COMPRESS_METHOD XBinary::ftStringToCompressMethod(const QString &sString)
@@ -1184,8 +1179,12 @@ QString XBinary::getFileFormatInfoString(const FILEFORMATINFO *pFileFormatInfo)
 {
     QString sResult;
 
-    if (pFileFormatInfo->bIsCrypted) {
-        sResult = appendText(sResult, QObject::tr("Crypted"), ", ");
+    if (pFileFormatInfo->bIsEncrypted) {
+        sResult = appendText(sResult, QObject::tr("Encrypted"), ", ");
+    }
+
+    if (pFileFormatInfo->sCompresionMethod != "") {
+        sResult = appendText(sResult, pFileFormatInfo->sCompresionMethod, ", ");
     }
 
     // TODO
@@ -1290,6 +1289,8 @@ XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
         result.sType = typeIdToString(getType());
         result.endian = getEndian();
         result.sMIME = getMIMEString();
+        result.sCompresionMethod = getCompressMethodString();
+        result.bIsEncrypted = isEncrypted();
 
         if (result.nSize == 0) {
             result.bIsValid = false;
@@ -8717,7 +8718,7 @@ bool XBinary::isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CO
     if (pListFmtMsgs) {
         qint32 nNumberOfRecords = pListFmtMsgs->count();
 
-        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+        for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
             if ((pListFmtMsgs->at(i).code == code) && (pListFmtMsgs->at(i).type == type)) {
                 bResult = true;
                 break;
