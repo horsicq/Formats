@@ -20,8 +20,12 @@
  */
 #include "xformats.h"
 
-XFormats::XFormats(QObject *pParent) : QObject(pParent)
+XFormats::XFormats(QObject *pParent) : XThreadObject(pParent)
 {
+    g_mode = MODE_UNKNOWN;
+    g_fileFormat = XBinary::FT_UNKNOWN;
+    g_pDevice = nullptr;
+    g_pPdStruct = nullptr;
 }
 
 XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
@@ -753,6 +757,41 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 #endif
 
     return stResult;
+}
+
+void XFormats::setData(MODE mode, XBinary::FT fileFormat, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct)
+{
+    g_mode = mode;
+    g_fileFormat = fileFormat;
+    g_pDevice = pDevice;
+    g_sFolderName = sFolderName;
+    g_pPdStruct = pPdStruct;
+}
+
+void XFormats::process()
+{
+    if (g_mode == MODE_UNPACKDEVICETOFOLDER) {
+        if (g_pDevice) {
+            if (!unpackDeviceToFolder(g_fileFormat, g_pDevice, g_sFolderName, g_pPdStruct)) {
+                emit errorMessage(tr("Cannot unpack"));
+            }
+        }
+    }
+}
+
+bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct)
+{
+    if (fileType == XBinary::FT_UNKNOWN) {
+        fileType = XBinary::getPrefFileType(pDevice, true);
+    }
+
+    QList<XBinary::FPART> listParts = XFormats::getFileParts(fileType, pDevice, XBinary::FILEPART_STREAM, -1, false, -1, pPdStruct);
+
+    XDecompress xDecompress;
+
+    // TODO Connect signals
+
+    return xDecompress.unpackFilePartsToFolder(&listParts, pDevice, sFolderName, pPdStruct);
 }
 
 #ifdef QT_GUI_LIB

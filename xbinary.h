@@ -181,7 +181,21 @@ public:
         COMPRESS_METHOD_IT214_16,
         COMPRESS_METHOD_IT215_8,
         COMPRESS_METHOD_IT215_16,
+        COMPRESS_METHOD_IMPLODED,
         // TODO check more methods
+    };
+
+    enum FPART_PROP {
+        FPART_PROP_UNKNOWN = 0,
+        FPART_PROP_COMPRESSMETHOD,
+        FPART_PROP_COMPRESSEDSIZE,
+        FPART_PROP_UNCOMPRESSEDSIZE,
+        FPART_PROP_CRC_TYPE,
+        FPART_PROP_CRC_VALUE,
+        FPART_PROP_DATETIME,
+        FPART_PROP_ENCRYPTED,
+        FPART_PROP_COMPRESSION_OPTION_0,
+        FPART_PROP_COMPRESSION_OPTION_1,
     };
 
     struct DECOMPRESS_STATE {
@@ -191,7 +205,7 @@ public:
         qint64 nInputLimit;
         qint64 nDecompressedOffset;
         qint64 nDecompressedLimit;
-        COMPRESS_METHOD compressMethod;
+        QMap<FPART_PROP, QVariant> mapProperties;
         bool bReadError;
         bool bWriteError;
         qint64 nCountInput;
@@ -1926,15 +1940,7 @@ public:
         CRC_TYPE_ZIP,
     };
 
-    enum FPART_PROP {
-        FPART_PROP_UNKNOWN = 0,
-        FPART_PROP_COMPRESSMETHOD,
-        FPART_PROP_COMPRESSEDSIZE,
-        FPART_PROP_UNCOMPRESSEDSIZE,
-        FPART_PROP_CRC_TYPE,
-        FPART_PROP_CRC_VALUE,
-        FPART_PROP_DATETIME,
-    };
+
 
     struct FPART {
         qint64 nFileOffset;

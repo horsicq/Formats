@@ -139,6 +139,7 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
     {XBinary::COMPRESS_METHOD_IT214_16, "IT214_16", QString("IT214 16-bit")},
     {XBinary::COMPRESS_METHOD_IT215_8, "IT215_8", QString("IT215 8-bit")},
     {XBinary::COMPRESS_METHOD_IT215_16, "IT215_16", QString("IT215 16-bit")},
+    {XBinary::COMPRESS_METHOD_IMPLODED, "Imploded", QString("Imploded")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -7370,6 +7371,8 @@ QString XBinary::getDeviceFileName(QIODevice *pDevice)
 
     if (pFile) {
         sResult = pFile->fileName();
+    } else {
+        sResult = pDevice->property("FileName").toString();
     }
 
     return sResult;
@@ -7398,18 +7401,12 @@ QString XBinary::getDeviceDirectory(QIODevice *pDevice)
 {
     QString sResult;
 
-    QFile *pFile = dynamic_cast<QFile *>(pDevice);
+    QString sFileName = getDeviceFileName(pDevice);
 
-    if (pFile) {
-        QString sFileName = pFile->fileName();
+    if (sFileName != "") {
+        QFileInfo fi(sFileName);
 
-        if (sFileName != "") {
-            QFileInfo fi(sFileName);
-
-            sResult = fi.absolutePath();
-        }
-    } else {
-        sResult = pDevice->property("DeviceDirectory").toString();
+        sResult = fi.absolutePath();
     }
 
     return sResult;
@@ -7419,18 +7416,12 @@ QString XBinary::getDeviceFileBaseName(QIODevice *pDevice)
 {
     QString sResult;
 
-    QFile *pFile = dynamic_cast<QFile *>(pDevice);
+    QString sFileName = getDeviceFileName(pDevice);
 
-    if (pFile) {
-        QString sFileName = pFile->fileName();
+    if (sFileName != "") {
+        QFileInfo fi(sFileName);
 
-        if (sFileName != "") {
-            QFileInfo fi(sFileName);
-
-            sResult = fi.baseName();
-        }
-    } else {
-        sResult = pDevice->property("DeviceFileBaseName").toString();
+        sResult = fi.baseName();
     }
 
     return sResult;
@@ -7440,18 +7431,12 @@ QString XBinary::getDeviceFileCompleteSuffix(QIODevice *pDevice)
 {
     QString sResult;
 
-    QFile *pFile = dynamic_cast<QFile *>(pDevice);
+    QString sFileName = getDeviceFileName(pDevice);
 
-    if (pFile) {
-        QString sFileName = pFile->fileName();
+    if (sFileName != "") {
+        QFileInfo fi(sFileName);
 
-        if (sFileName != "") {
-            QFileInfo fi(sFileName);
-
-            sResult = fi.completeSuffix();
-        }
-    } else {
-        sResult = pDevice->property("DeviceFileCompleteSuffix").toString();
+        sResult = fi.completeSuffix();
     }
 
     return sResult;
@@ -7461,20 +7446,12 @@ QString XBinary::getDeviceFileSuffix(QIODevice *pDevice)
 {
     QString sResult;
 
-    QFile *pFile = dynamic_cast<QFile *>(pDevice);
+    QString sFileName = getDeviceFileName(pDevice);
 
-    if (pFile) {
-        QString sFileName = pFile->fileName();
+    if (sFileName != "") {
+        QFileInfo fi(sFileName);
 
-        if (sFileName != "") {
-            QFileInfo fi(sFileName);
-
-            sResult = fi.suffix();
-        }
-    } else {
-        if (pDevice) {
-            sResult = pDevice->property("DeviceFileSuffix").toString();
-        }
+        sResult = fi.suffix();
     }
 
     return sResult;

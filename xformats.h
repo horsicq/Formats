@@ -58,10 +58,15 @@
 #include <QProgressBar>
 #endif
 
-class XFormats : public QObject {
+class XFormats : public XThreadObject {
     Q_OBJECT
 
 public:
+    enum MODE {
+        MODE_UNKNOWN = 0,
+        MODE_UNPACKDEVICETOFOLDER,
+    };
+
     explicit XFormats(QObject *pParent = nullptr);
 
     static XBinary *getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -130,6 +135,19 @@ public:
 
 private:
     static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct);
+
+public:
+    void setData(MODE mode, XBinary::FT fileFormat, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct);
+    virtual void process();
+
+    bool unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct);
+
+private:
+    MODE g_mode;
+    XBinary::FT g_fileFormat;
+    QIODevice *g_pDevice;
+    QString g_sFolderName;
+    XBinary::PDSTRUCT *g_pPdStruct;
 };
 
 #endif  // XFORMATS_H
