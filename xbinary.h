@@ -210,10 +210,10 @@ public:
         bool bWriteError;
         qint64 nCountInput;
         qint64 nCountOutput;
-        char *pInputBuffer; // Opt
-        qint32 nInputBufferSize; // Opt
-        char *pOutputBuffer; // Opt
-        qint32 nOutputBufferSize; // Opt
+        char *pInputBuffer;        // Opt
+        qint32 nInputBufferSize;   // Opt
+        char *pOutputBuffer;       // Opt
+        qint32 nOutputBufferSize;  // Opt
     };
 
     static qint32 _readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
@@ -1939,8 +1939,6 @@ public:
         CRC_TYPE_UNKNOWN = 0,
         CRC_TYPE_ZIP,
     };
-
-
 
     struct FPART {
         qint64 nFileOffset;

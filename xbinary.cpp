@@ -143,11 +143,10 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
-    {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")},        {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
-    {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")},
-    {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},     {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},
-    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")}, {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")},
-    {XBinary::FILEPART_SIGNATURE, "Signature", QObject::tr("Signature")},
+    {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")}, {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
+    {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")}, {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},
+    {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")},
+    {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")},    {XBinary::FILEPART_SIGNATURE, "Signature", QObject::tr("Signature")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FT[] = {
