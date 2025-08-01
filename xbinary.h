@@ -181,7 +181,16 @@ public:
         COMPRESS_METHOD_IT214_16,
         COMPRESS_METHOD_IT215_8,
         COMPRESS_METHOD_IT215_16,
-        COMPRESS_METHOD_IMPLODED,
+        COMPRESS_METHOD_IMPLODED_4KDICT_2TREES,
+        COMPRESS_METHOD_IMPLODED_4KDICT_3TREES,
+        COMPRESS_METHOD_IMPLODED_8KDICT_2TREES,
+        COMPRESS_METHOD_IMPLODED_8KDICT_3TREES,
+        COMPRESS_METHOD_SHRINK,
+        COMPRESS_METHOD_REDUCE_1,
+        COMPRESS_METHOD_REDUCE_2,
+        COMPRESS_METHOD_REDUCE_3,
+        COMPRESS_METHOD_REDUCE_4,
+        COMPRESS_METHOD_AES
         // TODO check more methods
     };
 
@@ -194,8 +203,8 @@ public:
         FPART_PROP_CRC_VALUE,
         FPART_PROP_DATETIME,
         FPART_PROP_ENCRYPTED,
-        FPART_PROP_COMPRESSION_OPTION_0,
-        FPART_PROP_COMPRESSION_OPTION_1,
+        // FPART_PROP_COMPRESSION_OPTION_0,
+        // FPART_PROP_COMPRESSION_OPTION_1,
     };
 
     struct DECOMPRESS_STATE {
@@ -895,8 +904,11 @@ public:
     static QList<QString> getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRecordsOptions, const DATA_RECORD_ROW &dataRecordRow, PDSTRUCT *pPdStruct);
 
     virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions);
-    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+
+    virtual bool readTableInit(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void *pUserData, PDSTRUCT *pPdStruct);
+    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, void *pUserData,
                                 PDSTRUCT *pPdStruct);
+    virtual void readTableFinalize(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void *pUserData, PDSTRUCT *pPdStruct);
 
     bool _isFlagPresentInRecords(const QList<DATA_RECORD> *pListRecords, quint32 nFlag);
 

@@ -559,12 +559,12 @@ bool XAmigaHunk::isExecutable()
 }
 
 qint32 XAmigaHunk::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
-                                PDSTRUCT *pPdStruct)
+                                void *pUserData, PDSTRUCT *pPdStruct)
 {
     qint32 nResult = 0;
 
     if (dataRecordsOptions.dataHeaderFirst.dsID.nID == STRUCTID_HUNK) {
-        nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pPdStruct);
+        nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pUserData, pPdStruct);
 
         qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, locType, nLocation);
 
@@ -574,7 +574,7 @@ qint32 XAmigaHunk::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const 
             nResult = (qint32)nHunkSize;
         }
     } else {
-        nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pPdStruct);
+        nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pUserData, pPdStruct);
     }
 
     return nResult;

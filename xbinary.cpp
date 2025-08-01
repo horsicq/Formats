@@ -139,7 +139,18 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
     {XBinary::COMPRESS_METHOD_IT214_16, "IT214_16", QString("IT214 16-bit")},
     {XBinary::COMPRESS_METHOD_IT215_8, "IT215_8", QString("IT215 8-bit")},
     {XBinary::COMPRESS_METHOD_IT215_16, "IT215_16", QString("IT215 16-bit")},
-    {XBinary::COMPRESS_METHOD_IMPLODED, "Imploded", QString("Imploded")},
+    {XBinary::COMPRESS_METHOD_IMPLODED_4KDICT_2TREES, "Imploded_4K_2", QString("Imploded 4K/2")},
+    {XBinary::COMPRESS_METHOD_IMPLODED_4KDICT_3TREES, "Imploded_4K_3", QString("Imploded 4K/3")},
+    {XBinary::COMPRESS_METHOD_IMPLODED_8KDICT_2TREES, "Imploded_8K_2", QString("Imploded 8K/2")},
+    {XBinary::COMPRESS_METHOD_IMPLODED_8KDICT_3TREES, "Imploded_8K_3", QString("Imploded 8K/3")},
+    {XBinary::COMPRESS_METHOD_SHRINK, "Shrink", QString("Shrink")},
+    {XBinary::COMPRESS_METHOD_REDUCE_1, "Reduce_1", QString("Reduce 1")},
+    {XBinary::COMPRESS_METHOD_REDUCE_2, "Reduce_2", QString("Reduce 2")},
+    {XBinary::COMPRESS_METHOD_REDUCE_3, "Reduce_3", QString("Reduce 3")},
+    {XBinary::COMPRESS_METHOD_REDUCE_4, "Reduce_4", QString("Reduce 4")},
+    {XBinary::COMPRESS_METHOD_AES, "AES", QString("AES")},
+
+    // TODO check more methods
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -731,14 +742,19 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
             pListTitles->append(getTableTitles(dataRecordsOptions));
         }
 
-        for (qint32 i = 0; (i < nCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-            QList<DATA_RECORD_ROW> listDataRecordRows;
+        void *pUserData = nullptr;
+        if (readTableInit(dataRecordsOptions, pUserData, pPdStruct)) {
+            for (qint32 i = 0; (i < nCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                QList<DATA_RECORD_ROW> listDataRecordRows;
 
-            qint32 nResultRead = readTableRow(i, dataRecordsOptions.dataHeaderFirst.locType, nLocation, dataRecordsOptions, &listDataRecordRows, pPdStruct);
+                qint32 nResultRead = readTableRow(i, dataRecordsOptions.dataHeaderFirst.locType, nLocation, dataRecordsOptions, &listDataRecordRows, pUserData, pPdStruct);
 
-            pListDataRecords->append(listDataRecordRows);
+                pListDataRecords->append(listDataRecordRows);
 
-            nLocation += nResultRead;
+                nLocation += nResultRead;
+            }
+
+            readTableFinalize(dataRecordsOptions, pUserData, pPdStruct);
         }
 
         nResult = nLocation - dataRecordsOptions.dataHeaderFirst.nLocation;
@@ -801,10 +817,21 @@ QList<QString> XBinary::getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOp
     return listTitles;
 }
 
+bool XBinary::readTableInit(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void *pUserData, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(dataRecordsOptions)
+    Q_UNUSED(pUserData)
+    Q_UNUSED(pPdStruct)
+
+    // Default implementation does nothing
+    return true;
+}
+
 qint32 XBinary::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
-                             PDSTRUCT *pPdStruct)
+                             void *pUserData, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(nRow)
+    Q_UNUSED(pUserData)
 
     DATA_RECORDS_OPTIONS _dataRecordsOptions = dataRecordsOptions;
     _dataRecordsOptions.dataHeaderFirst.locType = locType;
@@ -812,6 +839,15 @@ qint32 XBinary::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DAT
     _dataRecordsOptions.dataHeaderFirst.dhMode = DHMODE_HEADER;
 
     return getDataRecordValues(_dataRecordsOptions, pListDataRecords, nullptr, pPdStruct);
+}
+
+void XBinary::readTableFinalize(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void *pUserData, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(dataRecordsOptions)
+    Q_UNUSED(pUserData)
+    Q_UNUSED(pPdStruct)
+
+    // Default implementation does nothing
 }
 
 bool XBinary::_isFlagPresentInRecords(const QList<DATA_RECORD> *pListRecords, quint32 nFlag)
