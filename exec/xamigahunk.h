@@ -119,8 +119,8 @@ public:
 
     virtual bool isExecutable();
 
-    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, void *pUserData,
-                                PDSTRUCT *pPdStruct);
+    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+                                void *pUserData, PDSTRUCT *pPdStruct);
 };
 
 #endif  // XAMIGAHUNK_H

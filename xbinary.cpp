@@ -747,7 +747,8 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
             for (qint32 i = 0; (i < nCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                 QList<DATA_RECORD_ROW> listDataRecordRows;
 
-                qint32 nResultRead = readTableRow(i, dataRecordsOptions.dataHeaderFirst.locType, nLocation, dataRecordsOptions, &listDataRecordRows, pUserData, pPdStruct);
+                qint32 nResultRead =
+                    readTableRow(i, dataRecordsOptions.dataHeaderFirst.locType, nLocation, dataRecordsOptions, &listDataRecordRows, pUserData, pPdStruct);
 
                 pListDataRecords->append(listDataRecordRows);
 
