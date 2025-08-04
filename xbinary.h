@@ -190,7 +190,8 @@ public:
         COMPRESS_METHOD_REDUCE_2,
         COMPRESS_METHOD_REDUCE_3,
         COMPRESS_METHOD_REDUCE_4,
-        COMPRESS_METHOD_AES
+        COMPRESS_METHOD_AES,
+        COMPRESS_METHOD_ZLIB,
         // TODO check more methods
     };
 
@@ -1957,6 +1958,7 @@ public:
         qint64 nFileSize;
         XADDR nVirtualAddress;
         qint64 nVirtualSize;
+        QString sName;
         QString sOriginalName;
         FILEPART filePart;
         QMap<FPART_PROP, QVariant> mapProperties;

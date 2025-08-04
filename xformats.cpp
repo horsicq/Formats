@@ -789,7 +789,7 @@ bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QS
 
     XDecompress xDecompress;
 
-    // TODO Connect signals
+    _connect(&xDecompress);
 
     return xDecompress.unpackFilePartsToFolder(&listParts, pDevice, sFolderName, pPdStruct);
 }

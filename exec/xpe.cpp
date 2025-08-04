@@ -9577,7 +9577,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                 record.filePart = XBinary::FILEPART_RESOURCE;
                 record.nFileOffset = nResourceOffset;
                 record.nFileSize = nResourceSize;
-                record.sOriginalName = QString("%1 %2").arg(tr("Resource"), QString::number(i + 1));
+                record.sName = QString("%1 %2").arg(tr("Resource"), QString::number(i + 1));
 
                 listResult.append(record);
             }
@@ -9607,7 +9607,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                     record.filePart = XBinary::FILEPART_DEBUGDATA;
                     record.nFileOffset = nRecordOffset;
                     record.nFileSize = nRecordSize;
-                    record.sOriginalName = QString("%1 %2").arg(tr("Debug data"), nRecordType);
+                    record.sName = QString("%1 %2").arg(tr("Debug data"), nRecordType);
 
                     listResult.append(record);
                 }
@@ -9624,7 +9624,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         record.filePart = XBinary::FILEPART_OVERLAY;
         record.nFileOffset = getOverlayOffset(&memoryMap, pPdStruct);
         record.nFileSize = getOverlaySize(&memoryMap, pPdStruct);
-        record.sOriginalName = QString("%1").arg(tr("Overlay"));
+        record.sName = QString("%1").arg(tr("Overlay"));
 
         listResult.append(record);
     }

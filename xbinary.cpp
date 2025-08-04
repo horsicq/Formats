@@ -149,6 +149,7 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
     {XBinary::COMPRESS_METHOD_REDUCE_3, "Reduce_3", QString("Reduce 3")},
     {XBinary::COMPRESS_METHOD_REDUCE_4, "Reduce_4", QString("Reduce 4")},
     {XBinary::COMPRESS_METHOD_AES, "AES", QString("AES")},
+    {XBinary::COMPRESS_METHOD_ZLIB, "zlib", QString("zlib")},
 
     // TODO check more methods
 };
@@ -5599,7 +5600,7 @@ XBinary::_MEMORY_MAP XBinary::_getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStr
             record.nOffset = fpart.nFileOffset;
             record.nSize = fpart.nFileSize;
             record.nIndex = nIndex++;
-            record.sName = fpart.sOriginalName;
+            record.sName = fpart.sName;
             record.bIsVirtual = false;
             record.filePart = fpart.filePart;
             record.nFilePartNumber = i;
@@ -5613,7 +5614,7 @@ XBinary::_MEMORY_MAP XBinary::_getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStr
                 virtualRecord.nOffset = -1;
                 virtualRecord.nSize = fpart.nVirtualSize - fpart.nFileSize;
                 virtualRecord.nIndex = nIndex++;
-                virtualRecord.sName = fpart.sOriginalName + " (virtual)";
+                virtualRecord.sName = fpart.sName + " (virtual)";
                 virtualRecord.bIsVirtual = true;
                 virtualRecord.filePart = fpart.filePart;
                 virtualRecord.nFilePartNumber = i;
@@ -7828,11 +7829,6 @@ quint32 XBinary::getAdler32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 
 quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
     // TODO Check crash
     // TODO optimize!!!
     // TODO Progress bar
@@ -7856,17 +7852,17 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 
         XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
-        while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
+        while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
             nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
 
-            if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
+            if (read_array(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
                 pPdStruct->sInfoString = tr("Read error");
                 delete[] pBuffer;
                 return 0;
             }
 
-            for (qint64 i = 0; i < nTemp; i++) {
-                a = (a + (quint8)(pBuffer[nOffset + i])) % MOD_ADLER;
+            for (qint64 i = 0; (i < nTemp) && isPdStructNotCanceled(pPdStruct); i++) {
+                a = (a + (quint8)(pBuffer[i])) % MOD_ADLER;
                 b = (b + a) % MOD_ADLER;
             }
 
@@ -8860,7 +8856,7 @@ XBinary::FPART XBinary::getFPART(FILEPART filePart, const QString &sOriginalName
     XBinary::FPART fpart = {};
 
     fpart.filePart = filePart;
-    fpart.sOriginalName = sOriginalName;
+    fpart.sName = sOriginalName;
     fpart.nFileOffset = nFileOffset;
     fpart.nFileSize = nFileSize;
     fpart.nVirtualAddress = nVirtualAddress;
@@ -8876,7 +8872,7 @@ QList<XBinary::FPART> XBinary::getFileParts(quint32 nFileParts, qint32 nLimit, P
     XBinary::FPART fpart = {};
     fpart.nFileOffset = 0;
     fpart.nFileSize = getSize();
-    fpart.sOriginalName = tr("Data");
+    fpart.sName = tr("Data");
     fpart.filePart = FILEPART_REGION;
 
     listResult.append(fpart);
