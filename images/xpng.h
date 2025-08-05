@@ -26,6 +26,15 @@
 class XPNG : public XBinary {
     Q_OBJECT
 
+public:
+    enum COLOR_TYPE {
+        COLOR_TYPE_GRAYSCALE = 0,        // Grayscale
+        COLOR_TYPE_RGB = 2,              // RGB
+        COLOR_TYPE_PALETTE = 3,          // Palette
+        COLOR_TYPE_GRAYSCALE_ALPHA = 4,  // Grayscale with alpha
+        COLOR_TYPE_RGBA = 6              // RGBA
+    };
+
     struct CHUNK {
         QString sName;
         qint64 nDataOffset;
@@ -46,9 +55,14 @@ public:
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual QString getMIMEString();
     virtual ENDIAN getEndian();
+    
+    static bool createPNG(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const QByteArray &baImageData, COLOR_TYPE colorType, quint8 nBitDepth = 8);
 
 private:
     CHUNK _readChunk(qint64 nOffset);
+    static bool _writeChunk(QIODevice *pDevice, const QString &sChunkType, const QByteArray &data);
+    static quint32 _calculateCRC32(const QByteArray &data);
+    static QByteArray _compressData(const QByteArray &data);
 };
 
 #endif  // XPNG_H

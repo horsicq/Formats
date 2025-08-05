@@ -4,6 +4,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/video)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/audio)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/exec)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/formats)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/texts)
 
 if (NOT DEFINED XDEX_SOURCES)
     include(${CMAKE_CURRENT_LIST_DIR}/../XDEX/xdex.cmake)
@@ -37,6 +38,8 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/images/xbmp.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xgif.cpp
     ${CMAKE_CURRENT_LIST_DIR}/images/xgif.h
+    ${CMAKE_CURRENT_LIST_DIR}/images/xicc.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/images/xicc.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xicon.cpp
     ${CMAKE_CURRENT_LIST_DIR}/images/xicon.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xjpeg.cpp
@@ -79,4 +82,6 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/formats/xttf.cpp
     ${CMAKE_CURRENT_LIST_DIR}/formats/xdjvu.h
     ${CMAKE_CURRENT_LIST_DIR}/formats/xdjvu.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/texts/xtext.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/texts/xtext.h
 )

@@ -86,6 +86,11 @@ contains(XCONFIG, use_archive) {
     include($$PWD/images/xgif.pri)
 }
 
+!contains(XCONFIG, xicc) {
+    XCONFIG += xicc
+    include($$PWD/images/xicc.pri)
+}
+
 !contains(XCONFIG, xbmp) {
     XCONFIG += xbmp
     include($$PWD/images/xbmp.pri)
@@ -139,6 +144,11 @@ contains(XCONFIG, use_archive) {
 !contains(XCONFIG, xdjvu) {
     XCONFIG += xdjvu
     include($$PWD/formats/xdjvu.pri)
+}
+
+!contains(XCONFIG, xtext) {
+    XCONFIG += xtext
+    include($$PWD/texts/xtext.pri)
 }
 
 DISTFILES += \

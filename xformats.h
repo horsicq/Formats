@@ -27,6 +27,7 @@
 #include "xelf.h"
 #include "xbmp.h"
 #include "xgif.h"
+#include "xicc.h"
 #include "xicon.h"
 #include "xjpeg.h"
 #include "xle.h"
@@ -42,6 +43,7 @@
 #include "xriff.h"
 #include "xjavaclass.h"
 #include "xttf.h"
+#include "xtext.h"
 #include "xdjvu.h"
 #ifdef USE_DEX
 #include "xandroidbinary.h"

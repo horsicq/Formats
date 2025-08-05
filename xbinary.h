@@ -383,6 +383,7 @@ public:
         FT_ZLIB,
         FT_LHA,
         FT_ICO,
+        FT_ICC,
         FT_CUR,
         FT_MP3,
         FT_MP4,
