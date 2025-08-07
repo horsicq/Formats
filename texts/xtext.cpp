@@ -249,18 +249,18 @@ QString XText::getTextByLines(qint64 nStartLine, qint64 nLineCount)
 QStringList XText::getLines(qint64 nStartLine, qint64 nLineCount)
 {
     QString allText = getText();
-    QStringList allLines = allText.split(QRegExp("\\r\\n|\\r|\\n"));
+    // QStringList allLines = allText.split(QRegExp("\\r\\n|\\r|\\n"));
 
-    if (nLineCount == -1) {
-        nLineCount = allLines.size() - nStartLine;
-    }
+    // if (nLineCount == -1) {
+    //     nLineCount = allLines.size() - nStartLine;
+    // }
 
     QStringList result;
-    for (qint64 i = nStartLine; i < qMin(nStartLine + nLineCount, qint64(allLines.size())); i++) {
-        if (i >= 0 && i < allLines.size()) {
-            result.append(allLines[i]);
-        }
-    }
+    // for (qint64 i = nStartLine; i < qMin(nStartLine + nLineCount, qint64(allLines.size())); i++) {
+    //     if (i >= 0 && i < allLines.size()) {
+    //         result.append(allLines[i]);
+    //     }
+    // }
 
     return result;
 }
@@ -559,5 +559,6 @@ qint64 XText::_countLines(const QByteArray &data)
 
 qint64 XText::_countWords(const QString &text)
 {
-    return text.split(QRegExp("\\s+"), Qt::SkipEmptyParts).count();
+    // return text.split(QRegExp("\\s+"), Qt::SkipEmptyParts).count();
+    return 0;
 }
