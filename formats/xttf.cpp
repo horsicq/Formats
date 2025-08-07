@@ -132,11 +132,6 @@ QString XTTF::getVersion(QList<TTF_TABLE_RECORD> *pListTables, PDSTRUCT *pPdStru
     return sResult;
 }
 
-QString XTTF::getInfo()
-{
-    return "";
-}
-
 bool XTTF::isEncrypted()
 {
     return false;

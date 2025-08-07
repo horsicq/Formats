@@ -1230,6 +1230,10 @@ QString XBinary::getFileFormatInfoString(const FILEFORMATINFO *pFileFormatInfo)
         sResult = appendText(sResult, pFileFormatInfo->sCompresionMethod, ", ");
     }
 
+    if (pFileFormatInfo->sInfo != "") {
+        sResult = appendText(sResult, pFileFormatInfo->sInfo, ", ");
+    }
+
     // TODO
 
     return sResult;
@@ -1315,6 +1319,7 @@ QString XBinary::getOsVersion()
 
 XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
 {
+    // TODO userData
     FILEFORMATINFO result = {};
 
     result.bIsValid = isValid(pPdStruct);
@@ -1324,7 +1329,7 @@ XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
         result.fileType = getFileType();
         result.sExt = getFileFormatExt();
         result.sVersion = getVersion();
-        result.sInfo = getInfo();
+        result.sInfo = getInfo(pPdStruct);
         result.osName = getOsName();
         result.sOsVersion = getOsVersion();
         result.sArch = getArch();
@@ -8514,8 +8519,10 @@ QString XBinary::getVersion()
     return g_sVersion;
 }
 
-QString XBinary::getInfo()
+QString XBinary::getInfo(PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     return g_sOptions;
 }
 

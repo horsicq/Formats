@@ -204,6 +204,13 @@ public:
         FPART_PROP_CRC_VALUE,
         FPART_PROP_DATETIME,
         FPART_PROP_ENCRYPTED,
+        FPART_PROP_FILETYPE,
+        FPART_PROP_WIDTH,
+        FPART_PROP_HEIGHT,
+        FPART_PROP_BITSPERCOMPONENT,
+        FPART_PROP_INFO,
+        FPART_PROP_EXT,
+        FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
     };
@@ -401,7 +408,8 @@ public:
         FT_DJVU,
         FT_SZDD,
         FT_BZIP2,
-        FT_XZ
+        FT_XZ,
+
         // TODO more
     };
 
@@ -1582,7 +1590,7 @@ public:
     void setVersion(const QString &sVersion);
     void setOptions(const QString &sOptions);
     virtual QString getVersion();
-    virtual QString getInfo();
+    virtual QString getInfo(PDSTRUCT *pPdStruct = nullptr);
 
     virtual bool isEncrypted();
 

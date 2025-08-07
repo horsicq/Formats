@@ -99,7 +99,7 @@ public:
     virtual QString getFileFormatExt();
     virtual QString getFileFormatExtsString();
 
-    INFO getInfo(PDSTRUCT *pPdStruct = nullptr);
+    INFO _getInfo(PDSTRUCT *pPdStruct = nullptr);
 
     static QString _getJDKVersion(quint16 nMajor, quint16 nMinor);
 

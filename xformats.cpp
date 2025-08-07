@@ -44,6 +44,7 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_ICO, fileType)) return new XIcon(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_BMP, fileType)) return new XBMP(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_GIF, fileType)) return new XGif(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_ICC, fileType)) return new XICC(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) return new XTiff(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) return new XMP4(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) return new XMP3(pDevice);
@@ -52,6 +53,9 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return new XJavaClass(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_TTF, fileType)) return new XTTF(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_DJVU, fileType)) return new XDJVU(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_TEXT, fileType)) return new XText(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_UTF8, fileType)) return new XText(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_UNICODE, fileType)) return new XText(pDevice);
 #ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_DEX, fileType)) return new XDEX(pDevice);
 #endif

@@ -251,18 +251,12 @@ bool XPNG::_writeChunk(QIODevice *pDevice, const QString &sChunkType, const QByt
 
     // Calculate and write CRC
     QByteArray crcData = chunkTypeBytes + data;
-    quint32 nCRC = qToBigEndian(_calculateCRC32(crcData));
+    quint32 nCRC = qToBigEndian(_getCRC32(crcData, 0xFFFFFFFF, XBinary::_getCRC32Table_EDB88320()));
     if (pDevice->write((char*)&nCRC, 4) != 4) {
         return false;
     }
 
     return true;
-}
-
-quint32 XPNG::_calculateCRC32(const QByteArray &data)
-{
-    // Use zlib's CRC32 function
-    return crc32(0, (const Bytef*)data.constData(), data.size());
 }
 
 QByteArray XPNG::_compressData(const QByteArray &data)

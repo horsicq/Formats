@@ -128,7 +128,6 @@ public:
     virtual OSNAME getOsName();
     virtual QString getOsVersion();
     virtual QString getVersion();
-    virtual QString getInfo();
     virtual bool isEncrypted();
     virtual QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);

@@ -20,6 +20,13 @@
  */
 #include "xicc.h"
 
+XBinary::XCONVERT _TABLE_XICC_STRUCTID[] = {
+    {XICC::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XICC::STRUCTID_SIGNATURE, "Header", QObject::tr("Header")},
+    {XICC::STRUCTID_TAG, "Tag", QObject::tr("Tag")},
+    {XICC::STRUCTID_SECTION, "Section", QString("Section")},
+    };
+
 XICC::XICC(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -346,6 +353,225 @@ QString XICC::getMIMEString()
 {
     return "application/vnd.iccprofile";
 }
+
+QString XICC::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XICC_STRUCTID, sizeof(_TABLE_XICC_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::DATA_HEADER> XICC::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QList<DATA_HEADER> listResult;
+
+    // if (dataHeadersOptions.dhMode == DHMODE_TABLE) {
+    //     if (dataHeadersOptions.nID == STRUCTID_SIGNATURE) {
+    //         DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XICC::structIDToString(dataHeadersOptions.nID));
+
+    //         qint64 nCurrentOffset = dataHeadersOptions.nLocation;
+    //         qint64 nStartOffset = nCurrentOffset;
+            
+    //         dataHeader.nCount = 1;
+    //         dataHeader.listRecords.append(getDataRecord(nCurrentOffset - nStartOffset, 128, "Header", XBinary::VT_UNKNOWN, DRF_SIZE, XBinary::ENDIAN_BIG));
+
+    //         listResult.append(dataHeader);
+
+    //         if (dataHeadersOptions.bChildren) {
+    //             if (getSize() > 128) {
+    //                 DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+
+    //                 _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+    //                 _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+    //                 _dataHeadersOptions.nID = STRUCTID_SIGNATURE;
+    //                 _dataHeadersOptions.locType = LT_OFFSET;
+    //                 _dataHeadersOptions.nLocation = nCurrentOffset;
+    //                 _dataHeadersOptions.nSize = 128;
+
+    //                 listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+
+    //                 // Add tag table
+    //                 quint32 nTagCount = read_uint32(128, true);
+    //                 if (nTagCount > 0) {
+    //                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+    //                     _dataHeadersOptions.nID = STRUCTID_TAG;
+    //                     _dataHeadersOptions.nLocation = 132;
+    //                     _dataHeadersOptions.nSize = nTagCount * 12;
+
+    //                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    //                 }
+    //             }
+    //         }
+    //     } else if (dataHeadersOptions.nID == STRUCTID_TAG) {
+    //         DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XICC::structIDToString(dataHeadersOptions.nID));
+
+    //         qint64 nCurrentOffset = dataHeadersOptions.nLocation;
+    //         qint64 nStartOffset = nCurrentOffset;
+            
+    //         quint32 nTagCount = read_uint32(128, true);
+    //         dataHeader.nCount = nTagCount;
+
+    //         for (quint32 i = 0; i < nTagCount; i++) {
+    //             QString sName = QString("Tag[%1]").arg(i);
+    //             dataHeader.listRecords.append(getDataRecord(nCurrentOffset - nStartOffset, 12, sName, XBinary::VT_UNKNOWN, DRF_SIZE, XBinary::ENDIAN_BIG));
+    //             nCurrentOffset += 12;
+    //         }
+
+    //         listResult.append(dataHeader);
+
+    //         if (dataHeadersOptions.bChildren) {
+    //             QList<XICC::TAG> listTags = getTags(pPdStruct);
+
+    //             for (qint32 i = 0; i < listTags.count(); i++) {
+    //                 DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+
+    //                 _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+    //                 _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+    //                 _dataHeadersOptions.nID = STRUCTID_SECTION;
+    //                 _dataHeadersOptions.locType = LT_OFFSET;
+    //                 _dataHeadersOptions.nLocation = listTags.at(i).nOffset;
+    //                 _dataHeadersOptions.nSize = listTags.at(i).nSize;
+
+    //                 listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    //             }
+    //         }
+    //     }
+    // } else if (dataHeadersOptions.dhMode == DHMODE_HEADER) {
+    //     if (dataHeadersOptions.nID == STRUCTID_SIGNATURE) {
+    //         DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XICC::structIDToString(dataHeadersOptions.nID));
+
+    //         dataHeader.nSize = 128;
+    //         dataHeader.listRecords.append(getDataRecord(0, 4, "Profile Size", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(4, 4, "CMM Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(8, 4, "Version", XBinary::VT_UINT32, DRF_VERSION, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(12, 4, "Device Class", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(16, 4, "Data Color Space", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(20, 4, "PCS", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(24, 12, "Date", XBinary::VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(40, 4, "Platform", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(44, 4, "Flags", XBinary::VT_UINT32, DRF_FLAGS, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(48, 4, "Device Manufacturer", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(52, 4, "Device Model", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(56, 8, "Device Attributes", XBinary::VT_UINT64, DRF_FLAGS, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(64, 4, "Rendering Intent", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(68, 4, "Illuminant X", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(72, 4, "Illuminant Y", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(76, 4, "Illuminant Z", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(80, 4, "Creator", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(84, 44, "Reserved", XBinary::VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+
+    //         listResult.append(dataHeader);
+    //     } else if (dataHeadersOptions.nID == STRUCTID_SECTION) {
+    //         DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XICC::structIDToString(dataHeadersOptions.nID));
+
+    //         qint64 nStartOffset = dataHeadersOptions.nLocation;
+    //         quint32 nType = read_uint32(nStartOffset, true);
+    //         QString sTypeName = _fourCCToString(nType);
+
+    //         dataHeader.nSize = dataHeadersOptions.nSize;
+    //         dataHeader.listRecords.append(getDataRecord(0, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         dataHeader.listRecords.append(getDataRecord(4, 4, "Reserved", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+
+    //         // Add type-specific records
+    //         if (nType == 0x74657874) {  // 'text'
+    //             dataHeader.listRecords.append(getDataRecord(8, dataHeadersOptions.nSize - 8, "Text Data", XBinary::VT_ANSI_STRING, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         } else if (nType == 0x64657363) {  // 'desc'
+    //             dataHeader.listRecords.append(getDataRecord(8, 4, "String Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+    //             quint32 nLength = read_uint32(nStartOffset + 8, true);
+    //             if (nLength > 0) {
+    //                 dataHeader.listRecords.append(getDataRecord(12, nLength, "Description", XBinary::VT_ANSI_STRING, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //             }
+    //         } else if (nType == 0x6D6C7563) {  // 'mluc'
+    //             dataHeader.listRecords.append(getDataRecord(8, 4, "Record Count", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
+    //             dataHeader.listRecords.append(getDataRecord(12, 4, "Record Size", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+    //             quint32 nRecordCount = read_uint32(nStartOffset + 8, true);
+    //             if (nRecordCount > 0) {
+    //                 for (quint32 i = 0; i < nRecordCount && i < 10; i++) { // Limit to first 10 records
+    //                     qint64 nRecordOffset = 16 + (i * 12);
+    //                     dataHeader.listRecords.append(getDataRecord(nRecordOffset, 4, QString("Language Code[%1]").arg(i), XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //                     dataHeader.listRecords.append(getDataRecord(nRecordOffset + 4, 4, QString("Country Code[%1]").arg(i), XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //                     dataHeader.listRecords.append(getDataRecord(nRecordOffset + 8, 4, QString("Length[%1]").arg(i), XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+    //                     dataHeader.listRecords.append(getDataRecord(nRecordOffset + 12, 4, QString("Offset[%1]").arg(i), XBinary::VT_UINT32, DRF_OFFSET, XBinary::ENDIAN_BIG));
+    //                 }
+    //             }
+    //         } else {
+    //             // Generic data section
+    //             dataHeader.listRecords.append(getDataRecord(8, dataHeadersOptions.nSize - 8, "Data", XBinary::VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+    //         }
+
+    //         listResult.append(dataHeader);
+    //     }
+    // }
+    
+    return listResult;
+}
+
+QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+    
+    QList<FPART> listResult;
+
+    if (nFileParts & FILEPART_SIGNATURE) {
+        FPART record = {};
+
+        record.filePart = FILEPART_SIGNATURE;
+        record.nFileOffset = 0;
+        record.nFileSize = 128;
+        record.nVirtualAddress = -1;
+
+        listResult.append(record);
+    }
+
+    if (nFileParts & FILEPART_OBJECT) {
+        QList<XICC::TAG> listTags = getTags(pPdStruct);
+
+        for (qint32 i = 0; i < listTags.count(); i++) {
+            FPART record = {};
+
+            record.filePart = FILEPART_OBJECT;
+            record.nFileOffset = listTags.at(i).nOffset;
+            record.nFileSize = listTags.at(i).nSize;
+            record.nVirtualAddress = -1;
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+// qint32 XICC::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+//                             void *pUserData, PDSTRUCT *pPdStruct)
+// {
+//     Q_UNUSED(pUserData)
+//     Q_UNUSED(pPdStruct)
+
+//     qint32 nResult = 0;
+
+//     if (dataRecordsOptions.nID == STRUCTID_TAG) {
+//         if (nRow < getTags().count()) {
+//             QList<XICC::TAG> listTags = getTags();
+//             XICC::TAG tag = listTags.at(nRow);
+
+//             DATA_RECORD_ROW record = {};
+
+//             record.nRow = nRow;
+//             record.nLocation = XBinary::getAbsoluteAddress(this, locType, nLocation + (nRow * 12));
+//             record.nSize = 12;
+
+//             record.listRecords.append(getDataRecord(0, 4, "Signature", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//             record.listRecords.append(getDataRecord(4, 4, "Offset", XBinary::VT_UINT32, DRF_OFFSET, XBinary::ENDIAN_BIG));
+//             record.listRecords.append(getDataRecord(8, 4, "Size", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+
+//             pListDataRecords->append(record);
+
+//             nResult = 1;
+//         }
+//     }
+
+//     return nResult;
+// }
 
 XICC::TAG XICC::_readTag(qint64 nOffset)
 {

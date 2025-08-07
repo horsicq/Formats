@@ -123,11 +123,6 @@ QString XXM::getVersion()
     return QString("%1.%2").arg(header.version >> 8).arg(header.version & 0xFF);
 }
 
-QString XXM::getInfo()
-{
-    return "";
-}
-
 bool XXM::isEncrypted()
 {
     return false;

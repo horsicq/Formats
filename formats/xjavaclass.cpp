@@ -81,7 +81,7 @@ QString XJavaClass::getFileFormatExtsString()
     return "Java Class (*.class)";
 }
 
-XJavaClass::INFO XJavaClass::getInfo(PDSTRUCT *pPdStruct)
+XJavaClass::INFO XJavaClass::_getInfo(PDSTRUCT *pPdStruct)
 {
     INFO result = {};
 
@@ -336,7 +336,7 @@ XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
 
     _MEMORY_MAP result = {};
 
-    INFO info = getInfo(pPdStruct);
+    INFO info = _getInfo(pPdStruct);
 
     result.nBinarySize = nTotalSize;
     result.fileType = getFileType();
