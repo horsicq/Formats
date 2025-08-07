@@ -9429,7 +9429,6 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                     _dataHeadersOptions.nID = STRUCTID_IMAGE_DATA_DIRECTORY;
                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
                 }
-
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_OPTIONAL_HEADER64) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER64);

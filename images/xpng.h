@@ -23,6 +23,10 @@
 
 #include "xbinary.h"
 
+#ifdef USE_ARCHIVE
+#include "xdeflatedecoder.h"
+#endif
+
 class XPNG : public XBinary {
     Q_OBJECT
 
@@ -42,6 +46,40 @@ public:
         quint32 nCRC;
     };
 
+    struct IHDR {
+        quint32 nWidth;          // Image width in pixels
+        quint32 nHeight;         // Image height in pixels
+        quint8 nBitDepth;        // Bits per sample (1, 2, 4, 8, 16)
+        quint8 nColorType;       // Color type (0, 2, 3, 4, 6)
+        quint8 nCompression;     // Compression method (0 = deflate)
+        quint8 nFilter;          // Filter method (0 = adaptive filtering)
+        quint8 nInterlace;       // Interlace method (0 = no interlace, 1 = Adam7)
+    };
+
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_SIGNATURE,
+        STRUCTID_CHUNK,
+        STRUCTID_IHDR,
+        STRUCTID_PLTE,
+        STRUCTID_IDAT,
+        STRUCTID_IEND,
+        STRUCTID_cHRM,
+        STRUCTID_gAMA,
+        STRUCTID_iCCP,
+        STRUCTID_sBIT,
+        STRUCTID_sRGB,
+        STRUCTID_tEXt,
+        STRUCTID_zTXt,
+        STRUCTID_iTXt,
+        STRUCTID_bKGD,
+        STRUCTID_hIST,
+        STRUCTID_tRNS,
+        STRUCTID_pHYs,
+        STRUCTID_sPLT,
+        STRUCTID_tIME
+    };
+
 public:
     explicit XPNG(QIODevice *pDevice = nullptr);
     ~XPNG();
@@ -57,12 +95,22 @@ public:
     virtual ENDIAN getEndian();
     
     static bool createPNG(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const QByteArray &baImageData, COLOR_TYPE colorType, quint8 nBitDepth = 8);
+    
+    IHDR getIHDR();
+
+    virtual QString structIDToString(quint32 nID);
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
+
+    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+                                void *pUserData, PDSTRUCT *pPdStruct);
 
 private:
     CHUNK _readChunk(qint64 nOffset);
     static bool _writeChunk(QIODevice *pDevice, const QString &sChunkType, const QByteArray &data);
     static quint32 _calculateCRC32(const QByteArray &data);
     static QByteArray _compressData(const QByteArray &data);
+    static QByteArray _convertImageData(const char *pData, qint32 nDataSize, quint32 nWidth, quint32 nHeight, COLOR_TYPE colorType, quint8 nBitDepth);
 };
 
 #endif  // XPNG_H

@@ -534,6 +534,10 @@ XBinary::DATA_HEADER XBinary::_initDataHeader(const DATA_HEADERS_OPTIONS &dataHe
     result.nSize = dataHeadersOptions.nSize;
     result.nCount = dataHeadersOptions.nCount;
 
+    if (result.nCount == 0) {
+        result.nCount = 1;
+    }
+
     if (result.dsID.fileType == FT_UNKNOWN) {
         result.dsID.fileType = dataHeadersOptions.pMemoryMap->fileType;
     }
