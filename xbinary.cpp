@@ -125,6 +125,7 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
     {XBinary::COMPRESS_METHOD_DEFLATE64, "Deflate64", QString("Deflate64")},
     {XBinary::COMPRESS_METHOD_BZIP2, "Bzip2", QString("Bzip2")},
     {XBinary::COMPRESS_METHOD_LZMA, "LZMA", QString("LZMA")},
+    {XBinary::COMPRESS_METHOD_LZW, "LZW", QString("LZW")},
     {XBinary::COMPRESS_METHOD_PPMD, "PPMD", QString("PPMD")},  // TODO
     {XBinary::COMPRESS_METHOD_LZH5, "LZH5", QString("LZH5")},
     {XBinary::COMPRESS_METHOD_LZH6, "LZH6", QString("LZH6")},

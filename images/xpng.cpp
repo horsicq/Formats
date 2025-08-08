@@ -376,9 +376,7 @@ QString XPNG::structIDToString(quint32 nID)
 }
 
 QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(dataHeadersOptions)
-    
+{  
     QList<DATA_HEADER> listResult;
 
     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {

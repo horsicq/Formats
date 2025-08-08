@@ -58,9 +58,9 @@ public:
 
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
-        STRUCTID_SIGNATURE,  // Header
+        STRUCTID_HEADER,  // Header
         STRUCTID_TAG,        // Tag
-        STRUCTID_SECTION,    // Section
+        STRUCTID_REGION,    // Region
     };
 
     explicit XICC(QIODevice *pDevice = nullptr);
