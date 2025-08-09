@@ -43,7 +43,7 @@ XBinary::XCONVERT _TABLE_XPNG_STRUCTID[] = {
     {XPNG::STRUCTID_pHYs, "pHYs", QString("pHYs")},
     {XPNG::STRUCTID_sPLT, "sPLT", QString("sPLT")},
     {XPNG::STRUCTID_tIME, "tIME", QString("tIME")},
-    };
+};
 
 XPNG::XPNG(QIODevice *pDevice) : XBinary(pDevice)
 {
@@ -187,25 +187,23 @@ bool XPNG::createPNG(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const 
 
     // Create IHDR chunk data using the struct
     QByteArray ihdrData;
-    
+
     // Convert to big-endian and append
     quint32 nWidthBE = qToBigEndian(ihdr.nWidth);
     quint32 nHeightBE = qToBigEndian(ihdr.nHeight);
-    
-    ihdrData.append((char*)&nWidthBE, 4);      // Width (big-endian)
-    ihdrData.append((char*)&nHeightBE, 4);     // Height (big-endian)
-    ihdrData.append(ihdr.nBitDepth);           // Bit depth
-    ihdrData.append(ihdr.nColorType);          // Color type
-    ihdrData.append(ihdr.nCompression);        // Compression method
-    ihdrData.append(ihdr.nFilter);             // Filter method
-    ihdrData.append(ihdr.nInterlace);          // Interlace method
+
+    ihdrData.append((char *)&nWidthBE, 4);   // Width (big-endian)
+    ihdrData.append((char *)&nHeightBE, 4);  // Height (big-endian)
+    ihdrData.append(ihdr.nBitDepth);         // Bit depth
+    ihdrData.append(ihdr.nColorType);        // Color type
+    ihdrData.append(ihdr.nCompression);      // Compression method
+    ihdrData.append(ihdr.nFilter);           // Filter method
+    ihdrData.append(ihdr.nInterlace);        // Interlace method
 
     // Write IHDR chunk
     if (!_writeChunk(pDevice, "IHDR", ihdrData)) {
         return false;
     }
-
-
 
     // Compress image data
     QByteArray compressedData = _compressData(_baImageData);
@@ -234,7 +232,7 @@ bool XPNG::_writeChunk(QIODevice *pDevice, const QString &sChunkType, const QByt
 
     // Write data length (big-endian)
     quint32 nDataLength = qToBigEndian((quint32)data.size());
-    if (pDevice->write((char*)&nDataLength, 4) != 4) {
+    if (pDevice->write((char *)&nDataLength, 4) != 4) {
         return false;
     }
 
@@ -252,7 +250,7 @@ bool XPNG::_writeChunk(QIODevice *pDevice, const QString &sChunkType, const QByt
     // Calculate and write CRC
     QByteArray crcData = chunkTypeBytes + data;
     quint32 nCRC = qToBigEndian(_getCRC32(crcData, 0xFFFFFFFF, XBinary::_getCRC32Table_EDB88320()));
-    if (pDevice->write((char*)&nCRC, 4) != 4) {
+    if (pDevice->write((char *)&nCRC, 4) != 4) {
         return false;
     }
 
@@ -268,15 +266,15 @@ QByteArray XPNG::_compressData(const QByteArray &data)
     if (data.isEmpty()) {
         return result;
     }
-    
+
     // Create input and output devices
     QBuffer inputBuffer;
     inputBuffer.setData(data);
     inputBuffer.open(QIODevice::ReadOnly);
-    
+
     QBuffer outputBuffer;
     outputBuffer.open(QIODevice::WriteOnly);
-    
+
     // Setup compression state
     XBinary::DECOMPRESS_STATE compressState = {};
     compressState.pDeviceInput = &inputBuffer;
@@ -289,13 +287,13 @@ QByteArray XPNG::_compressData(const QByteArray &data)
     compressState.bWriteError = false;
     compressState.nCountInput = 0;
     compressState.nCountOutput = 0;
-    
+
     // Compress using XDeflateDecoder (actually compresses despite the class name)
     bool success = XDeflateDecoder::compress_zlib(&compressState);
-    
+
     inputBuffer.close();
     outputBuffer.close();
-    
+
     if (success && !compressState.bReadError && !compressState.bWriteError) {
         result = outputBuffer.data();
     }
@@ -310,33 +308,23 @@ QByteArray XPNG::_convertImageData(const char *pData, qint32 nDataSize, quint32 
     // Calculate expected data size based on color type
     qint32 nBytesPerPixel = 0;
     switch (colorType) {
-    case COLOR_TYPE_GRAYSCALE:
-        nBytesPerPixel = (nBitDepth + 7) / 8;
-        break;
-    case COLOR_TYPE_RGB:
-        nBytesPerPixel = 3 * ((nBitDepth + 7) / 8);
-        break;
-    case COLOR_TYPE_PALETTE:
-        nBytesPerPixel = (nBitDepth + 7) / 8;
-        break;
-    case COLOR_TYPE_GRAYSCALE_ALPHA:
-        nBytesPerPixel = 2 * ((nBitDepth + 7) / 8);
-        break;
-    case COLOR_TYPE_RGBA:
-        nBytesPerPixel = 4 * ((nBitDepth + 7) / 8);
-        break;
+        case COLOR_TYPE_GRAYSCALE: nBytesPerPixel = (nBitDepth + 7) / 8; break;
+        case COLOR_TYPE_RGB: nBytesPerPixel = 3 * ((nBitDepth + 7) / 8); break;
+        case COLOR_TYPE_PALETTE: nBytesPerPixel = (nBitDepth + 7) / 8; break;
+        case COLOR_TYPE_GRAYSCALE_ALPHA: nBytesPerPixel = 2 * ((nBitDepth + 7) / 8); break;
+        case COLOR_TYPE_RGBA: nBytesPerPixel = 4 * ((nBitDepth + 7) / 8); break;
     }
 
     if (nBytesPerPixel) {
-        qint32 nExpectedSize = nWidth * (nHeight * nBytesPerPixel + 1); // +1 for filter byte
+        qint32 nExpectedSize = nWidth * (nHeight * nBytesPerPixel + 1);  // +1 for filter byte
 
         baResult.resize(nExpectedSize);
-        baResult.fill(0); // Initialize with zeros
+        baResult.fill(0);  // Initialize with zeros
 
         qint32 nProcessSize = qMin(nDataSize, (qint32)(nWidth * nHeight * nBytesPerPixel));
 
         // Copy the data into the result array
-        for (qint32 i = 0, j= 0; i < nProcessSize; i++, j++) {
+        for (qint32 i = 0, j = 0; i < nProcessSize; i++, j++) {
             if (!(i % (nWidth * 3))) {
                 // Filter byte
                 j++;
@@ -351,14 +339,14 @@ QByteArray XPNG::_convertImageData(const char *pData, qint32 nDataSize, quint32 
 XPNG::IHDR XPNG::getIHDR()
 {
     IHDR result = {};
-    
+
     if (isValid()) {
         // IHDR is always the first chunk after the PNG signature (at offset 8)
         CHUNK ihdrChunk = _readChunk(8);
-        
+
         if (ihdrChunk.sName == "IHDR" && ihdrChunk.nDataSize == 13) {
-            result.nWidth = read_uint32(ihdrChunk.nDataOffset, true);        // Big-endian
-            result.nHeight = read_uint32(ihdrChunk.nDataOffset + 4, true);   // Big-endian
+            result.nWidth = read_uint32(ihdrChunk.nDataOffset, true);       // Big-endian
+            result.nHeight = read_uint32(ihdrChunk.nDataOffset + 4, true);  // Big-endian
             result.nBitDepth = read_uint8(ihdrChunk.nDataOffset + 8);
             result.nColorType = read_uint8(ihdrChunk.nDataOffset + 9);
             result.nCompression = read_uint8(ihdrChunk.nDataOffset + 10);
@@ -366,7 +354,7 @@ XPNG::IHDR XPNG::getIHDR()
             result.nInterlace = read_uint8(ihdrChunk.nDataOffset + 12);
         }
     }
-    
+
     return result;
 }
 
@@ -376,7 +364,7 @@ QString XPNG::structIDToString(quint32 nID)
 }
 
 QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{  
+{
     QList<DATA_HEADER> listResult;
 
     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
@@ -399,13 +387,12 @@ QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dat
                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = 8;
 
-                dataHeader.listRecords.append(
-                    getDataRecord(0, 8, "Signature", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(0, 8, "Signature", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 
                 listResult.append(dataHeader);
 
                 if (dataHeadersOptions.bChildren) {
-                    qint64 nCurrentOffset = 8; // Start after the PNG signature
+                    qint64 nCurrentOffset = 8;  // Start after the PNG signature
                     qint64 nTotalSize = getSize();
                     qint32 nNumberOfChunks = 0;
 
@@ -446,8 +433,7 @@ QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dat
 
                 dataHeader.nSize = 12 + nDataSize;
 
-                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE | DRF_VOLATILE,
-                                                            XBinary::ENDIAN_BIG));
+                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE | DRF_VOLATILE, XBinary::ENDIAN_BIG));
                 dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
                 dataHeader.listRecords.append(getDataRecord(8 + nDataSize, 4, "CRC", XBinary::VT_UINT32, 0, XBinary::ENDIAN_BIG));
 
@@ -481,8 +467,8 @@ QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dat
             } else if (dataHeadersOptions.nID == STRUCTID_IHDR) {
                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
 
-                dataHeader.nSize = 25; // IHDR size is always 25 bytes
-                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE,XBinary::ENDIAN_BIG));
+                dataHeader.nSize = 25;  // IHDR size is always 25 bytes
+                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
                 dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
                 dataHeader.listRecords.append(getDataRecord(8, 4, "Width", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
                 dataHeader.listRecords.append(getDataRecord(12, 4, "Height", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
@@ -499,14 +485,14 @@ QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dat
             }
         }
     }
-    
+
     return listResult;
 }
 
 QList<XBinary::FPART> XPNG::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(nLimit)
-    
+
     QList<FPART> listResult;
 
     if (nFileParts & FILEPART_SIGNATURE) {
@@ -539,7 +525,7 @@ QList<XBinary::FPART> XPNG::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             record.nFileOffset = nCurrentOffset;
             record.nFileSize = 12 + nDataSize;
             record.nVirtualAddress = -1;
-            record.sName = sTag; // mb TODO
+            record.sName = sTag;  // mb TODO
             record.sOriginalName = sTag;
 
             listResult.append(record);
@@ -566,17 +552,18 @@ QList<XBinary::FPART> XPNG::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             listResult.append(record);
         }
     }
-    
+
     return listResult;
 }
 
-qint32 XPNG::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, void *pUserData, PDSTRUCT *pPdStruct)
+qint32 XPNG::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+                          void *pUserData, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(locType)
     Q_UNUSED(nLocation)
     Q_UNUSED(dataRecordsOptions)
     Q_UNUSED(pUserData)
-    
+
     qint32 nResult = 0;
 
     if (dataRecordsOptions.dataHeaderFirst.dsID.nID == STRUCTID_CHUNK) {

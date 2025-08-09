@@ -25,7 +25,7 @@ XBinary::XCONVERT _TABLE_XICC_STRUCTID[] = {
     {XICC::STRUCTID_HEADER, "Header", QObject::tr("Header")},
     {XICC::STRUCTID_TAG, "Tag", QObject::tr("Tag")},
     {XICC::STRUCTID_REGION, "Region", QString("Region")},
-    };
+};
 
 XICC::XICC(QIODevice *pDevice) : XBinary(pDevice)
 {
@@ -47,9 +47,8 @@ bool XICC::isValid(PDSTRUCT *pPdStruct)
         // 'scnr' 73636E72h input devices - scanners and digital cameras
         // 'mntr' 6D6E7472h display devices - CRTs and LCDs
         // 'prtr' 70727472h output devices - printers.
-        
-        bIsValid = (nProfileSize <= getSize()) &&
-                   ((nSignature == 0x73636E72) || (nSignature == 0x6D6E7472) || (nSignature == 0x70727472));
+
+        bIsValid = (nProfileSize <= getSize()) && ((nSignature == 0x73636E72) || (nSignature == 0x6D6E7472) || (nSignature == 0x70727472));
     }
 
     return bIsValid;
@@ -121,9 +120,9 @@ XICC::HEADER XICC::getHeader()
     result.nDeviceClass = read_uint32(12, true);
     result.nDataColorSpace = read_uint32(16, true);
     result.nPCS = read_uint32(20, true);
-    
-    read_array(24, (char*)result.nDate, 12);
-    
+
+    read_array(24, (char *)result.nDate, 12);
+
     result.nPlatform = read_uint32(40, true);
     result.nFlags = read_uint32(44, true);
     result.nDeviceManufacturer = read_uint32(48, true);
@@ -134,8 +133,8 @@ XICC::HEADER XICC::getHeader()
     result.nIlluminantY = read_uint32(72, true);
     result.nIlluminantZ = read_uint32(76, true);
     result.nCreator = read_uint32(80, true);
-    
-    read_array(84, (char*)result.nReserved, 44);
+
+    read_array(84, (char *)result.nReserved, 44);
 
     return result;
 }
@@ -146,10 +145,10 @@ QList<XICC::TAG> XICC::getTags(PDSTRUCT *pPdStruct)
 
     if (getSize() > 132) {
         quint32 nTagCount = read_uint32(128, true);
-        
+
         for (quint32 i = 0; (i < nTagCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
             TAG tag = _readTag(132 + (i * 12));
-            
+
             if (tag.bValid) {
                 listResult.append(tag);
             }
@@ -212,7 +211,7 @@ QString XICC::getDescription(QList<TAG> *pListTags, PDSTRUCT *pPdStruct)
     if (listDesc.count() > 0) {
         TAG tagDesc = listDesc.at(0);
         quint32 nType = read_uint32(tagDesc.nOffset, true);
-        
+
         if (nType == 0x64657363) {  // 'desc' type
             sResult = _readTextType(tagDesc.nOffset);
         } else if (nType == 0x6D6C7563) {  // 'mluc' type
@@ -246,7 +245,7 @@ QString XICC::getCopyright(QList<TAG> *pListTags, PDSTRUCT *pPdStruct)
     if (listCopyright.count() > 0) {
         TAG tagCopyright = listCopyright.at(0);
         quint32 nType = read_uint32(tagCopyright.nOffset, true);
-        
+
         if (nType == 0x74657874) {  // 'text' type
             sResult = _readTextType(tagCopyright.nOffset);
         } else if (nType == 0x6D6C7563) {  // 'mluc' type
@@ -285,19 +284,19 @@ QString XICC::getColorSpace()
 QString XICC::getDeviceClass()
 {
     HEADER header = getHeader();
-    
+
     QString sResult;
     switch (header.nDeviceClass) {
-        case 0x73636E72: sResult = "Input"; break;      // 'scnr'
-        case 0x6D6E7472: sResult = "Display"; break;    // 'mntr'
-        case 0x70727472: sResult = "Output"; break;     // 'prtr'
-        case 0x6C696E6B: sResult = "DeviceLink"; break; // 'link'
-        case 0x73706163: sResult = "ColorSpace"; break; // 'spac'
-        case 0x61627374: sResult = "Abstract"; break;   // 'abst'
-        case 0x6E6D636C: sResult = "NamedColor"; break; // 'nmcl'
+        case 0x73636E72: sResult = "Input"; break;       // 'scnr'
+        case 0x6D6E7472: sResult = "Display"; break;     // 'mntr'
+        case 0x70727472: sResult = "Output"; break;      // 'prtr'
+        case 0x6C696E6B: sResult = "DeviceLink"; break;  // 'link'
+        case 0x73706163: sResult = "ColorSpace"; break;  // 'spac'
+        case 0x61627374: sResult = "Abstract"; break;    // 'abst'
+        case 0x6E6D636C: sResult = "NamedColor"; break;  // 'nmcl'
         default: sResult = _fourCCToString(header.nDeviceClass); break;
     }
-    
+
     return sResult;
 }
 
@@ -358,14 +357,14 @@ QList<XBinary::DATA_HEADER> XICC::getDataHeaders(const DATA_HEADERS_OPTIONS &dat
             }
         }
     }
-    
+
     return listResult;
 }
 
 QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(nLimit)
-    
+
     QList<FPART> listResult;
 
     if (nFileParts & FILEPART_HEADER) {
@@ -467,10 +466,9 @@ XICC::TAG XICC::_readTag(qint64 nOffset)
     result.nSignature = read_uint32(nOffset, true);
     result.nOffset = read_uint32(nOffset + 4, true);
     result.nSize = read_uint32(nOffset + 8, true);
-    
+
     result.sTagName = getTagName(result.nSignature);
-    result.bValid = (result.nOffset > 0) && (result.nSize > 0) && 
-                    (result.nOffset + result.nSize <= getSize());
+    result.bValid = (result.nOffset > 0) && (result.nSize > 0) && (result.nOffset + result.nSize <= getSize());
 
     return result;
 }
@@ -478,9 +476,9 @@ XICC::TAG XICC::_readTag(qint64 nOffset)
 QString XICC::_readTextType(qint64 nOffset)
 {
     QString sResult;
-    
+
     quint32 nType = read_uint32(nOffset, true);
-    
+
     if (nType == 0x74657874) {  // 'text'
         // Skip type signature (4 bytes) and reserved (4 bytes)
         sResult = read_ansiString(nOffset + 8);
@@ -491,46 +489,46 @@ QString XICC::_readTextType(qint64 nOffset)
             sResult = read_ansiString(nOffset + 12, qMin(nLength, quint32(1000)));
         }
     }
-    
+
     return sResult;
 }
 
 QString XICC::_readMultiLocalizedUnicodeType(qint64 nOffset)
 {
     QString sResult;
-    
+
     quint32 nType = read_uint32(nOffset, true);
-    
+
     if (nType == 0x6D6C7563) {  // 'mluc'
         // Skip type signature (4 bytes) and reserved (4 bytes)
         quint32 nRecordCount = read_uint32(nOffset + 8, true);
-        
+
         if (nRecordCount > 0) {
             // Read first record (English preferred)
             quint32 nLength = read_uint32(nOffset + 16, true);
             quint32 nRecordOffset = read_uint32(nOffset + 20, true);
-            
+
             if (nLength > 0 && nRecordOffset > 0) {
                 sResult = read_unicodeString(nOffset + nRecordOffset, qMin(nLength / 2, quint32(500)), true);
             }
         }
     }
-    
+
     return sResult;
 }
 
 QString XICC::_fourCCToString(quint32 nValue)
 {
     QString sResult;
-    
+
     char szBuffer[5];
     szBuffer[0] = (nValue >> 24) & 0xFF;
     szBuffer[1] = (nValue >> 16) & 0xFF;
     szBuffer[2] = (nValue >> 8) & 0xFF;
     szBuffer[3] = nValue & 0xFF;
     szBuffer[4] = '\0';
-    
+
     sResult = QString::fromLatin1(szBuffer);
-    
+
     return sResult;
 }

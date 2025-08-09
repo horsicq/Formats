@@ -59,8 +59,8 @@ public:
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_HEADER,  // Header
-        STRUCTID_TAG,        // Tag
-        STRUCTID_REGION,    // Region
+        STRUCTID_TAG,     // Tag
+        STRUCTID_REGION,  // Region
     };
 
     explicit XICC(QIODevice *pDevice = nullptr);
@@ -79,7 +79,7 @@ public:
     QList<TAG> getTags(PDSTRUCT *pPdStruct = nullptr);
     static QList<TAG> _getTagsBySignature(QList<TAG> *pListTags, quint32 nSignature);
     QString getTagName(quint32 nSignature);
-    
+
     QString getDescription(QList<TAG> *pListTags, PDSTRUCT *pPdStruct = nullptr);
     QString getDescription();
     QString getCopyright(QList<TAG> *pListTags, PDSTRUCT *pPdStruct = nullptr);
@@ -97,7 +97,6 @@ public:
 
     // virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
     //                             void *pUserData, PDSTRUCT *pPdStruct);
-
 
 private:
     TAG _readTag(qint64 nOffset);

@@ -9171,7 +9171,7 @@ quint64 XBinary::swapBytes(quint64 nValue)
 bool XBinary::isPlainTextType()
 {
     // Read a larger sample for better text detection accuracy
-    QByteArray baData = read_array(0, qMin(getSize(), (qint64)0x8000)); // Increased from 0x2000 to 0x8000
+    QByteArray baData = read_array(0, qMin(getSize(), (qint64)0x8000));  // Increased from 0x2000 to 0x8000
 
     return isPlainTextType(&baData);
 }
@@ -9184,32 +9184,28 @@ bool XBinary::isPlainTextType(QByteArray *pbaData)
 
     qint32 nDataSize = pbaData->size();
     const unsigned char *pDataOffset = (const unsigned char *)(pbaData->constData());
-    
+
     // Check for BOM markers - if present, not ANSI
-    if (nDataSize >= 3 && 
-        pDataOffset[0] == 0xEF && 
-        pDataOffset[1] == 0xBB && 
-        pDataOffset[2] == 0xBF) {
-        return false; // UTF-8 BOM
+    if (nDataSize >= 3 && pDataOffset[0] == 0xEF && pDataOffset[1] == 0xBB && pDataOffset[2] == 0xBF) {
+        return false;  // UTF-8 BOM
     }
-    
+
     // Check for UTF-16 BOM
     if (nDataSize >= 2) {
-        if ((pDataOffset[0] == 0xFF && pDataOffset[1] == 0xFE) ||
-            (pDataOffset[0] == 0xFE && pDataOffset[1] == 0xFF)) {
-            return false; // UTF-16 BOM
+        if ((pDataOffset[0] == 0xFF && pDataOffset[1] == 0xFE) || (pDataOffset[0] == 0xFE && pDataOffset[1] == 0xFF)) {
+            return false;  // UTF-16 BOM
         }
     }
-    
+
     qint32 nNullCount = 0;
     qint32 nControlCount = 0;
     qint32 nPrintableCount = 0;
     qint32 nExtendedCount = 0;
-    
+
     // Analyze character distribution for ANSI compatibility
     for (qint32 i = 0; i < nDataSize; i++) {
         unsigned char byte = pDataOffset[i];
-        
+
         if (byte == 0) {
             nNullCount++;
             // Any null bytes indicate binary data
@@ -9233,12 +9229,12 @@ bool XBinary::isPlainTextType(QByteArray *pbaData)
             nControlCount++;
         }
     }
-    
+
     // Calculate ratios for ANSI text detection
     double printableRatio = (double)(nPrintableCount + nExtendedCount) / nDataSize;
     double controlRatio = (double)nControlCount / nDataSize;
     double extendedRatio = (double)nExtendedCount / nDataSize;
-    
+
     // ANSI text should have:
     // - High printable ratio (including extended ASCII)
     // - Low control character ratio
@@ -9248,7 +9244,7 @@ bool XBinary::isPlainTextType(QByteArray *pbaData)
 
 bool XBinary::isUTF8TextType()
 {
-    QByteArray baData = read_array(0, qMin(getSize(), (qint64)0x2000)); // Larger sample for better detection
+    QByteArray baData = read_array(0, qMin(getSize(), (qint64)0x2000));  // Larger sample for better detection
 
     return isUTF8TextType(&baData);
 }
@@ -9261,28 +9257,25 @@ bool XBinary::isUTF8TextType(QByteArray *pbaData)
 
     const unsigned char *pDataOffset = (const unsigned char *)(pbaData->constData());
     qint32 nDataSize = pbaData->size();
-    
+
     // Check for UTF-8 BOM
     bool bHasBOM = false;
     qint32 nStartOffset = 0;
-    
-    if (nDataSize >= 3 && 
-        pDataOffset[0] == 0xEF && 
-        pDataOffset[1] == 0xBB && 
-        pDataOffset[2] == 0xBF) {
+
+    if (nDataSize >= 3 && pDataOffset[0] == 0xEF && pDataOffset[1] == 0xBB && pDataOffset[2] == 0xBF) {
         bHasBOM = true;
         nStartOffset = 3;
     }
-    
+
     // Validate UTF-8 encoding from start offset
     qint32 nValidChars = 0;
     qint32 nMultiByteChars = 0;
     qint32 nPrintableChars = 0;
     qint32 nNullBytes = 0;
-    
-    for (qint32 i = nStartOffset; i < nDataSize; ) {
+
+    for (qint32 i = nStartOffset; i < nDataSize;) {
         unsigned char byte = pDataOffset[i];
-        
+
         if (byte == 0) {
             nNullBytes++;
             // UTF-8 text shouldn't contain null bytes
@@ -9300,43 +9293,38 @@ bool XBinary::isUTF8TextType(QByteArray *pbaData)
         } else if ((byte & 0xE0) == 0xC0) {
             // 2-byte UTF-8 sequence (110xxxxx 10xxxxxx)
             if (i + 1 >= nDataSize || (pDataOffset[i + 1] & 0xC0) != 0x80) {
-                return false; // Invalid UTF-8 sequence
+                return false;  // Invalid UTF-8 sequence
             }
             // Check for overlong encoding
             if (byte < 0xC2) {
-                return false; // Overlong 2-byte sequence
+                return false;  // Overlong 2-byte sequence
             }
             nMultiByteChars++;
             nValidChars++;
             i += 2;
         } else if ((byte & 0xF0) == 0xE0) {
             // 3-byte UTF-8 sequence (1110xxxx 10xxxxxx 10xxxxxx)
-            if (i + 2 >= nDataSize || 
-                (pDataOffset[i + 1] & 0xC0) != 0x80 || 
-                (pDataOffset[i + 2] & 0xC0) != 0x80) {
-                return false; // Invalid UTF-8 sequence
+            if (i + 2 >= nDataSize || (pDataOffset[i + 1] & 0xC0) != 0x80 || (pDataOffset[i + 2] & 0xC0) != 0x80) {
+                return false;  // Invalid UTF-8 sequence
             }
             // Check for overlong encoding
             if (byte == 0xE0 && pDataOffset[i + 1] < 0xA0) {
-                return false; // Overlong 3-byte sequence
+                return false;  // Overlong 3-byte sequence
             }
             nMultiByteChars++;
             nValidChars++;
             i += 3;
         } else if ((byte & 0xF8) == 0xF0) {
             // 4-byte UTF-8 sequence (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx)
-            if (i + 3 >= nDataSize || 
-                (pDataOffset[i + 1] & 0xC0) != 0x80 || 
-                (pDataOffset[i + 2] & 0xC0) != 0x80 || 
-                (pDataOffset[i + 3] & 0xC0) != 0x80) {
-                return false; // Invalid UTF-8 sequence
+            if (i + 3 >= nDataSize || (pDataOffset[i + 1] & 0xC0) != 0x80 || (pDataOffset[i + 2] & 0xC0) != 0x80 || (pDataOffset[i + 3] & 0xC0) != 0x80) {
+                return false;  // Invalid UTF-8 sequence
             }
             // Check for overlong encoding and valid Unicode range
             if (byte == 0xF0 && pDataOffset[i + 1] < 0x90) {
-                return false; // Overlong 4-byte sequence
+                return false;  // Overlong 4-byte sequence
             }
             if (byte > 0xF4 || (byte == 0xF4 && pDataOffset[i + 1] > 0x8F)) {
-                return false; // Beyond valid Unicode range
+                return false;  // Beyond valid Unicode range
             }
             nMultiByteChars++;
             nValidChars++;
@@ -9346,20 +9334,20 @@ bool XBinary::isUTF8TextType(QByteArray *pbaData)
             return false;
         }
     }
-    
+
     // For UTF-8 detection, we need either:
     // 1. UTF-8 BOM present, or
     // 2. Valid UTF-8 sequences with some multi-byte characters and high printable ratio
     if (bHasBOM) {
-        return nValidChars > 0; // BOM present and valid UTF-8 content
+        return nValidChars > 0;  // BOM present and valid UTF-8 content
     } else if (nValidChars > 0) {
         double printableRatio = (double)nPrintableChars / nValidChars;
         double multiByteRatio = (double)nMultiByteChars / nValidChars;
-        
+
         // Require some multi-byte characters and high printable ratio for UTF-8 without BOM
         return (multiByteRatio > 0.05 && printableRatio >= 0.70);
     }
-    
+
     return false;
 }
 
@@ -9372,7 +9360,7 @@ bool XBinary::isPlainTextType(QIODevice *pDevice)
 
 XBinary::UNICODE_TYPE XBinary::getUnicodeType()
 {
-    QByteArray baData = read_array(0, qMin(getSize(), (qint64)0x1000)); // Larger sample for better detection
+    QByteArray baData = read_array(0, qMin(getSize(), (qint64)0x1000));  // Larger sample for better detection
 
     return getUnicodeType(&baData);
 }
@@ -9385,18 +9373,18 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType(QByteArray *pbaData)
 
     const unsigned char *pDataOffset = (const unsigned char *)(pbaData->constData());
     qint32 nDataSize = pbaData->size();
-    
+
     // Check for BOM first (most reliable method)
     if (nDataSize >= 2) {
         quint16 nSymbol = qFromLittleEndian(*((quint16 *)(pDataOffset)));
-        
+
         if (nSymbol == 0xFFFE) {
-            return UNICODE_TYPE_BE; // UTF-16 Big Endian BOM
+            return UNICODE_TYPE_BE;  // UTF-16 Big Endian BOM
         } else if (nSymbol == 0xFEFF) {
-            return UNICODE_TYPE_LE; // UTF-16 Little Endian BOM
+            return UNICODE_TYPE_LE;  // UTF-16 Little Endian BOM
         }
     }
-    
+
     // If no BOM, try to detect by content analysis
     if (nDataSize >= 4) {
         qint32 nNullCount = 0;
@@ -9404,12 +9392,12 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType(QByteArray *pbaData)
         qint32 nOddNulls = 0;   // Null bytes at odd positions
         qint32 nPrintableCount = 0;
         qint32 nValidChars = 0;
-        
+
         // Analyze first part of data for patterns
         qint32 nSampleSize = qMin(nDataSize, 512);
         for (qint32 i = 0; i < nSampleSize; i++) {
             unsigned char byte = pDataOffset[i];
-            
+
             if (byte == 0) {
                 nNullCount++;
                 if (i % 2 == 0) {
@@ -9420,15 +9408,15 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType(QByteArray *pbaData)
             } else if (byte >= 0x20 && byte <= 0x7E) {
                 nPrintableCount++;
             }
-            
+
             nValidChars++;
         }
-        
+
         // UTF-16 typically has null bytes in alternating positions
         if (nNullCount > 0 && nValidChars > 4) {
             double nullRatio = (double)nNullCount / nValidChars;
             double printableRatio = (double)nPrintableCount / nValidChars;
-            
+
             // For UTF-16, expect significant null presence and reasonable printable content
             if (nullRatio >= 0.30 && printableRatio >= 0.30) {
                 // Determine endianness by null byte pattern
@@ -9439,26 +9427,26 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType(QByteArray *pbaData)
                     // More nulls at odd positions suggests UTF-16 BE
                     return UNICODE_TYPE_BE;
                 }
-                
+
                 // If pattern is unclear, try byte pair analysis
                 qint32 nLELikelyPairs = 0;
                 qint32 nBELikelyPairs = 0;
-                
+
                 for (qint32 i = 0; i < nSampleSize - 1; i += 2) {
                     quint16 wChar = qFromLittleEndian(*((quint16 *)(pDataOffset + i)));
-                    
+
                     // Check if it's a likely ASCII character in LE format
                     if ((wChar & 0xFF00) == 0 && (wChar & 0xFF) >= 0x20 && (wChar & 0xFF) <= 0x7E) {
                         nLELikelyPairs++;
                     }
-                    
+
                     // Check if it's a likely ASCII character in BE format
                     wChar = qFromBigEndian(*((quint16 *)(pDataOffset + i)));
                     if ((wChar & 0xFF00) == 0 && (wChar & 0xFF) >= 0x20 && (wChar & 0xFF) <= 0x7E) {
                         nBELikelyPairs++;
                     }
                 }
-                
+
                 if (nLELikelyPairs > nBELikelyPairs) {
                     return UNICODE_TYPE_LE;
                 } else if (nBELikelyPairs > nLELikelyPairs) {
@@ -9467,7 +9455,7 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType(QByteArray *pbaData)
             }
         }
     }
-    
+
     return XBinary::UNICODE_TYPE_NONE;
 }
 

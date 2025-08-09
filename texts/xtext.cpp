@@ -35,7 +35,7 @@ bool XText::isValid(PDSTRUCT *pPdStruct)
     if (getSize() > 0) {
         // Check if file contains primarily text content
         QByteArray baData = read_array(0, qMin(getSize(), qint64(8192)), pPdStruct);
-        
+
         // Check for BOM markers
         TEXT_TYPE bomType = _detectBOM();
         if (bomType != TEXT_TYPE_UNKNOWN) {
@@ -111,19 +111,16 @@ XBinary::_MEMORY_MAP XText::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 XBinary::FT XText::getFileType()
 {
     TEXT_TYPE textType = detectTextType();
-    
+
     switch (textType) {
         case TEXT_TYPE_UTF8:
-        case TEXT_TYPE_UTF8_BOM:
-            return FT_UTF8;
+        case TEXT_TYPE_UTF8_BOM: return FT_UTF8;
         case TEXT_TYPE_UTF16_LE:
-        case TEXT_TYPE_UTF16_BE:
-            return FT_UNICODE;
+        case TEXT_TYPE_UTF16_BE: return FT_UNICODE;
         case TEXT_TYPE_PLAINTEXT:
         case TEXT_TYPE_ASCII:
         case TEXT_TYPE_ANSI:
-        default:
-            return FT_TEXT;
+        default: return FT_TEXT;
     }
 }
 
@@ -159,7 +156,7 @@ XText::TEXT_INFO XText::getTextInfo(PDSTRUCT *pPdStruct)
     result.nBOMSize = getBOMSize();
     result.nLineCount = getLineCount();
     result.nCharacterCount = getCharacterCount();
-    
+
     // Calculate word count from a sample of text
     QString sampleText = getText(result.nBOMSize, qMin(qint64(32768), getSize() - result.nBOMSize));
     result.nWordCount = _countWords(sampleText);
@@ -198,8 +195,6 @@ XText::TEXT_TYPE XText::detectTextType(PDSTRUCT *pPdStruct)
         }
     }
 
-
-
     // Default to plain text
     return TEXT_TYPE_PLAINTEXT;
 }
@@ -221,10 +216,8 @@ QString XText::getText(qint64 nOffset, qint64 nSize)
 
     switch (textType) {
         case TEXT_TYPE_UTF8:
-        case TEXT_TYPE_UTF8_BOM:
-            return QString::fromUtf8(baData);
-        case TEXT_TYPE_UTF16_LE:
-            return QString::fromUtf16(reinterpret_cast<const char16_t*>(baData.constData()), baData.size() / 2);
+        case TEXT_TYPE_UTF8_BOM: return QString::fromUtf8(baData);
+        case TEXT_TYPE_UTF16_LE: return QString::fromUtf16(reinterpret_cast<const char16_t *>(baData.constData()), baData.size() / 2);
         case TEXT_TYPE_UTF16_BE:
             // Convert big-endian to little-endian
             {
@@ -233,10 +226,9 @@ QString XText::getText(qint64 nOffset, qint64 nSize)
                     converted.append(baData[i + 1]);
                     converted.append(baData[i]);
                 }
-                return QString::fromUtf16(reinterpret_cast<const char16_t*>(converted.constData()), converted.size() / 2);
+                return QString::fromUtf16(reinterpret_cast<const char16_t *>(converted.constData()), converted.size() / 2);
             }
-        default:
-            return QString::fromLatin1(baData);
+        default: return QString::fromLatin1(baData);
     }
 }
 
@@ -275,14 +267,12 @@ qint64 XText::getCharacterCount()
 {
     TEXT_TYPE textType = detectTextType();
     qint64 nBOMSize = getBOMSize();
-    
+
     switch (textType) {
         case TEXT_TYPE_UTF16_LE:
-        case TEXT_TYPE_UTF16_BE:
-            return (getSize() - nBOMSize) / 2;
+        case TEXT_TYPE_UTF16_BE: return (getSize() - nBOMSize) / 2;
         case TEXT_TYPE_UTF32_LE:
-        case TEXT_TYPE_UTF32_BE:
-            return (getSize() - nBOMSize) / 4;
+        case TEXT_TYPE_UTF32_BE: return (getSize() - nBOMSize) / 4;
         default:
             // For UTF-8 and single-byte encodings, approximate character count
             QString text = getText();
@@ -304,18 +294,14 @@ bool XText::hasBOM()
 qint64 XText::getBOMSize()
 {
     TEXT_TYPE bomType = _detectBOM();
-    
+
     switch (bomType) {
-        case TEXT_TYPE_UTF8_BOM:
-            return 3;
+        case TEXT_TYPE_UTF8_BOM: return 3;
         case TEXT_TYPE_UTF16_LE:
-        case TEXT_TYPE_UTF16_BE:
-            return 2;
+        case TEXT_TYPE_UTF16_BE: return 2;
         case TEXT_TYPE_UTF32_LE:
-        case TEXT_TYPE_UTF32_BE:
-            return 4;
-        default:
-            return 0;
+        case TEXT_TYPE_UTF32_BE: return 4;
+        default: return 0;
     }
 }
 
@@ -355,16 +341,13 @@ QString XText::lineEndingToString(LINE_ENDING lineEnding)
 QString XText::getMIMEString()
 {
     TEXT_TYPE textType = detectTextType();
-    
+
     switch (textType) {
         case TEXT_TYPE_UTF8:
-        case TEXT_TYPE_UTF8_BOM:
-            return "text/plain; charset=utf-8";
+        case TEXT_TYPE_UTF8_BOM: return "text/plain; charset=utf-8";
         case TEXT_TYPE_UTF16_LE:
-        case TEXT_TYPE_UTF16_BE:
-            return "text/plain; charset=utf-16";
-        default:
-            return "text/plain";
+        case TEXT_TYPE_UTF16_BE: return "text/plain; charset=utf-16";
+        default: return "text/plain";
     }
 }
 
@@ -372,55 +355,42 @@ XText::TEXT_TYPE XText::_detectBOM()
 {
     if (getSize() >= 3) {
         QByteArray baBOM = read_array(0, 4);
-        
+
         // UTF-8 BOM: EF BB BF
-        if (baBOM.size() >= 3 && 
-            (quint8)baBOM[0] == 0xEF && 
-            (quint8)baBOM[1] == 0xBB && 
-            (quint8)baBOM[2] == 0xBF) {
+        if (baBOM.size() >= 3 && (quint8)baBOM[0] == 0xEF && (quint8)baBOM[1] == 0xBB && (quint8)baBOM[2] == 0xBF) {
             return TEXT_TYPE_UTF8_BOM;
         }
-        
+
         // UTF-16 LE BOM: FF FE
-        if (baBOM.size() >= 2 && 
-            (quint8)baBOM[0] == 0xFF && 
-            (quint8)baBOM[1] == 0xFE) {
+        if (baBOM.size() >= 2 && (quint8)baBOM[0] == 0xFF && (quint8)baBOM[1] == 0xFE) {
             // Check if it's UTF-32 LE: FF FE 00 00
-            if (baBOM.size() >= 4 && 
-                (quint8)baBOM[2] == 0x00 && 
-                (quint8)baBOM[3] == 0x00) {
+            if (baBOM.size() >= 4 && (quint8)baBOM[2] == 0x00 && (quint8)baBOM[3] == 0x00) {
                 return TEXT_TYPE_UTF32_LE;
             }
             return TEXT_TYPE_UTF16_LE;
         }
-        
+
         // UTF-16 BE BOM: FE FF
-        if (baBOM.size() >= 2 && 
-            (quint8)baBOM[0] == 0xFE && 
-            (quint8)baBOM[1] == 0xFF) {
+        if (baBOM.size() >= 2 && (quint8)baBOM[0] == 0xFE && (quint8)baBOM[1] == 0xFF) {
             return TEXT_TYPE_UTF16_BE;
         }
-        
+
         // UTF-32 BE BOM: 00 00 FE FF
-        if (baBOM.size() >= 4 && 
-            (quint8)baBOM[0] == 0x00 && 
-            (quint8)baBOM[1] == 0x00 && 
-            (quint8)baBOM[2] == 0xFE && 
-            (quint8)baBOM[3] == 0xFF) {
+        if (baBOM.size() >= 4 && (quint8)baBOM[0] == 0x00 && (quint8)baBOM[1] == 0x00 && (quint8)baBOM[2] == 0xFE && (quint8)baBOM[3] == 0xFF) {
             return TEXT_TYPE_UTF32_BE;
         }
     }
-    
+
     return TEXT_TYPE_UNKNOWN;
 }
 
 bool XText::_isValidUTF8(const QByteArray &data, qint64 nMaxCheck)
 {
     qint64 nCheck = qMin(nMaxCheck, qint64(data.size()));
-    
-    for (qint64 i = 0; i < nCheck; ) {
+
+    for (qint64 i = 0; i < nCheck;) {
         quint8 byte = data.at(i);
-        
+
         if (byte < 0x80) {
             // ASCII character
             i++;
@@ -443,16 +413,16 @@ bool XText::_isValidUTF8(const QByteArray &data, qint64 nMaxCheck)
             return false;
         }
     }
-    
+
     return true;
 }
 
 bool XText::_isValidUTF16(const QByteArray &data, bool bBigEndian, qint64 nMaxCheck)
 {
     qint64 nCheck = qMin(nMaxCheck, qint64(data.size()));
-    
+
     if (nCheck % 2 != 0) return false;
-    
+
     for (qint64 i = 0; i < nCheck - 1; i += 2) {
         quint16 codeUnit;
         if (bBigEndian) {
@@ -460,27 +430,27 @@ bool XText::_isValidUTF16(const QByteArray &data, bool bBigEndian, qint64 nMaxCh
         } else {
             codeUnit = ((quint8)data.at(i + 1) << 8) | (quint8)data.at(i);
         }
-        
+
         // Check for high surrogate
         if (codeUnit >= 0xD800 && codeUnit <= 0xDBFF) {
             // Need low surrogate
             if (i + 3 >= nCheck) return false;
-            
+
             quint16 lowSurrogate;
             if (bBigEndian) {
                 lowSurrogate = ((quint8)data.at(i + 2) << 8) | (quint8)data.at(i + 3);
             } else {
                 lowSurrogate = ((quint8)data.at(i + 3) << 8) | (quint8)data.at(i + 2);
             }
-            
+
             if (lowSurrogate < 0xDC00 || lowSurrogate > 0xDFFF) return false;
-            i += 2; // Skip the low surrogate in next iteration
+            i += 2;  // Skip the low surrogate in next iteration
         } else if (codeUnit >= 0xDC00 && codeUnit <= 0xDFFF) {
             // Unexpected low surrogate
             return false;
         }
     }
-    
+
     return true;
 }
 
@@ -488,10 +458,10 @@ bool XText::_isPrintableASCII(const QByteArray &data, qint64 nMaxCheck)
 {
     qint64 nCheck = qMin(nMaxCheck, qint64(data.size()));
     qint32 nPrintableCount = 0;
-    
+
     for (qint64 i = 0; i < nCheck; i++) {
         quint8 byte = data.at(i);
-        
+
         // Check for printable ASCII or common whitespace
         if ((byte >= 32 && byte <= 126) || byte == 9 || byte == 10 || byte == 13) {
             nPrintableCount++;
@@ -500,7 +470,7 @@ bool XText::_isPrintableASCII(const QByteArray &data, qint64 nMaxCheck)
             return false;
         }
     }
-    
+
     // Consider it text if at least 90% of characters are printable
     return (nCheck > 0) && (nPrintableCount * 100 / nCheck >= 90);
 }
@@ -510,7 +480,7 @@ XText::LINE_ENDING XText::_detectLineEndingInData(const QByteArray &data)
     bool hasCRLF = data.contains("\r\n");
     bool hasLF = data.contains("\n");
     bool hasCR = data.contains("\r");
-    
+
     if (hasCRLF && !hasCR && !hasLF) {
         return LINE_ENDING_CRLF;
     } else if (hasLF && !hasCR) {
@@ -520,7 +490,7 @@ XText::LINE_ENDING XText::_detectLineEndingInData(const QByteArray &data)
     } else if ((hasCR || hasLF) && (hasCRLF || (hasCR && hasLF))) {
         return LINE_ENDING_MIXED;
     }
-    
+
     return LINE_ENDING_UNKNOWN;
 }
 
@@ -528,32 +498,24 @@ qint64 XText::_countLines(const QByteArray &data)
 {
     qint64 nLines = 0;
     LINE_ENDING lineEnding = _detectLineEndingInData(data);
-    
+
     switch (lineEnding) {
-        case LINE_ENDING_CRLF:
-            nLines = data.count("\r\n");
-            break;
-        case LINE_ENDING_LF:
-            nLines = data.count("\n");
-            break;
-        case LINE_ENDING_CR:
-            nLines = data.count("\r");
-            break;
+        case LINE_ENDING_CRLF: nLines = data.count("\r\n"); break;
+        case LINE_ENDING_LF: nLines = data.count("\n"); break;
+        case LINE_ENDING_CR: nLines = data.count("\r"); break;
         case LINE_ENDING_MIXED:
             // Count all types of line endings
             nLines = data.count("\r\n") + data.count("\n") + data.count("\r");
-            nLines -= data.count("\r\n"); // Don't double-count CRLF
+            nLines -= data.count("\r\n");  // Don't double-count CRLF
             break;
-        default:
-            nLines = 0;
-            break;
+        default: nLines = 0; break;
     }
-    
+
     // Add 1 if file doesn't end with a line ending
     if (data.size() > 0 && !data.endsWith("\n") && !data.endsWith("\r")) {
         nLines++;
     }
-    
+
     return nLines;
 }
 

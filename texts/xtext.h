@@ -42,10 +42,10 @@ public:
 
     enum LINE_ENDING {
         LINE_ENDING_UNKNOWN = 0,
-        LINE_ENDING_LF,      // Unix/Linux (\n)
-        LINE_ENDING_CRLF,    // Windows (\r\n)
-        LINE_ENDING_CR,      // Mac Classic (\r)
-        LINE_ENDING_MIXED    // Mixed line endings
+        LINE_ENDING_LF,    // Unix/Linux (\n)
+        LINE_ENDING_CRLF,  // Windows (\r\n)
+        LINE_ENDING_CR,    // Mac Classic (\r)
+        LINE_ENDING_MIXED  // Mixed line endings
     };
 
     struct TEXT_INFO {
@@ -74,19 +74,19 @@ public:
     TEXT_INFO getTextInfo(PDSTRUCT *pPdStruct = nullptr);
     TEXT_TYPE detectTextType(PDSTRUCT *pPdStruct = nullptr);
     LINE_ENDING detectLineEnding(PDSTRUCT *pPdStruct = nullptr);
-    
+
     QString getText(qint64 nOffset = 0, qint64 nSize = -1);
     QString getTextByLines(qint64 nStartLine, qint64 nLineCount = 1);
     QStringList getLines(qint64 nStartLine = 0, qint64 nLineCount = -1);
-    
+
     qint64 getLineCount();
     qint64 getCharacterCount();
     qint64 getWordCount();
-    
+
     bool hasBOM();
     qint64 getBOMSize();
     QString getEncodingName();
-    
+
     static QString textTypeToString(TEXT_TYPE textType);
     static QString lineEndingToString(LINE_ENDING lineEnding);
 
