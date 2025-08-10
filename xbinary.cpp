@@ -926,37 +926,37 @@ XBinary::XBinary(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 
 XBinary::XBinary(const QString &sFileName)
 {
-    g_sFileName = sFileName;
+    m_sFileName = sFileName;
 
-    if (g_pFile) {
-        g_pFile->close();
+    if (m_pFile) {
+        m_pFile->close();
 
-        delete g_pFile;
+        delete m_pFile;
     }
 
-    g_pFile = new QFile(sFileName);
+    m_pFile = new QFile(sFileName);
 
-    tryToOpen(g_pFile);
+    tryToOpen(m_pFile);
 
-    setData(g_pFile);
+    setData(m_pFile);
 }
 
 XBinary::~XBinary()
 {
-    if (g_pFile) {
-        g_pFile->close();
+    if (m_pFile) {
+        m_pFile->close();
 
-        delete g_pFile;
+        delete m_pFile;
     }
 }
 
 void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
-    g_pReadWriteMutex = nullptr;
-    g_nSize = 0;
-    g_nFileFormatSize = 0;
-    g_pFile = nullptr;
-    g_pConstMemory = nullptr;
+    m_pReadWriteMutex = nullptr;
+    m_nSize = 0;
+    m_nFileFormatSize = 0;
+    m_pFile = nullptr;
+    m_pConstMemory = nullptr;
 
     setDevice(pDevice);
     setIsImage(bIsImage);
@@ -983,35 +983,35 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 
 void XBinary::setDevice(QIODevice *pDevice)
 {
-    g_pDevice = pDevice;
+    m_pDevice = pDevice;
 
-    if (g_pDevice) {
+    if (m_pDevice) {
         QBuffer *pBuffer = dynamic_cast<QBuffer *>(pDevice);
 
         if (pBuffer) {
-            g_pConstMemory = pBuffer->data().data();
+            m_pConstMemory = pBuffer->data().data();
         } else {
-            g_pConstMemory = nullptr;
+            m_pConstMemory = nullptr;
         }
 
-        if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
+        if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
-        // qDebug("%s",XBinary::valueToHex((quint64)g_pDevice).toLatin1().data());
+        // qDebug("%s",XBinary::valueToHex((quint64)m_pDevice).toLatin1().data());
 
-        g_nSize = g_pDevice->size();
+        m_nSize = m_pDevice->size();
 
-        if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+        if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
     }
 }
 
 void XBinary::setReadWriteMutex(QMutex *pReadWriteMutex)
 {
-    g_pReadWriteMutex = pReadWriteMutex;
+    m_pReadWriteMutex = pReadWriteMutex;
 }
 
 void XBinary::setFileName(const QString &sFileName)
 {
-    g_sFileName = sFileName;
+    m_sFileName = sFileName;
 }
 
 qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen, PDSTRUCT *pPdStruct)
@@ -1019,7 +1019,7 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
     // qDebug("%X %X pos: %X maxlen: %X", this, pDevice, nPos, nMaxLen);
     qint64 nResult = 0;
 
-    if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
+    if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
     if ((pDevice->size() > nPos) && (nPos >= 0)) {
         if (pDevice->seek(nPos)) {
@@ -1048,7 +1048,7 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 #endif
     }
 
-    if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+    if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
 
     return nResult;
 }
@@ -1057,7 +1057,7 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
 {
     qint64 nResult = 0;
 
-    if (g_pReadWriteMutex) g_pReadWriteMutex->lock();
+    if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
     if (pDevice->size() > nPos) {
         if (pDevice->seek(nPos)) {
@@ -1077,14 +1077,14 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
         }
     }
 
-    if (g_pReadWriteMutex) g_pReadWriteMutex->unlock();
+    if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
 
     return nResult;
 }
 
 qint64 XBinary::getSize()
 {
-    return g_nSize;
+    return m_nSize;
 }
 
 qint64 XBinary::getSize(QIODevice *pDevice)
@@ -1112,22 +1112,22 @@ qint64 XBinary::getSize(const QString &sFileName)
 
 void XBinary::setMode(XBinary::MODE mode)
 {
-    g_mode = mode;
+    m_mode = mode;
 }
 
 XBinary::MODE XBinary::getMode()
 {
-    return g_mode;
+    return m_mode;
 }
 
 void XBinary::setType(qint32 nType)
 {
-    g_nType = nType;
+    m_nType = nType;
 }
 
 qint32 XBinary::getType()
 {
-    return g_nType;
+    return m_nType;
 }
 
 QString XBinary::typeIdToString(qint32 nType)
@@ -1148,12 +1148,12 @@ QString XBinary::getTypeAsString()
 
 void XBinary::setFileType(XBinary::FT fileType)
 {
-    g_fileType = fileType;
+    m_fileType = fileType;
 }
 
 XBinary::FT XBinary::getFileType()
 {
-    return g_fileType;
+    return m_fileType;
 }
 
 QString XBinary::modeIdToString(XBinary::MODE mode)
@@ -1194,12 +1194,12 @@ QString XBinary::endianToString(ENDIAN endian)
 
 void XBinary::setArch(const QString &sArch)
 {
-    g_sArch = sArch;
+    m_sArch = sArch;
 }
 
 QString XBinary::getArch()
 {
-    return g_sArch;
+    return m_sArch;
 }
 
 QString XBinary::getFileFormatString(const FILEFORMATINFO *pFileFormatInfo)
@@ -1247,7 +1247,7 @@ XBinary::OSNAME XBinary::getOsName(const FILEFORMATINFO *pFileFormatInfo)
 
 void XBinary::setFileFormatExt(const QString &sFileFormatExt)
 {
-    g_sFileFormatExt = sFileFormatExt;
+    m_sFileFormatExt = sFileFormatExt;
 }
 
 QString XBinary::getFileFormatExt()
@@ -1255,35 +1255,35 @@ QString XBinary::getFileFormatExt()
 #ifdef QT_DEBUG
     // qDebug("TODO: XBinary::getFileFormatExt()");
 #endif
-    return g_sFileFormatExt;
+    return m_sFileFormatExt;
 }
 
 void XBinary::setFileFormatExtsString(const QString &sFileFormatExts)
 {
-    g_sFileFormatExts = sFileFormatExts;
+    m_sFileFormatExts = sFileFormatExts;
 }
 
 QString XBinary::getFileFormatExtsString()
 {
-    if (g_sFileFormatExts == "") {
+    if (m_sFileFormatExts == "") {
 #ifdef QT_DEBUG
         qDebug("TODO: XBinary::getFileFormatExtsString()");
 #endif
     }
 
-    return g_sFileFormatExts;
+    return m_sFileFormatExts;
 }
 
 void XBinary::setFileFormatSize(qint64 nFileFormatSize)
 {
-    g_nFileFormatSize = nFileFormatSize;
+    m_nFileFormatSize = nFileFormatSize;
 }
 
 qint64 XBinary::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
-    return g_nFileFormatSize;
+    return m_nFileFormatSize;
 }
 
 bool XBinary::isSigned()
@@ -1300,22 +1300,22 @@ XBinary::OFFSETSIZE XBinary::getSignOffsetSize()
 
 void XBinary::setOsType(OSNAME osName)
 {
-    g_osName = osName;
+    m_osName = osName;
 }
 
 XBinary::OSNAME XBinary::getOsName()
 {
-    return g_osName;
+    return m_osName;
 }
 
 void XBinary::setOsVersion(const QString &sOsVersion)
 {
-    g_sOsVersion = sOsVersion;
+    m_sOsVersion = sOsVersion;
 }
 
 QString XBinary::getOsVersion()
 {
-    return g_sOsVersion;
+    return m_sOsVersion;
 }
 
 XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
@@ -1351,22 +1351,22 @@ XBinary::FILEFORMATINFO XBinary::getFileFormatInfo(PDSTRUCT *pPdStruct)
 
 void XBinary::setEndian(ENDIAN endian)
 {
-    g_endian = endian;
+    m_endian = endian;
 }
 
 void XBinary::setIsExecutable(bool bIsExecutable)
 {
-    g_bIsExecutable = bIsExecutable;
+    m_bIsExecutable = bIsExecutable;
 }
 
 void XBinary::setIsArchive(bool bIsArchive)
 {
-    g_bIsArchive = bIsArchive;
+    m_bIsArchive = bIsArchive;
 }
 
 XBinary::ENDIAN XBinary::getEndian()
 {
-    return g_endian;
+    return m_endian;
 }
 
 bool XBinary::isPacked(double dEntropy)
@@ -1376,12 +1376,12 @@ bool XBinary::isPacked(double dEntropy)
 
 bool XBinary::isExecutable()
 {
-    return g_bIsExecutable;
+    return m_bIsExecutable;
 }
 
 bool XBinary::isArchive()
 {
-    return g_bIsArchive;
+    return m_bIsArchive;
 }
 
 quint8 XBinary::random8()
@@ -1797,7 +1797,7 @@ qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTR
 {
     qint64 nResult = 0;
 
-    nResult = safeReadData(g_pDevice, nOffset, pBuffer, nMaxSize, pPdStruct);  // Check for read large files
+    nResult = safeReadData(m_pDevice, nOffset, pBuffer, nMaxSize, pPdStruct);  // Check for read large files
 
     return nResult;
 }
@@ -1834,7 +1834,7 @@ qint64 XBinary::write_array(qint64 nOffset, const char *pBuffer, qint64 nSize, P
     qint64 _nTotalSize = getSize();
 
     if ((nSize <= (_nTotalSize - nOffset)) && (nOffset >= 0)) {
-        nResult = safeWriteData(g_pDevice, nOffset, pBuffer, nSize, pPdStruct);
+        nResult = safeWriteData(m_pDevice, nOffset, pBuffer, nSize, pPdStruct);
     }
 
     return nResult;
@@ -2875,15 +2875,15 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
 
     char *pBuffer = nullptr;
 
-    if (!g_pConstMemory) {
+    if (!m_pConstMemory) {
         pBuffer = new char[READWRITE_BUFFER_SIZE + (nArraySize - 1)];
     }
 
     while ((nSize > nArraySize - 1) && (!(pPdStruct->bIsStop))) {
         nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + (nArraySize - 1)), nSize);
 
-        if (g_pConstMemory) {
-            pBuffer = (char *)g_pConstMemory + nOffset;
+        if (m_pConstMemory) {
+            pBuffer = (char *)m_pConstMemory + nOffset;
         } else {
             if (read_array(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
                 pPdStruct->sInfoString = tr("Read error");
@@ -2944,7 +2944,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset - nStartOffset);
     }
 
-    if (!g_pConstMemory) {
+    if (!m_pConstMemory) {
         delete[] pBuffer;
     }
 
@@ -5797,12 +5797,12 @@ qint64 XBinary::getRecordsTotalRowSize(_MEMORY_MAP *pMemoryMap)
 
 XADDR XBinary::getBaseAddress()
 {
-    return this->g_nBaseAddress;
+    return this->m_nBaseAddress;
 }
 
 void XBinary::setBaseAddress(XADDR nBaseAddress)
 {
-    this->g_nBaseAddress = nBaseAddress;
+    this->m_nBaseAddress = nBaseAddress;
 }
 
 qint64 XBinary::getImageSize()
@@ -5812,17 +5812,17 @@ qint64 XBinary::getImageSize()
 
 bool XBinary::isImage()
 {
-    return g_bIsImage;
+    return m_bIsImage;
 }
 
 void XBinary::setIsImage(bool bValue)
 {
-    g_bIsImage = bValue;
+    m_bIsImage = bValue;
 }
 
 void XBinary::setMultiSearchCallbackState(bool bState)
 {
-    g_bMultiSearchCallback = bState;
+    m_bMultiSearchCallback = bState;
 }
 
 bool XBinary::compareSignature(const QString &sSignature, qint64 nOffset)
@@ -5930,7 +5930,7 @@ qint64 XBinary::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 
 void XBinary::setEntryPointOffset(qint64 nEntryPointOffset)
 {
-    this->g_nEntryPointOffset = nEntryPointOffset;
+    this->m_nEntryPointOffset = nEntryPointOffset;
 }
 
 XADDR XBinary::getEntryPointAddress()
@@ -6013,15 +6013,15 @@ quint64 XBinary::positionToVirtualAddress(_MEMORY_MAP *pMemoryMap, qint64 nPosit
 
 void XBinary::setModuleAddress(quint64 nValue)
 {
-    this->g_nModuleAddress = nValue;
+    this->m_nModuleAddress = nValue;
 }
 
 XADDR XBinary::getModuleAddress()
 {
     XADDR nResult = 0;
 
-    if (g_nModuleAddress != (XADDR)-1) {
-        nResult = g_nModuleAddress;
+    if (m_nModuleAddress != (XADDR)-1) {
+        nResult = m_nModuleAddress;
     } else {
         nResult = getBaseAddress();
     }
@@ -6200,7 +6200,7 @@ bool XBinary::patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64
                 break;
             }
 
-            if (safeWriteData(g_pDevice, nDestOffset, pBuffer, nTempSize, pPdStruct) != nTempSize) {
+            if (safeWriteData(m_pDevice, nDestOffset, pBuffer, nTempSize, pPdStruct) != nTempSize) {
                 pPdStruct->sInfoString = tr("Write error");
                 bResult = false;
                 break;
@@ -8435,7 +8435,7 @@ quint32 XBinary::getStringCustomCRC32(const QString &sString)
 
 QIODevice *XBinary::getDevice()
 {
-    return g_pDevice;
+    return m_pDevice;
 }
 
 bool XBinary::isValid(PDSTRUCT *pPdStruct)
@@ -8507,24 +8507,24 @@ bool XBinary::is64(XBinary::_MEMORY_MAP *pMemoryMap)
 
 void XBinary::setVersion(const QString &sVersion)
 {
-    g_sVersion = sVersion;
+    m_sVersion = sVersion;
 }
 
 void XBinary::setOptions(const QString &sOptions)
 {
-    g_sOptions = sOptions;
+    m_sOptions = sOptions;
 }
 
 QString XBinary::getVersion()
 {
-    return g_sVersion;
+    return m_sVersion;
 }
 
 QString XBinary::getInfo(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
-    return g_sOptions;
+    return m_sOptions;
 }
 
 bool XBinary::isEncrypted()
@@ -8619,7 +8619,7 @@ bool XBinary::compareSignatureStrings(const QString &sBaseSignature, const QStri
 void XBinary::_errorMessage(const QString &sErrorMessage)
 {
 #ifdef QT_DEBUG
-    QFile *pFile = dynamic_cast<QFile *>(g_pDevice);
+    QFile *pFile = dynamic_cast<QFile *>(m_pDevice);
 
     if (pFile) {
         qDebug("Filename: %s", pFile->fileName().toUtf8().data());
@@ -12165,7 +12165,7 @@ XBinary::REGION_FILL XBinary::getRegionFill(qint64 nOffset, qint64 nSize, qint32
     REGION_FILL result = {};
     result.nByte = read_uint8(nOffset);
 
-    qint64 nMaxOffset = qMin(g_pDevice->size(), nOffset + nSize);
+    qint64 nMaxOffset = qMin(m_pDevice->size(), nOffset + nSize);
     char *pData = new char[nAlignment];
 
     bool bError = false;
@@ -12277,7 +12277,7 @@ QList<XBinary::HREGION> XBinary::getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruc
         region.nVirtualAddress = getBaseAddress();
         region.nVirtualSize = getImageSize();
         region.nFileOffset = 0;
-        region.nFileSize = g_pDevice->size();
+    region.nFileSize = m_pDevice->size();
         listResult.append(region);
     } else if (hlType == HLTYPE_FILEREGIONS) {
         _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
