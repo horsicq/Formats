@@ -39,7 +39,7 @@ SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize, QObject *
         nSize = 0;
     }
 
-    this->g_pDevice = pDevice;
+    this->m_pDevice = pDevice;
 
     setInitLocation(nOffset);
     setSize(nSize);
@@ -62,7 +62,7 @@ SubDevice::~SubDevice()
 
 QIODevice *SubDevice::getOrigDevice()
 {
-    return g_pDevice;
+    return m_pDevice;
 }
 
 bool SubDevice::seek(qint64 nPos)
@@ -70,7 +70,7 @@ bool SubDevice::seek(qint64 nPos)
     bool bResult = false;
 
     if ((nPos < size()) && (nPos >= 0)) {
-        if (g_pDevice->seek(getInitLocation() + nPos)) {
+    if (m_pDevice->seek(getInitLocation() + nPos)) {
             bResult = QIODevice::seek(nPos);
         }
     }
@@ -87,7 +87,7 @@ qint64 SubDevice::readData(char *pData, qint64 nMaxSize)
 {
     nMaxSize = qMin(nMaxSize, size() - pos());
 
-    qint64 nLen = g_pDevice->read(pData, nMaxSize);
+    qint64 nLen = m_pDevice->read(pData, nMaxSize);
 
     return nLen;
 }
@@ -96,7 +96,7 @@ qint64 SubDevice::writeData(const char *pData, qint64 nMaxSize)
 {
     nMaxSize = qMin(nMaxSize, size() - pos());
 
-    qint64 nLen = g_pDevice->write(pData, nMaxSize);
+    qint64 nLen = m_pDevice->write(pData, nMaxSize);
 
     return nLen;
 }

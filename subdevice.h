@@ -42,7 +42,7 @@ protected:
     virtual qint64 writeData(const char *pData, qint64 nMaxSize);
 
 private:
-    QIODevice *g_pDevice;
+    QIODevice *m_pDevice;
 };
 
 #endif  // SUBDEVICE_H
