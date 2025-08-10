@@ -22,23 +22,23 @@
 
 XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent)
 {
-    g_nSize = 0;
-    g_nInitLocation = 0;
+    m_nSize = 0;
+    m_nInitLocation = 0;
 }
 
 void XIODevice::setSize(qint64 nSize)
 {
-    g_nSize = nSize;
+    m_nSize = nSize;
 }
 
 void XIODevice::setInitLocation(quint64 nLocation)
 {
-    g_nInitLocation = nLocation;
+    m_nInitLocation = nLocation;
 }
 
 quint64 XIODevice::getInitLocation()
 {
-    return g_nInitLocation;
+    return m_nInitLocation;
 }
 
 quint64 XIODevice::getInitLocation(QIODevice *pDevice)
@@ -56,7 +56,7 @@ quint64 XIODevice::getInitLocation(QIODevice *pDevice)
 
 qint64 XIODevice::size() const
 {
-    return g_nSize;
+    return m_nSize;
 }
 
 bool XIODevice::isSequential() const

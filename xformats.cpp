@@ -22,10 +22,10 @@
 
 XFormats::XFormats(QObject *pParent) : XThreadObject(pParent)
 {
-    g_mode = MODE_UNKNOWN;
-    g_fileFormat = XBinary::FT_UNKNOWN;
-    g_pDevice = nullptr;
-    g_pPdStruct = nullptr;
+    m_mode = MODE_UNKNOWN;
+    m_fileFormat = XBinary::FT_UNKNOWN;
+    m_pDevice = nullptr;
+    m_pPdStruct = nullptr;
 }
 
 XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
@@ -765,18 +765,18 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 
 void XFormats::setData(MODE mode, XBinary::FT fileFormat, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct)
 {
-    g_mode = mode;
-    g_fileFormat = fileFormat;
-    g_pDevice = pDevice;
-    g_sFolderName = sFolderName;
-    g_pPdStruct = pPdStruct;
+    m_mode = mode;
+    m_fileFormat = fileFormat;
+    m_pDevice = pDevice;
+    m_sFolderName = sFolderName;
+    m_pPdStruct = pPdStruct;
 }
 
 void XFormats::process()
 {
-    if (g_mode == MODE_UNPACKDEVICETOFOLDER) {
-        if (g_pDevice) {
-            if (!unpackDeviceToFolder(g_fileFormat, g_pDevice, g_sFolderName, g_pPdStruct)) {
+    if (m_mode == MODE_UNPACKDEVICETOFOLDER) {
+        if (m_pDevice) {
+            if (!unpackDeviceToFolder(m_fileFormat, m_pDevice, m_sFolderName, m_pPdStruct)) {
                 emit errorMessage(tr("Cannot unpack"));
             }
         }
