@@ -62,11 +62,11 @@ public:
     void process();
 
 private:
-    QIODevice *g_pDeviceIn;
-    DATA *g_pData;
-    CMETHOD g_method;
-    OPTIONS g_options;
-    XBinary::PDSTRUCT *g_pPdStruct;
+    QIODevice *m_pDeviceIn;
+    DATA *m_pData;
+    CMETHOD m_method;
+    OPTIONS m_options;
+    XBinary::PDSTRUCT *m_pPdStruct;
 };
 
 #endif  // XDATACONVERTOR_H

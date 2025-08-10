@@ -145,11 +145,11 @@ public:
     bool unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct);
 
 private:
-    MODE g_mode;
-    XBinary::FT g_fileFormat;
-    QIODevice *g_pDevice;
-    QString g_sFolderName;
-    XBinary::PDSTRUCT *g_pPdStruct;
+    MODE m_mode;
+    XBinary::FT m_fileFormat;
+    QIODevice *m_pDevice;
+    QString m_sFolderName;
+    XBinary::PDSTRUCT *m_pPdStruct;
 };
 
 #endif  // XFORMATS_H

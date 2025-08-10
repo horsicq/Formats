@@ -54,8 +54,8 @@ signals:
     void writeDataSignal(quint64 nOffset, char *pData, qint64 nSize);
 
 private:
-    qint64 g_nSize;
-    quint64 g_nInitLocation;
+    qint64 m_nSize;
+    quint64 m_nInitLocation;
 };
 
 #endif  // XIODEVICE_H
