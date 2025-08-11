@@ -125,7 +125,8 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
     {XBinary::COMPRESS_METHOD_DEFLATE64, "Deflate64", QString("Deflate64")},
     {XBinary::COMPRESS_METHOD_BZIP2, "Bzip2", QString("Bzip2")},
     {XBinary::COMPRESS_METHOD_LZMA, "LZMA", QString("LZMA")},
-    {XBinary::COMPRESS_METHOD_LZW, "LZW", QString("LZW")},
+    {XBinary::COMPRESS_METHOD_LZW_PDF, "LZW_PDF", QString("LZW PDF")},
+    {XBinary::COMPRESS_METHOD_ASCII85, "ASCII85", QString("ASCII85 PDF")},
     {XBinary::COMPRESS_METHOD_PPMD, "PPMD", QString("PPMD")},  // TODO
     {XBinary::COMPRESS_METHOD_LZH5, "LZH5", QString("LZH5")},
     {XBinary::COMPRESS_METHOD_LZH6, "LZH6", QString("LZH6")},
@@ -150,7 +151,7 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
     {XBinary::COMPRESS_METHOD_REDUCE_3, "Reduce_3", QString("Reduce 3")},
     {XBinary::COMPRESS_METHOD_REDUCE_4, "Reduce_4", QString("Reduce 4")},
     {XBinary::COMPRESS_METHOD_AES, "AES", QString("AES")},
-    {XBinary::COMPRESS_METHOD_ZLIB, "zlib", QString("zlib")},
+    {XBinary::COMPRESS_METHOD_ZLIB, "ZLIB", QString("ZLIB")},
 
     // TODO check more methods
 };
@@ -340,6 +341,12 @@ quint32 XBinary::XCONVERT_ftStringToId(const QString &sString, XCONVERT *pRecord
             break;
         }
     }
+
+#ifdef QT_DEBUG
+    if (nResult == 0) {
+        qDebug() << "XCONVERT_ftStringToId: Not found" << sString;
+    }
+#endif
 
     return nResult;
 }
@@ -7843,6 +7850,8 @@ quint32 XBinary::getAdler32(const QString &sFileName)
 quint32 XBinary::getAdler32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     quint32 nResult = 0;
+
+    pDevice->reset();
 
     XBinary binary(pDevice);
 
