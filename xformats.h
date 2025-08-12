@@ -73,6 +73,8 @@ public:
 
     static XBinary *getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
+    static bool isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
+
     static XBinary::_MEMORY_MAP getMemoryMap(XBinary::FT fileType, XBinary::MAPMODE mapMode, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
                                              XBinary::PDSTRUCT *pPdStruct = nullptr);
     static XBinary::_MEMORY_MAP getMemoryMap(const QString &sFileName, XBinary::MAPMODE mapMode, bool bIsImage = false, XADDR nModuleAddress = -1,

@@ -6308,7 +6308,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
 
                 if (nCP > 0) {
                     qint64 nSignatureOffset = (nCP - 1) * 512 + nCblp;
-                    if (nSize - nSignatureOffset) {
+                    if (nSize - nSignatureOffset > 0) {
                         bool bBW = false;
                         bool b16M = false;
                         bool b4G = false;
@@ -6486,10 +6486,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_XM);
         } else if (compareSignature(&memoryMap, "'dex\n'......00")) {
             stResult.insert(FT_DEX);
-        } else if (compareSignature(&memoryMap, "02000C00")) {
-            stResult.insert(FT_ANDROIDASRC);
-        } else if (compareSignature(&memoryMap, "00000800") || compareSignature(&memoryMap, "03000800")) {
+        } else if (compareSignature(&memoryMap, "00000800........0100") || compareSignature(&memoryMap, "03000800........0100")) {
             stResult.insert(FT_ANDROIDXML);
+        } else if (compareSignature(&memoryMap, "02000C00........0100")) {
+            stResult.insert(FT_ANDROIDASRC);
         } else if (compareSignature(&memoryMap, "'%PDF'", 0)) {
             stResult.insert(FT_DOCUMENT);
             stResult.insert(FT_PDF);
@@ -6702,6 +6702,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_AR;
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
         result = FT_ANDROIDXML;
+    } else if (pStFileTypes->contains(FT_ANDROIDASRC)) {
+        result = FT_ANDROIDASRC;
     } else if (pStFileTypes->contains(FT_DEX)) {
         result = FT_DEX;
     } else if (pStFileTypes->contains(FT_PNG)) {

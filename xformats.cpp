@@ -53,6 +53,7 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return new XJavaClass(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_TTF, fileType)) return new XTTF(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_DJVU, fileType)) return new XDJVU(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_ANDROIDXML, fileType) || XBinary::checkFileType(XBinary::FT_ANDROIDASRC, fileType)) return new XAndroidBinary(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_TEXT, fileType)) return new XText(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_UTF8, fileType)) return new XText(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_UNICODE, fileType)) return new XText(pDevice);
@@ -97,6 +98,17 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
 
         return pBinary;
     }
+}
+
+bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    bResult = pBinary->isValid(pPdStruct);
+    delete pBinary;
+
+    return bResult;
 }
 
 XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMODE mapMode, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress,
