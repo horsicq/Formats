@@ -70,7 +70,7 @@ bool SubDevice::seek(qint64 nPos)
     bool bResult = false;
 
     if ((nPos < size()) && (nPos >= 0)) {
-    if (m_pDevice->seek(getInitLocation() + nPos)) {
+        if (m_pDevice->seek(getInitLocation() + nPos)) {
             bResult = QIODevice::seek(nPos);
         }
     }
