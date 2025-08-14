@@ -31,6 +31,13 @@ XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
     {XPE::STRUCTID_IMAGE_SECTION_HEADER, "IMAGE_SECTION_HEADER", QString("IMAGE_SECTION_HEADER")},
     {XPE::STRUCTID_IMAGE_DATA_DIRECTORY, "IMAGE_DATA_DIRECTORY", QString("IMAGE_DATA_DIRECTORY")},
     {XPE::STRUCTID_IMAGE_COR20_HEADER, "IMAGE_COR20_HEADER", QString("IMAGE_COR20_HEADER")},
+    {XPE::STRUCTID_NET_METADATA, "NET_METADATA", QString(".NET MetaData")},
+    {XPE::STRUCTID_NET_RESOURCES, "NET_RESOURCES", QString(".NET Resources")},
+    {XPE::STRUCTID_NET_STRONGNAMESIGNATURE, "NET_STRONGNAMESIGNATURE", QString(".NET StrongNameSignature")},
+    {XPE::STRUCTID_NET_CODEMANAGERTABLE, "NET_CODEMANAGERTABLE", QString(".NET CodeManagerTable")},
+    {XPE::STRUCTID_NET_VTABLEFIXUPS, "NET_VTABLEFIXUPS", QString(".NET VTableFixups")},
+    {XPE::STRUCTID_NET_EXPORTADDRESSTABLEJUMPS, "NET_EXPORTADDRESSTABLEJUMPS", QString(".NET ExportAddressTableJumps")},
+    {XPE::STRUCTID_NET_MANAGEDNATIVEHEADER, "NET_MANAGEDNATIVEHEADER", QString(".NET ManagedNativeHeader")},
 };
 
 XPE::XPE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevice, bIsImage, nModuleAddress)
@@ -9546,7 +9553,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 listResult.append(dataHeader);
 
                 if (dataHeadersOptions.bChildren) {
-                    for (quint32 i = 0; i < dataHeadersOptions.nCount; i++) {
+                    for (qint32 i = 0; i < dataHeadersOptions.nCount; i++) {
                         XPE_DEF::IMAGE_DATA_DIRECTORY idd = read_IMAGE_DATA_DIRECTORY(nStartOffset + i * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
 
                         if (isDataDirectoryValid(&idd, dataHeadersOptions.pMemoryMap)) {
@@ -9554,7 +9561,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
 
                             if (nStructOffset != -1) {
                                 DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                                _dataHeadersOptions.nLocation += nStructOffset;
+                                _dataHeadersOptions.nLocation = nStructOffset;
                                 _dataHeadersOptions.locType = XBinary::LT_OFFSET;
                                 _dataHeadersOptions.nID = STRUCTID_UNKNOWN;
                                 _dataHeadersOptions.dsID_parent = dataHeader.dsID;
@@ -9627,6 +9634,122 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                   dataHeadersOptions.pMemoryMap->endian));
 
                 listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    XPE_DEF::IMAGE_COR20_HEADER ich = _read_IMAGE_COR20_HEADER(nStartOffset);
+
+                    if (isDataDirectoryValid(&(ich.MetaData), dataHeadersOptions.pMemoryMap)) {
+                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.MetaData.VirtualAddress);
+
+                        if (nStructOffset != -1) {
+                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                            _dataHeadersOptions.nLocation = nStructOffset;
+                            _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+                            _dataHeadersOptions.nID = STRUCTID_NET_METADATA;
+                            _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEX;
+                            _dataHeadersOptions.nCount = 1;
+
+                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                        }
+                    }
+
+                    if (isDataDirectoryValid(&(ich.Resources), dataHeadersOptions.pMemoryMap)) {
+                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.Resources.VirtualAddress);
+
+                        if (nStructOffset != -1) {
+                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                            _dataHeadersOptions.nLocation = nStructOffset;
+                            _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+                            _dataHeadersOptions.nID = STRUCTID_NET_RESOURCES;
+                            _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEX;
+                            _dataHeadersOptions.nCount = 1;
+
+                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                        }
+                    }
+
+                    if (isDataDirectoryValid(&(ich.StrongNameSignature), dataHeadersOptions.pMemoryMap)) {
+                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.StrongNameSignature.VirtualAddress);
+
+                        if (nStructOffset != -1) {
+                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                            _dataHeadersOptions.nLocation = nStructOffset;
+                            _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+                            _dataHeadersOptions.nID = STRUCTID_NET_STRONGNAMESIGNATURE;
+                            _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEX;
+                            _dataHeadersOptions.nCount = 1;
+
+                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                        }
+                    }
+
+                    if (isDataDirectoryValid(&(ich.CodeManagerTable), dataHeadersOptions.pMemoryMap)) {
+                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.CodeManagerTable.VirtualAddress);
+
+                        if (nStructOffset != -1) {
+                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                            _dataHeadersOptions.nLocation = nStructOffset;
+                            _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+                            _dataHeadersOptions.nID = STRUCTID_NET_CODEMANAGERTABLE;
+                            _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEX;
+                            _dataHeadersOptions.nCount = 1;
+
+                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                        }
+                    }
+
+                    if (isDataDirectoryValid(&(ich.VTableFixups), dataHeadersOptions.pMemoryMap)) {
+                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.VTableFixups.VirtualAddress);
+
+                        if (nStructOffset != -1) {
+                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                            _dataHeadersOptions.nLocation = nStructOffset;
+                            _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+                            _dataHeadersOptions.nID = STRUCTID_NET_VTABLEFIXUPS;
+                            _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEX;
+                            _dataHeadersOptions.nCount = 1;
+
+                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                        }
+                    }
+
+                    if (isDataDirectoryValid(&(ich.ExportAddressTableJumps), dataHeadersOptions.pMemoryMap)) {
+                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.ExportAddressTableJumps.VirtualAddress);
+
+                        if (nStructOffset != -1) {
+                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                            _dataHeadersOptions.nLocation = nStructOffset;
+                            _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+                            _dataHeadersOptions.nID = STRUCTID_NET_EXPORTADDRESSTABLEJUMPS;
+                            _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEX;
+                            _dataHeadersOptions.nCount = 1;
+
+                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                        }
+                    }
+
+                    if (isDataDirectoryValid(&(ich.ManagedNativeHeader), dataHeadersOptions.pMemoryMap)) {
+                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.ManagedNativeHeader.VirtualAddress);
+
+                        if (nStructOffset != -1) {
+                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                            _dataHeadersOptions.nLocation = nStructOffset;
+                            _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+                            _dataHeadersOptions.nID = STRUCTID_NET_MANAGEDNATIVEHEADER;
+                            _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEX;
+                            _dataHeadersOptions.nCount = 1;
+
+                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                        }
+                    }
+                }
             }
         }
     }

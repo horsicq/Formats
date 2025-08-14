@@ -673,7 +673,7 @@ XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDST
             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
             pListHeaders->append(dhGeneric);
         }
-        if (isOverlayPresent()) {
+        if (getFileParts(FILEPART_OVERLAY, 1, pPdStruct).count()) {
             dhGeneric.dsID.nID = STRUCTID_OVERLAY;
             dhGeneric.dsID.sGUID = generateUUID();
             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
