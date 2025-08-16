@@ -30,6 +30,7 @@ XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
     {XPE::STRUCTID_IMAGE_OPTIONAL_HEADER64, "IMAGE_OPTIONAL_HEADER64", QString("IMAGE_OPTIONAL_HEADER64")},
     {XPE::STRUCTID_IMAGE_SECTION_HEADER, "IMAGE_SECTION_HEADER", QString("IMAGE_SECTION_HEADER")},
     {XPE::STRUCTID_IMAGE_DATA_DIRECTORY, "IMAGE_DATA_DIRECTORY", QString("IMAGE_DATA_DIRECTORY")},
+    {XPE::STRUCTID_IMAGE_RESOURCE_DIRECTORY, "IMAGE_RESOURCE_DIRECTORY", QString("IMAGE_RESOURCE_DIRECTORY")},
     {XPE::STRUCTID_IMAGE_COR20_HEADER, "IMAGE_COR20_HEADER", QString("IMAGE_COR20_HEADER")},
     {XPE::STRUCTID_NET_METADATA, "NET_METADATA", QString(".NET MetaData")},
     {XPE::STRUCTID_NET_RESOURCES, "NET_RESOURCES", QString(".NET Resources")},
@@ -9568,7 +9569,9 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                 _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
                                 _dataHeadersOptions.nCount = 1;
 
-                                if (i == XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR) {
+                                if (i == XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE) {
+                                    _dataHeadersOptions.nID = STRUCTID_IMAGE_RESOURCE_DIRECTORY;
+                                } else if (i == XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR) {
                                     _dataHeadersOptions.nID = STRUCTID_IMAGE_COR20_HEADER;
                                 } else {
                                     _dataHeadersOptions.nID = STRUCTID_UNKNOWN;
@@ -9581,6 +9584,38 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         }
                     }
                 }
+            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RESOURCE_DIRECTORY) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
+
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfNamedEntries), 2, "NumberOfNamedEntries", VT_WORD,
+                                                            DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfIdEntries), 2, "NumberOfIdEntries", VT_WORD, DRF_COUNT,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+
+                listResult.append(dataHeader);
+
+                // if (dataHeadersOptions.bChildren) {
+                //     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                //     _dataHeadersOptions.nLocation += sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
+                //     _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+                //     _dataHeadersOptions.nID = STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY;
+                //     _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                //     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+                //     _dataHeadersOptions.nCount = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfNamedEntries)) +
+                //                                 read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfIdEntries));
+                //     _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY) *
+                //                                 _dataHeadersOptions.nCount; // TODO: check size
+                //     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                // }
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_COR20_HEADER) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_COR20_HEADER);
