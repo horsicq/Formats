@@ -332,7 +332,6 @@ public:
     enum FT {
         FT_UNKNOWN = 0,
         FT_DATA,
-        FT_OTHER,
         FT_REGION,  // For Memory regions
         FT_PROCESS,
         FT_BINARY,
@@ -898,6 +897,7 @@ public:
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
 
     DATA_HEADER _initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName);
+    DATA_HEADER _dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset, qint64 nSize);
 
     struct DATA_RECORDS_OPTIONS {
         _MEMORY_MAP *pMemoryMap;

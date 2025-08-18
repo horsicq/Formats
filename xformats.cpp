@@ -92,10 +92,6 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
 #endif
         XBinary *pBinary = new XBinary(pDevice, bIsImage, nModuleAddress);
 
-        if (XBinary::checkFileType(XBinary::FT_OTHER, fileType)) {
-            pBinary->setFileFormatExtsString("*, *.*");
-        }
-
         return pBinary;
     }
 }

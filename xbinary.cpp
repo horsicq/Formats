@@ -166,7 +166,6 @@ XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
 XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XBinary::FT_DATA, "Data", QObject::tr("Data")},
-    {XBinary::FT_OTHER, "Other", QObject::tr("Other")},
     {XBinary::FT_REGION, "Region", QObject::tr("Region")},
     {XBinary::FT_PROCESS, "Process", QObject::tr("Process")},
     {XBinary::FT_BINARY, "Binary", QString("Binary")},
@@ -525,6 +524,20 @@ XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nRelOffset, qint64 nSize, c
 QString XBinary::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XBINARY_STRUCTID, sizeof(_TABLE_XBINARY_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+XBinary::DATA_HEADER XBinary::_dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset, qint64 nSize)
+{
+    XBinary::DATA_HEADER result = _initDataHeader(dataHeadersOptions, sName);
+    result.dsID_parent = dsID_parent;
+    result.dsID.nID = nID;
+    result.nLocation = nOffset;
+    result.nSize = nSize;
+    result.locType = LT_OFFSET;
+    result.dhMode = DHMODE_HEX;
+    result.nCount = 1;  // Hex view is always one record
+
+    return result;
 }
 
 XBinary::DATA_HEADER XBinary::_initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName)
