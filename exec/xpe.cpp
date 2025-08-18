@@ -9668,7 +9668,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.MetaData.VirtualAddress);
 
                         if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_METADATA), dataHeader.dsID, STRUCTID_NET_METADATA, nStructOffset, ich.MetaData.Size));
+                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_METADATA), dataHeader.dsID, STRUCTID_NET_METADATA,
+                                                             nStructOffset, ich.MetaData.Size));
                         }
                     }
 
@@ -9676,7 +9677,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.Resources.VirtualAddress);
 
                         if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_RESOURCES), dataHeader.dsID, STRUCTID_NET_RESOURCES, nStructOffset, ich.Resources.Size));
+                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_RESOURCES), dataHeader.dsID, STRUCTID_NET_RESOURCES,
+                                                             nStructOffset, ich.Resources.Size));
                         }
                     }
 
@@ -9684,7 +9686,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.StrongNameSignature.VirtualAddress);
 
                         if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_STRONGNAMESIGNATURE), dataHeader.dsID, STRUCTID_NET_STRONGNAMESIGNATURE, nStructOffset, ich.StrongNameSignature.Size));
+                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_STRONGNAMESIGNATURE), dataHeader.dsID,
+                                                             STRUCTID_NET_STRONGNAMESIGNATURE, nStructOffset, ich.StrongNameSignature.Size));
                         }
                     }
 
@@ -9692,7 +9695,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.CodeManagerTable.VirtualAddress);
 
                         if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_CODEMANAGERTABLE), dataHeader.dsID, STRUCTID_NET_CODEMANAGERTABLE, nStructOffset, ich.CodeManagerTable.Size));
+                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_CODEMANAGERTABLE), dataHeader.dsID,
+                                                             STRUCTID_NET_CODEMANAGERTABLE, nStructOffset, ich.CodeManagerTable.Size));
                         }
                     }
 
@@ -9700,7 +9704,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.VTableFixups.VirtualAddress);
 
                         if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_VTABLEFIXUPS), dataHeader.dsID, STRUCTID_NET_VTABLEFIXUPS, nStructOffset, ich.VTableFixups.Size));
+                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_VTABLEFIXUPS), dataHeader.dsID, STRUCTID_NET_VTABLEFIXUPS,
+                                                             nStructOffset, ich.VTableFixups.Size));
                         }
                     }
 
@@ -9708,7 +9713,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.ExportAddressTableJumps.VirtualAddress);
 
                         if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_EXPORTADDRESSTABLEJUMPS), dataHeader.dsID, STRUCTID_NET_EXPORTADDRESSTABLEJUMPS, nStructOffset, ich.ExportAddressTableJumps.Size));
+                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_EXPORTADDRESSTABLEJUMPS), dataHeader.dsID,
+                                                             STRUCTID_NET_EXPORTADDRESSTABLEJUMPS, nStructOffset, ich.ExportAddressTableJumps.Size));
                         }
                     }
 
@@ -9716,7 +9722,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.ManagedNativeHeader.VirtualAddress);
 
                         if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_MANAGEDNATIVEHEADER), dataHeader.dsID, STRUCTID_NET_MANAGEDNATIVEHEADER, nStructOffset, ich.ManagedNativeHeader.Size));
+                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_MANAGEDNATIVEHEADER), dataHeader.dsID,
+                                                             STRUCTID_NET_MANAGEDNATIVEHEADER, nStructOffset, ich.ManagedNativeHeader.Size));
                         }
                     }
                 }
