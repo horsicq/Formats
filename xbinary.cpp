@@ -229,8 +229,8 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_TEXT, "Text", QObject::tr("Text")},
     {XBinary::FT_TIFF, "TIFF", QString("TIFF")},
     {XBinary::FT_UNICODE, "Unicode", QString("Unicode")},
-    {XBinary::FT_UNICODE_BE, "Unicode BE", QString("Unicode BE")},
-    {XBinary::FT_UNICODE_LE, "Unicode LE", QString("Unicode LE")},
+    {XBinary::FT_UNICODE_BE, "UnicodeBE", QString("Unicode BE")},
+    {XBinary::FT_UNICODE_LE, "UnicodeLE", QString("Unicode LE")},
     {XBinary::FT_UTF8, "UTF8", QString("UTF8")},
     {XBinary::FT_VIDEO, "Video", QObject::tr("Video")},
     {XBinary::FT_WEBP, "WebP", QString("WebP")},
@@ -526,8 +526,7 @@ QString XBinary::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XBINARY_STRUCTID, sizeof(_TABLE_XBINARY_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
-XBinary::DATA_HEADER XBinary::_dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset,
-                                             qint64 nSize)
+XBinary::DATA_HEADER XBinary::_dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset, qint64 nSize)
 {
     XBinary::DATA_HEADER result = _initDataHeader(dataHeadersOptions, sName);
     result.dsID_parent = dsID_parent;
@@ -8032,12 +8031,6 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, quint32 
     // TODO optimize!!!
     quint32 nResult = nInit;
 
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
 
     nOffset = osRegion.nOffset;
@@ -8045,7 +8038,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, quint32 
 
     qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
 
-    if ((nOffset != -1) && (!(pPdStruct->bIsStop))) {
+    if ((nOffset != -1) && (isPdStructNotCanceled(pPdStruct))) {
         XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
         qint64 nTemp = 0;
@@ -8055,7 +8048,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, quint32 
             nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-                pPdStruct->sInfoString = tr("Read error");
+                setPdStructInfoString(pPdStruct, tr("Read error"));
 
                 nResult = 0;
 
@@ -8077,7 +8070,7 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, quint32 
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
-    if (pPdStruct->bIsStop) {
+    if (isPdStructStopped(pPdStruct)) {
         nResult = 0;
     }
 
