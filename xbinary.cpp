@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xbinary.h"
+#include <cstring>
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b)
 {
@@ -456,6 +457,28 @@ qint32 XBinary::_writeDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE
     return nBufferSize;
 }
 
+quint32 XBinary::getFPART_crc32(const FPART &fpart)
+{
+    QByteArray buffer;
+    QDataStream stream(&buffer, QIODevice::WriteOnly);
+
+    // Serialize basic types
+    stream << fpart.nFileOffset;
+    stream << fpart.nFileSize;
+    stream << fpart.nVirtualAddress;
+    stream << fpart.nVirtualSize;
+    stream << fpart.sName;
+    stream << fpart.sOriginalName;
+    stream << static_cast<qint32>(fpart.filePart);
+
+    // Serialize mapProperties
+    stream << fpart.mapProperties;
+
+    quint32 crc = _getCRC32(buffer.constData(), buffer.size(), 0xFFFFFFFF, XBinary::_getCRC32Table_EDB88320());
+
+    return crc;
+}
+
 XBinary::DATA_HEADER XBinary::_searchDataHeaderById(FT fileType, quint32 nID, const QList<DATA_HEADER> &listDataHeaders)
 {
     XBinary::DATA_HEADER result = {};
@@ -488,9 +511,9 @@ XBinary::DATA_HEADER XBinary::_searchDataHeaderByGuid(const QString &sGUID, cons
     return result;
 }
 
-XBinary::HREGION XBinary::findParentHRegion(const QList<HREGION> &listHRegions, const HREGION &hRegion)
+XBinary::FPART XBinary::findParentFPart(const QList<FPART> &listHRegions, const FPART &hRegion)
 {
-    HREGION result = {};
+    FPART result = {};
 
     qint32 nNumberOfRegions = listHRegions.size();
 
@@ -2899,6 +2922,25 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         pBuffer = new char[READWRITE_BUFFER_SIZE + (nArraySize - 1)];
     }
 
+    // Precompute BMH shift table for byte-compare mode
+    qint32 bmhShift[256];
+    bool bUseBMH = (st == ST_COMPAREBYTES) && (nArraySize >= 2);
+    if (bUseBMH) {
+        qint32 m = (qint32)qMin<qint64>(nArraySize, (qint64)0x7fffffff);
+        for (int i = 0; i < 256; ++i) bmhShift[i] = m;
+        // Set shifts for all but last character
+        for (int i = 0; i < m - 1; ++i) bmhShift[(quint8)pArray[i]] = m - 1 - i;
+    }
+
+    // Precompute ANSI classification table if needed
+    bool needAnsiTable = (st == ST_ANSI) || (st == ST_NOTANSI) || (st == ST_NOTANSIANDNULL);
+    bool ansiTable[256];
+    if (needAnsiTable) {
+        for (int i = 0; i < 256; ++i) {
+            ansiTable[i] = isAnsiSymbol((quint8)i);
+        }
+    }
+
     while ((nSize > nArraySize - 1) && (!(pPdStruct->bIsStop))) {
         nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + (nArraySize - 1)), nSize);
 
@@ -2913,42 +2955,120 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         }
 
         if (st == ST_COMPAREBYTES) {
-            for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
-                if (compareMemory(pBuffer + i, pArray, nArraySize)) {
-                    nResult = nOffset + i;
+            // Fast path: single-byte needle
+            if (nArraySize == 1) {
+                const unsigned char needle = (unsigned char)pArray[0];
+                const unsigned char *hay = (const unsigned char *)pBuffer;
+                const unsigned char *end = hay + (nTemp - (nArraySize - 1));
+                while (hay < end) {
+                    // Manual scan to avoid dependency on libc memchr behavior across chunks
+                    if (*hay == needle) {
+                        nResult = nOffset + (hay - (const unsigned char *)pBuffer);
+                        break;
+                    }
+                    ++hay;
+                }
+            } else if (bUseBMH) {
+                // Boyer–Moore–Horspool over the current chunk
+                const char *hay = pBuffer;
+                qint64 hayLen = nTemp;
+                qint64 m = nArraySize;
+                qint64 i = 0;
+                const char last = pArray[m - 1];
+                qint64 limit = hayLen - m;
+                while (i <= limit) {
+                    unsigned char c = (unsigned char)hay[i + m - 1];
+                    if (c == (unsigned char)last) {
+                        // Potential match; verify
+                        if (memcmp(hay + i, pArray, (size_t)m) == 0) {
+                            nResult = nOffset + i;
+                            break;
+                        }
+                    }
+                    i += (qint64)bmhShift[c];
+                }
+            } else {
+                // Fallback naive scan
+                for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
+                    if (compareMemory(pBuffer + i, pArray, nArraySize)) {
+                        nResult = nOffset + i;
 
-                    break;
+                        break;
+                    }
                 }
             }
         } else if (st == ST_NOTNULL) {
-            for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
-                if (_isMemoryNotNull(pBuffer + i, nArraySize)) {
-                    nResult = nOffset + i;
-
+            // Find first window of length nArraySize with no zero bytes using memchr to skip over zero-containing regions.
+            const char *hay = pBuffer;
+            qint64 hayLen = nTemp;
+            qint64 m = nArraySize;
+            qint64 limit = hayLen - (m - 1);
+            qint64 j = 0;
+            while (j < limit) {
+                const void *pz = memchr(hay + j, 0, (size_t)(hayLen - j));
+                qint64 runLen = (pz ? ((const char *)pz - (hay + j)) : (hayLen - j));
+                if (runLen >= m) {
+                    nResult = nOffset + j;
                     break;
                 }
+                // Skip to just after the zero byte
+                j += runLen + 1;
             }
         } else if (st == ST_ANSI) {
-            for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
-                if (_isMemoryAnsi(pBuffer + i, nArraySize)) {
-                    nResult = nOffset + i;
-
+            const unsigned char *hay = (const unsigned char *)pBuffer;
+            qint64 hayLen = nTemp;
+            qint64 m = nArraySize;
+            qint64 limit = hayLen - (m - 1);
+            qint64 j = 0;
+            while (j < limit) {
+                // Skip non-ANSI bytes to the start of an ANSI run
+                while (j < hayLen && !ansiTable[hay[j]]) j++;
+                if (j >= limit) break;
+                qint64 start = j;
+                // Extend ANSI run
+                while (j < hayLen && ansiTable[hay[j]]) j++;
+                qint64 runLen = j - start;
+                if (runLen >= m) {
+                    nResult = nOffset + start;
                     break;
                 }
             }
         } else if (st == ST_NOTANSI) {
-            for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
-                if (_isMemoryNotAnsi(pBuffer + i, nArraySize)) {
-                    nResult = nOffset + i;
-
+            const unsigned char *hay = (const unsigned char *)pBuffer;
+            qint64 hayLen = nTemp;
+            qint64 m = nArraySize;
+            qint64 limit = hayLen - (m - 1);
+            qint64 j = 0;
+            while (j < limit) {
+                // Skip ANSI bytes to the start of a non-ANSI run
+                while (j < hayLen && ansiTable[hay[j]]) j++;
+                if (j >= limit) break;
+                qint64 start = j;
+                // Extend non-ANSI run
+                while (j < hayLen && !ansiTable[hay[j]]) j++;
+                qint64 runLen = j - start;
+                if (runLen >= m) {
+                    nResult = nOffset + start;
                     break;
                 }
             }
         } else if (st == ST_NOTANSIANDNULL) {
-            for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
-                if (_isMemoryNotAnsiAndNull(pBuffer + i, nArraySize)) {
-                    nResult = nOffset + i;
-
+            const unsigned char *hay = (const unsigned char *)pBuffer;
+            qint64 hayLen = nTemp;
+            qint64 m = nArraySize;
+            qint64 limit = hayLen - (m - 1);
+            qint64 j = 0;
+            auto isGood = [&](unsigned char c) { return (!ansiTable[c] && c != 0); };
+            while (j < limit) {
+                // Skip bytes that are not part of the target class (ANSI or zero)
+                while (j < hayLen && !isGood(hay[j])) j++;
+                if (j >= limit) break;
+                qint64 start = j;
+                // Extend run of non-ANSI and non-zero bytes
+                while (j < hayLen && isGood(hay[j])) j++;
+                qint64 runLen = j - start;
+                if (runLen >= m) {
+                    nResult = nOffset + start;
                     break;
                 }
             }
@@ -3265,7 +3385,9 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                 QByteArray baFirst = listSignatureRecords.at(0).baData;
 
                 char *pData = baFirst.data();
-                qint32 nDataSize = listSignatureRecords.at(0).nSize;
+                // For ST_COMPAREBYTES (including remapped ST_FINDBYTES), use the actual baFirst size.
+                // For other ST_* modes, use the recorded window size.
+                qint32 nDataSize = (_st == ST_COMPAREBYTES) ? baFirst.size() : listSignatureRecords.at(0).nSize;
 
                 for (qint64 i = 0; (i < nSize) && (!(pPdStruct->bIsStop));) {
                     qint64 nTempOffset = _find_array(_st, nOffset + i, nSize - i, pData, nDataSize, pPdStruct);
@@ -5599,32 +5721,32 @@ bool XBinary::_initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
     pMemoryMap->nModuleAddress = getModuleAddress();
     pMemoryMap->bIsImage = isImage();
     pMemoryMap->nBinarySize = nTotalSize;
-    pMemoryMap->nImageSize = nTotalSize;
+    pMemoryMap->nImageSize = getImageSize();
     pMemoryMap->fileType = getFileType();
     pMemoryMap->mode = getMode();
     pMemoryMap->sArch = getArch();
     pMemoryMap->endian = getEndian();
     pMemoryMap->sType = getTypeAsString();
+    pMemoryMap->nEntryPointAddress = _getEntryPointAddress();
 
     return true;
 }
 
-XBinary::_MEMORY_MAP XBinary::_getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XBinary::_getMemoryMap(QList<FPART> *pListFParts, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-
+    // TODO isImage
     _MEMORY_MAP result = {};
 
     if (_initMemoryMap(&result, pPdStruct)) {
-        QList<FPART> listParts = getFileParts(nFileParts, 1000, pPdStruct);
+        std::sort(pListFParts->begin(), pListFParts->end(), compareFileParts);
 
-        std::sort(listParts.begin(), listParts.end(), compareFileParts);
-
-        qint32 nNumberOfParts = listParts.count();
+        XADDR nMaxAddress = 0;
+        XADDR nMinAddress = -1;
+        qint32 nNumberOfParts = pListFParts->count();
         qint32 nIndex = 0;
 
         for (qint32 i = 0; i < nNumberOfParts && isPdStructNotCanceled(pPdStruct); i++) {
-            FPART fpart = listParts.at(i);
+            FPART fpart = pListFParts->at(i);
 
             _MEMORY_RECORD record = {};
             record.nAddress = fpart.nVirtualAddress;
@@ -5653,64 +5775,52 @@ XBinary::_MEMORY_MAP XBinary::_getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStr
                 result.listRecords.append(virtualRecord);
             }
 
-            if (result.nModuleAddress == -1) {
-                result.nModuleAddress = fpart.nVirtualAddress;
-            } else {
-                result.nModuleAddress = qMin(result.nModuleAddress, fpart.nVirtualAddress);
-            }
+            if (fpart.nVirtualAddress != -1) {
+                if (nMinAddress == -1) {
+                    nMinAddress = fpart.nVirtualAddress;
+                }
 
-            result.nImageSize = qMax(result.nImageSize, (qint64)(fpart.nVirtualAddress + fpart.nVirtualSize));
+                nMinAddress = qMin(nMinAddress, fpart.nVirtualAddress);
+                nMaxAddress = qMax(nMaxAddress, (XADDR)(fpart.nVirtualAddress + fpart.nVirtualSize));
+            }
         }
+        result.nModuleAddress = nMinAddress;
+        result.nImageSize = nMaxAddress - nMinAddress;
     }
 
     return result;
 }
 
-QList<XBinary::HREGION> XBinary::_getPhysRegions(MAPMODE mapMode, PDSTRUCT *pPdStruct)
+XBinary::_MEMORY_MAP XBinary::_getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct)
 {
-    QList<XBinary::HREGION> listResult;
+    QList<FPART> listParts = getFileParts(nFileParts, 1000, pPdStruct);
 
-    _MEMORY_MAP memoryMap = getMemoryMap(mapMode, pPdStruct);
+    return _getMemoryMap(&listParts, pPdStruct);
+}
 
-    qint32 nNumberOfRecords = memoryMap.listRecords.count();
+QList<XBinary::FPART> XBinary::getHData(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct);
 
-    for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
-        if (!memoryMap.listRecords.at(i).bIsVirtual) {
-            XBinary::HREGION region = {};
-            region.sPrefix = QString::number(i);
-            region.nVirtualAddress = memoryMap.listRecords.at(i).nAddress;
-            region.nFileOffset = memoryMap.listRecords.at(i).nOffset;
-            region.nFileSize = memoryMap.listRecords.at(i).nSize;
-            region.nVirtualSize = memoryMap.listRecords.at(i).nSize;
-            region.sName = memoryMap.listRecords.at(i).sName;
-            region.sGUID = generateUUID();
-
-            listResult.append(region);
-        }
-    }
+    QList<XBinary::FPART> listResult;
 
     return listResult;
 }
 
-QList<XBinary::HREGION> XBinary::getHData(PDSTRUCT *pPdStruct)
+QList<XBinary::FPART> XBinary::getNativeRegions(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct);
 
-    QList<XBinary::HREGION> listResult;
+    QList<XBinary::FPART> listResult;
 
     return listResult;
 }
 
-QList<XBinary::HREGION> XBinary::getNativeRegions(PDSTRUCT *pPdStruct)
-{
-    return _getPhysRegions(MAPMODE_UNKNOWN, pPdStruct);
-}
-
-QList<XBinary::HREGION> XBinary::getNativeSubRegions(PDSTRUCT *pPdStruct)
+QList<XBinary::FPART> XBinary::getNativeSubRegions(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct);
 
-    QList<XBinary::HREGION> listResult;
+    QList<XBinary::FPART> listResult;
 
     return listResult;
 }
@@ -5735,7 +5845,7 @@ XBinary::_MEMORY_MAP XBinary::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
     result.nModuleAddress = getModuleAddress();
     result.nBinarySize = nTotalSize;
-    result.nImageSize = nTotalSize;
+    result.nImageSize = getImageSize();
     result.fileType = getFileType();
     result.mode = getMode();
     result.sArch = getArch();
@@ -5963,6 +6073,11 @@ XADDR XBinary::getEntryPointAddress()
 XADDR XBinary::getEntryPointAddress(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     return pMemoryMap->nEntryPointAddress;
+}
+
+XADDR XBinary::_getEntryPointAddress()
+{
+    return 0;
 }
 
 qint64 XBinary::getEntryPointRVA()
@@ -8814,10 +8929,10 @@ void XBinary::dumpMemoryMap()
     _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN);
 
     qDebug("%s", memoryMap.bIsImage ? "Image" : "File");
-    qDebug("Binary Size: %lld", memoryMap.nBinarySize);
-    qDebug("Image Size: %lld", memoryMap.nImageSize);
-    qDebug("Module Address: %lld", memoryMap.nModuleAddress);
-    qDebug("EntryPoint Address: %lld", memoryMap.nEntryPointAddress);
+    qDebug("Binary Size: %s", valueToHex(memoryMap.nBinarySize).toLatin1().data());
+    qDebug("Image Size: %s", valueToHex(memoryMap.nImageSize).toLatin1().data());
+    qDebug("Module Address: %s", valueToHex(memoryMap.nModuleAddress).toLatin1().data());
+    qDebug("EntryPoint Address: %s", valueToHex(memoryMap.nEntryPointAddress).toLatin1().data());
     qDebug("File Type: %s", fileTypeIdToString(memoryMap.fileType).toLatin1().data());
     qDebug("Mode: %s", modeIdToString(memoryMap.mode).toLatin1().data());
     qDebug("Endian: %s", endianToString(memoryMap.endian).toLatin1().data());
@@ -12255,57 +12370,28 @@ QString XBinary::getDataString(char *pData, qint32 nDataSize, const QString &sBa
     return sResult;
 }
 
-QList<XBinary::HREGION> XBinary::getFileRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+quint32 XBinary::hlTypeToFParts(HLTYPE hlType)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    Q_UNUSED(hlType)
 
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
-    QList<XBinary::HREGION> listResult;
-
-    qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
-
-    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-        if (pMemoryMap->listRecords.at(i).nOffset > 0) {
-            HREGION region = {};
-            region.sGUID = generateUUID();
-            region.sPrefix = QString::number(i);
-            region.nVirtualAddress = pMemoryMap->listRecords.at(i).nAddress;
-            region.nFileOffset = pMemoryMap->listRecords.at(i).nOffset;
-            region.nFileSize = pMemoryMap->listRecords.at(i).nSize;
-            region.sName = pMemoryMap->listRecords.at(i).sName;
-
-            listResult.append(region);
-        }
-    }
-
-    return listResult;
+    return 0;
 }
 
-QList<XBinary::HREGION> XBinary::getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruct)
+QList<XBinary::FPART> XBinary::getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruct)
 {
-    QList<XBinary::HREGION> listResult;
+    QList<XBinary::FPART> listResult;
 
     if (hlType == HLTYPE_TOTAL) {
-        HREGION region = {};
-        region.sGUID = generateUUID();
+        FPART region = {};
+        region.filePart = FILEPART_DATA;
         region.sName = tr("Total");
         region.nVirtualAddress = getBaseAddress();
         region.nVirtualSize = getImageSize();
         region.nFileOffset = 0;
         region.nFileSize = m_pDevice->size();
         listResult.append(region);
-    } else if (hlType == HLTYPE_FILEREGIONS) {
-        _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
-        listResult = getFileRegions(&memoryMap, pPdStruct);
-    } else if (hlType == HLTYPE_DATA) {
-        listResult = getHData(pPdStruct);
-    } else if (hlType == HLTYPE_NATIVEREGIONS) {
-        listResult = getNativeRegions(pPdStruct);
-    } else if (hlType == HLTYPE_NATIVESUBREGIONS) {
-        listResult = getNativeSubRegions(pPdStruct);
+    } else {
+        listResult = getFileParts(hlTypeToFParts(hlType), -1, pPdStruct);
     }
 
     return listResult;
@@ -12495,135 +12581,119 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSi
 
 bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, qint64 nOffset)
 {
-    // TODO optimize
+    const qint64 fileSize = getSize();
 
-    qint32 nNumberOfSignatures = pListSignatureRecords->count();
+    const int nNumberOfSignatures = pListSignatureRecords->count();
+    for (int i = 0; i < nNumberOfSignatures; ++i) {
+        const SIGNATURE_RECORD &rec = pListSignatureRecords->at(i);
 
-    for (qint32 i = 0; i < nNumberOfSignatures; i++) {
-        switch (pListSignatureRecords->at(i).st) {
-            case XBinary::ST_COMPAREBYTES: {
-                QByteArray baData = read_array(nOffset, pListSignatureRecords->at(i).baData.size());
+        switch (rec.st) {
+            case ST_COMPAREBYTES: {
+                const int need = rec.baData.size();
+                if (need <= 0 || (nOffset < 0) || (nOffset + need > fileSize)) return false;
 
-                if (baData.size() != pListSignatureRecords->at(i).baData.size()) {
-                    return false;
+                if (m_pConstMemory) {
+                    const char *src = ((const char *)m_pConstMemory) + nOffset;
+                    if (memcmp(src, rec.baData.constData(), (size_t)need) != 0) return false;
+                } else {
+                    QByteArray ba = read_array(nOffset, need);
+                    if (ba.size() != need) return false;
+                    if (!compareMemory((char *)ba.constData(), rec.baData.constData(), need)) return false;
                 }
-
-                if (!compareMemory(baData.data(), (char *)(pListSignatureRecords->at(i).baData.data()), baData.size())) {
-                    return false;
-                }
-
-                nOffset += baData.size();
+                nOffset += need;
             } break;
 
-            case XBinary::ST_NOTNULL:
-            case XBinary::ST_ANSI:
-            case XBinary::ST_NOTANSI:
-            case XBinary::ST_NOTANSIANDNULL: {
-                QByteArray baData = read_array(nOffset, pListSignatureRecords->at(i).nSize);
+            case ST_NOTNULL:
+            case ST_ANSI:
+            case ST_NOTANSI:
+            case ST_NOTANSIANDNULL: {
+                const int need = rec.nSize;
+                if (need <= 0 || (nOffset < 0) || (nOffset + need > fileSize)) return false;
 
-                if (baData.size() != pListSignatureRecords->at(i).nSize) {
-                    return false;
+                if (m_pConstMemory) {
+                    char *ptr = ((char *)m_pConstMemory) + nOffset;
+                    bool ok = true;
+                    if (rec.st == ST_NOTNULL) ok = _isMemoryNotNull(ptr, need);
+                    else if (rec.st == ST_ANSI) ok = _isMemoryAnsi(ptr, need);
+                    else if (rec.st == ST_NOTANSI) ok = _isMemoryNotAnsi(ptr, need);
+                    else if (rec.st == ST_NOTANSIANDNULL) ok = _isMemoryNotAnsiAndNull(ptr, need);
+                    if (!ok) return false;
+                } else {
+                    QByteArray ba = read_array(nOffset, need);
+                    if (ba.size() != need) return false;
+                    bool ok = true;
+                    if (rec.st == ST_NOTNULL) ok = _isMemoryNotNull(ba.data(), ba.size());
+                    else if (rec.st == ST_ANSI) ok = _isMemoryAnsi(ba.data(), ba.size());
+                    else if (rec.st == ST_NOTANSI) ok = _isMemoryNotAnsi(ba.data(), ba.size());
+                    else if (rec.st == ST_NOTANSIANDNULL) ok = _isMemoryNotAnsiAndNull(ba.data(), ba.size());
+                    if (!ok) return false;
                 }
-
-                if (pListSignatureRecords->at(i).st == XBinary::ST_NOTNULL) {
-                    if (!_isMemoryNotNull(baData.data(), baData.size())) {
-                        return false;
-                    }
-                } else if (pListSignatureRecords->at(i).st == XBinary::ST_ANSI) {
-                    if (!_isMemoryAnsi(baData.data(), baData.size())) {
-                        return false;
-                    }
-                } else if (pListSignatureRecords->at(i).st == XBinary::ST_NOTANSI) {
-                    if (!_isMemoryNotAnsi(baData.data(), baData.size())) {
-                        return false;
-                    }
-                } else if (pListSignatureRecords->at(i).st == XBinary::ST_NOTANSIANDNULL) {
-                    if (!_isMemoryNotAnsiAndNull(baData.data(), baData.size())) {
-                        return false;
-                    }
-                }
-
-                nOffset += baData.size();
+                nOffset += need;
             } break;
 
-            case XBinary::ST_FINDBYTES: {
-                qint64 nResult =
-                    find_byteArray(nOffset, pListSignatureRecords->at(i).nFindDelta + pListSignatureRecords->at(i).baData.size(), pListSignatureRecords->at(i).baData);
-
-                if (nResult == -1) {
-                    return false;
-                }
-
-                nOffset = nResult + pListSignatureRecords->at(i).baData.size();
+            case ST_FINDBYTES: {
+                const qint64 limit = rec.nFindDelta + rec.baData.size();
+                qint64 where = find_byteArray(nOffset, limit, rec.baData);
+                if (where == -1) return false;
+                nOffset = where + rec.baData.size();
             } break;
 
-            case XBinary::ST_SKIP:
-                // TODO Check
-                nOffset += pListSignatureRecords->at(i).nSize;
-                break;
+            case ST_SKIP: {
+                const qint64 add = rec.nSize;
+                if (add < 0 || (nOffset + add > fileSize)) return false;
+                nOffset += add;
+            } break;
 
-            case XBinary::ST_RELOFFSET: {
+            case ST_RELOFFSET: {
                 qint64 nValue = 0;
-
-                switch (pListSignatureRecords->at(i).nSizeOfAddr) {
+                switch (rec.nSizeOfAddr) {
                     case 1: nValue = 1 + read_int8(nOffset); break;
-                    case 2:
-                        nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap));
-                        // nValue &= 0xFFFF;
-                        break;
+                    case 2: nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
                     case 4: nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap)); break;
                     case 8: nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap)); break;
+                    default: return false;
                 }
 
                 if ((pMemoryMap->fileType == FT_COM) || (pMemoryMap->fileType == FT_MSDOS)) {
-                    // nOffset += nValue;
-                    qint64 _nOffset = nOffset & 0xFFFF0000;
-                    qint64 _nDelta = nOffset & 0xFFFF;
+                    const qint64 _nOffset = nOffset & 0xFFFF0000;
+                    const qint64 _nDelta = nOffset & 0xFFFF;
                     nOffset = _nOffset + ((_nDelta + nValue) & 0xFFFF);
                 } else {
                     XADDR _nAddress = offsetToAddress(pMemoryMap, nOffset);
                     _nAddress += nValue;
                     nOffset = addressToOffset(pMemoryMap, _nAddress);
                 }
-            }
+            } break;
 
-            break;
-
-            case XBinary::ST_ADDRESS: {
+            case ST_ADDRESS: {
                 XADDR _nAddress = 0;
-                switch (pListSignatureRecords->at(i).nSizeOfAddr) {
+                switch (rec.nSizeOfAddr) {
                     case 1: _nAddress = read_uint8(nOffset); break;
-
                     case 2: _nAddress = read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
-
                     case 4: _nAddress = read_uint32(nOffset, isBigEndian(pMemoryMap)); break;
-
                     case 8: _nAddress = read_uint64(nOffset, isBigEndian(pMemoryMap)); break;
+                    default: return false;
                 }
 
                 if (pMemoryMap->fileType == FT_MSDOS) {
-                    if (pListSignatureRecords->at(i).nSizeOfAddr == 2) {
+                    if (rec.nSizeOfAddr == 2) {
                         _nAddress += pMemoryMap->nCodeBase;
-                        nOffset = addressToOffset(pMemoryMap, _nAddress);  // TODO!
-                    } else if (pListSignatureRecords->at(i).nSizeOfAddr == 4) {
+                        nOffset = addressToOffset(pMemoryMap, _nAddress);
+                    } else if (rec.nSizeOfAddr == 4) {
                         quint16 nLow = (quint16)_nAddress;
                         quint16 nHigh = (quint16)(_nAddress >> 16);
                         nOffset = pMemoryMap->nStartLoadOffset + getSegmentAddress(nHigh, nLow);
                     }
                 } else {
-                    nOffset = addressToOffset(pMemoryMap, _nAddress);  // TODO!
+                    nOffset = addressToOffset(pMemoryMap, _nAddress);
                 }
             } break;
+        }
 
-                if (!isOffsetValid(pMemoryMap, nOffset)) {
-                    return false;
-                }
+        if (!isOffsetValid(pMemoryMap, nOffset)) {
+            return false;
         }
     }
-    //    CompareBytes,
-    //    RelOffsetFix,
-    //    RelOffset,
-    //    Address
 
     return true;
 }

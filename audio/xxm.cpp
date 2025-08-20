@@ -274,23 +274,6 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     return memoryMap;
 }
 
-QList<XXM::HREGION> XXM::getNativeRegions(PDSTRUCT *pPdStruct)
-{
-    return _getPhysRegions(MAPMODE_UNKNOWN, pPdStruct);
-}
-
-QList<XXM::HREGION> XXM::getNativeSubRegions(PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(pPdStruct)
-    return QList<HREGION>();
-}
-
-QList<XXM::HREGION> XXM::getHData(PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(pPdStruct)
-    return QList<HREGION>();
-}
-
 QString XXM::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XM_STRUCTID, sizeof(_TABLE_XM_STRUCTID) / sizeof(XBinary::XCONVERT));

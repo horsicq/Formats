@@ -191,21 +191,6 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     return result;
 }
 
-QList<XBinary::HREGION> XTTF::getNativeRegions(PDSTRUCT *pPdStruct)
-{
-    return _getPhysRegions(MAPMODE_UNKNOWN, pPdStruct);
-}
-
-QList<XBinary::HREGION> XTTF::getNativeSubRegions(PDSTRUCT * /*pPdStruct*/)
-{
-    return QList<HREGION>();
-}
-
-QList<XBinary::HREGION> XTTF::getHData(PDSTRUCT *pPdStruct)
-{
-    return getNativeRegions(pPdStruct);
-}
-
 QList<XBinary::DATA_HEADER> XTTF::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::DATA_HEADER> listResult;

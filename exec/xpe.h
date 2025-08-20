@@ -709,7 +709,7 @@ public:
 
     static QString resourceRecordToString(XPE::RESOURCE_RECORD resourceRecord);
 
-    qint64 getModuleAddress();
+    XADDR getModuleAddress();
 
     virtual QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
@@ -1318,7 +1318,6 @@ public:
 
     static XCERT_INFO getCertInfo(const QString &sFileName);
 
-    virtual QList<HREGION> getHData(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<FMT_MSG> checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct);
 
 #if defined(_MSC_VER)
@@ -1339,6 +1338,9 @@ public:
 
     virtual QString structIDToString(quint32 nID);
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+
+    virtual XADDR _getEntryPointAddress();
+    virtual quint32 hlTypeToFParts(HLTYPE hlType);
 
 private:
     quint16 _checkSum(qint64 nStartValue, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);

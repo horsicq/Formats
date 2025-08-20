@@ -4680,27 +4680,6 @@ qint64 XMACH::getFileFormatSize(PDSTRUCT *pPdStruct)
     return _calculateRawSize(pPdStruct);
 }
 
-QList<XBinary::HREGION> XMACH::getHData(PDSTRUCT *pPdStruct)
-{
-    QList<XBinary::HREGION> listResult;
-
-    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
-
-    {
-        HREGION region = {};
-        region.sGUID = generateUUID();
-        region.nVirtualAddress = memoryMap.nEntryPointAddress;
-        region.nFileOffset = addressToOffset(&memoryMap, region.nVirtualAddress);
-        region.nFileSize = 1;
-        region.nVirtualSize = region.nFileSize;
-        region.sName = tr("Entry point");
-
-        listResult.append(region);
-    }
-
-    return listResult;
-}
-
 XBinary::FILEFORMATINFO XMACH::getFileFormatInfo(PDSTRUCT *pPdStruct)
 {
     FILEFORMATINFO result = {};
@@ -4860,16 +4839,6 @@ XBinary::FILEFORMATINFO XMACH::getFileFormatInfo(PDSTRUCT *pPdStruct)
     }
 
     return result;
-}
-
-QList<XBinary::HREGION> XMACH::getNativeRegions(PDSTRUCT *pPdStruct)
-{
-    return _getPhysRegions(MAPMODE_SEGMENTS, pPdStruct);
-}
-
-QList<XBinary::HREGION> XMACH::getNativeSubRegions(PDSTRUCT *pPdStruct)
-{
-    return _getPhysRegions(MAPMODE_SECTIONS, pPdStruct);
 }
 
 bool XMACH::handleImport(qint64 nOffset, qint64 nRelOffset, qint64 nSize, QList<EXPORT_RECORD> *pListExportRecords, const QString &sCurrentName, PDSTRUCT *pPdStruct)

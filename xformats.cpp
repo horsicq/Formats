@@ -180,10 +180,10 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
     return bResult;
 }
 
-QList<XBinary::HREGION> XFormats::getHighlights(XBinary::FT fileType, QIODevice *pDevice, XBinary::HLTYPE hlType, bool bIsImage, XADDR nModuleAddress,
+QList<XBinary::FPART> XFormats::getHighlights(XBinary::FT fileType, QIODevice *pDevice, XBinary::HLTYPE hlType, bool bIsImage, XADDR nModuleAddress,
                                                 XBinary::PDSTRUCT *pPdStruct)
 {
-    QList<XBinary::HREGION> listResult;
+    QList<XBinary::FPART> listResult;
 
     XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
     listResult = pBinary->getHighlights(hlType, pPdStruct);

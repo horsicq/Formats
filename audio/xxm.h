@@ -132,10 +132,6 @@ public:
     virtual QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
-    virtual QList<HREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
-    virtual QList<HREGION> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);
-    virtual QList<HREGION> getHData(PDSTRUCT *pPdStruct = nullptr);
-
     virtual QString structIDToString(quint32 nID);
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, void *pUserData,

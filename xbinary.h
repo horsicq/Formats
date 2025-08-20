@@ -291,6 +291,19 @@ public:
         FILEPART_ALL = 0xFFFFFFFF,
     };
 
+    struct FPART {
+        qint64 nFileOffset;
+        qint64 nFileSize;
+        XADDR nVirtualAddress;
+        qint64 nVirtualSize;
+        QString sName;
+        QString sOriginalName;
+        FILEPART filePart;
+        QMap<FPART_PROP, QVariant> mapProperties;
+    };
+
+    static quint32 getFPART_crc32(const FPART &fpart);
+
     // enum MMT {
     //     MMT_UNKNOWN = 0,
     //     MMT_HEADER,
@@ -758,30 +771,12 @@ public:
     enum HLTYPE {
         HLTYPE_UNKNOWN = 0,
         HLTYPE_TOTAL,
-        HLTYPE_FILEREGIONS,
         HLTYPE_NATIVEREGIONS,
         HLTYPE_NATIVESUBREGIONS,
         HLTYPE_DATA
     };
 
-    struct RFLAGS {
-        bool bRead;
-        bool bWrite;
-        bool bExecute;
-    };
-
-    struct HREGION {
-        QString sGUID;
-        QString sPrefix;
-        XADDR nVirtualAddress;
-        qint64 nVirtualSize;
-        qint64 nFileOffset;
-        qint64 nFileSize;
-        RFLAGS rflags;
-        QString sName;
-    };
-
-    static HREGION findParentHRegion(const QList<HREGION> &listHRegions, const HREGION &hRegion);
+    static FPART findParentFPart(const QList<FPART> &listFParts, const FPART &fPart);
 
     struct PDRECORD {
         qint64 nCurrent;
@@ -931,7 +926,6 @@ public:
 
     virtual QString getCompressMethodString();
 
-private:
     enum ST {
         ST_COMPAREBYTES = 0,
         ST_NOTNULL,
@@ -953,7 +947,6 @@ private:
         qint32 nSize;
     };
 
-public:
     explicit XBinary(QIODevice *pDevice = nullptr, bool bIsImage = false,
                      XADDR nModuleAddress = -1);  // mb TODO parent for signals/slot
     XBinary(const QString &sFileName);
@@ -1385,11 +1378,11 @@ public:
 
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     _MEMORY_MAP _getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct = nullptr);
+    _MEMORY_MAP _getMemoryMap(QList<FPART> *pListFParts, PDSTRUCT *pPdStruct = nullptr);
 
-    virtual QList<HREGION> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
-    virtual QList<HREGION> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);
-    virtual QList<HREGION> getHData(PDSTRUCT *pPdStruct = nullptr);
-    QList<HREGION> _getPhysRegions(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<FPART> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<FPART> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<FPART> getHData(PDSTRUCT *pPdStruct = nullptr);
 
     static qint32 getNumberOfPhysicalRecords(_MEMORY_MAP *pMemoryMap);
     static qint32 getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap);
@@ -1406,6 +1399,7 @@ public:
     virtual void setEntryPointOffset(qint64 nEntryPointOffset);
     XADDR getEntryPointAddress();
     XADDR getEntryPointAddress(_MEMORY_MAP *pMemoryMap);
+    virtual XADDR _getEntryPointAddress();
 
     qint64 getEntryPointRVA();
     qint64 getEntryPointRVA(_MEMORY_MAP *pMemoryMap);
@@ -1889,8 +1883,8 @@ public:
     REGION_FILL getRegionFill(qint64 nOffset, qint64 nSize, qint32 nAlignment);
     static QString getDataString(char *pData, qint32 nDataSize, const QString &sBaseType, bool bIsBigEndian);
 
-    QList<HREGION> getFileRegions(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
-    QList<HREGION> getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruct = nullptr);
+    QList<FPART> getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruct = nullptr);
+    virtual quint32 hlTypeToFParts(HLTYPE hlType);
 
     static qint64 align_up(qint64 nValue, qint64 nAlignment);
     static qint64 align_down(qint64 nValue, qint64 nAlignment);
@@ -1963,17 +1957,6 @@ public:
     enum CRC_TYPE {
         CRC_TYPE_UNKNOWN = 0,
         CRC_TYPE_ZIP,
-    };
-
-    struct FPART {
-        qint64 nFileOffset;
-        qint64 nFileSize;
-        XADDR nVirtualAddress;
-        qint64 nVirtualSize;
-        QString sName;
-        QString sOriginalName;
-        FILEPART filePart;
-        QMap<FPART_PROP, QVariant> mapProperties;
     };
 
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);

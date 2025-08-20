@@ -1851,206 +1851,14 @@ bool XPE::isIATPresent()
 
 XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(mapMode)
+    XBinary::_MEMORY_MAP result = {};
 
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
+    if (mapMode == MAPMODE_UNKNOWN) {
+        mapMode = MAPMODE_SECTIONS;  // Default mode
     }
 
-    _MEMORY_MAP result = {};
-
-    qint32 nIndex = 0;
-
-    result.mode = getMode();
-
-    if (result.mode == MODE_64) {
-        result.fileType = FT_PE64;
-    } else {
-        result.fileType = FT_PE32;
-    }
-
-    result.sArch = getArch();
-    result.endian = getEndian();
-    result.sType = getTypeAsString();
-
-    result.nModuleAddress = getModuleAddress();
-    result.nBinarySize = getSize();
-    result.nImageSize = S_ALIGN_UP(getOptionalHeader_SizeOfImage(), 0x1000);
-    result.nEntryPointAddress = result.nModuleAddress + getOptionalHeader_AddressOfEntryPoint();
-
-    OFFSETSIZE osStringTable = getStringTable();
-
-    qint32 nNumberOfSections = qMin((qint32)getFileHeader_NumberOfSections(), XPE_DEF::S_MAX_SECTIONCOUNT);
-    qint64 nFileAlignment = getOptionalHeader_FileAlignment();
-    qint64 nSectionAlignment = getOptionalHeader_SectionAlignment();
-    // qint64 nBaseAddress=getOptionalHeader_ImageBase();
-    qint64 nHeadersSize = getOptionalHeader_SizeOfHeaders();  // mb TODO calc for UPX
-
-    if (nFileAlignment > 0x10000)  // Invalid file
-    {
-        nFileAlignment = 0x200;
-    }
-
-    if (nSectionAlignment > 0x10000)  // Invalid file
-    {
-        nSectionAlignment = 0x1000;
-    }
-
-    if (nHeadersSize > getSize()) {
-        nHeadersSize = getSize();
-    }
-
-    //    if(nFileAlignment==nSectionAlignment)
-    //    {
-    //        nFileAlignment=1;
-    //    }
-
-    qint64 nVirtualSizeofHeaders = S_ALIGN_UP64(nHeadersSize, nSectionAlignment);
-    qint64 nMaxOffset = 0;
-    // Check Format
-    bool bValid = false;
-
-    if (nHeadersSize != 0) {
-        bValid = true;
-    }
-
-    if (bValid) {
-        _MEMORY_RECORD recordHeaderRaw = {};
-
-        QString sHeaderName = tr("Header");
-
-        if (!isImage()) {
-            recordHeaderRaw.filePart = FILEPART_HEADER;
-            recordHeaderRaw.nAddress = result.nModuleAddress;
-            recordHeaderRaw.nOffset = 0;
-            recordHeaderRaw.nSize = nHeadersSize;
-            recordHeaderRaw.sName = sHeaderName;
-            recordHeaderRaw.nIndex = nIndex++;
-
-            result.listRecords.append(recordHeaderRaw);
-
-            if (nVirtualSizeofHeaders - nHeadersSize) {
-                _MEMORY_RECORD record = {};
-                record.filePart = FILEPART_HEADER;
-                record.bIsVirtual = true;
-
-                record.nAddress = result.nModuleAddress + nHeadersSize;
-                record.nOffset = -1;
-                record.nSize = nVirtualSizeofHeaders - nHeadersSize;
-                record.sName = sHeaderName;
-                record.nIndex = nIndex++;
-
-                result.listRecords.append(record);
-            }
-        } else {
-            recordHeaderRaw.filePart = FILEPART_HEADER;
-            recordHeaderRaw.nAddress = result.nModuleAddress;
-            recordHeaderRaw.nOffset = 0;
-            recordHeaderRaw.nSize = nVirtualSizeofHeaders;
-            recordHeaderRaw.sName = sHeaderName;
-            recordHeaderRaw.nIndex = nIndex++;
-
-            result.listRecords.append(recordHeaderRaw);
-        }
-
-        nMaxOffset = recordHeaderRaw.nSize;
-
-        // Started from 1!
-        for (qint32 i = 0; i < nNumberOfSections; i++) {
-            XPE_DEF::IMAGE_SECTION_HEADER section = getSectionHeader(i);
-
-            if (section.PointerToRawData > result.nBinarySize) {
-                section.PointerToRawData = 0;
-            }
-
-            // TODO for corrupted files
-            if (section.SizeOfRawData > result.nBinarySize) {
-                // Corrupted files
-                section.SizeOfRawData = result.nBinarySize - section.PointerToRawData;
-            }
-
-            qint64 nFileOffset = section.PointerToRawData;
-            //
-            nFileOffset = S_ALIGN_DOWN64(nFileOffset, nFileAlignment);
-            //        qint64
-            //        nFileSize=__ALIGN_UP(section.SizeOfRawData,nFileAlignment);
-            qint64 nFileSize = section.SizeOfRawData + (section.PointerToRawData - nFileOffset);
-            XADDR nVirtualAddress = result.nModuleAddress + section.VirtualAddress;
-            qint64 nVirtualSize = S_ALIGN_UP(section.Misc.VirtualSize, nSectionAlignment);
-
-            if (nVirtualSize < nFileSize) {
-                nVirtualSize = nFileSize;
-            }
-
-            if (!isImage()) {
-                if (nFileSize) {
-                    nMaxOffset = qMax(nMaxOffset, (qint64)(nFileOffset + nFileSize));
-                }
-            } else {
-                if (nVirtualSize) {
-                    nMaxOffset = qMax(nMaxOffset, (qint64)(nVirtualAddress + nVirtualSize));
-                }
-            }
-
-            QString _sSectionName = QString((char *)section.Name);
-
-            _sSectionName.resize(qMin(_sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
-
-            _sSectionName = convertSectionName(_sSectionName, &osStringTable);
-
-            QString sSectionName = _sSectionName;
-
-            if (!isImage()) {
-                if (nFileSize) {
-                    _MEMORY_RECORD record = {};
-
-                    record.filePart = FILEPART_SECTION;
-                    record.nFilePartNumber = i + 1;
-
-                    record.nAddress = nVirtualAddress;
-                    record.nOffset = nFileOffset;
-                    record.nSize = nFileSize;
-                    record.sName = sSectionName;
-                    record.nIndex = nIndex++;
-
-                    result.listRecords.append(record);
-                }
-
-                if (nVirtualSize - nFileSize > 0) {
-                    _MEMORY_RECORD record = {};
-                    record.bIsVirtual = true;
-
-                    record.filePart = FILEPART_SECTION;
-                    record.nFilePartNumber = i + 1;
-
-                    record.nAddress = nVirtualAddress + nFileSize;
-                    record.nOffset = -1;
-                    record.nSize = nVirtualSize - nFileSize;
-                    record.sName = sSectionName;
-                    record.nIndex = nIndex++;
-
-                    result.listRecords.append(record);
-                }
-            } else {
-                _MEMORY_RECORD record = {};
-
-                record.filePart = FILEPART_SECTION;
-                record.nFilePartNumber = i + 1;
-
-                record.nAddress = nVirtualAddress;
-                record.nOffset = nVirtualAddress - result.nModuleAddress;
-                record.nSize = nVirtualSize;
-                record.sName = sSectionName;
-                record.nIndex = nIndex++;
-
-                result.listRecords.append(record);
-            }
-        }
-
-        _handleOverlay(&result);
+    if (mapMode == MAPMODE_SECTIONS) {
+        result = _getMemoryMap(FILEPART_HEADER | FILEPART_SECTION | FILEPART_OVERLAY, pPdStruct);
     }
 
     return result;
@@ -2058,7 +1866,7 @@ XBinary::_MEMORY_MAP XPE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
 XADDR XPE::getBaseAddress()
 {
-    return (qint64)getOptionalHeader_ImageBase();
+    return (XADDR)getOptionalHeader_ImageBase();
 }
 
 void XPE::setBaseAddress(XADDR nBaseAddress)
@@ -4061,7 +3869,7 @@ QString XPE::resourceRecordToString(RESOURCE_RECORD resourceRecord)
     return sResult;
 }
 
-qint64 XPE::getModuleAddress()
+XADDR XPE::getModuleAddress()
 {
     // mb TODO
     return XBinary::getModuleAddress();
@@ -8976,131 +8784,131 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
     return result;
 }
 
-QList<XBinary::HREGION> XPE::getHData(PDSTRUCT *pPdStruct)
-{
-    QList<XBinary::HREGION> listResult;
+// QList<XBinary::HREGION> XPE::getHData(PDSTRUCT *pPdStruct)
+// {
+//     QList<XBinary::HREGION> listResult;
 
-    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+//     _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
-    {
-        HREGION region = {};
-        region.sGUID = generateUUID();
-        region.nVirtualAddress = memoryMap.nEntryPointAddress;
-        region.nFileOffset = addressToOffset(&memoryMap, region.nVirtualAddress);
-        region.nFileSize = 1;
-        region.nVirtualSize = region.nFileSize;
-        region.sName = tr("Entry point");
+//     {
+//         HREGION region = {};
+//         region.sGUID = generateUUID();
+//         region.nVirtualAddress = memoryMap.nEntryPointAddress;
+//         region.nFileOffset = addressToOffset(&memoryMap, region.nVirtualAddress);
+//         region.nFileSize = 1;
+//         region.nVirtualSize = region.nFileSize;
+//         region.sName = tr("Entry point");
 
-        listResult.append(region);
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+//         listResult.append(region);
+//     }
+//     {
+//         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
-        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
-            HREGION region = {};
-            region.sGUID = generateUUID();
-            region.nVirtualAddress = dataDirectory.VirtualAddress;
-            region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
-            region.nFileSize = dataDirectory.Size;
-            region.nVirtualSize = region.nFileSize;
-            region.sName = tr("Export");
+//         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+//             HREGION region = {};
+//             region.sGUID = generateUUID();
+//             region.nVirtualAddress = dataDirectory.VirtualAddress;
+//             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
+//             region.nFileSize = dataDirectory.Size;
+//             region.nVirtualSize = region.nFileSize;
+//             region.sName = tr("Export");
 
-            listResult.append(region);
-        }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
+//             listResult.append(region);
+//         }
+//     }
+//     {
+//         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
 
-        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
-            HREGION region = {};
-            region.sGUID = generateUUID();
-            region.nVirtualAddress = dataDirectory.VirtualAddress;
-            region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
-            region.nFileSize = dataDirectory.Size;
-            region.nVirtualSize = region.nFileSize;
-            region.sName = tr("Import");
+//         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+//             HREGION region = {};
+//             region.sGUID = generateUUID();
+//             region.nVirtualAddress = dataDirectory.VirtualAddress;
+//             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
+//             region.nFileSize = dataDirectory.Size;
+//             region.nVirtualSize = region.nFileSize;
+//             region.sName = tr("Import");
 
-            listResult.append(region);
-        }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
+//             listResult.append(region);
+//         }
+//     }
+//     {
+//         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
 
-        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
-            HREGION region = {};
-            region.sGUID = generateUUID();
-            region.nVirtualAddress = dataDirectory.VirtualAddress;
-            region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
-            region.nFileSize = dataDirectory.Size;
-            region.nVirtualSize = region.nFileSize;
-            region.sName = tr("Relocs");
+//         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+//             HREGION region = {};
+//             region.sGUID = generateUUID();
+//             region.nVirtualAddress = dataDirectory.VirtualAddress;
+//             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
+//             region.nFileSize = dataDirectory.Size;
+//             region.nVirtualSize = region.nFileSize;
+//             region.sName = tr("Relocs");
 
-            listResult.append(region);
-        }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
+//             listResult.append(region);
+//         }
+//     }
+//     {
+//         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 
-        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
-            HREGION region = {};
-            region.sGUID = generateUUID();
-            region.nVirtualAddress = dataDirectory.VirtualAddress;
-            region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
-            region.nFileSize = dataDirectory.Size;
-            region.nVirtualSize = region.nFileSize;
-            region.sName = tr("Resources");
+//         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+//             HREGION region = {};
+//             region.sGUID = generateUUID();
+//             region.nVirtualAddress = dataDirectory.VirtualAddress;
+//             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
+//             region.nFileSize = dataDirectory.Size;
+//             region.nVirtualSize = region.nFileSize;
+//             region.sName = tr("Resources");
 
-            listResult.append(region);
-        }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+//             listResult.append(region);
+//         }
+//     }
+//     {
+//         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
 
-        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
-            HREGION region = {};
-            region.sGUID = generateUUID();
-            region.nVirtualAddress = dataDirectory.VirtualAddress;
-            region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
-            region.nFileSize = dataDirectory.Size;
-            region.nVirtualSize = region.nFileSize;
-            region.sName = QString("TLS");
+//         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+//             HREGION region = {};
+//             region.sGUID = generateUUID();
+//             region.nVirtualAddress = dataDirectory.VirtualAddress;
+//             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
+//             region.nFileSize = dataDirectory.Size;
+//             region.nVirtualSize = region.nFileSize;
+//             region.sName = QString("TLS");
 
-            listResult.append(region);
-        }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+//             listResult.append(region);
+//         }
+//     }
+//     {
+//         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
-        if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
-            HREGION region = {};
-            region.sGUID = generateUUID();
-            region.nVirtualAddress = dataDirectory.VirtualAddress;
-            region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
-            region.nFileSize = dataDirectory.Size;
-            region.nVirtualSize = region.nFileSize;
-            region.sName = QString(".NET");
+//         if (isDataDirectoryValid(&dataDirectory, &memoryMap)) {
+//             HREGION region = {};
+//             region.sGUID = generateUUID();
+//             region.nVirtualAddress = dataDirectory.VirtualAddress;
+//             region.nFileOffset = relAddressToOffset(&memoryMap, region.nVirtualAddress);
+//             region.nFileSize = dataDirectory.Size;
+//             region.nVirtualSize = region.nFileSize;
+//             region.sName = QString(".NET");
 
-            listResult.append(region);
-        }
-    }
-    {
-        XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY);
+//             listResult.append(region);
+//         }
+//     }
+//     {
+//         XPE_DEF::IMAGE_DATA_DIRECTORY dataDirectory = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY);
 
-        if (dataDirectory.VirtualAddress && isOffsetValid(&memoryMap, dataDirectory.VirtualAddress)) {
-            HREGION region = {};
-            region.sGUID = generateUUID();
-            region.nVirtualAddress = -1;
-            region.nFileOffset = dataDirectory.VirtualAddress;
-            region.nFileSize = dataDirectory.Size;
-            region.nVirtualSize = region.nFileSize;
-            region.sName = tr("Certificate");
+//         if (dataDirectory.VirtualAddress && isOffsetValid(&memoryMap, dataDirectory.VirtualAddress)) {
+//             HREGION region = {};
+//             region.sGUID = generateUUID();
+//             region.nVirtualAddress = -1;
+//             region.nFileOffset = dataDirectory.VirtualAddress;
+//             region.nFileSize = dataDirectory.Size;
+//             region.nVirtualSize = region.nFileSize;
+//             region.sName = tr("Certificate");
 
-            listResult.append(region);
-        }
-    }
+//             listResult.append(region);
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 #if defined(_MSC_VER)
 QString XPE::getCertNameString(PCCERT_CONTEXT pCertContext, CERTNAMESTRING certNameString)
 {
@@ -9235,6 +9043,26 @@ quint64 XPE::getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader,
 QString XPE::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XPE_STRUCTID, sizeof(_TABLE_XPE_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+XADDR XPE::_getEntryPointAddress()
+{
+    return getModuleAddress() + getOptionalHeader_AddressOfEntryPoint();
+}
+
+quint32 XPE::hlTypeToFParts(HLTYPE hlType)
+{
+    quint32 nResult = 0;
+
+    if (hlType == HLTYPE_NATIVEREGIONS) {
+        nResult = FILEPART_HEADER + FILEPART_SECTION + FILEPART_OVERLAY;
+    } else if (hlType == HLTYPE_NATIVESUBREGIONS) {
+        // TODO
+    } else if (hlType == HLTYPE_DATA) {
+        // nResult = FILEPART_RESOURCE;
+    }
+
+    return nResult;
 }
 
 QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
@@ -9737,77 +9565,226 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
 QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::FPART> listResult;
+    QList<XBinary::FPART> _listCalc;
 
-    XBinary::_MEMORY_MAP memoryMap = getMemoryMap(XBinary::MAPMODE_SECTIONS, pPdStruct);
+    bool bCalcAdress = false;
 
-    if (isResourcesPresent()) {
-        QList<XPE::RESOURCE_RECORD> listResources = getResources(&memoryMap, 10000, pPdStruct);
+    if (nFileParts & FILEPART_RESOURCE) {
+        bCalcAdress = true;
+    }
 
-        qint32 nNumberOfRecords = listResources.count();
+    OFFSETSIZE osStringTable = getStringTable();
 
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
+    XADDR nModuleAddress = getModuleAddress();
+    qint64 nTotalSize = getSize();
+    qint64 nMaxOffset = 0;
+    qint32 nNumberOfSections = qMin((qint32)getFileHeader_NumberOfSections(), XPE_DEF::S_MAX_SECTIONCOUNT);
+    qint64 nFileAlignment = getOptionalHeader_FileAlignment();
+    qint64 nSectionAlignment = getOptionalHeader_SectionAlignment();
+    // qint64 nBaseAddress=getOptionalHeader_ImageBase();
+    qint64 nHeadersSize = getOptionalHeader_SizeOfHeaders();  // mb TODO calc for UPX
 
-        for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-            qint64 nResourceOffset = listResources.at(i).nOffset;
-            qint64 nResourceSize = listResources.at(i).nSize;
+    if (nFileAlignment > 0x10000)  // Invalid file
+    {
+        nFileAlignment = 0x200;
+    }
 
-            if (checkOffsetSize(nResourceOffset, nResourceSize)) {
-                FPART record = {};
-                record.filePart = XBinary::FILEPART_RESOURCE;
-                record.nFileOffset = nResourceOffset;
-                record.nFileSize = nResourceSize;
-                record.sName = QString("%1 %2").arg(tr("Resource"), QString::number(i + 1));
+    if (nSectionAlignment > 0x10000)  // Invalid file
+    {
+        nSectionAlignment = 0x1000;
+    }
 
+    if (nHeadersSize > getSize()) {
+        nHeadersSize = getSize();
+    }
+
+    //    if(nFileAlignment==nSectionAlignment)
+    //    {
+    //        nFileAlignment=1;
+    //    }
+    // Check Format
+    bool bValid = false;
+
+    if (nHeadersSize != 0) {
+        bValid = true;
+    }
+
+    if (bCalcAdress || (nFileParts & FILEPART_HEADER) || (nFileParts & FILEPART_OVERLAY)) {
+        FPART record = {};
+        record.filePart = FILEPART_HEADER;
+        record.nVirtualAddress = nModuleAddress;
+        record.nVirtualSize = S_ALIGN_UP64(nHeadersSize, nSectionAlignment);
+        record.nFileOffset = 0;
+        record.nFileSize = nHeadersSize;
+        record.sName = tr("Header");
+
+        if (bCalcAdress) {
+            _listCalc.append(record);
+        }
+
+        if (nFileParts & FILEPART_HEADER) {
+            listResult.append(record);
+        }
+
+        nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
+    }
+
+    if (bCalcAdress || (nFileParts & FILEPART_SECTION) || (nFileParts & FILEPART_OVERLAY)) {
+        for (qint32 i = 0; i < nNumberOfSections; i++) {
+            XPE_DEF::IMAGE_SECTION_HEADER section = getSectionHeader(i);
+
+            if (section.PointerToRawData > nTotalSize) {
+                section.PointerToRawData = 0;
+            }
+
+            if (section.PointerToRawData + section.SizeOfRawData > nTotalSize) {
+                // Corrupted files
+                section.SizeOfRawData = nTotalSize - section.PointerToRawData;
+            }
+
+            FPART record = {};
+            record.filePart = FILEPART_SECTION;
+            record.nVirtualAddress = nModuleAddress + section.VirtualAddress;
+            record.nVirtualSize = S_ALIGN_UP(section.Misc.VirtualSize, nSectionAlignment);
+            record.nFileOffset =  S_ALIGN_DOWN64(section.PointerToRawData, nFileAlignment);
+            record.nFileSize = section.SizeOfRawData + (section.PointerToRawData - record.nFileOffset);
+
+            if (bCalcAdress) {
+                _listCalc.append(record);
+            }
+
+            if (nFileParts & FILEPART_SECTION) {
+                QString _sSectionName = QString((char *)section.Name);
+                _sSectionName.resize(qMin(_sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
+                _sSectionName = convertSectionName(_sSectionName, &osStringTable);
+                record.sOriginalName = _sSectionName;
+                record.sName = QString("%1 (%2) [\"%3\"]").arg(tr("Section"), QString::number(i + 1), _sSectionName);
                 listResult.append(record);
             }
 
-            XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
+            nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
         }
-
-        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
     }
 
-    if (isDebugPresent()) {
-        QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> listDebug = getDebugList(&memoryMap);
+    if (nFileParts & FILEPART_OVERLAY) {
+        if (nMaxOffset < nTotalSize) {
+            FPART record = {};
 
-        qint32 nNumberOfRecords = listDebug.count();
+            record.filePart = FILEPART_OVERLAY;
+            record.nFileOffset = nMaxOffset;
+            record.nFileSize = getSize() - nMaxOffset;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Overlay");
 
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
+            listResult.append(record);
+        }
+    }
 
-        for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-            qint64 nRecordOffset = listDebug.at(i).PointerToRawData;
-            qint64 nRecordSize = listDebug.at(i).SizeOfData;
-            quint32 nRecordType = listDebug.at(i).Type;
+    _MEMORY_MAP memoryMap;
 
-            if ((nRecordType == 0) || (nRecordType == 2)) {
-                if (checkOffsetSize(nRecordOffset, nRecordSize)) {
+    if (bCalcAdress) {
+        memoryMap = _getMemoryMap(&_listCalc, pPdStruct);
+    }
+
+    if (nFileParts & FILEPART_RESOURCE) {
+        if (isResourcesPresent()) {
+            QList<XPE::RESOURCE_RECORD> listResources = getResources(&memoryMap, 10000, pPdStruct);
+
+            qint32 nNumberOfRecords = listResources.count();
+
+            qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+            XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
+
+            for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                qint64 nResourceOffset = listResources.at(i).nOffset;
+                qint64 nResourceSize = listResources.at(i).nSize;
+
+                if (checkOffsetSize(nResourceOffset, nResourceSize)) {
                     FPART record = {};
-                    record.filePart = XBinary::FILEPART_DEBUGDATA;
-                    record.nFileOffset = nRecordOffset;
-                    record.nFileSize = nRecordSize;
-                    record.sName = QString("%1 %2").arg(tr("Debug data"), nRecordType);
+                    record.filePart = XBinary::FILEPART_RESOURCE;
+                    record.nFileOffset = nResourceOffset;
+                    record.nFileSize = nResourceSize;
+                    record.sName = QString("%1 %2").arg(tr("Resource"), QString::number(i));
 
                     listResult.append(record);
                 }
+
+                XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
             }
 
-            XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
+            XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
         }
-
-        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
     }
 
-    if (isOverlayPresent(&memoryMap, pPdStruct)) {
-        FPART record = {};
-        record.filePart = XBinary::FILEPART_OVERLAY;
-        record.nFileOffset = getOverlayOffset(&memoryMap, pPdStruct);
-        record.nFileSize = getOverlaySize(&memoryMap, pPdStruct);
-        record.sName = QString("%1").arg(tr("Overlay"));
 
-        listResult.append(record);
-    }
+    // if (isResourcesPresent()) {
+    //     QList<XPE::RESOURCE_RECORD> listResources = getResources(&memoryMap, 10000, pPdStruct);
+
+    //     qint32 nNumberOfRecords = listResources.count();
+
+    //     qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+    //     XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
+
+    //     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+    //         qint64 nResourceOffset = listResources.at(i).nOffset;
+    //         qint64 nResourceSize = listResources.at(i).nSize;
+
+    //         if (checkOffsetSize(nResourceOffset, nResourceSize)) {
+    //             FPART record = {};
+    //             record.filePart = XBinary::FILEPART_RESOURCE;
+    //             record.nFileOffset = nResourceOffset;
+    //             record.nFileSize = nResourceSize;
+    //             record.sName = QString("%1 %2").arg(tr("Resource"), QString::number(i + 1));
+
+    //             listResult.append(record);
+    //         }
+
+    //         XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
+    //     }
+
+    //     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+    // }
+
+    // if (isDebugPresent()) {
+    //     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> listDebug = getDebugList(&memoryMap);
+
+    //     qint32 nNumberOfRecords = listDebug.count();
+
+    //     qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+    //     XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
+
+    //     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+    //         qint64 nRecordOffset = listDebug.at(i).PointerToRawData;
+    //         qint64 nRecordSize = listDebug.at(i).SizeOfData;
+    //         quint32 nRecordType = listDebug.at(i).Type;
+
+    //         if ((nRecordType == 0) || (nRecordType == 2)) {
+    //             if (checkOffsetSize(nRecordOffset, nRecordSize)) {
+    //                 FPART record = {};
+    //                 record.filePart = XBinary::FILEPART_DEBUGDATA;
+    //                 record.nFileOffset = nRecordOffset;
+    //                 record.nFileSize = nRecordSize;
+    //                 record.sName = QString("%1 %2").arg(tr("Debug data"), nRecordType);
+
+    //                 listResult.append(record);
+    //             }
+    //         }
+
+    //         XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
+    //     }
+
+    //     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+    // }
+
+    // if (isOverlayPresent(&memoryMap, pPdStruct)) {
+    //     FPART record = {};
+    //     record.filePart = XBinary::FILEPART_OVERLAY;
+    //     record.nFileOffset = getOverlayOffset(&memoryMap, pPdStruct);
+    //     record.nFileSize = getOverlaySize(&memoryMap, pPdStruct);
+    //     record.sName = QString("%1").arg(tr("Overlay"));
+
+    //     listResult.append(record);
+    // }
 
     return listResult;
 }
