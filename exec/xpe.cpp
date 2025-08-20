@@ -9646,7 +9646,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             record.filePart = FILEPART_SECTION;
             record.nVirtualAddress = nModuleAddress + section.VirtualAddress;
             record.nVirtualSize = S_ALIGN_UP(section.Misc.VirtualSize, nSectionAlignment);
-            record.nFileOffset =  S_ALIGN_DOWN64(section.PointerToRawData, nFileAlignment);
+            record.nFileOffset = S_ALIGN_DOWN64(section.PointerToRawData, nFileAlignment);
             record.nFileSize = section.SizeOfRawData + (section.PointerToRawData - record.nFileOffset);
 
             if (bCalcAdress) {
@@ -9715,7 +9715,6 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
         }
     }
-
 
     // if (isResourcesPresent()) {
     //     QList<XPE::RESOURCE_RECORD> listResources = getResources(&memoryMap, 10000, pPdStruct);

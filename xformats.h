@@ -84,7 +84,7 @@ public:
     static qint64 getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static bool isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static QList<XBinary::FPART> getHighlights(XBinary::FT fileType, QIODevice *pDevice, XBinary::HLTYPE hlType, bool bIsImage = false, XADDR nModuleAddress = -1,
-                                                 XBinary::PDSTRUCT *pPdStruct = nullptr);
+                                               XBinary::PDSTRUCT *pPdStruct = nullptr);
     static bool isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static bool isSigned(const QString &sFileName);
     static XBinary::OFFSETSIZE getSignOffsetSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);

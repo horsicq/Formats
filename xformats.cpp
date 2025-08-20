@@ -181,7 +181,7 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
 }
 
 QList<XBinary::FPART> XFormats::getHighlights(XBinary::FT fileType, QIODevice *pDevice, XBinary::HLTYPE hlType, bool bIsImage, XADDR nModuleAddress,
-                                                XBinary::PDSTRUCT *pPdStruct)
+                                              XBinary::PDSTRUCT *pPdStruct)
 {
     QList<XBinary::FPART> listResult;
 
