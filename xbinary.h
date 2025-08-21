@@ -413,6 +413,7 @@ public:
         FT_RIFF,
         FT_AVI,
         FT_WEBP,
+    FT_WAV,
         FT_SIGNATURE,
         FT_NPM,
         FT_DEB,

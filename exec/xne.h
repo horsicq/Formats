@@ -29,13 +29,26 @@ class XNE : public XMSDOS {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_IMAGE_DOS_HEADER,       // Reuse from base via call
+        STRUCTID_IMAGE_DOS_HEADEREX,     // Reuse from base via call
+        STRUCTID_IMAGE_OS2_HEADER,       // NE header
+        STRUCTID_ENTRY_TABLE,            // Raw entry table (hex)
+        STRUCTID_SEGMENT_TABLE,          // Table of NE_SEGMENT
+        STRUCTID_RESOURCE_TABLE,         // Raw resource table (hex)
+        STRUCTID_RESIDENT_NAME_TABLE,    // Raw resident name table (hex)
+        STRUCTID_MODULE_REFERENCE_TABLE, // Raw module reference table (hex)
+        STRUCTID_IMPORTED_NAMES_TABLE,   // Raw imported names table (hex)
+        STRUCTID_NONRESIDENT_NAME_TABLE  // Raw non-resident name table (hex)
+    };
     enum TYPE {
         TYPE_UNKNOWN = 0,
         TYPE_EXE,
         TYPE_DLL,
-        TYPE_DRIVER
-        // TODO Check More
-        // mb FONT
+    TYPE_DRIVER,
+    TYPE_FONT
+    // TODO Check More
     };
 
     explicit XNE(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -137,11 +150,21 @@ public:
     virtual ENDIAN getEndian();
     virtual FT getFileType();
     virtual qint32 getType();
+    virtual qint64 getImageSize() override;
+    virtual XADDR _getEntryPointAddress() override;
     virtual OSNAME getOsName();
     virtual QString getOsVersion();
     virtual QString typeIdToString(qint32 nType);
 
     virtual QString getFileFormatExtsString();
+    virtual QList<MAPMODE> getMapModesList() override;
+
+    // Data headers/inspection
+    virtual QString structIDToString(quint32 nID) override;
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
+
+    // File parts (header/segments/overlay)
+    virtual QList<XBinary::FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 };
 
 #endif  // XNE_H

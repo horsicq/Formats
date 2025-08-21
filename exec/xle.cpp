@@ -1245,151 +1245,35 @@ XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
 
-    XBinary::PDSTRUCT pdStructEmpty = {};
+    // Build memory map from file parts (header/objects-as-segments/overlay)
+    return _getMemoryMap(FILEPART_HEADER | FILEPART_SEGMENT | FILEPART_OVERLAY, pPdStruct);
+}
 
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
+qint64 XLE::getImageSize()
+{
+    // Compute image size as highest end VA among objects
+    QList<XLE_DEF::o32_obj> objs = getObjects();
+    XADDR maxEnd = 0;
+    for (int i = 0; i < objs.size(); ++i) {
+        // Approximate object size as sum of its pages
+        XADDR base = objs.at(i).o32_base;
+        quint32 pages = objs.at(i).o32_mapsize;
+        quint32 pageSize = getImageVxdHeader_pagesize();
+        XADDR end = base + (XADDR)pages * (XADDR)pageSize;
+        if (end > maxEnd) maxEnd = end;
     }
+    return (qint64)maxEnd;
+}
 
-    XBinary::_MEMORY_MAP result = {};
-
-    //    bool bIsLE=isLE();
-    //    bool bIsLX=isLX();
-
-    result.sArch = getArch();
-    result.mode = getMode();
-    result.endian = getEndian();
-    result.sType = getTypeAsString();
-    result.fileType = getFileType();
-
-    result.nBinarySize = getSize();
-
-    quint32 nStartObj = getImageVxdHeader_startobj();
-    quint32 nEIP = getImageVxdHeader_eip();
-
-    QList<XLE_DEF::o32_obj> listObjects = getObjects();
-
-    if ((nStartObj <= (quint32)listObjects.count()) && (nStartObj > 0)) {
-        result.nEntryPointAddress = listObjects.at(nStartObj - 1).o32_base + nEIP;
-    }
-
-    // TODO Image size CONST
-    // TODO Image Base
-    //    result.nImageSize=0xFFFF;
-
-    quint32 nNumberOfPages = getImageVxdHeader_mpages();
-    quint32 nLastPageSize = getImageVxdHeader_lastpagesize();
-    quint32 nPageSize = getImageVxdHeader_pagesize();
-    qint64 nDataPageOffset = getImageVxdHeader_datapage();
-    qint64 nMapOffset = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
-    // quint32 nNumberOfMaps = getImageVxdHeader_mpages();
-
-    if (nDataPageOffset > 0) {
-        _MEMORY_RECORD memoryRecord = {};
-
-        memoryRecord.nAddress = 0;
-        memoryRecord.nOffset = 0;
-        memoryRecord.nSize = nDataPageOffset;
-        memoryRecord.sName = tr("Header");
-        memoryRecord.filePart = FILEPART_HEADER;
-
-        result.listRecords.append(memoryRecord);
-    }
-
-    qint64 nLoaderSize = 0;
-
-    if (nNumberOfPages > 0) {
-        nLoaderSize = nDataPageOffset + (nNumberOfPages - 1) * nPageSize + nLastPageSize;
-    }
-
-    qint32 nNumberOfObjects = listObjects.count();
-
-    qint32 nIndex = 0;
-    qint64 nMaxOffset = 0;
-    XADDR nMinAddress = -1;
-    XADDR nMaxAddress = 0;
-
-    for (qint32 i = 0; (i < nNumberOfObjects) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-        qint64 nObjectMinOffset = -1;
-        qint64 nObjectMaxOffset = 0;
-        XADDR nObjectCurrentAddress = listObjects.at(i).o32_base;
-
-        for (qint32 j = 0; j < (qint32)listObjects.at(i).o32_mapsize; j++) {
-            _MEMORY_RECORD memoryRecord = {};
-
-            if (result.fileType == FT_LE) {
-                XLE_DEF::o16_map record = _read_o16_map(nMapOffset + (listObjects.at(i).o32_pagemap - 1 + j) * sizeof(XLE_DEF::o16_map));
-
-                qint64 nCurrentOffset = 0;
-
-                quint32 nOfs = record.o16_pagenum[2] + (record.o16_pagenum[1] << 8) + ((quint32)record.o16_pagenum[0] << 16);
-
-                if (nOfs) {
-                    nCurrentOffset = ((nOfs - 1) * nPageSize) + nDataPageOffset;
-                }
-
-                memoryRecord.nOffset = nCurrentOffset;
-                memoryRecord.nSize = qMin((qint64)nPageSize, nLoaderSize - nCurrentOffset);
-            } else if (result.fileType == FT_LX) {
-                XLE_DEF::o32_map record = _read_o32_map(nMapOffset + (listObjects.at(i).o32_pagemap - 1 + j) * sizeof(XLE_DEF::o32_map));
-
-                memoryRecord.nOffset = nDataPageOffset + record.o32_pagedataoffset;
-                memoryRecord.nSize = record.o32_pagesize;
-            }
-
-            if (nObjectMinOffset == -1) {
-                nObjectMinOffset = memoryRecord.nOffset;
-            }
-
-            nObjectMinOffset = qMin(nObjectMinOffset, memoryRecord.nOffset);
-            nObjectMaxOffset = qMax(nObjectMaxOffset, memoryRecord.nOffset + memoryRecord.nSize);
-
-            memoryRecord.nAddress = nObjectCurrentAddress;
-            nObjectCurrentAddress += memoryRecord.nSize;
-
-            if (mapMode == MAPMODE_MAPS) {
-                memoryRecord.nIndex = nIndex;
-                memoryRecord.sName = QString("%1(%2)").arg(tr("Map"), QString::number(listObjects.at(i).o32_pagemap + j));
-                memoryRecord.filePart = FILEPART_SEGMENT;
-
-                result.listRecords.append(memoryRecord);
-
-                nIndex++;
-            }
-        }
-
-        if ((mapMode == MAPMODE_OBJECTS) || (mapMode == MAPMODE_UNKNOWN)) {
-            _MEMORY_RECORD memoryRecord = {};
-
-            memoryRecord.nIndex = nIndex;
-            memoryRecord.nAddress = listObjects.at(i).o32_base;
-            memoryRecord.nOffset = nObjectMinOffset;
-            memoryRecord.nSize = nObjectMaxOffset - nObjectMinOffset;
-            memoryRecord.sName = QString("%1(%2)").arg(tr("Object"), QString::number(i + 1));
-            memoryRecord.filePart = FILEPART_SEGMENT;
-
-            result.listRecords.append(memoryRecord);
-
-            nIndex++;
-        }
-
-        nMaxOffset = qMax(nMaxOffset, nObjectMaxOffset);
-
-        if (nMinAddress == (XADDR)-1) {
-            nMinAddress = listObjects.at(i).o32_base;
-        }
-
-        nMinAddress = qMin(nMinAddress, (XADDR)listObjects.at(i).o32_base);
-        nMaxAddress = qMax(nMaxAddress, (XADDR)nObjectCurrentAddress);
-    }
-
-    result.nModuleAddress = getModuleAddress();
-    result.nImageSize = nMaxAddress;
-
-    _handleOverlay(&result);
-
-    return result;
+XADDR XLE::_getEntryPointAddress()
+{
+    // Entry point is base of start object + EIP
+    quint32 startObj = getImageVxdHeader_startobj();
+    quint32 eip = getImageVxdHeader_eip();
+    if (startObj == 0) return (XADDR)-1;
+    QList<XLE_DEF::o32_obj> objs = getObjects();
+    if (startObj > (quint32)objs.size()) return (XADDR)-1;
+    return (XADDR)objs.at(startObj - 1).o32_base + (XADDR)eip;
 }
 
 XBinary::MODE XLE::getMode()
@@ -1561,4 +1445,158 @@ QMap<quint64, QString> XLE::getImageLEMflagsS()
 QString XLE::getFileFormatExtsString()
 {
     return "LE(vxd lx)";
+}
+
+// --- Data headers/inspection and file parts ---------------------------------
+
+QString XLE::structIDToString(quint32 nID)
+{
+    // Reuse DOS struct IDs for base if requested, else provide simple mapping for LE header
+    switch (nID) {
+        case XMSDOS::STRUCTID_IMAGE_DOS_HEADER: return QString("IMAGE_DOS_HEADER");
+        case XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX: return QString("IMAGE_DOS_HEADEREX");
+        default: break;
+    }
+    // For LE/LX, expose a generic header id string
+    return QString("IMAGE_VXD_HEADER");
+}
+
+QList<XBinary::DATA_HEADER> XLE::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    QList<DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == XBinary::STRUCTID_UNKNOWN) {
+        // Root: defaults + DOS header + LE/LX header
+        DATA_HEADERS_OPTIONS opts = dataHeadersOptions;
+        opts.bChildren = true;
+        opts.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        opts.dhMode = XBinary::DHMODE_HEADER;
+        opts.fileType = dataHeadersOptions.pMemoryMap->fileType;
+
+        // DOS header (extended)
+        {
+            DATA_HEADERS_OPTIONS dos = opts;
+            dos.nID = XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX;
+            dos.locType = LT_OFFSET;
+            dos.nLocation = 0;
+            listResult.append(XMSDOS::getDataHeaders(dos, pPdStruct));
+        }
+
+        // LE/LX header at e_lfanew
+        qint64 nHdrOff = getImageVxdHeaderOffset();
+        if (nHdrOff != -1) {
+            DATA_HEADERS_OPTIONS le = opts;
+            le.nID = 1; // local id placeholder
+            le.locType = LT_OFFSET;
+            le.nLocation = nHdrOff;
+
+            DATA_HEADER dh = _initDataHeader(le, QString("%1").arg(isLE() ? "IMAGE_VXD_HEADER(LE)" : "IMAGE_VXD_HEADER(LX)"));
+            dh.nSize = getImageVxdHeaderSize();
+            // Minimal key fields
+            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_magic), 2, "e32_magic", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_cpu), 2, "e32_cpu", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_os), 2, "e32_os", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_objtab), 4, "e32_objtab", VT_DWORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_objcnt), 4, "e32_objcnt", VT_DWORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_objmap), 4, "e32_objmap", VT_DWORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_mpages), 4, "e32_mpages", VT_DWORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_pagesize), 4, "e32_pagesize", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+            listResult.append(dh);
+        }
+    } else {
+        // For any DOS header request, delegate to base
+        if ((dataHeadersOptions.nID == XMSDOS::STRUCTID_IMAGE_DOS_HEADER) || (dataHeadersOptions.nID == XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX)) {
+            listResult.append(XMSDOS::getDataHeaders(dataHeadersOptions, pPdStruct));
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+    Q_UNUSED(pPdStruct)
+
+    QList<FPART> listResult;
+    qint64 nTotal = getSize();
+
+    // Header
+    if (nFileParts & FILEPART_HEADER) {
+        FPART rec = {};
+        rec.filePart = FILEPART_HEADER;
+        rec.nFileOffset = 0;
+        rec.nFileSize = qMin<qint64>(getImageVxdHeaderOffset() + getImageVxdHeaderSize(), nTotal);
+        rec.nVirtualAddress = 0;
+        rec.sName = tr("Header");
+        listResult.append(rec);
+    }
+
+    // Segments/objects (treat as segments for file parts)
+    if (nFileParts & FILEPART_SEGMENT) {
+        QList<XLE_DEF::o32_obj> objs = getObjects();
+        quint32 nPageSize = getImageVxdHeader_pagesize();
+    quint32 nPages = getImageVxdHeader_mpages();
+    quint32 nLastPageSize = getImageVxdHeader_lastpagesize();
+        qint64 nDataPageOff = getImageVxdHeader_datapage();
+        qint64 nMapOff = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
+    qint64 nLoaderSize = 0;
+    if (nPages > 0) nLoaderSize = nDataPageOff + (qint64)(nPages - 1) * (qint64)nPageSize + (qint64)nLastPageSize;
+
+        for (qint32 i = 0; i < objs.size(); ++i) {
+            // Determine object span over pages
+            qint64 nObjMin = -1;
+            qint64 nObjMax = 0;
+            for (qint32 j = 0; j < (qint32)objs.at(i).o32_mapsize; j++) {
+                qint64 nPageDataOffset = 0;
+                qint64 nThisPageSize = nPageSize;
+                if (isLE()) {
+                    XLE_DEF::o16_map m = _read_o16_map(nMapOff + (objs.at(i).o32_pagemap - 1 + j) * sizeof(XLE_DEF::o16_map));
+                    quint32 nOfs = m.o16_pagenum[2] + (m.o16_pagenum[1] << 8) + ((quint32)m.o16_pagenum[0] << 16);
+                    if (nOfs) nPageDataOffset = ((nOfs - 1) * nPageSize) + nDataPageOff;
+                    // For LE, all pages except last have standard page size; clamp to loader end
+                    if (nLoaderSize) nThisPageSize = qMin((qint64)nPageSize, nLoaderSize - nPageDataOffset);
+                } else {
+                    XLE_DEF::o32_map m = _read_o32_map(nMapOff + (objs.at(i).o32_pagemap - 1 + j) * sizeof(XLE_DEF::o32_map));
+                    nPageDataOffset = nDataPageOff + m.o32_pagedataoffset;
+                    nThisPageSize = m.o32_pagesize ? m.o32_pagesize : nPageSize;
+                }
+                if (nObjMin == -1) nObjMin = nPageDataOffset;
+                nObjMin = qMin(nObjMin, nPageDataOffset);
+                nObjMax = qMax(nObjMax, nPageDataOffset + nThisPageSize);
+            }
+
+            if (nObjMin >= 0 && nObjMax > nObjMin) {
+                FPART rec = {};
+                rec.filePart = FILEPART_SEGMENT;
+                rec.nFileOffset = nObjMin;
+                rec.nFileSize = qMin<qint64>(nTotal - nObjMin, nObjMax - nObjMin);
+                rec.nVirtualAddress = objs.at(i).o32_base;
+                rec.nVirtualSize = rec.nFileSize;
+                rec.sName = QString("%1(%2)").arg(tr("Object")).arg(i + 1);
+                listResult.append(rec);
+            }
+        }
+        Q_UNUSED(nPages)
+    }
+
+    // Overlay
+    if (nFileParts & FILEPART_OVERLAY) {
+        qint64 nMax = 0;
+        for (int i = 0; i < listResult.size(); ++i) {
+            const auto &r = listResult.at(i);
+            nMax = qMax(nMax, r.nFileOffset + r.nFileSize);
+        }
+        if (nMax < nTotal) {
+            FPART rec = {};
+            rec.filePart = FILEPART_OVERLAY;
+            rec.nFileOffset = nMax;
+            rec.nFileSize = nTotal - nMax;
+            rec.nVirtualAddress = -1;
+            rec.sName = tr("Overlay");
+            listResult.append(rec);
+        }
+    }
+
+    return listResult;
 }

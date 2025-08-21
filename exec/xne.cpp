@@ -20,6 +20,20 @@
  */
 #include "xne.h"
 
+XBinary::XCONVERT _TABLE_XNE_STRUCTID[] = {
+    {XNE::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XNE::STRUCTID_IMAGE_DOS_HEADER, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
+    {XNE::STRUCTID_IMAGE_DOS_HEADEREX, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
+    {XNE::STRUCTID_IMAGE_OS2_HEADER, "IMAGE_OS2_HEADER", QString("IMAGE_OS2_HEADER")},
+    {XNE::STRUCTID_ENTRY_TABLE, "ENTRY_TABLE", QString("Entry table")},
+    {XNE::STRUCTID_SEGMENT_TABLE, "SEGMENT_TABLE", QString("Segment table" )},
+    {XNE::STRUCTID_RESOURCE_TABLE, "RESOURCE_TABLE", QString("Resource table")},
+    {XNE::STRUCTID_RESIDENT_NAME_TABLE, "RESIDENT_NAME_TABLE", QString("Resident name table")},
+    {XNE::STRUCTID_MODULE_REFERENCE_TABLE, "MODULE_REFERENCE_TABLE", QString("Module reference table")},
+    {XNE::STRUCTID_IMPORTED_NAMES_TABLE, "IMPORTED_NAMES_TABLE", QString("Imported names table")},
+    {XNE::STRUCTID_NONRESIDENT_NAME_TABLE, "NONRESIDENT_NAME_TABLE", QString("Non-resident name table")},
+};
+
 XNE::XNE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevice, bIsImage, nModuleAddress)
 {
 }
@@ -852,94 +866,16 @@ XNE_DEF::NE_SEGMENT XNE::_read_NE_SEGMENT(qint64 nOffset)
 
 XBinary::_MEMORY_MAP XNE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(mapMode)
+    XBinary::_MEMORY_MAP result = {};
 
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
+    // Default to segmented view
+    if (mapMode == MAPMODE_UNKNOWN) {
+        mapMode = MAPMODE_SEGMENTS;
     }
 
-    _MEMORY_MAP result = {};
-
-    qint32 nIndex = 0;
-
-    result.sArch = getArch();
-    result.sType = getTypeAsString();
-
-    result.fileType = FT_NE;
-    result.mode = MODE_16SEG;
-    result.nBinarySize = getSize();
-
-    quint16 nShift = getImageOS2Header_align();
-    QList<XNE_DEF::NE_SEGMENT> listSegments = getSegmentList();
-
-    qint32 nNumberOfSegments = listSegments.count();
-
-    result.nModuleAddress = getModuleAddress();       // TODO const
-    result.nImageSize = nNumberOfSegments * 0x10000;  // TODO Check
-    result.nEntryPointAddress = getImageOS2Header_csip();
-
-    qint64 nMaxOffset = 0;
-
-    for (qint32 i = 0; i < nNumberOfSegments; i++) {
-        qint64 nFileSize = listSegments.at(i).dwFileSize;
-        qint64 nFileOffset = listSegments.at(i).dwFileOffset << nShift;
-
-        if (nFileSize == 0) {
-            nFileSize = 0x10000;
-        }
-
-        // nFileSize = S_ALIGN_UP(nFileSize, 0x200);  // TODO const
-
-        if (nFileOffset)  // if offset = 0 no data
-        {
-            _MEMORY_RECORD record = {};
-            record.nSize = nFileSize;
-            record.nOffset = nFileOffset;
-            record.nAddress = (i + 1) * 0x10000;  // TODO const
-            record.filePart = FILEPART_SEGMENT;
-            record.nIndex = nIndex++;
-
-            result.listRecords.append(record);
-        }
-
-        if (0x10000 - nFileSize) {
-            _MEMORY_RECORD record = {};
-            record.nSize = 0x10000 - nFileSize;
-            record.nOffset = -1;
-            record.nAddress = (i + 1) * 0x10000 + nFileSize;  // TODO const
-            record.filePart = FILEPART_SEGMENT;
-            record.nIndex = nIndex++;
-            record.bIsVirtual = true;
-
-            result.listRecords.append(record);
-        }
-
-        if (nFileOffset) {
-            nMaxOffset = qMax(nMaxOffset, nFileOffset + nFileSize);
-        }
+    if (mapMode == MAPMODE_SEGMENTS) {
+        result = _getMemoryMap(FILEPART_HEADER | FILEPART_SEGMENT | FILEPART_OVERLAY, pPdStruct);
     }
-
-    // TODO Overlay !!!
-    // Check overlay!!
-    //    qint64 nOverlaySize=result.nRawSize-nMaxOffset;
-
-    //    if(nOverlaySize>0)
-    //    {
-    //        XBinary::_MEMORY_RECORD record={};
-
-    //        record.type=MMT_OVERLAY;
-    //        record.nAddress=-1;
-    //        record.nSize=nOverlaySize;
-    //        record.nOffset=nMaxOffset;
-    //        record.nIndex=nIndex++;
-
-    //        result.listRecords.append(record);
-    //    }
-
-    _handleOverlay(&result);
 
     return result;
 }
@@ -1063,7 +999,59 @@ XBinary::FT XNE::getFileType()
 
 qint32 XNE::getType()
 {
-    return TYPE_EXE;  // TODO
+    TYPE result = TYPE_EXE;
+
+    quint16 nFlags = getImageOS2Header_flags();
+
+    // If library/driver bit set in NE flags
+    if (nFlags & 0x8000) {
+        // Heuristic: scan non-resident name table for the word 'driver'
+        // If found, treat as DRIVER; if 'font' present, treat as FONT; otherwise classify as DLL
+        bool bIsDriver = false;
+        bool bIsFont = false;
+        qint64 nNRTableOffset = getNotResindentNameTableOffset();
+        quint16 nNRTableSize = getImageOS2Header_cbnrestab();
+
+        if ((nNRTableOffset > 0) && (nNRTableSize > 0) && checkOffsetSize({nNRTableOffset, nNRTableSize})) {
+            qint64 nPos = nNRTableOffset;
+            qint64 nEnd = nNRTableOffset + nNRTableSize;
+            while (nPos < nEnd) {
+                quint8 nLen = read_uint8(nPos);
+                nPos += 1;
+                if (nLen == 0) {
+                    break;
+                }
+                QString sName = read_ansiString(nPos, qMin<qint64>(nLen, 255));
+                if (sName.contains("driver", Qt::CaseInsensitive)) {
+                    bIsDriver = true;
+                    break;
+                }
+                if (sName.contains("font", Qt::CaseInsensitive)) {
+                    bIsFont = true;
+                    // don't break yet; prefer 'driver' if both appear, but mark font
+                }
+                // Skip name bytes and trailing ordinal (2 bytes)
+                nPos += nLen + 2;
+            }
+        }
+
+        if (bIsDriver) {
+            result = TYPE_DRIVER;
+        } else if (bIsFont) {
+            result = TYPE_FONT;
+        } else {
+            result = TYPE_DLL;
+        }
+    }
+
+    return result;
+}
+
+qint64 XNE::getImageSize()
+{
+    // Sum of segment virtual sizes in NE: N * 0x10000
+    qint32 nNumberOfSegments = qMax<qint32>(1, getImageOS2Header_cseg());
+    return (qint64)nNumberOfSegments * 0x10000;
 }
 
 QString XNE::getOsVersion()
@@ -1116,7 +1104,8 @@ QString XNE::typeIdToString(qint32 nType)
         case TYPE_UNKNOWN: sResult = tr("Unknown"); break;
         case TYPE_EXE: sResult = QString("EXE"); break;
         case TYPE_DLL: sResult = QString("DLL"); break;
-        case TYPE_DRIVER: sResult = QString("Driver"); break;
+    case TYPE_DRIVER: sResult = QString("Driver"); break;
+    case TYPE_FONT: sResult = QString("Font"); break;
     }
 
     return sResult;
@@ -1125,4 +1114,323 @@ QString XNE::typeIdToString(qint32 nType)
 QString XNE::getFileFormatExtsString()
 {
     return QString("ne");
+}
+
+QList<XBinary::MAPMODE> XNE::getMapModesList()
+{
+    QList<MAPMODE> listResult;
+    listResult.append(MAPMODE_SEGMENTS);
+    return listResult;
+}
+
+XADDR XNE::_getEntryPointAddress()
+{
+    // CS:IP encoded in ne_csip
+    XADDR nModule = getModuleAddress();
+    quint32 csip = getImageOS2Header_csip();
+    quint16 ip = (quint16)(csip & 0xFFFF);
+    quint16 cs = (quint16)((csip >> 16) & 0xFFFF);
+    return nModule + ((XADDR)cs) * 0x10000 + ip;
+}
+
+QString XNE::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XNE_STRUCTID, sizeof(_TABLE_XNE_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    QList<DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        // Root: add defaults and DOS header, then NE header at e_lfanew with children
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+
+        // Append DOS header (extended) via base implementation
+        {
+            DATA_HEADERS_OPTIONS dosOpts = _dataHeadersOptions;
+            dosOpts.nID = XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX;
+            dosOpts.locType = LT_OFFSET;
+            dosOpts.nLocation = 0;
+            QList<DATA_HEADER> listDos = XMSDOS::getDataHeaders(dosOpts, pPdStruct);
+            listResult.append(listDos);
+        }
+
+        // Append NE header
+        {
+            DATA_HEADERS_OPTIONS neOpts = _dataHeadersOptions;
+            neOpts.nID = STRUCTID_IMAGE_OS2_HEADER;
+            neOpts.locType = LT_OFFSET;
+            neOpts.nLocation = getImageOS2HeaderOffset();
+            listResult.append(getDataHeaders(neOpts, pPdStruct));
+        }
+    } else {
+        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+
+        if (nStartOffset != -1) {
+            if (dataHeadersOptions.nID == STRUCTID_IMAGE_OS2_HEADER) {
+                // NE header
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XNE::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = sizeof(XNE_DEF::IMAGE_OS2_HEADER);
+
+                // Fields
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_magic), 2, "ne_magic", VT_WORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_ver), 1, "ne_ver", VT_UINT8, DRF_VERSION,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_rev), 1, "ne_rev", VT_UINT8, DRF_VERSION,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_enttab), 2, "ne_enttab", VT_WORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbenttab), 2, "ne_cbenttab", VT_WORD, DRF_SIZE,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_crc), 4, "ne_crc", VT_DWORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_flags), 2, "ne_flags", VT_WORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_autodata), 2, "ne_autodata", VT_WORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_heap), 2, "ne_heap", VT_WORD, DRF_SIZE,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_stack), 2, "ne_stack", VT_WORD, DRF_SIZE,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_csip), 4, "ne_csip", VT_DWORD, DRF_ADDRESS,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_sssp), 4, "ne_sssp", VT_DWORD, DRF_ADDRESS,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cseg), 2, "ne_cseg", VT_WORD, DRF_COUNT,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cmod), 2, "ne_cmod", VT_WORD, DRF_COUNT,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbnrestab), 2, "ne_cbnrestab", VT_WORD, DRF_SIZE,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_segtab), 2, "ne_segtab", VT_WORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_rsrctab), 2, "ne_rsrctab", VT_WORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_restab), 2, "ne_restab", VT_WORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_modtab), 2, "ne_modtab", VT_WORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_imptab), 2, "ne_imptab", VT_WORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_nrestab), 4, "ne_nrestab", VT_DWORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cmovent), 2, "ne_cmovent", VT_WORD, DRF_COUNT,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_align), 2, "ne_align", VT_WORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cres), 2, "ne_cres", VT_WORD, DRF_COUNT,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_exetyp), 1, "ne_exetyp", VT_UINT8, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_flagsothers), 1, "ne_flagsothers", VT_UINT8, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_pretthunks), 2, "ne_pretthunks", VT_WORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_psegrefbytes), 2, "ne_psegrefbytes", VT_WORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_swaparea), 2, "ne_swaparea", VT_WORD, DRF_SIZE,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_expver), 2, "ne_expver", VT_WORD, DRF_VERSION,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    // Compute key offsets/sizes
+                    const qint64 nBase = getImageOS2HeaderOffset();
+                    const quint16 offEntry = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_enttab));
+                    const quint16 cbEntry = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbenttab));
+                    const quint16 offSeg = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_segtab));
+                    const quint16 offRes = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_rsrctab));
+                    const quint16 offResNames = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_restab));
+                    const quint16 offModRef = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_modtab));
+                    const quint16 offImpNames = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_imptab));
+                    const quint32 offNonRes = read_uint32(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_nrestab));
+                    const quint16 cSeg = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cseg));
+
+                    // Entry table (hex)
+                    if (cbEntry && _isOffsetValid(nBase + offEntry)) {
+                        listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_ENTRY_TABLE), dataHeader.dsID, STRUCTID_ENTRY_TABLE,
+                                                         nBase + offEntry, cbEntry));
+                    }
+
+                    // Segment table (table mode)
+                    if (cSeg && _isOffsetValid(nBase + offSeg)) {
+                        DATA_HEADERS_OPTIONS segOpts = dataHeadersOptions;
+                        segOpts.dhMode = XBinary::DHMODE_TABLE;
+                        segOpts.nID = STRUCTID_SEGMENT_TABLE;
+                        segOpts.locType = LT_OFFSET;
+                        segOpts.nLocation = nBase + offSeg;
+                        segOpts.nCount = cSeg;
+                        segOpts.nSize = (qint64)cSeg * (qint64)sizeof(XNE_DEF::NE_SEGMENT);
+
+                        DATA_HEADER segHeader = _initDataHeader(segOpts, XNE::structIDToString(STRUCTID_SEGMENT_TABLE));
+                        segHeader.dsID = segOpts.dsID_parent;  // keep chaining
+                        segHeader.dsID_parent = dataHeader.dsID;
+                        segHeader.nSize = segOpts.nSize;
+                        segHeader.nCount = cSeg;
+                        segHeader.dhMode = XBinary::DHMODE_TABLE;
+                        segHeader.locType = LT_OFFSET;
+                        segHeader.nLocation = segOpts.nLocation;
+                        segHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwFileOffset), 2, "FileOffset", VT_WORD, DRF_OFFSET,
+                                                                   dataHeadersOptions.pMemoryMap->endian));
+                        segHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwFileSize), 2, "FileSize", VT_WORD, DRF_SIZE,
+                                                                   dataHeadersOptions.pMemoryMap->endian));
+                        segHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwFlags), 2, "Flags", VT_WORD, DRF_UNKNOWN,
+                                                                   dataHeadersOptions.pMemoryMap->endian));
+                        segHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwMinAllocSize), 2, "MinAllocSize", VT_WORD, DRF_SIZE,
+                                                                   dataHeadersOptions.pMemoryMap->endian));
+
+                        listResult.append(segHeader);
+                    }
+
+                    // Resource table: from rsrctab to restab
+                    if (_isOffsetValid(nBase + offRes) && (offResNames > offRes)) {
+                        qint64 nResSize = (qint64)offResNames - (qint64)offRes;
+                        if (nResSize > 0) {
+                            listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_RESOURCE_TABLE), dataHeader.dsID,
+                                                             STRUCTID_RESOURCE_TABLE, nBase + offRes, nResSize));
+                        }
+                    }
+
+                    // Resident name table: from restab to modtab
+                    if (_isOffsetValid(nBase + offResNames) && (offModRef > offResNames)) {
+                        qint64 nSize = (qint64)offModRef - (qint64)offResNames;
+                        if (nSize > 0) {
+                            listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_RESIDENT_NAME_TABLE), dataHeader.dsID,
+                                                             STRUCTID_RESIDENT_NAME_TABLE, nBase + offResNames, nSize));
+                        }
+                    }
+
+                    // Module reference table: from modtab to imptab
+                    if (_isOffsetValid(nBase + offModRef) && (offImpNames > offModRef)) {
+                        qint64 nSize = (qint64)offImpNames - (qint64)offModRef;
+                        if (nSize > 0) {
+                            listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_MODULE_REFERENCE_TABLE), dataHeader.dsID,
+                                                             STRUCTID_MODULE_REFERENCE_TABLE, nBase + offModRef, nSize));
+                        }
+                    }
+
+                    // Imported names table: from imptab to (nrestab low 16?) In NE, nrestab is file offset for non-resident names.
+                    if (_isOffsetValid(nBase + offImpNames)) {
+                        qint64 nEnd = offNonRes ? (qint64)offNonRes : (qint64)getSize();
+                        if (nEnd > (nBase + offImpNames)) {
+                            qint64 nSize = nEnd - (nBase + offImpNames);
+                            if (nSize > 0) {
+                                listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_IMPORTED_NAMES_TABLE), dataHeader.dsID,
+                                                                 STRUCTID_IMPORTED_NAMES_TABLE, nBase + offImpNames, nSize));
+                            }
+                        }
+                    }
+
+                    // Non-resident names table: absolute file offset and size cbnrestab
+                    const quint16 cbNonRes = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbnrestab));
+                    if (offNonRes && cbNonRes && _isOffsetValid(offNonRes)) {
+                        listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_NONRESIDENT_NAME_TABLE), dataHeader.dsID,
+                                                         STRUCTID_NONRESIDENT_NAME_TABLE, offNonRes, cbNonRes));
+                    }
+                }
+            } else if ((dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADER) || (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADEREX)) {
+                // Delegate to base for DOS headers if requested explicitly
+                listResult.append(XMSDOS::getDataHeaders(dataHeadersOptions, pPdStruct));
+            }
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+
+    QList<XBinary::FPART> listResult;
+    QList<XBinary::FPART> _listCalc;
+
+    bool bCalcAddress = false;
+    if (nFileParts & FILEPART_SEGMENT) {
+        bCalcAddress = true;
+    }
+
+    XADDR nModuleAddress = getModuleAddress();
+    qint64 nTotalSize = getSize();
+    qint64 nMaxOffset = 0;
+
+    // Header
+    if (bCalcAddress || (nFileParts & FILEPART_HEADER) || (nFileParts & FILEPART_OVERLAY)) {
+        FPART record = {};
+        record.filePart = FILEPART_HEADER;
+        record.nVirtualAddress = nModuleAddress;  // NE header maps at module base
+        record.nVirtualSize = 0x200;              // minimal header page; not used for calc
+        record.nFileOffset = 0;
+        record.nFileSize = qMin<qint64>(getImageOS2HeaderOffset() + sizeof(XNE_DEF::IMAGE_OS2_HEADER), nTotalSize);
+        record.sName = tr("Header");
+
+        if (bCalcAddress) {
+            _listCalc.append(record);
+        }
+        if (nFileParts & FILEPART_HEADER) {
+            listResult.append(record);
+        }
+        nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
+    }
+
+    // Segments (16-bit segmented model)
+    if (bCalcAddress || (nFileParts & FILEPART_SEGMENT) || (nFileParts & FILEPART_OVERLAY)) {
+        QList<XNE_DEF::NE_SEGMENT> listSegments = getSegmentList();
+        quint16 nShift = getImageOS2Header_align();
+
+        for (qint32 i = 0; i < listSegments.count(); i++) {
+            const auto &seg = listSegments.at(i);
+
+            qint64 nFileSize = seg.dwFileSize ? seg.dwFileSize : 0x10000;
+            qint64 nFileOffset = (qint64)seg.dwFileOffset << nShift;
+
+            if (nFileOffset > nTotalSize) {
+                continue;
+            }
+            if (nFileOffset + nFileSize > nTotalSize) {
+                nFileSize = nTotalSize - nFileOffset;
+            }
+
+            FPART record = {};
+            record.filePart = FILEPART_SEGMENT;
+            record.nFileOffset = nFileOffset;
+            record.nFileSize = nFileSize;
+            record.nVirtualAddress = nModuleAddress + (XADDR)((i + 1) * 0x10000);
+            record.nVirtualSize = 0x10000;
+            record.sName = QString("%1 %2").arg(tr("Segment"), QString::number(i + 1));
+
+            if (bCalcAddress) {
+                _listCalc.append(record);
+            }
+            if (nFileParts & FILEPART_SEGMENT) {
+                listResult.append(record);
+            }
+
+            nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
+        }
+    }
+
+    // Overlay
+    if (nFileParts & FILEPART_OVERLAY) {
+        if (nMaxOffset < nTotalSize) {
+            FPART record = {};
+            record.filePart = FILEPART_OVERLAY;
+            record.nFileOffset = nMaxOffset;
+            record.nFileSize = nTotalSize - nMaxOffset;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Overlay");
+            listResult.append(record);
+        }
+    }
+
+    Q_UNUSED(pPdStruct)
+    return listResult;
 }

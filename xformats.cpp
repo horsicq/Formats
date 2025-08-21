@@ -48,7 +48,10 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_TIFF, fileType)) return new XTiff(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_MP4, fileType)) return new XMP4(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_MP3, fileType)) return new XMP3(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_WAV, fileType)) return new XWAV(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_XM, fileType)) return new XXM(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_AVI, fileType)) return new XAVI(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_WEBP, fileType)) return new XWEBP(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_RIFF, fileType)) return new XRiff(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return new XJavaClass(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_TTF, fileType)) return new XTTF(pDevice);

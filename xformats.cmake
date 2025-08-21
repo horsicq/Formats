@@ -3,8 +3,8 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/images)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/video)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/audio)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/exec)
-include_directories(${CMAKE_CURRENT_LIST_DIR}/formats)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/texts)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/formats)
 
 if (NOT DEFINED XDEX_SOURCES)
     include(${CMAKE_CURRENT_LIST_DIR}/../XDEX/xdex.cmake)
@@ -32,6 +32,8 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/xformats.h
     ${CMAKE_CURRENT_LIST_DIR}/audio/xmp3.cpp
     ${CMAKE_CURRENT_LIST_DIR}/audio/xmp3.h
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xwav.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xwav.h
     ${CMAKE_CURRENT_LIST_DIR}/audio/xxm.cpp
     ${CMAKE_CURRENT_LIST_DIR}/audio/xxm.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xbmp.cpp
@@ -48,10 +50,14 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/images/xpng.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xtiff.cpp
     ${CMAKE_CURRENT_LIST_DIR}/images/xtiff.h
+    ${CMAKE_CURRENT_LIST_DIR}/images/xwebp.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/images/xwebp.h
     ${CMAKE_CURRENT_LIST_DIR}/video/xmp4.cpp
     ${CMAKE_CURRENT_LIST_DIR}/video/xmp4.h
-    ${CMAKE_CURRENT_LIST_DIR}/video/xriff.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/video/xriff.h
+    ${CMAKE_CURRENT_LIST_DIR}/video/xavi.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/video/xavi.h
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xriff.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xriff.h
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk.cpp
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk.h
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk_def.h
@@ -80,6 +86,8 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/formats/xjavaclass.cpp
     ${CMAKE_CURRENT_LIST_DIR}/formats/xttf.h
     ${CMAKE_CURRENT_LIST_DIR}/formats/xttf.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xriff.h
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xriff.cpp
     ${CMAKE_CURRENT_LIST_DIR}/formats/xdjvu.h
     ${CMAKE_CURRENT_LIST_DIR}/formats/xdjvu.cpp
     ${CMAKE_CURRENT_LIST_DIR}/texts/xtext.cpp

@@ -156,6 +156,8 @@ public:
     virtual QString getOsVersion();
     virtual QString typeIdToString(qint32 nType);
     virtual QList<MAPMODE> getMapModesList();
+    virtual qint64 getImageSize() override;
+    virtual XADDR _getEntryPointAddress() override;
     qint64 getModuleAddress();
 
     static QMap<quint64, QString> getImageLEMagics();
@@ -165,6 +167,13 @@ public:
     static QMap<quint64, QString> getImageLEMflagsS();
 
     virtual QString getFileFormatExtsString();
+
+    // Data headers/inspection (overrides)
+    virtual QString structIDToString(quint32 nID) override;
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
+
+    // File parts (header/segments/overlay)
+    virtual QList<XBinary::FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 };
 
 #endif  // XLE_H

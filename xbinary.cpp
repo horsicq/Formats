@@ -235,6 +235,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_UTF8, "UTF8", QString("UTF8")},
     {XBinary::FT_VIDEO, "Video", QObject::tr("Video")},
     {XBinary::FT_WEBP, "WebP", QString("WebP")},
+    {XBinary::FT_WAV, "WAV", QString("WAV")},
     {XBinary::FT_ZIP, "ZIP", QString("ZIP")},
     {XBinary::FT_ZLIB, "zlib", QString("zlib")},
     {XBinary::FT_DEB, "deb", QString("deb")},
@@ -6631,6 +6632,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             } else if (compareSignature(&memoryMap, "'RIFF'........'WEBPVP8'", 0)) {
                 stResult.insert(FT_IMAGE);
                 stResult.insert(FT_WEBP);
+            } else if (compareSignature(&memoryMap, "'RIFF'........'WAVE'", 0)) {
+                stResult.insert(FT_AUDIO);
+                stResult.insert(FT_WAV);
             } /*else if (compareSignature(&memoryMap, "'RIFF'........'ACON'", 0)) {
                 stResult.insert(FT_IMAGE);
                 stResult.insert(FT_ANI);
@@ -6861,6 +6865,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_AVI;
     } else if (pStFileTypes->contains(FT_WEBP)) {
         result = FT_WEBP;
+    } else if (pStFileTypes->contains(FT_WAV)) {
+        result = FT_WAV;
     } else if (pStFileTypes->contains(FT_SIGNATURE)) {
         result = FT_SIGNATURE;
     } else if (pStFileTypes->contains(FT_RIFF)) {
@@ -6988,9 +6994,10 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_MP3)) listResult.append(FT_MP3);
         if (stFileTypes.contains(FT_MP4)) listResult.append(FT_MP4);
         if (stFileTypes.contains(FT_XM)) listResult.append(FT_XM);
+    if (stFileTypes.contains(FT_AVI)) listResult.append(FT_AVI);
+    if (stFileTypes.contains(FT_WEBP)) listResult.append(FT_WEBP);
+    if (stFileTypes.contains(FT_WAV)) listResult.append(FT_WAV);
         if (stFileTypes.contains(FT_RIFF)) listResult.append(FT_RIFF);
-        if (stFileTypes.contains(FT_AVI)) listResult.append(FT_AVI);
-        if (stFileTypes.contains(FT_WEBP)) listResult.append(FT_WEBP);
         if (stFileTypes.contains(FT_SIGNATURE)) listResult.append(FT_SIGNATURE);
         if (stFileTypes.contains(FT_TAR)) listResult.append(FT_TAR);
         if (stFileTypes.contains(FT_TARGZ)) listResult.append(FT_TARGZ);

@@ -21,6 +21,10 @@ SOURCES += \
     XCONFIG += xmsdos
     include($$PWD/exec/xmsdos.pri)
 }
+!contains(XCONFIG, xavi) {
+    XCONFIG += xavi
+    include($$PWD/video/xavi.pri)
+}
 
 !contains(XCONFIG, xne) {
     XCONFIG += xne
@@ -29,6 +33,10 @@ SOURCES += \
 
 !contains(XCONFIG, xle) {
     XCONFIG += xle
+!contains(XCONFIG, xwebp) {
+    XCONFIG += xwebp
+    include($$PWD/images/xwebp.pri)
+}
     include($$PWD/exec/xle.pri)
 }
 
@@ -118,12 +126,17 @@ contains(XCONFIG, use_archive) {
 
 !contains(XCONFIG, xriff) {
     XCONFIG += xriff
-    include($$PWD/video/xriff.pri)
+    include($$PWD/formats/xriff.pri)
 }
 
 !contains(XCONFIG, xmp3) {
     XCONFIG += xmp3
     include($$PWD/audio/xmp3.pri)
+}
+
+!contains(XCONFIG, xwav) {
+    XCONFIG += xwav
+    include($$PWD/audio/xwav.pri)
 }
 
 !contains(XCONFIG, xxm) {

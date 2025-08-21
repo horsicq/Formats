@@ -47,6 +47,17 @@ public:
         STRUCTID_IMAGE_SECTION_HEADER,
         STRUCTID_IMAGE_DATA_DIRECTORY,
         STRUCTID_IMAGE_RESOURCE_DIRECTORY,
+    STRUCTID_IMAGE_EXPORT_DIRECTORY,
+    STRUCTID_IMAGE_IMPORT_DESCRIPTOR,
+    STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR,
+    STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR,
+    STRUCTID_IMAGE_DEBUG_DIRECTORY,
+    STRUCTID_IMAGE_TLS_DIRECTORY32,
+    STRUCTID_IMAGE_TLS_DIRECTORY64,
+    STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32,
+    STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64,
+    STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY,
+    STRUCTID_WIN_CERT_RECORD,
         STRUCTID_IMAGE_COR20_HEADER,
         STRUCTID_NET_METADATA,
         STRUCTID_NET_RESOURCES,
@@ -707,7 +718,7 @@ public:
     bool isResourceGroupCursorsPresent();
     bool isResourceGroupCursorsPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords);
 
-    static QString resourceRecordToString(XPE::RESOURCE_RECORD resourceRecord);
+    static QString resourceRecordToString(const XPE::RESOURCE_RECORD &resourceRecord);
 
     XADDR getModuleAddress();
 
@@ -778,7 +789,7 @@ public:
     XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY read_IMAGE_RESOURCE_DATA_ENTRY(qint64 nOffset);
     XPE::RESOURCES_ID_NAME getResourcesIDName(qint64 nResourceOffset, quint32 nValue);
 
-    static QString resourceIdNameToString(RESOURCES_ID_NAME resourceIdName, qint32 nNumber);
+    static QString resourceIdNameToString(const RESOURCES_ID_NAME &resourceIdName, qint32 nNumber);
 
     QList<qint64> getRelocsAsRVAList();
     QList<RELOCS_HEADER> getRelocsHeaders(PDSTRUCT *pPdStruct = nullptr);
