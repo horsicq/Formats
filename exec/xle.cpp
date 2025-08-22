@@ -1542,7 +1542,6 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         qint64 nMapOff = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
     qint64 nLoaderSize = 0;
     if (nPages > 0) nLoaderSize = nDataPageOff + (qint64)(nPages - 1) * (qint64)nPageSize + (qint64)nLastPageSize;
-
         for (qint32 i = 0; i < objs.size(); ++i) {
             // Determine object span over pages
             qint64 nObjMin = -1;

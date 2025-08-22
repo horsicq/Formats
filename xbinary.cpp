@@ -8322,10 +8322,6 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
 {
     double dResult = 0;
 
-    if (bstatus == BSTATUS_ENTROPY) {
-        dResult = 1.4426950408889634073599246810023;
-    }
-
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
@@ -8348,9 +8344,10 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
     if ((nOffset != -1) && (!(pPdStruct->bIsStop))) {
         XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
-        double bytes[256] = {0.0};
-        qint64 nSymbolCount = 0;
-        quint64 nSum = 0;
+        // Use integer histogram for entropy for better performance
+        quint64 counts[256] = {0};
+        qint64 nSymbolCount = 0;  // reused for ZEROS/TEXT
+        quint64 nSum = 0;         // for GRADIENT
 
         qint64 nTemp = 0;
         char *pBuffer = new char[READWRITE_BUFFER_SIZE];
@@ -8366,24 +8363,26 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
             }
 
             if (bstatus == BSTATUS_ENTROPY) {
+                const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
                 for (qint64 i = 0; i < nTemp; i++) {
-                    bytes[(unsigned char)pBuffer[i]] += 1;
+                    counts[*ptr++]++;
                 }
             } else if (bstatus == BSTATUS_ZEROS) {
+                const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
                 for (qint64 i = 0; i < nTemp; i++) {
-                    if (pBuffer[i] == 0) {
-                        nSymbolCount++;
-                    }
+                    nSymbolCount += (*ptr++ == 0);
                 }
             } else if (bstatus == BSTATUS_GRADIENT) {
+                const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
                 for (qint64 i = 0; i < nTemp; i++) {
-                    nSum += (quint8)pBuffer[i];
+                    nSum += *ptr++;
                 }
             } else if (bstatus == BSTATUS_TEXT) {
+                const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
                 for (qint64 i = 0; i < nTemp; i++) {
-                    char _bchar = pBuffer[i];
-                    QChar _char(_bchar);
-                    if (_char.isPrint() || (_bchar == 8) || (_bchar == 10) || (_bchar == 13)) {
+                    unsigned char c = *ptr++;
+                    // ASCII printable range [32..126] plus 8(BS),10(LF),13(CR)
+                    if ((c >= 32 && c <= 126) || c == 8 || c == 10 || c == 13) {
                         nSymbolCount++;
                     }
                 }
@@ -8399,15 +8398,15 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
 
         if ((!(pPdStruct->bIsStop)) && (!bReadError)) {
             if (bstatus == BSTATUS_ENTROPY) {
+                // H = -sum(p * log2 p)
+                const double invLog2 = 1.4426950408889634073599246810023; // 1/ln(2)
+                const double N = (double)osRegion.nSize;
                 for (qint32 j = 0; j < 256; j++) {
-                    double dTemp = bytes[j] / (double)osRegion.nSize;
-
-                    if (dTemp) {
-                        dResult += (-log(dTemp) / log((double)2)) * bytes[j];
+                    if (counts[j]) {
+                        double p = (double)counts[j] / N;
+                        dResult += -p * (log(p) * invLog2);
                     }
                 }
-
-                dResult = dResult / (double)osRegion.nSize;
             } else if (bstatus == BSTATUS_ZEROS) {
                 dResult = (double)nSymbolCount / (double)(osRegion.nSize);
             } else if (bstatus == BSTATUS_GRADIENT) {
