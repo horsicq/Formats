@@ -9423,17 +9423,13 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         _dataHeadersOptions.nSize = idd.Size;
 
                         switch (i) {
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT:
-                                _dataHeadersOptions.nID = STRUCTID_IMAGE_EXPORT_DIRECTORY;
-                                break;
+                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT: _dataHeadersOptions.nID = STRUCTID_IMAGE_EXPORT_DIRECTORY; break;
                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT:
                                 _dataHeadersOptions.nID = STRUCTID_IMAGE_IMPORT_DESCRIPTOR;
                                 _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
                                 _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
                                 break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE:
-                                _dataHeadersOptions.nID = STRUCTID_IMAGE_RESOURCE_DIRECTORY;
-                                break;
+                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE: _dataHeadersOptions.nID = STRUCTID_IMAGE_RESOURCE_DIRECTORY; break;
                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION:
                                 if (getMode() == MODE_64) {
                                     _dataHeadersOptions.nID = STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY;
@@ -9469,9 +9465,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                 _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
                                 _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
                                 break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR:
-                                _dataHeadersOptions.nID = STRUCTID_IMAGE_COR20_HEADER;
-                                break;
+                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR: _dataHeadersOptions.nID = STRUCTID_IMAGE_COR20_HEADER; break;
                             default: _dataHeadersOptions.nID = STRUCTID_UNKNOWN; break;
                         }
 
@@ -9634,16 +9628,16 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Name), 4, "Name", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Base), 4, "Base", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Name), 4, "Name", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Base), 4, "Base", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfFunctions), 4, "NumberOfFunctions", VT_DWORD, DRF_COUNT,
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfNames), 4, "NumberOfNames", VT_DWORD, DRF_COUNT,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfFunctions), 4, "AddressOfFunctions", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfFunctions), 4, "AddressOfFunctions", VT_DWORD, DRF_ADDRESS,
+                                                            dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNames), 4, "AddressOfNames", VT_DWORD, DRF_ADDRESS,
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals), 4, "AddressOfNameOrdinals", VT_DWORD,
@@ -9654,20 +9648,20 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, OriginalFirstThunk), 4, "OriginalFirstThunk", VT_DWORD,
                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, ForwarderChain), 4, "ForwarderChain", VT_DWORD, DRF_UNKNOWN,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, Name), 4, "Name", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, Name), 4, "Name", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(
                     getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, FirstThunk), 4, "FirstThunk", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
                 listResult.append(dataHeader);
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, OffsetModuleName), 2, "OffsetModuleName", VT_WORD,
                                                             DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, NumberOfModuleForwarderRefs), 2,
@@ -9686,12 +9680,12 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, Type), 4, "Type", VT_DWORD, DRF_UNKNOWN,
                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getDebugTypesS(), VL_TYPE_LIST));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, SizeOfData), 4, "SizeOfData", VT_DWORD, DRF_SIZE,
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, SizeOfData), 4, "SizeOfData", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, AddressOfRawData), 4, "AddressOfRawData", VT_DWORD, DRF_ADDRESS,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, AddressOfRawData), 4, "AddressOfRawData", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, PointerToRawData), 4, "PointerToRawData", VT_DWORD,
-                                                            DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, PointerToRawData), 4, "PointerToRawData", VT_DWORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
                 listResult.append(dataHeader);
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_TLS_DIRECTORY32) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
@@ -9706,8 +9700,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, SizeOfZeroFill), 4, "SizeOfZeroFill", VT_DWORD, DRF_SIZE,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
                 listResult.append(dataHeader);
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_TLS_DIRECTORY64) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
@@ -9728,30 +9722,30 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, Size), 4, "Size", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MajorVersion), 2, "MajorVersion", VT_WORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MinorVersion), 2, "MinorVersion", VT_WORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, SecurityCookie), 4, "SecurityCookie", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+                    getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, SecurityCookie), 4, "SecurityCookie", VT_DWORD,
+                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardFlags), 4, "GuardFlags", VT_DWORD, DRF_UNKNOWN,
                                                             dataHeadersOptions.pMemoryMap->endian));
                 listResult.append(dataHeader);
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, Size), 4, "Size", VT_DWORD, DRF_SIZE,
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MajorVersion), 2, "MajorVersion", VT_WORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MinorVersion), 2, "MinorVersion", VT_WORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, SecurityCookie), 8, "SecurityCookie", VT_QWORD,
                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardFlags), 4, "GuardFlags", VT_DWORD, DRF_UNKNOWN,
@@ -9764,24 +9758,24 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, DllNameRVA), 4, "DllNameRVA", VT_DWORD, DRF_ADDRESS,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ModuleHandleRVA), 4, "ModuleHandleRVA", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportAddressTableRVA), 4, "ImportAddressTableRVA",
-                                                            VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ModuleHandleRVA), 4, "ModuleHandleRVA", VT_DWORD, DRF_ADDRESS,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportAddressTableRVA), 4, "ImportAddressTableRVA", VT_DWORD,
+                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportNameTableRVA), 4, "ImportNameTableRVA", VT_DWORD,
                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, BoundImportAddressTableRVA), 4,
-                                                            "BoundImportAddressTableRVA", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, UnloadInformationTableRVA), 4,
-                                                            "UnloadInformationTableRVA", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, BoundImportAddressTableRVA), 4, "BoundImportAddressTableRVA",
+                                                            VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, UnloadInformationTableRVA), 4, "UnloadInformationTableRVA",
+                                                            VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
                 listResult.append(dataHeader);
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, BeginAddress), 4, "BeginAddress", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, BeginAddress), 4, "BeginAddress", VT_DWORD, DRF_ADDRESS,
+                                                            dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, EndAddress), 4, "EndAddress", VT_DWORD, DRF_ADDRESS,
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, UnwindInfoAddress), 4, "UnwindInfoAddress", VT_DWORD,

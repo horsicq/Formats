@@ -6994,9 +6994,9 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_MP3)) listResult.append(FT_MP3);
         if (stFileTypes.contains(FT_MP4)) listResult.append(FT_MP4);
         if (stFileTypes.contains(FT_XM)) listResult.append(FT_XM);
-    if (stFileTypes.contains(FT_AVI)) listResult.append(FT_AVI);
-    if (stFileTypes.contains(FT_WEBP)) listResult.append(FT_WEBP);
-    if (stFileTypes.contains(FT_WAV)) listResult.append(FT_WAV);
+        if (stFileTypes.contains(FT_AVI)) listResult.append(FT_AVI);
+        if (stFileTypes.contains(FT_WEBP)) listResult.append(FT_WEBP);
+        if (stFileTypes.contains(FT_WAV)) listResult.append(FT_WAV);
         if (stFileTypes.contains(FT_RIFF)) listResult.append(FT_RIFF);
         if (stFileTypes.contains(FT_SIGNATURE)) listResult.append(FT_SIGNATURE);
         if (stFileTypes.contains(FT_TAR)) listResult.append(FT_TAR);
@@ -8399,7 +8399,7 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
         if ((!(pPdStruct->bIsStop)) && (!bReadError)) {
             if (bstatus == BSTATUS_ENTROPY) {
                 // H = -sum(p * log2 p)
-                const double invLog2 = 1.4426950408889634073599246810023; // 1/ln(2)
+                const double invLog2 = 1.4426950408889634073599246810023;  // 1/ln(2)
                 const double N = (double)osRegion.nSize;
                 for (qint32 j = 0; j < 256; j++) {
                     if (counts[j]) {

@@ -1486,21 +1486,27 @@ QList<XBinary::DATA_HEADER> XLE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
         qint64 nHdrOff = getImageVxdHeaderOffset();
         if (nHdrOff != -1) {
             DATA_HEADERS_OPTIONS le = opts;
-            le.nID = 1; // local id placeholder
+            le.nID = 1;  // local id placeholder
             le.locType = LT_OFFSET;
             le.nLocation = nHdrOff;
 
             DATA_HEADER dh = _initDataHeader(le, QString("%1").arg(isLE() ? "IMAGE_VXD_HEADER(LE)" : "IMAGE_VXD_HEADER(LX)"));
             dh.nSize = getImageVxdHeaderSize();
             // Minimal key fields
-            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_magic), 2, "e32_magic", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(
+                getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_magic), 2, "e32_magic", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
             dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_cpu), 2, "e32_cpu", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
             dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_os), 2, "e32_os", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_objtab), 4, "e32_objtab", VT_DWORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
-            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_objcnt), 4, "e32_objcnt", VT_DWORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
-            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_objmap), 4, "e32_objmap", VT_DWORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
-            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_mpages), 4, "e32_mpages", VT_DWORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
-            dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_pagesize), 4, "e32_pagesize", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(
+                getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_objtab), 4, "e32_objtab", VT_DWORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(
+                getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_objcnt), 4, "e32_objcnt", VT_DWORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(
+                getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_objmap), 4, "e32_objmap", VT_DWORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(
+                getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_mpages), 4, "e32_mpages", VT_DWORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+            dh.listRecords.append(
+                getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_pagesize), 4, "e32_pagesize", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
             listResult.append(dh);
         }
     } else {
@@ -1536,12 +1542,12 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
     if (nFileParts & FILEPART_SEGMENT) {
         QList<XLE_DEF::o32_obj> objs = getObjects();
         quint32 nPageSize = getImageVxdHeader_pagesize();
-    quint32 nPages = getImageVxdHeader_mpages();
-    quint32 nLastPageSize = getImageVxdHeader_lastpagesize();
+        quint32 nPages = getImageVxdHeader_mpages();
+        quint32 nLastPageSize = getImageVxdHeader_lastpagesize();
         qint64 nDataPageOff = getImageVxdHeader_datapage();
         qint64 nMapOff = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
-    qint64 nLoaderSize = 0;
-    if (nPages > 0) nLoaderSize = nDataPageOff + (qint64)(nPages - 1) * (qint64)nPageSize + (qint64)nLastPageSize;
+        qint64 nLoaderSize = 0;
+        if (nPages > 0) nLoaderSize = nDataPageOff + (qint64)(nPages - 1) * (qint64)nPageSize + (qint64)nLastPageSize;
         for (qint32 i = 0; i < objs.size(); ++i) {
             // Determine object span over pages
             qint64 nObjMin = -1;

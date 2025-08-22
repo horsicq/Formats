@@ -1,7 +1,11 @@
 #include "xwav.h"
 
-XWAV::XWAV(QIODevice *pDevice) : XRiff(pDevice) {}
-XWAV::~XWAV() {}
+XWAV::XWAV(QIODevice *pDevice) : XRiff(pDevice)
+{
+}
+XWAV::~XWAV()
+{
+}
 
 bool XWAV::isValid(PDSTRUCT *pPdStruct)
 {
@@ -17,8 +21,23 @@ bool XWAV::isValid(QIODevice *pDevice)
     return x.isValid();
 }
 
-QString XWAV::getFileFormatExt() { return "wav"; }
-QString XWAV::getFileFormatExtsString() { return "WAV"; }
-qint64 XWAV::getFileFormatSize(PDSTRUCT *pPdStruct) { return _calculateRawSize(pPdStruct); }
-XBinary::FT XWAV::getFileType() { return FT_WAV; }
-QString XWAV::getMIMEString() { return "audio/x-wav"; }
+QString XWAV::getFileFormatExt()
+{
+    return "wav";
+}
+QString XWAV::getFileFormatExtsString()
+{
+    return "WAV";
+}
+qint64 XWAV::getFileFormatSize(PDSTRUCT *pPdStruct)
+{
+    return _calculateRawSize(pPdStruct);
+}
+XBinary::FT XWAV::getFileType()
+{
+    return FT_WAV;
+}
+QString XWAV::getMIMEString()
+{
+    return "audio/x-wav";
+}

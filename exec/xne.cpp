@@ -26,7 +26,7 @@ XBinary::XCONVERT _TABLE_XNE_STRUCTID[] = {
     {XNE::STRUCTID_IMAGE_DOS_HEADEREX, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
     {XNE::STRUCTID_IMAGE_OS2_HEADER, "IMAGE_OS2_HEADER", QString("IMAGE_OS2_HEADER")},
     {XNE::STRUCTID_ENTRY_TABLE, "ENTRY_TABLE", QString("Entry table")},
-    {XNE::STRUCTID_SEGMENT_TABLE, "SEGMENT_TABLE", QString("Segment table" )},
+    {XNE::STRUCTID_SEGMENT_TABLE, "SEGMENT_TABLE", QString("Segment table")},
     {XNE::STRUCTID_RESOURCE_TABLE, "RESOURCE_TABLE", QString("Resource table")},
     {XNE::STRUCTID_RESIDENT_NAME_TABLE, "RESIDENT_NAME_TABLE", QString("Resident name table")},
     {XNE::STRUCTID_MODULE_REFERENCE_TABLE, "MODULE_REFERENCE_TABLE", QString("Module reference table")},
@@ -1104,8 +1104,8 @@ QString XNE::typeIdToString(qint32 nType)
         case TYPE_UNKNOWN: sResult = tr("Unknown"); break;
         case TYPE_EXE: sResult = QString("EXE"); break;
         case TYPE_DLL: sResult = QString("DLL"); break;
-    case TYPE_DRIVER: sResult = QString("Driver"); break;
-    case TYPE_FONT: sResult = QString("Font"); break;
+        case TYPE_DRIVER: sResult = QString("Driver"); break;
+        case TYPE_FONT: sResult = QString("Font"); break;
     }
 
     return sResult;
@@ -1178,66 +1178,66 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.nSize = sizeof(XNE_DEF::IMAGE_OS2_HEADER);
 
                 // Fields
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_magic), 2, "ne_magic", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_ver), 1, "ne_ver", VT_UINT8, DRF_VERSION,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_rev), 1, "ne_rev", VT_UINT8, DRF_VERSION,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_enttab), 2, "ne_enttab", VT_WORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbenttab), 2, "ne_cbenttab", VT_WORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_crc), 4, "ne_crc", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_flags), 2, "ne_flags", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_autodata), 2, "ne_autodata", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_heap), 2, "ne_heap", VT_WORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_stack), 2, "ne_stack", VT_WORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_csip), 4, "ne_csip", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_sssp), 4, "ne_sssp", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cseg), 2, "ne_cseg", VT_WORD, DRF_COUNT,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cmod), 2, "ne_cmod", VT_WORD, DRF_COUNT,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbnrestab), 2, "ne_cbnrestab", VT_WORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_segtab), 2, "ne_segtab", VT_WORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_rsrctab), 2, "ne_rsrctab", VT_WORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_restab), 2, "ne_restab", VT_WORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_modtab), 2, "ne_modtab", VT_WORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_imptab), 2, "ne_imptab", VT_WORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_nrestab), 4, "ne_nrestab", VT_DWORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cmovent), 2, "ne_cmovent", VT_WORD, DRF_COUNT,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_align), 2, "ne_align", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cres), 2, "ne_cres", VT_WORD, DRF_COUNT,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_exetyp), 1, "ne_exetyp", VT_UINT8, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_magic), 2, "ne_magic", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_ver), 1, "ne_ver", VT_UINT8, DRF_VERSION, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_rev), 1, "ne_rev", VT_UINT8, DRF_VERSION, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_enttab), 2, "ne_enttab", VT_WORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbenttab), 2, "ne_cbenttab", VT_WORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_crc), 4, "ne_crc", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_flags), 2, "ne_flags", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_autodata), 2, "ne_autodata", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_heap), 2, "ne_heap", VT_WORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_stack), 2, "ne_stack", VT_WORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_csip), 4, "ne_csip", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_sssp), 4, "ne_sssp", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cseg), 2, "ne_cseg", VT_WORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cmod), 2, "ne_cmod", VT_WORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbnrestab), 2, "ne_cbnrestab", VT_WORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_segtab), 2, "ne_segtab", VT_WORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_rsrctab), 2, "ne_rsrctab", VT_WORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_restab), 2, "ne_restab", VT_WORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_modtab), 2, "ne_modtab", VT_WORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_imptab), 2, "ne_imptab", VT_WORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_nrestab), 4, "ne_nrestab", VT_DWORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cmovent), 2, "ne_cmovent", VT_WORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_align), 2, "ne_align", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cres), 2, "ne_cres", VT_WORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_exetyp), 1, "ne_exetyp", VT_UINT8, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_flagsothers), 1, "ne_flagsothers", VT_UINT8, DRF_UNKNOWN,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_pretthunks), 2, "ne_pretthunks", VT_WORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_pretthunks), 2, "ne_pretthunks", VT_WORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_psegrefbytes), 2, "ne_psegrefbytes", VT_WORD, DRF_OFFSET,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_swaparea), 2, "ne_swaparea", VT_WORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_expver), 2, "ne_expver", VT_WORD, DRF_VERSION,
-                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_swaparea), 2, "ne_swaparea", VT_WORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_expver), 2, "ne_expver", VT_WORD, DRF_VERSION, dataHeadersOptions.pMemoryMap->endian));
 
                 listResult.append(dataHeader);
 
@@ -1278,14 +1278,14 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         segHeader.dhMode = XBinary::DHMODE_TABLE;
                         segHeader.locType = LT_OFFSET;
                         segHeader.nLocation = segOpts.nLocation;
-                        segHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwFileOffset), 2, "FileOffset", VT_WORD, DRF_OFFSET,
-                                                                   dataHeadersOptions.pMemoryMap->endian));
-                        segHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwFileSize), 2, "FileSize", VT_WORD, DRF_SIZE,
-                                                                   dataHeadersOptions.pMemoryMap->endian));
-                        segHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwFlags), 2, "Flags", VT_WORD, DRF_UNKNOWN,
-                                                                   dataHeadersOptions.pMemoryMap->endian));
-                        segHeader.listRecords.append(getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwMinAllocSize), 2, "MinAllocSize", VT_WORD, DRF_SIZE,
-                                                                   dataHeadersOptions.pMemoryMap->endian));
+                        segHeader.listRecords.append(
+                            getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwFileOffset), 2, "FileOffset", VT_WORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+                        segHeader.listRecords.append(
+                            getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwFileSize), 2, "FileSize", VT_WORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+                        segHeader.listRecords.append(
+                            getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwFlags), 2, "Flags", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                        segHeader.listRecords.append(
+                            getDataRecord(offsetof(XNE_DEF::NE_SEGMENT, dwMinAllocSize), 2, "MinAllocSize", VT_WORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
 
                         listResult.append(segHeader);
                     }
@@ -1294,8 +1294,8 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                     if (_isOffsetValid(nBase + offRes) && (offResNames > offRes)) {
                         qint64 nResSize = (qint64)offResNames - (qint64)offRes;
                         if (nResSize > 0) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_RESOURCE_TABLE), dataHeader.dsID,
-                                                             STRUCTID_RESOURCE_TABLE, nBase + offRes, nResSize));
+                            listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_RESOURCE_TABLE), dataHeader.dsID, STRUCTID_RESOURCE_TABLE,
+                                                             nBase + offRes, nResSize));
                         }
                     }
 

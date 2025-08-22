@@ -20,8 +20,12 @@
  */
 #include "xavi.h"
 
-XAVI::XAVI(QIODevice *pDevice) : XRiff(pDevice) {}
-XAVI::~XAVI() {}
+XAVI::XAVI(QIODevice *pDevice) : XRiff(pDevice)
+{
+}
+XAVI::~XAVI()
+{
+}
 
 bool XAVI::isValid(PDSTRUCT *pPdStruct)
 {
@@ -37,8 +41,23 @@ bool XAVI::isValid(QIODevice *pDevice)
     return x.isValid();
 }
 
-QString XAVI::getFileFormatExt() { return "avi"; }
-QString XAVI::getFileFormatExtsString() { return "AVI"; }
-qint64 XAVI::getFileFormatSize(PDSTRUCT *pPdStruct) { return _calculateRawSize(pPdStruct); }
-XBinary::FT XAVI::getFileType() { return FT_AVI; }
-QString XAVI::getMIMEString() { return "video/x-msvideo"; }
+QString XAVI::getFileFormatExt()
+{
+    return "avi";
+}
+QString XAVI::getFileFormatExtsString()
+{
+    return "AVI";
+}
+qint64 XAVI::getFileFormatSize(PDSTRUCT *pPdStruct)
+{
+    return _calculateRawSize(pPdStruct);
+}
+XBinary::FT XAVI::getFileType()
+{
+    return FT_AVI;
+}
+QString XAVI::getMIMEString()
+{
+    return "video/x-msvideo";
+}

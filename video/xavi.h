@@ -39,4 +39,4 @@ public:
     QString getMIMEString() override;
 };
 
-#endif // XAVI_H
+#endif  // XAVI_H

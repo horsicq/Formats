@@ -31,24 +31,24 @@ class XNE : public XMSDOS {
 public:
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
-        STRUCTID_IMAGE_DOS_HEADER,       // Reuse from base via call
-        STRUCTID_IMAGE_DOS_HEADEREX,     // Reuse from base via call
-        STRUCTID_IMAGE_OS2_HEADER,       // NE header
-        STRUCTID_ENTRY_TABLE,            // Raw entry table (hex)
-        STRUCTID_SEGMENT_TABLE,          // Table of NE_SEGMENT
-        STRUCTID_RESOURCE_TABLE,         // Raw resource table (hex)
-        STRUCTID_RESIDENT_NAME_TABLE,    // Raw resident name table (hex)
-        STRUCTID_MODULE_REFERENCE_TABLE, // Raw module reference table (hex)
-        STRUCTID_IMPORTED_NAMES_TABLE,   // Raw imported names table (hex)
-        STRUCTID_NONRESIDENT_NAME_TABLE  // Raw non-resident name table (hex)
+        STRUCTID_IMAGE_DOS_HEADER,        // Reuse from base via call
+        STRUCTID_IMAGE_DOS_HEADEREX,      // Reuse from base via call
+        STRUCTID_IMAGE_OS2_HEADER,        // NE header
+        STRUCTID_ENTRY_TABLE,             // Raw entry table (hex)
+        STRUCTID_SEGMENT_TABLE,           // Table of NE_SEGMENT
+        STRUCTID_RESOURCE_TABLE,          // Raw resource table (hex)
+        STRUCTID_RESIDENT_NAME_TABLE,     // Raw resident name table (hex)
+        STRUCTID_MODULE_REFERENCE_TABLE,  // Raw module reference table (hex)
+        STRUCTID_IMPORTED_NAMES_TABLE,    // Raw imported names table (hex)
+        STRUCTID_NONRESIDENT_NAME_TABLE   // Raw non-resident name table (hex)
     };
     enum TYPE {
         TYPE_UNKNOWN = 0,
         TYPE_EXE,
         TYPE_DLL,
-    TYPE_DRIVER,
-    TYPE_FONT
-    // TODO Check More
+        TYPE_DRIVER,
+        TYPE_FONT
+        // TODO Check More
     };
 
     explicit XNE(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);

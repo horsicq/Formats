@@ -1,7 +1,11 @@
 #include "xwebp.h"
 
-XWEBP::XWEBP(QIODevice *pDevice) : XRiff(pDevice) {}
-XWEBP::~XWEBP() {}
+XWEBP::XWEBP(QIODevice *pDevice) : XRiff(pDevice)
+{
+}
+XWEBP::~XWEBP()
+{
+}
 
 bool XWEBP::isValid(PDSTRUCT *pPdStruct)
 {
@@ -18,8 +22,23 @@ bool XWEBP::isValid(QIODevice *pDevice)
     return x.isValid();
 }
 
-QString XWEBP::getFileFormatExt() { return "webp"; }
-QString XWEBP::getFileFormatExtsString() { return "WebP"; }
-qint64 XWEBP::getFileFormatSize(PDSTRUCT *pPdStruct) { return _calculateRawSize(pPdStruct); }
-XBinary::FT XWEBP::getFileType() { return FT_WEBP; }
-QString XWEBP::getMIMEString() { return "image/webp"; }
+QString XWEBP::getFileFormatExt()
+{
+    return "webp";
+}
+QString XWEBP::getFileFormatExtsString()
+{
+    return "WebP";
+}
+qint64 XWEBP::getFileFormatSize(PDSTRUCT *pPdStruct)
+{
+    return _calculateRawSize(pPdStruct);
+}
+XBinary::FT XWEBP::getFileType()
+{
+    return FT_WEBP;
+}
+QString XWEBP::getMIMEString()
+{
+    return "image/webp";
+}
