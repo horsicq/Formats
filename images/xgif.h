@@ -27,6 +27,20 @@ class XGif : public XBinary {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_SIGNATURE,
+        STRUCTID_LOGICAL_SCREEN_DESCRIPTOR,
+        STRUCTID_GLOBAL_COLOR_TABLE,
+        STRUCTID_BLOCK,  // Generic block (image/extension)
+        STRUCTID_IMAGE_DESCRIPTOR,
+        STRUCTID_GRAPHIC_CONTROL_EXTENSION,
+        STRUCTID_COMMENT_EXTENSION,
+        STRUCTID_APPLICATION_EXTENSION,
+        STRUCTID_PLAIN_TEXT_EXTENSION,
+        STRUCTID_TRAILER
+    };
+
     explicit XGif(QIODevice *pDevice = nullptr);
     ~XGif();
 
@@ -39,6 +53,10 @@ public:
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual FT getFileType();
     virtual QString getMIMEString();
+
+    // Data headers/inspection
+    virtual QString structIDToString(quint32 nID);
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
 
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
 };

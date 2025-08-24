@@ -37,6 +37,12 @@ class XTiff : public XBinary {
 #pragma pack(pop)
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_SIGNATURE,
+        STRUCTID_IFD_TABLE,
+        STRUCTID_IFD_ENTRY
+    };
     struct CHUNK {
         quint32 nTag;
         qint64 nOffset;
@@ -62,6 +68,11 @@ public:
 
     static QList<XTiff::CHUNK> getExifChunks(QIODevice *pDevice, OFFSETSIZE osExif, PDSTRUCT *pPdStruct = nullptr);
     virtual QString getMIMEString();
+
+    // Inspection
+    virtual QString structIDToString(quint32 nID);
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
 
 private:
     qint32 getBaseTypeSize(quint16 nType);

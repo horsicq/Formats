@@ -27,6 +27,11 @@ class XIcon : public XBinary {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_ICONDIR,
+        STRUCTID_ICONDIRENTRY
+    };
 #pragma pack(push)
 #pragma pack(1)
     struct ICONDIR {
@@ -74,6 +79,13 @@ public:
     QList<ICONDIRENTRY> getIconDirectories();
     QList<GRPICONDIRENTRY> getIconGPRDirectories();
     virtual QString getMIMEString();
+
+    // Data headers/inspection
+    virtual QString structIDToString(quint32 nID);
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+
+    // File parts (header/entries/images/overlay)
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
 };
 
 #endif  // XICON_H

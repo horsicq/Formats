@@ -20,6 +20,12 @@
  */
 #include "xjpeg.h"
 
+static XBinary::XCONVERT _TABLE_XJPEG_STRUCTID[] = {
+    {XJpeg::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XJpeg::STRUCTID_SIGNATURE, "Signature", QString("Signature")},
+    {XJpeg::STRUCTID_CHUNK, "CHUNK", QString("Chunk")},
+};
+
 XJpeg::XJpeg(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -305,6 +311,114 @@ bool XJpeg::isExifPresent(OFFSETSIZE osExif)
 QString XJpeg::getMIMEString()
 {
     return "image/jpeg";
+}
+
+QString XJpeg::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XJPEG_STRUCTID, sizeof(_TABLE_XJPEG_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::DATA_HEADER> XJpeg::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    QList<DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+        _dataHeadersOptions.fileType = getFileType();
+
+        _dataHeadersOptions.nID = STRUCTID_SIGNATURE;
+        _dataHeadersOptions.nLocation = 0;
+        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    } else {
+        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+        if (nStartOffset != -1) {
+            if (dataHeadersOptions.nID == STRUCTID_SIGNATURE) {
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJpeg::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 2;  // SOI marker
+                dataHeader.listRecords.append(getDataRecord(0, 2, "SOI", VT_UINT16, DRF_UNKNOWN, ENDIAN_BIG));
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+                    _dataHeadersOptions.nID = STRUCTID_CHUNK;
+                    _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + 2;
+                    _dataHeadersOptions.locType = dataHeadersOptions.locType;
+                    _dataHeadersOptions.nSize = getSize() - 2;
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_CHUNK) {
+                // Represent chunks as a table region starting after SOI
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJpeg::structIDToString(dataHeadersOptions.nID));
+                listResult.append(dataHeader);
+            }
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::FPART> XJpeg::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+    QList<FPART> listResult;
+
+    qint64 nTotal = getSize();
+
+    if (nFileParts & FILEPART_SIGNATURE) {
+        FPART rec = {};
+        rec.filePart = FILEPART_SIGNATURE;
+        rec.nFileOffset = 0;
+        rec.nFileSize = 2;
+        rec.nVirtualAddress = -1;
+        rec.sName = tr("Signature");
+        listResult.append(rec);
+    }
+
+    QList<CHUNK> chunks = getChunks(pPdStruct);
+    for (const auto &ch : chunks) {
+        if (ch.bEntropyCodedData) {
+            if (nFileParts & FILEPART_REGION) {
+                FPART rec = {};
+                rec.filePart = FILEPART_REGION;
+                rec.nFileOffset = ch.nDataOffset;
+                rec.nFileSize = ch.nDataSize;
+                rec.nVirtualAddress = -1;
+                rec.sName = tr("Data");
+                listResult.append(rec);
+            }
+        } else {
+            if (nFileParts & FILEPART_OBJECT) {
+                FPART rec = {};
+                rec.filePart = FILEPART_OBJECT;
+                rec.nFileOffset = ch.nDataOffset;
+                rec.nFileSize = ch.nDataSize;
+                rec.nVirtualAddress = -1;
+                rec.sName = valueToHex(ch.nId);
+                listResult.append(rec);
+            }
+        }
+    }
+
+    if (nFileParts & FILEPART_OVERLAY) {
+        qint64 nMax = 0;
+        for (const auto &p : listResult) nMax = qMax(nMax, p.nFileOffset + p.nFileSize);
+        if (nMax < nTotal) {
+            FPART rec = {};
+            rec.filePart = FILEPART_OVERLAY;
+            rec.nFileOffset = nMax;
+            rec.nFileSize = nTotal - nMax;
+            rec.nVirtualAddress = -1;
+            rec.sName = tr("Overlay");
+            listResult.append(rec);
+        }
+    }
+
+    return listResult;
 }
 
 XJpeg::CHUNK XJpeg::_readChunk(qint64 nOffset)

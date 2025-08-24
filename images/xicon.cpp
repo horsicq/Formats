@@ -20,6 +20,12 @@
  */
 #include "xicon.h"
 
+static XBinary::XCONVERT _TABLE_XICON_STRUCTID[] = {
+    {XIcon::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XIcon::STRUCTID_ICONDIR, "ICONDIR", QString("ICONDIR")},
+    {XIcon::STRUCTID_ICONDIRENTRY, "ICONDIRENTRY", QString("ICONDIRENTRY")},
+};
+
 XIcon::XIcon(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -269,6 +275,122 @@ QList<XIcon::GRPICONDIRENTRY> XIcon::getIconGPRDirectories()
         listResult.append(record);
 
         nOffset += sizeof(GRPICONDIRENTRY);
+    }
+
+    return listResult;
+}
+
+QString XIcon::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XICON_STRUCTID, sizeof(_TABLE_XICON_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::DATA_HEADER> XIcon::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    QList<DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+        _dataHeadersOptions.fileType = getFileType();
+
+        _dataHeadersOptions.nID = STRUCTID_ICONDIR;
+        _dataHeadersOptions.nLocation = 0;
+        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    } else {
+        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+        if (nStartOffset != -1) {
+            if (dataHeadersOptions.nID == STRUCTID_ICONDIR) {
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XIcon::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = sizeof(ICONDIR);
+                dataHeader.listRecords.append(getDataRecord(0, 2, "Reserved", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
+                dataHeader.listRecords.append(getDataRecord(2, 2, "Type", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
+                dataHeader.listRecords.append(getDataRecord(4, 2, "Count", VT_UINT16, DRF_COUNT, ENDIAN_LITTLE));
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    ICONDIR dir = readICONDIR();
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+                    _dataHeadersOptions.nID = STRUCTID_ICONDIRENTRY;
+                    _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + sizeof(ICONDIR);
+                    _dataHeadersOptions.locType = dataHeadersOptions.locType;
+                    _dataHeadersOptions.nCount = dir.idCount;
+                    _dataHeadersOptions.nSize = sizeof(ICONDIRENTRY) * dir.idCount;
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_ICONDIRENTRY) {
+                // Describe the table of entries; row reading can be added later if needed
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XIcon::structIDToString(dataHeadersOptions.nID));
+                listResult.append(dataHeader);
+            }
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+    QList<FPART> listResult;
+
+    qint64 nTotal = getSize();
+    qint64 nMax = 0;
+
+    if (nFileParts & FILEPART_HEADER) {
+        FPART rec = {};
+        rec.filePart = FILEPART_HEADER;
+        rec.nFileOffset = 0;
+        rec.nFileSize = sizeof(ICONDIR);
+        rec.nVirtualAddress = -1;
+        rec.sName = tr("Header");
+        listResult.append(rec);
+        nMax = qMax(nMax, rec.nFileOffset + rec.nFileSize);
+    }
+
+    ICONDIR dir = readICONDIR();
+
+    if (nFileParts & FILEPART_TABLE) {
+        FPART rec = {};
+        rec.filePart = FILEPART_TABLE;
+        rec.nFileOffset = sizeof(ICONDIR);
+        rec.nFileSize = sizeof(ICONDIRENTRY) * dir.idCount;
+        rec.nVirtualAddress = -1;
+        rec.sName = tr("Entries");
+        listResult.append(rec);
+        nMax = qMax(nMax, rec.nFileOffset + rec.nFileSize);
+    }
+
+    if (nFileParts & FILEPART_OBJECT) {
+        QList<ICONDIRENTRY> entries = getIconDirectories();
+        for (const auto &e : entries) {
+            if ((e.dwImageOffset < nTotal) && (e.dwBytesInRes > 0)) {
+                FPART rec = {};
+                rec.filePart = FILEPART_OBJECT;
+                rec.nFileOffset = e.dwImageOffset;
+                rec.nFileSize = qMin<qint64>(e.dwBytesInRes, nTotal - e.dwImageOffset);
+                rec.nVirtualAddress = -1;
+                rec.sName = tr("Icon");
+                listResult.append(rec);
+                nMax = qMax(nMax, rec.nFileOffset + rec.nFileSize);
+            }
+        }
+    }
+
+    if (nFileParts & FILEPART_OVERLAY) {
+        if (nMax < nTotal) {
+            FPART rec = {};
+            rec.filePart = FILEPART_OVERLAY;
+            rec.nFileOffset = nMax;
+            rec.nFileSize = nTotal - nMax;
+            rec.nVirtualAddress = -1;
+            rec.sName = tr("Overlay");
+            listResult.append(rec);
+        }
     }
 
     return listResult;

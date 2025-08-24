@@ -28,6 +28,11 @@ class XJpeg : public XBinary {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_SIGNATURE,
+        STRUCTID_CHUNK
+    };
     struct CHUNK {
         bool bValid;
         bool bEntropyCodedData;
@@ -62,6 +67,11 @@ public:
     bool isExifPresent(OFFSETSIZE osExif);
 
     virtual QString getMIMEString();
+
+    // Inspection
+    virtual QString structIDToString(quint32 nID);
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
 
 private:
     CHUNK _readChunk(qint64 nOffset);

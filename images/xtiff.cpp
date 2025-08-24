@@ -20,6 +20,13 @@
  */
 #include "xtiff.h"
 
+static XBinary::XCONVERT _TABLE_XTIFF_STRUCTID[] = {
+    {XTiff::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XTiff::STRUCTID_SIGNATURE, "Signature", QString("Signature")},
+    {XTiff::STRUCTID_IFD_TABLE, "IFD_TABLE", QString("IFD Table")},
+    {XTiff::STRUCTID_IFD_ENTRY, "IFD_ENTRY", QString("IFD Entry")},
+};
+
 XTiff::XTiff(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -348,6 +355,103 @@ QList<XTiff::CHUNK> XTiff::getExifChunks(QIODevice *pDevice, OFFSETSIZE osExif, 
 QString XTiff::getMIMEString()
 {
     return "image/tiff-exif";
+}
+
+QString XTiff::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XTIFF_STRUCTID, sizeof(_TABLE_XTIFF_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::DATA_HEADER> XTiff::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    QList<DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        _dataHeadersOptions.fileType = getFileType();
+
+        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+        _dataHeadersOptions.nID = STRUCTID_SIGNATURE;
+        _dataHeadersOptions.nLocation = 0;
+        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    } else {
+        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+        if (nStartOffset != -1) {
+            if (dataHeadersOptions.nID == STRUCTID_SIGNATURE) {
+                DATA_HEADER dh = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+                dh.nSize = 8;
+                dh.listRecords.append(getDataRecord(0, 2, "Byte order", VT_CHAR_ARRAY, DRF_UNKNOWN, ENDIAN_LITTLE));
+                dh.listRecords.append(getDataRecord(2, 2, "Magic", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
+                dh.listRecords.append(getDataRecord(4, 4, "IFD0 offset", VT_UINT32, DRF_OFFSET, isBigEndian() ? ENDIAN_BIG : ENDIAN_LITTLE));
+                listResult.append(dh);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+                    _dataHeadersOptions.nID = STRUCTID_IFD_TABLE;
+                    _dataHeadersOptions.nLocation = read_uint32(4, isBigEndian());
+                    _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_IFD_TABLE) {
+                DATA_HEADER dh = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+                listResult.append(dh);
+            }
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::FPART> XTiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    QList<FPART> listResult;
+    Q_UNUSED(nLimit)
+
+    qint64 nTotal = getSize();
+
+    if (nFileParts & FILEPART_HEADER) {
+        FPART rec = {};
+        rec.filePart = FILEPART_HEADER;
+        rec.nFileOffset = 0;
+        rec.nFileSize = 8;
+        rec.nVirtualAddress = -1;
+        rec.sName = tr("Header");
+        listResult.append(rec);
+    }
+
+    if (nFileParts & (FILEPART_TABLE | FILEPART_REGION)) {
+        QList<CHUNK> chunks = getChunks(pPdStruct);
+        for (const auto &c : chunks) {
+            if (c.nSize <= 4) continue;  // small inline values
+            FPART rec = {};
+            rec.filePart = (nFileParts & FILEPART_REGION) ? FILEPART_REGION : FILEPART_TABLE;
+            rec.nFileOffset = c.nOffset;
+            rec.nFileSize = qMin<qint64>(c.nSize, nTotal - c.nOffset);
+            rec.nVirtualAddress = -1;
+            rec.sName = tr("Data");
+            listResult.append(rec);
+        }
+    }
+
+    if (nFileParts & FILEPART_OVERLAY) {
+        qint64 nMax = 0;
+        for (const auto &p : listResult) nMax = qMax(nMax, p.nFileOffset + p.nFileSize);
+        if (nMax < nTotal) {
+            FPART rec = {};
+            rec.filePart = FILEPART_OVERLAY;
+            rec.nFileOffset = nMax;
+            rec.nFileSize = nTotal - nMax;
+            rec.nVirtualAddress = -1;
+            rec.sName = tr("Overlay");
+            listResult.append(rec);
+        }
+    }
+
+    return listResult;
 }
 
 qint32 XTiff::getBaseTypeSize(quint16 nType)
