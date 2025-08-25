@@ -98,107 +98,17 @@ bool XAmigaHunk::_initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 
 QList<XBinary::MAPMODE> XAmigaHunk::getMapModesList()
 {
-    QList<XBinary::MAPMODE> listResult;
-
-    listResult.append(XBinary::MAPMODE_SEGMENTS);
-    listResult.append(XBinary::MAPMODE_REGIONS);
-
-    return listResult;
+    QList<XBinary::MAPMODE> list;
+    // Standardize to regions view; segment view can be derived later if needed
+    list.append(MAPMODE_REGIONS);
+    return list;
 }
 
 XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    if (mapMode == MAPMODE_UNKNOWN) {
-        mapMode = MAPMODE_SEGMENTS;
-    }
-
-    XBinary::_MEMORY_MAP result = {};
-
-    _initMemoryMap(&result, pPdStruct);
-
-    QList<HUNK> listHunks = getHunks(pPdStruct);
-
-    qint32 nIndex = 0;
-
-    qint32 nNumberOfHunks = listHunks.count();
-
-    if (mapMode == XBinary::MAPMODE_REGIONS) {
-        for (qint32 i = 0; (i < nNumberOfHunks) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-            HUNK hunk = listHunks.at(i);
-            _MEMORY_RECORD record = {};
-            record.nIndex = nIndex++;
-            record.filePart = FILEPART_REGION;
-            record.nOffset = hunk.nOffset;
-            record.nSize = hunk.nSize;
-            record.nAddress = hunk.nOffset;  // TODO Check
-            record.sName = structIDToString(hunkTypeToStructId(hunk.nId));
-
-            result.listRecords.append(record);
-        }
-    } else if (mapMode == XBinary::MAPMODE_SEGMENTS) {
-        result.nModuleAddress = XAMIGAHUNK_DEF::IMAGE_BASE;
-        XADDR nCurrentAddress = result.nModuleAddress;
-
-        for (qint32 i = 0; (i < nNumberOfHunks) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-            HUNK hunk = listHunks.at(i);
-
-            if ((hunk.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_DATA) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE) ||
-                (hunk.nId == XAMIGAHUNK_DEF::HUNK_BSS)) {
-                {
-                    _MEMORY_RECORD record = {};
-                    record.nIndex = nIndex++;
-                    record.filePart = FILEPART_REGION;
-                    record.nOffset = hunk.nOffset;
-                    record.nSize = 8;
-                    record.nAddress = -1;
-                    record.sName = structIDToString(hunkTypeToStructId(hunk.nId));
-
-                    result.listRecords.append(record);
-                }
-                {
-                    _MEMORY_RECORD record = {};
-                    record.nIndex = nIndex++;
-                    record.filePart = FILEPART_REGION;
-                    record.nSize = hunk.nSize - 8;
-                    record.nAddress = nCurrentAddress;
-
-                    if (record.nSize) {
-                        record.nOffset = hunk.nOffset + 8;
-                    } else {
-                        record.bIsVirtual = true;
-
-                        if (hunk.nId == XAMIGAHUNK_DEF::HUNK_BSS) {
-                            quint32 nBSS = read_uint32(hunk.nOffset + 4, true);
-                            record.nSize = nBSS * 4;
-                            record.nOffset = -1;
-                        }
-                    }
-
-                    record.sName = structIDToString(hunkTypeToStructId(hunk.nId));
-
-                    result.listRecords.append(record);
-
-                    nCurrentAddress += record.nSize;
-                }
-            } else {
-                _MEMORY_RECORD record = {};
-                record.nIndex = nIndex++;
-                record.filePart = FILEPART_REGION;
-                record.nOffset = hunk.nOffset;
-                record.nSize = hunk.nSize;
-                record.nAddress = -1;
-                record.sName = structIDToString(hunkTypeToStructId(hunk.nId));
-
-                result.listRecords.append(record);
-            }
-        }
-
-        // result.nImageSize = nCurrentAddress - result.nModuleAddress;
-    }
-
-    _handleOverlay(&result);
-
-    return result;
+    Q_UNUSED(mapMode)
+    // Delegate to the generic helper using our file parts implementation
+    return _getMemoryMap(FILEPART_HEADER | FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
 }
 
 XBinary::ENDIAN XAmigaHunk::getEndian()
@@ -618,9 +528,53 @@ QList<XBinary::DATA_HEADER> XAmigaHunk::getDataHeaders(const DATA_HEADERS_OPTION
 
 QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    QList<XBinary::FPART> listResult;
+    Q_UNUSED(nLimit)
+    QList<FPART> list;
 
-    // TODO
+    QList<HUNK> hunks = getHunks(pPdStruct);
+    if (hunks.isEmpty()) return list;
 
-    return listResult;
+    // Header: if the first hunk is a header, expose it separately
+    if ((nFileParts & FILEPART_HEADER) && (hunks.first().nId == XAMIGAHUNK_DEF::HUNK_HEADER)) {
+        const HUNK &h = hunks.first();
+        FPART f = {};
+        f.filePart = FILEPART_HEADER;
+        f.nFileOffset = h.nOffset;
+        f.nFileSize = h.nSize;
+        f.nVirtualAddress = -1;
+        f.sName = tr("Header");
+        list.append(f);
+    }
+
+    if (nFileParts & FILEPART_REGION) {
+        for (int i = 0; i < hunks.size(); ++i) {
+            const HUNK &h = hunks.at(i);
+            FPART r = {};
+            r.filePart = FILEPART_REGION;
+            r.nFileOffset = h.nOffset;
+            r.nFileSize = h.nSize;
+            r.nVirtualAddress = -1;
+            r.sName = structIDToString(hunkTypeToStructId(h.nId));
+            list.append(r);
+        }
+    }
+
+    if (nFileParts & FILEPART_OVERLAY) {
+        qint64 maxEnd = 0;
+        for (int i = 0; i < list.size(); ++i) {
+            const FPART &p = list.at(i);
+            maxEnd = qMax(maxEnd, p.nFileOffset + p.nFileSize);
+        }
+        if (maxEnd < getSize()) {
+            FPART ov = {};
+            ov.filePart = FILEPART_OVERLAY;
+            ov.nFileOffset = maxEnd;
+            ov.nFileSize = getSize() - maxEnd;
+            ov.nVirtualAddress = -1;
+            ov.sName = tr("Overlay");
+            list.append(ov);
+        }
+    }
+
+    return list;
 }

@@ -27,6 +27,11 @@ class XMP4 : public XBinary {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_BOX,
+        STRUCTID_HEADER
+    };
     explicit XMP4(QIODevice *pDevice = nullptr);
     ~XMP4();
 
@@ -39,6 +44,11 @@ public:
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     virtual FT getFileType();
     virtual QString getMIMEString();
+
+    virtual QList<MAPMODE> getMapModesList() override { QList<MAPMODE> l; l.append(MAPMODE_REGIONS); return l; }
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
+    virtual QString structIDToString(quint32 nID) override { Q_UNUSED(nID) return QString("MP4"); }
 
 private:
     bool isTagValid(const QString &sTagName);

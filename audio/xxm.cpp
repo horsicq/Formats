@@ -138,140 +138,118 @@ QList<XXM::MAPMODE> XXM::getMapModesList()
 XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
+    return _getMemoryMap(FILEPART_HEADER | FILEPART_TABLE | FILEPART_DATA | FILEPART_OVERLAY, pPdStruct);
+}
 
-    _MEMORY_MAP memoryMap = {};
-    memoryMap.fileType = getFileType();
-    memoryMap.mode = getMode();
-    memoryMap.endian = getEndian();
-    memoryMap.sArch = getArch();
-    memoryMap.sType = typeIdToString(getType());
+QList<XBinary::FPART> XXM::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+    QList<FPART> list;
+    HEADER header = _read_HEADER(0);
+    if (getSize() < 60) return list;
 
-    qint32 nIndex = 0;
-    qint64 nOffset = 0;
+    qint64 offset = 60 + header.header_size;
 
-    HEADER header = _read_HEADER(nOffset);
-    qint64 nHeaderSize = 60 + header.header_size;
-    nOffset = nHeaderSize;
-
-    // Header
-    {
-        _MEMORY_RECORD record = {};
-        record.nAddress = -1;
-
-        record.nOffset = 0;
-        record.nSize = nHeaderSize;
-        record.filePart = FILEPART_HEADER;
-        record.nIndex = nIndex++;
-        record.sName = tr("Header");
-        memoryMap.listRecords.append(record);
+    if (nFileParts & FILEPART_HEADER) {
+        FPART f = {};
+        f.filePart = FILEPART_HEADER;
+        f.nFileOffset = 0;
+        f.nFileSize = offset;
+        f.nVirtualAddress = -1;
+        f.sName = tr("Header");
+        list.append(f);
     }
 
-    // Patterns and pattern data
+    // Patterns
     for (qint32 i = 0; (i < header.num_patterns) && isPdStructNotCanceled(pPdStruct); i++) {
-        PATTERN_HEADER patternHeader = _read_PATTERN_HEADER(nOffset);
-        qint64 patternHeaderSize = 9;  // 4+1+2+2
-        {
-            _MEMORY_RECORD rec = {};
-            rec.nAddress = -1;
-            rec.nOffset = nOffset;
-            rec.nSize = patternHeaderSize;
-            rec.filePart = FILEPART_TABLE;
-            rec.nIndex = nIndex++;
-            rec.sName = QString("Pattern %1 header").arg(i);
-            memoryMap.listRecords.append(rec);
+        PATTERN_HEADER ph = _read_PATTERN_HEADER(offset);
+        qint64 patternHeaderSize = 9;
+        if (nFileParts & FILEPART_TABLE) {
+            FPART t = {};
+            t.filePart = FILEPART_TABLE;
+            t.nFileOffset = offset;
+            t.nFileSize = patternHeaderSize;
+            t.nVirtualAddress = -1;
+            t.sName = QString("Pattern %1 header").arg(i);
+            list.append(t);
         }
-        nOffset += patternHeaderSize;
-
-        if (patternHeader.packed_data_size > 0) {
-            _MEMORY_RECORD rec = {};
-            rec.nAddress = -1;
-            rec.nOffset = nOffset;
-            rec.nSize = patternHeader.packed_data_size;
-            rec.filePart = FILEPART_DATA;
-            rec.nIndex = nIndex++;
-            rec.sName = QString("Pattern %1 data").arg(i);
-            memoryMap.listRecords.append(rec);
-
-            nOffset += patternHeader.packed_data_size;
+        offset += patternHeaderSize;
+        if ((nFileParts & FILEPART_DATA) && ph.packed_data_size > 0) {
+            FPART d = {};
+            d.filePart = FILEPART_DATA;
+            d.nFileOffset = offset;
+            d.nFileSize = ph.packed_data_size;
+            d.nVirtualAddress = -1;
+            d.sName = QString("Pattern %1 data").arg(i);
+            list.append(d);
         }
+        offset += ph.packed_data_size;
     }
 
     // Instruments
     for (qint32 i = 0; (i < header.num_instruments) && isPdStructNotCanceled(pPdStruct); i++) {
-        INSTRUMENT_HEADER instrumentHeader = _read_INSTRUMENT_HEADER(nOffset);
-        qint64 instrumentHeaderSize = 4 + 22 + 1 + 2;
-        qint64 nThisInstrumentHeaderSize = instrumentHeader.instrument_header_size;
-
-        {
-            _MEMORY_RECORD rec = {};
-            rec.nAddress = -1;
-            rec.nOffset = nOffset;
-            rec.nSize = instrumentHeaderSize;
-            rec.filePart = FILEPART_TABLE;
-            rec.nIndex = nIndex++;
-            rec.sName = QString("Instrument %1 header").arg(i);
-            memoryMap.listRecords.append(rec);
+        INSTRUMENT_HEADER ih = _read_INSTRUMENT_HEADER(offset);
+        qint64 ihFixed = 4 + 22 + 1 + 2;
+        if (nFileParts & FILEPART_TABLE) {
+            FPART t = {};
+            t.filePart = FILEPART_TABLE;
+            t.nFileOffset = offset;
+            t.nFileSize = ihFixed;
+            t.nVirtualAddress = -1;
+            t.sName = QString("Instrument %1 header").arg(i);
+            list.append(t);
         }
-
-        qint64 nExtraOffset = nOffset + instrumentHeaderSize;
-        if (instrumentHeader.num_samples > 0) {
-            INSTRUMENT_EXTRA_HEADER extraHeader = _read_INSTRUMENT_EXTRA_HEADER(nExtraOffset);
-
-            // Extra header
-            {
-                _MEMORY_RECORD rec = {};
-                rec.nAddress = -1;
-                rec.nOffset = nExtraOffset;
-                rec.nSize = sizeof(INSTRUMENT_EXTRA_HEADER);
-                rec.filePart = FILEPART_TABLE;
-                rec.nIndex = nIndex++;
-                rec.sName = QString("Instrument %1 extra header").arg(i);
-                memoryMap.listRecords.append(rec);
+        qint64 extraOffset = offset + ihFixed;
+        if (ih.num_samples > 0) {
+            INSTRUMENT_EXTRA_HEADER ieh = _read_INSTRUMENT_EXTRA_HEADER(extraOffset);
+            qint64 extraSize = 212; // fixed size of extra header
+            if (nFileParts & FILEPART_TABLE) {
+                FPART t2 = {};
+                t2.filePart = FILEPART_TABLE;
+                t2.nFileOffset = extraOffset;
+                t2.nFileSize = extraSize;
+                t2.nVirtualAddress = -1;
+                t2.sName = QString("Instrument %1 extra").arg(i);
+                list.append(t2);
             }
-
-            qint64 nSampleHeadersOffset = nExtraOffset + sizeof(INSTRUMENT_EXTRA_HEADER);
-            for (qint32 j = 0; (j < instrumentHeader.num_samples) && isPdStructNotCanceled(pPdStruct); j++) {
-                SAMPLE_HEADER sampleHeader = _read_SAMPLE_HEADER(nSampleHeadersOffset + j * sizeof(SAMPLE_HEADER));
-                _MEMORY_RECORD rec = {};
-                rec.nAddress = -1;
-                rec.nOffset = nSampleHeadersOffset + j * sizeof(SAMPLE_HEADER);
-                rec.nSize = sizeof(SAMPLE_HEADER);
-                rec.filePart = FILEPART_TABLE;
-                rec.nIndex = nIndex++;
-                rec.sName = QString("Instrument %1 Sample header %2").arg(i).arg(j);
-                memoryMap.listRecords.append(rec);
-            }
-
-            // Sample data
-            qint64 nSampleDataOffset = nSampleHeadersOffset + instrumentHeader.num_samples * sizeof(SAMPLE_HEADER);
-            for (qint32 j = 0; (j < instrumentHeader.num_samples) && isPdStructNotCanceled(pPdStruct); j++) {
-                SAMPLE_HEADER sampleHeader = _read_SAMPLE_HEADER(nSampleHeadersOffset + j * sizeof(SAMPLE_HEADER));
-
-                if (sampleHeader.sample_length > 0) {
-                    _MEMORY_RECORD rec = {};
-                    rec.nAddress = -1;
-                    rec.nOffset = nSampleDataOffset;
-                    rec.nSize = sampleHeader.sample_length;
-                    rec.filePart = FILEPART_DATA;
-                    rec.nIndex = nIndex++;
-                    rec.sName = QString("Instrument %1 Sample data %2").arg(i).arg(j);
-                    memoryMap.listRecords.append(rec);
+            Q_UNUSED(ieh)
+            qint64 sampleHeadersOffset = extraOffset + extraSize;
+            for (qint32 s = 0; s < ih.num_samples && isPdStructNotCanceled(pPdStruct); s++) {
+                SAMPLE_HEADER sh = _read_SAMPLE_HEADER(sampleHeadersOffset);
+                if (nFileParts & FILEPART_TABLE) {
+                    FPART shf = {};
+                    shf.filePart = FILEPART_TABLE;
+                    shf.nFileOffset = sampleHeadersOffset;
+                    shf.nFileSize = 40;
+                    shf.nVirtualAddress = -1;
+                    shf.sName = QString("Instrument %1 sample %2 header").arg(i).arg(s);
+                    list.append(shf);
                 }
-                nSampleDataOffset += sampleHeader.sample_length;
+                sampleHeadersOffset += 40;
             }
-            nOffset = nSampleDataOffset;
-        } else {
-            nOffset += nThisInstrumentHeaderSize;
+            // Sample data blocks follow sample headers; sizes not trivially derivable here without decoding ADPCM/packed — skip safe mapping.
+        }
+        offset = qMax(offset, extraOffset + qMax<qint64>(0, ih.instrument_header_size - ihFixed));
+    }
+
+    if (nFileParts & FILEPART_OVERLAY) {
+        qint64 maxEnd = 0;
+        for (int i = 0; i < list.size(); ++i) {
+            const FPART &p = list.at(i);
+            maxEnd = qMax(maxEnd, p.nFileOffset + p.nFileSize);
+        }
+        if (maxEnd < getSize()) {
+            FPART ov = {};
+            ov.filePart = FILEPART_OVERLAY;
+            ov.nFileOffset = maxEnd;
+            ov.nFileSize = getSize() - maxEnd;
+            ov.nVirtualAddress = -1;
+            ov.sName = tr("Overlay");
+            list.append(ov);
         }
     }
 
-    memoryMap.nBinarySize = getSize();
-    memoryMap.nModuleAddress = 0;
-    memoryMap.nEntryPointAddress = 0;
-
-    _handleOverlay(&memoryMap);
-
-    return memoryMap;
+    return list;
 }
 
 QString XXM::structIDToString(quint32 nID)

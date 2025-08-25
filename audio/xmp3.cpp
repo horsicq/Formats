@@ -74,64 +74,7 @@ qint64 XMP3::getFileFormatSize(PDSTRUCT *pPdStruct)
 XBinary::_MEMORY_MAP XMP3::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
-
-    XBinary::_MEMORY_MAP result = {};
-
-    result.nBinarySize = getSize();
-
-    qint32 nIndex = 0;
-
-    _MEMORY_MAP _memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
-
-    if (compareSignature(&_memoryMap, "'ID3'..00", 0, pPdStruct)) {
-        quint32 nVar[4] = {};
-        nVar[0] = read_uint8(6);
-        nVar[1] = read_uint8(7);
-        nVar[2] = read_uint8(8);
-        nVar[3] = read_uint8(9);
-
-        qint64 nOffset = 10 + ((nVar[0] << 21) | (nVar[1] << 14) | (nVar[2] << 7) | (nVar[3]));
-
-        {
-            _MEMORY_RECORD record = {};
-
-            record.nIndex = nIndex++;
-            record.filePart = FILEPART_HEADER;
-            record.nOffset = 0;
-            record.nSize = nOffset;
-            record.nAddress = -1;
-            record.sName = tr("Header");
-
-            result.listRecords.append(record);
-        }
-        // TODO
-        quint32 nFrameSize = 0;
-
-        do {
-            nFrameSize = decodeFrame(nOffset);
-
-            if (nFrameSize) {
-                _MEMORY_RECORD record = {};
-
-                record.nIndex = nIndex++;
-                record.filePart = FILEPART_REGION;
-                record.nOffset = nOffset;
-                record.nSize = nFrameSize;
-                record.nAddress = -1;
-                record.sName = QString("Frame");  // mb translate
-
-                result.listRecords.append(record);
-
-                nOffset += nFrameSize;
-            }
-        } while (nFrameSize && XBinary::isPdStructNotCanceled(pPdStruct));
-
-        // TODO TAG
-    }
-
-    _handleOverlay(&result);
-
-    return result;
+    return _getMemoryMap(FILEPART_HEADER | FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
 }
 
 XBinary::FT XMP3::getFileType()
@@ -398,6 +341,76 @@ qint64 XMP3::decodeFrame(qint64 nOffset)
     }
 
     return nResult;
+}
+
+QList<XBinary::FPART> XMP3::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+    QList<FPART> list;
+    const qint64 total = getSize();
+
+    qint64 offset = 0;
+    qint64 startAfterId3 = 0;
+
+    // Optional ID3v2 header
+    if (total >= 10) {
+        if (read_ansiString(0, 3) == "ID3") {
+            quint32 b0 = read_uint8(6);
+            quint32 b1 = read_uint8(7);
+            quint32 b2 = read_uint8(8);
+            quint32 b3 = read_uint8(9);
+            qint64 id3Size = 10 + ((b0 << 21) | (b1 << 14) | (b2 << 7) | b3);
+            if (nFileParts & FILEPART_HEADER) {
+                FPART h = {};
+                h.filePart = FILEPART_HEADER;
+                h.nFileOffset = 0;
+                h.nFileSize = qMin(id3Size, total);
+                h.nVirtualAddress = -1;
+                h.sName = tr("Header");
+                list.append(h);
+            }
+            startAfterId3 = qMin(id3Size, total);
+            offset = startAfterId3;
+        }
+    }
+
+    if (nFileParts & FILEPART_REGION) {
+        // Walk frames conservatively
+        while (offset + 4 <= total && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            quint32 header = read_uint32(offset, true);
+            if ((header & 0xFFE00000) != 0xFFE00000) break; // sync bits
+            qint64 frameSize = decodeFrame(offset);
+            if (frameSize <= 0) break;
+            if (offset + frameSize > total) { frameSize = total - offset; }
+            FPART f = {};
+            f.filePart = FILEPART_REGION;
+            f.nFileOffset = offset;
+            f.nFileSize = frameSize;
+            f.nVirtualAddress = -1;
+            f.sName = QString("Frame");
+            list.append(f);
+            offset += frameSize;
+        }
+    }
+
+    if (nFileParts & FILEPART_OVERLAY) {
+        qint64 maxEnd = 0;
+        for (int i = 0; i < list.size(); ++i) {
+            const FPART &p = list.at(i);
+            maxEnd = qMax(maxEnd, p.nFileOffset + p.nFileSize);
+        }
+        if (maxEnd < total) {
+            FPART ov = {};
+            ov.filePart = FILEPART_OVERLAY;
+            ov.nFileOffset = maxEnd;
+            ov.nFileSize = total - maxEnd;
+            ov.nVirtualAddress = -1;
+            ov.sName = tr("Overlay");
+            list.append(ov);
+        }
+    }
+
+    return list;
 }
 
 QString XMP3::structIDToString(quint32 nID)

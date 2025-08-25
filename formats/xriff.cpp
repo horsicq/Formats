@@ -104,41 +104,8 @@ XBinary::_MEMORY_MAP XRiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
 
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
-    XBinary::_MEMORY_MAP result = {};
-
-    result.nBinarySize = getSize();
-    result.endian = getEndian();
-
-    qint32 nIndex = 0;
-
-    qint64 nOffset = 0;
-
-    quint32 nChunkSize = read_uint32(nOffset + 4, result.endian == ENDIAN_BIG);
-    QString sTag = read_ansiString(nOffset, 4);
-
-    {
-        _MEMORY_RECORD record = {};
-
-        record.nIndex = nIndex++;
-        record.filePart = FILEPART_REGION;
-        record.nOffset = nOffset;
-        record.nSize = nChunkSize + 8;
-        record.nAddress = -1;
-        record.sName = sTag;
-
-        result.listRecords.append(record);
-    }
-
-    _handleOverlay(&result);
-
-    return result;
+    // Delegate to generic helper using our file parts implementation
+    return _getMemoryMap(FILEPART_HEADER | FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
 }
 
 XBinary::FT XRiff::getFileType()
@@ -175,4 +142,111 @@ XBinary::ENDIAN XRiff::getEndian()
     }
 
     return result;
+}
+
+QList<XBinary::MAPMODE> XRiff::getMapModesList()
+{
+    QList<MAPMODE> list;
+    list.append(MAPMODE_REGIONS);
+    return list;
+}
+
+QList<XBinary::FPART> XRiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+    QList<FPART> list;
+
+    if (getSize() < 12) return list;
+
+    bool bBE = (getEndian() == ENDIAN_BIG);
+
+    if (nFileParts & FILEPART_HEADER) {
+        FPART f = {};
+        f.filePart = FILEPART_HEADER;
+        f.nFileOffset = 0;
+        f.nFileSize = 12; // RIFF header: 'RIFF'/'RIFX' + size + form type
+        f.nVirtualAddress = -1;
+        f.sName = tr("Header");
+        list.append(f);
+    }
+
+    if (nFileParts & FILEPART_REGION) {
+        // Top-level RIFF chunk spans from 0 to 8+size
+        quint32 nSize = read_uint32(4, bBE);
+        qint64 nChunkTotal = qMin<qint64>(getSize(), (qint64)nSize + 8);
+        FPART f = {};
+        f.filePart = FILEPART_REGION;
+        f.nFileOffset = 0;
+        f.nFileSize = nChunkTotal;
+        f.nVirtualAddress = -1;
+        f.sName = read_ansiString(0, 4);
+        list.append(f);
+    }
+
+    if (nFileParts & FILEPART_OVERLAY) {
+        // Anything beyond the stated RIFF size
+        bool bBE2 = bBE;
+        quint32 nSize = read_uint32(4, bBE2);
+        qint64 nEnd = qMin<qint64>(getSize(), (qint64)nSize + 8);
+        if (nEnd < getSize()) {
+            FPART ov = {};
+            ov.filePart = FILEPART_OVERLAY;
+            ov.nFileOffset = nEnd;
+            ov.nFileSize = getSize() - nEnd;
+            ov.nVirtualAddress = -1;
+            ov.sName = tr("Overlay");
+            list.append(ov);
+        }
+    }
+
+    return list;
+}
+
+QList<XBinary::DATA_HEADER> XRiff::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+    QList<DATA_HEADER> list;
+
+    if (!(dataHeadersOptions.nID) || (dataHeadersOptions.nID == STRUCTID_HEADER)) {
+        DATA_HEADERS_OPTIONS opt = dataHeadersOptions;
+        opt.nID = STRUCTID_HEADER;
+        opt.dhMode = DHMODE_HEADER;
+        DATA_HEADER h = _initDataHeader(opt, tr("Header"));
+        h.locType = LT_OFFSET;
+        h.nLocation = 0;
+        h.nSize = 12;
+    h.listRecords.append(getDataRecord(0, 4, "Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+        h.listRecords.append(getDataRecord(4, 4, "Size", VT_UINT32, DRF_SIZE, getEndian()));
+    h.listRecords.append(getDataRecord(8, 4, "Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+        list.append(h);
+    }
+
+    if (!(dataHeadersOptions.nID) || (dataHeadersOptions.nID == STRUCTID_CHUNK)) {
+        // Present a single table row for the outer chunk
+        DATA_HEADERS_OPTIONS opt = dataHeadersOptions;
+        opt.nID = STRUCTID_CHUNK;
+        opt.dhMode = DHMODE_TABLE;
+        DATA_HEADER t = _initDataHeader(opt, tr("Chunks"));
+        t.locType = LT_OFFSET;
+        t.nLocation = 0;
+        bool bBE = (getEndian() == ENDIAN_BIG);
+        quint32 nSize = read_uint32(4, bBE);
+        t.nSize = qMin<qint64>(getSize(), (qint64)nSize + 8);
+    t.listRecords.append(getDataRecord(0, 4, "Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+        t.listRecords.append(getDataRecord(4, 4, "Size", VT_UINT32, DRF_SIZE, getEndian()));
+    t.listRecords.append(getDataRecord(8, 4, "Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+        list.append(t);
+    }
+
+    return list;
+}
+
+QString XRiff::structIDToString(quint32 nID)
+{
+    switch (nID) {
+        case STRUCTID_HEADER: return QString("HEADER");
+        case STRUCTID_CHUNK: return QString("CHUNK");
+        default: break;
+    }
+    return XBinary::structIDToString(nID);
 }

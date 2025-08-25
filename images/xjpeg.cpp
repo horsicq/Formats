@@ -380,7 +380,8 @@ QList<XBinary::FPART> XJpeg::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
     }
 
     QList<CHUNK> chunks = getChunks(pPdStruct);
-    for (const auto &ch : chunks) {
+    for (int i = 0; i < chunks.size(); ++i) {
+        const CHUNK &ch = chunks.at(i);
         if (ch.bEntropyCodedData) {
             if (nFileParts & FILEPART_REGION) {
                 FPART rec = {};
@@ -406,7 +407,10 @@ QList<XBinary::FPART> XJpeg::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
 
     if (nFileParts & FILEPART_OVERLAY) {
         qint64 nMax = 0;
-        for (const auto &p : listResult) nMax = qMax(nMax, p.nFileOffset + p.nFileSize);
+        for (int i = 0; i < listResult.size(); ++i) {
+            const FPART &p = listResult.at(i);
+            nMax = qMax(nMax, p.nFileOffset + p.nFileSize);
+        }
         if (nMax < nTotal) {
             FPART rec = {};
             rec.filePart = FILEPART_OVERLAY;

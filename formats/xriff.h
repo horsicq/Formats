@@ -27,6 +27,12 @@ class XRiff : public XBinary {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_HEADER,
+        STRUCTID_CHUNK
+    };
+
     explicit XRiff(QIODevice *pDevice = nullptr);
     ~XRiff();
 
@@ -36,10 +42,16 @@ public:
     virtual QString getFileFormatExt();
     virtual QString getFileFormatExtsString();
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
-    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
     virtual FT getFileType();
     virtual ENDIAN getEndian();
     virtual QString getMIMEString();
+
+    // Standardized inspection
+    virtual QList<MAPMODE> getMapModesList() override;
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
+    virtual QString structIDToString(quint32 nID) override;
 };
 
 #endif  // XRIFF_H

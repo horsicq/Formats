@@ -425,7 +425,8 @@ QList<XBinary::FPART> XTiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
 
     if (nFileParts & (FILEPART_TABLE | FILEPART_REGION)) {
         QList<CHUNK> chunks = getChunks(pPdStruct);
-        for (const auto &c : chunks) {
+        for (int i = 0; i < chunks.size(); ++i) {
+            const CHUNK &c = chunks.at(i);
             if (c.nSize <= 4) continue;  // small inline values
             FPART rec = {};
             rec.filePart = (nFileParts & FILEPART_REGION) ? FILEPART_REGION : FILEPART_TABLE;
@@ -439,7 +440,10 @@ QList<XBinary::FPART> XTiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
 
     if (nFileParts & FILEPART_OVERLAY) {
         qint64 nMax = 0;
-        for (const auto &p : listResult) nMax = qMax(nMax, p.nFileOffset + p.nFileSize);
+        for (int i = 0; i < listResult.size(); ++i) {
+            const FPART &p = listResult.at(i);
+            nMax = qMax(nMax, p.nFileOffset + p.nFileSize);
+        }
         if (nMax < nTotal) {
             FPART rec = {};
             rec.filePart = FILEPART_OVERLAY;

@@ -74,46 +74,7 @@ QString XMP4::getMIMEString()
 XBinary::_MEMORY_MAP XMP4::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
-
-    XBinary::_MEMORY_MAP result = {};
-
-    result.nBinarySize = getSize();
-
-    qint32 nIndex = 0;
-    qint64 nOffset = 0;
-
-    while (XBinary::isPdStructNotCanceled(pPdStruct)) {
-        quint32 nChunkSize = read_uint32(nOffset, true);
-
-        if (nChunkSize == 0) {
-            break;
-        }
-
-        QString sTag = read_ansiString(nOffset + 4, 4);
-
-        if (!isTagValid(sTag)) {
-            break;
-        }
-
-        {
-            _MEMORY_RECORD record = {};
-
-            record.nIndex = nIndex++;
-            record.filePart = FILEPART_REGION;
-            record.nOffset = nOffset;
-            record.nSize = nChunkSize;
-            record.nAddress = -1;
-            record.sName = sTag;
-
-            result.listRecords.append(record);
-        }
-
-        nOffset += nChunkSize;
-    }
-
-    _handleOverlay(&result);
-
-    return result;
+    return _getMemoryMap(FILEPART_HEADER | FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
 }
 
 XBinary::FT XMP4::getFileType()
@@ -136,4 +97,108 @@ bool XMP4::isTagValid(const QString &sTagName)
     }
 
     return bResult;
+}
+
+QList<XBinary::DATA_HEADER> XMP4::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+    QList<DATA_HEADER> list;
+
+    if (!(dataHeadersOptions.nID) || (dataHeadersOptions.nID == STRUCTID_BOX)) {
+        DATA_HEADERS_OPTIONS opt = dataHeadersOptions;
+        opt.nID = STRUCTID_BOX;
+        opt.dhMode = DHMODE_TABLE;
+        DATA_HEADER t = _initDataHeader(opt, tr("Boxes"));
+        t.locType = LT_OFFSET;
+        t.nLocation = 0;
+        t.nSize = getSize();
+        t.listRecords.append(getDataRecord(0, 4, "size", VT_UINT32, DRF_SIZE, ENDIAN_BIG));
+        t.listRecords.append(getDataRecord(4, 4, "type", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+        list.append(t);
+    }
+
+    return list;
+}
+
+QList<XBinary::FPART> XMP4::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+    QList<FPART> list;
+    const qint64 nTotal = getSize();
+
+    if (nFileParts & FILEPART_HEADER) {
+        FPART h = {};
+        h.filePart = FILEPART_HEADER;
+        h.nFileOffset = 0;
+        h.nFileSize = qMin<qint64>(nTotal, 8); // size(4)+type(4) of first box
+        h.nVirtualAddress = -1;
+        h.sName = tr("Header");
+        list.append(h);
+    }
+
+    if (nFileParts & FILEPART_REGION) {
+        qint64 nOffset = 0;
+        while ((nOffset + 8 <= nTotal) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            quint32 size = read_uint32(nOffset, true);
+            QString type = read_ansiString(nOffset + 4, 4);
+
+            if (size == 0) {
+                // box extends to EOF
+                size = (quint32)(nTotal - nOffset);
+            }
+            if (size == 1) {
+                // 64-bit largesize follows
+                if (nOffset + 16 > nTotal) break;
+                quint64 largesize = read_uint64(nOffset + 8, true);
+                if (largesize < 16) break;
+                // Cap to file size
+                if ((qint64)largesize > nTotal - nOffset) largesize = (quint64)(nTotal - nOffset);
+                FPART f = {};
+                f.filePart = FILEPART_REGION;
+                f.nFileOffset = nOffset;
+                f.nFileSize = (qint64)largesize;
+                f.nVirtualAddress = -1;
+                f.sName = type;
+                f.sOriginalName = type;
+                list.append(f);
+                nOffset += (qint64)largesize;
+                continue;
+            }
+
+            if (size < 8 || (nOffset + size > nTotal) || !isTagValid(type)) {
+                break;
+            }
+
+            FPART f = {};
+            f.filePart = FILEPART_REGION;
+            f.nFileOffset = nOffset;
+            f.nFileSize = size;
+            f.nVirtualAddress = -1;
+            f.sName = type;
+            f.sOriginalName = type;
+            list.append(f);
+
+            nOffset += size;
+        }
+    }
+
+    if (nFileParts & FILEPART_OVERLAY) {
+        // Overlay is anything past the last parsed box
+        qint64 nMax = 0;
+        for (int i = 0; i < list.size(); ++i) {
+            const FPART &p = list.at(i);
+            nMax = qMax(nMax, p.nFileOffset + p.nFileSize);
+        }
+        if (nMax < nTotal) {
+            FPART ov = {};
+            ov.filePart = FILEPART_OVERLAY;
+            ov.nFileOffset = nMax;
+            ov.nFileSize = nTotal - nMax;
+            ov.nVirtualAddress = -1;
+            ov.sName = tr("Overlay");
+            list.append(ov);
+        }
+    }
+
+    return list;
 }

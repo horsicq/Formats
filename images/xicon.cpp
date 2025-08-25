@@ -367,7 +367,8 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
 
     if (nFileParts & FILEPART_OBJECT) {
         QList<ICONDIRENTRY> entries = getIconDirectories();
-        for (const auto &e : entries) {
+        for (int i = 0; i < entries.size(); ++i) {
+            const ICONDIRENTRY &e = entries.at(i);
             if ((e.dwImageOffset < nTotal) && (e.dwBytesInRes > 0)) {
                 FPART rec = {};
                 rec.filePart = FILEPART_OBJECT;
