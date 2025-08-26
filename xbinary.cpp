@@ -4331,12 +4331,20 @@ QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bI
 
     if ((valueType == XBinary::VT_UINT8) || (valueType == XBinary::VT_BYTE)) {
         varResult = read_uint8(nOffset);
-    } else if ((valueType == XBinary::VT_UINT16) || (valueType == XBinary::VT_WORD)) {
+    } else if (valueType == XBinary::VT_UINT8) {
+        varResult = read_int8(nOffset);
+    } else if ((valueType == XBinary::VT_UINT16) || (valueType == XBinary::VT_WORD) || (valueType == XBinary::VT_USHORT)) {
         varResult = read_uint16(nOffset, bIsBigEndian);
+    } else if ((valueType == XBinary::VT_INT16) || (valueType == XBinary::VT_SHORT)) {
+        varResult = read_int16(nOffset, bIsBigEndian);
     } else if ((valueType == XBinary::VT_UINT32) || (valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_DWORD)) {
         varResult = read_uint32(nOffset, bIsBigEndian);
+    } else if ((valueType == XBinary::VT_INT32) || (valueType == XBinary::VT_INT)) {
+        varResult = read_int32(nOffset, bIsBigEndian);
     } else if ((valueType == XBinary::VT_UINT64) || (valueType == XBinary::VT_QWORD)) {
         varResult = read_uint64(nOffset, bIsBigEndian);
+    } else if (valueType == XBinary::VT_INT64) {
+        varResult = read_int64(nOffset, bIsBigEndian);
     } else if ((valueType == XBinary::VT_A) || (valueType == XBinary::VT_A_I)) {
         varResult = read_ansiString(nOffset, nSize);
     } else if ((valueType == XBinary::VT_UTF8) || (valueType == XBinary::VT_UTF8_I)) {

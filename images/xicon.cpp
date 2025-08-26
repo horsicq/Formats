@@ -339,7 +339,7 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
     QList<FPART> listResult;
 
     qint64 nTotal = getSize();
-    qint64 nMax = 0;
+    qint64 nMax = sizeof(ICONDIR);
 
     if (nFileParts & FILEPART_HEADER) {
         FPART rec = {};
@@ -349,7 +349,6 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         rec.nVirtualAddress = -1;
         rec.sName = tr("Header");
         listResult.append(rec);
-        nMax = qMax(nMax, rec.nFileOffset + rec.nFileSize);
     }
 
     ICONDIR dir = readICONDIR();
@@ -362,14 +361,15 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         rec.nVirtualAddress = -1;
         rec.sName = tr("Entries");
         listResult.append(rec);
-        nMax = qMax(nMax, rec.nFileOffset + rec.nFileSize);
     }
 
-    if (nFileParts & FILEPART_OBJECT) {
-        QList<ICONDIRENTRY> entries = getIconDirectories();
-        for (int i = 0; i < entries.size(); ++i) {
-            const ICONDIRENTRY &e = entries.at(i);
-            if ((e.dwImageOffset < nTotal) && (e.dwBytesInRes > 0)) {
+    nMax = qMax(nMax, (qint64)(sizeof(ICONDIR) + sizeof(ICONDIRENTRY) * dir.idCount));
+
+    QList<ICONDIRENTRY> entries = getIconDirectories();
+    for (int i = 0; i < entries.size(); ++i) {
+        const ICONDIRENTRY &e = entries.at(i);
+        if ((e.dwImageOffset < nTotal) && (e.dwBytesInRes > 0)) {
+            if (nFileParts & FILEPART_OBJECT) {
                 FPART rec = {};
                 rec.filePart = FILEPART_OBJECT;
                 rec.nFileOffset = e.dwImageOffset;
@@ -377,8 +377,9 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
                 rec.nVirtualAddress = -1;
                 rec.sName = tr("Icon");
                 listResult.append(rec);
-                nMax = qMax(nMax, rec.nFileOffset + rec.nFileSize);
             }
+
+            nMax = qMax(nMax, (qint64)(e.dwImageOffset + e.dwBytesInRes));
         }
     }
 

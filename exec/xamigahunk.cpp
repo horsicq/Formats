@@ -108,7 +108,7 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
 {
     Q_UNUSED(mapMode)
     // Delegate to the generic helper using our file parts implementation
-    return _getMemoryMap(FILEPART_HEADER | FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
+    return _getMemoryMap(FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
 }
 
 XBinary::ENDIAN XAmigaHunk::getEndian()
@@ -534,42 +534,42 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
     QList<HUNK> hunks = getHunks(pPdStruct);
     if (hunks.isEmpty()) return list;
 
-    // Header: if the first hunk is a header, expose it separately
-    if ((nFileParts & FILEPART_HEADER) && (hunks.first().nId == XAMIGAHUNK_DEF::HUNK_HEADER)) {
-        const HUNK &h = hunks.first();
-        FPART f = {};
-        f.filePart = FILEPART_HEADER;
-        f.nFileOffset = h.nOffset;
-        f.nFileSize = h.nSize;
-        f.nVirtualAddress = -1;
-        f.sName = tr("Header");
-        list.append(f);
-    }
+    qint64 nMaxOffset = 0;
+    // Sequential VA assignment for loadable hunks starting at IMAGE_BASE
+    XADDR currentVA = XAMIGAHUNK_DEF::IMAGE_BASE;
 
-    if (nFileParts & FILEPART_REGION) {
-        for (int i = 0; i < hunks.size(); ++i) {
-            const HUNK &h = hunks.at(i);
+    for (int i = 0; i < hunks.size(); ++i) {
+        const HUNK &h = hunks.at(i);
+
+        if (nFileParts & FILEPART_REGION) {
             FPART r = {};
             r.filePart = FILEPART_REGION;
             r.nFileOffset = h.nOffset;
             r.nFileSize = h.nSize;
-            r.nVirtualAddress = -1;
+            // Assign sequential VAs to loadable hunks with 4-byte alignment
+            if ((h.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (h.nId == XAMIGAHUNK_DEF::HUNK_DATA) || (h.nId == XAMIGAHUNK_DEF::HUNK_BSS) ||
+                (h.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
+                r.nVirtualAddress = currentVA;
+                // Memory size is stored as longword count at offset+4 for CODE/DATA/PPC_CODE and BSS
+                quint32 nLongwords = read_uint32(h.nOffset + 4, true);
+                XADDR nMemSize = (XADDR)nLongwords * 4;
+                currentVA = (XADDR)XBinary::align_up((qint64)(currentVA + nMemSize), 4);
+            } else {
+                r.nVirtualAddress = -1;
+            }
             r.sName = structIDToString(hunkTypeToStructId(h.nId));
             list.append(r);
         }
+
+        nMaxOffset = qMax(nMaxOffset, h.nOffset + h.nSize);
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
-        qint64 maxEnd = 0;
-        for (int i = 0; i < list.size(); ++i) {
-            const FPART &p = list.at(i);
-            maxEnd = qMax(maxEnd, p.nFileOffset + p.nFileSize);
-        }
-        if (maxEnd < getSize()) {
+        if (nMaxOffset < getSize()) {
             FPART ov = {};
             ov.filePart = FILEPART_OVERLAY;
-            ov.nFileOffset = maxEnd;
-            ov.nFileSize = getSize() - maxEnd;
+            ov.nFileOffset = nMaxOffset;
+            ov.nFileSize = getSize() - nMaxOffset;
             ov.nVirtualAddress = -1;
             ov.sName = tr("Overlay");
             list.append(ov);

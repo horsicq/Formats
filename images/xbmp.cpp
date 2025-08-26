@@ -276,7 +276,7 @@ QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
     BMPINFOHEADER ih = getInfoHeader();
 
     qint64 nTotal = getSize();
-    qint64 nMaxOffset = 0;
+    qint64 nMaxOffset = 14 + ih.biSize;
 
     if (nFileParts & FILEPART_HEADER) {
         FPART rec = {};
@@ -286,11 +286,10 @@ QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         rec.nVirtualAddress = -1;
         rec.sName = tr("Header");
         listResult.append(rec);
-        nMaxOffset = qMax(nMaxOffset, rec.nFileOffset + rec.nFileSize);
     }
 
-    if (nFileParts & FILEPART_DATA) {
-        if ((fh.bfOffBits > 0) && (fh.bfOffBits < nTotal) && (fh.bfSize <= (quint64)nTotal)) {
+    if ((fh.bfOffBits > 0) && (fh.bfOffBits < nTotal) && (fh.bfSize <= (quint64)nTotal)) {
+        if (nFileParts & FILEPART_DATA) {
             FPART rec = {};
             rec.filePart = FILEPART_DATA;
             rec.nFileOffset = fh.bfOffBits;
@@ -298,8 +297,9 @@ QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             rec.nVirtualAddress = -1;
             rec.sName = tr("Bitmap Data");
             listResult.append(rec);
-            nMaxOffset = qMax(nMaxOffset, rec.nFileOffset + rec.nFileSize);
         }
+
+        nMaxOffset = qMax(nMaxOffset, (qint64)(fh.bfSize));
     }
 
     if (nFileParts & FILEPART_OVERLAY) {

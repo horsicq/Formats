@@ -368,6 +368,7 @@ QList<XBinary::FPART> XJpeg::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
     QList<FPART> listResult;
 
     qint64 nTotal = getSize();
+    qint64 nMaxOffset = 0;
 
     if (nFileParts & FILEPART_SIGNATURE) {
         FPART rec = {};
@@ -403,19 +404,16 @@ QList<XBinary::FPART> XJpeg::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
                 listResult.append(rec);
             }
         }
+
+        nMaxOffset = qMax(nMaxOffset, ch.nDataOffset + ch.nDataSize);
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
-        qint64 nMax = 0;
-        for (int i = 0; i < listResult.size(); ++i) {
-            const FPART &p = listResult.at(i);
-            nMax = qMax(nMax, p.nFileOffset + p.nFileSize);
-        }
-        if (nMax < nTotal) {
+        if (nMaxOffset < nTotal) {
             FPART rec = {};
             rec.filePart = FILEPART_OVERLAY;
-            rec.nFileOffset = nMax;
-            rec.nFileSize = nTotal - nMax;
+            rec.nFileOffset = nMaxOffset;
+            rec.nFileSize = nTotal - nMaxOffset;
             rec.nVirtualAddress = -1;
             rec.sName = tr("Overlay");
             listResult.append(rec);
