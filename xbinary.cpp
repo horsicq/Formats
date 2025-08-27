@@ -5746,6 +5746,23 @@ bool XBinary::_initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
     return true;
 }
 
+XBinary::_MEMORY_MAP XBinary::getSimpleMemoryMap()
+{
+    _MEMORY_MAP result = {};
+
+    qint64 nTotalSize = getSize();
+
+    _MEMORY_RECORD record = {};
+    record.nAddress = 0;
+    record.nOffset = 0;
+    record.nSize = nTotalSize;
+    record.nIndex = 0;
+
+    result.listRecords.append(record);
+
+    return result;
+}
+
 XBinary::_MEMORY_MAP XBinary::_getMemoryMap(QList<FPART> *pListFParts, PDSTRUCT *pPdStruct)
 {
     // TODO isImage
@@ -12665,12 +12682,23 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
 
             case ST_RELOFFSET: {
                 qint64 nValue = 0;
-                switch (rec.nSizeOfAddr) {
-                    case 1: nValue = 1 + read_int8(nOffset); break;
-                    case 2: nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
-                    case 4: nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap)); break;
-                    case 8: nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap)); break;
-                    default: return false;
+
+                if (pMemoryMap->fileType == FT_AMIGAHUNK) {
+                    switch (rec.nSizeOfAddr) {
+                        case 1: nValue = read_int8(nOffset); break;
+                        case 2: nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
+                        case 4: nValue = -2 + read_int32(nOffset, isBigEndian(pMemoryMap)); break;
+                        case 8: nValue = read_int64(nOffset, isBigEndian(pMemoryMap)); break;
+                        default: return false;
+                    }
+                } else {
+                    switch (rec.nSizeOfAddr) {
+                        case 1: nValue = 1 + read_int8(nOffset); break;
+                        case 2: nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
+                        case 4: nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap)); break;
+                        case 8: nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap)); break;
+                        default: return false;
+                    }
                 }
 
                 if ((pMemoryMap->fileType == FT_COM) || (pMemoryMap->fileType == FT_MSDOS)) {

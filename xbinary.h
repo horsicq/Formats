@@ -288,6 +288,7 @@ public:
         FILEPART_DATA = 1 << 12,
         FILEPART_OBJECT = 1 << 13,
         FILEPART_TABLE = 1 << 14,
+        FILEPART_VALUE = 1 << 15,
         FILEPART_ALL = 0xFFFFFFFF,
     };
 
@@ -1381,6 +1382,8 @@ public:
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     _MEMORY_MAP _getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct = nullptr);
     _MEMORY_MAP _getMemoryMap(QList<FPART> *pListFParts, PDSTRUCT *pPdStruct = nullptr);
+
+    _MEMORY_MAP getSimpleMemoryMap();
 
     virtual QList<FPART> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<FPART> getNativeSubRegions(PDSTRUCT *pPdStruct = nullptr);

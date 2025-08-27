@@ -100,15 +100,23 @@ QList<XBinary::MAPMODE> XAmigaHunk::getMapModesList()
 {
     QList<XBinary::MAPMODE> list;
     // Standardize to regions view; segment view can be derived later if needed
+    list.append(MAPMODE_SEGMENTS);
     list.append(MAPMODE_REGIONS);
+
     return list;
 }
 
 XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(mapMode)
-    // Delegate to the generic helper using our file parts implementation
-    return _getMemoryMap(FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
+    if (mapMode == MAPMODE_UNKNOWN) {
+        mapMode = MAPMODE_SEGMENTS;
+    }
+
+    if (mapMode == MAPMODE_SEGMENTS) {
+       return _getMemoryMap(FILEPART_SEGMENT, pPdStruct);
+    } else {
+        return _getMemoryMap(FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
+    }
 }
 
 XBinary::ENDIAN XAmigaHunk::getEndian()
@@ -541,22 +549,56 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
     for (int i = 0; i < hunks.size(); ++i) {
         const HUNK &h = hunks.at(i);
 
+        if ((nFileParts & FILEPART_TABLE) || (nFileParts & FILEPART_SEGMENT)) {
+            // Assign sequential VAs to loadable hunks with 4-byte alignment
+            if ((h.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (h.nId == XAMIGAHUNK_DEF::HUNK_DATA) || (h.nId == XAMIGAHUNK_DEF::HUNK_BSS) ||
+                (h.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
+
+                if (nFileParts & FILEPART_TABLE) {
+                    FPART r = {};
+                    r.filePart = FILEPART_TABLE;
+                    r.nFileOffset = h.nOffset;
+                    r.nFileSize = 8;
+                    r.nVirtualAddress = -1;
+                    r.sName = tr("Value");
+                    list.append(r);
+                }
+
+                if (nFileParts & FILEPART_SEGMENT) {
+                    QString sName;
+
+                    if (h.nId == XAMIGAHUNK_DEF::HUNK_CODE) {
+                        sName = QString("CODE");
+                    } else if (h.nId == XAMIGAHUNK_DEF::HUNK_DATA) {
+                        sName = QString("DATA");
+                    } else if (h.nId == XAMIGAHUNK_DEF::HUNK_BSS) {
+                        sName = QString("BSS");
+                    } else if (h.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE) {
+                        sName = QString("PPC_CODE");
+                    }
+
+                    FPART r = {};
+                    r.filePart = FILEPART_SEGMENT;
+                    r.nFileOffset = h.nOffset + 8;
+                    r.nFileSize = h.nSize - 8;
+                    r.nVirtualAddress = currentVA;
+                    r.sName = sName;
+                    list.append(r);
+                }
+
+                // Memory size is stored as longword count at offset+4 for CODE/DATA/PPC_CODE and BSS
+                quint32 nLongwords = read_uint32(h.nOffset + 4, true);
+                XADDR nMemSize = (XADDR)nLongwords * 4;
+                currentVA = (XADDR)XBinary::align_up((qint64)(currentVA + nMemSize), 4);
+            }
+        }
+
         if (nFileParts & FILEPART_REGION) {
             FPART r = {};
             r.filePart = FILEPART_REGION;
             r.nFileOffset = h.nOffset;
             r.nFileSize = h.nSize;
-            // Assign sequential VAs to loadable hunks with 4-byte alignment
-            if ((h.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (h.nId == XAMIGAHUNK_DEF::HUNK_DATA) || (h.nId == XAMIGAHUNK_DEF::HUNK_BSS) ||
-                (h.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
-                r.nVirtualAddress = currentVA;
-                // Memory size is stored as longword count at offset+4 for CODE/DATA/PPC_CODE and BSS
-                quint32 nLongwords = read_uint32(h.nOffset + 4, true);
-                XADDR nMemSize = (XADDR)nLongwords * 4;
-                currentVA = (XADDR)XBinary::align_up((qint64)(currentVA + nMemSize), 4);
-            } else {
-                r.nVirtualAddress = -1;
-            }
+            r.nVirtualAddress = -1;
             r.sName = structIDToString(hunkTypeToStructId(h.nId));
             list.append(r);
         }
