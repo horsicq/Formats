@@ -1303,6 +1303,7 @@ public:
     static bool compareMemoryWordI(quint16 *pMemory, const quint16 *pMemoryU, const quint16 *pMemoryL,
                                    qint64 nSize);  // Unicode
 
+    bool isOffsetValid(qint64 nOffset, qint64 nTotalSize);
     bool isOffsetValid(qint64 nOffset);
     bool isAddressValid(XADDR nAddress);
     bool isRelAddressValid(qint64 nRelAddress);

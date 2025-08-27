@@ -162,6 +162,7 @@ XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
     {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")}, {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},
     {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")},
     {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")},    {XBinary::FILEPART_SIGNATURE, "Signature", QObject::tr("Signature")},
+    {XBinary::FILEPART_SECTION, "Section", QObject::tr("Section")},  {XBinary::FILEPART_DATA, "Data", QObject::tr("Data")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FT[] = {
@@ -5198,11 +5199,14 @@ bool XBinary::compareMemoryWordI(quint16 *pMemory, const quint16 *pMemoryU, cons
     return bResult;
 }
 
+bool XBinary::isOffsetValid(qint64 nOffset, qint64 nTotalSize)
+{
+    return (nOffset >= 0) && (nOffset < nTotalSize);
+}
+
 bool XBinary::isOffsetValid(qint64 nOffset)
 {
-    _MEMORY_MAP memoryMap = getMemoryMap();
-
-    return isOffsetValid(&memoryMap, nOffset);
+    return isOffsetValid(nOffset, getSize());
 }
 
 bool XBinary::isAddressValid(XADDR nAddress)
