@@ -164,7 +164,7 @@ QList<XBinary::FPART> XRiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         FPART f = {};
         f.filePart = FILEPART_HEADER;
         f.nFileOffset = 0;
-        f.nFileSize = 12; // RIFF header: 'RIFF'/'RIFX' + size + form type
+        f.nFileSize = 12;  // RIFF header: 'RIFF'/'RIFX' + size + form type
         f.nVirtualAddress = -1;
         f.sName = tr("Header");
         list.append(f);
@@ -215,9 +215,9 @@ QList<XBinary::DATA_HEADER> XRiff::getDataHeaders(const DATA_HEADERS_OPTIONS &da
         h.locType = LT_OFFSET;
         h.nLocation = 0;
         h.nSize = 12;
-    h.listRecords.append(getDataRecord(0, 4, "Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+        h.listRecords.append(getDataRecord(0, 4, "Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
         h.listRecords.append(getDataRecord(4, 4, "Size", VT_UINT32, DRF_SIZE, getEndian()));
-    h.listRecords.append(getDataRecord(8, 4, "Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+        h.listRecords.append(getDataRecord(8, 4, "Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
         list.append(h);
     }
 
@@ -232,9 +232,9 @@ QList<XBinary::DATA_HEADER> XRiff::getDataHeaders(const DATA_HEADERS_OPTIONS &da
         bool bBE = (getEndian() == ENDIAN_BIG);
         quint32 nSize = read_uint32(4, bBE);
         t.nSize = qMin<qint64>(getSize(), (qint64)nSize + 8);
-    t.listRecords.append(getDataRecord(0, 4, "Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+        t.listRecords.append(getDataRecord(0, 4, "Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
         t.listRecords.append(getDataRecord(4, 4, "Size", VT_UINT32, DRF_SIZE, getEndian()));
-    t.listRecords.append(getDataRecord(8, 4, "Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+        t.listRecords.append(getDataRecord(8, 4, "Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
         list.append(t);
     }
 

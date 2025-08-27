@@ -130,7 +130,7 @@ QList<XBinary::FPART> XMP4::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         FPART h = {};
         h.filePart = FILEPART_HEADER;
         h.nFileOffset = 0;
-        h.nFileSize = qMin<qint64>(nTotal, 8); // size(4)+type(4) of first box
+        h.nFileSize = qMin<qint64>(nTotal, 8);  // size(4)+type(4) of first box
         h.nVirtualAddress = -1;
         h.sName = tr("Header");
         list.append(h);

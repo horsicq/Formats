@@ -49,7 +49,12 @@ public:
 
     virtual QString structIDToString(quint32 nID);
 
-    virtual QList<MAPMODE> getMapModesList() override { QList<MAPMODE> l; l.append(MAPMODE_REGIONS); return l; }
+    virtual QList<MAPMODE> getMapModesList() override
+    {
+        QList<MAPMODE> l;
+        l.append(MAPMODE_REGIONS);
+        return l;
+    }
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 };
 

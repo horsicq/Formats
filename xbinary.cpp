@@ -162,7 +162,7 @@ XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
     {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")}, {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},
     {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")},
     {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")},    {XBinary::FILEPART_SIGNATURE, "Signature", QObject::tr("Signature")},
-    {XBinary::FILEPART_SECTION, "Section", QObject::tr("Section")},  {XBinary::FILEPART_DATA, "Data", QObject::tr("Data")},
+    {XBinary::FILEPART_SECTION, "Section", QObject::tr("Section")}, {XBinary::FILEPART_DATA, "Data", QObject::tr("Data")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FT[] = {
@@ -12686,7 +12686,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 if (pMemoryMap->fileType == FT_AMIGAHUNK) {
                     switch (rec.nSizeOfAddr) {
                         case 1: nValue = read_int8(nOffset); break;
-                        case 2: nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
+                        case 2: nValue = read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
                         case 4: nValue = -2 + read_int32(nOffset, isBigEndian(pMemoryMap)); break;
                         case 8: nValue = read_int64(nOffset, isBigEndian(pMemoryMap)); break;
                         default: return false;

@@ -113,7 +113,7 @@ XBinary::_MEMORY_MAP XAmigaHunk::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
     }
 
     if (mapMode == MAPMODE_SEGMENTS) {
-       return _getMemoryMap(FILEPART_SEGMENT, pPdStruct);
+        return _getMemoryMap(FILEPART_SEGMENT, pPdStruct);
     } else {
         return _getMemoryMap(FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
     }
@@ -553,7 +553,6 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
             // Assign sequential VAs to loadable hunks with 4-byte alignment
             if ((h.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (h.nId == XAMIGAHUNK_DEF::HUNK_DATA) || (h.nId == XAMIGAHUNK_DEF::HUNK_BSS) ||
                 (h.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
-
                 if (nFileParts & FILEPART_TABLE) {
                     FPART r = {};
                     r.filePart = FILEPART_TABLE;

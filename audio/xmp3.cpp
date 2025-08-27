@@ -378,10 +378,12 @@ QList<XBinary::FPART> XMP3::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         // Walk frames conservatively
         while (offset + 4 <= total && XBinary::isPdStructNotCanceled(pPdStruct)) {
             quint32 header = read_uint32(offset, true);
-            if ((header & 0xFFE00000) != 0xFFE00000) break; // sync bits
+            if ((header & 0xFFE00000) != 0xFFE00000) break;  // sync bits
             qint64 frameSize = decodeFrame(offset);
             if (frameSize <= 0) break;
-            if (offset + frameSize > total) { frameSize = total - offset; }
+            if (offset + frameSize > total) {
+                frameSize = total - offset;
+            }
             FPART f = {};
             f.filePart = FILEPART_REGION;
             f.nFileOffset = offset;

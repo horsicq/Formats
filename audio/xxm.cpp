@@ -202,7 +202,7 @@ QList<XBinary::FPART> XXM::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         qint64 extraOffset = offset + ihFixed;
         if (ih.num_samples > 0) {
             INSTRUMENT_EXTRA_HEADER ieh = _read_INSTRUMENT_EXTRA_HEADER(extraOffset);
-            qint64 extraSize = 212; // fixed size of extra header
+            qint64 extraSize = 212;  // fixed size of extra header
             if (nFileParts & FILEPART_TABLE) {
                 FPART t2 = {};
                 t2.filePart = FILEPART_TABLE;
