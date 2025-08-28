@@ -1120,6 +1120,7 @@ public:
     static qint8 _read_int8(char *pData);
     static quint16 _read_uint16(char *pData, bool bIsBigEndian = false);
     static qint16 _read_int16(char *pData, bool bIsBigEndian = false);
+    static quint32 _read_uint24(char *pData, bool bIsBigEndian = false);
     static quint32 _read_uint32(char *pData, bool bIsBigEndian = false);
     static qint32 _read_int32(char *pData, bool bIsBigEndian = false);
     static quint64 _read_uint64(char *pData, bool bIsBigEndian = false);

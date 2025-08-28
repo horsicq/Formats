@@ -2561,6 +2561,21 @@ qint16 XBinary::_read_int16(char *pData, bool bIsBigEndian)
     return result;
 }
 
+quint32 XBinary::_read_uint24(char *pData, bool bIsBigEndian)
+{
+    quint32 result = 0;
+
+    if (bIsBigEndian) {
+        _copyMemory(((char *)(&result)) + 1, pData, 3);
+        result = qFromBigEndian(result);
+    } else {
+        _copyMemory(((char *)(&result)) + 0, pData, 3);
+        result = qFromLittleEndian(result);
+    }
+
+    return (result & (0xFFFFFF));
+}
+
 quint32 XBinary::_read_uint32(char *pData, bool bIsBigEndian)
 {
     quint32 result = *(quint32 *)pData;
@@ -13023,14 +13038,38 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
 
 qint64 XBinary::getPhysSize(char *pBuffer, qint64 nSize)
 {
-    while (nSize > 0) {
-        char *pOffset = pBuffer + nSize - 1;
+    if ((nSize <= 0) || (pBuffer == nullptr)) {
+        return 0;
+    }
 
-        if (*pOffset) {
-            break;
+    const qint64 wordSize = (qint64)sizeof(uint64_t);
+
+    // Scan in word-sized chunks from the end for speed. Use memcpy to avoid
+    // alignment UB on platforms that care.
+    while (nSize >= wordSize) {
+        const char *pWord = pBuffer + nSize - wordSize;
+        uint64_t val = 0;
+        memcpy(&val, pWord, sizeof(val));
+
+        if (val != 0) {
+            // Found a non-zero word, search inside it from the end
+            for (qint64 i = wordSize - 1; i >= 0; --i) {
+                if (pWord[i] != 0) {
+                    return (nSize - wordSize) + i + 1;
+                }
+            }
+            // Shouldn't reach here since val != 0, but keep safe behavior
         }
 
-        nSize--;
+        nSize -= wordSize;
+    }
+
+    // Tail: scan remaining bytes one by one
+    while (nSize > 0) {
+        if (pBuffer[nSize - 1] != 0) {
+            break;
+        }
+        --nSize;
     }
 
     return nSize;
