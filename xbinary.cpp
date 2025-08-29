@@ -5127,18 +5127,29 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
         return false;
     }
 
-    qint64 nMaxSize = getSize();
-
-    if (nOffset + nSize > nMaxSize) {
+    if ((nOffset < 0) || (nSize < 0)) {
         return false;
     }
 
-    quint8 cZero = 0;
+    qint64 nMaxSize = getSize();
 
-    // TODO optimize with dwords
-    for (qint32 i = 0; i < nSize; i++) {
-        write_array(nOffset, (char *)&cZero, 1);
+    // Prevent overflow and out-of-bounds
+    if ((nOffset > nMaxSize) || (nSize > (nMaxSize - nOffset))) {
+        return false;
     }
+
+    const qint64 kBufferSize = 0x1000;  // 4 KB chunk
+    qint64 nChunk = qMin(nSize, kBufferSize);
+    char *pZero = new char[(size_t)nChunk]();  // zero-initialized buffer
+
+    while (nSize > 0) {
+        qint64 nWrite = qMin(nSize, nChunk);
+        write_array(nOffset, pZero, nWrite);
+        nOffset += nWrite;
+        nSize -= nWrite;
+    }
+
+    delete[] pZero;
 
     return true;
 }
@@ -11503,6 +11514,11 @@ QString XBinary::appendText(const QString &sResult, const QString &sString, cons
     }
 
     return _sResult;
+}
+
+QString XBinary::appendComma(const QString &sResult, const QString &sString)
+{
+    return appendText(sResult, sString, ", ");
 }
 
 QString XBinary::bytesCountToString(quint64 nValue, quint64 nBase)
