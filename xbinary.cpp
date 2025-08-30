@@ -6828,20 +6828,21 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
 {
     XBinary::FT result = FT_UNKNOWN;
 
-    if (pStFileTypes->contains(FT_PE32)) {
-        result = FT_PE32;
-    } else if (pStFileTypes->contains(FT_PE64)) {
+    // Executables: prefer 64-bit over 32-bit; prefer container formats first
+    if (pStFileTypes->contains(FT_PE64)) {
         result = FT_PE64;
-    } else if (pStFileTypes->contains(FT_MACHO32)) {
-        result = FT_MACHO32;
-    } else if (pStFileTypes->contains(FT_MACHO64)) {
-        result = FT_MACHO64;
+    } else if (pStFileTypes->contains(FT_PE32)) {
+        result = FT_PE32;
     } else if (pStFileTypes->contains(FT_MACHOFAT)) {
         result = FT_MACHOFAT;
-    } else if (pStFileTypes->contains(FT_ELF32)) {
-        result = FT_ELF32;
+    } else if (pStFileTypes->contains(FT_MACHO64)) {
+        result = FT_MACHO64;
+    } else if (pStFileTypes->contains(FT_MACHO32)) {
+        result = FT_MACHO32;
     } else if (pStFileTypes->contains(FT_ELF64)) {
         result = FT_ELF64;
+    } else if (pStFileTypes->contains(FT_ELF32)) {
+        result = FT_ELF32;
     } else if (pStFileTypes->contains(FT_LE)) {
         result = FT_LE;
     } else if (pStFileTypes->contains(FT_LX)) {
@@ -6850,16 +6851,16 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_NE;
     } else if (pStFileTypes->contains(FT_AMIGAHUNK)) {
         result = FT_AMIGAHUNK;
+    } else if (pStFileTypes->contains(FT_BWDOS16M)) {
+        result = FT_BWDOS16M;
     } else if (pStFileTypes->contains(FT_DOS16M)) {
         result = FT_DOS16M;
     } else if (pStFileTypes->contains(FT_DOS4G)) {
         result = FT_DOS4G;
     } else if (pStFileTypes->contains(FT_MSDOS)) {
         result = FT_MSDOS;
-    } else if (pStFileTypes->contains(FT_CAB)) {
-        result = FT_CAB;
-    } else if (pStFileTypes->contains(FT_RAR)) {
-        result = FT_RAR;
+
+    // Android/Java ecosystems and archives: prefer specific containers first
     } else if (pStFileTypes->contains(FT_APKS)) {
         result = FT_APKS;
     } else if (pStFileTypes->contains(FT_APK)) {
@@ -6872,88 +6873,106 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_ZIP;
     } else if (pStFileTypes->contains(FT_NPM)) {
         result = FT_NPM;
-    } else if (pStFileTypes->contains(FT_TAR)) {
-        result = FT_TAR;
     } else if (pStFileTypes->contains(FT_TARGZ)) {
         result = FT_TARGZ;
+    } else if (pStFileTypes->contains(FT_TAR)) {
+        result = FT_TAR;
     } else if (pStFileTypes->contains(FT_GZIP)) {
         result = FT_GZIP;
     } else if (pStFileTypes->contains(FT_ZLIB)) {
         result = FT_ZLIB;
-    } else if (pStFileTypes->contains(FT_LHA)) {
-        result = FT_LHA;
     } else if (pStFileTypes->contains(FT_7Z)) {
         result = FT_7Z;
+    } else if (pStFileTypes->contains(FT_RAR)) {
+        result = FT_RAR;
+    } else if (pStFileTypes->contains(FT_LHA)) {
+        result = FT_LHA;
     } else if (pStFileTypes->contains(FT_DEB)) {
         result = FT_DEB;
     } else if (pStFileTypes->contains(FT_AR)) {
         result = FT_AR;
+    } else if (pStFileTypes->contains(FT_CAB)) {
+        result = FT_CAB;
+
+    // Android resources and DEX/Java
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
         result = FT_ANDROIDXML;
     } else if (pStFileTypes->contains(FT_ANDROIDASRC)) {
         result = FT_ANDROIDASRC;
     } else if (pStFileTypes->contains(FT_DEX)) {
         result = FT_DEX;
-    } else if (pStFileTypes->contains(FT_PNG)) {
-        result = FT_PNG;
-    } else if (pStFileTypes->contains(FT_ICO)) {
-        result = FT_ICO;
-    } else if (pStFileTypes->contains(FT_CUR)) {
-        result = FT_CUR;
-    } else if (pStFileTypes->contains(FT_ICC)) {
-        result = FT_ICC;
-    } else if (pStFileTypes->contains(FT_JPEG)) {
-        result = FT_JPEG;
-    } else if (pStFileTypes->contains(FT_BMP)) {
-        result = FT_BMP;
-    } else if (pStFileTypes->contains(FT_GIF)) {
-        result = FT_GIF;
-    } else if (pStFileTypes->contains(FT_TIFF)) {
-        result = FT_TIFF;
-    } else if (pStFileTypes->contains(FT_MP3)) {
-        result = FT_MP3;
-    } else if (pStFileTypes->contains(FT_MP4)) {
-        result = FT_MP4;
-    } else if (pStFileTypes->contains(FT_XM)) {
-        result = FT_XM;
-    } else if (pStFileTypes->contains(FT_AVI)) {
-        result = FT_AVI;
-    } else if (pStFileTypes->contains(FT_WEBP)) {
-        result = FT_WEBP;
-    } else if (pStFileTypes->contains(FT_WAV)) {
-        result = FT_WAV;
-    } else if (pStFileTypes->contains(FT_SIGNATURE)) {
-        result = FT_SIGNATURE;
-    } else if (pStFileTypes->contains(FT_RIFF)) {
-        result = FT_RIFF;
-    } else if (pStFileTypes->contains(FT_PDF)) {
-        result = FT_PDF;
-    } else if (pStFileTypes->contains(FT_BWDOS16M)) {
-        result = FT_BWDOS16M;
     } else if (pStFileTypes->contains(FT_JAVACLASS)) {
         result = FT_JAVACLASS;
+
+    // Documents and containers
+    } else if (pStFileTypes->contains(FT_PDF)) {
+        result = FT_PDF;
     } else if (pStFileTypes->contains(FT_CFBF)) {
         result = FT_CFBF;
+
+    // Compressed/pack formats
     } else if (pStFileTypes->contains(FT_SZDD)) {
         result = FT_SZDD;
     } else if (pStFileTypes->contains(FT_BZIP2)) {
         result = FT_BZIP2;
     } else if (pStFileTypes->contains(FT_XZ)) {
         result = FT_XZ;
+
+    // Fonts and images/media
     } else if (pStFileTypes->contains(FT_TTF)) {
         result = FT_TTF;
+    } else if (pStFileTypes->contains(FT_PNG)) {
+        result = FT_PNG;
+    } else if (pStFileTypes->contains(FT_JPEG)) {
+        result = FT_JPEG;
+    } else if (pStFileTypes->contains(FT_WEBP)) {
+        result = FT_WEBP;
+    } else if (pStFileTypes->contains(FT_BMP)) {
+        result = FT_BMP;
+    } else if (pStFileTypes->contains(FT_GIF)) {
+        result = FT_GIF;
+    } else if (pStFileTypes->contains(FT_TIFF)) {
+        result = FT_TIFF;
+    } else if (pStFileTypes->contains(FT_ICO)) {
+        result = FT_ICO;
+    } else if (pStFileTypes->contains(FT_CUR)) {
+        result = FT_CUR;
+    } else if (pStFileTypes->contains(FT_ICC)) {
+        result = FT_ICC;
+    } else if (pStFileTypes->contains(FT_MP4)) {
+        result = FT_MP4;
+    } else if (pStFileTypes->contains(FT_AVI)) {
+        result = FT_AVI;
+    } else if (pStFileTypes->contains(FT_MP3)) {
+        result = FT_MP3;
+    } else if (pStFileTypes->contains(FT_WAV)) {
+        result = FT_WAV;
+    } else if (pStFileTypes->contains(FT_XM)) {
+        result = FT_XM;
+    } else if (pStFileTypes->contains(FT_RIFF)) {
+        result = FT_RIFF;
+
+    // Scanners signatures
+    } else if (pStFileTypes->contains(FT_SIGNATURE)) {
+        result = FT_SIGNATURE;
+
+    // DjVu
     } else if (pStFileTypes->contains(FT_DJVU)) {
         result = FT_DJVU;
-    } else if (pStFileTypes->contains(FT_TEXT)) {
-        result = FT_TEXT;
-    } else if (pStFileTypes->contains(FT_UTF8)) {
-        result = FT_UTF8;
+
+    // Encodings/text: prefer UNICODE > UTF8 > TEXT
     } else if (pStFileTypes->contains(FT_UNICODE)) {
         result = FT_UNICODE;
-    } else if (pStFileTypes->contains(FT_DATA)) {
-        result = FT_DATA;
+    } else if (pStFileTypes->contains(FT_UTF8)) {
+        result = FT_UTF8;
+    } else if (pStFileTypes->contains(FT_TEXT)) {
+        result = FT_TEXT;
+
+    // Generic
     } else if (pStFileTypes->contains(FT_COM)) {
         result = FT_COM;
+    } else if (pStFileTypes->contains(FT_DATA)) {
+        result = FT_DATA;
     } else if (pStFileTypes->contains(FT_BINARY)) {
         result = FT_BINARY;
     }
