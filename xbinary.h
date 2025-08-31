@@ -1668,6 +1668,13 @@ public:
 
     PACKED_UINT read_acn1_integer(qint64 nOffset, qint64 nSize);
 
+    // ASN.1 helpers (moved from XPE)
+    QString read_ASN_OIDString(qint64 nOffset, qint64 nSize);
+    qint64 read_ASN_Integer(qint64 nOffset, qint64 nSize);
+    bool read_ASN_Bool(qint64 nOffset, qint64 nSize);
+    QDateTime read_ASN_DateTime(qint64 nOffset, qint64 nSize);
+    QString read_ASN_AnsiString(qint64 nOffset, qint64 nSize);
+
     static PACKED_UINT _read_packedNumber(char *pData, qint64 nSize);
     PACKED_UINT read_packedNumber(qint64 nOffset, qint64 nSize);
 

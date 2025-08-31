@@ -1295,15 +1295,6 @@ public:
     static QString certRecordToString(CERT_RECORD certRecord, qint32 nLevel);
 
     CERT_TAG read_CertTag(qint64 nOffset, quint32 nTag);
-    QString read_ASN_OIDString(qint64 nOffset,
-                               qint64 nSize);  // TODO move to XBinary;
-    qint64 read_ASN_Integer(qint64 nOffset,
-                            qint64 nSize);             // TODO move to XBinary;
-    bool read_ASN_Bool(qint64 nOffset, qint64 nSize);  // TODO move to XBinary;
-    QDateTime read_ASN_DateTime(qint64 nOffset,
-                                qint64 nSize);  // TODO move to XBinary;
-    QString read_ASN_AnsiString(qint64 nOffset,
-                                qint64 nSize);  // TODO move to XBinary;
 
     void getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize, CERT_RECORD *pCertRecord);
 

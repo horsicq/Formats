@@ -9860,6 +9860,89 @@ XBinary::PACKED_UINT XBinary::read_acn1_integer(qint64 nOffset, qint64 nSize)
     return result;
 }
 
+QString XBinary::read_ASN_OIDString(qint64 nOffset, qint64 nSize)
+{
+    QString sResult;
+
+    if (nSize > 0) {
+        quint8 nStart = read_uint8(nOffset);
+
+        sResult += QString("%1.%2").arg(QString::number(nStart / 40), QString::number(nStart % 40));
+
+        nOffset++;
+        nSize--;
+
+        quint64 nValue = 0;
+
+        while (nSize > 0) {
+            quint8 nByte = read_uint8(nOffset);
+
+            nValue <<= 7;
+            nValue += (nByte & 0x7F);
+
+            if (!(nByte & 0x80)) {
+                sResult += QString(".%1").arg(nValue);
+                nValue = 0;
+            }
+
+            nOffset++;
+            nSize--;
+        }
+    }
+
+    return sResult;
+}
+
+qint64 XBinary::read_ASN_Integer(qint64 nOffset, qint64 nSize)
+{
+    qint64 nResult = 0;
+
+    PACKED_UINT packedInt = read_acn1_integer(nOffset, nSize);
+
+    if (packedInt.bIsValid) {
+        nResult = packedInt.nValue;
+    }
+
+    return nResult;
+}
+
+bool XBinary::read_ASN_Bool(qint64 nOffset, qint64 nSize)
+{
+    if (nSize <= 0) return false;
+    quint8 v = read_uint8(nOffset);
+    return v != 0x00;  // per DER, any non-zero is TRUE
+}
+
+QDateTime XBinary::read_ASN_DateTime(qint64 nOffset, qint64 nSize)
+{
+    // Try UTCTime (YYMMDDHHMMSSZ) then GeneralizedTime (YYYYMMDDHHMMSSZ)
+    QByteArray bytes = read_array(nOffset, qMax<qint64>(0, nSize));
+    QString s = QString::fromLatin1(bytes);
+    QDateTime dt;
+    // Ensure ends with 'Z' for UTC; handle missing seconds too
+    static const QStringList fmts = {
+        "yyMMddHHmmss'Z'", "yyMMddHHmm'Z'", "yyyyMMddHHmmss'Z'", "yyyyMMddHHmm'Z'"
+    };
+    for (const QString &f : fmts) {
+        dt = QDateTime::fromString(s, f);
+        if (dt.isValid()) {
+            dt.setTimeSpec(Qt::UTC);
+            return dt;
+        }
+    }
+    return QDateTime();
+}
+
+QString XBinary::read_ASN_AnsiString(qint64 nOffset, qint64 nSize)
+{
+    if (nSize <= 0) return QString();
+    QByteArray bytes = read_array(nOffset, nSize);
+    // Trim potential trailing NULs
+    int trim = bytes.size();
+    while (trim > 0 && bytes.at(trim - 1) == '\0') trim--;
+    return QString::fromLatin1(bytes.constData(), trim);
+}
+
 XBinary::PACKED_UINT XBinary::_read_packedNumber(char *pData, qint64 nSize)
 {
     PACKED_UINT result = {};
