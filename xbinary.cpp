@@ -163,6 +163,9 @@ XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
     {XBinary::FILEPART_REGION, "Region", QObject::tr("Region")},    {XBinary::FILEPART_DEBUGDATA, "DebugData", QObject::tr("Debug data")},
     {XBinary::FILEPART_STREAM, "Stream", QObject::tr("Stream")},    {XBinary::FILEPART_SIGNATURE, "Signature", QObject::tr("Signature")},
     {XBinary::FILEPART_SECTION, "Section", QObject::tr("Section")}, {XBinary::FILEPART_DATA, "Data", QObject::tr("Data")},
+    {XBinary::FILEPART_SEGMENT, "Segment", QObject::tr("Segment")}, {XBinary::FILEPART_FOOTER, "Footer", QObject::tr("Footer")},
+    {XBinary::FILEPART_OBJECT, "Object", QObject::tr("Object")},    {XBinary::FILEPART_TABLE, "Table", QObject::tr("Table")},
+    {XBinary::FILEPART_VALUE, "Value", QObject::tr("Value")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FT[] = {

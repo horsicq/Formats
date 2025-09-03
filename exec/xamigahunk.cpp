@@ -559,7 +559,7 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
                     r.nFileOffset = h.nOffset;
                     r.nFileSize = 8;
                     r.nVirtualAddress = -1;
-                    r.sName = tr("Value");
+                    r.sName = tr("Table");
                     list.append(r);
                 }
 
