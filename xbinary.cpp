@@ -2906,8 +2906,12 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
+    // Validate input
+    if ((!pArray) || (nArraySize <= 0)) {
+        return -1;
+    }
+
     // TODO CheckSize function
-    // TODO Optimize
     qint64 _nSize = getSize();
 
     if (nSize == -1) {
@@ -2978,16 +2982,9 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         if (st == ST_COMPAREBYTES) {
             // Fast path: single-byte needle
             if (nArraySize == 1) {
-                const unsigned char needle = (unsigned char)pArray[0];
-                const unsigned char *hay = (const unsigned char *)pBuffer;
-                const unsigned char *end = hay + (nTemp - (nArraySize - 1));
-                while (hay < end) {
-                    // Manual scan to avoid dependency on libc memchr behavior across chunks
-                    if (*hay == needle) {
-                        nResult = nOffset + (hay - (const unsigned char *)pBuffer);
-                        break;
-                    }
-                    ++hay;
+                const void *p = memchr(pBuffer, (unsigned char)pArray[0], (size_t)nTemp);
+                if (p) {
+                    nResult = nOffset + ((const char *)p - pBuffer);
                 }
             } else if (bUseBMH) {
                 // Boyer–Moore–Horspool over the current chunk
@@ -3010,10 +3007,10 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 }
             } else {
                 // Fallback naive scan
-                for (quint32 i = 0; i < nTemp - (nArraySize - 1); i++) {
+                qint64 limit = nTemp - (nArraySize - 1);
+                for (qint64 i = 0; i < limit; ++i) {
                     if (compareMemory(pBuffer + i, pArray, nArraySize)) {
                         nResult = nOffset + i;
-
                         break;
                     }
                 }
@@ -3079,14 +3076,21 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             qint64 m = nArraySize;
             qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
-            auto isGood = [&](unsigned char c) { return (!ansiTable[c] && c != 0); };
             while (j < limit) {
-                // Skip bytes that are not part of the target class (ANSI or zero)
-                while (j < hayLen && !isGood(hay[j])) j++;
+                // Skip bytes that are ANSI or zero to the start of a desired run
+                while (j < hayLen) {
+                    unsigned char c = hay[j];
+                    if ((!ansiTable[c]) && (c != 0)) break;
+                    j++;
+                }
                 if (j >= limit) break;
                 qint64 start = j;
                 // Extend run of non-ANSI and non-zero bytes
-                while (j < hayLen && isGood(hay[j])) j++;
+                while (j < hayLen) {
+                    unsigned char c = hay[j];
+                    if ((ansiTable[c]) || (c == 0)) break;
+                    j++;
+                }
                 qint64 runLen = j - start;
                 if (runLen >= m) {
                     nResult = nOffset + start;

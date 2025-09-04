@@ -1387,7 +1387,7 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         quint16 nShift = getImageOS2Header_align();
 
         for (qint32 i = 0; i < listSegments.count(); i++) {
-            const auto &seg = listSegments.at(i);
+            const XNE_DEF::NE_SEGMENT &seg = listSegments.at(i);
 
             qint64 nFileSize = seg.dwFileSize ? seg.dwFileSize : 0x10000;
             qint64 nFileOffset = (qint64)seg.dwFileOffset << nShift;

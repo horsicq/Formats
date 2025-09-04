@@ -8244,8 +8244,6 @@ XPE::CERT_TAG XPE::read_CertTag(qint64 nOffset, quint32 nTag)
     return result;
 }
 
-
-
 void XPE::getCertRecord(CERT *pCert, qint64 nOffset, qint64 nSize, CERT_RECORD *pCertRecord)
 {
     while ((nSize > 0) && (pCert->bIsValid)) {

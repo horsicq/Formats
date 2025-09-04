@@ -1585,23 +1585,23 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         Q_UNUSED(nPages)
     }
 
-    // Overlay
-    if (nFileParts & FILEPART_OVERLAY) {
-        qint64 nMax = 0;
-        for (int i = 0; i < listResult.size(); ++i) {
-            const auto &r = listResult.at(i);
-            nMax = qMax(nMax, r.nFileOffset + r.nFileSize);
-        }
-        if (nMax < nTotal) {
-            FPART rec = {};
-            rec.filePart = FILEPART_OVERLAY;
-            rec.nFileOffset = nMax;
-            rec.nFileSize = nTotal - nMax;
-            rec.nVirtualAddress = -1;
-            rec.sName = tr("Overlay");
-            listResult.append(rec);
-        }
-    }
+    // // Overlay
+    // if (nFileParts & FILEPART_OVERLAY) {
+    //     qint64 nMax = 0;
+    //     for (int i = 0; i < listResult.size(); ++i) {
+    //         const auto &r = listResult.at(i);
+    //         nMax = qMax(nMax, r.nFileOffset + r.nFileSize);
+    //     }
+    //     if (nMax < nTotal) {
+    //         FPART rec = {};
+    //         rec.filePart = FILEPART_OVERLAY;
+    //         rec.nFileOffset = nMax;
+    //         rec.nFileSize = nTotal - nMax;
+    //         rec.nVirtualAddress = -1;
+    //         rec.sName = tr("Overlay");
+    //         listResult.append(rec);
+    //     }
+    // }
 
     return listResult;
 }
