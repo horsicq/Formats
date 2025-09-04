@@ -6867,7 +6867,7 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
     } else if (pStFileTypes->contains(FT_MSDOS)) {
         result = FT_MSDOS;
 
-    // Android/Java ecosystems and archives: prefer specific containers first
+        // Android/Java ecosystems and archives: prefer specific containers first
     } else if (pStFileTypes->contains(FT_APKS)) {
         result = FT_APKS;
     } else if (pStFileTypes->contains(FT_APK)) {
@@ -6901,7 +6901,7 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
     } else if (pStFileTypes->contains(FT_CAB)) {
         result = FT_CAB;
 
-    // Android resources and DEX/Java
+        // Android resources and DEX/Java
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
         result = FT_ANDROIDXML;
     } else if (pStFileTypes->contains(FT_ANDROIDASRC)) {
@@ -6911,13 +6911,13 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
     } else if (pStFileTypes->contains(FT_JAVACLASS)) {
         result = FT_JAVACLASS;
 
-    // Documents and containers
+        // Documents and containers
     } else if (pStFileTypes->contains(FT_PDF)) {
         result = FT_PDF;
     } else if (pStFileTypes->contains(FT_CFBF)) {
         result = FT_CFBF;
 
-    // Compressed/pack formats
+        // Compressed/pack formats
     } else if (pStFileTypes->contains(FT_SZDD)) {
         result = FT_SZDD;
     } else if (pStFileTypes->contains(FT_BZIP2)) {
@@ -6925,7 +6925,7 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
     } else if (pStFileTypes->contains(FT_XZ)) {
         result = FT_XZ;
 
-    // Fonts and images/media
+        // Fonts and images/media
     } else if (pStFileTypes->contains(FT_TTF)) {
         result = FT_TTF;
     } else if (pStFileTypes->contains(FT_PNG)) {
@@ -6959,15 +6959,15 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
     } else if (pStFileTypes->contains(FT_RIFF)) {
         result = FT_RIFF;
 
-    // Scanners signatures
+        // Scanners signatures
     } else if (pStFileTypes->contains(FT_SIGNATURE)) {
         result = FT_SIGNATURE;
 
-    // DjVu
+        // DjVu
     } else if (pStFileTypes->contains(FT_DJVU)) {
         result = FT_DJVU;
 
-    // Encodings/text: prefer UNICODE > UTF8 > TEXT
+        // Encodings/text: prefer UNICODE > UTF8 > TEXT
     } else if (pStFileTypes->contains(FT_UNICODE)) {
         result = FT_UNICODE;
     } else if (pStFileTypes->contains(FT_UTF8)) {
@@ -6975,7 +6975,7 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
     } else if (pStFileTypes->contains(FT_TEXT)) {
         result = FT_TEXT;
 
-    // Generic
+        // Generic
     } else if (pStFileTypes->contains(FT_COM)) {
         result = FT_COM;
     } else if (pStFileTypes->contains(FT_DATA)) {
@@ -9927,9 +9927,7 @@ QDateTime XBinary::read_ASN_DateTime(qint64 nOffset, qint64 nSize)
     QString s = QString::fromLatin1(bytes);
     QDateTime dt;
     // Ensure ends with 'Z' for UTC; handle missing seconds too
-    static const QStringList fmts = {
-        "yyMMddHHmmss'Z'", "yyMMddHHmm'Z'", "yyyyMMddHHmmss'Z'", "yyyyMMddHHmm'Z'"
-    };
+    static const QStringList fmts = {"yyMMddHHmmss'Z'", "yyMMddHHmm'Z'", "yyyyMMddHHmmss'Z'", "yyyyMMddHHmm'Z'"};
     for (const QString &f : fmts) {
         dt = QDateTime::fromString(s, f);
         if (dt.isValid()) {
