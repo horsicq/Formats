@@ -177,17 +177,19 @@ qint64 XAmigaHunk::_getHunkSize(qint64 nOffset, PDSTRUCT *pPdStruct)
         } else {
             nCurrentOffset += 4;
         }
-        quint32 nTableSize = read_uint32(nCurrentOffset + 0, true);
-        // quint32 nFirstLoaded = read_uint32(nCurrentOffset + 4, true);
-        // quint32 nLastLoaded = read_uint32(nCurrentOffset + 8, true);
+        qint32 nTableSize = read_uint32(nCurrentOffset + 0, true);
+        qint32 nFirstLoaded = read_int32(nCurrentOffset + 4, true);
+        qint32 nLastLoaded = read_int32(nCurrentOffset + 8, true);
 
         nCurrentOffset += 12;
 
         QList<qint64> listSizes;
 
-        nTableSize = qMin(nTableSize, (quint32)100);
+        nTableSize = qMin(nTableSize, (qint32)100);
 
-        for (quint32 i = 0; i < nTableSize; i++) {
+        nTableSize = qMin(nTableSize, nLastLoaded - nFirstLoaded);
+
+        for (qint32 i = 0; i <= nTableSize; i++) {
             listSizes.append(read_uint32(nCurrentOffset, true));
             nCurrentOffset += 4;
         }
