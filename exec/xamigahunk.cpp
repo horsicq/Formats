@@ -563,6 +563,9 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
                     list.append(r);
                 }
 
+                quint32 nLongwords = read_uint32(h.nOffset + 4, true);
+                XADDR nMemSize = (XADDR)XBinary::align_up((XADDR)nLongwords * 4, 16);
+
                 if (nFileParts & FILEPART_SEGMENT) {
                     QString sName;
 
@@ -581,14 +584,12 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
                     r.nFileOffset = h.nOffset + 8;
                     r.nFileSize = h.nSize - 8;
                     r.nVirtualAddress = currentVA;
+                    r.nVirtualSize = nMemSize;
                     r.sName = sName;
                     list.append(r);
                 }
 
-                // Memory size is stored as longword count at offset+4 for CODE/DATA/PPC_CODE and BSS
-                quint32 nLongwords = read_uint32(h.nOffset + 4, true);
-                XADDR nMemSize = (XADDR)nLongwords * 4;
-                currentVA = (XADDR)XBinary::align_up((qint64)(currentVA + nMemSize), 4);
+                currentVA = currentVA + nMemSize;
             }
         }
 

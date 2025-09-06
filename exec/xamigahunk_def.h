@@ -24,7 +24,7 @@
 #include <QtGlobal>
 
 namespace XAMIGAHUNK_DEF {
-const quint64 IMAGE_BASE = 0x21F000;
+const quint64 IMAGE_BASE = 0x00010000;
 
 const quint16 HUNK_UNIT = 0x03E7;          // 999
 const quint16 HUNK_NAME = 0x03E8;          // 1000
