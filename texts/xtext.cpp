@@ -69,13 +69,7 @@ bool XText::isValid(QIODevice *pDevice)
 XBinary::_MEMORY_MAP XText::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)
-
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
+    Q_UNUSED(pPdStruct)
 
     XBinary::_MEMORY_MAP result = {};
     result.nBinarySize = getSize();
