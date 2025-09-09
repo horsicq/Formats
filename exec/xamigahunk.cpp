@@ -185,7 +185,7 @@ qint64 XAmigaHunk::_getHunkSize(qint64 nOffset, PDSTRUCT *pPdStruct)
 
         QList<qint64> listSizes;
 
-        nTableSize = qMin(nTableSize, (qint32)100);
+        nTableSize = qMin(nTableSize, (qint32)0xFF0);
 
         nTableSize = qMin(nTableSize, nLastLoaded - nFirstLoaded);
 

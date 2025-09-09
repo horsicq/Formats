@@ -12823,7 +12823,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
 
                 if (pMemoryMap->fileType == FT_AMIGAHUNK) {
                     switch (rec.nSizeOfAddr) {
-                        case 1: nValue = read_int8(nOffset); break;
+                        case 1: nValue = 1 + read_int8(nOffset); break;
                         case 2: nValue = read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
                         case 4: nValue = read_int32(nOffset, isBigEndian(pMemoryMap)); break;
                         case 8: nValue = read_int64(nOffset, isBigEndian(pMemoryMap)); break;
