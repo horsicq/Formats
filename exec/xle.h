@@ -35,7 +35,7 @@ public:
     };
 
     explicit XLE(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
@@ -146,16 +146,16 @@ public:
     QList<XLE_DEF::o16_map> getMapsLE();
     QList<XLE_DEF::o32_map> getMapsLX();
 
-    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
-    virtual MODE getMode();
-    virtual QString getArch();
-    virtual ENDIAN getEndian();
-    virtual FT getFileType();
-    virtual qint32 getType();
-    virtual OSNAME getOsName();
-    virtual QString getOsVersion();
-    virtual QString typeIdToString(qint32 nType);
-    virtual QList<MAPMODE> getMapModesList();
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual MODE getMode() override;
+    virtual QString getArch() override;
+    virtual ENDIAN getEndian() override;
+    virtual FT getFileType() override;
+    virtual qint32 getType() override;
+    virtual OSNAME getOsName() override;
+    virtual QString getOsVersion() override;
+    virtual QString typeIdToString(qint32 nType) override;
+    virtual QList<MAPMODE> getMapModesList() override;
     virtual qint64 getImageSize() override;
     virtual XADDR _getEntryPointAddress() override;
     qint64 getModuleAddress();
@@ -166,7 +166,7 @@ public:
     static QMap<quint64, QString> getImageLEOssS();
     static QMap<quint64, QString> getImageLEMflagsS();
 
-    virtual QString getFileFormatExtsString();
+    virtual QString getFileFormatExtsString() override;
 
     // Data headers/inspection (overrides)
     virtual QString structIDToString(quint32 nID) override;
