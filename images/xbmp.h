@@ -36,18 +36,18 @@ public:
     explicit XBMP(QIODevice *pDevice = nullptr);
     ~XBMP();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice);
-    virtual FT getFileType();
-    virtual QString getMIMEString();
-    virtual QString getArch();
-    virtual MODE getMode();
-    virtual ENDIAN getEndian();
+    virtual FT getFileType() override;
+    virtual QString getMIMEString() override;
+    virtual QString getArch() override;
+    virtual MODE getMode() override;
+    virtual ENDIAN getEndian() override;
 
-    virtual QString getFileFormatExt();
-    virtual QString getFileFormatExtsString();
-    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
-    virtual QString getVersion();
+    virtual QString getFileFormatExt() override;
+    virtual QString getFileFormatExtsString() override;
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QString getVersion() override;
 
     struct BMPFILEHEADER {
         quint16 bfType;
@@ -74,13 +74,13 @@ public:
     BMPFILEHEADER getFileHeader();
     BMPINFOHEADER getInfoHeader();
 
-    virtual QString structIDToString(quint32 nID);
+    virtual QString structIDToString(quint32 nID) override;
 
     // Data headers/inspection
-    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
 
     // File parts (header/bitmap/overlay)
-    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 };
 
 #endif  // XBMP_H
