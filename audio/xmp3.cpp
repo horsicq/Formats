@@ -419,3 +419,12 @@ QString XMP3::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XMP3_STRUCTID, sizeof(_TABLE_XMP3_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
+
+QList<XBinary::MAPMODE> XMP3::getMapModesList()
+{
+    QList<MAPMODE> list;
+
+    list.append(MAPMODE_UNKNOWN);
+
+    return list;
+}

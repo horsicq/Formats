@@ -34,27 +34,22 @@ public:
     explicit XMP3(QIODevice *pDevice = nullptr);
     ~XMP3();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice);
 
-    virtual QString getFileFormatExt();
-    virtual QString getFileFormatExtsString();
-    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
-    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
-    virtual FT getFileType();
-    virtual QString getVersion();
-    virtual QString getMIMEString();
+    virtual QString getFileFormatExt() override;
+    virtual QString getFileFormatExtsString() override;
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct) override;
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual FT getFileType() override;
+    virtual QString getVersion() override;
+    virtual QString getMIMEString() override;
 
     qint64 decodeFrame(qint64 nOffset);
 
-    virtual QString structIDToString(quint32 nID);
+    virtual QString structIDToString(quint32 nID) override;
 
-    virtual QList<MAPMODE> getMapModesList() override
-    {
-        QList<MAPMODE> l;
-        l.append(MAPMODE_REGIONS);
-        return l;
-    }
+    virtual QList<MAPMODE> getMapModesList() override;
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 };
 
