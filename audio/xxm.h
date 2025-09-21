@@ -114,27 +114,27 @@ public:
     XXM(QIODevice *pDevice = nullptr);
     ~XXM();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
-    virtual FT getFileType();
-    virtual MODE getMode();
-    virtual QString getMIMEString();
-    virtual qint32 getType();
-    virtual QString typeIdToString(qint32 nType);
-    virtual ENDIAN getEndian();
-    virtual QString getArch();
-    virtual QString getFileFormatExt();
-    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
-    virtual bool isSigned();
-    virtual OSNAME getOsName();
-    virtual QString getOsVersion();
-    virtual QString getVersion();
-    virtual bool isEncrypted();
-    virtual QList<MAPMODE> getMapModesList();
-    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
+    virtual FT getFileType() override;
+    virtual MODE getMode() override;
+    virtual QString getMIMEString() override;
+    virtual qint32 getType() override;
+    virtual QString typeIdToString(qint32 nType) override;
+    virtual ENDIAN getEndian() override;
+    virtual QString getArch() override;
+    virtual QString getFileFormatExt() override;
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct) override;
+    virtual bool isSigned() override;
+    virtual OSNAME getOsName() override;
+    virtual QString getOsVersion() override;
+    virtual QString getVersion() override;
+    virtual bool isEncrypted() override;
+    virtual QList<MAPMODE> getMapModesList() override;
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 
-    virtual QString structIDToString(quint32 nID);
-    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+    virtual QString structIDToString(quint32 nID) override;
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, void *pUserData,
                                 PDSTRUCT *pPdStruct);
 
