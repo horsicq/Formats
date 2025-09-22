@@ -79,16 +79,15 @@ public:
     explicit XAmigaHunk(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XAmigaHunk();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
-    virtual QList<MAPMODE> getMapModesList();
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QList<MAPMODE> getMapModesList() override;
 
-    virtual bool _initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);
-
-    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
-    virtual ENDIAN getEndian();
-    virtual QString getArch();
+    virtual bool _initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct) override;
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual ENDIAN getEndian() override;
+    virtual QString getArch() override;
     QString getArch(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
-    virtual MODE getMode();
+    virtual MODE getMode() override;
     MODE getMode(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
 
     XADDR _getEntryPointAddress(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
@@ -101,26 +100,26 @@ public:
     static QList<HUNK> _getHunksByType(QList<HUNK> *pListHunks, quint32 nHunkType, PDSTRUCT *pPdStruct);
     static qint64 getHunksSize(QList<HUNK> *pListHunks, PDSTRUCT *pPdStruct);
 
-    virtual FT getFileType();
-    virtual QString getFileFormatExt();
-    virtual QString getFileFormatExtsString();
-    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
-    virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
+    virtual FT getFileType() override;
+    virtual QString getFileFormatExt() override;
+    virtual QString getFileFormatExtsString() override;
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct) override;
+    virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct) override;
 
-    virtual qint32 getType();
-    QString typeIdToString(qint32 nType);
+    virtual qint32 getType() override;
+    QString typeIdToString(qint32 nType) override;
 
-    virtual QString getMIMEString();
+    virtual QString getMIMEString() override;
 
-    virtual QString structIDToString(quint32 nID);
-    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+    virtual QString structIDToString(quint32 nID) override;
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
 
-    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 
-    virtual bool isExecutable();
+    virtual bool isExecutable() override;
 
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
-                                void *pUserData, PDSTRUCT *pPdStruct);
+                                void *pUserData, PDSTRUCT *pPdStruct) override;
 };
 
 #endif  // XAMIGAHUNK_H

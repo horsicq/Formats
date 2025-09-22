@@ -207,7 +207,7 @@ public:
         FPART_PROP_DATETIME,
         FPART_PROP_ENCRYPTED,
         FPART_PROP_FILETYPE,
-        FPART_PROP_FILETYPE_EXTRA,
+        FPART_PROP_HANDLEMETHOD,
         FPART_PROP_WIDTH,
         FPART_PROP_HEIGHT,
         FPART_PROP_BITSPERCOMPONENT,
@@ -428,6 +428,11 @@ public:
         FT_XZ,
 
         // TODO more
+    };
+
+    enum HANDLE_METHOD {
+        HANDLE_METHOD_UNKNOWN = 0,
+        HANDLE_METHOD_PDF_IMAGEDATA,
     };
 
     enum MODE {
@@ -928,6 +933,10 @@ public:
 
     virtual QString getCompressMethodString();
 
+    static QString handleMethodToString(HANDLE_METHOD handleMethod);
+    static QString handleMethodToFtString(HANDLE_METHOD handleMethod);
+    static HANDLE_METHOD ftStringToHandleMethod(const QString &sString);
+
     enum ST {
         ST_COMPAREBYTES = 0,
         ST_NOTNULL,
@@ -1284,6 +1293,7 @@ public:
     static bool isDirectoryExists(const QString &sDirectoryName);
     static bool removeDirectory(const QString &sDirectoryName);
     static bool isDirectoryEmpty(const QString &sDirectoryName);
+    static QDateTime getDirectoryLatestModificationDate(const QString &sDirectoryName);
 
     static QByteArray readFile(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     static bool readFile(const QString &sFileName, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);

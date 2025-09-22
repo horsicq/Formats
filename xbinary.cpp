@@ -157,6 +157,11 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
     // TODO check more methods
 };
 
+XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
+    {XBinary::HANDLE_METHOD_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XBinary::HANDLE_METHOD_PDF_IMAGEDATA, "PDF_IMAGEDATA", QString("PDF Image data")},
+};
+
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
     {XBinary::FILEPART_UNKNOWN, "Unknown", QObject::tr("Unknown")}, {XBinary::FILEPART_HEADER, "Header", QObject::tr("Header")},
     {XBinary::FILEPART_OVERLAY, "Overlay", QObject::tr("Overlay")}, {XBinary::FILEPART_RESOURCE, "Resource", QObject::tr("Resource")},
@@ -936,6 +941,21 @@ QString XBinary::compressMethodToFtString(COMPRESS_METHOD compressMethod)
 QString XBinary::getCompressMethodString()
 {
     return "";
+}
+
+QString XBinary::handleMethodToString(HANDLE_METHOD handleMethod)
+{
+    return XBinary::XCONVERT_idToTransString(handleMethod, _TABLE_XBINARY_HANDLE_METHOD, sizeof(_TABLE_XBINARY_HANDLE_METHOD) / sizeof(XBinary::XCONVERT));
+}
+
+QString XBinary::handleMethodToFtString(HANDLE_METHOD handleMethod)
+{
+    return XBinary::XCONVERT_idToFtString(handleMethod, _TABLE_XBINARY_HANDLE_METHOD, sizeof(_TABLE_XBINARY_HANDLE_METHOD) / sizeof(XBinary::XCONVERT));
+}
+
+XBinary::HANDLE_METHOD XBinary::ftStringToHandleMethod(const QString &sString)
+{
+    return (HANDLE_METHOD)XBinary::XCONVERT_ftStringToId(sString, _TABLE_XBINARY_HANDLE_METHOD, sizeof(_TABLE_XBINARY_HANDLE_METHOD) / sizeof(XBinary::XCONVERT));
 }
 
 XBinary::COMPRESS_METHOD XBinary::ftStringToCompressMethod(const QString &sString)
@@ -4848,14 +4868,33 @@ bool XBinary::isDirectoryEmpty(const QString &sDirectoryName)
     return (QDir(sDirectoryName).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() == 0);
 }
 
+QDateTime XBinary::getDirectoryLatestModificationDate(const QString &sDirectoryName)
+{
+    QDateTime latestMod;
+    QDir dir(sDirectoryName);
+
+    QFileInfoList entries = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+
+    qint32 nNumberOfEntries = entries.size();
+
+    for (qint32 i = 0; i < nNumberOfEntries; i++) {
+        const QFileInfo &entry = entries.at(i);
+        if (entry.isDir()) {
+            QDateTime subDirMod = getDirectoryLatestModificationDate(entry.absoluteFilePath());
+            if (subDirMod.isValid() && subDirMod > latestMod)
+                latestMod = subDirMod;
+        } else if (entry.isFile()) {
+            QDateTime fileMod = entry.lastModified();
+            if (fileMod > latestMod)
+                latestMod = fileMod;
+        }
+    }
+    return latestMod;
+}
+
 QByteArray XBinary::readFile(const QString &sFileName, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
+    Q_UNUSED(pPdStruct)
     // TODO PDSTRUCT
 
     QByteArray baResult;
