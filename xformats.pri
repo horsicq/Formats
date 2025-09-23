@@ -129,6 +129,11 @@ contains(XCONFIG, use_archive) {
     include($$PWD/formats/xriff.pri)
 }
 
+!contains(XCONFIG, xder) {
+    XCONFIG += xder
+    include($$PWD/formats/xder.pri)
+}
+
 !contains(XCONFIG, xmp3) {
     XCONFIG += xmp3
     include($$PWD/audio/xmp3.pri)

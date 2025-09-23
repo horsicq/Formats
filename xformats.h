@@ -48,6 +48,7 @@
 #include "xttf.h"
 #include "xtext.h"
 #include "xdjvu.h"
+#include "xder.h"
 #ifdef USE_DEX
 #include "xandroidbinary.h"
 #include "xdex.h"

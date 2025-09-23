@@ -392,6 +392,7 @@ public:
         FT_JPEG,
         FT_MACHOFAT,
         FT_PDF,
+    FT_DER,
         FT_PLAINTEXT,
         FT_PNG,
         FT_RAR,
@@ -1677,6 +1678,7 @@ public:
     static PACKED_UINT _read_uleb128(char *pData, qint64 nSize);
 
     PACKED_UINT read_acn1_integer(qint64 nOffset, qint64 nSize);
+    static PACKED_UINT _read_acn1_integer(char *pData, qint64 nSize);
 
     // ASN.1 helpers (moved from XPE)
     QString read_ASN_OIDString(qint64 nOffset, qint64 nSize);

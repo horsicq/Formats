@@ -229,6 +229,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_XM, "XM", QString("XM")},
     {XBinary::FT_NPM, "NPM", QString("NPM")},
     {XBinary::FT_PDF, "PDF", QString("PDF")},
+    {XBinary::FT_DER, "DER", QString("DER")},
     {XBinary::FT_PLAINTEXT, "PlainText", QObject::tr("Plain Text")},
     {XBinary::FT_PNG, "PNG", QString("PNG")},
     {XBinary::FT_RAR, "RAR", QString("RAR")},
@@ -6644,7 +6645,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
     }
 
     if ((!bAllFound) && bExtra) {
-        _MEMORY_MAP memoryMap = XBinary::getMemoryMap();
+        _MEMORY_MAP memoryMap = XBinary::getSimpleMemoryMap();
         UNICODE_TYPE unicodeType = getUnicodeType(&baHeader);
 
         bAllFound = true;
@@ -6724,6 +6725,27 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'%PDF'", 0)) {
             stResult.insert(FT_DOCUMENT);
             stResult.insert(FT_PDF);
+        } else if ((compareSignature(&memoryMap, "30", 0)) && (nSize >= 4)) {
+            // Minimal DER/ASN.1 check: first byte is a tag, second is definite length short form (<0x80)
+            // or long form (>=0x80) followed by that many length bytes; ensure it fits into the file.
+            // quint8 nTag = _read_uint8(pOffset);
+            PACKED_UINT packedLen = _read_acn1_integer(pOffset + 1, nSize - 1);
+
+            if ((packedLen.bIsValid) && (packedLen.nByteSize > 0) && (1 + packedLen.nByteSize + packedLen.nValue <= (quint64)nSize)) {
+                bool bDer = false;
+
+                if (_read_uint8(pOffset + 1 + packedLen.nByteSize) == 0x06) {
+                    // OID
+                    bDer = true;
+                }
+
+                if (bDer) {
+                    stResult.insert(FT_DOCUMENT);
+                    stResult.insert(FT_DER);
+                } else {
+                    bAllFound = false;
+                }
+            }
         } else if (compareSignature(&memoryMap, "'RIFF'", 0) || compareSignature(&memoryMap, "'RIFX'", 0)) {
             // TODO AIFF
             stResult.insert(FT_RIFF);
@@ -6953,6 +6975,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         // Documents and containers
     } else if (pStFileTypes->contains(FT_PDF)) {
         result = FT_PDF;
+    } else if (pStFileTypes->contains(FT_DER)) {
+        result = FT_DER;
     } else if (pStFileTypes->contains(FT_CFBF)) {
         result = FT_CFBF;
 
@@ -7104,6 +7128,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_7Z)) listResult.append(FT_7Z);
         if (stFileTypes.contains(FT_DEX)) listResult.append(FT_DEX);
         if (stFileTypes.contains(FT_PDF)) listResult.append(FT_PDF);
+        if (stFileTypes.contains(FT_DER)) listResult.append(FT_DER);
         if (stFileTypes.contains(FT_PNG)) listResult.append(FT_PNG);
         if (stFileTypes.contains(FT_ICO)) listResult.append(FT_ICO);
         if (stFileTypes.contains(FT_ICC)) listResult.append(FT_ICC);
@@ -9891,7 +9916,9 @@ XBinary::PACKED_UINT XBinary::read_acn1_integer(qint64 nOffset, qint64 nSize)
         } else {
             quint8 _nSize = (nByte & 0x7F);
 
-            if ((_nSize <= 4) && (_nSize <= nSize)) {
+            // Indefinite form (_nSize == 0) is not allowed here
+            // Ensure we have at least 1 + _nSize bytes available and cap to 4 bytes
+            if ((_nSize != 0) && (_nSize <= 4) && (1 + (qint64)_nSize <= nSize)) {
                 result.bIsValid = true;
                 result.nByteSize = 1 + _nSize;
 
@@ -9899,6 +9926,37 @@ XBinary::PACKED_UINT XBinary::read_acn1_integer(qint64 nOffset, qint64 nSize)
                     result.nValue <<= 8;
                     result.nValue |= read_uint8(nOffset + 1 + i);
                 }
+            }
+        }
+    }
+
+    return result;
+}
+
+XBinary::PACKED_UINT XBinary::_read_acn1_integer(char *pData, qint64 nSize)
+{
+    PACKED_UINT result = {};
+
+    if ((pData != nullptr) && (nSize > 0)) {
+        quint8 nByte = (quint8)(*pData);
+
+        if ((nByte & 0x80) == 0) {
+            result.bIsValid = true;
+            result.nByteSize = 1;
+            result.nValue = nByte;
+        } else {
+            quint8 _nSize = (nByte & 0x7F);
+
+            if ((_nSize != 0) && (_nSize <= 4) && (1 + (qint64)_nSize <= nSize)) {
+                result.bIsValid = true;
+                result.nByteSize = 1 + _nSize;
+
+                quint64 nVal = 0;
+                for (qint32 i = 0; i < _nSize; i++) {
+                    nVal <<= 8;
+                    nVal |= (quint8)(*(pData + 1 + i));
+                }
+                result.nValue = nVal;
             }
         }
     }

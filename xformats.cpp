@@ -56,6 +56,8 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_JAVACLASS, fileType)) return new XJavaClass(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_TTF, fileType)) return new XTTF(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_DJVU, fileType)) return new XDJVU(pDevice);
+    // DER is a generic ASN.1 container; we map it under DOCUMENT if requested
+    else if (XBinary::checkFileType(XBinary::FT_DER, fileType)) return new XDER(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_ANDROIDXML, fileType) || XBinary::checkFileType(XBinary::FT_ANDROIDASRC, fileType)) return new XAndroidBinary(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_TEXT, fileType)) return new XText(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_UTF8, fileType)) return new XText(pDevice);
