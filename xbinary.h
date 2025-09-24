@@ -401,6 +401,7 @@ public:
         FT_UNICODE,
         FT_UNICODE_BE,
         FT_UNICODE_LE,
+        FT_XML,
         FT_UTF8,
         FT_ZIP,
         FT_GZIP,
@@ -434,6 +435,7 @@ public:
     enum HANDLE_METHOD {
         HANDLE_METHOD_UNKNOWN = 0,
         HANDLE_METHOD_PDF_IMAGEDATA,
+        HANDLE_METHOD_ANDROID_XML
     };
 
     enum MODE {

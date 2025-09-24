@@ -805,10 +805,128 @@ bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QS
     QList<XBinary::FPART> listParts = XFormats::getFileParts(fileType, pDevice, XBinary::FILEPART_STREAM, -1, false, -1, pPdStruct);
 
     XDecompress xDecompress;
-
     _connect(&xDecompress);
 
-    return xDecompress.unpackFilePartsToFolder(&listParts, pDevice, sFolderName, pPdStruct);
+    return extractFilePartsToFolder(&listParts, pDevice, sFolderName, pPdStruct);
+}
+
+bool XFormats::extractFilePartsToFolder(QList<XBinary::FPART> *pListParts, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    qint32 nNumberOfParts = pListParts->count();
+
+    if (nNumberOfParts > 0) {
+        XDecompress xDecompress;
+        _connect(&xDecompress);
+
+        if (XBinary::createDirectory(sFolderName)) {
+            bResult = true;
+            qint32 nGlobalIndex = XBinary::getFreeIndex(pPdStruct);
+            XBinary::setPdStructInit(pPdStruct, nGlobalIndex, nNumberOfParts);
+
+            for (qint32 i = 0; (i < nNumberOfParts) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                QString sPrefName = pListParts->at(i).sOriginalName;
+
+                if (sPrefName == "") {
+                    sPrefName = pListParts->at(i).sName;
+                }
+
+                XBinary::setPdStructStatus(pPdStruct, nGlobalIndex, sPrefName);
+
+                QString sResultFileName = sFolderName + QDir::separator() + sPrefName;
+
+                QFileInfo fi(sResultFileName);
+                if (XBinary::createDirectory(fi.absolutePath())) {
+                    QFile file;
+                    file.setFileName(sResultFileName);
+
+                    if (file.open(QIODevice::ReadWrite)) {
+                        const XBinary::FPART &fpart = pListParts->at(i);
+
+                        QIODevice *pDecompressIn = nullptr;
+                        QIODevice *pDecompressOut = nullptr;
+                        QIODevice *pHandleIn = nullptr;
+                        QIODevice *pHandleOut = nullptr;
+                        QTemporaryFile *pTmpFile = nullptr;;
+
+                        bool bUnpack = (fpart.mapProperties.value(XBinary::FPART_PROP_COMPRESSMETHOD, XBinary::COMPRESS_METHOD_UNKNOWN).toUInt() != XBinary::COMPRESS_METHOD_UNKNOWN);
+                        bool bHandle = (fpart.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt() != XBinary::HANDLE_METHOD_UNKNOWN);
+
+                        if (bUnpack) {
+                            pDecompressIn = pDevice;
+
+                            if (bHandle) {
+                                pTmpFile = new QTemporaryFile;
+                                pTmpFile->open();
+                                pDecompressOut = pTmpFile;
+                            } else {
+                                pDecompressOut = &file;
+                            }
+                        }
+
+                        if (bHandle) {
+                            if (bUnpack) {
+                                pHandleIn = pTmpFile;
+                            } else {
+                                pHandleIn = pDevice;
+                            }
+
+                            pHandleOut = &file;
+                        }
+
+                        if (bUnpack) {
+                            if (xDecompress.decompressFPART(fpart, pDecompressIn, pDecompressOut, 0, -1, pPdStruct)) {
+                                if (!xDecompress.checkCRC(fpart, pDecompressOut, pPdStruct)) {
+#ifdef QT_DEBUG
+                                    qDebug() << "Invalid CRC for" << sPrefName;
+#endif
+                                    emit warningMessage(QString("%1: %2").arg(tr("Invalid CRC"), sPrefName));
+                                }
+                            } else {
+#ifdef QT_DEBUG
+                                qDebug() << "Cannot decompress" << sPrefName;
+#endif
+                                emit errorMessage(QString("%1: %2").arg(tr("Cannot decompress"), sPrefName));
+                                bResult = false;
+                            }
+                        }
+
+                        if (bHandle) {
+                            XBinary::HANDLE_METHOD handleMethod = (XBinary::HANDLE_METHOD)(fpart.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt());
+
+                            // if () {
+
+                            // }
+                            // TODO
+                        }
+
+                        if (pTmpFile) {
+                            pTmpFile->close();
+                            delete pTmpFile;
+                        }
+
+                        file.close();
+                    } else {
+                        emit errorMessage(QString("%1: %2").arg(tr("Cannot create"), sResultFileName));
+                        bResult = false;
+                    }
+                } else {
+                    emit errorMessage(QString("%1: %2").arg(tr("Cannot create"), fi.absolutePath()));
+                    bResult = false;
+                }
+
+                XBinary::setPdStructCurrentIncrement(pPdStruct, nGlobalIndex);
+            }
+
+            XBinary::setPdStructFinished(pPdStruct, nGlobalIndex);
+        } else {
+            emit errorMessage(QString("%1: %2").arg(tr("Cannot create"), sFolderName));
+            bResult = false;
+        }
+    }
+
+    return bResult;
 }
 
 #ifdef QT_GUI_LIB

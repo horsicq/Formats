@@ -160,6 +160,7 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
 XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XBinary::HANDLE_METHOD_PDF_IMAGEDATA, "PDF_IMAGEDATA", QString("PDF Image data")},
+    {XBinary::HANDLE_METHOD_ANDROID_XML, "Android_XML", QString("Android XML")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -242,6 +243,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_UNICODE, "Unicode", QString("Unicode")},
     {XBinary::FT_UNICODE_BE, "UnicodeBE", QString("Unicode BE")},
     {XBinary::FT_UNICODE_LE, "UnicodeLE", QString("Unicode LE")},
+    {XBinary::FT_XML, "XML", QString("XML")},
     {XBinary::FT_UTF8, "UTF8", QString("UTF8")},
     {XBinary::FT_VIDEO, "Video", QObject::tr("Video")},
     {XBinary::FT_WEBP, "WebP", QString("WebP")},

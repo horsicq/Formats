@@ -101,11 +101,10 @@ QString XPNG::getFileFormatExtsString()
 
 qint64 XPNG::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
     qint64 nResult = 0;
     qint64 nOffset = 8;
 
-    while (true) {
+    while (isPdStructNotCanceled(pPdStruct)) {
         CHUNK chunk = _readChunk(nOffset);
 
         nOffset += (12 + chunk.nDataSize);
@@ -127,6 +126,34 @@ qint64 XPNG::getFileFormatSize(PDSTRUCT *pPdStruct)
 QString XPNG::getMIMEString()
 {
     return "image/png";
+}
+
+QString XPNG::getInfo(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QString sResult;
+
+    if (isValid()) {
+        IHDR ihdr = getIHDR();
+
+        if (ihdr.nWidth && ihdr.nHeight) {
+            QString sSchema;
+
+            switch (ihdr.nColorType) {
+                case COLOR_TYPE_GRAYSCALE: sSchema = QString("Grayscale"); break;
+                case COLOR_TYPE_RGB: sSchema = QString("RGB"); break;
+                case COLOR_TYPE_PALETTE: sSchema = QString("Palette"); break;
+                case COLOR_TYPE_GRAYSCALE_ALPHA: sSchema = QString("Grayscale+Alpha"); break;
+                case COLOR_TYPE_RGBA: sSchema = QString("RGBA"); break;
+                default: sSchema = QString("Unknown(%1)").arg(ihdr.nColorType); break;
+            }
+
+            sResult = QString("%1x%2, %3 bits, %4").arg(ihdr.nWidth).arg(ihdr.nHeight).arg(ihdr.nBitDepth).arg(sSchema);
+        }
+    }
+
+    return sResult;
 }
 
 XBinary::ENDIAN XPNG::getEndian()
@@ -433,7 +460,7 @@ QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dat
 
                 dataHeader.nSize = 12 + nDataSize;
 
-                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE | DRF_VOLATILE, XBinary::ENDIAN_BIG));
+                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
                 dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
                 dataHeader.listRecords.append(getDataRecord(8 + nDataSize, 4, "CRC", XBinary::VT_UINT32, 0, XBinary::ENDIAN_BIG));
 
@@ -531,12 +558,12 @@ QList<XBinary::FPART> XPNG::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             listResult.append(record);
         }
 
+        nCurrentOffset += (12 + nDataSize);
+
         // End Tag
         if (sTag == "IEND") {
             break;
         }
-
-        nCurrentOffset += (12 + nDataSize);
     }
 
     if (nFileParts & FILEPART_OVERLAY) {

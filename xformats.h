@@ -149,6 +149,7 @@ public:
     virtual void process();
 
     bool unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct);
+    bool extractFilePartsToFolder(QList<XBinary::FPART> *pListParts, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct);
 
 private:
     MODE m_mode;

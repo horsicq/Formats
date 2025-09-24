@@ -84,26 +84,27 @@ public:
     explicit XPNG(QIODevice *pDevice = nullptr);
     ~XPNG();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice);
-    virtual FT getFileType();
-    virtual QString getFileFormatExt();
-    virtual QString getFileFormatExtsString();
-    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
-    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
-    virtual QString getMIMEString();
-    virtual ENDIAN getEndian();
+    virtual FT getFileType() override;
+    virtual QString getFileFormatExt() override;
+    virtual QString getFileFormatExtsString() override;
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct) override;
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QString getMIMEString() override;
+    virtual ENDIAN getEndian() override;
+    virtual QString getInfo(PDSTRUCT *pPdStruct = nullptr) override;
 
     static bool createPNG(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const QByteArray &baImageData, COLOR_TYPE colorType, quint8 nBitDepth = 8);
 
     IHDR getIHDR();
 
-    virtual QString structIDToString(quint32 nID);
-    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
-    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
+    virtual QString structIDToString(quint32 nID) override;
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
-                                void *pUserData, PDSTRUCT *pPdStruct);
+                                void *pUserData, PDSTRUCT *pPdStruct) override;
 
 private:
     CHUNK _readChunk(qint64 nOffset);
