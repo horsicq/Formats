@@ -56,6 +56,23 @@ public:
         quint8 nInterlace;    // Interlace method (0 = no interlace, 1 = Adam7)
     };
 
+    // pHYs chunk: physical pixel dimensions
+    struct pHYs {
+        quint32 nPixelsPerUnitX;  // Pixels per unit, X axis
+        quint32 nPixelsPerUnitY;  // Pixels per unit, Y axis
+        quint8 nUnitSpecifier;    // Unit specifier (0 = unknown, 1 = meter)
+    };
+
+    // bKGD chunk: background color. Layout depends on color type
+    struct bKGD {
+        quint16 nGray;         // For grayscale images (length=2)
+        quint16 nRed;          // For truecolor images (length=6)
+        quint16 nGreen;        // For truecolor images (length=6)
+        quint16 nBlue;         // For truecolor images (length=6)
+        quint8 nPaletteIndex;  // For indexed-color images (length=1)
+        quint8 nType;          // 0=unknown, 1=grayscale, 2=truecolor, 3=indexed
+    };
+
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_SIGNATURE,
@@ -98,6 +115,8 @@ public:
     static bool createPNG(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const QByteArray &baImageData, COLOR_TYPE colorType, quint8 nBitDepth = 8);
 
     IHDR getIHDR();
+    pHYs getpHYs();
+    bKGD getbKGD();
 
     virtual QString structIDToString(quint32 nID) override;
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;

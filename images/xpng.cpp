@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xpng.h"
+#include <QBuffer>
 #include <zlib.h>
 
 XBinary::XCONVERT _TABLE_XPNG_STRUCTID[] = {
@@ -150,6 +151,23 @@ QString XPNG::getInfo(PDSTRUCT *pPdStruct)
             }
 
             sResult = QString("%1x%2, %3 bits, %4").arg(ihdr.nWidth).arg(ihdr.nHeight).arg(ihdr.nBitDepth).arg(sSchema);
+
+            // Append pHYs info if available
+            XPNG::pHYs phys = getpHYs();
+            if (phys.nPixelsPerUnitX || phys.nPixelsPerUnitY) {
+                QString sUnit = (phys.nUnitSpecifier == 1) ? QString("meter") : QString("unknown");
+                sResult += QString(", pHYs: %1x%2 %3").arg(phys.nPixelsPerUnitX).arg(phys.nPixelsPerUnitY).arg(sUnit);
+            }
+
+            // Append bKGD info if available
+            XPNG::bKGD bkgd = getbKGD();
+            if (bkgd.nType == 1) {
+                sResult += QString(", bKGD: gray=%1").arg(bkgd.nGray);
+            } else if (bkgd.nType == 2) {
+                sResult += QString(", bKGD: rgb=(%1,%2,%3)").arg(bkgd.nRed).arg(bkgd.nGreen).arg(bkgd.nBlue);
+            } else if (bkgd.nType == 3) {
+                sResult += QString(", bKGD: paletteIndex=%1").arg((quint32)bkgd.nPaletteIndex);
+            }
         }
     }
 
@@ -385,6 +403,92 @@ XPNG::IHDR XPNG::getIHDR()
     return result;
 }
 
+XPNG::pHYs XPNG::getpHYs()
+{
+    XPNG::pHYs result = {};
+
+    if (!isValid()) {
+        return result;
+    }
+
+    qint64 nOffset = 8;  // After signature
+    qint64 nTotalSize = getSize();
+
+    while (nOffset + 12 <= nTotalSize) {
+        CHUNK chunk = _readChunk(nOffset);
+
+        if (chunk.sName == "pHYs") {
+            if (chunk.nDataSize >= 9) {
+                result.nPixelsPerUnitX = read_uint32(chunk.nDataOffset + 0, true);
+                result.nPixelsPerUnitY = read_uint32(chunk.nDataOffset + 4, true);
+                result.nUnitSpecifier = read_uint8(chunk.nDataOffset + 8);
+            }
+            break;
+        }
+
+        if (chunk.sName == "IEND") {
+            break;
+        }
+
+        // Advance to next chunk: length(4) + type(4) + data + crc(4)
+        nOffset += (12 + chunk.nDataSize);
+    }
+
+    return result;
+}
+
+XPNG::bKGD XPNG::getbKGD()
+{
+    XPNG::bKGD result = {};
+
+    if (!isValid()) {
+        return result;
+    }
+
+    // We may use IHDR color type to infer expected layout, but chunk itself defines size
+    IHDR ihdr = getIHDR();
+
+    qint64 nOffset = 8;  // After signature
+    qint64 nTotalSize = getSize();
+
+    while (nOffset + 12 <= nTotalSize) {
+        CHUNK chunk = _readChunk(nOffset);
+
+        if (chunk.sName == "bKGD") {
+            quint32 nLen = (quint32)chunk.nDataSize;
+            if (nLen == 1) {
+                result.nPaletteIndex = read_uint8(chunk.nDataOffset + 0);
+                result.nType = 3;  // indexed
+            } else if (nLen == 2) {
+                result.nGray = read_uint16(chunk.nDataOffset + 0, true);
+                result.nType = 1;  // grayscale
+            } else if (nLen == 6) {
+                result.nRed = read_uint16(chunk.nDataOffset + 0, true);
+                result.nGreen = read_uint16(chunk.nDataOffset + 2, true);
+                result.nBlue = read_uint16(chunk.nDataOffset + 4, true);
+                result.nType = 2;  // truecolor
+            } else {
+                result.nType = 0;  // unknown or unsupported
+            }
+            break;
+        }
+
+        if (chunk.sName == "IEND") {
+            break;
+        }
+
+        nOffset += (12 + chunk.nDataSize);
+    }
+
+    // Validate against color type if present
+    if (result.nType != 0) {
+        // If mismatch between IHDR color type and bKGD content, still return parsed values; caller can decide.
+        Q_UNUSED(ihdr)
+    }
+
+    return result;
+}
+
 QString XPNG::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XPNG_STRUCTID, sizeof(_TABLE_XPNG_STRUCTID) / sizeof(XBinary::XCONVERT));
@@ -485,6 +589,28 @@ QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dat
                             _dataHeadersOptions.nSize = nDataSize + 12;
 
                             listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                        } else if (sTag == "pHYs") {
+                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+
+                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+                            _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+                            _dataHeadersOptions.nID = STRUCTID_pHYs;
+                            _dataHeadersOptions.locType = LT_OFFSET;
+                            _dataHeadersOptions.nLocation = nLocation;
+                            _dataHeadersOptions.nSize = nDataSize + 12;
+
+                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                        } else if (sTag == "bKGD") {
+                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+
+                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+                            _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+                            _dataHeadersOptions.nID = STRUCTID_bKGD;
+                            _dataHeadersOptions.locType = LT_OFFSET;
+                            _dataHeadersOptions.nLocation = nLocation;
+                            _dataHeadersOptions.nSize = nDataSize + 12;
+
+                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
                         }
 
                         nCurrentOffset += (12 + nDataSize);
@@ -505,6 +631,45 @@ QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dat
                 dataHeader.listRecords.append(getDataRecord(19, 1, "Filter", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
                 dataHeader.listRecords.append(getDataRecord(20, 1, "Interlace", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
                 dataHeader.listRecords.append(getDataRecord(21, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+
+                listResult.append(dataHeader);
+            } else if (dataHeadersOptions.nID == STRUCTID_pHYs) {
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
+
+                dataHeader.nSize = 21;  // pHYs size is always 21 bytes (length=9)
+                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+                dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                dataHeader.listRecords.append(getDataRecord(8, 4, "Pixels per Unit X", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
+                dataHeader.listRecords.append(getDataRecord(12, 4, "Pixels per Unit Y", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
+                dataHeader.listRecords.append(getDataRecord(16, 1, "Unit Specifier", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                dataHeader.listRecords.append(getDataRecord(17, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+
+                listResult.append(dataHeader);
+            } else if (dataHeadersOptions.nID == STRUCTID_bKGD) {
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
+
+                // Data part of bKGD can be 1 (indexed), 2 (grayscale), or 6 (truecolor) bytes
+                quint32 nLen = read_uint32(nStartOffset, true);
+                dataHeader.nSize = 12 + nLen;  // length + type + data + crc
+
+                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+                dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                if (nLen == 1) {
+                    dataHeader.listRecords.append(getDataRecord(8, 1, "Palette Index", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                    dataHeader.listRecords.append(getDataRecord(9, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                } else if (nLen == 2) {
+                    dataHeader.listRecords.append(getDataRecord(8, 2, "Gray", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                    dataHeader.listRecords.append(getDataRecord(10, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                } else if (nLen == 6) {
+                    dataHeader.listRecords.append(getDataRecord(8, 2, "Red", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                    dataHeader.listRecords.append(getDataRecord(10, 2, "Green", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                    dataHeader.listRecords.append(getDataRecord(12, 2, "Blue", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                    dataHeader.listRecords.append(getDataRecord(14, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                } else {
+                    // Unknown size, just show raw data
+                    dataHeader.listRecords.append(getDataRecord(8, nLen, "Data", XBinary::VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                    dataHeader.listRecords.append(getDataRecord(8 + nLen, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                }
 
                 listResult.append(dataHeader);
             } else {

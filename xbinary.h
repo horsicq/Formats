@@ -392,7 +392,7 @@ public:
         FT_JPEG,
         FT_MACHOFAT,
         FT_PDF,
-    FT_DER,
+        FT_DER,
         FT_PLAINTEXT,
         FT_PNG,
         FT_RAR,

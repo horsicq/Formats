@@ -29,11 +29,11 @@ class XDER : public XBinary {
 
 public:
     struct HEADER {
-        quint8 nTag;              // Top-level tag (usually 0x30 for SEQUENCE)
-        qint64 nHeaderSize;       // Size of Tag+Length
-        qint64 nContentOffset;    // Offset of content (value)
-        qint64 nContentSize;      // Content size from length field
-        bool bIsValid;            // Whether header is valid and fits into file
+        quint8 nTag;            // Top-level tag (usually 0x30 for SEQUENCE)
+        qint64 nHeaderSize;     // Size of Tag+Length
+        qint64 nContentOffset;  // Offset of content (value)
+        qint64 nContentSize;    // Content size from length field
+        bool bIsValid;          // Whether header is valid and fits into file
     };
 
     explicit XDER(QIODevice *pDevice = nullptr);

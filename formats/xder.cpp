@@ -24,7 +24,9 @@ XDER::XDER(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
 
-XDER::~XDER() {}
+XDER::~XDER()
+{
+}
 
 bool XDER::isValid(PDSTRUCT *pPdStruct)
 {
@@ -59,7 +61,7 @@ QString XDER::getFileFormatExt()
 
 QString XDER::getFileFormatExtsString()
 {
-    return "DER (*.der *.cer *.crt *.p7b *.p7c *.p12 *.pfx *.spc)"; // typical DER-encoded containers
+    return "DER (*.der *.cer *.crt *.p7b *.p7c *.p12 *.pfx *.spc)";  // typical DER-encoded containers
 }
 
 qint64 XDER::getFileFormatSize(PDSTRUCT *pPdStruct)
@@ -77,7 +79,7 @@ qint64 XDER::getFileFormatSize(PDSTRUCT *pPdStruct)
 
 QString XDER::getMIMEString()
 {
-    return "application/pkix-cert"; // commonly used for DER certs
+    return "application/pkix-cert";  // commonly used for DER certs
 }
 
 XDER::HEADER XDER::getHeader(PDSTRUCT *pPdStruct)
@@ -101,7 +103,7 @@ XDER::HEADER XDER::_getHeader(PDSTRUCT *pPdStruct)
     quint8 nTag = read_uint8(nOffset);
 
     // Typical DER starts with SEQUENCE (0x30). Accept universal/constructed.
-    if ((nTag & 0x1F) != 0x10) { // 0x10 == SEQUENCE tag number
+    if ((nTag & 0x1F) != 0x10) {  // 0x10 == SEQUENCE tag number
         // Still allow other top-level tags (e.g., OCTET STRING, 0x04), but require definite length.
         // We'll not restrict too much: just require valid length and fit in file.
     }

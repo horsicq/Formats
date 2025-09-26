@@ -848,10 +848,13 @@ bool XFormats::extractFilePartsToFolder(QList<XBinary::FPART> *pListParts, QIODe
                         QIODevice *pDecompressOut = nullptr;
                         QIODevice *pHandleIn = nullptr;
                         QIODevice *pHandleOut = nullptr;
-                        QTemporaryFile *pTmpFile = nullptr;;
+                        QTemporaryFile *pTmpFile = nullptr;
+                        ;
 
-                        bool bUnpack = (fpart.mapProperties.value(XBinary::FPART_PROP_COMPRESSMETHOD, XBinary::COMPRESS_METHOD_UNKNOWN).toUInt() != XBinary::COMPRESS_METHOD_UNKNOWN);
-                        bool bHandle = (fpart.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt() != XBinary::HANDLE_METHOD_UNKNOWN);
+                        bool bUnpack = (fpart.mapProperties.value(XBinary::FPART_PROP_COMPRESSMETHOD, XBinary::COMPRESS_METHOD_UNKNOWN).toUInt() !=
+                                        XBinary::COMPRESS_METHOD_UNKNOWN);
+                        bool bHandle =
+                            (fpart.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt() != XBinary::HANDLE_METHOD_UNKNOWN);
 
                         if (bUnpack) {
                             pDecompressIn = pDevice;
@@ -893,7 +896,8 @@ bool XFormats::extractFilePartsToFolder(QList<XBinary::FPART> *pListParts, QIODe
                         }
 
                         if (bHandle) {
-                            XBinary::HANDLE_METHOD handleMethod = (XBinary::HANDLE_METHOD)(fpart.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt());
+                            XBinary::HANDLE_METHOD handleMethod =
+                                (XBinary::HANDLE_METHOD)(fpart.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt());
 
                             // if () {
 

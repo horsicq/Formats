@@ -4884,12 +4884,10 @@ QDateTime XBinary::getDirectoryLatestModificationDate(const QString &sDirectoryN
         const QFileInfo &entry = entries.at(i);
         if (entry.isDir()) {
             QDateTime subDirMod = getDirectoryLatestModificationDate(entry.absoluteFilePath());
-            if (subDirMod.isValid() && subDirMod > latestMod)
-                latestMod = subDirMod;
+            if (subDirMod.isValid() && subDirMod > latestMod) latestMod = subDirMod;
         } else if (entry.isFile()) {
             QDateTime fileMod = entry.lastModified();
-            if (fileMod > latestMod)
-                latestMod = fileMod;
+            if (fileMod > latestMod) latestMod = fileMod;
         }
     }
     return latestMod;
