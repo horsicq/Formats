@@ -923,7 +923,11 @@ public:
 
     virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions);
 
-    virtual bool readTableInit(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void *pUserData, PDSTRUCT *pPdStruct);
+    struct TABLE_LIST {
+        QList<OFFSETSIZE> listOffsetsSizes;
+    };
+
+    virtual bool readTableInit(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void **ppUserData, PDSTRUCT *pPdStruct);
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
                                 void *pUserData, PDSTRUCT *pPdStruct);
     virtual void readTableFinalize(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void *pUserData, PDSTRUCT *pPdStruct);
@@ -1742,6 +1746,11 @@ public:
     static QDateTime valueToTime(quint64 nValue, DT_TYPE type);
     static QString valueToTimeString(quint64 nValue, DT_TYPE type);
     static QString msecToDate(quint64 nValue);
+
+    // DOS date/time helpers (used by ZIP, RAR, etc.)
+    // Converts MS-DOS packed date (nDosDate) and time (nDosTime) into QDateTime (local time).
+    // If the values are invalid (e.g., zero month/day), returns an invalid QDateTime.
+    static QDateTime dosDateTimeToQDateTime(quint16 nDosDate, quint16 nDosTime);
 
     static QString valueToFlagsString(quint64 nValue, const QMap<quint64, QString> &mapFlags, VL_TYPE vlType);
 

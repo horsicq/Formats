@@ -807,7 +807,7 @@ qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptio
         }
 
         void *pUserData = nullptr;
-        if (readTableInit(dataRecordsOptions, pUserData, pPdStruct)) {
+        if (readTableInit(dataRecordsOptions, &pUserData, pPdStruct)) {
             for (qint32 i = 0; (i < nCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                 QList<DATA_RECORD_ROW> listDataRecordRows;
 
@@ -882,10 +882,10 @@ QList<QString> XBinary::getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOp
     return listTitles;
 }
 
-bool XBinary::readTableInit(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void *pUserData, PDSTRUCT *pPdStruct)
+bool XBinary::readTableInit(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void **ppUserData, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(dataRecordsOptions)
-    Q_UNUSED(pUserData)
+    Q_UNUSED(ppUserData)
     Q_UNUSED(pPdStruct)
 
     // Default implementation does nothing
@@ -10624,6 +10624,29 @@ QString XBinary::msecToDate(quint64 nValue)
     sResult += QString("%1").arg(nSec, 2, 10, QChar('0'));
 
     return sResult;
+}
+
+QDateTime XBinary::dosDateTimeToQDateTime(quint16 nDosDate, quint16 nDosTime)
+{
+    // MS-DOS date format: bits 0-4 day (1-31), 5-8 month (1-12), 9-15 years from 1980
+    // MS-DOS time format: bits 0-4 seconds/2 (0-29 => 0-58), 5-10 minutes (0-59), 11-15 hours (0-23)
+    qint32 nDay = (nDosDate & 0x1F);
+    qint32 nMonth = (nDosDate >> 5) & 0x0F;
+    qint32 nYear = ((nDosDate >> 9) & 0x7F) + 1980;
+
+    qint32 nSecond = (nDosTime & 0x1F) * 2;
+    qint32 nMinute = (nDosTime >> 5) & 0x3F;
+    qint32 nHour = (nDosTime >> 11) & 0x1F;
+
+    QDate date(nYear, nMonth, nDay);
+    QTime time(nHour, nMinute, nSecond);
+
+    QDateTime result;
+    if (date.isValid() && time.isValid()) {
+        result = QDateTime(date, time);
+    }
+
+    return result;
 }
 
 QString XBinary::valueToFlagsString(quint64 nValue, const QMap<quint64, QString> &mapFlags, VL_TYPE vlType)
