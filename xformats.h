@@ -45,6 +45,7 @@
 #include "xavi.h"
 #include "xwav.h"
 #include "xjavaclass.h"
+#include "xpyc.h"
 #include "xttf.h"
 #include "xtext.h"
 #include "xdjvu.h"

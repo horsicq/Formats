@@ -349,6 +349,7 @@ public:
         TYPE_CONSOLE,
         TYPE_DLL,
         TYPE_DRIVER,
+        TYPE_NATIVE,
         TYPE_BOOTAPPLICATION,
         //        TYPE_SERVICEDRIVER,
         TYPE_EFI_RUNTIMEDRIVER,
@@ -607,6 +608,8 @@ public:
     QList<IMPORT_HEADER> getImports(PDSTRUCT *pPdStruct = nullptr);
     QList<IMPORT_HEADER> getImports(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
     XPE_DEF::IMAGE_DATA_DIRECTORY getIAT(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
+
+    QList<QString> getImportNames(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
     QList<IMPORT_POSITION> _getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA, qint64 nRVA, PDSTRUCT *pPdStruct = nullptr);
     QList<IMPORT_POSITION> getImportPositions(qint32 nIndex, PDSTRUCT *pPdStruct = nullptr);

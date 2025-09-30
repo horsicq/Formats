@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xbinary.h"
+#include "formats/xpyc.h"
 #include <cstring>
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b)
@@ -253,6 +254,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_DEB, "deb", QString("deb")},
     {XBinary::FT_BWDOS16M, "BW DOS16M", QString("BW DOS16M")},
     {XBinary::FT_JAVACLASS, "Java Class", QString("Java Class")},
+    {XBinary::FT_PYC, "Python Bytecode", QString("Python Bytecode")},
     {XBinary::FT_TTF, "TTF", QString("TTF")},
     {XBinary::FT_DJVU, "DjVu", QString("DjVu")},
     {XBinary::FT_CFBF, "CFBF", QString("CFBF")},
@@ -5819,6 +5821,69 @@ bool XBinary::_initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
     return true;
 }
 
+void XBinary::_processMemoryMap(_MEMORY_MAP *pMemoryMap, QList<FPART> *pListFParts, PDSTRUCT *pPdStruct)
+{
+    std::sort(pListFParts->begin(), pListFParts->end(), compareFileParts);
+
+    XADDR nMaxAddress = 0;
+    XADDR nMinAddress = -1;
+    qint32 nNumberOfParts = pListFParts->count();
+    qint32 nIndex = 0;
+
+    for (qint32 i = 0; i < nNumberOfParts && isPdStructNotCanceled(pPdStruct); i++) {
+        FPART fpart = pListFParts->at(i);
+
+        _MEMORY_RECORD record = {};
+        record.nAddress = fpart.nVirtualAddress;
+        record.nOffset = fpart.nFileOffset;
+        record.nSize = fpart.nFileSize;
+        record.nIndex = nIndex++;
+        record.sName = fpart.sName;
+        record.bIsVirtual = false;
+        record.filePart = fpart.filePart;
+        record.nFilePartNumber = i;
+
+        pMemoryMap->listRecords.append(record);
+
+        if (fpart.nVirtualSize > fpart.nFileSize) {
+            // Add virtual size
+            _MEMORY_RECORD virtualRecord = {};
+            virtualRecord.nAddress = fpart.nVirtualAddress + fpart.nFileSize;
+            virtualRecord.nOffset = -1;
+            virtualRecord.nSize = fpart.nVirtualSize - fpart.nFileSize;
+            virtualRecord.nIndex = nIndex++;
+            virtualRecord.sName = fpart.sName + " (virtual)";
+            virtualRecord.bIsVirtual = true;
+            virtualRecord.filePart = fpart.filePart;
+            virtualRecord.nFilePartNumber = i;
+
+            pMemoryMap->listRecords.append(virtualRecord);
+        }
+
+        if (fpart.nVirtualAddress != -1) {
+            if (nMinAddress == -1) {
+                nMinAddress = fpart.nVirtualAddress;
+            }
+
+            nMinAddress = qMin(nMinAddress, fpart.nVirtualAddress);
+            nMaxAddress = qMax(nMaxAddress, (XADDR)(fpart.nVirtualAddress + fpart.nVirtualSize));
+        }
+    }
+    pMemoryMap->nModuleAddress = nMinAddress;
+    pMemoryMap->nImageSize = nMaxAddress - nMinAddress;
+}
+
+XBinary::_MEMORY_MAP XBinary::_getSimpleMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct)
+{
+    _MEMORY_MAP result = {};
+
+    QList<FPART> listParts = getFileParts(nFileParts, 1000, pPdStruct);
+
+    _processMemoryMap(&result, &listParts, pPdStruct);
+
+    return result;
+}
+
 XBinary::_MEMORY_MAP XBinary::getSimpleMemoryMap()
 {
     _MEMORY_MAP result = {};
@@ -5842,54 +5907,7 @@ XBinary::_MEMORY_MAP XBinary::_getMemoryMap(QList<FPART> *pListFParts, PDSTRUCT 
     _MEMORY_MAP result = {};
 
     if (_initMemoryMap(&result, pPdStruct)) {
-        std::sort(pListFParts->begin(), pListFParts->end(), compareFileParts);
-
-        XADDR nMaxAddress = 0;
-        XADDR nMinAddress = -1;
-        qint32 nNumberOfParts = pListFParts->count();
-        qint32 nIndex = 0;
-
-        for (qint32 i = 0; i < nNumberOfParts && isPdStructNotCanceled(pPdStruct); i++) {
-            FPART fpart = pListFParts->at(i);
-
-            _MEMORY_RECORD record = {};
-            record.nAddress = fpart.nVirtualAddress;
-            record.nOffset = fpart.nFileOffset;
-            record.nSize = fpart.nFileSize;
-            record.nIndex = nIndex++;
-            record.sName = fpart.sName;
-            record.bIsVirtual = false;
-            record.filePart = fpart.filePart;
-            record.nFilePartNumber = i;
-
-            result.listRecords.append(record);
-
-            if (fpart.nVirtualSize > fpart.nFileSize) {
-                // Add virtual size
-                _MEMORY_RECORD virtualRecord = {};
-                virtualRecord.nAddress = fpart.nVirtualAddress + fpart.nFileSize;
-                virtualRecord.nOffset = -1;
-                virtualRecord.nSize = fpart.nVirtualSize - fpart.nFileSize;
-                virtualRecord.nIndex = nIndex++;
-                virtualRecord.sName = fpart.sName + " (virtual)";
-                virtualRecord.bIsVirtual = true;
-                virtualRecord.filePart = fpart.filePart;
-                virtualRecord.nFilePartNumber = i;
-
-                result.listRecords.append(virtualRecord);
-            }
-
-            if (fpart.nVirtualAddress != -1) {
-                if (nMinAddress == -1) {
-                    nMinAddress = fpart.nVirtualAddress;
-                }
-
-                nMinAddress = qMin(nMinAddress, fpart.nVirtualAddress);
-                nMaxAddress = qMax(nMaxAddress, (XADDR)(fpart.nVirtualAddress + fpart.nVirtualSize));
-            }
-        }
-        result.nModuleAddress = nMinAddress;
-        result.nImageSize = nMaxAddress - nMinAddress;
+        _processMemoryMap(&result, pListFParts, pPdStruct);
     }
 
     return result;
@@ -6812,6 +6830,17 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             }
         }
 
+        if (!bAllFound) {
+            if (nSize >= 12) {
+                if (read_uint16(2) == 0x0A0D) {
+                    if (XPYC::isValid(getDevice())) {
+                        stResult.insert(FT_PYC);
+                        bAllFound = true;
+                    }
+                }
+            }
+        }
+
         if (isPlainTextType(&baHeader)) {
             stResult.insert(FT_TEXT);
             stResult.insert(FT_PLAINTEXT);
@@ -6971,6 +7000,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_DEX;
     } else if (pStFileTypes->contains(FT_JAVACLASS)) {
         result = FT_JAVACLASS;
+    } else if (pStFileTypes->contains(FT_PYC)) {
+        result = FT_PYC;
 
         // Documents and containers
     } else if (pStFileTypes->contains(FT_PDF)) {
@@ -7151,6 +7182,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_AR)) listResult.append(FT_AR);
         if (stFileTypes.contains(FT_DEB)) listResult.append(FT_DEB);
         if (stFileTypes.contains(FT_JAVACLASS)) listResult.append(FT_JAVACLASS);
+    if (stFileTypes.contains(FT_PYC)) listResult.append(FT_PYC);
         if (stFileTypes.contains(FT_TTF)) listResult.append(FT_TTF);
         if (stFileTypes.contains(FT_DJVU)) listResult.append(FT_DJVU);
         if (stFileTypes.contains(FT_TEXT)) listResult.append(FT_TEXT);

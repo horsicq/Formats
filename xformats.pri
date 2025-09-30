@@ -154,6 +154,11 @@ contains(XCONFIG, use_archive) {
     include($$PWD/formats/xjavaclass.pri)
 }
 
+!contains(XCONFIG, xpyc) {
+    XCONFIG += xpyc
+    include($$PWD/formats/xpyc.pri)
+}
+
 !contains(XCONFIG, xttf) {
     XCONFIG += xttf
     include($$PWD/formats/xttf.pri)

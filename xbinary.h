@@ -422,6 +422,7 @@ public:
         FT_DEB,
         FT_BWDOS16M,
         FT_JAVACLASS,
+    FT_PYC,
         FT_CFBF,
         FT_TTF,
         FT_DJVU,
@@ -1396,11 +1397,13 @@ public:
     virtual QList<MAPMODE> getMapModesList();
 
     virtual bool _initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);
+    virtual void _processMemoryMap(_MEMORY_MAP *pMemoryMap, QList<FPART> *pListFParts, PDSTRUCT *pPdStruct);
 
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
     _MEMORY_MAP _getMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct = nullptr);
     _MEMORY_MAP _getMemoryMap(QList<FPART> *pListFParts, PDSTRUCT *pPdStruct = nullptr);
 
+    _MEMORY_MAP _getSimpleMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct = nullptr);
     _MEMORY_MAP getSimpleMemoryMap();
 
     virtual QList<FPART> getNativeRegions(PDSTRUCT *pPdStruct = nullptr);

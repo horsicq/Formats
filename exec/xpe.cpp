@@ -167,8 +167,12 @@ qint32 XPE::getType()
 
     quint16 nSubsystem = getOptionalHeader_Subsystem();
 
-    if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS)) {
-        result = TYPE_DRIVER;
+    if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS)) { 
+        if(isImportLibraryPresent("ntdll.dll")) {
+            result = TYPE_NATIVE;
+        } else {
+            result = TYPE_DRIVER;
+        }
     } else if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_WINDOWS_CUI) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_OS2_CUI) ||
                (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_POSIX_CUI)) {
         result = TYPE_CONSOLE;
@@ -211,6 +215,7 @@ QString XPE::typeIdToString(qint32 nType)
         case TYPE_CONSOLE: sResult = tr("Console"); break;
         case TYPE_DLL: sResult = QString("DLL"); break;
         case TYPE_DRIVER: sResult = tr("Driver"); break;
+        case TYPE_NATIVE: sResult = tr("Native"); break;
         case TYPE_BOOTAPPLICATION: sResult = tr("Boot application"); break;
         case TYPE_EFI_RUNTIMEDRIVER: sResult = QString("EFI %1").arg(tr("Runtime driver")); break;
         case TYPE_EFI_BOOTSERVICEDRIVER:
@@ -2359,6 +2364,64 @@ XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getIAT(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPd
     return result;
 }
 
+QList<QString> XPE::getImportNames(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
+{
+    XBinary::PDSTRUCT pdStructEmpty = {};
+
+    if (!pPdStruct) {
+        pdStructEmpty = XBinary::createPdStruct();
+        pPdStruct = &pdStructEmpty;
+    }
+
+    QList<QString> listResult;
+
+    XPE_DEF::IMAGE_DATA_DIRECTORY dataResources = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT);
+
+    XADDR nModuleAddress = getModuleAddress();
+    qint64 nImportOffset = -1;
+    qint64 nImportOffsetTest = -1;
+
+    if (dataResources.VirtualAddress) {
+        nImportOffset = addressToOffset(pMemoryMap, dataResources.VirtualAddress + nModuleAddress);
+        nImportOffsetTest =
+            addressToOffset(pMemoryMap, dataResources.VirtualAddress + nModuleAddress + sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR) - 2);  // Test for some (Win)Upack stubs
+    }
+
+    if (nImportOffset != -1) {
+        while (!(pPdStruct->bIsStop)) {
+            XPE_DEF::IMAGE_IMPORT_DESCRIPTOR iid = read_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
+
+            QString sLibrary;
+
+            if (nImportOffsetTest == -1) {
+                iid.FirstThunk &= 0x0000FFFF;
+            }
+
+            if ((iid.Characteristics == 0) && (iid.Name == 0)) {
+                break;
+            }
+
+            qint64 nOffset = addressToOffset(pMemoryMap, iid.Name + nModuleAddress);
+
+            if (nOffset != -1) {
+                sLibrary = read_ansiString(nOffset);
+
+                if (sLibrary == "") {
+                    break;
+                }
+            } else {
+                break;  // corrupted
+            }
+
+            listResult.append(sLibrary);
+
+            nImportOffset += sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
+        }
+    }
+
+    return listResult;
+}
+
 QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA, qint64 nRVA, PDSTRUCT *pPdStruct)
 {
     XBinary::PDSTRUCT pdStructEmpty = {};
@@ -2584,15 +2647,11 @@ bool XPE::isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 
 
 bool XPE::isImportLibraryPresent(const QString &sLibrary, PDSTRUCT *pPdStruct)
 {
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+     _MEMORY_MAP memoryMap = _getSimpleMemoryMap(FILEPART_HEADER | FILEPART_SECTION | FILEPART_OVERLAY, pPdStruct);
 
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
+    QList<QString> listLibraries = getImportNames(&memoryMap, pPdStruct);
 
-    QList<IMPORT_HEADER> listImportHeaders = getImports(pPdStruct);
-
-    return isImportLibraryPresent(sLibrary, &listImportHeaders, pPdStruct);
+    return listLibraries.contains(sLibrary);
 }
 
 bool XPE::isImportLibraryPresent(const QString &sLibrary, QList<IMPORT_HEADER> *pListImportHeaders, PDSTRUCT *pPdStruct)
