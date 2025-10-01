@@ -159,7 +159,6 @@ QList<XBinary::FPART> XMP4::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
                 f.nFileSize = (qint64)largesize;
                 f.nVirtualAddress = -1;
                 f.sName = type;
-                f.sOriginalName = type;
                 list.append(f);
                 nOffset += (qint64)largesize;
                 continue;
@@ -175,7 +174,6 @@ QList<XBinary::FPART> XMP4::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             f.nFileSize = size;
             f.nVirtualAddress = -1;
             f.sName = type;
-            f.sOriginalName = type;
             list.append(f);
 
             nOffset += size;

@@ -213,6 +213,7 @@ public:
         FPART_PROP_BITSPERCOMPONENT,
         FPART_PROP_INFO,
         FPART_PROP_EXT,
+        FPART_PROP_ORIGINALNAME,
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
@@ -234,6 +235,14 @@ public:
         qint32 nInputBufferSize;   // Opt
         char *pOutputBuffer;       // Opt
         qint32 nOutputBufferSize;  // Opt
+    };
+
+    struct ARCHIVERECORD {
+        qint64 nStreamOffset;
+        qint64 nStreamSize;
+        qint64 nDecompressedOffset;
+        qint64 nDecompressedSize;
+        QMap<FPART_PROP, QVariant> mapProperties;
     };
 
     static qint32 _readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
@@ -298,7 +307,6 @@ public:
         XADDR nVirtualAddress;
         qint64 nVirtualSize;
         QString sName;
-        QString sOriginalName;
         FILEPART filePart;
         QMap<FPART_PROP, QVariant> mapProperties;
     };
@@ -2001,6 +2009,9 @@ public:
 
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
     static FPART getFPART(FILEPART filePart, const QString &sOriginalName, qint64 nFileOffset, qint64 nFileSize, XADDR nVirtualAddress, qint64 nVirtualSize);
+
+    virtual qint64 getNumberOfArchiveRecords(PDSTRUCT *pPdStruct);
+    virtual QList<ARCHIVERECORD> getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

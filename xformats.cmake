@@ -60,6 +60,8 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/formats/xriff.h
     ${CMAKE_CURRENT_LIST_DIR}/formats/xder.h
     ${CMAKE_CURRENT_LIST_DIR}/formats/xder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xpyc.h
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xpyc.cpp
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk.cpp
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk.h
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk_def.h

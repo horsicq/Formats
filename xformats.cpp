@@ -89,6 +89,7 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_BZIP2, fileType)) return new XBZIP2(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_TAR, fileType)) return new XTAR(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_XZ, fileType)) return new XXZ(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_AR, fileType)) return new X_Ar(pDevice);
 
     else if (XBinary::checkFileType(XBinary::FT_DOS4G, fileType) || XBinary::checkFileType(XBinary::FT_DOS16M, fileType)) return new XDOS16(pDevice);
 #endif
@@ -536,6 +537,17 @@ QList<XBinary::FPART> XFormats::getFileParts(XBinary::FT fileType, QIODevice *pD
     return listResult;
 }
 
+QList<XBinary::ARCHIVERECORD> XFormats::getArchiveRecords(XBinary::FT fileType, QIODevice *pDevice, qint32 nLimit, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::ARCHIVERECORD> listResult;
+
+    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    listResult = pBinary->getArchiveRecords(nLimit, pPdStruct);
+    delete pBinary;
+
+    return listResult;
+}
+
 qint32 XFormats::getDataRecordValues(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_RECORDS_OPTIONS &dataRecordsOptions,
                                      QList<XBinary::DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles, bool bIsImage, XADDR nModuleAddress,
                                      XBinary::PDSTRUCT *pPdStruct)
@@ -803,35 +815,43 @@ bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QS
         fileType = XBinary::getPrefFileType(pDevice, true);
     }
 
-    QList<XBinary::FPART> listParts = XFormats::getFileParts(fileType, pDevice, XBinary::FILEPART_STREAM, -1, false, -1, pPdStruct);
+    QList<XBinary::ARCHIVERECORD> listArchiveRecords = XFormats::getArchiveRecords(fileType, pDevice, -1, false, -1, pPdStruct);
 
     XDecompress xDecompress;
     _connect(&xDecompress);
 
-    return extractFilePartsToFolder(&listParts, pDevice, sFolderName, pPdStruct);
+    return extractArchiveRecordsToFolder(&listArchiveRecords, pDevice, sFolderName, pPdStruct);
 }
 
-bool XFormats::extractFilePartsToFolder(QList<XBinary::FPART> *pListParts, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct)
+bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pListRecords, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct)
 {
+#ifdef QT_DEBUG
+    qDebug("XFormats::extractArchiveRecordsToFolder: Starting extraction to %s", sFolderName.toLatin1().data());
+#endif
     bool bResult = false;
 
-    qint32 nNumberOfParts = pListParts->count();
+    qint32 nNumberOfRecords = pListRecords->count();
+#ifdef QT_DEBUG
+    qDebug("XFormats::extractArchiveRecordsToFolder: Number of records=%d", nNumberOfRecords);
+#endif
 
-    if (nNumberOfParts > 0) {
+    if (nNumberOfRecords > 0) {
         XDecompress xDecompress;
         _connect(&xDecompress);
 
         if (XBinary::createDirectory(sFolderName)) {
+#ifdef QT_DEBUG
+            qDebug("XFormats::extractArchiveRecordsToFolder: Directory created successfully");
+#endif
             bResult = true;
             qint32 nGlobalIndex = XBinary::getFreeIndex(pPdStruct);
-            XBinary::setPdStructInit(pPdStruct, nGlobalIndex, nNumberOfParts);
+            XBinary::setPdStructInit(pPdStruct, nGlobalIndex, nNumberOfRecords);
 
-            for (qint32 i = 0; (i < nNumberOfParts) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-                QString sPrefName = pListParts->at(i).sOriginalName;
-
-                if (sPrefName == "") {
-                    sPrefName = pListParts->at(i).sName;
-                }
+            for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                QString sPrefName = pListRecords->at(i).mapProperties.value(XBinary::FPART_PROP_ORIGINALNAME).toString();
+#ifdef QT_DEBUG
+                qDebug("XFormats::extractArchiveRecordsToFolder: Processing record %d/%d: %s", i + 1, nNumberOfRecords, sPrefName.toLatin1().data());
+#endif
 
                 XBinary::setPdStructStatus(pPdStruct, nGlobalIndex, sPrefName);
 
@@ -843,19 +863,21 @@ bool XFormats::extractFilePartsToFolder(QList<XBinary::FPART> *pListParts, QIODe
                     file.setFileName(sResultFileName);
 
                     if (file.open(QIODevice::ReadWrite)) {
-                        const XBinary::FPART &fpart = pListParts->at(i);
+                        const XBinary::ARCHIVERECORD &archiveRecord = pListRecords->at(i);
 
                         QIODevice *pDecompressIn = nullptr;
                         QIODevice *pDecompressOut = nullptr;
                         QIODevice *pHandleIn = nullptr;
                         QIODevice *pHandleOut = nullptr;
                         QTemporaryFile *pTmpFile = nullptr;
-                        ;
 
-                        bool bUnpack = (fpart.mapProperties.value(XBinary::FPART_PROP_COMPRESSMETHOD, XBinary::COMPRESS_METHOD_UNKNOWN).toUInt() !=
+                        bool bUnpack = (archiveRecord.mapProperties.value(XBinary::FPART_PROP_COMPRESSMETHOD, XBinary::COMPRESS_METHOD_UNKNOWN).toUInt() !=
                                         XBinary::COMPRESS_METHOD_UNKNOWN);
                         bool bHandle =
-                            (fpart.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt() != XBinary::HANDLE_METHOD_UNKNOWN);
+                            (archiveRecord.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt() != XBinary::HANDLE_METHOD_UNKNOWN);
+#ifdef QT_DEBUG
+                        qDebug("XFormats::extractArchiveRecordsToFolder: bUnpack=%d, bHandle=%d", bUnpack, bHandle);
+#endif
 
                         if (bUnpack) {
                             pDecompressIn = pDevice;
@@ -880,12 +902,22 @@ bool XFormats::extractFilePartsToFolder(QList<XBinary::FPART> *pListParts, QIODe
                         }
 
                         if (bUnpack) {
-                            if (xDecompress.decompressFPART(fpart, pDecompressIn, pDecompressOut, 0, -1, pPdStruct)) {
-                                if (!xDecompress.checkCRC(fpart, pDecompressOut, pPdStruct)) {
+#ifdef QT_DEBUG
+                            qDebug("XFormats::extractArchiveRecordsToFolder: Starting decompression for %s", sPrefName.toLatin1().data());
+#endif
+                            if (xDecompress.decompressArchiveRecord(archiveRecord, pDecompressIn, pDecompressOut, pPdStruct)) {
+#ifdef QT_DEBUG
+                                qDebug("XFormats::extractArchiveRecordsToFolder: Decompression successful, checking CRC");
+#endif
+                                if (!xDecompress.checkCRC(archiveRecord.mapProperties, pDecompressOut, pPdStruct)) {
 #ifdef QT_DEBUG
                                     qDebug() << "Invalid CRC for" << sPrefName;
 #endif
                                     emit warningMessage(QString("%1: %2").arg(tr("Invalid CRC"), sPrefName));
+                                } else {
+#ifdef QT_DEBUG
+                                    qDebug("XFormats::extractArchiveRecordsToFolder: CRC check passed");
+#endif
                                 }
                             } else {
 #ifdef QT_DEBUG
@@ -898,7 +930,7 @@ bool XFormats::extractFilePartsToFolder(QList<XBinary::FPART> *pListParts, QIODe
 
                         if (bHandle) {
                             XBinary::HANDLE_METHOD handleMethod =
-                                (XBinary::HANDLE_METHOD)(fpart.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt());
+                                (XBinary::HANDLE_METHOD)(archiveRecord.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt());
 
                             // if () {
 
@@ -912,11 +944,20 @@ bool XFormats::extractFilePartsToFolder(QList<XBinary::FPART> *pListParts, QIODe
                         }
 
                         file.close();
+#ifdef QT_DEBUG
+                        qDebug("XFormats::extractArchiveRecordsToFolder: File closed successfully");
+#endif
                     } else {
+#ifdef QT_DEBUG
+                        qDebug("XFormats::extractArchiveRecordsToFolder: Cannot create file %s", sResultFileName.toLatin1().data());
+#endif
                         emit errorMessage(QString("%1: %2").arg(tr("Cannot create"), sResultFileName));
                         bResult = false;
                     }
                 } else {
+#ifdef QT_DEBUG
+                    qDebug("XFormats::extractArchiveRecordsToFolder: Cannot create directory %s", fi.absolutePath().toLatin1().data());
+#endif
                     emit errorMessage(QString("%1: %2").arg(tr("Cannot create"), fi.absolutePath()));
                     bResult = false;
                 }
@@ -925,12 +966,21 @@ bool XFormats::extractFilePartsToFolder(QList<XBinary::FPART> *pListParts, QIODe
             }
 
             XBinary::setPdStructFinished(pPdStruct, nGlobalIndex);
+#ifdef QT_DEBUG
+            qDebug("XFormats::extractArchiveRecordsToFolder: Extraction completed, bResult=%d", bResult);
+#endif
         } else {
+#ifdef QT_DEBUG
+            qDebug("XFormats::extractArchiveRecordsToFolder: Cannot create folder %s", sFolderName.toLatin1().data());
+#endif
             emit errorMessage(QString("%1: %2").arg(tr("Cannot create"), sFolderName));
             bResult = false;
         }
     }
 
+#ifdef QT_DEBUG
+    qDebug("XFormats::extractArchiveRecordsToFolder: Returning bResult=%d", bResult);
+#endif
     return bResult;
 }
 

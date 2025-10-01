@@ -9860,7 +9860,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                 QString _sSectionName = QString((char *)section.Name);
                 _sSectionName.resize(qMin(_sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
                 _sSectionName = convertSectionName(_sSectionName, &osStringTable);
-                record.sOriginalName = _sSectionName;
+                record.mapProperties.insert(FPART_PROP_ORIGINALNAME, _sSectionName);
                 record.sName = QString("%1 (%2) [\"%3\"]").arg(tr("Section"), QString::number(i + 1), _sSectionName);
                 listResult.append(record);
             }

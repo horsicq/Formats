@@ -412,6 +412,38 @@ QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 n
     return sResult;
 }
 
+qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
+{
+    return getFileParts(FILEPART_STREAM, -1, pPdStruct).count();
+}
+
+QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::ARCHIVERECORD> listResult;
+
+    QList<FPART> listParts = getFileParts(FILEPART_STREAM, nLimit, pPdStruct);
+
+    qint32 nNumberOfRecords = listParts.count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        const FPART &part = listParts.at(i);
+        ARCHIVERECORD record = {};
+        record.nStreamOffset = part.nFileOffset;
+        record.nStreamSize = part.nFileSize;
+        record.nDecompressedOffset = 0;
+        record.nDecompressedSize = part.mapProperties.value(FPART_PROP_UNCOMPRESSEDSIZE).toLongLong();
+        record.mapProperties = part.mapProperties;
+
+        if (record.mapProperties.value(FPART_PROP_ORIGINALNAME).toString() == "") {
+            record.mapProperties.insert(FPART_PROP_ORIGINALNAME, part.sName);
+        }
+
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
 qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState)
 {
     qint32 nRead = pState->pDeviceInput->read(pBuffer, nBufferSize);
@@ -483,7 +515,6 @@ quint32 XBinary::getFPART_crc32(const FPART &fpart)
     stream << fpart.nVirtualAddress;
     stream << fpart.nVirtualSize;
     stream << fpart.sName;
-    stream << fpart.sOriginalName;
     stream << static_cast<qint32>(fpart.filePart);
 
     // Serialize mapProperties

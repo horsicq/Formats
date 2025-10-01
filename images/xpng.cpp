@@ -718,7 +718,6 @@ QList<XBinary::FPART> XPNG::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             record.nFileSize = 12 + nDataSize;
             record.nVirtualAddress = -1;
             record.sName = sTag;  // mb TODO
-            record.sOriginalName = sTag;
 
             listResult.append(record);
         }
