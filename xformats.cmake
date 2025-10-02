@@ -65,6 +65,9 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk.cpp
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk.h
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk_def.h
+    ${CMAKE_CURRENT_LIST_DIR}/exec/xatarist.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/exec/xatarist.h
+    ${CMAKE_CURRENT_LIST_DIR}/exec/xatarist_def.h
     ${CMAKE_CURRENT_LIST_DIR}/exec/xcom.cpp
     ${CMAKE_CURRENT_LIST_DIR}/exec/xcom.h
     ${CMAKE_CURRENT_LIST_DIR}/exec/xcom_def.h

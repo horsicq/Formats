@@ -154,6 +154,9 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
     {XBinary::COMPRESS_METHOD_REDUCE_4, "Reduce_4", QString("Reduce 4")},
     {XBinary::COMPRESS_METHOD_AES, "AES", QString("AES")},
     {XBinary::COMPRESS_METHOD_ZLIB, "ZLIB", QString("ZLIB")},
+    {XBinary::COMPRESS_METHOD_MSZIP_CAB, "MSZIP_CAB", QString("MSZIP CAB")},
+    {XBinary::COMPRESS_METHOD_STORE_CAB, "STORE_CAB", QString("STORE CAB")},
+    {XBinary::COMPRESS_METHOD_LZX_CAB, "LZX_CAB", QString("LZX CAB")},
 
     // TODO check more methods
 };
@@ -201,6 +204,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_MACHO32, "Mach-O32", QString("Mach-O32")},
     {XBinary::FT_MACHO64, "Mach-O64", QString("Mach-O64")},
     {XBinary::FT_AMIGAHUNK, "Amiga Hunk", QString("Amiga Hunk")},
+    {XBinary::FT_ATARIST, "Atari ST", QString("Atari ST")},
     // Extra
     {XBinary::FT_7Z, "7-Zip", QString("7-Zip")},
     {XBinary::FT_ANDROIDASRC, "AndroidASRC", QString("Android ASRC")},
@@ -6693,6 +6697,15 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         }
     }
 
+    if ((!bAllFound) && (nSize >= 28)) {
+        quint16 nMagic = _read_uint16(pOffset, true);  // Big-endian
+        if (nMagic == 0x601A) {
+            stResult.insert(FT_ATARIST);
+
+            bAllFound = true;
+        }
+    }
+
     if ((!bAllFound) && bExtra) {
         _MEMORY_MAP memoryMap = XBinary::getSimpleMemoryMap();
         UNICODE_TYPE unicodeType = getUnicodeType(&baHeader);
@@ -6979,6 +6992,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_NE;
     } else if (pStFileTypes->contains(FT_AMIGAHUNK)) {
         result = FT_AMIGAHUNK;
+    } else if (pStFileTypes->contains(FT_ATARIST)) {
+        result = FT_ATARIST;
     } else if (pStFileTypes->contains(FT_BWDOS16M)) {
         result = FT_BWDOS16M;
     } else if (pStFileTypes->contains(FT_DOS16M)) {
@@ -7238,6 +7253,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_MACHO64)) listResult.append(FT_MACHO64);
         if (stFileTypes.contains(FT_BWDOS16M)) listResult.append(FT_BWDOS16M);
         if (stFileTypes.contains(FT_AMIGAHUNK)) listResult.append(FT_AMIGAHUNK);
+        if (stFileTypes.contains(FT_ATARIST)) listResult.append(FT_ATARIST);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_ALL)) {
@@ -10916,6 +10932,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_ANDROID: sResult = QString("Android"); break;
         case OSNAME_AROS: sResult = QString("Amiga Research OS"); break;
         case OSNAME_ASPLINUX: sResult = QString("ASPLinux"); break;
+        case OSNAME_ATARIST: sResult = QString("Atari ST"); break;
         case OSNAME_BORLANDOSSERVICES: sResult = QString("Borland OS Services"); break;
         case OSNAME_BRIDGEOS: sResult = QString("bridgeOS"); break;
         case OSNAME_DEBIANLINUX: sResult = QString("Debian Linux"); break;
@@ -11210,7 +11227,8 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_ELF) || pStFileTypes->contains(XBinary::FT_ELF32) || pStFileTypes->contains(XBinary::FT_ELF64) ||
         pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) || pStFileTypes->contains(XBinary::FT_MACHO64) ||
         pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP) ||
-        pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA) || pStFileTypes->contains(XBinary::FT_AMIGAHUNK)) {
+        pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA) || pStFileTypes->contains(XBinary::FT_AMIGAHUNK) ||
+        pStFileTypes->contains(XBinary::FT_ATARIST)) {
         pStFileTypes->remove(XBinary::FT_BINARY);
     }
 }

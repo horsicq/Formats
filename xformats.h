@@ -22,6 +22,7 @@
 #define XFORMATS_H
 
 #include "xamigahunk.h"
+#include "xatarist.h"
 #include "xbinary.h"
 #include "xcom.h"
 #include "xelf.h"

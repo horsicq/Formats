@@ -194,6 +194,9 @@ public:
         COMPRESS_METHOD_REDUCE_4,
         COMPRESS_METHOD_AES,
         COMPRESS_METHOD_ZLIB,
+        COMPRESS_METHOD_STORE_CAB,
+        COMPRESS_METHOD_MSZIP_CAB,
+        COMPRESS_METHOD_LZX_CAB
         // TODO check more methods
     };
 
@@ -377,6 +380,7 @@ public:
         FT_MACHO32,
         FT_MACHO64,
         FT_AMIGAHUNK,
+        FT_ATARIST,
         // Extra
         FT_7Z,
         FT_ANDROIDASRC,
@@ -570,6 +574,7 @@ public:
         OSNAME_ANDROID,
         OSNAME_AROS,
         OSNAME_ASPLINUX,
+        OSNAME_ATARIST,
         OSNAME_BORLANDOSSERVICES,
         OSNAME_BRIDGEOS,
         OSNAME_DEBIANLINUX,

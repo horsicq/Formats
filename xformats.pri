@@ -60,6 +60,11 @@ SOURCES += \
     include($$PWD/exec/xamigahunk.pri)
 }
 
+!contains(XCONFIG, xatarist) {
+    XCONFIG += xatarist
+    include($$PWD/exec/xatarist.pri)
+}
+
 contains(XCONFIG, use_dex) {
     DEFINES += USE_DEX
     !contains(XCONFIG, xdex) {
