@@ -28,6 +28,10 @@ class XAtariST : public XBinary {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_HEADER
+    };
     enum TYPE {
         TYPE_UNKNOWN = 0,
         TYPE_EXECUTABLE
@@ -45,6 +49,8 @@ public:
     XATARIST_DEF::HEADER getHeader();
 
     virtual _MEMORY_MAP getMemoryMap(XBinary::MAPMODE mapMode = XBinary::MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<MAPMODE> getMapModesList() override;
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QString getArch();
     virtual MODE getMode();
     virtual ENDIAN getEndian();
@@ -52,6 +58,7 @@ public:
     virtual FT getFileType();
     virtual qint32 getType();
     virtual OSNAME getOsName();
+    virtual QString structIDToString(quint32 nID) override;
     virtual QString typeIdToString(qint32 nType);
     virtual QString getFileFormatExtsString();
 };

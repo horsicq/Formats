@@ -20,6 +20,11 @@
  */
 #include "xatarist.h"
 
+XBinary::XCONVERT _TABLE_XAtariST_STRUCTID[] = {
+    {XAtariST::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XAtariST::STRUCTID_HEADER, "HEADER", QString("HEADER")},
+};
+
 XAtariST::XAtariST(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
 }
@@ -78,6 +83,91 @@ XATARIST_DEF::HEADER XAtariST::getHeader()
     result.nRelocation = read_uint16(26, true);
 
     return result;
+}
+
+QList<XBinary::MAPMODE> XAtariST::getMapModesList()
+{
+    QList<XBinary::MAPMODE> listResult;
+
+    listResult.append(MAPMODE_REGIONS);
+
+    return listResult;
+}
+
+QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+    Q_UNUSED(pPdStruct)
+
+    QList<FPART> listResult;
+
+    XATARIST_DEF::HEADER header = getHeader();
+
+    qint64 nTotalSize = getSize();
+    qint64 nHeaderSize = sizeof(XATARIST_DEF::HEADER);
+    qint64 nCurrentOffset = nHeaderSize;
+
+    if (nFileParts & FILEPART_HEADER) {
+        FPART partHeader = {};
+        partHeader.filePart = FILEPART_HEADER;
+        partHeader.nFileOffset = 0;
+        partHeader.nFileSize = nHeaderSize;
+        partHeader.nVirtualAddress = -1;
+        partHeader.sName = tr("Header");
+        listResult.append(partHeader);
+    }
+
+    if (nFileParts & FILEPART_SEGMENT) {
+        // Text segment
+        if ((header.nTextSize > 0) && (nCurrentOffset < nTotalSize)) {
+            FPART partText = {};
+            partText.filePart = FILEPART_SEGMENT;
+            partText.nFileOffset = nCurrentOffset;
+            partText.nFileSize = qMin((qint64)header.nTextSize, nTotalSize - nCurrentOffset);
+            partText.nVirtualAddress = -1;
+            partText.sName = tr("Text");
+            listResult.append(partText);
+            nCurrentOffset += partText.nFileSize;
+        }
+
+        // Data segment
+        if ((header.nDataSize > 0) && (nCurrentOffset < nTotalSize)) {
+            FPART partData = {};
+            partData.filePart = FILEPART_SEGMENT;
+            partData.nFileOffset = nCurrentOffset;
+            partData.nFileSize = qMin((qint64)header.nDataSize, nTotalSize - nCurrentOffset);
+            partData.nVirtualAddress = -1;
+            partData.sName = tr("Data");
+            listResult.append(partData);
+            nCurrentOffset += partData.nFileSize;
+        }
+    }
+
+    if (nFileParts & FILEPART_OVERLAY) {
+        qint64 nCoveredEnd = 0;
+        qint32 nNumberOfParts = listResult.count();
+
+        for (qint32 i = 0; i < nNumberOfParts; i++) {
+            const FPART &part = listResult.at(i);
+            qint64 nPartEnd = part.nFileOffset + part.nFileSize;
+
+            if (nPartEnd > nCoveredEnd) {
+                nCoveredEnd = nPartEnd;
+            }
+        }
+
+        if (nCoveredEnd < nTotalSize) {
+            FPART partOverlay = {};
+            partOverlay.filePart = FILEPART_OVERLAY;
+            partOverlay.nFileOffset = nCoveredEnd;
+            partOverlay.nFileSize = nTotalSize - nCoveredEnd;
+            partOverlay.nVirtualAddress = -1;
+            partOverlay.sName = tr("Overlay");
+            listResult.append(partOverlay);
+        }
+    }
+
+    return listResult;
 }
 
 XBinary::_MEMORY_MAP XAtariST::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
@@ -193,6 +283,11 @@ qint32 XAtariST::getType()
 XBinary::OSNAME XAtariST::getOsName()
 {
     return OSNAME_ATARIST;
+}
+
+QString XAtariST::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XAtariST_STRUCTID, sizeof(_TABLE_XAtariST_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
 QString XAtariST::typeIdToString(qint32 nType)
