@@ -124,7 +124,7 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
             partText.filePart = FILEPART_SEGMENT;
             partText.nFileOffset = nCurrentOffset;
             partText.nFileSize = qMin((qint64)header.nTextSize, nTotalSize - nCurrentOffset);
-            partText.nVirtualAddress = -1;
+            partText.nVirtualAddress = getModuleAddress();
             partText.sName = tr("Text");
             listResult.append(partText);
             nCurrentOffset += partText.nFileSize;
@@ -136,10 +136,21 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
             partData.filePart = FILEPART_SEGMENT;
             partData.nFileOffset = nCurrentOffset;
             partData.nFileSize = qMin((qint64)header.nDataSize, nTotalSize - nCurrentOffset);
-            partData.nVirtualAddress = -1;
+            partData.nVirtualAddress = getModuleAddress() + header.nTextSize;
             partData.sName = tr("Data");
             listResult.append(partData);
             nCurrentOffset += partData.nFileSize;
+        }
+
+        // BSS segment
+        if (header.nBssSize > 0) {
+            FPART partBss = {};
+            partBss.filePart = FILEPART_SEGMENT;
+            partBss.nFileOffset = -1;
+            partBss.nFileSize = header.nBssSize;
+            partBss.nVirtualAddress = getModuleAddress() + header.nTextSize + header.nDataSize;
+            partBss.sName = tr("BSS");
+            listResult.append(partBss);
         }
     }
 
@@ -170,87 +181,43 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
     return listResult;
 }
 
-XBinary::_MEMORY_MAP XAtariST::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
+bool XAtariST::_initMemoryMap(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(mapMode)
-
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
-    _MEMORY_MAP result = {};
+    Q_UNUSED(pPdStruct)
 
     XATARIST_DEF::HEADER header = getHeader();
 
     qint64 nTotalSize = getSize();
-    qint64 nHeaderSize = sizeof(XATARIST_DEF::HEADER);
 
-    result.nModuleAddress = getModuleAddress();
-    result.nEntryPointAddress = result.nModuleAddress;
-    result.nBinarySize = nTotalSize;
-    result.fileType = getFileType();
-    result.mode = getMode();
-    result.sArch = getArch();
-    result.endian = getEndian();
-    result.sType = getTypeAsString();
+    pMemoryMap->nModuleAddress = getModuleAddress();
+    pMemoryMap->nEntryPointAddress = pMemoryMap->nModuleAddress;
+    pMemoryMap->nBinarySize = nTotalSize;
+    pMemoryMap->nImageSize = header.nTextSize + header.nDataSize + header.nBssSize;
+    pMemoryMap->fileType = getFileType();
+    pMemoryMap->mode = getMode();
+    pMemoryMap->sArch = getArch();
+    pMemoryMap->endian = getEndian();
+    pMemoryMap->sType = getTypeAsString();
 
-    qint64 nCurrentOffset = nHeaderSize;
+    return true;
+}
 
-    // Text segment
-    if (header.nTextSize > 0) {
-        _MEMORY_RECORD recordText = {};
-        recordText.nAddress = result.nModuleAddress;
-        recordText.nOffset = nCurrentOffset;
-        recordText.nSize = qMin((qint64)header.nTextSize, nTotalSize - nCurrentOffset);
-        recordText.nIndex = 0;
-        // recordText.type = MMT_LOADSEGMENT;
-        recordText.sName = QString("Text");
-
-        result.listRecords.append(recordText);
-        nCurrentOffset += recordText.nSize;
+XBinary::_MEMORY_MAP XAtariST::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
+{
+    if (mapMode == MAPMODE_UNKNOWN) {
+        mapMode = MAPMODE_REGIONS;
     }
 
-    // Data segment
-    if ((header.nDataSize > 0) && (nCurrentOffset < nTotalSize)) {
-        _MEMORY_RECORD recordData = {};
-        recordData.nAddress = result.nModuleAddress + header.nTextSize;
-        recordData.nOffset = nCurrentOffset;
-        recordData.nSize = qMin((qint64)header.nDataSize, nTotalSize - nCurrentOffset);
-        recordData.nIndex = 1;
-        // recordData.type = MMT_LOADSEGMENT;
-        recordData.sName = QString("Data");
-
-        result.listRecords.append(recordData);
-        nCurrentOffset += recordData.nSize;
+    if (mapMode == MAPMODE_REGIONS) {
+        return _getMemoryMap(FILEPART_SEGMENT | FILEPART_OVERLAY, pPdStruct);
+    } else {
+        return _getMemoryMap(FILEPART_SEGMENT | FILEPART_OVERLAY, pPdStruct);
     }
-
-    // BSS segment (virtual)
-    if (header.nBssSize > 0) {
-        _MEMORY_RECORD recordBss = {};
-        recordBss.nAddress = result.nModuleAddress + header.nTextSize + header.nDataSize;
-        recordBss.nOffset = -1;
-        recordBss.nSize = header.nBssSize;
-        recordBss.nIndex = 2;
-        recordBss.bIsVirtual = true;
-        // recordBss.type = MMT_LOADSEGMENT;
-        recordBss.sName = QString("BSS");
-
-        result.listRecords.append(recordBss);
-    }
-
-    result.nImageSize = header.nTextSize + header.nDataSize + header.nBssSize;
-
-    _handleOverlay(&result);
-
-    return result;
 }
 
 QString XAtariST::getArch()
 {
-    return QString("68000");
+    return QString("68K");
 }
 
 XBinary::MODE XAtariST::getMode()
