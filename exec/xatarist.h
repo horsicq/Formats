@@ -40,11 +40,11 @@ public:
     explicit XAtariST(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XAtariST();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
-    virtual bool isExecutable();
+    virtual bool isExecutable() override;
 
     XATARIST_DEF::HEADER getHeader();
 
@@ -52,16 +52,16 @@ public:
     virtual _MEMORY_MAP getMemoryMap(XBinary::MAPMODE mapMode = XBinary::MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QList<MAPMODE> getMapModesList() override;
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
-    virtual QString getArch();
-    virtual MODE getMode();
-    virtual ENDIAN getEndian();
-    virtual qint64 getImageSize();
-    virtual FT getFileType();
-    virtual qint32 getType();
-    virtual OSNAME getOsName();
+    virtual QString getArch() override;
+    virtual MODE getMode() override;
+    virtual ENDIAN getEndian() override;
+    virtual qint64 getImageSize() override;
+    virtual FT getFileType() override;
+    virtual qint32 getType() override;
+    virtual OSNAME getOsName() override;
     virtual QString structIDToString(quint32 nID) override;
-    virtual QString typeIdToString(qint32 nType);
-    virtual QString getFileFormatExtsString();
+    virtual QString typeIdToString(qint32 nType) override;
+    virtual QString getFileFormatExtsString() override;
 };
 
 #endif  // XATARIST_H
