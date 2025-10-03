@@ -50,6 +50,9 @@ XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
     {XPE::STRUCTID_NET_VTABLEFIXUPS, "NET_VTABLEFIXUPS", QString(".NET VTableFixups")},
     {XPE::STRUCTID_NET_EXPORTADDRESSTABLEJUMPS, "NET_EXPORTADDRESSTABLEJUMPS", QString(".NET ExportAddressTableJumps")},
     {XPE::STRUCTID_NET_MANAGEDNATIVEHEADER, "NET_MANAGEDNATIVEHEADER", QString(".NET ManagedNativeHeader")},
+    {XPE::STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY, "IMAGE_RESOURCE_DIRECTORY_ENTRY", QString("IMAGE_RESOURCE_DIRECTORY_ENTRY")},
+    {XPE::STRUCTID_IMAGE_RESOURCE_DATA_ENTRY, "IMAGE_RESOURCE_DATA_ENTRY", QString("IMAGE_RESOURCE_DATA_ENTRY")},
+    {XPE::STRUCTID_IMAGE_BASE_RELOCATION, "IMAGE_BASE_RELOCATION", QString("IMAGE_BASE_RELOCATION")},
 };
 
 XPE::XPE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevice, bIsImage, nModuleAddress)
@@ -9070,7 +9073,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
         if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADER) {
+            if (dataHeadersOptions.nID == XPE::STRUCTID_IMAGE_DOS_HEADER) {
                 {
                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
                     _dataHeadersOptions.bChildren = false;
@@ -9746,6 +9749,34 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, UnloadInformationTableRVA), 4, "UnloadInformationTableRVA",
                                                             VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                listResult.append(dataHeader);
+            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY, Name), 4, "Name", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY, OffsetToData), 4, "OffsetToData", VT_DWORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                listResult.append(dataHeader);
+            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RESOURCE_DATA_ENTRY) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY);
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, OffsetToData), 4, "OffsetToData", VT_DWORD, DRF_OFFSET,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, CodePage), 4, "CodePage", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, Reserved), 4, "Reserved", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                listResult.append(dataHeader);
+            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_BASE_RELOCATION) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
+                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, SizeOfBlock), 4, "SizeOfBlock", VT_DWORD, DRF_SIZE,
                                                             dataHeadersOptions.pMemoryMap->endian));
                 listResult.append(dataHeader);
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) {
