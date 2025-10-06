@@ -3018,7 +3018,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
     }
 
     // Precompute ANSI classification table if needed
-    bool needAnsiTable = (st == ST_ANSI) || (st == ST_NOTANSI) || (st == ST_NOTANSIANDNULL);
+    bool needAnsiTable = (st == ST_ANSI) || (st == ST_NOTANSI) || (st == ST_NOTANSIANDNULL) || (st == ST_ANSINUMBER);
     bool ansiTable[256];
     if (needAnsiTable) {
         for (int i = 0; i < 256; ++i) {
@@ -3149,6 +3149,33 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 while (j < hayLen) {
                     unsigned char c = hay[j];
                     if ((ansiTable[c]) || (c == 0)) break;
+                    j++;
+                }
+                qint64 runLen = j - start;
+                if (runLen >= m) {
+                    nResult = nOffset + start;
+                    break;
+                }
+            }
+        } else if (st == ST_ANSINUMBER) {
+            const unsigned char *hay = (const unsigned char *)pBuffer;
+            qint64 hayLen = nTemp;
+            qint64 m = nArraySize;
+            qint64 limit = hayLen - (m - 1);
+            qint64 j = 0;
+            while (j < limit) {
+                // Skip bytes that are not digits to the start of a desired run
+                while (j < hayLen) {
+                    unsigned char c = hay[j];
+                    if ((ansiTable[c]) || ((c >= 0x30) && (c <= 0x39))) break;
+                    j++;
+                }
+                if (j >= limit) break;
+                qint64 start = j;
+                // Extend run of digit bytes
+                while (j < hayLen) {
+                    unsigned char c = hay[j];
+                    if ((!ansiTable[c]) && ((c < 0x30) || (c > 0x39))) break;
                     j++;
                 }
                 qint64 runLen = j - start;
@@ -3400,7 +3427,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
     qint64 nResult = -1;
 
     if (_sSignature.contains(QChar('.')) || _sSignature.contains(QChar('$')) || _sSignature.contains(QChar('#')) || _sSignature.contains(QChar('+')) ||
-        _sSignature.contains(QChar('*')) || _sSignature.contains(QChar('%')) || _sSignature.contains(QChar('!')) || _sSignature.contains(QChar('_'))) {
+        _sSignature.contains(QChar('*')) || _sSignature.contains(QChar('%')) || _sSignature.contains(QChar('!')) || _sSignature.contains(QChar('_')) || _sSignature.contains(QChar('&'))) {
         bool bIsValid = true;
 
         QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bIsValid, pPdStruct);
@@ -3419,12 +3446,12 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                 for (qint32 i = 0; i < nNumberOfRecords; i++) {
                     if ((listSignatureRecords.at(i).st == ST_ADDRESS) || (listSignatureRecords.at(i).st == ST_RELOFFSET)) {
                         break;
-                    } else if ((listSignatureRecords.at(i).nSize > nMaxSize) && (listSignatureRecords.at(i).st == ST_COMPAREBYTES)) {
-                        nMaxSize = listSignatureRecords.at(i).nSize;
+                    } else if ((listSignatureRecords.at(i).nWindowSize > nMaxSize) && (listSignatureRecords.at(i).st == ST_COMPAREBYTES)) {
+                        nMaxSize = listSignatureRecords.at(i).nWindowSize;
                         nDelta = nCurrentDelta;
                         nSearchFirstIndex = i;
                     }
-                    nCurrentDelta += listSignatureRecords.at(i).nSize;
+                    nCurrentDelta += listSignatureRecords.at(i).nWindowSize;
                 }
             }
 
@@ -3458,7 +3485,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                 }
             } else if ((listSignatureRecords.at(0).st == ST_COMPAREBYTES) || (listSignatureRecords.at(0).st == ST_FINDBYTES) ||
                        (listSignatureRecords.at(0).st == ST_NOTNULL) || (listSignatureRecords.at(0).st == ST_ANSI) || (listSignatureRecords.at(0).st == ST_NOTANSI) ||
-                       (listSignatureRecords.at(0).st == ST_NOTANSIANDNULL)) {
+                       (listSignatureRecords.at(0).st == ST_NOTANSIANDNULL) || (listSignatureRecords.at(0).st == ST_ANSINUMBER)) {
                 ST _st = listSignatureRecords.at(0).st;
 
                 if (listSignatureRecords.at(0).st == ST_FINDBYTES) {
@@ -3472,7 +3499,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                 char *pData = baFirst.data();
                 // For ST_COMPAREBYTES (including remapped ST_FINDBYTES), use the actual baFirst size.
                 // For other ST_* modes, use the recorded window size.
-                qint32 nDataSize = (_st == ST_COMPAREBYTES) ? baFirst.size() : listSignatureRecords.at(0).nSize;
+                qint32 nDataSize = (_st == ST_COMPAREBYTES) ? baFirst.size() : listSignatureRecords.at(0).nWindowSize;
 
                 for (qint64 i = 0; (i < nSize) && (!(pPdStruct->bIsStop));) {
                     qint64 nTempOffset = _find_array(_st, nOffset + i, nSize - i, pData, nDataSize, pPdStruct);
@@ -3549,6 +3576,9 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
         QByteArray baUpper = sString.toUpper().toLatin1();
         QByteArray baLower = sString.toLower().toLatin1();
 
+        const quint8 *pUpperData = (const quint8 *)baUpper.constData();
+        const quint8 *pLowerData = (const quint8 *)baLower.constData();
+
         qint64 nStartOffset = nOffset;
 
         while ((nSize > nStringSize - 1) && isPdStructNotCanceled(pPdStruct)) {
@@ -3560,10 +3590,30 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
                 break;
             }
 
-            for (quint32 i = 0; i < nTemp - (nStringSize - 1); i++) {
-                if (compareMemoryByteI((quint8 *)(pBuffer + i), (quint8 *)baUpper.data(), (quint8 *)baLower.data(), nStringSize)) {
-                    nResult = nOffset + i;
+            quint8 *pData = (quint8 *)pBuffer;
+            qint64 nSearchEnd = nTemp - (nStringSize - 1);
 
+            for (qint64 i = 0; i < nSearchEnd; i++) {
+                // Inline comparison for better performance
+                bool bMatch = true;
+                quint8 *pCurrent = pData + i;
+                const quint8 *pUpper = pUpperData;
+                const quint8 *pLower = pLowerData;
+                qint64 nRemaining = nStringSize;
+
+                while (nRemaining > 0) {
+                    if ((*pCurrent != *pUpper) && (*pCurrent != *pLower)) {
+                        bMatch = false;
+                        break;
+                    }
+                    pCurrent++;
+                    pUpper++;
+                    pLower++;
+                    nRemaining--;
+                }
+
+                if (bMatch) {
+                    nResult = nOffset + i;
                     break;
                 }
             }
@@ -3589,14 +3639,12 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
 qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, const QString &sString, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = -1;
-    // TODO optimize
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
     // TODO CheckSize function
-    // TODO Optimize
     qint64 nStringSize = sString.size();
     qint64 _nSize = getSize();
 
@@ -3627,7 +3675,11 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, const QString 
     QByteArray baUpper = getUnicodeString(sString.toUpper(), bIsBigEndian);
     QByteArray baLower = getUnicodeString(sString.toLower(), bIsBigEndian);
 
+    const quint16 *pUpperData = (const quint16 *)baUpper.constData();
+    const quint16 *pLowerData = (const quint16 *)baLower.constData();
+
     qint64 nStartOffset = nOffset;
+    qint64 nByteStringSize = 2 * nStringSize;
 
     while ((nSize > 2 * (nStringSize - 1)) && (!(pPdStruct->bIsStop))) {
         nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + 2 * (nStringSize - 1)), nSize);
@@ -3637,12 +3689,36 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, const QString 
             break;
         }
 
-        for (quint32 i = 0; i < nTemp - 2 * (nStringSize - 1); i++) {
-            if (compareMemoryWordI((quint16 *)(pBuffer + i), (quint16 *)baUpper.data(), (quint16 *)baLower.data(), nStringSize)) {
-                nResult = nOffset + i;
+        quint16 *pData = (quint16 *)pBuffer;
+        qint64 nSearchEnd = nTemp - 2 * (nStringSize - 1);
 
+        for (qint64 i = 0; i < nSearchEnd; i++) {
+            // Inline comparison for better performance
+            bool bMatch = true;
+            quint16 *pCurrent = (quint16 *)(pBuffer + i);
+            const quint16 *pUpper = pUpperData;
+            const quint16 *pLower = pLowerData;
+            qint64 nRemaining = nStringSize;
+
+            while (nRemaining > 0) {
+                if ((*pCurrent != *pUpper) && (*pCurrent != *pLower)) {
+                    bMatch = false;
+                    break;
+                }
+                pCurrent++;
+                pUpper++;
+                pLower++;
+                nRemaining--;
+            }
+
+            if (bMatch) {
+                nResult = nOffset + i;
                 break;
             }
+        }
+
+        if (nResult != -1) {
+            break;
         }
 
         nSize -= nTemp - 2 * (nStringSize - 1);
@@ -5107,6 +5183,26 @@ bool XBinary::_isMemoryNotAnsiAndNull(char *pSource, qint64 nSize)
     // TODO optimize
     while (nSize) {
         if (((*pSource) == 0) || isAnsiSymbol(*pSource)) {
+            bResult = false;
+
+            break;
+        }
+
+        pSource++;
+        nSize--;
+    }
+
+    return bResult;
+}
+
+bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
+{
+    bool bResult = true;
+    // TODO optimize
+    while (nSize) {
+        quint8 cTemp = (quint8)(*pSource);
+
+        if ((cTemp < 0x30) || (cTemp > 0x39)) {
             bResult = false;
 
             break;
@@ -9042,39 +9138,69 @@ qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pP
 
 QString XBinary::convertSignature(const QString &sSignature)
 {
-    QString _sSignature = sSignature;
+    QString _sSignature;
     // 'AnsiString'
     // TODO more defs
-    if (_sSignature.contains(QChar(39))) {
-        QString sTemp;
-        qint32 nStringSize = _sSignature.size();
+    
+    qint32 nSignatureSize = sSignature.size();
+    bool bHasQuote = false;
+    
+    // First pass: detect what conversions are needed and pre-allocate
+    for (qint32 i = 0; i < nSignatureSize; i++) {
+        QChar c = sSignature.at(i);
+        if (c == QChar(39)) {
+            bHasQuote = true;
+            break;
+        }
+    }
+    
+    // Reserve appropriate capacity
+    if (bHasQuote) {
+        _sSignature.reserve(nSignatureSize * 2);  // Worst case: all chars become hex
+    } else {
+        _sSignature.reserve(nSignatureSize);
+    }
+    
+    if (bHasQuote) {
         bool bAnsiString = false;
-
-        for (qint32 i = 0; i < nStringSize; i++) {
-            QChar c = _sSignature.at(i);
-
+        
+        for (qint32 i = 0; i < nSignatureSize; i++) {
+            QChar c = sSignature.at(i);
+            
             if (c == QChar(39)) {
                 bAnsiString = !bAnsiString;
             } else if (bAnsiString) {
-                sTemp.append(qcharToHex(c));
+                // Inline hex conversion for better performance
+                quint8 nValue = (quint8)(c.toLatin1());
+                quint8 nHigh = (nValue >> 4) & 0x0F;
+                quint8 nLow = nValue & 0x0F;
+                _sSignature.append(QChar(nHigh + (nHigh < 10 ? '0' : 'a' - 10)));
+                _sSignature.append(QChar(nLow + (nLow < 10 ? '0' : 'a' - 10)));
             } else {
-                sTemp.append(c);
+                if (c != QChar(' ')) {  // Skip spaces while we're at it
+                    if (c == QChar('?')) {
+                        _sSignature.append(QChar('.'));
+                    } else {
+                        _sSignature.append(c.toLower());
+                    }
+                }
             }
         }
-
-        _sSignature = sTemp;
+    } else {
+        // Simpler path when no quotes present
+        for (qint32 i = 0; i < nSignatureSize; i++) {
+            QChar c = sSignature.at(i);
+            
+            if (c != QChar(' ')) {  // Skip spaces
+                if (c == QChar('?')) {
+                    _sSignature.append(QChar('.'));
+                } else {
+                    _sSignature.append(c.toLower());
+                }
+            }
+        }
     }
-
-    if (_sSignature.contains(QChar(' '))) {
-        _sSignature = _sSignature.remove(QChar(' '));
-    }
-
-    if (_sSignature.contains(QChar('?'))) {
-        _sSignature = _sSignature.replace(QChar('?'), QChar('.'));
-    }
-
-    _sSignature = _sSignature.toLower();
-
+    
     return _sSignature;
 }
 
@@ -12930,6 +13056,8 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSi
             i += _getSignatureNotNull(&listResult, sSignature, i);
         } else if ((cSymbol == QChar('%')) && (cSymbol2 == QChar('%'))) {
             i += _getSignatureANSI(&listResult, sSignature, i);
+        } else if ((cSymbol == QChar('%')) && (cSymbol2 == QChar('&'))) {
+            i += _getSignatureANSIAndNumber(&listResult, sSignature, i);
         } else if ((cSymbol == QChar('!')) && (cSymbol2 == QChar('%'))) {
             i += _getSignatureNotANSI(&listResult, sSignature, i);
         } else if ((cSymbol == QChar('_')) && (cSymbol2 == QChar('%'))) {
@@ -12981,8 +13109,9 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
             case ST_NOTNULL:
             case ST_ANSI:
             case ST_NOTANSI:
-            case ST_NOTANSIANDNULL: {
-                const int need = rec.nSize;
+            case ST_NOTANSIANDNULL:
+            case ST_ANSINUMBER: {
+                const int need = rec.nWindowSize;
                 if (need <= 0 || (nOffset < 0) || (nOffset + need > fileSize)) return false;
 
                 if (m_pConstMemory) {
@@ -12992,6 +13121,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                     else if (rec.st == ST_ANSI) ok = _isMemoryAnsi(ptr, need);
                     else if (rec.st == ST_NOTANSI) ok = _isMemoryNotAnsi(ptr, need);
                     else if (rec.st == ST_NOTANSIANDNULL) ok = _isMemoryNotAnsiAndNull(ptr, need);
+                    else if (rec.st == ST_ANSINUMBER) ok = _isMemoryAnsiNumber(ptr, need);
                     if (!ok) return false;
                 } else {
                     QByteArray ba = read_array(nOffset, need);
@@ -13001,6 +13131,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                     else if (rec.st == ST_ANSI) ok = _isMemoryAnsi(ba.data(), ba.size());
                     else if (rec.st == ST_NOTANSI) ok = _isMemoryNotAnsi(ba.data(), ba.size());
                     else if (rec.st == ST_NOTANSIANDNULL) ok = _isMemoryNotAnsiAndNull(ba.data(), ba.size());
+                    else if (rec.st == ST_ANSINUMBER) ok = _isMemoryAnsiNumber(ba.data(), ba.size());
                     if (!ok) return false;
                 }
                 nOffset += need;
@@ -13014,7 +13145,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
             } break;
 
             case ST_SKIP: {
-                const qint64 add = rec.nSize;
+                const qint64 add = rec.nWindowSize;
                 if (add < 0 || (nOffset + add > fileSize)) return false;
                 nOffset += add;
             } break;
@@ -13102,7 +13233,7 @@ qint32 XBinary::_getSignatureSkip(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
 
         record.st = XBinary::ST_SKIP;
         record.nSizeOfAddr = 0;
-        record.nSize = nResult / 2;
+        record.nWindowSize = nResult / 2;
 
         pListSignatureRecords->append(record);
     }
@@ -13128,7 +13259,7 @@ qint32 XBinary::_getSignatureNotNull(QList<SIGNATURE_RECORD> *pListSignatureReco
 
         record.st = XBinary::ST_NOTNULL;
         record.nSizeOfAddr = 0;
-        record.nSize = nResult / 2;
+        record.nWindowSize = nResult / 2;
 
         pListSignatureRecords->append(record);
     }
@@ -13154,7 +13285,7 @@ qint32 XBinary::_getSignatureANSI(QList<SIGNATURE_RECORD> *pListSignatureRecords
 
         record.st = XBinary::ST_ANSI;
         record.nSizeOfAddr = 0;
-        record.nSize = nResult / 2;
+        record.nWindowSize = nResult / 2;
 
         pListSignatureRecords->append(record);
     }
@@ -13180,7 +13311,7 @@ qint32 XBinary::_getSignatureNotANSI(QList<SIGNATURE_RECORD> *pListSignatureReco
 
         record.st = XBinary::ST_NOTANSI;
         record.nSizeOfAddr = 0;
-        record.nSize = nResult / 2;
+        record.nWindowSize = nResult / 2;
 
         pListSignatureRecords->append(record);
     }
@@ -13206,7 +13337,33 @@ qint32 XBinary::_getSignatureNotANSIAndNull(QList<SIGNATURE_RECORD> *pListSignat
 
         record.st = XBinary::ST_NOTANSIANDNULL;
         record.nSizeOfAddr = 0;
-        record.nSize = nResult / 2;
+        record.nWindowSize = nResult / 2;
+
+        pListSignatureRecords->append(record);
+    }
+
+    return nResult;
+}
+
+qint32 XBinary::_getSignatureANSIAndNumber(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
+{
+    qint32 nResult = 0;
+    qint32 nSignatureSize = sSignature.size();
+
+    for (qint32 i = nStartIndex; i < nSignatureSize; i += 2) {
+        if (sSignature.mid(i, 2) == "%&") {
+            nResult += 2;
+        } else {
+            break;
+        }
+    }
+
+    if (nResult) {
+        SIGNATURE_RECORD record = {};
+
+        record.st = XBinary::ST_ANSINUMBER;
+        record.nSizeOfAddr = 0;
+        record.nWindowSize = nResult / 2;
 
         pListSignatureRecords->append(record);
     }
@@ -13239,7 +13396,7 @@ qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignat
 
             record.st = XBinary::ST_FINDBYTES;
             record.nSizeOfAddr = 0;
-            record.nSize = 0;
+            record.nWindowSize = 0;
             record.baData = _listSignatureRecords.at(0).baData;
             record.nFindDelta = 32 * nResult;
 
@@ -13271,7 +13428,7 @@ qint32 XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSi
 
         record.st = XBinary::ST_RELOFFSET;
         record.nSizeOfAddr = nResult / 2;
-        record.nSize = 0;
+        record.nWindowSize = 0;
 
         pListSignatureRecords->append(record);
     }
@@ -13346,7 +13503,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
         record.st = XBinary::ST_COMPAREBYTES;
         record.nSizeOfAddr = 0;
         record.baData = QByteArray::fromHex(sBytes.toUtf8());  // TODO Check
-        record.nSize = record.baData.size();
+        record.nWindowSize = record.baData.size();
 
         pListSignatureRecords->append(record);
     }

@@ -964,6 +964,7 @@ public:
         ST_ANSI,
         ST_NOTANSI,
         ST_NOTANSIANDNULL,
+        ST_ANSINUMBER,
         ST_FINDBYTES,
         ST_SKIP,
         ST_RELOFFSET,
@@ -976,7 +977,7 @@ public:
         QByteArray baData;
         quint32 nSizeOfAddr;
         qint64 nFindDelta;
-        qint32 nSize;
+        qint32 nWindowSize;
     };
 
     explicit XBinary(QIODevice *pDevice = nullptr, bool bIsImage = false,
@@ -1326,6 +1327,7 @@ public:
     static bool _isMemoryAnsi(char *pSource, qint64 nSize);
     static bool _isMemoryNotAnsi(char *pSource, qint64 nSize);
     static bool _isMemoryNotAnsiAndNull(char *pSource, qint64 nSize);
+    static bool _isMemoryAnsiNumber(char *pSource, qint64 nSize);
     static bool copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 0x1000);
     bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 1, bool bReverse = false);
     bool zeroFill(qint64 nOffset, qint64 nSize);
@@ -2031,6 +2033,7 @@ private:
     static qint32 _getSignatureANSI(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
     static qint32 _getSignatureNotANSI(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
     static qint32 _getSignatureNotANSIAndNull(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
+    static qint32 _getSignatureANSIAndNumber(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
     static qint32 _getSignatureDelta(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid, PDSTRUCT *pPdStruct);
     static qint32 _getSignatureRelOffset(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
     static qint32 _getSignatureAddress(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex);
