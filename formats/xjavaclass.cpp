@@ -20,6 +20,20 @@
  */
 #include "xjavaclass.h"
 
+XBinary::XCONVERT _TABLE_XJAVACLASS_STRUCTID[] = {
+    {XJavaClass::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XJavaClass::STRUCTID_MAGIC, "MAGIC", QString("Magic")},
+    {XJavaClass::STRUCTID_VERSION, "VERSION", QString("Version")},
+    {XJavaClass::STRUCTID_CONSTANT_POOL, "CONSTANT_POOL", QString("Constant pool")},
+    {XJavaClass::STRUCTID_ACCESS_FLAGS, "ACCESS_FLAGS", QString("Access flags")},
+    {XJavaClass::STRUCTID_THIS_CLASS, "THIS_CLASS", QString("This class")},
+    {XJavaClass::STRUCTID_SUPER_CLASS, "SUPER_CLASS", QString("Super class")},
+    {XJavaClass::STRUCTID_INTERFACES, "INTERFACES", QString("Interfaces")},
+    {XJavaClass::STRUCTID_FIELDS, "FIELDS", QString("Fields")},
+    {XJavaClass::STRUCTID_METHODS, "METHODS", QString("Methods")},
+    {XJavaClass::STRUCTID_ATTRIBUTES, "ATTRIBUTES", QString("Attributes")},
+};
+
 XJavaClass::XJavaClass(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -79,6 +93,31 @@ QString XJavaClass::getFileFormatExt()
 QString XJavaClass::getFileFormatExtsString()
 {
     return "Java Class (*.class)";
+}
+
+qint64 XJavaClass::getFileFormatSize(PDSTRUCT *pPdStruct)
+{
+    qint64 nResult = 0;
+
+    INFO info = _getInfo(pPdStruct);
+    nResult = info.nSize;
+
+    return nResult;
+}
+
+QString XJavaClass::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XJAVACLASS_STRUCTID, sizeof(_TABLE_XJAVACLASS_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::MAPMODE> XJavaClass::getMapModesList()
+{
+    QList<MAPMODE> listResult;
+
+    listResult.append(MAPMODE_REGIONS);
+    listResult.append(MAPMODE_DATA);
+
+    return listResult;
 }
 
 XJavaClass::INFO XJavaClass::_getInfo(PDSTRUCT *pPdStruct)
@@ -330,11 +369,13 @@ qint32 XJavaClass::_read_record_info(qint64 nOffset, record_info *pRecordInfo)
 
 XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(mapMode)
-
     qint64 nTotalSize = getSize();
 
     _MEMORY_MAP result = {};
+
+    if (mapMode == MAPMODE_UNKNOWN) {
+        mapMode = MAPMODE_DATA;
+    }
 
     INFO info = _getInfo(pPdStruct);
 
@@ -345,22 +386,455 @@ XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
     result.endian = getEndian();
     result.sType = getTypeAsString();
 
-    qint32 nIndex = 0;
+    if (mapMode == MAPMODE_REGIONS) {
+        result = _getMemoryMap(FILEPART_HEADER | FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
+    } else if (mapMode == MAPMODE_DATA) {
+        qint32 nIndex = 0;
 
-    _MEMORY_RECORD record = {};
-    record.nAddress = -1;
-    record.nOffset = 0;
-    record.nSize = info.nSize;
-    record.nIndex = 0;
-    record.sName = tr("Data");
-    record.nIndex = nIndex++;
-    record.filePart = FILEPART_DATA;
+        _MEMORY_RECORD record = {};
+        record.nAddress = -1;
+        record.nOffset = 0;
+        record.nSize = info.nSize;
+        record.nIndex = 0;
+        record.sName = tr("Data");
+        record.nIndex = nIndex++;
+        record.filePart = FILEPART_DATA;
 
-    result.listRecords.append(record);
+        result.listRecords.append(record);
 
-    _handleOverlay(&result);
+        _handleOverlay(&result);
+    }
 
     return result;
+}
+
+QList<XBinary::DATA_HEADER> XJavaClass::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    QList<DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+
+        _dataHeadersOptions.nID = STRUCTID_MAGIC;
+        _dataHeadersOptions.nLocation = 0;
+        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+
+        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    } else {
+        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+
+        if (nStartOffset != -1) {
+            if (dataHeadersOptions.nID == STRUCTID_MAGIC) {
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 4;
+
+                dataHeader.listRecords.append(getDataRecord(0, 4, "Magic", VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nID = STRUCTID_VERSION;
+                    _dataHeadersOptions.nLocation = 4;
+
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_VERSION) {
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 4;
+
+                dataHeader.listRecords.append(getDataRecord(0, 2, "Minor version", VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                dataHeader.listRecords.append(getDataRecord(2, 2, "Major version", VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nID = STRUCTID_CONSTANT_POOL;
+                    _dataHeadersOptions.nLocation = 8;
+
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_CONSTANT_POOL) {
+                INFO info = _getInfo(pPdStruct);
+
+                qint64 nConstantPoolSize = 0;
+                if (info.listCP.size() > 0) {
+                    qint64 nLastOffset = info.listCP.last().nOffset;
+                    quint8 nLastTag = info.listCP.last().nTag;
+                    
+                    nConstantPoolSize = nLastOffset - 10;
+                    
+                    switch (nLastTag) {
+                        case CONSTANT_Utf8: {
+                            quint16 nLength = read_uint16(nLastOffset + 1, true);
+                            nConstantPoolSize += 3 + nLength;
+                        } break;
+                        case CONSTANT_Integer:
+                        case CONSTANT_Float:
+                        case CONSTANT_Fieldref:
+                        case CONSTANT_Methodref:
+                        case CONSTANT_InterfaceMethodref:
+                        case CONSTANT_NameAndType:
+                        case CONSTANT_InvokeDynamic:
+                            nConstantPoolSize += 5;
+                            break;
+                        case CONSTANT_Long:
+                        case CONSTANT_Double:
+                            nConstantPoolSize += 9;
+                            break;
+                        case CONSTANT_Class:
+                        case CONSTANT_String:
+                        case CONSTANT_MethodType:
+                        case CONSTANT_Module:
+                        case CONSTANT_Package:
+                            nConstantPoolSize += 3;
+                            break;
+                        case CONSTANT_MethodHandle:
+                            nConstantPoolSize += 4;
+                            break;
+                    }
+                }
+
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 2 + nConstantPoolSize;
+
+                dataHeader.listRecords.append(getDataRecord(0, 2, "Constant pool count", VT_UINT16, DRF_COUNT, XBinary::ENDIAN_BIG));
+                if (nConstantPoolSize > 0) {
+                    dataHeader.listRecords.append(getDataRecord(2, nConstantPoolSize, "Constant pool", VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                }
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nID = STRUCTID_ACCESS_FLAGS;
+                    _dataHeadersOptions.nLocation = 8 + 2 + nConstantPoolSize;
+
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_ACCESS_FLAGS) {
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 2;
+
+                dataHeader.listRecords.append(getDataRecord(0, 2, "Access flags", VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nID = STRUCTID_THIS_CLASS;
+                    _dataHeadersOptions.nLocation = nStartOffset + 2;
+
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_THIS_CLASS) {
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 2;
+
+                dataHeader.listRecords.append(getDataRecord(0, 2, "This class", VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nID = STRUCTID_SUPER_CLASS;
+                    _dataHeadersOptions.nLocation = nStartOffset + 2;
+
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_SUPER_CLASS) {
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 2;
+
+                dataHeader.listRecords.append(getDataRecord(0, 2, "Super class", VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nID = STRUCTID_INTERFACES;
+                    _dataHeadersOptions.nLocation = nStartOffset + 2;
+
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_INTERFACES) {
+                INFO info = _getInfo(pPdStruct);
+                
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 2 + (info.nInterfacesCount * 2);
+
+                dataHeader.listRecords.append(getDataRecord(0, 2, "Interfaces count", VT_UINT16, DRF_COUNT, XBinary::ENDIAN_BIG));
+                if (info.nInterfacesCount > 0) {
+                    dataHeader.listRecords.append(getDataRecord(2, info.nInterfacesCount * 2, "Interfaces", VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                }
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nID = STRUCTID_FIELDS;
+                    _dataHeadersOptions.nLocation = nStartOffset + dataHeader.nSize;
+
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_FIELDS) {
+                INFO info = _getInfo(pPdStruct);
+                
+                qint64 nFieldsSize = 0;
+                for (qint32 i = 0; (i < info.nFieldsCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                    nFieldsSize += 8;
+                    for (qint32 j = 0; j < info.listFields[i].nAttributesCount; j++) {
+                        nFieldsSize += 6 + info.listFields[i].listAttributes[j].nAttributeLength;
+                    }
+                }
+                
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 2 + nFieldsSize;
+
+                dataHeader.listRecords.append(getDataRecord(0, 2, "Fields count", VT_UINT16, DRF_COUNT, XBinary::ENDIAN_BIG));
+                if (nFieldsSize > 0) {
+                    dataHeader.listRecords.append(getDataRecord(2, nFieldsSize, "Fields", VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                }
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nID = STRUCTID_METHODS;
+                    _dataHeadersOptions.nLocation = nStartOffset + dataHeader.nSize;
+
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_METHODS) {
+                INFO info = _getInfo(pPdStruct);
+                
+                qint64 nMethodsSize = 0;
+                for (qint32 i = 0; (i < info.nMethodsCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                    nMethodsSize += 8;
+                    for (qint32 j = 0; j < info.listMethods[i].nAttributesCount; j++) {
+                        nMethodsSize += 6 + info.listMethods[i].listAttributes[j].nAttributeLength;
+                    }
+                }
+                
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 2 + nMethodsSize;
+
+                dataHeader.listRecords.append(getDataRecord(0, 2, "Methods count", VT_UINT16, DRF_COUNT, XBinary::ENDIAN_BIG));
+                if (nMethodsSize > 0) {
+                    dataHeader.listRecords.append(getDataRecord(2, nMethodsSize, "Methods", VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                }
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                    _dataHeadersOptions.nID = STRUCTID_ATTRIBUTES;
+                    _dataHeadersOptions.nLocation = nStartOffset + dataHeader.nSize;
+
+                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_ATTRIBUTES) {
+                INFO info = _getInfo(pPdStruct);
+                
+                qint64 nAttributesSize = 0;
+                for (qint32 i = 0; (i < info.nAttributesCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                    nAttributesSize += 6 + info.listAttributes[i].nAttributeLength;
+                }
+                
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = 2 + nAttributesSize;
+
+                dataHeader.listRecords.append(getDataRecord(0, 2, "Attributes count", VT_UINT16, DRF_COUNT, XBinary::ENDIAN_BIG));
+                if (nAttributesSize > 0) {
+                    dataHeader.listRecords.append(getDataRecord(2, nAttributesSize, "Attributes", VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+                }
+
+                listResult.append(dataHeader);
+            }
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+
+    QList<FPART> listResult;
+
+    INFO info = _getInfo(pPdStruct);
+
+    if (nFileParts & FILEPART_HEADER) {
+        FPART record = {};
+
+        record.filePart = FILEPART_HEADER;
+        record.nFileOffset = 0;
+        record.nFileSize = 8;
+        record.nVirtualAddress = -1;
+        record.sName = tr("Header");
+
+        listResult.append(record);
+    }
+
+    if (nFileParts & FILEPART_REGION) {
+        qint64 nOffset = 8;
+        
+        // Constant pool
+        qint64 nConstantPoolSize = 0;
+        if (info.listCP.size() > 0) {
+            qint64 nLastOffset = info.listCP.last().nOffset;
+            quint8 nLastTag = info.listCP.last().nTag;
+            
+            nConstantPoolSize = nLastOffset - 10;
+            
+            switch (nLastTag) {
+                case CONSTANT_Utf8: {
+                    quint16 nLength = read_uint16(nLastOffset + 1, true);
+                    nConstantPoolSize += 3 + nLength;
+                } break;
+                case CONSTANT_Integer:
+                case CONSTANT_Float:
+                case CONSTANT_Fieldref:
+                case CONSTANT_Methodref:
+                case CONSTANT_InterfaceMethodref:
+                case CONSTANT_NameAndType:
+                case CONSTANT_InvokeDynamic:
+                    nConstantPoolSize += 5;
+                    break;
+                case CONSTANT_Long:
+                case CONSTANT_Double:
+                    nConstantPoolSize += 9;
+                    break;
+                case CONSTANT_Class:
+                case CONSTANT_String:
+                case CONSTANT_MethodType:
+                case CONSTANT_Module:
+                case CONSTANT_Package:
+                    nConstantPoolSize += 3;
+                    break;
+                case CONSTANT_MethodHandle:
+                    nConstantPoolSize += 4;
+                    break;
+            }
+        }
+
+        if (nConstantPoolSize > 0) {
+            FPART record = {};
+            record.filePart = FILEPART_REGION;
+            record.nFileOffset = nOffset;
+            record.nFileSize = 2 + nConstantPoolSize;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Constant pool");
+            listResult.append(record);
+            nOffset += record.nFileSize;
+        }
+
+        // Access flags, this class, super class
+        {
+            FPART record = {};
+            record.filePart = FILEPART_REGION;
+            record.nFileOffset = nOffset;
+            record.nFileSize = 6;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Class info");
+            listResult.append(record);
+            nOffset += 6;
+        }
+
+        // Interfaces
+        {
+            FPART record = {};
+            record.filePart = FILEPART_REGION;
+            record.nFileOffset = nOffset;
+            record.nFileSize = 2 + (info.nInterfacesCount * 2);
+            record.nVirtualAddress = -1;
+            record.sName = tr("Interfaces");
+            listResult.append(record);
+            nOffset += record.nFileSize;
+        }
+
+        // Fields
+        {
+            qint64 nFieldsSize = 0;
+            for (qint32 i = 0; (i < info.nFieldsCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                nFieldsSize += 8;
+                for (qint32 j = 0; j < info.listFields[i].nAttributesCount; j++) {
+                    nFieldsSize += 6 + info.listFields[i].listAttributes[j].nAttributeLength;
+                }
+            }
+
+            FPART record = {};
+            record.filePart = FILEPART_REGION;
+            record.nFileOffset = nOffset;
+            record.nFileSize = 2 + nFieldsSize;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Fields");
+            listResult.append(record);
+            nOffset += record.nFileSize;
+        }
+
+        // Methods
+        {
+            qint64 nMethodsSize = 0;
+            for (qint32 i = 0; (i < info.nMethodsCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                nMethodsSize += 8;
+                for (qint32 j = 0; j < info.listMethods[i].nAttributesCount; j++) {
+                    nMethodsSize += 6 + info.listMethods[i].listAttributes[j].nAttributeLength;
+                }
+            }
+
+            FPART record = {};
+            record.filePart = FILEPART_REGION;
+            record.nFileOffset = nOffset;
+            record.nFileSize = 2 + nMethodsSize;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Methods");
+            listResult.append(record);
+            nOffset += record.nFileSize;
+        }
+
+        // Attributes
+        {
+            qint64 nAttributesSize = 0;
+            for (qint32 i = 0; (i < info.nAttributesCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                nAttributesSize += 6 + info.listAttributes[i].nAttributeLength;
+            }
+
+            FPART record = {};
+            record.filePart = FILEPART_REGION;
+            record.nFileOffset = nOffset;
+            record.nFileSize = 2 + nAttributesSize;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Attributes");
+            listResult.append(record);
+            nOffset += record.nFileSize;
+        }
+    }
+
+    if (nFileParts & FILEPART_OVERLAY) {
+        qint64 nTotalSize = getSize();
+        qint64 nDataEnd = info.nSize;
+
+        if (nDataEnd < nTotalSize) {
+            FPART record = {};
+
+            record.filePart = FILEPART_OVERLAY;
+            record.nFileOffset = nDataEnd;
+            record.nFileSize = nTotalSize - nDataEnd;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Overlay");
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
 }
 
 XBinary::FT XJavaClass::getFileType()

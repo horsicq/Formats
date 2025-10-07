@@ -36,6 +36,12 @@ public:
         TYPE_SECURE
     };
 
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_HEADER,
+        STRUCTID_CHUNK
+    };
+
     struct CHUNK_RECORD {
         QString sName;
         qint64 nOffset;
@@ -66,16 +72,26 @@ public:
     };
 
     explicit XDJVU(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
+    virtual ~XDJVU();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
-    virtual QString getVersion();
-    virtual FT getFileType();
-    virtual HEADER getHeader();
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice);
-    virtual QString getFileFormatExt();
-    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
-    virtual QString getMIMEString();
-    virtual QString getFileFormatExtsString();
+    virtual FT getFileType() override;
+    virtual QString getMIMEString() override;
+    virtual QString getArch() override;
+    virtual MODE getMode() override;
+    virtual ENDIAN getEndian() override;
+    virtual QString getFileFormatExt() override;
+    virtual QString getFileFormatExtsString() override;
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QString getVersion() override;
+    virtual QList<MAPMODE> getMapModesList() override;
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QString structIDToString(quint32 nID) override;
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
+
+    virtual HEADER getHeader();
 
     bool isSecure();
     quint32 getDocumentSize();

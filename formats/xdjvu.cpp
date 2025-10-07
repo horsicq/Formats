@@ -20,9 +20,19 @@
 //
 #include "xdjvu.h"
 
+XBinary::XCONVERT _TABLE_XDJVU_STRUCTID[] = {
+    {XDJVU::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XDJVU::STRUCTID_HEADER, "HEADER", QString("Header")},
+    {XDJVU::STRUCTID_CHUNK, "CHUNK", QString("Chunk")},
+};
+
 XDJVU::XDJVU(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
     g_header = {};
+}
+
+XDJVU::~XDJVU()
+{
 }
 
 bool XDJVU::isValid(PDSTRUCT *pPdStruct)
@@ -102,6 +112,143 @@ QString XDJVU::getMIMEString()
 QString XDJVU::getFileFormatExtsString()
 {
     return "DjVu (*.djvu *.djv)";
+}
+
+XBinary::ENDIAN XDJVU::getEndian()
+{
+    return ENDIAN_BIG;
+}
+
+XBinary::MODE XDJVU::getMode()
+{
+    return MODE_UNKNOWN;
+}
+
+QString XDJVU::getArch()
+{
+    return "";
+}
+
+QList<XBinary::MAPMODE> XDJVU::getMapModesList()
+{
+    QList<MAPMODE> listResult;
+
+    listResult.append(MAPMODE_REGIONS);
+
+    return listResult;
+}
+
+XBinary::_MEMORY_MAP XDJVU::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
+{
+    XBinary::_MEMORY_MAP result = {};
+
+    if (mapMode == MAPMODE_UNKNOWN) {
+        mapMode = MAPMODE_REGIONS;
+    }
+
+    if (mapMode == MAPMODE_REGIONS) {
+        result = _getMemoryMap(FILEPART_HEADER | FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
+    }
+
+    return result;
+}
+
+QString XDJVU::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XDJVU_STRUCTID, sizeof(_TABLE_XDJVU_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::DATA_HEADER> XDJVU::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QList<DATA_HEADER> listResult;
+
+    // TODO: Implement data headers parsing
+
+    return listResult;
+}
+
+QList<XBinary::FPART> XDJVU::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+
+    QList<FPART> listResult;
+
+    if (nFileParts & FILEPART_HEADER) {
+        FPART record = {};
+
+        record.filePart = FILEPART_HEADER;
+        record.nFileOffset = 0;
+        record.nFileSize = 16;
+        record.nVirtualAddress = -1;
+        record.sName = tr("Header");
+
+        listResult.append(record);
+    }
+
+    HEADER header = getHeader();
+
+    if (header.bIsValid && !header.bIsSecure) {
+        qint64 nOffset = 16;
+        qint64 nEndOffset = qMin((qint64)(header.nSize + 8), getSize());
+
+        while (nOffset < nEndOffset) {
+            if (nOffset + 8 > nEndOffset) break;
+
+            qint64 nChunkSize = read_uint32(nOffset + 4, true);
+            QString sChunkName = read_ansiString(nOffset, 4);
+
+            if (!_isChunkValid(sChunkName)) {
+                break;
+            }
+
+            if (nOffset + 8 + nChunkSize > nEndOffset) {
+                break;
+            }
+
+            if (nFileParts & FILEPART_REGION) {
+                FPART record = {};
+
+                record.filePart = FILEPART_REGION;
+                record.nFileOffset = nOffset;
+                record.nFileSize = 8 + nChunkSize;
+                record.nVirtualAddress = -1;
+                record.sName = sChunkName;
+
+                listResult.append(record);
+            }
+
+            nOffset += (8 + nChunkSize);
+
+            if (nOffset & 1) {
+                nOffset++;
+            }
+
+            if (XBinary::isPdStructNotCanceled(pPdStruct) == false) {
+                break;
+            }
+        }
+    }
+
+    qint64 nFileFormatSize = getFileFormatSize();
+    qint64 nTotalSize = getSize();
+
+    if (nFileParts & FILEPART_OVERLAY) {
+        if (nFileFormatSize < nTotalSize) {
+            FPART record = {};
+
+            record.filePart = FILEPART_OVERLAY;
+            record.nFileOffset = nFileFormatSize;
+            record.nFileSize = nTotalSize - nFileFormatSize;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Overlay");
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
 }
 
 bool XDJVU::isSecure()

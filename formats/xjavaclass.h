@@ -27,6 +27,20 @@ class XJavaClass : public XBinary {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_MAGIC,
+        STRUCTID_VERSION,
+        STRUCTID_CONSTANT_POOL,
+        STRUCTID_ACCESS_FLAGS,
+        STRUCTID_THIS_CLASS,
+        STRUCTID_SUPER_CLASS,
+        STRUCTID_INTERFACES,
+        STRUCTID_FIELDS,
+        STRUCTID_METHODS,
+        STRUCTID_ATTRIBUTES
+    };
+
     struct cp_info {
         qint64 nOffset;
         quint8 nTag;
@@ -86,25 +100,30 @@ public:
     };
 
     explicit XJavaClass(QIODevice *pDevice = nullptr);
-    ~XJavaClass();
+    virtual ~XJavaClass();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice);
 
-    virtual QString getArch();
-    virtual MODE getMode();
-    virtual ENDIAN getEndian();
-    virtual FT getFileType();
-    virtual QString getVersion();
-    virtual QString getFileFormatExt();
-    virtual QString getFileFormatExtsString();
+    virtual QString getArch() override;
+    virtual MODE getMode() override;
+    virtual ENDIAN getEndian() override;
+    virtual FT getFileType() override;
+    virtual QString getVersion() override;
+    virtual QString getFileFormatExt() override;
+    virtual QString getFileFormatExtsString() override;
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QString getMIMEString() override;
+    virtual QString structIDToString(quint32 nID) override;
+
+    virtual QList<MAPMODE> getMapModesList() override;
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 
     INFO _getInfo(PDSTRUCT *pPdStruct = nullptr);
 
     static QString _getJDKVersion(quint16 nMajor, quint16 nMinor);
-
-    _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
-    virtual QString getMIMEString();
 
 private:
     qint32 _read_attribute_info(qint64 nOffset, attribute_info *pAttributeInfo);
