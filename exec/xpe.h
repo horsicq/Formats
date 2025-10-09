@@ -60,6 +60,7 @@ public:
         STRUCTID_WIN_CERT_RECORD,
         STRUCTID_IMAGE_COR20_HEADER,
         STRUCTID_NET_METADATA,
+        STRUCTID_NET_METADATA_STREAM,
         STRUCTID_NET_RESOURCES,
         STRUCTID_NET_STRONGNAMESIGNATURE,
         STRUCTID_NET_CODEMANAGERTABLE,
@@ -851,6 +852,26 @@ public:
 
     TLS_HEADER getTLSHeader();
 
+    static const QString PREFIX_ImageNtHeadersSignatures;
+    static const QString PREFIX_ImageMagics;
+    static const QString PREFIX_ImageFileHeaderMachines;
+    static const QString PREFIX_ImageFileHeaderCharacteristics;
+    static const QString PREFIX_ImageOptionalHeaderMagic;
+    static const QString PREFIX_ImageOptionalHeaderSubsystem;
+    static const QString PREFIX_ImageOptionalHeaderDllCharacteristics;
+    static const QString PREFIX_ImageOptionalHeaderDataDirectory;
+    static const QString PREFIX_ImageSectionHeaderFlags;
+    static const QString PREFIX_ImageSectionHeaderAligns;
+    static const QString PREFIX_ResourceTypes;
+    static const QString PREFIX_ImageRelBased;
+    static const QString PREFIX_ComImageFlags;
+    static const QString PREFIX_DebugTypes;
+    static const QString PREFIX_ResourcesFixedFileInfoSignatures;
+    static const QString PREFIX_ResourcesFixedFileInfoFileFlags;
+    static const QString PREFIX_ResourcesFixedFileInfoFileOses;
+    static const QString PREFIX_ResourcesFixedFileInfoFileTypes;
+    static const QString PREFIX_NetMetadataFlags;
+
     static QMap<quint64, QString> getImageNtHeadersSignatures();
     static QMap<quint64, QString> getImageNtHeadersSignaturesS();
     static QMap<quint64, QString> getImageMagics();
@@ -879,6 +900,8 @@ public:
     static QMap<quint64, QString> getComImageFlagsS();
     static QMap<quint64, QString> getDebugTypes();
     static QMap<quint64, QString> getDebugTypesS();
+    static QMap<quint64, QString> getNetMetadataFlags();
+    static QMap<quint64, QString> getNetMetadataFlagsS();
     static QMap<quint64, QString> getOperatingSystemVersions(OSNAME osName = OSNAME_WINDOWS);
     static QMap<quint64, QString> getOperatingSystemVersionsS(OSNAME osName = OSNAME_WINDOWS);
     static QMap<quint64, QString> getMajorOperatingSystemVersion();

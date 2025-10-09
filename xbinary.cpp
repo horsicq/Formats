@@ -272,7 +272,6 @@ XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
     {XBinary::VT_STRING, "String"},
     {XBinary::VT_HEX, "Hex"},
     {XBinary::VT_DATETIME, "DateTime"},
-
     {XBinary::VT_A, "A"},
     {XBinary::VT_A_I, "A"},
     {XBinary::VT_U, "U"},
@@ -289,7 +288,6 @@ XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
     {XBinary::VT_128, "U128"},
     {XBinary::VT_256, "U256"},
     {XBinary::VT_FPEG, "FPEG"},
-
     {XBinary::VT_CHAR, "char"},
     {XBinary::VT_UCHAR, "uchar"},
     {XBinary::VT_SHORT, "short"},
@@ -303,7 +301,6 @@ XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
     {XBinary::VT_UINT64, "uint64"},
     {XBinary::VT_DOUBLE, "double"},
     {XBinary::VT_FLOAT, "float"},
-
     {XBinary::VT_PACKEDNUMBER, "PackedNumber"},
 };
 
@@ -414,6 +411,28 @@ QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 n
     }
 
     return sResult;
+}
+
+QMap<quint64, QString> XBinary::XIDSTRING_createMap(XIDSTRING *pRecords, qint32 nRecordsSize)
+{
+    QMap<quint64, QString> mapResult;
+
+    for (qint32 i = 0; i < nRecordsSize; i++) {
+        mapResult.insert(pRecords[i].nID, pRecords[i].sString);
+    }
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XBinary::XIDSTRING_createMapPrefix(XIDSTRING *pRecords, qint32 nRecordsSize, const QString &sPrefix)
+{
+    QMap<quint64, QString> mapResult;
+
+    for (qint32 i = 0; i < nRecordsSize; i++) {
+        mapResult.insert(pRecords[i].nID, sPrefix + pRecords[i].sString);
+    }
+
+    return mapResult;
 }
 
 qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
@@ -3167,7 +3186,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 // Skip bytes that are not digits to the start of a desired run
                 while (j < hayLen) {
                     unsigned char c = hay[j];
-                    if ((ansiTable[c]) || ((c >= 0x30) && (c <= 0x39))) break;
+                    if ((c >= 0x30) && (c <= 0x39)) break;
                     j++;
                 }
                 if (j >= limit) break;
@@ -3175,7 +3194,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 // Extend run of digit bytes
                 while (j < hayLen) {
                     unsigned char c = hay[j];
-                    if ((!ansiTable[c]) && ((c < 0x30) || (c > 0x39))) break;
+                    if ((c < 0x30) || (c > 0x39)) break;
                     j++;
                 }
                 qint64 runLen = j - start;

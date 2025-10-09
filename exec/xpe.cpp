@@ -44,6 +44,7 @@ XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
     {XPE::STRUCTID_WIN_CERT_RECORD, "WIN_CERT_RECORD", QString("WIN_CERT_RECORD")},
     {XPE::STRUCTID_IMAGE_COR20_HEADER, "IMAGE_COR20_HEADER", QString("IMAGE_COR20_HEADER")},
     {XPE::STRUCTID_NET_METADATA, "NET_METADATA", QString(".NET MetaData")},
+    {XPE::STRUCTID_NET_METADATA_STREAM, "NET_METADATA_STREAM", QString(".NET MetaData Stream")},
     {XPE::STRUCTID_NET_RESOURCES, "NET_RESOURCES", QString(".NET Resources")},
     {XPE::STRUCTID_NET_STRONGNAMESIGNATURE, "NET_STRONGNAMESIGNATURE", QString(".NET StrongNameSignature")},
     {XPE::STRUCTID_NET_CODEMANAGERTABLE, "NET_CODEMANAGERTABLE", QString(".NET CodeManagerTable")},
@@ -54,6 +55,308 @@ XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
     {XPE::STRUCTID_IMAGE_RESOURCE_DATA_ENTRY, "IMAGE_RESOURCE_DATA_ENTRY", QString("IMAGE_RESOURCE_DATA_ENTRY")},
     {XPE::STRUCTID_IMAGE_BASE_RELOCATION, "IMAGE_BASE_RELOCATION", QString("IMAGE_BASE_RELOCATION")},
 };
+
+
+XBinary::XIDSTRING _TABLE_XPE_ImageNtHeadersSignatures[] = {
+    {0x00004550, "NT_SIGNATURE"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ImageMagics[] = {
+    {0x5A4D, "DOS_SIGNATURE"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ImageFileHeaderMachines[] = {
+    {0, "UNKNOWN"},
+    {0x014c, "I386"},
+    {0x014d, "I486"},
+    {0x014e, "PENTIUM"},
+    {0x0160, "R3000_BE"},
+    {0x0162, "R3000"},
+    {0x0166, "R4000"},
+    {0x0168, "R10000"},
+    {0x0169, "WCEMIPSV2"},
+    {0x0184, "ALPHA"},
+    {0x01F0, "POWERPC"},
+    {0x01a2, "SH3"},
+    {0x01a3, "SH3DSP"},
+    {0x01a4, "SH3E"},
+    {0x01a6, "SH4"},
+    {0x01a8, "SH5"},
+    {0x01c0, "ARM"},
+    {0x01c2, "THUMB"},
+    {0x01c4, "ARMNT"},
+    {0x01d3, "AM33"},
+    {0x01f1, "POWERPCFP"},
+    {0x01f2, "POWERPCBE"},
+    {0x0200, "IA64"},
+    {0x0266, "MIPS16"},
+    {0x0284, "ALPHA64"},
+    {0x0366, "MIPSFPU"},
+    {0x0466, "MIPSFPU16"},
+    {0x0520, "TRICORE"},
+    {0x0CEF, "CEF"},
+    {0x0EBC, "EBC"},
+    {0x5032, "RISCV32"},
+    {0x5064, "RISCV64"},
+    {0x5128, "RISCV128"},
+    {0x6232, "LOONGARCH32"},
+    {0x6264, "LOONGARCH64"},
+    {0x8664, "AMD64"},
+    {0x9041, "M32R"},
+    {0xAA64, "ARM64"},
+    {0xC0EE, "CEE"},
+    {0xfd1d, "AMD64_LINUX_NI"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ImageFileHeaderCharacteristics[] = {
+    {0x0001, "RELOCS_STRIPPED"},
+    {0x0002, "EXECUTABLE_IMAGE"},
+    {0x0004, "LINE_NUMS_STRIPPED"},
+    {0x0008, "LOCAL_SYMS_STRIPPED"},
+    {0x0010, "AGGRESIVE_WS_TRIM"},
+    {0x0020, "LARGE_ADDRESS_AWARE"},
+    {0x0080, "BYTES_REVERSED_LO"},
+    {0x0100, "32BIT_MACHINE"},
+    {0x0200, "DEBUG_STRIPPED"},
+    {0x0400, "REMOVABLE_RUN_FROM_SWAP"},
+    {0x0800, "NET_RUN_FROM_SWAP"},
+    {0x1000, "SYSTEM"},
+    {0x2000, "DLL"},
+    {0x4000, "UP_SYSTEM_ONLY"},
+    {0x8000, "BYTES_REVERSED_HI"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ImageOptionalHeaderMagic[] = {
+    {0x10b, "NT_OPTIONAL_HDR32_MAGIC"},
+    {0x20b, "NT_OPTIONAL_HDR64_MAGIC"},
+    {0x107, "ROM_OPTIONAL_HDR_MAGIC"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ImageOptionalHeaderSubsystem[] = {
+    {0, "UNKNOWN"},
+    {1, "NATIVE"},
+    {2, "WINDOWS_GUI"},
+    {3, "WINDOWS_CUI"},
+    {5, "OS2_CUI"},
+    {7, "POSIX_CUI"},
+    {8, "NATIVE_WINDOWS"},
+    {9, "WINDOWS_CE_GUI"},
+    {10, "EFI_APPLICATION"},
+    {11, "EFI_BOOT_SERVICE_DRIVER"},
+    {12, "EFI_RUNTIME_DRIVER"},
+    {13, "EFI_ROM"},
+    {14, "XBOX"},
+    {16, "WINDOWS_BOOT_APPLICATION"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ImageOptionalHeaderDllCharacteristics[] = {
+    {0x0020, "HIGH_ENTROPY_VA"},
+    {0x0040, "DYNAMIC_BASE"},
+    {0x0080, "FORCE_INTEGRITY"},
+    {0x0100, "NX_COMPAT"},
+    {0x0200, "NO_ISOLATION"},
+    {0x0400, "NO_SEH"},
+    {0x0800, "NO_BIND"},
+    {0x1000, "APPCONTAINER"},
+    {0x2000, "WDM_DRIVER"},
+    {0x4000, "GUARD_CF"},
+    {0x8000, "TERMINAL_SERVER_AWARE"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ImageOptionalHeaderDataDirectory[] = {
+    {0, "EXPORT"},
+    {1, "IMPORT"},
+    {2, "RESOURCE"},
+    {3, "EXCEPTION"},
+    {4, "SECURITY"},
+    {5, "BASERELOC"},
+    {6, "DEBUG"},
+    {7, "ARCHITECTURE"},
+    {8, "GLOBALPTR"},
+    {9, "TLS"},
+    {10, "LOAD_CONFIG"},
+    {11, "BOUND_IMPORT"},
+    {12, "IAT"},
+    {13, "DELAY_IMPORT"},
+    {14, "COM_DESCRIPTOR"},
+    {15, "RESERVED"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ImageSectionHeaderFlags[] = {
+    {0x00000008, "TYPE_NO_PAD"},
+    {0x00000020, "CNT_CODE"},
+    {0x00000040, "CNT_INITIALIZED_DATA"},
+    {0x00000080, "CNT_UNINITIALIZED_DATA"},
+    {0x00000100, "LNK_OTHER"},
+    {0x00000200, "LNK_INFO"},
+    {0x00000800, "LNK_REMOVE"},
+    {0x00001000, "LNK_COMDAT"},
+    {0x00004000, "NO_DEFER_SPEC_EXC"},
+    {0x00008000, "GPREL"},
+    {0x00020000, "MEM_PURGEABLE"},
+    {0x00020000, "MEM_16BIT"},
+    {0x00040000, "MEM_LOCKED"},
+    {0x00080000, "MEM_PRELOAD"},
+    {0x01000000, "LNK_NRELOC_OVFL"},
+    {0x02000000, "MEM_DISCARDABLE"},
+    {0x04000000, "MEM_NOT_CACHED"},
+    {0x08000000, "MEM_NOT_PAGED"},
+    {0x10000000, "MEM_SHARED"},
+    {0x20000000, "MEM_EXECUTE"},
+    {0x40000000, "MEM_READ"},
+    {0x80000000, "MEM_WRITE"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ImageSectionHeaderAligns[] = {
+    {0x00100000, "1BYTES"},
+    {0x00200000, "2BYTES"},
+    {0x00300000, "4BYTES"},
+    {0x00400000, "8BYTES"},
+    {0x00500000, "16BYTES"},
+    {0x00600000, "32BYTES"},
+    {0x00700000, "64BYTES"},
+    {0x00800000, "128BYTES"},
+    {0x00900000, "256BYTES"},
+    {0x00A00000, "512BYTES"},
+    {0x00B00000, "1024BYTES"},
+    {0x00C00000, "2048BYTES"},
+    {0x00D00000, "4096BYTES"},
+    {0x00E00000, "8192BYTES"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ResourceTypes[] = {
+    {1, "CURSOR"},
+    {2, "BITMAP"},
+    {3, "ICON"},
+    {4, "MENU"},
+    {5, "DIALOG"},
+    {6, "STRING"},
+    {7, "FONTDIR"},
+    {8, "FONT"},
+    {9, "ACCELERATORS"},
+    {10, "RCDATA"},
+    {11, "MESSAGETABLE"},
+    {12, "GROUP_CURSOR"},
+    {14, "GROUP_ICON"},
+    {15, "NAMETABLE"},
+    {16, "VERSION"},
+    {17, "DLGINCLUDE"},
+    {23, "HTML"},
+    {24, "MANIFEST"},
+    {0x2000 + 2, "NEWBITMAP"},
+    {0x2000 + 4, "NEWMENU"},
+    {0x2000 + 5, "NEWDIALOG"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ImageRelBased[] = {
+    {0, "ABSOLUTE"},
+    {1, "HIGH"},
+    {2, "LOW"},
+    {3, "HIGHLOW"},
+    {4, "HIGHADJ"},
+    {5, "MACHINE_SPECIFIC_5"},
+    {6, "RESERVED"},
+    {7, "MACHINE_SPECIFIC_7"},
+    {8, "MACHINE_SPECIFIC_8"},
+    {9, "MACHINE_SPECIFIC_9"},
+    {10, "DIR64"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ComImageFlags[] = {
+    {0x00000001, "ILONLY"},
+    {0x00000002, "32BITREQUIRED"},
+    {0x00000004, "IL_LIBRARY"},
+    {0x00000008, "STRONGNAMESIGNED"},
+    {0x00000010, "NATIVE_ENTRYPOINT"},
+    {0x00010000, "TRACKDEBUGDATA"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_DebugTypes[] = {
+    {0, "UNKNOWN"},
+    {1, "COFF"},
+    {2, "CODEVIEW"},
+    {3, "FPO"},
+    {4, "MISC"},
+    {5, "EXCEPTION"},
+    {6, "FIXUP"},
+    {7, "OMAP_TO_SRC"},
+    {8, "OMAP_FROM_SRC"},
+    {9, "BORLAND"},
+    {10, "RESERVED10"},
+    {11, "CLSID"},
+    {12, "VC_FEATURE"},
+    {13, "POGO"},
+    {14, "ILTCG"},
+    {15, "MPX"},
+    {16, "REPRO"},
+    {20, "EX_DLLCHARACTERISTICS"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ResourcesFixedFileInfoSignatures[] = {
+    {0xFEEF04BD, "FIXEDFILEINFO Signature"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ResourcesFixedFileInfoFileFlags[] = {
+    {0x00000001, "DEBUG"},
+    {0x00000010, "INFOINFERRED"},
+    {0x00000004, "PATCHED"},
+    {0x00000002, "PRERELEASE"},
+    {0x00000008, "PRIVATEBUILD"},
+    {0x00000020, "SPECIALBUILD"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ResourcesFixedFileInfoFileOses[] = {
+    {0x00000000, "UNKNOWN"},
+    {0x00010000, "DOS"},
+    {0x00020000, "OS216"},
+    {0x00030000, "OS232"},
+    {0x00040000, "NT"},
+    {0x00050000, "WINCE"},
+    {0x00000000, "_BASE"},
+    {0x00000001, "_WINDOWS16"},
+    {0x00000002, "_PM16"},
+    {0x00000003, "_PM32"},
+    {0x00000004, "_WINDOWS32"},
+    {0x00010001, "DOS_WINDOWS16"},
+    {0x00010004, "DOS_WINDOWS32"},
+    {0x00020002, "OS216_PM16"},
+    {0x00030003, "OS232_PM32"},
+    {0x00040004, "NT_WINDOWS32"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_ResourcesFixedFileInfoFileTypes[] = {
+    {0x00000000L, "UNKNOWN"},
+    {0x00000001L, "APP"},
+    {0x00000002L, "DLL"},
+    {0x00000003L, "DRV"},
+    {0x00000004L, "FONT"},
+    {0x00000005L, "VXD"},
+    {0x00000007L, "STATIC_LIB"},
+};
+
+XBinary::XIDSTRING _TABLE_XPE_NetMetadataFlags[] = {
+    {0x0001, "EXTRA_DATA"},
+};
+
+const QString XPE::PREFIX_ImageNtHeadersSignatures = "IMAGE_";
+const QString XPE::PREFIX_ImageMagics = "IMAGE_";
+const QString XPE::PREFIX_ImageFileHeaderMachines = "IMAGE_FILE_MACHINE_";
+const QString XPE::PREFIX_ImageFileHeaderCharacteristics = "IMAGE_FILE_";
+const QString XPE::PREFIX_ImageOptionalHeaderMagic = "IMAGE_";
+const QString XPE::PREFIX_ImageOptionalHeaderSubsystem = "IMAGE_SUBSYSTEM_";
+const QString XPE::PREFIX_ImageOptionalHeaderDllCharacteristics = "IMAGE_DLLCHARACTERISTICS_";
+const QString XPE::PREFIX_ImageOptionalHeaderDataDirectory = "IMAGE_DIRECTORY_ENTRY_";
+const QString XPE::PREFIX_ImageSectionHeaderFlags = "IMAGE_SCN_";
+const QString XPE::PREFIX_ImageSectionHeaderAligns = "IMAGE_SCN_ALIGN_";
+const QString XPE::PREFIX_ResourceTypes = "RT_";
+const QString XPE::PREFIX_ImageRelBased = "IMAGE_REL_BASED_";
+const QString XPE::PREFIX_ComImageFlags = "COMIMAGE_FLAGS_";
+const QString XPE::PREFIX_DebugTypes = "IMAGE_DEBUG_TYPE_";
+const QString XPE::PREFIX_ResourcesFixedFileInfoSignatures = "";
+const QString XPE::PREFIX_ResourcesFixedFileInfoFileFlags = "VS_FF_";
+const QString XPE::PREFIX_ResourcesFixedFileInfoFileOses = "VOS_";
+const QString XPE::PREFIX_ResourcesFixedFileInfoFileTypes = "VFT_";
+const QString XPE::PREFIX_NetMetadataFlags = "METADATA_";
 
 XPE::XPE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevice, bIsImage, nModuleAddress)
 {
@@ -9538,8 +9841,40 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.MetaData.VirtualAddress);
 
                         if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_METADATA), dataHeader.dsID, STRUCTID_NET_METADATA,
-                                                             nStructOffset, ich.MetaData.Size));
+                            quint32 nVersionLength = read_uint32(nStructOffset + 12);
+
+                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                            _dataHeadersOptions.nLocation = nStructOffset;
+                            _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+                            _dataHeadersOptions.nCount = 1;
+                            _dataHeadersOptions.nSize = 20 + nVersionLength;  // Header + version string + 2 words
+                            // _dataHeadersOptions.nSize = ich.MetaData.Size;
+                            _dataHeadersOptions.nID = STRUCTID_NET_METADATA;
+                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+
+                            quint16 nNumberOfStreams = read_uint16(nStructOffset + 18 + nVersionLength);
+
+                            // Streams
+                            qint64 nStreamOffset = nStructOffset + 20 + nVersionLength;
+                            qint32 i = 0;
+
+                            while ((i < nNumberOfStreams) && (nStreamOffset + 8 < nStartOffset + dataHeadersOptions.nSize)) {
+                                QString sName = read_ansiString(nStreamOffset + 8, 32);
+                                qint32 j = sName.length();
+
+                                // Align
+                                j = (j + 4) & ~3;
+
+                                quint32 nOffset = read_uint32(nStreamOffset); // TODO Check
+                                quint32 nSize = read_uint32(nStreamOffset + 4); // TODO Check
+
+                                listResult.append(_dataHeaderHex(dataHeadersOptions, sName, dataHeader.dsID, STRUCTID_NET_METADATA_STREAM,
+                                                                 nOffset, nSize));
+
+                                nStreamOffset += 8 + j;
+                                i++;
+                            }
                         }
                     }
 
@@ -9788,6 +10123,29 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                                             dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, UnwindInfoAddress), 4, "UnwindInfoAddress", VT_DWORD,
                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+                listResult.append(dataHeader);
+            } else if (dataHeadersOptions.nID == STRUCTID_NET_METADATA) {
+                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+
+                // .NET Metadata Storage Signature Header
+                // quint32 nSignature = read_uint32(nStartOffset);
+                // quint16 nMajorVersion = read_uint16(nStartOffset + 4);
+                // quint16 nMinorVersion = read_uint16(nStartOffset + 6);
+                // quint32 nExtraData = read_uint32(nStartOffset + 8);
+                quint32 nVersionLength = read_uint32(nStartOffset + 12);
+
+                dataHeader.nSize = 16 + nVersionLength;  // Header + version string
+
+                dataHeader.listRecords.append(getDataRecord(0, 4, "Signature", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(4, 2, "MajorVersion", VT_WORD, DRF_VERSION, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(6, 2, "MinorVersion", VT_WORD, DRF_VERSION, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(8, 4, "ExtraData", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(12, 4, "VersionLength", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(16, nVersionLength, "Version", VT_CHAR_ARRAY, DRF_VOLATILE, dataHeadersOptions.pMemoryMap->endian));
+                // Flags
+                dataHeader.listRecords.append(getDataRecordDV(16 + nVersionLength, 2, "Flags", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian, XPE::getNetMetadataFlagsS(), VL_TYPE_FLAGS));
+                dataHeader.listRecords.append(getDataRecord(18 + nVersionLength, 2, "NumberOfStreams", VT_WORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+
                 listResult.append(dataHeader);
             }
         }
@@ -13097,612 +13455,176 @@ XPE::TLS_HEADER XPE::getTLSHeader()
 
 QMap<quint64, QString> XPE::getImageNtHeadersSignatures()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00004550, "IMAGE_NT_SIGNATURE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageNtHeadersSignatures,
+                                              sizeof(_TABLE_XPE_ImageNtHeadersSignatures) / sizeof(XBinary::XIDSTRING), PREFIX_ImageNtHeadersSignatures);
 }
 
 QMap<quint64, QString> XPE::getImageNtHeadersSignaturesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00004550, "NT_SIGNATURE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ImageNtHeadersSignatures, sizeof(_TABLE_XPE_ImageNtHeadersSignatures) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getImageMagics()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x5A4D, "IMAGE_DOS_SIGNATURE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageMagics, sizeof(_TABLE_XPE_ImageMagics) / sizeof(XBinary::XIDSTRING), PREFIX_ImageMagics);
 }
 
 QMap<quint64, QString> XPE::getImageMagicsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x5A4D, "DOS_SIGNATURE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ImageMagics, sizeof(_TABLE_XPE_ImageMagics) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getImageFileHeaderMachines()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "IMAGE_FILE_MACHINE_UNKNOWN");
-    mapResult.insert(0x014c, "IMAGE_FILE_MACHINE_I386");
-    mapResult.insert(0x014d, "IMAGE_FILE_MACHINE_I486");
-    mapResult.insert(0x014e, "IMAGE_FILE_MACHINE_PENTIUM");
-    mapResult.insert(0x0160, "IMAGE_FILE_MACHINE_R3000_BE");
-    mapResult.insert(0x0162, "IMAGE_FILE_MACHINE_R3000");
-    mapResult.insert(0x0166, "IMAGE_FILE_MACHINE_R4000");
-    mapResult.insert(0x0168, "IMAGE_FILE_MACHINE_R10000");
-    mapResult.insert(0x0169, "IMAGE_FILE_MACHINE_WCEMIPSV2");
-    mapResult.insert(0x0184, "IMAGE_FILE_MACHINE_ALPHA");
-    mapResult.insert(0x01F0, "IMAGE_FILE_MACHINE_POWERPC");
-    mapResult.insert(0x01a2, "IMAGE_FILE_MACHINE_SH3");
-    mapResult.insert(0x01a3, "IMAGE_FILE_MACHINE_SH3DSP");
-    mapResult.insert(0x01a4, "IMAGE_FILE_MACHINE_SH3E");
-    mapResult.insert(0x01a6, "IMAGE_FILE_MACHINE_SH4");
-    mapResult.insert(0x01a8, "IMAGE_FILE_MACHINE_SH5");
-    mapResult.insert(0x01c0, "IMAGE_FILE_MACHINE_ARM");
-    mapResult.insert(0x01c2, "IMAGE_FILE_MACHINE_THUMB");
-    mapResult.insert(0x01c4, "IMAGE_FILE_MACHINE_ARMNT");
-    mapResult.insert(0x01d3, "IMAGE_FILE_MACHINE_AM33");
-    mapResult.insert(0x01f1, "IMAGE_FILE_MACHINE_POWERPCFP");
-    mapResult.insert(0x01f2, "IMAGE_FILE_MACHINE_POWERPCBE");
-    mapResult.insert(0x0200, "IMAGE_FILE_MACHINE_IA64");
-    mapResult.insert(0x0266, "IMAGE_FILE_MACHINE_MIPS16");
-    mapResult.insert(0x0284, "IMAGE_FILE_MACHINE_ALPHA64");
-    mapResult.insert(0x0366, "IMAGE_FILE_MACHINE_MIPSFPU");
-    mapResult.insert(0x0466, "IMAGE_FILE_MACHINE_MIPSFPU16");
-    mapResult.insert(0x0520, "IMAGE_FILE_MACHINE_TRICORE");
-    mapResult.insert(0x0CEF, "IMAGE_FILE_MACHINE_CEF");
-    mapResult.insert(0x0EBC, "IMAGE_FILE_MACHINE_EBC");
-    mapResult.insert(0x5032, "IMAGE_FILE_MACHINE_RISCV32");
-    mapResult.insert(0x5064, "IMAGE_FILE_MACHINE_RISCV64");
-    mapResult.insert(0x5128, "IMAGE_FILE_MACHINE_RISCV128");
-    mapResult.insert(0x6232, "IMAGE_FILE_MACHINE_LOONGARCH32");
-    mapResult.insert(0x6264, "IMAGE_FILE_MACHINE_LOONGARCH64");
-    mapResult.insert(0x8664, "IMAGE_FILE_MACHINE_AMD64");
-    mapResult.insert(0x9041, "IMAGE_FILE_MACHINE_M32R");
-    mapResult.insert(0xAA64, "IMAGE_FILE_MACHINE_ARM64");
-    mapResult.insert(0xC0EE, "IMAGE_FILE_MACHINE_CEE");
-    mapResult.insert(0xfd1d, "IMAGE_FILE_MACHINE_AMD64_LINUX_NI");  // 0x7b79 ^ 0x8664
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageFileHeaderMachines, sizeof(_TABLE_XPE_ImageFileHeaderMachines) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ImageFileHeaderMachines);
 }
 
 QMap<quint64, QString> XPE::getImageFileHeaderMachinesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, tr("Unknown"));
-    mapResult.insert(0x014c, "I386");
-    mapResult.insert(0x014d, "I486");
-    mapResult.insert(0x014e, "PENTIUM");
-    mapResult.insert(0x0160, "R3000_BE");
-    mapResult.insert(0x0162, "R3000");
-    mapResult.insert(0x0166, "R4000");
-    mapResult.insert(0x0168, "R10000");
-    mapResult.insert(0x0169, "WCEMIPSV2");
-    mapResult.insert(0x0184, "ALPHA");
-    mapResult.insert(0x01F0, "POWERPC");
-    mapResult.insert(0x01a2, "SH3");
-    mapResult.insert(0x01a3, "SH3DSP");
-    mapResult.insert(0x01a4, "SH3E");
-    mapResult.insert(0x01a6, "SH4");
-    mapResult.insert(0x01a8, "SH5");
-    mapResult.insert(0x01c0, "ARM");
-    mapResult.insert(0x01c2, "THUMB");
-    mapResult.insert(0x01c4, "ARMNT");
-    mapResult.insert(0x01d3, "AM33");
-    mapResult.insert(0x01f1, "POWERPCFP");
-    mapResult.insert(0x01f2, "POWERPCBE");
-    mapResult.insert(0x0200, "IA64");
-    mapResult.insert(0x0266, "MIPS16");
-    mapResult.insert(0x0284, "ALPHA64");
-    mapResult.insert(0x0366, "MIPSFPU");
-    mapResult.insert(0x0466, "MIPSFPU16");
-    mapResult.insert(0x0520, "TRICORE");
-    mapResult.insert(0x0CEF, "CEF");
-    mapResult.insert(0x0EBC, "EBC");
-    mapResult.insert(0x5032, "RISCV32");
-    mapResult.insert(0x5064, "RISCV64");
-    mapResult.insert(0x5128, "RISCV128");
-    mapResult.insert(0x6232, "LOONGARCH32");
-    mapResult.insert(0x6264, "LOONGARCH64");
-    mapResult.insert(0x8664, "AMD64");
-    mapResult.insert(0x9041, "M32R");
-    mapResult.insert(0xAA64, "ARM64");
-    mapResult.insert(0xC0EE, "CEE");
-    mapResult.insert(0xfd1d, "AMD64_LINUX_NI");  // 0x7b79 ^ 0x8664
+    QMap<quint64, QString> mapResult =
+        XBinary::XIDSTRING_createMap(_TABLE_XPE_ImageFileHeaderMachines, sizeof(_TABLE_XPE_ImageFileHeaderMachines) / sizeof(XBinary::XIDSTRING));
 
     return mapResult;
 }
 
 QMap<quint64, QString> XPE::getImageFileHeaderCharacteristics()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x0001, "IMAGE_FILE_RELOCS_STRIPPED");
-    mapResult.insert(0x0002, "IMAGE_FILE_EXECUTABLE_IMAGE");
-    mapResult.insert(0x0004, "IMAGE_FILE_LINE_NUMS_STRIPPED");
-    mapResult.insert(0x0008, "IMAGE_FILE_LOCAL_SYMS_STRIPPED");
-    mapResult.insert(0x0010, "IMAGE_FILE_AGGRESIVE_WS_TRIM");
-    mapResult.insert(0x0020, "IMAGE_FILE_LARGE_ADDRESS_AWARE");
-    mapResult.insert(0x0080, "IMAGE_FILE_BYTES_REVERSED_LO");
-    mapResult.insert(0x0100, "IMAGE_FILE_32BIT_MACHINE");
-    mapResult.insert(0x0200, "IMAGE_FILE_DEBUG_STRIPPED");
-    mapResult.insert(0x0400, "IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP");
-    mapResult.insert(0x0800, "IMAGE_FILE_NET_RUN_FROM_SWAP");
-    mapResult.insert(0x1000, "IMAGE_FILE_SYSTEM");
-    mapResult.insert(0x2000, "IMAGE_FILE_DLL");
-    mapResult.insert(0x4000, "IMAGE_FILE_UP_SYSTEM_ONLY");
-    mapResult.insert(0x8000, "IMAGE_FILE_BYTES_REVERSED_HI");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageFileHeaderCharacteristics, sizeof(_TABLE_XPE_ImageFileHeaderCharacteristics) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ImageFileHeaderCharacteristics);
 }
 
 QMap<quint64, QString> XPE::getImageFileHeaderCharacteristicsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x0001, "RELOCS_STRIPPED");
-    mapResult.insert(0x0002, "EXECUTABLE_IMAGE");
-    mapResult.insert(0x0004, "LINE_NUMS_STRIPPED");
-    mapResult.insert(0x0008, "LOCAL_SYMS_STRIPPED");
-    mapResult.insert(0x0010, "AGGRESIVE_WS_TRIM");
-    mapResult.insert(0x0020, "LARGE_ADDRESS_AWARE");
-    mapResult.insert(0x0080, "BYTES_REVERSED_LO");
-    mapResult.insert(0x0100, "32BIT_MACHINE");
-    mapResult.insert(0x0200, "DEBUG_STRIPPED");
-    mapResult.insert(0x0400, "REMOVABLE_RUN_FROM_SWAP");
-    mapResult.insert(0x0800, "NET_RUN_FROM_SWAP");
-    mapResult.insert(0x1000, "SYSTEM");
-    mapResult.insert(0x2000, "DLL");
-    mapResult.insert(0x4000, "UP_SYSTEM_ONLY");
-    mapResult.insert(0x8000, "BYTES_REVERSED_HI");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ImageFileHeaderCharacteristics, sizeof(_TABLE_XPE_ImageFileHeaderCharacteristics) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getImageOptionalHeaderMagic()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x10b, "IMAGE_NT_OPTIONAL_HDR32_MAGIC");
-    mapResult.insert(0x20b, "IMAGE_NT_OPTIONAL_HDR64_MAGIC");
-    mapResult.insert(0x107, "IMAGE_ROM_OPTIONAL_HDR_MAGIC");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageOptionalHeaderMagic, sizeof(_TABLE_XPE_ImageOptionalHeaderMagic) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ImageOptionalHeaderMagic);
 }
 
 QMap<quint64, QString> XPE::getImageOptionalHeaderMagicS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x10b, "NT_HDR32_MAGIC");
-    mapResult.insert(0x20b, "NT_HDR64_MAGIC");
-    mapResult.insert(0x107, "ROM_HDR_MAGIC");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ImageOptionalHeaderMagic, sizeof(_TABLE_XPE_ImageOptionalHeaderMagic) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getImageOptionalHeaderSubsystem()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "IMAGE_SUBSYSTEM_UNKNOWN");
-    mapResult.insert(1, "IMAGE_SUBSYSTEM_NATIVE");
-    mapResult.insert(2, "IMAGE_SUBSYSTEM_WINDOWS_GUI");
-    mapResult.insert(3, "IMAGE_SUBSYSTEM_WINDOWS_CUI");
-    mapResult.insert(5, "IMAGE_SUBSYSTEM_OS2_CUI");
-    mapResult.insert(7, "IMAGE_SUBSYSTEM_POSIX_CUI");
-    mapResult.insert(8, "IMAGE_SUBSYSTEM_NATIVE_WINDOWS");
-    mapResult.insert(9, "IMAGE_SUBSYSTEM_WINDOWS_CE_GUI");
-    mapResult.insert(10, "IMAGE_SUBSYSTEM_EFI_APPLICATION");
-    mapResult.insert(11, "IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER");
-    mapResult.insert(12, "IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER");
-    mapResult.insert(13, "IMAGE_SUBSYSTEM_EFI_ROM");
-    mapResult.insert(14, "IMAGE_SUBSYSTEM_XBOX");
-    mapResult.insert(16, "IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageOptionalHeaderSubsystem, sizeof(_TABLE_XPE_ImageOptionalHeaderSubsystem) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ImageOptionalHeaderSubsystem);
 }
 
 QMap<quint64, QString> XPE::getImageOptionalHeaderSubsystemS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64, QString> mapResult =
+        XBinary::XIDSTRING_createMap(_TABLE_XPE_ImageOptionalHeaderSubsystem, sizeof(_TABLE_XPE_ImageOptionalHeaderSubsystem) / sizeof(XBinary::XIDSTRING));
 
-    mapResult.insert(0, tr("Unknown"));
-    mapResult.insert(1, "NATIVE");
-    mapResult.insert(2, "WINDOWS_GUI");
-    mapResult.insert(3, "WINDOWS_CUI");
-    mapResult.insert(5, "OS2_CUI");
-    mapResult.insert(7, "POSIX_CUI");
-    mapResult.insert(8, "NATIVE_WINDOWS");
-    mapResult.insert(9, "WINDOWS_CE_GUI");
-    mapResult.insert(10, "EFI_APPLICATION");
-    mapResult.insert(11, "EFI_BOOT_SERVICE_DRIVER");
-    mapResult.insert(12, "EFI_RUNTIME_DRIVER");
-    mapResult.insert(13, "EFI_ROM");
-    mapResult.insert(14, "XBOX");
-    mapResult.insert(16, "WINDOWS_BOOT_APPLICATION");
+    mapResult[0] = tr("Unknown");
 
     return mapResult;
 }
 
 QMap<quint64, QString> XPE::getImageOptionalHeaderDllCharacteristics()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x0020, "IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA");
-    mapResult.insert(0x0040, "IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE");
-    mapResult.insert(0x0080, "IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY");
-    mapResult.insert(0x0100, "IMAGE_DLLCHARACTERISTICS_NX_COMPAT");
-    mapResult.insert(0x0200, "IMAGE_DLLCHARACTERISTICS_NO_ISOLATION");
-    mapResult.insert(0x0400, "IMAGE_DLLCHARACTERISTICS_NO_SEH");
-    mapResult.insert(0x0800, "IMAGE_DLLCHARACTERISTICS_NO_BIND");
-    mapResult.insert(0x1000, "IMAGE_DLLCHARACTERISTICS_APPCONTAINER");
-    mapResult.insert(0x2000, "IMAGE_DLLCHARACTERISTICS_WDM_DRIVER");
-    mapResult.insert(0x4000, "IMAGE_DLLCHARACTERISTICS_GUARD_CF");
-    mapResult.insert(0x8000, "IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageOptionalHeaderDllCharacteristics,
+                                              sizeof(_TABLE_XPE_ImageOptionalHeaderDllCharacteristics) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ImageOptionalHeaderDllCharacteristics);
 }
 
 QMap<quint64, QString> XPE::getImageOptionalHeaderDllCharacteristicsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x0020, "HIGH_ENTROPY_VA");
-    mapResult.insert(0x0040, "DYNAMIC_BASE");
-    mapResult.insert(0x0080, "FORCE_INTEGRITY");
-    mapResult.insert(0x0100, "NX_COMPAT");
-    mapResult.insert(0x0200, "NO_ISOLATION");
-    mapResult.insert(0x0400, "NO_SEH");
-    mapResult.insert(0x0800, "NO_BIND");
-    mapResult.insert(0x1000, "APPCONTAINER");
-    mapResult.insert(0x2000, "WDM_DRIVER");
-    mapResult.insert(0x4000, "GUARD_CF");
-    mapResult.insert(0x8000, "TERMINAL_SERVER_AWARE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ImageOptionalHeaderDllCharacteristics,
+                                        sizeof(_TABLE_XPE_ImageOptionalHeaderDllCharacteristics) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getImageOptionalHeaderDataDirectory()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "IMAGE_DIRECTORY_ENTRY_EXPORT");
-    mapResult.insert(1, "IMAGE_DIRECTORY_ENTRY_IMPORT");
-    mapResult.insert(2, "IMAGE_DIRECTORY_ENTRY_RESOURCE");
-    mapResult.insert(3, "IMAGE_DIRECTORY_ENTRY_EXCEPTION");
-    mapResult.insert(4, "IMAGE_DIRECTORY_ENTRY_SECURITY");
-    mapResult.insert(5, "IMAGE_DIRECTORY_ENTRY_BASERELOC");
-    mapResult.insert(6, "IMAGE_DIRECTORY_ENTRY_DEBUG");
-    mapResult.insert(7, "IMAGE_DIRECTORY_ENTRY_ARCHITECTURE");
-    mapResult.insert(8, "IMAGE_DIRECTORY_ENTRY_GLOBALPTR");
-    mapResult.insert(9, "IMAGE_DIRECTORY_ENTRY_TLS");
-    mapResult.insert(10, "IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG");
-    mapResult.insert(11, "IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT");
-    mapResult.insert(12, "IMAGE_DIRECTORY_ENTRY_IAT");
-    mapResult.insert(13, "IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT");
-    mapResult.insert(14, "IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR");
-    mapResult.insert(15, "RESERVED");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageOptionalHeaderDataDirectory,
+                                              sizeof(_TABLE_XPE_ImageOptionalHeaderDataDirectory) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ImageOptionalHeaderDataDirectory);
 }
 
 QMap<quint64, QString> XPE::getImageOptionalHeaderDataDirectoryS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "EXPORT");
-    mapResult.insert(1, "IMPORT");
-    mapResult.insert(2, "RESOURCE");
-    mapResult.insert(3, "EXCEPTION");
-    mapResult.insert(4, "SECURITY");
-    mapResult.insert(5, "BASERELOC");
-    mapResult.insert(6, "DEBUG");
-    mapResult.insert(7, "ARCHITECTURE");
-    mapResult.insert(8, "GLOBALPTR");
-    mapResult.insert(9, "TLS");
-    mapResult.insert(10, "LOAD_CONFIG");
-    mapResult.insert(11, "BOUND_IMPORT");
-    mapResult.insert(12, "IAT");
-    mapResult.insert(13, "DELAY_IMPORT");
-    mapResult.insert(14, "COM_DESCRIPTOR");
-    mapResult.insert(15, "RESERVED");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ImageOptionalHeaderDataDirectory, sizeof(_TABLE_XPE_ImageOptionalHeaderDataDirectory) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getImageSectionHeaderFlags()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000008, "IMAGE_SCN_TYPE_NO_PAD");
-    mapResult.insert(0x00000020, "IMAGE_SCN_CNT_CODE");
-    mapResult.insert(0x00000040, "IMAGE_SCN_CNT_INITIALIZED_DATA");
-    mapResult.insert(0x00000080, "IMAGE_SCN_CNT_UNINITIALIZED_DATA");
-    mapResult.insert(0x00000100, "IMAGE_SCN_LNK_OTHER");
-    mapResult.insert(0x00000200, "IMAGE_SCN_LNK_INFO");
-    mapResult.insert(0x00000800, "IMAGE_SCN_LNK_REMOVE");
-    mapResult.insert(0x00001000, "IMAGE_SCN_LNK_COMDAT");
-    mapResult.insert(0x00004000, "IMAGE_SCN_NO_DEFER_SPEC_EXC");
-    mapResult.insert(0x00008000, "IMAGE_SCN_GPREL");
-    mapResult.insert(0x00020000, "IMAGE_SCN_MEM_PURGEABLE");
-    mapResult.insert(0x00020000, "IMAGE_SCN_MEM_16BIT");
-    mapResult.insert(0x00040000, "IMAGE_SCN_MEM_LOCKED");
-    mapResult.insert(0x00080000, "IMAGE_SCN_MEM_PRELOAD");
-    mapResult.insert(0x01000000, "IMAGE_SCN_LNK_NRELOC_OVFL");
-    mapResult.insert(0x02000000, "IMAGE_SCN_MEM_DISCARDABLE");
-    mapResult.insert(0x04000000, "IMAGE_SCN_MEM_NOT_CACHED");
-    mapResult.insert(0x08000000, "IMAGE_SCN_MEM_NOT_PAGED");
-    mapResult.insert(0x10000000, "IMAGE_SCN_MEM_SHARED");
-    mapResult.insert(0x20000000, "IMAGE_SCN_MEM_EXECUTE");
-    mapResult.insert(0x40000000, "IMAGE_SCN_MEM_READ");
-    mapResult.insert(0x80000000, "IMAGE_SCN_MEM_WRITE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageSectionHeaderFlags, sizeof(_TABLE_XPE_ImageSectionHeaderFlags) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ImageSectionHeaderFlags);
 }
 
 QMap<quint64, QString> XPE::getImageSectionHeaderFlagsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000008, "TYPE_NO_PAD");
-    mapResult.insert(0x00000020, "CNT_CODE");
-    mapResult.insert(0x00000040, "CNT_INITIALIZED_DATA");
-    mapResult.insert(0x00000080, "CNT_UNINITIALIZED_DATA");
-    mapResult.insert(0x00000100, "LNK_OTHER");
-    mapResult.insert(0x00000200, "LNK_INFO");
-    mapResult.insert(0x00000800, "LNK_REMOVE");
-    mapResult.insert(0x00001000, "LNK_COMDAT");
-    mapResult.insert(0x00004000, "NO_DEFER_SPEC_EXC");
-    mapResult.insert(0x00008000, "GPREL");
-    mapResult.insert(0x00020000, "MEM_PURGEABLE");
-    mapResult.insert(0x00020000, "MEM_16BIT");
-    mapResult.insert(0x00040000, "MEM_LOCKED");
-    mapResult.insert(0x00080000, "MEM_PRELOAD");
-    mapResult.insert(0x01000000, "LNK_NRELOC_OVFL");
-    mapResult.insert(0x02000000, "MEM_DISCARDABLE");
-    mapResult.insert(0x04000000, "MEM_NOT_CACHED");
-    mapResult.insert(0x08000000, "MEM_NOT_PAGED");
-    mapResult.insert(0x10000000, "MEM_SHARED");
-    mapResult.insert(0x20000000, "MEM_EXECUTE");
-    mapResult.insert(0x40000000, "MEM_READ");
-    mapResult.insert(0x80000000, "MEM_WRITE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ImageSectionHeaderFlags, sizeof(_TABLE_XPE_ImageSectionHeaderFlags) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getImageSectionHeaderAligns()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00100000, "IMAGE_SCN_ALIGN_1BYTES");
-    mapResult.insert(0x00200000, "IMAGE_SCN_ALIGN_2BYTES");
-    mapResult.insert(0x00300000, "IMAGE_SCN_ALIGN_4BYTES");
-    mapResult.insert(0x00400000, "IMAGE_SCN_ALIGN_8BYTES");
-    mapResult.insert(0x00500000, "IMAGE_SCN_ALIGN_16BYTES");
-    mapResult.insert(0x00600000, "IMAGE_SCN_ALIGN_32BYTES");
-    mapResult.insert(0x00700000, "IMAGE_SCN_ALIGN_64BYTES");
-    mapResult.insert(0x00800000, "IMAGE_SCN_ALIGN_128BYTES");
-    mapResult.insert(0x00900000, "IMAGE_SCN_ALIGN_256BYTES");
-    mapResult.insert(0x00A00000, "IMAGE_SCN_ALIGN_512BYTES");
-    mapResult.insert(0x00B00000, "IMAGE_SCN_ALIGN_1024BYTES");
-    mapResult.insert(0x00C00000, "IMAGE_SCN_ALIGN_2048BYTES");
-    mapResult.insert(0x00D00000, "IMAGE_SCN_ALIGN_4096BYTES");
-    mapResult.insert(0x00E00000, "IMAGE_SCN_ALIGN_8192BYTES");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageSectionHeaderAligns, sizeof(_TABLE_XPE_ImageSectionHeaderAligns) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ImageSectionHeaderAligns);
 }
 
 QMap<quint64, QString> XPE::getImageSectionHeaderAlignsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00100000, "1BYTES");
-    mapResult.insert(0x00200000, "2BYTES");
-    mapResult.insert(0x00300000, "4BYTES");
-    mapResult.insert(0x00400000, "8BYTES");
-    mapResult.insert(0x00500000, "16BYTES");
-    mapResult.insert(0x00600000, "32BYTES");
-    mapResult.insert(0x00700000, "64BYTES");
-    mapResult.insert(0x00800000, "128BYTES");
-    mapResult.insert(0x00900000, "256BYTES");
-    mapResult.insert(0x00A00000, "512BYTES");
-    mapResult.insert(0x00B00000, "1024BYTES");
-    mapResult.insert(0x00C00000, "2048BYTES");
-    mapResult.insert(0x00D00000, "4096BYTES");
-    mapResult.insert(0x00E00000, "8192BYTES");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ImageSectionHeaderAligns, sizeof(_TABLE_XPE_ImageSectionHeaderAligns) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getResourceTypes()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(1, "RT_CURSOR");
-    mapResult.insert(2, "RT_BITMAP");
-    mapResult.insert(3, "RT_ICON");
-    mapResult.insert(4, "RT_MENU");
-    mapResult.insert(5, "RT_DIALOG");
-    mapResult.insert(6, "RT_STRING");
-    mapResult.insert(7, "RT_FONTDIR");
-    mapResult.insert(8, "RT_FONT");
-    mapResult.insert(9, "RT_ACCELERATORS");
-    mapResult.insert(10, "RT_RCDATA");
-    mapResult.insert(11, "RT_MESSAGETABLE");
-    mapResult.insert(12, "RT_GROUP_CURSOR");
-    mapResult.insert(14, "RT_GROUP_ICON");
-    mapResult.insert(15, "S_RT_NAMETABLE");
-    mapResult.insert(16, "RT_VERSION");
-    mapResult.insert(17, "RT_DLGINCLUDE");
-    mapResult.insert(23, "RT_HTML");
-    mapResult.insert(24, "RT_MANIFEST");
-    mapResult.insert(0x2000 + 2, "RT_NEWBITMAP");
-    mapResult.insert(0x2000 + 4, "RT_NEWMENU");
-    mapResult.insert(0x2000 + 5, "RT_NEWDIALOG");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ResourceTypes, sizeof(_TABLE_XPE_ResourceTypes) / sizeof(XBinary::XIDSTRING), PREFIX_ResourceTypes);
 }
 
 QMap<quint64, QString> XPE::getResourceTypesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(1, "CURSOR");
-    mapResult.insert(2, "BITMAP");
-    mapResult.insert(3, "ICON");
-    mapResult.insert(4, "MENU");
-    mapResult.insert(5, "DIALOG");
-    mapResult.insert(6, "STRING");
-    mapResult.insert(7, "FONTDIR");
-    mapResult.insert(8, "FONT");
-    mapResult.insert(9, "ACCELERATORS");
-    mapResult.insert(10, "RCDATA");
-    mapResult.insert(11, "MESSAGETABLE");
-    mapResult.insert(12, "GROUP_CURSOR");
-    mapResult.insert(14, "GROUP_ICON");
-    mapResult.insert(15, "NAMETABLE");
-    mapResult.insert(16, "VERSION");
-    mapResult.insert(17, "DLGINCLUDE");
-    mapResult.insert(23, "HTML");
-    mapResult.insert(24, "MANIFEST");
-    mapResult.insert(0x2000 + 2, "NEWBITMAP");
-    mapResult.insert(0x2000 + 4, "NEWMENU");
-    mapResult.insert(0x2000 + 5, "NEWDIALOG");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ResourceTypes, sizeof(_TABLE_XPE_ResourceTypes) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getImageRelBased()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "IMAGE_REL_BASED_ABSOLUTE");
-    mapResult.insert(1, "IMAGE_REL_BASED_HIGH");
-    mapResult.insert(2, "IMAGE_REL_BASED_LOW");
-    mapResult.insert(3, "IMAGE_REL_BASED_HIGHLOW");
-    mapResult.insert(4, "IMAGE_REL_BASED_HIGHADJ");
-    mapResult.insert(5, "IMAGE_REL_BASED_MACHINE_SPECIFIC_5");
-    mapResult.insert(6, "IMAGE_REL_BASED_RESERVED");
-    mapResult.insert(7, "IMAGE_REL_BASED_MACHINE_SPECIFIC_7");
-    mapResult.insert(8, "IMAGE_REL_BASED_MACHINE_SPECIFIC_8");
-    mapResult.insert(9, "IMAGE_REL_BASED_MACHINE_SPECIFIC_9");
-    mapResult.insert(10, "IMAGE_REL_BASED_DIR64");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageRelBased, sizeof(_TABLE_XPE_ImageRelBased) / sizeof(XBinary::XIDSTRING), PREFIX_ImageRelBased);
 }
 
 QMap<quint64, QString> XPE::getImageRelBasedS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "ABSOLUTE");
-    mapResult.insert(1, "HIGH");
-    mapResult.insert(2, "LOW");
-    mapResult.insert(3, "HIGHLOW");
-    mapResult.insert(4, "HIGHADJ");
-    mapResult.insert(5, "MACHINE_SPECIFIC_5");
-    mapResult.insert(6, "RESERVED");
-    mapResult.insert(7, "MACHINE_SPECIFIC_7");
-    mapResult.insert(8, "MACHINE_SPECIFIC_8");
-    mapResult.insert(9, "MACHINE_SPECIFIC_9");
-    mapResult.insert(10, "DIR64");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ImageRelBased, sizeof(_TABLE_XPE_ImageRelBased) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getComImageFlags()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000001, "COMIMAGE_FLAGS_ILONLY");
-    mapResult.insert(0x00000002, "COMIMAGE_FLAGS_32BITREQUIRED");
-    mapResult.insert(0x00000004, "COMIMAGE_FLAGS_IL_LIBRARY");
-    mapResult.insert(0x00000008, "COMIMAGE_FLAGS_STRONGNAMESIGNED");
-    mapResult.insert(0x00000010, "COMIMAGE_FLAGS_NATIVE_ENTRYPOINT");
-    mapResult.insert(0x00010000, "COMIMAGE_FLAGS_TRACKDEBUGDATA");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ComImageFlags, sizeof(_TABLE_XPE_ComImageFlags) / sizeof(XBinary::XIDSTRING), PREFIX_ComImageFlags);
 }
 
 QMap<quint64, QString> XPE::getComImageFlagsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000001, "ILONLY");
-    mapResult.insert(0x00000002, "32BITREQUIRED");
-    mapResult.insert(0x00000004, "IL_LIBRARY");
-    mapResult.insert(0x00000008, "STRONGNAMESIGNED");
-    mapResult.insert(0x00000010, "NATIVE_ENTRYPOINT");
-    mapResult.insert(0x00010000, "TRACKDEBUGDATA");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ComImageFlags, sizeof(_TABLE_XPE_ComImageFlags) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getDebugTypes()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "IMAGE_DEBUG_TYPE_UNKNOWN");
-    mapResult.insert(1, "IMAGE_DEBUG_TYPE_COFF");
-    mapResult.insert(2, "IMAGE_DEBUG_TYPE_CODEVIEW");
-    mapResult.insert(3, "IMAGE_DEBUG_TYPE_FPO");
-    mapResult.insert(4, "IMAGE_DEBUG_TYPE_MISC");
-    mapResult.insert(5, "IMAGE_DEBUG_TYPE_EXCEPTION");
-    mapResult.insert(6, "IMAGE_DEBUG_TYPE_FIXUP");
-    mapResult.insert(7, "IMAGE_DEBUG_TYPE_OMAP_TO_SRC");
-    mapResult.insert(8, "IMAGE_DEBUG_TYPE_OMAP_FROM_SRC");
-    mapResult.insert(9, "IMAGE_DEBUG_TYPE_BORLAND");
-    mapResult.insert(10, "IMAGE_DEBUG_TYPE_RESERVED10");
-    mapResult.insert(11, "IMAGE_DEBUG_TYPE_CLSID");
-    mapResult.insert(12, "IMAGE_DEBUG_TYPE_VC_FEATURE");
-    mapResult.insert(13, "IMAGE_DEBUG_TYPE_POGO");
-    mapResult.insert(14, "IMAGE_DEBUG_TYPE_ILTCG");
-    mapResult.insert(15, "IMAGE_DEBUG_TYPE_MPX");
-    mapResult.insert(16, "IMAGE_DEBUG_TYPE_REPRO");
-    mapResult.insert(20, "IMAGE_DEBUG_TYPE_EX_DLLCHARACTERISTICS");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_DebugTypes, sizeof(_TABLE_XPE_DebugTypes) / sizeof(XBinary::XIDSTRING), PREFIX_DebugTypes);
 }
 
 QMap<quint64, QString> XPE::getDebugTypesS()
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64, QString> mapResult = XBinary::XIDSTRING_createMap(_TABLE_XPE_DebugTypes, sizeof(_TABLE_XPE_DebugTypes) / sizeof(XBinary::XIDSTRING));
 
-    mapResult.insert(0, tr("Unknown"));
-    mapResult.insert(1, "COFF");
-    mapResult.insert(2, "CODEVIEW");
-    mapResult.insert(3, "FPO");
-    mapResult.insert(4, "MISC");
-    mapResult.insert(5, "EXCEPTION");
-    mapResult.insert(6, "FIXUP");
-    mapResult.insert(7, "OMAP_TO_SRC");
-    mapResult.insert(8, "OMAP_FROM_SRC");
-    mapResult.insert(9, "BORLAND");
-    mapResult.insert(10, "RESERVED10");
-    mapResult.insert(11, "CLSID");
-    mapResult.insert(12, "VC_FEATURE");
-    mapResult.insert(13, "POGO");
-    mapResult.insert(14, "ILTCG");
-    mapResult.insert(15, "MPX");
-    mapResult.insert(16, "REPRO");
-    mapResult.insert(20, "EX_DLLCHARACTERISTICS");
+    mapResult[0] = tr("Unknown");
 
     return mapResult;
+}
+
+QMap<quint64, QString> XPE::getNetMetadataFlags()
+{
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_NetMetadataFlags, sizeof(_TABLE_XPE_NetMetadataFlags) / sizeof(XBinary::XIDSTRING), PREFIX_NetMetadataFlags);
+}
+
+QMap<quint64, QString> XPE::getNetMetadataFlagsS()
+{
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_NetMetadataFlags, sizeof(_TABLE_XPE_NetMetadataFlags) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getOperatingSystemVersions(OSNAME osName)
@@ -13842,11 +13764,7 @@ QMap<quint64, QString> XPE::getMinorOperatingSystemVersionS(quint16 nMajorOperat
 
 QMap<quint64, QString> XPE::getResourcesFixedFileInfoSignatures()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0xFEEF04BD, QString("FIXEDFILEINFO Signature"));
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ResourcesFixedFileInfoSignatures, sizeof(_TABLE_XPE_ResourcesFixedFileInfoSignatures) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getResourcesFixedFileInfoSignaturesS()
@@ -13860,106 +13778,33 @@ QMap<quint64, QString> XPE::getResourcesFixedFileInfoSignaturesS()
 
 QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileFlags()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000001, QString("VS_FF_DEBUG"));
-    mapResult.insert(0x00000010, QString("VS_FF_INFOINFERRED"));
-    mapResult.insert(0x00000004, QString("VS_FF_PATCHED"));
-    mapResult.insert(0x00000002, QString("VS_FF_PRERELEASE"));
-    mapResult.insert(0x00000008, QString("VS_FF_PRIVATEBUILD"));
-    mapResult.insert(0x00000020, QString("VS_FF_SPECIALBUILD"));
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ResourcesFixedFileInfoFileFlags, sizeof(_TABLE_XPE_ResourcesFixedFileInfoFileFlags) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ResourcesFixedFileInfoFileFlags);
 }
 
 QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileFlagsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000001, QString("DEBUG"));
-    mapResult.insert(0x00000010, QString("INFOINFERRED"));
-    mapResult.insert(0x00000004, QString("PATCHED"));
-    mapResult.insert(0x00000002, QString("PRERELEASE"));
-    mapResult.insert(0x00000008, QString("PRIVATEBUILD"));
-    mapResult.insert(0x00000020, QString("SPECIALBUILD"));
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ResourcesFixedFileInfoFileFlags, sizeof(_TABLE_XPE_ResourcesFixedFileInfoFileFlags) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileOses()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000000, QString("VOS_UNKNOWN"));
-    mapResult.insert(0x00010000, QString("VOS_DOS"));
-    mapResult.insert(0x00020000, QString("VOS_OS216"));
-    mapResult.insert(0x00030000, QString("VOS_OS232"));
-    mapResult.insert(0x00040000, QString("VOS_NT"));
-    mapResult.insert(0x00050000, QString("VOS_WINCE"));
-    mapResult.insert(0x00000000, QString("VOS__BASE"));
-    mapResult.insert(0x00000001, QString("VOS__WINDOWS16"));
-    mapResult.insert(0x00000002, QString("VOS__PM16"));
-    mapResult.insert(0x00000003, QString("VOS__PM32"));
-    mapResult.insert(0x00000004, QString("VOS__WINDOWS32"));
-    mapResult.insert(0x00010001, QString("VOS_DOS_WINDOWS16"));
-    mapResult.insert(0x00010004, QString("VOS_DOS_WINDOWS32"));
-    mapResult.insert(0x00020002, QString("VOS_OS216_PM16"));
-    mapResult.insert(0x00030003, QString("VOS_OS232_PM32"));
-    mapResult.insert(0x00040004, QString("VOS_NT_WINDOWS32"));
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ResourcesFixedFileInfoFileOses, sizeof(_TABLE_XPE_ResourcesFixedFileInfoFileOses) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ResourcesFixedFileInfoFileOses);
 }
 
 QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileOsesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000000, QString("UNKNOWN"));
-    mapResult.insert(0x00010000, QString("DOS"));
-    mapResult.insert(0x00020000, QString("OS216"));
-    mapResult.insert(0x00030000, QString("OS232"));
-    mapResult.insert(0x00040000, QString("NT"));
-    mapResult.insert(0x00050000, QString("WINCE"));
-    mapResult.insert(0x00000000, QString("_BASE"));
-    mapResult.insert(0x00000001, QString("_WINDOWS16"));
-    mapResult.insert(0x00000002, QString("_PM16"));
-    mapResult.insert(0x00000003, QString("_PM32"));
-    mapResult.insert(0x00000004, QString("_WINDOWS32"));
-    mapResult.insert(0x00010001, QString("DOS_WINDOWS16"));
-    mapResult.insert(0x00010004, QString("DOS_WINDOWS32"));
-    mapResult.insert(0x00020002, QString("OS216_PM16"));
-    mapResult.insert(0x00030003, QString("OS232_PM32"));
-    mapResult.insert(0x00040004, QString("NT_WINDOWS32"));
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ResourcesFixedFileInfoFileOses, sizeof(_TABLE_XPE_ResourcesFixedFileInfoFileOses) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileTypes()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000000L, QString("VFT_UNKNOWN"));
-    mapResult.insert(0x00000001L, QString("VFT_APP"));
-    mapResult.insert(0x00000002L, QString("VFT_DLL"));
-    mapResult.insert(0x00000003L, QString("VFT_DRV"));
-    mapResult.insert(0x00000004L, QString("VFT_FONT"));
-    mapResult.insert(0x00000005L, QString("VFT_VXD"));
-    mapResult.insert(0x00000007L, QString("VFT_STATIC_LIB"));
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ResourcesFixedFileInfoFileTypes, sizeof(_TABLE_XPE_ResourcesFixedFileInfoFileTypes) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ResourcesFixedFileInfoFileTypes);
 }
 
 QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileTypesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000000L, QString("UNKNOWN"));
-    mapResult.insert(0x00000001L, QString("APP"));
-    mapResult.insert(0x00000002L, QString("DLL"));
-    mapResult.insert(0x00000003L, QString("DRV"));
-    mapResult.insert(0x00000004L, QString("FONT"));
-    mapResult.insert(0x00000005L, QString("VXD"));
-    mapResult.insert(0x00000007L, QString("STATIC_LIB"));
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XPE_ResourcesFixedFileInfoFileTypes, sizeof(_TABLE_XPE_ResourcesFixedFileInfoFileTypes) / sizeof(XBinary::XIDSTRING));
 }

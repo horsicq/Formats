@@ -119,6 +119,8 @@ public:
     };
 
     static QString XIDSTRING_idToString(quint32 nID, XBinary::XIDSTRING *pRecords, qint32 nRecordsSize);
+    static QMap<quint64, QString> XIDSTRING_createMap(XBinary::XIDSTRING *pRecords, qint32 nRecordsSize);
+    static QMap<quint64, QString> XIDSTRING_createMapPrefix(XBinary::XIDSTRING *pRecords, qint32 nRecordsSize, const QString &sPrefix);
 
     enum LT {
         LT_UNKNOWN = 0,
@@ -414,6 +416,7 @@ public:
         FT_UNICODE,
         FT_UNICODE_BE,
         FT_UNICODE_LE,
+        FT_UPX,
         FT_XML,
         FT_UTF8,
         FT_ZIP,
@@ -422,6 +425,7 @@ public:
         FT_LHA,
         FT_ICO,
         FT_ICC,
+        FT_INNOSETUP,
         FT_CUR,
         FT_MP3,
         FT_MP4,
@@ -432,6 +436,7 @@ public:
         FT_WAV,
         FT_SIGNATURE,
         FT_NPM,
+        FT_NSIS,
         FT_DEB,
         FT_BWDOS16M,
         FT_JAVACLASS,
