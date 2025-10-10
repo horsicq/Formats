@@ -9859,7 +9859,7 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                             qint64 nStreamOffset = nStructOffset + 20 + nVersionLength;
                             qint32 i = 0;
 
-                            while ((i < nNumberOfStreams) && (nStreamOffset + 8 < nStartOffset + dataHeadersOptions.nSize)) {
+                            while ((i < nNumberOfStreams) && (nStreamOffset + 8 < nStructOffset + ich.MetaData.Size)) {
                                 QString sName = read_ansiString(nStreamOffset + 8, 32);
                                 qint32 j = sName.length();
 
