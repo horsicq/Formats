@@ -437,7 +437,7 @@ QMap<quint64, QString> XBinary::XIDSTRING_createMapPrefix(XIDSTRING *pRecords, q
 
 qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
 {
-    return getFileParts(FILEPART_STREAM, -1, pPdStruct).count();
+    return getArchiveRecords(-1, pPdStruct).count();
 }
 
 QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct)
