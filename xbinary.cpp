@@ -467,6 +467,15 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
     return listResult;
 }
 
+bool XBinary::packFolderToDevice(const QString &sFolderName, QIODevice *pDevice, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(sFolderName)
+    Q_UNUSED(pDevice)
+    Q_UNUSED(pPdStruct)
+
+    return false;
+}
+
 qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState)
 {
     qint32 nRead = pState->pDeviceInput->read(pBuffer, nBufferSize);
@@ -13604,4 +13613,104 @@ bool XBinary::isAddressPhysical(XADDR nAddress)
     _MEMORY_MAP memoryMap = getMemoryMap();
 
     return isAddressPhysical(&memoryMap, nAddress);
+}
+
+bool XBinary::initUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pState)
+    Q_UNUSED(pPdStruct)
+
+    return false;
+}
+
+XBinary::ARCHIVERECORD XBinary::infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pState)
+    Q_UNUSED(pPdStruct)
+
+    ARCHIVERECORD result = {};
+
+    return result;
+}
+
+bool XBinary::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pState)
+    Q_UNUSED(pDevice)
+    Q_UNUSED(pPdStruct)
+
+    return false;
+}
+
+bool XBinary::moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pState)
+    Q_UNUSED(pPdStruct)
+
+    return false;
+}
+
+bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderName, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pDevice)
+
+    bool bResult = false;
+
+    PDSTRUCT pdStructEmpty = createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    if (!sFolderName.isEmpty()) {
+        QDir dir;
+
+        if (!dir.exists(sFolderName)) {
+            dir.mkpath(sFolderName);
+        }
+
+        UNPACK_STATE state = {};
+
+        if (initUnpack(&state, pPdStruct)) {
+            bResult = true;
+
+            do {
+                if (isPdStructNotCanceled(pPdStruct)) {
+                    ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
+
+                    QString sFileName = record.mapProperties.value(FPART_PROP_ORIGINALNAME).toString();
+
+                    if (!sFileName.isEmpty()) {
+                        QString sFilePath = sFolderName + QDir::separator() + sFileName;
+
+                        // Create directory structure if needed
+                        QFileInfo fileInfo(sFilePath);
+                        QString sDirPath = fileInfo.absolutePath();
+
+                        if (!dir.exists(sDirPath)) {
+                            dir.mkpath(sDirPath);
+                        }
+
+                        // Unpack file
+                        QFile file(sFilePath);
+
+                        if (file.open(QIODevice::WriteOnly)) {
+                            if (!unpackCurrent(&state, &file, pPdStruct)) {
+                                bResult = false;
+                            }
+
+                            file.close();
+                        } else {
+                            bResult = false;
+                        }
+                    }
+                } else {
+                    bResult = false;
+                    break;
+                }
+            } while (moveToNext(&state, pPdStruct));
+        }
+    }
+
+    return bResult;
 }

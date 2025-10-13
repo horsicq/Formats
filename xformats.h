@@ -155,6 +155,7 @@ public:
 
     bool unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct);
     bool extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pListRecords, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct);
+    bool packFolderToDevice(XBinary::FT fileType, QString sFolderName, QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct);
 
 private:
     MODE m_mode;

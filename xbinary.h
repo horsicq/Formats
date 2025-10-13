@@ -251,6 +251,14 @@ public:
         QMap<FPART_PROP, QVariant> mapProperties;
     };
 
+    struct UNPACK_STATE {
+        qint64 nCurrentOffset;
+        qint64 nTotalSize;
+        qint32 nCurrentIndex;
+        qint32 nNumberOfRecords;
+        void *pContext;  // Format-specific context
+    };
+
     static qint32 _readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
     static qint32 _readDevice(DECOMPRESS_STATE *pState);
     static qint32 _writeDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
@@ -2025,6 +2033,14 @@ public:
 
     virtual qint64 getNumberOfArchiveRecords(PDSTRUCT *pPdStruct);
     virtual QList<ARCHIVERECORD> getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct);
+    virtual bool packFolderToDevice(const QString &sFolderName, QIODevice *pDevice, PDSTRUCT *pPdStruct);
+
+    virtual bool initUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+    virtual ARCHIVERECORD infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+    virtual bool unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
+    virtual bool moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+
+    bool unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderName, PDSTRUCT *pPdStruct = nullptr);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

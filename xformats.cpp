@@ -986,6 +986,22 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
     return bResult;
 }
 
+bool XFormats::packFolderToDevice(XBinary::FT fileType, QString sFolderName, QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    if (XBinary::isDirectoryExists(sFolderName)) {
+        XBinary *pBinary = getClass(fileType, pDevice);
+
+        if (pBinary) {
+            bResult = pBinary->packFolderToDevice(sFolderName, pDevice, pPdStruct);
+            delete pBinary;
+        }
+    }
+
+    return bResult;
+}
+
 #ifdef QT_GUI_LIB
 XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox, XBinary::TL_OPTION tlOption)
 {
