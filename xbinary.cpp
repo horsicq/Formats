@@ -3446,7 +3446,8 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
     qint64 nResult = -1;
 
     if (_sSignature.contains(QChar('.')) || _sSignature.contains(QChar('$')) || _sSignature.contains(QChar('#')) || _sSignature.contains(QChar('+')) ||
-        _sSignature.contains(QChar('*')) || _sSignature.contains(QChar('%')) || _sSignature.contains(QChar('!')) || _sSignature.contains(QChar('_')) || _sSignature.contains(QChar('&'))) {
+        _sSignature.contains(QChar('*')) || _sSignature.contains(QChar('%')) || _sSignature.contains(QChar('!')) || _sSignature.contains(QChar('_')) ||
+        _sSignature.contains(QChar('&'))) {
         bool bIsValid = true;
 
         QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bIsValid, pPdStruct);
@@ -7343,7 +7344,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_AR)) listResult.append(FT_AR);
         if (stFileTypes.contains(FT_DEB)) listResult.append(FT_DEB);
         if (stFileTypes.contains(FT_JAVACLASS)) listResult.append(FT_JAVACLASS);
-    if (stFileTypes.contains(FT_PYC)) listResult.append(FT_PYC);
+        if (stFileTypes.contains(FT_PYC)) listResult.append(FT_PYC);
         if (stFileTypes.contains(FT_TTF)) listResult.append(FT_TTF);
         if (stFileTypes.contains(FT_DJVU)) listResult.append(FT_DJVU);
         if (stFileTypes.contains(FT_TEXT)) listResult.append(FT_TEXT);
@@ -9160,10 +9161,10 @@ QString XBinary::convertSignature(const QString &sSignature)
     QString _sSignature;
     // 'AnsiString'
     // TODO more defs
-    
+
     qint32 nSignatureSize = sSignature.size();
     bool bHasQuote = false;
-    
+
     // First pass: detect what conversions are needed and pre-allocate
     for (qint32 i = 0; i < nSignatureSize; i++) {
         QChar c = sSignature.at(i);
@@ -9172,20 +9173,20 @@ QString XBinary::convertSignature(const QString &sSignature)
             break;
         }
     }
-    
+
     // Reserve appropriate capacity
     if (bHasQuote) {
         _sSignature.reserve(nSignatureSize * 2);  // Worst case: all chars become hex
     } else {
         _sSignature.reserve(nSignatureSize);
     }
-    
+
     if (bHasQuote) {
         bool bAnsiString = false;
-        
+
         for (qint32 i = 0; i < nSignatureSize; i++) {
             QChar c = sSignature.at(i);
-            
+
             if (c == QChar(39)) {
                 bAnsiString = !bAnsiString;
             } else if (bAnsiString) {
@@ -9209,7 +9210,7 @@ QString XBinary::convertSignature(const QString &sSignature)
         // Simpler path when no quotes present
         for (qint32 i = 0; i < nSignatureSize; i++) {
             QChar c = sSignature.at(i);
-            
+
             if (c != QChar(' ')) {  // Skip spaces
                 if (c == QChar('?')) {
                     _sSignature.append(QChar('.'));
@@ -9219,7 +9220,7 @@ QString XBinary::convertSignature(const QString &sSignature)
             }
         }
     }
-    
+
     return _sSignature;
 }
 

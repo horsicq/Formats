@@ -538,7 +538,8 @@ QList<XBinary::FPART> XFormats::getFileParts(XBinary::FT fileType, QIODevice *pD
     return listResult;
 }
 
-QList<XBinary::ARCHIVERECORD> XFormats::getArchiveRecords(XBinary::FT fileType, QIODevice *pDevice, qint32 nLimit, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+QList<XBinary::ARCHIVERECORD> XFormats::getArchiveRecords(XBinary::FT fileType, QIODevice *pDevice, qint32 nLimit, bool bIsImage, XADDR nModuleAddress,
+                                                          XBinary::PDSTRUCT *pPdStruct)
 {
     QList<XBinary::ARCHIVERECORD> listResult;
 
@@ -874,8 +875,8 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 
                         bool bUnpack = (archiveRecord.mapProperties.value(XBinary::FPART_PROP_COMPRESSMETHOD, XBinary::COMPRESS_METHOD_UNKNOWN).toUInt() !=
                                         XBinary::COMPRESS_METHOD_UNKNOWN);
-                        bool bHandle =
-                            (archiveRecord.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt() != XBinary::HANDLE_METHOD_UNKNOWN);
+                        bool bHandle = (archiveRecord.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt() !=
+                                        XBinary::HANDLE_METHOD_UNKNOWN);
 #ifdef QT_DEBUG
                         qDebug("XFormats::extractArchiveRecordsToFolder: bUnpack=%d, bHandle=%d", bUnpack, bHandle);
 #endif

@@ -440,7 +440,7 @@ public:
         FT_DEB,
         FT_BWDOS16M,
         FT_JAVACLASS,
-    FT_PYC,
+        FT_PYC,
         FT_CFBF,
         FT_TTF,
         FT_DJVU,

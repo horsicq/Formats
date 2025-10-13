@@ -56,7 +56,6 @@ XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
     {XPE::STRUCTID_IMAGE_BASE_RELOCATION, "IMAGE_BASE_RELOCATION", QString("IMAGE_BASE_RELOCATION")},
 };
 
-
 XBinary::XIDSTRING _TABLE_XPE_ImageNtHeadersSignatures[] = {
     {0x00004550, "NT_SIGNATURE"},
 };
@@ -66,46 +65,14 @@ XBinary::XIDSTRING _TABLE_XPE_ImageMagics[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ImageFileHeaderMachines[] = {
-    {0, "UNKNOWN"},
-    {0x014c, "I386"},
-    {0x014d, "I486"},
-    {0x014e, "PENTIUM"},
-    {0x0160, "R3000_BE"},
-    {0x0162, "R3000"},
-    {0x0166, "R4000"},
-    {0x0168, "R10000"},
-    {0x0169, "WCEMIPSV2"},
-    {0x0184, "ALPHA"},
-    {0x01F0, "POWERPC"},
-    {0x01a2, "SH3"},
-    {0x01a3, "SH3DSP"},
-    {0x01a4, "SH3E"},
-    {0x01a6, "SH4"},
-    {0x01a8, "SH5"},
-    {0x01c0, "ARM"},
-    {0x01c2, "THUMB"},
-    {0x01c4, "ARMNT"},
-    {0x01d3, "AM33"},
-    {0x01f1, "POWERPCFP"},
-    {0x01f2, "POWERPCBE"},
-    {0x0200, "IA64"},
-    {0x0266, "MIPS16"},
-    {0x0284, "ALPHA64"},
-    {0x0366, "MIPSFPU"},
-    {0x0466, "MIPSFPU16"},
-    {0x0520, "TRICORE"},
-    {0x0CEF, "CEF"},
-    {0x0EBC, "EBC"},
-    {0x5032, "RISCV32"},
-    {0x5064, "RISCV64"},
-    {0x5128, "RISCV128"},
-    {0x6232, "LOONGARCH32"},
-    {0x6264, "LOONGARCH64"},
-    {0x8664, "AMD64"},
-    {0x9041, "M32R"},
-    {0xAA64, "ARM64"},
-    {0xC0EE, "CEE"},
-    {0xfd1d, "AMD64_LINUX_NI"},
+    {0, "UNKNOWN"},        {0x014c, "I386"},      {0x014d, "I486"},     {0x014e, "PENTIUM"},     {0x0160, "R3000_BE"},
+    {0x0162, "R3000"},     {0x0166, "R4000"},     {0x0168, "R10000"},   {0x0169, "WCEMIPSV2"},   {0x0184, "ALPHA"},
+    {0x01F0, "POWERPC"},   {0x01a2, "SH3"},       {0x01a3, "SH3DSP"},   {0x01a4, "SH3E"},        {0x01a6, "SH4"},
+    {0x01a8, "SH5"},       {0x01c0, "ARM"},       {0x01c2, "THUMB"},    {0x01c4, "ARMNT"},       {0x01d3, "AM33"},
+    {0x01f1, "POWERPCFP"}, {0x01f2, "POWERPCBE"}, {0x0200, "IA64"},     {0x0266, "MIPS16"},      {0x0284, "ALPHA64"},
+    {0x0366, "MIPSFPU"},   {0x0466, "MIPSFPU16"}, {0x0520, "TRICORE"},  {0x0CEF, "CEF"},         {0x0EBC, "EBC"},
+    {0x5032, "RISCV32"},   {0x5064, "RISCV64"},   {0x5128, "RISCV128"}, {0x6232, "LOONGARCH32"}, {0x6264, "LOONGARCH64"},
+    {0x8664, "AMD64"},     {0x9041, "M32R"},      {0xAA64, "ARM64"},    {0xC0EE, "CEE"},         {0xfd1d, "AMD64_LINUX_NI"},
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ImageFileHeaderCharacteristics[] = {
@@ -150,78 +117,28 @@ XBinary::XIDSTRING _TABLE_XPE_ImageOptionalHeaderSubsystem[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ImageOptionalHeaderDllCharacteristics[] = {
-    {0x0020, "HIGH_ENTROPY_VA"},
-    {0x0040, "DYNAMIC_BASE"},
-    {0x0080, "FORCE_INTEGRITY"},
-    {0x0100, "NX_COMPAT"},
-    {0x0200, "NO_ISOLATION"},
-    {0x0400, "NO_SEH"},
-    {0x0800, "NO_BIND"},
-    {0x1000, "APPCONTAINER"},
-    {0x2000, "WDM_DRIVER"},
-    {0x4000, "GUARD_CF"},
-    {0x8000, "TERMINAL_SERVER_AWARE"},
+    {0x0020, "HIGH_ENTROPY_VA"}, {0x0040, "DYNAMIC_BASE"}, {0x0080, "FORCE_INTEGRITY"}, {0x0100, "NX_COMPAT"}, {0x0200, "NO_ISOLATION"},          {0x0400, "NO_SEH"},
+    {0x0800, "NO_BIND"},         {0x1000, "APPCONTAINER"}, {0x2000, "WDM_DRIVER"},      {0x4000, "GUARD_CF"},  {0x8000, "TERMINAL_SERVER_AWARE"},
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ImageOptionalHeaderDataDirectory[] = {
-    {0, "EXPORT"},
-    {1, "IMPORT"},
-    {2, "RESOURCE"},
-    {3, "EXCEPTION"},
-    {4, "SECURITY"},
-    {5, "BASERELOC"},
-    {6, "DEBUG"},
-    {7, "ARCHITECTURE"},
-    {8, "GLOBALPTR"},
-    {9, "TLS"},
-    {10, "LOAD_CONFIG"},
-    {11, "BOUND_IMPORT"},
-    {12, "IAT"},
-    {13, "DELAY_IMPORT"},
-    {14, "COM_DESCRIPTOR"},
-    {15, "RESERVED"},
+    {0, "EXPORT"},    {1, "IMPORT"}, {2, "RESOURCE"},     {3, "EXCEPTION"},     {4, "SECURITY"}, {5, "BASERELOC"},     {6, "DEBUG"},           {7, "ARCHITECTURE"},
+    {8, "GLOBALPTR"}, {9, "TLS"},    {10, "LOAD_CONFIG"}, {11, "BOUND_IMPORT"}, {12, "IAT"},     {13, "DELAY_IMPORT"}, {14, "COM_DESCRIPTOR"}, {15, "RESERVED"},
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ImageSectionHeaderFlags[] = {
-    {0x00000008, "TYPE_NO_PAD"},
-    {0x00000020, "CNT_CODE"},
-    {0x00000040, "CNT_INITIALIZED_DATA"},
-    {0x00000080, "CNT_UNINITIALIZED_DATA"},
-    {0x00000100, "LNK_OTHER"},
-    {0x00000200, "LNK_INFO"},
-    {0x00000800, "LNK_REMOVE"},
-    {0x00001000, "LNK_COMDAT"},
-    {0x00004000, "NO_DEFER_SPEC_EXC"},
-    {0x00008000, "GPREL"},
-    {0x00020000, "MEM_PURGEABLE"},
-    {0x00020000, "MEM_16BIT"},
-    {0x00040000, "MEM_LOCKED"},
-    {0x00080000, "MEM_PRELOAD"},
-    {0x01000000, "LNK_NRELOC_OVFL"},
-    {0x02000000, "MEM_DISCARDABLE"},
-    {0x04000000, "MEM_NOT_CACHED"},
-    {0x08000000, "MEM_NOT_PAGED"},
-    {0x10000000, "MEM_SHARED"},
-    {0x20000000, "MEM_EXECUTE"},
-    {0x40000000, "MEM_READ"},
-    {0x80000000, "MEM_WRITE"},
+    {0x00000008, "TYPE_NO_PAD"},       {0x00000020, "CNT_CODE"},      {0x00000040, "CNT_INITIALIZED_DATA"}, {0x00000080, "CNT_UNINITIALIZED_DATA"},
+    {0x00000100, "LNK_OTHER"},         {0x00000200, "LNK_INFO"},      {0x00000800, "LNK_REMOVE"},           {0x00001000, "LNK_COMDAT"},
+    {0x00004000, "NO_DEFER_SPEC_EXC"}, {0x00008000, "GPREL"},         {0x00020000, "MEM_PURGEABLE"},        {0x00020000, "MEM_16BIT"},
+    {0x00040000, "MEM_LOCKED"},        {0x00080000, "MEM_PRELOAD"},   {0x01000000, "LNK_NRELOC_OVFL"},      {0x02000000, "MEM_DISCARDABLE"},
+    {0x04000000, "MEM_NOT_CACHED"},    {0x08000000, "MEM_NOT_PAGED"}, {0x10000000, "MEM_SHARED"},           {0x20000000, "MEM_EXECUTE"},
+    {0x40000000, "MEM_READ"},          {0x80000000, "MEM_WRITE"},
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ImageSectionHeaderAligns[] = {
-    {0x00100000, "1BYTES"},
-    {0x00200000, "2BYTES"},
-    {0x00300000, "4BYTES"},
-    {0x00400000, "8BYTES"},
-    {0x00500000, "16BYTES"},
-    {0x00600000, "32BYTES"},
-    {0x00700000, "64BYTES"},
-    {0x00800000, "128BYTES"},
-    {0x00900000, "256BYTES"},
-    {0x00A00000, "512BYTES"},
-    {0x00B00000, "1024BYTES"},
-    {0x00C00000, "2048BYTES"},
-    {0x00D00000, "4096BYTES"},
-    {0x00E00000, "8192BYTES"},
+    {0x00100000, "1BYTES"},    {0x00200000, "2BYTES"},    {0x00300000, "4BYTES"},    {0x00400000, "8BYTES"},    {0x00500000, "16BYTES"},
+    {0x00600000, "32BYTES"},   {0x00700000, "64BYTES"},   {0x00800000, "128BYTES"},  {0x00900000, "256BYTES"},  {0x00A00000, "512BYTES"},
+    {0x00B00000, "1024BYTES"}, {0x00C00000, "2048BYTES"}, {0x00D00000, "4096BYTES"}, {0x00E00000, "8192BYTES"},
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ResourceTypes[] = {
@@ -263,33 +180,14 @@ XBinary::XIDSTRING _TABLE_XPE_ImageRelBased[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ComImageFlags[] = {
-    {0x00000001, "ILONLY"},
-    {0x00000002, "32BITREQUIRED"},
-    {0x00000004, "IL_LIBRARY"},
-    {0x00000008, "STRONGNAMESIGNED"},
-    {0x00000010, "NATIVE_ENTRYPOINT"},
-    {0x00010000, "TRACKDEBUGDATA"},
+    {0x00000001, "ILONLY"},           {0x00000002, "32BITREQUIRED"},     {0x00000004, "IL_LIBRARY"},
+    {0x00000008, "STRONGNAMESIGNED"}, {0x00000010, "NATIVE_ENTRYPOINT"}, {0x00010000, "TRACKDEBUGDATA"},
 };
 
 XBinary::XIDSTRING _TABLE_XPE_DebugTypes[] = {
-    {0, "UNKNOWN"},
-    {1, "COFF"},
-    {2, "CODEVIEW"},
-    {3, "FPO"},
-    {4, "MISC"},
-    {5, "EXCEPTION"},
-    {6, "FIXUP"},
-    {7, "OMAP_TO_SRC"},
-    {8, "OMAP_FROM_SRC"},
-    {9, "BORLAND"},
-    {10, "RESERVED10"},
-    {11, "CLSID"},
-    {12, "VC_FEATURE"},
-    {13, "POGO"},
-    {14, "ILTCG"},
-    {15, "MPX"},
-    {16, "REPRO"},
-    {20, "EX_DLLCHARACTERISTICS"},
+    {0, "UNKNOWN"},     {1, "COFF"},        {2, "CODEVIEW"},      {3, "FPO"},     {4, "MISC"},        {5, "EXCEPTION"},
+    {6, "FIXUP"},       {7, "OMAP_TO_SRC"}, {8, "OMAP_FROM_SRC"}, {9, "BORLAND"}, {10, "RESERVED10"}, {11, "CLSID"},
+    {12, "VC_FEATURE"}, {13, "POGO"},       {14, "ILTCG"},        {15, "MPX"},    {16, "REPRO"},      {20, "EX_DLLCHARACTERISTICS"},
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ResourcesFixedFileInfoSignatures[] = {
@@ -297,41 +195,18 @@ XBinary::XIDSTRING _TABLE_XPE_ResourcesFixedFileInfoSignatures[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ResourcesFixedFileInfoFileFlags[] = {
-    {0x00000001, "DEBUG"},
-    {0x00000010, "INFOINFERRED"},
-    {0x00000004, "PATCHED"},
-    {0x00000002, "PRERELEASE"},
-    {0x00000008, "PRIVATEBUILD"},
-    {0x00000020, "SPECIALBUILD"},
+    {0x00000001, "DEBUG"}, {0x00000010, "INFOINFERRED"}, {0x00000004, "PATCHED"}, {0x00000002, "PRERELEASE"}, {0x00000008, "PRIVATEBUILD"}, {0x00000020, "SPECIALBUILD"},
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ResourcesFixedFileInfoFileOses[] = {
-    {0x00000000, "UNKNOWN"},
-    {0x00010000, "DOS"},
-    {0x00020000, "OS216"},
-    {0x00030000, "OS232"},
-    {0x00040000, "NT"},
-    {0x00050000, "WINCE"},
-    {0x00000000, "_BASE"},
-    {0x00000001, "_WINDOWS16"},
-    {0x00000002, "_PM16"},
-    {0x00000003, "_PM32"},
-    {0x00000004, "_WINDOWS32"},
-    {0x00010001, "DOS_WINDOWS16"},
-    {0x00010004, "DOS_WINDOWS32"},
-    {0x00020002, "OS216_PM16"},
-    {0x00030003, "OS232_PM32"},
+    {0x00000000, "UNKNOWN"},      {0x00010000, "DOS"},           {0x00020000, "OS216"},         {0x00030000, "OS232"},      {0x00040000, "NT"},
+    {0x00050000, "WINCE"},        {0x00000000, "_BASE"},         {0x00000001, "_WINDOWS16"},    {0x00000002, "_PM16"},      {0x00000003, "_PM32"},
+    {0x00000004, "_WINDOWS32"},   {0x00010001, "DOS_WINDOWS16"}, {0x00010004, "DOS_WINDOWS32"}, {0x00020002, "OS216_PM16"}, {0x00030003, "OS232_PM32"},
     {0x00040004, "NT_WINDOWS32"},
 };
 
 XBinary::XIDSTRING _TABLE_XPE_ResourcesFixedFileInfoFileTypes[] = {
-    {0x00000000L, "UNKNOWN"},
-    {0x00000001L, "APP"},
-    {0x00000002L, "DLL"},
-    {0x00000003L, "DRV"},
-    {0x00000004L, "FONT"},
-    {0x00000005L, "VXD"},
-    {0x00000007L, "STATIC_LIB"},
+    {0x00000000L, "UNKNOWN"}, {0x00000001L, "APP"}, {0x00000002L, "DLL"}, {0x00000003L, "DRV"}, {0x00000004L, "FONT"}, {0x00000005L, "VXD"}, {0x00000007L, "STATIC_LIB"},
 };
 
 XBinary::XIDSTRING _TABLE_XPE_NetMetadataFlags[] = {
@@ -473,8 +348,8 @@ qint32 XPE::getType()
 
     quint16 nSubsystem = getOptionalHeader_Subsystem();
 
-    if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS)) { 
-        if(isImportLibraryPresent("ntdll.dll")) {
+    if ((nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE) || (nSubsystem == XPE_DEF::S_IMAGE_SUBSYSTEM_NATIVE_WINDOWS)) {
+        if (isImportLibraryPresent("ntdll.dll")) {
             result = TYPE_NATIVE;
         } else {
             result = TYPE_DRIVER;
@@ -2953,7 +2828,7 @@ bool XPE::isImportPositionHashPresent(QList<quint32> *pListImportHashes, qint32 
 
 bool XPE::isImportLibraryPresent(const QString &sLibrary, PDSTRUCT *pPdStruct)
 {
-     _MEMORY_MAP memoryMap = _getSimpleMemoryMap(FILEPART_HEADER | FILEPART_SECTION | FILEPART_OVERLAY, pPdStruct);
+    _MEMORY_MAP memoryMap = _getSimpleMemoryMap(FILEPART_HEADER | FILEPART_SECTION | FILEPART_OVERLAY, pPdStruct);
 
     QList<QString> listLibraries = getImportNames(&memoryMap, pPdStruct);
 
@@ -9866,11 +9741,10 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                                 // Align
                                 j = (j + 4) & ~3;
 
-                                quint32 nOffset = read_uint32(nStreamOffset); // TODO Check
-                                quint32 nSize = read_uint32(nStreamOffset + 4); // TODO Check
+                                quint32 nOffset = read_uint32(nStreamOffset);    // TODO Check
+                                quint32 nSize = read_uint32(nStreamOffset + 4);  // TODO Check
 
-                                listResult.append(_dataHeaderHex(dataHeadersOptions, sName, dataHeader.dsID, STRUCTID_NET_METADATA_STREAM,
-                                                                 nOffset, nSize));
+                                listResult.append(_dataHeaderHex(dataHeadersOptions, sName, dataHeader.dsID, STRUCTID_NET_METADATA_STREAM, nOffset, nSize));
 
                                 nStreamOffset += 8 + j;
                                 i++;
@@ -10111,8 +9985,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
                                                             dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, SizeOfBlock), 4, "SizeOfBlock", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(
+                    getDataRecord(offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, SizeOfBlock), 4, "SizeOfBlock", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
                 listResult.append(dataHeader);
             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) {
                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
@@ -10143,7 +10017,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 dataHeader.listRecords.append(getDataRecord(12, 4, "VersionLength", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(getDataRecord(16, nVersionLength, "Version", VT_CHAR_ARRAY, DRF_VOLATILE, dataHeadersOptions.pMemoryMap->endian));
                 // Flags
-                dataHeader.listRecords.append(getDataRecordDV(16 + nVersionLength, 2, "Flags", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian, XPE::getNetMetadataFlagsS(), VL_TYPE_FLAGS));
+                dataHeader.listRecords.append(getDataRecordDV(16 + nVersionLength, 2, "Flags", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian,
+                                                              XPE::getNetMetadataFlagsS(), VL_TYPE_FLAGS));
                 dataHeader.listRecords.append(getDataRecord(18 + nVersionLength, 2, "NumberOfStreams", VT_WORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
 
                 listResult.append(dataHeader);
@@ -13455,8 +13330,8 @@ XPE::TLS_HEADER XPE::getTLSHeader()
 
 QMap<quint64, QString> XPE::getImageNtHeadersSignatures()
 {
-    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageNtHeadersSignatures,
-                                              sizeof(_TABLE_XPE_ImageNtHeadersSignatures) / sizeof(XBinary::XIDSTRING), PREFIX_ImageNtHeadersSignatures);
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageNtHeadersSignatures, sizeof(_TABLE_XPE_ImageNtHeadersSignatures) / sizeof(XBinary::XIDSTRING),
+                                              PREFIX_ImageNtHeadersSignatures);
 }
 
 QMap<quint64, QString> XPE::getImageNtHeadersSignaturesS()
@@ -13542,8 +13417,7 @@ QMap<quint64, QString> XPE::getImageOptionalHeaderDllCharacteristicsS()
 QMap<quint64, QString> XPE::getImageOptionalHeaderDataDirectory()
 {
     return XBinary::XIDSTRING_createMapPrefix(_TABLE_XPE_ImageOptionalHeaderDataDirectory,
-                                              sizeof(_TABLE_XPE_ImageOptionalHeaderDataDirectory) / sizeof(XBinary::XIDSTRING),
-                                              PREFIX_ImageOptionalHeaderDataDirectory);
+                                              sizeof(_TABLE_XPE_ImageOptionalHeaderDataDirectory) / sizeof(XBinary::XIDSTRING), PREFIX_ImageOptionalHeaderDataDirectory);
 }
 
 QMap<quint64, QString> XPE::getImageOptionalHeaderDataDirectoryS()

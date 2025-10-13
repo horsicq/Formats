@@ -466,9 +466,9 @@ QList<XBinary::DATA_HEADER> XJavaClass::getDataHeaders(const DATA_HEADERS_OPTION
                 if (info.listCP.size() > 0) {
                     qint64 nLastOffset = info.listCP.last().nOffset;
                     quint8 nLastTag = info.listCP.last().nTag;
-                    
+
                     nConstantPoolSize = nLastOffset - 10;
-                    
+
                     switch (nLastTag) {
                         case CONSTANT_Utf8: {
                             quint16 nLength = read_uint16(nLastOffset + 1, true);
@@ -480,23 +480,15 @@ QList<XBinary::DATA_HEADER> XJavaClass::getDataHeaders(const DATA_HEADERS_OPTION
                         case CONSTANT_Methodref:
                         case CONSTANT_InterfaceMethodref:
                         case CONSTANT_NameAndType:
-                        case CONSTANT_InvokeDynamic:
-                            nConstantPoolSize += 5;
-                            break;
+                        case CONSTANT_InvokeDynamic: nConstantPoolSize += 5; break;
                         case CONSTANT_Long:
-                        case CONSTANT_Double:
-                            nConstantPoolSize += 9;
-                            break;
+                        case CONSTANT_Double: nConstantPoolSize += 9; break;
                         case CONSTANT_Class:
                         case CONSTANT_String:
                         case CONSTANT_MethodType:
                         case CONSTANT_Module:
-                        case CONSTANT_Package:
-                            nConstantPoolSize += 3;
-                            break;
-                        case CONSTANT_MethodHandle:
-                            nConstantPoolSize += 4;
-                            break;
+                        case CONSTANT_Package: nConstantPoolSize += 3; break;
+                        case CONSTANT_MethodHandle: nConstantPoolSize += 4; break;
                     }
                 }
 
@@ -564,7 +556,7 @@ QList<XBinary::DATA_HEADER> XJavaClass::getDataHeaders(const DATA_HEADERS_OPTION
                 }
             } else if (dataHeadersOptions.nID == STRUCTID_INTERFACES) {
                 INFO info = _getInfo(pPdStruct);
-                
+
                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = 2 + (info.nInterfacesCount * 2);
 
@@ -584,7 +576,7 @@ QList<XBinary::DATA_HEADER> XJavaClass::getDataHeaders(const DATA_HEADERS_OPTION
                 }
             } else if (dataHeadersOptions.nID == STRUCTID_FIELDS) {
                 INFO info = _getInfo(pPdStruct);
-                
+
                 qint64 nFieldsSize = 0;
                 for (qint32 i = 0; (i < info.nFieldsCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                     nFieldsSize += 8;
@@ -592,7 +584,7 @@ QList<XBinary::DATA_HEADER> XJavaClass::getDataHeaders(const DATA_HEADERS_OPTION
                         nFieldsSize += 6 + info.listFields[i].listAttributes[j].nAttributeLength;
                     }
                 }
-                
+
                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = 2 + nFieldsSize;
 
@@ -612,7 +604,7 @@ QList<XBinary::DATA_HEADER> XJavaClass::getDataHeaders(const DATA_HEADERS_OPTION
                 }
             } else if (dataHeadersOptions.nID == STRUCTID_METHODS) {
                 INFO info = _getInfo(pPdStruct);
-                
+
                 qint64 nMethodsSize = 0;
                 for (qint32 i = 0; (i < info.nMethodsCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                     nMethodsSize += 8;
@@ -620,7 +612,7 @@ QList<XBinary::DATA_HEADER> XJavaClass::getDataHeaders(const DATA_HEADERS_OPTION
                         nMethodsSize += 6 + info.listMethods[i].listAttributes[j].nAttributeLength;
                     }
                 }
-                
+
                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = 2 + nMethodsSize;
 
@@ -640,12 +632,12 @@ QList<XBinary::DATA_HEADER> XJavaClass::getDataHeaders(const DATA_HEADERS_OPTION
                 }
             } else if (dataHeadersOptions.nID == STRUCTID_ATTRIBUTES) {
                 INFO info = _getInfo(pPdStruct);
-                
+
                 qint64 nAttributesSize = 0;
                 for (qint32 i = 0; (i < info.nAttributesCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                     nAttributesSize += 6 + info.listAttributes[i].nAttributeLength;
                 }
-                
+
                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJavaClass::structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = 2 + nAttributesSize;
 
@@ -684,15 +676,15 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
 
     if (nFileParts & FILEPART_REGION) {
         qint64 nOffset = 8;
-        
+
         // Constant pool
         qint64 nConstantPoolSize = 0;
         if (info.listCP.size() > 0) {
             qint64 nLastOffset = info.listCP.last().nOffset;
             quint8 nLastTag = info.listCP.last().nTag;
-            
+
             nConstantPoolSize = nLastOffset - 10;
-            
+
             switch (nLastTag) {
                 case CONSTANT_Utf8: {
                     quint16 nLength = read_uint16(nLastOffset + 1, true);
@@ -704,23 +696,15 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
                 case CONSTANT_Methodref:
                 case CONSTANT_InterfaceMethodref:
                 case CONSTANT_NameAndType:
-                case CONSTANT_InvokeDynamic:
-                    nConstantPoolSize += 5;
-                    break;
+                case CONSTANT_InvokeDynamic: nConstantPoolSize += 5; break;
                 case CONSTANT_Long:
-                case CONSTANT_Double:
-                    nConstantPoolSize += 9;
-                    break;
+                case CONSTANT_Double: nConstantPoolSize += 9; break;
                 case CONSTANT_Class:
                 case CONSTANT_String:
                 case CONSTANT_MethodType:
                 case CONSTANT_Module:
-                case CONSTANT_Package:
-                    nConstantPoolSize += 3;
-                    break;
-                case CONSTANT_MethodHandle:
-                    nConstantPoolSize += 4;
-                    break;
+                case CONSTANT_Package: nConstantPoolSize += 3; break;
+                case CONSTANT_MethodHandle: nConstantPoolSize += 4; break;
             }
         }
 

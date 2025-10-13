@@ -112,9 +112,8 @@ public:
     static QList<XBinary::FPART> getFileParts(XBinary::FT fileType, QIODevice *pDevice, quint32 nFileParts, qint32 nLimit = -1, bool bIsImage = false,
                                               XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
 
-    static QList<XBinary::ARCHIVERECORD> getArchiveRecords(XBinary::FT fileType, QIODevice *pDevice, qint32 nLimit = -1, bool bIsImage = false,
-                                              XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
-
+    static QList<XBinary::ARCHIVERECORD> getArchiveRecords(XBinary::FT fileType, QIODevice *pDevice, qint32 nLimit = -1, bool bIsImage = false, XADDR nModuleAddress = -1,
+                                                           XBinary::PDSTRUCT *pPdStruct = nullptr);
 
     static qint32 getDataRecordValues(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_RECORDS_OPTIONS &dataRecordsOptions,
                                       QList<XBinary::DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles, bool bIsImage = false, XADDR nModuleAddress = -1,

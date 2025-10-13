@@ -27,14 +27,14 @@ namespace XATARIST_DEF {
 const quint16 MAGIC = 0x601A;
 
 struct HEADER {
-    quint16 nMagic;         // 0x601A
-    quint32 nTextSize;      // Size of text segment
-    quint32 nDataSize;      // Size of data segment
-    quint32 nBssSize;       // Size of BSS segment
-    quint32 nSymbolSize;    // Size of symbol table
-    quint32 nReserved;      // Reserved (0)
-    quint32 nFlags;         // Flags
-    quint16 nRelocation;    // Relocation flag
+    quint16 nMagic;       // 0x601A
+    quint32 nTextSize;    // Size of text segment
+    quint32 nDataSize;    // Size of data segment
+    quint32 nBssSize;     // Size of BSS segment
+    quint32 nSymbolSize;  // Size of symbol table
+    quint32 nReserved;    // Reserved (0)
+    quint32 nFlags;       // Flags
+    quint16 nRelocation;  // Relocation flag
 };
 }  // namespace XATARIST_DEF
 
