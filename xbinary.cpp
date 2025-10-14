@@ -1417,6 +1417,22 @@ void XBinary::setFileFormatSize(qint64 nFileFormatSize)
     m_nFileFormatSize = nFileFormatSize;
 }
 
+bool XBinary::setFileDateTime(const QString &sFileName, const QDateTime &dateTime)
+{
+    // Try to set both modification and access times via Qt API (member function)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QFile file;
+    file.setFileName(sFileName);
+    bool bMod = file.setFileTime(dateTime, QFileDevice::FileModificationTime);
+    bool bAccess = file.setFileTime(dateTime, QFileDevice::FileAccessTime);
+    return (bMod || bAccess);
+#else
+    Q_UNUSED(sFileName)
+    Q_UNUSED(dateTime)
+    return false;
+#endif
+}
+
 qint64 XBinary::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
@@ -13724,6 +13740,28 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
                             }
 
                             file.close();
+
+                            // Set file datetime if provided by the archive record
+                            if (bResult) {
+                                QVariant vDateTime = record.mapProperties.value(XBinary::FPART_PROP_DATETIME);
+                                if (vDateTime.isValid() && !vDateTime.isNull()) {
+                                    QDateTime dt;
+                                    if (vDateTime.canConvert<QDateTime>()) {
+                                        dt = vDateTime.toDateTime();
+                                    } else if (vDateTime.canConvert<quint64>()) {
+                                        // Some formats may store timestamp as uint64 (seconds since epoch)
+                                        quint64 t = vDateTime.toULongLong();
+                                        dt = QDateTime::fromSecsSinceEpoch((qint64)t);
+                                    } else if (vDateTime.canConvert<qint64>()) {
+                                        qint64 t = vDateTime.toLongLong();
+                                        dt = QDateTime::fromSecsSinceEpoch(t);
+                                    }
+
+                                    if (dt.isValid()) {
+                                        XBinary::setFileDateTime(sFilePath, dt);
+                                    }
+                                }
+                            }
                         } else {
                             bResult = false;
                         }

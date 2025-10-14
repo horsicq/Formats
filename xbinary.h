@@ -1041,6 +1041,9 @@ public:
 
     void setFileFormatSize(qint64 nFileFormatSize);
 
+    // Filesystem helpers
+    static bool setFileDateTime(const QString &sFileName, const QDateTime &dateTime);
+
     virtual OFFSETSIZE getSignOffsetSize();  // TODO rename
 
     void setOsType(OSNAME osName);
