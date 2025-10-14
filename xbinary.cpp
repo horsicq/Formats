@@ -467,10 +467,11 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
     return listResult;
 }
 
-bool XBinary::packFolderToDevice(const QString &sFolderName, QIODevice *pDevice, PDSTRUCT *pPdStruct)
+bool XBinary::packFolderToDevice(const QString &sFolderName, QIODevice *pDevice, void *pOptions, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(sFolderName)
     Q_UNUSED(pDevice)
+    Q_UNUSED(pOptions)
     Q_UNUSED(pPdStruct)
 
     return false;

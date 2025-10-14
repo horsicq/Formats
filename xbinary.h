@@ -2033,7 +2033,7 @@ public:
 
     virtual qint64 getNumberOfArchiveRecords(PDSTRUCT *pPdStruct);
     virtual QList<ARCHIVERECORD> getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct);
-    virtual bool packFolderToDevice(const QString &sFolderName, QIODevice *pDevice, PDSTRUCT *pPdStruct);
+    virtual bool packFolderToDevice(const QString &sFolderName, QIODevice *pDevice, void *pOptions, PDSTRUCT *pPdStruct);
 
     virtual bool initUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
     virtual ARCHIVERECORD infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
