@@ -220,7 +220,15 @@ public:
         FPART_PROP_INFO,
         FPART_PROP_EXT,
         FPART_PROP_ORIGINALNAME,
-        FPART_PROP_WINDOWSIZE
+        FPART_PROP_WINDOWSIZE,
+        FPART_PROP_FILEMODE,
+        FPART_PROP_UID,
+        FPART_PROP_GID,
+        FPART_PROP_LINKNAME,
+        FPART_PROP_USERNAME,
+        FPART_PROP_GROUPNAME,
+        FPART_PROP_DEVVERSION,
+        FPART_PROP_PREFIX
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
@@ -2026,7 +2034,7 @@ public:
 
     enum CRC_TYPE {
         CRC_TYPE_UNKNOWN = 0,
-        CRC_TYPE_ZIP,
+        CRC_TYPE_EDB88320,
     };
 
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);

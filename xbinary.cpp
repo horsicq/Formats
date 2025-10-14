@@ -13700,6 +13700,29 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
                                 bResult = false;
                             }
 
+                            if (bResult) {
+
+                                XBinary::CRC_TYPE crcType = (XBinary::CRC_TYPE)record.mapProperties.value(XBinary::FPART_PROP_CRC_TYPE, XBinary::CRC_TYPE_UNKNOWN).toUInt();
+
+                                if (crcType != XBinary::CRC_TYPE_UNKNOWN) {
+                                    if (crcType == XBinary::CRC_TYPE_EDB88320) {
+                                        XBinary binary(pDevice);
+
+                                        pDevice->reset();
+
+                                        quint32 nCalculatedCRC = binary._getCRC32(0, -1, 0xFFFFFFFF, XBinary::_getCRC32Table_EDB88320(), pPdStruct);
+                                        quint32 nStoredCRC = record.mapProperties.value(XBinary::FPART_PROP_CRC_VALUE, 0).toUInt();
+
+                                        if (nStoredCRC != nCalculatedCRC) {
+    #ifdef QT_DEBUG
+                                            qDebug() << "CRC is false for" << sFilePath << ": stored=" << QString::number(nStoredCRC, 16) << ", calc="
+                                                     << QString::number(nCalculatedCRC, 16);
+    #endif
+                                        }
+                                    }
+                                }
+                            }
+
                             file.close();
                         } else {
                             bResult = false;
