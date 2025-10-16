@@ -469,12 +469,35 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
 
 bool XBinary::packFolderToDevice(const QString &sFolderName, QIODevice *pDevice, void *pOptions, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(sFolderName)
-    Q_UNUSED(pDevice)
-    Q_UNUSED(pOptions)
-    Q_UNUSED(pPdStruct)
+    bool bResult = false;
 
-    return false;
+    PDSTRUCT pdStructEmpty = createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    // Validate input
+    if (!isDirectoryExists(sFolderName) || !pDevice || !pDevice->isWritable()) {
+        return false;
+    }
+
+    // Initialize pack state
+    PACK_STATE state = {};
+
+    // Initialize packing (this writes signature/header)
+    if (!initPack(&state, pDevice, pOptions, pPdStruct)) {
+        return false;
+    }
+
+    // Add entire folder contents
+    bResult = addFolder(&state, sFolderName, pPdStruct);
+
+    // Finish packing (writes end marker and cleans up)
+    // Always call finishPack() even if addFolder() failed, to ensure cleanup
+    bool bFinish = finishPack(&state, pPdStruct);
+
+    // Return true only if both operations succeeded
+    return bResult && bFinish;
 }
 
 qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState)
@@ -13667,6 +13690,59 @@ bool XBinary::moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
     return false;
 }
 
+bool XBinary::finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pState)
+    Q_UNUSED(pPdStruct)
+
+    return false;
+}
+
+bool XBinary::initPack(PACK_STATE *pState, QIODevice *pDestDevice, void *pOptions, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pState)
+    Q_UNUSED(pDestDevice)
+    Q_UNUSED(pOptions)
+    Q_UNUSED(pPdStruct)
+
+    return false;
+}
+
+bool XBinary::addDevice(PACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pState)
+    Q_UNUSED(pDevice)
+    Q_UNUSED(pPdStruct)
+
+    return false;
+}
+
+bool XBinary::addFile(PACK_STATE *pState, const QString &sFileName, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pState)
+    Q_UNUSED(sFileName)
+    Q_UNUSED(pPdStruct)
+
+    return false;
+}
+
+bool XBinary::addFolder(PACK_STATE *pState, const QString &sDirectoryPath, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pState)
+    Q_UNUSED(sDirectoryPath)
+    Q_UNUSED(pPdStruct)
+
+    return false;
+}
+
+bool XBinary::finishPack(PACK_STATE *pState, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pState)
+    Q_UNUSED(pPdStruct)
+
+    return false;
+}
+
 bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderName, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pDevice)
@@ -13700,18 +13776,30 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
                     if (!sFileName.isEmpty()) {
                         QString sFilePath = sFolderName + QDir::separator() + sFileName;
 
-                        // Create directory structure if needed
-                        QFileInfo fileInfo(sFilePath);
-                        QString sDirPath = fileInfo.absolutePath();
+                        // Check if this is a directory entry (ends with '/' and has zero size)
+                        bool bIsDirectory = sFileName.endsWith(QLatin1Char('/')) && (record.nDecompressedSize == 0);
 
-                        if (!dir.exists(sDirPath)) {
-                            dir.mkpath(sDirPath);
+                        // Create directory structure if needed
+                        if (bIsDirectory) {
+                            // This is a directory entry - just create the directory
+                            if (!dir.exists(sFilePath)) {
+                                dir.mkpath(sFilePath);
+                            }
+                        } else {
+                            // This is a file entry
+                            QFileInfo fileInfo(sFilePath);
+                            QString sDirPath = fileInfo.absolutePath();
+
+                            if (!dir.exists(sDirPath)) {
+                                dir.mkpath(sDirPath);
+                            }
                         }
 
-                        // Unpack file
-                        QFile file(sFilePath);
+                        // Unpack file (skip if this is a directory entry)
+                        if (!bIsDirectory) {
+                            QFile file(sFilePath);
 
-                        if (file.open(QIODevice::WriteOnly)) {
+                            if (file.open(QIODevice::WriteOnly)) {
                             if (!unpackCurrent(&state, &file, pPdStruct)) {
                                 bResult = false;
                             }
@@ -13765,6 +13853,7 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
                         } else {
                             bResult = false;
                         }
+                        }  // end if (!bIsDirectory)
                     }
                 } else {
                     bResult = false;

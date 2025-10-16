@@ -268,6 +268,22 @@ public:
         void *pContext;  // Format-specific context
     };
 
+    enum PATH_MODE {
+        PATH_MODE_DEFAULT = 0,
+        PATH_MODE_RELATIVE = 1,   // Store relative paths from base path
+        PATH_MODE_BASENAME = 2,   // Store only filename (no directories)
+        PATH_MODE_ABSOLUTE = 3    // Store absolute paths
+    };
+
+    struct PACK_STATE {
+        QIODevice *pDevice;       // Output device for the archive
+        qint64 nCurrentOffset;    // Current write position in archive
+        qint32 nNumberOfRecords;  // Number of records added so far
+        void *pContext;           // Format-specific context (cast to format's context struct)
+        PATH_MODE pathMode;       // Path storage mode
+        QString sBasePath;        // Base path for relative path calculation
+    };
+
     static qint32 _readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
     static qint32 _readDevice(DECOMPRESS_STATE *pState);
     static qint32 _writeDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
@@ -2045,12 +2061,21 @@ public:
 
     virtual qint64 getNumberOfArchiveRecords(PDSTRUCT *pPdStruct);
     virtual QList<ARCHIVERECORD> getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct);
-    virtual bool packFolderToDevice(const QString &sFolderName, QIODevice *pDevice, void *pOptions, PDSTRUCT *pPdStruct);
+    bool packFolderToDevice(const QString &sFolderName, QIODevice *pDevice, void *pOptions, PDSTRUCT *pPdStruct);
 
+    // Streaming unpacking API
     virtual bool initUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
     virtual ARCHIVERECORD infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
     virtual bool unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     virtual bool moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+    virtual bool finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+
+    // Streaming packing API
+    virtual bool initPack(PACK_STATE *pState, QIODevice *pDestDevice, void *pOptions, PDSTRUCT *pPdStruct = nullptr);
+    virtual bool addDevice(PACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
+    virtual bool addFile(PACK_STATE *pState, const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
+    virtual bool addFolder(PACK_STATE *pState, const QString &sDirectoryPath, PDSTRUCT *pPdStruct = nullptr);
+    virtual bool finishPack(PACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
 
     bool unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderName, PDSTRUCT *pPdStruct = nullptr);
 
