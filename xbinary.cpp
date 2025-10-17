@@ -127,6 +127,7 @@ XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
     {XBinary::COMPRESS_METHOD_DEFLATE64, "Deflate64", QString("Deflate64")},
     {XBinary::COMPRESS_METHOD_BZIP2, "Bzip2", QString("Bzip2")},
     {XBinary::COMPRESS_METHOD_LZMA, "LZMA", QString("LZMA")},
+    {XBinary::COMPRESS_METHOD_LZMA2, "LZMA2", QString("LZMA2")},
     {XBinary::COMPRESS_METHOD_LZW_PDF, "LZW_PDF", QString("LZW PDF")},
     {XBinary::COMPRESS_METHOD_ASCII85, "ASCII85", QString("ASCII85 PDF")},
     {XBinary::COMPRESS_METHOD_PPMD, "PPMD", QString("PPMD")},  // TODO
@@ -265,6 +266,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_SZDD, "SZDD", QString("SZDD")},
     {XBinary::FT_BZIP2, "BZip2", QString("BZip2")},
     {XBinary::FT_XZ, "XZ", QString("XZ")},
+    {XBinary::FT_LZIP, "LZIP", QString("Lzip (LZMA)")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -6909,6 +6911,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'7z'BCAF271C", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_7Z);
+        } else if (compareSignature(&memoryMap, "'LZIP'", 0)) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_LZIP);
         } else if (compareSignature(&memoryMap, "89'PNG\r\n'1A0A", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_PNG);
@@ -7229,6 +7234,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_BZIP2;
     } else if (pStFileTypes->contains(FT_XZ)) {
         result = FT_XZ;
+    } else if (pStFileTypes->contains(FT_LZIP)) {
+        result = FT_LZIP;
 
         // Fonts and images/media
     } else if (pStFileTypes->contains(FT_TTF)) {
@@ -7403,6 +7410,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_SZDD)) listResult.append(FT_SZDD);
         if (stFileTypes.contains(FT_BZIP2)) listResult.append(FT_BZIP2);
         if (stFileTypes.contains(FT_XZ)) listResult.append(FT_XZ);
+        if (stFileTypes.contains(FT_LZIP)) listResult.append(FT_LZIP);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {

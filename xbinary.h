@@ -170,6 +170,7 @@ public:
         COMPRESS_METHOD_DEFLATE64,
         COMPRESS_METHOD_BZIP2,
         COMPRESS_METHOD_LZMA,
+        COMPRESS_METHOD_LZMA2,
         COMPRESS_METHOD_LZW_PDF,
         COMPRESS_METHOD_ASCII85,
         COMPRESS_METHOD_PPMD,
@@ -480,6 +481,7 @@ public:
         FT_DJVU,
         FT_SZDD,
         FT_BZIP2,
+        FT_LZIP,
         FT_XZ,
 
         // TODO more
