@@ -60,7 +60,9 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_DJVU, fileType)) return new XDJVU(pDevice);
     // DER is a generic ASN.1 container; we map it under DOCUMENT if requested
     else if (XBinary::checkFileType(XBinary::FT_DER, fileType)) return new XDER(pDevice);
+#ifdef USE_DEX
     else if (XBinary::checkFileType(XBinary::FT_ANDROIDXML, fileType) || XBinary::checkFileType(XBinary::FT_ANDROIDASRC, fileType)) return new XAndroidBinary(pDevice);
+#endif
     else if (XBinary::checkFileType(XBinary::FT_TEXT, fileType)) return new XText(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_UTF8, fileType)) return new XText(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_UNICODE, fileType)) return new XText(pDevice);
@@ -819,8 +821,10 @@ bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QS
 
     QList<XBinary::ARCHIVERECORD> listArchiveRecords = XFormats::getArchiveRecords(fileType, pDevice, -1, false, -1, pPdStruct);
 
+#ifdef USE_ARCHIVE
     XDecompress xDecompress;
     _connect(&xDecompress);
+#endif
 
     return extractArchiveRecordsToFolder(&listArchiveRecords, pDevice, sFolderName, pPdStruct);
 }
@@ -838,8 +842,10 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 #endif
 
     if (nNumberOfRecords > 0) {
+#ifdef USE_ARCHIVE
         XDecompress xDecompress;
         _connect(&xDecompress);
+#endif
 
         if (XBinary::createDirectory(sFolderName)) {
 #ifdef QT_DEBUG
@@ -907,6 +913,7 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 #ifdef QT_DEBUG
                             qDebug("XFormats::extractArchiveRecordsToFolder: Starting decompression for %s", sPrefName.toLatin1().data());
 #endif
+#ifdef USE_ARCHIVE
                             if (xDecompress.decompressArchiveRecord(archiveRecord, pDecompressIn, pDecompressOut, pPdStruct)) {
 #ifdef QT_DEBUG
                                 qDebug("XFormats::extractArchiveRecordsToFolder: Decompression successful, checking CRC");
@@ -928,6 +935,7 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
                                 emit errorMessage(QString("%1: %2").arg(tr("Cannot decompress"), sPrefName));
                                 bResult = false;
                             }
+#endif
                         }
 
                         if (bHandle) {

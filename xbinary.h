@@ -34,6 +34,7 @@
 #include <QIODevice>
 #include <QMap>
 #include <QMutex>
+#include <QPair>
 #include <QSet>
 #include <QTemporaryFile>
 #include <QTextStream>
@@ -1811,6 +1812,10 @@ public:
     // Converts MS-DOS packed date (nDosDate) and time (nDosTime) into QDateTime (local time).
     // If the values are invalid (e.g., zero month/day), returns an invalid QDateTime.
     static QDateTime dosDateTimeToQDateTime(quint16 nDosDate, quint16 nDosTime);
+    // Converts QDateTime to MS-DOS packed date and time format.
+    // Returns a pair where first is nDosDate and second is nDosTime.
+    // If date/time is invalid or out of DOS range (1980-2107), returns {0, 0}.
+    static QPair<quint16, quint16> qDateTimeToDosDateTime(const QDateTime &dateTime);
 
     static QString valueToFlagsString(quint64 nValue, const QMap<quint64, QString> &mapFlags, VL_TYPE vlType);
 
@@ -2054,6 +2059,7 @@ public:
     enum CRC_TYPE {
         CRC_TYPE_UNKNOWN = 0,
         CRC_TYPE_EDB88320,
+        CRC_TYPE_ADLER32
     };
 
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);

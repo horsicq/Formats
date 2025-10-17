@@ -10923,6 +10923,34 @@ QDateTime XBinary::dosDateTimeToQDateTime(quint16 nDosDate, quint16 nDosTime)
     return result;
 }
 
+QPair<quint16, quint16> XBinary::qDateTimeToDosDateTime(const QDateTime &dateTime)
+{
+    QPair<quint16, quint16> result = {0, 0};
+
+    if (dateTime.isValid()) {
+        QDate date = dateTime.date();
+        QTime time = dateTime.time();
+
+        quint16 nDosDate = 0;
+        quint16 nDosTime = 0;
+
+        if (date.isValid()) {
+            qint32 nYear = date.year();
+            if (nYear >= 1980 && nYear <= 2107) {
+                nDosDate = (date.day() & 0x1F) | ((date.month() & 0x0F) << 5) | (((nYear - 1980) & 0x7F) << 9);
+            }
+        }
+
+        if (time.isValid()) {
+            nDosTime = ((time.second() / 2) & 0x1F) | ((time.minute() & 0x3F) << 5) | ((time.hour() & 0x1F) << 11);
+        }
+
+        result = {nDosDate, nDosTime};
+    }
+
+    return result;
+}
+
 QString XBinary::valueToFlagsString(quint64 nValue, const QMap<quint64, QString> &mapFlags, VL_TYPE vlType)
 {
     QString sResult;
@@ -13800,60 +13828,64 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
                             QFile file(sFilePath);
 
                             if (file.open(QIODevice::WriteOnly)) {
-                            if (!unpackCurrent(&state, &file, pPdStruct)) {
-                                bResult = false;
-                            }
+                                if (!unpackCurrent(&state, &file, pPdStruct)) {
+                                    bResult = false;
+                                }
 
-                            if (bResult) {
+                                if (bResult) {
+                                    XBinary::CRC_TYPE crcType = (XBinary::CRC_TYPE)record.mapProperties.value(XBinary::FPART_PROP_CRC_TYPE, XBinary::CRC_TYPE_UNKNOWN).toUInt();
 
-                                XBinary::CRC_TYPE crcType = (XBinary::CRC_TYPE)record.mapProperties.value(XBinary::FPART_PROP_CRC_TYPE, XBinary::CRC_TYPE_UNKNOWN).toUInt();
-
-                                if (crcType != XBinary::CRC_TYPE_UNKNOWN) {
-                                    if (crcType == XBinary::CRC_TYPE_EDB88320) {
+                                    if (crcType != XBinary::CRC_TYPE_UNKNOWN) {
                                         XBinary binary(pDevice);
 
                                         pDevice->reset();
 
-                                        quint32 nCalculatedCRC = binary._getCRC32(0, -1, 0xFFFFFFFF, XBinary::_getCRC32Table_EDB88320(), pPdStruct);
+                                        quint32 nCalculatedCRC = 0;
+
+                                        if (crcType == XBinary::CRC_TYPE_EDB88320) {
+                                            nCalculatedCRC = binary._getCRC32(0, -1, 0xFFFFFFFF, XBinary::_getCRC32Table_EDB88320(), pPdStruct);
+                                        } else if (crcType == XBinary::CRC_TYPE_ADLER32) {
+                                            nCalculatedCRC = binary.getAdler32(0, -1, pPdStruct);
+                                        }
+
                                         quint32 nStoredCRC = record.mapProperties.value(XBinary::FPART_PROP_CRC_VALUE, 0).toUInt();
 
                                         if (nStoredCRC != nCalculatedCRC) {
-    #ifdef QT_DEBUG
+#ifdef QT_DEBUG
                                             qDebug() << "CRC is false for" << sFilePath << ": stored=" << QString::number(nStoredCRC, 16) << ", calc="
                                                      << QString::number(nCalculatedCRC, 16);
-    #endif
+#endif
                                         }
                                     }
                                 }
-                            }
 
-                            file.close();
+                                file.close();
 
-                            // Set file datetime if provided by the archive record
-                            if (bResult) {
-                                QVariant vDateTime = record.mapProperties.value(XBinary::FPART_PROP_DATETIME);
-                                if (vDateTime.isValid() && !vDateTime.isNull()) {
-                                    QDateTime dt;
-                                    if (vDateTime.canConvert<QDateTime>()) {
-                                        dt = vDateTime.toDateTime();
-                                    } else if (vDateTime.canConvert<quint64>()) {
-                                        // Some formats may store timestamp as uint64 (seconds since epoch)
-                                        quint64 t = vDateTime.toULongLong();
-                                        dt = QDateTime::fromSecsSinceEpoch((qint64)t);
-                                    } else if (vDateTime.canConvert<qint64>()) {
-                                        qint64 t = vDateTime.toLongLong();
-                                        dt = QDateTime::fromSecsSinceEpoch(t);
-                                    }
+                                // Set file datetime if provided by the archive record
+                                if (bResult) {
+                                    QVariant vDateTime = record.mapProperties.value(XBinary::FPART_PROP_DATETIME);
+                                    if (vDateTime.isValid() && !vDateTime.isNull()) {
+                                        QDateTime dt;
+                                        if (vDateTime.canConvert<QDateTime>()) {
+                                            dt = vDateTime.toDateTime();
+                                        } else if (vDateTime.canConvert<quint64>()) {
+                                            // Some formats may store timestamp as uint64 (seconds since epoch)
+                                            quint64 t = vDateTime.toULongLong();
+                                            dt = QDateTime::fromSecsSinceEpoch((qint64)t);
+                                        } else if (vDateTime.canConvert<qint64>()) {
+                                            qint64 t = vDateTime.toLongLong();
+                                            dt = QDateTime::fromSecsSinceEpoch(t);
+                                        }
 
-                                    if (dt.isValid()) {
-                                        XBinary::setFileDateTime(sFilePath, dt);
+                                        if (dt.isValid()) {
+                                            XBinary::setFileDateTime(sFilePath, dt);
+                                        }
                                     }
                                 }
+                            } else {
+                                bResult = false;
                             }
-                        } else {
-                            bResult = false;
                         }
-                        }  // end if (!bIsDirectory)
                     }
                 } else {
                     bResult = false;
