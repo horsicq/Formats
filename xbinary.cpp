@@ -13905,3 +13905,47 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
 
     return bResult;
 }
+
+bool XBinary::initFFSearch(FFSEARCH_STATE *pState, QIODevice *pDevice, FFSEARCH_OPTIONS *pOptions, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pOptions)
+    Q_UNUSED(pPdStruct)
+
+    // Initialize search state
+    pState->pDevice = pDevice;
+    pState->nCurrentOffset = 0;
+    pState->pContext = nullptr;
+
+    return true;
+}
+
+qint64 XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pState)
+    Q_UNUSED(pPdStruct)
+
+    // Return -1 to indicate no search found or search not implemented
+    // Derived classes should override this method for format-specific search
+    return -1;
+}
+
+bool XBinary::finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    if (!pState) {
+        return false;
+    }
+
+    // Clean up search state
+    pState->pDevice = nullptr;
+    pState->nCurrentOffset = 0;
+
+    if (pState->pContext) {
+        delete[] (char *)pState->pContext;
+        pState->pContext = nullptr;
+    }
+
+    return true;
+}
+

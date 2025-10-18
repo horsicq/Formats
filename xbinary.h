@@ -2087,6 +2087,21 @@ public:
 
     bool unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderName, PDSTRUCT *pPdStruct = nullptr);
 
+    struct FFSEARCH_STATE {
+        QIODevice *pDevice;       // Input device 
+        qint64 nCurrentOffset;    // Current position
+        void *pContext;           // Format-specific context (cast to format's context struct)
+    };
+
+    struct FFSEARCH_OPTIONS {
+        qint64 nStartOffset;        // Start offset for search
+        qint64 nSize;               // Size for search
+    };
+
+    virtual bool initFFSearch(FFSEARCH_STATE *pState, QIODevice *pDevice, FFSEARCH_OPTIONS *pOptions, PDSTRUCT *pPdStruct = nullptr);
+    virtual qint64 searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+    virtual bool finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);   
+
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;
 
