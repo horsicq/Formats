@@ -3082,7 +3082,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
     bool bUseBMH = (st == ST_COMPAREBYTES) && (nArraySize >= 2);
     if (bUseBMH) {
         qint32 m = (qint32)qMin<qint64>(nArraySize, (qint64)0x7fffffff);
-        for (int i = 0; i < 256; ++i) bmhShift[i] = m;
+        memset(bmhShift, m, sizeof(bmhShift));  // Initialize all entries to m
         // Set shifts for all but last character
         for (int i = 0; i < m - 1; ++i) bmhShift[(quint8)pArray[i]] = m - 1 - i;
     }
@@ -3096,8 +3096,11 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         }
     }
 
+    const qint64 nBufferSize = READWRITE_BUFFER_SIZE + (nArraySize - 1);
+    const char nLastSearchChar = (st == ST_COMPAREBYTES) ? pArray[nArraySize - 1] : 0;
+
     while ((nSize > nArraySize - 1) && (!(pPdStruct->bIsStop))) {
-        nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + (nArraySize - 1)), nSize);
+        nTemp = (nSize < nBufferSize) ? nSize : nBufferSize;
 
         if (m_pConstMemory) {
             pBuffer = (char *)m_pConstMemory + nOffset;
@@ -3115,6 +3118,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 const void *p = memchr(pBuffer, (unsigned char)pArray[0], (size_t)nTemp);
                 if (p) {
                     nResult = nOffset + ((const char *)p - pBuffer);
+                    break;
                 }
             } else if (bUseBMH) {
                 // Boyer–Moore–Horspool over the current chunk
@@ -3122,12 +3126,11 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 qint64 hayLen = nTemp;
                 qint64 m = nArraySize;
                 qint64 i = 0;
-                const char last = pArray[m - 1];
-                qint64 limit = hayLen - m;
+                const qint64 limit = hayLen - m;
                 while (i <= limit) {
                     unsigned char c = (unsigned char)hay[i + m - 1];
-                    if (c == (unsigned char)last) {
-                        // Potential match; verify
+                    if (c == (unsigned char)nLastSearchChar) {
+                        // Potential match; verify all bytes
                         if (memcmp(hay + i, pArray, (size_t)m) == 0) {
                             nResult = nOffset + i;
                             break;
@@ -3137,7 +3140,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 }
             } else {
                 // Fallback naive scan
-                qint64 limit = nTemp - (nArraySize - 1);
+                const qint64 limit = nTemp - (nArraySize - 1);
                 for (qint64 i = 0; i < limit; ++i) {
                     if (compareMemory(pBuffer + i, pArray, nArraySize)) {
                         nResult = nOffset + i;
@@ -3150,7 +3153,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             const char *hay = pBuffer;
             qint64 hayLen = nTemp;
             qint64 m = nArraySize;
-            qint64 limit = hayLen - (m - 1);
+            const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
             while (j < limit) {
                 const void *pz = memchr(hay + j, 0, (size_t)(hayLen - j));
@@ -3166,7 +3169,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             const unsigned char *hay = (const unsigned char *)pBuffer;
             qint64 hayLen = nTemp;
             qint64 m = nArraySize;
-            qint64 limit = hayLen - (m - 1);
+            const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
             while (j < limit) {
                 // Skip non-ANSI bytes to the start of an ANSI run
@@ -3185,7 +3188,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             const unsigned char *hay = (const unsigned char *)pBuffer;
             qint64 hayLen = nTemp;
             qint64 m = nArraySize;
-            qint64 limit = hayLen - (m - 1);
+            const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
             while (j < limit) {
                 // Skip ANSI bytes to the start of a non-ANSI run
@@ -3204,7 +3207,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             const unsigned char *hay = (const unsigned char *)pBuffer;
             qint64 hayLen = nTemp;
             qint64 m = nArraySize;
-            qint64 limit = hayLen - (m - 1);
+            const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
             while (j < limit) {
                 // Skip bytes that are ANSI or zero to the start of a desired run
@@ -3231,7 +3234,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             const unsigned char *hay = (const unsigned char *)pBuffer;
             qint64 hayLen = nTemp;
             qint64 m = nArraySize;
-            qint64 limit = hayLen - (m - 1);
+            const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
             while (j < limit) {
                 // Skip bytes that are not digits to the start of a desired run
@@ -3321,50 +3324,96 @@ qint64 XBinary::find_int16(qint64 nOffset, qint64 nSize, qint16 nValue, bool bIs
 
 qint64 XBinary::find_uint32(qint64 nOffset, qint64 nSize, quint32 nValue, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
+    quint8 baValue[4];
+    
     if (bIsBigEndian) {
-        nValue = qFromBigEndian(nValue);
+        baValue[0] = (quint8)(nValue >> 24);
+        baValue[1] = (quint8)(nValue >> 16);
+        baValue[2] = (quint8)(nValue >> 8);
+        baValue[3] = (quint8)nValue;
     } else {
-        nValue = qFromLittleEndian(nValue);
+        baValue[0] = (quint8)nValue;
+        baValue[1] = (quint8)(nValue >> 8);
+        baValue[2] = (quint8)(nValue >> 16);
+        baValue[3] = (quint8)(nValue >> 24);
     }
 
-    return find_array(nOffset, nSize, (char *)&nValue, 4, pPdStruct);
+    return find_array(nOffset, nSize, (char *)baValue, 4, pPdStruct);
 }
 
 qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     quint32 _value = (quint32)nValue;
-
+    quint8 baValue[4];
+    
     if (bIsBigEndian) {
-        _value = qFromBigEndian(_value);
+        baValue[0] = (quint8)(_value >> 24);
+        baValue[1] = (quint8)(_value >> 16);
+        baValue[2] = (quint8)(_value >> 8);
+        baValue[3] = (quint8)_value;
     } else {
-        _value = qFromLittleEndian(_value);
+        baValue[0] = (quint8)_value;
+        baValue[1] = (quint8)(_value >> 8);
+        baValue[2] = (quint8)(_value >> 16);
+        baValue[3] = (quint8)(_value >> 24);
     }
 
-    return find_array(nOffset, nSize, (char *)&_value, 4, pPdStruct);
+    return find_array(nOffset, nSize, (char *)baValue, 4, pPdStruct);
 }
 
 qint64 XBinary::find_uint64(qint64 nOffset, qint64 nSize, quint64 nValue, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
+    quint8 baValue[8];
+    
     if (bIsBigEndian) {
-        nValue = qFromBigEndian(nValue);
+        baValue[0] = (quint8)(nValue >> 56);
+        baValue[1] = (quint8)(nValue >> 48);
+        baValue[2] = (quint8)(nValue >> 40);
+        baValue[3] = (quint8)(nValue >> 32);
+        baValue[4] = (quint8)(nValue >> 24);
+        baValue[5] = (quint8)(nValue >> 16);
+        baValue[6] = (quint8)(nValue >> 8);
+        baValue[7] = (quint8)nValue;
     } else {
-        nValue = qFromLittleEndian(nValue);
+        baValue[0] = (quint8)nValue;
+        baValue[1] = (quint8)(nValue >> 8);
+        baValue[2] = (quint8)(nValue >> 16);
+        baValue[3] = (quint8)(nValue >> 24);
+        baValue[4] = (quint8)(nValue >> 32);
+        baValue[5] = (quint8)(nValue >> 40);
+        baValue[6] = (quint8)(nValue >> 48);
+        baValue[7] = (quint8)(nValue >> 56);
     }
 
-    return find_array(nOffset, nSize, (char *)&nValue, 8, pPdStruct);
+    return find_array(nOffset, nSize, (char *)baValue, 8, pPdStruct);
 }
 
 qint64 XBinary::find_int64(qint64 nOffset, qint64 nSize, qint64 nValue, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     quint64 _value = (quint64)nValue;
-
+    quint8 baValue[8];
+    
     if (bIsBigEndian) {
-        _value = qFromBigEndian(_value);
+        baValue[0] = (quint8)(_value >> 56);
+        baValue[1] = (quint8)(_value >> 48);
+        baValue[2] = (quint8)(_value >> 40);
+        baValue[3] = (quint8)(_value >> 32);
+        baValue[4] = (quint8)(_value >> 24);
+        baValue[5] = (quint8)(_value >> 16);
+        baValue[6] = (quint8)(_value >> 8);
+        baValue[7] = (quint8)_value;
     } else {
-        _value = qFromLittleEndian(_value);
+        baValue[0] = (quint8)_value;
+        baValue[1] = (quint8)(_value >> 8);
+        baValue[2] = (quint8)(_value >> 16);
+        baValue[3] = (quint8)(_value >> 24);
+        baValue[4] = (quint8)(_value >> 32);
+        baValue[5] = (quint8)(_value >> 40);
+        baValue[6] = (quint8)(_value >> 48);
+        baValue[7] = (quint8)(_value >> 56);
     }
 
-    return find_array(nOffset, nSize, (char *)&_value, 8, pPdStruct);
+    return find_array(nOffset, nSize, (char *)baValue, 8, pPdStruct);
 }
 
 qint64 XBinary::find_float(qint64 nOffset, qint64 nSize, float fValue, bool bIsBigEndian, PDSTRUCT *pPdStruct)
