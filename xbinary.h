@@ -483,6 +483,9 @@ public:
         FT_BZIP2,
         FT_LZIP,
         FT_XZ,
+        FT_CPIO,
+        FT_SQUASHFS,
+        FT_ISO9660,
 
         // TODO more
     };
