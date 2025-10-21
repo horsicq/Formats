@@ -267,6 +267,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_BZIP2, "BZip2", QString("BZip2")},
     {XBinary::FT_XZ, "XZ", QString("XZ")},
     {XBinary::FT_LZIP, "LZIP", QString("Lzip (LZMA)")},
+    {XBinary::FT_CPIO, "CPIO", QString("CPIO")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -6974,6 +6975,11 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'LZIP'", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_LZIP);
+        } else if (compareSignature(&memoryMap, "303730373031", 0) || compareSignature(&memoryMap, "303730373032", 0) ||
+                   compareSignature(&memoryMap, "303730373037", 0)) {
+            // CPIO formats: 070701, 070702, 070707
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_CPIO);
         } else if (compareSignature(&memoryMap, "89'PNG\r\n'1A0A", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_PNG);
@@ -7266,6 +7272,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_AR;
     } else if (pStFileTypes->contains(FT_CAB)) {
         result = FT_CAB;
+    } else if (pStFileTypes->contains(FT_CPIO)) {
+        result = FT_CPIO;
 
         // Android resources and DEX/Java
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
@@ -7471,6 +7479,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_BZIP2)) listResult.append(FT_BZIP2);
         if (stFileTypes.contains(FT_XZ)) listResult.append(FT_XZ);
         if (stFileTypes.contains(FT_LZIP)) listResult.append(FT_LZIP);
+        if (stFileTypes.contains(FT_CPIO)) listResult.append(FT_CPIO);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
