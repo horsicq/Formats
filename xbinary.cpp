@@ -226,6 +226,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_ICC, "ICC", QString("ICC")},
     {XBinary::FT_ICO, "ICO", QString("ICO")},
     {XBinary::FT_IMAGE, "Image", QObject::tr("Image")},
+    {XBinary::FT_ISO9660, "ISO 9660", QString("ISO 9660")},
     {XBinary::FT_IPA, "IPA", QString("IPA")},
     {XBinary::FT_JAR, "JAR", QString("JAR")},
     {XBinary::FT_JPEG, "JPEG", QString("JPEG")},
@@ -7005,6 +7006,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "........................'mntr'", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_ICC);
+        } else if (compareSignature(&memoryMap, "4344303031", 0x8001, pPdStruct)) {  // "CD001" at offset 0x8001
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_ISO9660);
         } else if (compareSignature(&memoryMap, "'ID3'..00", 0)) {
             stResult.insert(FT_AUDIO);
             stResult.insert(FT_MP3);
@@ -7274,6 +7278,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_CAB;
     } else if (pStFileTypes->contains(FT_CPIO)) {
         result = FT_CPIO;
+    } else if (pStFileTypes->contains(FT_ISO9660)) {
+        result = FT_ISO9660;
 
         // Android resources and DEX/Java
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
@@ -7480,6 +7486,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_XZ)) listResult.append(FT_XZ);
         if (stFileTypes.contains(FT_LZIP)) listResult.append(FT_LZIP);
         if (stFileTypes.contains(FT_CPIO)) listResult.append(FT_CPIO);
+        if (stFileTypes.contains(FT_ISO9660)) listResult.append(FT_ISO9660);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
