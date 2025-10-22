@@ -7006,7 +7006,7 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "........................'mntr'", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_ICC);
-        } else if (compareSignature(&memoryMap, "4344303031", 0x8001, pPdStruct)) {  // "CD001" at offset 0x8001
+        } else if (compareSignature(&memoryMap, "4344303031", 0x8001, 0)) {  // "CD001" at offset 0x8001
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_ISO9660);
         } else if (compareSignature(&memoryMap, "'ID3'..00", 0)) {
