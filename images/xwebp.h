@@ -27,6 +27,10 @@ class XWEBP : public XRiff {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+    };
+
     explicit XWEBP(QIODevice *pDevice = nullptr);
     ~XWEBP();
 
@@ -38,6 +42,7 @@ public:
     qint64 getFileFormatSize(PDSTRUCT *pPdStruct) override;
     FT getFileType() override;
     QString getMIMEString() override;
+    virtual QString structIDToString(quint32 nID) override;
 };
 
 #endif  // XWEBP_H

@@ -1,5 +1,9 @@
 #include "xwebp.h"
 
+XBinary::XCONVERT _TABLE_XWEBP_STRUCTID[] = {
+    {XWEBP::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+};
+
 XWEBP::XWEBP(QIODevice *pDevice) : XRiff(pDevice)
 {
 }
@@ -41,4 +45,9 @@ XBinary::FT XWEBP::getFileType()
 QString XWEBP::getMIMEString()
 {
     return "image/webp";
+}
+
+QString XWEBP::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XWEBP_STRUCTID, sizeof(_TABLE_XWEBP_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
