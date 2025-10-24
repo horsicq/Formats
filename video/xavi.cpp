@@ -84,12 +84,12 @@ QString XAVI::getArch()
     return "";  // AVI is a multimedia container, no specific architecture
 }
 
-MODE XAVI::getMode()
+XBinary::MODE XAVI::getMode()
 {
     return MODE_DATA;  // AVI files contain data, not executable code
 }
 
-ENDIAN XAVI::getEndian()
+XBinary::ENDIAN XAVI::getEndian()
 {
     return XRiff::getEndian();  // Delegate to parent class
 }
