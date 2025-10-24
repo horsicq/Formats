@@ -25,7 +25,20 @@
 
 class XAVI : public XRiff {
     Q_OBJECT
+
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_HEADER = XRiff::STRUCTID_UNKNOWN + 1,
+        STRUCTID_CHUNK = XRiff::STRUCTID_UNKNOWN + 2,
+        STRUCTID_AVIH,
+        STRUCTID_STRH,
+        STRUCTID_STRF,
+        STRUCTID_JUNK,
+        STRUCTID_MOVI,
+        STRUCTID_IDX1
+    };
+
     explicit XAVI(QIODevice *pDevice = nullptr);
     ~XAVI();
 
@@ -37,6 +50,11 @@ public:
     qint64 getFileFormatSize(PDSTRUCT *pPdStruct) override;
     FT getFileType() override;
     QString getMIMEString() override;
+    virtual QString structIDToString(quint32 nID) override;
+    virtual QString getArch() override;
+    virtual MODE getMode() override;
+    virtual ENDIAN getEndian() override;
+    virtual QString getVersion() override;
 };
 
 #endif  // XAVI_H
