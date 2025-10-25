@@ -45,19 +45,10 @@ public:
     virtual FT getFileType() override;
     virtual QString getMIMEString() override;
 
-    virtual QList<MAPMODE> getMapModesList() override
-    {
-        QList<MAPMODE> l;
-        l.append(MAPMODE_REGIONS);
-        return l;
-    }
+    virtual QList<MAPMODE> getMapModesList() override;
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
-    virtual QString structIDToString(quint32 nID) override
-    {
-        Q_UNUSED(nID)
-        return QString("MP4");
-    }
+    virtual QString structIDToString(quint32 nID) override;
 
 private:
     bool isTagValid(const QString &sTagName);

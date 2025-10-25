@@ -20,6 +20,12 @@
  */
 #include "xmp4.h"
 
+XBinary::XCONVERT _TABLE_XMP4_STRUCTID[] = {
+    {XMP4::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XMP4::STRUCTID_BOX, "BOX", QObject::tr("Box")},
+    {XMP4::STRUCTID_HEADER, "HEADER", QObject::tr("Header")},
+};
+
 XMP4::XMP4(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -199,4 +205,18 @@ QList<XBinary::FPART> XMP4::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
     }
 
     return list;
+}
+
+QList<XBinary::MAPMODE> XMP4::getMapModesList()
+{
+    QList<MAPMODE> listResult;
+
+    listResult.append(MAPMODE_REGIONS);
+
+    return listResult;
+}
+
+QString XMP4::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XMP4_STRUCTID, sizeof(_TABLE_XMP4_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
