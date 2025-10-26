@@ -27,6 +27,19 @@ class XTTF : public XBinary {
     Q_OBJECT
 
 public:
+    enum TYPE {
+        TYPE_UNKNOWN = 0,
+        TYPE_TRUETYPE,
+        TYPE_OPENTYPE_CFF
+    };
+
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_HEADER,
+        STRUCTID_TABLE_DIRECTORY,
+        STRUCTID_TABLE
+    };
+
     struct TTF_TABLE_RECORD {
         quint32 tag;  // Table name/tag (e.g. 'name', 'cmap', etc.)
         quint32 checkSum;
@@ -47,6 +60,7 @@ public:
 
     // Core overrides
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
+    static bool isValid(QIODevice *pDevice);
     virtual FT getFileType() override;
     virtual MODE getMode() override;
     virtual QString getMIMEString() override;
@@ -55,6 +69,7 @@ public:
     virtual ENDIAN getEndian() override;
     virtual QString getArch() override;
     virtual QString getFileFormatExt() override;
+    virtual QString getFileFormatExtsString() override;
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct) override;
     virtual bool isSigned() override;
     virtual OSNAME getOsName() override;
@@ -67,12 +82,21 @@ public:
 
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
     virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions) override;
+    virtual QString structIDToString(quint32 nID) override;
 
     // TTF-specific
     static QString tagToString(quint32 tag);
+    static quint32 stringToTag(const QString &sTag);
 
     TTF_HEADER readHeader();
     QList<TTF_TABLE_RECORD> getTableDirectory(quint16 numTables);
+    TTF_TABLE_RECORD getTableRecord(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables);
+    bool isTablePresent(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables);
+    qint64 getTableOffset(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables);
+    qint64 getTableSize(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables);
+    
+    static QMap<quint64, QString> getHeaderVersions();
+    static QMap<quint64, QString> getHeaderVersionsS();
 };
 
 #endif  // XTTF_H

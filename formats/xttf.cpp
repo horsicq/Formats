@@ -20,6 +20,13 @@
  */
 #include "xttf.h"
 
+XBinary::XCONVERT _TABLE_XTTF_STRUCTID[] = {
+    {XTTF::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XTTF::STRUCTID_HEADER, "HEADER", QObject::tr("Header")},
+    {XTTF::STRUCTID_TABLE_DIRECTORY, "TABLE_DIRECTORY", QObject::tr("Table Directory")},
+    {XTTF::STRUCTID_TABLE, "TABLE", QObject::tr("Table")},
+};
+
 XTTF::XTTF(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -30,10 +37,42 @@ XTTF::~XTTF()
 
 bool XTTF::isValid(PDSTRUCT *pPdStruct)
 {
-    // TTF starts with: 0x00010000 or 'OTTO' (for CFF, OpenType)
-    if (getSize() < 12) return false;
-    quint32 version = read_uint32(0, true);                     // Big-endian
-    return (version == 0x00010000) || (version == 0x4F54544F);  // 'OTTO'
+    Q_UNUSED(pPdStruct)
+
+    bool bResult = false;
+
+    // TTF/OTF must have at least the offset table (12 bytes)
+    if (getSize() >= 12) {
+        quint32 nVersion = read_uint32(0, true);  // Big-endian
+        
+        // Check for valid TTF/OTF signatures:
+        // 0x00010000 - TrueType
+        // 'OTTO' (0x4F54544F) - OpenType with CFF
+        // 'true' (0x74727565) - Apple TrueType
+        // 'typ1' (0x74797031) - PostScript Type 1
+        if ((nVersion == 0x00010000) || (nVersion == 0x4F54544F) || (nVersion == 0x74727565) || (nVersion == 0x74797031)) {
+            // Verify number of tables is reasonable
+            quint16 nNumTables = read_uint16(4, true);
+            
+            if ((nNumTables > 0) && (nNumTables <= 256)) {  // Reasonable limit
+                // Verify the offset table size fits in the file
+                qint64 nOffsetTableSize = 12 + (qint64)nNumTables * 16;
+                
+                if (getSize() >= nOffsetTableSize) {
+                    bResult = true;
+                }
+            }
+        }
+    }
+
+    return bResult;
+}
+
+bool XTTF::isValid(QIODevice *pDevice)
+{
+    XTTF xttf(pDevice);
+
+    return xttf.isValid();
 }
 
 XBinary::FT XTTF::getFileType()
@@ -53,12 +92,31 @@ QString XTTF::getMIMEString()
 
 qint32 XTTF::getType()
 {
-    return 0;
+    qint32 nResult = TYPE_UNKNOWN;
+
+    if (isValid()) {
+        quint32 nVersion = read_uint32(0, true);
+        
+        if (nVersion == 0x00010000 || nVersion == 0x74727565) {
+            nResult = TYPE_TRUETYPE;
+        } else if (nVersion == 0x4F54544F) {
+            nResult = TYPE_OPENTYPE_CFF;
+        }
+    }
+
+    return nResult;
 }
 
 QString XTTF::typeIdToString(qint32 nType)
 {
-    return QString::number(nType);
+    QString sResult = tr("Unknown");
+
+    switch (nType) {
+        case TYPE_TRUETYPE: sResult = QString("TrueType"); break;
+        case TYPE_OPENTYPE_CFF: sResult = QString("OpenType (CFF)"); break;
+    }
+
+    return sResult;
 }
 
 XBinary::ENDIAN XTTF::getEndian()
@@ -73,7 +131,32 @@ QString XTTF::getArch()
 
 QString XTTF::getFileFormatExt()
 {
-    return "ttf";
+    QString sResult;
+
+    qint32 nType = getType();
+
+    if (nType == TYPE_OPENTYPE_CFF) {
+        sResult = "otf";
+    } else {
+        sResult = "ttf";
+    }
+
+    return sResult;
+}
+
+QString XTTF::getFileFormatExtsString()
+{
+    QString sResult;
+
+    qint32 nType = getType();
+
+    if (nType == TYPE_OPENTYPE_CFF) {
+        sResult = "OpenType Font (*.otf)";
+    } else {
+        sResult = "TrueType Font (*.ttf)";
+    }
+
+    return sResult;
 }
 
 qint64 XTTF::getFileFormatSize(PDSTRUCT *pPdStruct)
@@ -139,15 +222,22 @@ bool XTTF::isEncrypted()
 
 QList<XBinary::MAPMODE> XTTF::getMapModesList()
 {
-    QList<MAPMODE> list;
-    list.append(MAPMODE_OBJECTS);
-    return list;
+    QList<MAPMODE> listResult;
+
+    listResult.append(MAPMODE_REGIONS);
+    listResult.append(MAPMODE_OBJECTS);
+
+    return listResult;
 }
 
 XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
     _MEMORY_MAP result = {};
+
+    if (mapMode == MAPMODE_UNKNOWN) {
+        mapMode = MAPMODE_REGIONS;  // Default mode
+    }
+
     result.fileType = getFileType();
     result.mode = getMode();
     result.sArch = getArch();
@@ -157,36 +247,42 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     result.nBinarySize = getSize();
     result.nModuleAddress = getModuleAddress();
 
-    // TTF Header
-    TTF_HEADER header = readHeader();
+    if ((mapMode == MAPMODE_REGIONS) || (mapMode == MAPMODE_OBJECTS)) {
+        // TTF Header
+        TTF_HEADER header = readHeader();
 
-    // Table Directory
-    QList<TTF_TABLE_RECORD> tableRecords = getTableDirectory(header.numTables);
+        // Table Directory
+        QList<TTF_TABLE_RECORD> tableRecords = getTableDirectory(header.numTables);
 
-    qint64 nHeaderOffset = 0;
-    qint64 nHeaderSize = 12 + header.numTables * 16;
+        if (mapMode == MAPMODE_REGIONS) {
+            qint64 nHeaderOffset = 0;
+            qint64 nHeaderSize = 12 + header.numTables * 16;
 
-    _MEMORY_RECORD memHeader = {};
-    memHeader.nOffset = nHeaderOffset;
-    memHeader.nAddress = -1;  // TTF header does not have a specific address in memory
-    memHeader.nSize = nHeaderSize;
-    memHeader.filePart = FILEPART_HEADER;
-    memHeader.sName = "Header";
-    result.listRecords.append(memHeader);
+            _MEMORY_RECORD memHeader = {};
+            memHeader.nOffset = nHeaderOffset;
+            memHeader.nAddress = -1;
+            memHeader.nSize = nHeaderSize;
+            memHeader.filePart = FILEPART_HEADER;
+            memHeader.sName = tr("Header + Table Directory");
+            result.listRecords.append(memHeader);
+        }
 
-    // Add Table Objects
-    for (qint32 i = 0, nNumberOfTables = tableRecords.size(); (i < nNumberOfTables) && isPdStructNotCanceled(pPdStruct); i++) {
-        _MEMORY_RECORD rec = {};
-        rec.nOffset = tableRecords.at(i).offset;
-        rec.nSize = tableRecords.at(i).length;
-        rec.filePart = FILEPART_OBJECT;
-        rec.sName = tagToString(tableRecords.at(i).tag);
-        rec.nIndex = i;
-        rec.nAddress = -1;  // TTF tables do not have a specific address in memory
-        result.listRecords.append(rec);
+        // Add Table Objects
+        if (mapMode == MAPMODE_OBJECTS) {
+            for (qint32 i = 0, nNumberOfTables = tableRecords.size(); (i < nNumberOfTables) && isPdStructNotCanceled(pPdStruct); i++) {
+                _MEMORY_RECORD rec = {};
+                rec.nOffset = tableRecords.at(i).offset;
+                rec.nSize = tableRecords.at(i).length;
+                rec.filePart = FILEPART_OBJECT;
+                rec.sName = tagToString(tableRecords.at(i).tag);
+                rec.nIndex = i;
+                rec.nAddress = -1;
+                result.listRecords.append(rec);
+            }
+        }
+
+        _handleOverlay(&result);
     }
-
-    _handleOverlay(&result);
 
     return result;
 }
@@ -235,20 +331,45 @@ QString XTTF::tagToString(quint32 tag)
     return QString::fromLatin1(arr);
 }
 
+quint32 XTTF::stringToTag(const QString &sTag)
+{
+    quint32 nResult = 0;
+
+    if (sTag.length() >= 4) {
+        QByteArray baTag = sTag.toLatin1();
+        nResult = ((quint8)baTag[0] << 24) | ((quint8)baTag[1] << 16) | ((quint8)baTag[2] << 8) | (quint8)baTag[3];
+    }
+
+    return nResult;
+}
+
 QList<XTTF::TTF_TABLE_RECORD> XTTF::getTableDirectory(quint16 numTables)
 {
-    QList<TTF_TABLE_RECORD> list;
+    QList<TTF_TABLE_RECORD> listResult;
+
     qint64 nOffset = 12;
-    for (qint32 i = 0, nNumberOfTables = numTables; i < nNumberOfTables; i++) {
+    qint64 nFileSize = getSize();
+
+    for (qint32 i = 0; i < numTables; i++) {
+        if (nOffset + 16 > nFileSize) {
+            break;  // Prevent reading beyond file bounds
+        }
+
         TTF_TABLE_RECORD rec = {};
         rec.tag = read_uint32(nOffset, true);
         rec.checkSum = read_uint32(nOffset + 4, true);
         rec.offset = read_uint32(nOffset + 8, true);
         rec.length = read_uint32(nOffset + 12, true);
-        list.append(rec);
+
+        // Validate that table data is within file bounds
+        if ((qint64)rec.offset + (qint64)rec.length <= nFileSize) {
+            listResult.append(rec);
+        }
+
         nOffset += 16;
     }
-    return list;
+
+    return listResult;
 }
 
 XTTF::TTF_HEADER XTTF::readHeader()
@@ -260,4 +381,91 @@ XTTF::TTF_HEADER XTTF::readHeader()
     header.entrySelector = read_uint16(8, true);
     header.rangeShift = read_uint16(10, true);
     return header;
+}
+
+QString XTTF::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XTTF_STRUCTID, sizeof(_TABLE_XTTF_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+XTTF::TTF_TABLE_RECORD XTTF::getTableRecord(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables)
+{
+    TTF_TABLE_RECORD result = {};
+
+    qint32 nNumberOfTables = pListTables->count();
+
+    for (qint32 i = 0; i < nNumberOfTables; i++) {
+        if (pListTables->at(i).tag == tag) {
+            result = pListTables->at(i);
+            break;
+        }
+    }
+
+    return result;
+}
+
+bool XTTF::isTablePresent(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables)
+{
+    bool bResult = false;
+
+    qint32 nNumberOfTables = pListTables->count();
+
+    for (qint32 i = 0; i < nNumberOfTables; i++) {
+        if (pListTables->at(i).tag == tag) {
+            bResult = true;
+            break;
+        }
+    }
+
+    return bResult;
+}
+
+qint64 XTTF::getTableOffset(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables)
+{
+    qint64 nResult = -1;
+
+    TTF_TABLE_RECORD record = getTableRecord(tag, pListTables);
+
+    if (record.tag == tag) {
+        nResult = record.offset;
+    }
+
+    return nResult;
+}
+
+qint64 XTTF::getTableSize(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables)
+{
+    qint64 nResult = 0;
+
+    TTF_TABLE_RECORD record = getTableRecord(tag, pListTables);
+
+    if (record.tag == tag) {
+        nResult = record.length;
+    }
+
+    return nResult;
+}
+
+QMap<quint64, QString> XTTF::getHeaderVersions()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00010000, "TrueType");
+    mapResult.insert(0x4F54544F, "OpenType_CFF");
+    mapResult.insert(0x74727565, "TrueType_Apple");
+    mapResult.insert(0x74797031, "PostScript_Type1");
+
+    return mapResult;
+}
+
+QMap<quint64, QString> XTTF::getHeaderVersionsS()
+{
+    QMap<quint64, QString> mapResult;
+
+    mapResult.insert(0x00010000, "TrueType 1.0");
+    mapResult.insert(0x4F54544F, "OpenType with CFF");
+    mapResult.insert(0x74727565, "Apple TrueType");
+    mapResult.insert(0x74797031, "PostScript Type 1");
+
+    return mapResult;
 }
