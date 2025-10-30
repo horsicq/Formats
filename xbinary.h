@@ -196,12 +196,20 @@ public:
         COMPRESS_METHOD_REDUCE_2,
         COMPRESS_METHOD_REDUCE_3,
         COMPRESS_METHOD_REDUCE_4,
-        COMPRESS_METHOD_AES,
+        COMPRESS_METHOD_AES, // TODO Check
         COMPRESS_METHOD_ZLIB,
         COMPRESS_METHOD_STORE_CAB,
         COMPRESS_METHOD_MSZIP_CAB,
         COMPRESS_METHOD_LZX_CAB
         // TODO check more methods
+    };
+
+    enum CRYPTO_METHOD {
+        CRYPTO_METHOD_UNKNOWN = 0,
+        CRYPTO_METHOD_ZIPCRYPTO,
+        CRYPTO_METHOD_AES128,
+        CRYPTO_METHOD_AES192,
+        CRYPTO_METHOD_AES256
     };
 
     enum FPART_PROP {
@@ -236,13 +244,13 @@ public:
         // FPART_PROP_COMPRESSION_OPTION_1,
     };
 
-    struct DECOMPRESS_STATE {
+    struct DATAPROCESS_STATE {
         QIODevice *pDeviceInput;
         QIODevice *pDeviceOutput;
         qint64 nInputOffset;
         qint64 nInputLimit;
-        qint64 nDecompressedOffset;
-        qint64 nDecompressedLimit;
+        qint64 nProcessedOffset;
+        qint64 nProcessedLimit;
         QMap<FPART_PROP, QVariant> mapProperties;
         bool bReadError;
         bool bWriteError;
@@ -267,6 +275,7 @@ public:
         qint64 nTotalSize;
         qint32 nCurrentIndex;
         qint32 nNumberOfRecords;
+        QString sPassword;         // Password for encryption
         void *pContext;  // Format-specific context
     };
 
@@ -281,14 +290,18 @@ public:
         QIODevice *pDevice;       // Output device for the archive
         qint64 nCurrentOffset;    // Current write position in archive
         qint32 nNumberOfRecords;  // Number of records added so far
-        void *pContext;           // Format-specific context (cast to format's context struct)
         PATH_MODE pathMode;       // Path storage mode
         QString sBasePath;        // Base path for relative path calculation
+        COMPRESS_METHOD compressMethod;   // Compression method
+        qint32 nCompressionLevel; // Compression level (0-9, -1 for default)
+        CRYPTO_METHOD cryptoMethod;     // Encryption method
+        QString sPassword;         // Password for encryption
+        void *pContext;           // Format-specific context (cast to format's context struct)
     };
 
-    static qint32 _readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
-    static qint32 _readDevice(DECOMPRESS_STATE *pState);
-    static qint32 _writeDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState);
+    static qint32 _readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState);
+    static qint32 _readDevice(DATAPROCESS_STATE *pState);
+    static qint32 _writeDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState);
 
     struct BYTE_COUNTS {
         qint64 nSize;
@@ -2103,7 +2116,10 @@ public:
 
     virtual bool initFFSearch(FFSEARCH_STATE *pState, QIODevice *pDevice, FFSEARCH_OPTIONS *pOptions, PDSTRUCT *pPdStruct = nullptr);
     virtual qint64 searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
-    virtual bool finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);   
+    virtual bool finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+
+    QIODevice *createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct);
+    void freeFileBuffer(QIODevice **ppBuffer, PDSTRUCT *pPdStruct);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

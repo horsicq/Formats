@@ -494,6 +494,11 @@ bool XBinary::packFolderToDevice(const QString &sFolderName, QIODevice *pDevice,
         return false;
     }
 
+    // Set path mode to relative to preserve directory structure
+    // This ensures files in subdirectories are stored with their relative paths
+    state.pathMode = PATH_MODE_RELATIVE;
+    state.sBasePath = sFolderName;
+
     // Add entire folder contents
     bResult = addFolder(&state, sFolderName, pPdStruct);
 
@@ -505,7 +510,7 @@ bool XBinary::packFolderToDevice(const QString &sFolderName, QIODevice *pDevice,
     return bResult && bFinish;
 }
 
-qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState)
+qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState)
 {
     qint32 nRead = pState->pDeviceInput->read(pBuffer, nBufferSize);
 
@@ -518,7 +523,7 @@ qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE 
     return nRead;
 }
 
-qint32 XBinary::_readDevice(DECOMPRESS_STATE *pState)
+qint32 XBinary::_readDevice(DATAPROCESS_STATE *pState)
 {
     qint32 nRead = pState->pDeviceInput->read(pState->pInputBuffer, pState->nInputBufferSize);
 
@@ -527,25 +532,25 @@ qint32 XBinary::_readDevice(DECOMPRESS_STATE *pState)
     return nRead;
 }
 
-qint32 XBinary::_writeDevice(char *pBuffer, qint32 nBufferSize, DECOMPRESS_STATE *pState)
+qint32 XBinary::_writeDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState)
 {
     qint64 nRealSize = 0;
     qint64 nSkip = 0;
 
-    if (pState->nDecompressedOffset == 0 && (pState->nDecompressedLimit == -1)) {
+    if (pState->nProcessedOffset == 0 && (pState->nProcessedLimit == -1)) {
         nRealSize = nBufferSize;
         nSkip = 0;
-    } else if (pState->nDecompressedOffset > 0) {
-        nSkip = pState->nDecompressedOffset;  // TODO fix
+    } else if (pState->nProcessedOffset > 0) {
+        nSkip = pState->nProcessedOffset;  // TODO fix
         nRealSize = nBufferSize - nSkip;
 
         if (nRealSize < 0) {
             nRealSize = 0;
         }
 
-        if (pState->nDecompressedLimit != -1) {
-            if ((pState->nDecompressedOffset + nRealSize) > pState->nDecompressedLimit) {
-                nRealSize = pState->nDecompressedLimit - pState->nDecompressedOffset;
+        if (pState->nProcessedLimit != -1) {
+            if ((pState->nProcessedOffset + nRealSize) > pState->nProcessedLimit) {
+                nRealSize = pState->nProcessedLimit - pState->nProcessedOffset;
             }
         }
     } else {
@@ -14195,5 +14200,45 @@ bool XBinary::finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
     }
 
     return true;
+}
+
+QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+    QIODevice *pResult = nullptr;
+
+    if (nSize < 0x10000) {
+        QBuffer *pBuffer = new QBuffer();
+
+        if (pBuffer->open(QIODevice::ReadWrite)) {
+            QByteArray ba;
+            ba.resize(nSize);
+            pBuffer->write(ba);
+            pBuffer->seek(0);  // ← FIX: Reset position to beginning after pre-allocating
+            pResult = pBuffer;
+        } else {
+            delete pBuffer;
+        }
+    } else {
+        QTemporaryFile *pTempFile = new QTemporaryFile();
+        if (pTempFile->open()) {
+            pTempFile->resize(nSize);
+            pResult = pTempFile;
+        } else {
+            delete pTempFile;
+        }
+    }
+
+    return pResult;
+}
+
+void XBinary::freeFileBuffer(QIODevice **ppBuffer, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    if (ppBuffer && *ppBuffer) {
+        delete *ppBuffer;
+        *ppBuffer = nullptr;
+    }
 }
 

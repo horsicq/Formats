@@ -321,13 +321,13 @@ QByteArray XPNG::_compressData(const QByteArray &data)
     outputBuffer.open(QIODevice::WriteOnly);
 
     // Setup compression state
-    XBinary::DECOMPRESS_STATE compressState = {};
+    XBinary::DATAPROCESS_STATE compressState = {};
     compressState.pDeviceInput = &inputBuffer;
     compressState.pDeviceOutput = &outputBuffer;
     compressState.nInputOffset = 0;
     compressState.nInputLimit = data.size();
-    compressState.nDecompressedOffset = 0;
-    compressState.nDecompressedLimit = -1;
+    compressState.nProcessedOffset = 0;
+    compressState.nProcessedLimit = -1;
     compressState.bReadError = false;
     compressState.bWriteError = false;
     compressState.nCountInput = 0;
