@@ -369,11 +369,7 @@ QString XDJVU::getDocumentInfo(PDSTRUCT *pPdStruct)
             for (qint32 i = 0; i < listChunks.count(); i++) {
                 CHUNK_RECORD chunk = listChunks.at(i);
 
-                sResult += QString("  [%1] %2 - Offset: 0x%3, Size: %4 bytes\n")
-                               .arg(i)
-                               .arg(chunk.sName)
-                               .arg(chunk.nOffset, 0, 16)
-                               .arg(chunk.nSize);
+                sResult += QString("  [%1] %2 - Offset: 0x%3, Size: %4 bytes\n").arg(i).arg(chunk.sName).arg(chunk.nOffset, 0, 16).arg(chunk.nSize);
 
                 if (chunk.sName == "INFO") {
                     INFO_RECORD infoRecord = _getInfoRecord(chunk.nDataOffset, pPdStruct);

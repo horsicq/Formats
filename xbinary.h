@@ -196,7 +196,7 @@ public:
         COMPRESS_METHOD_REDUCE_2,
         COMPRESS_METHOD_REDUCE_3,
         COMPRESS_METHOD_REDUCE_4,
-        COMPRESS_METHOD_AES, // TODO Check
+        COMPRESS_METHOD_AES,  // TODO Check
         COMPRESS_METHOD_ZLIB,
         COMPRESS_METHOD_STORE_CAB,
         COMPRESS_METHOD_MSZIP_CAB,
@@ -275,28 +275,28 @@ public:
         qint64 nTotalSize;
         qint32 nCurrentIndex;
         qint32 nNumberOfRecords;
-        QString sPassword;         // Password for encryption
-        void *pContext;  // Format-specific context
+        QString sPassword;  // Password for encryption
+        void *pContext;     // Format-specific context
     };
 
     enum PATH_MODE {
         PATH_MODE_DEFAULT = 0,
-        PATH_MODE_RELATIVE = 1,   // Store relative paths from base path
-        PATH_MODE_BASENAME = 2,   // Store only filename (no directories)
-        PATH_MODE_ABSOLUTE = 3    // Store absolute paths
+        PATH_MODE_RELATIVE = 1,  // Store relative paths from base path
+        PATH_MODE_BASENAME = 2,  // Store only filename (no directories)
+        PATH_MODE_ABSOLUTE = 3   // Store absolute paths
     };
 
     struct PACK_STATE {
-        QIODevice *pDevice;       // Output device for the archive
-        qint64 nCurrentOffset;    // Current write position in archive
-        qint32 nNumberOfRecords;  // Number of records added so far
-        PATH_MODE pathMode;       // Path storage mode
-        QString sBasePath;        // Base path for relative path calculation
-        COMPRESS_METHOD compressMethod;   // Compression method
-        qint32 nCompressionLevel; // Compression level (0-9, -1 for default)
-        CRYPTO_METHOD cryptoMethod;     // Encryption method
-        QString sPassword;         // Password for encryption
-        void *pContext;           // Format-specific context (cast to format's context struct)
+        QIODevice *pDevice;              // Output device for the archive
+        qint64 nCurrentOffset;           // Current write position in archive
+        qint32 nNumberOfRecords;         // Number of records added so far
+        PATH_MODE pathMode;              // Path storage mode
+        QString sBasePath;               // Base path for relative path calculation
+        COMPRESS_METHOD compressMethod;  // Compression method
+        qint32 nCompressionLevel;        // Compression level (0-9, -1 for default)
+        CRYPTO_METHOD cryptoMethod;      // Encryption method
+        QString sPassword;               // Password for encryption
+        void *pContext;                  // Format-specific context (cast to format's context struct)
     };
 
     static qint32 _readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState);
@@ -2104,14 +2104,14 @@ public:
     bool unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderName, PDSTRUCT *pPdStruct = nullptr);
 
     struct FFSEARCH_STATE {
-        QIODevice *pDevice;       // Input device 
-        qint64 nCurrentOffset;    // Current position
-        void *pContext;           // Format-specific context (cast to format's context struct)
+        QIODevice *pDevice;     // Input device
+        qint64 nCurrentOffset;  // Current position
+        void *pContext;         // Format-specific context (cast to format's context struct)
     };
 
     struct FFSEARCH_OPTIONS {
-        qint64 nStartOffset;        // Start offset for search
-        qint64 nSize;               // Size for search
+        qint64 nStartOffset;  // Start offset for search
+        qint64 nSize;         // Size for search
     };
 
     virtual bool initFFSearch(FFSEARCH_STATE *pState, QIODevice *pDevice, FFSEARCH_OPTIONS *pOptions, PDSTRUCT *pPdStruct = nullptr);

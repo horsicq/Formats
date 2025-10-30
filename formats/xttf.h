@@ -94,7 +94,7 @@ public:
     bool isTablePresent(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables);
     qint64 getTableOffset(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables);
     qint64 getTableSize(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables);
-    
+
     static QMap<quint64, QString> getHeaderVersions();
     static QMap<quint64, QString> getHeaderVersionsS();
 };

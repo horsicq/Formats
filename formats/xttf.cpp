@@ -44,7 +44,7 @@ bool XTTF::isValid(PDSTRUCT *pPdStruct)
     // TTF/OTF must have at least the offset table (12 bytes)
     if (getSize() >= 12) {
         quint32 nVersion = read_uint32(0, true);  // Big-endian
-        
+
         // Check for valid TTF/OTF signatures:
         // 0x00010000 - TrueType
         // 'OTTO' (0x4F54544F) - OpenType with CFF
@@ -53,11 +53,11 @@ bool XTTF::isValid(PDSTRUCT *pPdStruct)
         if ((nVersion == 0x00010000) || (nVersion == 0x4F54544F) || (nVersion == 0x74727565) || (nVersion == 0x74797031)) {
             // Verify number of tables is reasonable
             quint16 nNumTables = read_uint16(4, true);
-            
+
             if ((nNumTables > 0) && (nNumTables <= 256)) {  // Reasonable limit
                 // Verify the offset table size fits in the file
                 qint64 nOffsetTableSize = 12 + (qint64)nNumTables * 16;
-                
+
                 if (getSize() >= nOffsetTableSize) {
                     bResult = true;
                 }
@@ -96,7 +96,7 @@ qint32 XTTF::getType()
 
     if (isValid()) {
         quint32 nVersion = read_uint32(0, true);
-        
+
         if (nVersion == 0x00010000 || nVersion == 0x74727565) {
             nResult = TYPE_TRUETYPE;
         } else if (nVersion == 0x4F54544F) {

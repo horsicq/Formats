@@ -20,17 +20,11 @@
  */
 #include "xavi.h"
 
-XBinary::XCONVERT _TABLE_XAVI_STRUCTID[] = {
-    {XAVI::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    {XAVI::STRUCTID_HEADER, "HEADER", QObject::tr("Header")},
-    {XAVI::STRUCTID_CHUNK, "CHUNK", QObject::tr("Chunk")},
-    {XAVI::STRUCTID_AVIH, "AVIH", QObject::tr("AVI Header")},
-    {XAVI::STRUCTID_STRH, "STRH", QObject::tr("Stream Header")},
-    {XAVI::STRUCTID_STRF, "STRF", QObject::tr("Stream Format")},
-    {XAVI::STRUCTID_JUNK, "JUNK", QObject::tr("Junk")},
-    {XAVI::STRUCTID_MOVI, "MOVI", QObject::tr("Movie Data")},
-    {XAVI::STRUCTID_IDX1, "IDX1", QObject::tr("Index")}
-};
+XBinary::XCONVERT _TABLE_XAVI_STRUCTID[] = {{XAVI::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")}, {XAVI::STRUCTID_HEADER, "HEADER", QObject::tr("Header")},
+                                            {XAVI::STRUCTID_CHUNK, "CHUNK", QObject::tr("Chunk")},       {XAVI::STRUCTID_AVIH, "AVIH", QObject::tr("AVI Header")},
+                                            {XAVI::STRUCTID_STRH, "STRH", QObject::tr("Stream Header")}, {XAVI::STRUCTID_STRF, "STRF", QObject::tr("Stream Format")},
+                                            {XAVI::STRUCTID_JUNK, "JUNK", QObject::tr("Junk")},          {XAVI::STRUCTID_MOVI, "MOVI", QObject::tr("Movie Data")},
+                                            {XAVI::STRUCTID_IDX1, "IDX1", QObject::tr("Index")}};
 
 XAVI::XAVI(QIODevice *pDevice) : XRiff(pDevice)
 {

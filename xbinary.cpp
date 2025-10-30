@@ -1197,7 +1197,7 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 {
     // qDebug("%X %X pos: %X maxlen: %X", this, pDevice, nPos, nMaxLen);
     qint64 nResult = 0;
-    
+
     // DEBUG: Detailed logging for reads that might be ECD searches (any reads > 1000 bytes offset)
     // bool bDebugRead = (nPos > 1000) || (nMaxLen > 2000); // Log large reads or reads from higher offsets
     bool bDebugRead = false;
@@ -1212,34 +1212,36 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
         if (bDebugRead) {
             qDebug() << "safeReadData: Size check passed, attempting seek";
         }
-        
+
         if (pDevice->seek(nPos)) {
             if (bDebugRead) {
                 qDebug() << "safeReadData: Seek successful, reading...";
             }
-            
+
             while ((nMaxLen > 0) && isPdStructNotCanceled(pPdStruct)) {
                 qint64 nCurrentSize = qMin(nMaxLen, (qint64)READWRITE_BUFFER_SIZE);
 
                 if (bDebugRead) {
                     // DEBUG: Check buffer BEFORE read
-                    qDebug() << "safeReadData: Buffer BEFORE read (first 4 bytes):" 
-                             << QString("%1 %2 %3 %4").arg((quint8)pData[0], 2, 16, QChar('0'))
-                                                       .arg((quint8)pData[1], 2, 16, QChar('0'))
-                                                       .arg((quint8)pData[2], 2, 16, QChar('0'))
-                                                       .arg((quint8)pData[3], 2, 16, QChar('0'));
+                    qDebug() << "safeReadData: Buffer BEFORE read (first 4 bytes):"
+                             << QString("%1 %2 %3 %4")
+                                    .arg((quint8)pData[0], 2, 16, QChar('0'))
+                                    .arg((quint8)pData[1], 2, 16, QChar('0'))
+                                    .arg((quint8)pData[2], 2, 16, QChar('0'))
+                                    .arg((quint8)pData[3], 2, 16, QChar('0'));
                 }
 
                 nCurrentSize = pDevice->read(pData, nCurrentSize);
-                
+
                 if (bDebugRead) {
                     qDebug() << "safeReadData: Read" << nCurrentSize << "bytes (requested" << qMin(nMaxLen, (qint64)READWRITE_BUFFER_SIZE) << ")";
                     if (nCurrentSize > 0) {
-                        qDebug() << "safeReadData: Buffer AFTER read (first 4 bytes):" 
-                                 << QString("%1 %2 %3 %4").arg((quint8)pData[0], 2, 16, QChar('0'))
-                                                           .arg((quint8)pData[1], 2, 16, QChar('0'))
-                                                           .arg((quint8)pData[2], 2, 16, QChar('0'))
-                                                           .arg((quint8)pData[3], 2, 16, QChar('0'));
+                        qDebug() << "safeReadData: Buffer AFTER read (first 4 bytes):"
+                                 << QString("%1 %2 %3 %4")
+                                        .arg((quint8)pData[0], 2, 16, QChar('0'))
+                                        .arg((quint8)pData[1], 2, 16, QChar('0'))
+                                        .arg((quint8)pData[2], 2, 16, QChar('0'))
+                                        .arg((quint8)pData[3], 2, 16, QChar('0'));
                     }
                 }
 
@@ -1254,7 +1256,7 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
                 pData += nCurrentSize;
                 nResult += nCurrentSize;
             }
-            
+
             if (bDebugRead) {
                 qDebug() << "safeReadData: Total read" << nResult << "bytes";
             }
@@ -2040,7 +2042,7 @@ bool XBinary::isRegExpValid(const QString &sRegExp)
 qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = 0;
-    
+
     // DEBUG: Check if device is set
     if (!m_pDevice) {
         qDebug() << "read_array: ERROR - m_pDevice is NULL! Cannot read.";
@@ -3174,7 +3176,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
     const char nLastSearchChar = (st == ST_COMPAREBYTES) ? pArray[nArraySize - 1] : 0;
 
     // DEBUG: Print search pattern for 4-byte arrays (uint32 searches)
-    bool bDebugECD = false; // Disabled after fixing BMH bug
+    bool bDebugECD = false;  // Disabled after fixing BMH bug
     // bool bDebugECD = (nArraySize == 4 && pArray[0] == 0x50 && pArray[1] == 0x4B && pArray[2] == 0x05 && pArray[3] == 0x06);
     if (bDebugECD) {
         qDebug() << "_find_array: Searching for ECD signature. Start offset:" << nStartOffset << "Search size:" << nSize;
@@ -3205,9 +3207,9 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 }
                 qDebug() << sHexBefore;
             }
-            
+
             qint64 nBytesRead = read_array(nOffset, pBuffer, nTemp, pPdStruct);
-            
+
             if (bDebugECD) {
                 qDebug() << "_find_array: read_array returned" << nBytesRead << "(expected" << nTemp << ")";
                 if (nBytesRead > 0) {
@@ -3219,10 +3221,10 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                     qDebug() << sHex;
                 }
             }
-            
+
             if (nBytesRead != nTemp) {
                 pPdStruct->sInfoString = tr("Read error");
-                
+
                 if (bDebugECD) {
                     qDebug() << "_find_array: READ ERROR - breaking from search loop";
                 }
@@ -3246,50 +3248,52 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 qint64 m = nArraySize;
                 qint64 i = 0;
                 const qint64 limit = hayLen - m;
-                
+
                 if (bDebugECD) {
                     qDebug() << "_find_array: BMH search - hayLen:" << hayLen << "m:" << m << "limit:" << limit;
-                    qDebug() << "_find_array: Looking for pattern:" 
-                             << QString("%1 %2 %3 %4").arg((quint8)pArray[0], 2, 16, QChar('0'))
-                                                       .arg((quint8)pArray[1], 2, 16, QChar('0'))
-                                                       .arg((quint8)pArray[2], 2, 16, QChar('0'))
-                                                       .arg((quint8)pArray[3], 2, 16, QChar('0'));
+                    qDebug() << "_find_array: Looking for pattern:"
+                             << QString("%1 %2 %3 %4")
+                                    .arg((quint8)pArray[0], 2, 16, QChar('0'))
+                                    .arg((quint8)pArray[1], 2, 16, QChar('0'))
+                                    .arg((quint8)pArray[2], 2, 16, QChar('0'))
+                                    .arg((quint8)pArray[3], 2, 16, QChar('0'));
                     qDebug() << "_find_array: nLastSearchChar (should be last byte):" << QString("%1").arg((quint8)nLastSearchChar, 2, 16, QChar('0'));
-                    
+
                     // Count how many times we find the last character
                     qint32 nLastCharCount = 0;
                     for (qint64 j = 0; j <= limit; j++) {
                         if ((unsigned char)hay[j + m - 1] == (unsigned char)nLastSearchChar) {
                             nLastCharCount++;
                             if (nLastCharCount <= 5) {  // Only show first 5
-                                qDebug() << "  Found last char at position" << j << "- bytes:" 
-                                         << QString("%1 %2 %3 %4").arg((quint8)hay[j], 2, 16, QChar('0'))
-                                                                   .arg((quint8)hay[j+1], 2, 16, QChar('0'))
-                                                                   .arg((quint8)hay[j+2], 2, 16, QChar('0'))
-                                                                   .arg((quint8)hay[j+3], 2, 16, QChar('0'));
+                                qDebug() << "  Found last char at position" << j << "- bytes:"
+                                         << QString("%1 %2 %3 %4")
+                                                .arg((quint8)hay[j], 2, 16, QChar('0'))
+                                                .arg((quint8)hay[j + 1], 2, 16, QChar('0'))
+                                                .arg((quint8)hay[j + 2], 2, 16, QChar('0'))
+                                                .arg((quint8)hay[j + 3], 2, 16, QChar('0'));
                             }
                         }
                     }
                     qDebug() << "_find_array: Total last char matches:" << nLastCharCount;
                 }
-                
+
                 qint32 nCheckCount = 0;
                 while (i <= limit) {
                     unsigned char c = (unsigned char)hay[i + m - 1];
-                    
+
                     if (bDebugECD && nCheckCount < 10) {
-                        qDebug() << "  BMH checking position" << i << "char at i+3:" << QString("%1").arg(c, 2, 16, QChar('0')) 
-                                 << "skip:" << bmhShift[c];
+                        qDebug() << "  BMH checking position" << i << "char at i+3:" << QString("%1").arg(c, 2, 16, QChar('0')) << "skip:" << bmhShift[c];
                         nCheckCount++;
                     }
-                    
+
                     if (c == (unsigned char)nLastSearchChar) {
                         if (bDebugECD) {
-                            qDebug() << "_find_array: BMH potential match at i:" << i << "- comparing:" 
-                                     << QString("%1 %2 %3 %4").arg((quint8)hay[i], 2, 16, QChar('0'))
-                                                               .arg((quint8)hay[i+1], 2, 16, QChar('0'))
-                                                               .arg((quint8)hay[i+2], 2, 16, QChar('0'))
-                                                               .arg((quint8)hay[i+3], 2, 16, QChar('0'));
+                            qDebug() << "_find_array: BMH potential match at i:" << i << "- comparing:"
+                                     << QString("%1 %2 %3 %4")
+                                            .arg((quint8)hay[i], 2, 16, QChar('0'))
+                                            .arg((quint8)hay[i + 1], 2, 16, QChar('0'))
+                                            .arg((quint8)hay[i + 2], 2, 16, QChar('0'))
+                                            .arg((quint8)hay[i + 3], 2, 16, QChar('0'));
                         }
                         // Potential match; verify all bytes
                         if (memcmp(hay + i, pArray, (size_t)m) == 0) {
@@ -3302,7 +3306,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                     }
                     i += (qint64)bmhShift[c];
                 }
-                
+
                 if (bDebugECD && nResult == -1) {
                     qDebug() << "_find_array: BMH search completed, no match found";
                 }
@@ -3473,7 +3477,7 @@ qint64 XBinary::find_int8(qint64 nOffset, qint64 nSize, qint8 nValue, PDSTRUCT *
 qint64 XBinary::find_uint16(qint64 nOffset, qint64 nSize, quint16 nValue, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     quint8 baValue[2];
-    
+
     if (bIsBigEndian) {
         baValue[0] = (quint8)(nValue >> 8);
         baValue[1] = (quint8)nValue;
@@ -3489,7 +3493,7 @@ qint64 XBinary::find_int16(qint64 nOffset, qint64 nSize, qint16 nValue, bool bIs
 {
     quint16 _value = (quint16)nValue;
     quint8 baValue[2];
-    
+
     if (bIsBigEndian) {
         baValue[0] = (quint8)(_value >> 8);
         baValue[1] = (quint8)_value;
@@ -3507,9 +3511,9 @@ qint64 XBinary::find_uint32(qint64 nOffset, qint64 nSize, quint32 nValue, bool b
     // if (nValue == 0x06054B50) {
     //     qDebug() << "find_uint32: Searching for ECD signature 0x06054B50 at offset" << nOffset << "nSize=" << nSize;
     // }
-    
+
     quint8 baValue[4];
-    
+
     if (bIsBigEndian) {
         baValue[0] = (quint8)(nValue >> 24);
         baValue[1] = (quint8)(nValue >> 16);
@@ -3523,11 +3527,11 @@ qint64 XBinary::find_uint32(qint64 nOffset, qint64 nSize, quint32 nValue, bool b
     }
 
     qint64 nResult = find_array(nOffset, nSize, (char *)baValue, 4, pPdStruct);
-    
+
     // if (nValue == 0x06054B50) {
     //     qDebug() << "find_uint32: ECD search result:" << nResult;
     // }
-    
+
     return nResult;
 }
 
@@ -3535,7 +3539,7 @@ qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIs
 {
     quint32 _value = (quint32)nValue;
     quint8 baValue[4];
-    
+
     if (bIsBigEndian) {
         baValue[0] = (quint8)(_value >> 24);
         baValue[1] = (quint8)(_value >> 16);
@@ -3554,7 +3558,7 @@ qint64 XBinary::find_int32(qint64 nOffset, qint64 nSize, qint32 nValue, bool bIs
 qint64 XBinary::find_uint64(qint64 nOffset, qint64 nSize, quint64 nValue, bool bIsBigEndian, PDSTRUCT *pPdStruct)
 {
     quint8 baValue[8];
-    
+
     if (bIsBigEndian) {
         baValue[0] = (quint8)(nValue >> 56);
         baValue[1] = (quint8)(nValue >> 48);
@@ -3582,7 +3586,7 @@ qint64 XBinary::find_int64(qint64 nOffset, qint64 nSize, qint64 nValue, bool bIs
 {
     quint64 _value = (quint64)nValue;
     quint8 baValue[8];
-    
+
     if (bIsBigEndian) {
         baValue[0] = (quint8)(_value >> 56);
         baValue[1] = (quint8)(_value >> 48);
@@ -14094,7 +14098,8 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
                                 }
 
                                 if (bResult) {
-                                    XBinary::CRC_TYPE crcType = (XBinary::CRC_TYPE)record.mapProperties.value(XBinary::FPART_PROP_CRC_TYPE, XBinary::CRC_TYPE_UNKNOWN).toUInt();
+                                    XBinary::CRC_TYPE crcType =
+                                        (XBinary::CRC_TYPE)record.mapProperties.value(XBinary::FPART_PROP_CRC_TYPE, XBinary::CRC_TYPE_UNKNOWN).toUInt();
 
                                     if (crcType != XBinary::CRC_TYPE_UNKNOWN) {
                                         XBinary binary(pDevice);
@@ -14113,8 +14118,8 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
 
                                         if (nStoredCRC != nCalculatedCRC) {
 #ifdef QT_DEBUG
-                                            qDebug() << "CRC is false for" << sFilePath << ": stored=" << QString::number(nStoredCRC, 16) << ", calc="
-                                                     << QString::number(nCalculatedCRC, 16);
+                                            qDebug() << "CRC is false for" << sFilePath << ": stored=" << QString::number(nStoredCRC, 16)
+                                                     << ", calc=" << QString::number(nCalculatedCRC, 16);
 #endif
                                         }
                                     }
@@ -14241,4 +14246,3 @@ void XBinary::freeFileBuffer(QIODevice **ppBuffer, PDSTRUCT *pPdStruct)
         *ppBuffer = nullptr;
     }
 }
-
