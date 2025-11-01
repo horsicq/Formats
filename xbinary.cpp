@@ -445,9 +445,10 @@ qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
     qint64 nResult = 0;
 
     UNPACK_STATE state = {};
+    QMap<UNPACK_PROP, QVariant> mapProperties;
 
     // Initialize packing (this writes signature/header)
-    if (initUnpack(&state, pPdStruct)) {
+    if (initUnpack(&state, mapProperties, pPdStruct)) {
         nResult = state.nNumberOfRecords;
     }
 
@@ -465,8 +466,9 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
 
     // Initialize unpack state
     UNPACK_STATE state = {};
+    QMap<UNPACK_PROP, QVariant> mapProperties;
 
-    if (initUnpack(&state, pPdStruct)) {
+    if (initUnpack(&state, mapProperties, pPdStruct)) {
         qint32 nCount = 0;
 
         // Iterate through records using streaming API
@@ -13975,7 +13977,7 @@ bool XBinary::isAddressPhysical(XADDR nAddress)
     return isAddressPhysical(&memoryMap, nAddress);
 }
 
-bool XBinary::initUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
+bool XBinary::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pState)
     Q_UNUSED(pPdStruct)
@@ -14083,8 +14085,9 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
         }
 
         UNPACK_STATE state = {};
+        QMap<UNPACK_PROP, QVariant> mapProperties;
 
-        if (initUnpack(&state, pPdStruct)) {
+        if (initUnpack(&state, mapProperties, pPdStruct)) {
             bResult = true;
 
             do {
