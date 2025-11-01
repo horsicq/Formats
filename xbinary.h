@@ -206,6 +206,7 @@ public:
 
     enum CRYPTO_METHOD {
         CRYPTO_METHOD_UNKNOWN = 0,
+        CRYPTO_METHOD_NONE,
         CRYPTO_METHOD_ZIPCRYPTO,
         CRYPTO_METHOD_AES128,
         CRYPTO_METHOD_AES192,
@@ -270,12 +271,17 @@ public:
         QMap<FPART_PROP, QVariant> mapProperties;
     };
 
+    enum UNPACK_PROP {
+        UNPACK_PROP_UNKNOWN = 0,
+        UNPACK_PROP_PASSWORD,
+    };
+
     struct UNPACK_STATE {
         qint64 nCurrentOffset;
         qint64 nTotalSize;
         qint32 nCurrentIndex;
         qint32 nNumberOfRecords;
-        QString sPassword;  // Password for encryption
+        QMap<UNPACK_PROP, QVariant> mapProperties;
         void *pContext;     // Format-specific context
     };
 
@@ -286,16 +292,22 @@ public:
         PATH_MODE_ABSOLUTE = 3   // Store absolute paths
     };
 
+    enum PACK_PROP {
+        PACK_PROP_UNKNOWN = 0,
+        PACK_PROP_COMPRESSMETHOD,       // Compression method
+        PACK_PROP_COMPRESSIONLEVEL,     // Compression level (0-9, -1 for default)
+        PACK_PROP_ENCRYPTIONMETHOD,     // Encryption method
+        PACK_PROP_PASSWORD,             // Password for encryption
+        PACK_PROP_PATHMODE,             // Path storage mode
+        PACK_PROP_BASEPATH,             // Base path for relative path calculation
+        PACK_PROP_OUTPUT_FORMAT,        // Output format (for multi-format packers)
+    };
+
     struct PACK_STATE {
         QIODevice *pDevice;              // Output device for the archive
+        QMap<PACK_PROP, QVariant> mapProperties;
         qint64 nCurrentOffset;           // Current write position in archive
         qint32 nNumberOfRecords;         // Number of records added so far
-        PATH_MODE pathMode;              // Path storage mode
-        QString sBasePath;               // Base path for relative path calculation
-        COMPRESS_METHOD compressMethod;  // Compression method
-        qint32 nCompressionLevel;        // Compression level (0-9, -1 for default)
-        CRYPTO_METHOD cryptoMethod;      // Encryption method
-        QString sPassword;               // Password for encryption
         void *pContext;                  // Format-specific context (cast to format's context struct)
     };
 
@@ -2083,9 +2095,9 @@ public:
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
     static FPART getFPART(FILEPART filePart, const QString &sOriginalName, qint64 nFileOffset, qint64 nFileSize, XADDR nVirtualAddress, qint64 nVirtualSize);
 
-    virtual qint64 getNumberOfArchiveRecords(PDSTRUCT *pPdStruct);
-    virtual QList<ARCHIVERECORD> getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct);
-    bool packFolderToDevice(const QString &sFolderName, QIODevice *pDevice, void *pOptions, PDSTRUCT *pPdStruct);
+    qint64 getNumberOfArchiveRecords(PDSTRUCT *pPdStruct);
+    QList<ARCHIVERECORD> getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct);
+    bool packFolderToDevice(QIODevice *pDevice, const QMap<PACK_PROP, QVariant> &mapProperties, const QString &sFolderName, PDSTRUCT *pPdStruct);
 
     // Streaming unpacking API
     virtual bool initUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
@@ -2095,7 +2107,7 @@ public:
     virtual bool finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
 
     // Streaming packing API
-    virtual bool initPack(PACK_STATE *pState, QIODevice *pDestDevice, void *pOptions, PDSTRUCT *pPdStruct = nullptr);
+    virtual bool initPack(PACK_STATE *pState, QIODevice *pDevice, const QMap<PACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
     virtual bool addDevice(PACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     virtual bool addFile(PACK_STATE *pState, const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     virtual bool addFolder(PACK_STATE *pState, const QString &sDirectoryPath, PDSTRUCT *pPdStruct = nullptr);
@@ -2105,17 +2117,23 @@ public:
 
     struct FFSEARCH_STATE {
         QIODevice *pDevice;     // Input device
+        qint64 nStartOffset;  // Start offset for search
+        qint64 nSize;         // Size for search
         qint64 nCurrentOffset;  // Current position
         void *pContext;         // Format-specific context (cast to format's context struct)
     };
 
-    struct FFSEARCH_OPTIONS {
-        qint64 nStartOffset;  // Start offset for search
-        qint64 nSize;         // Size for search
+    struct FFSEARCH_INFO {
+        bool bIsValid;
+        FT fileTYPE;
+        qint64 nOffset;
+        qint64 nSize;
+        QString sString;
+        QString sExt;
     };
 
-    virtual bool initFFSearch(FFSEARCH_STATE *pState, QIODevice *pDevice, FFSEARCH_OPTIONS *pOptions, PDSTRUCT *pPdStruct = nullptr);
-    virtual qint64 searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+    virtual bool initFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+    virtual FFSEARCH_INFO searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
     virtual bool finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
 
     QIODevice *createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct);

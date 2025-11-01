@@ -442,37 +442,60 @@ QMap<quint64, QString> XBinary::XIDSTRING_createMapPrefix(XIDSTRING *pRecords, q
 
 qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
 {
-    return getArchiveRecords(-1, pPdStruct).count();
+    qint64 nResult = 0;
+
+    UNPACK_STATE state = {};
+
+    // Initialize packing (this writes signature/header)
+    if (initUnpack(&state, pPdStruct)) {
+        nResult = state.nNumberOfRecords;
+    }
+
+    return nResult;
 }
 
 QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::ARCHIVERECORD> listResult;
 
-    QList<FPART> listParts = getFileParts(FILEPART_STREAM, nLimit, pPdStruct);
+    PDSTRUCT pdStructEmpty = createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
 
-    qint32 nNumberOfRecords = listParts.count();
+    // Initialize unpack state
+    UNPACK_STATE state = {};
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        const FPART &part = listParts.at(i);
-        ARCHIVERECORD record = {};
-        record.nStreamOffset = part.nFileOffset;
-        record.nStreamSize = part.nFileSize;
-        record.nDecompressedOffset = 0;
-        record.nDecompressedSize = part.mapProperties.value(FPART_PROP_UNCOMPRESSEDSIZE).toLongLong();
-        record.mapProperties = part.mapProperties;
+    if (initUnpack(&state, pPdStruct)) {
+        qint32 nCount = 0;
 
-        if (record.mapProperties.value(FPART_PROP_ORIGINALNAME).toString() == "") {
-            record.mapProperties.insert(FPART_PROP_ORIGINALNAME, part.sName);
+        // Iterate through records using streaming API
+        while (isPdStructNotCanceled(pPdStruct) && (state.nCurrentIndex < state.nNumberOfRecords)) {
+            // Get current record info
+            ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
+
+            listResult.append(record);
+            nCount++;
+
+            // Check limit
+            if (nLimit != -1 && nCount >= nLimit) {
+                break;
+            }
+
+            // Move to next record
+            if (!moveToNext(&state, pPdStruct)) {
+                break;
+            }
         }
 
-        listResult.append(record);
+        // Clean up
+        finishUnpack(&state, pPdStruct);
     }
 
     return listResult;
 }
 
-bool XBinary::packFolderToDevice(const QString &sFolderName, QIODevice *pDevice, void *pOptions, PDSTRUCT *pPdStruct)
+bool XBinary::packFolderToDevice(QIODevice *pDevice, const QMap<PACK_PROP, QVariant> &mapProperties, const QString &sFolderName, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
@@ -482,22 +505,26 @@ bool XBinary::packFolderToDevice(const QString &sFolderName, QIODevice *pDevice,
     }
 
     // Validate input
-    if (!isDirectoryExists(sFolderName) || !pDevice || !pDevice->isWritable()) {
+    if (!isDirectoryExists(sFolderName)) {
         return false;
     }
 
-    // Initialize pack state
     PACK_STATE state = {};
 
-    // Initialize packing (this writes signature/header)
-    if (!initPack(&state, pDevice, pOptions, pPdStruct)) {
-        return false;
+    QMap<PACK_PROP, QVariant> _mapProperties = mapProperties;
+
+    if (!_mapProperties.contains(PACK_PROP_PATHMODE)) {
+        _mapProperties.insert(PACK_PROP_PATHMODE, PATH_MODE_RELATIVE);
     }
 
-    // Set path mode to relative to preserve directory structure
-    // This ensures files in subdirectories are stored with their relative paths
-    state.pathMode = PATH_MODE_RELATIVE;
-    state.sBasePath = sFolderName;
+    if (!_mapProperties.contains(PACK_PROP_BASEPATH)) {
+        _mapProperties.insert(PACK_PROP_BASEPATH, sFolderName);
+    }
+
+    // Initialize packing (this writes signature/header)
+    if (!initPack(&state, pDevice, _mapProperties, pPdStruct)) {
+        return false;
+    }
 
     // Add entire folder contents
     bResult = addFolder(&state, sFolderName, pPdStruct);
@@ -1512,7 +1539,7 @@ void XBinary::setFileFormatSize(qint64 nFileFormatSize)
 bool XBinary::setFileDateTime(const QString &sFileName, const QDateTime &dateTime)
 {
     // Try to set both modification and access times via Qt API (member function)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     QFile file;
     file.setFileName(sFileName);
     bool bMod = file.setFileTime(dateTime, QFileDevice::FileModificationTime);
@@ -13991,11 +14018,11 @@ bool XBinary::finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
     return false;
 }
 
-bool XBinary::initPack(PACK_STATE *pState, QIODevice *pDestDevice, void *pOptions, PDSTRUCT *pPdStruct)
+bool XBinary::initPack(PACK_STATE *pState, QIODevice *pDevice, const QMap<PACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pState)
-    Q_UNUSED(pDestDevice)
-    Q_UNUSED(pOptions)
+    Q_UNUSED(pDevice)
+    Q_UNUSED(mapProperties)
     Q_UNUSED(pPdStruct)
 
     return false;
@@ -14097,35 +14124,38 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
                                     bResult = false;
                                 }
 
+                                file.close();
+
                                 if (bResult) {
                                     XBinary::CRC_TYPE crcType =
                                         (XBinary::CRC_TYPE)record.mapProperties.value(XBinary::FPART_PROP_CRC_TYPE, XBinary::CRC_TYPE_UNKNOWN).toUInt();
 
                                     if (crcType != XBinary::CRC_TYPE_UNKNOWN) {
-                                        XBinary binary(pDevice);
+                                        // Reopen the file for reading to calculate CRC
+                                        if (file.open(QIODevice::ReadOnly)) {
+                                            XBinary binary(&file);
 
-                                        pDevice->reset();
+                                            quint32 nCalculatedCRC = 0;
 
-                                        quint32 nCalculatedCRC = 0;
+                                            if (crcType == XBinary::CRC_TYPE_EDB88320) {
+                                                nCalculatedCRC = binary._getCRC32(0, -1, 0xFFFFFFFF, XBinary::_getCRC32Table_EDB88320(), pPdStruct);
+                                            } else if (crcType == XBinary::CRC_TYPE_ADLER32) {
+                                                nCalculatedCRC = binary.getAdler32(0, -1, pPdStruct);
+                                            }
 
-                                        if (crcType == XBinary::CRC_TYPE_EDB88320) {
-                                            nCalculatedCRC = binary._getCRC32(0, -1, 0xFFFFFFFF, XBinary::_getCRC32Table_EDB88320(), pPdStruct);
-                                        } else if (crcType == XBinary::CRC_TYPE_ADLER32) {
-                                            nCalculatedCRC = binary.getAdler32(0, -1, pPdStruct);
-                                        }
+                                            file.close();
 
-                                        quint32 nStoredCRC = record.mapProperties.value(XBinary::FPART_PROP_CRC_VALUE, 0).toUInt();
+                                            quint32 nStoredCRC = record.mapProperties.value(XBinary::FPART_PROP_CRC_VALUE, 0).toUInt();
 
-                                        if (nStoredCRC != nCalculatedCRC) {
+                                            if (nStoredCRC != nCalculatedCRC) {
 #ifdef QT_DEBUG
-                                            qDebug() << "CRC is false for" << sFilePath << ": stored=" << QString::number(nStoredCRC, 16)
-                                                     << ", calc=" << QString::number(nCalculatedCRC, 16);
+                                                qDebug() << "CRC is false for" << sFilePath << ": stored=" << QString::number(nStoredCRC, 16)
+                                                         << ", calc=" << QString::number(nCalculatedCRC, 16);
 #endif
+                                            }
                                         }
                                     }
                                 }
-
-                                file.close();
 
                                 // Set file datetime if provided by the archive record
                                 if (bResult) {
@@ -14137,10 +14167,18 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
                                         } else if (vDateTime.canConvert<quint64>()) {
                                             // Some formats may store timestamp as uint64 (seconds since epoch)
                                             quint64 t = vDateTime.toULongLong();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
                                             dt = QDateTime::fromSecsSinceEpoch((qint64)t);
+#else
+                                            dt = QDateTime::fromMSecsSinceEpoch((qint64)t * 1000);
+#endif
                                         } else if (vDateTime.canConvert<qint64>()) {
                                             qint64 t = vDateTime.toLongLong();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
                                             dt = QDateTime::fromSecsSinceEpoch(t);
+#else
+                                            dt = QDateTime::fromMSecsSinceEpoch(t * 1000);
+#endif
                                         }
 
                                         if (dt.isValid()) {
@@ -14164,27 +14202,25 @@ bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderNam
     return bResult;
 }
 
-bool XBinary::initFFSearch(FFSEARCH_STATE *pState, QIODevice *pDevice, FFSEARCH_OPTIONS *pOptions, PDSTRUCT *pPdStruct)
+bool XBinary::initFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pOptions)
     Q_UNUSED(pPdStruct)
 
     // Initialize search state
-    pState->pDevice = pDevice;
-    pState->nCurrentOffset = 0;
+    pState->nCurrentOffset = pState->nStartOffset;
     pState->pContext = nullptr;
 
     return true;
 }
 
-qint64 XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
+XBinary::FFSEARCH_INFO XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pState)
     Q_UNUSED(pPdStruct)
+    FFSEARCH_INFO result = {};
 
-    // Return -1 to indicate no search found or search not implemented
     // Derived classes should override this method for format-specific search
-    return -1;
+    return result;
 }
 
 bool XBinary::finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
@@ -14197,7 +14233,7 @@ bool XBinary::finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
 
     // Clean up search state
     pState->pDevice = nullptr;
-    pState->nCurrentOffset = 0;
+    pState->nCurrentOffset = pState->nStartOffset;
 
     if (pState->pContext) {
         delete[] (char *)pState->pContext;

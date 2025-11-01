@@ -996,7 +996,7 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
     return bResult;
 }
 
-bool XFormats::packFolderToDevice(XBinary::FT fileType, QString sFolderName, QIODevice *pDevice, void *pOptions, XBinary::PDSTRUCT *pPdStruct)
+bool XFormats::packFolderToDevice(XBinary::FT fileType, QIODevice *pDevice, const QMap<XBinary::PACK_PROP, QVariant> &mapProperties, const QString &sFolderName, XBinary::PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
@@ -1004,7 +1004,7 @@ bool XFormats::packFolderToDevice(XBinary::FT fileType, QString sFolderName, QIO
         XBinary *pBinary = getClass(fileType, pDevice);
 
         if (pBinary) {
-            bResult = pBinary->packFolderToDevice(sFolderName, pDevice, pOptions, pPdStruct);
+            bResult = pBinary->packFolderToDevice(pDevice, mapProperties, sFolderName, pPdStruct);
             delete pBinary;
         }
     }
