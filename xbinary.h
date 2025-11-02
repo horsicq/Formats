@@ -200,7 +200,9 @@ public:
         COMPRESS_METHOD_ZLIB,
         COMPRESS_METHOD_STORE_CAB,
         COMPRESS_METHOD_MSZIP_CAB,
-        COMPRESS_METHOD_LZX_CAB
+        COMPRESS_METHOD_LZX_CAB,
+        COMPRESS_METHOD_BCJ,
+        COMPRESS_METHOD_BCJ2
         // TODO check more methods
     };
 
@@ -236,6 +238,7 @@ public:
         FPART_PROP_UID,
         FPART_PROP_GID,
         FPART_PROP_LINKNAME,
+        FPART_PROP_FILTERMETHOD,  // For preprocessing filters like BCJ, BCJ2
         FPART_PROP_USERNAME,
         FPART_PROP_GROUPNAME,
         FPART_PROP_DEVVERSION,
