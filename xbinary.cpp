@@ -10617,45 +10617,77 @@ XBinary::PACKED_UINT XBinary::_read_packedNumber(char *pData, qint64 nSize)
 {
     PACKED_UINT result = {};
 
+    if (nSize <= 0) {
+        return result;
+    }
+
     quint8 nFirstByte = (quint8)(*(pData));
 
     result.nByteSize = 0;
 
-    if ((nFirstByte & 0x80) == 0) {  // 0xxxxxxx
-        result.nValue = nFirstByte & 0x7F;
-        result.nByteSize = 1;
-    } else if ((nFirstByte & 0xC0) == 0x80) {  // 10xxxxxx
-        result.nValue = nFirstByte & 0x3F;
-        result.nByteSize = 2;
-    } else if ((nFirstByte & 0xE0) == 0xC0) {  // 110xxxxx
-        result.nValue = nFirstByte & 0x1F;
-        result.nByteSize = 3;
-    } else if ((nFirstByte & 0xF0) == 0xE0) {  // 1110xxxx
-        result.nValue = nFirstByte & 0x0F;
-        result.nByteSize = 4;
-    } else if ((nFirstByte & 0xF8) == 0xF0) {  // 11110xxx
-        result.nValue = nFirstByte & 0x07;
-        result.nByteSize = 5;
-    } else if ((nFirstByte & 0xFC) == 0xF8) {  // 111110xx
-        result.nValue = nFirstByte & 0x03;
-        result.nByteSize = 6;
-    } else if ((nFirstByte & 0xFE) == 0xFC) {  // 1111110x
-        result.nValue = nFirstByte & 0x01;
-        result.nByteSize = 7;
-    } else if (nFirstByte == 0xFE) {  // 11111110
-        result.nValue = 0;
-        result.nByteSize = 8;
-    } else if (nFirstByte == 0xFF) {  // 11111111
-        result.nValue = 0;
-        result.nByteSize = 9;
-    }
+    // if ((nFirstByte & 0x80) == 0) {  // 0xxxxxxx
+    //     result.nValue = nFirstByte & 0x7F;
+    //     result.nByteSize = 1;
+    // } else if ((nFirstByte & 0xC0) == 0x80) {  // 10xxxxxx
+    //     result.nValue = nFirstByte & 0x3F;
+    //     result.nByteSize = 2;
+    // } else if ((nFirstByte & 0xE0) == 0xC0) {  // 110xxxxx
+    //     result.nValue = nFirstByte & 0x1F;
+    //     result.nByteSize = 3;
+    // } else if ((nFirstByte & 0xF0) == 0xE0) {  // 1110xxxx
+    //     result.nValue = nFirstByte & 0x0F;
+    //     result.nByteSize = 4;
+    // } else if ((nFirstByte & 0xF8) == 0xF0) {  // 11110xxx
+    //     result.nValue = nFirstByte & 0x07;
+    //     result.nByteSize = 5;
+    // } else if ((nFirstByte & 0xFC) == 0xF8) {  // 111110xx
+    //     result.nValue = nFirstByte & 0x03;
+    //     result.nByteSize = 6;
+    // } else if ((nFirstByte & 0xFE) == 0xFC) {  // 1111110x
+    //     result.nValue = nFirstByte & 0x01;
+    //     result.nByteSize = 7;
+    // } else if (nFirstByte == 0xFE) {  // 11111110
+    //     result.nValue = 0;
+    //     result.nByteSize = 8;
+    // } else if (nFirstByte == 0xFF) {  // 11111111
+    //     result.nValue = 0;
+    //     result.nByteSize = 9;
+    // }
 
-    if (result.nByteSize <= nSize) {
+    // if (result.nByteSize <= nSize) {
+    //     result.bIsValid = true;
+
+    //     for (qint32 i = 1; i < result.nByteSize; ++i) {
+    //         quint8 _nByte = (quint8)(*(pData + i));
+    //         result.nValue |= static_cast<quint32>(_nByte) << (8 * (i - 1));
+    //     }
+    // }
+
+    result.nByteSize = 1;
+
+    if (nFirstByte < 0x80) {
+        // Single byte
+        result.nValue = nFirstByte;
         result.bIsValid = true;
+    } else {
+        // Multi-byte encoding
+        quint8 nMask = 0x80;
+        result.nByteSize = 1;
 
-        for (qint32 i = 1; i < result.nByteSize; ++i) {
-            quint8 _nByte = (quint8)(*(pData + i));
-            result.nValue |= static_cast<quint32>(_nByte) << (8 * (i - 1));
+        for (qint32 i = 0; i < 8; i++) {
+            if (nFirstByte & nMask) {
+                if (result.nByteSize < nSize) {
+                    result.nValue |= ((quint64)(quint8)pData[result.nByteSize] << (8 * i));
+                    result.nByteSize++;
+                } else {
+                    break;
+                }
+            } else {
+                result.nValue |= ((quint64)(nFirstByte & (nMask - 1)) << (8 * i));
+                result.bIsValid = true;
+                break;
+            }
+            nMask >>= 1;
         }
     }
 
