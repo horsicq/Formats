@@ -821,14 +821,18 @@ bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QS
         fileType = XBinary::getPrefFileType(pDevice, true);
     }
 
-    QList<XBinary::ARCHIVERECORD> listArchiveRecords = XFormats::getArchiveRecords(fileType, pDevice, -1, false, -1, pPdStruct);
+    bool bResult = false;
 
-#ifdef USE_ARCHIVE
-    XDecompress xDecompress;
-    _connect(&xDecompress);
-#endif
+    if (XBinary::isDirectoryExists(sFolderName)) {
+        XBinary *pBinary = getClass(fileType, pDevice);
 
-    return extractArchiveRecordsToFolder(&listArchiveRecords, pDevice, sFolderName, pPdStruct);
+        if (pBinary) {
+            bResult = pBinary->unpackToFolder(sFolderName, pPdStruct);
+            delete pBinary;
+        }
+    }
+
+    return bResult;
 }
 
 bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pListRecords, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct)

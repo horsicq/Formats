@@ -14097,10 +14097,31 @@ bool XBinary::finishPack(PACK_STATE *pState, PDSTRUCT *pPdStruct)
     return false;
 }
 
-bool XBinary::unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderName, PDSTRUCT *pPdStruct)
+bool XBinary::unpackSingleStream(QIODevice *pOutDevice, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pDevice)
+    bool bResult = false;
 
+    PDSTRUCT pdStructEmpty = createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    UNPACK_STATE state = {};
+    QMap<UNPACK_PROP, QVariant> mapProperties;
+
+    if (initUnpack(&state, mapProperties, pPdStruct)) {
+
+        bResult = unpackCurrent(&state, pOutDevice, pPdStruct);
+
+        finishUnpack(&state, pPdStruct);
+    }
+
+    return bResult;
+}
+
+bool XBinary::unpackToFolder(const QString &sFolderName, PDSTRUCT *pPdStruct)
+{
     bool bResult = false;
 
     PDSTRUCT pdStructEmpty = createPdStruct();
@@ -14283,7 +14304,17 @@ QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
     Q_UNUSED(pPdStruct)
     QIODevice *pResult = nullptr;
 
-    if (nSize < 0x10000) {
+    qint32 nFileBufferSize = 0;
+
+    if (pPdStruct) {
+        nFileBufferSize = pPdStruct->nFileBufferSize;
+    }
+
+    if (nFileBufferSize == 0) {
+        nFileBufferSize = 0x1000000;  // 16 MB
+    }
+
+    if (nSize < nFileBufferSize) {
         QBuffer *pBuffer = new QBuffer();
 
         if (pBuffer->open(QIODevice::ReadWrite)) {

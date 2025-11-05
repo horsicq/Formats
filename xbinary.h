@@ -902,6 +902,7 @@ public:
         //        bool bSuccess; // TODO important
         QString sInfoString;
         bool bCriticalError;  // TODO !!!
+        qint32 nFileBufferSize; // 0 => 0x10000
     };
 
     enum DHT {
@@ -2122,7 +2123,8 @@ public:
     virtual bool addFolder(PACK_STATE *pState, const QString &sDirectoryPath, PDSTRUCT *pPdStruct = nullptr);
     virtual bool finishPack(PACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
 
-    bool unpackDeviceToFolder(QIODevice *pDevice, const QString &sFolderName, PDSTRUCT *pPdStruct = nullptr);
+    bool unpackToFolder(const QString &sFolderName, PDSTRUCT *pPdStruct = nullptr);
+    bool unpackSingleStream(QIODevice *pOutDevice, PDSTRUCT *pPdStruct = nullptr);
 
     struct FFSEARCH_STATE {
         QIODevice *pDevice;     // Input device
