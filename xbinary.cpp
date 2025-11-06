@@ -307,6 +307,7 @@ XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
     {XBinary::VT_DOUBLE, "double"},
     {XBinary::VT_FLOAT, "float"},
     {XBinary::VT_PACKEDNUMBER, "PackedNumber"},
+    {XBinary::VT_ULEB128, "ULEB128"},
 };
 
 const double XBinary::D_ENTROPY_THRESHOLD = 6.5;
@@ -4855,6 +4856,8 @@ QVariant XBinary::read_value(VT valueType, qint64 nOffset, qint64 nSize, bool bI
         varResult = read_unicodeString(nOffset, nSize, bIsBigEndian);
     } else if (valueType == XBinary::VT_PACKEDNUMBER) {
         varResult = read_packedNumber(nOffset, nSize).nValue;
+    } else if (valueType == XBinary::VT_ULEB128) {
+        varResult = read_uleb128(nOffset, nSize).nValue;
     } else if (valueType == XBinary::VT_BYTE_ARRAY) {
         if (nSize <= 256) {
             varResult = read_array(nOffset, nSize, pPdStruct);
@@ -4966,6 +4969,8 @@ QString XBinary::getValueString(QVariant varValue, VT valueType, bool bTypesAsHe
     } else if (valueType == XBinary::VT_UINT64) {
         sResult = QString("%1").arg((quint64)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_PACKEDNUMBER) {
+        sResult = QString("%1").arg((quint64)(varValue.toULongLong()));
+    } else if (valueType == XBinary::VT_ULEB128) {
         sResult = QString("%1").arg((quint64)(varValue.toULongLong()));
     } else if (valueType == XBinary::VT_FLOAT) {
         sResult = QString("%1").arg(varValue.toFloat());

@@ -834,7 +834,8 @@ public:
         VT_BYTE_ARRAY,
         VT_WORD_ARRAY,
         VT_DWORD_ARRAY,
-        VT_PACKEDNUMBER
+        VT_PACKEDNUMBER,
+        VT_ULEB128,
         // TODO pascal strings(A/U)
     };
 
