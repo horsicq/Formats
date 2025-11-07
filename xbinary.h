@@ -2124,8 +2124,8 @@ public:
     virtual bool addFolder(PACK_STATE *pState, const QString &sDirectoryPath, PDSTRUCT *pPdStruct = nullptr);
     virtual bool finishPack(PACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
 
-    bool unpackToFolder(const QString &sFolderName, PDSTRUCT *pPdStruct = nullptr);
-    bool unpackSingleStream(QIODevice *pOutDevice, PDSTRUCT *pPdStruct = nullptr);
+    bool unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
+    bool unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
 
     struct FFSEARCH_STATE {
         QIODevice *pDevice;     // Input device
@@ -2148,8 +2148,8 @@ public:
     virtual FFSEARCH_INFO searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
     virtual bool finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
 
-    QIODevice *createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct);
-    void freeFileBuffer(QIODevice **ppBuffer, PDSTRUCT *pPdStruct);
+    static QIODevice *createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct);
+    static void freeFileBuffer(QIODevice **ppBuffer);
 
 private:
     static const qint32 READWRITE_BUFFER_SIZE = 0x8000;

@@ -827,7 +827,8 @@ bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QS
         XBinary *pBinary = getClass(fileType, pDevice);
 
         if (pBinary) {
-            bResult = pBinary->unpackToFolder(sFolderName, pPdStruct);
+            QMap<XBinary::UNPACK_PROP, QVariant> mapProperties;
+            bResult = pBinary->unpackToFolder(sFolderName, mapProperties, pPdStruct);
             delete pBinary;
         }
     }

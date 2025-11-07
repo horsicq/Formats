@@ -14102,7 +14102,7 @@ bool XBinary::finishPack(PACK_STATE *pState, PDSTRUCT *pPdStruct)
     return false;
 }
 
-bool XBinary::unpackSingleStream(QIODevice *pOutDevice, PDSTRUCT *pPdStruct)
+bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
@@ -14113,7 +14113,6 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, PDSTRUCT *pPdStruct)
     }
 
     UNPACK_STATE state = {};
-    QMap<UNPACK_PROP, QVariant> mapProperties;
 
     if (initUnpack(&state, mapProperties, pPdStruct)) {
 
@@ -14125,7 +14124,7 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XBinary::unpackToFolder(const QString &sFolderName, PDSTRUCT *pPdStruct)
+bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
@@ -14143,7 +14142,6 @@ bool XBinary::unpackToFolder(const QString &sFolderName, PDSTRUCT *pPdStruct)
         }
 
         UNPACK_STATE state = {};
-        QMap<UNPACK_PROP, QVariant> mapProperties;
 
         if (initUnpack(&state, mapProperties, pPdStruct)) {
             bResult = true;
@@ -14326,8 +14324,9 @@ QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
             QByteArray ba;
             ba.resize(nSize);
             pBuffer->write(ba);
-            pBuffer->seek(0);  // ← FIX: Reset position to beginning after pre-allocating
+            pBuffer->seek(0);  // FIX: Reset position to beginning after pre-allocating
             pResult = pBuffer;
+            pResult->setProperty("Memory", true);
         } else {
             delete pBuffer;
         }
@@ -14344,10 +14343,8 @@ QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
     return pResult;
 }
 
-void XBinary::freeFileBuffer(QIODevice **ppBuffer, PDSTRUCT *pPdStruct)
+void XBinary::freeFileBuffer(QIODevice **ppBuffer)
 {
-    Q_UNUSED(pPdStruct)
-
     if (ppBuffer && *ppBuffer) {
         delete *ppBuffer;
         *ppBuffer = nullptr;
