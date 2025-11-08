@@ -14115,7 +14115,6 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
     UNPACK_STATE state = {};
 
     if (initUnpack(&state, mapProperties, pPdStruct)) {
-
         bResult = unpackCurrent(&state, pOutDevice, pPdStruct);
 
         finishUnpack(&state, pPdStruct);

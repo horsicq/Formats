@@ -291,7 +291,7 @@ public:
         qint32 nCurrentIndex;
         qint32 nNumberOfRecords;
         QMap<UNPACK_PROP, QVariant> mapProperties;
-        void *pContext;     // Format-specific context
+        void *pContext;  // Format-specific context
     };
 
     enum PATH_MODE {
@@ -303,21 +303,21 @@ public:
 
     enum PACK_PROP {
         PACK_PROP_UNKNOWN = 0,
-        PACK_PROP_COMPRESSMETHOD,       // Compression method
-        PACK_PROP_COMPRESSIONLEVEL,     // Compression level (0-9, -1 for default)
-        PACK_PROP_ENCRYPTIONMETHOD,     // Encryption method
-        PACK_PROP_PASSWORD,             // Password for encryption
-        PACK_PROP_PATHMODE,             // Path storage mode
-        PACK_PROP_BASEPATH,             // Base path for relative path calculation
-        PACK_PROP_OUTPUT_FORMAT,        // Output format (for multi-format packers)
+        PACK_PROP_COMPRESSMETHOD,    // Compression method
+        PACK_PROP_COMPRESSIONLEVEL,  // Compression level (0-9, -1 for default)
+        PACK_PROP_ENCRYPTIONMETHOD,  // Encryption method
+        PACK_PROP_PASSWORD,          // Password for encryption
+        PACK_PROP_PATHMODE,          // Path storage mode
+        PACK_PROP_BASEPATH,          // Base path for relative path calculation
+        PACK_PROP_OUTPUT_FORMAT,     // Output format (for multi-format packers)
     };
 
     struct PACK_STATE {
-        QIODevice *pDevice;              // Output device for the archive
+        QIODevice *pDevice;  // Output device for the archive
         QMap<PACK_PROP, QVariant> mapProperties;
-        qint64 nCurrentOffset;           // Current write position in archive
-        qint32 nNumberOfRecords;         // Number of records added so far
-        void *pContext;                  // Format-specific context (cast to format's context struct)
+        qint64 nCurrentOffset;    // Current write position in archive
+        qint32 nNumberOfRecords;  // Number of records added so far
+        void *pContext;           // Format-specific context (cast to format's context struct)
     };
 
     static qint32 _readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState);
@@ -902,8 +902,8 @@ public:
         //        bool bErrors;
         //        bool bSuccess; // TODO important
         QString sInfoString;
-        bool bCriticalError;  // TODO !!!
-        qint32 nFileBufferSize; // 0 => 0x10000
+        bool bCriticalError;     // TODO !!!
+        qint32 nFileBufferSize;  // 0 => 0x10000
     };
 
     enum DHT {
@@ -2129,8 +2129,8 @@ public:
 
     struct FFSEARCH_STATE {
         QIODevice *pDevice;     // Input device
-        qint64 nStartOffset;  // Start offset for search
-        qint64 nSize;         // Size for search
+        qint64 nStartOffset;    // Start offset for search
+        qint64 nSize;           // Size for search
         qint64 nCurrentOffset;  // Current position
         void *pContext;         // Format-specific context (cast to format's context struct)
     };
