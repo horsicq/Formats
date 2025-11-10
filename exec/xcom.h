@@ -33,24 +33,39 @@ public:
         TYPE_EXECUTABLE
     };
 
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_HEADER,
+    };
+
     explicit XCOM(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XCOM();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
     virtual bool isExecutable();
 
-    virtual _MEMORY_MAP getMemoryMap(XBinary::MAPMODE mapMode = XBinary::MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
-    virtual QString getArch();
-    virtual MODE getMode();
-    virtual ENDIAN getEndian();
+    virtual QList<MAPMODE> getMapModesList() override;
+    virtual _MEMORY_MAP getMemoryMap(XBinary::MAPMODE mapMode = XBinary::MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QString getArch() override;
+    virtual MODE getMode() override;
+    virtual ENDIAN getEndian() override;
     virtual qint64 getImageSize();
-    virtual FT getFileType();
+    virtual FT getFileType() override;
+    virtual QString getVersion() override;
     virtual qint32 getType();
-    virtual OSNAME getOsName();
+    virtual OSNAME getOsName() override;
     virtual QString typeIdToString(qint32 nType);
+    virtual QString getMIMEString() override;
+    virtual QString getFileFormatExt() override;
+    virtual QString getFileFormatExtsString() override;
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct = nullptr) override;
+
+    virtual QString structIDToString(quint32 nID) override;
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 };
 
 #endif  // XCOM_H

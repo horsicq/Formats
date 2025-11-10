@@ -20,6 +20,11 @@
  */
 #include "xcom.h"
 
+XBinary::XCONVERT _TABLE_XCOM_STRUCTID[] = {
+    {XCOM::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XCOM::STRUCTID_HEADER, "HEADER", QString("Header")},
+};
+
 XCOM::XCOM(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
     XBinary::setBaseAddress(XCOM_DEF::ADDRESS_BEGIN);
@@ -60,6 +65,15 @@ XBinary::MODE XCOM::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddr
     XCOM xcom(pDevice, bIsImage, nModuleAddress);
 
     return xcom.getMode();
+}
+
+QList<XBinary::MAPMODE> XCOM::getMapModesList()
+{
+    QList<MAPMODE> listResult;
+
+    listResult.append(MAPMODE_REGIONS);
+
+    return listResult;
 }
 
 XBinary::_MEMORY_MAP XCOM::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
@@ -151,6 +165,11 @@ XBinary::FT XCOM::getFileType()
     return FT_COM;
 }
 
+QString XCOM::getVersion()
+{
+    return QString("");
+}
+
 qint32 XCOM::getType()
 {
     return TYPE_EXECUTABLE;
@@ -171,4 +190,89 @@ QString XCOM::typeIdToString(qint32 nType)
     }
 
     return sResult;
+}
+
+QString XCOM::getMIMEString()
+{
+    return "application/x-dosexec";
+}
+
+QString XCOM::getFileFormatExt()
+{
+    return "com";
+}
+
+QString XCOM::getFileFormatExtsString()
+{
+    return "COM files (*.com);;";
+}
+
+qint64 XCOM::getFileFormatSize(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    return getSize();
+}
+
+QString XCOM::structIDToString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XCOM_STRUCTID, sizeof(_TABLE_XCOM_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::DATA_HEADER> XCOM::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+{
+    QList<DATA_HEADER> listResult;
+
+    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+        _dataHeadersOptions.bChildren = true;
+        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+
+        _dataHeadersOptions.nID = STRUCTID_HEADER;
+        _dataHeadersOptions.nLocation = 0;
+        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+
+        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+    } else {
+        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+
+        if (nStartOffset != -1) {
+            if (dataHeadersOptions.nID == STRUCTID_HEADER) {
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XCOM::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = getSize();
+
+                dataHeader.listRecords.append(getDataRecord(0, dataHeader.nSize, "Data", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+
+                listResult.append(dataHeader);
+            }
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::FPART> XCOM::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(nLimit)
+    Q_UNUSED(pPdStruct)
+
+    QList<FPART> listResult;
+
+    qint64 nTotalSize = getSize();
+
+    if (nFileParts & FILEPART_HEADER) {
+        FPART record = {};
+
+        record.filePart = FILEPART_HEADER;
+        record.nFileOffset = 0;
+        record.nFileSize = nTotalSize;
+        record.nVirtualAddress = XCOM_DEF::ADDRESS_BEGIN;
+        record.sName = tr("Header");
+
+        listResult.append(record);
+    }
+
+    return listResult;
 }
