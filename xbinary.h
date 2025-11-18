@@ -520,6 +520,7 @@ public:
         FT_CPIO,
         FT_SQUASHFS,
         FT_ISO9660,
+        FT_MINIDUMP,
 
         // TODO more
     };

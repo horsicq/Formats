@@ -270,6 +270,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_XZ, "XZ", QString("XZ")},
     {XBinary::FT_LZIP, "LZIP", QString("Lzip (LZMA)")},
     {XBinary::FT_CPIO, "CPIO", QString("CPIO")},
+    {XBinary::FT_MINIDUMP, "MiniDump", QString("Windows MiniDump")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -7196,6 +7197,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             // CPIO formats: 070701, 070702, 070707
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_CPIO);
+        } else if (compareSignature(&memoryMap, "'MDMP'", 0)) {
+            // Windows MiniDump format
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_MINIDUMP);
         } else if (compareSignature(&memoryMap, "89'PNG\r\n'1A0A", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_PNG);
@@ -7495,6 +7500,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_CPIO;
     } else if (pStFileTypes->contains(FT_ISO9660)) {
         result = FT_ISO9660;
+    } else if (pStFileTypes->contains(FT_MINIDUMP)) {
+        result = FT_MINIDUMP;
 
         // Android resources and DEX/Java
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
@@ -7702,6 +7709,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_LZIP)) listResult.append(FT_LZIP);
         if (stFileTypes.contains(FT_CPIO)) listResult.append(FT_CPIO);
         if (stFileTypes.contains(FT_ISO9660)) listResult.append(FT_ISO9660);
+        if (stFileTypes.contains(FT_MINIDUMP)) listResult.append(FT_MINIDUMP);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
