@@ -239,6 +239,7 @@ public:
         FPART_PROP_GID,
         FPART_PROP_LINKNAME,
         FPART_PROP_FILTERMETHOD,  // For preprocessing filters like BCJ, BCJ2
+        FPART_PROP_COMPRESSPROPERTIES,  // Compression algorithm properties (e.g., LZMA dictionary size)
         FPART_PROP_USERNAME,
         FPART_PROP_GROUPNAME,
         FPART_PROP_DEVVERSION,
@@ -2110,6 +2111,8 @@ public:
     qint64 getNumberOfArchiveRecords(PDSTRUCT *pPdStruct);
     QList<ARCHIVERECORD> getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct);
     bool packFolderToDevice(QIODevice *pDevice, const QMap<PACK_PROP, QVariant> &mapProperties, const QString &sFolderName, PDSTRUCT *pPdStruct);
+
+    virtual QList<QString> getListOfArchiveRecordNames(const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
 
     // Streaming unpacking API
     virtual bool initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);

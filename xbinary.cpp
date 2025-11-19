@@ -541,6 +541,45 @@ bool XBinary::packFolderToDevice(QIODevice *pDevice, const QMap<PACK_PROP, QVari
     return bResult && bFinish;
 }
 
+QList<QString> XBinary::getListOfArchiveRecordNames(const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
+{
+    QList<QString> listResult;
+
+    PDSTRUCT pdStructEmpty = createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    // Initialize unpack state
+    UNPACK_STATE state = {};
+
+    if (initUnpack(&state, mapProperties, pPdStruct)) {
+        // Iterate through records using streaming API
+        while (isPdStructNotCanceled(pPdStruct) && (state.nCurrentIndex < state.nNumberOfRecords)) {
+            // Get current record info
+            ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
+
+            // Extract the record name from properties
+            if (record.mapProperties.contains(FPART_PROP_ORIGINALNAME)) {
+                QString sRecordName = record.mapProperties.value(FPART_PROP_ORIGINALNAME).toString();
+                if (!sRecordName.isEmpty()) {
+                    listResult.append(sRecordName);
+                }
+            }
+
+            // Move to next record
+            if (!moveToNext(&state, pPdStruct)) {
+                break;
+            }
+        }
+
+        // Clean up
+        finishUnpack(&state, pPdStruct);
+    }
+
+    return listResult;
+}
+
 qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState)
 {
     qint32 nRead = pState->pDeviceInput->read(pBuffer, nBufferSize);
