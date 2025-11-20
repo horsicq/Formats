@@ -28,7 +28,7 @@ XBinary::XCONVERT _TABLE_XDJVU_STRUCTID[] = {
 
 XDJVU::XDJVU(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
-    g_header = {};
+    m_header = {};
 }
 
 XDJVU::~XDJVU()
@@ -70,11 +70,11 @@ XBinary::FT XDJVU::getFileType()
 
 XDJVU::HEADER XDJVU::getHeader()
 {
-    if (g_header.sSignature == "") {
-        g_header = _getHeader();
+    if (m_header.sSignature == "") {
+        m_header = _getHeader();
     }
 
-    return g_header;
+    return m_header;
 }
 
 bool XDJVU::isValid(QIODevice *pDevice)

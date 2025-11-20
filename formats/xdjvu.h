@@ -110,7 +110,7 @@ private:
     bool _isChunkValid(const QString &sChunkName);
 
 private:
-    HEADER g_header;
+    HEADER m_header;
 };
 
 #endif  // XDJVU_H
