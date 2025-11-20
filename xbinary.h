@@ -240,6 +240,7 @@ public:
         FPART_PROP_LINKNAME,
         FPART_PROP_FILTERMETHOD,  // For preprocessing filters like BCJ, BCJ2
         FPART_PROP_COMPRESSPROPERTIES,  // Compression algorithm properties (e.g., LZMA dictionary size)
+        FPART_PROP_AESKEY,  // AES encryption key derivation parameters (salt, IV, etc.)
         FPART_PROP_USERNAME,
         FPART_PROP_GROUPNAME,
         FPART_PROP_DEVVERSION,
