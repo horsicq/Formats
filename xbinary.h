@@ -220,6 +220,7 @@ public:
         FPART_PROP_COMPRESSMETHOD,
         FPART_PROP_COMPRESSEDSIZE,
         FPART_PROP_UNCOMPRESSEDSIZE,
+        FPART_PROP_SUBSTREAMOFFSET,
         FPART_PROP_CRC_TYPE,
         FPART_PROP_CRC_VALUE,
         FPART_PROP_DATETIME,
@@ -235,6 +236,8 @@ public:
         FPART_PROP_ORIGINALNAME,
         FPART_PROP_WINDOWSIZE,
         FPART_PROP_FILEMODE,
+        FPART_PROP_ISFOLDER,
+        FPART_PROP_ISEMPTYFILE,
         FPART_PROP_UID,
         FPART_PROP_GID,
         FPART_PROP_LINKNAME,
@@ -277,8 +280,6 @@ public:
     struct ARCHIVERECORD {
         qint64 nStreamOffset;
         qint64 nStreamSize;
-        qint64 nDecompressedOffset;
-        qint64 nDecompressedSize;
         QMap<FPART_PROP, QVariant> mapProperties;
     };
 

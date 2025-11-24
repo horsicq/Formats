@@ -14202,7 +14202,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                         QString sFilePath = sFolderName + QDir::separator() + sFileName;
 
                         // Check if this is a directory entry (ends with '/' and has zero size)
-                        bool bIsDirectory = sFileName.endsWith(QLatin1Char('/')) && (record.nDecompressedSize == 0);
+                        bool bIsDirectory = sFileName.endsWith(QLatin1Char('/'));
 
                         // Create directory structure if needed
                         if (bIsDirectory) {
