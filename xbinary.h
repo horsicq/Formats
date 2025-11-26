@@ -220,6 +220,9 @@ public:
         FPART_PROP_COMPRESSMETHOD,
         FPART_PROP_COMPRESSEDSIZE,
         FPART_PROP_UNCOMPRESSEDSIZE,
+        FPART_PROP_STREAMOFFSET,
+        FPART_PROP_STREAMSIZE,
+        FPART_PROP_STREAMUNPACKEDSIZE,
         FPART_PROP_SUBSTREAMOFFSET,
         FPART_PROP_CRC_TYPE,
         FPART_PROP_CRC_VALUE,
@@ -237,7 +240,7 @@ public:
         FPART_PROP_WINDOWSIZE,
         FPART_PROP_FILEMODE,
         FPART_PROP_ISFOLDER,
-        FPART_PROP_ISEMPTYFILE,
+        FPART_PROP_ISSOLID,
         FPART_PROP_UID,
         FPART_PROP_GID,
         FPART_PROP_LINKNAME,
@@ -1260,6 +1263,10 @@ public:
     static quint64 _read_uint64_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, bool bIsBigEndian = false);
     static QString _read_ansiString_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset, qint32 nMaxSize = 512);
 
+    static bool _read_bool_safe(char *pBuffer, qint32 nBufferSize, qint32 nBitPosition);
+    static bool _read_bool_safe_rev(char *pBuffer, qint32 nBufferSize, qint32 nBitPosition);
+    static quint32 _getBitCount_safe(char *pBuffer, qint32 nBufferSize);
+
     static void _write_uint8(char *pData, quint8 nValue);
     static void _write_int8(char *pData, qint8 nValue);
     static void _write_uint16(char *pData, quint16 nValue, bool bIsBigEndian = false);
@@ -1404,6 +1411,8 @@ public:
     static bool removeDirectory(const QString &sDirectoryName);
     static bool isDirectoryEmpty(const QString &sDirectoryName);
     static QDateTime getDirectoryLatestModificationDate(const QString &sDirectoryName);
+
+    static bool createEmptyFile(const QString &sFileName);
 
     static QByteArray readFile(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     static bool readFile(const QString &sFileName, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);

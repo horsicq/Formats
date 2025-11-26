@@ -823,7 +823,13 @@ bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QS
 
     bool bResult = false;
 
-    if (XBinary::isDirectoryExists(sFolderName)) {
+    bool bDirectory = XBinary::isDirectoryExists(sFolderName);
+
+    if (!bDirectory) {
+        bDirectory = XBinary::createDirectory(sFolderName);
+    }
+
+    if (bDirectory) {
         XBinary *pBinary = getClass(fileType, pDevice);
 
         if (pBinary) {

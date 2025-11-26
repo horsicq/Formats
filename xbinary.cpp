@@ -3013,6 +3013,54 @@ QString XBinary::_read_ansiString_safe(char *pBuffer, qint32 nBufferSize, qint32
     return sResult;
 }
 
+bool XBinary::_read_bool_safe(char *pBuffer, qint32 nBufferSize, qint32 nBitPosition)
+{
+    bool bResult = false;
+
+    if (nBitPosition < nBufferSize * 8) {
+        qint32 _nIndex = nBitPosition / 8;
+        qint32 _nPosition = nBitPosition % 8;
+        bResult = (quint8)(pBuffer[_nIndex]) & (0x1 << _nPosition);
+    }
+
+    return bResult;
+}
+
+bool XBinary::_read_bool_safe_rev(char *pBuffer, qint32 nBufferSize, qint32 nBitPosition)
+{
+    bool bResult = false;
+
+    if (nBitPosition < nBufferSize * 8) {
+        qint32 _nIndex = nBitPosition / 8;
+        qint32 _nPosition = nBitPosition % 8;
+        bResult = (quint8)(pBuffer[_nIndex]) & (0x80 >> _nPosition);
+    }
+
+    return bResult;
+}
+
+quint32 XBinary::_getBitCount_safe(char *pBuffer, qint32 nBufferSize)
+{
+    quint32 nResult = 0;
+
+        if (pBuffer && (nBufferSize > 0))
+        {
+            for (qint32 i = 0; i < nBufferSize; i++)
+            {
+                unsigned char byte = static_cast<unsigned char>(pBuffer[i]);
+
+                // Count set bits in the byte
+                while (byte)
+                {
+                    nResult += byte & 1;
+                    byte >>= 1;
+                }
+            }
+        }
+
+        return nResult;
+}
+
 void XBinary::_write_uint8(char *pData, quint8 nValue)
 {
     *(quint8 *)pData = nValue;
@@ -4832,11 +4880,11 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
     } else if (valueType == XBinary::VT_BYTE) {
         nResult = find_uint8(nOffset, nSize, (quint8)(varValue.toULongLong()), pPdStruct);
     } else if (valueType == XBinary::VT_WORD) {
-        nResult = find_uint16(nOffset, nSize, (qint16)(varValue.toULongLong()), pPdStruct);
+        nResult = find_uint16(nOffset, nSize, (quint16)(varValue.toULongLong()), pPdStruct);
     } else if (valueType == XBinary::VT_DWORD) {
-        nResult = find_uint32(nOffset, nSize, (qint32)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
+        nResult = find_uint32(nOffset, nSize, (quint32)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_QWORD) {
-        nResult = find_uint64(nOffset, nSize, (qint64)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
+        nResult = find_uint64(nOffset, nSize, (quint64)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_CHAR) {
         nResult = find_int8(nOffset, nSize, (qint8)(varValue.toULongLong()), pPdStruct);
     } else if (valueType == XBinary::VT_UCHAR) {
@@ -5392,6 +5440,11 @@ QDateTime XBinary::getDirectoryLatestModificationDate(const QString &sDirectoryN
         }
     }
     return latestMod;
+}
+
+bool XBinary::createEmptyFile(const QString &sFileName)
+{
+    return createFile(sFileName, 0);
 }
 
 QByteArray XBinary::readFile(const QString &sFileName, PDSTRUCT *pPdStruct)
@@ -14172,6 +14225,9 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
 
 bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
+    // TODO replace options
+    // Create a copy
+    // convert file name
     bool bResult = false;
 
     PDSTRUCT pdStructEmpty = createPdStruct();
@@ -14197,12 +14253,15 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                     ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
 
                     QString sFileName = record.mapProperties.value(FPART_PROP_ORIGINALNAME).toString();
+                    qint64 nFileSize = record.mapProperties.value(FPART_PROP_UNCOMPRESSEDSIZE).toLongLong();
+
+                    // TODO convert fileName
 
                     if (!sFileName.isEmpty()) {
                         QString sFilePath = sFolderName + QDir::separator() + sFileName;
 
                         // Check if this is a directory entry (ends with '/' and has zero size)
-                        bool bIsDirectory = sFileName.endsWith(QLatin1Char('/'));
+                        bool bIsDirectory = sFileName.endsWith(QLatin1Char('/')) || record.mapProperties.value(FPART_PROP_ISFOLDER).toBool();
 
                         // Create directory structure if needed
                         if (bIsDirectory) {
@@ -14221,83 +14280,95 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                         }
 
                         // Unpack file (skip if this is a directory entry)
-                        if (!bIsDirectory) {
+                        if (bIsDirectory) {
+                            bResult = XBinary::isDirectoryExists(sFilePath);
+                        } else if (XBinary::isFileExists(sFilePath)) {
+                            bResult = true;
+                        } else if (nFileSize == 0) {
+                            bResult = XBinary::createEmptyFile(sFilePath);
+                        } else if (!bIsDirectory) {
                             QFile file(sFilePath);
 
                             if (file.open(QIODevice::WriteOnly)) {
                                 if (!unpackCurrent(&state, &file, pPdStruct)) {
+#ifdef QT_DEBUG
+                                    qDebug() << "Cannot unpack" << sFilePath;
+#endif
                                     bResult = false;
                                 }
 
                                 file.close();
-
-                                if (bResult) {
-                                    XBinary::CRC_TYPE crcType =
-                                        (XBinary::CRC_TYPE)record.mapProperties.value(XBinary::FPART_PROP_CRC_TYPE, XBinary::CRC_TYPE_UNKNOWN).toUInt();
-
-                                    if (crcType != XBinary::CRC_TYPE_UNKNOWN) {
-                                        // Reopen the file for reading to calculate CRC
-                                        if (file.open(QIODevice::ReadOnly)) {
-                                            XBinary binary(&file);
-
-                                            quint32 nCalculatedCRC = 0;
-
-                                            if (crcType == XBinary::CRC_TYPE_EDB88320) {
-                                                nCalculatedCRC = binary._getCRC32(0, -1, 0xFFFFFFFF, XBinary::_getCRC32Table_EDB88320(), pPdStruct);
-                                            } else if (crcType == XBinary::CRC_TYPE_ADLER32) {
-                                                nCalculatedCRC = binary.getAdler32(0, -1, pPdStruct);
-                                            }
-
-                                            file.close();
-
-                                            quint32 nStoredCRC = record.mapProperties.value(XBinary::FPART_PROP_CRC_VALUE, 0).toUInt();
-
-                                            if (nStoredCRC != nCalculatedCRC) {
-#ifdef QT_DEBUG
-                                                qDebug() << "CRC is false for" << sFilePath << ": stored=" << QString::number(nStoredCRC, 16)
-                                                         << ", calc=" << QString::number(nCalculatedCRC, 16);
-#endif
-                                            }
-                                        }
-                                    }
-                                }
-
-                                // Set file datetime if provided by the archive record
-                                if (bResult) {
-                                    QVariant vDateTime = record.mapProperties.value(XBinary::FPART_PROP_DATETIME);
-                                    if (vDateTime.isValid() && !vDateTime.isNull()) {
-                                        QDateTime dt;
-                                        if (vDateTime.canConvert<QDateTime>()) {
-                                            dt = vDateTime.toDateTime();
-                                        } else if (vDateTime.canConvert<quint64>()) {
-                                            // Some formats may store timestamp as uint64 (seconds since epoch)
-                                            quint64 t = vDateTime.toULongLong();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-                                            dt = QDateTime::fromSecsSinceEpoch((qint64)t);
-#else
-                                            dt = QDateTime::fromMSecsSinceEpoch((qint64)t * 1000);
-#endif
-                                        } else if (vDateTime.canConvert<qint64>()) {
-                                            qint64 t = vDateTime.toLongLong();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-                                            dt = QDateTime::fromSecsSinceEpoch(t);
-#else
-                                            dt = QDateTime::fromMSecsSinceEpoch(t * 1000);
-#endif
-                                        }
-
-                                        if (dt.isValid()) {
-                                            XBinary::setFileDateTime(sFilePath, dt);
-                                        }
-                                    }
-                                }
                             } else {
                                 bResult = false;
+                            }
+
+                            if (bResult) {
+                                XBinary::CRC_TYPE crcType =
+                                    (XBinary::CRC_TYPE)record.mapProperties.value(XBinary::FPART_PROP_CRC_TYPE, XBinary::CRC_TYPE_UNKNOWN).toUInt();
+
+                                if (crcType != XBinary::CRC_TYPE_UNKNOWN) {
+                                    // Reopen the file for reading to calculate CRC
+                                    if (file.open(QIODevice::ReadOnly)) {
+                                        XBinary binary(&file);
+
+                                        quint32 nCalculatedCRC = 0;
+
+                                        if (crcType == XBinary::CRC_TYPE_EDB88320) {
+                                            nCalculatedCRC = binary._getCRC32(0, -1, 0xFFFFFFFF, XBinary::_getCRC32Table_EDB88320(), pPdStruct);
+                                        } else if (crcType == XBinary::CRC_TYPE_ADLER32) {
+                                            nCalculatedCRC = binary.getAdler32(0, -1, pPdStruct);
+                                        }
+
+                                        file.close();
+
+                                        quint32 nStoredCRC = record.mapProperties.value(XBinary::FPART_PROP_CRC_VALUE, 0).toUInt();
+
+                                        if (nStoredCRC != nCalculatedCRC) {
+#ifdef QT_DEBUG
+                                            qDebug() << "CRC is false for" << sFilePath << ": stored=" << QString::number(nStoredCRC, 16)
+                                                     << ", calc=" << QString::number(nCalculatedCRC, 16);
+#endif
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Set file datetime if provided by the archive record
+                        if (bResult) {
+                            QVariant vDateTime = record.mapProperties.value(XBinary::FPART_PROP_DATETIME);
+                            if (vDateTime.isValid() && !vDateTime.isNull()) {
+                                QDateTime dt;
+                                if (vDateTime.canConvert<QDateTime>()) {
+                                    dt = vDateTime.toDateTime();
+                                } else if (vDateTime.canConvert<quint64>()) {
+                                    // Some formats may store timestamp as uint64 (seconds since epoch)
+                                    quint64 t = vDateTime.toULongLong();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                    dt = QDateTime::fromSecsSinceEpoch((qint64)t);
+#else
+                                    dt = QDateTime::fromMSecsSinceEpoch((qint64)t * 1000);
+#endif
+                                } else if (vDateTime.canConvert<qint64>()) {
+                                    qint64 t = vDateTime.toLongLong();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                    dt = QDateTime::fromSecsSinceEpoch(t);
+#else
+                                    dt = QDateTime::fromMSecsSinceEpoch(t * 1000);
+#endif
+                                }
+
+                                if (dt.isValid()) {
+                                    XBinary::setFileDateTime(sFilePath, dt);
+                                }
                             }
                         }
                     }
                 } else {
                     bResult = false;
+                }
+
+                if (!bResult) {
                     break;
                 }
             } while (moveToNext(&state, pPdStruct));
