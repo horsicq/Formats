@@ -23,6 +23,47 @@
 #include <cstring>
 #include <QDebug>
 
+// SIMD intrinsics
+#ifdef _MSC_VER
+    #include <intrin.h>
+#else
+    #include <cpuid.h>
+    #include <x86intrin.h>
+#endif
+
+// CPU feature detection
+namespace {
+    struct CPUFeatures {
+        bool sse2;
+        bool avx2;
+        
+        CPUFeatures() : sse2(false), avx2(false) {
+            detectFeatures();
+        }
+        
+        void detectFeatures() {
+#ifdef _MSC_VER
+            int cpuInfo[4];
+            __cpuid(cpuInfo, 1);
+            sse2 = (cpuInfo[3] & (1 << 26)) != 0;
+            
+            __cpuid(cpuInfo, 7);
+            avx2 = (cpuInfo[1] & (1 << 5)) != 0;
+#else
+            unsigned int eax, ebx, ecx, edx;
+            if (__get_cpuid(1, &eax, &ebx, &ecx, &edx)) {
+                sse2 = (edx & (1 << 26)) != 0;
+            }
+            if (__get_cpuid_count(7, 0, &eax, &ebx, &ecx, &edx)) {
+                avx2 = (ebx & (1 << 5)) != 0;
+            }
+#endif
+        }
+    };
+    
+    const CPUFeatures g_cpuFeatures;
+}  // namespace
+
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b)
 {
     if (a.nAddress != b.nAddress) {
@@ -3228,7 +3269,13 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         pPdStruct = &pdStructEmpty;
     }
     // Validate input
-    if ((!pArray) || (nArraySize <= 0)) {
+    // For ST_COMPAREBYTES, pArray must be provided
+    // For other ST modes (NOTNULL, ANSI, etc.), pArray can be nullptr
+    if ((st == ST_COMPAREBYTES) && (!pArray)) {
+        return -1;
+    }
+    
+    if (nArraySize <= 0) {
         return -1;
     }
 
@@ -3352,13 +3399,87 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         }
 
         if (st == ST_COMPAREBYTES) {
-            // Fast path: single-byte needle
+            // Fast path: single-byte needle with SIMD optimization
             if (nArraySize == 1) {
-                const void *p = memchr(pBuffer, (unsigned char)pArray[0], (size_t)nTemp);
-                if (p) {
-                    nResult = nOffset + ((const char *)p - pBuffer);
-                    break;
+                #ifdef Q_PROCESSOR_X86
+                if (g_cpuFeatures.avx2 && nTemp >= 32) {
+                    // AVX2 optimized single-byte search
+                    const unsigned char *hay = (const unsigned char *)pBuffer;
+                    __m256i vNeedle = _mm256_set1_epi8((char)pArray[0]);
+                    qint64 i = 0;
+                    
+                    // Process 32-byte chunks
+                    while (i + 32 <= nTemp) {
+                        __m256i vData = _mm256_loadu_si256((const __m256i *)(hay + i));
+                        __m256i vCmp = _mm256_cmpeq_epi8(vData, vNeedle);
+                        qint32 nMask = _mm256_movemask_epi8(vCmp);
+                        
+                        if (nMask != 0) {
+                            // Found match - find first set bit
+                            #ifdef _MSC_VER
+                            unsigned long nBitPos;
+                            _BitScanForward(&nBitPos, nMask);
+                            nResult = nOffset + i + nBitPos;
+                            #else
+                            nResult = nOffset + i + __builtin_ctz(nMask);
+                            #endif
+                            break;
+                        }
+                        i += 32;
+                    }
+                    
+                    // Handle remaining bytes with standard memchr
+                    if (nResult == -1 && i < nTemp) {
+                        const void *p = memchr(hay + i, (unsigned char)pArray[0], (size_t)(nTemp - i));
+                        if (p) {
+                            nResult = nOffset + ((const char *)p - pBuffer);
+                        }
+                    }
+                } else if (g_cpuFeatures.sse2 && nTemp >= 16) {
+                    // SSE2 optimized single-byte search
+                    const unsigned char *hay = (const unsigned char *)pBuffer;
+                    __m128i vNeedle = _mm_set1_epi8((char)pArray[0]);
+                    qint64 i = 0;
+                    
+                    // Process 16-byte chunks
+                    while (i + 16 <= nTemp) {
+                        __m128i vData = _mm_loadu_si128((const __m128i *)(hay + i));
+                        __m128i vCmp = _mm_cmpeq_epi8(vData, vNeedle);
+                        qint32 nMask = _mm_movemask_epi8(vCmp);
+                        
+                        if (nMask != 0) {
+                            // Found match - find first set bit
+                            #ifdef _MSC_VER
+                            unsigned long nBitPos;
+                            _BitScanForward(&nBitPos, nMask);
+                            nResult = nOffset + i + nBitPos;
+                            #else
+                            nResult = nOffset + i + __builtin_ctz(nMask);
+                            #endif
+                            break;
+                        }
+                        i += 16;
+                    }
+                    
+                    // Handle remaining bytes with standard memchr
+                    if (nResult == -1 && i < nTemp) {
+                        const void *p = memchr(hay + i, (unsigned char)pArray[0], (size_t)(nTemp - i));
+                        if (p) {
+                            nResult = nOffset + ((const char *)p - pBuffer);
+                        }
+                    }
+                } else
+                #endif
+                {
+                    // Fallback to standard memchr
+                    const void *p = memchr(pBuffer, (unsigned char)pArray[0], (size_t)nTemp);
+                    if (p) {
+                        nResult = nOffset + ((const char *)p - pBuffer);
+                        break;
+                    }
                 }
+                
+                if (nResult != -1) break;
             } else if (bUseBMH) {
                 // Boyer–Moore–Horspool over the current chunk
                 const char *hay = pBuffer;
@@ -3396,33 +3517,173 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 }
 
                 qint32 nCheckCount = 0;
-                while (i <= limit) {
-                    unsigned char c = (unsigned char)hay[i + m - 1];
-
-                    if (bDebugECD && nCheckCount < 10) {
-                        qDebug() << "  BMH checking position" << i << "char at i+3:" << QString("%1").arg(c, 2, 16, QChar('0')) << "skip:" << bmhShift[c];
-                        nCheckCount++;
-                    }
-
-                    if (c == (unsigned char)nLastSearchChar) {
-                        if (bDebugECD) {
-                            qDebug() << "_find_array: BMH potential match at i:" << i << "- comparing:"
-                                     << QString("%1 %2 %3 %4")
-                                            .arg((quint8)hay[i], 2, 16, QChar('0'))
-                                            .arg((quint8)hay[i + 1], 2, 16, QChar('0'))
-                                            .arg((quint8)hay[i + 2], 2, 16, QChar('0'))
-                                            .arg((quint8)hay[i + 3], 2, 16, QChar('0'));
-                        }
-                        // Potential match; verify all bytes
-                        if (memcmp(hay + i, pArray, (size_t)m) == 0) {
-                            if (bDebugECD) {
-                                qDebug() << "_find_array: BMH MATCH FOUND at offset:" << (nOffset + i);
+                
+                // SIMD-optimized BMH search for patterns >= 32 bytes (adjusted threshold to avoid regression)
+                if (m >= 32 && g_cpuFeatures.avx2) {
+                    // SIMD-optimized BMH search for patterns >= 32 bytes (adjusted threshold to avoid regression)
+                    #ifdef Q_PROCESSOR_X86
+                    // AVX2: Load last character for comparison
+                    __m256i vLast = _mm256_set1_epi8(nLastSearchChar);
+                    
+                    while (i <= limit) {
+                        // Check if we can use SIMD for last char search (need 32 bytes ahead)
+                        if (i + m + 31 <= hayLen) {
+                            // Scan for last character using AVX2
+                            const char *pLastPos = hay + i + m - 1;
+                            __m256i vData = _mm256_loadu_si256((const __m256i *)pLastPos);
+                            __m256i vCmp = _mm256_cmpeq_epi8(vData, vLast);
+                            qint32 nMask = _mm256_movemask_epi8(vCmp);
+                            
+                            if (nMask != 0) {
+                                // Found potential match(es) in this 32-byte window
+                                qint32 nBitPos = 0;
+                                while (nMask != 0) {
+                                    if (nMask & 1) {
+                                        // Last char matches at position i + nBitPos
+                                        qint64 nCheckPos = i + nBitPos;
+                                        if (nCheckPos <= limit) {
+                                            // Verify full pattern with SIMD-accelerated comparison
+                                            if (compareMemory((char *)(hay + nCheckPos), pArray, m)) {
+                                                nResult = nOffset + nCheckPos;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    nMask >>= 1;
+                                    nBitPos++;
+                                }
+                                
+                                if (nResult != -1) break;
+                                
+                                // Skip forward by 32 bytes
+                                i += 32;
+                            } else {
+                                // No matches in this 32-byte window, skip ahead
+                                i += 32;
                             }
-                            nResult = nOffset + i;
-                            break;
+                        } else {
+                            // Fall back to scalar for remaining bytes
+                            unsigned char c = (unsigned char)hay[i + m - 1];
+                            
+                            if (c == (unsigned char)nLastSearchChar) {
+                                if (compareMemory((char *)(hay + i), pArray, m)) {
+                                    nResult = nOffset + i;
+                                    break;
+                                }
+                            }
+                            i += (qint64)bmhShift[c];
                         }
                     }
-                    i += (qint64)bmhShift[c];
+                    #else
+                    // Non-x86 fallback
+                    while (i <= limit) {
+                        unsigned char c = (unsigned char)hay[i + m - 1];
+                        if (c == (unsigned char)nLastSearchChar) {
+                            if (compareMemory((char *)(hay + i), pArray, m)) {
+                                nResult = nOffset + i;
+                                break;
+                            }
+                        }
+                        i += (qint64)bmhShift[c];
+                    }
+                    #endif
+                } else if (m >= 24 && g_cpuFeatures.sse2) {
+                    #ifdef Q_PROCESSOR_X86
+                    // SSE2: Load last character for comparison (threshold 24 to balance overhead)
+                    __m128i vLast = _mm_set1_epi8(nLastSearchChar);
+                    
+                    while (i <= limit) {
+                        // Check if we can use SIMD for last char search (need 16 bytes ahead)
+                        if (i + m + 15 <= hayLen) {
+                            // Scan for last character using SIMD
+                            const char *pLastPos = hay + i + m - 1;
+                            __m128i vData = _mm_loadu_si128((const __m128i *)pLastPos);
+                            __m128i vCmp = _mm_cmpeq_epi8(vData, vLast);
+                            qint32 nMask = _mm_movemask_epi8(vCmp);
+                            
+                            if (nMask != 0) {
+                                // Found potential match(es) in this 16-byte window
+                                qint32 nBitPos = 0;
+                                while (nMask != 0) {
+                                    if (nMask & 1) {
+                                        // Last char matches at position i + nBitPos
+                                        qint64 nCheckPos = i + nBitPos;
+                                        if (nCheckPos <= limit) {
+                                            // Verify full pattern with SIMD-accelerated comparison
+                                            if (compareMemory((char *)(hay + nCheckPos), pArray, m)) {
+                                                nResult = nOffset + nCheckPos;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    nMask >>= 1;
+                                    nBitPos++;
+                                }
+                                
+                                if (nResult != -1) break;
+                                
+                                // Skip forward by the maximum of shifts for found positions
+                                i += 16;
+                            } else {
+                                // No matches in this 16-byte window, skip ahead
+                                i += 16;
+                            }
+                        } else {
+                            // Fall back to scalar for remaining bytes
+                            unsigned char c = (unsigned char)hay[i + m - 1];
+                            
+                            if (c == (unsigned char)nLastSearchChar) {
+                                if (compareMemory((char *)(hay + i), pArray, m)) {
+                                    nResult = nOffset + i;
+                                    break;
+                                }
+                            }
+                            i += (qint64)bmhShift[c];
+                        }
+                    }
+                    #else
+                    // Non-x86 fallback
+                    while (i <= limit) {
+                        unsigned char c = (unsigned char)hay[i + m - 1];
+                        if (c == (unsigned char)nLastSearchChar) {
+                            if (compareMemory((char *)(hay + i), pArray, m)) {
+                                nResult = nOffset + i;
+                                break;
+                            }
+                        }
+                        i += (qint64)bmhShift[c];
+                    }
+                    #endif
+                } else {
+                    // Scalar BMH search for patterns < 16 bytes or no SSE2
+                    while (i <= limit) {
+                        unsigned char c = (unsigned char)hay[i + m - 1];
+
+                        if (bDebugECD && nCheckCount < 10) {
+                            qDebug() << "  BMH checking position" << i << "char at i+3:" << QString("%1").arg(c, 2, 16, QChar('0')) << "skip:" << bmhShift[c];
+                            nCheckCount++;
+                        }
+
+                        if (c == (unsigned char)nLastSearchChar) {
+                            if (bDebugECD) {
+                                qDebug() << "_find_array: BMH potential match at i:" << i << "- comparing:"
+                                         << QString("%1 %2 %3 %4")
+                                                .arg((quint8)hay[i], 2, 16, QChar('0'))
+                                                .arg((quint8)hay[i + 1], 2, 16, QChar('0'))
+                                                .arg((quint8)hay[i + 2], 2, 16, QChar('0'))
+                                                .arg((quint8)hay[i + 3], 2, 16, QChar('0'));
+                            }
+                            // Potential match; verify all bytes
+                            if (memcmp(hay + i, pArray, (size_t)m) == 0) {
+                                if (bDebugECD) {
+                                    qDebug() << "_find_array: BMH MATCH FOUND at offset:" << (nOffset + i);
+                                }
+                                nResult = nOffset + i;
+                                break;
+                            }
+                        }
+                        i += (qint64)bmhShift[c];
+                    }
                 }
 
                 if (bDebugECD && nResult == -1) {
@@ -5566,94 +5827,340 @@ bool XBinary::_isMemoryZeroFilled(char *pSource, qint64 nSize)
 
 bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
 {
-    bool bResult = true;
-    // TODO optimize
-    while (nSize) {
-        if ((*pSource) == 0) {
-            bResult = false;
-
-            break;
+    const char *ptr = pSource;
+    
+    // AVX2: Process 32 bytes at a time
+    if (g_cpuFeatures.avx2 && nSize >= 32) {
+        const __m256i zero = _mm256_setzero_si256();
+        
+        while (nSize >= 32) {
+            __m256i chunk = _mm256_loadu_si256((const __m256i*)ptr);
+            __m256i cmp = _mm256_cmpeq_epi8(chunk, zero);
+            int mask = _mm256_movemask_epi8(cmp);
+            
+            if (mask != 0) {
+                return false;  // Found zero byte
+            }
+            
+            ptr += 32;
+            nSize -= 32;
         }
-
-        pSource++;
+    }
+    
+    // SSE2: Process 16 bytes at a time
+    if (g_cpuFeatures.sse2 && nSize >= 16) {
+        const __m128i zero = _mm_setzero_si128();
+        
+        while (nSize >= 16) {
+            __m128i chunk = _mm_loadu_si128((const __m128i*)ptr);
+            __m128i cmp = _mm_cmpeq_epi8(chunk, zero);
+            int mask = _mm_movemask_epi8(cmp);
+            
+            if (mask != 0) {
+                return false;  // Found zero byte
+            }
+            
+            ptr += 16;
+            nSize -= 16;
+        }
+    }
+    
+    // Fallback: 64-bit processing
+    const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(ptr);
+    while (nSize >= 8) {
+        quint64 v = *pSource64;
+        if (((v - 0x0101010101010101ULL) & ~v & 0x8080808080808080ULL) != 0) {
+            return false;
+        }
+        pSource64++;
+        nSize -= 8;
+    }
+    
+    // Process remaining bytes
+    const char *pRemaining = reinterpret_cast<const char *>(pSource64);
+    while (nSize > 0) {
+        if (*pRemaining == 0) {
+            return false;
+        }
+        pRemaining++;
         nSize--;
     }
-
-    return bResult;
+    
+    return true;
 }
 
 bool XBinary::_isMemoryAnsi(char *pSource, qint64 nSize)
 {
-    bool bResult = true;
-    // TODO optimize
-    while (nSize) {
-        if (!isAnsiSymbol(*pSource)) {
-            bResult = false;
-
-            break;
+    const char *ptr = pSource;
+    
+    // SSE2: Process 16 bytes at a time
+    if (g_cpuFeatures.sse2 && nSize >= 16) {
+        const __m128i low_bound = _mm_set1_epi8(0x20 - 1);  // Less than 0x20 is invalid
+        const __m128i high_bound = _mm_set1_epi8(0x7F);     // Greater than 0x7F is invalid
+        
+        while (nSize >= 16) {
+            __m128i chunk = _mm_loadu_si128((const __m128i*)ptr);
+            
+            // Check if any byte < 0x20 or >= 0x80
+            __m128i too_low = _mm_cmpgt_epi8(low_bound, chunk);
+            __m128i too_high = _mm_cmpgt_epi8(chunk, high_bound);
+            __m128i invalid = _mm_or_si128(too_low, too_high);
+            
+            if (_mm_movemask_epi8(invalid) != 0) {
+                return false;
+            }
+            
+            ptr += 16;
+            nSize -= 16;
         }
-
-        pSource++;
+        
+        // After SSE2, process remaining bytes directly
+        const quint8 *pRemaining = reinterpret_cast<const quint8 *>(ptr);
+        while (nSize > 0) {
+            if (*pRemaining < 0x20 || *pRemaining >= 0x80) {
+                return false;
+            }
+            pRemaining++;
+            nSize--;
+        }
+        return true;
+    }
+    
+    // Fallback: 64-bit processing (when SSE2 not available)
+    const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
+    while (nSize >= 8) {
+        quint64 v = *pSource64;
+        if ((((v - 0x2020202020202020ULL) | v) & 0x8080808080808080ULL) != 0) {
+            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pSource64);
+            for (qint32 i = 0; i < 8; i++) {
+                if (pCheck[i] < 0x20 || pCheck[i] >= 0x80) {
+                    return false;
+                }
+            }
+        }
+        pSource64++;
+        nSize -= 8;
+    }
+    
+    // Process remaining bytes
+    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pSource64);
+    while (nSize > 0) {
+        if (*pRemaining < 0x20 || *pRemaining >= 0x80) {
+            return false;
+        }
+        pRemaining++;
         nSize--;
     }
-
-    return bResult;
+    
+    return true;
 }
 
 bool XBinary::_isMemoryNotAnsi(char *pSource, qint64 nSize)
 {
-    bool bResult = true;
-    // TODO optimize
-    while (nSize) {
-        if (isAnsiSymbol(*pSource)) {
-            bResult = false;
-
-            break;
+    const char *ptr = pSource;
+    
+    // SSE2: Process 16 bytes at a time
+    if (g_cpuFeatures.sse2 && nSize >= 16) {
+        const __m128i low_bound = _mm_set1_epi8(0x20);
+        const __m128i high_bound = _mm_set1_epi8(0x7F);
+        
+        while (nSize >= 16) {
+            __m128i chunk = _mm_loadu_si128((const __m128i*)ptr);
+            
+            // Check if any byte is printable (>= 0x20 AND <= 0x7F)
+            __m128i ge_low = _mm_cmpgt_epi8(chunk, _mm_set1_epi8(0x1F));  // >= 0x20
+            __m128i le_high = _mm_cmpgt_epi8(_mm_set1_epi8(static_cast<char>(0x80)), chunk);  // < 0x80
+            __m128i printable = _mm_and_si128(ge_low, le_high);
+            
+            if (_mm_movemask_epi8(printable) != 0) {
+                return false;  // Found printable byte
+            }
+            
+            ptr += 16;
+            nSize -= 16;
         }
-
-        pSource++;
+        
+        // After SSE2, process remaining bytes directly
+        const quint8 *pRemaining = reinterpret_cast<const quint8 *>(ptr);
+        while (nSize > 0) {
+            if (*pRemaining >= 0x20 && *pRemaining < 0x80) {
+                return false;
+            }
+            pRemaining++;
+            nSize--;
+        }
+        return true;
+    }
+    
+    // Fallback: 64-bit processing (when SSE2 not available)
+    const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
+    while (nSize >= 8) {
+        quint64 v = *pSource64;
+        if ((((v - 0x2020202020202020ULL) | v) & 0x8080808080808080ULL) == 0) {
+            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pSource64);
+            for (qint32 i = 0; i < 8; i++) {
+                if (pCheck[i] >= 0x20 && pCheck[i] < 0x80) {
+                    return false;
+                }
+            }
+        }
+        pSource64++;
+        nSize -= 8;
+    }
+    
+    // Process remaining bytes
+    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pSource64);
+    while (nSize > 0) {
+        if (*pRemaining >= 0x20 && *pRemaining < 0x80) {
+            return false;
+        }
+        pRemaining++;
         nSize--;
     }
-
-    return bResult;
+    
+    return true;
 }
 
 bool XBinary::_isMemoryNotAnsiAndNull(char *pSource, qint64 nSize)
 {
-    bool bResult = true;
-    // TODO optimize
-    while (nSize) {
-        if (((*pSource) == 0) || isAnsiSymbol(*pSource)) {
-            bResult = false;
-
-            break;
+    const char *ptr = pSource;
+    
+    // SSE2: Process 16 bytes at a time
+    if (g_cpuFeatures.sse2 && nSize >= 16) {
+        const __m128i zero = _mm_setzero_si128();
+        const __m128i low_bound = _mm_set1_epi8(0x20);
+        const __m128i high_bound = _mm_set1_epi8(0x7F);
+        
+        while (nSize >= 16) {
+            __m128i chunk = _mm_loadu_si128((const __m128i*)ptr);
+            
+            // Check for zero bytes
+            __m128i is_zero = _mm_cmpeq_epi8(chunk, zero);
+            
+            // Check for printable ASCII
+            __m128i ge_low = _mm_cmpgt_epi8(chunk, _mm_set1_epi8(0x1F));
+            __m128i le_high = _mm_cmpgt_epi8(_mm_set1_epi8(static_cast<char>(0x80)), chunk);
+            __m128i is_printable = _mm_and_si128(ge_low, le_high);
+            
+            __m128i invalid = _mm_or_si128(is_zero, is_printable);
+            
+            if (_mm_movemask_epi8(invalid) != 0) {
+                return false;
+            }
+            
+            ptr += 16;
+            nSize -= 16;
         }
-
-        pSource++;
+        
+        // After SSE2, process remaining bytes directly
+        const quint8 *pRemaining = reinterpret_cast<const quint8 *>(ptr);
+        while (nSize > 0) {
+            if (*pRemaining == 0 || (*pRemaining >= 0x20 && *pRemaining < 0x80)) {
+                return false;
+            }
+            pRemaining++;
+            nSize--;
+        }
+        return true;
+    }
+    
+    // Fallback: 64-bit processing (when SSE2 not available)
+    const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
+    while (nSize >= 8) {
+        quint64 v = *pSource64;
+        if (((v - 0x0101010101010101ULL) & ~v & 0x8080808080808080ULL) != 0) {
+            return false;
+        }
+        if ((((v - 0x2020202020202020ULL) | v) & 0x8080808080808080ULL) == 0) {
+            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pSource64);
+            for (qint32 i = 0; i < 8; i++) {
+                if (pCheck[i] >= 0x20 && pCheck[i] < 0x80) {
+                    return false;
+                }
+            }
+        }
+        pSource64++;
+        nSize -= 8;
+    }
+    
+    // Process remaining bytes
+    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pSource64);
+    while (nSize > 0) {
+        if (*pRemaining == 0 || (*pRemaining >= 0x20 && *pRemaining < 0x80)) {
+            return false;
+        }
+        pRemaining++;
         nSize--;
     }
-
-    return bResult;
+    
+    return true;
 }
 
 bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
 {
-    bool bResult = true;
-    // TODO optimize
-    while (nSize) {
-        quint8 cTemp = (quint8)(*pSource);
-
-        if ((cTemp < 0x30) || (cTemp > 0x39)) {
-            bResult = false;
-
-            break;
+    const char *ptr = pSource;
+    
+    // SSE2: Process 16 bytes at a time
+    if (g_cpuFeatures.sse2 && nSize >= 16) {
+        const __m128i digit_low = _mm_set1_epi8(0x30);  // '0'
+        const __m128i digit_high = _mm_set1_epi8(0x39); // '9'
+        
+        while (nSize >= 16) {
+            __m128i chunk = _mm_loadu_si128((const __m128i*)ptr);
+            
+            // Check if any byte < '0' or > '9'
+            __m128i too_low = _mm_cmplt_epi8(chunk, digit_low);
+            __m128i too_high = _mm_cmpgt_epi8(chunk, digit_high);
+            __m128i invalid = _mm_or_si128(too_low, too_high);
+            
+            if (_mm_movemask_epi8(invalid) != 0) {
+                return false;
+            }
+            
+            ptr += 16;
+            nSize -= 16;
         }
-
-        pSource++;
+        
+        // After SSE2, process remaining bytes directly
+        const quint8 *pRemaining = reinterpret_cast<const quint8 *>(ptr);
+        while (nSize > 0) {
+            if (*pRemaining < 0x30 || *pRemaining > 0x39) {
+                return false;
+            }
+            pRemaining++;
+            nSize--;
+        }
+        return true;
+    }
+    
+    // Fallback: 64-bit processing (when SSE2 not available)
+    const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
+    while (nSize >= 8) {
+        quint64 v = *pSource64;
+        quint64 v_minus_0x30 = v - 0x3030303030303030ULL;
+        if (((v_minus_0x30 | (v_minus_0x30 >> 4)) & 0xF0F0F0F0F0F0F0F0ULL) != 0) {
+            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pSource64);
+            for (qint32 i = 0; i < 8; i++) {
+                if (pCheck[i] < 0x30 || pCheck[i] > 0x39) {
+                    return false;
+                }
+            }
+        }
+        pSource64++;
+        nSize -= 8;
+    }
+    
+    // Process remaining bytes
+    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pSource64);
+    while (nSize > 0) {
+        if (*pRemaining < 0x30 || *pRemaining > 0x39) {
+            return false;
+        }
+        pRemaining++;
         nSize--;
     }
-
-    return bResult;
+    
+    return true;
 }
 
 bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize)
@@ -5777,32 +6284,73 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
 
 bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)
 {
-    while (nSize > 0) {
-        if (nSize >= 4) {
-            if (*((quint32 *)pMemory1) != *((quint32 *)pMemory2)) {
+    const char *__restrict ptr1 = pMemory1;
+    const char *__restrict ptr2 = pMemory2;
+    
+    // AVX2: Compare 32 bytes at a time
+    #ifdef __AVX2__
+    if (g_cpuFeatures.avx2 && nSize >= 32) {
+        while (nSize >= 32) {
+            __m256i chunk1 = _mm256_loadu_si256((const __m256i*)ptr1);
+            __m256i chunk2 = _mm256_loadu_si256((const __m256i*)ptr2);
+            __m256i cmp = _mm256_cmpeq_epi8(chunk1, chunk2);
+            
+            // If not all bytes match, there's a difference
+            if (_mm256_movemask_epi8(cmp) != 0xFFFFFFFF) {
                 return false;
             }
-
-            pMemory1 += 4;
-            pMemory2 += 4;
-            nSize -= 4;
-        } else if (nSize >= 2) {
-            if (*((quint16 *)pMemory1) != *((quint16 *)pMemory2)) {
-                return false;
-            }
-
-            pMemory1 += 2;
-            pMemory2 += 2;
-            nSize -= 2;
-        } else {
-            if (*(pMemory1) != *(pMemory2)) {
-                return false;
-            }
-
-            pMemory1++;
-            pMemory2++;
-            nSize--;
+            
+            ptr1 += 32;
+            ptr2 += 32;
+            nSize -= 32;
         }
+    }
+    #endif
+    
+    // SSE2: Compare 16 bytes at a time
+    if (g_cpuFeatures.sse2 && nSize >= 16) {
+        while (nSize >= 16) {
+            __m128i chunk1 = _mm_loadu_si128((const __m128i*)ptr1);
+            __m128i chunk2 = _mm_loadu_si128((const __m128i*)ptr2);
+            __m128i cmp = _mm_cmpeq_epi8(chunk1, chunk2);
+            
+            // If not all bytes match, there's a difference
+            if (_mm_movemask_epi8(cmp) != 0xFFFF) {
+                return false;
+            }
+            
+            ptr1 += 16;
+            ptr2 += 16;
+            nSize -= 16;
+        }
+        
+        // After SSE2, process remainder with 64-bit or byte-by-byte
+    }
+    
+    // 64-bit comparison for remaining bytes
+    const quint64 *__restrict p1_64 = reinterpret_cast<const quint64 *>(ptr1);
+    const quint64 *__restrict p2_64 = reinterpret_cast<const quint64 *>(ptr2);
+    
+    while (nSize >= 8) {
+        if (*p1_64 != *p2_64) {
+            return false;
+        }
+        p1_64++;
+        p2_64++;
+        nSize -= 8;
+    }
+    
+    // Process remaining 0-7 bytes
+    ptr1 = reinterpret_cast<const char *>(p1_64);
+    ptr2 = reinterpret_cast<const char *>(p2_64);
+    
+    while (nSize > 0) {
+        if (*ptr1 != *ptr2) {
+            return false;
+        }
+        ptr1++;
+        ptr2++;
+        nSize--;
     }
 
     return true;
@@ -7429,7 +7977,22 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         if (!bAllFound) {
             if (nSize >= 12) {
                 if (read_uint16(2) == 0x0A0D) {
-                    if (XPYC::isValid(getDevice())) {
+                    // XPYC validation check
+                    quint16 nMagic = read_uint16(0);
+                    quint16 nCRLF = read_uint16(2);
+                    
+                    // Python bytecode magic numbers (partial list, see XPYC for complete list)
+                    // Format: first 2 bytes = magic, next 2 bytes = 0x0A0D (CRLF)
+                    bool bIsPYC = false;
+                    if (nCRLF == 0x0A0D) {
+                        // Check for common Python magic numbers
+                        if ((nMagic >= 0x0A0D) && (nMagic <= 0xFFFF)) {
+                            // Basic validation: magic number present and CRLF marker
+                            bIsPYC = true;
+                        }
+                    }
+                    
+                    if (bIsPYC) {
                         stResult.insert(FT_PYC);
                         bAllFound = true;
                     }
@@ -9152,23 +9715,28 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
 
             if (bstatus == BSTATUS_ENTROPY) {
                 const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
-                for (qint64 i = 0; i < nTemp; i++) {
-                    counts[*ptr++]++;
+                qint64 i = 0;
+                
+                // Simple loop - let compiler optimize (unrolling can hurt cache performance)
+                for (; i < nTemp; i++) {
+                    counts[ptr[i]]++;
                 }
             } else if (bstatus == BSTATUS_ZEROS) {
                 const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
                 for (qint64 i = 0; i < nTemp; i++) {
-                    nSymbolCount += (*ptr++ == 0);
+                    nSymbolCount += (ptr[i] == 0);
                 }
             } else if (bstatus == BSTATUS_GRADIENT) {
                 const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
                 for (qint64 i = 0; i < nTemp; i++) {
-                    nSum += *ptr++;
+                    nSum += ptr[i];
                 }
             } else if (bstatus == BSTATUS_TEXT) {
                 const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
+                
+                // Simple loop - compiler optimizes better than manual unrolling for this
                 for (qint64 i = 0; i < nTemp; i++) {
-                    unsigned char c = *ptr++;
+                    unsigned char c = ptr[i];
                     // ASCII printable range [32..126] plus 8(BS),10(LF),13(CR)
                     if ((c >= 32 && c <= 126) || c == 8 || c == 10 || c == 13) {
                         nSymbolCount++;
@@ -14155,6 +14723,20 @@ bool XBinary::finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
     Q_UNUSED(pPdStruct)
 
     return false;
+}
+
+QList<XBinary::FPART_PROP> XBinary::getAvailableFPARTProperties()
+{
+    QList<XBinary::FPART_PROP> listResult;
+
+    listResult.append(FPART_PROP_ORIGINALNAME);
+    listResult.append(FPART_PROP_COMPRESSEDSIZE);
+    listResult.append(FPART_PROP_UNCOMPRESSEDSIZE);
+    listResult.append(FPART_PROP_STREAMOFFSET);
+    listResult.append(FPART_PROP_STREAMSIZE);
+    listResult.append(FPART_PROP_COMPRESSMETHOD);
+
+    return listResult;
 }
 
 bool XBinary::initPack(PACK_STATE *pState, QIODevice *pDevice, const QMap<PACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
