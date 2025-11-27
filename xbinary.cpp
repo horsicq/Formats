@@ -3401,7 +3401,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         if (st == ST_COMPAREBYTES) {
             // Fast path: single-byte needle with SIMD optimization
             if (nArraySize == 1) {
-                #ifdef Q_PROCESSOR_X86
+                #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
                 if (g_cpuFeatures.avx2 && nTemp >= 32) {
                     // AVX2 optimized single-byte search
                     const unsigned char *hay = (const unsigned char *)pBuffer;
@@ -3521,7 +3521,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 // SIMD-optimized BMH search for patterns >= 32 bytes (adjusted threshold to avoid regression)
                 if (m >= 32 && g_cpuFeatures.avx2) {
                     // SIMD-optimized BMH search for patterns >= 32 bytes (adjusted threshold to avoid regression)
-                    #ifdef Q_PROCESSOR_X86
+                    #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
                     // AVX2: Load last character for comparison
                     __m256i vLast = _mm256_set1_epi8(nLastSearchChar);
                     
@@ -5830,6 +5830,7 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
     const char *ptr = pSource;
     
     // AVX2: Process 32 bytes at a time
+    #ifdef XBINARY_USE_AVX2
     if (g_cpuFeatures.avx2 && nSize >= 32) {
         const __m256i zero = _mm256_setzero_si256();
         
@@ -5846,6 +5847,7 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
             nSize -= 32;
         }
     }
+    #endif
     
     // SSE2: Process 16 bytes at a time
     if (g_cpuFeatures.sse2 && nSize >= 16) {
@@ -6288,7 +6290,7 @@ bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)
     const char *__restrict ptr2 = pMemory2;
     
     // AVX2: Compare 32 bytes at a time
-    #ifdef __AVX2__
+    #ifdef XBINARY_USE_AVX2
     if (g_cpuFeatures.avx2 && nSize >= 32) {
         while (nSize >= 32) {
             __m256i chunk1 = _mm256_loadu_si256((const __m256i*)ptr1);
