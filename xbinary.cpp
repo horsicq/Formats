@@ -3722,6 +3722,53 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             qint64 m = nArraySize;
             const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
+
+            #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
+            // SSE2 optimized ANSI detection (0x20-0x7E range)
+            if (g_cpuFeatures.sse2 && hayLen >= 16) {
+                const __m128i vLower = _mm_set1_epi8(0x20);  // Lower bound (space)
+                const __m128i vUpper = _mm_set1_epi8(0x7E);  // Upper bound (~)
+                
+                while (j + 16 <= hayLen) {
+                    __m128i vData = _mm_loadu_si128((const __m128i *)(hay + j));
+                    
+                    // Check if byte >= 0x20 AND byte <= 0x7E
+                    __m128i vGe = _mm_cmpgt_epi8(vData, _mm_sub_epi8(vLower, _mm_set1_epi8(1)));
+                    __m128i vLe = _mm_cmpgt_epi8(_mm_add_epi8(vUpper, _mm_set1_epi8(1)), vData);
+                    __m128i vAnsi = _mm_and_si128(vGe, vLe);
+                    
+                    qint32 nMask = _mm_movemask_epi8(vAnsi);
+                    
+                    if (nMask != 0) {
+                        // Found ANSI byte(s) - find start of ANSI run
+                        #ifdef _MSC_VER
+                        unsigned long nBitPos;
+                        _BitScanForward(&nBitPos, nMask);
+                        qint64 start = j + nBitPos;
+                        #else
+                        qint64 start = j + __builtin_ctz(nMask);
+                        #endif
+                        
+                        // Count consecutive ANSI bytes
+                        qint64 runLen = 0;
+                        while ((start + runLen) < hayLen && hay[start + runLen] >= 0x20 && hay[start + runLen] <= 0x7E) {
+                            runLen++;
+                        }
+                        
+                        if (runLen >= m) {
+                            nResult = nOffset + start;
+                            break;
+                        }
+                        
+                        j = start + runLen + 1;
+                    } else {
+                        j += 16;
+                    }
+                }
+            }
+            #endif
+            
+            // Fallback: scalar loop for remainder or non-SIMD platforms
             while (j < limit) {
                 // Skip non-ANSI bytes to the start of an ANSI run
                 while (j < hayLen && !ansiTable[hay[j]]) j++;
@@ -3741,6 +3788,53 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             qint64 m = nArraySize;
             const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
+
+            #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
+            // SSE2 optimized NOT-ANSI detection (NOT in range 0x20-0x7E)
+            if (g_cpuFeatures.sse2 && hayLen >= 16) {
+                const __m128i vLower = _mm_set1_epi8(0x20);  // Lower bound (space)
+                const __m128i vUpper = _mm_set1_epi8(0x7E);  // Upper bound (~)
+                
+                while (j + 16 <= hayLen) {
+                    __m128i vData = _mm_loadu_si128((const __m128i *)(hay + j));
+                    
+                    // Check if byte < 0x20 OR byte > 0x7E (NOT ANSI)
+                    __m128i vLt = _mm_cmpgt_epi8(vLower, vData);  // vData < 0x20
+                    __m128i vGt = _mm_cmpgt_epi8(vData, vUpper);  // vData > 0x7E
+                    __m128i vNotAnsi = _mm_or_si128(vLt, vGt);
+                    
+                    qint32 nMask = _mm_movemask_epi8(vNotAnsi);
+                    
+                    if (nMask != 0) {
+                        // Found NOT-ANSI byte(s) - find start of NOT-ANSI run
+                        #ifdef _MSC_VER
+                        unsigned long nBitPos;
+                        _BitScanForward(&nBitPos, nMask);
+                        qint64 start = j + nBitPos;
+                        #else
+                        qint64 start = j + __builtin_ctz(nMask);
+                        #endif
+                        
+                        // Count consecutive NOT-ANSI bytes
+                        qint64 runLen = 0;
+                        while ((start + runLen) < hayLen && (hay[start + runLen] < 0x20 || hay[start + runLen] > 0x7E)) {
+                            runLen++;
+                        }
+                        
+                        if (runLen >= m) {
+                            nResult = nOffset + start;
+                            break;
+                        }
+                        
+                        j = start + runLen + 1;
+                    } else {
+                        j += 16;
+                    }
+                }
+            }
+            #endif
+            
+            // Fallback: scalar loop for remainder or non-SIMD platforms
             while (j < limit) {
                 // Skip ANSI bytes to the start of a non-ANSI run
                 while (j < hayLen && ansiTable[hay[j]]) j++;
@@ -3760,28 +3854,161 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             qint64 m = nArraySize;
             const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
+            
+#ifdef XBINARY_USE_AVX2
+            // SSE2-optimized search for NOT-ANSI-AND-NULL (non-printable excluding 0x00)
+            const qint64 vectorSize = 16;
+            __m128i vMin = _mm_set1_epi8(0x20);  // Min printable ASCII
+            __m128i vMax = _mm_set1_epi8(0x7E);  // Max printable ASCII
+            __m128i vZero = _mm_setzero_si128(); // For null check
+            
+            while (j + vectorSize <= hayLen) {
+                __m128i vData = _mm_loadu_si128((const __m128i *)(hay + j));
+                
+                // Check for bytes < 0x20 (but not 0x00)
+                __m128i vLt = _mm_cmpgt_epi8(vMin, vData);      // vData < 0x20
+                __m128i vNotNull = _mm_cmpeq_epi8(vData, vZero); // vData == 0x00
+                vLt = _mm_andnot_si128(vNotNull, vLt);          // vData < 0x20 AND vData != 0x00
+                
+                // Check for bytes > 0x7E
+                __m128i vGt = _mm_cmpgt_epi8(vData, vMax);      // vData > 0x7E
+                
+                // Combine: NOT-ANSI-AND-NULL = (< 0x20 AND != 0x00) OR (> 0x7E)
+                __m128i vNotAnsiAndNull = _mm_or_si128(vLt, vGt);
+                
+                quint32 mask = _mm_movemask_epi8(vNotAnsiAndNull);
+                
+                if (mask != 0) {
+                    // Found some NOT-ANSI-AND-NULL bytes, check for runs of length m
+                    for (qint32 k = 0; k < vectorSize && j + k < limit; k++) {
+                        if (mask & (1U << k)) {
+                            // Potential start of a run
+                            qint64 start = j + k;
+                            qint64 runLen = 0;
+                            for (qint64 r = start; r < hayLen; r++) {
+                                unsigned char c = hay[r];
+                                if ((ansiTable[c]) || (c == 0)) break;
+                                runLen++;
+                                if (runLen >= m) {
+                                    nResult = nOffset + start;
+                                    j = hayLen; // Exit outer loop
+                                    break;
+                                }
+                            }
+                            if (nResult != -1) break;
+                        }
+                    }
+                    if (nResult != -1) break;
+                }
+                j += vectorSize;
+            }
+            
+            // Fallback scalar loop for remaining bytes
+            if (nResult == -1) {
+#endif
+                while (j < limit) {
+                    // Skip bytes that are ANSI or zero to the start of a desired run
+                    while (j < hayLen) {
+                        unsigned char c = hay[j];
+                        if ((!ansiTable[c]) && (c != 0)) break;
+                        j++;
+                    }
+                    if (j >= limit) break;
+                    qint64 start = j;
+                    // Extend run of non-ANSI and non-zero bytes
+                    while (j < hayLen) {
+                        unsigned char c = hay[j];
+                        if ((ansiTable[c]) || (c == 0)) break;
+                        j++;
+                    }
+                    qint64 runLen = j - start;
+                    if (runLen >= m) {
+                        nResult = nOffset + start;
+                        break;
+                    }
+                }
+#ifdef XBINARY_USE_AVX2
+            }
+#endif
+        } else if (st == ST_ANSINUMBER) {
+#ifdef XBINARY_USE_AVX2
+            const unsigned char *hay = (const unsigned char *)pBuffer;
+            qint64 hayLen = nTemp;
+            qint64 m = nArraySize;
+            const qint64 limit = hayLen - (m - 1);
+            qint64 j = 0;
+
+            const qint64 nVectorSize = 16;  // SSE2 processes 16 bytes at once
+
+            // SSE2 constants for digit range checking (0x30-0x39)
+            __m128i vMin = _mm_set1_epi8(0x30);  // '0'
+            __m128i vMax = _mm_set1_epi8(0x39);  // '9'
+            __m128i vOne = _mm_set1_epi8(1);
+
             while (j < limit) {
-                // Skip bytes that are ANSI or zero to the start of a desired run
-                while (j < hayLen) {
-                    unsigned char c = hay[j];
-                    if ((!ansiTable[c]) && (c != 0)) break;
-                    j++;
+                // SSE2 optimized search for digit bytes
+                qint64 nScanStart = j;
+                bool bFoundDigit = false;
+
+                // Process 16 bytes at a time with SSE2
+                for (; j + nVectorSize <= hayLen; j += nVectorSize) {
+                    __m128i vData = _mm_loadu_si128(reinterpret_cast<const __m128i *>(hay + j));
+
+                    // Check for bytes >= 0x30
+                    __m128i vGe = _mm_cmpgt_epi8(vData, _mm_sub_epi8(vMin, vOne));
+
+                    // Check for bytes <= 0x39
+                    __m128i vLe = _mm_cmpgt_epi8(_mm_add_epi8(vMax, vOne), vData);
+
+                    // Combine: digit = (>= 0x30 AND <= 0x39)
+                    __m128i vDigit = _mm_and_si128(vGe, vLe);
+
+                    quint32 nMask = _mm_movemask_epi8(vDigit);
+
+                    if (nMask != 0) {
+                        // Found some digit bytes, scan for start of run
+                        for (qint32 i = 0; i < nVectorSize && j + i < hayLen; i++) {
+                            if (nMask & (1U << i)) {
+                                j += i;
+                                bFoundDigit = true;
+                                break;
+                            }
+                        }
+                        if (bFoundDigit) break;
+                    }
                 }
-                if (j >= limit) break;
+
+                // Fallback scalar search for remaining bytes
+                if (!bFoundDigit) {
+                    while (j < hayLen) {
+                        unsigned char c = hay[j];
+                        if ((c >= 0x30) && (c <= 0x39)) {
+                            bFoundDigit = true;
+                            break;
+                        }
+                        j++;
+                    }
+                }
+
+                if (!bFoundDigit || j >= limit) break;
+
                 qint64 start = j;
-                // Extend run of non-ANSI and non-zero bytes
+
+                // Extend run of digit bytes with scalar code
+                // (SIMD not efficient here due to need to find exact end point)
                 while (j < hayLen) {
                     unsigned char c = hay[j];
-                    if ((ansiTable[c]) || (c == 0)) break;
+                    if ((c < 0x30) || (c > 0x39)) break;
                     j++;
                 }
+
                 qint64 runLen = j - start;
                 if (runLen >= m) {
                     nResult = nOffset + start;
                     break;
                 }
             }
-        } else if (st == ST_ANSINUMBER) {
+#else
             const unsigned char *hay = (const unsigned char *)pBuffer;
             qint64 hayLen = nTemp;
             qint64 m = nArraySize;
@@ -3808,6 +4035,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                     break;
                 }
             }
+#endif
         }
 
         if (nResult != -1) {
@@ -4286,6 +4514,79 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
             quint8 *pData = (quint8 *)pBuffer;
             qint64 nSearchEnd = nTemp - (nStringSize - 1);
 
+#ifdef XBINARY_USE_AVX2
+            // SSE2 optimized scan for first character, then verify full match
+            const qint64 nVectorSize = 16;
+            __m128i vFirstUpper = _mm_set1_epi8(pUpperData[0]);
+            __m128i vFirstLower = _mm_set1_epi8(pLowerData[0]);
+            
+            for (qint64 i = 0; i < nSearchEnd; ) {
+                // Quick SIMD scan for first character match
+                bool bFoundCandidate = false;
+                qint64 nCandidatePos = i;
+                
+                // Process vectors until we find a candidate or reach the end
+                for (; i + nVectorSize <= nSearchEnd; i += nVectorSize) {
+                    __m128i vData = _mm_loadu_si128(reinterpret_cast<const __m128i *>(pData + i));
+                    __m128i vCmpUpper = _mm_cmpeq_epi8(vData, vFirstUpper);
+                    __m128i vCmpLower = _mm_cmpeq_epi8(vData, vFirstLower);
+                    __m128i vMatch = _mm_or_si128(vCmpUpper, vCmpLower);
+                    
+                    quint32 nMask = _mm_movemask_epi8(vMatch);
+                    
+                    if (nMask != 0) {
+                        // Find first set bit
+                        qint32 j = 0;
+                        while (j < nVectorSize && !(nMask & (1U << j))) j++;
+                        
+                        if (i + j < nSearchEnd) {
+                            nCandidatePos = i + j;
+                            bFoundCandidate = true;
+                            break;
+                        }
+                    }
+                }
+                
+                // Check remaining bytes with scalar
+                if (!bFoundCandidate) {
+                    for (; i < nSearchEnd; i++) {
+                        if (pData[i] == pUpperData[0] || pData[i] == pLowerData[0]) {
+                            nCandidatePos = i;
+                            bFoundCandidate = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!bFoundCandidate) break;
+                
+                // Verify full string match at candidate position
+                bool bFullMatch = true;
+                quint8 *pCurrent = pData + nCandidatePos;
+                const quint8 *pUpper = pUpperData;
+                const quint8 *pLower = pLowerData;
+                qint64 nRemaining = nStringSize;
+                
+                while (nRemaining > 0) {
+                    if ((*pCurrent != *pUpper) && (*pCurrent != *pLower)) {
+                        bFullMatch = false;
+                        break;
+                    }
+                    pCurrent++;
+                    pUpper++;
+                    pLower++;
+                    nRemaining--;
+                }
+                
+                if (bFullMatch) {
+                    nResult = nOffset + nCandidatePos;
+                    break;
+                }
+                
+                // Move past this candidate and continue
+                i = nCandidatePos + 1;
+            }
+#else
             for (qint64 i = 0; i < nSearchEnd; i++) {
                 // Inline comparison for better performance
                 bool bMatch = true;
@@ -4310,6 +4611,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
                     break;
                 }
             }
+#endif
 
             if (nResult != -1) {
                 break;
@@ -4568,18 +4870,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
         ssOptions.nMaxLenght = 128;  // TODO Check
     }
 
-    // bool bANSICodec = false;
-
-    // TODO Check Qt6
-    // #if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
-    //     QTextCodec *pCodec = nullptr;
-
-    //     if (ssOptions.sANSICodec != "") {
-    //         bANSICodec = true;
-    //         pCodec = QTextCodec::codecForName(ssOptions.sANSICodec.toLatin1().data());
-    //     }
-    // #endif
-
     qint64 _nSize = nSize;
     qint64 _nOffset = nOffset;
     qint64 _nRawOffset = 0;
@@ -4589,9 +4879,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
     char *pBuffer = new char[READWRITE_BUFFER_SIZE];
 
     char *pAnsiBuffer = new char[ssOptions.nMaxLenght + 1];
-    char *pUTF8Buffer = new char[ssOptions.nMaxLenght * 4 + 1];
-
-    //    _zeroMemory(pUTF8Buffer,ssOptions.nMaxLenght*4);
 
     quint16 *pUnicodeBuffer[2] = {new quint16[ssOptions.nMaxLenght + 1], new quint16[ssOptions.nMaxLenght + 1]};
     qint64 nCurrentUnicodeSize[2] = {0, 0};
@@ -4599,11 +4886,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
     qint64 nCurrentAnsiSize = 0;
     qint64 nCurrentAnsiOffset = 0;
-
-    // qint64 nCurrentUTF8Size = 0;
-    // qint64 nCurrentUTF8Offset = 0;
-    // qint32 nLastUTF8Width = 0;
-    // qint64 nLastUTF8Offset = -1;
 
     bool bIsStart = true;
     char cPrevSymbol = 0;
@@ -4631,43 +4913,11 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
             char cSymbol = *(pBuffer + i);
 
             bool bIsAnsiSymbol = false;
-            // bool bIsUTF8Symbol = false;
-
-            // bool bNewUTF8String = false;
             bool bLongString = false;
 
             if (ssOptions.bAnsi) {
-                // bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol, bANSICodec);
                 bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol);
             }
-
-            // if (ssOptions.bUTF8) {
-            //     qint32 nUTF8SymbolWidth = 0;
-
-            //     bIsUTF8Symbol = isUTF8Symbol((quint8)cSymbol, &nUTF8SymbolWidth);
-
-            //     if (bIsUTF8Symbol) {
-            //         if (nLastUTF8Offset == -1) {
-            //             if (nUTF8SymbolWidth == 0)  // Cannot start with rest
-            //             {
-            //                 bIsUTF8Symbol = false;
-            //             } else {
-            //                 nLastUTF8Offset = _nOffset + i;
-            //                 nLastUTF8Width = nUTF8SymbolWidth;
-            //             }
-            //         } else {
-            //             if (nUTF8SymbolWidth) {
-            //                 if (((_nOffset + i) - nLastUTF8Offset) < nLastUTF8Width) {
-            //                     bIsUTF8Symbol = false;
-            //                     bNewUTF8String = true;
-            //                 }
-
-            //                 nLastUTF8Offset = _nOffset + i;
-            //                 nLastUTF8Width = nUTF8SymbolWidth;
-            //             }
-            //         }
-            //     }
-            // }
 
             if (bIsAnsiSymbol) {
                 if (nCurrentAnsiSize == 0) {
@@ -4684,22 +4934,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
                 nCurrentAnsiSize++;
             }
 
-            // if (bIsUTF8Symbol) {
-            //     if (nCurrentUTF8Size == 0) {
-            //         nCurrentUTF8Offset = _nOffset + i;
-            //     }
-
-            //     if (nCurrentUTF8Size < ssOptions.nMaxLenght) {
-            //         *(pUTF8Buffer + nCurrentUTF8Size) = cSymbol;
-            //     } else {
-            //         bIsUTF8Symbol = false;
-            //         bNewUTF8String = true;
-            //         bLongString = true;
-            //     }
-
-            //     nCurrentUTF8Size++;
-            // }
-
             if ((!bIsAnsiSymbol) || (bIsEnd)) {
                 if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
                     if (nCurrentAnsiSize - 1 < ssOptions.nMaxLenght) {
@@ -4710,18 +4944,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                     if (ssOptions.bAnsi) {
                         QString sString;
-
-                        //                         if (!bANSICodec) {
-                        //                             sString = pAnsiBuffer;
-                        //                         } else {
-                        //                             // TODO Check Qt6
-                        //                             QByteArray baString = QByteArray(pAnsiBuffer, nCurrentAnsiSize);
-                        // #if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
-                        //                             sString = pCodec->toUnicode(baString);
-                        // #else
-                        //                             sString = QString::fromLatin1(baString);  // TODO
-                        // #endif
-                        //                         }
 
                         sString = pAnsiBuffer;
 
@@ -4756,59 +4978,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                 nCurrentAnsiSize = 0;
             }
-
-            // if ((!bIsUTF8Symbol) || (bIsEnd)) {
-            //     if (nCurrentUTF8Size >= ssOptions.nMinLenght) {
-            //         pUTF8Buffer[nCurrentUTF8Size] = 0;
-
-            //         if (ssOptions.bUTF8) {
-            //             QString sString = QString::fromUtf8(pUTF8Buffer, -1);
-
-            //             qint32 nStringSize = sString.size();
-
-            //             bool bAdd = true;
-
-            //             if (ssOptions.bNullTerminated && cSymbol && (!bLongString)) {
-            //                 bAdd = false;
-            //             }
-
-            //             if (nStringSize < ssOptions.nMinLenght) {
-            //                 bAdd = false;
-            //             }
-
-            //             if ((nStringSize == nCurrentUTF8Size) && (ssOptions.bAnsi)) {
-            //                 bAdd = false;
-            //             }
-
-            //             if (bAdd) {
-            //                 MS_RECORD record = {};
-            //                 record.recordType = MS_RECORD_TYPE_STRING_UTF8;
-            //                 record.nOffset = nCurrentUTF8Offset;
-            //                 record.nSize = nCurrentUTF8Size;
-            //                 record.sString = sString;
-            //                 record.nAddress = offsetToAddress(pMemoryMap, record.nOffset);
-            //                 record.sRegion = getMemoryRecordByOffset(pMemoryMap, record.nOffset).sName;
-
-            //                 if (_addMultiSearchStringRecord(&listResult, &record, &ssOptions)) {
-            //                     nCurrentRecords++;
-            //                 }
-
-            //                 if (nCurrentRecords >= ssOptions.nLimit) {
-            //                     break;
-            //                 }
-            //             }
-            //         }
-            //     }
-
-            //     if (bNewUTF8String) {
-            //         *(pUTF8Buffer) = cSymbol;
-            //         nCurrentUTF8Offset = _nOffset + i;
-            //         nCurrentUTF8Size = 1;
-            //     } else {
-            //         nCurrentUTF8Size = 0;
-            //         nLastUTF8Offset = -1;
-            //     }
-            // }
 
             if (!bIsStart) {
                 quint16 nCode = cPrevSymbol + (cSymbol << 8);  // TODO BE/LE
@@ -4946,7 +5115,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
     delete[] pBuffer;
     delete[] pAnsiBuffer;
-    delete[] pUTF8Buffer;
     delete[] pUnicodeBuffer[0];
     delete[] pUnicodeBuffer[1];
 
