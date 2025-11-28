@@ -1309,57 +1309,17 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
     // qDebug("%X %X pos: %X maxlen: %X", this, pDevice, nPos, nMaxLen);
     qint64 nResult = 0;
 
-    // DEBUG: Detailed logging for reads that might be ECD searches (any reads > 1000 bytes offset)
-    // bool bDebugRead = (nPos > 1000) || (nMaxLen > 2000); // Log large reads or reads from higher offsets
-    bool bDebugRead = false;
-    if (bDebugRead) {
-        qDebug() << "safeReadData: pos=" << nPos << "maxLen=" << nMaxLen << "device->size()=" << (pDevice ? pDevice->size() : -1);
-        qDebug() << "safeReadData: device=" << (pDevice ? "SET" : "NULL") << "isOpen=" << (pDevice ? pDevice->isOpen() : false);
-    }
-
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
     if ((pDevice->size() > nPos) && (nPos >= 0)) {
-        if (bDebugRead) {
-            qDebug() << "safeReadData: Size check passed, attempting seek";
-        }
-
         if (pDevice->seek(nPos)) {
-            if (bDebugRead) {
-                qDebug() << "safeReadData: Seek successful, reading...";
-            }
 
             while ((nMaxLen > 0) && isPdStructNotCanceled(pPdStruct)) {
                 qint64 nCurrentSize = qMin(nMaxLen, (qint64)READWRITE_BUFFER_SIZE);
 
-                if (bDebugRead) {
-                    // DEBUG: Check buffer BEFORE read
-                    qDebug() << "safeReadData: Buffer BEFORE read (first 4 bytes):"
-                             << QString("%1 %2 %3 %4")
-                                    .arg((quint8)pData[0], 2, 16, QChar('0'))
-                                    .arg((quint8)pData[1], 2, 16, QChar('0'))
-                                    .arg((quint8)pData[2], 2, 16, QChar('0'))
-                                    .arg((quint8)pData[3], 2, 16, QChar('0'));
-                }
-
                 nCurrentSize = pDevice->read(pData, nCurrentSize);
 
-                if (bDebugRead) {
-                    qDebug() << "safeReadData: Read" << nCurrentSize << "bytes (requested" << qMin(nMaxLen, (qint64)READWRITE_BUFFER_SIZE) << ")";
-                    if (nCurrentSize > 0) {
-                        qDebug() << "safeReadData: Buffer AFTER read (first 4 bytes):"
-                                 << QString("%1 %2 %3 %4")
-                                        .arg((quint8)pData[0], 2, 16, QChar('0'))
-                                        .arg((quint8)pData[1], 2, 16, QChar('0'))
-                                        .arg((quint8)pData[2], 2, 16, QChar('0'))
-                                        .arg((quint8)pData[3], 2, 16, QChar('0'));
-                    }
-                }
-
                 if (nCurrentSize <= 0) {
-                    if (bDebugRead) {
-                        qDebug() << "safeReadData: Read returned" << nCurrentSize << "- breaking";
-                    }
                     break;
                 }
 
@@ -1367,23 +1327,13 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
                 pData += nCurrentSize;
                 nResult += nCurrentSize;
             }
-
-            if (bDebugRead) {
-                qDebug() << "safeReadData: Total read" << nResult << "bytes";
-            }
         } else {
-            if (bDebugRead) {
-                qDebug() << "safeReadData: SEEK FAILED";
-            }
 #ifdef QT_DEBUG
             qDebug("Cannot seek");
 #endif
         }
 
     } else {
-        if (bDebugRead) {
-            qDebug() << "safeReadData: SIZE CHECK FAILED - pos=" << nPos << "size=" << (pDevice ? pDevice->size() : -1);
-        }
 #ifdef QT_DEBUG
         qDebug("Invalid pos: %llX Size: %llX", nPos, getSize());
 #endif
@@ -2154,9 +2104,7 @@ qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTR
 {
     qint64 nResult = 0;
 
-    // DEBUG: Check if device is set
     if (!m_pDevice) {
-        qDebug() << "read_array: ERROR - m_pDevice is NULL! Cannot read.";
         return 0;
     }
 
@@ -3340,60 +3288,18 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
     const qint64 nBufferSize = READWRITE_BUFFER_SIZE + (nArraySize - 1);
     const char nLastSearchChar = (st == ST_COMPAREBYTES) ? pArray[nArraySize - 1] : 0;
 
-    // DEBUG: Print search pattern for 4-byte arrays (uint32 searches)
-    bool bDebugECD = false;  // Disabled after fixing BMH bug
-    // bool bDebugECD = (nArraySize == 4 && pArray[0] == 0x50 && pArray[1] == 0x4B && pArray[2] == 0x05 && pArray[3] == 0x06);
-    if (bDebugECD) {
-        qDebug() << "_find_array: Searching for ECD signature. Start offset:" << nStartOffset << "Search size:" << nSize;
-        qDebug() << "_find_array: Device:" << (m_pDevice ? "SET" : "NULL") << "ConstMemory:" << (m_pConstMemory ? "SET" : "NULL");
-        qDebug() << "_find_array: File size (_nSize):" << _nSize;
-    }
+
 
     while ((nSize > nArraySize - 1) && (!(pPdStruct->bIsStop))) {
         nTemp = (nSize < nBufferSize) ? nSize : nBufferSize;
 
-        if (bDebugECD) {
-            qDebug() << "_find_array: Loop iteration - nOffset:" << nOffset << "nTemp:" << nTemp << "nSize:" << nSize;
-        }
-
         if (m_pConstMemory) {
             pBuffer = (char *)m_pConstMemory + nOffset;
-            if (bDebugECD) {
-                qDebug() << "_find_array: Using const memory buffer";
-            }
         } else {
-            if (bDebugECD) {
-                qDebug() << "_find_array: Calling read_array(" << nOffset << "," << nTemp << ")";
-                // DEBUG: Check buffer BEFORE read
-                qDebug() << "_find_array: Buffer BEFORE read (first 8 bytes):";
-                QString sHexBefore;
-                for (int i = 0; i < 8; i++) {
-                    sHexBefore += QString("%1 ").arg((quint8)pBuffer[i], 2, 16, QChar('0')).toUpper();
-                }
-                qDebug() << sHexBefore;
-            }
-
             qint64 nBytesRead = read_array(nOffset, pBuffer, nTemp, pPdStruct);
-
-            if (bDebugECD) {
-                qDebug() << "_find_array: read_array returned" << nBytesRead << "(expected" << nTemp << ")";
-                if (nBytesRead > 0) {
-                    qDebug() << "_find_array: First 32 bytes read (hex):";
-                    QString sHex;
-                    for (int i = 0; i < qMin((qint64)32, nBytesRead); i++) {
-                        sHex += QString("%1 ").arg((quint8)pBuffer[i], 2, 16, QChar('0')).toUpper();
-                    }
-                    qDebug() << sHex;
-                }
-            }
 
             if (nBytesRead != nTemp) {
                 pPdStruct->sInfoString = tr("Read error");
-
-                if (bDebugECD) {
-                    qDebug() << "_find_array: READ ERROR - breaking from search loop";
-                }
-
                 break;
             }
         }
@@ -3487,36 +3393,6 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 qint64 m = nArraySize;
                 qint64 i = 0;
                 const qint64 limit = hayLen - m;
-
-                if (bDebugECD) {
-                    qDebug() << "_find_array: BMH search - hayLen:" << hayLen << "m:" << m << "limit:" << limit;
-                    qDebug() << "_find_array: Looking for pattern:"
-                             << QString("%1 %2 %3 %4")
-                                    .arg((quint8)pArray[0], 2, 16, QChar('0'))
-                                    .arg((quint8)pArray[1], 2, 16, QChar('0'))
-                                    .arg((quint8)pArray[2], 2, 16, QChar('0'))
-                                    .arg((quint8)pArray[3], 2, 16, QChar('0'));
-                    qDebug() << "_find_array: nLastSearchChar (should be last byte):" << QString("%1").arg((quint8)nLastSearchChar, 2, 16, QChar('0'));
-
-                    // Count how many times we find the last character
-                    qint32 nLastCharCount = 0;
-                    for (qint64 j = 0; j <= limit; j++) {
-                        if ((unsigned char)hay[j + m - 1] == (unsigned char)nLastSearchChar) {
-                            nLastCharCount++;
-                            if (nLastCharCount <= 5) {  // Only show first 5
-                                qDebug() << "  Found last char at position" << j << "- bytes:"
-                                         << QString("%1 %2 %3 %4")
-                                                .arg((quint8)hay[j], 2, 16, QChar('0'))
-                                                .arg((quint8)hay[j + 1], 2, 16, QChar('0'))
-                                                .arg((quint8)hay[j + 2], 2, 16, QChar('0'))
-                                                .arg((quint8)hay[j + 3], 2, 16, QChar('0'));
-                            }
-                        }
-                    }
-                    qDebug() << "_find_array: Total last char matches:" << nLastCharCount;
-                }
-
-                qint32 nCheckCount = 0;
                 
                 // SIMD-optimized BMH search for patterns >= 32 bytes (adjusted threshold to avoid regression)
                 if (m >= 32 && g_cpuFeatures.avx2) {
@@ -3659,35 +3535,15 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                     while (i <= limit) {
                         unsigned char c = (unsigned char)hay[i + m - 1];
 
-                        if (bDebugECD && nCheckCount < 10) {
-                            qDebug() << "  BMH checking position" << i << "char at i+3:" << QString("%1").arg(c, 2, 16, QChar('0')) << "skip:" << bmhShift[c];
-                            nCheckCount++;
-                        }
-
                         if (c == (unsigned char)nLastSearchChar) {
-                            if (bDebugECD) {
-                                qDebug() << "_find_array: BMH potential match at i:" << i << "- comparing:"
-                                         << QString("%1 %2 %3 %4")
-                                                .arg((quint8)hay[i], 2, 16, QChar('0'))
-                                                .arg((quint8)hay[i + 1], 2, 16, QChar('0'))
-                                                .arg((quint8)hay[i + 2], 2, 16, QChar('0'))
-                                                .arg((quint8)hay[i + 3], 2, 16, QChar('0'));
-                            }
                             // Potential match; verify all bytes
                             if (memcmp(hay + i, pArray, (size_t)m) == 0) {
-                                if (bDebugECD) {
-                                    qDebug() << "_find_array: BMH MATCH FOUND at offset:" << (nOffset + i);
-                                }
                                 nResult = nOffset + i;
                                 break;
                             }
                         }
                         i += (qint64)bmhShift[c];
                     }
-                }
-
-                if (bDebugECD && nResult == -1) {
-                    qDebug() << "_find_array: BMH search completed, no match found";
                 }
             } else {
                 // Fallback naive scan
