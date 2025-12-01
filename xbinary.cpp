@@ -24,6 +24,7 @@
 #include <QDebug>
 
 // SIMD intrinsics
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
 #ifdef _MSC_VER
     #include <intrin.h>
 #else
@@ -63,6 +64,7 @@ namespace {
     
     const CPUFeatures g_cpuFeatures;
 }  // namespace
+#endif  // x86/x64
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b)
 {
@@ -3287,8 +3289,6 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
 
     const qint64 nBufferSize = READWRITE_BUFFER_SIZE + (nArraySize - 1);
     const char nLastSearchChar = (st == ST_COMPAREBYTES) ? pArray[nArraySize - 1] : 0;
-
-
 
     while ((nSize > nArraySize - 1) && (!(pPdStruct->bIsStop))) {
         nTemp = (nSize < nBufferSize) ? nSize : nBufferSize;

@@ -1,18 +1,20 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-# Enable AVX2 for optimized binary operations
-linux|macx|unix {
-    QMAKE_CXXFLAGS += -mavx2
-    DEFINES += XBINARY_USE_AVX2
-}
-win32-msvc* {
-    QMAKE_CXXFLAGS += /arch:AVX2
-    DEFINES += XBINARY_USE_AVX2
-}
-win32-g++ {
-    QMAKE_CXXFLAGS += -mavx2
-    DEFINES += XBINARY_USE_AVX2
+# Enable AVX2 for optimized binary operations on x86/x64 architectures
+contains(QT_ARCH, x86_64)|contains(QT_ARCH, i386) {
+    linux|macx|unix {
+        QMAKE_CXXFLAGS += -mavx2
+        DEFINES += XBINARY_USE_AVX2
+    }
+    win32-msvc* {
+        QMAKE_CXXFLAGS += /arch:AVX2
+        DEFINES += XBINARY_USE_AVX2
+    }
+    win32-g++ {
+        QMAKE_CXXFLAGS += -mavx2
+        DEFINES += XBINARY_USE_AVX2
+    }
 }
 
 HEADERS += \
