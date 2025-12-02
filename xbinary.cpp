@@ -31,6 +31,7 @@
     #include <cpuid.h>
     #include <x86intrin.h>
 #endif
+#endif  // x86/x64
 
 // CPU feature detection
 namespace {
@@ -43,6 +44,7 @@ namespace {
         }
         
         void detectFeatures() {
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
 #ifdef _MSC_VER
             int cpuInfo[4];
             __cpuid(cpuInfo, 1);
@@ -59,12 +61,12 @@ namespace {
                 avx2 = (ebx & (1 << 5)) != 0;
             }
 #endif
+#endif
         }
     };
     
     const CPUFeatures g_cpuFeatures;
 }  // namespace
-#endif  // x86/x64
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b)
 {
@@ -314,6 +316,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_LZIP, "LZIP", QString("Lzip (LZMA)")},
     {XBinary::FT_CPIO, "CPIO", QString("CPIO")},
     {XBinary::FT_MINIDUMP, "MiniDump", QString("Windows MiniDump")},
+    {XBinary::FT_DMG, "DMG", QString("Apple Disk Image")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -7867,6 +7870,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             // Windows MiniDump format
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_MINIDUMP);
+        } else if (compareSignature(&memoryMap, "'koly'", nSize - 512)) {
+            // Apple Disk Image format (koly block at end)
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_DMG);
         } else if (compareSignature(&memoryMap, "89'PNG\r\n'1A0A", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_PNG);
@@ -8183,6 +8190,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_ISO9660;
     } else if (pStFileTypes->contains(FT_MINIDUMP)) {
         result = FT_MINIDUMP;
+    } else if (pStFileTypes->contains(FT_DMG)) {
+        result = FT_DMG;
 
         // Android resources and DEX/Java
     } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
@@ -8391,6 +8400,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_CPIO)) listResult.append(FT_CPIO);
         if (stFileTypes.contains(FT_ISO9660)) listResult.append(FT_ISO9660);
         if (stFileTypes.contains(FT_MINIDUMP)) listResult.append(FT_MINIDUMP);
+        if (stFileTypes.contains(FT_DMG)) listResult.append(FT_DMG);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {
@@ -14980,6 +14990,8 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                     break;
                 }
             } while (moveToNext(&state, pPdStruct));
+
+            finishUnpack(&state, pPdStruct);
         }
     }
 

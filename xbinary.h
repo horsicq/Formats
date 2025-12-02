@@ -527,6 +527,7 @@ public:
         FT_SQUASHFS,
         FT_ISO9660,
         FT_MINIDUMP,
+        FT_DMG,
 
         // TODO more
     };

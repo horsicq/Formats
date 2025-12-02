@@ -78,6 +78,7 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_APK, fileType)) return new XAPK(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_IPA, fileType)) return new XIPA(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_APKS, fileType)) return new XAPKS(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_DMG, fileType)) return new XDMG(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_7Z, fileType)) return new XSevenZip(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_CAB, fileType)) return new XCab(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) return new XRar(pDevice);
@@ -95,6 +96,7 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_XZ, fileType)) return new XXZ(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_AR, fileType)) return new X_Ar(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_CPIO, fileType)) return new XCPIO(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_ISO9660, fileType)) return new XISO9660(pDevice);
 
     else if (XBinary::checkFileType(XBinary::FT_DOS4G, fileType) || XBinary::checkFileType(XBinary::FT_DOS16M, fileType)) return new XDOS16(pDevice);
 #endif
