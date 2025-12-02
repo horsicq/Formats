@@ -5856,6 +5856,7 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
 {
     const char *ptr = pSource;
     
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // AVX2: Process 32 bytes at a time
     #ifdef XBINARY_USE_AVX2
     if (g_cpuFeatures.avx2 && nSize >= 32) {
@@ -5893,6 +5894,7 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
             nSize -= 16;
         }
     }
+#endif  // x86/x64
     
     // Fallback: 64-bit processing
     const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(ptr);
@@ -5922,6 +5924,7 @@ bool XBinary::_isMemoryAnsi(char *pSource, qint64 nSize)
 {
     const char *ptr = pSource;
     
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // SSE2: Process 16 bytes at a time
     if (g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i low_bound = _mm_set1_epi8(0x20 - 1);  // Less than 0x20 is invalid
@@ -5954,6 +5957,7 @@ bool XBinary::_isMemoryAnsi(char *pSource, qint64 nSize)
         }
         return true;
     }
+#endif  // x86/x64
     
     // Fallback: 64-bit processing (when SSE2 not available)
     const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
@@ -5988,6 +5992,7 @@ bool XBinary::_isMemoryNotAnsi(char *pSource, qint64 nSize)
 {
     const char *ptr = pSource;
     
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // SSE2: Process 16 bytes at a time
     if (g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i low_bound = _mm_set1_epi8(0x20);
@@ -6020,6 +6025,7 @@ bool XBinary::_isMemoryNotAnsi(char *pSource, qint64 nSize)
         }
         return true;
     }
+#endif  // x86/x64
     
     // Fallback: 64-bit processing (when SSE2 not available)
     const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
@@ -6054,6 +6060,7 @@ bool XBinary::_isMemoryNotAnsiAndNull(char *pSource, qint64 nSize)
 {
     const char *ptr = pSource;
     
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // SSE2: Process 16 bytes at a time
     if (g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i zero = _mm_setzero_si128();
@@ -6092,6 +6099,7 @@ bool XBinary::_isMemoryNotAnsiAndNull(char *pSource, qint64 nSize)
         }
         return true;
     }
+#endif  // x86/x64
     
     // Fallback: 64-bit processing (when SSE2 not available)
     const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
@@ -6129,6 +6137,7 @@ bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
 {
     const char *ptr = pSource;
     
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // SSE2: Process 16 bytes at a time
     if (g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i digit_low = _mm_set1_epi8(0x30);  // '0'
@@ -6161,6 +6170,7 @@ bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
         }
         return true;
     }
+#endif  // x86/x64
     
     // Fallback: 64-bit processing (when SSE2 not available)
     const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
