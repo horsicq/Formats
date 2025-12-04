@@ -3417,7 +3417,12 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                                 // Iterate set bits (lowest-first) safely without arithmetic signed shifts
                                 while (nMask != 0) {
                                     // find index of least-significant set bit (0..31)
+                                    #ifdef _MSC_VER
+                                    unsigned long bit;
+                                    _BitScanForward(&bit, nMask);
+                                    #else
                                     unsigned bit = __builtin_ctz(nMask);
+                                    #endif
                                     qint64 nCheckPos = i + (qint64)bit; // start position = i + bit
 
                                     if (nCheckPos <= limit) {
