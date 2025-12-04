@@ -3402,8 +3402,8 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                     // SIMD-optimized BMH search for patterns >= 32 bytes (adjusted threshold to avoid regression)
                     #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
                     // AVX2: Load last character for comparison
-                    __m256i vLast = _mm256_set1_epi8(nLastSearchChar);
-                    
+                    __m256i vLast = _mm256_set1_epi8((int8_t)nLastSearchChar);
+
                     while (i <= limit) {
                         // Check if we can use SIMD for last char search (need 32 bytes ahead)
                         if (i + m + 31 <= hayLen) {
@@ -3411,30 +3411,30 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                             const char *pLastPos = hay + i + m - 1;
                             __m256i vData = _mm256_loadu_si256((const __m256i *)pLastPos);
                             __m256i vCmp = _mm256_cmpeq_epi8(vData, vLast);
-                            qint32 nMask = _mm256_movemask_epi8(vCmp);
-                            
+                            uint32_t nMask = (uint32_t)_mm256_movemask_epi8(vCmp);
+
                             if (nMask != 0) {
-                                // Found potential match(es) in this 32-byte window
-                                qint32 nBitPos = 0;
+                                // Iterate set bits (lowest-first) safely without arithmetic signed shifts
                                 while (nMask != 0) {
-                                    if (nMask & 1) {
-                                        // Last char matches at position i + nBitPos
-                                        qint64 nCheckPos = i + nBitPos;
-                                        if (nCheckPos <= limit) {
-                                            // Verify full pattern with SIMD-accelerated comparison
-                                            if (compareMemory((char *)(hay + nCheckPos), pArray, m)) {
-                                                nResult = nOffset + nCheckPos;
-                                                break;
-                                            }
+                                    // find index of least-significant set bit (0..31)
+                                    unsigned bit = __builtin_ctz(nMask);
+                                    qint64 nCheckPos = i + (qint64)bit; // start position = i + bit
+
+                                    if (nCheckPos <= limit) {
+                                        // Verify full pattern
+                                        if (compareMemory((char *)(hay + nCheckPos), pArray, m)) {
+                                            nResult = nOffset + nCheckPos;
+                                            break;
                                         }
                                     }
-                                    nMask >>= 1;
-                                    nBitPos++;
+
+                                    // clear lowest set bit
+                                    nMask &= nMask - 1;
                                 }
-                                
+
                                 if (nResult != -1) break;
-                                
-                                // Skip forward by 32 bytes
+
+                                // Advance by 32 bytes (we already checked these bytes)
                                 i += 32;
                             } else {
                                 // No matches in this 32-byte window, skip ahead
@@ -3443,7 +3443,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                         } else {
                             // Fall back to scalar for remaining bytes
                             unsigned char c = (unsigned char)hay[i + m - 1];
-                            
+
                             if (c == (unsigned char)nLastSearchChar) {
                                 if (compareMemory((char *)(hay + i), pArray, m)) {
                                     nResult = nOffset + i;
@@ -5865,7 +5865,7 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
         while (nSize >= 32) {
             __m256i chunk = _mm256_loadu_si256((const __m256i*)ptr);
             __m256i cmp = _mm256_cmpeq_epi8(chunk, zero);
-            int mask = _mm256_movemask_epi8(cmp);
+            qint32 mask = _mm256_movemask_epi8(cmp);
             
             if (mask != 0) {
                 return false;  // Found zero byte
@@ -6325,7 +6325,8 @@ bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)
 {
     const char *__restrict ptr1 = pMemory1;
     const char *__restrict ptr2 = pMemory2;
-    
+
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // AVX2: Compare 32 bytes at a time
     #ifdef XBINARY_USE_AVX2
     if (g_cpuFeatures.avx2 && nSize >= 32) {
@@ -6365,7 +6366,7 @@ bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)
         
         // After SSE2, process remainder with 64-bit or byte-by-byte
     }
-    
+#endif
     // 64-bit comparison for remaining bytes
     const quint64 *__restrict p1_64 = reinterpret_cast<const quint64 *>(ptr1);
     const quint64 *__restrict p2_64 = reinterpret_cast<const quint64 *>(ptr2);
