@@ -1,13 +1,10 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-# Enable AVX2 for optimized binary operations on x86/x64 architectures
+# Enable SSE2 for safe binary operations on x86/x64 architectures
 # CRITICAL: Use SSE2 by default to avoid crashes on CPUs without AVX2
-# AVX2 instructions are enabled per-function with target attributes and runtime detection
+# Do NOT define XBINARY_USE_AVX2 since we compile with SSE2 baseline
 contains(QT_ARCH, x86_64)|contains(QT_ARCH, i386) {
-    # Define the flag to enable AVX2 optimized code paths (runtime-detected)
-    DEFINES += XBINARY_USE_AVX2
-    
     linux|macx|unix {
         # Use SSE2 as baseline (safe for all x86_64 CPUs)
         # AVX2 will be enabled per-function with __attribute__((target("avx2")))

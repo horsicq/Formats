@@ -66,97 +66,6 @@ namespace {
     };
     
     const CPUFeatures g_cpuFeatures;
-    
-    // AVX2-optimized helper functions with target attributes
-    // These functions are only called after runtime CPU feature detection
-    #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
-    
-    // Single-byte search with AVX2 (32-byte chunks)
-    #if defined(__GNUC__) || defined(__clang__)
-    __attribute__((target("avx2")))
-    #endif
-    qint64 findSingleByteAVX2(const unsigned char *hay, qint64 nOffset, qint64 nTemp, unsigned char needle) {
-        __m256i vNeedle = _mm256_set1_epi8((char)needle);
-        qint64 i = 0;
-        
-        // Process 32-byte chunks
-        while (i + 32 <= nTemp) {
-            __m256i vData = _mm256_loadu_si256((const __m256i *)(hay + i));
-            __m256i vCmp = _mm256_cmpeq_epi8(vData, vNeedle);
-            qint32 nMask = _mm256_movemask_epi8(vCmp);
-            
-            if (nMask != 0) {
-                // Found match - find first set bit
-                #ifdef _MSC_VER
-                unsigned long nBitPos;
-                _BitScanForward(&nBitPos, nMask);
-                return nOffset + i + nBitPos;
-                #else
-                return nOffset + i + __builtin_ctz(nMask);
-                #endif
-            }
-            i += 32;
-        }
-        
-        return -1;  // Not found in aligned chunks
-    }
-    
-    // BMH pattern search with AVX2 for last-char scanning
-    #if defined(__GNUC__) || defined(__clang__)
-    __attribute__((target("avx2")))
-    #endif
-    qint64 scanLastCharAVX2(const char *pLastPos, unsigned char nLastChar, qint64 i, qint64 limit,
-                            const char *hay, const char *pArray, qint64 m, qint64 nOffset,
-                            qint64 hayLen) {
-        __m256i vLast = _mm256_set1_epi8((int8_t)nLastChar);
-        
-        while (i <= limit) {
-            // Check if we can use SIMD for last char search (need 32 bytes ahead)
-            if (i + m + 31 <= hayLen) {
-                // Scan for last character using AVX2
-                const char *pPos = hay + i + m - 1;
-                __m256i vData = _mm256_loadu_si256((const __m256i *)pPos);
-                __m256i vCmp = _mm256_cmpeq_epi8(vData, vLast);
-                uint32_t nMask = (uint32_t)_mm256_movemask_epi8(vCmp);
-                
-                if (nMask != 0) {
-                    // Iterate set bits (lowest-first)
-                    while (nMask != 0) {
-                        // find index of least-significant set bit (0..31)
-                        #ifdef _MSC_VER
-                        unsigned long bit;
-                        _BitScanForward(&bit, nMask);
-                        #else
-                        unsigned bit = __builtin_ctz(nMask);
-                        #endif
-                        qint64 nCheckPos = i + (qint64)bit;
-                        
-                        if (nCheckPos <= limit) {
-                            // Verify full pattern
-                            if (compareMemory((char *)(hay + nCheckPos), pArray, m)) {
-                                return nOffset + nCheckPos;
-                            }
-                        }
-                        
-                        // clear lowest set bit
-                        nMask &= nMask - 1;
-                    }
-                    
-                    // Advance by 32 bytes (we already checked these bytes)
-                    i += 32;
-                } else {
-                    // No matches in this 32-byte window, skip ahead
-                    i += 32;
-                }
-            } else {
-                break;  // Not enough space for AVX2, fall back to scalar
-            }
-        }
-        
-        return -1;  // Continue with scalar search
-    }
-    
-    #endif  // AVX2 helper functions
 }  // namespace
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b)
@@ -3402,22 +3311,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             // Fast path: single-byte needle with SIMD optimization
             if (nArraySize == 1) {
                 #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
-                if (g_cpuFeatures.avx2 && nTemp >= 32) {
-                    // AVX2 optimized single-byte search (uses helper function with target attribute)
-                    const unsigned char *hay = (const unsigned char *)pBuffer;
-                    nResult = findSingleByteAVX2(hay, nOffset, nTemp, (unsigned char)pArray[0]);
-                    
-                    // Handle remaining bytes with standard memchr if not found in aligned chunks
-                    if (nResult == -1) {
-                        qint64 i = (nTemp / 32) * 32;  // Start after last aligned chunk
-                        if (i < nTemp) {
-                            const void *p = memchr(hay + i, (unsigned char)pArray[0], (size_t)(nTemp - i));
-                            if (p) {
-                                nResult = nOffset + ((const char *)p - pBuffer);
-                            }
-                        }
-                    }
-                } else if (g_cpuFeatures.sse2 && nTemp >= 16) {
+                if (g_cpuFeatures.sse2 && nTemp >= 16) {
                     // SSE2 optimized single-byte search
                     const unsigned char *hay = (const unsigned char *)pBuffer;
                     __m128i vNeedle = _mm_set1_epi8((char)pArray[0]);
@@ -3470,37 +3364,11 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 qint64 i = 0;
                 const qint64 limit = hayLen - m;
                 
-                // SIMD-optimized BMH search for patterns >= 32 bytes (adjusted threshold to avoid regression)
-                if (m >= 32 && g_cpuFeatures.avx2) {
-                    #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
-                    // AVX2-optimized last-char scanning (uses helper function with target attribute)
-                    qint64 avx2Result = scanLastCharAVX2(hay + i + m - 1, (unsigned char)nLastSearchChar,
-                                                          i, limit, hay, pArray, m, nOffset, hayLen);
-                    
-                    if (avx2Result != -1) {
-                        nResult = avx2Result;
-                        break;
-                    }
-                    
-                    // AVX2 helper returned -1: continue with scalar search for remaining bytes
-                    // (helper advances 'i' internally but we can't access it, so recalculate position)
-                    // Fall through to scalar BMH below
-                    #endif
-                    
-                    // Scalar BMH for remaining positions not covered by AVX2
-                    while (i <= limit) {
-                        unsigned char c = (unsigned char)hay[i + m - 1];
-                        if (c == (unsigned char)nLastSearchChar) {
-                            if (compareMemory((char *)(hay + i), pArray, m)) {
-                                nResult = nOffset + i;
-                                break;
-                            }
-                        }
-                        i += (qint64)bmhShift[c];
-                    }
-                } else if (m >= 24 && g_cpuFeatures.sse2) {
+                // SIMD-optimized BMH search for patterns >= 24 bytes (adjusted threshold to avoid regression)
+                if (m >= 24 && g_cpuFeatures.sse2) {
                     #ifdef Q_PROCESSOR_X86
                     // SSE2: Load last character for comparison (threshold 24 to balance overhead)
+                    // AVX2 disabled by SSE2 baseline compiler flags
                     __m128i vLast = _mm_set1_epi8(nLastSearchChar);
                     
                     while (i <= limit) {
