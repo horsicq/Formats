@@ -3311,7 +3311,40 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             // Fast path: single-byte needle with SIMD optimization
             if (nArraySize == 1) {
                 #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
-                if (g_cpuFeatures.sse2 && nTemp >= 16) {
+                if(g_cpuFeatures.avx2 && nTemp >= 32) {
+                    // AVX2 optimized single-byte search
+                    const unsigned char *hay = (const unsigned char *)pBuffer;
+                    __m256i vNeedle = _mm256_set1_epi8((char)pArray[0]);
+                    qint64 i = 0;
+                    
+                    // Process 32-byte chunks
+                    while (i + 32 <= nTemp) {
+                        __m256i vData = _mm256_loadu_si256((const __m256i *)(hay + i));
+                        __m256i vCmp = _mm256_cmpeq_epi8(vData, vNeedle);
+                        qint32 nMask = _mm256_movemask_epi8(vCmp);
+                        
+                        if (nMask != 0) {
+                            // Found match - find first set bit
+                            #ifdef _MSC_VER
+                            unsigned long nBitPos;
+                            _BitScanForward(&nBitPos, nMask);
+                            nResult = nOffset + i + nBitPos;
+                            #else
+                            nResult = nOffset + i + __builtin_ctz(nMask);
+                            #endif
+                            break;
+                        }
+                        i += 32;
+                    }
+                    
+                    // Handle remaining bytes with standard memchr
+                    if (nResult == -1 && i < nTemp) {
+                        const void *p = memchr(hay + i, (unsigned char)pArray[0], (size_t)(nTemp - i));
+                        if (p) {
+                            nResult = nOffset + ((const char *)p - pBuffer);
+                        }
+                    }
+                } else if(g_cpuFeatures.sse2 && nTemp >= 16) {
                     // SSE2 optimized single-byte search
                     const unsigned char *hay = (const unsigned char *)pBuffer;
                     __m128i vNeedle = _mm_set1_epi8((char)pArray[0]);
@@ -3364,11 +3397,84 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 qint64 i = 0;
                 const qint64 limit = hayLen - m;
                 
-                // SIMD-optimized BMH search for patterns >= 24 bytes (adjusted threshold to avoid regression)
-                if (m >= 24 && g_cpuFeatures.sse2) {
-                    #ifdef Q_PROCESSOR_X86
+                // SIMD-optimized BMH search for patterns >= 32 bytes (adjusted threshold to avoid regression)
+                #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
+                if(m >= 32 && g_cpuFeatures.avx2) {
+                    // SIMD-optimized BMH search for patterns >= 32 bytes (adjusted threshold to avoid regression)
+                    // AVX2: Load last character for comparison
+                    __m256i vLast = _mm256_set1_epi8((int8_t)nLastSearchChar);
+
+                    while (i <= limit) {
+                        // Check if we can use SIMD for last char search (need 32 bytes ahead)
+                        if (i + m + 31 <= hayLen) {
+                            // Scan for last character using AVX2
+                            const char *pLastPos = hay + i + m - 1;
+                            __m256i vData = _mm256_loadu_si256((const __m256i *)pLastPos);
+                            __m256i vCmp = _mm256_cmpeq_epi8(vData, vLast);
+                            uint32_t nMask = (uint32_t)_mm256_movemask_epi8(vCmp);
+
+                            if (nMask != 0) {
+                                // Iterate set bits (lowest-first) safely without arithmetic signed shifts
+                                while (nMask != 0) {
+                                    // find index of least-significant set bit (0..31)
+                                    #ifdef _MSC_VER
+                                    unsigned long bit;
+                                    _BitScanForward(&bit, nMask);
+                                    #else
+                                    unsigned bit = __builtin_ctz(nMask);
+                                    #endif
+                                    qint64 nCheckPos = i + (qint64)bit; // start position = i + bit
+
+                                    if (nCheckPos <= limit) {
+                                        // Verify full pattern
+                                        if (compareMemory((char *)(hay + nCheckPos), pArray, m)) {
+                                            nResult = nOffset + nCheckPos;
+                                            break;
+                                        }
+                                    }
+
+                                    // clear lowest set bit
+                                    nMask &= nMask - 1;
+                                }
+
+                                if (nResult != -1) break;
+
+                                // Advance by 32 bytes (we already checked these bytes)
+                                i += 32;
+                            } else {
+                                // No matches in this 32-byte window, skip ahead
+                                i += 32;
+                            }
+                        } else {
+                            // Fall back to scalar for remaining bytes
+                            unsigned char c = (unsigned char)hay[i + m - 1];
+
+                            if (c == (unsigned char)nLastSearchChar) {
+                                if (compareMemory((char *)(hay + i), pArray, m)) {
+                                    nResult = nOffset + i;
+                                    break;
+                                }
+                            }
+                            i += (qint64)bmhShift[c];
+                        }
+                    }
+                    #else
+                    // Non-x86 fallback
+                    while (i <= limit) {
+                        unsigned char c = (unsigned char)hay[i + m - 1];
+                        if (c == (unsigned char)nLastSearchChar) {
+                            if (compareMemory((char *)(hay + i), pArray, m)) {
+                                nResult = nOffset + i;
+                                break;
+                            }
+                        }
+                        i += (qint64)bmhShift[c];
+                    }
+                    #endif
+                }
+                #ifdef Q_PROCESSOR_X86
+                else if(m >= 24 && g_cpuFeatures.sse2) {
                     // SSE2: Load last character for comparison (threshold 24 to balance overhead)
-                    // AVX2 disabled by SSE2 baseline compiler flags
                     __m128i vLast = _mm_set1_epi8(nLastSearchChar);
                     
                     while (i <= limit) {
@@ -3484,7 +3590,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
 
             #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
             // SSE2 optimized ANSI detection (0x20-0x7E range)
-            if (g_cpuFeatures.sse2 && hayLen >= 16) {
+            if(g_cpuFeatures.sse2 && hayLen >= 16) {
                 const __m128i vLower = _mm_set1_epi8(0x20);  // Lower bound (space)
                 const __m128i vUpper = _mm_set1_epi8(0x7E);  // Upper bound (~)
                 
@@ -3550,7 +3656,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
 
             #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
             // SSE2 optimized NOT-ANSI detection (NOT in range 0x20-0x7E)
-            if (g_cpuFeatures.sse2 && hayLen >= 16) {
+            if(g_cpuFeatures.sse2 && hayLen >= 16) {
                 const __m128i vLower = _mm_set1_epi8(0x20);  // Lower bound (space)
                 const __m128i vUpper = _mm_set1_epi8(0x7E);  // Upper bound (~)
                 
@@ -5759,7 +5865,7 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
 #if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // AVX2: Process 32 bytes at a time
     #ifdef XBINARY_USE_AVX2
-    if (g_cpuFeatures.avx2 && nSize >= 32) {
+    if(g_cpuFeatures.avx2 && nSize >= 32) {
         const __m256i zero = _mm256_setzero_si256();
         
         while (nSize >= 32) {
@@ -5778,7 +5884,7 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
     #endif
     
     // SSE2: Process 16 bytes at a time
-    if (g_cpuFeatures.sse2 && nSize >= 16) {
+    if(g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i zero = _mm_setzero_si128();
         
         while (nSize >= 16) {
@@ -5826,7 +5932,7 @@ bool XBinary::_isMemoryAnsi(char *pSource, qint64 nSize)
     
 #if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // SSE2: Process 16 bytes at a time
-    if (g_cpuFeatures.sse2 && nSize >= 16) {
+    if(g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i low_bound = _mm_set1_epi8(0x20 - 1);  // Less than 0x20 is invalid
         const __m128i high_bound = _mm_set1_epi8(0x7F);     // Greater than 0x7F is invalid
         
@@ -5894,7 +6000,7 @@ bool XBinary::_isMemoryNotAnsi(char *pSource, qint64 nSize)
     
 #if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // SSE2: Process 16 bytes at a time
-    if (g_cpuFeatures.sse2 && nSize >= 16) {
+    if(g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i low_bound = _mm_set1_epi8(0x20);
         const __m128i high_bound = _mm_set1_epi8(0x7F);
         
@@ -5962,7 +6068,7 @@ bool XBinary::_isMemoryNotAnsiAndNull(char *pSource, qint64 nSize)
     
 #if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // SSE2: Process 16 bytes at a time
-    if (g_cpuFeatures.sse2 && nSize >= 16) {
+    if(g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i zero = _mm_setzero_si128();
         const __m128i low_bound = _mm_set1_epi8(0x20);
         const __m128i high_bound = _mm_set1_epi8(0x7F);
@@ -6039,7 +6145,7 @@ bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
     
 #if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // SSE2: Process 16 bytes at a time
-    if (g_cpuFeatures.sse2 && nSize >= 16) {
+    if(g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i digit_low = _mm_set1_epi8(0x30);  // '0'
         const __m128i digit_high = _mm_set1_epi8(0x39); // '9'
         
@@ -6229,7 +6335,7 @@ bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)
 #if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
     // AVX2: Compare 32 bytes at a time
     #ifdef XBINARY_USE_AVX2
-    if (g_cpuFeatures.avx2 && nSize >= 32) {
+    if(g_cpuFeatures.avx2 && nSize >= 32) {
         while (nSize >= 32) {
             __m256i chunk1 = _mm256_loadu_si256((const __m256i*)ptr1);
             __m256i chunk2 = _mm256_loadu_si256((const __m256i*)ptr2);
@@ -6248,7 +6354,7 @@ bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)
     #endif
     
     // SSE2: Compare 16 bytes at a time
-    if (g_cpuFeatures.sse2 && nSize >= 16) {
+    if(g_cpuFeatures.sse2 && nSize >= 16) {
         while (nSize >= 16) {
             __m128i chunk1 = _mm_loadu_si128((const __m128i*)ptr1);
             __m128i chunk2 = _mm_loadu_si128((const __m128i*)ptr2);

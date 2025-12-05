@@ -1,14 +1,11 @@
-# Enable SSE2 for safe binary operations on x86/x64 architectures
-# CRITICAL: Use SSE2 by default to avoid crashes on CPUs without AVX2
-# Do NOT define XBINARY_USE_AVX2 since we compile with SSE2 baseline
+# Enable AVX2 for optimized binary operations on x86/x64 architectures
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|i686|i386")
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        # Use SSE2 as baseline (safe for all x86_64 CPUs)
-        # AVX2 will be enabled per-function with __attribute__((target("avx2")))
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse2")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
+        add_definitions(-DXBINARY_USE_AVX2)
     elseif(MSVC)
-        # Use SSE2 as baseline for MSVC
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE2")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
+        add_definitions(-DXBINARY_USE_AVX2)
     endif()
 endif()
 

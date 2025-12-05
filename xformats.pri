@@ -1,24 +1,19 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-# Enable SSE2 for safe binary operations on x86/x64 architectures
-# CRITICAL: Use SSE2 by default to avoid crashes on CPUs without AVX2
-# Do NOT define XBINARY_USE_AVX2 since we compile with SSE2 baseline
+# Enable AVX2 for optimized binary operations on x86/x64 architectures
 contains(QT_ARCH, x86_64)|contains(QT_ARCH, i386) {
     linux|macx|unix {
-        # Use SSE2 as baseline (safe for all x86_64 CPUs)
-        # AVX2 will be enabled per-function with __attribute__((target("avx2")))
-        QMAKE_CXXFLAGS += -msse2
+        QMAKE_CXXFLAGS += -mavx2
+        DEFINES += XBINARY_USE_AVX2
     }
     win32-msvc* {
-        # Use SSE2 as baseline for MSVC
-        # Note: MSVC doesn't support per-function target attributes well
-        # Consider separate compilation units for AVX2 code if needed
-        QMAKE_CXXFLAGS += /arch:SSE2
+        QMAKE_CXXFLAGS += /arch:AVX2
+        DEFINES += XBINARY_USE_AVX2
     }
     win32-g++ {
-        # Use SSE2 as baseline (safe for all x86_64 CPUs)
-        QMAKE_CXXFLAGS += -msse2
+        QMAKE_CXXFLAGS += -mavx2
+        DEFINES += XBINARY_USE_AVX2
     }
 }
 
