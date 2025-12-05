@@ -1,11 +1,19 @@
 # Enable AVX2 for optimized binary operations on x86/x64 architectures
+# CRITICAL: Use SSE2 by default to avoid crashes on CPUs without AVX2
+# AVX2 instructions are enabled per-function with target attributes and runtime detection
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|i686|i386")
+    # Define the flag to enable AVX2 optimized code paths (runtime-detected)
+    add_definitions(-DXBINARY_USE_AVX2)
+    
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
-        add_definitions(-DXBINARY_USE_AVX2)
+        # Use SSE2 as baseline (safe for all x86_64 CPUs)
+        # AVX2 will be enabled per-function with __attribute__((target("avx2")))
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse2")
     elseif(MSVC)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
-        add_definitions(-DXBINARY_USE_AVX2)
+        # Use SSE2 as baseline for MSVC
+        # Note: MSVC doesn't support per-function target attributes well
+        # Consider separate compilation units for AVX2 code if needed
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE2")
     endif()
 endif()
 
