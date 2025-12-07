@@ -3469,9 +3469,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                     i += (qint64)bmhShift[c];
                 }
 #endif
-                }
-#ifdef Q_PROCESSOR_X86
-                else if (m >= 24 && g_cpuFeatures.sse2) {
+                } else if (m >= 24 && g_cpuFeatures.sse2) {
                     // SSE2: Load last character for comparison (threshold 24 to balance overhead)
                     __m128i vLast = _mm_set1_epi8(nLastSearchChar);
 
@@ -3524,19 +3522,6 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                             i += (qint64)bmhShift[c];
                         }
                     }
-#else
-            // Non-x86 fallback
-            while (i <= limit) {
-                unsigned char c = (unsigned char)hay[i + m - 1];
-                if (c == (unsigned char)nLastSearchChar) {
-                    if (compareMemory((char *)(hay + i), pArray, m)) {
-                        nResult = nOffset + i;
-                        break;
-                    }
-                }
-                i += (qint64)bmhShift[c];
-            }
-#endif
                 } else {
                     // Scalar BMH search for patterns < 16 bytes or no SSE2
                     while (i <= limit) {
