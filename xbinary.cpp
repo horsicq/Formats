@@ -3458,6 +3458,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 }
 #else
                 // Non-x86 or no AVX2 available: use SSE2 or scalar fallback
+#ifdef Q_PROCESSOR_X86
                 if (m >= 24 && g_cpuFeatures.sse2) {
                     // SSE2: Load last character for comparison (threshold 24 to balance overhead)
                     __m128i vLast = _mm_set1_epi8(nLastSearchChar);
@@ -3526,6 +3527,21 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                         i += (qint64)bmhShift[c];
                     }
                 }
+#else
+                // Non-x86 or no SSE2: use scalar fallback
+                while (i <= limit) {
+                    unsigned char c = (unsigned char)hay[i + m - 1];
+
+                    if (c == (unsigned char)nLastSearchChar) {
+                        // Potential match; verify all bytes
+                        if (memcmp(hay + i, pArray, (size_t)m) == 0) {
+                            nResult = nOffset + i;
+                            break;
+                        }
+                    }
+                    i += (qint64)bmhShift[c];
+                }
+#endif
 #endif
             } else {
                 // Fallback naive scan
