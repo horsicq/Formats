@@ -3395,7 +3395,6 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 qint64 i = 0;
                 const qint64 limit = hayLen - m;
 
-// SIMD-optimized BMH search for patterns >= 32 bytes (adjusted threshold to avoid regression)
 #if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
                 if (m >= 32 && g_cpuFeatures.avx2) {
                     // SIMD-optimized BMH search for patterns >= 32 bytes (adjusted threshold to avoid regression)
@@ -3456,20 +3455,10 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                             i += (qint64)bmhShift[c];
                         }
                     }
-#else
-                // Non-x86 fallback
-                while (i <= limit) {
-                    unsigned char c = (unsigned char)hay[i + m - 1];
-                    if (c == (unsigned char)nLastSearchChar) {
-                        if (compareMemory((char *)(hay + i), pArray, m)) {
-                            nResult = nOffset + i;
-                            break;
-                        }
-                    }
-                    i += (qint64)bmhShift[c];
                 }
-#endif
-                } else if (m >= 24 && g_cpuFeatures.sse2) {
+#else
+                // Non-x86 or no AVX2 available: use SSE2 or scalar fallback
+                if (m >= 24 && g_cpuFeatures.sse2) {
                     // SSE2: Load last character for comparison (threshold 24 to balance overhead)
                     __m128i vLast = _mm_set1_epi8(nLastSearchChar);
 
@@ -3537,6 +3526,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                         i += (qint64)bmhShift[c];
                     }
                 }
+#endif
             } else {
                 // Fallback naive scan
                 const qint64 limit = nTemp - (nArraySize - 1);
