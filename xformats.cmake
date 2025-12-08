@@ -1,11 +1,11 @@
 # Enable AVX2 for optimized binary operations on x86/x64 architectures
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|i686|i386")
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
-        add_definitions(-DXBINARY_USE_AVX2)
+        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
+        #add_definitions(-DXBINARY_USE_AVX2)
     elseif(MSVC)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
-        add_definitions(-DXBINARY_USE_AVX2)
+        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
+        #add_definitions(-DXBINARY_USE_AVX2)
     endif()
 endif()
 

@@ -3455,6 +3455,20 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                             i += (qint64)bmhShift[c];
                         }
                     }
+                } else {
+                    // Scalar BMH search for patterns 2-31 bytes (when AVX2 is not applicable or pattern too small)
+                    while (i <= limit) {
+                        unsigned char c = (unsigned char)hay[i + m - 1];
+
+                        if (c == (unsigned char)nLastSearchChar) {
+                            // Potential match; verify all bytes
+                            if (memcmp(hay + i, pArray, (size_t)m) == 0) {
+                                nResult = nOffset + i;
+                                break;
+                            }
+                        }
+                        i += (qint64)bmhShift[c];
+                    }
                 }
 #else
                 // Non-x86 or no AVX2 available: use SSE2 or scalar fallback
@@ -3709,7 +3723,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
 
-#ifdef XBINARY_USE_AVX2
+#if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
             // SSE2-optimized search for NOT-ANSI-AND-NULL (non-printable excluding 0x00)
             const qint64 vectorSize = 16;
             __m128i vMin = _mm_set1_epi8(0x20);   // Min printable ASCII
@@ -3781,11 +3795,11 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                         break;
                     }
                 }
-#ifdef XBINARY_USE_AVX2
+#if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
             }
 #endif
         } else if (st == ST_ANSINUMBER) {
-#ifdef XBINARY_USE_AVX2
+#if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
             const unsigned char *hay = (const unsigned char *)pBuffer;
             qint64 hayLen = nTemp;
             qint64 m = nArraySize;
@@ -4368,7 +4382,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
             quint8 *pData = (quint8 *)pBuffer;
             qint64 nSearchEnd = nTemp - (nStringSize - 1);
 
-#ifdef XBINARY_USE_AVX2
+#if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
             // SSE2 optimized scan for first character, then verify full match
             const qint64 nVectorSize = 16;
             __m128i vFirstUpper = _mm_set1_epi8(pUpperData[0]);
@@ -5851,9 +5865,7 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
 {
     const char *ptr = pSource;
 
-#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
-// AVX2: Process 32 bytes at a time
-#ifdef XBINARY_USE_AVX2
+#if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
     if (g_cpuFeatures.avx2 && nSize >= 32) {
         const __m256i zero = _mm256_setzero_si256();
 
@@ -5870,7 +5882,6 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
             nSize -= 32;
         }
     }
-#endif
 
     // SSE2: Process 16 bytes at a time
     if (g_cpuFeatures.sse2 && nSize >= 16) {
@@ -5919,7 +5930,7 @@ bool XBinary::_isMemoryAnsi(char *pSource, qint64 nSize)
 {
     const char *ptr = pSource;
 
-#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
+#if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
     // SSE2: Process 16 bytes at a time
     if (g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i low_bound = _mm_set1_epi8(0x20 - 1);  // Less than 0x20 is invalid
@@ -5987,7 +5998,7 @@ bool XBinary::_isMemoryNotAnsi(char *pSource, qint64 nSize)
 {
     const char *ptr = pSource;
 
-#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
+#if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
     // SSE2: Process 16 bytes at a time
     if (g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i low_bound = _mm_set1_epi8(0x20);
@@ -6055,7 +6066,7 @@ bool XBinary::_isMemoryNotAnsiAndNull(char *pSource, qint64 nSize)
 {
     const char *ptr = pSource;
 
-#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
+#if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
     // SSE2: Process 16 bytes at a time
     if (g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i zero = _mm_setzero_si128();
@@ -6132,7 +6143,7 @@ bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
 {
     const char *ptr = pSource;
 
-#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
+#if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
     // SSE2: Process 16 bytes at a time
     if (g_cpuFeatures.sse2 && nSize >= 16) {
         const __m128i digit_low = _mm_set1_epi8(0x30);   // '0'
@@ -6321,9 +6332,7 @@ bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)
     const char *__restrict ptr1 = pMemory1;
     const char *__restrict ptr2 = pMemory2;
 
-#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
-// AVX2: Compare 32 bytes at a time
-#ifdef XBINARY_USE_AVX2
+#if defined(Q_PROCESSOR_X86) && defined(XBINARY_USE_AVX2)
     if (g_cpuFeatures.avx2 && nSize >= 32) {
         while (nSize >= 32) {
             __m256i chunk1 = _mm256_loadu_si256((const __m256i *)ptr1);
@@ -6340,7 +6349,6 @@ bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)
             nSize -= 32;
         }
     }
-#endif
 
     // SSE2: Compare 16 bytes at a time
     if (g_cpuFeatures.sse2 && nSize >= 16) {
