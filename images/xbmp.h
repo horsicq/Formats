@@ -34,7 +34,7 @@ public:
     };
 
     explicit XBMP(QIODevice *pDevice = nullptr);
-    ~XBMP();
+    virtual ~XBMP();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice);
@@ -46,6 +46,7 @@ public:
 
     virtual QString getFileFormatExt() override;
     virtual QString getFileFormatExtsString() override;
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct = nullptr) override;
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QString getVersion() override;
 

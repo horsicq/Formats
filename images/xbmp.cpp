@@ -109,6 +109,21 @@ QString XBMP::getFileFormatExtsString()
     return "BMP (*.bmp)";
 }
 
+qint64 XBMP::getFileFormatSize(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    qint64 nResult = 0;
+
+    BMPFILEHEADER fileHeader = getFileHeader();
+
+    if (fileHeader.bfSize > 0 && fileHeader.bfSize <= (quint64)getSize()) {
+        nResult = fileHeader.bfSize;
+    }
+
+    return nResult;
+}
+
 XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
