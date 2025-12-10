@@ -19,7 +19,6 @@
  * SOFTWARE.
  */
 #include "xbinary.h"
-#include "formats/xpyc.h"
 #include <cstring>
 #include <QDebug>
 
