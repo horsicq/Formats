@@ -5333,20 +5333,25 @@ void XBinary::_zeroMemory(char *pDest, qint64 nSize)
 
 bool XBinary::_isMemoryZeroFilled(char *pSource, qint64 nSize)
 {
-    bool bResult = true;
-    // TODO optimize
+    // Check in 8-byte chunks for better performance
+    while (nSize >= 8) {
+        if (*((quint64 *)pSource) != 0) {
+            return false;
+        }
+        pSource += 8;
+        nSize -= 8;
+    }
+
+    // Check remaining bytes one by one
     while (nSize) {
         if (*pSource) {
-            bResult = false;
-
-            break;
+            return false;
         }
-
         pSource++;
         nSize--;
     }
 
-    return bResult;
+    return true;
 }
 
 bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
