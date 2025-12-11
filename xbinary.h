@@ -75,6 +75,12 @@
 #include "xne_def.h"
 #include "xpe_def.h"
 
+#ifdef XSIMD_ENABLE
+extern "C" {
+#include "xsimd/src/xsimd.h"
+}
+#endif
+
 // TODO mb Functions
 #define S_ALIGN_DOWN32(value, align) (((quint32)value) & ~((quint32)align - 1))
 #define S_ALIGN_UP32(value, align) ((((quint32)value) & ((quint32)align - 1)) ? (S_ALIGN_DOWN32((quint32)value, (quint32)align) + (quint32)align) : ((quint32)value))
