@@ -75,7 +75,7 @@
 #include "xne_def.h"
 #include "xpe_def.h"
 
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
 extern "C" {
 #include "xsimd/src/xsimd.h"
 }

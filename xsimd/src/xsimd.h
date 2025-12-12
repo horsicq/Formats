@@ -41,6 +41,7 @@ typedef long long xsimd_int64;
 typedef unsigned long long xsimd_uint64;
 typedef int xsimd_int32;
 typedef unsigned int xsimd_uint32;
+typedef unsigned short xsimd_uint16;
 typedef unsigned char xsimd_uint8;
 
 /**
@@ -124,6 +125,17 @@ xsimd_int64 xsimd_find_pattern_bmh(const void* pBuffer, xsimd_int64 nBufferSize,
  */
 xsimd_int64 xsimd_find_ansi(const void* pBuffer, xsimd_int64 nBufferSize, 
                             xsimd_int64 nMinLength, xsimd_int64 nOffset);
+
+/**
+ * Find first occurrence of non-null sequence (no 0x00 bytes)
+ * @param pBuffer Buffer to search in
+ * @param nBufferSize Buffer size
+ * @param nMinLength Minimum sequence length (consecutive non-null bytes)
+ * @param nOffset Base offset (added to result)
+ * @return Offset of first sequence, or -1 if not found
+ */
+xsimd_int64 xsimd_find_notnull(const void* pBuffer, xsimd_int64 nBufferSize, 
+                               xsimd_int64 nMinLength, xsimd_int64 nOffset);
 
 /**
  * Find first occurrence of non-ANSI sequence (NOT in 0x20-0x7E)

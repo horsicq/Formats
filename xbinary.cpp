@@ -22,12 +22,6 @@
 #include <cstring>
 #include <QDebug>
 
-#ifdef XSIMD_ENABLE
-extern "C" {
-#include "xsimd/src/xsimd.h"
-}
-#endif
-
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b)
 {
     if (a.nAddress != b.nAddress) {
@@ -3266,7 +3260,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         if (st == ST_COMPAREBYTES) {
             // Fast path: single-byte needle with SIMD optimization
             if (nArraySize == 1) {
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
                 nResult = xsimd_find_byte(pBuffer, nTemp, (unsigned char)pArray[0], nOffset);
                 if (nResult != -1) break;
 #else
@@ -3279,7 +3273,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
 #endif
             } else if (bUseBMH) {
                 // Boyer–Moore–Horspool pattern search
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
                 nResult = xsimd_find_pattern_bmh(pBuffer, nTemp, pArray, nArraySize, nOffset);
                 if (nResult != -1) break;
 #else
@@ -3317,6 +3311,10 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 if (nResult != -1) break;
             }
         } else if (st == ST_NOTNULL) {
+#ifdef USE_XSIMD
+            nResult = xsimd_find_notnull(pBuffer, nTemp, nArraySize, nOffset);
+            if (nResult != -1) break;
+#else
             // Find first window of length nArraySize with no zero bytes using memchr to skip over zero-containing regions.
             const char *hay = pBuffer;
             qint64 hayLen = nTemp;
@@ -3333,8 +3331,9 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 // Skip to just after the zero byte
                 j += runLen + 1;
             }
+#endif
         } else if (st == ST_ANSI) {
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
             nResult = xsimd_find_ansi(pBuffer, nTemp, nArraySize, nOffset);
             if (nResult != -1) break;
 #else
@@ -3362,7 +3361,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             if (nResult != -1) break;
 #endif
         } else if (st == ST_NOTANSI) {
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
             nResult = xsimd_find_not_ansi(pBuffer, nTemp, nArraySize, nOffset);
             if (nResult != -1) break;
 #else
@@ -3390,7 +3389,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             if (nResult != -1) break;
 #endif
         } else if (st == ST_NOTANSIANDNULL) {
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
             nResult = xsimd_find_not_ansi_and_null(pBuffer, nTemp, nArraySize, nOffset);
             if (nResult != -1) break;
 #else
@@ -3425,7 +3424,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             if (nResult != -1) break;
 #endif
         } else if (st == ST_ANSINUMBER) {
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
             nResult = xsimd_find_ansi_number(pBuffer, nTemp, nArraySize, nOffset);
             if (nResult != -1) break;
 #else
@@ -3936,7 +3935,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
             quint8 *pData = (quint8 *)pBuffer;
             qint64 nSearchEnd = nTemp - (nStringSize - 1);
 
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
             qint64 nFoundPos = xsimd_find_ansi_string_i(pBuffer, nTemp, baUpper.constData(), nStringSize, nOffset);
             if (nFoundPos != -1) {
                 nResult = nFoundPos;
@@ -5356,7 +5355,7 @@ bool XBinary::_isMemoryZeroFilled(char *pSource, qint64 nSize)
 
 bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
 {
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
     return xsimd_is_not_null(pSource, nSize) != 0;
 #else
     // Fallback: 64-bit processing
@@ -5387,7 +5386,7 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
 
 bool XBinary::_isMemoryAnsi(char *pSource, qint64 nSize)
 {
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
     return xsimd_is_ansi(pSource, nSize) != 0;
 #else
     // Fallback: 64-bit processing
@@ -5422,7 +5421,7 @@ bool XBinary::_isMemoryAnsi(char *pSource, qint64 nSize)
 
 bool XBinary::_isMemoryNotAnsi(char *pSource, qint64 nSize)
 {
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
     return xsimd_is_not_ansi(pSource, nSize) != 0;
 #else
     // Fallback: 64-bit processing
@@ -5457,7 +5456,7 @@ bool XBinary::_isMemoryNotAnsi(char *pSource, qint64 nSize)
 
 bool XBinary::_isMemoryNotAnsiAndNull(char *pSource, qint64 nSize)
 {
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
     return xsimd_is_not_ansi_and_null(pSource, nSize) ? true : false;
 #else
     // Fallback: 64-bit processing
@@ -5495,7 +5494,7 @@ bool XBinary::_isMemoryNotAnsiAndNull(char *pSource, qint64 nSize)
 
 bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
 {
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
     return xsimd_is_ansi_number(pSource, nSize) ? true : false;
 #else
     // Fallback: 64-bit processing
@@ -5650,7 +5649,7 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
 
 bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)
 {
-#ifdef XSIMD_ENABLE
+#ifdef USE_XSIMD
     return xsimd_compare_memory(pMemory1, pMemory2, nSize) != 0;
 #else
     const char *__restrict ptr1 = pMemory1;

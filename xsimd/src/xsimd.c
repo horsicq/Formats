@@ -328,6 +328,139 @@ xsimd_int64 xsimd_find_pattern_bmh(const void* pBuffer, xsimd_int64 nBufferSize,
     xsimd_int64 i = 0;
     
 #ifdef XSIMD_X86
+    /* Special handling for 1-byte patterns using SIMD */
+    if (nPatternSize == 1 && (g_nEnabledFeatures & XSIMD_FEATURE_AVX2)) {
+        __m256i vPattern = _mm256_set1_epi8(pNeedle[0]);
+        
+        /* Process 32 bytes per iteration */
+        while (i + 31 < nBufferSize) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pHay + i));
+            __m256i vCmp = _mm256_cmpeq_epi8(vData, vPattern);
+            xsimd_uint32 nMask = (xsimd_uint32)_mm256_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                /* Find first match using bit scan */
+#ifdef _MSC_VER
+                unsigned long bit;
+                _BitScanForward(&bit, nMask);
+#else
+                unsigned bit = __builtin_ctz(nMask);
+#endif
+                return nOffset + i + (xsimd_int64)bit;
+            }
+            
+            i += 32;
+        }
+        
+        /* Scalar fallback for remaining bytes */
+        while (i < nBufferSize) {
+            if (pHay[i] == pNeedle[0]) {
+                return nOffset + i;
+            }
+            i++;
+        }
+        
+        return -1;
+    }
+    
+    /* Special handling for 2-byte patterns using SIMD */
+    if (nPatternSize == 2 && (g_nEnabledFeatures & XSIMD_FEATURE_AVX2)) {
+        xsimd_uint16 pattern16 = *(const xsimd_uint16*)pNeedle;
+        __m256i vPattern = _mm256_set1_epi16((short)pattern16);
+        
+        /* Process 32 bytes (16 two-byte values) per iteration */
+        while (i + 31 < nBufferSize) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pHay + i));
+            __m256i vCmp = _mm256_cmpeq_epi16(vData, vPattern);
+            xsimd_uint32 nMask = (xsimd_uint32)_mm256_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                /* Check each potential match (aligned to 2-byte boundaries) */
+                xsimd_uint32 nTempMask = nMask;
+                while (nTempMask != 0) {
+#ifdef _MSC_VER
+                    unsigned long bit;
+                    _BitScanForward(&bit, nTempMask);
+#else
+                    unsigned bit = __builtin_ctz(nTempMask);
+#endif
+                    /* 16-bit comparison marks every other byte */
+                    if ((bit & 1) == 0) {
+                        xsimd_int64 pos = i + (xsimd_int64)bit;
+                        if (pos + 1 < nBufferSize) {
+                            if (*(const xsimd_uint16*)(pHay + pos) == pattern16) {
+                                return nOffset + pos;
+                            }
+                        }
+                    }
+                    
+                    nTempMask &= nTempMask - 1;
+                }
+            }
+            
+            i += 32;
+        }
+        
+        /* Scalar fallback for remaining bytes */
+        while (i + 1 < nBufferSize) {
+            if (*(const xsimd_uint16*)(pHay + i) == pattern16) {
+                return nOffset + i;
+            }
+            i++;
+        }
+        
+        return -1;
+    }
+    
+    /* Special handling for 3-byte patterns using hybrid SIMD + scalar */
+    if (nPatternSize == 3 && (g_nEnabledFeatures & XSIMD_FEATURE_AVX2)) {
+        __m256i vFirst = _mm256_set1_epi8(pNeedle[0]);
+        const char nSecond = pNeedle[1];
+        const char nThird = pNeedle[2];
+        
+        /* Process 32 bytes per iteration - filter by first byte */
+        while (i + 31 + 2 < nBufferSize) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pHay + i));
+            __m256i vCmp = _mm256_cmpeq_epi8(vData, vFirst);
+            xsimd_uint32 nMask = (xsimd_uint32)_mm256_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                /* Check each candidate */
+                xsimd_uint32 nTempMask = nMask;
+                while (nTempMask != 0) {
+#ifdef _MSC_VER
+                    unsigned long bit;
+                    _BitScanForward(&bit, nTempMask);
+#else
+                    unsigned bit = __builtin_ctz(nTempMask);
+#endif
+                    xsimd_int64 pos = i + (xsimd_int64)bit;
+                    
+                    /* Verify remaining 2 bytes */
+                    if (pos + 2 < nBufferSize) {
+                        if (pHay[pos + 1] == nSecond && pHay[pos + 2] == nThird) {
+                            return nOffset + pos;
+                        }
+                    }
+                    
+                    nTempMask &= nTempMask - 1;
+                }
+            }
+            
+            i += 32;
+        }
+        
+        /* Scalar fallback for remaining bytes */
+        while (i + 2 < nBufferSize) {
+            if (pHay[i] == pNeedle[0] && pHay[i + 1] == nSecond && pHay[i + 2] == nThird) {
+                return nOffset + i;
+            }
+            i++;
+        }
+        
+        return -1;
+    }
+    
     /* AVX2: Process 64 bytes at a time (2 × 32-byte vectors) */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nPatternSize >= 4) {
         __m256i vLast = _mm256_set1_epi8((char)nLastChar);
@@ -461,6 +594,266 @@ xsimd_int64 xsimd_find_pattern_bmh(const void* pBuffer, xsimd_int64 nBufferSize,
             
             i += 32;
         }
+    }
+    /* AVX: Special handling for 1-byte patterns */
+    else if (nPatternSize == 1 && (g_nEnabledFeatures & XSIMD_FEATURE_AVX)) {
+        __m256i vPattern = _mm256_set1_epi8(pNeedle[0]);
+        
+        /* Process 32 bytes per iteration */
+        while (i + 31 < nBufferSize) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pHay + i));
+            __m256i vCmp = _mm256_cmpeq_epi8(vData, vPattern);
+            xsimd_uint32 nMask = (xsimd_uint32)_mm256_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                /* Find first match using bit scan */
+#ifdef _MSC_VER
+                unsigned long bit;
+                _BitScanForward(&bit, nMask);
+#else
+                unsigned bit = __builtin_ctz(nMask);
+#endif
+                return nOffset + i + (xsimd_int64)bit;
+            }
+            
+            i += 32;
+        }
+        
+        /* Scalar fallback for remaining bytes */
+        while (i < nBufferSize) {
+            if (pHay[i] == pNeedle[0]) {
+                return nOffset + i;
+            }
+            i++;
+        }
+        
+        return -1;
+    }
+    /* SSE2: Special handling for 1-byte patterns */
+    else if (nPatternSize == 1 && (g_nEnabledFeatures & XSIMD_FEATURE_SSE2)) {
+        __m128i vPattern = _mm_set1_epi8(pNeedle[0]);
+        
+        /* Process 16 bytes per iteration */
+        while (i + 15 < nBufferSize) {
+            __m128i vData = _mm_loadu_si128((const __m128i*)(pHay + i));
+            __m128i vCmp = _mm_cmpeq_epi8(vData, vPattern);
+            int nMask = _mm_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                /* Find first match using bit scan */
+#ifdef _MSC_VER
+                unsigned long bit;
+                _BitScanForward(&bit, (unsigned long)nMask);
+#else
+                unsigned bit = __builtin_ctz((unsigned int)nMask);
+#endif
+                return nOffset + i + (xsimd_int64)bit;
+            }
+            
+            i += 16;
+        }
+        
+        /* Scalar fallback for remaining bytes */
+        while (i < nBufferSize) {
+            if (pHay[i] == pNeedle[0]) {
+                return nOffset + i;
+            }
+            i++;
+        }
+        
+        return -1;
+    }
+    /* AVX: Special handling for 2-byte patterns */
+    else if (nPatternSize == 2 && (g_nEnabledFeatures & XSIMD_FEATURE_AVX)) {
+        xsimd_uint16 pattern16 = *(const xsimd_uint16*)pNeedle;
+        __m256i vPattern = _mm256_set1_epi16((short)pattern16);
+        
+        /* Process 32 bytes (16 two-byte values) per iteration */
+        while (i + 31 < nBufferSize) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pHay + i));
+            __m256i vCmp = _mm256_cmpeq_epi16(vData, vPattern);
+            xsimd_uint32 nMask = (xsimd_uint32)_mm256_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                /* Check each potential match (aligned to 2-byte boundaries) */
+                xsimd_uint32 nTempMask = nMask;
+                while (nTempMask != 0) {
+#ifdef _MSC_VER
+                    unsigned long bit;
+                    _BitScanForward(&bit, nTempMask);
+#else
+                    unsigned bit = __builtin_ctz(nTempMask);
+#endif
+                    /* 16-bit comparison marks every other byte */
+                    if ((bit & 1) == 0) {
+                        xsimd_int64 pos = i + (xsimd_int64)bit;
+                        if (pos + 1 < nBufferSize) {
+                            if (*(const xsimd_uint16*)(pHay + pos) == pattern16) {
+                                return nOffset + pos;
+                            }
+                        }
+                    }
+                    
+                    nTempMask &= nTempMask - 1;
+                }
+            }
+            
+            i += 32;
+        }
+        
+        /* Scalar fallback for remaining bytes */
+        while (i + 1 < nBufferSize) {
+            if (*(const xsimd_uint16*)(pHay + i) == pattern16) {
+                return nOffset + i;
+            }
+            i++;
+        }
+        
+        return -1;
+    }
+    /* SSE2: Special handling for 2-byte patterns */
+    else if (nPatternSize == 2 && (g_nEnabledFeatures & XSIMD_FEATURE_SSE2)) {
+        xsimd_uint16 pattern16 = *(const xsimd_uint16*)pNeedle;
+        __m128i vPattern = _mm_set1_epi16((short)pattern16);
+        
+        /* Process 16 bytes (8 two-byte values) per iteration */
+        while (i + 15 < nBufferSize) {
+            __m128i vData = _mm_loadu_si128((const __m128i*)(pHay + i));
+            __m128i vCmp = _mm_cmpeq_epi16(vData, vPattern);
+            int nMask = _mm_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                /* Check each potential match (aligned to 2-byte boundaries) */
+                int nTempMask = nMask;
+                while (nTempMask != 0) {
+#ifdef _MSC_VER
+                    unsigned long bit;
+                    _BitScanForward(&bit, (unsigned long)nTempMask);
+#else
+                    unsigned bit = __builtin_ctz((unsigned int)nTempMask);
+#endif
+                    /* 16-bit comparison marks every other byte */
+                    if ((bit & 1) == 0) {
+                        xsimd_int64 pos = i + (xsimd_int64)bit;
+                        if (pos + 1 < nBufferSize) {
+                            if (*(const xsimd_uint16*)(pHay + pos) == pattern16) {
+                                return nOffset + pos;
+                            }
+                        }
+                    }
+                    
+                    nTempMask &= nTempMask - 1;
+                }
+            }
+            
+            i += 16;
+        }
+        
+        /* Scalar fallback for remaining bytes */
+        while (i + 1 < nBufferSize) {
+            if (*(const xsimd_uint16*)(pHay + i) == pattern16) {
+                return nOffset + i;
+            }
+            i++;
+        }
+        
+        return -1;
+    }
+    /* AVX: Special handling for 3-byte patterns */
+    else if (nPatternSize == 3 && (g_nEnabledFeatures & XSIMD_FEATURE_AVX)) {
+        __m256i vFirst = _mm256_set1_epi8(pNeedle[0]);
+        const char nSecond = pNeedle[1];
+        const char nThird = pNeedle[2];
+        
+        /* Process 32 bytes per iteration - filter by first byte */
+        while (i + 31 + 2 < nBufferSize) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pHay + i));
+            __m256i vCmp = _mm256_cmpeq_epi8(vData, vFirst);
+            xsimd_uint32 nMask = (xsimd_uint32)_mm256_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                /* Check each candidate */
+                xsimd_uint32 nTempMask = nMask;
+                while (nTempMask != 0) {
+#ifdef _MSC_VER
+                    unsigned long bit;
+                    _BitScanForward(&bit, nTempMask);
+#else
+                    unsigned bit = __builtin_ctz(nTempMask);
+#endif
+                    xsimd_int64 pos = i + (xsimd_int64)bit;
+                    
+                    /* Verify remaining 2 bytes */
+                    if (pos + 2 < nBufferSize) {
+                        if (pHay[pos + 1] == nSecond && pHay[pos + 2] == nThird) {
+                            return nOffset + pos;
+                        }
+                    }
+                    
+                    nTempMask &= nTempMask - 1;
+                }
+            }
+            
+            i += 32;
+        }
+        
+        /* Scalar fallback for remaining bytes */
+        while (i + 2 < nBufferSize) {
+            if (pHay[i] == pNeedle[0] && pHay[i + 1] == nSecond && pHay[i + 2] == nThird) {
+                return nOffset + i;
+            }
+            i++;
+        }
+        
+        return -1;
+    }
+    /* SSE2: Special handling for 3-byte patterns */
+    else if (nPatternSize == 3 && (g_nEnabledFeatures & XSIMD_FEATURE_SSE2)) {
+        __m128i vFirst = _mm_set1_epi8(pNeedle[0]);
+        const char nSecond = pNeedle[1];
+        const char nThird = pNeedle[2];
+        
+        /* Process 16 bytes per iteration - filter by first byte */
+        while (i + 15 + 2 < nBufferSize) {
+            __m128i vData = _mm_loadu_si128((const __m128i*)(pHay + i));
+            __m128i vCmp = _mm_cmpeq_epi8(vData, vFirst);
+            int nMask = _mm_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                /* Check each candidate */
+                int nTempMask = nMask;
+                while (nTempMask != 0) {
+#ifdef _MSC_VER
+                    unsigned long bit;
+                    _BitScanForward(&bit, (unsigned long)nTempMask);
+#else
+                    unsigned bit = __builtin_ctz((unsigned int)nTempMask);
+#endif
+                    xsimd_int64 pos = i + (xsimd_int64)bit;
+                    
+                    /* Verify remaining 2 bytes */
+                    if (pos + 2 < nBufferSize) {
+                        if (pHay[pos + 1] == nSecond && pHay[pos + 2] == nThird) {
+                            return nOffset + pos;
+                        }
+                    }
+                    
+                    nTempMask &= nTempMask - 1;
+                }
+            }
+            
+            i += 16;
+        }
+        
+        /* Scalar fallback for remaining bytes */
+        while (i + 2 < nBufferSize) {
+            if (pHay[i] == pNeedle[0] && pHay[i + 1] == nSecond && pHay[i + 2] == nThird) {
+                return nOffset + i;
+            }
+            i++;
+        }
+        
+        return -1;
     }
     /* SSE2: Process 64 bytes at a time (4 × 16-byte vectors) */
     else if ((g_nEnabledFeatures & XSIMD_FEATURE_SSE2) && nPatternSize >= 4) {
@@ -869,6 +1262,197 @@ xsimd_int64 xsimd_find_ansi(const void* pBuffer, xsimd_int64 nBufferSize,
         if ((j - start) >= nMinLength) {
             return nOffset + start;
         }
+    }
+    
+    return -1;
+}
+
+xsimd_int64 xsimd_find_notnull(const void* pBuffer, xsimd_int64 nBufferSize, 
+                               xsimd_int64 nMinLength, xsimd_int64 nOffset)
+{
+    const unsigned char* pData = (const unsigned char*)pBuffer;
+    xsimd_int64 j = 0;
+    xsimd_int64 runStart = -1;  // Track start of current non-null run
+    
+    /* Fast path for very short minimum lengths (1-3 bytes) */
+    /* SIMD overhead outweighs benefits for tiny searches */
+    if (nMinLength <= 3) {
+        /* Skip leading nulls */
+        while (j < nBufferSize && pData[j] == 0) j++;
+        if (j >= nBufferSize) return -1;
+        
+        /* For length 1, we're done - found first non-null */
+        if (nMinLength == 1) return nOffset + j;
+        
+        /* For length 2-3, verify consecutive non-null bytes */
+        runStart = j;
+        j++;
+        
+        while (j < nBufferSize) {
+            if (pData[j] == 0) {
+                xsimd_int64 runLen = j - runStart;
+                if (runLen >= nMinLength) return nOffset + runStart;
+                
+                /* Skip past null byte(s) and find next non-null */
+                j++;
+                while (j < nBufferSize && pData[j] == 0) j++;
+                if (j >= nBufferSize) return -1;
+                runStart = j;
+            }
+            j++;
+        }
+        
+        /* Check final run */
+        xsimd_int64 runLen = j - runStart;
+        if (runLen >= nMinLength) return nOffset + runStart;
+        return -1;
+    }
+    
+#ifdef XSIMD_X86
+    /* AVX2: Process 32 bytes at a time */
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nBufferSize >= 32) {
+        const __m256i vZero = _mm256_setzero_si256();
+        
+        /* First, skip any leading nulls */
+        while (j < nBufferSize && pData[j] == 0) j++;
+        if (j >= nBufferSize) return -1;
+        runStart = j;
+        
+        /* Process 32 bytes per iteration */
+        while (j + 32 <= nBufferSize) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + j));
+            __m256i vCmpZero = _mm256_cmpeq_epi8(vData, vZero);
+            xsimd_int32 nMask = _mm256_movemask_epi8(vCmpZero);
+            
+            if (nMask != 0) {
+                /* Found a null byte in this chunk */
+#ifdef _MSC_VER
+                unsigned long nBitPos;
+                _BitScanForward(&nBitPos, (unsigned long)nMask);
+                xsimd_int64 nullPos = j + nBitPos;
+#else
+                xsimd_int64 nullPos = j + __builtin_ctz((unsigned int)nMask);
+#endif
+                /* Check if current run is long enough */
+                xsimd_int64 runLen = nullPos - runStart;
+                if (runLen >= nMinLength) {
+                    return nOffset + runStart;
+                }
+                
+                /* Skip past null byte(s) and find start of next run */
+                j = nullPos + 1;
+                while (j < nBufferSize && pData[j] == 0) j++;
+                if (j >= nBufferSize) return -1;
+                runStart = j;
+            } else {
+                /* No nulls in this 32-byte chunk */
+                j += 32;
+            }
+        }
+    }
+    /* AVX: Process 32 bytes at a time */
+    else if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX) && nBufferSize >= 32) {
+        const __m256i vZero = _mm256_setzero_si256();
+        
+        /* Skip leading nulls */
+        while (j < nBufferSize && pData[j] == 0) j++;
+        if (j >= nBufferSize) return -1;
+        runStart = j;
+        
+        while (j + 32 <= nBufferSize) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + j));
+            __m256i vCmpZero = _mm256_cmpeq_epi8(vData, vZero);
+            xsimd_int32 nMask = _mm256_movemask_epi8(vCmpZero);
+            
+            if (nMask != 0) {
+#ifdef _MSC_VER
+                unsigned long nBitPos;
+                _BitScanForward(&nBitPos, (unsigned long)nMask);
+                xsimd_int64 nullPos = j + nBitPos;
+#else
+                xsimd_int64 nullPos = j + __builtin_ctz((unsigned int)nMask);
+#endif
+                xsimd_int64 runLen = nullPos - runStart;
+                if (runLen >= nMinLength) {
+                    return nOffset + runStart;
+                }
+                
+                j = nullPos + 1;
+                while (j < nBufferSize && pData[j] == 0) j++;
+                if (j >= nBufferSize) return -1;
+                runStart = j;
+            } else {
+                j += 32;
+            }
+        }
+    }
+    /* SSE2: Process 16 bytes at a time */
+    else if ((g_nEnabledFeatures & XSIMD_FEATURE_SSE2) && nBufferSize >= 16) {
+        const __m128i vZero = _mm_setzero_si128();
+        
+        /* Skip leading nulls */
+        while (j < nBufferSize && pData[j] == 0) j++;
+        if (j >= nBufferSize) return -1;
+        runStart = j;
+        
+        while (j + 16 <= nBufferSize) {
+            __m128i vData = _mm_loadu_si128((const __m128i*)(pData + j));
+            __m128i vCmpZero = _mm_cmpeq_epi8(vData, vZero);
+            xsimd_int32 nMask = _mm_movemask_epi8(vCmpZero);
+            
+            if (nMask != 0) {
+#ifdef _MSC_VER
+                unsigned long nBitPos;
+                _BitScanForward(&nBitPos, (unsigned long)nMask);
+                xsimd_int64 nullPos = j + nBitPos;
+#else
+                xsimd_int64 nullPos = j + __builtin_ctz((unsigned int)nMask);
+#endif
+                xsimd_int64 runLen = nullPos - runStart;
+                if (runLen >= nMinLength) {
+                    return nOffset + runStart;
+                }
+                
+                j = nullPos + 1;
+                while (j < nBufferSize && pData[j] == 0) j++;
+                if (j >= nBufferSize) return -1;
+                runStart = j;
+            } else {
+                j += 16;
+            }
+        }
+    }
+#endif
+    
+    /* Fallback: Process remaining bytes scalar */
+    if (runStart == -1) {
+        /* Haven't started processing yet, skip leading nulls */
+        while (j < nBufferSize && pData[j] == 0) j++;
+        if (j >= nBufferSize) return -1;
+        runStart = j;
+    }
+    
+    /* Check remaining bytes */
+    while (j < nBufferSize) {
+        if (pData[j] == 0) {
+            xsimd_int64 runLen = j - runStart;
+            if (runLen >= nMinLength) {
+                return nOffset + runStart;
+            }
+            /* Skip past null byte(s) */
+            j++;
+            while (j < nBufferSize && pData[j] == 0) j++;
+            if (j >= nBufferSize) return -1;
+            runStart = j;
+        } else {
+            j++;
+        }
+    }
+    
+    /* Check final run */
+    xsimd_int64 runLen = j - runStart;
+    if (runLen >= nMinLength) {
+        return nOffset + runStart;
     }
     
     return -1;
