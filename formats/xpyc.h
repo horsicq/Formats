@@ -27,6 +27,16 @@ class XPYC : public XBinary {
     Q_OBJECT
 
 public:
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_HEADER,
+        STRUCTID_FLAGS,
+        STRUCTID_HASH,
+        STRUCTID_TIMESTAMP,
+        STRUCTID_SOURCESIZE,
+        STRUCTID_CODEOBJECT
+    };
+
     struct INFO {
         quint16 nMagicValue;
         quint16 nMagicMarker;
@@ -39,22 +49,25 @@ public:
     };
 
     explicit XPYC(QIODevice *pDevice = nullptr);
-    ~XPYC();
+    virtual ~XPYC();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice);
 
-    virtual QString getArch();
-    virtual MODE getMode();
-    virtual ENDIAN getEndian();
-    virtual FT getFileType();
-    virtual QString getVersion();
-    virtual QString getFileFormatExt();
-    virtual QString getFileFormatExtsString();
-    virtual QString getMIMEString();
+    virtual QString getArch() override;
+    virtual MODE getMode() override;
+    virtual ENDIAN getEndian() override;
+    virtual FT getFileType() override;
+    virtual QString getVersion() override;
+    virtual QString getFileFormatExt() override;
+    virtual QString getFileFormatExtsString() override;
+    virtual QString getMIMEString() override;
+    virtual QString structIDToString(quint32 nID) override;
 
     INFO getInternalInfo(PDSTRUCT *pPdStruct = nullptr);
-    _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
+    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct = nullptr) override;
 
 private:
     static QString _magicToVersion(quint16 nMagicValue);
