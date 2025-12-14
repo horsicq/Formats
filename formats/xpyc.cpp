@@ -265,7 +265,7 @@ XBinary::_MEMORY_MAP XPYC::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     return result;
 }
 
-XBinary::QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
+QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(nLimit)
 
@@ -339,7 +339,7 @@ XBinary::QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLi
     return listResult;
 }
 
-XBinary::QList<XBinary::DATA_HEADER> XPYC::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+QList<XBinary::DATA_HEADER> XPYC::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 {
     QList<DATA_HEADER> listResult;
 
@@ -365,8 +365,8 @@ XBinary::QList<XBinary::DATA_HEADER> XPYC::getDataHeaders(const DATA_HEADERS_OPT
                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPYC::structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = 4;
 
-                dataHeader.listRecords.append(getDataRecord(nStartOffset + 0, 2, "Magic Value", VT_UINT16, DRF_HEX, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(nStartOffset + 2, 2, "Magic Marker", VT_UINT16, DRF_HEX, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(nStartOffset + 0, 2, "Magic Value", VT_UINT16, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+                dataHeader.listRecords.append(getDataRecord(nStartOffset + 2, 2, "Magic Marker", VT_UINT16, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 
                 listResult.append(dataHeader);
 
@@ -390,7 +390,7 @@ XBinary::QList<XBinary::DATA_HEADER> XPYC::getDataHeaders(const DATA_HEADERS_OPT
                 if (bNewLayout) {
                     DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, "Flags");
                     dataHeader.nSize = 4;
-                    dataHeader.listRecords.append(getDataRecord(nStartOffset, 4, "Flags", VT_UINT32, DRF_HEX, dataHeadersOptions.pMemoryMap->endian));
+                    dataHeader.listRecords.append(getDataRecord(nStartOffset, 4, "Flags", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                     listResult.append(dataHeader);
 
                     if (info.bHashBased && !info.baHash.isEmpty()) {
