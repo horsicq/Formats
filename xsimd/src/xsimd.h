@@ -93,6 +93,42 @@ void xsimd_enable_all_features(void);
 void xsimd_disable_all_features(void);
 
 /**
+ * Check if SSE2 is enabled
+ * @return 1 if SSE2 is enabled, 0 otherwise
+ */
+int isSSE2Enabled(void);
+
+/**
+ * Check if AVX is enabled
+ * @return 1 if AVX is enabled, 0 otherwise
+ */
+int isAVXEnabled(void);
+
+/**
+ * Check if AVX2 is enabled
+ * @return 1 if AVX2 is enabled, 0 otherwise
+ */
+int isAVX2Enabled(void);
+
+/**
+ * Set SSE2 feature state
+ * @param bState 1 to enable, 0 to disable
+ */
+void setSSE2(int bState);
+
+/**
+ * Set AVX feature state
+ * @param bState 1 to enable, 0 to disable
+ */
+void setAVX(int bState);
+
+/**
+ * Set AVX2 feature state
+ * @param bState 1 to enable, 0 to disable
+ */
+void setAVX2(int bState);
+
+/**
  * Find first occurrence of a single byte in buffer (optimized with SIMD)
  * @param pBuffer Buffer to search in
  * @param nSize Size of buffer

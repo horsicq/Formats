@@ -137,6 +137,48 @@ void xsimd_disable_all_features(void)
     g_nEnabledFeatures = XSIMD_FEATURE_NONE;
 }
 
+int isSSE2Enabled(void)
+{
+    return (g_nEnabledFeatures & XSIMD_FEATURE_SSE2) != 0;
+}
+
+int isAVXEnabled(void)
+{
+    return (g_nEnabledFeatures & XSIMD_FEATURE_AVX) != 0;
+}
+
+int isAVX2Enabled(void)
+{
+    return (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) != 0;
+}
+
+void setSSE2(int bState)
+{
+    if (bState) {
+        xsimd_enable_features(XSIMD_FEATURE_SSE2);
+    } else {
+        xsimd_disable_features(XSIMD_FEATURE_SSE2);
+    }
+}
+
+void setAVX(int bState)
+{
+    if (bState) {
+        xsimd_enable_features(XSIMD_FEATURE_AVX);
+    } else {
+        xsimd_disable_features(XSIMD_FEATURE_AVX);
+    }
+}
+
+void setAVX2(int bState)
+{
+    if (bState) {
+        xsimd_enable_features(XSIMD_FEATURE_AVX2);
+    } else {
+        xsimd_disable_features(XSIMD_FEATURE_AVX2);
+    }
+}
+
 xsimd_int64 xsimd_find_byte(const void* pBuffer, xsimd_int64 nSize, xsimd_uint8 nByte, xsimd_int64 nOffset)
 {
     const unsigned char* pData = (const unsigned char*)pBuffer;
