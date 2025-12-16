@@ -12571,7 +12571,8 @@ quint16 XPE::_checkSum(qint64 nStartValue, qint64 nDataSize, PDSTRUCT *pPdStruct
     const qint32 BUFFER_SIZE = 0x1000;
     qint32 nSum = (qint32)nStartValue;
     quint32 nTemp = 0;
-    char *pBuffer = new char[BUFFER_SIZE];
+    qint32 nBufferSize = getBufferSize(pPdStruct);
+    char *pBuffer = new char[nBufferSize];
     char *pOffset;
 
     while ((nDataSize > 0) && (!(pPdStruct->bIsStop))) {

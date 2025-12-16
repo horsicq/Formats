@@ -1270,10 +1270,12 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
+    qint64 nBufferSize = getBufferSize(pPdStruct);
+
     if ((pDevice->size() > nPos) && (nPos >= 0)) {
         if (pDevice->seek(nPos)) {
             while ((nMaxLen > 0) && isPdStructNotCanceled(pPdStruct)) {
-                qint64 nCurrentSize = qMin(nMaxLen, (qint64)READWRITE_BUFFER_SIZE);
+                qint64 nCurrentSize = qMin(nMaxLen, nBufferSize);
 
                 nCurrentSize = pDevice->read(pData, nCurrentSize);
 
@@ -1310,8 +1312,10 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
 
     if (pDevice->size() > nPos) {
         if (pDevice->seek(nPos)) {
+            qint64 nBufferSize = getBufferSize(pPdStruct);
+
             while ((nLen > 0) && isPdStructNotCanceled(pPdStruct)) {
-                qint64 nCurrentSize = qMin(nLen, (qint64)READWRITE_BUFFER_SIZE);
+                qint64 nCurrentSize = qMin(nLen, nBufferSize);
 
                 nCurrentSize = pDevice->write(pData, nCurrentSize);
 
@@ -3214,8 +3218,10 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
 
     char *pBuffer = nullptr;
 
+    qint32 nBufferSize = getBufferSize(pPdStruct);
+
     if (!m_pConstMemory) {
-        pBuffer = new char[READWRITE_BUFFER_SIZE + (nArraySize - 1)];
+        pBuffer = new char[nBufferSize];
     }
 
     // Precompute BMH shift table for byte-compare mode
@@ -3240,7 +3246,6 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         }
     }
 
-    const qint64 nBufferSize = READWRITE_BUFFER_SIZE + (nArraySize - 1);
     const char nLastSearchChar = (st == ST_COMPAREBYTES) ? pArray[nArraySize - 1] : 0;
 
     while ((nSize > nArraySize - 1) && (!(pPdStruct->bIsStop))) {
@@ -3913,7 +3918,8 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
 
         qint64 nTemp = 0;
 
-        char *pBuffer = new char[READWRITE_BUFFER_SIZE + (nStringSize - 1)];
+        qint32 nBufferSize = getBufferSize(pPdStruct);
+        char *pBuffer = new char[nBufferSize];
 
         QByteArray baUpper = sString.toUpper().toLatin1();
         QByteArray baLower = sString.toLower().toLatin1();
@@ -3924,7 +3930,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
         qint64 nStartOffset = nOffset;
 
         while ((nSize > nStringSize - 1) && isPdStructNotCanceled(pPdStruct)) {
-            nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + (nStringSize - 1)), nSize);
+            nTemp = qMin((qint64)nBufferSize, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
                 pPdStruct->sInfoString = tr("Read error");
@@ -4020,7 +4026,8 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, const QString 
 
     qint64 nTemp = 0;
 
-    char *pBuffer = new char[READWRITE_BUFFER_SIZE + 2 * (nStringSize - 1)];
+    qint32 nBufferSize = getBufferSize(pPdStruct);
+    char *pBuffer = new char[nBufferSize];
 
     QByteArray baUpper = getUnicodeString(sString.toUpper(), bIsBigEndian);
     QByteArray baLower = getUnicodeString(sString.toLower(), bIsBigEndian);
@@ -4032,7 +4039,7 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, const QString 
     qint64 nByteStringSize = 2 * nStringSize;
 
     while ((nSize > 2 * (nStringSize - 1)) && (!(pPdStruct->bIsStop))) {
-        nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + 2 * (nStringSize - 1)), nSize);
+        nTemp = qMin((qint64)nBufferSize, nSize);
 
         if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
             pPdStruct->sInfoString = tr("Read error");
@@ -4231,7 +4238,8 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
     bool bReadError = false;
 
-    char *pBuffer = new char[READWRITE_BUFFER_SIZE];
+    qint32 nBufferSize = getBufferSize(pPdStruct);
+    char *pBuffer = new char[nBufferSize];
 
     char *pAnsiBuffer = new char[ssOptions.nMaxLenght + 1];
 
@@ -4254,7 +4262,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
     while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
         qint64 nCurrentSize = _nSize;
 
-        nCurrentSize = qMin((qint64)READWRITE_BUFFER_SIZE, nCurrentSize);
+        nCurrentSize = qMin((qint64)nBufferSize, nCurrentSize);
 
         if (read_array(_nOffset, pBuffer, nCurrentSize, pPdStruct) != nCurrentSize) {
             bReadError = true;
@@ -5269,9 +5277,10 @@ bool XBinary::readFile(const QString &sFileName, char *pBuffer, qint64 nSize, PD
         qint64 nOffset = 0;
 
         bResult = true;
+        qint32 nBufferSize = getBufferSize(pPdStruct);
 
         while ((nSize > 0) && !(pPdStruct->bIsStop)) {
-            qint64 nCurrentSize = qMin(nSize, (qint64)READWRITE_BUFFER_SIZE);
+            qint64 nCurrentSize = qMin(nSize, (qint64)nBufferSize);
 
             if (nCurrentSize != file.read(pBuffer, nCurrentSize)) {
                 bResult = false;
@@ -6821,7 +6830,8 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
     if (file.open(QIODevice::ReadWrite)) {
         file.resize(0);
 
-        char *pBuffer = new char[0x1000];  // TODO const
+        qint32 nBufferSize = getBufferSize(pPdStruct);
+        char *pBuffer = new char[nBufferSize];  // TODO const
 
         qint64 nSourceOffset = nDataOffset;
         qint64 nDestOffset = 0;
@@ -6886,7 +6896,8 @@ bool XBinary::patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        char *pBuffer = new char[0x1000];  // TODO const
+        qint32 nBufferSize = getBufferSize(pPdStruct);
+        char *pBuffer = new char[nBufferSize];  // TODO const
 
         qint64 nSourceOffset = 0;
         qint64 nDestOffset = nDataOffset;
@@ -8409,7 +8420,7 @@ QString XBinary::getCurrentBackupDate()
     return sResult;
 }
 
-QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta)
+QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta, PDSTRUCT *pPdStruct)
 {
     QList<qint64> listResult;
 
@@ -8420,12 +8431,14 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
         qint64 nSize = nSize1;
         qint64 nTemp = 0;
 
-        char *pBuffer1 = new char[READWRITE_BUFFER_SIZE + 3];
-        char *pBuffer2 = new char[READWRITE_BUFFER_SIZE + 3];
+        qint32 nBufferSize = getBufferSize(pPdStruct);
+
+        char *pBuffer1 = new char[nBufferSize];
+        char *pBuffer2 = new char[nBufferSize];
         qint64 nOffset = 0;
 
         while (nSize > 3) {
-            nTemp = qMin((qint64)(READWRITE_BUFFER_SIZE + 3), nSize);
+            nTemp = qMin((qint64)nBufferSize, nSize);
 
             pDevice1->seek(nOffset);
 
@@ -8515,7 +8528,8 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pPdStr
     }
 
     qint64 nTemp = 0;
-    char *pBuffer = new char[READWRITE_BUFFER_SIZE];
+    qint32 nBufferSize = getBufferSize(pPdStruct);
+    char *pBuffer = new char[nBufferSize];
 
     QCryptographicHash::Algorithm algorithm = QCryptographicHash::Md4;
 
@@ -8551,7 +8565,7 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pPdStr
         XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
         while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
-            nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
+            nTemp = qMin((qint64)nBufferSize, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
                 pPdStruct->sInfoString = tr("Read error");
@@ -8703,7 +8717,8 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 
     if (nOffset != -1) {
         qint64 nTemp = 0;
-        char *pBuffer = new char[READWRITE_BUFFER_SIZE];
+        qint32 nBufferSize = getBufferSize(pPdStruct);
+        char *pBuffer = new char[nBufferSize];
 
         quint32 a = 1;
         quint32 b = 0;
@@ -8713,7 +8728,7 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
         XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
         while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
-            nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
+            nTemp = qMin((qint64)nBufferSize, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
                 pPdStruct->sInfoString = tr("Read error");
@@ -8852,10 +8867,11 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, quint32 
         XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
         qint64 nTemp = 0;
-        char *pBuffer = new char[READWRITE_BUFFER_SIZE];
+        qint32 nBufferSize = getBufferSize(pPdStruct);
+        char *pBuffer = new char[nBufferSize];
 
         while (nSize > 0) {
-            nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
+            nTemp = qMin((qint64)nBufferSize, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
                 setPdStructInfoString(pPdStruct, tr("Read error"));
@@ -8908,10 +8924,11 @@ quint16 XBinary::_getCRC16(qint64 nOffset, qint64 nSize, quint16 nInit, PDSTRUCT
         XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
         qint64 nTemp = 0;
-        char *pBuffer = new char[READWRITE_BUFFER_SIZE];
+        qint32 nBufferSize = getBufferSize(pPdStruct);
+        char *pBuffer = new char[nBufferSize];
 
         while (nSize > 0) {
-            nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
+            nTemp = qMin((qint64)nBufferSize, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
                 pPdStruct->sInfoString = tr("Read error");
@@ -9037,10 +9054,11 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
         quint64 nSum = 0;         // for GRADIENT
 
         qint64 nTemp = 0;
-        char *pBuffer = new char[READWRITE_BUFFER_SIZE];
+        qint32 nBufferSize = getBufferSize(pPdStruct);
+        char *pBuffer = new char[nBufferSize];
 
         while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
-            nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
+            nTemp = qMin((qint64)nBufferSize, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
                 pPdStruct->sInfoString = tr("Read error");
@@ -9143,10 +9161,11 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRU
         XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
         qint64 nTemp = 0;
-        char *pBuffer = new char[READWRITE_BUFFER_SIZE];
+        qint32 nBufferSize = getBufferSize(pPdStruct);
+        char *pBuffer = new char[nBufferSize];
 
         while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
-            nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
+            nTemp = qMin((qint64)nBufferSize, nSize);
 
             if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
                 _errorMessage(tr("Read error"));
@@ -9195,10 +9214,11 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPd
     if (nOffset != -1) {
         if (nOffset != -1) {
             qint64 nTemp = 0;
-            char *pBuffer = new char[READWRITE_BUFFER_SIZE];
+            qint32 nBufferSize = getBufferSize(pPdStruct);
+            char *pBuffer = new char[nBufferSize];
 
             while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
-                nTemp = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
+                nTemp = qMin((qint64)nBufferSize, nSize);
 
                 if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
                     _errorMessage(tr("Read error"));
@@ -10979,7 +10999,7 @@ bool XBinary::writeToFile(const QString &sFileName, const QByteArray &baData)
     return bResult;
 }
 
-bool XBinary::writeToFile(const QString &sFileName, QIODevice *pDevice)
+bool XBinary::writeToFile(const QString &sFileName, QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
@@ -10988,7 +11008,8 @@ bool XBinary::writeToFile(const QString &sFileName, QIODevice *pDevice)
         file.setFileName(sFileName);
 
         if (file.open(QIODevice::ReadWrite)) {
-            bResult = copyDeviceMemory(pDevice, 0, &file, 0, pDevice->size(), READWRITE_BUFFER_SIZE);
+            qint32 nBufferSize = getBufferSize(pPdStruct);
+            bResult = copyDeviceMemory(pDevice, 0, &file, 0, pDevice->size(), nBufferSize);
             file.close();
         }
     }
@@ -12077,10 +12098,11 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, XADDR nStartAddress, 
     nSize = osRegion.nSize;
 
     if (nOffset != -1) {
-        char *pBuffer = new char[READWRITE_BUFFER_SIZE];
+        qint32 nBufferSize = getBufferSize(pPdStruct);
+        char *pBuffer = new char[nBufferSize];
 
         while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
-            qint64 nTempSize = qMin((qint64)READWRITE_BUFFER_SIZE, nSize);
+            qint64 nTempSize = qMin((qint64)nBufferSize, nSize);
 
             if (read_array(nOffset, pBuffer, nTempSize) != nTempSize) {
                 pPdStruct->sInfoString = tr("Read error");
@@ -13955,13 +13977,13 @@ qint64 XBinary::getPhysSize(char *pBuffer, qint64 nSize)
         return 0;
     }
 
-    const qint64 wordSize = (qint64)sizeof(uint64_t);
+    const qint64 wordSize = (qint64)sizeof(quint64);
 
     // Scan in word-sized chunks from the end for speed. Use memcpy to avoid
     // alignment UB on platforms that care.
     while (nSize >= wordSize) {
         const char *pWord = pBuffer + nSize - wordSize;
-        uint64_t val = 0;
+        quint64 val = 0;
         memcpy(&val, pWord, sizeof(val));
 
         if (val != 0) {
@@ -14337,6 +14359,25 @@ bool XBinary::finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
     }
 
     return true;
+}
+
+qint32 XBinary::getBufferSize(PDSTRUCT *pPdStruct)
+{
+    qint32 nResult = 0x4000;
+
+    if (pPdStruct) {
+        if (pPdStruct->nBufferSize) {
+            nResult = pPdStruct->nBufferSize;
+        }
+    }
+
+// #ifdef QT_DEBUG
+//     if (!pPdStruct) {
+//         qDebug("Empty PDSTRUCT!!!");
+//     }
+// #endif
+
+    return nResult;
 }
 
 QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)

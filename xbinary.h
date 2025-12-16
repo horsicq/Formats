@@ -917,6 +917,7 @@ public:
         //        bool bSuccess; // TODO important
         QString sInfoString;
         bool bCriticalError;     // TODO !!!
+        qint32 nBufferSize; // 0 =
         qint32 nFileBufferSize;  // 0 => 0x10000
     };
 
@@ -1660,7 +1661,7 @@ public:
 
     static QString getCurrentBackupDate();
 
-    static QList<qint64> getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta);
+    static QList<qint64> getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta, PDSTRUCT *pPdStruct = nullptr);
 
     static QString getHash(HASH hash, const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     static QString getHash(HASH hash, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
@@ -1842,7 +1843,7 @@ public:
     static QString getStringCollision(QList<QString> *pListStrings, const QString &sString1, const QString &sString2);
 
     static bool writeToFile(const QString &sFileName, const QByteArray &baData);
-    static bool writeToFile(const QString &sFileName, QIODevice *pDevice);
+    static bool writeToFile(const QString &sFileName, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     static bool appendToFile(const QString &sFileName, const QString &sString);  // TODO rename
     static bool clearFile(const QString &sFileName);
     static qint32 getStringNumberFromList(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
@@ -2172,12 +2173,11 @@ public:
     virtual FFSEARCH_INFO searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
     virtual bool finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
 
+    static qint32 getBufferSize(PDSTRUCT *pPdStruct);
     static QIODevice *createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct);
     static void freeFileBuffer(QIODevice **ppBuffer);
 
 private:
-    static const qint32 READWRITE_BUFFER_SIZE = 0x8000;
-
     static QString qcharToHex(QChar cSymbol);
 
     static QList<SIGNATURE_RECORD> getSignatureRecords(const QString &sSignature, bool *pbValid, PDSTRUCT *pPdStruct);

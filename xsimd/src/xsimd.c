@@ -1008,8 +1008,6 @@ xsimd_int64 xsimd_find_ansi(const void* pBuffer, xsimd_int64 nBufferSize,
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nBufferSize >= 32) {
-        const __m256i vLower = _mm256_set1_epi8(0x20);
-        const __m256i vUpper = _mm256_set1_epi8(0x7E);
         const __m256i vLowerMinus1 = _mm256_set1_epi8(0x1F);
         const __m256i vUpperPlus1 = _mm256_set1_epi8(0x7F);
         
@@ -2116,9 +2114,6 @@ int xsimd_is_not_ansi(const void* pBuffer, xsimd_int64 nSize)
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nSize >= 32) {
-        const __m256i low_bound = _mm256_set1_epi8(0x20);
-        const __m256i high_bound = _mm256_set1_epi8(0x7F);
-        
         /* Process 128 bytes per iteration for better throughput */
         while (nSize >= 128) {
             __m256i chunk0 = _mm256_loadu_si256((const __m256i*)ptr);
@@ -2168,9 +2163,6 @@ int xsimd_is_not_ansi(const void* pBuffer, xsimd_int64 nSize)
     }
     /* AVX: Process 32 bytes at a time */
     else if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX) && nSize >= 32) {
-        const __m256i low_bound = _mm256_set1_epi8(0x20);
-        const __m256i high_bound = _mm256_set1_epi8(0x7F);
-        
         while (nSize >= 32) {
             __m256i chunk = _mm256_loadu_si256((const __m256i*)ptr);
             __m256i ge_low = _mm256_cmpgt_epi8(chunk, _mm256_set1_epi8(0x1F));
@@ -2187,9 +2179,6 @@ int xsimd_is_not_ansi(const void* pBuffer, xsimd_int64 nSize)
     }
     /* SSE2: Process 16 bytes at a time */
     else if ((g_nEnabledFeatures & XSIMD_FEATURE_SSE2) && nSize >= 16) {
-        const __m128i low_bound = _mm_set1_epi8(0x20);
-        const __m128i high_bound = _mm_set1_epi8(0x7F);
-        
         /* Process 128 bytes per iteration for better throughput */
         while (nSize >= 128) {
             __m128i chunk0 = _mm_loadu_si128((const __m128i*)ptr);
@@ -2608,8 +2597,6 @@ int xsimd_is_not_ansi_and_null(const void* pBuffer, xsimd_int64 nSize)
     /* AVX2 optimization: process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nSize >= 32) {
         const __m256i zero = _mm256_setzero_si256();
-        const __m256i low_bound = _mm256_set1_epi8(0x20);
-        const __m256i high_bound = _mm256_set1_epi8(0x7F);
         
         while (nSize >= 32) {
             __m256i chunk = _mm256_loadu_si256((const __m256i*)ptr);
@@ -2637,8 +2624,6 @@ int xsimd_is_not_ansi_and_null(const void* pBuffer, xsimd_int64 nSize)
     /* AVX optimization: process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX) && nSize >= 32) {
         const __m256i zero = _mm256_setzero_si256();
-        const __m256i low_bound = _mm256_set1_epi8(0x20);
-        const __m256i high_bound = _mm256_set1_epi8(0x7F);
         
         while (nSize >= 32) {
             __m256i chunk = _mm256_loadu_si256((const __m256i*)ptr);
@@ -2666,8 +2651,6 @@ int xsimd_is_not_ansi_and_null(const void* pBuffer, xsimd_int64 nSize)
     /* SSE2 optimization: process 16 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_SSE2) && nSize >= 16) {
         const __m128i zero = _mm_setzero_si128();
-        const __m128i low_bound = _mm_set1_epi8(0x20);
-        const __m128i high_bound = _mm_set1_epi8(0x7F);
         
         while (nSize >= 16) {
             __m128i chunk = _mm_loadu_si128((const __m128i*)ptr);

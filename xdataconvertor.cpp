@@ -56,7 +56,7 @@ void XDataConvertor::process()
 
         if (m_pData->pTmpFile->open()) {
             qint64 nOutSize = 0;
-            qint64 nBufferSize = 0x1000;
+            qint32 nBufferSize = XBinary::getBufferSize(pPdStruct);
             qint64 nInSize = m_pDeviceIn->size();
             quint64 nKey = 0;
 
@@ -86,7 +86,7 @@ void XDataConvertor::process()
 
             if (XBinary::resize(m_pData->pTmpFile, nOutSize)) {
                 for (qint32 i = 0; i < nInSize;) {
-                    qint64 _nBufferSize = qMin(nBufferSize, nInSize - i);
+                    qint64 _nBufferSize = qMin((qint64)nBufferSize, nInSize - i);
                     qint64 nProcessedSize = 0;
                     QByteArray baOut;
 
