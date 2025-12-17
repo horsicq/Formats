@@ -1,13 +1,13 @@
 QT -= core gui
 
-CONFIG += c++11 console
-CONFIG -= app_bundle
-
 TARGET = xsimd
 TEMPLATE = lib
 CONFIG += staticlib
 
-DEFINES += QT_DEPRECATED_WARNINGS
+INCLUDEPATH += $$PWD/xsimd
+DEPENDPATH += $$PWD/xsimd
+
+include(../../build.pri)
 
 # Enable SIMD instructions (SSE, AVX, AVX2)
 win32-msvc* {
@@ -19,8 +19,19 @@ else:gcc|clang {
     QMAKE_CXXFLAGS += -msse -msse2 -mavx -mavx2
 }
 
-SOURCES += \
-    src/xsimd.c
+win32{
+    TARGET = xsimd-win-$${QT_ARCH}
+}
+unix:!macx {
+    TARGET = xsimd-unix-$${QT_ARCH}
+}
+unix:macx {
+    TARGET = xsimd-macos-$${QT_ARCH}
+}
 
-HEADERS += \
-    src/xsimd.h
+SOURCES += \
+    $$PWD/src/xsimd.c
+	
+TARGETLIB_PATH = $$PWD
+
+DESTDIR=$${TARGETLIB_PATH}/libs

@@ -137,22 +137,37 @@ void xsimd_disable_all_features(void)
     g_nEnabledFeatures = XSIMD_FEATURE_NONE;
 }
 
-int isSSE2Enabled(void)
+int xsimd_is_sse2_enabled(void)
 {
     return (g_nEnabledFeatures & XSIMD_FEATURE_SSE2) != 0;
 }
 
-int isAVXEnabled(void)
+int xsimd_is_avx_enabled(void)
 {
     return (g_nEnabledFeatures & XSIMD_FEATURE_AVX) != 0;
 }
 
-int isAVX2Enabled(void)
+int xsimd_is_avx2_enabled(void)
 {
     return (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) != 0;
 }
 
-void setSSE2(int bState)
+int xsimd_is_sse2_present(void)
+{
+    return (g_nFeatures & XSIMD_FEATURE_SSE2) != 0;
+}
+
+int xsimd_is_avx_present(void)
+{
+    return (g_nFeatures & XSIMD_FEATURE_AVX) != 0;
+}
+
+int xsimd_is_avx2_present(void)
+{
+    return (g_nFeatures & XSIMD_FEATURE_AVX2) != 0;
+}
+
+void xsimd_set_sse2(int bState)
 {
     if (bState) {
         xsimd_enable_features(XSIMD_FEATURE_SSE2);
@@ -161,7 +176,7 @@ void setSSE2(int bState)
     }
 }
 
-void setAVX(int bState)
+void xsimd_set_avx(int bState)
 {
     if (bState) {
         xsimd_enable_features(XSIMD_FEATURE_AVX);
@@ -170,7 +185,7 @@ void setAVX(int bState)
     }
 }
 
-void setAVX2(int bState)
+void xsimd_set_avx2(int bState)
 {
     if (bState) {
         xsimd_enable_features(XSIMD_FEATURE_AVX2);

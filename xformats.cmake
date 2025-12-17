@@ -16,6 +16,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/audio)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/exec)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/texts)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/formats)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/xsimd/src)
 
 if (NOT DEFINED XDEX_SOURCES)
     include(${CMAKE_CURRENT_LIST_DIR}/../XDEX/xdex.cmake)

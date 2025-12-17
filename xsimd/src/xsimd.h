@@ -96,37 +96,55 @@ void xsimd_disable_all_features(void);
  * Check if SSE2 is enabled
  * @return 1 if SSE2 is enabled, 0 otherwise
  */
-int isSSE2Enabled(void);
+int xsimd_is_sse2_enabled(void);
 
 /**
  * Check if AVX is enabled
  * @return 1 if AVX is enabled, 0 otherwise
  */
-int isAVXEnabled(void);
+int xsimd_is_avx_enabled(void);
 
 /**
  * Check if AVX2 is enabled
  * @return 1 if AVX2 is enabled, 0 otherwise
  */
-int isAVX2Enabled(void);
+int xsimd_is_avx2_enabled(void);
+
+/**
+ * Check if SSE2 is present (detected on CPU)
+ * @return 1 if SSE2 is available, 0 otherwise
+ */
+int xsimd_is_sse2_present(void);
+
+/**
+ * Check if AVX is present (detected on CPU)
+ * @return 1 if AVX is available, 0 otherwise
+ */
+int xsimd_is_avx_present(void);
+
+/**
+ * Check if AVX2 is present (detected on CPU)
+ * @return 1 if AVX2 is available, 0 otherwise
+ */
+int xsimd_is_avx2_present(void);
 
 /**
  * Set SSE2 feature state
  * @param bState 1 to enable, 0 to disable
  */
-void setSSE2(int bState);
+void xsimd_set_sse2(int bState);
 
 /**
  * Set AVX feature state
  * @param bState 1 to enable, 0 to disable
  */
-void setAVX(int bState);
+void xsimd_set_avx(int bState);
 
 /**
  * Set AVX2 feature state
  * @param bState 1 to enable, 0 to disable
  */
-void setAVX2(int bState);
+void xsimd_set_avx2(int bState);
 
 /**
  * Find first occurrence of a single byte in buffer (optimized with SIMD)

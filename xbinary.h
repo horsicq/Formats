@@ -1089,6 +1089,11 @@ public:
 
     qint64 safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen, PDSTRUCT *pPdStruct);
     qint64 safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen, PDSTRUCT *pPdStruct);
+
+    qint64 _readDataSimple(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen);
+    QByteArray _readDataSimple(QIODevice *pDevice, qint64 nPos, qint64 nSize);
+    qint64 _writeDataSimple(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen);
+
     qint64 getSize();
     static qint64 getSize(QIODevice *pDevice);
     static qint64 getSize(const QString &sFileName);
@@ -1184,6 +1189,8 @@ public:
     static QString getRegExpSection(const QString &sRegExp, const QString &sString, qint32 nStart, qint32 nEnd);
     static bool isRegExpValid(const QString &sRegExp);
     qint64 read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTRUCT *pPdStruct = nullptr);
+    qint64 read_array_simple(qint64 nOffset, char *pBuffer, qint64 nMaxSize);
+    QByteArray read_array_simple(qint64 nOffset, qint64 nSize);
     QByteArray read_array(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
     qint64 write_array(qint64 nOffset, const char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
     qint64 write_array(qint64 nOffset, const QByteArray &baData, PDSTRUCT *pPdStruct = nullptr);

@@ -16,3 +16,12 @@ SOURCES += \
 
 DISTFILES += \
     $$PWD/xbinary.cmake
+
+contains(XCONFIG, use_xsimd) {
+    DEFINES += USE_XSIMD
+    !contains(XCONFIG, xsimd) {
+        XCONFIG += xsimd
+        include($$PWD/xsimd/xsimd.pri)
+    }
+}
+

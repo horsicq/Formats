@@ -1270,10 +1270,10 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
-    qint64 nBufferSize = getBufferSize(pPdStruct);
-
     if ((pDevice->size() > nPos) && (nPos >= 0)) {
         if (pDevice->seek(nPos)) {
+            qint64 nBufferSize = getBufferSize(pPdStruct);
+
             while ((nMaxLen > 0) && isPdStructNotCanceled(pPdStruct)) {
                 qint64 nCurrentSize = qMin(nMaxLen, nBufferSize);
 
@@ -1328,6 +1328,77 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
                 nResult += nCurrentSize;
             }
         }
+    }
+
+    if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
+
+    return nResult;
+}
+
+qint64 XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen)
+{
+    // qDebug("%X %X pos: %X maxlen: %X", this, pDevice, nPos, nMaxLen);
+    qint64 nResult = 0;
+
+    if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
+
+    if ((pDevice->size() > nPos) && (nPos >= 0)) {
+        if (pDevice->seek(nPos)) {
+            nResult = pDevice->read(pData, nMaxLen);
+        } else {
+#ifdef QT_DEBUG
+            qDebug("Cannot seek");
+#endif
+        }
+
+    } else {
+#ifdef QT_DEBUG
+        qDebug("Invalid pos: %llX Size: %llX", nPos, getSize());
+#endif
+    }
+
+    if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
+
+    return nResult;
+}
+
+QByteArray XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, qint64 nSize)
+{
+    QByteArray baResult;
+
+    XBinary::OFFSETSIZE osRegion = convertOffsetAndSize(nPos, nSize);
+
+    if (osRegion.nOffset != -1) {
+        baResult.resize((qint32)osRegion.nSize);
+
+        qint64 nBytes = _readDataSimple(pDevice, osRegion.nOffset, baResult.data(), osRegion.nSize);
+
+        if (osRegion.nSize != nBytes) {
+            baResult.resize((qint32)nBytes);
+        }
+    }
+
+    return baResult;
+}
+
+qint64 XBinary::_writeDataSimple(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen)
+{
+    qint64 nResult = 0;
+
+    if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
+
+    if (pDevice->size() > nPos) {
+        if (pDevice->seek(nPos)) {
+            nResult = pDevice->write(pData, nLen);
+        } else {
+#ifdef QT_DEBUG
+            qDebug("Cannot seek");
+#endif
+        }
+    } else {
+#ifdef QT_DEBUG
+        qDebug("Invalid pos: %llX Size: %llX", nPos, getSize());
+#endif
     }
 
     if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
@@ -2075,6 +2146,38 @@ qint64 XBinary::read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTR
     return nResult;
 }
 
+qint64 XBinary::read_array_simple(qint64 nOffset, char *pBuffer, qint64 nMaxSize)
+{
+    qint64 nResult = 0;
+
+    if (!m_pDevice) {
+        return 0;
+    }
+
+    nResult = _readDataSimple(m_pDevice, nOffset, pBuffer, nMaxSize);  // Check for read large files
+
+    return nResult;
+}
+
+QByteArray XBinary::read_array_simple(qint64 nOffset, qint64 nSize)
+{
+    QByteArray baResult;
+
+    XBinary::OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
+
+    if (osRegion.nOffset != -1) {
+        baResult.resize((qint32)osRegion.nSize);
+
+        qint64 nBytes = read_array_simple(osRegion.nOffset, baResult.data(), osRegion.nSize);
+
+        if (osRegion.nSize != nBytes) {
+            baResult.resize((qint32)nBytes);
+        }
+    }
+
+    return baResult;
+}
+
 QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     QByteArray baResult;
@@ -2150,7 +2253,7 @@ quint8 XBinary::read_uint8(qint64 nOffset)
 {
     quint8 result = 0;
 
-    read_array(nOffset, (char *)(&result), 1);
+    read_array_simple(nOffset, (char *)(&result), 1);
 
     return result;
 }
@@ -2159,7 +2262,7 @@ qint8 XBinary::read_int8(qint64 nOffset)
 {
     quint8 result = 0;
 
-    read_array(nOffset, (char *)(&result), 1);
+    read_array_simple(nOffset, (char *)(&result), 1);
 
     return (qint8)result;
 }
@@ -2168,7 +2271,7 @@ quint16 XBinary::read_uint16(qint64 nOffset, bool bIsBigEndian)
 {
     quint16 result = 0;
 
-    read_array(nOffset, (char *)(&result), 2);
+    read_array_simple(nOffset, (char *)(&result), 2);
 
     if (bIsBigEndian) {
         result = qFromBigEndian(result);
@@ -2183,7 +2286,7 @@ qint16 XBinary::read_int16(qint64 nOffset, bool bIsBigEndian)
 {
     quint16 result = 0;
 
-    read_array(nOffset, (char *)(&result), 2);
+    read_array_simple(nOffset, (char *)(&result), 2);
 
     if (bIsBigEndian) {
         result = qFromBigEndian(result);
@@ -2198,7 +2301,7 @@ quint32 XBinary::read_uint32(qint64 nOffset, bool bIsBigEndian)
 {
     quint32 result = 0;
 
-    read_array(nOffset, (char *)(&result), 4);
+    read_array_simple(nOffset, (char *)(&result), 4);
 
     if (bIsBigEndian) {
         result = qFromBigEndian(result);
@@ -2213,7 +2316,7 @@ qint32 XBinary::read_int32(qint64 nOffset, bool bIsBigEndian)
 {
     quint32 result = 0;
 
-    read_array(nOffset, (char *)(&result), 4);
+    read_array_simple(nOffset, (char *)(&result), 4);
 
     if (bIsBigEndian) {
         result = qFromBigEndian(result);
@@ -2228,7 +2331,7 @@ quint64 XBinary::read_uint64(qint64 nOffset, bool bIsBigEndian)
 {
     quint64 result = 0;
 
-    read_array(nOffset, (char *)(&result), 8);
+    read_array_simple(nOffset, (char *)(&result), 8);
 
     if (bIsBigEndian) {
         result = qFromBigEndian(result);
@@ -2243,7 +2346,7 @@ qint64 XBinary::read_int64(qint64 nOffset, bool bIsBigEndian)
 {
     qint64 result = 0;
 
-    read_array(nOffset, (char *)(&result), 8);
+    read_array_simple(nOffset, (char *)(&result), 8);
 
     if (bIsBigEndian) {
         result = qFromBigEndian(result);
@@ -2302,7 +2405,7 @@ float XBinary::read_float(qint64 nOffset, bool bIsBigEndian)
 {
     float result = 0;
 
-    read_array(nOffset, (char *)(&result), 4);
+    read_array_simple(nOffset, (char *)(&result), 4);
 
     endian_float(&result, bIsBigEndian);
 
@@ -2313,7 +2416,7 @@ double XBinary::read_double(qint64 nOffset, bool bIsBigEndian)
 {
     double result = 0;
 
-    read_array(nOffset, (char *)(&result), 8);
+    read_array_simple(nOffset, (char *)(&result), 8);
 
     endian_double(&result, bIsBigEndian);
 
@@ -2325,10 +2428,10 @@ quint32 XBinary::read_uint24(qint64 nOffset, bool bIsBigEndian)
     quint32 result = 0;
 
     if (bIsBigEndian) {
-        read_array(nOffset, (char *)(&result) + 1, 3);
+        read_array_simple(nOffset, (char *)(&result) + 1, 3);
         result = qFromBigEndian(result);
     } else {
-        read_array(nOffset, (char *)(&result) + 0, 3);
+        read_array_simple(nOffset, (char *)(&result) + 0, 3);
         result = qFromLittleEndian(result);
     }
 
@@ -2344,7 +2447,7 @@ XBinary::PACKED_UINT XBinary::read_packedNumber(qint64 nOffset, qint64 nSize)
 {
     nSize = qMin((qint64)9, nSize);
 
-    QByteArray baData = read_array(nOffset, nSize);
+    QByteArray baData = read_array_simple(nOffset, nSize);
 
     return XBinary::_read_packedNumber(baData.data(), nSize);
 }
@@ -2514,7 +2617,7 @@ QString XBinary::read_utf8String(qint64 nOffset, qint64 nMaxSize)
         }
 
         if (nRealSize) {
-            QByteArray baString = read_array(nOffset, nRealSize);
+            QByteArray baString = read_array_simple(nOffset, nRealSize);
             sResult = QString::fromUtf8(baString.data());
         }
     }
@@ -2567,7 +2670,7 @@ QString XBinary::read_codePageString(qint64 nOffset, qint64 nMaxByteSize, const 
     QString sResult;
 
 #if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
-    QByteArray baData = read_array(nOffset, nMaxByteSize);
+    QByteArray baData = read_array_simple(nOffset, nMaxByteSize);
 
     QTextCodec *pCodec = QTextCodec::codecForName(sCodePage.toLatin1().data());
 
@@ -2725,8 +2828,8 @@ QString XBinary::read_UUID_bytes(qint64 nOffset)
     // TODO check!
     // TODO Check Endian
     QString sResult = QString("%1-%2-%3-%4-%5")
-                          .arg(read_array(nOffset + 0, 4).toHex().data(), read_array(nOffset + 4, 2).toHex().data(), read_array(nOffset + 6, 2).toHex().data(),
-                               read_array(nOffset + 8, 2).toHex().data(), read_array(nOffset + 10, 6).toHex().data());
+                          .arg(read_array_simple(nOffset + 0, 4).toHex().data(), read_array_simple(nOffset + 4, 2).toHex().data(), read_array_simple(nOffset + 6, 2).toHex().data(),
+                               read_array_simple(nOffset + 8, 2).toHex().data(), read_array_simple(nOffset + 10, 6).toHex().data());
 
     return sResult;
 }
