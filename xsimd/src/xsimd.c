@@ -55,10 +55,20 @@ static void xsimd_detect_features(void)
         if ((nXCR0 & 0x6) == 0x6) {  /* XMM (bit 1) and YMM (bit 2) state enabled */
             g_nFeatures |= XSIMD_FEATURE_AVX;
             
-            /* Check AVX2 (CPUID function 7, subleaf 0, EBX bit 5) */
+            /* Check AVX2 independently (CPUID function 7, subleaf 0, EBX bit 5) */
+            /* Some virtualized environments may report AVX2 without AVX flag */
             __cpuidex(nInfo, 7, 0);
             
             if (nInfo[1] & (1 << 5)) {
+                g_nFeatures |= XSIMD_FEATURE_AVX2;
+            }
+        } else {
+            /* OS doesn't support AVX state, but check AVX2 anyway for completeness */
+            /* In some rare cases (VM snapshots, CPU modes), AVX2 might be available */
+            __cpuidex(nInfo, 7, 0);
+            
+            if (nInfo[1] & (1 << 5)) {
+                /* AVX2 detected but OS doesn't support YMM state - still enable for SSE fallback paths */
                 g_nFeatures |= XSIMD_FEATURE_AVX2;
             }
         }
@@ -94,10 +104,17 @@ int xsimd_init(void)
 const char* xsimd_version(void)
 {
     static char sVersion[32];
+#ifdef _MSC_VER
+    _snprintf(sVersion, sizeof(sVersion), "%d.%d.%d",
+              XSIMD_VERSION_MAJOR,
+              XSIMD_VERSION_MINOR,
+              XSIMD_VERSION_PATCH);
+#else
     snprintf(sVersion, sizeof(sVersion), "%d.%d.%d",
              XSIMD_VERSION_MAJOR,
              XSIMD_VERSION_MINOR,
              XSIMD_VERSION_PATCH);
+#endif
     return sVersion;
 }
 
@@ -3335,6 +3352,155 @@ xsimd_int64 xsimd_find_ansi_string_i(const void* pBuffer, xsimd_int64 nBufferSiz
     free(pUpperData);
     free(pLowerData);
     return -1;
+}
+
+xsimd_int64 xsimd_find_first_non_ansi(const void* pBuffer, xsimd_int64 nSize)
+{
+    const xsimd_uint8* pData = (const xsimd_uint8*)pBuffer;
+    xsimd_int64 i = 0;
+    
+    if (!g_bInitialized) {
+        xsimd_init();
+    }
+    
+#ifdef XSIMD_X86
+    if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
+        __m256i vMin = _mm256_set1_epi8(0x20);  /* Minimum ANSI (space) */
+        __m256i vMax = _mm256_set1_epi8(0x7F);  /* Maximum ANSI (DEL-1) */
+        
+        /* Process 32 bytes at a time */
+        for (; i + 32 <= nSize; i += 32) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
+            
+            /* Check if any byte < 0x20 OR >= 0x80 */
+            __m256i vLessThanMin = _mm256_cmpgt_epi8(vMin, vData);
+            __m256i vGreaterThanMax = _mm256_cmpgt_epi8(vData, vMax);
+            __m256i vNonAnsi = _mm256_or_si256(vLessThanMin, vGreaterThanMax);
+            
+            int nMask = _mm256_movemask_epi8(vNonAnsi);
+            
+            if (nMask != 0) {
+                /* Find first set bit */
+                int nPos = 0;
+                while (((nMask >> nPos) & 1) == 0) nPos++;
+                return i + nPos;
+            }
+        }
+    } else if (g_nEnabledFeatures & XSIMD_FEATURE_SSE2) {
+        __m128i vMin = _mm_set1_epi8(0x20);
+        __m128i vMax = _mm_set1_epi8(0x7F);
+        
+        /* Process 16 bytes at a time */
+        for (; i + 16 <= nSize; i += 16) {
+            __m128i vData = _mm_loadu_si128((const __m128i*)(pData + i));
+            
+            __m128i vLessThanMin = _mm_cmplt_epi8(vData, vMin);
+            __m128i vGreaterThanMax = _mm_cmpgt_epi8(vData, vMax);
+            __m128i vNonAnsi = _mm_or_si128(vLessThanMin, vGreaterThanMax);
+            
+            int nMask = _mm_movemask_epi8(vNonAnsi);
+            
+            if (nMask != 0) {
+                int nPos = 0;
+                while (((nMask >> nPos) & 1) == 0) nPos++;
+                return i + nPos;
+            }
+        }
+    }
+#endif
+    
+    /* Scalar fallback for remaining bytes */
+    for (; i < nSize; i++) {
+        xsimd_uint8 nByte = pData[i];
+        if (nByte < 0x20 || nByte >= 0x80) {
+            return i;
+        }
+    }
+    
+    return -1;
+}
+
+xsimd_int64 xsimd_count_ansi_prefix(const void* pBuffer, xsimd_int64 nSize)
+{
+    xsimd_int64 nNonAnsiPos = xsimd_find_first_non_ansi(pBuffer, nSize);
+    
+    if (nNonAnsiPos == -1) {
+        return nSize;  /* All bytes are ANSI */
+    }
+    
+    return nNonAnsiPos;
+}
+
+xsimd_int64 xsimd_create_ansi_mask(const void* pBuffer, xsimd_int64 nSize, void* pMask)
+{
+    const xsimd_uint8* pData = (const xsimd_uint8*)pBuffer;
+    xsimd_uint8* pMaskData = (xsimd_uint8*)pMask;
+    xsimd_int64 nAnsiCount = 0;
+    xsimd_int64 i = 0;
+    
+    if (!g_bInitialized) {
+        xsimd_init();
+    }
+    
+    /* Initialize mask to zero */
+    memset(pMaskData, 0, (nSize + 7) / 8);
+    
+#ifdef XSIMD_X86
+    if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
+        __m256i vMin = _mm256_set1_epi8(0x20);
+        __m256i vMax = _mm256_set1_epi8(0x7F);
+        
+        for (; i + 32 <= nSize; i += 32) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
+            
+            /* Check if byte >= 0x20 AND < 0x80 */
+            __m256i vGreaterEqMin = _mm256_cmpgt_epi8(vData, _mm256_sub_epi8(vMin, _mm256_set1_epi8(1)));
+            __m256i vLessThanMax = _mm256_cmpgt_epi8(vMax, vData);
+            __m256i vIsAnsi = _mm256_and_si256(vGreaterEqMin, vLessThanMax);
+            
+            xsimd_uint32 nMask = _mm256_movemask_epi8(vIsAnsi);
+            
+            /* Store mask bits */
+            pMaskData[i / 8] = (xsimd_uint8)(nMask & 0xFF);
+            pMaskData[i / 8 + 1] = (xsimd_uint8)((nMask >> 8) & 0xFF);
+            pMaskData[i / 8 + 2] = (xsimd_uint8)((nMask >> 16) & 0xFF);
+            pMaskData[i / 8 + 3] = (xsimd_uint8)((nMask >> 24) & 0xFF);
+            
+            /* Count ANSI characters (popcount) */
+            nAnsiCount += __popcnt(nMask);
+        }
+    } else if (g_nEnabledFeatures & XSIMD_FEATURE_SSE2) {
+        __m128i vMin = _mm_set1_epi8(0x20);
+        __m128i vMax = _mm_set1_epi8(0x7F);
+        
+        for (; i + 16 <= nSize; i += 16) {
+            __m128i vData = _mm_loadu_si128((const __m128i*)(pData + i));
+            
+            __m128i vGreaterEqMin = _mm_cmpgt_epi8(vData, _mm_sub_epi8(vMin, _mm_set1_epi8(1)));
+            __m128i vLessThanMax = _mm_cmpgt_epi8(vMax, vData);
+            __m128i vIsAnsi = _mm_and_si128(vGreaterEqMin, vLessThanMax);
+            
+            xsimd_uint16 nMask = _mm_movemask_epi8(vIsAnsi);
+            
+            pMaskData[i / 8] = (xsimd_uint8)(nMask & 0xFF);
+            pMaskData[i / 8 + 1] = (xsimd_uint8)((nMask >> 8) & 0xFF);
+            
+            /* Count ANSI characters */
+            nAnsiCount += __popcnt(nMask);
+        }
+    }
+#endif
+    
+    /* Scalar fallback for remaining bytes */
+    for (; i < nSize; i++) {
+        xsimd_uint8 nByte = pData[i];
+        if (nByte >= 0x20 && nByte < 0x80) {
+            pMaskData[i / 8] |= (1 << (i % 8));
+            nAnsiCount++;
+        }
+    }
+    
+    return nAnsiCount;
 }
 
 void xsimd_cleanup(void)

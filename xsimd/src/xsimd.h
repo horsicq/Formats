@@ -287,6 +287,34 @@ xsimd_int64 xsimd_find_ansi_string_i(const void* pBuffer, xsimd_int64 nBufferSiz
 int xsimd_compare_memory(const void* pBuffer1, const void* pBuffer2, xsimd_int64 nSize);
 
 /**
+ * Fast scan buffer for non-ANSI byte (finds first byte < 0x20 or >= 0x80)
+ * Useful for validating ANSI strings quickly
+ * @param pBuffer Buffer to scan
+ * @param nSize Size of buffer
+ * @return Offset of first non-ANSI byte, or -1 if all bytes are ANSI
+ */
+xsimd_int64 xsimd_find_first_non_ansi(const void* pBuffer, xsimd_int64 nSize);
+
+/**
+ * Count consecutive ANSI characters from start of buffer
+ * Stops at first non-ANSI byte (< 0x20 or >= 0x80)
+ * @param pBuffer Buffer to scan
+ * @param nSize Maximum size to scan
+ * @return Number of consecutive ANSI bytes from start
+ */
+xsimd_int64 xsimd_count_ansi_prefix(const void* pBuffer, xsimd_int64 nSize);
+
+/**
+ * Scan buffer and mark ANSI character positions
+ * Creates a bitmask where bit=1 means ANSI character (0x20-0x7F)
+ * @param pBuffer Input buffer to scan
+ * @param nSize Size of input buffer
+ * @param pMask Output bitmask buffer (must be at least nSize/8 bytes)
+ * @return Number of ANSI characters found
+ */
+xsimd_int64 xsimd_create_ansi_mask(const void* pBuffer, xsimd_int64 nSize, void* pMask);
+
+/**
  * Cleanup library resources
  */
 void xsimd_cleanup(void);
