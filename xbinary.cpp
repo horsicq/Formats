@@ -40,6 +40,15 @@ bool compareFileParts(const XBinary::FPART &a, const XBinary::FPART &b)
     }
 }
 
+bool compareMS_RECORD(const XBinary::MS_RECORD &a, const XBinary::MS_RECORD &b)
+{
+    if (a.nRegionIndex != b.nRegionIndex) {
+        return a.nRegionIndex < b.nRegionIndex;
+    } else {
+        return a.nRelOffset < b.nRelOffset;
+    }
+}
+
 const quint32 _crc32_EDB88320_tab[] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b,
     0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7, 0x136c9856, 0x646ba8c0,
@@ -4319,6 +4328,33 @@ bool XBinary::_addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *
     return bResult;
 }
 
+// Optimized version that accepts pre-compiled regex to avoid creating QRegularExpression repeatedly
+bool XBinary::_addMultiSearchStringRecordOptimized(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, const QString &sString, STRINGSEARCH_OPTIONS *pSsOptions, QRegularExpression *pRegex)
+{
+    bool bAdd = true;
+
+    if (pSsOptions->bLinks) {
+        // Early rejection - most strings don't contain links
+        // Use indexOf for faster rejection than contains()
+        bAdd = (sString.indexOf("http:", 0, Qt::CaseSensitive) != -1 ||
+                sString.indexOf("www.", 0, Qt::CaseSensitive) != -1 ||
+                sString.indexOf("mailto:", 0, Qt::CaseSensitive) != -1);
+    }
+
+    if (bAdd && pRegex) {
+        // Use pre-compiled regex - MUCH faster than creating new QRegularExpression each time
+        QRegularExpressionMatch match = pRegex->match(sString);
+        bAdd = match.hasMatch();
+    }
+
+    if (bAdd) {
+        pList->append(*pRecord);
+        return true;
+    }
+
+    return false;
+}
+
 QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
@@ -4598,6 +4634,63 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
 QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
 {
+    // Optimized implementation: Use specialized functions and combine results
+    QVector<XBinary::MS_RECORD> listResult;
+
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    // Calculate total limit to distribute between ANSI and Unicode searches
+    qint32 nTotalLimit = ssOptions.nLimit;
+    
+    // Search for ANSI strings if flag is set
+    if (ssOptions.bAnsi) {
+        STRINGSEARCH_OPTIONS ansiOptions = ssOptions;
+        ansiOptions.bUnicode = false;  // ANSI only
+        ansiOptions.bAnsi = true;
+        
+        QVector<XBinary::MS_RECORD> listAnsi = multiSearch_ansiStrings(pMemoryMap, nOffset, nSize, ansiOptions, pPdStruct);
+        listResult.append(listAnsi);
+        
+        // Adjust remaining limit
+        if (nTotalLimit > 0) {
+            nTotalLimit -= listAnsi.size();
+            if (nTotalLimit <= 0) {
+                nTotalLimit = 0;
+            }
+        }
+    }
+    
+    // Search for Unicode strings if flag is set and we haven't reached limit
+    if (ssOptions.bUnicode && (nTotalLimit != 0)) {
+        STRINGSEARCH_OPTIONS unicodeOptions = ssOptions;
+        unicodeOptions.bAnsi = false;  // Unicode only
+        unicodeOptions.bUnicode = true;
+        unicodeOptions.nLimit = nTotalLimit;  // Apply remaining limit
+        
+        QVector<XBinary::MS_RECORD> listUnicode = multiSearch_unicodeStrings(pMemoryMap, nOffset, nSize, unicodeOptions, pPdStruct);
+        listResult.append(listUnicode);
+    }
+    
+    // Sort results by region index first, then by relative offset within region
+    if (listResult.size() > 1) {
+        std::sort(listResult.begin(), listResult.end(), compareMS_RECORD);
+    }
+    
+    // Enforce final limit if needed
+    if (ssOptions.nLimit > 0 && listResult.size() > ssOptions.nLimit) {
+        listResult.resize(ssOptions.nLimit);
+        pPdStruct->sInfoString = QString("%1: %2").arg(tr("Maximum"), QString::number(ssOptions.nLimit));
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
+{
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
@@ -4609,7 +4702,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
 
-    QVector<XBinary::MS_RECORD> listResult;
+    QVector<MS_RECORD> listResult;
 
     if (ssOptions.nMinLenght == 0) {
         ssOptions.nMinLenght = 1;
@@ -4619,15 +4712,14 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
         ssOptions.nMaxLenght = 128;
     }
 
-    qint64 _nSize = nSize;
     qint64 _nOffset = nOffset;
-    qint64 _nRawOffset = 0;
+    qint64 _nSize = nSize;
 
     bool bReadError = false;
 
-    qint32 nBufferSize = getBufferSize(pPdStruct);
-    char *pBuffer = new char[nBufferSize];
+    const qint32 BUFFER_SIZE = 0x10000;  // 64KB chunks for efficient processing
 
+    char *pBuffer = new char[BUFFER_SIZE];
     char *pAnsiBuffer = new char[ssOptions.nMaxLenght + 1];
 
     qint64 nCurrentAnsiSize = 0;
@@ -4639,116 +4731,227 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
 
     qint32 nCurrentRecords = 0;
 
-    while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
-        qint64 nCurrentSize = _nSize;
+    // OPTIMIZATION: Pre-compile regex once instead of creating it for every string!
+    QRegularExpression *pRegex = nullptr;
+    if (ssOptions.sMask != "") {
+        pRegex = new QRegularExpression(ssOptions.sMask);
+        // Optimize regex for repeated matching
+        pRegex->optimize();
+    }
 
-        nCurrentSize = qMin((qint64)nBufferSize, nCurrentSize);
+#ifdef USE_XSIMD
+    // Pre-calculate SIMD threshold once based on available features
+    qint32 nSimdThreshold = xsimd_is_avx2_enabled() ? 8 : (xsimd_is_avx_enabled() ? 6 : 4);
+#endif
+
+    while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
+        qint64 nCurrentSize = qMin((qint64)BUFFER_SIZE, _nSize);
 
         if (read_array(_nOffset, pBuffer, nCurrentSize, pPdStruct) != nCurrentSize) {
             bReadError = true;
             break;
         }
 
-        qint64 i = 0;
-
 #ifdef USE_XSIMD
-        // SIMD-optimized: byte-by-byte logic matching original exactly for 100% accuracy
-        // SIMD used only for acceleration within already-identified strings
-        for (; i < nCurrentSize; i++) {
+        // SIMD-optimized: aggressively use xsimd for maximum performance
+        // Process entire buffer with SIMD acceleration
+        qint64 i = 0;
+        
+        while ((i < nCurrentSize) && (nCurrentRecords < ssOptions.nLimit) && isPdStructNotCanceled(pPdStruct)) {
             bool bIsEnd = ((i == (nCurrentSize - 1)) && (_nSize == nCurrentSize));
-
             char cSymbol = *(pBuffer + i);
-
-            bool bIsAnsiSymbol = false;
-            bool bLongString = false;
-
-            bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol);
-
+            bool bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol);
+            
             if (bIsAnsiSymbol) {
                 if (nCurrentAnsiSize == 0) {
                     nCurrentAnsiOffset = _nOffset + i;
+                    
+                    // Use SIMD to find the end of the ANSI string quickly
+                    qint64 nRemaining = nCurrentSize - i;
+                    qint64 nMaxScan = qMin(nRemaining, ssOptions.nMaxLenght);
+                    
+                    if (nMaxScan >= nSimdThreshold) {
+                        // Use xsimd to count consecutive ANSI characters
+                        qint64 nAnsiRun = xsimd_count_ansi_prefix(pBuffer + i, nMaxScan);
+                        
+                        if (nAnsiRun >= nSimdThreshold) {
+                            // Found substantial ANSI run - bulk copy with memcpy
+                            qint64 nCopySize = qMin(nAnsiRun, ssOptions.nMaxLenght);
+                            memcpy(pAnsiBuffer, pBuffer + i, nCopySize);
+                            nCurrentAnsiSize = nCopySize;
+                            i += nCopySize;
+                            
+                            // Check if string actually ended or just reached buffer boundary
+                            bool bStringEnded = false;
+                            if (i < nCurrentSize) {
+                                // We're still within buffer - check if next char is non-ANSI
+                                if (!isAnsiSymbol((quint8)pBuffer[i])) {
+                                    bStringEnded = true;
+                                }
+                            } else {
+                                // Hit buffer boundary - string may continue in next buffer
+                                // Only end string if this is the absolute end of all data
+                                if (_nSize == nCurrentSize) {
+                                    bStringEnded = true;
+                                }
+                                // Otherwise string continues in next buffer - preserve state
+                            }
+                            
+                            if (bStringEnded) {
+                                // String ended - process it
+                                bool bLongString = (nCurrentAnsiSize >= ssOptions.nMaxLenght);
+                                
+                                if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
+                                    pAnsiBuffer[nCurrentAnsiSize] = 0;
+                                    bool bAdd = true;
+                                    
+                                    if (ssOptions.bNullTerminated && i < nCurrentSize && pBuffer[i] && (!bLongString)) {
+                                        bAdd = false;
+                                    }
+                                    
+                                    if (bAdd) {
+                                        MS_RECORD record = {};
+                                        record.nValueType = VT_A;
+                                        record.nSize = nCurrentAnsiSize;
+                                        record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
+                                        
+                                        if (record.nRegionIndex != -1) {
+                                            record.nRelOffset = nCurrentAnsiOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+                                        } else {
+                                            record.nRelOffset = nCurrentAnsiOffset;
+                                        }
+                                        
+                                        QString sString = pAnsiBuffer;
+                                        if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
+                                            nCurrentRecords++;
+                                        }
+                                    }
+                                }
+                                
+                                nCurrentAnsiSize = 0;
+                                continue;
+                            }
+                            
+                            // String continues beyond SIMD scan - continue byte-by-byte
+                            continue;
+                        }
+                    }
                 }
-
+                
+                // Single character handling (short strings or continuation)
                 if (nCurrentAnsiSize < ssOptions.nMaxLenght) {
                     *(pAnsiBuffer + nCurrentAnsiSize) = cSymbol;
+                    nCurrentAnsiSize++;
+                    i++;
                 } else {
-                    bIsAnsiSymbol = false;
-                    bLongString = true;
-                }
-
-                nCurrentAnsiSize++;
-            }
-
-            if ((!bIsAnsiSymbol) || (bIsEnd)) {
-                if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
-                    if (nCurrentAnsiSize - 1 < ssOptions.nMaxLenght) {
-                        pAnsiBuffer[nCurrentAnsiSize] = 0;
-                    } else {
+                    // String too long
+                    if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
                         pAnsiBuffer[ssOptions.nMaxLenght] = 0;
-                    }
-
-                    QString sString;
-
-                    sString = pAnsiBuffer;
-
-                    bool bAdd = true;
-
-                    if (ssOptions.bNullTerminated && cSymbol && (!bLongString)) {
-                        bAdd = false;
-                    }
-
-                    if (bAdd) {
+                        
                         MS_RECORD record = {};
                         record.nValueType = VT_A;
-                        record.nSize = nCurrentAnsiSize;
+                        record.nSize = ssOptions.nMaxLenght;
                         record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
-
+                        
                         if (record.nRegionIndex != -1) {
                             record.nRelOffset = nCurrentAnsiOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
                         } else {
                             record.nRelOffset = nCurrentAnsiOffset;
                         }
-
-                        if (_addMultiSearchStringRecord(&listResult, &record, sString, &ssOptions)) {
+                        
+                        QString sString = pAnsiBuffer;
+                        if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
                             nCurrentRecords++;
                         }
-
-                        if (nCurrentRecords >= ssOptions.nLimit) {
-                            break;
+                    }
+                    
+                    nCurrentAnsiSize = 0;
+                    i++;
+                }
+            } else {
+                // Non-ANSI character - terminate current string if any
+                if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
+                    pAnsiBuffer[nCurrentAnsiSize] = 0;
+                    bool bAdd = true;
+                    
+                    if (ssOptions.bNullTerminated && cSymbol) {
+                        bAdd = false;
+                    }
+                    
+                    if (bAdd) {
+                        MS_RECORD record = {};
+                        record.nValueType = VT_A;
+                        record.nSize = nCurrentAnsiSize;
+                        record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
+                        
+                        if (record.nRegionIndex != -1) {
+                            record.nRelOffset = nCurrentAnsiOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+                        } else {
+                            record.nRelOffset = nCurrentAnsiOffset;
+                        }
+                        
+                        QString sString = pAnsiBuffer;
+                        if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
+                            nCurrentRecords++;
                         }
                     }
                 }
-
+                
                 nCurrentAnsiSize = 0;
+                i++;
+            }
+            
+            // Handle end of buffer - DON'T terminate partial strings at buffer boundary
+            // Only save strings if we're at the actual end of data OR if string is complete
+            if (bIsEnd && nCurrentAnsiSize >= ssOptions.nMinLenght) {
+                // Only save if this is truly the end of all data (not just buffer boundary)
+                if (_nSize == nCurrentSize) {
+                    pAnsiBuffer[nCurrentAnsiSize] = 0;
+                    
+                    MS_RECORD record = {};
+                    record.nValueType = VT_A;
+                    record.nSize = nCurrentAnsiSize;
+                    record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
+                    
+                    if (record.nRegionIndex != -1) {
+                        record.nRelOffset = nCurrentAnsiOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+                    } else {
+                        record.nRelOffset = nCurrentAnsiOffset;
+                    }
+                    
+                    QString sString = pAnsiBuffer;
+                    if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
+                        nCurrentRecords++;
+                    }
+                    
+                    nCurrentAnsiSize = 0;
+                }
+                // Otherwise, partial string continues in next buffer - preserve state
             }
         }
 #else
-        // Non-SIMD fallback: byte-by-byte scanning
-        for (; i < nCurrentSize; i++) {
+        // Fallback: non-SIMD implementation
+        for (qint64 i = 0; (i < nCurrentSize) && (nCurrentRecords < ssOptions.nLimit) && isPdStructNotCanceled(pPdStruct); i++) {
             bool bIsEnd = ((i == (nCurrentSize - 1)) && (_nSize == nCurrentSize));
-
             char cSymbol = *(pBuffer + i);
-
-            bool bIsAnsiSymbol = false;
+            bool bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol);
             bool bLongString = false;
-
-            bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol);
-
+            
             if (bIsAnsiSymbol) {
                 if (nCurrentAnsiSize == 0) {
                     nCurrentAnsiOffset = _nOffset + i;
                 }
-
+                
                 if (nCurrentAnsiSize < ssOptions.nMaxLenght) {
                     *(pAnsiBuffer + nCurrentAnsiSize) = cSymbol;
                 } else {
                     bIsAnsiSymbol = false;
                     bLongString = true;
                 }
-
+                
                 nCurrentAnsiSize++;
             }
-
+            
             if ((!bIsAnsiSymbol) || (bIsEnd)) {
                 if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
                     if (nCurrentAnsiSize - 1 < ssOptions.nMaxLenght) {
@@ -4756,39 +4959,32 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
                     } else {
                         pAnsiBuffer[ssOptions.nMaxLenght] = 0;
                     }
-
-                    QString sString;
-
-                    sString = pAnsiBuffer;
-
+                    
                     bool bAdd = true;
-
+                    
                     if (ssOptions.bNullTerminated && cSymbol && (!bLongString)) {
                         bAdd = false;
                     }
-
+                    
                     if (bAdd) {
                         MS_RECORD record = {};
                         record.nValueType = VT_A;
                         record.nSize = nCurrentAnsiSize;
                         record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
-
+                        
                         if (record.nRegionIndex != -1) {
                             record.nRelOffset = nCurrentAnsiOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
                         } else {
                             record.nRelOffset = nCurrentAnsiOffset;
                         }
-
-                        if (_addMultiSearchStringRecord(&listResult, &record, sString, &ssOptions)) {
+                        
+                        QString sString = pAnsiBuffer;
+                        if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
                             nCurrentRecords++;
-                        }
-
-                        if (nCurrentRecords >= ssOptions.nLimit) {
-                            break;
                         }
                     }
                 }
-
+                
                 nCurrentAnsiSize = 0;
             }
         }
@@ -4796,13 +4992,11 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
 
         _nSize -= nCurrentSize;
         _nOffset += nCurrentSize;
-        _nRawOffset += nCurrentSize;
 
         XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, _nOffset - nOffset);
 
         if (nCurrentRecords >= ssOptions.nLimit) {
             pPdStruct->sInfoString = QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords));
-
             break;
         }
     }
@@ -4813,6 +5007,229 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
 
     delete[] pBuffer;
     delete[] pAnsiBuffer;
+    
+    // Clean up pre-compiled regex
+    if (pRegex) {
+        delete pRegex;
+    }
+
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+    return listResult;
+}
+
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
+{
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
+
+    nOffset = osRegion.nOffset;
+    nSize = osRegion.nSize;
+
+    QVector<MS_RECORD> listResult;
+
+    if (ssOptions.nMinLenght == 0) {
+        ssOptions.nMinLenght = 1;
+    }
+
+    if (ssOptions.nMaxLenght == 0) {
+        ssOptions.nMaxLenght = 128;
+    }
+
+    qint64 _nOffset = nOffset;
+    qint64 _nSize = nSize;
+
+    bool bReadError = false;
+
+    const qint32 BUFFER_SIZE = 0x10000;  // 64KB chunks for efficient processing
+
+    char *pBuffer = new char[BUFFER_SIZE];
+    quint16 *pUnicodeBuffer[2];  // Two buffers for even/odd parity
+    pUnicodeBuffer[0] = new quint16[ssOptions.nMaxLenght + 1];
+    pUnicodeBuffer[1] = new quint16[ssOptions.nMaxLenght + 1];
+
+    qint64 nCurrentUnicodeSize[2] = {0, 0};  // Track both parities
+    qint64 nCurrentUnicodeOffset[2] = {0, 0};
+    char cPrevSymbol = 0;  // For building 16-bit Unicode characters
+
+    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+
+    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+
+    qint32 nCurrentRecords = 0;
+
+    // OPTIMIZATION: Pre-compile regex once instead of creating it for every string!
+    QRegularExpression *pRegex = nullptr;
+    if (ssOptions.sMask != "") {
+        pRegex = new QRegularExpression(ssOptions.sMask);
+        pRegex->optimize();
+    }
+
+    bool bIsStart = true;  // Track if we're at the start of processing
+
+    while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
+        qint64 nCurrentSize = qMin((qint64)BUFFER_SIZE, _nSize);
+
+        if (read_array(_nOffset, pBuffer, nCurrentSize, pPdStruct) != nCurrentSize) {
+            bReadError = true;
+            break;
+        }
+
+        // Process buffer byte-by-byte to build Unicode (UTF-16) characters
+        // Unicode strings are 16-bit (2 bytes per character)
+        for (qint64 i = 0; (i < nCurrentSize) && (nCurrentRecords < ssOptions.nLimit) && isPdStructNotCanceled(pPdStruct); i++) {
+            char cSymbol = *(pBuffer + i);
+            bool bIsEnd = ((i == (nCurrentSize - 1)) && (_nSize == nCurrentSize));
+            qint32 nParity = (_nOffset + i) % 2;  // Track even/odd byte position
+
+            if (!bIsStart) {
+                // Build 16-bit Unicode character (little-endian by default)
+                quint16 nCode = (quint8)cPrevSymbol + ((quint8)cSymbol << 8);
+                
+                // Check if this is a valid Unicode character
+                bool bIsUnicodeSymbol = isUnicodeSymbol(nCode, true);
+                bool bLongString = false;
+
+                if (bIsUnicodeSymbol) {
+                    if (nCurrentUnicodeSize[nParity] == 0) {
+                        // Start of new Unicode string (offset points to first byte of first char)
+                        nCurrentUnicodeOffset[nParity] = _nOffset + i - 1;
+                    }
+
+                    if (nCurrentUnicodeSize[nParity] < ssOptions.nMaxLenght) {
+                        *(pUnicodeBuffer[nParity] + nCurrentUnicodeSize[nParity]) = nCode;
+                        nCurrentUnicodeSize[nParity]++;
+                    } else {
+                        // String too long - save it
+                        bIsUnicodeSymbol = false;
+                        bLongString = true;
+
+                        if (nCurrentUnicodeSize[nParity] >= ssOptions.nMinLenght) {
+                            pUnicodeBuffer[nParity][ssOptions.nMaxLenght] = 0;
+                            QString sString = QString::fromUtf16(pUnicodeBuffer[nParity], ssOptions.nMaxLenght);
+
+                            MS_RECORD record = {};
+                            record.nValueType = VT_U;
+                            record.nSize = ssOptions.nMaxLenght * 2;  // Byte size = char count * 2
+                            record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentUnicodeOffset[nParity]);
+
+                            if (record.nRegionIndex != -1) {
+                                record.nRelOffset = nCurrentUnicodeOffset[nParity] - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+                            } else {
+                                record.nRelOffset = nCurrentUnicodeOffset[nParity];
+                            }
+
+                            if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
+                                nCurrentRecords++;
+                            }
+                        }
+
+                        nCurrentUnicodeSize[nParity] = 0;
+                    }
+                }
+
+                // Check if string ended
+                if ((!bIsUnicodeSymbol) || (bIsEnd)) {
+                    if (nCurrentUnicodeSize[nParity] >= ssOptions.nMinLenght) {
+                        pUnicodeBuffer[nParity][nCurrentUnicodeSize[nParity]] = 0;
+                        QString sString = QString::fromUtf16(pUnicodeBuffer[nParity], nCurrentUnicodeSize[nParity]);
+                        bool bAdd = true;
+
+                        if (ssOptions.bNullTerminated && !bLongString) {
+                            // For Unicode, check if followed by 0x0000 (two zero bytes)
+                            // The current position is at the byte that broke the string
+                            // We need to check if this byte and the previous byte form 0x0000
+                            if (!bIsEnd) {
+                                // Check if the Unicode character that broke the string is 0x0000
+                                quint16 nBreakCode = (quint8)cPrevSymbol + ((quint8)cSymbol << 8);
+                                if (nBreakCode != 0) {
+                                    bAdd = false;
+                                }
+                            } else {
+                                // At end of buffer - assume not null-terminated unless we can verify
+                                bAdd = false;
+                            }
+                        }
+
+                        if (bAdd) {
+                            MS_RECORD record = {};
+                            record.nValueType = VT_U;
+                            record.nSize = nCurrentUnicodeSize[nParity] * 2;  // Byte size = char count * 2
+                            record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentUnicodeOffset[nParity]);
+
+                            if (record.nRegionIndex != -1) {
+                                record.nRelOffset = nCurrentUnicodeOffset[nParity] - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+                            } else {
+                                record.nRelOffset = nCurrentUnicodeOffset[nParity];
+                            }
+
+                            if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
+                                nCurrentRecords++;
+                            }
+                        }
+                    }
+
+                    // Handle the other parity at end of file
+                    if (bIsEnd) {
+                        qint32 nOtherParity = (nParity == 1) ? 0 : 1;
+                        
+                        if (nCurrentUnicodeSize[nOtherParity] >= ssOptions.nMinLenght) {
+                            pUnicodeBuffer[nOtherParity][nCurrentUnicodeSize[nOtherParity]] = 0;
+                            QString sString = QString::fromUtf16(pUnicodeBuffer[nOtherParity], nCurrentUnicodeSize[nOtherParity]);
+
+                            MS_RECORD record = {};
+                            record.nValueType = VT_U;
+                            record.nSize = nCurrentUnicodeSize[nOtherParity] * 2;
+                            record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentUnicodeOffset[nOtherParity]);
+
+                            if (record.nRegionIndex != -1) {
+                                record.nRelOffset = nCurrentUnicodeOffset[nOtherParity] - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+                            } else {
+                                record.nRelOffset = nCurrentUnicodeOffset[nOtherParity];
+                            }
+
+                            if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
+                                nCurrentRecords++;
+                            }
+                        }
+                    }
+
+                    nCurrentUnicodeSize[nParity] = 0;
+                }
+            }
+
+            cPrevSymbol = cSymbol;
+            bIsStart = false;
+        }
+
+        _nSize -= nCurrentSize;
+        _nOffset += nCurrentSize;
+
+        XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, _nOffset - nOffset);
+
+        if (nCurrentRecords >= ssOptions.nLimit) {
+            pPdStruct->sInfoString = QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords));
+            break;
+        }
+    }
+
+    if (bReadError) {
+        pPdStruct->sInfoString = tr("Read error");
+    }
+
+    delete[] pBuffer;
+    delete[] pUnicodeBuffer[0];
+    delete[] pUnicodeBuffer[1];
+    
+    // Clean up pre-compiled regex
+    if (pRegex) {
+        delete pRegex;
+    }
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 

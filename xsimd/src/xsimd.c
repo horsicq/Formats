@@ -3420,6 +3420,298 @@ xsimd_int64 xsimd_find_first_non_ansi(const void* pBuffer, xsimd_int64 nSize)
     return -1;
 }
 
+xsimd_int64 xsimd_find_null_byte(const void* pBuffer, xsimd_int64 nSize)
+{
+    const xsimd_uint8* pData = (const xsimd_uint8*)pBuffer;
+    xsimd_int64 i = 0;
+    
+    if (!g_bInitialized) {
+        xsimd_init();
+    }
+    
+#ifdef XSIMD_X86
+    if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
+        __m256i vZero = _mm256_setzero_si256();
+        
+        for (; i + 32 <= nSize; i += 32) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
+            __m256i vCmp = _mm256_cmpeq_epi8(vData, vZero);
+            xsimd_uint32 nMask = _mm256_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                /* Found null byte, find its position */
+                unsigned long nBitPos;
+#ifdef _MSC_VER
+                _BitScanForward(&nBitPos, nMask);
+#else
+                nBitPos = __builtin_ctz(nMask);
+#endif
+                return i + nBitPos;
+            }
+        }
+    } else if (g_nEnabledFeatures & XSIMD_FEATURE_AVX) {
+        __m256i vZero = _mm256_setzero_si256();
+        
+        for (; i + 32 <= nSize; i += 32) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
+            __m256i vCmp = _mm256_cmpeq_epi8(vData, vZero);
+            xsimd_uint32 nMask = _mm256_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                unsigned long nBitPos;
+#ifdef _MSC_VER
+                _BitScanForward(&nBitPos, nMask);
+#else
+                nBitPos = __builtin_ctz(nMask);
+#endif
+                return i + nBitPos;
+            }
+        }
+    } else if (g_nEnabledFeatures & XSIMD_FEATURE_SSE2) {
+        __m128i vZero = _mm_setzero_si128();
+        
+        for (; i + 16 <= nSize; i += 16) {
+            __m128i vData = _mm_loadu_si128((const __m128i*)(pData + i));
+            __m128i vCmp = _mm_cmpeq_epi8(vData, vZero);
+            xsimd_uint16 nMask = _mm_movemask_epi8(vCmp);
+            
+            if (nMask != 0) {
+                unsigned long nBitPos;
+#ifdef _MSC_VER
+                _BitScanForward(&nBitPos, nMask);
+#else
+                nBitPos = __builtin_ctz(nMask);
+#endif
+                return i + nBitPos;
+            }
+        }
+    }
+#endif
+    
+    /* Scalar fallback */
+    for (; i < nSize; i++) {
+        if (pData[i] == 0) {
+            return i;
+        }
+    }
+    
+    return -1;
+}
+
+xsimd_int64 xsimd_count_unicode_prefix(const void* pBuffer, xsimd_int64 nSize)
+{
+    const xsimd_uint16* pData = (const xsimd_uint16*)pBuffer;
+    xsimd_int64 nChars = nSize / 2;  /* Number of 16-bit characters */
+    xsimd_int64 i = 0;
+    
+    if (!g_bInitialized) {
+        xsimd_init();
+    }
+    
+    /* Must be even size for 16-bit characters */
+    if (nSize % 2 != 0) {
+        return 0;
+    }
+    
+#ifdef XSIMD_X86
+    if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
+        /* Process 16 characters (32 bytes) at a time */
+        __m256i vMin1 = _mm256_set1_epi16(0x0020);
+        __m256i vMax1 = _mm256_set1_epi16(0x00FF);
+        __m256i vMin2 = _mm256_set1_epi16(0x0400);  /* Cyrillic start */
+        __m256i vMax2 = _mm256_set1_epi16(0x04FF);  /* Cyrillic end */
+        
+        for (; i + 16 <= nChars; i += 16) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
+            
+            /* Check if in range [0x0020, 0x00FF] */
+            __m256i vGe1 = _mm256_cmpgt_epi16(vData, _mm256_sub_epi16(vMin1, _mm256_set1_epi16(1)));
+            __m256i vLe1 = _mm256_cmpgt_epi16(_mm256_add_epi16(vMax1, _mm256_set1_epi16(1)), vData);
+            __m256i vRange1 = _mm256_and_si256(vGe1, vLe1);
+            
+            /* Check if in range [0x0400, 0x04FF] (Cyrillic) */
+            __m256i vGe2 = _mm256_cmpgt_epi16(vData, _mm256_sub_epi16(vMin2, _mm256_set1_epi16(1)));
+            __m256i vLe2 = _mm256_cmpgt_epi16(_mm256_add_epi16(vMax2, _mm256_set1_epi16(1)), vData);
+            __m256i vRange2 = _mm256_and_si256(vGe2, vLe2);
+            
+            /* Valid if in either range */
+            __m256i vValid = _mm256_or_si256(vRange1, vRange2);
+            
+            /* Check if all characters are valid */
+            xsimd_uint32 nMask = _mm256_movemask_epi8(vValid);
+            
+            /* All 32 bytes should have alternating bits set (0xAAAAAAAA for 16-bit LE) */
+            /* or all bits set (0xFFFFFFFF) */
+            if (nMask != 0xFFFFFFFF) {
+                /* Found invalid character, find first one */
+                xsimd_int64 j;
+                for (j = 0; j < 16; j++) {
+                    xsimd_uint16 nChar = pData[i + j];
+                    int bValid = ((nChar >= 0x0020 && nChar <= 0x00FF) || 
+                                 (nChar >= 0x0400 && nChar <= 0x04FF));
+                    if (!bValid) {
+                        return (i + j) * 2;  /* Return byte offset */
+                    }
+                }
+            }
+        }
+    } else if (g_nEnabledFeatures & XSIMD_FEATURE_AVX) {
+        /* Process 16 characters (32 bytes) at a time with AVX */
+        __m256i vMin1 = _mm256_set1_epi16(0x0020);
+        __m256i vMax1 = _mm256_set1_epi16(0x00FF);
+        __m256i vMin2 = _mm256_set1_epi16(0x0400);
+        __m256i vMax2 = _mm256_set1_epi16(0x04FF);
+        
+        for (; i + 16 <= nChars; i += 16) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
+            
+            __m256i vGe1 = _mm256_cmpgt_epi16(vData, _mm256_sub_epi16(vMin1, _mm256_set1_epi16(1)));
+            __m256i vLe1 = _mm256_cmpgt_epi16(_mm256_add_epi16(vMax1, _mm256_set1_epi16(1)), vData);
+            __m256i vRange1 = _mm256_and_si256(vGe1, vLe1);
+            
+            __m256i vGe2 = _mm256_cmpgt_epi16(vData, _mm256_sub_epi16(vMin2, _mm256_set1_epi16(1)));
+            __m256i vLe2 = _mm256_cmpgt_epi16(_mm256_add_epi16(vMax2, _mm256_set1_epi16(1)), vData);
+            __m256i vRange2 = _mm256_and_si256(vGe2, vLe2);
+            
+            __m256i vValid = _mm256_or_si256(vRange1, vRange2);
+            
+            xsimd_uint32 nMask = _mm256_movemask_epi8(vValid);
+            
+            if (nMask != 0xFFFFFFFF) {
+                xsimd_int64 j;
+                for (j = 0; j < 16; j++) {
+                    xsimd_uint16 nChar = pData[i + j];
+                    int bValid = ((nChar >= 0x0020 && nChar <= 0x00FF) || 
+                                 (nChar >= 0x0400 && nChar <= 0x04FF));
+                    if (!bValid) {
+                        return (i + j) * 2;
+                    }
+                }
+            }
+        }
+    } else if (g_nEnabledFeatures & XSIMD_FEATURE_SSE2) {
+        /* Process 8 characters (16 bytes) at a time */
+        __m128i vMin1 = _mm_set1_epi16(0x0020);
+        __m128i vMax1 = _mm_set1_epi16(0x00FF);
+        __m128i vMin2 = _mm_set1_epi16(0x0400);
+        __m128i vMax2 = _mm_set1_epi16(0x04FF);
+        
+        for (; i + 8 <= nChars; i += 8) {
+            __m128i vData = _mm_loadu_si128((const __m128i*)(pData + i));
+            
+            __m128i vGe1 = _mm_cmpgt_epi16(vData, _mm_sub_epi16(vMin1, _mm_set1_epi16(1)));
+            __m128i vLe1 = _mm_cmpgt_epi16(_mm_add_epi16(vMax1, _mm_set1_epi16(1)), vData);
+            __m128i vRange1 = _mm_and_si128(vGe1, vLe1);
+            
+            __m128i vGe2 = _mm_cmpgt_epi16(vData, _mm_sub_epi16(vMin2, _mm_set1_epi16(1)));
+            __m128i vLe2 = _mm_cmpgt_epi16(_mm_add_epi16(vMax2, _mm_set1_epi16(1)), vData);
+            __m128i vRange2 = _mm_and_si128(vGe2, vLe2);
+            
+            __m128i vValid = _mm_or_si128(vRange1, vRange2);
+            
+            xsimd_uint16 nMask = _mm_movemask_epi8(vValid);
+            
+            if (nMask != 0xFFFF) {
+                xsimd_int64 j;
+                for (j = 0; j < 8; j++) {
+                    xsimd_uint16 nChar = pData[i + j];
+                    int bValid = ((nChar >= 0x0020 && nChar <= 0x00FF) || 
+                                 (nChar >= 0x0400 && nChar <= 0x04FF));
+                    if (!bValid) {
+                        return (i + j) * 2;
+                    }
+                }
+            }
+        }
+    }
+#endif
+    
+    /* Scalar fallback */
+    for (; i < nChars; i++) {
+        xsimd_uint16 nChar = pData[i];
+        int bValid = ((nChar >= 0x0020 && nChar <= 0x00FF) || 
+                     (nChar >= 0x0400 && nChar <= 0x04FF));
+        if (!bValid) {
+            return i * 2;  /* Return byte offset */
+        }
+    }
+    
+    return nSize;  /* All characters are valid */
+}
+
+int xsimd_is_valid_unicode(const void* pBuffer, xsimd_int64 nSize)
+{
+    xsimd_int64 nValidBytes = xsimd_count_unicode_prefix(pBuffer, nSize);
+    return (nValidBytes == nSize) ? 1 : 0;
+}
+
+xsimd_int64 xsimd_count_char(const void* pBuffer, xsimd_int64 nSize, xsimd_uint8 nByte)
+{
+    const xsimd_uint8* pData = (const xsimd_uint8*)pBuffer;
+    xsimd_int64 nCount = 0;
+    xsimd_int64 i = 0;
+    
+    if (!g_bInitialized) {
+        xsimd_init();
+    }
+    
+#ifdef XSIMD_X86
+    if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
+        __m256i vNeedle = _mm256_set1_epi8(nByte);
+        
+        for (; i + 32 <= nSize; i += 32) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
+            __m256i vCmp = _mm256_cmpeq_epi8(vData, vNeedle);
+            xsimd_uint32 nMask = _mm256_movemask_epi8(vCmp);
+            
+            /* Count set bits (popcount) */
+#ifdef _MSC_VER
+            nCount += __popcnt(nMask);
+#else
+            nCount += __builtin_popcount(nMask);
+#endif
+        }
+    } else if (g_nEnabledFeatures & XSIMD_FEATURE_AVX) {
+        __m256i vNeedle = _mm256_set1_epi8(nByte);
+        
+        for (; i + 32 <= nSize; i += 32) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
+            __m256i vCmp = _mm256_cmpeq_epi8(vData, vNeedle);
+            xsimd_uint32 nMask = _mm256_movemask_epi8(vCmp);
+            
+#ifdef _MSC_VER
+            nCount += __popcnt(nMask);
+#else
+            nCount += __builtin_popcount(nMask);
+#endif
+        }
+    } else if (g_nEnabledFeatures & XSIMD_FEATURE_SSE2) {
+        __m128i vNeedle = _mm_set1_epi8(nByte);
+        
+        for (; i + 16 <= nSize; i += 16) {
+            __m128i vData = _mm_loadu_si128((const __m128i*)(pData + i));
+            __m128i vCmp = _mm_cmpeq_epi8(vData, vNeedle);
+            xsimd_uint16 nMask = _mm_movemask_epi8(vCmp);
+            
+#ifdef _MSC_VER
+            nCount += __popcnt(nMask);
+#else
+            nCount += __builtin_popcount(nMask);
+#endif
+        }
+    }
+#endif
+    
+    /* Scalar fallback */
+    for (; i < nSize; i++) {
+        if (pData[i] == nByte) {
+            nCount++;
+        }
+    }
+    
+    return nCount;
+}
+
 xsimd_int64 xsimd_count_ansi_prefix(const void* pBuffer, xsimd_int64 nSize)
 {
     xsimd_int64 nNonAnsiPos = xsimd_find_first_non_ansi(pBuffer, nSize);
@@ -3467,6 +3759,26 @@ xsimd_int64 xsimd_create_ansi_mask(const void* pBuffer, xsimd_int64 nSize, void*
             pMaskData[i / 8 + 3] = (xsimd_uint8)((nMask >> 24) & 0xFF);
             
             /* Count ANSI characters (popcount) */
+            nAnsiCount += __popcnt(nMask);
+        }
+    } else if (g_nEnabledFeatures & XSIMD_FEATURE_AVX) {
+        __m256i vMin = _mm256_set1_epi8(0x20);
+        __m256i vMax = _mm256_set1_epi8(0x7F);
+        
+        for (; i + 32 <= nSize; i += 32) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
+            
+            __m256i vGreaterEqMin = _mm256_cmpgt_epi8(vData, _mm256_sub_epi8(vMin, _mm256_set1_epi8(1)));
+            __m256i vLessThanMax = _mm256_cmpgt_epi8(vMax, vData);
+            __m256i vIsAnsi = _mm256_and_si256(vGreaterEqMin, vLessThanMax);
+            
+            xsimd_uint32 nMask = _mm256_movemask_epi8(vIsAnsi);
+            
+            pMaskData[i / 8] = (xsimd_uint8)(nMask & 0xFF);
+            pMaskData[i / 8 + 1] = (xsimd_uint8)((nMask >> 8) & 0xFF);
+            pMaskData[i / 8 + 2] = (xsimd_uint8)((nMask >> 16) & 0xFF);
+            pMaskData[i / 8 + 3] = (xsimd_uint8)((nMask >> 24) & 0xFF);
+            
             nAnsiCount += __popcnt(nMask);
         }
     } else if (g_nEnabledFeatures & XSIMD_FEATURE_SSE2) {

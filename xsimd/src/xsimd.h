@@ -305,6 +305,43 @@ xsimd_int64 xsimd_find_first_non_ansi(const void* pBuffer, xsimd_int64 nSize);
 xsimd_int64 xsimd_count_ansi_prefix(const void* pBuffer, xsimd_int64 nSize);
 
 /**
+ * Find first null byte (0x00) in buffer (optimized with SIMD)
+ * Useful for finding null-termination in strings
+ * @param pBuffer Buffer to search in
+ * @param nSize Size of buffer
+ * @return Offset of first null byte, or -1 if not found
+ */
+xsimd_int64 xsimd_find_null_byte(const void* pBuffer, xsimd_int64 nSize);
+
+/**
+ * Count consecutive valid Unicode characters from start of buffer (UTF-16 LE)
+ * Validates 16-bit characters: 0x0020-0x00FF and Cyrillic 0x0400-0x04FF
+ * Stops at first invalid Unicode character or odd byte boundary
+ * @param pBuffer Buffer to scan (must be 16-bit aligned for best performance)
+ * @param nSize Maximum size to scan (in bytes, must be even)
+ * @return Number of consecutive bytes that form valid Unicode characters
+ */
+xsimd_int64 xsimd_count_unicode_prefix(const void* pBuffer, xsimd_int64 nSize);
+
+/**
+ * Check if buffer contains valid Unicode characters (UTF-16 LE)
+ * Validates 16-bit characters: 0x0020-0x00FF and Cyrillic 0x0400-0x04FF
+ * @param pBuffer Buffer to check (should be 16-bit aligned)
+ * @param nSize Size of buffer in bytes (must be even)
+ * @return 1 if all characters are valid Unicode, 0 otherwise
+ */
+int xsimd_is_valid_unicode(const void* pBuffer, xsimd_int64 nSize);
+
+/**
+ * Count occurrences of specific byte value in buffer (optimized with SIMD)
+ * @param pBuffer Buffer to scan
+ * @param nSize Size of buffer
+ * @param nByte Byte value to count
+ * @return Number of occurrences found
+ */
+xsimd_int64 xsimd_count_char(const void* pBuffer, xsimd_int64 nSize, xsimd_uint8 nByte);
+
+/**
  * Scan buffer and mark ANSI character positions
  * Creates a bitmask where bit=1 means ANSI character (0x20-0x7F)
  * @param pBuffer Input buffer to scan
