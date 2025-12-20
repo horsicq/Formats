@@ -23,5 +23,5 @@ if(MSVC)
     target_compile_options(xsimd PRIVATE /arch:AVX2)
 elseif(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     # Enable SSE, AVX, AVX2, and POPCNT for GCC/Clang
-    target_compile_options(xsimd PRIVATE -msse -msse2 -mavx -mavx2 -mpopcnt)
+    target_compile_options(xsimd PRIVATE -msse -msse2 -mavx -mavx2)
 endif()

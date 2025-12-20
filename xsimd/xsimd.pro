@@ -16,8 +16,8 @@ win32-msvc* {
 }
 else:gcc|clang {
     contains(QT_ARCH, x86_64)|contains(QT_ARCH, i386) {
-        QMAKE_CFLAGS += -msse -msse2 -mavx -mavx2 -mpopcnt
-        QMAKE_CXXFLAGS += -msse -msse2 -mavx -mavx2 -mpopcnt
+        QMAKE_CFLAGS += -msse -msse2 -mavx -mavx2
+        QMAKE_CXXFLAGS += -msse -msse2 -mavx -mavx2
     }
 }
 

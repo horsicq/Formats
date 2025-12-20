@@ -3759,7 +3759,11 @@ xsimd_int64 xsimd_create_ansi_mask(const void* pBuffer, xsimd_int64 nSize, void*
             pMaskData[i / 8 + 3] = (xsimd_uint8)((nMask >> 24) & 0xFF);
             
             /* Count ANSI characters (popcount) */
+#ifdef _MSC_VER
             nAnsiCount += __popcnt(nMask);
+#else
+            nAnsiCount += __builtin_popcount(nMask);
+#endif
         }
     } else if (g_nEnabledFeatures & XSIMD_FEATURE_AVX) {
         __m256i vMin = _mm256_set1_epi8(0x20);
@@ -3779,7 +3783,11 @@ xsimd_int64 xsimd_create_ansi_mask(const void* pBuffer, xsimd_int64 nSize, void*
             pMaskData[i / 8 + 2] = (xsimd_uint8)((nMask >> 16) & 0xFF);
             pMaskData[i / 8 + 3] = (xsimd_uint8)((nMask >> 24) & 0xFF);
             
+#ifdef _MSC_VER
             nAnsiCount += __popcnt(nMask);
+#else
+            nAnsiCount += __builtin_popcount(nMask);
+#endif
         }
     } else if (g_nEnabledFeatures & XSIMD_FEATURE_SSE2) {
         __m128i vMin = _mm_set1_epi8(0x20);
@@ -3798,7 +3806,11 @@ xsimd_int64 xsimd_create_ansi_mask(const void* pBuffer, xsimd_int64 nSize, void*
             pMaskData[i / 8 + 1] = (xsimd_uint8)((nMask >> 8) & 0xFF);
             
             /* Count ANSI characters */
+#ifdef _MSC_VER
             nAnsiCount += __popcnt(nMask);
+#else
+            nAnsiCount += __builtin_popcount(nMask);
+#endif
         }
     }
 #endif
