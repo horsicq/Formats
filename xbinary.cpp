@@ -2843,9 +2843,10 @@ QString XBinary::read_UUID_bytes(qint64 nOffset)
 {
     // TODO check!
     // TODO Check Endian
-    QString sResult = QString("%1-%2-%3-%4-%5")
-                          .arg(read_array_simple(nOffset + 0, 4).toHex().data(), read_array_simple(nOffset + 4, 2).toHex().data(), read_array_simple(nOffset + 6, 2).toHex().data(),
-                               read_array_simple(nOffset + 8, 2).toHex().data(), read_array_simple(nOffset + 10, 6).toHex().data());
+    QString sResult =
+        QString("%1-%2-%3-%4-%5")
+            .arg(read_array_simple(nOffset + 0, 4).toHex().data(), read_array_simple(nOffset + 4, 2).toHex().data(), read_array_simple(nOffset + 6, 2).toHex().data(),
+                 read_array_simple(nOffset + 8, 2).toHex().data(), read_array_simple(nOffset + 10, 6).toHex().data());
 
     return sResult;
 }
@@ -3407,10 +3408,10 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 qint64 m = nArraySize;
                 qint64 i = 0;
                 const qint64 limit = hayLen - m;
-                
+
                 while (i <= limit) {
                     unsigned char c = (unsigned char)hay[i + m - 1];
-                    
+
                     if (c == (unsigned char)nLastSearchChar) {
                         if (memcmp(hay + i, pArray, (size_t)m) == 0) {
                             nResult = nOffset + i;
@@ -3419,7 +3420,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                     }
                     i += (qint64)bmhShift[c];
                 }
-                
+
                 if (nResult != -1) break;
 #endif
             } else {
@@ -3431,7 +3432,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                         break;
                     }
                 }
-                
+
                 if (nResult != -1) break;
             }
         } else if (st == ST_NOTNULL) {
@@ -3467,7 +3468,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             qint64 m = nArraySize;
             const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
-            
+
             while (j < limit) {
                 // Skip non-ANSI bytes to the start of an ANSI run
                 while (j < hayLen && !ansiTable[hay[j]]) j++;
@@ -3481,7 +3482,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                     break;
                 }
             }
-            
+
             if (nResult != -1) break;
 #endif
         } else if (st == ST_NOTANSI) {
@@ -3495,7 +3496,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             qint64 m = nArraySize;
             const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
-            
+
             while (j < limit) {
                 // Skip ANSI bytes to the start of a non-ANSI run
                 while (j < hayLen && ansiTable[hay[j]]) j++;
@@ -3509,7 +3510,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                     break;
                 }
             }
-            
+
             if (nResult != -1) break;
 #endif
         } else if (st == ST_NOTANSIANDNULL) {
@@ -3522,7 +3523,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
             qint64 m = nArraySize;
             const qint64 limit = hayLen - (m - 1);
             qint64 j = 0;
-            
+
             while (j < limit) {
                 // Skip bytes that are ANSI or zero to the start of a desired run
                 while (j < hayLen) {
@@ -3544,7 +3545,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                     break;
                 }
             }
-            
+
             if (nResult != -1) break;
 #endif
         } else if (st == ST_ANSINUMBER) {
@@ -3578,7 +3579,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                     break;
                 }
             }
-            
+
             if (nResult != -1) break;
 #endif
         }
@@ -4329,15 +4330,15 @@ bool XBinary::_addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *
 }
 
 // Optimized version that accepts pre-compiled regex to avoid creating QRegularExpression repeatedly
-bool XBinary::_addMultiSearchStringRecordOptimized(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, const QString &sString, STRINGSEARCH_OPTIONS *pSsOptions, QRegularExpression *pRegex)
+bool XBinary::_addMultiSearchStringRecordOptimized(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, const QString &sString, STRINGSEARCH_OPTIONS *pSsOptions,
+                                                   QRegularExpression *pRegex)
 {
     bool bAdd = true;
 
     if (pSsOptions->bLinks) {
         // Early rejection - most strings don't contain links
         // Use indexOf for faster rejection than contains()
-        bAdd = (sString.indexOf("http:", 0, Qt::CaseSensitive) != -1 ||
-                sString.indexOf("www.", 0, Qt::CaseSensitive) != -1 ||
+        bAdd = (sString.indexOf("http:", 0, Qt::CaseSensitive) != -1 || sString.indexOf("www.", 0, Qt::CaseSensitive) != -1 ||
                 sString.indexOf("mailto:", 0, Qt::CaseSensitive) != -1);
     }
 
@@ -4645,16 +4646,16 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
 
     // Calculate total limit to distribute between ANSI and Unicode searches
     qint32 nTotalLimit = ssOptions.nLimit;
-    
+
     // Search for ANSI strings if flag is set
     if (ssOptions.bAnsi) {
         STRINGSEARCH_OPTIONS ansiOptions = ssOptions;
         ansiOptions.bUnicode = false;  // ANSI only
         ansiOptions.bAnsi = true;
-        
+
         QVector<XBinary::MS_RECORD> listAnsi = multiSearch_ansiStrings(pMemoryMap, nOffset, nSize, ansiOptions, pPdStruct);
         listResult.append(listAnsi);
-        
+
         // Adjust remaining limit
         if (nTotalLimit > 0) {
             nTotalLimit -= listAnsi.size();
@@ -4663,23 +4664,23 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
             }
         }
     }
-    
+
     // Search for Unicode strings if flag is set and we haven't reached limit
     if (ssOptions.bUnicode && (nTotalLimit != 0)) {
         STRINGSEARCH_OPTIONS unicodeOptions = ssOptions;
         unicodeOptions.bAnsi = false;  // Unicode only
         unicodeOptions.bUnicode = true;
         unicodeOptions.nLimit = nTotalLimit;  // Apply remaining limit
-        
+
         QVector<XBinary::MS_RECORD> listUnicode = multiSearch_unicodeStrings(pMemoryMap, nOffset, nSize, unicodeOptions, pPdStruct);
         listResult.append(listUnicode);
     }
-    
+
     // Sort results by region index first, then by relative offset within region
     if (listResult.size() > 1) {
         std::sort(listResult.begin(), listResult.end(), compareMS_RECORD);
     }
-    
+
     // Enforce final limit if needed
     if (ssOptions.nLimit > 0 && listResult.size() > ssOptions.nLimit) {
         listResult.resize(ssOptions.nLimit);
@@ -4756,31 +4757,31 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
         // SIMD-optimized: aggressively use xsimd for maximum performance
         // Process entire buffer with SIMD acceleration
         qint64 i = 0;
-        
+
         while ((i < nCurrentSize) && (nCurrentRecords < ssOptions.nLimit) && isPdStructNotCanceled(pPdStruct)) {
             bool bIsEnd = ((i == (nCurrentSize - 1)) && (_nSize == nCurrentSize));
             char cSymbol = *(pBuffer + i);
             bool bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol);
-            
+
             if (bIsAnsiSymbol) {
                 if (nCurrentAnsiSize == 0) {
                     nCurrentAnsiOffset = _nOffset + i;
-                    
+
                     // Use SIMD to find the end of the ANSI string quickly
                     qint64 nRemaining = nCurrentSize - i;
                     qint64 nMaxScan = qMin(nRemaining, ssOptions.nMaxLenght);
-                    
+
                     if (nMaxScan >= nSimdThreshold) {
                         // Use xsimd to count consecutive ANSI characters
                         qint64 nAnsiRun = xsimd_count_ansi_prefix(pBuffer + i, nMaxScan);
-                        
+
                         if (nAnsiRun >= nSimdThreshold) {
                             // Found substantial ANSI run - bulk copy with memcpy
                             qint64 nCopySize = qMin(nAnsiRun, ssOptions.nMaxLenght);
                             memcpy(pAnsiBuffer, pBuffer + i, nCopySize);
                             nCurrentAnsiSize = nCopySize;
                             i += nCopySize;
-                            
+
                             // Check if string actually ended or just reached buffer boundary
                             bool bStringEnded = false;
                             if (i < nCurrentSize) {
@@ -4796,48 +4797,48 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
                                 }
                                 // Otherwise string continues in next buffer - preserve state
                             }
-                            
+
                             if (bStringEnded) {
                                 // String ended - process it
                                 bool bLongString = (nCurrentAnsiSize >= ssOptions.nMaxLenght);
-                                
+
                                 if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
                                     pAnsiBuffer[nCurrentAnsiSize] = 0;
                                     bool bAdd = true;
-                                    
+
                                     if (ssOptions.bNullTerminated && i < nCurrentSize && pBuffer[i] && (!bLongString)) {
                                         bAdd = false;
                                     }
-                                    
+
                                     if (bAdd) {
                                         MS_RECORD record = {};
                                         record.nValueType = VT_A;
                                         record.nSize = nCurrentAnsiSize;
                                         record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
-                                        
+
                                         if (record.nRegionIndex != -1) {
                                             record.nRelOffset = nCurrentAnsiOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
                                         } else {
                                             record.nRelOffset = nCurrentAnsiOffset;
                                         }
-                                        
+
                                         QString sString = pAnsiBuffer;
                                         if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
                                             nCurrentRecords++;
                                         }
                                     }
                                 }
-                                
+
                                 nCurrentAnsiSize = 0;
                                 continue;
                             }
-                            
+
                             // String continues beyond SIMD scan - continue byte-by-byte
                             continue;
                         }
                     }
                 }
-                
+
                 // Single character handling (short strings or continuation)
                 if (nCurrentAnsiSize < ssOptions.nMaxLenght) {
                     *(pAnsiBuffer + nCurrentAnsiSize) = cSymbol;
@@ -4847,24 +4848,24 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
                     // String too long
                     if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
                         pAnsiBuffer[ssOptions.nMaxLenght] = 0;
-                        
+
                         MS_RECORD record = {};
                         record.nValueType = VT_A;
                         record.nSize = ssOptions.nMaxLenght;
                         record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
-                        
+
                         if (record.nRegionIndex != -1) {
                             record.nRelOffset = nCurrentAnsiOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
                         } else {
                             record.nRelOffset = nCurrentAnsiOffset;
                         }
-                        
+
                         QString sString = pAnsiBuffer;
                         if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
                             nCurrentRecords++;
                         }
                     }
-                    
+
                     nCurrentAnsiSize = 0;
                     i++;
                 }
@@ -4873,57 +4874,57 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
                 if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
                     pAnsiBuffer[nCurrentAnsiSize] = 0;
                     bool bAdd = true;
-                    
+
                     if (ssOptions.bNullTerminated && cSymbol) {
                         bAdd = false;
                     }
-                    
+
                     if (bAdd) {
                         MS_RECORD record = {};
                         record.nValueType = VT_A;
                         record.nSize = nCurrentAnsiSize;
                         record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
-                        
+
                         if (record.nRegionIndex != -1) {
                             record.nRelOffset = nCurrentAnsiOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
                         } else {
                             record.nRelOffset = nCurrentAnsiOffset;
                         }
-                        
+
                         QString sString = pAnsiBuffer;
                         if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
                             nCurrentRecords++;
                         }
                     }
                 }
-                
+
                 nCurrentAnsiSize = 0;
                 i++;
             }
-            
+
             // Handle end of buffer - DON'T terminate partial strings at buffer boundary
             // Only save strings if we're at the actual end of data OR if string is complete
             if (bIsEnd && nCurrentAnsiSize >= ssOptions.nMinLenght) {
                 // Only save if this is truly the end of all data (not just buffer boundary)
                 if (_nSize == nCurrentSize) {
                     pAnsiBuffer[nCurrentAnsiSize] = 0;
-                    
+
                     MS_RECORD record = {};
                     record.nValueType = VT_A;
                     record.nSize = nCurrentAnsiSize;
                     record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
-                    
+
                     if (record.nRegionIndex != -1) {
                         record.nRelOffset = nCurrentAnsiOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
                     } else {
                         record.nRelOffset = nCurrentAnsiOffset;
                     }
-                    
+
                     QString sString = pAnsiBuffer;
                     if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
                         nCurrentRecords++;
                     }
-                    
+
                     nCurrentAnsiSize = 0;
                 }
                 // Otherwise, partial string continues in next buffer - preserve state
@@ -4936,22 +4937,22 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
             char cSymbol = *(pBuffer + i);
             bool bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol);
             bool bLongString = false;
-            
+
             if (bIsAnsiSymbol) {
                 if (nCurrentAnsiSize == 0) {
                     nCurrentAnsiOffset = _nOffset + i;
                 }
-                
+
                 if (nCurrentAnsiSize < ssOptions.nMaxLenght) {
                     *(pAnsiBuffer + nCurrentAnsiSize) = cSymbol;
                 } else {
                     bIsAnsiSymbol = false;
                     bLongString = true;
                 }
-                
+
                 nCurrentAnsiSize++;
             }
-            
+
             if ((!bIsAnsiSymbol) || (bIsEnd)) {
                 if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
                     if (nCurrentAnsiSize - 1 < ssOptions.nMaxLenght) {
@@ -4959,32 +4960,32 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
                     } else {
                         pAnsiBuffer[ssOptions.nMaxLenght] = 0;
                     }
-                    
+
                     bool bAdd = true;
-                    
+
                     if (ssOptions.bNullTerminated && cSymbol && (!bLongString)) {
                         bAdd = false;
                     }
-                    
+
                     if (bAdd) {
                         MS_RECORD record = {};
                         record.nValueType = VT_A;
                         record.nSize = nCurrentAnsiSize;
                         record.nRegionIndex = getMemoryIndexByOffset(pMemoryMap, nCurrentAnsiOffset);
-                        
+
                         if (record.nRegionIndex != -1) {
                             record.nRelOffset = nCurrentAnsiOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
                         } else {
                             record.nRelOffset = nCurrentAnsiOffset;
                         }
-                        
+
                         QString sString = pAnsiBuffer;
                         if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
                             nCurrentRecords++;
                         }
                     }
                 }
-                
+
                 nCurrentAnsiSize = 0;
             }
         }
@@ -5007,7 +5008,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
 
     delete[] pBuffer;
     delete[] pAnsiBuffer;
-    
+
     // Clean up pre-compiled regex
     if (pRegex) {
         delete pRegex;
@@ -5018,7 +5019,8 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
     return listResult;
 }
 
-QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions,
+                                                                PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -5090,7 +5092,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
             if (!bIsStart) {
                 // Build 16-bit Unicode character (little-endian by default)
                 quint16 nCode = (quint8)cPrevSymbol + ((quint8)cSymbol << 8);
-                
+
                 // Check if this is a valid Unicode character
                 bool bIsUnicodeSymbol = isUnicodeSymbol(nCode, true);
                 bool bLongString = false;
@@ -5177,7 +5179,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
                     // Handle the other parity at end of file
                     if (bIsEnd) {
                         qint32 nOtherParity = (nParity == 1) ? 0 : 1;
-                        
+
                         if (nCurrentUnicodeSize[nOtherParity] >= ssOptions.nMinLenght) {
                             pUnicodeBuffer[nOtherParity][nCurrentUnicodeSize[nOtherParity]] = 0;
                             QString sString = QString::fromUtf16(pUnicodeBuffer[nOtherParity], nCurrentUnicodeSize[nOtherParity]);
@@ -5225,7 +5227,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
     delete[] pBuffer;
     delete[] pUnicodeBuffer[0];
     delete[] pUnicodeBuffer[1];
-    
+
     // Clean up pre-compiled regex
     if (pRegex) {
         delete pRegex;
@@ -6413,7 +6415,7 @@ bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)
 #else
     const char *__restrict ptr1 = pMemory1;
     const char *__restrict ptr2 = pMemory2;
-    
+
     // 64-bit comparison
     const quint64 *__restrict p1_64 = reinterpret_cast<const quint64 *>(ptr1);
     const quint64 *__restrict p2_64 = reinterpret_cast<const quint64 *>(ptr2);

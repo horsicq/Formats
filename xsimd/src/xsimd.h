@@ -31,10 +31,10 @@ extern "C" {
 #define XSIMD_VERSION_PATCH 0
 
 /* SIMD feature detection result codes */
-#define XSIMD_FEATURE_NONE  0x00
-#define XSIMD_FEATURE_SSE2  0x01
-#define XSIMD_FEATURE_AVX   0x02
-#define XSIMD_FEATURE_AVX2  0x04
+#define XSIMD_FEATURE_NONE 0x00
+#define XSIMD_FEATURE_SSE2 0x01
+#define XSIMD_FEATURE_AVX 0x02
+#define XSIMD_FEATURE_AVX2 0x04
 
 /* Search result type */
 typedef long long xsimd_int64;
@@ -165,9 +165,7 @@ xsimd_int64 xsimd_find_byte(const void* pBuffer, xsimd_int64 nSize, xsimd_uint8 
  * @param nOffset Base offset (added to result)
  * @return Offset of first occurrence, or -1 if not found
  */
-xsimd_int64 xsimd_find_pattern_bmh(const void* pBuffer, xsimd_int64 nBufferSize, 
-                                   const void* pPattern, xsimd_int64 nPatternSize, 
-                                   xsimd_int64 nOffset);
+xsimd_int64 xsimd_find_pattern_bmh(const void* pBuffer, xsimd_int64 nBufferSize, const void* pPattern, xsimd_int64 nPatternSize, xsimd_int64 nOffset);
 
 /**
  * Find first occurrence of ANSI printable sequence (0x20-0x7E)
@@ -177,8 +175,7 @@ xsimd_int64 xsimd_find_pattern_bmh(const void* pBuffer, xsimd_int64 nBufferSize,
  * @param nOffset Base offset (added to result)
  * @return Offset of first sequence, or -1 if not found
  */
-xsimd_int64 xsimd_find_ansi(const void* pBuffer, xsimd_int64 nBufferSize, 
-                            xsimd_int64 nMinLength, xsimd_int64 nOffset);
+xsimd_int64 xsimd_find_ansi(const void* pBuffer, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);
 
 /**
  * Find first occurrence of non-null sequence (no 0x00 bytes)
@@ -188,8 +185,7 @@ xsimd_int64 xsimd_find_ansi(const void* pBuffer, xsimd_int64 nBufferSize,
  * @param nOffset Base offset (added to result)
  * @return Offset of first sequence, or -1 if not found
  */
-xsimd_int64 xsimd_find_notnull(const void* pBuffer, xsimd_int64 nBufferSize, 
-                               xsimd_int64 nMinLength, xsimd_int64 nOffset);
+xsimd_int64 xsimd_find_notnull(const void* pBuffer, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);
 
 /**
  * Find first occurrence of non-ANSI sequence (NOT in 0x20-0x7E)
@@ -199,8 +195,7 @@ xsimd_int64 xsimd_find_notnull(const void* pBuffer, xsimd_int64 nBufferSize,
  * @param nOffset Base offset (added to result)
  * @return Offset of first sequence, or -1 if not found
  */
-xsimd_int64 xsimd_find_not_ansi(const void* pBuffer, xsimd_int64 nBufferSize, 
-                                xsimd_int64 nMinLength, xsimd_int64 nOffset);
+xsimd_int64 xsimd_find_not_ansi(const void* pBuffer, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);
 
 /**
  * Check if memory contains no zero bytes
@@ -234,8 +229,7 @@ int xsimd_is_not_ansi(const void* pBuffer, xsimd_int64 nSize);
  * @param nOffset Base offset (added to result)
  * @return Offset of first sequence, or -1 if not found
  */
-xsimd_int64 xsimd_find_not_ansi_and_null(const void* pBuffer, xsimd_int64 nBufferSize, 
-                                         xsimd_int64 nMinLength, xsimd_int64 nOffset);
+xsimd_int64 xsimd_find_not_ansi_and_null(const void* pBuffer, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);
 
 /**
  * Check if entire memory region is NOT-ANSI-AND-NULL (non-printable excluding null)
@@ -253,8 +247,7 @@ int xsimd_is_not_ansi_and_null(const void* pBuffer, xsimd_int64 nSize);
  * @param nOffset Base offset (added to result)
  * @return Offset of first sequence, or -1 if not found
  */
-xsimd_int64 xsimd_find_ansi_number(const void* pBuffer, xsimd_int64 nBufferSize, 
-                                   xsimd_int64 nMinLength, xsimd_int64 nOffset);
+xsimd_int64 xsimd_find_ansi_number(const void* pBuffer, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);
 
 /**
  * Check if entire memory region is all digits (0x30-0x39)
@@ -273,9 +266,7 @@ int xsimd_is_ansi_number(const void* pBuffer, xsimd_int64 nSize);
  * @param nOffset Base offset (added to result)
  * @return Offset of first occurrence, or -1 if not found
  */
-xsimd_int64 xsimd_find_ansi_string_i(const void* pBuffer, xsimd_int64 nBufferSize,
-                                     const void* pString, xsimd_int64 nStringSize,
-                                     xsimd_int64 nOffset);
+xsimd_int64 xsimd_find_ansi_string_i(const void* pBuffer, xsimd_int64 nBufferSize, const void* pString, xsimd_int64 nStringSize, xsimd_int64 nOffset);
 
 /**
  * Compare two memory regions for equality

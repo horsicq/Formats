@@ -917,7 +917,7 @@ public:
         //        bool bSuccess; // TODO important
         QString sInfoString;
         bool bCriticalError;     // TODO !!!
-        qint32 nBufferSize; // 0 =
+        qint32 nBufferSize;      // 0 =
         qint32 nFileBufferSize;  // 0 => 0x10000
     };
 
@@ -1385,7 +1385,8 @@ public:
     };
 
     bool _addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, QString sString, STRINGSEARCH_OPTIONS *pSsOptions);
-    bool _addMultiSearchStringRecordOptimized(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, const QString &sString, STRINGSEARCH_OPTIONS *pSsOptions, QRegularExpression *pRegex);
+    bool _addMultiSearchStringRecordOptimized(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, const QString &sString, STRINGSEARCH_OPTIONS *pSsOptions,
+                                              QRegularExpression *pRegex);
 
     QVector<MS_RECORD> multiSearch_allStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct = nullptr);
     QVector<MS_RECORD> multiSearch_allStrings2(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct = nullptr);

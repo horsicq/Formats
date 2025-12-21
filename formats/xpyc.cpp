@@ -27,15 +27,13 @@ struct MAGIC_RECORD {
 };
 
 // Conversion table for structure IDs to strings
-XBinary::XCONVERT _TABLE_XPYC_STRUCTID[] = {
-    {XPYC::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    {XPYC::STRUCTID_HEADER, "HEADER", QString("Header")},
-    {XPYC::STRUCTID_FLAGS, "FLAGS", QString("Flags")},
-    {XPYC::STRUCTID_HASH, "HASH", QString("Hash")},
-    {XPYC::STRUCTID_TIMESTAMP, "TIMESTAMP", QString("Timestamp")},
-    {XPYC::STRUCTID_SOURCESIZE, "SOURCESIZE", QString("Source Size")},
-    {XPYC::STRUCTID_CODEOBJECT, "CODEOBJECT", QString("Code Object")}
-};
+XBinary::XCONVERT _TABLE_XPYC_STRUCTID[] = {{XPYC::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+                                            {XPYC::STRUCTID_HEADER, "HEADER", QString("Header")},
+                                            {XPYC::STRUCTID_FLAGS, "FLAGS", QString("Flags")},
+                                            {XPYC::STRUCTID_HASH, "HASH", QString("Hash")},
+                                            {XPYC::STRUCTID_TIMESTAMP, "TIMESTAMP", QString("Timestamp")},
+                                            {XPYC::STRUCTID_SOURCESIZE, "SOURCESIZE", QString("Source Size")},
+                                            {XPYC::STRUCTID_CODEOBJECT, "CODEOBJECT", QString("Code Object")}};
 
 // Magic number records sorted by value for binary search
 static const MAGIC_RECORD g_records[] = {{2012, "1.5.2"},  {3000, "3000"},   {3111, "3.0a4"},  {3131, "3.0b1"},  {3141, "3.1a1"},
