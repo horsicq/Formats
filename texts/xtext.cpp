@@ -34,7 +34,7 @@ bool XText::isValid(PDSTRUCT *pPdStruct)
 
     if (getSize() > 0) {
         // Check if file contains primarily text content
-        QByteArray baData = read_array(0, qMin(getSize(), qint64(8192)), pPdStruct);
+        QByteArray baData = read_array_process(0, qMin(getSize(), qint64(8192)), pPdStruct);
 
         // Check for BOM markers
         TEXT_TYPE bomType = _detectBOM();
@@ -167,7 +167,7 @@ XText::TEXT_TYPE XText::detectTextType(PDSTRUCT *pPdStruct)
     }
 
     // Read sample data for analysis
-    QByteArray baData = read_array(0, qMin(getSize(), qint64(8192)), pPdStruct);
+    QByteArray baData = read_array_process(0, qMin(getSize(), qint64(8192)), pPdStruct);
 
     // Check if it's printable ASCII
     if (_isPrintableASCII(baData)) {
@@ -195,7 +195,7 @@ XText::TEXT_TYPE XText::detectTextType(PDSTRUCT *pPdStruct)
 
 XText::LINE_ENDING XText::detectLineEnding(PDSTRUCT *pPdStruct)
 {
-    QByteArray baData = read_array(0, qMin(getSize(), qint64(8192)), pPdStruct);
+    QByteArray baData = read_array_process(0, qMin(getSize(), qint64(8192)), pPdStruct);
     return _detectLineEndingInData(baData);
 }
 

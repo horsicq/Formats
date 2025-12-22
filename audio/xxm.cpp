@@ -45,7 +45,7 @@ bool XXM::isValid(PDSTRUCT *pPdStruct)
     bool bResult = false;
 
     if (getSize() >= 60) {
-        QByteArray id = read_array(0, 17, pPdStruct);
+        QByteArray id = read_array_process(0, 17, pPdStruct);
         if (id == QByteArray("Extended Module: ")) {
             bResult = true;
         }

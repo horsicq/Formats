@@ -1188,18 +1188,22 @@ public:
     static qint32 getRegExpCount(const QString &sRegExp, const QString &sString);  // TODO Check!
     static QString getRegExpSection(const QString &sRegExp, const QString &sString, qint32 nStart, qint32 nEnd);
     static bool isRegExpValid(const QString &sRegExp);
-    qint64 read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTRUCT *pPdStruct = nullptr);
-    qint64 read_array_simple(qint64 nOffset, char *pBuffer, qint64 nMaxSize);
-    QByteArray read_array_simple(qint64 nOffset, qint64 nSize);
-    QByteArray read_array(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
-    qint64 write_array(qint64 nOffset, const char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
-    qint64 write_array(qint64 nOffset, const QByteArray &baData, PDSTRUCT *pPdStruct = nullptr);
+    qint64 read_array_process(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTRUCT *pPdStruct = nullptr);
+    qint64 read_array(qint64 nOffset, char *pBuffer, qint64 nMaxSize);
+    QByteArray read_array(qint64 nOffset, qint64 nSize);
+    QByteArray read_array_process(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    qint64 write_array_process(qint64 nOffset, const char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    qint64 write_array_process(qint64 nOffset, const QByteArray &baData, PDSTRUCT *pPdStruct = nullptr);
+    qint64 write_array(qint64 nOffset, const char *pBuffer, qint64 nSize);
+    qint64 write_array(qint64 nOffset, const QByteArray &baData);
 
-    static QByteArray read_array(QIODevice *pDevice, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
-    static qint64 read_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
-    static qint64 write_array(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
-    static qint64 write_array(QIODevice *pDevice, qint64 nOffset, const QByteArray &baData, PDSTRUCT *pPdStruct = nullptr);
-    static QByteArray read_array_simple(QIODevice *pDevice, qint64 nOffset, qint64 nSize);
+    static QByteArray read_array_process(QIODevice *pDevice, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    static qint64 read_array_process(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    static qint64 write_array_process(QIODevice *pDevice, qint64 nOffset, char *pBuffer, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    static qint64 write_array_process(QIODevice *pDevice, qint64 nOffset, const QByteArray &baData, PDSTRUCT *pPdStruct = nullptr);
+    static QByteArray read_array(QIODevice *pDevice, qint64 nOffset, qint64 nSize);
+    static qint64 write_array(QIODevice *pDevice, qint64 nOffset, const char *pBuffer, qint64 nSize);
+    static qint64 write_array(QIODevice *pDevice, qint64 nOffset, const QByteArray &baData);
 
     quint8 read_uint8(qint64 nOffset);
     qint8 read_int8(qint64 nOffset);
