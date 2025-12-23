@@ -7132,6 +7132,8 @@ XBinary::_MEMORY_MAP XBinary::getSimpleMemoryMap()
 
     qint64 nTotalSize = getSize();
 
+    result.nBinarySize = nTotalSize;
+
     _MEMORY_RECORD record = {};
     record.nAddress = 0;
     record.nOffset = 0;
@@ -13888,6 +13890,7 @@ void XBinary::setPdStructCurrent(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nVal
     if (pPdStruct) {
         if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
             pPdStruct->_pdRecord[nIndex].nCurrent = nValue;
+            invokePdStructCallback(pPdStruct);
         }
     }
 }
@@ -13897,6 +13900,7 @@ void XBinary::setPdStructCurrentIncrement(PDSTRUCT *pPdStruct, qint32 nIndex)
     if (pPdStruct) {
         if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
             pPdStruct->_pdRecord[nIndex].nCurrent++;
+            invokePdStructCallback(pPdStruct);
         }
     }
 }
@@ -14030,6 +14034,18 @@ qint32 XBinary::getPdStructPercentage(PDSTRUCT *pPdStruct)
     }
 
     return nResult;
+}
+
+void XBinary::invokePdStructCallback(PDSTRUCT *pPdStruct, qint32 nMinIntervalMs)
+{
+    if (pPdStruct && pPdStruct->pCallback) {
+        qint64 nCurrentTime = QDateTime::currentMSecsSinceEpoch();
+        
+        if ((nCurrentTime - pPdStruct->nLastCallbackTime) >= nMinIntervalMs) {
+            pPdStruct->pCallback(pPdStruct->pCallbackUserData, pPdStruct);
+            pPdStruct->nLastCallbackTime = nCurrentTime;
+        }
+    }
 }
 
 XBinary::REGION_FILL XBinary::getRegionFill(qint64 nOffset, qint64 nSize, qint32 nAlignment)

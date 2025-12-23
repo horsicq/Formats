@@ -907,6 +907,9 @@ public:
 
     const static qint32 N_NUMBER_PDRECORDS = 5;
 
+    struct PDSTRUCT;
+    typedef void (*PDSTRUCT_CALLBACK)(void *pUserData, PDSTRUCT *pPdStruct);
+
     struct PDSTRUCT {
         PDRECORD _pdRecord[N_NUMBER_PDRECORDS];
         bool bIsStop;
@@ -919,6 +922,9 @@ public:
         bool bCriticalError;     // TODO !!!
         qint32 nBufferSize;      // 0 =
         qint32 nFileBufferSize;  // 0 => 0x10000
+        PDSTRUCT_CALLBACK pCallback;
+        void *pCallbackUserData;
+        qint64 nLastCallbackTime;
     };
 
     enum DHT {
@@ -2055,6 +2061,7 @@ public:
     static bool isPdStructStopped(PDSTRUCT *pPdStruct);
     static void setPdStructStopped(PDSTRUCT *pPdStruct);
     static qint32 getPdStructPercentage(PDSTRUCT *pPdStruct);  // 0-100
+    static void invokePdStructCallback(PDSTRUCT *pPdStruct, qint32 nMinIntervalMs = 100);
 
     struct REGION_FILL {
         quint64 nSize;
