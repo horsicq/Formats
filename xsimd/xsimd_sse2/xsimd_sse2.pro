@@ -32,12 +32,12 @@ unix:macx {
 }
 
 SOURCES += \
-    $$PWD/src/xsimd_sse.c
+    $$PWD/../src/xsimd_sse2.c
 
 HEADERS += \
-    $$PWD/src/xsimd_sse.h \
-    $$PWD/src/xsimd.h
+    $$PWD/../src/xsimd_sse2.h \
+    $$PWD/../src/xsimd.h
 	
-TARGETLIB_PATH = $$PWD
+TARGETLIB_PATH = $$PWD/..
 
 DESTDIR=$${TARGETLIB_PATH}/libs
