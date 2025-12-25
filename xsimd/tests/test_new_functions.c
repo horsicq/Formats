@@ -181,7 +181,6 @@ int main(void)
     printf("Enabled features:  0x%08X\n", xsimd_get_enabled_features());
     
     if (xsimd_is_avx2_present()) printf("  - AVX2 available\n");
-    if (xsimd_is_avx_present())  printf("  - AVX available\n");
     if (xsimd_is_sse2_present()) printf("  - SSE2 available\n");
     
     /* Run tests */

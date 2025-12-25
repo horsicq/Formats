@@ -39,23 +39,8 @@ void test_all_simd_paths(void)
     xsimd_int64 nCount = xsimd_count_char(sTestData, 128, 'X');
     printf("count_char: %lld %s\n", nCount, (nCount == 3) ? "[PASS]" : "[FAIL]");
     
-    /* Test with AVX + SSE2 only (disable AVX2) */
-    printf("\n--- Testing with AVX + SSE2 (no AVX2) ---\n");
-    xsimd_set_avx2(0);
-    printf("Enabled features: 0x%08X\n", xsimd_get_enabled_features());
-    
-    nPos = xsimd_find_null_byte(sTestData, 128);
-    printf("find_null_byte: %lld %s\n", nPos, (nPos == 50) ? "[PASS]" : "[FAIL]");
-    
-    nValidBytes = xsimd_count_unicode_prefix(sUnicodeData, 128);
-    printf("count_unicode_prefix: %lld bytes %s\n", nValidBytes, (nValidBytes == 60) ? "[PASS]" : "[FAIL]");
-    
-    nCount = xsimd_count_char(sTestData, 128, 'X');
-    printf("count_char: %lld %s\n", nCount, (nCount == 3) ? "[PASS]" : "[FAIL]");
-    
-    /* Test with SSE2 only (disable AVX and AVX2) */
-    printf("\n--- Testing with SSE2 only (no AVX/AVX2) ---\n");
-    xsimd_set_avx(0);
+    /* Test with SSE2 only (disable AVX2) */
+    printf("\n--- Testing with SSE2 only (no AVX2) ---\n");
     xsimd_set_avx2(0);
     printf("Enabled features: 0x%08X\n", xsimd_get_enabled_features());
     
@@ -102,7 +87,6 @@ int main(void)
     printf("Detected features: 0x%08X\n", xsimd_get_features());
     
     if (xsimd_is_avx2_present()) printf("  - AVX2 detected\n");
-    if (xsimd_is_avx_present())  printf("  - AVX detected\n");
     if (xsimd_is_sse2_present()) printf("  - SSE2 detected\n");
     
     test_all_simd_paths();
