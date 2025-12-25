@@ -7,7 +7,7 @@ CONFIG += staticlib
 INCLUDEPATH += $$PWD/src
 DEPENDPATH += $$PWD/src
 
-include(../../build.pri)
+include(../../../build.pri)
 
 # Enable SSE2 instructions only
 win32-msvc* {
