@@ -33,7 +33,6 @@ extern "C" {
 /* SIMD feature detection result codes */
 #define XSIMD_FEATURE_NONE 0x00
 #define XSIMD_FEATURE_SSE2 0x01
-#define XSIMD_FEATURE_AVX 0x02
 #define XSIMD_FEATURE_AVX2 0x04
 
 /* Search result type */
@@ -99,12 +98,6 @@ void xsimd_disable_all_features(void);
 int xsimd_is_sse2_enabled(void);
 
 /**
- * Check if AVX is enabled
- * @return 1 if AVX is enabled, 0 otherwise
- */
-int xsimd_is_avx_enabled(void);
-
-/**
  * Check if AVX2 is enabled
  * @return 1 if AVX2 is enabled, 0 otherwise
  */
@@ -117,12 +110,6 @@ int xsimd_is_avx2_enabled(void);
 int xsimd_is_sse2_present(void);
 
 /**
- * Check if AVX is present (detected on CPU)
- * @return 1 if AVX is available, 0 otherwise
- */
-int xsimd_is_avx_present(void);
-
-/**
  * Check if AVX2 is present (detected on CPU)
  * @return 1 if AVX2 is available, 0 otherwise
  */
@@ -133,12 +120,6 @@ int xsimd_is_avx2_present(void);
  * @param bState 1 to enable, 0 to disable
  */
 void xsimd_set_sse2(int bState);
-
-/**
- * Set AVX feature state
- * @param bState 1 to enable, 0 to disable
- */
-void xsimd_set_avx(int bState);
 
 /**
  * Set AVX2 feature state

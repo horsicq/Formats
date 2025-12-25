@@ -4792,7 +4792,7 @@ static qint32 _x_get_simd_threshold()
 
 #ifdef USE_XSIMD
     // Pre-calculate SIMD threshold once based on available features
-    nSimdThreshold = xsimd_is_avx2_enabled() ? 8 : (xsimd_is_avx_enabled() ? 6 : 4);
+    nSimdThreshold = xsimd_is_avx2_enabled() ? 8 : 4;
 #endif
 
     return nSimdThreshold;
