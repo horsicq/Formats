@@ -3318,6 +3318,229 @@ quint8 XBinary::_bcd_decimal(quint8 nValue)
     return nResult;
 }
 
+static qint64 _x_findbyte(char *pBuffer, qint64 nTemp, const char *pArray, qint64 nOffset)
+{
+    qint64 nResult = -1;
+
+#ifdef USE_XSIMD
+    nResult = xsimd_find_byte(pBuffer, nTemp, (unsigned char)pArray[0], nOffset);
+    if (nResult != -1) return nResult;
+#else
+    // Fallback to standard memchr
+    const void *p = memchr(pBuffer, (unsigned char)pArray[0], (size_t)nTemp);
+    if (p) {
+        nResult = nOffset + ((const char *)p - pBuffer);
+    }
+#endif
+
+    return nResult;
+}
+
+static qint64 _x_findpattern_bmh(char *pBuffer, qint64 nTemp, const char *pArray, qint64 nArraySize, qint64 nOffset, const qint32 *bmhShift, char nLastSearchChar)
+{
+    qint64 nResult = -1;
+
+#ifdef USE_XSIMD
+    nResult = xsimd_find_pattern_bmh(pBuffer, nTemp, pArray, nArraySize, nOffset);
+    if (nResult != -1) return nResult;
+#else
+    // Fallback: scalar BMH search
+    const char *hay = pBuffer;
+    qint64 hayLen = nTemp;
+    qint64 m = nArraySize;
+    qint64 i = 0;
+    const qint64 limit = hayLen - m;
+
+    while (i <= limit) {
+        unsigned char c = (unsigned char)hay[i + m - 1];
+
+        if (c == (unsigned char)nLastSearchChar) {
+            if (memcmp(hay + i, pArray, (size_t)m) == 0) {
+                nResult = nOffset + i;
+                break;
+            }
+        }
+        i += (qint64)bmhShift[c];
+    }
+#endif
+
+    return nResult;
+}
+
+static qint64 _x_find_notnull(char *pBuffer, qint64 nTemp, qint64 nArraySize, qint64 nOffset)
+{
+    qint64 nResult = -1;
+
+#ifdef USE_XSIMD
+    nResult = xsimd_find_notnull(pBuffer, nTemp, nArraySize, nOffset);
+    if (nResult != -1) return nResult;
+#else
+    // Find first window of length nArraySize with no zero bytes using memchr to skip over zero-containing regions.
+    const char *hay = pBuffer;
+    qint64 hayLen = nTemp;
+    qint64 m = nArraySize;
+    const qint64 limit = hayLen - (m - 1);
+    qint64 j = 0;
+    while (j < limit) {
+        const void *pz = memchr(hay + j, 0, (size_t)(hayLen - j));
+        qint64 runLen = (pz ? ((const char *)pz - (hay + j)) : (hayLen - j));
+        if (runLen >= m) {
+            nResult = nOffset + j;
+            break;
+        }
+        // Skip to just after the zero byte
+        j += runLen + 1;
+    }
+#endif
+
+    return nResult;
+}
+
+static qint64 _x_find_ansi(char *pBuffer, qint64 nTemp, qint64 nArraySize, qint64 nOffset, const bool *ansiTable)
+{
+    qint64 nResult = -1;
+
+#ifdef USE_XSIMD
+    nResult = xsimd_find_ansi(pBuffer, nTemp, nArraySize, nOffset);
+    if (nResult != -1) return nResult;
+#else
+    // Fallback: scalar loop
+    const unsigned char *hay = (const unsigned char *)pBuffer;
+    qint64 hayLen = nTemp;
+    qint64 m = nArraySize;
+    const qint64 limit = hayLen - (m - 1);
+    qint64 j = 0;
+
+    while (j < limit) {
+        // Skip non-ANSI bytes to the start of an ANSI run
+        while (j < hayLen && !ansiTable[hay[j]]) j++;
+        if (j >= limit) break;
+        qint64 start = j;
+        // Extend ANSI run
+        while (j < hayLen && ansiTable[hay[j]]) j++;
+        qint64 runLen = j - start;
+        if (runLen >= m) {
+            nResult = nOffset + start;
+            break;
+        }
+    }
+#endif
+
+    return nResult;
+}
+
+static qint64 _x_find_notansi(char *pBuffer, qint64 nTemp, qint64 nArraySize, qint64 nOffset, const bool *ansiTable)
+{
+    qint64 nResult = -1;
+
+#ifdef USE_XSIMD
+    nResult = xsimd_find_not_ansi(pBuffer, nTemp, nArraySize, nOffset);
+    if (nResult != -1) return nResult;
+#else
+    // Fallback: scalar loop
+    const unsigned char *hay = (const unsigned char *)pBuffer;
+    qint64 hayLen = nTemp;
+    qint64 m = nArraySize;
+    const qint64 limit = hayLen - (m - 1);
+    qint64 j = 0;
+
+    while (j < limit) {
+        // Skip ANSI bytes to the start of a non-ANSI run
+        while (j < hayLen && ansiTable[hay[j]]) j++;
+        if (j >= limit) break;
+        qint64 start = j;
+        // Extend non-ANSI run
+        while (j < hayLen && !ansiTable[hay[j]]) j++;
+        qint64 runLen = j - start;
+        if (runLen >= m) {
+            nResult = nOffset + start;
+            break;
+        }
+    }
+#endif
+
+    return nResult;
+}
+
+static qint64 _x_find_notansiandnull(char *pBuffer, qint64 nTemp, qint64 nArraySize, qint64 nOffset, const bool *ansiTable)
+{
+    qint64 nResult = -1;
+
+#ifdef USE_XSIMD
+    nResult = xsimd_find_not_ansi_and_null(pBuffer, nTemp, nArraySize, nOffset);
+    if (nResult != -1) return nResult;
+#else
+    const unsigned char *hay = (const unsigned char *)pBuffer;
+    qint64 hayLen = nTemp;
+    qint64 m = nArraySize;
+    const qint64 limit = hayLen - (m - 1);
+    qint64 j = 0;
+
+    while (j < limit) {
+        // Skip bytes that are ANSI or zero to the start of a desired run
+        while (j < hayLen) {
+            unsigned char c = hay[j];
+            if ((!ansiTable[c]) && (c != 0)) break;
+            j++;
+        }
+        if (j >= limit) break;
+        qint64 start = j;
+        // Extend run of non-ANSI and non-zero bytes
+        while (j < hayLen) {
+            unsigned char c = hay[j];
+            if ((ansiTable[c]) || (c == 0)) break;
+            j++;
+        }
+        qint64 runLen = j - start;
+        if (runLen >= m) {
+            nResult = nOffset + start;
+            break;
+        }
+    }
+#endif
+
+    return nResult;
+}
+
+static qint64 _x_find_ansinumber(char *pBuffer, qint64 nTemp, qint64 nArraySize, qint64 nOffset)
+{
+    qint64 nResult = -1;
+
+#ifdef USE_XSIMD
+    nResult = xsimd_find_ansi_number(pBuffer, nTemp, nArraySize, nOffset);
+    if (nResult != -1) return nResult;
+#else
+    const unsigned char *hay = (const unsigned char *)pBuffer;
+    qint64 hayLen = nTemp;
+    qint64 m = nArraySize;
+    const qint64 limit = hayLen - (m - 1);
+    qint64 j = 0;
+    while (j < limit) {
+        // Skip bytes that are not digits to the start of a desired run
+        while (j < hayLen) {
+            unsigned char c = hay[j];
+            if ((c >= 0x30) && (c <= 0x39)) break;
+            j++;
+        }
+        if (j >= limit) break;
+        qint64 start = j;
+        // Extend run of digit bytes
+        while (j < hayLen) {
+            unsigned char c = hay[j];
+            if ((c < 0x30) || (c > 0x39)) break;
+            j++;
+        }
+        qint64 runLen = j - start;
+        if (runLen >= m) {
+            nResult = nOffset + start;
+            break;
+        }
+    }
+#endif
+
+    return nResult;
+}
+
 qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pArray, qint64 nArraySize, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = -1;
@@ -3417,44 +3640,12 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         if (st == ST_COMPAREBYTES) {
             // Fast path: single-byte needle with SIMD optimization
             if (nArraySize == 1) {
-#ifdef USE_XSIMD
-                nResult = xsimd_find_byte(pBuffer, nTemp, (unsigned char)pArray[0], nOffset);
+                nResult = _x_findbyte(pBuffer, nTemp, pArray, nOffset);
                 if (nResult != -1) break;
-#else
-                // Fallback to standard memchr
-                const void *p = memchr(pBuffer, (unsigned char)pArray[0], (size_t)nTemp);
-                if (p) {
-                    nResult = nOffset + ((const char *)p - pBuffer);
-                    break;
-                }
-#endif
             } else if (bUseBMH) {
                 // Boyer–Moore–Horspool pattern search
-#ifdef USE_XSIMD
-                nResult = xsimd_find_pattern_bmh(pBuffer, nTemp, pArray, nArraySize, nOffset);
+                nResult = _x_findpattern_bmh(pBuffer, nTemp, pArray, nArraySize, nOffset, bmhShift, nLastSearchChar);
                 if (nResult != -1) break;
-#else
-                // Fallback: scalar BMH search
-                const char *hay = pBuffer;
-                qint64 hayLen = nTemp;
-                qint64 m = nArraySize;
-                qint64 i = 0;
-                const qint64 limit = hayLen - m;
-
-                while (i <= limit) {
-                    unsigned char c = (unsigned char)hay[i + m - 1];
-
-                    if (c == (unsigned char)nLastSearchChar) {
-                        if (memcmp(hay + i, pArray, (size_t)m) == 0) {
-                            nResult = nOffset + i;
-                            break;
-                        }
-                    }
-                    i += (qint64)bmhShift[c];
-                }
-
-                if (nResult != -1) break;
-#endif
             } else {
                 // Fallback naive scan
                 const qint64 limit = nTemp - (nArraySize - 1);
@@ -3468,152 +3659,20 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
                 if (nResult != -1) break;
             }
         } else if (st == ST_NOTNULL) {
-#ifdef USE_XSIMD
-            nResult = xsimd_find_notnull(pBuffer, nTemp, nArraySize, nOffset);
+            nResult = _x_find_notnull(pBuffer, nTemp, nArraySize, nOffset);
             if (nResult != -1) break;
-#else
-            // Find first window of length nArraySize with no zero bytes using memchr to skip over zero-containing regions.
-            const char *hay = pBuffer;
-            qint64 hayLen = nTemp;
-            qint64 m = nArraySize;
-            const qint64 limit = hayLen - (m - 1);
-            qint64 j = 0;
-            while (j < limit) {
-                const void *pz = memchr(hay + j, 0, (size_t)(hayLen - j));
-                qint64 runLen = (pz ? ((const char *)pz - (hay + j)) : (hayLen - j));
-                if (runLen >= m) {
-                    nResult = nOffset + j;
-                    break;
-                }
-                // Skip to just after the zero byte
-                j += runLen + 1;
-            }
-#endif
         } else if (st == ST_ANSI) {
-#ifdef USE_XSIMD
-            nResult = xsimd_find_ansi(pBuffer, nTemp, nArraySize, nOffset);
+            nResult = _x_find_ansi(pBuffer, nTemp, nArraySize, nOffset, ansiTable);
             if (nResult != -1) break;
-#else
-            // Fallback: scalar loop
-            const unsigned char *hay = (const unsigned char *)pBuffer;
-            qint64 hayLen = nTemp;
-            qint64 m = nArraySize;
-            const qint64 limit = hayLen - (m - 1);
-            qint64 j = 0;
-
-            while (j < limit) {
-                // Skip non-ANSI bytes to the start of an ANSI run
-                while (j < hayLen && !ansiTable[hay[j]]) j++;
-                if (j >= limit) break;
-                qint64 start = j;
-                // Extend ANSI run
-                while (j < hayLen && ansiTable[hay[j]]) j++;
-                qint64 runLen = j - start;
-                if (runLen >= m) {
-                    nResult = nOffset + start;
-                    break;
-                }
-            }
-
-            if (nResult != -1) break;
-#endif
         } else if (st == ST_NOTANSI) {
-#ifdef USE_XSIMD
-            nResult = xsimd_find_not_ansi(pBuffer, nTemp, nArraySize, nOffset);
+            nResult = _x_find_notansi(pBuffer, nTemp, nArraySize, nOffset, ansiTable);
             if (nResult != -1) break;
-#else
-            // Fallback: scalar loop
-            const unsigned char *hay = (const unsigned char *)pBuffer;
-            qint64 hayLen = nTemp;
-            qint64 m = nArraySize;
-            const qint64 limit = hayLen - (m - 1);
-            qint64 j = 0;
-
-            while (j < limit) {
-                // Skip ANSI bytes to the start of a non-ANSI run
-                while (j < hayLen && ansiTable[hay[j]]) j++;
-                if (j >= limit) break;
-                qint64 start = j;
-                // Extend non-ANSI run
-                while (j < hayLen && !ansiTable[hay[j]]) j++;
-                qint64 runLen = j - start;
-                if (runLen >= m) {
-                    nResult = nOffset + start;
-                    break;
-                }
-            }
-
-            if (nResult != -1) break;
-#endif
         } else if (st == ST_NOTANSIANDNULL) {
-#ifdef USE_XSIMD
-            nResult = xsimd_find_not_ansi_and_null(pBuffer, nTemp, nArraySize, nOffset);
+            nResult = _x_find_notansiandnull(pBuffer, nTemp, nArraySize, nOffset, ansiTable);
             if (nResult != -1) break;
-#else
-            const unsigned char *hay = (const unsigned char *)pBuffer;
-            qint64 hayLen = nTemp;
-            qint64 m = nArraySize;
-            const qint64 limit = hayLen - (m - 1);
-            qint64 j = 0;
-
-            while (j < limit) {
-                // Skip bytes that are ANSI or zero to the start of a desired run
-                while (j < hayLen) {
-                    unsigned char c = hay[j];
-                    if ((!ansiTable[c]) && (c != 0)) break;
-                    j++;
-                }
-                if (j >= limit) break;
-                qint64 start = j;
-                // Extend run of non-ANSI and non-zero bytes
-                while (j < hayLen) {
-                    unsigned char c = hay[j];
-                    if ((ansiTable[c]) || (c == 0)) break;
-                    j++;
-                }
-                qint64 runLen = j - start;
-                if (runLen >= m) {
-                    nResult = nOffset + start;
-                    break;
-                }
-            }
-
-            if (nResult != -1) break;
-#endif
         } else if (st == ST_ANSINUMBER) {
-#ifdef USE_XSIMD
-            nResult = xsimd_find_ansi_number(pBuffer, nTemp, nArraySize, nOffset);
+            nResult = _x_find_ansinumber(pBuffer, nTemp, nArraySize, nOffset);
             if (nResult != -1) break;
-#else
-            const unsigned char *hay = (const unsigned char *)pBuffer;
-            qint64 hayLen = nTemp;
-            qint64 m = nArraySize;
-            const qint64 limit = hayLen - (m - 1);
-            qint64 j = 0;
-            while (j < limit) {
-                // Skip bytes that are not digits to the start of a desired run
-                while (j < hayLen) {
-                    unsigned char c = hay[j];
-                    if ((c >= 0x30) && (c <= 0x39)) break;
-                    j++;
-                }
-                if (j >= limit) break;
-                qint64 start = j;
-                // Extend run of digit bytes
-                while (j < hayLen) {
-                    unsigned char c = hay[j];
-                    if ((c < 0x30) || (c > 0x39)) break;
-                    j++;
-                }
-                qint64 runLen = j - start;
-                if (runLen >= m) {
-                    nResult = nOffset + start;
-                    break;
-                }
-            }
-
-            if (nResult != -1) break;
-#endif
         }
 
         if (nResult != -1) {
@@ -4046,6 +4105,45 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
     return nResult;
 }
 
+static qint64 _x_find_ansi_string_i(char *pBuffer, qint64 nTemp, qint64 nStringSize, const quint8 *pUpperData, const quint8 *pLowerData, qint64 nOffset)
+{
+    qint64 nResult = -1;
+    qint64 nSearchEnd = nTemp - (nStringSize - 1);
+
+#ifdef USE_XSIMD
+    nResult = xsimd_find_ansi_string_i(pBuffer, nTemp, (const char *)pUpperData, nStringSize, nOffset);
+    if (nResult != -1) return nResult;
+#else
+    quint8 *pData = (quint8 *)pBuffer;
+    for (qint64 i = 0; i < nSearchEnd; i++) {
+        // Inline comparison for better performance
+        bool bMatch = true;
+        quint8 *pCurrent = pData + i;
+        const quint8 *pUpper = pUpperData;
+        const quint8 *pLower = pLowerData;
+        qint64 nRemaining = nStringSize;
+
+        while (nRemaining > 0) {
+            if ((*pCurrent != *pUpper) && (*pCurrent != *pLower)) {
+                bMatch = false;
+                break;
+            }
+            pCurrent++;
+            pUpper++;
+            pLower++;
+            nRemaining--;
+        }
+
+        if (bMatch) {
+            nResult = nOffset + i;
+            break;
+        }
+    }
+#endif
+
+    return nResult;
+}
+
 qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sString, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
@@ -4090,41 +4188,7 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
                 break;
             }
 
-            quint8 *pData = (quint8 *)pBuffer;
-            qint64 nSearchEnd = nTemp - (nStringSize - 1);
-
-#ifdef USE_XSIMD
-            qint64 nFoundPos = xsimd_find_ansi_string_i(pBuffer, nTemp, baUpper.constData(), nStringSize, nOffset);
-            if (nFoundPos != -1) {
-                nResult = nFoundPos;
-                break;
-            }
-#else
-            for (qint64 i = 0; i < nSearchEnd; i++) {
-                // Inline comparison for better performance
-                bool bMatch = true;
-                quint8 *pCurrent = pData + i;
-                const quint8 *pUpper = pUpperData;
-                const quint8 *pLower = pLowerData;
-                qint64 nRemaining = nStringSize;
-
-                while (nRemaining > 0) {
-                    if ((*pCurrent != *pUpper) && (*pCurrent != *pLower)) {
-                        bMatch = false;
-                        break;
-                    }
-                    pCurrent++;
-                    pUpper++;
-                    pLower++;
-                    nRemaining--;
-                }
-
-                if (bMatch) {
-                    nResult = nOffset + i;
-                    break;
-                }
-            }
-#endif
+            nResult = _x_find_ansi_string_i(pBuffer, nTemp, nStringSize, pUpperData, pLowerData, nOffset);
 
             if (nResult != -1) {
                 break;
@@ -4722,6 +4786,18 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
     return listResult;
 }
 
+static qint32 _x_get_simd_threshold()
+{
+    qint32 nSimdThreshold = 4;
+
+#ifdef USE_XSIMD
+    // Pre-calculate SIMD threshold once based on available features
+    nSimdThreshold = xsimd_is_avx2_enabled() ? 8 : (xsimd_is_avx_enabled() ? 6 : 4);
+#endif
+
+    return nSimdThreshold;
+}
+
 QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
@@ -4772,10 +4848,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
         pRegex->optimize();
     }
 
-#ifdef USE_XSIMD
-    // Pre-calculate SIMD threshold once based on available features
-    qint32 nSimdThreshold = xsimd_is_avx2_enabled() ? 8 : (xsimd_is_avx_enabled() ? 6 : 4);
-#endif
+    qint32 nSimdThreshold = _x_get_simd_threshold();
 
     while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
         qint64 nCurrentSize = qMin((qint64)BUFFER_SIZE, _nSize);
