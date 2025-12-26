@@ -4,8 +4,8 @@ TARGET = xsimd_sse2
 TEMPLATE = lib
 CONFIG += staticlib
 
-INCLUDEPATH += $$PWD/src
-DEPENDPATH += $$PWD/src
+INCLUDEPATH += $$PWD/../src
+DEPENDPATH += $$PWD/../src
 
 include(../../../build.pri)
 
