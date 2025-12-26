@@ -12,7 +12,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src/)
 
 # xsimd_sse2 library - SSE2 specific implementations
 add_library(xsimd_sse2 STATIC
-    ${PROJECT_SOURCE_DIR}/src/xsimd_sse.c
+    ${PROJECT_SOURCE_DIR}/src/xsimd_sse2.c
 )
 set_target_properties(xsimd_sse2 PROPERTIES LINKER_LANGUAGE C)
 

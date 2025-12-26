@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 #include "xsimd.h"
-#include "xsimd_sse.h"
+#include "xsimd_sse2.h"
 #include "xsimd_avx2.h"
 #include <stdio.h>
 #include <stdlib.h>

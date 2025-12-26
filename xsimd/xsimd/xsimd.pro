@@ -24,7 +24,7 @@ SOURCES += \
 
 HEADERS += \
     $$PWD/../src/xsimd.h \
-    $$PWD/../src/xsimd_sse.h \
+    $$PWD/../src/xsimd_sse2.h \
     $$PWD/../src/xsimd_avx2.h
 	
 TARGETLIB_PATH = $$PWD/..
