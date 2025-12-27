@@ -2875,10 +2875,9 @@ QString XBinary::read_UUID_bytes(qint64 nOffset)
 {
     // TODO check!
     // TODO Check Endian
-    QString sResult =
-        QString("%1-%2-%3-%4-%5")
-            .arg(read_array(nOffset + 0, 4).toHex().data(), read_array(nOffset + 4, 2).toHex().data(), read_array(nOffset + 6, 2).toHex().data(),
-                 read_array(nOffset + 8, 2).toHex().data(), read_array(nOffset + 10, 6).toHex().data());
+    QString sResult = QString("%1-%2-%3-%4-%5")
+                          .arg(read_array(nOffset + 0, 4).toHex().data(), read_array(nOffset + 4, 2).toHex().data(), read_array(nOffset + 6, 2).toHex().data(),
+                               read_array(nOffset + 8, 2).toHex().data(), read_array(nOffset + 10, 6).toHex().data());
 
     return sResult;
 }
@@ -14113,7 +14112,7 @@ void XBinary::invokePdStructCallback(PDSTRUCT *pPdStruct, qint32 nMinIntervalMs)
 {
     if (pPdStruct && pPdStruct->pCallback) {
         qint64 nCurrentTime = QDateTime::currentMSecsSinceEpoch();
-        
+
         if ((nCurrentTime - pPdStruct->nLastCallbackTime) >= nMinIntervalMs) {
             pPdStruct->pCallback(pPdStruct->pCallbackUserData, pPdStruct);
             pPdStruct->nLastCallbackTime = nCurrentTime;

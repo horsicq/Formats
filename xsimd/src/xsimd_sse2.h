@@ -29,18 +29,21 @@ extern "C" {
 
 /* SSE2 internal functions */
 xsimd_int64 _xsimd_find_byte_SSE2(const unsigned char* pData, xsimd_int64 nSize, xsimd_uint8 nByte, xsimd_int64 nOffset);
-xsimd_int64 _xsimd_find_pattern_bmh_SSE2(const char* pHay, xsimd_int64 nBufferSize, const char* pNeedle, xsimd_int64 nPatternSize, xsimd_int64 nOffset, xsimd_int64 nLimit, char nLastChar, xsimd_int64 nStartPos);
+xsimd_int64 _xsimd_find_pattern_bmh_SSE2(const char* pHay, xsimd_int64 nBufferSize, const char* pNeedle, xsimd_int64 nPatternSize, xsimd_int64 nOffset,
+                                         xsimd_int64 nLimit, char nLastChar, xsimd_int64 nStartPos);
 xsimd_int64 _xsimd_find_pattern_bmh_3byte_SSE2(const char* pHay, xsimd_int64 nBufferSize, const char* pNeedle, xsimd_int64 nOffset);
 xsimd_int64 _xsimd_find_pattern_bmh_2byte_SSE2(const char* pHay, xsimd_int64 nBufferSize, xsimd_uint16 pattern16, xsimd_int64 nOffset);
 xsimd_int64 _xsimd_find_pattern_bmh_1byte_SSE2(const char* pHay, xsimd_int64 nBufferSize, char nByte, xsimd_int64 nOffset);
 xsimd_int64 _xsimd_find_ansi_SSE2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);
-xsimd_int64 _xsimd_find_notnull_SSE2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset, xsimd_int64 j, xsimd_int64 runStart);
+xsimd_int64 _xsimd_find_notnull_SSE2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset, xsimd_int64 j,
+                                     xsimd_int64 runStart);
 xsimd_int64 _xsimd_find_not_ansi_SSE2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);
 int _xsimd_is_not_null_SSE2(const char* ptr, xsimd_int64 nSize);
 int _xsimd_is_ansi_SSE2(const char* ptr, xsimd_int64 nSize);
 int _xsimd_is_not_ansi_SSE2(const char* ptr, xsimd_int64 nSize);
 int _xsimd_compare_memory_SSE2(const char* ptr1, const char* ptr2, xsimd_int64 nSize);
-xsimd_int64 _xsimd_find_not_ansi_and_null_SSE2(const unsigned char* hay, xsimd_int64 hayLen, xsimd_int64 nOffset, xsimd_int64 m, const xsimd_int64 limit, const int* ansiTable, xsimd_int64* pj);
+xsimd_int64 _xsimd_find_not_ansi_and_null_SSE2(const unsigned char* hay, xsimd_int64 hayLen, xsimd_int64 nOffset, xsimd_int64 m, const xsimd_int64 limit,
+                                               const int* ansiTable, xsimd_int64* pj);
 int _xsimd_is_not_ansi_and_null_SSE2(const char* ptr, xsimd_int64 nSize);
 xsimd_int64 _xsimd_find_ansi_number_SSE2(const unsigned char* hay, xsimd_int64 hayLen, xsimd_int64 nOffset, xsimd_int64 m, const xsimd_int64 limit, xsimd_int64* pj);
 int _xsimd_is_ansi_number_SSE2(const char* ptr, xsimd_int64 nSize);
