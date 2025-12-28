@@ -601,6 +601,7 @@ xsimd_int64 _xsimd_find_not_ansi_AVX2(const unsigned char* pData, xsimd_int64 nB
 
 int _xsimd_is_not_null_AVX2(const char* ptr, xsimd_int64 nSize)
 {
+#ifdef XSIMD_X86
     const __m256i zero = _mm256_setzero_si256();
     
     /* Process 128 bytes per iteration for better throughput */
@@ -643,10 +644,14 @@ int _xsimd_is_not_null_AVX2(const char* ptr, xsimd_int64 nSize)
     }
     
     return -1;  /* Continue with fallback */
+#else
+    return -1;
+#endif
 }
 
 int _xsimd_is_ansi_AVX2(const char* ptr, xsimd_int64 nSize)
 {
+#ifdef XSIMD_X86
     const __m256i low_bound = _mm256_set1_epi8(0x20 - 1);
     const __m256i high_bound = _mm256_set1_epi8(0x7F);
     
@@ -698,10 +703,14 @@ int _xsimd_is_ansi_AVX2(const char* ptr, xsimd_int64 nSize)
     }
     
     return -1;  /* Continue with fallback */
+#else
+    return -1;
+#endif
 }
 
 int _xsimd_is_not_ansi_AVX2(const char* ptr, xsimd_int64 nSize)
 {
+#ifdef XSIMD_X86
     /* Process 128 bytes per iteration for better throughput */
     while (nSize >= 128) {
         __m256i chunk0 = _mm256_loadu_si256((const __m256i*)ptr);
@@ -750,10 +759,14 @@ int _xsimd_is_not_ansi_AVX2(const char* ptr, xsimd_int64 nSize)
     }
     
     return -1;  /* Continue with fallback */
+#else
+    return -1;
+#endif
 }
 
 int _xsimd_compare_memory_AVX2(const char* ptr1, const char* ptr2, xsimd_int64 nSize)
 {
+#ifdef XSIMD_X86
     /* Process 128 bytes per iteration for better throughput */
     while (nSize >= 128) {
         __m256i chunk1_0 = _mm256_loadu_si256((const __m256i*)ptr1);
@@ -798,6 +811,9 @@ int _xsimd_compare_memory_AVX2(const char* ptr1, const char* ptr2, xsimd_int64 n
     }
     
     return -1;  /* Continue with fallback */
+#else
+    return -1;
+#endif
 }
 
 xsimd_int64 _xsimd_find_not_ansi_and_null_AVX2(const unsigned char* hay, xsimd_int64 hayLen, xsimd_int64 nOffset, xsimd_int64 m, const xsimd_int64 limit, const int* ansiTable, xsimd_int64* pj)
@@ -850,6 +866,7 @@ xsimd_int64 _xsimd_find_not_ansi_and_null_AVX2(const unsigned char* hay, xsimd_i
 
 int _xsimd_is_not_ansi_and_null_AVX2(const char* ptr, xsimd_int64 nSize)
 {
+#ifdef XSIMD_X86
     const __m256i zero = _mm256_setzero_si256();
     
     while (nSize >= 32) {
@@ -875,6 +892,9 @@ int _xsimd_is_not_ansi_and_null_AVX2(const char* ptr, xsimd_int64 nSize)
     }
     
     return -1;  /* Continue with fallback */
+#else
+    return -1;
+#endif
 }
 
 xsimd_int64 _xsimd_find_ansi_number_AVX2(const unsigned char* hay, xsimd_int64 hayLen, xsimd_int64 nOffset, xsimd_int64 m, const xsimd_int64 limit, xsimd_int64* pj)
@@ -945,6 +965,7 @@ xsimd_int64 _xsimd_find_ansi_number_AVX2(const unsigned char* hay, xsimd_int64 h
 
 int _xsimd_is_ansi_number_AVX2(const char* ptr, xsimd_int64 nSize)
 {
+#ifdef XSIMD_X86
     const __m256i digit_low = _mm256_set1_epi8(0x30);   /* '0' */
     const __m256i digit_high = _mm256_set1_epi8(0x39);  /* '9' */
     
@@ -965,10 +986,14 @@ int _xsimd_is_ansi_number_AVX2(const char* ptr, xsimd_int64 nSize)
     }
     
     return -1;  /* Continue with fallback */
+#else
+    return -1;
+#endif
 }
 
 xsimd_int64 _xsimd_find_first_non_ansi_AVX2(const xsimd_uint8* pData, xsimd_int64 i, xsimd_int64 nSize)
 {
+#ifdef XSIMD_X86
     __m256i vMin = _mm256_set1_epi8(0x20);  /* Minimum ANSI (space) */
     __m256i vMax = _mm256_set1_epi8(0x7F);  /* Maximum ANSI (DEL-1) */
     
@@ -992,6 +1017,9 @@ xsimd_int64 _xsimd_find_first_non_ansi_AVX2(const xsimd_uint8* pData, xsimd_int6
     }
     
     return -1;  /* Not found in SIMD portion */
+#else
+    return -1;
+#endif
 }
 
 xsimd_int64 _xsimd_find_null_byte_AVX2(const xsimd_uint8* pData, xsimd_int64 nSize, xsimd_int64* pi)
