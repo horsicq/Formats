@@ -18,8 +18,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef XSIMD_SSE_H
-#define XSIMD_SSE_H
+#ifndef XSIMD_SSE2_H
+#define XSIMD_SSE2_H
 
 #include "xsimd.h"
 
@@ -57,4 +57,4 @@ void _xsimd_create_ansi_mask_SSE2(const xsimd_uint8* pData, xsimd_int64 nSize, x
 }
 #endif
 
-#endif /* XSIMD_SSE_H */
+#endif /* XSIMD_SSE2_H */

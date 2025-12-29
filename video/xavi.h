@@ -50,11 +50,15 @@ public:
     qint64 getFileFormatSize(PDSTRUCT *pPdStruct) override;
     FT getFileType() override;
     QString getMIMEString() override;
-    virtual QString structIDToString(quint32 nID) override;
-    virtual QString getArch() override;
-    virtual MODE getMode() override;
-    virtual ENDIAN getEndian() override;
-    virtual QString getVersion() override;
+    QString getArch() override;
+    MODE getMode() override;
+    ENDIAN getEndian() override;
+    QString getVersion() override;
+    QString structIDToString(quint32 nID) override;
+    QList<MAPMODE> getMapModesList() override;
+    _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
+    QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 };
 
 #endif  // XAVI_H
