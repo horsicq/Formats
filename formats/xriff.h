@@ -36,16 +36,16 @@ public:
     explicit XRiff(QIODevice *pDevice = nullptr);
     ~XRiff();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
+    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice);
 
-    virtual QString getFileFormatExt();
-    virtual QString getFileFormatExtsString();
-    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
+    virtual QString getFileFormatExt() override;
+    virtual QString getFileFormatExtsString() override;
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct) override;
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
-    virtual FT getFileType();
-    virtual ENDIAN getEndian();
-    virtual QString getMIMEString();
+    virtual FT getFileType() override;
+    virtual ENDIAN getEndian() override;
+    virtual QString getMIMEString() override;
 
     // Standardized inspection
     virtual QList<MAPMODE> getMapModesList() override;
