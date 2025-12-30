@@ -45,19 +45,19 @@ public:
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
-    virtual bool isExecutable();
+    virtual bool isExecutable() override;
 
     virtual QList<MAPMODE> getMapModesList() override;
     virtual _MEMORY_MAP getMemoryMap(XBinary::MAPMODE mapMode = XBinary::MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QString getArch() override;
     virtual MODE getMode() override;
     virtual ENDIAN getEndian() override;
-    virtual qint64 getImageSize();
+    virtual qint64 getImageSize() override;
     virtual FT getFileType() override;
     virtual QString getVersion() override;
-    virtual qint32 getType();
+    virtual qint32 getType() override;
     virtual OSNAME getOsName() override;
-    virtual QString typeIdToString(qint32 nType);
+    virtual QString typeIdToString(qint32 nType) override;
     virtual QString getMIMEString() override;
     virtual QString getFileFormatExt() override;
     virtual QString getFileFormatExtsString() override;
