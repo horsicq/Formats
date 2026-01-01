@@ -47,9 +47,9 @@ xsimd_int64 _xsimd_find_byte_AVX2(const unsigned char* pData, xsimd_int64 nSize,
 #ifdef _MSC_VER
             unsigned long nBitPos;
             _BitScanForward(&nBitPos, (unsigned long)nMask0);
-            return nOffset + i + nBitPos;
+            return i + nBitPos;
 #else
-            return nOffset + i + __builtin_ctz((unsigned int)nMask0);
+            return i + __builtin_ctz((unsigned int)nMask0);
 #endif
         }
         
@@ -57,9 +57,9 @@ xsimd_int64 _xsimd_find_byte_AVX2(const unsigned char* pData, xsimd_int64 nSize,
 #ifdef _MSC_VER
             unsigned long nBitPos;
             _BitScanForward(&nBitPos, (unsigned long)nMask1);
-            return nOffset + i + 32 + nBitPos;
+            return i + 32 + nBitPos;
 #else
-            return nOffset + i + 32 + __builtin_ctz((unsigned int)nMask1);
+            return i + 32 + __builtin_ctz((unsigned int)nMask1);
 #endif
         }
         
@@ -76,9 +76,9 @@ xsimd_int64 _xsimd_find_byte_AVX2(const unsigned char* pData, xsimd_int64 nSize,
 #ifdef _MSC_VER
             unsigned long nBitPos;
             _BitScanForward(&nBitPos, (unsigned long)nMask);
-            return nOffset + i + nBitPos;
+            return i + nBitPos;
 #else
-            return nOffset + i + __builtin_ctz((unsigned int)nMask);
+            return i + __builtin_ctz((unsigned int)nMask);
 #endif
         }
         i += 32;

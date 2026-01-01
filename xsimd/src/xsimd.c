@@ -190,6 +190,7 @@ xsimd_int64 xsimd_find_byte(const void* pBuffer, xsimd_int64 nSize, xsimd_uint8 
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nSize >= 32) {
         i = _xsimd_find_byte_AVX2(pData, nSize, nByte, nOffset);
+
         if (i < nSize && pData[i] == nByte) {
             return nOffset + i;
         }
@@ -197,6 +198,7 @@ xsimd_int64 xsimd_find_byte(const void* pBuffer, xsimd_int64 nSize, xsimd_uint8 
     /* SSE2: Process 16 bytes at a time */
     else if ((g_nEnabledFeatures & XSIMD_FEATURE_SSE2) && nSize >= 16) {
         i = _xsimd_find_byte_SSE2(pData, nSize, nByte, nOffset);
+
         if (i < nSize && pData[i] == nByte) {
             return nOffset + i;
         }
