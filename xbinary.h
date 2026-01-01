@@ -362,13 +362,6 @@ public:
         qint64 nSize;
     };
 
-    // enum ADDRESS_SEGMENT {
-    //     ADDRESS_SEGMENT_UNKNOWN = -1,
-    //     ADDRESS_SEGMENT_FLAT = 0,
-    //     ADDRESS_SEGMENT_CODE,
-    //     //        ADDRESS_SEGMENT_DATA
-    // };
-
     enum FILEPART {
         FILEPART_UNKNOWN = 0,
         FILEPART_REGION = 1 << 0,
