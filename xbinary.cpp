@@ -3963,11 +3963,12 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
         nSize = _nSize - nOffset;
     }
 
-    if (nSize <= 0) {
-        return -1;
+    if (nOffset + nSize > _nSize) {
+        // return -1;
+        nSize = _nSize - nOffset;
     }
 
-    if (nOffset + nSize > _nSize) {
+    if (nSize <= 0) {
         return -1;
     }
 
