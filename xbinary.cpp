@@ -236,6 +236,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_ICO, "ICO", QString("ICO")},
     {XBinary::FT_IMAGE, "Image", QObject::tr("Image")},
     {XBinary::FT_ISO9660, "ISO 9660", QString("ISO 9660")},
+    {XBinary::FT_UDF, "UDF", QString("UDF")},
     {XBinary::FT_IPA, "IPA", QString("IPA")},
     {XBinary::FT_JAR, "JAR", QString("JAR")},
     {XBinary::FT_JPEG, "JPEG", QString("JPEG")},
@@ -8072,6 +8073,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "4344303031", 0x8001, 0)) {  // "CD001" at offset 0x8001
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_ISO9660);
+        } else if (compareSignature(&memoryMap, "0002", 256 * 2048, 0)) {  // UDF Anchor at sector 256
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_UDF);
         } else if (compareSignature(&memoryMap, "'ID3'..00", 0)) {
             stResult.insert(FT_AUDIO);
             stResult.insert(FT_MP3);
@@ -8569,6 +8573,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_LZIP)) listResult.append(FT_LZIP);
         if (stFileTypes.contains(FT_CPIO)) listResult.append(FT_CPIO);
         if (stFileTypes.contains(FT_ISO9660)) listResult.append(FT_ISO9660);
+        if (stFileTypes.contains(FT_UDF)) listResult.append(FT_UDF);
         if (stFileTypes.contains(FT_MINIDUMP)) listResult.append(FT_MINIDUMP);
         if (stFileTypes.contains(FT_DMG)) listResult.append(FT_DMG);
     }
