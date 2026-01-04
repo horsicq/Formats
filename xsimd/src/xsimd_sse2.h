@@ -30,7 +30,7 @@ extern "C" {
 /* SSE2 internal functions */
 xsimd_int64 _xsimd_find_byte_SSE2(const unsigned char* pData, xsimd_int64 nSize, xsimd_uint8 nByte, xsimd_int64 nOffset);
 xsimd_int64 _xsimd_find_pattern_bmh_SSE2(const char* pHay, xsimd_int64 nBufferSize, const char* pNeedle, xsimd_int64 nPatternSize, xsimd_int64 nOffset,
-                                         xsimd_int64 nLimit, char nLastChar, xsimd_int64 nStartPos);
+                                         xsimd_int64 nLimit, char nLastChar, xsimd_int64 *pPosition);
 xsimd_int64 _xsimd_find_pattern_bmh_3byte_SSE2(const char* pHay, xsimd_int64 nBufferSize, const char* pNeedle, xsimd_int64 nOffset);
 xsimd_int64 _xsimd_find_pattern_bmh_2byte_SSE2(const char* pHay, xsimd_int64 nBufferSize, xsimd_uint16 pattern16, xsimd_int64 nOffset);
 xsimd_int64 _xsimd_find_pattern_bmh_1byte_SSE2(const char* pHay, xsimd_int64 nBufferSize, char nByte, xsimd_int64 nOffset);

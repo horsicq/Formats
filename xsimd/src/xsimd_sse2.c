@@ -116,11 +116,11 @@ xsimd_int64 _xsimd_find_byte_SSE2(const unsigned char* pData, xsimd_int64 nSize,
 #endif
 }
 
-xsimd_int64 _xsimd_find_pattern_bmh_SSE2(const char* pHay, xsimd_int64 nBufferSize, const char* pNeedle, xsimd_int64 nPatternSize, xsimd_int64 nOffset, xsimd_int64 nLimit, char nLastChar, xsimd_int64 nStartPos)
+xsimd_int64 _xsimd_find_pattern_bmh_SSE2(const char* pHay, xsimd_int64 nBufferSize, const char* pNeedle, xsimd_int64 nPatternSize, xsimd_int64 nOffset, xsimd_int64 nLimit, char nLastChar, xsimd_int64 *pPosition)
 {
 #ifdef XSIMD_X86
     __m128i vLast = _mm_set1_epi8((char)nLastChar);
-    xsimd_int64 i = nStartPos;
+    xsimd_int64 i = *pPosition;
     
     /* Process 64 bytes per iteration for better throughput */
     while (i + nPatternSize + 63 <= nBufferSize) {
@@ -204,6 +204,8 @@ xsimd_int64 _xsimd_find_pattern_bmh_SSE2(const char* pHay, xsimd_int64 nBufferSi
         i += 16;
     }
     
+    /* Update position and return -1 to signal no match found by SIMD */
+    *pPosition = i;
     return -1;
 #else
     return -1;

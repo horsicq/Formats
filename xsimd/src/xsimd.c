@@ -247,7 +247,7 @@ xsimd_int64 xsimd_find_pattern_bmh(const void* pBuffer, xsimd_int64 nBufferSize,
     
     /* AVX2: Process 64 bytes at a time (2 × 32-byte vectors) */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nPatternSize >= 4) {
-        xsimd_int64 result = _xsimd_find_pattern_bmh_AVX2(pHay, nBufferSize, pNeedle, nPatternSize, nOffset, nLimit, nLastChar, i);
+        xsimd_int64 result = _xsimd_find_pattern_bmh_AVX2(pHay, nBufferSize, pNeedle, nPatternSize, nOffset, nLimit, nLastChar, &i);
         if (result != -1) {
             return result;
         }
@@ -268,7 +268,7 @@ xsimd_int64 xsimd_find_pattern_bmh(const void* pBuffer, xsimd_int64 nBufferSize,
     }
     /* SSE2: Process 64 bytes at a time (4 × 16-byte vectors) */
     else if ((g_nEnabledFeatures & XSIMD_FEATURE_SSE2) && nPatternSize >= 4) {
-        xsimd_int64 result = _xsimd_find_pattern_bmh_SSE2(pHay, nBufferSize, pNeedle, nPatternSize, nOffset, nLimit, nLastChar, i);
+        xsimd_int64 result = _xsimd_find_pattern_bmh_SSE2(pHay, nBufferSize, pNeedle, nPatternSize, nOffset, nLimit, nLastChar, &i);
         if (result != -1) {
             return result;
         }
