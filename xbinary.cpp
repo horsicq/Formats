@@ -8182,28 +8182,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         }
 
         if (!bAllFound) {
-            if (nSize >= 12) {
-                if (read_uint16(2) == 0x0A0D) {
-                    // XPYC validation check
-                    quint16 nMagic = read_uint16(0);
-                    quint16 nCRLF = read_uint16(2);
-
-                    // Python bytecode magic numbers (partial list, see XPYC for complete list)
-                    // Format: first 2 bytes = magic, next 2 bytes = 0x0A0D (CRLF)
-                    bool bIsPYC = false;
-                    if (nCRLF == 0x0A0D) {
-                        // Check for common Python magic numbers
-                        if ((nMagic >= 0x0A0D) && (nMagic <= 0xFFFF)) {
-                            // Basic validation: magic number present and CRLF marker
-                            bIsPYC = true;
-                        }
-                    }
-
-                    if (bIsPYC) {
-                        stResult.insert(FT_PYC);
-                        bAllFound = true;
-                    }
-                }
+            if (XPYC::isValid(pDevice)) {
+                stResult.insert(FT_PYC);
+                bAllFound = true;
             }
         }
 
