@@ -256,17 +256,74 @@ xsimd_int64 _xsimd_find_pattern_bmh_3byte_AVX2(const char* pHay, xsimd_int64 nBu
 xsimd_int64 _xsimd_find_pattern_bmh_2byte_AVX2(const char* pHay, xsimd_int64 nBufferSize, xsimd_uint16 pattern16, xsimd_int64 nOffset)
 {
 #ifdef XSIMD_X86
-    __m256i vPattern = _mm256_set1_epi16((short)pattern16);
+    const char nFirstByte = (char)(pattern16 & 0xFF);
+    const char nSecondByte = (char)((pattern16 >> 8) & 0xFF);
+    __m256i vFirst = _mm256_set1_epi8(nFirstByte);
     xsimd_int64 i = 0;
     
-    /* Process 32 bytes (16 two-byte values) per iteration */
-    while (i + 31 < nBufferSize) {
+    /* Process 64 bytes per iteration - filter by first byte */
+    while (i + 64 <= nBufferSize) {
+        __m256i vData0 = _mm256_loadu_si256((const __m256i*)(pHay + i));
+        __m256i vData1 = _mm256_loadu_si256((const __m256i*)(pHay + i + 32));
+        
+        __m256i vCmp0 = _mm256_cmpeq_epi8(vData0, vFirst);
+        __m256i vCmp1 = _mm256_cmpeq_epi8(vData1, vFirst);
+        
+        xsimd_uint32 nMask0 = (xsimd_uint32)_mm256_movemask_epi8(vCmp0);
+        xsimd_uint32 nMask1 = (xsimd_uint32)_mm256_movemask_epi8(vCmp1);
+        
+        /* Fast skip if no matches */
+        if ((nMask0 | nMask1) == 0) {
+            i += 64;
+            continue;
+        }
+        
+        /* Check first block */
+        if (nMask0 != 0) {
+            xsimd_uint32 nTempMask = nMask0;
+            while (nTempMask != 0) {
+#ifdef _MSC_VER
+                unsigned long bit;
+                _BitScanForward(&bit, nTempMask);
+#else
+                unsigned bit = __builtin_ctz(nTempMask);
+#endif
+                xsimd_int64 pos = i + (xsimd_int64)bit;
+                if (pos + 1 < nBufferSize && pHay[pos + 1] == nSecondByte) {
+                    return nOffset + pos;
+                }
+                nTempMask &= nTempMask - 1;
+            }
+        }
+        
+        /* Check second block */
+        if (nMask1 != 0) {
+            xsimd_uint32 nTempMask = nMask1;
+            while (nTempMask != 0) {
+#ifdef _MSC_VER
+                unsigned long bit;
+                _BitScanForward(&bit, nTempMask);
+#else
+                unsigned bit = __builtin_ctz(nTempMask);
+#endif
+                xsimd_int64 pos = i + 32 + (xsimd_int64)bit;
+                if (pos + 1 < nBufferSize && pHay[pos + 1] == nSecondByte) {
+                    return nOffset + pos;
+                }
+                nTempMask &= nTempMask - 1;
+            }
+        }
+        
+        i += 64;
+    }
+    
+    /* Process remaining 32-byte chunks */
+    while (i + 32 <= nBufferSize) {
         __m256i vData = _mm256_loadu_si256((const __m256i*)(pHay + i));
-        __m256i vCmp = _mm256_cmpeq_epi16(vData, vPattern);
+        __m256i vCmp = _mm256_cmpeq_epi8(vData, vFirst);
         xsimd_uint32 nMask = (xsimd_uint32)_mm256_movemask_epi8(vCmp);
         
         if (nMask != 0) {
-            /* Check each potential match (aligned to 2-byte boundaries) */
             xsimd_uint32 nTempMask = nMask;
             while (nTempMask != 0) {
 #ifdef _MSC_VER
@@ -275,16 +332,10 @@ xsimd_int64 _xsimd_find_pattern_bmh_2byte_AVX2(const char* pHay, xsimd_int64 nBu
 #else
                 unsigned bit = __builtin_ctz(nTempMask);
 #endif
-                /* 16-bit comparison marks every other byte */
-                if ((bit & 1) == 0) {
-                    xsimd_int64 pos = i + (xsimd_int64)bit;
-                    if (pos + 1 < nBufferSize) {
-                        if (*(const xsimd_uint16*)(pHay + pos) == pattern16) {
-                            return nOffset + pos;
-                        }
-                    }
+                xsimd_int64 pos = i + (xsimd_int64)bit;
+                if (pos + 1 < nBufferSize && pHay[pos + 1] == nSecondByte) {
+                    return nOffset + pos;
                 }
-                
                 nTempMask &= nTempMask - 1;
             }
         }
@@ -292,12 +343,16 @@ xsimd_int64 _xsimd_find_pattern_bmh_2byte_AVX2(const char* pHay, xsimd_int64 nBu
         i += 32;
     }
     
-    /* Scalar fallback for remaining bytes */
+    /* Scalar fallback for remaining bytes using memchr for speed */
     while (i + 1 < nBufferSize) {
-        if (*(const xsimd_uint16*)(pHay + i) == pattern16) {
-            return nOffset + i;
+        const char* pFound = (const char*)memchr(pHay + i, nFirstByte, (size_t)(nBufferSize - i));
+        if (!pFound) break;
+        
+        xsimd_int64 pos = pFound - pHay;
+        if (pos + 1 < nBufferSize && pHay[pos + 1] == nSecondByte) {
+            return nOffset + pos;
         }
-        i++;
+        i = pos + 1;
     }
 #endif
     
