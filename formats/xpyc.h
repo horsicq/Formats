@@ -30,10 +30,6 @@ public:
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_HEADER,
-        STRUCTID_FLAGS,
-        STRUCTID_HASH,
-        STRUCTID_TIMESTAMP,
-        STRUCTID_SOURCESIZE,
         STRUCTID_CODEOBJECT
     };
 
@@ -61,6 +57,7 @@ public:
     virtual QString getVersion() override;
     virtual QString getFileFormatExt() override;
     virtual QString getFileFormatExtsString() override;
+    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct = nullptr) override;
     virtual QString getMIMEString() override;
     virtual QString structIDToString(quint32 nID) override;
 

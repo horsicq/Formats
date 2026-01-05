@@ -369,40 +369,16 @@ qint32 XJavaClass::_read_record_info(qint64 nOffset, record_info *pRecordInfo)
 
 XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    qint64 nTotalSize = getSize();
-
-    _MEMORY_MAP result = {};
+    XBinary::_MEMORY_MAP result = {};
 
     if (mapMode == MAPMODE_UNKNOWN) {
         mapMode = MAPMODE_DATA;
     }
 
-    INFO info = _getInfo(pPdStruct);
-
-    result.nBinarySize = nTotalSize;
-    result.fileType = getFileType();
-    result.mode = getMode();
-    result.sArch = getArch();
-    result.endian = getEndian();
-    result.sType = getTypeAsString();
-
     if (mapMode == MAPMODE_REGIONS) {
         result = _getMemoryMap(FILEPART_HEADER | FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
     } else if (mapMode == MAPMODE_DATA) {
-        qint32 nIndex = 0;
-
-        _MEMORY_RECORD record = {};
-        record.nAddress = -1;
-        record.nOffset = 0;
-        record.nSize = info.nSize;
-        record.nIndex = 0;
-        record.sName = tr("Data");
-        record.nIndex = nIndex++;
-        record.filePart = FILEPART_DATA;
-
-        result.listRecords.append(record);
-
-        _handleOverlay(&result);
+        result = _getMemoryMap(FILEPART_DATA | FILEPART_OVERLAY, pPdStruct);
     }
 
     return result;
