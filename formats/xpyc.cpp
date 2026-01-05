@@ -266,6 +266,105 @@ XPYC::INFO XPYC::getInternalInfo(PDSTRUCT *pPdStruct)
     return info;
 }
 
+XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    CODE_OBJECT codeObject = {};
+    codeObject.bValid = false;
+    codeObject.nFirstLineNo = 0;
+    codeObject.nArgCount = 0;
+    codeObject.nPosOnlyArgCount = 0;
+    codeObject.nKwOnlyArgCount = 0;
+    codeObject.nNLocals = 0;
+    codeObject.nStackSize = 0;
+    codeObject.nFlags = 0;
+
+    if (!isValid(pPdStruct)) {
+        return codeObject;
+    }
+
+    INFO info = getInternalInfo(pPdStruct);
+    qint32 nMajor = 0;
+    qint32 nMinor = 0;
+    _parseVersionNumbers(info.sVersion, &nMajor, &nMinor);
+
+    // Calculate offset to marshalled code object
+    qint64 nCodeOffset = 4;  // Magic + Marker
+    if ((nMajor > 3) || ((nMajor == 3) && (nMinor >= 7))) {
+        nCodeOffset += 4;  // Flags
+        if (info.bHashBased) {
+            nCodeOffset += 8 + 4;  // Hash + source size
+        } else {
+            nCodeOffset += 4 + 4;  // Timestamp + source size
+        }
+    } else {
+        nCodeOffset += 8;  // Timestamp + source size
+    }
+
+    qint64 nTotalSize = getSize();
+    if (nCodeOffset >= nTotalSize) {
+        return codeObject;
+    }
+
+    // Read marshal type byte
+    quint8 nMarshalType = read_uint8(nCodeOffset);
+    
+    // Check for code object type (TYPE_CODE = 'c' = 0x63)
+    if ((nMarshalType & 0x7F) != 0x63) {
+        // Not a code object at the expected position
+        return codeObject;
+    }
+
+    // Parse code object fields (simplified parsing)
+    // Note: Full marshal format parsing is complex and version-dependent
+    // This is a basic implementation that attempts to extract key fields
+    qint64 nOffset = nCodeOffset + 1;
+
+    // Try to read basic integer fields (varies by Python version)
+    if ((nOffset + 4) <= nTotalSize) {
+        codeObject.nArgCount = read_int32(nOffset, false);
+        nOffset += 4;
+    }
+
+    if ((nMajor >= 3) && (nMinor >= 8)) {
+        // Python 3.8+ has positional-only argument count
+        if ((nOffset + 4) <= nTotalSize) {
+            codeObject.nPosOnlyArgCount = read_int32(nOffset, false);
+            nOffset += 4;
+        }
+    }
+
+    if ((nOffset + 4) <= nTotalSize) {
+        codeObject.nKwOnlyArgCount = read_int32(nOffset, false);
+        nOffset += 4;
+    }
+
+    if ((nOffset + 4) <= nTotalSize) {
+        codeObject.nNLocals = read_int32(nOffset, false);
+        nOffset += 4;
+    }
+
+    if ((nOffset + 4) <= nTotalSize) {
+        codeObject.nStackSize = read_int32(nOffset, false);
+        nOffset += 4;
+    }
+
+    if ((nOffset + 4) <= nTotalSize) {
+        codeObject.nFlags = read_int32(nOffset, false);
+        nOffset += 4;
+    }
+
+    // Set as partially valid (basic fields extracted)
+    // Full parsing of strings, tuples, and bytecode would require
+    // a complete marshal format parser
+    codeObject.bValid = true;
+    codeObject.sName = "<module>";  // Default name
+    codeObject.sFileName = "";       // Would need string parsing
+
+    return codeObject;
+}
+
 XBinary::_MEMORY_MAP XPYC::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     XBinary::_MEMORY_MAP result = {};
@@ -430,6 +529,32 @@ QList<XBinary::DATA_HEADER> XPYC::getDataHeaders(const DATA_HEADERS_OPTIONS &dat
                     nOffset += 4;
                     dataHeader.listRecords.append(getDataRecord(nStartOffset + nOffset, 4, "Source Size", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
                 }
+
+                listResult.append(dataHeader);
+
+                if (dataHeadersOptions.bChildren) {
+                    // Add marshalled code object section
+                    qint64 nHeaderSize = dataHeader.nSize;
+                    qint64 nFormatSize = getFileFormatSize(pPdStruct);
+                    
+                    if (nHeaderSize < nFormatSize) {
+                        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+                        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+                        _dataHeadersOptions.nID = STRUCTID_CODEOBJECT;
+                        _dataHeadersOptions.nLocation = nHeaderSize;
+                        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+
+                        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+                    }
+                }
+            } else if (dataHeadersOptions.nID == STRUCTID_CODEOBJECT) {
+                qint64 nFormatSize = getFileFormatSize(pPdStruct);
+                
+                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPYC::structIDToString(dataHeadersOptions.nID));
+                dataHeader.nSize = nFormatSize - nStartOffset;
+
+                // Marshalled code object - binary data
+                dataHeader.listRecords.append(getDataRecord(nStartOffset, dataHeader.nSize, "Marshalled Code Object", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 
                 listResult.append(dataHeader);
             }

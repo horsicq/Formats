@@ -44,6 +44,25 @@ public:
         QByteArray baHash;
     };
 
+    struct CODE_OBJECT {
+        QString sName;              // co_name
+        QString sFileName;          // co_filename
+        qint32 nFirstLineNo;        // co_firstlineno
+        qint32 nArgCount;           // co_argcount
+        qint32 nPosOnlyArgCount;    // co_posonlyargcount (3.8+)
+        qint32 nKwOnlyArgCount;     // co_kwonlyargcount
+        qint32 nNLocals;            // co_nlocals
+        qint32 nStackSize;          // co_stacksize
+        qint32 nFlags;              // co_flags
+        QByteArray baCode;          // co_code (bytecode instructions)
+        QList<QString> listConsts;  // co_consts (simplified)
+        QList<QString> listNames;   // co_names
+        QList<QString> listVarNames;// co_varnames
+        QList<QString> listFreeVars;// co_freevars
+        QList<QString> listCellVars;// co_cellvars
+        bool bValid;                // parsing success flag
+    };
+
     explicit XPYC(QIODevice *pDevice = nullptr);
     virtual ~XPYC();
 
@@ -62,6 +81,7 @@ public:
     virtual QString structIDToString(quint32 nID) override;
 
     INFO getInternalInfo(PDSTRUCT *pPdStruct = nullptr);
+    CODE_OBJECT getCodeObject(PDSTRUCT *pPdStruct = nullptr);
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct = nullptr) override;
