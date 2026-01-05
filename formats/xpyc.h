@@ -44,23 +44,63 @@ public:
         QByteArray baHash;
     };
 
+    // Marshal format type codes
+    enum MARSHAL_TYPE {
+        TYPE_NULL = '0',
+        TYPE_NONE = 'N',
+        TYPE_FALSE = 'F',
+        TYPE_TRUE = 'T',
+        TYPE_STOPITER = 'S',
+        TYPE_ELLIPSIS = '.',
+        TYPE_INT = 'i',
+        TYPE_INT64 = 'I',
+        TYPE_FLOAT = 'f',
+        TYPE_BINARY_FLOAT = 'g',
+        TYPE_COMPLEX = 'x',
+        TYPE_BINARY_COMPLEX = 'y',
+        TYPE_LONG = 'l',
+        TYPE_STRING = 's',
+        TYPE_INTERNED = 't',
+        TYPE_REF = 'r',
+        TYPE_TUPLE = '(',
+        TYPE_LIST = '[',
+        TYPE_DICT = '{',
+        TYPE_CODE = 'c',
+        TYPE_UNICODE = 'u',
+        TYPE_UNKNOWN = '?',
+        TYPE_SET = '<',
+        TYPE_FROZENSET = '>',
+        TYPE_ASCII = 'a',
+        TYPE_ASCII_INTERNED = 'A',
+        TYPE_SMALL_TUPLE = ')',
+        TYPE_SHORT_ASCII = 'z',
+        TYPE_SHORT_ASCII_INTERNED = 'Z'
+    };
+
+    struct MARSHAL_OBJECT {
+        quint8 nType;
+        QVariant vValue;
+        QList<MARSHAL_OBJECT> listItems;
+        bool bValid;
+    };
+
     struct CODE_OBJECT {
-        QString sName;              // co_name
-        QString sFileName;          // co_filename
-        qint32 nFirstLineNo;        // co_firstlineno
-        qint32 nArgCount;           // co_argcount
-        qint32 nPosOnlyArgCount;    // co_posonlyargcount (3.8+)
-        qint32 nKwOnlyArgCount;     // co_kwonlyargcount
-        qint32 nNLocals;            // co_nlocals
-        qint32 nStackSize;          // co_stacksize
-        qint32 nFlags;              // co_flags
-        QByteArray baCode;          // co_code (bytecode instructions)
-        QList<QString> listConsts;  // co_consts (simplified)
-        QList<QString> listNames;   // co_names
-        QList<QString> listVarNames;// co_varnames
-        QList<QString> listFreeVars;// co_freevars
-        QList<QString> listCellVars;// co_cellvars
-        bool bValid;                // parsing success flag
+        QString sName;                      // co_name
+        QString sFileName;                  // co_filename
+        qint32 nFirstLineNo;                // co_firstlineno
+        qint32 nArgCount;                   // co_argcount
+        qint32 nPosOnlyArgCount;            // co_posonlyargcount (3.8+)
+        qint32 nKwOnlyArgCount;             // co_kwonlyargcount
+        qint32 nNLocals;                    // co_nlocals
+        qint32 nStackSize;                  // co_stacksize
+        qint32 nFlags;                      // co_flags
+        QByteArray baCode;                  // co_code (bytecode instructions)
+        QList<MARSHAL_OBJECT> listConsts;   // co_consts (constants tuple)
+        QList<QString> listNames;           // co_names
+        QList<QString> listVarNames;        // co_varnames
+        QList<QString> listFreeVars;        // co_freevars
+        QList<QString> listCellVars;        // co_cellvars
+        bool bValid;                        // parsing success flag
     };
 
     explicit XPYC(QIODevice *pDevice = nullptr);
@@ -90,6 +130,11 @@ private:
     static QString _magicToVersion(quint16 nMagicValue);
     static bool _isMagicKnown(quint16 nMagicValue);
     static void _parseVersionNumbers(const QString &sVersion, qint32 *pnMajor, qint32 *pnMinor);
+    
+    MARSHAL_OBJECT _readMarshalObject(qint64 *pnOffset, PDSTRUCT *pPdStruct);
+    QString _readMarshalString(qint64 *pnOffset);
+    qint32 _readMarshalInt(qint64 *pnOffset);
+    QList<MARSHAL_OBJECT> _readMarshalTuple(qint64 *pnOffset, PDSTRUCT *pPdStruct);
 };
 
 #endif  // XPYC_H
