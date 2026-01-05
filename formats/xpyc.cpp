@@ -278,19 +278,20 @@ QString XPYC::_readMarshalString(qint64 *pnOffset)
     }
     
     quint8 nType = read_uint8(nOffset);
+    quint8 nActualType = nType & 0x7F;  // Strip REF flag (0x80)
     nOffset += 1;
     
     qint32 nLength = 0;
     
     // Handle different string type codes
-    if ((nType == TYPE_SHORT_ASCII) || (nType == TYPE_SHORT_ASCII_INTERNED)) {
+    if ((nActualType == TYPE_SHORT_ASCII) || (nActualType == TYPE_SHORT_ASCII_INTERNED)) {
         // Short ASCII: length is 1 byte
         if ((nOffset + 1) > nTotalSize) {
             return QString();
         }
         nLength = read_uint8(nOffset);
         nOffset += 1;
-    } else if ((nType == TYPE_STRING) || (nType == TYPE_INTERNED) || (nType == TYPE_UNICODE) || (nType == TYPE_ASCII) || (nType == TYPE_ASCII_INTERNED)) {
+    } else if ((nActualType == TYPE_STRING) || (nActualType == TYPE_INTERNED) || (nActualType == TYPE_UNICODE) || (nActualType == TYPE_ASCII) || (nActualType == TYPE_ASCII_INTERNED)) {
         // Regular string: length is 4 bytes (little-endian)
         if ((nOffset + 4) > nTotalSize) {
             return QString();
@@ -311,7 +312,7 @@ QString XPYC::_readMarshalString(qint64 *pnOffset)
     
     QString sResult;
     
-    if ((nType == TYPE_UNICODE) || (nType == TYPE_STRING)) {
+    if ((nActualType == TYPE_UNICODE) || (nActualType == TYPE_STRING)) {
         // UTF-8 encoded string
         QByteArray baData = read_array(nOffset, nLength);
         sResult = QString::fromUtf8(baData);
@@ -338,6 +339,7 @@ qint32 XPYC::_readMarshalInt(qint64 *pnOffset)
     }
     
     quint8 nType = read_uint8(nOffset);
+    qDebug("_readMarshalInt at offset %lld: type=0x%02X", nOffset, nType);
     nOffset += 1;
     
     qint32 nResult = 0;
@@ -386,19 +388,20 @@ XPYC::MARSHAL_OBJECT XPYC::_readMarshalObject(qint64 *pnOffset, PDSTRUCT *pPdStr
     }
     
     quint8 nType = read_uint8(nOffset);
+    quint8 nActualType = nType & 0x7F;  // Strip REF flag (0x80)
     obj.nType = nType;
     nOffset += 1;
     
-    if (nType == TYPE_NONE) {
+    if (nActualType == TYPE_NONE) {
         obj.vValue = QVariant();
         obj.bValid = true;
-    } else if (nType == TYPE_TRUE) {
+    } else if (nActualType == TYPE_TRUE) {
         obj.vValue = true;
         obj.bValid = true;
-    } else if (nType == TYPE_FALSE) {
+    } else if (nActualType == TYPE_FALSE) {
         obj.vValue = false;
         obj.bValid = true;
-    } else if (nType == TYPE_INT) {
+    } else if (nActualType == TYPE_INT) {
         if ((nOffset + 4) > nTotalSize) {
             *pnOffset = nOffset;
             return obj;
@@ -407,7 +410,7 @@ XPYC::MARSHAL_OBJECT XPYC::_readMarshalObject(qint64 *pnOffset, PDSTRUCT *pPdStr
         nOffset += 4;
         obj.vValue = nValue;
         obj.bValid = true;
-    } else if (nType == TYPE_INT64) {
+    } else if (nActualType == TYPE_INT64) {
         if ((nOffset + 8) > nTotalSize) {
             *pnOffset = nOffset;
             return obj;
@@ -416,7 +419,7 @@ XPYC::MARSHAL_OBJECT XPYC::_readMarshalObject(qint64 *pnOffset, PDSTRUCT *pPdStr
         nOffset += 8;
         obj.vValue = nValue;
         obj.bValid = true;
-    } else if (nType == TYPE_FLOAT) {
+    } else if (nActualType == TYPE_FLOAT) {
         // Binary float representation
         if ((nOffset + 8) > nTotalSize) {
             *pnOffset = nOffset;
@@ -430,8 +433,8 @@ XPYC::MARSHAL_OBJECT XPYC::_readMarshalObject(qint64 *pnOffset, PDSTRUCT *pPdStr
         nOffset += 8;
         obj.vValue = dValue;
         obj.bValid = true;
-    } else if ((nType == TYPE_STRING) || (nType == TYPE_INTERNED) || (nType == TYPE_UNICODE) || (nType == TYPE_ASCII) || (nType == TYPE_ASCII_INTERNED) || (nType == TYPE_SHORT_ASCII) ||
-               (nType == TYPE_SHORT_ASCII_INTERNED)) {
+    } else if ((nActualType == TYPE_STRING) || (nActualType == TYPE_INTERNED) || (nActualType == TYPE_UNICODE) || (nActualType == TYPE_ASCII) || (nActualType == TYPE_ASCII_INTERNED) || (nActualType == TYPE_SHORT_ASCII) ||
+               (nActualType == TYPE_SHORT_ASCII_INTERNED)) {
         // String type - rewind and use string reader
         nOffset -= 1;
         qint64 nStringOffset = nOffset;
@@ -439,21 +442,21 @@ XPYC::MARSHAL_OBJECT XPYC::_readMarshalObject(qint64 *pnOffset, PDSTRUCT *pPdStr
         nOffset = nStringOffset;
         obj.vValue = sValue;
         obj.bValid = true;
-    } else if ((nType == TYPE_TUPLE) || (nType == TYPE_SMALL_TUPLE)) {
+    } else if ((nActualType == TYPE_TUPLE) || (nActualType == TYPE_SMALL_TUPLE)) {
         // Tuple type - rewind and use tuple reader
         nOffset -= 1;
         qint64 nTupleOffset = nOffset;
         obj.listItems = _readMarshalTuple(&nTupleOffset, pPdStruct);
         nOffset = nTupleOffset;
         obj.bValid = true;
-    } else if (nType == TYPE_CODE) {
+    } else if (nActualType == TYPE_CODE) {
         // Nested code object - skip for now
         obj.vValue = QString("<code object>");
         obj.bValid = true;
         // TODO: Recursively parse code object
     } else {
         // Unknown or unsupported type
-        obj.vValue = QString("<unknown>");
+        obj.vValue = QString("<unknown type 0x%1>").arg(nActualType, 2, 16, QChar('0'));
         obj.bValid = false;
     }
     
@@ -475,15 +478,18 @@ QList<XPYC::MARSHAL_OBJECT> XPYC::_readMarshalTuple(qint64 *pnOffset, PDSTRUCT *
     }
     
     quint8 nType = read_uint8(nOffset);
+    quint8 nActualType = nType & 0x7F;  // Strip REF flag (0x80)
+    qDebug("_readMarshalTuple at offset %lld: type=0x%02X (actual=0x%02X)", *pnOffset, nType, nActualType);
     nOffset += 1;
     
-    if ((nType != TYPE_TUPLE) && (nType != TYPE_SMALL_TUPLE)) {
+    if ((nActualType != TYPE_TUPLE) && (nActualType != TYPE_SMALL_TUPLE)) {
+        qDebug("_readMarshalTuple: not a tuple type, returning empty");
         return listResult;
     }
     
     qint32 nCount = 0;
     
-    if (nType == TYPE_SMALL_TUPLE) {
+    if (nActualType == TYPE_SMALL_TUPLE) {
         // Small tuple: count is 1 byte
         if ((nOffset + 1) > nTotalSize) {
             return listResult;
@@ -505,10 +511,13 @@ QList<XPYC::MARSHAL_OBJECT> XPYC::_readMarshalTuple(qint64 *pnOffset, PDSTRUCT *
     
     // Read each element
     for (qint32 i = 0; (i < nCount) && isPdStructNotCanceled(pPdStruct); i++) {
+        qint64 nItemOffset = nOffset;
         MARSHAL_OBJECT obj = _readMarshalObject(&nOffset, pPdStruct);
+        qDebug("_readMarshalTuple: item[%d] at offset %lld, type=0x%02X, valid=%d, new offset=%lld", i, nItemOffset, obj.nType, obj.bValid, nOffset);
         listResult.append(obj);
         
         if (!obj.bValid) {
+            qDebug("_readMarshalTuple: stopping at invalid object");
             break;  // Stop on error
         }
     }
@@ -540,6 +549,8 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
     qint32 nMinor = 0;
     _parseVersionNumbers(info.sVersion, &nMajor, &nMinor);
 
+    qDebug("getCodeObject: Version %d.%d, bHashBased=%d", nMajor, nMinor, info.bHashBased);
+
     // Calculate offset to marshalled code object
     qint64 nCodeOffset = 4;  // Magic + Marker
     if ((nMajor > 3) || ((nMajor == 3) && (nMinor >= 7))) {
@@ -554,54 +565,122 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
     }
 
     qint64 nTotalSize = getSize();
+    qDebug("getCodeObject: nCodeOffset=%lld, nTotalSize=%lld", nCodeOffset, nTotalSize);
+
     if (nCodeOffset >= nTotalSize) {
+        qDebug("getCodeObject: nCodeOffset >= nTotalSize, returning invalid");
         return codeObject;
     }
 
     // Read marshal type byte
     quint8 nMarshalType = read_uint8(nCodeOffset);
     
+    qDebug("getCodeObject: nMarshalType=0x%02X at offset %lld", nMarshalType, nCodeOffset);
+    
     // Check for code object type (TYPE_CODE = 'c' = 0x63)
-    if ((nMarshalType & 0x7F) != 0x63) {
+    // The high bit (0x80) is the FLAG_REF which indicates this object can be referenced later
+    bool bHasRefFlag = (nMarshalType & 0x80) != 0;
+    quint8 nActualType = nMarshalType & 0x7F;
+    
+    qDebug("getCodeObject: bHasRefFlag=%d, nActualType=0x%02X", bHasRefFlag, nActualType);
+    
+    if (nActualType != 0x63) {
         // Not a code object at the expected position
+        qDebug("getCodeObject: Marshal type is not CODE (0x63), returning invalid");
         return codeObject;
     }
 
+
+
     // Parse code object fields (version-dependent)
     qint64 nOffset = nCodeOffset + 1;
+    qDebug("getCodeObject: Starting parse at offset %lld", nOffset);
 
-    // Read argcount (all versions)
-    codeObject.nArgCount = _readMarshalInt(&nOffset);
+    // Python 3.11+ changed to raw integer format for initial fields
+    if ((nMajor >= 3) && (nMinor >= 11)) {
+        // Read argcount as raw integer
+        if ((nOffset + 4) <= nTotalSize) {
+            codeObject.nArgCount = read_int32(nOffset, false);
+            nOffset += 4;
+        }
+        qDebug("getCodeObject: nArgCount=%d (raw int), nOffset=%lld", codeObject.nArgCount, nOffset);
 
-    // Read posonlyargcount (Python 3.8+)
-    if ((nMajor >= 3) && (nMinor >= 8)) {
-        codeObject.nPosOnlyArgCount = _readMarshalInt(&nOffset);
+        // Read posonlyargcount as raw integer (Python 3.8+)
+        if ((nOffset + 4) <= nTotalSize) {
+            codeObject.nPosOnlyArgCount = read_int32(nOffset, false);
+            nOffset += 4;
+        }
+        qDebug("getCodeObject: nPosOnlyArgCount=%d (raw int), nOffset=%lld", codeObject.nPosOnlyArgCount, nOffset);
+
+        // Read kwonlyargcount as raw integer  
+        if ((nOffset + 4) <= nTotalSize) {
+            codeObject.nKwOnlyArgCount = read_int32(nOffset, false);
+            nOffset += 4;
+        }
+        qDebug("getCodeObject: nKwOnlyArgCount=%d (raw int), nOffset=%lld", codeObject.nKwOnlyArgCount, nOffset);
+    } else {
+        // Pre-3.11: Read argcount (all versions)
+        codeObject.nArgCount = _readMarshalInt(&nOffset);
+        qDebug("getCodeObject: nArgCount=%d, nOffset=%lld", codeObject.nArgCount, nOffset);
+
+        // Read posonlyargcount (Python 3.8+)
+        if ((nMajor >= 3) && (nMinor >= 8)) {
+            codeObject.nPosOnlyArgCount = _readMarshalInt(&nOffset);
+            qDebug("getCodeObject: nPosOnlyArgCount=%d, nOffset=%lld", codeObject.nPosOnlyArgCount, nOffset);
+        }
+
+        // Read kwonlyargcount (Python 3.0+)
+        if (nMajor >= 3) {
+            codeObject.nKwOnlyArgCount = _readMarshalInt(&nOffset);
+            qDebug("getCodeObject: nKwOnlyArgCount=%d, nOffset=%lld", codeObject.nKwOnlyArgCount, nOffset);
+        }
+
+        // Read nlocals (pre-3.11)
+        codeObject.nNLocals = _readMarshalInt(&nOffset);
+        qDebug("getCodeObject: nNLocals=%d, nOffset=%lld", codeObject.nNLocals, nOffset);
     }
 
-    // Read kwonlyargcount (Python 3.0+)
-    if (nMajor >= 3) {
-        codeObject.nKwOnlyArgCount = _readMarshalInt(&nOffset);
+    // Python 3.11+ does not have nlocals in marshal format (it's computed)
+    // For pre-3.11, nlocals was already read above
+
+    // Python 3.11+ changed code object format - stacksize and flags are raw integers
+    if ((nMajor >= 3) && (nMinor >= 11)) {
+        // Read stacksize as raw integer (4 bytes, little-endian)
+        if ((nOffset + 4) <= nTotalSize) {
+            codeObject.nStackSize = read_int32(nOffset, false);
+            nOffset += 4;
+        }
+        qDebug("getCodeObject: nStackSize=%d (raw int), nOffset=%lld", codeObject.nStackSize, nOffset);
+
+        // Read flags as raw integer (4 bytes, little-endian)
+        if ((nOffset + 4) <= nTotalSize) {
+            codeObject.nFlags = read_int32(nOffset, false);
+            nOffset += 4;
+        }
+        qDebug("getCodeObject: nFlags=0x%08X (raw int), nOffset=%lld", codeObject.nFlags, nOffset);
+    } else {
+        // Pre-3.11: Read stacksize (all versions)
+        codeObject.nStackSize = _readMarshalInt(&nOffset);
+        qDebug("getCodeObject: nStackSize=%d, nOffset=%lld", codeObject.nStackSize, nOffset);
+
+        // Read flags (all versions)
+        codeObject.nFlags = _readMarshalInt(&nOffset);
+        qDebug("getCodeObject: nFlags=0x%08X, nOffset=%lld", codeObject.nFlags, nOffset);
     }
-
-    // Read nlocals (all versions)
-    codeObject.nNLocals = _readMarshalInt(&nOffset);
-
-    // Read stacksize (all versions)
-    codeObject.nStackSize = _readMarshalInt(&nOffset);
-
-    // Read flags (all versions)
-    codeObject.nFlags = _readMarshalInt(&nOffset);
 
     // Read code (bytecode) - TYPE_STRING or TYPE_BYTES
     qint64 nCodeBytesOffset = nOffset;
+    qDebug("getCodeObject: Reading code at offset %lld", nOffset);
     if ((nOffset + 1) <= nTotalSize) {
         quint8 nCodeType = read_uint8(nOffset);
+        quint8 nActualCodeType = nCodeType & 0x7F;  // Strip REF flag
+        qDebug("getCodeObject: Code type byte=0x%02X (actual type=0x%02X)", nCodeType, nActualCodeType);
         nOffset += 1;
         
-        if ((nCodeType == TYPE_STRING) || (nCodeType == TYPE_SHORT_ASCII) || (nCodeType == TYPE_ASCII)) {
+        if ((nActualCodeType == TYPE_STRING) || (nActualCodeType == TYPE_SHORT_ASCII) || (nActualCodeType == TYPE_ASCII)) {
             qint32 nCodeLength = 0;
             
-            if (nCodeType == TYPE_SHORT_ASCII) {
+            if (nActualCodeType == TYPE_SHORT_ASCII) {
                 nCodeLength = read_uint8(nOffset);
                 nOffset += 1;
             } else {
@@ -609,18 +688,24 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
                 nOffset += 4;
             }
             
+            qDebug("getCodeObject: Code length=%d, reading from offset %lld", nCodeLength, nOffset);
             if ((nCodeLength >= 0) && (nCodeLength <= 1024 * 1024) && ((nOffset + nCodeLength) <= nTotalSize)) {
                 codeObject.baCode = read_array(nOffset, nCodeLength);
                 nOffset += nCodeLength;
+                qDebug("getCodeObject: Read %d bytes of code, nOffset=%lld", nCodeLength, nOffset);
             }
         }
     }
 
     // Read consts (tuple of constants)
+    qDebug("getCodeObject: Reading consts tuple at offset %lld", nOffset);
     codeObject.listConsts = _readMarshalTuple(&nOffset, pPdStruct);
+    qDebug("getCodeObject: Read %d consts, nOffset=%lld", codeObject.listConsts.count(), nOffset);
 
     // Read names (tuple of variable/function names)
+    qDebug("getCodeObject: Reading names tuple at offset %lld", nOffset);
     QList<MARSHAL_OBJECT> listNamesObjects = _readMarshalTuple(&nOffset, pPdStruct);
+    qDebug("getCodeObject: Read %d names, nOffset=%lld", listNamesObjects.count(), nOffset);
     for (qint32 i = 0; i < listNamesObjects.size(); i++) {
         if (listNamesObjects[i].vValue.type() == QVariant::String) {
             codeObject.listNames.append(listNamesObjects[i].vValue.toString());
@@ -652,19 +737,25 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
     }
 
     // Read filename (string)
+    qDebug("getCodeObject: Reading filename at offset %lld", nOffset);
     codeObject.sFileName = _readMarshalString(&nOffset);
+    qDebug("getCodeObject: sFileName='%s', nOffset=%lld", codeObject.sFileName.toUtf8().constData(), nOffset);
 
     // Read name (string)
+    qDebug("getCodeObject: Reading name at offset %lld", nOffset);
     codeObject.sName = _readMarshalString(&nOffset);
+    qDebug("getCodeObject: sName='%s', nOffset=%lld", codeObject.sName.toUtf8().constData(), nOffset);
 
     // Read firstlineno (integer)
     codeObject.nFirstLineNo = _readMarshalInt(&nOffset);
+    qDebug("getCodeObject: nFirstLineNo=%d, nOffset=%lld", codeObject.nFirstLineNo, nOffset);
 
     // Read lnotab (line number table) - skip for now
     // This is a complex structure that maps bytecode offsets to line numbers
     
-    // Set as valid if we successfully parsed the main fields
-    codeObject.bValid = (!codeObject.sName.isEmpty());
+    // Set as valid if we successfully parsed key fields
+    // Name might be empty or a reference in Python 3.11+
+    codeObject.bValid = (codeObject.baCode.size() > 0 || codeObject.listConsts.count() > 0 || !codeObject.sName.isEmpty());
 
     return codeObject;
 }
