@@ -15241,7 +15241,7 @@ bool XBinary::finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
 
 qint32 XBinary::getBufferSize(PDSTRUCT *pPdStruct)
 {
-    qint32 nResult = 0x8000;
+    qint32 nResult = 0x4000;
 
     if (pPdStruct) {
         if (pPdStruct->nBufferSize) {
