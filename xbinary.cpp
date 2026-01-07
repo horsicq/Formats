@@ -6480,7 +6480,7 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
     return bResult;
 }
 
-bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
+bool XBinary::zeroFill(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     // TODO optimize
     if (nSize == 0) {
@@ -6498,20 +6498,35 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize)
         return false;
     }
 
-    const qint64 kBufferSize = 0x1000;  // 4 KB chunk
-    qint64 nChunk = qMin(nSize, kBufferSize);
-    char *pZero = new char[(size_t)nChunk]();  // zero-initialized buffer
+    qint32 nBufferSize = getBufferSize(pPdStruct);
+    char *pZero = new char[nBufferSize];
 
-    while (nSize > 0) {
-        qint64 nWrite = qMin(nSize, nChunk);
-        write_array(nOffset, pZero, nWrite);
+    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+
+    qint64 nProcessed = 0;
+    bool bSuccess = true;
+
+    while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
+        qint64 nWrite = qMin(nSize, (qint64)nBufferSize);
+        
+        if (write_array(nOffset, pZero, nWrite) != nWrite) {
+            bSuccess = false;
+            break;
+        }
+        
         nOffset += nWrite;
         nSize -= nWrite;
+        nProcessed += nWrite;
+        
+        XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nProcessed);
     }
+
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
     delete[] pZero;
 
-    return true;
+    return bSuccess && (nSize == 0);
 }
 
 bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)

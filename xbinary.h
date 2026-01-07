@@ -1452,7 +1452,7 @@ public:
     static bool _isMemoryAnsiNumber(char *pSource, qint64 nSize);
     static bool copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 0x1000);
     bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 1, bool bReverse = false);
-    bool zeroFill(qint64 nOffset, qint64 nSize);
+    bool zeroFill(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
     static bool compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize);
     // For strings compare
     static bool compareMemoryByteI(quint8 *pMemory, const quint8 *pMemoryU, const quint8 *pMemoryL,
