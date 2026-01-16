@@ -96,6 +96,7 @@ extern "C" {
 #define S_FULL_VERSION(value1, value2, value3) ((quint32)((((quint16)value1) << 16) | (((quint8)value2) << 8) | ((quint8)value3)))
 
 typedef quint64 XADDR;
+#define XADDR_MAX ((XADDR)0xFFFFFFFFFFFFFFFF)
 // #define XADDR_ERROR (XADDR)-1
 
 #ifdef Q_OS_MAC
