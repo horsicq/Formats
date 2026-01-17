@@ -107,74 +107,47 @@ XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_OVERLAY, "overlay", QObject::tr("Overlay")},
 };
 
-// enum COMPRESS_METHOD {
-//     COMPRESS_METHOD_UNKNOWN = 0,
-//     COMPRESS_METHOD_STORE,
-//     COMPRESS_METHOD_FILE,  // TODO Check
-//     COMPRESS_METHOD_DEFLATE,
-//     COMPRESS_METHOD_DEFLATE64,
-//     COMPRESS_METHOD_BZIP2,
-//     COMPRESS_METHOD_LZMA,
-//     COMPRESS_METHOD_PPMD,
-//     COMPRESS_METHOD_LZH5,
-//     COMPRESS_METHOD_LZH6,
-//     COMPRESS_METHOD_LZH7,
-//     COMPRESS_METHOD_RAR_15,
-//     COMPRESS_METHOD_RAR_20,
-//     COMPRESS_METHOD_RAR_29,
-//     COMPRESS_METHOD_RAR_50,
-//     COMPRESS_METHOD_RAR_70,
-//     COMPRESS_METHOD_LZSS_SZDD
-//     // TODO check more methods
-// };
-
-XBinary::XCONVERT _TABLE_XBINARY_COMPRESS_METHOD[] = {
-    {XBinary::COMPRESS_METHOD_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    {XBinary::COMPRESS_METHOD_STORE, "Store", QString("Store")},
-    {XBinary::COMPRESS_METHOD_FILE, "File", QObject::tr("File")},  // TODO Check
-    {XBinary::COMPRESS_METHOD_DEFLATE, "Deflate", QString("Deflate")},
-    {XBinary::COMPRESS_METHOD_DEFLATE64, "Deflate64", QString("Deflate64")},
-    {XBinary::COMPRESS_METHOD_BZIP2, "Bzip2", QString("Bzip2")},
-    {XBinary::COMPRESS_METHOD_LZMA, "LZMA", QString("LZMA")},
-    {XBinary::COMPRESS_METHOD_LZMA2, "LZMA2", QString("LZMA2")},
-    {XBinary::COMPRESS_METHOD_LZW_PDF, "LZW_PDF", QString("LZW PDF")},
-    {XBinary::COMPRESS_METHOD_ASCII85, "ASCII85", QString("ASCII85 PDF")},
-    {XBinary::COMPRESS_METHOD_PPMD, "PPMD", QString("PPMD")},  // TODO
-    {XBinary::COMPRESS_METHOD_LZH5, "LZH5", QString("LZH5")},
-    {XBinary::COMPRESS_METHOD_LZH6, "LZH6", QString("LZH6")},
-    {XBinary::COMPRESS_METHOD_LZH7, "LZH7", QString("LZH7")},
-    {XBinary::COMPRESS_METHOD_RAR_15, "RAR_15", QString("RAR 1.5")},
-    {XBinary::COMPRESS_METHOD_RAR_20, "RAR_20", QString("RAR 2.0")},
-    {XBinary::COMPRESS_METHOD_RAR_29, "RAR_29", QString("RAR 2.9")},
-    {XBinary::COMPRESS_METHOD_RAR_50, "RAR_50", QString("RAR 5.0")},
-    {XBinary::COMPRESS_METHOD_RAR_70, "RAR_70", QString("RAR 7.0")},
-    {XBinary::COMPRESS_METHOD_LZSS_SZDD, "LZSS_SZDD", QString("LZSS SZDD")},
-    {XBinary::COMPRESS_METHOD_IT214_8, "IT214_8", QString("IT214 8-bit")},
-    {XBinary::COMPRESS_METHOD_IT214_16, "IT214_16", QString("IT214 16-bit")},
-    {XBinary::COMPRESS_METHOD_IT215_8, "IT215_8", QString("IT215 8-bit")},
-    {XBinary::COMPRESS_METHOD_IT215_16, "IT215_16", QString("IT215 16-bit")},
-    {XBinary::COMPRESS_METHOD_IMPLODED_4KDICT_2TREES, "Imploded_4K_2", QString("Imploded 4K/2")},
-    {XBinary::COMPRESS_METHOD_IMPLODED_4KDICT_3TREES, "Imploded_4K_3", QString("Imploded 4K/3")},
-    {XBinary::COMPRESS_METHOD_IMPLODED_8KDICT_2TREES, "Imploded_8K_2", QString("Imploded 8K/2")},
-    {XBinary::COMPRESS_METHOD_IMPLODED_8KDICT_3TREES, "Imploded_8K_3", QString("Imploded 8K/3")},
-    {XBinary::COMPRESS_METHOD_SHRINK, "Shrink", QString("Shrink")},
-    {XBinary::COMPRESS_METHOD_REDUCE_1, "Reduce_1", QString("Reduce 1")},
-    {XBinary::COMPRESS_METHOD_REDUCE_2, "Reduce_2", QString("Reduce 2")},
-    {XBinary::COMPRESS_METHOD_REDUCE_3, "Reduce_3", QString("Reduce 3")},
-    {XBinary::COMPRESS_METHOD_REDUCE_4, "Reduce_4", QString("Reduce 4")},
-    {XBinary::COMPRESS_METHOD_AES, "AES", QString("AES")},
-    {XBinary::COMPRESS_METHOD_ZLIB, "ZLIB", QString("ZLIB")},
-    {XBinary::COMPRESS_METHOD_MSZIP_CAB, "MSZIP_CAB", QString("MSZIP CAB")},
-    {XBinary::COMPRESS_METHOD_STORE_CAB, "STORE_CAB", QString("STORE CAB")},
-    {XBinary::COMPRESS_METHOD_LZX_CAB, "LZX_CAB", QString("LZX CAB")},
-
-    // TODO check more methods
-};
-
 XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XBinary::HANDLE_METHOD_STORE, "Store", QString("Store")},
     {XBinary::HANDLE_METHOD_PDF_IMAGEDATA, "PDF_IMAGEDATA", QString("PDF Image data")},
     {XBinary::HANDLE_METHOD_ANDROID_XML, "Android_XML", QString("Android XML")},
+    {XBinary::HANDLE_METHOD_FILE, "File", QObject::tr("File")},  // TODO Check
+    {XBinary::HANDLE_METHOD_DEFLATE, "Deflate", QString("Deflate")},
+    {XBinary::HANDLE_METHOD_DEFLATE64, "Deflate64", QString("Deflate64")},
+    {XBinary::HANDLE_METHOD_BZIP2, "Bzip2", QString("Bzip2")},
+    {XBinary::HANDLE_METHOD_LZMA, "LZMA", QString("LZMA")},
+    {XBinary::HANDLE_METHOD_LZMA2, "LZMA2", QString("LZMA2")},
+    {XBinary::HANDLE_METHOD_LZW_PDF, "LZW_PDF", QString("LZW PDF")},
+    {XBinary::HANDLE_METHOD_ASCII85, "ASCII85", QString("ASCII85 PDF")},
+    {XBinary::HANDLE_METHOD_PPMD, "PPMD", QString("PPMD")},  // TODO
+    {XBinary::HANDLE_METHOD_LZH5, "LZH5", QString("LZH5")},
+    {XBinary::HANDLE_METHOD_LZH6, "LZH6", QString("LZH6")},
+    {XBinary::HANDLE_METHOD_LZH7, "LZH7", QString("LZH7")},
+    {XBinary::HANDLE_METHOD_RAR_15, "RAR_15", QString("RAR 1.5")},
+    {XBinary::HANDLE_METHOD_RAR_20, "RAR_20", QString("RAR 2.0")},
+    {XBinary::HANDLE_METHOD_RAR_29, "RAR_29", QString("RAR 2.9")},
+    {XBinary::HANDLE_METHOD_RAR_50, "RAR_50", QString("RAR 5.0")},
+    {XBinary::HANDLE_METHOD_RAR_70, "RAR_70", QString("RAR 7.0")},
+    {XBinary::HANDLE_METHOD_LZSS_SZDD, "LZSS_SZDD", QString("LZSS SZDD")},
+    {XBinary::HANDLE_METHOD_IT214_8, "IT214_8", QString("IT214 8-bit")},
+    {XBinary::HANDLE_METHOD_IT214_16, "IT214_16", QString("IT214 16-bit")},
+    {XBinary::HANDLE_METHOD_IT215_8, "IT215_8", QString("IT215 8-bit")},
+    {XBinary::HANDLE_METHOD_IT215_16, "IT215_16", QString("IT215 16-bit")},
+    {XBinary::HANDLE_METHOD_IMPLODED_4KDICT_2TREES, "Imploded_4K_2", QString("Imploded 4K/2")},
+    {XBinary::HANDLE_METHOD_IMPLODED_4KDICT_3TREES, "Imploded_4K_3", QString("Imploded 4K/3")},
+    {XBinary::HANDLE_METHOD_IMPLODED_8KDICT_2TREES, "Imploded_8K_2", QString("Imploded 8K/2")},
+    {XBinary::HANDLE_METHOD_IMPLODED_8KDICT_3TREES, "Imploded_8K_3", QString("Imploded 8K/3")},
+    {XBinary::HANDLE_METHOD_SHRINK, "Shrink", QString("Shrink")},
+    {XBinary::HANDLE_METHOD_REDUCE_1, "Reduce_1", QString("Reduce 1")},
+    {XBinary::HANDLE_METHOD_REDUCE_2, "Reduce_2", QString("Reduce 2")},
+    {XBinary::HANDLE_METHOD_REDUCE_3, "Reduce_3", QString("Reduce 3")},
+    {XBinary::HANDLE_METHOD_REDUCE_4, "Reduce_4", QString("Reduce 4")},
+    {XBinary::HANDLE_METHOD_AES, "AES", QString("AES")},
+    {XBinary::HANDLE_METHOD_ZLIB, "ZLIB", QString("ZLIB")},
+    {XBinary::HANDLE_METHOD_MSZIP_CAB, "MSZIP_CAB", QString("MSZIP CAB")},
+    {XBinary::HANDLE_METHOD_STORE_CAB, "STORE_CAB", QString("STORE CAB")},
+    {XBinary::HANDLE_METHOD_LZX_CAB, "LZX_CAB", QString("LZX CAB")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -1110,15 +1083,6 @@ bool XBinary::_isFlagPresentInRecords(const QList<DATA_RECORD> *pListRecords, qu
     return bResult;
 }
 
-QString XBinary::compressMethodToString(COMPRESS_METHOD compressMethod)
-{
-    return XBinary::XCONVERT_idToTransString(compressMethod, _TABLE_XBINARY_COMPRESS_METHOD, sizeof(_TABLE_XBINARY_COMPRESS_METHOD) / sizeof(XBinary::XCONVERT));
-}
-
-QString XBinary::compressMethodToFtString(COMPRESS_METHOD compressMethod)
-{
-    return XBinary::XCONVERT_idToFtString(compressMethod, _TABLE_XBINARY_COMPRESS_METHOD, sizeof(_TABLE_XBINARY_COMPRESS_METHOD) / sizeof(XBinary::XCONVERT));
-}
 
 QString XBinary::getCompressMethodString()
 {
@@ -1138,11 +1102,6 @@ QString XBinary::handleMethodToFtString(HANDLE_METHOD handleMethod)
 XBinary::HANDLE_METHOD XBinary::ftStringToHandleMethod(const QString &sString)
 {
     return (HANDLE_METHOD)XBinary::XCONVERT_ftStringToId(sString, _TABLE_XBINARY_HANDLE_METHOD, sizeof(_TABLE_XBINARY_HANDLE_METHOD) / sizeof(XBinary::XCONVERT));
-}
-
-XBinary::COMPRESS_METHOD XBinary::ftStringToCompressMethod(const QString &sString)
-{
-    return (COMPRESS_METHOD)XBinary::XCONVERT_ftStringToId(sString, _TABLE_XBINARY_COMPRESS_METHOD, sizeof(_TABLE_XBINARY_COMPRESS_METHOD) / sizeof(XBinary::XCONVERT));
 }
 
 XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian)
@@ -14985,7 +14944,7 @@ QList<XBinary::FPART_PROP> XBinary::getAvailableFPARTProperties()
     listResult.append(FPART_PROP_UNCOMPRESSEDSIZE);
     listResult.append(FPART_PROP_STREAMOFFSET);
     listResult.append(FPART_PROP_STREAMSIZE);
-    listResult.append(FPART_PROP_COMPRESSMETHOD);
+    listResult.append(FPART_PROP_HANDLEMETHOD1);
 
     return listResult;
 }
