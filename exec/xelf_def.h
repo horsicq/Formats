@@ -28,16 +28,16 @@
 #define S_ELF32_R_INFO(sym, type) (((sym) << 8) + (quint8)(type))
 
 #define S_ELF64_R_SYM(info) ((info) >> 32)
-#define S_ELF64_R_TYPE(info) ((info)&0xFFFFFFFFL)
-#define S_ELF64_R_INFO(sym, type) (((sym) << 32) + ((type)&0xFFFFFFFFL))
+#define S_ELF64_R_TYPE(info) ((info) & 0xFFFFFFFFL)
+#define S_ELF64_R_INFO(sym, type) (((sym) << 32) + ((type) & 0xFFFFFFFFL))
 
 #define S_ELF32_ST_BIND(info) ((info) >> 4)
-#define S_ELF32_ST_TYPE(info) ((info)&0xF)
-#define S_ELF32_ST_INFO(bind, type) (((bind) << 4) + ((type)&0xF))
+#define S_ELF32_ST_TYPE(info) ((info) & 0xF)
+#define S_ELF32_ST_INFO(bind, type) (((bind) << 4) + ((type) & 0xF))
 
 #define S_ELF64_ST_BIND(info) ((info) >> 4)
-#define S_ELF64_ST_TYPE(info) ((info)&0xF)
-#define S_ELF64_ST_INFO(bind, type) (((bind) << 4) + ((type)&0xF))
+#define S_ELF64_ST_TYPE(info) ((info) & 0xF)
+#define S_ELF64_ST_INFO(bind, type) (((bind) << 4) + ((type) & 0xF))
 
 namespace XELF_DEF {
 // typedef quint32        Elf32_Addr;

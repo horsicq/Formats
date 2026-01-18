@@ -9265,7 +9265,8 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 if (dataHeadersOptions.bChildren) {
                     {
                         // DOS Stub
-                    } {
+                    }
+                    {
                         // Rich
                     }
 

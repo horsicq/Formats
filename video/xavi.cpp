@@ -20,17 +20,15 @@
  */
 #include "xavi.h"
 
-XBinary::XCONVERT _TABLE_XAVI_STRUCTID[] = {
-    {XAVI::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    {XAVI::STRUCTID_HEADER, "HEADER", QString("Header")},
-    {XAVI::STRUCTID_CHUNK, "CHUNK", QString("Chunk")},
-    {XAVI::STRUCTID_AVIH, "AVIH", QString("AVI Header")},
-    {XAVI::STRUCTID_STRH, "STRH", QString("Stream Header")},
-    {XAVI::STRUCTID_STRF, "STRF", QString("Stream Format")},
-    {XAVI::STRUCTID_JUNK, "JUNK", QString("Junk")},
-    {XAVI::STRUCTID_MOVI, "MOVI", QString("Movie Data")},
-    {XAVI::STRUCTID_IDX1, "IDX1", QString("Index")}
-};
+XBinary::XCONVERT _TABLE_XAVI_STRUCTID[] = {{XAVI::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+                                            {XAVI::STRUCTID_HEADER, "HEADER", QString("Header")},
+                                            {XAVI::STRUCTID_CHUNK, "CHUNK", QString("Chunk")},
+                                            {XAVI::STRUCTID_AVIH, "AVIH", QString("AVI Header")},
+                                            {XAVI::STRUCTID_STRH, "STRH", QString("Stream Header")},
+                                            {XAVI::STRUCTID_STRF, "STRF", QString("Stream Format")},
+                                            {XAVI::STRUCTID_JUNK, "JUNK", QString("Junk")},
+                                            {XAVI::STRUCTID_MOVI, "MOVI", QString("Movie Data")},
+                                            {XAVI::STRUCTID_IDX1, "IDX1", QString("Index")}};
 
 XAVI::XAVI(QIODevice *pDevice) : XRiff(pDevice)
 {
@@ -49,7 +47,7 @@ bool XAVI::isValid(PDSTRUCT *pPdStruct)
 
     // AVI files have form type "AVI " at offset 8
     QString sForm = read_ansiString(8, 4);
-    
+
     return (sForm == "AVI ");
 }
 

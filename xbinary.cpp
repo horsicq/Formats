@@ -1083,7 +1083,6 @@ bool XBinary::_isFlagPresentInRecords(const QList<DATA_RECORD> *pListRecords, qu
     return bResult;
 }
 
-
 QString XBinary::getCompressMethodString()
 {
     return "";
@@ -6468,16 +6467,16 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 
     while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
         qint64 nWrite = qMin(nSize, (qint64)nBufferSize);
-        
+
         if (write_array(nOffset, pZero, nWrite) != nWrite) {
             bSuccess = false;
             break;
         }
-        
+
         nOffset += nWrite;
         nSize -= nWrite;
         nProcessed += nWrite;
-        
+
         XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nProcessed);
     }
 
@@ -11224,17 +11223,17 @@ bool XBinary::checkOffsetSize(qint64 nOffset, qint64 nSize)
 
 QString XBinary::get_uint8_full_version(quint8 nValue)
 {
-    return QString("%1").arg(QString::number((nValue)&0xFF));
+    return QString("%1").arg(QString::number((nValue) & 0xFF));
 }
 
 QString XBinary::get_uint16_full_version(quint16 nValue)
 {
-    return QString("%1.%2").arg(QString::number((nValue >> 8) & 0xFF), QString::number((nValue)&0xFF));
+    return QString("%1.%2").arg(QString::number((nValue >> 8) & 0xFF), QString::number((nValue) & 0xFF));
 }
 
 QString XBinary::get_uint32_full_version(quint32 nValue)
 {
-    return QString("%1.%2.%3").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue >> 8) & 0xFF), QString::number((nValue)&0xFF));
+    return QString("%1.%2.%3").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue >> 8) & 0xFF), QString::number((nValue) & 0xFF));
 }
 
 QString XBinary::get_uint64_full_version(quint64 nValue)
@@ -11251,12 +11250,12 @@ QString XBinary::get_uint64_full_version(quint64 nValue)
 
 QString XBinary::get_uint16_version(quint16 nValue)
 {
-    return QString("%1").arg(QString::number((nValue)&0xFFFF));
+    return QString("%1").arg(QString::number((nValue) & 0xFFFF));
 }
 
 QString XBinary::get_uint32_version(quint32 nValue)
 {
-    return QString("%1.%2").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue)&0xFFFF));
+    return QString("%1.%2").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue) & 0xFFFF));
 }
 
 bool XBinary::isResizeEnable(QIODevice *pDevice)
