@@ -152,6 +152,62 @@ public:
         quint32 nFlags;
     };
 
+    struct XCODE_VERSION_RECORD {
+        QString sVersion;
+        QString sReleaseDate;
+        QString sMinMacOSToRun;
+        QString sMacOSSDK;
+        QString siOSSDK;
+        QString sWatchOSSDK;
+        QString sTvOSSDK;
+        QString sVisionOSSDK;
+    };
+
+    struct SDK_VERSION_RECORD {
+        QString sSDKVersion;
+        QString sSDKBuild;
+    };
+
+    struct XCODE_TOOLCHAIN_RECORD_1 {
+        QString sVersion;
+        QString sGccVersion;
+        QString sGdbVersion;
+    };
+
+    struct XCODE_TOOLCHAIN_RECORD_3 {
+        QString sVersion;
+        QString sCctools;
+        QString sLd64;
+        QString sGcc40;
+        QString sGcc42;
+        QString sLLVMGcc42;
+        QString sLLVM;
+        QString sAppleLLVMClang;
+    };
+
+    struct XCODE_TOOLCHAIN_RECORD_5 {
+        QString sVersion;
+        QString sCctools;
+        QString sLd64;
+        QString sLLVM;
+        QString sClangVersion;
+        QString sSwiftVersion;
+    };
+
+    struct FOUNDATION_VERSION_RECORD {
+        quint32 nMajor;
+        quint32 nMinor;
+        quint32 nPatch;
+        QString sMacOSVersion;
+    };
+
+    struct IOS_FOUNDATION_VERSION_RECORD {
+        quint32 nMajor;
+        quint32 nMinor;
+        quint32 nPatch;
+        QString siOSVersion;
+    };
+
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_mach_header,
@@ -226,6 +282,12 @@ public:
     static QMap<quint64, QString> getBuildToolS();
     static QMap<quint64, QString> getDyldChainedImport();
     static QMap<quint64, QString> getDyldChainedImportS();
+
+    static QString getSDKVersionFromFoundation(quint32 nFoundationVersion, XBinary::OSNAME osName);
+    static XBinary::OSNAME getExactOSName(XBinary::OSNAME osName, const QString &sVersion);
+    static QString getXcodeVersionFromSDK(const QString &sSDKVersion, XBinary::OSNAME osName);
+    static QString getClangVersionFromSDK(const QString &sSDKVersion, XBinary::OSNAME osName);
+    static QString getSwiftVersionFromSDK(const QString &sSDKVersion, XBinary::OSNAME osName);
 
     COMMAND_RECORD _readLoadCommand(qint64 nOffset, bool bIsBigEndian);
 
