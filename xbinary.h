@@ -127,6 +127,8 @@ public:
     };
 
     static QString XIDSTRING_idToString(quint32 nID, XBinary::XIDSTRING *pRecords, qint32 nRecordsSize);
+    static quint32 XIDSTRING_ftStringToId(const QString &sString, XBinary::XIDSTRING *pRecords, qint32 nRecordsSize);
+
     static QMap<quint64, QString> XIDSTRING_createMap(XBinary::XIDSTRING *pRecords, qint32 nRecordsSize);
     static QMap<quint64, QString> XIDSTRING_createMapPrefix(XBinary::XIDSTRING *pRecords, qint32 nRecordsSize, const QString &sPrefix);
 
@@ -2185,6 +2187,7 @@ public:
     virtual bool finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
 
     static qint32 getBufferSize(PDSTRUCT *pPdStruct);
+    static qint32 getFileBufferSize(PDSTRUCT *pPdStruct);
     static QIODevice *createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct);
     static void freeFileBuffer(QIODevice **ppBuffer);
 

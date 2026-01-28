@@ -403,6 +403,26 @@ QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 n
     return sResult;
 }
 
+quint32 XBinary::XIDSTRING_ftStringToId(const QString &sString, XIDSTRING *pRecords, qint32 nRecordsSize)
+{
+    quint32 nResult = 0;
+
+    for (qint32 i = 0; i < nRecordsSize; i++) {
+        if (pRecords[i].sString.toUpper().remove(" ").remove("-") == sString.toUpper()) {
+            nResult = pRecords[i].nID;
+            break;
+        }
+    }
+
+#ifdef QT_DEBUG
+    if (nResult == 0) {
+        qDebug() << "XIDSTRING_ftStringToId: Not found" << sString;
+    }
+#endif
+
+    return nResult;
+}
+
 QMap<quint64, QString> XBinary::XIDSTRING_createMap(XIDSTRING *pRecords, qint32 nRecordsSize)
 {
     QMap<quint64, QString> mapResult;
@@ -15219,6 +15239,25 @@ qint32 XBinary::getBufferSize(PDSTRUCT *pPdStruct)
     if (pPdStruct) {
         if (pPdStruct->nBufferSize) {
             nResult = pPdStruct->nBufferSize;
+        }
+    }
+
+#ifdef QT_DEBUG
+    if (!pPdStruct) {
+        qDebug("Empty PDSTRUCT!!!");
+    }
+#endif
+
+    return nResult;
+}
+
+qint32 XBinary::getFileBufferSize(PDSTRUCT *pPdStruct)
+{
+    qint32 nResult = 0x1000000;
+
+    if (pPdStruct) {
+        if (pPdStruct->nFileBufferSize) {
+            nResult = pPdStruct->nFileBufferSize;
         }
     }
 
