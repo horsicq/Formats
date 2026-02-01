@@ -14253,9 +14253,20 @@ qint64 XBinary::align_down(qint64 nValue, qint64 nAlignment)
     return nResult;
 }
 
-char *XBinary::strCopy(char *pszDest, char *pszSource)
+char* XBinary::strCopy(char* dest, const char* src, size_t destSize)
 {
-    return strcpy(pszDest, pszSource);
+  if (!dest || !src || destSize == 0)
+    return dest;
+
+  size_t i = 0;
+  while (i + 1 < destSize && src[i] != '\0')
+  {
+    dest[i] = src[i];
+    i++;
+  }
+
+  dest[i] = '\0';
+  return dest;
 }
 
 QString XBinary::getAndroidVersionFromApi(quint32 nAPI)
