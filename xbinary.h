@@ -2066,7 +2066,7 @@ public:
     static qint64 align_up(qint64 nValue, qint64 nAlignment);
     static qint64 align_down(qint64 nValue, qint64 nAlignment);
 
-    static char *strCopy(char *pszDest, char *pszSource);
+    static char *strCopy(char* dest, const char* src, size_t destSize);
     static QString getAndroidVersionFromApi(quint32 nAPI);
     static QString getiOSVersionFromDarwin(quint32 nAPI);
 
