@@ -14314,25 +14314,25 @@ QString XBinary::getAndroidVersionFromApi(quint32 nAPI)
     return sResult;
 }
 
-QString XBinary::getiOSVersionFromDarwin(quint32 nAPI)
+QString XBinary::getiOSVersionFromDarwin(quint32 nDarwin)
 {
     QString sResult = tr("Unknown");
 
-    if (nAPI == 9) sResult = QString("1.X - 2.X");
-    else if (nAPI == 10) sResult = QString("3.X - 4.X");
-    else if (nAPI == 11) sResult = QString("5.X - 6.X");
-    else if (nAPI == 13) sResult = QString("7.X");
-    else if (nAPI == 14) sResult = QString("8.X");
-    else if (nAPI == 15) sResult = QString("9.X");
-    else if (nAPI == 16) sResult = QString("10.X");
-    else if (nAPI == 17) sResult = QString("11.X");
-    else if (nAPI == 18) sResult = QString("12.X");
-    else if (nAPI == 19) sResult = QString("13.X");
-    else if (nAPI == 20) sResult = QString("14.X");
-    else if (nAPI == 21) sResult = QString("15.X");
-    else if (nAPI == 22) sResult = QString("16.X");
-    else if (nAPI == 23) sResult = QString("17.X");
-    else if (nAPI == 24) sResult = QString("18.X");
+    if (nDarwin == 9) sResult = QString("1.X - 2.X");
+    else if (nDarwin == 10) sResult = QString("3.X - 4.X");
+    else if (nDarwin == 11) sResult = QString("5.X - 6.X");
+    else if (nDarwin == 13) sResult = QString("7.X");
+    else if (nDarwin == 14) sResult = QString("8.X");
+    else if (nDarwin == 15) sResult = QString("9.X");
+    else if (nDarwin == 16) sResult = QString("10.X");
+    else if (nDarwin == 17) sResult = QString("11.X");
+    else if (nDarwin == 18) sResult = QString("12.X");
+    else if (nDarwin == 19) sResult = QString("13.X");
+    else if (nDarwin == 20) sResult = QString("14.X");
+    else if (nDarwin == 21) sResult = QString("15.X");
+    else if (nDarwin == 22) sResult = QString("16.X");
+    else if (nDarwin == 23) sResult = QString("17.X");
+    else if (nDarwin == 24) sResult = QString("18.X");
 
     return sResult;
 }

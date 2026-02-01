@@ -2068,7 +2068,7 @@ public:
 
     static char *strCopy(char* dest, const char* src, size_t destSize);
     static QString getAndroidVersionFromApi(quint32 nAPI);
-    static QString getiOSVersionFromDarwin(quint32 nAPI);
+    static QString getiOSVersionFromDarwin(quint32 nDarwin);
 
     static QString _fromWCharArray(const wchar_t *pWString, qint32 size = -1);
     static qint32 _toWCharArray(const QString &sString, wchar_t *pWString);
