@@ -14298,6 +14298,7 @@ QString XBinary::getAndroidVersionFromApi(quint32 nAPI)
     else if (nAPI == 33) sResult = QString("13.0");
     else if (nAPI == 34) sResult = QString("14.0");
     else if (nAPI == 35) sResult = QString("15.0");
+    else if (nAPI == 36) sResult = QString("16.0");
 
     return sResult;
 }
