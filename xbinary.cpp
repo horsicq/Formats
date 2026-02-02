@@ -12675,7 +12675,6 @@ void XBinary::removeFileTypes(QSet<XBinary::FT> *pStFileTypes) {
 
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)
 {
-    // TODO Check!
     if (fileType != XBinary::FT_UNKNOWN) {
         QSet<XBinary::FT> stFileTypesNew;
 
