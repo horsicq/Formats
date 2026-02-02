@@ -12613,7 +12613,9 @@ QList<XBinary::SYNTAX> XBinary::getDisasmSyntax(DM disasmMode)
         listResult.append(SYNTAX_MASM);
     }
 
-    // TODO Motorola
+    if (getDisasmFamily(disasmMode) == DMFAMILY_M68K) {
+        listResult.append(SYNTAX_MOTOROLA);
+    }
 
     return listResult;
 }
