@@ -12399,6 +12399,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_MINIX: sResult = QString("Minix"); break;
         case OSNAME_MODESTO: sResult = QString("Novell Modesto"); break;
         case OSNAME_MSDOS: sResult = QString("MS-DOS"); break;
+        case OSNAME_FREEDOS: sResult = QString("FreeDOS"); break;
         case OSNAME_NETBSD: sResult = QString("NetBSD"); break;
         case OSNAME_NSK: sResult = QString("Hewlett-Packard Non-Stop Kernel"); break;
         case OSNAME_OPENBSD: sResult = QString("OpenBSD"); break;
@@ -12423,10 +12424,13 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_UNIX: sResult = QString("Unix"); break;
         case OSNAME_VINELINUX: sResult = QString("Vine Linux"); break;
         case OSNAME_WATCHOS: sResult = QString("watchOS"); break;
+        case OSNAME_REACTOS: sResult = QString("ReactOS"); break;
         case OSNAME_WINDOWS: sResult = QString("Windows"); break;
         case OSNAME_WINDOWSCE: sResult = QString("Windows CE"); break;
+        case OSNAME_WINDOWSPHONE: sResult = QString("Windows Phone"); break;
         case OSNAME_WINDRIVERLINUX: sResult = QString("Wind River Linux"); break;
         case OSNAME_XBOX: sResult = QString("XBOX"); break;
+        case OSNAME_PLAYSTATION: sResult = QString("PlayStation"); break;
         case OSNAME_JVM: sResult = QString("JVM"); break;
 
         default: sResult = tr("Unknown");

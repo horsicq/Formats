@@ -652,8 +652,6 @@ public:
         // TODO more
     };
 
-    // TODO reactOS
-    // TODO FreeDOS
     enum OSNAME {
         OSNAME_UNKNOWN = 0,
         OSNAME_MULTIPLATFORM,
@@ -685,6 +683,7 @@ public:
         OSNAME_MINIX,
         OSNAME_MODESTO,
         OSNAME_MSDOS,
+        OSNAME_FREEDOS,
         OSNAME_NETBSD,
         OSNAME_NSK,
         OSNAME_OPENBSD,
@@ -708,10 +707,13 @@ public:
         OSNAME_UNIX,
         OSNAME_VINELINUX,
         OSNAME_WATCHOS,
+        OSNAME_REACTOS,
         OSNAME_WINDOWS,
         OSNAME_WINDOWSCE,
+        OSNAME_WINDOWSPHONE,
         OSNAME_WINDRIVERLINUX,
         OSNAME_XBOX,
+        OSNAME_PLAYSTATION,
         OSNAME_JVM,
         OSNAME_MACCATALYST,
         OSNAME_MACDRIVERKIT,
