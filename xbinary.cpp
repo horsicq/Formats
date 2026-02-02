@@ -194,7 +194,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_ANDROIDXML, "AndroidXML", QString("Android XML")},
     {XBinary::FT_APK, "APK", QString("APK")},
     {XBinary::FT_APKS, "APKS", QString("APKS")},
-    {XBinary::FT_AR, "ar", QString("ar")},  // TODO DEB
+    {XBinary::FT_AR, "ar", QString("ar")},
     {XBinary::FT_ARCHIVE, "Archive", QObject::tr("Archive")},
     {XBinary::FT_AUDIO, "Audio", QObject::tr("Audio")},
     {XBinary::FT_AVI, "AVI", QString("AVI")},
