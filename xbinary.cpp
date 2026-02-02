@@ -12656,7 +12656,7 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 {
     // TODO Check!
-    // TODO optimize! new Types create remove function
+    // TODO optimize! Add new Types!
     if (pStFileTypes->contains(XBinary::FT_MSDOS) || pStFileTypes->contains(XBinary::FT_DOS16M) || pStFileTypes->contains(XBinary::FT_DOS4G) ||
         pStFileTypes->contains(XBinary::FT_NE) || pStFileTypes->contains(XBinary::FT_LE) || pStFileTypes->contains(XBinary::FT_LX) ||
         pStFileTypes->contains(XBinary::FT_PE) || pStFileTypes->contains(XBinary::FT_PE32) || pStFileTypes->contains(XBinary::FT_PE64) ||
@@ -12665,8 +12665,12 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP) ||
         pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA) || pStFileTypes->contains(XBinary::FT_AMIGAHUNK) ||
         pStFileTypes->contains(XBinary::FT_ATARIST)) {
-        pStFileTypes->remove(XBinary::FT_BINARY);
+        XBinary::removeFileTypes(pStFileTypes);
     }
+}
+
+void XBinary::removeFileTypes(QSet<XBinary::FT> *pStFileTypes) {
+        pStFileTypes->remove(XBinary::FT_BINARY);
 }
 
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)

@@ -1912,6 +1912,7 @@ public:
 
     static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes);
     static void filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType);
+    static void removeFileTypes(QSet<XBinary::FT> *pStFileTypes);
 
     static bool isFileTypePresent(QSet<XBinary::FT> *pStFileTypes, QSet<XBinary::FT> *pStAvailableFileTypes);
 
