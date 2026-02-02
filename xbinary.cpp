@@ -12335,10 +12335,13 @@ QString XBinary::syntaxIdToString(SYNTAX syntax)
 
     switch (syntax) {
         case SYNTAX_DEFAULT: sResult = tr("Default"); break;
+        case SYNTAX_ARM: sResult = tr("ARM"); break;
         case SYNTAX_ATT: sResult = QString("ATT"); break;
+        case SYNTAX_AMD: sResult = QString("AMD"); break;
         case SYNTAX_INTEL: sResult = QString("INTEL"); break;
         case SYNTAX_MASM: sResult = QString("MASM"); break;
         case SYNTAX_MOTOROLA: sResult = QString("MOTOROLA"); break;
+        case SYNTAX_MIPS: sResult = QString("MIPS"); break;
     }
 
     return sResult;
@@ -12349,9 +12352,12 @@ XBinary::SYNTAX XBinary::stringToSyntaxId(const QString &sString)
     SYNTAX result = SYNTAX_DEFAULT;
 
     if (sString == "ATT") result = SYNTAX_ATT;
+    else if (sString == "ARM") result = SYNTAX_ARM;
+    else if (sString == "AMD") result = SYNTAX_AMD;
     else if (sString == "INTEL") result = SYNTAX_INTEL;
     else if (sString == "MASM") result = SYNTAX_MASM;
     else if (sString == "MOTOROLA") result = SYNTAX_MOTOROLA;
+    else if (sString == "MIPS") result = SYNTAX_MIPS;
 
     return result;
 }
@@ -12598,6 +12604,7 @@ QList<XBinary::SYNTAX> XBinary::getDisasmSyntax(DM disasmMode)
 
     if (getDisasmFamily(disasmMode) == DMFAMILY_X86) {
         listResult.append(SYNTAX_ATT);
+        listResult.append(SYNTAX_AMD);
         listResult.append(SYNTAX_INTEL);
         listResult.append(SYNTAX_MASM);
     }

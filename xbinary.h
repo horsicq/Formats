@@ -639,9 +639,12 @@ public:
     enum SYNTAX {
         SYNTAX_DEFAULT = 0,
         SYNTAX_INTEL,
+        SYNTAX_AMD,
+        SYNTAX_ARM,
         SYNTAX_ATT,
         SYNTAX_MASM,
-        SYNTAX_MOTOROLA
+        SYNTAX_MOTOROLA,
+        SYNTAX_MIPS
     };
 
     enum TYPE {
