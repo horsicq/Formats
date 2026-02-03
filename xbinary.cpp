@@ -6373,16 +6373,18 @@ bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
 #endif
 }
 
-bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize)
+bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     // TODO optimize
     if ((!pSourceDevice->seek(nSourceOffset)) || (!pDestDevice->seek(nDestOffset))) {
         return false;
     }
 
+    qint32 nBufferSize = getBufferSize(pPdStruct);
+
     char *pBuffer = new char[nBufferSize];
 
-    while (nSize > 0) {
+    while ((nSize > 0) && (isPdStructNotCanceled(pPdStruct))) {
         qint64 nCurrentBufferSize = qMin(nSize, (qint64)nBufferSize);
 
         if (nCurrentBufferSize != pSourceDevice->read(pBuffer, nCurrentBufferSize)) {
@@ -7725,6 +7727,22 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
         file.close();
     } else {
         _errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file"), sFileName));
+    }
+
+    return bResult;
+}
+
+bool XBinary::dumpToFile(const QString &sFileName, QIODevice *pDevice, PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    QFile file;
+    file.setFileName(sFileName);
+    file.resize(0);
+
+    if (file.open(QIODevice::ReadWrite)) {
+        copyDeviceMemory(pDevice, 0, &file, 0, pDevice->size(), pPdStruct);
+        file.close();
     }
 
     return bResult;
@@ -11865,8 +11883,7 @@ bool XBinary::writeToFile(const QString &sFileName, QIODevice *pDevice, PDSTRUCT
         file.setFileName(sFileName);
 
         if (file.open(QIODevice::ReadWrite)) {
-            qint32 nBufferSize = getBufferSize(pPdStruct);
-            bResult = copyDeviceMemory(pDevice, 0, &file, 0, pDevice->size(), nBufferSize);
+            bResult = copyDeviceMemory(pDevice, 0, &file, 0, pDevice->size(), pPdStruct);
             file.close();
         }
     }

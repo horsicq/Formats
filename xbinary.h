@@ -1450,7 +1450,7 @@ public:
     static bool _isMemoryNotAnsi(char *pSource, qint64 nSize);
     static bool _isMemoryNotAnsiAndNull(char *pSource, qint64 nSize);
     static bool _isMemoryAnsiNumber(char *pSource, qint64 nSize);
-    static bool copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 0x1000);
+    static bool copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
     bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 1, bool bReverse = false);
     bool zeroFill(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
     static bool compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize);
@@ -1597,6 +1597,7 @@ public:
 
     static bool dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize);
     bool dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);
+    static bool dumpToFile(const QString &sFileName, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
 
     bool patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);
 
