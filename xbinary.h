@@ -398,19 +398,6 @@ public:
 
     static quint32 getFPART_crc32(const FPART &fpart);
 
-    // enum MMT {
-    //     MMT_UNKNOWN = 0,
-    //     MMT_HEADER,
-    //     MMT_FOOTER,
-    //     MMT_LOADSEGMENT,  // Section in PE; LoadProgram in ELF; Segments in MACH
-    //     MMT_NOLOADABLE,   // For ELF TODO Check
-    //     MMT_FILESEGMENT,
-    //     MMT_OVERLAY,
-    //     MMT_DATA,
-    //     MMT_OBJECT,
-    //     MMT_TABLE
-    // };
-
     struct _MEMORY_RECORD {
         qint64 nOffset;
         XADDR nAddress;

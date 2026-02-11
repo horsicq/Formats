@@ -12510,7 +12510,7 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
                 dmResult = DM_MIPS_LE;
             }
         }
-    } else if ((_sArch == "ARM") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7") || (_sArch == "ARM_V7S") || (_sArch == "ARM64_32")) {
+    } else if ((_sArch == "ARM") ||(_sArch == "ARMNT") ||(_sArch == "THUMB") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7") || (_sArch == "ARM_V7S") || (_sArch == "ARM64_32")) {
         if (bIsBigEndian) {
             dmResult = DM_ARM_BE;
         } else {
