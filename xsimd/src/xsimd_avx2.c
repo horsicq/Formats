@@ -502,6 +502,109 @@ xsimd_int64 _xsimd_find_ansi_AVX2(const unsigned char* pData, xsimd_int64 nBuffe
 #endif
 }
 
+/* Optimized version using combined 64-bit bitmask analysis */
+xsimd_int64 _xsimd_find_ansi_AVX2_2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset)
+{
+#ifdef XSIMD_X86
+    const __m256i vLowerMinus1 = _mm256_set1_epi8(0x1F);
+    const __m256i vUpperPlus1 = _mm256_set1_epi8(0x7F);
+    xsimd_int64 j = 0;
+    
+    /* Process 64 bytes per iteration using combined 64-bit bitmask */
+    while (j + 64 <= nBufferSize) {
+        __m256i vData0 = _mm256_loadu_si256((const __m256i*)(pData + j));
+        __m256i vData1 = _mm256_loadu_si256((const __m256i*)(pData + j + 32));
+        
+        __m256i vGe0 = _mm256_cmpgt_epi8(vData0, vLowerMinus1);
+        __m256i vLe0 = _mm256_cmpgt_epi8(vUpperPlus1, vData0);
+        __m256i vAnsi0 = _mm256_and_si256(vGe0, vLe0);
+        
+        __m256i vGe1 = _mm256_cmpgt_epi8(vData1, vLowerMinus1);
+        __m256i vLe1 = _mm256_cmpgt_epi8(vUpperPlus1, vData1);
+        __m256i vAnsi1 = _mm256_and_si256(vGe1, vLe1);
+        
+        xsimd_uint32 nMask0 = (xsimd_uint32)_mm256_movemask_epi8(vAnsi0);
+        xsimd_uint32 nMask1 = (xsimd_uint32)_mm256_movemask_epi8(vAnsi1);
+        
+        /* Combine into single 64-bit mask: bit N=1 means pData[j+N] is ANSI */
+        xsimd_uint64 nCombinedMask = (xsimd_uint64)nMask0 | ((xsimd_uint64)nMask1 << 32);
+        
+        if (nCombinedMask == 0) {
+            j += 64;
+            continue;
+        }
+        
+        /* Find first ANSI byte using combined bitmask */
+        {
+#ifdef _MSC_VER
+            unsigned long nBitPos;
+#if defined(_WIN64)
+            _BitScanForward64(&nBitPos, nCombinedMask);
+#else
+            /* 32-bit: check lower 32 bits first, then upper 32 bits */
+            if ((unsigned long)nCombinedMask != 0) {
+                _BitScanForward(&nBitPos, (unsigned long)nCombinedMask);
+            } else {
+                _BitScanForward(&nBitPos, (unsigned long)(nCombinedMask >> 32));
+                nBitPos += 32;
+            }
+#endif
+            xsimd_int64 start = j + (xsimd_int64)nBitPos;
+#else
+            xsimd_int64 start = j + __builtin_ctzll(nCombinedMask);
+#endif
+            /* Always scalar-extend the run for exact compatibility */
+            xsimd_int64 runLen = 0;
+            while ((start + runLen) < nBufferSize && pData[start + runLen] >= 0x20 && pData[start + runLen] <= 0x7E) {
+                runLen++;
+            }
+            
+            if (runLen >= nMinLength) {
+                return nOffset + start;
+            }
+            
+            j = start + runLen + 1;
+            continue;
+        }
+    }
+    
+    /* Process remaining 32-byte chunk */
+    while (j + 32 <= nBufferSize) {
+        __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + j));
+        __m256i vGe = _mm256_cmpgt_epi8(vData, vLowerMinus1);
+        __m256i vLe = _mm256_cmpgt_epi8(vUpperPlus1, vData);
+        __m256i vAnsi = _mm256_and_si256(vGe, vLe);
+        xsimd_uint32 nMask = (xsimd_uint32)_mm256_movemask_epi8(vAnsi);
+        
+        if (nMask != 0) {
+#ifdef _MSC_VER
+            unsigned long nBitPos;
+            _BitScanForward(&nBitPos, (unsigned long)nMask);
+            xsimd_int64 start = j + (xsimd_int64)nBitPos;
+#else
+            xsimd_int64 start = j + __builtin_ctz((unsigned int)nMask);
+#endif
+            xsimd_int64 runLen = 0;
+            while ((start + runLen) < nBufferSize && pData[start + runLen] >= 0x20 && pData[start + runLen] <= 0x7E) {
+                runLen++;
+            }
+            
+            if (runLen >= nMinLength) {
+                return nOffset + start;
+            }
+            
+            j = start + runLen + 1;
+        } else {
+            j += 32;
+        }
+    }
+    
+    return j;
+#else
+    return 0;
+#endif
+}
+
 xsimd_int64 _xsimd_find_notnull_AVX2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset, xsimd_int64 j, xsimd_int64 runStart)
 {
 #ifdef XSIMD_X86

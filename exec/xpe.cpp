@@ -828,9 +828,11 @@ quint32 XPE::getOptionalHeader_BaseOfCode()
 
 quint32 XPE::getOptionalHeader_BaseOfData()
 {
-   if (is32()) {
-    return read_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, BaseOfData));
-   }
+    if (is32()) {
+        return read_uint32(getOptionalHeaderOffset() + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, BaseOfData));
+    }
+
+    return 0;
 }
 
 quint64 XPE::getOptionalHeader_ImageBase()

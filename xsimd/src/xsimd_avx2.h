@@ -35,6 +35,7 @@ xsimd_int64 _xsimd_find_pattern_bmh_3byte_AVX2(const char* pHay, xsimd_int64 nBu
 xsimd_int64 _xsimd_find_pattern_bmh_2byte_AVX2(const char* pHay, xsimd_int64 nBufferSize, xsimd_uint16 pattern16, xsimd_int64 nOffset);
 xsimd_int64 _xsimd_find_pattern_bmh_1byte_AVX2(const char* pHay, xsimd_int64 nBufferSize, char nByte, xsimd_int64 nOffset);
 xsimd_int64 _xsimd_find_ansi_AVX2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);
+xsimd_int64 _xsimd_find_ansi_AVX2_2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);
 xsimd_int64 _xsimd_find_notnull_AVX2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset, xsimd_int64 j,
                                      xsimd_int64 runStart);
 xsimd_int64 _xsimd_find_not_ansi_AVX2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);

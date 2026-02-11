@@ -10222,11 +10222,10 @@ bool XBinary::isBigEndian(XBinary::_MEMORY_MAP *pMemoryMap)
     return (pMemoryMap->endian == ENDIAN_BIG);
 }
 
-bool XBinary::isLittleEndian(XBinary::_MEMORY_MAP *pMemoryMap)
+bool XBinary::isLittleEndian(_MEMORY_MAP *pMemoryMap)
 {
     return (pMemoryMap->endian == ENDIAN_LITTLE);
 }
-
 
 bool XBinary::is16(XBinary::_MEMORY_MAP *pMemoryMap)
 {

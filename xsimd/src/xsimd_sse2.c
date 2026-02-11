@@ -609,6 +609,124 @@ xsimd_int64 _xsimd_find_ansi_SSE2(const unsigned char* pData, xsimd_int64 nBuffe
 #endif
 }
 
+/* Optimized version using combined 64-bit bitmask analysis */
+xsimd_int64 _xsimd_find_ansi_SSE2_2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset)
+{
+#ifdef XSIMD_X86
+    const __m128i vLowerMinus1 = _mm_set1_epi8(0x1F);
+    const __m128i vUpperPlus1 = _mm_set1_epi8(0x7F);
+    xsimd_int64 j = 0;
+    
+    /* Process 64 bytes per iteration using combined 64-bit bitmask */
+    while (j + 64 <= nBufferSize) {
+        __m128i vData0 = _mm_loadu_si128((const __m128i*)(pData + j));
+        __m128i vData1 = _mm_loadu_si128((const __m128i*)(pData + j + 16));
+        __m128i vData2 = _mm_loadu_si128((const __m128i*)(pData + j + 32));
+        __m128i vData3 = _mm_loadu_si128((const __m128i*)(pData + j + 48));
+        
+        __m128i vGe0 = _mm_cmpgt_epi8(vData0, vLowerMinus1);
+        __m128i vLe0 = _mm_cmpgt_epi8(vUpperPlus1, vData0);
+        __m128i vAnsi0 = _mm_and_si128(vGe0, vLe0);
+        
+        __m128i vGe1 = _mm_cmpgt_epi8(vData1, vLowerMinus1);
+        __m128i vLe1 = _mm_cmpgt_epi8(vUpperPlus1, vData1);
+        __m128i vAnsi1 = _mm_and_si128(vGe1, vLe1);
+        
+        __m128i vGe2 = _mm_cmpgt_epi8(vData2, vLowerMinus1);
+        __m128i vLe2 = _mm_cmpgt_epi8(vUpperPlus1, vData2);
+        __m128i vAnsi2 = _mm_and_si128(vGe2, vLe2);
+        
+        __m128i vGe3 = _mm_cmpgt_epi8(vData3, vLowerMinus1);
+        __m128i vLe3 = _mm_cmpgt_epi8(vUpperPlus1, vData3);
+        __m128i vAnsi3 = _mm_and_si128(vGe3, vLe3);
+        
+        xsimd_uint32 nMask0 = (xsimd_uint32)(unsigned int)_mm_movemask_epi8(vAnsi0);
+        xsimd_uint32 nMask1 = (xsimd_uint32)(unsigned int)_mm_movemask_epi8(vAnsi1);
+        xsimd_uint32 nMask2 = (xsimd_uint32)(unsigned int)_mm_movemask_epi8(vAnsi2);
+        xsimd_uint32 nMask3 = (xsimd_uint32)(unsigned int)_mm_movemask_epi8(vAnsi3);
+        
+        /* Combine four 16-bit masks into one 64-bit mask */
+        xsimd_uint64 nCombinedMask = (xsimd_uint64)(nMask0 & 0xFFFF)
+                                   | ((xsimd_uint64)(nMask1 & 0xFFFF) << 16)
+                                   | ((xsimd_uint64)(nMask2 & 0xFFFF) << 32)
+                                   | ((xsimd_uint64)(nMask3 & 0xFFFF) << 48);
+        
+        if (nCombinedMask == 0) {
+            j += 64;
+            continue;
+        }
+        
+        /* Find first ANSI byte using combined bitmask */
+        {
+#ifdef _MSC_VER
+            unsigned long nBitPos;
+#if defined(_WIN64)
+            _BitScanForward64(&nBitPos, nCombinedMask);
+#else
+            /* 32-bit: check lower 32 bits first, then upper 32 bits */
+            if ((unsigned long)nCombinedMask != 0) {
+                _BitScanForward(&nBitPos, (unsigned long)nCombinedMask);
+            } else {
+                _BitScanForward(&nBitPos, (unsigned long)(nCombinedMask >> 32));
+                nBitPos += 32;
+            }
+#endif
+            xsimd_int64 start = j + (xsimd_int64)nBitPos;
+#else
+            xsimd_int64 start = j + __builtin_ctzll(nCombinedMask);
+#endif
+            /* Always scalar-extend the run for exact compatibility */
+            xsimd_int64 runLen = 0;
+            while ((start + runLen) < nBufferSize && pData[start + runLen] >= 0x20 && pData[start + runLen] <= 0x7E) {
+                runLen++;
+            }
+            
+            if (runLen >= nMinLength) {
+                return nOffset + start;
+            }
+            
+            j = start + runLen + 1;
+            continue;
+        }
+    }
+    
+    /* Process remaining 16-byte chunks */
+    while (j + 16 <= nBufferSize) {
+        __m128i vData = _mm_loadu_si128((const __m128i*)(pData + j));
+        __m128i vGe = _mm_cmpgt_epi8(vData, vLowerMinus1);
+        __m128i vLe = _mm_cmpgt_epi8(vUpperPlus1, vData);
+        __m128i vAnsi = _mm_and_si128(vGe, vLe);
+        xsimd_uint32 nMask = (xsimd_uint32)(unsigned int)_mm_movemask_epi8(vAnsi);
+        
+        if (nMask != 0) {
+#ifdef _MSC_VER
+            unsigned long nBitPos;
+            _BitScanForward(&nBitPos, (unsigned long)nMask);
+            xsimd_int64 start = j + (xsimd_int64)nBitPos;
+#else
+            xsimd_int64 start = j + __builtin_ctz((unsigned int)nMask);
+#endif
+            xsimd_int64 runLen = 0;
+            while ((start + runLen) < nBufferSize && pData[start + runLen] >= 0x20 && pData[start + runLen] <= 0x7E) {
+                runLen++;
+            }
+            
+            if (runLen >= nMinLength) {
+                return nOffset + start;
+            }
+            
+            j = start + runLen + 1;
+        } else {
+            j += 16;
+        }
+    }
+    
+    return j;
+#else
+    return 0;
+#endif
+}
+
 xsimd_int64 _xsimd_find_notnull_SSE2(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset, xsimd_int64 j, xsimd_int64 runStart)
 {
 #ifdef XSIMD_X86
