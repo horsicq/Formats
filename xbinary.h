@@ -1458,6 +1458,7 @@ public:
     XADDR offsetToRelAddress(qint64 nOffset);
     qint64 relAddressToOffset(qint64 nRelAddress);
 
+    static bool isEOD(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
     static bool isOffsetValid(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
     static bool isOffsetAndSizeValid(_MEMORY_MAP *pMemoryMap, OFFSETSIZE *pOsRegion);
     bool isOffsetAndSizeValid(qint64 nOffset, qint64 nSize);

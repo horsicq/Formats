@@ -6636,6 +6636,11 @@ qint64 XBinary::relAddressToOffset(qint64 nRelAddress)
     return relAddressToOffset(&memoryMap, nRelAddress);
 }
 
+bool XBinary::isEOD(_MEMORY_MAP *pMemoryMap, qint64 nOffset)
+{
+    return (pMemoryMap->nBinarySize == nOffset);
+}
+
 bool XBinary::isOffsetValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 {
     bool bResult = false;
@@ -13985,7 +13990,7 @@ void XBinary::setPdStructInit(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nTotal)
             pPdStruct->_pdRecord[nIndex].bIsValid = true;
             pPdStruct->_pdRecord[nIndex].nCurrent = 0;
             pPdStruct->_pdRecord[nIndex].nTotal = nTotal;
-            pPdStruct->_pdRecord[nIndex].sStatus = "";
+            pPdStruct->_pdRecord[nIndex].sStatus.clear();
         }
     }
 }
@@ -14610,7 +14615,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
             } break;
         }
 
-        if (!isOffsetValid(pMemoryMap, nOffset)) {
+        if ((!isOffsetValid(pMemoryMap, nOffset)) && (!isEOD(pMemoryMap, nOffset))) {
             return false;
         }
     }
