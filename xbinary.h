@@ -904,7 +904,8 @@ public:
         //        bool bErrors;
         //        bool bSuccess; // TODO important
         QString sInfoString;
-        bool bCriticalError;     // TODO !!!
+        QString sErrorString;
+        bool bForceStop;     // TODO !!!
         qint32 nBufferSize;      // 0 =
         qint32 nFileBufferSize;  // 0 => 0x10000
         PDSTRUCT_CALLBACK pCallback;
@@ -2040,6 +2041,11 @@ public:
     static void setPdStructStatus(PDSTRUCT *pPdStruct, qint32 nIndex, const QString &sStatus);
     static void setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex);
     static void setPdStructInfoString(PDSTRUCT *pPdStruct, const QString &sInfoString);
+    static void setPdStructErrorString(PDSTRUCT *pPdStruct, const QString &sErrorString);
+    static void clearPdStructInfoString(PDSTRUCT *pPdStruct);
+    static void clearPdStructErrorString(PDSTRUCT *pPdStruct);
+    static QString getPdStructInfoString(PDSTRUCT *pPdStruct);
+    static QString getPdStructErrorString(PDSTRUCT *pPdStruct);
     static qint32 getFreeIndex(PDSTRUCT *pPdStruct);
     static bool isPdStructFinished(PDSTRUCT *pPdStruct);
     static bool isPdStructNotCanceled(PDSTRUCT *pPdStruct);
@@ -2208,8 +2214,8 @@ private:
 
 protected:
     bool _isOffsetValid(qint64 nOffset);
-    void _errorMessage(const QString &sErrorMessage);
-    void _infoMessage(const QString &sInfoMessage);
+    void _errorMessage(const QString &sErrorMessage, PDSTRUCT *pPdStruct = nullptr);
+    void _infoMessage(const QString &sInfoMessage, PDSTRUCT *pPdStruct = nullptr);
     qint64 _calculateRawSize(PDSTRUCT *pPdStruct);
     static qint64 _calculateRawSize(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct);
 

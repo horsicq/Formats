@@ -4772,7 +4772,7 @@ bool XPE::addSection(const QString &sFileName, bool bIsImage, XPE_DEF::IMAGE_SEC
 
         file.close();
     } else {
-        _errorMessage(QString("%1: %2").arg(tr("Cannot open file"), sFileName));
+        _errorMessage(QString("%1: %2").arg(tr("Cannot open file"), sFileName), pPdStruct);
     }
 
     return bResult;
