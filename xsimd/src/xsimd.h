@@ -324,6 +324,34 @@ xsimd_int64 xsimd_count_char(const void* pBuffer, xsimd_int64 nSize, xsimd_uint8
 xsimd_int64 xsimd_create_ansi_mask(const void* pBuffer, xsimd_int64 nSize, void* pMask);
 
 /**
+ * Compare signature bytes against data (optimized with SIMD)
+ * SigBytes format: pairs of {type:quint8, value:quint8}
+ * Types: 0=HEX, 1=WILDCARD, 2=ANSI, 3=NOT_ANSI, 4=NOT_ANSI_AND_NOT_NULL, 5=ANSI_ALPHANUMERIC, 6=NOT_NULL
+ * @param pSigBytes Signature pattern in SigBytes format
+ * @param nSigBytesSize Size of signature pattern (must be even)
+ * @param pData Data buffer to match against
+ * @param nDataSize Size of data buffer
+ * @param pAlphaNumTable Pointer to 256-byte alphanumeric lookup table (for type 5)
+ * @return 1 if pattern matches, 0 if mismatch or invalid input
+ */
+int xsimd_compare_sigbytes(const void* pSigBytes, xsimd_int64 nSigBytesSize, const void* pData, xsimd_int64 nDataSize, const void* pAlphaNumTable);
+
+/**
+ * Find signature pattern in data buffer using SIMD acceleration
+ * 
+ * Searches for a signature pattern within a data buffer. Uses SIMD to accelerate
+ * scanning for candidate positions and verifies matches with full pattern comparison.
+ * 
+ * @param pData Data buffer to search in
+ * @param nDataSize Size of data buffer
+ * @param pSigBytes Signature pattern in SigBytes format
+ * @param nSigBytesSize Size of signature pattern (must be even)
+ * @param pAlphaNumTable Pointer to 256-byte alphanumeric lookup table (for type 5)
+ * @return Offset of first match, or -1 if not found or SIMD not available
+ */
+xsimd_int64 xsimd_find_sigbytes(const void* pData, xsimd_int64 nDataSize, const void* pSigBytes, xsimd_int64 nSigBytesSize, const void* pAlphaNumTable);
+
+/**
  * Cleanup library resources
  */
 void xsimd_cleanup(void);

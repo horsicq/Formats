@@ -86,6 +86,26 @@ const quint16 _crc16_tab[] = {
     0x9901, 0x59c0, 0x5880, 0x9841, 0x8801, 0x48c0, 0x4980, 0x8941, 0x4b00, 0x8bc1, 0x8a81, 0x4a40, 0x4e00, 0x8ec1, 0x8f81, 0x4f40, 0x8d01, 0x4dc0, 0x4c80, 0x8c41,
     0x4400, 0x84c1, 0x8581, 0x4540, 0x8701, 0x47c0, 0x4680, 0x8641, 0x8201, 0x42c0, 0x4380, 0x8341, 0x4100, 0x81c1, 0x8081, 0x4040};
 
+// Alphanumeric lookup table for signature matching (0-9, A-Z, a-z)
+const bool g_alphaNumTable[256] = {
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false, // 0-9
+    false, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  // A-O
+    true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, // P-Z
+    false, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  // a-o
+    true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, // p-z
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false
+};
+
 XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XBinary::STRUCTID_NFDSCAN, "nfd", QString("Nauz File Detector")},
@@ -3906,6 +3926,270 @@ qint64 XBinary::find_utf8String(qint64 nOffset, qint64 nSize, const QString &sSt
     return find_array(nOffset, nSize, (char *)baData.data(), baData.size(), pPdStruct);
 }
 
+QByteArray XBinary::_signatureToSigBytes(const QString &sSignature, PDSTRUCT *pPdStruct)
+{
+    QByteArray baResult;
+
+    QString _sSignature = convertSignature(sSignature);
+    qint32 nSignatureSize = _sSignature.size();
+
+    for (qint32 i = 0; (i < nSignatureSize) && isPdStructNotCanceled(pPdStruct);) {
+        QChar cSymbol = _sSignature.at(i);
+        QChar cSymbol2;
+
+        if ((i + 1) < nSignatureSize) {
+            cSymbol2 = _sSignature.at(i + 1);
+        }
+
+        if ((cSymbol == QChar('.')) && (cSymbol2 == QChar('.'))) {
+            // Wildcard
+            baResult.append((char)SIGBYTETYPE_WILDCARD);
+            baResult.append((char)0x00);
+            i += 2;
+        } else if ((cSymbol == QChar('*')) && (cSymbol2 == QChar('*'))) {
+            // Not null byte
+            baResult.append((char)SIGBYTE_NOT_NULL);
+            baResult.append((char)0x00);
+            i += 2;
+        } else if ((cSymbol == QChar('%')) && (cSymbol2 == QChar('%'))) {
+            // ANSI character
+            baResult.append((char)SIGBYTETYPE_ANSI);
+            baResult.append((char)0x00);
+            i += 2;
+        } else if ((cSymbol == QChar('%')) && (cSymbol2 == QChar('&'))) {
+            // ANSI alphanumeric
+            baResult.append((char)SIGBYTETYPE_ANSI_ALPHANUMERIC);
+            baResult.append((char)0x00);
+            i += 2;
+        } else if ((cSymbol == QChar('!')) && (cSymbol2 == QChar('%'))) {
+            // Not ANSI
+            baResult.append((char)SIGBYTETYPE_NOT_ANSI);
+            baResult.append((char)0x00);
+            i += 2;
+        } else if ((cSymbol == QChar('_')) && (cSymbol2 == QChar('%'))) {
+            // Not ANSI and not null
+            baResult.append((char)SIGBYTETYPE_NOT_ANSI_AND_NOT_NULL);
+            baResult.append((char)0x00);
+            i += 2;
+        } else if ((cSymbol == QChar('$')) || (cSymbol == QChar('#')) || (cSymbol == QChar('+')) || (cSymbol == QChar('['))) {
+            // Skip relative offset, absolute address, find pattern, and address base markers
+            i++;
+        } else if (cSymbol == QChar(']')) {
+            // Skip address base end marker
+            i++;
+        } else if ((i + 1) < nSignatureSize) {
+            // Hex byte
+            QString sHexByte = _sSignature.mid(i, 2);
+            bool bOk = false;
+            quint8 nValue = (quint8)sHexByte.toUInt(&bOk, 16);
+
+            if (bOk) {
+                baResult.append((char)SIGBYTETYPE_HEX);
+                baResult.append((char)nValue);
+                i += 2;
+            } else {
+                // Invalid hex, skip
+                i++;
+            }
+        } else {
+            // End of signature
+            break;
+        }
+    }
+
+    return baResult;
+}
+
+bool XBinary::_compareSigBytes(const QByteArray &baSigBytes, const QByteArray &baData, PDSTRUCT *pPdStruct)
+{
+    return _compareSigBytes(baSigBytes.constData(), baSigBytes.size(), baData.constData(), baData.size(), pPdStruct);
+}
+
+bool XBinary::_compareSigBytes(const char *pSigBytes, qint64 nSigBytesSize, const char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct)
+{
+    // SigBytes format: pairs of {type:quint8, value:quint8}
+    // So nSigBytesSize must be even and represent nSigBytesSize/2 bytes to match
+    if ((nSigBytesSize % 2) != 0) {
+        return false;
+    }
+
+    qint64 nPatternLength = nSigBytesSize / 2;
+
+    // Data must be at least as long as the pattern
+    if (nDataSize < nPatternLength) {
+        return false;
+    }
+
+#ifdef USE_XSIMD
+    // Try SIMD path first for better performance
+    qint32 nResult = xsimd_compare_sigbytes((const quint8 *)pSigBytes, (qint64)nSigBytesSize, 
+                                             (const quint8 *)pData, (qint64)nDataSize, 
+                                             (const quint8 *)g_alphaNumTable);
+    
+    if (nResult >= 0) {
+        // SIMD was able to process it
+        return (nResult == 1);
+    }
+    // If nResult < 0, fall back to scalar implementation below
+#endif
+
+    const quint8 *pSig = (const quint8 *)pSigBytes;
+    const quint8 *pSigEnd = pSig + nSigBytesSize;
+    const quint8 *pDat = (const quint8 *)pData;
+
+    // Check cancellation less frequently for better performance
+    qint64 nCheckInterval = 64;
+    qint64 nNextCheck = nCheckInterval;
+
+    while (pSig < pSigEnd) {
+        quint8 nType = *pSig++;
+        quint8 nValue = *pSig++;
+        quint8 nDataByte = *pDat++;
+
+        // Most common cases first (HEX and WILDCARD)
+        if (nType == SIGBYTETYPE_HEX) {
+            if (nDataByte != nValue) {
+                return false;
+            }
+        } else if (nType == SIGBYTETYPE_WILDCARD) {
+            // Matches any byte, continue
+        } else if (nType == SIGBYTE_NOT_NULL) {
+            if (nDataByte == 0x00) {
+                return false;
+            }
+        } else if (nType == SIGBYTETYPE_ANSI) {
+            // Printable ASCII: 0x20 (space) to 0x7E (~)
+            // Optimized: single comparison using unsigned arithmetic
+            if ((quint8)(nDataByte - 0x20) >= 0x5F) {
+                return false;
+            }
+        } else if (nType == SIGBYTETYPE_NOT_ANSI) {
+            // Not printable ASCII
+            if ((quint8)(nDataByte - 0x20) < 0x5F) {
+                return false;
+            }
+        } else if (nType == SIGBYTETYPE_ANSI_ALPHANUMERIC) {
+            // Use lookup table for fast classification
+            if (!g_alphaNumTable[nDataByte]) {
+                return false;
+            }
+        } else if (nType == SIGBYTETYPE_NOT_ANSI_AND_NOT_NULL) {
+            // Not printable ASCII and not null
+            // Optimized: combine checks
+            if (nDataByte == 0x00 || (quint8)(nDataByte - 0x20) < 0x5F) {
+                return false;
+            }
+        } else {
+            // Unknown type, fail
+            return false;
+        }
+
+        // Check for cancellation periodically
+        if ((pSig >= pSigEnd) || ((pSig - (const quint8 *)pSigBytes) >= nNextCheck)) {
+            if (!isPdStructNotCanceled(pPdStruct)) {
+                return false;
+            }
+            nNextCheck += nCheckInterval;
+        }
+    }
+
+    return true;
+}
+
+qint64 XBinary::_findSigBytes(qint64 nOffset, qint64 nSize, const char *pSigBytes, qint64 nSigBytesSize, PDSTRUCT *pPdStruct)
+{
+    // Validate inputs
+    if (!pSigBytes || nSigBytesSize <= 0) {
+        return -1;
+    }
+
+    // SigBytes format uses 2 bytes per pattern byte (type + value)
+    if ((nSigBytesSize % 2) != 0) {
+        return -1;
+    }
+
+    qint64 nPatternLength = nSigBytesSize / 2;
+
+    // Validate region
+    qint64 nFileSize = getSize();
+
+    if (nSize == -1) {
+        nSize = nFileSize - nOffset;
+    }
+
+    if (nSize <= 0 || nOffset < 0 || nOffset + nSize > nFileSize) {
+        return -1;
+    }
+
+    if (nPatternLength > nSize) {
+        return -1;
+    }
+
+    // Search through the region
+    qint64 nSearchEnd = nOffset + nSize - nPatternLength + 1;
+
+    if (m_pConstMemory) {
+        // Fast path: constant memory access
+        const char *pFileData = (const char *)m_pConstMemory;
+
+#ifdef USE_XSIMD
+        // Try SIMD path first for better performance
+        qint64 nResult = xsimd_find_sigbytes((const quint8 *)(pFileData + nOffset), nSize, 
+                                              (const quint8 *)pSigBytes, nSigBytesSize, 
+                                              (const quint8 *)g_alphaNumTable);
+        
+        if (nResult >= 0) {
+            // SIMD found it, adjust offset
+            return nOffset + nResult;
+        }
+        // If nResult < 0, fall back to scalar implementation below
+#endif
+
+        for (qint64 i = nOffset; (i < nSearchEnd) && isPdStructNotCanceled(pPdStruct); i++) {
+            if (_compareSigBytes(pSigBytes, nSigBytesSize, pFileData + i, nPatternLength, pPdStruct)) {
+                return i;
+            }
+        }
+    } else {
+        // Buffered read path
+        qint32 nBufferSize = 0x10000;  // 64KB buffer
+        QByteArray baBuffer;
+
+        for (qint64 i = nOffset; (i < nSearchEnd) && isPdStructNotCanceled(pPdStruct);) {
+            // Read buffer at current position
+            qint64 nRemaining = nSearchEnd - i;
+            qint64 nReadSize = qMin<qint64>(nBufferSize, nRemaining + nPatternLength - 1);
+
+            baBuffer = read_array(i, nReadSize);
+
+            if (baBuffer.isEmpty()) {
+                break;
+            }
+
+            // Search within buffer
+            qint64 nBufferSearchEnd = baBuffer.size() - nPatternLength + 1;
+
+            for (qint64 j = 0; (j < nBufferSearchEnd) && isPdStructNotCanceled(pPdStruct); j++) {
+                if (_compareSigBytes(pSigBytes, nSigBytesSize, baBuffer.constData() + j, nPatternLength, pPdStruct)) {
+                    return i + j;
+                }
+            }
+
+            // Move to next buffer position
+            // Overlap by (nPatternLength - 1) to catch patterns spanning buffer boundaries
+            qint64 nAdvance = baBuffer.size() - (nPatternLength - 1);
+
+            if (nAdvance <= 0) {
+                nAdvance = 1;
+            }
+
+            i += nAdvance;
+        }
+    }
+
+    return -1;
+}
+
 qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, const QString &sSignature, qint64 *pnResultSize, PDSTRUCT *pPdStruct)
 {
     _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
@@ -3962,9 +4246,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
     qint64 nResult = -1;
 
-    if (_sSignature.contains(QChar('.')) || _sSignature.contains(QChar('$')) || _sSignature.contains(QChar('#')) || _sSignature.contains(QChar('+')) ||
-        _sSignature.contains(QChar('*')) || _sSignature.contains(QChar('%')) || _sSignature.contains(QChar('!')) || _sSignature.contains(QChar('_')) ||
-        _sSignature.contains(QChar('&'))) {
+    if (_sSignature.contains(QChar('$')) || _sSignature.contains(QChar('#')) || _sSignature.contains(QChar('+'))) {
         bool bIsValid = true;
 
         QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bIsValid, pPdStruct);
@@ -4090,6 +4372,90 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
             XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
         }
+    } else if (_sSignature.contains(QChar('.')) ||
+                       _sSignature.contains(QChar('*')) || _sSignature.contains(QChar('%')) || _sSignature.contains(QChar('!')) || _sSignature.contains(QChar('_')) ||
+                       _sSignature.contains(QChar('&'))) {
+        QByteArray baSigBytes = _signatureToSigBytes(_sSignature, pPdStruct);
+        if (baSigBytes.size()) {
+            // Optimization: Check for leading non-HEX bytes
+            // Sigbytes format: each entry is 2 bytes [type, value]
+            qint32 nLeadingNonHex = 0;
+            qint32 nSigBytesSize = baSigBytes.size();
+            const quint8 *pSigBytes = (const quint8 *)baSigBytes.constData();
+            
+            // Count leading non-HEX bytes (each entry is 2 bytes: [SIGBYTETYPE, value])
+            for (qint32 i = 0; i < nSigBytesSize; i += 2) {
+                quint8 nType = pSigBytes[i];
+                if (nType != SIGBYTETYPE_HEX) {
+                    nLeadingNonHex++;
+                } else {
+                    break;
+                }
+            }
+            
+            // If we have >=3 leading non-HEX bytes, extract first fixed pattern and search for it
+            if (nLeadingNonHex >= 3) {
+                // Find first fixed hex byte sequence (at least 3 bytes)
+                qint32 nFixedStartIndex = nLeadingNonHex * 2;  // Byte offset in sigbytes
+                qint32 nFixedLength = 0;
+                
+                for (qint32 i = nFixedStartIndex; i < nSigBytesSize; i += 2) {
+                    quint8 nType = pSigBytes[i];
+                    if (nType == SIGBYTETYPE_HEX) {
+                        nFixedLength++;
+                    } else {
+                        break;
+                    }
+                }
+                
+                // If fixed pattern is >=3 bytes, use optimized search
+                if (nFixedLength >= 3) {
+                    // Extract actual hex values (second byte of each [type, value] pair)
+                    QByteArray baFixedPattern;
+                    baFixedPattern.reserve(nFixedLength);
+                    for (qint32 i = 0; i < nFixedLength; i++) {
+                        baFixedPattern.append((char)pSigBytes[nFixedStartIndex + (i * 2) + 1]);
+                    }
+                    
+                    qint64 nCurrentOffset = nOffset;
+                    qint64 nRemainingSize = nSize;
+                    
+                    while (isPdStructNotCanceled(pPdStruct)) {
+                        // Search for fixed pattern
+                        qint64 nFoundOffset = find_array(nCurrentOffset, nRemainingSize, baFixedPattern.constData(), baFixedPattern.size(), pPdStruct);
+                        
+                        if (nFoundOffset == -1) {
+                            break;
+                        }
+                        
+                        // Check if full signature matches at position - nLeadingNonHex
+                        qint64 nCheckOffset = nFoundOffset - nLeadingNonHex;
+                        
+                        if (nCheckOffset >= nOffset) {
+                            // Verify the full signature at this position
+                            if (compareSignature(pMemoryMap, _sSignature, nCheckOffset, pPdStruct)) {
+                                nResult = nCheckOffset;
+                                break;
+                            }
+                        }
+                        
+                        // Continue searching after this match
+                        nCurrentOffset = nFoundOffset + 1;
+                        if (nCurrentOffset >= nOffset + nSize) {
+                            break;
+                        }
+                        nRemainingSize = nSize - (nCurrentOffset - nOffset);
+                    }
+                } else {
+                    // Fixed pattern too short, use normal search
+                    nResult = _findSigBytes(nOffset, nSize, baSigBytes.constData(), baSigBytes.size(), pPdStruct);
+                }
+            } else {
+                // No leading non-HEX bytes or too few, use normal search
+                nResult = _findSigBytes(nOffset, nSize, baSigBytes.constData(), baSigBytes.size(), pPdStruct);
+            }
+        }
+
     } else {
         QByteArray baData = QByteArray::fromHex(QByteArray(_sSignature.toLatin1().data()));
 

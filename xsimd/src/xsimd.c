@@ -628,6 +628,91 @@ int xsimd_compare_memory(const void* pBuffer1, const void* pBuffer2, xsimd_int64
     return (memcmp(ptr1, ptr2, (size_t)nSize) == 0) ? 1 : 0;
 }
 
+int xsimd_compare_sigbytes(const void* pSigBytes, xsimd_int64 nSigBytesSize, const void* pData, xsimd_int64 nDataSize, const void* pAlphaNumTable)
+{
+    if (!pSigBytes || !pData || !pAlphaNumTable) {
+        return 0;  /* Invalid input */
+    }
+    
+    /* SigBytes must be even size (type+value pairs) */
+    if ((nSigBytesSize % 2) != 0) {
+        return 0;
+    }
+    
+    /* Pattern length = nSigBytesSize / 2 */
+    xsimd_int64 nPatternLength = nSigBytesSize / 2;
+    
+    /* Data must be at least as long as pattern */
+    if (nDataSize < nPatternLength) {
+        return 0;
+    }
+    
+#ifdef XSIMD_X86
+    /* Use SIMD if pattern is large enough */
+    if (nPatternLength >= 8) {
+        /* Try AVX2 first (processes 32 bytes at a time) */
+        if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
+            return _xsimd_compare_sigbytes_AVX2((const xsimd_uint8*)pSigBytes, nSigBytesSize, 
+                                                 (const xsimd_uint8*)pData, nDataSize, 
+                                                 (const xsimd_uint8*)pAlphaNumTable);
+        }
+        /* Fall back to SSE2 (processes 16 bytes at a time) */
+        else if (g_nEnabledFeatures & XSIMD_FEATURE_SSE2) {
+            return _xsimd_compare_sigbytes_SSE2((const xsimd_uint8*)pSigBytes, nSigBytesSize, 
+                                                 (const xsimd_uint8*)pData, nDataSize, 
+                                                 (const xsimd_uint8*)pAlphaNumTable);
+        }
+    }
+#endif
+    
+    /* For small patterns or no SIMD, use scalar implementation */
+    /* This fallback is handled in xbinary.cpp _compareSigBytes */
+    return -1;  /* Indicates caller should use scalar path */
+}
+
+xsimd_int64 xsimd_find_sigbytes(const void* pData, xsimd_int64 nDataSize, const void* pSigBytes, xsimd_int64 nSigBytesSize, const void* pAlphaNumTable)
+{
+    if (!pData || !pSigBytes || !pAlphaNumTable) {
+        return -1;  /* Invalid input */
+    }
+    
+    /* SigBytes must be even size (type+value pairs) */
+    if ((nSigBytesSize % 2) != 0) {
+        return -1;
+    }
+    
+    /* Pattern length = nSigBytesSize / 2 */
+    xsimd_int64 nPatternLength = nSigBytesSize / 2;
+    
+    /* Data must be at least as long as pattern */
+    if (nDataSize < nPatternLength) {
+        return -1;
+    }
+    
+#ifdef XSIMD_X86
+    /* Use SIMD if pattern is large enough (>= 4 bytes) */
+    if (nPatternLength >= 4) {
+        /* Try AVX2 first (faster for larger data) */
+        if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
+            return _xsimd_find_sigbytes_AVX2((const xsimd_uint8*)pData, nDataSize, 
+                                              (const xsimd_uint8*)pSigBytes, nSigBytesSize, 
+                                              (const xsimd_uint8*)pAlphaNumTable);
+        }
+        /* Fall back to SSE2 */
+        else if (g_nEnabledFeatures & XSIMD_FEATURE_SSE2) {
+            return _xsimd_find_sigbytes_SSE2((const xsimd_uint8*)pData, nDataSize, 
+                                              (const xsimd_uint8*)pSigBytes, nSigBytesSize, 
+                                              (const xsimd_uint8*)pAlphaNumTable);
+        }
+    }
+#endif
+    
+    /* For small patterns or no SIMD, use scalar implementation */
+    /* This fallback is handled in xbinary.cpp _findSigBytes */
+    return -1;  /* Indicates caller should use scalar path */
+}
+
+
 xsimd_int64 xsimd_find_not_ansi_and_null(const void* pBuffer, xsimd_int64 nBufferSize, 
                                          xsimd_int64 nMinLength, xsimd_int64 nOffset)
 {

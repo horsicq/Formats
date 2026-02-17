@@ -1318,6 +1318,38 @@ public:
     qint64 find_ansiString(qint64 nOffset, qint64 nSize, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_unicodeString(qint64 nOffset, qint64 nSize, const QString &sString, bool bIsBigEndian, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_utf8String(qint64 nOffset, qint64 nSize, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
+
+    // Signature Format:
+    // - Hex bytes: AA-FF or aa-ff (case insensitive, spaces ignored)
+    // - Wildcards: .. or ?? (matches any byte, converted to .. internally)
+    // - ASCII strings: 'string' (converted to hex automatically)
+    // - Relative offset: $ ($$=1 byte, $$$$=2 bytes, $$$$$$$$=4 bytes, $$$$$$$$$$$$$$$$=8 bytes)
+    // - Absolute address: # (####=4 bytes, ########=8 bytes, ##=2 bytes, ##=1 byte)
+    // - Find pattern: + (e.g., ++4D5A searches for 4D5A within 64-byte window, each + adds 32 bytes)
+    // - ANSI character: %% (matches printable ASCII 0x20-0x7E, each pair=1 byte)
+    // - Not ANSI: !% (matches non-printable ASCII, each pair=1 byte)
+    // - Not ANSI and not null: _% (matches non-ASCII and non-zero, each pair=1 byte)
+    // - ANSI alphanumeric: %& (matches 0-9, A-Z, a-z, each pair=1 byte)
+    // - Not null: ** (matches any non-zero byte, each pair=1 byte)
+    // Examples: "4D5A..0003", "'PE'0000", "E9$$$$$$$$", "68########", "23%%%%%%%%%%2F"
+
+    enum SIGBYTETYPE {
+        SIGBYTETYPE_HEX,
+        SIGBYTETYPE_WILDCARD,
+        SIGBYTETYPE_ANSI,
+        SIGBYTETYPE_NOT_ANSI,
+        SIGBYTETYPE_NOT_ANSI_AND_NOT_NULL,
+        SIGBYTETYPE_ANSI_ALPHANUMERIC,
+        SIGBYTE_NOT_NULL
+    };
+
+    // SigByte format: {type:SIGBYTETYPE quint8, value:QByteArray (for hex) quint8}
+
+    QByteArray _signatureToSigBytes(const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
+    bool _compareSigBytes(const QByteArray &baSigBytes, const QByteArray &baData, PDSTRUCT *pPdStruct = nullptr);
+    bool _compareSigBytes(const char *pSigBytes, qint64 nSigBytesSize, const char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);
+    qint64 _findSigBytes(qint64 nOffset, qint64 nSize, const char *pSigBytes, qint64 nSigBytesSize, PDSTRUCT *pPdStruct = nullptr);
+
     qint64 find_signature(qint64 nOffset, qint64 nSize, const QString &sSignature, qint64 *pnResultSize = 0, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, qint64 *pnResultSize = nullptr,
                           PDSTRUCT *pPdStruct = nullptr);

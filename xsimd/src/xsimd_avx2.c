@@ -1305,3 +1305,190 @@ void _xsimd_create_ansi_mask_AVX2(const xsimd_uint8* pData, xsimd_int64 nSize, x
 #endif
 }
 
+xsimd_int32 _xsimd_compare_sigbytes_AVX2(const xsimd_uint8 *pSigBytes, xsimd_int64 nSigBytesSize, const xsimd_uint8 *pData, xsimd_int64 nDataSize, const xsimd_uint8 *pAlphaNumTable)
+{
+#ifdef XSIMD_X86
+    if (!pData || !pSigBytes || !pAlphaNumTable || nSigBytesSize < 2 || (nSigBytesSize % 2) != 0) {
+        return 0;
+    }
+    
+    xsimd_int64 nPatternLength = nSigBytesSize / 2;
+    
+    if (nDataSize < nPatternLength) {
+        return 0;
+    }
+    
+    // Constants for ANSI range check (0x20 to 0x7E)
+    const __m256i vAnsiMin = _mm256_set1_epi8(0x20);
+    const __m256i vAnsiMax = _mm256_set1_epi8(0x7E);
+    const __m256i vZero = _mm256_setzero_si256();
+    
+    // Process signature pattern byte by byte
+    for (xsimd_int64 i = 0; i < nPatternLength; i++) {
+        xsimd_uint8 nType = pSigBytes[i * 2];
+        xsimd_uint8 nValue = pSigBytes[i * 2 + 1];
+        xsimd_uint8 nDataByte = pData[i];
+        
+        switch (nType) {
+            case 0:  // HEX - exact match
+                if (nDataByte != nValue) {
+                    return 0;
+                }
+                break;
+                
+            case 1:  // WILDCARD - always matches
+                break;
+                
+            case 2:  // ANSI - check if in range 0x20-0x7E
+            {
+                // Use AVX2 for single byte check (will be optimized by compiler)
+                __m256i vData = _mm256_set1_epi8(nDataByte);
+                __m256i vGte = _mm256_cmpgt_epi8(vData, _mm256_subs_epi8(vAnsiMin, _mm256_set1_epi8(1)));
+                __m256i vLte = _mm256_cmpgt_epi8(_mm256_adds_epi8(vAnsiMax, _mm256_set1_epi8(1)), vData);
+                __m256i vInRange = _mm256_and_si256(vGte, vLte);
+                xsimd_uint32 nMask = _mm256_movemask_epi8(vInRange);
+                if (nMask != 0xFFFFFFFF) {
+                    return 0;
+                }
+                break;
+            }
+            
+            case 3:  // NOT_ANSI - check if NOT in range 0x20-0x7E
+            {
+                __m256i vData = _mm256_set1_epi8(nDataByte);
+                __m256i vGte = _mm256_cmpgt_epi8(vData, _mm256_subs_epi8(vAnsiMin, _mm256_set1_epi8(1)));
+                __m256i vLte = _mm256_cmpgt_epi8(_mm256_adds_epi8(vAnsiMax, _mm256_set1_epi8(1)), vData);
+                __m256i vInRange = _mm256_and_si256(vGte, vLte);
+                xsimd_uint32 nMask = _mm256_movemask_epi8(vInRange);
+                if (nMask == 0xFFFFFFFF) {
+                    return 0;  // It IS in ANSI range, but we want NOT_ANSI
+                }
+                break;
+            }
+            
+            case 4:  // NOT_ANSI_AND_NOT_NULL
+            {
+                if (nDataByte == 0x00) {
+                    return 0;  // Is null
+                }
+                __m256i vData = _mm256_set1_epi8(nDataByte);
+                __m256i vGte = _mm256_cmpgt_epi8(vData, _mm256_subs_epi8(vAnsiMin, _mm256_set1_epi8(1)));
+                __m256i vLte = _mm256_cmpgt_epi8(_mm256_adds_epi8(vAnsiMax, _mm256_set1_epi8(1)), vData);
+                __m256i vInRange = _mm256_and_si256(vGte, vLte);
+                xsimd_uint32 nMask = _mm256_movemask_epi8(vInRange);
+                if (nMask == 0xFFFFFFFF) {
+                    return 0;  // Is in ANSI range
+                }
+                break;
+            }
+            
+            case 5:  // ANSI_ALPHANUMERIC
+            {
+                // Use lookup table for fast check
+                if (!pAlphaNumTable[nDataByte]) {
+                    return 0;
+                }
+                break;
+            }
+            
+            case 6:  // NOT_NULL
+                if (nDataByte == 0x00) {
+                    return 0;
+                }
+                break;
+                
+            default:
+                return 0;  // Unknown type
+        }
+    }
+    
+    return 1;  // All checks passed
+#else
+    return -1;  // Not available
+#endif
+}
+
+xsimd_int64 _xsimd_find_sigbytes_AVX2(const xsimd_uint8 *pData, xsimd_int64 nDataSize, const xsimd_uint8 *pSigBytes, xsimd_int64 nSigBytesSize, const xsimd_uint8 *pAlphaNumTable)
+{
+#ifdef XSIMD_X86
+    if (!pData || !pSigBytes || !pAlphaNumTable || nSigBytesSize < 2 || (nSigBytesSize % 2) != 0) {
+        return -1;
+    }
+    
+    xsimd_int64 nPatternLength = nSigBytesSize / 2;
+    
+    if (nDataSize < nPatternLength) {
+        return -1;
+    }
+    
+    xsimd_int64 nSearchEnd = nDataSize - nPatternLength + 1;
+    
+    /* Check first signature byte type to determine scan strategy */
+    xsimd_uint8 nFirstType = pSigBytes[0];
+    xsimd_uint8 nFirstValue = pSigBytes[1];
+    
+    /* If first byte is HEX, use SIMD to scan for that specific byte */
+    if (nFirstType == 0) {  /* HEX type */
+        __m256i vFirstByte = _mm256_set1_epi8(nFirstValue);
+        xsimd_int64 i = 0;
+        
+        /* Process 32 bytes at a time with AVX2 */
+        for (; i + 32 <= nSearchEnd; i += 32) {
+            __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
+            __m256i vCmp = _mm256_cmpeq_epi8(vData, vFirstByte);
+            xsimd_uint32 nMask = _mm256_movemask_epi8(vCmp);
+            
+            /* Check each matching position */
+            while (nMask != 0) {
+                xsimd_int32 nBitPos = 0;
+#ifdef _MSC_VER
+                unsigned long nIndex;
+                _BitScanForward(&nIndex, nMask);
+                nBitPos = (xsimd_int32)nIndex;
+#else
+                nBitPos = __builtin_ctz(nMask);
+#endif
+                xsimd_int64 nCandidatePos = i + nBitPos;
+                
+                /* Verify full pattern at this position */
+                if (nCandidatePos + nPatternLength <= nDataSize) {
+                    if (_xsimd_compare_sigbytes_AVX2(pSigBytes, nSigBytesSize, 
+                                                      pData + nCandidatePos, nPatternLength, 
+                                                      pAlphaNumTable) == 1) {
+                        return nCandidatePos;
+                    }
+                }
+                
+                /* Clear this bit and continue */
+                nMask &= nMask - 1;
+            }
+        }
+        
+        /* Handle remaining bytes with scalar scan */
+        for (; i < nSearchEnd; i++) {
+            if (pData[i] == nFirstValue) {
+                if (_xsimd_compare_sigbytes_AVX2(pSigBytes, nSigBytesSize, 
+                                                  pData + i, nPatternLength, 
+                                                  pAlphaNumTable) == 1) {
+                    return i;
+                }
+            }
+        }
+    } else {
+        /* For non-HEX first byte (wildcard, ANSI, etc.), do linear scan */
+        /* This is still faster than scalar due to SIMD comparison */
+        for (xsimd_int64 i = 0; i < nSearchEnd; i++) {
+            if (_xsimd_compare_sigbytes_AVX2(pSigBytes, nSigBytesSize, 
+                                              pData + i, nPatternLength, 
+                                              pAlphaNumTable) == 1) {
+                return i;
+            }
+        }
+    }
+    
+    return -1;  /* Not found */
+#else
+    return -1;  /* Not available */
+#endif
+}
+
