@@ -15521,6 +15521,19 @@ bool XBinary::finishPack(PACK_STATE *pState, PDSTRUCT *pPdStruct)
     return false;
 }
 
+QVariant XBinary::calculateHash(QIODevice *pDevice, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pDevice)
+    Q_UNUSED(pPdStruct)
+
+    return 0;
+}
+
+QVariant XBinary::calculateHash(const QString &sFileName, PDSTRUCT *pPdStruct)
+{
+    return XBinary::_getCRC32(sFileName, pPdStruct);
+}
+
 bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;

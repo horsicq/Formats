@@ -2198,6 +2198,9 @@ public:
     virtual bool addFolder(PACK_STATE *pState, const QString &sDirectoryPath, PDSTRUCT *pPdStruct = nullptr);
     virtual bool finishPack(PACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
 
+    virtual QVariant calculateHash(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
+    static QVariant calculateHash(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
+
     bool unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
     bool unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
 
