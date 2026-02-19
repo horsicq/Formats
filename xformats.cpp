@@ -860,7 +860,9 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
     if (nNumberOfRecords > 0) {
 #ifdef USE_ARCHIVE
         XDecompress xDecompress;
-        _connect(&xDecompress);
+        connect(&xDecompress, &XDecompress::errorMessage, this, &XThreadObject::errorMessage);
+        connect(&xDecompress, &XDecompress::warningMessage, this, &XThreadObject::warningMessage);
+        connect(&xDecompress, &XDecompress::infoMessage, this, &XThreadObject::infoMessage);
 #endif
 
         if (XBinary::createDirectory(sFolderName)) {
@@ -889,85 +891,29 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
                     if (file.open(QIODevice::ReadWrite)) {
                         const XBinary::ARCHIVERECORD &archiveRecord = pListRecords->at(i);
 
-                        QIODevice *pDecompressIn = nullptr;
-                        QIODevice *pDecompressOut = nullptr;
-                        QIODevice *pHandleIn = nullptr;
-                        QIODevice *pHandleOut = nullptr;
-                        QTemporaryFile *pTmpFile = nullptr;
-
-                        bool bUnpack = (archiveRecord.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD1, XBinary::HANDLE_METHOD_UNKNOWN).toUInt() !=
-                                        XBinary::HANDLE_METHOD_UNKNOWN);
-                        bool bHandle = (archiveRecord.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD2, XBinary::HANDLE_METHOD_UNKNOWN).toUInt() !=
-                                        XBinary::HANDLE_METHOD_UNKNOWN);
-#ifdef QT_DEBUG
-                        qDebug("XFormats::extractArchiveRecordsToFolder: bUnpack=%d, bHandle=%d", bUnpack, bHandle);
-#endif
-
-                        if (bUnpack) {
-                            pDecompressIn = pDevice;
-
-                            if (bHandle) {
-                                pTmpFile = new QTemporaryFile;
-                                pTmpFile->open();
-                                pDecompressOut = pTmpFile;
-                            } else {
-                                pDecompressOut = &file;
-                            }
-                        }
-
-                        if (bHandle) {
-                            if (bUnpack) {
-                                pHandleIn = pTmpFile;
-                            } else {
-                                pHandleIn = pDevice;
-                            }
-
-                            pHandleOut = &file;
-                        }
-
-                        if (bUnpack) {
-#ifdef QT_DEBUG
-                            qDebug("XFormats::extractArchiveRecordsToFolder: Starting decompression for %s", sPrefName.toLatin1().data());
-#endif
 #ifdef USE_ARCHIVE
-                            if (xDecompress.decompressArchiveRecord(archiveRecord, pDecompressIn, pDecompressOut, pPdStruct)) {
+                        if (xDecompress.decompressArchiveRecord(archiveRecord, pDevice, &file, pPdStruct)) {
 #ifdef QT_DEBUG
-                                qDebug("XFormats::extractArchiveRecordsToFolder: Decompression successful, checking CRC");
+                            qDebug("XFormats::extractArchiveRecordsToFolder: Decompression successful, checking CRC");
 #endif
-                                if (!xDecompress.checkCRC(archiveRecord.mapProperties, pDecompressOut, pPdStruct)) {
+                            if (!xDecompress.checkCRC(archiveRecord.mapProperties, &file, pPdStruct)) {
 #ifdef QT_DEBUG
-                                    qDebug() << "Invalid CRC for" << sPrefName;
+                                qDebug() << "Invalid CRC for" << sPrefName;
 #endif
-                                    emit warningMessage(QString("%1: %2").arg(tr("Invalid CRC"), sPrefName));
-                                } else {
-#ifdef QT_DEBUG
-                                    qDebug("XFormats::extractArchiveRecordsToFolder: CRC check passed");
-#endif
-                                }
+                                emit warningMessage(QString("%1: %2").arg(tr("Invalid CRC"), sPrefName));
                             } else {
 #ifdef QT_DEBUG
-                                qDebug() << "Cannot decompress" << sPrefName;
+                                qDebug("XFormats::extractArchiveRecordsToFolder: CRC check passed");
 #endif
-                                emit errorMessage(QString("%1: %2").arg(tr("Cannot decompress"), sPrefName));
-                                bResult = false;
                             }
+                        } else {
+#ifdef QT_DEBUG
+                            qDebug() << "Cannot decompress" << sPrefName;
 #endif
+                            emit errorMessage(QString("%1: %2").arg(tr("Cannot decompress"), sPrefName));
+                            bResult = false;
                         }
-
-                        if (bHandle) {
-                            XBinary::HANDLE_METHOD handleMethod =
-                                (XBinary::HANDLE_METHOD)(archiveRecord.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD2, XBinary::HANDLE_METHOD_UNKNOWN).toUInt());
-
-                            // if () {
-
-                            // }
-                            // TODO
-                        }
-
-                        if (pTmpFile) {
-                            pTmpFile->close();
-                            delete pTmpFile;
-                        }
+#endif
 
                         file.close();
 #ifdef QT_DEBUG
