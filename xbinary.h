@@ -180,9 +180,11 @@ public:
         HANDLE_METHOD_BZIP2,
         HANDLE_METHOD_LZMA,
         HANDLE_METHOD_LZMA2,
+        HANDLE_METHOD_XZ,
         HANDLE_METHOD_LZW_PDF,
         HANDLE_METHOD_ASCII85,
-        HANDLE_METHOD_PPMD,
+        HANDLE_METHOD_PPMD7,
+        HANDLE_METHOD_PPMD8,
         HANDLE_METHOD_LZH5,
         HANDLE_METHOD_LZH6,
         HANDLE_METHOD_LZH7,
@@ -259,7 +261,7 @@ public:
         FPART_PROP_UID,
         FPART_PROP_GID,
         FPART_PROP_LINKNAME,
-        FPART_PROP_FILTERMETHOD,        // For preprocessing filters like BCJ, BCJ2
+        FPART_PROP_FILTERMETHOD,        // For preprocessing filters like BCJ, BCJ2 // TODO check!
         FPART_PROP_COMPRESSPROPERTIES,  // Compression algorithm properties (e.g., LZMA dictionary size)
         FPART_PROP_AESKEY,              // AES encryption key derivation parameters (salt, IV, etc.)
         FPART_PROP_USERNAME,
@@ -2238,6 +2240,8 @@ public:
     static qint32 getFileBufferSize(PDSTRUCT *pPdStruct);
     static QIODevice *createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct);
     static void freeFileBuffer(QIODevice **ppBuffer);
+
+    static QString getHandleMethods(const QMap<FPART_PROP, QVariant> &mapProperties);
 
 private:
     static QString qcharToHex(QChar cSymbol);

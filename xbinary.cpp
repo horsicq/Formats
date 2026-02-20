@@ -140,7 +140,8 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_LZMA2, "LZMA2", QString("LZMA2")},
     {XBinary::HANDLE_METHOD_LZW_PDF, "LZW_PDF", QString("LZW PDF")},
     {XBinary::HANDLE_METHOD_ASCII85, "ASCII85", QString("ASCII85 PDF")},
-    {XBinary::HANDLE_METHOD_PPMD, "PPMD", QString("PPMD")},  // TODO
+    {XBinary::HANDLE_METHOD_PPMD7, "PPMD7", QString("PPMD7")},
+    {XBinary::HANDLE_METHOD_PPMD8, "PPMD8", QString("PPMD8")},  // TODO
     {XBinary::HANDLE_METHOD_LZH5, "LZH5", QString("LZH5")},
     {XBinary::HANDLE_METHOD_LZH6, "LZH6", QString("LZH6")},
     {XBinary::HANDLE_METHOD_LZH7, "LZH7", QString("LZH7")},
@@ -1244,15 +1245,7 @@ void XBinary::setDevice(QIODevice *pDevice)
         if (pBuffer) {
             m_pConstMemory = pBuffer->data().data();
         } else {
-            SubDevice *pSubDevice = dynamic_cast<SubDevice *>(pDevice);
-            if (pSubDevice) {
-#ifdef QT_DEBUG
-                qDebug("XBinary::setDevice(): SubDevice detected!!!!");
-#endif
-                m_pConstMemory = nullptr;
-            } else {
-                m_pConstMemory = nullptr;
-            }
+            m_pConstMemory = (const char *)(pDevice->property("Memory").toULongLong());
         }
 
         if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
@@ -1362,7 +1355,6 @@ qint64 XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, char *pData, qi
             qDebug("Cannot seek");
 #endif
         }
-
     } else {
 #ifdef QT_DEBUG
         qDebug("Invalid pos: %llX Size: %llX", nPos, getSize());
@@ -15819,7 +15811,7 @@ QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
             pBuffer->write(ba);
             pBuffer->seek(0);  // FIX: Reset position to beginning after pre-allocating
             pResult = pBuffer;
-            pResult->setProperty("Memory", true);
+            pResult->setProperty("Memory", (quint64)ba.data());
         } else {
             delete pBuffer;
         }
@@ -15842,4 +15834,24 @@ void XBinary::freeFileBuffer(QIODevice **ppBuffer)
         delete *ppBuffer;
         *ppBuffer = nullptr;
     }
+}
+
+QString XBinary::getHandleMethods(const QMap<FPART_PROP, QVariant> &mapProperties)
+{
+    QString sResult;
+
+    HANDLE_METHOD handleMethod1 = (HANDLE_METHOD)(mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD1).toULongLong());
+    HANDLE_METHOD handleMethod2 = (HANDLE_METHOD)(mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD2).toULongLong());
+
+    // QString sHandleMethod3 = handleMethodToString(mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD3).toULongLong());
+
+    if (handleMethod2 != HANDLE_METHOD_UNKNOWN) {
+        sResult = appendText(sResult, handleMethodToString(handleMethod2), "/");
+    }
+
+    if (handleMethod1 != HANDLE_METHOD_UNKNOWN) {
+        sResult = appendText(sResult, handleMethodToString(handleMethod1), "/");
+    }
+
+    return sResult;
 }
