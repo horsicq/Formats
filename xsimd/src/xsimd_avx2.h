@@ -53,8 +53,10 @@ xsimd_int64 _xsimd_find_null_byte_AVX2(const xsimd_uint8* pData, xsimd_int64 nSi
 xsimd_int64 _xsimd_count_unicode_prefix_AVX2(const xsimd_uint16* pData, xsimd_int64 nChars, xsimd_int64* pi);
 void _xsimd_count_char_AVX2(const xsimd_uint8* pData, xsimd_int64 nSize, xsimd_uint8 nByte, xsimd_int64* pi, xsimd_int64* pnCount);
 void _xsimd_create_ansi_mask_AVX2(const xsimd_uint8* pData, xsimd_int64 nSize, xsimd_uint8* pMaskData, xsimd_int64* pi, xsimd_int64* pnAnsiCount);
-int _xsimd_compare_sigbytes_AVX2(const xsimd_uint8* pSigBytes, xsimd_int64 nSigBytesSize, const xsimd_uint8* pData, xsimd_int64 nDataSize, const xsimd_uint8* pAlphaNumTable);
-xsimd_int64 _xsimd_find_sigbytes_AVX2(const xsimd_uint8* pData, xsimd_int64 nDataSize, const xsimd_uint8* pSigBytes, xsimd_int64 nSigBytesSize, const xsimd_uint8* pAlphaNumTable);
+int _xsimd_compare_sigbytes_AVX2(const xsimd_uint8* pSigBytes, xsimd_int64 nSigBytesSize, const xsimd_uint8* pData, xsimd_int64 nDataSize,
+                                 const xsimd_uint8* pAlphaNumTable);
+xsimd_int64 _xsimd_find_sigbytes_AVX2(const xsimd_uint8* pData, xsimd_int64 nDataSize, const xsimd_uint8* pSigBytes, xsimd_int64 nSigBytesSize,
+                                      const xsimd_uint8* pAlphaNumTable);
 
 #ifdef __cplusplus
 }

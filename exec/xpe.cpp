@@ -3007,19 +3007,19 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
             }
 
             nImportTableSize = S_ALIGN_UP(nImportTableSize, 16);
-            nIATSize         = S_ALIGN_UP(nIATSize, 16);
-            nAnsiDataSize    = S_ALIGN_UP(nAnsiDataSize, 16);
+            nIATSize = S_ALIGN_UP(nIATSize, 16);
+            nAnsiDataSize = S_ALIGN_UP(nAnsiDataSize, 16);
 
             baImport.resize(nIATSize + nImportTableSize + nIATSize + nAnsiDataSize);
             baImport.fill(0);
 
             char *pDataOffset = baImport.data();
-            char *pIAT        = pDataOffset;
-            auto *pIID        = (XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *)(pDataOffset + nIATSize);
-            char *pOIAT       = pDataOffset + nIATSize + nImportTableSize;
+            char *pIAT = pDataOffset;
+            auto *pIID = (XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *)(pDataOffset + nIATSize);
+            char *pOIAT = pDataOffset + nIATSize + nImportTableSize;
 
-            char *pAnsiBase   = pDataOffset + nIATSize + nImportTableSize + nIATSize;
-            char *pAnsiData   = pAnsiBase;
+            char *pAnsiBase = pDataOffset + nIATSize + nImportTableSize + nIATSize;
+            char *pAnsiData = pAnsiBase;
 
             quint32 nAnsiOffset = 0;
 
@@ -3039,7 +3039,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                 strCopy(pAnsiData, baName.constData(), remaining);
 
                 size_t written = baName.size() + 1;
-                pAnsiData   += written;
+                pAnsiData += written;
                 nAnsiOffset += written;
 
                 pIID++;
@@ -3051,7 +3051,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
 
                     if (!pos.sName.isEmpty()) {
                         *((quint32 *)pOIAT) = pAnsiData - pDataOffset;
-                        *((quint32 *)pIAT)  = *((quint32 *)pOIAT);
+                        *((quint32 *)pIAT) = *((quint32 *)pOIAT);
 
                         listPatches.append(pOIAT - pDataOffset);
                         listPatches.append(pIAT - pDataOffset);
@@ -3060,32 +3060,32 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                         if (remaining < 2) break;
 
                         *((quint16 *)pAnsiData) = pos.nHint;
-                        pAnsiData   += 2;
+                        pAnsiData += 2;
                         nAnsiOffset += 2;
-                        remaining   -= 2;
+                        remaining -= 2;
 
                         QByteArray baFunc = pos.sName.toLatin1();
                         strCopy(pAnsiData, baFunc.constData(), remaining);
 
                         written = baFunc.size() + 1;
-                        pAnsiData   += written;
+                        pAnsiData += written;
                         nAnsiOffset += written;
 
                     } else {
                         if (nAddressSize == 4) {
                             *((quint32 *)pOIAT) = pos.nOrdinal + 0x80000000;
-                            *((quint32 *)pIAT)  = *((quint32 *)pOIAT);
+                            *((quint32 *)pIAT) = *((quint32 *)pOIAT);
                         } else {
                             *((quint64 *)pOIAT) = pos.nOrdinal + 0x8000000000000000;
-                            *((quint64 *)pIAT)  = *((quint64 *)pOIAT);
+                            *((quint64 *)pIAT) = *((quint64 *)pOIAT);
                         }
                     }
 
-                    pIAT  += nAddressSize;
+                    pIAT += nAddressSize;
                     pOIAT += nAddressSize;
                 }
 
-                pIAT  += nAddressSize;
+                pIAT += nAddressSize;
                 pOIAT += nAddressSize;
             }
 

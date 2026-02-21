@@ -338,10 +338,10 @@ int xsimd_compare_sigbytes(const void* pSigBytes, xsimd_int64 nSigBytesSize, con
 
 /**
  * Find signature pattern in data buffer using SIMD acceleration
- * 
+ *
  * Searches for a signature pattern within a data buffer. Uses SIMD to accelerate
  * scanning for candidate positions and verifies matches with full pattern comparison.
- * 
+ *
  * @param pData Data buffer to search in
  * @param nDataSize Size of data buffer
  * @param pSigBytes Signature pattern in SigBytes format

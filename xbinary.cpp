@@ -88,23 +88,19 @@ const quint16 _crc16_tab[] = {
 
 // Alphanumeric lookup table for signature matching (0-9, A-Z, a-z)
 const bool g_alphaNumTable[256] = {
-    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false, // 0-9
-    false, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  // A-O
-    true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, // P-Z
-    false, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  // a-o
-    true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, // p-z
-    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false
-};
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false,  // 0-9
+    false, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,                               // A-O
+    true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false,                              // P-Z
+    false, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,                               // a-o
+    true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false,                              // p-z
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
 
 XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -1917,8 +1913,7 @@ QString XBinary::convertPathName(const QString &sPathName)
         sResult.replace("/", QDir::separator());
     }
 
-    if (sPathName.contains("$data"))
-    {
+    if (sPathName.contains("$data")) {
 #ifdef Q_OS_MAC
         sResult.replace("$data", QCoreApplication::applicationDirPath() + "/../Resources");
 #else
@@ -4018,10 +4013,8 @@ bool XBinary::_compareSigBytes(const char *pSigBytes, qint64 nSigBytesSize, cons
 
 #ifdef USE_XSIMD
     // Try SIMD path first for better performance
-    qint32 nResult = xsimd_compare_sigbytes((const quint8 *)pSigBytes, (qint64)nSigBytesSize, 
-                                             (const quint8 *)pData, (qint64)nDataSize, 
-                                             (const quint8 *)g_alphaNumTable);
-    
+    qint32 nResult = xsimd_compare_sigbytes((const quint8 *)pSigBytes, (qint64)nSigBytesSize, (const quint8 *)pData, (qint64)nDataSize, (const quint8 *)g_alphaNumTable);
+
     if (nResult >= 0) {
         // SIMD was able to process it
         return (nResult == 1);
@@ -4130,10 +4123,8 @@ qint64 XBinary::_findSigBytes(qint64 nOffset, qint64 nSize, const char *pSigByte
 
 #ifdef USE_XSIMD
         // Try SIMD path first for better performance
-        qint64 nResult = xsimd_find_sigbytes((const quint8 *)(pFileData + nOffset), nSize, 
-                                              (const quint8 *)pSigBytes, nSigBytesSize, 
-                                              (const quint8 *)g_alphaNumTable);
-        
+        qint64 nResult = xsimd_find_sigbytes((const quint8 *)(pFileData + nOffset), nSize, (const quint8 *)pSigBytes, nSigBytesSize, (const quint8 *)g_alphaNumTable);
+
         if (nResult >= 0) {
             // SIMD found it, adjust offset
             return nOffset + nResult;
@@ -4263,19 +4254,16 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                 for (qint32 i = 0; i < nNumberOfRecords; i++) {
                     if ((listSignatureRecords.at(i).st == ST_ADDRESS) || (listSignatureRecords.at(i).st == ST_RELOFFSET)) {
                         break;
-                    } else if ((listSignatureRecords.at(i).nWindowSize > nSearchMaxSize) && (
-                                   (listSignatureRecords.at(i).st == ST_COMPAREBYTES) ||
-                                   (listSignatureRecords.at(i).st == ST_FINDBYTES))) {
+                    } else if ((listSignatureRecords.at(i).nWindowSize > nSearchMaxSize) &&
+                               ((listSignatureRecords.at(i).st == ST_COMPAREBYTES) || (listSignatureRecords.at(i).st == ST_FINDBYTES))) {
                         nSearchMaxSize = listSignatureRecords.at(i).nWindowSize;
                         stIndex = listSignatureRecords.at(i).st;
                         nDelta = nCurrentDelta;
                         nSearchFirstIndex = i;
-                    } else if (bNewAlgo && (listSignatureRecords.at(i).nWindowSize > nSearchMaxSize) && (
-                                   (listSignatureRecords.at(i).st == ST_NOTNULL) ||
-                                   (listSignatureRecords.at(i).st == ST_ANSI) ||
-                                   (listSignatureRecords.at(i).st == ST_NOTANSI) ||
-                                   (listSignatureRecords.at(i).st == ST_NOTANSIANDNULL) ||
-                                   (listSignatureRecords.at(i).st == ST_ANSINUMBER))) {
+                    } else if (bNewAlgo && (listSignatureRecords.at(i).nWindowSize > nSearchMaxSize) &&
+                               ((listSignatureRecords.at(i).st == ST_NOTNULL) || (listSignatureRecords.at(i).st == ST_ANSI) ||
+                                (listSignatureRecords.at(i).st == ST_NOTANSI) || (listSignatureRecords.at(i).st == ST_NOTANSIANDNULL) ||
+                                (listSignatureRecords.at(i).st == ST_ANSINUMBER))) {
                         nSearchMaxSize = listSignatureRecords.at(i).nWindowSize;
                         stIndex = listSignatureRecords.at(i).st;
                         nDelta = nCurrentDelta;
@@ -4299,8 +4287,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                 for (qint64 i = 0; (i < nTmpSize) && (!(pPdStruct->bIsStop));) {
                     qint64 nCurrentOffset = -1;
 
-                    if ((stIndex == ST_COMPAREBYTES) ||
-                        (stIndex == ST_FINDBYTES)) {
+                    if ((stIndex == ST_COMPAREBYTES) || (stIndex == ST_FINDBYTES)) {
                         nCurrentOffset = _find_array(stIndex, nTmpOffset + i, nTmpSize - i, pData, nDataSize, pPdStruct);
                     } else {
                         nCurrentOffset = _find_array(stIndex, nTmpOffset + i, nTmpSize - i, 0, nSearchMaxSize, pPdStruct);
@@ -4368,9 +4355,8 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
 
             XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
         }
-    } else if (_sSignature.contains(QChar('.')) ||
-                       _sSignature.contains(QChar('*')) || _sSignature.contains(QChar('%')) || _sSignature.contains(QChar('!')) || _sSignature.contains(QChar('_')) ||
-                       _sSignature.contains(QChar('&'))) {
+    } else if (_sSignature.contains(QChar('.')) || _sSignature.contains(QChar('*')) || _sSignature.contains(QChar('%')) || _sSignature.contains(QChar('!')) ||
+               _sSignature.contains(QChar('_')) || _sSignature.contains(QChar('&'))) {
         QByteArray baSigBytes = _signatureToSigBytes(_sSignature, pPdStruct);
         if (baSigBytes.size()) {
             // Optimization: Check for leading non-HEX bytes
@@ -4378,7 +4364,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
             qint32 nLeadingNonHex = 0;
             qint32 nSigBytesSize = baSigBytes.size();
             const quint8 *pSigBytes = (const quint8 *)baSigBytes.constData();
-            
+
             // Count leading non-HEX bytes (each entry is 2 bytes: [SIGBYTETYPE, value])
             for (qint32 i = 0; i < nSigBytesSize; i += 2) {
                 quint8 nType = pSigBytes[i];
@@ -4388,13 +4374,13 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                     break;
                 }
             }
-            
+
             // If we have >=3 leading non-HEX bytes, extract first fixed pattern and search for it
             if (nLeadingNonHex >= 3) {
                 // Find first fixed hex byte sequence (at least 3 bytes)
                 qint32 nFixedStartIndex = nLeadingNonHex * 2;  // Byte offset in sigbytes
                 qint32 nFixedLength = 0;
-                
+
                 for (qint32 i = nFixedStartIndex; i < nSigBytesSize; i += 2) {
                     quint8 nType = pSigBytes[i];
                     if (nType == SIGBYTETYPE_HEX) {
@@ -4403,7 +4389,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                         break;
                     }
                 }
-                
+
                 // If fixed pattern is >=3 bytes, use optimized search
                 if (nFixedLength >= 3) {
                     // Extract actual hex values (second byte of each [type, value] pair)
@@ -4412,21 +4398,21 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                     for (qint32 i = 0; i < nFixedLength; i++) {
                         baFixedPattern.append((char)pSigBytes[nFixedStartIndex + (i * 2) + 1]);
                     }
-                    
+
                     qint64 nCurrentOffset = nOffset;
                     qint64 nRemainingSize = nSize;
-                    
+
                     while (isPdStructNotCanceled(pPdStruct)) {
                         // Search for fixed pattern
                         qint64 nFoundOffset = find_array(nCurrentOffset, nRemainingSize, baFixedPattern.constData(), baFixedPattern.size(), pPdStruct);
-                        
+
                         if (nFoundOffset == -1) {
                             break;
                         }
-                        
+
                         // Check if full signature matches at position - nLeadingNonHex
                         qint64 nCheckOffset = nFoundOffset - nLeadingNonHex;
-                        
+
                         if (nCheckOffset >= nOffset) {
                             // Verify the full signature at this position
                             if (compareSignature(pMemoryMap, _sSignature, nCheckOffset, pPdStruct)) {
@@ -4434,7 +4420,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
                                 break;
                             }
                         }
-                        
+
                         // Continue searching after this match
                         nCurrentOffset = nFoundOffset + 1;
                         if (nCurrentOffset >= nOffset + nSize) {
@@ -12895,7 +12881,8 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
                 dmResult = DM_MIPS_LE;
             }
         }
-    } else if ((_sArch == "ARM") ||(_sArch == "ARMNT") ||(_sArch == "THUMB") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7") || (_sArch == "ARM_V7S") || (_sArch == "ARM64_32")) {
+    } else if ((_sArch == "ARM") || (_sArch == "ARMNT") || (_sArch == "THUMB") || (_sArch == "ARM_V6") || (_sArch == "ARM_V7") || (_sArch == "ARM_V7S") ||
+               (_sArch == "ARM64_32")) {
         if (bIsBigEndian) {
             dmResult = DM_ARM_BE;
         } else {
@@ -13094,8 +13081,9 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
     }
 }
 
-void XBinary::removeFileTypes(QSet<XBinary::FT> *pStFileTypes) {
-        pStFileTypes->remove(XBinary::FT_BINARY);
+void XBinary::removeFileTypes(QSet<XBinary::FT> *pStFileTypes)
+{
+    pStFileTypes->remove(XBinary::FT_BINARY);
 }
 
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)
@@ -14724,20 +14712,18 @@ qint64 XBinary::align_down(qint64 nValue, qint64 nAlignment)
     return nResult;
 }
 
-char* XBinary::strCopy(char* dest, const char* src, size_t destSize)
+char *XBinary::strCopy(char *dest, const char *src, size_t destSize)
 {
-  if (!dest || !src || destSize == 0)
+    if (!dest || !src || destSize == 0) return dest;
+
+    size_t i = 0;
+    while (i + 1 < destSize && src[i] != '\0') {
+        dest[i] = src[i];
+        i++;
+    }
+
+    dest[i] = '\0';
     return dest;
-
-  size_t i = 0;
-  while (i + 1 < destSize && src[i] != '\0')
-  {
-    dest[i] = src[i];
-    i++;
-  }
-
-  dest[i] = '\0';
-  return dest;
 }
 
 QString XBinary::getAndroidVersionFromApi(quint32 nAPI)

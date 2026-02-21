@@ -223,7 +223,7 @@ public:
         // TODO check more methods
     };
 
-    enum CRYPTO_METHOD { // Obsolete
+    enum CRYPTO_METHOD {  // Obsolete
         CRYPTO_METHOD_UNKNOWN = 0,
         CRYPTO_METHOD_NONE,
         CRYPTO_METHOD_ZIPCRYPTO,
@@ -916,7 +916,7 @@ public:
         //        bool bSuccess; // TODO important
         QString sInfoString;
         QString sErrorString;
-        bool bForceStop;     // TODO !!!
+        bool bForceStop;         // TODO !!!
         qint32 nBufferSize;      // 0 =
         qint32 nFileBufferSize;  // 0 => 0x10000
         PDSTRUCT_CALLBACK pCallback;
@@ -2112,7 +2112,7 @@ public:
     static qint64 align_up(qint64 nValue, qint64 nAlignment);
     static qint64 align_down(qint64 nValue, qint64 nAlignment);
 
-    static char *strCopy(char* dest, const char* src, size_t destSize);
+    static char *strCopy(char *dest, const char *src, size_t destSize);
     static QString getAndroidVersionFromApi(quint32 nAPI);
     static QString getiOSVersionFromDarwin(quint32 nDarwin);
 
