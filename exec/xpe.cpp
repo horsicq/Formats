@@ -10162,6 +10162,12 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                     record.nVirtualSize = nResourceSize;
                     record.sName = QString("%1 %2").arg(tr("Resource"), QString::number(i));
 
+                    if (listResources.at(i).irin[0].bIsName) {
+                        record.mapProperties.insert(FPART_PROP_RESOURCEID, listResources.at(i).irin[0].sName);
+                    } else {
+                        record.mapProperties.insert(FPART_PROP_RESOURCEID, listResources.at(i).irin[0].nID);
+                    }
+
                     listResult.append(record);
                 }
 

@@ -261,14 +261,13 @@ public:
         FPART_PROP_UID,
         FPART_PROP_GID,
         FPART_PROP_LINKNAME,
-        FPART_PROP_FILTERMETHOD,        // For preprocessing filters like BCJ, BCJ2 // TODO check!
-        FPART_PROP_COMPRESSPROPERTIES,  // Compression algorithm properties (e.g., LZMA dictionary size)
+        FPART_PROP_COMPRESSPROPERTIES1,  // Compression algorithm properties (e.g., LZMA dictionary size)
+        FPART_PROP_COMPRESSPROPERTIES2,
         FPART_PROP_AESKEY,              // AES encryption key derivation parameters (salt, IV, etc.)
         FPART_PROP_USERNAME,
         FPART_PROP_GROUPNAME,
         FPART_PROP_DEVVERSION,
         FPART_PROP_PREFIX,
-        FPART_PROP_SOLID,
         FPART_PROP_HEADER_OFFSET,
         FPART_PROP_HEADER_SIZE,
         FPART_PROP_OPTHEADER_OFFSET,
@@ -278,10 +277,16 @@ public:
         FPART_PROP_EXTRAFIELDLENGTH,
         FPART_PROP_FILECOMMENTOFFSET,
         FPART_PROP_FILECOMMENTLENGTH,
-        FPART_PROP_FLAGS
+        FPART_PROP_FLAGS,
+        FPART_PROP_RESOURCEID
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
+    };
+
+    enum UNPACK_PROP {
+        UNPACK_PROP_UNKNOWN = 0,
+        UNPACK_PROP_PASSWORD,
     };
 
     struct DATAPROCESS_STATE {
@@ -292,6 +297,7 @@ public:
         qint64 nProcessedOffset;
         qint64 nProcessedLimit;
         QMap<FPART_PROP, QVariant> mapProperties;
+        QMap<UNPACK_PROP, QVariant> mapUnpackProperties;
         bool bReadError;
         bool bWriteError;
         qint64 nCountInput;
@@ -306,11 +312,6 @@ public:
         qint64 nStreamOffset;
         qint64 nStreamSize;
         QMap<FPART_PROP, QVariant> mapProperties;
-    };
-
-    enum UNPACK_PROP {
-        UNPACK_PROP_UNKNOWN = 0,
-        UNPACK_PROP_PASSWORD,
     };
 
     struct UNPACK_STATE {
@@ -2033,6 +2034,7 @@ public:
     static XDWORD make_xdword(quint32 nValue);
 
     static QString recordFilePartIdToString(FILEPART id);
+    static QString recordFilePartIdToFtString(FILEPART id);
 
     static bool checkVersionString(const QString &sVersion);
     static QString cleanString(const QString &sString);

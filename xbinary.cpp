@@ -13814,6 +13814,11 @@ QString XBinary::recordFilePartIdToString(FILEPART id)
     return XCONVERT_idToTransString(id, _TABLE_XBinary_FILEPART, sizeof(_TABLE_XBinary_FILEPART) / sizeof(XBinary::XCONVERT));
 }
 
+QString XBinary::recordFilePartIdToFtString(FILEPART id)
+{
+    return XCONVERT_idToFtString(id, _TABLE_XBinary_FILEPART, sizeof(_TABLE_XBinary_FILEPART) / sizeof(XBinary::XCONVERT));
+}
+
 bool XBinary::checkVersionString(const QString &sVersion)
 {
     bool bResult = false;

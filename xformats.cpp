@@ -892,7 +892,9 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
                         const XBinary::ARCHIVERECORD &archiveRecord = pListRecords->at(i);
 
 #ifdef USE_ARCHIVE
-                        if (xDecompress.decompressArchiveRecord(archiveRecord, pDevice, &file, pPdStruct)) {
+                        QMap<XBinary::UNPACK_PROP, QVariant> mapUnpackProperties;
+
+                        if (xDecompress.decompressArchiveRecord(archiveRecord, pDevice, &file, mapUnpackProperties, pPdStruct)) {
 #ifdef QT_DEBUG
                             qDebug("XFormats::extractArchiveRecordsToFolder: Decompression successful, checking CRC");
 #endif
