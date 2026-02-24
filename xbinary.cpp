@@ -11035,13 +11035,15 @@ QList<XBinary::FPART> XBinary::getFileParts(quint32 nFileParts, qint32 nLimit, P
 {
     QList<XBinary::FPART> listResult;
 
-    XBinary::FPART fpart = {};
-    fpart.nFileOffset = 0;
-    fpart.nFileSize = getSize();
-    fpart.sName = tr("Data");
-    fpart.filePart = FILEPART_REGION;
+    if (nFileParts & FILEPART_REGION) {
+        XBinary::FPART fpart = {};
+        fpart.nFileOffset = 0;
+        fpart.nFileSize = getSize();
+        fpart.sName = tr("Data");
+        fpart.filePart = FILEPART_REGION;
 
-    listResult.append(fpart);
+        listResult.append(fpart);
+    }
 
     return listResult;
 }
