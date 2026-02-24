@@ -111,6 +111,7 @@ XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_VISUALIZATION, "visualization", QObject::tr("Visualization")},
     {XBinary::STRUCTID_HEX, "hex", QObject::tr("Hex")},
     {XBinary::STRUCTID_DISASM, "disasm", QObject::tr("Disasm")},
+    {XBinary::STRUCTID_ARCHIVE, "archive", QObject::tr("Archive")},
     {XBinary::STRUCTID_HASH, "hash", QObject::tr("Hash")},
     {XBinary::STRUCTID_STRINGS, "strings", QObject::tr("Strings")},
     {XBinary::STRUCTID_SIGNATURES, "signatures", QObject::tr("Signatures")},
@@ -858,6 +859,12 @@ XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDST
         }
         if (isExecutable() && XBinary::isPdStructNotCanceled(pPdStruct)) {
             dhGeneric.dsID.nID = STRUCTID_DISASM;
+            dhGeneric.dsID.sGUID = generateUUID();
+            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+            pListHeaders->append(dhGeneric);
+        }
+        if (isArchive() && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            dhGeneric.dsID.nID = STRUCTID_ARCHIVE;
             dhGeneric.dsID.sGUID = generateUUID();
             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
             pListHeaders->append(dhGeneric);
