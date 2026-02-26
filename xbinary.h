@@ -235,7 +235,7 @@ public:
 
     enum FPART_PROP {
         FPART_PROP_UNKNOWN = 0,
-        FPART_PROP_HANDLEMETHOD1,
+        FPART_PROP_HANDLEMETHOD,
         FPART_PROP_HANDLEMETHOD2,
         FPART_PROP_COMPRESSEDSIZE,
         FPART_PROP_UNCOMPRESSEDSIZE,
@@ -262,7 +262,7 @@ public:
         FPART_PROP_UID,
         FPART_PROP_GID,
         FPART_PROP_LINKNAME,
-        FPART_PROP_COMPRESSPROPERTIES1,  // Compression algorithm properties (e.g., LZMA dictionary size)
+        FPART_PROP_COMPRESSPROPERTIES,  // Compression algorithm properties (e.g., LZMA dictionary size)
         FPART_PROP_COMPRESSPROPERTIES2,
         FPART_PROP_AESKEY,              // AES encryption key derivation parameters (salt, IV, etc.)
         FPART_PROP_USERNAME,

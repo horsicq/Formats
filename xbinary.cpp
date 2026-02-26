@@ -9523,14 +9523,14 @@ QString XBinary::getResultFileName(const QString &sFileName, const QString &sApp
 
 QString XBinary::getDeviceFileName(QIODevice *pDevice)
 {
-    QString sResult;
+    QString sResult = pDevice->property("FileName").toString();
 
-    QFile *pFile = dynamic_cast<QFile *>(pDevice);
+    if (sResult == "") {
+        QFile *pFile = dynamic_cast<QFile *>(pDevice);
 
-    if (pFile) {
-        sResult = pFile->fileName();
-    } else {
-        sResult = pDevice->property("FileName").toString();
+        if (pFile) {
+            sResult = pFile->fileName();
+        }
     }
 
     return sResult;
@@ -15467,7 +15467,7 @@ QList<XBinary::FPART_PROP> XBinary::getAvailableFPARTProperties()
     listResult.append(FPART_PROP_UNCOMPRESSEDSIZE);
     listResult.append(FPART_PROP_STREAMOFFSET);
     listResult.append(FPART_PROP_STREAMSIZE);
-    listResult.append(FPART_PROP_HANDLEMETHOD1);
+    listResult.append(FPART_PROP_HANDLEMETHOD);
 
     return listResult;
 }
@@ -15840,7 +15840,7 @@ QString XBinary::getHandleMethods(const QMap<FPART_PROP, QVariant> &mapPropertie
 {
     QString sResult;
 
-    HANDLE_METHOD handleMethod1 = (HANDLE_METHOD)(mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD1).toULongLong());
+    HANDLE_METHOD handleMethod = (HANDLE_METHOD)(mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD).toULongLong());
     HANDLE_METHOD handleMethod2 = (HANDLE_METHOD)(mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD2).toULongLong());
 
     // QString sHandleMethod3 = handleMethodToString(mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD3).toULongLong());
@@ -15849,8 +15849,8 @@ QString XBinary::getHandleMethods(const QMap<FPART_PROP, QVariant> &mapPropertie
         sResult = appendText(sResult, handleMethodToString(handleMethod2), "/");
     }
 
-    if (handleMethod1 != HANDLE_METHOD_UNKNOWN) {
-        sResult = appendText(sResult, handleMethodToString(handleMethod1), "/");
+    if (handleMethod != HANDLE_METHOD_UNKNOWN) {
+        sResult = appendText(sResult, handleMethodToString(handleMethod), "/");
     }
 
     return sResult;
