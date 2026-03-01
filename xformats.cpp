@@ -723,7 +723,7 @@ QSet<XBinary::FT> XFormats::getFileTypesGZIP(QIODevice *pDevice, QList<XArchive:
 QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
 {
 #ifdef QT_DEBUG
-    qDebug("XFormats::_getFileTypes");
+    qDebug("XFormats::_getFileTypes(): Timer started");
     QElapsedTimer timer;
     timer.start();
 #endif
@@ -792,9 +792,9 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 
 #ifdef QT_DEBUG
     qint64 nElapsed = timer.elapsed();
-    qDebug("XFormats::_getFileTypes time=%lld", nElapsed);
+    qDebug("XFormats::_getFileTypes(): time=%lld ms", nElapsed); // Calculated in milisecounds
 #endif
-
+    qDebug("XFormats::_getFileTypes(): Timer stopped");
     return stResult;
 }
 
