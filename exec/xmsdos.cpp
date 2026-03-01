@@ -140,11 +140,8 @@ QList<XBinary::FPART> XMSDOS::getFileParts(quint32 nFileParts, qint32 nLimit, PD
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
-        qint64 coveredEnd = 0;
-        for (int i = 0; i < list.size(); ++i) {
-            const FPART &p = list.at(i);
-            if (p.filePart != FILEPART_OVERLAY) coveredEnd = qMax(coveredEnd, p.nFileOffset + qMax<qint64>(0, p.nFileSize));
-        }
+        qint64 coveredEnd = bodyOffset + bodySize;
+
         if (coveredEnd < total) {
             FPART ov = {};
             ov.filePart = FILEPART_OVERLAY;
