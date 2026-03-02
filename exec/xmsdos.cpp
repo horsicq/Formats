@@ -107,53 +107,56 @@ QList<XBinary::FPART> XMSDOS::getFileParts(quint32 nFileParts, qint32 nLimit, PD
     Q_UNUSED(nLimit)
     Q_UNUSED(pPdStruct)
 
-    QList<FPART> list;
+    QList<FPART> listResult;
 
-    const qint64 total = getSize();
+    qint64 nTotal = getSize();
 
-    // Compute MS-DOS logical end (nMaxOffset) from header fields
-    const qint64 maxOffset = (quint32)get_e_cp() * 0x200 - ((-get_e_cblp()) & 0x1ff);
-    const qint64 headerSize = (quint32)(get_e_cparhdr() * 16);
-    const qint64 bodyOffset = headerSize;
-    const qint64 bodySize = qMax<qint64>(0, qMin<qint64>(total, maxOffset) - bodyOffset);
+    qint64 nHeaderSize = (quint32)get_e_cparhdr() * 16;
+
+    // When e_cp is 0 treat the entire file as the image (non-standard but common)
+    quint16 nEcp = get_e_cp();
+    qint64 nMaxOffset = (nEcp == 0) ? nTotal : ((quint32)nEcp * 0x200 - ((-get_e_cblp()) & 0x1ff));
+
+    qint64 nBodyOffset = nHeaderSize;
+    qint64 nBodySize = qMax<qint64>(0, qMin<qint64>(nTotal, nMaxOffset) - nBodyOffset);
 
     if (nFileParts & FILEPART_HEADER) {
-        FPART h = {};
-        h.filePart = FILEPART_HEADER;
-        h.nFileOffset = 0;
-        h.nFileSize = qMin<qint64>(headerSize, total);
-        h.nVirtualAddress = -1;
-        h.sName = tr("Header");
-        list.append(h);
+        FPART record = {};
+        record.filePart = FILEPART_HEADER;
+        record.nFileOffset = 0;
+        record.nFileSize = qMin<qint64>(nHeaderSize, nTotal);
+        record.nVirtualAddress = -1;
+        record.sName = tr("Header");
+        listResult.append(record);
     }
 
     if (nFileParts & FILEPART_SEGMENT) {
-        if (bodySize > 0) {
-            FPART seg = {};
-            seg.filePart = FILEPART_SEGMENT;
-            seg.nFileOffset = bodyOffset;
-            seg.nFileSize = bodySize;
-            seg.nVirtualAddress = -1;
-            seg.sName = tr("Image");
-            list.append(seg);
+        if (nBodySize > 0) {
+            FPART record = {};
+            record.filePart = FILEPART_SEGMENT;
+            record.nFileOffset = nBodyOffset;
+            record.nFileSize = nBodySize;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Image");
+            listResult.append(record);
         }
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
-        qint64 coveredEnd = bodyOffset + bodySize;
+        qint64 nCoveredEnd = nBodyOffset + nBodySize;
 
-        if (coveredEnd < total) {
-            FPART ov = {};
-            ov.filePart = FILEPART_OVERLAY;
-            ov.nFileOffset = coveredEnd;
-            ov.nFileSize = total - coveredEnd;
-            ov.nVirtualAddress = -1;
-            ov.sName = tr("Overlay");
-            list.append(ov);
+        if (nCoveredEnd < nTotal) {
+            FPART record = {};
+            record.filePart = FILEPART_OVERLAY;
+            record.nFileOffset = nCoveredEnd;
+            record.nFileSize = nTotal - nCoveredEnd;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Overlay");
+            listResult.append(record);
         }
     }
 
-    return list;
+    return listResult;
 }
 
 XMSDOS_DEF::IMAGE_DOS_HEADEREX XMSDOS::getDosHeaderEx()
