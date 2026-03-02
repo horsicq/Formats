@@ -161,10 +161,11 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_REDUCE_2, "Reduce_2", QString("Reduce 2")},
     {XBinary::HANDLE_METHOD_REDUCE_3, "Reduce_3", QString("Reduce 3")},
     {XBinary::HANDLE_METHOD_REDUCE_4, "Reduce_4", QString("Reduce 4")},
-    {XBinary::HANDLE_METHOD_AES, "AES", QString("AES")},
-    {XBinary::HANDLE_METHOD_AES128, "AES128", QString("AES128")},
-    {XBinary::HANDLE_METHOD_AES192, "AES128", QString("AES128")},
-    {XBinary::HANDLE_METHOD_AES256, "AES256", QString("AES256")},
+    {XBinary::HANDLE_METHOD_ZIP_AES, "ZIP_AES", QString("7Z AES")},
+    {XBinary::HANDLE_METHOD_ZIP_AES128, "ZIP_AES128", QString("ZIP AES128")},
+    {XBinary::HANDLE_METHOD_ZIP_AES192, "ZIP_AES128", QString("ZIP AES128")},
+    {XBinary::HANDLE_METHOD_ZIP_AES256, "ZIP_AES256", QString("ZIP AES256")},
+    {XBinary:: HANDLE_METHOD_7Z_AES, "7Z_AES", QString("7Z AES")},
     {XBinary::HANDLE_METHOD_ZIPCRYPTO, "ZIP_Crypto", QString("ZIP Crypto")},
     {XBinary::HANDLE_METHOD_ZLIB, "ZLIB", QString("ZLIB")},
     {XBinary::HANDLE_METHOD_MSZIP_CAB, "MSZIP_CAB", QString("MSZIP CAB")},
@@ -10063,6 +10064,56 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
     return nResult;
 }
 
+quint32 XBinary::_getCRC32(QIODevice *pDevice, quint32 nInit, quint32 *pCRCTable, PDSTRUCT *pPdStruct)
+{
+    quint32 nResult = nInit;
+
+    XBinary binary(pDevice);
+
+    OFFSETSIZE osRegion = binary.convertOffsetAndSize(0, -1);
+    qint64 nOffset = osRegion.nOffset;
+    qint64 nSize = osRegion.nSize;
+
+    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+
+    if ((nOffset != -1) && (XBinary::isPdStructNotCanceled(pPdStruct))) {
+        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+
+        qint64 nTemp = 0;
+        qint32 nBufferSize = binary.getBufferSize(pPdStruct);
+        char *pBuffer = new char[nBufferSize];
+
+        while (nSize > 0) {
+            nTemp = qMin((qint64)nBufferSize, nSize);
+
+            if (binary.read_array(nOffset, pBuffer, nTemp) != nTemp) {
+                XBinary::setPdStructInfoString(pPdStruct, QObject::tr("Read error"));
+                nResult = 0;
+                break;
+            }
+
+            nResult = _getCRC32(pBuffer, (qint32)nTemp, nResult, pCRCTable);
+
+            nSize -= nTemp;
+            nOffset += nTemp;
+
+            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset);
+        }
+
+        delete[] pBuffer;
+    }
+
+    pDevice->reset();
+
+    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+    if (XBinary::isPdStructStopped(pPdStruct)) {
+        nResult = 0;
+    }
+
+    return (quint32)nResult;
+}
+
 quint32 XBinary::_getCRC32(const char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable)
 {
     quint32 nResult = nInit;
@@ -10385,6 +10436,56 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
     }
 
     return dResult;
+}
+
+bool XBinary::isZeroFilled(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
+{
+    if (nSize <= 0) {
+        return false;
+    }
+
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
+    nOffset = osRegion.nOffset;
+    nSize = osRegion.nSize;
+
+    if (nSize == 0) {
+        return false;
+    }
+
+    bool bResult = true;
+    qint32 nBufferSize = getBufferSize(pPdStruct);
+    char *pBuffer = new char[nBufferSize];
+
+    while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
+        qint64 nTemp = qMin((qint64)nBufferSize, nSize);
+
+        if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
+            bResult = false;
+            break;
+        }
+
+        if (!_isMemoryZeroFilled(pBuffer, nTemp)) {
+            bResult = false;
+            break;
+        }
+
+        nSize -= nTemp;
+        nOffset += nTemp;
+    }
+
+    delete[] pBuffer;
+
+    if (pPdStruct->bIsStop) {
+        bResult = false;
+    }
+
+    return bResult;
 }
 
 XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)

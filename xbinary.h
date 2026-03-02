@@ -209,10 +209,11 @@ public:
         HANDLE_METHOD_REDUCE_3,
         HANDLE_METHOD_REDUCE_4,
         HANDLE_METHOD_ZLIB,
-        HANDLE_METHOD_AES,
-        HANDLE_METHOD_AES128,
-        HANDLE_METHOD_AES192,
-        HANDLE_METHOD_AES256,
+        HANDLE_METHOD_ZIP_AES,
+        HANDLE_METHOD_ZIP_AES128,
+        HANDLE_METHOD_ZIP_AES192,
+        HANDLE_METHOD_ZIP_AES256,
+        HANDLE_METHOD_7Z_AES,
         HANDLE_METHOD_ZIPCRYPTO,
         HANDLE_METHOD_STORE_CAB,
         HANDLE_METHOD_MSZIP_CAB,
@@ -1737,6 +1738,7 @@ public:
 
     static quint32 _getCRC32(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     static quint32 _getCRC32(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
+    static quint32 _getCRC32(QIODevice *pDevice, quint32 nInit, quint32 *pCRCTable, PDSTRUCT *pPdStruct = nullptr);
     static quint32 _getCRC32(const char *pData, qint32 nDataSize, quint32 nInit, quint32 *pCRCTable);
     static quint16 _getCRC16(const char *pData, qint32 nDataSize, quint16 nInit, quint16 *pCRCTable);
     static quint32 _getCRC32(const QByteArray &baData, quint32 nInit, quint32 *pCRCTable);
@@ -1758,6 +1760,7 @@ public:
     };
 
     double getBinaryStatus(BSTATUS bstatus, qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
+    bool isZeroFilled(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
 
     BYTE_COUNTS getByteCounts(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 

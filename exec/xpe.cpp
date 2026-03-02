@@ -6900,14 +6900,14 @@ XPE_DEF::S_IMAGE_DEBUG_DIRECTORY XPE::_read_IMAGE_DEBUG_DIRECTORY(qint64 nOffset
     return result;
 }
 
-QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList()
+QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList(PDSTRUCT *pPdStruct)
 {
-    _MEMORY_MAP memoryMap = getMemoryMap();
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
-    return getDebugList(&memoryMap);
+    return getDebugList(&memoryMap, pPdStruct);
 }
 
-QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList(XBinary::_MEMORY_MAP *pMemoryMap)
+QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> listResult;
 
@@ -6918,7 +6918,7 @@ QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> XPE::getDebugList(XBinary::_MEMORY_MAP *
         qint64 nCurrent = 0;
 
         if (nDebugOffset != -1) {
-            while (nCurrent < dataResources.Size) {
+            while ((isPdStructNotCanceled(pPdStruct)) && (nCurrent < dataResources.Size)) {
                 XPE_DEF::S_IMAGE_DEBUG_DIRECTORY record = _read_IMAGE_DEBUG_DIRECTORY(nDebugOffset);
 
                 if (record.PointerToRawData && isOffsetValid(pMemoryMap, record.PointerToRawData)) {
@@ -10017,12 +10017,14 @@ QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
 
 QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(nLimit);
+
     QList<XBinary::FPART> listResult;
     QList<XBinary::FPART> _listCalc;
 
     bool bCalcAdress = false;
 
-    if (nFileParts & FILEPART_RESOURCE) {
+    if ((nFileParts & FILEPART_RESOURCE) || (nFileParts & FILEPART_DEBUGDATA)) {
         bCalcAdress = true;
     }
 
@@ -10119,21 +10121,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         }
     }
 
-    if (nFileParts & FILEPART_OVERLAY) {
-        if (nMaxOffset < nTotalSize) {
-            FPART record = {};
-
-            record.filePart = FILEPART_OVERLAY;
-            record.nFileOffset = nMaxOffset;
-            record.nFileSize = getSize() - nMaxOffset;
-            record.nVirtualAddress = -1;
-            record.sName = tr("Overlay");
-
-            listResult.append(record);
-        }
-    }
-
-    _MEMORY_MAP memoryMap;
+    _MEMORY_MAP memoryMap = {};
 
     if (bCalcAdress) {
         memoryMap = _getMemoryMap(&_listCalc, pPdStruct);
@@ -10178,74 +10166,52 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         }
     }
 
-    // if (isResourcesPresent()) {
-    //     QList<XPE::RESOURCE_RECORD> listResources = getResources(&memoryMap, 10000, pPdStruct);
+    if (nFileParts & FILEPART_DEBUGDATA) {
+        if (isDebugPresent()) {
+            QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> listDebug = getDebugList(&memoryMap, pPdStruct);
 
-    //     qint32 nNumberOfRecords = listResources.count();
+            qint32 nNumberOfRecords = listDebug.count();
 
-    //     qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-    //     XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
+            qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+            XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
 
-    //     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-    //         qint64 nResourceOffset = listResources.at(i).nOffset;
-    //         qint64 nResourceSize = listResources.at(i).nSize;
+            for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                qint64 nRecordOffset = listDebug.at(i).PointerToRawData;
+                qint64 nRecordSize = listDebug.at(i).SizeOfData;
+                quint32 nRecordType = listDebug.at(i).Type;
 
-    //         if (checkOffsetSize(nResourceOffset, nResourceSize)) {
-    //             FPART record = {};
-    //             record.filePart = XBinary::FILEPART_RESOURCE;
-    //             record.nFileOffset = nResourceOffset;
-    //             record.nFileSize = nResourceSize;
-    //             record.sName = QString("%1 %2").arg(tr("Resource"), QString::number(i + 1));
+                if ((nRecordType == 0) || (nRecordType == 2)) {
+                    if (checkOffsetSize(nRecordOffset, nRecordSize)) {
+                        FPART record = {};
+                        record.filePart = XBinary::FILEPART_DEBUGDATA;
+                        record.nFileOffset = nRecordOffset;
+                        record.nFileSize = nRecordSize;
+                        record.sName = QString::number(nRecordType);
 
-    //             listResult.append(record);
-    //         }
+                        listResult.append(record);
+                    }
+                }
 
-    //         XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
-    //     }
+                XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
+            }
 
-    //     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
-    // }
+            XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+        }
+    }
 
-    // if (isDebugPresent()) {
-    //     QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> listDebug = getDebugList(&memoryMap);
+    if (nFileParts & FILEPART_OVERLAY) {
+        if (nMaxOffset < nTotalSize) {
+            FPART record = {};
 
-    //     qint32 nNumberOfRecords = listDebug.count();
+            record.filePart = FILEPART_OVERLAY;
+            record.nFileOffset = nMaxOffset;
+            record.nFileSize = getSize() - nMaxOffset;
+            record.nVirtualAddress = -1;
+            record.sName = tr("Overlay");
 
-    //     qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-    //     XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
-
-    //     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-    //         qint64 nRecordOffset = listDebug.at(i).PointerToRawData;
-    //         qint64 nRecordSize = listDebug.at(i).SizeOfData;
-    //         quint32 nRecordType = listDebug.at(i).Type;
-
-    //         if ((nRecordType == 0) || (nRecordType == 2)) {
-    //             if (checkOffsetSize(nRecordOffset, nRecordSize)) {
-    //                 FPART record = {};
-    //                 record.filePart = XBinary::FILEPART_DEBUGDATA;
-    //                 record.nFileOffset = nRecordOffset;
-    //                 record.nFileSize = nRecordSize;
-    //                 record.sName = QString("%1 %2").arg(tr("Debug data"), nRecordType);
-
-    //                 listResult.append(record);
-    //             }
-    //         }
-
-    //         XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
-    //     }
-
-    //     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
-    // }
-
-    // if (isOverlayPresent(&memoryMap, pPdStruct)) {
-    //     FPART record = {};
-    //     record.filePart = XBinary::FILEPART_OVERLAY;
-    //     record.nFileOffset = getOverlayOffset(&memoryMap, pPdStruct);
-    //     record.nFileSize = getOverlaySize(&memoryMap, pPdStruct);
-    //     record.sName = QString("%1").arg(tr("Overlay"));
-
-    //     listResult.append(record);
-    // }
+            listResult.append(record);
+        }
+    }
 
     return listResult;
 }
@@ -13479,7 +13445,7 @@ QMap<quint64, QString> XPE::getDebugTypesS()
 {
     QMap<quint64, QString> mapResult = XBinary::XIDSTRING_createMap(_TABLE_XPE_DebugTypes, sizeof(_TABLE_XPE_DebugTypes) / sizeof(XBinary::XIDSTRING));
 
-    mapResult[0] = tr("Unknown");
+    // mapResult[0] = tr("Unknown");
 
     return mapResult;
 }
