@@ -239,7 +239,9 @@ public:
         FPART_PROP_HANDLEMETHOD,
         FPART_PROP_HANDLEMETHOD2,
         FPART_PROP_COMPRESSEDSIZE,
+        FPART_PROP_COMPRESSEDSIZE2,
         FPART_PROP_UNCOMPRESSEDSIZE,
+        FPART_PROP_UNCOMPRESSEDSIZE2,
         FPART_PROP_STREAMOFFSET,
         FPART_PROP_STREAMSIZE,
         FPART_PROP_STREAMUNPACKEDSIZE,
@@ -321,7 +323,7 @@ public:
         qint64 nTotalSize;
         qint32 nCurrentIndex;
         qint32 nNumberOfRecords;
-        QMap<UNPACK_PROP, QVariant> mapProperties;
+        QMap<UNPACK_PROP, QVariant> mapUnpackProperties;
         void *pContext;  // Format-specific context
     };
 

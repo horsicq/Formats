@@ -636,6 +636,15 @@ qint32 XBinary::_writeDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STAT
     if (pState->nProcessedOffset == 0 && (pState->nProcessedLimit == -1)) {
         nRealSize = nBufferSize;
         nSkip = 0;
+    } else if (pState->nProcessedOffset == 0 && (pState->nProcessedLimit != -1)) {
+        // Start of output with a cap: limit total output to nProcessedLimit bytes
+        nRealSize = nBufferSize;
+        if ((pState->nCountOutput + nRealSize) > pState->nProcessedLimit) {
+            nRealSize = pState->nProcessedLimit - pState->nCountOutput;
+            if (nRealSize < 0) {
+                nRealSize = 0;
+            }
+        }
     } else if (pState->nProcessedOffset > 0) {
         nSkip = pState->nProcessedOffset;  // TODO fix
         nRealSize = nBufferSize - nSkip;
