@@ -3904,6 +3904,10 @@ QString XPE::getResourceNameByNumber(quint32 nNumber, QList<XPE::RESOURCE_RECORD
 
     if ((qint32)nNumber < pListResourceRecords->count()) {
         sResult = pListResourceRecords->at(nNumber).irin[1].sName;
+
+        if (sResult == "") {
+            sResult = pListResourceRecords->at(nNumber).irin[0].sName;
+        }
     }
 
     return sResult;
