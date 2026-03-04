@@ -10163,6 +10163,38 @@ quint16 XBinary::_getCRC16(const QByteArray &baData, quint16 nInit, quint16 *pCR
     return _getCRC16(baData.data(), baData.size(), nInit, pCRCTable);
 }
 
+bool XBinary::checkCRC(QIODevice *pDevice, CRC_TYPE crcType, QVariant value, PDSTRUCT *pPdStruct)
+{
+    bool bResult = false;
+
+    if (!pDevice) {
+        return bResult;
+    }
+
+    quint32 nExpectedCRC = value.toUInt();
+    quint32 nCalculatedCRC = 0;
+    bool bCRCComputed = true;
+
+    if (crcType == CRC_TYPE_FFFFFFFF_EDB88320_00000000) {
+        nCalculatedCRC = _getCRC32(pDevice, 0xFFFFFFFF, _getCRC32Table_EDB88320(), pPdStruct);
+    } else if (crcType == CRC_TYPE_FFFFFFFF_EDB88320_FFFFFFFFF) {
+        nCalculatedCRC = _getCRC32(pDevice, 0xFFFFFFFF, _getCRC32Table_EDB88320(), pPdStruct);
+        nCalculatedCRC ^= 0xFFFFFFFF;
+    } else if (crcType == CRC_TYPE_EDB88320) {
+        nCalculatedCRC = _getCRC32(pDevice, pPdStruct);
+    } else if (crcType == CRC_TYPE_ADLER32) {
+        nCalculatedCRC = getAdler32(pDevice, pPdStruct);
+    } else {
+        bCRCComputed = false;
+    }
+
+    if (bCRCComputed) {
+        bResult = (nCalculatedCRC == nExpectedCRC);
+    }
+
+    return bResult;
+}
+
 quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, quint32 *pCRCTable, PDSTRUCT *pPdStruct)
 {
     // TODO optimize!!!
@@ -15745,28 +15777,16 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                     (XBinary::CRC_TYPE)record.mapProperties.value(XBinary::FPART_PROP_CRC_TYPE, XBinary::CRC_TYPE_UNKNOWN).toUInt();
 
                                 if (crcType != XBinary::CRC_TYPE_UNKNOWN) {
-                                    // Reopen the file for reading to calculate CRC
                                     if (file.open(QIODevice::ReadOnly)) {
-                                        XBinary binary(&file);
-
-                                        quint32 nCalculatedCRC = 0;
-
-                                        if (crcType == XBinary::CRC_TYPE_EDB88320) {
-                                            nCalculatedCRC = binary._getCRC32(0, -1, 0xFFFFFFFF, XBinary::_getCRC32Table_EDB88320(), pPdStruct);
-                                        } else if (crcType == XBinary::CRC_TYPE_ADLER32) {
-                                            nCalculatedCRC = binary.getAdler32(0, -1, pPdStruct);
-                                        }
-
+                                        QVariant varCRC = record.mapProperties.value(XBinary::FPART_PROP_RESULTCRC, 0);
+                                        bool bCRCOk = checkCRC(&file, crcType, varCRC, pPdStruct);
                                         file.close();
-
-                                        quint32 nStoredCRC = record.mapProperties.value(XBinary::FPART_PROP_CRC_VALUE, 0).toUInt();
-
-                                        if (nStoredCRC != nCalculatedCRC) {
 #ifdef QT_DEBUG
-                                            qDebug() << "CRC is false for" << sFilePath << ": stored=" << QString::number(nStoredCRC, 16)
-                                                     << ", calc=" << QString::number(nCalculatedCRC, 16);
-#endif
+                                        if (!bCRCOk) {
+                                            qDebug() << "CRC is false for" << sFilePath
+                                                     << ": stored=" << QString::number(varCRC.toUInt(), 16);
                                         }
+#endif
                                     }
                                 }
                             }

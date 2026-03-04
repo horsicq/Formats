@@ -898,16 +898,6 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 #ifdef QT_DEBUG
                             qDebug("XFormats::extractArchiveRecordsToFolder: Decompression successful, checking CRC");
 #endif
-                            if (!xDecompress.checkCRC(archiveRecord.mapProperties, &file, pPdStruct)) {
-#ifdef QT_DEBUG
-                                qDebug() << "Invalid CRC for" << sPrefName;
-#endif
-                                emit warningMessage(QString("%1: %2").arg(tr("Invalid CRC"), sPrefName));
-                            } else {
-#ifdef QT_DEBUG
-                                qDebug("XFormats::extractArchiveRecordsToFolder: CRC check passed");
-#endif
-                            }
                         } else {
 #ifdef QT_DEBUG
                             qDebug() << "Cannot decompress" << sPrefName;

@@ -220,6 +220,7 @@ public:
         HANDLE_METHOD_LZX_CAB,
         HANDLE_METHOD_BCJ,
         HANDLE_METHOD_BCJ2,
+        HANDLE_METHOD_ARM64_BCJ,  // ARM64 branch/call/jump filter
         HANDLE_METHOD_PDF_IMAGEDATA,
         HANDLE_METHOD_ANDROID_XML
         // TODO check more methods
@@ -238,16 +239,30 @@ public:
         FPART_PROP_UNKNOWN = 0,
         FPART_PROP_HANDLEMETHOD,
         FPART_PROP_HANDLEMETHOD2,
+        FPART_PROP_HANDLEMETHOD3,
         FPART_PROP_COMPRESSEDSIZE,
         FPART_PROP_COMPRESSEDSIZE2,
+        FPART_PROP_COMPRESSEDSIZE3,
         FPART_PROP_UNCOMPRESSEDSIZE,
         FPART_PROP_UNCOMPRESSEDSIZE2,
+        FPART_PROP_UNCOMPRESSEDSIZE3,
         FPART_PROP_STREAMOFFSET,
         FPART_PROP_STREAMSIZE,
         FPART_PROP_STREAMUNPACKEDSIZE,
+        FPART_PROP_STREAMOFFSET2,         // BCJ2: call LZMA archive offset
+        FPART_PROP_STREAMSIZE2,           // BCJ2: call LZMA compressed size
+        FPART_PROP_STREAMOFFSET3,         // BCJ2: jmp LZMA archive offset
+        FPART_PROP_STREAMSIZE3,           // BCJ2: jmp LZMA compressed size
+        FPART_PROP_STREAMOFFSET4,         // BCJ2: range coder archive offset
+        FPART_PROP_STREAMSIZE4,           // BCJ2: range coder size
+        FPART_PROP_HANDLEMETHOD4,         // BCJ2: main LZMA compress method
+        FPART_PROP_UNCOMPRESSEDSIZE4,     // BCJ2: main LZMA uncompressed size
         FPART_PROP_SUBSTREAMOFFSET,
         FPART_PROP_CRC_TYPE,
-        FPART_PROP_CRC_VALUE,
+        FPART_PROP_RESULTCRC,
+        FPART_PROP_UNCOMPRESSEDCRC,
+        FPART_PROP_UNCOMPRESSEDCRC2,
+        FPART_PROP_UNCOMPRESSEDCRC3,
         FPART_PROP_DATETIME,
         FPART_PROP_ENCRYPTED,
         FPART_PROP_FILETYPE,
@@ -267,6 +282,7 @@ public:
         FPART_PROP_LINKNAME,
         FPART_PROP_COMPRESSPROPERTIES,  // Compression algorithm properties (e.g., LZMA dictionary size)
         FPART_PROP_COMPRESSPROPERTIES2,
+        FPART_PROP_COMPRESSPROPERTIES3,
         FPART_PROP_AESKEY,              // AES encryption key derivation parameters (salt, IV, etc.)
         FPART_PROP_USERNAME,
         FPART_PROP_GROUPNAME,
@@ -282,7 +298,9 @@ public:
         FPART_PROP_FILECOMMENTOFFSET,
         FPART_PROP_FILECOMMENTLENGTH,
         FPART_PROP_FLAGS,
-        FPART_PROP_RESOURCEID
+        FPART_PROP_RESOURCEID,
+        FPART_PROP_SOLIDFOLDERINDEX,    // Solid folder/block index within an archive (e.g., 7z folder index)
+        FPART_PROP_FILEMD5,             // MD5 hash of the entire archive file (hex string, set during initUnpack)
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
@@ -324,6 +342,7 @@ public:
         qint32 nCurrentIndex;
         qint32 nNumberOfRecords;
         QMap<UNPACK_PROP, QVariant> mapUnpackProperties;
+        QMap<FPART_PROP, QVariant> mapArchiveProperties;  // Archive-level properties (e.g., FPART_PROP_FILEMD5)
         void *pContext;  // Format-specific context
     };
 
@@ -2189,8 +2208,12 @@ public:
     enum CRC_TYPE {
         CRC_TYPE_UNKNOWN = 0,
         CRC_TYPE_EDB88320,
-        CRC_TYPE_ADLER32
+        CRC_TYPE_ADLER32,
+        CRC_TYPE_FFFFFFFF_EDB88320_00000000,
+        CRC_TYPE_FFFFFFFF_EDB88320_FFFFFFFFF
     };
+
+    static bool checkCRC(QIODevice *pDevice, CRC_TYPE crcType, QVariant value, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
     static FPART getFPART(FILEPART filePart, const QString &sOriginalName, qint64 nFileOffset, qint64 nFileSize, XADDR nVirtualAddress, qint64 nVirtualSize);
