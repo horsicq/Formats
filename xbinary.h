@@ -214,6 +214,7 @@ public:
         HANDLE_METHOD_ZIP_AES192,
         HANDLE_METHOD_ZIP_AES256,
         HANDLE_METHOD_7Z_AES,
+        HANDLE_METHOD_RAR5_AES,
         HANDLE_METHOD_ZIPCRYPTO,
         HANDLE_METHOD_STORE_CAB,
         HANDLE_METHOD_MSZIP_CAB,
@@ -301,6 +302,13 @@ public:
         FPART_PROP_RESOURCEID,
         FPART_PROP_SOLIDFOLDERINDEX,    // Solid folder/block index within an archive (e.g., 7z folder index)
         FPART_PROP_FILEMD5,             // MD5 hash of the entire archive file (hex string, set during initUnpack)
+        FPART_PROP_MTIME,               // Modification time (QDateTime)
+        FPART_PROP_CTIME,               // Creation time / birth time (QDateTime; on Unix: inode change time)
+        FPART_PROP_ATIME,               // Last access time (QDateTime)
+        FPART_PROP_ISREADONLY,          // Windows FILE_ATTRIBUTE_READONLY / Unix write-permission absent (bool)
+        FPART_PROP_ISHIDDEN,            // Windows FILE_ATTRIBUTE_HIDDEN (bool)
+        FPART_PROP_ISSYSTEM,            // Windows FILE_ATTRIBUTE_SYSTEM (bool)
+        FPART_PROP_ISARCHIVE,           // Windows FILE_ATTRIBUTE_ARCHIVE (bool)
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
@@ -1144,6 +1152,8 @@ public:
 
     // Filesystem helpers
     static bool setFileDateTime(const QString &sFileName, const QDateTime &dateTime);
+    static QDateTime winFileTimeToQDateTime(quint64 nWinFileTime);
+    static bool setFileProperties(const QMap<FPART_PROP, QVariant> &mapProperties, const QString &sFileName);
 
     virtual OFFSETSIZE getSignOffsetSize();  // TODO rename
 

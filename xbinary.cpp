@@ -21,6 +21,9 @@
 #include "xbinary.h"
 #include <cstring>
 #include <QDebug>
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b)
 {
@@ -1634,6 +1637,130 @@ bool XBinary::setFileDateTime(const QString &sFileName, const QDateTime &dateTim
     Q_UNUSED(dateTime)
     return false;
 #endif
+}
+
+QDateTime XBinary::winFileTimeToQDateTime(quint64 nWinFileTime)
+{
+    // Windows FILETIME: 100-nanosecond intervals since January 1, 1601 UTC.
+    // Offset to Unix epoch (January 1, 1970): 116444736000000000 * 100ns.
+    if (nWinFileTime == 0) {
+        return QDateTime();
+    }
+
+    const quint64 nEpochDelta = Q_UINT64_C(116444736000000000);
+
+    if (nWinFileTime < nEpochDelta) {
+        return QDateTime();
+    }
+
+    qint64 nMsecsSinceEpoch = (qint64)((nWinFileTime - nEpochDelta) / Q_UINT64_C(10000));
+
+    return QDateTime::fromMSecsSinceEpoch(nMsecsSinceEpoch, Qt::UTC);
+}
+
+bool XBinary::setFileProperties(const QMap<FPART_PROP, QVariant> &mapProperties, const QString &sFileName)
+{
+    bool bResult = false;
+
+    // --- Timestamps ---
+    // QFile::setFileTime requires the file to be open; use ReadWrite so the
+    // OS handle has FILE_WRITE_ATTRIBUTES rights on Windows.
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    {
+        QFile file(sFileName);
+        if (file.open(QIODevice::ReadWrite)) {
+            if (mapProperties.contains(FPART_PROP_MTIME)) {
+                QDateTime dt = mapProperties.value(FPART_PROP_MTIME).toDateTime();
+                if (dt.isValid()) {
+                    if (file.setFileTime(dt, QFileDevice::FileModificationTime)) {
+                        bResult = true;
+                    }
+                }
+            }
+            if (mapProperties.contains(FPART_PROP_ATIME)) {
+                QDateTime dt = mapProperties.value(FPART_PROP_ATIME).toDateTime();
+                if (dt.isValid()) {
+                    file.setFileTime(dt, QFileDevice::FileAccessTime);
+                }
+            }
+            if (mapProperties.contains(FPART_PROP_CTIME)) {
+                QDateTime dt = mapProperties.value(FPART_PROP_CTIME).toDateTime();
+                if (dt.isValid()) {
+                    // FileBirthTime = creation time on Windows; inode change time on Unix
+                    file.setFileTime(dt, QFileDevice::FileBirthTime);
+                }
+            }
+            file.close();
+        }
+    }
+#endif
+
+    // --- File attributes ---
+#ifdef Q_OS_WIN
+    bool bHasAttrib = mapProperties.contains(FPART_PROP_ISREADONLY)
+                   || mapProperties.contains(FPART_PROP_ISHIDDEN)
+                   || mapProperties.contains(FPART_PROP_ISSYSTEM)
+                   || mapProperties.contains(FPART_PROP_ISARCHIVE);
+
+    if (bHasAttrib) {
+        DWORD nAttribs = GetFileAttributesW((LPCWSTR)sFileName.utf16());
+
+        if (nAttribs != INVALID_FILE_ATTRIBUTES) {
+            if (mapProperties.contains(FPART_PROP_ISREADONLY)) {
+                if (mapProperties.value(FPART_PROP_ISREADONLY).toBool()) {
+                    nAttribs |= FILE_ATTRIBUTE_READONLY;
+                } else {
+                    nAttribs &= ~(DWORD)FILE_ATTRIBUTE_READONLY;
+                }
+            }
+
+            if (mapProperties.contains(FPART_PROP_ISHIDDEN)) {
+                if (mapProperties.value(FPART_PROP_ISHIDDEN).toBool()) {
+                    nAttribs |= FILE_ATTRIBUTE_HIDDEN;
+                } else {
+                    nAttribs &= ~(DWORD)FILE_ATTRIBUTE_HIDDEN;
+                }
+            }
+
+            if (mapProperties.contains(FPART_PROP_ISSYSTEM)) {
+                if (mapProperties.value(FPART_PROP_ISSYSTEM).toBool()) {
+                    nAttribs |= FILE_ATTRIBUTE_SYSTEM;
+                } else {
+                    nAttribs &= ~(DWORD)FILE_ATTRIBUTE_SYSTEM;
+                }
+            }
+
+            if (mapProperties.contains(FPART_PROP_ISARCHIVE)) {
+                if (mapProperties.value(FPART_PROP_ISARCHIVE).toBool()) {
+                    nAttribs |= FILE_ATTRIBUTE_ARCHIVE;
+                } else {
+                    nAttribs &= ~(DWORD)FILE_ATTRIBUTE_ARCHIVE;
+                }
+            }
+
+            if (SetFileAttributesW((LPCWSTR)sFileName.utf16(), nAttribs)) {
+                bResult = true;
+            }
+        }
+    }
+#else
+    // Unix: map ISREADONLY to write-permission bits
+    if (mapProperties.contains(FPART_PROP_ISREADONLY)) {
+        QFile::Permissions perms = QFile::permissions(sFileName);
+
+        if (mapProperties.value(FPART_PROP_ISREADONLY).toBool()) {
+            perms &= ~(QFile::WriteOwner | QFile::WriteUser | QFile::WriteGroup | QFile::WriteOther);
+        } else {
+            perms |= QFile::WriteOwner | QFile::WriteUser;
+        }
+
+        if (QFile::setPermissions(sFileName, perms)) {
+            bResult = true;
+        }
+    }
+#endif
+
+    return bResult;
 }
 
 qint64 XBinary::getFileFormatSize(PDSTRUCT *pPdStruct)
