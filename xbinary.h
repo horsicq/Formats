@@ -309,6 +309,7 @@ public:
         FPART_PROP_ISHIDDEN,            // Windows FILE_ATTRIBUTE_HIDDEN (bool)
         FPART_PROP_ISSYSTEM,            // Windows FILE_ATTRIBUTE_SYSTEM (bool)
         FPART_PROP_ISARCHIVE,           // Windows FILE_ATTRIBUTE_ARCHIVE (bool)
+        FPART_PROP_ISCOMMENTPRESENT,     // Archive record has a comment (bool)
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
@@ -317,6 +318,7 @@ public:
     enum UNPACK_PROP {
         UNPACK_PROP_UNKNOWN = 0,
         UNPACK_PROP_PASSWORD,
+        UNPACK_PROP_FIXFILENAMES,  // Sanitize filenames for current OS; handle duplicates with _2, _3; treat symlinks as folders
     };
 
     struct DATAPROCESS_STATE {
@@ -1495,6 +1497,7 @@ public:
     static bool moveFile(const QString &sSrcFileName, const QString &sDestFileName);
     static bool moveFileToDirectory(const QString &sSrcFileName, const QString &sDestDirectory);
     static QString convertFileNameSymbols(const QString &sFileName);
+    static QString fixFileName(const QString &sFileName);
     static QString getBaseFileName(const QString &sFileName);
     static bool createDirectory(const QString &sDirectoryName);
     static bool isDirectoryExists(const QString &sDirectoryName);
@@ -1824,6 +1827,9 @@ public:
     virtual QString getInfo(PDSTRUCT *pPdStruct = nullptr);
 
     virtual bool isEncrypted();
+
+    virtual bool isCommentPresent();
+    virtual QString getComment();
 
     static QString getSignature(QIODevice *pDevice, qint64 nOffset, qint64 nSize);
     QString getSignature(qint64 nOffset, qint64 nSize);
@@ -2282,6 +2288,7 @@ public:
     static QIODevice *createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct);
     static void freeFileBuffer(QIODevice **ppBuffer);
 
+    static QString getArchiveRecordComment(const ARCHIVERECORD &record);
     static QString getHandleMethods(const QMap<FPART_PROP, QVariant> &mapProperties);
 
 private:

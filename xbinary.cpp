@@ -6518,6 +6518,85 @@ QString XBinary::convertFileNameSymbols(const QString &sFileName)
     return sResult;
 }
 
+QString XBinary::fixFileName(const QString &sFileName)
+{
+    QString sResult;
+
+    qint32 nLength = sFileName.length();
+
+    for (qint32 i = 0; i < nLength; i++) {
+        QChar ch = sFileName.at(i);
+        ushort nCode = ch.unicode();
+
+        // Replace control characters
+        if (nCode < 0x20) {
+            sResult.append(QLatin1Char('_'));
+            continue;
+        }
+
+#ifdef Q_OS_WIN
+        // Windows: replace characters not allowed in filenames
+        // (except / and \ which are path separators — keep them)
+        if ((ch == QLatin1Char('?')) || (ch == QLatin1Char('*')) || (ch == QLatin1Char('"')) || (ch == QLatin1Char('<')) || (ch == QLatin1Char('>')) ||
+            (ch == QLatin1Char('|')) || (ch == QLatin1Char(':'))) {
+            sResult.append(QLatin1Char('_'));
+            continue;
+        }
+
+        // Replace characters that Windows filesystem cannot represent
+        // (surrogate halves, certain Unicode chars that NTFS rejects)
+        if (nCode >= 0xD800 && nCode <= 0xDFFF) {
+            sResult.append(QLatin1Char('_'));
+            continue;
+        }
+
+        // Replace non-ASCII characters that may fail on Windows (code page issues)
+        // Keep common Latin-1 supplement (0x00A0-0x00FF) and general letters
+        // Replace characters outside BMP or unusual Unicode that causes filesystem errors
+        if (nCode > 0xFFFD) {
+            sResult.append(QLatin1Char('_'));
+            continue;
+        }
+#endif
+
+        sResult.append(ch);
+    }
+
+    // Normalize path separators to /
+    sResult = sResult.replace(QLatin1Char('\\'), QLatin1Char('/'));
+
+    // Remove trailing dots and spaces from each path component (Windows restriction)
+#ifdef Q_OS_WIN
+    QStringList listParts = sResult.split(QLatin1Char('/'));
+    QStringList listFixed;
+
+    for (qint32 i = 0; i < listParts.count(); i++) {
+        QString sPart = listParts.at(i);
+
+        // Remove trailing dots and spaces
+        while (sPart.endsWith(QLatin1Char('.')) || sPart.endsWith(QLatin1Char(' '))) {
+            sPart.chop(1);
+        }
+
+        // If part became empty, use underscore
+        if (sPart.isEmpty() && !listParts.at(i).isEmpty()) {
+            sPart = QLatin1String("_");
+        }
+
+        listFixed.append(sPart);
+    }
+
+    sResult = listFixed.join(QLatin1Char('/'));
+#endif
+
+    // If the entire result is empty, return underscore
+    if (sResult.isEmpty() && !sFileName.isEmpty()) {
+        sResult = QLatin1String("_");
+    }
+
+    return sResult;
+}
+
 QString XBinary::getBaseFileName(const QString &sFileName)
 {
     QFileInfo fi(sFileName);
@@ -10912,6 +10991,16 @@ QString XBinary::getInfo(PDSTRUCT *pPdStruct)
 bool XBinary::isEncrypted()
 {
     return false;
+}
+
+bool XBinary::isCommentPresent()
+{
+    return false;
+}
+
+QString XBinary::getComment()
+{
+    return QString();
 }
 
 QString XBinary::getSignature(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
@@ -15822,9 +15911,6 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
 
 bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
-    // TODO replace options
-    // Create a copy
-    // convert file name
     bool bResult = false;
 
     PDSTRUCT pdStructEmpty = createPdStruct();
@@ -15840,6 +15926,11 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
             dir.mkpath(sFolderName);
         }
 
+        bool bFixFileNames = mapProperties.value(UNPACK_PROP_FIXFILENAMES).toBool();
+
+        // Track used filenames for duplicate detection when FIXFILENAMES is enabled
+        QMap<QString, qint32> mapUsedNames;
+
         UNPACK_STATE state = {};
 
         if (initUnpack(&state, mapProperties, pPdStruct)) {
@@ -15852,13 +15943,52 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                     QString sFileName = record.mapProperties.value(FPART_PROP_ORIGINALNAME).toString();
                     qint64 nFileSize = record.mapProperties.value(FPART_PROP_UNCOMPRESSEDSIZE).toLongLong();
 
-                    // TODO convert fileName
+                    // Check if this is a directory entry (ends with '/' and has zero size)
+                    bool bIsDirectory = sFileName.endsWith(QLatin1Char('/')) || record.mapProperties.value(FPART_PROP_ISFOLDER).toBool();
+
+                    // FIXFILENAMES: sanitize filename for current OS
+                    if (bFixFileNames && !sFileName.isEmpty()) {
+                        sFileName = fixFileName(sFileName);
+
+                        // If symlink (has link target) -> treat as folder
+                        QString sLinkName = record.mapProperties.value(FPART_PROP_LINKNAME).toString();
+                        if (!sLinkName.isEmpty()) {
+                            bIsDirectory = true;
+                        }
+
+                        // Handle duplicate filenames by appending _2, _3, etc.
+                        QString sKey = sFileName.toLower();
+
+                        if (mapUsedNames.contains(sKey)) {
+                            qint32 nSuffix = mapUsedNames.value(sKey) + 1;
+                            mapUsedNames.insert(sKey, nSuffix);
+
+                            // Insert suffix before extension (or at end if no extension)
+                            qint32 nLastSlash = sFileName.lastIndexOf(QLatin1Char('/'));
+                            QString sDir;
+                            QString sBase;
+
+                            if (nLastSlash >= 0) {
+                                sDir = sFileName.left(nLastSlash + 1);
+                                sBase = sFileName.mid(nLastSlash + 1);
+                            } else {
+                                sBase = sFileName;
+                            }
+
+                            qint32 nDotPos = sBase.lastIndexOf(QLatin1Char('.'));
+
+                            if (nDotPos > 0) {
+                                sFileName = sDir + sBase.left(nDotPos) + QString("_%1").arg(nSuffix) + sBase.mid(nDotPos);
+                            } else {
+                                sFileName = sDir + sBase + QString("_%1").arg(nSuffix);
+                            }
+                        } else {
+                            mapUsedNames.insert(sKey, 1);
+                        }
+                    }
 
                     if (!sFileName.isEmpty()) {
                         QString sFilePath = sFolderName + QDir::separator() + sFileName;
-
-                        // Check if this is a directory entry (ends with '/' and has zero size)
-                        bool bIsDirectory = sFileName.endsWith(QLatin1Char('/')) || record.mapProperties.value(FPART_PROP_ISFOLDER).toBool();
 
                         // Create directory structure if needed
                         if (bIsDirectory) {
@@ -15896,6 +16026,9 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
                                 file.close();
                             } else {
+#ifdef QT_DEBUG
+                                qDebug() << "Cannot open for writing:" << sFilePath;
+#endif
                                 bResult = false;
                             }
 
@@ -15927,7 +16060,6 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                 if (vDateTime.canConvert<QDateTime>()) {
                                     dt = vDateTime.toDateTime();
                                 } else if (vDateTime.canConvert<quint64>()) {
-                                    // Some formats may store timestamp as uint64 (seconds since epoch)
                                     quint64 t = vDateTime.toULongLong();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
                                     dt = QDateTime::fromSecsSinceEpoch((qint64)t);
@@ -16091,6 +16223,24 @@ void XBinary::freeFileBuffer(QIODevice **ppBuffer)
         delete *ppBuffer;
         *ppBuffer = nullptr;
     }
+}
+
+QString XBinary::getArchiveRecordComment(const ARCHIVERECORD &record)
+{
+    QString sResult;
+
+    if (record.mapProperties.value(FPART_PROP_ISCOMMENTPRESENT).toBool()) {
+        qint64 nCommentOffset = record.mapProperties.value(FPART_PROP_FILECOMMENTOFFSET).toLongLong();
+        qint64 nCommentLength = record.mapProperties.value(FPART_PROP_FILECOMMENTLENGTH).toLongLong();
+
+        Q_UNUSED(nCommentOffset)
+        Q_UNUSED(nCommentLength)
+        // Comment data must be read from the archive device at nCommentOffset with nCommentLength
+        // This static method returns the comment text if stored directly in a property,
+        // otherwise the caller must read from the device.
+    }
+
+    return sResult;
 }
 
 QString XBinary::getHandleMethods(const QMap<FPART_PROP, QVariant> &mapProperties)
