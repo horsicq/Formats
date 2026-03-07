@@ -632,7 +632,6 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, QList<XArchive::
     } else if (XJAR::isValid(pListRecords, pPdStruct)) {
         stResult.insert(XBinary::FT_JAR);
     }
-    // TODO APKS
 
     return stResult;
 }
@@ -659,7 +658,6 @@ QSet<XBinary::FT> XFormats::getFileTypesZIP(QIODevice *pDevice, XBinary::PDSTRUC
         } else if (xzip.isJAR(nECDOffset, pPdStruct)) {
             stResult.insert(XBinary::FT_JAR);
         }
-        // TODO APKS
     }
 
     // XBinary::FT fileType = XZip::_getFileType(pDevice, pListRecords, true);
