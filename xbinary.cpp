@@ -9180,6 +9180,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_UDF)) listResult.append(FT_UDF);
         if (stFileTypes.contains(FT_MINIDUMP)) listResult.append(FT_MINIDUMP);
         if (stFileTypes.contains(FT_DMG)) listResult.append(FT_DMG);
+        if (stFileTypes.contains(FT_STK)) listResult.append(FT_STK);
     }
 
     if ((tlOption == TL_OPTION_DEFAULT) || (tlOption == TL_OPTION_EXECUTABLE) || (tlOption == TL_OPTION_ALL)) {

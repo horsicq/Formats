@@ -565,6 +565,7 @@ public:
         FT_UDF,
         FT_MINIDUMP,
         FT_DMG,
+        FT_STK,
 
         // TODO more
     };
