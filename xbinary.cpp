@@ -1189,6 +1189,73 @@ QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(const DATA_HEADERS_OPTIONS &
     return listResult;
 }
 
+QList<XBinary::XFHEADER> XBinary::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(xfStruct)
+    Q_UNUSED(pPdStruct)
+
+    QList<XBinary::XFHEADER> listResult;
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XBinary::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(nStructID)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    return listResult;
+}
+
+QList<QVariant> XBinary::getXFRecordValues(const QList<XFRECORD> &listXFRecords, const XLOC &xLoc)
+{
+    QList<QVariant> listResult;
+
+    qint64 nBaseOffset = xLoc.nLocation;
+    qint32 nCount = listXFRecords.count();
+
+    for (qint32 i = 0; i < nCount; i++) {
+        XFRECORD xfRecord = listXFRecords.at(i);
+        qint64 nOffset = nBaseOffset + xfRecord.nOffset;
+        QVariant varValue;
+
+        if (xfRecord.valueType == VT_UINT8) {
+            varValue = read_uint8(nOffset);
+        } else if (xfRecord.valueType == VT_INT8) {
+            varValue = read_int8(nOffset);
+        } else if (xfRecord.valueType == VT_UINT16) {
+            varValue = read_uint16(nOffset);
+        } else if (xfRecord.valueType == VT_INT16) {
+            varValue = read_int16(nOffset);
+        } else if (xfRecord.valueType == VT_UINT32) {
+            varValue = read_uint32(nOffset);
+        } else if (xfRecord.valueType == VT_INT32) {
+            varValue = read_int32(nOffset);
+        } else if (xfRecord.valueType == VT_UINT64) {
+            varValue = read_uint64(nOffset);
+        } else if (xfRecord.valueType == VT_INT64) {
+            varValue = read_int64(nOffset);
+        } else if (xfRecord.valueType == VT_FLOAT) {
+            varValue = read_float(nOffset);
+        } else if (xfRecord.valueType == VT_DOUBLE) {
+            varValue = read_double(nOffset);
+        } else if (xfRecord.valueType == VT_BYTE_ARRAY) {
+            varValue = read_array(nOffset, xfRecord.nSize);
+        } else if (xfRecord.valueType == VT_CHAR_ARRAY) {
+            varValue = read_ansiString(nOffset, xfRecord.nSize);
+        } else {
+            varValue = read_array(nOffset, xfRecord.nSize);
+        }
+
+        listResult.append(varValue);
+    }
+
+    return listResult;
+}
+
 XBinary::XBinary(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     setData(pDevice, bIsImage, nModuleAddress);
@@ -7474,6 +7541,20 @@ qint64 XBinary::locationToOffset(_MEMORY_MAP *pMemoryMap, LT locType, XADDR nLoc
     }
 
     return nResult;
+}
+
+qint64 XBinary::locToOffset(_MEMORY_MAP *pMemoryMap, const XLOC &xLoc)
+{
+    return locationToOffset(pMemoryMap, xLoc.locType, xLoc.nLocation);
+}
+
+XBinary::XLOC XBinary::offsetToLoc(qint64 nOffset)
+{
+    XLOC result = {};
+    result.locType = LT_OFFSET;
+    result.nLocation = nOffset;
+
+    return result;
 }
 
 XADDR XBinary::getSegmentAddress(quint16 nSegment, quint16 nAddress)
@@ -15928,6 +16009,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
         }
 
         bool bFixFileNames = mapProperties.value(UNPACK_PROP_FIXFILENAMES).toBool();
+        bool bNoCRC = mapProperties.value(UNPACK_PROP_NOCRC).toBool();
 
         // Track used filenames for duplicate detection when FIXFILENAMES is enabled
         QMap<QString, qint32> mapUsedNames;
@@ -16033,7 +16115,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                 bResult = false;
                             }
 
-                            if (bResult) {
+                            if (bResult && !bNoCRC) {
                                 XBinary::CRC_TYPE crcType =
                                     (XBinary::CRC_TYPE)record.mapProperties.value(XBinary::FPART_PROP_CRC_TYPE, XBinary::CRC_TYPE_UNKNOWN).toUInt();
 

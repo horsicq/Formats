@@ -122,7 +122,7 @@ public:
     static QString XCONVERT_translate(const QString &sString, XBinary::XCONVERT *pRecords, qint32 nRecordsSize);
 
     struct XIDSTRING {
-        quint32 nID;
+        quint64 nID;
         QString sString;
     };
 
@@ -137,6 +137,11 @@ public:
         LT_OFFSET,
         LT_ADDRESS,
         LT_RELADDRESS,
+    };
+
+    struct XLOC {
+        LT locType;
+        XADDR nLocation;
     };
 
     enum STRUCTID {
@@ -319,6 +324,7 @@ public:
         UNPACK_PROP_UNKNOWN = 0,
         UNPACK_PROP_PASSWORD,
         UNPACK_PROP_FIXFILENAMES,  // Sanitize filenames for current OS; handle duplicates with _2, _3; treat symlinks as folders
+        UNPACK_PROP_NOCRC,         // Do not check CRC after unpacking
     };
 
     struct DATAPROCESS_STATE {
@@ -884,6 +890,41 @@ public:
         // TODO pascal strings(A/U)
     };
 
+    struct XFRECORD {
+        QString sName;
+        qint32 nOffset;  // From start
+        qint32 nSize;
+        VT valueType;
+    };
+
+    enum XFTYPE {
+        XFTYPE_UNKNOWN = 0,
+        XFTYPE_HEADER,
+        XFTYPE_TABLE
+    };
+
+    struct XFHEADER {
+        QString sGUID;
+        QString sParentGUID;  // empty if no parent
+        FT fileType;
+        STRUCTID structID;
+        XLOC xLoc;
+        XFTYPE xfType;
+        QList<XFRECORD> listFields;  // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
+        QList<XADDR> listLocations;  // For XFTYPE_TABLE
+    };
+
+    struct XFSTRUCT {
+        QString sParent;
+        _MEMORY_MAP *pMemoryMap;
+        FT fileType;
+        quint32 nStructID;
+        XLOC xLoc;
+        XFTYPE xfType;
+        bool bIsParent;
+        qint32 nCount;
+    };
+
     struct MS_RECORD {
         XADDR nRelOffset;
         qint16 nRegionIndex;
@@ -1048,6 +1089,10 @@ public:
     DSID _addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct);
 
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+
+    virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct);
+    virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc);
+    QList<QVariant> getXFRecordValues(const QList<XFRECORD> &listXFRecords, const XLOC &xLoc);
 
     DATA_HEADER _initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName);
     DATA_HEADER _dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset, qint64 nSize);
@@ -1561,6 +1606,8 @@ public:
     static qint64 addressToRelAddress(_MEMORY_MAP *pMemoryMap, XADDR nAddress);
     static XADDR segmentRelOffsetToAddress(_MEMORY_MAP *pMemoryMap, quint16 nSegment, XADDR nRelOffset);
     static qint64 locationToOffset(_MEMORY_MAP *pMemoryMap, LT locType, XADDR nLocation);
+    static qint64 locToOffset(_MEMORY_MAP *pMemoryMap, const XLOC &xLoc);
+    static XLOC offsetToLoc(qint64 nOffset);
 
     static XADDR getSegmentAddress(quint16 nSegment, quint16 nAddress);
 
