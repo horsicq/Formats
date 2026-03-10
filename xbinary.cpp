@@ -411,7 +411,7 @@ QString XBinary::XCONVERT_translate(const QString &sString, XCONVERT *pRecords, 
     return sResult;
 }
 
-QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 nRecordsSize)
+QString XBinary::XIDSTRING_idToString(quint64 nID, XIDSTRING *pRecords, qint32 nRecordsSize)
 {
     QString sResult;
 
@@ -429,9 +429,9 @@ QString XBinary::XIDSTRING_idToString(quint32 nID, XIDSTRING *pRecords, qint32 n
     return sResult;
 }
 
-quint32 XBinary::XIDSTRING_ftStringToId(const QString &sString, XIDSTRING *pRecords, qint32 nRecordsSize)
+quint64 XBinary::XIDSTRING_ftStringToId(const QString &sString, XIDSTRING *pRecords, qint32 nRecordsSize)
 {
-    quint32 nResult = 0;
+    quint64 nResult = 0;
 
     for (qint32 i = 0; i < nRecordsSize; i++) {
         if (pRecords[i].sString.toUpper().remove(" ").remove("-").remove("/").remove("\\") == sString.toUpper()) {
@@ -767,6 +767,11 @@ XBinary::DATA_RECORD XBinary::getDataRecordDV(qint64 nRelOffset, qint64 nSize, c
 QString XBinary::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XBINARY_STRUCTID, sizeof(_TABLE_XBINARY_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+quint32 XBinary::ftStringToStructID(const QString &sFtString)
+{
+    return XCONVERT_ftStringToId(sFtString, _TABLE_XBINARY_STRUCTID, sizeof(_TABLE_XBINARY_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
 XBinary::DATA_HEADER XBinary::_dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset,
@@ -12921,6 +12926,22 @@ QDateTime XBinary::valueToTime(quint64 nValue, DT_TYPE type)
 
     if (type == DT_TYPE_POSIX) {
         result.setMSecsSinceEpoch(nValue * 1000);
+    } else if (type == DT_TYPE_UNIXTIME) {
+        result = QDateTime::fromSecsSinceEpoch((quint32)nValue, Qt::UTC);
+    } else if (type == DT_TYPE_DOSTIME) {
+        quint16 nDosTime = (quint16)nValue;
+        // Use a valid dummy date (1980-01-01 = 0x0021) since we only need the time component
+        result = dosDateTimeToQDateTime(0x0021, nDosTime);
+    } else if (type == DT_TYPE_DOSDATE) {
+        quint16 nDosDate = (quint16)nValue;
+        result = dosDateTimeToQDateTime(nDosDate, 0);
+    } else if (type == DT_TYPE_FILETIME) {
+        // FILETIME: 100-nanosecond intervals since 1601-01-01
+        qint64 nTicksSinceEpoch = (qint64)nValue - 116444736000000000LL;
+        if (nTicksSinceEpoch >= 0) {
+            qint64 nMsec = nTicksSinceEpoch / 10000;
+            result = QDateTime::fromMSecsSinceEpoch(nMsec, Qt::UTC);
+        }
     }
 
     return result;
@@ -12930,7 +12951,22 @@ QString XBinary::valueToTimeString(quint64 nValue, XBinary::DT_TYPE type)
 {
     QString sResult;
 
-    sResult = valueToTime(nValue, type).toString("yyyy-MM-dd hh:mm:ss");
+    if (type == DT_TYPE_DOSTIME) {
+        QDateTime dateTime = valueToTime(nValue, type);
+        if (dateTime.isValid()) {
+            sResult = dateTime.time().toString("HH:mm:ss");
+        }
+    } else if (type == DT_TYPE_DOSDATE) {
+        QDateTime dateTime = valueToTime(nValue, type);
+        if (dateTime.isValid()) {
+            sResult = dateTime.date().toString("yyyy-MM-dd");
+        }
+    } else {
+        QDateTime dateTime = valueToTime(nValue, type);
+        if (dateTime.isValid()) {
+            sResult = dateTime.toString("yyyy-MM-dd hh:mm:ss");
+        }
+    }
 
     return sResult;
 }
@@ -14176,7 +14212,7 @@ QString XBinary::numberToString(quint64 nValue)
 {
     QString sResult;
 
-    sResult = QString("\"%1\"").arg(nValue);
+    sResult = QString::number(nValue);
 
     return sResult;
 }
@@ -14209,6 +14245,18 @@ QString XBinary::versionWordToString(quint16 nValue)
 QString XBinary::versionDwordToString(quint32 nValue)
 {
     return QString("\"%1\"").arg(get_uint32_version(nValue));
+}
+
+QString XBinary::versionDivModByteToString(quint8 nValue)
+{
+    return QString("\"%1.%2\"").arg(nValue / 10).arg(nValue % 10);
+}
+
+QString XBinary::versionDivModWordToString(quint16 nValue)
+{
+    quint8 nHigh = (nValue >> 8) & 0xFF;
+    quint8 nLow = nValue & 0xFF;
+    return QString("\"%1.%2.%3.%4\"").arg(nHigh / 10).arg(nHigh % 10).arg(nLow / 10).arg(nLow % 10);
 }
 
 QString XBinary::formatXML(const QString &sXML)

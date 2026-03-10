@@ -26,6 +26,11 @@ XBinary::XCONVERT _TABLE_XMSDOS_STRUCTID[] = {
     {XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
 };
 
+XBinary::XIDSTRING _TABLE_XMSDOS_ImageMagics[] = {
+    {0x5A4D, "MZ"},
+    {0x4D5A, "ZM"},
+};
+
 XMSDOS::XMSDOS(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
 }
@@ -804,6 +809,87 @@ QString XMSDOS::getMIMEString()
 QString XMSDOS::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XMSDOS_STRUCTID, sizeof(_TABLE_XMSDOS_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::XFHEADER> XMSDOS::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == 0) {
+        // Root: determine whether this is a plain DOS or extended (PE/NE/LE) header
+        bool bIsExtended = (isLE() || isLX() || isNE() || isPE());
+
+        XFSTRUCT _xfStruct = xfStruct;
+
+        if (bIsExtended) {
+            _xfStruct.nStructID = STRUCTID_IMAGE_DOS_HEADEREX;
+        } else {
+            _xfStruct.nStructID = STRUCTID_IMAGE_DOS_HEADER;
+        }
+
+        _xfStruct.xLoc = offsetToLoc(0);
+
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if ((nStructID == STRUCTID_IMAGE_DOS_HEADER) || (nStructID == STRUCTID_IMAGE_DOS_HEADEREX)) {
+        XLOC headerLoc = xfStruct.xLoc;
+
+        XFHEADER xfHeader = {};
+        xfHeader.sGUID = QUuid::createUuid().toString();
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(nStructID);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, headerLoc);
+        // Field 0 = e_magic
+        xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XMSDOS_ImageMagics, sizeof(_TABLE_XMSDOS_ImageMagics) / sizeof(XBinary::XIDSTRING)});
+
+        listResult.append(xfHeader);
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XMSDOS::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    if ((nStructID == STRUCTID_IMAGE_DOS_HEADER) || (nStructID == STRUCTID_IMAGE_DOS_HEADEREX)) {
+        listResult.append({"e_magic", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_magic), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"e_cblp", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cblp), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"e_cp", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cp), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"e_crlc", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_crlc), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"e_cparhdr", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cparhdr), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"e_minalloc", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_minalloc), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"e_maxalloc", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_maxalloc), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"e_ss", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ss), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"e_sp", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_sp), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"e_csum", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_csum), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"e_ip", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ip), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"e_cs", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cs), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"e_lfarlc", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_lfarlc), 2, XFRECORD_FLAG_OFFSET, VT_UINT16});
+        listResult.append({"e_ovno", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ovno), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+
+        if (nStructID == STRUCTID_IMAGE_DOS_HEADEREX) {
+            for (qint32 i = 0; i < 4; i++) {
+                listResult.append({QString("e_res_%1").arg(i), (qint32)(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + i * sizeof(quint16)), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+            }
+            listResult.append({"e_oemid", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oemid), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+            listResult.append({"e_oeminfo", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oeminfo), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+            for (qint32 i = 0; i < 10; i++) {
+                listResult.append({QString("e_res2_%1").arg(i), (qint32)(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res2) + i * sizeof(quint16)), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+            }
+            listResult.append({"e_lfanew", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        }
+    }
+
+    return listResult;
 }
 
 QList<XBinary::DATA_HEADER> XMSDOS::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)

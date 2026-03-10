@@ -126,8 +126,8 @@ public:
         QString sString;
     };
 
-    static QString XIDSTRING_idToString(quint32 nID, XBinary::XIDSTRING *pRecords, qint32 nRecordsSize);
-    static quint32 XIDSTRING_ftStringToId(const QString &sString, XBinary::XIDSTRING *pRecords, qint32 nRecordsSize);
+    static QString XIDSTRING_idToString(quint64 nID, XBinary::XIDSTRING *pRecords, qint32 nRecordsSize);
+    static quint64 XIDSTRING_ftStringToId(const QString &sString, XBinary::XIDSTRING *pRecords, qint32 nRecordsSize);
 
     static QMap<quint64, QString> XIDSTRING_createMap(XBinary::XIDSTRING *pRecords, qint32 nRecordsSize);
     static QMap<quint64, QString> XIDSTRING_createMapPrefix(XBinary::XIDSTRING *pRecords, qint32 nRecordsSize, const QString &sPrefix);
@@ -890,10 +890,34 @@ public:
         // TODO pascal strings(A/U)
     };
 
+    enum XFRECORD_FLAG {
+        XFRECORD_FLAG_NONE = 0,
+        XFRECORD_FLAG_SIZE = 0x00000001,
+        XFRECORD_FLAG_OFFSET = 0x00000002,
+        XFRECORD_FLAG_RELATIVE_OFFSET = 0x00000004,
+        XFRECORD_FLAG_ADDRESS = 0x00000008,
+        XFRECORD_FLAG_RELATIVE_ADDRESS = 0x00000010,
+        XFRECORD_FLAG_VERSION_MAJOR = 0x00000020,
+        XFRECORD_FLAG_VERSION_MINOR = 0x00000040,
+        XFRECORD_FLAG_VERSION_PATCH = 0x00000080,
+        XFRECORD_FLAG_VERSION_BUILD = 0x00000100,
+        XFRECORD_FLAG_VERSION = 0x00000200,
+        XFRECORD_FLAG_VERSION_DIVMOD = 0x00000400,
+        XFRECORD_FLAG_DATETIME = 0x00001000,
+        XFRECORD_FLAG_DATE = 0x00002000,
+        XFRECORD_FLAG_TIME = 0x00004000,
+        XFRECORD_FLAG_DOSDATE = 0x00008000,
+        XFRECORD_FLAG_DOSTIME = 0x00010000,
+        XFRECORD_FLAG_UNIXTIME = 0x00020000,
+        XFRECORD_FLAG_FILETIME = 0x00040000,
+        XFRECORD_FLAG_COUNT = 0x00080000,
+    };
+
     struct XFRECORD {
         QString sName;
         qint32 nOffset;  // From start
         qint32 nSize;
+        quint64 nFlags;
         VT valueType;
     };
 
@@ -903,6 +927,20 @@ public:
         XFTYPE_TABLE
     };
 
+    enum XFDATASTTYPE {
+        XFDATASTYPE_UNKNOWN = 0,
+        XFDATASTYPE_LIST,
+        XFDATASTYPE_FLAGS
+    };
+
+    struct XFDATAST {
+        qint32 nFieldIndex;  // Index in XFRECORD
+        quint64 nMask;
+        XFDATASTTYPE xfDataStType;
+        XBinary::XIDSTRING *pRecords;
+        qint32 nRecordsSize;
+    };
+
     struct XFHEADER {
         QString sGUID;
         QString sParentGUID;  // empty if no parent
@@ -910,8 +948,10 @@ public:
         STRUCTID structID;
         XLOC xLoc;
         XFTYPE xfType;
+        bool bIsParentNeeded; // if we need parent struct to calculate the header right way
         QList<XFRECORD> listFields;  // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
-        QList<XADDR> listLocations;  // For XFTYPE_TABLE
+        QList<XFDATAST> listDataSt;  // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
+        QList<XADDR> listRowLocations;  // For XFTYPE_TABLE
     };
 
     struct XFSTRUCT {
@@ -1072,6 +1112,7 @@ public:
                                 VL_TYPE vlType);
 
     virtual QString structIDToString(quint32 nID);
+    virtual quint32 ftStringToStructID(const QString &sFtString);
 
     struct DATA_HEADERS_OPTIONS {
         _MEMORY_MAP *pMemoryMap;
@@ -2004,8 +2045,11 @@ public:
 
     enum DT_TYPE {
         DT_TYPE_UNKNOWN = 0,
-        DT_TYPE_POSIX
-        // TODO more
+        DT_TYPE_POSIX,
+        DT_TYPE_DOSTIME,
+        DT_TYPE_DOSDATE,
+        DT_TYPE_UNIXTIME,
+        DT_TYPE_FILETIME
     };
 
     static QDateTime valueToTime(quint64 nValue, DT_TYPE type);
@@ -2111,6 +2155,8 @@ public:
     static QString fullVersionQwordToString(quint64 nValue);
     static QString versionWordToString(quint16 nValue);
     static QString versionDwordToString(quint32 nValue);
+    static QString versionDivModByteToString(quint8 nValue);
+    static QString versionDivModWordToString(quint16 nValue);
     static QString formatXML(const QString &sXML);
 
     struct XDWORD {

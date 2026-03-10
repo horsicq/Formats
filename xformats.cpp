@@ -533,6 +533,192 @@ QList<XBinary::DATA_HEADER> XFormats::getDataHeaders(XBinary::FT fileType, QIODe
     return listResult;
 }
 
+QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QString &sTag, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    // Tag format: Offset::FileType::StructID::Type[::Count]
+    // With '#' separator:
+    // TAG                  -> no parent (bIsParent=false)
+    // TAG#                 -> with parent (bIsParent=true)
+    // TAG1#TAG2[#TAG3...]  -> TAG1 with parent, filter results matching TAG2, TAG3, etc.
+    // Filter tags can be partial: 5594::ZIP::LOCALFILEHEADER (offset+fileType+structID)
+    // or full: 5594::ZIP::LOCALFILEHEADER::TABLE::6
+
+    QStringList listSegments = sTag.split("#");
+
+    if (listSegments.isEmpty()) {
+        return listResult;
+    }
+
+    QString sRootTag = listSegments.at(0);
+    bool bIsParent = false;
+    QStringList listFilterTags;
+    qint32 nSegmentCount = listSegments.count();
+
+    if (nSegmentCount == 1) {
+        // No '#' found -> no parent flag
+        bIsParent = false;
+    } else if ((nSegmentCount == 2) && listSegments.at(1).isEmpty()) {
+        // Trailing '#' -> parent flag, no filter
+        bIsParent = true;
+    } else {
+        // Multiple segments -> parent flag + filter on remaining segments
+        bIsParent = true;
+        for (qint32 i = 1; i < nSegmentCount; i++) {
+            if (!listSegments.at(i).isEmpty()) {
+                listFilterTags.append(listSegments.at(i));
+            }
+        }
+    }
+
+    // Parse root tag: Offset::FileTypeFt::StructFt::TypeName[::Count]
+    QStringList listParts = sRootTag.split("::");
+
+    if (listParts.count() >= 4) {
+        QString sOffset = listParts.at(0);
+        QString sFileTypeFt = listParts.at(1);
+        QString sStructFt = listParts.at(2);
+        QString sTypeName = listParts.at(3);
+
+        XBinary::FT fileType = XBinary::ftStringToFileTypeId(sFileTypeFt);
+
+        bool bOk = false;
+        qint64 nOffset = sOffset.toLongLong(&bOk, 16);
+
+        if ((fileType != XBinary::FT_UNKNOWN) && bOk) {
+            XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+
+            if (pBinary) {
+                quint32 nStructID = pBinary->ftStringToStructID(sStructFt);
+
+                XBinary::XFTYPE xfType = XBinary::XFTYPE_UNKNOWN;
+                if (sTypeName == "HEADER") {
+                    xfType = XBinary::XFTYPE_HEADER;
+                } else if (sTypeName == "TABLE") {
+                    xfType = XBinary::XFTYPE_TABLE;
+                }
+
+                XBinary::_MEMORY_MAP memoryMap = pBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
+
+                XBinary::XLOC xLoc = {};
+                xLoc.locType = XBinary::LT_OFFSET;
+                xLoc.nLocation = nOffset;
+
+                XBinary::XFSTRUCT xfStruct = {};
+                xfStruct.pMemoryMap = &memoryMap;
+                xfStruct.fileType = fileType;
+                xfStruct.nStructID = nStructID;
+                xfStruct.xLoc = xLoc;
+                xfStruct.xfType = xfType;
+                xfStruct.bIsParent = bIsParent;
+                xfStruct.nCount = -1;
+
+                if (listParts.count() >= 5) {
+                    bool bCountOk = false;
+                    qint32 nCount = listParts.at(4).toInt(&bCountOk);
+                    if (bCountOk) {
+                        xfStruct.nCount = nCount;
+                    }
+                }
+
+                QList<XBinary::XFHEADER> listAllHeaders = pBinary->getXFHeaders(xfStruct, pPdStruct);
+
+                if (listFilterTags.isEmpty()) {
+                    listResult = listAllHeaders;
+                } else {
+                    // Pre-parse filter criteria
+                    qint32 nFilterCount = listFilterTags.count();
+                    QList<qint32> listFilterPartCounts;
+                    QList<XBinary::FT> listFilterFileTypes;
+                    QList<quint32> listFilterStructIDs;
+                    QList<XBinary::XFTYPE> listFilterXfTypes;
+                    QList<qint64> listFilterOffsets;
+
+                    for (qint32 i = 0; i < nFilterCount; i++) {
+                        QStringList listFilterParts = listFilterTags.at(i).split("::");
+                        qint32 nFilterPartCount = listFilterParts.count();
+
+                        qint64 nFilterOffset = 0;
+                        XBinary::FT filterFileType = XBinary::FT_UNKNOWN;
+                        quint32 nFilterStructID = 0;
+                        XBinary::XFTYPE filterXfType = XBinary::XFTYPE_UNKNOWN;
+
+                        if (nFilterPartCount >= 1) {
+                            bool bFilterOk = false;
+                            nFilterOffset = listFilterParts.at(0).toLongLong(&bFilterOk, 16);
+                            if (!bFilterOk) {
+                                nFilterPartCount = 0;
+                            }
+                        }
+                        if (nFilterPartCount >= 2) {
+                            filterFileType = XBinary::ftStringToFileTypeId(listFilterParts.at(1));
+                        }
+                        if (nFilterPartCount >= 3) {
+                            nFilterStructID = pBinary->ftStringToStructID(listFilterParts.at(2));
+                        }
+                        if (nFilterPartCount >= 4) {
+                            if (listFilterParts.at(3) == "HEADER") {
+                                filterXfType = XBinary::XFTYPE_HEADER;
+                            } else if (listFilterParts.at(3) == "TABLE") {
+                                filterXfType = XBinary::XFTYPE_TABLE;
+                            }
+                        }
+
+                        listFilterPartCounts.append(nFilterPartCount);
+                        listFilterFileTypes.append(filterFileType);
+                        listFilterStructIDs.append(nFilterStructID);
+                        listFilterXfTypes.append(filterXfType);
+                        listFilterOffsets.append(nFilterOffset);
+                    }
+
+                    // Filter headers against pre-parsed criteria
+                    qint32 nAllCount = listAllHeaders.count();
+
+                    for (qint32 i = 0; i < nAllCount; i++) {
+                        const XBinary::XFHEADER &header = listAllHeaders.at(i);
+
+                        for (qint32 j = 0; j < nFilterCount; j++) {
+                            bool bMatch = true;
+                            qint32 nFPC = listFilterPartCounts.at(j);
+
+                            if (bMatch && (nFPC >= 1)) {
+                                if (header.xLoc.nLocation != listFilterOffsets.at(j)) {
+                                    bMatch = false;
+                                }
+                            }
+                            if (bMatch && (nFPC >= 2)) {
+                                if (header.fileType != listFilterFileTypes.at(j)) {
+                                    bMatch = false;
+                                }
+                            }
+                            if (bMatch && (nFPC >= 3)) {
+                                if (header.structID != listFilterStructIDs.at(j)) {
+                                    bMatch = false;
+                                }
+                            }
+                            if (bMatch && (nFPC >= 4)) {
+                                if (header.xfType != listFilterXfTypes.at(j)) {
+                                    bMatch = false;
+                                }
+                            }
+
+                            if (bMatch) {
+                                listResult.append(header);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                delete pBinary;
+            }
+        }
+    }
+
+    return listResult;
+}
+
 QList<XBinary::FPART> XFormats::getFileParts(XBinary::FT fileType, QIODevice *pDevice, quint32 nFileParts, qint32 nLimit, bool bIsImage, XADDR nModuleAddress,
                                              XBinary::PDSTRUCT *pPdStruct)
 {
