@@ -21,6 +21,8 @@
 
 #include "xfmodel.h"
 #include <QDebug>
+#include <QFile>
+#include <QTextStream>
 
 XFModel::XFModel(QObject *pParent) : QAbstractItemModel(pParent)
 {
@@ -471,4 +473,205 @@ QString XFModel::separatorLine(const QList<qint32> &listWidths)
     }
 
     return sResult;
+}
+
+QString XFModel::exportToString(const QAbstractItemModel *pModel, EXPORT_FORMAT exportFormat)
+{
+    QString sResult;
+
+    qint32 nRowCount = pModel->rowCount();
+    qint32 nColumnCount = pModel->columnCount();
+
+    if ((nRowCount == 0) || (nColumnCount == 0)) {
+        return sResult;
+    }
+
+    // Collect headers
+    QStringList listHeaders;
+
+    for (qint32 nCol = 0; nCol < nColumnCount; nCol++) {
+        QVariant varHeader = pModel->headerData(nCol, Qt::Horizontal, Qt::DisplayRole);
+        listHeaders.append(varHeader.toString());
+    }
+
+    // Collect data
+    QList<QStringList> listRows;
+
+    for (qint32 nRow = 0; nRow < nRowCount; nRow++) {
+        QStringList listRowValues;
+
+        for (qint32 nCol = 0; nCol < nColumnCount; nCol++) {
+            QModelIndex idx = pModel->index(nRow, nCol);
+            QVariant varData = pModel->data(idx, Qt::DisplayRole);
+            listRowValues.append(varData.toString());
+        }
+
+        listRows.append(listRowValues);
+    }
+
+    if (exportFormat == EXPORT_PLAINTEXT) {
+        QList<qint32> listWidths = calculateColumnWidths(pModel);
+        QList<bool> listAlignRight = calculateColumnAlignRight(pModel);
+
+        sResult += separatorLine(listWidths) + "\n";
+        sResult += formatRow(listHeaders, listWidths) + "\n";
+        sResult += separatorLine(listWidths) + "\n";
+
+        for (qint32 i = 0; i < listRows.count(); i++) {
+            sResult += formatRow(listRows.at(i), listWidths, listAlignRight) + "\n";
+        }
+
+        sResult += separatorLine(listWidths);
+    } else if ((exportFormat == EXPORT_CSV) || (exportFormat == EXPORT_TSV)) {
+        QChar cSeparator = (exportFormat == EXPORT_CSV) ? QChar(',') : QChar('\t');
+
+        // Header
+        QStringList listEscapedHeaders;
+
+        for (qint32 i = 0; i < listHeaders.count(); i++) {
+            QString sField = listHeaders.at(i);
+
+            if (exportFormat == EXPORT_CSV) {
+                sField.replace("\"", "\"\"");
+                sField = "\"" + sField + "\"";
+            }
+
+            listEscapedHeaders.append(sField);
+        }
+
+        sResult += listEscapedHeaders.join(cSeparator) + "\n";
+
+        // Rows
+        for (qint32 i = 0; i < listRows.count(); i++) {
+            QStringList listEscapedValues;
+
+            for (qint32 j = 0; j < listRows.at(i).count(); j++) {
+                QString sField = listRows.at(i).at(j);
+
+                if (exportFormat == EXPORT_CSV) {
+                    sField.replace("\"", "\"\"");
+                    sField = "\"" + sField + "\"";
+                }
+
+                listEscapedValues.append(sField);
+            }
+
+            sResult += listEscapedValues.join(cSeparator) + "\n";
+        }
+    } else if (exportFormat == EXPORT_JSON) {
+        QJsonArray jsonRows;
+
+        for (qint32 i = 0; i < listRows.count(); i++) {
+            QJsonObject jsonRow;
+
+            for (qint32 j = 0; j < listHeaders.count(); j++) {
+                QString sValue = (j < listRows.at(i).count()) ? listRows.at(i).at(j) : QString();
+                jsonRow.insert(listHeaders.at(j), sValue);
+            }
+
+            jsonRows.append(jsonRow);
+        }
+
+        QJsonDocument jsonDoc(jsonRows);
+        sResult = jsonDoc.toJson(QJsonDocument::Indented);
+    } else if (exportFormat == EXPORT_XML) {
+        QXmlStreamWriter xmlWriter(&sResult);
+        xmlWriter.setAutoFormatting(true);
+        xmlWriter.writeStartDocument();
+        xmlWriter.writeStartElement("data");
+
+        for (qint32 i = 0; i < listRows.count(); i++) {
+            xmlWriter.writeStartElement("row");
+
+            for (qint32 j = 0; j < listHeaders.count(); j++) {
+                QString sValue = (j < listRows.at(i).count()) ? listRows.at(i).at(j) : QString();
+                QString sTag = listHeaders.at(j);
+                sTag.replace(" ", "_");
+                sTag.replace("#", "Number");
+
+                if (sTag.isEmpty() || sTag.at(0).isDigit()) {
+                    sTag = "field_" + sTag;
+                }
+
+                xmlWriter.writeTextElement(sTag, sValue);
+            }
+
+            xmlWriter.writeEndElement();
+        }
+
+        xmlWriter.writeEndElement();
+        xmlWriter.writeEndDocument();
+    }
+
+    return sResult;
+}
+
+bool XFModel::exportToFile(const QAbstractItemModel *pModel, EXPORT_FORMAT exportFormat, const QString &sFileName)
+{
+    QString sContent = exportToString(pModel, exportFormat);
+
+    if (sContent.isEmpty()) {
+        return false;
+    }
+
+    QFile file(sFileName);
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return false;
+    }
+
+    QTextStream stream(&file);
+    stream.setCodec("UTF-8");
+    stream << sContent;
+
+    file.close();
+
+    return true;
+}
+
+QString XFModel::exportFormatToFilter(EXPORT_FORMAT exportFormat)
+{
+    QString sResult;
+
+    if (exportFormat == EXPORT_PLAINTEXT) {
+        sResult = "Plain Text (*.txt)";
+    } else if (exportFormat == EXPORT_CSV) {
+        sResult = "CSV (*.csv)";
+    } else if (exportFormat == EXPORT_TSV) {
+        sResult = "TSV (*.tsv)";
+    } else if (exportFormat == EXPORT_JSON) {
+        sResult = "JSON (*.json)";
+    } else if (exportFormat == EXPORT_XML) {
+        sResult = "XML (*.xml)";
+    }
+
+    return sResult;
+}
+
+QString XFModel::exportAllFilters()
+{
+    QStringList listFilters;
+
+    listFilters.append(exportFormatToFilter(EXPORT_PLAINTEXT));
+    listFilters.append(exportFormatToFilter(EXPORT_CSV));
+    listFilters.append(exportFormatToFilter(EXPORT_TSV));
+    listFilters.append(exportFormatToFilter(EXPORT_JSON));
+    listFilters.append(exportFormatToFilter(EXPORT_XML));
+
+    return listFilters.join(";;");
+}
+
+XFModel::EXPORT_FORMAT XFModel::filterToExportFormat(const QString &sFilter)
+{
+    if (sFilter.contains("*.csv")) {
+        return EXPORT_CSV;
+    } else if (sFilter.contains("*.tsv")) {
+        return EXPORT_TSV;
+    } else if (sFilter.contains("*.json")) {
+        return EXPORT_JSON;
+    } else if (sFilter.contains("*.xml")) {
+        return EXPORT_XML;
+    }
+
+    return EXPORT_PLAINTEXT;
 }

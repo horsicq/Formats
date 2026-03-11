@@ -198,6 +198,13 @@ void XFModel_table::_rebuildColumnMap()
     entry.nIndex = 0;
     m_listColumnMap.append(entry);
 
+    // Name column (optional, only if listRowNames is not empty)
+    if (!m_xfHeader.listRowNames.isEmpty()) {
+        entry.columnEntryType = CET_NAME;
+        entry.nIndex = 0;
+        m_listColumnMap.append(entry);
+    }
+
     // Offset column (optional)
     if (m_bShowOffset) {
         entry.columnEntryType = CET_OFFSET;
@@ -234,6 +241,8 @@ QVariant XFModel_table::headerData(int section, Qt::Orientation orientation, int
 
             if (entry.columnEntryType == CET_NUMBER) {
                 result = tr("#");
+            } else if (entry.columnEntryType == CET_NAME) {
+                result = tr("Name");
             } else if (entry.columnEntryType == CET_OFFSET) {
                 result = tr("Offset");
             } else if (entry.columnEntryType == CET_FIELD) {
@@ -275,6 +284,10 @@ QVariant XFModel_table::data(const QModelIndex &index, int role) const
         if ((nRow >= 0) && (nRow < m_listTableRowValues.count())) {
             if (entry.columnEntryType == CET_NUMBER) {
                 result = QString::number(nRow);
+            } else if (entry.columnEntryType == CET_NAME) {
+                if (nRow < m_xfHeader.listRowNames.count()) {
+                    result = m_xfHeader.listRowNames.at(nRow);
+                }
             } else if (entry.columnEntryType == CET_OFFSET) {
                 if (nRow < m_xfHeader.listRowLocations.count()) {
                     result = XBinary::valueToHexEx(m_xfHeader.listRowLocations.at(nRow));

@@ -131,6 +131,8 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XBinary::HANDLE_METHOD_STORE, "Store", QString("Store")},
     {XBinary::HANDLE_METHOD_PDF_IMAGEDATA, "PDF_IMAGEDATA", QString("PDF Image data")},
+    {XBinary::HANDLE_METHOD_PDF_CCITTIMAGE, "PDF_CCITTIMAGE", QString("PDF CCITT Image")},
+    {XBinary::HANDLE_METHOD_PDF_PALETTE, "PDF_PALETTE", QString("PDF Palette")},
     {XBinary::HANDLE_METHOD_ANDROID_XML, "Android_XML", QString("Android XML")},
     {XBinary::HANDLE_METHOD_FILE, "File", QObject::tr("File")},  // TODO Check
     {XBinary::HANDLE_METHOD_DEFLATE, "Deflate", QString("Deflate")},
@@ -256,6 +258,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_TARGZ, "tar.gz", QString("tar.gz")},
     {XBinary::FT_TEXT, "Text", QObject::tr("Text")},
     {XBinary::FT_TIFF, "TIFF", QString("TIFF")},
+    {XBinary::FT_PAL, "PAL", QString("PAL")},
     {XBinary::FT_UNICODE, "Unicode", QString("Unicode")},
     {XBinary::FT_UNICODE_BE, "UnicodeBE", QString("Unicode BE")},
     {XBinary::FT_UNICODE_LE, "UnicodeLE", QString("Unicode LE")},
@@ -1259,6 +1262,35 @@ QList<QVariant> XBinary::getXFRecordValues(const QList<XFRECORD> &listXFRecords,
     }
 
     return listResult;
+}
+
+QString XBinary::xfHeaderToTag(const XFHEADER &xfHeader, const QString &sStructName, const QString &sParentTag)
+{
+    QString sOffset = valueToHexEx(xfHeader.xLoc.nLocation);
+    QString sFileTypeFt = fileTypeIdToFtString(xfHeader.fileType);
+    QString sStructFt = QString(sStructName).toUpper().remove(" ").remove("-");
+
+    QString sTypeName;
+
+    if (xfHeader.xfType == XFTYPE_HEADER) {
+        sTypeName = "HEADER";
+    } else if (xfHeader.xfType == XFTYPE_TABLE) {
+        sTypeName = "TABLE";
+    } else {
+        sTypeName = "UNKNOWN";
+    }
+
+    QString sResult = sOffset + "::" + sFileTypeFt + "::" + sStructFt + "::" + sTypeName;
+
+    if (xfHeader.xfType == XFTYPE_TABLE) {
+        sResult += "::" + QString::number(xfHeader.listRowLocations.count());
+    }
+
+    if (xfHeader.bIsParentNeeded && (sParentTag != "")) {
+        sResult = sParentTag + "#" + sResult;
+    }
+
+    return sResult;
 }
 
 XBinary::XBinary(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
@@ -8760,7 +8792,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "........................'mntr'", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_ICC);
-        } else if (compareSignature(&memoryMap, "4344303031", 0x8001, 0)) {  // "CD001" at offset 0x8001
+        }
+
+        if (compareSignature(&memoryMap, "4344303031", 0x8001, 0)) {  // "CD001" at offset 0x8001
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_ISO9660);
         } else if (compareSignature(&memoryMap, "0002", 256 * 2048, 0)) {  // UDF Anchor at sector 256
@@ -8817,6 +8851,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             } else if (compareSignature(&memoryMap, "'RIFF'........'WAVE'", 0)) {
                 stResult.insert(FT_AUDIO);
                 stResult.insert(FT_WAV);
+            } else if (compareSignature(&memoryMap, "'RIFF'........'PAL '", 0)) {
+                stResult.insert(FT_IMAGE);
+                stResult.insert(FT_PAL);
             } /*else if (compareSignature(&memoryMap, "'RIFF'........'ACON'", 0)) {
                 stResult.insert(FT_IMAGE);
                 stResult.insert(FT_ANI);
@@ -9108,6 +9145,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_CUR;
     } else if (pStFileTypes->contains(FT_ICC)) {
         result = FT_ICC;
+    } else if (pStFileTypes->contains(FT_PAL)) {
+        result = FT_PAL;
     } else if (pStFileTypes->contains(FT_MP4)) {
         result = FT_MP4;
     } else if (pStFileTypes->contains(FT_AVI)) {
@@ -9235,6 +9274,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_BMP)) listResult.append(FT_BMP);
         if (stFileTypes.contains(FT_GIF)) listResult.append(FT_GIF);
         if (stFileTypes.contains(FT_TIFF)) listResult.append(FT_TIFF);
+        if (stFileTypes.contains(FT_PAL)) listResult.append(FT_PAL);
         if (stFileTypes.contains(FT_MP3)) listResult.append(FT_MP3);
         if (stFileTypes.contains(FT_MP4)) listResult.append(FT_MP4);
         if (stFileTypes.contains(FT_XM)) listResult.append(FT_XM);

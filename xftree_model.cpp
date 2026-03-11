@@ -240,16 +240,16 @@ void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders)
         pItem->pParent = nullptr;
         pItem->nRow = 0;
         listItems.append(pItem);
-        mapItems.insert(pItem->xfHeader.sGUID, pItem);
+        mapItems.insert(pItem->xfHeader.sTag, pItem);
     }
 
     // Second pass: establish parent-child relationships
     for (qint32 i = 0; i < nCount; i++) {
         TREEITEM *pItem = listItems.at(i);
-        QString sParentGUID = pItem->xfHeader.sParentGUID;
+        QString sParentTag = pItem->xfHeader.sParentTag;
 
-        if (!sParentGUID.isEmpty() && mapItems.contains(sParentGUID)) {
-            TREEITEM *pParentItem = mapItems.value(sParentGUID);
+        if (!sParentTag.isEmpty() && mapItems.contains(sParentTag)) {
+            TREEITEM *pParentItem = mapItems.value(sParentTag);
             pItem->pParent = pParentItem;
             pItem->nRow = pParentItem->listChildren.count();
             pParentItem->listChildren.append(pItem);
@@ -325,50 +325,7 @@ void XFTreeModel::appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TR
 
     QString sOffset = XBinary::valueToHexEx(pItem->xfHeader.xLoc.nLocation);
 
-    QString sFileTypeFt = XBinary::fileTypeIdToFtString(pItem->xfHeader.fileType);
-    QString sStructFt = sStructName.toUpper().remove(" ").remove("-");
-    QString sTagContent = sOffset + "::" + sFileTypeFt + "::" + sStructFt + "::" + sTypeName;
-
-    if (pItem->xfHeader.xfType == XBinary::XFTYPE_TABLE) {
-        sTagContent += "::" + QString::number(pItem->xfHeader.listRowLocations.count());
-    }
-
-    bool bIsParentNeeded = pItem->xfHeader.bIsParentNeeded && (pItem->pParent) && (pItem->pParent->pParent);
-
-    QString sTag;
-
-    if (bIsParentNeeded) {
-        TREEITEM *pParentItem = pItem->pParent;
-
-        QString sParentTypeName;
-        if (pParentItem->xfHeader.xfType == XBinary::XFTYPE_HEADER) {
-            sParentTypeName = "HEADER";
-        } else if (pParentItem->xfHeader.xfType == XBinary::XFTYPE_TABLE) {
-            sParentTypeName = "TABLE";
-        } else {
-            sParentTypeName = "UNKNOWN";
-        }
-
-        QString sParentStructName;
-        if (pXBinary) {
-            sParentStructName = pXBinary->structIDToString(pParentItem->xfHeader.structID);
-        } else {
-            sParentStructName = QString::number(pParentItem->xfHeader.structID);
-        }
-
-        QString sParentOffset = XBinary::valueToHexEx(pParentItem->xfHeader.xLoc.nLocation);
-        QString sParentFileTypeFt = XBinary::fileTypeIdToFtString(pParentItem->xfHeader.fileType);
-        QString sParentStructFt = sParentStructName.toUpper().remove(" ").remove("-");
-        QString sParentTagContent = sParentOffset + "::" + sParentFileTypeFt + "::" + sParentStructFt + "::" + sParentTypeName;
-
-        if (pParentItem->xfHeader.xfType == XBinary::XFTYPE_TABLE) {
-            sParentTagContent += "::" + QString::number(pParentItem->xfHeader.listRowLocations.count());
-        }
-
-        sTag = "[" + sParentTagContent + "#" + sTagContent + "]";
-    } else {
-        sTag = "[" + sTagContent + "]";
-    }
+    QString sTag = "[" + XBinary::xfHeaderToTag(pItem->xfHeader, sStructName, pItem->xfHeader.sParentTag) + "]";
 
     QString sLine = sPrefix + sConnector + sStructName + " [" + sTypeName + "] offset=" +
                     sOffset + " " + sInfo + " " + sTag;

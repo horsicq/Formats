@@ -23,6 +23,10 @@
 #define XFMODEL_H
 
 #include <QAbstractItemModel>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QXmlStreamWriter>
 #include "xbinary.h"
 
 class XFModel : public QAbstractItemModel {
@@ -63,8 +67,22 @@ public:
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+    enum EXPORT_FORMAT {
+        EXPORT_PLAINTEXT = 0,
+        EXPORT_CSV,
+        EXPORT_TSV,
+        EXPORT_JSON,
+        EXPORT_XML
+    };
+
     void printToConsole(const QString &sTitle = QString()) const;
     QString modelToString(const QString &sTitle = QString()) const;
+
+    static QString exportToString(const QAbstractItemModel *pModel, EXPORT_FORMAT exportFormat);
+    static bool exportToFile(const QAbstractItemModel *pModel, EXPORT_FORMAT exportFormat, const QString &sFileName);
+    static QString exportFormatToFilter(EXPORT_FORMAT exportFormat);
+    static QString exportAllFilters();
+    static EXPORT_FORMAT filterToExportFormat(const QString &sFilter);
 
     static QString presentationToString(PRESENTATION_TYPE presentationType, quint64 nValue,
                                         const XBinary::XFRECORD &xfRecord, const XBinary::XFDATAST &xfDataSt);

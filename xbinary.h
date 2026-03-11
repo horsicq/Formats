@@ -228,6 +228,8 @@ public:
         HANDLE_METHOD_BCJ2,
         HANDLE_METHOD_ARM64_BCJ,  // ARM64 branch/call/jump filter
         HANDLE_METHOD_PDF_IMAGEDATA,
+        HANDLE_METHOD_PDF_CCITTIMAGE,
+        HANDLE_METHOD_PDF_PALETTE,
         HANDLE_METHOD_ANDROID_XML
         // TODO check more methods
     };
@@ -315,6 +317,12 @@ public:
         FPART_PROP_ISSYSTEM,            // Windows FILE_ATTRIBUTE_SYSTEM (bool)
         FPART_PROP_ISARCHIVE,           // Windows FILE_ATTRIBUTE_ARCHIVE (bool)
         FPART_PROP_ISCOMMENTPRESENT,     // Archive record has a comment (bool)
+        FPART_PROP_COLORSPACE,           // PDF image color space (e.g., "/DeviceRGB", "/DeviceGray", "/Indexed")
+        FPART_PROP_BASECOLORSPACE,       // PDF indexed image base color space (e.g., "/DeviceRGB")
+        FPART_PROP_PALETTE,              // PDF indexed image palette data (QByteArray)
+        FPART_PROP_SUBTYPE,              // PDF stream subtype (e.g., "/Image", "/Form")
+        FPART_PROP_FILTERNAME,           // PDF filter name (e.g., "/FlateDecode", "/DCTDecode")
+        FPART_PROP_CCITTK,               // CCITT /K parameter (-1=Group4, 0=Group3 1D, >0=Group3 2D)
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
@@ -572,6 +580,7 @@ public:
         FT_MINIDUMP,
         FT_DMG,
         FT_STK,
+        FT_PAL,
 
         // TODO more
     };
@@ -942,8 +951,8 @@ public:
     };
 
     struct XFHEADER {
-        QString sGUID;
-        QString sParentGUID;  // empty if no parent
+        QString sTag;
+        QString sParentTag;  // empty if no parent
         FT fileType;
         STRUCTID structID;
         XLOC xLoc;
@@ -952,6 +961,7 @@ public:
         QList<XFRECORD> listFields;  // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
         QList<XFDATAST> listDataSt;  // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
         QList<XADDR> listRowLocations;  // For XFTYPE_TABLE
+        QList<QString> listRowNames;  // For XFTYPE_TABLE, optional names for rows
     };
 
     struct XFSTRUCT {
@@ -1134,6 +1144,8 @@ public:
     virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct);
     virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc);
     QList<QVariant> getXFRecordValues(const QList<XFRECORD> &listXFRecords, const XLOC &xLoc);
+
+    static QString xfHeaderToTag(const XFHEADER &xfHeader, const QString &sStructName, const QString &sParentTag);
 
     DATA_HEADER _initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName);
     DATA_HEADER _dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset, qint64 nSize);

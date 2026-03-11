@@ -43,6 +43,7 @@ public:
 private:
     enum COLUMN_ENTRY_TYPE {
         CET_NUMBER = 0,
+        CET_NAME,
         CET_OFFSET,
         CET_FIELD,
         CET_PRESENTATION

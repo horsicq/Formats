@@ -9336,7 +9336,6 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
 
         // NT Headers header (contains just Signature)
         XFHEADER xfHeader = {};
-        xfHeader.sGUID = QUuid::createUuid().toString();
         xfHeader.fileType = xfStruct.fileType;
         xfHeader.structID = static_cast<XBinary::STRUCTID>(nStructID);
         xfHeader.xLoc = ntLoc;
@@ -9344,6 +9343,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, ntLoc);
         // Field 0 = Signature
         xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageNtHeadersSignatures, sizeof(_TABLE_XPE_ImageNtHeadersSignatures) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
 
         listResult.append(xfHeader);
 
@@ -9353,7 +9353,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
 
             if (nFileHeaderOffset != -1) {
                 XFSTRUCT fhStruct = xfStruct;
-                fhStruct.sParent = xfHeader.sGUID;
+                fhStruct.sParent = xfHeader.sTag;
                 fhStruct.nStructID = STRUCTID_IMAGE_FILE_HEADER;
                 fhStruct.xLoc = offsetToLoc(nFileHeaderOffset);
 
@@ -9365,7 +9365,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
 
             if (nOptionalHeaderOffset != -1) {
                 XFSTRUCT ohStruct = xfStruct;
-                ohStruct.sParent = xfHeader.sGUID;
+                ohStruct.sParent = xfHeader.sTag;
                 ohStruct.nStructID = bIs64 ? STRUCTID_IMAGE_OPTIONAL_HEADER64 : STRUCTID_IMAGE_OPTIONAL_HEADER32;
                 ohStruct.xLoc = offsetToLoc(nOptionalHeaderOffset);
 
@@ -9376,8 +9376,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         XLOC fhLoc = xfStruct.xLoc;
 
         XFHEADER xfHeader = {};
-        xfHeader.sParentGUID = xfStruct.sParent;
-        xfHeader.sGUID = QUuid::createUuid().toString();
+        xfHeader.sParentTag = xfStruct.sParent;
         xfHeader.fileType = xfStruct.fileType;
         xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_IMAGE_FILE_HEADER);
         xfHeader.xLoc = fhLoc;
@@ -9386,6 +9385,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         // Field 0 = Machine (list), Field 6 = Characteristics (flags)
         xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageFileHeaderMachines, sizeof(_TABLE_XPE_ImageFileHeaderMachines) / sizeof(XBinary::XIDSTRING)});
         xfHeader.listDataSt.append({6, 0xFFFF, XFDATASTYPE_FLAGS, _TABLE_XPE_ImageFileHeaderCharacteristics, sizeof(_TABLE_XPE_ImageFileHeaderCharacteristics) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_IMAGE_FILE_HEADER), xfHeader.sParentTag);
 
         listResult.append(xfHeader);
 
@@ -9396,8 +9396,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
 
             if ((nSectionsTableOffset != -1) && (nNumberOfSections > 0)) {
                 XFHEADER xfSectionTable = {};
-                xfSectionTable.sParentGUID = xfHeader.sGUID;
-                xfSectionTable.sGUID = QUuid::createUuid().toString();
+                xfSectionTable.sParentTag = xfHeader.sTag;
                 xfSectionTable.fileType = xfStruct.fileType;
                 xfSectionTable.structID = static_cast<XBinary::STRUCTID>(STRUCTID_IMAGE_SECTION_HEADER);
                 xfSectionTable.xLoc = offsetToLoc(nSectionsTableOffset);
@@ -9410,6 +9409,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                     xfSectionTable.listRowLocations.append(nSectionsTableOffset + i * sizeof(XPE_DEF::IMAGE_SECTION_HEADER));
                 }
 
+                xfSectionTable.sTag = xfHeaderToTag(xfSectionTable, structIDToString(STRUCTID_IMAGE_SECTION_HEADER), xfSectionTable.sParentTag);
+
                 listResult.append(xfSectionTable);
             }
         }
@@ -9418,8 +9419,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         XLOC ohLoc = xfStruct.xLoc;
 
         XFHEADER xfHeader = {};
-        xfHeader.sParentGUID = xfStruct.sParent;
-        xfHeader.sGUID = QUuid::createUuid().toString();
+        xfHeader.sParentTag = xfStruct.sParent;
         xfHeader.fileType = xfStruct.fileType;
         xfHeader.structID = static_cast<XBinary::STRUCTID>(nStructID);
         xfHeader.xLoc = ohLoc;
@@ -9427,6 +9427,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, ohLoc);
         // Field 0 = Magic (list)
         xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageOptionalHeaderMagic, sizeof(_TABLE_XPE_ImageOptionalHeaderMagic) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
 
         if (bIs64) {
             // 64-bit: Field 21 = Subsystem, Field 22 = DllCharacteristics (no BaseOfData, so shifted by 1)
@@ -9456,8 +9457,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 }
 
                 XFHEADER xfDataDirTable = {};
-                xfDataDirTable.sParentGUID = xfHeader.sGUID;
-                xfDataDirTable.sGUID = QUuid::createUuid().toString();
+                xfDataDirTable.sParentTag = xfHeader.sTag;
                 xfDataDirTable.fileType = xfStruct.fileType;
                 xfDataDirTable.structID = static_cast<XBinary::STRUCTID>(STRUCTID_IMAGE_DATA_DIRECTORY);
                 xfDataDirTable.xLoc = offsetToLoc(nDataDirOffset);
@@ -9467,6 +9467,14 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 for (qint32 i = 0; i < nDataDirCount; i++) {
                     xfDataDirTable.listRowLocations.append(nDataDirOffset + i * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
                 }
+
+                QMap<quint64, QString> mapDataDirNames = getImageOptionalHeaderDataDirectoryS();
+
+                for (qint32 i = 0; i < nDataDirCount; i++) {
+                    xfDataDirTable.listRowNames.append(mapDataDirNames.value(i));
+                }
+
+                xfDataDirTable.sTag = xfHeaderToTag(xfDataDirTable, structIDToString(STRUCTID_IMAGE_DATA_DIRECTORY), xfDataDirTable.sParentTag);
 
                 listResult.append(xfDataDirTable);
             }
