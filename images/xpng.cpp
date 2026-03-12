@@ -269,6 +269,78 @@ bool XPNG::createPNG(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const 
     return true;
 }
 
+bool XPNG::createPNGIndexed(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const QByteArray &baImageData, const QByteArray &baPalette, quint8 nBitDepth)
+{
+    if (!pDevice || !pDevice->isWritable()) {
+        return false;
+    }
+
+    if (baPalette.isEmpty() || ((baPalette.size() % 3) != 0)) {
+        return false;
+    }
+
+    // Create IHDR structure
+    IHDR ihdr = {};
+    ihdr.nWidth = nWidth;
+    ihdr.nHeight = nHeight;
+    ihdr.nBitDepth = nBitDepth;
+    ihdr.nColorType = (quint8)COLOR_TYPE_PALETTE;
+    ihdr.nCompression = 0;
+    ihdr.nFilter = 0;
+    ihdr.nInterlace = 0;
+
+    QByteArray _baImageData = _convertImageData(baImageData.data(), baImageData.size(), nWidth, nHeight, COLOR_TYPE_PALETTE, nBitDepth);
+
+    // Write PNG signature
+    const char pngSignature[8] = {'\x89', 'P', 'N', 'G', '\r', '\n', '\x1a', '\n'};
+
+    if (pDevice->write(pngSignature, 8) != 8) {
+        return false;
+    }
+
+    // Create IHDR chunk data
+    QByteArray ihdrData;
+
+    quint32 nWidthBE = qToBigEndian(ihdr.nWidth);
+    quint32 nHeightBE = qToBigEndian(ihdr.nHeight);
+
+    ihdrData.append((char *)&nWidthBE, 4);
+    ihdrData.append((char *)&nHeightBE, 4);
+    ihdrData.append(ihdr.nBitDepth);
+    ihdrData.append(ihdr.nColorType);
+    ihdrData.append(ihdr.nCompression);
+    ihdrData.append(ihdr.nFilter);
+    ihdrData.append(ihdr.nInterlace);
+
+    if (!_writeChunk(pDevice, "IHDR", ihdrData)) {
+        return false;
+    }
+
+    // Write PLTE chunk (palette data in RGB format, 3 bytes per entry)
+    if (!_writeChunk(pDevice, "PLTE", baPalette)) {
+        return false;
+    }
+
+    // Compress image data
+    QByteArray compressedData = _compressData(_baImageData);
+
+    if (compressedData.isEmpty()) {
+        return false;
+    }
+
+    // Write IDAT chunk
+    if (!_writeChunk(pDevice, "IDAT", compressedData)) {
+        return false;
+    }
+
+    // Write IEND chunk
+    if (!_writeChunk(pDevice, "IEND", QByteArray())) {
+        return false;
+    }
+
+    return true;
+}
+
 bool XPNG::_writeChunk(QIODevice *pDevice, const QString &sChunkType, const QByteArray &data)
 {
     if (!pDevice || sChunkType.length() != 4) {
@@ -350,31 +422,35 @@ QByteArray XPNG::_convertImageData(const char *pData, qint32 nDataSize, quint32 
 {
     QByteArray baResult;
 
-    // Calculate expected data size based on color type
-    qint32 nBytesPerPixel = 0;
+    // Calculate samples per pixel based on color type
+    qint32 nSamplesPerPixel = 0;
     switch (colorType) {
-        case COLOR_TYPE_GRAYSCALE: nBytesPerPixel = (nBitDepth + 7) / 8; break;
-        case COLOR_TYPE_RGB: nBytesPerPixel = 3 * ((nBitDepth + 7) / 8); break;
-        case COLOR_TYPE_PALETTE: nBytesPerPixel = (nBitDepth + 7) / 8; break;
-        case COLOR_TYPE_GRAYSCALE_ALPHA: nBytesPerPixel = 2 * ((nBitDepth + 7) / 8); break;
-        case COLOR_TYPE_RGBA: nBytesPerPixel = 4 * ((nBitDepth + 7) / 8); break;
+        case COLOR_TYPE_GRAYSCALE: nSamplesPerPixel = 1; break;
+        case COLOR_TYPE_RGB: nSamplesPerPixel = 3; break;
+        case COLOR_TYPE_PALETTE: nSamplesPerPixel = 1; break;
+        case COLOR_TYPE_GRAYSCALE_ALPHA: nSamplesPerPixel = 2; break;
+        case COLOR_TYPE_RGBA: nSamplesPerPixel = 4; break;
     }
 
-    if (nBytesPerPixel) {
-        qint32 nExpectedSize = nWidth * (nHeight * nBytesPerPixel + 1);  // +1 for filter byte
+    if (nSamplesPerPixel > 0) {
+        qint32 nBitsPerRow = nWidth * nSamplesPerPixel * nBitDepth;
+        qint32 nBytesPerRow = (nBitsPerRow + 7) / 8;
+        qint32 nFilteredRowSize = nBytesPerRow + 1;  // +1 for filter byte
+        qint32 nTotalSize = nFilteredRowSize * nHeight;
 
-        baResult.resize(nExpectedSize);
-        baResult.fill(0);  // Initialize with zeros
+        baResult.resize(nTotalSize);
+        baResult.fill(0);  // Initialize with zeros (filter byte 0 = None)
 
-        qint32 nProcessSize = qMin(nDataSize, (qint32)(nWidth * nHeight * nBytesPerPixel));
+        for (quint32 y = 0; y < nHeight; y++) {
+            qint32 nOutputRowOffset = y * nFilteredRowSize;
+            qint32 nInputRowOffset = y * nBytesPerRow;
 
-        // Copy the data into the result array
-        for (qint32 i = 0, j = 0; i < nProcessSize; i++, j++) {
-            if (!(i % (nWidth * 3))) {
-                // Filter byte
-                j++;
+            // Filter byte is already 0 (None) from fill
+            qint32 nCopySize = qMin(nBytesPerRow, nDataSize - nInputRowOffset);
+
+            if (nCopySize > 0) {
+                memcpy(baResult.data() + nOutputRowOffset + 1, pData + nInputRowOffset, nCopySize);
             }
-            baResult[j] = pData[i];
         }
     }
 

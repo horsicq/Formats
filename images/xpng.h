@@ -113,6 +113,7 @@ public:
     virtual QString getInfo(PDSTRUCT *pPdStruct = nullptr) override;
 
     static bool createPNG(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const QByteArray &baImageData, COLOR_TYPE colorType, quint8 nBitDepth = 8);
+    static bool createPNGIndexed(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const QByteArray &baImageData, const QByteArray &baPalette, quint8 nBitDepth = 8);
 
     IHDR getIHDR();
     pHYs getpHYs();
