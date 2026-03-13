@@ -977,8 +977,9 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 #ifdef QT_DEBUG
     qint64 nElapsed = timer.elapsed();
     qDebug("XFormats::_getFileTypes(): time=%lld ms", nElapsed); // Calculated in milisecounds
-#endif
     qDebug("XFormats::_getFileTypes(): Timer stopped");
+#endif
+
     return stResult;
 }
 

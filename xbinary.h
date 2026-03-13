@@ -581,6 +581,7 @@ public:
         FT_DMG,
         FT_STK,
         FT_PAL,
+        FT_ARC,
 
         // TODO more
     };

@@ -283,6 +283,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_CPIO, "CPIO", QString("CPIO")},
     {XBinary::FT_MINIDUMP, "MiniDump", QString("Windows MiniDump")},
     {XBinary::FT_DMG, "DMG", QString("Apple Disk Image")},
+    {XBinary::FT_ARC, "ARC", QString("ARC")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -8767,7 +8768,19 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             // Apple Disk Image format (koly block at end)
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_DMG);
-        } else if (compareSignature(&memoryMap, "89'PNG\r\n'1A0A", 0)) {
+        } else if (nSize >= 29) {
+            // ARC format: 0x1A + method(1-9) + filename(13 bytes null-terminated, first char printable ASCII 0x21-0x7E)
+            quint8 _nArcMarker = read_uint8(0);
+            quint8 _nArcMethod = read_uint8(1);
+            quint8 _nArcFirstChar = read_uint8(2);
+
+            if ((_nArcMarker == 0x1A) && (_nArcMethod >= 1) && (_nArcMethod <= 9) && (_nArcFirstChar >= 0x21) && (_nArcFirstChar <= 0x7E)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_ARC);
+            }
+        }
+
+        if (compareSignature(&memoryMap, "89'PNG\r\n'1A0A", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_PNG);
         } else if (compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00", 0) || compareSignature(&memoryMap, "FFD8FFE1....'Exif'00", 0) ||
@@ -9079,6 +9092,8 @@ XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
         result = FT_RAR;
     } else if (pStFileTypes->contains(FT_LHA)) {
         result = FT_LHA;
+    } else if (pStFileTypes->contains(FT_ARC)) {
+        result = FT_ARC;
     } else if (pStFileTypes->contains(FT_DEB)) {
         result = FT_DEB;
     } else if (pStFileTypes->contains(FT_AR)) {
@@ -9258,6 +9273,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_GZIP)) listResult.append(FT_GZIP);
         if (stFileTypes.contains(FT_ZLIB)) listResult.append(FT_ZLIB);
         if (stFileTypes.contains(FT_LHA)) listResult.append(FT_LHA);
+        if (stFileTypes.contains(FT_ARC)) listResult.append(FT_ARC);
         if (stFileTypes.contains(FT_RAR)) listResult.append(FT_RAR);
         if (stFileTypes.contains(FT_CAB)) listResult.append(FT_CAB);
         if (stFileTypes.contains(FT_JAR)) listResult.append(FT_JAR);
