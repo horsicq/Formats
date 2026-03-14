@@ -1548,23 +1548,46 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         qint64 nMapOff = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
         qint64 nLoaderSize = 0;
         if (nPages > 0) nLoaderSize = nDataPageOff + (qint64)(nPages - 1) * (qint64)nPageSize + (qint64)nLastPageSize;
-        for (qint32 i = 0; i < objs.size(); ++i) {
+        bool bIsLE = isLE();
+        for (qint32 i = 0; i < objs.size(); i++) {
             // Determine object span over pages
             qint64 nObjMin = -1;
             qint64 nObjMax = 0;
-            for (qint32 j = 0; j < (qint32)objs.at(i).o32_mapsize; j++) {
+            qint32 nMapSize = qMin((qint32)objs.at(i).o32_mapsize, (qint32)nPages);
+            for (qint32 j = 0; j < nMapSize; j++) {
                 qint64 nPageDataOffset = 0;
                 qint64 nThisPageSize = nPageSize;
-                if (isLE()) {
-                    XLE_DEF::o16_map m = _read_o16_map(nMapOff + (objs.at(i).o32_pagemap - 1 + j) * sizeof(XLE_DEF::o16_map));
+                qint64 nMapEntryOff = 0;
+                if (bIsLE) {
+                    nMapEntryOff = nMapOff + (qint64)(objs.at(i).o32_pagemap - 1 + j) * (qint64)sizeof(XLE_DEF::o16_map);
+                    if ((nMapEntryOff < 0) || (nMapEntryOff + (qint64)sizeof(XLE_DEF::o16_map) > nTotal)) {
+                        continue;
+                    }
+                    XLE_DEF::o16_map m = _read_o16_map(nMapEntryOff);
                     quint32 nOfs = m.o16_pagenum[2] + (m.o16_pagenum[1] << 8) + ((quint32)m.o16_pagenum[0] << 16);
-                    if (nOfs) nPageDataOffset = ((nOfs - 1) * nPageSize) + nDataPageOff;
+                    if (nOfs) {
+                        nPageDataOffset = ((qint64)(nOfs - 1) * (qint64)nPageSize) + nDataPageOff;
+                    }
                     // For LE, all pages except last have standard page size; clamp to loader end
-                    if (nLoaderSize) nThisPageSize = qMin((qint64)nPageSize, nLoaderSize - nPageDataOffset);
+                    if ((nLoaderSize > 0) && (nPageDataOffset < nLoaderSize)) {
+                        nThisPageSize = qMin((qint64)nPageSize, nLoaderSize - nPageDataOffset);
+                    }
                 } else {
-                    XLE_DEF::o32_map m = _read_o32_map(nMapOff + (objs.at(i).o32_pagemap - 1 + j) * sizeof(XLE_DEF::o32_map));
+                    nMapEntryOff = nMapOff + (qint64)(objs.at(i).o32_pagemap - 1 + j) * (qint64)sizeof(XLE_DEF::o32_map);
+                    if ((nMapEntryOff < 0) || (nMapEntryOff + (qint64)sizeof(XLE_DEF::o32_map) > nTotal)) {
+                        continue;
+                    }
+                    XLE_DEF::o32_map m = _read_o32_map(nMapEntryOff);
                     nPageDataOffset = nDataPageOff + m.o32_pagedataoffset;
                     nThisPageSize = m.o32_pagesize ? m.o32_pagesize : nPageSize;
+                }
+                // Validate page data offset is within file
+                if ((nPageDataOffset < 0) || (nPageDataOffset >= nTotal)) {
+                    continue;
+                }
+                nThisPageSize = qMin(nThisPageSize, nTotal - nPageDataOffset);
+                if (nThisPageSize <= 0) {
+                    continue;
                 }
                 if (nObjMin == -1) nObjMin = nPageDataOffset;
                 nObjMin = qMin(nObjMin, nPageDataOffset);
