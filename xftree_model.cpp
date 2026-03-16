@@ -20,6 +20,7 @@
  */
 
 #include "xftree_model.h"
+#include "xformats.h"
 #include <QDebug>
 
 XFTreeModel::XFTreeModel(QObject *pParent) : QAbstractItemModel(pParent)
@@ -140,7 +141,7 @@ QVariant XFTreeModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole) {
         if (nColumn == COLUMN_NAME) {
             if (m_pXBinary) {
-                result = m_pXBinary->structIDToString(pItem->xfHeader.structID);
+                result = XFormats::getXFHeaderStructName(pItem->xfHeader);
             } else {
                 result = QString::number(pItem->xfHeader.structID);
             }
@@ -318,7 +319,7 @@ void XFTreeModel::appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TR
 
     QString sStructName;
     if (pXBinary) {
-        sStructName = pXBinary->structIDToString(pItem->xfHeader.structID);
+        sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
     } else {
         sStructName = QString::number(pItem->xfHeader.structID);
     }

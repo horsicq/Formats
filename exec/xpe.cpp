@@ -9304,8 +9304,6 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
 
 QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-
     QList<XBinary::XFHEADER> listResult;
 
     quint32 nStructID = xfStruct.nStructID;
@@ -9315,6 +9313,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         XFSTRUCT _xfStruct = xfStruct;
         _xfStruct.nStructID = STRUCTID_IMAGE_DOS_HEADEREX;
         _xfStruct.xLoc = offsetToLoc(0);
+        _xfStruct.fileType = FT_MSDOS;
 
         listResult.append(XMSDOS::getXFHeaders(_xfStruct, pPdStruct));
 

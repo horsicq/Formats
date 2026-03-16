@@ -1,6 +1,11 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
+!contains(XCONFIG, xmodel) {
+    XCONFIG += xmodel
+    include($$PWD/../../Controls/xmodel.pri)
+}
+
 HEADERS += \
     $$PWD/xfmodel.h \
     $$PWD/xfmodel_header.h \

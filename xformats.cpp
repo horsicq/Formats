@@ -788,6 +788,20 @@ bool XFormats::isExecutable(XBinary::FT fileType)
 
     return bResult;
 }
+
+QString XFormats::getXFHeaderStructName(const XBinary::XFHEADER &header)
+{
+    QString sResult;
+
+    XBinary *pBinary = XFormats::getClass(header.fileType, nullptr);
+
+    if (pBinary) {
+        sResult = pBinary->structIDToString(header.structID);
+        delete pBinary;
+    }
+
+    return sResult;
+}
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra)
 {

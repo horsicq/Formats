@@ -127,6 +127,7 @@ public:
     static QString getFileFormatExtsString(XBinary::FT fileType);
     static bool isArchive(XBinary::FT fileType);
     static bool isExecutable(XBinary::FT fileType);
+    static QString getXFHeaderStructName(const XBinary::XFHEADER &header);
 
 #ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra = false);

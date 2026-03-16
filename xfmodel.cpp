@@ -24,7 +24,7 @@
 #include <QFile>
 #include <QTextStream>
 
-XFModel::XFModel(QObject *pParent) : QAbstractItemModel(pParent)
+XFModel::XFModel(QObject *pParent) : XModel(pParent)
 {
     m_pXBinary = nullptr;
 }
@@ -41,24 +41,6 @@ void XFModel::setData(XBinary *pXBinary, const XBinary::XFHEADER &xfHeader)
     m_xfHeader = xfHeader;
 
     endResetModel();
-}
-
-QModelIndex XFModel::index(int row, int column, const QModelIndex &parent) const
-{
-    QModelIndex result;
-
-    if (hasIndex(row, column, parent)) {
-        result = createIndex(row, column);
-    }
-
-    return result;
-}
-
-QModelIndex XFModel::parent(const QModelIndex &child) const
-{
-    Q_UNUSED(child)
-
-    return QModelIndex();
 }
 
 int XFModel::rowCount(const QModelIndex &parent) const

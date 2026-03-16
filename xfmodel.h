@@ -22,14 +22,14 @@
 #ifndef XFMODEL_H
 #define XFMODEL_H
 
-#include <QAbstractItemModel>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QXmlStreamWriter>
+#include "xmodel.h"
 #include "xbinary.h"
 
-class XFModel : public QAbstractItemModel {
+class XFModel : public XModel {
     Q_OBJECT
 
 public:
@@ -60,8 +60,6 @@ public:
 
     virtual void setData(XBinary *pXBinary, const XBinary::XFHEADER &xfHeader);
 
-    virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-    virtual QModelIndex parent(const QModelIndex &child) const override;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;

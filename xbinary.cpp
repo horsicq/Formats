@@ -778,6 +778,19 @@ quint32 XBinary::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XBINARY_STRUCTID, sizeof(_TABLE_XBINARY_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XBinary::_getXFHeaders(PDSTRUCT *pPdStruct)
+{
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+
+    XFSTRUCT xfStruct = {};
+    xfStruct.bIsParent = true;
+    xfStruct.fileType = getFileType();
+    xfStruct.nStructID = 0;
+    xfStruct.pMemoryMap = &memoryMap;
+
+    return getXFHeaders(xfStruct, pPdStruct);
+}
+
 XBinary::DATA_HEADER XBinary::_dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset,
                                              qint64 nSize)
 {
