@@ -9227,18 +9227,23 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
         listResult.append({"SizeOfCode", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, SizeOfCode), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"SizeOfInitializedData", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, SizeOfInitializedData), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"SizeOfUninitializedData", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, SizeOfUninitializedData), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
-        listResult.append({"AddressOfEntryPoint", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, AddressOfEntryPoint), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append(
+            {"AddressOfEntryPoint", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, AddressOfEntryPoint), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
         listResult.append({"BaseOfCode", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, BaseOfCode), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
         listResult.append({"BaseOfData", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, BaseOfData), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
         listResult.append({"ImageBase", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, ImageBase), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
         listResult.append({"SectionAlignment", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, SectionAlignment), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"FileAlignment", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, FileAlignment), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
-        listResult.append({"MajorOperatingSystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, MajorOperatingSystemVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
-        listResult.append({"MinorOperatingSystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, MinorOperatingSystemVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append(
+            {"MajorOperatingSystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, MajorOperatingSystemVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append(
+            {"MinorOperatingSystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, MinorOperatingSystemVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
         listResult.append({"MajorImageVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, MajorImageVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
         listResult.append({"MinorImageVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, MinorImageVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
-        listResult.append({"MajorSubsystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, MajorSubsystemVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
-        listResult.append({"MinorSubsystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, MinorSubsystemVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append(
+            {"MajorSubsystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, MajorSubsystemVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append(
+            {"MinorSubsystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, MinorSubsystemVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
         listResult.append({"Win32VersionValue", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, Win32VersionValue), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"SizeOfImage", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, SizeOfImage), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"SizeOfHeaders", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32S, SizeOfHeaders), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
@@ -9258,17 +9263,22 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
         listResult.append({"SizeOfCode", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, SizeOfCode), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"SizeOfInitializedData", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, SizeOfInitializedData), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"SizeOfUninitializedData", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, SizeOfUninitializedData), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
-        listResult.append({"AddressOfEntryPoint", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, AddressOfEntryPoint), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append(
+            {"AddressOfEntryPoint", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, AddressOfEntryPoint), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
         listResult.append({"BaseOfCode", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, BaseOfCode), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
         listResult.append({"ImageBase", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, ImageBase), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
         listResult.append({"SectionAlignment", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, SectionAlignment), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"FileAlignment", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, FileAlignment), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
-        listResult.append({"MajorOperatingSystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, MajorOperatingSystemVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
-        listResult.append({"MinorOperatingSystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, MinorOperatingSystemVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append(
+            {"MajorOperatingSystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, MajorOperatingSystemVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append(
+            {"MinorOperatingSystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, MinorOperatingSystemVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
         listResult.append({"MajorImageVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, MajorImageVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
         listResult.append({"MinorImageVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, MinorImageVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
-        listResult.append({"MajorSubsystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, MajorSubsystemVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
-        listResult.append({"MinorSubsystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, MinorSubsystemVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append(
+            {"MajorSubsystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, MajorSubsystemVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append(
+            {"MinorSubsystemVersion", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, MinorSubsystemVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
         listResult.append({"Win32VersionValue", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, Win32VersionValue), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"SizeOfImage", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, SizeOfImage), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"SizeOfHeaders", (qint32)offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64S, SizeOfHeaders), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
@@ -9341,7 +9351,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, ntLoc);
         // Field 0 = Signature
-        xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageNtHeadersSignatures, sizeof(_TABLE_XPE_ImageNtHeadersSignatures) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append(
+            {0, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageNtHeadersSignatures, sizeof(_TABLE_XPE_ImageNtHeadersSignatures) / sizeof(XBinary::XIDSTRING)});
         xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
 
         listResult.append(xfHeader);
@@ -9383,7 +9394,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IMAGE_FILE_HEADER, fhLoc);
         // Field 0 = Machine (list), Field 6 = Characteristics (flags)
         xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageFileHeaderMachines, sizeof(_TABLE_XPE_ImageFileHeaderMachines) / sizeof(XBinary::XIDSTRING)});
-        xfHeader.listDataSt.append({6, 0xFFFF, XFDATASTYPE_FLAGS, _TABLE_XPE_ImageFileHeaderCharacteristics, sizeof(_TABLE_XPE_ImageFileHeaderCharacteristics) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append(
+            {6, 0xFFFF, XFDATASTYPE_FLAGS, _TABLE_XPE_ImageFileHeaderCharacteristics, sizeof(_TABLE_XPE_ImageFileHeaderCharacteristics) / sizeof(XBinary::XIDSTRING)});
         xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_IMAGE_FILE_HEADER), xfHeader.sParentTag);
 
         listResult.append(xfHeader);
@@ -9402,7 +9414,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 xfSectionTable.xfType = XFTYPE_TABLE;
                 xfSectionTable.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IMAGE_SECTION_HEADER, offsetToLoc(nSectionsTableOffset));
                 // Field 9 = Characteristics (flags)
-                xfSectionTable.listDataSt.append({9, 0xFFFFFFFF, XFDATASTYPE_FLAGS, _TABLE_XPE_ImageSectionHeaderFlags, sizeof(_TABLE_XPE_ImageSectionHeaderFlags) / sizeof(XBinary::XIDSTRING)});
+                xfSectionTable.listDataSt.append(
+                    {9, 0xFFFFFFFF, XFDATASTYPE_FLAGS, _TABLE_XPE_ImageSectionHeaderFlags, sizeof(_TABLE_XPE_ImageSectionHeaderFlags) / sizeof(XBinary::XIDSTRING)});
 
                 for (qint32 i = 0; i < (qint32)nNumberOfSections; i++) {
                     xfSectionTable.listRowLocations.append(nSectionsTableOffset + i * sizeof(XPE_DEF::IMAGE_SECTION_HEADER));
@@ -9425,17 +9438,22 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, ohLoc);
         // Field 0 = Magic (list)
-        xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageOptionalHeaderMagic, sizeof(_TABLE_XPE_ImageOptionalHeaderMagic) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append(
+            {0, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageOptionalHeaderMagic, sizeof(_TABLE_XPE_ImageOptionalHeaderMagic) / sizeof(XBinary::XIDSTRING)});
         xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
 
         if (bIs64) {
             // 64-bit: Field 21 = Subsystem, Field 22 = DllCharacteristics (no BaseOfData, so shifted by 1)
-            xfHeader.listDataSt.append({21, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageOptionalHeaderSubsystem, sizeof(_TABLE_XPE_ImageOptionalHeaderSubsystem) / sizeof(XBinary::XIDSTRING)});
-            xfHeader.listDataSt.append({22, 0xFFFF, XFDATASTYPE_FLAGS, _TABLE_XPE_ImageOptionalHeaderDllCharacteristics, sizeof(_TABLE_XPE_ImageOptionalHeaderDllCharacteristics) / sizeof(XBinary::XIDSTRING)});
+            xfHeader.listDataSt.append(
+                {21, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageOptionalHeaderSubsystem, sizeof(_TABLE_XPE_ImageOptionalHeaderSubsystem) / sizeof(XBinary::XIDSTRING)});
+            xfHeader.listDataSt.append({22, 0xFFFF, XFDATASTYPE_FLAGS, _TABLE_XPE_ImageOptionalHeaderDllCharacteristics,
+                                        sizeof(_TABLE_XPE_ImageOptionalHeaderDllCharacteristics) / sizeof(XBinary::XIDSTRING)});
         } else {
             // 32-bit: Field 22 = Subsystem, Field 23 = DllCharacteristics
-            xfHeader.listDataSt.append({22, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageOptionalHeaderSubsystem, sizeof(_TABLE_XPE_ImageOptionalHeaderSubsystem) / sizeof(XBinary::XIDSTRING)});
-            xfHeader.listDataSt.append({23, 0xFFFF, XFDATASTYPE_FLAGS, _TABLE_XPE_ImageOptionalHeaderDllCharacteristics, sizeof(_TABLE_XPE_ImageOptionalHeaderDllCharacteristics) / sizeof(XBinary::XIDSTRING)});
+            xfHeader.listDataSt.append(
+                {22, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageOptionalHeaderSubsystem, sizeof(_TABLE_XPE_ImageOptionalHeaderSubsystem) / sizeof(XBinary::XIDSTRING)});
+            xfHeader.listDataSt.append({23, 0xFFFF, XFDATASTYPE_FLAGS, _TABLE_XPE_ImageOptionalHeaderDllCharacteristics,
+                                        sizeof(_TABLE_XPE_ImageOptionalHeaderDllCharacteristics) / sizeof(XBinary::XIDSTRING)});
         }
 
         listResult.append(xfHeader);

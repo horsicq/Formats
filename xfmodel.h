@@ -82,8 +82,7 @@ public:
     static QString exportAllFilters();
     static EXPORT_FORMAT filterToExportFormat(const QString &sFilter);
 
-    static QString presentationToString(PRESENTATION_TYPE presentationType, quint64 nValue,
-                                        const XBinary::XFRECORD &xfRecord, const XBinary::XFDATAST &xfDataSt);
+    static QString presentationToString(PRESENTATION_TYPE presentationType, quint64 nValue, const XBinary::XFRECORD &xfRecord, const XBinary::XFDATAST &xfDataSt);
 
 protected:
     QString valueToString(const XBinary::XFRECORD &xfRecord, const QVariant &varValue) const;

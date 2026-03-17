@@ -990,7 +990,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 
 #ifdef QT_DEBUG
     qint64 nElapsed = timer.elapsed();
-    qDebug("XFormats::_getFileTypes(): time=%lld ms", nElapsed); // Calculated in milisecounds
+    qDebug("XFormats::_getFileTypes(): time=%lld ms", nElapsed);  // Calculated in milisecounds
     qDebug("XFormats::_getFileTypes(): Timer stopped");
 #endif
 
@@ -1094,7 +1094,6 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
                         QMap<XBinary::UNPACK_PROP, QVariant> mapUnpackProperties;
 
                         if (xDecompress.decompressArchiveRecord(archiveRecord, pDevice, &file, mapUnpackProperties, pPdStruct)) {
-
                         } else {
 #ifdef QT_DEBUG
                             qDebug() << "Cannot decompress" << sPrefName;

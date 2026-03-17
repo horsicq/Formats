@@ -257,14 +257,14 @@ public:
         FPART_PROP_STREAMOFFSET,
         FPART_PROP_STREAMSIZE,
         FPART_PROP_STREAMUNPACKEDSIZE,
-        FPART_PROP_STREAMOFFSET2,         // BCJ2: call LZMA archive offset
-        FPART_PROP_STREAMSIZE2,           // BCJ2: call LZMA compressed size
-        FPART_PROP_STREAMOFFSET3,         // BCJ2: jmp LZMA archive offset
-        FPART_PROP_STREAMSIZE3,           // BCJ2: jmp LZMA compressed size
-        FPART_PROP_STREAMOFFSET4,         // BCJ2: range coder archive offset
-        FPART_PROP_STREAMSIZE4,           // BCJ2: range coder size
-        FPART_PROP_HANDLEMETHOD4,         // BCJ2: main LZMA compress method
-        FPART_PROP_UNCOMPRESSEDSIZE4,     // BCJ2: main LZMA uncompressed size
+        FPART_PROP_STREAMOFFSET2,      // BCJ2: call LZMA archive offset
+        FPART_PROP_STREAMSIZE2,        // BCJ2: call LZMA compressed size
+        FPART_PROP_STREAMOFFSET3,      // BCJ2: jmp LZMA archive offset
+        FPART_PROP_STREAMSIZE3,        // BCJ2: jmp LZMA compressed size
+        FPART_PROP_STREAMOFFSET4,      // BCJ2: range coder archive offset
+        FPART_PROP_STREAMSIZE4,        // BCJ2: range coder size
+        FPART_PROP_HANDLEMETHOD4,      // BCJ2: main LZMA compress method
+        FPART_PROP_UNCOMPRESSEDSIZE4,  // BCJ2: main LZMA uncompressed size
         FPART_PROP_SUBSTREAMOFFSET,
         FPART_PROP_CRC_TYPE,
         FPART_PROP_RESULTCRC,
@@ -291,7 +291,7 @@ public:
         FPART_PROP_COMPRESSPROPERTIES,  // Compression algorithm properties (e.g., LZMA dictionary size)
         FPART_PROP_COMPRESSPROPERTIES2,
         FPART_PROP_COMPRESSPROPERTIES3,
-        FPART_PROP_AESKEY,              // AES encryption key derivation parameters (salt, IV, etc.)
+        FPART_PROP_AESKEY,  // AES encryption key derivation parameters (salt, IV, etc.)
         FPART_PROP_USERNAME,
         FPART_PROP_GROUPNAME,
         FPART_PROP_DEVVERSION,
@@ -307,22 +307,22 @@ public:
         FPART_PROP_FILECOMMENTLENGTH,
         FPART_PROP_FLAGS,
         FPART_PROP_RESOURCEID,
-        FPART_PROP_SOLIDFOLDERINDEX,    // Solid folder/block index within an archive (e.g., 7z folder index)
-        FPART_PROP_FILEMD5,             // MD5 hash of the entire archive file (hex string, set during initUnpack)
-        FPART_PROP_MTIME,               // Modification time (QDateTime)
-        FPART_PROP_CTIME,               // Creation time / birth time (QDateTime; on Unix: inode change time)
-        FPART_PROP_ATIME,               // Last access time (QDateTime)
-        FPART_PROP_ISREADONLY,          // Windows FILE_ATTRIBUTE_READONLY / Unix write-permission absent (bool)
-        FPART_PROP_ISHIDDEN,            // Windows FILE_ATTRIBUTE_HIDDEN (bool)
-        FPART_PROP_ISSYSTEM,            // Windows FILE_ATTRIBUTE_SYSTEM (bool)
-        FPART_PROP_ISARCHIVE,           // Windows FILE_ATTRIBUTE_ARCHIVE (bool)
-        FPART_PROP_ISCOMMENTPRESENT,     // Archive record has a comment (bool)
-        FPART_PROP_COLORSPACE,           // PDF image color space (e.g., "/DeviceRGB", "/DeviceGray", "/Indexed")
-        FPART_PROP_BASECOLORSPACE,       // PDF indexed image base color space (e.g., "/DeviceRGB")
-        FPART_PROP_PALETTE,              // PDF indexed image palette data (QByteArray)
-        FPART_PROP_SUBTYPE,              // PDF stream subtype (e.g., "/Image", "/Form")
-        FPART_PROP_FILTERNAME,           // PDF filter name (e.g., "/FlateDecode", "/DCTDecode")
-        FPART_PROP_CCITTK,               // CCITT /K parameter (-1=Group4, 0=Group3 1D, >0=Group3 2D)
+        FPART_PROP_SOLIDFOLDERINDEX,  // Solid folder/block index within an archive (e.g., 7z folder index)
+        FPART_PROP_FILEMD5,           // MD5 hash of the entire archive file (hex string, set during initUnpack)
+        FPART_PROP_MTIME,             // Modification time (QDateTime)
+        FPART_PROP_CTIME,             // Creation time / birth time (QDateTime; on Unix: inode change time)
+        FPART_PROP_ATIME,             // Last access time (QDateTime)
+        FPART_PROP_ISREADONLY,        // Windows FILE_ATTRIBUTE_READONLY / Unix write-permission absent (bool)
+        FPART_PROP_ISHIDDEN,          // Windows FILE_ATTRIBUTE_HIDDEN (bool)
+        FPART_PROP_ISSYSTEM,          // Windows FILE_ATTRIBUTE_SYSTEM (bool)
+        FPART_PROP_ISARCHIVE,         // Windows FILE_ATTRIBUTE_ARCHIVE (bool)
+        FPART_PROP_ISCOMMENTPRESENT,  // Archive record has a comment (bool)
+        FPART_PROP_COLORSPACE,        // PDF image color space (e.g., "/DeviceRGB", "/DeviceGray", "/Indexed")
+        FPART_PROP_BASECOLORSPACE,    // PDF indexed image base color space (e.g., "/DeviceRGB")
+        FPART_PROP_PALETTE,           // PDF indexed image palette data (QByteArray)
+        FPART_PROP_SUBTYPE,           // PDF stream subtype (e.g., "/Image", "/Form")
+        FPART_PROP_FILTERNAME,        // PDF filter name (e.g., "/FlateDecode", "/DCTDecode")
+        FPART_PROP_CCITTK,            // CCITT /K parameter (-1=Group4, 0=Group3 1D, >0=Group3 2D)
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
@@ -367,7 +367,7 @@ public:
         qint32 nNumberOfRecords;
         QMap<UNPACK_PROP, QVariant> mapUnpackProperties;
         QMap<FPART_PROP, QVariant> mapArchiveProperties;  // Archive-level properties (e.g., FPART_PROP_FILEMD5)
-        void *pContext;  // Format-specific context
+        void *pContext;                                   // Format-specific context
     };
 
     enum PATH_MODE {
@@ -958,11 +958,11 @@ public:
         STRUCTID structID;
         XLOC xLoc;
         XFTYPE xfType;
-        bool bIsParentNeeded; // if we need parent struct to calculate the header right way
-        QList<XFRECORD> listFields;  // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
-        QList<XFDATAST> listDataSt;  // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
+        bool bIsParentNeeded;           // if we need parent struct to calculate the header right way
+        QList<XFRECORD> listFields;     // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
+        QList<XFDATAST> listDataSt;     // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
         QList<XADDR> listRowLocations;  // For XFTYPE_TABLE
-        QList<QString> listRowNames;  // For XFTYPE_TABLE, optional names for rows
+        QList<QString> listRowNames;    // For XFTYPE_TABLE, optional names for rows
     };
 
     struct XFSTRUCT {

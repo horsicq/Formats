@@ -92,8 +92,8 @@ QString XFModel::valueToString(const XBinary::XFRECORD &xfRecord, const QVariant
 {
     QString sResult;
 
-    if ((xfRecord.valueType == XBinary::VT_UINT8) || (xfRecord.valueType == XBinary::VT_UINT16) ||
-        (xfRecord.valueType == XBinary::VT_UINT32) || (xfRecord.valueType == XBinary::VT_UINT64)) {
+    if ((xfRecord.valueType == XBinary::VT_UINT8) || (xfRecord.valueType == XBinary::VT_UINT16) || (xfRecord.valueType == XBinary::VT_UINT32) ||
+        (xfRecord.valueType == XBinary::VT_UINT64)) {
         quint64 nValue = varValue.toULongLong();
 
         if (xfRecord.valueType == XBinary::VT_UINT8) {
@@ -105,8 +105,8 @@ QString XFModel::valueToString(const XBinary::XFRECORD &xfRecord, const QVariant
         } else if (xfRecord.valueType == XBinary::VT_UINT64) {
             sResult = XBinary::valueToHex((quint64)nValue);
         }
-    } else if ((xfRecord.valueType == XBinary::VT_INT8) || (xfRecord.valueType == XBinary::VT_INT16) ||
-               (xfRecord.valueType == XBinary::VT_INT32) || (xfRecord.valueType == XBinary::VT_INT64)) {
+    } else if ((xfRecord.valueType == XBinary::VT_INT8) || (xfRecord.valueType == XBinary::VT_INT16) || (xfRecord.valueType == XBinary::VT_INT32) ||
+               (xfRecord.valueType == XBinary::VT_INT64)) {
         sResult = QString::number(varValue.toLongLong());
     } else if (xfRecord.valueType == XBinary::VT_FLOAT) {
         sResult = QString::number(varValue.toFloat());
@@ -151,8 +151,7 @@ QString XFModel::flagsToString(quint64 nFlags) const
     return listFlags.join("|");
 }
 
-QString XFModel::presentationToString(PRESENTATION_TYPE presentationType, quint64 nValue,
-                                      const XBinary::XFRECORD &xfRecord, const XBinary::XFDATAST &xfDataSt)
+QString XFModel::presentationToString(PRESENTATION_TYPE presentationType, quint64 nValue, const XBinary::XFRECORD &xfRecord, const XBinary::XFDATAST &xfDataSt)
 {
     QString sResult;
 
@@ -179,8 +178,8 @@ QString XFModel::presentationToString(PRESENTATION_TYPE presentationType, quint6
         sResult = XBinary::valueToTimeString(nValue, XBinary::DT_TYPE_FILETIME);
     } else if (presentationType == PT_VERSION) {
         quint32 nFlags = xfRecord.nFlags;
-        const quint32 nFullVersionMask = XBinary::XFRECORD_FLAG_VERSION_MAJOR | XBinary::XFRECORD_FLAG_VERSION_MINOR |
-                                         XBinary::XFRECORD_FLAG_VERSION_PATCH | XBinary::XFRECORD_FLAG_VERSION_BUILD;
+        const quint32 nFullVersionMask =
+            XBinary::XFRECORD_FLAG_VERSION_MAJOR | XBinary::XFRECORD_FLAG_VERSION_MINOR | XBinary::XFRECORD_FLAG_VERSION_PATCH | XBinary::XFRECORD_FLAG_VERSION_BUILD;
 
         if (nFlags & XBinary::XFRECORD_FLAG_VERSION_DIVMOD) {
             if (xfRecord.valueType == XBinary::VT_UINT8) {
@@ -192,10 +191,8 @@ QString XFModel::presentationToString(PRESENTATION_TYPE presentationType, quint6
             quint32 nVersionFlags = nFlags & nFullVersionMask;
             // Single version component (only one of MAJOR/MINOR/PATCH/BUILD set):
             // show plain decimal, e.g. "10" instead of byte-split "0.10"
-            bool bSingleComponent = (nVersionFlags == XBinary::XFRECORD_FLAG_VERSION_MAJOR) ||
-                                    (nVersionFlags == XBinary::XFRECORD_FLAG_VERSION_MINOR) ||
-                                    (nVersionFlags == XBinary::XFRECORD_FLAG_VERSION_PATCH) ||
-                                    (nVersionFlags == XBinary::XFRECORD_FLAG_VERSION_BUILD);
+            bool bSingleComponent = (nVersionFlags == XBinary::XFRECORD_FLAG_VERSION_MAJOR) || (nVersionFlags == XBinary::XFRECORD_FLAG_VERSION_MINOR) ||
+                                    (nVersionFlags == XBinary::XFRECORD_FLAG_VERSION_PATCH) || (nVersionFlags == XBinary::XFRECORD_FLAG_VERSION_BUILD);
 
             if (bSingleComponent) {
                 sResult = QString("\"%1\"").arg(QString::number(nValue));
@@ -277,9 +274,8 @@ QString XFModel::commentForField(qint32 nFieldIndex, const QVariant &varValue) c
             listComments.append(presentationToString(PT_FILETIME, nValue, xfRecord, xfDataStEmpty));
         }
 
-        const quint32 nVersionMask = XBinary::XFRECORD_FLAG_VERSION_MAJOR | XBinary::XFRECORD_FLAG_VERSION_MINOR |
-                                     XBinary::XFRECORD_FLAG_VERSION_PATCH | XBinary::XFRECORD_FLAG_VERSION_BUILD |
-                                     XBinary::XFRECORD_FLAG_VERSION | XBinary::XFRECORD_FLAG_VERSION_DIVMOD;
+        const quint32 nVersionMask = XBinary::XFRECORD_FLAG_VERSION_MAJOR | XBinary::XFRECORD_FLAG_VERSION_MINOR | XBinary::XFRECORD_FLAG_VERSION_PATCH |
+                                     XBinary::XFRECORD_FLAG_VERSION_BUILD | XBinary::XFRECORD_FLAG_VERSION | XBinary::XFRECORD_FLAG_VERSION_DIVMOD;
 
         if (xfRecord.nFlags & nVersionMask) {
             listComments.append(presentationToString(PT_VERSION, nValue, xfRecord, xfDataStEmpty));

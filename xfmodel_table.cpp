@@ -161,9 +161,8 @@ void XFModel_table::_rebuildColumnMap()
             m_listPresentationColumns.append(presCol);
         }
 
-        const quint32 nVersionMask = XBinary::XFRECORD_FLAG_VERSION_MAJOR | XBinary::XFRECORD_FLAG_VERSION_MINOR |
-                                     XBinary::XFRECORD_FLAG_VERSION_PATCH | XBinary::XFRECORD_FLAG_VERSION_BUILD |
-                                     XBinary::XFRECORD_FLAG_VERSION | XBinary::XFRECORD_FLAG_VERSION_DIVMOD;
+        const quint32 nVersionMask = XBinary::XFRECORD_FLAG_VERSION_MAJOR | XBinary::XFRECORD_FLAG_VERSION_MINOR | XBinary::XFRECORD_FLAG_VERSION_PATCH |
+                                     XBinary::XFRECORD_FLAG_VERSION_BUILD | XBinary::XFRECORD_FLAG_VERSION | XBinary::XFRECORD_FLAG_VERSION_DIVMOD;
 
         if (xfRecord.nFlags & nVersionMask) {
             PRESENTATION_COLUMN presCol = {};
@@ -334,9 +333,8 @@ QVariant XFModel_table::data(const QModelIndex &index, int role) const
             qint32 nFieldIndex = entry.nIndex;
             if ((nFieldIndex >= 0) && (nFieldIndex < m_listColumnFields.count())) {
                 XBinary::XFRECORD xfRecord = m_listColumnFields.at(nFieldIndex);
-                if ((xfRecord.valueType == XBinary::VT_UINT8) || (xfRecord.valueType == XBinary::VT_UINT16) ||
-                    (xfRecord.valueType == XBinary::VT_UINT32) || (xfRecord.valueType == XBinary::VT_UINT64) ||
-                    (xfRecord.valueType == XBinary::VT_INT8) || (xfRecord.valueType == XBinary::VT_INT16) ||
+                if ((xfRecord.valueType == XBinary::VT_UINT8) || (xfRecord.valueType == XBinary::VT_UINT16) || (xfRecord.valueType == XBinary::VT_UINT32) ||
+                    (xfRecord.valueType == XBinary::VT_UINT64) || (xfRecord.valueType == XBinary::VT_INT8) || (xfRecord.valueType == XBinary::VT_INT16) ||
                     (xfRecord.valueType == XBinary::VT_INT32) || (xfRecord.valueType == XBinary::VT_INT64)) {
                     result = (int)(Qt::AlignRight | Qt::AlignVCenter);
                 }

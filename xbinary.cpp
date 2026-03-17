@@ -170,7 +170,7 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_ZIP_AES128, "ZIP_AES128", QString("ZIP AES128")},
     {XBinary::HANDLE_METHOD_ZIP_AES192, "ZIP_AES128", QString("ZIP AES128")},
     {XBinary::HANDLE_METHOD_ZIP_AES256, "ZIP_AES256", QString("ZIP AES256")},
-    {XBinary:: HANDLE_METHOD_7Z_AES, "7Z_AES", QString("7Z AES")},
+    {XBinary::HANDLE_METHOD_7Z_AES, "7Z_AES", QString("7Z AES")},
     {XBinary::HANDLE_METHOD_ZIPCRYPTO, "ZIP_Crypto", QString("ZIP Crypto")},
     {XBinary::HANDLE_METHOD_ZLIB, "ZLIB", QString("ZLIB")},
     {XBinary::HANDLE_METHOD_MSZIP_CAB, "MSZIP_CAB", QString("MSZIP CAB")},
@@ -1815,10 +1815,8 @@ bool XBinary::setFileProperties(const QMap<FPART_PROP, QVariant> &mapProperties,
 
     // --- File attributes ---
 #ifdef Q_OS_WIN
-    bool bHasAttrib = mapProperties.contains(FPART_PROP_ISREADONLY)
-                   || mapProperties.contains(FPART_PROP_ISHIDDEN)
-                   || mapProperties.contains(FPART_PROP_ISSYSTEM)
-                   || mapProperties.contains(FPART_PROP_ISARCHIVE);
+    bool bHasAttrib = mapProperties.contains(FPART_PROP_ISREADONLY) || mapProperties.contains(FPART_PROP_ISHIDDEN) || mapProperties.contains(FPART_PROP_ISSYSTEM) ||
+                      mapProperties.contains(FPART_PROP_ISARCHIVE);
 
     if (bHasAttrib) {
         DWORD nAttribs = GetFileAttributesW((LPCWSTR)sFileName.utf16());
@@ -16243,8 +16241,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                         file.close();
 #ifdef QT_DEBUG
                                         if (!bCRCOk) {
-                                            qDebug() << "CRC is false for" << sFilePath
-                                                     << ": stored=" << QString::number(varCRC.toUInt(), 16);
+                                            qDebug() << "CRC is false for" << sFilePath << ": stored=" << QString::number(varCRC.toUInt(), 16);
                                         }
 #endif
                                     }

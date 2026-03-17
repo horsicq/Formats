@@ -328,8 +328,7 @@ void XFTreeModel::appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TR
 
     QString sTag = "[" + XBinary::xfHeaderToTag(pItem->xfHeader, sStructName, pItem->xfHeader.sParentTag) + "]";
 
-    QString sLine = sPrefix + sConnector + sStructName + " [" + sTypeName + "] offset=" +
-                    sOffset + " " + sInfo + " " + sTag;
+    QString sLine = sPrefix + sConnector + sStructName + " [" + sTypeName + "] offset=" + sOffset + " " + sInfo + " " + sTag;
 
     pListLines->append(sLine);
 

@@ -878,12 +878,14 @@ QList<XBinary::XFRECORD> XMSDOS::getXFRecords(FT fileType, quint32 nStructID, co
 
         if (nStructID == STRUCTID_IMAGE_DOS_HEADEREX) {
             for (qint32 i = 0; i < 4; i++) {
-                listResult.append({QString("e_res_%1").arg(i), (qint32)(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + i * sizeof(quint16)), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+                listResult.append(
+                    {QString("e_res_%1").arg(i), (qint32)(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + i * sizeof(quint16)), 2, XFRECORD_FLAG_NONE, VT_UINT16});
             }
             listResult.append({"e_oemid", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oemid), 2, XFRECORD_FLAG_NONE, VT_UINT16});
             listResult.append({"e_oeminfo", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oeminfo), 2, XFRECORD_FLAG_NONE, VT_UINT16});
             for (qint32 i = 0; i < 10; i++) {
-                listResult.append({QString("e_res2_%1").arg(i), (qint32)(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res2) + i * sizeof(quint16)), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+                listResult.append(
+                    {QString("e_res2_%1").arg(i), (qint32)(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res2) + i * sizeof(quint16)), 2, XFRECORD_FLAG_NONE, VT_UINT16});
             }
             listResult.append({"e_lfanew", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
         }
