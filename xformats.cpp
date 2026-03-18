@@ -84,10 +84,31 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_RAR, fileType)) return new XRar(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) return new XMACHOFat(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_NPM, fileType)) return new XNPM(pDevice);
-    else if (XBinary::checkFileType(XBinary::FT_TARGZ, fileType)) return new XTGZ(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_TAR_GZ, fileType) || XBinary::checkFileType(XBinary::FT_TAR_BZIP2, fileType) ||
+             XBinary::checkFileType(XBinary::FT_TAR_LZIP, fileType) || XBinary::checkFileType(XBinary::FT_TAR_LZMA, fileType) ||
+             XBinary::checkFileType(XBinary::FT_TAR_LZOP, fileType) || XBinary::checkFileType(XBinary::FT_TAR_XZ, fileType) ||
+             XBinary::checkFileType(XBinary::FT_TAR_Z, fileType) || XBinary::checkFileType(XBinary::FT_TAR_ZSTD, fileType)) {
+        XTARCOMPRESSED::COMPRESSION_TYPE compressionType = XTARCOMPRESSED::detectCompressionType(pDevice);
+        XArchive *pArchive = (XArchive *)XTARCOMPRESSED::getCompressionClassInstance(compressionType, pDevice);
+
+        if (pArchive) {
+            return pArchive;
+        }
+
+        if (XBinary::checkFileType(XBinary::FT_TAR_BZIP2, fileType)) return new XTAR_BZIP2(pDevice);
+        if (XBinary::checkFileType(XBinary::FT_TAR_LZIP, fileType)) return new XTAR_LZIP(pDevice);
+        if (XBinary::checkFileType(XBinary::FT_TAR_LZMA, fileType)) return new XTAR_LZMA(pDevice);
+        if (XBinary::checkFileType(XBinary::FT_TAR_LZOP, fileType)) return new XTAR_LZOP(pDevice);
+        if (XBinary::checkFileType(XBinary::FT_TAR_XZ, fileType)) return new XTAR_XZ(pDevice);
+        if (XBinary::checkFileType(XBinary::FT_TAR_Z, fileType)) return new XTAR_COMPRESS(pDevice);
+        if (XBinary::checkFileType(XBinary::FT_TAR_ZSTD, fileType)) return new XTAR_ZSTD(pDevice);
+
+        return new XTAR_GZ(pDevice);
+    }
     else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) return new XGzip(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) return new XZlib(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) return new XLHA(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_ARJ, fileType)) return new XARJ(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_CFBF, fileType)) return new XCFBF(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_SZDD, fileType)) return new XSZDD(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_BZIP2, fileType)) return new XBZIP2(pDevice);
@@ -871,10 +892,73 @@ QSet<XBinary::FT> XFormats::getFileTypesTGZ(QIODevice *pDevice, QList<XArchive::
 
     QSet<XBinary::FT> stResult;
 
-    stResult.insert(XBinary::FT_TARGZ);
+    stResult.insert(XBinary::FT_TAR_GZ);
 
     if (XNPM::isValid(pListRecords, pPdStruct)) {
         stResult.insert(XBinary::FT_NPM);
+    }
+
+    return stResult;
+}
+#endif
+#ifdef USE_ARCHIVE
+QSet<XBinary::FT> XFormats::getFileTypesTBZIP2(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QSet<XBinary::FT> stResult;
+
+    if (pListRecords->count()) {
+        const XArchive::RECORD &record = pListRecords->at(0);
+        QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
+
+        QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
+
+        if (stFileTypes.contains(XBinary::FT_TAR)) {
+            stResult.insert(XBinary::FT_TAR_BZIP2);
+        }
+    }
+
+    return stResult;
+}
+#endif
+#ifdef USE_ARCHIVE
+QSet<XBinary::FT> XFormats::getFileTypesTXZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QSet<XBinary::FT> stResult;
+
+    if (pListRecords->count()) {
+        const XArchive::RECORD &record = pListRecords->at(0);
+        QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
+
+        QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
+
+        if (stFileTypes.contains(XBinary::FT_TAR)) {
+            stResult.insert(XBinary::FT_TAR_XZ);
+        }
+    }
+
+    return stResult;
+}
+#endif
+#ifdef USE_ARCHIVE
+QSet<XBinary::FT> XFormats::getFileTypesTLZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QSet<XBinary::FT> stResult;
+
+    if (pListRecords->count()) {
+        const XArchive::RECORD &record = pListRecords->at(0);
+        QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
+
+        QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
+
+        if (stFileTypes.contains(XBinary::FT_TAR)) {
+            stResult.insert(XBinary::FT_TAR_LZIP);
+        }
     }
 
     return stResult;
@@ -908,8 +992,8 @@ QSet<XBinary::FT> XFormats::getFileTypesGZIP(QIODevice *pDevice, QList<XArchive:
         QSet<XBinary::FT> _ft = getFileTypes(&baData, true);
 
         if (_ft.contains(XBinary::FT_TAR)) {
-            XTGZ xtgz(pDevice);
-            QList<XArchive::RECORD> listArchiveRecords = xtgz.getRecords(20000, pPdStruct);
+            XTAR_GZ xtarGz(pDevice);
+            QList<XArchive::RECORD> listArchiveRecords = xtarGz.getRecords(20000, pPdStruct);
 
             stResult += getFileTypesTGZ(pDevice, &listArchiveRecords, pPdStruct);
         }
@@ -918,6 +1002,64 @@ QSet<XBinary::FT> XFormats::getFileTypesGZIP(QIODevice *pDevice, QList<XArchive:
     return stResult;
 }
 #endif
+#ifdef USE_ARCHIVE
+QSet<XBinary::FT> XFormats::getFileTypesBZIP2(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
+{
+    QSet<XBinary::FT> stResult;
+
+    stResult += getFileTypesTBZIP2(pDevice, pListRecords, pPdStruct);
+
+    return stResult;
+}
+#endif
+#ifdef USE_ARCHIVE
+QSet<XBinary::FT> XFormats::getFileTypesXZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
+{
+    QSet<XBinary::FT> stResult;
+
+    stResult += getFileTypesTXZ(pDevice, pListRecords, pPdStruct);
+
+    return stResult;
+}
+#endif
+#ifdef USE_ARCHIVE
+QSet<XBinary::FT> XFormats::getFileTypesLZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
+{
+    QSet<XBinary::FT> stResult;
+
+    stResult += getFileTypesTLZIP(pDevice, pListRecords, pPdStruct);
+
+    return stResult;
+}
+#endif
+
+#ifdef USE_ARCHIVE
+static XBinary::FT _compressionTypeToTarFT(XTARCOMPRESSED::COMPRESSION_TYPE compressionType)
+{
+    XBinary::FT result = XBinary::FT_UNKNOWN;
+
+    if (compressionType == XTARCOMPRESSED::COMPRESSION_GZIP) {
+        result = XBinary::FT_TAR_GZ;
+    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_BZIP2) {
+        result = XBinary::FT_TAR_BZIP2;
+    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_XZ) {
+        result = XBinary::FT_TAR_XZ;
+    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_LZMA) {
+        result = XBinary::FT_TAR_LZMA;
+    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_ZSTD) {
+        result = XBinary::FT_TAR_ZSTD;
+    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_COMPRESS) {
+        result = XBinary::FT_TAR_Z;
+    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_LZIP) {
+        result = XBinary::FT_TAR_LZIP;
+    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_LZOP) {
+        result = XBinary::FT_TAR_LZOP;
+    }
+
+    return result;
+}
+#endif
+
 QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
 {
 #ifdef QT_DEBUG
@@ -971,6 +1113,58 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 
                     stResult += getFileTypesGZIP(pDevice, &listArchiveRecords, pPdStruct);
                 }
+            }
+        } else if (stResult.contains(XBinary::FT_BZIP2)) {
+            if (pDevice->size() < 100000000) {
+                XBZIP2 xbzip2(pDevice);
+
+                if (xbzip2.isValid(pPdStruct)) {
+                    QList<XArchive::RECORD> listArchiveRecords = xbzip2.getRecords(1, pPdStruct);
+
+                    stResult += getFileTypesBZIP2(pDevice, &listArchiveRecords, pPdStruct);
+                }
+            }
+        } else if (stResult.contains(XBinary::FT_XZ)) {
+            if (pDevice->size() < 100000000) {
+                XXZ xxz(pDevice);
+
+                if (xxz.isValid(pPdStruct)) {
+                    QList<XArchive::RECORD> listArchiveRecords = xxz.getRecords(1, pPdStruct);
+
+                    stResult += getFileTypesXZ(pDevice, &listArchiveRecords, pPdStruct);
+                }
+            }
+        } else if (stResult.contains(XBinary::FT_LZIP)) {
+            if (pDevice->size() < 100000000) {
+                XLzip xlzip(pDevice);
+
+                if (xlzip.isValid(pPdStruct)) {
+                    QList<XArchive::RECORD> listArchiveRecords = xlzip.getRecords(1, pPdStruct);
+
+                    stResult += getFileTypesLZIP(pDevice, &listArchiveRecords, pPdStruct);
+                }
+            }
+
+            // Fallback for .tar.lz when lzip stream decompression is not available in refinement path.
+            if (!stResult.contains(XBinary::FT_TAR_LZIP)) {
+                XTARCOMPRESSED::COMPRESSION_TYPE compressionType = XTARCOMPRESSED::detectCompressionType(pDevice);
+                XBinary::FT tarCompressedFT = _compressionTypeToTarFT(compressionType);
+
+                if (tarCompressedFT == XBinary::FT_TAR_LZIP) {
+                    stResult.insert(XBinary::FT_ARCHIVE);
+                    stResult.insert(XBinary::FT_TAR);
+                    stResult.insert(tarCompressedFT);
+                }
+            }
+        } else {
+            XTARCOMPRESSED::COMPRESSION_TYPE compressionType = XTARCOMPRESSED::detectCompressionType(pDevice);
+            XBinary::FT tarCompressedFT = _compressionTypeToTarFT(compressionType);
+
+            if ((tarCompressedFT == XBinary::FT_TAR_ZSTD) || (tarCompressedFT == XBinary::FT_TAR_Z) || (tarCompressedFT == XBinary::FT_TAR_LZMA) ||
+                (tarCompressedFT == XBinary::FT_TAR_LZIP) || (tarCompressedFT == XBinary::FT_TAR_LZOP)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_TAR);
+                stResult.insert(tarCompressedFT);
             }
         }
 

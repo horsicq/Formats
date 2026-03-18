@@ -517,7 +517,14 @@ public:
         FT_APKS,
         FT_AR,
         FT_TAR,
-        FT_TARGZ,
+        FT_TAR_GZ,
+        FT_TAR_BZIP2,
+        FT_TAR_LZIP,
+        FT_TAR_LZMA,
+        FT_TAR_LZOP,
+        FT_TAR_XZ,
+        FT_TAR_Z,
+        FT_TAR_ZSTD,
         FT_ARCHIVE,
         FT_CAB,
         FT_DEX,
@@ -582,6 +589,7 @@ public:
         FT_STK,
         FT_PAL,
         FT_ARC,
+        FT_ARJ,
 
         // TODO more
     };
@@ -1780,7 +1788,7 @@ public:
     static QSet<FT> getFileTypes(const QString &sFileName, bool bExtra = false);
     static QSet<FT> getFileTypes(QByteArray *pbaData, bool bExtra = false);
 
-    static FT _getPrefFileType(QSet<XBinary::FT> *pStFileTypes);
+    static FT _getPrefFileType(const QSet<XBinary::FT> *pStFileTypes);
     static FT getPrefFileType(QIODevice *pDevice, bool bExtra = false);
     static FT getPrefFileType(const QString &sFileName, bool bExtra = false);
 

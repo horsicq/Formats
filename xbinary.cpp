@@ -255,7 +255,14 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_RIFF, "RIFF", QString("RIFF")},
     {XBinary::FT_SIGNATURE, "Signature", QObject::tr("Signature")},
     {XBinary::FT_TAR, "tar", QString("tar")},
-    {XBinary::FT_TARGZ, "tar.gz", QString("tar.gz")},
+    {XBinary::FT_TAR_GZ, "tar.gz (typed)", QString("tar.gz")},
+    {XBinary::FT_TAR_BZIP2, "tar.bz2", QString("tar.bz2")},
+    {XBinary::FT_TAR_LZIP, "tar.lz", QString("tar.lz")},
+    {XBinary::FT_TAR_LZMA, "tar.lzma", QString("tar.lzma")},
+    {XBinary::FT_TAR_LZOP, "tar.lzo", QString("tar.lzo")},
+    {XBinary::FT_TAR_XZ, "tar.xz", QString("tar.xz")},
+    {XBinary::FT_TAR_Z, "tar.Z", QString("tar.Z")},
+    {XBinary::FT_TAR_ZSTD, "tar.zst", QString("tar.zst")},
     {XBinary::FT_TEXT, "Text", QObject::tr("Text")},
     {XBinary::FT_TIFF, "TIFF", QString("TIFF")},
     {XBinary::FT_PAL, "PAL", QString("PAL")},
@@ -284,6 +291,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_MINIDUMP, "MiniDump", QString("Windows MiniDump")},
     {XBinary::FT_DMG, "DMG", QString("Apple Disk Image")},
     {XBinary::FT_ARC, "ARC", QString("ARC")},
+    {XBinary::FT_ARJ, "ARJ", QString("ARJ")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -8779,6 +8787,15 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             // Apple Disk Image format (koly block at end)
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_DMG);
+        } else if (compareSignature(&memoryMap, "60EA", 0) && nSize >= 34) {
+            // ARJ format: 0x60 0xEA marker, basic_header_size >= 30, first_hdr_size == 30
+            quint16 _nArjHdrSize = read_uint16(2, false);
+            quint8 _nArjFirstHdr = read_uint8(4);
+
+            if ((_nArjHdrSize >= 30) && (_nArjHdrSize <= 2600) && (_nArjFirstHdr == 30)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_ARJ);
+            }
         } else if (nSize >= 29) {
             // ARC format: 0x1A + method(1-9) + filename(13 bytes null-terminated, first char printable ASCII 0x21-0x7E)
             quint8 _nArcMarker = read_uint8(0);
@@ -9038,180 +9055,123 @@ QSet<XBinary::FT> XBinary::getFileTypes(QByteArray *pbaData, bool bExtra)
     return result;
 }
 
-XBinary::FT XBinary::_getPrefFileType(QSet<FT> *pStFileTypes)
+XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
 {
-    XBinary::FT result = FT_UNKNOWN;
-
-    // Executables: prefer 64-bit over 32-bit; prefer container formats first
-    if (pStFileTypes->contains(FT_PE64)) {
-        result = FT_PE64;
-    } else if (pStFileTypes->contains(FT_PE32)) {
-        result = FT_PE32;
-    } else if (pStFileTypes->contains(FT_MACHOFAT)) {
-        result = FT_MACHOFAT;
-    } else if (pStFileTypes->contains(FT_MACHO64)) {
-        result = FT_MACHO64;
-    } else if (pStFileTypes->contains(FT_MACHO32)) {
-        result = FT_MACHO32;
-    } else if (pStFileTypes->contains(FT_ELF64)) {
-        result = FT_ELF64;
-    } else if (pStFileTypes->contains(FT_ELF32)) {
-        result = FT_ELF32;
-    } else if (pStFileTypes->contains(FT_LE)) {
-        result = FT_LE;
-    } else if (pStFileTypes->contains(FT_LX)) {
-        result = FT_LX;
-    } else if (pStFileTypes->contains(FT_NE)) {
-        result = FT_NE;
-    } else if (pStFileTypes->contains(FT_AMIGAHUNK)) {
-        result = FT_AMIGAHUNK;
-    } else if (pStFileTypes->contains(FT_ATARIST)) {
-        result = FT_ATARIST;
-    } else if (pStFileTypes->contains(FT_BWDOS16M)) {
-        result = FT_BWDOS16M;
-    } else if (pStFileTypes->contains(FT_DOS16M)) {
-        result = FT_DOS16M;
-    } else if (pStFileTypes->contains(FT_DOS4G)) {
-        result = FT_DOS4G;
-    } else if (pStFileTypes->contains(FT_MSDOS)) {
-        result = FT_MSDOS;
-
-        // Android/Java ecosystems and archives: prefer specific containers first
-    } else if (pStFileTypes->contains(FT_APKS)) {
-        result = FT_APKS;
-    } else if (pStFileTypes->contains(FT_APK)) {
-        result = FT_APK;
-    } else if (pStFileTypes->contains(FT_IPA)) {
-        result = FT_IPA;
-    } else if (pStFileTypes->contains(FT_JAR)) {
-        result = FT_JAR;
-    } else if (pStFileTypes->contains(FT_ZIP)) {
-        result = FT_ZIP;
-    } else if (pStFileTypes->contains(FT_NPM)) {
-        result = FT_NPM;
-    } else if (pStFileTypes->contains(FT_TARGZ)) {
-        result = FT_TARGZ;
-    } else if (pStFileTypes->contains(FT_TAR)) {
-        result = FT_TAR;
-    } else if (pStFileTypes->contains(FT_GZIP)) {
-        result = FT_GZIP;
-    } else if (pStFileTypes->contains(FT_ZLIB)) {
-        result = FT_ZLIB;
-    } else if (pStFileTypes->contains(FT_7Z)) {
-        result = FT_7Z;
-    } else if (pStFileTypes->contains(FT_RAR)) {
-        result = FT_RAR;
-    } else if (pStFileTypes->contains(FT_LHA)) {
-        result = FT_LHA;
-    } else if (pStFileTypes->contains(FT_ARC)) {
-        result = FT_ARC;
-    } else if (pStFileTypes->contains(FT_DEB)) {
-        result = FT_DEB;
-    } else if (pStFileTypes->contains(FT_AR)) {
-        result = FT_AR;
-    } else if (pStFileTypes->contains(FT_CAB)) {
-        result = FT_CAB;
-    } else if (pStFileTypes->contains(FT_CPIO)) {
-        result = FT_CPIO;
-    } else if (pStFileTypes->contains(FT_ISO9660)) {
-        result = FT_ISO9660;
-    } else if (pStFileTypes->contains(FT_MINIDUMP)) {
-        result = FT_MINIDUMP;
-    } else if (pStFileTypes->contains(FT_DMG)) {
-        result = FT_DMG;
-
-        // Android resources and DEX/Java
-    } else if (pStFileTypes->contains(FT_ANDROIDXML)) {
-        result = FT_ANDROIDXML;
-    } else if (pStFileTypes->contains(FT_ANDROIDASRC)) {
-        result = FT_ANDROIDASRC;
-    } else if (pStFileTypes->contains(FT_DEX)) {
-        result = FT_DEX;
-    } else if (pStFileTypes->contains(FT_JAVACLASS)) {
-        result = FT_JAVACLASS;
-    } else if (pStFileTypes->contains(FT_PYC)) {
-        result = FT_PYC;
-
-        // Documents and containers
-    } else if (pStFileTypes->contains(FT_PDF)) {
-        result = FT_PDF;
-    } else if (pStFileTypes->contains(FT_DER)) {
-        result = FT_DER;
-    } else if (pStFileTypes->contains(FT_CFBF)) {
-        result = FT_CFBF;
-
-        // Compressed/pack formats
-    } else if (pStFileTypes->contains(FT_SZDD)) {
-        result = FT_SZDD;
-    } else if (pStFileTypes->contains(FT_BZIP2)) {
-        result = FT_BZIP2;
-    } else if (pStFileTypes->contains(FT_XZ)) {
-        result = FT_XZ;
-    } else if (pStFileTypes->contains(FT_LZIP)) {
-        result = FT_LZIP;
-
-        // Fonts and images/media
-    } else if (pStFileTypes->contains(FT_TTF)) {
-        result = FT_TTF;
-    } else if (pStFileTypes->contains(FT_PNG)) {
-        result = FT_PNG;
-    } else if (pStFileTypes->contains(FT_JPEG)) {
-        result = FT_JPEG;
-    } else if (pStFileTypes->contains(FT_WEBP)) {
-        result = FT_WEBP;
-    } else if (pStFileTypes->contains(FT_BMP)) {
-        result = FT_BMP;
-    } else if (pStFileTypes->contains(FT_GIF)) {
-        result = FT_GIF;
-    } else if (pStFileTypes->contains(FT_TIFF)) {
-        result = FT_TIFF;
-    } else if (pStFileTypes->contains(FT_ICO)) {
-        result = FT_ICO;
-    } else if (pStFileTypes->contains(FT_CUR)) {
-        result = FT_CUR;
-    } else if (pStFileTypes->contains(FT_ICC)) {
-        result = FT_ICC;
-    } else if (pStFileTypes->contains(FT_PAL)) {
-        result = FT_PAL;
-    } else if (pStFileTypes->contains(FT_MP4)) {
-        result = FT_MP4;
-    } else if (pStFileTypes->contains(FT_AVI)) {
-        result = FT_AVI;
-    } else if (pStFileTypes->contains(FT_MP3)) {
-        result = FT_MP3;
-    } else if (pStFileTypes->contains(FT_WAV)) {
-        result = FT_WAV;
-    } else if (pStFileTypes->contains(FT_XM)) {
-        result = FT_XM;
-    } else if (pStFileTypes->contains(FT_RIFF)) {
-        result = FT_RIFF;
-
-        // Scanners signatures
-    } else if (pStFileTypes->contains(FT_SIGNATURE)) {
-        result = FT_SIGNATURE;
-
-        // DjVu
-    } else if (pStFileTypes->contains(FT_DJVU)) {
-        result = FT_DJVU;
-
-        // Encodings/text: prefer UNICODE > UTF8 > TEXT
-    } else if (pStFileTypes->contains(FT_UNICODE)) {
-        result = FT_UNICODE;
-    } else if (pStFileTypes->contains(FT_UTF8)) {
-        result = FT_UTF8;
-    } else if (pStFileTypes->contains(FT_TEXT)) {
-        result = FT_TEXT;
-
-        // Generic
-    } else if (pStFileTypes->contains(FT_COM)) {
-        result = FT_COM;
-    } else if (pStFileTypes->contains(FT_DATA)) {
-        result = FT_DATA;
-    } else if (pStFileTypes->contains(FT_BINARY)) {
-        result = FT_BINARY;
+    if (!pStFileTypes) {
+        return FT_UNKNOWN;
     }
 
-    return result;
+    static const XBinary::FT g_arrPrefFileTypeOrder[] = {
+        // Executables
+        FT_PE64,
+        FT_PE32,
+        FT_MACHOFAT,
+        FT_MACHO64,
+        FT_MACHO32,
+        FT_ELF64,
+        FT_ELF32,
+        FT_LE,
+        FT_LX,
+        FT_NE,
+        FT_AMIGAHUNK,
+        FT_ATARIST,
+        FT_BWDOS16M,
+        FT_DOS16M,
+        FT_DOS4G,
+        FT_MSDOS,
+
+        // Android/Java ecosystems and archives
+        FT_APKS,
+        FT_APK,
+        FT_IPA,
+        FT_JAR,
+        FT_ZIP,
+        FT_NPM,
+        FT_TAR_GZ,
+        FT_TAR_BZIP2,
+        FT_TAR_LZIP,
+        FT_TAR_LZMA,
+        FT_TAR_LZOP,
+        FT_TAR_XZ,
+        FT_TAR_Z,
+        FT_TAR_ZSTD,
+        FT_TAR,
+        FT_GZIP,
+        FT_ZLIB,
+        FT_7Z,
+        FT_RAR,
+        FT_LHA,
+        FT_ARJ,
+        FT_ARC,
+        FT_DEB,
+        FT_AR,
+        FT_CAB,
+        FT_CPIO,
+        FT_ISO9660,
+        FT_MINIDUMP,
+        FT_DMG,
+
+        // Android resources and bytecode
+        FT_ANDROIDXML,
+        FT_ANDROIDASRC,
+        FT_DEX,
+        FT_JAVACLASS,
+        FT_PYC,
+
+        // Documents and container formats
+        FT_PDF,
+        FT_DER,
+        FT_CFBF,
+
+        // Compressed/pack formats
+        FT_SZDD,
+        FT_BZIP2,
+        FT_XZ,
+        FT_LZIP,
+
+        // Fonts and images/media
+        FT_TTF,
+        FT_PNG,
+        FT_JPEG,
+        FT_WEBP,
+        FT_BMP,
+        FT_GIF,
+        FT_TIFF,
+        FT_ICO,
+        FT_CUR,
+        FT_ICC,
+        FT_PAL,
+        FT_MP4,
+        FT_AVI,
+        FT_MP3,
+        FT_WAV,
+        FT_XM,
+        FT_RIFF,
+
+        // Special
+        FT_SIGNATURE,
+        FT_DJVU,
+
+        // Text/encoding
+        FT_UNICODE,
+        FT_UTF8,
+        FT_TEXT,
+
+        // Generic
+        FT_COM,
+        FT_DATA,
+        FT_BINARY,
+    };
+
+    const qint32 nNumberOfTypes = sizeof(g_arrPrefFileTypeOrder) / sizeof(XBinary::FT);
+
+    for (qint32 i = 0; i < nNumberOfTypes; i++) {
+        if (pStFileTypes->contains(g_arrPrefFileTypeOrder[i])) {
+            return g_arrPrefFileTypeOrder[i];
+        }
+    }
+
+    return FT_UNKNOWN;
 }
 
 QSet<XBinary::FT> XBinary::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
@@ -9284,6 +9244,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_GZIP)) listResult.append(FT_GZIP);
         if (stFileTypes.contains(FT_ZLIB)) listResult.append(FT_ZLIB);
         if (stFileTypes.contains(FT_LHA)) listResult.append(FT_LHA);
+        if (stFileTypes.contains(FT_ARJ)) listResult.append(FT_ARJ);
         if (stFileTypes.contains(FT_ARC)) listResult.append(FT_ARC);
         if (stFileTypes.contains(FT_RAR)) listResult.append(FT_RAR);
         if (stFileTypes.contains(FT_CAB)) listResult.append(FT_CAB);
@@ -9311,7 +9272,14 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_RIFF)) listResult.append(FT_RIFF);
         if (stFileTypes.contains(FT_SIGNATURE)) listResult.append(FT_SIGNATURE);
         if (stFileTypes.contains(FT_TAR)) listResult.append(FT_TAR);
-        if (stFileTypes.contains(FT_TARGZ)) listResult.append(FT_TARGZ);
+        if (stFileTypes.contains(FT_TAR_GZ)) listResult.append(FT_TAR_GZ);
+        if (stFileTypes.contains(FT_TAR_BZIP2)) listResult.append(FT_TAR_BZIP2);
+        if (stFileTypes.contains(FT_TAR_LZIP)) listResult.append(FT_TAR_LZIP);
+        if (stFileTypes.contains(FT_TAR_LZMA)) listResult.append(FT_TAR_LZMA);
+        if (stFileTypes.contains(FT_TAR_LZOP)) listResult.append(FT_TAR_LZOP);
+        if (stFileTypes.contains(FT_TAR_XZ)) listResult.append(FT_TAR_XZ);
+        if (stFileTypes.contains(FT_TAR_Z)) listResult.append(FT_TAR_Z);
+        if (stFileTypes.contains(FT_TAR_ZSTD)) listResult.append(FT_TAR_ZSTD);
         if (stFileTypes.contains(FT_NPM)) listResult.append(FT_NPM);
         if (stFileTypes.contains(FT_MACHOFAT)) listResult.append(FT_MACHOFAT);
         if (stFileTypes.contains(FT_AR)) listResult.append(FT_AR);
@@ -13610,6 +13578,10 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
         bResult = true;
     } else if ((fileTypeMain == FT_TEXT) && ((fileTypeOptional == FT_TEXT) || (fileTypeOptional == FT_UTF8) || (fileTypeOptional == FT_UNICODE))) {
         bResult = true;
+    } else if ((fileTypeMain == FT_TAR_GZ) && ((fileTypeOptional == FT_TAR_GZ) || (fileTypeOptional == FT_TAR_BZIP2) || (fileTypeOptional == FT_TAR_LZIP) ||
+                                                (fileTypeOptional == FT_TAR_LZMA) || (fileTypeOptional == FT_TAR_LZOP) || (fileTypeOptional == FT_TAR_XZ) ||
+                                                (fileTypeOptional == FT_TAR_Z) || (fileTypeOptional == FT_TAR_ZSTD))) {
+        bResult = true;
     } else if (fileTypeMain == fileTypeOptional) {
         bResult = true;
     }
@@ -13627,7 +13599,8 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_ELF) || pStFileTypes->contains(XBinary::FT_ELF32) || pStFileTypes->contains(XBinary::FT_ELF64) ||
         pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) || pStFileTypes->contains(XBinary::FT_MACHO64) ||
         pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP) ||
-        pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA) || pStFileTypes->contains(XBinary::FT_AMIGAHUNK) ||
+        pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA) || pStFileTypes->contains(XBinary::FT_ARJ) ||
+        pStFileTypes->contains(XBinary::FT_AMIGAHUNK) ||
         pStFileTypes->contains(XBinary::FT_ATARIST)) {
         XBinary::removeFileTypes(pStFileTypes);
     }
