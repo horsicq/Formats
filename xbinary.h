@@ -230,7 +230,11 @@ public:
         HANDLE_METHOD_PDF_IMAGEDATA,
         HANDLE_METHOD_PDF_CCITTIMAGE,
         HANDLE_METHOD_PDF_PALETTE,
-        HANDLE_METHOD_ANDROID_XML
+        HANDLE_METHOD_ANDROID_XML,
+        HANDLE_METHOD_ZSTD,       // Zstandard compression (tar.zst, .zst)
+        HANDLE_METHOD_LZIP,       // LZIP compression - LZMA variant (tar.lz, .lz)
+        HANDLE_METHOD_LZOP,       // LZO compression (tar.lzo, .lzo)
+        HANDLE_METHOD_COMPRESS    // Compress (.Z) - LZW algorithm (tar.Z, .Z)
         // TODO check more methods
     };
 
@@ -578,7 +582,10 @@ public:
         FT_DJVU,
         FT_SZDD,
         FT_BZIP2,
+        FT_ZSTD,
         FT_LZIP,
+        FT_LZO,
+        FT_COMPRESS,
         FT_XZ,
         FT_CPIO,
         FT_SQUASHFS,

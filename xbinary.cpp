@@ -176,6 +176,10 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_MSZIP_CAB, "MSZIP_CAB", QString("MSZIP CAB")},
     {XBinary::HANDLE_METHOD_STORE_CAB, "STORE_CAB", QString("STORE CAB")},
     {XBinary::HANDLE_METHOD_LZX_CAB, "LZX_CAB", QString("LZX CAB")},
+    {XBinary::HANDLE_METHOD_ZSTD, "ZSTD", QString("Zstandard")},
+    {XBinary::HANDLE_METHOD_LZIP, "LZIP", QString("LZIP")},
+    {XBinary::HANDLE_METHOD_LZOP, "LZOP", QString("LZOP")},
+    {XBinary::HANDLE_METHOD_COMPRESS, "COMPRESS", QString("Compress (LZW)")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -285,8 +289,11 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_CFBF, "CFBF", QString("CFBF")},
     {XBinary::FT_SZDD, "SZDD", QString("SZDD")},
     {XBinary::FT_BZIP2, "BZip2", QString("BZip2")},
+    {XBinary::FT_ZSTD, "Zstandard", QString("Zstandard")},
     {XBinary::FT_XZ, "XZ", QString("XZ")},
     {XBinary::FT_LZIP, "LZIP", QString("Lzip (LZMA)")},
+    {XBinary::FT_LZO, "LZO", QString("LZO (lzop)")},
+    {XBinary::FT_COMPRESS, "Compress", QString("Unix compress (.Z)")},
     {XBinary::FT_CPIO, "CPIO", QString("CPIO")},
     {XBinary::FT_MINIDUMP, "MiniDump", QString("Windows MiniDump")},
     {XBinary::FT_DMG, "DMG", QString("Apple Disk Image")},
@@ -8774,6 +8781,12 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'LZIP'", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_LZIP);
+        } else if (compareSignature(&memoryMap, "894C5A4F000D0A1A0A", 0)) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_LZO);
+        } else if (compareSignature(&memoryMap, "1F9D", 0)) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_COMPRESS);
         } else if (compareSignature(&memoryMap, "303730373031", 0) || compareSignature(&memoryMap, "303730373032", 0) ||
                    compareSignature(&memoryMap, "303730373037", 0)) {
             // CPIO formats: 070701, 070702, 070707
@@ -8913,6 +8926,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'BZh'..314159265359", 0) || compareSignature(&memoryMap, "'BZh'..17724538509000000000")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_BZIP2);
+        } else if (compareSignature(&memoryMap, "28B52FFD", 0)) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_ZSTD);
         } else if (compareSignature(&memoryMap, "FD'7zXZ'00", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_XZ);
@@ -9126,8 +9142,11 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         // Compressed/pack formats
         FT_SZDD,
         FT_BZIP2,
+        FT_ZSTD,
         FT_XZ,
         FT_LZIP,
+        FT_LZO,
+        FT_COMPRESS,
 
         // Fonts and images/media
         FT_TTF,
@@ -9294,8 +9313,11 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_CFBF)) listResult.append(FT_CFBF);
         if (stFileTypes.contains(FT_SZDD)) listResult.append(FT_SZDD);
         if (stFileTypes.contains(FT_BZIP2)) listResult.append(FT_BZIP2);
+        if (stFileTypes.contains(FT_ZSTD)) listResult.append(FT_ZSTD);
         if (stFileTypes.contains(FT_XZ)) listResult.append(FT_XZ);
         if (stFileTypes.contains(FT_LZIP)) listResult.append(FT_LZIP);
+        if (stFileTypes.contains(FT_LZO)) listResult.append(FT_LZO);
+        if (stFileTypes.contains(FT_COMPRESS)) listResult.append(FT_COMPRESS);
         if (stFileTypes.contains(FT_CPIO)) listResult.append(FT_CPIO);
         if (stFileTypes.contains(FT_ISO9660)) listResult.append(FT_ISO9660);
         if (stFileTypes.contains(FT_UDF)) listResult.append(FT_UDF);
