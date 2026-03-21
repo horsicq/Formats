@@ -51,7 +51,7 @@
 #include "xtext.h"
 #include "xdjvu.h"
 #include "xder.h"
-#include "xlzip.h"
+#include "../../XArchive/xlzip.h"
 #include "../../XOptions/xthreadobject.h"
 #ifdef USE_DEX
 #include "xandroidbinary.h"
