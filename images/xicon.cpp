@@ -160,7 +160,7 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
         quint32 nHeader = read_uint32(iconDirectory.dwImageOffset);
 
-        if ((nHeader != 0x00000028) && nHeader != (0x474e5089)) {  // PDF
+        if ((nHeader != 0x00000028) && nHeader != (0x474e5089)) {  // PNG
             bError = true;
             break;
         }
@@ -191,9 +191,9 @@ XIcon::ICONDIR XIcon::readICONDIR()
 {
     ICONDIR result = {};
 
-    result.idReserved = read_uint32(offsetof(ICONDIR, idReserved));
-    result.idType = read_uint32(offsetof(ICONDIR, idType));
-    result.idCount = read_uint32(offsetof(ICONDIR, idCount));
+    result.idReserved = read_uint16(offsetof(ICONDIR, idReserved));
+    result.idType = read_uint16(offsetof(ICONDIR, idType));
+    result.idCount = read_uint16(offsetof(ICONDIR, idCount));
 
     return result;
 }
@@ -225,7 +225,7 @@ XIcon::GRPICONDIRENTRY XIcon::readGPRICONDIRENTRY(qint64 nOffset)
     result.wPlanes = read_uint16(nOffset + offsetof(GRPICONDIRENTRY, wPlanes));
     result.wBitCount = read_uint16(nOffset + offsetof(GRPICONDIRENTRY, wBitCount));
     result.dwBytesInRes = read_uint32(nOffset + offsetof(GRPICONDIRENTRY, dwBytesInRes));
-    result.nID = read_uint32(nOffset + offsetof(GRPICONDIRENTRY, nID));
+    result.nID = read_uint16(nOffset + offsetof(GRPICONDIRENTRY, nID));
 
     return result;
 }
@@ -366,8 +366,8 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
     nMax = qMax(nMax, (qint64)(sizeof(ICONDIR) + sizeof(ICONDIRENTRY) * dir.idCount));
 
     QList<ICONDIRENTRY> entries = getIconDirectories();
-    for (int i = 0; i < entries.size(); ++i) {
-        const ICONDIRENTRY &e = entries.at(i);
+    for (qint32 nI = 0; nI < entries.size(); ++nI) {
+        ICONDIRENTRY e = entries.at(nI);
         if ((e.dwImageOffset < nTotal) && (e.dwBytesInRes > 0)) {
             if (nFileParts & FILEPART_OBJECT) {
                 FPART rec = {};
