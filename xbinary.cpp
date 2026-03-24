@@ -298,6 +298,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_MINIDUMP, "MiniDump", QString("Windows MiniDump")},
     {XBinary::FT_DMG, "DMG", QString("Apple Disk Image")},
     {XBinary::FT_ARC, "ARC", QString("ARC")},
+    {XBinary::FT_FREEARC, "FreeARC", QString("FreeARC")},
     {XBinary::FT_ARJ, "ARJ", QString("ARJ")},
 };
 
@@ -8821,6 +8822,16 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             }
         }
 
+        // FreeARC format: "ArC\x01" signature at offset 0, second "ArC\x01" at offset 8
+        if (compareSignature(&memoryMap, "'ArC'01", 0) && (nSize >= 12)) {
+            quint32 _nFreeArcBlock = read_uint32(8, false);
+
+            if (_nFreeArcBlock == 0x01437241) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_FREEARC);
+            }
+        }
+
         if (compareSignature(&memoryMap, "89'PNG\r\n'1A0A", 0)) {
             stResult.insert(FT_IMAGE);
             stResult.insert(FT_PNG);
@@ -9119,6 +9130,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_LHA,
         FT_ARJ,
         FT_ARC,
+        FT_FREEARC,
         FT_DEB,
         FT_AR,
         FT_CAB,
@@ -9265,6 +9277,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_LHA)) listResult.append(FT_LHA);
         if (stFileTypes.contains(FT_ARJ)) listResult.append(FT_ARJ);
         if (stFileTypes.contains(FT_ARC)) listResult.append(FT_ARC);
+        if (stFileTypes.contains(FT_FREEARC)) listResult.append(FT_FREEARC);
         if (stFileTypes.contains(FT_RAR)) listResult.append(FT_RAR);
         if (stFileTypes.contains(FT_CAB)) listResult.append(FT_CAB);
         if (stFileTypes.contains(FT_JAR)) listResult.append(FT_JAR);

@@ -596,6 +596,7 @@ public:
         FT_STK,
         FT_PAL,
         FT_ARC,
+        FT_FREEARC,
         FT_ARJ,
 
         // TODO more
