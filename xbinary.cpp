@@ -2821,23 +2821,15 @@ QString XBinary::read_ansiString(qint64 nOffset, qint64 nMaxSize)
     }
 
     if (nMaxSize > 0) {
-        quint8 *pBuffer = new quint8[nMaxSize + 1];
+        QByteArray baBuffer = read_array(nOffset, nMaxSize);
+        qint32 nActualSize = (qint32)baBuffer.size();
+        qint32 nLen = 0;
 
-        for (qint32 i = 0; i < nMaxSize; i++) {
-            pBuffer[i] = read_uint8(nOffset + i);
-
-            if (pBuffer[i] == 0) {
-                break;
-            }
-
-            if (i == nMaxSize - 1) {
-                pBuffer[nMaxSize] = 0;
-            }
+        while ((nLen < nActualSize) && (baBuffer.at(nLen) != 0)) {
+            nLen++;
         }
 
-        sResult.append((char *)pBuffer);
-
-        delete[] pBuffer;
+        sResult = QString::fromLatin1(baBuffer.constData(), nLen);
     }
 
     return sResult;
@@ -2848,21 +2840,26 @@ QString XBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize, bool bIsBig
     QString sResult;
 
     if ((nMaxSize > 0) && (nMaxSize < 0x10000)) {
-        quint16 *pBuffer = new quint16[nMaxSize + 1];
+        QByteArray baBuffer = read_array(nOffset, nMaxSize * 2);
+        qint32 nActualWords = (qint32)(baBuffer.size() / 2);
+        quint16 *pBuffer = new quint16[nActualWords + 1];
+        const char *pData = baBuffer.constData();
+        qint32 nLen = 0;
 
-        for (qint32 i = 0; i < nMaxSize; i++) {
-            pBuffer[i] = read_uint16(nOffset + 2 * i, bIsBigEndian);
-
-            if (pBuffer[i] == 0) {
+        for (qint32 i = 0; i < nActualWords; i++) {
+            quint16 nWord;
+            memcpy(&nWord, pData + i * 2, 2);
+            if (bIsBigEndian) {
+                nWord = (quint16)(((nWord & 0xFF) << 8) | ((nWord >> 8) & 0xFF));
+            }
+            if (nWord == 0) {
                 break;
             }
-
-            if (i == nMaxSize - 1) {
-                pBuffer[nMaxSize] = 0;
-            }
+            pBuffer[nLen++] = nWord;
         }
+        pBuffer[nLen] = 0;
 
-        sResult = QString::fromUtf16(pBuffer);  // TODO Check Qt6
+        sResult = QString::fromUtf16(pBuffer, nLen);
 
         delete[] pBuffer;
     }
@@ -8802,11 +8799,12 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_DMG);
         } else if (compareSignature(&memoryMap, "60EA", 0) && nSize >= 34) {
-            // ARJ format: 0x60 0xEA marker, basic_header_size >= 30, first_hdr_size == 30
+            // ARJ format: 0x60 0xEA marker, basic_header_size >= 30, first_hdr_size >= 30
+            // Note: ARJ 2.50+ uses first_hdr_size=34; older versions use 30
             quint16 _nArjHdrSize = read_uint16(2, false);
             quint8 _nArjFirstHdr = read_uint8(4);
 
-            if ((_nArjHdrSize >= 30) && (_nArjHdrSize <= 2600) && (_nArjFirstHdr == 30)) {
+            if ((_nArjHdrSize >= 30) && (_nArjHdrSize <= 2600) && (_nArjFirstHdr >= 30)) {
                 stResult.insert(FT_ARCHIVE);
                 stResult.insert(FT_ARJ);
             }
