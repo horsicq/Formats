@@ -27,6 +27,143 @@ XBinary::XCONVERT _TABLE_XMACH_STRUCTID[] = {
     {XMACH::STRUCTID_load_command, "load_command", QString("load_command")},
 };
 
+XBinary::XIDSTRING _TABLE_XMACH_HeaderMagics[] = {
+    {0xfeedface, "MAGIC"},
+    {0xcefaedfe, "CIGAM"},
+    {0xfeedfacf, "MAGIC_64"},
+    {0xcffaedfe, "CIGAM_64"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_HeaderCpuTypes[] = {
+    {1, "VAX"},
+    {2, "ROMP"},
+    {4, "NS32032"},
+    {5, "NS32332"},
+    {6, "MC680x0"},
+    {7, "I386"},
+    {0x1000007, "X86_64"},
+    {8, "MIPS"},
+    {9, "NS32532"},
+    {0xB, "HPPA"},
+    {0xC, "ARM"},
+    {0x100000C, "ARM64"},
+    {0x200000C, "ARM64_32"},
+    {0xD, "MC88000"},
+    {0xE, "SPARC"},
+    {0xF, "I860"},
+    {0x10, "I860_LITTLE"},
+    {0x11, "RS6000"},
+    {0x12, "POWERPC"},
+    {0x1000012, "POWERPC64"},
+    {255, "VEO"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_HeaderFileTypes[] = {
+    {0x1, "OBJECT"},
+    {0x2, "EXECUTE"},
+    {0x3, "FVMLIB"},
+    {0x4, "CORE"},
+    {0x5, "PRELOAD"},
+    {0x6, "DYLIB"},
+    {0x7, "DYLINKER"},
+    {0x8, "BUNDLE"},
+    {0x9, "DYLIB_STUB"},
+    {0xa, "DSYM"},
+    {0xb, "KEXT_BUNDLE"},
+    {0xc, "FILESET"},
+    {0xd, "GPU_EXECUTE"},
+    {0xe, "GPU_DYLIB"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_HeaderFlags[] = {
+    {0x1, "NOUNDEFS"},
+    {0x2, "INCRLINK"},
+    {0x4, "DYLDLINK"},
+    {0x8, "BINDATLOAD"},
+    {0x10, "PREBOUND"},
+    {0x20, "SPLIT_SEGS"},
+    {0x40, "LAZY_INIT"},
+    {0x80, "TWOLEVEL"},
+    {0x100, "FORCE_FLAT"},
+    {0x200, "NOMULTIDEFS"},
+    {0x400, "NOFIXPREBINDING"},
+    {0x800, "PREBINDABLE"},
+    {0x1000, "ALLMODSBOUND"},
+    {0x2000, "SUBSECTIONS_VIA_SYMBOLS"},
+    {0x4000, "CANONICAL"},
+    {0x8000, "WEAK_DEFINES"},
+    {0x10000, "BINDS_TO_WEAK"},
+    {0x20000, "ALLOW_STACK_EXECUTION"},
+    {0x40000, "ROOT_SAFE"},
+    {0x80000, "SETUID_SAFE"},
+    {0x100000, "NO_REEXPORTED_DYLIBS"},
+    {0x200000, "PIE"},
+    {0x400000, "DEAD_STRIPPABLE_DYLIB"},
+    {0x800000, "HAS_TLV_DESCRIPTORS"},
+    {0x1000000, "NO_HEAP_EXECUTION"},
+    {0x02000000, "APP_EXTENSION_SAFE"},
+    {0x04000000, "NLIST_OUTOFSYNC_WITH_DYLDINFO"},
+    {0x08000000, "SIM_SUPPORT"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_LoadCommandTypes[] = {
+    {0x1, "SEGMENT"},
+    {0x2, "SYMTAB"},
+    {0x3, "SYMSEG"},
+    {0x4, "THREAD"},
+    {0x5, "UNIXTHREAD"},
+    {0x6, "LOADFVMLIB"},
+    {0x7, "IDFVMLIB"},
+    {0x8, "IDENT"},
+    {0x9, "FVMFILE"},
+    {0xa, "PREPAGE"},
+    {0xb, "DYSYMTAB"},
+    {0xc, "LOAD_DYLIB"},
+    {0xd, "ID_DYLIB"},
+    {0xe, "LOAD_DYLINKER"},
+    {0xf, "ID_DYLINKER"},
+    {0x10, "PREBOUND_DYLIB"},
+    {0x11, "ROUTINES"},
+    {0x12, "SUB_FRAMEWORK"},
+    {0x13, "SUB_UMBRELLA"},
+    {0x14, "SUB_CLIENT"},
+    {0x15, "SUB_LIBRARY"},
+    {0x16, "TWOLEVEL_HINTS"},
+    {0x17, "PREBIND_CKSUM"},
+    {0x80000018, "LOAD_WEAK_DYLIB"},
+    {0x19, "SEGMENT_64"},
+    {0x1a, "ROUTINES_64"},
+    {0x1b, "UUID"},
+    {0x8000001c, "RPATH"},
+    {0x1d, "CODE_SIGNATURE"},
+    {0x1e, "SEGMENT_SPLIT_INFO"},
+    {0x8000001f, "REEXPORT_DYLIB"},
+    {0x20, "LAZY_LOAD_DYLIB"},
+    {0x21, "ENCRYPTION_INFO"},
+    {0x22, "DYLD_INFO"},
+    {0x80000022, "DYLD_INFO_ONLY"},
+    {0x80000023, "LOAD_UPWARD_DYLIB"},
+    {0x24, "VERSION_MIN_MACOSX"},
+    {0x25, "VERSION_MIN_IPHONEOS"},
+    {0x26, "FUNCTION_STARTS"},
+    {0x27, "DYLD_ENVIRONMENT"},
+    {0x80000028, "MAIN"},
+    {0x29, "DATA_IN_CODE"},
+    {0x2A, "SOURCE_VERSION"},
+    {0x2B, "DYLIB_CODE_SIGN_DRS"},
+    {0x2C, "ENCRYPTION_INFO_64"},
+    {0x2D, "LINKER_OPTION"},
+    {0x2E, "LINKER_OPTIMIZATION_HINT"},
+    {0x2F, "VERSION_MIN_TVOS"},
+    {0x30, "VERSION_MIN_WATCHOS"},
+    {0x31, "NOTE"},
+    {0x32, "BUILD_VERSION"},
+    {0x80000033, "DYLD_EXPORTS_TRIE"},
+    {0x80000034, "DYLD_CHAINED_FIXUPS"},
+    {0x80000035, "FILESET_ENTRY"},
+    {0x36, "ATOM_INFO"},
+};
+
 // Xcode Toolchain Version History Table (1.0-2.x, Before iOS Support)
 // Source: https://en.wikipedia.org/wiki/Xcode (Retrieved: January 2026)
 // Fields: {sVersion, sGccVersion, sGdbVersion}
@@ -5459,6 +5596,145 @@ bool XMACH::handleImport(qint64 nOffset, qint64 nRelOffset, qint64 nSize, QList<
 QString XMACH::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XMACH_STRUCTID, sizeof(_TABLE_XMACH_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+QList<XBinary::XFRECORD> XMACH::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    if (nStructID == STRUCTID_mach_header) {
+        listResult.append({"magic", (qint32)offsetof(XMACH_DEF::mach_header, magic), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cputype", (qint32)offsetof(XMACH_DEF::mach_header, cputype), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cpusubtype", (qint32)offsetof(XMACH_DEF::mach_header, cpusubtype), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"filetype", (qint32)offsetof(XMACH_DEF::mach_header, filetype), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"ncmds", (qint32)offsetof(XMACH_DEF::mach_header, ncmds), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"sizeofcmds", (qint32)offsetof(XMACH_DEF::mach_header, sizeofcmds), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"flags", (qint32)offsetof(XMACH_DEF::mach_header, flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_mach_header_64) {
+        listResult.append({"magic", (qint32)offsetof(XMACH_DEF::mach_header_64, magic), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cputype", (qint32)offsetof(XMACH_DEF::mach_header_64, cputype), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cpusubtype", (qint32)offsetof(XMACH_DEF::mach_header_64, cpusubtype), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"filetype", (qint32)offsetof(XMACH_DEF::mach_header_64, filetype), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"ncmds", (qint32)offsetof(XMACH_DEF::mach_header_64, ncmds), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"sizeofcmds", (qint32)offsetof(XMACH_DEF::mach_header_64, sizeofcmds), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"flags", (qint32)offsetof(XMACH_DEF::mach_header_64, flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"reserved", (qint32)offsetof(XMACH_DEF::mach_header_64, reserved), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_load_command) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::load_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::load_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == 0) {
+        XFSTRUCT _xfStruct = xfStruct;
+
+        if (xfStruct.pMemoryMap->mode == MODE_64) {
+            _xfStruct.nStructID = STRUCTID_mach_header_64;
+        } else {
+            _xfStruct.nStructID = STRUCTID_mach_header;
+        }
+
+        _xfStruct.xLoc = offsetToLoc(0);
+
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if ((nStructID == STRUCTID_mach_header) || (nStructID == STRUCTID_mach_header_64)) {
+        bool bIs64 = (nStructID == STRUCTID_mach_header_64);
+        XLOC headerLoc = xfStruct.xLoc;
+
+        XFHEADER xfHeader = {};
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(nStructID);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, headerLoc);
+        xfHeader.listDataSt.append(
+            {0, 0, XFDATASTYPE_LIST, _TABLE_XMACH_HeaderMagics, sizeof(_TABLE_XMACH_HeaderMagics) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append(
+            {1, 0, XFDATASTYPE_LIST, _TABLE_XMACH_HeaderCpuTypes, sizeof(_TABLE_XMACH_HeaderCpuTypes) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append(
+            {3, 0, XFDATASTYPE_LIST, _TABLE_XMACH_HeaderFileTypes, sizeof(_TABLE_XMACH_HeaderFileTypes) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append(
+            {6, 0xFFFFFFFF, XFDATASTYPE_FLAGS, _TABLE_XMACH_HeaderFlags, sizeof(_TABLE_XMACH_HeaderFlags) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
+
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            qint64 nHeaderOffset = locToOffset(xfStruct.pMemoryMap, headerLoc);
+            qint64 nCommandsOffset = 0;
+            qint32 nCommandCount = 0;
+
+            if (bIs64) {
+                XMACH_DEF::mach_header_64 mh = _read_mach_header_64(nHeaderOffset);
+                nCommandsOffset = nHeaderOffset + sizeof(XMACH_DEF::mach_header_64);
+                nCommandCount = mh.ncmds;
+            } else {
+                XMACH_DEF::mach_header mh = _read_mach_header(nHeaderOffset);
+                nCommandsOffset = nHeaderOffset + sizeof(XMACH_DEF::mach_header);
+                nCommandCount = mh.ncmds;
+            }
+
+            if (nCommandCount > 0) {
+                XFSTRUCT _xfStruct = xfStruct;
+                _xfStruct.sParent = xfHeader.sTag;
+                _xfStruct.nStructID = STRUCTID_load_command;
+                _xfStruct.xLoc = offsetToLoc(nCommandsOffset);
+                _xfStruct.nCount = nCommandCount;
+
+                listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+            }
+        }
+    } else if (nStructID == STRUCTID_load_command) {
+        qint64 nCurrentOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        qint32 nCommandCount = xfStruct.nCount;
+        qint64 nFileSize = getSize();
+        bool bIsBigEndian = (xfStruct.pMemoryMap->endian == ENDIAN_BIG);
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_load_command);
+        xfHeader.xLoc = xfStruct.xLoc;
+        xfHeader.xfType = XFTYPE_TABLE;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_load_command, xfStruct.xLoc);
+        xfHeader.listDataSt.append(
+            {0, 0, XFDATASTYPE_LIST, _TABLE_XMACH_LoadCommandTypes, sizeof(_TABLE_XMACH_LoadCommandTypes) / sizeof(XBinary::XIDSTRING)});
+
+        for (qint32 i = 0; i < nCommandCount; i++) {
+            if ((nCurrentOffset + (qint64)sizeof(XMACH_DEF::load_command)) > nFileSize) {
+                break;
+            }
+
+            xfHeader.listRowLocations.append(nCurrentOffset);
+
+            quint32 nCmdSize = read_uint32(nCurrentOffset + offsetof(XMACH_DEF::load_command, cmdsize), bIsBigEndian);
+
+            if (nCmdSize < sizeof(XMACH_DEF::load_command)) {
+                break;
+            }
+
+            nCurrentOffset += nCmdSize;
+        }
+
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_load_command), xfHeader.sParentTag);
+
+        listResult.append(xfHeader);
+    }
+
+    return listResult;
 }
 
 QString XMACH::getMIMEString()

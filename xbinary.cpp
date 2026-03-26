@@ -300,6 +300,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_ARC, "ARC", QString("ARC")},
     {XBinary::FT_FREEARC, "FreeARC", QString("FreeARC")},
     {XBinary::FT_ARJ, "ARJ", QString("ARJ")},
+    {XBinary::FT_BROTLI, "Brotli", QString("Brotli")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -9127,6 +9128,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_RAR,
         FT_LHA,
         FT_ARJ,
+        FT_BROTLI,
         FT_ARC,
         FT_FREEARC,
         FT_DEB,
@@ -9152,6 +9154,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         // Compressed/pack formats
         FT_SZDD,
         FT_BZIP2,
+        FT_BROTLI,
         FT_ZSTD,
         FT_XZ,
         FT_LZIP,
@@ -9324,6 +9327,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_CFBF)) listResult.append(FT_CFBF);
         if (stFileTypes.contains(FT_SZDD)) listResult.append(FT_SZDD);
         if (stFileTypes.contains(FT_BZIP2)) listResult.append(FT_BZIP2);
+        if (stFileTypes.contains(FT_BROTLI)) listResult.append(FT_BROTLI);
         if (stFileTypes.contains(FT_ZSTD)) listResult.append(FT_ZSTD);
         if (stFileTypes.contains(FT_XZ)) listResult.append(FT_XZ);
         if (stFileTypes.contains(FT_LZIP)) listResult.append(FT_LZIP);
