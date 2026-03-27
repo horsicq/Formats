@@ -2180,27 +2180,27 @@ QString XBinary::convertFileName(const QString &sFileName)  // TODO Check
     return sResult;
 }
 
-QString XBinary::convertPathName(const QString &sPathName)
-{
-    QString sResult = sPathName;
+// QString XBinary::convertPathName(const QString &sPathName)
+// {
+//     QString sResult = sPathName;
 
-    // TODO more
-    if (sPathName.contains("$app")) {
-        sResult.replace("$app", QCoreApplication::applicationDirPath());
-        sResult.replace("/", QDir::separator());
-    }
+//     // TODO more
+//     if (sPathName.contains("$app")) {
+//         sResult.replace("$app", QCoreApplication::applicationDirPath());
+//         sResult.replace("/", QDir::separator());
+//     }
 
-    if (sPathName.contains("$data")) {
-#ifdef Q_OS_MAC
-        sResult.replace("$data", QCoreApplication::applicationDirPath() + "/../Resources");
-#else
-        sResult.replace("$data", QCoreApplication::applicationDirPath());
-#endif
-        sResult.replace("/", QDir::separator());
-    }
+//     if (sPathName.contains("$data")) {
+// #ifdef Q_OS_MAC
+//         sResult.replace("$data", QCoreApplication::applicationDirPath() + "/../Resources");
+// #else
+//         sResult.replace("$data", QCoreApplication::applicationDirPath());
+// #endif
+//         sResult.replace("/", QDir::separator());
+//     }
 
-    return sResult;
-}
+//     return sResult;
+// }
 
 XBinary::OS_STRING XBinary::getOsAnsiString(qint64 nOffset, qint64 nSize)
 {
