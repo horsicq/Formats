@@ -104,8 +104,7 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
         if (XBinary::checkFileType(XBinary::FT_TAR_ZSTD, fileType)) return new XTAR_ZSTD(pDevice);
 
         return new XTAR_GZ(pDevice);
-    }
-    else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) return new XGzip(pDevice);
+    } else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) return new XGzip(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) return new XZlib(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) return new XLHA(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_ARJ, fileType)) return new XARJ(pDevice);

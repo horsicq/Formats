@@ -231,13 +231,13 @@ public:
         HANDLE_METHOD_PDF_CCITTIMAGE,
         HANDLE_METHOD_PDF_PALETTE,
         HANDLE_METHOD_ANDROID_XML,
-        HANDLE_METHOD_ZSTD,       // Zstandard compression (tar.zst, .zst)
-        HANDLE_METHOD_LZIP,       // LZIP compression - LZMA variant (tar.lz, .lz)
-        HANDLE_METHOD_LZOP,       // LZO compression (tar.lzo, .lzo)
-        HANDLE_METHOD_COMPRESS,   // Compress (.Z) - LZW algorithm (tar.Z, .Z)
-        HANDLE_METHOD_ARJ,        // ARJ compression methods 1-3 (Huffman + LZSS)
-        HANDLE_METHOD_ARJ_FASTEST, // ARJ compression method 4 (simple LZSS)
-        HANDLE_METHOD_BROTLI       // Brotli compression (.br)
+        HANDLE_METHOD_ZSTD,         // Zstandard compression (tar.zst, .zst)
+        HANDLE_METHOD_LZIP,         // LZIP compression - LZMA variant (tar.lz, .lz)
+        HANDLE_METHOD_LZOP,         // LZO compression (tar.lzo, .lzo)
+        HANDLE_METHOD_COMPRESS,     // Compress (.Z) - LZW algorithm (tar.Z, .Z)
+        HANDLE_METHOD_ARJ,          // ARJ compression methods 1-3 (Huffman + LZSS)
+        HANDLE_METHOD_ARJ_FASTEST,  // ARJ compression method 4 (simple LZSS)
+        HANDLE_METHOD_BROTLI        // Brotli compression (.br)
         // TODO check more methods
     };
 

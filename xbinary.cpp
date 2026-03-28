@@ -13615,9 +13615,9 @@ bool XBinary::checkFileType(XBinary::FT fileTypeMain, XBinary::FT fileTypeOption
         bResult = true;
     } else if ((fileTypeMain == FT_TEXT) && ((fileTypeOptional == FT_TEXT) || (fileTypeOptional == FT_UTF8) || (fileTypeOptional == FT_UNICODE))) {
         bResult = true;
-    } else if ((fileTypeMain == FT_TAR_GZ) && ((fileTypeOptional == FT_TAR_GZ) || (fileTypeOptional == FT_TAR_BZIP2) || (fileTypeOptional == FT_TAR_LZIP) ||
-                                                (fileTypeOptional == FT_TAR_LZMA) || (fileTypeOptional == FT_TAR_LZOP) || (fileTypeOptional == FT_TAR_XZ) ||
-                                                (fileTypeOptional == FT_TAR_Z) || (fileTypeOptional == FT_TAR_ZSTD))) {
+    } else if ((fileTypeMain == FT_TAR_GZ) &&
+               ((fileTypeOptional == FT_TAR_GZ) || (fileTypeOptional == FT_TAR_BZIP2) || (fileTypeOptional == FT_TAR_LZIP) || (fileTypeOptional == FT_TAR_LZMA) ||
+                (fileTypeOptional == FT_TAR_LZOP) || (fileTypeOptional == FT_TAR_XZ) || (fileTypeOptional == FT_TAR_Z) || (fileTypeOptional == FT_TAR_ZSTD))) {
         bResult = true;
     } else if (fileTypeMain == fileTypeOptional) {
         bResult = true;
@@ -13637,8 +13637,7 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) || pStFileTypes->contains(XBinary::FT_MACHO64) ||
         pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP) ||
         pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA) || pStFileTypes->contains(XBinary::FT_ARJ) ||
-        pStFileTypes->contains(XBinary::FT_AMIGAHUNK) ||
-        pStFileTypes->contains(XBinary::FT_ATARIST)) {
+        pStFileTypes->contains(XBinary::FT_AMIGAHUNK) || pStFileTypes->contains(XBinary::FT_ATARIST)) {
         XBinary::removeFileTypes(pStFileTypes);
     }
 }

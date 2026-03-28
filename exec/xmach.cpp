@@ -59,20 +59,8 @@ XBinary::XIDSTRING _TABLE_XMACH_HeaderCpuTypes[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_HeaderFileTypes[] = {
-    {0x1, "OBJECT"},
-    {0x2, "EXECUTE"},
-    {0x3, "FVMLIB"},
-    {0x4, "CORE"},
-    {0x5, "PRELOAD"},
-    {0x6, "DYLIB"},
-    {0x7, "DYLINKER"},
-    {0x8, "BUNDLE"},
-    {0x9, "DYLIB_STUB"},
-    {0xa, "DSYM"},
-    {0xb, "KEXT_BUNDLE"},
-    {0xc, "FILESET"},
-    {0xd, "GPU_EXECUTE"},
-    {0xe, "GPU_DYLIB"},
+    {0x1, "OBJECT"}, {0x2, "EXECUTE"},    {0x3, "FVMLIB"}, {0x4, "CORE"},        {0x5, "PRELOAD"}, {0x6, "DYLIB"},       {0x7, "DYLINKER"},
+    {0x8, "BUNDLE"}, {0x9, "DYLIB_STUB"}, {0xa, "DSYM"},   {0xb, "KEXT_BUNDLE"}, {0xc, "FILESET"}, {0xd, "GPU_EXECUTE"}, {0xe, "GPU_DYLIB"},
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_HeaderFlags[] = {
@@ -5660,14 +5648,10 @@ QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
         xfHeader.xLoc = headerLoc;
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, headerLoc);
-        xfHeader.listDataSt.append(
-            {0, 0, XFDATASTYPE_LIST, _TABLE_XMACH_HeaderMagics, sizeof(_TABLE_XMACH_HeaderMagics) / sizeof(XBinary::XIDSTRING)});
-        xfHeader.listDataSt.append(
-            {1, 0, XFDATASTYPE_LIST, _TABLE_XMACH_HeaderCpuTypes, sizeof(_TABLE_XMACH_HeaderCpuTypes) / sizeof(XBinary::XIDSTRING)});
-        xfHeader.listDataSt.append(
-            {3, 0, XFDATASTYPE_LIST, _TABLE_XMACH_HeaderFileTypes, sizeof(_TABLE_XMACH_HeaderFileTypes) / sizeof(XBinary::XIDSTRING)});
-        xfHeader.listDataSt.append(
-            {6, 0xFFFFFFFF, XFDATASTYPE_FLAGS, _TABLE_XMACH_HeaderFlags, sizeof(_TABLE_XMACH_HeaderFlags) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XMACH_HeaderMagics, sizeof(_TABLE_XMACH_HeaderMagics) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append({1, 0, XFDATASTYPE_LIST, _TABLE_XMACH_HeaderCpuTypes, sizeof(_TABLE_XMACH_HeaderCpuTypes) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append({3, 0, XFDATASTYPE_LIST, _TABLE_XMACH_HeaderFileTypes, sizeof(_TABLE_XMACH_HeaderFileTypes) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append({6, 0xFFFFFFFF, XFDATASTYPE_FLAGS, _TABLE_XMACH_HeaderFlags, sizeof(_TABLE_XMACH_HeaderFlags) / sizeof(XBinary::XIDSTRING)});
         xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
 
         listResult.append(xfHeader);
@@ -5710,8 +5694,7 @@ QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
         xfHeader.xLoc = xfStruct.xLoc;
         xfHeader.xfType = XFTYPE_TABLE;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_load_command, xfStruct.xLoc);
-        xfHeader.listDataSt.append(
-            {0, 0, XFDATASTYPE_LIST, _TABLE_XMACH_LoadCommandTypes, sizeof(_TABLE_XMACH_LoadCommandTypes) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XMACH_LoadCommandTypes, sizeof(_TABLE_XMACH_LoadCommandTypes) / sizeof(XBinary::XIDSTRING)});
 
         for (qint32 i = 0; i < nCommandCount; i++) {
             if ((nCurrentOffset + (qint64)sizeof(XMACH_DEF::load_command)) > nFileSize) {
