@@ -300,6 +300,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_ARC, "ARC", QString("ARC")},
     {XBinary::FT_FREEARC, "FreeARC", QString("FreeARC")},
     {XBinary::FT_ARJ, "ARJ", QString("ARJ")},
+    {XBinary::FT_ACE, "ACE", QString("ACE")},
     {XBinary::FT_BROTLI, "Brotli", QString("Brotli")},
 };
 
@@ -8809,6 +8810,17 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                 stResult.insert(FT_ARCHIVE);
                 stResult.insert(FT_ARJ);
             }
+        } else if (nSize >= 14) {
+            // ACE format: head_type=0 at offset 4, magic "**ACE**" at offset 7
+            quint8 _nAceHeadType = read_uint8(4);
+            quint16 _nAceHeadSize = read_uint16(2, false);
+
+            if ((_nAceHeadType == 0) && (_nAceHeadSize >= 10)) {
+                if (compareSignature(&memoryMap, "'**ACE**'", 7)) {
+                    stResult.insert(FT_ARCHIVE);
+                    stResult.insert(FT_ACE);
+                }
+            }
         } else if (nSize >= 29) {
             // ARC format: 0x1A + method(1-9) + filename(13 bytes null-terminated, first char printable ASCII 0x21-0x7E)
             quint8 _nArcMarker = read_uint8(0);
@@ -9128,6 +9140,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_RAR,
         FT_LHA,
         FT_ARJ,
+        FT_ACE,
         FT_BROTLI,
         FT_ARC,
         FT_FREEARC,
@@ -9277,6 +9290,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_ZLIB)) listResult.append(FT_ZLIB);
         if (stFileTypes.contains(FT_LHA)) listResult.append(FT_LHA);
         if (stFileTypes.contains(FT_ARJ)) listResult.append(FT_ARJ);
+        if (stFileTypes.contains(FT_ACE)) listResult.append(FT_ACE);
         if (stFileTypes.contains(FT_ARC)) listResult.append(FT_ARC);
         if (stFileTypes.contains(FT_FREEARC)) listResult.append(FT_FREEARC);
         if (stFileTypes.contains(FT_RAR)) listResult.append(FT_RAR);

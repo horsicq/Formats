@@ -601,6 +601,7 @@ public:
         FT_ARC,
         FT_FREEARC,
         FT_ARJ,
+        FT_ACE,
         FT_BROTLI,
 
         // TODO more
