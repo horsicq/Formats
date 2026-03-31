@@ -16330,12 +16330,224 @@ bool XBinary::initFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
 
 XBinary::FFSEARCH_INFO XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pState)
-    Q_UNUSED(pPdStruct)
     FFSEARCH_INFO result = {};
 
-    // Derived classes should override this method for format-specific search
+    if (!pState) {
+        return result;
+    }
+
+    QList<QString> listSignatures = getSearchSignatures();
+
+    if (listSignatures.isEmpty()) {
+        return result;
+    }
+
+    QIODevice *pDevice = pState->pDevice;
+
+    if (!pDevice) {
+        pDevice = getDevice();
+    }
+
+    if (!pDevice) {
+        return result;
+    }
+
+    qint64 nTotalSize = pDevice->size();
+    qint64 nStartOffset = pState->nCurrentOffset;
+    qint64 nSearchSize = -1;
+
+    if (pState->nSize > 0) {
+        qint64 nSearchEnd = qMin(nTotalSize, pState->nStartOffset + pState->nSize);
+        nSearchSize = nSearchEnd - nStartOffset;
+    }
+
+    while (XBinary::isPdStructNotCanceled(pPdStruct)) {
+        qint64 nFoundOffset = -1;
+
+        qint32 nCount = listSignatures.count();
+
+        for (qint32 i = 0; i < nCount; i++) {
+            QString sSignature = listSignatures.at(i);
+
+            if (!sSignature.isEmpty()) {
+                qint64 nCandidate = find_signature(nullptr, nStartOffset, nSearchSize, sSignature, nullptr, pPdStruct);
+
+                if ((nCandidate != -1) && ((nFoundOffset == -1) || (nCandidate < nFoundOffset))) {
+                    nFoundOffset = nCandidate;
+                }
+            }
+        }
+
+        if (nFoundOffset == -1) {
+            break;
+        }
+
+        qint64 nEmbeddedSize = 0;
+        FT fileType = FT_UNKNOWN;
+
+        {
+            SubDevice subdevice(pDevice, nFoundOffset, -1);
+
+            if (subdevice.open(QIODevice::ReadOnly)) {
+                XBinary *pInstance = createInstance(&subdevice);
+
+                if (pInstance) {
+                    if (pInstance->isValid(pPdStruct)) {
+                        nEmbeddedSize = pInstance->getFileFormatSize(pPdStruct);
+                        fileType = pInstance->getFileType();
+                    }
+
+                    delete pInstance;
+                    pInstance = nullptr;
+                }
+
+                subdevice.close();
+            }
+        }
+
+        if (nEmbeddedSize > 0) {
+            if ((pState->nSize > 0) && ((nFoundOffset + nEmbeddedSize) > (pState->nStartOffset + pState->nSize))) {
+                nStartOffset = nFoundOffset + 1;
+
+                if (pState->nSize > 0) {
+                    qint64 nSearchEnd = qMin(nTotalSize, pState->nStartOffset + pState->nSize);
+                    nSearchSize = nSearchEnd - nStartOffset;
+                }
+
+                continue;
+            }
+
+            SubDevice subdevice(pDevice, nFoundOffset, nEmbeddedSize);
+
+            if (subdevice.open(QIODevice::ReadOnly)) {
+                XBinary *pInstance = createInstance(&subdevice);
+
+                if (pInstance) {
+                    XBinary::FILEFORMATINFO formatInfo = pInstance->getFileFormatInfo(pPdStruct);
+
+                    delete pInstance;
+                    pInstance = nullptr;
+
+                    if (formatInfo.bIsValid) {
+                        result.bIsValid = true;
+                        result.fileTYPE = (fileType != FT_UNKNOWN) ? fileType : formatInfo.fileType;
+                        result.nOffset = nFoundOffset;
+                        result.nSize = nEmbeddedSize;
+                        result.sExt = formatInfo.sExt;
+                        result.sString = XBinary::getFileFormatString(&formatInfo);
+
+                        pState->nCurrentOffset = nFoundOffset + nEmbeddedSize;
+
+                        subdevice.close();
+                        return result;
+                    }
+                }
+
+                subdevice.close();
+            }
+        }
+
+        nStartOffset = nFoundOffset + 1;
+
+        if (pState->nSize > 0) {
+            qint64 nSearchEnd = qMin(nTotalSize, pState->nStartOffset + pState->nSize);
+            nSearchSize = nSearchEnd - nStartOffset;
+        }
+    }
+
     return result;
+}
+
+QList<QString> XBinary::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    FT fileType = getFileType();
+
+    if (XBinary::checkFileType(FT_PE, fileType)) {
+        listResult.append("'MZ'");
+    } else if (XBinary::checkFileType(FT_ELF, fileType)) {
+        listResult.append("7F'ELF'");
+    } else if (XBinary::checkFileType(FT_MACHOFAT, fileType)) {
+        listResult.append("CAFEBABE");
+        listResult.append("BEBAFECA");
+    } else if (XBinary::checkFileType(FT_MACHO, fileType)) {
+        listResult.append("FEEDFACE");
+        listResult.append("CEFAEDFE");
+        listResult.append("FEEDFACF");
+        listResult.append("CFFAEDFE");
+    } else if (XBinary::checkFileType(FT_PDF, fileType)) {
+        listResult.append("'%PDF'");
+    } else if (XBinary::checkFileType(FT_PNG, fileType)) {
+        listResult.append("89'PNG\r\n'1A0A");
+    } else if (XBinary::checkFileType(FT_JPEG, fileType)) {
+        listResult.append("FFD8FF");
+    } else if (XBinary::checkFileType(FT_TIFF, fileType)) {
+        listResult.append("'MM'002A");
+        listResult.append("'II'2A00");
+    } else if (XBinary::checkFileType(FT_BMP, fileType)) {
+        listResult.append("'BM'");
+    } else if (XBinary::checkFileType(FT_GIF, fileType)) {
+        listResult.append("'GIF8'");
+    } else if (XBinary::checkFileType(FT_ICO, fileType)) {
+        listResult.append("00000100");
+    } else if (XBinary::checkFileType(FT_DEX, fileType)) {
+        listResult.append("'dex\n'");
+    } else if (XBinary::checkFileType(FT_ZIP, fileType)) {
+        listResult.append("'PK'0304");
+    } else if (XBinary::checkFileType(FT_RAR, fileType)) {
+        listResult.append("'Rar!'1A07");
+    } else if (XBinary::checkFileType(FT_GZIP, fileType)) {
+        listResult.append("1F8B08");
+    } else if (XBinary::checkFileType(FT_ZLIB, fileType)) {
+        listResult.append("785E");
+        listResult.append("789C");
+        listResult.append("78DA");
+    } else if (XBinary::checkFileType(FT_7Z, fileType)) {
+        listResult.append("'7z'BCAF271C");
+    } else if (XBinary::checkFileType(FT_CAB, fileType)) {
+        listResult.append("'MSCF'");
+    } else if (XBinary::checkFileType(FT_MP3, fileType)) {
+        listResult.append("'ID3'");
+    } else if (XBinary::checkFileType(FT_MP4, fileType)) {
+        listResult.append("'ftyp'");
+    } else if (XBinary::checkFileType(FT_RIFF, fileType)) {
+        listResult.append("'RIFF'");
+    } else if (XBinary::checkFileType(FT_LE, fileType)) {
+        listResult.append("'MZ'");
+    } else if (XBinary::checkFileType(FT_NE, fileType)) {
+        listResult.append("'MZ'");
+    } else if (XBinary::checkFileType(FT_AMIGAHUNK, fileType)) {
+        listResult.append("000003F3");
+        listResult.append("000003E7");
+    } else if (XBinary::checkFileType(FT_JAVACLASS, fileType)) {
+        listResult.append("CAFEBABE");
+    } else if (XBinary::checkFileType(FT_SZDD, fileType)) {
+        listResult.append("'SZDD'88F027'3A'");
+    } else if (XBinary::checkFileType(FT_BZIP2, fileType)) {
+        listResult.append("314159265359");
+        listResult.append("17724538509000000000");
+    } else if (XBinary::checkFileType(FT_LHA, fileType)) {
+        listResult.append("'-lh'..2d");
+        listResult.append("'-lz'..2d");
+        listResult.append("'-pm'..2d");
+    } else if (XBinary::checkFileType(FT_DJVU, fileType)) {
+        listResult.append("'AT&TFORM'");
+        listResult.append("'SDJVFORM'");
+    }
+
+    return listResult;
+}
+
+XBinary *XBinary::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    FT fileType = getFileType();
+
+    if (fileType != FT_BINARY) {
+        return nullptr;
+    }
+
+    return new XBinary(pDevice, bIsImage, nModuleAddress);
 }
 
 bool XBinary::finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)

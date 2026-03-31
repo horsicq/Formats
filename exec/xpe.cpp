@@ -550,6 +550,20 @@ XBinary::FILEFORMATINFO XPE::getFileFormatInfo(PDSTRUCT *pPdStruct)
     return result;
 }
 
+QList<QString> XPE::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("'MZ'");
+
+    return listResult;
+}
+
+XBinary *XPE::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    return new XPE(pDevice, bIsImage, nModuleAddress);
+}
+
 qint64 XPE::getNtHeadersOffset()
 {
     qint64 result = get_lfanew();

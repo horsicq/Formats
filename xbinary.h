@@ -237,7 +237,9 @@ public:
         HANDLE_METHOD_COMPRESS,     // Compress (.Z) - LZW algorithm (tar.Z, .Z)
         HANDLE_METHOD_ARJ,          // ARJ compression methods 1-3 (Huffman + LZSS)
         HANDLE_METHOD_ARJ_FASTEST,  // ARJ compression method 4 (simple LZSS)
-        HANDLE_METHOD_BROTLI        // Brotli compression (.br)
+        HANDLE_METHOD_BROTLI,       // Brotli compression (.br)
+        HANDLE_METHOD_ACE,          // ACE method 1: LZ77 + Huffman (32KB window)
+        HANDLE_METHOD_ACE_DELTA     // ACE method 2: LZ77 + Huffman + inverse byte-delta filter
         // TODO check more methods
     };
 
@@ -2411,6 +2413,9 @@ public:
     virtual bool initFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
     virtual FFSEARCH_INFO searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
     virtual bool finishFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+
+    virtual QList<QString> getSearchSignatures();
+    virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
     static qint32 getBufferSize(PDSTRUCT *pPdStruct);
     static qint32 getFileBufferSize(PDSTRUCT *pPdStruct);

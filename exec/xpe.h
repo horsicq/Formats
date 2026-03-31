@@ -388,6 +388,9 @@ public:
 
     virtual FILEFORMATINFO getFileFormatInfo(PDSTRUCT *pPdStruct);
 
+    virtual QList<QString> getSearchSignatures() override;
+    virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
+
     qint64 getNtHeadersOffset();
     quint32 getNtHeaders_Signature();
     void setNtHeaders_Signature(quint32 nValue);
