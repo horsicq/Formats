@@ -5847,3 +5847,20 @@ QMap<quint64, QString> XELF::getStTypesS()
 
     return mapResult;
 }
+
+QList<QString> XELF::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("7F'ELF'");
+
+    return listResult;
+}
+
+XBinary *XELF::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XELF(pDevice);
+}

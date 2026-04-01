@@ -240,3 +240,20 @@ QList<XBinary::FPART> XAVI::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
 
     return listResult;
 }
+
+QList<QString> XAVI::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("'RIFF'....'AVI '");
+
+    return listResult;
+}
+
+XBinary *XAVI::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XAVI(pDevice);
+}

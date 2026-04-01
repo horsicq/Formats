@@ -6153,3 +6153,23 @@ QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &da
 
     return listResult;
 }
+
+QList<QString> XMACH::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("CEFAEDFE");
+    listResult.append("CFFAEDFE");
+    listResult.append("FEEDFACE");
+    listResult.append("FEEDFACF");
+
+    return listResult;
+}
+
+XBinary *XMACH::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XMACH(pDevice);
+}

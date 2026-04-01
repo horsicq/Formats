@@ -538,3 +538,21 @@ bool XDJVU::_isChunkValid(const QString &sChunkName)
 
     return listValidChunks.contains(sChunkName);
 }
+
+QList<QString> XDJVU::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("'AT&T'");
+    listResult.append("'SDJV'");
+
+    return listResult;
+}
+
+XBinary *XDJVU::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XDJVU(pDevice);
+}

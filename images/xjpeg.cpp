@@ -450,3 +450,20 @@ XJpeg::CHUNK XJpeg::_readChunk(qint64 nOffset)
 
     return result;
 }
+
+QList<QString> XJpeg::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("FFD8FF");
+
+    return listResult;
+}
+
+XBinary *XJpeg::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XJpeg(pDevice);
+}

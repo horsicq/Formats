@@ -397,3 +397,18 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
 
     return listResult;
 }
+
+QList<QString> XIcon::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    return listResult;
+}
+
+XBinary *XIcon::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XIcon(pDevice);
+}

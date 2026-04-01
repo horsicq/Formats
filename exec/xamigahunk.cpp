@@ -622,3 +622,21 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
 
     return list;
 }
+
+QList<QString> XAmigaHunk::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("03F3");
+    listResult.append("03E7");
+
+    return listResult;
+}
+
+XBinary *XAmigaHunk::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XAmigaHunk(pDevice);
+}

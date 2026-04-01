@@ -811,3 +811,20 @@ XBinary::MODE XJavaClass::getMode()
 {
     return MODE_32;
 }
+
+QList<QString> XJavaClass::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("CAFEBABE");
+
+    return listResult;
+}
+
+XBinary *XJavaClass::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XJavaClass(pDevice);
+}

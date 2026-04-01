@@ -250,3 +250,22 @@ QString XRiff::structIDToString(quint32 nID)
     }
     return XBinary::structIDToString(nID);
 }
+
+QList<QString> XRiff::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("'RIFF'");
+    listResult.append("'RIFX'");
+    listResult.append("'AIFF'");
+
+    return listResult;
+}
+
+XBinary *XRiff::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XRiff(pDevice);
+}

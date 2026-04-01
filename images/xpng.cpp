@@ -847,3 +847,20 @@ qint32 XPNG::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_R
 
     return nResult;
 }
+
+QList<QString> XPNG::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("89504E470D0A1A0A");
+
+    return listResult;
+}
+
+XBinary *XPNG::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XPNG(pDevice);
+}

@@ -27,6 +27,8 @@ class XDJVU : public XBinary {
     Q_OBJECT
 
 public:
+    virtual QList<QString> getSearchSignatures() override;
+    virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
     enum TYPE {
         TYPE_UNKNOWN = 0,
         TYPE_SINGLE_PAGE,
@@ -104,13 +106,14 @@ public:
     static QMap<quint64, QString> getImageTypesS();
 
 private:
-    HEADER _getHeader();
+HEADER _getHeader();
     QList<CHUNK_RECORD> _getChunkRecords(PDSTRUCT *pPdStruct);
     INFO_RECORD _getInfoRecord(qint64 nOffset, PDSTRUCT *pPdStruct);
     bool _isChunkValid(const QString &sChunkName);
 
 private:
-    HEADER m_header;
+HEADER m_header;
+
 };
 
 #endif  // XDJVU_H

@@ -401,3 +401,20 @@ XBinary::FT XGif::getFileType()
 {
     return FT_GIF;
 }
+
+QList<QString> XGif::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("'GIF8'");
+
+    return listResult;
+}
+
+XBinary *XGif::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XGif(pDevice);
+}

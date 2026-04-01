@@ -220,3 +220,20 @@ QString XMP4::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XMP4_STRUCTID, sizeof(_TABLE_XMP4_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
+
+QList<QString> XMP4::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("....'ftyp'");
+
+    return listResult;
+}
+
+XBinary *XMP4::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XMP4(pDevice);
+}

@@ -428,3 +428,22 @@ QList<XBinary::MAPMODE> XMP3::getMapModesList()
 
     return list;
 }
+
+QList<QString> XMP3::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("'ID3'02");
+    listResult.append("'ID3'03");
+    listResult.append("'ID3'04");
+
+    return listResult;
+}
+
+XBinary *XMP3::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XMP3(pDevice);
+}

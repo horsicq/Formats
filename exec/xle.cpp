@@ -1628,3 +1628,20 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
 
     return listResult;
 }
+
+QList<QString> XLE::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("'MZ'");
+
+    return listResult;
+}
+
+XBinary *XLE::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XLE(pDevice);
+}

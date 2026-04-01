@@ -27,6 +27,8 @@ class XJavaClass : public XBinary {
     Q_OBJECT
 
 public:
+    virtual QList<QString> getSearchSignatures() override;
+    virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_MAGIC,
@@ -126,8 +128,9 @@ public:
     static QString _getJDKVersion(quint16 nMajor, quint16 nMinor);
 
 private:
-    qint32 _read_attribute_info(qint64 nOffset, attribute_info *pAttributeInfo);
+qint32 _read_attribute_info(qint64 nOffset, attribute_info *pAttributeInfo);
     qint32 _read_record_info(qint64 nOffset, record_info *pRecordInfo);
+
 };
 
 #endif  // XJAVACLASS_H

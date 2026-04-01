@@ -1434,3 +1434,20 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
     Q_UNUSED(pPdStruct)
     return listResult;
 }
+
+QList<QString> XNE::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("'MZ'");
+
+    return listResult;
+}
+
+XBinary *XNE::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XNE(pDevice);
+}

@@ -27,6 +27,8 @@ class XMP4 : public XBinary {
     Q_OBJECT
 
 public:
+    virtual QList<QString> getSearchSignatures() override;
+    virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_BOX,
@@ -51,7 +53,8 @@ public:
     virtual QString structIDToString(quint32 nID) override;
 
 private:
-    bool isTagValid(const QString &sTagName);
+bool isTagValid(const QString &sTagName);
+
 };
 
 #endif  // XMP4_H

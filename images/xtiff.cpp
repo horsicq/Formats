@@ -493,3 +493,21 @@ qint32 XTiff::getBaseTypeSize(quint16 nType)
 
     return nResult;
 }
+
+QList<QString> XTiff::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("'II'..");
+    listResult.append("'MM'..");
+
+    return listResult;
+}
+
+XBinary *XTiff::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XTiff(pDevice);
+}

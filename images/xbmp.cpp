@@ -331,3 +331,20 @@ QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
 
     return listResult;
 }
+
+QList<QString> XBMP::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("'BM'");
+
+    return listResult;
+}
+
+XBinary *XBMP::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XBMP(pDevice);
+}

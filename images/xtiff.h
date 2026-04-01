@@ -37,6 +37,8 @@ class XTiff : public XBinary {
 #pragma pack(pop)
 
 public:
+    virtual QList<QString> getSearchSignatures() override;
+    virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_SIGNATURE,
@@ -75,7 +77,8 @@ public:
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 
 private:
-    qint32 getBaseTypeSize(quint16 nType);
+qint32 getBaseTypeSize(quint16 nType);
+
 };
 
 #endif  // XTIFF_H
