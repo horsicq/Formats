@@ -12547,7 +12547,7 @@ bool XBinary::_handleOverlay(_MEMORY_MAP *pMemoryMap)
 
     qint64 nTotalSize = pMemoryMap->nBinarySize;
 
-    // get maxmimal offset
+    // get maximal offset
     qint64 nMaxOffset = 0;
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
