@@ -13405,6 +13405,7 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_XBOX: sResult = QString("XBOX"); break;
         case OSNAME_PLAYSTATION: sResult = QString("PlayStation"); break;
         case OSNAME_JVM: sResult = QString("JVM"); break;
+        case OSNAME_CHROMEOS: sResult = QString("ChromeOS"); break;
 
         default: sResult = tr("Unknown");
     }

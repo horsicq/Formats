@@ -790,7 +790,8 @@ public:
         OSNAME_MACCATALYST,
         OSNAME_MACDRIVERKIT,
         OSNAME_MACFIRMWARE,
-        OSNAME_SEPOS
+        OSNAME_SEPOS,
+        OSNAME_CHROMEOS
         // TODO more
     };
 
