@@ -13013,7 +13013,11 @@ QDateTime XBinary::valueToTime(quint64 nValue, DT_TYPE type)
     if (type == DT_TYPE_POSIX) {
         result.setMSecsSinceEpoch(nValue * 1000);
     } else if (type == DT_TYPE_UNIXTIME) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
         result = QDateTime::fromSecsSinceEpoch((quint32)nValue, Qt::UTC);
+#else
+        result = QDateTime::fromMSecsSinceEpoch((quint32)nValue * 1000, Qt::UTC);
+#endif
     } else if (type == DT_TYPE_DOSTIME) {
         quint16 nDosTime = (quint16)nValue;
         // Use a valid dummy date (1980-01-01 = 0x0021) since we only need the time component
