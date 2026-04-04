@@ -13406,8 +13406,8 @@ QString XBinary::osNameIdToString(OSNAME osName)
         case OSNAME_PLAYSTATION: sResult = QString("PlayStation"); break;
         case OSNAME_JVM: sResult = QString("JVM"); break;
         case OSNAME_CHROMEOS: sResult = QString("ChromeOS"); break;
-        case OSNAME_NINTENDOSWITCH: sResult = QString("Nintendo Switch");
-        case OSNAME_WEBOS: sResult = QString("webOS");
+        case OSNAME_NINTENDOSWITCH: sResult = QString("Nintendo Switch"); break;
+        case OSNAME_WEBOS: sResult = QString("webOS"); break;
 
         default: sResult = tr("Unknown");
     }
