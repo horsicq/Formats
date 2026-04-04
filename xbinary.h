@@ -791,7 +791,9 @@ public:
         OSNAME_MACDRIVERKIT,
         OSNAME_MACFIRMWARE,
         OSNAME_SEPOS,
-        OSNAME_CHROMEOS
+        OSNAME_CHROMEOS,
+        OSNAME_NINTENDOSWITCH,
+        OSNAME_WEBOS
         // TODO more
     };
 
