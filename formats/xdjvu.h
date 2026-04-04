@@ -105,14 +105,15 @@ public:
     static QMap<quint64, QString> getImageTypes();
     static QMap<quint64, QString> getImageTypesS();
 
+    static const QString PREFIX_ImageType;
+
 private:
-HEADER _getHeader();
+    HEADER _getHeader();
     QList<CHUNK_RECORD> _getChunkRecords(PDSTRUCT *pPdStruct);
     INFO_RECORD _getInfoRecord(qint64 nOffset, PDSTRUCT *pPdStruct);
     bool _isChunkValid(const QString &sChunkName);
 
-private:
-HEADER m_header;
+    HEADER m_header;
 
 };
 

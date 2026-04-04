@@ -20,6 +20,17 @@
 //
 #include "xdjvu.h"
 
+XBinary::XIDSTRING _TABLE_XDJVU_ImageTypes[] = {
+    {XDJVU::TYPE_UNKNOWN,      "UNKNOWN"},
+    {XDJVU::TYPE_SINGLE_PAGE,  "SINGLE_PAGE"},
+    {XDJVU::TYPE_MULTI_PAGE,   "MULTI_PAGE"},
+    {XDJVU::TYPE_MULTI_FILE,   "MULTI_FILE"},
+    {XDJVU::TYPE_THUMBNAILS,   "THUMBNAILS"},
+    {XDJVU::TYPE_SECURE,       "SECURE"},
+};
+
+const QString XDJVU::PREFIX_ImageType = "IMAGETYPE";
+
 XBinary::XCONVERT _TABLE_XDJVU_STRUCTID[] = {
     {XDJVU::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XDJVU::STRUCTID_HEADER, "HEADER", QString("Header")},
@@ -43,7 +54,7 @@ bool XDJVU::isValid(PDSTRUCT *pPdStruct)
 
     quint64 nSize = getSize();
 
-    if (nSize >= 12) {
+    if (nSize >= 16) {
         QString sSignature = read_ansiString(0, 8);
 
         if ((sSignature == "AT&TFORM") || (sSignature == "SDJVFORM")) {
@@ -193,7 +204,7 @@ QList<XBinary::DATA_HEADER> XDJVU::getDataHeaders(const DATA_HEADERS_OPTIONS &da
 
                     if (header.bIsValid && !header.bIsSecure) {
                         qint64 nCurrentOffset = 16;
-                        qint64 nEndOffset = qMin((qint64)(header.nSize + 8), getSize());
+                        qint64 nEndOffset = qMin((qint64)(header.nSize + 12), getSize());
                         qint32 nNumberOfChunks = 0;
 
                         while (nCurrentOffset < nEndOffset) {
@@ -272,7 +283,7 @@ QList<XBinary::FPART> XDJVU::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
 
     if (header.bIsValid && !header.bIsSecure) {
         qint64 nOffset = 16;
-        qint64 nEndOffset = qMin((qint64)(header.nSize + 8), getSize());
+        qint64 nEndOffset = qMin((qint64)(header.nSize + 12), getSize());
 
         while (nOffset < nEndOffset) {
             if (nOffset + 8 > nEndOffset) break;
@@ -392,30 +403,12 @@ QString XDJVU::getDocumentInfo(PDSTRUCT *pPdStruct)
 
 QMap<quint64, QString> XDJVU::getImageTypes()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "UNKNOWN");
-    mapResult.insert(1, "Single page");
-    mapResult.insert(2, "Multi-page");
-    mapResult.insert(3, "Multi-file");
-    mapResult.insert(4, "Thumbnails");
-    mapResult.insert(5, "Secure");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XDJVU_ImageTypes, sizeof(_TABLE_XDJVU_ImageTypes) / sizeof(XBinary::XIDSTRING), PREFIX_ImageType);
 }
 
 QMap<quint64, QString> XDJVU::getImageTypesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "Unknown");
-    mapResult.insert(1, "Single");
-    mapResult.insert(2, "Multi");
-    mapResult.insert(3, "MultiFile");
-    mapResult.insert(4, "Thumbnails");
-    mapResult.insert(5, "Secure");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XDJVU_ImageTypes, sizeof(_TABLE_XDJVU_ImageTypes) / sizeof(XBinary::XIDSTRING));
 }
 
 XDJVU::HEADER XDJVU::_getHeader()
@@ -465,7 +458,7 @@ QList<XDJVU::CHUNK_RECORD> XDJVU::_getChunkRecords(PDSTRUCT *pPdStruct)
 
     if (header.bIsValid && !header.bIsSecure) {
         qint64 nOffset = 16;  // Start after main header
-        qint64 nEndOffset = qMin((qint64)(header.nSize + 8), getSize());
+        qint64 nEndOffset = qMin((qint64)(header.nSize + 12), getSize());
 
         while (nOffset < nEndOffset) {
             if (nOffset + 8 > nEndOffset) break;
@@ -532,9 +525,8 @@ XDJVU::INFO_RECORD XDJVU::_getInfoRecord(qint64 nOffset, PDSTRUCT *pPdStruct)
 
 bool XDJVU::_isChunkValid(const QString &sChunkName)
 {
-    // List of known DjVu chunk names
-    QStringList listValidChunks = {"INFO", "Sjbz", "FG44", "BG44", "FGbz", "BGjp", "BGbz", "TXTa", "TXTz", "ANTa",
-                                   "ANTz", "DJBZ", "FORM", "DIRM", "NAVM", "Smmr", "INCL", "CIDa", "LTAn", "KTAn"};
+    static const QStringList listValidChunks = {"INFO", "Sjbz", "FG44", "BG44", "FGbz", "BGjp", "BGbz", "TXTa", "TXTz", "ANTa",
+                                                "ANTz", "DJBZ", "FORM", "DIRM", "NAVM", "Smmr", "INCL", "CIDa", "LTAn", "KTAn"};
 
     return listValidChunks.contains(sChunkName);
 }
@@ -543,8 +535,8 @@ QList<QString> XDJVU::getSearchSignatures()
 {
     QList<QString> listResult;
 
-    listResult.append("'AT&T'");
-    listResult.append("'SDJV'");
+    listResult.append("'AT&TFORM'");
+    listResult.append("'SDJVFORM'");
 
     return listResult;
 }
