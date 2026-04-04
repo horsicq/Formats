@@ -793,7 +793,9 @@ public:
         OSNAME_SEPOS,
         OSNAME_CHROMEOS,
         OSNAME_NINTENDOSWITCH,
-        OSNAME_WEBOS
+        OSNAME_WEBOS,
+        OSNAME_HARMONYOS,
+        OSNAME_ARCHLINUX
         // TODO more
     };
 
