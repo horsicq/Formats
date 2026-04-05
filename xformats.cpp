@@ -1267,6 +1267,8 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
             qint32 nGlobalIndex = XBinary::getFreeIndex(pPdStruct);
             XBinary::setPdStructInit(pPdStruct, nGlobalIndex, nNumberOfRecords);
 
+            QString sCanonicalRoot = QDir::cleanPath(QDir(sFolderName).absolutePath());
+
             for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                 QString sPrefName = pListRecords->at(i).mapProperties.value(XBinary::FPART_PROP_ORIGINALNAME).toString();
 #ifdef QT_DEBUG
@@ -1275,7 +1277,17 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 
                 XBinary::setPdStructStatus(pPdStruct, nGlobalIndex, sPrefName);
 
-                QString sResultFileName = sFolderName + QDir::separator() + sPrefName;
+                QString sResultFileName = QDir::cleanPath(sFolderName + QDir::separator() + sPrefName);
+
+                if (!sResultFileName.startsWith(sCanonicalRoot + "/")) {
+#ifdef QT_DEBUG
+                    qDebug("XFormats::extractArchiveRecordsToFolder: Path traversal detected for %s", sPrefName.toLatin1().data());
+#endif
+                    emit errorMessage(QString("%1: %2").arg(tr("Path traversal detected"), sPrefName));
+                    bResult = false;
+                    XBinary::setPdStructCurrentIncrement(pPdStruct, nGlobalIndex);
+                    continue;
+                }
 
                 QFileInfo fi(sResultFileName);
                 if (XBinary::createDirectory(fi.absolutePath())) {
