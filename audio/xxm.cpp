@@ -20,7 +20,7 @@
  */
 #include "xxm.h"
 
-XBinary::XCONVERT _TABLE_XM_STRUCTID[] = {
+static XBinary::XCONVERT _TABLE_XXM_STRUCTID[] = {
     {XXM::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XXM::STRUCTID_HEADER, "HEADER", QString("HEADER")},
     {XXM::STRUCTID_PATTERN_HEADER, "PATTERN_HEADER", QString("PATTERN_HEADER")},
@@ -254,7 +254,7 @@ QList<XBinary::FPART> XXM::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
 
 QString XXM::structIDToString(quint32 nID)
 {
-    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XM_STRUCTID, sizeof(_TABLE_XM_STRUCTID) / sizeof(XBinary::XCONVERT));
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XXM_STRUCTID, sizeof(_TABLE_XXM_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
 qint32 XXM::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, void *pUserData,
@@ -500,6 +500,23 @@ XXM::INSTRUMENT_EXTRA_HEADER XXM::_read_INSTRUMENT_EXTRA_HEADER(qint64 nOffset)
     hdr.reserved = read_uint16(nOffset + 212);
 
     return hdr;
+}
+
+QList<QString> XXM::getSearchSignatures()
+{
+    QList<QString> listResult;
+
+    listResult.append("'Extended Module: '");
+
+    return listResult;
+}
+
+XBinary *XXM::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    Q_UNUSED(bIsImage)
+    Q_UNUSED(nModuleAddress)
+
+    return new XXM(pDevice);
 }
 
 XXM::SAMPLE_HEADER XXM::_read_SAMPLE_HEADER(qint64 nOffset)

@@ -20,6 +20,10 @@
  */
 #include "xriff.h"
 
+static XBinary::XCONVERT _TABLE_XRIFF_STRUCTID[] = {{XRiff::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+                                                    {XRiff::STRUCTID_HEADER, "HEADER", QString("HEADER")},
+                                                    {XRiff::STRUCTID_CHUNK, "CHUNK", QString("CHUNK")}};
+
 XRiff::XRiff(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -243,12 +247,7 @@ QList<XBinary::DATA_HEADER> XRiff::getDataHeaders(const DATA_HEADERS_OPTIONS &da
 
 QString XRiff::structIDToString(quint32 nID)
 {
-    switch (nID) {
-        case STRUCTID_HEADER: return QString("HEADER");
-        case STRUCTID_CHUNK: return QString("CHUNK");
-        default: break;
-    }
-    return XBinary::structIDToString(nID);
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XRIFF_STRUCTID, sizeof(_TABLE_XRIFF_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
 QList<QString> XRiff::getSearchSignatures()

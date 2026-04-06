@@ -20,7 +20,7 @@
  */
 #include "xamigahunk.h"
 
-XBinary::XCONVERT _TABLE_XAmigaHunk_STRUCTID[] = {
+static XBinary::XCONVERT _TABLE_XAmigaHunk_STRUCTID[] = {
     {XAmigaHunk::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XAmigaHunk::STRUCTID_HUNK, "HUNK", QString("HUNK")},
     {XAmigaHunk::STRUCTID_HUNK_UNIT, "HUNK_UNIT", QString("HUNK_UNIT")},
@@ -627,8 +627,8 @@ QList<QString> XAmigaHunk::getSearchSignatures()
 {
     QList<QString> listResult;
 
-    listResult.append("03F3");
-    listResult.append("03E7");
+    listResult.append("000003F3");
+    listResult.append("000003E7");
 
     return listResult;
 }
