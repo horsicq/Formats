@@ -142,6 +142,8 @@ public:
     static QMap<quint64, QString> getImageNEFlagsothersS();
     static QMap<quint64, QString> getImageSegmentTypesS();
 
+    static const QString PREFIX_ImageNEMagics;
+
     qint64 getModuleAddress();
 
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;

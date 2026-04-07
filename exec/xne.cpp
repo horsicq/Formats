@@ -34,6 +34,51 @@ XBinary::XCONVERT _TABLE_XNE_STRUCTID[] = {
     {XNE::STRUCTID_NONRESIDENT_NAME_TABLE, "NONRESIDENT_NAME_TABLE", QString("Non-resident name table")},
 };
 
+XBinary::XIDSTRING _TABLE_XNE_ImageNEMagics[] = {
+    {0x454E, "OS2_SIGNATURE"},
+};
+
+XBinary::XIDSTRING _TABLE_XNE_ImageNEFlags[] = {
+    {0x0001, "single shared"},
+    {0x0002, "multiple"},
+    {0x0004, "Global initialization"},
+    {0x0008, "Protected mode only"},
+    {0x0010, "8086 instructions"},
+    {0x0020, "80286 instructions"},
+    {0x0040, "80386 instructions"},
+    {0x0080, "80x87 instructions"},
+    {0x0100, "Full screen"},
+    {0x0200, "Compatible with Windows/P.M."},
+    {0x0800, "OS/2 family application"},
+    {0x1000, "reserved?"},
+    {0x2000, "Errors in image/executable"},
+    {0x4000, "non-conforming program"},
+    {0x8000, "DLL or driver"},
+};
+
+XBinary::XIDSTRING _TABLE_XNE_ImageNEExetypes[] = {
+    {0x0000, "Unknown"},
+    {0x0001, "OS/2"},
+    {0x0002, "Windows"},
+    {0x0003, "European MS-DOS 4.x"},
+    {0x0004, "Windows 386"},
+    {0x0005, "BOSS (Borland Operating System Services)"},
+};
+
+XBinary::XIDSTRING _TABLE_XNE_ImageNEFlagsothers[] = {
+    {0x0001, "Long filename support"},
+    {0x0002, "2.x protected mode"},
+    {0x0004, "2.x proportional fonts"},
+    {0x0008, "Executable has gangload area"},
+};
+
+XBinary::XIDSTRING _TABLE_XNE_ImageSegmentTypes[] = {
+    {0x0000, "CODE"},
+    {0x0001, "DATA"},
+};
+
+const QString XNE::PREFIX_ImageNEMagics = "IMAGE_";
+
 XNE::XNE(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XMSDOS(pDevice, bIsImage, nModuleAddress)
 {
 }
@@ -882,80 +927,32 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
 QMap<quint64, QString> XNE::getImageNEMagics()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x454E, "IMAGE_OS2_SIGNATURE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XNE_ImageNEMagics, sizeof(_TABLE_XNE_ImageNEMagics) / sizeof(XBinary::XIDSTRING), PREFIX_ImageNEMagics);
 }
 
 QMap<quint64, QString> XNE::getImageNEMagicsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x454E, "OS2_SIGNATURE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XNE_ImageNEMagics, sizeof(_TABLE_XNE_ImageNEMagics) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XNE::getImageNEFlagsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x0001, "single shared");
-    mapResult.insert(0x0002, "multiple");
-    mapResult.insert(0x0004, "Global initialization");
-    mapResult.insert(0x0008, "Protected mode only");
-    mapResult.insert(0x0010, "8086 instructions");
-    mapResult.insert(0x0020, "80286 instructions");
-    mapResult.insert(0x0040, "80386 instructions");
-    mapResult.insert(0x0080, "80x87 instructions");
-    mapResult.insert(0x0100, "Full screen");
-    mapResult.insert(0x0200, "Compatible with Windows/P.M.");
-    //    mapResult.insert(0x0400,""); // TODO Check !!!
-    mapResult.insert(0x0800, "OS/2 family application");
-    mapResult.insert(0x1000, "reserved?");
-    mapResult.insert(0x2000, "Errors in image/executable");
-    mapResult.insert(0x4000, "non-conforming program");
-    mapResult.insert(0x8000, "DLL or driver");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XNE_ImageNEFlags, sizeof(_TABLE_XNE_ImageNEFlags) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XNE::getImageNEExetypesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x0000, tr("Unknown"));
-    mapResult.insert(0x0001, "OS/2");
-    mapResult.insert(0x0002, "Windows");
-    mapResult.insert(0x0003, "European MS-DOS 4.x");
-    mapResult.insert(0x0004, "Windows 386");
-    mapResult.insert(0x0005, "BOSS (Borland Operating System Services)");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XNE_ImageNEExetypes, sizeof(_TABLE_XNE_ImageNEExetypes) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XNE::getImageNEFlagsothersS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x0001, "Long filename support");
-    mapResult.insert(0x0002, "2.x protected mode");
-    mapResult.insert(0x0004, "2.x proportional fonts");
-    mapResult.insert(0x0008, "Executable has gangload area");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XNE_ImageNEFlagsothers, sizeof(_TABLE_XNE_ImageNEFlagsothers) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XNE::getImageSegmentTypesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x0000, "CODE");
-    mapResult.insert(0x0001, "DATA");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XNE_ImageSegmentTypes, sizeof(_TABLE_XNE_ImageSegmentTypes) / sizeof(XBinary::XIDSTRING));
 }
 
 qint64 XNE::getModuleAddress()
