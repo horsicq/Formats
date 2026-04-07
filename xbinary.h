@@ -1327,6 +1327,8 @@ public:
     // static QString fileTypeIdToExts(FT fileType);  // TODO move to classes
     static FT ftStringToFileTypeId(QString sFileType);
     static QString fileTypeIdToFtString(FT fileType);
+    static QString fileTypesToString(const QSet<FT> &stResult);
+    static QSet<FT> stringToFileTypes(const QString &sString);
 
     static QString convertFileName(const QString &sFileName);
     // static QString convertPathName(const QString &sPathName);

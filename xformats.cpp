@@ -1068,120 +1068,304 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
     QElapsedTimer timer;
     timer.start();
 #endif
+    QSet<XBinary::FT> stResult;
 
-    QSet<XBinary::FT> stResult = XBinary::getFileTypes(pDevice, bExtra);
+    QString sFileTypes = pDevice->property("filetypes").toString();
 
+    if (sFileTypes.isEmpty()) {
+        // No cached file types, proceed with detection
+        stResult.insert(XBinary::FT_BINARY);
+
+        if (XMSDOS::isValid(pDevice, false, -1)) {
+            stResult.insert(XBinary::FT_MSDOS);
+
+            if (XPE::isValid(pDevice, false, -1)) {
+                stResult.insert(XBinary::FT_PE);
+
+                XPE xpe(pDevice, false, -1);
+
+                if (xpe.isValid(pPdStruct)) {
+                    stResult.insert(xpe.getFileType());
+                }
+            } else if (XNE::isValid(pDevice, false, -1)) {
+                stResult.insert(XBinary::FT_NE);
+            } else if (XLE::isValid(pDevice, false, -1)) {
+                stResult.insert(XBinary::FT_LE);
+
+                XLE xle(pDevice, false, -1);
+
+                if (xle.isValid(pPdStruct)) {
+                    stResult.insert(xle.getFileType());
+                }
+            }
 #ifdef USE_ARCHIVE
-    if (pDevice->property(XBinary::fileTypeIdToFtString(XBinary::FT_ARCHIVE).toLatin1().data()).toBool()) {
-        // Cache
-        QList<QByteArray> listProperties = pDevice->dynamicPropertyNames();
+            if (XDOS16::isValid(pDevice)) {
+                XDOS16 xdos16(pDevice);
+                if (xdos16.isValid(pPdStruct)) {
+                    stResult.insert(xdos16.getFileType());
+                }
+            }
+#endif
+        } else if (XELF::isValid(pDevice, false, -1)) {
+            stResult.insert(XBinary::FT_ELF);
 
-        qint32 nNumberOfProperties = listProperties.count();
+            XELF xelf(pDevice, false, -1);
 
-        for (qint32 i = 0; i < nNumberOfProperties; i++) {
-            QByteArray baProperty = listProperties.at(i);
-            XBinary::FT fileType = XBinary::ftStringToFileTypeId(baProperty);
+            if (xelf.isValid(pPdStruct)) {
+                stResult.insert(xelf.getFileType());
+            }
+        } else if (XMACH::isValid(pDevice, false, -1)) {
+            stResult.insert(XBinary::FT_MACHO);
 
-            if (fileType != XBinary::FT_UNKNOWN) {
-                stResult.insert(fileType);
+            XMACH xmach(pDevice);
+
+            if (xmach.isValid(pPdStruct)) {
+                stResult.insert(xmach.getFileType());
+            }
+        }
+
+        if (stResult.size() <= 1) {
+            if (XAmigaHunk::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_AMIGAHUNK);
+            }
+        }
+
+        if (stResult.size() <= 1) {
+            if (XAtariST::isValid(pDevice, false, -1)) {
+                stResult.insert(XBinary::FT_ATARIST);
+            }
+        }
+
+#ifdef USE_PDF
+        if (stResult.size() <= 1) {
+            if (XPDF::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_PDF);
+            }
+        }
+#endif
+#ifdef USE_DEX
+        if (stResult.size() <= 1) {
+            if (XDEX::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_DEX);
+            }
+        }
+#endif
+#ifdef USE_ARCHIVE
+        if (stResult.size() <= 1) {
+            if (XZip::isValid(pDevice)) {
+                XZip xzip(pDevice);
+                if (xzip.isValid(pPdStruct)) {
+                    stResult.insert(XBinary::FT_ARCHIVE);
+                    stResult.insert(XBinary::FT_ZIP);
+                    qint64 nECDOffset = xzip.findECDOffset(pPdStruct);
+
+                    if (xzip.isAPK(nECDOffset, pPdStruct)) {
+                        stResult.insert(XBinary::FT_APK);
+                        stResult.insert(XBinary::FT_JAR);
+                    } else if (xzip.isIPA(nECDOffset, pPdStruct)) {
+                        stResult.insert(XBinary::FT_IPA);
+                    } else if (xzip.isJAR(nECDOffset, pPdStruct)) {
+                        stResult.insert(XBinary::FT_JAR);
+                    }
+                }
+            } else if (X_Ar::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_AR);
+                // TODO DEB
+            } else if (XGzip::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_GZIP);
+            } else if (XBZIP2::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_BZIP2);
+            } else if (XXZ::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_XZ);
+            } else if (XLzip::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_LZIP);
+            } else if (XTAR::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_TAR);
+            } else if (XSevenZip::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_7Z);
+            } else if (XRar::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_RAR);
+            }
+        }
+
+        if (bExtra && (stResult.size() <= 1)) {
+            if (XZlib::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_ZLIB);
+            } else if (XLHA::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_LHA);
+            } else if (XCab::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_CAB);
+            } else if (XLzo::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_LZO);
+            } else if (XCompressZ::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_COMPRESS);
+            } else if (XCPIO::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_CPIO);
+            } else if (XMiniDump::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_MINIDUMP);
+            } else if (XDMG::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_DMG);
+            } else if (XARJ::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_ARJ);
+            } else if (XACE::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_ACE);
+            } else if (XSEAARC::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_ARC);
+            } else if (XSZDD::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_SZDD);
+            } else if (XZstd::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_ZSTD);
+            } else if (XCFBF::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_CFBF);
+            } else if (XISO9660::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_ISO9660);
+            } else if (XUDF::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_UDF);
+            } else if (XMACHOFat::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_MACHOFAT);
+            }
+
+            if (XFREEARC::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_FREEARC);
+            }
+        }
+#endif
+
+        if (bExtra && (stResult.size() <= 1)) {
+            if (XPNG::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_IMAGE);
+                stResult.insert(XBinary::FT_PNG);
+            } else if (XJpeg::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_IMAGE);
+                stResult.insert(XBinary::FT_JPEG);
+            } else if (XGif::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_IMAGE);
+                stResult.insert(XBinary::FT_GIF);
+            } else if (XBMP::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_IMAGE);
+                stResult.insert(XBinary::FT_BMP);
+            } else if (XTiff::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_IMAGE);
+                stResult.insert(XBinary::FT_TIFF);
+            } else if (XIcon::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_IMAGE);
+                XIcon xicon(pDevice);
+                stResult.insert(xicon.getFileType());  // FT_ICO or FT_CUR
+            } else if (XICC::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_IMAGE);
+                stResult.insert(XBinary::FT_ICC);
+            }
+        }
+
+        if (bExtra && (stResult.size() <= 1)) {
+            if (XMP3::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_AUDIO);
+                stResult.insert(XBinary::FT_MP3);
+            } else if (XMP4::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_VIDEO);
+                stResult.insert(XBinary::FT_MP4);
+            } else if (XXM::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_AUDIO);
+                stResult.insert(XBinary::FT_XM);
+            } else if (XAVI::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_RIFF);
+                stResult.insert(XBinary::FT_VIDEO);
+                stResult.insert(XBinary::FT_AVI);
+            } else if (XWEBP::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_RIFF);
+                stResult.insert(XBinary::FT_IMAGE);
+                stResult.insert(XBinary::FT_WEBP);
+            } else if (XWAV::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_RIFF);
+                stResult.insert(XBinary::FT_AUDIO);
+                stResult.insert(XBinary::FT_WAV);
+            } else if (XRiff::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_RIFF);
+            }
+        }
+
+        if (bExtra && (stResult.size() <= 1)) {
+#ifdef USE_DEX
+            if (XAndroidBinary::isValid(pDevice)) {
+                XAndroidBinary xandroid(pDevice);
+                stResult.insert(xandroid.getFileType());  // FT_ANDROIDXML or FT_ANDROIDASRC
+            } else
+#endif
+            if (XDER::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_DOCUMENT);
+                stResult.insert(XBinary::FT_DER);
+            } else if (XJavaClass::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_JAVACLASS);
+            } else if (XPYC::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_PYC);
+            } else if (XTTF::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_TTF);
+            } else if (XDJVU::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_DJVU);
+            }
+        }
+
+        if (bExtra) {
+            if (XText::isValid(pDevice)) {
+                stResult.insert(XBinary::FT_TEXT);
+                XText xtext(pDevice);
+                XText::TEXT_TYPE textType = xtext.detectTextType();
+
+                if (textType == XText::TEXT_TYPE_UTF8 || textType == XText::TEXT_TYPE_UTF8_BOM) {
+                    stResult.insert(XBinary::FT_UTF8);
+                } else if (textType == XText::TEXT_TYPE_UTF16_LE || textType == XText::TEXT_TYPE_UTF32_LE) {
+                    stResult.insert(XBinary::FT_UNICODE);
+                    stResult.insert(XBinary::FT_UNICODE_LE);
+                } else if (textType == XText::TEXT_TYPE_UTF16_BE || textType == XText::TEXT_TYPE_UTF32_BE) {
+                    stResult.insert(XBinary::FT_UNICODE);
+                    stResult.insert(XBinary::FT_UNICODE_BE);
+                } else {
+                    stResult.insert(XBinary::FT_PLAINTEXT);
+                }
+
+                // Fix: GIF can trigger text detection
+                if (stResult.contains(XBinary::FT_GIF) && stResult.contains(XBinary::FT_TEXT)) {
+                    stResult.remove(XBinary::FT_GIF);
+                }
+            }
+        }
+
+        if ((stResult.count() <= 1) || (stResult.contains(XBinary::FT_PLAINTEXT))) {
+            if (XCOM::isValid(pDevice, false, -1)) {
+                if (XBinary::getDeviceFileSuffix(pDevice).toUpper() == "COM") {
+                    stResult.insert(XBinary::FT_COM);
+                }
             }
         }
     } else {
-        if (stResult.contains(XBinary::FT_ZIP)) {
-            XZip xzip(pDevice);
-
-            if (xzip.isValid(pPdStruct)) {
-                // QList<XArchive::RECORD> listArchiveRecords = xzip.getRecords(20000, pPdStruct);
-
-                // stResult += getFileTypesZIP(pDevice, &listArchiveRecords, pPdStruct);
-                stResult += getFileTypesZIP(pDevice, pPdStruct);
-            }
-        } else if (stResult.contains(XBinary::FT_AR)) {
-            X_Ar xar(pDevice);
-
-            if (xar.isValid(pPdStruct)) {
-                QList<XArchive::RECORD> listArchiveRecords = xar.getRecords(20000, pPdStruct);
-
-                stResult += getFileTypesAR(pDevice, &listArchiveRecords, pPdStruct);
-            }
-        } else if (stResult.contains(XBinary::FT_GZIP)) {
-            // TODO Check
-            if (pDevice->size() < 100000000) {
-                XGzip xgzip(pDevice);
-
-                if (xgzip.isValid(pPdStruct)) {
-                    QList<XArchive::RECORD> listArchiveRecords = xgzip.getRecords(1, pPdStruct);
-
-                    stResult += getFileTypesGZIP(pDevice, &listArchiveRecords, pPdStruct);
-                }
-            }
-        } else if (stResult.contains(XBinary::FT_BZIP2)) {
-            if (pDevice->size() < 100000000) {
-                XBZIP2 xbzip2(pDevice);
-
-                if (xbzip2.isValid(pPdStruct)) {
-                    QList<XArchive::RECORD> listArchiveRecords = xbzip2.getRecords(1, pPdStruct);
-
-                    stResult += getFileTypesBZIP2(pDevice, &listArchiveRecords, pPdStruct);
-                }
-            }
-        } else if (stResult.contains(XBinary::FT_XZ)) {
-            if (pDevice->size() < 100000000) {
-                XXZ xxz(pDevice);
-
-                if (xxz.isValid(pPdStruct)) {
-                    QList<XArchive::RECORD> listArchiveRecords = xxz.getRecords(1, pPdStruct);
-
-                    stResult += getFileTypesXZ(pDevice, &listArchiveRecords, pPdStruct);
-                }
-            }
-        } else if (stResult.contains(XBinary::FT_LZIP)) {
-            if (pDevice->size() < 100000000) {
-                XLzip xlzip(pDevice);
-
-                if (xlzip.isValid(pPdStruct)) {
-                    QList<XArchive::RECORD> listArchiveRecords = xlzip.getRecords(1, pPdStruct);
-
-                    stResult += getFileTypesLZIP(pDevice, &listArchiveRecords, pPdStruct);
-                }
-            }
-
-            // Fallback for .tar.lz when lzip stream decompression is not available in refinement path.
-            if (!stResult.contains(XBinary::FT_TAR_LZIP)) {
-                XTARCOMPRESSED::COMPRESSION_TYPE compressionType = XTARCOMPRESSED::detectCompressionType(pDevice);
-                XBinary::FT tarCompressedFT = _compressionTypeToTarFT(compressionType);
-
-                if (tarCompressedFT == XBinary::FT_TAR_LZIP) {
-                    stResult.insert(XBinary::FT_ARCHIVE);
-                    stResult.insert(XBinary::FT_TAR);
-                    stResult.insert(tarCompressedFT);
-                }
-            }
-        } else {
-            XTARCOMPRESSED::COMPRESSION_TYPE compressionType = XTARCOMPRESSED::detectCompressionType(pDevice);
-            XBinary::FT tarCompressedFT = _compressionTypeToTarFT(compressionType);
-
-            if ((tarCompressedFT == XBinary::FT_TAR_ZSTD) || (tarCompressedFT == XBinary::FT_TAR_Z) || (tarCompressedFT == XBinary::FT_TAR_LZMA) ||
-                (tarCompressedFT == XBinary::FT_TAR_LZIP) || (tarCompressedFT == XBinary::FT_TAR_LZOP)) {
-                stResult.insert(XBinary::FT_ARCHIVE);
-                stResult.insert(XBinary::FT_TAR);
-                stResult.insert(tarCompressedFT);
-            }
-        }
-
-        if (stResult.contains(XBinary::FT_ARCHIVE)) {
-            QList<XBinary::FT> listFT = stResult.values();
-
-            qint32 nNumberOfFT = listFT.count();
-
-            for (qint32 i = 0; i < nNumberOfFT; i++) {
-                XBinary::FT ft = listFT.at(i);
-
-                pDevice->setProperty(XBinary::fileTypeIdToFtString(ft).toLatin1().data(), true);
-            }
-        }
+        // Cached file types available, return them
+        stResult = XBinary::stringToFileTypes(sFileTypes);
     }
-#endif
 
 #ifdef QT_DEBUG
     qint64 nElapsed = timer.elapsed();

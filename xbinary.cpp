@@ -2126,6 +2126,83 @@ QString XBinary::fileTypeIdToFtString(FT fileType)
     return XCONVERT_idToFtString(fileType, _TABLE_XBinary_FT, sizeof(_TABLE_XBinary_FT) / sizeof(XBinary::XCONVERT));
 }
 
+QString XBinary::fileTypesToString(const QSet<XBinary::FT> &stResult)
+{
+    QString sResult;
+
+    qint32 nNumberOfRecords = sizeof(_TABLE_XBinary_FT) / sizeof(XBinary::XCONVERT);
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        XBinary::FT fileType = (XBinary::FT)_TABLE_XBinary_FT[i].nID;
+
+        if (stResult.contains(fileType)) {
+            if (!sResult.isEmpty()) {
+                sResult += QString("|");
+            }
+
+            sResult += fileTypeIdToFtString(fileType);
+        }
+    }
+
+    return sResult;
+}
+
+QSet<XBinary::FT> XBinary::stringToFileTypes(const QString &sString)
+{
+    QSet<XBinary::FT> stResult;
+
+    QString sCurrent;
+    qint32 nSize = sString.size();
+
+    for (qint32 i = 0; i < nSize; i++) {
+        const QChar c = sString.at(i);
+
+        if ((c == ',') || (c == ';') || (c == '|') || c.isSpace()) {
+            QString sToken = sCurrent.trimmed();
+
+            if (!sToken.isEmpty()) {
+                XBinary::FT fileType = ftStringToFileTypeId(sToken);
+
+                if (fileType == XBinary::FT_UNKNOWN) {
+                    fileType = ftStringToFileTypeId(sToken.toUpper());
+                }
+
+                if (fileType == XBinary::FT_UNKNOWN) {
+                    fileType = ftStringToFileTypeId(sToken.toLower());
+                }
+
+                if (fileType != XBinary::FT_UNKNOWN) {
+                    stResult.insert(fileType);
+                }
+            }
+
+            sCurrent.clear();
+        } else {
+            sCurrent += c;
+        }
+    }
+
+    QString sToken = sCurrent.trimmed();
+
+    if (!sToken.isEmpty()) {
+        XBinary::FT fileType = ftStringToFileTypeId(sToken);
+
+        if (fileType == XBinary::FT_UNKNOWN) {
+            fileType = ftStringToFileTypeId(sToken.toUpper());
+        }
+
+        if (fileType == XBinary::FT_UNKNOWN) {
+            fileType = ftStringToFileTypeId(sToken.toLower());
+        }
+
+        if (fileType != XBinary::FT_UNKNOWN) {
+            stResult.insert(fileType);
+        }
+    }
+
+    return stResult;
+}
+
 QString XBinary::convertFileName(const QString &sFileName)  // TODO Check
 {
     QString sResult = sFileName;

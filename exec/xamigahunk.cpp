@@ -76,6 +76,13 @@ bool XAmigaHunk::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
+bool XAmigaHunk::isValid(QIODevice *pDevice)
+{
+    XAmigaHunk xamigahunk(pDevice);
+
+    return xamigahunk.isValid();
+}
+
 bool XAmigaHunk::_initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
     qint64 nTotalSize = getSize();

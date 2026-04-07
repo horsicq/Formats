@@ -80,6 +80,7 @@ public:
     ~XAmigaHunk();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
+    static bool isValid(QIODevice *pDevice);
     virtual QList<MAPMODE> getMapModesList() override;
 
     virtual bool _initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct) override;

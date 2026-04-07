@@ -117,6 +117,7 @@ public:
     ~XXM();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
+    static bool isValid(QIODevice *pDevice);
     virtual FT getFileType() override;
     virtual MODE getMode() override;
     virtual QString getMIMEString() override;

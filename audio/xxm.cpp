@@ -59,6 +59,13 @@ XBinary::FT XXM::getFileType()
     return XBinary::FT_XM;
 }
 
+bool XXM::isValid(QIODevice *pDevice)
+{
+    XXM xxm(pDevice);
+
+    return xxm.isValid();
+}
+
 XBinary::MODE XXM::getMode()
 {
     return XBinary::MODE_8;
