@@ -49,7 +49,7 @@ bool XMP3::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XMP3::isValid(QIODevice *pDevice)
+bool XMP3::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XMP3 mp3(pDevice);
 
@@ -447,3 +447,4 @@ XBinary *XMP3::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
     return new XMP3(pDevice);
 }
+

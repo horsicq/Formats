@@ -20,7 +20,7 @@ bool XWEBP::isValid(PDSTRUCT *pPdStruct)
     return (form == "WEBP");
 }
 
-bool XWEBP::isValid(QIODevice *pDevice)
+bool XWEBP::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XWEBP x(pDevice);
     return x.isValid();
@@ -51,3 +51,4 @@ QString XWEBP::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XWEBP_STRUCTID, sizeof(_TABLE_XWEBP_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
+

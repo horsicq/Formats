@@ -47,7 +47,7 @@ bool XJpeg::isValid(PDSTRUCT *pPdStruct)
     return bIsValid;
 }
 
-bool XJpeg::isValid(QIODevice *pDevice)
+bool XJpeg::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XJpeg xjpeg(pDevice);
 
@@ -467,3 +467,4 @@ XBinary *XJpeg::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
     return new XJpeg(pDevice);
 }
+

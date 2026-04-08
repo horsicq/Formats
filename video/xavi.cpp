@@ -51,7 +51,7 @@ bool XAVI::isValid(PDSTRUCT *pPdStruct)
     return (sForm == "AVI ");
 }
 
-bool XAVI::isValid(QIODevice *pDevice)
+bool XAVI::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XAVI x(pDevice);
     return x.isValid();
@@ -257,3 +257,4 @@ XBinary *XAVI::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
     return new XAVI(pDevice);
 }
+

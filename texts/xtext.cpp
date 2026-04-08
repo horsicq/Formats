@@ -60,10 +60,10 @@ bool XText::isValid(PDSTRUCT *pPdStruct)
     return bIsValid;
 }
 
-bool XText::isValid(QIODevice *pDevice)
+bool XText::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XText xtext(pDevice);
-    return xtext.isValid();
+    return xtext.isValid(pPdStruct);
 }
 
 XBinary::_MEMORY_MAP XText::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
@@ -518,3 +518,4 @@ qint64 XText::_countWords(const QString &text)
     // return text.split(QRegExp("\\s+"), Qt::SkipEmptyParts).count();
     return 0;
 }
+

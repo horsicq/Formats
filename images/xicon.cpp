@@ -60,7 +60,7 @@ bool XIcon::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XIcon::isValid(QIODevice *pDevice)
+bool XIcon::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XIcon xicon(pDevice);
 
@@ -412,3 +412,4 @@ XBinary *XIcon::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
     return new XIcon(pDevice);
 }
+

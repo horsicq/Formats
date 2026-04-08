@@ -76,7 +76,7 @@ bool XAmigaHunk::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XAmigaHunk::isValid(QIODevice *pDevice)
+bool XAmigaHunk::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XAmigaHunk xamigahunk(pDevice);
 
@@ -647,3 +647,4 @@ XBinary *XAmigaHunk::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nMo
 
     return new XAmigaHunk(pDevice);
 }
+

@@ -67,7 +67,7 @@ bool XPNG::isValid(PDSTRUCT *pPdStruct)
     return bIsValid;
 }
 
-bool XPNG::isValid(QIODevice *pDevice)
+bool XPNG::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XPNG xpng(pDevice);
 
@@ -864,3 +864,4 @@ XBinary *XPNG::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
     return new XPNG(pDevice);
 }
+

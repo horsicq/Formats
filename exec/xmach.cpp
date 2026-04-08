@@ -723,7 +723,7 @@ bool XMACH::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XMACH::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+bool XMACH::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTRUCT *pPdStruct)
 {
     XMACH xmach(pDevice, bIsImage, nModuleAddress);
 

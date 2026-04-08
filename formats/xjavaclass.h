@@ -105,7 +105,7 @@ public:
     virtual ~XJavaClass();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
-    static bool isValid(QIODevice *pDevice);
+    static bool isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QString getArch() override;
     virtual MODE getMode() override;
@@ -134,3 +134,4 @@ qint32 _read_attribute_info(qint64 nOffset, attribute_info *pAttributeInfo);
 };
 
 #endif  // XJAVACLASS_H
+

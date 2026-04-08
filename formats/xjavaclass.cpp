@@ -59,7 +59,7 @@ bool XJavaClass::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XJavaClass::isValid(QIODevice *pDevice)
+bool XJavaClass::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XJavaClass xjavaclass(pDevice);
 
@@ -828,3 +828,4 @@ XBinary *XJavaClass::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nMo
 
     return new XJavaClass(pDevice);
 }
+

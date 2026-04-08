@@ -50,7 +50,7 @@ bool XMP4::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XMP4::isValid(QIODevice *pDevice)
+bool XMP4::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XMP4 mp4(pDevice);
 
@@ -225,7 +225,7 @@ QList<QString> XMP4::getSearchSignatures()
 {
     QList<QString> listResult;
 
-    listResult.append("....'ftyp'");
+    listResult.append("000000..'ftyp'");
 
     return listResult;
 }
@@ -237,3 +237,4 @@ XBinary *XMP4::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
     return new XMP4(pDevice);
 }
+

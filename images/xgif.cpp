@@ -57,7 +57,7 @@ bool XGif::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XGif::isValid(QIODevice *pDevice)
+bool XGif::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XGif xgif(pDevice);
 
@@ -418,3 +418,4 @@ XBinary *XGif::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
     return new XGif(pDevice);
 }
+

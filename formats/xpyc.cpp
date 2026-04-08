@@ -106,7 +106,7 @@ bool XPYC::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XPYC::isValid(QIODevice *pDevice)
+bool XPYC::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XPYC xpyc(pDevice);
 
@@ -1108,3 +1108,4 @@ void XPYC::_parseVersionNumbers(const QString &sVersion, qint32 *pnMajor, qint32
         *pnMinor = nCurrentMinor;
     }
 }
+

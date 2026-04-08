@@ -262,7 +262,7 @@ bool XPE::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XPE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+bool XPE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTRUCT *pPdStruct)
 {
     XPE xpe(pDevice, bIsImage, nModuleAddress);
 

@@ -31,7 +31,7 @@ public:
     ~XWAV();
 
     bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
-    static bool isValid(QIODevice *pDevice);
+    static bool isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
 
     QString getFileFormatExt() override;
     QString getFileFormatExtsString() override;
@@ -41,3 +41,4 @@ public:
 };
 
 #endif  // XWAV_H
+

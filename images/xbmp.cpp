@@ -67,7 +67,7 @@ bool XBMP::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XBMP::isValid(QIODevice *pDevice)
+bool XBMP::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XBMP xbmp(pDevice);
 
@@ -348,3 +348,4 @@ XBinary *XBMP::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
     return new XBMP(pDevice);
 }
+

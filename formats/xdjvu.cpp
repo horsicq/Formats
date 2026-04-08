@@ -88,7 +88,7 @@ XDJVU::HEADER XDJVU::getHeader()
     return m_header;
 }
 
-bool XDJVU::isValid(QIODevice *pDevice)
+bool XDJVU::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XDJVU djvu(pDevice);
 
@@ -548,3 +548,4 @@ XBinary *XDJVU::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
     return new XDJVU(pDevice);
 }
+

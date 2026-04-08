@@ -64,7 +64,7 @@ bool XRiff::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XRiff::isValid(QIODevice *pDevice)
+bool XRiff::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XRiff xriff(pDevice);
 
@@ -268,3 +268,4 @@ XBinary *XRiff::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
     return new XRiff(pDevice);
 }
+

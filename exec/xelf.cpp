@@ -669,11 +669,11 @@ bool XELF::isExecutable()
     return true;
 }
 
-bool XELF::isValid(QIODevice *pDevice, bool bIsImage, quint64 nModuleAddress)
+bool XELF::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTRUCT *pPdStruct)
 {
     XELF xelf(pDevice, bIsImage, nModuleAddress);
 
-    return xelf.isValid();
+    return xelf.isValid(pPdStruct);
 }
 
 XBinary::MODE XELF::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)

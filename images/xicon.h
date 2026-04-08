@@ -66,7 +66,7 @@ public:
     ~XIcon();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
-    static bool isValid(QIODevice *pDevice);
+    static bool isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     virtual FT getFileType() override;
     virtual QString getFileFormatExt() override;
     virtual QString getFileFormatExtsString() override;
@@ -92,3 +92,4 @@ public:
 };
 
 #endif  // XICON_H
+

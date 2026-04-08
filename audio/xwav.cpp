@@ -15,7 +15,7 @@ bool XWAV::isValid(PDSTRUCT *pPdStruct)
     return (form == "WAVE");
 }
 
-bool XWAV::isValid(QIODevice *pDevice)
+bool XWAV::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XWAV x(pDevice);
     return x.isValid();
@@ -41,3 +41,4 @@ QString XWAV::getMIMEString()
 {
     return "audio/x-wav";
 }
+

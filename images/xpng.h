@@ -104,7 +104,7 @@ public:
     ~XPNG();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
-    static bool isValid(QIODevice *pDevice);
+    static bool isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     virtual FT getFileType() override;
     virtual QString getFileFormatExt() override;
     virtual QString getFileFormatExtsString() override;
@@ -137,3 +137,4 @@ CHUNK _readChunk(qint64 nOffset);
 };
 
 #endif  // XPNG_H
+

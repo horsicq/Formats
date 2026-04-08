@@ -49,7 +49,7 @@ bool XMSDOS::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XMSDOS::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+bool XMSDOS::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTRUCT *pPdStruct)
 {
     XMSDOS xmsdos(pDevice, bIsImage, nModuleAddress);
 

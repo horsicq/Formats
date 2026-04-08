@@ -50,7 +50,7 @@ bool XAtariST::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XAtariST::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+bool XAtariST::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTRUCT *pPdStruct)
 {
     XAtariST xatarist(pDevice, bIsImage, nModuleAddress);
 

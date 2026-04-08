@@ -11146,7 +11146,7 @@ bool XBinary::isValid(PDSTRUCT *pPdStruct)
     return true;
 }
 
-bool XBinary::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+bool XBinary::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTRUCT *pPdStruct)
 {
     XBinary xbinary(pDevice, bIsImage, nModuleAddress);
 

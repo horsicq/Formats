@@ -48,7 +48,7 @@ bool XCOM::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTRUCT *pPdStruct)
 {
     XCOM xcom(pDevice, bIsImage, nModuleAddress);
 

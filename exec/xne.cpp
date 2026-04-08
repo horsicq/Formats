@@ -107,7 +107,7 @@ bool XNE::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XNE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+bool XNE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTRUCT *pPdStruct)
 {
     XNE xne(pDevice, bIsImage, nModuleAddress);
 

@@ -55,7 +55,7 @@ public:
     ~XTiff();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
-    static bool isValid(QIODevice *pDevice);
+    static bool isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
     virtual FT getFileType() override;
     virtual QString getFileFormatExt() override;
@@ -82,3 +82,4 @@ qint32 getBaseTypeSize(quint16 nType);
 };
 
 #endif  // XTIFF_H
+

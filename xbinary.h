@@ -1940,7 +1940,7 @@ public:
     QIODevice *getDevice();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
-    static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
+    static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, PDSTRUCT *pPdStruct = nullptr);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
     bool isBigEndian();

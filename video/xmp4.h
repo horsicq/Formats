@@ -38,7 +38,7 @@ public:
     ~XMP4();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
-    static bool isValid(QIODevice *pDevice);
+    static bool isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QString getFileFormatExt() override;
     virtual QString getFileFormatExtsString() override;
@@ -58,3 +58,4 @@ bool isTagValid(const QString &sTagName);
 };
 
 #endif  // XMP4_H
+

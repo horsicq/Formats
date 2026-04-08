@@ -59,11 +59,11 @@ XBinary::FT XXM::getFileType()
     return XBinary::FT_XM;
 }
 
-bool XXM::isValid(QIODevice *pDevice)
+bool XXM::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XXM xxm(pDevice);
 
-    return xxm.isValid();
+    return xxm.isValid(pPdStruct);
 }
 
 XBinary::MODE XXM::getMode()
@@ -543,3 +543,4 @@ XXM::SAMPLE_HEADER XXM::_read_SAMPLE_HEADER(qint64 nOffset)
 
     return hdr;
 }
+

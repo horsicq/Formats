@@ -54,7 +54,7 @@ bool XICC::isValid(PDSTRUCT *pPdStruct)
     return bIsValid;
 }
 
-bool XICC::isValid(QIODevice *pDevice)
+bool XICC::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XICC xicc(pDevice);
 
@@ -532,3 +532,4 @@ QString XICC::_fourCCToString(quint32 nValue)
 
     return sResult;
 }
+

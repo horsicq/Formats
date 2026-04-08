@@ -55,7 +55,7 @@ bool XTiff::isValid(PDSTRUCT *pPdStruct)
     return bIsValid;
 }
 
-bool XTiff::isValid(QIODevice *pDevice)
+bool XTiff::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XTiff xtiff(pDevice);
 
@@ -511,3 +511,4 @@ XBinary *XTiff::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
     return new XTiff(pDevice);
 }
+

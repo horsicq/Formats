@@ -68,7 +68,7 @@ bool XTTF::isValid(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
-bool XTTF::isValid(QIODevice *pDevice)
+bool XTTF::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XTTF xttf(pDevice);
 
@@ -469,3 +469,4 @@ QMap<quint64, QString> XTTF::getHeaderVersionsS()
 
     return mapResult;
 }
+

@@ -40,7 +40,7 @@ public:
     ~XDER();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
-    static bool isValid(QIODevice *pDevice);
+    static bool isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
 
     virtual FT getFileType();
     virtual QString getVersion();
@@ -56,3 +56,4 @@ private:
 };
 
 #endif  // XDER_H
+

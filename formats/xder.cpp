@@ -37,7 +37,7 @@ bool XDER::isValid(PDSTRUCT *pPdStruct)
     return header.bIsValid;
 }
 
-bool XDER::isValid(QIODevice *pDevice)
+bool XDER::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XDER der(pDevice);
 
@@ -132,3 +132,4 @@ XDER::HEADER XDER::_getHeader(PDSTRUCT *pPdStruct)
 
     return result;
 }
+
