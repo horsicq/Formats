@@ -20,6 +20,625 @@
  */
 #include "xelf.h"
 
+// clang-format off
+XBinary::XIDSTRING _TABLE_XELF_Types[] = {
+    {0,      "NONE"},
+    {1,      "REL"},
+    {2,      "EXEC"},
+    {3,      "DYN"},
+    {4,      "CORE"},
+    {5,      "NUM"},
+    {0xff00, "LOPROC"},
+    {0xffff, "HIPROC"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_Machines[] = {
+    {0,      "NONE"},
+    {1,      "M32"},
+    {2,      "SPARC"},
+    {3,      "386"},
+    {4,      "68K"},
+    {5,      "88K"},
+    {6,      "486"},
+    {7,      "860"},
+    {8,      "MIPS"},
+    {9,      "S370"},
+    {10,     "MIPS_RS3_LE"},
+    {11,     "RS6000"},
+    {15,     "PARISC"},
+    {16,     "nCUBE"},
+    {17,     "VPP500"},
+    {18,     "SPARC32PLUS"},
+    {19,     "960"},
+    {20,     "PPC"},
+    {21,     "PPC64"},
+    {22,     "S390"},
+    {23,     "SPU"},
+    {36,     "V800"},
+    {37,     "FR20"},
+    {38,     "RH32"},
+    {39,     "RCE"},
+    {40,     "ARM"},
+    {41,     "ALPHA"},
+    {42,     "SH"},
+    {43,     "SPARCV9"},
+    {44,     "TRICORE"},
+    {45,     "ARC"},
+    {46,     "H8_300"},
+    {47,     "H8_300H"},
+    {48,     "H8S"},
+    {49,     "H8_500"},
+    {50,     "IA_64"},
+    {51,     "MIPS_X"},
+    {52,     "COLDFIRE"},
+    {53,     "68HC12"},
+    {54,     "MMA"},
+    {55,     "PCP"},
+    {56,     "NCPU"},
+    {57,     "NDR1"},
+    {58,     "STARCORE"},
+    {59,     "ME16"},
+    {60,     "ST100"},
+    {61,     "TINYJ"},
+    {62,     "AMD64"},
+    {63,     "PDSP"},
+    {66,     "FX66"},
+    {67,     "ST9PLUS"},
+    {68,     "ST7"},
+    {69,     "68HC16"},
+    {70,     "68HC11"},
+    {71,     "68HC08"},
+    {72,     "68HC05"},
+    {73,     "SVX"},
+    {74,     "ST19"},
+    {75,     "VAX"},
+    {76,     "CRIS"},
+    {77,     "JAVELIN"},
+    {78,     "FIREPATH"},
+    {79,     "ZSP"},
+    {80,     "MMIX"},
+    {81,     "HUANY"},
+    {82,     "PRISM"},
+    {83,     "AVR"},
+    {84,     "FR30"},
+    {85,     "D10V"},
+    {86,     "D30V"},
+    {87,     "V850"},
+    {88,     "M32R"},
+    {89,     "MN10300"},
+    {90,     "MN10200"},
+    {91,     "PJ"},
+    {92,     "OPENRISC"},
+    {93,     "ARC_A5"},
+    {94,     "XTENSA"},
+    {95,     "VIDEOCORE"},
+    {96,     "TMM_GPP"},
+    {97,     "NS32K"},
+    {98,     "TPC"},
+    {99,     "SNP1K"},
+    {100,    "ST200"},
+    {101,    "IP2K"},
+    {102,    "MAX"},
+    {103,    "CR"},
+    {104,    "F2MC16"},
+    {105,    "MSP430"},
+    {106,    "BLACKFIN"},
+    {107,    "SE_C33"},
+    {108,    "SEP"},
+    {109,    "ARCA"},
+    {110,    "UNICORE"},
+    {111,    "EXCESS"},
+    {112,    "DXP"},
+    {113,    "ALTERA_NIOS2"},
+    {114,    "CRX"},
+    {115,    "XGATE"},
+    {116,    "C166"},
+    {117,    "M16C"},
+    {118,    "DSPIC30F"},
+    {119,    "CE"},
+    {120,    "M32C"},
+    {140,    "TI_C6000"},
+    {183,    "AARCH64"},
+    {243,    "RISC_V"},
+    {258,    "LOONGARCH"},
+    {0x5441, "FRV"},
+    {0x18ad, "AVR32"},
+    {0x9026, "ALPHA"},
+    {0x9080, "CYGNUS_V850"},
+    {0x9041, "CYGNUS_M32R"},
+    {0xA390, "S390_OLD"},
+    {0xbeef, "CYGNUS_MN10300"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_Versions[] = {
+    {1, "CURRENT"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_IndentMag[] = {
+    {0x464C457F, "ELFMAG"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_IndentClasses[] = {
+    {0, "NONE"},
+    {1, "32"},
+    {2, "64"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_IndentDatas[] = {
+    {0, "NONE"},
+    {1, "2LSB"},
+    {2, "2MSB"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_IndentOsabis[] = {
+    {0,   "SYSV"},
+    {1,   "HPUX"},
+    {2,   "NETBSD"},
+    {3,   "LINUX"},
+    {4,   "HURD"},
+    {5,   "86OPEN"},
+    {6,   "SOLARIS"},
+    {7,   "AIX"},
+    {8,   "IRIX"},
+    {9,   "FREEBSD"},
+    {10,  "TRU64"},
+    {11,  "MODESTO"},
+    {12,  "OPENBSD"},
+    {13,  "OPENVMS"},
+    {14,  "NSK"},
+    {15,  "AROS"},
+    {16,  "FENIXOS"},
+    {17,  "CLOUDABI"},
+    {18,  "OPENVOS"},
+    {64,  "ARM_AEABI"},
+    {97,  "ARM"},
+    {255, "STANDALONE"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_SectionTypes[] = {
+    {0,          "NULL"},
+    {1,          "PROGBITS"},
+    {2,          "SYMTAB"},
+    {3,          "STRTAB"},
+    {4,          "RELA"},
+    {5,          "HASH"},
+    {6,          "DYNAMIC"},
+    {7,          "NOTE"},
+    {8,          "NOBITS"},
+    {9,          "REL"},
+    {10,         "SHLIB"},
+    {11,         "DYNSYM"},
+    {14,         "INIT_ARRAY"},
+    {15,         "FINI_ARRAY"},
+    {16,         "PREINIT_ARRAY"},
+    {17,         "GROUP"},
+    {18,         "SYMTAB_SHNDX"},
+    {19,         "NUM"},
+    {0x60000000, "LOOS"},
+    {0x6ffffff5, "GNU_ATTRIBUTES"},
+    {0x6ffffff6, "GNU_HASH"},
+    {0x6ffffffa, "SUNW_move"},
+    {0x6ffffffc, "SUNW_syminfo"},
+    {0x6ffffffd, "GNU_verdef"},
+    {0x6ffffffe, "GNU_verneed"},
+    {0x6fffffff, "GNU_versym"},
+    {0x70000000, "LOPROC"},
+    {0x7fffffff, "HIPROC"},
+    {0x80000000, "LOUSER"},
+    {0xffffffff, "HIUSER"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_SectionTypes_ARM[] = {
+    {0x70000001, "ARM_EXIDX"},
+    {0x70000002, "ARM_PREEMPTMAP"},
+    {0x70000003, "ARM_ATTRIBUTES"},
+    {0x70000004, "ARM_DEBUGOVERLAY"},
+    {0x70000005, "ARM_OVERLAYSECTION"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_SectionTypes_MIPS[] = {
+    {0x70000001, "MIPS_MSYM"},
+    {0x70000002, "MIPS_CONFLICT"},
+    {0x70000003, "MIPS_GPTAB"},
+    {0x70000004, "MIPS_UCODE"},
+    {0x70000005, "MIPS_DEBUG"},
+    {0x70000006, "MIPS_REGINFO"},
+    {0x70000007, "MIPS_PACKAGE"},
+    {0x70000008, "MIPS_PACKSYM"},
+    {0x70000009, "MIPS_RELD"},
+    {0x7000000b, "MIPS_IFACE"},
+    {0x7000000c, "MIPS_CONTENT"},
+    {0x7000000d, "MIPS_OPTIONS"},
+    {0x70000010, "MIPS_SHDR"},
+    {0x70000011, "MIPS_FDESC"},
+    {0x70000012, "MIPS_EXTSYM"},
+    {0x70000013, "MIPS_DENSE"},
+    {0x70000014, "MIPS_PDESC"},
+    {0x70000015, "MIPS_LOCSYM"},
+    {0x70000016, "MIPS_AUXSYM"},
+    {0x70000017, "MIPS_OPTSYM"},
+    {0x70000018, "MIPS_LOCSTR"},
+    {0x70000019, "MIPS_LINE"},
+    {0x7000001a, "MIPS_RFDESC"},
+    {0x7000001b, "MIPS_DELTASYM"},
+    {0x7000001c, "MIPS_DELTAINST"},
+    {0x7000001d, "MIPS_DELTACLASS"},
+    {0x7000001e, "MIPS_DWARF"},
+    {0x7000001f, "MIPS_DELTADECL"},
+    {0x70000020, "MIPS_SYMBOL_LIB"},
+    {0x70000021, "MIPS_EVENTS"},
+    {0x70000022, "MIPS_TRANSLATE"},
+    {0x70000023, "MIPS_PIXIE"},
+    {0x70000024, "MIPS_XLATE"},
+    {0x70000025, "MIPS_XLATE_DEBUG"},
+    {0x70000026, "MIPS_WHIRL"},
+    {0x70000027, "MIPS_EH_REGION"},
+    {0x70000028, "MIPS_XLATE_OLD"},
+    {0x70000029, "MIPS_PDR_EXCEPTION"},
+    {0x7000002a, "MIPS_ABIFLAGS"},
+    {0x7000002b, "MIPS_XHASH"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_SectionTypes_AMD64[] = {
+    {0x70000001, "AMD64_UNWIND"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_SectionFlags[] = {
+    {0x00000001, "WRITE"},
+    {0x00000002, "ALLOC"},
+    {0x00000004, "EXECINSTR"},
+    {0x00000010, "MERGE"},
+    {0x00000020, "STRINGS"},
+    {0x00000040, "INFO_LINK"},
+    {0x00000080, "LINK_ORDER"},
+    {0x00000100, "OS_NONCONFORMING"},
+    {0x00000200, "GROUP"},
+    {0x00000400, "TLS"},
+    {0x00000800, "COMPRESSED"},
+    {0x0ff00000, "MASKOS"},
+    {0xf0000000, "MASKPROC"},
+    {0x40000000, "ORDERED"},
+    {0x80000000, "EXCLUDE"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramTypes_Base[] = {
+    {0,          "NULL"},
+    {1,          "LOAD"},
+    {2,          "DYNAMIC"},
+    {3,          "INTERP"},
+    {4,          "NOTE"},
+    {5,          "SHLIB"},
+    {6,          "PHDR"},
+    {7,          "TLS"},
+    {8,          "NUM"},
+    {0x60000000, "LOOS"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramTypes_Solaris[] = {
+    {0x6464e550, "SUNW_UNWIND"},
+    {0x6474e550, "SUNW_EH_FRAME"},
+    {0x6ffffffa, "SUNWBSS"},
+    {0x6ffffffb, "SUNWSTACK"},
+    {0x6ffffffc, "SUNWDTRACE"},
+    {0x6ffffffd, "SUNWCAP"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramTypes_GNU[] = {
+    {0x6474e550, "GNU_EH_FRAME"},
+    {0x6474e551, "GNU_STACK"},
+    {0x6474e552, "GNU_RELRO"},
+    {0x6474e553, "GNU_PROPERTY"},
+    {0x65041580, "PAX_FLAGS"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramTypes_OpenBSD[] = {
+    {0x65A3DBE6, "OPENBSD_RANDOMIZE"},
+    {0x65A3DBE7, "OPENBSD_WXNEEDED"},
+    {0x65A41BE6, "OPENBSD_BOOTDATA"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramTypes_Cont[] = {
+    {0x6ffffffa, "LOSUNW"},
+    {0x6fffffff, "HIOS"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramTypes_ARM[] = {
+    {0x70000001, "ARM_EXIDX"},
+    {0x70000002, "ARM_PREEMPTMAP"},
+    {0x70000003, "ARM_ATTRIBUTES"},
+    {0x70000004, "ARM_DEBUGOVERLAY"},
+    {0x70000005, "ARM_OVERLAYSECTION"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramTypes_MIPS[] = {
+    {0x70000000, "MIPS_REGINFO"},
+    {0x70000001, "MIPS_RTPROC"},
+    {0x70000002, "MIPS_OPTIONS"},
+    {0x70000003, "MIPS_ABIFLAGS"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramTypes_AARCH64[] = {
+    {0x70000000, "AARCH64_ARCHEXT"},
+    {0x70000001, "AARCH64_UNWIND"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramTypes_S390[] = {
+    {0x70000000, "S390_PGSTE"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramTypes_LOPROC[] = {
+    {0x70000000, "LOPROC"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramTypes_Tail[] = {
+    {0x7fffffff, "HIPROC"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_ProgramFlags[] = {
+    {0x00000001, "X"},
+    {0x00000002, "W"},
+    {0x00000004, "R"},
+    {0x0ff00000, "MASKOS"},
+    {0xf0000000, "MASKPROC"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_DynamicTags_Base[] = {
+    {0,          "NULL"},
+    {1,          "NEEDED"},
+    {2,          "PLTRELSZ"},
+    {3,          "PLTGOT"},
+    {4,          "HASH"},
+    {5,          "STRTAB"},
+    {6,          "SYMTAB"},
+    {7,          "RELA"},
+    {8,          "RELASZ"},
+    {9,          "RELAENT"},
+    {10,         "STRSZ"},
+    {11,         "SYMENT"},
+    {12,         "INIT"},
+    {13,         "FINI"},
+    {14,         "SONAME"},
+    {15,         "RPATH"},
+    {16,         "SYMBOLIC"},
+    {17,         "REL"},
+    {18,         "RELSZ"},
+    {19,         "RELENT"},
+    {20,         "PLTREL"},
+    {21,         "DEBUG"},
+    {22,         "TEXTREL"},
+    {23,         "JMPREL"},
+    {24,         "BIND_NOW"},
+    {25,         "INIT_ARRAY"},
+    {26,         "FINI_ARRAY"},
+    {27,         "INIT_ARRAYSZ"},
+    {28,         "FINI_ARRAYSZ"},
+    {29,         "RUNPATH"},
+    {30,         "FLAGS"},
+    {32,         "PREINIT_ARRAY"},
+    {33,         "PREINIT_ARRAYSZ"},
+    {34,         "NUM"},
+    {0x6000000d, "LOOS"},
+    {0x6000000e, "SUNW_RTLDINF"},
+    {0x6ffff000, "HIOS"},
+    {0x6ffffd00, "VALRNGLO"},
+    {0x6ffffdf8, "CHECKSUM"},
+    {0x6ffffdf9, "PLTPADSZ"},
+    {0x6ffffdfa, "MOVEENT"},
+    {0x6ffffdfb, "MOVESZ"},
+    {0x6ffffdfc, "FEATURE_1"},
+    {0x6ffffdfd, "POSFLAG_1"},
+    {0x6ffffdfe, "SYMINSZ"},
+    {0x6ffffdff, "SYMINENT"},
+    {0x6ffffdff, "VALRNGHI"},
+    {0x6ffffe00, "ADDRRNGLO"},
+    {0x6ffffef5, "GNU_HASH"},
+    {0x6ffffefa, "CONFIG"},
+    {0x6ffffefb, "DEPAUDIT"},
+    {0x6ffffefc, "AUDIT"},
+    {0x6ffffefd, "PLTPAD"},
+    {0x6ffffefe, "MOVETAB"},
+    {0x6ffffeff, "SYMINFO"},
+    {0x6ffffeff, "ADDRRNGHI"},
+    {0x6ffffff0, "VERSYM"},
+    {0x6ffffff9, "RELACOUNT"},
+    {0x6ffffffa, "RELCOUNT"},
+    {0x6ffffffb, "FLAGS_1"},
+    {0x6ffffffc, "VERDEF"},
+    {0x6ffffffd, "VERDEFNUM"},
+    {0x6ffffffe, "VERNEED"},
+    {0x6fffffff, "VERNEEDNUM"},
+    {0x70000000, "LOPROC"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_DynamicTags_MIPS[] = {
+    {0x70000001, "MIPS_RLD_VERSION"},
+    {0x70000002, "MIPS_TIME_STAMP"},
+    {0x70000003, "MIPS_ICHECKSUM"},
+    {0x70000004, "MIPS_IVERSION"},
+    {0x70000005, "MIPS_FLAGS"},
+    {0x70000006, "MIPS_BASE_ADDRESS"},
+    {0x70000008, "MIPS_CONFLICT"},
+    {0x70000009, "MIPS_LIBLIST"},
+    {0x7000000a, "MIPS_LOCAL_GOTNO"},
+    {0x7000000b, "MIPS_CONFLICTNO"},
+    {0x70000010, "MIPS_LIBLISTNO"},
+    {0x70000011, "MIPS_SYMTABNO"},
+    {0x70000012, "MIPS_UNREFEXTNO"},
+    {0x70000013, "MIPS_GOTSYM"},
+    {0x70000014, "MIPS_HIPAGENO"},
+    {0x70000016, "MIPS_RLD_MAP"},
+    {0x70000017, "MIPS_DELTA_CLASS"},
+    {0x70000018, "MIPS_DELTA_CLASS_NO"},
+    {0x70000019, "MIPS_DELTA_INSTANCE"},
+    {0x7000001A, "MIPS_DELTA_INSTANCE_NO"},
+    {0x7000001B, "MIPS_DELTA_RELOC"},
+    {0x7000001C, "MIPS_DELTA_RELOC_NO"},
+    {0x7000001D, "MIPS_DELTA_SYM"},
+    {0x7000001E, "MIPS_DELTA_SYM_NO"},
+    {0x70000020, "MIPS_DELTA_CLASSSYM"},
+    {0x70000021, "MIPS_DELTA_CLASSSYM_NO"},
+    {0x70000022, "MIPS_CXX_FLAGS"},
+    {0x70000023, "MIPS_PIXIE_INIT"},
+    {0x70000024, "MIPS_SYMBOL_LIB"},
+    {0x70000025, "MIPS_LOCALPAGE_GOTIDX"},
+    {0x70000026, "MIPS_LOCAL_GOTIDX"},
+    {0x70000027, "MIPS_HIDDEN_GOTIDX"},
+    {0x70000028, "MIPS_PROTECTED_GOTIDX"},
+    {0x70000029, "MIPS_OPTIONS"},
+    {0x7000002A, "MIPS_INTERFACE"},
+    {0x7000002B, "MIPS_DYNSTR_ALIGN"},
+    {0x7000002C, "MIPS_INTERFACE_SIZE"},
+    {0x7000002D, "MIPS_RLD_TEXT_RESOLVE_ADDR"},
+    {0x7000002E, "MIPS_PERF_SUFFIX"},
+    {0x7000002F, "MIPS_COMPACT_SIZE"},
+    {0x70000030, "MIPS_GP_VALUE"},
+    {0x70000031, "MIPS_AUX_DYNAMIC"},
+    {0x70000032, "MIPS_PLTGOT"},
+    {0x70000033, "MIPS_RLD_OBJ_UPDATE"},
+    {0x70000034, "MIPS_RWPLT"},
+    {0x70000035, "MIPS_RLD_VERSION"},
+    {0x36,       "MIPS_NUM"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_DynamicTags_SPARC[] = {
+    {0x70000001, "SPARC_REGISTER"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_DynamicTags_Tail[] = {
+    {0x7ffffffd, "AUXILIARY"},
+    {0x7ffffffe, "USED"},
+    {0x7fffffff, "HIPROC"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_RelTypes_x86[] = {
+    {0,  "386_NONE"},
+    {1,  "386_32"},
+    {2,  "386_PC32"},
+    {3,  "386_GOT32"},
+    {4,  "386_PLT32"},
+    {5,  "386_COPY"},
+    {6,  "386_GLOB_DAT"},
+    {7,  "386_JMP_SLOT"},
+    {8,  "386_RELATIVE"},
+    {9,  "386_GOTOFF"},
+    {10, "386_GOTPC"},
+    {11, "386_32PLT"},
+    {20, "386_16"},
+    {21, "386_PC16"},
+    {22, "386_8"},
+    {23, "386_PC8"},
+    {38, "386_SIZE32"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_RelTypes_x64[] = {
+    {0,  "X86_64_NONE"},
+    {1,  "X86_64_64"},
+    {2,  "386_PC32"},
+    {3,  "386_GOT32"},
+    {4,  "X86_64_PLT32"},
+    {5,  "X86_64_COPY"},
+    {6,  "X86_64_GLOB_DAT"},
+    {7,  "X86_64_JMP_SLOT"},
+    {8,  "X86_64_RELATIVE"},
+    {9,  "X86_64_GOTPCREL"},
+    {10, "X86_64_32"},
+    {11, "X86_64_32S"},
+    {12, "X86_64_16"},
+    {13, "X86_64_PC16"},
+    {14, "X86_64_8"},
+    {15, "X86_64_PC8"},
+    {24, "X86_64_PC64"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_RelTypes_SPARC[] = {
+    {0,  "SPARC_NONE"},
+    {1,  "SPARC_8"},
+    {2,  "SPARC_16"},
+    {3,  "SPARC_32"},
+    {4,  "SPARC_DISP8"},
+    {5,  "SPARC_DISP16"},
+    {6,  "SPARC_DISP32"},
+    {7,  "SPARC_WDISP30"},
+    {8,  "SPARC_WDISP22"},
+    {9,  "SPARC_HI22"},
+    {10, "SPARC_22"},
+    {11, "SPARC_13"},
+    {12, "SPARC_LO10"},
+    {13, "SPARC_GOT10"},
+    {14, "SPARC_GOT13"},
+    {15, "SPARC_GOT22"},
+    {16, "SPARC_PC10"},
+    {17, "SPARC_PC22"},
+    {18, "SPARC_WPLT30"},
+    {19, "SPARC_COPY"},
+    {20, "SPARC_GLOB_DAT"},
+    {21, "SPARC_JMP_SLOT"},
+    {22, "SPARC_RELATIVE"},
+    {23, "SPARC_UA32"},
+    {24, "SPARC_PLT32"},
+    {25, "SPARC_HIPLT22"},
+    {26, "SPARC_LOPLT10"},
+    {27, "SPARC_PCPLT32"},
+    {28, "SPARC_PCPLT22"},
+    {29, "SPARC_PCPLT10"},
+    {30, "SPARC_10"},
+    {31, "SPARC_11"},
+    {32, "SPARC_64"},
+    {33, "SPARC_OLO10"},
+    {34, "SPARC_HH22"},
+    {35, "SPARC_HM10"},
+    {36, "SPARC_LM22"},
+    {37, "SPARC_PC_HH22"},
+    {38, "SPARC_PC_HM10"},
+    {39, "SPARC_PC_LM22"},
+    {40, "SPARC_WDISP16"},
+    {41, "SPARC_WDISP19"},
+    {43, "SPARC_7"},
+    {44, "SPARC_5"},
+    {45, "SPARC_6"},
+    {46, "SPARC_DISP64"},
+    {47, "SPARC_PLT64"},
+    {48, "SPARC_HIX22"},
+    {49, "SPARC_LOX10"},
+    {50, "SPARC_H44"},
+    {51, "SPARC_M44"},
+    {52, "SPARC_L44"},
+    {53, "SPARC_REGISTER"},
+    {54, "SPARC_UA64"},
+    {55, "SPARC_UA16"},
+    {80, "SPARC_GOTDATA_HIX22"},
+    {81, "SPARC_GOTDATA_LOX10"},
+    {82, "SPARC_GOTDATA_OP_HIX22"},
+    {83, "SPARC_GOTDATA_OP_LOX10"},
+    {84, "SPARC_GOTDATA_OP"},
+    {85, "SPARC_SIZE32"},
+    {87, "SPARC_SIZE64"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_StBinds[] = {
+    {0,  "LOCAL"},
+    {1,  "GLOBAL"},
+    {2,  "WEAK"},
+    {10, "LOOS"},
+    {12, "HIOS"},
+    {13, "LOPROC"},
+    {15, "HIPROC"},
+};
+
+XBinary::XIDSTRING _TABLE_XELF_StTypes[] = {
+    {0,  "NOTYPE"},
+    {1,  "OBJECT"},
+    {2,  "FUNC"},
+    {3,  "SECTION"},
+    {4,  "FILE"},
+    {5,  "COMMON"},
+    {10, "LOOS"},
+    {12, "HIOS"},
+    {13, "LOPROC"},
+    {15, "HIPROC"},
+};
+// clang-format on
+
 XELF::XELF(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pDevice, bIsImage, nModuleAddress)
 {
 }
@@ -499,818 +1118,292 @@ XELF_DEF::Elf_Ehdr XELF::getHdr()
     return result;
 }
 
+const QString XELF::PREFIX_ET = "ET";
+const QString XELF::PREFIX_EM = "EM";
+const QString XELF::PREFIX_EV = "EV";
+const QString XELF::PREFIX_ELFCLASS = "ELFCLASS";
+const QString XELF::PREFIX_ELFDATA = "ELFDATA";
+const QString XELF::PREFIX_ELFOSABI = "ELFOSABI";
+const QString XELF::PREFIX_SHT = "SHT";
+const QString XELF::PREFIX_SHF = "SHF";
+const QString XELF::PREFIX_PT = "PT";
+const QString XELF::PREFIX_PF = "PF";
+const QString XELF::PREFIX_DT = "DT";
+const QString XELF::PREFIX_R = "R";
+const QString XELF::PREFIX_STB = "STB";
+const QString XELF::PREFIX_STT = "STT";
+
 QMap<quint64, QString> XELF::getTypes()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "ET_NONE");
-    mapResult.insert(1, "ET_REL");
-    mapResult.insert(2, "ET_EXEC");
-    mapResult.insert(3, "ET_DYN");
-    mapResult.insert(4, "ET_CORE");
-    mapResult.insert(5, "ET_NUM");
-    mapResult.insert(0xff00, "ET_LOPROC");
-    mapResult.insert(0xffff, "ET_HIPROC");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_Types, sizeof(_TABLE_XELF_Types) / sizeof(XBinary::XIDSTRING), PREFIX_ET);
 }
 
 QMap<quint64, QString> XELF::getTypesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "NONE");
-    mapResult.insert(1, "REL");
-    mapResult.insert(2, "EXEC");
-    mapResult.insert(3, "DYN");
-    mapResult.insert(4, "CORE");
-    mapResult.insert(5, "NUM");
-    mapResult.insert(0xff00, "LOPROC");
-    mapResult.insert(0xffff, "HIPROC");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_Types, sizeof(_TABLE_XELF_Types) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getMachines()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0,
-                     "EM_NONE");  // TODO
-                                  // http://users.sosdg.org/~qiyong/mxr/source/sys/sys/exec_elf.h
-                                  // https://github.com/Mm7/oatrev/blob/master/elfio/elf_types.hpp
-    mapResult.insert(1, "EM_M32");
-    mapResult.insert(2, "EM_SPARC");
-    mapResult.insert(3, "EM_386");
-    mapResult.insert(4, "EM_68K");
-    mapResult.insert(5, "EM_88K");
-    mapResult.insert(6, "EM_486"); /* Perhaps disused */
-    mapResult.insert(7, "EM_860");
-    mapResult.insert(8, "EM_MIPS");
-    mapResult.insert(9, "EM_S370");
-    mapResult.insert(10, "EM_MIPS_RS3_LE");
-    mapResult.insert(11, "EM_RS6000");
-    mapResult.insert(15, "EM_PARISC");
-    mapResult.insert(16, "EM_nCUBE");
-    mapResult.insert(17, "EM_VPP500");
-    mapResult.insert(18, "EM_SPARC32PLUS");
-    mapResult.insert(19, "EM_960");
-    mapResult.insert(20, "EM_PPC");
-    mapResult.insert(21, "EM_PPC64");
-    mapResult.insert(22, "EM_S390");
-    mapResult.insert(23, "EM_SPU");
-    mapResult.insert(36, "EM_V800");
-    mapResult.insert(37, "EM_FR20");
-    mapResult.insert(38, "EM_RH32");
-    mapResult.insert(39, "EM_RCE");
-    mapResult.insert(40, "EM_ARM");
-    mapResult.insert(41, "EM_ALPHA");
-    mapResult.insert(42, "EM_SH");
-    mapResult.insert(43, "EM_SPARCV9");
-    mapResult.insert(44, "EM_TRICORE");
-    mapResult.insert(45, "EM_ARC");
-    mapResult.insert(46, "EM_H8_300");
-    mapResult.insert(47, "EM_H8_300H");
-    mapResult.insert(48, "EM_H8S");
-    mapResult.insert(49, "EM_H8_500");
-    mapResult.insert(50, "EM_IA_64");
-    mapResult.insert(51, "EM_MIPS_X");
-    mapResult.insert(52, "EM_COLDFIRE");
-    mapResult.insert(53, "EM_68HC12");
-    mapResult.insert(54, "EM_MMA");
-    mapResult.insert(55, "EM_PCP");
-    mapResult.insert(56, "EM_NCPU");
-    mapResult.insert(57, "EM_NDR1");
-    mapResult.insert(58, "EM_STARCORE");
-    mapResult.insert(59, "EM_ME16");
-    mapResult.insert(60, "EM_ST100");
-    mapResult.insert(61, "EM_TINYJ");
-    mapResult.insert(62, "EM_AMD64");  // EM_X86_64
-    mapResult.insert(63, "EM_PDSP");
-    mapResult.insert(66, "EM_FX66");
-    mapResult.insert(67, "EM_ST9PLUS");
-    mapResult.insert(68, "EM_ST7");
-    mapResult.insert(69, "EM_68HC16");
-    mapResult.insert(70, "EM_68HC11");
-    mapResult.insert(71, "EM_68HC08");
-    mapResult.insert(72, "EM_68HC05");
-    mapResult.insert(73, "EM_SVX");
-    mapResult.insert(74, "EM_ST19");
-    mapResult.insert(75, "EM_VAX");
-    mapResult.insert(76, "EM_CRIS");
-    mapResult.insert(77, "EM_JAVELIN");
-    mapResult.insert(78, "EM_FIREPATH");
-    mapResult.insert(79, "EM_ZSP");
-    mapResult.insert(80, "EM_MMIX");
-    mapResult.insert(81, "EM_HUANY");
-    mapResult.insert(82, "EM_PRISM");
-    mapResult.insert(83, "EM_AVR");
-    mapResult.insert(84, "EM_FR30");
-    mapResult.insert(85, "EM_D10V");
-    mapResult.insert(86, "EM_D30V");
-    mapResult.insert(87, "EM_V850");
-    mapResult.insert(88, "EM_M32R");
-    mapResult.insert(89, "EM_MN10300");
-    mapResult.insert(90, "EM_MN10200");
-    mapResult.insert(91, "EM_PJ");
-    mapResult.insert(92, "EM_OPENRISC");
-    mapResult.insert(93, "EM_ARC_A5");
-    mapResult.insert(94, "EM_XTENSA");
-    mapResult.insert(95, "EM_VIDEOCORE");
-    mapResult.insert(96, "EM_TMM_GPP");
-    mapResult.insert(97, "EM_NS32K");
-    mapResult.insert(98, "EM_TPC");
-    mapResult.insert(99, "EM_SNP1K");
-    mapResult.insert(100, "EM_ST200");
-    mapResult.insert(101, "EM_IP2K");
-    mapResult.insert(102, "EM_MAX");
-    mapResult.insert(103, "EM_CR");
-    mapResult.insert(104, "EM_F2MC16");
-    mapResult.insert(105, "EM_MSP430");
-    mapResult.insert(106, "EM_BLACKFIN");
-    mapResult.insert(107, "EM_SE_C33");
-    mapResult.insert(108, "EM_SEP");
-    mapResult.insert(109, "EM_ARCA");
-    mapResult.insert(110, "EM_UNICORE");
-    mapResult.insert(111, "EM_EXCESS");
-    mapResult.insert(112, "EM_DXP");
-    mapResult.insert(113, "EM_ALTERA_NIOS2");
-    mapResult.insert(114, "EM_CRX");
-    mapResult.insert(115, "EM_XGATE");
-    mapResult.insert(116, "EM_C166");
-    mapResult.insert(117, "EM_M16C");
-    mapResult.insert(118, "EM_DSPIC30F");
-    mapResult.insert(119, "EM_CE");
-    mapResult.insert(120, "EM_M32C");
-    mapResult.insert(140, "EM_TI_C6000");
-    mapResult.insert(183, "EM_AARCH64");
-    mapResult.insert(243, "EM_RISC_V");
-    mapResult.insert(258, "EM_LOONGARCH");
-    mapResult.insert(0x5441, "EM_FRV");
-    mapResult.insert(0x18ad, "EM_AVR32");
-    mapResult.insert(0x9026, "EM_ALPHA");
-    mapResult.insert(0x9080, "EM_CYGNUS_V850");
-    mapResult.insert(0x9041, "EM_CYGNUS_M32R");
-    mapResult.insert(0xA390, "EM_S390_OLD");
-    mapResult.insert(0xbeef, "EM_CYGNUS_MN10300");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_Machines, sizeof(_TABLE_XELF_Machines) / sizeof(XBinary::XIDSTRING), PREFIX_EM);
 }
 
 QMap<quint64, QString> XELF::getMachinesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    // TODO
-    // ftp://ftp.eso.org/pub/solaris/rec_patches/8/8_Recommended/109147-39/SUNWhea/reloc/usr/include/sys/elf.h
-    // TODO http://users.sosdg.org/~qiyong/mxr/source/sys/sys/elf.h
-    mapResult.insert(0, "NONE");
-    mapResult.insert(1, "M32");
-    mapResult.insert(2, "SPARC");
-    mapResult.insert(3, "386");
-    mapResult.insert(4, "68K");
-    mapResult.insert(5, "88K");
-    mapResult.insert(6, "486"); /* Perhaps disused */
-    mapResult.insert(7, "860");
-    mapResult.insert(8, "MIPS");
-    mapResult.insert(9, "S370");
-    mapResult.insert(10, "MIPS_RS3_LE");
-    mapResult.insert(11, "RS6000");
-    mapResult.insert(15, "PARISC");
-    mapResult.insert(16, "nCUBE");
-    mapResult.insert(17, "VPP500");
-    mapResult.insert(18, "SPARC32PLUS");
-    mapResult.insert(19, "960");
-    mapResult.insert(20, "PPC");
-    mapResult.insert(21, "PPC64");
-    mapResult.insert(22, "S390");
-    mapResult.insert(23, "SPU");
-    mapResult.insert(36, "V800");
-    mapResult.insert(37, "FR20");
-    mapResult.insert(38, "RH32");
-    mapResult.insert(39, "RCE");
-    mapResult.insert(40, "ARM");
-    mapResult.insert(41, "ALPHA");
-    mapResult.insert(42, "SH");
-    mapResult.insert(43, "SPARCV9");
-    mapResult.insert(44, "TRICORE");
-    mapResult.insert(45, "ARC");
-    mapResult.insert(46, "H8_300");
-    mapResult.insert(47, "H8_300H");
-    mapResult.insert(48, "H8S");
-    mapResult.insert(49, "H8_500");
-    mapResult.insert(50, "IA_64");
-    mapResult.insert(51, "MIPS_X");
-    mapResult.insert(52, "COLDFIRE");
-    mapResult.insert(53, "68HC12");
-    mapResult.insert(54, "MMA");
-    mapResult.insert(55, "PCP");
-    mapResult.insert(56, "NCPU");
-    mapResult.insert(57, "NDR1");
-    mapResult.insert(58, "STARCORE");
-    mapResult.insert(59, "ME16");
-    mapResult.insert(60, "ST100");
-    mapResult.insert(61, "TINYJ");
-    mapResult.insert(62, "AMD64");  // X86_64
-    mapResult.insert(63, "PDSP");
-    mapResult.insert(66, "FX66");
-    mapResult.insert(67, "ST9PLUS");
-    mapResult.insert(68, "ST7");
-    mapResult.insert(69, "68HC16");
-    mapResult.insert(70, "68HC11");
-    mapResult.insert(71, "68HC08");
-    mapResult.insert(72, "68HC05");
-    mapResult.insert(73, "SVX");
-    mapResult.insert(74, "ST19");
-    mapResult.insert(75, "VAX");
-    mapResult.insert(76, "CRIS");
-    mapResult.insert(77, "JAVELIN");
-    mapResult.insert(78, "FIREPATH");
-    mapResult.insert(79, "ZSP");
-    mapResult.insert(80, "MMIX");
-    mapResult.insert(81, "HUANY");
-    mapResult.insert(82, "PRISM");
-    mapResult.insert(83, "AVR");
-    mapResult.insert(84, "FR30");
-    mapResult.insert(85, "D10V");
-    mapResult.insert(86, "D30V");
-    mapResult.insert(87, "V850");
-    mapResult.insert(88, "M32R");
-    mapResult.insert(89, "MN10300");
-    mapResult.insert(89, "MN10300");
-    mapResult.insert(90, "MN10200");
-    mapResult.insert(91, "PJ");  // TODO
-    mapResult.insert(92, "OPENRISC");
-    mapResult.insert(93, "ARC_A5");
-    mapResult.insert(94, "XTENSA");
-    mapResult.insert(95, "VIDEOCORE");
-    mapResult.insert(96, "TMM_GPP");
-    mapResult.insert(97, "NS32K");
-    mapResult.insert(98, "TPC");
-    mapResult.insert(99, "SNP1K");
-    mapResult.insert(100, "ST200");
-    mapResult.insert(101, "IP2K");
-    mapResult.insert(102, "MAX");
-    mapResult.insert(103, "CR");
-    mapResult.insert(104, "F2MC16");
-    mapResult.insert(105, "MSP430");
-    mapResult.insert(106, "BLACKFIN");
-    mapResult.insert(107, "SE_C33");
-    mapResult.insert(108, "SEP");
-    mapResult.insert(109, "ARCA");
-    mapResult.insert(110, "UNICORE");
-    mapResult.insert(111, "EXCESS");
-    mapResult.insert(112, "DXP");
-    mapResult.insert(113, "ALTERA_NIOS2");
-    mapResult.insert(114, "CRX");
-    mapResult.insert(115, "XGATE");
-    mapResult.insert(116, "C166");
-    mapResult.insert(117, "M16C");
-    mapResult.insert(118, "DSPIC30F");
-    mapResult.insert(119, "CE");
-    mapResult.insert(120, "M32C");
-    mapResult.insert(140, "TI_C6000");
-    mapResult.insert(183, "AARCH64");
-    mapResult.insert(243, "RISC_V");
-    mapResult.insert(258, "LOONGARCH");
-    mapResult.insert(0x5441, "FRV");
-    mapResult.insert(0x18ad, "AVR32");
-    mapResult.insert(0x9026, "ALPHA");
-    mapResult.insert(0x9080, "CYGNUS_V850");
-    mapResult.insert(0x9041, "CYGNUS_M32R");
-    mapResult.insert(0xA390, "S390_OLD");
-    mapResult.insert(0xbeef, "CYGNUS_MN10300");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_Machines, sizeof(_TABLE_XELF_Machines) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getHeaderVersionList()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(1, "EV_CURRENT");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_Versions, sizeof(_TABLE_XELF_Versions) / sizeof(XBinary::XIDSTRING), PREFIX_EV);
 }
 
 QMap<quint64, QString> XELF::getIndentMag()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x464C457F, "ELFMAG");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_IndentMag, sizeof(_TABLE_XELF_IndentMag) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getIndentMagS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x464C457F, "ELFMAG");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_IndentMag, sizeof(_TABLE_XELF_IndentMag) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getIndentClasses()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "ELFCLASSNONE");
-    mapResult.insert(1, "ELFCLASS32");
-    mapResult.insert(2, "ELFCLASS64");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_IndentClasses, sizeof(_TABLE_XELF_IndentClasses) / sizeof(XBinary::XIDSTRING), PREFIX_ELFCLASS);
 }
 
 QMap<quint64, QString> XELF::getIndentClassesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "NONE");
-    mapResult.insert(1, "32");
-    mapResult.insert(2, "64");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_IndentClasses, sizeof(_TABLE_XELF_IndentClasses) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getIndentDatas()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "ELFDATANONE");
-    mapResult.insert(1, "ELFDATA2LSB");
-    mapResult.insert(2, "ELFDATA2MSB");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_IndentDatas, sizeof(_TABLE_XELF_IndentDatas) / sizeof(XBinary::XIDSTRING), PREFIX_ELFDATA);
 }
 
 QMap<quint64, QString> XELF::getIndentDatasS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "NONE");
-    mapResult.insert(1, "2LSB");
-    mapResult.insert(2, "2MSB");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_IndentDatas, sizeof(_TABLE_XELF_IndentDatas) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getIndentVersions()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(1, "EV_CURRENT");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_Versions, sizeof(_TABLE_XELF_Versions) / sizeof(XBinary::XIDSTRING), PREFIX_EV);
 }
 
 QMap<quint64, QString> XELF::getIndentVersionsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(1, "CURRENT");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_Versions, sizeof(_TABLE_XELF_Versions) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getIndentOsabis()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "ELFOSABI_SYSV");
-    mapResult.insert(1, "ELFOSABI_HPUX");
-    mapResult.insert(2, "ELFOSABI_NETBSD");
-    mapResult.insert(3, "ELFOSABI_LINUX");
-    mapResult.insert(4, "ELFOSABI_HURD");
-    mapResult.insert(5, "ELFOSABI_86OPEN");
-    mapResult.insert(6, "ELFOSABI_SOLARIS");
-    mapResult.insert(7, "ELFOSABI_AIX");
-    mapResult.insert(8, "ELFOSABI_IRIX");
-    mapResult.insert(9, "ELFOSABI_FREEBSD");
-    mapResult.insert(10, "ELFOSABI_TRU64");
-    mapResult.insert(11, "ELFOSABI_MODESTO");
-    mapResult.insert(12, "ELFOSABI_OPENBSD");
-    mapResult.insert(13, "ELFOSABI_OPENVMS");
-    mapResult.insert(14, "ELFOSABI_NSK");
-    mapResult.insert(15, "ELFOSABI_AROS");
-    mapResult.insert(16, "ELFOSABI_FENIXOS");
-    mapResult.insert(17, "ELFOSABI_CLOUDABI");
-    mapResult.insert(18, "ELFOSABI_OPENVOS");
-    mapResult.insert(64, "ELFOSABI_ARM_AEABI");
-    mapResult.insert(97, "ELFOSABI_ARM");
-    mapResult.insert(255, "ELFOSABI_STANDALONE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_IndentOsabis, sizeof(_TABLE_XELF_IndentOsabis) / sizeof(XBinary::XIDSTRING), PREFIX_ELFOSABI);
 }
 
 QMap<quint64, QString> XELF::getIndentOsabisS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "SYSV");
-    mapResult.insert(1, "HPUX");
-    mapResult.insert(2, "NETBSD");
-    mapResult.insert(3, "LINUX");
-    mapResult.insert(4, "HURD");
-    mapResult.insert(5, "86OPEN");
-    mapResult.insert(6, "SOLARIS");
-    mapResult.insert(7, "AIX");
-    mapResult.insert(8, "IRIX");
-    mapResult.insert(9, "FREEBSD");
-    mapResult.insert(10, "TRU64");
-    mapResult.insert(11, "MODESTO");
-    mapResult.insert(12, "OPENBSD");
-    mapResult.insert(13, "OPENVMS");
-    mapResult.insert(14, "NSK");
-    mapResult.insert(15, "AROS");
-    mapResult.insert(16, "FENIXOS");
-    mapResult.insert(17, "CLOUDABI");
-    mapResult.insert(18, "OPENVOS");
-    mapResult.insert(64, "ARM_AEABI");
-    mapResult.insert(97, "ARM");
-    mapResult.insert(255, "STANDALONE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_IndentOsabis, sizeof(_TABLE_XELF_IndentOsabis) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getSectionTypes(const QString &sArch)
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64, QString> mapResult = XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_SectionTypes, sizeof(_TABLE_XELF_SectionTypes) / sizeof(XBinary::XIDSTRING), PREFIX_SHT);
 
-    mapResult.insert(0, "SHT_NULL");
-    mapResult.insert(1, "SHT_PROGBITS");
-    mapResult.insert(2, "SHT_SYMTAB");
-    mapResult.insert(3, "SHT_STRTAB");
-    mapResult.insert(4, "SHT_RELA");
-    mapResult.insert(5, "SHT_HASH");
-    mapResult.insert(6, "SHT_DYNAMIC");
-    mapResult.insert(7, "SHT_NOTE");
-    mapResult.insert(8, "SHT_NOBITS");
-    mapResult.insert(9, "SHT_REL");
-    mapResult.insert(10, "SHT_SHLIB");
-    mapResult.insert(11, "SHT_DYNSYM");
-    mapResult.insert(14, "SHT_INIT_ARRAY");
-    mapResult.insert(15, "SHT_FINI_ARRAY");
-    mapResult.insert(16, "SHT_PREINIT_ARRAY");
-    mapResult.insert(17, "SHT_GROUP");
-    mapResult.insert(18, "SHT_SYMTAB_SHNDX");
-    mapResult.insert(19, "SHT_NUM");
-    mapResult.insert(0x60000000, "SHT_LOOS");
-    mapResult.insert(0x6ffffff5, "SHT_GNU_ATTRIBUTES");
-    mapResult.insert(0x6ffffff6, "SHT_GNU_HASH");
-    mapResult.insert(0x6ffffffa, "SHT_SUNW_move");
-    mapResult.insert(0x6ffffffc, "SHT_SUNW_syminfo");
-    mapResult.insert(0x6ffffffd, "SHT_GNU_verdef");
-    mapResult.insert(0x6ffffffe, "SHT_GNU_verneed");
-    mapResult.insert(0x6fffffff, "SHT_GNU_versym");
-    mapResult.insert(0x70000000, "SHT_LOPROC");
+    XBinary::XIDSTRING *pArchTable = nullptr;
+    qint32 nArchCount = 0;
 
     if (sArch == "ARM") {
-        mapResult.insert(0x70000001, "SHT_ARM_EXIDX");
-        mapResult.insert(0x70000002, "SHT_ARM_PREEMPTMAP");
-        mapResult.insert(0x70000003, "SHT_ARM_ATTRIBUTES");
-        mapResult.insert(0x70000004, "SHT_ARM_DEBUGOVERLAY");
-        mapResult.insert(0x70000005, "SHT_ARM_OVERLAYSECTION");
+        pArchTable = _TABLE_XELF_SectionTypes_ARM;
+        nArchCount = sizeof(_TABLE_XELF_SectionTypes_ARM) / sizeof(XBinary::XIDSTRING);
     } else if (sArch == "MIPS") {
-        mapResult.insert(0x70000001, "SHT_MIPS_MSYM");
-        mapResult.insert(0x70000002, "SHT_MIPS_CONFLICT");
-        mapResult.insert(0x70000003, "SHT_MIPS_GPTAB");
-        mapResult.insert(0x70000004, "SHT_MIPS_UCODE");
-        mapResult.insert(0x70000005, "SHT_MIPS_DEBUG");
-        mapResult.insert(0x70000006, "SHT_MIPS_REGINFO");
-        mapResult.insert(0x70000007, "SHT_MIPS_PACKAGE");
-        mapResult.insert(0x70000008, "SHT_MIPS_PACKSYM");
-        mapResult.insert(0x70000009, "SHT_MIPS_RELD");
-        mapResult.insert(0x7000000b, "SHT_MIPS_IFACE");
-        mapResult.insert(0x7000000c, "SHT_MIPS_CONTENT");
-        mapResult.insert(0x7000000d, "SHT_MIPS_OPTIONS");
-        mapResult.insert(0x70000010, "SHT_MIPS_SHDR");
-        mapResult.insert(0x70000011, "SHT_MIPS_FDESC");
-        mapResult.insert(0x70000012, "SHT_MIPS_EXTSYM");
-        mapResult.insert(0x70000013, "SHT_MIPS_DENSE");
-        mapResult.insert(0x70000014, "SHT_MIPS_PDESC");
-        mapResult.insert(0x70000015, "SHT_MIPS_LOCSYM");
-        mapResult.insert(0x70000016, "SHT_MIPS_AUXSYM");
-        mapResult.insert(0x70000017, "SHT_MIPS_OPTSYM");
-        mapResult.insert(0x70000018, "SHT_MIPS_LOCSTR");
-        mapResult.insert(0x70000019, "SHT_MIPS_LINE");
-        mapResult.insert(0x7000001a, "SHT_MIPS_RFDESC");
-        mapResult.insert(0x7000001b, "SHT_MIPS_DELTASYM");
-        mapResult.insert(0x7000001c, "SHT_MIPS_DELTAINST");
-        mapResult.insert(0x7000001d, "SHT_MIPS_DELTACLASS");
-        mapResult.insert(0x7000001e, "SHT_MIPS_DWARF");
-        mapResult.insert(0x7000001f, "SHT_MIPS_DELTADECL");
-        mapResult.insert(0x70000020, "SHT_MIPS_SYMBOL_LIB");
-        mapResult.insert(0x70000021, "SHT_MIPS_EVENTS");
-        mapResult.insert(0x70000022, "SHT_MIPS_TRANSLATE");
-        mapResult.insert(0x70000023, "SHT_MIPS_PIXIE");
-        mapResult.insert(0x70000024, "SHT_MIPS_XLATE");
-        mapResult.insert(0x70000025, "SHT_MIPS_XLATE_DEBUG");
-        mapResult.insert(0x70000026, "SHT_MIPS_WHIRL");
-        mapResult.insert(0x70000027, "SHT_MIPS_EH_REGION");
-        mapResult.insert(0x70000028, "SHT_MIPS_XLATE_OLD");
-        mapResult.insert(0x70000029, "SHT_MIPS_PDR_EXCEPTION");
-        mapResult.insert(0x7000002a, "SHT_MIPS_ABIFLAGS");
-        mapResult.insert(0x7000002b, "SHT_MIPS_XHASH");
+        pArchTable = _TABLE_XELF_SectionTypes_MIPS;
+        nArchCount = sizeof(_TABLE_XELF_SectionTypes_MIPS) / sizeof(XBinary::XIDSTRING);
     } else if (sArch == "AMD64") {
-        mapResult.insert(0x70000001, "SHT_AMD64_UNWIND");
+        pArchTable = _TABLE_XELF_SectionTypes_AMD64;
+        nArchCount = sizeof(_TABLE_XELF_SectionTypes_AMD64) / sizeof(XBinary::XIDSTRING);
     }
 
-    mapResult.insert(0x7fffffff, "SHT_HIPROC");
-    mapResult.insert(0x80000000, "SHT_LOUSER");
-    mapResult.insert(0xffffffff, "SHT_HIUSER");
+    for (qint32 i = 0; i < nArchCount; i++) {
+        mapResult.insert(pArchTable[i].nID, PREFIX_SHT + "_" + pArchTable[i].sString);
+    }
 
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getSectionTypesS(const QString &sArch)
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64, QString> mapResult = XBinary::XIDSTRING_createMap(_TABLE_XELF_SectionTypes, sizeof(_TABLE_XELF_SectionTypes) / sizeof(XBinary::XIDSTRING));
 
-    mapResult.insert(0, "NULL");
-    mapResult.insert(1, "PROGBITS");
-    mapResult.insert(2, "SYMTAB");
-    mapResult.insert(3, "STRTAB");
-    mapResult.insert(4, "RELA");
-    mapResult.insert(5, "HASH");
-    mapResult.insert(6, "DYNAMIC");
-    mapResult.insert(7, "NOTE");
-    mapResult.insert(8, "NOBITS");
-    mapResult.insert(9, "REL");
-    mapResult.insert(10, "SHLIB");
-    mapResult.insert(11, "DYNSYM");
-    mapResult.insert(14, "INIT_ARRAY");
-    mapResult.insert(15, "FINI_ARRAY");
-    mapResult.insert(16, "PREINIT_ARRAY");
-    mapResult.insert(17, "GROUP");
-    mapResult.insert(18, "SYMTAB_SHNDX");
-    mapResult.insert(19, "NUM");
-    mapResult.insert(0x60000000, "LOOS");
-    mapResult.insert(0x6ffffff5, "GNU_ATTRIBUTES");
-    mapResult.insert(0x6ffffff6, "GNU_HASH");
-    mapResult.insert(0x6ffffffa, "SUNW_move");
-    mapResult.insert(0x6ffffffc, "SUNW_syminfo");
-    mapResult.insert(0x6ffffffd, "GNU_verdef");
-    mapResult.insert(0x6ffffffe, "GNU_verneed");
-    mapResult.insert(0x6fffffff, "GNU_versym");
-    mapResult.insert(0x70000000, "LOPROC");
+    XBinary::XIDSTRING *pArchTable = nullptr;
+    qint32 nArchCount = 0;
 
     if (sArch == "ARM") {
-        mapResult.insert(0x70000001, "ARM_EXIDX");
-        mapResult.insert(0x70000002, "ARM_PREEMPTMAP");
-        mapResult.insert(0x70000003, "ARM_ATTRIBUTES");
-        mapResult.insert(0x70000004, "ARM_DEBUGOVERLAY");
-        mapResult.insert(0x70000005, "ARM_OVERLAYSECTION");
+        pArchTable = _TABLE_XELF_SectionTypes_ARM;
+        nArchCount = sizeof(_TABLE_XELF_SectionTypes_ARM) / sizeof(XBinary::XIDSTRING);
     } else if (sArch == "MIPS") {
-        mapResult.insert(0x70000001, "MIPS_MSYM");
-        mapResult.insert(0x70000002, "MIPS_CONFLICT");
-        mapResult.insert(0x70000003, "MIPS_GPTAB");
-        mapResult.insert(0x70000004, "MIPS_UCODE");
-        mapResult.insert(0x70000005, "MIPS_DEBUG");
-        mapResult.insert(0x70000006, "MIPS_REGINFO");
-        mapResult.insert(0x70000007, "MIPS_PACKAGE");
-        mapResult.insert(0x70000008, "MIPS_PACKSYM");
-        mapResult.insert(0x70000009, "MIPS_RELD");
-        mapResult.insert(0x7000000b, "MIPS_IFACE");
-        mapResult.insert(0x7000000c, "MIPS_CONTENT");
-        mapResult.insert(0x7000000d, "MIPS_OPTIONS");
-        mapResult.insert(0x70000010, "MIPS_SHDR");
-        mapResult.insert(0x70000011, "MIPS_FDESC");
-        mapResult.insert(0x70000012, "MIPS_EXTSYM");
-        mapResult.insert(0x70000013, "MIPS_DENSE");
-        mapResult.insert(0x70000014, "MIPS_PDESC");
-        mapResult.insert(0x70000015, "MIPS_LOCSYM");
-        mapResult.insert(0x70000016, "MIPS_AUXSYM");
-        mapResult.insert(0x70000017, "MIPS_OPTSYM");
-        mapResult.insert(0x70000018, "MIPS_LOCSTR");
-        mapResult.insert(0x70000019, "MIPS_LINE");
-        mapResult.insert(0x7000001a, "MIPS_RFDESC");
-        mapResult.insert(0x7000001b, "MIPS_DELTASYM");
-        mapResult.insert(0x7000001c, "MIPS_DELTAINST");
-        mapResult.insert(0x7000001d, "MIPS_DELTACLASS");
-        mapResult.insert(0x7000001e, "MIPS_DWARF");
-        mapResult.insert(0x7000001f, "MIPS_DELTADECL");
-        mapResult.insert(0x70000020, "MIPS_SYMBOL_LIB");
-        mapResult.insert(0x70000021, "MIPS_EVENTS");
-        mapResult.insert(0x70000022, "MIPS_TRANSLATE");
-        mapResult.insert(0x70000023, "MIPS_PIXIE");
-        mapResult.insert(0x70000024, "MIPS_XLATE");
-        mapResult.insert(0x70000025, "MIPS_XLATE_DEBUG");
-        mapResult.insert(0x70000026, "MIPS_WHIRL");
-        mapResult.insert(0x70000027, "MIPS_EH_REGION");
-        mapResult.insert(0x70000028, "MIPS_XLATE_OLD");
-        mapResult.insert(0x70000029, "MIPS_PDR_EXCEPTION");
-        mapResult.insert(0x7000002a, "MIPS_ABIFLAGS");
-        mapResult.insert(0x7000002b, "MIPS_XHASH");
+        pArchTable = _TABLE_XELF_SectionTypes_MIPS;
+        nArchCount = sizeof(_TABLE_XELF_SectionTypes_MIPS) / sizeof(XBinary::XIDSTRING);
     } else if (sArch == "AMD64") {
-        mapResult.insert(0x70000001, "AMD64_UNWIND");
+        pArchTable = _TABLE_XELF_SectionTypes_AMD64;
+        nArchCount = sizeof(_TABLE_XELF_SectionTypes_AMD64) / sizeof(XBinary::XIDSTRING);
     }
 
-    mapResult.insert(0x7fffffff, "HIPROC");
-    mapResult.insert(0x80000000, "LOUSER");
-    mapResult.insert(0xffffffff, "HIUSER");
+    for (qint32 i = 0; i < nArchCount; i++) {
+        mapResult.insert(pArchTable[i].nID, pArchTable[i].sString);
+    }
 
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getSectionFlags()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000001, "SHF_WRITE");
-    mapResult.insert(0x00000002, "SHF_ALLOC");
-    mapResult.insert(0x00000004, "SHF_EXECINSTR");
-    mapResult.insert(0x00000010, "SHF_MERGE");
-    mapResult.insert(0x00000020, "SHF_STRINGS");
-    mapResult.insert(0x00000040, "SHF_INFO_LINK");
-    mapResult.insert(0x00000080, "SHF_LINK_ORDER");
-    mapResult.insert(0x00000100, "SHF_OS_NONCONFORMING");
-    mapResult.insert(0x00000200, "SHF_GROUP");
-    mapResult.insert(0x00000400, "SHF_TLS");
-    mapResult.insert(0x00000800, "SHF_COMPRESSED");
-    mapResult.insert(0x0ff00000, "SHF_MASKOS");
-    mapResult.insert(0xf0000000, "SHF_MASKPROC");
-    mapResult.insert(0x40000000, "SHF_ORDERED");
-    mapResult.insert(0x80000000, "SHF_EXCLUDE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_SectionFlags, sizeof(_TABLE_XELF_SectionFlags) / sizeof(XBinary::XIDSTRING), PREFIX_SHF);
 }
 
 QMap<quint64, QString> XELF::getSectionFlagsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000001, "WRITE");
-    mapResult.insert(0x00000002, "ALLOC");
-    mapResult.insert(0x00000004, "EXECINSTR");
-    mapResult.insert(0x00000010, "MERGE");
-    mapResult.insert(0x00000020, "STRINGS");
-    mapResult.insert(0x00000040, "INFO_LINK");
-    mapResult.insert(0x00000080, "LINK_ORDER");
-    mapResult.insert(0x00000100, "OS_NONCONFORMING");
-    mapResult.insert(0x00000200, "GROUP");
-    mapResult.insert(0x00000400, "TLS");
-    mapResult.insert(0x00000800, "COMPRESSED");
-    mapResult.insert(0x0ff00000, "MASKOS");
-    mapResult.insert(0xf0000000, "MASKPROC");
-    mapResult.insert(0x40000000, "ORDERED");
-    mapResult.insert(0x80000000, "EXCLUDE");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_SectionFlags, sizeof(_TABLE_XELF_SectionFlags) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getProgramTypes(qint32 nIndent, const QString &sArch)
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64, QString> mapResult = XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_ProgramTypes_Base, sizeof(_TABLE_XELF_ProgramTypes_Base) / sizeof(XBinary::XIDSTRING), PREFIX_PT);
 
-    mapResult.insert(0, "PT_NULL");
-    mapResult.insert(1, "PT_LOAD");
-    mapResult.insert(2, "PT_DYNAMIC");
-    mapResult.insert(3, "PT_INTERP");
-    mapResult.insert(4, "PT_NOTE");
-    mapResult.insert(5, "PT_SHLIB");
-    mapResult.insert(6, "PT_PHDR");
-    mapResult.insert(7, "PT_TLS");
-    mapResult.insert(8, "PT_NUM");
-    mapResult.insert(0x60000000, "PT_LOOS");
+    XBinary::XIDSTRING *pOsabiTable = _TABLE_XELF_ProgramTypes_GNU;
+    qint32 nOsabiCount = sizeof(_TABLE_XELF_ProgramTypes_GNU) / sizeof(XBinary::XIDSTRING);
 
     if (nIndent == XELF_DEF::S_ELFOSABI_SOLARIS) {
-        mapResult.insert(0x6464e550, "PT_SUNW_UNWIND");
-        mapResult.insert(0x6474e550, "PT_SUNW_EH_FRAME");
-        mapResult.insert(0x6ffffffa, "PT_SUNWBSS");
-        mapResult.insert(0x6ffffffb, "PT_SUNWSTACK");
-        mapResult.insert(0x6ffffffc, "PT_SUNWDTRACE");
-        mapResult.insert(0x6ffffffd, "PT_SUNWCAP");
-    } else {
-        mapResult.insert(0x6474e550, "GNU_EH_FRAME");
-        mapResult.insert(0x6474e551, "PT_GNU_STACK");
-        mapResult.insert(0x6474e552, "PT_GNU_RELRO");
-        mapResult.insert(0x6474e553, "PT_GNU_PROPERTY");
-        mapResult.insert(0x65041580, "PT_PAX_FLAGS");
+        pOsabiTable = _TABLE_XELF_ProgramTypes_Solaris;
+        nOsabiCount = sizeof(_TABLE_XELF_ProgramTypes_Solaris) / sizeof(XBinary::XIDSTRING);
+    }
+
+    for (qint32 i = 0; i < nOsabiCount; i++) {
+        mapResult.insert(pOsabiTable[i].nID, PREFIX_PT + "_" + pOsabiTable[i].sString);
     }
 
     if (nIndent == XELF_DEF::S_ELFOSABI_OPENBSD) {
-        mapResult.insert(0x65A3DBE6, "PT_OPENBSD_RANDOMIZE");
-        mapResult.insert(0x65A3DBE7, "PT_OPENBSD_WXNEEDED");
-        mapResult.insert(0x65A41BE6, "PT_OPENBSD_BOOTDATA");
+        qint32 nCount = sizeof(_TABLE_XELF_ProgramTypes_OpenBSD) / sizeof(XBinary::XIDSTRING);
+
+        for (qint32 i = 0; i < nCount; i++) {
+            mapResult.insert(_TABLE_XELF_ProgramTypes_OpenBSD[i].nID, PREFIX_PT + "_" + _TABLE_XELF_ProgramTypes_OpenBSD[i].sString);
+        }
     }
 
-    mapResult.insert(0x6ffffffa, "PT_LOSUNW");
-    mapResult.insert(0x6fffffff, "PT_HIOS");  // PT_HISUNW
+    {
+        qint32 nCount = sizeof(_TABLE_XELF_ProgramTypes_Cont) / sizeof(XBinary::XIDSTRING);
+
+        for (qint32 i = 0; i < nCount; i++) {
+            mapResult.insert(_TABLE_XELF_ProgramTypes_Cont[i].nID, PREFIX_PT + "_" + _TABLE_XELF_ProgramTypes_Cont[i].sString);
+        }
+    }
+
+    XBinary::XIDSTRING *pArchTable = _TABLE_XELF_ProgramTypes_LOPROC;
+    qint32 nArchCount = sizeof(_TABLE_XELF_ProgramTypes_LOPROC) / sizeof(XBinary::XIDSTRING);
 
     if (sArch == "ARM") {
-        mapResult.insert(0x70000001, "PT_ARM_EXIDX");
-        mapResult.insert(0x70000002, "PT_ARM_PREEMPTMAP");
-        mapResult.insert(0x70000003, "PT_ARM_ATTRIBUTES");
-        mapResult.insert(0x70000004, "PT_ARM_DEBUGOVERLAY");
-        mapResult.insert(0x70000005, "PT_ARM_OVERLAYSECTION");
+        pArchTable = _TABLE_XELF_ProgramTypes_ARM;
+        nArchCount = sizeof(_TABLE_XELF_ProgramTypes_ARM) / sizeof(XBinary::XIDSTRING);
     } else if (sArch == "MIPS") {
-        mapResult.insert(0x70000000, "PT_MIPS_REGINFO");
-        mapResult.insert(0x70000001, "PT_MIPS_RTPROC");
-        mapResult.insert(0x70000002, "PT_MIPS_OPTIONS");
-        mapResult.insert(0x70000003, "PT_MIPS_ABIFLAGS");
+        pArchTable = _TABLE_XELF_ProgramTypes_MIPS;
+        nArchCount = sizeof(_TABLE_XELF_ProgramTypes_MIPS) / sizeof(XBinary::XIDSTRING);
     } else if (sArch == "AARCH64") {
-        mapResult.insert(0x70000000, "PT_AARCH64_ARCHEXT");
-        mapResult.insert(0x70000001, "PT_AARCH64_UNWIND");
+        pArchTable = _TABLE_XELF_ProgramTypes_AARCH64;
+        nArchCount = sizeof(_TABLE_XELF_ProgramTypes_AARCH64) / sizeof(XBinary::XIDSTRING);
     } else if (sArch == "S390") {
-        mapResult.insert(0x70000000, "PT_S390_PGSTE");
-    } else {
-        mapResult.insert(0x70000000, "PT_LOPROC");
+        pArchTable = _TABLE_XELF_ProgramTypes_S390;
+        nArchCount = sizeof(_TABLE_XELF_ProgramTypes_S390) / sizeof(XBinary::XIDSTRING);
     }
 
-    mapResult.insert(0x7fffffff, "PT_HIPROC");
+    for (qint32 i = 0; i < nArchCount; i++) {
+        mapResult.insert(pArchTable[i].nID, PREFIX_PT + "_" + pArchTable[i].sString);
+    }
+
+    {
+        qint32 nCount = sizeof(_TABLE_XELF_ProgramTypes_Tail) / sizeof(XBinary::XIDSTRING);
+
+        for (qint32 i = 0; i < nCount; i++) {
+            mapResult.insert(_TABLE_XELF_ProgramTypes_Tail[i].nID, PREFIX_PT + "_" + _TABLE_XELF_ProgramTypes_Tail[i].sString);
+        }
+    }
 
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getProgramTypesS(qint32 nIndent, const QString &sArch)
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64, QString> mapResult = XBinary::XIDSTRING_createMap(_TABLE_XELF_ProgramTypes_Base, sizeof(_TABLE_XELF_ProgramTypes_Base) / sizeof(XBinary::XIDSTRING));
 
-    mapResult.insert(0, "NULL");
-    mapResult.insert(1, "LOAD");
-    mapResult.insert(2, "DYNAMIC");
-    mapResult.insert(3, "INTERP");
-    mapResult.insert(4, "NOTE");
-    mapResult.insert(5, "SHLIB");
-    mapResult.insert(6, "PHDR");
-    mapResult.insert(7, "TLS");
-    mapResult.insert(8, "NUM");
-    mapResult.insert(0x60000000, "LOOS");
+    XBinary::XIDSTRING *pOsabiTable = _TABLE_XELF_ProgramTypes_GNU;
+    qint32 nOsabiCount = sizeof(_TABLE_XELF_ProgramTypes_GNU) / sizeof(XBinary::XIDSTRING);
 
     if (nIndent == XELF_DEF::S_ELFOSABI_SOLARIS) {
-        mapResult.insert(0x6464e550, "SUNW_UNWIND");
-        mapResult.insert(0x6474e550, "SUNW_EH_FRAME");
-        mapResult.insert(0x6ffffffa, "SUNWBSS");
-        mapResult.insert(0x6ffffffb, "SUNWSTACK");
-        mapResult.insert(0x6ffffffc, "SUNWDTRACE");
-        mapResult.insert(0x6ffffffd, "SUNWCAP");
-    } else {
-        mapResult.insert(0x6474e550, "GNU_EH_FRAME");
-        mapResult.insert(0x6474e551, "GNU_STACK");
-        mapResult.insert(0x6474e552, "GNU_RELRO");
-        mapResult.insert(0x6474e553, "GNU_PROPERTY");
-        mapResult.insert(0x65041580, "PAX_FLAGS");
+        pOsabiTable = _TABLE_XELF_ProgramTypes_Solaris;
+        nOsabiCount = sizeof(_TABLE_XELF_ProgramTypes_Solaris) / sizeof(XBinary::XIDSTRING);
+    }
+
+    for (qint32 i = 0; i < nOsabiCount; i++) {
+        mapResult.insert(pOsabiTable[i].nID, pOsabiTable[i].sString);
     }
 
     if (nIndent == XELF_DEF::S_ELFOSABI_OPENBSD) {
-        mapResult.insert(0x65A3DBE6, "OPENBSD_RANDOMIZE");
-        mapResult.insert(0x65A3DBE7, "OPENBSD_WXNEEDED");
-        mapResult.insert(0x65A41BE6, "OPENBSD_BOOTDATA");
+        qint32 nCount = sizeof(_TABLE_XELF_ProgramTypes_OpenBSD) / sizeof(XBinary::XIDSTRING);
+
+        for (qint32 i = 0; i < nCount; i++) {
+            mapResult.insert(_TABLE_XELF_ProgramTypes_OpenBSD[i].nID, _TABLE_XELF_ProgramTypes_OpenBSD[i].sString);
+        }
     }
 
-    mapResult.insert(0x6ffffffa, "LOSUNW");
-    mapResult.insert(0x6fffffff, "HIOS");  // HISUNW
+    {
+        qint32 nCount = sizeof(_TABLE_XELF_ProgramTypes_Cont) / sizeof(XBinary::XIDSTRING);
+
+        for (qint32 i = 0; i < nCount; i++) {
+            mapResult.insert(_TABLE_XELF_ProgramTypes_Cont[i].nID, _TABLE_XELF_ProgramTypes_Cont[i].sString);
+        }
+    }
+
+    XBinary::XIDSTRING *pArchTable = _TABLE_XELF_ProgramTypes_LOPROC;
+    qint32 nArchCount = sizeof(_TABLE_XELF_ProgramTypes_LOPROC) / sizeof(XBinary::XIDSTRING);
 
     if (sArch == "ARM") {
-        mapResult.insert(0x70000001, "ARM_EXIDX");
-        mapResult.insert(0x70000002, "ARM_PREEMPTMAP");
-        mapResult.insert(0x70000003, "ARM_ATTRIBUTES");
-        mapResult.insert(0x70000004, "ARM_DEBUGOVERLAY");
-        mapResult.insert(0x70000005, "ARM_OVERLAYSECTION");
+        pArchTable = _TABLE_XELF_ProgramTypes_ARM;
+        nArchCount = sizeof(_TABLE_XELF_ProgramTypes_ARM) / sizeof(XBinary::XIDSTRING);
     } else if (sArch == "MIPS") {
-        mapResult.insert(0x70000000, "MIPS_REGINFO");
-        mapResult.insert(0x70000001, "MIPS_RTPROC");
-        mapResult.insert(0x70000002, "MIPS_OPTIONS");
-        mapResult.insert(0x70000003, "MIPS_ABIFLAGS");
+        pArchTable = _TABLE_XELF_ProgramTypes_MIPS;
+        nArchCount = sizeof(_TABLE_XELF_ProgramTypes_MIPS) / sizeof(XBinary::XIDSTRING);
     } else if (sArch == "AARCH64") {
-        mapResult.insert(0x70000000, "AARCH64_ARCHEXT");
-        mapResult.insert(0x70000001, "AARCH64_UNWIND");
+        pArchTable = _TABLE_XELF_ProgramTypes_AARCH64;
+        nArchCount = sizeof(_TABLE_XELF_ProgramTypes_AARCH64) / sizeof(XBinary::XIDSTRING);
     } else if (sArch == "S390") {
-        mapResult.insert(0x70000000, "S390_PGSTE");
-    } else {
-        mapResult.insert(0x70000000, "LOPROC");
+        pArchTable = _TABLE_XELF_ProgramTypes_S390;
+        nArchCount = sizeof(_TABLE_XELF_ProgramTypes_S390) / sizeof(XBinary::XIDSTRING);
     }
 
-    mapResult.insert(0x7fffffff, "HIPROC");
+    for (qint32 i = 0; i < nArchCount; i++) {
+        mapResult.insert(pArchTable[i].nID, pArchTable[i].sString);
+    }
+
+    {
+        qint32 nCount = sizeof(_TABLE_XELF_ProgramTypes_Tail) / sizeof(XBinary::XIDSTRING);
+
+        for (qint32 i = 0; i < nCount; i++) {
+            mapResult.insert(_TABLE_XELF_ProgramTypes_Tail[i].nID, _TABLE_XELF_ProgramTypes_Tail[i].sString);
+        }
+    }
 
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getProgramFlags()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000001, "PF_X");
-    mapResult.insert(0x00000002, "PF_W");
-    mapResult.insert(0x00000004, "PF_R");
-    mapResult.insert(0x0ff00000, "PF_MASKOS");
-    mapResult.insert(0xf0000000, "PF_MASKPROC");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_ProgramFlags, sizeof(_TABLE_XELF_ProgramFlags) / sizeof(XBinary::XIDSTRING), PREFIX_PF);
 }
 
 QMap<quint64, QString> XELF::getProgramFlagsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000001, "X");
-    mapResult.insert(0x00000002, "W");
-    mapResult.insert(0x00000004, "R");
-    mapResult.insert(0x0ff00000, "MASKOS");
-    mapResult.insert(0xf0000000, "MASKPROC");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_ProgramFlags, sizeof(_TABLE_XELF_ProgramFlags) / sizeof(XBinary::XIDSTRING));
 }
 
 quint32 XELF::getSectionStringTable()
@@ -3674,259 +3767,54 @@ QList<XBinary::MAPMODE> XELF::getMapModesList()
 
 QMap<quint64, QString> XELF::getDynamicTags(const QString &sArch)
 {
-    QMap<quint64, QString> mapResult;
-    // https://github.com/ziglang/zig/blob/master/lib/std/elf.zig
+    QMap<quint64, QString> mapResult = XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_DynamicTags_Base, sizeof(_TABLE_XELF_DynamicTags_Base) / sizeof(XBinary::XIDSTRING), PREFIX_DT);
 
-    mapResult.insert(0, "DT_NULL");
-    mapResult.insert(1, "DT_NEEDED");
-    mapResult.insert(2, "DT_PLTRELSZ");
-    mapResult.insert(3, "DT_PLTGOT");
-    mapResult.insert(4, "DT_HASH");
-    mapResult.insert(5, "DT_STRTAB");
-    mapResult.insert(6, "DT_SYMTAB");
-    mapResult.insert(7, "DT_RELA");
-    mapResult.insert(8, "DT_RELASZ");
-    mapResult.insert(9, "DT_RELAENT");
-    mapResult.insert(10, "DT_STRSZ");
-    mapResult.insert(11, "DT_SYMENT");
-    mapResult.insert(12, "DT_INIT");
-    mapResult.insert(13, "DT_FINI");
-    mapResult.insert(14, "DT_SONAME");
-    mapResult.insert(15, "DT_RPATH");
-    mapResult.insert(16, "DT_SYMBOLIC");
-    mapResult.insert(17, "DT_REL");
-    mapResult.insert(18, "DT_RELSZ");
-    mapResult.insert(19, "DT_RELENT");
-    mapResult.insert(20, "DT_PLTREL");
-    mapResult.insert(21, "DT_DEBUG");
-    mapResult.insert(22, "DT_TEXTREL");
-    mapResult.insert(23, "DT_JMPREL");
-    mapResult.insert(24, "DT_BIND_NOW");
-    mapResult.insert(25, "DT_INIT_ARRAY");
-    mapResult.insert(26, "DT_FINI_ARRAY");
-    mapResult.insert(27, "DT_INIT_ARRAYSZ");
-    mapResult.insert(28, "DT_FINI_ARRAYSZ");
-    mapResult.insert(29, "DT_RUNPATH");
-    mapResult.insert(30, "DT_FLAGS");
-    mapResult.insert(32, "DT_PREINIT_ARRAY");  // DT_ENCODING
-    mapResult.insert(33, "DT_PREINIT_ARRAYSZ");
-    mapResult.insert(34, "DT_NUM");
-    mapResult.insert(0x6000000d, "DT_LOOS");
-    mapResult.insert(0x6000000e, "DT_SUNW_RTLDINF");
-    mapResult.insert(0x6ffff000, "DT_HIOS");
-    mapResult.insert(0x6ffffd00, "DT_VALRNGLO");
-    mapResult.insert(0x6ffffdf8, "DT_CHECKSUM");
-    mapResult.insert(0x6ffffdf9, "DT_PLTPADSZ");
-    mapResult.insert(0x6ffffdfa, "DT_MOVEENT");
-    mapResult.insert(0x6ffffdfb, "DT_MOVESZ");
-    mapResult.insert(0x6ffffdfc, "DT_FEATURE_1");
-    mapResult.insert(0x6ffffdfd, "DT_POSFLAG_1");
-    mapResult.insert(0x6ffffdfe, "DT_SYMINSZ");
-    mapResult.insert(0x6ffffdff, "DT_SYMINENT");
-    mapResult.insert(0x6ffffdff, "DT_VALRNGHI");
-    mapResult.insert(0x6ffffe00, "DT_ADDRRNGLO");
-    mapResult.insert(0x6ffffef5, "DT_GNU_HASH");
-    mapResult.insert(0x6ffffefa, "DT_CONFIG");
-    mapResult.insert(0x6ffffefb, "DT_DEPAUDIT");
-    mapResult.insert(0x6ffffefc, "DT_AUDIT");
-    mapResult.insert(0x6ffffefd, "DT_PLTPAD");
-    mapResult.insert(0x6ffffefe, "DT_MOVETAB");
-    mapResult.insert(0x6ffffeff, "DT_SYMINFO");
-    mapResult.insert(0x6ffffeff, "DT_ADDRRNGHI");
-    mapResult.insert(0x6ffffff0, "DT_VERSYM");
-    mapResult.insert(0x6ffffff9, "DT_RELACOUNT");
-    mapResult.insert(0x6ffffffa, "DT_RELCOUNT");
-    mapResult.insert(0x6ffffffb, "DT_FLAGS_1");
-    mapResult.insert(0x6ffffffc, "DT_VERDEF");
-    mapResult.insert(0x6ffffffd, "DT_VERDEFNUM");
-    mapResult.insert(0x6ffffffe, "DT_VERNEED");
-    mapResult.insert(0x6fffffff, "DT_VERNEEDNUM");
-    mapResult.insert(0x70000000, "DT_LOPROC");
+    XBinary::XIDSTRING *pArchTable = _TABLE_XELF_DynamicTags_SPARC;
+    qint32 nArchCount = sizeof(_TABLE_XELF_DynamicTags_SPARC) / sizeof(XBinary::XIDSTRING);
 
     if (sArch == "MIPS") {
-        mapResult.insert(0x70000001, "DT_MIPS_RLD_VERSION");
-        mapResult.insert(0x70000002, "DT_MIPS_TIME_STAMP");
-        mapResult.insert(0x70000003, "DT_MIPS_ICHECKSUM");
-        mapResult.insert(0x70000004, "DT_MIPS_IVERSION");
-        mapResult.insert(0x70000005, "DT_MIPS_FLAGS");
-        mapResult.insert(0x70000006, "DT_MIPS_BASE_ADDRESS");
-        mapResult.insert(0x70000008, "DT_MIPS_CONFLICT");
-        mapResult.insert(0x70000009, "DT_MIPS_LIBLIST");
-        mapResult.insert(0x7000000a, "DT_MIPS_LOCAL_GOTNO");
-        mapResult.insert(0x7000000b, "DT_MIPS_CONFLICTNO");
-        mapResult.insert(0x70000010, "DT_MIPS_LIBLISTNO");
-        mapResult.insert(0x70000011, "DT_MIPS_SYMTABNO");
-        mapResult.insert(0x70000012, "DT_MIPS_UNREFEXTNO");
-        mapResult.insert(0x70000013, "DT_MIPS_GOTSYM");
-        mapResult.insert(0x70000014, "DT_MIPS_HIPAGENO");
-        mapResult.insert(0x70000016, "DT_MIPS_RLD_MAP");
-        mapResult.insert(0x70000017, "DT_MIPS_DELTA_CLASS");
-        mapResult.insert(0x70000018, "DT_MIPS_DELTA_CLASS_NO");
-        mapResult.insert(0x70000019, "DT_MIPS_DELTA_INSTANCE");
-        mapResult.insert(0x7000001A, "DT_MIPS_DELTA_INSTANCE_NO");
-        mapResult.insert(0x7000001B, "DT_MIPS_DELTA_RELOC");
-        mapResult.insert(0x7000001C, "DT_MIPS_DELTA_RELOC_NO");
-        mapResult.insert(0x7000001D, "DT_MIPS_DELTA_SYM");
-        mapResult.insert(0x7000001E, "DT_MIPS_DELTA_SYM_NO");
-        mapResult.insert(0x70000020, "DT_MIPS_DELTA_CLASSSYM");
-        mapResult.insert(0x70000021, "DT_MIPS_DELTA_CLASSSYM_NO");
-        mapResult.insert(0x70000022, "DT_MIPS_CXX_FLAGS");
-        mapResult.insert(0x70000023, "DT_MIPS_PIXIE_INIT");
-        mapResult.insert(0x70000024, "DT_MIPS_SYMBOL_LIB");
-        mapResult.insert(0x70000025, "DT_MIPS_LOCALPAGE_GOTIDX");
-        mapResult.insert(0x70000026, "DT_MIPS_LOCAL_GOTIDX");
-        mapResult.insert(0x70000027, "DT_MIPS_HIDDEN_GOTIDX");
-        mapResult.insert(0x70000028, "DT_MIPS_PROTECTED_GOTIDX");
-        mapResult.insert(0x70000029, "DT_MIPS_OPTIONS");
-        mapResult.insert(0x7000002A, "DT_MIPS_INTERFACE");
-        mapResult.insert(0x7000002B, "DT_MIPS_DYNSTR_ALIGN");
-        mapResult.insert(0x7000002C, "DT_MIPS_INTERFACE_SIZE");
-        mapResult.insert(0x7000002D, "DT_MIPS_RLD_TEXT_RESOLVE_ADDR");
-        mapResult.insert(0x7000002E, "DT_MIPS_PERF_SUFFIX");
-        mapResult.insert(0x7000002F, "DT_MIPS_COMPACT_SIZE");
-        mapResult.insert(0x70000030, "DT_MIPS_GP_VALUE");
-        mapResult.insert(0x70000031, "DT_MIPS_AUX_DYNAMIC");
-        mapResult.insert(0x70000032, "DT_MIPS_PLTGOT");
-        mapResult.insert(0x70000033, "DT_MIPS_RLD_OBJ_UPDATE");
-        mapResult.insert(0x70000034, "DT_MIPS_RWPLT");
-        mapResult.insert(0x70000035, "DT_MIPS_RLD_VERSION");
-        mapResult.insert(0x36, "DT_MIPS_NUM");
-    } else {
-        mapResult.insert(0x70000001, "DT_SPARC_REGISTER");
+        pArchTable = _TABLE_XELF_DynamicTags_MIPS;
+        nArchCount = sizeof(_TABLE_XELF_DynamicTags_MIPS) / sizeof(XBinary::XIDSTRING);
     }
 
-    mapResult.insert(0x7ffffffd, "DT_AUXILIARY");
-    mapResult.insert(0x7ffffffe, "DT_USED");
-    mapResult.insert(0x7fffffff, "DT_HIPROC");  // DT_FILTER
+    for (qint32 i = 0; i < nArchCount; i++) {
+        mapResult.insert(pArchTable[i].nID, PREFIX_DT + "_" + pArchTable[i].sString);
+    }
+
+    {
+        qint32 nCount = sizeof(_TABLE_XELF_DynamicTags_Tail) / sizeof(XBinary::XIDSTRING);
+
+        for (qint32 i = 0; i < nCount; i++) {
+            mapResult.insert(_TABLE_XELF_DynamicTags_Tail[i].nID, PREFIX_DT + "_" + _TABLE_XELF_DynamicTags_Tail[i].sString);
+        }
+    }
 
     return mapResult;
 }
 
 QMap<quint64, QString> XELF::getDynamicTagsS(const QString &sArch)
 {
-    QMap<quint64, QString> mapResult;
+    QMap<quint64, QString> mapResult = XBinary::XIDSTRING_createMap(_TABLE_XELF_DynamicTags_Base, sizeof(_TABLE_XELF_DynamicTags_Base) / sizeof(XBinary::XIDSTRING));
 
-    mapResult.insert(0, "NULL");
-    mapResult.insert(1, "NEEDED");
-    mapResult.insert(2, "PLTRELSZ");
-    mapResult.insert(3, "PLTGOT");
-    mapResult.insert(4, "HASH");
-    mapResult.insert(5, "STRTAB");
-    mapResult.insert(6, "SYMTAB");
-    mapResult.insert(7, "RELA");
-    mapResult.insert(8, "RELASZ");
-    mapResult.insert(9, "RELAENT");
-    mapResult.insert(10, "STRSZ");
-    mapResult.insert(11, "SYMENT");
-    mapResult.insert(12, "INIT");
-    mapResult.insert(13, "FINI");
-    mapResult.insert(14, "SONAME");
-    mapResult.insert(15, "RPATH");
-    mapResult.insert(16, "SYMBOLIC");
-    mapResult.insert(17, "REL");
-    mapResult.insert(18, "RELSZ");
-    mapResult.insert(19, "RELENT");
-    mapResult.insert(20, "PLTREL");
-    mapResult.insert(21, "DEBUG");
-    mapResult.insert(22, "TEXTREL");
-    mapResult.insert(23, "JMPREL");
-    mapResult.insert(24, "BIND_NOW");
-    mapResult.insert(25, "INIT_ARRAY");
-    mapResult.insert(26, "FINI_ARRAY");
-    mapResult.insert(27, "INIT_ARRAYSZ");
-    mapResult.insert(28, "FINI_ARRAYSZ");
-    mapResult.insert(29, "RUNPATH");
-    mapResult.insert(30, "FLAGS");
-    mapResult.insert(32, "PREINIT_ARRAY");  // ENCODING
-    mapResult.insert(33, "PREINIT_ARRAYSZ");
-    mapResult.insert(34, "NUM");
-    mapResult.insert(0x6000000d, "LOOS");
-    mapResult.insert(0x6000000e, "SUNW_RTLDINF");
-    mapResult.insert(0x6ffff000, "HIOS");
-    mapResult.insert(0x6ffffd00, "VALRNGLO");
-    mapResult.insert(0x6ffffdf8, "CHECKSUM");
-    mapResult.insert(0x6ffffdf9, "PLTPADSZ");
-    mapResult.insert(0x6ffffdfa, "MOVEENT");
-    mapResult.insert(0x6ffffdfb, "MOVESZ");
-    mapResult.insert(0x6ffffdfc, "FEATURE_1");
-    mapResult.insert(0x6ffffdfd, "POSFLAG_1");
-    mapResult.insert(0x6ffffdfe, "SYMINSZ");
-    mapResult.insert(0x6ffffdff, "SYMINENT");
-    mapResult.insert(0x6ffffdff, "VALRNGHI");
-    mapResult.insert(0x6ffffe00, "ADDRRNGLO");
-    mapResult.insert(0x6ffffef5, "GNU_HASH");
-    mapResult.insert(0x6ffffefa, "CONFIG");
-    mapResult.insert(0x6ffffefb, "DEPAUDIT");
-    mapResult.insert(0x6ffffefc, "AUDIT");
-    mapResult.insert(0x6ffffefd, "PLTPAD");
-    mapResult.insert(0x6ffffefe, "MOVETAB");
-    mapResult.insert(0x6ffffeff, "SYMINFO");
-    mapResult.insert(0x6ffffeff, "ADDRRNGHI");
-    mapResult.insert(0x6ffffff0, "VERSYM");
-    mapResult.insert(0x6ffffff9, "RELACOUNT");
-    mapResult.insert(0x6ffffffa, "RELCOUNT");
-    mapResult.insert(0x6ffffffb, "FLAGS_1");
-    mapResult.insert(0x6ffffffc, "VERDEF");
-    mapResult.insert(0x6ffffffd, "VERDEFNUM");
-    mapResult.insert(0x6ffffffe, "VERNEED");
-    mapResult.insert(0x6fffffff, "VERNEEDNUM");
-    mapResult.insert(0x70000000, "LOPROC");
+    XBinary::XIDSTRING *pArchTable = _TABLE_XELF_DynamicTags_SPARC;
+    qint32 nArchCount = sizeof(_TABLE_XELF_DynamicTags_SPARC) / sizeof(XBinary::XIDSTRING);
 
     if (sArch == "MIPS") {
-        mapResult.insert(0x70000001, "MIPS_RLD_VERSION");
-        mapResult.insert(0x70000002, "MIPS_TIME_STAMP");
-        mapResult.insert(0x70000003, "MIPS_ICHECKSUM");
-        mapResult.insert(0x70000004, "MIPS_IVERSION");
-        mapResult.insert(0x70000005, "MIPS_FLAGS");
-        mapResult.insert(0x70000006, "MIPS_BASE_ADDRESS");
-        mapResult.insert(0x70000008, "MIPS_CONFLICT");
-        mapResult.insert(0x70000009, "MIPS_LIBLIST");
-        mapResult.insert(0x7000000a, "MIPS_LOCAL_GOTNO");
-        mapResult.insert(0x7000000b, "MIPS_CONFLICTNO");
-        mapResult.insert(0x70000010, "MIPS_LIBLISTNO");
-        mapResult.insert(0x70000011, "MIPS_SYMTABNO");
-        mapResult.insert(0x70000012, "MIPS_UNREFEXTNO");
-        mapResult.insert(0x70000013, "MIPS_GOTSYM");
-        mapResult.insert(0x70000014, "MIPS_HIPAGENO");
-        mapResult.insert(0x70000016, "MIPS_RLD_MAP");
-        mapResult.insert(0x70000017, "MIPS_DELTA_CLASS");
-        mapResult.insert(0x70000018, "MIPS_DELTA_CLASS_NO");
-        mapResult.insert(0x70000019, "MIPS_DELTA_INSTANCE");
-        mapResult.insert(0x7000001A, "MIPS_DELTA_INSTANCE_NO");
-        mapResult.insert(0x7000001B, "MIPS_DELTA_RELOC");
-        mapResult.insert(0x7000001C, "MIPS_DELTA_RELOC_NO");
-        mapResult.insert(0x7000001D, "MIPS_DELTA_SYM");
-        mapResult.insert(0x7000001E, "MIPS_DELTA_SYM_NO");
-        mapResult.insert(0x70000020, "MIPS_DELTA_CLASSSYM");
-        mapResult.insert(0x70000021, "MIPS_DELTA_CLASSSYM_NO");
-        mapResult.insert(0x70000022, "MIPS_CXX_FLAGS");
-        mapResult.insert(0x70000023, "MIPS_PIXIE_INIT");
-        mapResult.insert(0x70000024, "MIPS_SYMBOL_LIB");
-        mapResult.insert(0x70000025, "MIPS_LOCALPAGE_GOTIDX");
-        mapResult.insert(0x70000026, "MIPS_LOCAL_GOTIDX");
-        mapResult.insert(0x70000027, "MIPS_HIDDEN_GOTIDX");
-        mapResult.insert(0x70000028, "MIPS_PROTECTED_GOTIDX");
-        mapResult.insert(0x70000029, "MIPS_OPTIONS");
-        mapResult.insert(0x7000002A, "MIPS_INTERFACE");
-        mapResult.insert(0x7000002B, "MIPS_DYNSTR_ALIGN");
-        mapResult.insert(0x7000002C, "MIPS_INTERFACE_SIZE");
-        mapResult.insert(0x7000002D, "MIPS_RLD_TEXT_RESOLVE_ADDR");
-        mapResult.insert(0x7000002E, "MIPS_PERF_SUFFIX");
-        mapResult.insert(0x7000002F, "MIPS_COMPACT_SIZE");
-        mapResult.insert(0x70000030, "MIPS_GP_VALUE");
-        mapResult.insert(0x70000031, "MIPS_AUX_DYNAMIC");
-        mapResult.insert(0x70000032, "MIPS_PLTGOT");
-        mapResult.insert(0x70000033, "MIPS_RLD_OBJ_UPDATE");
-        mapResult.insert(0x70000034, "MIPS_RWPLT");
-        mapResult.insert(0x70000035, "MIPS_RLD_VERSION");
-        mapResult.insert(0x36, "MIPS_NUM");
-    } else {
-        mapResult.insert(0x70000001, "SPARC_REGISTER");
+        pArchTable = _TABLE_XELF_DynamicTags_MIPS;
+        nArchCount = sizeof(_TABLE_XELF_DynamicTags_MIPS) / sizeof(XBinary::XIDSTRING);
     }
 
-    mapResult.insert(0x7ffffffd, "AUXILIARY");
-    mapResult.insert(0x7ffffffe, "USED");
-    mapResult.insert(0x7fffffff, "HIPROC");  // FILTER
+    for (qint32 i = 0; i < nArchCount; i++) {
+        mapResult.insert(pArchTable[i].nID, pArchTable[i].sString);
+    }
+
+    {
+        qint32 nCount = sizeof(_TABLE_XELF_DynamicTags_Tail) / sizeof(XBinary::XIDSTRING);
+
+        for (qint32 i = 0; i < nCount; i++) {
+            mapResult.insert(_TABLE_XELF_DynamicTags_Tail[i].nID, _TABLE_XELF_DynamicTags_Tail[i].sString);
+        }
+    }
 
     return mapResult;
 }
@@ -5540,312 +5428,52 @@ QByteArray XELF::getHeaders()
 
 QMap<quint64, QString> XELF::getRelTypes_x86()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "R_386_NONE");
-    mapResult.insert(1, "R_386_32");
-    mapResult.insert(2, "R_386_PC32");
-    mapResult.insert(3, "R_386_GOT32");
-    mapResult.insert(4, "R_386_PLT32");
-    mapResult.insert(5, "R_386_COPY");
-    mapResult.insert(6, "R_386_GLOB_DAT");
-    mapResult.insert(7, "R_386_JMP_SLOT");
-    mapResult.insert(8, "R_386_RELATIVE");
-    mapResult.insert(9, "R_386_GOTOFF");
-    mapResult.insert(10, "R_386_GOTPC");
-    mapResult.insert(11, "R_386_32PLT");
-    mapResult.insert(20, "R_386_16");
-    mapResult.insert(21, "R_386_PC16");
-    mapResult.insert(22, "R_386_8");
-    mapResult.insert(23, "R_386_PC8");
-    mapResult.insert(38, "R_386_SIZE32");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_RelTypes_x86, sizeof(_TABLE_XELF_RelTypes_x86) / sizeof(XBinary::XIDSTRING), PREFIX_R);
 }
 
 QMap<quint64, QString> XELF::getRelTypesS_x86()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "386_NONE");
-    mapResult.insert(1, "386_32");
-    mapResult.insert(2, "386_PC32");
-    mapResult.insert(3, "386_GOT32");
-    mapResult.insert(4, "386_PLT32");
-    mapResult.insert(5, "386_COPY");
-    mapResult.insert(6, "386_GLOB_DAT");
-    mapResult.insert(7, "386_JMP_SLOT");
-    mapResult.insert(8, "386_RELATIVE");
-    mapResult.insert(9, "386_GOTOFF");
-    mapResult.insert(10, "386_GOTPC");
-    mapResult.insert(11, "386_32PLT");
-    mapResult.insert(20, "386_16");
-    mapResult.insert(21, "386_PC16");
-    mapResult.insert(22, "386_8");
-    mapResult.insert(23, "386_PC8");
-    mapResult.insert(38, "386_SIZE32");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_RelTypes_x86, sizeof(_TABLE_XELF_RelTypes_x86) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getRelTypes_x64()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "R_X86_64_NONE");
-    mapResult.insert(1, "R_X86_64_64");
-    mapResult.insert(2, "R_386_PC32");
-    mapResult.insert(3, "R_386_GOT32");
-    mapResult.insert(4, "R_X86_64_PLT32");
-    mapResult.insert(5, "R_X86_64_COPY");
-    mapResult.insert(6, "R_X86_64_GLOB_DAT");
-    mapResult.insert(7, "R_X86_64_JMP_SLOT");
-    mapResult.insert(8, "R_X86_64_RELATIVE");
-    mapResult.insert(9, "R_X86_64_GOTPCREL");
-    mapResult.insert(10, "R_X86_64_32");
-    mapResult.insert(11, "R_X86_64_32S");
-    mapResult.insert(12, "R_X86_64_16");
-    mapResult.insert(13, "R_X86_64_PC16");
-    mapResult.insert(14, "R_X86_64_8");
-    mapResult.insert(15, "R_X86_64_PC8");
-    mapResult.insert(24, "R_X86_64_PC64");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_RelTypes_x64, sizeof(_TABLE_XELF_RelTypes_x64) / sizeof(XBinary::XIDSTRING), PREFIX_R);
 }
 
 QMap<quint64, QString> XELF::getRelTypesS_x64()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "X86_64_NONE");
-    mapResult.insert(1, "X86_64_64");
-    mapResult.insert(2, "386_PC32");
-    mapResult.insert(3, "386_GOT32");
-    mapResult.insert(4, "X86_64_PLT32");
-    mapResult.insert(5, "X86_64_COPY");
-    mapResult.insert(6, "X86_64_GLOB_DAT");
-    mapResult.insert(7, "X86_64_JMP_SLOT");
-    mapResult.insert(8, "X86_64_RELATIVE");
-    mapResult.insert(9, "X86_64_GOTPCREL");
-    mapResult.insert(10, "X86_64_32");
-    mapResult.insert(11, "X86_64_32S");
-    mapResult.insert(12, "X86_64_16");
-    mapResult.insert(13, "X86_64_PC16");
-    mapResult.insert(14, "X86_64_8");
-    mapResult.insert(15, "X86_64_PC8");
-    mapResult.insert(24, "X86_64_PC64");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_RelTypes_x64, sizeof(_TABLE_XELF_RelTypes_x64) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getRelTypes_SPARC()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "R_SPARC_NONE");
-    mapResult.insert(1, "R_SPARC_8");
-    mapResult.insert(2, "R_SPARC_16");
-    mapResult.insert(3, "R_SPARC_32");
-    mapResult.insert(4, "R_SPARC_DISP8");
-    mapResult.insert(5, "R_SPARC_DISP16");
-    mapResult.insert(6, "R_SPARC_DISP32");
-    mapResult.insert(7, "R_SPARC_WDISP30");
-    mapResult.insert(8, "R_SPARC_WDISP22");
-    mapResult.insert(9, "R_SPARC_HI22");
-    mapResult.insert(10, "R_SPARC_22");
-    mapResult.insert(11, "R_SPARC_13");
-    mapResult.insert(12, "R_SPARC_LO10");
-    mapResult.insert(13, "R_SPARC_GOT10");
-    mapResult.insert(14, "R_SPARC_GOT13");
-    mapResult.insert(15, "R_SPARC_GOT22");
-    mapResult.insert(16, "R_SPARC_PC10");
-    mapResult.insert(17, "R_SPARC_PC22");
-    mapResult.insert(18, "R_SPARC_WPLT30");
-    mapResult.insert(19, "R_SPARC_COPY");
-    mapResult.insert(20, "R_SPARC_GLOB_DAT");
-    mapResult.insert(21, "R_SPARC_JMP_SLOT");
-    mapResult.insert(22, "R_SPARC_RELATIVE");
-    mapResult.insert(23, "R_SPARC_UA32");
-    mapResult.insert(24, "R_SPARC_PLT32");
-    mapResult.insert(25, "R_SPARC_HIPLT22");
-    mapResult.insert(26, "R_SPARC_LOPLT10");
-    mapResult.insert(27, "R_SPARC_PCPLT32");
-    mapResult.insert(28, "R_SPARC_PCPLT22");
-    mapResult.insert(29, "R_SPARC_PCPLT10");
-    mapResult.insert(30, "R_SPARC_10");
-    mapResult.insert(31, "R_SPARC_11");
-    mapResult.insert(32, "R_SPARC_64");
-    mapResult.insert(33, "R_SPARC_OLO10");
-    mapResult.insert(34, "R_SPARC_HH22");
-    mapResult.insert(35, "R_SPARC_HM10");
-    mapResult.insert(36, "R_SPARC_LM22");
-    mapResult.insert(37, "R_SPARC_PC_HH22");
-    mapResult.insert(38, "R_SPARC_PC_HM10");
-    mapResult.insert(39, "R_SPARC_PC_LM22");
-    mapResult.insert(40, "R_SPARC_WDISP16");
-    mapResult.insert(41, "R_SPARC_WDISP19");
-    mapResult.insert(43, "R_SPARC_7");
-    mapResult.insert(44, "R_SPARC_5");
-    mapResult.insert(45, "R_SPARC_6");
-    mapResult.insert(46, "R_SPARC_DISP64");
-    mapResult.insert(47, "R_SPARC_PLT64");
-    mapResult.insert(48, "R_SPARC_HIX22");
-    mapResult.insert(49, "R_SPARC_LOX10");
-    mapResult.insert(50, "R_SPARC_H44");
-    mapResult.insert(51, "R_SPARC_M44");
-    mapResult.insert(52, "R_SPARC_L44");
-    mapResult.insert(53, "R_SPARC_REGISTER");
-    mapResult.insert(54, "R_SPARC_UA64");
-    mapResult.insert(55, "R_SPARC_UA16");
-    mapResult.insert(80, "R_SPARC_GOTDATA_HIX22");
-    mapResult.insert(81, "R_SPARC_GOTDATA_LOX10");
-    mapResult.insert(82, "R_SPARC_GOTDATA_OP_HIX22");
-    mapResult.insert(83, "R_SPARC_GOTDATA_OP_LOX10");
-    mapResult.insert(84, "R_SPARC_GOTDATA_OP");
-    mapResult.insert(85,
-                     "R_SPARC_SIZE32");  // mb TODO
-                                         // https://docs.oracle.com/cd/E19120-01/open.solaris/819-0690/6n33n7fct/index.html
-    mapResult.insert(87, "R_SPARC_SIZE64");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_RelTypes_SPARC, sizeof(_TABLE_XELF_RelTypes_SPARC) / sizeof(XBinary::XIDSTRING), PREFIX_R);
 }
 
 QMap<quint64, QString> XELF::getRelTypesS_SPARC()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "SPARC_NONE");
-    mapResult.insert(1, "SPARC_8");
-    mapResult.insert(2, "SPARC_16");
-    mapResult.insert(3, "SPARC_32");
-    mapResult.insert(4, "SPARC_DISP8");
-    mapResult.insert(5, "SPARC_DISP16");
-    mapResult.insert(6, "SPARC_DISP32");
-    mapResult.insert(7, "SPARC_WDISP30");
-    mapResult.insert(8, "SPARC_WDISP22");
-    mapResult.insert(9, "SPARC_HI22");
-    mapResult.insert(10, "SPARC_22");
-    mapResult.insert(11, "SPARC_13");
-    mapResult.insert(12, "SPARC_LO10");
-    mapResult.insert(13, "SPARC_GOT10");
-    mapResult.insert(14, "SPARC_GOT13");
-    mapResult.insert(15, "SPARC_GOT22");
-    mapResult.insert(16, "SPARC_PC10");
-    mapResult.insert(17, "SPARC_PC22");
-    mapResult.insert(18, "SPARC_WPLT30");
-    mapResult.insert(19, "SPARC_COPY");
-    mapResult.insert(20, "SPARC_GLOB_DAT");
-    mapResult.insert(21, "SPARC_JMP_SLOT");
-    mapResult.insert(22, "SPARC_RELATIVE");
-    mapResult.insert(23, "SPARC_UA32");
-    mapResult.insert(24, "SPARC_PLT32");
-    mapResult.insert(25, "SPARC_HIPLT22");
-    mapResult.insert(26, "SPARC_LOPLT10");
-    mapResult.insert(27, "SPARC_PCPLT32");
-    mapResult.insert(28, "SPARC_PCPLT22");
-    mapResult.insert(29, "SPARC_PCPLT10");
-    mapResult.insert(30, "SPARC_10");
-    mapResult.insert(31, "SPARC_11");
-    mapResult.insert(32, "SPARC_64");
-    mapResult.insert(33, "SPARC_OLO10");
-    mapResult.insert(34, "SPARC_HH22");
-    mapResult.insert(35, "SPARC_HM10");
-    mapResult.insert(36, "SPARC_LM22");
-    mapResult.insert(37, "SPARC_PC_HH22");
-    mapResult.insert(38, "SPARC_PC_HM10");
-    mapResult.insert(39, "SPARC_PC_LM22");
-    mapResult.insert(40, "SPARC_WDISP16");
-    mapResult.insert(41, "SPARC_WDISP19");
-    mapResult.insert(43, "SPARC_7");
-    mapResult.insert(44, "SPARC_5");
-    mapResult.insert(45, "SPARC_6");
-    mapResult.insert(46, "SPARC_DISP64");
-    mapResult.insert(47, "SPARC_PLT64");
-    mapResult.insert(48, "SPARC_HIX22");
-    mapResult.insert(49, "SPARC_LOX10");
-    mapResult.insert(50, "SPARC_H44");
-    mapResult.insert(51, "SPARC_M44");
-    mapResult.insert(52, "SPARC_L44");
-    mapResult.insert(53, "SPARC_REGISTER");
-    mapResult.insert(54, "SPARC_UA64");
-    mapResult.insert(55, "SPARC_UA16");
-    mapResult.insert(80, "SPARC_GOTDATA_HIX22");
-    mapResult.insert(81, "SPARC_GOTDATA_LOX10");
-    mapResult.insert(82, "SPARC_GOTDATA_OP_HIX22");
-    mapResult.insert(83, "SPARC_GOTDATA_OP_LOX10");
-    mapResult.insert(84, "SPARC_GOTDATA_OP");
-    mapResult.insert(85,
-                     "SPARC_SIZE32");  // mb TODO
-                                       // https://docs.oracle.com/cd/E19120-01/open.solaris/819-0690/6n33n7fct/index.html
-    mapResult.insert(87, "SPARC_SIZE64");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_RelTypes_SPARC, sizeof(_TABLE_XELF_RelTypes_SPARC) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getStBinds()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "STB_LOCAL");
-    mapResult.insert(1, "STB_GLOBAL");
-    mapResult.insert(2, "STB_WEAK");
-    mapResult.insert(10, "STB_LOOS");
-    mapResult.insert(12, "STB_HIOS");
-    mapResult.insert(13, "STB_LOPROC");
-    mapResult.insert(15, "STB_HIPROC");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_StBinds, sizeof(_TABLE_XELF_StBinds) / sizeof(XBinary::XIDSTRING), PREFIX_STB);
 }
 
 QMap<quint64, QString> XELF::getStBindsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "LOCAL");
-    mapResult.insert(1, "GLOBAL");
-    mapResult.insert(2, "WEAK");
-    mapResult.insert(10, "LOOS");
-    mapResult.insert(12, "HIOS");
-    mapResult.insert(13, "LOPROC");
-    mapResult.insert(15, "HIPROC");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_StBinds, sizeof(_TABLE_XELF_StBinds) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XELF::getStTypes()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "STT_NOTYPE");
-    mapResult.insert(1, "STT_OBJECT");
-    mapResult.insert(2, "STT_FUNC");
-    mapResult.insert(3, "STT_SECTION");
-    mapResult.insert(4, "STT_FILE");
-    mapResult.insert(5, "STT_COMMON");
-    mapResult.insert(10, "STT_LOOS");
-    mapResult.insert(12, "STT_HIOS");
-    mapResult.insert(13, "STT_LOPROC");  // STT_SPARC_REGISTER
-    mapResult.insert(15, "STT_HIPROC");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_StTypes, sizeof(_TABLE_XELF_StTypes) / sizeof(XBinary::XIDSTRING), PREFIX_STT);
 }
 
 QMap<quint64, QString> XELF::getStTypesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "NOTYPE");
-    mapResult.insert(1, "OBJECT");
-    mapResult.insert(2, "FUNC");
-    mapResult.insert(3, "SECTION");
-    mapResult.insert(4, "FILE");
-    mapResult.insert(5, "COMMON");
-    mapResult.insert(10, "LOOS");
-    mapResult.insert(12, "HIOS");
-    mapResult.insert(13, "LOPROC");  // SPARC_REGISTER
-    mapResult.insert(15, "HIPROC");
-
-    return mapResult;
+    return XBinary::XIDSTRING_createMap(_TABLE_XELF_StTypes, sizeof(_TABLE_XELF_StTypes) / sizeof(XBinary::XIDSTRING));
 }
 
 QList<QString> XELF::getSearchSignatures()

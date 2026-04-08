@@ -499,6 +499,22 @@ public:
     FIXDUMP_OPTIONS getFixDumpOptions(PDSTRUCT *pPdStruct = nullptr);
 
     QByteArray getHeaders();
+
+    static const QString PREFIX_ET;
+    static const QString PREFIX_EM;
+    static const QString PREFIX_EV;
+    static const QString PREFIX_ELFCLASS;
+    static const QString PREFIX_ELFDATA;
+    static const QString PREFIX_ELFOSABI;
+    static const QString PREFIX_SHT;
+    static const QString PREFIX_SHF;
+    static const QString PREFIX_PT;
+    static const QString PREFIX_PF;
+    static const QString PREFIX_DT;
+    static const QString PREFIX_R;
+    static const QString PREFIX_STB;
+    static const QString PREFIX_STT;
+
     virtual QList<QString> getSearchSignatures() override;
     virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
 
