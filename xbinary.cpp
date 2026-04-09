@@ -9296,46 +9296,6 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
     return FT_UNKNOWN;
 }
 
-QSet<XBinary::FT> XBinary::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra)
-{
-    QSet<XBinary::FT> result;
-
-    SubDevice sd(pDevice, nOffset, nSize);
-
-    if (sd.open(QIODevice::ReadOnly)) {
-        result = getFileTypes(&sd, bExtra);
-
-        sd.close();
-    }
-
-    return result;
-}
-
-XBinary::FT XBinary::getPrefFileType(QIODevice *pDevice, bool bExtra)
-{
-    QSet<XBinary::FT> stFileTypes = getFileTypes(pDevice, bExtra);
-
-    return _getPrefFileType(&stFileTypes);
-}
-
-XBinary::FT XBinary::getPrefFileType(const QString &sFileName, bool bExtra)
-{
-    XBinary::FT result = XBinary::FT_UNKNOWN;
-
-    QFile file;
-    file.setFileName(sFileName);
-
-    if (file.open(QIODevice::ReadOnly)) {
-        XBinary _binary(&file);
-
-        result = _binary.getPrefFileType(&file, bExtra);
-
-        file.close();
-    }
-
-    return result;
-}
-
 QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes, TL_OPTION tlOption)
 {
     QList<XBinary::FT> listResult;

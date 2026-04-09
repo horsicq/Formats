@@ -1811,8 +1811,6 @@ public:
     static QSet<FT> getFileTypes(QByteArray *pbaData, bool bExtra = false);
 
     static FT _getPrefFileType(const QSet<XBinary::FT> *pStFileTypes);
-    static FT getPrefFileType(QIODevice *pDevice, bool bExtra = false);
-    static FT getPrefFileType(const QString &sFileName, bool bExtra = false);
 
     enum TL_OPTION {
         TL_OPTION_DEFAULT = 0,

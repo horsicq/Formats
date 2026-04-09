@@ -60,7 +60,51 @@
 #include "xpdf.h"
 #endif
 #ifdef USE_ARCHIVE
-#include "xarchives.h"
+#include "x_ar.h"
+#include "xace.h"
+#include "xapk.h"
+#include "xapks.h"
+#include "xarj.h"
+#include "xbrotli.h"
+#include "xbzip2.h"
+#include "xcab.h"
+#include "xcfbf.h"
+#include "xcompressz.h"
+#include "xcpio.h"
+#include "xdeb.h"
+#include "xdmg.h"
+#include "xdos16.h"
+#include "xfreearc.h"
+#include "xgzip.h"
+#include "xipa.h"
+#include "xiso9660.h"
+#include "xjar.h"
+#include "xlha.h"
+#include "xlzip.h"
+#include "xlzo.h"
+#include "xmachofat.h"
+#include "xminidump.h"
+#include "xnpm.h"
+#include "xrar.h"
+#include "xseaarc.h"
+#include "xsevenzip.h"
+#include "xsquashfs.h"
+#include "xszdd.h"
+#include "xtar.h"
+#include "xtar_bzip2.h"
+#include "xtar_compress.h"
+#include "xtar_gz.h"
+#include "xtar_lzip.h"
+#include "xtar_lzma.h"
+#include "xtar_lzop.h"
+#include "xtar_xz.h"
+#include "xtar_zstd.h"
+#include "xtarcompressed.h"
+#include "xudf.h"
+#include "xxz.h"
+#include "xzip.h"
+#include "xzlib.h"
+#include "xzstd.h"
 #endif
 #ifdef QT_GUI_LIB
 #include <QComboBox>  // TODO Check TESTLIB !!!
@@ -102,6 +146,8 @@ public:
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QSet<XBinary::FT> getFileTypes(const QString &sFileName, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData, bool bExtra = false);
+    static XBinary::FT getPrefFileType(QIODevice *pDevice, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
+
     static XBinary::FILEFORMATINFO getFileFormatInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                      XBinary::PDSTRUCT *pPdStruct = nullptr, qint64 nOffset = 0, qint64 nSize = -1);
     static qint64 getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr,

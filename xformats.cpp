@@ -164,7 +164,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(const QString &sFileName, XBinary::M
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        result = getMemoryMap(XBinary::getPrefFileType(&file, true), mapMode, &file, bIsImage, nModuleAddress, pPdStruct);
+        result = getMemoryMap(XFormats::getPrefFileType(&file, true), mapMode, &file, bIsImage, nModuleAddress, pPdStruct);
 
         file.close();
     }
@@ -259,7 +259,7 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(const QString &sFileName)
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        result = getSignOffsetSize(XBinary::getPrefFileType(&file, true), &file);
+        result = getSignOffsetSize(XFormats::getPrefFileType(&file, true), &file);
 
         file.close();
     }
@@ -275,7 +275,7 @@ bool XFormats::isSigned(const QString &sFileName)
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        bResult = isSigned(XBinary::getPrefFileType(&file, true), &file);
+        bResult = isSigned(XFormats::getPrefFileType(&file, true), &file);
 
         file.close();
     }
@@ -485,6 +485,13 @@ QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
     }
 
     return stResult;
+}
+
+XBinary::FT XFormats::getPrefFileType(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
+{
+    QSet<XBinary::FT> stFileTypes = getFileTypes(pDevice, bExtra, pPdStruct);
+
+    return XBinary::_getPrefFileType(&stFileTypes);
 }
 
 XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct,
@@ -1399,7 +1406,7 @@ void XFormats::process()
 bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct)
 {
     if (fileType == XBinary::FT_UNKNOWN) {
-        fileType = XBinary::getPrefFileType(pDevice, true);
+        fileType = XFormats::getPrefFileType(pDevice, true);
     }
 
     bool bResult = false;
