@@ -836,9 +836,9 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *p
 {
     QSet<XBinary::FT> stResult;
 
-    QByteArray baData = XArchives::decompress(pDevice, pRecord, 0, 0, 0x200);
+    // QByteArray baData = XArchives::decompress(pDevice, pRecord, 0, 0, 0x200);
 
-    stResult = XFormats::getFileTypes(&baData, bExtra);
+    // stResult = XFormats::getFileTypes(&baData, bExtra);
 
     return stResult;
 }
@@ -916,16 +916,16 @@ QSet<XBinary::FT> XFormats::getFileTypesTBZIP2(QIODevice *pDevice, QList<XArchiv
 
     QSet<XBinary::FT> stResult;
 
-    if (pListRecords->count()) {
-        const XArchive::RECORD &record = pListRecords->at(0);
-        QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
+    // if (pListRecords->count()) {
+    //     const XArchive::RECORD &record = pListRecords->at(0);
+    //     QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
 
-        QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
+    //     QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
 
-        if (stFileTypes.contains(XBinary::FT_TAR)) {
-            stResult.insert(XBinary::FT_TAR_BZIP2);
-        }
-    }
+    //     if (stFileTypes.contains(XBinary::FT_TAR)) {
+    //         stResult.insert(XBinary::FT_TAR_BZIP2);
+    //     }
+    // }
 
     return stResult;
 }
@@ -937,16 +937,16 @@ QSet<XBinary::FT> XFormats::getFileTypesTXZ(QIODevice *pDevice, QList<XArchive::
 
     QSet<XBinary::FT> stResult;
 
-    if (pListRecords->count()) {
-        const XArchive::RECORD &record = pListRecords->at(0);
-        QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
+    // if (pListRecords->count()) {
+    //     const XArchive::RECORD &record = pListRecords->at(0);
+    //     QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
 
-        QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
+    //     QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
 
-        if (stFileTypes.contains(XBinary::FT_TAR)) {
-            stResult.insert(XBinary::FT_TAR_XZ);
-        }
-    }
+    //     if (stFileTypes.contains(XBinary::FT_TAR)) {
+    //         stResult.insert(XBinary::FT_TAR_XZ);
+    //     }
+    // }
 
     return stResult;
 }
@@ -958,16 +958,16 @@ QSet<XBinary::FT> XFormats::getFileTypesTLZIP(QIODevice *pDevice, QList<XArchive
 
     QSet<XBinary::FT> stResult;
 
-    if (pListRecords->count()) {
-        const XArchive::RECORD &record = pListRecords->at(0);
-        QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
+    // if (pListRecords->count()) {
+    //     const XArchive::RECORD &record = pListRecords->at(0);
+    //     QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
 
-        QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
+    //     QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
 
-        if (stFileTypes.contains(XBinary::FT_TAR)) {
-            stResult.insert(XBinary::FT_TAR_LZIP);
-        }
-    }
+    //     if (stFileTypes.contains(XBinary::FT_TAR)) {
+    //         stResult.insert(XBinary::FT_TAR_LZIP);
+    //     }
+    // }
 
     return stResult;
 }
@@ -993,19 +993,19 @@ QSet<XBinary::FT> XFormats::getFileTypesGZIP(QIODevice *pDevice, QList<XArchive:
 {
     QSet<XBinary::FT> stResult;
 
-    if (pListRecords->count()) {
-        const XArchive::RECORD &record = pListRecords->at(0);
-        QByteArray baData = XArchives::decompress(pDevice, &record, pPdStruct, 0, 0x200);
+    // if (pListRecords->count()) {
+    //     const XArchive::RECORD &record = pListRecords->at(0);
+    //     QByteArray baData = XArchives::decompress(pDevice, &record, pPdStruct, 0, 0x200);
 
-        QSet<XBinary::FT> _ft = getFileTypes(&baData, true);
+    //     QSet<XBinary::FT> _ft = getFileTypes(&baData, true);
 
-        if (_ft.contains(XBinary::FT_TAR)) {
-            XTAR_GZ xtarGz(pDevice);
-            QList<XArchive::RECORD> listArchiveRecords = xtarGz.getRecords(20000, pPdStruct);
+    //     if (_ft.contains(XBinary::FT_TAR)) {
+    //         XTAR_GZ xtarGz(pDevice);
+    //         QList<XArchive::RECORD> listArchiveRecords = xtarGz.getRecords(20000, pPdStruct);
 
-            stResult += getFileTypesTGZ(pDevice, &listArchiveRecords, pPdStruct);
-        }
-    }
+    //         stResult += getFileTypesTGZ(pDevice, &listArchiveRecords, pPdStruct);
+    //     }
+    // }
 
     return stResult;
 }
@@ -1035,7 +1035,7 @@ QSet<XBinary::FT> XFormats::getFileTypesLZIP(QIODevice *pDevice, QList<XArchive:
 {
     QSet<XBinary::FT> stResult;
 
-    stResult += getFileTypesTLZIP(pDevice, pListRecords, pPdStruct);
+    // stResult += getFileTypesTLZIP(pDevice, pListRecords, pPdStruct);
 
     return stResult;
 }
