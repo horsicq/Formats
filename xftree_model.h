@@ -44,7 +44,7 @@ public:
         qint32 nRow;
     };
 
-    explicit XFTreeModel(QObject *pParent);
+    explicit XFTreeModel(QObject *pParent = nullptr);
     virtual ~XFTreeModel() override;
 
     void setData(XBinary *pXBinary, const QList<XBinary::XFHEADER> &listHeaders);
@@ -62,10 +62,31 @@ public:
     static QString treeToString(XFTreeModel *pModel, const QString &sTitle = QString());
     static void printToConsole(XFTreeModel *pModel, const QString &sTitle = QString());
 
+    QString toString(XBinary::FORMATTYPE formatType = XBinary::FORMATTYPE_UNKNOWN);
+    QString toFormattedString();
+    QString toXML() const;
+    QString toJSON() const;
+    QString toCSV() const;
+    QString toTSV() const;
+
 private:
     void clear();
     void buildTree(const QList<XBinary::XFHEADER> &listHeaders);
-    static void appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, const QString &sPrefix, bool bIsLast);
+    static void appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, const QString &sPrefix);
+    static void _toFormattedString(QString *pString, XBinary *pXBinary, TREEITEM *pItem, qint32 nLevel);
+    static void appendXMLLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, const QString &sIndent);
+    static void appendJSONLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, const QString &sIndent, bool bLast);
+    static void appendSVLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, QChar cSep);
+    static QString getItemName(XBinary *pXBinary, TREEITEM *pItem);
+    static QString getItemString(XBinary *pXBinary, TREEITEM *pItem);
+    static QString getItemType(TREEITEM *pItem);
+    static QString getItemFileType(TREEITEM *pItem);
+    static QString getItemOffset(TREEITEM *pItem);
+    static QString getItemSize(TREEITEM *pItem);
+    static QString getItemRows(TREEITEM *pItem);
+    static QString xmlEscape(const QString &s);
+    static QString jsonEscape(const QString &s);
+    static QString svQuote(const QString &s, QChar cSep);
 
     TREEITEM *m_pRootItem;
     XBinary *m_pXBinary;

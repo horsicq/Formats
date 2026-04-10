@@ -279,8 +279,7 @@ QString XFTreeModel::treeToString(XFTreeModel *pModel, const QString &sTitle)
     qint32 nChildCount = pRoot->listChildren.count();
 
     for (qint32 i = 0; i < nChildCount; i++) {
-        bool bIsLast = (i == nChildCount - 1);
-        appendTreeLines(&listLines, pModel->m_pXBinary, pRoot->listChildren.at(i), "", bIsLast);
+        appendTreeLines(&listLines, pModel->m_pXBinary, pRoot->listChildren.at(i), "");
     }
 
     return listLines.join("\n");
@@ -297,26 +296,8 @@ void XFTreeModel::printToConsole(XFTreeModel *pModel, const QString &sTitle)
     }
 }
 
-void XFTreeModel::appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, const QString &sPrefix, bool bIsLast)
+void XFTreeModel::appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, const QString &sPrefix)
 {
-    QString sConnector = bIsLast ? QString::fromUtf8("\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80 ") : QString::fromUtf8("\xe2\x94\x9c\xe2\x94\x80\xe2\x94\x80 ");
-
-    QString sTypeName;
-    if (pItem->xfHeader.xfType == XBinary::XFTYPE_HEADER) {
-        sTypeName = "HEADER";
-    } else if (pItem->xfHeader.xfType == XBinary::XFTYPE_TABLE) {
-        sTypeName = "TABLE";
-    } else {
-        sTypeName = "UNKNOWN";
-    }
-
-    QString sInfo;
-    if (pItem->xfHeader.xfType == XBinary::XFTYPE_HEADER) {
-        sInfo = QString("fields: %1").arg(pItem->xfHeader.listFields.count());
-    } else if (pItem->xfHeader.xfType == XBinary::XFTYPE_TABLE) {
-        sInfo = QString("rows: %1").arg(pItem->xfHeader.listRowLocations.count());
-    }
-
     QString sStructName;
     if (pXBinary) {
         sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
@@ -324,20 +305,264 @@ void XFTreeModel::appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TR
         sStructName = QString::number(pItem->xfHeader.structID);
     }
 
-    QString sOffset = XBinary::valueToHexEx(pItem->xfHeader.xLoc.nLocation);
+    QString sString = "[" + XBinary::xfHeaderToString(pItem->xfHeader, sStructName, pItem->xfHeader.sParentTag) + "]";
 
-    QString sTag = "[" + XBinary::xfHeaderToTag(pItem->xfHeader, sStructName, pItem->xfHeader.sParentTag) + "]";
-
-    QString sLine = sPrefix + sConnector + sStructName + " [" + sTypeName + "] offset=" + sOffset + " " + sInfo + " " + sTag;
+    QString sLine = sPrefix + sStructName + sString;
 
     pListLines->append(sLine);
-
-    QString sChildPrefix = sPrefix + (bIsLast ? "    " : QString::fromUtf8("\xe2\x94\x82   "));
 
     qint32 nChildCount = pItem->listChildren.count();
 
     for (qint32 i = 0; i < nChildCount; i++) {
-        bool bChildIsLast = (i == nChildCount - 1);
-        appendTreeLines(pListLines, pXBinary, pItem->listChildren.at(i), sChildPrefix, bChildIsLast);
+        appendTreeLines(pListLines, pXBinary, pItem->listChildren.at(i), sPrefix + "    ");
     }
+}
+
+QString XFTreeModel::getItemName(XBinary *pXBinary, TREEITEM *pItem)
+{
+    QString sStructName;
+    if (pXBinary) {
+        sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
+    } else {
+        sStructName = QString::number(pItem->xfHeader.structID);
+    }
+    return QString(sStructName).toUpper().remove(" ").remove("-");
+}
+
+QString XFTreeModel::getItemString(XBinary *pXBinary, TREEITEM *pItem)
+{
+    QString sStructName;
+    if (pXBinary) {
+        sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
+    } else {
+        sStructName = QString::number(pItem->xfHeader.structID);
+    }
+    return XBinary::xfHeaderToString(pItem->xfHeader, sStructName, pItem->xfHeader.sParentTag);
+}
+
+QString XFTreeModel::getItemType(TREEITEM *pItem)
+{
+    return XBinary::xfTypeIdToFtString(pItem->xfHeader.xfType);
+}
+
+QString XFTreeModel::getItemFileType(TREEITEM *pItem)
+{
+    return XBinary::fileTypeIdToString(pItem->xfHeader.fileType);
+}
+
+QString XFTreeModel::getItemOffset(TREEITEM *pItem)
+{
+    return XBinary::valueToHexEx(pItem->xfHeader.xLoc.nLocation);
+}
+
+QString XFTreeModel::getItemSize(TREEITEM *pItem)
+{
+    return XBinary::valueToHexEx(pItem->xfHeader.nSize);
+}
+
+QString XFTreeModel::getItemRows(TREEITEM *pItem)
+{
+    return QString::number(pItem->xfHeader.listRowLocations.count());
+}
+
+QString XFTreeModel::xmlEscape(const QString &s)
+{
+    QString r = s;
+    r.replace("&", "&amp;");
+    r.replace("<", "&lt;");
+    r.replace(">", "&gt;");
+    r.replace("\"", "&quot;");
+    return r;
+}
+
+QString XFTreeModel::jsonEscape(const QString &s)
+{
+    QString r = s;
+    r.replace("\\", "\\\\");
+    r.replace("\"", "\\\"");
+    r.replace("\n", "\\n");
+    r.replace("\r", "\\r");
+    r.replace("\t", "\\t");
+    return r;
+}
+
+QString XFTreeModel::svQuote(const QString &s, QChar cSep)
+{
+    if (s.contains(cSep) || s.contains('"') || s.contains('\n')) {
+        return "\"" + QString(s).replace("\"", "\"\"") + "\"";
+    }
+    return s;
+}
+
+void XFTreeModel::appendXMLLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, const QString &sIndent)
+{
+    QString sTag = QString("%1<item name=\"%2\" type=\"%3\" string=\"%4\" fileType=\"%5\" offset=\"%6\" size=\"%7\" rows=\"%8\"")
+                       .arg(sIndent)
+                       .arg(xmlEscape(getItemName(pXBinary, pItem)))
+                       .arg(xmlEscape(getItemType(pItem)))
+                       .arg(xmlEscape(getItemString(pXBinary, pItem)))
+                       .arg(xmlEscape(getItemFileType(pItem)))
+                       .arg(xmlEscape(getItemOffset(pItem)))
+                       .arg(xmlEscape(getItemSize(pItem)))
+                       .arg(xmlEscape(getItemRows(pItem)));
+
+    if (pItem->listChildren.isEmpty()) {
+        pListLines->append(sTag + "/>");
+    } else {
+        pListLines->append(sTag + ">");
+        for (qint32 i = 0; i < pItem->listChildren.count(); i++) {
+            appendXMLLines(pListLines, pXBinary, pItem->listChildren.at(i), sIndent + "  ");
+        }
+        pListLines->append(sIndent + "</item>");
+    }
+}
+
+void XFTreeModel::appendJSONLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, const QString &sIndent, bool bLast)
+{
+    QString sInner = sIndent + "  ";
+    pListLines->append(sIndent + "{");
+    pListLines->append(sInner + QString("\"name\": \"%1\",").arg(jsonEscape(getItemName(pXBinary, pItem))));
+    pListLines->append(sInner + QString("\"type\": \"%1\",").arg(jsonEscape(getItemType(pItem))));
+    pListLines->append(sInner + QString("\"string\": \"%1\",").arg(jsonEscape(getItemString(pXBinary, pItem))));
+    pListLines->append(sInner + QString("\"fileType\": \"%1\",").arg(jsonEscape(getItemFileType(pItem))));
+    pListLines->append(sInner + QString("\"offset\": \"%1\",").arg(jsonEscape(getItemOffset(pItem))));
+    pListLines->append(sInner + QString("\"size\": \"%1\",").arg(jsonEscape(getItemSize(pItem))));
+    pListLines->append(sInner + QString("\"rows\": %1,").arg(getItemRows(pItem)));
+
+    if (pItem->listChildren.isEmpty()) {
+        pListLines->append(sInner + "\"children\": []");
+    } else {
+        pListLines->append(sInner + "\"children\": [");
+        for (qint32 i = 0; i < pItem->listChildren.count(); i++) {
+            appendJSONLines(pListLines, pXBinary, pItem->listChildren.at(i), sInner + "  ", i == pItem->listChildren.count() - 1);
+        }
+        pListLines->append(sInner + "]");
+    }
+
+    pListLines->append(sIndent + (bLast ? "}" : "},"));
+}
+
+void XFTreeModel::appendSVLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, QChar cSep)
+{
+    QStringList fields;
+    fields << svQuote(getItemName(pXBinary, pItem), cSep)
+           << svQuote(getItemType(pItem), cSep)
+           << svQuote(getItemString(pXBinary, pItem), cSep)
+           << svQuote(getItemFileType(pItem), cSep)
+           << svQuote(getItemOffset(pItem), cSep)
+           << svQuote(getItemSize(pItem), cSep)
+           << svQuote(getItemRows(pItem), cSep);
+    pListLines->append(fields.join(cSep));
+
+    for (qint32 i = 0; i < pItem->listChildren.count(); i++) {
+        appendSVLines(pListLines, pXBinary, pItem->listChildren.at(i), cSep);
+    }
+}
+
+QString XFTreeModel::toString(XBinary::FORMATTYPE formatType)
+{
+    if (formatType == XBinary::FORMATTYPE_UNKNOWN) {
+        formatType = XBinary::FORMATTYPE_PLAINTEXT;
+    }
+
+    if (formatType == XBinary::FORMATTYPE_PLAINTEXT) {
+        return toFormattedString();
+    } else if (formatType == XBinary::FORMATTYPE_XML) {
+        return toXML();
+    } else if (formatType == XBinary::FORMATTYPE_JSON) {
+        return toJSON();
+    } else if (formatType == XBinary::FORMATTYPE_CSV) {
+        return toCSV();
+    } else if (formatType == XBinary::FORMATTYPE_TSV) {
+        return toTSV();
+    }
+
+    return QString();
+}
+
+QString XFTreeModel::toFormattedString()
+{
+    QString sResult;
+
+    if (m_pRootItem) {
+        for (qint32 i = 0; i < m_pRootItem->listChildren.count(); i++) {
+            _toFormattedString(&sResult, m_pXBinary, m_pRootItem->listChildren.at(i), 1);
+        }
+    }
+
+    return sResult;
+}
+
+void XFTreeModel::_toFormattedString(QString *pString, XBinary *pXBinary, TREEITEM *pItem, qint32 nLevel)
+{
+    QString sIndent;
+    sIndent = sIndent.leftJustified(4 * (nLevel - 1), ' ');
+    pString->append(QString("%1%2 %3\n")
+                        .arg(sIndent)
+                        .arg(getItemName(pXBinary, pItem))
+                        .arg(getItemString(pXBinary, pItem)));
+
+    for (qint32 i = 0; i < pItem->listChildren.count(); i++) {
+        _toFormattedString(pString, pXBinary, pItem->listChildren.at(i), nLevel + 1);
+    }
+}
+
+QString XFTreeModel::toXML() const
+{
+    if (!m_pRootItem) return QString();
+
+    QStringList listLines;
+    listLines.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    listLines.append("<tree>");
+
+    for (qint32 i = 0; i < m_pRootItem->listChildren.count(); i++) {
+        appendXMLLines(&listLines, m_pXBinary, m_pRootItem->listChildren.at(i), "  ");
+    }
+
+    listLines.append("</tree>");
+    return listLines.join("\n");
+}
+
+QString XFTreeModel::toJSON() const
+{
+    if (!m_pRootItem) return QString();
+
+    QStringList listLines;
+    listLines.append("[");
+
+    qint32 nCount = m_pRootItem->listChildren.count();
+    for (qint32 i = 0; i < nCount; i++) {
+        appendJSONLines(&listLines, m_pXBinary, m_pRootItem->listChildren.at(i), "  ", i == nCount - 1);
+    }
+
+    listLines.append("]");
+    return listLines.join("\n");
+}
+
+QString XFTreeModel::toCSV() const
+{
+    if (!m_pRootItem) return QString();
+
+    QStringList listLines;
+    listLines.append("Name,Type,String,FileType,Offset,Size,Rows");
+
+    for (qint32 i = 0; i < m_pRootItem->listChildren.count(); i++) {
+        appendSVLines(&listLines, m_pXBinary, m_pRootItem->listChildren.at(i), ',');
+    }
+
+    return listLines.join("\n");
+}
+
+QString XFTreeModel::toTSV() const
+{
+    if (!m_pRootItem) return QString();
+
+    QStringList listLines;
+    listLines.append("Name\tType\tString\tFileType\tOffset\tSize\tRows");
+
+    for (qint32 i = 0; i < m_pRootItem->listChildren.count(); i++) {
+        appendSVLines(&listLines, m_pXBinary, m_pRootItem->listChildren.at(i), '\t');
+    }
+
+    return listLines.join("\n");
 }

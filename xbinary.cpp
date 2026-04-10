@@ -342,6 +342,12 @@ XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
     {XBinary::VT_ULEB128, "ULEB128"},
 };
 
+XBinary::XCONVERT _TABLE_XBinary_XFTYPE[] = {
+    {XBinary::XFTYPE_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+    {XBinary::XFTYPE_HEADER, "Header", QObject::tr("Header")},
+    {XBinary::XFTYPE_TABLE, "Table", QObject::tr("Table")},
+};
+
 const double XBinary::D_ENTROPY_THRESHOLD = 6.5;
 
 QString XBinary::XCONVERT_idToTransString(quint32 nID, XCONVERT *pRecords, qint32 nRecordsSize)
@@ -1325,6 +1331,45 @@ QString XBinary::xfHeaderToTag(const XFHEADER &xfHeader, const QString &sStructN
     return sResult;
 }
 
+QString XBinary::xfHeaderToString(const XFHEADER &xfHeader, const QString &sStructName, const QString &sParentString)
+{
+    QString sResult;
+
+    if (xfHeader.fileType != FT_UNKNOWN) {
+        sResult += QString("%1::").arg(fileTypeIdToFtString(xfHeader.fileType));
+    }
+
+    sResult += QString(sStructName).toUpper().remove(" ").remove("-");
+
+    QList<QString> listParams;
+
+    if (xfHeader.xfType != XFTYPE_UNKNOWN) {
+        listParams.append(QString("type=%1").arg(xfTypeIdToFtString(xfHeader.xfType)));
+    }
+
+    if (xfHeader.xLoc.nLocation > 0) {
+        listParams.append(QString("offset=0x%1").arg(valueToHexEx(xfHeader.xLoc.nLocation)));
+    }
+
+    if (xfHeader.nSize > 0) {
+        listParams.append(QString("size=0x%1").arg(valueToHexEx(xfHeader.nSize)));
+    }
+
+    if (xfHeader.listRowLocations.count() > 0) {
+        listParams.append(QString("rows=0x%1").arg(valueToHexEx(xfHeader.listRowLocations.count())));
+    }
+
+    if (xfHeader.bIsParentNeeded && (sParentString != "")) {
+        sResult = sParentString + "#" + sResult;
+    }
+
+    if (listParams.count()) {
+        sResult += "?" + listParams.join("&");
+    }
+
+    return sResult;
+}
+
 XBinary::XBinary(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     setData(pDevice, bIsImage, nModuleAddress);
@@ -2075,6 +2120,16 @@ QString XBinary::randomString(qint32 nSize)
 QString XBinary::fileTypeIdToString(XBinary::FT fileType)
 {
     return XCONVERT_idToTransString(fileType, _TABLE_XBinary_FT, sizeof(_TABLE_XBinary_FT) / sizeof(XBinary::XCONVERT));
+}
+
+QString XBinary::xfTypeIdToString(XBinary::XFTYPE xfType)
+{
+    return XCONVERT_idToTransString(xfType, _TABLE_XBinary_XFTYPE, sizeof(_TABLE_XBinary_XFTYPE) / sizeof(XBinary::XCONVERT));
+}
+
+QString XBinary::xfTypeIdToFtString(XBinary::XFTYPE xfType)
+{
+    return XCONVERT_idToFtString(xfType, _TABLE_XBinary_XFTYPE, sizeof(_TABLE_XBinary_XFTYPE) / sizeof(XBinary::XCONVERT));
 }
 
 // QString XBinary::fileTypeIdToExts(FT fileType)

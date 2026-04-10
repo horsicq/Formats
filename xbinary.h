@@ -985,6 +985,7 @@ public:
         FT fileType;
         STRUCTID structID;
         XLOC xLoc;
+        qint64 nSize; // Optional
         XFTYPE xfType;
         bool bIsParentNeeded;           // if we need parent struct to calculate the header right way
         QList<XFRECORD> listFields;     // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
@@ -999,6 +1000,7 @@ public:
         FT fileType;
         quint32 nStructID;
         XLOC xLoc;
+        qint64 nSize; // Optional, if 0 => calculate by parent struct
         XFTYPE xfType;
         bool bIsParent;
         qint32 nCount;
@@ -1176,6 +1178,7 @@ public:
     QList<QVariant> getXFRecordValues(const QList<XFRECORD> &listXFRecords, const XLOC &xLoc);
 
     static QString xfHeaderToTag(const XFHEADER &xfHeader, const QString &sStructName, const QString &sParentTag);
+    static QString xfHeaderToString(const XFHEADER &xfHeader, const QString &sStructName, const QString &sParentString);
 
     DATA_HEADER _initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName);
     DATA_HEADER _dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset, qint64 nSize);
@@ -1324,6 +1327,8 @@ public:
     static QString randomString(qint32 nSize);
 
     static QString fileTypeIdToString(FT fileType);
+    static QString xfTypeIdToString(XFTYPE xfType);
+    static QString xfTypeIdToFtString(XFTYPE xfType);
     // static QString fileTypeIdToExts(FT fileType);  // TODO move to classes
     static FT ftStringToFileTypeId(QString sFileType);
     static QString fileTypeIdToFtString(FT fileType);

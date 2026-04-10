@@ -157,7 +157,7 @@ public:
                                                       bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
 
     static QList<XBinary::XFHEADER> getXFHeaders(QIODevice *pDevice, const QString &sTag, bool bIsImage = false, XADDR nModuleAddress = -1,
-                                                 XBinary::PDSTRUCT *pPdStruct = nullptr);
+                                                 XBinary::PDSTRUCT *pPdStruct = nullptr); // Obsolete
 
     static QList<XBinary::FPART> getFileParts(XBinary::FT fileType, QIODevice *pDevice, quint32 nFileParts, qint32 nLimit = -1, bool bIsImage = false,
                                               XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);

@@ -3,7 +3,7 @@ DEPENDPATH += $$PWD
 
 !contains(XCONFIG, xmodel) {
     XCONFIG += xmodel
-    include($$PWD/../../Controls/xmodel.pri)
+    include($$PWD/../Controls/xmodel.pri)
 }
 
 HEADERS += \

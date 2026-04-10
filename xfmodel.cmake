@@ -1,7 +1,7 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
 if (NOT DEFINED XMODEL_SOURCES)
-    include(${CMAKE_CURRENT_LIST_DIR}/../../Controls/xmodel.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/../Controls/xmodel.cmake)
     set(XFMODEL_SOURCES ${XFMODEL_SOURCES} ${XMODEL_SOURCES})
 endif()
 
