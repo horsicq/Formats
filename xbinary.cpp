@@ -8920,8 +8920,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_COMPRESS);
         } else if (compareSignature(&memoryMap, "303730373031", 0) || compareSignature(&memoryMap, "303730373032", 0) ||
-                   compareSignature(&memoryMap, "303730373037", 0)) {
-            // CPIO formats: 070701, 070702, 070707
+                   compareSignature(&memoryMap, "303730373037", 0) ||
+                   ((nSize >= 26) && (((read_uint16(0) == 0x71C7) && (read_uint16(20) > 0) && (read_uint16(20) < 0x1000)) ||
+                                      ((read_uint16(0, true) == 0x71C7) && (read_uint16(20, true) > 0) && (read_uint16(20, true) < 0x1000))))) {
+            // CPIO formats: 070701, 070702, 070707, binary little-endian, binary big-endian
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_CPIO);
         } else if (compareSignature(&memoryMap, "'MDMP'", 0)) {

@@ -332,6 +332,16 @@ public:
         FPART_PROP_SUBTYPE,           // PDF stream subtype (e.g., "/Image", "/Form")
         FPART_PROP_FILTERNAME,        // PDF filter name (e.g., "/FlateDecode", "/DCTDecode")
         FPART_PROP_CCITTK,            // CCITT /K parameter (-1=Group4, 0=Group3 1D, >0=Group3 2D)
+        // BCJ2 per-stream AES decryption properties (for AES-encrypted 7z BCJ2 archives)
+        FPART_PROP_BCJ2_AES_PROPS_0,   // AES properties for BCJ2 main stream
+        FPART_PROP_BCJ2_AES_UNPACK_0,  // AES output size for BCJ2 main stream (= LZMA2 compressed size)
+        FPART_PROP_BCJ2_AES_PROPS_1,   // AES properties for BCJ2 call stream
+        FPART_PROP_BCJ2_AES_UNPACK_1,  // AES output size for BCJ2 call stream
+        FPART_PROP_BCJ2_AES_PROPS_2,   // AES properties for BCJ2 jmp stream
+        FPART_PROP_BCJ2_AES_UNPACK_2,  // AES output size for BCJ2 jmp stream
+        FPART_PROP_BCJ2_AES_PROPS_3,   // AES properties for BCJ2 range stream
+        FPART_PROP_BCJ2_AES_UNPACK_3,  // AES output size for BCJ2 range stream
+        FPART_PROP_PASSWORD_MODIFIER,  // ARJ garble password modifier byte
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
