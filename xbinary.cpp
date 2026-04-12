@@ -8608,10 +8608,10 @@ bool XBinary::dumpToFile(const QString &sFileName, QIODevice *pDevice, PDSTRUCT 
 
     QFile file;
     file.setFileName(sFileName);
-    file.resize(0);
 
     if (file.open(QIODevice::ReadWrite)) {
-        copyDeviceMemory(pDevice, 0, &file, 0, pDevice->size(), pPdStruct);
+        file.resize(0);
+        bResult = copyDeviceMemory(pDevice, 0, &file, 0, pDevice->size(), pPdStruct);
         file.close();
     }
 
