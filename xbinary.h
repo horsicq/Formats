@@ -2388,6 +2388,7 @@ public:
     qint64 getNumberOfArchiveRecords(PDSTRUCT *pPdStruct);
     QList<ARCHIVERECORD> getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct);
     bool packFolderToDevice(QIODevice *pDevice, const QMap<PACK_PROP, QVariant> &mapProperties, const QString &sFolderName, PDSTRUCT *pPdStruct);
+    virtual bool unpack(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QList<QString> getListOfArchiveRecordNames(const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
 

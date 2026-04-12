@@ -16104,6 +16104,14 @@ bool XBinary::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant>
     return false;
 }
 
+bool XBinary::unpack(QIODevice *pDevice, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pDevice)
+    Q_UNUSED(pPdStruct)
+
+    return false;
+}
+
 XBinary::ARCHIVERECORD XBinary::infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pState)
@@ -16116,11 +16124,15 @@ XBinary::ARCHIVERECORD XBinary::infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdS
 
 bool XBinary::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pState)
-    Q_UNUSED(pDevice)
-    Q_UNUSED(pPdStruct)
+    if ((!pState) || (!pDevice)) {
+        return false;
+    }
 
-    return false;
+    if ((pState->nCurrentIndex < 0) || (pState->nCurrentIndex >= pState->nNumberOfRecords)) {
+        return false;
+    }
+
+    return unpack(pDevice, pPdStruct);
 }
 
 bool XBinary::moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
