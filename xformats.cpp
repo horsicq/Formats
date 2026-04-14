@@ -831,6 +831,62 @@ QString XFormats::getXFHeaderStructName(const XBinary::XFHEADER &header)
 
     return sResult;
 }
+
+XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const QString &sStruct, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+{
+    XBinary::XFHEADER result = {};
+
+    // sStruct is in xfHeaderToString format: [PARENTSTRING#][FILETYPE::]STRUCTNAME[?params]
+    // Strip parent prefix (everything up to and including the last '#')
+    QString sFiltered = sStruct;
+    qint32 nHashIdx = sFiltered.lastIndexOf('#');
+    if (nHashIdx != -1) {
+        sFiltered = sFiltered.mid(nHashIdx + 1);
+    }
+
+    // Strip params (everything from '?' onward)
+    qint32 nParamIdx = sFiltered.indexOf('?');
+    if (nParamIdx != -1) {
+        sFiltered = sFiltered.left(nParamIdx);
+    }
+
+    // Try to extract optional FILETYPE:: prefix
+    XBinary::FT fileType = XBinary::FT_UNKNOWN;
+    QString sStructName = sFiltered;
+
+    qint32 nSepIdx = sFiltered.indexOf("::");
+    if (nSepIdx != -1) {
+        fileType = XBinary::ftStringToFileTypeId(sFiltered.left(nSepIdx));
+        sStructName = sFiltered.mid(nSepIdx + 2);
+    }
+
+    // Fall back to device detection if no file type in string
+    if (fileType == XBinary::FT_UNKNOWN) {
+        QSet<XBinary::FT> stFileTypes = XFormats::getFileTypes(pDevice, false, pPdStruct);
+        fileType = XBinary::_getPrefFileType(&stFileTypes);
+    }
+
+    bool bParent = false;
+
+    if (!bParent) {
+        XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+
+        XBinary::_MEMORY_MAP memoryMap = pBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
+
+        XBinary::XFSTRUCT xfStruct = {};
+        xfStruct.fileType = fileType;
+        xfStruct.nStructID = pBinary->ftStringToStructID(sStructName);
+        xfStruct.pMemoryMap = &memoryMap;
+
+        QList<XBinary::XFHEADER> listResult = pBinary->getXFHeaders(xfStruct, pPdStruct);
+
+        if (listResult.count() > 0) {
+            result = listResult.last();
+        }
+    }
+
+    return result;
+}
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra)
 {

@@ -420,6 +420,16 @@ QString XMP3::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XMP3_STRUCTID, sizeof(_TABLE_XMP3_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QString XMP3::structIDToFtString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XMP3_STRUCTID, sizeof(_TABLE_XMP3_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+quint32 XMP3::ftStringToStructID(const QString &sFtString)
+{
+    return XCONVERT_ftStringToId(sFtString, _TABLE_XMP3_STRUCTID, sizeof(_TABLE_XMP3_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
 QList<XBinary::MAPMODE> XMP3::getMapModesList()
 {
     QList<MAPMODE> list;

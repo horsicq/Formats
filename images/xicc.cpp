@@ -310,6 +310,16 @@ QString XICC::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XICC_STRUCTID, sizeof(_TABLE_XICC_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QString XICC::structIDToFtString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XICC_STRUCTID, sizeof(_TABLE_XICC_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+quint32 XICC::ftStringToStructID(const QString &sFtString)
+{
+    return XCONVERT_ftStringToId(sFtString, _TABLE_XICC_STRUCTID, sizeof(_TABLE_XICC_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
 QList<XBinary::DATA_HEADER> XICC::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 {
     QList<DATA_HEADER> listResult;

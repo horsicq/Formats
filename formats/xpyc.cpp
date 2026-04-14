@@ -197,6 +197,16 @@ QString XPYC::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XPYC_STRUCTID, sizeof(_TABLE_XPYC_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QString XPYC::structIDToFtString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XPYC_STRUCTID, sizeof(_TABLE_XPYC_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+quint32 XPYC::ftStringToStructID(const QString &sFtString)
+{
+    return XCONVERT_ftStringToId(sFtString, _TABLE_XPYC_STRUCTID, sizeof(_TABLE_XPYC_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
 XPYC::INFO XPYC::getInternalInfo(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)

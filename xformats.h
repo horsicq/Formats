@@ -173,6 +173,8 @@ public:
     static bool isArchive(XBinary::FT fileType);
     static bool isExecutable(XBinary::FT fileType);
     static QString getXFHeaderStructName(const XBinary::XFHEADER &header);
+    static XBinary::XFHEADER getXFHeaderFromStructName(QIODevice *pDevice, const QString &sStruct, bool bIsImage = false, XADDR nModuleAddress = -1,
+                                                 XBinary::PDSTRUCT *pPdStruct = nullptr);
 
 #ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra = false);

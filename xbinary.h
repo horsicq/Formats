@@ -1163,6 +1163,7 @@ public:
                                 VL_TYPE vlType);
 
     virtual QString structIDToString(quint32 nID);
+    virtual QString structIDToFtString(quint32 nID);
     virtual quint32 ftStringToStructID(const QString &sFtString);
 
     struct DATA_HEADERS_OPTIONS {

@@ -151,6 +151,8 @@ public:
     virtual QString getMIMEString();
 
     virtual QString structIDToString(quint32 nID);
+    virtual QString structIDToFtString(quint32 nID);
+    virtual quint32 ftStringToStructID(const QString &sFtString);
     virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct) override;
     virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc) override;
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);

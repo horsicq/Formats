@@ -87,6 +87,16 @@ QString XAVI::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XAVI_STRUCTID, sizeof(_TABLE_XAVI_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QString XAVI::structIDToFtString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XAVI_STRUCTID, sizeof(_TABLE_XAVI_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+quint32 XAVI::ftStringToStructID(const QString &sFtString)
+{
+    return XCONVERT_ftStringToId(sFtString, _TABLE_XAVI_STRUCTID, sizeof(_TABLE_XAVI_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
 QString XAVI::getArch()
 {
     return "";  // AVI is a multimedia container, no specific architecture

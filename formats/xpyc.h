@@ -119,6 +119,8 @@ public:
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct = nullptr) override;
     virtual QString getMIMEString() override;
     virtual QString structIDToString(quint32 nID) override;
+    virtual QString structIDToFtString(quint32 nID) override;
+    virtual quint32 ftStringToStructID(const QString &sFtString) override;
 
     INFO getInternalInfo(PDSTRUCT *pPdStruct = nullptr);
     CODE_OBJECT getCodeObject(PDSTRUCT *pPdStruct = nullptr);

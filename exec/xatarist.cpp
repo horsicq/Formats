@@ -257,6 +257,16 @@ QString XAtariST::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XAtariST_STRUCTID, sizeof(_TABLE_XAtariST_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QString XAtariST::structIDToFtString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XAtariST_STRUCTID, sizeof(_TABLE_XAtariST_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+quint32 XAtariST::ftStringToStructID(const QString &sFtString)
+{
+    return XCONVERT_ftStringToId(sFtString, _TABLE_XAtariST_STRUCTID, sizeof(_TABLE_XAtariST_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
 QString XAtariST::typeIdToString(qint32 nType)
 {
     QString sResult = tr("Unknown");

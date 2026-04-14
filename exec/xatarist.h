@@ -60,6 +60,8 @@ public:
     virtual qint32 getType() override;
     virtual OSNAME getOsName() override;
     virtual QString structIDToString(quint32 nID) override;
+    virtual QString structIDToFtString(quint32 nID) override;
+    virtual quint32 ftStringToStructID(const QString &sFtString) override;
     virtual QString typeIdToString(qint32 nType) override;
     virtual QString getFileFormatExtsString() override;
 };

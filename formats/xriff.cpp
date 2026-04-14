@@ -250,6 +250,16 @@ QString XRiff::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XRIFF_STRUCTID, sizeof(_TABLE_XRIFF_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QString XRiff::structIDToFtString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XRIFF_STRUCTID, sizeof(_TABLE_XRIFF_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+quint32 XRiff::ftStringToStructID(const QString &sFtString)
+{
+    return XCONVERT_ftStringToId(sFtString, _TABLE_XRIFF_STRUCTID, sizeof(_TABLE_XRIFF_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
 QList<QString> XRiff::getSearchSignatures()
 {
     QList<QString> listResult;

@@ -110,6 +110,16 @@ QString XJavaClass::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XJAVACLASS_STRUCTID, sizeof(_TABLE_XJAVACLASS_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QString XJavaClass::structIDToFtString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XJAVACLASS_STRUCTID, sizeof(_TABLE_XJAVACLASS_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+quint32 XJavaClass::ftStringToStructID(const QString &sFtString)
+{
+    return XCONVERT_ftStringToId(sFtString, _TABLE_XJAVACLASS_STRUCTID, sizeof(_TABLE_XJAVACLASS_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
 QList<XBinary::MAPMODE> XJavaClass::getMapModesList()
 {
     QList<MAPMODE> listResult;

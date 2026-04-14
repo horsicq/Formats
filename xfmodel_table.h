@@ -28,7 +28,7 @@ class XFModel_table : public XFModel {
     Q_OBJECT
 
 public:
-    explicit XFModel_table(QObject *pParent);
+    explicit XFModel_table(QObject *pParent = nullptr);
     virtual ~XFModel_table() override;
 
     virtual void setData(XBinary *pXBinary, const XBinary::XFHEADER &xfHeader) override;

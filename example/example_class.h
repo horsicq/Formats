@@ -79,6 +79,8 @@ public:
     virtual QList<HREGION> getHData(PDSTRUCT *pPdStruct = nullptr);
 
     virtual QString structIDToString(quint32 nID);
+    virtual QString structIDToFtString(quint32 nID);
+    virtual quint32 ftStringToStructID(const QString &sFtString);
     virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
     virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues,
                                 PDSTRUCT *pPdStruct);

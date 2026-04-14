@@ -143,6 +143,16 @@ QString EXAMPLE_CLASS::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_EXAMPLE_CLASS_STRUCTID, sizeof(_TABLE_EXAMPLE_CLASS_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QString EXAMPLE_CLASS::structIDToFtString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToFtString(nID, _TABLE_EXAMPLE_CLASS_STRUCTID, sizeof(_TABLE_EXAMPLE_CLASS_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+quint32 EXAMPLE_CLASS::ftStringToStructID(const QString &sFtString)
+{
+    return XCONVERT_ftStringToId(sFtString, _TABLE_EXAMPLE_CLASS_STRUCTID, sizeof(_TABLE_EXAMPLE_CLASS_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
 qint32 EXAMPLE_CLASS::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues,
                                    PDSTRUCT *pPdStruct)
 {

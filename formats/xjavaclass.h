@@ -117,6 +117,8 @@ public:
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct = nullptr) override;
     virtual QString getMIMEString() override;
     virtual QString structIDToString(quint32 nID) override;
+    virtual QString structIDToFtString(quint32 nID) override;
+    virtual quint32 ftStringToStructID(const QString &sFtString) override;
 
     virtual QList<MAPMODE> getMapModesList() override;
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;

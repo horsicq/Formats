@@ -1461,6 +1461,30 @@ QString XLE::structIDToString(quint32 nID)
     return QString("IMAGE_VXD_HEADER");
 }
 
+QString XLE::structIDToFtString(quint32 nID)
+{
+    return structIDToString(nID).toUpper().remove(" " ).remove("-");
+}
+
+quint32 XLE::ftStringToStructID(const QString &sFtString)
+{
+    QString sNormalized = sFtString.toUpper().remove(" " ).remove("-");
+
+    if (sNormalized == "IMAGE_DOS_HEADER") {
+        return XMSDOS::STRUCTID_IMAGE_DOS_HEADER;
+    }
+
+    if (sNormalized == "IMAGE_DOS_HEADEREX") {
+        return XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX;
+    }
+
+    if (sNormalized == "IMAGE_VXD_HEADER") {
+        return 1;
+    }
+
+    return 0;
+}
+
 QList<XBinary::DATA_HEADER> XLE::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 {
     QList<DATA_HEADER> listResult;

@@ -388,6 +388,16 @@ QString XTTF::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XTTF_STRUCTID, sizeof(_TABLE_XTTF_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QString XTTF::structIDToFtString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XTTF_STRUCTID, sizeof(_TABLE_XTTF_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+quint32 XTTF::ftStringToStructID(const QString &sFtString)
+{
+    return XCONVERT_ftStringToId(sFtString, _TABLE_XTTF_STRUCTID, sizeof(_TABLE_XTTF_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
 XTTF::TTF_TABLE_RECORD XTTF::getTableRecord(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables)
 {
     TTF_TABLE_RECORD result = {};

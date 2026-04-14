@@ -264,6 +264,16 @@ QString XXM::structIDToString(quint32 nID)
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XXM_STRUCTID, sizeof(_TABLE_XXM_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QString XXM::structIDToFtString(quint32 nID)
+{
+    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XXM_STRUCTID, sizeof(_TABLE_XXM_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
+quint32 XXM::ftStringToStructID(const QString &sFtString)
+{
+    return XCONVERT_ftStringToId(sFtString, _TABLE_XXM_STRUCTID, sizeof(_TABLE_XXM_STRUCTID) / sizeof(XBinary::XCONVERT));
+}
+
 qint32 XXM::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, void *pUserData,
                          PDSTRUCT *pPdStruct)
 {
