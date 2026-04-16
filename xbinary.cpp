@@ -140,6 +140,7 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_BZIP2, "Bzip2", QString("Bzip2")},
     {XBinary::HANDLE_METHOD_LZMA, "LZMA", QString("LZMA")},
     {XBinary::HANDLE_METHOD_LZMA2, "LZMA2", QString("LZMA2")},
+    {XBinary::HANDLE_METHOD_XZ, "XZ", QString("XZ")},
     {XBinary::HANDLE_METHOD_LZW_PDF, "LZW_PDF", QString("LZW PDF")},
     {XBinary::HANDLE_METHOD_ASCII85, "ASCII85", QString("ASCII85 PDF")},
     {XBinary::HANDLE_METHOD_PPMD7, "PPMD7", QString("PPMD7")},
@@ -166,20 +167,29 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_REDUCE_2, "Reduce_2", QString("Reduce 2")},
     {XBinary::HANDLE_METHOD_REDUCE_3, "Reduce_3", QString("Reduce 3")},
     {XBinary::HANDLE_METHOD_REDUCE_4, "Reduce_4", QString("Reduce 4")},
-    {XBinary::HANDLE_METHOD_ZIP_AES, "ZIP_AES", QString("7Z AES")},
+    {XBinary::HANDLE_METHOD_ZIP_AES, "ZIP_AES", QString("ZIP AES")},
     {XBinary::HANDLE_METHOD_ZIP_AES128, "ZIP_AES128", QString("ZIP AES128")},
-    {XBinary::HANDLE_METHOD_ZIP_AES192, "ZIP_AES128", QString("ZIP AES128")},
+    {XBinary::HANDLE_METHOD_ZIP_AES192, "ZIP_AES192", QString("ZIP AES192")},
     {XBinary::HANDLE_METHOD_ZIP_AES256, "ZIP_AES256", QString("ZIP AES256")},
     {XBinary::HANDLE_METHOD_7Z_AES, "7Z_AES", QString("7Z AES")},
+    {XBinary::HANDLE_METHOD_RAR5_AES, "RAR5_AES", QString("RAR5 AES")},
     {XBinary::HANDLE_METHOD_ZIPCRYPTO, "ZIP_Crypto", QString("ZIP Crypto")},
     {XBinary::HANDLE_METHOD_ZLIB, "ZLIB", QString("ZLIB")},
     {XBinary::HANDLE_METHOD_MSZIP_CAB, "MSZIP_CAB", QString("MSZIP CAB")},
     {XBinary::HANDLE_METHOD_STORE_CAB, "STORE_CAB", QString("STORE CAB")},
     {XBinary::HANDLE_METHOD_LZX_CAB, "LZX_CAB", QString("LZX CAB")},
+    {XBinary::HANDLE_METHOD_BCJ, "BCJ", QString("BCJ")},
+    {XBinary::HANDLE_METHOD_BCJ2, "BCJ2", QString("BCJ2")},
+    {XBinary::HANDLE_METHOD_ARM64_BCJ, "ARM64_BCJ", QString("ARM64 BCJ")},
     {XBinary::HANDLE_METHOD_ZSTD, "ZSTD", QString("Zstandard")},
     {XBinary::HANDLE_METHOD_LZIP, "LZIP", QString("LZIP")},
     {XBinary::HANDLE_METHOD_LZOP, "LZOP", QString("LZOP")},
     {XBinary::HANDLE_METHOD_COMPRESS, "COMPRESS", QString("Compress (LZW)")},
+    {XBinary::HANDLE_METHOD_ARJ, "ARJ", QString("ARJ")},
+    {XBinary::HANDLE_METHOD_ARJ_FASTEST, "ARJ_FASTEST", QString("ARJ Fastest")},
+    {XBinary::HANDLE_METHOD_BROTLI, "BROTLI", QString("Brotli")},
+    {XBinary::HANDLE_METHOD_ACE, "ACE", QString("ACE")},
+    {XBinary::HANDLE_METHOD_ACE_DELTA, "ACE_DELTA", QString("ACE Delta")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -363,6 +373,9 @@ QString XBinary::XCONVERT_idToTransString(quint32 nID, XCONVERT *pRecords, qint3
 
     if (sResult == "") {
         sResult = tr("Unknown");
+#ifdef QT_DEBUG
+        qDebug() << "Unknown XBinary::XCONVERT_idToTransString" << nID;
+#endif
     }
 
     return sResult;
@@ -381,6 +394,9 @@ QString XBinary::XCONVERT_idToSetString(quint32 nID, XCONVERT *pRecords, qint32 
 
     if (sResult == "") {
         sResult = "Unknown";
+#ifdef QT_DEBUG
+        qDebug() << "Unknown XBinary::XCONVERT_idToSetString" << nID;
+#endif
     }
 
     return sResult;
@@ -405,6 +421,9 @@ quint32 XBinary::XCONVERT_ftStringToId(const QString &sString, XCONVERT *pRecord
 #ifdef QT_DEBUG
     if (nResult == 0) {
         qDebug() << "XCONVERT_ftStringToId: Not found" << sString;
+#ifdef QT_DEBUG
+        qDebug() << "Unknown XBinary::XCONVERT_ftStringToId" << sString;
+#endif
     }
 #endif
 
@@ -452,6 +471,9 @@ QString XBinary::XIDSTRING_idToString(quint64 nID, XIDSTRING *pRecords, qint32 n
 
     if (sResult == "") {
         sResult = "Unknown";
+#ifdef QT_DEBUG
+        qDebug() << "Unknown XBinary::XIDSTRING_idToString" << nID;
+#endif
     }
 
     return sResult;
@@ -1445,7 +1467,7 @@ void XBinary::setDevice(QIODevice *pDevice)
         QBuffer *pBuffer = dynamic_cast<QBuffer *>(pDevice);
 
         if (pBuffer) {
-            m_pConstMemory = pBuffer->data().data();
+            m_pConstMemory = pBuffer->buffer().constData();
         } else {
             m_pConstMemory = (const char *)(pDevice->property("Memory").toULongLong());
         }
@@ -2378,7 +2400,7 @@ void XBinary::findFiles(const QString &sDirectoryName, XBinary::FFOPTIONS *pFFOp
     }
 }
 
-void XBinary::findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames)
+void XBinary::findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames, PDSTRUCT *pPdStruct)
 {
     QFileInfo fi(sDirectoryName);
 
@@ -2391,11 +2413,11 @@ void XBinary::findFiles(const QString &sDirectoryName, QList<QString> *pListFile
 
         qint32 nNumberOfFiles = eil.count();
 
-        for (qint32 i = 0; i < nNumberOfFiles; i++) {
+        for (qint32 i = 0; (i < nNumberOfFiles) && isPdStructNotCanceled(pPdStruct); i++) {
             QString sFN = eil.at(i).fileName();
 
             if ((sFN != ".") && (sFN != "..")) {
-                findFiles(eil.at(i).absoluteFilePath(), pListFileNames);
+                findFiles(eil.at(i).absoluteFilePath(), pListFileNames, pPdStruct);
             }
         }
     }
@@ -16747,12 +16769,11 @@ QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
         QBuffer *pBuffer = new QBuffer();
 
         if (pBuffer->open(QIODevice::ReadWrite)) {
-            QByteArray ba;
-            ba.resize(nSize);
+            QByteArray ba(nSize, '\0');
             pBuffer->write(ba);
             pBuffer->seek(0);  // FIX: Reset position to beginning after pre-allocating
             pResult = pBuffer;
-            pResult->setProperty("Memory", (quint64)ba.data());
+            pResult->setProperty("Memory", (quint64)pBuffer->buffer().constData());
         } else {
             delete pBuffer;
         }

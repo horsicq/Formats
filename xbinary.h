@@ -1360,7 +1360,7 @@ public:
     };
 
     static void findFiles(const QString &sDirectoryName, FFOPTIONS *pFFOption, qint32 nLevel = 0);
-    static void findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames);
+    static void findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames, PDSTRUCT *pPdStruct = nullptr);
     static void findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct = nullptr);
 
     static qint32 getNumberOfFiles(const QString &sDirectoryName, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct = nullptr);
