@@ -1104,6 +1104,11 @@ public:
         QString sGUID;
     };
 
+    struct KeyValueItem {
+        QString key;
+        QVariant value;
+    };
+
     enum DRF {
         DRF_UNKNOWN = 0,
         DRF_SIZE = 0x00000001,

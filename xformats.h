@@ -173,6 +173,15 @@ public:
     static bool isArchive(XBinary::FT fileType);
     static bool isExecutable(XBinary::FT fileType);
     static QString getXFHeaderStructName(const XBinary::XFHEADER &header);
+
+    static QString toJSON(const QVector<XBinary::KeyValueItem> &listItems);
+    static QString toXML(const QVector<XBinary::KeyValueItem> &listItems);
+    static QString toCSV(const QVector<XBinary::KeyValueItem> &listItems);
+    static QString toTSV(const QVector<XBinary::KeyValueItem> &listItems);
+    static QString toFormattedString(const QVector<XBinary::KeyValueItem> &listItems);
+
+    static QVector<XBinary::KeyValueItem> getEntropy(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static QVector<XBinary::KeyValueItem> getFileInfo(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static XBinary::XFHEADER getXFHeaderFromStructName(QIODevice *pDevice, const QString &sStruct, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                  XBinary::PDSTRUCT *pPdStruct = nullptr);
 

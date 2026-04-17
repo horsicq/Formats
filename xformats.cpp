@@ -19,6 +19,9 @@
  * SOFTWARE.
  */
 #include "xformats.h"
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 XFormats::XFormats(QObject *pParent) : XThreadObject(pParent)
 {
@@ -1397,7 +1400,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             if (XText::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_TEXT);
                 XText xtext(pDevice);
-                XText::TEXT_TYPE textType = xtext.detectTextType();
+                XText::TEXT_TYPE textType = xtext.detectTextType(pPdStruct);
 
                 if (textType == XText::TEXT_TYPE_UTF8 || textType == XText::TEXT_TYPE_UTF8_BOM) {
                     stResult.insert(XBinary::FT_UTF8);
@@ -1839,3 +1842,140 @@ XBinary::DM XFormats::setDisasmModeComboBox(XBinary::DM disasmMode, QComboBox *p
     return result;
 }
 #endif
+
+QString XFormats::toJSON(const QVector<XBinary::KeyValueItem> &listItems)
+{
+    QJsonObject jsonObject;
+    qint32 nCount = listItems.count();
+    for (qint32 i = 0; i < nCount; i++) {
+        jsonObject[listItems.at(i).key] = QJsonValue::fromVariant(listItems.at(i).value);
+    }
+    return QString(QJsonDocument(jsonObject).toJson(QJsonDocument::Compact));
+}
+
+QString XFormats::toXML(const QVector<XBinary::KeyValueItem> &listItems)
+{
+    QString sResult;
+    QXmlStreamWriter xml(&sResult);
+    xml.setAutoFormatting(true);
+    xml.writeStartDocument();
+    xml.writeStartElement("items");
+    qint32 nCount = listItems.count();
+    for (qint32 i = 0; i < nCount; i++) {
+        xml.writeTextElement(listItems.at(i).key, listItems.at(i).value.toString());
+    }
+    xml.writeEndElement();
+    xml.writeEndDocument();
+    return sResult;
+}
+
+QString XFormats::toCSV(const QVector<XBinary::KeyValueItem> &listItems)
+{
+    QStringList keys, values;
+    qint32 nCount = listItems.count();
+    for (qint32 i = 0; i < nCount; i++) {
+        keys.append(listItems.at(i).key);
+        values.append(listItems.at(i).value.toString());
+    }
+    return keys.join(',') + "\n" + values.join(',') + "\n";
+}
+
+QString XFormats::toTSV(const QVector<XBinary::KeyValueItem> &listItems)
+{
+    QStringList keys, values;
+    qint32 nCount = listItems.count();
+    for (qint32 i = 0; i < nCount; i++) {
+        keys.append(listItems.at(i).key);
+        values.append(listItems.at(i).value.toString());
+    }
+    return keys.join('\t') + "\n" + values.join('\t') + "\n";
+}
+
+QString XFormats::toFormattedString(const QVector<XBinary::KeyValueItem> &listItems)
+{
+    QString sResult;
+    qint32 nCount = listItems.count();
+    for (qint32 i = 0; i < nCount; i++) {
+        sResult += QString("%1: %2\n").arg(listItems.at(i).key, listItems.at(i).value.toString());
+    }
+    return sResult;
+}
+
+QVector<XBinary::KeyValueItem> XFormats::getEntropy(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+{
+    QVector<XBinary::KeyValueItem> result;
+
+    XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    XBinary binary(pDevice);
+
+    result.append({"Total", binary.getBinaryStatus(XBinary::BSTATUS_ENTROPY, 0, -1, pPdStruct)});
+
+    XBinary::FT fileType = getPrefFileType(pDevice, true, pPdStruct);
+    XBinary::_MEMORY_MAP memoryMap = getMemoryMap(fileType, XBinary::MAPMODE_UNKNOWN, pDevice, bIsImage, nModuleAddress, pPdStruct);
+
+    qint32 nNumberOfRecords = memoryMap.listRecords.count();
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        const XBinary::_MEMORY_RECORD &record = memoryMap.listRecords.at(i);
+
+        if (record.bIsVirtual || record.nSize <= 0) {
+            continue;
+        }
+
+        double dEntropy = binary.getBinaryStatus(XBinary::BSTATUS_ENTROPY, record.nOffset, record.nSize, pPdStruct);
+
+        QString sKey = record.sName.isEmpty() ? QString("Record_%1").arg(i) : record.sName;
+        result.append({sKey, dEntropy});
+    }
+
+    return result;
+}
+
+QVector<XBinary::KeyValueItem> XFormats::getFileInfo(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+{
+    QVector<XBinary::KeyValueItem> result;
+
+    XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    XBinary::FT fileType = getPrefFileType(pDevice, true, pPdStruct);
+    XBinary *pBinary = getClass(fileType, pDevice, bIsImage, nModuleAddress);
+
+    if (pBinary) {
+        XBinary::FILEFORMATINFO info = pBinary->getFileFormatInfo(pPdStruct);
+
+        QString sValue;
+
+        sValue = XBinary::fileTypeIdToString(info.fileType);       if (!sValue.isEmpty()) result.append({"FileType",          sValue});
+        sValue = XBinary::bytesCountToString(info.nSize);          if (!sValue.isEmpty()) result.append({"Size",              sValue});
+        sValue = info.sExt;                                        if (!sValue.isEmpty()) result.append({"Ext",               sValue});
+        sValue = info.sVersion;                                    if (!sValue.isEmpty()) result.append({"Version",           sValue});
+        sValue = info.sInfo;                                       if (!sValue.isEmpty()) result.append({"Info",              sValue});
+        sValue = info.sType;                                       if (!sValue.isEmpty()) result.append({"Type",              sValue});
+        sValue = info.sArch;                                       if (!sValue.isEmpty()) result.append({"Arch",              sValue});
+        sValue = XBinary::modeIdToString(info.mode);               if (!sValue.isEmpty()) result.append({"Mode",              sValue});
+        sValue = XBinary::endianToString(info.endian);             if (!sValue.isEmpty()) result.append({"Endian",            sValue});
+        sValue = info.sMIME;                                       if (!sValue.isEmpty()) result.append({"MIME",              sValue});
+        sValue = XBinary::osNameIdToString(info.osName);           if (!sValue.isEmpty()) result.append({"OsName",            sValue});
+        sValue = info.sOsVersion;                                  if (!sValue.isEmpty()) result.append({"OsVersion",         sValue});
+        sValue = info.sOsBuild;                                    if (!sValue.isEmpty()) result.append({"OsBuild",           sValue});
+        sValue = XBinary::boolToString(info.bIsVM);                if (!sValue.isEmpty()) result.append({"IsVM",              sValue});
+        sValue = XBinary::boolToString(info.bIsEncrypted);         if (!sValue.isEmpty()) result.append({"IsEncrypted",       sValue});
+        sValue = info.sCompresionMethod;                           if (!sValue.isEmpty()) result.append({"CompressionMethod", sValue});
+
+        sValue = XBinary::getHash(XBinary::HASH_MD5, pDevice, pPdStruct);
+        if (!sValue.isEmpty()) result.append({"MD5", sValue});
+
+        sValue = QString::number(pBinary->getBinaryStatus(XBinary::BSTATUS_ENTROPY, 0, -1, pPdStruct), 'f', 4);
+        if (!sValue.isEmpty()) result.append({"Entropy", sValue});
+
+        delete pBinary;
+    }
+
+    return result;
+}
