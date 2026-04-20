@@ -149,7 +149,7 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
             partBss.nFileOffset = -1;
             partBss.nFileSize = header.nBssSize;
             partBss.nVirtualAddress = getModuleAddress() + header.nTextSize + header.nDataSize;
-            partBss.sName = tr("BSS");
+            partBss.sName = QString("BSS");
             listResult.append(partBss);
         }
     }

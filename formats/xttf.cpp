@@ -263,7 +263,7 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             memHeader.nAddress = -1;
             memHeader.nSize = nHeaderSize;
             memHeader.filePart = FILEPART_HEADER;
-            memHeader.sName = tr("Header + Table Directory");
+            memHeader.sName = tr("Header") + QString(" + ") + tr("Table Directory");
             result.listRecords.append(memHeader);
         }
 

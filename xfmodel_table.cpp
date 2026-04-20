@@ -239,7 +239,7 @@ QVariant XFModel_table::headerData(int section, Qt::Orientation orientation, int
             COLUMN_ENTRY entry = m_listColumnMap.at(section);
 
             if (entry.columnEntryType == CET_NUMBER) {
-                result = tr("#");
+                result = QString("#");
             } else if (entry.columnEntryType == CET_NAME) {
                 result = tr("Name");
             } else if (entry.columnEntryType == CET_OFFSET) {

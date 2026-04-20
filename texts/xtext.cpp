@@ -82,7 +82,7 @@ XBinary::_MEMORY_MAP XText::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         _MEMORY_RECORD recordBOM = {};
         recordBOM.nIndex = nIndex++;
         recordBOM.filePart = FILEPART_HEADER;
-        recordBOM.sName = tr("BOM");
+        recordBOM.sName = QString("BOM");
         recordBOM.nOffset = 0;
         recordBOM.nSize = nBOMSize;
         recordBOM.nAddress = -1;

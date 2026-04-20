@@ -147,11 +147,11 @@ QVariant XFTreeModel::data(const QModelIndex &index, int role) const
             }
         } else if (nColumn == COLUMN_TYPE) {
             if (pItem->xfHeader.xfType == XBinary::XFTYPE_HEADER) {
-                result = tr("HEADER");
+                result = QString("HEADER");
             } else if (pItem->xfHeader.xfType == XBinary::XFTYPE_TABLE) {
                 result = tr("TABLE");
             } else {
-                result = tr("UNKNOWN");
+                result = tr("Unknown");
             }
         } else if (nColumn == COLUMN_OFFSET) {
             result = XBinary::valueToHexEx(pItem->xfHeader.xLoc.nLocation);

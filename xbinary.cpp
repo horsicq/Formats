@@ -13429,7 +13429,7 @@ QString XBinary::syntaxIdToString(SYNTAX syntax)
 
     switch (syntax) {
         case SYNTAX_DEFAULT: sResult = tr("Default"); break;
-        case SYNTAX_ARM: sResult = tr("ARM"); break;
+        case SYNTAX_ARM: sResult = QString("ARM"); break;
         case SYNTAX_ATT: sResult = QString("ATT"); break;
         case SYNTAX_AMD: sResult = QString("AMD"); break;
         case SYNTAX_INTEL: sResult = QString("INTEL"); break;
