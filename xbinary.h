@@ -42,10 +42,21 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include <QtEndian>
-#if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
+
+#ifndef QT_VERSION_MAJOR
+#define QT_VERSION_MAJOR ((QT_VERSION >> 16) & 0xff)
+#endif
+#ifndef QT_VERSION_MINOR
+#define QT_VERSION_MINOR ((QT_VERSION >> 8) & 0xff)
+#endif
+#ifndef QT_VERSION_PATCH
+#define QT_VERSION_PATCH (QT_VERSION & 0xff)
+#endif
+
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0)) || defined(QT_CORE5COMPAT_LIB)
 #include <QTextCodec>  // Qt5 Compat
 #endif
-#if (QT_VERSION_MAJOR < 5)  // TODO Check
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include <QRegExp>
 #else
 #include <QRegularExpression>
@@ -56,7 +67,7 @@
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
 #include <QRandomGenerator>
-#elif (QT_VERSION_MAJOR >= 6)  // TODO Check
+#elif QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 #include <QRandomGenerator>
 #endif
 

@@ -5623,7 +5623,9 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
     if (ssOptions.sMask != "") {
         pRegex = new QRegularExpression(ssOptions.sMask);
         // Optimize regex for repeated matching
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         pRegex->optimize();
+#endif
     }
 
     qint32 nSimdThreshold = _x_get_simd_threshold();
@@ -5952,7 +5954,9 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
     QRegularExpression *pRegex = nullptr;
     if (ssOptions.sMask != "") {
         pRegex = new QRegularExpression(ssOptions.sMask);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         pRegex->optimize();
+#endif
     }
 
     bool bIsStart = true;  // Track if we're at the start of processing
