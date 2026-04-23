@@ -113,7 +113,7 @@ public:
     };
 #pragma pack(pop)
 
-    XXM(QIODevice *pDevice = nullptr);
+    explicit XXM(QIODevice *pDevice = nullptr);
     ~XXM();
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;

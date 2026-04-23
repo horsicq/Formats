@@ -38,6 +38,9 @@ public:
     qint64 getFileFormatSize(PDSTRUCT *pPdStruct) override;
     FT getFileType() override;
     QString getMIMEString() override;
+
+    virtual QList<QString> getSearchSignatures() override;
+    virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
 };
 
 #endif  // XWAV_H

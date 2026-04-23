@@ -241,7 +241,7 @@ QList<XBinary::FPART> XXM::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
 
     if (nFileParts & FILEPART_OVERLAY) {
         qint64 maxEnd = 0;
-        for (int i = 0; i < list.size(); ++i) {
+        for (qint32 i = 0; i < list.size(); ++i) {
             const FPART &p = list.at(i);
             maxEnd = qMax(maxEnd, p.nFileOffset + p.nFileSize);
         }

@@ -20,7 +20,7 @@
  */
 #include "xmp3.h"
 
-XBinary::XCONVERT _TABLE_XMP3_STRUCTID[] = {
+static XBinary::XCONVERT _TABLE_XMP3_STRUCTID[] = {
     {XMP3::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
 };
 
@@ -53,7 +53,7 @@ bool XMP3::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XMP3 mp3(pDevice);
 
-    return mp3.isValid();
+    return mp3.isValid(pPdStruct);
 }
 
 QString XMP3::getFileFormatExt()
@@ -397,7 +397,7 @@ QList<XBinary::FPART> XMP3::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
 
     if (nFileParts & FILEPART_OVERLAY) {
         qint64 maxEnd = 0;
-        for (int i = 0; i < list.size(); ++i) {
+        for (qint32 i = 0; i < list.size(); ++i) {
             const FPART &p = list.at(i);
             maxEnd = qMax(maxEnd, p.nFileOffset + p.nFileSize);
         }
