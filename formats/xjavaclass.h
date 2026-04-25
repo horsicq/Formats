@@ -130,10 +130,8 @@ public:
     static QString _getJDKVersion(quint16 nMajor, quint16 nMinor);
 
 private:
-qint32 _read_attribute_info(qint64 nOffset, attribute_info *pAttributeInfo);
+    qint32 _read_attribute_info(qint64 nOffset, attribute_info *pAttributeInfo);
     qint32 _read_record_info(qint64 nOffset, record_info *pRecordInfo);
-
 };
 
 #endif  // XJAVACLASS_H
-

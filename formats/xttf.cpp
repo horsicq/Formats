@@ -479,4 +479,3 @@ QMap<quint64, QString> XTTF::getHeaderVersionsS()
 
     return mapResult;
 }
-

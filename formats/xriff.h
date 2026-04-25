@@ -56,8 +56,6 @@ public:
     virtual quint32 ftStringToStructID(const QString &sFtString) override;
     virtual QList<QString> getSearchSignatures() override;
     virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
-
 };
 
 #endif  // XRIFF_H
-

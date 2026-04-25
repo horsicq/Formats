@@ -358,4 +358,3 @@ XBinary *XBMP::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
     return new XBMP(pDevice);
 }
-

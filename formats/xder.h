@@ -56,4 +56,3 @@ private:
 };
 
 #endif  // XDER_H
-

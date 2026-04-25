@@ -1006,7 +1006,7 @@ public:
         FT fileType;
         STRUCTID structID;
         XLOC xLoc;
-        qint64 nSize; // Optional
+        qint64 nSize;  // Optional
         XFTYPE xfType;
         bool bIsParentNeeded;           // if we need parent struct to calculate the header right way
         QList<XFRECORD> listFields;     // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
@@ -1021,7 +1021,7 @@ public:
         FT fileType;
         quint32 nStructID;
         XLOC xLoc;
-        qint64 nSize; // Optional, if 0 => calculate by parent struct
+        qint64 nSize;  // Optional, if 0 => calculate by parent struct
         XFTYPE xfType;
         bool bIsParent;
         qint32 nCount;

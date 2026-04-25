@@ -477,4 +477,3 @@ XBinary *XJpeg::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
     return new XJpeg(pDevice);
 }
-

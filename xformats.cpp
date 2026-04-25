@@ -1382,7 +1382,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
                 stResult.insert(xandroid.getFileType());  // FT_ANDROIDXML or FT_ANDROIDASRC
             } else
 #endif
-            if (XDER::isValid(pDevice, pPdStruct)) {
+                if (XDER::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_DOCUMENT);
                 stResult.insert(XBinary::FT_DER);
             } else if (XJavaClass::isValid(pDevice, pPdStruct)) {
@@ -1951,22 +1951,38 @@ QVector<XBinary::KeyValueItem> XFormats::getFileInfo(QIODevice *pDevice, bool bI
 
         QString sValue;
 
-        sValue = XBinary::fileTypeIdToString(info.fileType);       if (!sValue.isEmpty()) result.append({"FileType",          sValue});
-        sValue = XBinary::bytesCountToString(info.nSize);          if (!sValue.isEmpty()) result.append({"Size",              sValue});
-        sValue = info.sExt;                                        if (!sValue.isEmpty()) result.append({"Ext",               sValue});
-        sValue = info.sVersion;                                    if (!sValue.isEmpty()) result.append({"Version",           sValue});
-        sValue = info.sInfo;                                       if (!sValue.isEmpty()) result.append({"Info",              sValue});
-        sValue = info.sType;                                       if (!sValue.isEmpty()) result.append({"Type",              sValue});
-        sValue = info.sArch;                                       if (!sValue.isEmpty()) result.append({"Arch",              sValue});
-        sValue = XBinary::modeIdToString(info.mode);               if (!sValue.isEmpty()) result.append({"Mode",              sValue});
-        sValue = XBinary::endianToString(info.endian);             if (!sValue.isEmpty()) result.append({"Endian",            sValue});
-        sValue = info.sMIME;                                       if (!sValue.isEmpty()) result.append({"MIME",              sValue});
-        sValue = XBinary::osNameIdToString(info.osName);           if (!sValue.isEmpty()) result.append({"OsName",            sValue});
-        sValue = info.sOsVersion;                                  if (!sValue.isEmpty()) result.append({"OsVersion",         sValue});
-        sValue = info.sOsBuild;                                    if (!sValue.isEmpty()) result.append({"OsBuild",           sValue});
-        sValue = XBinary::boolToString(info.bIsVM);                if (!sValue.isEmpty()) result.append({"IsVM",              sValue});
-        sValue = XBinary::boolToString(info.bIsEncrypted);         if (!sValue.isEmpty()) result.append({"IsEncrypted",       sValue});
-        sValue = info.sCompresionMethod;                           if (!sValue.isEmpty()) result.append({"CompressionMethod", sValue});
+        sValue = XBinary::fileTypeIdToString(info.fileType);
+        if (!sValue.isEmpty()) result.append({"FileType", sValue});
+        sValue = XBinary::bytesCountToString(info.nSize);
+        if (!sValue.isEmpty()) result.append({"Size", sValue});
+        sValue = info.sExt;
+        if (!sValue.isEmpty()) result.append({"Ext", sValue});
+        sValue = info.sVersion;
+        if (!sValue.isEmpty()) result.append({"Version", sValue});
+        sValue = info.sInfo;
+        if (!sValue.isEmpty()) result.append({"Info", sValue});
+        sValue = info.sType;
+        if (!sValue.isEmpty()) result.append({"Type", sValue});
+        sValue = info.sArch;
+        if (!sValue.isEmpty()) result.append({"Arch", sValue});
+        sValue = XBinary::modeIdToString(info.mode);
+        if (!sValue.isEmpty()) result.append({"Mode", sValue});
+        sValue = XBinary::endianToString(info.endian);
+        if (!sValue.isEmpty()) result.append({"Endian", sValue});
+        sValue = info.sMIME;
+        if (!sValue.isEmpty()) result.append({"MIME", sValue});
+        sValue = XBinary::osNameIdToString(info.osName);
+        if (!sValue.isEmpty()) result.append({"OsName", sValue});
+        sValue = info.sOsVersion;
+        if (!sValue.isEmpty()) result.append({"OsVersion", sValue});
+        sValue = info.sOsBuild;
+        if (!sValue.isEmpty()) result.append({"OsBuild", sValue});
+        sValue = XBinary::boolToString(info.bIsVM);
+        if (!sValue.isEmpty()) result.append({"IsVM", sValue});
+        sValue = XBinary::boolToString(info.bIsEncrypted);
+        if (!sValue.isEmpty()) result.append({"IsEncrypted", sValue});
+        sValue = info.sCompresionMethod;
+        if (!sValue.isEmpty()) result.append({"CompressionMethod", sValue});
 
         sValue = XBinary::getHash(XBinary::HASH_MD5, pDevice, pPdStruct);
         if (!sValue.isEmpty()) result.append({"MD5", sValue});

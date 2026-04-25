@@ -79,9 +79,7 @@ public:
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 
 private:
-qint32 getBaseTypeSize(quint16 nType);
-
+    qint32 getBaseTypeSize(quint16 nType);
 };
 
 #endif  // XTIFF_H
-

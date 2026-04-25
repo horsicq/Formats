@@ -142,4 +142,3 @@ private:
 };
 
 #endif  // XPYC_H
-

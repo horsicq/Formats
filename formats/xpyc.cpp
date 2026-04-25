@@ -1118,4 +1118,3 @@ void XPYC::_parseVersionNumbers(const QString &sVersion, qint32 *pnMajor, qint32
         *pnMinor = nCurrentMinor;
     }
 }
-

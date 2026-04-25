@@ -542,4 +542,3 @@ QString XICC::_fourCCToString(quint32 nValue)
 
     return sResult;
 }
-

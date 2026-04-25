@@ -21,12 +21,8 @@
 #include "xdjvu.h"
 
 XBinary::XIDSTRING _TABLE_XDJVU_ImageTypes[] = {
-    {XDJVU::TYPE_UNKNOWN,      "UNKNOWN"},
-    {XDJVU::TYPE_SINGLE_PAGE,  "SINGLE_PAGE"},
-    {XDJVU::TYPE_MULTI_PAGE,   "MULTI_PAGE"},
-    {XDJVU::TYPE_MULTI_FILE,   "MULTI_FILE"},
-    {XDJVU::TYPE_THUMBNAILS,   "THUMBNAILS"},
-    {XDJVU::TYPE_SECURE,       "SECURE"},
+    {XDJVU::TYPE_UNKNOWN, "UNKNOWN"},       {XDJVU::TYPE_SINGLE_PAGE, "SINGLE_PAGE"}, {XDJVU::TYPE_MULTI_PAGE, "MULTI_PAGE"},
+    {XDJVU::TYPE_MULTI_FILE, "MULTI_FILE"}, {XDJVU::TYPE_THUMBNAILS, "THUMBNAILS"},   {XDJVU::TYPE_SECURE, "SECURE"},
 };
 
 const QString XDJVU::PREFIX_ImageType = "IMAGETYPE";
@@ -558,4 +554,3 @@ XBinary *XDJVU::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
     return new XDJVU(pDevice);
 }
-

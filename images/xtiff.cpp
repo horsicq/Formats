@@ -521,4 +521,3 @@ XBinary *XTiff::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
     return new XTiff(pDevice);
 }
-

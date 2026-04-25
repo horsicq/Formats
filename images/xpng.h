@@ -131,12 +131,10 @@ public:
                                 void *pUserData, PDSTRUCT *pPdStruct) override;
 
 private:
-CHUNK _readChunk(qint64 nOffset);
+    CHUNK _readChunk(qint64 nOffset);
     static bool _writeChunk(QIODevice *pDevice, const QString &sChunkType, const QByteArray &data);
     static QByteArray _compressData(const QByteArray &data);
     static QByteArray _convertImageData(const char *pData, qint32 nDataSize, quint32 nWidth, quint32 nHeight, COLOR_TYPE colorType, quint8 nBitDepth);
-
 };
 
 #endif  // XPNG_H
-

@@ -247,4 +247,3 @@ XBinary *XMP4::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
     return new XMP4(pDevice);
 }
-

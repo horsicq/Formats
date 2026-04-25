@@ -61,4 +61,3 @@ quint32 XWEBP::ftStringToStructID(const QString &sFtString)
 {
     return XCONVERT_ftStringToId(sFtString, _TABLE_XWEBP_STRUCTID, sizeof(_TABLE_XWEBP_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
-

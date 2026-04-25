@@ -278,4 +278,3 @@ XBinary *XRiff::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
     return new XRiff(pDevice);
 }
-

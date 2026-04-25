@@ -157,7 +157,7 @@ public:
                                                       bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
 
     static QList<XBinary::XFHEADER> getXFHeaders(QIODevice *pDevice, const QString &sTag, bool bIsImage = false, XADDR nModuleAddress = -1,
-                                                 XBinary::PDSTRUCT *pPdStruct = nullptr); // Obsolete
+                                                 XBinary::PDSTRUCT *pPdStruct = nullptr);  // Obsolete
 
     static QList<XBinary::FPART> getFileParts(XBinary::FT fileType, QIODevice *pDevice, quint32 nFileParts, qint32 nLimit = -1, bool bIsImage = false,
                                               XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
@@ -183,7 +183,7 @@ public:
     static QVector<XBinary::KeyValueItem> getEntropy(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QVector<XBinary::KeyValueItem> getFileInfo(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static XBinary::XFHEADER getXFHeaderFromStructName(QIODevice *pDevice, const QString &sStruct, bool bIsImage = false, XADDR nModuleAddress = -1,
-                                                 XBinary::PDSTRUCT *pPdStruct = nullptr);
+                                                       XBinary::PDSTRUCT *pPdStruct = nullptr);
 
 #ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra = false);

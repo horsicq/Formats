@@ -132,4 +132,3 @@ XDER::HEADER XDER::_getHeader(PDSTRUCT *pPdStruct)
 
     return result;
 }
-

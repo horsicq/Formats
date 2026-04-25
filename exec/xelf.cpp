@@ -1210,7 +1210,8 @@ QMap<quint64, QString> XELF::getIndentOsabisS()
 
 QMap<quint64, QString> XELF::getSectionTypes(const QString &sArch)
 {
-    QMap<quint64, QString> mapResult = XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_SectionTypes, sizeof(_TABLE_XELF_SectionTypes) / sizeof(XBinary::XIDSTRING), PREFIX_SHT);
+    QMap<quint64, QString> mapResult =
+        XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_SectionTypes, sizeof(_TABLE_XELF_SectionTypes) / sizeof(XBinary::XIDSTRING), PREFIX_SHT);
 
     XBinary::XIDSTRING *pArchTable = nullptr;
     qint32 nArchCount = 0;
@@ -1270,7 +1271,8 @@ QMap<quint64, QString> XELF::getSectionFlagsS()
 
 QMap<quint64, QString> XELF::getProgramTypes(qint32 nIndent, const QString &sArch)
 {
-    QMap<quint64, QString> mapResult = XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_ProgramTypes_Base, sizeof(_TABLE_XELF_ProgramTypes_Base) / sizeof(XBinary::XIDSTRING), PREFIX_PT);
+    QMap<quint64, QString> mapResult =
+        XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_ProgramTypes_Base, sizeof(_TABLE_XELF_ProgramTypes_Base) / sizeof(XBinary::XIDSTRING), PREFIX_PT);
 
     XBinary::XIDSTRING *pOsabiTable = _TABLE_XELF_ProgramTypes_GNU;
     qint32 nOsabiCount = sizeof(_TABLE_XELF_ProgramTypes_GNU) / sizeof(XBinary::XIDSTRING);
@@ -3767,7 +3769,8 @@ QList<XBinary::MAPMODE> XELF::getMapModesList()
 
 QMap<quint64, QString> XELF::getDynamicTags(const QString &sArch)
 {
-    QMap<quint64, QString> mapResult = XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_DynamicTags_Base, sizeof(_TABLE_XELF_DynamicTags_Base) / sizeof(XBinary::XIDSTRING), PREFIX_DT);
+    QMap<quint64, QString> mapResult =
+        XBinary::XIDSTRING_createMapPrefix(_TABLE_XELF_DynamicTags_Base, sizeof(_TABLE_XELF_DynamicTags_Base) / sizeof(XBinary::XIDSTRING), PREFIX_DT);
 
     XBinary::XIDSTRING *pArchTable = _TABLE_XELF_DynamicTags_SPARC;
     qint32 nArchCount = sizeof(_TABLE_XELF_DynamicTags_SPARC) / sizeof(XBinary::XIDSTRING);

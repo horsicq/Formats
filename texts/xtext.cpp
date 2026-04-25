@@ -518,4 +518,3 @@ qint64 XText::_countWords(const QString &text)
     // return text.split(QRegExp("\\s+"), Qt::SkipEmptyParts).count();
     return 0;
 }
-

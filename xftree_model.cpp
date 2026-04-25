@@ -445,13 +445,8 @@ void XFTreeModel::appendJSONLines(QStringList *pListLines, XBinary *pXBinary, TR
 void XFTreeModel::appendSVLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, QChar cSep)
 {
     QStringList fields;
-    fields << svQuote(getItemName(pXBinary, pItem), cSep)
-           << svQuote(getItemType(pItem), cSep)
-           << svQuote(getItemString(pXBinary, pItem), cSep)
-           << svQuote(getItemFileType(pItem), cSep)
-           << svQuote(getItemOffset(pItem), cSep)
-           << svQuote(getItemSize(pItem), cSep)
-           << svQuote(getItemRows(pItem), cSep);
+    fields << svQuote(getItemName(pXBinary, pItem), cSep) << svQuote(getItemType(pItem), cSep) << svQuote(getItemString(pXBinary, pItem), cSep)
+           << svQuote(getItemFileType(pItem), cSep) << svQuote(getItemOffset(pItem), cSep) << svQuote(getItemSize(pItem), cSep) << svQuote(getItemRows(pItem), cSep);
     pListLines->append(fields.join(cSep));
 
     for (qint32 i = 0; i < pItem->listChildren.count(); i++) {
@@ -497,10 +492,7 @@ void XFTreeModel::_toFormattedString(QString *pString, XBinary *pXBinary, TREEIT
 {
     QString sIndent;
     sIndent = sIndent.leftJustified(4 * (nLevel - 1), ' ');
-    pString->append(QString("%1%2 %3\n")
-                        .arg(sIndent)
-                        .arg(getItemName(pXBinary, pItem))
-                        .arg(getItemString(pXBinary, pItem)));
+    pString->append(QString("%1%2 %3\n").arg(sIndent).arg(getItemName(pXBinary, pItem)).arg(getItemString(pXBinary, pItem)));
 
     for (qint32 i = 0; i < pItem->listChildren.count(); i++) {
         _toFormattedString(pString, pXBinary, pItem->listChildren.at(i), nLevel + 1);

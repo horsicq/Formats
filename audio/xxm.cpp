@@ -553,4 +553,3 @@ XXM::SAMPLE_HEADER XXM::_read_SAMPLE_HEADER(qint64 nOffset)
 
     return hdr;
 }
-

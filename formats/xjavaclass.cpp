@@ -838,4 +838,3 @@ XBinary *XJavaClass::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nMo
 
     return new XJavaClass(pDevice);
 }
-

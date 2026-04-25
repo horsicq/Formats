@@ -1463,12 +1463,12 @@ QString XLE::structIDToString(quint32 nID)
 
 QString XLE::structIDToFtString(quint32 nID)
 {
-    return structIDToString(nID).toUpper().remove(" " ).remove("-");
+    return structIDToString(nID).toUpper().remove(" ").remove("-");
 }
 
 quint32 XLE::ftStringToStructID(const QString &sFtString)
 {
-    QString sNormalized = sFtString.toUpper().remove(" " ).remove("-");
+    QString sNormalized = sFtString.toUpper().remove(" ").remove("-");
 
     if (sNormalized == "IMAGE_DOS_HEADER") {
         return XMSDOS::STRUCTID_IMAGE_DOS_HEADER;

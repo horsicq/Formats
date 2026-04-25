@@ -657,4 +657,3 @@ XBinary *XAmigaHunk::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nMo
 
     return new XAmigaHunk(pDevice);
 }
-

@@ -55,9 +55,7 @@ public:
     virtual quint32 ftStringToStructID(const QString &sFtString) override;
 
 private:
-bool isTagValid(const QString &sTagName);
-
+    bool isTagValid(const QString &sTagName);
 };
 
 #endif  // XMP4_H
-

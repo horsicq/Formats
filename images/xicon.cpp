@@ -422,4 +422,3 @@ XBinary *XIcon::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
     return new XIcon(pDevice);
 }
-

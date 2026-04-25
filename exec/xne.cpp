@@ -57,12 +57,9 @@ XBinary::XIDSTRING _TABLE_XNE_ImageNEFlags[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XNE_ImageNEExetypes[] = {
-    {0x0000, "Unknown"},
-    {0x0001, "OS/2"},
-    {0x0002, "Windows"},
-    {0x0003, "European MS-DOS 4.x"},
-    {0x0004, "Windows 386"},
-    {0x0005, "BOSS (Borland Operating System Services)"},
+    {0x0000, "Unknown"},     {0x0001, "OS/2"},
+    {0x0002, "Windows"},     {0x0003, "European MS-DOS 4.x"},
+    {0x0004, "Windows 386"}, {0x0005, "BOSS (Borland Operating System Services)"},
 };
 
 XBinary::XIDSTRING _TABLE_XNE_ImageNEFlagsothers[] = {
