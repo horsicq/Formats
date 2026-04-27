@@ -38,6 +38,8 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/xbinary.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xbinary.h
     ${CMAKE_CURRENT_LIST_DIR}/xbinary_def.h
+    ${CMAKE_CURRENT_LIST_DIR}/xfilepart.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/xfilepart.h
     ${CMAKE_CURRENT_LIST_DIR}/subdevice.cpp
     ${CMAKE_CURRENT_LIST_DIR}/subdevice.h
     ${CMAKE_CURRENT_LIST_DIR}/xformats.cpp
@@ -80,6 +82,9 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/exec/xatarist.cpp
     ${CMAKE_CURRENT_LIST_DIR}/exec/xatarist.h
     ${CMAKE_CURRENT_LIST_DIR}/exec/xatarist_def.h
+    ${CMAKE_CURRENT_LIST_DIR}/exec/xcliassembly.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/exec/xcliassembly.h
+    ${CMAKE_CURRENT_LIST_DIR}/exec/xcliassembly_def.h
     ${CMAKE_CURRENT_LIST_DIR}/exec/xcom.cpp
     ${CMAKE_CURRENT_LIST_DIR}/exec/xcom.h
     ${CMAKE_CURRENT_LIST_DIR}/exec/xcom_def.h

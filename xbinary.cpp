@@ -2239,7 +2239,7 @@ QSet<XBinary::FT> XBinary::stringToFileTypes(const QString &sString)
     for (qint32 i = 0; i < nSize; i++) {
         const QChar c = sString.at(i);
 
-        if ((c == ',') || (c == ';') || (c == '|') || c.isSpace()) {
+        if (c == '|') {
             QString sToken = sCurrent.trimmed();
 
             if (!sToken.isEmpty()) {

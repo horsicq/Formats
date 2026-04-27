@@ -20,6 +20,52 @@
  */
 #include "xmach.h"
 
+namespace {
+template <typename T, int N>
+qint32 xmachCountOf(T (&)[N])
+{
+    return N;
+}
+
+template <int N>
+QMap<quint64, QString> xmachCreateMap(XBinary::XIDSTRING (&records)[N])
+{
+    return XBinary::XIDSTRING_createMap(records, xmachCountOf(records));
+}
+
+template <int N>
+QMap<quint64, QString> xmachCreateMapPrefix(XBinary::XIDSTRING (&records)[N], const QString &sPrefix)
+{
+    return XBinary::XIDSTRING_createMapPrefix(records, xmachCountOf(records), sPrefix);
+}
+
+const XMACH::COMMAND_RECORD *xmachFindCommandRecord(quint32 nCommandID, qint32 nIndex, const QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
+{
+    const XMACH::COMMAND_RECORD *pResult = nullptr;
+
+    if (pListCommandRecords && (nIndex >= 0)) {
+        qint32 nCurrentIndex = 0;
+        qint32 nNumberOfCommands = pListCommandRecords->count();
+
+        for (qint32 i = 0; i < nNumberOfCommands; i++) {
+            const XMACH::COMMAND_RECORD &record = pListCommandRecords->at(i);
+
+            if (record.nId == nCommandID) {
+                if (nCurrentIndex == nIndex) {
+                    pResult = &record;
+
+                    break;
+                }
+
+                nCurrentIndex++;
+            }
+        }
+    }
+
+    return pResult;
+}
+}  // namespace
+
 XBinary::XCONVERT _TABLE_XMACH_STRUCTID[] = {
     {XMACH::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XMACH::STRUCTID_mach_header, "mach_header", QString("mach_header")},
@@ -150,6 +196,93 @@ XBinary::XIDSTRING _TABLE_XMACH_LoadCommandTypes[] = {
     {0x80000034, "DYLD_CHAINED_FIXUPS"},
     {0x80000035, "FILESET_ENTRY"},
     {0x36, "ATOM_INFO"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_VMProtections[] = {
+    {0x1, "READ"},
+    {0x2, "WRITE"},
+    {0x4, "EXECUTE"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_SectionFlagsTypes[] = {
+    {0x00, "REGULAR"},
+    {0x01, "ZEROFILL"},
+    {0x02, "CSTRING_LITERALS"},
+    {0x03, "4BYTE_LITERALS"},
+    {0x04, "8BYTE_LITERALS"},
+    {0x05, "LITERAL_POINTERS"},
+    {0x06, "NON_LAZY_SYMBOL_POINTERS"},
+    {0x07, "LAZY_SYMBOL_POINTERS"},
+    {0x08, "SYMBOL_STUBS"},
+    {0x09, "MOD_INIT_FUNC_POINTERS"},
+    {0x0A, "MOD_TERM_FUNC_POINTERS"},
+    {0x0B, "COALESCED"},
+    {0x0C, "GB_ZEROFILL"},
+    {0x0D, "INTERPOSING"},
+    {0x0E, "16BYTE_LITERALS"},
+    {0x0F, "DTRACE_DOF"},
+    {0x10, "LAZY_DYLIB_SYMBOL_POINTERS"},
+    {0x11, "THREAD_LOCAL_REGULAR"},
+    {0x12, "THREAD_LOCAL_ZEROFILL"},
+    {0x13, "THREAD_LOCAL_VARIABLES"},
+    {0x14, "THREAD_LOCAL_VARIABLE_POINTERS"},
+    {0x15, "THREAD_LOCAL_INIT_FUNCTION_POINTERS"},
+    {0x16, "INIT_FUNC_OFFSETS"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_SectionAttributesUsr[] = {
+    {0x02000000, "DEBUG"},
+    {0x04000000, "SELF_MODIFYING_CODE"},
+    {0x08000000, "LIVE_SUPPORT"},
+    {0x10000000, "NO_DEAD_STRIP"},
+    {0x20000000, "STRIP_STATIC_SYMS"},
+    {0x40000000, "NO_TOC"},
+    {0x80000000, "PURE_INSTRUCTIONS"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_SectionAttributesSys[] = {
+    {0x00000100, "LOC_RELOC"},
+    {0x00000200, "EXT_RELOC"},
+    {0x00000400, "SOME_INSTRUCTIONS"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_DICEKinds[] = {
+    {0x00000001, "DATA"},
+    {0x00000002, "JUMP_TABLE8"},
+    {0x00000003, "JUMP_TABLE16"},
+    {0x00000004, "JUMP_TABLE32"},
+    {0x00000005, "ABS_JUMP_TABLE32"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_Platforms[] = {
+    {0, "UNKNOWN"},
+    {0xFFFFFFFF, "ANY"},
+    {1, "MACOS"},
+    {2, "IOS"},
+    {3, "TVOS"},
+    {4, "WATCHOS"},
+    {5, "BRIDGEOS"},
+    {6, "MACCATALYST"},
+    {7, "IOSSIMULATOR"},
+    {8, "TVOSSIMULATOR"},
+    {9, "WATCHOSSIMULATOR"},
+    {10, "DRIVERKIT"},
+    {11, "VISIONOS"},
+    {12, "VISIONOSSIMULATOR"},
+    {13, "FIRMWARE"},
+    {14, "SEPOS"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_BuildTools[] = {
+    {1, "CLANG"},
+    {2, "SWIFT"},
+    {3, "LD"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_DyldChainedImports[] = {
+    {1, "IMPORT"},
+    {2, "IMPORT_ADDEND"},
+    {3, "IMPORT_ADDEND64"},
 };
 
 // Xcode Toolchain Version History Table (1.0-2.x, Before iOS Support)
@@ -912,85 +1045,24 @@ XMACH_DEF::mach_header_64 XMACH::_read_mach_header_64(qint64 nOffset)
 
 QMap<quint64, QString> XMACH::getHeaderMagics()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0xfeedface, "MH_MAGIC");
-    mapResult.insert(0xcefaedfe, "MH_CIGAM");
-    mapResult.insert(0xfeedfacf, "MH_MAGIC_64");
-    mapResult.insert(0xcffaedfe, "MH_CIGAM_64");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_HeaderMagics, "MH_");
 }
 
 QMap<quint64, QString> XMACH::getHeaderMagicsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0xfeedface, "MAGIC");
-    mapResult.insert(0xcefaedfe, "CIGAM");
-    mapResult.insert(0xfeedfacf, "MAGIC_64");
-    mapResult.insert(0xcffaedfe, "CIGAM_64");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_HeaderMagics);
 }
 
 QMap<quint64, QString> XMACH::getHeaderCpuTypes()
 {
-    QMap<quint64, QString> mapResult;
     // https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h
     // https://github.com/apple-oss-distributions
-    mapResult.insert(1, "CPU_TYPE_VAX");
-    mapResult.insert(2, "CPU_TYPE_ROMP");
-    mapResult.insert(4, "CPU_TYPE_NS32032");
-    mapResult.insert(5, "CPU_TYPE_NS32332");
-    mapResult.insert(6, "CPU_TYPE_MC680x0");
-    mapResult.insert(7, "CPU_TYPE_I386");
-    mapResult.insert(0x1000007, "CPU_TYPE_X86_64");
-    mapResult.insert(8, "CPU_TYPE_MIPS");
-    mapResult.insert(9, "CPU_TYPE_NS32532");
-    mapResult.insert(0xB, "CPU_TYPE_HPPA");
-    mapResult.insert(0xC, "CPU_TYPE_ARM");
-    mapResult.insert(0x100000C, "CPU_TYPE_ARM64");
-    mapResult.insert(0x200000C, "CPU_TYPE_ARM64_32");
-    mapResult.insert(0xD, "CPU_TYPE_MC88000");
-    mapResult.insert(0xE, "CPU_TYPE_SPARC");
-    mapResult.insert(0xF, "CPU_TYPE_I860");
-    mapResult.insert(0x10, "CPU_TYPE_I860_LITTLE");
-    mapResult.insert(0x11, "CPU_TYPE_RS6000");
-    mapResult.insert(0x12, "CPU_TYPE_POWERPC");
-    mapResult.insert(0x1000012, "CPU_TYPE_POWERPC64");
-    mapResult.insert(255, "CPU_TYPE_VEO");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_HeaderCpuTypes, "CPU_TYPE_");
 }
 
 QMap<quint64, QString> XMACH::getHeaderCpuTypesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(1, "VAX");
-    mapResult.insert(2, "ROMP");
-    mapResult.insert(4, "NS32032");
-    mapResult.insert(5, "NS32332");
-    mapResult.insert(6, "MC680x0");
-    mapResult.insert(7, "I386");
-    mapResult.insert(0x1000007, "X86_64");
-    mapResult.insert(8, "MIPS");
-    mapResult.insert(9, "NS32532");
-    mapResult.insert(0xB, "HPPA");
-    mapResult.insert(0xC, "ARM");
-    mapResult.insert(0x100000C, "ARM64");
-    mapResult.insert(0x200000C, "ARM64_32");
-    mapResult.insert(0xD, "MC88000");
-    mapResult.insert(0xE, "SPARC");
-    mapResult.insert(0xF, "I860");
-    mapResult.insert(0x10, "I860_LITTLE");
-    mapResult.insert(0x11, "RS6000");
-    mapResult.insert(0x12, "POWERPC");
-    mapResult.insert(0x1000012, "POWERPC64");
-    mapResult.insert(255, "VEO");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_HeaderCpuTypes);
 }
 
 QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
@@ -1203,498 +1275,112 @@ QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
 
 QMap<quint64, QString> XMACH::getHeaderFileTypes()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x1, "MH_OBJECT");
-    mapResult.insert(0x2, "MH_EXECUTE");
-    mapResult.insert(0x3, "MH_FVMLIB");
-    mapResult.insert(0x4, "MH_CORE");
-    mapResult.insert(0x5, "MH_PRELOAD");
-    mapResult.insert(0x6, "MH_DYLIB");
-    mapResult.insert(0x7, "MH_DYLINKER");
-    mapResult.insert(0x8, "MH_BUNDLE");
-    mapResult.insert(0x9, "MH_DYLIB_STUB");
-    mapResult.insert(0xa, "MH_DSYM");
-    mapResult.insert(0xb, "MH_KEXT_BUNDLE");
-    mapResult.insert(0xc, "MH_FILESET");
-    mapResult.insert(0xd, "MH_GPU_EXECUTE");
-    mapResult.insert(0xe, "MH_GPU_DYLIB");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_HeaderFileTypes, "MH_");
 }
 
 QMap<quint64, QString> XMACH::getHeaderFileTypesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x1, "OBJECT");
-    mapResult.insert(0x2, "EXECUTE");
-    mapResult.insert(0x3, "FVMLIB");
-    mapResult.insert(0x4, "CORE");
-    mapResult.insert(0x5, "PRELOAD");
-    mapResult.insert(0x6, "DYLIB");
-    mapResult.insert(0x7, "DYLINKER");
-    mapResult.insert(0x8, "BUNDLE");
-    mapResult.insert(0x9, "DYLIB_STUB");
-    mapResult.insert(0xa, "DSYM");
-    mapResult.insert(0xb, "KEXT_BUNDLE");
-    mapResult.insert(0xc, "FILESET");
-    mapResult.insert(0xd, "GPU_EXECUTE");
-    mapResult.insert(0xe, "GPU_DYLIB");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_HeaderFileTypes);
 }
 
 QMap<quint64, QString> XMACH::getHeaderFlags()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x1, "MH_NOUNDEFS");
-    mapResult.insert(0x2, "MH_INCRLINK");
-    mapResult.insert(0x4, "MH_DYLDLINK");
-    mapResult.insert(0x8, "MH_BINDATLOAD");
-    mapResult.insert(0x10, "MH_PREBOUND");
-    mapResult.insert(0x20, "MH_SPLIT_SEGS");
-    mapResult.insert(0x40, "MH_LAZY_INIT");
-    mapResult.insert(0x80, "MH_TWOLEVEL");
-    mapResult.insert(0x100, "MH_FORCE_FLAT");
-    mapResult.insert(0x200, "MH_NOMULTIDEFS");
-    mapResult.insert(0x400, "MH_NOFIXPREBINDING");
-    mapResult.insert(0x800, "MH_PREBINDABLE");
-    mapResult.insert(0x1000, "MH_ALLMODSBOUND");
-    mapResult.insert(0x2000, "MH_SUBSECTIONS_VIA_SYMBOLS");
-    mapResult.insert(0x4000, "MH_CANONICAL");
-    mapResult.insert(0x8000, "MH_WEAK_DEFINES");
-    mapResult.insert(0x10000, "MH_BINDS_TO_WEAK");
-    mapResult.insert(0x20000, "MH_ALLOW_STACK_EXECUTION");
-    mapResult.insert(0x40000, "MH_ROOT_SAFE");
-    mapResult.insert(0x80000, "MH_SETUID_SAFE");
-    mapResult.insert(0x100000, "MH_NO_REEXPORTED_DYLIBS");
-    mapResult.insert(0x200000, "MH_PIE");
-    mapResult.insert(0x400000, "MH_DEAD_STRIPPABLE_DYLIB");
-    mapResult.insert(0x800000, "MH_HAS_TLV_DESCRIPTORS");
-    mapResult.insert(0x1000000, "MH_NO_HEAP_EXECUTION");
-    mapResult.insert(0x02000000, "MH_APP_EXTENSION_SAFE");
-    mapResult.insert(0x04000000, "MH_NLIST_OUTOFSYNC_WITH_DYLDINFO");
-    mapResult.insert(0x08000000, "MH_SIM_SUPPORT");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_HeaderFlags, "MH_");
 }
 
 QMap<quint64, QString> XMACH::getHeaderFlagsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x1, "NOUNDEFS");
-    mapResult.insert(0x2, "INCRLINK");
-    mapResult.insert(0x4, "DYLDLINK");
-    mapResult.insert(0x8, "BINDATLOAD");
-    mapResult.insert(0x10, "PREBOUND");
-    mapResult.insert(0x20, "SPLIT_SEGS");
-    mapResult.insert(0x40, "LAZY_INIT");
-    mapResult.insert(0x80, "TWOLEVEL");
-    mapResult.insert(0x100, "FORCE_FLAT");
-    mapResult.insert(0x200, "NOMULTIDEFS");
-    mapResult.insert(0x400, "NOFIXPREBINDING");
-    mapResult.insert(0x800, "PREBINDABLE");
-    mapResult.insert(0x1000, "ALLMODSBOUND");
-    mapResult.insert(0x2000, "SUBSECTIONS_VIA_SYMBOLS");
-    mapResult.insert(0x4000, "CANONICAL");
-    mapResult.insert(0x8000, "WEAK_DEFINES");
-    mapResult.insert(0x10000, "BINDS_TO_WEAK");
-    mapResult.insert(0x20000, "ALLOW_STACK_EXECUTION");
-    mapResult.insert(0x40000, "ROOT_SAFE");
-    mapResult.insert(0x80000, "SETUID_SAFE");
-    mapResult.insert(0x100000, "NO_REEXPORTED_DYLIBS");
-    mapResult.insert(0x200000, "PIE");
-    mapResult.insert(0x400000, "DEAD_STRIPPABLE_DYLIB");
-    mapResult.insert(0x800000, "HAS_TLV_DESCRIPTORS");
-    mapResult.insert(0x1000000, "NO_HEAP_EXECUTION");
-    mapResult.insert(0x02000000, "APP_EXTENSION_SAFE");
-    mapResult.insert(0x04000000, "NLIST_OUTOFSYNC_WITH_DYLDINFO");
-    mapResult.insert(0x08000000, "SIM_SUPPORT");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_HeaderFlags);
 }
 
 QMap<quint64, QString> XMACH::getLoadCommandTypes()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x1, "LC_SEGMENT");
-    mapResult.insert(0x2, "LC_SYMTAB");
-    mapResult.insert(0x3, "LC_SYMSEG");
-    mapResult.insert(0x4, "LC_THREAD");
-    mapResult.insert(0x5, "LC_UNIXTHREAD");
-    mapResult.insert(0x6, "LC_LOADFVMLIB");
-    mapResult.insert(0x7, "LC_IDFVMLIB");
-    mapResult.insert(0x8, "LC_IDENT");
-    mapResult.insert(0x9, "LC_FVMFILE");
-    mapResult.insert(0xa, "LC_PREPAGE");
-    mapResult.insert(0xb, "LC_DYSYMTAB");
-    mapResult.insert(0xc, "LC_LOAD_DYLIB");
-    mapResult.insert(0xd, "LC_ID_DYLIB");
-    mapResult.insert(0xe, "LC_LOAD_DYLINKER");
-    mapResult.insert(0xf, "LC_ID_DYLINKER");
-    mapResult.insert(0x10, "LC_PREBOUND_DYLIB");
-    mapResult.insert(0x11, "LC_ROUTINES");
-    mapResult.insert(0x12, "LC_SUB_FRAMEWORK");
-    mapResult.insert(0x13, "LC_SUB_UMBRELLA");
-    mapResult.insert(0x14, "LC_SUB_CLIENT");
-    mapResult.insert(0x15, "LC_SUB_LIBRARY");
-    mapResult.insert(0x16, "LC_TWOLEVEL_HINTS");
-    mapResult.insert(0x17, "LC_PREBIND_CKSUM");
-    mapResult.insert(0x18 | 0x80000000, "LC_LOAD_WEAK_DYLIB");
-    mapResult.insert(0x19, "LC_SEGMENT_64");
-    mapResult.insert(0x1a, "LC_ROUTINES_64");
-    mapResult.insert(0x1b, "LC_UUID");
-    mapResult.insert(0x1c | 0x80000000, "LC_RPATH");
-    mapResult.insert(0x1d, "LC_CODE_SIGNATURE");
-    mapResult.insert(0x1e, "LC_SEGMENT_SPLIT_INFO");
-    mapResult.insert(0x1f | 0x80000000, "LC_REEXPORT_DYLIB");
-    mapResult.insert(0x20, "LC_LAZY_LOAD_DYLIB");
-    mapResult.insert(0x21, "LC_ENCRYPTION_INFO");
-    mapResult.insert(0x22, "LC_DYLD_INFO");
-    mapResult.insert(0x22 | 0x80000000, "LC_DYLD_INFO_ONLY");
-    mapResult.insert(0x23 | 0x80000000, "LC_LOAD_UPWARD_DYLIB");
-    mapResult.insert(0x24, "LC_VERSION_MIN_MACOSX");
-    mapResult.insert(0x25, "LC_VERSION_MIN_IPHONEOS");
-    mapResult.insert(0x26, "LC_FUNCTION_STARTS");
-    mapResult.insert(0x27, "LC_DYLD_ENVIRONMENT");
-    mapResult.insert(0x28 | 0x80000000, "LC_MAIN");
-    mapResult.insert(0x29, "LC_DATA_IN_CODE");
-    mapResult.insert(0x2A, "LC_SOURCE_VERSION");
-    mapResult.insert(0x2B, "LC_DYLIB_CODE_SIGN_DRS");
-    mapResult.insert(0x2C, "LC_ENCRYPTION_INFO_64");
-    mapResult.insert(0x2D, "LC_LINKER_OPTION");
-    mapResult.insert(0x2E, "LC_LINKER_OPTIMIZATION_HINT");
-    mapResult.insert(0x2F, "LC_VERSION_MIN_TVOS");
-    mapResult.insert(0x30, "LC_VERSION_MIN_WATCHOS");
-    mapResult.insert(0x31, "LC_NOTE");
-    mapResult.insert(0x32, "LC_BUILD_VERSION");
-    mapResult.insert(0x33 | 0x80000000, "LC_DYLD_EXPORTS_TRIE");
-    mapResult.insert(0x34 | 0x80000000, "LC_DYLD_CHAINED_FIXUPS");
-    mapResult.insert(0x35 | 0x80000000, "LC_FILESET_ENTRY");
-    mapResult.insert(0x36, "LC_ATOM_INFO");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_LoadCommandTypes, "LC_");
 }
 
 QMap<quint64, QString> XMACH::getLoadCommandTypesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x1, "SEGMENT");
-    mapResult.insert(0x2, "SYMTAB");
-    mapResult.insert(0x3, "SYMSEG");
-    mapResult.insert(0x4, "THREAD");
-    mapResult.insert(0x5, "UNIXTHREAD");
-    mapResult.insert(0x6, "LOADFVMLIB");
-    mapResult.insert(0x7, "IDFVMLIB");
-    mapResult.insert(0x8, "IDENT");
-    mapResult.insert(0x9, "FVMFILE");
-    mapResult.insert(0xa, "PREPAGE");
-    mapResult.insert(0xb, "DYSYMTAB");
-    mapResult.insert(0xc, "LOAD_DYLIB");
-    mapResult.insert(0xd, "ID_DYLIB");
-    mapResult.insert(0xe, "LOAD_DYLINKER");
-    mapResult.insert(0xf, "ID_DYLINKER");
-    mapResult.insert(0x10, "PREBOUND_DYLIB");
-    mapResult.insert(0x11, "ROUTINES");
-    mapResult.insert(0x12, "SUB_FRAMEWORK");
-    mapResult.insert(0x13, "SUB_UMBRELLA");
-    mapResult.insert(0x14, "SUB_CLIENT");
-    mapResult.insert(0x15, "SUB_LIBRARY");
-    mapResult.insert(0x16, "TWOLEVEL_HINTS");
-    mapResult.insert(0x17, "PREBIND_CKSUM");
-    mapResult.insert(0x18 | 0x80000000, "LOAD_WEAK_DYLIB");
-    mapResult.insert(0x19, "SEGMENT_64");
-    mapResult.insert(0x1a, "ROUTINES_64");
-    mapResult.insert(0x1b, "UUID");
-    mapResult.insert(0x1c | 0x80000000, "RPATH");
-    mapResult.insert(0x1d, "CODE_SIGNATURE");
-    mapResult.insert(0x1e, "SEGMENT_SPLIT_INFO");
-    mapResult.insert(0x1f | 0x80000000, "REEXPORT_DYLIB");
-    mapResult.insert(0x20, "LAZY_LOAD_DYLIB");
-    mapResult.insert(0x21, "ENCRYPTION_INFO");
-    mapResult.insert(0x22, "DYLD_INFO");
-    mapResult.insert(0x22 | 0x80000000, "DYLD_INFO_ONLY");
-    mapResult.insert(0x23 | 0x80000000, "LOAD_UPWARD_DYLIB");
-    mapResult.insert(0x24, "VERSION_MIN_MACOSX");
-    mapResult.insert(0x25, "VERSION_MIN_IPHONEOS");
-    mapResult.insert(0x26, "FUNCTION_STARTS");
-    mapResult.insert(0x27, "DYLD_ENVIRONMENT");
-    mapResult.insert(0x28 | 0x80000000, "MAIN");
-    mapResult.insert(0x29, "DATA_IN_CODE");
-    mapResult.insert(0x2A, "SOURCE_VERSION");
-    mapResult.insert(0x2B, "DYLIB_CODE_SIGN_DRS");
-    mapResult.insert(0x2C, "ENCRYPTION_INFO_64");
-    mapResult.insert(0x2D, "LINKER_OPTION");
-    mapResult.insert(0x2E, "LINKER_OPTIMIZATION_HINT");
-    mapResult.insert(0x2F, "VERSION_MIN_TVOS");
-    mapResult.insert(0x30, "VERSION_MIN_WATCHOS");
-    mapResult.insert(0x31, "NOTE");
-    mapResult.insert(0x32, "BUILD_VERSION");
-    mapResult.insert(0x33 | 0x80000000, "DYLD_EXPORTS_TRIE");
-    mapResult.insert(0x34 | 0x80000000, "DYLD_CHAINED_FIXUPS");
-    mapResult.insert(0x35 | 0x80000000, "FILESET_ENTRY");
-    mapResult.insert(0x36, "ATOM_INFO");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_LoadCommandTypes);
 }
 
 QMap<quint64, QString> XMACH::getVMProtections()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x1, "VM_PROT_READ");
-    mapResult.insert(0x2, "VM_PROT_WRITE");
-    mapResult.insert(0x4, "VM_PROT_EXECUTE");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_VMProtections, "VM_PROT_");
 }
 
 QMap<quint64, QString> XMACH::getVMProtectionsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x1, "READ");
-    mapResult.insert(0x2, "WRITE");
-    mapResult.insert(0x4, "EXECUTE");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_VMProtections);
 }
 
 QMap<quint64, QString> XMACH::getSectionFlagsTypes()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00, "S_REGULAR");
-    mapResult.insert(0x01, "S_ZEROFILL");
-    mapResult.insert(0x02, "S_CSTRING_LITERALS");
-    mapResult.insert(0x03, "S_4BYTE_LITERALS");
-    mapResult.insert(0x04, "S_8BYTE_LITERALS");
-    mapResult.insert(0x05, "S_LITERAL_POINTERS");
-    mapResult.insert(0x06, "S_NON_LAZY_SYMBOL_POINTERS");
-    mapResult.insert(0x07, "S_LAZY_SYMBOL_POINTERS");
-    mapResult.insert(0x08, "S_SYMBOL_STUBS");
-    mapResult.insert(0x09, "S_MOD_INIT_FUNC_POINTERS");
-    mapResult.insert(0x0A, "S_MOD_TERM_FUNC_POINTERS");
-    mapResult.insert(0x0B, "S_COALESCED");
-    mapResult.insert(0x0C, "S_GB_ZEROFILL");
-    mapResult.insert(0x0D, "S_INTERPOSING");
-    mapResult.insert(0x0E, "S_16BYTE_LITERALS");
-    mapResult.insert(0x0F, "S_DTRACE_DOF");
-    mapResult.insert(0x10, "S_LAZY_DYLIB_SYMBOL_POINTERS");
-    mapResult.insert(0x11, "S_THREAD_LOCAL_REGULAR");
-    mapResult.insert(0x12, "S_THREAD_LOCAL_ZEROFILL");
-    mapResult.insert(0x13, "S_THREAD_LOCAL_VARIABLES");
-    mapResult.insert(0x14, "S_THREAD_LOCAL_VARIABLE_POINTERS");
-    mapResult.insert(0x15, "S_THREAD_LOCAL_INIT_FUNCTION_POINTERS");
-    mapResult.insert(0x16, "S_INIT_FUNC_OFFSETS");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_SectionFlagsTypes, "S_");
 }
 
 QMap<quint64, QString> XMACH::getSectionFlagsTypesS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00, "REGULAR");
-    mapResult.insert(0x01, "ZEROFILL");
-    mapResult.insert(0x02, "CSTRING_LITERALS");
-    mapResult.insert(0x03, "4BYTE_LITERALS");
-    mapResult.insert(0x04, "8BYTE_LITERALS");
-    mapResult.insert(0x05, "LITERAL_POINTERS");
-    mapResult.insert(0x06, "NON_LAZY_SYMBOL_POINTERS");
-    mapResult.insert(0x07, "LAZY_SYMBOL_POINTERS");
-    mapResult.insert(0x08, "SYMBOL_STUBS");
-    mapResult.insert(0x09, "MOD_INIT_FUNC_POINTERS");
-    mapResult.insert(0x0A, "MOD_TERM_FUNC_POINTERS");
-    mapResult.insert(0x0B, "COALESCED");
-    mapResult.insert(0x0C, "GB_ZEROFILL");
-    mapResult.insert(0x0D, "INTERPOSING");
-    mapResult.insert(0x0E, "16BYTE_LITERALS");
-    mapResult.insert(0x0F, "DTRACE_DOF");
-    mapResult.insert(0x10, "LAZY_DYLIB_SYMBOL_POINTERS");
-    mapResult.insert(0x11, "THREAD_LOCAL_REGULAR");
-    mapResult.insert(0x12, "THREAD_LOCAL_ZEROFILL");
-    mapResult.insert(0x13, "THREAD_LOCAL_VARIABLES");
-    mapResult.insert(0x14, "THREAD_LOCAL_VARIABLE_POINTERS");
-    mapResult.insert(0x15, "THREAD_LOCAL_INIT_FUNCTION_POINTERS");
-    mapResult.insert(0x16, "INIT_FUNC_OFFSETS");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_SectionFlagsTypes);
 }
 
 QMap<quint64, QString> XMACH::getSectionAttributesUsr()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x02000000, "S_ATTR_DEBUG");
-    mapResult.insert(0x04000000, "S_ATTR_SELF_MODIFYING_CODE");
-    mapResult.insert(0x08000000, "S_ATTR_LIVE_SUPPORT");
-    mapResult.insert(0x10000000, "S_ATTR_NO_DEAD_STRIP");
-    mapResult.insert(0x20000000, "S_ATTR_STRIP_STATIC_SYMS");
-    mapResult.insert(0x40000000, "S_ATTR_NO_TOC");
-    mapResult.insert(0x80000000, "S_ATTR_PURE_INSTRUCTIONS");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_SectionAttributesUsr, "S_ATTR_");
 }
 
 QMap<quint64, QString> XMACH::getSectionAttributesUsrS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x02000000, "DEBUG");
-    mapResult.insert(0x04000000, "SELF_MODIFYING_CODE");
-    mapResult.insert(0x08000000, "LIVE_SUPPORT");
-    mapResult.insert(0x10000000, "NO_DEAD_STRIP");
-    mapResult.insert(0x20000000, "STRIP_STATIC_SYMS");
-    mapResult.insert(0x40000000, "NO_TOC");
-    mapResult.insert(0x80000000, "PURE_INSTRUCTIONS");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_SectionAttributesUsr);
 }
 
 QMap<quint64, QString> XMACH::getSectionAttributesSys()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000100, "S_ATTR_LOC_RELOC");
-    mapResult.insert(0x00000200, "S_ATTR_EXT_RELOC");
-    mapResult.insert(0x00000400, "S_ATTR_SOME_INSTRUCTIONS");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_SectionAttributesSys, "S_ATTR_");
 }
 
 QMap<quint64, QString> XMACH::getSectionAttributesSysS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000100, "LOC_RELOC");
-    mapResult.insert(0x00000200, "EXT_RELOC");
-    mapResult.insert(0x00000400, "SOME_INSTRUCTIONS");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_SectionAttributesSys);
 }
 
 QMap<quint64, QString> XMACH::getDICEKinds()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000001, "DICE_KIND_DATA");
-    mapResult.insert(0x00000002, "DICE_KIND_JUMP_TABLE8");
-    mapResult.insert(0x00000003, "DICE_KIND_JUMP_TABLE16");
-    mapResult.insert(0x00000004, "DICE_KIND_JUMP_TABLE32");
-    mapResult.insert(0x00000005, "DICE_KIND_ABS_JUMP_TABLE32");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_DICEKinds, "DICE_KIND_");
 }
 
 QMap<quint64, QString> XMACH::getDICEKindsS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0x00000001, "DATA");
-    mapResult.insert(0x00000002, "JUMP_TABLE8");
-    mapResult.insert(0x00000003, "JUMP_TABLE16");
-    mapResult.insert(0x00000004, "JUMP_TABLE32");
-    mapResult.insert(0x00000005, "ABS_JUMP_TABLE32");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_DICEKinds);
 }
 
 QMap<quint64, QString> XMACH::getPlatform()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "PLATFORM_UNKNOWN");
-    mapResult.insert(0xFFFFFFFF, "PLATFORM_ANY");
-    mapResult.insert(1, "PLATFORM_MACOS");
-    mapResult.insert(2, "PLATFORM_IOS");
-    mapResult.insert(3, "PLATFORM_TVOS");
-    mapResult.insert(4, "PLATFORM_WATCHOS");
-    mapResult.insert(5, "PLATFORM_BRIDGEOS");
-    mapResult.insert(6, "PLATFORM_MACCATALYST");
-    mapResult.insert(7, "PLATFORM_IOSSIMULATOR");
-    mapResult.insert(8, "PLATFORM_TVOSSIMULATOR");
-    mapResult.insert(9, "PLATFORM_WATCHOSSIMULATOR");
-    mapResult.insert(10, "PLATFORM_DRIVERKIT");
-    mapResult.insert(11, "PLATFORM_VISIONOS");
-    mapResult.insert(12, "PLATFORM_VISIONOSSIMULATOR");
-    mapResult.insert(13, "PLATFORM_FIRMWARE");
-    mapResult.insert(14, "PLATFORM_SEPOS");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_Platforms, "PLATFORM_");
 }
 
 QMap<quint64, QString> XMACH::getPlatformS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(0, "UNKNOWN");
-    mapResult.insert(0xFFFFFFFF, "ANY");
-    mapResult.insert(1, "MACOS");
-    mapResult.insert(2, "IOS");
-    mapResult.insert(3, "TVOS");
-    mapResult.insert(4, "WATCHOS");
-    mapResult.insert(5, "BRIDGEOS");
-    mapResult.insert(6, "MACCATALYST");
-    mapResult.insert(7, "IOSSIMULATOR");
-    mapResult.insert(8, "TVOSSIMULATOR");
-    mapResult.insert(9, "WATCHOSSIMULATOR");
-    mapResult.insert(10, "DRIVERKIT");
-    mapResult.insert(11, "VISIONOS");
-    mapResult.insert(12, "VISIONOSSIMULATOR");
-    mapResult.insert(13, "FIRMWARE");
-    mapResult.insert(14, "SEPOS");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_Platforms);
 }
 
 QMap<quint64, QString> XMACH::getBuildTool()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(1, "TOOL_CLANG");
-    mapResult.insert(2, "TOOL_SWIFT");
-    mapResult.insert(3, "TOOL_LD");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_BuildTools, "TOOL_");
 }
 
 QMap<quint64, QString> XMACH::getBuildToolS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(1, "CLANG");
-    mapResult.insert(2, "SWIFT");
-    mapResult.insert(3, "LD");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_BuildTools);
 }
 
 QMap<quint64, QString> XMACH::getDyldChainedImport()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(1, "DYLD_CHAINED_IMPORT");
-    mapResult.insert(2, "DYLD_CHAINED_IMPORT_ADDEND");
-    mapResult.insert(3, "DYLD_CHAINED_IMPORT_ADDEND64");
-
-    return mapResult;
+    return xmachCreateMapPrefix(_TABLE_XMACH_DyldChainedImports, "DYLD_CHAINED_");
 }
 
 QMap<quint64, QString> XMACH::getDyldChainedImportS()
 {
-    QMap<quint64, QString> mapResult;
-
-    mapResult.insert(1, "IMPORT");
-    mapResult.insert(2, "IMPORT_ADDEND");
-    mapResult.insert(3, "IMPORT_ADDEND64");
-
-    return mapResult;
+    return xmachCreateMap(_TABLE_XMACH_DyldChainedImports);
 }
 
 XMACH::COMMAND_RECORD XMACH::_readLoadCommand(qint64 nOffset, bool bIsBigEndian)
@@ -1733,8 +1419,9 @@ QList<XMACH::COMMAND_RECORD> XMACH::getCommandRecords(quint32 nCommandID, PDSTRU
     quint32 nSizeOfCommands = getHeader_sizeofcmds();
 
     qint64 nOffset = getHeaderSize();
+    qint64 nFileSize = getSize();
 
-    if (nOffset + nSizeOfCommands < getSize()) {
+    if ((nOffset >= 0) && (nOffset <= nFileSize) && ((qint64)nSizeOfCommands <= (nFileSize - nOffset))) {
         bool bIsBigEndian = isBigEndian();
         bool bIs64 = is64();
 
@@ -1771,13 +1458,21 @@ QList<XMACH::COMMAND_RECORD> XMACH::_getCommandRecords(qint64 nDataOffset, qint6
     }
 
     for (qint32 i = 0; (i < nLimit) && isPdStructNotCanceled(pPdStruct); i++) {
+        if ((nDataOffset < 0) || ((nSize + (qint64)sizeof(XMACH_DEF::load_command)) > nDataSize)) {
+            break;
+        }
+
         COMMAND_RECORD record = _readLoadCommand(nDataOffset, bIsBigEndian);
+
+        qint64 _nSize = record.nSize;
+
+        if ((_nSize < (qint64)sizeof(XMACH_DEF::load_command)) || ((nSize + _nSize) > nDataSize)) {
+            break;
+        }
 
         if ((nCommandID == 0) || (record.nId == nCommandID)) {
             listResult.append(record);
         }
-
-        qint64 _nSize = record.nSize;
 
         if (bIs64) {
             _nSize = S_ALIGN_UP(_nSize, 8);
@@ -1785,12 +1480,12 @@ QList<XMACH::COMMAND_RECORD> XMACH::_getCommandRecords(qint64 nDataOffset, qint6
             _nSize = S_ALIGN_UP(_nSize, 4);
         }
 
-        nSize += _nSize;
-        nDataOffset += _nSize;
-
-        if (nSize > nDataSize) {
+        if ((nSize + _nSize) > nDataSize) {
             break;
         }
+
+        nSize += _nSize;
+        nDataOffset += _nSize;
     }
 
     return listResult;
@@ -1805,25 +1500,7 @@ bool XMACH::isCommandPresent(quint32 nCommandID, qint32 nIndex)
 
 bool XMACH::isCommandPresent(quint32 nCommandID, qint32 nIndex, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
-    bool bResult = false;
-
-    qint32 nNumberOfCommands = pListCommandRecords->count();
-
-    qint32 nCurrentIndex = 0;
-
-    for (qint32 i = 0; i < nNumberOfCommands; i++) {
-        if (pListCommandRecords->at(i).nId == nCommandID) {
-            if (nCurrentIndex == nIndex) {
-                bResult = true;
-
-                break;
-            }
-
-            nCurrentIndex++;
-        }
-    }
-
-    return bResult;
+    return (xmachFindCommandRecord(nCommandID, nIndex, pListCommandRecords) != nullptr);
 }
 
 bool XMACH::isCommandPresent(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
@@ -1862,20 +1539,10 @@ QByteArray XMACH::getCommandData(quint32 nCommandID, qint32 nIndex, QList<XMACH:
 {
     QByteArray baResult;
 
-    qint32 nNumberOfCommands = pListCommandRecords->count();
+    const COMMAND_RECORD *pRecord = xmachFindCommandRecord(nCommandID, nIndex, pListCommandRecords);
 
-    qint32 nCurrentIndex = 0;
-
-    for (qint32 i = 0; i < nNumberOfCommands; i++) {
-        if (pListCommandRecords->at(i).nId == nCommandID) {
-            if (nCurrentIndex == nIndex) {
-                baResult = read_array(pListCommandRecords->at(i).nStructOffset, pListCommandRecords->at(i).nSize);
-
-                break;
-            }
-
-            nCurrentIndex++;
-        }
+    if (pRecord) {
+        baResult = read_array(pRecord->nStructOffset, pRecord->nSize);
     }
 
     return baResult;
@@ -1885,23 +1552,13 @@ bool XMACH::setCommandData(quint32 nCommandID, const QByteArray &baData, qint32 
 {
     bool bResult = false;
 
-    qint32 nNumberOfCommands = pListCommandRecords->count();
+    const COMMAND_RECORD *pRecord = xmachFindCommandRecord(nCommandID, nIndex, pListCommandRecords);
 
-    qint32 nCurrentIndex = 0;
+    if (pRecord) {
+        qint32 nSize = baData.size();
 
-    for (qint32 i = 0; i < nNumberOfCommands; i++) {
-        if (pListCommandRecords->at(i).nId == nCommandID) {
-            qint32 nSize = baData.size();
-
-            if (nCurrentIndex == nIndex) {
-                if (nSize == pListCommandRecords->at(i).nSize) {
-                    bResult = (write_array(pListCommandRecords->at(i).nStructOffset, baData.data(), pListCommandRecords->at(i).nSize) == nSize);
-                }
-
-                break;
-            }
-
-            nCurrentIndex++;
+        if (nSize == pRecord->nSize) {
+            bResult = (write_array(pRecord->nStructOffset, baData.data(), pRecord->nSize) == nSize);
         }
     }
 
@@ -1913,9 +1570,10 @@ qint64 XMACH::getCommandRecordOffset(quint32 nCommandID, qint32 nIndex)
     qint64 nResult = -1;
 
     QList<COMMAND_RECORD> listCR = getCommandRecords(nCommandID);
+    const COMMAND_RECORD *pRecord = xmachFindCommandRecord(nCommandID, nIndex, &listCR);
 
-    if (nIndex < listCR.count()) {
-        nResult = listCR.at(nIndex).nStructOffset;
+    if (pRecord) {
+        nResult = pRecord->nStructOffset;
     }
 
     return nResult;
@@ -1925,10 +1583,10 @@ qint64 XMACH::getCommandRecordOffset(quint32 nCommandID, qint32 nIndex, QList<XM
 {
     qint64 nResult = -1;
 
-    QList<COMMAND_RECORD> listCR = getCommandRecords(nCommandID, pListCommandRecords);
+    const COMMAND_RECORD *pRecord = xmachFindCommandRecord(nCommandID, nIndex, pListCommandRecords);
 
-    if (nIndex < listCR.count()) {
-        nResult = listCR.at(nIndex).nStructOffset;
+    if (pRecord) {
+        nResult = pRecord->nStructOffset;
     }
 
     return nResult;

@@ -539,6 +539,7 @@ public:
         FT_MACHO64,
         FT_AMIGAHUNK,
         FT_ATARIST,
+        FT_CLI_ASSEMBLY,
         // Extra
         FT_7Z,
         FT_ANDROIDASRC,

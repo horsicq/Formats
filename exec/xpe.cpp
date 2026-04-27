@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xpe.h"
+#include "xcliassembly.h"
 
 XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
     {XPE::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -10617,6 +10618,26 @@ bool XPE::isNETPresent()
 {
     // TODO more checks
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+}
+
+void XPE::initCLIAssembly(XCLIAssembly *pCLIAssembly, PDSTRUCT *pPdStruct)
+{
+    if (!isNETPresent()) {
+        return;
+    }
+
+    pCLIAssembly->setNetHeaderOffset(getNetHeaderOffset());
+
+    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+    CLI_INFO cliInfo = getCliInfo(false, &memoryMap, pPdStruct);
+
+    if (cliInfo.bValid) {
+        pCLIAssembly->setNetMetaDataOffset(cliInfo.nMetaDataOffset);
+
+        if (!cliInfo.metaData.header.sVersion.isEmpty()) {
+            pCLIAssembly->setVersion(cliInfo.metaData.header.sVersion);
+        }
+    }
 }
 
 QList<QString> XPE::getAnsiStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)

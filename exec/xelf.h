@@ -232,49 +232,27 @@ public:
     XELF_DEF::Elf32_Shdr _readElf32_Shdr(qint64 nOffset, bool bIsBigEndian);
     XELF_DEF::Elf64_Shdr _readElf64_Shdr(qint64 nOffset, bool bIsBigEndian);
 
-    quint32 getElf32_Shdr_name(quint32 nIndex);
-    quint32 getElf32_Shdr_type(quint32 nIndex);
-    quint32 getElf32_Shdr_flags(quint32 nIndex);
-    quint32 getElf32_Shdr_addr(quint32 nIndex);
-    quint32 getElf32_Shdr_offset(quint32 nIndex);
-    quint32 getElf32_Shdr_size(quint32 nIndex);
-    quint32 getElf32_Shdr_link(quint32 nIndex);
-    quint32 getElf32_Shdr_info(quint32 nIndex);
-    quint32 getElf32_Shdr_addralign(quint32 nIndex);
-    quint32 getElf32_Shdr_entsize(quint32 nIndex);
+    void _setElf32_Shdr_name(qint64 nOffset, quint32 nValue);
+    void _setElf32_Shdr_type(qint64 nOffset, quint32 nValue);
+    void _setElf32_Shdr_flags(qint64 nOffset, quint32 nValue);
+    void _setElf32_Shdr_addr(qint64 nOffset, quint32 nValue);
+    void _setElf32_Shdr_offset(qint64 nOffset, quint32 nValue);
+    void _setElf32_Shdr_size(qint64 nOffset, quint32 nValue);
+    void _setElf32_Shdr_link(qint64 nOffset, quint32 nValue);
+    void _setElf32_Shdr_info(qint64 nOffset, quint32 nValue);
+    void _setElf32_Shdr_addralign(qint64 nOffset, quint32 nValue);
+    void _setElf32_Shdr_entsize(qint64 nOffset, quint32 nValue);
 
-    void setElf32_Shdr_name(quint32 nIndex, quint32 nValue);
-    void setElf32_Shdr_type(quint32 nIndex, quint32 nValue);
-    void setElf32_Shdr_flags(quint32 nIndex, quint32 nValue);
-    void setElf32_Shdr_addr(quint32 nIndex, quint32 nValue);
-    void setElf32_Shdr_offset(quint32 nIndex, quint32 nValue);
-    void setElf32_Shdr_size(quint32 nIndex, quint32 nValue);
-    void setElf32_Shdr_link(quint32 nIndex, quint32 nValue);
-    void setElf32_Shdr_info(quint32 nIndex, quint32 nValue);
-    void setElf32_Shdr_addralign(quint32 nIndex, quint32 nValue);
-    void setElf32_Shdr_entsize(quint32 nIndex, quint32 nValue);
-
-    quint32 getElf64_Shdr_name(quint32 nIndex);
-    quint32 getElf64_Shdr_type(quint32 nIndex);
-    quint64 getElf64_Shdr_flags(quint32 nIndex);
-    quint64 getElf64_Shdr_addr(quint32 nIndex);
-    quint64 getElf64_Shdr_offset(quint32 nIndex);
-    quint64 getElf64_Shdr_size(quint32 nIndex);
-    quint32 getElf64_Shdr_link(quint32 nIndex);
-    quint32 getElf64_Shdr_info(quint32 nIndex);
-    quint64 getElf64_Shdr_addralign(quint32 nIndex);
-    quint64 getElf64_Shdr_entsize(quint32 nIndex);
-
-    void setElf64_Shdr_name(quint32 nIndex, quint32 nValue);
-    void setElf64_Shdr_type(quint32 nIndex, quint32 nValue);
-    void setElf64_Shdr_flags(quint32 nIndex, quint64 nValue);
-    void setElf64_Shdr_addr(quint32 nIndex, quint64 nValue);
-    void setElf64_Shdr_offset(quint32 nIndex, quint64 nValue);
-    void setElf64_Shdr_size(quint32 nIndex, quint64 nValue);
-    void setElf64_Shdr_link(quint32 nIndex, quint32 nValue);
-    void setElf64_Shdr_info(quint32 nIndex, quint32 nValue);
-    void setElf64_Shdr_addralign(quint32 nIndex, quint64 nValue);
-    void setElf64_Shdr_entsize(quint32 nIndex, quint64 nValue);
+    void _setElf64_Shdr_name(qint64 nOffset, quint32 nValue);
+    void _setElf64_Shdr_type(qint64 nOffset, quint32 nValue);
+    void _setElf64_Shdr_flags(qint64 nOffset, quint64 nValue);
+    void _setElf64_Shdr_addr(qint64 nOffset, quint64 nValue);
+    void _setElf64_Shdr_offset(qint64 nOffset, quint64 nValue);
+    void _setElf64_Shdr_size(qint64 nOffset, quint64 nValue);
+    void _setElf64_Shdr_link(qint64 nOffset, quint32 nValue);
+    void _setElf64_Shdr_info(qint64 nOffset, quint32 nValue);
+    void _setElf64_Shdr_addralign(qint64 nOffset, quint64 nValue);
+    void _setElf64_Shdr_entsize(qint64 nOffset, quint64 nValue);
 
     static quint32 getElf_Shdr_name(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
     static quint32 getElf_Shdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pListSectionHeaders);
@@ -300,41 +278,23 @@ public:
     XELF_DEF::Elf32_Phdr _readElf32_Phdr(qint64 nOffset, bool bIsBigEndian);
     XELF_DEF::Elf64_Phdr _readElf64_Phdr(qint64 nOffset, bool bIsBigEndian);
 
-    quint32 getElf32_Phdr_type(quint32 nIndex);
-    quint32 getElf32_Phdr_offset(quint32 nIndex);
-    quint32 getElf32_Phdr_vaddr(quint32 nIndex);
-    quint32 getElf32_Phdr_paddr(quint32 nIndex);
-    quint32 getElf32_Phdr_filesz(quint32 nIndex);
-    quint32 getElf32_Phdr_memsz(quint32 nIndex);
-    quint32 getElf32_Phdr_flags(quint32 nIndex);
-    quint32 getElf32_Phdr_align(quint32 nIndex);
+    void _setElf32_Phdr_type(qint64 nOffset, quint32 nValue);
+    void _setElf32_Phdr_offset(qint64 nOffset, quint32 nValue);
+    void _setElf32_Phdr_vaddr(qint64 nOffset, quint32 nValue);
+    void _setElf32_Phdr_paddr(qint64 nOffset, quint32 nValue);
+    void _setElf32_Phdr_filesz(qint64 nOffset, quint32 nValue);
+    void _setElf32_Phdr_memsz(qint64 nOffset, quint32 nValue);
+    void _setElf32_Phdr_flags(qint64 nOffset, quint32 nValue);
+    void _setElf32_Phdr_align(qint64 nOffset, quint32 nValue);
 
-    void setElf32_Phdr_type(quint32 nIndex, quint32 nValue);
-    void setElf32_Phdr_offset(quint32 nIndex, quint32 nValue);
-    void setElf32_Phdr_vaddr(quint32 nIndex, quint32 nValue);
-    void setElf32_Phdr_paddr(quint32 nIndex, quint32 nValue);
-    void setElf32_Phdr_filesz(quint32 nIndex, quint32 nValue);
-    void setElf32_Phdr_memsz(quint32 nIndex, quint32 nValue);
-    void setElf32_Phdr_flags(quint32 nIndex, quint32 nValue);
-    void setElf32_Phdr_align(quint32 nIndex, quint32 nValue);
-
-    quint32 getElf64_Phdr_type(quint32 nIndex);
-    quint64 getElf64_Phdr_offset(quint32 nIndex);
-    quint64 getElf64_Phdr_vaddr(quint32 nIndex);
-    quint64 getElf64_Phdr_paddr(quint32 nIndex);
-    quint64 getElf64_Phdr_filesz(quint32 nIndex);
-    quint64 getElf64_Phdr_memsz(quint32 nIndex);
-    quint32 getElf64_Phdr_flags(quint32 nIndex);
-    quint64 getElf64_Phdr_align(quint32 nIndex);
-
-    void setElf64_Phdr_type(quint32 nIndex, quint32 nValue);
-    void setElf64_Phdr_offset(quint32 nIndex, quint64 nValue);
-    void setElf64_Phdr_vaddr(quint32 nIndex, quint64 nValue);
-    void setElf64_Phdr_paddr(quint32 nIndex, quint64 nValue);
-    void setElf64_Phdr_filesz(quint32 nIndex, quint64 nValue);
-    void setElf64_Phdr_memsz(quint32 nIndex, quint64 nValue);
-    void setElf64_Phdr_flags(quint32 nIndex, quint32 nValue);
-    void setElf64_Phdr_align(quint32 nIndex, quint64 nValue);
+    void _setElf64_Phdr_type(qint64 nOffset, quint32 nValue);
+    void _setElf64_Phdr_offset(qint64 nOffset, quint64 nValue);
+    void _setElf64_Phdr_vaddr(qint64 nOffset, quint64 nValue);
+    void _setElf64_Phdr_paddr(qint64 nOffset, quint64 nValue);
+    void _setElf64_Phdr_filesz(qint64 nOffset, quint64 nValue);
+    void _setElf64_Phdr_memsz(qint64 nOffset, quint64 nValue);
+    void _setElf64_Phdr_flags(qint64 nOffset, quint32 nValue);
+    void _setElf64_Phdr_align(qint64 nOffset, quint64 nValue);
 
     quint32 getElf_Phdr_type(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
     quint64 getElf_Phdr_offset(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pListProgramHeaders);
@@ -432,19 +392,19 @@ public:
     XELF_DEF::Elf32_Sym _readElf32_Sym(qint64 nOffset, bool bIsBigEndian);
     XELF_DEF::Elf64_Sym _readElf64_Sym(qint64 nOffset, bool bIsBigEndian);
 
-    void setElf32_Sym_st_name(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
-    void setElf32_Sym_st_value(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
-    void setElf32_Sym_st_size(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
-    void setElf32_Sym_st_info(qint64 nOffset, quint8 nValue);
-    void setElf32_Sym_st_other(qint64 nOffset, quint8 nValue);
-    void setElf32_Sym_st_shndx(qint64 nOffset, quint16 nValue, bool bIsBigEndian);
+    void _setElf32_Sym_st_name(qint64 nOffset, quint32 nValue);
+    void _setElf32_Sym_st_value(qint64 nOffset, quint32 nValue);
+    void _setElf32_Sym_st_size(qint64 nOffset, quint32 nValue);
+    void _setElf32_Sym_st_info(qint64 nOffset, quint8 nValue);
+    void _setElf32_Sym_st_other(qint64 nOffset, quint8 nValue);
+    void _setElf32_Sym_st_shndx(qint64 nOffset, quint16 nValue);
 
-    void setElf64_Sym_st_name(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
-    void setElf64_Sym_st_info(qint64 nOffset, quint8 nValue);
-    void setElf64_Sym_st_other(qint64 nOffset, quint8 nValue);
-    void setElf64_Sym_st_shndx(qint64 nOffset, quint16 nValue, bool bIsBigEndian);
-    void setElf64_Sym_st_value(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
-    void setElf64_Sym_st_size(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
+    void _setElf64_Sym_st_name(qint64 nOffset, quint32 nValue);
+    void _setElf64_Sym_st_info(qint64 nOffset, quint8 nValue);
+    void _setElf64_Sym_st_other(qint64 nOffset, quint8 nValue);
+    void _setElf64_Sym_st_shndx(qint64 nOffset, quint16 nValue);
+    void _setElf64_Sym_st_value(qint64 nOffset, quint64 nValue);
+    void _setElf64_Sym_st_size(qint64 nOffset, quint64 nValue);
 
     qint64 getSymSize();
     qint64 getSymTableSize(qint64 nOffset);
@@ -462,19 +422,19 @@ public:
     QList<XELF_DEF::Elf32_Rela> getElf32_RelaList(qint64 nOffset, qint64 nSize);
     QList<XELF_DEF::Elf64_Rela> getElf64_RelaList(qint64 nOffset, qint64 nSize);
 
-    void setElf32_Rel_r_offset(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
-    void setElf32_Rel_r_info(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
+    void _setElf32_Rel_r_offset(qint64 nOffset, quint32 nValue);
+    void _setElf32_Rel_r_info(qint64 nOffset, quint32 nValue);
 
-    void setElf64_Rel_r_offset(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
-    void setElf64_Rel_r_info(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
+    void _setElf64_Rel_r_offset(qint64 nOffset, quint64 nValue);
+    void _setElf64_Rel_r_info(qint64 nOffset, quint64 nValue);
 
-    void setElf32_Rela_r_offset(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
-    void setElf32_Rela_r_info(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
-    void setElf32_Rela_r_addend(qint64 nOffset, quint32 nValue, bool bIsBigEndian);
+    void _setElf32_Rela_r_offset(qint64 nOffset, quint32 nValue);
+    void _setElf32_Rela_r_info(qint64 nOffset, quint32 nValue);
+    void _setElf32_Rela_r_addend(qint64 nOffset, qint32 nValue);
 
-    void setElf64_Rela_r_offset(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
-    void setElf64_Rela_r_info(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
-    void setElf64_Rela_r_addend(qint64 nOffset, quint64 nValue, bool bIsBigEndian);
+    void _setElf64_Rela_r_offset(qint64 nOffset, quint64 nValue);
+    void _setElf64_Rela_r_info(qint64 nOffset, quint64 nValue);
+    void _setElf64_Rela_r_addend(qint64 nOffset, qint64 nValue);
 
     quint32 getNumberOfSections();
     quint16 getNumberOfPrograms();

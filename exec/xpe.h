@@ -25,6 +25,8 @@
 #include "xmsdos.h"
 #include "xpe_def.h"
 
+class XCLIAssembly;
+
 #if defined(_MSC_VER)  // For WinTrust TODO Check minGW
 // #include <wincrypt.h>
 #include <windows.h>
@@ -930,6 +932,7 @@ public:
     static bool isConsole(const QString &sFileName);
     bool isDriver();
     bool isNETPresent();
+    void initCLIAssembly(XCLIAssembly *pCLIAssembly, PDSTRUCT *pPdStruct = nullptr);
 
     CLI_INFO getCliInfo(bool bFindHidden, PDSTRUCT *pPdStruct = nullptr);
     CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);

@@ -13,6 +13,11 @@ SOURCES += \
     include($$PWD/xmsdos.pri)
 }
 
+!contains(XCONFIG, xcliassembly) {
+    XCONFIG += xcliassembly
+    include($$PWD/xcliassembly.pri)
+}
+
 win32-msvc* {
     # TODO Check MinGW
     LIBS += wintrust.lib    # for WinTrust
