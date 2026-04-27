@@ -847,10 +847,48 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
         sFiltered = sFiltered.mid(nHashIdx + 1);
     }
 
-    // Strip params (everything from '?' onward)
+    // Parse params before stripping them
+    XBinary::XLOC xLoc = {};
+    XBinary::XFTYPE xfType = XBinary::XFTYPE_UNKNOWN;
+    qint32 nCount = 0;
     qint32 nParamIdx = sFiltered.indexOf('?');
     if (nParamIdx != -1) {
+        const QString sParams = sFiltered.mid(nParamIdx + 1);
         sFiltered = sFiltered.left(nParamIdx);
+
+        for (const QString &sParam : sParams.split('&')) {
+            qint32 nEqIdx = sParam.indexOf('=');
+            if (nEqIdx != -1) {
+                const QString sKey = sParam.left(nEqIdx);
+                const QString sValue = sParam.mid(nEqIdx + 1);
+                if (sKey == "offset") {
+                    bool bOk = false;
+                    qint64 nOffset = sValue.toLongLong(&bOk, 16);
+                    if (!bOk) {
+                        nOffset = sValue.toLongLong(&bOk, 10);
+                    }
+                    if (bOk) {
+                        xLoc = XBinary::offsetToLoc(nOffset);
+                    }
+                } else if (sKey == "type") {
+                    const QString sUpper = sValue.toUpper();
+                    if (sUpper == "HEADER") {
+                        xfType = XBinary::XFTYPE_HEADER;
+                    } else if (sUpper == "TABLE") {
+                        xfType = XBinary::XFTYPE_TABLE;
+                    }
+                } else if (sKey == "rows") {
+                    bool bOk = false;
+                    qint32 nRows = sValue.toInt(&bOk, 16);
+                    if (!bOk) {
+                        nRows = sValue.toInt(&bOk, 10);
+                    }
+                    if (bOk) {
+                        nCount = nRows;
+                    }
+                }
+            }
+        }
     }
 
     // Try to extract optional FILETYPE:: prefix
@@ -880,6 +918,9 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
         xfStruct.fileType = fileType;
         xfStruct.nStructID = pBinary->ftStringToStructID(sStructName);
         xfStruct.pMemoryMap = &memoryMap;
+        xfStruct.xLoc = xLoc;
+        xfStruct.xfType = xfType;
+        xfStruct.nCount = nCount;
 
         QList<XBinary::XFHEADER> listResult = pBinary->getXFHeaders(xfStruct, pPdStruct);
 
