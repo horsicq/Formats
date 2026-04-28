@@ -71,6 +71,8 @@ XBinary::XCONVERT _TABLE_XMACH_STRUCTID[] = {
     {XMACH::STRUCTID_mach_header, "mach_header", QString("mach_header")},
     {XMACH::STRUCTID_mach_header_64, "mach_header_64", QString("mach_header_64")},
     {XMACH::STRUCTID_load_command, "load_command", QString("load_command")},
+    {XMACH::STRUCTID_segment_command, "segment", QString("segment")},
+    {XMACH::STRUCTID_segment_command_64, "segment_64", QString("segment_64")},
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_HeaderMagics[] = {
@@ -5281,6 +5283,30 @@ QList<XBinary::XFRECORD> XMACH::getXFRecords(FT fileType, quint32 nStructID, con
     } else if (nStructID == STRUCTID_load_command) {
         listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::load_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::load_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+    } else if (nStructID == STRUCTID_segment_command) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::segment_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::segment_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"segname", (qint32)offsetof(XMACH_DEF::segment_command, segname), 16, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"vmaddr", (qint32)offsetof(XMACH_DEF::segment_command, vmaddr), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"vmsize", (qint32)offsetof(XMACH_DEF::segment_command, vmsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"fileoff", (qint32)offsetof(XMACH_DEF::segment_command, fileoff), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"filesize", (qint32)offsetof(XMACH_DEF::segment_command, filesize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"maxprot", (qint32)offsetof(XMACH_DEF::segment_command, maxprot), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"initprot", (qint32)offsetof(XMACH_DEF::segment_command, initprot), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"nsects", (qint32)offsetof(XMACH_DEF::segment_command, nsects), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"flags", (qint32)offsetof(XMACH_DEF::segment_command, flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_segment_command_64) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::segment_command_64, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::segment_command_64, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"segname", (qint32)offsetof(XMACH_DEF::segment_command_64, segname), 16, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"vmaddr", (qint32)offsetof(XMACH_DEF::segment_command_64, vmaddr), 8, XFRECORD_FLAG_NONE, VT_UINT64});
+        listResult.append({"vmsize", (qint32)offsetof(XMACH_DEF::segment_command_64, vmsize), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"fileoff", (qint32)offsetof(XMACH_DEF::segment_command_64, fileoff), 8, XFRECORD_FLAG_NONE, VT_UINT64});
+        listResult.append({"filesize", (qint32)offsetof(XMACH_DEF::segment_command_64, filesize), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"maxprot", (qint32)offsetof(XMACH_DEF::segment_command_64, maxprot), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"initprot", (qint32)offsetof(XMACH_DEF::segment_command_64, initprot), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"nsects", (qint32)offsetof(XMACH_DEF::segment_command_64, nsects), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"flags", (qint32)offsetof(XMACH_DEF::segment_command_64, flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
     }
 
     return listResult;
@@ -5381,6 +5407,41 @@ QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
         }
 
         xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_load_command), xfHeader.sParentTag);
+
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            for (qint32 i = 0; i < xfHeader.listRowLocations.count(); i++) {
+                qint64 nRowOffset = xfHeader.listRowLocations.at(i);
+                quint32 nCmd = read_uint32(nRowOffset + offsetof(XMACH_DEF::load_command, cmd), bIsBigEndian);
+
+                if ((nCmd == XMACH_DEF::S_LC_SEGMENT) || (nCmd == XMACH_DEF::S_LC_SEGMENT_64)) {
+                    XFSTRUCT _xfStruct = xfStruct;
+                    _xfStruct.sParent = xfHeader.sTag;
+                    _xfStruct.nStructID = (nCmd == XMACH_DEF::S_LC_SEGMENT_64) ? STRUCTID_segment_command_64 : STRUCTID_segment_command;
+                    _xfStruct.xLoc = offsetToLoc(nRowOffset);
+                    _xfStruct.nSize = (nCmd == XMACH_DEF::S_LC_SEGMENT_64) ? sizeof(XMACH_DEF::segment_command_64) : sizeof(XMACH_DEF::segment_command);
+
+                    listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+                }
+            }
+        }
+    } else if ((nStructID == STRUCTID_segment_command) || (nStructID == STRUCTID_segment_command_64)) {
+        bool bIs64 = (nStructID == STRUCTID_segment_command_64);
+        qint64 nStructSize = bIs64 ? sizeof(XMACH_DEF::segment_command_64) : sizeof(XMACH_DEF::segment_command);
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(nStructID);
+        xfHeader.xLoc = xfStruct.xLoc;
+        xfHeader.nSize = nStructSize;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, xfStruct.xLoc);
+        xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XMACH_LoadCommandTypes, sizeof(_TABLE_XMACH_LoadCommandTypes) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append({7, 0xFFFFFFFF, XFDATASTYPE_FLAGS, _TABLE_XMACH_VMProtections, sizeof(_TABLE_XMACH_VMProtections) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append({8, 0xFFFFFFFF, XFDATASTYPE_FLAGS, _TABLE_XMACH_VMProtections, sizeof(_TABLE_XMACH_VMProtections) / sizeof(XBinary::XIDSTRING)});
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
 
         listResult.append(xfHeader);
     }

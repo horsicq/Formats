@@ -213,6 +213,8 @@ public:
         STRUCTID_mach_header,
         STRUCTID_mach_header_64,
         STRUCTID_load_command,
+        STRUCTID_segment_command,
+        STRUCTID_segment_command_64,
     };
 
     XMACH(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
