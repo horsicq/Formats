@@ -853,6 +853,9 @@ QList<XBinary::XFHEADER> XMSDOS::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT
         xfHeader.xLoc = headerLoc;
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, headerLoc);
+        xfHeader.nSize = (xfStruct.nSize > 0) ? xfStruct.nSize
+                                              : ((nStructID == STRUCTID_IMAGE_DOS_HEADEREX) ? sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)
+                                                                                             : sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));
         // Field 0 = e_magic
         xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XMSDOS_ImageMagics, sizeof(_TABLE_XMSDOS_ImageMagics) / sizeof(XBinary::XIDSTRING)});
         xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);

@@ -73,6 +73,16 @@ public:
         TYPE_NUM
     };
 
+    enum STRUCTID {
+        STRUCTID_UNKNOWN = 0,
+        STRUCTID_ELF_EHDR32,
+        STRUCTID_ELF_EHDR64,
+        STRUCTID_ELF_PHDR32,
+        STRUCTID_ELF_PHDR64,
+        STRUCTID_ELF_SHDR32,
+        STRUCTID_ELF_SHDR64,
+    };
+
     XELF(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
     ~XELF();
 
@@ -447,6 +457,11 @@ public:
     virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct);
 
     virtual QString getMIMEString();
+
+    virtual QString structIDToString(quint32 nID);
+    virtual quint32 ftStringToStructID(const QString &sFtString);
+    virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct) override;
+    virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc) override;
 
     struct FIXDUMP_OPTIONS {
         bool bOptimizeSize;

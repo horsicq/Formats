@@ -142,6 +142,39 @@ XBinary::XIDSTRING _TABLE_XPE_ImageSectionHeaderAligns[] = {
     {0x00B00000, "1024BYTES"}, {0x00C00000, "2048BYTES"}, {0x00D00000, "4096BYTES"}, {0x00E00000, "8192BYTES"},
 };
 
+static qint32 _getXFRecordsSize(const QList<XBinary::XFRECORD> &listRecords)
+{
+    qint32 nResult = 0;
+
+    for (const XBinary::XFRECORD &record : listRecords) {
+        nResult = qMax(nResult, record.nOffset + record.nSize);
+    }
+
+    return nResult;
+}
+
+static void _filterXFRecordsBySize(QList<XBinary::XFRECORD> *pListRecords, qint64 nSize)
+{
+    if (nSize <= 0) {
+        return;
+    }
+
+    QList<XBinary::XFRECORD> listFiltered;
+
+    for (const XBinary::XFRECORD &record : qAsConst(*pListRecords)) {
+        if ((record.nOffset >= 0) && ((qint64)record.nOffset + record.nSize <= nSize)) {
+            listFiltered.append(record);
+        }
+    }
+
+    *pListRecords = listFiltered;
+}
+
+static qint32 _getXFHeaderSize(qint64 nSize, const QList<XBinary::XFRECORD> &listRecords)
+{
+    return (nSize > 0) ? (qint32)nSize : _getXFRecordsSize(listRecords);
+}
+
 XBinary::XIDSTRING _TABLE_XPE_ResourceTypes[] = {
     {1, "CURSOR"},
     {2, "BITMAP"},
@@ -9231,7 +9264,6 @@ quint32 XPE::ftStringToStructID(const QString &sFtString)
 QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
 {
     Q_UNUSED(fileType)
-    Q_UNUSED(xLoc)
 
     QList<XBinary::XFRECORD> listResult;
 
@@ -9330,8 +9362,146 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
     } else if (nStructID == STRUCTID_IMAGE_DATA_DIRECTORY) {
         listResult.append({"VirtualAddress", (qint32)offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
         listResult.append({"Size", (qint32)offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_EXPORT_DIRECTORY) {
+        listResult.append({"Characteristics", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Characteristics), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+        listResult.append({"MajorVersion", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MajorVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append({"MinorVersion", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MinorVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append({"Name", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Name), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"Base", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Base), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"NumberOfFunctions", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfFunctions), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"NumberOfNames", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfNames), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"AddressOfFunctions", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfFunctions), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"AddressOfNames", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNames), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"AddressOfNameOrdinals", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) {
+        listResult.append({"OriginalFirstThunk", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, OriginalFirstThunk), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+        listResult.append({"ForwarderChain", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, ForwarderChain), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"Name", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, Name), 4,
+                           XFRECORD_FLAG_RELATIVE_ADDRESS | XFRECORD_FLAG_RELATIVE_ADDRESS_STRING, VT_UINT32});
+        listResult.append({"FirstThunk", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, FirstThunk), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_DEBUG_DIRECTORY) {
+        listResult.append({"Characteristics", (qint32)offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, Characteristics), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+        listResult.append({"MajorVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, MajorVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append({"MinorVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, MinorVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append({"Type", (qint32)offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, Type), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"SizeOfData", (qint32)offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, SizeOfData), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"AddressOfRawData", (qint32)offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, AddressOfRawData), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"PointerToRawData", (qint32)offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, PointerToRawData), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_TLS_DIRECTORY32) {
+        listResult.append({"StartAddressOfRawData", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, StartAddressOfRawData), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"EndAddressOfRawData", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, EndAddressOfRawData), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"AddressOfIndex", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, AddressOfIndex), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"AddressOfCallBacks", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, AddressOfCallBacks), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"SizeOfZeroFill", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, SizeOfZeroFill), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"Characteristics", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, Characteristics), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_TLS_DIRECTORY64) {
+        listResult.append({"StartAddressOfRawData", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, StartAddressOfRawData), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"EndAddressOfRawData", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, EndAddressOfRawData), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"AddressOfIndex", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, AddressOfIndex), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"AddressOfCallBacks", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, AddressOfCallBacks), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"SizeOfZeroFill", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, SizeOfZeroFill), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"Characteristics", (qint32)offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, Characteristics), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32) {
+        listResult.append({"Size", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, Size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+        listResult.append({"MajorVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MajorVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append({"MinorVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MinorVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append({"GlobalFlagsClear", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GlobalFlagsClear), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"GlobalFlagsSet", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GlobalFlagsSet), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"CriticalSectionDefaultTimeout", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CriticalSectionDefaultTimeout), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"DeCommitFreeBlockThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DeCommitFreeBlockThreshold), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"DeCommitTotalFreeThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DeCommitTotalFreeThreshold), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"LockPrefixTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, LockPrefixTable), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"MaximumAllocationSize", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MaximumAllocationSize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"VirtualMemoryThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, VirtualMemoryThreshold), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"ProcessAffinityMask", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, ProcessAffinityMask), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"ProcessHeapFlags", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, ProcessHeapFlags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"CSDVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CSDVersion), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"DependentLoadFlags", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DependentLoadFlags), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"EditList", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, EditList), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"SecurityCookie", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, SecurityCookie), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"SEHandlerTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, SEHandlerTable), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"SEHandlerCount", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, SEHandlerCount), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"GuardCFCheckFunctionPointer", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFCheckFunctionPointer), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"GuardCFFunctionTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFFunctionTable), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"GuardCFFunctionCount", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFFunctionCount), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"GuardFlags", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardFlags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64) {
+        listResult.append({"Size", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, Size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+        listResult.append({"MajorVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MajorVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append({"MinorVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MinorVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append({"GlobalFlagsClear", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GlobalFlagsClear), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"GlobalFlagsSet", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GlobalFlagsSet), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"CriticalSectionDefaultTimeout", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CriticalSectionDefaultTimeout), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"DeCommitFreeBlockThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DeCommitFreeBlockThreshold), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"DeCommitTotalFreeThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DeCommitTotalFreeThreshold), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"LockPrefixTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, LockPrefixTable), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"MaximumAllocationSize", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MaximumAllocationSize), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"VirtualMemoryThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, VirtualMemoryThreshold), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"ProcessAffinityMask", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, ProcessAffinityMask), 8, XFRECORD_FLAG_NONE, VT_UINT64});
+        listResult.append({"ProcessHeapFlags", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, ProcessHeapFlags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"CSDVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CSDVersion), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"DependentLoadFlags", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DependentLoadFlags), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"EditList", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, EditList), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"SecurityCookie", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, SecurityCookie), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"SEHandlerTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, SEHandlerTable), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"SEHandlerCount", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, SEHandlerCount), 8, XFRECORD_FLAG_COUNT, VT_UINT64});
+        listResult.append({"GuardCFCheckFunctionPointer", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFCheckFunctionPointer), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"GuardCFFunctionTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFFunctionTable), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"GuardCFFunctionCount", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFFunctionCount), 8, XFRECORD_FLAG_COUNT, VT_UINT64});
+        listResult.append({"GuardFlags", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardFlags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) {
+        listResult.append({"BeginAddress", (qint32)offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, BeginAddress), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"EndAddress", (qint32)offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, EndAddress), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"UnwindData", (qint32)offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, UnwindData), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR) {
+        listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+        listResult.append({"OffsetModuleName", (qint32)offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, OffsetModuleName), 2, XFRECORD_FLAG_OFFSET, VT_UINT16});
+        listResult.append({"NumberOfModuleForwarderRefs", (qint32)offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, NumberOfModuleForwarderRefs), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+    } else if (nStructID == STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR) {
+        listResult.append({"AllAttributes", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, AllAttributes), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"DllNameRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, DllNameRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"ModuleHandleRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ModuleHandleRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"ImportAddressTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportAddressTableRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"ImportNameTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportNameTableRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"BoundImportAddressTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, BoundImportAddressTableRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"UnloadInformationTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, UnloadInformationTableRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_COR20_HEADER) {
+        listResult.append({"cb", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, cb), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"MajorRuntimeVersion", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, MajorRuntimeVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append({"MinorRuntimeVersion", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, MinorRuntimeVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append({"MetaData.VirtualAddress", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"MetaData.Size", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"Flags", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, Flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"EntryPointToken", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, EntryPointToken), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"Resources.VirtualAddress", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"Resources.Size", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"StrongNameSignature.VirtualAddress", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"StrongNameSignature.Size", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
     } else {
         listResult = XMSDOS::getXFRecords(fileType, nStructID, xLoc);
+    }
+
+    if (((nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32) || (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64)) && (xLoc.locType == LT_OFFSET) &&
+        checkOffsetSize(xLoc.nLocation, sizeof(quint32))) {
+        quint32 nLoadConfigSize = read_uint32(xLoc.nLocation);
+
+        if (nLoadConfigSize) {
+            QList<XBinary::XFRECORD> listFiltered;
+
+            for (const XBinary::XFRECORD &record : qAsConst(listResult)) {
+                if ((record.nOffset >= 0) && ((quint32)(record.nOffset + record.nSize) <= nLoadConfigSize)) {
+                    listFiltered.append(record);
+                }
+            }
+
+            listResult = listFiltered;
+        }
     }
 
     return listResult;
@@ -9375,6 +9545,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         xfHeader.xLoc = ntLoc;
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, ntLoc);
+        _filterXFRecordsBySize(&xfHeader.listFields, xfStruct.nSize);
+        xfHeader.nSize = _getXFHeaderSize(xfStruct.nSize, xfHeader.listFields);
         // Field 0 = Signature
         xfHeader.listDataSt.append(
             {0, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageNtHeadersSignatures, sizeof(_TABLE_XPE_ImageNtHeadersSignatures) / sizeof(XBinary::XIDSTRING)});
@@ -9417,6 +9589,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         xfHeader.xLoc = fhLoc;
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IMAGE_FILE_HEADER, fhLoc);
+        _filterXFRecordsBySize(&xfHeader.listFields, xfStruct.nSize);
+        xfHeader.nSize = _getXFHeaderSize(xfStruct.nSize, xfHeader.listFields);
         // Field 0 = Machine (list), Field 6 = Characteristics (flags)
         xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageFileHeaderMachines, sizeof(_TABLE_XPE_ImageFileHeaderMachines) / sizeof(XBinary::XIDSTRING)});
         xfHeader.listDataSt.append(
@@ -9438,12 +9612,13 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 xfSectionTable.xLoc = offsetToLoc(nSectionsTableOffset);
                 xfSectionTable.xfType = XFTYPE_TABLE;
                 xfSectionTable.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IMAGE_SECTION_HEADER, offsetToLoc(nSectionsTableOffset));
+                xfSectionTable.nSize = _getXFHeaderSize(0, xfSectionTable.listFields);
                 // Field 9 = Characteristics (flags)
                 xfSectionTable.listDataSt.append(
                     {9, 0xFFFFFFFF, XFDATASTYPE_FLAGS, _TABLE_XPE_ImageSectionHeaderFlags, sizeof(_TABLE_XPE_ImageSectionHeaderFlags) / sizeof(XBinary::XIDSTRING)});
 
                 for (qint32 i = 0; i < (qint32)nNumberOfSections; i++) {
-                    xfSectionTable.listRowLocations.append(nSectionsTableOffset + i * sizeof(XPE_DEF::IMAGE_SECTION_HEADER));
+                    xfSectionTable.listRowLocations.append(nSectionsTableOffset + i * xfSectionTable.nSize);
                 }
 
                 xfSectionTable.sTag = xfHeaderToTag(xfSectionTable, structIDToString(STRUCTID_IMAGE_SECTION_HEADER), xfSectionTable.sParentTag);
@@ -9462,6 +9637,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
         xfHeader.xLoc = ohLoc;
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, ohLoc);
+        _filterXFRecordsBySize(&xfHeader.listFields, xfStruct.nSize);
+        xfHeader.nSize = _getXFHeaderSize(xfStruct.nSize, xfHeader.listFields);
         // Field 0 = Magic (list)
         xfHeader.listDataSt.append(
             {0, 0, XFDATASTYPE_LIST, _TABLE_XPE_ImageOptionalHeaderMagic, sizeof(_TABLE_XPE_ImageOptionalHeaderMagic) / sizeof(XBinary::XIDSTRING)});
@@ -9505,9 +9682,10 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 xfDataDirTable.xLoc = offsetToLoc(nDataDirOffset);
                 xfDataDirTable.xfType = XFTYPE_TABLE;
                 xfDataDirTable.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IMAGE_DATA_DIRECTORY, offsetToLoc(nDataDirOffset));
+                xfDataDirTable.nSize = _getXFHeaderSize(0, xfDataDirTable.listFields);
 
                 for (qint32 i = 0; i < nDataDirCount; i++) {
-                    xfDataDirTable.listRowLocations.append(nDataDirOffset + i * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+                    xfDataDirTable.listRowLocations.append(nDataDirOffset + i * xfDataDirTable.nSize);
                 }
 
                 QMap<quint64, QString> mapDataDirNames = getImageOptionalHeaderDataDirectoryS();
@@ -9519,7 +9697,296 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 xfDataDirTable.sTag = xfHeaderToTag(xfDataDirTable, structIDToString(STRUCTID_IMAGE_DATA_DIRECTORY), xfDataDirTable.sParentTag);
 
                 listResult.append(xfDataDirTable);
+
+                // Add children for each non-empty data directory entry
+                for (qint32 i = 0; i < nDataDirCount; i++) {
+                    XPE_DEF::IMAGE_DATA_DIRECTORY idd = read_IMAGE_DATA_DIRECTORY(nDataDirOffset + i * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+
+                    if (!isDataDirectoryValid(&idd, xfStruct.pMemoryMap)) {
+                        continue;
+                    }
+
+                    // Security dir (index 4) uses raw file offset, not RVA
+                    qint64 nChildOffset = -1;
+                    if (i == XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY) {
+                        if (checkOffsetSize(idd.VirtualAddress, idd.Size)) {
+                            nChildOffset = idd.VirtualAddress;
+                        }
+                    } else {
+                        nChildOffset = relAddressToOffset(xfStruct.pMemoryMap, idd.VirtualAddress);
+                    }
+
+                    if (nChildOffset == -1) {
+                        continue;
+                    }
+
+                    quint32 nChildStructID = STRUCTID_UNKNOWN;
+                    bool bChildIsTable = false;
+                    qint32 nChildRows = 1;
+
+                    switch (i) {
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT:
+                            nChildStructID = STRUCTID_IMAGE_EXPORT_DIRECTORY;
+                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT:
+                            nChildStructID = STRUCTID_IMAGE_IMPORT_DESCRIPTOR;
+                            bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR));
+                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION:
+                            if (getMode() == MODE_64) {
+                                nChildStructID = STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY;
+                                bChildIsTable = true;
+                                nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY));
+                            }
+                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DEBUG:
+                            nChildStructID = STRUCTID_IMAGE_DEBUG_DIRECTORY;
+                            bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY));
+                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS:
+                            nChildStructID = bIs64 ? STRUCTID_IMAGE_TLS_DIRECTORY64 : STRUCTID_IMAGE_TLS_DIRECTORY32;
+                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG:
+                            nChildStructID = bIs64 ? STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64 : STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32;
+                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT:
+                            nChildStructID = STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR;
+                            bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR));
+                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT:
+                            nChildStructID = STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR;
+                            bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR));
+                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR:
+                            nChildStructID = STRUCTID_IMAGE_COR20_HEADER;
+                            break;
+                        default: break;
+                    }
+
+                    if ((nChildStructID == STRUCTID_UNKNOWN) || (nChildRows <= 0)) {
+                        continue;
+                    }
+
+                    XLOC childLoc = offsetToLoc(nChildOffset);
+
+                    XFHEADER xfChild = {};
+                    xfChild.sParentTag = xfDataDirTable.sTag;
+                    xfChild.fileType = xfStruct.fileType;
+                    xfChild.structID = static_cast<XBinary::STRUCTID>(nChildStructID);
+                    xfChild.xLoc = childLoc;
+                    xfChild.xfType = bChildIsTable ? XFTYPE_TABLE : XFTYPE_HEADER;
+                    xfChild.listFields = getXFRecords(xfStruct.fileType, nChildStructID, childLoc);
+                    xfChild.nSize = _getXFHeaderSize(0, xfChild.listFields);
+
+                    if (bChildIsTable) {
+                        qint32 nStructSize = xfChild.nSize;
+                        if (nStructSize <= 0) nStructSize = (qint32)(idd.Size / nChildRows);
+                        xfChild.nSize = nStructSize;
+                        for (qint32 j = 0; j < nChildRows; j++) {
+                            xfChild.listRowLocations.append(nChildOffset + j * nStructSize);
+                        }
+                    }
+
+                    xfChild.sTag = xfHeaderToTag(xfChild, structIDToString(nChildStructID), xfChild.sParentTag);
+                    listResult.append(xfChild);
+                }
             }
+        }
+    } else if (nStructID == STRUCTID_IMAGE_SECTION_HEADER) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        qint32 nRows = xfStruct.nCount > 0 ? xfStruct.nCount : (qint32)getFileHeader_NumberOfSections();
+
+        if ((nOffset != -1) && (nRows > 0)) {
+            XFHEADER xfSectionTable = {};
+            xfSectionTable.sParentTag = xfStruct.sParent;
+            xfSectionTable.fileType = xfStruct.fileType;
+            xfSectionTable.structID = static_cast<XBinary::STRUCTID>(STRUCTID_IMAGE_SECTION_HEADER);
+            xfSectionTable.xLoc = xfStruct.xLoc;
+            xfSectionTable.xfType = XFTYPE_TABLE;
+            xfSectionTable.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IMAGE_SECTION_HEADER, xfStruct.xLoc);
+            xfSectionTable.nSize = _getXFHeaderSize(xfStruct.nSize, xfSectionTable.listFields);
+            xfSectionTable.listDataSt.append(
+                {9, 0xFFFFFFFF, XFDATASTYPE_FLAGS, _TABLE_XPE_ImageSectionHeaderFlags, sizeof(_TABLE_XPE_ImageSectionHeaderFlags) / sizeof(XBinary::XIDSTRING)});
+            for (qint32 i = 0; i < nRows; i++) {
+                xfSectionTable.listRowLocations.append(nOffset + i * xfSectionTable.nSize);
+            }
+            xfSectionTable.sTag = xfHeaderToTag(xfSectionTable, structIDToString(STRUCTID_IMAGE_SECTION_HEADER), xfSectionTable.sParentTag);
+            listResult.append(xfSectionTable);
+        }
+    } else if (nStructID == STRUCTID_IMAGE_DATA_DIRECTORY) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        quint32 nNumberOfRvaAndSizes = getOptionalHeader_NumberOfRvaAndSizes();
+        qint32 nRows = xfStruct.nCount > 0 ? xfStruct.nCount : (qint32)qMin((quint32)16, nNumberOfRvaAndSizes);
+
+        if ((nOffset != -1) && (nRows > 0)) {
+            XFHEADER xfDataDirTable = {};
+            xfDataDirTable.sParentTag = xfStruct.sParent;
+            xfDataDirTable.fileType = xfStruct.fileType;
+            xfDataDirTable.structID = static_cast<XBinary::STRUCTID>(STRUCTID_IMAGE_DATA_DIRECTORY);
+            xfDataDirTable.xLoc = xfStruct.xLoc;
+            xfDataDirTable.xfType = XFTYPE_TABLE;
+            xfDataDirTable.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IMAGE_DATA_DIRECTORY, xfStruct.xLoc);
+            xfDataDirTable.nSize = _getXFHeaderSize(xfStruct.nSize, xfDataDirTable.listFields);
+            for (qint32 i = 0; i < nRows; i++) {
+                xfDataDirTable.listRowLocations.append(nOffset + i * xfDataDirTable.nSize);
+            }
+            QMap<quint64, QString> mapDataDirNames = getImageOptionalHeaderDataDirectoryS();
+            for (qint32 i = 0; i < nRows; i++) {
+                xfDataDirTable.listRowNames.append(mapDataDirNames.value(i));
+            }
+            xfDataDirTable.sTag = xfHeaderToTag(xfDataDirTable, structIDToString(STRUCTID_IMAGE_DATA_DIRECTORY), xfDataDirTable.sParentTag);
+            listResult.append(xfDataDirTable);
+
+            if (xfStruct.bIsParent) {
+                bool bIs64 = is64();
+                for (qint32 i = 0; i < nRows; i++) {
+                    XPE_DEF::IMAGE_DATA_DIRECTORY idd = read_IMAGE_DATA_DIRECTORY(nOffset + i * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+
+                    if (!isDataDirectoryValid(&idd, xfStruct.pMemoryMap)) {
+                        continue;
+                    }
+
+                    qint64 nChildOffset = -1;
+                    if (i == XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY) {
+                        if (checkOffsetSize(idd.VirtualAddress, idd.Size)) {
+                            nChildOffset = idd.VirtualAddress;
+                        }
+                    } else {
+                        nChildOffset = relAddressToOffset(xfStruct.pMemoryMap, idd.VirtualAddress);
+                    }
+
+                    if (nChildOffset == -1) {
+                        continue;
+                    }
+
+                    quint32 nChildStructID = STRUCTID_UNKNOWN;
+                    bool bChildIsTable = false;
+                    qint32 nChildRows = 1;
+
+                    switch (i) {
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT:   nChildStructID = STRUCTID_IMAGE_EXPORT_DIRECTORY; break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT:
+                            nChildStructID = STRUCTID_IMAGE_IMPORT_DESCRIPTOR; bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR)); break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION:
+                            if (getMode() == MODE_64) {
+                                nChildStructID = STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY; bChildIsTable = true;
+                                nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY));
+                            } break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DEBUG:
+                            nChildStructID = STRUCTID_IMAGE_DEBUG_DIRECTORY; bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY)); break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS:
+                            nChildStructID = bIs64 ? STRUCTID_IMAGE_TLS_DIRECTORY64 : STRUCTID_IMAGE_TLS_DIRECTORY32; break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG:
+                            nChildStructID = bIs64 ? STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64 : STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32; break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT:
+                            nChildStructID = STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR; bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR)); break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT:
+                            nChildStructID = STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR; bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR)); break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR:
+                            nChildStructID = STRUCTID_IMAGE_COR20_HEADER; break;
+                        default: break;
+                    }
+
+                    if ((nChildStructID == STRUCTID_UNKNOWN) || (nChildRows <= 0)) {
+                        continue;
+                    }
+
+                    XLOC childLoc = offsetToLoc(nChildOffset);
+
+                    XFHEADER xfChild = {};
+                    xfChild.sParentTag = xfDataDirTable.sTag;
+                    xfChild.fileType = xfStruct.fileType;
+                    xfChild.structID = static_cast<XBinary::STRUCTID>(nChildStructID);
+                    xfChild.xLoc = childLoc;
+                    xfChild.xfType = bChildIsTable ? XFTYPE_TABLE : XFTYPE_HEADER;
+                    xfChild.listFields = getXFRecords(xfStruct.fileType, nChildStructID, childLoc);
+                    xfChild.nSize = _getXFHeaderSize(0, xfChild.listFields);
+
+                    if (bChildIsTable) {
+                        qint32 nStructSize = xfChild.nSize;
+                        if (nStructSize <= 0) nStructSize = (qint32)(idd.Size / nChildRows);
+                        xfChild.nSize = nStructSize;
+                        for (qint32 j = 0; j < nChildRows; j++) {
+                            xfChild.listRowLocations.append(nChildOffset + j * nStructSize);
+                        }
+                    }
+
+                    xfChild.sTag = xfHeaderToTag(xfChild, structIDToString(nChildStructID), xfChild.sParentTag);
+                    listResult.append(xfChild);
+                }
+            }
+        }
+    } else if ((nStructID == STRUCTID_IMAGE_EXPORT_DIRECTORY) ||
+               (nStructID == STRUCTID_IMAGE_TLS_DIRECTORY32) ||
+               (nStructID == STRUCTID_IMAGE_TLS_DIRECTORY64) ||
+               (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32) ||
+               (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64) ||
+               (nStructID == STRUCTID_IMAGE_COR20_HEADER)) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+        XLOC headerLoc = xfStruct.xLoc;
+
+        if (nOffset == -1) {
+            if (nStructID == STRUCTID_IMAGE_EXPORT_DIRECTORY) {
+                nOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
+            } else if ((nStructID == STRUCTID_IMAGE_TLS_DIRECTORY32) || (nStructID == STRUCTID_IMAGE_TLS_DIRECTORY64)) {
+                nOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS);
+            } else if ((nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32) || (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64)) {
+                nOffset = getLoadConfigDirectoryOffset();
+            } else if (nStructID == STRUCTID_IMAGE_COR20_HEADER) {
+                nOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+            }
+
+            if (nOffset != -1) {
+                headerLoc = offsetToLoc(nOffset);
+            }
+        }
+
+        if (nOffset != -1) {
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(nStructID);
+            xfHeader.xLoc = headerLoc;
+            xfHeader.xfType = XFTYPE_HEADER;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, headerLoc);
+            _filterXFRecordsBySize(&xfHeader.listFields, xfStruct.nSize);
+            xfHeader.nSize = _getXFHeaderSize(xfStruct.nSize, xfHeader.listFields);
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    } else if ((nStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) ||
+               (nStructID == STRUCTID_IMAGE_DEBUG_DIRECTORY) ||
+               (nStructID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) ||
+               (nStructID == STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR) ||
+               (nStructID == STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR)) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        qint32 nRows = xfStruct.nCount;
+        if ((nOffset != -1) && (nRows > 0)) {
+            XFHEADER xfTable = {};
+            xfTable.sParentTag = xfStruct.sParent;
+            xfTable.fileType = xfStruct.fileType;
+            xfTable.structID = static_cast<XBinary::STRUCTID>(nStructID);
+            xfTable.xLoc = xfStruct.xLoc;
+            xfTable.xfType = XFTYPE_TABLE;
+            xfTable.listFields = getXFRecords(xfStruct.fileType, nStructID, xfStruct.xLoc);
+            qint32 nStructSize = _getXFHeaderSize(xfStruct.nSize, xfTable.listFields);
+            if (nStructSize > 0) {
+                xfTable.nSize = nStructSize;
+                for (qint32 i = 0; i < nRows; i++) {
+                    xfTable.listRowLocations.append(nOffset + i * nStructSize);
+                }
+            }
+            xfTable.sTag = xfHeaderToTag(xfTable, structIDToString(nStructID), xfTable.sParentTag);
+            listResult.append(xfTable);
         }
     } else {
         listResult = XMSDOS::getXFHeaders(xfStruct, pPdStruct);

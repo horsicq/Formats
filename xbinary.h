@@ -971,6 +971,7 @@ public:
         XFRECORD_FLAG_UNIXTIME = 0x00020000,
         XFRECORD_FLAG_FILETIME = 0x00040000,
         XFRECORD_FLAG_COUNT = 0x00080000,
+        XFRECORD_FLAG_RELATIVE_ADDRESS_STRING = 0x00100000,
     };
 
     struct XFRECORD {
@@ -1203,7 +1204,7 @@ public:
     QList<XFHEADER> _getXFHeaders(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct);
     virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc);
-    QList<QVariant> getXFRecordValues(const QList<XFRECORD> &listXFRecords, const XLOC &xLoc);
+    virtual QList<QVariant> getXFRecordValues(const QList<XFRECORD> &listXFRecords, const XLOC &xLoc);
 
     static QString xfHeaderToTag(const XFHEADER &xfHeader, const QString &sStructName, const QString &sParentTag);
     static QString xfHeaderToString(const XFHEADER &xfHeader, const QString &sStructName, const QString &sParentString);

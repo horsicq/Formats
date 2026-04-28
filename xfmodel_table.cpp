@@ -187,6 +187,14 @@ void XFModel_table::_rebuildColumnMap()
             presCol.nDataStIndex = -1;
             m_listPresentationColumns.append(presCol);
         }
+
+        if (xfRecord.nFlags & XBinary::XFRECORD_FLAG_RELATIVE_ADDRESS_STRING) {
+            PRESENTATION_COLUMN presCol = {};
+            presCol.nFieldIndex = i;
+            presCol.presentationType = PT_REL_ADDRESS_STRING;
+            presCol.nDataStIndex = -1;
+            m_listPresentationColumns.append(presCol);
+        }
     }
 
     // Build ordered column map
@@ -311,7 +319,8 @@ QVariant XFModel_table::data(const QModelIndex &index, int role) const
                         quint64 nValue = listRowValues.at(nFieldIndex).toULongLong();
 
                         XBinary::XFRECORD xfRecord = {};
-                        if ((presCol.presentationType == PT_VERSION) && (nFieldIndex < m_listRowFields.at(nRow).count())) {
+                        if (((presCol.presentationType == PT_VERSION) || (presCol.presentationType == PT_REL_ADDRESS_STRING)) &&
+                            (nFieldIndex < m_listRowFields.at(nRow).count())) {
                             xfRecord = m_listRowFields.at(nRow).at(nFieldIndex);
                         }
 
@@ -321,7 +330,19 @@ QVariant XFModel_table::data(const QModelIndex &index, int role) const
                             xfDataSt = m_xfHeader.listDataSt.at(nDataStIndex);
                         }
 
-                        result = presentationToString(presCol.presentationType, nValue, xfRecord, xfDataSt);
+                        if (presCol.presentationType == PT_REL_ADDRESS_STRING) {
+                            qint64 nStringOffset = -1;
+
+                            if ((m_pXBinary != nullptr) && nValue) {
+                                nStringOffset = m_pXBinary->relAddressToOffset((qint64)nValue);
+                            }
+
+                            if (nStringOffset != -1) {
+                                result = m_pXBinary->read_utf8String(nStringOffset);
+                            }
+                        } else {
+                            result = presentationToString(presCol.presentationType, nValue, xfRecord, xfDataSt);
+                        }
                     }
                 }
             }

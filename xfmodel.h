@@ -52,7 +52,8 @@ public:
         PT_FILETIME,
         PT_VERSION,
         PT_COUNT,
-        PT_SIZE
+        PT_SIZE,
+        PT_REL_ADDRESS_STRING
     };
 
     explicit XFModel(QObject *pParent);

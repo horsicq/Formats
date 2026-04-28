@@ -850,6 +850,7 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
     // Parse params before stripping them
     XBinary::XLOC xLoc = {};
     XBinary::XFTYPE xfType = XBinary::XFTYPE_UNKNOWN;
+    qint64 nSize = 0;
     qint32 nCount = 0;
     qint32 nParamIdx = sFiltered.indexOf('?');
     if (nParamIdx != -1) {
@@ -876,6 +877,12 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
                         xfType = XBinary::XFTYPE_HEADER;
                     } else if (sUpper == "TABLE") {
                         xfType = XBinary::XFTYPE_TABLE;
+                    }
+                } else if (sKey == "size") {
+                    bool bOk = false;
+                    qint64 _nSize = sValue.toLongLong(&bOk, 0);
+                    if (bOk && (_nSize > 0)) {
+                        nSize = _nSize;
                     }
                 } else if (sKey == "rows") {
                     bool bOk = false;
@@ -920,6 +927,21 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
         xfStruct.pMemoryMap = &memoryMap;
         xfStruct.xLoc = xLoc;
         xfStruct.xfType = xfType;
+
+        if ((xfType == XBinary::XFTYPE_TABLE) && (nSize > 0) && (nCount > 0)) {
+            qint64 nDefaultRowSize = 0;
+            QList<XBinary::XFRECORD> listFields = pBinary->getXFRecords(fileType, xfStruct.nStructID, xLoc);
+
+            for (const XBinary::XFRECORD &record : qAsConst(listFields)) {
+                nDefaultRowSize = qMax(nDefaultRowSize, (qint64)record.nOffset + record.nSize);
+            }
+
+            if ((nSize != nDefaultRowSize) && ((nSize % nCount) == 0)) {
+                nSize /= nCount;
+            }
+        }
+
+        xfStruct.nSize = nSize;
         xfStruct.nCount = nCount;
 
         QList<XBinary::XFHEADER> listResult = pBinary->getXFHeaders(xfStruct, pPdStruct);

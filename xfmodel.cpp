@@ -147,6 +147,7 @@ QString XFModel::flagsToString(quint64 nFlags) const
     if (nFlags & XBinary::XFRECORD_FLAG_UNIXTIME) listFlags.append("UNIXTIME");
     if (nFlags & XBinary::XFRECORD_FLAG_FILETIME) listFlags.append("FILETIME");
     if (nFlags & XBinary::XFRECORD_FLAG_COUNT) listFlags.append("COUNT");
+    if (nFlags & XBinary::XFRECORD_FLAG_RELATIVE_ADDRESS_STRING) listFlags.append("REL_ADDRESS_STRING");
 
     return listFlags.join("|");
 }

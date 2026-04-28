@@ -1378,12 +1378,29 @@ QString XBinary::xfHeaderToString(const XFHEADER &xfHeader, const QString &sStru
         listParams.append(QString("offset=0x%1").arg(valueToHexEx(xfHeader.xLoc.nLocation)));
     }
 
-    if (xfHeader.nSize > 0) {
-        listParams.append(QString("size=0x%1").arg(valueToHexEx(xfHeader.nSize)));
+    qint64 nSize = xfHeader.nSize;
+
+    if (nSize <= 0) {
+        qint32 nNumberOfFields = xfHeader.listFields.count();
+
+        for (qint32 i = 0; i < nNumberOfFields; i++) {
+            const XFRECORD &record = xfHeader.listFields.at(i);
+            nSize = qMax(nSize, (qint64)record.nOffset + record.nSize);
+        }
     }
 
-    if (xfHeader.listRowLocations.count() > 0) {
-        listParams.append(QString("rows=0x%1").arg(valueToHexEx(xfHeader.listRowLocations.count())));
+    qint32 nNumberOfRows = xfHeader.listRowLocations.count();
+
+    if ((xfHeader.xfType == XFTYPE_TABLE) && (nSize > 0) && (nNumberOfRows > 0)) {
+        nSize *= nNumberOfRows;
+    }
+
+    if (nSize > 0) {
+        listParams.append(QString("size=0x%1").arg(valueToHexEx(nSize)));
+    }
+
+    if (nNumberOfRows > 0) {
+        listParams.append(QString("rows=0x%1").arg(valueToHexEx(nNumberOfRows)));
     }
 
     if (xfHeader.bIsParentNeeded && (sParentString != "")) {
@@ -3066,32 +3083,20 @@ QString XBinary::read_utf8String(qint64 nOffset, qint64 nMaxSize)
 {
     QString sResult;
 
-    if (nMaxSize) {
-        qint32 nRealSize = 0;
+    if (nMaxSize > 0x10000) {
+        nMaxSize = 0x10000;
+    }
 
-        for (qint32 i = 0; i < nMaxSize; i++) {
-            quint8 nByte = read_uint8(nOffset + nRealSize);
+    if (nMaxSize > 0) {
+        QByteArray baBuffer = read_array(nOffset, nMaxSize);
+        qint32 nActualSize = (qint32)baBuffer.size();
+        qint32 nLen = 0;
 
-            if (nByte == 0) {
-                break;
-            }
-
-            // TODO Check !!!
-            if ((nByte >> 7) & 0x1) {
-                nRealSize++;
-            } else if ((nByte >> 5) & 0x1) {
-                nRealSize += 2;
-            } else if ((nByte >> 4) & 0x1) {
-                nRealSize += 3;
-            } else if ((nByte >> 3) & 0x1) {
-                nRealSize += 4;
-            }
+        while ((nLen < nActualSize) && (baBuffer.at(nLen) != 0)) {
+            nLen++;
         }
 
-        if (nRealSize) {
-            QByteArray baString = read_array(nOffset, nRealSize);
-            sResult = QString::fromUtf8(baString.data());
-        }
+        sResult = QString::fromUtf8(baBuffer.constData(), nLen);
     }
 
     return sResult;

@@ -840,8 +840,8 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY32 {
     quint32 LockPrefixTable;  // VA
     quint32 MaximumAllocationSize;
     quint32 VirtualMemoryThreshold;
-    quint32 ProcessHeapFlags;
     quint32 ProcessAffinityMask;
+    quint32 ProcessHeapFlags;
     quint16 CSDVersion;
     quint16 DependentLoadFlags;
     quint32 EditList;        // VA
