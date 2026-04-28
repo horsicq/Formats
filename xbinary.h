@@ -627,6 +627,8 @@ public:
         FT_ARJ,
         FT_ACE,
         FT_BROTLI,
+        FT_LZ4,
+        FT_LZMA,
 
         // TODO more
     };
@@ -981,6 +983,16 @@ public:
         quint64 nFlags;
         VT valueType;
     };
+
+    struct XFIXEDFIELD {
+        const char *pszName;
+        qint32 nOffset;  // From start
+        qint32 nSize;
+        quint64 nFlags;
+        VT valueType;
+    };
+
+    static QList<XFRECORD> XFIXEDFIELD_toXFRecords(const XFIXEDFIELD *pRecords, qint32 nRecordsSize);
 
     enum XFTYPE {
         XFTYPE_UNKNOWN = 0,
@@ -1661,7 +1673,7 @@ public:
     static bool copyFile(const QString &sSrcFileName, const QString &sDestFileName);
     static bool moveFile(const QString &sSrcFileName, const QString &sDestFileName);
     static bool moveFileToDirectory(const QString &sSrcFileName, const QString &sDestDirectory);
-    static QString convertFileNameSymbols(const QString &sFileName);
+    static QString convertFileNameSymbols(const QString &sFileName, const QString &sDefaultString = "_");
     static QString fixFileName(const QString &sFileName);
     static QString getBaseFileName(const QString &sFileName);
     static bool createDirectory(const QString &sDirectoryName);

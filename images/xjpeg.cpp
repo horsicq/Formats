@@ -56,45 +56,15 @@ bool XJpeg::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 
 XBinary::_MEMORY_MAP XJpeg::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(mapMode)
-
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
     XBinary::_MEMORY_MAP result = {};
-    result.nBinarySize = getSize();
 
-    qint32 nIndex = 0;
-
-    QList<XJpeg::CHUNK> listChunks = getChunks(pPdStruct);
-
-    qint32 nNumberOfChunks = listChunks.count();
-
-    for (qint32 i = 0; (i < nNumberOfChunks) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-        _MEMORY_RECORD record = {};
-
-        record.nIndex = nIndex++;
-
-        if (listChunks.at(i).bEntropyCodedData) {
-            record.filePart = FILEPART_DATA;
-            record.sName = tr("Data");
-        } else {
-            record.filePart = FILEPART_OBJECT;
-            record.sName = XBinary::valueToHex(listChunks.at(i).nId);
-        }
-
-        record.nOffset = listChunks.at(i).nDataOffset;
-        record.nSize = listChunks.at(i).nDataSize;
-        record.nAddress = -1;
-
-        result.listRecords.append(record);
+    if (mapMode == MAPMODE_UNKNOWN) {
+        mapMode = MAPMODE_REGIONS;
     }
 
-    _handleOverlay(&result);
+    if (mapMode == MAPMODE_REGIONS) {
+        result = _getMemoryMap(FILEPART_HEADER | FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
+    }
 
     return result;
 }

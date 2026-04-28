@@ -81,6 +81,8 @@
 #include "xjar.h"
 #include "xlha.h"
 #include "xlzip.h"
+#include "xlz4.h"
+#include "xlzma.h"
 #include "xlzo.h"
 #include "xmachofat.h"
 #include "xminidump.h"

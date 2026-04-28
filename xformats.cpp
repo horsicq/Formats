@@ -116,6 +116,11 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_SZDD, fileType)) return new XSZDD(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_BZIP2, fileType)) return new XBZIP2(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_BROTLI, fileType)) return new XBrotli(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_LZ4, fileType)) return new XLZ4(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_LZMA, fileType)) return new XLZMA(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_LZO, fileType)) return new XLzo(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_COMPRESS, fileType)) return new XCompressZ(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_ZSTD, fileType)) return new XZstd(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_LZIP, fileType)) return new XLzip(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_TAR, fileType)) return new XTAR(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_XZ, fileType)) return new XXZ(pDevice);
@@ -1335,6 +1340,12 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             } else if (XCab::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_CAB);
+            } else if (XLZ4::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_LZ4);
+            } else if (XLZMA::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_LZMA);
             } else if (XLzo::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_LZO);
@@ -1445,10 +1456,12 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
                 stResult.insert(xandroid.getFileType());  // FT_ANDROIDXML or FT_ANDROIDASRC
             } else
 #endif
-                if (XDER::isValid(pDevice, pPdStruct)) {
-                stResult.insert(XBinary::FT_DOCUMENT);
-                stResult.insert(XBinary::FT_DER);
-            } else if (XJavaClass::isValid(pDevice, pPdStruct)) {
+            // if (XDER::isValid(pDevice, pPdStruct)) {
+            //     stResult.insert(XBinary::FT_DOCUMENT);
+            //     stResult.insert(XBinary::FT_DER);
+            // } else
+
+            if (XJavaClass::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_JAVACLASS);
             } else if (XPYC::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_PYC);

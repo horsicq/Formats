@@ -312,6 +312,8 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_ARJ, "ARJ", QString("ARJ")},
     {XBinary::FT_ACE, "ACE", QString("ACE")},
     {XBinary::FT_BROTLI, "Brotli", QString("Brotli")},
+    {XBinary::FT_LZ4, "LZ4", QString("LZ4")},
+    {XBinary::FT_LZMA, "LZMA", QString("LZMA")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -1279,6 +1281,28 @@ QList<XBinary::XFRECORD> XBinary::getXFRecords(FT fileType, quint32 nStructID, c
     Q_UNUSED(xLoc)
 
     QList<XBinary::XFRECORD> listResult;
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XBinary::XFIXEDFIELD_toXFRecords(const XFIXEDFIELD *pRecords, qint32 nRecordsSize)
+{
+    QList<XBinary::XFRECORD> listResult;
+
+    if (pRecords && (nRecordsSize > 0)) {
+        for (qint32 i = 0; i < nRecordsSize; i++) {
+            const XFIXEDFIELD &record = pRecords[i];
+
+            XBinary::XFRECORD xfRecord = {};
+            xfRecord.sName = (record.pszName) ? QString::fromLatin1(record.pszName) : QString();
+            xfRecord.nOffset = record.nOffset;
+            xfRecord.nSize = record.nSize;
+            xfRecord.nFlags = record.nFlags;
+            xfRecord.valueType = record.valueType;
+
+            listResult.append(xfRecord);
+        }
+    }
 
     return listResult;
 }
@@ -6796,7 +6820,7 @@ bool XBinary::moveFileToDirectory(const QString &sSrcFileName, const QString &sD
     return moveFile(sSrcFileName, sDestDirectory + QDir::separator() + fi.fileName());
 }
 
-QString XBinary::convertFileNameSymbols(const QString &sFileName)
+QString XBinary::convertFileNameSymbols(const QString &sFileName, const QString &sDefaultString)
 {
     QString sResult = sFileName;
 
@@ -6813,6 +6837,10 @@ QString XBinary::convertFileNameSymbols(const QString &sFileName)
     sResult = sResult.replace("\r", "_");
     sResult = sResult.replace("{", "_");
     sResult = sResult.replace("}", "_");
+
+    if (sResult.isEmpty()) {
+        sResult = sDefaultString;
+    }
 
     return sResult;
 }
@@ -8952,6 +8980,12 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "894C5A4F000D0A1A0A", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_LZO);
+        } else if (compareSignature(&memoryMap, "04224D18", 0)) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_LZ4);
+        } else if (compareSignature(&memoryMap, "5D000000", 0)) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_LZMA);
         } else if (compareSignature(&memoryMap, "1F9D", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_COMPRESS);
@@ -9118,6 +9152,12 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'BZh'..314159265359", 0) || compareSignature(&memoryMap, "'BZh'..17724538509000000000")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_BZIP2);
+        } else if (compareSignature(&memoryMap, "04224D18", 0)) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_LZ4);
+        } else if (compareSignature(&memoryMap, "5D000000", 0)) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_LZMA);
         } else if (compareSignature(&memoryMap, "28B52FFD", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_ZSTD);
@@ -9312,6 +9352,8 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_ARJ,
         FT_ACE,
         FT_BROTLI,
+        FT_LZ4,
+        FT_LZMA,
         FT_ARC,
         FT_FREEARC,
         FT_DEB,
@@ -9338,6 +9380,8 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_SZDD,
         FT_BZIP2,
         FT_BROTLI,
+        FT_LZ4,
+        FT_LZMA,
         FT_ZSTD,
         FT_XZ,
         FT_LZIP,
@@ -9472,6 +9516,8 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_SZDD)) listResult.append(FT_SZDD);
         if (stFileTypes.contains(FT_BZIP2)) listResult.append(FT_BZIP2);
         if (stFileTypes.contains(FT_BROTLI)) listResult.append(FT_BROTLI);
+        if (stFileTypes.contains(FT_LZ4)) listResult.append(FT_LZ4);
+        if (stFileTypes.contains(FT_LZMA)) listResult.append(FT_LZMA);
         if (stFileTypes.contains(FT_ZSTD)) listResult.append(FT_ZSTD);
         if (stFileTypes.contains(FT_XZ)) listResult.append(FT_XZ);
         if (stFileTypes.contains(FT_LZIP)) listResult.append(FT_LZIP);
@@ -13790,6 +13836,7 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) || pStFileTypes->contains(XBinary::FT_MACHO64) ||
         pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP) ||
         pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA) || pStFileTypes->contains(XBinary::FT_ARJ) ||
+        pStFileTypes->contains(XBinary::FT_LZ4) || pStFileTypes->contains(XBinary::FT_LZMA) ||
         pStFileTypes->contains(XBinary::FT_AMIGAHUNK) || pStFileTypes->contains(XBinary::FT_ATARIST)) {
         XBinary::removeFileTypes(pStFileTypes);
     }
@@ -16678,6 +16725,10 @@ QList<QString> XBinary::getSearchSignatures()
     } else if (XBinary::checkFileType(FT_BZIP2, fileType)) {
         listResult.append("314159265359");
         listResult.append("17724538509000000000");
+    } else if (XBinary::checkFileType(FT_LZ4, fileType)) {
+        listResult.append("04224D18");
+    } else if (XBinary::checkFileType(FT_LZMA, fileType)) {
+        listResult.append("5D000000");
     } else if (XBinary::checkFileType(FT_LHA, fileType)) {
         listResult.append("'-lh'..2d");
         listResult.append("'-lz'..2d");
