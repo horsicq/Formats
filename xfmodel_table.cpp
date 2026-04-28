@@ -195,6 +195,22 @@ void XFModel_table::_rebuildColumnMap()
             presCol.nDataStIndex = -1;
             m_listPresentationColumns.append(presCol);
         }
+
+        if (xfRecord.nFlags & XBinary::XFRECORD_FLAG_OFFSET_MUTF8STRING) {
+            PRESENTATION_COLUMN presCol = {};
+            presCol.nFieldIndex = i;
+            presCol.presentationType = PT_OFFSET_MUTF8STRING;
+            presCol.nDataStIndex = -1;
+            m_listPresentationColumns.append(presCol);
+        }
+
+        if (xfRecord.nFlags & XBinary::XFRECORD_FLAG_STRING_POOL_IDX) {
+            PRESENTATION_COLUMN presCol = {};
+            presCol.nFieldIndex = i;
+            presCol.presentationType = PT_STRING_POOL_IDX;
+            presCol.nDataStIndex = -1;
+            m_listPresentationColumns.append(presCol);
+        }
     }
 
     // Build ordered column map
@@ -338,7 +354,32 @@ QVariant XFModel_table::data(const QModelIndex &index, int role) const
                             }
 
                             if (nStringOffset != -1) {
-                                result = m_pXBinary->read_utf8String(nStringOffset);
+                                QString sTmp = m_pXBinary->read_utf8String(nStringOffset);
+                                bool bValid = !sTmp.isEmpty();
+                                for (QChar c : sTmp) {
+                                    if (c.unicode() < 0x20 || c.unicode() > 0x7E) { bValid = false; break; }
+                                }
+                                if (bValid) result = sTmp;
+                            }
+                        } else if (presCol.presentationType == PT_OFFSET_MUTF8STRING) {
+                            if (m_pXBinary != nullptr) {
+                                qint64 nStrOff = (qint64)nValue;
+                                XBinary::PACKED_UINT pu = m_pXBinary->read_uleb128(nStrOff, 5);
+                                if (pu.bIsValid) {
+                                    result = m_pXBinary->read_utf8String(nStrOff + pu.nByteSize);
+                                }
+                            }
+                        } else if (presCol.presentationType == PT_STRING_POOL_IDX) {
+                            if (m_pXBinary != nullptr && (nFieldIndex < m_listRowFields.at(nRow).count())) {
+                                XBinary::XFRECORD fieldRec = m_listRowFields.at(nRow).at(nFieldIndex);
+                                qint32 nIdx = (qint32)nValue;
+                                if (nIdx >= 0 && nIdx < fieldRec.nStringPoolSize) {
+                                    quint32 nStrDataOff = m_pXBinary->read_uint32(fieldRec.nStringPoolOffset + (qint64)nIdx * 4);
+                                    XBinary::PACKED_UINT pu = m_pXBinary->read_uleb128(nStrDataOff, 5);
+                                    if (pu.bIsValid) {
+                                        result = m_pXBinary->read_utf8String(nStrDataOff + pu.nByteSize);
+                                    }
+                                }
                             }
                         } else {
                             result = presentationToString(presCol.presentationType, nValue, xfRecord, xfDataSt);

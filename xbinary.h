@@ -974,6 +974,8 @@ public:
         XFRECORD_FLAG_FILETIME = 0x00040000,
         XFRECORD_FLAG_COUNT = 0x00080000,
         XFRECORD_FLAG_RELATIVE_ADDRESS_STRING = 0x00100000,
+        XFRECORD_FLAG_OFFSET_MUTF8STRING = 0x00200000,  // offset points to ULEB128-length-prefixed MUTF-8 string
+        XFRECORD_FLAG_STRING_POOL_IDX = 0x00400000,    // index into a string pool (nStringPoolOffset, nStringPoolSize)
     };
 
     struct XFRECORD {
@@ -982,6 +984,8 @@ public:
         qint32 nSize;
         quint64 nFlags;
         VT valueType;
+        qint64 nStringPoolOffset = 0;  // For XFRECORD_FLAG_STRING_POOL_IDX: file offset of string_ids array
+        qint32 nStringPoolSize = 0;    // For XFRECORD_FLAG_STRING_POOL_IDX: number of entries in the pool
     };
 
     struct XFIXEDFIELD {

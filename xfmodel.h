@@ -53,7 +53,9 @@ public:
         PT_VERSION,
         PT_COUNT,
         PT_SIZE,
-        PT_REL_ADDRESS_STRING
+        PT_REL_ADDRESS_STRING,
+        PT_OFFSET_MUTF8STRING,
+        PT_STRING_POOL_IDX
     };
 
     explicit XFModel(QObject *pParent);

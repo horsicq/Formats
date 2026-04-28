@@ -903,6 +903,15 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
         }
     }
 
+    // Strip optional display name prefix ("WORD FILETYPE::STRUCT" → "FILETYPE::STRUCT")
+    {
+        qint32 nSpaceIdx = sFiltered.indexOf(' ');
+        qint32 nColonIdx = sFiltered.indexOf("::");
+        if (nSpaceIdx != -1 && (nColonIdx == -1 || nSpaceIdx < nColonIdx)) {
+            sFiltered = sFiltered.mid(nSpaceIdx + 1);
+        }
+    }
+
     // Try to extract optional FILETYPE:: prefix
     XBinary::FT fileType = XBinary::FT_UNKNOWN;
     QString sStructName = sFiltered;

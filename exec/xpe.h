@@ -50,6 +50,7 @@ public:
         STRUCTID_IMAGE_DATA_DIRECTORY,
         STRUCTID_IMAGE_RESOURCE_DIRECTORY,
         STRUCTID_IMAGE_EXPORT_DIRECTORY,
+        STRUCTID_IMAGE_EXPORT_FUNCTION,
         STRUCTID_IMAGE_IMPORT_DESCRIPTOR,
         STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR,
         STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR,
@@ -1390,6 +1391,7 @@ private:
     // qint64 _getMinSectionOffset();  // TODO move to XBinary
     void _fixFileOffsets(qint64 nDelta);
     quint32 __getResourcesVersion(RESOURCES_VERSION *pResourcesVersionResult, qint64 nOffset, qint64 nSize, const QString &sPrefix, qint32 nLevel);
+    void _appendExportFunctionNames(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nExportDirOffset, const QString &sParentTag);
 };
 
 #endif  // XPE_H

@@ -289,6 +289,26 @@ QString XFModel::commentForField(qint32 nFieldIndex, const QVariant &varValue) c
         if (xfRecord.nFlags & XBinary::XFRECORD_FLAG_SIZE) {
             listComments.append(presentationToString(PT_SIZE, nValue, xfRecord, xfDataStEmpty));
         }
+
+        if ((xfRecord.nFlags & XBinary::XFRECORD_FLAG_RELATIVE_ADDRESS_STRING) && m_pXBinary) {
+            qint64 nStrOff = m_pXBinary->relAddressToOffset((qint64)nValue);
+            if (nStrOff != -1) {
+                QString sTmp = m_pXBinary->read_utf8String(nStrOff);
+                bool bValid = !sTmp.isEmpty();
+                for (QChar c : sTmp) {
+                    if (c.unicode() < 0x20 || c.unicode() > 0x7E) { bValid = false; break; }
+                }
+                if (bValid) listComments.append(sTmp);
+            }
+        }
+
+        if ((xfRecord.nFlags & XBinary::XFRECORD_FLAG_OFFSET_MUTF8STRING) && m_pXBinary) {
+            qint64 nStrOff = (qint64)nValue;
+            XBinary::PACKED_UINT pu = m_pXBinary->read_uleb128(nStrOff, 5);
+            if (pu.bIsValid) {
+                listComments.append(m_pXBinary->read_utf8String(nStrOff + pu.nByteSize));
+            }
+        }
     }
 
     return listComments.join("; ");
