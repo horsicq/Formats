@@ -10647,7 +10647,7 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice, quint32 nInit, quint32 *pCRCTable
         qint32 nBufferSize = binary.getBufferSize(pPdStruct);
         char *pBuffer = new char[nBufferSize];
 
-        while (nSize > 0) {
+        while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
             nTemp = qMin((qint64)nBufferSize, nSize);
 
             if (binary.read_array(nOffset, pBuffer, nTemp) != nTemp) {

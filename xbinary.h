@@ -984,8 +984,8 @@ public:
         qint32 nSize;
         quint64 nFlags;
         VT valueType;
-        qint64 nStringPoolOffset = 0;  // For XFRECORD_FLAG_STRING_POOL_IDX: file offset of string_ids array
-        qint32 nStringPoolSize = 0;    // For XFRECORD_FLAG_STRING_POOL_IDX: number of entries in the pool
+        // qint64 nStringPoolOffset = 0;  // For XFRECORD_FLAG_STRING_POOL_IDX: file offset of string_ids array
+        // qint32 nStringPoolSize = 0;    // For XFRECORD_FLAG_STRING_POOL_IDX: number of entries in the pool
     };
 
     struct XFIXEDFIELD {

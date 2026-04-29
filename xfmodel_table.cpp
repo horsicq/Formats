@@ -371,15 +371,15 @@ QVariant XFModel_table::data(const QModelIndex &index, int role) const
                             }
                         } else if (presCol.presentationType == PT_STRING_POOL_IDX) {
                             if (m_pXBinary != nullptr && (nFieldIndex < m_listRowFields.at(nRow).count())) {
-                                XBinary::XFRECORD fieldRec = m_listRowFields.at(nRow).at(nFieldIndex);
-                                qint32 nIdx = (qint32)nValue;
-                                if (nIdx >= 0 && nIdx < fieldRec.nStringPoolSize) {
-                                    quint32 nStrDataOff = m_pXBinary->read_uint32(fieldRec.nStringPoolOffset + (qint64)nIdx * 4);
-                                    XBinary::PACKED_UINT pu = m_pXBinary->read_uleb128(nStrDataOff, 5);
-                                    if (pu.bIsValid) {
-                                        result = m_pXBinary->read_utf8String(nStrDataOff + pu.nByteSize);
-                                    }
-                                }
+                                // XBinary::XFRECORD fieldRec = m_listRowFields.at(nRow).at(nFieldIndex);
+                                // qint32 nIdx = (qint32)nValue;
+                                // if (nIdx >= 0 && nIdx < fieldRec.nStringPoolSize) {
+                                //     quint32 nStrDataOff = m_pXBinary->read_uint32(fieldRec.nStringPoolOffset + (qint64)nIdx * 4);
+                                //     XBinary::PACKED_UINT pu = m_pXBinary->read_uleb128(nStrDataOff, 5);
+                                //     if (pu.bIsValid) {
+                                //         result = m_pXBinary->read_utf8String(nStrDataOff + pu.nByteSize);
+                                //     }
+                                // }
                             }
                         } else {
                             result = presentationToString(presCol.presentationType, nValue, xfRecord, xfDataSt);
