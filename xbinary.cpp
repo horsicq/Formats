@@ -10371,14 +10371,13 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pPdStr
 
     qint64 nCurrentSize = 0;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-
     bool bReadError = false;
 
     for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
         qint64 nOffset = pListOS->at(i).nOffset;
         qint64 nSize = pListOS->at(i).nSize;
 
+        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
         XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
 
         while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
@@ -10400,9 +10399,9 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pPdStr
 
             XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nCurrentSize);
         }
-    }
 
-    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+    }
 
     delete[] pBuffer;
 
@@ -15139,6 +15138,8 @@ void XBinary::setPdStructInit(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nTotal)
             pPdStruct->_pdRecord[nIndex].sStatus.clear();
         }
     }
+
+    // qDebug("setPdStructInit: %d", nIndex);
 }
 
 void XBinary::setPdStructTotal(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue)
@@ -15191,6 +15192,8 @@ void XBinary::setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex)
             pPdStruct->nFinished++;
         }
     }
+
+    // qDebug("setPdStructFinished: %d", nIndex);
 }
 
 void XBinary::setPdStructInfoString(PDSTRUCT *pPdStruct, const QString &sInfoString)
@@ -15256,6 +15259,14 @@ qint32 XBinary::getFreeIndex(PDSTRUCT *pPdStruct)
             }
         }
     }
+
+    if (nResult == -1) {
+#ifdef QT_DEBUG
+        qDebug("Cannot create an index !!!");
+#endif
+    }
+
+    // qDebug("getFreeIndex: %d", nResult);
 
     return nResult;
 }
