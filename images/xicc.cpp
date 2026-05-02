@@ -24,7 +24,7 @@ XBinary::XCONVERT _TABLE_XICC_STRUCTID[] = {
     {XICC::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XICC::STRUCTID_HEADER, "Header", QObject::tr("Header")},
     {XICC::STRUCTID_TAG, "Tag", QObject::tr("Tag")},
-    {XICC::STRUCTID_REGION, "Region", QString("Region")},
+    {XICC::STRUCTID_REGION, "Region", QObject::tr("Region")},
 };
 
 XICC::XICC(QIODevice *pDevice) : XBinary(pDevice)
@@ -175,51 +175,20 @@ QList<XICC::TAG> XICC::_getTagsBySignature(QList<TAG> *pListTags, quint32 nSigna
 
 QString XICC::getTagName(quint32 nSignature)
 {
-    QString sResult;
-
-    switch (nSignature) {
-        case 0x64657363: sResult = "desc"; break;  // Description
-        case 0x63707274: sResult = "cprt"; break;  // Copyright
-        case 0x77747074: sResult = "wtpt"; break;  // White point
-        case 0x72545243: sResult = "rTRC"; break;  // Red tone reproduction curve
-        case 0x67545243: sResult = "gTRC"; break;  // Green tone reproduction curve
-        case 0x62545243: sResult = "bTRC"; break;  // Blue tone reproduction curve
-        case 0x72585950: sResult = "rXYZ"; break;  // Red colorant
-        case 0x67585950: sResult = "gXYZ"; break;  // Green colorant
-        case 0x62585950: sResult = "bXYZ"; break;  // Blue colorant
-        case 0x646D6E64: sResult = "dmnd"; break;  // Device manufacturer description
-        case 0x646D6464: sResult = "dmdd"; break;  // Device model description
-        default: sResult = _fourCCToString(nSignature); break;
-    }
-
-    return sResult;
+    return _fourCCToString(nSignature);
 }
 
 QString XICC::getDescription(QList<TAG> *pListTags, PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
-    QString sResult;
+    Q_UNUSED(pPdStruct)
 
     QList<XICC::TAG> listDesc = _getTagsBySignature(pListTags, 0x64657363);  // 'desc'
 
-    if (listDesc.count() > 0) {
-        TAG tagDesc = listDesc.at(0);
-        quint32 nType = read_uint32(tagDesc.nOffset, true);
-
-        if (nType == 0x64657363) {  // 'desc' type
-            sResult = _readTextType(tagDesc.nOffset);
-        } else if (nType == 0x6D6C7563) {  // 'mluc' type
-            sResult = _readMultiLocalizedUnicodeType(tagDesc.nOffset);
-        }
+    if (!listDesc.isEmpty()) {
+        return _readTagContent(listDesc.at(0).nOffset);
     }
 
-    return sResult;
+    return {};
 }
 
 QString XICC::getDescription()
@@ -231,29 +200,15 @@ QString XICC::getDescription()
 
 QString XICC::getCopyright(QList<TAG> *pListTags, PDSTRUCT *pPdStruct)
 {
-    XBinary::PDSTRUCT pdStructEmpty = {};
-
-    if (!pPdStruct) {
-        pdStructEmpty = XBinary::createPdStruct();
-        pPdStruct = &pdStructEmpty;
-    }
-
-    QString sResult;
+    Q_UNUSED(pPdStruct)
 
     QList<XICC::TAG> listCopyright = _getTagsBySignature(pListTags, 0x63707274);  // 'cprt'
 
-    if (listCopyright.count() > 0) {
-        TAG tagCopyright = listCopyright.at(0);
-        quint32 nType = read_uint32(tagCopyright.nOffset, true);
-
-        if (nType == 0x74657874) {  // 'text' type
-            sResult = _readTextType(tagCopyright.nOffset);
-        } else if (nType == 0x6D6C7563) {  // 'mluc' type
-            sResult = _readMultiLocalizedUnicodeType(tagCopyright.nOffset);
-        }
+    if (!listCopyright.isEmpty()) {
+        return _readTagContent(listCopyright.at(0).nOffset);
     }
 
-    return sResult;
+    return {};
 }
 
 QString XICC::getCopyright()
@@ -437,38 +392,6 @@ QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
     return listResult;
 }
 
-// qint32 XICC::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
-//                             void *pUserData, PDSTRUCT *pPdStruct)
-// {
-//     Q_UNUSED(pUserData)
-//     Q_UNUSED(pPdStruct)
-
-//     qint32 nResult = 0;
-
-//     if (dataRecordsOptions.nID == STRUCTID_TAG) {
-//         if (nRow < getTags().count()) {
-//             QList<XICC::TAG> listTags = getTags();
-//             XICC::TAG tag = listTags.at(nRow);
-
-//             DATA_RECORD_ROW record = {};
-
-//             record.nRow = nRow;
-//             record.nLocation = XBinary::getAbsoluteAddress(this, locType, nLocation + (nRow * 12));
-//             record.nSize = 12;
-
-//             record.listRecords.append(getDataRecord(0, 4, "Signature", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-//             record.listRecords.append(getDataRecord(4, 4, "Offset", XBinary::VT_UINT32, DRF_OFFSET, XBinary::ENDIAN_BIG));
-//             record.listRecords.append(getDataRecord(8, 4, "Size", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
-
-//             pListDataRecords->append(record);
-
-//             nResult = 1;
-//         }
-//     }
-
-//     return nResult;
-// }
-
 XICC::TAG XICC::_readTag(qint64 nOffset)
 {
     TAG result = {};
@@ -481,6 +404,19 @@ XICC::TAG XICC::_readTag(qint64 nOffset)
     result.bValid = (result.nOffset > 0) && (result.nSize > 0) && (result.nOffset + result.nSize <= getSize());
 
     return result;
+}
+
+QString XICC::_readTagContent(qint64 nOffset)
+{
+    quint32 nType = read_uint32(nOffset, true);
+
+    if (nType == 0x74657874 || nType == 0x64657363) {  // 'text' or 'desc'
+        return _readTextType(nOffset);
+    } else if (nType == 0x6D6C7563) {  // 'mluc'
+        return _readMultiLocalizedUnicodeType(nOffset);
+    }
+
+    return {};
 }
 
 QString XICC::_readTextType(qint64 nOffset)
