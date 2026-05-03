@@ -40,21 +40,17 @@ XAVI::~XAVI()
 
 bool XAVI::isValid(PDSTRUCT *pPdStruct)
 {
-    // First check if it's a valid RIFF file
     if (!XRiff::isValid(pPdStruct)) {
         return false;
     }
 
-    // AVI files have form type "AVI " at offset 8
-    QString sForm = read_ansiString(8, 4);
-
-    return (sForm == "AVI ");
+    return (read_ansiString(8, 4) == "AVI ");
 }
 
 bool XAVI::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XAVI x(pDevice);
-    return x.isValid();
+    return x.isValid(pPdStruct);
 }
 
 QString XAVI::getFileFormatExt()
@@ -99,22 +95,17 @@ quint32 XAVI::ftStringToStructID(const QString &sFtString)
 
 QString XAVI::getArch()
 {
-    return "";  // AVI is a multimedia container, no specific architecture
+    return "";
 }
 
 XBinary::MODE XAVI::getMode()
 {
-    return MODE_DATA;  // AVI files contain data, not executable code
-}
-
-XBinary::ENDIAN XAVI::getEndian()
-{
-    return XRiff::getEndian();  // Delegate to parent class
+    return MODE_DATA;
 }
 
 QString XAVI::getVersion()
 {
-    return "";  // AVI format doesn't have a version number
+    return "";
 }
 
 QList<XBinary::MAPMODE> XAVI::getMapModesList()
@@ -129,19 +120,15 @@ QList<XBinary::MAPMODE> XAVI::getMapModesList()
 
 XBinary::_MEMORY_MAP XAVI::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    XBinary::_MEMORY_MAP result = {};
-
     if (mapMode == MAPMODE_UNKNOWN) {
-        mapMode = MAPMODE_DATA;  // Default mode
+        mapMode = MAPMODE_DATA;
     }
 
     if (mapMode == MAPMODE_REGIONS) {
-        result = _getMemoryMap(FILEPART_HEADER | FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
-    } else if (mapMode == MAPMODE_DATA) {
-        result = _getMemoryMap(FILEPART_DATA | FILEPART_OVERLAY, pPdStruct);
+        return _getMemoryMap(FILEPART_HEADER | FILEPART_REGION | FILEPART_OVERLAY, pPdStruct);
     }
 
-    return result;
+    return _getMemoryMap(FILEPART_DATA | FILEPART_OVERLAY, pPdStruct);
 }
 
 QList<XBinary::DATA_HEADER> XAVI::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
@@ -149,14 +136,11 @@ QList<XBinary::DATA_HEADER> XAVI::getDataHeaders(const DATA_HEADERS_OPTIONS &dat
     QList<DATA_HEADER> listResult;
 
     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        // Initialize with default headers
         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
         _dataHeadersOptions.bChildren = true;
         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
-
-        // Start with RIFF header
         _dataHeadersOptions.nID = STRUCTID_HEADER;
         _dataHeadersOptions.nLocation = 0;
         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
@@ -190,7 +174,6 @@ QList<XBinary::FPART> XAVI::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
 
     if (nFileParts & FILEPART_HEADER) {
         FPART record = {};
-
         record.filePart = FILEPART_HEADER;
         record.nFileOffset = 0;
         record.nFileSize = 12;
@@ -201,12 +184,10 @@ QList<XBinary::FPART> XAVI::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
     }
 
     if (nFileParts & FILEPART_REGION) {
-        qint64 nTotalSize = getSize();
-        quint32 nRiffSize = read_uint32(4, false);  // Little-endian
-        qint64 nContentSize = qMin<qint64>(nTotalSize, (qint64)nRiffSize + 8);
+        quint32 nRiffSize = read_uint32(4, false);
+        qint64 nContentSize = qMin<qint64>(getSize(), (qint64)nRiffSize + 8);
 
         FPART record = {};
-
         record.filePart = FILEPART_REGION;
         record.nFileOffset = 0;
         record.nFileSize = nContentSize;
@@ -217,13 +198,10 @@ QList<XBinary::FPART> XAVI::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
     }
 
     if (nFileParts & FILEPART_DATA) {
-        qint64 nTotalSize = getSize();
-
         FPART record = {};
-
         record.filePart = FILEPART_DATA;
         record.nFileOffset = 0;
-        record.nFileSize = nTotalSize;
+        record.nFileSize = getSize();
         record.nVirtualAddress = -1;
         record.sName = tr("Data");
 
@@ -231,13 +209,12 @@ QList<XBinary::FPART> XAVI::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
-        quint32 nRiffSize = read_uint32(4, false);  // Little-endian
+        quint32 nRiffSize = read_uint32(4, false);
         qint64 nContentEnd = (qint64)nRiffSize + 8;
         qint64 nTotalSize = getSize();
 
         if (nContentEnd < nTotalSize) {
             FPART record = {};
-
             record.filePart = FILEPART_OVERLAY;
             record.nFileOffset = nContentEnd;
             record.nFileSize = nTotalSize - nContentEnd;
