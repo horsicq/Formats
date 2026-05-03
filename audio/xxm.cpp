@@ -20,17 +20,87 @@
  */
 #include "xxm.h"
 
-static XBinary::XCONVERT _TABLE_XXM_STRUCTID[] = {
-    {XXM::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
-    {XXM::STRUCTID_HEADER, "HEADER", QString("HEADER")},
-    {XXM::STRUCTID_PATTERN_HEADER, "PATTERN_HEADER", QString("PATTERN_HEADER")},
-    {XXM::STRUCTID_PATTERN_DATA, "PATTERN_DATA", QString("PATTERN_DATA")},
-    {XXM::STRUCTID_INSTRUMENT_HEADER, "INSTRUMENT_HEADER", QString("INSTRUMENT_HEADER")},
-    {XXM::STRUCTID_INSTRUMENT_EXTRA_HEADER, "INSTRUMENT_EXTRA_HEADER", QString("INSTRUMENT_EXTRA_HEADER")},
-    {XXM::STRUCTID_SAMPLE_HEADER, "SAMPLE_HEADER", QString("SAMPLE_HEADER")},
-    {XXM::STRUCTID_SAMPLE_DATA, "SAMPLE_DATA", QString("SAMPLE_DATA")}
-    // Add more as needed
-};
+namespace {
+
+XBinary::XCONVERT g_tableXxmStructId[] = {{XXM::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
+                                          {XXM::STRUCTID_HEADER, "HEADER", QString("Header")},
+                                          {XXM::STRUCTID_PATTERN_HEADER, "PATTERN_HEADER", QString("Pattern Header")},
+                                          {XXM::STRUCTID_PATTERN_DATA, "PATTERN_DATA", QString("Pattern Data")},
+                                          {XXM::STRUCTID_INSTRUMENT_HEADER, "INSTRUMENT_HEADER", QString("Instrument Header")},
+                                          {XXM::STRUCTID_INSTRUMENT_EXTRA_HEADER, "INSTRUMENT_EXTRA_HEADER", QString("Instrument Extra Header")},
+                                          {XXM::STRUCTID_SAMPLE_HEADER, "SAMPLE_HEADER", QString("Sample Header")},
+                                          {XXM::STRUCTID_SAMPLE_DATA, "SAMPLE_DATA", QString("Sample Data")}};
+
+const qint64 kXmControlByteOffset = offsetof(XXM::HEADER, ctrl_byte_1a);
+const qint64 kXmHeaderSizeFieldOffset = offsetof(XXM::HEADER, header_size);
+const qint64 kXmHeaderMinimumSize = kXmHeaderSizeFieldOffset + sizeof(quint32);
+const qint64 kXmHeaderDeclaredMinimumSize = sizeof(XXM::HEADER) - kXmHeaderSizeFieldOffset;
+const qint64 kXmPatternHeaderSize = sizeof(XXM::PATTERN_HEADER);
+const qint64 kXmInstrumentHeaderFixedSize = sizeof(XXM::INSTRUMENT_HEADER);
+const qint64 kXmSampleHeaderSize = sizeof(XXM::SAMPLE_HEADER);
+const qint32 kXmMaxPatterns = 256;
+const qint32 kXmMaxInstruments = 256;
+const qint32 kXmMaxSamplesPerInstrument = 256;
+
+static_assert(sizeof(XXM::PATTERN_HEADER) == 9, "Unexpected XM pattern header size");
+static_assert(sizeof(XXM::INSTRUMENT_HEADER) == 29, "Unexpected XM instrument header size");
+static_assert(sizeof(XXM::INSTRUMENT_EXTRA_HEADER) == 214, "Unexpected XM instrument extra header size");
+static_assert(sizeof(XXM::SAMPLE_HEADER) == 40, "Unexpected XM sample header size");
+
+qint64 clampFileRangeSize(qint64 nOffset, qint64 nSize, qint64 nTotalSize)
+{
+    qint64 nResult = 0;
+
+    if ((nOffset >= 0) && (nOffset < nTotalSize) && (nSize > 0)) {
+        nResult = qMin(nSize, nTotalSize - nOffset);
+    }
+
+    return nResult;
+}
+
+qint64 addClamped(qint64 nOffset, qint64 nSize, qint64 nTotalSize)
+{
+    qint64 nResult = nOffset;
+
+    if (nSize > 0) {
+        if (nOffset > nTotalSize - nSize) {
+            nResult = nTotalSize;
+        } else {
+            nResult = nOffset + nSize;
+        }
+    }
+
+    return nResult;
+}
+
+void appendFilePart(QList<XBinary::FPART> *pList, quint32 nRequestedFileParts, XBinary::FILEPART filePart, qint64 nOffset, qint64 nSize, qint64 nTotalSize,
+                    const QString &sName, qint32 nLimit)
+{
+    if (!(nRequestedFileParts & filePart)) {
+        return;
+    }
+
+    if ((nLimit != -1) && (pList->count() >= nLimit)) {
+        return;
+    }
+
+    nSize = clampFileRangeSize(nOffset, nSize, nTotalSize);
+
+    if (nSize <= 0) {
+        return;
+    }
+
+    XBinary::FPART record = {};
+    record.filePart = filePart;
+    record.nFileOffset = nOffset;
+    record.nFileSize = nSize;
+    record.nVirtualAddress = -1;
+    record.sName = sName;
+
+    pList->append(record);
+}
+
+}  // namespace
 
 XXM::XXM(QIODevice *pDevice) : XBinary(pDevice)
 {
@@ -44,10 +114,15 @@ bool XXM::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
 
-    if (getSize() >= 60) {
-        QByteArray id = read_array_process(0, 17, pPdStruct);
-        if (id == QByteArray("Extended Module: ")) {
-            bResult = true;
+    if (getSize() >= kXmHeaderMinimumSize) {
+        _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+
+        if (compareSignature(&memoryMap, "'Extended Module: '", 0, pPdStruct) && (read_uint8(kXmControlByteOffset) == 0x1A)) {
+            quint32 nHeaderSize = read_uint32(kXmHeaderSizeFieldOffset);
+
+            if ((nHeaderSize >= kXmHeaderDeclaredMinimumSize) && (kXmHeaderSizeFieldOffset + nHeaderSize <= getSize())) {
+                bResult = true;
+            }
         }
     }
 
@@ -103,10 +178,14 @@ QString XXM::getFileFormatExt()
     return "xm";
 }
 
+QString XXM::getFileFormatExtsString()
+{
+    return "XM (*.xm)";
+}
+
 qint64 XXM::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-    return getSize();
+    return _calculateRawSize(pPdStruct);
 }
 
 bool XXM::isSigned()
@@ -126,8 +205,19 @@ QString XXM::getOsVersion()
 
 QString XXM::getVersion()
 {
+    QString sResult;
+
+    if (getSize() < (qint64)offsetof(HEADER, header_size)) {
+        return sResult;
+    }
+
     HEADER header = _read_HEADER(0);
-    return QString("%1.%2").arg(header.version >> 8).arg(header.version & 0xFF);
+
+    if (header.version) {
+        sResult = QString("%1.%2").arg(header.version >> 8).arg(header.version & 0xFF, 2, 10, QChar('0'));
+    }
+
+    return sResult;
 }
 
 bool XXM::isEncrypted()
@@ -150,160 +240,140 @@ XXM::_MEMORY_MAP XXM::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
 QList<XBinary::FPART> XXM::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
-    QList<FPART> list;
-    HEADER header = _read_HEADER(0);
-    if (getSize() < 60) return list;
+    QList<FPART> listResult;
+    const qint64 nTotalSize = getSize();
 
-    qint64 offset = 60 + header.header_size;
+    if (!isValid(pPdStruct)) {
+        return listResult;
+    }
+
+    const HEADER header = _read_HEADER(0);
+    qint64 nOffset = addClamped(kXmHeaderSizeFieldOffset, header.header_size, nTotalSize);
 
     if (nFileParts & FILEPART_HEADER) {
-        FPART f = {};
-        f.filePart = FILEPART_HEADER;
-        f.nFileOffset = 0;
-        f.nFileSize = offset;
-        f.nVirtualAddress = -1;
-        f.sName = tr("Header");
-        list.append(f);
+        appendFilePart(&listResult, nFileParts, FILEPART_HEADER, 0, nOffset, nTotalSize, tr("Header"), nLimit);
     }
 
-    // Patterns
-    for (qint32 i = 0; (i < header.num_patterns) && isPdStructNotCanceled(pPdStruct); i++) {
-        PATTERN_HEADER ph = _read_PATTERN_HEADER(offset);
-        qint64 patternHeaderSize = 9;
-        if (nFileParts & FILEPART_TABLE) {
-            FPART t = {};
-            t.filePart = FILEPART_TABLE;
-            t.nFileOffset = offset;
-            t.nFileSize = patternHeaderSize;
-            t.nVirtualAddress = -1;
-            t.sName = QString("Pattern %1 header").arg(i);
-            list.append(t);
+    const qint32 nNumberOfPatterns = qMin<qint32>(header.num_patterns, kXmMaxPatterns);
+
+    for (qint32 i = 0; (i < nNumberOfPatterns) && isPdStructNotCanceled(pPdStruct); i++) {
+        if (nOffset + kXmPatternHeaderSize > nTotalSize) {
+            break;
         }
-        offset += patternHeaderSize;
-        if ((nFileParts & FILEPART_DATA) && ph.packed_data_size > 0) {
-            FPART d = {};
-            d.filePart = FILEPART_DATA;
-            d.nFileOffset = offset;
-            d.nFileSize = ph.packed_data_size;
-            d.nVirtualAddress = -1;
-            d.sName = QString("Pattern %1 data").arg(i);
-            list.append(d);
+
+        const PATTERN_HEADER patternHeader = _read_PATTERN_HEADER(nOffset);
+        const qint64 nPatternHeaderSize = qMax<qint64>(kXmPatternHeaderSize, patternHeader.header_length);
+
+        appendFilePart(&listResult, nFileParts, FILEPART_TABLE, nOffset, nPatternHeaderSize, nTotalSize, QString("Pattern %1 header").arg(i), nLimit);
+        nOffset = addClamped(nOffset, nPatternHeaderSize, nTotalSize);
+
+        appendFilePart(&listResult, nFileParts, FILEPART_DATA, nOffset, patternHeader.packed_data_size, nTotalSize, QString("Pattern %1 data").arg(i), nLimit);
+        nOffset = addClamped(nOffset, patternHeader.packed_data_size, nTotalSize);
+
+        if (nOffset >= nTotalSize) {
+            break;
         }
-        offset += ph.packed_data_size;
     }
 
-    // Instruments
-    for (qint32 i = 0; (i < header.num_instruments) && isPdStructNotCanceled(pPdStruct); i++) {
-        INSTRUMENT_HEADER ih = _read_INSTRUMENT_HEADER(offset);
-        qint64 ihFixed = 4 + 22 + 1 + 2;
-        if (nFileParts & FILEPART_TABLE) {
-            FPART t = {};
-            t.filePart = FILEPART_TABLE;
-            t.nFileOffset = offset;
-            t.nFileSize = ihFixed;
-            t.nVirtualAddress = -1;
-            t.sName = QString("Instrument %1 header").arg(i);
-            list.append(t);
+    const qint32 nNumberOfInstruments = qMin<qint32>(header.num_instruments, kXmMaxInstruments);
+
+    for (qint32 i = 0; (i < nNumberOfInstruments) && isPdStructNotCanceled(pPdStruct); i++) {
+        if (nOffset + kXmInstrumentHeaderFixedSize > nTotalSize) {
+            break;
         }
-        qint64 extraOffset = offset + ihFixed;
-        if (ih.num_samples > 0) {
-            INSTRUMENT_EXTRA_HEADER ieh = _read_INSTRUMENT_EXTRA_HEADER(extraOffset);
-            qint64 extraSize = 212;  // fixed size of extra header
-            if (nFileParts & FILEPART_TABLE) {
-                FPART t2 = {};
-                t2.filePart = FILEPART_TABLE;
-                t2.nFileOffset = extraOffset;
-                t2.nFileSize = extraSize;
-                t2.nVirtualAddress = -1;
-                t2.sName = QString("Instrument %1 extra").arg(i);
-                list.append(t2);
+
+        const INSTRUMENT_HEADER instrumentHeader = _read_INSTRUMENT_HEADER(nOffset);
+        const qint64 nInstrumentHeaderSize = qMax<qint64>(kXmInstrumentHeaderFixedSize, instrumentHeader.instrument_header_size);
+        const qint64 nInstrumentEndOffset = addClamped(nOffset, nInstrumentHeaderSize, nTotalSize);
+        const qint64 nInstrumentFixedSize = qMin(kXmInstrumentHeaderFixedSize, nInstrumentHeaderSize);
+
+        appendFilePart(&listResult, nFileParts, FILEPART_TABLE, nOffset, nInstrumentFixedSize, nTotalSize, QString("Instrument %1 header").arg(i), nLimit);
+
+        qint64 nNextInstrumentOffset = nInstrumentEndOffset;
+
+        if (instrumentHeader.num_samples > 0) {
+            const qint64 nExtraOffset = nOffset + kXmInstrumentHeaderFixedSize;
+            const qint64 nExtraSize = qMax<qint64>(0, nInstrumentHeaderSize - kXmInstrumentHeaderFixedSize);
+
+            appendFilePart(&listResult, nFileParts, FILEPART_TABLE, nExtraOffset, nExtraSize, nTotalSize, QString("Instrument %1 extra").arg(i), nLimit);
+
+            quint32 nSampleHeaderSize = kXmSampleHeaderSize;
+
+            if (nExtraSize >= (qint64)sizeof(quint32)) {
+                nSampleHeaderSize = qMax<quint32>((quint32)kXmSampleHeaderSize, read_uint32(nExtraOffset));
             }
-            Q_UNUSED(ieh)
-            qint64 sampleHeadersOffset = extraOffset + extraSize;
-            for (qint32 s = 0; s < ih.num_samples && isPdStructNotCanceled(pPdStruct); s++) {
-                SAMPLE_HEADER sh = _read_SAMPLE_HEADER(sampleHeadersOffset);
-                if (nFileParts & FILEPART_TABLE) {
-                    FPART shf = {};
-                    shf.filePart = FILEPART_TABLE;
-                    shf.nFileOffset = sampleHeadersOffset;
-                    shf.nFileSize = 40;
-                    shf.nVirtualAddress = -1;
-                    shf.sName = QString("Instrument %1 sample %2 header").arg(i).arg(s);
-                    list.append(shf);
+
+            QList<quint32> listSampleLengths;
+            qint64 nSampleHeaderOffset = nInstrumentEndOffset;
+            const qint32 nNumberOfSamples = qMin<qint32>(instrumentHeader.num_samples, kXmMaxSamplesPerInstrument);
+
+            for (qint32 j = 0; (j < nNumberOfSamples) && isPdStructNotCanceled(pPdStruct); j++) {
+                if (nSampleHeaderOffset + kXmSampleHeaderSize > nTotalSize) {
+                    break;
                 }
-                sampleHeadersOffset += 40;
+
+                const SAMPLE_HEADER sampleHeader = _read_SAMPLE_HEADER(nSampleHeaderOffset);
+
+                appendFilePart(&listResult, nFileParts, FILEPART_TABLE, nSampleHeaderOffset, nSampleHeaderSize, nTotalSize,
+                               QString("Instrument %1 sample %2 header").arg(i).arg(j), nLimit);
+
+                listSampleLengths.append(sampleHeader.sample_length);
+                nSampleHeaderOffset = addClamped(nSampleHeaderOffset, nSampleHeaderSize, nTotalSize);
             }
-            // Sample data blocks follow sample headers; sizes not trivially derivable here without decoding ADPCM/packed — skip safe mapping.
+
+            qint64 nSampleDataOffset = nSampleHeaderOffset;
+
+            for (qint32 j = 0; (j < listSampleLengths.count()) && isPdStructNotCanceled(pPdStruct); j++) {
+                const qint64 nSampleSize = listSampleLengths.at(j);
+
+                appendFilePart(&listResult, nFileParts, FILEPART_DATA, nSampleDataOffset, nSampleSize, nTotalSize, QString("Instrument %1 sample %2 data").arg(i).arg(j),
+                               nLimit);
+
+                nSampleDataOffset = addClamped(nSampleDataOffset, nSampleSize, nTotalSize);
+            }
+
+            nNextInstrumentOffset = nSampleDataOffset;
         }
-        offset = qMax(offset, extraOffset + qMax<qint64>(0, ih.instrument_header_size - ihFixed));
+
+        if (nNextInstrumentOffset <= nOffset) {
+            break;
+        }
+
+        nOffset = nNextInstrumentOffset;
+
+        if (nOffset >= nTotalSize) {
+            break;
+        }
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
-        qint64 maxEnd = 0;
-        for (qint32 i = 0; i < list.size(); ++i) {
-            const FPART &p = list.at(i);
+        qint64 maxEnd = nOffset;
+        for (qint32 i = 0; i < listResult.size(); ++i) {
+            const FPART &p = listResult.at(i);
             maxEnd = qMax(maxEnd, p.nFileOffset + p.nFileSize);
         }
-        if (maxEnd < getSize()) {
-            FPART ov = {};
-            ov.filePart = FILEPART_OVERLAY;
-            ov.nFileOffset = maxEnd;
-            ov.nFileSize = getSize() - maxEnd;
-            ov.nVirtualAddress = -1;
-            ov.sName = tr("Overlay");
-            list.append(ov);
+
+        if (maxEnd < nTotalSize) {
+            appendFilePart(&listResult, nFileParts, FILEPART_OVERLAY, maxEnd, nTotalSize - maxEnd, nTotalSize, tr("Overlay"), nLimit);
         }
     }
 
-    return list;
+    return listResult;
 }
 
 QString XXM::structIDToString(quint32 nID)
 {
-    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XXM_STRUCTID, sizeof(_TABLE_XXM_STRUCTID) / sizeof(XBinary::XCONVERT));
+    return XBinary::XCONVERT_idToTransString(nID, g_tableXxmStructId, sizeof(g_tableXxmStructId) / sizeof(XBinary::XCONVERT));
 }
 
 QString XXM::structIDToFtString(quint32 nID)
 {
-    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XXM_STRUCTID, sizeof(_TABLE_XXM_STRUCTID) / sizeof(XBinary::XCONVERT));
+    return XBinary::XCONVERT_idToFtString(nID, g_tableXxmStructId, sizeof(g_tableXxmStructId) / sizeof(XBinary::XCONVERT));
 }
 
 quint32 XXM::ftStringToStructID(const QString &sFtString)
 {
-    return XCONVERT_ftStringToId(sFtString, _TABLE_XXM_STRUCTID, sizeof(_TABLE_XXM_STRUCTID) / sizeof(XBinary::XCONVERT));
-}
-
-qint32 XXM::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues, void *pUserData,
-                         PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(pPdStruct)
-
-    qint32 nResult = 0;
-    if (dataRecordsOptions.dataHeaderFirst.dsID.nID == STRUCTID_HEADER) {
-        HEADER header = _read_HEADER(locationToOffset(dataRecordsOptions.pMemoryMap, locType, nLocation));
-        if (nRow == 0) {
-            pListValues->append(QByteArray(header.id_text, 17));
-            pListValues->append(QByteArray(header.module_name, 20));
-            pListValues->append(header.ctrl_byte_1a);
-            pListValues->append(QByteArray(header.tracker_name, 20));
-            pListValues->append(header.version);
-            pListValues->append(header.header_size);
-            pListValues->append(header.song_length);
-            pListValues->append(header.song_restart);
-            pListValues->append(header.channels);
-            pListValues->append(header.num_patterns);
-            pListValues->append(header.num_instruments);
-            pListValues->append(header.flags);
-            pListValues->append(header.default_tempo);
-            pListValues->append(header.default_bpm);
-            pListValues->append(QByteArray(reinterpret_cast<const char *>(header.pattern_order), 256));
-            nResult = 1;
-        }
-    }
-    // Add for other structs as needed
-
-    return nResult;
+    return XCONVERT_ftStringToId(sFtString, g_tableXxmStructId, sizeof(g_tableXxmStructId) / sizeof(XBinary::XCONVERT));
 }
 
 QList<XXM::DATA_HEADER> XXM::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
@@ -315,6 +385,7 @@ QList<XXM::DATA_HEADER> XXM::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHead
         _dataHeadersOptions.bChildren = true;
         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
 
         _dataHeadersOptions.nID = STRUCTID_HEADER;
         _dataHeadersOptions.nLocation = 0;
@@ -326,6 +397,7 @@ QList<XXM::DATA_HEADER> XXM::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHead
 
         if (nStartOffset != -1) {
             DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XXM::structIDToString(dataHeadersOptions.nID));
+            bool bAppend = true;
 
             if (dataHeadersOptions.nID == STRUCTID_HEADER) {
                 dataHeader.nSize = sizeof(HEADER);
@@ -436,9 +508,13 @@ QList<XXM::DATA_HEADER> XXM::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHead
                     getDataRecord(offsetof(SAMPLE_HEADER, reserved), 1, "reserved", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(
                     getDataRecord(offsetof(SAMPLE_HEADER, sample_name), 22, "sample_name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+            } else {
+                bAppend = false;
             }
 
-            listResult.append(dataHeader);
+            if (bAppend) {
+                listResult.append(dataHeader);
+            }
         }
     }
 
@@ -448,10 +524,10 @@ QList<XXM::DATA_HEADER> XXM::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHead
 XXM::HEADER XXM::_read_HEADER(qint64 nOffset)
 {
     HEADER header = {};
-    read_array(nOffset + offsetof(HEADER, id_text), header.id_text, 17);
-    read_array(nOffset + offsetof(HEADER, module_name), header.module_name, 20);
+    read_array(nOffset + offsetof(HEADER, id_text), header.id_text, sizeof(header.id_text));
+    read_array(nOffset + offsetof(HEADER, module_name), header.module_name, sizeof(header.module_name));
     header.ctrl_byte_1a = read_uint8(nOffset + offsetof(HEADER, ctrl_byte_1a));
-    read_array(nOffset + offsetof(HEADER, tracker_name), header.tracker_name, 20);
+    read_array(nOffset + offsetof(HEADER, tracker_name), header.tracker_name, sizeof(header.tracker_name));
     header.version = read_uint16(nOffset + offsetof(HEADER, version));
     header.header_size = read_uint32(nOffset + offsetof(HEADER, header_size));
     header.song_length = read_uint16(nOffset + offsetof(HEADER, song_length));
@@ -462,7 +538,7 @@ XXM::HEADER XXM::_read_HEADER(qint64 nOffset)
     header.flags = read_uint16(nOffset + offsetof(HEADER, flags));
     header.default_tempo = read_uint16(nOffset + offsetof(HEADER, default_tempo));
     header.default_bpm = read_uint16(nOffset + offsetof(HEADER, default_bpm));
-    read_array(nOffset + offsetof(HEADER, pattern_order), (char *)header.pattern_order, 256);
+    read_array(nOffset + offsetof(HEADER, pattern_order), reinterpret_cast<char *>(header.pattern_order), sizeof(header.pattern_order));
 
     return header;
 }
@@ -470,51 +546,50 @@ XXM::HEADER XXM::_read_HEADER(qint64 nOffset)
 XXM::PATTERN_HEADER XXM::_read_PATTERN_HEADER(qint64 nOffset)
 {
     PATTERN_HEADER patternHeader = {};
-    patternHeader.header_length = read_uint32(nOffset);
-    patternHeader.packing_type = read_uint8(nOffset + 4);
-    patternHeader.num_rows = read_uint16(nOffset + 5);
-    patternHeader.packed_data_size = read_uint16(nOffset + 7);
+    patternHeader.header_length = read_uint32(nOffset + offsetof(PATTERN_HEADER, header_length));
+    patternHeader.packing_type = read_uint8(nOffset + offsetof(PATTERN_HEADER, packing_type));
+    patternHeader.num_rows = read_uint16(nOffset + offsetof(PATTERN_HEADER, num_rows));
+    patternHeader.packed_data_size = read_uint16(nOffset + offsetof(PATTERN_HEADER, packed_data_size));
     return patternHeader;
 }
 
 XXM::INSTRUMENT_HEADER XXM::_read_INSTRUMENT_HEADER(qint64 nOffset)
 {
     INSTRUMENT_HEADER hdr = {};
-    hdr.instrument_header_size = read_uint32(nOffset);
-    QByteArray arrName = read_array(nOffset + 4, 22);
-    memcpy(hdr.instrument_name, arrName.constData(), 22);
-    hdr.instrument_type = read_uint8(nOffset + 26);
-    hdr.num_samples = read_uint16(nOffset + 27);
+    hdr.instrument_header_size = read_uint32(nOffset + offsetof(INSTRUMENT_HEADER, instrument_header_size));
+    read_array(nOffset + offsetof(INSTRUMENT_HEADER, instrument_name), hdr.instrument_name, sizeof(hdr.instrument_name));
+    hdr.instrument_type = read_uint8(nOffset + offsetof(INSTRUMENT_HEADER, instrument_type));
+    hdr.num_samples = read_uint16(nOffset + offsetof(INSTRUMENT_HEADER, num_samples));
     return hdr;
 }
 
 XXM::INSTRUMENT_EXTRA_HEADER XXM::_read_INSTRUMENT_EXTRA_HEADER(qint64 nOffset)
 {
     INSTRUMENT_EXTRA_HEADER hdr = {};
-    hdr.sample_header_size = read_uint32(nOffset);
-    QByteArray samples = read_array(nOffset + 4, 96);
-    memcpy(hdr.sample_number_for_notes, samples.constData(), 96);
-    QByteArray volEnv = read_array(nOffset + 100, 48);
-    memcpy(hdr.volume_envelope_points, volEnv.constData(), 48);
-    QByteArray panEnv = read_array(nOffset + 148, 48);
-    memcpy(hdr.panning_envelope_points, panEnv.constData(), 48);
+    hdr.sample_header_size = read_uint32(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, sample_header_size));
+    read_array(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, sample_number_for_notes), reinterpret_cast<char *>(hdr.sample_number_for_notes),
+               sizeof(hdr.sample_number_for_notes));
+    read_array(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, volume_envelope_points), reinterpret_cast<char *>(hdr.volume_envelope_points),
+               sizeof(hdr.volume_envelope_points));
+    read_array(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, panning_envelope_points), reinterpret_cast<char *>(hdr.panning_envelope_points),
+               sizeof(hdr.panning_envelope_points));
 
-    hdr.num_volume_points = read_uint8(nOffset + 196);
-    hdr.num_panning_points = read_uint8(nOffset + 197);
-    hdr.volume_sustain_point = read_uint8(nOffset + 198);
-    hdr.volume_loop_start_point = read_uint8(nOffset + 199);
-    hdr.volume_loop_end_point = read_uint8(nOffset + 200);
-    hdr.panning_sustain_point = read_uint8(nOffset + 201);
-    hdr.panning_loop_start_point = read_uint8(nOffset + 202);
-    hdr.panning_loop_end_point = read_uint8(nOffset + 203);
-    hdr.volume_type = read_uint8(nOffset + 204);
-    hdr.panning_type = read_uint8(nOffset + 205);
-    hdr.vibrato_type = read_uint8(nOffset + 206);
-    hdr.vibrato_sweep = read_uint8(nOffset + 207);
-    hdr.vibrato_depth = read_uint8(nOffset + 208);
-    hdr.vibrato_rate = read_uint8(nOffset + 209);
-    hdr.volume_fadeout = read_uint16(nOffset + 210);
-    hdr.reserved = read_uint16(nOffset + 212);
+    hdr.num_volume_points = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, num_volume_points));
+    hdr.num_panning_points = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, num_panning_points));
+    hdr.volume_sustain_point = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, volume_sustain_point));
+    hdr.volume_loop_start_point = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, volume_loop_start_point));
+    hdr.volume_loop_end_point = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, volume_loop_end_point));
+    hdr.panning_sustain_point = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, panning_sustain_point));
+    hdr.panning_loop_start_point = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, panning_loop_start_point));
+    hdr.panning_loop_end_point = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, panning_loop_end_point));
+    hdr.volume_type = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, volume_type));
+    hdr.panning_type = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, panning_type));
+    hdr.vibrato_type = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_type));
+    hdr.vibrato_sweep = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_sweep));
+    hdr.vibrato_depth = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_depth));
+    hdr.vibrato_rate = read_uint8(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_rate));
+    hdr.volume_fadeout = read_uint16(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, volume_fadeout));
+    hdr.reserved = read_uint16(nOffset + offsetof(INSTRUMENT_EXTRA_HEADER, reserved));
 
     return hdr;
 }
@@ -539,17 +614,16 @@ XBinary *XXM::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAdd
 XXM::SAMPLE_HEADER XXM::_read_SAMPLE_HEADER(qint64 nOffset)
 {
     SAMPLE_HEADER hdr = {};
-    hdr.sample_length = read_uint32(nOffset);
-    hdr.loop_start = read_uint32(nOffset + 4);
-    hdr.loop_length = read_uint32(nOffset + 8);
-    hdr.volume = read_uint8(nOffset + 12);
-    hdr.finetune = read_int8(nOffset + 13);
-    hdr.type = read_uint8(nOffset + 14);
-    hdr.panning = read_uint8(nOffset + 15);
-    hdr.relative_note_number = read_int8(nOffset + 16);
-    hdr.reserved = read_uint8(nOffset + 17);
-    QByteArray arrName = read_array(nOffset + 18, 22);
-    memcpy(hdr.sample_name, arrName.constData(), 22);
+    hdr.sample_length = read_uint32(nOffset + offsetof(SAMPLE_HEADER, sample_length));
+    hdr.loop_start = read_uint32(nOffset + offsetof(SAMPLE_HEADER, loop_start));
+    hdr.loop_length = read_uint32(nOffset + offsetof(SAMPLE_HEADER, loop_length));
+    hdr.volume = read_uint8(nOffset + offsetof(SAMPLE_HEADER, volume));
+    hdr.finetune = read_int8(nOffset + offsetof(SAMPLE_HEADER, finetune));
+    hdr.type = read_uint8(nOffset + offsetof(SAMPLE_HEADER, type));
+    hdr.panning = read_uint8(nOffset + offsetof(SAMPLE_HEADER, panning));
+    hdr.relative_note_number = read_int8(nOffset + offsetof(SAMPLE_HEADER, relative_note_number));
+    hdr.reserved = read_uint8(nOffset + offsetof(SAMPLE_HEADER, reserved));
+    read_array(nOffset + offsetof(SAMPLE_HEADER, sample_name), hdr.sample_name, sizeof(hdr.sample_name));
 
     return hdr;
 }
