@@ -314,6 +314,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_BROTLI, "Brotli", QString("Brotli")},
     {XBinary::FT_LZ4, "LZ4", QString("LZ4")},
     {XBinary::FT_LZMA, "LZMA", QString("LZMA")},
+    {XBinary::FT_WIM, "WIM", QString("Windows Imaging Format")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -8974,6 +8975,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'7z'BCAF271C", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_7Z);
+        } else if (compareSignature(&memoryMap, "'MSWIM'000000", 0)) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_WIM);
         } else if (compareSignature(&memoryMap, "'LZIP'", 0)) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_LZIP);
@@ -9363,6 +9367,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_ISO9660,
         FT_MINIDUMP,
         FT_DMG,
+        FT_WIM,
 
         // Android resources and bytecode
         FT_ANDROIDXML,
@@ -9528,6 +9533,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_UDF)) listResult.append(FT_UDF);
         if (stFileTypes.contains(FT_MINIDUMP)) listResult.append(FT_MINIDUMP);
         if (stFileTypes.contains(FT_DMG)) listResult.append(FT_DMG);
+        if (stFileTypes.contains(FT_WIM)) listResult.append(FT_WIM);
         if (stFileTypes.contains(FT_STK)) listResult.append(FT_STK);
     }
 
@@ -16204,6 +16210,20 @@ bool XBinary::unpack(QIODevice *pDevice, PDSTRUCT *pPdStruct)
     Q_UNUSED(pPdStruct)
 
     return false;
+}
+
+QList<XBinary::PM_INFO> XBinary::unpackImplemented()
+{
+    QList<XBinary::PM_INFO> listResult;
+
+    return listResult;
+}
+
+QList<XBinary::PM_INFO> XBinary::packImplemented()
+{
+    QList<XBinary::PM_INFO> listResult;
+
+    return listResult;
 }
 
 XBinary::ARCHIVERECORD XBinary::infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)

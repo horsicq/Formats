@@ -128,6 +128,7 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
     else if (XBinary::checkFileType(XBinary::FT_CPIO, fileType)) return new XCPIO(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_ISO9660, fileType)) return new XISO9660(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_UDF, fileType)) return new XUDF(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_WIM, fileType)) return new XWIM(pDevice);
 
     else if (XBinary::checkFileType(XBinary::FT_DOS4G, fileType) || XBinary::checkFileType(XBinary::FT_DOS16M, fileType)) return new XDOS16(pDevice);
 #endif
@@ -187,6 +188,101 @@ QList<XBinary::MAPMODE> XFormats::getMapModesList(XBinary::FT fileType)
     XBinary *pBinary = XFormats::getClass(fileType, nullptr);
     listResult = pBinary->getMapModesList();
     delete pBinary;
+
+    return listResult;
+}
+
+QList<XBinary::FT> XFormats::getAvailableFileTypes()
+{
+    QList<XBinary::FT> listResult;
+
+    listResult.append(XBinary::FT_BINARY);
+    listResult.append(XBinary::FT_COM);
+    listResult.append(XBinary::FT_MSDOS);
+    listResult.append(XBinary::FT_NE);
+    listResult.append(XBinary::FT_LE);
+    listResult.append(XBinary::FT_PE);
+    listResult.append(XBinary::FT_ELF);
+    listResult.append(XBinary::FT_MACHO);
+    listResult.append(XBinary::FT_AMIGAHUNK);
+    listResult.append(XBinary::FT_ATARIST);
+    listResult.append(XBinary::FT_PNG);
+    listResult.append(XBinary::FT_JPEG);
+    listResult.append(XBinary::FT_ICO);
+    listResult.append(XBinary::FT_BMP);
+    listResult.append(XBinary::FT_GIF);
+    listResult.append(XBinary::FT_ICC);
+    listResult.append(XBinary::FT_TIFF);
+    listResult.append(XBinary::FT_MP4);
+    listResult.append(XBinary::FT_MP3);
+    listResult.append(XBinary::FT_WAV);
+    listResult.append(XBinary::FT_XM);
+    listResult.append(XBinary::FT_AVI);
+    listResult.append(XBinary::FT_WEBP);
+    listResult.append(XBinary::FT_RIFF);
+    listResult.append(XBinary::FT_JAVACLASS);
+    listResult.append(XBinary::FT_PYC);
+    listResult.append(XBinary::FT_TTF);
+    listResult.append(XBinary::FT_DJVU);
+    listResult.append(XBinary::FT_DER);
+#ifdef USE_DEX
+    listResult.append(XBinary::FT_ANDROIDXML);
+    listResult.append(XBinary::FT_ANDROIDASRC);
+#endif
+    listResult.append(XBinary::FT_TEXT);
+    listResult.append(XBinary::FT_UTF8);
+    listResult.append(XBinary::FT_UNICODE);
+#ifdef USE_DEX
+    listResult.append(XBinary::FT_DEX);
+#endif
+#ifdef USE_PDF
+    listResult.append(XBinary::FT_PDF);
+#endif
+#ifdef USE_ARCHIVE
+    listResult.append(XBinary::FT_ZIP);
+    listResult.append(XBinary::FT_JAR);
+    listResult.append(XBinary::FT_APK);
+    listResult.append(XBinary::FT_IPA);
+    listResult.append(XBinary::FT_APKS);
+    listResult.append(XBinary::FT_DMG);
+    listResult.append(XBinary::FT_7Z);
+    listResult.append(XBinary::FT_CAB);
+    listResult.append(XBinary::FT_RAR);
+    listResult.append(XBinary::FT_MACHOFAT);
+    listResult.append(XBinary::FT_NPM);
+    listResult.append(XBinary::FT_TAR_GZ);
+    listResult.append(XBinary::FT_TAR_BZIP2);
+    listResult.append(XBinary::FT_TAR_LZIP);
+    listResult.append(XBinary::FT_TAR_LZMA);
+    listResult.append(XBinary::FT_TAR_LZOP);
+    listResult.append(XBinary::FT_TAR_XZ);
+    listResult.append(XBinary::FT_TAR_Z);
+    listResult.append(XBinary::FT_TAR_ZSTD);
+    listResult.append(XBinary::FT_GZIP);
+    listResult.append(XBinary::FT_ZLIB);
+    listResult.append(XBinary::FT_LHA);
+    listResult.append(XBinary::FT_ARJ);
+    listResult.append(XBinary::FT_ACE);
+    listResult.append(XBinary::FT_CFBF);
+    listResult.append(XBinary::FT_SZDD);
+    listResult.append(XBinary::FT_BZIP2);
+    listResult.append(XBinary::FT_BROTLI);
+    listResult.append(XBinary::FT_LZ4);
+    listResult.append(XBinary::FT_LZMA);
+    listResult.append(XBinary::FT_LZO);
+    listResult.append(XBinary::FT_COMPRESS);
+    listResult.append(XBinary::FT_ZSTD);
+    listResult.append(XBinary::FT_LZIP);
+    listResult.append(XBinary::FT_TAR);
+    listResult.append(XBinary::FT_XZ);
+    listResult.append(XBinary::FT_AR);
+    listResult.append(XBinary::FT_CPIO);
+    listResult.append(XBinary::FT_ISO9660);
+    listResult.append(XBinary::FT_UDF);
+    listResult.append(XBinary::FT_WIM);
+    listResult.append(XBinary::FT_DOS4G);
+    listResult.append(XBinary::FT_DOS16M);
+#endif
 
     return listResult;
 }
@@ -1333,6 +1429,9 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             } else if (XSevenZip::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_7Z);
+            } else if (XWIM::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_WIM);
             } else if (XRar::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_RAR);
@@ -1370,6 +1469,9 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             } else if (XDMG::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_DMG);
+            } else if (XWIM::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_WIM);
             } else if (XARJ::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_ARJ);

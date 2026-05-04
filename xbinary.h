@@ -254,6 +254,10 @@ public:
         // TODO check more methods
     };
 
+    struct PM_INFO {
+        HANDLE_METHOD hm[4];
+    };
+
     enum CRYPTO_METHOD {  // Obsolete
         CRYPTO_METHOD_UNKNOWN = 0,
         CRYPTO_METHOD_NONE,
@@ -629,6 +633,7 @@ public:
         FT_BROTLI,
         FT_LZ4,
         FT_LZMA,
+        FT_WIM,
 
         // TODO more
     };
@@ -2426,6 +2431,8 @@ public:
     virtual bool unpack(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QList<QString> getListOfArchiveRecordNames(const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<PM_INFO> unpackImplemented();
+    virtual QList<PM_INFO> packImplemented();
 
     // Streaming unpacking API
     virtual bool initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);

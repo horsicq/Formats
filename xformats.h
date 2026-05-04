@@ -103,6 +103,7 @@
 #include "xtar_zstd.h"
 #include "xtarcompressed.h"
 #include "xudf.h"
+#include "xwim.h"
 #include "xxz.h"
 #include "xzip.h"
 #include "xzlib.h"
@@ -133,6 +134,7 @@ public:
     static XBinary::_MEMORY_MAP getMemoryMap(const QString &sFileName, XBinary::MAPMODE mapMode, bool bIsImage = false, XADDR nModuleAddress = -1,
                                              XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QList<XBinary::MAPMODE> getMapModesList(XBinary::FT fileType);
+    static QList<XBinary::FT> getAvailableFileTypes();
     static XADDR getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static qint64 getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
     static bool isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
